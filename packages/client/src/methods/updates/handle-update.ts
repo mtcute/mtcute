@@ -2,7 +2,7 @@ import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { ChannelPrivateError } from '@mtcute/tl/errors'
 import { MAX_CHANNEL_ID } from '@mtcute/core'
-import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { createUsersChatsIndex, normalizeToInputChannel } from '../../utils/peer-utils'
 import { extractChannelIdFromUpdate } from '../../utils/misc-utils'
 
 const debug = require('debug')('mtcute:upds')
@@ -21,10 +21,7 @@ export function _handleUpdate(
         if (update._ === 'updates' || update._ === 'updatesCombined') {
             const isMin = await this._cachePeersFrom(update)
 
-            const users: Record<number, tl.TypeUser> = {}
-            const chats: Record<number, tl.TypeChat> = {}
-            update.users.forEach((u) => (users[u.id] = u))
-            update.chats.forEach((u) => (chats[u.id] = u))
+            const { users, chats } = createUsersChatsIndex(update)
 
             for (const upd of update.updates) {
                 if (upd._ === 'updateChannelTooLong') {
@@ -167,10 +164,7 @@ export function _handleUpdate(
 
             if (diff._ === 'updates.difference') {
                 if (diff.newMessages.length) {
-                    const users: Record<number, tl.TypeUser> = {}
-                    const chats: Record<number, tl.TypeChat> = {}
-                    diff.users.forEach((u) => (users[u.id] = u))
-                    diff.chats.forEach((u) => (chats[u.id] = u))
+                    const { users, chats } = createUsersChatsIndex(diff)
 
                     await this._dispatchUpdate(
                         {

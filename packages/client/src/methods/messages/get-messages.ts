@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { MaybeArray } from '@mtcute/core'
-import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { createUsersChatsIndex, normalizeToInputChannel } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 import { Message, InputPeerLike, MtCuteTypeAssertionError } from '../../types'
 
@@ -81,10 +81,7 @@ export async function getMessages(
             res._
         )
 
-    const users: Record<number, tl.TypeUser> = {}
-    const chats: Record<number, tl.TypeChat> = {}
-    res.users.forEach((e) => (users[e.id] = e))
-    res.chats.forEach((e) => (chats[e.id] = e))
+    const { users, chats } = createUsersChatsIndex(res)
 
     const ret = res.messages.map((msg) => new Message(this, msg, users, chats))
 

@@ -77,3 +77,15 @@ export function inputPeerToPeer(inp: tl.TypeInputPeer): tl.TypePeer {
 
     return inp as never
 }
+
+export function createUsersChatsIndex(obj: { users: tl.TypeUser[], chats: tl.TypeChat[] }): {
+    users: Record<number, tl.TypeUser>
+    chats: Record<number, tl.TypeChat>
+} {
+    const users: Record<number, tl.TypeUser> = {}
+    const chats: Record<number, tl.TypeChat> = {}
+    obj.users.forEach((e) => (users[e.id] = e))
+    obj.chats.forEach((e) => (chats[e.id] = e))
+
+    return { users, chats }
+}
