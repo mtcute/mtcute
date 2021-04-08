@@ -50,13 +50,13 @@ Supported entities:
 | Code | Result (visual) | Result (as HTML)
 |---|---|---|
 | `**bold**` | **bold** | `<b>bold</b>`
-| `**italic**` | **italic** | `<i>italic</i>`
+| `__italic__` | __italic__ | `<i>italic</i>`
 | `--underline` | <u>underline</u> | `<u>underline</u>`
 | `~~strikethrough~~` | ~~strikethrough~~ | `<s>strikethrough</s>`
 | `*whatever*` | \*whatever\* | `*whatever*`
 | `_whatever_` | \_whatever\_ | `_whatever_`
 | <code>\`hello world\`</code> | `hello world` | `<code>hello world</code>`
-| <code>`__text__`</code> | `__text__` | `<code>__text__</code>`
+| <code>\`__text__\`</code> | `__text__` | `<code>__text__</code>`
 
 ### Pre
 
