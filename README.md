@@ -6,6 +6,13 @@ Work-in-progress library for MTProto in TypeScript.
 
 [🎯 Roadmap (notion.so)](https://www.notion.so/teidesu/MTCute-development-cfccff4fddad4b218f3bea27f784b8b5)
 
+> ⚠️ **Warning**: While this library is WIP, storage
+> format *will* change without changing format version
+> and without migration algorithm.
+>
+> If you encounter errors related to this, either
+> reset your storage by removing the file, or fix it manually.
+
 What currently works:
 
 - [x] TCP Connection in NodeJS
