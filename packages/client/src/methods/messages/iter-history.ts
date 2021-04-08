@@ -1,26 +1,26 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, MtCuteArgumentError, MtCuteTypeAssertionError } from '../../types'
-import { createUsersChatsIndex, normalizeToInputPeer } from '../../utils/peer-utils'
-import { normalizeDate } from '../../utils/misc-utils'
+import { InputPeerLike, Message } from '../../types'
+import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
- * Retrieve a chunk of the chat history.
+ * Iterate through a chat history sequentially.
  *
- * You can get up to 100 messages with one call.
- * For larger chunks, use {@link iterHistory}.
+ * This method wraps {@link getHistory} to allow processing large
+ * groups of messages or entire chats.
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
  * @param params  Additional fetch parameters
  * @internal
  */
-export async function getHistory(
+export async function* iterHistory(
     this: TelegramClient,
     chatId: InputPeerLike,
     params?: {
         /**
          * Limits the number of messages to be retrieved.
          *
-         * Defaults to `100`.
+         * By default, no limit is applied and all messages
+         * are returned.
          */
         limit?: number
 
@@ -49,42 +49,43 @@ export async function getHistory(
          * Pass `true` to retrieve messages in reversed order (from older to recent)
          */
         reverse?: boolean
+
+        /**
+         * Chunk size, which will be passed as `limit` parameter
+         * to {@link getHistory}. Usually you shouldn't care about this.
+         *
+         * Defaults to `100`
+         */
+        chunkSize?: number
     }
-): Promise<Message[]> {
+): AsyncIterableIterator<Message> {
     if (!params) params = {}
 
-    const offsetId =
+    let offsetId =
         params.offsetId ?? (params.reverse && !params.offsetDate ? 1 : 0)
-    const limit = params.limit || 100
+    let current = 0
+    const total = params.limit || Infinity
+    const limit = Math.min(params.chunkSize || 100, total)
 
+    // resolve peer once and pass an InputPeer afterwards
     const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
 
-    const res = await this.call({
-        _: 'messages.getHistory',
-        peer,
-        offsetId,
-        offsetDate: normalizeDate(params.offsetDate) || 0,
-        addOffset:
-            (params.offset ? params.offset * (params.reverse ? -1 : 1) : 0) -
-            (params.reverse ? limit : 0),
-        limit,
-        maxId: 0,
-        minId: 0,
-        hash: 0,
-    })
+    for (;;) {
+        const messages = await this.getHistory(peer, {
+            limit: Math.min(limit, total - current),
+            offset: params.offset,
+            offsetId,
+            offsetDate: params.offsetDate,
+            reverse: params.reverse,
+        })
 
-    if (res._ === 'messages.messagesNotModified')
-        throw new MtCuteTypeAssertionError(
-            'getHistory',
-            '!messages.messagesNotModified',
-            res._
-        )
+        if (!messages.length) break
 
-    const { users, chats } = createUsersChatsIndex(res)
+        offsetId = messages[messages.length - 1].id + (params.reverse ? 1 : 0)
 
-    const msgs = res.messages.map((msg) => new Message(this, msg, users, chats))
+        yield* messages
+        current += messages.length
 
-    if (params.reverse) msgs.reverse()
-
-    return msgs
+        if (current >= total) break
+    }
 }

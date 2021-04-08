@@ -22,6 +22,7 @@ import { deleteMessages } from './methods/messages/delete-messages'
 import { _findMessageInUpdate } from './methods/messages/find-in-update'
 import { getHistory } from './methods/messages/get-history'
 import { getMessages } from './methods/messages/get-messages'
+import { iterHistory } from './methods/messages/iter-history'
 import { _parseEntities } from './methods/messages/parse-entities'
 import { sendPhoto } from './methods/messages/send-photo'
 import { sendText } from './methods/messages/send-text'
@@ -440,7 +441,7 @@ export class TelegramClient extends BaseTelegramClient {
      * Retrieve a chunk of the chat history.
      *
      * You can get up to 100 messages with one call.
-     * For larger chunks, use {@link TelegramClient.iterHistory}.
+     * For larger chunks, use {@link iterHistory}.
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param params  Additional fetch parameters
@@ -523,6 +524,63 @@ export class TelegramClient extends BaseTelegramClient {
         fromReply = false
     ): Promise<MaybeArray<Message>> {
         return getMessages.apply(this, arguments)
+    }
+    /**
+     * Iterate through a chat history sequentially.
+     *
+     * This method wraps {@link getHistory} to allow processing large
+     * groups of messages or entire chats.
+     *
+     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
+     * @param params  Additional fetch parameters
+     */
+    iterHistory(
+        chatId: InputPeerLike,
+        params?: {
+            /**
+             * Limits the number of messages to be retrieved.
+             *
+             * By default, no limit is applied and all messages
+             * are returned.
+             */
+            limit?: number
+
+            /**
+             * Sequential number of the first message to be returned.
+             * Defaults to 0 (most recent message).
+             *
+             * Negative values are also accepted and are useful
+             * in case you set `offsetId` or `offsetDate`.
+             */
+            offset?: number
+
+            /**
+             * Pass a message identifier as an offset to retrieve
+             * only older messages starting from that message
+             */
+            offsetId?: number
+
+            /**
+             * Pass a date (`Date` or Unix time in ms) as an offset to retrieve
+             * only older messages starting from that date.
+             */
+            offsetDate?: number | Date
+
+            /**
+             * Pass `true` to retrieve messages in reversed order (from older to recent)
+             */
+            reverse?: boolean
+
+            /**
+             * Chunk size, which will be passed as `limit` parameter
+             * to {@link getHistory}. Usually you shouldn't care about this.
+             *
+             * Defaults to `100`
+             */
+            chunkSize?: number
+        }
+    ): AsyncIterableIterator<Message> {
+        return iterHistory.apply(this, arguments)
     }
 
     protected _parseEntities(
