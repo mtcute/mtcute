@@ -1,6 +1,6 @@
 # MTCute
 
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/dwyl/esta/issues)
+![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)]
 
 Work-in-progress library for MTProto in TypeScript.
 
