@@ -793,6 +793,15 @@ export class Message {
         }
         return this.client.sendText(this.chat.inputPeer, text, params)
     }
+
+    /**
+     * Delete this message.
+     *
+     * @param revoke  Whether to "revoke" (i.e. delete for both sides). Only used for chats and private chats.
+     */
+    delete(revoke = false): Promise<boolean> {
+        return this.client.deleteMessages(this.chat.inputPeer, this.id, revoke)
+    }
 }
 
 makeInspectable(Message, ['empty', 'isScheduled'], ['link'])

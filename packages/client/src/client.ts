@@ -17,9 +17,10 @@ import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
 import { downloadAsIterable } from './methods/files/download-iterable'
 import { downloadAsStream } from './methods/files/download-stream'
-import { UploadedFile } from './types/files/uploaded-file'
 import { uploadFile } from './methods/files/upload-file'
+import { deleteMessages } from './methods/messages/delete-messages'
 import { _findMessageInUpdate } from './methods/messages/find-in-update'
+import { getHistory } from './methods/messages/get-history'
 import { getMessages } from './methods/messages/get-messages'
 import { _parseEntities } from './methods/messages/parse-entities'
 import { sendPhoto } from './methods/messages/send-photo'
@@ -60,6 +61,7 @@ import {
     UpdateFilter,
     UpdateHandler,
     UploadFileLike,
+    UploadedFile,
     User,
     filters,
     handlers,
@@ -99,7 +101,6 @@ export class TelegramClient extends BaseTelegramClient {
     acceptTos(tosId: string): Promise<boolean> {
         return acceptTos.apply(this, arguments)
     }
-
     /**
      * Check your Two-Step verification password and log in
      *
@@ -110,7 +111,6 @@ export class TelegramClient extends BaseTelegramClient {
     checkPassword(password: string): Promise<User> {
         return checkPassword.apply(this, arguments)
     }
-
     /**
      * Get your Two-Step Verification password hint.
      *
@@ -119,7 +119,6 @@ export class TelegramClient extends BaseTelegramClient {
     getPasswordHint(): Promise<string | null> {
         return getPasswordHint.apply(this, arguments)
     }
-
     /**
      * Log out from Telegram account and optionally reset the session storage.
      *
@@ -132,7 +131,6 @@ export class TelegramClient extends BaseTelegramClient {
     logOut(resetSession = false): Promise<true> {
         return logOut.apply(this, arguments)
     }
-
     /**
      * Recover your password with a recovery code and log in.
      *
@@ -143,7 +141,6 @@ export class TelegramClient extends BaseTelegramClient {
     recoverPassword(recoveryCode: string): Promise<User> {
         return recoverPassword.apply(this, arguments)
     }
-
     /**
      * Re-send the confirmation code using a different type.
      *
@@ -156,7 +153,6 @@ export class TelegramClient extends BaseTelegramClient {
     resendCode(phone: string, phoneCodeHash: string): Promise<SentCode> {
         return resendCode.apply(this, arguments)
     }
-
     /**
      * Send the confirmation code to the given phone number
      *
@@ -166,7 +162,6 @@ export class TelegramClient extends BaseTelegramClient {
     sendCode(phone: string): Promise<SentCode> {
         return sendCode.apply(this, arguments)
     }
-
     /**
      * Send a code to email needed to recover your password
      *
@@ -175,7 +170,6 @@ export class TelegramClient extends BaseTelegramClient {
     sendRecoveryCode(): Promise<string> {
         return sendRecoveryCode.apply(this, arguments)
     }
-
     /**
      * Authorize a bot using its token issued by [@BotFather](//t.me/BotFather)
      *
@@ -186,7 +180,6 @@ export class TelegramClient extends BaseTelegramClient {
     signInBot(token: string): Promise<User> {
         return signInBot.apply(this, arguments)
     }
-
     /**
      * Authorize a user in Telegram with a valid confirmation code.
      *
@@ -208,7 +201,6 @@ export class TelegramClient extends BaseTelegramClient {
     ): Promise<User | TermsOfService | false> {
         return signIn.apply(this, arguments)
     }
-
     /**
      * Register a new user in Telegram.
      *
@@ -225,7 +217,6 @@ export class TelegramClient extends BaseTelegramClient {
     ): Promise<User> {
         return signUp.apply(this, arguments)
     }
-
     /**
      * Start the client in an interactive and declarative manner,
      * by providing callbacks for authorization details.
@@ -312,14 +303,16 @@ export class TelegramClient extends BaseTelegramClient {
         codeSentCallback?: (code: SentCode) => MaybeAsync<void>
 
         /**
-         * Whether to "catch up" (load missed updates) after authorization.
+         * Whether to "catch up" (load missed updates).
+         * Note: you should register your handlers
+         * before calling `start()`
+         *
          * Defaults to true.
          */
         catchUp?: boolean
     }): Promise<User> {
         return start.apply(this, arguments)
     }
-
     /**
      * Download a file and return its contents as a Buffer.
      *
@@ -331,7 +324,6 @@ export class TelegramClient extends BaseTelegramClient {
     downloadAsBuffer(params: FileDownloadParameters): Promise<Buffer> {
         return downloadAsBuffer.apply(this, arguments)
     }
-
     /**
      * Download a remote file to a local file (only for NodeJS).
      * Promise will resolve once the download is complete.
@@ -345,7 +337,6 @@ export class TelegramClient extends BaseTelegramClient {
     ): Promise<void> {
         return downloadToFile.apply(this, arguments)
     }
-
     /**
      * Download a file and return it as an iterable, which yields file contents
      * in chunks of a given size. Order of the chunks is guaranteed to be
@@ -358,7 +349,6 @@ export class TelegramClient extends BaseTelegramClient {
     ): AsyncIterableIterator<Buffer> {
         return downloadAsIterable.apply(this, arguments)
     }
-
     /**
      * Download a file and return it as a Node readable stream,
      * streaming file contents.
@@ -368,7 +358,6 @@ export class TelegramClient extends BaseTelegramClient {
     downloadAsStream(params: FileDownloadParameters): Readable {
         return downloadAsStream.apply(this, arguments)
     }
-
     /**
      * Upload a file to Telegram servers, without actually
      * sending a message anywhere. Useful when an `InputFile` is required.
@@ -429,11 +418,72 @@ export class TelegramClient extends BaseTelegramClient {
     }): Promise<UploadedFile> {
         return uploadFile.apply(this, arguments)
     }
+    /**
+     * Delete messages, including service messages.
+     *
+     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
+     * @param ids  Message(s) ID(s) to delete.
+     * @param revoke  Whether to "revoke" (i.e. delete for both sides). Only used for chats and private chats.
+     */
+    deleteMessages(
+        chatId: InputPeerLike,
+        ids: MaybeArray<number>,
+        revoke = true
+    ): Promise<boolean> {
+        return deleteMessages.apply(this, arguments)
+    }
 
     protected _findMessageInUpdate(res: tl.TypeUpdates): Message {
         return _findMessageInUpdate.apply(this, arguments)
     }
+    /**
+     * Retrieve a chunk of the chat history.
+     *
+     * You can get up to 100 messages with one call.
+     * For larger chunks, use {@link TelegramClient.iterHistory}.
+     *
+     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
+     * @param params  Additional fetch parameters
+     */
+    getHistory(
+        chatId: InputPeerLike,
+        params?: {
+            /**
+             * Limits the number of messages to be retrieved.
+             *
+             * Defaults to `100`.
+             */
+            limit?: number
 
+            /**
+             * Sequential number of the first message to be returned.
+             * Defaults to 0 (most recent message).
+             *
+             * Negative values are also accepted and are useful
+             * in case you set `offsetId` or `offsetDate`.
+             */
+            offset?: number
+
+            /**
+             * Pass a message identifier as an offset to retrieve
+             * only older messages starting from that message
+             */
+            offsetId?: number
+
+            /**
+             * Pass a date (`Date` or Unix time in ms) as an offset to retrieve
+             * only older messages starting from that date.
+             */
+            offsetDate?: number | Date
+
+            /**
+             * Pass `true` to retrieve messages in reversed order (from older to recent)
+             */
+            reverse?: boolean
+        }
+    ): Promise<Message[]> {
+        return getHistory.apply(this, arguments)
+    }
     /**
      * Get a single message in chat by its ID
      *
@@ -482,7 +532,6 @@ export class TelegramClient extends BaseTelegramClient {
     ): Promise<[string, tl.TypeMessageEntity[] | undefined]> {
         return _parseEntities.apply(this, arguments)
     }
-
     /**
      * Send a single photo
      *
@@ -556,7 +605,6 @@ export class TelegramClient extends BaseTelegramClient {
     ): Promise<filters.Modify<Message, { media: Photo }>> {
         return sendPhoto.apply(this, arguments)
     }
-
     /**
      * Send a text message
      *
@@ -614,7 +662,6 @@ export class TelegramClient extends BaseTelegramClient {
     ): Promise<filters.Modify<Message, { media: null }>> {
         return sendText.apply(this, arguments)
     }
-
     /**
      * Register a given {@link IMessageEntityParser} as a parse mode
      * for messages. When this method is first called, given parse
@@ -630,7 +677,6 @@ export class TelegramClient extends BaseTelegramClient {
     ): void {
         return registerParseMode.apply(this, arguments)
     }
-
     /**
      * Unregister a parse mode by its name.
      * Will silently fail if given parse mode does not exist.
@@ -642,7 +688,6 @@ export class TelegramClient extends BaseTelegramClient {
     unregisterParseMode(name: string): void {
         return unregisterParseMode.apply(this, arguments)
     }
-
     /**
      * Get a {@link IMessageEntityParser} registered under a given name (or a default one).
      *
@@ -653,7 +698,6 @@ export class TelegramClient extends BaseTelegramClient {
     getParseMode(name?: string | null): IMessageEntityParser {
         return getParseMode.apply(this, arguments)
     }
-
     /**
      * Set a given parse mode as a default one.
      *
@@ -663,7 +707,6 @@ export class TelegramClient extends BaseTelegramClient {
     setDefaultParseMode(name: string): void {
         return setDefaultParseMode.apply(this, arguments)
     }
-
     /**
      * Catch up with the server by loading missed updates.
      *
@@ -671,7 +714,6 @@ export class TelegramClient extends BaseTelegramClient {
     catchUp(): Promise<void> {
         return catchUp.apply(this, arguments)
     }
-
     protected _dispatchUpdate(
         update: tl.TypeUpdate,
         users: Record<number, tl.TypeUser>,
@@ -679,7 +721,6 @@ export class TelegramClient extends BaseTelegramClient {
     ): Promise<void> {
         return _dispatchUpdate.apply(this, arguments)
     }
-
     /**
      * Add an update handler to a given handlers group
      *
@@ -689,7 +730,6 @@ export class TelegramClient extends BaseTelegramClient {
     addUpdateHandler(handler: UpdateHandler, group = 0): void {
         return addUpdateHandler.apply(this, arguments)
     }
-
     /**
      * Remove an update handler (or handlers) from a given
      * handler group.
@@ -703,11 +743,9 @@ export class TelegramClient extends BaseTelegramClient {
     ): void {
         return removeUpdateHandler.apply(this, arguments)
     }
-
     protected _handleUpdate(update: tl.TypeUpdates): void {
         return _handleUpdate.apply(this, arguments)
     }
-
     /**
      * Register a message handler without any filters.
      *
@@ -739,7 +777,6 @@ export class TelegramClient extends BaseTelegramClient {
     ): void {
         return onNewMessage.apply(this, arguments)
     }
-
     /**
      * Block a user
      *
@@ -749,7 +786,6 @@ export class TelegramClient extends BaseTelegramClient {
     blockUser(id: InputPeerLike): Promise<boolean> {
         return blockUser.apply(this, arguments)
     }
-
     /**
      * Get a list of common chats you have with a given user
      *
@@ -759,7 +795,6 @@ export class TelegramClient extends BaseTelegramClient {
     getCommonChats(userId: InputPeerLike): Promise<Chat[]> {
         return getCommonChats.apply(this, arguments)
     }
-
     /**
      * Get currently authorized user's full information
      *
@@ -767,7 +802,6 @@ export class TelegramClient extends BaseTelegramClient {
     getMe(): Promise<User> {
         return getMe.apply(this, arguments)
     }
-
     /**
      * Get information about a single user.
      *
@@ -785,7 +819,6 @@ export class TelegramClient extends BaseTelegramClient {
     getUsers(ids: MaybeArray<InputPeerLike>): Promise<MaybeArray<User>> {
         return getUsers.apply(this, arguments)
     }
-
     /**
      * Get the `InputPeer` of a known peer id.
      * Useful when an `InputPeer` is needed.
