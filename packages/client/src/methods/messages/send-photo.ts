@@ -11,7 +11,7 @@ import {
 import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
-import { randomUlong } from '../../utils/misc-utils'
+import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 
 /**
  * Send a single photo
@@ -139,13 +139,7 @@ export async function sendPhoto(
                 : params.replyTo.id
             : undefined,
         randomId: randomUlong(),
-        scheduleDate: params.schedule
-            ? ~~(
-                  (typeof params.schedule === 'number'
-                      ? params.schedule
-                      : params.schedule.getTime()) / 1000
-              )
-            : undefined,
+        scheduleDate: normalizeDate(params.schedule),
         replyMarkup,
         message,
         entities,

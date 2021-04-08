@@ -35,3 +35,11 @@ export function extractChannelIdFromUpdate(
         ? upd.message.peerId.channelId
         : undefined
 }
+
+export function normalizeDate(
+    date: Date | number | undefined
+): number | undefined {
+    return date
+        ? ~~((typeof date === 'number' ? date : date.getTime()) / 1000)
+        : undefined
+}

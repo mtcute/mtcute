@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { inputPeerToPeer, normalizeToInputPeer } from '../../utils/peer-utils'
-import { randomUlong } from '../../utils/misc-utils'
+import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 import {
     InputPeerLike,
     Message,
@@ -89,13 +89,7 @@ export async function sendText(
                 : params.replyTo.id
             : undefined,
         randomId: randomUlong(),
-        scheduleDate: params.schedule
-            ? ~~(
-                  (typeof params.schedule === 'number'
-                      ? params.schedule
-                      : params.schedule.getTime()) / 1000
-              )
-            : undefined,
+        scheduleDate: normalizeDate(params.schedule),
         replyMarkup,
         message,
         entities,
