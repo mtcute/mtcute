@@ -1,0 +1,8 @@
+# auto-generated files
+src/tl/errors.d.ts
+src/tl/errors.js
+src/tl/keys.js
+src/tl/types.d.ts
+src/tl/types.js
+src/tl/binary/reader.js
+src/tl/binary/writer.js

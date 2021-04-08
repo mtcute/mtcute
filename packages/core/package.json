@@ -1,0 +1,16 @@
+{
+    "name": "@mtcute/core",
+    "version": "0.0.0",
+    "description": "Core functions and base MTProto client",
+    "author": "Alisa Sireneva <me@tei.su>",
+    "license": "MIT",
+    "main": "dist/index.js",
+    "scripts": {
+        "test": "mocha -r ts-node/register tests/**/*.spec.ts",
+        "build": "tsc",
+        "docs": "npx typedoc"
+    },
+    "dependencies": {
+        "@mtcute/tl": "^0.0.0"
+    }
+}

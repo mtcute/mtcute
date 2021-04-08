@@ -1,0 +1,24 @@
+{
+    "name": "@mtcute/tl",
+    "version": "0.0.0",
+    "description": "TL schema used for MTCute",
+    "main": "index.js",
+    "author": "Alisa Sireneva <me@tei.su>",
+    "license": "MIT",
+    "scripts": {
+        "test": "tsc --noEmit tests/types.ts",
+        "generate-schema": "node scripts/generate-schema.js",
+        "generate-code": "node scripts/generate-types.js && node scripts/generate-binary-reader.js && node scripts/generate-binary-writer.js",
+        "generate-all": "npm run generate-schema && npm run generate-code",
+        "docs": "npx typedoc --options typedoc.json"
+    },
+    "dependencies": {
+        "big-integer": "^1.6.48"
+    },
+    "devDependencies": {
+        "@mtcute/core": "^0.0.0",
+        "cheerio": "^1.0.0-rc.5",
+        "eager-async-pool": "^1.0.0",
+        "csv-parser": "^3.0.0"
+    }
+}

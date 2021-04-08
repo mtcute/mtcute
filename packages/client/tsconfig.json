@@ -1,0 +1,19 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./dist"
+    },
+    "include": [
+        "./src"
+    ],
+    "typedocOptions": {
+        "name": "@mtcute/client",
+        "includeVersion": true,
+        "out": "../../docs/packages/client",
+        "listInvalidSymbolLinks": true,
+        "excludePrivate": true,
+        "entryPoints": [
+            "./src/index.ts"
+        ]
+    }
+}

@@ -1,0 +1,58 @@
+{
+    "name": "mtcute",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Cute and type-safe library for MTProto (Telegram API) for browser and NodeJS",
+    "license": "MIT",
+    "author": "Alisa Sireneva <me@tei.su>",
+    "scripts": {
+        "test": "tsc && mocha dist/tests/**/*.spec.js",
+        "build": "tsc",
+        "lint": "eslint packages/**/*.ts",
+        "generate-schema": "node scripts/generate-schema.js",
+        "generate-code": "node packages/client/scripts/generate-client.js && node scripts/generate-types.js && node scripts/generate-binary-reader.js && node scripts/generate-binary-writer.js && node scripts/post-build.js",
+        "generate-all": "npm run generate-schema && npm run generate-code",
+        "build:doc": "node packages/client/scripts/generate-client.js && typedoc"
+    },
+    "dependencies": {
+        "big-integer": "1.6.48",
+        "buffer": "^6.0.3",
+        "debug": "^4.3.1",
+        "es6-symbol": "^3.1.3",
+        "events": "3.2.0",
+        "file-type": "^16.2.0",
+        "leemon": "6.2.0",
+        "pako": "2.0.2",
+        "ts-mixer": "^5.4.0"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.2.14",
+        "@types/debug": "^4.1.5",
+        "@types/mocha": "^8.2.0",
+        "@types/node": "^14.14.22",
+        "@types/node-forge": "^0.9.7",
+        "@types/pako": "^1.0.1",
+        "@types/ws": "^7.4.0",
+        "@typescript-eslint/eslint-plugin": "^4.15.0",
+        "@typescript-eslint/parser": "^4.15.0",
+        "benchmark": "^2.1.4",
+        "chai": "^4.2.0",
+        "cheerio": "^1.0.0-rc.5",
+        "eager-async-pool": "^1.0.0",
+        "eslint": "^7.19.0",
+        "eslint-config-prettier": "7.2.0",
+        "lerna": "^4.0.0",
+        "mocha": "^8.2.1",
+        "node-fetch": "^2.6.1",
+        "node-forge": "^0.10.0",
+        "node-html-parser": "^3.0.4",
+        "prettier": "2.2.1",
+        "ts-node": "^9.1.1",
+        "typedoc": "^0.20.28",
+        "typescript": "^4.1.3",
+        "nyc": "^15.1.0"
+    },
+    "workspaces": [
+        "packages/*"
+    ]
+}

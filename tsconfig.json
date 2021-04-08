@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2018",
+        "allowJs": true,
+        "sourceMap": true,
+        "inlineSources": true,
+        "outDir": "dist",
+        "baseUrl": ".",
+        "declaration": true,
+        "esModuleInterop": true,
+        "strictNullChecks": true,
+        "noImplicitAny": true,
+        "incremental": true,
+        "stripInternal": true
+    },
+    "exclude": [
+        "private",
+        "node_modules"
+    ]
+}

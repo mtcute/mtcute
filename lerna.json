@@ -1,0 +1,11 @@
+{
+    "command": {
+        "create": {
+            "license": "MIT",
+            "author": "Alisa Sireneva <me@tei.su>"
+        }
+    },
+    "version": "independent",
+    "npmClient": "yarn",
+    "useWorkspaces": true
+}
