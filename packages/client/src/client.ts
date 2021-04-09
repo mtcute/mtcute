@@ -24,6 +24,7 @@ import { getHistory } from './methods/messages/get-history'
 import { getMessages } from './methods/messages/get-messages'
 import { iterHistory } from './methods/messages/iter-history'
 import { _parseEntities } from './methods/messages/parse-entities'
+import { searchGlobal } from './methods/messages/search-global'
 import { searchMessages } from './methods/messages/search-messages'
 import { sendPhoto } from './methods/messages/send-photo'
 import { sendText } from './methods/messages/send-text'
@@ -590,6 +591,46 @@ export class TelegramClient extends BaseTelegramClient {
         entities?: tl.TypeMessageEntity[]
     ): Promise<[string, tl.TypeMessageEntity[] | undefined]> {
         return _parseEntities.apply(this, arguments)
+    }
+    /**
+     * Search for messages globally from all of your chats
+     *
+     * **Note**: Due to Telegram limitations, you can only get up to ~10000 messages
+     *
+     * @param params  Search parameters
+     */
+    searchGlobal(params?: {
+        /**
+         * Text query string. Use `"@"` to search for mentions.
+         *
+         * Defaults to `""` (empty string)
+         */
+        query?: string
+
+        /**
+         * Limits the number of messages to be retrieved.
+         *
+         * By default, no limit is applied and all messages are returned
+         */
+        limit?: number
+
+        /**
+         * Filter the results using some filter.
+         * Defaults to {@link SearchFilters.Empty} (i.e. will return all messages)
+         *
+         * @link SearchFilters
+         */
+        filter?: tl.TypeMessagesFilter
+
+        /**
+         * Chunk size, which will be passed as `limit` parameter
+         * for `messages.search`. Usually you shouldn't care about this.
+         *
+         * Defaults to `100`
+         */
+        chunkSize?: number
+    }): AsyncIterableIterator<Message> {
+        return searchGlobal.apply(this, arguments)
     }
     /**
      * Search for messages inside a specific chat

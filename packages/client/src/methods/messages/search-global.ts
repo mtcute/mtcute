@@ -1,37 +1,26 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, MtCuteTypeAssertionError } from '../../types'
+import { Message, MtCuteTypeAssertionError } from '../../types'
 import { tl } from '@mtcute/tl'
-import {
-    createUsersChatsIndex,
-    normalizeToInputPeer,
-} from '../../utils/peer-utils'
+import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { SearchFilters } from '../../types'
 
 /**
- * Search for messages inside a specific chat
+ * Search for messages globally from all of your chats
  *
- * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
- * @param params  Additional search parameters
+ * **Note**: Due to Telegram limitations, you can only get up to ~10000 messages
+ *
+ * @param params  Search parameters
  * @internal
  */
-export async function* searchMessages(
+export async function* searchGlobal(
     this: TelegramClient,
-    chatId: InputPeerLike,
     params?: {
         /**
-         * Text query string. Required for text-only messages,
-         * optional for media.
+         * Text query string. Use `"@"` to search for mentions.
          *
          * Defaults to `""` (empty string)
          */
         query?: string
-
-        /**
-         * Sequential number of the first message to be returned.
-         *
-         * Defaults to `0`.
-         */
-        offset?: number
 
         /**
          * Limits the number of messages to be retrieved.
@@ -49,13 +38,6 @@ export async function* searchMessages(
         filter?: tl.TypeMessagesFilter
 
         /**
-         * Search for messages sent by a specific user.
-         *
-         * Pass their marked ID, username, phone or `"me"` or `"self"`
-         */
-        fromUser?: InputPeerLike
-
-        /**
          * Chunk size, which will be passed as `limit` parameter
          * for `messages.search`. Usually you shouldn't care about this.
          *
@@ -67,32 +49,25 @@ export async function* searchMessages(
     if (!params) params = {}
 
     let current = 0
-    let offset = params.offset || 0
 
     const total = params.limit || Infinity
     const limit = Math.min(params.chunkSize || 100, total)
 
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
-    const fromUser =
-        (params.fromUser
-            ? normalizeToInputPeer(await this.resolvePeer(params.fromUser))
-            : null) || undefined
+    let offsetDate = 0
+    let offsetPeer = { _: 'inputPeerEmpty' } as tl.TypeInputPeer
+    let offsetId = 0
 
     for (;;) {
         const res = await this.call({
-            _: 'messages.search',
-            peer,
+            _: 'messages.searchGlobal',
             q: params.query || '',
             filter: params.filter || SearchFilters.Empty,
             minDate: 0,
             maxDate: 0,
-            offsetId: 0,
-            addOffset: offset,
+            offsetId,
+            offsetRate: offsetDate,
+            offsetPeer: offsetPeer,
             limit: Math.min(limit, total - current),
-            minId: 0,
-            maxId: 0,
-            fromId: fromUser,
-            hash: 0,
         })
 
         if (res._ === 'messages.messagesNotModified')
@@ -110,7 +85,11 @@ export async function* searchMessages(
 
         if (!msgs.length) break
 
-        offset += msgs.length
+        const last = msgs[msgs.length - 1]
+        offsetDate = last.raw.date
+        offsetPeer = last.chat.inputPeer
+        offsetId = last.id
+
         yield* msgs
 
         current += msgs.length
