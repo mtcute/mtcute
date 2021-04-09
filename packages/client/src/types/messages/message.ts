@@ -802,6 +802,35 @@ export class Message {
     delete(revoke = false): Promise<boolean> {
         return this.client.deleteMessages(this.chat.inputPeer, this.id, revoke)
     }
+
+    /**
+     * Edit this message's text and/or reply markup
+     *
+     * @see TelegramClient.editMessage
+     */
+    edit(params: Parameters<TelegramClient['editMessage']>[2]): Promise<Message> {
+        return this.client.editMessage(this.chat.inputPeer, this.id, params)
+    }
+
+    /**
+     * Edit message text and optionally reply markup.
+     *
+     * Convenience method that just wraps {@link edit},
+     * passing positional `text` as object field.
+     *
+     * @param text  New message text
+     * @param params  Additional parameters
+     * @see TelegramClient.editMessage
+     */
+    editText(
+        text: string,
+        params?: Omit<Parameters<TelegramClient['editMessage']>[2], 'text'>
+    ): Promise<Message> {
+        return this.edit({
+            text,
+            ...(params || {})
+        })
+    }
 }
 
 makeInspectable(Message, ['empty', 'isScheduled'], ['link'])

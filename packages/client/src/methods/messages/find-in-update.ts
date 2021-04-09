@@ -6,7 +6,8 @@ import { createUsersChatsIndex } from '../../utils/peer-utils'
 /** @internal */
 export function _findMessageInUpdate(
     this: TelegramClient,
-    res: tl.TypeUpdates
+    res: tl.TypeUpdates,
+    isEdit = false
 ): Message {
     if (!(res._ === 'updates' || res._ === 'updatesCombined'))
         throw new MtCuteTypeAssertionError(
@@ -17,9 +18,14 @@ export function _findMessageInUpdate(
 
     for (const u of res.updates) {
         if (
-            u._ === 'updateNewMessage' ||
-            u._ === 'updateNewChannelMessage' ||
-            u._ === 'updateNewScheduledMessage'
+            isEdit && (
+                u._ === 'updateEditMessage' ||
+                u._ === 'updateEditChannelMessage'
+            ) || !isEdit && (
+                u._ === 'updateNewMessage' ||
+                u._ === 'updateNewChannelMessage' ||
+                u._ === 'updateNewScheduledMessage'
+            )
         ) {
             const { users, chats } = createUsersChatsIndex(res)
 

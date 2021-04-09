@@ -19,6 +19,7 @@ import { downloadAsIterable } from './methods/files/download-iterable'
 import { downloadAsStream } from './methods/files/download-stream'
 import { uploadFile } from './methods/files/upload-file'
 import { deleteMessages } from './methods/messages/delete-messages'
+import { editMessage } from './methods/messages/edit-message'
 import { _findMessageInUpdate } from './methods/messages/find-in-update'
 import { getHistory } from './methods/messages/get-history'
 import { getMessages } from './methods/messages/get-messages'
@@ -435,8 +436,57 @@ export class TelegramClient extends BaseTelegramClient {
     ): Promise<boolean> {
         return deleteMessages.apply(this, arguments)
     }
+    /**
+     * Edit message text and/or reply markup.
+     *
+     * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
+     * @param message  Message or its ID
+     * @param params
+     */
+    editMessage(
+        chatId: InputPeerLike,
+        message: number | Message,
+        params: {
+            /**
+             * New message text
+             */
+            text?: string
 
-    protected _findMessageInUpdate(res: tl.TypeUpdates): Message {
+            /**
+             * Parse mode to use to parse entities before sending
+             * the message. Defaults to current default parse mode (if any).
+             *
+             * Passing `null` will explicitly disable formatting.
+             */
+            parseMode?: string | null
+
+            /**
+             * List of formatting entities to use instead of parsing via a
+             * parse mode.
+             *
+             * **Note:** Passing this makes the method ignore {@link parseMode}
+             */
+            entities?: tl.TypeMessageEntity[]
+
+            /**
+             * Whether to disable links preview in this message
+             */
+            disableWebPreview?: boolean
+
+            /**
+             * For bots: inline or reply markup or an instruction
+             * to hide a reply keyboard or to force a reply.
+             */
+            replyMarkup?: ReplyMarkup
+        }
+    ): Promise<Message> {
+        return editMessage.apply(this, arguments)
+    }
+
+    protected _findMessageInUpdate(
+        res: tl.TypeUpdates,
+        isEdit = false
+    ): Message {
         return _findMessageInUpdate.apply(this, arguments)
     }
     /**
