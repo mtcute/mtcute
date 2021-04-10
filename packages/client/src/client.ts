@@ -55,7 +55,7 @@ import {
     FileDownloadParameters,
     InputPeerLike,
     MaybeDynamic,
-    MediaLike,
+    InputFileLike,
     Message,
     Photo,
     PropagationSymbol,
@@ -748,7 +748,7 @@ export class TelegramClient extends BaseTelegramClient {
      */
     sendPhoto(
         chatId: InputPeerLike,
-        photo: MediaLike,
+        photo: InputFileLike,
         params?: {
             /**
              * Caption for the photo

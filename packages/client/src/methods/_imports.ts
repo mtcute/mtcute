@@ -17,7 +17,7 @@ import {
     Photo,
     UploadedFile,
     UploadFileLike,
-    MediaLike,
+    InputFileLike,
     FileDownloadParameters,
     UpdateHandler,
     handlers,

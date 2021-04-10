@@ -1,6 +1,6 @@
 import {
     InputPeerLike,
-    MediaLike,
+    InputFileLike,
     Message,
     BotKeyboard,
     ReplyMarkup,
@@ -24,7 +24,7 @@ import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 export async function sendPhoto(
     this: TelegramClient,
     chatId: InputPeerLike,
-    photo: MediaLike,
+    photo: InputFileLike,
     params?: {
         /**
          * Caption for the photo
