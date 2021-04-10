@@ -48,7 +48,7 @@ async function addSingleMethod(state, fileName) {
         return getLeadingComments(ast)
             .split('\n')
             .map((i) => i.replace(/^(\/\/|\s*\*+|\/\*\*+\s*)/g, '').trim())
-            .some((i) => i.startsWith(flag))
+            .find((i) => i.startsWith(flag))
     }
 
     for (const stmt of program.statements) {
@@ -108,6 +108,15 @@ async function addSingleMethod(state, fileName) {
                 (mod) => mod.kind === 92 /* ExportKeyword */
             )
             const isInitialize = checkForFlag(stmt, '@initialize')
+            const aliases = (function() {
+                const flag = checkForFlag(stmt, '@alias')
+                if (!flag) return []
+
+                const [, aliases] = flag.split('=')
+                if (!aliases || !aliases.length) return []
+
+                return aliases.split(',')
+            })()
 
             if (!isExported && !isPrivate) {
                 throwError(
@@ -186,6 +195,7 @@ async function addSingleMethod(state, fileName) {
                     isPrivate,
                     func: stmt,
                     comment: getLeadingComments(stmt),
+                    aliases
                 })
 
                 const module = `./${relPath.replace(/\.ts$/, '')}`
@@ -286,82 +296,90 @@ async function main() {
 
     const printer = ts.createPrinter()
 
-    state.methods.list.forEach(({ name, isPrivate, func, comment }) => {
-        // create method that calls that function and passes `this`
-        // first let's determine the signature
-        const returnType = func.type ? ': ' + func.type.getText() : ''
-        const generics = func.typeParameters
-            ? `<${func.typeParameters
-                  .map((it) => it.getFullText())
-                  .join(', ')}>`
-            : ''
-        const rawParams = (func.parameters || []).filter(
-            (it) => !it.type || it.type.getText() !== 'TelegramClient'
-        )
-        const parameters = rawParams
-            .map((it) => {
-                if (it.initializer) {
-                    // has default value
-                    it._savedDefault = it.initializer.getFullText()
-                    if (!it.type) {
-                        // no explicit type.
-                        // infer from initializer
-                        if (
-                            it.initializer.kind === ts.SyntaxKind.TrueKeyword ||
-                            it.initializer.kind === ts.SyntaxKind.FalseKeyword
-                        ) {
-                            it.type = { kind: ts.SyntaxKind.BooleanKeyword }
-                        } else if (
-                            it.initializer.kind === ts.SyntaxKind.StringLiteral
-                        ) {
-                            it.type = { kind: ts.SyntaxKind.StringKeyword }
-                        } else if (
-                            it.initializer.kind ===
+    state.methods.list.forEach(({ name: origName, isPrivate, func, comment, aliases }) => {
+            // create method that calls that function and passes `this`
+            // first let's determine the signature
+            const returnType = func.type ? ': ' + func.type.getText() : ''
+            const generics = func.typeParameters
+                ? `<${func.typeParameters
+                    .map((it) => it.getFullText())
+                    .join(', ')}>`
+                : ''
+            const rawParams = (func.parameters || []).filter(
+                (it) => !it.type || it.type.getText() !== 'TelegramClient'
+            )
+            const parameters = rawParams
+                .map((it) => {
+                    if (it.initializer) {
+                        // has default value
+                        it._savedDefault = it.initializer.getFullText()
+                        if (!it.type) {
+                            // no explicit type.
+                            // infer from initializer
+                            if (
+                                it.initializer.kind === ts.SyntaxKind.TrueKeyword ||
+                                it.initializer.kind === ts.SyntaxKind.FalseKeyword
+                            ) {
+                                it.type = { kind: ts.SyntaxKind.BooleanKeyword }
+                            } else if (
+                                it.initializer.kind === ts.SyntaxKind.StringLiteral
+                            ) {
+                                it.type = { kind: ts.SyntaxKind.StringKeyword }
+                            } else if (
+                                it.initializer.kind ===
                                 ts.SyntaxKind.NumericLiteral ||
-                            (it.initializer.kind === ts.SyntaxKind.Identifier &&
-                                it.initializer.escapedText === 'NaN')
-                        ) {
-                            it.type = { kind: ts.SyntaxKind.NumberKeyword }
-                        } else {
-                            throwError(
-                                it,
-                                state.methods.used[name],
-                                'Cannot infer parameter type'
-                            )
+                                (it.initializer.kind === ts.SyntaxKind.Identifier &&
+                                    it.initializer.escapedText === 'NaN')
+                            ) {
+                                it.type = { kind: ts.SyntaxKind.NumberKeyword }
+                            } else {
+                                throwError(
+                                    it,
+                                    state.methods.used[name],
+                                    'Cannot infer parameter type'
+                                )
+                            }
                         }
+                        it.initializer = undefined
+                        it.questionToken = { kind: ts.SyntaxKind.QuestionToken }
+                        return printer.printNode(ts.EmitHint.Unspecified, it)
                     }
-                    it.initializer = undefined
-                    it.questionToken = { kind: ts.SyntaxKind.QuestionToken }
-                    return printer.printNode(ts.EmitHint.Unspecified, it)
-                }
 
-                return it.getFullText()
-            }).join(', ')
+                    return it.getFullText()
+                }).join(', ')
 
-        // write comment, but remove @internal mark and set default values for parameters
+        // remove @internal mark and set default values for parameters
         comment = comment
+            .replace(/^\s*\/\/+\s*@alias.*$/m, '')
             .replace(/(\n^|\/\*)\s*\*\s*@internal.*/m, '')
             .replace(/((?:\n^|\/\*)\s*\*\s*@param )([^\s]+?)($|\s+)/gm, (_, pref, arg, post) => {
                 const param = rawParams.find(it => it.name.escapedText === arg)
                 if (!param) return _
                 if (!param._savedDefault) return _
-                return `${pref}${arg}${post}(default: \`${param._savedDefault.trim()}\`) `
+                if (post) {
+                    return `${pref}${arg}${post}(default: \`${param._savedDefault.trim()}\`) `
+                } else {
+                    return `${pref}${arg}\n*  (default: \`${param._savedDefault.trim()}\`)`
+                }
             })
-        if (!comment.match(/\/\*\*?\s*\*\//))
-            // empty comment, no need to write it
-            output.write(comment)
 
-        output.write(
-            `${
-                isPrivate ? 'protected ' : ''
-            }${name}${generics}(${parameters})${returnType}${
-                func.body
-                    ? `{
-return ${name}.apply(this, arguments)
+        for (const name of [origName, ...aliases]) {
+            if (!comment.match(/\/\*\*?\s*\*\//))
+                // empty comment, no need to write it
+                output.write(comment)
+
+            output.write(
+                `${
+                    isPrivate ? 'protected ' : ''
+                }${name}${generics}(${parameters})${returnType}${
+                    func.body
+                        ? `{
+return ${origName}.apply(this, arguments)
 }`
-                    : ''
-            }`
-        )
+                        : ''
+                }`
+            )
+        }
     })
     output.untab()
     output.write('}')
