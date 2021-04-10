@@ -21,10 +21,12 @@ import {
     LiveLocation,
     Sticker,
     Voice,
+    InputMediaLike,
 } from '../media'
 import { parseDocument } from '../media/document-utils'
 import { Game } from '../media/game'
 import { WebPage } from '../media/web-page'
+import { InputFileLike } from '../files'
 
 /**
  * A message or a service message
@@ -795,6 +797,114 @@ export class Message {
     }
 
     /**
+     * Send a photo in reply to this message.
+     *
+     * By default just sends a message to the same chat,
+     * to make the reply a "real" reply, pass `visible=true`
+     *
+     * @param photo  Photo to send
+     * @param visible  Whether the reply should be visible
+     * @param params
+     */
+    replyPhoto(
+        photo: InputFileLike,
+        visible = false,
+        params?: Parameters<TelegramClient['sendPhoto']>[2]
+    ): ReturnType<TelegramClient['sendPhoto']> {
+        if (visible) {
+            return this.client.sendPhoto(this.chat.inputPeer, photo, {
+                ...(params || {}),
+                replyTo: this.id,
+            })
+        }
+        return this.client.sendPhoto(this.chat.inputPeer, photo, params)
+    }
+
+    /**
+     * Send a media in reply to this message.
+     *
+     * By default just sends a message to the same chat,
+     * to make the reply a "real" reply, pass `visible=true`
+     *
+     * @param media  Media to send
+     * @param visible  Whether the reply should be visible
+     * @param params
+     */
+    replyMedia(
+        media: InputMediaLike,
+        visible = false,
+        params?: Parameters<TelegramClient['sendMedia']>[2]
+    ): ReturnType<TelegramClient['sendMedia']> {
+        if (visible) {
+            return this.client.sendMedia(this.chat.inputPeer, media, {
+                ...(params || {}),
+                replyTo: this.id,
+            })
+        }
+        return this.client.sendMedia(this.chat.inputPeer, media, params)
+    }
+
+    /**
+     * Send a dice in reply to this message.
+     *
+     * By default just sends a message to the same chat,
+     * to make the reply a "real" reply, pass `visible=true`
+     *
+     * @param emoji  Emoji representing a dice to send
+     * @param visible  Whether the reply should be visible
+     * @param params
+     */
+    replyDice(
+        emoji: string,
+        visible = false,
+        params?: Parameters<TelegramClient['sendDice']>[2]
+    ): ReturnType<TelegramClient['sendDice']> {
+        if (visible) {
+            return this.client.sendDice(this.chat.inputPeer, emoji, {
+                ...(params || {}),
+                replyTo: this.id,
+            })
+        }
+        return this.client.sendDice(this.chat.inputPeer, emoji, params)
+    }
+
+    /**
+     * Send a static geo location in reply to this message.
+     *
+     * By default just sends a message to the same chat,
+     * to make the reply a "real" reply, pass `visible=true`
+     *
+     * @param latitude  Latitude of the location
+     * @param longitude  Longitude of the location
+     * @param visible  Whether the reply should be visible
+     * @param params
+     */
+    replyLocation(
+        latitude: number,
+        longitude: number,
+        visible = false,
+        params?: Parameters<TelegramClient['sendLocation']>[3]
+    ): ReturnType<TelegramClient['sendLocation']> {
+        if (visible) {
+            return this.client.sendLocation(
+                this.chat.inputPeer,
+                latitude,
+                longitude,
+                {
+                    ...(params || {}),
+                    replyTo: this.id,
+                }
+            )
+        }
+        return this.client.sendLocation(
+            this.chat.inputPeer,
+            latitude,
+            longitude,
+            params
+        )
+    }
+
+    /**
      * Delete this message.
      *
      * @param revoke  Whether to "revoke" (i.e. delete for both sides). Only used for chats and private chats.
@@ -808,7 +918,9 @@ export class Message {
      *
      * @see TelegramClient.editMessage
      */
-    edit(params: Parameters<TelegramClient['editMessage']>[2]): Promise<Message> {
+    edit(
+        params: Parameters<TelegramClient['editMessage']>[2]
+    ): Promise<Message> {
         return this.client.editMessage(this.chat.inputPeer, this.id, params)
     }
 
@@ -828,7 +940,7 @@ export class Message {
     ): Promise<Message> {
         return this.edit({
             text,
-            ...(params || {})
+            ...(params || {}),
         })
     }
 }
