@@ -27,6 +27,7 @@ import { iterHistory } from './methods/messages/iter-history'
 import { _parseEntities } from './methods/messages/parse-entities'
 import { searchGlobal } from './methods/messages/search-global'
 import { searchMessages } from './methods/messages/search-messages'
+import { sendDice } from './methods/messages/send-dice'
 import { sendMedia } from './methods/messages/send-media'
 import { sendPhoto } from './methods/messages/send-photo'
 import { sendText } from './methods/messages/send-text'
@@ -739,6 +740,46 @@ export class TelegramClient extends BaseTelegramClient {
         }
     ): AsyncIterableIterator<Message> {
         return searchMessages.apply(this, arguments)
+    }
+    /**
+     * Send an animated dice with a random value.
+     *
+     * For convenience, supported dice emojis are available
+     * as static members of {@link Dice}.
+     *
+     * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
+     * @param emoji  Emoji representing a dice
+     * @param params  Additional sending parameters
+     * @link Dice
+     */
+    sendDice(
+        chatId: InputPeerLike,
+        emoji: string,
+        params?: {
+            /**
+             * Message to reply to. Either a message object or message ID.
+             */
+            replyTo?: number | Message
+
+            /**
+             * Whether to send this message silently.
+             */
+            silent?: boolean
+
+            /**
+             * If set, the message will be scheduled to this date.
+             * When passing a number, a UNIX time in ms is expected.
+             */
+            schedule?: Date | number
+
+            /**
+             * For bots: inline or reply markup or an instruction
+             * to hide a reply keyboard or to force a reply.
+             */
+            replyMarkup?: ReplyMarkup
+        }
+    ): Promise<Message> {
+        return sendDice.apply(this, arguments)
     }
     /**
      * Send a single media.
