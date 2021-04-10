@@ -28,6 +28,7 @@ import { _parseEntities } from './methods/messages/parse-entities'
 import { searchGlobal } from './methods/messages/search-global'
 import { searchMessages } from './methods/messages/search-messages'
 import { sendDice } from './methods/messages/send-dice'
+import { sendLocation } from './methods/messages/send-location'
 import { sendMedia } from './methods/messages/send-media'
 import { sendPhoto } from './methods/messages/send-photo'
 import { sendText } from './methods/messages/send-text'
@@ -744,8 +745,11 @@ export class TelegramClient extends BaseTelegramClient {
     /**
      * Send an animated dice with a random value.
      *
-     * For convenience, supported dice emojis are available
+     * For convenience, known dice emojis are available
      * as static members of {@link Dice}.
+     *
+     * Note that dice result value is generated randomly on the server,
+     * you can't influence it in any way!
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param emoji  Emoji representing a dice
@@ -780,6 +784,44 @@ export class TelegramClient extends BaseTelegramClient {
         }
     ): Promise<Message> {
         return sendDice.apply(this, arguments)
+    }
+    /**
+     * Send a static geo location.
+     *
+     * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
+     * @param latitude  Latitude of the location
+     * @param longitude  Longitude of the location
+     * @param params  Additional sending parameters
+     */
+    sendLocation(
+        chatId: InputPeerLike,
+        latitude: number,
+        longitude: number,
+        params?: {
+            /**
+             * Message to reply to. Either a message object or message ID.
+             */
+            replyTo?: number | Message
+
+            /**
+             * Whether to send this message silently.
+             */
+            silent?: boolean
+
+            /**
+             * If set, the message will be scheduled to this date.
+             * When passing a number, a UNIX time in ms is expected.
+             */
+            schedule?: Date | number
+
+            /**
+             * For bots: inline or reply markup or an instruction
+             * to hide a reply keyboard or to force a reply.
+             */
+            replyMarkup?: ReplyMarkup
+        }
+    ): Promise<Message> {
+        return sendLocation.apply(this, arguments)
     }
     /**
      * Send a single media.

@@ -1,27 +1,22 @@
-import { TelegramClient } from '../../client'
 import { BotKeyboard, InputPeerLike, Message, ReplyMarkup } from '../../types'
-import { normalizeDate, randomUlong } from '../../utils/misc-utils'
+import { TelegramClient } from '../../client'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
+import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 
 /**
- * Send an animated dice with a random value.
- *
- * For convenience, known dice emojis are available
- * as static members of {@link Dice}.
- *
- * Note that dice result value is generated randomly on the server,
- * you can't influence it in any way!
+ * Send a static geo location.
  *
  * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
- * @param emoji  Emoji representing a dice
+ * @param latitude  Latitude of the location
+ * @param longitude  Longitude of the location
  * @param params  Additional sending parameters
- * @link Dice
  * @internal
  */
-export async function sendDice(
+export async function sendLocation(
     this: TelegramClient,
     chatId: InputPeerLike,
-    emoji: string,
+    latitude: number,
+    longitude: number,
     params?: {
         /**
          * Message to reply to. Either a message object or message ID.
@@ -55,8 +50,12 @@ export async function sendDice(
         _: 'messages.sendMedia',
         peer,
         media: {
-            _: 'inputMediaDice',
-            emoticon: emoji,
+            _: 'inputMediaGeoPoint',
+            geoPoint: {
+                _: 'inputGeoPoint',
+                lat: latitude,
+                long: longitude
+            }
         },
         silent: params.silent,
         replyToMsgId: params.replyTo
