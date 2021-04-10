@@ -16,6 +16,7 @@ import { start } from './methods/auth/start'
 import { addChatMembers } from './methods/chats/add-chat-members'
 import { archiveChats } from './methods/chats/archive-chats'
 import { createChannel } from './methods/chats/create-channel'
+import { createSupergroup } from './methods/chats/create-supergroup'
 import { deleteChannel } from './methods/chats/delete-channel'
 import { getChatPreview } from './methods/chats/get-chat-preview'
 import { getChat } from './methods/chats/get-chat'
@@ -364,6 +365,15 @@ export class TelegramClient extends BaseTelegramClient {
      */
     createChannel(title: string, description?: string): Promise<Chat> {
         return createChannel.apply(this, arguments)
+    }
+    /**
+     * Create a new supergroup
+     *
+     * @param title  Title of the supergroup
+     * @param description  (default: `''`) Description of the supergroup
+     */
+    createSupergroup(title: string, description?: string): Promise<Chat> {
+        return createSupergroup.apply(this, arguments)
     }
 
     /**
