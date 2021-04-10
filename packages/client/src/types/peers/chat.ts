@@ -15,7 +15,6 @@ export namespace Chat {
      *  - `group`: Legacy group
      *  - `supergroup`: Supergroup
      *  - `channel`: Broadcast channel
-     *  - `broadcast`: Broadcast group
      */
     export type Type =
         | 'private'
@@ -23,7 +22,6 @@ export namespace Chat {
         | 'group'
         | 'supergroup'
         | 'channel'
-        | 'broadcast'
 }
 
 /**
@@ -117,9 +115,7 @@ export class Chat {
             } else if (this.peer._ === 'chat') {
                 this._type = 'group'
             } else if (this.peer._ === 'channel') {
-                this._type = this.peer.megagroup
-                    ? 'broadcast'
-                    : this.peer.broadcast
+                this._type = this.peer.broadcast
                     ? 'channel'
                     : 'supergroup'
             }

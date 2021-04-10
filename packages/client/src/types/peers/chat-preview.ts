@@ -11,9 +11,8 @@ export namespace ChatPreview {
      *  - `group`: Legacy group
      *  - `supergroup`: Supergroup
      *  - `channel`: Broadcast channel
-     *  - `broadcast`: Broadcast group
      */
-    export type Type = 'group' | 'supergroup' | 'channel' | 'broadcast'
+    export type Type = 'group' | 'supergroup' | 'channel'
 }
 
 export class ChatPreview {
@@ -45,7 +44,6 @@ export class ChatPreview {
     get type(): ChatPreview.Type {
         if (!this.invite.channel) return 'group'
         if (this.invite.broadcast) return 'channel'
-        if (this.invite.megagroup) return 'broadcast'
         return 'supergroup'
     }
 
