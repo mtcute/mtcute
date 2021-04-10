@@ -15,6 +15,8 @@ import { signUp } from './methods/auth/sign-up'
 import { start } from './methods/auth/start'
 import { addChatMembers } from './methods/chats/add-chat-members'
 import { archiveChats } from './methods/chats/archive-chats'
+import { createChannel } from './methods/chats/create-channel'
+import { deleteChannel } from './methods/chats/delete-channel'
 import { getChatPreview } from './methods/chats/get-chat-preview'
 import { getChat } from './methods/chats/get-chat'
 import { getFullChat } from './methods/chats/get-full-chat'
@@ -333,7 +335,8 @@ export class TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  ID of the chat or its username
      * @param users ID(s) of the users, their username(s) or phone(s).
-     * @param forwardCount(default: `100`)
+     * @param forwardCount
+     *  (default: `100`)
      *   Number of old messages to be forwarded (0-100).
      *   Only applicable to legacy groups, ignored for supergroups and channels
      */
@@ -351,6 +354,34 @@ export class TelegramClient extends BaseTelegramClient {
      */
     archiveChats(chats: MaybeArray<InputPeerLike>): Promise<void> {
         return archiveChats.apply(this, arguments)
+    }
+    /**
+     * Create a new broadcast channel
+     *
+     * @param title  Channel title
+     * @param description  (default: `''`) Channel description
+     * @returns  Newly created channel
+     */
+    createChannel(title: string, description?: string): Promise<Chat> {
+        return createChannel.apply(this, arguments)
+    }
+
+    /**
+     * Delete a channel or a supergroup
+     *
+     * @param chatId  Chat ID or username
+     */
+    deleteChannel(chatId: InputPeerLike): Promise<void> {
+        return deleteChannel.apply(this, arguments)
+    }
+
+    /**
+     * Delete a channel or a supergroup
+     *
+     * @param chatId  Chat ID or username
+     */
+    deleteSupergroup(chatId: InputPeerLike): Promise<void> {
+        return deleteChannel.apply(this, arguments)
     }
     /**
      * Get preview information about a private chat.
