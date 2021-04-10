@@ -2,9 +2,10 @@ import { ChatPhoto } from './chat-photo'
 import { tl } from '@mtcute/tl'
 import { ChatPermissions } from './chat-permissions'
 import { TelegramClient } from '../../client'
-import { getMarkedPeerId } from '@mtcute/core'
+import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
 import { MtCuteArgumentError, MtCuteTypeAssertionError } from '../errors'
 import { makeInspectable } from '../utils'
+import { InputPeerLike } from './index'
 
 export namespace Chat {
     /**
@@ -427,6 +428,18 @@ export class Chat {
      */
     async join(): Promise<void> {
         await this.client.joinChat(this.inputPeer)
+    }
+
+    /**
+     * Add user(s) to this chat
+     *
+     * @param users  ID(s) of the users, their username(s) or phone(s).
+     * @param forwardCount
+     *   Number of old messages to be forwarded (0-100).
+     *   Only applicable to legacy groups, ignored for supergroups and channels
+     */
+    async addMembers(users: MaybeArray<InputPeerLike>, forwardCount?: number): Promise<void> {
+        return this.client.addChatMembers(this.inputPeer, users, forwardCount)
     }
 }
 

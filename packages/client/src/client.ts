@@ -13,6 +13,7 @@ import { signInBot } from './methods/auth/sign-in-bot'
 import { signIn } from './methods/auth/sign-in'
 import { signUp } from './methods/auth/sign-up'
 import { start } from './methods/auth/start'
+import { addChatMembers } from './methods/chats/add-chat-members'
 import { getChatPreview } from './methods/chats/get-chat-preview'
 import { getChat } from './methods/chats/get-chat'
 import { getFullChat } from './methods/chats/get-full-chat'
@@ -324,6 +325,22 @@ export class TelegramClient extends BaseTelegramClient {
         catchUp?: boolean
     }): Promise<User> {
         return start.apply(this, arguments)
+    }
+    /**
+     * Add new members to a group, supergroup or channel.
+     *
+     * @param chatId  ID of the chat or its username
+     * @param users ID(s) of the users, their username(s) or phone(s).
+     * @param forwardCount(default: `100`)
+     *   Number of old messages to be forwarded (0-100).
+     *   Only applicable to legacy groups, ignored for supergroups and channels
+     */
+    addChatMembers(
+        chatId: InputPeerLike,
+        users: MaybeArray<InputPeerLike>,
+        forwardCount?: number
+    ): Promise<void> {
+        return addChatMembers.apply(this, arguments)
     }
     /**
      * Get preview information about a private chat.
