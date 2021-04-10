@@ -38,6 +38,8 @@ async function addSingleMethod(state, fileName) {
     )
     const relPath = path.relative(targetDir, fileName).replace(/\\/g, '/') // replace path delim to unix
 
+    state.files[relPath] = fileFullText
+
     function getLeadingComments(ast) {
         return (ts.getLeadingCommentRanges(fileFullText, ast.pos) || [])
             .map((range) => fileFullText.substring(range.pos, range.end))
@@ -108,7 +110,7 @@ async function addSingleMethod(state, fileName) {
                 (mod) => mod.kind === 92 /* ExportKeyword */
             )
             const isInitialize = checkForFlag(stmt, '@initialize')
-            const aliases = (function() {
+            const aliases = (function () {
                 const flag = checkForFlag(stmt, '@alias')
                 if (!flag) return []
 
@@ -195,7 +197,7 @@ async function addSingleMethod(state, fileName) {
                     isPrivate,
                     func: stmt,
                     comment: getLeadingComments(stmt),
-                    aliases
+                    aliases,
                 })
 
                 const module = `./${relPath.replace(/\.ts$/, '')}`
@@ -255,6 +257,7 @@ async function main() {
             list: [],
         },
         copy: [],
+        files: {},
     }
 
     for await (const file of getFiles(path.join(__dirname, '../src/methods'))) {
@@ -296,14 +299,15 @@ async function main() {
 
     const printer = ts.createPrinter()
 
-    state.methods.list.forEach(({ name: origName, isPrivate, func, comment, aliases }) => {
+    state.methods.list.forEach(
+        ({ name: origName, isPrivate, func, comment, aliases }) => {
             // create method that calls that function and passes `this`
             // first let's determine the signature
             const returnType = func.type ? ': ' + func.type.getText() : ''
             const generics = func.typeParameters
                 ? `<${func.typeParameters
-                    .map((it) => it.getFullText())
-                    .join(', ')}>`
+                      .map((it) => it.getFullText())
+                      .join(', ')}>`
                 : ''
             const rawParams = (func.parameters || []).filter(
                 (it) => !it.type || it.type.getText() !== 'TelegramClient'
@@ -317,70 +321,99 @@ async function main() {
                             // no explicit type.
                             // infer from initializer
                             if (
-                                it.initializer.kind === ts.SyntaxKind.TrueKeyword ||
-                                it.initializer.kind === ts.SyntaxKind.FalseKeyword
+                                it.initializer.kind ===
+                                    ts.SyntaxKind.TrueKeyword ||
+                                it.initializer.kind ===
+                                    ts.SyntaxKind.FalseKeyword
                             ) {
                                 it.type = { kind: ts.SyntaxKind.BooleanKeyword }
                             } else if (
-                                it.initializer.kind === ts.SyntaxKind.StringLiteral
+                                it.initializer.kind ===
+                                ts.SyntaxKind.StringLiteral
                             ) {
                                 it.type = { kind: ts.SyntaxKind.StringKeyword }
                             } else if (
                                 it.initializer.kind ===
-                                ts.SyntaxKind.NumericLiteral ||
-                                (it.initializer.kind === ts.SyntaxKind.Identifier &&
+                                    ts.SyntaxKind.NumericLiteral ||
+                                (it.initializer.kind ===
+                                    ts.SyntaxKind.Identifier &&
                                     it.initializer.escapedText === 'NaN')
                             ) {
                                 it.type = { kind: ts.SyntaxKind.NumberKeyword }
                             } else {
                                 throwError(
                                     it,
-                                    state.methods.used[name],
+                                    state.methods.used[origName],
                                     'Cannot infer parameter type'
                                 )
                             }
                         }
                         it.initializer = undefined
+
+                        const deleteParents = (obj) => {
+                            if (Array.isArray(obj)) return obj.forEach((it) => deleteParents(it))
+
+                            if (obj.parent) delete obj.parent
+
+                            for (const k of Object.keys(obj)) {
+                                if (obj[k] && typeof obj[k] === 'object') {
+                                    deleteParents(obj[k])
+                                }
+                            }
+                        }
+                        deleteParents(it)
+
                         it.questionToken = { kind: ts.SyntaxKind.QuestionToken }
-                        return printer.printNode(ts.EmitHint.Unspecified, it)
+                        return printer.printNode(
+                            ts.EmitHint.Unspecified,
+                            it,
+                            // state.files[state.methods.used[origName]]
+                        )
                     }
 
                     return it.getFullText()
-                }).join(', ')
+                })
+                .join(', ')
 
-        // remove @internal mark and set default values for parameters
-        comment = comment
-            .replace(/^\s*\/\/+\s*@alias.*$/m, '')
-            .replace(/(\n^|\/\*)\s*\*\s*@internal.*/m, '')
-            .replace(/((?:\n^|\/\*)\s*\*\s*@param )([^\s]+?)($|\s+)/gm, (_, pref, arg, post) => {
-                const param = rawParams.find(it => it.name.escapedText === arg)
-                if (!param) return _
-                if (!param._savedDefault) return _
-                if (post) {
-                    return `${pref}${arg}${post}(default: \`${param._savedDefault.trim()}\`) `
-                } else {
-                    return `${pref}${arg}\n*  (default: \`${param._savedDefault.trim()}\`)`
-                }
-            })
+            // remove @internal mark and set default values for parameters
+            comment = comment
+                .replace(/^\s*\/\/+\s*@alias.*$/m, '')
+                .replace(/(\n^|\/\*)\s*\*\s*@internal.*/m, '')
+                .replace(
+                    /((?:\n^|\/\*)\s*\*\s*@param )([^\s]+?)($|\s+)/gm,
+                    (_, pref, arg, post) => {
+                        const param = rawParams.find(
+                            (it) => it.name.escapedText === arg
+                        )
+                        if (!param) return _
+                        if (!param._savedDefault) return _
+                        if (post) {
+                            return `${pref}${arg}${post}(default: \`${param._savedDefault.trim()}\`) `
+                        } else {
+                            return `${pref}${arg}\n*  (default: \`${param._savedDefault.trim()}\`)`
+                        }
+                    }
+                )
 
-        for (const name of [origName, ...aliases]) {
-            if (!comment.match(/\/\*\*?\s*\*\//))
-                // empty comment, no need to write it
-                output.write(comment)
+            for (const name of [origName, ...aliases]) {
+                if (!comment.match(/\/\*\*?\s*\*\//))
+                    // empty comment, no need to write it
+                    output.write(comment)
 
-            output.write(
-                `${
-                    isPrivate ? 'protected ' : ''
-                }${name}${generics}(${parameters})${returnType}${
-                    func.body
-                        ? `{
+                output.write(
+                    `${
+                        isPrivate ? 'protected ' : ''
+                    }${name}${generics}(${parameters})${returnType}${
+                        func.body
+                            ? `{
 return ${origName}.apply(this, arguments)
 }`
-                        : ''
-                }`
-            )
+                            : ''
+                    }`
+                )
+            }
         }
-    })
+    )
     output.untab()
     output.write('}')
 
