@@ -26,6 +26,9 @@ export class MtCuteUnsupportedError extends MtCuteError {}
 
 /**
  * Server returned something of an unexpected type.
+ *
+ * This is usually a problem on library side.
+ * Feel free to open an issue about this!
  */
 export class MtCuteTypeAssertionError extends MtCuteError {
     /**

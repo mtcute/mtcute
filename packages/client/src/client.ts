@@ -16,12 +16,16 @@ import { start } from './methods/auth/start'
 import { addChatMembers } from './methods/chats/add-chat-members'
 import { archiveChats } from './methods/chats/archive-chats'
 import { createChannel } from './methods/chats/create-channel'
+import { createGroup } from './methods/chats/create-group'
 import { createSupergroup } from './methods/chats/create-supergroup'
 import { deleteChannel } from './methods/chats/delete-channel'
+import { deleteGroup } from './methods/chats/delete-group'
+import { deleteHistory } from './methods/chats/delete-history'
 import { getChatPreview } from './methods/chats/get-chat-preview'
 import { getChat } from './methods/chats/get-chat'
 import { getFullChat } from './methods/chats/get-full-chat'
 import { joinChat } from './methods/chats/join-chat'
+import { leaveChat } from './methods/chats/leave-chat'
 import { unarchiveChats } from './methods/chats/unarchive-chats'
 import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
@@ -367,6 +371,23 @@ export class TelegramClient extends BaseTelegramClient {
         return createChannel.apply(this, arguments)
     }
     /**
+     * Create a legacy group chat
+     *
+     * If you want to create a supergroup, use {@link createSupergroup}
+     * instead.
+     *
+     * @param title  Group title
+     * @param users
+     *   User(s) to be invited in the group (ID(s), username(s) or phone number(s)).
+     *   Due to Telegram limitations, you can't create a legacy group with yourself.
+     */
+    createGroup(
+        title: string,
+        users: MaybeArray<InputPeerLike>
+    ): Promise<Chat> {
+        return createGroup.apply(this, arguments)
+    }
+    /**
      * Create a new supergroup
      *
      * @param title  Title of the supergroup
@@ -392,6 +413,36 @@ export class TelegramClient extends BaseTelegramClient {
      */
     deleteSupergroup(chatId: InputPeerLike): Promise<void> {
         return deleteChannel.apply(this, arguments)
+    }
+    /**
+     * Delete a legacy group chat for all members
+     *
+     * @param chatId  Chat ID
+     */
+    deleteGroup(chatId: InputPeerLike): Promise<void> {
+        return deleteGroup.apply(this, arguments)
+    }
+    /**
+     * Delete communication history (for private chats
+     * and legacy groups)
+     *
+     * @param chat  Chat or user ID, username, phone number, `"me"` or `"self"`
+     * @param mode
+     *  (default: `'delete'`)
+     *   Deletion mode. Can be:
+     *   - `delete`: delete messages (only for yourself)
+     *   - `clear`: delete messages (only for yourself)
+     *   - `revoke`: delete messages for all users
+     *   - I'm not sure what's the difference between `delete` and `clear`,
+     *     but they are in fact different flags in TL object.
+     * @param maxId  (default: `0`) Maximum ID of message to delete. Defaults to 0 (remove all messages)
+     */
+    deleteHistory(
+        chat: InputPeerLike,
+        mode?: 'delete' | 'clear' | 'revoke',
+        maxId?: number
+    ): Promise<void> {
+        return deleteHistory.apply(this, arguments)
     }
     /**
      * Get preview information about a private chat.
@@ -436,6 +487,15 @@ export class TelegramClient extends BaseTelegramClient {
      */
     joinChat(chatId: InputPeerLike): Promise<Chat> {
         return joinChat.apply(this, arguments)
+    }
+    /**
+     * Leave a group chat, supergroup or channel
+     *
+     * @param chatId  Chat ID or username
+     * @param clear  (default: `false`) Whether to clear history after leaving (only for legacy group chats)
+     */
+    leaveChat(chatId: InputPeerLike, clear?: boolean): Promise<void> {
+        return leaveChat.apply(this, arguments)
     }
     /**
      * Unarchive one or more chats
