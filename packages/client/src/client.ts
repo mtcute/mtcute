@@ -14,10 +14,12 @@ import { signIn } from './methods/auth/sign-in'
 import { signUp } from './methods/auth/sign-up'
 import { start } from './methods/auth/start'
 import { addChatMembers } from './methods/chats/add-chat-members'
+import { archiveChats } from './methods/chats/archive-chats'
 import { getChatPreview } from './methods/chats/get-chat-preview'
 import { getChat } from './methods/chats/get-chat'
 import { getFullChat } from './methods/chats/get-full-chat'
 import { joinChat } from './methods/chats/join-chat'
+import { unarchiveChats } from './methods/chats/unarchive-chats'
 import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
 import { downloadAsIterable } from './methods/files/download-iterable'
@@ -343,6 +345,14 @@ export class TelegramClient extends BaseTelegramClient {
         return addChatMembers.apply(this, arguments)
     }
     /**
+     * Archive one or more chats
+     *
+     * @param chats  Chat ID(s), username(s), phone number(s), `"me"` or `"self"`
+     */
+    archiveChats(chats: MaybeArray<InputPeerLike>): Promise<void> {
+        return archiveChats.apply(this, arguments)
+    }
+    /**
      * Get preview information about a private chat.
      *
      * @param inviteLink  Invite link
@@ -385,6 +395,14 @@ export class TelegramClient extends BaseTelegramClient {
      */
     joinChat(chatId: InputPeerLike): Promise<Chat> {
         return joinChat.apply(this, arguments)
+    }
+    /**
+     * Unarchive one or more chats
+     *
+     * @param chats  Chat ID(s), username(s), phone number(s), `"me"` or `"self"`
+     */
+    unarchiveChats(chats: MaybeArray<InputPeerLike>): Promise<void> {
+        return unarchiveChats.apply(this, arguments)
     }
     /**
      * Download a file and return its contents as a Buffer.

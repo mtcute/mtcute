@@ -441,6 +441,20 @@ export class Chat {
     async addMembers(users: MaybeArray<InputPeerLike>, forwardCount?: number): Promise<void> {
         return this.client.addChatMembers(this.inputPeer, users, forwardCount)
     }
+
+    /**
+     * Archive this chat
+     */
+    async archive(): Promise<void> {
+        return this.client.archiveChats(this.inputPeer)
+    }
+
+    /**
+     * Unarchive this chat
+     */
+    async unarchive(): Promise<void> {
+        return this.client.unarchiveChats(this.inputPeer)
+    }
 }
 
 makeInspectable(Chat)
