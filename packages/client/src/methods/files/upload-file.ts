@@ -22,6 +22,11 @@ try {
 
 const debug = require('debug')('mtcute:upload')
 
+const OVERRIDE_MIME: Record<string, string> = {
+    // tg doesn't interpret `audio/opus` files as voice messages for some reason
+    'audio/opus': 'audio/ogg'
+}
+
 /**
  * Upload a file to Telegram servers, without actually
  * sending a message anywhere. Useful when an `InputFile` is required.
@@ -246,6 +251,8 @@ export async function uploadFile(
             md5Checksum: (await hash.digest()).toString('hex'),
         }
     }
+
+    if (fileMime! in OVERRIDE_MIME) fileMime = OVERRIDE_MIME[fileMime!]
 
     return {
         inputFile,

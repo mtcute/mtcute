@@ -98,3 +98,11 @@ export function svgPathToFile(path: string): Buffer {
             '</svg>'
     )
 }
+
+const FILENAME_REGEX = /^(\/?.+[/\\])*(.+\..+)$/
+
+export function extractFileName(path: string): string {
+    const m = path.match(FILENAME_REGEX)
+    if (m) return m[2]
+    return ''
+}

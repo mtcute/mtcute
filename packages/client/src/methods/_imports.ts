@@ -25,6 +25,7 @@ import {
     UpdateFilter,
     Message,
     ReplyMarkup,
+    InputMediaLike
 } from '../types'
 
 // @copy

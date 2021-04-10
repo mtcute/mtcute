@@ -5,8 +5,6 @@ import {
     BotKeyboard,
     ReplyMarkup,
     isUploadedFile,
-    filters,
-    Photo,
 } from '../../types'
 import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'

@@ -27,6 +27,7 @@ import { iterHistory } from './methods/messages/iter-history'
 import { _parseEntities } from './methods/messages/parse-entities'
 import { searchGlobal } from './methods/messages/search-global'
 import { searchMessages } from './methods/messages/search-messages'
+import { sendMedia } from './methods/messages/send-media'
 import { sendPhoto } from './methods/messages/send-photo'
 import { sendText } from './methods/messages/send-text'
 import {
@@ -54,6 +55,7 @@ import {
     Chat,
     FileDownloadParameters,
     InputFileLike,
+    InputMediaLike,
     InputPeerLike,
     MaybeDynamic,
     Message,
@@ -737,6 +739,60 @@ export class TelegramClient extends BaseTelegramClient {
         }
     ): AsyncIterableIterator<Message> {
         return searchMessages.apply(this, arguments)
+    }
+    /**
+     * Send a single media.
+     *
+     * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
+     * @param media  Media contained in the message
+     * @param params  Additional sending parameters
+     */
+    sendMedia(
+        chatId: InputPeerLike,
+        media: InputMediaLike,
+        params?: {
+            /**
+             * Message to reply to. Either a message object or message ID.
+             */
+            replyTo?: number | Message
+
+            /**
+             * Parse mode to use to parse entities before sending
+             * the message. Defaults to current default parse mode (if any).
+             *
+             * Passing `null` will explicitly disable formatting.
+             */
+            parseMode?: string | null
+
+            /**
+             * Whether to send this message silently.
+             */
+            silent?: boolean
+
+            /**
+             * If set, the message will be scheduled to this date.
+             * When passing a number, a UNIX time in ms is expected.
+             */
+            schedule?: Date | number
+
+            /**
+             * For bots: inline or reply markup or an instruction
+             * to hide a reply keyboard or to force a reply.
+             */
+            replyMarkup?: ReplyMarkup
+
+            /**
+             * Function that will be called after some part has been uploaded.
+             * Only used when a file that requires uploading is passed,
+             * and not used when uploading a thumbnail.
+             *
+             * @param uploaded  Number of bytes already uploaded
+             * @param total  Total file size
+             */
+            progressCallback?: (uploaded: number, total: number) => void
+        }
+    ): Promise<Message> {
+        return sendMedia.apply(this, arguments)
     }
     /**
      * Send a single photo
