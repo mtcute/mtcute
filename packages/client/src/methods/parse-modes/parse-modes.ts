@@ -15,7 +15,7 @@ import { MtCuteError } from '../../types'
 export function registerParseMode(
     this: TelegramClient,
     parseMode: IMessageEntityParser,
-    name = parseMode.name
+    name: string = parseMode.name
 ): void {
     if (name in this._parseModes) {
         throw new MtCuteError(

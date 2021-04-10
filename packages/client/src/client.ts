@@ -137,10 +137,10 @@ export class TelegramClient extends BaseTelegramClient {
      * When you log out, you can immediately log back in using
      * the same {@link TelegramClient} instance.
      *
-     * @param resetSession  Whether to reset the session
+     * @param resetSession  (default: `false`) Whether to reset the session
      * @returns  On success, `true` is returned
      */
-    logOut(resetSession = false): Promise<true> {
+    logOut(resetSession?: boolean): Promise<true> {
         return logOut.apply(this, arguments)
     }
     /**
@@ -219,13 +219,13 @@ export class TelegramClient extends BaseTelegramClient {
      * @param phone  Phone number in international format
      * @param phoneCodeHash  Code identifier from {@link TelegramClient.sendCode}
      * @param firstName  New user's first name
-     * @param lastName  New user's last name
+     * @param lastName  (default: `''`) New user's last name
      */
     signUp(
         phone: string,
         phoneCodeHash: string,
         firstName: string,
-        lastName = ''
+        lastName?: string
     ): Promise<User> {
         return signUp.apply(this, arguments)
     }
@@ -479,12 +479,12 @@ export class TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param ids  Message(s) ID(s) to delete.
-     * @param revoke  Whether to "revoke" (i.e. delete for both sides). Only used for chats and private chats.
+     * @param revoke  (default: `true`) Whether to "revoke" (i.e. delete for both sides). Only used for chats and private chats.
      */
     deleteMessages(
         chatId: InputPeerLike,
         ids: MaybeArray<number>,
-        revoke = true
+        revoke?: boolean
     ): Promise<boolean> {
         return deleteMessages.apply(this, arguments)
     }
@@ -537,7 +537,7 @@ export class TelegramClient extends BaseTelegramClient {
 
     protected _findMessageInUpdate(
         res: tl.TypeUpdates,
-        isEdit = false
+        isEdit?: boolean
     ): Message {
         return _findMessageInUpdate.apply(this, arguments)
     }
@@ -625,7 +625,7 @@ export class TelegramClient extends BaseTelegramClient {
     getMessages(
         chatId: InputPeerLike,
         messageIds: MaybeArray<number>,
-        fromReply = false
+        fromReply?: boolean
     ): Promise<MaybeArray<Message>> {
         return getMessages.apply(this, arguments)
     }
@@ -1062,13 +1062,10 @@ export class TelegramClient extends BaseTelegramClient {
      * mode is also set as default.
      *
      * @param parseMode  Parse mode to register
-     * @param name  Parse mode name. By default is taken from the object.
+     * @param name  (default: `parseMode.name`) Parse mode name. By default is taken from the object.
      * @throws MtCuteError  When the parse mode with a given name is already registered.
      */
-    registerParseMode(
-        parseMode: IMessageEntityParser,
-        name = parseMode.name
-    ): void {
+    registerParseMode(parseMode: IMessageEntityParser, name?: string): void {
         return registerParseMode.apply(this, arguments)
     }
     /**
@@ -1119,9 +1116,9 @@ export class TelegramClient extends BaseTelegramClient {
      * Add an update handler to a given handlers group
      *
      * @param handler  Update handler
-     * @param group  Handler group index
+     * @param group  (default: `0`) Handler group index
      */
-    addUpdateHandler(handler: UpdateHandler, group = 0): void {
+    addUpdateHandler(handler: UpdateHandler, group?: number): void {
         return addUpdateHandler.apply(this, arguments)
     }
     /**
@@ -1129,11 +1126,11 @@ export class TelegramClient extends BaseTelegramClient {
      * handler group.
      *
      * @param handler  Update handler to remove, its type or `'all'` to remove all
-     * @param group  Handler group index
+     * @param group  (default: `0`) Handler group index
      */
     removeUpdateHandler(
         handler: UpdateHandler | UpdateHandler['type'] | 'all',
-        group = 0
+        group?: number
     ): void {
         return removeUpdateHandler.apply(this, arguments)
     }

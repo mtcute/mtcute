@@ -284,6 +284,8 @@ async function main() {
     output.untab()
     output.write('}\n')
 
+    const printer = ts.createPrinter()
+
     state.methods.list.forEach(({ name, isPrivate, func, comment }) => {
         // create method that calls that function and passes `this`
         // first let's determine the signature
@@ -296,10 +298,55 @@ async function main() {
         const rawParams = (func.parameters || []).filter(
             (it) => !it.type || it.type.getText() !== 'TelegramClient'
         )
-        const parameters = rawParams.map((it) => it.getFullText()).join(', ')
+        const parameters = rawParams
+            .map((it) => {
+                if (it.initializer) {
+                    // has default value
+                    it._savedDefault = it.initializer.getFullText()
+                    if (!it.type) {
+                        // no explicit type.
+                        // infer from initializer
+                        if (
+                            it.initializer.kind === ts.SyntaxKind.TrueKeyword ||
+                            it.initializer.kind === ts.SyntaxKind.FalseKeyword
+                        ) {
+                            it.type = { kind: ts.SyntaxKind.BooleanKeyword }
+                        } else if (
+                            it.initializer.kind === ts.SyntaxKind.StringLiteral
+                        ) {
+                            it.type = { kind: ts.SyntaxKind.StringKeyword }
+                        } else if (
+                            it.initializer.kind ===
+                                ts.SyntaxKind.NumericLiteral ||
+                            (it.initializer.kind === ts.SyntaxKind.Identifier &&
+                                it.initializer.escapedText === 'NaN')
+                        ) {
+                            it.type = { kind: ts.SyntaxKind.NumberKeyword }
+                        } else {
+                            throwError(
+                                it,
+                                state.methods.used[name],
+                                'Cannot infer parameter type'
+                            )
+                        }
+                    }
+                    it.initializer = undefined
+                    it.questionToken = { kind: ts.SyntaxKind.QuestionToken }
+                    return printer.printNode(ts.EmitHint.Unspecified, it)
+                }
 
-        // write comment, but remove @internal mark
-        comment = comment.replace(/(\n^|\/\*)\s*\*\s*@internal.*/m, '')
+                return it.getFullText()
+            }).join(', ')
+
+        // write comment, but remove @internal mark and set default values for parameters
+        comment = comment
+            .replace(/(\n^|\/\*)\s*\*\s*@internal.*/m, '')
+            .replace(/((?:\n^|\/\*)\s*\*\s*@param )([^\s]+?)($|\s+)/gm, (_, pref, arg, post) => {
+                const param = rawParams.find(it => it.name.escapedText === arg)
+                if (!param) return _
+                if (!param._savedDefault) return _
+                return `${pref}${arg}${post}(default: \`${param._savedDefault.trim()}\`) `
+            })
         if (!comment.match(/\/\*\*?\s*\*\//))
             // empty comment, no need to write it
             output.write(comment)
