@@ -10,6 +10,7 @@ import { Readable } from 'stream'
 import {
     User,
     Chat,
+    ChatPreview,
     TermsOfService,
     SentCode,
     MaybeDynamic,

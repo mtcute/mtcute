@@ -1,5 +1,8 @@
 import { tl } from '@mtcute/tl'
 
+export const INVITE_LINK_REGEX = /^(?:https?:\/\/)?(?:www\.)?(?:t(?:elegram)?\.(?:org|me|dog)\/joinchat\/)([\w-]+)$/i
+
+
 // helpers to normalize result of `resolvePeer` function
 
 export function normalizeToInputPeer(

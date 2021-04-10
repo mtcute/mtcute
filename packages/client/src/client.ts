@@ -13,6 +13,10 @@ import { signInBot } from './methods/auth/sign-in-bot'
 import { signIn } from './methods/auth/sign-in'
 import { signUp } from './methods/auth/sign-up'
 import { start } from './methods/auth/start'
+import { getChatPreview } from './methods/chats/get-chat-preview'
+import { getChat } from './methods/chats/get-chat'
+import { getFullChat } from './methods/chats/get-full-chat'
+import { joinChat } from './methods/chats/join-chat'
 import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
 import { downloadAsIterable } from './methods/files/download-iterable'
@@ -55,6 +59,7 @@ import { IMessageEntityParser } from './parser'
 import { Readable } from 'stream'
 import {
     Chat,
+    ChatPreview,
     FileDownloadParameters,
     InputFileLike,
     InputMediaLike,
@@ -319,6 +324,50 @@ export class TelegramClient extends BaseTelegramClient {
         catchUp?: boolean
     }): Promise<User> {
         return start.apply(this, arguments)
+    }
+    /**
+     * Get preview information about a private chat.
+     *
+     * @param inviteLink  Invite link
+     * @throws MtCuteArgumentError  In case invite link has invalid format
+     * @throws MtCuteNotFoundError
+     *   In case you are trying to get info about private chat that you have already joined.
+     *   Use {@link getChat} or {@link getFullChat} instead.
+     */
+    getChatPreview(inviteLink: string): Promise<ChatPreview> {
+        return getChatPreview.apply(this, arguments)
+    }
+    /**
+     * Get basic information about a chat.
+     *
+     * @param chatId  ID of the chat, its username or invite link
+     * @throws MtCuteArgumentError
+     *   In case you are trying to get info about private chat that you haven't joined.
+     *   Use {@link getChatPreview} instead.
+     */
+    getChat(chatId: InputPeerLike): Promise<Chat> {
+        return getChat.apply(this, arguments)
+    }
+    /**
+     * Get full information about a chat.
+     *
+     * @param chatId  ID of the chat, its username or invite link
+     * @throws MtCuteArgumentError
+     *   In case you are trying to get info about private chat that you haven't joined.
+     *   Use {@link getChatPreview} instead.
+     */
+    getFullChat(chatId: InputPeerLike): Promise<Chat> {
+        return getFullChat.apply(this, arguments)
+    }
+    /**
+     * Join a channel or supergroup
+     *
+     * @param chatId
+     *   Chat identifier. Either an invite link (`t.me/joinchat/*`), a username (`@username`)
+     *   or ID of the linked supergroup or channel.
+     */
+    joinChat(chatId: InputPeerLike): Promise<Chat> {
+        return joinChat.apply(this, arguments)
     }
     /**
      * Download a file and return its contents as a Buffer.

@@ -14,8 +14,15 @@ export namespace Chat {
      *  - `group`: Legacy group
      *  - `supergroup`: Supergroup
      *  - `channel`: Broadcast channel
+     *  - `broadcast`: Broadcast group
      */
-    export type Type = 'private' | 'bot' | 'group' | 'supergroup' | 'channel'
+    export type Type =
+        | 'private'
+        | 'bot'
+        | 'group'
+        | 'supergroup'
+        | 'channel'
+        | 'broadcast'
 }
 
 /**
@@ -109,7 +116,11 @@ export class Chat {
             } else if (this.peer._ === 'chat') {
                 this._type = 'group'
             } else if (this.peer._ === 'channel') {
-                this._type = this.peer.broadcast ? 'channel' : 'supergroup'
+                this._type = this.peer.megagroup
+                    ? 'broadcast'
+                    : this.peer.broadcast
+                    ? 'channel'
+                    : 'supergroup'
             }
         }
 
@@ -379,6 +390,7 @@ export class Chat {
         return new Chat(client, chats[peer.channelId])
     }
 
+    /** @internal */
     static _parseFull(
         client: TelegramClient,
         full: tl.messages.RawChatFull | tl.RawUserFull
@@ -409,6 +421,13 @@ export class Chat {
     }
 
     // todo: bound methods https://github.com/pyrogram/pyrogram/blob/a86656aefcc93cc3d2f5c98227d5da28fcddb136/pyrogram/types/user_and_chats/chat.py#L319
+
+    /**
+     * Join this chat.
+     */
+    async join(): Promise<void> {
+        await this.client.joinChat(this.inputPeer)
+    }
 }
 
 makeInspectable(Chat)

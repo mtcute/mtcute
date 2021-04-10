@@ -2,6 +2,7 @@ import { tl } from '@mtcute/tl'
 
 export * from './user'
 export * from './chat'
+export * from './chat-preview'
 
 /**
  * Peer types that have one-to-one relation to tl.Peer* types.
