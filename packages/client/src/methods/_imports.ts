@@ -14,7 +14,6 @@ import {
     SentCode,
     MaybeDynamic,
     InputPeerLike,
-    Photo,
     UploadedFile,
     UploadFileLike,
     InputFileLike,

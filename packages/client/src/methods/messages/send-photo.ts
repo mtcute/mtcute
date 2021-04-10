@@ -85,7 +85,7 @@ export async function sendPhoto(
          */
         progressCallback?: (uploaded: number, total: number) => void
     }
-): Promise<filters.Modify<Message, { media: Photo }>> {
+): Promise<Message> {
     if (!params) params = {}
 
     let media: tl.TypeInputMedia
@@ -145,5 +145,5 @@ export async function sendPhoto(
         entities,
     })
 
-    return this._findMessageInUpdate(res) as any
+    return this._findMessageInUpdate(res)
 }

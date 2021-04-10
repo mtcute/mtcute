@@ -5,7 +5,6 @@ import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 import {
     InputPeerLike,
     Message,
-    filters,
     BotKeyboard,
     ReplyMarkup,
 } from '../../types'
@@ -66,7 +65,7 @@ export async function sendText(
          */
         replyMarkup?: ReplyMarkup
     }
-): Promise<filters.Modify<Message, { media: null }>> {
+): Promise<Message> {
     if (!params) params = {}
 
     const [message, entities] = await this._parseEntities(
@@ -107,8 +106,8 @@ export async function sendText(
             entities: res.entities,
         }
 
-        return new Message(this, msg, {}, {}) as any
+        return new Message(this, msg, {}, {})
     }
 
-    return this._findMessageInUpdate(res) as any
+    return this._findMessageInUpdate(res)
 }

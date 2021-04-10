@@ -53,11 +53,10 @@ import { Readable } from 'stream'
 import {
     Chat,
     FileDownloadParameters,
+    InputFileLike,
     InputPeerLike,
     MaybeDynamic,
-    InputFileLike,
     Message,
-    Photo,
     PropagationSymbol,
     ReplyMarkup,
     SentCode,
@@ -809,7 +808,7 @@ export class TelegramClient extends BaseTelegramClient {
              */
             progressCallback?: (uploaded: number, total: number) => void
         }
-    ): Promise<filters.Modify<Message, { media: Photo }>> {
+    ): Promise<Message> {
         return sendPhoto.apply(this, arguments)
     }
     /**
@@ -866,7 +865,7 @@ export class TelegramClient extends BaseTelegramClient {
              */
             replyMarkup?: ReplyMarkup
         }
-    ): Promise<filters.Modify<Message, { media: null }>> {
+    ): Promise<Message> {
         return sendText.apply(this, arguments)
     }
     /**
