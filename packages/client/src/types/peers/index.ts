@@ -3,6 +3,7 @@ import { tl } from '@mtcute/tl'
 export * from './user'
 export * from './chat'
 export * from './chat-preview'
+export { InputChatPermissions } from './chat-permissions'
 export * from './chat-member'
 
 /**

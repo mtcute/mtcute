@@ -28,9 +28,11 @@ import { getChat } from './methods/chats/get-chat'
 import { getFullChat } from './methods/chats/get-full-chat'
 import { joinChat } from './methods/chats/join-chat'
 import { leaveChat } from './methods/chats/leave-chat'
+import { setChatDefaultPermissions } from './methods/chats/set-chat-default-permissions'
 import { setChatDescription } from './methods/chats/set-chat-description'
 import { setChatPhoto } from './methods/chats/set-chat-photo'
 import { setChatTitle } from './methods/chats/set-chat-title'
+import { setSlowMode } from './methods/chats/set-slow-mode'
 import { unarchiveChats } from './methods/chats/unarchive-chats'
 import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
@@ -77,6 +79,7 @@ import {
     ChatMember,
     ChatPreview,
     FileDownloadParameters,
+    InputChatPermissions,
     InputFileLike,
     InputMediaLike,
     InputPeerLike,
@@ -527,6 +530,33 @@ export class TelegramClient extends BaseTelegramClient {
         return leaveChat.apply(this, arguments)
     }
     /**
+     * Change default chat permissions for all members.
+     *
+     * You must be an administrator in the chat and have appropriate permissions.
+     *
+     * @param chatId  Chat ID or username
+     * @param permissions  New default chat permissions
+     * @example
+     * ```typescript
+     * // Completely restrict chat
+     * await tg.setDefaultChatPermissions('somechat', {})
+     *
+     * // Chat members can only send text, media, stickers and GIFs
+     * await tg.setDefaultChatPermissions('somechat', {
+     *     canSendMessages: true,
+     *     canSendMedia: true,
+     *     canSendStickers: true,
+     *     canSendGifs: true,
+     * })
+     * ```
+     */
+    setChatDefaultPermissions(
+        chatId: InputPeerLike,
+        permissions: InputChatPermissions
+    ): Promise<Chat> {
+        return setChatDefaultPermissions.apply(this, arguments)
+    }
+    /**
      * Change chat description
      *
      * You must be an administrator and have the appropriate permissions.
@@ -570,6 +600,19 @@ export class TelegramClient extends BaseTelegramClient {
      */
     setChatTitle(chatId: InputPeerLike, title: string): Promise<void> {
         return setChatTitle.apply(this, arguments)
+    }
+    /**
+     * Set supergroup's slow mode interval.
+     *
+     * @param chatId  Chat ID or username
+     * @param seconds
+     *  (default: `0`)
+     *   Slow mode interval in seconds.
+     *   Users will be able to send a message only once per this interval.
+     *   Valid values are: `0 (off), 10, 30, 60 (1m), 300 (5m), 900 (15m) or 3600 (1h)`
+     */
+    setSlowMode(chatId: InputPeerLike, seconds?: number): Promise<void> {
+        return setSlowMode.apply(this, arguments)
     }
     /**
      * Unarchive one or more chats
