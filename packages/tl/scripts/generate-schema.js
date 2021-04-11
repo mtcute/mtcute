@@ -8,6 +8,8 @@ const fetch = require('node-fetch')
 const fs = require('fs')
 const path = require('path')
 const cheerio = require('cheerio')
+const { applyDescriptionsFile } = require('./process-descriptions-yaml')
+const yaml = require('js-yaml')
 const { snakeToCamel } = require('./common')
 const { asyncPool } = require('eager-async-pool')
 const SingleRegex = /^(.+?)(?:#([0-f]{1,8}))?(?: \?)?(?: {(.+?:.+?)})? ((?:.+? )*)= (.+);$/
@@ -472,6 +474,10 @@ function convertJsonToTl(json) {
 }
 
 async function main() {
+    const descriptionsYaml = yaml.load(
+        await fs.promises.readFile(path.join(__dirname, '../descriptions.yaml'))
+    )
+
     console.log('[i] Fetching mtproto.tl')
     // using this instead of one in tgdesktop repo because tgdesktop one uses strings instead of bytes in many places
     // idk why, i don't wanna know why, maybe some memes with strings in c++ or smth...
@@ -494,6 +500,8 @@ async function main() {
     ret.apiLayer = apiTl.match(/^\/\/ LAYER (\d+)/m)[1]
     ret.api = await convertTlToJson(apiTl, 'api')
     await addDocumentation(ret.api)
+
+    await applyDescriptionsFile(ret, descriptionsYaml)
 
     await fs.promises.writeFile(
         path.join(__dirname, '../raw-schema.json'),
