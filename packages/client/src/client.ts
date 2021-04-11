@@ -32,6 +32,7 @@ import { setChatDefaultPermissions } from './methods/chats/set-chat-default-perm
 import { setChatDescription } from './methods/chats/set-chat-description'
 import { setChatPhoto } from './methods/chats/set-chat-photo'
 import { setChatTitle } from './methods/chats/set-chat-title'
+import { setChatUsername } from './methods/chats/set-chat-username'
 import { setSlowMode } from './methods/chats/set-slow-mode'
 import { unarchiveChats } from './methods/chats/unarchive-chats'
 import { downloadAsBuffer } from './methods/files/download-buffer'
@@ -602,6 +603,20 @@ export class TelegramClient extends BaseTelegramClient {
      */
     setChatTitle(chatId: InputPeerLike, title: string): Promise<void> {
         return setChatTitle.apply(this, arguments)
+    }
+    /**
+     * Change supergroup/channel username
+     *
+     * You must be an administrator and have the appropriate permissions.
+     *
+     * @param chatId  Chat ID or current username
+     * @param username  New username, or `null` to remove
+     */
+    setChatUsername(
+        chatId: InputPeerLike,
+        username: string | null
+    ): Promise<void> {
+        return setChatUsername.apply(this, arguments)
     }
     /**
      * Set supergroup's slow mode interval.
