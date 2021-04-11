@@ -19,6 +19,7 @@ import { createChannel } from './methods/chats/create-channel'
 import { createGroup } from './methods/chats/create-group'
 import { createSupergroup } from './methods/chats/create-supergroup'
 import { deleteChannel } from './methods/chats/delete-channel'
+import { deleteChatPhoto } from './methods/chats/delete-chat-photo'
 import { deleteGroup } from './methods/chats/delete-group'
 import { deleteHistory } from './methods/chats/delete-history'
 import { getChatMember } from './methods/chats/get-chat-member'
@@ -27,6 +28,7 @@ import { getChat } from './methods/chats/get-chat'
 import { getFullChat } from './methods/chats/get-full-chat'
 import { joinChat } from './methods/chats/join-chat'
 import { leaveChat } from './methods/chats/leave-chat'
+import { setChatPhoto } from './methods/chats/set-chat-photo'
 import { unarchiveChats } from './methods/chats/unarchive-chats'
 import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
@@ -417,6 +419,16 @@ export class TelegramClient extends BaseTelegramClient {
         return deleteChannel.apply(this, arguments)
     }
     /**
+     * Delete a chat photo
+     *
+     * You must be an administrator and have the appropriate permissions.
+     *
+     * @param chatId  Chat ID or username
+     */
+    deleteChatPhoto(chatId: InputPeerLike): Promise<void> {
+        return deleteChatPhoto.apply(this, arguments)
+    }
+    /**
      * Delete a legacy group chat for all members
      *
      * @param chatId  Chat ID
@@ -451,7 +463,7 @@ export class TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat ID or username
      * @param userId  User ID, username, phone number, `"me"` or `"self"`
-     * @throws MtCuteNotFoundError  In case given user is not a participant of a given chat
+     * @throws UserNotParticipantError  In case given user is not a participant of a given chat
      */
     getChatMember(
         chatId: InputPeerLike,
@@ -511,6 +523,26 @@ export class TelegramClient extends BaseTelegramClient {
      */
     leaveChat(chatId: InputPeerLike, clear?: boolean): Promise<void> {
         return leaveChat.apply(this, arguments)
+    }
+    /**
+     * Set a new chat photo or video.
+     *
+     * You must be an administrator and have the appropriate permissions.
+     *
+     * @param chatId  Chat ID or username
+     * @param type  Media type (photo or video)
+     * @param media  Input media file
+     * @param previewSec
+     *   When `type = video`, timestamp in seconds which will be shown
+     *   as a static preview.
+     */
+    setChatPhoto(
+        chatId: InputPeerLike,
+        type: 'photo' | 'video',
+        media: InputFileLike,
+        previewSec?: number
+    ): Promise<void> {
+        return setChatPhoto.apply(this, arguments)
     }
     /**
      * Unarchive one or more chats
