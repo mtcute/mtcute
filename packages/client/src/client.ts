@@ -21,6 +21,7 @@ import { createSupergroup } from './methods/chats/create-supergroup'
 import { deleteChannel } from './methods/chats/delete-channel'
 import { deleteGroup } from './methods/chats/delete-group'
 import { deleteHistory } from './methods/chats/delete-history'
+import { getChatMember } from './methods/chats/get-chat-member'
 import { getChatPreview } from './methods/chats/get-chat-preview'
 import { getChat } from './methods/chats/get-chat'
 import { getFullChat } from './methods/chats/get-full-chat'
@@ -69,6 +70,7 @@ import { IMessageEntityParser } from './parser'
 import { Readable } from 'stream'
 import {
     Chat,
+    ChatMember,
     ChatPreview,
     FileDownloadParameters,
     InputFileLike,
@@ -443,6 +445,19 @@ export class TelegramClient extends BaseTelegramClient {
         maxId?: number
     ): Promise<void> {
         return deleteHistory.apply(this, arguments)
+    }
+    /**
+     * Get information about a single chat member
+     *
+     * @param chatId  Chat ID or username
+     * @param userId  User ID, username, phone number, `"me"` or `"self"`
+     * @throws MtCuteNotFoundError  In case given user is not a participant of a given chat
+     */
+    getChatMember(
+        chatId: InputPeerLike,
+        userId: InputPeerLike
+    ): Promise<ChatMember> {
+        return getChatMember.apply(this, arguments)
     }
     /**
      * Get preview information about a private chat.

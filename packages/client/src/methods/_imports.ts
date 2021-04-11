@@ -11,6 +11,7 @@ import {
     User,
     Chat,
     ChatPreview,
+    ChatMember,
     TermsOfService,
     SentCode,
     MaybeDynamic,

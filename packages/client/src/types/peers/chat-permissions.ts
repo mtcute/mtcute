@@ -2,7 +2,7 @@ import { tl } from '@mtcute/tl'
 import { makeInspectable } from '../utils'
 
 /**
- * Represents the rights of a normal user in a {@link Chat}.
+ * Represents the permissions of a user in a {@link Chat}.
  */
 export class ChatPermissions {
     readonly _bannedRights: tl.RawChatBannedRights
@@ -115,6 +115,9 @@ export class ChatPermissions {
     /**
      * UNIX date until which these permissions are valid,
      * or `null` if forever.
+     *
+     * For example, represents the time when the restrictions
+     * will be lifted from a {@link ChatMember}
      */
     get untilDate(): Date | null {
         return this._bannedRights.untilDate === 0
