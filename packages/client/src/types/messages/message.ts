@@ -914,6 +914,23 @@ export class Message {
     }
 
     /**
+     * Pin this message.
+     *
+     * @param notify  Whether to send a notification (only for legacy groups and supergroups)
+     * @param bothSides  Whether to pin for both sides (only for private chats)
+     */
+    pin(notify = false, bothSides = false): Promise<void> {
+        return this.client.pinMessage(this.chat.inputPeer, this.id, notify, bothSides)
+    }
+
+    /**
+     * Unpin this message.
+     */
+    unpin(): Promise<void> {
+        return this.client.pinMessage(this.chat.inputPeer, this.id)
+    }
+
+    /**
      * Edit this message's text and/or reply markup
      *
      * @see TelegramClient.editMessage

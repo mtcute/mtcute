@@ -46,6 +46,7 @@ import { getHistory } from './methods/messages/get-history'
 import { getMessages } from './methods/messages/get-messages'
 import { iterHistory } from './methods/messages/iter-history'
 import { _parseEntities } from './methods/messages/parse-entities'
+import { pinMessage } from './methods/messages/pin-message'
 import { searchGlobal } from './methods/messages/search-global'
 import { searchMessages } from './methods/messages/search-messages'
 import { sendDice } from './methods/messages/send-dice'
@@ -53,6 +54,7 @@ import { sendLocation } from './methods/messages/send-location'
 import { sendMedia } from './methods/messages/send-media'
 import { sendPhoto } from './methods/messages/send-photo'
 import { sendText } from './methods/messages/send-text'
+import { unpinMessage } from './methods/messages/unpin-message'
 import {
     getParseMode,
     registerParseMode,
@@ -948,6 +950,25 @@ export class TelegramClient extends BaseTelegramClient {
         return _parseEntities.apply(this, arguments)
     }
     /**
+     * Pin a message in a group, supergroup, channel or PM.
+     *
+     * For supergroups/channels, you must have appropriate permissions,
+     * either as an admin, or as default permissions
+     *
+     * @param chatId  Chat ID, username, phone number, `"self"` or `"me"`
+     * @param messageId  Message ID
+     * @param notify  (default: `false`) Whether to send a notification (only for legacy groups and supergroups)
+     * @param bothSides  (default: `false`) Whether to pin for both sides (only for private chats)
+     */
+    pinMessage(
+        chatId: InputPeerLike,
+        messageId: number,
+        notify?: boolean,
+        bothSides?: boolean
+    ): Promise<void> {
+        return pinMessage.apply(this, arguments)
+    }
+    /**
      * Search for messages globally from all of your chats
      *
      * **Note**: Due to Telegram limitations, you can only get up to ~10000 messages
@@ -1308,6 +1329,18 @@ export class TelegramClient extends BaseTelegramClient {
         }
     ): Promise<Message> {
         return sendText.apply(this, arguments)
+    }
+    /**
+     * Unpin a message in a group, supergroup, channel or PM.
+     *
+     * For supergroups/channels, you must have appropriate permissions,
+     * either as an admin, or as default permissions
+     *
+     * @param chatId  Chat ID, username, phone number, `"self"` or `"me"`
+     * @param messageId  Message ID
+     */
+    unpinMessage(chatId: InputPeerLike, messageId: number): Promise<void> {
+        return unpinMessage.apply(this, arguments)
     }
     /**
      * Register a given {@link IMessageEntityParser} as a parse mode
