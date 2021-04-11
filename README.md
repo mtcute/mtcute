@@ -8,9 +8,10 @@ Work-in-progress library for MTProto in TypeScript.
 
 > ⚠️ **Warning**: While this library is WIP, storage
 > format *will* change without changing format version
-> and without migration algorithm.
+> and without migration algorithm, and there *will* be breaking
+> changes in the API.
 >
-> If you encounter errors related to this, either
+> If you encounter errors related to storage, either
 > reset your storage by removing the file, or fix it manually.
 
 What currently works:
