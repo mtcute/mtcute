@@ -113,7 +113,7 @@ export declare class RpcError extends Error {
     baseErrors.forEach((it) => (it.base = true))
     const allErrors = [...baseErrors, ...csv]
 
-    fs.writeFileSync(path.join(__dirname, '../errors.json'), JSON.stringify(allErrors))
+    fs.writeFileSync(path.join(__dirname, '../raw-errors.json'), JSON.stringify(allErrors))
 
     allErrors.forEach((err) => {
         let hasArgument =
