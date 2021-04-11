@@ -28,7 +28,9 @@ import { getChat } from './methods/chats/get-chat'
 import { getFullChat } from './methods/chats/get-full-chat'
 import { joinChat } from './methods/chats/join-chat'
 import { leaveChat } from './methods/chats/leave-chat'
+import { setChatDescription } from './methods/chats/set-chat-description'
 import { setChatPhoto } from './methods/chats/set-chat-photo'
+import { setChatTitle } from './methods/chats/set-chat-title'
 import { unarchiveChats } from './methods/chats/unarchive-chats'
 import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
@@ -525,6 +527,20 @@ export class TelegramClient extends BaseTelegramClient {
         return leaveChat.apply(this, arguments)
     }
     /**
+     * Change chat description
+     *
+     * You must be an administrator and have the appropriate permissions.
+     *
+     * @param chatId  Chat ID or username
+     * @param description  New chat description, 0-255 characters
+     */
+    setChatDescription(
+        chatId: InputPeerLike,
+        description: string
+    ): Promise<void> {
+        return setChatDescription.apply(this, arguments)
+    }
+    /**
      * Set a new chat photo or video.
      *
      * You must be an administrator and have the appropriate permissions.
@@ -543,6 +559,17 @@ export class TelegramClient extends BaseTelegramClient {
         previewSec?: number
     ): Promise<void> {
         return setChatPhoto.apply(this, arguments)
+    }
+    /**
+     * Change chat title
+     *
+     * You must be an administrator and have the appropriate permissions.
+     *
+     * @param chatId  Chat ID or username
+     * @param title  New chat title, 1-255 characters
+     */
+    setChatTitle(chatId: InputPeerLike, title: string): Promise<void> {
+        return setChatTitle.apply(this, arguments)
     }
     /**
      * Unarchive one or more chats
