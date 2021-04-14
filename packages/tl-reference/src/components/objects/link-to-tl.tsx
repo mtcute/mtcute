@@ -22,7 +22,7 @@ export function LinkToTl(
         prefix = prefix.prefix
     }
 
-    // this kind of invokation is used in parameters table
+    // this kind of invocation is used in parameters table and for return type
     if (!type && !name) {
         const fullType = prefix
 

@@ -208,7 +208,7 @@ export default function TlObject({ data }: { data: GraphqlResult }) {
                         obj.returns && (
                             <>
                                 constructor ID 0x{obj.tlId} / returns{' '}
-                                {LinkToTl(obj.prefix, 'union', obj.returns)}
+                                {LinkToTl(obj.returns)}
                                 {obj.available &&
                                     ' / available for ' +
                                         (obj.available === 'both'
