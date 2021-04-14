@@ -1,10 +1,11 @@
 {
     "name": "@mtcute/html-parser",
+    "private": true,
     "version": "0.0.0",
     "description": "HTML entities parser for MTCute",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "MIT",
-    "main": "index.js",
+    "main": "src/index.ts",
     "scripts": {
         "test": "mocha -r ts-node/register tests/**/*.spec.ts",
         "coverage": "nyc npm run test",
