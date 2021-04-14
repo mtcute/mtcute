@@ -1,0 +1,48 @@
+html, body, #___gatsby, #gatsby-focus-wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden
+}
+
+html:not(.touch) *:not(.default-scroll) {
+    scrollbar-color: #7f7f7f transparent;
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+        margin-left: 5px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #7f7f7f;
+        border-radius: 6px;
+    }
+}
+
+// 80px offset for scroll anchors
+section, .is-anchor {
+    margin-top: -80px;
+    padding-top: 80px;
+}
+
+h2, h3, h4 {
+    word-break: break-all;
+}
+
+table {
+    overflow-x: auto;
+    display: block!important;
+    white-space: nowrap;
+}
+
+table tbody {
+    display: table;
+    width: 100%;
+}
+

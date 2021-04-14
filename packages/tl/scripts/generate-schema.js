@@ -84,7 +84,7 @@ function getJSType(typ, argName) {
     return normalizeGenerics(typ)
 }
 
-async function convertTlToJson(tlText, tlType) {
+async function convertTlToJson(tlText, tlType, silent = false) {
     let lines = tlText.split('\n')
     let pos = 0
     let line = lines[0].trim()
@@ -130,7 +130,7 @@ async function convertTlToJson(tlText, tlType) {
             state.type = 'class'
             return nextLine()
         }
-        process.stdout.write(
+        if (!silent) process.stdout.write(
             `[${pad(pos)}/${lines.length}] Processing ${tlType}.tl..\r`
         )
     }
@@ -148,7 +148,7 @@ async function convertTlToJson(tlText, tlType) {
         return ret[name]
     }
 
-    process.stdout.write(
+    if (!silent) process.stdout.write(
         `[${pad(pos)}/${lines.length}] Processing ${tlType}.tl..\r`
     )
 
@@ -294,7 +294,7 @@ async function convertTlToJson(tlText, tlType) {
         })
     })
 
-    console.log(`[${lines.length}/${lines.length}] Processed ${tlType}.tl`)
+    if (!silent) console.log(`[${lines.length}/${lines.length}] Processed ${tlType}.tl`)
 
     return ret
 }
@@ -522,4 +522,10 @@ async function main() {
     await fs.promises.writeFile(path.join(__dirname, '../README.md'), readmeMd)
 }
 
-main().catch(console.error)
+module.exports = {
+    convertTlToJson
+}
+
+if (require.main === module) {
+    main().catch(console.error)
+}
