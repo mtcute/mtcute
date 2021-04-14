@@ -84,10 +84,11 @@ function prepareData(data) {
             // add hex constructor id
             if (item.id) item.tlId = item.id.toString(16).padStart(8, '0')
 
+            // raw non-array type for usages count
             if (item.arguments) item.arguments.forEach((arg) => {
-                // raw non-array type for usages count
                 arg.rawType = arg.type.replace(/\[]$/, '')
             })
+            if (item.returns) item.rawReturns = item.returns.replace(/\[]$/, '')
 
             // add typescript types for the item and arguments
             // basically copy-pasted from generate-types.js

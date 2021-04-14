@@ -471,7 +471,7 @@ export const query = graphql`
             filter: {
                 prefix: { eq: $prefix }
                 type: { eq: "method" }
-                returns: { eq: $name }
+                rawReturns: { eq: $name }
             }
         ) @include(if: $hasSubtypes) {
             nodes {
