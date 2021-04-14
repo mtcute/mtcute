@@ -16,7 +16,6 @@ module.exports = {
     },
     plugins: ['@typescript-eslint'],
     rules: {
-        'linebreak-style': ['error', 'unix'],
         '@typescript-eslint/no-var-requires': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/interface-name-prefix': 'off',
