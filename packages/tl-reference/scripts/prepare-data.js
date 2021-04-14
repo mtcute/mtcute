@@ -84,6 +84,11 @@ function prepareData(data) {
             // add hex constructor id
             if (item.id) item.tlId = item.id.toString(16).padStart(8, '0')
 
+            if (item.arguments) item.arguments.forEach((arg) => {
+                // raw non-array type for usages count
+                arg.rawType = arg.type.replace(/\[]$/, '')
+            })
+
             // add typescript types for the item and arguments
             // basically copy-pasted from generate-types.js
             const prefix_ = item.prefix === 'mtproto/' ? 'mt_' : ''

@@ -471,7 +471,7 @@ export const query = graphql`
         usageTypes: allTlObject(
             filter: {
                 prefix: { eq: $prefix }
-                arguments: { elemMatch: { type: { eq: $name } } }
+                arguments: { elemMatch: { rawType: { eq: $name } } }
             }
         ) {
             nodes {
