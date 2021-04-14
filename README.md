@@ -34,6 +34,10 @@ git clone https://github.com/teidesu/mtcute
 cd mtcute
 yarn install
 npx lerna link
+
+# generate code from tl schema
+cd packages/tl
+yarn generate-code
 ```
 
 ## Acknowledgements
