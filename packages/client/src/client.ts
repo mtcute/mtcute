@@ -23,9 +23,11 @@ import { deleteChatPhoto } from './methods/chats/delete-chat-photo'
 import { deleteGroup } from './methods/chats/delete-group'
 import { deleteHistory } from './methods/chats/delete-history'
 import { getChatMember } from './methods/chats/get-chat-member'
+import { getChatMembers } from './methods/chats/get-chat-members'
 import { getChatPreview } from './methods/chats/get-chat-preview'
 import { getChat } from './methods/chats/get-chat'
 import { getFullChat } from './methods/chats/get-full-chat'
+import { iterChatMembers } from './methods/chats/iter-chat-members'
 import { joinChat } from './methods/chats/join-chat'
 import { leaveChat } from './methods/chats/leave-chat'
 import { setChatDefaultPermissions } from './methods/chats/set-chat-default-permissions'
@@ -480,6 +482,62 @@ export class TelegramClient extends BaseTelegramClient {
         return getChatMember.apply(this, arguments)
     }
     /**
+     * Get a chunk of members of some chat.
+     *
+     * You can retrieve up to 200 members at once
+     *
+     * @param chatId  Chat ID or username
+     * @param params  Additional parameters
+     */
+    getChatMembers(
+        chatId: InputPeerLike,
+        params?: {
+            /**
+             * Search query to filter members by their display names and usernames
+             * Defaults to `''` (empty string)
+             *
+             * > **Note**: Only used for these values of `filter`:
+             * > `all`, `banned`, `restricted`, `contacts`
+             */
+            query?: string
+
+            /**
+             * Sequential number of the first member to be returned.
+             */
+            offset?: number
+
+            /**
+             * Maximum number of members to be retrieved. Defaults to `200`
+             */
+            limit?: number
+
+            /**
+             * Type of the query. Can be:
+             *  - `all`: get all members
+             *  - `banned`: get only banned members
+             *  - `restricted`: get only restricted members
+             *  - `bots`: get only bots
+             *  - `recent`: get recent members
+             *  - `admins`: get only administrators (and creator)
+             *  - `contacts`: get only contacts
+             *  - `mention`: get users that can be mentioned ([learn more](https://mt.tei.su/tl/class/channelParticipantsMentions))
+             *
+             *  Only used for channels and supergroups. Defaults to `recent`
+             */
+            type?:
+                | 'all'
+                | 'banned'
+                | 'restricted'
+                | 'bots'
+                | 'recent'
+                | 'admins'
+                | 'contacts'
+                | 'mention'
+        }
+    ): Promise<ChatMember[]> {
+        return getChatMembers.apply(this, arguments)
+    }
+    /**
      * Get preview information about a private chat.
      *
      * @param inviteLink  Invite link
@@ -512,6 +570,30 @@ export class TelegramClient extends BaseTelegramClient {
      */
     getFullChat(chatId: InputPeerLike): Promise<Chat> {
         return getFullChat.apply(this, arguments)
+    }
+    /**
+     * Iterate through chat members
+     *
+     * This method is a small wrapper over {@link getChatMembers},
+     * which also handles duplicate entries (i.e. does not yield
+     * the same member twice)
+     *
+     * @param chatId  Chat ID or username
+     * @param params  Additional parameters
+     */
+    iterChatMembers(
+        chatId: InputPeerLike,
+        params?: Parameters<TelegramClient['getChatMembers']>[1] & {
+            /**
+             * Chunk size, which will be passed as `limit` parameter
+             * to {@link getChatMembers}. Usually you shouldn't care about this.
+             *
+             * Defaults to `200`
+             */
+            chunkSize?: number
+        }
+    ): AsyncIterableIterator<ChatMember> {
+        return iterChatMembers.apply(this, arguments)
     }
     /**
      * Join a channel or supergroup
