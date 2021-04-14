@@ -12,6 +12,7 @@ import {
     Chat,
     ChatPreview,
     ChatMember,
+    Dialog,
     InputChatPermissions,
     TermsOfService,
     SentCode,

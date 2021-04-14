@@ -65,6 +65,13 @@ export async function sendMedia(
          * @param total  Total file size
          */
         progressCallback?: (uploaded: number, total: number) => void
+
+        /**
+         * Whether to clear draft after sending this message.
+         *
+         * Defaults to `false`
+         */
+        clearDraft?: boolean
     }
 ): Promise<Message> {
     if (!params) params = {}
@@ -143,9 +150,10 @@ export async function sendMedia(
                 w: media.width || 0,
                 h: media.height || 0,
                 supportsStreaming: media.supportsStreaming,
-                roundMessage: media.isRound
+                roundMessage: media.isRound,
             })
-            if (media.isAnimated) attributes.push({ _: 'documentAttributeAnimated' })
+            if (media.isAnimated)
+                attributes.push({ _: 'documentAttributeAnimated' })
         }
 
         if (media.type === 'audio' || media.type === 'voice') {
@@ -155,7 +163,7 @@ export async function sendMedia(
                 duration: media.duration || 0,
                 title: media.type === 'audio' ? media.title : undefined,
                 performer: media.type === 'audio' ? media.performer : undefined,
-                waveform: media.type === 'voice' ? media.waveform : undefined
+                waveform: media.type === 'voice' ? media.waveform : undefined,
             })
         }
 
@@ -166,7 +174,7 @@ export async function sendMedia(
             file: inputFile,
             thumb,
             mimeType: mime,
-            attributes
+            attributes,
         }
     }
 
@@ -178,7 +186,6 @@ export async function sendMedia(
 
     const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
-
 
     const res = await this.call({
         _: 'messages.sendMedia',
@@ -195,6 +202,7 @@ export async function sendMedia(
         replyMarkup,
         message,
         entities,
+        clearDraft: params.clearDraft,
     })
 
     return this._findMessageInUpdate(res)

@@ -163,6 +163,11 @@ export class Chat {
         return this.peer._ === 'user' && this.peer.support!
     }
 
+    /** Whether this chat is chat with yourself (i.e. Saved Messages) */
+    get isSelf(): boolean {
+        return this.peer._ === 'user' && this.peer.self!
+    }
+
     /**
      * Title, for supergroups, channels and groups
      */

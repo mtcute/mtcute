@@ -82,6 +82,13 @@ export async function sendPhoto(
          * @param total  Total file size
          */
         progressCallback?: (uploaded: number, total: number) => void
+
+        /**
+         * Whether to clear draft after sending this message.
+         *
+         * Defaults to `false`
+         */
+        clearDraft?: boolean
     }
 ): Promise<Message> {
     if (!params) params = {}
@@ -141,6 +148,7 @@ export async function sendPhoto(
         replyMarkup,
         message,
         entities,
+        clearDraft: params.clearDraft,
     })
 
     return this._findMessageInUpdate(res)

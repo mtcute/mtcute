@@ -26,10 +26,12 @@ import { getChatMember } from './methods/chats/get-chat-member'
 import { getChatMembers } from './methods/chats/get-chat-members'
 import { getChatPreview } from './methods/chats/get-chat-preview'
 import { getChat } from './methods/chats/get-chat'
+import { getDialogs } from './methods/chats/get-dialogs'
 import { getFullChat } from './methods/chats/get-full-chat'
 import { iterChatMembers } from './methods/chats/iter-chat-members'
 import { joinChat } from './methods/chats/join-chat'
 import { leaveChat } from './methods/chats/leave-chat'
+import { saveDraft } from './methods/chats/save-draft'
 import { setChatDefaultPermissions } from './methods/chats/set-chat-default-permissions'
 import { setChatDescription } from './methods/chats/set-chat-description'
 import { setChatPhoto } from './methods/chats/set-chat-photo'
@@ -83,6 +85,7 @@ import {
     Chat,
     ChatMember,
     ChatPreview,
+    Dialog,
     FileDownloadParameters,
     InputChatPermissions,
     InputFileLike,
@@ -561,6 +564,45 @@ export class TelegramClient extends BaseTelegramClient {
         return getChat.apply(this, arguments)
     }
     /**
+     * Get a chunk of dialogs
+     *
+     * You can get up to 100 dialogs at once
+     *
+     * @param params  Fetch parameters
+     */
+    getDialogs(params?: {
+        /**
+         * Offset date used as an anchor for pagination.
+         *
+         * Use {@link Dialog.date} for this value.
+         */
+        offsetDate?: Date | number
+
+        /**
+         * Limits the number of dialogs to be received.
+         *
+         * Defaults to 100.
+         */
+        limit?: number
+
+        /**
+         * How to handle pinned dialogs?
+         * Whether to `include` them, `exclude`,
+         * or `only` return pinned dialogs.
+         *
+         * Defaults to `include`
+         */
+        pinned?: 'include' | 'exclude' | 'only'
+
+        /**
+         * Whether to get dialogs from the
+         * archived dialogs list.
+         */
+        archived?: boolean
+    }): Promise<Dialog[]> {
+        return getDialogs.apply(this, arguments)
+    }
+    /**
      * Get full information about a chat.
      *
      * @param chatId  ID of the chat, its username or invite link
@@ -613,6 +655,18 @@ export class TelegramClient extends BaseTelegramClient {
      */
     leaveChat(chatId: InputPeerLike, clear?: boolean): Promise<void> {
         return leaveChat.apply(this, arguments)
+    }
+    /**
+     * Save or delete a draft message associated with some chat
+     *
+     * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
+     * @param draft  Draft message, or `null` to delete.
+     */
+    saveDraft(
+        chatId: InputPeerLike,
+        draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>
+    ): Promise<void> {
+        return saveDraft.apply(this, arguments)
     }
     /**
      * Change default chat permissions for all members.
@@ -1293,6 +1347,13 @@ export class TelegramClient extends BaseTelegramClient {
              * @param total  Total file size
              */
             progressCallback?: (uploaded: number, total: number) => void
+
+            /**
+             * Whether to clear draft after sending this message.
+             *
+             * Defaults to `false`
+             */
+            clearDraft?: boolean
         }
     ): Promise<Message> {
         return sendMedia.apply(this, arguments)
@@ -1366,6 +1427,13 @@ export class TelegramClient extends BaseTelegramClient {
              * @param total  Total file size
              */
             progressCallback?: (uploaded: number, total: number) => void
+
+            /**
+             * Whether to clear draft after sending this message.
+             *
+             * Defaults to `false`
+             */
+            clearDraft?: boolean
         }
     ): Promise<Message> {
         return sendPhoto.apply(this, arguments)
@@ -1423,6 +1491,13 @@ export class TelegramClient extends BaseTelegramClient {
              * to hide a reply keyboard or to force a reply.
              */
             replyMarkup?: ReplyMarkup
+
+            /**
+             * Whether to clear draft after sending this message.
+             *
+             * Defaults to `false`
+             */
+            clearDraft?: boolean
         }
     ): Promise<Message> {
         return sendText.apply(this, arguments)

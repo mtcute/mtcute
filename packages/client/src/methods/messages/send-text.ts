@@ -2,12 +2,7 @@ import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { inputPeerToPeer, normalizeToInputPeer } from '../../utils/peer-utils'
 import { normalizeDate, randomUlong } from '../../utils/misc-utils'
-import {
-    InputPeerLike,
-    Message,
-    BotKeyboard,
-    ReplyMarkup,
-} from '../../types'
+import { InputPeerLike, Message, BotKeyboard, ReplyMarkup } from '../../types'
 
 /**
  * Send a text message
@@ -64,6 +59,13 @@ export async function sendText(
          * to hide a reply keyboard or to force a reply.
          */
         replyMarkup?: ReplyMarkup
+
+        /**
+         * Whether to clear draft after sending this message.
+         *
+         * Defaults to `false`
+         */
+        clearDraft?: boolean
     }
 ): Promise<Message> {
     if (!params) params = {}
@@ -92,6 +94,7 @@ export async function sendText(
         replyMarkup,
         message,
         entities,
+        clearDraft: params.clearDraft,
     })
 
     if (res._ === 'updateShortSentMessage') {
