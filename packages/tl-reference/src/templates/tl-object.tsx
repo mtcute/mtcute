@@ -75,6 +75,9 @@ const useStyles = makeStyles((theme) =>
         string: {
             color: '#98c379',
         },
+        bold: {
+            fontWeight: 'bold',
+        },
     })
 )
 
@@ -152,7 +155,9 @@ export default function TlObject({ data }: { data: GraphqlResult }) {
                     name="description"
                     content={
                         obj.description ||
-                        obj.prefix + obj.name + " currently doesn't have a description."
+                        obj.prefix +
+                            obj.name +
+                            " currently doesn't have a description."
                     }
                 />
             </Helmet>
@@ -237,7 +242,16 @@ export default function TlObject({ data }: { data: GraphqlResult }) {
                             {obj.arguments.map((arg) => (
                                 <TableRow key={arg.name}>
                                     <TableCell>
-                                        <code>{arg.name}</code>
+                                        <code
+                                            className={
+                                                !arg.optional &&
+                                                arg.type !== '$FlagsBitField'
+                                                    ? classes.bold
+                                                    : undefined
+                                            }
+                                        >
+                                            {arg.name}
+                                        </code>
                                     </TableCell>
                                     <TableCell className={classes.mono}>
                                         {LinkToTl(arg.type)}
