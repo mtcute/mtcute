@@ -2,8 +2,6 @@ import { TransportFactory } from './abstract'
 
 export * from './abstract'
 export * from './streamed'
-export * from './tcp'
-export * from './tcp-intermediate'
 
 /** Platform-defined default transport factory */
 export let defaultTransportFactory: TransportFactory
@@ -22,9 +20,7 @@ if (typeof process !== 'undefined') {
             )
         }
     } else {
-        // TODO: implement websocket transport
-        throw new Error('WebSocket is not supported (yet)!')
-        // const { WebSocketTransport } = require('./websocket')
-        // defaultTransportFactory = () => new WebSocketTransport()
+        const { WebSocketObfuscatedTransport } = require('./ws-obfuscated')
+        defaultTransportFactory = () => new WebSocketObfuscatedTransport()
     }
 }

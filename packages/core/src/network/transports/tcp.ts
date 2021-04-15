@@ -2,6 +2,7 @@ import { ICuteTransport, PacketCodec, TransportState } from './abstract'
 import { tl } from '@mtcute/tl'
 import { Socket, connect } from 'net'
 import EventEmitter from 'events'
+import { ICryptoProvider } from '../../utils/crypto'
 
 const debug = require('debug')('mtcute:tcp')
 
@@ -17,7 +18,13 @@ export abstract class TcpTransport
     private _socket: Socket | null = null
 
     abstract _packetCodec: PacketCodec
+    private _crypto: ICryptoProvider
+
     packetCodecInitialized = false
+
+    setupCrypto(crypto: ICryptoProvider): void {
+        this._crypto = crypto
+    }
 
     state(): TransportState {
         return this._state

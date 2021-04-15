@@ -4,7 +4,6 @@ import {
 } from './persistent-connection'
 import { TransportError } from './transports'
 import { tl } from '@mtcute/tl'
-import { ICryptoProvider } from '../utils/crypto'
 import { doAuthorization } from './authorization'
 import { MtprotoSession } from './mtproto-session'
 import { BinaryWriter } from '../utils/binary/binary-writer'
@@ -29,7 +28,6 @@ _debug.formatters.h = (v: Buffer): string => v.toString('hex')
 _debug.formatters.b = (v: any): string => !!v + ''
 
 export interface TelegramConnectionParams extends PersistentConnectionParams {
-    crypto: ICryptoProvider
     initConnection: tl.RawInitConnectionRequest
     inactivityTimeout?: number
     niceStacks?: boolean
@@ -63,7 +61,6 @@ interface PendingMessage {
 // TODO: error handling basically everywhere, most importantly (de-)serialization errors
 // noinspection JSUnusedLocalSymbols
 export class TelegramConnection extends PersistentConnection {
-    private readonly _crypto: ICryptoProvider
     readonly params: TelegramConnectionParams
 
     private readonly _mtproto: MtprotoSession

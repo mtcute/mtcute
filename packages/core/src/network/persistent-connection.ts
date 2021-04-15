@@ -6,10 +6,12 @@ import {
     ControllablePromise,
     createControllablePromise,
 } from '../utils/controllable-promise'
+import { ICryptoProvider } from '../utils/crypto'
 
 const debug = require('debug')('mtcute:conn')
 
 export interface PersistentConnectionParams {
+    crypto: ICryptoProvider
     transportFactory: TransportFactory
     dc: tl.RawDcOption
     reconnectionStrategy: ReconnectionStrategy<PersistentConnectionParams>
@@ -52,6 +54,7 @@ export abstract class PersistentConnection extends EventEmitter {
         super()
         this.params = params
         this._transport = params.transportFactory()
+        this._transport.setupCrypto?.(params.crypto)
 
         this._transport.on('ready', this.onTransportReady.bind(this))
         this._transport.on('message', this.onTransportMessage.bind(this))

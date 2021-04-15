@@ -1,5 +1,6 @@
 import { tl } from '@mtcute/tl'
 import { MaybeAsync } from '../../types/utils'
+import { ICryptoProvider } from '../../utils/crypto'
 
 export enum TransportState {
     /**
@@ -55,6 +56,12 @@ export interface ICuteTransport {
     close(): void
     /** send a message */
     send(data: Buffer): Promise<void>
+
+    /**
+     * For transports whose codecs use crypto functions.
+     * This method is called before any other.
+     */
+    setupCrypto?(crypto: ICryptoProvider): void
 }
 
 /** Transport factory function */
@@ -84,6 +91,12 @@ export interface PacketCodec {
     on(event: 'error', handler: (error: Error) => void): void
     /** Emitted when a full packet has been processed. */
     on(event: 'packet', handler: (packet: Buffer) => void): void
+
+    /**
+     * For codecs that use crypto functions.
+     * This method is called before any other.
+     */
+    setupCrypto?(crypto: ICryptoProvider): void
 }
 
 /**
