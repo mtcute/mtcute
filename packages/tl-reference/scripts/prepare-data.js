@@ -42,7 +42,7 @@ const camelToSnake = (str) =>
 const camelToPascal = (s) => s[0].toUpperCase() + s.substr(1)
 
 function renderDescription(description) {
-    return marked.parseInline(
+    return marked(
         description.replace(/{@link (.+?)}/g, (_, name) => {
             if (name.startsWith('tl.')) {
                 let [ns, type] = name.substr(3).split('.')
@@ -75,7 +75,7 @@ function renderDescription(description) {
             }
             return `\`${name}\``
         })
-    )
+    ).replace(/<(\/)?p>/g, '<$1div>') // replace <p> with <div>
 }
 
 function prepareData(data) {

@@ -35,14 +35,17 @@ h2, h3, h4 {
     word-break: break-all;
 }
 
-table {
-    overflow-x: auto;
-    display: block!important;
-    white-space: nowrap;
-}
+// table scroll for mobiles
+@media screen and (max-width: 640px) {
+    table {
+        overflow-x: auto;
+        display: block !important;
+        white-space: nowrap;
+    }
 
-table tbody {
-    display: table;
-    width: 100%;
+    table tbody {
+        display: table;
+        width: 100%;
+    }
 }
 
