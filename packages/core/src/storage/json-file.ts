@@ -32,10 +32,19 @@ export class JsonFileStorage extends JsonMemoryStorage {
 
     save(): Promise<void> {
         return new Promise((resolve, reject) => {
-            fs.writeFile(this._filename, this._saveJson(), (err?: Error) => {
-                if (err) reject(err)
-                else resolve()
-            })
+            // calling writeFile immediately seems to destroy session when using debugger
+            setTimeout(
+                () =>
+                    fs.writeFile(
+                        this._filename,
+                        this._saveJson(),
+                        (err?: Error) => {
+                            if (err) reject(err)
+                            else resolve()
+                        }
+                    ),
+                0
+            )
         })
     }
 }
