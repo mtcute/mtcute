@@ -8,4 +8,4 @@ export * from './updates'
 
 export * from './errors'
 export { MaybeDynamic } from './utils'
-export { MaybeAsync } from '@mtcute/core'
+export { MaybeAsync, PartialExcept } from '@mtcute/core'

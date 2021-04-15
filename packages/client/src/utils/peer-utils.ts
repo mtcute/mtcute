@@ -2,7 +2,6 @@ import { tl } from '@mtcute/tl'
 
 export const INVITE_LINK_REGEX = /^(?:https?:\/\/)?(?:www\.)?(?:t(?:elegram)?\.(?:org|me|dog)\/joinchat\/)([\w-]+)$/i
 
-
 // helpers to normalize result of `resolvePeer` function
 
 export function normalizeToInputPeer(
@@ -81,7 +80,16 @@ export function inputPeerToPeer(inp: tl.TypeInputPeer): tl.TypePeer {
     return inp as never
 }
 
-export function createUsersChatsIndex(obj: { users: tl.TypeUser[], chats: tl.TypeChat[] }): {
+export function createUsersChatsIndex(
+    obj: {
+        users: tl.TypeUser[]
+        chats: tl.TypeChat[]
+    },
+    second?: {
+        users: tl.TypeUser[]
+        chats: tl.TypeChat[]
+    }
+): {
     users: Record<number, tl.TypeUser>
     chats: Record<number, tl.TypeChat>
 } {
@@ -89,6 +97,11 @@ export function createUsersChatsIndex(obj: { users: tl.TypeUser[], chats: tl.Typ
     const chats: Record<number, tl.TypeChat> = {}
     obj.users.forEach((e) => (users[e.id] = e))
     obj.chats.forEach((e) => (chats[e.id] = e))
+
+    if (second) {
+        second.users.forEach((e) => (users[e.id] = e))
+        second.chats.forEach((e) => (chats[e.id] = e))
+    }
 
     return { users, chats }
 }

@@ -26,7 +26,6 @@ import { getChatMember } from './methods/chats/get-chat-member'
 import { getChatMembers } from './methods/chats/get-chat-members'
 import { getChatPreview } from './methods/chats/get-chat-preview'
 import { getChat } from './methods/chats/get-chat'
-import { getDialogs } from './methods/chats/get-dialogs'
 import { getFullChat } from './methods/chats/get-full-chat'
 import { iterChatMembers } from './methods/chats/iter-chat-members'
 import { joinChat } from './methods/chats/join-chat'
@@ -39,6 +38,11 @@ import { setChatTitle } from './methods/chats/set-chat-title'
 import { setChatUsername } from './methods/chats/set-chat-username'
 import { setSlowMode } from './methods/chats/set-slow-mode'
 import { unarchiveChats } from './methods/chats/unarchive-chats'
+import { createFolder } from './methods/dialogs/create-folder'
+import { deleteFolder } from './methods/dialogs/delete-folder'
+import { editFolder } from './methods/dialogs/edit-folder'
+import { getDialogs } from './methods/dialogs/get-dialogs'
+import { getFolders } from './methods/dialogs/get-folders'
 import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
 import { downloadAsIterable } from './methods/files/download-iterable'
@@ -93,6 +97,7 @@ import {
     InputPeerLike,
     MaybeDynamic,
     Message,
+    PartialExcept,
     PropagationSymbol,
     ReplyMarkup,
     SentCode,
@@ -564,45 +569,6 @@ export class TelegramClient extends BaseTelegramClient {
         return getChat.apply(this, arguments)
     }
     /**
-     * Get a chunk of dialogs
-     *
-     * You can get up to 100 dialogs at once
-     *
-     * @param params  Fetch parameters
-     */
-    getDialogs(params?: {
-        /**
-         * Offset date used as an anchor for pagination.
-         *
-         * Use {@link Dialog.date} for this value.
-         */
-        offsetDate?: Date | number
-
-        /**
-         * Limits the number of dialogs to be received.
-         *
-         * Defaults to 100.
-         */
-        limit?: number
-
-        /**
-         * How to handle pinned dialogs?
-         * Whether to `include` them, `exclude`,
-         * or `only` return pinned dialogs.
-         *
-         * Defaults to `include`
-         */
-        pinned?: 'include' | 'exclude' | 'only'
-
-        /**
-         * Whether to get dialogs from the
-         * archived dialogs list.
-         */
-        archived?: boolean
-    }): Promise<Dialog[]> {
-        return getDialogs.apply(this, arguments)
-    }
-    /**
      * Get full information about a chat.
      *
      * @param chatId  ID of the chat, its username or invite link
@@ -774,6 +740,140 @@ export class TelegramClient extends BaseTelegramClient {
      */
     unarchiveChats(chats: MaybeArray<InputPeerLike>): Promise<void> {
         return unarchiveChats.apply(this, arguments)
+    }
+    /**
+     * Create a folder from given parameters
+     *
+     * ID for the folder is optional, if not
+     * provided it will be derived automatically.
+     *
+     * @param folder  Parameters for the folder
+     * @returns  Newly created folder
+     */
+    createFolder(
+        folder: PartialExcept<tl.RawDialogFilter, 'title'>
+    ): Promise<tl.RawDialogFilter> {
+        return createFolder.apply(this, arguments)
+    }
+    /**
+     * Delete a folder by its ID
+     *
+     * @param id  Folder ID or folder itself
+     */
+    deleteFolder(id: number | tl.RawDialogFilter): Promise<void> {
+        return deleteFolder.apply(this, arguments)
+    }
+    /**
+     * Edit a folder with given modification
+     *
+     * @param folder  Folder or folder ID. Note that passing an ID will require re-fetching all folders
+     * @param modification  Modification that will be applied to this folder
+     * @returns  Modified folder
+     */
+    editFolder(
+        folder: tl.RawDialogFilter | number,
+        modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>
+    ): Promise<tl.RawDialogFilter> {
+        return editFolder.apply(this, arguments)
+    }
+    /**
+     * Iterate over dialogs
+     *
+     * @param params  Fetch parameters
+     */
+    getDialogs(params?: {
+        /**
+         * Offset message date used as an anchor for pagination.
+         */
+        offsetDate?: Date | number
+
+        /**
+         * Offset message ID used as an anchor for pagination
+         */
+        offsetId?: number
+
+        /**
+         * Offset peer used as an anchor for pagination
+         */
+        offsetPeer?: tl.TypeInputPeer
+
+        /**
+         * Limits the number of dialogs to be received.
+         *
+         * Defaults to `Infinity`, i.e. all dialogs are fetched, ignored when `pinned=only`
+         */
+        limit?: number
+
+        /**
+         * Chunk size which will be passed to `messages.getDialogs`.
+         * You shouldn't usually care about this.
+         *
+         * Defaults to 100.
+         */
+        chunkSize?: number
+
+        /**
+         * How to handle pinned dialogs?
+         *
+         * Whether to `include` them at the start of the list,
+         * `exclude` them at all, or `only` return pinned dialogs.
+         *
+         * Additionally, for folders you can specify
+         * `keep`, which will return pinned dialogs
+         * ordered by date among other non-pinned dialogs.
+         *
+         * Defaults to `include`.
+         *
+         * > **Note**: fetching pinned dialogs from
+         * > folders is slow because of Telegram API limitations.
+         * > When possible, try to either `exclude` them,
+         * > or use `keep` and find them using {@link Dialog.findPinned},
+         * > passing your folder there.
+         * >
+         * > Additionally, when using `include` mode with folders,
+         * > folders will only be fetched if all offset parameters are unset.
+         */
+        pinned?: 'include' | 'exclude' | 'only' | 'keep'
+
+        /**
+         * How to handle archived chats?
+         *
+         * Whether to `keep` them among other dialogs,
+         * `exclude` them from the list, or `only`
+         * return archived dialogs
+         *
+         * Defaults to `exclude`, ignored for folders since folders
+         * themselves contain information about archived chats.
+         *
+         * > **Note**: when fetching `only` pinned dialogs
+         * > passing `keep` will act as passing `only`
+         */
+        archived?: 'keep' | 'exclude' | 'only'
+
+        /**
+         * Folder from which the dialogs will be fetched.
+         *
+         * You can pass folder object, id or title
+         *
+         * Note that passing anything except object will
+         * cause the list of the folders to be fetched,
+         * and passing a title may fetch from
+         * a wrong folder if you have multiple with the same title.
+         *
+         * When a folder with given ID or title is not found,
+         * {@link MtCuteArgumentError} is thrown
+         *
+         * By default fetches from "All" folder
+         */
+        folder?: string | number | tl.RawDialogFilter
+    }): AsyncIterableIterator<Dialog> {
+        return getDialogs.apply(this, arguments)
+    }
+    /**
+     * Get list of folders.
+     */
+    getFolders(): Promise<tl.RawDialogFilter[]> {
+        return getFolders.apply(this, arguments)
     }
     /**
      * Download a file and return its contents as a Buffer.

@@ -15,6 +15,7 @@ export namespace Chat {
      *  - `group`: Legacy group
      *  - `supergroup`: Supergroup
      *  - `channel`: Broadcast channel
+     *  - `gigagroup`: Gigagroup aka Broadcast group
      */
     export type Type =
         | 'private'
@@ -22,6 +23,7 @@ export namespace Chat {
         | 'group'
         | 'supergroup'
         | 'channel'
+        | 'gigagroup'
 }
 
 /**
@@ -115,7 +117,9 @@ export class Chat {
             } else if (this.peer._ === 'chat') {
                 this._type = 'group'
             } else if (this.peer._ === 'channel') {
-                this._type = this.peer.broadcast
+                this._type = this.peer.gigagroup
+                    ? 'gigagroup'
+                    : this.peer.broadcast
                     ? 'channel'
                     : 'supergroup'
             }
@@ -166,6 +170,11 @@ export class Chat {
     /** Whether this chat is chat with yourself (i.e. Saved Messages) */
     get isSelf(): boolean {
         return this.peer._ === 'user' && this.peer.self!
+    }
+
+    /** Whether this peer is your contact */
+    get isContact(): boolean {
+        return this.peer._ === 'user' && this.peer.contact!
     }
 
     /**
@@ -439,7 +448,10 @@ export class Chat {
      *   Number of old messages to be forwarded (0-100).
      *   Only applicable to legacy groups, ignored for supergroups and channels
      */
-    async addMembers(users: MaybeArray<InputPeerLike>, forwardCount?: number): Promise<void> {
+    async addMembers(
+        users: MaybeArray<InputPeerLike>,
+        forwardCount?: number
+    ): Promise<void> {
         return this.client.addChatMembers(this.inputPeer, users, forwardCount)
     }
 

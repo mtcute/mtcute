@@ -21,6 +21,7 @@ import {
     UploadedFile,
     UploadFileLike,
     InputFileLike,
+    PartialExcept,
     FileDownloadParameters,
     UpdateHandler,
     handlers,
