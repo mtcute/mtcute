@@ -29,7 +29,7 @@ export interface ICryptoProvider {
     rsaEncrypt(data: Buffer, key: TlPublicKey): MaybeAsync<Buffer>
 
     // in telegram, iv is always either used only once, or is the same for all calls for the key
-    createAesCtr(key: Buffer, iv: Buffer): IEncryptionScheme
+    createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme
     createAesIge(key: Buffer, iv: Buffer): IEncryptionScheme
     createAesEcb(key: Buffer): IEncryptionScheme
 
@@ -65,7 +65,7 @@ export abstract class BaseCryptoProvider implements ICryptoProvider {
         return bigIntToBuffer(encryptedBigInt)
     }
 
-    abstract createAesCtr(key: Buffer, iv: Buffer): IEncryptionScheme
+    abstract createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme
 
     abstract createAesEcb(key: Buffer): IEncryptionScheme
 

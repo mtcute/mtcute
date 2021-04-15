@@ -46,16 +46,31 @@ export function testCryptoProvider(c: ICryptoProvider): void {
     })
 
     it('should encrypt and decrypt aes-ctr', async () => {
-        const aes = c.createAesCtr(
-            Buffer.from('8ddcf593fd74ec251038e459c165461f', 'hex'),
-            Buffer.from('0fea3601c60e770ac57ffe6b33ca8be1', 'hex')
+        let aes = c.createAesCtr(
+            Buffer.from('d450aae0bf0060a4af1044886b42a13f7c506b35255d134a7e87ab3f23a9493b', 'hex'),
+            Buffer.from('0182de2bd789c295c3c6c875c5e9e190', 'hex'),
+            true
         )
-        expect((await aes.encrypt(Buffer.from('hello'))).toString('hex')).to.eq(
-            '4f6d702526'
+
+        expect((await aes.encrypt(Buffer.from([1, 2, 3]))).toString('hex')).eq('a5fea1')
+        expect((await aes.encrypt(Buffer.from([1, 2, 3]))).toString('hex')).eq('ab51ca')
+        expect((await aes.encrypt(Buffer.from([1, 2, 3]))).toString('hex')).eq('365e5c')
+        expect((await aes.encrypt(Buffer.from([1, 2, 3]))).toString('hex')).eq('4b94a9')
+        expect((await aes.encrypt(Buffer.from([1, 2, 3]))).toString('hex')).eq('776387')
+        expect((await aes.encrypt(Buffer.from([1, 2, 3]))).toString('hex')).eq('c940be')
+
+        aes = c.createAesCtr(
+            Buffer.from('d450aae0bf0060a4af1044886b42a13f7c506b35255d134a7e87ab3f23a9493b', 'hex'),
+            Buffer.from('0182de2bd789c295c3c6c875c5e9e190', 'hex'),
+            false
         )
-        expect(
-            (await aes.decrypt(Buffer.from('4f6d702526', 'hex'))).toString()
-        ).to.eq('hello')
+
+        expect((await aes.decrypt(Buffer.from('a5fea1', 'hex'))).toString('hex')).eq('010203')
+        expect((await aes.decrypt(Buffer.from('ab51ca', 'hex'))).toString('hex')).eq('010203')
+        expect((await aes.decrypt(Buffer.from('365e5c', 'hex'))).toString('hex')).eq('010203')
+        expect((await aes.decrypt(Buffer.from('4b94a9', 'hex'))).toString('hex')).eq('010203')
+        expect((await aes.decrypt(Buffer.from('776387', 'hex'))).toString('hex')).eq('010203')
+        expect((await aes.decrypt(Buffer.from('c940be', 'hex'))).toString('hex')).eq('010203')
     })
 
     it('should encrypt and decrypt aes-ige', async () => {

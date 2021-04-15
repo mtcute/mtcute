@@ -16,17 +16,6 @@ export function typedArrayToBuffer(arr: NodeJS.TypedArray): Buffer {
           Buffer.from(arr)
 }
 
-export function reverseBuffer(buffer: Buffer): Buffer {
-    for (let i = 0, j = buffer.length - 1; i < j; ++i, --j) {
-        const t = buffer[j]
-
-        buffer[j] = buffer[i]
-        buffer[i] = t
-    }
-
-    return buffer
-}
-
 export function buffersEqual(a: Buffer, b: Buffer): boolean {
     if (a.length !== b.length) return false
 

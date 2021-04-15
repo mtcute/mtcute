@@ -4,29 +4,13 @@ import {
     buffersEqual,
     cloneBuffer,
     encodeUrlSafeBase64,
-    isProbablyPlainText,
     parseUrlSafeBase64,
     randomBytes,
-    reverseBuffer,
     telegramRleDecode,
     telegramRleEncode,
     xorBuffer,
     xorBufferInPlace,
 } from '../src/utils/buffer-utils'
-
-describe('reverseBuffer', () => {
-    it('should reverse even-sized buffers', () => {
-        const buf = Buffer.from([1, 2, 3, 4])
-        reverseBuffer(buf)
-        expect([...buf]).to.eql([4, 3, 2, 1])
-    })
-
-    it('should reverse odd-sized buffers', () => {
-        const buf = Buffer.from([1, 2, 3])
-        reverseBuffer(buf)
-        expect([...buf]).to.eql([3, 2, 1])
-    })
-})
 
 describe('buffersEqual', () => {
     it('should return true for equal buffers', () => {
@@ -207,60 +191,60 @@ describe('telegramRleDecode', () => {
     })
 })
 
-describe('isProbablyPlainText', () => {
-    it('should return true for buffers only containing printable ascii', () => {
-        expect(
-            isProbablyPlainText(Buffer.from('hello this is some ascii text'))
-        ).to.be.true
-        expect(
-            isProbablyPlainText(
-                Buffer.from(
-                    'hello this is some ascii text\nwith unix new lines'
-                )
-            )
-        ).to.be.true
-        expect(
-            isProbablyPlainText(
-                Buffer.from(
-                    'hello this is some ascii text\r\nwith windows new lines'
-                )
-            )
-        ).to.be.true
-        expect(
-            isProbablyPlainText(
-                Buffer.from(
-                    'hello this is some ascii text\n\twith unix new lines and tabs'
-                )
-            )
-        ).to.be.true
-        expect(
-            isProbablyPlainText(
-                Buffer.from(
-                    'hello this is some ascii text\r\n\twith windows new lines and tabs'
-                )
-            )
-        ).to.be.true
-    })
-
-    it('should return false for buffers containing some binary data', () => {
-        expect(isProbablyPlainText(Buffer.from('hello this is cedilla: ç'))).to
-            .be.false
-        expect(
-            isProbablyPlainText(
-                Buffer.from('hello this is some ascii text with emojis 🌸')
-            )
-        ).to.be.false
-
-        // random strings of 16 bytes
-        expect(
-            isProbablyPlainText(
-                Buffer.from('717f80f08eb9d88c3931712c0e2be32f', 'hex')
-            )
-        ).to.be.false
-        expect(
-            isProbablyPlainText(
-                Buffer.from('20e8e218e54254c813b261432b0330d7', 'hex')
-            )
-        ).to.be.false
-    })
-})
+// describe('isProbablyPlainText', () => {
+//     it('should return true for buffers only containing printable ascii', () => {
+//         expect(
+//             isProbablyPlainText(Buffer.from('hello this is some ascii text'))
+//         ).to.be.true
+//         expect(
+//             isProbablyPlainText(
+//                 Buffer.from(
+//                     'hello this is some ascii text\nwith unix new lines'
+//                 )
+//             )
+//         ).to.be.true
+//         expect(
+//             isProbablyPlainText(
+//                 Buffer.from(
+//                     'hello this is some ascii text\r\nwith windows new lines'
+//                 )
+//             )
+//         ).to.be.true
+//         expect(
+//             isProbablyPlainText(
+//                 Buffer.from(
+//                     'hello this is some ascii text\n\twith unix new lines and tabs'
+//                 )
+//             )
+//         ).to.be.true
+//         expect(
+//             isProbablyPlainText(
+//                 Buffer.from(
+//                     'hello this is some ascii text\r\n\twith windows new lines and tabs'
+//                 )
+//             )
+//         ).to.be.true
+//     })
+//
+//     it('should return false for buffers containing some binary data', () => {
+//         expect(isProbablyPlainText(Buffer.from('hello this is cedilla: ç'))).to
+//             .be.false
+//         expect(
+//             isProbablyPlainText(
+//                 Buffer.from('hello this is some ascii text with emojis 🌸')
+//             )
+//         ).to.be.false
+//
+//         // random strings of 16 bytes
+//         expect(
+//             isProbablyPlainText(
+//                 Buffer.from('717f80f08eb9d88c3931712c0e2be32f', 'hex')
+//             )
+//         ).to.be.false
+//         expect(
+//             isProbablyPlainText(
+//                 Buffer.from('20e8e218e54254c813b261432b0330d7', 'hex')
+//             )
+//         ).to.be.false
+//     })
+// })

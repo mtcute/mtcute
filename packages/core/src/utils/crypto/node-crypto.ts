@@ -9,29 +9,29 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
             throw new Error('Cannot use Node crypto functions outside NodeJS!')
     }
 
-    createAesCtr(key: Buffer, iv: Buffer): IEncryptionScheme {
-        return this._createAes(key, iv, 'ctr')
+    createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme {
+        const cipher = nodeCrypto[encrypt ? 'createCipheriv' : 'createDecipheriv'](`aes-${key.length * 8}-ctr`, key, iv)
+
+        const update = (data: Buffer) => cipher.update(data)
+
+        return {
+            encrypt: update,
+            decrypt: update,
+        }
     }
 
     createAesEcb(key: Buffer): IEncryptionScheme {
-        return this._createAes(key, null, 'ecb')
-    }
+        const methodName = `aes-${key.length * 8}-ecb`
 
-    private _createAes(
-        key: Buffer,
-        iv: Buffer | null,
-        method: string
-    ): IEncryptionScheme {
-        const methodName = `aes-${key.length * 8}-${method}`
         return {
             encrypt(data: Buffer) {
-                const cipher = nodeCrypto.createCipheriv(methodName, key, iv)
-                if (method === 'ecb') cipher.setAutoPadding(false)
+                const cipher = nodeCrypto.createCipheriv(methodName, key, null)
+                cipher.setAutoPadding(false)
                 return Buffer.concat([cipher.update(data), cipher.final()])
             },
             decrypt(data: Buffer) {
-                const cipher = nodeCrypto.createDecipheriv(methodName, key, iv)
-                if (method === 'ecb') cipher.setAutoPadding(false)
+                const cipher = nodeCrypto.createDecipheriv(methodName, key, null)
+                cipher.setAutoPadding(false)
                 return Buffer.concat([cipher.update(data), cipher.final()])
             },
         }

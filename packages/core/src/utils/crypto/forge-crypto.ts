@@ -15,41 +15,41 @@ export class ForgeCryptoProvider extends BaseCryptoProvider {
             )
     }
 
-    createAesCtr(key: Buffer, iv: Buffer): IEncryptionScheme {
-        return this._createAes(key, iv, 'CTR')
+    createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme {
+        const cipher = forge.cipher[encrypt ? 'createCipher' : 'createDecipher']('AES-CTR', key.toString('binary'))
+        cipher.start({ iv: iv.toString('binary') })
+
+        const update = (data: Buffer): Buffer => {
+            cipher.output.data = ''
+            cipher.update(forge.util.createBuffer(data.toString('binary')))
+            return Buffer.from(cipher.output.data, 'binary')
+        }
+
+        return {
+            encrypt: update,
+            decrypt: update
+        }
     }
 
     createAesEcb(key: Buffer): IEncryptionScheme {
-        return this._createAes(key, null, 'ECB')
-    }
-
-    private _createAes(
-        key: Buffer,
-        iv: Buffer | null,
-        method: string
-    ): IEncryptionScheme {
-        const methodName = `AES-${method}`
         const keyBuffer = key.toString('binary')
-        const ivBuffer = iv ? iv.toString('binary') : undefined
 
         return {
             encrypt(data: Buffer) {
-                const cipher = forge.cipher.createCipher(methodName, keyBuffer)
-                if (method === 'ECB')
-                    cipher.mode.pad = cipher.mode.unpad = false
-                cipher.start(method === 'ECB' ? {} : { iv: ivBuffer })
+                const cipher = forge.cipher.createCipher('AES-ECB', keyBuffer)
+                cipher.start({})
+                cipher.mode.pad = cipher.mode.unpad = false
                 cipher.update(forge.util.createBuffer(data.toString('binary')))
                 cipher.finish()
                 return Buffer.from(cipher.output.data, 'binary')
             },
             decrypt(data: Buffer) {
                 const cipher = forge.cipher.createDecipher(
-                    methodName,
+                    'AES-ECB',
                     keyBuffer
                 )
-                if (method === 'ECB')
-                    cipher.mode.pad = cipher.mode.unpad = false
-                cipher.start(method === 'ECB' ? {} : { iv: ivBuffer })
+                cipher.start({})
+                cipher.mode.pad = cipher.mode.unpad = false
                 cipher.update(forge.util.createBuffer(data.toString('binary')))
                 cipher.finish()
                 return Buffer.from(cipher.output.data, 'binary')
