@@ -286,6 +286,14 @@ export class BaseTelegramClient {
         }
     }
 
+    protected async _loadStorage(): Promise<void> {
+        await this.storage.load?.()
+    }
+
+    protected async _saveStorage(): Promise<void> {
+        await this.storage.save?.()
+    }
+
     private _cleanupPrimaryConnection(forever = false): void {
         if (forever && this.primaryConnection) this.primaryConnection.destroy()
         if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
@@ -303,7 +311,7 @@ export class BaseTelegramClient {
         })
         this.primaryConnection.on('usable', async () => {
             this._keepAliveInterval = setInterval(async () => {
-                await this.storage.save?.()
+                await this._saveStorage()
 
                 // according to telethon, "We need to send some content-related request at least hourly
                 // for Telegram to keep delivering updates, otherwise they will just stop even if we're connected.
@@ -346,7 +354,7 @@ export class BaseTelegramClient {
         )
         this.primaryConnection.on('key-change', async (key) => {
             this.storage.setAuthKeyFor(this._primaryDc.id, key)
-            await this.storage.save?.()
+            await this._saveStorage()
         })
         this.primaryConnection.on('error', (err) => this._emitError(err))
     }
@@ -358,7 +366,7 @@ export class BaseTelegramClient {
      * implicitly the first time you call {@link call}.
      */
     async connect(): Promise<void> {
-        await this.storage.load?.()
+        await this._loadStorage()
         const primaryDc = await this.storage.getDefaultDc()
         if (primaryDc !== null) this._primaryDc = primaryDc
 
@@ -379,7 +387,7 @@ export class BaseTelegramClient {
         // close additional connections
         this._additionalConnections.forEach((conn) => conn.destroy())
 
-        await this.storage.save?.()
+        await this._saveStorage()
         await this.storage.destroy?.()
     }
 
@@ -430,7 +438,7 @@ export class BaseTelegramClient {
 
         this._primaryDc = newDc
         await this.storage.setDefaultDc(newDc)
-        await this.storage.save?.()
+        await this._saveStorage()
         this.primaryConnection.changeDc(newDc)
     }
 
@@ -593,7 +601,7 @@ export class BaseTelegramClient {
 
             // connection.authKey was already generated at this point
             this.storage.setAuthKeyFor(dc.id, connection.authKey)
-            await this.storage.save?.()
+            await this._saveStorage()
         }
 
         this._additionalConnections.push(connection)
