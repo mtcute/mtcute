@@ -18,7 +18,7 @@ export async function logOut(
 
     if (resetSession) {
         this.storage.reset()
-        await this.storage.save?.()
+        await this._saveStorage()
     }
 
     return true

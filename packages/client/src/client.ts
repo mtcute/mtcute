@@ -301,6 +301,15 @@ export class TelegramClient extends BaseTelegramClient {
          * Last name of the user (used only for sign-up, defaults to empty)
          */
         lastName?: MaybeDynamic<string>
+
+        /**
+         * By using this method to sign up an account, you are agreeing to Telegram
+         * ToS. This is required and your account will be banned otherwise.
+         * See https://telegram.org/tos and https://core.telegram.org/api/terms.
+         *
+         * If true, TOS will not be displayed and `tosCallback` will not be called.
+         */
+        acceptTos?: boolean
     }): Promise<User> {
         return startTest.apply(this, arguments)
     }

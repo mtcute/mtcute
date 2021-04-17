@@ -41,7 +41,7 @@ export async function checkPassword(
         userId: res.user.id,
         isBot: false,
     })
-    await this.storage.save?.()
+    await this._saveStorage()
 
     return new User(this, res.user)
 }

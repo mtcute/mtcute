@@ -36,6 +36,7 @@ export async function signUp(
         userId: res.user.id,
         isBot: false,
     })
+    await this._saveStorage()
 
     return new User(this, res.user)
 }

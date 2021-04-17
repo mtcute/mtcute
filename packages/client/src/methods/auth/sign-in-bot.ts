@@ -37,7 +37,7 @@ export async function signInBot(
         userId: res.user.id,
         isBot: true,
     })
-    await this.storage.save?.()
+    await this._saveStorage()
 
     return new User(this, res.user)
 }
