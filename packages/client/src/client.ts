@@ -119,67 +119,13 @@ import {
 import { MaybeArray, MaybeAsync, TelegramConnection } from '@mtcute/core'
 import { Lock } from './utils/lock'
 
-export class TelegramClient extends BaseTelegramClient {
-    // from methods/auth/_initialize.ts
-    protected _userId: number | null
-
-    // from methods/auth/_initialize.ts
-    protected _isBot: boolean
-
-    // from methods/files/_initialize.ts
-    protected _downloadConnections: Record<number, TelegramConnection>
-
-    // from methods/parse-modes/_initialize.ts
-    protected _parseModes: Record<string, IMessageEntityParser>
-
-    // from methods/parse-modes/_initialize.ts
-    protected _defaultParseMode: string | null
-
-    // from methods/updates/dispatcher.ts
-    protected _groups: Record<number, UpdateHandler[]>
-
-    // from methods/updates/dispatcher.ts
-    protected _groupsOrder: number[]
-
-    // from methods/updates/handle-update.ts
-    protected _updLock: Lock
-
-    // from methods/updates/handle-update.ts
-    protected _pts: number
-
-    // from methods/updates/handle-update.ts
-    protected _date: number
-
-    // from methods/updates/handle-update.ts
-    protected _cpts: Record<number, number>
-
-    constructor(opts: BaseTelegramClient.Options) {
-        super(opts)
-        this._userId = null
-        this._isBot = false
-        this._downloadConnections = {}
-        this._parseModes = {}
-        this._defaultParseMode = null
-        this._groups = {}
-        this._groupsOrder = []
-        this._updLock = new Lock()
-        // we dont need to initialize state fields since
-        // they are always loaded either from the server, or from storage.
-
-        // channel PTS are not loaded immediately, and instead are cached here
-        // after the first time they were retrieved from the storage.
-        // they are later pushed into the storage.
-        this._cpts = {}
-    }
-
+export interface TelegramClient extends BaseTelegramClient {
     /**
      * Accept the given TOS
      *
      * @param tosId  TOS id
      */
-    acceptTos(tosId: string): Promise<boolean> {
-        return acceptTos.apply(this, arguments)
-    }
+    acceptTos(tosId: string): Promise<boolean>
     /**
      * Check your Two-Step verification password and log in
      *
@@ -187,17 +133,13 @@ export class TelegramClient extends BaseTelegramClient {
      * @returns  The authorized user
      * @throws BadRequestError  In case the password is invalid
      */
-    checkPassword(password: string): Promise<User> {
-        return checkPassword.apply(this, arguments)
-    }
+    checkPassword(password: string): Promise<User>
     /**
      * Get your Two-Step Verification password hint.
      *
      * @returns  The password hint as a string, if any
      */
-    getPasswordHint(): Promise<string | null> {
-        return getPasswordHint.apply(this, arguments)
-    }
+    getPasswordHint(): Promise<string | null>
     /**
      * Log out from Telegram account and optionally reset the session storage.
      *
@@ -207,9 +149,7 @@ export class TelegramClient extends BaseTelegramClient {
      * @param resetSession  (default: `false`) Whether to reset the session
      * @returns  On success, `true` is returned
      */
-    logOut(resetSession?: boolean): Promise<true> {
-        return logOut.apply(this, arguments)
-    }
+    logOut(resetSession?: boolean): Promise<true>
     /**
      * Recover your password with a recovery code and log in.
      *
@@ -217,9 +157,7 @@ export class TelegramClient extends BaseTelegramClient {
      * @returns  The authorized user
      * @throws BadRequestError  In case the code is invalid
      */
-    recoverPassword(recoveryCode: string): Promise<User> {
-        return recoverPassword.apply(this, arguments)
-    }
+    recoverPassword(recoveryCode: string): Promise<User>
     /**
      * Re-send the confirmation code using a different type.
      *
@@ -229,26 +167,20 @@ export class TelegramClient extends BaseTelegramClient {
      * @param phone  Phone number in international format
      * @param phoneCodeHash  Confirmation code identifier from {@link SentCode}
      */
-    resendCode(phone: string, phoneCodeHash: string): Promise<SentCode> {
-        return resendCode.apply(this, arguments)
-    }
+    resendCode(phone: string, phoneCodeHash: string): Promise<SentCode>
     /**
      * Send the confirmation code to the given phone number
      *
      * @param phone  Phone number in international format.
      * @returns  An object containing information about the sent confirmation code
      */
-    sendCode(phone: string): Promise<SentCode> {
-        return sendCode.apply(this, arguments)
-    }
+    sendCode(phone: string): Promise<SentCode>
     /**
      * Send a code to email needed to recover your password
      *
      * @returns  String containing email pattern to which the recovery code was sent
      */
-    sendRecoveryCode(): Promise<string> {
-        return sendRecoveryCode.apply(this, arguments)
-    }
+    sendRecoveryCode(): Promise<string>
     /**
      * Authorize a bot using its token issued by [@BotFather](//t.me/BotFather)
      *
@@ -256,9 +188,7 @@ export class TelegramClient extends BaseTelegramClient {
      * @returns  Bot's {@link User} object
      * @throws BadRequestError  In case the bot token is invalid
      */
-    signInBot(token: string): Promise<User> {
-        return signInBot.apply(this, arguments)
-    }
+    signInBot(token: string): Promise<User>
     /**
      * Authorize a user in Telegram with a valid confirmation code.
      *
@@ -277,9 +207,7 @@ export class TelegramClient extends BaseTelegramClient {
         phone: string,
         phoneCodeHash: string,
         phoneCode: string
-    ): Promise<User | TermsOfService | false> {
-        return signIn.apply(this, arguments)
-    }
+    ): Promise<User | TermsOfService | false>
     /**
      * Register a new user in Telegram.
      *
@@ -293,9 +221,7 @@ export class TelegramClient extends BaseTelegramClient {
         phoneCodeHash: string,
         firstName: string,
         lastName?: string
-    ): Promise<User> {
-        return signUp.apply(this, arguments)
-    }
+    ): Promise<User>
     /**
      * Utility function to quickly authorize on test DC
      * using a [Test phone number](https://core.telegram.org/api/auth#test-phone-numbers),
@@ -344,9 +270,7 @@ export class TelegramClient extends BaseTelegramClient {
          * If true, TOS will not be displayed and `tosCallback` will not be called.
          */
         acceptTos?: boolean
-    }): Promise<User> {
-        return startTest.apply(this, arguments)
-    }
+    }): Promise<User>
     /**
      * Start the client in an interactive and declarative manner,
      * by providing callbacks for authorization details.
@@ -440,9 +364,7 @@ export class TelegramClient extends BaseTelegramClient {
          * Defaults to true.
          */
         catchUp?: boolean
-    }): Promise<User> {
-        return start.apply(this, arguments)
-    }
+    }): Promise<User>
     /**
      * Add new members to a group, supergroup or channel.
      *
@@ -457,17 +379,13 @@ export class TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         users: MaybeArray<InputPeerLike>,
         forwardCount?: number
-    ): Promise<void> {
-        return addChatMembers.apply(this, arguments)
-    }
+    ): Promise<void>
     /**
      * Archive one or more chats
      *
      * @param chats  Chat ID(s), username(s), phone number(s), `"me"` or `"self"`
      */
-    archiveChats(chats: MaybeArray<InputPeerLike>): Promise<void> {
-        return archiveChats.apply(this, arguments)
-    }
+    archiveChats(chats: MaybeArray<InputPeerLike>): Promise<void>
     /**
      * Create a new broadcast channel
      *
@@ -475,9 +393,7 @@ export class TelegramClient extends BaseTelegramClient {
      * @param description  (default: `''`) Channel description
      * @returns  Newly created channel
      */
-    createChannel(title: string, description?: string): Promise<Chat> {
-        return createChannel.apply(this, arguments)
-    }
+    createChannel(title: string, description?: string): Promise<Chat>
     /**
      * Create a legacy group chat
      *
@@ -489,39 +405,28 @@ export class TelegramClient extends BaseTelegramClient {
      *   User(s) to be invited in the group (ID(s), username(s) or phone number(s)).
      *   Due to Telegram limitations, you can't create a legacy group with yourself.
      */
-    createGroup(
-        title: string,
-        users: MaybeArray<InputPeerLike>
-    ): Promise<Chat> {
-        return createGroup.apply(this, arguments)
-    }
+    createGroup(title: string, users: MaybeArray<InputPeerLike>): Promise<Chat>
     /**
      * Create a new supergroup
      *
      * @param title  Title of the supergroup
      * @param description  (default: `''`) Description of the supergroup
      */
-    createSupergroup(title: string, description?: string): Promise<Chat> {
-        return createSupergroup.apply(this, arguments)
-    }
+    createSupergroup(title: string, description?: string): Promise<Chat>
 
     /**
      * Delete a channel or a supergroup
      *
      * @param chatId  Chat ID or username
      */
-    deleteChannel(chatId: InputPeerLike): Promise<void> {
-        return deleteChannel.apply(this, arguments)
-    }
+    deleteChannel(chatId: InputPeerLike): Promise<void>
 
     /**
      * Delete a channel or a supergroup
      *
      * @param chatId  Chat ID or username
      */
-    deleteSupergroup(chatId: InputPeerLike): Promise<void> {
-        return deleteChannel.apply(this, arguments)
-    }
+    deleteSupergroup(chatId: InputPeerLike): Promise<void>
     /**
      * Delete a chat photo
      *
@@ -529,17 +434,13 @@ export class TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat ID or username
      */
-    deleteChatPhoto(chatId: InputPeerLike): Promise<void> {
-        return deleteChatPhoto.apply(this, arguments)
-    }
+    deleteChatPhoto(chatId: InputPeerLike): Promise<void>
     /**
      * Delete a legacy group chat for all members
      *
      * @param chatId  Chat ID
      */
-    deleteGroup(chatId: InputPeerLike): Promise<void> {
-        return deleteGroup.apply(this, arguments)
-    }
+    deleteGroup(chatId: InputPeerLike): Promise<void>
     /**
      * Delete communication history (for private chats
      * and legacy groups)
@@ -559,9 +460,7 @@ export class TelegramClient extends BaseTelegramClient {
         chat: InputPeerLike,
         mode?: 'delete' | 'clear' | 'revoke',
         maxId?: number
-    ): Promise<void> {
-        return deleteHistory.apply(this, arguments)
-    }
+    ): Promise<void>
     /**
      * Get information about a single chat member
      *
@@ -572,9 +471,7 @@ export class TelegramClient extends BaseTelegramClient {
     getChatMember(
         chatId: InputPeerLike,
         userId: InputPeerLike
-    ): Promise<ChatMember> {
-        return getChatMember.apply(this, arguments)
-    }
+    ): Promise<ChatMember>
     /**
      * Get a chunk of members of some chat.
      *
@@ -628,9 +525,7 @@ export class TelegramClient extends BaseTelegramClient {
                 | 'contacts'
                 | 'mention'
         }
-    ): Promise<ChatMember[]> {
-        return getChatMembers.apply(this, arguments)
-    }
+    ): Promise<ChatMember[]>
     /**
      * Get preview information about a private chat.
      *
@@ -640,9 +535,7 @@ export class TelegramClient extends BaseTelegramClient {
      *   In case you are trying to get info about private chat that you have already joined.
      *   Use {@link getChat} or {@link getFullChat} instead.
      */
-    getChatPreview(inviteLink: string): Promise<ChatPreview> {
-        return getChatPreview.apply(this, arguments)
-    }
+    getChatPreview(inviteLink: string): Promise<ChatPreview>
     /**
      * Get basic information about a chat.
      *
@@ -651,9 +544,7 @@ export class TelegramClient extends BaseTelegramClient {
      *   In case you are trying to get info about private chat that you haven't joined.
      *   Use {@link getChatPreview} instead.
      */
-    getChat(chatId: InputPeerLike): Promise<Chat> {
-        return getChat.apply(this, arguments)
-    }
+    getChat(chatId: InputPeerLike): Promise<Chat>
     /**
      * Get full information about a chat.
      *
@@ -662,9 +553,7 @@ export class TelegramClient extends BaseTelegramClient {
      *   In case you are trying to get info about private chat that you haven't joined.
      *   Use {@link getChatPreview} instead.
      */
-    getFullChat(chatId: InputPeerLike): Promise<Chat> {
-        return getFullChat.apply(this, arguments)
-    }
+    getFullChat(chatId: InputPeerLike): Promise<Chat>
     /**
      * Iterate through chat members
      *
@@ -686,9 +575,7 @@ export class TelegramClient extends BaseTelegramClient {
              */
             chunkSize?: number
         }
-    ): AsyncIterableIterator<ChatMember> {
-        return iterChatMembers.apply(this, arguments)
-    }
+    ): AsyncIterableIterator<ChatMember>
     /**
      * Join a channel or supergroup
      *
@@ -696,18 +583,14 @@ export class TelegramClient extends BaseTelegramClient {
      *   Chat identifier. Either an invite link (`t.me/joinchat/*`), a username (`@username`)
      *   or ID of the linked supergroup or channel.
      */
-    joinChat(chatId: InputPeerLike): Promise<Chat> {
-        return joinChat.apply(this, arguments)
-    }
+    joinChat(chatId: InputPeerLike): Promise<Chat>
     /**
      * Leave a group chat, supergroup or channel
      *
      * @param chatId  Chat ID or username
      * @param clear  (default: `false`) Whether to clear history after leaving (only for legacy group chats)
      */
-    leaveChat(chatId: InputPeerLike, clear?: boolean): Promise<void> {
-        return leaveChat.apply(this, arguments)
-    }
+    leaveChat(chatId: InputPeerLike, clear?: boolean): Promise<void>
     /**
      * Save or delete a draft message associated with some chat
      *
@@ -717,9 +600,7 @@ export class TelegramClient extends BaseTelegramClient {
     saveDraft(
         chatId: InputPeerLike,
         draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>
-    ): Promise<void> {
-        return saveDraft.apply(this, arguments)
-    }
+    ): Promise<void>
     /**
      * Change default chat permissions for all members.
      *
@@ -744,9 +625,7 @@ export class TelegramClient extends BaseTelegramClient {
     setChatDefaultPermissions(
         chatId: InputPeerLike,
         permissions: InputChatPermissions
-    ): Promise<Chat> {
-        return setChatDefaultPermissions.apply(this, arguments)
-    }
+    ): Promise<Chat>
     /**
      * Change chat description
      *
@@ -758,9 +637,7 @@ export class TelegramClient extends BaseTelegramClient {
     setChatDescription(
         chatId: InputPeerLike,
         description: string
-    ): Promise<void> {
-        return setChatDescription.apply(this, arguments)
-    }
+    ): Promise<void>
     /**
      * Set a new chat photo or video.
      *
@@ -778,9 +655,7 @@ export class TelegramClient extends BaseTelegramClient {
         type: 'photo' | 'video',
         media: InputFileLike,
         previewSec?: number
-    ): Promise<void> {
-        return setChatPhoto.apply(this, arguments)
-    }
+    ): Promise<void>
     /**
      * Change chat title
      *
@@ -789,9 +664,7 @@ export class TelegramClient extends BaseTelegramClient {
      * @param chatId  Chat ID or username
      * @param title  New chat title, 1-255 characters
      */
-    setChatTitle(chatId: InputPeerLike, title: string): Promise<void> {
-        return setChatTitle.apply(this, arguments)
-    }
+    setChatTitle(chatId: InputPeerLike, title: string): Promise<void>
     /**
      * Change supergroup/channel username
      *
@@ -803,9 +676,7 @@ export class TelegramClient extends BaseTelegramClient {
     setChatUsername(
         chatId: InputPeerLike,
         username: string | null
-    ): Promise<void> {
-        return setChatUsername.apply(this, arguments)
-    }
+    ): Promise<void>
     /**
      * Set supergroup's slow mode interval.
      *
@@ -816,17 +687,13 @@ export class TelegramClient extends BaseTelegramClient {
      *   Users will be able to send a message only once per this interval.
      *   Valid values are: `0 (off), 10, 30, 60 (1m), 300 (5m), 900 (15m) or 3600 (1h)`
      */
-    setSlowMode(chatId: InputPeerLike, seconds?: number): Promise<void> {
-        return setSlowMode.apply(this, arguments)
-    }
+    setSlowMode(chatId: InputPeerLike, seconds?: number): Promise<void>
     /**
      * Unarchive one or more chats
      *
      * @param chats  Chat ID(s), username(s), phone number(s), `"me"` or `"self"`
      */
-    unarchiveChats(chats: MaybeArray<InputPeerLike>): Promise<void> {
-        return unarchiveChats.apply(this, arguments)
-    }
+    unarchiveChats(chats: MaybeArray<InputPeerLike>): Promise<void>
     /**
      * Create a folder from given parameters
      *
@@ -838,17 +705,13 @@ export class TelegramClient extends BaseTelegramClient {
      */
     createFolder(
         folder: PartialExcept<tl.RawDialogFilter, 'title'>
-    ): Promise<tl.RawDialogFilter> {
-        return createFolder.apply(this, arguments)
-    }
+    ): Promise<tl.RawDialogFilter>
     /**
      * Delete a folder by its ID
      *
      * @param id  Folder ID or folder itself
      */
-    deleteFolder(id: number | tl.RawDialogFilter): Promise<void> {
-        return deleteFolder.apply(this, arguments)
-    }
+    deleteFolder(id: number | tl.RawDialogFilter): Promise<void>
     /**
      * Edit a folder with given modification
      *
@@ -859,9 +722,7 @@ export class TelegramClient extends BaseTelegramClient {
     editFolder(
         folder: tl.RawDialogFilter | number,
         modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>
-    ): Promise<tl.RawDialogFilter> {
-        return editFolder.apply(this, arguments)
-    }
+    ): Promise<tl.RawDialogFilter>
     /**
      * Iterate over dialogs.
      *
@@ -958,15 +819,11 @@ export class TelegramClient extends BaseTelegramClient {
          * By default fetches from "All" folder
          */
         folder?: string | number | tl.RawDialogFilter
-    }): AsyncIterableIterator<Dialog> {
-        return getDialogs.apply(this, arguments)
-    }
+    }): AsyncIterableIterator<Dialog>
     /**
      * Get list of folders.
      */
-    getFolders(): Promise<tl.RawDialogFilter[]> {
-        return getFolders.apply(this, arguments)
-    }
+    getFolders(): Promise<tl.RawDialogFilter[]>
     /**
      * Download a file and return its contents as a Buffer.
      *
@@ -975,9 +832,7 @@ export class TelegramClient extends BaseTelegramClient {
      *
      * @param params  File download parameters
      */
-    downloadAsBuffer(params: FileDownloadParameters): Promise<Buffer> {
-        return downloadAsBuffer.apply(this, arguments)
-    }
+    downloadAsBuffer(params: FileDownloadParameters): Promise<Buffer>
     /**
      * Download a remote file to a local file (only for NodeJS).
      * Promise will resolve once the download is complete.
@@ -988,9 +843,7 @@ export class TelegramClient extends BaseTelegramClient {
     downloadToFile(
         filename: string,
         params: FileDownloadParameters
-    ): Promise<void> {
-        return downloadToFile.apply(this, arguments)
-    }
+    ): Promise<void>
     /**
      * Download a file and return it as an iterable, which yields file contents
      * in chunks of a given size. Order of the chunks is guaranteed to be
@@ -1000,18 +853,14 @@ export class TelegramClient extends BaseTelegramClient {
      */
     downloadAsIterable(
         params: FileDownloadParameters
-    ): AsyncIterableIterator<Buffer> {
-        return downloadAsIterable.apply(this, arguments)
-    }
+    ): AsyncIterableIterator<Buffer>
     /**
      * Download a file and return it as a Node readable stream,
      * streaming file contents.
      *
      * @param params  File download parameters
      */
-    downloadAsStream(params: FileDownloadParameters): Readable {
-        return downloadAsStream.apply(this, arguments)
-    }
+    downloadAsStream(params: FileDownloadParameters): Readable
     /**
      * Upload a file to Telegram servers, without actually
      * sending a message anywhere. Useful when an `InputFile` is required.
@@ -1069,9 +918,7 @@ export class TelegramClient extends BaseTelegramClient {
          * @param total  Total file size
          */
         progressCallback?: (uploaded: number, total: number) => void
-    }): Promise<UploadedFile> {
-        return uploadFile.apply(this, arguments)
-    }
+    }): Promise<UploadedFile>
     /**
      * Delete messages, including service messages.
      *
@@ -1083,9 +930,7 @@ export class TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         ids: MaybeArray<number>,
         revoke?: boolean
-    ): Promise<boolean> {
-        return deleteMessages.apply(this, arguments)
-    }
+    ): Promise<boolean>
     /**
      * Edit message text and/or reply markup.
      *
@@ -1129,16 +974,7 @@ export class TelegramClient extends BaseTelegramClient {
              */
             replyMarkup?: ReplyMarkup
         }
-    ): Promise<Message> {
-        return editMessage.apply(this, arguments)
-    }
-
-    protected _findMessageInUpdate(
-        res: tl.TypeUpdates,
-        isEdit?: boolean
-    ): Message {
-        return _findMessageInUpdate.apply(this, arguments)
-    }
+    ): Promise<Message>
     /**
      * Retrieve a chunk of the chat history.
      *
@@ -1184,9 +1020,7 @@ export class TelegramClient extends BaseTelegramClient {
              */
             reverse?: boolean
         }
-    ): Promise<Message[]> {
-        return getHistory.apply(this, arguments)
-    }
+    ): Promise<Message[]>
     /**
      * Get a single message in chat by its ID
      *
@@ -1224,9 +1058,7 @@ export class TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         messageIds: MaybeArray<number>,
         fromReply?: boolean
-    ): Promise<MaybeArray<Message>> {
-        return getMessages.apply(this, arguments)
-    }
+    ): Promise<MaybeArray<Message>>
     /**
      * Iterate through a chat history sequentially.
      *
@@ -1281,17 +1113,7 @@ export class TelegramClient extends BaseTelegramClient {
              */
             chunkSize?: number
         }
-    ): AsyncIterableIterator<Message> {
-        return iterHistory.apply(this, arguments)
-    }
-
-    protected _parseEntities(
-        text?: string,
-        mode?: string | null,
-        entities?: tl.TypeMessageEntity[]
-    ): Promise<[string, tl.TypeMessageEntity[] | undefined]> {
-        return _parseEntities.apply(this, arguments)
-    }
+    ): AsyncIterableIterator<Message>
     /**
      * Pin a message in a group, supergroup, channel or PM.
      *
@@ -1308,9 +1130,7 @@ export class TelegramClient extends BaseTelegramClient {
         messageId: number,
         notify?: boolean,
         bothSides?: boolean
-    ): Promise<void> {
-        return pinMessage.apply(this, arguments)
-    }
+    ): Promise<void>
     /**
      * Search for messages globally from all of your chats
      *
@@ -1348,9 +1168,7 @@ export class TelegramClient extends BaseTelegramClient {
          * Defaults to `100`
          */
         chunkSize?: number
-    }): AsyncIterableIterator<Message> {
-        return searchGlobal.apply(this, arguments)
-    }
+    }): AsyncIterableIterator<Message>
     /**
      * Search for messages inside a specific chat
      *
@@ -1405,9 +1223,7 @@ export class TelegramClient extends BaseTelegramClient {
              */
             chunkSize?: number
         }
-    ): AsyncIterableIterator<Message> {
-        return searchMessages.apply(this, arguments)
-    }
+    ): AsyncIterableIterator<Message>
     /**
      * Send an animated dice with a random value.
      *
@@ -1448,9 +1264,7 @@ export class TelegramClient extends BaseTelegramClient {
              */
             replyMarkup?: ReplyMarkup
         }
-    ): Promise<Message> {
-        return sendDice.apply(this, arguments)
-    }
+    ): Promise<Message>
     /**
      * Send a static geo location.
      *
@@ -1486,9 +1300,7 @@ export class TelegramClient extends BaseTelegramClient {
              */
             replyMarkup?: ReplyMarkup
         }
-    ): Promise<Message> {
-        return sendLocation.apply(this, arguments)
-    }
+    ): Promise<Message>
     /**
      * Send a single media.
      *
@@ -1547,9 +1359,7 @@ export class TelegramClient extends BaseTelegramClient {
              */
             clearDraft?: boolean
         }
-    ): Promise<Message> {
-        return sendMedia.apply(this, arguments)
-    }
+    ): Promise<Message>
     /**
      * Send a single photo
      *
@@ -1627,9 +1437,7 @@ export class TelegramClient extends BaseTelegramClient {
              */
             clearDraft?: boolean
         }
-    ): Promise<Message> {
-        return sendPhoto.apply(this, arguments)
-    }
+    ): Promise<Message>
     /**
      * Send a text message
      *
@@ -1691,9 +1499,7 @@ export class TelegramClient extends BaseTelegramClient {
              */
             clearDraft?: boolean
         }
-    ): Promise<Message> {
-        return sendText.apply(this, arguments)
-    }
+    ): Promise<Message>
     /**
      * Unpin a message in a group, supergroup, channel or PM.
      *
@@ -1703,9 +1509,7 @@ export class TelegramClient extends BaseTelegramClient {
      * @param chatId  Chat ID, username, phone number, `"self"` or `"me"`
      * @param messageId  Message ID
      */
-    unpinMessage(chatId: InputPeerLike, messageId: number): Promise<void> {
-        return unpinMessage.apply(this, arguments)
-    }
+    unpinMessage(chatId: InputPeerLike, messageId: number): Promise<void>
     /**
      * Register a given {@link IMessageEntityParser} as a parse mode
      * for messages. When this method is first called, given parse
@@ -1715,9 +1519,7 @@ export class TelegramClient extends BaseTelegramClient {
      * @param name  (default: `parseMode.name`) Parse mode name. By default is taken from the object.
      * @throws MtCuteError  When the parse mode with a given name is already registered.
      */
-    registerParseMode(parseMode: IMessageEntityParser, name?: string): void {
-        return registerParseMode.apply(this, arguments)
-    }
+    registerParseMode(parseMode: IMessageEntityParser, name?: string): void
     /**
      * Unregister a parse mode by its name.
      * Will silently fail if given parse mode does not exist.
@@ -1726,9 +1528,7 @@ export class TelegramClient extends BaseTelegramClient {
      *
      * @param name  Name of the parse mode to unregister
      */
-    unregisterParseMode(name: string): void {
-        return unregisterParseMode.apply(this, arguments)
-    }
+    unregisterParseMode(name: string): void
     /**
      * Get a {@link IMessageEntityParser} registered under a given name (or a default one).
      *
@@ -1736,34 +1536,21 @@ export class TelegramClient extends BaseTelegramClient {
      * @throws MtCuteError  When the provided parse mode is not registered
      * @throws MtCuteError  When `name` is omitted and there is no default parse mode
      */
-    getParseMode(name?: string | null): IMessageEntityParser {
-        return getParseMode.apply(this, arguments)
-    }
+    getParseMode(name?: string | null): IMessageEntityParser
     /**
      * Set a given parse mode as a default one.
      *
      * @param name  Name of the parse mode
      * @throws MtCuteError  When given parse mode is not registered.
      */
-    setDefaultParseMode(name: string): void {
-        return setDefaultParseMode.apply(this, arguments)
-    }
-    protected _dispatchUpdate(
-        update: tl.TypeUpdate | tl.TypeMessage,
-        users: Record<number, tl.TypeUser>,
-        chats: Record<number, tl.TypeChat>
-    ): void {
-        return _dispatchUpdate.apply(this, arguments)
-    }
+    setDefaultParseMode(name: string): void
     /**
      * Add an update handler to a given handlers group
      *
      * @param handler  Update handler
      * @param group  (default: `0`) Handler group index
      */
-    addUpdateHandler(handler: UpdateHandler, group?: number): void {
-        return addUpdateHandler.apply(this, arguments)
-    }
+    addUpdateHandler(handler: UpdateHandler, group?: number): void
     /**
      * Remove an update handler (or handlers) from a given
      * handler group.
@@ -1774,33 +1561,12 @@ export class TelegramClient extends BaseTelegramClient {
     removeUpdateHandler(
         handler: UpdateHandler | UpdateHandler['type'] | 'all',
         group?: number
-    ): void {
-        return removeUpdateHandler.apply(this, arguments)
-    }
-    /**
-     * Fetch updates state from the server.
-     * Meant to be used right after authorization,
-     * but before force-saving the session.
-     */
-    protected _fetchUpdatesState(): Promise<void> {
-        return _fetchUpdatesState.apply(this, arguments)
-    }
-    protected _loadStorage(): Promise<void> {
-        return _loadStorage.apply(this, arguments)
-    }
-    protected _saveStorage(): Promise<void> {
-        return _saveStorage.apply(this, arguments)
-    }
-    protected _handleUpdate(update: tl.TypeUpdates): void {
-        return _handleUpdate.apply(this, arguments)
-    }
+    ): void
     /**
      * Catch up with the server by loading missed updates.
      *
      */
-    catchUp(): Promise<void> {
-        return catchUp.apply(this, arguments)
-    }
+    catchUp(): Promise<void>
     /**
      * Register a message handler without any filters.
      *
@@ -1829,34 +1595,26 @@ export class TelegramClient extends BaseTelegramClient {
         handler?: (
             msg: filters.Modify<Message, Mod>
         ) => MaybeAsync<void | PropagationSymbol>
-    ): void {
-        return onNewMessage.apply(this, arguments)
-    }
+    ): void
     /**
      * Block a user
      *
      * @param id  User ID, its username or phone number
      * @returns  Whether the action was successful
      */
-    blockUser(id: InputPeerLike): Promise<boolean> {
-        return blockUser.apply(this, arguments)
-    }
+    blockUser(id: InputPeerLike): Promise<boolean>
     /**
      * Get a list of common chats you have with a given user
      *
      * @param userId  User's ID, username or phone number
      * @throws MtCuteInvalidPeerTypeError
      */
-    getCommonChats(userId: InputPeerLike): Promise<Chat[]> {
-        return getCommonChats.apply(this, arguments)
-    }
+    getCommonChats(userId: InputPeerLike): Promise<Chat[]>
     /**
      * Get currently authorized user's full information
      *
      */
-    getMe(): Promise<User> {
-        return getMe.apply(this, arguments)
-    }
+    getMe(): Promise<User>
     /**
      * Get information about a single user.
      *
@@ -1871,9 +1629,7 @@ export class TelegramClient extends BaseTelegramClient {
      */
     getUsers(ids: InputPeerLike[]): Promise<User[]>
 
-    getUsers(ids: MaybeArray<InputPeerLike>): Promise<MaybeArray<User>> {
-        return getUsers.apply(this, arguments)
-    }
+    getUsers(ids: MaybeArray<InputPeerLike>): Promise<MaybeArray<User>>
     /**
      * Get the `InputPeer` of a known peer id.
      * Useful when an `InputPeer` is needed.
@@ -1882,7 +1638,121 @@ export class TelegramClient extends BaseTelegramClient {
      */
     resolvePeer(
         peerId: InputPeerLike
-    ): Promise<tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel> {
-        return resolvePeer.apply(this, arguments)
+    ): Promise<tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel>
+}
+/** @internal */
+export class TelegramClient extends BaseTelegramClient {
+    protected _userId: number | null
+    protected _isBot: boolean
+    protected _downloadConnections: Record<number, TelegramConnection>
+    protected _parseModes: Record<string, IMessageEntityParser>
+    protected _defaultParseMode: string | null
+    protected _groups: Record<number, UpdateHandler[]>
+    protected _groupsOrder: number[]
+    protected _updLock: Lock
+    protected _pts: number
+    protected _date: number
+    protected _cpts: Record<number, number>
+    constructor(opts: BaseTelegramClient.Options) {
+        super(opts)
+        this._userId = null
+        this._isBot = false
+        this._downloadConnections = {}
+        this._parseModes = {}
+        this._defaultParseMode = null
+        this._groups = {}
+        this._groupsOrder = []
+        this._updLock = new Lock()
+        // we dont need to initialize state fields since
+        // they are always loaded either from the server, or from storage.
+
+        // channel PTS are not loaded immediately, and instead are cached here
+        // after the first time they were retrieved from the storage.
+        // they are later pushed into the storage.
+        this._cpts = {}
     }
+
+    acceptTos = acceptTos as TelegramClient['acceptTos']
+    checkPassword = checkPassword as TelegramClient['checkPassword']
+    getPasswordHint = getPasswordHint as TelegramClient['getPasswordHint']
+    logOut = logOut as TelegramClient['logOut']
+    recoverPassword = recoverPassword as TelegramClient['recoverPassword']
+    resendCode = resendCode as TelegramClient['resendCode']
+    sendCode = sendCode as TelegramClient['sendCode']
+    sendRecoveryCode = sendRecoveryCode as TelegramClient['sendRecoveryCode']
+    signInBot = signInBot as TelegramClient['signInBot']
+    signIn = signIn as TelegramClient['signIn']
+    signUp = signUp as TelegramClient['signUp']
+    startTest = startTest as TelegramClient['startTest']
+    start = start as TelegramClient['start']
+    addChatMembers = addChatMembers as TelegramClient['addChatMembers']
+    archiveChats = archiveChats as TelegramClient['archiveChats']
+    createChannel = createChannel as TelegramClient['createChannel']
+    createGroup = createGroup as TelegramClient['createGroup']
+    createSupergroup = createSupergroup as TelegramClient['createSupergroup']
+    deleteChannel = deleteChannel as TelegramClient['deleteChannel']
+    deleteSupergroup = deleteChannel as TelegramClient['deleteSupergroup']
+    deleteChatPhoto = deleteChatPhoto as TelegramClient['deleteChatPhoto']
+    deleteGroup = deleteGroup as TelegramClient['deleteGroup']
+    deleteHistory = deleteHistory as TelegramClient['deleteHistory']
+    getChatMember = getChatMember as TelegramClient['getChatMember']
+    getChatMembers = getChatMembers as TelegramClient['getChatMembers']
+    getChatPreview = getChatPreview as TelegramClient['getChatPreview']
+    getChat = getChat as TelegramClient['getChat']
+    getFullChat = getFullChat as TelegramClient['getFullChat']
+    iterChatMembers = iterChatMembers as TelegramClient['iterChatMembers']
+    joinChat = joinChat as TelegramClient['joinChat']
+    leaveChat = leaveChat as TelegramClient['leaveChat']
+    saveDraft = saveDraft as TelegramClient['saveDraft']
+    setChatDefaultPermissions = setChatDefaultPermissions as TelegramClient['setChatDefaultPermissions']
+    setChatDescription = setChatDescription as TelegramClient['setChatDescription']
+    setChatPhoto = setChatPhoto as TelegramClient['setChatPhoto']
+    setChatTitle = setChatTitle as TelegramClient['setChatTitle']
+    setChatUsername = setChatUsername as TelegramClient['setChatUsername']
+    setSlowMode = setSlowMode as TelegramClient['setSlowMode']
+    unarchiveChats = unarchiveChats as TelegramClient['unarchiveChats']
+    createFolder = createFolder as TelegramClient['createFolder']
+    deleteFolder = deleteFolder as TelegramClient['deleteFolder']
+    editFolder = editFolder as TelegramClient['editFolder']
+    getDialogs = getDialogs as TelegramClient['getDialogs']
+    getFolders = getFolders as TelegramClient['getFolders']
+    downloadAsBuffer = downloadAsBuffer as TelegramClient['downloadAsBuffer']
+    downloadToFile = downloadToFile as TelegramClient['downloadToFile']
+    downloadAsIterable = downloadAsIterable as TelegramClient['downloadAsIterable']
+    downloadAsStream = downloadAsStream as TelegramClient['downloadAsStream']
+    uploadFile = uploadFile as TelegramClient['uploadFile']
+    deleteMessages = deleteMessages as TelegramClient['deleteMessages']
+    editMessage = editMessage as TelegramClient['editMessage']
+    protected _findMessageInUpdate = _findMessageInUpdate
+    getHistory = getHistory as TelegramClient['getHistory']
+    getMessages = getMessages as TelegramClient['getMessages']
+    iterHistory = iterHistory as TelegramClient['iterHistory']
+    protected _parseEntities = _parseEntities
+    pinMessage = pinMessage as TelegramClient['pinMessage']
+    searchGlobal = searchGlobal as TelegramClient['searchGlobal']
+    searchMessages = searchMessages as TelegramClient['searchMessages']
+    sendDice = sendDice as TelegramClient['sendDice']
+    sendLocation = sendLocation as TelegramClient['sendLocation']
+    sendMedia = sendMedia as TelegramClient['sendMedia']
+    sendPhoto = sendPhoto as TelegramClient['sendPhoto']
+    sendText = sendText as TelegramClient['sendText']
+    unpinMessage = unpinMessage as TelegramClient['unpinMessage']
+    registerParseMode = registerParseMode as TelegramClient['registerParseMode']
+    unregisterParseMode = unregisterParseMode as TelegramClient['unregisterParseMode']
+    getParseMode = getParseMode as TelegramClient['getParseMode']
+    setDefaultParseMode = setDefaultParseMode as TelegramClient['setDefaultParseMode']
+    protected _dispatchUpdate = _dispatchUpdate
+    addUpdateHandler = addUpdateHandler as TelegramClient['addUpdateHandler']
+    removeUpdateHandler = removeUpdateHandler as TelegramClient['removeUpdateHandler']
+    protected _fetchUpdatesState = _fetchUpdatesState
+    protected _loadStorage = _loadStorage
+    protected _saveStorage = _saveStorage
+    protected _handleUpdate = _handleUpdate
+    catchUp = catchUp as TelegramClient['catchUp']
+    onNewMessage = onNewMessage as TelegramClient['onNewMessage']
+    blockUser = blockUser as TelegramClient['blockUser']
+    getCommonChats = getCommonChats as TelegramClient['getCommonChats']
+    getMe = getMe as TelegramClient['getMe']
+    getUsers = getUsers as TelegramClient['getUsers']
+    resolvePeer = resolvePeer as TelegramClient['resolvePeer']
 }

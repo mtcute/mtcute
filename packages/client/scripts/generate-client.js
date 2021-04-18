@@ -198,6 +198,7 @@ async function addSingleMethod(state, fileName) {
                     func: stmt,
                     comment: getLeadingComments(stmt),
                     aliases,
+                    overload: !stmt.body,
                 })
 
                 const module = `./${relPath.replace(/\.ts$/, '')}`
@@ -282,25 +283,17 @@ async function main() {
         output.write(`// from ${from}\n${code}\n`)
     })
 
-    output.write('\nexport class TelegramClient extends BaseTelegramClient {')
+    output.write(
+        '\nexport interface TelegramClient extends BaseTelegramClient {'
+    )
     output.tab()
-    state.fields.forEach(({ from, code }) => {
-        output.write(`// from ${from}\nprotected ${code}\n`)
-    })
-
-    output.write('constructor(opts: BaseTelegramClient.Options) {')
-    output.tab()
-    output.write('super(opts)')
-    state.init.forEach((code) => {
-        output.write(code)
-    })
-    output.untab()
-    output.write('}\n')
 
     const printer = ts.createPrinter()
 
+    const classContents = []
+
     state.methods.list.forEach(
-        ({ name: origName, isPrivate, func, comment, aliases }) => {
+        ({ name: origName, isPrivate, func, comment, aliases, overload }) => {
             // create method that calls that function and passes `this`
             // first let's determine the signature
             const returnType = func.type ? ': ' + func.type.getText() : ''
@@ -351,7 +344,8 @@ async function main() {
                         it.initializer = undefined
 
                         const deleteParents = (obj) => {
-                            if (Array.isArray(obj)) return obj.forEach((it) => deleteParents(it))
+                            if (Array.isArray(obj))
+                                return obj.forEach((it) => deleteParents(it))
 
                             if (obj.parent) delete obj.parent
 
@@ -366,7 +360,7 @@ async function main() {
                         it.questionToken = { kind: ts.SyntaxKind.QuestionToken }
                         return printer.printNode(
                             ts.EmitHint.Unspecified,
-                            it,
+                            it
                             // state.files[state.methods.used[origName]]
                         )
                     }
@@ -396,24 +390,46 @@ async function main() {
                 )
 
             for (const name of [origName, ...aliases]) {
-                if (!comment.match(/\/\*\*?\s*\*\//))
-                    // empty comment, no need to write it
-                    output.write(comment)
+                if (!isPrivate) {
+                    if (!comment.match(/\/\*\*?\s*\*\//))
+                        // empty comment, no need to write it
+                        output.write(comment)
+                    output.write(
+                        `${name}${generics}(${parameters})${returnType}`
+                    )
+                }
 
-                output.write(
-                    `${
-                        isPrivate ? 'protected ' : ''
-                    }${name}${generics}(${parameters})${returnType}${
-                        func.body
-                            ? `{
-return ${origName}.apply(this, arguments)
-}`
-                            : ''
-                    }`
-                )
+                if (!overload) {
+                    classContents.push(
+                        `${isPrivate ? 'protected ' : ''}${name} = ${origName}${
+                            // dirty hack required for overloads
+                            isPrivate ? '' : ` as TelegramClient['${name}']`
+                        }`
+                    )
+                }
             }
         }
     )
+    output.untab()
+    output.write('}')
+
+    output.write(
+        '/** @internal */\nexport class TelegramClient extends BaseTelegramClient {'
+    )
+    output.tab()
+
+    state.fields.forEach(({ code }) => output.write('protected ' + code))
+
+    output.write('constructor(opts: BaseTelegramClient.Options) {')
+    output.tab()
+    output.write('super(opts)')
+    state.init.forEach((code) => {
+        output.write(code)
+    })
+    output.untab()
+    output.write('}\n')
+
+    classContents.forEach((line) => output.write(line))
     output.untab()
     output.write('}')
 
