@@ -1,5 +1,5 @@
 import { tl } from '@mtcute/tl'
-import { BasicPeerType, MaybeArray, PeerType } from '../types'
+import { BasicPeerType, PeerType } from '../types'
 
 export const MIN_CHANNEL_ID = -1002147483647
 export const MAX_CHANNEL_ID = -1000000000000
@@ -92,72 +92,167 @@ export function peerTypeToBasic(type: PeerType): BasicPeerType {
     throw new Error('Invalid peer type')
 }
 
+function comparePeers(
+    first: tl.TypePeer | undefined,
+    second: tl.TypePeer | tl.TypeUser | tl.TypeChat
+): boolean {
+    if (!first) return false
+
+    if ('userId' in first) {
+        if ('userId' in second) return first.userId === second.userId
+        if (second._ === 'user' || second._ === 'userEmpty')
+            return first.userId === second.id
+    }
+    if ('chatId' in first) {
+        if ('chatId' in second) return first.chatId === second.chatId
+        if (
+            second._ === 'chat' ||
+            second._ === 'chatForbidden' ||
+            second._ === 'chatEmpty'
+        )
+            return first.chatId === second.id
+    }
+    if ('channelId' in first) {
+        if ('channelId' in second) return first.channelId === second.channelId
+        if (second._ === 'channel' || second._ === 'channelForbidden')
+            return first.channelId === second.id
+    }
+    return false
+}
+
+function isRefMessage(msg: tl.TypeMessage, peer: any): boolean | undefined {
+    return (
+        comparePeers(msg.peerId, peer) ||
+        ('fromId' in msg && comparePeers(msg.fromId, peer)) ||
+        ('fwdFrom' in msg && msg.fwdFrom && comparePeers(msg.fwdFrom.fromId, peer))
+    )
+}
+
+function findContext(obj: any, peer: any): [number, number] | undefined {
+    if (!peer.min) return undefined
+    if (obj._ === 'updates' || obj._ === 'updatesCombined') {
+        for (const upd of obj.updates as tl.TypeUpdate[]) {
+            if (
+                (upd._ === 'updateNewMessage' ||
+                    upd._ === 'updateNewChannelMessage' ||
+                    upd._ === 'updateEditMessage' ||
+                    upd._ === 'updateEditChannelMessage') &&
+                isRefMessage(upd.message, peer)
+            ) {
+                return [getMarkedPeerId(upd.message.peerId!), upd.message.id]
+            }
+        }
+    }
+
+    if (obj._ === 'updateShortMessage') {
+        return [obj.userId, obj.id]
+    }
+
+    if (obj._ === 'updateShortChatMessage') {
+        return [-obj.chatId, obj.id]
+    }
+
+    if ('messages' in obj || 'newMessages' in obj) {
+        for (const msg of (obj.messages ||
+            obj.newMessages) as tl.TypeMessage[]) {
+            if (isRefMessage(msg, peer)) {
+                return [getMarkedPeerId(msg.peerId!), msg.id]
+            }
+        }
+    }
+
+    // im not sure if this is exhaustive check or not
+
+    return undefined
+}
+
 /**
  * Extracts all (cacheable) entities from a TlObject or a list of them.
  * Only checks `.user`, `.chat`, `.channel`, `.users` and `.chats` properties
  */
 export function* getAllPeersFrom(
-    objects: MaybeArray<any>
+    obj: any
 ): Iterable<
-    | tl.RawUser
-    | tl.RawChat
-    | tl.RawChatForbidden
-    | tl.RawChannel
-    | tl.RawChannelForbidden
+    (tl.TypeUser | tl.TypeChat) & { fromMessage: [number, number] | undefined }
 > {
-    if (!Array.isArray(objects)) objects = [objects]
+    if (typeof obj !== 'object') return
 
-    for (const obj of objects) {
-        if (typeof obj !== 'object') continue
+    if (
+        obj._ === 'user' ||
+        obj._ === 'chat' ||
+        obj._ === 'channel' ||
+        obj._ === 'chatForbidden' ||
+        obj._ === 'channelForbidden'
+    ) {
+        yield obj
+        return
+    }
+    if (obj._ === 'userFull') {
+        yield obj.user
+        return
+    }
 
-        if (
-            'user' in obj &&
-            typeof obj.user === 'object' &&
-            obj.user._ === 'user'
-        ) {
-            yield obj.user
-        }
+    if (
+        'user' in obj &&
+        typeof obj.user === 'object' &&
+        obj.user._ === 'user'
+    ) {
+        yield obj.user
+    }
 
-        if (
-            'chat' in obj &&
-            typeof obj.chat === 'object' &&
-            (obj.chat._ === 'chat' ||
-                obj.chat._ === 'channel' ||
-                obj.chat._ === 'chatForbidden' ||
-                obj.chat._ === 'channelForbidden')
-        ) {
-            yield obj.chat
-        }
+    if (
+        'chat' in obj &&
+        typeof obj.chat === 'object' &&
+        (obj.chat._ === 'chat' ||
+            obj.chat._ === 'channel' ||
+            obj.chat._ === 'chatForbidden' ||
+            obj.chat._ === 'channelForbidden')
+    ) {
+        yield obj.chat
+    }
 
-        if (
-            'channel' in obj &&
-            typeof obj.channel === 'object' &&
-            (obj.channel._ === 'chat' ||
-                obj.channel._ === 'channel' ||
-                obj.channel._ === 'chatForbidden' ||
-                obj.channel._ === 'channelForbidden')
-        ) {
-            yield obj.channel
-        }
+    if (
+        'channel' in obj &&
+        typeof obj.channel === 'object' &&
+        (obj.channel._ === 'chat' ||
+            obj.channel._ === 'channel' ||
+            obj.channel._ === 'chatForbidden' ||
+            obj.channel._ === 'channelForbidden')
+    ) {
+        yield obj.channel
+    }
 
-        if ('users' in obj && Array.isArray(obj.users) && obj.users.length) {
-            for (const user of obj.users) {
-                // .users is sometimes number[]
-                if (typeof user === 'object' && user._ === 'user') yield user
+    if ('users' in obj && Array.isArray(obj.users) && obj.users.length) {
+        for (const user of obj.users) {
+            // .users is sometimes number[]
+            if (typeof user === 'object' && user._ === 'user') {
+                if (user.min && !user.bot) {
+                    // min seems to be set for @Channel_Bot,
+                    // but we don't really need to cache its context
+                    // (we don't need to cache it at all, really, but whatever)
+                    user.fromMessage = findContext(obj, user)
+                }
+
+                yield user
             }
         }
+    }
 
-        if ('chats' in obj && Array.isArray(obj.chats) && obj.chats.length) {
-            for (const chat of obj.chats) {
-                // .chats is sometimes number[]
-                if (
-                    typeof chat === 'object' &&
-                    (chat._ === 'chat' ||
-                        chat._ === 'channel' ||
-                        chat._ === 'chatForbidden' ||
-                        chat._ === 'channelForbidden')
-                )
-                    yield chat
+    if ('chats' in obj && Array.isArray(obj.chats) && obj.chats.length) {
+        for (const chat of obj.chats) {
+            // .chats is sometimes number[]
+            if (
+                typeof chat === 'object' &&
+                (chat._ === 'chat' ||
+                    chat._ === 'channel' ||
+                    chat._ === 'chatForbidden' ||
+                    chat._ === 'channelForbidden')
+            ) {
+                if (chat.min) {
+                    chat.fromMessage = findContext(obj, chat)
+                }
+
+                yield chat
             }
         }
     }

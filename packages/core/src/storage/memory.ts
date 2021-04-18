@@ -1,6 +1,7 @@
 import { ITelegramStorage } from './abstract'
 import { MaybeAsync } from '../types'
 import { tl } from '@mtcute/tl'
+import { MAX_CHANNEL_ID } from '../utils/peer-utils'
 
 const CURRENT_VERSION = 1
 
@@ -18,7 +19,9 @@ interface MemorySessionState {
     // username -> peer id
     usernameIndex: Record<string, number>
 
+    // common pts, date
     gpts: [number, number] | null
+    // channel pts
     pts: Record<number, number>
 
     self: ITelegramStorage.SelfInfo | null
@@ -99,6 +102,9 @@ export class MemoryStorage implements ITelegramStorage {
             peer.updated = Date.now()
             const old = this._state.entities[peer.id]
             if (old) {
+                // min peer
+                if (peer.fromMessage) continue
+
                 // delete old index entries if needed
                 if (old.username && old.username !== peer.username) {
                     delete this._state.usernameIndex[old.username]
@@ -115,16 +121,60 @@ export class MemoryStorage implements ITelegramStorage {
         }
     }
 
+    protected _getInputPeer(peerInfo?: ITelegramStorage.PeerInfo): tl.TypeInputPeer | null {
+        if (!peerInfo) return null
+        if (peerInfo.type === 'user' || peerInfo.type === 'bot') {
+            if (peerInfo.fromMessage) {
+                return {
+                    _: 'inputPeerUserFromMessage',
+                    peer: this.getPeerById(peerInfo.fromMessage[0])!,
+                    msgId: peerInfo.fromMessage[1],
+                    userId: peerInfo.id
+                }
+            }
+            return {
+                _: 'inputPeerUser',
+                userId: peerInfo.id,
+                accessHash: peerInfo.accessHash,
+            }
+        }
+
+        if (peerInfo.type === 'group')
+            return {
+                _: 'inputPeerChat',
+                chatId: -peerInfo.id,
+            }
+
+        if (peerInfo.type === 'channel' || peerInfo.type === 'supergroup') {
+            if (peerInfo.fromMessage) {
+                return {
+                    _: 'inputPeerChannelFromMessage',
+                    peer: this.getPeerById(peerInfo.fromMessage[0])!,
+                    msgId: peerInfo.fromMessage[1],
+                    channelId: peerInfo.id
+                }
+            }
+
+            return {
+                _: 'inputPeerChannel',
+                channelId: MAX_CHANNEL_ID - peerInfo.id,
+                accessHash: peerInfo.accessHash,
+            }
+        }
+
+        throw new Error(`Invalid peer type: ${peerInfo.type}`)
+    }
+
     getPeerById(peerId: number): tl.TypeInputPeer | null {
         if (peerId in this._cachedInputPeers)
             return this._cachedInputPeers[peerId]
-        const peer = ITelegramStorage.getInputPeer(this._state.entities[peerId])
+        const peer = this._getInputPeer(this._state.entities[peerId])
         if (peer) this._cachedInputPeers[peerId] = peer
         return peer
     }
 
     getPeerByPhone(phone: string): tl.TypeInputPeer | null {
-        return ITelegramStorage.getInputPeer(
+        return this._getInputPeer(
             this._state.entities[this._state.phoneIndex[phone]]
         )
     }
@@ -137,7 +187,7 @@ export class MemoryStorage implements ITelegramStorage {
 
         if (Date.now() - peer.updated > USERNAME_TTL) return null
 
-        return ITelegramStorage.getInputPeer(peer)
+        return this._getInputPeer(peer)
     }
 
     getSelf(): ITelegramStorage.SelfInfo | null {
@@ -148,28 +198,18 @@ export class MemoryStorage implements ITelegramStorage {
         this._state.self = self
     }
 
-    setChannelPts(entityId: number, pts: number | null): void {
-        if (pts !== null) {
-            this._state.pts[entityId] = pts
-        } else {
-            delete this._state.pts[entityId]
-        }
+    setManyChannelPts(values: Record<number, number>): void {
+        Object.keys(values).forEach((id: any) => {
+            this._state.pts[id] = values[id]
+        })
     }
 
     getChannelPts(entityId: number): number | null {
         return this._state.pts[entityId] ?? null
     }
 
-    setCommonPts(val: [number | null, number | null] | null): void {
-        if (val) {
-            if (this._state.gpts) {
-                if (val[0] === null) val[0] = this._state.gpts[0]
-                if (val[1] === null) val[1] = this._state.gpts[1]
-            } else {
-                val = null
-            }
-        }
-        this._state.gpts = val as [number, number] | null
+    setCommonPts(val: [number, number]): void {
+        this._state.gpts = val
     }
 
     getCommonPts(): [number, number] | null {

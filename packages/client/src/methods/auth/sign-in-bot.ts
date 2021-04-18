@@ -33,10 +33,9 @@ export async function signInBot(
         'user'
     )
 
-    await this.storage.setSelf({
-        userId: res.user.id,
-        isBot: true,
-    })
+    this._userId = res.user.id
+    this._isBot = true
+    await this._fetchUpdatesState()
     await this._saveStorage()
 
     return new User(this, res.user)

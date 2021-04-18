@@ -222,7 +222,7 @@ export async function start(
 
                 if (e instanceof PasswordHashInvalidError) {
                     if (params.invalidCodeCallback) {
-                        params.invalidCodeCallback('password')
+                        await params.invalidCodeCallback('password')
                     } else {
                         console.log('Invalid password. Please try again')
                     }
@@ -245,7 +245,7 @@ export async function start(
 
     if (result instanceof TermsOfService && !params.acceptTos) {
         if (params.tosCallback) {
-            params.tosCallback(result)
+            await params.tosCallback(result)
         } else {
             console.log(result.text)
         }

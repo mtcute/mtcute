@@ -30,10 +30,8 @@ export async function recoverPassword(
         'user'
     )
 
-    await this.storage.setSelf({
-        userId: res.user.id,
-        isBot: false,
-    })
+    this._userId = res.user.id
+    this._isBot = false
     await this._saveStorage()
 
     return new User(this, res.user)

@@ -71,13 +71,18 @@ import {
     setDefaultParseMode,
     unregisterParseMode,
 } from './methods/parse-modes/parse-modes'
-import { catchUp } from './methods/updates/catch-up'
 import {
     _dispatchUpdate,
     addUpdateHandler,
     removeUpdateHandler,
 } from './methods/updates/dispatcher'
-import { _handleUpdate } from './methods/updates/handle-update'
+import {
+    _fetchUpdatesState,
+    _handleUpdate,
+    _loadStorage,
+    _saveStorage,
+    catchUp,
+} from './methods/updates/handle-update'
 import { onNewMessage } from './methods/updates/on-new-message'
 import { blockUser } from './methods/users/block-user'
 import { getCommonChats } from './methods/users/get-common-chats'
@@ -112,8 +117,15 @@ import {
     handlers,
 } from './types'
 import { MaybeArray, MaybeAsync, TelegramConnection } from '@mtcute/core'
+import { Lock } from './utils/lock'
 
 export class TelegramClient extends BaseTelegramClient {
+    // from methods/auth/_initialize.ts
+    protected _userId: number | null
+
+    // from methods/auth/_initialize.ts
+    protected _isBot: boolean
+
     // from methods/files/_initialize.ts
     protected _downloadConnections: Record<number, TelegramConnection>
 
@@ -129,13 +141,35 @@ export class TelegramClient extends BaseTelegramClient {
     // from methods/updates/dispatcher.ts
     protected _groupsOrder: number[]
 
+    // from methods/updates/handle-update.ts
+    protected _updLock: Lock
+
+    // from methods/updates/handle-update.ts
+    protected _pts: number
+
+    // from methods/updates/handle-update.ts
+    protected _date: number
+
+    // from methods/updates/handle-update.ts
+    protected _cpts: Record<number, number>
+
     constructor(opts: BaseTelegramClient.Options) {
         super(opts)
+        this._userId = null
+        this._isBot = false
         this._downloadConnections = {}
         this._parseModes = {}
         this._defaultParseMode = null
         this._groups = {}
         this._groupsOrder = []
+        this._updLock = new Lock()
+        // we dont need to initialize state fields since
+        // they are always loaded either from the server, or from storage.
+
+        // channel PTS are not loaded immediately, and instead are cached here
+        // after the first time they were retrieved from the storage.
+        // they are later pushed into the storage.
+        this._cpts = {}
     }
 
     /**
@@ -1714,18 +1748,11 @@ export class TelegramClient extends BaseTelegramClient {
     setDefaultParseMode(name: string): void {
         return setDefaultParseMode.apply(this, arguments)
     }
-    /**
-     * Catch up with the server by loading missed updates.
-     *
-     */
-    catchUp(): Promise<void> {
-        return catchUp.apply(this, arguments)
-    }
     protected _dispatchUpdate(
-        update: tl.TypeUpdate,
+        update: tl.TypeUpdate | tl.TypeMessage,
         users: Record<number, tl.TypeUser>,
         chats: Record<number, tl.TypeChat>
-    ): Promise<void> {
+    ): void {
         return _dispatchUpdate.apply(this, arguments)
     }
     /**
@@ -1750,8 +1777,29 @@ export class TelegramClient extends BaseTelegramClient {
     ): void {
         return removeUpdateHandler.apply(this, arguments)
     }
+    /**
+     * Fetch updates state from the server.
+     * Meant to be used right after authorization,
+     * but before force-saving the session.
+     */
+    protected _fetchUpdatesState(): Promise<void> {
+        return _fetchUpdatesState.apply(this, arguments)
+    }
+    protected _loadStorage(): Promise<void> {
+        return _loadStorage.apply(this, arguments)
+    }
+    protected _saveStorage(): Promise<void> {
+        return _saveStorage.apply(this, arguments)
+    }
     protected _handleUpdate(update: tl.TypeUpdates): void {
         return _handleUpdate.apply(this, arguments)
+    }
+    /**
+     * Catch up with the server by loading missed updates.
+     *
+     */
+    catchUp(): Promise<void> {
+        return catchUp.apply(this, arguments)
     }
     /**
      * Register a message handler without any filters.

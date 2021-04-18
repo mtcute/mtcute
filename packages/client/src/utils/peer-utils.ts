@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+import bigInt from 'big-integer'
 
 export const INVITE_LINK_REGEX = /^(?:https?:\/\/)?(?:www\.)?(?:t(?:elegram)?\.(?:org|me|dog)\/joinchat\/)([\w-]+)$/i
 
@@ -77,7 +78,19 @@ export function inputPeerToPeer(inp: tl.TypeInputPeer): tl.TypePeer {
 
     if (inp._ === 'inputPeerChat') return { _: 'peerChat', chatId: inp.chatId }
 
-    return inp as never
+    throw new Error(`Cannot convert ${inp._} to peer`)
+}
+
+export function peerToInputPeer(peer: tl.TypePeer, accessHash = bigInt.zero): tl.TypeInputPeer {
+    if (peer._ === 'peerUser')
+        return { _: 'inputPeerUser', userId: peer.userId, accessHash }
+
+    if (peer._ === 'peerChannel')
+        return { _: 'inputPeerChannel', channelId: peer.channelId, accessHash }
+
+    if (peer._ === 'peerChat') return { _: 'inputPeerChat', chatId: peer.chatId }
+
+    return peer as never
 }
 
 export function createUsersChatsIndex(

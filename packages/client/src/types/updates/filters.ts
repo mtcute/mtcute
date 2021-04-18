@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
 import { MaybeArray, MaybeAsync } from '@mtcute/core'
 import { Message } from '../messages'
-import { User } from '../peers'
+import { Chat, User } from '../peers'
 import {
     Dice,
     Photo,
@@ -284,6 +284,14 @@ export namespace filters {
      */
     export const bot: UpdateFilter<Message, { sender: User }> = (msg) =>
         msg.sender instanceof User && msg.sender.isBot
+
+    /**
+     * Filter messages sent in broadcast channels
+     */
+    export const channel: UpdateFilter<
+        Message,
+        { chat: Modify<Chat, { type: 'channel' }> }
+    > = (msg) => msg.chat.type === 'channel'
 
     /**
      * Filter incoming messages.

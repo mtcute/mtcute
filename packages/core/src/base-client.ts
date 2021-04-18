@@ -207,8 +207,8 @@ export class BaseTelegramClient {
     private _lastRequestTime = 0
     private _floodWaitedRequests: Record<string, number> = {}
 
-    private _config?: tl.RawConfig
-    private _cdnConfig?: tl.RawCdnConfig
+    protected _config?: tl.RawConfig
+    protected _cdnConfig?: tl.RawCdnConfig
 
     private _additionalConnections: TelegramConnection[] = []
 
@@ -639,15 +639,13 @@ export class BaseTelegramClient {
 
     /**
      * Adds all peers from a given object to entity cache in storage.
-     * Returns boolean indicating whether there were any `min` entities.
      */
-    protected async _cachePeersFrom(obj: any): Promise<boolean> {
-        let isMin = false
+    protected async _cachePeersFrom(obj: any): Promise<void> {
         const parsedPeers: ITelegramStorage.PeerInfo[] = []
 
         for (const peer of getAllPeersFrom(obj)) {
-            if ('min' in peer && peer.min) {
-                isMin = true
+            if ((peer as any).min && !peer.fromMessage && !(peer as any).bot) {
+                debug('peer is min, but no context was found: %o %o', obj, peer)
                 continue
             }
 
@@ -659,6 +657,7 @@ export class BaseTelegramClient {
                     phone: peer.phone ?? null,
                     type: peer.bot ? 'bot' : 'user',
                     updated: 0,
+                    fromMessage: peer.fromMessage
                 })
             } else if (peer._ === 'chat' || peer._ === 'chatForbidden') {
                 parsedPeers.push({
@@ -668,6 +667,7 @@ export class BaseTelegramClient {
                     phone: null,
                     type: 'group',
                     updated: 0,
+                    fromMessage: peer.fromMessage
                 })
             } else if (peer._ === 'channel' || peer._ === 'channelForbidden') {
                 parsedPeers.push({
@@ -680,12 +680,11 @@ export class BaseTelegramClient {
                     phone: null,
                     type: peer.broadcast ? 'channel' : 'supergroup',
                     updated: 0,
+                    fromMessage: peer.fromMessage
                 })
             }
         }
 
         await this.storage.updatePeers(parsedPeers)
-
-        return isMin
     }
 }

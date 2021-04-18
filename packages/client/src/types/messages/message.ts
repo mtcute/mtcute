@@ -150,9 +150,7 @@ export namespace Message {
         readonly inviter: number
     }
 
-    export interface MessageForwardInfo<
-        Sender extends User | Chat | string = User | Chat | string
-    > {
+    export interface MessageForwardInfo {
         /**
          * Date the original message was sent
          */
@@ -162,7 +160,7 @@ export namespace Message {
          * Sender of the original message (either user or a channel)
          * or their name (for users with private forwards)
          */
-        sender: Sender
+        sender: User | Chat | string
 
         /**
          * For messages forwarded from channels,

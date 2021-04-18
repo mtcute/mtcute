@@ -35,3 +35,6 @@ import {
 
 // @copy
 import { MaybeArray, MaybeAsync, TelegramConnection } from '@mtcute/core'
+
+// @copy
+import { Lock } from '../utils/lock'

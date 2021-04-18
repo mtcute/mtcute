@@ -7,6 +7,7 @@ import {
     PropagationSymbol,
     StopPropagation,
 } from '../../types'
+import { createUsersChatsIndex } from '../../utils/peer-utils'
 
 // @extension
 interface DispatcherExtension {
@@ -23,47 +24,71 @@ function _initializeDispatcher() {
 /**
  * @internal
  */
-export async function _dispatchUpdate(
+export function _dispatchUpdate(
     this: TelegramClient,
-    update: tl.TypeUpdate,
+    update: tl.TypeUpdate | tl.TypeMessage,
     users: Record<number, tl.TypeUser>,
     chats: Record<number, tl.TypeChat>
-): Promise<void> {
-    let message: Message | null = null
-    if (
-        update._ === 'updateNewMessage' ||
-        update._ === 'updateNewChannelMessage' ||
-        update._ === 'updateNewScheduledMessage' ||
-        update._ === 'updateEditMessage' ||
-        update._ === 'updateEditChannelMessage'
-    ) {
-        message = new Message(this, update.message, users, chats)
-    }
+): void {
+    ;(async () => {
+        // order does not matter in the dispatcher,
+        // so we can handle each update in its own task
 
-    for (const grp of this._groupsOrder) {
-        for (const handler of this._groups[grp]) {
-            let result: void | PropagationSymbol
+        const isRawMessage = tl.isAnyMessage(update)
 
-            if (
-                handler.type === 'raw' &&
-                (!handler.check ||
-                    (await handler.check(this, update, users, chats)))
-            ) {
-                result = await handler.callback(this, update, users, chats)
-            } else if (
-                handler.type === 'new_message' &&
-                message &&
-                (!handler.check || (await handler.check(message, this)))
-            ) {
-                result = await handler.callback(message, this)
-            } else continue
-
-            if (result === ContinuePropagation) continue
-            if (result === StopPropagation) return
-
-            break
+        let message: Message | null = null
+        if (
+            update._ === 'updateNewMessage' ||
+            update._ === 'updateNewChannelMessage' ||
+            update._ === 'updateNewScheduledMessage' ||
+            update._ === 'updateEditMessage' ||
+            update._ === 'updateEditChannelMessage' ||
+            isRawMessage
+        ) {
+            message = new Message(
+                this,
+                isRawMessage ? update : (update as any).message,
+                users,
+                chats
+            )
         }
-    }
+
+        for (const grp of this._groupsOrder) {
+            for (const handler of this._groups[grp]) {
+                let result: void | PropagationSymbol
+
+                if (
+                    handler.type === 'raw' &&
+                    !isRawMessage &&
+                    (!handler.check ||
+                        (await handler.check(
+                            this,
+                            update as any,
+                            users,
+                            chats
+                        )))
+                ) {
+                    result = await handler.callback(
+                        this,
+                        update as any,
+                        users,
+                        chats
+                    )
+                } else if (
+                    handler.type === 'new_message' &&
+                    message &&
+                    (!handler.check || (await handler.check(message, this)))
+                ) {
+                    result = await handler.callback(message, this)
+                } else continue
+
+                if (result === ContinuePropagation) continue
+                if (result === StopPropagation) return
+
+                break
+            }
+        }
+    })().catch((err) => this._emitError(err))
 }
 
 /**

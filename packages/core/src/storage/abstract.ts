@@ -11,36 +11,13 @@ export namespace ITelegramStorage {
         username: string | null
         phone: string | null
         updated: number
+        // marked peer id of chat, message id
+        fromMessage?: [number, number]
     }
 
     export interface SelfInfo {
         isBot: boolean
         userId: number
-    }
-
-    export function getInputPeer(peerInfo?: PeerInfo): tl.TypeInputPeer | null {
-        if (!peerInfo) return null
-        if (peerInfo.type === 'user' || peerInfo.type === 'bot')
-            return {
-                _: 'inputPeerUser',
-                userId: peerInfo.id,
-                accessHash: peerInfo.accessHash,
-            }
-
-        if (peerInfo.type === 'group')
-            return {
-                _: 'inputPeerChat',
-                chatId: -peerInfo.id,
-            }
-
-        if (peerInfo.type === 'channel' || peerInfo.type === 'supergroup')
-            return {
-                _: 'inputPeerChannel',
-                channelId: MAX_CHANNEL_ID - peerInfo.id,
-                accessHash: peerInfo.accessHash,
-            }
-
-        throw new Error(`Invalid peer type: ${peerInfo.type}`)
     }
 }
 
@@ -135,15 +112,14 @@ export interface ITelegramStorage {
     getChannelPts(entityId: number): MaybeAsync<number | null>
     /**
      * Set common `pts` and `date` values
-     *
-     * `null` values in the tuple are replaced with the current value,
-     * `null` as a `val` will remove common pts
      */
-    setCommonPts(val: [number | null, number | null] | null): MaybeAsync<void>
+    setCommonPts(val: [number, number]): MaybeAsync<void>
     /**
-     * Set channel `pts` value
+     * Set channels `pts` values in batch.
+     * Storage is supposed to replace stored channel `pts` values
+     * with given in the object (key is unmarked peer id, value is the `pts`)
      */
-    setChannelPts(entityId: number, pts: number | null): MaybeAsync<void>
+    setManyChannelPts(values: Record<number, number>): MaybeAsync<void>
 
     // TODO!
     // exportToString(): MaybeAsync<string>

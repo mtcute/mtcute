@@ -32,10 +32,9 @@ export async function signUp(
     assertTypeIs('signUp (@ auth.signUp)', res, 'auth.authorization')
     assertTypeIs('signUp (@ auth.signUp -> user)', res.user, 'user')
 
-    await this.storage.setSelf({
-        userId: res.user.id,
-        isBot: false,
-    })
+    this._userId = res.user.id
+    this._isBot = false
+    await this._fetchUpdatesState()
     await this._saveStorage()
 
     return new User(this, res.user)

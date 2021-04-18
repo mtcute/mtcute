@@ -17,6 +17,9 @@ export async function logOut(
     await this.call({ _: 'auth.logOut' })
 
     if (resetSession) {
+        this._userId = null
+        this._isBot = false
+        this._pts = this._seq = this._date = undefined as any
         this.storage.reset()
         await this._saveStorage()
     }
