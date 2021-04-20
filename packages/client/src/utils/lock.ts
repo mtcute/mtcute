@@ -1,24 +1,36 @@
+type LockInfo = [Promise<void>, () => void]
+interface OneWayLinkedList<T> {
+    v: T
+    n?: OneWayLinkedList<T>
+}
+
 /** @internal */
 export class Lock {
-    private _prom: Promise<void> | null = null
-    private _unlock: (() => void) | null = null
-
-    constructor() {
-        this._prom = null
-        this._unlock = null
-    }
+    private _first?: OneWayLinkedList<LockInfo>
+    private _last?: OneWayLinkedList<LockInfo>
 
     async acquire(): Promise<void> {
-        if (this._prom) await this._prom
-        this._prom = new Promise((resolve) => {
-            this._unlock = resolve
+        while (this._first) {
+            await this._first.v[0]
+        }
+
+        let unlock: () => void
+        const prom = new Promise<void>((resolve) => {
+            unlock = resolve
         })
+
+        if (this._last) {
+            this._last.n = { v: [prom, unlock!] }
+            this._last = this._last.n
+        } else {
+            this._first = this._last = { v: [prom, unlock!] }
+        }
     }
 
     release(): void {
-        if (!this._unlock) return
-        this._unlock()
-        this._prom = null
-        this._unlock = null
+        if (!this._first) throw new Error('Nothing to release')
+        this._first.v[1]()
+        this._first = this._first.n
+        if (!this._first) this._last = undefined
     }
 }
