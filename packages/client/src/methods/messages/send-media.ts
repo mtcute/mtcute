@@ -91,7 +91,9 @@ export async function sendMedia(
     let mime = 'application/octet-stream'
 
     const input = media.file
-    if (typeof input === 'string' && input.match(/^https?:\/\//)) {
+    if (typeof input === 'object' && tl.isAnyInputMedia(input)) {
+        inputMedia = input
+    } else if (typeof input === 'string' && input.match(/^https?:\/\//)) {
         inputMedia = {
             _: 'inputMediaDocumentExternal',
             url: input,
@@ -116,7 +118,9 @@ export async function sendMedia(
 
         if ('thumb' in media && media.thumb) {
             const t = media.thumb
-            if (typeof t === 'string' && t.match(/^https?:\/\//)) {
+            if (typeof t === 'object' && tl.isAnyInputMedia(t)) {
+                throw new MtCuteArgumentError("Thumbnail can't be InputMedia")
+            } else if (typeof t === 'string' && t.match(/^https?:\/\//)) {
                 throw new MtCuteArgumentError("Thumbnail can't be external")
             } else if (isUploadedFile(t)) {
                 thumb = t.inputFile

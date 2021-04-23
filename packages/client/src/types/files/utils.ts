@@ -30,7 +30,7 @@ export type UploadFileLike =
  * can also pass {@link UploadedFile} returned from {@link TelegramClient.uploadFile},
  * raw `tl.TypeInputFile` and URLs to remote files
  */
-export type InputFileLike = UploadFileLike | UploadedFile | tl.TypeInputFile
+export type InputFileLike = UploadFileLike | UploadedFile | tl.TypeInputFile | tl.TypeInputMedia
 
 export interface FileDownloadParameters {
     /**

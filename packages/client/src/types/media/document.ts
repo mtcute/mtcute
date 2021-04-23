@@ -3,6 +3,7 @@ import { tl } from '@mtcute/tl'
 import { Thumbnail } from './thumbnail'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
+import { InputMediaLike } from './input-media'
 
 /**
  * A file that is represented as a document in MTProto.
@@ -92,6 +93,36 @@ export class RawDocument extends FileLocation {
      */
     getThumbnail(type: string): Thumbnail | null {
         return this.thumbnails.find((it) => it.raw.type === type) ?? null
+    }
+
+    /**
+     * Input media TL object generated from this object,
+     * to be used inside {@link InputMediaLike} or {@link TelegramClient.sendPhoto}
+     */
+    get inputMediaTl(): tl.TypeInputMedia {
+        return {
+            _: 'inputMediaDocument',
+            id: {
+                _: 'inputDocument',
+                id: this.doc.id,
+                accessHash: this.doc.accessHash,
+                fileReference: this.doc.fileReference
+            }
+        }
+    }
+
+    /**
+     * Input media object generated from this object,
+     * to be used with {@link TelegramClient.sendMedia}
+     */
+    get inputMedia(): InputMediaLike {
+        return {
+            // type is only really used for creating tl.InputMedia,
+            // but since we are providing it directly, we can use `auto`
+            type: 'auto',
+            file: this.inputMediaTl
+            // other fields are not needed since it's a forwarded media
+        }
     }
 }
 

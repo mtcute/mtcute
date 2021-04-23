@@ -4,6 +4,7 @@ import { TelegramClient } from '../../client'
 import { MtCuteArgumentError } from '../errors'
 import { Thumbnail } from './thumbnail'
 import { makeInspectable } from '../utils'
+import { InputMediaLike } from './input-media'
 
 /**
  * A photo
@@ -104,6 +105,37 @@ export class Photo extends FileLocation {
      */
     getThumbnail(type: string): Thumbnail | null {
         return this.thumbnails.find((it) => it.raw.type === type) ?? null
+    }
+
+    /**
+     * Input media generated from this object,
+     * to be used in {@link TelegramClient.sendPhoto}
+     * and {@link InputMediaLike}
+     */
+    get inputMediaTl(): tl.TypeInputMedia {
+        return {
+            _: 'inputMediaPhoto',
+            id: {
+                _: 'inputPhoto',
+                id: this.raw.id,
+                accessHash: this.raw.accessHash,
+                fileReference: this.raw.fileReference
+            }
+        }
+    }
+
+    /**
+     * Input media object generated from this object,
+     * to be used with {@link TelegramClient.sendMedia}
+     */
+    get inputMedia(): InputMediaLike {
+        return {
+            // type is only really used for creating tl.InputMedia,
+            // but since we are providing it directly, we can use `auto`
+            type: 'auto',
+            file: this.inputMediaTl
+            // other fields are not needed since it's a forwarded media
+        }
     }
 }
 

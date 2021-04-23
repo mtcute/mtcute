@@ -94,7 +94,9 @@ export async function sendPhoto(
     if (!params) params = {}
 
     let media: tl.TypeInputMedia
-    if (typeof photo === 'string' && photo.match(/^https?:\/\//)) {
+    if (typeof photo === 'object' && tl.isAnyInputMedia(photo)) {
+        media = photo
+    } else if (typeof photo === 'string' && photo.match(/^https?:\/\//)) {
         media = {
             _: 'inputMediaPhotoExternal',
             url: photo,
