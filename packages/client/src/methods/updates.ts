@@ -1,15 +1,15 @@
 import { tl } from '@mtcute/tl'
-import { TelegramClient } from '../../client'
+import { TelegramClient } from '../client'
 import {
     createUsersChatsIndex,
     normalizeToInputChannel,
     normalizeToInputUser,
     peerToInputPeer,
-} from '../../utils/peer-utils'
-import { extractChannelIdFromUpdate } from '../../utils/misc-utils'
-import { Lock } from '../../utils/lock'
+} from '../utils/peer-utils'
+import { extractChannelIdFromUpdate } from '../utils/misc-utils'
+import { Lock } from '../utils/lock'
 import bigInt from 'big-integer'
-import { MAX_CHANNEL_ID } from '../../../../core'
+import { MAX_CHANNEL_ID } from '@mtcute/core'
 
 const debug = require('debug')('mtcute:upds')
 
@@ -106,6 +106,34 @@ export async function _saveStorage(this: TelegramClient): Promise<void> {
     await this.storage.save?.()
 }
 
+/**
+ * Base function for update handling. Replace or override this function
+ * and implement your own update handler, and call this function
+ * to handle externally obtained or manually crafted updates.
+ *
+ * Note that this function is called every time an `Update` is received,
+ * not `Updates`. Low-level updates containers are parsed by the library,
+ * and you receive ready to use updates and related entities.
+ * Also note that entity maps may contain entities that are not
+ * used in this particular update, so do not rely on its contents.
+ *
+ * `update` might contain a Message object - in this case,
+ * it should be interpreted as some kind of `updateNewMessage`.
+ *
+ * @param update  Update that has just happened
+ * @param users  Map of users in this update
+ * @param chats  Map of chats in this update
+ * @internal
+ */
+export function dispatchUpdate(
+    this: TelegramClient,
+    update: tl.TypeUpdate | tl.TypeMessage,
+    users: Record<number, tl.TypeUser>,
+    chats: Record<number, tl.TypeChat>
+): void {
+    // no-op //
+}
+
 async function _loadDifference(this: TelegramClient): Promise<void> {
     for (;;) {
         const diff = await this.call({
@@ -131,10 +159,10 @@ async function _loadDifference(this: TelegramClient): Promise<void> {
         const { users, chats } = createUsersChatsIndex(diff)
 
         diff.newMessages.forEach((message) =>
-            this._dispatchUpdate(message, users, chats)
+            this.dispatchUpdate(message, users, chats)
         )
         diff.otherUpdates.forEach((upd) =>
-            this._dispatchUpdate(upd, users, chats)
+            this.dispatchUpdate(upd, users, chats)
         )
 
         this._pts = state.pts
@@ -182,10 +210,10 @@ async function _loadChannelDifference(
         const { users, chats } = createUsersChatsIndex(diff)
 
         diff.newMessages.forEach((message) =>
-            this._dispatchUpdate(message, users, chats)
+            this.dispatchUpdate(message, users, chats)
         )
         diff.otherUpdates.forEach((upd) =>
-            this._dispatchUpdate(upd, users, chats)
+            this.dispatchUpdate(upd, users, chats)
         )
 
         pts = diff.pts
@@ -255,7 +283,10 @@ export function _handleUpdate(
                         if (upd.pts) {
                             this._cpts[upd.channelId] = upd.pts
                         }
-                        return await _loadChannelDifference.call(this, upd.channelId)
+                        return await _loadChannelDifference.call(
+                            this,
+                            upd.channelId
+                        )
                     }
 
                     const channelId = extractChannelIdFromUpdate(upd)
@@ -286,18 +317,21 @@ export function _handleUpdate(
                                 // "the update was already applied, and must be ignored"
                                 return
                             if (nextLocalPts < pts)
-                                // "there's an update gap that must be filled"
-                                // same as before, loading diff will also load
-                                // any of the pending updates, so we don't need
-                                // to bother handling them further.
                                 if (channelId) {
-                                    return await _loadChannelDifference.call(this, channelId)
+                                    // "there's an update gap that must be filled"
+                                    // same as before, loading diff will also load
+                                    // any of the pending updates, so we don't need
+                                    // to bother handling them further.
+                                    return await _loadChannelDifference.call(
+                                        this,
+                                        channelId
+                                    )
                                 } else {
                                     return await _loadDifference.call(this)
                                 }
                         }
 
-                        this._dispatchUpdate(upd, users, chats)
+                        this.dispatchUpdate(upd, users, chats)
 
                         if (channelId) {
                             this._cpts[channelId] = pts
@@ -305,7 +339,7 @@ export function _handleUpdate(
                             this._pts = pts
                         }
                     } else {
-                        this._dispatchUpdate(upd, users, chats)
+                        this.dispatchUpdate(upd, users, chats)
                     }
                 }
 
@@ -319,7 +353,7 @@ export function _handleUpdate(
                 } else if (upd._ === 'updateConfig') {
                     this._config = await this.call({ _: 'help.getConfig' })
                 } else {
-                    this._dispatchUpdate(upd, {}, {})
+                    this.dispatchUpdate(upd, {}, {})
                 }
 
                 this._date = update.date
@@ -377,6 +411,48 @@ export function _handleUpdate(
                         _: 'users.getUsers',
                         id,
                     })
+
+                    if (rawUsers.length < 2) {
+                        // other user failed to load.
+                        // first try checking for input peer in storage
+                        const saved = await this.storage.getPeerById(
+                            update.userId
+                        )
+                        if (saved) {
+                            id[1] = normalizeToInputUser(saved)!
+
+                            rawUsers = await this.call({
+                                _: 'users.getUsers',
+                                id,
+                            })
+                        }
+                    }
+                    if (rawUsers.length < 2) {
+                        // not saved (or invalid hash), not found by id
+                        // find that user in dialogs (since the update
+                        // is about an incoming message, dialog with that
+                        // user should be one of the first)
+                        const dialogs = await this.call({
+                            _: 'messages.getDialogs',
+                            offsetDate: 0,
+                            offsetId: 0,
+                            offsetPeer: { _: 'inputPeerEmpty' },
+                            limit: 20,
+                            hash: 0,
+                        })
+                        if (dialogs._ === 'messages.dialogsNotModified') return
+
+                        const user = dialogs.users.find(
+                            (it) => it.id === update.userId
+                        )
+                        if (!user) {
+                            debug(
+                                "received updateShortMessage, but wasn't able to find User"
+                            )
+                            return
+                        }
+                        rawUsers.push(user)
+                    }
                 }
                 let rawChats: tl.TypeChat[] = []
                 if (fwdFrom) {
@@ -389,12 +465,13 @@ export function _handleUpdate(
                 }
 
                 this._date = update.date
+                this._pts = update.pts
 
                 const { users, chats } = createUsersChatsIndex({
                     users: rawUsers,
                     chats: rawChats,
                 })
-                this._dispatchUpdate(message, users, chats)
+                this.dispatchUpdate(message, users, chats)
             } else if (update._ === 'updateShortChatMessage') {
                 const message: tl.RawMessage = {
                     _: 'message',
@@ -464,17 +541,18 @@ export function _handleUpdate(
                 }
 
                 this._date = update.date
+                this._pts = update.pts
+
                 const { users, chats } = createUsersChatsIndex({
                     users: rawUsers,
                     chats: rawChats,
                 })
-                this._dispatchUpdate(message, users, chats)
+                this.dispatchUpdate(message, users, chats)
             }
         })
         .catch((err) => this._emitError(err))
         .then(() => this._updLock.release())
 }
-
 
 /**
  * Catch up with the server by loading missed updates.
@@ -484,4 +562,3 @@ export function _handleUpdate(
 export function catchUp(this: TelegramClient): Promise<void> {
     return _loadDifference.call(this)
 }
-

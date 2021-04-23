@@ -1,22 +1,24 @@
-import { TelegramClient } from '../../client'
-import { MaybeArray, MaybeAsync } from '@mtcute/core'
-import { Message } from '../messages'
-import { Chat, User } from '../peers'
 import {
-    Dice,
-    Photo,
     Audio,
-    Document,
+    Chat,
     Contact,
-    RawDocument,
-    Location,
+    Dice,
+    Document,
     LiveLocation,
+    Location,
+    MaybeAsync,
+    Message,
+    Photo,
+    RawDocument,
     Sticker,
-} from '../media'
-import { Video } from '../media/video'
-import { Voice } from '../media/voice'
-import { Game } from '../media/game'
-import { WebPage } from '../media/web-page'
+    TelegramClient,
+    User,
+    Video,
+    Voice,
+} from '@mtcute/client'
+import { Game } from '@mtcute/client/src/types/media/game'
+import { WebPage } from '@mtcute/client/src/types/media/web-page'
+import { MaybeArray } from '@mtcute/core'
 
 /**
  * Type describing a primitive filter, which is a function taking some `Base`

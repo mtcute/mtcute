@@ -1,8 +1,8 @@
 {
-    "name": "@mtcute/client",
+    "name": "@mtcute/dispatcher",
     "private": true,
     "version": "0.0.0",
-    "description": "High-level API over @mtcute/core",
+    "description": "Updates dispatcher and bot framework for @mtcute/client",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "MIT",
     "main": "src/index.ts",
@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@mtcute/tl": "^0.0.0",
-        "@mtcute/core": "^0.0.0"
+        "@mtcute/core": "^0.0.0",
+        "@mtcute/client": "^0.0.0"
     }
 }

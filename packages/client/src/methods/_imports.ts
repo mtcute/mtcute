@@ -23,11 +23,6 @@ import {
     InputFileLike,
     PartialExcept,
     FileDownloadParameters,
-    UpdateHandler,
-    handlers,
-    PropagationSymbol,
-    filters,
-    UpdateFilter,
     Message,
     ReplyMarkup,
     InputMediaLike

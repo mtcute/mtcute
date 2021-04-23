@@ -72,18 +72,13 @@ import {
     unregisterParseMode,
 } from './methods/parse-modes/parse-modes'
 import {
-    _dispatchUpdate,
-    addUpdateHandler,
-    removeUpdateHandler,
-} from './methods/updates/dispatcher'
-import {
     _fetchUpdatesState,
     _handleUpdate,
     _loadStorage,
     _saveStorage,
     catchUp,
-} from './methods/updates/handle-update'
-import { onNewMessage } from './methods/updates/on-new-message'
+    dispatchUpdate,
+} from './methods/updates'
 import { blockUser } from './methods/users/block-user'
 import { getCommonChats } from './methods/users/get-common-chats'
 import { getMe } from './methods/users/get-me'
@@ -104,17 +99,12 @@ import {
     MaybeDynamic,
     Message,
     PartialExcept,
-    PropagationSymbol,
     ReplyMarkup,
     SentCode,
     TermsOfService,
-    UpdateFilter,
-    UpdateHandler,
     UploadFileLike,
     UploadedFile,
     User,
-    filters,
-    handlers,
 } from './types'
 import { MaybeArray, MaybeAsync, TelegramConnection } from '@mtcute/core'
 import { Lock } from './utils/lock'
@@ -1545,57 +1535,30 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     setDefaultParseMode(name: string): void
     /**
-     * Add an update handler to a given handlers group
+     * Base function for update handling. Replace or override this function
+     * and implement your own update handler, and call this function
+     * to handle externally obtained or manually crafted updates.
      *
-     * @param handler  Update handler
-     * @param group  (default: `0`) Handler group index
-     */
-    addUpdateHandler(handler: UpdateHandler, group?: number): void
-    /**
-     * Remove an update handler (or handlers) from a given
-     * handler group.
+     * Note that this function is called every time an `Update` is received,
+     * not `Updates`. Low-level updates containers are parsed by the library,
+     * and you receive ready to use updates and related entities.
+     * Also note that entity maps may contain entities that are not
+     * used in this particular update, so do not rely on its contents.
      *
-     * @param handler  Update handler to remove, its type or `'all'` to remove all
-     * @param group  (default: `0`) Handler group index
+     * @param update  Update that has just happened
+     * @param users  Map of users in this update
+     * @param chats  Map of chats in this update
      */
-    removeUpdateHandler(
-        handler: UpdateHandler | UpdateHandler['type'] | 'all',
-        group?: number
+    dispatchUpdate(
+        update: tl.TypeUpdate | tl.TypeMessage,
+        users: Record<number, tl.TypeUser>,
+        chats: Record<number, tl.TypeChat>
     ): void
     /**
      * Catch up with the server by loading missed updates.
      *
      */
     catchUp(): Promise<void>
-    /**
-     * Register a message handler without any filters.
-     *
-     * @param handler  Message handler
-     */
-    onNewMessage(
-        handler: (msg: Message) => MaybeAsync<void | PropagationSymbol>
-    ): void
-    /**
-     * Register a message handler with a given filter
-     *
-     * @param filter  Update filter
-     * @param handler  Message handler
-     */
-    onNewMessage<Mod>(
-        filter: UpdateFilter<Message, Mod>,
-        handler: (
-            msg: filters.Modify<Message, Mod>
-        ) => MaybeAsync<void | PropagationSymbol>
-    ): void
-
-    onNewMessage<Mod>(
-        filter:
-            | UpdateFilter<Message, Mod>
-            | ((msg: Message) => MaybeAsync<void | PropagationSymbol>),
-        handler?: (
-            msg: filters.Modify<Message, Mod>
-        ) => MaybeAsync<void | PropagationSymbol>
-    ): void
     /**
      * Block a user
      *
@@ -1647,8 +1610,6 @@ export class TelegramClient extends BaseTelegramClient {
     protected _downloadConnections: Record<number, TelegramConnection>
     protected _parseModes: Record<string, IMessageEntityParser>
     protected _defaultParseMode: string | null
-    protected _groups: Record<number, UpdateHandler[]>
-    protected _groupsOrder: number[]
     protected _updLock: Lock
     protected _pts: number
     protected _date: number
@@ -1660,8 +1621,6 @@ export class TelegramClient extends BaseTelegramClient {
         this._downloadConnections = {}
         this._parseModes = {}
         this._defaultParseMode = null
-        this._groups = {}
-        this._groupsOrder = []
         this._updLock = new Lock()
         // we dont need to initialize state fields since
         // they are always loaded either from the server, or from storage.
@@ -1741,15 +1700,12 @@ export class TelegramClient extends BaseTelegramClient {
     unregisterParseMode = unregisterParseMode as TelegramClient['unregisterParseMode']
     getParseMode = getParseMode as TelegramClient['getParseMode']
     setDefaultParseMode = setDefaultParseMode as TelegramClient['setDefaultParseMode']
-    protected _dispatchUpdate = _dispatchUpdate
-    addUpdateHandler = addUpdateHandler as TelegramClient['addUpdateHandler']
-    removeUpdateHandler = removeUpdateHandler as TelegramClient['removeUpdateHandler']
     protected _fetchUpdatesState = _fetchUpdatesState
     protected _loadStorage = _loadStorage
     protected _saveStorage = _saveStorage
+    dispatchUpdate = dispatchUpdate as TelegramClient['dispatchUpdate']
     protected _handleUpdate = _handleUpdate
     catchUp = catchUp as TelegramClient['catchUp']
-    onNewMessage = onNewMessage as TelegramClient['onNewMessage']
     blockUser = blockUser as TelegramClient['blockUser']
     getCommonChats = getCommonChats as TelegramClient['getCommonChats']
     getMe = getMe as TelegramClient['getMe']
