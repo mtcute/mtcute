@@ -505,6 +505,10 @@ export class BaseTelegramClient {
 
                 if (e instanceof InternalError) {
                     debug('Telegram is having internal issues: %s', e)
+                    if (e.message === 'WORKER_BUSY_TOO_LONG_RETRY') {
+                        // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
+                        await sleep(1000)
+                    }
                     continue
                 }
 
