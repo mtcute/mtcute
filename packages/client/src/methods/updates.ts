@@ -202,11 +202,13 @@ async function _loadDifference(
             qts: 0,
         })
 
-        if (
-            diff._ === 'updates.differenceEmpty' ||
-            diff._ === 'updates.differenceTooLong'
-        )
+        if (diff._ === 'updates.differenceEmpty')
             return
+
+        if (diff._ === 'updates.differenceTooLong') {
+            this._pts = diff.pts
+            return
+        }
 
         const state =
             diff._ === 'updates.difference'
@@ -232,6 +234,18 @@ async function _loadDifference(
         })
 
         for (const upd of diff.otherUpdates) {
+            if (upd._ === 'updateChannelTooLong') {
+                if (upd.pts) {
+                    this._cpts[upd.channelId] = upd.pts
+                }
+                await _loadChannelDifference.call(
+                    this,
+                    upd.channelId,
+                    noDispatch
+                )
+                continue
+            }
+
             const cid = extractChannelIdFromUpdate(upd)
             const pts = 'pts' in upd ? upd.pts : undefined
             const ptsCount = 'ptsCount' in upd ? upd.ptsCount : undefined
@@ -297,6 +311,8 @@ async function _loadChannelDifference(
         pts = (await this.storage.getChannelPts(channelId)) ?? 0
     }
 
+    if (!pts) return
+
     for (;;) {
         const diff = await this.call({
             _: 'updates.getChannelDifference',
@@ -306,15 +322,24 @@ async function _loadChannelDifference(
             filter: { _: 'channelMessagesFilterEmpty' },
         })
 
-        if (
-            diff._ === 'updates.channelDifferenceEmpty' ||
-            diff._ === 'updates.channelDifferenceTooLong'
-        )
-            return
+        if (diff._ === 'updates.channelDifferenceEmpty') return
 
         await this._cachePeersFrom(diff)
 
         const { users, chats } = createUsersChatsIndex(diff)
+
+        if (diff._ === 'updates.channelDifferenceTooLong') {
+            if (diff.dialog._ === 'dialog') {
+                pts = diff.dialog.pts!
+            }
+
+            diff.messages.forEach((message) => {
+                if (noDispatch && noDispatch.msg[channelId][message.id]) return
+
+                this.dispatchUpdate(message, users, chats)
+            })
+            break
+        }
 
         diff.newMessages.forEach((message) => {
             if (noDispatch && noDispatch.msg[channelId][message.id]) return
@@ -338,7 +363,8 @@ async function _loadChannelDifference(
 
         pts = diff.pts
 
-        if (diff.final) break
+        // nice naming bro, final=true means there are more updates
+        if (!diff.final) break
     }
 
     this._cpts[channelId] = pts
@@ -366,7 +392,9 @@ export function _handleUpdate(
     // additionally, locking here blocks updates handling while we are
     // loading difference inside update handler.
 
-    const noDispatchIndex = noDispatch ? _createNoDispatchIndex(update) : undefined
+    const noDispatchIndex = noDispatch
+        ? _createNoDispatchIndex(update)
+        : undefined
 
     this._updLock
         .acquire()
@@ -408,11 +436,12 @@ export function _handleUpdate(
                         if (upd.pts) {
                             this._cpts[upd.channelId] = upd.pts
                         }
-                        return await _loadChannelDifference.call(
+                        await _loadChannelDifference.call(
                             this,
                             upd.channelId,
                             noDispatchIndex
                         )
+                        continue
                     }
 
                     const channelId = extractChannelIdFromUpdate(upd)
@@ -445,14 +474,12 @@ export function _handleUpdate(
                             if (nextLocalPts < pts)
                                 if (channelId) {
                                     // "there's an update gap that must be filled"
-                                    // same as before, loading diff will also load
-                                    // any of the pending updates, so we don't need
-                                    // to bother handling them further.
-                                    return await _loadChannelDifference.call(
+                                    await _loadChannelDifference.call(
                                         this,
                                         channelId,
                                         noDispatchIndex
                                     )
+                                    continue
                                 } else {
                                     return await _loadDifference.call(this)
                                 }
