@@ -4,6 +4,7 @@ export * from './files'
 export * from './media'
 export * from './messages'
 export * from './peers'
+export * from './misc'
 
 export * from './errors'
 export { MaybeDynamic } from './utils'

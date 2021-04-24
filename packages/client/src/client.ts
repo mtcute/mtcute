@@ -68,6 +68,7 @@ import { sendMedia } from './methods/messages/send-media'
 import { sendPhoto } from './methods/messages/send-photo'
 import { sendText } from './methods/messages/send-text'
 import { unpinMessage } from './methods/messages/unpin-message'
+import { initTakeoutSession } from './methods/misc/init-takeout-session'
 import {
     getParseMode,
     registerParseMode,
@@ -104,6 +105,7 @@ import {
     PartialExcept,
     ReplyMarkup,
     SentCode,
+    TakeoutSession,
     TermsOfService,
     UploadFileLike,
     UploadedFile,
@@ -1031,6 +1033,7 @@ export interface TelegramClient extends BaseTelegramClient {
     ): Promise<Message>
     /**
      * Forward one or more messages, optionally including a caption message.
+     * You can forward no more than 100 messages at once.
      *
      * If a caption message was sent, it will be the first message in the resulting array.
      *
@@ -1631,6 +1634,14 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     unpinMessage(chatId: InputPeerLike, messageId: number): Promise<void>
     /**
+     * Create a new takeout session
+     *
+     * @param params  Takeout session parameters
+     */
+    initTakeoutSession(
+        params: Omit<tl.account.RawInitTakeoutSessionRequest, '_'>
+    ): Promise<TakeoutSession>
+    /**
      * Register a given {@link IMessageEntityParser} as a parse mode
      * for messages. When this method is first called, given parse
      * mode is also set as default.
@@ -1830,6 +1841,7 @@ export class TelegramClient extends BaseTelegramClient {
     sendPhoto = sendPhoto
     sendText = sendText
     unpinMessage = unpinMessage
+    initTakeoutSession = initTakeoutSession
     registerParseMode = registerParseMode
     unregisterParseMode = unregisterParseMode
     getParseMode = getParseMode

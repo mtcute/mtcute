@@ -25,7 +25,8 @@ import {
     FileDownloadParameters,
     Message,
     ReplyMarkup,
-    InputMediaLike
+    InputMediaLike,
+    TakeoutSession
 } from '../types'
 
 // @copy
