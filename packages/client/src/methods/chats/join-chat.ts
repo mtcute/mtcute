@@ -5,7 +5,10 @@ import {
     MtCuteNotFoundError,
     MtCuteTypeAssertionError,
 } from '../../types'
-import { INVITE_LINK_REGEX, normalizeToInputChannel } from '../../utils/peer-utils'
+import {
+    INVITE_LINK_REGEX,
+    normalizeToInputChannel,
+} from '../../utils/peer-utils'
 
 /**
  * Join a channel or supergroup
@@ -34,6 +37,8 @@ export async function joinChat(
                 )
             }
 
+            this._handleUpdate(res)
+
             return new Chat(this, res.chats[0])
         }
     }
@@ -52,6 +57,8 @@ export async function joinChat(
             res._
         )
     }
+
+    this._handleUpdate(res)
 
     return new Chat(this, res.chats[0])
 }

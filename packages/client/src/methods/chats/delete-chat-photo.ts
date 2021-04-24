@@ -21,17 +21,20 @@ export async function deleteChatPhoto(
     if (!(chat._ === 'inputPeerChat' || chat._ === 'inputPeerChannel'))
         throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 
+    let res
     if (chat._ === 'inputPeerChat') {
-        await this.call({
+        res = await this.call({
             _: 'messages.editChatPhoto',
             chatId: chat.chatId,
             photo: { _: 'inputChatPhotoEmpty' }
         })
     } else {
-        await this.call({
+        res = await this.call({
             _: 'channels.editPhoto',
             channel: normalizeToInputChannel(chat)!,
             photo: { _: 'inputChatPhotoEmpty' }
         })
     }
+
+    this._handleUpdate(res)
 }

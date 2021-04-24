@@ -21,11 +21,13 @@ export async function pinMessage(
     notify = false,
     bothSides = false
 ): Promise<void> {
-    await this.call({
+    const res = await this.call({
         _: 'messages.updatePinnedMessage',
         peer: normalizeToInputPeer(await this.resolvePeer(chatId)),
         id: messageId,
         silent: !notify,
         pmOneside: !bothSides
     })
+
+    this._handleUpdate(res)
 }

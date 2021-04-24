@@ -21,16 +21,18 @@ export async function leaveChat(
     const input = normalizeToInputPeer(chat)
 
     if (input._ === 'inputPeerChannel') {
-        await this.call({
+        const res = await this.call({
             _: 'channels.leaveChannel',
             channel: normalizeToInputChannel(chat)!,
         })
+        this._handleUpdate(res)
     } else if (input._ === 'inputPeerChat') {
-        await this.call({
+        const res = await this.call({
             _: 'messages.deleteChatUser',
             chatId: input.chatId,
             userId: { _: 'inputUserSelf' },
         })
+        this._handleUpdate(res)
 
         if (clear) {
             await this.deleteHistory(input)

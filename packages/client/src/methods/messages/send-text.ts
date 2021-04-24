@@ -109,6 +109,9 @@ export async function sendText(
             entities: res.entities,
         }
 
+        this._pts = res.pts
+        this._date = res.date
+
         return new Message(this, msg, {}, {})
     }
 

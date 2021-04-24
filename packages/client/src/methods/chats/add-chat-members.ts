@@ -34,15 +34,16 @@ export async function addChatMembers(
             const p = normalizeToInputUser(await this.resolvePeer(user))
             if (!p) continue
 
-            await this.call({
+            const updates = await this.call({
                 _: 'messages.addChatUser',
                 chatId: input.chatId,
                 userId: p,
                 fwdLimit: forwardCount,
             })
+            this._handleUpdate(updates)
         }
     } else if (input._ === 'inputPeerChannel') {
-        await this.call({
+        const updates = await this.call({
             _: 'channels.inviteToChannel',
             channel: normalizeToInputChannel(chat)!,
             users: await Promise.all(
@@ -52,5 +53,6 @@ export async function addChatMembers(
             ).then((res) => res.filter(Boolean)) as tl.TypeInputUser[],
             fwdLimit: forwardCount,
         })
+        this._handleUpdate(updates)
     } else throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 }

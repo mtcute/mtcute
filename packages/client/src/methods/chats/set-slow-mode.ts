@@ -20,9 +20,10 @@ export async function setSlowMode(
     const chat = normalizeToInputChannel(await this.resolvePeer(chatId))
     if (!chat) throw new MtCuteInvalidPeerTypeError(chatId, 'channel')
 
-    await this.call({
+    const res = await this.call({
         _: 'channels.toggleSlowMode',
         channel: chat,
         seconds
     })
+    this._handleUpdate(res)
 }

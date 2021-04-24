@@ -16,12 +16,13 @@ export async function deleteGroup(
     if (chat._ !== 'inputPeerChat')
         throw new MtCuteInvalidPeerTypeError(chatId, 'chat')
 
-    await this.call({
+    const res = await this.call({
         _: 'messages.deleteChatUser',
         revokeHistory: true,
         chatId: chat.chatId,
         userId: { _: 'inputUserSelf' },
     })
+    this._handleUpdate(res)
 
     await this.call({
         _: 'messages.deleteChat',

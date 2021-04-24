@@ -16,6 +16,8 @@ export function _findMessageInUpdate(
             res._
         )
 
+    this._handleUpdate(res, true)
+
     for (const u of res.updates) {
         if (
             isEdit && (

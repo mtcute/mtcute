@@ -37,5 +37,7 @@ export async function deleteMessages(
         })
     }
 
+    this._pts = res.pts
+
     return !!res.ptsCount
 }

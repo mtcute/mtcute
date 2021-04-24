@@ -26,8 +26,9 @@ export async function unarchiveChats(
         })
     }
 
-    await this.call({
+    const res = await this.call({
         _: 'folders.editPeerFolders',
         folderPeers
     })
+    this._handleUpdate(res)
 }

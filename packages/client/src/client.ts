@@ -1545,6 +1545,9 @@ export interface TelegramClient extends BaseTelegramClient {
      * Also note that entity maps may contain entities that are not
      * used in this particular update, so do not rely on its contents.
      *
+     * `update` might contain a Message object - in this case,
+     * it should be interpreted as some kind of `updateNewMessage`.
+     *
      * @param update  Update that has just happened
      * @param users  Map of users in this update
      * @param chats  Map of chats in this update

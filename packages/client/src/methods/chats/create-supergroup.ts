@@ -28,5 +28,7 @@ export async function createSupergroup(
         )
     }
 
+    this._handleUpdate(res)
+
     return new Chat(this, res.chats[0])
 }

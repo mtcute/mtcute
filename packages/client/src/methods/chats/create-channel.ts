@@ -29,5 +29,7 @@ export async function createChannel(
         )
     }
 
+    this._handleUpdate(res)
+
     return new Chat(this, res.chats[0])
 }

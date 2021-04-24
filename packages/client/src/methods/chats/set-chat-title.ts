@@ -23,17 +23,19 @@ export async function setChatTitle(
     if (!(chat._ === 'inputPeerChat' || chat._ === 'inputPeerChannel'))
         throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 
+    let res
     if (chat._ === 'inputPeerChat') {
-        await this.call({
+        res = await this.call({
             _: 'messages.editChatTitle',
             chatId: chat.chatId,
             title
         })
     } else {
-        await this.call({
+        res = await this.call({
             _: 'channels.editTitle',
             channel: normalizeToInputChannel(chat)!,
             title
         })
     }
+    this._handleUpdate(res)
 }

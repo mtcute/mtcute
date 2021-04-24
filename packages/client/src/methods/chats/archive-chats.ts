@@ -26,8 +26,9 @@ export async function archiveChats(
         })
     }
 
-    await this.call({
+    const updates = await this.call({
         _: 'folders.editPeerFolders',
         folderPeers
     })
+    this._handleUpdate(updates)
 }

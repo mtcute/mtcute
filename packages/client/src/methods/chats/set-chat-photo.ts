@@ -37,6 +37,8 @@ export async function setChatPhoto(
 
     if (typeof media === 'string' && media.match(/^https?:\/\//)) {
         throw new MtCuteArgumentError("Chat photo can't be external")
+    } else if (typeof media === 'object' && tl.isAnyInputMedia(media)) {
+        throw new MtCuteArgumentError("Chat photo can't be InputMedia")
     } else if (isUploadedFile(media)) {
         input = media.inputFile
     } else if (typeof media === 'object' && tl.isAnyInputFile(media)) {
@@ -54,17 +56,19 @@ export async function setChatPhoto(
         videoStartTs: previewSec
     }
 
+    let res
     if (chat._ === 'inputPeerChat') {
-        await this.call({
+        res = await this.call({
             _: 'messages.editChatPhoto',
             chatId: chat.chatId,
             photo
         })
     } else {
-        await this.call({
+        res = await this.call({
             _: 'channels.editPhoto',
             channel: normalizeToInputChannel(chat)!,
             photo
         })
     }
+    this._handleUpdate(res)
 }

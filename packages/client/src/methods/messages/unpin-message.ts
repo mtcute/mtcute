@@ -17,10 +17,12 @@ export async function unpinMessage(
     chatId: InputPeerLike,
     messageId: number,
 ): Promise<void> {
-    await this.call({
+    const res = await this.call({
         _: 'messages.updatePinnedMessage',
         peer: normalizeToInputPeer(await this.resolvePeer(chatId)),
         id: messageId,
         unpin: true
     })
+
+    this._handleUpdate(res)
 }
