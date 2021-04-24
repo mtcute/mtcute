@@ -53,6 +53,8 @@ async function addSingleMethod(state, fileName) {
             .find((i) => i.startsWith(flag))
     }
 
+    const hasOverloads = {}
+
     for (const stmt of program.statements) {
         const isCopy = checkForFlag(stmt, '@copy')
         if (stmt.kind === ts.SyntaxKind.ImportDeclaration) {
@@ -186,7 +188,10 @@ async function addSingleMethod(state, fileName) {
                 .includes('@returns-exported')
 
             // overloads
-            if (stmt.body) {
+            const isOverload = !stmt.body
+            if (isOverload) {
+                hasOverloads[name] = true
+            } else {
                 state.methods.used[name] = relPath
             }
 
@@ -198,7 +203,8 @@ async function addSingleMethod(state, fileName) {
                     func: stmt,
                     comment: getLeadingComments(stmt),
                     aliases,
-                    overload: !stmt.body,
+                    overload: isOverload,
+                    hasOverloads: hasOverloads[name] && !isOverload
                 })
 
                 const module = `./${relPath.replace(/\.ts$/, '')}`
@@ -293,7 +299,7 @@ async function main() {
     const classContents = []
 
     state.methods.list.forEach(
-        ({ name: origName, isPrivate, func, comment, aliases, overload }) => {
+        ({ name: origName, isPrivate, func, comment, aliases, overload, hasOverloads }) => {
             // create method that calls that function and passes `this`
             // first let's determine the signature
             const returnType = func.type ? ': ' + func.type.getText() : ''
@@ -390,10 +396,11 @@ async function main() {
                 )
 
             for (const name of [origName, ...aliases]) {
-                if (!isPrivate) {
+                if (!isPrivate && !hasOverloads) {
                     if (!comment.match(/\/\*\*?\s*\*\//))
                         // empty comment, no need to write it
                         output.write(comment)
+
                     output.write(
                         `${name}${generics}(${parameters})${returnType}`
                     )
@@ -401,10 +408,7 @@ async function main() {
 
                 if (!overload) {
                     classContents.push(
-                        `${isPrivate ? 'protected ' : ''}${name} = ${origName}${
-                            // dirty hack required for overloads
-                            isPrivate ? '' : ` as TelegramClient['${name}']`
-                        }`
+                        `${isPrivate ? 'protected ' : ''}${name} = ${origName}`
                     )
                 }
             }
