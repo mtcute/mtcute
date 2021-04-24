@@ -12,7 +12,7 @@ import { TelegramClient } from '../../client'
  * @param params  Additional parameters
  * @internal
  */
-export async function startTest (
+export async function startTest(
     this: TelegramClient,
     params?: {
         /**
@@ -52,15 +52,14 @@ export async function startTest (
          * If true, TOS will not be displayed and `tosCallback` will not be called.
          */
         acceptTos?: boolean
-    },
+    }
 ): Promise<User> {
     if (!params) params = {}
 
     if (params.logout)
         try {
             await this.logOut()
-        } catch (e) {
-        }
+        } catch (e) {}
 
     const availableDcs = await this.call({
         _: 'help.getConfig',
@@ -70,15 +69,15 @@ export async function startTest (
     if (phone) {
         if (!phone.match(/^99966\d{5}/))
             throw new MtCuteArgumentError(
-                `${phone} is an invalid test phone number`,
+                `${phone} is an invalid test phone number`
             )
         const id = parseInt(phone[5])
-        if (!availableDcs.find(dc => dc.id === id))
+        if (!availableDcs.find((dc) => dc.id === id))
             throw new MtCuteArgumentError(`${phone} has invalid DC ID (${id})`)
     } else {
         let dcId = this._primaryDc.id
         if (params.dcId) {
-            if (!availableDcs.find(dc => dc.id === params!.dcId))
+            if (!availableDcs.find((dc) => dc.id === params!.dcId))
                 throw new MtCuteArgumentError(`DC ID is invalid (${dcId})`)
             dcId = params.dcId
         }
@@ -90,7 +89,7 @@ export async function startTest (
     }
 
     // such a smart solution, much wow
-    const code = phone[5] + phone[5] + phone[5] + phone[5] + phone[5]
+    const code = phone[5] + phone[5] + phone[5] + phone[5] + phone[5] + phone[5]
 
     return this.start({
         phone,
@@ -98,6 +97,6 @@ export async function startTest (
         firstName: params.firstName,
         lastName: params.lastName,
         acceptTos: params.acceptTos,
-        codeSentCallback: () => {}
+        codeSentCallback: () => {},
     })
 }
