@@ -3,11 +3,15 @@ import {
     InputMediaLike,
     InputPeerLike,
     Message,
-    MtCuteArgumentError, MtCuteTypeAssertionError,
+    MtCuteArgumentError,
+    MtCuteTypeAssertionError,
 } from '../../types'
 import { MaybeArray } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
-import { createUsersChatsIndex, normalizeToInputPeer } from '../../utils/peer-utils'
+import {
+    createUsersChatsIndex,
+    normalizeToInputPeer,
+} from '../../utils/peer-utils'
 import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 
 /**
@@ -43,6 +47,7 @@ export async function forwardMessages(
 
 /**
  * Forward one or more messages, optionally including a caption message.
+ * You can forward no more than 100 messages at once.
  *
  * If a caption message was sent, it will be the first message in the resulting array.
  *
@@ -180,6 +185,14 @@ export async function forwardMessages(
     const isSingle = !Array.isArray(messages)
     if (isSingle) messages = [messages as number]
 
+    // sending more than 100 will not result in a server-sent
+    // error, instead only first 100 IDs will be forwarded,
+    // which is definitely not the best outcome.
+    if ((messages as number[]).length > 100)
+        throw new MtCuteArgumentError(
+            'You can forward no more than 100 messages at once'
+        )
+
     const toPeer = normalizeToInputPeer(await this.resolvePeer(toChatId))
 
     let captionMessage: Message | null = null
@@ -230,7 +243,11 @@ export async function forwardMessages(
 
     const forwarded: Message[] = []
     res.updates.forEach((upd) => {
-        if (upd._ === 'updateNewMessage' || upd._ == 'updateNewChannelMessage' || upd._ === 'updateNewScheduledMessage') {
+        if (
+            upd._ === 'updateNewMessage' ||
+            upd._ == 'updateNewChannelMessage' ||
+            upd._ === 'updateNewScheduledMessage'
+        ) {
             forwarded.push(new Message(this, upd.message, users, chats))
         }
     })
