@@ -65,7 +65,7 @@ export function getParseMode(
         name = this._defaultParseMode
     }
 
-    if (name in this._parseModes) {
+    if (!(name in this._parseModes)) {
         throw new MtCuteError(`Parse mode ${name} is not registered.`)
     }
 
@@ -80,7 +80,7 @@ export function getParseMode(
  * @internal
  */
 export function setDefaultParseMode(this: TelegramClient, name: string): void {
-    if (name in this._parseModes) {
+    if (!(name in this._parseModes)) {
         throw new MtCuteError(`Parse mode ${name} is not registered.`)
     }
 
