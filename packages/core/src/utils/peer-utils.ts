@@ -124,14 +124,25 @@ function isRefMessage(msg: tl.TypeMessage, peer: any): boolean | undefined {
     return (
         comparePeers(msg.peerId, peer) ||
         ('fromId' in msg && comparePeers(msg.fromId, peer)) ||
-        ('fwdFrom' in msg && msg.fwdFrom && comparePeers(msg.fwdFrom.fromId, peer))
+        ('fwdFrom' in msg &&
+            msg.fwdFrom &&
+            comparePeers(msg.fwdFrom.fromId, peer)) ||
+        ('replies' in msg &&
+            msg.replies &&
+            msg.replies.recentRepliers &&
+            msg.replies.recentRepliers.some((it) => comparePeers(it, peer)))
     )
 }
 
 function findContext(obj: any, peer: any): [number, number] | undefined {
     if (!peer.min) return undefined
-    if (obj._ === 'updates' || obj._ === 'updatesCombined') {
-        for (const upd of obj.updates as tl.TypeUpdate[]) {
+    if (
+        obj._ === 'updates' ||
+        obj._ === 'updatesCombined' ||
+        obj._ === 'updates.difference' ||
+        obj._ === 'updates.differenceSlice'
+    ) {
+        for (const upd of (obj.updates || obj.otherUpdates) as tl.TypeUpdate[]) {
             if (
                 (upd._ === 'updateNewMessage' ||
                     upd._ === 'updateNewChannelMessage' ||
