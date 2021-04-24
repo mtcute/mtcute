@@ -127,7 +127,8 @@ export async function start(
     try {
         const me = await this.getMe()
         // user is already authorized
-        if (params.catchUp !== false) await this.catchUp()
+        if (params.catchUp !== false && !this._disableUpdates)
+            await this.catchUp()
         return me
     } catch (e) {
         if (!(e instanceof AuthKeyUnregisteredError)) throw e
