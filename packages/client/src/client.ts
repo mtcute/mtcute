@@ -53,6 +53,7 @@ import { uploadFile } from './methods/files/upload-file'
 import { deleteMessages } from './methods/messages/delete-messages'
 import { editMessage } from './methods/messages/edit-message'
 import { _findMessageInUpdate } from './methods/messages/find-in-update'
+import { forwardMessages } from './methods/messages/forward-messages'
 import { getHistory } from './methods/messages/get-history'
 import { getMessages } from './methods/messages/get-messages'
 import { iterHistory } from './methods/messages/iter-history'
@@ -982,6 +983,106 @@ export interface TelegramClient extends BaseTelegramClient {
         }
     ): Promise<Message>
     /**
+     * Forward a single message.
+     *
+     * To forward with a caption, use another overload that takes an array of IDs.
+     *
+     * @param toChatId  Destination chat ID, username, phone, `"me"` or `"self"`
+     * @param fromChatId  Source chat ID, username, phone, `"me"` or `"self"`
+     * @param message  Message ID
+     * @param params  Additional sending parameters
+     * @returns  Newly sent, forwarded messages in the destination chat
+     */
+    forwardMessages(
+        toChatId: InputPeerLike,
+        fromChatId: InputPeerLike,
+        message: number,
+        params?: {
+            /**
+             * Whether to forward this message silently.
+             */
+            silent?: boolean
+
+            /**
+             * If set, the message will be scheduled to this date.
+             * When passing a number, a UNIX time in ms is expected.
+             */
+            schedule?: Date | number
+        }
+    ): Promise<Message>
+    /**
+     * Forward one or more messages, optionally including a caption message.
+     *
+     * If a caption message was sent, it will be the first message in the resulting array.
+     *
+     * @param toChatId  Destination chat ID, username, phone, `"me"` or `"self"`
+     * @param fromChatId  Source chat ID, username, phone, `"me"` or `"self"`
+     * @param messages  Message IDs
+     * @param params  Additional sending parameters
+     * @returns
+     *   Newly sent, forwarded messages in the destination chat.
+     *   If a caption message was provided, it will be the first message in the array.
+     */
+    forwardMessages(
+        toChatId: InputPeerLike,
+        fromChatId: InputPeerLike,
+        messages: number[],
+        params?: {
+            /**
+             * Optionally, a caption for your forwarded message(s).
+             * It will be sent as a separate message before the forwarded messages.
+             *
+             * You can either pass `caption` or `captionMedia`, passing both will
+             * result in an error
+             */
+            caption?: string
+
+            /**
+             * Optionally, a media caption for your forwarded message(s).
+             * It will be sent as a separate message before the forwarded messages.
+             *
+             * You can either pass `caption` or `captionMedia`, passing both will
+             * result in an error
+             */
+            captionMedia?: InputMediaLike
+
+            /**
+             * Parse mode to use to parse entities in caption.
+             * Defaults to current default parse mode (if any).
+             *
+             * Passing `null` will explicitly disable formatting.
+             */
+            parseMode?: string | null
+
+            /**
+             * List of formatting entities in caption to use instead
+             * of parsing via a parse mode.
+             *
+             * **Note:** Passing this makes the method ignore {@link parseMode}
+             */
+            entities?: tl.TypeMessageEntity[]
+
+            /**
+             * Whether to forward silently (also applies to caption message).
+             */
+            silent?: boolean
+
+            /**
+             * If set, the forwarding will be scheduled to this date
+             * (also applies to caption message).
+             * When passing a number, a UNIX time in ms is expected.
+             */
+            schedule?: Date | number
+
+            /**
+             * Whether to clear draft after sending this message (only used for caption)
+             *
+             * Defaults to `false`
+             */
+            clearDraft?: boolean
+        }
+    ): Promise<MaybeArray<Message>>
+    /**
      * Retrieve a chunk of the chat history.
      *
      * You can get up to 100 messages with one call.
@@ -1059,12 +1160,6 @@ export interface TelegramClient extends BaseTelegramClient {
         messageIds: number[],
         fromReply?: boolean
     ): Promise<Message[]>
-
-    getMessages(
-        chatId: InputPeerLike,
-        messageIds: MaybeArray<number>,
-        fromReply?: boolean
-    ): Promise<MaybeArray<Message>>
     /**
      * Iterate through a chat history sequentially.
      *
@@ -1610,8 +1705,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param ids  Users' identifiers. Can be ID, username, phone number, `"me"`, `"self"` or TL object
      */
     getUsers(ids: InputPeerLike[]): Promise<User[]>
-
-    getUsers(ids: MaybeArray<InputPeerLike>): Promise<MaybeArray<User>>
     /**
      * Get the `InputPeer` of a known peer id.
      * Useful when an `InputPeer` is needed.
@@ -1650,85 +1743,86 @@ export class TelegramClient extends BaseTelegramClient {
         this._cpts = {}
     }
 
-    acceptTos = acceptTos as TelegramClient['acceptTos']
-    checkPassword = checkPassword as TelegramClient['checkPassword']
-    getPasswordHint = getPasswordHint as TelegramClient['getPasswordHint']
-    logOut = logOut as TelegramClient['logOut']
-    recoverPassword = recoverPassword as TelegramClient['recoverPassword']
-    resendCode = resendCode as TelegramClient['resendCode']
-    run = run as TelegramClient['run']
-    sendCode = sendCode as TelegramClient['sendCode']
-    sendRecoveryCode = sendRecoveryCode as TelegramClient['sendRecoveryCode']
-    signInBot = signInBot as TelegramClient['signInBot']
-    signIn = signIn as TelegramClient['signIn']
-    signUp = signUp as TelegramClient['signUp']
-    startTest = startTest as TelegramClient['startTest']
-    start = start as TelegramClient['start']
-    addChatMembers = addChatMembers as TelegramClient['addChatMembers']
-    archiveChats = archiveChats as TelegramClient['archiveChats']
-    createChannel = createChannel as TelegramClient['createChannel']
-    createGroup = createGroup as TelegramClient['createGroup']
-    createSupergroup = createSupergroup as TelegramClient['createSupergroup']
-    deleteChannel = deleteChannel as TelegramClient['deleteChannel']
-    deleteSupergroup = deleteChannel as TelegramClient['deleteSupergroup']
-    deleteChatPhoto = deleteChatPhoto as TelegramClient['deleteChatPhoto']
-    deleteGroup = deleteGroup as TelegramClient['deleteGroup']
-    deleteHistory = deleteHistory as TelegramClient['deleteHistory']
-    getChatMember = getChatMember as TelegramClient['getChatMember']
-    getChatMembers = getChatMembers as TelegramClient['getChatMembers']
-    getChatPreview = getChatPreview as TelegramClient['getChatPreview']
-    getChat = getChat as TelegramClient['getChat']
-    getFullChat = getFullChat as TelegramClient['getFullChat']
-    iterChatMembers = iterChatMembers as TelegramClient['iterChatMembers']
-    joinChat = joinChat as TelegramClient['joinChat']
-    leaveChat = leaveChat as TelegramClient['leaveChat']
-    saveDraft = saveDraft as TelegramClient['saveDraft']
-    setChatDefaultPermissions = setChatDefaultPermissions as TelegramClient['setChatDefaultPermissions']
-    setChatDescription = setChatDescription as TelegramClient['setChatDescription']
-    setChatPhoto = setChatPhoto as TelegramClient['setChatPhoto']
-    setChatTitle = setChatTitle as TelegramClient['setChatTitle']
-    setChatUsername = setChatUsername as TelegramClient['setChatUsername']
-    setSlowMode = setSlowMode as TelegramClient['setSlowMode']
-    unarchiveChats = unarchiveChats as TelegramClient['unarchiveChats']
-    createFolder = createFolder as TelegramClient['createFolder']
-    deleteFolder = deleteFolder as TelegramClient['deleteFolder']
-    editFolder = editFolder as TelegramClient['editFolder']
-    getDialogs = getDialogs as TelegramClient['getDialogs']
-    getFolders = getFolders as TelegramClient['getFolders']
-    downloadAsBuffer = downloadAsBuffer as TelegramClient['downloadAsBuffer']
-    downloadToFile = downloadToFile as TelegramClient['downloadToFile']
-    downloadAsIterable = downloadAsIterable as TelegramClient['downloadAsIterable']
-    downloadAsStream = downloadAsStream as TelegramClient['downloadAsStream']
-    uploadFile = uploadFile as TelegramClient['uploadFile']
-    deleteMessages = deleteMessages as TelegramClient['deleteMessages']
-    editMessage = editMessage as TelegramClient['editMessage']
+    acceptTos = acceptTos
+    checkPassword = checkPassword
+    getPasswordHint = getPasswordHint
+    logOut = logOut
+    recoverPassword = recoverPassword
+    resendCode = resendCode
+    run = run
+    sendCode = sendCode
+    sendRecoveryCode = sendRecoveryCode
+    signInBot = signInBot
+    signIn = signIn
+    signUp = signUp
+    startTest = startTest
+    start = start
+    addChatMembers = addChatMembers
+    archiveChats = archiveChats
+    createChannel = createChannel
+    createGroup = createGroup
+    createSupergroup = createSupergroup
+    deleteChannel = deleteChannel
+    deleteSupergroup = deleteChannel
+    deleteChatPhoto = deleteChatPhoto
+    deleteGroup = deleteGroup
+    deleteHistory = deleteHistory
+    getChatMember = getChatMember
+    getChatMembers = getChatMembers
+    getChatPreview = getChatPreview
+    getChat = getChat
+    getFullChat = getFullChat
+    iterChatMembers = iterChatMembers
+    joinChat = joinChat
+    leaveChat = leaveChat
+    saveDraft = saveDraft
+    setChatDefaultPermissions = setChatDefaultPermissions
+    setChatDescription = setChatDescription
+    setChatPhoto = setChatPhoto
+    setChatTitle = setChatTitle
+    setChatUsername = setChatUsername
+    setSlowMode = setSlowMode
+    unarchiveChats = unarchiveChats
+    createFolder = createFolder
+    deleteFolder = deleteFolder
+    editFolder = editFolder
+    getDialogs = getDialogs
+    getFolders = getFolders
+    downloadAsBuffer = downloadAsBuffer
+    downloadToFile = downloadToFile
+    downloadAsIterable = downloadAsIterable
+    downloadAsStream = downloadAsStream
+    uploadFile = uploadFile
+    deleteMessages = deleteMessages
+    editMessage = editMessage
     protected _findMessageInUpdate = _findMessageInUpdate
-    getHistory = getHistory as TelegramClient['getHistory']
-    getMessages = getMessages as TelegramClient['getMessages']
-    iterHistory = iterHistory as TelegramClient['iterHistory']
+    forwardMessages = forwardMessages
+    getHistory = getHistory
+    getMessages = getMessages
+    iterHistory = iterHistory
     protected _parseEntities = _parseEntities
-    pinMessage = pinMessage as TelegramClient['pinMessage']
-    searchGlobal = searchGlobal as TelegramClient['searchGlobal']
-    searchMessages = searchMessages as TelegramClient['searchMessages']
-    sendDice = sendDice as TelegramClient['sendDice']
-    sendLocation = sendLocation as TelegramClient['sendLocation']
-    sendMedia = sendMedia as TelegramClient['sendMedia']
-    sendPhoto = sendPhoto as TelegramClient['sendPhoto']
-    sendText = sendText as TelegramClient['sendText']
-    unpinMessage = unpinMessage as TelegramClient['unpinMessage']
-    registerParseMode = registerParseMode as TelegramClient['registerParseMode']
-    unregisterParseMode = unregisterParseMode as TelegramClient['unregisterParseMode']
-    getParseMode = getParseMode as TelegramClient['getParseMode']
-    setDefaultParseMode = setDefaultParseMode as TelegramClient['setDefaultParseMode']
+    pinMessage = pinMessage
+    searchGlobal = searchGlobal
+    searchMessages = searchMessages
+    sendDice = sendDice
+    sendLocation = sendLocation
+    sendMedia = sendMedia
+    sendPhoto = sendPhoto
+    sendText = sendText
+    unpinMessage = unpinMessage
+    registerParseMode = registerParseMode
+    unregisterParseMode = unregisterParseMode
+    getParseMode = getParseMode
+    setDefaultParseMode = setDefaultParseMode
     protected _fetchUpdatesState = _fetchUpdatesState
     protected _loadStorage = _loadStorage
     protected _saveStorage = _saveStorage
-    dispatchUpdate = dispatchUpdate as TelegramClient['dispatchUpdate']
+    dispatchUpdate = dispatchUpdate
     protected _handleUpdate = _handleUpdate
-    catchUp = catchUp as TelegramClient['catchUp']
-    blockUser = blockUser as TelegramClient['blockUser']
-    getCommonChats = getCommonChats as TelegramClient['getCommonChats']
-    getMe = getMe as TelegramClient['getMe']
-    getUsers = getUsers as TelegramClient['getUsers']
-    resolvePeer = resolvePeer as TelegramClient['resolvePeer']
+    catchUp = catchUp
+    blockUser = blockUser
+    getCommonChats = getCommonChats
+    getMe = getMe
+    getUsers = getUsers
+    resolvePeer = resolvePeer
 }
