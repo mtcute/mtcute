@@ -43,6 +43,7 @@ import { unarchiveChats } from './methods/chats/unarchive-chats'
 import { createFolder } from './methods/dialogs/create-folder'
 import { deleteFolder } from './methods/dialogs/delete-folder'
 import { editFolder } from './methods/dialogs/edit-folder'
+import { findFolder } from './methods/dialogs/find-folder'
 import { getDialogs } from './methods/dialogs/get-dialogs'
 import { getFolders } from './methods/dialogs/get-folders'
 import { downloadAsBuffer } from './methods/files/download-buffer'
@@ -722,14 +723,32 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Edit a folder with given modification
      *
-     * @param folder  Folder or folder ID. Note that passing an ID will require re-fetching all folders
+     * @param folder
+     *     Folder, folder ID or name.
+     *     Note that passing an ID or name will require re-fetching all folders,
+     *     and passing name might affect not the right folder if you have multiple
+     *     with the same name.
      * @param modification  Modification that will be applied to this folder
      * @returns  Modified folder
      */
     editFolder(
-        folder: tl.RawDialogFilter | number,
+        folder: tl.RawDialogFilter | number | string,
         modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>
     ): Promise<tl.RawDialogFilter>
+    /**
+     * Find a folder by its parameter.
+     *
+     * > **Note**: Searching by title and/or emoji might not be
+     * > accurate since you can set the same title and/or emoji
+     * > to multiple folders.
+     *
+     * @param params  Search parameters. At least one must be set.
+     */
+    findFolder(params: {
+        title?: string
+        emoji?: string
+        id?: number
+    }): Promise<tl.RawDialogFilter | null>
     /**
      * Iterate over dialogs.
      *
@@ -1786,6 +1805,7 @@ export class TelegramClient extends BaseTelegramClient {
     createFolder = createFolder
     deleteFolder = deleteFolder
     editFolder = editFolder
+    findFolder = findFolder
     getDialogs = getDialogs
     getFolders = getFolders
     downloadAsBuffer = downloadAsBuffer
