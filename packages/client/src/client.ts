@@ -7,6 +7,7 @@ import { getPasswordHint } from './methods/auth/get-password-hint'
 import { logOut } from './methods/auth/log-out'
 import { recoverPassword } from './methods/auth/recover-password'
 import { resendCode } from './methods/auth/resend-code'
+import { run } from './methods/auth/run'
 import { sendCode } from './methods/auth/send-code'
 import { sendRecoveryCode } from './methods/auth/send-recovery-code'
 import { signInBot } from './methods/auth/sign-in-bot'
@@ -158,6 +159,21 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param phoneCodeHash  Confirmation code identifier from {@link SentCode}
      */
     resendCode(phone: string, phoneCodeHash: string): Promise<SentCode>
+    /**
+     * Simple wrapper that calls {@link start} and then
+     * provided callback function (if any) without the
+     * need to introduce a `main()` function manually.
+     *
+     * Errors that were encountered while calling {@link start}
+     * and `then` will be emitted as usual, and can be caught with {@link onError}
+     *
+     * @param params  Parameters to be passed to {@link params}
+     * @param then  Function to be called after {@link start} returns
+     */
+    run(
+        params: Parameters<TelegramClient['start']>[0],
+        then?: (user: User) => void | Promise<void>
+    ): void
     /**
      * Send the confirmation code to the given phone number
      *
@@ -1640,6 +1656,7 @@ export class TelegramClient extends BaseTelegramClient {
     logOut = logOut as TelegramClient['logOut']
     recoverPassword = recoverPassword as TelegramClient['recoverPassword']
     resendCode = resendCode as TelegramClient['resendCode']
+    run = run as TelegramClient['run']
     sendCode = sendCode as TelegramClient['sendCode']
     sendRecoveryCode = sendRecoveryCode as TelegramClient['sendRecoveryCode']
     signInBot = signInBot as TelegramClient['signInBot']
