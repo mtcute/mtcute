@@ -75,6 +75,8 @@ import {
     setDefaultParseMode,
     unregisterParseMode,
 } from './methods/parse-modes/parse-modes'
+import { getInstalledStickers } from './methods/stickers/get-installed-stickers'
+import { getStickerSet } from './methods/stickers/get-sticker-set'
 import {
     _fetchUpdatesState,
     _handleUpdate,
@@ -105,6 +107,7 @@ import {
     PartialExcept,
     ReplyMarkup,
     SentCode,
+    StickerSet,
     TakeoutSession,
     TermsOfService,
     UploadFileLike,
@@ -1676,6 +1679,24 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     setDefaultParseMode(name: string): void
     /**
+     * Get a list of all installed sticker packs
+     *
+     * > **Note**: This method returns *brief* meta information about
+     * > the packs, that does not include the stickers themselves.
+     * > Use {@link StickerSet.getFull} or {@link getStickerSet}
+     * > to get a stickerset that will include the stickers
+     *
+     */
+    getInstalledStickers(): Promise<StickerSet[]>
+    /**
+     * Get a sticker pack and stickers inside of it.
+     *
+     * @param id  Sticker pack short name, dice emoji, `"emoji"` for animated emojis or input ID
+     */
+    getStickerSet(
+        id: string | { dice: string } | tl.TypeInputStickerSet
+    ): Promise<StickerSet>
+    /**
      * Base function for update handling. Replace or override this function
      * and implement your own update handler, and call this function
      * to handle externally obtained or manually crafted updates.
@@ -1846,6 +1867,8 @@ export class TelegramClient extends BaseTelegramClient {
     unregisterParseMode = unregisterParseMode
     getParseMode = getParseMode
     setDefaultParseMode = setDefaultParseMode
+    getInstalledStickers = getInstalledStickers
+    getStickerSet = getStickerSet
     protected _fetchUpdatesState = _fetchUpdatesState
     protected _loadStorage = _loadStorage
     protected _saveStorage = _saveStorage

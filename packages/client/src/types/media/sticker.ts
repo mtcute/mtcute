@@ -2,6 +2,7 @@ import { RawDocument } from './document'
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { makeInspectable } from '../utils'
+import { StickerSet } from '../misc'
 
 /**
  * A sticker
@@ -36,14 +37,15 @@ export class Sticker extends RawDocument {
     }
 
     /**
-     * Emoji associated with this sticker.
+     * Primary emoji associated with this sticker,
+     * that is displayed in dialogs list.
      *
      * If there is none, empty string is returned.
      *
      * **Note:** This only contains at most one emoji.
      * Some stickers have multiple associated emojis,
      * but only one is returned here. This is Telegram's
-     * limitation! Use {@link getAllEmojis}
+     * limitation! Use {@link getAllEmojis} instead.
      */
     get emoji(): string {
         return this.attr.alt
@@ -72,13 +74,10 @@ export class Sticker extends RawDocument {
      *
      * Returns `null` if there's no sticker set.
      */
-    async getStickerSet(): Promise<tl.messages.RawStickerSet | null> {
+    async getStickerSet(): Promise<StickerSet | null> {
         if (!this.hasStickerSet) return null
 
-        return this.client.call({
-            _: 'messages.getStickerSet',
-            stickerset: this.attr.stickerset,
-        })
+        return this.client.getStickerSet(this.attr.stickerset)
     }
 
     /**
@@ -88,18 +87,11 @@ export class Sticker extends RawDocument {
      * with a sticker pack.
      */
     async getAllEmojis(): Promise<string> {
-        let ret = ''
-
         const set = await this.getStickerSet()
         if (!set) return ''
 
-        set.packs.forEach((pack) => {
-            if (pack.documents.some((doc) => doc.eq(this.doc.id))) {
-                ret += pack.emoticon
-            }
-        })
-
-        return ret
+        return set.stickers.find((it) => it.sticker.doc.id.eq(this.doc.id))!
+            .emoji
     }
 }
 
