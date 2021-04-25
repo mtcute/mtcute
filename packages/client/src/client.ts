@@ -40,6 +40,10 @@ import { setChatTitle } from './methods/chats/set-chat-title'
 import { setChatUsername } from './methods/chats/set-chat-username'
 import { setSlowMode } from './methods/chats/set-slow-mode'
 import { unarchiveChats } from './methods/chats/unarchive-chats'
+import { addContact } from './methods/contacts/add-contact'
+import { deleteContacts } from './methods/contacts/delete-contacts'
+import { getContacts } from './methods/contacts/get-contacts'
+import { importContacts } from './methods/contacts/import-contacts'
 import { createFolder } from './methods/dialogs/create-folder'
 import { deleteFolder } from './methods/dialogs/delete-folder'
 import { editFolder } from './methods/dialogs/edit-folder'
@@ -707,6 +711,67 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chats  Chat ID(s), username(s), phone number(s), `"me"` or `"self"`
      */
     unarchiveChats(chats: MaybeArray<InputPeerLike>): Promise<void>
+    /**
+     * Add an existing Telegram user as a contact
+     *
+     * @param userId  User ID, username or phone number
+     * @param params  Contact details
+     */
+    addContact(
+        userId: InputPeerLike,
+        params: {
+            /**
+             * First name of the contact
+             */
+            firstName: string
+
+            /**
+             * Last name of the contact
+             */
+            lastName?: string
+
+            /**
+             * Phone number of the contact, if available
+             */
+            phone?: string
+
+            /**
+             * Whether to share your own phone number
+             * with the newly created contact (defaults to `false`)
+             */
+            sharePhone?: boolean
+        }
+    ): Promise<User>
+    /**
+     * Delete a single contact from your Telegram contacts list
+     *
+     * Returns deleted contact's profile or `null` in case
+     * that user was not in your contacts list
+     *
+     * @param userId  User ID, username or phone number
+     */
+    deleteContacts(userId: InputPeerLike): Promise<User | null>
+    /**
+     * Delete one or more contacts from your Telegram contacts list
+     *
+     * Returns deleted contact's profiles. Does not return
+     * profiles of users that were not in your contacts list
+     *
+     * @param userIds  User IDs, usernames or phone numbers
+     */
+    deleteContacts(userIds: InputPeerLike[]): Promise<User[]>
+    /**
+     * Get list of contacts from your Telegram contacts list.
+     */
+    getContacts(): Promise<User[]>
+    /**
+     * Import contacts to your Telegram contacts list.
+     *
+     * @param contacts  List of contacts
+     */
+    importContacts(
+        contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[]
+    ): Promise<tl.contacts.RawImportedContacts>
     /**
      * Create a folder from given parameters
      *
@@ -1834,6 +1899,10 @@ export class TelegramClient extends BaseTelegramClient {
     setChatUsername = setChatUsername
     setSlowMode = setSlowMode
     unarchiveChats = unarchiveChats
+    addContact = addContact
+    deleteContacts = deleteContacts
+    getContacts = getContacts
+    importContacts = importContacts
     createFolder = createFolder
     deleteFolder = deleteFolder
     editFolder = editFolder
