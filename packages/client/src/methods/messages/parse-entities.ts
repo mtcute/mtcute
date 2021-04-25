@@ -15,31 +15,31 @@ export async function _parseEntities(
         return empty
     }
 
-    if (entities) {
-        // replace mentionName entities with input ones
-        for (const ent of entities) {
-            if (ent._ === 'messageEntityMentionName') {
-                try {
-                    const inputPeer = normalizeToInputUser(
-                        await this.resolvePeer(ent.userId)
-                    )
-
-                    // not a user
-                    if (!inputPeer) continue
-                    ;(ent as any)._ = 'inputMessageEntityMentionName'
-                    ;(ent as any).userId = inputPeer
-                } catch (e) {}
-            }
+    if (!entities) {
+        if (mode === undefined) {
+            mode = this._defaultParseMode
         }
+        // either explicitly disabled or no available parser
+        if (!mode) return [text, []]
 
-        return [text, entities]
+        ;([text, entities] = await this._parseModes[mode].parse(text))
     }
 
-    if (mode === undefined) {
-        mode = this._defaultParseMode
-    }
-    // either explicitly disabled or no available parser
-    if (!mode) return [text, []]
+    // replace mentionName entities with input ones
+    for (const ent of entities) {
+        if (ent._ === 'messageEntityMentionName') {
+            try {
+                const inputPeer = normalizeToInputUser(
+                    await this.resolvePeer(ent.userId)
+                )
 
-    return this._parseModes[mode].parse(text)
+                // not a user
+                if (!inputPeer) continue
+                ;(ent as any)._ = 'inputMessageEntityMentionName'
+                ;(ent as any).userId = inputPeer
+            } catch (e) {}
+        }
+    }
+
+    return [text, entities]
 }
