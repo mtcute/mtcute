@@ -229,7 +229,7 @@ export class Chat {
         if (this.peer._ === 'user') {
             if (this.peer.lastName)
                 return this.peer.firstName + ' ' + this.peer.lastName
-            return this.peer.firstName!
+            return this.peer.firstName ?? 'Deleted Account'
         } else {
             return this.peer.title
         }
