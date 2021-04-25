@@ -98,12 +98,18 @@ export class Chat {
                     userId: this.peer.id,
                     accessHash: this.peer.accessHash,
                 }
-            } else if (this.peer._ === 'chat' || this.peer._ === 'chatForbidden') {
+            } else if (
+                this.peer._ === 'chat' ||
+                this.peer._ === 'chatForbidden'
+            ) {
                 this._inputPeer = {
                     _: 'inputPeerChat',
                     chatId: this.peer.id,
                 }
-            } else if (this.peer._ === 'channel' || this.peer._ === 'channelForbidden') {
+            } else if (
+                this.peer._ === 'channel' ||
+                this.peer._ === 'channelForbidden'
+            ) {
                 if (!this.peer.accessHash) {
                     throw new MtCuteArgumentError(
                         "Peer's access hash is not available!"
@@ -127,14 +133,21 @@ export class Chat {
         if (!this._type) {
             if (this.peer._ === 'user') {
                 this._type = this.peer.bot ? 'bot' : 'private'
-            } else if (this.peer._ === 'chat' || this.peer._ === 'chatForbidden') {
+            } else if (
+                this.peer._ === 'chat' ||
+                this.peer._ === 'chatForbidden'
+            ) {
                 this._type = 'group'
-            } else if (this.peer._ === 'channel' || this.peer._ === 'channelForbidden') {
-                this._type = this.peer._ === 'channel' && this.peer.gigagroup
-                    ? 'gigagroup'
-                    : this.peer.broadcast
-                    ? 'channel'
-                    : 'supergroup'
+            } else if (
+                this.peer._ === 'channel' ||
+                this.peer._ === 'channelForbidden'
+            ) {
+                this._type =
+                    this.peer._ === 'channel' && this.peer.gigagroup
+                        ? 'gigagroup'
+                        : this.peer.broadcast
+                        ? 'channel'
+                        : 'supergroup'
             }
         }
 
@@ -163,6 +176,14 @@ export class Chat {
      */
     get isCreator(): boolean {
         return 'creator' in this.peer ? this.peer.creator! : false
+    }
+
+    /**
+     * Whether current user has admin rights in this chat.
+     * Supergroups, channels and groups only.
+     */
+    get isAdmin(): boolean {
+        return 'adminRights' in this.peer && !!this.peer.adminRights
     }
 
     /** Whether this chat has been flagged for scam */
@@ -345,7 +366,8 @@ export class Chat {
      * Current user's permissions, for supergroups.
      */
     get permissions(): ChatPermissions | null {
-        if (!('bannedRights' in this.peer && this.peer.bannedRights)) return null
+        if (!('bannedRights' in this.peer && this.peer.bannedRights))
+            return null
 
         if (!this._permissions) {
             this._permissions = new ChatPermissions(this.peer.bannedRights)
@@ -371,6 +393,14 @@ export class Chat {
         }
 
         return this._permissions
+    }
+
+    /**
+     * Admin rights of the current user in this chat.
+     * `null` for PMs and non-administered chats
+     */
+    get adminRights(): tl.RawChatAdminRights | null {
+        return 'adminRights' in this.peer ? this.peer.adminRights ?? null : null
     }
 
     /**

@@ -109,6 +109,7 @@ import {
     MaybeDynamic,
     Message,
     PartialExcept,
+    PartialOnly,
     ReplyMarkup,
     SentCode,
     StickerSet,

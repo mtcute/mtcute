@@ -22,6 +22,7 @@ import {
     UploadFileLike,
     InputFileLike,
     PartialExcept,
+    PartialOnly,
     FileDownloadParameters,
     Message,
     ReplyMarkup,
