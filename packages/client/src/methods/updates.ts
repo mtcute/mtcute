@@ -227,7 +227,7 @@ async function _loadDifference(
                     message.peerId?._ === 'peerChannel'
                         ? message.peerId.channelId
                         : 0
-                if (noDispatch.msg[cid][message.id]) return
+                if (noDispatch.msg[cid]?.[message.id]) return
             }
 
             this.dispatchUpdate(message, users, chats)
@@ -279,7 +279,7 @@ async function _loadDifference(
             }
 
             if (noDispatch && pts) {
-                if (noDispatch.pts[cid ?? 0][pts]) continue
+                if (noDispatch.pts[cid ?? 0]?.[pts]) continue
             }
 
             this.dispatchUpdate(upd, users, chats)
@@ -334,7 +334,7 @@ async function _loadChannelDifference(
             }
 
             diff.messages.forEach((message) => {
-                if (noDispatch && noDispatch.msg[channelId][message.id]) return
+                if (noDispatch && noDispatch.msg[channelId]?.[message.id]) return
 
                 this.dispatchUpdate(message, users, chats)
             })
@@ -342,7 +342,7 @@ async function _loadChannelDifference(
         }
 
         diff.newMessages.forEach((message) => {
-            if (noDispatch && noDispatch.msg[channelId][message.id]) return
+            if (noDispatch && noDispatch.msg[channelId]?.[message.id]) return
 
             this.dispatchUpdate(message, users, chats)
         })
@@ -355,7 +355,7 @@ async function _loadChannelDifference(
                 // is expected to return them in a correct order
                 // again, i would not trust Telegram server that much,
                 // but checking pts here seems like an overkill
-                if (pts && noDispatch.pts[channelId][pts]) return
+                if (pts && noDispatch.pts[channelId]?.[pts]) return
             }
 
             this.dispatchUpdate(upd, users, chats)
