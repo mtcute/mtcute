@@ -5,7 +5,7 @@ import { TelegramClient } from '../../client'
 import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
 import { MtCuteArgumentError, MtCuteTypeAssertionError } from '../errors'
 import { makeInspectable } from '../utils'
-import { InputPeerLike } from './index'
+import { InputPeerLike, User } from './index'
 
 export namespace Chat {
     /**
@@ -250,7 +250,7 @@ export class Chat {
      * Bio of the other party in a private chat, or description of a
      * group, supergroup or channel.
      *
-     * Returned only in {@link TelegramClient.getChat}
+     * Returned only in {@link TelegramClient.getFullChat}
      */
     get bio(): string | null {
         return this.fullPeer?.about ?? null
@@ -271,7 +271,7 @@ export class Chat {
 
     /**
      * Chat's permanent invite link, for groups, supergroups and channels.
-     * Returned only in {@link TelegramClient.getChat}
+     * Returned only in {@link TelegramClient.getFullChat}
      */
     get inviteLink(): string | null {
         return this.fullPeer && this.fullPeer._ !== 'userFull'
@@ -281,7 +281,7 @@ export class Chat {
 
     /**
      * For supergroups, name of the group sticker set.
-     * Returned only in {@link TelegramClient.getChat}
+     * Returned only in {@link TelegramClient.getFullChat}
      */
     get stickerSetName(): string | null {
         return this.fullPeer && this.fullPeer._ === 'channelFull'
@@ -291,7 +291,7 @@ export class Chat {
 
     /**
      * Whether the group sticker set can be changed by you.
-     * Returned only in {@link TelegramClient.getChat}
+     * Returned only in {@link TelegramClient.getFullChat}
      */
     get canSetStickerSet(): boolean | null {
         return this.fullPeer && this.fullPeer._ === 'channelFull'
@@ -301,7 +301,7 @@ export class Chat {
 
     /**
      * Chat members count, for groups, supergroups and channels only.
-     * Returned only in {@link TelegramClient.getChat}
+     * Returned only in {@link TelegramClient.getFullChat}
      */
     get membersCount(): number | null {
         return this.fullPeer && this.fullPeer._ !== 'userFull'
@@ -367,10 +367,23 @@ export class Chat {
      * The linked discussion group (in case of channels)
      * or the linked channel (in case of supergroups).
      *
-     * Returned only in {@link TelegramClient.getChat}
+     * Returned only in {@link TelegramClient.getFullChat}
      */
     get linkedChat(): Chat | null {
         return this._linkedChat ?? null
+    }
+
+    private _user?: User
+    /**
+     * Get a {@link User} from this chat.
+     *
+     * Returns `null` if this is not a chat with user
+     */
+    get user(): User | null {
+        if (this.peer._ !== 'user') return null
+
+        if (!this._user) this._user = new User(this.client, this.peer)
+        return this._user
     }
 
     /** @internal */
@@ -470,4 +483,4 @@ export class Chat {
     }
 }
 
-makeInspectable(Chat)
+makeInspectable(Chat, [], ['user'])
