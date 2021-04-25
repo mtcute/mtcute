@@ -36,7 +36,12 @@ export class Chat {
     /**
      * Raw peer object that this {@link Chat} represents.
      */
-    readonly peer: tl.RawUser | tl.RawChat | tl.RawChannel
+    readonly peer:
+        | tl.RawUser
+        | tl.RawChat
+        | tl.RawChannel
+        | tl.RawChatForbidden
+        | tl.RawChannelForbidden
 
     /**
      * Raw full peer object that this {@link Chat} represents.
@@ -50,7 +55,15 @@ export class Chat {
     ) {
         if (!peer) throw new MtCuteArgumentError('peer is not available')
 
-        if (!(peer._ === 'user' || peer._ === 'chat' || peer._ === 'channel'))
+        if (
+            !(
+                peer._ === 'user' ||
+                peer._ === 'chat' ||
+                peer._ === 'channel' ||
+                peer._ === 'chatForbidden' ||
+                peer._ === 'channelForbidden'
+            )
+        )
             throw new MtCuteTypeAssertionError(
                 'Chat#constructor (@ peer)',
                 'user | chat | channel',
@@ -85,12 +98,12 @@ export class Chat {
                     userId: this.peer.id,
                     accessHash: this.peer.accessHash,
                 }
-            } else if (this.peer._ === 'chat') {
+            } else if (this.peer._ === 'chat' || this.peer._ === 'chatForbidden') {
                 this._inputPeer = {
                     _: 'inputPeerChat',
                     chatId: this.peer.id,
                 }
-            } else if (this.peer._ === 'channel') {
+            } else if (this.peer._ === 'channel' || this.peer._ === 'channelForbidden') {
                 if (!this.peer.accessHash) {
                     throw new MtCuteArgumentError(
                         "Peer's access hash is not available!"
@@ -114,10 +127,10 @@ export class Chat {
         if (!this._type) {
             if (this.peer._ === 'user') {
                 this._type = this.peer.bot ? 'bot' : 'private'
-            } else if (this.peer._ === 'chat') {
+            } else if (this.peer._ === 'chat' || this.peer._ === 'chatForbidden') {
                 this._type = 'group'
-            } else if (this.peer._ === 'channel') {
-                this._type = this.peer.gigagroup
+            } else if (this.peer._ === 'channel' || this.peer._ === 'channelForbidden') {
+                this._type = this.peer._ === 'channel' && this.peer.gigagroup
                     ? 'gigagroup'
                     : this.peer.broadcast
                     ? 'channel'
@@ -133,7 +146,7 @@ export class Chat {
      * Supergroups, channels and groups only
      */
     get isVerified(): boolean {
-        return this.peer._ !== 'chat' && this.peer.verified!
+        return 'verified' in this.peer ? this.peer.verified! : false
     }
 
     /**
@@ -141,7 +154,7 @@ export class Chat {
      * See {@link restrictions} for details
      */
     get isRestricted(): boolean {
-        return this.peer._ !== 'chat' && this.peer.restricted!
+        return 'restricted' in this.peer ? this.peer.restricted! : false
     }
 
     /**
@@ -149,17 +162,17 @@ export class Chat {
      * Supergroups, channels and groups only
      */
     get isCreator(): boolean {
-        return this.peer._ !== 'user' && this.peer.creator!
+        return 'creator' in this.peer ? this.peer.creator! : false
     }
 
     /** Whether this chat has been flagged for scam */
     get isScam(): boolean {
-        return this.peer._ !== 'chat' && this.peer.scam!
+        return 'scam' in this.peer ? this.peer.scam! : false
     }
 
     /** Whether this chat has been flagged for impersonation */
     get isFake(): boolean {
-        return this.peer._ !== 'chat' && this.peer.fake!
+        return 'fake' in this.peer ? this.peer.fake! : false
     }
 
     /** Whether this chat is part of the Telegram support team. Users and bots only */
@@ -188,7 +201,7 @@ export class Chat {
      * Username, for private chats, bots, supergroups and channels if available
      */
     get username(): string | null {
-        return this.peer._ !== 'chat' ? this.peer.username ?? null : null
+        return 'username' in this.peer ? this.peer.username ?? null : null
     }
 
     /**
@@ -229,6 +242,7 @@ export class Chat {
      */
     get photo(): ChatPhoto | null {
         if (
+            !('photo' in this.peer) ||
             !this.peer.photo ||
             (this.peer.photo._ !== 'userProfilePhoto' &&
                 this.peer.photo._ !== 'chatPhoto')
@@ -266,7 +280,7 @@ export class Chat {
      * to the administrator who set the current profile photo.
      */
     get dcId(): number | null {
-        return (this.peer.photo as any)?.dcId ?? null
+        return ('photo' in this.peer && (this.peer.photo as any))?.dcId ?? null
     }
 
     /**
@@ -320,7 +334,7 @@ export class Chat {
      * This field is available only in case {@link isRestricted} is `true`
      */
     get restrictions(): tl.RawRestrictionReason[] | null {
-        return this.peer._ !== 'chat'
+        return 'restrictionReason' in this.peer
             ? this.peer.restrictionReason ?? null
             : null
     }
@@ -331,7 +345,7 @@ export class Chat {
      * Current user's permissions, for supergroups.
      */
     get permissions(): ChatPermissions | null {
-        if (this.peer._ !== 'channel' || !this.peer.bannedRights) return null
+        if (!('bannedRights' in this.peer && this.peer.bannedRights)) return null
 
         if (!this._permissions) {
             this._permissions = new ChatPermissions(this.peer.bannedRights)
@@ -344,7 +358,10 @@ export class Chat {
      * Default chat member permissions, for groups and supergroups.
      */
     get defaultPermissions(): ChatPermissions | null {
-        if (this.peer._ === 'user' || !this.peer.defaultBannedRights)
+        if (
+            !('defaultBannedRights' in this.peer) ||
+            !this.peer.defaultBannedRights
+        )
             return null
 
         if (!this._permissions) {

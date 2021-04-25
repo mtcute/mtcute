@@ -305,6 +305,10 @@ export class User {
      * > mention links (`tg://user?id=123&hash=abc`).
      * >
      * > Both `@mtcute/html-parser` and `@mtcute/markdown-parser` support it.
+     * >
+     * > Also note that these permanent mentions are only
+     * > valid for current account, since peer access hashes are
+     * > account-specific and can't be used on another account.
      *
      * @param text  Mention text
      * @param parseMode  Parse mode to use when creating mention
