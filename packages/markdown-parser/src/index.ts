@@ -2,7 +2,7 @@ import type { IMessageEntityParser, MessageEntity } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import bigInt from 'big-integer'
 
-const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=([0-9a-fA-F]+)(?:&|$)|&|$)/
+const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 
 const TAG_BOLD = '**'
 const TAG_ITALIC = '__'
