@@ -11,7 +11,7 @@ const TAG_STRIKE = '~~'
 const TAG_CODE = '`'
 const TAG_PRE = '```'
 
-const TO_BE_ESCAPED = /[*_\-~`[\\]/g
+const TO_BE_ESCAPED = /[*_\-~`[\\]]/g
 
 /**
  * Markdown MessageEntity parser.
