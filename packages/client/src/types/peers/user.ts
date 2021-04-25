@@ -106,7 +106,7 @@ export class User {
 
     /** User's or bot's first name */
     get firstName(): string {
-        return this._user.firstName!
+        return this._user.firstName ?? 'Deleted Account'
     }
 
     /** User's or bot's last name */
@@ -251,6 +251,7 @@ export class User {
      * only first name otherwise.
      */
     get displayName(): string {
+        if (!this.firstName) return 'Deleted Account'
         if (this.lastName) return `${this.firstName} ${this.lastName}`
         return this.firstName
     }
