@@ -916,6 +916,15 @@ export interface TelegramClient extends BaseTelegramClient {
          * By default fetches from "All" folder
          */
         folder?: string | number | tl.RawDialogFilter
+
+        /**
+         * Additional filtering for the dialogs.
+         *
+         * If `folder` is not provided, this filter is used instead.
+         * If `folder` is provided, fields from this object are used
+         * to override filters inside the folder.
+         */
+        filter?: Partial<Omit<tl.RawDialogFilter, '_' | 'id' | 'title'>>
     }): AsyncIterableIterator<Dialog>
     /**
      * Get list of folders.
