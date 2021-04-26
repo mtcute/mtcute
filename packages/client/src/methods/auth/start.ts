@@ -111,28 +111,39 @@ export async function start(
 
         /**
          * Whether to "catch up" (load missed updates).
-         * Note: you should register your handlers
-         * before calling `start()`
+         * Only applicable if the saved session already
+         * contained authorization and updates state.
          *
-         * Defaults to true.
+         * Note: you should register your handlers
+         * before calling `start()`, otherwise they will
+         * not be called.
+         *
+         * Note: In case the storage was not properly
+         * closed the last time, "catching up" might
+         * result in duplicate updates.
+         *
+         * Defaults to `false`.
          */
         catchUp?: boolean
     }
 ): Promise<User> {
-    if (!params.phone && !params.botToken)
-        throw new MtCuteArgumentError(
-            'Neither phone nor bot token were provided'
-        )
-
     try {
         const me = await this.getMe()
+
         // user is already authorized
-        if (params.catchUp !== false && !this._disableUpdates)
+
+        if (!this._disableUpdates && params.catchUp)
             await this.catchUp()
+
         return me
     } catch (e) {
         if (!(e instanceof AuthKeyUnregisteredError)) throw e
     }
+
+    if (!params.phone && !params.botToken)
+        throw new MtCuteArgumentError(
+            'Neither phone nor bot token were provided'
+        )
 
     let phone = params.phone ? await resolveMaybeDynamic(params.phone) : null
     if (phone) {
@@ -149,9 +160,7 @@ export async function start(
                 'Either bot token or phone number must be provided'
             )
 
-        if (params.catchUp !== false) await this.catchUp()
-
-        return this.signInBot(botToken)
+        return await this.signInBot(botToken)
     }
 
     let sentCode = await this.sendCode(phone)

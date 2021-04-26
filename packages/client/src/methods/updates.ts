@@ -767,4 +767,5 @@ export function catchUp(this: TelegramClient): Promise<void> {
         .then(() => _loadDifference.call(this))
         .catch((err) => this._emitError(err))
         .then(() => this._updLock.release())
+        .then(() => this._saveStorage())
 }
