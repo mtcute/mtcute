@@ -311,8 +311,6 @@ export class BaseTelegramClient {
         })
         this.primaryConnection.on('usable', async () => {
             this._keepAliveInterval = setInterval(async () => {
-                await this._saveStorage()
-
                 // according to telethon, "We need to send some content-related request at least hourly
                 // for Telegram to keep delivering updates, otherwise they will just stop even if we're connected.
                 // Do so every 30 minutes"
@@ -690,5 +688,6 @@ export class BaseTelegramClient {
         }
 
         await this.storage.updatePeers(parsedPeers)
+        await this._saveStorage()
     }
 }

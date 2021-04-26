@@ -93,19 +93,23 @@ export async function _loadStorage(this: TelegramClient): Promise<void> {
 export async function _saveStorage(this: TelegramClient): Promise<void> {
     // save updates state to the session
 
-    // before any authorization pts will be undefined
-    if (this._pts !== undefined) {
-        await this.storage.setCommonPts([this._pts, this._date]) // , this._seq])
-        await this.storage.setManyChannelPts(this._cpts)
-    }
-    if (this._userId !== null) {
-        await this.storage.setSelf({
-            userId: this._userId,
-            isBot: this._isBot,
-        })
-    }
+    try {
+        // before any authorization pts will be undefined
+        if (this._pts !== undefined) {
+            await this.storage.setCommonPts([this._pts, this._date]) // , this._seq])
+            await this.storage.setManyChannelPts(this._cpts)
+        }
+        if (this._userId !== null) {
+            await this.storage.setSelf({
+                userId: this._userId,
+                isBot: this._isBot,
+            })
+        }
 
-    await this.storage.save?.()
+        await this.storage.save?.()
+    } catch (err) {
+        this._emitError(err)
+    }
 }
 
 /**
@@ -751,6 +755,7 @@ export function _handleUpdate(
         })
         .catch((err) => this._emitError(err))
         .then(() => this._updLock.release())
+        .then(() => this._saveStorage())
 }
 
 /**
