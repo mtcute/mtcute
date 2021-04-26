@@ -352,7 +352,7 @@ export class Message {
             } else if (from._ === 'peerUser') {
                 this._sender = new User(
                     this.client,
-                    this._users[from.userId] as tl.RawUser
+                    this._users[from.userId]
                 )
             } else
                 throw new MtCuteTypeAssertionError(
@@ -420,7 +420,7 @@ export class Message {
                     } else if (fwd.fromId._ === 'peerUser') {
                         sender = new User(
                             this.client,
-                            this._users[fwd.fromId.userId] as tl.RawUser
+                            this._users[fwd.fromId.userId]
                         )
                     } else
                         throw new MtCuteTypeAssertionError(
@@ -478,7 +478,7 @@ export class Message {
             } else {
                 this._viaBot = new User(
                     this.client,
-                    this._users[this.raw.viaBotId] as tl.RawUser
+                    this._users[this.raw.viaBotId]
                 )
             }
         }

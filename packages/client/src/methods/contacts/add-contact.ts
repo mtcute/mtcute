@@ -57,5 +57,5 @@ export async function addContact(
 
     this._handleUpdate(res)
 
-    return new User(this, res.users[0] as tl.RawUser)
+    return new User(this, res.users[0])
 }

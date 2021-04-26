@@ -3,6 +3,7 @@ import { TelegramClient } from '../../client'
 import { ChatPhoto } from './chat-photo'
 import { MtCuteArgumentError } from '../errors'
 import { makeInspectable } from '../utils'
+import { assertTypeIs } from '../../utils/type-assertion'
 
 export namespace User {
     /**
@@ -41,7 +42,9 @@ export class User {
      */
     private _user: tl.RawUser
 
-    constructor(client: TelegramClient, user: tl.RawUser) {
+    constructor(client: TelegramClient, user: tl.TypeUser) {
+        assertTypeIs('User#init', user, 'user')
+
         this.client = client
         this._user = user
     }

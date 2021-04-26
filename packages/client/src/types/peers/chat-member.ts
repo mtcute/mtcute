@@ -61,12 +61,12 @@ export class ChatMember {
                 )
                 this._user = new User(
                     this.client,
-                    this._users[this.raw.peer.userId] as tl.RawUser
+                    this._users[this.raw.peer.userId]
                 )
             } else {
                 this._user = new User(
                     this.client,
-                    this._users[this.raw.userId] as tl.RawUser
+                    this._users[this.raw.userId]
                 )
             }
         }
@@ -158,7 +158,7 @@ export class ChatMember {
             ) {
                 this._invitedBy = new User(
                     this.client,
-                    this._users[this.raw.inviterId] as tl.RawUser
+                    this._users[this.raw.inviterId]
                 )
             } else {
                 this._invitedBy = null
@@ -179,7 +179,7 @@ export class ChatMember {
             if (this.raw._ === 'channelParticipantAdmin') {
                 this._promotedBy = new User(
                     this.client,
-                    this._users[this.raw.promotedBy] as tl.RawUser
+                    this._users[this.raw.promotedBy]
                 )
             } else {
                 this._promotedBy = null
@@ -200,7 +200,7 @@ export class ChatMember {
             if (this.raw._ === 'channelParticipantBanned') {
                 this._restrictedBy = new User(
                     this.client,
-                    this._users[this.raw.kickedBy] as tl.RawUser
+                    this._users[this.raw.kickedBy]
                 )
             } else {
                 this._restrictedBy = null

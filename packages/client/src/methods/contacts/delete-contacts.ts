@@ -70,7 +70,7 @@ export async function deleteContacts(
 
     this._handleUpdate(res)
 
-    const users = res.users.map(user => new User(this, user as tl.RawUser))
+    const users = res.users.map(user => new User(this, user))
 
     return single ? users[0] : users
 }

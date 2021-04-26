@@ -51,6 +51,6 @@ export async function getUsers(
     res = res.filter((it) => it._ !== 'userEmpty')
 
     return isArray
-        ? res.map((it) => new User(this, it as tl.RawUser))
-        : new User(this, res[0] as tl.RawUser)
+        ? res.map((it) => new User(this, it))
+        : new User(this, res[0])
 }

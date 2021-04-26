@@ -16,5 +16,5 @@ export async function getContacts(
     })
     assertTypeIs('getContacts', res, 'contacts.contacts')
 
-    return res.users.map((user) => new User(this, user as tl.RawUser))
+    return res.users.map((user) => new User(this, user))
 }

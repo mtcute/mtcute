@@ -80,7 +80,7 @@ export class ChatPreview {
         if (!this._someMembers) {
             this._someMembers = this.invite.participants
                 ? this.invite.participants.map(
-                      (it) => new User(this.client, it as tl.RawUser)
+                      (it) => new User(this.client, it)
                   )
                 : []
         }
