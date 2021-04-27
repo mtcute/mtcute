@@ -1,6 +1,7 @@
-import { NewMessageHandler, RawUpdateHandler } from './handler'
+import { ChatMemberUpdateHandler, NewMessageHandler, RawUpdateHandler } from './handler'
 import { filters, UpdateFilter } from './filters'
 import { Message } from '@mtcute/client'
+import { ChatMemberUpdate } from './updates'
 
 export namespace handlers {
     /**
@@ -72,6 +73,44 @@ export namespace handlers {
 
         return {
             type: 'new_message',
+            callback: filter,
+        }
+    }
+
+    /**
+     * Create a {@link ChatMemberUpdateHandler}
+     *
+     * @param handler  Chat member update handler
+     */
+    export function chatMemberUpdate(
+        handler: ChatMemberUpdateHandler['callback']
+    ): ChatMemberUpdateHandler
+
+    /**
+     * Create a {@link ChatMemberUpdateHandler} with a filter
+     *
+     * @param filter  Chat member update filter
+     * @param handler  Chat member update handler
+     */
+    export function chatMemberUpdate<Mod>(
+        filter: UpdateFilter<ChatMemberUpdate, Mod>,
+        handler: ChatMemberUpdateHandler<filters.Modify<ChatMemberUpdate, Mod>>['callback']
+    ): ChatMemberUpdateHandler
+
+    export function chatMemberUpdate(
+        filter: any,
+        handler?: any
+    ): ChatMemberUpdateHandler {
+        if (handler) {
+            return {
+                type: 'chat_member',
+                check: filter,
+                callback: handler,
+            }
+        }
+
+        return {
+            type: 'chat_member',
             callback: filter,
         }
     }

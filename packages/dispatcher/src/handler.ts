@@ -1,6 +1,7 @@
 import { MaybeAsync, Message, TelegramClient } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { PropagationSymbol } from './propagation'
+import { ChatMemberUpdate } from './updates'
 
 interface BaseUpdateHandler<Type, Handler, Checker> {
     type: Type
@@ -34,6 +35,16 @@ export type RawUpdateHandler = BaseUpdateHandler<
     ) => MaybeAsync<boolean>
 >
 
-export type NewMessageHandler<T = Message> = ParsedUpdateHandler<'new_message', T>
+export type NewMessageHandler<T = Message> = ParsedUpdateHandler<
+    'new_message',
+    T
+>
+export type ChatMemberUpdateHandler<T = ChatMemberUpdate> = ParsedUpdateHandler<
+    'chat_member',
+    T
+>
 
-export type UpdateHandler = RawUpdateHandler | NewMessageHandler
+export type UpdateHandler =
+    | RawUpdateHandler
+    | NewMessageHandler
+    | ChatMemberUpdateHandler

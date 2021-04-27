@@ -6,9 +6,15 @@ import {
     StopChildrenPropagation,
     StopPropagation,
 } from './propagation'
-import { NewMessageHandler, RawUpdateHandler, UpdateHandler } from './handler'
+import {
+    ChatMemberUpdateHandler,
+    NewMessageHandler,
+    RawUpdateHandler,
+    UpdateHandler,
+} from './handler'
 import { filters, UpdateFilter } from './filters'
 import { handlers } from './builders'
+import { ChatMemberUpdate } from './updates'
 
 const noop = () => {}
 
@@ -127,6 +133,19 @@ export class Dispatcher {
             )
         }
 
+        let chatMember: ChatMemberUpdate | null = null
+        if (
+            update._ === 'updateChatParticipant' ||
+            update._ === 'updateChannelParticipant'
+        ) {
+            chatMember = new ChatMemberUpdate(
+                this._client,
+                update,
+                users,
+                chats
+            )
+        }
+
         outer: for (const grp of this._groupsOrder) {
             for (const handler of this._groups[grp]) {
                 let result: void | PropagationSymbol
@@ -155,6 +174,13 @@ export class Dispatcher {
                         (await handler.check(message, this._client)))
                 ) {
                     result = await handler.callback(message, this._client)
+                } else if (
+                    handler.type === 'chat_member' &&
+                    chatMember &&
+                    (!handler.check ||
+                        (await handler.check(chatMember, this._client)))
+                ) {
+                    result = await handler.callback(chatMember, this._client)
                 } else continue
 
                 if (result === ContinuePropagation) continue
@@ -378,5 +404,37 @@ export class Dispatcher {
     /** @internal */
     onNewMessage(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('newMessage', filter, handler, group)
+    }
+
+    /**
+     * Register a chat member update filter without any filters.
+     *
+     * @param handler  Update handler
+     * @param group  Handler group index
+     * @internal
+     */
+    onChatMemberUpdate(
+        handler: ChatMemberUpdateHandler['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register a message handler with a given filter
+     *
+     * @param filter  Update filter
+     * @param handler  Update handler
+     * @param group  Handler group index
+     */
+    onChatMemberUpdate<Mod>(
+        filter: UpdateFilter<ChatMemberUpdate, Mod>,
+        handler: ChatMemberUpdateHandler<
+            filters.Modify<ChatMemberUpdate, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onChatMemberUpdate(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('chatMemberUpdate', filter, handler, group)
     }
 }

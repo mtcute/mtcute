@@ -19,6 +19,7 @@ import {
 import { Game } from '@mtcute/client/src/types/media/game'
 import { WebPage } from '@mtcute/client/src/types/media/web-page'
 import { MaybeArray } from '@mtcute/core'
+import { ChatMemberUpdate } from './updates'
 
 /**
  * Type describing a primitive filter, which is a function taking some `Base`
@@ -560,5 +561,32 @@ export namespace filters {
 
             return false
         }
+    }
+
+    /**
+     * Create a filter for {@link ChatMemberUpdate} by update type
+     *
+     * @param types  Update type(s)
+     */
+    export const chatMember: {
+        <T extends ChatMemberUpdate.Type>(type: T): UpdateFilter<
+            ChatMemberUpdate,
+            { type: T }
+        >
+        <T extends ChatMemberUpdate.Type[]>(types: T): UpdateFilter<
+            ChatMemberUpdate,
+            { type: T[number] }
+        >
+    } = (
+        types: MaybeArray<ChatMemberUpdate.Type>
+    ): UpdateFilter<ChatMemberUpdate> => {
+        if (Array.isArray(types)) {
+            const index: Partial<Record<ChatMemberUpdate.Type, true>> = {}
+            types.forEach((typ) => (index[typ] = true))
+
+            return (upd) => upd.type in index
+        }
+
+        return (upd) => upd.type === types
     }
 }
