@@ -5,6 +5,7 @@ export * from './chat'
 export * from './chat-preview'
 export { InputChatPermissions } from './chat-permissions'
 export * from './chat-member'
+export * from './chat-invite-link'
 
 /**
  * Peer types that have one-to-one relation to tl.Peer* types.
