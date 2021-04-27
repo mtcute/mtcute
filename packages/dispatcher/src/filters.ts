@@ -567,6 +567,7 @@ export namespace filters {
      * Create a filter for {@link ChatMemberUpdate} by update type
      *
      * @param types  Update type(s)
+     * @link ChatMemberUpdate.Type
      */
     export const chatMember: {
         <T extends ChatMemberUpdate.Type>(type: T): UpdateFilter<
@@ -589,4 +590,10 @@ export namespace filters {
 
         return (upd) => upd.type === types
     }
+
+    /**
+     * Create a filter for {@link ChatMemberUpdate} for updates
+     * regarding current user
+     */
+    export const chatMemberSelf: UpdateFilter<ChatMemberUpdate, { isSelf: true }> = (upd) => upd.isSelf
 }
