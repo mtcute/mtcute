@@ -14,7 +14,7 @@ interface BaseInputMedia {
 
     /**
      * Caption entities of the media.
-     * If passed, {@link caption} is ignored
+     * If passed, parse mode is ignored
      */
     entities?: tl.TypeMessageEntity[]
 

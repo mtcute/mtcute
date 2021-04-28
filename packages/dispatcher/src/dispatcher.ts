@@ -1,4 +1,9 @@
-import { Message, MtCuteArgumentError, TelegramClient } from '@mtcute/client'
+import {
+    InlineQuery,
+    Message,
+    MtCuteArgumentError,
+    TelegramClient,
+} from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import {
     ContinuePropagation,
@@ -7,7 +12,7 @@ import {
     StopPropagation,
 } from './propagation'
 import {
-    ChatMemberUpdateHandler,
+    ChatMemberUpdateHandler, InlineQueryHandler,
     NewMessageHandler,
     RawUpdateHandler,
     UpdateHandler,
@@ -17,6 +22,54 @@ import { handlers } from './builders'
 import { ChatMemberUpdate } from './updates'
 
 const noop = () => {}
+
+type ParserFunction = (
+    client: TelegramClient,
+    upd: tl.TypeUpdate | tl.TypeMessage,
+    users: Record<number, tl.TypeUser>,
+    chats: Record<number, tl.TypeChat>
+) => any
+type UpdateParser = [Exclude<UpdateHandler['type'], 'raw'>, ParserFunction]
+
+const baseMessageParser: ParserFunction = (
+    client: TelegramClient,
+    upd,
+    users,
+    chats
+) =>
+    new Message(
+        client,
+        tl.isAnyMessage(upd) ? upd : (upd as any).message,
+        users,
+        chats
+    )
+
+const newMessageParser: UpdateParser = ['new_message', baseMessageParser]
+const editMessageParser: UpdateParser = ['edit_message', baseMessageParser]
+const chatMemberParser: UpdateParser = [
+    'chat_member',
+    (client, upd, users, chats) =>
+        new ChatMemberUpdate(client, upd as any, users, chats),
+]
+
+const PARSERS: Partial<
+    Record<(tl.TypeUpdate | tl.TypeMessage)['_'], UpdateParser>
+> = {
+    message: newMessageParser,
+    messageEmpty: newMessageParser,
+    messageService: newMessageParser,
+    updateNewMessage: newMessageParser,
+    updateNewChannelMessage: newMessageParser,
+    updateNewScheduledMessage: newMessageParser,
+    updateEditMessage: editMessageParser,
+    updateEditChannelMessage: editMessageParser,
+    updateChatParticipant: chatMemberParser,
+    updateChannelParticipant: chatMemberParser,
+    updateBotInlineQuery: [
+        'inline_query',
+        (client, upd, users) => new InlineQuery(client, upd as any, users),
+    ],
+}
 
 /**
  * The dispatcher
@@ -115,36 +168,10 @@ export class Dispatcher {
         if (!this._client) return
 
         const isRawMessage = tl.isAnyMessage(update)
-
-        let message: Message | null = null
-        if (
-            update._ === 'updateNewMessage' ||
-            update._ === 'updateNewChannelMessage' ||
-            update._ === 'updateNewScheduledMessage' ||
-            update._ === 'updateEditMessage' ||
-            update._ === 'updateEditChannelMessage' ||
-            isRawMessage
-        ) {
-            message = new Message(
-                this._client,
-                isRawMessage ? update : (update as any).message,
-                users,
-                chats
-            )
-        }
-
-        let chatMember: ChatMemberUpdate | null = null
-        if (
-            update._ === 'updateChatParticipant' ||
-            update._ === 'updateChannelParticipant'
-        ) {
-            chatMember = new ChatMemberUpdate(
-                this._client,
-                update,
-                users,
-                chats
-            )
-        }
+        const pair = PARSERS[update._]
+        const parsed = pair
+            ? pair[1](this._client, update, users, chats)
+            : undefined
 
         outer: for (const grp of this._groupsOrder) {
             for (const handler of this._groups[grp]) {
@@ -168,19 +195,12 @@ export class Dispatcher {
                         chats
                     )
                 } else if (
-                    handler.type === 'new_message' &&
-                    message &&
+                    pair &&
+                    handler.type === pair[0] &&
                     (!handler.check ||
-                        (await handler.check(message, this._client)))
+                        (await handler.check(parsed, this._client)))
                 ) {
-                    result = await handler.callback(message, this._client)
-                } else if (
-                    handler.type === 'chat_member' &&
-                    chatMember &&
-                    (!handler.check ||
-                        (await handler.check(chatMember, this._client)))
-                ) {
-                    result = await handler.callback(chatMember, this._client)
+                    result = await handler.callback(parsed, this._client)
                 } else continue
 
                 if (result === ContinuePropagation) continue
@@ -407,7 +427,7 @@ export class Dispatcher {
     }
 
     /**
-     * Register a chat member update filter without any filters.
+     * Register a chat member update handler without any filters.
      *
      * @param handler  Update handler
      * @param group  Handler group index
@@ -436,5 +456,37 @@ export class Dispatcher {
     /** @internal */
     onChatMemberUpdate(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('chatMemberUpdate', filter, handler, group)
+    }
+
+    /**
+     * Register an inline query handler without any filters.
+     *
+     * @param handler  Update handler
+     * @param group  Handler group index
+     * @internal
+     */
+    onInlineQuery(
+        handler: InlineQueryHandler['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register an inline query handler with a given filter
+     *
+     * @param filter  Update filter
+     * @param handler  Update handler
+     * @param group  Handler group index
+     */
+    onInlineQuery<Mod>(
+        filter: UpdateFilter<InlineQuery, Mod>,
+        handler: InlineQueryHandler<
+            filters.Modify<InlineQuery, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onInlineQuery(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('inlineQuery', filter, handler, group)
     }
 }

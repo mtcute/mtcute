@@ -1,4 +1,4 @@
-import { MaybeAsync, Message, TelegramClient } from '@mtcute/client'
+import { MaybeAsync, Message, TelegramClient, InlineQuery } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { PropagationSymbol } from './propagation'
 import { ChatMemberUpdate } from './updates'
@@ -39,12 +39,19 @@ export type NewMessageHandler<T = Message> = ParsedUpdateHandler<
     'new_message',
     T
 >
+export type EditMessageHandler<T = Message> = ParsedUpdateHandler<
+    'edit_message',
+    T
+>
 export type ChatMemberUpdateHandler<T = ChatMemberUpdate> = ParsedUpdateHandler<
     'chat_member',
     T
 >
+export type InlineQueryHandler<T = InlineQuery> = ParsedUpdateHandler<'inline_query', T>
 
 export type UpdateHandler =
     | RawUpdateHandler
     | NewMessageHandler
+    | EditMessageHandler
     | ChatMemberUpdateHandler
+    | InlineQueryHandler

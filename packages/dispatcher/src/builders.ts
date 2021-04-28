@@ -1,9 +1,35 @@
-import { ChatMemberUpdateHandler, NewMessageHandler, RawUpdateHandler } from './handler'
+import {
+    ChatMemberUpdateHandler,
+    InlineQueryHandler,
+    NewMessageHandler,
+    RawUpdateHandler,
+    UpdateHandler,
+} from './handler'
 import { filters, UpdateFilter } from './filters'
-import { Message } from '@mtcute/client'
+import { InlineQuery, Message } from '@mtcute/client'
 import { ChatMemberUpdate } from './updates'
 
+function _create<T extends UpdateHandler>(
+    type: T['type'],
+    filter: any,
+    handler?: any
+): T {
+    if (handler) {
+        return {
+            type,
+            check: filter,
+            callback: handler
+        } as any
+    }
+
+    return {
+        type,
+        callback: filter
+    } as any
+}
+
 export namespace handlers {
+
     /**
      * Create a {@link RawUpdateHandler}
      *
@@ -25,18 +51,7 @@ export namespace handlers {
     ): RawUpdateHandler
 
     export function rawUpdate(filter: any, handler?: any): RawUpdateHandler {
-        if (handler) {
-            return {
-                type: 'raw',
-                check: filter,
-                callback: handler
-            }
-        }
-
-        return {
-            type: 'raw',
-            callback: filter
-        }
+        return _create('raw', filter, handler)
     }
 
     /**
@@ -63,18 +78,7 @@ export namespace handlers {
         filter: any,
         handler?: any
     ): NewMessageHandler {
-        if (handler) {
-            return {
-                type: 'new_message',
-                check: filter,
-                callback: handler,
-            }
-        }
-
-        return {
-            type: 'new_message',
-            callback: filter,
-        }
+        return _create('new_message', filter, handler)
     }
 
     /**
@@ -101,17 +105,33 @@ export namespace handlers {
         filter: any,
         handler?: any
     ): ChatMemberUpdateHandler {
-        if (handler) {
-            return {
-                type: 'chat_member',
-                check: filter,
-                callback: handler,
-            }
-        }
+        return _create('chat_member', filter, handler)
+    }
 
-        return {
-            type: 'chat_member',
-            callback: filter,
-        }
+    /**
+     * Create an inline query handler
+     *
+     * @param handler  Inline query handler
+     */
+    export function inlineQuery(
+        handler: InlineQueryHandler['callback']
+    ): InlineQueryHandler
+
+    /**
+     * Create an inline query with a filter
+     *
+     * @param filter  Inline query update filter
+     * @param handler  Inline query handler
+     */
+    export function inlineQuery<Mod>(
+        filter: UpdateFilter<InlineQuery, Mod>,
+        handler: InlineQueryHandler<filters.Modify<InlineQuery, Mod>>['callback']
+    ): InlineQueryHandler
+
+    export function inlineQuery(
+        filter: any,
+        handler?: any
+    ): InlineQueryHandler {
+        return _create('inline_query', filter, handler)
     }
 }

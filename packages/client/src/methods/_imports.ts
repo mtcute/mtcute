@@ -27,6 +27,7 @@ import {
     Message,
     ReplyMarkup,
     InputMediaLike,
+    InputInlineResult,
     TakeoutSession,
     StickerSet
 } from '../types'
