@@ -1,5 +1,5 @@
 import { tl } from '@mtcute/tl'
-import { FileLocation } from '../files/file-location'
+import { FileLocation } from '../files'
 import { TelegramClient } from '../../client'
 import { MtCuteArgumentError } from '../errors'
 import { Thumbnail } from './thumbnail'
@@ -119,8 +119,8 @@ export class Photo extends FileLocation {
                 _: 'inputPhoto',
                 id: this.raw.id,
                 accessHash: this.raw.accessHash,
-                fileReference: this.raw.fileReference
-            }
+                fileReference: this.raw.fileReference,
+            },
         }
     }
 
@@ -133,7 +133,7 @@ export class Photo extends FileLocation {
             // type is only really used for creating tl.InputMedia,
             // but since we are providing it directly, we can use `auto`
             type: 'auto',
-            file: this.inputMediaTl
+            file: this.inputMediaTl,
             // other fields are not needed since it's a forwarded media
         }
     }

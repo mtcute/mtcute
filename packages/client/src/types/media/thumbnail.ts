@@ -1,14 +1,15 @@
 import { TelegramClient } from '../../client'
-import { FileLocation } from '../files/file-location'
+import { FileLocation } from '../files'
 import { tl } from '@mtcute/tl'
 import {
     inflateSvgPath,
     strippedPhotoToJpg,
     svgPathToFile,
 } from '../../utils/file-utils'
-import { MtCuteTypeAssertionError } from '../errors'
+import { MtCuteArgumentError, MtCuteTypeAssertionError } from '../errors'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { makeInspectable } from '../utils'
+import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
 /**
  * One size of some thumbnail
@@ -54,6 +55,7 @@ export class Thumbnail extends FileLocation {
     readonly height: number
 
     private _path?: string
+    private _media: tl.RawPhoto | tl.RawDocument
 
     constructor(
         client: TelegramClient,
@@ -102,6 +104,7 @@ export class Thumbnail extends FileLocation {
         this.raw = sz
         this.width = width
         this.height = height
+        this._media = media
 
         if (sz._ === 'photoPathSize') {
             this._path = inflateSvgPath(sz.bytes)
@@ -129,6 +132,59 @@ export class Thumbnail extends FileLocation {
         assertTypeIs('Thumbnail#path', this.raw, 'photoPathSize')
 
         return this._path!
+    }
+
+    private _fileId?: string
+    /**
+     * Get TDLib and Bot API compatible File ID
+     * representing this thumbnail.
+     */
+    get fileId(): string {
+        if (!this._fileId) {
+            if (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive') {
+                throw new MtCuteArgumentError(`Cannot generate a file ID for "${this.raw.type}"`)
+            }
+
+            this._fileId = toFileId({
+                type: this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
+                dcId: this.dcId,
+                fileReference: this._media.fileReference,
+                location: {
+                    _: 'photo',
+                    id: this._media.id,
+                    accessHash: this._media.accessHash,
+                    volumeId: this.raw.location.volumeId,
+                    localId: this.raw.location.localId,
+                    source: {
+                        _: 'thumbnail',
+                        fileType: td.FileType.Photo,
+                        thumbnailType: this.raw.type,
+                    },
+                },
+            })
+        }
+
+        return this._fileId
+    }
+
+    private _uniqueFileId?: string
+    /**
+     * Get a unique File ID representing this thumbnail.
+     */
+    get uniqueFileId(): string {
+        if (!this._uniqueFileId) {
+            if (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive') {
+                throw new MtCuteArgumentError(`Cannot generate a unique file ID for "${this.raw.type}"`)
+            }
+
+            this._uniqueFileId = toUniqueFileId(td.FileType.Photo, {
+                _: 'photo',
+                volumeId: this.raw.location.volumeId,
+                localId: this.raw.location.localId
+            })
+        }
+
+        return this._uniqueFileId
     }
 }
 
