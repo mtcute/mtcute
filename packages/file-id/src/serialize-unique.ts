@@ -1,6 +1,12 @@
-import { tdFileId as td } from './types'
+import { tdFileId, tdFileId as td } from './types'
 import { BinaryWriter } from '@mtcute/core/src/utils/binary/binary-writer'
 import { encodeUrlSafeBase64, telegramRleEncode } from './utils'
+import FileType = tdFileId.FileType
+
+type InputUniqueLocation =
+    | Pick<td.RawWebRemoteFileLocation, '_' | 'url'>
+    | Pick<td.RawPhotoRemoteFileLocation, '_' | 'volumeId' | 'localId'>
+    | Pick<td.RawCommonRemoteFileLocation, '_' | 'id'>
 
 /**
  * Serialize an object with information about file
@@ -16,12 +22,23 @@ import { encodeUrlSafeBase64, telegramRleEncode } from './utils'
  */
 export function toUniqueFileId(
     location: Omit<td.RawFullRemoteFileLocation, '_'>
+): string
+export function toUniqueFileId(
+    type: FileType,
+    location: InputUniqueLocation
+): string
+export function toUniqueFileId(
+    first: FileType | Omit<td.RawFullRemoteFileLocation, '_'>,
+    second?: InputUniqueLocation
 ): string {
+    const inputType = typeof first === 'number' ? first : first.type
+    const inputLocation = typeof first === 'number' ? second! : first.location
+
     let type
-    if (location.location._ === 'web') {
+    if (inputLocation._ === 'web') {
         type = 0
     } else {
-        switch (location.type) {
+        switch (inputType) {
             case td.FileType.Photo:
             case td.FileType.ProfilePhoto:
             case td.FileType.Thumbnail:
@@ -52,30 +69,30 @@ export function toUniqueFileId(
                 break
             default:
                 throw new td.InvalidFileIdError(
-                    `Invalid file type: ${location.type}`
+                    `Invalid file type: ${inputType}`
                 )
         }
     }
 
     let writer: BinaryWriter
-    if (location.location._ === 'photo') {
+    if (inputLocation._ === 'photo') {
         writer = BinaryWriter.alloc(16)
         writer.int32(type)
-        writer.long(location.location.volumeId)
-        writer.int32(location.location.localId)
-    } else if (location.location._ === 'web') {
+        writer.long(inputLocation.volumeId)
+        writer.int32(inputLocation.localId)
+    } else if (inputLocation._ === 'web') {
         writer = BinaryWriter.alloc(
-            Buffer.byteLength(location.location.url, 'utf-8') + 8
+            Buffer.byteLength(inputLocation.url, 'utf-8') + 8
         )
         writer.int32(type)
-        writer.string(location.location.url)
-    } else if (location.location._ === 'common') {
+        writer.string(inputLocation.url)
+    } else if (inputLocation._ === 'common') {
         writer = BinaryWriter.alloc(12)
         writer.int32(type)
-        writer.long(location.location.id)
+        writer.long(inputLocation.id)
     } else {
         throw new td.UnsupportedError(
-            `Unique IDs are not supported for ${(location.location as any)._}`
+            `Unique IDs are not supported for ${(inputLocation as any)._}`
         )
     }
 
