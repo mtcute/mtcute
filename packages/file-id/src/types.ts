@@ -35,7 +35,7 @@ export namespace tdFileId {
      * Provided File ID cannot be converted to that TL object.
      */
     export class ConversionError extends FileIdError {
-        constructor (to: string) {
+        constructor(to: string) {
             super(`Cannot convert given File ID to ${to}`)
         }
     }
@@ -189,5 +189,14 @@ export namespace tdFileId {
          * Context of the file location
          */
         readonly location: TypeRemoteFileLocation
+    }
+
+    export function isFileIdLike(
+        obj: any
+    ): obj is string | RawFullRemoteFileLocation {
+        return (
+            typeof obj === 'string' ||
+            (typeof obj === 'object' && obj._ === 'remoteFileLocation')
+        )
     }
 }

@@ -10,6 +10,7 @@ import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
 import { normalizeDate, randomUlong } from '../../utils/misc-utils'
+import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
 
 /**
  * Send a single photo
@@ -94,14 +95,23 @@ export async function sendPhoto(
     if (!params) params = {}
 
     let media: tl.TypeInputMedia
-    if (typeof photo === 'object' && tl.isAnyInputMedia(photo)) {
-        media = photo
-    } else if (typeof photo === 'string' && photo.match(/^https?:\/\//)) {
-        media = {
-            _: 'inputMediaPhotoExternal',
-            url: photo,
-            ttlSeconds: params.ttlSeconds,
+
+    if (tdFileId.isFileIdLike(photo)) {
+        if (typeof photo === 'string' && photo.match(/^https?:\/\//)) {
+            media = {
+                _: 'inputMediaPhotoExternal',
+                url: photo,
+                ttlSeconds: params.ttlSeconds,
+            }
+        } else {
+            const input = fileIdToInputPhoto(photo)
+            media = {
+                _: 'inputMediaPhoto',
+                id: input
+            }
         }
+    } else if (typeof photo === 'object' && tl.isAnyInputMedia(photo)) {
+        media = photo
     } else if (isUploadedFile(photo)) {
         media = {
             _: 'inputMediaUploadedPhoto',

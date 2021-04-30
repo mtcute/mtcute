@@ -8,6 +8,7 @@ import {
 } from '../../types'
 import { normalizeToInputChannel, normalizeToInputPeer } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
+import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
 
 /**
  * Set a new chat photo or video.
@@ -33,27 +34,37 @@ export async function setChatPhoto(
     if (!(chat._ === 'inputPeerChat' || chat._ === 'inputPeerChannel'))
         throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 
-    let input: tl.TypeInputFile
+    let photo: tl.TypeInputChatPhoto
 
-    if (typeof media === 'string' && media.match(/^https?:\/\//)) {
-        throw new MtCuteArgumentError("Chat photo can't be external")
-    } else if (typeof media === 'object' && tl.isAnyInputMedia(media)) {
-        throw new MtCuteArgumentError("Chat photo can't be InputMedia")
-    } else if (isUploadedFile(media)) {
-        input = media.inputFile
-    } else if (typeof media === 'object' && tl.isAnyInputFile(media)) {
-        input = media
+    if (tdFileId.isFileIdLike(media)) {
+        if (typeof media === 'string' && media.match(/^https?:\/\//))
+            throw new MtCuteArgumentError("Chat photo can't be external")
+
+        const input = fileIdToInputPhoto(media)
+        photo = {
+            _: 'inputChatPhoto',
+            id: input
+        }
     } else {
-        const uploaded = await this.uploadFile({
-            file: media,
-        })
-        input = uploaded.inputFile
-    }
+        let inputFile: tl.TypeInputFile
+        if (typeof media === 'object' && tl.isAnyInputMedia(media)) {
+            throw new MtCuteArgumentError("Chat photo can't be InputMedia")
+        } else if (isUploadedFile(media)) {
+            inputFile = media.inputFile
+        } else if (typeof media === 'object' && tl.isAnyInputFile(media)) {
+            inputFile = media
+        } else {
+            const uploaded = await this.uploadFile({
+                file: media,
+            })
+            inputFile = uploaded.inputFile
+        }
 
-    const photo: tl.RawInputChatUploadedPhoto = {
-        _: 'inputChatUploadedPhoto',
-        [type === 'photo' ? 'file' : 'video']: input,
-        videoStartTs: previewSec
+        photo = {
+            _: 'inputChatUploadedPhoto',
+            [type === 'photo' ? 'file' : 'video']: inputFile,
+            videoStartTs: previewSec
+        }
     }
 
     let res

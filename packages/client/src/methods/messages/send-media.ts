@@ -12,19 +12,28 @@ import { tl } from '@mtcute/tl'
 import { extractFileName } from '../../utils/file-utils'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
 import { normalizeDate, randomUlong } from '../../utils/misc-utils'
+import {
+    fileIdToInputDocument,
+    fileIdToInputPhoto,
+    parseFileId,
+    tdFileId,
+} from '@mtcute/file-id'
 
 /**
  * Send a single media.
  *
  * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
- * @param media  Media contained in the message
+ * @param media
+ *     Media contained in the message. You can also pass TDLib
+ *     and Bot API compatible File ID, which will be wrapped
+ *     in {@link InputMedia.auto}
  * @param params  Additional sending parameters
  * @internal
  */
 export async function sendMedia(
     this: TelegramClient,
     chatId: InputPeerLike,
-    media: InputMediaLike,
+    media: InputMediaLike | string,
     params?: {
         /**
          * Message to reply to. Either a message object or message ID.
@@ -76,6 +85,13 @@ export async function sendMedia(
 ): Promise<Message> {
     if (!params) params = {}
 
+    if (typeof media === 'string') {
+        media = {
+            type: 'auto',
+            file: media
+        }
+    }
+
     if (media.type === 'photo') {
         return this.sendPhoto(chatId, media.file, {
             caption: media.caption,
@@ -91,13 +107,38 @@ export async function sendMedia(
     let mime = 'application/octet-stream'
 
     const input = media.file
-    if (typeof input === 'object' && tl.isAnyInputMedia(input)) {
-        inputMedia = input
-    } else if (typeof input === 'string' && input.match(/^https?:\/\//)) {
-        inputMedia = {
-            _: 'inputMediaDocumentExternal',
-            url: input,
+    if (tdFileId.isFileIdLike(input)) {
+        if (typeof input === 'string' && input.match(/^https?:\/\//)) {
+            inputMedia = {
+                _: 'inputMediaDocumentExternal',
+                url: input,
+            }
+        } else {
+            const parsed =
+                typeof input === 'string' ? parseFileId(input) : input
+
+            if (parsed.location._ === 'photo') {
+                inputMedia = {
+                    _: 'inputMediaPhoto',
+                    id: fileIdToInputPhoto(parsed),
+                }
+            } else if (parsed.location._ === 'web') {
+                inputMedia = {
+                    _:
+                        parsed.type === tdFileId.FileType.Photo
+                            ? 'inputMediaPhotoExternal'
+                            : 'inputMediaDocumentExternal',
+                    url: parsed.location.url,
+                }
+            } else {
+                inputMedia = {
+                    _: 'inputMediaDocument',
+                    id: fileIdToInputDocument(parsed),
+                }
+            }
         }
+    } else if (typeof input === 'object' && tl.isAnyInputMedia(input)) {
+        inputMedia = input
     } else if (isUploadedFile(input)) {
         inputFile = input.inputFile
         mime = input.mime
@@ -120,8 +161,8 @@ export async function sendMedia(
             const t = media.thumb
             if (typeof t === 'object' && tl.isAnyInputMedia(t)) {
                 throw new MtCuteArgumentError("Thumbnail can't be InputMedia")
-            } else if (typeof t === 'string' && t.match(/^https?:\/\//)) {
-                throw new MtCuteArgumentError("Thumbnail can't be external")
+            } else if (tdFileId.isFileIdLike(t)) {
+                throw new MtCuteArgumentError("Thumbnail can't be a URL or a File ID")
             } else if (isUploadedFile(t)) {
                 thumb = t.inputFile
             } else if (typeof t === 'object' && tl.isAnyInputFile(t)) {

@@ -1603,12 +1603,15 @@ export interface TelegramClient extends BaseTelegramClient {
      * Send a single media.
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
-     * @param media  Media contained in the message
+     * @param media
+     *     Media contained in the message. You can also pass TDLib
+     *     and Bot API compatible File ID, which will be wrapped
+     *     in {@link InputMedia.auto}
      * @param params  Additional sending parameters
      */
     sendMedia(
         chatId: InputPeerLike,
-        media: InputMediaLike,
+        media: InputMediaLike | string,
         params?: {
             /**
              * Message to reply to. Either a message object or message ID.
