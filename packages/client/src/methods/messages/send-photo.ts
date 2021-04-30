@@ -5,6 +5,7 @@ import {
     BotKeyboard,
     ReplyMarkup,
     isUploadedFile,
+    UploadFileLike,
 } from '../../types'
 import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
@@ -90,11 +91,30 @@ export async function sendPhoto(
          * Defaults to `false`
          */
         clearDraft?: boolean
+
+        /**
+         * File size. Only used when uploading from streams without
+         * known length.
+         */
+        fileSize?: number
     }
 ): Promise<Message> {
     if (!params) params = {}
 
     let media: tl.TypeInputMedia
+
+    const upload = async (photo: UploadFileLike) => {
+        const uploaded = await this.uploadFile({
+            file: photo,
+            progressCallback: params!.progressCallback,
+            fileSize: params!.fileSize,
+        })
+        media = {
+            _: 'inputMediaUploadedPhoto',
+            file: uploaded.inputFile,
+            ttlSeconds: params!.ttlSeconds,
+        }
+    }
 
     if (tdFileId.isFileIdLike(photo)) {
         if (typeof photo === 'string' && photo.match(/^https?:\/\//)) {
@@ -103,11 +123,13 @@ export async function sendPhoto(
                 url: photo,
                 ttlSeconds: params.ttlSeconds,
             }
+        } else if (typeof photo === 'string' && photo.match(/^file:/)) {
+            await upload(photo.substr(5))
         } else {
             const input = fileIdToInputPhoto(photo)
             media = {
                 _: 'inputMediaPhoto',
-                id: input
+                id: input,
             }
         }
     } else if (typeof photo === 'object' && tl.isAnyInputMedia(photo)) {
@@ -125,15 +147,7 @@ export async function sendPhoto(
             ttlSeconds: params.ttlSeconds,
         }
     } else {
-        const uploaded = await this.uploadFile({
-            file: photo,
-            progressCallback: params.progressCallback,
-        })
-        media = {
-            _: 'inputMediaUploadedPhoto',
-            file: uploaded.inputFile,
-            ttlSeconds: params.ttlSeconds,
-        }
+        await upload(photo)
     }
 
     const [message, entities] = await this._parseEntities(
@@ -147,7 +161,7 @@ export async function sendPhoto(
 
     const res = await this.call({
         _: 'messages.sendMedia',
-        media,
+        media: media!,
         peer,
         silent: params.silent,
         replyToMsgId: params.replyTo

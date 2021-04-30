@@ -6,7 +6,7 @@ import {
     isUploadedFile,
     Message,
     MtCuteArgumentError,
-    ReplyMarkup,
+    ReplyMarkup, UploadFileLike,
 } from '../../types'
 import { tl } from '@mtcute/tl'
 import { extractFileName } from '../../utils/file-utils'
@@ -88,7 +88,7 @@ export async function sendMedia(
     if (typeof media === 'string') {
         media = {
             type: 'auto',
-            file: media
+            file: media,
         }
     }
 
@@ -102,9 +102,28 @@ export async function sendMedia(
 
     let inputMedia: tl.TypeInputMedia | null = null
 
+    // my condolences to those poor souls who are going to maintain this (myself included)
+
     let inputFile: tl.TypeInputFile | undefined = undefined
     let thumb: tl.TypeInputFile | undefined = undefined
     let mime = 'application/octet-stream'
+
+    const upload = async (media: InputMediaLike, file: UploadFileLike): Promise<void> => {
+        const uploaded = await this.uploadFile({
+            file,
+            fileName: media.fileName,
+            progressCallback: params!.progressCallback,
+            fileMime:
+                media.type === 'sticker'
+                    ? media.isAnimated
+                    ? 'application/x-tgsticker'
+                    : 'image/webp'
+                    : media.mime,
+            fileSize: media.fileSize
+        })
+        inputFile = uploaded.inputFile
+        mime = uploaded.mime
+    }
 
     const input = media.file
     if (tdFileId.isFileIdLike(input)) {
@@ -113,6 +132,8 @@ export async function sendMedia(
                 _: 'inputMediaDocumentExternal',
                 url: input,
             }
+        } else if (typeof input === 'string' && input.match(/^file:/)) {
+            await upload(media, input.substr(5))
         } else {
             const parsed =
                 typeof input === 'string' ? parseFileId(input) : input
@@ -145,13 +166,7 @@ export async function sendMedia(
     } else if (typeof input === 'object' && tl.isAnyInputFile(input)) {
         inputFile = input
     } else {
-        const uploaded = await this.uploadFile({
-            file: input,
-            fileName: media.fileName,
-            progressCallback: params.progressCallback,
-        })
-        inputFile = uploaded.inputFile
-        mime = uploaded.mime
+        await upload(media, input)
     }
 
     if (!inputMedia) {
@@ -162,7 +177,16 @@ export async function sendMedia(
             if (typeof t === 'object' && tl.isAnyInputMedia(t)) {
                 throw new MtCuteArgumentError("Thumbnail can't be InputMedia")
             } else if (tdFileId.isFileIdLike(t)) {
-                throw new MtCuteArgumentError("Thumbnail can't be a URL or a File ID")
+                if (typeof t === 'string' && t.match(/^file:/)) {
+                    const uploaded = await this.uploadFile({
+                        file: t.substr(5),
+                    })
+                    thumb = uploaded.inputFile
+                } else {
+                    throw new MtCuteArgumentError(
+                        "Thumbnail can't be a URL or a File ID"
+                    )
+                }
             } else if (isUploadedFile(t)) {
                 thumb = t.inputFile
             } else if (typeof t === 'object' && tl.isAnyInputFile(t)) {
@@ -209,6 +233,16 @@ export async function sendMedia(
                 title: media.type === 'audio' ? media.title : undefined,
                 performer: media.type === 'audio' ? media.performer : undefined,
                 waveform: media.type === 'voice' ? media.waveform : undefined,
+            })
+        }
+
+        if (media.type === 'sticker') {
+            attributes.push({
+                _: 'documentAttributeSticker',
+                stickerset: {
+                    _: 'inputStickerSetEmpty',
+                },
+                alt: media.alt ?? '',
             })
         }
 

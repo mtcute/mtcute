@@ -22,13 +22,24 @@ interface BaseInputMedia {
      * Override file name for the file.
      */
     fileName?: string
+
+    /**
+     * Override MIME type for the file
+     */
+    mime?: string
+
+    /**
+     * Override file size for the file
+     */
+    fileSize?: number
 }
 
 /**
  * Automatically detect media type based on file contents.
  *
  * Only works for files that are internally documents, i.e.
- * *does not* infer photos, so use {@link InputMediaPhoto} instead.
+ * *does not* infer photos, so use {@link InputMediaPhoto} instead
+ * (except for File IDs, from which photos *are* inferred)
  */
 export interface InputMediaAuto extends BaseInputMedia {
     type: 'auto'
@@ -106,6 +117,31 @@ export interface InputMediaPhoto extends BaseInputMedia {
 }
 
 /**
+ * A sticker to be sent
+ */
+export interface InputMediaSticker extends BaseInputMedia {
+    type: 'sticker'
+
+    caption?: never
+    entities?: never
+
+    /**
+     * Whether this sticker is animated?
+     *
+     * Note that animated stickers must be in TGS
+     * format, which is Lottie JSON compressed using GZip
+     *
+     * Defaults to `false`
+     */
+    isAnimated?: boolean
+
+    /**
+     * An emoji representing this sticker
+     */
+    alt?: string
+}
+
+/**
  * A video to be sent
  */
 export interface InputMediaVideo extends BaseInputMedia {
@@ -167,6 +203,7 @@ export type InputMediaLike =
     | InputMediaPhoto
     | InputMediaVideo
     | InputMediaAuto
+    | InputMediaSticker
 
 export namespace InputMedia {
     type OmitTypeAndFile<T extends InputMediaLike> = Omit<T, 'type' | 'file'>
@@ -251,6 +288,20 @@ export namespace InputMedia {
     ): InputMediaVoice {
         return {
             type: 'voice',
+            file,
+            ...(params || {}),
+        }
+    }
+
+    /**
+     * Create a sticker to be sent
+     */
+    export function sticker(
+        file: InputFileLike,
+        params?: OmitTypeAndFile<InputMediaSticker>
+    ): InputMediaSticker {
+        return {
+            type: 'sticker',
             file,
             ...(params || {}),
         }

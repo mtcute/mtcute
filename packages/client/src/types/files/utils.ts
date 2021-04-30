@@ -35,12 +35,10 @@ export type UploadFileLike =
  *  - `Readable` (for NodeJS, base readable stream)
  *  - {@link UploadedFile} returned from {@link TelegramClient.uploadFile}
  *  - `tl.TypeInputFile` and `tl.TypeInputMedia` TL objects
+ *  - `string` with a path to a local file prepended with `file:` (NodeJS only) (e.g. `file:image.jpg`)
  *  - `string` with a URL to remote files (e.g. `https://example.com/image.jpg`)
  *  - `string` with TDLib and Bot API compatible File ID.
  *  - `td.RawFullRemoteFileLocation` (parsed File ID)
- *
- *  > **Note**: Unlike {@link UploadFileLike}, you can't pass
- *  > a file path directly. Use `fs.createReadStream('/path/to/file.png')`
  */
 export type InputFileLike =
     | UploadFileLike

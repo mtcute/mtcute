@@ -34,35 +34,41 @@ export async function setChatPhoto(
     if (!(chat._ === 'inputPeerChat' || chat._ === 'inputPeerChannel'))
         throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 
-    let photo: tl.TypeInputChatPhoto
+    let photo: tl.TypeInputChatPhoto | undefined = undefined
 
+    let inputFile: tl.TypeInputFile
     if (tdFileId.isFileIdLike(media)) {
         if (typeof media === 'string' && media.match(/^https?:\/\//))
             throw new MtCuteArgumentError("Chat photo can't be external")
-
-        const input = fileIdToInputPhoto(media)
-        photo = {
-            _: 'inputChatPhoto',
-            id: input
-        }
-    } else {
-        let inputFile: tl.TypeInputFile
-        if (typeof media === 'object' && tl.isAnyInputMedia(media)) {
-            throw new MtCuteArgumentError("Chat photo can't be InputMedia")
-        } else if (isUploadedFile(media)) {
-            inputFile = media.inputFile
-        } else if (typeof media === 'object' && tl.isAnyInputFile(media)) {
-            inputFile = media
-        } else {
+        if (typeof media === 'string' && media.match(/^file:/)) {
             const uploaded = await this.uploadFile({
-                file: media,
+                file: media.substr(5),
             })
             inputFile = uploaded.inputFile
+        } else {
+            const input = fileIdToInputPhoto(media)
+            photo = {
+                _: 'inputChatPhoto',
+                id: input
+            }
         }
+    } else if (typeof media === 'object' && tl.isAnyInputMedia(media)) {
+            throw new MtCuteArgumentError("Chat photo can't be InputMedia")
+    } else if (isUploadedFile(media)) {
+        inputFile = media.inputFile
+    } else if (typeof media === 'object' && tl.isAnyInputFile(media)) {
+        inputFile = media
+    } else {
+        const uploaded = await this.uploadFile({
+            file: media,
+        })
+        inputFile = uploaded.inputFile
+    }
 
+    if (!photo) {
         photo = {
             _: 'inputChatUploadedPhoto',
-            [type === 'photo' ? 'file' : 'video']: inputFile,
+            [type === 'photo' ? 'file' : 'video']: inputFile!,
             videoStartTs: previewSec
         }
     }
