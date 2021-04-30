@@ -4,6 +4,7 @@ import { Thumbnail } from './thumbnail'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 import { InputMediaLike } from './input-media'
+import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
 /**
  * A file that is represented as a document in MTProto.
@@ -123,6 +124,47 @@ export class RawDocument extends FileLocation {
             file: this.inputMediaTl
             // other fields are not needed since it's a forwarded media
         }
+    }
+
+    protected _fileIdType(): td.FileType {
+        return td.FileType.Document
+    }
+
+    protected _fileId?: string
+    /**
+     * Get TDLib and Bot API compatible File ID
+     * representing this document.
+     */
+    get fileId(): string {
+        if (!this._fileId) {
+            this._fileId = toFileId({
+                type: this._fileIdType(),
+                dcId: this.doc.dcId,
+                fileReference: this.doc.fileReference,
+                location: {
+                    _: 'common',
+                    id: this.doc.id,
+                    accessHash: this.doc.accessHash,
+                },
+            })
+        }
+
+        return this._fileId
+    }
+
+    protected _uniqueFileId?: string
+    /**
+     * Get a unique File ID representing this document.
+     */
+    get uniqueFileId(): string {
+        if (!this._uniqueFileId) {
+            this._uniqueFileId = toUniqueFileId(td.FileType.Document, {
+                _: 'common',
+                id: this.doc.id,
+            })
+        }
+
+        return this._uniqueFileId
     }
 }
 

@@ -2,6 +2,7 @@ import { RawDocument } from './document'
 import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
+import { tdFileId } from '@mtcute/file-id'
 
 /**
  * An voice note.
@@ -9,6 +10,10 @@ import { makeInspectable } from '../utils'
 export class Voice extends RawDocument {
     readonly doc: tl.RawDocument
     readonly attr: tl.RawDocumentAttributeAudio
+
+    protected _fileIdType(): tdFileId.FileType {
+        return tdFileId.FileType.VoiceNote
+    }
 
     constructor(
         client: TelegramClient,

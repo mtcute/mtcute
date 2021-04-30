@@ -3,6 +3,7 @@ import type { Readable } from 'stream'
 import type { ReadStream } from 'fs'
 import { UploadedFile } from './uploaded-file'
 import { FileLocation } from './file-location'
+import { tdFileId } from '@mtcute/file-id'
 
 /**
  * Describes types that can be used in {@link TelegramClient.uploadFile}
@@ -26,11 +27,27 @@ export type UploadFileLike =
  * Describes types that can be used as an input
  * to any methods that send media (like {@link TelegramClient.sendPhoto})
  *
- * In addition to all the types available in {@link UploadFileLike}, you
- * can also pass {@link UploadedFile} returned from {@link TelegramClient.uploadFile},
- * raw `tl.TypeInputFile` and URLs to remote files
+ * Can be one of:
+ *  - `Buffer`, which will be interpreted as raw file contents
+ *  - `File` (from the Web API)
+ *  - `ReadStream` (for NodeJS, from the `fs` module)
+ *  - `ReadableStream` (from the Web API, base readable stream)
+ *  - `Readable` (for NodeJS, base readable stream)
+ *  - {@link UploadedFile} returned from {@link TelegramClient.uploadFile}
+ *  - `tl.TypeInputFile` and `tl.TypeInputMedia` TL objects
+ *  - `string` with a URL to remote files (e.g. `https://example.com/image.jpg`)
+ *  - `string` with TDLib and Bot API compatible File ID.
+ *  - `td.RawFullRemoteFileLocation` (parsed File ID)
+ *
+ *  > **Note**: Unlike {@link UploadFileLike}, you can't pass
+ *  > a file path directly. Use `fs.createReadStream('/path/to/file.png')`
  */
-export type InputFileLike = UploadFileLike | UploadedFile | tl.TypeInputFile | tl.TypeInputMedia
+export type InputFileLike =
+    | UploadFileLike
+    | UploadedFile
+    | tl.TypeInputFile
+    | tl.TypeInputMedia
+    | tdFileId.RawFullRemoteFileLocation
 
 export interface FileDownloadParameters {
     /**

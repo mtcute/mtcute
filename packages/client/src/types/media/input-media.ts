@@ -260,7 +260,8 @@ export namespace InputMedia {
      * Create a document to be sent, which subtype
      * is inferred automatically by file contents.
      *
-     * **Does not** infer photos, they will be sent as simple files.
+     * Only infers photos from the File ID, otherwise
+     * photos will be sent as documents.
      */
     export function auto(
         file: InputFileLike,

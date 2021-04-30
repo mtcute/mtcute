@@ -3,6 +3,7 @@ import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { makeInspectable } from '../utils'
 import { StickerSet } from '../misc'
+import { tdFileId } from '@mtcute/file-id'
 
 /**
  * A sticker
@@ -10,6 +11,10 @@ import { StickerSet } from '../misc'
 export class Sticker extends RawDocument {
     readonly attr: tl.RawDocumentAttributeSticker
     readonly attrSize?: tl.RawDocumentAttributeImageSize
+
+    protected _fileIdType(): tdFileId.FileType {
+        return tdFileId.FileType.Sticker
+    }
 
     constructor(
         client: TelegramClient,

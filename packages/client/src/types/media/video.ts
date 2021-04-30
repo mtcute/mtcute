@@ -2,6 +2,7 @@ import { RawDocument } from './document'
 import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
+import { tdFileId } from '@mtcute/file-id'
 
 /**
  * A video, round video message or GIF animation.
@@ -12,6 +13,14 @@ export class Video extends RawDocument {
     readonly attr:
         | tl.RawDocumentAttributeVideo
         | tl.RawDocumentAttributeImageSize
+
+    protected _fileIdType(): tdFileId.FileType {
+        return this.isRound
+            ? tdFileId.FileType.VideoNote
+            : this.isAnimation
+            ? tdFileId.FileType.Animation
+            : tdFileId.FileType.Video
+    }
 
     constructor(
         client: TelegramClient,
