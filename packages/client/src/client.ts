@@ -71,6 +71,7 @@ import { searchGlobal } from './methods/messages/search-global'
 import { searchMessages } from './methods/messages/search-messages'
 import { sendDice } from './methods/messages/send-dice'
 import { sendLocation } from './methods/messages/send-location'
+import { sendMediaGroup } from './methods/messages/send-media-group'
 import { sendMedia } from './methods/messages/send-media'
 import { sendText } from './methods/messages/send-text'
 import { unpinMessage } from './methods/messages/unpin-message'
@@ -1601,6 +1602,71 @@ export interface TelegramClient extends BaseTelegramClient {
         }
     ): Promise<Message>
     /**
+     * Send a group of media.
+     *
+     * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
+     * @param medias  Medias contained in the message.
+     * @param params  Additional sending parameters
+     * @see InputMedia
+     */
+    sendMediaGroup(
+        chatId: InputPeerLike,
+        medias: InputMediaLike[],
+        params?: {
+            /**
+             * Message to reply to. Either a message object or message ID.
+             */
+            replyTo?: number | Message
+
+            /**
+             * Parse mode to use to parse entities before sending
+             * the message. Defaults to current default parse mode (if any).
+             *
+             * Passing `null` will explicitly disable formatting.
+             */
+            parseMode?: string | null
+
+            /**
+             * Whether to send this message silently.
+             */
+            silent?: boolean
+
+            /**
+             * If set, the message will be scheduled to this date.
+             * When passing a number, a UNIX time in ms is expected.
+             */
+            schedule?: Date | number
+
+            /**
+             * For bots: inline or reply markup or an instruction
+             * to hide a reply keyboard or to force a reply.
+             */
+            replyMarkup?: ReplyMarkup
+
+            /**
+             * Function that will be called after some part has been uploaded.
+             * Only used when a file that requires uploading is passed,
+             * and not used when uploading a thumbnail.
+             *
+             * @param index  Index of the media in the original array
+             * @param uploaded  Number of bytes already uploaded
+             * @param total  Total file size
+             */
+            progressCallback?: (
+                index: number,
+                uploaded: number,
+                total: number
+            ) => void
+
+            /**
+             * Whether to clear draft after sending this message.
+             *
+             * Defaults to `false`
+             */
+            clearDraft?: boolean
+        }
+    ): Promise<Message>
+    /**
      * Send a single media (a photo or a document-based media)
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
@@ -1964,6 +2030,7 @@ export class TelegramClient extends BaseTelegramClient {
     searchMessages = searchMessages
     sendDice = sendDice
     sendLocation = sendLocation
+    sendMediaGroup = sendMediaGroup
     sendMedia = sendMedia
     sendText = sendText
     unpinMessage = unpinMessage
