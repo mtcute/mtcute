@@ -20,26 +20,39 @@ interface BaseInputMedia {
 
     /**
      * Override file name for the file.
+     *
+     * Only applicable to newly uploaded files.
      */
     fileName?: string
 
     /**
      * Override MIME type for the file
+     *
+     * Only applicable to newly uploaded files.
      */
-    mime?: string
+    fileMime?: string
 
     /**
      * Override file size for the file
+     *
+     * Only applicable to newly uploaded files.
      */
     fileSize?: number
+
+    /**
+     * TTL for the media in seconds.
+     *
+     * Only applicable to some media types
+     */
+    ttlSeconds?: number
 }
 
 /**
  * Automatically detect media type based on file contents.
  *
- * Only works for files that are internally documents, i.e.
- * *does not* infer photos, so use {@link InputMediaPhoto} instead
- * (except for File IDs, from which photos *are* inferred)
+ * Photo type is only inferred for reused files,
+ * newly uploaded photos with `auto` will be
+ * uploaded as a document
  */
 export interface InputMediaAuto extends BaseInputMedia {
     type: 'auto'
@@ -57,21 +70,29 @@ export interface InputMediaAudio extends BaseInputMedia {
      * The thumbnail should be in JPEG format and less than 200 KB in size.
      * A thumbnail's width and height should not exceed 320 pixels.
      * Thumbnails can't be reused and can be only uploaded as a new file.
+     *
+     * Only applicable to newly uploaded files.
      */
     thumb?: InputFileLike
 
     /**
      * Duration of the audio in seconds
+     *
+     * Only applicable to newly uploaded files.
      */
     duration?: number
 
     /**
      * Performer of the audio
+     *
+     * Only applicable to newly uploaded files.
      */
     performer?: string
 
     /**
      * Title of the audio
+     *
+     * Only applicable to newly uploaded files.
      */
     title?: string
 }
@@ -84,11 +105,15 @@ export interface InputMediaVoice extends BaseInputMedia {
 
     /**
      * Duration of the voice message in seconds
+     *
+     * Only applicable to newly uploaded files.
      */
     duration?: number
 
     /**
      * Waveform of the voice message
+     *
+     * Only applicable to newly uploaded files.
      */
     waveform?: Buffer
 }
@@ -105,6 +130,8 @@ export interface InputMediaDocument extends BaseInputMedia {
      * The thumbnail should be in JPEG format and less than 200 KB in size.
      * A thumbnail's width and height should not exceed 320 pixels.
      * Thumbnails can't be reused and can be only uploaded as a new file.
+     *
+     * Only applicable to newly uploaded files.
      */
     thumb?: InputFileLike
 }
@@ -132,11 +159,16 @@ export interface InputMediaSticker extends BaseInputMedia {
      * format, which is Lottie JSON compressed using GZip
      *
      * Defaults to `false`
+     *
+     * Only applicable to newly uploaded files.
      */
     isAnimated?: boolean
 
     /**
      * An emoji representing this sticker
+     *
+     * Only applicable to newly uploaded files,
+     * for some reason doesn't work with animated stickers.
      */
     alt?: string
 }
@@ -153,36 +185,50 @@ export interface InputMediaVideo extends BaseInputMedia {
      * The thumbnail should be in JPEG format and less than 200 KB in size.
      * A thumbnail's width and height should not exceed 320 pixels.
      * Thumbnails can't be reused and can be only uploaded as a new file.
+     *
+     * Only applicable to newly uploaded files.
      */
     thumb?: InputFileLike
 
     /**
      * Width of the video in pixels
+     *
+     * Only applicable to newly uploaded files.
      */
     width?: number
 
     /**
      * Height of the video in pixels
+     *
+     * Only applicable to newly uploaded files.
      */
     height?: number
 
     /**
      * Duration of the video in seconds
+     *
+     * Only applicable to newly uploaded files.
      */
     duration?: number
 
     /**
      * Whether the video is suitable for streaming
+     *
+     * Only applicable to newly uploaded files.
      */
     supportsStreaming?: boolean
 
     /**
      * Whether this video is an animated GIF
+     *
+     * Only applicable to newly uploaded files.
      */
     isAnimated?: boolean
 
     /**
      * Whether this video is a round message (aka video note)
+     *
+     * Only applicable to newly uploaded files.
      */
     isRound?: boolean
 }
@@ -311,8 +357,9 @@ export namespace InputMedia {
      * Create a document to be sent, which subtype
      * is inferred automatically by file contents.
      *
-     * Only infers photos from the File ID, otherwise
-     * photos will be sent as documents.
+     * Photo type is only inferred for reused files,
+     * newly uploaded photos with `auto` will be
+     * uploaded as a document
      */
     export function auto(
         file: InputFileLike,

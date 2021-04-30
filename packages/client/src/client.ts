@@ -55,6 +55,8 @@ import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
 import { downloadAsIterable } from './methods/files/download-iterable'
 import { downloadAsStream } from './methods/files/download-stream'
+import { _normalizeInputFile } from './methods/files/normalize-input-file'
+import { _normalizeInputMedia } from './methods/files/normalize-input-media'
 import { uploadFile } from './methods/files/upload-file'
 import { deleteMessages } from './methods/messages/delete-messages'
 import { editMessage } from './methods/messages/edit-message'
@@ -70,7 +72,6 @@ import { searchMessages } from './methods/messages/search-messages'
 import { sendDice } from './methods/messages/send-dice'
 import { sendLocation } from './methods/messages/send-location'
 import { sendMedia } from './methods/messages/send-media'
-import { sendPhoto } from './methods/messages/send-photo'
 import { sendText } from './methods/messages/send-text'
 import { unpinMessage } from './methods/messages/unpin-message'
 import { initTakeoutSession } from './methods/misc/init-takeout-session'
@@ -1600,7 +1601,7 @@ export interface TelegramClient extends BaseTelegramClient {
         }
     ): Promise<Message>
     /**
-     * Send a single media.
+     * Send a single media (a photo or a document-based media)
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param media
@@ -1608,6 +1609,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *     and Bot API compatible File ID, which will be wrapped
      *     in {@link InputMedia.auto}
      * @param params  Additional sending parameters
+     * @see InputMedia
      */
     sendMedia(
         chatId: InputPeerLike,
@@ -1647,84 +1649,6 @@ export interface TelegramClient extends BaseTelegramClient {
              * Function that will be called after some part has been uploaded.
              * Only used when a file that requires uploading is passed,
              * and not used when uploading a thumbnail.
-             *
-             * @param uploaded  Number of bytes already uploaded
-             * @param total  Total file size
-             */
-            progressCallback?: (uploaded: number, total: number) => void
-
-            /**
-             * Whether to clear draft after sending this message.
-             *
-             * Defaults to `false`
-             */
-            clearDraft?: boolean
-        }
-    ): Promise<Message>
-    /**
-     * Send a single photo
-     *
-     * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
-     * @param photo  Photo contained in the message.
-     * @param params  Additional sending parameters
-     */
-    sendPhoto(
-        chatId: InputPeerLike,
-        photo: InputFileLike,
-        params?: {
-            /**
-             * Caption for the photo
-             */
-            caption?: string
-
-            /**
-             * Message to reply to. Either a message object or message ID.
-             */
-            replyTo?: number | Message
-
-            /**
-             * Parse mode to use to parse entities before sending
-             * the message. Defaults to current default parse mode (if any).
-             *
-             * Passing `null` will explicitly disable formatting.
-             */
-            parseMode?: string | null
-
-            /**
-             * List of formatting entities to use instead of parsing via a
-             * parse mode.
-             *
-             * **Note:** Passing this makes the method ignore {@link parseMode}
-             */
-            entities?: tl.TypeMessageEntity[]
-
-            /**
-             * Whether to send this message silently.
-             */
-            silent?: boolean
-
-            /**
-             * If set, the message will be scheduled to this date.
-             * When passing a number, a UNIX time in ms is expected.
-             */
-            schedule?: Date | number
-
-            /**
-             * For bots: inline or reply markup or an instruction
-             * to hide a reply keyboard or to force a reply.
-             */
-            replyMarkup?: ReplyMarkup
-
-            /**
-             * Self-Destruct timer.
-             * If set, the photo will self-destruct in a given number
-             * of seconds.
-             */
-            ttlSeconds?: number
-
-            /**
-             * Function that will be called after some part has been uploaded.
-             * Only used when a file that requires uploading is passed.
              *
              * @param uploaded  Number of bytes already uploaded
              * @param total  Total file size
@@ -2024,6 +1948,8 @@ export class TelegramClient extends BaseTelegramClient {
     downloadToFile = downloadToFile
     downloadAsIterable = downloadAsIterable
     downloadAsStream = downloadAsStream
+    protected _normalizeInputFile = _normalizeInputFile
+    protected _normalizeInputMedia = _normalizeInputMedia
     uploadFile = uploadFile
     deleteMessages = deleteMessages
     editMessage = editMessage
@@ -2039,7 +1965,6 @@ export class TelegramClient extends BaseTelegramClient {
     sendDice = sendDice
     sendLocation = sendLocation
     sendMedia = sendMedia
-    sendPhoto = sendPhoto
     sendText = sendText
     unpinMessage = unpinMessage
     initTakeoutSession = initTakeoutSession
