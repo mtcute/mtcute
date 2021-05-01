@@ -177,6 +177,8 @@ export class TelegramConnection extends PersistentConnection {
         this._sendOnceUsable = []
         sendOnceUsable.forEach((it) => this._resend(it))
 
+        Object.entries(this._pendingRpcCalls).forEach(([id, it]) => this._resend(it, id))
+
         this._pingInterval = setInterval(() => {
             if (this._pendingPing === null) {
                 this._pendingPing = ulongToLong(
@@ -221,9 +223,10 @@ export class TelegramConnection extends PersistentConnection {
         this._sendPendingAcks()
     }
 
-    private _resend(it: PendingMessage): void {
+    private _resend(it: PendingMessage, id?: string): void {
         debug('resending %s', it.method)
         this._sendBufferForResult(it).catch(it.promise.reject)
+        if (id) delete this._pendingRpcCalls[id]
     }
 
     private _authorize(): void {
@@ -344,8 +347,7 @@ export class TelegramConnection extends PersistentConnection {
         this._mtproto.serverSalt = message.newServerSalt
 
         if (this._pendingRpcCalls[badMsgId]) {
-            this._resend(this._pendingRpcCalls[badMsgId])
-            delete this._pendingRpcCalls[badMsgId] // because resend will assign it a new id
+            this._resend(this._pendingRpcCalls[badMsgId], badMsgId)
         } else if (
             this._pendingPingMsgId &&
             this._pendingPingMsgId.eq(message.badMsgId)
@@ -389,8 +391,7 @@ export class TelegramConnection extends PersistentConnection {
         }
 
         if (this._pendingRpcCalls[badMsgId]) {
-            this._resend(this._pendingRpcCalls[badMsgId])
-            delete this._pendingRpcCalls[badMsgId] // because resend will assign it a new id
+            this._resend(this._pendingRpcCalls[badMsgId], badMsgId)
         } else {
             debug('bad_msg_notification to unknown message %s', badMsgId)
         }
@@ -422,7 +423,7 @@ export class TelegramConnection extends PersistentConnection {
                     msgId > firstMsgIdStr) ||
                 firstMsgId.lt(bigInt(msgId, 16))
             ) {
-                this._resend(info)
+                this._resend(info, msgId)
             }
         }
 
