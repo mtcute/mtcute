@@ -8,6 +8,7 @@ import {
     FileDownloadParameters,
     FileLocation,
 } from '../../types'
+import { fileIdToInputFileLocation } from '@mtcute/file-id'
 
 /**
  * Download a file and return it as an iterable, which yields file contents
@@ -51,6 +52,9 @@ export async function* downloadAsIterable(
         if (!dcId) dcId = location.dcId
         if (!fileSize) fileSize = location.fileSize
         location = location.location as any
+    }
+    if (typeof location === 'string') {
+        location = fileIdToInputFileLocation(location)
     }
 
     // we will receive a FileMigrateError in case this is invalid

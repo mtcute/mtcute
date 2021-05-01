@@ -49,9 +49,10 @@ export type InputFileLike =
 
 export interface FileDownloadParameters {
     /**
-     * File location which should be downloaded
+     * File location which should be downloaded.
+     * You can also provide TDLib and Bot API compatible File ID
      */
-    location: tl.TypeInputFileLocation | FileLocation
+    location: tl.TypeInputFileLocation | FileLocation | string
 
     /**
      * Total file size, if known.
