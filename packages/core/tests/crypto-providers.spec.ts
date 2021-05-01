@@ -75,7 +75,7 @@ export function testCryptoProvider(c: ICryptoProvider): void {
 
     it('should encrypt and decrypt aes-ige', async () => {
         const aes = c.createAesIge(
-            Buffer.from('5468697320697320616E20696D706C65', 'hex'),
+            Buffer.from('5468697320697320616E20696D706C655468697320697320616E20696D706C65', 'hex'),
             Buffer.from(
                 '6D656E746174696F6E206F6620494745206D6F646520666F72204F70656E5353',
                 'hex'
@@ -91,13 +91,13 @@ export function testCryptoProvider(c: ICryptoProvider): void {
                 )
             ).toString('hex')
         ).to.eq(
-            '4c2e204c6574277320686f70652042656e20676f74206974207269676874210a'
+            '792ea8ae577b1a66cb3bd92679b8030ca54ee631976bd3a04547fdcb4639fa69'
         )
         expect(
             (
                 await aes.decrypt(
                     Buffer.from(
-                        '4c2e204c6574277320686f70652042656e20676f74206974207269676874210a',
+                        '792ea8ae577b1a66cb3bd92679b8030ca54ee631976bd3a04547fdcb4639fa69',
                         'hex'
                     )
                 )

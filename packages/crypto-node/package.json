@@ -1,0 +1,20 @@
+{
+    "name": "@mtcute/crypto-node",
+    "version": "0.0.0",
+    "description": "Native crypto implementation for NodeJS",
+    "main": "src/index.ts",
+    "private": true,
+    "scripts": {
+        "build:dev": "node-gyp -j 16 build --debug",
+        "build": "node-gyp configure && node-gyp -j 16 build && tsc",
+        "install": "node-gyp configure && node-gyp -j 16 build",
+        "rebuild:dev": "node-gyp configure --debug && node-gyp -j 16 rebuild --debug",
+        "rebuild": "node-gyp configure && node-gyp -j 16 rebuild",
+        "clean": "node-gyp clean",
+        "test": "mocha -r ts-node/register tests/**/*.spec.ts",
+        "docs": "npx typedoc"
+    },
+    "dependencies": {
+        "node-gyp": "^8.0.0"
+    }
+}
