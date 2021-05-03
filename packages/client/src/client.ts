@@ -1137,7 +1137,7 @@ export interface TelegramClient extends BaseTelegramClient {
         revoke?: boolean
     ): Promise<boolean>
     /**
-     * Edit message text and/or reply markup.
+     * Edit message text, media, reply markup and schedule date.
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param message  Message or its ID
@@ -1149,6 +1149,8 @@ export interface TelegramClient extends BaseTelegramClient {
         params: {
             /**
              * New message text
+             *
+             * When `media` is passed, `media.caption` is used instead
              */
             text?: string
 
@@ -1165,8 +1167,15 @@ export interface TelegramClient extends BaseTelegramClient {
              * parse mode.
              *
              * **Note:** Passing this makes the method ignore {@link parseMode}
+             *
+             * When `media` is passed, `media.entities` is used instead
              */
             entities?: tl.TypeMessageEntity[]
+
+            /**
+             * New message media
+             */
+            media?: InputMediaLike
 
             /**
              * Whether to disable links preview in this message
@@ -1174,10 +1183,24 @@ export interface TelegramClient extends BaseTelegramClient {
             disableWebPreview?: boolean
 
             /**
-             * For bots: inline or reply markup or an instruction
-             * to hide a reply keyboard or to force a reply.
+             * For bots: new reply markup.
+             * If omitted, existing markup will be removed.
              */
             replyMarkup?: ReplyMarkup
+
+            /**
+             * To re-schedule a message: new schedule date.
+             * When passing a number, a UNIX time in ms is expected.
+             */
+            scheduleDate?: Date | number
+
+            /**
+             * For media, upload progress callback.
+             *
+             * @param uploaded  Number of bytes uploaded
+             * @param total  Total file size in bytes
+             */
+            progressCallback?: (uploaded: number, total: number) => void
         }
     ): Promise<Message>
     /**

@@ -1,10 +1,16 @@
 import { TelegramClient } from '../../client'
-import { BotKeyboard, InputPeerLike, Message, ReplyMarkup } from '../../types'
+import {
+    BotKeyboard,
+    InputMediaLike,
+    InputPeerLike,
+    Message,
+    ReplyMarkup,
+} from '../../types'
 import { tl } from '@mtcute/tl'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
- * Edit message text and/or reply markup.
+ * Edit message text, media, reply markup and schedule date.
  *
  * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
  * @param message  Message or its ID
@@ -18,6 +24,8 @@ export async function editMessage(
     params: {
         /**
          * New message text
+         *
+         * When `media` is passed, `media.caption` is used instead
          */
         text?: string
 
@@ -34,8 +42,15 @@ export async function editMessage(
          * parse mode.
          *
          * **Note:** Passing this makes the method ignore {@link parseMode}
+         *
+         * When `media` is passed, `media.entities` is used instead
          */
         entities?: tl.TypeMessageEntity[]
+
+        /**
+         * New message media
+         */
+        media?: InputMediaLike
 
         /**
          * Whether to disable links preview in this message
@@ -43,17 +58,44 @@ export async function editMessage(
         disableWebPreview?: boolean
 
         /**
-         * For bots: inline or reply markup or an instruction
-         * to hide a reply keyboard or to force a reply.
+         * For bots: new reply markup.
+         * If omitted, existing markup will be removed.
          */
         replyMarkup?: ReplyMarkup
+
+        /**
+         * To re-schedule a message: new schedule date.
+         * When passing a number, a UNIX time in ms is expected.
+         */
+        scheduleDate?: Date | number
+
+        /**
+         * For media, upload progress callback.
+         *
+         * @param uploaded  Number of bytes uploaded
+         * @param total  Total file size in bytes
+         */
+        progressCallback?: (uploaded: number, total: number) => void
     }
 ): Promise<Message> {
-    const [content, entities] = await this._parseEntities(
-        params.text,
-        params.parseMode,
-        params.entities
-    )
+    let content: string | undefined
+    let entities: tl.TypeMessageEntity[] | undefined
+    let media: tl.TypeInputMedia | undefined = undefined
+
+    if (params.media) {
+        media = await this._normalizeInputMedia(params.media, params)
+        ;[content, entities] = await this._parseEntities(
+            params.media.caption,
+            params.parseMode,
+            params.media.entities
+        )
+    } else {
+        ;[content, entities] = await this._parseEntities(
+            params.text,
+            params.parseMode,
+            params.entities
+        )
+    }
 
     const res = await this.call({
         _: 'messages.editMessage',
@@ -63,6 +105,7 @@ export async function editMessage(
         replyMarkup: BotKeyboard._convertToTl(params.replyMarkup),
         message: content,
         entities,
+        media
     })
 
     return this._findMessageInUpdate(res, true) as any
