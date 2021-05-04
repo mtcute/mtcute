@@ -84,7 +84,7 @@ export class FileLocation {
      *
      * Shorthand for `client.downloadAsStream({ location: this })`
      *
-     * @see TelegramClient.downloadAsIterable
+     * @link TelegramClient.downloadAsIterable
      */
     downloadIterable(): AsyncIterableIterator<Buffer> {
         return this.client.downloadAsIterable({ location: this })
@@ -96,7 +96,7 @@ export class FileLocation {
      *
      * Shorthand for `client.downloadAsStream({ location: this })`
      *
-     * @see TelegramClient.downloadAsStream
+     * @link TelegramClient.downloadAsStream
      */
     downloadStream(): Readable {
         return this.client.downloadAsStream({ location: this })
@@ -107,7 +107,7 @@ export class FileLocation {
      *
      * Shorthand for `client.downloadAsBuffer({ location: this })`
      *
-     * @see TelegramClient.downloadAsBuffer
+     * @link TelegramClient.downloadAsBuffer
      */
     downloadBuffer(): Promise<Buffer> {
         return this.client.downloadAsBuffer({ location: this })
@@ -120,7 +120,7 @@ export class FileLocation {
      * Shorthand for `client.downloadToFile(filename, { location: this })`
      *
      * @param filename  Local file name
-     * @see TelegramClient.downloadToFile
+     * @link TelegramClient.downloadToFile
      */
     downloadToFile(filename: string): Promise<void> {
         return this.client.downloadToFile(filename, { location: this })

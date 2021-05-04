@@ -18,7 +18,7 @@ import { normalizeDate, randomUlong } from '../../utils/misc-utils'
  *     and Bot API compatible File ID, which will be wrapped
  *     in {@link InputMedia.auto}
  * @param params  Additional sending parameters
- * @see InputMedia
+ * @link InputMedia
  * @internal
  */
 export async function sendMedia(

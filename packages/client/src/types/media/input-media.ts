@@ -240,7 +240,7 @@ export interface InputMediaVideo extends BaseInputMedia {
  * applicable if `file` is {@link UploadFileLike},
  * otherwise they are ignored.
  *
- * @see InputMedia
+ * @link InputMedia
  */
 export type InputMediaLike =
     | InputMediaAudio

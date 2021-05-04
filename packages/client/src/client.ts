@@ -1630,7 +1630,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param medias  Medias contained in the message.
      * @param params  Additional sending parameters
-     * @see InputMedia
+     * @link InputMedia
      */
     sendMediaGroup(
         chatId: InputPeerLike,
@@ -1698,7 +1698,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *     and Bot API compatible File ID, which will be wrapped
      *     in {@link InputMedia.auto}
      * @param params  Additional sending parameters
-     * @see InputMedia
+     * @link InputMedia
      */
     sendMedia(
         chatId: InputPeerLike,

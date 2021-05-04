@@ -931,7 +931,7 @@ export class Message {
     /**
      * Edit this message's text and/or reply markup
      *
-     * @see TelegramClient.editMessage
+     * @link TelegramClient.editMessage
      */
     edit(
         params: Parameters<TelegramClient['editMessage']>[2]
@@ -947,7 +947,7 @@ export class Message {
      *
      * @param text  New message text
      * @param params  Additional parameters
-     * @see TelegramClient.editMessage
+     * @link TelegramClient.editMessage
      */
     editText(
         text: string,

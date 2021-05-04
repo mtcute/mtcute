@@ -16,7 +16,7 @@ import { tl } from '@mtcute/tl'
  * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
  * @param medias  Medias contained in the message.
  * @param params  Additional sending parameters
- * @see InputMedia
+ * @link InputMedia
  * @internal
  */
 export async function sendMediaGroup(
