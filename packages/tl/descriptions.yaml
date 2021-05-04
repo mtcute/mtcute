@@ -468,3 +468,5 @@ regex:
     repl: UNIX timestamp in seconds
   - regex: \bstickerset\b
     repl: stickerset
+  - regex: \bonly "foursquare" needs\b
+    repl: only "foursquare" and "gplaces" need
