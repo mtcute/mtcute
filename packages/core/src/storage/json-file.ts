@@ -81,7 +81,8 @@ export class JsonFileStorage extends JsonMemoryStorage {
                 this._safe ? this._filename + '.tmp' : this._filename,
                 this._saveJson(),
                 (err?: Error) => {
-                    if (this._safe) {
+                    if (err) reject(err)
+                    else if (this._safe) {
                         fs.rename(
                             this._filename + '.tmp',
                             this._filename,
@@ -90,10 +91,7 @@ export class JsonFileStorage extends JsonMemoryStorage {
                                 else resolve()
                             }
                         )
-                    } else {
-                        if (err) reject(err)
-                        else resolve()
-                    }
+                    } else resolve()
                 }
             )
         })
