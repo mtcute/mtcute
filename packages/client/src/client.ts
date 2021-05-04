@@ -59,6 +59,7 @@ import { _normalizeInputFile } from './methods/files/normalize-input-file'
 import { _normalizeInputMedia } from './methods/files/normalize-input-media'
 import { uploadFile } from './methods/files/upload-file'
 import { deleteMessages } from './methods/messages/delete-messages'
+import { editInlineMessage } from './methods/messages/edit-inline-message'
 import { editMessage } from './methods/messages/edit-message'
 import { _findMessageInUpdate } from './methods/messages/find-in-update'
 import { forwardMessages } from './methods/messages/forward-messages'
@@ -1137,6 +1138,67 @@ export interface TelegramClient extends BaseTelegramClient {
         revoke?: boolean
     ): Promise<boolean>
     /**
+     * Edit sent inline message text, media and reply markup.
+     *
+     * @param id
+     *     Inline message ID, either as a TL object, or as a
+     *     TDLib and Bot API compatible string
+     * @param params
+     */
+    editInlineMessage(
+        id: tl.TypeInputBotInlineMessageID | string,
+        params: {
+            /**
+             * New message text
+             *
+             * When `media` is passed, `media.caption` is used instead
+             */
+            text?: string
+
+            /**
+             * Parse mode to use to parse entities before sending
+             * the message. Defaults to current default parse mode (if any).
+             *
+             * Passing `null` will explicitly disable formatting.
+             */
+            parseMode?: string | null
+
+            /**
+             * List of formatting entities to use instead of parsing via a
+             * parse mode.
+             *
+             * **Note:** Passing this makes the method ignore {@link parseMode}
+             *
+             * When `media` is passed, `media.entities` is used instead
+             */
+            entities?: tl.TypeMessageEntity[]
+
+            /**
+             * New message media
+             */
+            media?: InputMediaLike
+
+            /**
+             * Whether to disable links preview in this message
+             */
+            disableWebPreview?: boolean
+
+            /**
+             * For bots: new reply markup.
+             * If omitted, existing markup will be removed.
+             */
+            replyMarkup?: ReplyMarkup
+
+            /**
+             * For media, upload progress callback.
+             *
+             * @param uploaded  Number of bytes uploaded
+             * @param total  Total file size in bytes
+             */
+            progressCallback?: (uploaded: number, total: number) => void
+        }
+    ): Promise<void>
+    /**
      * Edit message text, media, reply markup and schedule date.
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
@@ -1959,6 +2021,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _userId: number | null
     protected _isBot: boolean
     protected _downloadConnections: Record<number, TelegramConnection>
+    protected _connectionsForInline: Record<number, TelegramConnection>
     protected _parseModes: Record<string, IMessageEntityParser>
     protected _defaultParseMode: string | null
     protected _updLock: Lock
@@ -1970,6 +2033,7 @@ export class TelegramClient extends BaseTelegramClient {
         this._userId = null
         this._isBot = false
         this._downloadConnections = {}
+        this._connectionsForInline = {}
         this._parseModes = {}
         this._defaultParseMode = null
         this._updLock = new Lock()
@@ -2041,6 +2105,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _normalizeInputMedia = _normalizeInputMedia
     uploadFile = uploadFile
     deleteMessages = deleteMessages
+    editInlineMessage = editInlineMessage
     editMessage = editMessage
     protected _findMessageInUpdate = _findMessageInUpdate
     forwardMessages = forwardMessages

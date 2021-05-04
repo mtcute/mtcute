@@ -546,13 +546,13 @@ export namespace BotInline {
     export function photo(
         id: string,
         media: string | tl.RawInputWebDocument | tl.RawInputPhoto,
-        params: Omit<InputInlineResultPhoto, 'type' | 'id' | 'media'>
+        params?: Omit<InputInlineResultPhoto, 'type' | 'id' | 'media'>
     ): InputInlineResultPhoto {
         return {
             id,
             type: 'photo',
             media,
-            ...params,
+            ...(params || {}),
         }
     }
 

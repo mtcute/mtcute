@@ -1,5 +1,6 @@
 import {
     ChatMemberUpdateHandler,
+    ChosenInlineResultHandler,
     InlineQueryHandler,
     NewMessageHandler,
     RawUpdateHandler,
@@ -8,6 +9,7 @@ import {
 import { filters, UpdateFilter } from './filters'
 import { InlineQuery, Message } from '@mtcute/client'
 import { ChatMemberUpdate } from './updates'
+import { ChosenInlineResult } from './updates/chosen-inline-result'
 
 function _create<T extends UpdateHandler>(
     type: T['type'],
@@ -18,18 +20,17 @@ function _create<T extends UpdateHandler>(
         return {
             type,
             check: filter,
-            callback: handler
+            callback: handler,
         } as any
     }
 
     return {
         type,
-        callback: filter
+        callback: filter,
     } as any
 }
 
 export namespace handlers {
-
     /**
      * Create a {@link RawUpdateHandler}
      *
@@ -74,10 +75,7 @@ export namespace handlers {
         handler: NewMessageHandler<filters.Modify<Message, Mod>>['callback']
     ): NewMessageHandler
 
-    export function newMessage(
-        filter: any,
-        handler?: any
-    ): NewMessageHandler {
+    export function newMessage(filter: any, handler?: any): NewMessageHandler {
         return _create('new_message', filter, handler)
     }
 
@@ -98,7 +96,9 @@ export namespace handlers {
      */
     export function chatMemberUpdate<Mod>(
         filter: UpdateFilter<ChatMemberUpdate, Mod>,
-        handler: ChatMemberUpdateHandler<filters.Modify<ChatMemberUpdate, Mod>>['callback']
+        handler: ChatMemberUpdateHandler<
+            filters.Modify<ChatMemberUpdate, Mod>
+        >['callback']
     ): ChatMemberUpdateHandler
 
     export function chatMemberUpdate(
@@ -125,7 +125,9 @@ export namespace handlers {
      */
     export function inlineQuery<Mod>(
         filter: UpdateFilter<InlineQuery, Mod>,
-        handler: InlineQueryHandler<filters.Modify<InlineQuery, Mod>>['callback']
+        handler: InlineQueryHandler<
+            filters.Modify<InlineQuery, Mod>
+        >['callback']
     ): InlineQueryHandler
 
     export function inlineQuery(
@@ -133,5 +135,34 @@ export namespace handlers {
         handler?: any
     ): InlineQueryHandler {
         return _create('inline_query', filter, handler)
+    }
+
+    /**
+     * Create a chosen inline result handler
+     *
+     * @param handler  Chosen inline result handler
+     */
+    export function chosenInlineResult(
+        handler: ChosenInlineResultHandler['callback']
+    ): ChosenInlineResultHandler
+
+    /**
+     * Create a chosen inline result handler with a filter
+     *
+     * @param filter  Chosen inline result filter
+     * @param handler  Chosen inline result handler
+     */
+    export function chosenInlineResult<Mod>(
+        filter: UpdateFilter<ChosenInlineResult, Mod>,
+        handler: ChosenInlineResultHandler<
+            filters.Modify<ChosenInlineResult, Mod>
+        >['callback']
+    ): ChosenInlineResultHandler
+
+    export function chosenInlineResult(
+        filter: any,
+        handler?: any
+    ): ChosenInlineResultHandler {
+        return _create('chosen_inline_result', filter, handler)
     }
 }

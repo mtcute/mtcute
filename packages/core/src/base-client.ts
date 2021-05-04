@@ -456,7 +456,8 @@ export class BaseTelegramClient {
     async call<T extends tl.RpcMethod>(
         message: T,
         params?: {
-            throwFlood: boolean
+            throwFlood?: boolean
+            connection?: TelegramConnection
         }
     ): Promise<tl.RpcCallReturn[T['_']]> {
         if (!this._connected) {
@@ -491,7 +492,7 @@ export class BaseTelegramClient {
 
         for (let i = 0; i < this._rpcRetryCount; i++) {
             try {
-                const res = await this.primaryConnection.sendForResult(
+                const res = await (params?.connection ?? this.primaryConnection).sendForResult(
                     message,
                     stack
                 )

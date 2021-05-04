@@ -1,7 +1,13 @@
-import { MaybeAsync, Message, TelegramClient, InlineQuery } from '@mtcute/client'
+import {
+    MaybeAsync,
+    Message,
+    TelegramClient,
+    InlineQuery,
+} from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { PropagationSymbol } from './propagation'
 import { ChatMemberUpdate } from './updates'
+import { ChosenInlineResult } from './updates/chosen-inline-result'
 
 interface BaseUpdateHandler<Type, Handler, Checker> {
     type: Type
@@ -47,7 +53,13 @@ export type ChatMemberUpdateHandler<T = ChatMemberUpdate> = ParsedUpdateHandler<
     'chat_member',
     T
 >
-export type InlineQueryHandler<T = InlineQuery> = ParsedUpdateHandler<'inline_query', T>
+export type InlineQueryHandler<T = InlineQuery> = ParsedUpdateHandler<
+    'inline_query',
+    T
+>
+export type ChosenInlineResultHandler<
+    T = ChosenInlineResult
+> = ParsedUpdateHandler<'chosen_inline_result', T>
 
 export type UpdateHandler =
     | RawUpdateHandler
@@ -55,3 +67,4 @@ export type UpdateHandler =
     | EditMessageHandler
     | ChatMemberUpdateHandler
     | InlineQueryHandler
+    | ChosenInlineResultHandler

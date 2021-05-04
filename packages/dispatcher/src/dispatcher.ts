@@ -12,7 +12,9 @@ import {
     StopPropagation,
 } from './propagation'
 import {
-    ChatMemberUpdateHandler, InlineQueryHandler,
+    ChatMemberUpdateHandler,
+    ChosenInlineResultHandler,
+    InlineQueryHandler,
     NewMessageHandler,
     RawUpdateHandler,
     UpdateHandler,
@@ -20,6 +22,7 @@ import {
 import { filters, UpdateFilter } from './filters'
 import { handlers } from './builders'
 import { ChatMemberUpdate } from './updates'
+import { ChosenInlineResult } from './updates/chosen-inline-result'
 
 const noop = () => {}
 
@@ -68,6 +71,11 @@ const PARSERS: Partial<
     updateBotInlineQuery: [
         'inline_query',
         (client, upd, users) => new InlineQuery(client, upd as any, users),
+    ],
+    updateBotInlineSend: [
+        'chosen_inline_result',
+        (client, upd, users) =>
+            new ChosenInlineResult(client, upd as any, users),
     ],
 }
 
@@ -465,10 +473,7 @@ export class Dispatcher {
      * @param group  Handler group index
      * @internal
      */
-    onInlineQuery(
-        handler: InlineQueryHandler['callback'],
-        group?: number
-    ): void
+    onInlineQuery(handler: InlineQueryHandler['callback'], group?: number): void
 
     /**
      * Register an inline query handler with a given filter
@@ -488,5 +493,37 @@ export class Dispatcher {
     /** @internal */
     onInlineQuery(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('inlineQuery', filter, handler, group)
+    }
+
+    /**
+     * Register a chosen inline result handler without any filters.
+     *
+     * @param handler  Update handler
+     * @param group  Handler group index
+     * @internal
+     */
+    onChosenInlineResult(
+        handler: ChosenInlineResultHandler['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register an inline query handler with a given filter
+     *
+     * @param filter  Update filter
+     * @param handler  Update handler
+     * @param group  Handler group index
+     */
+    onChosenInlineResult<Mod>(
+        filter: UpdateFilter<ChosenInlineResult, Mod>,
+        handler: ChosenInlineResultHandler<
+            filters.Modify<ChosenInlineResult, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onChosenInlineResult(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('chosenInlineResult', filter, handler, group)
     }
 }

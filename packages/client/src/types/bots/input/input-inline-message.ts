@@ -185,12 +185,10 @@ export namespace BotInlineMessage {
     }
 
     export function media (
-        text?: string,
-        params?: Omit<InputInlineMessageMedia, 'type' | 'text'>,
+        params?: Omit<InputInlineMessageMedia, 'type'>,
     ): InputInlineMessageMedia {
         return {
             type: 'media',
-            text,
             ...(
                 params || {}
             ),
