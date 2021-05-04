@@ -132,8 +132,14 @@ export async function start(
 
         // user is already authorized
 
-        if (!this._disableUpdates && params.catchUp)
-            await this.catchUp()
+        if (!this._disableUpdates) {
+            if (params.catchUp) {
+                await this.catchUp()
+            } else {
+                // otherwise we will catch up as soon as we receive a new update
+                await this._fetchUpdatesState()
+            }
+        }
 
         return me
     } catch (e) {
