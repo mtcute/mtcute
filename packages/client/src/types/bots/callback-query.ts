@@ -129,6 +129,24 @@ export class CallbackQuery {
         return this.raw.data ?? null
     }
 
+    private _dataStr?: string
+    /**
+     * Data that was contained in the callback button, if any,
+     * parsed as a UTF8 string
+     *
+     * Note that this field is defined by the client, and a bad
+     * client can send arbitrary data in this field.
+     */
+    get dataStr(): string | null {
+        if (!this.raw.data) return null
+
+        if (!this._dataStr) {
+            this._dataStr = this.raw.data.toString('utf8')
+        }
+
+        return this._dataStr
+    }
+
     /**
      * In case this message was from {@link InputInlineResultGame},
      * or the button was {@link BotKeyboard.game},

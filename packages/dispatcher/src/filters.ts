@@ -1,9 +1,11 @@
 import {
     Audio,
+    CallbackQuery,
     Chat,
     Contact,
     Dice,
     Document,
+    InlineQuery,
     LiveLocation,
     Location,
     MaybeAsync,
@@ -20,6 +22,7 @@ import { Game } from '@mtcute/client/src/types/media/game'
 import { WebPage } from '@mtcute/client/src/types/media/web-page'
 import { MaybeArray } from '@mtcute/core'
 import { ChatMemberUpdate } from './updates'
+import { ChosenInlineResult } from './updates/chosen-inline-result'
 
 /**
  * Type describing a primitive filter, which is a function taking some `Base`
@@ -482,20 +485,36 @@ export namespace filters {
     // todo: more filters, see https://github.com/pyrogram/pyrogram/blob/701c1cde07af779ab18dbf79a3e626f04fa5d5d2/pyrogram/filters.py#L191
 
     /**
-     * Filter messages that match a given regular expression.
+     * Filter objects that match a given regular expression
+     *  - for `Message`, `Message.text` is used
+     *  - for `InlineQuery`, `InlineQuery.query` is used
+     *  - for {@link ChosenInlineResult}, {@link ChosenInlineResult.id} is used
+     *  - for `CallbackQuery`, `CallbackQuery.dataStr`
      *
      * When a regex matches, the match array is stored in a
-     * type-safe extension field `.match` of the {@link Message} object
+     * type-safe extension field `.match` of the object
      *
      * @param regex  Regex to be matched
      */
     export const regex = (
         regex: RegExp
-    ): UpdateFilter<Message, { match: RegExpMatchArray }> => (msg) => {
-        const m = msg.text.match(regex)
+    ): UpdateFilter<
+        Message | InlineQuery | ChosenInlineResult | CallbackQuery,
+        { match: RegExpMatchArray }
+    > => (obj) => {
+        let m: RegExpMatchArray | null = null
+        if (obj instanceof Message) {
+            m = obj.text.match(regex)
+        } else if (obj instanceof InlineQuery) {
+            m = obj.query.match(regex)
+        } else if (obj instanceof ChosenInlineResult) {
+            m = obj.id.match(regex)
+        } else if (obj instanceof CallbackQuery) {
+            if (obj.raw.data) m = obj.dataStr!.match(regex)
+        }
 
         if (m) {
-            ;(msg as Message & { match: RegExpMatchArray }).match = m
+            ;(obj as any).match = m
             return true
         }
         return false
@@ -595,5 +614,17 @@ export namespace filters {
      * Create a filter for {@link ChatMemberUpdate} for updates
      * regarding current user
      */
-    export const chatMemberSelf: UpdateFilter<ChatMemberUpdate, { isSelf: true }> = (upd) => upd.isSelf
+    export const chatMemberSelf: UpdateFilter<
+        ChatMemberUpdate,
+        { isSelf: true }
+    > = (upd) => upd.isSelf
+
+    /**
+     * Create a filter for callback queries that
+     * originated from an inline message
+     */
+    export const callbackInline: UpdateFilter<
+        CallbackQuery,
+        { isInline: true }
+    > = (q) => q.isInline
 }
