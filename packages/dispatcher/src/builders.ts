@@ -81,6 +81,7 @@ export namespace handlers {
         handler: NewMessageHandler<filters.Modify<Message, Mod>>['callback']
     ): NewMessageHandler
 
+    /** @internal */
     export function newMessage(filter: any, handler?: any): NewMessageHandler {
         return _create('new_message', filter, handler)
     }
@@ -105,6 +106,7 @@ export namespace handlers {
         handler: EditMessageHandler<filters.Modify<Message, Mod>>['callback']
     ): EditMessageHandler
 
+    /** @internal */
     export function editMessage(
         filter: any,
         handler?: any
@@ -134,6 +136,7 @@ export namespace handlers {
         >['callback']
     ): ChatMemberUpdateHandler
 
+    /** @internal */
     export function chatMemberUpdate(
         filter: any,
         handler?: any
@@ -163,6 +166,7 @@ export namespace handlers {
         >['callback']
     ): InlineQueryHandler
 
+    /** @internal */
     export function inlineQuery(
         filter: any,
         handler?: any
@@ -192,6 +196,7 @@ export namespace handlers {
         >['callback']
     ): ChosenInlineResultHandler
 
+    /** @internal */
     export function chosenInlineResult(
         filter: any,
         handler?: any

@@ -413,7 +413,7 @@ export class Dispatcher {
     }
 
     /**
-     * Register a new message handler without any filters.
+     * Register a new message handler without any filters
      *
      * @param handler  New message handler
      * @param group  Handler group index
@@ -440,7 +440,7 @@ export class Dispatcher {
     }
 
     /**
-     * Register an edit message handler without any filters.
+     * Register an edit message handler without any filters
      *
      * @param handler  Edit message handler
      * @param group  Handler group index
@@ -467,7 +467,7 @@ export class Dispatcher {
     }
 
     /**
-     * Register a chat member update handler without any filters.
+     * Register a chat member update handler without any filters
      *
      * @param handler  Chat member update handler
      * @param group  Handler group index
@@ -499,7 +499,7 @@ export class Dispatcher {
     }
 
     /**
-     * Register an inline query handler without any filters.
+     * Register an inline query handler without any filters
      *
      * @param handler  Inline query handler
      * @param group  Handler group index
@@ -528,7 +528,7 @@ export class Dispatcher {
     }
 
     /**
-     * Register a chosen inline result handler without any filters.
+     * Register a chosen inline result handler without any filters
      *
      * @param handler  Chosen inline result handler
      * @param group  Handler group index

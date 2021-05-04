@@ -56,7 +56,6 @@ function replaceSections(filename, sections) {
 }
 
 const types = parseUpdateTypes()
-console.log(types)
 
 async function formatFile(filename) {
     const targetFile = path.join(__dirname, '../src/', filename)
@@ -141,6 +140,7 @@ function generateBuilders() {
         >['callback']
     ): ${type.handlerTypeName}Handler
 
+    /** @internal */
     export function ${type.funcName}(
         filter: any,
         handler?: any
