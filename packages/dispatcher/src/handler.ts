@@ -3,6 +3,7 @@ import {
     Message,
     TelegramClient,
     InlineQuery,
+    CallbackQuery,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { PropagationSymbol } from './propagation'
@@ -61,6 +62,10 @@ export type InlineQueryHandler<T = InlineQuery> = ParsedUpdateHandler<
 export type ChosenInlineResultHandler<
     T = ChosenInlineResult
 > = ParsedUpdateHandler<'chosen_inline_result', T>
+export type CallbackQueryHandler<T = CallbackQuery> = ParsedUpdateHandler<
+    'callback_query',
+    T
+>
 
 export type UpdateHandler =
     | RawUpdateHandler
@@ -69,5 +74,6 @@ export type UpdateHandler =
     | ChatMemberUpdateHandler
     | InlineQueryHandler
     | ChosenInlineResultHandler
+    | CallbackQueryHandler
 
 // end-codegen

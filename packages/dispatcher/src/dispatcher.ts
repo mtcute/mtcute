@@ -1,4 +1,5 @@
 import {
+    CallbackQuery,
     InlineQuery,
     Message,
     MtCuteArgumentError,
@@ -20,6 +21,7 @@ import {
     ChatMemberUpdateHandler,
     InlineQueryHandler,
     ChosenInlineResultHandler,
+    CallbackQueryHandler,
 } from './handler'
 // end-codegen-imports
 import { filters, UpdateFilter } from './filters'
@@ -57,6 +59,10 @@ const chatMemberParser: UpdateParser = [
     (client, upd, users, chats) =>
         new ChatMemberUpdate(client, upd as any, users, chats),
 ]
+const callbackQueryParser: UpdateParser = [
+    'callback_query',
+    (client, upd, users) => new CallbackQuery(client, upd as any, users),
+]
 
 const PARSERS: Partial<
     Record<(tl.TypeUpdate | tl.TypeMessage)['_'], UpdateParser>
@@ -80,6 +86,8 @@ const PARSERS: Partial<
         (client, upd, users) =>
             new ChosenInlineResult(client, upd as any, users),
     ],
+    updateBotCallbackQuery: callbackQueryParser,
+    updateInlineBotCallbackQuery: callbackQueryParser,
 }
 
 /**
@@ -557,6 +565,38 @@ export class Dispatcher {
     /** @internal */
     onChosenInlineResult(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('chosenInlineResult', filter, handler, group)
+    }
+
+    /**
+     * Register a callback query handler without any filters
+     *
+     * @param handler  Callback query handler
+     * @param group  Handler group index
+     * @internal
+     */
+    onCallbackQuery(
+        handler: CallbackQueryHandler['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register a callback query handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Callback query handler
+     * @param group  Handler group index
+     */
+    onCallbackQuery<Mod>(
+        filter: UpdateFilter<CallbackQuery, Mod>,
+        handler: CallbackQueryHandler<
+            filters.Modify<CallbackQuery, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onCallbackQuery(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('callbackQuery', filter, handler, group)
     }
 
     // end-codegen

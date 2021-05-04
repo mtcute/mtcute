@@ -7,10 +7,11 @@ import {
     ChatMemberUpdateHandler,
     InlineQueryHandler,
     ChosenInlineResultHandler,
+    CallbackQueryHandler,
 } from './handler'
 // end-codegen-imports
 import { filters, UpdateFilter } from './filters'
-import { InlineQuery, Message } from '@mtcute/client'
+import { CallbackQuery, InlineQuery, Message } from '@mtcute/client'
 import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
 
@@ -202,6 +203,36 @@ export namespace handlers {
         handler?: any
     ): ChosenInlineResultHandler {
         return _create('chosen_inline_result', filter, handler)
+    }
+
+    /**
+     * Create a callback query handler
+     *
+     * @param handler  Callback query handler
+     */
+    export function callbackQuery(
+        handler: CallbackQueryHandler['callback']
+    ): CallbackQueryHandler
+
+    /**
+     * Create a callback query handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Callback query handler
+     */
+    export function callbackQuery<Mod>(
+        filter: UpdateFilter<CallbackQuery, Mod>,
+        handler: CallbackQueryHandler<
+            filters.Modify<CallbackQuery, Mod>
+        >['callback']
+    ): CallbackQueryHandler
+
+    /** @internal */
+    export function callbackQuery(
+        filter: any,
+        handler?: any
+    ): CallbackQueryHandler {
+        return _create('callback_query', filter, handler)
     }
 
     // end-codegen

@@ -6,3 +6,4 @@ edit_message = Message
 chat_member: ChatMemberUpdate = ChatMemberUpdate
 inline_query = InlineQuery
 chosen_inline_result = ChosenInlineResult
+callback_query = CallbackQuery
