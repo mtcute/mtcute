@@ -41,6 +41,7 @@ export type RawUpdateHandler = BaseUpdateHandler<
     ) => MaybeAsync<boolean>
 >
 
+// begin-codegen
 export type NewMessageHandler<T = Message> = ParsedUpdateHandler<
     'new_message',
     T
@@ -68,3 +69,5 @@ export type UpdateHandler =
     | ChatMemberUpdateHandler
     | InlineQueryHandler
     | ChosenInlineResultHandler
+
+// end-codegen

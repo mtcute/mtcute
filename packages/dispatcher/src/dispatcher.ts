@@ -11,14 +11,17 @@ import {
     StopChildrenPropagation,
     StopPropagation,
 } from './propagation'
+// begin-codegen-imports
 import {
-    ChatMemberUpdateHandler,
-    ChosenInlineResultHandler,
-    InlineQueryHandler,
-    NewMessageHandler,
-    RawUpdateHandler,
     UpdateHandler,
+    RawUpdateHandler,
+    NewMessageHandler,
+    EditMessageHandler,
+    ChatMemberUpdateHandler,
+    InlineQueryHandler,
+    ChosenInlineResultHandler,
 } from './handler'
+// end-codegen-imports
 import { filters, UpdateFilter } from './filters'
 import { handlers } from './builders'
 import { ChatMemberUpdate } from './updates'
@@ -381,19 +384,21 @@ export class Dispatcher {
         }
     }
 
+    // begin-codegen
+
     /**
-     * Register a raw update handler
+     * Register a raw update handler without any filters
      *
-     * @param handler  Handler function
+     * @param handler  Raw update handler
      * @param group  Handler group index
      */
     onRawUpdate(handler: RawUpdateHandler['callback'], group?: number): void
 
     /**
-     * Register a filtered raw update handler
+     * Register a raw update handler with a filter
      *
      * @param filter  Update filter function
-     * @param handler  Handler function
+     * @param handler  Raw update handler
      * @param group  Handler group index
      */
     onRawUpdate(
@@ -408,19 +413,19 @@ export class Dispatcher {
     }
 
     /**
-     * Register a message handler without any filters.
+     * Register a new message handler without any filters.
      *
-     * @param handler  Message handler
+     * @param handler  New message handler
      * @param group  Handler group index
      * @internal
      */
     onNewMessage(handler: NewMessageHandler['callback'], group?: number): void
 
     /**
-     * Register a message handler with a given filter
+     * Register a new message handler with a filter
      *
      * @param filter  Update filter
-     * @param handler  Message handler
+     * @param handler  New message handler
      * @param group  Handler group index
      */
     onNewMessage<Mod>(
@@ -435,9 +440,36 @@ export class Dispatcher {
     }
 
     /**
+     * Register an edit message handler without any filters.
+     *
+     * @param handler  Edit message handler
+     * @param group  Handler group index
+     * @internal
+     */
+    onEditMessage(handler: EditMessageHandler['callback'], group?: number): void
+
+    /**
+     * Register an edit message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Edit message handler
+     * @param group  Handler group index
+     */
+    onEditMessage<Mod>(
+        filter: UpdateFilter<Message, Mod>,
+        handler: EditMessageHandler<filters.Modify<Message, Mod>>['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onEditMessage(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('editMessage', filter, handler, group)
+    }
+
+    /**
      * Register a chat member update handler without any filters.
      *
-     * @param handler  Update handler
+     * @param handler  Chat member update handler
      * @param group  Handler group index
      * @internal
      */
@@ -447,10 +479,10 @@ export class Dispatcher {
     ): void
 
     /**
-     * Register a message handler with a given filter
+     * Register a chat member update handler with a filter
      *
      * @param filter  Update filter
-     * @param handler  Update handler
+     * @param handler  Chat member update handler
      * @param group  Handler group index
      */
     onChatMemberUpdate<Mod>(
@@ -469,17 +501,17 @@ export class Dispatcher {
     /**
      * Register an inline query handler without any filters.
      *
-     * @param handler  Update handler
+     * @param handler  Inline query handler
      * @param group  Handler group index
      * @internal
      */
     onInlineQuery(handler: InlineQueryHandler['callback'], group?: number): void
 
     /**
-     * Register an inline query handler with a given filter
+     * Register an inline query handler with a filter
      *
      * @param filter  Update filter
-     * @param handler  Update handler
+     * @param handler  Inline query handler
      * @param group  Handler group index
      */
     onInlineQuery<Mod>(
@@ -498,7 +530,7 @@ export class Dispatcher {
     /**
      * Register a chosen inline result handler without any filters.
      *
-     * @param handler  Update handler
+     * @param handler  Chosen inline result handler
      * @param group  Handler group index
      * @internal
      */
@@ -508,10 +540,10 @@ export class Dispatcher {
     ): void
 
     /**
-     * Register an inline query handler with a given filter
+     * Register a chosen inline result handler with a filter
      *
      * @param filter  Update filter
-     * @param handler  Update handler
+     * @param handler  Chosen inline result handler
      * @param group  Handler group index
      */
     onChosenInlineResult<Mod>(
@@ -526,4 +558,6 @@ export class Dispatcher {
     onChosenInlineResult(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('chosenInlineResult', filter, handler, group)
     }
+
+    // end-codegen
 }

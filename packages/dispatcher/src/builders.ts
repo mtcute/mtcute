@@ -1,11 +1,14 @@
+// begin-codegen-imports
 import {
-    ChatMemberUpdateHandler,
-    ChosenInlineResultHandler,
-    InlineQueryHandler,
-    NewMessageHandler,
-    RawUpdateHandler,
     UpdateHandler,
+    RawUpdateHandler,
+    NewMessageHandler,
+    EditMessageHandler,
+    ChatMemberUpdateHandler,
+    InlineQueryHandler,
+    ChosenInlineResultHandler,
 } from './handler'
+// end-codegen-imports
 import { filters, UpdateFilter } from './filters'
 import { InlineQuery, Message } from '@mtcute/client'
 import { ChatMemberUpdate } from './updates'
@@ -31,44 +34,47 @@ function _create<T extends UpdateHandler>(
 }
 
 export namespace handlers {
+    // begin-codegen
+
     /**
-     * Create a {@link RawUpdateHandler}
+     * Create a raw update handler
      *
-     * @param handler  Update handler
+     * @param handler  Raw update handler
      */
     export function rawUpdate(
         handler: RawUpdateHandler['callback']
     ): RawUpdateHandler
 
     /**
-     * Create a {@link RawUpdateHandler} with a predicate
+     * Create a raw update handler with a filter
      *
      * @param filter  Predicate to check the update against
-     * @param handler  Update handler
+     * @param handler  Raw update handler
      */
     export function rawUpdate(
         filter: RawUpdateHandler['check'],
         handler: RawUpdateHandler['callback']
     ): RawUpdateHandler
 
+    /** @internal */
     export function rawUpdate(filter: any, handler?: any): RawUpdateHandler {
         return _create('raw', filter, handler)
     }
 
     /**
-     * Create a {@link NewMessageHandler}
+     * Create a new message handler
      *
-     * @param handler  Message handler
+     * @param handler  New message handler
      */
     export function newMessage(
         handler: NewMessageHandler['callback']
     ): NewMessageHandler
 
     /**
-     * Create a {@link NewMessageHandler} with a filter
+     * Create a new message handler with a filter
      *
-     * @param filter  Message update filter
-     * @param handler  Message handler
+     * @param filter  Update filter
+     * @param handler  New message handler
      */
     export function newMessage<Mod>(
         filter: UpdateFilter<Message, Mod>,
@@ -80,7 +86,34 @@ export namespace handlers {
     }
 
     /**
-     * Create a {@link ChatMemberUpdateHandler}
+     * Create an edit message handler
+     *
+     * @param handler  Edit message handler
+     */
+    export function editMessage(
+        handler: EditMessageHandler['callback']
+    ): EditMessageHandler
+
+    /**
+     * Create an edit message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Edit message handler
+     */
+    export function editMessage<Mod>(
+        filter: UpdateFilter<Message, Mod>,
+        handler: EditMessageHandler<filters.Modify<Message, Mod>>['callback']
+    ): EditMessageHandler
+
+    export function editMessage(
+        filter: any,
+        handler?: any
+    ): EditMessageHandler {
+        return _create('edit_message', filter, handler)
+    }
+
+    /**
+     * Create a chat member update handler
      *
      * @param handler  Chat member update handler
      */
@@ -89,9 +122,9 @@ export namespace handlers {
     ): ChatMemberUpdateHandler
 
     /**
-     * Create a {@link ChatMemberUpdateHandler} with a filter
+     * Create a chat member update handler with a filter
      *
-     * @param filter  Chat member update filter
+     * @param filter  Update filter
      * @param handler  Chat member update handler
      */
     export function chatMemberUpdate<Mod>(
@@ -118,9 +151,9 @@ export namespace handlers {
     ): InlineQueryHandler
 
     /**
-     * Create an inline query with a filter
+     * Create an inline query handler with a filter
      *
-     * @param filter  Inline query update filter
+     * @param filter  Update filter
      * @param handler  Inline query handler
      */
     export function inlineQuery<Mod>(
@@ -149,7 +182,7 @@ export namespace handlers {
     /**
      * Create a chosen inline result handler with a filter
      *
-     * @param filter  Chosen inline result filter
+     * @param filter  Update filter
      * @param handler  Chosen inline result handler
      */
     export function chosenInlineResult<Mod>(
@@ -165,4 +198,6 @@ export namespace handlers {
     ): ChosenInlineResultHandler {
         return _create('chosen_inline_result', filter, handler)
     }
+
+    // end-codegen
 }

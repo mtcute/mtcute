@@ -1,0 +1,8 @@
+# format: type_name[: handler_type_name] = update_type
+# IGNORE as update_type disables filters modification
+raw: RawUpdate = IGNORE
+new_message = Message
+edit_message = Message
+chat_member: ChatMemberUpdate = ChatMemberUpdate
+inline_query = InlineQuery
+chosen_inline_result = ChosenInlineResult
