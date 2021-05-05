@@ -177,7 +177,7 @@ export class CallbackQuery {
      * Answer this query
      */
     async answer(
-        params: Parameters<TelegramClient['answerCallbackQuery']>[1]
+        params?: Parameters<TelegramClient['answerCallbackQuery']>[1]
     ): Promise<void> {
         return this.client.answerCallbackQuery(this.raw.queryId, params)
     }

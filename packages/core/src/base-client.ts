@@ -487,15 +487,14 @@ export class BaseTelegramClient {
 
         this._lastRequestTime = Date.now()
 
+        const connection = params?.connection ?? this.primaryConnection
+
         let lastError: Error | null = null
         const stack = this._niceStacks ? new Error().stack : undefined
 
         for (let i = 0; i < this._rpcRetryCount; i++) {
             try {
-                const res = await (params?.connection ?? this.primaryConnection).sendForResult(
-                    message,
-                    stack
-                )
+                const res = await connection.sendForResult(message, stack)
                 await this._cachePeersFrom(res)
 
                 return res
@@ -538,9 +537,10 @@ export class BaseTelegramClient {
                     }
                 }
                 if (
-                    e instanceof PhoneMigrateError ||
-                    e instanceof UserMigrateError ||
-                    e instanceof NetworkMigrateError
+                    connection === this.primaryConnection &&
+                    (e instanceof PhoneMigrateError ||
+                        e instanceof UserMigrateError ||
+                        e instanceof NetworkMigrateError)
                 ) {
                     debug('Migrate error, new dc = %d', e.newDc)
                     await this.changeDc(e.newDc)
@@ -660,7 +660,7 @@ export class BaseTelegramClient {
                     phone: peer.phone ?? null,
                     type: peer.bot ? 'bot' : 'user',
                     updated: 0,
-                    fromMessage: peer.fromMessage
+                    fromMessage: peer.fromMessage,
                 })
             } else if (peer._ === 'chat' || peer._ === 'chatForbidden') {
                 parsedPeers.push({
@@ -670,7 +670,7 @@ export class BaseTelegramClient {
                     phone: null,
                     type: 'group',
                     updated: 0,
-                    fromMessage: peer.fromMessage
+                    fromMessage: peer.fromMessage,
                 })
             } else if (peer._ === 'channel' || peer._ === 'channelForbidden') {
                 parsedPeers.push({
@@ -683,7 +683,7 @@ export class BaseTelegramClient {
                     phone: null,
                     type: peer.broadcast ? 'channel' : 'supergroup',
                     updated: 0,
-                    fromMessage: peer.fromMessage
+                    fromMessage: peer.fromMessage,
                 })
             }
         }
