@@ -4,6 +4,7 @@ import { makeInspectable } from '../utils'
 import { Sticker } from '../media'
 import { MtCuteEmptyError, MtCuteTypeAssertionError } from '../errors'
 import { parseDocument } from '../media/document-utils'
+import { InputFileLike } from '../files'
 
 export namespace StickerSet {
     /**
@@ -196,6 +197,103 @@ export class StickerSet {
 
         return this.client.getStickerSet(this.inputStickerSet)
     }
+
+    /**
+     * Add a new sticker to this sticker set.
+     *
+     * Only for bots, and the sticker set must
+     * have been created by this bot.
+     *
+     * Note that this method returns a new
+     * {@link StickerSet} object instead of modifying current.
+     */
+    async addSticker(sticker: InputStickerSetItem): Promise<StickerSet> {
+        return this.client.addStickerToSet(this.inputStickerSet, sticker)
+    }
+
+    /**
+     * Delete a sticker from this set.
+     *
+     * Only for bots, and the sticker set must
+     * have been created by this bot.
+     *
+     * @param sticker
+     *     Sticker File ID. In case this is a full sticker set object,
+     *     you can also pass index (even negative), and that sticker will be removed
+     */
+    async deleteSticker(sticker: number | Parameters<TelegramClient['deleteStickerFromSet']>[0]): Promise<StickerSet> {
+        if (typeof sticker === 'number') {
+            if (!this.full) throw new MtCuteEmptyError()
+
+            if (sticker < 0) sticker = this.full!.documents.length - sticker
+            const doc = this.full!.documents[sticker] as tl.RawDocument
+
+            sticker = {
+                _: 'inputDocument',
+                id: doc.id,
+                accessHash: doc.accessHash,
+                fileReference: doc.fileReference
+            }
+        }
+
+        return this.client.deleteStickerFromSet(sticker)
+    }
+
+    /**
+     * Move a sticker in this set.
+     *
+     * Only for bots, and the sticker set must
+     * have been created by this bot.
+     *
+     * @param sticker
+     *     Sticker File ID. In case this is a full sticker set object,
+     *     you can also pass index (even negative), and that sticker will be removed
+     * @param position  New sticker position
+     */
+    async moveSticker(sticker: number | Parameters<TelegramClient['moveStickerInSet']>[0], position: number): Promise<StickerSet> {
+        if (typeof sticker === 'number') {
+            if (!this.full) throw new MtCuteEmptyError()
+
+            if (sticker < 0) sticker = this.full!.documents.length - sticker
+            const doc = this.full!.documents[sticker] as tl.RawDocument
+
+            sticker = {
+                _: 'inputDocument',
+                id: doc.id,
+                accessHash: doc.accessHash,
+                fileReference: doc.fileReference
+            }
+        }
+
+        return this.client.moveStickerInSet(sticker, position)
+    }
 }
 
 makeInspectable(StickerSet, ['isFull'])
+
+export interface InputStickerSetItem {
+    /**
+     * File containing the sticker.
+     *
+     * For normal stickers: must be a `.png` or `.webp` file
+     * up to 512kb, having both dimensions `<=512px`, and having
+     * one of the dimensions `==512px`
+     *
+     * For animated stickers: must be a `.tgs` file
+     * up to 64kb, having canvas dimensions exactly
+     * `512x512`px, duration no more than 3 seconds
+     * and animated at 60fps ([source](https://core.telegram.org/animated_stickers#technical-requirements))
+     */
+    file: InputFileLike
+
+    /**
+     * One or more emojis that represent this sticker
+     */
+    emojis: string
+
+    /**
+     * In case this is a mask sticker,
+     * position of the mask
+     */
+    maskPosition?: Sticker.MaskPosition
+}

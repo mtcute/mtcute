@@ -28,6 +28,7 @@ import {
     ReplyMarkup,
     InputMediaLike,
     InputInlineResult,
+    InputStickerSetItem,
     TakeoutSession,
     StickerSet
 } from '../types'
@@ -37,3 +38,6 @@ import { MaybeArray, MaybeAsync, TelegramConnection } from '@mtcute/core'
 
 // @copy
 import { Lock } from '../utils/lock'
+
+// @copy
+import { tdFileId } from '@mtcute/file-id'

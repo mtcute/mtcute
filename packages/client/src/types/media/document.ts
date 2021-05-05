@@ -97,18 +97,26 @@ export class RawDocument extends FileLocation {
     }
 
     /**
+     * Input document TL object generated from this object,
+     * to be used with methods that use it
+     */
+    get inputDocument(): tl.TypeInputDocument {
+        return {
+            _: 'inputDocument',
+            id: this.doc.id,
+            accessHash: this.doc.accessHash,
+            fileReference: this.doc.fileReference
+        }
+    }
+
+    /**
      * Input media TL object generated from this object,
-     * to be used inside {@link InputMediaLike} or {@link TelegramClient.sendPhoto}
+     * to be used inside {@link InputMediaLike}
      */
     get inputMediaTl(): tl.TypeInputMedia {
         return {
             _: 'inputMediaDocument',
-            id: {
-                _: 'inputDocument',
-                id: this.doc.id,
-                accessHash: this.doc.accessHash,
-                fileReference: this.doc.fileReference
-            }
+            id: this.inputDocument
         }
     }
 

@@ -56,6 +56,7 @@ import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
 import { downloadAsIterable } from './methods/files/download-iterable'
 import { downloadAsStream } from './methods/files/download-stream'
+import { _normalizeFileToDocument } from './methods/files/normalize-file-to-document'
 import { _normalizeInputFile } from './methods/files/normalize-input-file'
 import { _normalizeInputMedia } from './methods/files/normalize-input-media'
 import { uploadFile } from './methods/files/upload-file'
@@ -84,8 +85,12 @@ import {
     setDefaultParseMode,
     unregisterParseMode,
 } from './methods/parse-modes/parse-modes'
+import { addStickerToSet } from './methods/stickers/add-sticker-to-set'
+import { createStickerSet } from './methods/stickers/create-sticker-set'
+import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set'
 import { getInstalledStickers } from './methods/stickers/get-installed-stickers'
 import { getStickerSet } from './methods/stickers/get-sticker-set'
+import { moveStickerInSet } from './methods/stickers/move-sticker-in-set'
 import {
     _fetchUpdatesState,
     _handleUpdate,
@@ -112,6 +117,7 @@ import {
     InputInlineResult,
     InputMediaLike,
     InputPeerLike,
+    InputStickerSetItem,
     MaybeDynamic,
     Message,
     PartialExcept,
@@ -127,6 +133,7 @@ import {
 } from './types'
 import { MaybeArray, MaybeAsync, TelegramConnection } from '@mtcute/core'
 import { Lock } from './utils/lock'
+import { tdFileId } from '@mtcute/file-id'
 
 export interface TelegramClient extends BaseTelegramClient {
     /**
@@ -1974,6 +1981,116 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     setDefaultParseMode(name: string): void
     /**
+     * Add a sticker to a sticker set.
+     *
+     * Only for bots, and the sticker set must
+     * have been created by this bot.
+     *
+     * @param id  Sticker set short name or TL object with input sticker set
+     * @param sticker  Sticker to be added
+     * @param params
+     * @returns  Modfiied sticker set
+     */
+    addStickerToSet(
+        id: string | tl.TypeInputStickerSet,
+        sticker: InputStickerSetItem,
+        params?: {
+            /**
+             * Upload progress callback
+             *
+             * @param uploaded  Number of bytes uploaded
+             * @param total  Total file size
+             */
+            progressCallback?: (uploaded: number, total: number) => void
+        }
+    ): Promise<StickerSet>
+    /**
+     * Create a new sticker set (only for bots)
+     *
+     * Only for bots.
+     *
+     * @param params
+     * @returns  Newly created sticker set
+     */
+    createStickerSet(params: {
+        /**
+         * Owner of the sticker set (must be user)
+         */
+        owner: InputPeerLike
+
+        /**
+         * Title of the sticker set (1-64 chars)
+         */
+        title: string
+
+        /**
+         * Short name of the sticker set.
+         * Can only contain English letters, digits and underscores
+         * (i.e. must match `/^[a-zA-Z0-9_]+$/),
+         * and must end with `_by_<bot username>` (`<bot username>` is
+         * case-insensitive).
+         */
+        shortName: string
+
+        /**
+         * Whether this is a set of masks
+         */
+        masks?: boolean
+
+        /**
+         * Whether this is a set of animated stickers
+         */
+        animated?: boolean
+
+        /**
+         * List of stickers to be immediately added into the pack.
+         * There must be at least one sticker in this list.
+         */
+        stickers: InputStickerSetItem[]
+
+        /**
+         * Thumbnail for the set.
+         *
+         * The file must be either a `.png` file
+         * up to 128kb, having size of exactly `100x100` px,
+         * or a `.tgs` file up to 32kb.
+         *
+         * If not set, Telegram will use the first sticker
+         * in the sticker set as the thumbnail
+         */
+        thumb?: InputFileLike
+
+        /**
+         * Upload progress callback.
+         *
+         * @param idx  Index of the sticker
+         * @param uploaded  Number of bytes uploaded
+         * @param total  Total file size
+         */
+        progressCallback?: (
+            idx: number,
+            uploaded: number,
+            total: number
+        ) => void
+    }): Promise<StickerSet>
+    /**
+     * Delete a sticker from a sticker set
+     *
+     * Only for bots, and the sticker set must
+     * have been created by this bot.
+     *
+     * @param sticker
+     *     TDLib and Bot API compatible File ID, or a
+     *     TL object representing a sticker to be removed
+     * @returns  Modfiied sticker set
+     */
+    deleteStickerFromSet(
+        sticker:
+            | string
+            | tdFileId.RawFullRemoteFileLocation
+            | tl.TypeInputDocument
+    ): Promise<StickerSet>
+    /**
      * Get a list of all installed sticker packs
      *
      * > **Note**: This method returns *brief* meta information about
@@ -1990,6 +2107,26 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getStickerSet(
         id: string | { dice: string } | tl.TypeInputStickerSet
+    ): Promise<StickerSet>
+    /**
+     * Move a sticker in a sticker set
+     * to another position
+     *
+     * Only for bots, and the sticker set must
+     * have been created by this bot.
+     *
+     * @param sticker
+     *     TDLib and Bot API compatible File ID, or a
+     *     TL object representing a sticker to be removed
+     * @param position  New sticker position (starting from 0)
+     * @returns  Modfiied sticker set
+     */
+    moveStickerInSet(
+        sticker:
+            | string
+            | tdFileId.RawFullRemoteFileLocation
+            | tl.TypeInputDocument,
+        position: number
     ): Promise<StickerSet>
     /**
      * Base function for update handling. Replace or override this function
@@ -2147,6 +2284,7 @@ export class TelegramClient extends BaseTelegramClient {
     downloadToFile = downloadToFile
     downloadAsIterable = downloadAsIterable
     downloadAsStream = downloadAsStream
+    protected _normalizeFileToDocument = _normalizeFileToDocument
     protected _normalizeInputFile = _normalizeInputFile
     protected _normalizeInputMedia = _normalizeInputMedia
     uploadFile = uploadFile
@@ -2173,8 +2311,12 @@ export class TelegramClient extends BaseTelegramClient {
     unregisterParseMode = unregisterParseMode
     getParseMode = getParseMode
     setDefaultParseMode = setDefaultParseMode
+    addStickerToSet = addStickerToSet
+    createStickerSet = createStickerSet
+    deleteStickerFromSet = deleteStickerFromSet
     getInstalledStickers = getInstalledStickers
     getStickerSet = getStickerSet
+    moveStickerInSet = moveStickerInSet
     protected _fetchUpdatesState = _fetchUpdatesState
     protected _loadStorage = _loadStorage
     protected _saveStorage = _saveStorage

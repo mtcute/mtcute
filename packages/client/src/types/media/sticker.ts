@@ -5,6 +5,37 @@ import { makeInspectable } from '../utils'
 import { StickerSet } from '../misc'
 import { tdFileId } from '@mtcute/file-id'
 
+export namespace Sticker {
+    export interface MaskPosition {
+        /**
+         * The part of the face relative where the mask should be placed
+         */
+        point: 'forehead' | 'eyes' | 'mouth' | 'chin'
+
+        /**
+         * Shift by X-axis measured in widths of the mask scaled to
+         * the face size, from left to right. For example, choosing
+         * -1.0 will place mask just to the left of the default
+         * mask position.
+         */
+        x: number
+
+        /**
+         * Shift by Y-axis measured in heights of the mask scaled to
+         * the face size, from top to bottom. For example, 1.0
+         * will place the mask just below the default mask position.
+         */
+        y: number
+
+        /**
+         * Mask scaling coefficient. For example, 2.0 means double size.
+         */
+        scale: number
+    }
+}
+
+const MASK_POS = ['forehead', 'eyes', 'mouth', 'chin'] as const
+
 /**
  * A sticker
  */
@@ -68,10 +99,37 @@ export class Sticker extends RawDocument {
     }
 
     /**
+     * Whether this is a mask
+     */
+    get isMask(): boolean {
+        return !!this.attr.mask
+    }
+
+    /**
      * Whether this sticker has an associated public sticker set.
      */
     get hasStickerSet(): boolean {
         return this.attr.stickerset._ === 'inputStickerSetID'
+    }
+
+    private _maskPosition?: Sticker.MaskPosition
+    /**
+     * Position where this mask should be placed
+     */
+    get maskPosition(): Sticker.MaskPosition | null {
+        if (!this.attr.maskCoords) return null
+
+        const raw = this.attr.maskCoords
+        if (!this._maskPosition) {
+            this._maskPosition = {
+                point: MASK_POS[raw.n],
+                x: raw.x,
+                y: raw.y,
+                scale: raw.zoom
+            }
+        }
+
+        return this._maskPosition
     }
 
     /**
