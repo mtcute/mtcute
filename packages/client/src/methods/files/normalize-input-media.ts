@@ -13,6 +13,7 @@ import {
     tdFileId,
 } from '@mtcute/file-id'
 import { extractFileName } from '../../utils/file-utils'
+import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Normalize an {@link InputMediaLike} to `InputMedia`,
@@ -25,9 +26,14 @@ export async function _normalizeInputMedia(
     media: InputMediaLike,
     params: {
         progressCallback?: (uploaded: number, total: number) => void
-    }
+    },
+    uploadMedia = false
 ): Promise<tl.TypeInputMedia> {
     // my condolences to those poor souls who are going to maintain this (myself included)
+
+    // thanks to @pacificescape for pointing out messages.uploadMedia method
+
+    if (tl.isAnyInputMedia(media)) return media
 
     let inputFile: tl.TypeInputFile | undefined = undefined
     let thumb: tl.TypeInputFile | undefined = undefined
@@ -100,10 +106,31 @@ export async function _normalizeInputMedia(
     if (!inputFile) throw new Error('should not happen')
 
     if (media.type === 'photo') {
-        return {
+        const ret: tl.RawInputMediaUploadedPhoto = {
             _: 'inputMediaUploadedPhoto',
             file: inputFile,
             ttlSeconds: media.ttlSeconds,
+        }
+        if (!uploadMedia) return ret
+
+        const res = await this.call({
+            _: 'messages.uploadMedia',
+            peer: { _: 'inputPeerSelf' },
+            media: ret
+        })
+
+        assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaPhoto')
+        assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.photo!, 'photo')
+
+        return {
+            _: 'inputMediaPhoto',
+            id: {
+                _: 'inputPhoto',
+                id: res.photo.id,
+                accessHash: res.photo.accessHash,
+                fileReference: res.photo.fileReference
+            },
+            ttlSeconds: media.ttlSeconds
         }
     }
 
@@ -158,7 +185,7 @@ export async function _normalizeInputMedia(
         })
     }
 
-    return {
+    const ret: tl.RawInputMediaUploadedDocument = {
         _: 'inputMediaUploadedDocument',
         nosoundVideo: media.type === 'video' && media.isAnimated,
         forceFile: media.type === 'document',
@@ -166,6 +193,28 @@ export async function _normalizeInputMedia(
         thumb,
         mimeType: mime,
         attributes,
+        ttlSeconds: media.ttlSeconds
+    }
+
+    if (!uploadMedia) return ret
+
+    const res = await this.call({
+        _: 'messages.uploadMedia',
+        peer: { _: 'inputPeerSelf' },
+        media: ret
+    })
+
+    assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaDocument')
+    assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.document!, 'document')
+
+    return {
+        _: 'inputMediaDocument',
+        id: {
+            _: 'inputDocument',
+            id: res.document.id,
+            accessHash: res.document.accessHash,
+            fileReference: res.document.fileReference
+        },
         ttlSeconds: media.ttlSeconds
     }
 }

@@ -250,6 +250,7 @@ export type InputMediaLike =
     | InputMediaVideo
     | InputMediaAuto
     | InputMediaSticker
+    | tl.TypeInputMedia
 
 export namespace InputMedia {
     type OmitTypeAndFile<T extends InputMediaLike> = Omit<T, 'type' | 'file'>

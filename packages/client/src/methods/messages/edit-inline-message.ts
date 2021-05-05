@@ -81,21 +81,6 @@ export async function editInlineMessage(
     let entities: tl.TypeMessageEntity[] | undefined
     let media: tl.TypeInputMedia | undefined = undefined
 
-    if (params.media) {
-        media = await this._normalizeInputMedia(params.media, params)
-        ;[content, entities] = await this._parseEntities(
-            params.media.caption,
-            params.parseMode,
-            params.media.entities
-        )
-    } else {
-        ;[content, entities] = await this._parseEntities(
-            params.text,
-            params.parseMode,
-            params.entities
-        )
-    }
-
     if (typeof id === 'string') {
         id = parseInlineMessageId(id)
     }
@@ -105,9 +90,26 @@ export async function editInlineMessage(
         if (!(id.dcId in this._connectionsForInline)) {
             this._connectionsForInline[
                 id.dcId
-            ] = await this.createAdditionalConnection(id.dcId)
+                ] = await this.createAdditionalConnection(id.dcId)
         }
         connection = this._connectionsForInline[id.dcId]
+    }
+
+    if (params.media) {
+        media = await this._normalizeInputMedia(params.media, params, true)
+        if ('caption' in params.media) {
+            ;[content, entities] = await this._parseEntities(
+                params.media.caption,
+                params.parseMode,
+                params.media.entities
+            )
+        }
+    } else {
+        ;[content, entities] = await this._parseEntities(
+            params.text,
+            params.parseMode,
+            params.entities
+        )
     }
 
     await this.call(

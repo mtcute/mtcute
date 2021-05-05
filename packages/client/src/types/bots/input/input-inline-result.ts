@@ -345,7 +345,7 @@ export interface InputInlineResultFile extends BaseInputInlineResult {
     /**
      * Title of the result
      */
-    title?: string
+    title: string
 
     /**
      * Description of the result
