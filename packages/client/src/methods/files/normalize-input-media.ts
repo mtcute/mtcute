@@ -56,16 +56,56 @@ export async function _normalizeInputMedia(
         mime = uploaded.mime
     }
 
+    const uploadMediaIfNeeded = async (inputMedia: tl.TypeInputMedia, photo: boolean): Promise<tl.TypeInputMedia> => {
+        if (!uploadMedia) return inputMedia
+
+        const res = await this.call({
+            _: 'messages.uploadMedia',
+            peer: { _: 'inputPeerSelf' },
+            media: inputMedia
+        })
+
+        if (photo) {
+            assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaPhoto')
+            assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.photo!, 'photo')
+
+            return {
+                _: 'inputMediaPhoto',
+                id: {
+                    _: 'inputPhoto',
+                    id: res.photo.id,
+                    accessHash: res.photo.accessHash,
+                    fileReference: res.photo.fileReference
+                },
+                ttlSeconds: media.ttlSeconds
+            }
+        } else {
+            assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaDocument')
+            assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.document!, 'document')
+
+            return {
+                _: 'inputMediaDocument',
+                id: {
+                    _: 'inputDocument',
+                    id: res.document.id,
+                    accessHash: res.document.accessHash,
+                    fileReference: res.document.fileReference
+                },
+                ttlSeconds: media.ttlSeconds
+            }
+        }
+    }
+
     const input = media.file
     if (tdFileId.isFileIdLike(input)) {
         if (typeof input === 'string' && input.match(/^https?:\/\//)) {
-            return {
+            return uploadMediaIfNeeded({
                 _:
                     media.type === 'photo'
                         ? 'inputMediaPhotoExternal'
                         : 'inputMediaDocumentExternal',
                 url: input,
-            }
+            }, media.type === 'photo')
         } else if (typeof input === 'string' && input.match(/^file:/)) {
             await upload(input.substr(5))
         } else {
@@ -78,13 +118,13 @@ export async function _normalizeInputMedia(
                     id: fileIdToInputPhoto(parsed),
                 }
             } else if (parsed.location._ === 'web') {
-                return {
+                return uploadMediaIfNeeded({
                     _:
                         parsed.type === tdFileId.FileType.Photo
                             ? 'inputMediaPhotoExternal'
                             : 'inputMediaDocumentExternal',
                     url: parsed.location.url,
-                }
+                }, parsed.type === tdFileId.FileType.Photo)
             } else {
                 return {
                     _: 'inputMediaDocument',
@@ -106,32 +146,11 @@ export async function _normalizeInputMedia(
     if (!inputFile) throw new Error('should not happen')
 
     if (media.type === 'photo') {
-        const ret: tl.RawInputMediaUploadedPhoto = {
+        return uploadMediaIfNeeded({
             _: 'inputMediaUploadedPhoto',
             file: inputFile,
             ttlSeconds: media.ttlSeconds,
-        }
-        if (!uploadMedia) return ret
-
-        const res = await this.call({
-            _: 'messages.uploadMedia',
-            peer: { _: 'inputPeerSelf' },
-            media: ret
-        })
-
-        assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaPhoto')
-        assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.photo!, 'photo')
-
-        return {
-            _: 'inputMediaPhoto',
-            id: {
-                _: 'inputPhoto',
-                id: res.photo.id,
-                accessHash: res.photo.accessHash,
-                fileReference: res.photo.fileReference
-            },
-            ttlSeconds: media.ttlSeconds
-        }
+        }, true)
     }
 
     if ('thumb' in media && media.thumb) {
@@ -185,7 +204,7 @@ export async function _normalizeInputMedia(
         })
     }
 
-    const ret: tl.RawInputMediaUploadedDocument = {
+    return uploadMediaIfNeeded({
         _: 'inputMediaUploadedDocument',
         nosoundVideo: media.type === 'video' && media.isAnimated,
         forceFile: media.type === 'document',
@@ -194,27 +213,5 @@ export async function _normalizeInputMedia(
         mimeType: mime,
         attributes,
         ttlSeconds: media.ttlSeconds
-    }
-
-    if (!uploadMedia) return ret
-
-    const res = await this.call({
-        _: 'messages.uploadMedia',
-        peer: { _: 'inputPeerSelf' },
-        media: ret
-    })
-
-    assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaDocument')
-    assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.document!, 'document')
-
-    return {
-        _: 'inputMediaDocument',
-        id: {
-            _: 'inputDocument',
-            id: res.document.id,
-            accessHash: res.document.accessHash,
-            fileReference: res.document.fileReference
-        },
-        ttlSeconds: media.ttlSeconds
-    }
+    }, false)
 }
