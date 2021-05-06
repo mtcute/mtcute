@@ -211,11 +211,30 @@ export class StickerSet {
         return this.client.addStickerToSet(this.inputStickerSet, sticker)
     }
 
+    private _getInputDocument(idx: number): tl.TypeInputDocument {
+        if (!this.full) throw new MtCuteEmptyError()
+
+        if (idx < 0) idx = this.full!.documents.length + idx
+        const doc = this.full!.documents[idx] as tl.RawDocument
+
+        if (!doc) throw new RangeError(`Sticker set does not have sticker ${idx}`)
+
+        return {
+            _: 'inputDocument',
+            id: doc.id,
+            accessHash: doc.accessHash,
+            fileReference: doc.fileReference
+        }
+    }
+
     /**
      * Delete a sticker from this set.
      *
      * Only for bots, and the sticker set must
      * have been created by this bot.
+     *
+     * Note that this method returns a new
+     * {@link StickerSet} object instead of modifying current.
      *
      * @param sticker
      *     Sticker File ID. In case this is a full sticker set object,
@@ -223,17 +242,7 @@ export class StickerSet {
      */
     async deleteSticker(sticker: number | Parameters<TelegramClient['deleteStickerFromSet']>[0]): Promise<StickerSet> {
         if (typeof sticker === 'number') {
-            if (!this.full) throw new MtCuteEmptyError()
-
-            if (sticker < 0) sticker = this.full!.documents.length + sticker
-            const doc = this.full!.documents[sticker] as tl.RawDocument
-
-            sticker = {
-                _: 'inputDocument',
-                id: doc.id,
-                accessHash: doc.accessHash,
-                fileReference: doc.fileReference
-            }
+            sticker = this._getInputDocument(sticker)
         }
 
         return this.client.deleteStickerFromSet(sticker)
@@ -245,6 +254,9 @@ export class StickerSet {
      * Only for bots, and the sticker set must
      * have been created by this bot.
      *
+     * Note that this method returns a new
+     * {@link StickerSet} object instead of modifying current.
+     *
      * @param sticker
      *     Sticker File ID. In case this is a full sticker set object,
      *     you can also pass index (even negative), and that sticker will be removed
@@ -252,20 +264,32 @@ export class StickerSet {
      */
     async moveSticker(sticker: number | Parameters<TelegramClient['moveStickerInSet']>[0], position: number): Promise<StickerSet> {
         if (typeof sticker === 'number') {
-            if (!this.full) throw new MtCuteEmptyError()
-
-            if (sticker < 0) sticker = this.full!.documents.length + sticker
-            const doc = this.full!.documents[sticker] as tl.RawDocument
-
-            sticker = {
-                _: 'inputDocument',
-                id: doc.id,
-                accessHash: doc.accessHash,
-                fileReference: doc.fileReference
-            }
+            sticker = this._getInputDocument(sticker)
         }
 
         return this.client.moveStickerInSet(sticker, position)
+    }
+
+    /**
+     * Set sticker set thumbnail.
+     *
+     * Only for bots, and the sticker set must
+     * have been created by this bot.
+     *
+     * Note that this method returns a new
+     * {@link StickerSet} object instead of modifying current.
+     *
+     * @param thumb
+     *     Thumbnail file. In case this is a full sticker set object,
+     *     you can also pass index (even negative), and that sticker
+     *     will be used as a thumb
+     */
+    async setThumb(thumb: number | Parameters<TelegramClient['setStickerSetThumb']>[1]): Promise<StickerSet> {
+        if (typeof thumb === 'number') {
+            thumb = this._getInputDocument(thumb)
+        }
+
+        return this.client.setStickerSetThumb(this.inputStickerSet, thumb)
     }
 }
 

@@ -91,6 +91,7 @@ import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set
 import { getInstalledStickers } from './methods/stickers/get-installed-stickers'
 import { getStickerSet } from './methods/stickers/get-sticker-set'
 import { moveStickerInSet } from './methods/stickers/move-sticker-in-set'
+import { setStickerSetThumb } from './methods/stickers/set-sticker-set-thumb'
 import {
     _fetchUpdatesState,
     _handleUpdate,
@@ -2129,6 +2130,27 @@ export interface TelegramClient extends BaseTelegramClient {
         position: number
     ): Promise<StickerSet>
     /**
+     * Set sticker set thumbnail
+     *
+     * @param id  Sticker set short name or a TL object with input sticker set
+     * @param thumb  Sticker set thumbnail
+     * @param params
+     * @returns  Modified sticker set
+     */
+    setStickerSetThumb(
+        id: string | tl.TypeInputStickerSet,
+        thumb: InputFileLike | tl.TypeInputDocument,
+        params?: {
+            /**
+             * Upload progress callback
+             *
+             * @param uploaded  Number of bytes uploaded
+             * @param total  Total file size
+             */
+            progressCallback?: (uploaded: number, total: number) => void
+        }
+    ): Promise<StickerSet>
+    /**
      * Base function for update handling. Replace or override this function
      * and implement your own update handler, and call this function
      * to handle externally obtained or manually crafted updates.
@@ -2317,6 +2339,7 @@ export class TelegramClient extends BaseTelegramClient {
     getInstalledStickers = getInstalledStickers
     getStickerSet = getStickerSet
     moveStickerInSet = moveStickerInSet
+    setStickerSetThumb = setStickerSetThumb
     protected _fetchUpdatesState = _fetchUpdatesState
     protected _loadStorage = _loadStorage
     protected _saveStorage = _saveStorage
