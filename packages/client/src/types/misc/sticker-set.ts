@@ -225,7 +225,7 @@ export class StickerSet {
         if (typeof sticker === 'number') {
             if (!this.full) throw new MtCuteEmptyError()
 
-            if (sticker < 0) sticker = this.full!.documents.length - sticker
+            if (sticker < 0) sticker = this.full!.documents.length + sticker
             const doc = this.full!.documents[sticker] as tl.RawDocument
 
             sticker = {
@@ -254,7 +254,7 @@ export class StickerSet {
         if (typeof sticker === 'number') {
             if (!this.full) throw new MtCuteEmptyError()
 
-            if (sticker < 0) sticker = this.full!.documents.length - sticker
+            if (sticker < 0) sticker = this.full!.documents.length + sticker
             const doc = this.full!.documents[sticker] as tl.RawDocument
 
             sticker = {
