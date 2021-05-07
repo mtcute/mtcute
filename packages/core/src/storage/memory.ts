@@ -115,7 +115,7 @@ export class MemoryStorage implements ITelegramStorage {
             }
 
             if (peer.username)
-                this._state.usernameIndex[peer.username] = peer.id
+                this._state.usernameIndex[peer.username.toLowerCase()] = peer.id
             if (peer.phone) this._state.phoneIndex[peer.phone] = peer.id
             this._state.entities[peer.id] = peer
         }
@@ -180,7 +180,7 @@ export class MemoryStorage implements ITelegramStorage {
     }
 
     getPeerByUsername(username: string): tl.TypeInputPeer | null {
-        const id = this._state.usernameIndex[username]
+        const id = this._state.usernameIndex[username.toLowerCase()]
         if (!id) return null
         const peer = this._state.entities[id]
         if (!peer) return null
