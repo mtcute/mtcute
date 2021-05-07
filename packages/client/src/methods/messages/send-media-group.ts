@@ -63,7 +63,11 @@ export async function sendMediaGroup(
          * @param uploaded  Number of bytes already uploaded
          * @param total  Total file size
          */
-        progressCallback?: (index: number, uploaded: number, total: number) => void
+        progressCallback?: (
+            index: number,
+            uploaded: number,
+            total: number
+        ) => void
 
         /**
          * Whether to clear draft after sending this message.
@@ -83,13 +87,16 @@ export async function sendMediaGroup(
     for (let i = 0; i < medias.length; i++) {
         const media = medias[i]
         const inputMedia = await this._normalizeInputMedia(media, {
-            progressCallback: params.progressCallback?.bind(null, i)
+            progressCallback: params.progressCallback?.bind(null, i),
         })
 
         const [message, entities] = await this._parseEntities(
-            media.caption,
+            // some types dont have `caption` field, and ts warns us,
+            // but since it's JS, they'll just be `undefined` and properly
+            // handled by _parseEntities method
+            (media as any).caption,
             params.parseMode,
-            media.entities
+            (media as any).entities
         )
 
         multiMedia.push({
@@ -97,7 +104,7 @@ export async function sendMediaGroup(
             randomId: randomUlong(),
             media: inputMedia,
             message,
-            entities
+            entities,
         })
     }
 

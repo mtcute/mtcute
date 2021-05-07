@@ -7,7 +7,7 @@ import { MessageEntity } from './message-entity'
 import { Message } from './message'
 import { InputPeerLike } from '../peers'
 import { makeInspectable } from '../utils'
-import { InputMediaLike } from '../media'
+import { InputMediaWithCaption } from '../media'
 
 export class DraftMessage {
     readonly client: TelegramClient
@@ -101,7 +101,7 @@ export class DraftMessage {
      * @link TelegramClient.sendMedia
      */
     sendWithMedia(
-        media: InputMediaLike,
+        media: InputMediaWithCaption,
         params?: Parameters<TelegramClient['sendMedia']>[2]
     ): Promise<Message> {
         if (!media.caption) {

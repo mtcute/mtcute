@@ -21,12 +21,14 @@ import {
     LiveLocation,
     Sticker,
     Voice,
-    InputMediaLike,
+    InputMediaLike, Venue,
 } from '../media'
 import { parseDocument } from '../media/document-utils'
 import { Game } from '../media/game'
 import { WebPage } from '../media/web-page'
 import { InputFileLike } from '../files'
+import { Poll } from '../media/poll'
+import { Invoice } from '../media/invoice'
 
 /**
  * A message or a service message
@@ -208,6 +210,9 @@ export namespace Message {
         | LiveLocation
         | Game
         | WebPage
+        | Venue
+        | Poll
+        | Invoice
         | null
 }
 
@@ -655,12 +660,12 @@ export class Message {
                     m._ === 'messageMediaGeo' &&
                     m.geo._ === 'geoPoint'
                 ) {
-                    media = new Location(m.geo)
+                    media = new Location(this.client, m.geo)
                 } else if (
                     m._ === 'messageMediaGeoLive' &&
                     m.geo._ === 'geoPoint'
                 ) {
-                    media = new LiveLocation(m)
+                    media = new LiveLocation(this.client, m)
                 } else if (m._ === 'messageMediaGame') {
                     media = new Game(this.client, m.game)
                 } else if (
@@ -668,6 +673,12 @@ export class Message {
                     m.webpage._ === 'webPage'
                 ) {
                     media = new WebPage(this.client, m.webpage)
+                } else if (m._ === 'messageMediaVenue') {
+                    media = new Venue(this.client, m)
+                } else if (m._ === 'messageMediaPoll') {
+                    media = new Poll(this.client, m.poll, this._users, m.results)
+                } else if (m._ === 'messageMediaInvoice') {
+                    media = new Invoice(this.client, m)
                 } else {
                     media = null
                 }
@@ -757,7 +768,6 @@ export class Message {
             .unparse(this.text, this.entities)
     }
 
-    // todo: bound methods https://github.com/pyrogram/pyrogram/blob/701c1cde07af779ab18dbf79a3e626f04fa5d5d2/pyrogram/types/messages_and_media/message.py#L737
     /**
      * For replies, fetch the message that is being replied.
      *
@@ -795,30 +805,6 @@ export class Message {
     }
 
     /**
-     * Send a photo in reply to this message.
-     *
-     * By default just sends a message to the same chat,
-     * to make the reply a "real" reply, pass `visible=true`
-     *
-     * @param photo  Photo to send
-     * @param visible  Whether the reply should be visible
-     * @param params
-     */
-    replyPhoto(
-        photo: InputFileLike,
-        visible = false,
-        params?: Parameters<TelegramClient['sendPhoto']>[2]
-    ): ReturnType<TelegramClient['sendPhoto']> {
-        if (visible) {
-            return this.client.sendPhoto(this.chat.inputPeer, photo, {
-                ...(params || {}),
-                replyTo: this.id,
-            })
-        }
-        return this.client.sendPhoto(this.chat.inputPeer, photo, params)
-    }
-
-    /**
      * Send a media in reply to this message.
      *
      * By default just sends a message to the same chat,
@@ -840,66 +826,6 @@ export class Message {
             })
         }
         return this.client.sendMedia(this.chat.inputPeer, media, params)
-    }
-
-    /**
-     * Send a dice in reply to this message.
-     *
-     * By default just sends a message to the same chat,
-     * to make the reply a "real" reply, pass `visible=true`
-     *
-     * @param emoji  Emoji representing a dice to send
-     * @param visible  Whether the reply should be visible
-     * @param params
-     */
-    replyDice(
-        emoji: string,
-        visible = false,
-        params?: Parameters<TelegramClient['sendDice']>[2]
-    ): ReturnType<TelegramClient['sendDice']> {
-        if (visible) {
-            return this.client.sendDice(this.chat.inputPeer, emoji, {
-                ...(params || {}),
-                replyTo: this.id,
-            })
-        }
-        return this.client.sendDice(this.chat.inputPeer, emoji, params)
-    }
-
-    /**
-     * Send a static geo location in reply to this message.
-     *
-     * By default just sends a message to the same chat,
-     * to make the reply a "real" reply, pass `visible=true`
-     *
-     * @param latitude  Latitude of the location
-     * @param longitude  Longitude of the location
-     * @param visible  Whether the reply should be visible
-     * @param params
-     */
-    replyLocation(
-        latitude: number,
-        longitude: number,
-        visible = false,
-        params?: Parameters<TelegramClient['sendLocation']>[3]
-    ): ReturnType<TelegramClient['sendLocation']> {
-        if (visible) {
-            return this.client.sendLocation(
-                this.chat.inputPeer,
-                latitude,
-                longitude,
-                {
-                    ...(params || {}),
-                    replyTo: this.id,
-                }
-            )
-        }
-        return this.client.sendLocation(
-            this.chat.inputPeer,
-            latitude,
-            longitude,
-            params
-        )
     }
 
     /**

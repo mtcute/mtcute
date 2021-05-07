@@ -86,9 +86,12 @@ export async function sendMedia(
     const inputMedia = await this._normalizeInputMedia(media, params)
 
     const [message, entities] = await this._parseEntities(
-        media.caption,
+        // some types dont have `caption` field, and ts warns us,
+        // but since it's JS, they'll just be `undefined` and properly
+        // handled by _parseEntities method
+        (media as any).caption,
         params.parseMode,
-        media.entities
+        (media as any).entities
     )
 
     const peer = normalizeToInputPeer(await this.resolvePeer(chatId))

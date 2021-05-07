@@ -1,5 +1,7 @@
 import { InputFileLike } from '../files'
 import { tl } from '@mtcute/tl'
+import { Venue } from './venue'
+import { MaybeArray } from '@mtcute/core'
 
 interface BaseInputMedia {
     /**
@@ -234,6 +236,303 @@ export interface InputMediaVideo extends BaseInputMedia {
 }
 
 /**
+ * A geolocation to be sent
+ */
+export interface InputMediaGeo {
+    type: 'geo'
+
+    /**
+     * Latitude of the geolocation
+     */
+    latitude: number
+
+    /**
+     * Longitude of the geolocation
+     */
+    longitude: number
+
+    /**
+     * The estimated horizontal accuracy of the
+     * geolocation, in meters (0-1500)
+     */
+    accuracy?: number
+}
+
+/**
+ * A live geolocation to be sent
+ */
+export interface InputMediaGeoLive extends Omit<InputMediaGeo, 'type'> {
+    type: 'geo_live'
+
+    /**
+     * Direction in which the location moves, in degrees (1-360)
+     */
+    heading?: number
+
+    /**
+     * Validity period of the live location
+     */
+    period?: number
+
+    /**
+     * Maximum distance to another chat member for proximity
+     * alerts, in meters (0-100000)
+     */
+    proximityNotificationRadius?: number
+}
+
+/**
+ * An animated dice with a random value to be sent
+ *
+ * For convenience, known dice emojis are available
+ * as static members of {@link Dice}.
+ *
+ * Note that dice result value is generated randomly on the server,
+ * you can't influence it in any way!
+ */
+export interface InputMediaDice {
+    type: 'dice'
+
+    /**
+     * Emoji representing a dice
+     */
+    emoji: string
+}
+
+/**
+ * A venue to be sent
+ */
+export interface InputMediaVenue {
+    type: 'venue'
+
+    /**
+     * Latitude of the geolocation
+     */
+    latitude: number
+
+    /**
+     * Longitude of the geolocation
+     */
+    longitude: number
+
+    /**
+     * Venue name
+     */
+    title: string
+
+    /**
+     * Venue address
+     */
+    address: string
+
+    /**
+     * When available, source from where this venue was acquired
+     */
+    source?: Venue.VenueSource
+}
+
+/**
+ * A contact to be sent
+ */
+export interface InputMediaContact {
+    type: 'contact'
+
+    /**
+     * Contact's phone number
+     */
+    phone: string
+
+    /**
+     * Contact's first name
+     */
+    firstName: string
+
+    /**
+     * Contact's last name
+     */
+    lastName?: string
+
+    /**
+     * Additional data about the contact
+     * as a vCard (0-2048 bytes)
+     */
+    vcard?: string
+}
+
+/**
+ * A game to be sent
+ */
+export interface InputMediaGame {
+    type: 'game'
+
+    /**
+     * Game's short name, or a TL object with an input game
+     */
+    game: string | tl.TypeInputGame
+}
+
+/**
+ * An invoice to be sent (see https://core.telegram.org/bots/payments)
+ */
+export interface InputMediaInvoice {
+    type: 'invoice'
+
+    /**
+     * Product name (1-32 chars)
+     */
+    title: string
+
+    /**
+     * Product description (1-255 chars)
+     */
+    description: string
+
+    /**
+     * The invoice itself
+     */
+    invoice: tl.TypeInvoice
+
+    /**
+     * Bot-defined invoice payload (1-128 bytes).
+     *
+     * Will not be displayed to the user and can be used
+     * for internal processes
+     */
+    payload: Buffer
+
+    /**
+     * Payments provider token, obtained from
+     * [@BotFather](//t.me/botfather)
+     */
+    token: string
+
+    /**
+     * Data about the invoice as a plain JS object, which
+     * will be shared with the payment provider. A detailed
+     * description of required fields should be provided by
+     * the payment provider.
+     */
+    providerData: any
+
+    /**
+     * Start parameter for the bot
+     */
+    startParam: string
+
+    /**
+     * Product photo. Can be a photo of the goods or a marketing image for a service.
+     *
+     * Can be a URL, or a TL object with input web document
+     */
+    photo?: string | tl.TypeInputWebDocument
+}
+
+/**
+ * A simple poll to be sent
+ */
+export interface InputMediaPoll {
+    type: 'poll'
+
+    /**
+     * Question of the poll (1-255 chars for users, 1-300 chars for bots)
+     */
+    question: string
+
+    /**
+     * Answers of the poll.
+     *
+     * You can either provide a string, or a
+     * TL object representing an answer.
+     * Strings will be transformed to TL
+     * objects, with a single=byte incrementing
+     * `option` value.
+     */
+    answers: (string | tl.TypePollAnswer)[]
+
+    /**
+     * Whether this is a public poll
+     * (i.e. users who have voted are visible to everyone)
+     */
+    public?: boolean
+
+    /**
+     * Whether users can select multiple answers
+     * as an answer
+     */
+    multiple?: boolean
+
+    /**
+     * Amount of time in seconds the poll will be active after creation (5-600).
+     *
+     * Can't be used together with `closeDate`.
+     */
+    closePeriod?: number
+
+    /**
+     * Point in time when the poll will be automatically closed.
+     *
+     * Must be at least 5 and no more than 600 seconds in the future,
+     * can't be used together with `closePeriod`.
+     *
+     * When `number` is used, UNIX time in ms is expected
+     */
+    closeDate?: number | Date
+}
+
+/**
+ * A quiz to be sent.
+ *
+ * Quiz is an extended version of a poll, but quizzes have
+ * correct answers, and votes can't be retracted from them
+ */
+export interface InputMediaQuiz extends Omit<InputMediaPoll, 'type'> {
+    type: 'quiz'
+
+    /**
+     * Correct answer ID(s) or index(es).
+     *
+     * > **Note**: even though quizzes can actually
+     * > only have exactly one correct answer,
+     * > the API itself has the possibility to pass
+     * > multiple or zero correct answers,
+     * > but that would result in `QUIZ_CORRECT_ANSWERS_TOO_MUCH`
+     * > and `QUIZ_CORRECT_ANSWERS_EMPTY` errors respectively.
+     * >
+     * > But since the API has that option, we also provide it,
+     * > maybe to future-proof this :shrug:
+     */
+    correct: MaybeArray<number | Buffer>
+
+    /**
+     * Explanation of the quiz solution
+     */
+    solution?: string
+
+    /**
+     * Format entities for `solution`.
+     * If used, parse mode is ignored.
+     */
+    solutionEntities?: tl.TypeMessageEntity[]
+}
+
+/**
+ * Input media that can have a caption.
+ *
+ * Note that meta-fields (like `duration`) are only
+ * applicable if `file` is {@link UploadFileLike},
+ * otherwise they are ignored.
+ *
+ * A subset of {@link InputMediaLike}
+ */
+export type InputMediaWithCaption =
+    | InputMediaAudio
+    | InputMediaVoice
+    | InputMediaDocument
+    | InputMediaPhoto
+    | InputMediaVideo
+    | InputMediaAuto
+
+/**
  * Input media that can be sent somewhere.
  *
  * Note that meta-fields (like `duration`) are only
@@ -243,17 +542,24 @@ export interface InputMediaVideo extends BaseInputMedia {
  * @link InputMedia
  */
 export type InputMediaLike =
-    | InputMediaAudio
-    | InputMediaVoice
-    | InputMediaDocument
-    | InputMediaPhoto
-    | InputMediaVideo
-    | InputMediaAuto
+    | InputMediaWithCaption
     | InputMediaSticker
+    | InputMediaVenue
+    | InputMediaGeo
+    | InputMediaGeoLive
+    | InputMediaDice
+    | InputMediaContact
+    | InputMediaGame
+    | InputMediaInvoice
+    | InputMediaPoll
+    | InputMediaQuiz
     | tl.TypeInputMedia
 
 export namespace InputMedia {
-    type OmitTypeAndFile<T extends InputMediaLike> = Omit<T, 'type' | 'file'>
+    type OmitTypeAndFile<
+        T extends InputMediaLike,
+        K extends keyof T = never
+    > = Omit<T, 'type' | 'file' | K>
 
     /**
      * Create an animation to be sent
@@ -351,6 +657,121 @@ export namespace InputMedia {
             type: 'sticker',
             file,
             ...(params || {}),
+        }
+    }
+
+    /**
+     * Create a venue to be sent
+     */
+    export function venue(
+        params: OmitTypeAndFile<InputMediaVenue>
+    ): InputMediaVenue {
+        return {
+            type: 'venue',
+            ...params,
+        }
+    }
+
+    /**
+     * Create a geolocation to be sent
+     */
+    export function geo(
+        latitude: number,
+        longitude: number,
+        params?: OmitTypeAndFile<InputMediaGeo, 'latitude' | 'longitude'>
+    ): InputMediaGeo {
+        return {
+            type: 'geo',
+            latitude,
+            longitude,
+            ...(params || {}),
+        }
+    }
+
+    /**
+     * Create a live geolocation to be sent
+     */
+    export function geoLive(
+        latitude: number,
+        longitude: number,
+        params?: OmitTypeAndFile<InputMediaGeoLive, 'latitude' | 'longitude'>
+    ): InputMediaGeoLive {
+        return {
+            type: 'geo_live',
+            latitude,
+            longitude,
+            ...(params || {}),
+        }
+    }
+
+    /**
+     * Create a dice to be sent
+     *
+     * For convenience, known dice emojis are available
+     * as static members of {@link Dice}.
+     */
+    export function dice(emoji: string): InputMediaDice {
+        return {
+            type: 'dice',
+            emoji,
+        }
+    }
+
+    /**
+     * Create a contact to be sent
+     */
+    export function contact(
+        params: OmitTypeAndFile<InputMediaContact>
+    ): InputMediaContact {
+        return {
+            type: 'contact',
+            ...params,
+        }
+    }
+
+    /**
+     * Create a game to be sent
+     */
+    export function game(game: string | tl.TypeInputGame): InputMediaGame {
+        return {
+            type: 'game',
+            game,
+        }
+    }
+
+    /**
+     * Create an invoice to be sent
+     */
+    export function invoice(
+        params: OmitTypeAndFile<InputMediaInvoice>
+    ): InputMediaInvoice {
+        return {
+            type: 'invoice',
+            ...params,
+        }
+    }
+
+    /**
+     * Create a poll to be sent
+     */
+    export function poll(
+        params: OmitTypeAndFile<InputMediaPoll>
+    ): InputMediaPoll {
+        return {
+            type: 'poll',
+            ...params,
+        }
+    }
+
+    /**
+     * Create a quiz to be sent
+     */
+    export function quiz(
+        params: OmitTypeAndFile<InputMediaQuiz>
+    ): InputMediaQuiz {
+        return {
+            type: 'quiz',
+            ...params,
         }
     }
 

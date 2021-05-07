@@ -97,7 +97,10 @@ export async function editInlineMessage(
 
     if (params.media) {
         media = await this._normalizeInputMedia(params.media, params, true)
-        if ('caption' in params.media) {
+
+        // if there's no caption in input media (i.e. not present or undefined),
+        // user wants to keep current caption, thus `content` needs to stay `undefined`
+        if ('caption' in params.media && params.media.caption !== undefined) {
             ;[content, entities] = await this._parseEntities(
                 params.media.caption,
                 params.parseMode,

@@ -14,6 +14,8 @@ import {
 } from '@mtcute/file-id'
 import { extractFileName } from '../../utils/file-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
+import bigInt from 'big-integer'
+import { normalizeDate } from '../../utils/misc-utils'
 
 /**
  * Normalize an {@link InputMediaLike} to `InputMedia`,
@@ -25,6 +27,7 @@ export async function _normalizeInputMedia(
     this: TelegramClient,
     media: InputMediaLike,
     params: {
+        parseMode?: string | null
         progressCallback?: (uploaded: number, total: number) => void
     },
     uploadMedia = false
@@ -34,6 +37,160 @@ export async function _normalizeInputMedia(
     // thanks to @pacificescape for pointing out messages.uploadMedia method
 
     if (tl.isAnyInputMedia(media)) return media
+
+    if (media.type === 'venue') {
+        return {
+            _: 'inputMediaVenue',
+            geoPoint: {
+                _: 'inputGeoPoint',
+                lat: media.latitude,
+                long: media.longitude,
+            },
+            title: media.title,
+            address: media.address,
+            provider: media.source?.provider ?? '',
+            venueId: media.source?.id ?? '',
+            venueType: media.source?.type ?? '',
+        }
+    }
+
+    if (media.type === 'geo') {
+        return {
+            _: 'inputMediaGeoPoint',
+            geoPoint: {
+                _: 'inputGeoPoint',
+                lat: media.latitude,
+                long: media.longitude,
+            },
+        }
+    }
+
+    if (media.type === 'geo_live') {
+        return {
+            _: 'inputMediaGeoLive',
+            geoPoint: {
+                _: 'inputGeoPoint',
+                lat: media.latitude,
+                long: media.longitude,
+            },
+            heading: media.heading,
+            period: media.period,
+            proximityNotificationRadius: media.proximityNotificationRadius,
+        }
+    }
+
+    if (media.type === 'dice') {
+        return {
+            _: 'inputMediaDice',
+            emoticon: media.emoji,
+        }
+    }
+
+    if (media.type === 'contact') {
+        return {
+            _: 'inputMediaContact',
+            phoneNumber: media.phone,
+            firstName: media.firstName,
+            lastName: media.lastName ?? '',
+            vcard: media.vcard ?? '',
+        }
+    }
+
+    if (media.type === 'game') {
+        return {
+            _: 'inputMediaGame',
+            id:
+                typeof media.game === 'string'
+                    ? {
+                          _: 'inputGameShortName',
+                          botId: { _: 'inputUserSelf' },
+                          shortName: media.game,
+                      }
+                    : media.game,
+        }
+    }
+
+    if (media.type === 'invoice') {
+        return {
+            _: 'inputMediaInvoice',
+            title: media.title,
+            description: media.description,
+            photo:
+                typeof media.photo === 'string'
+                    ? {
+                          _: 'inputWebDocument',
+                          url: media.photo,
+                          mimeType: 'image/jpeg',
+                          size: 0,
+                          attributes: [],
+                      }
+                    : media.photo,
+            invoice: media.invoice,
+            payload: media.payload,
+            provider: media.token,
+            providerData: {
+                _: 'dataJSON',
+                data: JSON.stringify(media.providerData),
+            },
+            startParam: media.startParam,
+        }
+    }
+
+    if (media.type === 'poll' || media.type === 'quiz') {
+        const answers: tl.TypePollAnswer[] = media.answers.map((ans, idx) => {
+            if (typeof ans === 'string') {
+                return {
+                    _: 'pollAnswer',
+                    text: ans,
+                    option: Buffer.from([idx]),
+                }
+            }
+
+            return ans
+        })
+
+        let correct: Buffer[] | undefined = undefined
+        let solution: string | undefined = undefined
+        let solutionEntities: tl.TypeMessageEntity[] | undefined = undefined
+
+        if (media.type === 'quiz') {
+            let input = media.correct
+            if (!Array.isArray(input)) input = [input]
+            correct = input.map((it) => {
+                if (typeof it === 'number') {
+                    return answers[it].option
+                }
+
+                return it
+            })
+
+            if (media.solution) {
+                ;[solution, solutionEntities] = await this._parseEntities(
+                    media.solution,
+                    params.parseMode,
+                    media.solutionEntities
+                )
+            }
+        }
+
+        return {
+            _: 'inputMediaPoll',
+            poll: {
+                _: 'poll',
+                id: bigInt.zero,
+                publicVoters: media.public,
+                multipleChoice: media.multiple,
+                quiz: media.type === 'quiz',
+                question: media.question,
+                answers,
+                closePeriod: media.closePeriod,
+                closeDate: normalizeDate(media.closeDate)
+            },
+            correctAnswers: correct,
+            solution,
+            solutionEntities
+        }
+    }
 
     let inputFile: tl.TypeInputFile | undefined = undefined
     let thumb: tl.TypeInputFile | undefined = undefined
@@ -56,18 +213,29 @@ export async function _normalizeInputMedia(
         mime = uploaded.mime
     }
 
-    const uploadMediaIfNeeded = async (inputMedia: tl.TypeInputMedia, photo: boolean): Promise<tl.TypeInputMedia> => {
+    const uploadMediaIfNeeded = async (
+        inputMedia: tl.TypeInputMedia,
+        photo: boolean
+    ): Promise<tl.TypeInputMedia> => {
         if (!uploadMedia) return inputMedia
 
         const res = await this.call({
             _: 'messages.uploadMedia',
             peer: { _: 'inputPeerSelf' },
-            media: inputMedia
+            media: inputMedia,
         })
 
         if (photo) {
-            assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaPhoto')
-            assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.photo!, 'photo')
+            assertTypeIs(
+                'normalizeInputMedia (@ messages.uploadMedia)',
+                res,
+                'messageMediaPhoto'
+            )
+            assertTypeIs(
+                'normalizeInputMedia (@ messages.uploadMedia)',
+                res.photo!,
+                'photo'
+            )
 
             return {
                 _: 'inputMediaPhoto',
@@ -75,13 +243,21 @@ export async function _normalizeInputMedia(
                     _: 'inputPhoto',
                     id: res.photo.id,
                     accessHash: res.photo.accessHash,
-                    fileReference: res.photo.fileReference
+                    fileReference: res.photo.fileReference,
                 },
-                ttlSeconds: media.ttlSeconds
+                ttlSeconds: media.ttlSeconds,
             }
         } else {
-            assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaDocument')
-            assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.document!, 'document')
+            assertTypeIs(
+                'normalizeInputMedia (@ messages.uploadMedia)',
+                res,
+                'messageMediaDocument'
+            )
+            assertTypeIs(
+                'normalizeInputMedia (@ messages.uploadMedia)',
+                res.document!,
+                'document'
+            )
 
             return {
                 _: 'inputMediaDocument',
@@ -89,9 +265,9 @@ export async function _normalizeInputMedia(
                     _: 'inputDocument',
                     id: res.document.id,
                     accessHash: res.document.accessHash,
-                    fileReference: res.document.fileReference
+                    fileReference: res.document.fileReference,
                 },
-                ttlSeconds: media.ttlSeconds
+                ttlSeconds: media.ttlSeconds,
             }
         }
     }
@@ -99,13 +275,16 @@ export async function _normalizeInputMedia(
     const input = media.file
     if (tdFileId.isFileIdLike(input)) {
         if (typeof input === 'string' && input.match(/^https?:\/\//)) {
-            return uploadMediaIfNeeded({
-                _:
-                    media.type === 'photo'
-                        ? 'inputMediaPhotoExternal'
-                        : 'inputMediaDocumentExternal',
-                url: input,
-            }, media.type === 'photo')
+            return uploadMediaIfNeeded(
+                {
+                    _:
+                        media.type === 'photo'
+                            ? 'inputMediaPhotoExternal'
+                            : 'inputMediaDocumentExternal',
+                    url: input,
+                },
+                media.type === 'photo'
+            )
         } else if (typeof input === 'string' && input.match(/^file:/)) {
             await upload(input.substr(5))
         } else {
@@ -118,13 +297,16 @@ export async function _normalizeInputMedia(
                     id: fileIdToInputPhoto(parsed),
                 }
             } else if (parsed.location._ === 'web') {
-                return uploadMediaIfNeeded({
-                    _:
-                        parsed.type === tdFileId.FileType.Photo
-                            ? 'inputMediaPhotoExternal'
-                            : 'inputMediaDocumentExternal',
-                    url: parsed.location.url,
-                }, parsed.type === tdFileId.FileType.Photo)
+                return uploadMediaIfNeeded(
+                    {
+                        _:
+                            parsed.type === tdFileId.FileType.Photo
+                                ? 'inputMediaPhotoExternal'
+                                : 'inputMediaDocumentExternal',
+                        url: parsed.location.url,
+                    },
+                    parsed.type === tdFileId.FileType.Photo
+                )
             } else {
                 return {
                     _: 'inputMediaDocument',
@@ -146,11 +328,14 @@ export async function _normalizeInputMedia(
     if (!inputFile) throw new Error('should not happen')
 
     if (media.type === 'photo') {
-        return uploadMediaIfNeeded({
-            _: 'inputMediaUploadedPhoto',
-            file: inputFile,
-            ttlSeconds: media.ttlSeconds,
-        }, true)
+        return uploadMediaIfNeeded(
+            {
+                _: 'inputMediaUploadedPhoto',
+                file: inputFile,
+                ttlSeconds: media.ttlSeconds,
+            },
+            true
+        )
     }
 
     if ('thumb' in media && media.thumb) {
@@ -204,14 +389,17 @@ export async function _normalizeInputMedia(
         })
     }
 
-    return uploadMediaIfNeeded({
-        _: 'inputMediaUploadedDocument',
-        nosoundVideo: media.type === 'video' && media.isAnimated,
-        forceFile: media.type === 'document',
-        file: inputFile,
-        thumb,
-        mimeType: mime,
-        attributes,
-        ttlSeconds: media.ttlSeconds
-    }, false)
+    return uploadMediaIfNeeded(
+        {
+            _: 'inputMediaUploadedDocument',
+            nosoundVideo: media.type === 'video' && media.isAnimated,
+            forceFile: media.type === 'document',
+            file: inputFile,
+            thumb,
+            mimeType: mime,
+            attributes,
+            ttlSeconds: media.ttlSeconds,
+        },
+        false
+    )
 }

@@ -72,8 +72,6 @@ import { _parseEntities } from './methods/messages/parse-entities'
 import { pinMessage } from './methods/messages/pin-message'
 import { searchGlobal } from './methods/messages/search-global'
 import { searchMessages } from './methods/messages/search-messages'
-import { sendDice } from './methods/messages/send-dice'
-import { sendLocation } from './methods/messages/send-location'
 import { sendMediaGroup } from './methods/messages/send-media-group'
 import { sendMedia } from './methods/messages/send-media'
 import { sendText } from './methods/messages/send-text'
@@ -1663,83 +1661,6 @@ export interface TelegramClient extends BaseTelegramClient {
         }
     ): AsyncIterableIterator<Message>
     /**
-     * Send an animated dice with a random value.
-     *
-     * For convenience, known dice emojis are available
-     * as static members of {@link Dice}.
-     *
-     * Note that dice result value is generated randomly on the server,
-     * you can't influence it in any way!
-     *
-     * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
-     * @param emoji  Emoji representing a dice
-     * @param params  Additional sending parameters
-     * @link Dice
-     */
-    sendDice(
-        chatId: InputPeerLike,
-        emoji: string,
-        params?: {
-            /**
-             * Message to reply to. Either a message object or message ID.
-             */
-            replyTo?: number | Message
-
-            /**
-             * Whether to send this message silently.
-             */
-            silent?: boolean
-
-            /**
-             * If set, the message will be scheduled to this date.
-             * When passing a number, a UNIX time in ms is expected.
-             */
-            schedule?: Date | number
-
-            /**
-             * For bots: inline or reply markup or an instruction
-             * to hide a reply keyboard or to force a reply.
-             */
-            replyMarkup?: ReplyMarkup
-        }
-    ): Promise<Message>
-    /**
-     * Send a static geo location.
-     *
-     * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
-     * @param latitude  Latitude of the location
-     * @param longitude  Longitude of the location
-     * @param params  Additional sending parameters
-     */
-    sendLocation(
-        chatId: InputPeerLike,
-        latitude: number,
-        longitude: number,
-        params?: {
-            /**
-             * Message to reply to. Either a message object or message ID.
-             */
-            replyTo?: number | Message
-
-            /**
-             * Whether to send this message silently.
-             */
-            silent?: boolean
-
-            /**
-             * If set, the message will be scheduled to this date.
-             * When passing a number, a UNIX time in ms is expected.
-             */
-            schedule?: Date | number
-
-            /**
-             * For bots: inline or reply markup or an instruction
-             * to hide a reply keyboard or to force a reply.
-             */
-            replyMarkup?: ReplyMarkup
-        }
-    ): Promise<Message>
-    /**
      * Send a group of media.
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
@@ -2322,8 +2243,6 @@ export class TelegramClient extends BaseTelegramClient {
     pinMessage = pinMessage
     searchGlobal = searchGlobal
     searchMessages = searchMessages
-    sendDice = sendDice
-    sendLocation = sendLocation
     sendMediaGroup = sendMediaGroup
     sendMedia = sendMedia
     sendText = sendText

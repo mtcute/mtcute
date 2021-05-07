@@ -1,6 +1,12 @@
 import { tl } from '@mtcute/tl'
 import { BotKeyboard, ReplyMarkup } from '../keyboards'
 import { TelegramClient } from '../../../client'
+import {
+    InputMediaGeo,
+    InputMediaGeoLive,
+    InputMediaVenue,
+    Venue,
+} from '../../media'
 
 /**
  * Inline message containing only text
@@ -57,37 +63,17 @@ export interface InputInlineMessageMedia {
 /**
  * Inline message containing a geolocation
  */
-export interface InputInlineMessageGeo {
-    type: 'geo'
-
+export interface InputInlineMessageGeo extends InputMediaGeo {
     /**
-     * Latitude of the geolocation
+     * Message's reply markup
      */
-    latitude: number
+    replyMarkup?: ReplyMarkup
+}
 
-    /**
-     * Longitude of the geolocation
-     */
-    longitude: number
-
-    /**
-     * For live locations, direction in which the location
-     * moves, in degrees (1-360)
-     */
-    heading?: number
-
-    /**
-     * For live locations, period for which this live location
-     * will be updated
-     */
-    period?: number
-
-    /**
-     * For live locations, a maximum distance to another
-     * chat member for proximity alerts, in meters (0-100000)
-     */
-    proximityNotificationRadius?: number
-
+/**
+ * Inline message containing a live geolocation
+ */
+export interface InputInlineMessageGeoLive extends InputMediaGeoLive {
     /**
      * Message's reply markup
      */
@@ -97,54 +83,7 @@ export interface InputInlineMessageGeo {
 /**
  * Inline message containing a venue
  */
-export interface InputInlineMessageVenue {
-    type: 'venue'
-
-    /**
-     * Latitude of the geolocation
-     */
-    latitude: number
-
-    /**
-     * Longitude of the geolocation
-     */
-    longitude: number
-
-    /**
-     * Venue name
-     */
-    title: string
-
-    /**
-     * Venue address
-     */
-    address: string
-
-    /**
-     * When available, source from where this venue was acquired
-     */
-    source?: {
-        /**
-         * Provider name (`foursquare` or `gplaces` for Google Places)
-         */
-        provider?: 'foursquare' | 'gplaces'
-
-        /**
-         * Venue ID in the provider's DB
-         */
-        id: string
-
-        /**
-         * Venue type in the provider's DB
-         *
-         * - [Supported types for Foursquare](https://developer.foursquare.com/docs/build-with-foursquare/categories/)
-         *   (use names, lowercase them, replace spaces and " & " with `_` (underscore) and remove other symbols,
-         *   and use `/` (slash) as hierarchy separator)
-         * - [Supported types for Google Places](https://developers.google.com/places/web-service/supported_types)
-         */
-        type: string
-    }
-
+export interface InputInlineMessageVenue extends InputMediaVenue {
     /**
      * Message's reply markup
      */
@@ -167,51 +106,62 @@ export type InputInlineMessage =
     | InputInlineMessageText
     | InputInlineMessageMedia
     | InputInlineMessageGeo
+    | InputInlineMessageGeoLive
     | InputInlineMessageVenue
     | InputInlineMessageGame
 
 export namespace BotInlineMessage {
-    export function text (
+    export function text(
         text: string,
-        params?: Omit<InputInlineMessageText, 'type' | 'text'>,
+        params?: Omit<InputInlineMessageText, 'type' | 'text'>
     ): InputInlineMessageText {
         return {
             type: 'text',
             text,
-            ...(
-                params || {}
-            ),
+            ...(params || {}),
         }
     }
 
-    export function media (
-        params?: Omit<InputInlineMessageMedia, 'type'>,
+    export function media(
+        params?: Omit<InputInlineMessageMedia, 'type'>
     ): InputInlineMessageMedia {
         return {
             type: 'media',
-            ...(
-                params || {}
-            ),
+            ...(params || {}),
         }
     }
 
-    export function geo (
+    export function geo(
         latitude: number,
         longitude: number,
-        params?: Omit<InputInlineMessageGeo, 'type' | 'latitude' | 'longitude'>,
+        params?: Omit<InputInlineMessageGeo, 'type' | 'latitude' | 'longitude'>
     ): InputInlineMessageGeo {
         return {
             type: 'geo',
             latitude,
             longitude,
-            ...(
-                params || {}
-            ),
+            ...(params || {}),
         }
     }
 
-    export function venue (
-        params: Omit<InputInlineMessageVenue, 'type'>,
+    export function geoLive(
+        latitude: number,
+        longitude: number,
+        params?: Omit<
+            InputInlineMessageGeoLive,
+            'type' | 'latitude' | 'longitude'
+        >
+    ): InputInlineMessageGeoLive {
+        return {
+            type: 'geo_live',
+            latitude,
+            longitude,
+            ...(params || {}),
+        }
+    }
+
+    export function venue(
+        params: Omit<InputInlineMessageVenue, 'type'>
     ): InputInlineMessageVenue {
         return {
             type: 'venue',
@@ -219,8 +169,8 @@ export namespace BotInlineMessage {
         }
     }
 
-    export function game (
-        params: Omit<InputInlineMessageGame, 'type'>,
+    export function game(
+        params: Omit<InputInlineMessageGame, 'type'>
     ): InputInlineMessageGame {
         return {
             type: 'game',
@@ -228,45 +178,55 @@ export namespace BotInlineMessage {
         }
     }
 
-    export async function _convertToTl (
+    export async function _convertToTl(
         client: TelegramClient,
         obj: InputInlineMessage,
-        parseMode?: string | null,
+        parseMode?: string | null
     ): Promise<tl.TypeInputBotInlineMessage> {
         if (obj.type === 'text') {
-            const [message, entities] = await client['_parseEntities'](obj.text, parseMode, obj.entities)
+            const [message, entities] = await client['_parseEntities'](
+                obj.text,
+                parseMode,
+                obj.entities
+            )
 
             return {
                 _: 'inputBotInlineMessageText',
                 message,
                 entities,
-                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup)
+                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
             }
         }
 
         if (obj.type === 'media') {
-            const [message, entities] = await client['_parseEntities'](obj.text, parseMode, obj.entities)
+            const [message, entities] = await client['_parseEntities'](
+                obj.text,
+                parseMode,
+                obj.entities
+            )
 
             return {
                 _: 'inputBotInlineMessageMediaAuto',
                 message,
                 entities,
-                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup)
+                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
             }
         }
 
-        if (obj.type === 'geo') {
+        if (obj.type === 'geo' || obj.type === 'geo_live') {
             return {
                 _: 'inputBotInlineMessageMediaGeo',
                 geoPoint: {
                     _: 'inputGeoPoint',
                     lat: obj.latitude,
-                    long: obj.longitude
+                    long: obj.longitude,
                 },
-                heading: obj.heading,
-                period: obj.period,
-                proximityNotificationRadius: obj.proximityNotificationRadius,
-                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup)
+                // fields will be `undefined` if this is a `geo`
+                heading: (obj as InputMediaGeoLive).heading,
+                period: (obj as InputMediaGeoLive).period,
+                proximityNotificationRadius: (obj as InputMediaGeoLive)
+                    .proximityNotificationRadius,
+                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
             }
         }
 
@@ -276,21 +236,21 @@ export namespace BotInlineMessage {
                 geoPoint: {
                     _: 'inputGeoPoint',
                     lat: obj.latitude,
-                    long: obj.longitude
+                    long: obj.longitude,
                 },
                 title: obj.title,
                 address: obj.address,
                 provider: obj.source?.provider ?? '',
                 venueId: obj.source?.id ?? '',
                 venueType: obj.source?.type ?? '',
-                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup)
+                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
             }
         }
 
         if (obj.type === 'game') {
             return {
                 _: 'inputBotInlineMessageGame',
-                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup)
+                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
             }
         }
 

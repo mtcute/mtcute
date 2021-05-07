@@ -14,7 +14,7 @@ import {
     RawDocument,
     Sticker,
     TelegramClient,
-    User,
+    User, Venue,
     Video,
     Voice,
 } from '@mtcute/client'
@@ -23,6 +23,8 @@ import { WebPage } from '@mtcute/client/src/types/media/web-page'
 import { MaybeArray } from '@mtcute/core'
 import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
+import { Poll } from '@mtcute/client/src/types/media/poll'
+import { Invoice } from '@mtcute/client/src/types/media/invoice'
 
 /**
  * Type describing a primitive filter, which is a function taking some `Base`
@@ -482,7 +484,23 @@ export namespace filters {
     export const webpage: UpdateFilter<Message, { media: WebPage }> = (msg) =>
         msg.media instanceof WebPage
 
-    // todo: more filters, see https://github.com/pyrogram/pyrogram/blob/701c1cde07af779ab18dbf79a3e626f04fa5d5d2/pyrogram/filters.py#L191
+    /**
+     * Filter messages containing a venue.
+     */
+    export const venue: UpdateFilter<Message, { media: Venue }> = (msg) =>
+        msg.media instanceof Venue
+
+    /**
+     * Filter messages containing a poll.
+     */
+    export const poll: UpdateFilter<Message, { media: Poll }> = (msg) =>
+        msg.media instanceof Poll
+
+    /**
+     * Filter messages containing an invoice.
+     */
+    export const invoice: UpdateFilter<Message, { media: Invoice }> = (msg) =>
+        msg.media instanceof Invoice
 
     /**
      * Filter objects that match a given regular expression

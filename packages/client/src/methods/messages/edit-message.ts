@@ -84,11 +84,16 @@ export async function editMessage(
 
     if (params.media) {
         media = await this._normalizeInputMedia(params.media, params)
-        ;[content, entities] = await this._parseEntities(
-            params.media.caption,
-            params.parseMode,
-            params.media.entities
-        )
+
+        // if there's no caption in input media (i.e. not present or undefined),
+        // user wants to keep current caption, thus `content` needs to stay `undefined`
+        if ('caption' in params.media && params.media.caption !== undefined) {
+            ;[content, entities] = await this._parseEntities(
+                params.media.caption,
+                params.parseMode,
+                params.media.entities
+            )
+        }
     } else {
         ;[content, entities] = await this._parseEntities(
             params.text,
@@ -105,7 +110,7 @@ export async function editMessage(
         replyMarkup: BotKeyboard._convertToTl(params.replyMarkup),
         message: content,
         entities,
-        media
+        media,
     })
 
     return this._findMessageInUpdate(res, true) as any

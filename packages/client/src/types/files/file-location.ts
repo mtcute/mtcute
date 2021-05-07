@@ -27,8 +27,9 @@ export class FileLocation {
      */
     readonly location:
         | tl.TypeInputFileLocation
+        | tl.TypeInputWebFileLocation
         | Buffer
-        | (() => tl.TypeInputFileLocation | Buffer)
+        | (() => tl.TypeInputFileLocation | tl.TypeInputWebFileLocation | Buffer)
 
     /**
      * File size in bytes, when available
@@ -44,8 +45,9 @@ export class FileLocation {
         client: TelegramClient,
         location:
             | tl.TypeInputFileLocation
+            | tl.TypeInputWebFileLocation
             | Buffer
-            | (() => tl.TypeInputFileLocation | Buffer),
+            | (() => tl.TypeInputFileLocation | tl.TypeInputWebFileLocation | Buffer),
         fileSize?: number,
         dcId?: number
     ) {
@@ -82,7 +84,7 @@ export class FileLocation {
      * in chunks of a given size. Order of the chunks is guaranteed to be
      * consecutive.
      *
-     * Shorthand for `client.downloadAsStream({ location: this })`
+     * Shorthand for `client.downloadAsIterable({ location: this })`
      *
      * @link TelegramClient.downloadAsIterable
      */

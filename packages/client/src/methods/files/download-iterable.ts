@@ -8,7 +8,7 @@ import {
     FileDownloadParameters,
     FileLocation,
 } from '../../types'
-import { fileIdToInputFileLocation } from '@mtcute/file-id'
+import { fileIdToInputFileLocation, fileIdToInputWebFileLocation, parseFileId } from '@mtcute/file-id'
 
 /**
  * Download a file and return it as an iterable, which yields file contents
@@ -39,30 +39,37 @@ export async function* downloadAsIterable(
     let dcId = params.dcId
     let fileSize = params.fileSize
 
-    let location = params.location
-    if (location instanceof FileLocation) {
-        if (typeof location.location === 'function') {
-            ;(location as tl.Mutable<FileLocation>).location = location.location()
+    const input = params.location
+    let location: tl.TypeInputFileLocation | tl.TypeInputWebFileLocation
+    if (input instanceof FileLocation) {
+        if (typeof input.location === 'function') {
+            ;(input as tl.Mutable<FileLocation>).location = input.location()
         }
 
-        if (location.location instanceof Buffer) {
-            yield location.location
+        if (input.location instanceof Buffer) {
+            yield input.location
             return
         }
-        if (!dcId) dcId = location.dcId
-        if (!fileSize) fileSize = location.fileSize
-        location = location.location as any
-    }
-    if (typeof location === 'string') {
-        location = fileIdToInputFileLocation(location)
-    }
+        if (!dcId) dcId = input.dcId
+        if (!fileSize) fileSize = input.fileSize
+        location = input.location as any
+    } else if (typeof input === 'string') {
+        const parsed = parseFileId(input)
+        if (parsed.location._ === 'web') {
+            location = fileIdToInputWebFileLocation(parsed)
+        } else {
+            location = fileIdToInputFileLocation(parsed)
+        }
+    } else location = input
+
+    const isWeb = tl.isAnyInputWebFileLocation(location)
 
     // we will receive a FileMigrateError in case this is invalid
     if (!dcId) dcId = this._primaryDc.id
 
     const chunkSize = partSizeKb * 1024
 
-    const limit =
+    let limit =
         params.limit ??
         (fileSize
             ? // derive limit from chunk size, file size and offset
@@ -77,13 +84,13 @@ export async function* downloadAsIterable(
     }
 
     const requestCurrent = async (): Promise<Buffer> => {
-        let result: tl.RpcCallReturn['upload.getFile']
+        let result: tl.RpcCallReturn['upload.getFile'] | tl.RpcCallReturn['upload.getWebFile']
         try {
             result = await connection.sendForResult({
-                _: 'upload.getFile',
-                location: location as tl.TypeInputFileLocation,
+                _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
+                location: location as any,
                 offset,
-                limit: chunkSize,
+                limit: chunkSize
             })
         } catch (e) {
             if (e instanceof FileMigrateError) {
@@ -94,16 +101,23 @@ export async function* downloadAsIterable(
                 }
                 return requestCurrent()
             } else if (e instanceof FilerefUpgradeNeededError) {
-                // todo: implement once messages api is ready
+                // todo: implement someday
                 // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
                 throw new MtCuteUnsupportedError('File ref expired!')
             } else throw e
         }
 
         if (result._ === 'upload.fileCdnRedirect') {
+            // we shouldnt receive them since cdnSupported is not set in the getFile request.
+            // also, i couldnt find any media that would be downloaded from cdn, so even if
+            // i implemented that, i wouldnt be able to test that, so :shrug:
             throw new MtCuteUnsupportedError(
                 'Received CDN redirect, which is not supported (yet)'
             )
+        }
+
+        if (result._ === 'upload.webFile' && result.size && limit === Infinity) {
+            limit = result.size
         }
 
         return result.bytes
