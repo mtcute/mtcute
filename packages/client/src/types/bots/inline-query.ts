@@ -66,7 +66,7 @@ export class InlineQuery {
         if (this.raw.geo?._ !== 'geoPoint') return null
 
         if (!this._location) {
-            this._location = new Location(this.raw.geo)
+            this._location = new Location(this.client, this.raw.geo)
         }
 
         return this._location

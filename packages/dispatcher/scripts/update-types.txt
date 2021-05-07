@@ -7,3 +7,5 @@ chat_member: ChatMemberUpdate = ChatMemberUpdate
 inline_query = InlineQuery
 chosen_inline_result = ChosenInlineResult
 callback_query = CallbackQuery
+poll: PollUpdate = PollUpdate
+poll_vote = PollVoteUpdate

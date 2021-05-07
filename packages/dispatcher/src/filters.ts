@@ -17,14 +17,14 @@ import {
     User, Venue,
     Video,
     Voice,
+    Poll,
+    Invoice,
+    Game,
+    WebPage
 } from '@mtcute/client'
-import { Game } from '@mtcute/client/src/types/media/game'
-import { WebPage } from '@mtcute/client/src/types/media/web-page'
 import { MaybeArray } from '@mtcute/core'
 import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
-import { Poll } from '@mtcute/client/src/types/media/poll'
-import { Invoice } from '@mtcute/client/src/types/media/invoice'
 
 /**
  * Type describing a primitive filter, which is a function taking some `Base`

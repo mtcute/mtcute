@@ -142,7 +142,8 @@ export async function _normalizeInputMedia(
                 return {
                     _: 'pollAnswer',
                     text: ans,
-                    option: Buffer.from([idx]),
+                    // emulate the behaviour of most implementations
+                    option: Buffer.from([48 /* '0' */ + idx]),
                 }
             }
 
@@ -184,11 +185,11 @@ export async function _normalizeInputMedia(
                 question: media.question,
                 answers,
                 closePeriod: media.closePeriod,
-                closeDate: normalizeDate(media.closeDate)
+                closeDate: normalizeDate(media.closeDate),
             },
             correctAnswers: correct,
             solution,
-            solutionEntities
+            solutionEntities,
         }
     }
 

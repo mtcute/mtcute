@@ -9,6 +9,8 @@ import { tl } from '@mtcute/tl'
 import { PropagationSymbol } from './propagation'
 import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
+import { PollUpdate } from './updates/poll-update'
+import { PollVoteUpdate } from './updates/poll-vote'
 
 interface BaseUpdateHandler<Type, Handler, Checker> {
     type: Type
@@ -66,6 +68,11 @@ export type CallbackQueryHandler<T = CallbackQuery> = ParsedUpdateHandler<
     'callback_query',
     T
 >
+export type PollUpdateHandler<T = PollUpdate> = ParsedUpdateHandler<'poll', T>
+export type PollVoteHandler<T = PollVoteUpdate> = ParsedUpdateHandler<
+    'poll_vote',
+    T
+>
 
 export type UpdateHandler =
     | RawUpdateHandler
@@ -75,5 +82,7 @@ export type UpdateHandler =
     | InlineQueryHandler
     | ChosenInlineResultHandler
     | CallbackQueryHandler
+    | PollUpdateHandler
+    | PollVoteHandler
 
 // end-codegen

@@ -21,14 +21,14 @@ import {
     LiveLocation,
     Sticker,
     Voice,
-    InputMediaLike, Venue,
+    InputMediaLike,
+    Venue,
+    Poll,
+    Invoice,
+    Game,
+    WebPage
 } from '../media'
 import { parseDocument } from '../media/document-utils'
-import { Game } from '../media/game'
-import { WebPage } from '../media/web-page'
-import { InputFileLike } from '../files'
-import { Poll } from '../media/poll'
-import { Invoice } from '../media/invoice'
 
 /**
  * A message or a service message

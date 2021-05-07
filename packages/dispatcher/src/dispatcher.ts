@@ -22,12 +22,16 @@ import {
     InlineQueryHandler,
     ChosenInlineResultHandler,
     CallbackQueryHandler,
+    PollUpdateHandler,
+    PollVoteHandler,
 } from './handler'
 // end-codegen-imports
 import { filters, UpdateFilter } from './filters'
 import { handlers } from './builders'
 import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
+import { PollUpdate } from './updates/poll-update'
+import { PollVoteUpdate } from './updates/poll-vote'
 
 const noop = () => {}
 
@@ -88,6 +92,14 @@ const PARSERS: Partial<
     ],
     updateBotCallbackQuery: callbackQueryParser,
     updateInlineBotCallbackQuery: callbackQueryParser,
+    updateMessagePoll: [
+        'poll',
+        (client, upd, users) => new PollUpdate(client, upd as any, users),
+    ],
+    updateMessagePollVote: [
+        'poll_vote',
+        (client, upd, users) => new PollVoteUpdate(client, upd as any, users),
+    ],
 }
 
 /**
@@ -597,6 +609,62 @@ export class Dispatcher {
     /** @internal */
     onCallbackQuery(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('callbackQuery', filter, handler, group)
+    }
+
+    /**
+     * Register a poll update handler without any filters
+     *
+     * @param handler  Poll update handler
+     * @param group  Handler group index
+     * @internal
+     */
+    onPollUpdate(handler: PollUpdateHandler['callback'], group?: number): void
+
+    /**
+     * Register a poll update handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Poll update handler
+     * @param group  Handler group index
+     */
+    onPollUpdate<Mod>(
+        filter: UpdateFilter<PollUpdate, Mod>,
+        handler: PollUpdateHandler<filters.Modify<PollUpdate, Mod>>['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onPollUpdate(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('pollUpdate', filter, handler, group)
+    }
+
+    /**
+     * Register a poll vote handler without any filters
+     *
+     * @param handler  Poll vote handler
+     * @param group  Handler group index
+     * @internal
+     */
+    onPollVote(handler: PollVoteHandler['callback'], group?: number): void
+
+    /**
+     * Register a poll vote handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Poll vote handler
+     * @param group  Handler group index
+     */
+    onPollVote<Mod>(
+        filter: UpdateFilter<PollVoteUpdate, Mod>,
+        handler: PollVoteHandler<
+            filters.Modify<PollVoteUpdate, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onPollVote(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('pollVote', filter, handler, group)
     }
 
     // end-codegen

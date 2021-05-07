@@ -8,12 +8,16 @@ import {
     InlineQueryHandler,
     ChosenInlineResultHandler,
     CallbackQueryHandler,
+    PollUpdateHandler,
+    PollVoteHandler,
 } from './handler'
 // end-codegen-imports
 import { filters, UpdateFilter } from './filters'
 import { CallbackQuery, InlineQuery, Message } from '@mtcute/client'
 import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
+import { PollUpdate } from './updates/poll-update'
+import { PollVoteUpdate } from './updates/poll-vote'
 
 function _create<T extends UpdateHandler>(
     type: T['type'],
@@ -233,6 +237,58 @@ export namespace handlers {
         handler?: any
     ): CallbackQueryHandler {
         return _create('callback_query', filter, handler)
+    }
+
+    /**
+     * Create a poll update handler
+     *
+     * @param handler  Poll update handler
+     */
+    export function pollUpdate(
+        handler: PollUpdateHandler['callback']
+    ): PollUpdateHandler
+
+    /**
+     * Create a poll update handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Poll update handler
+     */
+    export function pollUpdate<Mod>(
+        filter: UpdateFilter<PollUpdate, Mod>,
+        handler: PollUpdateHandler<filters.Modify<PollUpdate, Mod>>['callback']
+    ): PollUpdateHandler
+
+    /** @internal */
+    export function pollUpdate(filter: any, handler?: any): PollUpdateHandler {
+        return _create('poll', filter, handler)
+    }
+
+    /**
+     * Create a poll vote handler
+     *
+     * @param handler  Poll vote handler
+     */
+    export function pollVote(
+        handler: PollVoteHandler['callback']
+    ): PollVoteHandler
+
+    /**
+     * Create a poll vote handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Poll vote handler
+     */
+    export function pollVote<Mod>(
+        filter: UpdateFilter<PollVoteUpdate, Mod>,
+        handler: PollVoteHandler<
+            filters.Modify<PollVoteUpdate, Mod>
+        >['callback']
+    ): PollVoteHandler
+
+    /** @internal */
+    export function pollVote(filter: any, handler?: any): PollVoteHandler {
+        return _create('poll_vote', filter, handler)
     }
 
     // end-codegen
