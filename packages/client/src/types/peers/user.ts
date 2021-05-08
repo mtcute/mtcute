@@ -25,12 +25,12 @@ export namespace User {
         | 'within_month'
         | 'long_time_ago'
         | 'bot'
-}
 
-interface ParsedStatus {
-    status: User.Status
-    lastOnline: Date | null
-    nextOffline: Date | null
+    export interface ParsedStatus {
+        status: User.Status
+        lastOnline: Date | null
+        nextOffline: Date | null
+    }
 }
 
 export class User {
@@ -117,38 +117,41 @@ export class User {
         return this._user.lastName ?? null
     }
 
-    private _parsedStatus?: ParsedStatus
-
-    private _parseStatus() {
-        let status: User.Status
+    static parseStatus(status: tl.TypeUserStatus, bot = false): User.ParsedStatus {
+        let ret: User.Status
         let date: Date
 
-        const us = this._user.status
+        const us = status
         if (!us) {
-            status = 'long_time_ago'
-        } else if (this._user.bot) {
-            status = 'bot'
+            ret = 'long_time_ago'
+        } else if (bot) {
+            ret = 'bot'
         } else if (us._ === 'userStatusOnline') {
-            status = 'online'
+            ret = 'online'
             date = new Date(us.expires * 1000)
         } else if (us._ === 'userStatusOffline') {
-            status = 'offline'
+            ret = 'offline'
             date = new Date(us.wasOnline * 1000)
         } else if (us._ === 'userStatusRecently') {
-            status = 'recently'
+            ret = 'recently'
         } else if (us._ === 'userStatusLastWeek') {
-            status = 'within_week'
+            ret = 'within_week'
         } else if (us._ === 'userStatusLastMonth') {
-            status = 'within_month'
+            ret = 'within_month'
         } else {
-            status = 'long_time_ago'
+            ret = 'long_time_ago'
         }
 
-        this._parsedStatus = {
-            status,
-            lastOnline: status === 'offline' ? date! : null,
-            nextOffline: status === 'online' ? date! : null,
+        return {
+            status: ret,
+            lastOnline: ret === 'offline' ? date! : null,
+            nextOffline: ret === 'online' ? date! : null,
         }
+    }
+
+    private _parsedStatus?: User.ParsedStatus
+    private _parseStatus() {
+        this._parsedStatus = User.parseStatus(this._user.status!, this._user.bot)
     }
 
     /** User's Last Seen & Online status */

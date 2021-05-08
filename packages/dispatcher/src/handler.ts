@@ -11,6 +11,8 @@ import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
 import { PollUpdate } from './updates/poll-update'
 import { PollVoteUpdate } from './updates/poll-vote'
+import { UserStatusUpdate } from './updates/user-status-update'
+import { UserTypingUpdate } from './updates/user-typing-update'
 
 interface BaseUpdateHandler<Type, Handler, Checker> {
     type: Type
@@ -73,6 +75,14 @@ export type PollVoteHandler<T = PollVoteUpdate> = ParsedUpdateHandler<
     'poll_vote',
     T
 >
+export type UserStatusUpdateHandler<T = UserStatusUpdate> = ParsedUpdateHandler<
+    'user_status',
+    T
+>
+export type UserTypingHandler<T = UserTypingUpdate> = ParsedUpdateHandler<
+    'user_typing',
+    T
+>
 
 export type UpdateHandler =
     | RawUpdateHandler
@@ -84,5 +94,7 @@ export type UpdateHandler =
     | CallbackQueryHandler
     | PollUpdateHandler
     | PollVoteHandler
+    | UserStatusUpdateHandler
+    | UserTypingHandler
 
 // end-codegen

@@ -10,6 +10,8 @@ import {
     CallbackQueryHandler,
     PollUpdateHandler,
     PollVoteHandler,
+    UserStatusUpdateHandler,
+    UserTypingHandler,
 } from './handler'
 // end-codegen-imports
 import { filters, UpdateFilter } from './filters'
@@ -18,6 +20,8 @@ import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
 import { PollUpdate } from './updates/poll-update'
 import { PollVoteUpdate } from './updates/poll-vote'
+import { UserStatusUpdate } from './updates/user-status-update'
+import { UserTypingUpdate } from './updates/user-typing-update'
 
 function _create<T extends UpdateHandler>(
     type: T['type'],
@@ -289,6 +293,63 @@ export namespace handlers {
     /** @internal */
     export function pollVote(filter: any, handler?: any): PollVoteHandler {
         return _create('poll_vote', filter, handler)
+    }
+
+    /**
+     * Create an user status update handler
+     *
+     * @param handler  User status update handler
+     */
+    export function userStatusUpdate(
+        handler: UserStatusUpdateHandler['callback']
+    ): UserStatusUpdateHandler
+
+    /**
+     * Create an user status update handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  User status update handler
+     */
+    export function userStatusUpdate<Mod>(
+        filter: UpdateFilter<UserStatusUpdate, Mod>,
+        handler: UserStatusUpdateHandler<
+            filters.Modify<UserStatusUpdate, Mod>
+        >['callback']
+    ): UserStatusUpdateHandler
+
+    /** @internal */
+    export function userStatusUpdate(
+        filter: any,
+        handler?: any
+    ): UserStatusUpdateHandler {
+        return _create('user_status', filter, handler)
+    }
+
+    /**
+     * Create an user typing handler
+     *
+     * @param handler  User typing handler
+     */
+    export function userTyping(
+        handler: UserTypingHandler['callback']
+    ): UserTypingHandler
+
+    /**
+     * Create an user typing handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  User typing handler
+     */
+    export function userTyping<Mod>(
+        filter: UpdateFilter<UserTypingUpdate, Mod>,
+        handler: UserTypingHandler<
+            filters.Modify<UserTypingUpdate, Mod>
+        >['callback']
+    ): UserTypingHandler
+
+    /** @internal */
+    export function userTyping(filter: any, handler?: any): UserTypingHandler {
+        return _create('user_typing', filter, handler)
     }
 
     // end-codegen

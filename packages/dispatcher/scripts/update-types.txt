@@ -9,3 +9,5 @@ chosen_inline_result = ChosenInlineResult
 callback_query = CallbackQuery
 poll: PollUpdate = PollUpdate
 poll_vote = PollVoteUpdate
+user_status: UserStatusUpdate = UserStatusUpdate
+user_typing = UserTypingUpdate

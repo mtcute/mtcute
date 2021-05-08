@@ -73,6 +73,7 @@ import { _parseEntities } from './methods/messages/parse-entities'
 import { pinMessage } from './methods/messages/pin-message'
 import { searchGlobal } from './methods/messages/search-global'
 import { searchMessages } from './methods/messages/search-messages'
+import { sendTyping } from './methods/messages/send-chat-action'
 import { sendMediaGroup } from './methods/messages/send-media-group'
 import { sendMedia } from './methods/messages/send-media'
 import { sendText } from './methods/messages/send-text'
@@ -105,6 +106,7 @@ import { getCommonChats } from './methods/users/get-common-chats'
 import { getMe } from './methods/users/get-me'
 import { getUsers } from './methods/users/get-users'
 import { resolvePeer } from './methods/users/resolve-peer'
+import { setOffline } from './methods/users/set-offline'
 import { IMessageEntityParser } from './parser'
 import { Readable } from 'stream'
 import {
@@ -1674,6 +1676,50 @@ export interface TelegramClient extends BaseTelegramClient {
         }
     ): AsyncIterableIterator<Message>
     /**
+     * Sends a current user/bot typing event
+     * to a conversation partner or group.
+     *
+     * This status is set for 6 seconds, and is
+     * automatically cancelled if you send a
+     * message.
+     *
+     * @param chatId  Chat ID
+     * @param action
+     *  (default: `'typing'`)
+     *     Chat action:
+     *      - `typing` - user is typing
+     *      - `cancel` to cancel previously sent event
+     *      - `record_video` - user is recording a video
+     *      - `upload_video` - user is uploading a video
+     *      - `record_voice` - user is recording a voice note
+     *      - `upload_voice` - user is uploading a voice note
+     *      - `upload_photo` - user is uploading a photo
+     *      - `upload_document` - user is sending a document
+     *
+     * @param progress  For `upload_*` actions, progress of the upload (optional)
+     */
+    sendChatAction(
+        chatId: InputPeerLike,
+        action?:
+            | 'typing'
+            | 'cancel'
+            | 'record_video'
+            | 'upload_video'
+            | 'record_voice'
+            | 'upload_voice'
+            | 'upload_photo'
+            | 'upload_document'
+            | 'geo'
+            | 'contact'
+            | 'game'
+            | 'record_round'
+            | 'upload_round'
+            | 'group_call'
+            | 'history_import'
+            | tl.TypeSendMessageAction,
+        progress?: number
+    ): Promise<void>
+    /**
      * Send a group of media.
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
@@ -2169,6 +2215,12 @@ export interface TelegramClient extends BaseTelegramClient {
     resolvePeer(
         peerId: InputPeerLike
     ): Promise<tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel>
+    /**
+     * Change user status to offline or online
+     *
+     * @param offline  (default: `true`) Whether the user is currently offline
+     */
+    setOffline(offline?: boolean): Promise<void>
 }
 /** @internal */
 export class TelegramClient extends BaseTelegramClient {
@@ -2273,6 +2325,7 @@ export class TelegramClient extends BaseTelegramClient {
     pinMessage = pinMessage
     searchGlobal = searchGlobal
     searchMessages = searchMessages
+    sendChatAction = sendTyping
     sendMediaGroup = sendMediaGroup
     sendMedia = sendMedia
     sendText = sendText
@@ -2301,4 +2354,5 @@ export class TelegramClient extends BaseTelegramClient {
     getMe = getMe
     getUsers = getUsers
     resolvePeer = resolvePeer
+    setOffline = setOffline
 }

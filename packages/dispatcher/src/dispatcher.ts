@@ -24,6 +24,8 @@ import {
     CallbackQueryHandler,
     PollUpdateHandler,
     PollVoteHandler,
+    UserStatusUpdateHandler,
+    UserTypingHandler,
 } from './handler'
 // end-codegen-imports
 import { filters, UpdateFilter } from './filters'
@@ -32,6 +34,8 @@ import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
 import { PollUpdate } from './updates/poll-update'
 import { PollVoteUpdate } from './updates/poll-vote'
+import { UserStatusUpdate } from './updates/user-status-update'
+import { UserTypingUpdate } from './updates/user-typing-update'
 
 const noop = () => {}
 
@@ -67,6 +71,10 @@ const callbackQueryParser: UpdateParser = [
     'callback_query',
     (client, upd, users) => new CallbackQuery(client, upd as any, users),
 ]
+const userTypingParser: UpdateParser = [
+    'user_typing',
+    (client, upd) => new UserTypingUpdate(client, upd as any)
+]
 
 const PARSERS: Partial<
     Record<(tl.TypeUpdate | tl.TypeMessage)['_'], UpdateParser>
@@ -100,10 +108,17 @@ const PARSERS: Partial<
         'poll_vote',
         (client, upd, users) => new PollVoteUpdate(client, upd as any, users),
     ],
+    updateUserStatus: [
+        'user_status',
+        (client, upd) => new UserStatusUpdate(client, upd as any),
+    ],
+    updateChannelUserTyping: userTypingParser,
+    updateChatUserTyping: userTypingParser,
+    updateUserTyping: userTypingParser,
 }
 
 /**
- * The dispatcher
+ * Updates dispatcher
  */
 export class Dispatcher {
     private _groups: Record<number, UpdateHandler[]> = {}
@@ -665,6 +680,67 @@ export class Dispatcher {
     /** @internal */
     onPollVote(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('pollVote', filter, handler, group)
+    }
+
+    /**
+     * Register an user status update handler without any filters
+     *
+     * @param handler  User status update handler
+     * @param group  Handler group index
+     * @internal
+     */
+    onUserStatusUpdate(
+        handler: UserStatusUpdateHandler['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register an user status update handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  User status update handler
+     * @param group  Handler group index
+     */
+    onUserStatusUpdate<Mod>(
+        filter: UpdateFilter<UserStatusUpdate, Mod>,
+        handler: UserStatusUpdateHandler<
+            filters.Modify<UserStatusUpdate, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onUserStatusUpdate(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('userStatusUpdate', filter, handler, group)
+    }
+
+    /**
+     * Register an user typing handler without any filters
+     *
+     * @param handler  User typing handler
+     * @param group  Handler group index
+     * @internal
+     */
+    onUserTyping(handler: UserTypingHandler['callback'], group?: number): void
+
+    /**
+     * Register an user typing handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  User typing handler
+     * @param group  Handler group index
+     */
+    onUserTyping<Mod>(
+        filter: UpdateFilter<UserTypingUpdate, Mod>,
+        handler: UserTypingHandler<
+            filters.Modify<UserTypingUpdate, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onUserTyping(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('userTyping', filter, handler, group)
     }
 
     // end-codegen
