@@ -1,4 +1,4 @@
-import { User, Chat } from '../peers'
+import { User, Chat, InputPeerLike } from '../peers'
 import { tl } from '@mtcute/tl'
 import { BotKeyboard, ReplyMarkup } from '../bots'
 import { MAX_CHANNEL_ID } from '@mtcute/core'
@@ -26,7 +26,7 @@ import {
     Poll,
     Invoice,
     Game,
-    WebPage
+    WebPage,
 } from '../media'
 import { parseDocument } from '../media/document-utils'
 
@@ -245,12 +245,12 @@ export class Message {
 
     private _emptyError?: MtCuteEmptyError
 
-    constructor(
+    constructor (
         client: TelegramClient,
         raw: tl.TypeMessage,
         users: Record<number, tl.TypeUser>,
         chats: Record<number, tl.TypeChat>,
-        isScheduled = false
+        isScheduled = false,
     ) {
         this.client = client
         this._users = users
@@ -286,7 +286,7 @@ export class Message {
     readonly isScheduled: boolean
 
     /** Unique message identifier inside this chat */
-    get id(): number {
+    get id (): number {
         return this.raw.id
     }
 
@@ -295,7 +295,7 @@ export class Message {
      *
      * `null` for service messages and non-post messages.
      */
-    get views(): number | null {
+    get views (): number | null {
         if (this._emptyError) throw this._emptyError
 
         return this.raw._ === 'message' ? this.raw.views ?? null : null
@@ -307,7 +307,7 @@ export class Message {
      *  - Messages sent by you to other chats are outgoing (`outgoing = true`)
      *  - Messages to yourself (i.e. *Saved Messages*) are incoming (`outgoing = false`)
      */
-    get outgoing(): boolean {
+    get outgoing (): boolean {
         if (this._emptyError) throw this._emptyError
 
         return this.raw.out!
@@ -319,7 +319,7 @@ export class Message {
      *
      * `null` for service messages and non-grouped messages
      */
-    get groupedId(): tl.Long | null {
+    get groupedId (): tl.Long | null {
         if (this._emptyError) throw this._emptyError
 
         return this.raw._ === 'message' ? this.raw.groupedId ?? null : null
@@ -340,7 +340,7 @@ export class Message {
      * If the message is a forwarded channel post,
      * sender is the channel itself.
      */
-    get sender(): User | Chat {
+    get sender (): User | Chat {
         if (this._emptyError) throw this._emptyError
 
         if (this._sender === undefined) {
@@ -352,18 +352,18 @@ export class Message {
                 // forwarded channel post
                 this._sender = new Chat(
                     this.client,
-                    this._chats[from.channelId]
+                    this._chats[from.channelId],
                 )
             } else if (from._ === 'peerUser') {
                 this._sender = new User(
                     this.client,
-                    this._users[from.userId]
+                    this._users[from.userId],
                 )
             } else
                 throw new MtCuteTypeAssertionError(
                     'Message#sender (@ raw.fromId)',
                     'peerUser | peerChannel',
-                    from._
+                    from._,
                 )
         }
 
@@ -375,7 +375,7 @@ export class Message {
     /**
      * Conversation the message belongs to
      */
-    get chat(): Chat {
+    get chat (): Chat {
         if (this._emptyError) throw this._emptyError
 
         if (this._chat === undefined) {
@@ -383,7 +383,7 @@ export class Message {
                 this.client,
                 this.raw,
                 this._users,
-                this._chats
+                this._chats,
             )
         }
 
@@ -393,7 +393,7 @@ export class Message {
     /**
      * Date the message was sent
      */
-    get date(): Date {
+    get date (): Date {
         if (this._emptyError) throw this._emptyError
 
         return new Date(this.raw.date * 1000)
@@ -404,7 +404,7 @@ export class Message {
     /**
      * If this message is a forward, contains info about it.
      */
-    get forward(): Message.MessageForwardInfo | null {
+    get forward (): Message.MessageForwardInfo | null {
         if (this._emptyError) throw this._emptyError
 
         if (!this._forward) {
@@ -420,18 +420,18 @@ export class Message {
                     if (fwd.fromId._ === 'peerChannel') {
                         sender = new Chat(
                             this.client,
-                            this._chats[fwd.fromId.channelId]
+                            this._chats[fwd.fromId.channelId],
                         )
                     } else if (fwd.fromId._ === 'peerUser') {
                         sender = new User(
                             this.client,
-                            this._users[fwd.fromId.userId]
+                            this._users[fwd.fromId.userId],
                         )
                     } else
                         throw new MtCuteTypeAssertionError(
                             'Message#forward (@ raw.fwdFrom.fromId)',
                             'peerUser | peerChannel',
-                            fwd.fromId._
+                            fwd.fromId._,
                         )
                 } else {
                     this._forward = null
@@ -454,7 +454,7 @@ export class Message {
      * For replies, the ID of the message that current message
      * replies to.
      */
-    get replyToMessageId(): number | null {
+    get replyToMessageId (): number | null {
         if (this._emptyError) throw this._emptyError
 
         return this.raw.replyTo?.replyToMsgId ?? null
@@ -463,7 +463,7 @@ export class Message {
     /**
      * Whether this message contains mention of the current user
      */
-    get mentioned(): boolean {
+    get mentioned (): boolean {
         if (this._emptyError) throw this._emptyError
 
         return !!this.raw.mentioned
@@ -474,7 +474,7 @@ export class Message {
      * If this message is generated from an inline query,
      * information about the bot which generated it
      */
-    get viaBot(): User | null {
+    get viaBot (): User | null {
         if (this._emptyError) throw this._emptyError
 
         if (this._viaBot === undefined) {
@@ -483,7 +483,7 @@ export class Message {
             } else {
                 this._viaBot = new User(
                     this.client,
-                    this._users[this.raw.viaBotId]
+                    this._users[this.raw.viaBotId],
                 )
             }
         }
@@ -497,7 +497,7 @@ export class Message {
      * Empty string for service messages
      * (you should handle i18n yourself)
      */
-    get text(): string {
+    get text (): string {
         if (this._emptyError) throw this._emptyError
 
         return this.raw._ === 'messageService' ? '' : this.raw.message
@@ -507,7 +507,7 @@ export class Message {
     /**
      * Message text/caption entities (may be empty)
      */
-    get entities(): MessageEntity[] {
+    get entities (): MessageEntity[] {
         if (this._emptyError) throw this._emptyError
 
         if (!this._entities) {
@@ -530,7 +530,7 @@ export class Message {
      *
      * For unsupported events, use `.raw.action` directly.
      */
-    get action(): Message.MessageAction {
+    get action (): Message.MessageAction {
         if (!this._action) {
             if (this.raw._ === 'message') {
                 this._action = null
@@ -634,7 +634,7 @@ export class Message {
      *
      * For unsupported media types, use `.raw.media` directly.
      */
-    get media(): Message.MessageMedia {
+    get media (): Message.MessageMedia {
         if (this._media === undefined) {
             if (
                 this.raw._ === 'messageService' ||
@@ -694,7 +694,7 @@ export class Message {
     /**
      * Reply markup provided with this message, if any.
      */
-    get markup(): ReplyMarkup | null {
+    get markup (): ReplyMarkup | null {
         if (this._markup === undefined) {
             if (this.raw._ === 'messageService' || !this.raw.replyMarkup) {
                 this._markup = null
@@ -739,7 +739,7 @@ export class Message {
      *
      * @throws MtCuteArgumentError  In case the chat does not support message links
      */
-    get link(): string {
+    get link (): string {
         if (this.chat.type === 'supergroup' || this.chat.type === 'channel') {
             if (this.chat.username) {
                 return `https://t.me/${this.chat.username}/${this.id}`
@@ -751,7 +751,7 @@ export class Message {
         }
 
         throw new MtCuteArgumentError(
-            `Cannot generate message link for ${this.chat.type}`
+            `Cannot generate message link for ${this.chat.type}`,
         )
     }
 
@@ -762,7 +762,7 @@ export class Message {
      *
      * @param parseMode  Parse mode to use (`null` for default)
      */
-    unparse(parseMode?: string | null): string {
+    unparse (parseMode?: string | null): string {
         return this.client
             .getParseMode(parseMode)
             .unparse(this.text, this.entities)
@@ -773,7 +773,7 @@ export class Message {
      *
      * @throws MtCuteArgumentError  In case the message is not a reply
      */
-    getReplyTo(): Promise<Message> {
+    getReplyTo (): Promise<Message> {
         if (!this.replyToMessageId)
             throw new MtCuteArgumentError('This message is not a reply!')
 
@@ -790,14 +790,16 @@ export class Message {
      * @param visible  Whether the reply should be visible
      * @param params
      */
-    replyText(
+    replyText (
         text: string,
         visible = false,
-        params?: Parameters<TelegramClient['sendText']>[2]
+        params?: Parameters<TelegramClient['sendText']>[2],
     ): ReturnType<TelegramClient['sendText']> {
         if (visible) {
             return this.client.sendText(this.chat.inputPeer, text, {
-                ...(params || {}),
+                ...(
+                    params || {}
+                ),
                 replyTo: this.id,
             })
         }
@@ -814,14 +816,16 @@ export class Message {
      * @param visible  Whether the reply should be visible
      * @param params
      */
-    replyMedia(
+    replyMedia (
         media: InputMediaLike,
         visible = false,
-        params?: Parameters<TelegramClient['sendMedia']>[2]
+        params?: Parameters<TelegramClient['sendMedia']>[2],
     ): ReturnType<TelegramClient['sendMedia']> {
         if (visible) {
             return this.client.sendMedia(this.chat.inputPeer, media, {
-                ...(params || {}),
+                ...(
+                    params || {}
+                ),
                 replyTo: this.id,
             })
         }
@@ -833,7 +837,7 @@ export class Message {
      *
      * @param revoke  Whether to "revoke" (i.e. delete for both sides). Only used for chats and private chats.
      */
-    delete(revoke = false): Promise<boolean> {
+    delete (revoke = false): Promise<boolean> {
         return this.client.deleteMessages(this.chat.inputPeer, this.id, revoke)
     }
 
@@ -843,14 +847,14 @@ export class Message {
      * @param notify  Whether to send a notification (only for legacy groups and supergroups)
      * @param bothSides  Whether to pin for both sides (only for private chats)
      */
-    pin(notify = false, bothSides = false): Promise<void> {
+    pin (notify = false, bothSides = false): Promise<void> {
         return this.client.pinMessage(this.chat.inputPeer, this.id, notify, bothSides)
     }
 
     /**
      * Unpin this message.
      */
-    unpin(): Promise<void> {
+    unpin (): Promise<void> {
         return this.client.pinMessage(this.chat.inputPeer, this.id)
     }
 
@@ -859,8 +863,8 @@ export class Message {
      *
      * @link TelegramClient.editMessage
      */
-    edit(
-        params: Parameters<TelegramClient['editMessage']>[2]
+    edit (
+        params: Parameters<TelegramClient['editMessage']>[2],
     ): Promise<Message> {
         return this.client.editMessage(this.chat.inputPeer, this.id, params)
     }
@@ -875,15 +879,52 @@ export class Message {
      * @param params  Additional parameters
      * @link TelegramClient.editMessage
      */
-    editText(
+    editText (
         text: string,
-        params?: Omit<Parameters<TelegramClient['editMessage']>[2], 'text'>
+        params?: Omit<Parameters<TelegramClient['editMessage']>[2], 'text'>,
     ): Promise<Message> {
         return this.edit({
             text,
-            ...(params || {}),
+            ...(
+                params || {}
+            ),
         })
     }
+
+    /**
+     * Send this message as a copy (i.e. send the same message,
+     * but do not forward it).
+     *
+     * Note that if the message contains a webpage,
+     * it will be copied simply as a text message,
+     * and if the message contains an invoice,
+     * it can't be copied.
+     *
+     * @param toChatId  Target chat ID
+     * @param params  Copy parameters
+     */
+    sendCopy (toChatId: InputPeerLike, params: Parameters<TelegramClient['sendCopy']>[3]): Promise<Message> {
+        if (!params) params = {}
+
+        if (this.raw._ === 'messageService') {
+            throw new MtCuteArgumentError('Service messages can\'t be copied')
+        }
+
+        if (this.media && !(
+            this.media instanceof WebPage
+        )) {
+            return this.client.sendMedia(toChatId, {
+                type: 'auto',
+                file: this.media.inputMedia,
+                caption: params.caption ?? this.raw.message,
+                // we shouldn't use original entities if the user wants custom text
+                entities: params.entities ?? params.caption ? undefined : this.raw.entities,
+            }, params)
+        }
+
+        return this.client.sendText(toChatId, this.raw.message, params)
+    }
 }
+
 
 makeInspectable(Message, ['empty', 'isScheduled'], ['link'])

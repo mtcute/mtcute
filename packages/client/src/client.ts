@@ -73,10 +73,11 @@ import { _parseEntities } from './methods/messages/parse-entities'
 import { pinMessage } from './methods/messages/pin-message'
 import { searchGlobal } from './methods/messages/search-global'
 import { searchMessages } from './methods/messages/search-messages'
-import { sendTyping } from './methods/messages/send-chat-action'
+import { sendCopy } from './methods/messages/send-copy'
 import { sendMediaGroup } from './methods/messages/send-media-group'
 import { sendMedia } from './methods/messages/send-media'
 import { sendText } from './methods/messages/send-text'
+import { sendTyping } from './methods/messages/send-typing'
 import { sendVote } from './methods/messages/send-vote'
 import { unpinMessage } from './methods/messages/unpin-message'
 import { initTakeoutSession } from './methods/misc/init-takeout-session'
@@ -131,6 +132,7 @@ import {
     StickerSet,
     TakeoutSession,
     TermsOfService,
+    TypingStatus,
     UploadFileLike,
     UploadedFile,
     User,
@@ -1676,49 +1678,79 @@ export interface TelegramClient extends BaseTelegramClient {
         }
     ): AsyncIterableIterator<Message>
     /**
-     * Sends a current user/bot typing event
-     * to a conversation partner or group.
+     * Copy a message (i.e. send the same message,
+     * but do not forward it).
      *
-     * This status is set for 6 seconds, and is
-     * automatically cancelled if you send a
-     * message.
+     * Note that if the message contains a webpage,
+     * it will be copied simply as a text message,
+     * and if the message contains an invoice,
+     * it can't be copied.
      *
-     * @param chatId  Chat ID
-     * @param action
-     *  (default: `'typing'`)
-     *     Chat action:
-     *      - `typing` - user is typing
-     *      - `cancel` to cancel previously sent event
-     *      - `record_video` - user is recording a video
-     *      - `upload_video` - user is uploading a video
-     *      - `record_voice` - user is recording a voice note
-     *      - `upload_voice` - user is uploading a voice note
-     *      - `upload_photo` - user is uploading a photo
-     *      - `upload_document` - user is sending a document
+     * > **Note**: if you already have {@link Message} object,
+     * > use {@link Message.sendCopy} instead, since that is
+     * > much more efficient, and that is what this method wraps.
      *
-     * @param progress  For `upload_*` actions, progress of the upload (optional)
+     * @param toChatId  Source chat ID
+     * @param fromChatId  Target chat ID
+     * @param message  Message ID to forward
+     * @param params
      */
-    sendChatAction(
-        chatId: InputPeerLike,
-        action?:
-            | 'typing'
-            | 'cancel'
-            | 'record_video'
-            | 'upload_video'
-            | 'record_voice'
-            | 'upload_voice'
-            | 'upload_photo'
-            | 'upload_document'
-            | 'geo'
-            | 'contact'
-            | 'game'
-            | 'record_round'
-            | 'upload_round'
-            | 'group_call'
-            | 'history_import'
-            | tl.TypeSendMessageAction,
-        progress?: number
-    ): Promise<void>
+    sendCopy(
+        toChatId: InputPeerLike,
+        fromChatId: InputPeerLike,
+        message: number,
+        params?: {
+            /**
+             * Whether to send this message silently.
+             */
+            silent?: boolean
+
+            /**
+             * If set, the message will be scheduled to this date.
+             * When passing a number, a UNIX time in ms is expected.
+             */
+            schedule?: Date | number
+
+            /**
+             * New message caption (only used for media)
+             */
+            caption?: string
+
+            /**
+             * Parse mode to use to parse `text` entities before sending
+             * the message. Defaults to current default parse mode (if any).
+             *
+             * Passing `null` will explicitly disable formatting.
+             */
+            parseMode?: string | null
+
+            /**
+             * Message to reply to. Either a message object or message ID.
+             */
+            replyTo?: number | Message
+
+            /**
+             * List of formatting entities to use instead of parsing via a
+             * parse mode.
+             *
+             * **Note:** Passing this makes the method ignore {@link parseMode}
+             */
+            entities?: tl.TypeMessageEntity[]
+
+            /**
+             * For bots: inline or reply markup or an instruction
+             * to hide a reply keyboard or to force a reply.
+             */
+            replyMarkup?: ReplyMarkup
+
+            /**
+             * Whether to clear draft after sending this message.
+             *
+             * Defaults to `false`
+             */
+            clearDraft?: boolean
+        }
+    ): Promise<Message>
     /**
      * Send a group of media.
      *
@@ -1909,6 +1941,23 @@ export interface TelegramClient extends BaseTelegramClient {
             clearDraft?: boolean
         }
     ): Promise<Message>
+    /**
+     * Sends a current user/bot typing event
+     * to a conversation partner or group.
+     *
+     * This status is set for 6 seconds, and is
+     * automatically cancelled if you send a
+     * message.
+     *
+     * @param chatId  Chat ID
+     * @param status  (default: `'typing'`) Typing status
+     * @param progress  (default: `0`) For `upload_*` and history import actions, progress of the upload
+     */
+    sendTyping(
+        chatId: InputPeerLike,
+        status?: TypingStatus | tl.TypeSendMessageAction,
+        progress?: number
+    ): Promise<void>
     /**
      * Send or retract a vote in a poll.
      *
@@ -2325,10 +2374,11 @@ export class TelegramClient extends BaseTelegramClient {
     pinMessage = pinMessage
     searchGlobal = searchGlobal
     searchMessages = searchMessages
-    sendChatAction = sendTyping
+    sendCopy = sendCopy
     sendMediaGroup = sendMediaGroup
     sendMedia = sendMedia
     sendText = sendText
+    sendTyping = sendTyping
     sendVote = sendVote
     unpinMessage = unpinMessage
     initTakeoutSession = initTakeoutSession

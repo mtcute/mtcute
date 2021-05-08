@@ -1,7 +1,6 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { InputPeerLike } from '../../types'
-import { TypingStatus } from '../../types/peers/typing-status'
+import { InputPeerLike, TypingStatus } from '../../types'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
@@ -14,7 +13,7 @@ import { normalizeToInputPeer } from '../../utils/peer-utils'
  *
  * @param chatId  Chat ID
  * @param status  Typing status
- * @param progress  For `upload_*` and actions, progress of the upload
+ * @param progress  For `upload_*` and history import actions, progress of the upload
  * @internal
  */
 export async function sendTyping(

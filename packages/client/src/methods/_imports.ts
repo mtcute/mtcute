@@ -31,7 +31,8 @@ import {
     InputStickerSetItem,
     TakeoutSession,
     StickerSet,
-    Poll
+    Poll,
+    TypingStatus
 } from '../types'
 
 // @copy
