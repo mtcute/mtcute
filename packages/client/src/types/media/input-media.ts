@@ -450,6 +450,12 @@ export interface InputMediaPoll {
     answers: (string | tl.TypePollAnswer)[]
 
     /**
+     * Whether this is poll is closed
+     * (i.e. nobody can vote anymore)
+     */
+    closed?: boolean
+
+    /**
      * Whether this is a public poll
      * (i.e. users who have voted are visible to everyone)
      */

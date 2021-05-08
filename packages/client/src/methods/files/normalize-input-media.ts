@@ -178,6 +178,7 @@ export async function _normalizeInputMedia(
             _: 'inputMediaPoll',
             poll: {
                 _: 'poll',
+                closed: media.closed,
                 id: bigInt.zero,
                 publicVoters: media.public,
                 multipleChoice: media.multiple,

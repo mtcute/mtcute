@@ -60,6 +60,7 @@ import { _normalizeFileToDocument } from './methods/files/normalize-file-to-docu
 import { _normalizeInputFile } from './methods/files/normalize-input-file'
 import { _normalizeInputMedia } from './methods/files/normalize-input-media'
 import { uploadFile } from './methods/files/upload-file'
+import { closePoll } from './methods/messages/close-poll'
 import { deleteMessages } from './methods/messages/delete-messages'
 import { editInlineMessage } from './methods/messages/edit-inline-message'
 import { editMessage } from './methods/messages/edit-message'
@@ -1179,6 +1180,16 @@ export interface TelegramClient extends BaseTelegramClient {
         progressCallback?: (uploaded: number, total: number) => void
     }): Promise<UploadedFile>
     /**
+     * Close a poll sent by you.
+     *
+     * Once closed, poll can't be re-opened, and nobody
+     * will be able to vote in it
+     *
+     * @param chatId  Chat ID where this poll was found
+     * @param message  Message ID where this poll was found
+     */
+    closePoll(chatId: InputPeerLike, message: number): Promise<Poll>
+    /**
      * Delete messages, including service messages.
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
@@ -2249,6 +2260,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _normalizeInputFile = _normalizeInputFile
     protected _normalizeInputMedia = _normalizeInputMedia
     uploadFile = uploadFile
+    closePoll = closePoll
     deleteMessages = deleteMessages
     editInlineMessage = editInlineMessage
     editMessage = editMessage
