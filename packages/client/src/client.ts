@@ -75,6 +75,7 @@ import { searchMessages } from './methods/messages/search-messages'
 import { sendMediaGroup } from './methods/messages/send-media-group'
 import { sendMedia } from './methods/messages/send-media'
 import { sendText } from './methods/messages/send-text'
+import { sendVote } from './methods/messages/send-vote'
 import { unpinMessage } from './methods/messages/unpin-message'
 import { initTakeoutSession } from './methods/misc/init-takeout-session'
 import {
@@ -121,6 +122,7 @@ import {
     Message,
     PartialExcept,
     PartialOnly,
+    Poll,
     ReplyMarkup,
     SentCode,
     StickerSet,
@@ -1851,6 +1853,22 @@ export interface TelegramClient extends BaseTelegramClient {
         }
     ): Promise<Message>
     /**
+     * Send or retract a vote in a poll.
+     *
+     * @param chatId  Chat ID where this poll was found
+     * @param message  Message ID where this poll was found
+     * @param options
+     *     Selected options, or `null` to retract.
+     *     You can pass indexes of the answers or the `Buffer`s
+     *     representing them. In case of indexes, the poll will first
+     *     be requested from the server.
+     */
+    sendVote(
+        chatId: InputPeerLike,
+        message: number,
+        options: null | MaybeArray<number | Buffer>
+    ): Promise<Poll>
+    /**
      * Unpin a message in a group, supergroup, channel or PM.
      *
      * For supergroups/channels, you must have appropriate permissions,
@@ -2246,6 +2264,7 @@ export class TelegramClient extends BaseTelegramClient {
     sendMediaGroup = sendMediaGroup
     sendMedia = sendMedia
     sendText = sendText
+    sendVote = sendVote
     unpinMessage = unpinMessage
     initTakeoutSession = initTakeoutSession
     registerParseMode = registerParseMode

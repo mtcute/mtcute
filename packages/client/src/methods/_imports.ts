@@ -30,7 +30,8 @@ import {
     InputInlineResult,
     InputStickerSetItem,
     TakeoutSession,
-    StickerSet
+    StickerSet,
+    Poll
 } from '../types'
 
 // @copy
