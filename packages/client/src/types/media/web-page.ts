@@ -4,6 +4,7 @@ import { TelegramClient } from '../../client'
 import { RawDocument } from './document'
 import { parseDocument } from './document-utils'
 import { makeInspectable } from '../utils'
+import { MtCuteArgumentError } from '../errors'
 
 /**
  * Web page preview.
@@ -206,6 +207,19 @@ export class WebPage {
 
         return this._document
     }
+
+    /**
+     * Input media TL object generated from this object,
+     * to be used inside {@link InputMediaLike} and
+     * {@link TelegramClient.sendMedia}.
+     *
+     * WebPage can't provide an input media, since some
+     * can only be auto-generated from a link. This getter
+     * is only provided to allow using `msg.media.inputMedia`
+     */
+    get inputMedia(): tl.TypeInputMedia {
+        throw new MtCuteArgumentError('WebPage cannot provide an InputMedia')
+    }
 }
 
-makeInspectable(WebPage)
+makeInspectable(WebPage, undefined, ['inputMedia'])

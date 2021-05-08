@@ -3,6 +3,7 @@ import { Location } from './location'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
+import bigInt from 'big-integer'
 
 export namespace Venue {
     export interface VenueSource {
@@ -76,6 +77,38 @@ export class Venue {
             type: this.raw.venueType,
         }
     }
+
+    /**
+     * Input media TL object generated from this object,
+     * to be used inside {@link InputMediaLike} and
+     * {@link TelegramClient.sendMedia}
+     *
+     * A few notes:
+     *  - Using this will result in an
+     *    independent poll, which will not
+     *    be auto-updated with the current.
+     *  - If this is a quiz, a normal poll
+     *    will be returned since the client does not
+     *    know the correct answer.
+     *  - This always returns a non-closed poll,
+     *    even if the current poll was closed
+     */
+    get inputMedia(): tl.TypeInputMedia {
+        return {
+            _: 'inputMediaVenue',
+            geoPoint: {
+                _: 'inputGeoPoint',
+                lat: (this.raw.geo as tl.RawGeoPoint).lat,
+                long: (this.raw.geo as tl.RawGeoPoint).long,
+                accuracyRadius: (this.raw.geo as tl.RawGeoPoint).accuracyRadius,
+            },
+            title: this.raw.title,
+            address: this.raw.address,
+            provider: this.raw.provider,
+            venueId: this.raw.venueId,
+            venueType: this.raw.venueType
+        }
+    }
 }
 
-makeInspectable(Venue)
+makeInspectable(Venue, undefined, ['inputMedia'])

@@ -159,6 +159,21 @@ export class Dice {
     get value(): number {
         return this.obj.value
     }
+
+    /**
+     * Input media TL object generated from this object,
+     * to be used inside {@link InputMediaLike} and
+     * {@link TelegramClient.sendMedia}
+     *
+     * Note that when you use this media, a new `value`
+     * will be generated!
+     */
+    get inputMedia(): tl.TypeInputMedia {
+        return {
+            _: 'inputMediaDice',
+            emoticon: this.obj.emoticon
+        }
+    }
 }
 
-makeInspectable(Dice)
+makeInspectable(Dice, undefined, ['inputMedia'])

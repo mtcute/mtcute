@@ -2,6 +2,7 @@ import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 import { WebDocument } from '../files/web-document'
+import { MtCuteArgumentError } from '../errors'
 
 /**
  * An invoice
@@ -90,6 +91,20 @@ export class Invoice {
     get startParam(): string {
         return this.raw.startParam
     }
+
+    /**
+     * Input media TL object generated from this object,
+     * to be used inside {@link InputMediaLike} and
+     * {@link TelegramClient.sendMedia}.
+     *
+     * Invoice can't provide an input media, since some
+     * of the data is not available to the user,
+     * which is required to send it. This getter
+     * is only provided to allow using `msg.media.inputMedia`
+     */
+    get inputMedia(): tl.TypeInputMedia {
+        throw new MtCuteArgumentError('Invoice cannot provide an InputMedia')
+    }
 }
 
-makeInspectable(Invoice)
+makeInspectable(Invoice, undefined, ['inputMedia'])

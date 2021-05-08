@@ -2,6 +2,7 @@ import { makeInspectable } from '../utils'
 import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { MessageEntity } from '../messages'
+import bigInt from 'big-integer'
 
 export namespace Poll {
     export interface PollAnswer {
@@ -180,6 +181,38 @@ export class Poll {
             .getParseMode(parseMode)
             .unparse(this.solution, this.solutionEntities!)
     }
+
+    /**
+     * Input media TL object generated from this object,
+     * to be used inside {@link InputMediaLike} and
+     * {@link TelegramClient.sendMedia}
+     *
+     * A few notes:
+     *  - Using this will result in an
+     *    independent poll, which will not
+     *    be auto-updated with the current.
+     *  - If this is a quiz, a normal poll
+     *    will be returned since the client does not
+     *    know the correct answer.
+     *  - This always returns a non-closed poll,
+     *    even if the current poll was closed
+     */
+    get inputMedia(): tl.TypeInputMedia {
+        return {
+            _: 'inputMediaPoll',
+            poll: {
+                _: 'poll',
+                closed: false,
+                id: bigInt.zero,
+                publicVoters: this.raw.publicVoters,
+                multipleChoice: this.raw.multipleChoice,
+                question: this.raw.question,
+                answers: this.raw.answers,
+                closePeriod: this.raw.closePeriod,
+                closeDate: this.raw.closeDate
+            },
+        }
+    }
 }
 
-makeInspectable(Poll)
+makeInspectable(Poll, undefined, ['inputMedia'])

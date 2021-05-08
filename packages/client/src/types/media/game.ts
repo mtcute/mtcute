@@ -79,6 +79,22 @@ export class Game {
 
         return this._animation
     }
+
+    /**
+     * Input media TL object generated from this object,
+     * to be used inside {@link InputMediaLike} and
+     * {@link TelegramClient.sendMedia}
+     */
+    get inputMedia(): tl.TypeInputMedia {
+        return {
+            _: 'inputMediaGame',
+            id: {
+                _: 'inputGameID',
+                id: this.game.id,
+                accessHash: this.game.accessHash
+            }
+        }
+    }
 }
 
-makeInspectable(Game)
+makeInspectable(Game, undefined, ['inputMedia'])

@@ -38,6 +38,18 @@ export class Contact {
     get userId(): number {
         return this.obj.userId
     }
+
+    /**
+     * Input media TL object generated from this object,
+     * to be used inside {@link InputMediaLike} and
+     * {@link TelegramClient.sendMedia}
+     */
+    get inputMedia(): tl.TypeInputMedia {
+        return {
+            ...this.obj,
+            _: 'inputMediaContact',
+        }
+    }
 }
 
-makeInspectable(Contact)
+makeInspectable(Contact, undefined, ['inputMedia'])

@@ -39,4 +39,4 @@ export class Voice extends RawDocument {
     }
 }
 
-makeInspectable(Voice, ['fileSize', 'dcId'])
+makeInspectable(Voice, ['fileSize', 'dcId'], ['inputMedia'])

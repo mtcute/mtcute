@@ -109,10 +109,10 @@ export class Photo extends FileLocation {
 
     /**
      * Input media generated from this object,
-     * to be used in {@link TelegramClient.sendPhoto}
-     * and {@link InputMediaLike}
+     * to be used in {@link InputMediaLike} and
+     * {@link TelegramClient.sendMedia}
      */
-    get inputMediaTl(): tl.TypeInputMedia {
+    get inputMedia(): tl.TypeInputMedia {
         return {
             _: 'inputMediaPhoto',
             id: {
@@ -123,20 +123,6 @@ export class Photo extends FileLocation {
             },
         }
     }
-
-    /**
-     * Input media object generated from this object,
-     * to be used with {@link TelegramClient.sendMedia}
-     */
-    get inputMedia(): InputMediaLike {
-        return {
-            // type is only really used for creating tl.InputMedia,
-            // but since we are providing it directly, we can use `auto`
-            type: 'auto',
-            file: this.inputMediaTl,
-            // other fields are not needed since it's a forwarded media
-        }
-    }
 }
 
-makeInspectable(Photo, ['fileSize', 'dcId', 'width', 'height'])
+makeInspectable(Photo, ['fileSize', 'dcId', 'width', 'height'], ['inputMedia'])

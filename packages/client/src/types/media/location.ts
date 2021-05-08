@@ -84,6 +84,23 @@ export class Location {
             scale: params.scale ?? 1,
         })
     }
+
+    /**
+     * Input media TL object generated from this object,
+     * to be used inside {@link InputMediaLike} and
+     * {@link TelegramClient.sendMedia}
+     */
+    get inputMedia(): tl.TypeInputMedia {
+        return {
+            _: 'inputMediaGeoPoint',
+            geoPoint: {
+                _: 'inputGeoPoint',
+                lat: this.geo.lat,
+                long: this.geo.long,
+                accuracyRadius: this.geo.accuracyRadius
+            }
+        }
+    }
 }
 
 export class LiveLocation extends Location {
@@ -108,8 +125,32 @@ export class LiveLocation extends Location {
         return this.live.period
     }
 
+    /**
+     * Input media TL object generated from this object,
+     * to be used inside {@link InputMediaLike} and
+     * {@link TelegramClient.sendMedia}
+     *
+     * Note that using this will result in an
+     * independent live geolocation, which
+     * will not be auto-updated with the current
+     */
+    get inputMedia(): tl.TypeInputMedia {
+        return {
+            _: 'inputMediaGeoLive',
+            geoPoint: {
+                _: 'inputGeoPoint',
+                lat: this.geo.lat,
+                long: this.geo.long,
+                accuracyRadius: this.geo.accuracyRadius
+            },
+            heading: this.live.heading,
+            period: this.live.period,
+            proximityNotificationRadius: this.live.proximityNotificationRadius
+        }
+    }
+
     // todo: api to subscribe for real-time updates
 }
 
-makeInspectable(Location)
-makeInspectable(LiveLocation)
+makeInspectable(Location, undefined, ['inputMedia'])
+makeInspectable(LiveLocation, undefined, ['inputMedia'])

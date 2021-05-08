@@ -158,4 +158,4 @@ export class Sticker extends RawDocument {
     }
 }
 
-makeInspectable(Sticker, ['fileSize', 'dcId'])
+makeInspectable(Sticker, ['fileSize', 'dcId'], ['inputMedia'])

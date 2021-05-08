@@ -88,4 +88,4 @@ export class Video extends RawDocument {
     }
 }
 
-makeInspectable(Video, ['fileSize', 'dcId'])
+makeInspectable(Video, ['fileSize', 'dcId'], ['inputMedia'])
