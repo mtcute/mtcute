@@ -10,7 +10,7 @@ write(`// This file is auto-generated. Do not edit.
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-function _has (value) { return +!!(Array.isArray(value) ? value.length : value); }
+function _has (value) { return +!!(Array.isArray(value) ? value.length : value !== undefined); }
 function _assert_has (obj, prop) { if (obj[prop] === void 0) throw new Error('Object ' + obj._ + ' is missing required property ' + prop) }
 
 exports.default = {`)
