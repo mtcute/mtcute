@@ -1,6 +1,9 @@
 import { TelegramClient } from '../../client'
 import { MaybeArray } from '@mtcute/core'
-import { createUsersChatsIndex, normalizeToInputChannel } from '../../utils/peer-utils'
+import {
+    createUsersChatsIndex,
+    normalizeToInputChannel,
+} from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 import { Message, InputPeerLike, MtCuteTypeAssertionError } from '../../types'
 
@@ -53,16 +56,17 @@ export async function getMessages(
     const isSingle = !Array.isArray(messageIds)
     if (isSingle) messageIds = [messageIds as number]
 
-    const ids = (messageIds as number[]).map(
-        (it) =>
-            ({
-                _: fromReply ? 'inputMessageReplyTo' : 'inputMessageID',
-                id: it,
-            } as tl.TypeInputMessage)
-    )
+    const type = fromReply ? 'inputMessageReplyTo' : 'inputMessageID'
+    const ids: tl.TypeInputMessage[] = (messageIds as number[]).map((it) => ({
+        _: type,
+        id: it,
+    }))
 
     const res = await this.call(
-        peer._ === 'inputPeerChannel' || peer._ === 'inputChannel'
+        peer._ === 'inputPeerChannel' ||
+            peer._ === 'inputChannel' ||
+            peer._ === 'inputPeerChannelFromMessage' ||
+            peer._ === 'inputChannelFromMessage'
             ? {
                   _: 'channels.getMessages',
                   id: ids,

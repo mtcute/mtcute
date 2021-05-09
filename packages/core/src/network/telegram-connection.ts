@@ -551,6 +551,21 @@ export class TelegramConnection extends PersistentConnection {
             stack = new Error().stack
         }
 
+        const content = typeof method === 'string' ? message! : method.message
+        if (content.length > 1044404) {
+            // if you send larger payloads, telegram will just close connection,
+            // and since we resend them, it will get resent after reconnection and
+            // that will be an endless loop of reconnections. we don't want that,
+            // and payloads this large are usually a sign of an error in the code.
+            const err = new Error(`Payload is too big (${content.length} > 1044404)`)
+            if (typeof method === 'string') {
+                throw err
+            } else {
+                // shouldn't happen, but whatever
+                method.promise.reject(err)
+            }
+        }
+
         const promise =
             typeof method === 'string'
                 ? createControllablePromise()
@@ -572,7 +587,7 @@ export class TelegramConnection extends PersistentConnection {
         this._pendingRpcCalls[messageId.toString(16)] = pending
 
         const encrypted = await this._mtproto.encryptMessage(
-            typeof method === 'string' ? message! : method.message,
+            content,
             messageId,
             seqNo
         )
