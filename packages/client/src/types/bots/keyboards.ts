@@ -186,6 +186,8 @@ export namespace BotKeyboard {
     /**
      * Create a keyboard button with a link.
      *
+     * Used for inline keyboards, not reply!
+     *
      * @param text  Button text
      * @param url  URL
      */
@@ -199,6 +201,8 @@ export namespace BotKeyboard {
 
     /**
      * Create a keyboard button with a link.
+     *
+     * Used for inline keyboards, not reply!
      *
      * @param text  Button text
      * @param data  Callback data (1-64 bytes). String will be converted to `Buffer`
@@ -226,6 +230,8 @@ export namespace BotKeyboard {
      * one of their chats, open that chat and insert the bot‘s
      * username and the specified inline query (if any) in the input field.
      *
+     * Used for inline keyboards, not reply!
+     *
      * @param text  Button text
      * @param query  Inline query (can be empty or omitted)
      * @param currentChat
@@ -248,11 +254,61 @@ export namespace BotKeyboard {
     /**
      * Button to start a game
      *
+     * Used for inline keyboards, not reply!
+     *
      * **Note**: This type of button must always be
-     * the first button in the first row
+     * the first button in the first row. ID of the
+     * game is inferred from {@link InputMedia.game},
+     * thus this button should only be used with it.
      */
     export function game(text: string): tl.RawKeyboardButtonGame {
         return { _: 'keyboardButtonGame', text }
+    }
+
+    /**
+     * Button to authorize a user
+     *
+     * Used for inline keyboards, not reply!
+     *
+     * @param text  Button label
+     * @param url  Authorization URL (see [TL Reference](https://mt.tei.su/tl/class/inputKeyboardButtonUrlAuth))
+     * @param params
+     */
+    export function urlAuth(
+        text: string,
+        url: string,
+        params: {
+            /**
+             * Button label when forwarded
+             */
+            fwdText?: string
+
+            /**
+             * Whether to request the permission for
+             * your bot to send messages to the user
+             */
+            requestWriteAccess?: boolean
+
+            /**
+             * Bot, which will be used for user authorization.
+             * `url` domain must be the same as the domain linked
+             * with the bot.
+             *
+             * Defaults to current bot
+             */
+            bot?: tl.TypeInputUser
+        } = {}
+    ): tl.RawInputKeyboardButtonUrlAuth {
+        return {
+            _: 'inputKeyboardButtonUrlAuth',
+            text,
+            url,
+            bot: params.bot ?? {
+                _: 'inputUserSelf'
+            },
+            fwdText: params.fwdText,
+            requestWriteAccess: params.requestWriteAccess
+        }
     }
 
     /** @internal */
