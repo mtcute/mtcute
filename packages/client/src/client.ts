@@ -67,6 +67,7 @@ import { editMessage } from './methods/messages/edit-message'
 import { _findMessageInUpdate } from './methods/messages/find-in-update'
 import { forwardMessages } from './methods/messages/forward-messages'
 import { getHistory } from './methods/messages/get-history'
+import { getMessageGroup } from './methods/messages/get-message-group'
 import { getMessages } from './methods/messages/get-messages'
 import { iterHistory } from './methods/messages/iter-history'
 import { _parseEntities } from './methods/messages/parse-entities'
@@ -1497,6 +1498,13 @@ export interface TelegramClient extends BaseTelegramClient {
         }
     ): Promise<Message[]>
     /**
+     * Get all messages inside of a message group
+     *
+     * @param chatId  Chat ID
+     * @param message  ID of one of the messages in the group
+     */
+    getMessageGroup(chatId: InputPeerLike, message: number): Promise<Message[]>
+    /**
      * Get a single message in chat by its ID
      *
      * **Note**: this method might return empty message
@@ -2555,6 +2563,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _findMessageInUpdate = _findMessageInUpdate
     forwardMessages = forwardMessages
     getHistory = getHistory
+    getMessageGroup = getMessageGroup
     getMessages = getMessages
     iterHistory = iterHistory
     protected _parseEntities = _parseEntities

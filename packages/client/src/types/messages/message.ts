@@ -924,6 +924,20 @@ export class Message {
 
         return this.client.sendText(toChatId, this.raw.message, params)
     }
+
+    /**
+     * Get all messages inside a group that this
+     * message belongs to (see {@link groupedId}),
+     * including this message.
+     *
+     * In case this message is not inside of a group,
+     * will just return itself.
+     */
+    async getGroup(): Promise<Message[]> {
+        if (!this.groupedId) return [this]
+
+        return this.client.getMessageGroup(this.chat.inputPeer, this.raw.id)
+    }
 }
 
 
