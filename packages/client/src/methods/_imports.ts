@@ -32,7 +32,8 @@ import {
     TakeoutSession,
     StickerSet,
     Poll,
-    TypingStatus
+    TypingStatus,
+    Photo
 } from '../types'
 
 // @copy

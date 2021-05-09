@@ -6,7 +6,10 @@ import {
     MtCuteArgumentError,
     MtCuteInvalidPeerTypeError,
 } from '../../types'
-import { normalizeToInputChannel, normalizeToInputPeer } from '../../utils/peer-utils'
+import {
+    normalizeToInputChannel,
+    normalizeToInputPeer,
+} from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
 
@@ -31,7 +34,13 @@ export async function setChatPhoto(
     previewSec?: number
 ): Promise<void> {
     const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
-    if (!(chat._ === 'inputPeerChat' || chat._ === 'inputPeerChannel'))
+    if (
+        !(
+            chat._ === 'inputPeerChat' ||
+            chat._ === 'inputPeerChannel' ||
+            chat._ === 'inputPeerChannelFromMessage'
+        )
+    )
         throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 
     let photo: tl.TypeInputChatPhoto | undefined = undefined
@@ -49,11 +58,16 @@ export async function setChatPhoto(
             const input = fileIdToInputPhoto(media)
             photo = {
                 _: 'inputChatPhoto',
-                id: input
+                id: input,
             }
         }
     } else if (typeof media === 'object' && tl.isAnyInputMedia(media)) {
-            throw new MtCuteArgumentError("Chat photo can't be InputMedia")
+        if (media._ === 'inputMediaPhoto') {
+            photo = {
+                _: 'inputChatPhoto',
+                id: media.id,
+            }
+        } else throw new MtCuteArgumentError("Chat photo can't be InputMedia")
     } else if (isUploadedFile(media)) {
         inputFile = media.inputFile
     } else if (typeof media === 'object' && tl.isAnyInputFile(media)) {
@@ -69,7 +83,7 @@ export async function setChatPhoto(
         photo = {
             _: 'inputChatUploadedPhoto',
             [type === 'photo' ? 'file' : 'video']: inputFile!,
-            videoStartTs: previewSec
+            videoStartTs: previewSec,
         }
     }
 
@@ -78,13 +92,13 @@ export async function setChatPhoto(
         res = await this.call({
             _: 'messages.editChatPhoto',
             chatId: chat.chatId,
-            photo
+            photo,
         })
     } else {
         res = await this.call({
             _: 'channels.editPhoto',
             channel: normalizeToInputChannel(chat)!,
-            photo
+            photo,
         })
     }
     this._handleUpdate(res)

@@ -87,6 +87,14 @@ import {
     setDefaultParseMode,
     unregisterParseMode,
 } from './methods/parse-modes/parse-modes'
+import { changeCloudPassword } from './methods/pasword/change-cloud-password'
+import { enableCloudPassword } from './methods/pasword/enable-cloud-password'
+import {
+    cancelPasswordEmail,
+    resendPasswordEmail,
+    verifyPasswordEmail,
+} from './methods/pasword/password-email'
+import { removeCloudPassword } from './methods/pasword/remove-cloud-password'
 import { addStickerToSet } from './methods/stickers/add-sticker-to-set'
 import { createStickerSet } from './methods/stickers/create-sticker-set'
 import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set'
@@ -103,11 +111,18 @@ import {
     dispatchUpdate,
 } from './methods/updates'
 import { blockUser } from './methods/users/block-user'
+import { deleteProfilePhotos } from './methods/users/delete-profile-photos'
 import { getCommonChats } from './methods/users/get-common-chats'
 import { getMe } from './methods/users/get-me'
+import { getProfilePhotos } from './methods/users/get-profile-photos'
 import { getUsers } from './methods/users/get-users'
+import { iterProfilePhotos } from './methods/users/iter-profile-photos'
 import { resolvePeer } from './methods/users/resolve-peer'
 import { setOffline } from './methods/users/set-offline'
+import { setProfilePhoto } from './methods/users/set-profile-photo'
+import { unblockUser } from './methods/users/unblock-user'
+import { updateProfile } from './methods/users/update-profile'
+import { updateUsername } from './methods/users/update-username'
 import { IMessageEntityParser } from './parser'
 import { Readable } from 'stream'
 import {
@@ -126,6 +141,7 @@ import {
     Message,
     PartialExcept,
     PartialOnly,
+    Photo,
     Poll,
     ReplyMarkup,
     SentCode,
@@ -2027,6 +2043,57 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     setDefaultParseMode(name: string): void
     /**
+     * Change your 2FA password
+     *
+     * @param currentPassword  Current password as plaintext
+     * @param newPassword  New password as plaintext
+     * @param hint  Hint for the new password
+     */
+    changeCloudPassword(
+        currentPassword: string,
+        newPassword: string,
+        hint?: string
+    ): Promise<void>
+    /**
+     * Enable 2FA password on your account
+     *
+     * Note that if you pass `email`, `EmailUnconfirmedError` may be
+     * thrown, and you should use {@link verifyPasswordEmail},
+     * {@link resendPasswordEmail} or {@link cancelPasswordEmail},
+     * and the call this method again
+     *
+     * @param password  2FA password as plaintext
+     * @param hint  Hint for the new password
+     * @param email  Recovery email
+     */
+    enableCloudPassword(
+        password: string,
+        hint?: string,
+        email?: string
+    ): Promise<void>
+    /**
+     * Verify an email to use as 2FA recovery method
+     *
+     * @param code  Code which was sent via email
+     */
+    verifyPasswordEmail(code: string): Promise<void>
+    /**
+     * Resend the code to verify an email to use as 2FA recovery method.
+     *
+     */
+    resendPasswordEmail(): Promise<void>
+    /**
+     * Cancel the code that was sent to verify an email to use as 2FA recovery method
+     *
+     */
+    cancelPasswordEmail(): Promise<void>
+    /**
+     * Remove 2FA password from your account
+     *
+     * @param password  2FA password as plaintext
+     */
+    removeCloudPassword(password: string): Promise<void>
+    /**
      * Add a sticker to a sticker set.
      *
      * Only for bots, and the sticker set must
@@ -2226,10 +2293,17 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Block a user
      *
-     * @param id  User ID, its username or phone number
-     * @returns  Whether the action was successful
+     * @param id  User ID, username or phone number
      */
-    blockUser(id: InputPeerLike): Promise<boolean>
+    blockUser(id: InputPeerLike): Promise<void>
+    /**
+     * Delete your own profile photos
+     *
+     * @param ids  ID(s) of the photos. Can be file IDs or raw TL objects
+     */
+    deleteProfilePhotos(
+        ids: MaybeArray<string | tl.TypeInputPhoto>
+    ): Promise<void>
     /**
      * Get a list of common chats you have with a given user
      *
@@ -2243,6 +2317,30 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getMe(): Promise<User>
     /**
+     * Get a list of profile pictures of a user
+     *
+     * @param userId  User ID, username, phone number, `"me"` or `"self"`
+     * @param params
+     */
+    getProfilePhotos(
+        userId: InputPeerLike,
+        params?: {
+            /**
+             * Offset from which to fetch.
+             *
+             * Defaults to `0`
+             */
+            offset?: number
+
+            /**
+             * Maximum number of items to fetch (up to 100)
+             *
+             * Defaults to `100`
+             */
+            limit?: number
+        }
+    ): Promise<Photo[]>
+    /**
      * Get information about a single user.
      *
      * @param id  User's identifier. Can be ID, username, phone number, `"me"` or `"self"` or TL object
@@ -2255,6 +2353,43 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param ids  Users' identifiers. Can be ID, username, phone number, `"me"`, `"self"` or TL object
      */
     getUsers(ids: InputPeerLike[]): Promise<User[]>
+    /**
+     * Iterate over profile photos
+     *
+     * @param userId  User ID, username, phone number, `"me"` or `"self"`
+     * @param params
+     */
+    iterProfilePhotos(
+        userId: InputPeerLike,
+        params?: {
+            /**
+             * Offset from which to fetch.
+             *
+             * Defaults to `0`
+             */
+            offset?: number
+
+            /**
+             * Maximum number of items to fetch
+             *
+             * Defaults to `Infinity`, i.e. all items are fetched
+             */
+            limit?: number
+
+            /**
+             * Size of chunks which are fetched. Usually not needed.
+             *
+             * Defaults to `100`
+             */
+            chunkSize?: number
+
+            /**
+             * If set, the method will return only photos
+             * with IDs less than the set one
+             */
+            maxId?: tl.Long
+        }
+    ): AsyncIterableIterator<Photo>
     /**
      * Get the `InputPeer` of a known peer id.
      * Useful when an `InputPeer` is needed.
@@ -2270,6 +2405,58 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param offline  (default: `true`) Whether the user is currently offline
      */
     setOffline(offline?: boolean): Promise<void>
+    /**
+     * Set a new profile photo or video.
+     *
+     * @param type  Media type (photo or video)
+     * @param media  Input media file
+     * @param previewSec
+     *   When `type = video`, timestamp in seconds which will be shown
+     *   as a static preview.
+     */
+    setProfilePhoto(
+        type: 'photo' | 'video',
+        media: InputFileLike,
+        previewSec?: number
+    ): Promise<Photo>
+    /**
+     * Unblock a user
+     *
+     * @param id  User ID, username or phone number
+     */
+    unblockUser(id: InputPeerLike): Promise<void>
+    /**
+     * Update your profile details.
+     *
+     * Only pass fields that you want to change.
+     *
+     * @param params
+     */
+    updateProfile(params: {
+        /**
+         * New first name
+         */
+        firstName?: string
+
+        /**
+         * New last name. Pass `''` (empty string) to remove it
+         */
+        lastName?: string
+
+        /**
+         * New bio (max 70 chars). Pass `''` (empty string) to remove it
+         */
+        bio?: string
+    }): Promise<User>
+    /**
+     * Change username of the current user.
+     *
+     * Note that bots usernames must be changed through
+     * bot support or re-created from scratch.
+     *
+     * @param username  New username (5-32 chars, allowed chars: `a-zA-Z0-9_`), or `null` to remove
+     */
+    updateUsername(username: string | null): Promise<User>
 }
 /** @internal */
 export class TelegramClient extends BaseTelegramClient {
@@ -2386,6 +2573,12 @@ export class TelegramClient extends BaseTelegramClient {
     unregisterParseMode = unregisterParseMode
     getParseMode = getParseMode
     setDefaultParseMode = setDefaultParseMode
+    changeCloudPassword = changeCloudPassword
+    enableCloudPassword = enableCloudPassword
+    verifyPasswordEmail = verifyPasswordEmail
+    resendPasswordEmail = resendPasswordEmail
+    cancelPasswordEmail = cancelPasswordEmail
+    removeCloudPassword = removeCloudPassword
     addStickerToSet = addStickerToSet
     createStickerSet = createStickerSet
     deleteStickerFromSet = deleteStickerFromSet
@@ -2400,9 +2593,16 @@ export class TelegramClient extends BaseTelegramClient {
     protected _handleUpdate = _handleUpdate
     catchUp = catchUp
     blockUser = blockUser
+    deleteProfilePhotos = deleteProfilePhotos
     getCommonChats = getCommonChats
     getMe = getMe
+    getProfilePhotos = getProfilePhotos
     getUsers = getUsers
+    iterProfilePhotos = iterProfilePhotos
     resolvePeer = resolvePeer
     setOffline = setOffline
+    setProfilePhoto = setProfilePhoto
+    unblockUser = unblockUser
+    updateProfile = updateProfile
+    updateUsername = updateUsername
 }
