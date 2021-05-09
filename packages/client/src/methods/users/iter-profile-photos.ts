@@ -69,7 +69,10 @@ export async function* iterProfilePhotos(
 
         offset += res.photos.length
 
-        yield* res.photos.map((it) => new Photo(this, it as tl.RawPhoto))
+        for (const it of res.photos) {
+            yield new Photo(this, it as tl.RawPhoto)
+        }
+
         current += res.photos.length
 
         if (current >= total) break

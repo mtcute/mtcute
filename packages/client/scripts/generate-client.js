@@ -204,7 +204,7 @@ async function addSingleMethod(state, fileName) {
                     comment: getLeadingComments(stmt),
                     aliases,
                     overload: isOverload,
-                    hasOverloads: hasOverloads[name] && !isOverload
+                    hasOverloads: hasOverloads[name] && !isOverload,
                 })
 
                 const module = `./${relPath.replace(/\.ts$/, '')}`
@@ -299,7 +299,15 @@ async function main() {
     const classContents = []
 
     state.methods.list.forEach(
-        ({ name: origName, isPrivate, func, comment, aliases, overload, hasOverloads }) => {
+        ({
+            name: origName,
+            isPrivate,
+            func,
+            comment,
+            aliases,
+            overload,
+            hasOverloads,
+        }) => {
             // create method that calls that function and passes `this`
             // first let's determine the signature
             const returnType = func.type ? ': ' + func.type.getText() : ''
@@ -336,7 +344,9 @@ async function main() {
                                     ts.SyntaxKind.NumericLiteral ||
                                 (it.initializer.kind ===
                                     ts.SyntaxKind.Identifier &&
-                                    it.initializer.escapedText === 'NaN')
+                                    (it.initializer.escapedText === 'NaN' ||
+                                        it.initializer.escapedText ===
+                                            'Infinity'))
                             ) {
                                 it.type = { kind: ts.SyntaxKind.NumberKeyword }
                             } else {

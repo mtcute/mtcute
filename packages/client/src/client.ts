@@ -60,6 +60,14 @@ import { _normalizeFileToDocument } from './methods/files/normalize-file-to-docu
 import { _normalizeInputFile } from './methods/files/normalize-input-file'
 import { _normalizeInputMedia } from './methods/files/normalize-input-media'
 import { uploadFile } from './methods/files/upload-file'
+import { createInviteLink } from './methods/invite-links/create-invite-link'
+import { editInviteLink } from './methods/invite-links/edit-invite-link'
+import { exportInviteLink } from './methods/invite-links/export-invite-link'
+import { getInviteLinkMembers } from './methods/invite-links/get-invite-link-members'
+import { getInviteLink } from './methods/invite-links/get-invite-link'
+import { getInviteLinks } from './methods/invite-links/get-invite-links'
+import { getPrimaryInviteLink } from './methods/invite-links/get-primary-invite-link'
+import { revokeInviteLink } from './methods/invite-links/revoke-invite-link'
 import { closePoll } from './methods/messages/close-poll'
 import { deleteMessages } from './methods/messages/delete-messages'
 import { editInlineMessage } from './methods/messages/edit-inline-message'
@@ -1200,6 +1208,146 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         progressCallback?: (uploaded: number, total: number) => void
     }): Promise<UploadedFile>
+    /**
+     * Create an additional invite link for the chat.
+     *
+     * You must be an administrator and have appropriate rights.
+     *
+     * @param chatId  Chat ID
+     * @param params
+     */
+    createInviteLink(
+        chatId: InputPeerLike,
+        params?: {
+            /**
+             * Date when this link will expire.
+             * If `number` is passed, UNIX time in ms is expected.
+             */
+            expires?: number | Date
+
+            /**
+             * Maximum number of users that can be members of this chat
+             * at the same time after joining using this link.
+             *
+             * Integer in range `[1, 99999]` or `Infinity`, defaults to `Infinity`
+             */
+            usageLimit?: number
+        }
+    ): Promise<ChatInviteLink>
+    /**
+     * Edit an invite link. You can only edit non-primary
+     * invite links.
+     *
+     * Only pass the fields that you want to modify.
+     *
+     * @param chatId  Chat ID
+     * @param link  Invite link to edit
+     * @param params
+     * @returns  Modified invite link
+     */
+    editInviteLink(
+        chatId: InputPeerLike,
+        link: string,
+        params: {
+            /**
+             * Date when this link will expire.
+             * If `number` is passed, UNIX time in ms is expected.
+             */
+            expires?: number | Date
+
+            /**
+             * Maximum number of users that can be members of this chat
+             * at the same time after joining using this link.
+             *
+             * Integer in range `[1, 99999]` or `Infinity`,
+             */
+            usageLimit?: number
+        }
+    ): Promise<ChatInviteLink>
+    /**
+     * Generate a new primary invite link for a chat,
+     * old primary link is revoked.
+     *
+     * > **Note**: each administrator has their own primary invite link,
+     * > and bots by default don't have one.
+     *
+     * @param chatId  Chat ID
+     */
+    exportInviteLink(chatId: InputPeerLike): Promise<ChatInviteLink>
+    /**
+     * Iterate over users who have joined
+     * the chat with the given invite link.
+     *
+     * @param chatId  Chat ID
+     * @param link  Invite link
+     * @param limit  (default: `Infinity`) Maximum number of users to return (by default returns all)
+     */
+    getInviteLinkMembers(
+        chatId: InputPeerLike,
+        link: string,
+        limit?: number
+    ): AsyncIterableIterator<ChatInviteLink.JoinedMember>
+    /**
+     * Get detailed information about an invite link
+     *
+     * @param chatId  Chat ID
+     * @param link  The invite link
+     */
+    getInviteLink(chatId: InputPeerLike, link: string): Promise<ChatInviteLink>
+    /**
+     * Get invite links created by some administrator in the chat.
+     *
+     * As an administrator you can only get your own links
+     * (i.e. `adminId = "self"`), as a creator you can get
+     * any other admin's links.
+     *
+     * @param chatId  Chat ID
+     * @param adminId  Admin who created the links
+     * @param params
+     */
+    getInviteLinks(
+        chatId: InputPeerLike,
+        adminId: InputPeerLike,
+        params?: {
+            /**
+             * Whether to fetch revoked invite links
+             */
+            revoked?: boolean
+
+            /**
+             * Limit the number of invite links to be fetched.
+             * By default, all links are fetched.
+             */
+            limit?: number
+
+            /**
+             * Size of chunks which are fetched. Usually not needed.
+             *
+             * Defaults to `100`
+             */
+            chunkSize?: number
+        }
+    ): AsyncIterableIterator<ChatInviteLink>
+    /**
+     * Get primary invite link of a chat
+     *
+     * @param chatId  Chat ID
+     */
+    getPrimaryInviteLink(chatId: InputPeerLike): Promise<ChatInviteLink>
+    /**
+     * Revoke an invite link.
+     *
+     * If `link` is a primary invite link, a new invite link will be
+     * generated automatically by Telegram
+     *
+     * @param chatId  Chat ID
+     * @param link  Invite link to revoke
+     * @returns  If `link` is a primary invite, newly generated invite link, otherwise the revoked link
+     */
+    revokeInviteLink(
+        chatId: InputPeerLike,
+        link: string
+    ): Promise<ChatInviteLink>
     /**
      * Close a poll sent by you.
      *
@@ -2556,6 +2704,14 @@ export class TelegramClient extends BaseTelegramClient {
     protected _normalizeInputFile = _normalizeInputFile
     protected _normalizeInputMedia = _normalizeInputMedia
     uploadFile = uploadFile
+    createInviteLink = createInviteLink
+    editInviteLink = editInviteLink
+    exportInviteLink = exportInviteLink
+    getInviteLinkMembers = getInviteLinkMembers
+    getInviteLink = getInviteLink
+    getInviteLinks = getInviteLinks
+    getPrimaryInviteLink = getPrimaryInviteLink
+    revokeInviteLink = revokeInviteLink
     closePoll = closePoll
     deleteMessages = deleteMessages
     editInlineMessage = editInlineMessage

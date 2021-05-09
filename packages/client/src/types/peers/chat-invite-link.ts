@@ -1,6 +1,14 @@
 import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
+import { User } from './user'
+
+export namespace ChatInviteLink {
+    export interface JoinedMember {
+        user: User
+        date: Date
+    }
+}
 
 /**
  * An invite link
@@ -9,9 +17,12 @@ export class ChatInviteLink {
     readonly client: TelegramClient
     readonly raw: tl.RawChatInviteExported
 
-    constructor (client: TelegramClient, raw: tl.RawChatInviteExported) {
+    readonly _users?: Record<number, tl.TypeUser>
+
+    constructor (client: TelegramClient, raw: tl.RawChatInviteExported, users?: Record<number, tl.TypeUser>) {
         this.client = client
         this.raw = raw
+        this._users = users
     }
 
     /**
@@ -22,6 +33,20 @@ export class ChatInviteLink {
      */
     get link(): string {
         return this.raw.link
+    }
+
+    private _creator?: User
+    /**
+     * Creator of the invite link, if available
+     */
+    get creator(): User | null {
+        if (!this._users) return null
+
+        if (!this._creator) {
+            this._creator = new User(this.client, this._users[this.raw.adminId])
+        }
+
+        return this._creator
     }
 
     /**
@@ -73,7 +98,7 @@ export class ChatInviteLink {
      * Number of users currently in the chat that joined using this link
      */
     get usage(): number {
-        return this.raw.usageLimit ?? 0
+        return this.raw.usage ?? 0
     }
 }
 

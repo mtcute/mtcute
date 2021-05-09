@@ -95,12 +95,12 @@ export function peerToInputPeer(peer: tl.TypePeer, accessHash = bigInt.zero): tl
 
 export function createUsersChatsIndex(
     obj: {
-        users: tl.TypeUser[]
-        chats: tl.TypeChat[]
+        users?: tl.TypeUser[]
+        chats?: tl.TypeChat[]
     },
     second?: {
-        users: tl.TypeUser[]
-        chats: tl.TypeChat[]
+        users?: tl.TypeUser[]
+        chats?: tl.TypeChat[]
     }
 ): {
     users: Record<number, tl.TypeUser>
@@ -108,12 +108,12 @@ export function createUsersChatsIndex(
 } {
     const users: Record<number, tl.TypeUser> = {}
     const chats: Record<number, tl.TypeChat> = {}
-    obj.users.forEach((e) => (users[e.id] = e))
-    obj.chats.forEach((e) => (chats[e.id] = e))
+    obj.users?.forEach((e) => (users[e.id] = e))
+    obj.chats?.forEach((e) => (chats[e.id] = e))
 
     if (second) {
-        second.users.forEach((e) => (users[e.id] = e))
-        second.chats.forEach((e) => (chats[e.id] = e))
+        second.users?.forEach((e) => (users[e.id] = e))
+        second.chats?.forEach((e) => (chats[e.id] = e))
     }
 
     return { users, chats }
