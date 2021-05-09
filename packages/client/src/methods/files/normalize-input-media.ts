@@ -73,6 +73,7 @@ export async function _normalizeInputMedia(
                 lat: media.latitude,
                 long: media.longitude,
             },
+            stopped: media.stopped,
             heading: media.heading,
             period: media.period,
             proximityNotificationRadius: media.proximityNotificationRadius,

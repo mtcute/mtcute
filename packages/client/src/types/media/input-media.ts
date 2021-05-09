@@ -265,6 +265,11 @@ export interface InputMediaGeoLive extends Omit<InputMediaGeo, 'type'> {
     type: 'geo_live'
 
     /**
+     * Whether sending of the geolocation has stopped
+     */
+    stopped?: boolean
+
+    /**
      * Direction in which the location moves, in degrees (1-360)
      */
     heading?: number
