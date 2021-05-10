@@ -33,6 +33,7 @@ import { getChatMembers } from './methods/chats/get-chat-members'
 import { getChatPreview } from './methods/chats/get-chat-preview'
 import { getChat } from './methods/chats/get-chat'
 import { getFullChat } from './methods/chats/get-full-chat'
+import { getNearbyChats } from './methods/chats/get-nearby-chats'
 import { iterChatMembers } from './methods/chats/iter-chat-members'
 import { joinChat } from './methods/chats/join-chat'
 import { leaveChat } from './methods/chats/leave-chat'
@@ -837,6 +838,13 @@ export interface TelegramClient extends BaseTelegramClient {
      *   Use {@link getChatPreview} instead.
      */
     getFullChat(chatId: InputPeerLike): Promise<Chat>
+    /**
+     * Get nearby chats
+     *
+     * @param latitude  Latitude of the location
+     * @param longitude  Longitude of the location
+     */
+    getNearbyChats(latitude: number, longitude: number): Promise<Chat[]>
     /**
      * Iterate through chat members
      *
@@ -2759,6 +2767,7 @@ export class TelegramClient extends BaseTelegramClient {
     getChatPreview = getChatPreview
     getChat = getChat
     getFullChat = getFullChat
+    getNearbyChats = getNearbyChats
     iterChatMembers = iterChatMembers
     joinChat = joinChat
     leaveChat = leaveChat
