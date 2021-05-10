@@ -86,8 +86,8 @@ export class JsonFileStorage extends JsonMemoryStorage {
                         fs.rename(
                             this._filename + '.tmp',
                             this._filename,
-                            (err?: Error) => {
-                                if (err) reject(err)
+                            (err?: any) => {
+                                if (err && err.code !== 'ENOENT') reject(err)
                                 else resolve()
                             }
                         )
