@@ -14,17 +14,19 @@ import {
     RawDocument,
     Sticker,
     TelegramClient,
-    User, Venue,
+    User,
+    Venue,
     Video,
     Voice,
     Poll,
     Invoice,
     Game,
-    WebPage
+    WebPage,
 } from '@mtcute/client'
 import { MaybeArray } from '@mtcute/core'
 import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
+import { MessageAction } from '@mtcute/client/src/types/messages/message-action'
 
 /**
  * Type describing a primitive filter, which is a function taking some `Base`
@@ -294,12 +296,12 @@ export namespace filters {
         msg.sender instanceof User && msg.sender.isBot
 
     /**
-     * Filter messages sent in broadcast channels
+     * Filter messages by chat type
      */
-    export const channel: UpdateFilter<
-        Message,
-        { chat: Modify<Chat, { type: 'channel' }> }
-    > = (msg) => msg.chat.type === 'channel'
+    export const chat = <T extends Chat.Type>(
+        type: T
+    ): UpdateFilter<Message, { chat: Modify<Chat, { type: T }> }> => (msg) =>
+        msg.chat.type === type
 
     /**
      * Filter incoming messages.
@@ -331,6 +333,33 @@ export namespace filters {
         Message,
         { media: Exclude<Message['media'], null> }
     > = (msg) => msg.media !== null
+
+    /**
+     * Filter text-only messages non-service messages
+     */
+    export const text: UpdateFilter<
+        Message,
+        {
+            media: null
+            isService: false
+        }
+    > = (msg) => msg.media === null && !msg.isService
+
+    /**
+     * Filter service messages
+     */
+    export const service: UpdateFilter<Message, { isService: true }> = (msg) =>
+        msg.isService
+
+    /**
+     * Filter service messages by action type
+     */
+    export const action = <T extends Exclude<MessageAction, null>['type']>(
+        type: T
+    ): UpdateFilter<
+        Message,
+        { action: Extract<MessageAction, { type: T }> }
+    > => (msg) => msg.action?.type === type
 
     /**
      * Filter messages containing a photo

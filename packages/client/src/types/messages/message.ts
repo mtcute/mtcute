@@ -165,6 +165,13 @@ export class Message {
     }
 
     /**
+     * Whether this message is a service message
+     */
+    get isService(): boolean {
+        return this.raw._ === 'messageService'
+    }
+
+    /**
      * Multiple media messages with the same grouped ID
      * indicate an album or media group
      *
