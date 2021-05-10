@@ -326,7 +326,7 @@ async function _loadChannelDifference(
             filter: { _: 'channelMessagesFilterEmpty' },
         })
 
-        if (diff._ === 'updates.channelDifferenceEmpty') return
+        if (diff._ === 'updates.channelDifferenceEmpty') break
 
         await this._cachePeersFrom(diff)
 
@@ -367,8 +367,7 @@ async function _loadChannelDifference(
 
         pts = diff.pts
 
-        // nice naming bro, final=true means there are more updates
-        if (!diff.final) break
+        if (diff.final) break
     }
 
     this._cpts[channelId] = pts
