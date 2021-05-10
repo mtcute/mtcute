@@ -27,6 +27,7 @@ import { deleteChatPhoto } from './methods/chats/delete-chat-photo'
 import { deleteGroup } from './methods/chats/delete-group'
 import { deleteHistory } from './methods/chats/delete-history'
 import { deleteUserHistory } from './methods/chats/delete-user-history'
+import { getChatEventLog } from './methods/chats/get-chat-event-log'
 import { getChatMember } from './methods/chats/get-chat-member'
 import { getChatMembers } from './methods/chats/get-chat-members'
 import { getChatPreview } from './methods/chats/get-chat-preview'
@@ -137,6 +138,8 @@ import { IMessageEntityParser } from './parser'
 import { Readable } from 'stream'
 import {
     Chat,
+    ChatEvent,
+    ChatInviteLink,
     ChatMember,
     ChatPreview,
     Dialog,
@@ -673,6 +676,74 @@ export interface TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         userId: InputPeerLike
     ): Promise<void>
+    /**
+     * Get chat event log ("Recent actions" in official
+     * clients).
+     *
+     * Only available for supergroups and channels, and
+     * requires (any) administrator rights.
+     *
+     * Results are returned in reverse chronological
+     * order (i.e. newest first) and event IDs are
+     * in direct chronological order (i.e. newer
+     * events have bigger event ID)
+     *
+     * @param chatId  Chat ID
+     * @param params
+     */
+    getChatEventLog(
+        chatId: InputPeerLike,
+        params?: {
+            /**
+             * Search query
+             */
+            query?: string
+
+            /**
+             * Minimum event ID to return
+             */
+            minId?: tl.Long
+
+            /**
+             * Maximum event ID to return,
+             * can be used as a base offset
+             */
+            maxId?: tl.Long
+
+            /**
+             * List of users whose actions to return
+             */
+            users?: InputPeerLike[]
+
+            /**
+             * Event filters. Can be a TL object, or one or more
+             * action types.
+             *
+             * Note that some filters are grouped in TL
+             * (i.e. `info=true` will return `title_changed`,
+             * `username_changed` and many more),
+             * and when passing one or more action types,
+             * they will be filtered locally.
+             */
+            filters?:
+                | tl.TypeChannelAdminLogEventsFilter
+                | MaybeArray<Exclude<ChatEvent.Action, null>['type']>
+
+            /**
+             * Limit the number of events returned.
+             *
+             * Defaults to `Infinity`, i.e. all events are returned
+             */
+            limit?: number
+
+            /**
+             * Chunk size, usually not needed.
+             *
+             * Defaults to `100`
+             */
+            chunkSize?: number
+        }
+    ): AsyncIterableIterator<ChatEvent>
     /**
      * Get information about a single chat member
      *
@@ -2682,6 +2753,7 @@ export class TelegramClient extends BaseTelegramClient {
     deleteGroup = deleteGroup
     deleteHistory = deleteHistory
     deleteUserHistory = deleteUserHistory
+    getChatEventLog = getChatEventLog
     getChatMember = getChatMember
     getChatMembers = getChatMembers
     getChatPreview = getChatPreview

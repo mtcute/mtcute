@@ -33,7 +33,9 @@ import {
     StickerSet,
     Poll,
     TypingStatus,
-    Photo
+    Photo,
+    ChatEvent,
+    ChatInviteLink
 } from '../types'
 
 // @copy

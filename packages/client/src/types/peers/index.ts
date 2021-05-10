@@ -5,6 +5,7 @@ export * from './chat'
 export * from './chat-preview'
 export { InputChatPermissions } from './chat-permissions'
 export * from './chat-member'
+export * from './chat-event'
 export * from './chat-invite-link'
 export * from './typing-status'
 

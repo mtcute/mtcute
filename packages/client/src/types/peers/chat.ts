@@ -6,6 +6,7 @@ import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
 import { MtCuteArgumentError, MtCuteTypeAssertionError } from '../errors'
 import { makeInspectable } from '../utils'
 import { InputPeerLike, User } from './index'
+import { ChatLocation } from './chat-location'
 
 export namespace Chat {
     /**
@@ -408,6 +409,22 @@ export class Chat {
      * Returned only in {@link TelegramClient.getNearbyChats}
      */
     readonly distance?: number
+
+    private _location?: ChatLocation
+    /**
+     * Location of the chat.
+     * Returned only in {@link TelegramClient.getFullChat}
+     */
+    get location(): ChatLocation | null {
+        if (!this.fullPeer || this.fullPeer._ !== 'channelFull' || this.fullPeer.location?._ !== 'channelLocation')
+            return null
+
+        if (!this._location) {
+            this._location = new ChatLocation(this.client, this.fullPeer.location)
+        }
+
+        return this._location
+    }
 
     private _linkedChat?: Chat
     /**

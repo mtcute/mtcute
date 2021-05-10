@@ -563,7 +563,7 @@ export class Message {
      *
      * @param revoke  Whether to "revoke" (i.e. delete for both sides). Only used for chats and private chats.
      */
-    delete(revoke = false): Promise<boolean> {
+    delete(revoke = false): Promise<void> {
         return this.client.deleteMessages(this.chat.inputPeer, this.id, revoke)
     }
 
