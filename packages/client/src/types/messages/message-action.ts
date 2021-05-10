@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/tl'
 import { Photo } from '../media'
 import { _callDiscardReasonFromTl, CallDiscardReason } from '../calls/discard-reason'
+import { Message } from './message'
 
 export namespace MessageAction {
     /** Group was created */
@@ -278,7 +279,7 @@ export type MessageAction =
     | null
 
 /** @internal */
-export function _messageActionFromTl(act: tl.TypeMessageAction): MessageAction {
+export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): MessageAction {
     switch (act._) {
         case 'messageActionChatCreate':
             return {

@@ -390,11 +390,11 @@ export class Message {
             if (this.raw._ === 'message') {
                 this._action = null
             } else {
-                this._action = _messageActionFromTl(this.raw.action)
+                this._action = _messageActionFromTl.call(this, this.raw.action)
             }
         }
 
-        return this._action
+        return this._action!
     }
 
     private _media?: MessageMedia
@@ -413,11 +413,11 @@ export class Message {
             ) {
                 this._media = null
             } else {
-                this._media = _messageMediaFromTl(this.raw.media)
+                this._media = _messageMediaFromTl.call(this, this.raw.media)
             }
         }
 
-        return this._media
+        return this._media!
     }
 
     private _markup?: ReplyMarkup | null

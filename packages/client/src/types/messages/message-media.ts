@@ -17,6 +17,7 @@ import {
 } from '../media'
 import { tl } from '@mtcute/tl'
 import { parseDocument } from '../media/document-utils'
+import { Message } from './message'
 
 /** A media inside of a {@link Message} */
 export type MessageMedia =
@@ -39,7 +40,7 @@ export type MessageMedia =
 // todo: successful_payment, connected_website
 
 /** @internal */
-export function _messageMediaFromTl(m: tl.TypeMessageMedia): MessageMedia {
+export function _messageMediaFromTl(this: Message, m: tl.TypeMessageMedia): MessageMedia {
     switch (m._) {
         case 'messageMediaPhoto':
             if (!(m.photo?._ === 'photo')) return null
