@@ -6,7 +6,7 @@
 #define NODE_GYP_MODULE_NAME crypto
 #endif
 
-// maybe i love macroses a bit too much
+// maybe i love macros a bit too much
 
 #define CALL_ASSERT_OK(code) \
     status = code; \
