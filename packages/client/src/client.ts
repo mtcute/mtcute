@@ -26,6 +26,7 @@ import { deleteChannel } from './methods/chats/delete-channel'
 import { deleteChatPhoto } from './methods/chats/delete-chat-photo'
 import { deleteGroup } from './methods/chats/delete-group'
 import { deleteHistory } from './methods/chats/delete-history'
+import { deleteUserHistory } from './methods/chats/delete-user-history'
 import { getChatMember } from './methods/chats/get-chat-member'
 import { getChatMembers } from './methods/chats/get-chat-members'
 import { getChatPreview } from './methods/chats/get-chat-preview'
@@ -663,6 +664,16 @@ export interface TelegramClient extends BaseTelegramClient {
         maxId?: number
     ): Promise<void>
     /**
+     * Delete all messages of a user in a supergroup
+     *
+     * @param chatId  Chat ID
+     * @param userId  User ID
+     */
+    deleteUserHistory(
+        chatId: InputPeerLike,
+        userId: InputPeerLike
+    ): Promise<void>
+    /**
      * Get information about a single chat member
      *
      * @param chatId  Chat ID or username
@@ -1271,7 +1282,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * > **Note**: each administrator has their own primary invite link,
      * > and bots by default don't have one.
      *
-     * @param chatId  Chat ID
+     * @param chatId  Chat IDs
      */
     exportInviteLink(chatId: InputPeerLike): Promise<ChatInviteLink>
     /**
@@ -1369,7 +1380,7 @@ export interface TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         ids: MaybeArray<number>,
         revoke?: boolean
-    ): Promise<boolean>
+    ): Promise<void>
     /**
      * Edit sent inline message text, media and reply markup.
      *
@@ -2670,6 +2681,7 @@ export class TelegramClient extends BaseTelegramClient {
     deleteChatPhoto = deleteChatPhoto
     deleteGroup = deleteGroup
     deleteHistory = deleteHistory
+    deleteUserHistory = deleteUserHistory
     getChatMember = getChatMember
     getChatMembers = getChatMembers
     getChatPreview = getChatPreview

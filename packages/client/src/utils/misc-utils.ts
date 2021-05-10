@@ -25,7 +25,7 @@ export function extractChannelIdFromUpdate(
     upd: tl.TypeUpdate
 ): number | undefined {
     // holy shit
-    return 'channelId' in upd
+    const res = 'channelId' in upd
         ? upd.channelId
         : 'message' in upd &&
           typeof upd.message !== 'string' &&
@@ -34,6 +34,8 @@ export function extractChannelIdFromUpdate(
           'channelId' in upd.message.peerId
         ? upd.message.peerId.channelId
         : undefined
+    if (res === 0) return undefined
+    return res
 }
 
 export function normalizeDate(

@@ -10,6 +10,7 @@ import { extractChannelIdFromUpdate } from '../utils/misc-utils'
 import { Lock } from '../utils/lock'
 import bigInt from 'big-integer'
 import { MAX_CHANNEL_ID } from '@mtcute/core'
+import { isDummyUpdate, isDummyUpdates } from '../utils/updates-utils'
 
 const debug = require('debug')('mtcute:upds')
 
@@ -488,7 +489,7 @@ export function _handleUpdate(
                                 }
                         }
 
-                        if (!noDispatch) {
+                        if (!isDummyUpdate(upd) && !noDispatch) {
                             this.dispatchUpdate(upd, users, chats)
                         }
 
@@ -502,8 +503,10 @@ export function _handleUpdate(
                     }
                 }
 
-                // this._seq = update.seq
-                this._date = update.date
+                if (!isDummyUpdates(update)) {
+                    // this._seq = update.seq
+                    this._date = update.date
+                }
             } else if (update._ === 'updateShort') {
                 const upd = update.update
                 if (upd._ === 'updateDcOptions' && this._config) {
