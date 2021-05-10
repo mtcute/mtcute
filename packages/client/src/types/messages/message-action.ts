@@ -277,6 +277,7 @@ export type MessageAction =
     | MessageAction.ActionSetTtl
     | null
 
+/** @internal */
 export function _messageActionFromTl(act: tl.TypeMessageAction): MessageAction {
     switch (act._) {
         case 'messageActionChatCreate':

@@ -34,6 +34,7 @@ import {
     CallDiscardReason,
 } from '../calls/discard-reason'
 import { _messageActionFromTl, MessageAction } from './message-action'
+import { _messageMediaFromTl, MessageMedia } from './message-media'
 
 /**
  * A message or a service message
@@ -64,26 +65,6 @@ export namespace Message {
          */
         signature?: string
     }
-
-    // todo: venue, poll, invoice, successful_payment,
-    //       connected_website
-    export type MessageMedia =
-        | Photo
-        | Dice
-        | Contact
-        | Audio
-        | Voice
-        | Sticker
-        | Document
-        | Video
-        | Location
-        | LiveLocation
-        | Game
-        | WebPage
-        | Venue
-        | Poll
-        | Invoice
-        | null
 }
 
 /**
@@ -409,14 +390,14 @@ export class Message {
         return this._action
     }
 
-    private _media?: Message.MessageMedia
+    private _media?: MessageMedia
     /**
      * Message media. `null` for text-only and service messages
      * and for unsupported media types.
      *
      * For unsupported media types, use `.raw.media` directly.
      */
-    get media(): Message.MessageMedia {
+    get media(): MessageMedia {
         if (this._media === undefined) {
             if (
                 this.raw._ === 'messageService' ||
@@ -425,52 +406,7 @@ export class Message {
             ) {
                 this._media = null
             } else {
-                const m = this.raw.media
-                let media: Message.MessageMedia
-                if (m._ === 'messageMediaPhoto' && m.photo?._ === 'photo') {
-                    media = new Photo(this.client, m.photo)
-                } else if (m._ === 'messageMediaDice') {
-                    media = new Dice(m)
-                } else if (m._ === 'messageMediaContact') {
-                    media = new Contact(m)
-                } else if (
-                    m._ === 'messageMediaDocument' &&
-                    m.document?._ === 'document'
-                ) {
-                    media = parseDocument(this.client, m.document)
-                } else if (
-                    m._ === 'messageMediaGeo' &&
-                    m.geo._ === 'geoPoint'
-                ) {
-                    media = new Location(this.client, m.geo)
-                } else if (
-                    m._ === 'messageMediaGeoLive' &&
-                    m.geo._ === 'geoPoint'
-                ) {
-                    media = new LiveLocation(this.client, m)
-                } else if (m._ === 'messageMediaGame') {
-                    media = new Game(this.client, m.game)
-                } else if (
-                    m._ === 'messageMediaWebPage' &&
-                    m.webpage._ === 'webPage'
-                ) {
-                    media = new WebPage(this.client, m.webpage)
-                } else if (m._ === 'messageMediaVenue') {
-                    media = new Venue(this.client, m)
-                } else if (m._ === 'messageMediaPoll') {
-                    media = new Poll(
-                        this.client,
-                        m.poll,
-                        this._users,
-                        m.results
-                    )
-                } else if (m._ === 'messageMediaInvoice') {
-                    media = new Invoice(this.client, m)
-                } else {
-                    media = null
-                }
-
-                this._media = media
+                this._media = _messageMediaFromTl(this.raw.media)
             }
         }
 

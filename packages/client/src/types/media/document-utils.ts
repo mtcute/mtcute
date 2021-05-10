@@ -6,7 +6,7 @@ import { Video } from './video'
 import { Voice } from './voice'
 import { Sticker } from './sticker'
 
-/** @ignore */
+/** @internal */
 export function parseDocument(
     client: TelegramClient,
     doc: tl.RawDocument
