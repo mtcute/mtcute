@@ -29,6 +29,10 @@ import {
     WebPage,
 } from '../media'
 import { parseDocument } from '../media/document-utils'
+import {
+    _callDiscardReasonFromTl,
+    CallDiscardReason,
+} from '../calls/discard-reason'
 
 /**
  * A message or a service message
@@ -152,6 +156,134 @@ export namespace Message {
         readonly inviter: number
     }
 
+    /** A payment was received from a user (bot) */
+    export interface ActionPaymentReceived {
+        readonly type: 'payment_received'
+
+        /** Three-letter ISO 4217 currency code */
+        readonly currency: string
+
+        /**
+         * Price of the product in the smallest units of the currency
+         * (integer, not float/double). For example, for a price of
+         * `US$ 1.45`, `amount = 145`
+         */
+        readonly amount: tl.Long
+
+        /** Bot specified invoice payload */
+        readonly payload: Buffer
+
+        /** Order information provided by the user */
+        readonly info?: tl.TypePaymentRequestedInfo
+
+        /** ID of the shipping option chosen by the user */
+        readonly shippingOptionId?: string
+
+        /** Payment provider ID */
+        readonly charge?: tl.TypePaymentCharge
+    }
+
+    /** A payment was sent to a user */
+    export interface ActionPaymentSent {
+        readonly type: 'payment_sent'
+
+        /** Three-letter ISO 4217 currency code */
+        readonly currency: string
+
+        /**
+         * Price of the product in the smallest units of the currency
+         * (integer, not float/double). For example, for a price of
+         * `US$ 1.45`, `amount = 145`
+         */
+        readonly amount: tl.Long
+    }
+
+    /** A phone call */
+    export interface ActionCall {
+        readonly type: 'call'
+
+        /** Call ID */
+        readonly id: tl.Long
+
+        /** Whether this is a video call */
+        readonly isVideo: boolean
+
+        /** Duration if the call in seconds (0 if not available) */
+        readonly duration: number
+
+        /** Call discard reason, if available */
+        readonly reason?: CallDiscardReason
+    }
+
+    /** A screenshot was taken */
+    export interface ActionScreenshotTaken {
+        readonly type: 'screenshot_taken'
+    }
+
+    /** User has authorized via the bot */
+    export interface ActionBotAllowed {
+        readonly type: 'bot_allowed'
+
+        /** Domain where the user has logged in */
+        readonly domain: string
+    }
+
+    /**
+     * A user is in proximity of another user
+     * (see [Proximity alerts]{https://core.telegram.org/api/live-location#proximity-alert})
+     */
+    export interface ActionGeoProximity {
+        readonly type: 'geo_proximity'
+
+        /** ID of the user who sent the geolocation with proximity alerts */
+        readonly targetId: number
+
+        /** ID of the user who has approached `targetId` */
+        readonly userId: number
+
+        /** Distance between them in meters */
+        readonly distance: number
+    }
+
+    /** Group call has started */
+    export interface ActionGroupCallStarted {
+        readonly type: 'group_call_started'
+
+        /** TL object representing the call */
+        readonly call: tl.TypeInputGroupCall
+    }
+
+    /** Group call has ended */
+    export interface ActionGroupCallEnded {
+        readonly type: 'group_call_ended'
+
+        /** TL object representing the call */
+        readonly call: tl.TypeInputGroupCall
+
+        /** Duration of the call */
+        readonly duration: number
+    }
+
+    /** Group call has ended */
+    export interface ActionGroupInvite {
+        readonly type: 'group_call_invite'
+
+        /** TL object representing the call */
+        readonly call: tl.TypeInputGroupCall
+
+        /** IDs of the users invited to the call */
+        readonly userIds: number[]
+    }
+
+    /** Messages TTL changed */
+    export interface ActionSetTtl {
+        readonly type: 'set_ttl'
+
+        /** New TTL period */
+        readonly period: number
+    }
+
+    /** Information about a forward */
     export interface MessageForwardInfo {
         /**
          * Date the original message was sent
@@ -193,6 +325,16 @@ export namespace Message {
         | ActionUserLeft
         | ActionUserRemoved
         | ActionUserJoinedLink
+        | ActionPaymentReceived
+        | ActionPaymentSent
+        | ActionCall
+        | ActionScreenshotTaken
+        | ActionBotAllowed
+        | ActionGeoProximity
+        | ActionGroupCallStarted
+        | ActionGroupCallEnded
+        | ActionGroupInvite
+        | ActionSetTtl
         | null
 
     // todo: venue, poll, invoice, successful_payment,
@@ -245,12 +387,12 @@ export class Message {
 
     private _emptyError?: MtCuteEmptyError
 
-    constructor (
+    constructor(
         client: TelegramClient,
         raw: tl.TypeMessage,
         users: Record<number, tl.TypeUser>,
         chats: Record<number, tl.TypeChat>,
-        isScheduled = false,
+        isScheduled = false
     ) {
         this.client = client
         this._users = users
@@ -286,7 +428,7 @@ export class Message {
     readonly isScheduled: boolean
 
     /** Unique message identifier inside this chat */
-    get id (): number {
+    get id(): number {
         return this.raw.id
     }
 
@@ -295,7 +437,7 @@ export class Message {
      *
      * `null` for service messages and non-post messages.
      */
-    get views (): number | null {
+    get views(): number | null {
         if (this._emptyError) throw this._emptyError
 
         return this.raw._ === 'message' ? this.raw.views ?? null : null
@@ -307,7 +449,7 @@ export class Message {
      *  - Messages sent by you to other chats are outgoing (`outgoing = true`)
      *  - Messages to yourself (i.e. *Saved Messages*) are incoming (`outgoing = false`)
      */
-    get outgoing (): boolean {
+    get outgoing(): boolean {
         if (this._emptyError) throw this._emptyError
 
         return this.raw.out!
@@ -319,7 +461,7 @@ export class Message {
      *
      * `null` for service messages and non-grouped messages
      */
-    get groupedId (): tl.Long | null {
+    get groupedId(): tl.Long | null {
         if (this._emptyError) throw this._emptyError
 
         return this.raw._ === 'message' ? this.raw.groupedId ?? null : null
@@ -340,7 +482,7 @@ export class Message {
      * If the message is a forwarded channel post,
      * sender is the channel itself.
      */
-    get sender (): User | Chat {
+    get sender(): User | Chat {
         if (this._emptyError) throw this._emptyError
 
         if (this._sender === undefined) {
@@ -352,18 +494,15 @@ export class Message {
                 // forwarded channel post
                 this._sender = new Chat(
                     this.client,
-                    this._chats[from.channelId],
+                    this._chats[from.channelId]
                 )
             } else if (from._ === 'peerUser') {
-                this._sender = new User(
-                    this.client,
-                    this._users[from.userId],
-                )
+                this._sender = new User(this.client, this._users[from.userId])
             } else
                 throw new MtCuteTypeAssertionError(
                     'Message#sender (@ raw.fromId)',
                     'peerUser | peerChannel',
-                    from._,
+                    from._
                 )
         }
 
@@ -375,7 +514,7 @@ export class Message {
     /**
      * Conversation the message belongs to
      */
-    get chat (): Chat {
+    get chat(): Chat {
         if (this._emptyError) throw this._emptyError
 
         if (this._chat === undefined) {
@@ -383,7 +522,7 @@ export class Message {
                 this.client,
                 this.raw,
                 this._users,
-                this._chats,
+                this._chats
             )
         }
 
@@ -393,7 +532,7 @@ export class Message {
     /**
      * Date the message was sent
      */
-    get date (): Date {
+    get date(): Date {
         if (this._emptyError) throw this._emptyError
 
         return new Date(this.raw.date * 1000)
@@ -404,7 +543,7 @@ export class Message {
     /**
      * If this message is a forward, contains info about it.
      */
-    get forward (): Message.MessageForwardInfo | null {
+    get forward(): Message.MessageForwardInfo | null {
         if (this._emptyError) throw this._emptyError
 
         if (!this._forward) {
@@ -420,18 +559,18 @@ export class Message {
                     if (fwd.fromId._ === 'peerChannel') {
                         sender = new Chat(
                             this.client,
-                            this._chats[fwd.fromId.channelId],
+                            this._chats[fwd.fromId.channelId]
                         )
                     } else if (fwd.fromId._ === 'peerUser') {
                         sender = new User(
                             this.client,
-                            this._users[fwd.fromId.userId],
+                            this._users[fwd.fromId.userId]
                         )
                     } else
                         throw new MtCuteTypeAssertionError(
                             'Message#forward (@ raw.fwdFrom.fromId)',
                             'peerUser | peerChannel',
-                            fwd.fromId._,
+                            fwd.fromId._
                         )
                 } else {
                     this._forward = null
@@ -454,7 +593,7 @@ export class Message {
      * For replies, the ID of the message that current message
      * replies to.
      */
-    get replyToMessageId (): number | null {
+    get replyToMessageId(): number | null {
         if (this._emptyError) throw this._emptyError
 
         return this.raw.replyTo?.replyToMsgId ?? null
@@ -463,7 +602,7 @@ export class Message {
     /**
      * Whether this message contains mention of the current user
      */
-    get mentioned (): boolean {
+    get mentioned(): boolean {
         if (this._emptyError) throw this._emptyError
 
         return !!this.raw.mentioned
@@ -474,7 +613,7 @@ export class Message {
      * If this message is generated from an inline query,
      * information about the bot which generated it
      */
-    get viaBot (): User | null {
+    get viaBot(): User | null {
         if (this._emptyError) throw this._emptyError
 
         if (this._viaBot === undefined) {
@@ -483,7 +622,7 @@ export class Message {
             } else {
                 this._viaBot = new User(
                     this.client,
-                    this._users[this.raw.viaBotId],
+                    this._users[this.raw.viaBotId]
                 )
             }
         }
@@ -497,7 +636,7 @@ export class Message {
      * Empty string for service messages
      * (you should handle i18n yourself)
      */
-    get text (): string {
+    get text(): string {
         if (this._emptyError) throw this._emptyError
 
         return this.raw._ === 'messageService' ? '' : this.raw.message
@@ -507,7 +646,7 @@ export class Message {
     /**
      * Message text/caption entities (may be empty)
      */
-    get entities (): MessageEntity[] {
+    get entities(): MessageEntity[] {
         if (this._emptyError) throw this._emptyError
 
         if (!this._entities) {
@@ -530,7 +669,7 @@ export class Message {
      *
      * For unsupported events, use `.raw.action` directly.
      */
-    get action (): Message.MessageAction {
+    get action(): Message.MessageAction {
         if (!this._action) {
             if (this.raw._ === 'message') {
                 this._action = null
@@ -538,86 +677,184 @@ export class Message {
                 const act = this.raw.action
                 let action: Message.MessageAction
 
-                if (act._ === 'messageActionChatCreate') {
-                    action = {
-                        type: 'chat_created',
-                        title: act.title,
-                        users: act.users,
-                    }
-                } else if (act._ === 'messageActionChannelCreate') {
-                    action = {
-                        type: 'channel_created',
-                        title: act.title,
-                    }
-                } else if (act._ === 'messageActionChatMigrateTo') {
-                    action = {
-                        type: 'chat_migrate_to',
-                        id: act.channelId,
-                    }
-                } else if (act._ === 'messageActionChannelMigrateFrom') {
-                    action = {
-                        type: 'channel_migrate_from',
-                        id: act.chatId,
-                        title: act.title,
-                    }
-                } else if (act._ === 'messageActionPinMessage') {
-                    action = {
-                        type: 'message_pinned',
-                    }
-                } else if (act._ === 'messageActionHistoryClear') {
-                    action = {
-                        type: 'history_cleared',
-                    }
-                } else if (act._ === 'messageActionGameScore') {
-                    action = {
-                        type: 'game_score',
-                        gameId: act.gameId,
-                        score: act.score,
-                    }
-                } else if (act._ === 'messageActionContactSignUp') {
-                    action = {
-                        type: 'contact_joined',
-                    }
-                } else if (act._ === 'messageActionChatEditTitle') {
-                    action = {
-                        type: 'title_changed',
-                        title: act.title,
-                    }
-                } else if (act._ === 'messageActionChatEditPhoto') {
-                    action = {
-                        type: 'photo_changed',
-                        photo: new Photo(this.client, act.photo as tl.RawPhoto),
-                    }
-                } else if (act._ === 'messageActionChatDeletePhoto') {
-                    action = {
-                        type: 'photo_deleted',
-                    }
-                } else if (act._ === 'messageActionChatAddUser') {
-                    action = {
-                        type: 'users_added',
-                        users: act.users,
-                    }
-                } else if (act._ === 'messageActionChatDeleteUser') {
-                    if (
-                        this.raw.fromId?._ === 'peerUser' &&
-                        act.userId === this.raw.fromId.userId
-                    ) {
+                switch (act._) {
+                    case 'messageActionChatCreate':
                         action = {
-                            type: 'user_left',
+                            type: 'chat_created',
+                            title: act.title,
+                            users: act.users,
                         }
-                    } else {
+                        break
+                    case 'messageActionChannelCreate':
                         action = {
-                            type: 'user_removed',
-                            user: act.userId,
+                            type: 'channel_created',
+                            title: act.title,
                         }
-                    }
-                } else if (act._ === 'messageActionChatJoinedByLink') {
-                    action = {
-                        type: 'user_joined_link',
-                        inviter: act.inviterId,
-                    }
-                } else {
-                    action = null
+                        break
+                    case 'messageActionChatMigrateTo':
+                        action = {
+                            type: 'chat_migrate_to',
+                            id: act.channelId,
+                        }
+                        break
+                    case 'messageActionChannelMigrateFrom':
+                        action = {
+                            type: 'channel_migrate_from',
+                            id: act.chatId,
+                            title: act.title,
+                        }
+                        break
+                    case 'messageActionPinMessage':
+                        action = {
+                            type: 'message_pinned',
+                        }
+                        break
+                    case 'messageActionHistoryClear':
+                        action = {
+                            type: 'history_cleared',
+                        }
+                        break
+                    case 'messageActionGameScore':
+                        action = {
+                            type: 'game_score',
+                            gameId: act.gameId,
+                            score: act.score,
+                        }
+                        break
+                    case 'messageActionContactSignUp':
+                        action = {
+                            type: 'contact_joined',
+                        }
+                        break
+                    case 'messageActionChatEditTitle':
+                        action = {
+                            type: 'title_changed',
+                            title: act.title,
+                        }
+                        break
+                    case 'messageActionChatEditPhoto':
+                        action = {
+                            type: 'photo_changed',
+                            photo: new Photo(
+                                this.client,
+                                act.photo as tl.RawPhoto
+                            ),
+                        }
+                        break
+                    case 'messageActionChatDeletePhoto':
+                        action = {
+                            type: 'photo_deleted',
+                        }
+                        break
+                    case 'messageActionChatAddUser':
+                        action = {
+                            type: 'users_added',
+                            users: act.users,
+                        }
+                        break
+                    case 'messageActionChatDeleteUser':
+                        if (
+                            this.raw.fromId?._ === 'peerUser' &&
+                            act.userId === this.raw.fromId.userId
+                        ) {
+                            action = {
+                                type: 'user_left',
+                            }
+                        } else {
+                            action = {
+                                type: 'user_removed',
+                                user: act.userId,
+                            }
+                        }
+                        break
+                    case 'messageActionChatJoinedByLink':
+                        action = {
+                            type: 'user_joined_link',
+                            inviter: act.inviterId,
+                        }
+                        break
+                    case 'messageActionPaymentSentMe':
+                        action = {
+                            type: 'payment_received',
+                            currency: act.currency,
+                            amount: act.totalAmount,
+                            payload: act.payload,
+                            info: act.info,
+                            shippingOptionId: act.shippingOptionId,
+                            charge: act.charge,
+                        }
+                        break
+                    case 'messageActionPaymentSent':
+                        action = {
+                            type: 'payment_sent',
+                            currency: act.currency,
+                            amount: act.totalAmount,
+                        }
+                        break
+                    case 'messageActionPhoneCall':
+                        action = {
+                            type: 'call',
+                            id: act.callId,
+                            isVideo: !!act.video,
+                            reason: act.reason
+                                ? _callDiscardReasonFromTl(act.reason)
+                                : undefined,
+                            duration: act.duration ?? 0,
+                        }
+                        break
+                    case 'messageActionScreenshotTaken':
+                        action = {
+                            type: 'screenshot_taken'
+                        }
+                        break
+                    case 'messageActionBotAllowed':
+                        action = {
+                            type: 'bot_allowed',
+                            domain: act.domain
+                        }
+                        break
+                    case 'messageActionGeoProximityReached':
+                        if (act.fromId._ !== 'peerUser' || act.toId._ !== 'peerUser') {
+                            action = null
+                        } else {
+                            action = {
+                                type: 'geo_proximity',
+                                targetId: act.toId.userId,
+                                userId: act.fromId.userId,
+                                distance: act.distance
+                            }
+                        }
+                        break
+                    case 'messageActionGroupCall':
+                        if (act.duration) {
+                            action = {
+                                type: 'group_call_ended',
+                                call: act.call,
+                                duration: act.duration
+                            }
+                        } else {
+                            action = {
+                                type: 'group_call_started',
+                                call: act.call
+                            }
+                        }
+                        break
+                    case 'messageActionInviteToGroupCall':
+                        action = {
+                            type: 'group_call_invite',
+                            call: act.call,
+                            userIds: act.users
+                        }
+                        break
+                    case 'messageActionSetMessagesTTL':
+                        action = {
+                            type: 'set_ttl',
+                            period: act.period
+                        }
+                        break
+                    default:
+                        action = null
+                        break
                 }
 
                 this._action = action
@@ -634,7 +871,7 @@ export class Message {
      *
      * For unsupported media types, use `.raw.media` directly.
      */
-    get media (): Message.MessageMedia {
+    get media(): Message.MessageMedia {
         if (this._media === undefined) {
             if (
                 this.raw._ === 'messageService' ||
@@ -676,7 +913,12 @@ export class Message {
                 } else if (m._ === 'messageMediaVenue') {
                     media = new Venue(this.client, m)
                 } else if (m._ === 'messageMediaPoll') {
-                    media = new Poll(this.client, m.poll, this._users, m.results)
+                    media = new Poll(
+                        this.client,
+                        m.poll,
+                        this._users,
+                        m.results
+                    )
                 } else if (m._ === 'messageMediaInvoice') {
                     media = new Invoice(this.client, m)
                 } else {
@@ -694,7 +936,7 @@ export class Message {
     /**
      * Reply markup provided with this message, if any.
      */
-    get markup (): ReplyMarkup | null {
+    get markup(): ReplyMarkup | null {
         if (this._markup === undefined) {
             if (this.raw._ === 'messageService' || !this.raw.replyMarkup) {
                 this._markup = null
@@ -739,7 +981,7 @@ export class Message {
      *
      * @throws MtCuteArgumentError  In case the chat does not support message links
      */
-    get link (): string {
+    get link(): string {
         if (this.chat.type === 'supergroup' || this.chat.type === 'channel') {
             if (this.chat.username) {
                 return `https://t.me/${this.chat.username}/${this.id}`
@@ -751,7 +993,7 @@ export class Message {
         }
 
         throw new MtCuteArgumentError(
-            `Cannot generate message link for ${this.chat.type}`,
+            `Cannot generate message link for ${this.chat.type}`
         )
     }
 
@@ -762,7 +1004,7 @@ export class Message {
      *
      * @param parseMode  Parse mode to use (`null` for default)
      */
-    unparse (parseMode?: string | null): string {
+    unparse(parseMode?: string | null): string {
         return this.client
             .getParseMode(parseMode)
             .unparse(this.text, this.entities)
@@ -773,7 +1015,7 @@ export class Message {
      *
      * @throws MtCuteArgumentError  In case the message is not a reply
      */
-    getReplyTo (): Promise<Message> {
+    getReplyTo(): Promise<Message> {
         if (!this.replyToMessageId)
             throw new MtCuteArgumentError('This message is not a reply!')
 
@@ -790,16 +1032,14 @@ export class Message {
      * @param visible  Whether the reply should be visible
      * @param params
      */
-    replyText (
+    replyText(
         text: string,
         visible = false,
-        params?: Parameters<TelegramClient['sendText']>[2],
+        params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
         if (visible) {
             return this.client.sendText(this.chat.inputPeer, text, {
-                ...(
-                    params || {}
-                ),
+                ...(params || {}),
                 replyTo: this.id,
             })
         }
@@ -816,16 +1056,14 @@ export class Message {
      * @param visible  Whether the reply should be visible
      * @param params
      */
-    replyMedia (
+    replyMedia(
         media: InputMediaLike,
         visible = false,
-        params?: Parameters<TelegramClient['sendMedia']>[2],
+        params?: Parameters<TelegramClient['sendMedia']>[2]
     ): ReturnType<TelegramClient['sendMedia']> {
         if (visible) {
             return this.client.sendMedia(this.chat.inputPeer, media, {
-                ...(
-                    params || {}
-                ),
+                ...(params || {}),
                 replyTo: this.id,
             })
         }
@@ -837,7 +1075,7 @@ export class Message {
      *
      * @param revoke  Whether to "revoke" (i.e. delete for both sides). Only used for chats and private chats.
      */
-    delete (revoke = false): Promise<boolean> {
+    delete(revoke = false): Promise<boolean> {
         return this.client.deleteMessages(this.chat.inputPeer, this.id, revoke)
     }
 
@@ -847,14 +1085,19 @@ export class Message {
      * @param notify  Whether to send a notification (only for legacy groups and supergroups)
      * @param bothSides  Whether to pin for both sides (only for private chats)
      */
-    pin (notify = false, bothSides = false): Promise<void> {
-        return this.client.pinMessage(this.chat.inputPeer, this.id, notify, bothSides)
+    pin(notify = false, bothSides = false): Promise<void> {
+        return this.client.pinMessage(
+            this.chat.inputPeer,
+            this.id,
+            notify,
+            bothSides
+        )
     }
 
     /**
      * Unpin this message.
      */
-    unpin (): Promise<void> {
+    unpin(): Promise<void> {
         return this.client.pinMessage(this.chat.inputPeer, this.id)
     }
 
@@ -863,8 +1106,8 @@ export class Message {
      *
      * @link TelegramClient.editMessage
      */
-    edit (
-        params: Parameters<TelegramClient['editMessage']>[2],
+    edit(
+        params: Parameters<TelegramClient['editMessage']>[2]
     ): Promise<Message> {
         return this.client.editMessage(this.chat.inputPeer, this.id, params)
     }
@@ -879,15 +1122,13 @@ export class Message {
      * @param params  Additional parameters
      * @link TelegramClient.editMessage
      */
-    editText (
+    editText(
         text: string,
-        params?: Omit<Parameters<TelegramClient['editMessage']>[2], 'text'>,
+        params?: Omit<Parameters<TelegramClient['editMessage']>[2], 'text'>
     ): Promise<Message> {
         return this.edit({
             text,
-            ...(
-                params || {}
-            ),
+            ...(params || {}),
         })
     }
 
@@ -903,23 +1144,31 @@ export class Message {
      * @param toChatId  Target chat ID
      * @param params  Copy parameters
      */
-    sendCopy (toChatId: InputPeerLike, params: Parameters<TelegramClient['sendCopy']>[3]): Promise<Message> {
+    sendCopy(
+        toChatId: InputPeerLike,
+        params: Parameters<TelegramClient['sendCopy']>[3]
+    ): Promise<Message> {
         if (!params) params = {}
 
         if (this.raw._ === 'messageService') {
-            throw new MtCuteArgumentError('Service messages can\'t be copied')
+            throw new MtCuteArgumentError("Service messages can't be copied")
         }
 
-        if (this.media && !(
-            this.media instanceof WebPage
-        )) {
-            return this.client.sendMedia(toChatId, {
-                type: 'auto',
-                file: this.media.inputMedia,
-                caption: params.caption ?? this.raw.message,
-                // we shouldn't use original entities if the user wants custom text
-                entities: params.entities ?? params.caption ? undefined : this.raw.entities,
-            }, params)
+        if (this.media && !(this.media instanceof WebPage)) {
+            return this.client.sendMedia(
+                toChatId,
+                {
+                    type: 'auto',
+                    file: this.media.inputMedia,
+                    caption: params.caption ?? this.raw.message,
+                    // we shouldn't use original entities if the user wants custom text
+                    entities:
+                        params.entities ?? params.caption
+                            ? undefined
+                            : this.raw.entities,
+                },
+                params
+            )
         }
 
         return this.client.sendText(toChatId, this.raw.message, params)
@@ -939,6 +1188,5 @@ export class Message {
         return this.client.getMessageGroup(this.chat.inputPeer, this.raw.id)
     }
 }
-
 
 makeInspectable(Message, ['empty', 'isScheduled'], ['link'])
