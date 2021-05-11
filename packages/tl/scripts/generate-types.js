@@ -226,9 +226,11 @@ const writeSingleSchemaEntry = (type) => {
             js.write(`${jsPrefix}isAny${camelToPascal(
                 union.type
             )} = function (obj) {
-    return ${union.subtypes
-        .map((typ) => `obj._ === '${prefix_}${typ}'`)
-        .join(' || ')};
+    switch (obj._) {
+    ${union.subtypes
+        .map((typ) => `case '${prefix_}${typ}':`).join('')}return true;
+    }
+    return false;
 };`)
         })
 
