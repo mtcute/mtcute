@@ -74,7 +74,7 @@ export class Poll {
     /**
      * List of answers in this poll
      */
-    get answers(): Poll.PollAnswer[] {
+    get answers(): ReadonlyArray<Poll.PollAnswer> {
         if (!this._answers) {
             const results = this.results?.results
 
@@ -153,7 +153,7 @@ export class Poll {
      * Format entities for {@link solution}, only available
      * in case you have already answered
      */
-    get solutionEntities(): MessageEntity[] | null {
+    get solutionEntities(): ReadonlyArray<MessageEntity> | null {
         if (!this.results) return null
 
         if (!this._entities) {

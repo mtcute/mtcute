@@ -84,7 +84,7 @@ export class Photo extends FileLocation {
      * **Note**: This list will also contain the largest thumbnail that is
      * represented by the current object.
      */
-    get thumbnails(): Thumbnail[] {
+    get thumbnails(): ReadonlyArray<Thumbnail> {
         if (!this._thumbnails) {
             this._thumbnails = this.raw.sizes.map(
                 (sz) => new Thumbnail(this.client, this.raw, sz)

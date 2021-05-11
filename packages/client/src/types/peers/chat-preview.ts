@@ -76,7 +76,7 @@ export class ChatPreview {
      * and members that are inside your contacts list are
      * ordered before others.
      */
-    get someMembers(): User[] {
+    get someMembers(): ReadonlyArray<User> {
         if (!this._someMembers) {
             this._someMembers = this.invite.participants
                 ? this.invite.participants.map(

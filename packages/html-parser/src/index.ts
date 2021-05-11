@@ -169,14 +169,14 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
         return [plainText, entities]
     }
 
-    unparse(text: string, entities: MessageEntity[]): string {
+    unparse(text: string, entities: ReadonlyArray<MessageEntity>): string {
         return this._unparse(text, entities)
     }
 
     // internal function that uses recursion to correctly process nested & overlapping entities
     private _unparse(
         text: string,
-        entities: MessageEntity[],
+        entities: ReadonlyArray<MessageEntity>,
         entitiesOffset = 0,
         offset = 0,
         length = text.length

@@ -362,7 +362,7 @@ export class Message {
     /**
      * Message text/caption entities (may be empty)
      */
-    get entities(): MessageEntity[] {
+    get entities(): ReadonlyArray<MessageEntity> {
         if (this._emptyError) throw this._emptyError
 
         if (!this._entities) {

@@ -355,7 +355,7 @@ export class Chat {
      * The list of reasons why this chat might be unavailable to some users.
      * This field is available only in case {@link isRestricted} is `true`
      */
-    get restrictions(): tl.RawRestrictionReason[] | null {
+    get restrictions(): ReadonlyArray<tl.RawRestrictionReason> | null {
         return 'restrictionReason' in this.peer
             ? this.peer.restrictionReason ?? null
             : null

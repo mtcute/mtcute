@@ -244,7 +244,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
         return [result, entities]
     }
 
-    unparse(text: string, entities: MessageEntity[]): string {
+    unparse(text: string, entities: ReadonlyArray<MessageEntity>): string {
         // keep track of positions of inserted escape symbols
         const escaped: number[] = []
         text = text.replace(TO_BE_ESCAPED, (s, pos: number) => {

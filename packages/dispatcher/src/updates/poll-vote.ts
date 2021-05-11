@@ -70,7 +70,7 @@ export class PollVoteUpdate {
      * This might break at any time, but seems to be consistent for now.
      * To get chosen answer indexes derived as before, use {@link chosenIndexesAuto}.
      */
-    get chosen(): Buffer[] {
+    get chosen(): ReadonlyArray<Buffer> {
         return this.raw.options
     }
 
@@ -81,7 +81,7 @@ export class PollVoteUpdate {
      *
      * If something does not add up, {@link MtCuteUnsupportedError} is thrown
      */
-    get chosenIndexesAuto(): number[] {
+    get chosenIndexesAuto(): ReadonlyArray<number> {
         return this.raw.options.map((buf) => {
             if (buf.length > 1)
                 throw new MtCuteUnsupportedError('option had >1 byte')

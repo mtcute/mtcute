@@ -57,7 +57,7 @@ export class DraftMessage {
     /**
      * Message text entities (may be empty)
      */
-    get entities(): MessageEntity[] {
+    get entities(): ReadonlyArray<MessageEntity> {
         if (!this._entities) {
             this._entities = []
             if (this.raw.entities?.length) {

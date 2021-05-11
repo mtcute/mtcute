@@ -133,7 +133,7 @@ export class StickerSet {
      * @throws MtCuteEmptyError
      *     In case this object does not contain info about stickers (i.e. {@link isFull} = false)
      */
-    get stickers(): StickerSet.StickerInfo[] {
+    get stickers(): ReadonlyArray<StickerSet.StickerInfo> {
         if (!this.isFull) throw new MtCuteEmptyError()
 
         if (!this._stickers) {

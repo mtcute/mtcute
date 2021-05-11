@@ -246,7 +246,7 @@ export class User {
      * The list of reasons why this bot might be unavailable to some users.
      * This field is available only in case *isRestricted* is `true`
      */
-    get restrictions(): tl.RawRestrictionReason[] | null {
+    get restrictions(): ReadonlyArray<tl.RawRestrictionReason> | null {
         return this._user.restrictionReason ?? null
     }
 

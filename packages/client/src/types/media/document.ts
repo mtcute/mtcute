@@ -71,7 +71,7 @@ export class RawDocument extends FileLocation {
      *
      * If there are no thumbnails, the array will be empty.
      */
-    get thumbnails(): Thumbnail[] {
+    get thumbnails(): ReadonlyArray<Thumbnail> {
         if (!this._thumbnails) {
             this._thumbnails = this.doc.thumbs
                 ? this.doc.thumbs.map(

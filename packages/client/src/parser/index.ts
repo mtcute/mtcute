@@ -36,5 +36,5 @@ export interface IMessageEntityParser {
      * @param text  Plain text
      * @param entities  Message entities that should be added to the text
      */
-    unparse(text: string, entities: MessageEntity[]): string
+    unparse(text: string, entities: ReadonlyArray<MessageEntity>): string
 }
