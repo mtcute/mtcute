@@ -35,3 +35,6 @@ export type InputPeerLike =
     | tl.TypeInputPeer
     | tl.TypeInputUser
     | tl.TypeInputChannel
+
+export type UsersIndex = Record<number, tl.TypeUser>
+export type ChatsIndex = Record<number, tl.TypeChat>

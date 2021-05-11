@@ -11,6 +11,7 @@ import { Lock } from '../utils/lock'
 import bigInt from 'big-integer'
 import { MAX_CHANNEL_ID } from '@mtcute/core'
 import { isDummyUpdate, isDummyUpdates } from '../utils/updates-utils'
+import { ChatsIndex, UsersIndex } from '../types'
 
 const debug = require('debug')('mtcute:upds')
 
@@ -135,8 +136,8 @@ export async function _saveStorage(this: TelegramClient): Promise<void> {
 export function dispatchUpdate(
     this: TelegramClient,
     update: tl.TypeUpdate | tl.TypeMessage,
-    users: Record<number, tl.TypeUser>,
-    chats: Record<number, tl.TypeChat>
+    users: UsersIndex,
+    chats: ChatsIndex
 ): void {
     // no-op //
 }

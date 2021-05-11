@@ -4,6 +4,7 @@ import { tl } from '@mtcute/tl'
 import { User } from './user'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { ChatPermissions } from './chat-permissions'
+import { UsersIndex } from './index'
 
 export namespace ChatMember {
     /**
@@ -32,12 +33,12 @@ export class ChatMember {
     readonly raw: tl.TypeChatParticipant | tl.TypeChannelParticipant
 
     /** Map of users in this object. Mainly for internal use */
-    readonly _users: Record<number, tl.TypeUser>
+    readonly _users: UsersIndex
 
     constructor(
         client: TelegramClient,
         raw: tl.TypeChatParticipant | tl.TypeChannelParticipant,
-        users: Record<number, tl.TypeUser>,
+        users: UsersIndex,
     ) {
         this.client = client
         this.raw = raw

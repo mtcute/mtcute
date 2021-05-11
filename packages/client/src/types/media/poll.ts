@@ -3,6 +3,7 @@ import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { MessageEntity } from '../messages'
 import bigInt from 'big-integer'
+import { UsersIndex } from '../peers'
 
 export namespace Poll {
     export interface PollAnswer {
@@ -41,12 +42,12 @@ export class Poll {
     readonly raw: tl.TypePoll
     readonly results?: tl.TypePollResults
 
-    readonly _users: Record<number, tl.TypeUser>
+    readonly _users: UsersIndex
 
     constructor(
         client: TelegramClient,
         raw: tl.TypePoll,
-        users: Record<number, tl.TypeUser>,
+        users: UsersIndex,
         results?: tl.TypePollResults
     ) {
         this.client = client

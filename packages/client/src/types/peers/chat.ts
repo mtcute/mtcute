@@ -5,7 +5,7 @@ import { TelegramClient } from '../../client'
 import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
 import { MtCuteArgumentError, MtCuteTypeAssertionError } from '../errors'
 import { makeInspectable } from '../utils'
-import { InputPeerLike, User } from './index'
+import { ChatsIndex, InputPeerLike, User, UsersIndex } from './index'
 import { ChatLocation } from './chat-location'
 
 export namespace Chat {
@@ -454,8 +454,8 @@ export class Chat {
     static _parseFromMessage(
         client: TelegramClient,
         message: tl.RawMessage | tl.RawMessageService,
-        users: Record<number, tl.TypeUser>,
-        chats: Record<number, tl.TypeChat>
+        users: UsersIndex,
+        chats: ChatsIndex
     ): Chat {
         return Chat._parseFromPeer(client, message.peerId, users, chats)
     }
@@ -464,8 +464,8 @@ export class Chat {
     static _parseFromPeer(
         client: TelegramClient,
         peer: tl.TypePeer,
-        users: Record<number, tl.TypeUser>,
-        chats: Record<number, tl.TypeChat>
+        users: UsersIndex,
+        chats: ChatsIndex
     ): Chat {
         if (peer._ === 'peerUser') {
             return new Chat(client, users[peer.userId])

@@ -5,7 +5,7 @@ import { Message } from '../messages'
 import { MtCuteArgumentError } from '../errors'
 import { getMarkedPeerId } from '@mtcute/core'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
-import { User } from '../peers'
+import { User, UsersIndex } from '../peers'
 
 /**
  * An incoming callback query, originated from a callback button
@@ -17,12 +17,12 @@ export class CallbackQuery {
         | tl.RawUpdateBotCallbackQuery
         | tl.RawUpdateInlineBotCallbackQuery
 
-    readonly _users: Record<number, tl.TypeUser>
+    readonly _users: UsersIndex
 
     constructor(
         client: TelegramClient,
         raw: tl.RawUpdateBotCallbackQuery | tl.RawUpdateInlineBotCallbackQuery,
-        users: Record<number, tl.TypeUser>
+        users: UsersIndex
     ) {
         this.client = client
         this.raw = raw

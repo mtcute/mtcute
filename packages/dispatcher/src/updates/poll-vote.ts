@@ -1,4 +1,9 @@
-import { MtCuteUnsupportedError, TelegramClient, User } from '@mtcute/client'
+import {
+    MtCuteUnsupportedError,
+    TelegramClient,
+    User,
+    UsersIndex,
+} from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { makeInspectable } from '@mtcute/client/src/types/utils'
 
@@ -12,9 +17,13 @@ export class PollVoteUpdate {
     readonly client: TelegramClient
     readonly raw: tl.RawUpdateMessagePollVote
 
-    readonly _users: Record<number, tl.TypeUser>
+    readonly _users: UsersIndex
 
-    constructor(client: TelegramClient, raw: tl.RawUpdateMessagePollVote, users: Record<number, tl.TypeUser>) {
+    constructor(
+        client: TelegramClient,
+        raw: tl.RawUpdateMessagePollVote,
+        users: UsersIndex
+    ) {
         this.client = client
         this.raw = raw
         this._users = users

@@ -8,6 +8,7 @@ import { Message } from '../messages'
 import { ChatPermissions } from './chat-permissions'
 import { ChatLocation } from './chat-location'
 import { ChatInviteLink } from './chat-invite-link'
+import { ChatsIndex, UsersIndex } from './index'
 
 export namespace ChatEvent {
     /** A user has joined the group (in the case of big groups, info of the user that has joined isn't shown) */
@@ -496,14 +497,14 @@ export class ChatEvent {
     readonly client: TelegramClient
     readonly raw: tl.TypeChannelAdminLogEvent
 
-    readonly _users: Record<number, tl.TypeUser>
-    readonly _chats: Record<number, tl.TypeChat>
+    readonly _users: UsersIndex
+    readonly _chats: ChatsIndex
 
     constructor(
         client: TelegramClient,
         raw: tl.TypeChannelAdminLogEvent,
-        users: Record<number, tl.TypeUser>,
-        chats: Record<number, tl.TypeChat>
+        users: UsersIndex,
+        chats: ChatsIndex
     ) {
         this.client = client
         this.raw = raw

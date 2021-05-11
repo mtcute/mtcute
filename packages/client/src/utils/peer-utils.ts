@@ -1,5 +1,6 @@
 import { tl } from '@mtcute/tl'
 import bigInt from 'big-integer'
+import { ChatsIndex, UsersIndex } from '../types'
 
 export const INVITE_LINK_REGEX = /^(?:https?:\/\/)?(?:www\.)?(?:t(?:elegram)?\.(?:org|me|dog)\/joinchat\/)([\w-]+)$/i
 
@@ -103,11 +104,11 @@ export function createUsersChatsIndex(
         chats?: tl.TypeChat[]
     }
 ): {
-    users: Record<number, tl.TypeUser>
-    chats: Record<number, tl.TypeChat>
+    users: UsersIndex
+    chats: ChatsIndex
 } {
-    const users: Record<number, tl.TypeUser> = {}
-    const chats: Record<number, tl.TypeChat> = {}
+    const users: UsersIndex = {}
+    const chats: ChatsIndex = {}
     obj.users?.forEach((e) => (users[e.id] = e))
     obj.chats?.forEach((e) => (chats[e.id] = e))
 

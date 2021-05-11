@@ -1,5 +1,5 @@
 import { makeInspectable } from '@mtcute/client/src/types/utils'
-import { TelegramClient, Poll } from '@mtcute/client'
+import { TelegramClient, Poll, UsersIndex } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 
 /**
@@ -13,9 +13,13 @@ export class PollUpdate {
     readonly client: TelegramClient
     readonly raw: tl.RawUpdateMessagePoll
 
-    readonly _users: Record<number, tl.TypeUser>
+    readonly _users: UsersIndex
 
-    constructor (client: TelegramClient, raw: tl.RawUpdateMessagePoll, users: Record<number, tl.TypeUser>) {
+    constructor(
+        client: TelegramClient,
+        raw: tl.RawUpdateMessagePoll,
+        users: UsersIndex
+    ) {
         this.client = client
         this.raw = raw
         this._users = users
@@ -55,15 +59,21 @@ export class PollUpdate {
                     _: 'poll',
                     id: this.raw.pollId,
                     question: '',
-                    answers: this.raw.results.results?.map((res) => ({
-                        _: 'pollAnswer',
-                        text: '',
-                        option: res.option
-                    })) ?? []
+                    answers:
+                        this.raw.results.results?.map((res) => ({
+                            _: 'pollAnswer',
+                            text: '',
+                            option: res.option,
+                        })) ?? [],
                 }
             }
 
-            this._poll = new Poll(this.client, poll, this._users, this.raw.results)
+            this._poll = new Poll(
+                this.client,
+                poll,
+                this._users,
+                this.raw.results
+            )
         }
 
         return this._poll

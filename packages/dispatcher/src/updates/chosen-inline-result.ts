@@ -4,7 +4,7 @@ import {
     TelegramClient,
     User,
     Location,
-    MtCuteArgumentError,
+    MtCuteArgumentError, UsersIndex,
 } from '@mtcute/client'
 import { encodeInlineMessageId } from '@mtcute/client/src/utils/inline-utils'
 
@@ -18,12 +18,12 @@ export class ChosenInlineResult {
     readonly client: TelegramClient
     readonly raw: tl.RawUpdateBotInlineSend
 
-    readonly _users: Record<number, tl.TypeUser>
+    readonly _users: UsersIndex
 
     constructor(
         client: TelegramClient,
         raw: tl.RawUpdateBotInlineSend,
-        users: Record<number, tl.TypeUser>
+        users: UsersIndex
     ) {
         this.client = client
         this.raw = raw

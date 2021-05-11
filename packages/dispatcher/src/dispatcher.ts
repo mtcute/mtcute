@@ -1,9 +1,11 @@
 import {
     CallbackQuery,
+    ChatsIndex,
     InlineQuery,
     Message,
     MtCuteArgumentError,
     TelegramClient,
+    UsersIndex,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import {
@@ -42,8 +44,8 @@ const noop = () => {}
 type ParserFunction = (
     client: TelegramClient,
     upd: tl.TypeUpdate | tl.TypeMessage,
-    users: Record<number, tl.TypeUser>,
-    chats: Record<number, tl.TypeChat>
+    users: UsersIndex,
+    chats: ChatsIndex
 ) => any
 type UpdateParser = [Exclude<UpdateHandler['type'], 'raw'>, ParserFunction]
 
@@ -73,7 +75,7 @@ const callbackQueryParser: UpdateParser = [
 ]
 const userTypingParser: UpdateParser = [
     'user_typing',
-    (client, upd) => new UserTypingUpdate(client, upd as any)
+    (client, upd) => new UserTypingUpdate(client, upd as any),
 ]
 
 const PARSERS: Partial<
@@ -182,8 +184,8 @@ export class Dispatcher {
      */
     dispatchUpdate(
         update: tl.TypeUpdate | tl.TypeMessage,
-        users: Record<number, tl.TypeUser>,
-        chats: Record<number, tl.TypeChat>
+        users: UsersIndex,
+        chats: ChatsIndex
     ): void {
         if (!this._client) return
 
@@ -208,8 +210,8 @@ export class Dispatcher {
      */
     async dispatchUpdateNow(
         update: tl.TypeUpdate | tl.TypeMessage,
-        users: Record<number, tl.TypeUser>,
-        chats: Record<number, tl.TypeChat>
+        users: UsersIndex,
+        chats: ChatsIndex
     ): Promise<void> {
         if (!this._client) return
 

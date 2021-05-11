@@ -3,8 +3,10 @@ import {
     Chat,
     ChatInviteLink,
     ChatMember,
+    ChatsIndex,
     TelegramClient,
     User,
+    UsersIndex,
 } from '@mtcute/client'
 import { makeInspectable } from '@mtcute/client/src/types/utils'
 
@@ -49,15 +51,15 @@ export class ChatMemberUpdate {
     readonly raw: tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant
 
     /** Map of users in this message. Mainly for internal use */
-    readonly _users: Record<number, tl.TypeUser>
+    readonly _users: UsersIndex
     /** Map of chats in this message. Mainly for internal use */
-    readonly _chats: Record<number, tl.TypeChat>
+    readonly _chats: ChatsIndex
 
     constructor(
         client: TelegramClient,
         raw: tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant,
-        users: Record<number, tl.TypeUser>,
-        chats: Record<number, tl.TypeChat>
+        users: UsersIndex,
+        chats: ChatsIndex
     ) {
         this.client = client
         this.raw = raw

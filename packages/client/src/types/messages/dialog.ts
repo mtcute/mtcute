@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { Chat } from '../peers'
+import { Chat, ChatsIndex, UsersIndex } from '../peers'
 import { Message } from './message'
 import { DraftMessage } from './draft-message'
 import { makeInspectable } from '../utils'
@@ -18,10 +18,10 @@ export class Dialog {
     readonly raw: tl.RawDialog
 
     /** Map of users in this object. Mainly for internal use */
-    readonly _users: Record<number, tl.TypeUser>
+    readonly _users: UsersIndex
 
     /** Map of chats in this object. Mainly for internal use */
-    readonly _chats: Record<number, tl.TypeChat>
+    readonly _chats: ChatsIndex
 
     /** Map of messages in this object. Mainly for internal use */
     readonly _messages: Record<number, tl.TypeMessage>
@@ -29,8 +29,8 @@ export class Dialog {
     constructor(
         client: TelegramClient,
         raw: tl.RawDialog,
-        users: Record<number, tl.TypeUser>,
-        chats: Record<number, tl.TypeChat>,
+        users: UsersIndex,
+        chats: ChatsIndex,
         messages: Record<number, tl.TypeMessage>
     ) {
         this.client = client

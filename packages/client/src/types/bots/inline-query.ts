@@ -1,6 +1,6 @@
 import { makeInspectable } from '@mtcute/client/src/types/utils'
 import { tl } from '@mtcute/tl'
-import { PeerType, User } from '../peers'
+import { PeerType, User, UsersIndex } from '../peers'
 import { TelegramClient } from '../../client'
 import { Location } from '../media'
 import { InputInlineResult } from './input'
@@ -18,12 +18,12 @@ export class InlineQuery {
     readonly raw: tl.RawUpdateBotInlineQuery
 
     /** Map of users in this message. Mainly for internal use */
-    readonly _users: Record<number, tl.TypeUser>
+    readonly _users: UsersIndex
 
     constructor(
         client: TelegramClient,
         raw: tl.RawUpdateBotInlineQuery,
-        users: Record<number, tl.TypeUser>
+        users: UsersIndex
     ) {
         this.client = client
         this.raw = raw

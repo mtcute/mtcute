@@ -4,6 +4,8 @@ import {
     TelegramClient,
     InlineQuery,
     CallbackQuery,
+    UsersIndex,
+    ChatsIndex,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { PropagationSymbol } from './propagation'
@@ -35,14 +37,14 @@ export type RawUpdateHandler = BaseUpdateHandler<
     (
         client: TelegramClient,
         update: tl.TypeUpdate,
-        users: Record<number, tl.TypeUser>,
-        chats: Record<number, tl.TypeChat>
+        users: UsersIndex,
+        chats: ChatsIndex
     ) => MaybeAsync<void | PropagationSymbol>,
     (
         client: TelegramClient,
         update: tl.TypeUpdate,
-        users: Record<number, tl.TypeUser>,
-        chats: Record<number, tl.TypeChat>
+        users: UsersIndex,
+        chats: ChatsIndex
     ) => MaybeAsync<boolean>
 >
 

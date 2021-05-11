@@ -143,6 +143,7 @@ import {
     ChatInviteLink,
     ChatMember,
     ChatPreview,
+    ChatsIndex,
     Dialog,
     FileDownloadParameters,
     InputChatPermissions,
@@ -166,6 +167,7 @@ import {
     UploadFileLike,
     UploadedFile,
     User,
+    UsersIndex,
 } from './types'
 import { MaybeArray, MaybeAsync, TelegramConnection } from '@mtcute/core'
 import { Lock } from './utils/lock'
@@ -490,6 +492,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param queryId  Inline query ID
      * @param results  Results of the query
      * @param params  Additional parameters
+
      */
     answerInlineQuery(
         queryId: tl.Long,
@@ -691,6 +694,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat ID
      * @param params
+
      */
     getChatEventLog(
         chatId: InputPeerLike,
@@ -843,6 +847,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param latitude  Latitude of the location
      * @param longitude  Longitude of the location
+
      */
     getNearbyChats(latitude: number, longitude: number): Promise<Chat[]>
     /**
@@ -1054,6 +1059,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param folder  Parameters for the folder
      * @returns  Newly created folder
+
      */
     createFolder(
         folder: PartialExcept<tl.RawDialogFilter, 'title'>
@@ -1102,6 +1108,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * is not considered when sorting.
      *
      * @param params  Fetch parameters
+
      */
     getDialogs(params?: {
         /**
@@ -1740,6 +1747,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat ID
      * @param message  ID of one of the messages in the group
+
      */
     getMessageGroup(chatId: InputPeerLike, message: number): Promise<Message[]>
     /**
@@ -1956,6 +1964,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param fromChatId  Target chat ID
      * @param message  Message ID to forward
      * @param params
+
      */
     sendCopy(
         toChatId: InputPeerLike,
@@ -2147,6 +2156,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param text  Text of the message
      * @param params  Additional sending parameters
+
      */
     sendText(
         chatId: InputPeerLike,
@@ -2528,8 +2538,8 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     dispatchUpdate(
         update: tl.TypeUpdate | tl.TypeMessage,
-        users: Record<number, tl.TypeUser>,
-        chats: Record<number, tl.TypeChat>
+        users: UsersIndex,
+        chats: ChatsIndex
     ): void
     /**
      * Catch up with the server by loading missed updates.

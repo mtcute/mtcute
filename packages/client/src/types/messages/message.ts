@@ -1,4 +1,4 @@
-import { User, Chat, InputPeerLike } from '../peers'
+import { User, Chat, InputPeerLike, UsersIndex, ChatsIndex } from '../peers'
 import { tl } from '@mtcute/tl'
 import { BotKeyboard, ReplyMarkup } from '../bots'
 import { MAX_CHANNEL_ID } from '@mtcute/core'
@@ -90,17 +90,17 @@ export class Message {
     readonly raw: tl.RawMessage | tl.RawMessageService
 
     /** Map of users in this message. Mainly for internal use */
-    readonly _users: Record<number, tl.TypeUser>
+    readonly _users: UsersIndex
     /** Map of chats in this message. Mainly for internal use */
-    readonly _chats: Record<number, tl.TypeChat>
+    readonly _chats: ChatsIndex
 
     private _emptyError?: MtCuteEmptyError
 
     constructor(
         client: TelegramClient,
         raw: tl.TypeMessage,
-        users: Record<number, tl.TypeUser>,
-        chats: Record<number, tl.TypeChat>,
+        users: UsersIndex,
+        chats: ChatsIndex,
         isScheduled = false
     ) {
         this.client = client

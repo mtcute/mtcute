@@ -35,7 +35,9 @@ import {
     TypingStatus,
     Photo,
     ChatEvent,
-    ChatInviteLink
+    ChatInviteLink,
+    UsersIndex,
+    ChatsIndex
 } from '../types'
 
 // @copy

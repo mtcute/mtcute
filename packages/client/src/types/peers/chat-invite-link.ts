@@ -2,6 +2,7 @@ import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { User } from './user'
+import { UsersIndex } from './index'
 
 export namespace ChatInviteLink {
     export interface JoinedMember {
@@ -17,9 +18,9 @@ export class ChatInviteLink {
     readonly client: TelegramClient
     readonly raw: tl.RawChatInviteExported
 
-    readonly _users?: Record<number, tl.TypeUser>
+    readonly _users?: UsersIndex
 
-    constructor (client: TelegramClient, raw: tl.RawChatInviteExported, users?: Record<number, tl.TypeUser>) {
+    constructor (client: TelegramClient, raw: tl.RawChatInviteExported, users?: UsersIndex) {
         this.client = client
         this.raw = raw
         this._users = users
