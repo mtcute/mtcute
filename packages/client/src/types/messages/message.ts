@@ -158,7 +158,7 @@ export class Message {
      *  - Messages sent by you to other chats are outgoing (`outgoing = true`)
      *  - Messages to yourself (i.e. *Saved Messages*) are incoming (`outgoing = false`)
      */
-    get outgoing(): boolean {
+    get isOutgoing(): boolean {
         if (this._emptyError) throw this._emptyError
 
         return this.raw.out!
@@ -318,10 +318,10 @@ export class Message {
     /**
      * Whether this message contains mention of the current user
      */
-    get mentioned(): boolean {
+    get isMention(): boolean {
         if (this._emptyError) throw this._emptyError
 
-        return !!this.raw.mentioned
+        return this.raw.mentioned!
     }
 
     private _viaBot: User | null

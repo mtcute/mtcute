@@ -50,7 +50,7 @@ export class DraftMessage {
      * Whether no webpage preview will be generated
      */
     get disableWebPreview(): boolean {
-        return !!this.raw.noWebpage
+        return this.raw.noWebpage!
     }
 
     private _entities?: MessageEntity[]

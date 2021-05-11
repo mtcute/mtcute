@@ -20,14 +20,14 @@ export class Invoice {
      * Whether the shipping address was requested
      */
     isShippingAddressRequested(): boolean {
-        return !!this.raw.shippingAddressRequested
+        return this.raw.shippingAddressRequested!
     }
 
     /**
      * Whether this is an example (test) invoice
      */
     isTest(): boolean {
-        return !!this.raw.test
+        return this.raw.test!
     }
 
     /**

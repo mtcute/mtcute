@@ -14,7 +14,7 @@ export namespace Poll {
 
         /**
          * Answer data, to be passed to
-         * {@link TelegramClient.votePoll}
+         * {@link TelegramClient.sendVote}
          */
         data: Buffer
 
@@ -115,7 +115,7 @@ export class Poll {
      * accept votes anymore
      */
     get isClosed(): boolean {
-        return !!this.raw.closed
+        return this.raw.closed!
     }
 
     /**
@@ -123,21 +123,21 @@ export class Poll {
      * list of voters is publicly available
      */
     get isPublic(): boolean {
-        return !!this.raw.publicVoters
+        return this.raw.publicVoters!
     }
 
     /**
      * Whether this is a quiz
      */
     get isQuiz(): boolean {
-        return !!this.raw.quiz
+        return this.raw.quiz!
     }
 
     /**
      * Whether this poll accepts multiple answers
      */
     get isMultiple(): boolean {
-        return !!this.raw.multipleChoice
+        return this.raw.multipleChoice!
     }
 
     /**

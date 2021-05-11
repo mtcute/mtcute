@@ -128,14 +128,14 @@ export class Dialog {
      * Whether this dialog is pinned
      */
     get isPinned(): boolean {
-        return !!this.raw.pinned
+        return this.raw.pinned!
     }
 
     /**
      * Whether this chat was manually marked as unread
      */
     get isManuallyUnread(): boolean {
-        return !!this.raw.unreadMark
+        return this.raw.unreadMark!
     }
 
     /**
@@ -151,7 +151,7 @@ export class Dialog {
      * Whether this dialog is muted
      */
     get isMuted(): boolean {
-        return !!this.raw.notifySettings.silent
+        return this.raw.notifySettings.silent!
     }
 
     /**

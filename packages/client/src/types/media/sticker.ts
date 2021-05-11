@@ -102,7 +102,7 @@ export class Sticker extends RawDocument {
      * Whether this is a mask
      */
     get isMask(): boolean {
-        return !!this.attr.mask
+        return this.attr.mask!
     }
 
     /**
