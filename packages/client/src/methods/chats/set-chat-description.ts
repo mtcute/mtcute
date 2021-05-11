@@ -1,8 +1,5 @@
 import { TelegramClient } from '../../client'
-import {
-    InputPeerLike,
-    MtCuteInvalidPeerTypeError,
-} from '../../types'
+import { InputPeerLike } from '../../types'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
@@ -20,12 +17,10 @@ export async function setChatDescription(
     description: string
 ): Promise<void> {
     const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
-    if (!(chat._ === 'inputPeerChat' || chat._ === 'inputPeerChannel'))
-        throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 
     await this.call({
         _: 'messages.editChatAbout',
         peer: chat,
-        about: description
+        about: description,
     })
 }

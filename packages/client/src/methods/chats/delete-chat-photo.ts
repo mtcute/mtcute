@@ -1,9 +1,11 @@
 import { TelegramClient } from '../../client'
+import { InputPeerLike, MtCuteInvalidPeerTypeError } from '../../types'
 import {
-    InputPeerLike,
-    MtCuteInvalidPeerTypeError,
-} from '../../types'
-import { normalizeToInputChannel, normalizeToInputPeer } from '../../utils/peer-utils'
+    isInputPeerChannel,
+    isInputPeerChat,
+    normalizeToInputChannel,
+    normalizeToInputPeer,
+} from '../../utils/peer-utils'
 
 /**
  * Delete a chat photo
@@ -18,23 +20,21 @@ export async function deleteChatPhoto(
     chatId: InputPeerLike
 ): Promise<void> {
     const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
-    if (!(chat._ === 'inputPeerChat' || chat._ === 'inputPeerChannel'))
-        throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 
     let res
-    if (chat._ === 'inputPeerChat') {
+    if (isInputPeerChat(chat)) {
         res = await this.call({
             _: 'messages.editChatPhoto',
             chatId: chat.chatId,
-            photo: { _: 'inputChatPhotoEmpty' }
+            photo: { _: 'inputChatPhotoEmpty' },
         })
-    } else {
+    } else if (isInputPeerChannel(chat)) {
         res = await this.call({
             _: 'channels.editPhoto',
-            channel: normalizeToInputChannel(chat)!,
-            photo: { _: 'inputChatPhotoEmpty' }
+            channel: normalizeToInputChannel(chat),
+            photo: { _: 'inputChatPhotoEmpty' },
         })
-    }
+    } else throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 
     this._handleUpdate(res)
 }

@@ -3,7 +3,12 @@ import {
     InputPeerLike,
     MtCuteInvalidPeerTypeError,
 } from '../../types'
-import { normalizeToInputChannel, normalizeToInputPeer } from '../../utils/peer-utils'
+import {
+    isInputPeerChannel,
+    isInputPeerChat,
+    normalizeToInputChannel,
+    normalizeToInputPeer,
+} from '../../utils/peer-utils'
 
 /**
  * Change chat title
@@ -20,22 +25,21 @@ export async function setChatTitle(
     title: string
 ): Promise<void> {
     const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
-    if (!(chat._ === 'inputPeerChat' || chat._ === 'inputPeerChannel'))
-        throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 
     let res
-    if (chat._ === 'inputPeerChat') {
+    if (isInputPeerChat(chat)) {
         res = await this.call({
             _: 'messages.editChatTitle',
             chatId: chat.chatId,
             title
         })
-    } else {
+    } else if (isInputPeerChannel(chat)) {
         res = await this.call({
             _: 'channels.editTitle',
-            channel: normalizeToInputChannel(chat)!,
+            channel: normalizeToInputChannel(chat),
             title
         })
-    }
+    } else throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
+
     this._handleUpdate(res)
 }

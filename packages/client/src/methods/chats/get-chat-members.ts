@@ -5,7 +5,7 @@ import {
 } from '../../types'
 import { TelegramClient } from '../../client'
 import {
-    createUsersChatsIndex,
+    createUsersChatsIndex, isInputPeerChannel, isInputPeerChat,
     normalizeToInputChannel,
     normalizeToInputPeer,
 } from '../../utils/peer-utils'
@@ -71,10 +71,8 @@ export async function getChatMembers(
     if (!params) params = {}
 
     const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
-    if (chat._ === 'inputPeerUser')
-        throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 
-    if (chat._ === 'inputPeerChat') {
+    if (isInputPeerChat(chat)) {
         const res = await this.call({
             _: 'messages.getFullChat',
             chatId: chat.chatId,
@@ -99,7 +97,7 @@ export async function getChatMembers(
         return members.map((m) => new ChatMember(this, m, users))
     }
 
-    if (chat._ === 'inputPeerChannel') {
+    if (isInputPeerChannel(chat)) {
         const q = params.query?.toLowerCase() ?? ''
         const type = params.type ?? 'recent'
 
@@ -126,7 +124,7 @@ export async function getChatMembers(
 
         const res = await this.call({
             _: 'channels.getParticipants',
-            channel: normalizeToInputChannel(chat)!,
+            channel: normalizeToInputChannel(chat),
             filter,
             offset: params.offset ?? 0,
             limit: params.limit ?? 200,
@@ -143,5 +141,5 @@ export async function getChatMembers(
         return res.participants.map(i => new ChatMember(this, i, users))
     }
 
-    throw new Error('should not happen')
+    throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 }

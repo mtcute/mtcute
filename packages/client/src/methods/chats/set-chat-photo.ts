@@ -7,6 +7,8 @@ import {
     MtCuteInvalidPeerTypeError,
 } from '../../types'
 import {
+    isInputPeerChannel,
+    isInputPeerChat,
     normalizeToInputChannel,
     normalizeToInputPeer,
 } from '../../utils/peer-utils'
@@ -34,13 +36,7 @@ export async function setChatPhoto(
     previewSec?: number
 ): Promise<void> {
     const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
-    if (
-        !(
-            chat._ === 'inputPeerChat' ||
-            chat._ === 'inputPeerChannel' ||
-            chat._ === 'inputPeerChannelFromMessage'
-        )
-    )
+    if (!(isInputPeerChannel(chat) || isInputPeerChat(chat)))
         throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 
     let photo: tl.TypeInputChatPhoto | undefined = undefined
@@ -88,7 +84,7 @@ export async function setChatPhoto(
     }
 
     let res
-    if (chat._ === 'inputPeerChat') {
+    if (isInputPeerChat(chat)) {
         res = await this.call({
             _: 'messages.editChatPhoto',
             chatId: chat.chatId,
@@ -97,7 +93,7 @@ export async function setChatPhoto(
     } else {
         res = await this.call({
             _: 'channels.editPhoto',
-            channel: normalizeToInputChannel(chat)!,
+            channel: normalizeToInputChannel(chat),
             photo,
         })
     }

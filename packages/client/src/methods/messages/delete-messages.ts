@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
 import { MaybeArray } from '@mtcute/core'
-import { normalizeToInputChannel, normalizeToInputPeer } from '../../utils/peer-utils'
+import { isInputPeerChannel, normalizeToInputChannel, normalizeToInputPeer } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
 import { tl } from '@mtcute/tl'
 
@@ -21,12 +21,11 @@ export async function deleteMessages(
 ): Promise<void> {
     if (!Array.isArray(ids)) ids = [ids]
 
-    const peer = await this.resolvePeer(chatId)
-    const inputPeer = normalizeToInputPeer(peer)
+    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
 
     let upd
-    if (inputPeer._ === 'inputPeerChannel') {
-        const channel = normalizeToInputChannel(peer)!
+    if (isInputPeerChannel(peer)) {
+        const channel = normalizeToInputChannel(peer)
         const res = await this.call({
             _: 'channels.deleteMessages',
             channel,

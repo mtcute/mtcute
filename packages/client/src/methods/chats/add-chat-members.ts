@@ -2,6 +2,8 @@ import { TelegramClient } from '../../client'
 import { InputPeerLike, MtCuteInvalidPeerTypeError } from '../../types'
 import { MaybeArray } from '@mtcute/core'
 import {
+    isInputPeerChannel,
+    isInputPeerChat,
     normalizeToInputChannel,
     normalizeToInputPeer,
     normalizeToInputUser,
@@ -24,28 +26,27 @@ export async function addChatMembers(
     users: MaybeArray<InputPeerLike>,
     forwardCount = 100
 ): Promise<void> {
-    const chat = await this.resolvePeer(chatId)
-    const input = normalizeToInputPeer(chat)
+    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
 
     if (!Array.isArray(users)) users = [users]
 
-    if (input._ === 'inputPeerChat') {
+    if (isInputPeerChat(chat)) {
         for (const user of users) {
             const p = normalizeToInputUser(await this.resolvePeer(user))
             if (!p) continue
 
             const updates = await this.call({
                 _: 'messages.addChatUser',
-                chatId: input.chatId,
+                chatId: chat.chatId,
                 userId: p,
                 fwdLimit: forwardCount,
             })
             this._handleUpdate(updates)
         }
-    } else if (input._ === 'inputPeerChannel') {
+    } else if (isInputPeerChannel(chat)) {
         const updates = await this.call({
             _: 'channels.inviteToChannel',
-            channel: normalizeToInputChannel(chat)!,
+            channel: normalizeToInputChannel(chat),
             users:  await this.resolvePeerMany(
                 users as InputPeerLike[],
                 normalizeToInputUser

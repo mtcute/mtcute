@@ -4,7 +4,7 @@ import {
     MtCuteInvalidPeerTypeError,
 } from '../../types'
 import {
-    createUsersChatsIndex,
+    createUsersChatsIndex, isInputPeerChannel, isInputPeerChat, isInputPeerUser,
     normalizeToInputChannel,
     normalizeToInputPeer,
 } from '../../utils/peer-utils'
@@ -27,13 +27,15 @@ export async function getChatMember(
     userId: InputPeerLike
 ): Promise<ChatMember> {
     const user = normalizeToInputPeer(await this.resolvePeer(userId))
-    const chat = await this.resolvePeer(chatId)
-    const chatInput = normalizeToInputPeer(chat)
+    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
 
-    if (chatInput._ === 'inputPeerChat') {
+    if (isInputPeerChat(chat)) {
+        if (!isInputPeerUser(user))
+            throw new MtCuteInvalidPeerTypeError(userId, 'user')
+
         const res = await this.call({
             _: 'messages.getFullChat',
-            chatId: chatInput.chatId,
+            chatId: chat.chatId,
         })
 
         assertTypeIs(
@@ -60,10 +62,10 @@ export async function getChatMember(
         }
 
         throw new UserNotParticipantError()
-    } else if (chatInput._ === 'inputPeerChannel') {
+    } else if (isInputPeerChannel(chat)) {
         const res = await this.call({
             _: 'channels.getParticipant',
-            channel: normalizeToInputChannel(chat)!,
+            channel: normalizeToInputChannel(chat),
             participant: user,
         })
 

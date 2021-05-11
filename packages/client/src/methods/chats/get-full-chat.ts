@@ -1,7 +1,7 @@
 import { Chat, InputPeerLike, MtCuteArgumentError } from '../../types'
 import { TelegramClient } from '../../client'
 import {
-    INVITE_LINK_REGEX,
+    INVITE_LINK_REGEX, isInputPeerChannel, isInputPeerChat, isInputPeerUser,
     normalizeToInputChannel,
     normalizeToInputPeer,
     normalizeToInputUser,
@@ -38,24 +38,23 @@ export async function getFullChat(
         }
     }
 
-    const peer = await this.resolvePeer(chatId)
-    const input = normalizeToInputPeer(peer)
+    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
 
     let res: tl.messages.TypeChatFull | tl.TypeUserFull
-    if (input._ === 'inputPeerChannel') {
+    if (isInputPeerChannel(peer)) {
         res = await this.call({
             _: 'channels.getFullChannel',
-            channel: normalizeToInputChannel(peer)!
+            channel: normalizeToInputChannel(peer)
         })
-    } else if (input._ === 'inputPeerUser' || input._ === 'inputPeerSelf') {
+    } else if (isInputPeerUser(peer)) {
         res = await this.call({
             _: 'users.getFullUser',
             id: normalizeToInputUser(peer)!
         })
-    } else if (input._ === 'inputPeerChat') {
+    } else if (isInputPeerChat(peer)) {
         res = await this.call({
             _: 'messages.getFullChat',
-            chatId: input.chatId
+            chatId: peer.chatId
         })
     } else throw new Error('should not happen')
 

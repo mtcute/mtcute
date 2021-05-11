@@ -2,7 +2,9 @@ import { TelegramClient } from '../../client'
 import { MaybeArray } from '@mtcute/core'
 import {
     createUsersChatsIndex,
+    isInputPeerChannel,
     normalizeToInputChannel,
+    normalizeToInputPeer,
 } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 import { Message, InputPeerLike, MtCuteTypeAssertionError } from '../../types'
@@ -51,7 +53,7 @@ export async function getMessages(
     messageIds: MaybeArray<number>,
     fromReply = false
 ): Promise<MaybeArray<Message>> {
-    const peer = await this.resolvePeer(chatId)
+    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
 
     const isSingle = !Array.isArray(messageIds)
     if (isSingle) messageIds = [messageIds as number]
@@ -63,14 +65,11 @@ export async function getMessages(
     }))
 
     const res = await this.call(
-        peer._ === 'inputPeerChannel' ||
-            peer._ === 'inputChannel' ||
-            peer._ === 'inputPeerChannelFromMessage' ||
-            peer._ === 'inputChannelFromMessage'
+        isInputPeerChannel(peer)
             ? {
                   _: 'channels.getMessages',
                   id: ids,
-                  channel: normalizeToInputChannel(peer)!,
+                  channel: normalizeToInputChannel(peer),
               }
             : {
                   _: 'messages.getMessages',

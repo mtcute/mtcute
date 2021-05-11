@@ -2,6 +2,9 @@ import { Chat, InputPeerLike, MtCuteArgumentError } from '../../types'
 import { TelegramClient } from '../../client'
 import {
     INVITE_LINK_REGEX,
+    isInputPeerChannel,
+    isInputPeerChat,
+    isInputPeerUser,
     normalizeToInputChannel,
     normalizeToInputPeer,
     normalizeToInputUser,
@@ -26,37 +29,38 @@ export async function getChat(
         if (m) {
             const res = await this.call({
                 _: 'messages.checkChatInvite',
-                hash: m[1]
+                hash: m[1],
             })
 
             if (res._ === 'chatInvite') {
-                throw new MtCuteArgumentError(`You haven't joined ${JSON.stringify(res.title)}`)
+                throw new MtCuteArgumentError(
+                    `You haven't joined ${JSON.stringify(res.title)}`
+                )
             }
 
             return new Chat(this, res.chat)
         }
     }
 
-    const peer = await this.resolvePeer(chatId)
-    const input = normalizeToInputPeer(peer)
+    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
 
     let res: tl.TypeChat | tl.TypeUser
-    if (input._ === 'inputPeerChannel') {
+    if (isInputPeerChannel(peer)) {
         const r = await this.call({
             _: 'channels.getChannels',
-            id: [normalizeToInputChannel(peer)!]
+            id: [normalizeToInputChannel(peer)],
         })
         res = r.chats[0]
-    } else if (input._ === 'inputPeerUser' || input._ === 'inputPeerSelf') {
+    } else if (isInputPeerUser(peer)) {
         const r = await this.call({
             _: 'users.getUsers',
-            id: [normalizeToInputUser(peer)!]
+            id: [normalizeToInputUser(peer)],
         })
         res = r[0]
-    } else if (input._ === 'inputPeerChat') {
+    } else if (isInputPeerChat(peer)) {
         const r = await this.call({
             _: 'messages.getChats',
-            id: [input.chatId]
+            id: [peer.chatId],
         })
         res = r.chats[0]
     } else throw new Error('should not happen')
