@@ -23,10 +23,10 @@ export async function createGroup(
 ): Promise<Chat> {
     if (!Array.isArray(users)) users = [users]
 
-    const peers = (await Promise.all(
-        (users as InputPeerLike[])
-            .map(u => this.resolvePeer(u).then(normalizeToInputUser))
-    )).filter(Boolean) as tl.TypeInputUser[]
+    const peers =  await this.resolvePeerMany(
+        users as InputPeerLike[],
+        normalizeToInputUser
+    )
 
     const res = await this.call({
         _: 'messages.createChat',

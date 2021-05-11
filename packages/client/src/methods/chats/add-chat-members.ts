@@ -46,11 +46,10 @@ export async function addChatMembers(
         const updates = await this.call({
             _: 'channels.inviteToChannel',
             channel: normalizeToInputChannel(chat)!,
-            users: await Promise.all(
-                (users as InputPeerLike[]).map((u) =>
-                    this.resolvePeer(u).then(normalizeToInputUser)
-                )
-            ).then((res) => res.filter(Boolean)) as tl.TypeInputUser[],
+            users:  await this.resolvePeerMany(
+                users as InputPeerLike[],
+                normalizeToInputUser
+            ),
             fwdLimit: forwardCount,
         })
         this._handleUpdate(updates)

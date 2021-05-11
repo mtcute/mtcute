@@ -129,6 +129,7 @@ import { getMe } from './methods/users/get-me'
 import { getProfilePhotos } from './methods/users/get-profile-photos'
 import { getUsers } from './methods/users/get-users'
 import { iterProfilePhotos } from './methods/users/iter-profile-photos'
+import { resolvePeerMany } from './methods/users/resolve-peer-many'
 import { resolvePeer } from './methods/users/resolve-peer'
 import { setOffline } from './methods/users/set-offline'
 import { setProfilePhoto } from './methods/users/set-profile-photo'
@@ -2647,6 +2648,34 @@ export interface TelegramClient extends BaseTelegramClient {
         }
     ): AsyncIterableIterator<Photo>
     /**
+     * Get multiple `InputPeer`s at once,
+     * while also normalizing and removing
+     * peers that can't be normalized to that type.
+     * Uses `async-eager-pool` internally, with a
+     * limit of 10.
+     *
+     * @param peerIds  Peer Ids
+     * @param normalizer  Normalization function
+     */
+    resolvePeerMany<
+        T extends tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
+    >(
+        peerIds: InputPeerLike[],
+        normalizer: (
+            obj: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
+        ) => T | null
+    ): Promise<T[]>
+    /**
+     * Get multiple `InputPeer`s at once.
+     * Uses `async-eager-pool` internally, with a
+     * limit of 10.
+     *
+     * @param peerIds  Peer Ids
+     */
+    resolvePeerMany(
+        peerIds: InputPeerLike[]
+    ): Promise<(tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[]>
+    /**
      * Get the `InputPeer` of a known peer id.
      * Useful when an `InputPeer` is needed.
      *
@@ -2867,6 +2896,7 @@ export class TelegramClient extends BaseTelegramClient {
     getProfilePhotos = getProfilePhotos
     getUsers = getUsers
     iterProfilePhotos = iterProfilePhotos
+    resolvePeerMany = resolvePeerMany
     resolvePeer = resolvePeer
     setOffline = setOffline
     setProfilePhoto = setProfilePhoto

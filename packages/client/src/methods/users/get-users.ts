@@ -17,7 +17,9 @@ export async function getUsers(
 
 /**
  * Get information about multiple users.
- * You can retrieve up to 200 users at once
+ * You can retrieve up to 200 users at once.
+ *
+ * Note that order is not guaranteed.
  *
  * @param ids  Users' identifiers. Can be ID, username, phone number, `"me"`, `"self"` or TL object
  * @internal
@@ -35,13 +37,10 @@ export async function getUsers(
     const isArray = Array.isArray(ids)
     if (!isArray) ids = [ids as InputPeerLike]
 
-    const inputPeers = ((
-        await Promise.all(
-            (ids as InputPeerLike[]).map((it) =>
-                this.resolvePeer(it).then(normalizeToInputUser)
-            )
-        )
-    ).filter(Boolean) as unknown) as tl.TypeInputUser[]
+    const inputPeers = await this.resolvePeerMany(
+        ids as InputPeerLike[],
+        normalizeToInputUser
+    )
 
     let res = await this.call({
         _: 'users.getUsers',

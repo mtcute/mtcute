@@ -40,13 +40,10 @@ export async function deleteContacts(
     const single = !Array.isArray(userIds)
     if (single) userIds = [userIds as InputPeerLike]
 
-    const inputPeers = ((
-        await Promise.all(
-            (userIds as InputPeerLike[]).map((it) =>
-                this.resolvePeer(it).then(normalizeToInputUser)
-            )
-        )
-    ).filter(Boolean) as unknown) as tl.TypeInputUser[]
+    const inputPeers =  await this.resolvePeerMany(
+        userIds as InputPeerLike[],
+        normalizeToInputUser
+    )
 
     if (single && !inputPeers.length)
         throw new MtCuteInvalidPeerTypeError(
