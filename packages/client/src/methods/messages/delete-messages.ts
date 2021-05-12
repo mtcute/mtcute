@@ -31,7 +31,7 @@ export async function deleteMessages(
             channel,
             id: ids
         })
-        upd = createDummyUpdate(res.pts, res.ptsCount, (channel as tl.RawInputChannel).channelId)
+        upd = createDummyUpdate(res.pts, res.ptsCount, peer.channelId)
     } else {
         const res = await this.call({
             _: 'messages.deleteMessages',

@@ -95,6 +95,7 @@ import { sendMedia } from './methods/messages/send-media'
 import { sendText } from './methods/messages/send-text'
 import { sendTyping } from './methods/messages/send-typing'
 import { sendVote } from './methods/messages/send-vote'
+import { unpinAllMessages } from './methods/messages/unpin-all-messages'
 import { unpinMessage } from './methods/messages/unpin-message'
 import { initTakeoutSession } from './methods/misc/init-takeout-session'
 import {
@@ -2314,6 +2315,12 @@ export interface TelegramClient extends BaseTelegramClient {
         options: null | MaybeArray<number | Buffer>
     ): Promise<Poll>
     /**
+     * Unpin all pinned messages in a chat.
+     *
+     * @param chatId  Chat or user ID
+     */
+    unpinAllMessages(chatId: InputPeerLike): Promise<void>
+    /**
      * Unpin a message in a group, supergroup, channel or PM.
      *
      * For supergroups/channels, you must have appropriate permissions,
@@ -2937,6 +2944,7 @@ export class TelegramClient extends BaseTelegramClient {
     sendText = sendText
     sendTyping = sendTyping
     sendVote = sendVote
+    unpinAllMessages = unpinAllMessages
     unpinMessage = unpinMessage
     initTakeoutSession = initTakeoutSession
     registerParseMode = registerParseMode
