@@ -60,88 +60,99 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                 name = name.toLowerCase()
 
                 let entity: tl.TypeMessageEntity
-                if (name === 'b' || name === 'strong') {
-                    entity = {
-                        _: 'messageEntityBold',
-                        offset: plainText.length,
-                        length: 0,
-                    }
-                } else if (name === 'i' || name === 'em') {
-                    entity = {
-                        _: 'messageEntityItalic',
-                        offset: plainText.length,
-                        length: 0,
-                    }
-                } else if (name === 'u') {
-                    entity = {
-                        _: 'messageEntityUnderline',
-                        offset: plainText.length,
-                        length: 0,
-                    }
-                } else if (
-                    name === 's' ||
-                    name === 'del' ||
-                    name === 'strike'
-                ) {
-                    entity = {
-                        _: 'messageEntityStrike',
-                        offset: plainText.length,
-                        length: 0,
-                    }
-                } else if (name === 'blockquote') {
-                    entity = {
-                        _: 'messageEntityBlockquote',
-                        offset: plainText.length,
-                        length: 0,
-                    }
-                } else if (name === 'code') {
-                    entity = {
-                        _: 'messageEntityCode',
-                        offset: plainText.length,
-                        length: 0,
-                    }
-                } else if (name === 'pre') {
-                    entity = {
-                        _: 'messageEntityPre',
-                        offset: plainText.length,
-                        length: 0,
-                        language: attribs.language ?? '',
-                    }
-                } else if (name === 'a') {
-                    const url = attribs.href
-                    if (!url) return
+                switch (name) {
+                    case 'b':
+                    case 'strong':
+                        entity = {
+                            _: 'messageEntityBold',
+                            offset: plainText.length,
+                            length: 0,
+                        }
+                        break
+                    case 'i':
+                    case 'em':
+                        entity = {
+                            _: 'messageEntityItalic',
+                            offset: plainText.length,
+                            length: 0,
+                        }
+                        break
+                    case 'u':
+                        entity = {
+                            _: 'messageEntityUnderline',
+                            offset: plainText.length,
+                            length: 0,
+                        }
+                        break
+                    case 's':
+                    case 'del':
+                    case 'strike':
+                        entity = {
+                            _: 'messageEntityStrike',
+                            offset: plainText.length,
+                            length: 0,
+                        }
+                        break
+                    case 'blockquote':
+                        entity = {
+                            _: 'messageEntityBlockquote',
+                            offset: plainText.length,
+                            length: 0,
+                        }
+                        break
+                    case 'code':
+                        entity = {
+                            _: 'messageEntityCode',
+                            offset: plainText.length,
+                            length: 0,
+                        }
+                        break
+                    case 'pre':
+                        entity = {
+                            _: 'messageEntityPre',
+                            offset: plainText.length,
+                            length: 0,
+                            language: attribs.language ?? '',
+                        }
+                        break
+                    case 'a':
+                        const url = attribs.href
+                        if (!url) return
 
-                    const mention = MENTION_REGEX.exec(url)
-                    if (mention) {
-                        const accessHash = mention[2]
-                        if (accessHash) {
-                            entity = {
-                                _: 'inputMessageEntityMentionName',
-                                offset: plainText.length,
-                                length: 0,
-                                userId: {
-                                    _: 'inputUser',
+                        const mention = MENTION_REGEX.exec(url)
+                        if (mention) {
+                            const accessHash = mention[2]
+                            if (accessHash) {
+                                entity = {
+                                    _: 'inputMessageEntityMentionName',
+                                    offset: plainText.length,
+                                    length: 0,
+                                    userId: {
+                                        _: 'inputUser',
+                                        userId: parseInt(mention[1]),
+                                        accessHash: bigInt(accessHash, 16),
+                                    },
+                                }
+                            } else {
+                                entity = {
+                                    _: 'messageEntityMentionName',
+                                    offset: plainText.length,
+                                    length: 0,
                                     userId: parseInt(mention[1]),
-                                    accessHash: bigInt(accessHash, 16),
-                                },
+                                }
                             }
                         } else {
                             entity = {
-                                _: 'messageEntityMentionName',
+                                _: 'messageEntityTextUrl',
                                 offset: plainText.length,
                                 length: 0,
-                                userId: parseInt(mention[1]),
+                                url,
                             }
                         }
-                    } else {
-                        entity = {
-                            _: 'messageEntityTextUrl',
-                            offset: plainText.length,
-                            length: 0,
-                            url,
-                        }
-                    }
-                } else return
+                        break
+                    default:
+                        return
+                }
 
                 if (!(name in stacks)) {
                     stacks[name] = []
@@ -232,48 +243,56 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
             )
 
             const type = entity.type
-            if (
-                type === 'bold' ||
-                type === 'italic' ||
-                type === 'underline' ||
-                type === 'strikethrough'
-            ) {
-                html.push(`<${type[0]}>${entityText}</${type[0]}>`)
-            } else if (
-                type === 'code' ||
-                type === 'pre' ||
-                type === 'blockquote'
-            ) {
-                html.push(
-                    `<${type}${
-                        type === 'pre' && entity.language
-                            ? ` language="${entity.language}"`
-                            : ''
-                    }>${
-                        this._syntaxHighlighter
-                            ? this._syntaxHighlighter(
-                                  entityText,
-                                  entity.language!
-                              )
-                            : entityText
-                    }</${type}>`
-                )
-            } else if (type === 'email') {
-                html.push(`<a href="mailto:${entityText}">${entityText}</a>`)
-            } else if (type === 'url') {
-                html.push(`<a href="${entityText}">${entityText}</a>`)
-            } else if (type === 'text_link') {
-                html.push(
-                    `<a href="${HtmlMessageEntityParser.escape(
-                        entity.url!,
-                        true
-                    )}">${entityText}</a>`
-                )
-            } else if (type == 'text_mention') {
-                html.push(
-                    `<a href="tg://user?id=${entity.userId!}">${entityText}</a>`
-                )
-            } else skip = true
+            switch (type) {
+                case 'bold':
+                case 'italic':
+                case 'underline':
+                case 'strikethrough':
+                    html.push(`<${type[0]}>${entityText}</${type[0]}>`)
+                    break
+                case 'code':
+                case 'pre':
+                case 'blockquote':
+                    html.push(
+                        `<${type}${
+                            type === 'pre' && entity.language
+                                ? ` language="${entity.language}"`
+                                : ''
+                        }>${
+                            this._syntaxHighlighter
+                                ? this._syntaxHighlighter(
+                                      entityText,
+                                      entity.language!
+                                  )
+                                : entityText
+                        }</${type}>`
+                    )
+                    break
+                case 'email':
+                    html.push(
+                        `<a href="mailto:${entityText}">${entityText}</a>`
+                    )
+                    break
+                case 'url':
+                    html.push(`<a href="${entityText}">${entityText}</a>`)
+                    break
+                case 'text_link':
+                    html.push(
+                        `<a href="${HtmlMessageEntityParser.escape(
+                            entity.url!,
+                            true
+                        )}">${entityText}</a>`
+                    )
+                    break
+                case 'text_mention':
+                    html.push(
+                        `<a href="tg://user?id=${entity.userId!}">${entityText}</a>`
+                    )
+                    break
+                default:
+                    skip = true
+                    break
+            }
 
             lastOffset = relativeOffset + (skip ? 0 : length)
         }

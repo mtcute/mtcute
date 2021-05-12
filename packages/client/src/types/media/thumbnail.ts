@@ -75,29 +75,32 @@ export class Thumbnail extends FileLocation {
             | (() => tl.TypeInputFileLocation | Buffer)
         let size, width, height: number
 
-        if (sz._ === 'photoStrippedSize') {
-            location = strippedPhotoToJpg(sz.bytes)
-            width = height = NaN
-            size = location.length
-        } else if (sz._ === 'photoPathSize') {
-            // lazily
-            location = () => svgPathToFile(this._path!)
-            width = height = NaN
-            size = Infinity // this doesn't really matter
-        } else {
-            location = {
-                _:
-                    media._ === 'photo'
-                        ? 'inputPhotoFileLocation'
-                        : 'inputDocumentFileLocation',
-                id: media.id,
-                fileReference: media.fileReference,
-                accessHash: media.accessHash,
-                thumbSize: sz.type,
-            }
-            width = sz.w
-            height = sz.h
-            size = sz._ === 'photoSize' ? sz.size : Math.max(...sz.sizes)
+        switch (sz._) {
+            case 'photoStrippedSize':
+                location = strippedPhotoToJpg(sz.bytes)
+                width = height = NaN
+                size = location.length
+                break
+            case 'photoPathSize': // lazily
+                location = () => svgPathToFile(this._path!)
+                width = height = NaN
+                size = Infinity // this doesn't really matter
+                break
+            default:
+                location = {
+                    _:
+                        media._ === 'photo'
+                            ? 'inputPhotoFileLocation'
+                            : 'inputDocumentFileLocation',
+                    id: media.id,
+                    fileReference: media.fileReference,
+                    accessHash: media.accessHash,
+                    thumbSize: sz.type,
+                }
+                width = sz.w
+                height = sz.h
+                size = sz._ === 'photoSize' ? sz.size : Math.max(...sz.sizes)
+                break
         }
 
         super(client, location, size, media.dcId)

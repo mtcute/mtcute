@@ -208,8 +208,7 @@ async function _loadDifference(
             qts: 0,
         })
 
-        if (diff._ === 'updates.differenceEmpty')
-            return
+        if (diff._ === 'updates.differenceEmpty') return
 
         if (diff._ === 'updates.differenceTooLong') {
             this._pts = diff.pts
@@ -340,7 +339,8 @@ async function _loadChannelDifference(
             }
 
             diff.messages.forEach((message) => {
-                if (noDispatch && noDispatch.msg[channelId]?.[message.id]) return
+                if (noDispatch && noDispatch.msg[channelId]?.[message.id])
+                    return
 
                 this.dispatchUpdate(message, users, chats)
             })
@@ -409,351 +409,359 @@ export function _handleUpdate(
             // i tried my best to follow the documentation, but i still may have missed something.
             // feel free to contribute!
             // reference: https://core.telegram.org/api/updates
-            if (update._ === 'updatesTooLong') {
-                // "there are too many events pending to be pushed to the client", we need to fetch them manually
-                await _loadDifference.call(this, noDispatchIndex)
-            } else if (
-                update._ === 'updates' ||
-                update._ === 'updatesCombined'
-            ) {
-                // const seqStart =
-                //     update._ === 'updatesCombined'
-                //         ? update.seqStart
-                //         : update.seq
-                // const nextLocalSeq = this._seq + 1
-                //
-                // debug('received %s (seq_start=%d, seq_end=%d)', update._, seqStart, update.seq)
-                //
-                // if (nextLocalSeq > seqStart)
-                //     // "the updates were already applied, and must be ignored"
-                //     return
-                // if (nextLocalSeq < seqStart)
-                //     // "there's an updates gap that must be filled"
-                //     // loading difference will also load any updates contained
-                //     // in this update, so we discard it
-                //     return await _loadDifference.call(this)
+            switch (update._) {
+                case 'updatesTooLong': // "there are too many events pending to be pushed to the client", we need to fetch them manually
+                    await _loadDifference.call(this, noDispatchIndex)
+                    break
+                case 'updates':
+                case 'updatesCombined': {
+                    // const seqStart =
+                    //     update._ === 'updatesCombined'
+                    //         ? update.seqStart
+                    //         : update.seq
+                    // const nextLocalSeq = this._seq + 1
+                    //
+                    // debug('received %s (seq_start=%d, seq_end=%d)', update._, seqStart, update.seq)
+                    //
+                    // if (nextLocalSeq > seqStart)
+                    //     // "the updates were already applied, and must be ignored"
+                    //     return
+                    // if (nextLocalSeq < seqStart)
+                    //     // "there's an updates gap that must be filled"
+                    //     // loading difference will also load any updates contained
+                    //     // in this update, so we discard it
+                    //     return await _loadDifference.call(this)
 
-                await this._cachePeersFrom(update)
-                const { users, chats } = createUsersChatsIndex(update)
+                    await this._cachePeersFrom(update)
+                    const { users, chats } = createUsersChatsIndex(update)
 
-                for (const upd of update.updates) {
-                    if (upd._ === 'updateChannelTooLong') {
-                        if (upd.pts) {
-                            this._cpts[upd.channelId] = upd.pts
-                        }
-                        await _loadChannelDifference.call(
-                            this,
-                            upd.channelId,
-                            noDispatchIndex
-                        )
-                        continue
-                    }
-
-                    const channelId = extractChannelIdFromUpdate(upd)
-                    const pts = 'pts' in upd ? upd.pts : undefined
-                    const ptsCount =
-                        'ptsCount' in upd ? upd.ptsCount : undefined
-
-                    if (pts !== undefined && ptsCount !== undefined) {
-                        let nextLocalPts
-                        if (channelId === undefined)
-                            nextLocalPts = this._pts + ptsCount
-                        else if (channelId in this._cpts)
-                            nextLocalPts = this._cpts[channelId] + ptsCount
-                        else {
-                            const saved = await this.storage.getChannelPts(
-                                channelId
-                            )
-                            if (saved) {
-                                this._cpts[channelId] = saved
-                                nextLocalPts = saved + ptsCount
-                            } else {
-                                nextLocalPts = null
+                    for (const upd of update.updates) {
+                        if (upd._ === 'updateChannelTooLong') {
+                            if (upd.pts) {
+                                this._cpts[upd.channelId] = upd.pts
                             }
+                            await _loadChannelDifference.call(
+                                this,
+                                upd.channelId,
+                                noDispatchIndex
+                            )
+                            continue
                         }
 
-                        if (nextLocalPts) {
-                            if (nextLocalPts > pts)
-                                // "the update was already applied, and must be ignored"
-                                return
-                            if (nextLocalPts < pts)
-                                if (channelId) {
-                                    // "there's an update gap that must be filled"
-                                    await _loadChannelDifference.call(
-                                        this,
-                                        channelId,
-                                        noDispatchIndex
-                                    )
-                                    continue
+                        const channelId = extractChannelIdFromUpdate(upd)
+                        const pts = 'pts' in upd ? upd.pts : undefined
+                        const ptsCount =
+                            'ptsCount' in upd ? upd.ptsCount : undefined
+
+                        if (pts !== undefined && ptsCount !== undefined) {
+                            let nextLocalPts
+                            if (channelId === undefined)
+                                nextLocalPts = this._pts + ptsCount
+                            else if (channelId in this._cpts)
+                                nextLocalPts = this._cpts[channelId] + ptsCount
+                            else {
+                                const saved = await this.storage.getChannelPts(
+                                    channelId
+                                )
+                                if (saved) {
+                                    this._cpts[channelId] = saved
+                                    nextLocalPts = saved + ptsCount
                                 } else {
-                                    return await _loadDifference.call(this)
+                                    nextLocalPts = null
                                 }
-                        }
+                            }
 
-                        if (!isDummyUpdate(upd) && !noDispatch) {
+                            if (nextLocalPts) {
+                                if (nextLocalPts > pts)
+                                    // "the update was already applied, and must be ignored"
+                                    return
+                                if (nextLocalPts < pts)
+                                    if (channelId) {
+                                        // "there's an update gap that must be filled"
+                                        await _loadChannelDifference.call(
+                                            this,
+                                            channelId,
+                                            noDispatchIndex
+                                        )
+                                        continue
+                                    } else {
+                                        return await _loadDifference.call(this)
+                                    }
+                            }
+
+                            if (!isDummyUpdate(upd) && !noDispatch) {
+                                this.dispatchUpdate(upd, users, chats)
+                            }
+
+                            if (channelId) {
+                                this._cpts[channelId] = pts
+                            } else {
+                                this._pts = pts
+                            }
+                        } else if (!noDispatch) {
                             this.dispatchUpdate(upd, users, chats)
                         }
+                    }
 
-                        if (channelId) {
-                            this._cpts[channelId] = pts
-                        } else {
-                            this._pts = pts
-                        }
+                    if (!isDummyUpdates(update)) {
+                        // this._seq = update.seq
+                        this._date = update.date
+                    }
+                    break
+                }
+                case 'updateShort': {
+                    const upd = update.update
+                    if (upd._ === 'updateDcOptions' && this._config) {
+                        ;(this._config as tl.Mutable<tl.TypeConfig>).dcOptions =
+                            upd.dcOptions
+                    } else if (upd._ === 'updateConfig') {
+                        this._config = await this.call({ _: 'help.getConfig' })
                     } else if (!noDispatch) {
-                        this.dispatchUpdate(upd, users, chats)
+                        this.dispatchUpdate(upd, {}, {})
                     }
-                }
 
-                if (!isDummyUpdates(update)) {
-                    // this._seq = update.seq
                     this._date = update.date
+                    break
                 }
-            } else if (update._ === 'updateShort') {
-                const upd = update.update
-                if (upd._ === 'updateDcOptions' && this._config) {
-                    ;(this._config as tl.Mutable<tl.TypeConfig>).dcOptions =
-                        upd.dcOptions
-                } else if (upd._ === 'updateConfig') {
-                    this._config = await this.call({ _: 'help.getConfig' })
-                } else if (!noDispatch) {
-                    this.dispatchUpdate(upd, {}, {})
-                }
+                case 'updateShortMessage': {
+                    if (noDispatch) return
 
-                this._date = update.date
-            } else if (update._ === 'updateShortMessage') {
-                if (noDispatch) return
-
-                const message: tl.RawMessage = {
-                    _: 'message',
-                    out: update.out,
-                    mentioned: update.mentioned,
-                    mediaUnread: update.mediaUnread,
-                    silent: update.silent,
-                    id: update.id,
-                    fromId: {
-                        _: 'peerUser',
-                        userId: update.out ? this._userId! : update.userId,
-                    },
-                    peerId: {
-                        _: 'peerUser',
-                        userId: update.userId,
-                    },
-                    fwdFrom: update.fwdFrom,
-                    viaBotId: update.viaBotId,
-                    replyTo: update.replyTo,
-                    date: update.date,
-                    message: update.message,
-                    entities: update.entities,
-                    ttlPeriod: update.ttlPeriod,
-                }
-
-                // now we need to fetch info about users involved.
-                // since this update is only used for PM, we can just
-                // fetch the current user and the other user.
-                // additionally, we need to handle "forwarded from"
-                // field, as it may contain a user OR a channel
-                const fwdFrom = update.fwdFrom?.fromId
-                    ? peerToInputPeer(update.fwdFrom.fromId)
-                    : undefined
-
-                let rawUsers: tl.TypeUser[]
-                {
-                    const id: tl.TypeInputUser[] = [
-                        { _: 'inputUserSelf' },
-                        {
-                            _: 'inputUser',
+                    const message: tl.RawMessage = {
+                        _: 'message',
+                        out: update.out,
+                        mentioned: update.mentioned,
+                        mediaUnread: update.mediaUnread,
+                        silent: update.silent,
+                        id: update.id,
+                        fromId: {
+                            _: 'peerUser',
+                            userId: update.out ? this._userId! : update.userId,
+                        },
+                        peerId: {
+                            _: 'peerUser',
                             userId: update.userId,
-                            accessHash: bigInt.zero,
                         },
-                    ]
-
-                    if (fwdFrom) {
-                        const inputUser = normalizeToInputUser(fwdFrom)
-                        if (inputUser) id.push(inputUser)
+                        fwdFrom: update.fwdFrom,
+                        viaBotId: update.viaBotId,
+                        replyTo: update.replyTo,
+                        date: update.date,
+                        message: update.message,
+                        entities: update.entities,
+                        ttlPeriod: update.ttlPeriod,
                     }
 
-                    rawUsers = await this.call({
-                        _: 'users.getUsers',
-                        id,
-                    })
+                    // now we need to fetch info about users involved.
+                    // since this update is only used for PM, we can just
+                    // fetch the current user and the other user.
+                    // additionally, we need to handle "forwarded from"
+                    // field, as it may contain a user OR a channel
+                    const fwdFrom = update.fwdFrom?.fromId
+                        ? peerToInputPeer(update.fwdFrom.fromId)
+                        : undefined
 
-                    if (rawUsers.length !== id.length) {
-                        // other user failed to load.
-                        // first try checking for input peer in storage
-                        const saved = await this.storage.getPeerById(
-                            update.userId
-                        )
-                        if (saved) {
-                            id[1] = normalizeToInputUser(saved)!
+                    let rawUsers: tl.TypeUser[]
+                    {
+                        const id: tl.TypeInputUser[] = [
+                            { _: 'inputUserSelf' },
+                            {
+                                _: 'inputUser',
+                                userId: update.userId,
+                                accessHash: bigInt.zero,
+                            },
+                        ]
 
-                            rawUsers = await this.call({
-                                _: 'users.getUsers',
-                                id,
-                            })
+                        if (fwdFrom) {
+                            const inputUser = normalizeToInputUser(fwdFrom)
+                            if (inputUser) id.push(inputUser)
                         }
-                    }
-                    if (rawUsers.length !== id.length) {
-                        // not saved (or invalid hash), not found by id
-                        // find that user in dialogs (since the update
-                        // is about an incoming message, dialog with that
-                        // user should be one of the first)
-                        const dialogs = await this.call({
-                            _: 'messages.getDialogs',
-                            offsetDate: 0,
-                            offsetId: 0,
-                            offsetPeer: { _: 'inputPeerEmpty' },
-                            limit: 20,
-                            hash: 0,
+
+                        rawUsers = await this.call({
+                            _: 'users.getUsers',
+                            id,
                         })
-                        if (dialogs._ === 'messages.dialogsNotModified') return
 
-                        const user = dialogs.users.find(
-                            (it) => it.id === update.userId
-                        )
-                        if (!user) {
-                            debug(
-                                "received updateShortMessage, but wasn't able to find User"
+                        if (rawUsers.length !== id.length) {
+                            // other user failed to load.
+                            // first try checking for input peer in storage
+                            const saved = await this.storage.getPeerById(
+                                update.userId
                             )
-                            return
+                            if (saved) {
+                                id[1] = normalizeToInputUser(saved)!
+
+                                rawUsers = await this.call({
+                                    _: 'users.getUsers',
+                                    id,
+                                })
+                            }
                         }
-                        rawUsers.push(user)
+                        if (rawUsers.length !== id.length) {
+                            // not saved (or invalid hash), not found by id
+                            // find that user in dialogs (since the update
+                            // is about an incoming message, dialog with that
+                            // user should be one of the first)
+                            const dialogs = await this.call({
+                                _: 'messages.getDialogs',
+                                offsetDate: 0,
+                                offsetId: 0,
+                                offsetPeer: { _: 'inputPeerEmpty' },
+                                limit: 20,
+                                hash: 0,
+                            })
+                            if (dialogs._ === 'messages.dialogsNotModified')
+                                return
+
+                            const user = dialogs.users.find(
+                                (it) => it.id === update.userId
+                            )
+                            if (!user) {
+                                debug(
+                                    "received updateShortMessage, but wasn't able to find User"
+                                )
+                                return
+                            }
+                            rawUsers.push(user)
+                        }
                     }
+                    let rawChats: tl.TypeChat[] = []
+                    if (fwdFrom) {
+                        const inputChannel = normalizeToInputChannel(fwdFrom)
+                        if (inputChannel)
+                            rawChats = await this.call({
+                                _: 'channels.getChannels',
+                                id: [inputChannel],
+                            }).then((res) => res.chats)
+                    }
+
+                    this._date = update.date
+                    this._pts = update.pts
+
+                    const { users, chats } = createUsersChatsIndex({
+                        users: rawUsers,
+                        chats: rawChats,
+                    })
+                    this.dispatchUpdate(message, users, chats)
+                    break
                 }
-                let rawChats: tl.TypeChat[] = []
-                if (fwdFrom) {
-                    const inputChannel = normalizeToInputChannel(fwdFrom)
-                    if (inputChannel)
-                        rawChats = await this.call({
-                            _: 'channels.getChannels',
-                            id: [inputChannel],
-                        }).then((res) => res.chats)
-                }
+                case 'updateShortChatMessage': {
+                    if (noDispatch) return
 
-                this._date = update.date
-                this._pts = update.pts
-
-                const { users, chats } = createUsersChatsIndex({
-                    users: rawUsers,
-                    chats: rawChats,
-                })
-                this.dispatchUpdate(message, users, chats)
-            } else if (update._ === 'updateShortChatMessage') {
-                if (noDispatch) return
-
-                const message: tl.RawMessage = {
-                    _: 'message',
-                    out: update.out,
-                    mentioned: update.mentioned,
-                    mediaUnread: update.mediaUnread,
-                    silent: update.silent,
-                    id: update.id,
-                    fromId: {
-                        _: 'peerUser',
-                        userId: update.fromId,
-                    },
-                    peerId: {
-                        _: 'peerChat',
-                        chatId: update.chatId,
-                    },
-                    fwdFrom: update.fwdFrom,
-                    viaBotId: update.viaBotId,
-                    replyTo: update.replyTo,
-                    date: update.date,
-                    message: update.message,
-                    entities: update.entities,
-                    ttlPeriod: update.ttlPeriod,
-                }
-
-                // similarly to updateShortMessage, we need to fetch the sender
-                // user and the chat, and also handle "forwarded from" info.
-                const fwdFrom = update.fwdFrom?.fromId
-                    ? peerToInputPeer(update.fwdFrom.fromId)
-                    : undefined
-
-                let rawUsers: tl.TypeUser[]
-                {
-                    const id: tl.TypeInputUser[] = [
-                        {
-                            _: 'inputUser',
+                    const message: tl.RawMessage = {
+                        _: 'message',
+                        out: update.out,
+                        mentioned: update.mentioned,
+                        mediaUnread: update.mediaUnread,
+                        silent: update.silent,
+                        id: update.id,
+                        fromId: {
+                            _: 'peerUser',
                             userId: update.fromId,
-                            accessHash: bigInt.zero,
                         },
-                    ]
+                        peerId: {
+                            _: 'peerChat',
+                            chatId: update.chatId,
+                        },
+                        fwdFrom: update.fwdFrom,
+                        viaBotId: update.viaBotId,
+                        replyTo: update.replyTo,
+                        date: update.date,
+                        message: update.message,
+                        entities: update.entities,
+                        ttlPeriod: update.ttlPeriod,
+                    }
+
+                    // similarly to updateShortMessage, we need to fetch the sender
+                    // user and the chat, and also handle "forwarded from" info.
+                    const fwdFrom = update.fwdFrom?.fromId
+                        ? peerToInputPeer(update.fwdFrom.fromId)
+                        : undefined
+
+                    let rawUsers: tl.TypeUser[]
+                    {
+                        const id: tl.TypeInputUser[] = [
+                            {
+                                _: 'inputUser',
+                                userId: update.fromId,
+                                accessHash: bigInt.zero,
+                            },
+                        ]
+
+                        if (fwdFrom) {
+                            const inputUser = normalizeToInputUser(fwdFrom)
+                            if (inputUser) id.push(inputUser)
+                        }
+
+                        rawUsers = await this.call({
+                            _: 'users.getUsers',
+                            id,
+                        })
+
+                        if (rawUsers.length !== id.length) {
+                            // user failed to load.
+                            // first try checking for input peer in storage
+                            const saved = await this.storage.getPeerById(
+                                update.fromId
+                            )
+                            if (saved) {
+                                id[0] = normalizeToInputUser(saved)!
+
+                                rawUsers = await this.call({
+                                    _: 'users.getUsers',
+                                    id,
+                                })
+                            }
+                        }
+                        if (rawUsers.length !== id.length) {
+                            // not saved (or invalid hash), not found by id
+                            // find that user in chat participants list
+                            const res = await this.call({
+                                _: 'messages.getFullChat',
+                                chatId: update.chatId,
+                            })
+
+                            const user = res.users.find(
+                                (it) => it.id === update.fromId
+                            )
+                            if (!user) {
+                                debug(
+                                    "received updateShortChatMessage, but wasn't able to find User"
+                                )
+                                return
+                            }
+                            rawUsers.push(user)
+                        }
+                    }
+                    const rawChats = await this.call({
+                        _: 'messages.getChats',
+                        id: [update.chatId],
+                    }).then((res) => res.chats)
 
                     if (fwdFrom) {
-                        const inputUser = normalizeToInputUser(fwdFrom)
-                        if (inputUser) id.push(inputUser)
-                    }
-
-                    rawUsers = await this.call({
-                        _: 'users.getUsers',
-                        id,
-                    })
-
-                    if (rawUsers.length !== id.length) {
-                        // user failed to load.
-                        // first try checking for input peer in storage
-                        const saved = await this.storage.getPeerById(
-                            update.fromId
-                        )
-                        if (saved) {
-                            id[0] = normalizeToInputUser(saved)!
-
-                            rawUsers = await this.call({
-                                _: 'users.getUsers',
-                                id,
+                        const inputChannel = normalizeToInputChannel(fwdFrom)
+                        if (inputChannel) {
+                            const res = await this.call({
+                                _: 'channels.getChannels',
+                                id: [inputChannel],
                             })
+                            rawChats.push(...res.chats)
                         }
                     }
-                    if (rawUsers.length !== id.length) {
-                        // not saved (or invalid hash), not found by id
-                        // find that user in chat participants list
-                        const res = await this.call({
-                            _: 'messages.getFullChat',
-                            chatId: update.chatId,
-                        })
 
-                        const user = res.users.find(
-                            (it) => it.id === update.fromId
-                        )
-                        if (!user) {
-                            debug(
-                                "received updateShortChatMessage, but wasn't able to find User"
-                            )
-                            return
-                        }
-                        rawUsers.push(user)
-                    }
+                    this._date = update.date
+                    this._pts = update.pts
+
+                    const { users, chats } = createUsersChatsIndex({
+                        users: rawUsers,
+                        chats: rawChats,
+                    })
+                    this.dispatchUpdate(message, users, chats)
+                    break
                 }
-                const rawChats = await this.call({
-                    _: 'messages.getChats',
-                    id: [update.chatId],
-                }).then((res) => res.chats)
-
-                if (fwdFrom) {
-                    const inputChannel = normalizeToInputChannel(fwdFrom)
-                    if (inputChannel) {
-                        const res = await this.call({
-                            _: 'channels.getChannels',
-                            id: [inputChannel],
-                        })
-                        rawChats.push(...res.chats)
-                    }
-                }
-
-                this._date = update.date
-                this._pts = update.pts
-
-                const { users, chats } = createUsersChatsIndex({
-                    users: rawUsers,
-                    chats: rawChats,
-                })
-                this.dispatchUpdate(message, users, chats)
-            } else if (update._ === 'updateShortSentMessage') {
-                // only store the new pts and date values
-                // we never need to dispatch this
-                this._date = update.date
-                this._pts = update.pts
+                case 'updateShortSentMessage': // only store the new pts and date values
+                    // we never need to dispatch this
+                    this._date = update.date
+                    this._pts = update.pts
+                    break
             }
         })
         .catch((err) => this._emitError(err))

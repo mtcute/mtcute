@@ -209,10 +209,20 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                     | 'Underline'
                     | 'Strike'
                     | null = null
-                if (c === '_') type = 'Italic'
-                else if (c === '*') type = 'Bold'
-                else if (c === '-') type = 'Underline'
-                else if (c === '~') type = 'Strike'
+                switch (c) {
+                    case '_':
+                        type = 'Italic'
+                        break
+                    case '*':
+                        type = 'Bold'
+                        break
+                    case '-':
+                        type = 'Underline'
+                        break
+                    case '~':
+                        type = 'Strike'
+                        break
+                }
 
                 if (type) {
                     if (!(type in stacks)) stacks[type] = []
@@ -288,32 +298,43 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
             }
 
             let startTag, endTag: string
-            if (type === 'bold') {
-                startTag = endTag = TAG_BOLD
-            } else if (type === 'italic') {
-                startTag = endTag = TAG_ITALIC
-            } else if (type === 'underline') {
-                startTag = endTag = TAG_UNDERLINE
-            } else if (type === 'strikethrough') {
-                startTag = endTag = TAG_STRIKE
-            } else if (type === 'code') {
-                startTag = endTag = TAG_CODE
-            } else if (type === 'pre') {
-                startTag = TAG_PRE
+            switch (type) {
+                case 'bold':
+                    startTag = endTag = TAG_BOLD
+                    break
+                case 'italic':
+                    startTag = endTag = TAG_ITALIC
+                    break
+                case 'underline':
+                    startTag = endTag = TAG_UNDERLINE
+                    break
+                case 'strikethrough':
+                    startTag = endTag = TAG_STRIKE
+                    break
+                case 'code':
+                    startTag = endTag = TAG_CODE
+                    break
+                case 'pre':
+                    startTag = TAG_PRE
 
-                if (entity.language) {
-                    startTag += entity.language
-                }
+                    if (entity.language) {
+                        startTag += entity.language
+                    }
 
-                startTag += '\n'
-                endTag = '\n' + TAG_PRE
-            } else if (type === 'text_link') {
-                startTag = '['
-                endTag = `](${entity.url!})`
-            } else if (type === 'text_mention') {
-                startTag = '['
-                endTag = `](tg://user?id=${entity.userId!})`
-            } else continue
+                    startTag += '\n'
+                    endTag = '\n' + TAG_PRE
+                    break
+                case 'text_link':
+                    startTag = '['
+                    endTag = `](${entity.url!})`
+                    break
+                case 'text_mention':
+                    startTag = '['
+                    endTag = `](tg://user?id=${entity.userId!})`
+                    break
+                default:
+                    continue
+            }
 
             insert.push([start, startTag])
             insert.push([end, endTag])

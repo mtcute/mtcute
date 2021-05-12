@@ -126,21 +126,29 @@ export class User {
             ret = 'long_time_ago'
         } else if (bot) {
             ret = 'bot'
-        } else if (us._ === 'userStatusOnline') {
-            ret = 'online'
-            date = new Date(us.expires * 1000)
-        } else if (us._ === 'userStatusOffline') {
-            ret = 'offline'
-            date = new Date(us.wasOnline * 1000)
-        } else if (us._ === 'userStatusRecently') {
-            ret = 'recently'
-        } else if (us._ === 'userStatusLastWeek') {
-            ret = 'within_week'
-        } else if (us._ === 'userStatusLastMonth') {
-            ret = 'within_month'
-        } else {
-            ret = 'long_time_ago'
-        }
+        } else
+            switch (us._) {
+                case 'userStatusOnline':
+                    ret = 'online'
+                    date = new Date(us.expires * 1000)
+                    break
+                case 'userStatusOffline':
+                    ret = 'offline'
+                    date = new Date(us.wasOnline * 1000)
+                    break
+                case 'userStatusRecently':
+                    ret = 'recently'
+                    break
+                case 'userStatusLastWeek':
+                    ret = 'within_week'
+                    break
+                case 'userStatusLastMonth':
+                    ret = 'within_month'
+                    break
+                default:
+                    ret = 'long_time_ago'
+                    break
+            }
 
         return {
             status: ret,

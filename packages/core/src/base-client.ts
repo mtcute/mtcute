@@ -652,39 +652,45 @@ export class BaseTelegramClient {
                 continue
             }
 
-            if (peer._ === 'user') {
-                parsedPeers.push({
-                    id: peer.id,
-                    accessHash: peer.accessHash!,
-                    username: peer.username?.toLowerCase() ?? null,
-                    phone: peer.phone ?? null,
-                    type: peer.bot ? 'bot' : 'user',
-                    updated: 0,
-                    fromMessage: peer.fromMessage,
-                })
-            } else if (peer._ === 'chat' || peer._ === 'chatForbidden') {
-                parsedPeers.push({
-                    id: -peer.id,
-                    accessHash: bigInt.zero,
-                    username: null,
-                    phone: null,
-                    type: 'group',
-                    updated: 0,
-                    fromMessage: peer.fromMessage,
-                })
-            } else if (peer._ === 'channel' || peer._ === 'channelForbidden') {
-                parsedPeers.push({
-                    id: MAX_CHANNEL_ID - peer.id,
-                    accessHash: peer.accessHash!,
-                    username:
-                        peer._ === 'channel'
-                            ? peer.username?.toLowerCase() ?? null
-                            : null,
-                    phone: null,
-                    type: peer.broadcast ? 'channel' : 'supergroup',
-                    updated: 0,
-                    fromMessage: peer.fromMessage,
-                })
+            switch (peer._) {
+                case 'user':
+                    parsedPeers.push({
+                        id: peer.id,
+                        accessHash: peer.accessHash!,
+                        username: peer.username?.toLowerCase() ?? null,
+                        phone: peer.phone ?? null,
+                        type: peer.bot ? 'bot' : 'user',
+                        updated: 0,
+                        fromMessage: peer.fromMessage,
+                    })
+                    break
+                case 'chat':
+                case 'chatForbidden':
+                    parsedPeers.push({
+                        id: -peer.id,
+                        accessHash: bigInt.zero,
+                        username: null,
+                        phone: null,
+                        type: 'group',
+                        updated: 0,
+                        fromMessage: peer.fromMessage,
+                    })
+                    break
+                case 'channel':
+                case 'channelForbidden':
+                    parsedPeers.push({
+                        id: MAX_CHANNEL_ID - peer.id,
+                        accessHash: peer.accessHash!,
+                        username:
+                            peer._ === 'channel'
+                                ? peer.username?.toLowerCase() ?? null
+                                : null,
+                        phone: null,
+                        type: peer.broadcast ? 'channel' : 'supergroup',
+                        updated: 0,
+                        fromMessage: peer.fromMessage,
+                    })
+                    break
             }
         }
 

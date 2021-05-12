@@ -272,22 +272,26 @@ export class Message {
                 if (fwd.fromName) {
                     sender = fwd.fromName
                 } else if (fwd.fromId) {
-                    if (fwd.fromId._ === 'peerChannel') {
-                        sender = new Chat(
-                            this.client,
-                            this._chats[fwd.fromId.channelId]
-                        )
-                    } else if (fwd.fromId._ === 'peerUser') {
-                        sender = new User(
-                            this.client,
-                            this._users[fwd.fromId.userId]
-                        )
-                    } else
-                        throw new MtCuteTypeAssertionError(
-                            'Message#forward (@ raw.fwdFrom.fromId)',
-                            'peerUser | peerChannel',
-                            fwd.fromId._
-                        )
+                    switch (fwd.fromId._) {
+                        case 'peerChannel':
+                            sender = new Chat(
+                                this.client,
+                                this._chats[fwd.fromId.channelId]
+                            )
+                            break
+                        case 'peerUser':
+                            sender = new User(
+                                this.client,
+                                this._users[fwd.fromId.userId]
+                            )
+                            break
+                        default:
+                            throw new MtCuteTypeAssertionError(
+                                'Message#forward (@ raw.fwdFrom.fromId)',
+                                'peerUser | peerChannel',
+                                fwd.fromId._
+                            )
+                    }
                 } else {
                     this._forward = null
                     return this._forward
@@ -431,31 +435,39 @@ export class Message {
             } else {
                 const rm = this.raw.replyMarkup
                 let markup: ReplyMarkup | null
-                if (rm._ === 'replyKeyboardHide') {
-                    markup = {
-                        type: 'reply_hide',
-                        selective: rm.selective,
-                    }
-                } else if (rm._ === 'replyKeyboardForceReply') {
-                    markup = {
-                        type: 'force_reply',
-                        singleUse: rm.singleUse,
-                        selective: rm.selective,
-                    }
-                } else if (rm._ === 'replyKeyboardMarkup') {
-                    markup = {
-                        type: 'reply',
-                        resize: rm.resize,
-                        singleUse: rm.singleUse,
-                        selective: rm.selective,
-                        buttons: BotKeyboard._rowsTo2d(rm.rows),
-                    }
-                } else if (rm._ === 'replyInlineMarkup') {
-                    markup = {
-                        type: 'inline',
-                        buttons: BotKeyboard._rowsTo2d(rm.rows),
-                    }
-                } else markup = null
+                switch (rm._) {
+                    case 'replyKeyboardHide':
+                        markup = {
+                            type: 'reply_hide',
+                            selective: rm.selective,
+                        }
+                        break
+                    case 'replyKeyboardForceReply':
+                        markup = {
+                            type: 'force_reply',
+                            singleUse: rm.singleUse,
+                            selective: rm.selective,
+                        }
+                        break
+                    case 'replyKeyboardMarkup':
+                        markup = {
+                            type: 'reply',
+                            resize: rm.resize,
+                            singleUse: rm.singleUse,
+                            selective: rm.selective,
+                            buttons: BotKeyboard._rowsTo2d(rm.rows),
+                        }
+                        break
+                    case 'replyInlineMarkup':
+                        markup = {
+                            type: 'inline',
+                            buttons: BotKeyboard._rowsTo2d(rm.rows),
+                        }
+                        break
+                    default:
+                        markup = null
+                        break
+                }
 
                 this._markup = markup
             }

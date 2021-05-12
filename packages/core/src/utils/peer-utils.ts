@@ -74,9 +74,14 @@ export function getBasicPeerType(peer: tl.TypePeer | number): BasicPeerType {
 
 export function markedPeerIdToBare(peerId: number): number {
     const type = getBasicPeerType(peerId)
-    if (type === 'user') return peerId
-    else if (type === 'chat') return -peerId
-    else if (type === 'channel') return MAX_CHANNEL_ID - peerId
+    switch (type) {
+        case 'user':
+            return peerId
+        case 'chat':
+            return -peerId
+        case 'channel':
+            return MAX_CHANNEL_ID - peerId
+    }
 
     throw new Error('Invalid marked peer id')
 }

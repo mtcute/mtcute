@@ -56,33 +56,37 @@ export async function resolvePeer(
 
     const peerType = getBasicPeerType(peerId)
 
-    if (peerType === 'user') {
-        await this.call({
-            _: 'users.getUsers',
-            id: [
-                {
-                    _: 'inputUser',
-                    userId: peerId,
-                    accessHash: bigInt.zero,
-                },
-            ],
-        })
-    } else if (peerType === 'chat') {
-        await this.call({
-            _: 'messages.getChats',
-            id: [-peerId],
-        })
-    } else if (peerType === 'channel') {
-        await this.call({
-            _: 'channels.getChannels',
-            id: [
-                {
-                    _: 'inputChannel',
-                    channelId: MAX_CHANNEL_ID - peerId,
-                    accessHash: bigInt.zero,
-                },
-            ],
-        })
+    switch (peerType) {
+        case 'user':
+            await this.call({
+                _: 'users.getUsers',
+                id: [
+                    {
+                        _: 'inputUser',
+                        userId: peerId,
+                        accessHash: bigInt.zero,
+                    },
+                ],
+            })
+            break
+        case 'chat':
+            await this.call({
+                _: 'messages.getChats',
+                id: [-peerId],
+            })
+            break
+        case 'channel':
+            await this.call({
+                _: 'channels.getChannels',
+                id: [
+                    {
+                        _: 'inputChannel',
+                        channelId: MAX_CHANNEL_ID - peerId,
+                        accessHash: bigInt.zero,
+                    },
+                ],
+            })
+            break
     }
 
     const fromStorage = await this.storage.getPeerById(peerId)

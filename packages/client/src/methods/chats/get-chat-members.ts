@@ -102,24 +102,31 @@ export async function getChatMembers(
         const type = params.type ?? 'recent'
 
         let filter: tl.TypeChannelParticipantsFilter
-        if (type === 'all') {
-            filter = { _: 'channelParticipantsSearch', q }
-        } else if (type === 'banned') {
-            filter = { _: 'channelParticipantsKicked', q }
-        } else if (type === 'restricted') {
-            filter = { _: 'channelParticipantsBanned', q }
-        } else if (type === 'mention') {
-            filter = { _: 'channelParticipantsMentions', q }
-        } else if (type === 'bots') {
-            filter = { _: 'channelParticipantsBots' }
-        } else if (type === 'recent') {
-            filter = { _: 'channelParticipantsRecent' }
-        } else if (type === 'admins') {
-            filter = { _: 'channelParticipantsAdmins' }
-        } else if (type === 'contacts') {
-            filter = { _: 'channelParticipantsContacts', q }
-        } else {
-            return type as never
+        switch (type) {
+            case 'all':
+                filter = { _: 'channelParticipantsSearch', q }
+                break
+            case 'banned':
+                filter = { _: 'channelParticipantsKicked', q }
+                break
+            case 'restricted':
+                filter = { _: 'channelParticipantsBanned', q }
+                break
+            case 'mention':
+                filter = { _: 'channelParticipantsMentions', q }
+                break
+            case 'bots':
+                filter = { _: 'channelParticipantsBots' }
+                break
+            case 'recent':
+                filter = { _: 'channelParticipantsRecent' }
+                break
+            case 'admins':
+                filter = { _: 'channelParticipantsAdmins' }
+                break
+            case 'contacts':
+                filter = { _: 'channelParticipantsContacts', q }
+                break
         }
 
         const res = await this.call({
