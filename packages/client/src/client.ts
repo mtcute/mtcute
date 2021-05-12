@@ -19,6 +19,7 @@ import { answerCallbackQuery } from './methods/bots/answer-callback-query'
 import { answerInlineQuery } from './methods/bots/answer-inline-query'
 import { addChatMembers } from './methods/chats/add-chat-members'
 import { archiveChats } from './methods/chats/archive-chats'
+import { banChatMember } from './methods/chats/ban-chat-member'
 import { createChannel } from './methods/chats/create-channel'
 import { createGroup } from './methods/chats/create-group'
 import { createSupergroup } from './methods/chats/create-supergroup'
@@ -36,7 +37,9 @@ import { getFullChat } from './methods/chats/get-full-chat'
 import { getNearbyChats } from './methods/chats/get-nearby-chats'
 import { iterChatMembers } from './methods/chats/iter-chat-members'
 import { joinChat } from './methods/chats/join-chat'
+import { kickChatMember } from './methods/chats/kick-chat-member'
 import { leaveChat } from './methods/chats/leave-chat'
+import { restrictChatMember } from './methods/chats/restrict-chat-member'
 import { saveDraft } from './methods/chats/save-draft'
 import { setChatDefaultPermissions } from './methods/chats/set-chat-default-permissions'
 import { setChatDescription } from './methods/chats/set-chat-description'
@@ -45,6 +48,7 @@ import { setChatTitle } from './methods/chats/set-chat-title'
 import { setChatUsername } from './methods/chats/set-chat-username'
 import { setSlowMode } from './methods/chats/set-slow-mode'
 import { unarchiveChats } from './methods/chats/unarchive-chats'
+import { unbanChatMember } from './methods/chats/unban-chat-member'
 import { addContact } from './methods/contacts/add-contact'
 import { deleteContacts } from './methods/contacts/delete-contacts'
 import { getContacts } from './methods/contacts/get-contacts'
@@ -597,6 +601,19 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     archiveChats(chats: MaybeArray<InputPeerLike>): Promise<void>
     /**
+     * Ban a user from a legacy group, a supergroup or a channel.
+     * They will not be able to re-join the group on their own,
+     * manual administrator's action is required.
+     *
+     * @param chatId  Chat ID
+     * @param userId  User ID
+     * @returns  Service message about removed user, if one was generated.
+     */
+    banChatMember(
+        chatId: InputPeerLike,
+        userId: InputPeerLike
+    ): Promise<Message | null>
+    /**
      * Create a new broadcast channel
      *
      * @param title  Channel title
@@ -695,7 +712,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat ID
      * @param params
-
      */
     getChatEventLog(
         chatId: InputPeerLike,
@@ -882,12 +898,43 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     joinChat(chatId: InputPeerLike): Promise<Chat>
     /**
+     * Kick a user from a chat.
+     *
+     * This effectively bans a user and immediately unbans them.
+     *
+     * @param chatId  Chat ID
+     * @param userId  User ID
+     */
+    kickChatMember(chatId: InputPeerLike, userId: InputPeerLike): Promise<void>
+    /**
      * Leave a group chat, supergroup or channel
      *
      * @param chatId  Chat ID or username
      * @param clear  (default: `false`) Whether to clear history after leaving (only for legacy group chats)
      */
     leaveChat(chatId: InputPeerLike, clear?: boolean): Promise<void>
+    /**
+     * Restrict a user in a supergroup.
+     *
+     * @param chatId  Chat ID
+     * @param userId  User ID
+     * @param restrictions
+     *     Restrictions for the user. Note that unlike Bot API, this object contains
+     *     the restrictions, and not the permissions, i.e. to
+     *     passing `sendMessages=true` will disallow the user to send messages,
+     *     and passing `{}` (empty object) will lift any restrictions
+     * @param until
+     *     Date when the user will be unrestricted.
+     *     When `number` is passed, UNIX time in ms is expected.
+     *     If this value is less than 30 seconds or more than 366 days in
+     *     the future, user will be restricted forever. Defaults to `0` (forever)
+     */
+    restrictChatMember(
+        chatId: InputPeerLike,
+        userId: InputPeerLike,
+        restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>,
+        until?: number | Date
+    ): Promise<void>
     /**
      * Save or delete a draft message associated with some chat
      *
@@ -904,24 +951,15 @@ export interface TelegramClient extends BaseTelegramClient {
      * You must be an administrator in the chat and have appropriate permissions.
      *
      * @param chatId  Chat ID or username
-     * @param permissions  New default chat permissions
-     * @example
-     * ```typescript
-     * // Completely restrict chat
-     * await tg.setDefaultChatPermissions('somechat', {})
-     *
-     * // Chat members can only send text, media, stickers and GIFs
-     * await tg.setDefaultChatPermissions('somechat', {
-     *     canSendMessages: true,
-     *     canSendMedia: true,
-     *     canSendStickers: true,
-     *     canSendGifs: true,
-     * })
-     * ```
+     * @param restrictions
+     *     Restrictions for the chat. Note that unlike Bot API, this object contains
+     *     the restrictions, and not the permissions, i.e. to
+     *     passing `sendMessages=true` will disallow the users to send messages,
+     *     and passing `{}` (empty object) will lift any restrictions
      */
     setChatDefaultPermissions(
         chatId: InputPeerLike,
-        permissions: InputChatPermissions
+        restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>
     ): Promise<Chat>
     /**
      * Change chat description
@@ -991,6 +1029,35 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chats  Chat ID(s), username(s), phone number(s), `"me"` or `"self"`
      */
     unarchiveChats(chats: MaybeArray<InputPeerLike>): Promise<void>
+
+    /**
+     * Unban a user from a supergroup or a channel,
+     * or remove any restrictions that they have.
+     * Unbanning does not add the user back to the chat, this
+     * just allows the user to join the chat again, if they want.
+     *
+     * This method acts as a no-op in case a legacy group is passed.
+     *
+     * @param chatId  Chat ID
+     * @param userId  User ID
+     */
+    unbanChatMember(chatId: InputPeerLike, userId: InputPeerLike): Promise<void>
+
+    /**
+     * Unban a user from a supergroup or a channel,
+     * or remove any restrictions that they have.
+     * Unbanning does not add the user back to the chat, this
+     * just allows the user to join the chat again, if they want.
+     *
+     * This method acts as a no-op in case a legacy group is passed.
+     *
+     * @param chatId  Chat ID
+     * @param userId  User ID
+     */
+    unrestrictChatMember(
+        chatId: InputPeerLike,
+        userId: InputPeerLike
+    ): Promise<void>
     /**
      * Add an existing Telegram user as a contact
      *
@@ -1109,7 +1176,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * is not considered when sorting.
      *
      * @param params  Fetch parameters
-
      */
     getDialogs(params?: {
         /**
@@ -2605,7 +2671,9 @@ export interface TelegramClient extends BaseTelegramClient {
     getUsers(id: InputPeerLike): Promise<User>
     /**
      * Get information about multiple users.
-     * You can retrieve up to 200 users at once
+     * You can retrieve up to 200 users at once.
+     *
+     * Note that order is not guaranteed.
      *
      * @param ids  Users' identifiers. Can be ID, username, phone number, `"me"`, `"self"` or TL object
      */
@@ -2791,6 +2859,7 @@ export class TelegramClient extends BaseTelegramClient {
     answerInlineQuery = answerInlineQuery
     addChatMembers = addChatMembers
     archiveChats = archiveChats
+    banChatMember = banChatMember
     createChannel = createChannel
     createGroup = createGroup
     createSupergroup = createSupergroup
@@ -2809,7 +2878,9 @@ export class TelegramClient extends BaseTelegramClient {
     getNearbyChats = getNearbyChats
     iterChatMembers = iterChatMembers
     joinChat = joinChat
+    kickChatMember = kickChatMember
     leaveChat = leaveChat
+    restrictChatMember = restrictChatMember
     saveDraft = saveDraft
     setChatDefaultPermissions = setChatDefaultPermissions
     setChatDescription = setChatDescription
@@ -2818,6 +2889,8 @@ export class TelegramClient extends BaseTelegramClient {
     setChatUsername = setChatUsername
     setSlowMode = setSlowMode
     unarchiveChats = unarchiveChats
+    unbanChatMember = unbanChatMember
+    unrestrictChatMember = unbanChatMember
     addContact = addContact
     deleteContacts = deleteContacts
     getContacts = getContacts

@@ -1,6 +1,7 @@
 import { TelegramClient } from '../../client'
 import { Chat, InputChatPermissions, InputPeerLike, MtCuteTypeAssertionError } from '../../types'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
+import { tl } from '@mtcute/tl'
 
 /**
  * Change default chat permissions for all members.
@@ -8,26 +9,17 @@ import { normalizeToInputPeer } from '../../utils/peer-utils'
  * You must be an administrator in the chat and have appropriate permissions.
  *
  * @param chatId  Chat ID or username
- * @param permissions  New default chat permissions
- * @example
- * ```typescript
- * // Completely restrict chat
- * await tg.setDefaultChatPermissions('somechat', {})
- *
- * // Chat members can only send text, media, stickers and GIFs
- * await tg.setDefaultChatPermissions('somechat', {
- *     canSendMessages: true,
- *     canSendMedia: true,
- *     canSendStickers: true,
- *     canSendGifs: true,
- * })
- * ```
+ * @param restrictions
+ *     Restrictions for the chat. Note that unlike Bot API, this object contains
+ *     the restrictions, and not the permissions, i.e. to
+ *     passing `sendMessages=true` will disallow the users to send messages,
+ *     and passing `{}` (empty object) will lift any restrictions
  * @internal
  */
 export async function setChatDefaultPermissions(
     this: TelegramClient,
     chatId: InputPeerLike,
-    permissions: InputChatPermissions
+    restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>
 ): Promise<Chat> {
     const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
 
@@ -37,17 +29,7 @@ export async function setChatDefaultPermissions(
         bannedRights: {
             _: 'chatBannedRights',
             untilDate: 0,
-            sendMessages: !permissions.canSendMessages,
-            sendMedia: !permissions.canSendMedia,
-            sendStickers: !permissions.canSendStickers,
-            sendGifs: !permissions.canSendGifs,
-            sendGames: !permissions.canSendGames,
-            sendInline: !permissions.canUseInline,
-            embedLinks: !permissions.canAddWebPreviews,
-            sendPolls: !permissions.canSendPolls,
-            changeInfo: !permissions.canChangeInfo,
-            inviteUsers: !permissions.canInviteUsers,
-            pinMessages: !permissions.canPinMessages,
+            ...restrictions
         }
     })
 
