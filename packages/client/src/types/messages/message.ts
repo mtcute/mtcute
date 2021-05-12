@@ -687,6 +687,15 @@ export class Message {
 
         return this.client.getMessageGroup(this.chat.inputPeer, this.raw.id)
     }
+
+    /**
+     * Read history in the chat up until this message
+     *
+     * @param clearMentions  Whether to also clear mentions
+     */
+    async read(clearMentions = false): Promise<void> {
+        return this.client.readHistory(this.chat.inputPeer, this.raw.id, clearMentions)
+    }
 }
 
 makeInspectable(Message, ['empty', 'isScheduled'], ['link'])

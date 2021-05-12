@@ -545,6 +545,16 @@ export class Chat {
     async unarchive(): Promise<void> {
         return this.client.unarchiveChats(this.inputPeer)
     }
+
+    /**
+     * Read history in this chat
+     *
+     * @param message  Message up until which to read history (by default everything is read)
+     * @param clearMentions  Whether to also clear all mentions in the chat
+     */
+    async readHistory(message = 0, clearMentions = false): Promise<void> {
+        return this.client.readHistory(this.inputPeer, message, clearMentions)
+    }
 }
 
 makeInspectable(Chat, [], ['user'])

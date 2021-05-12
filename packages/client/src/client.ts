@@ -87,6 +87,7 @@ import { getMessages } from './methods/messages/get-messages'
 import { iterHistory } from './methods/messages/iter-history'
 import { _parseEntities } from './methods/messages/parse-entities'
 import { pinMessage } from './methods/messages/pin-message'
+import { readHistory } from './methods/messages/read-history'
 import { searchGlobal } from './methods/messages/search-global'
 import { searchMessages } from './methods/messages/search-messages'
 import { sendCopy } from './methods/messages/send-copy'
@@ -1923,6 +1924,18 @@ export interface TelegramClient extends BaseTelegramClient {
         bothSides?: boolean
     ): Promise<void>
     /**
+     * Mark chat history as read.
+     *
+     * @param chatId  Chat ID
+     * @param message  (default: `0`) Message up until which to read history (by default everything is read)
+     * @param clearMentions  (default: `false`) Whether to also clear all mentions in the chat
+     */
+    readHistory(
+        chatId: InputPeerLike,
+        message?: number,
+        clearMentions?: boolean
+    ): Promise<void>
+    /**
      * Search for messages globally from all of your chats
      *
      * **Note**: Due to Telegram limitations, you can only get up to ~10000 messages
@@ -2936,6 +2949,7 @@ export class TelegramClient extends BaseTelegramClient {
     iterHistory = iterHistory
     protected _parseEntities = _parseEntities
     pinMessage = pinMessage
+    readHistory = readHistory
     searchGlobal = searchGlobal
     searchMessages = searchMessages
     sendCopy = sendCopy

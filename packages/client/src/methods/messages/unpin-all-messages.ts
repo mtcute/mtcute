@@ -23,6 +23,6 @@ export async function unpinAllMessages(
     if (isInputPeerChannel(peer)) {
         this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount, peer.channelId))
     } else {
-        createDummyUpdate(res.pts, res.ptsCount)
+        this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
     }
 }
