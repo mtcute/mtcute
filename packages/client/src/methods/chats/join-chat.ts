@@ -31,7 +31,7 @@ export async function joinChat(
             })
             if (!(res._ === 'updates' || res._ === 'updatesCombined')) {
                 throw new MtCuteTypeAssertionError(
-                    'joinChat, (@ messages.importChatInvite)',
+                    'messages.importChatInvite',
                     'updates | updatesCombined',
                     res._
                 )
@@ -52,7 +52,7 @@ export async function joinChat(
     })
     if (!(res._ === 'updates' || res._ === 'updatesCombined')) {
         throw new MtCuteTypeAssertionError(
-            'joinChat, (@ channels.joinChannel)',
+            'channels.joinChannel',
             'updates | updatesCombined',
             res._
         )

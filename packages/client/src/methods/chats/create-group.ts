@@ -36,7 +36,7 @@ export async function createGroup(
 
     if (!(res._ === 'updates' || res._ === 'updatesCombined')) {
         throw new MtCuteTypeAssertionError(
-            'createChannel (@ channels.createChannel)',
+            'messages.createChat',
             'updates | updatesCombined',
             res._
         )

@@ -75,7 +75,7 @@ export async function getHistory(
 
     if (res._ === 'messages.messagesNotModified')
         throw new MtCuteTypeAssertionError(
-            'getHistory',
+            'messages.getHistory',
             '!messages.messagesNotModified',
             res._
         )

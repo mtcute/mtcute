@@ -216,7 +216,7 @@ export class Message {
                 this._sender = new User(this.client, this._users[from.userId])
             } else
                 throw new MtCuteTypeAssertionError(
-                    'Message#sender (@ raw.fromId)',
+                    'raw.fromId',
                     'peerUser | peerChannel',
                     from._
                 )
@@ -287,7 +287,7 @@ export class Message {
                             break
                         default:
                             throw new MtCuteTypeAssertionError(
-                                'Message#forward (@ raw.fwdFrom.fromId)',
+                                'raw.fwdFrom.fromId',
                                 'peerUser | peerChannel',
                                 fwd.fromId._
                             )

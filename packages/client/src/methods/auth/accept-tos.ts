@@ -21,7 +21,7 @@ export async function acceptTos(
 
     if (!res)
         throw new MtCuteTypeAssertionError(
-            'acceptTos (@ help.acceptTermsOfService)',
+            'help.acceptTermsOfService',
             'true',
             'false'
         )

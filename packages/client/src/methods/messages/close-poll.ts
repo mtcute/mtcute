@@ -41,7 +41,7 @@ export async function closePoll(
 
     if (!(res._ === 'updates' || res._ === 'updatesCombined'))
         throw new MtCuteTypeAssertionError(
-            '_findMessageInUpdate',
+            'messages.editMessage',
             'updates | updatesCombined',
             res._
         )
@@ -49,10 +49,10 @@ export async function closePoll(
     this._handleUpdate(res, true)
 
     const upd = res.updates[0]
-    assertTypeIs('closePoll (@ messages.editMessage)', upd, 'updateMessagePoll')
+    assertTypeIs('messages.editMessage (@ .updates[0])', upd, 'updateMessagePoll')
     if (!upd.poll) {
         throw new MtCuteTypeAssertionError(
-            'closePoll (@ messages.editMessage)',
+            'messages.editMessage (@ .updates[0].poll)',
             'poll',
             'undefined'
         )

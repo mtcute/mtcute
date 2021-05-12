@@ -147,7 +147,7 @@ export class StickerSet {
                 )
                 if (!(sticker instanceof Sticker)) {
                     throw new MtCuteTypeAssertionError(
-                        'StickerSet#stickers (full.documents)',
+                        'full.documents',
                         'Sticker',
                         sticker.mimeType
                     )

@@ -23,7 +23,7 @@ export async function createChannel(
 
     if (!(res._ === 'updates' || res._ === 'updatesCombined')) {
         throw new MtCuteTypeAssertionError(
-            'createChannel (@ channels.createChannel)',
+            'channels.createChannel',
             'updates | updatesCombined',
             res._
         )

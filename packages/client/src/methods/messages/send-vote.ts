@@ -1,7 +1,15 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtCuteArgumentError, MtCuteTypeAssertionError, Poll } from '../../types'
+import {
+    InputPeerLike,
+    MtCuteArgumentError,
+    MtCuteTypeAssertionError,
+    Poll,
+} from '../../types'
 import { MaybeArray } from '@mtcute/core'
-import { createUsersChatsIndex, normalizeToInputPeer } from '../../utils/peer-utils'
+import {
+    createUsersChatsIndex,
+    normalizeToInputPeer,
+} from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
@@ -31,7 +39,9 @@ export async function sendVote(
     if (options.some((it) => typeof it === 'number')) {
         const msg = await this.getMessages(peer, message)
         if (!(msg.media instanceof Poll))
-            throw new MtCuteArgumentError('This message does not contain a poll')
+            throw new MtCuteArgumentError(
+                'This message does not contain a poll'
+            )
 
         poll = msg.media
         options = options.map((opt) => {
@@ -46,12 +56,12 @@ export async function sendVote(
         _: 'messages.sendVote',
         peer,
         msgId: message,
-        options: options as Buffer[]
+        options: options as Buffer[],
     })
 
     if (!(res._ === 'updates' || res._ === 'updatesCombined'))
         throw new MtCuteTypeAssertionError(
-            '_findMessageInUpdate',
+            'messages.sendVote',
             'updates | updatesCombined',
             res._
         )
@@ -59,9 +69,13 @@ export async function sendVote(
     this._handleUpdate(res, true)
 
     const upd = res.updates[0]
-    assertTypeIs('sendVote (@ messages.sendVote)', upd, 'updateMessagePoll')
+    assertTypeIs('messages.sendVote (@ .updates[0])', upd, 'updateMessagePoll')
     if (!upd.poll) {
-        throw new MtCuteTypeAssertionError('sendVote (@ messages.sendVote)', 'poll', 'undefined')
+        throw new MtCuteTypeAssertionError(
+            'messages.sendVote (@ .updates[0].poll)',
+            'poll',
+            'undefined'
+        )
     }
 
     const { users } = createUsersChatsIndex(res)

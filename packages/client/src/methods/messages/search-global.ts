@@ -72,7 +72,7 @@ export async function* searchGlobal(
 
         if (res._ === 'messages.messagesNotModified')
             throw new MtCuteTypeAssertionError(
-                'searchMessages',
+                'messages.searchGlobal',
                 '!messages.messagesNotModified',
                 res._
             )

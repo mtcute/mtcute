@@ -53,7 +53,7 @@ export async function setChatDefaultPermissions(
 
     if (!(res._ === 'updates' || res._ === 'updatesCombined')) {
         throw new MtCuteTypeAssertionError(
-            'joinChat, (@ channels.joinChannel)',
+            'messages.editChatDefaultBannedRights',
             'updates | updatesCombined',
             res._
         )

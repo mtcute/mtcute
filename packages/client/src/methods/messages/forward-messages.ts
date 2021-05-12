@@ -232,7 +232,7 @@ export async function forwardMessages(
 
     if (!(res._ === 'updates' || res._ === 'updatesCombined'))
         throw new MtCuteTypeAssertionError(
-            'forwardMessages',
+            'messages.forwardMessages',
             'updates | updatesCombined',
             res._
         )

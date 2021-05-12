@@ -66,7 +66,7 @@ export class Chat {
             )
         )
             throw new MtCuteTypeAssertionError(
-                'Chat#constructor (@ peer)',
+                'peer',
                 'user | chat | channel',
                 peer._
             )

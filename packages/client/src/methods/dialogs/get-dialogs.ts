@@ -178,7 +178,7 @@ export async function* getDialogs(
     ): Dialog[] => {
         if (res._ === 'messages.dialogsNotModified')
             throw new MtCuteTypeAssertionError(
-                'getDialogs',
+                'messages.getPeerDialogs',
                 '!messages.dialogsNotModified',
                 'messages.dialogsNotModified'
             )

@@ -64,7 +64,7 @@ export class Thumbnail extends FileLocation {
     ) {
         if (sz._ === 'photoSizeEmpty' || sz._ === 'photoCachedSize')
             throw new MtCuteTypeAssertionError(
-                'Thumbnail#constructor (sz)',
+                'sz',
                 'not (photoSizeEmpty | photoCachedSize)',
                 sz._
             )

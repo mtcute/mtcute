@@ -42,7 +42,7 @@ export function _findMessageInUpdate(
     }
 
     throw new MtCuteTypeAssertionError(
-        '_findMessageInUpdate (@ -> updates[*])',
+        '_findInUpdate (@ .updates[*])',
         'updateNewMessage | updateNewChannelMessage | updateNewScheduledMessage',
         'none'
     )
