@@ -39,6 +39,7 @@ import { iterChatMembers } from './methods/chats/iter-chat-members'
 import { joinChat } from './methods/chats/join-chat'
 import { kickChatMember } from './methods/chats/kick-chat-member'
 import { leaveChat } from './methods/chats/leave-chat'
+import { markChatUnread } from './methods/chats/mark-chat-unread'
 import { restrictChatMember } from './methods/chats/restrict-chat-member'
 import { saveDraft } from './methods/chats/save-draft'
 import { setChatDefaultPermissions } from './methods/chats/set-chat-default-permissions'
@@ -915,6 +916,12 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param clear  (default: `false`) Whether to clear history after leaving (only for legacy group chats)
      */
     leaveChat(chatId: InputPeerLike, clear?: boolean): Promise<void>
+    /**
+     * Mark a chat as unread
+     *
+     * @param chatId  Chat ID
+     */
+    markChatUnread(chatId: InputPeerLike): Promise<void>
     /**
      * Restrict a user in a supergroup.
      *
@@ -2900,6 +2907,7 @@ export class TelegramClient extends BaseTelegramClient {
     joinChat = joinChat
     kickChatMember = kickChatMember
     leaveChat = leaveChat
+    markChatUnread = markChatUnread
     restrictChatMember = restrictChatMember
     saveDraft = saveDraft
     setChatDefaultPermissions = setChatDefaultPermissions
