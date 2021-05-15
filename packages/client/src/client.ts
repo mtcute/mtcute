@@ -86,6 +86,7 @@ import { getHistory } from './methods/messages/get-history'
 import { getMessageGroup } from './methods/messages/get-message-group'
 import { getMessages } from './methods/messages/get-messages'
 import { iterHistory } from './methods/messages/iter-history'
+import { _normalizeInline } from './methods/messages/normalize-inline'
 import { _parseEntities } from './methods/messages/parse-entities'
 import { pinMessage } from './methods/messages/pin-message'
 import { readHistory } from './methods/messages/read-history'
@@ -1546,13 +1547,13 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Edit sent inline message text, media and reply markup.
      *
-     * @param id
+     * @param messageId
      *     Inline message ID, either as a TL object, or as a
      *     TDLib and Bot API compatible string
      * @param params
      */
     editInlineMessage(
-        id: tl.TypeInputBotInlineMessageID | string,
+        messageId: tl.TypeInputBotInlineMessageID | string,
         params: {
             /**
              * New message text
@@ -2052,7 +2053,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param fromChatId  Target chat ID
      * @param message  Message ID to forward
      * @param params
-
      */
     sendCopy(
         toChatId: InputPeerLike,
@@ -2244,7 +2244,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param text  Text of the message
      * @param params  Additional sending parameters
-
      */
     sendText(
         chatId: InputPeerLike,
@@ -2949,6 +2948,7 @@ export class TelegramClient extends BaseTelegramClient {
     getMessageGroup = getMessageGroup
     getMessages = getMessages
     iterHistory = iterHistory
+    protected _normalizeInline = _normalizeInline
     protected _parseEntities = _parseEntities
     pinMessage = pinMessage
     readHistory = readHistory

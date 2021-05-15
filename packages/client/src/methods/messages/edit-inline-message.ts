@@ -1,23 +1,11 @@
 import { TelegramClient } from '../../client'
 import { BotKeyboard, InputMediaLike, ReplyMarkup } from '../../types'
 import { tl } from '@mtcute/tl'
-import { parseInlineMessageId } from '../../utils/inline-utils'
-import { TelegramConnection } from '@mtcute/core'
-
-// @extension
-interface EditInlineExtension {
-    _connectionsForInline: Record<number, TelegramConnection>
-}
-
-// @initialize
-function _initializeEditInline(this: TelegramClient) {
-    this._connectionsForInline = {}
-}
 
 /**
  * Edit sent inline message text, media and reply markup.
  *
- * @param id
+ * @param messageId
  *     Inline message ID, either as a TL object, or as a
  *     TDLib and Bot API compatible string
  * @param params
@@ -25,7 +13,7 @@ function _initializeEditInline(this: TelegramClient) {
  */
 export async function editInlineMessage(
     this: TelegramClient,
-    id: tl.TypeInputBotInlineMessageID | string,
+    messageId: tl.TypeInputBotInlineMessageID | string,
     params: {
         /**
          * New message text
@@ -81,19 +69,7 @@ export async function editInlineMessage(
     let entities: tl.TypeMessageEntity[] | undefined
     let media: tl.TypeInputMedia | undefined = undefined
 
-    if (typeof id === 'string') {
-        id = parseInlineMessageId(id)
-    }
-
-    let connection = this.primaryConnection
-    if (id.dcId !== connection.params.dc.id) {
-        if (!(id.dcId in this._connectionsForInline)) {
-            this._connectionsForInline[
-                id.dcId
-                ] = await this.createAdditionalConnection(id.dcId)
-        }
-        connection = this._connectionsForInline[id.dcId]
-    }
+    const [id, connection] = await this._normalizeInline(messageId)
 
     if (params.media) {
         media = await this._normalizeInputMedia(params.media, params, true)
