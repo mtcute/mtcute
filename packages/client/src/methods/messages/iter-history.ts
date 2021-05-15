@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Message } from '../../types'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Iterate through a chat history sequentially.
@@ -68,7 +67,7 @@ export async function* iterHistory(
     const limit = Math.min(params.chunkSize || 100, total)
 
     // resolve peer once and pass an InputPeer afterwards
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
 
     for (;;) {
         const messages = await this.getHistory(peer, {

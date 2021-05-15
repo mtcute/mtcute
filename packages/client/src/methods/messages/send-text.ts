@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { inputPeerToPeer, normalizeToInputPeer } from '../../utils/peer-utils'
+import { inputPeerToPeer } from '../../utils/peer-utils'
 import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 import { InputPeerLike, Message, BotKeyboard, ReplyMarkup } from '../../types'
 
@@ -76,7 +76,7 @@ export async function sendText(
         params.entities
     )
 
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
 
     const res = await this.call({

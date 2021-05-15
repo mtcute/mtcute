@@ -10,7 +10,6 @@ import {
     isInputPeerChannel,
     isInputPeerChat,
     normalizeToInputChannel,
-    normalizeToInputPeer,
 } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
@@ -35,7 +34,7 @@ export async function setChatPhoto(
     media: InputFileLike,
     previewSec?: number
 ): Promise<void> {
-    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const chat = await this.resolvePeer(chatId)
     if (!(isInputPeerChannel(chat) || isInputPeerChat(chat)))
         throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 

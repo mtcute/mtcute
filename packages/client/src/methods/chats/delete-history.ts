@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { normalizeToInputChannel, normalizeToInputPeer } from '../../utils/peer-utils'
+import { normalizeToInputChannel } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
 import { tl } from '@mtcute/tl'
 
@@ -25,7 +25,7 @@ export async function deleteHistory(
     mode: 'delete' | 'clear' | 'revoke' = 'delete',
     maxId = 0
 ): Promise<void> {
-    const peer = normalizeToInputPeer(await this.resolvePeer(chat))
+    const peer = await this.resolvePeer(chat)
 
     const res = await this.call({
         _: 'messages.deleteHistory',

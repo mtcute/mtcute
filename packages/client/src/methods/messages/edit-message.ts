@@ -7,7 +7,6 @@ import {
     ReplyMarkup,
 } from '../../types'
 import { tl } from '@mtcute/tl'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Edit message text, media, reply markup and schedule date.
@@ -105,7 +104,7 @@ export async function editMessage(
     const res = await this.call({
         _: 'messages.editMessage',
         id: typeof message === 'number' ? message : message.id,
-        peer: normalizeToInputPeer(await this.resolvePeer(chatId)),
+        peer: await this.resolvePeer(chatId),
         noWebpage: params.disableWebPreview,
         replyMarkup: BotKeyboard._convertToTl(params.replyMarkup),
         message: content,

@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Change chat description
@@ -16,7 +15,7 @@ export async function setChatDescription(
     chatId: InputPeerLike,
     description: string
 ): Promise<void> {
-    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const chat = await this.resolvePeer(chatId)
 
     await this.call({
         _: 'messages.editChatAbout',

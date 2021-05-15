@@ -20,7 +20,7 @@ export async function resolvePeerMany<
     this: TelegramClient,
     peerIds: InputPeerLike[],
     normalizer: (
-        obj: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
+        obj: tl.TypeInputPeer
     ) => T | null
 ): Promise<T[]>
 
@@ -35,7 +35,7 @@ export async function resolvePeerMany<
 export async function resolvePeerMany(
     this: TelegramClient,
     peerIds: InputPeerLike[]
-): Promise<(tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[]>
+): Promise<tl.TypeInputPeer[]>
 
 /**
  * @internal
@@ -44,7 +44,7 @@ export async function resolvePeerMany(
     this: TelegramClient,
     peerIds: InputPeerLike[],
     normalizer?: (
-        obj: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
+        obj: tl.TypeInputPeer
     ) => tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | null
 ): Promise<(tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[]> {
     const ret: (

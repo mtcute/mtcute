@@ -3,7 +3,6 @@ import { InputPeerLike, MtCuteInvalidPeerTypeError } from '../../types'
 import {
     isInputPeerChannel,
     normalizeToInputChannel,
-    normalizeToInputPeer,
 } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 import { normalizeDate } from '../../utils/misc-utils'
@@ -32,11 +31,11 @@ export async function restrictChatMember(
     restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>,
     until?: number | Date
 ): Promise<void> {
-    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const chat = await this.resolvePeer(chatId)
     if (!isInputPeerChannel(chat))
         throw new MtCuteInvalidPeerTypeError(chatId, 'channel')
 
-    const user = normalizeToInputPeer(await this.resolvePeer(userId))
+    const user = await this.resolvePeer(userId)
 
     const res = await this.call({
         _: 'channels.editBanned',

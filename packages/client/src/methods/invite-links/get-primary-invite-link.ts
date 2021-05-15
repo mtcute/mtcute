@@ -4,10 +4,7 @@ import {
     InputPeerLike,
     MtCuteTypeAssertionError,
 } from '../../types'
-import {
-    createUsersChatsIndex,
-    normalizeToInputPeer,
-} from '../../utils/peer-utils'
+import { createUsersChatsIndex } from '../../utils/peer-utils'
 
 /**
  * Get primary invite link of a chat
@@ -21,7 +18,7 @@ export async function getPrimaryInviteLink(
 ): Promise<ChatInviteLink> {
     const res = await this.call({
         _: 'messages.getExportedChatInvites',
-        peer: normalizeToInputPeer(await this.resolvePeer(chatId)),
+        peer: await this.resolvePeer(chatId),
         adminId: { _: 'inputUserSelf' },
         limit: 1,
         revoked: false,

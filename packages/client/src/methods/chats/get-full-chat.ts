@@ -1,9 +1,11 @@
 import { Chat, InputPeerLike, MtCuteArgumentError } from '../../types'
 import { TelegramClient } from '../../client'
 import {
-    INVITE_LINK_REGEX, isInputPeerChannel, isInputPeerChat, isInputPeerUser,
+    INVITE_LINK_REGEX,
+    isInputPeerChannel,
+    isInputPeerChat,
+    isInputPeerUser,
     normalizeToInputChannel,
-    normalizeToInputPeer,
     normalizeToInputUser,
 } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
@@ -26,11 +28,13 @@ export async function getFullChat(
         if (m) {
             const res = await this.call({
                 _: 'messages.checkChatInvite',
-                hash: m[1]
+                hash: m[1],
             })
 
             if (res._ === 'chatInvite') {
-                throw new MtCuteArgumentError(`You haven't joined ${JSON.stringify(res.title)}`)
+                throw new MtCuteArgumentError(
+                    `You haven't joined ${JSON.stringify(res.title)}`
+                )
             }
 
             // we still need to fetch full chat info
@@ -38,23 +42,23 @@ export async function getFullChat(
         }
     }
 
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
 
     let res: tl.messages.TypeChatFull | tl.TypeUserFull
     if (isInputPeerChannel(peer)) {
         res = await this.call({
             _: 'channels.getFullChannel',
-            channel: normalizeToInputChannel(peer)
+            channel: normalizeToInputChannel(peer),
         })
     } else if (isInputPeerUser(peer)) {
         res = await this.call({
             _: 'users.getFullUser',
-            id: normalizeToInputUser(peer)!
+            id: normalizeToInputUser(peer)!,
         })
     } else if (isInputPeerChat(peer)) {
         res = await this.call({
             _: 'messages.getFullChat',
-            chatId: peer.chatId
+            chatId: peer.chatId,
         })
     } else throw new Error('should not happen')
 

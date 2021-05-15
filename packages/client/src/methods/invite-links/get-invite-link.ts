@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { ChatInviteLink, InputPeerLike } from '../../types'
-import { createUsersChatsIndex, normalizeToInputPeer } from '../../utils/peer-utils'
+import { createUsersChatsIndex } from '../../utils/peer-utils'
 
 /**
  * Get detailed information about an invite link
@@ -16,7 +16,7 @@ export async function getInviteLink(
 ): Promise<ChatInviteLink> {
     const res = await this.call({
         _: 'messages.getExportedChatInvite',
-        peer: normalizeToInputPeer(await this.resolvePeer(chatId)),
+        peer: await this.resolvePeer(chatId),
         link
     })
 

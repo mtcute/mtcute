@@ -1,10 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtCuteTypeAssertionError, Poll } from '../../types'
-import { tl } from '@mtcute/tl'
-import {
-    createUsersChatsIndex,
-    normalizeToInputPeer,
-} from '../../utils/peer-utils'
+import { createUsersChatsIndex } from '../../utils/peer-utils'
 import bigInt from 'big-integer'
 import { assertTypeIs } from '../../utils/type-assertion'
 
@@ -25,7 +21,7 @@ export async function closePoll(
 ): Promise<Poll> {
     const res = await this.call({
         _: 'messages.editMessage',
-        peer: normalizeToInputPeer(await this.resolvePeer(chatId)),
+        peer: await this.resolvePeer(chatId),
         id: message,
         media: {
             _: 'inputMediaPoll',
@@ -49,7 +45,11 @@ export async function closePoll(
     this._handleUpdate(res, true)
 
     const upd = res.updates[0]
-    assertTypeIs('messages.editMessage (@ .updates[0])', upd, 'updateMessagePoll')
+    assertTypeIs(
+        'messages.editMessage (@ .updates[0])',
+        upd,
+        'updateMessagePoll'
+    )
     if (!upd.poll) {
         throw new MtCuteTypeAssertionError(
             'messages.editMessage (@ .updates[0].poll)',

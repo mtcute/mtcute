@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
 import { ChatInviteLink, InputPeerLike } from '../../types'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 import { normalizeDate } from '../../utils/misc-utils'
 
 /**
@@ -35,7 +34,7 @@ export async function createInviteLink(
 
     const res = await this.call({
         _: 'messages.exportChatInvite',
-        peer: normalizeToInputPeer(await this.resolvePeer(chatId)),
+        peer: await this.resolvePeer(chatId),
         expireDate: normalizeDate(params.expires),
         usageLimit: params.usageLimit
     })

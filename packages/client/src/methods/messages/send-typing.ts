@@ -1,7 +1,6 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { InputPeerLike, TypingStatus } from '../../types'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Sends a current user/bot typing event
@@ -74,7 +73,7 @@ export async function sendTyping(
 
     await this.call({
         _: 'messages.setTyping',
-        peer: normalizeToInputPeer(await this.resolvePeer(chatId)),
+        peer: await this.resolvePeer(chatId),
         action: status
     })
 }

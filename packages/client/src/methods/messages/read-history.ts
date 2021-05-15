@@ -1,6 +1,9 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { isInputPeerChannel, normalizeToInputChannel, normalizeToInputPeer } from '../../utils/peer-utils'
+import {
+    isInputPeerChannel,
+    normalizeToInputChannel,
+} from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
@@ -17,16 +20,18 @@ export async function readHistory(
     message = 0,
     clearMentions = false
 ): Promise<void> {
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
 
     if (clearMentions) {
         const res = await this.call({
             _: 'messages.readMentions',
-            peer
+            peer,
         })
 
         if (isInputPeerChannel(peer)) {
-            this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount, peer.channelId))
+            this._handleUpdate(
+                createDummyUpdate(res.pts, res.ptsCount, peer.channelId)
+            )
         } else {
             this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
         }
@@ -36,15 +41,14 @@ export async function readHistory(
         await this.call({
             _: 'channels.readHistory',
             channel: normalizeToInputChannel(peer),
-            maxId: message
+            maxId: message,
         })
     } else {
         const res = await this.call({
             _: 'messages.readHistory',
             peer,
-            maxId: message
+            maxId: message,
         })
         this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
     }
-
 }

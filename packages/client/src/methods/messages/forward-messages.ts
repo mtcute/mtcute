@@ -10,7 +10,6 @@ import { MaybeArray } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 import {
     createUsersChatsIndex,
-    normalizeToInputPeer,
 } from '../../utils/peer-utils'
 import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 
@@ -193,7 +192,7 @@ export async function forwardMessages(
             'You can forward no more than 100 messages at once'
         )
 
-    const toPeer = normalizeToInputPeer(await this.resolvePeer(toChatId))
+    const toPeer = await this.resolvePeer(toChatId)
 
     let captionMessage: Message | null = null
     if (params.caption) {
@@ -221,7 +220,7 @@ export async function forwardMessages(
     const res = await this.call({
         _: 'messages.forwardMessages',
         toPeer,
-        fromPeer: normalizeToInputPeer(await this.resolvePeer(fromChatId)),
+        fromPeer: await this.resolvePeer(fromChatId),
         id: messages as number[],
         silent: params.silent,
         scheduleDate: normalizeDate(params.schedule),

@@ -1,7 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
 import { tl } from '@mtcute/tl'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Save or delete a draft message associated with some chat
@@ -15,7 +14,7 @@ export async function saveDraft(
     chatId: InputPeerLike,
     draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>
 ): Promise<void> {
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
 
     if (draft) {
         await this.call({

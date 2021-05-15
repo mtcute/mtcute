@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Mark a chat as unread
@@ -16,7 +15,7 @@ export async function markChatUnread(
         _: 'messages.markDialogUnread',
         peer: {
             _: 'inputDialogPeer',
-            peer: normalizeToInputPeer(await this.resolvePeer(chatId)),
+            peer: await this.resolvePeer(chatId),
         },
         unread: true
     })

@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtCuteInvalidPeerTypeError } from '../../types'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
+import { isInputPeerChat } from '../../utils/peer-utils'
 
 /**
  * Delete a legacy group chat for all members
@@ -12,8 +12,8 @@ export async function deleteGroup(
     this: TelegramClient,
     chatId: InputPeerLike
 ): Promise<void> {
-    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
-    if (chat._ !== 'inputPeerChat')
+    const chat = await this.resolvePeer(chatId)
+    if (!isInputPeerChat(chat))
         throw new MtCuteInvalidPeerTypeError(chatId, 'chat')
 
     const res = await this.call({

@@ -2,7 +2,6 @@ import { TelegramClient } from '../../client'
 import { MaybeArray } from '@mtcute/core'
 import { InputPeerLike } from '../../types'
 import { tl } from '@mtcute/tl'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Archive one or more chats
@@ -21,7 +20,7 @@ export async function archiveChats(
     for (const chat of chats) {
         folderPeers.push({
             _: 'inputFolderPeer',
-            peer: normalizeToInputPeer(await this.resolvePeer(chat)),
+            peer: await this.resolvePeer(chat),
             folderId: 1
         })
     }

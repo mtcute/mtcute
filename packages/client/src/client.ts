@@ -2756,9 +2756,7 @@ export interface TelegramClient extends BaseTelegramClient {
         T extends tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
     >(
         peerIds: InputPeerLike[],
-        normalizer: (
-            obj: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
-        ) => T | null
+        normalizer: (obj: tl.TypeInputPeer) => T | null
     ): Promise<T[]>
     /**
      * Get multiple `InputPeer`s at once.
@@ -2767,18 +2765,14 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param peerIds  Peer Ids
      */
-    resolvePeerMany(
-        peerIds: InputPeerLike[]
-    ): Promise<(tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[]>
+    resolvePeerMany(peerIds: InputPeerLike[]): Promise<tl.TypeInputPeer[]>
     /**
      * Get the `InputPeer` of a known peer id.
      * Useful when an `InputPeer` is needed.
      *
      * @param peerId  The peer identifier that you want to extract the `InputPeer` from.
      */
-    resolvePeer(
-        peerId: InputPeerLike
-    ): Promise<tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel>
+    resolvePeer(peerId: InputPeerLike): Promise<tl.TypeInputPeer>
     /**
      * Change user status to offline or online
      *

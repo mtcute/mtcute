@@ -4,7 +4,6 @@ import {
     isInputPeerChannel,
     isInputPeerChat,
     normalizeToInputChannel,
-    normalizeToInputPeer,
 } from '../../utils/peer-utils'
 
 /**
@@ -19,7 +18,7 @@ export async function deleteChatPhoto(
     this: TelegramClient,
     chatId: InputPeerLike
 ): Promise<void> {
-    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const chat = await this.resolvePeer(chatId)
 
     let res
     if (isInputPeerChat(chat)) {

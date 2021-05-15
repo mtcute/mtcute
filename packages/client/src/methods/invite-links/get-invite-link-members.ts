@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { ChatInviteLink, InputPeerLike, User } from '../../types'
-import { createUsersChatsIndex, normalizeToInputPeer } from '../../utils/peer-utils'
+import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 
 /**
@@ -18,7 +18,7 @@ export async function* getInviteLinkMembers(
     link: string,
     limit = Infinity
 ): AsyncIterableIterator<ChatInviteLink.JoinedMember> {
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
 
     let current = 0
 

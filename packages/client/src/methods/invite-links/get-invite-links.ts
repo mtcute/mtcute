@@ -6,7 +6,6 @@ import {
 } from '../../types'
 import {
     createUsersChatsIndex,
-    normalizeToInputPeer,
     normalizeToInputUser,
 } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
@@ -53,7 +52,7 @@ export async function* getInviteLinks(
     const total = params.limit || Infinity
     const chunkSize = Math.min(params.chunkSize ?? 100, total)
 
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
     const admin = normalizeToInputUser(await this.resolvePeer(adminId))
 
     if (!admin) throw new MtCuteInvalidPeerTypeError(adminId, 'user')

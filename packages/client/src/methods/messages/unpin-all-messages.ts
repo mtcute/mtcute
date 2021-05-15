@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { isInputPeerChannel, normalizeToInputPeer } from '../../utils/peer-utils'
+import { isInputPeerChannel } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
@@ -13,7 +13,7 @@ export async function unpinAllMessages(
     this: TelegramClient,
     chatId: InputPeerLike
 ): Promise<void> {
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
 
     const res = await this.call({
         _: 'messages.unpinAllMessages',

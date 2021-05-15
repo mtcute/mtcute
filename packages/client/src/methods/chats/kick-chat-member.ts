@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { isInputPeerChannel, normalizeToInputPeer } from '../../utils/peer-utils'
+import { isInputPeerChannel } from '../../utils/peer-utils'
 
 /**
  * Kick a user from a chat.
@@ -16,8 +16,8 @@ export async function kickChatMember(
     chatId: InputPeerLike,
     userId: InputPeerLike
 ): Promise<void> {
-    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
-    const user = normalizeToInputPeer(await this.resolvePeer(userId))
+    const chat = await this.resolvePeer(chatId)
+    const user = await this.resolvePeer(userId)
 
     await this.banChatMember(chat, user)
 

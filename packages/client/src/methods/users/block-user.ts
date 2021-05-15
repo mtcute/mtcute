@@ -1,6 +1,5 @@
 import { InputPeerLike } from '../../types'
 import { TelegramClient } from '../../client'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Block a user
@@ -14,6 +13,6 @@ export async function blockUser(
 ): Promise<void> {
     await this.call({
         _: 'contacts.block',
-        id: normalizeToInputPeer(await this.resolvePeer(id)),
+        id: await this.resolvePeer(id),
     })
 }

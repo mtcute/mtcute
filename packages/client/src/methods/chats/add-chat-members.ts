@@ -5,10 +5,8 @@ import {
     isInputPeerChannel,
     isInputPeerChat,
     normalizeToInputChannel,
-    normalizeToInputPeer,
     normalizeToInputUser,
 } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
 
 /**
  * Add new members to a group, supergroup or channel.
@@ -26,7 +24,7 @@ export async function addChatMembers(
     users: MaybeArray<InputPeerLike>,
     forwardCount = 100
 ): Promise<void> {
-    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const chat = await this.resolvePeer(chatId)
 
     if (!Array.isArray(users)) users = [users]
 

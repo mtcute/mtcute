@@ -9,7 +9,6 @@ import {
     isInputPeerChannel,
     isInputPeerChat,
     normalizeToInputChannel,
-    normalizeToInputPeer,
     normalizeToInputUser,
 } from '../../utils/peer-utils'
 
@@ -28,8 +27,8 @@ export async function banChatMember(
     chatId: InputPeerLike,
     userId: InputPeerLike
 ): Promise<Message | null> {
-    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
-    const user = normalizeToInputPeer(await this.resolvePeer(userId))
+    const chat = await this.resolvePeer(chatId)
+    const user = await this.resolvePeer(userId)
 
     let res
     if (isInputPeerChannel(chat)) {

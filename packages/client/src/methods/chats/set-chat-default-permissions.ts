@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
-import { Chat, InputChatPermissions, InputPeerLike, MtCuteTypeAssertionError } from '../../types'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
+import { Chat, InputPeerLike, MtCuteTypeAssertionError } from '../../types'
 import { tl } from '@mtcute/tl'
 
 /**
@@ -21,7 +20,7 @@ export async function setChatDefaultPermissions(
     chatId: InputPeerLike,
     restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>
 ): Promise<Chat> {
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
 
     const res = await this.call({
         _: 'messages.editChatDefaultBannedRights',

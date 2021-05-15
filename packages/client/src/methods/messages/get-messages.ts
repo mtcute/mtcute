@@ -4,7 +4,6 @@ import {
     createUsersChatsIndex,
     isInputPeerChannel,
     normalizeToInputChannel,
-    normalizeToInputPeer,
 } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 import { Message, InputPeerLike, MtCuteTypeAssertionError } from '../../types'
@@ -53,7 +52,7 @@ export async function getMessages(
     messageIds: MaybeArray<number>,
     fromReply = false
 ): Promise<MaybeArray<Message>> {
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
 
     const isSingle = !Array.isArray(messageIds)
     if (isSingle) messageIds = [messageIds as number]

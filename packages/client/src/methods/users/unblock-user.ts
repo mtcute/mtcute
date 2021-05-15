@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Unblock a user
@@ -14,6 +13,6 @@ export async function unblockUser(
 ): Promise<void> {
     await this.call({
         _: 'contacts.unblock',
-        id: normalizeToInputPeer(await this.resolvePeer(id)),
+        id: await this.resolvePeer(id),
     })
 }

@@ -6,7 +6,6 @@ import {
     Message,
     ReplyMarkup,
 } from '../../types'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 import { tl } from '@mtcute/tl'
 
@@ -79,7 +78,7 @@ export async function sendMediaGroup(
 ): Promise<Message> {
     if (!params) params = {}
 
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
 
     const multiMedia: tl.RawInputSingleMedia[] = []

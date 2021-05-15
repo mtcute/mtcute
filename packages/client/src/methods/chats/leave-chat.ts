@@ -1,9 +1,9 @@
 import { InputPeerLike, MtCuteInvalidPeerTypeError } from '../../types'
 import { TelegramClient } from '../../client'
 import {
-    isInputPeerChannel, isInputPeerChat,
+    isInputPeerChannel,
+    isInputPeerChat,
     normalizeToInputChannel,
-    normalizeToInputPeer,
 } from '../../utils/peer-utils'
 
 /**
@@ -18,7 +18,7 @@ export async function leaveChat(
     chatId: InputPeerLike,
     clear = false
 ): Promise<void> {
-    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const chat = await this.resolvePeer(chatId)
 
     if (isInputPeerChannel(chat)) {
         const res = await this.call({

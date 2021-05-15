@@ -1,10 +1,7 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Message, MtCuteTypeAssertionError } from '../../types'
 import { tl } from '@mtcute/tl'
-import {
-    createUsersChatsIndex,
-    normalizeToInputPeer,
-} from '../../utils/peer-utils'
+import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { SearchFilters } from '../../types'
 
 /**
@@ -72,11 +69,10 @@ export async function* searchMessages(
     const total = params.limit || Infinity
     const limit = Math.min(params.chunkSize || 100, total)
 
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
     const fromUser =
-        (params.fromUser
-            ? normalizeToInputPeer(await this.resolvePeer(params.fromUser))
-            : null) || undefined
+        (params.fromUser ? await this.resolvePeer(params.fromUser) : null) ||
+        undefined
 
     for (;;) {
         const res = await this.call({

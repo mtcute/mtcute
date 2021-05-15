@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
 import { ChatInviteLink, InputPeerLike } from '../../types'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Generate a new primary invite link for a chat,
@@ -18,7 +17,7 @@ export async function exportInviteLink(
 ): Promise<ChatInviteLink> {
     const res = await this.call({
         _: 'messages.exportChatInvite',
-        peer: normalizeToInputPeer(await this.resolvePeer(chatId)),
+        peer: await this.resolvePeer(chatId),
         legacyRevokePermanent: true
     })
 

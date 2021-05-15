@@ -1,7 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Message, ReplyMarkup } from '../../types'
 import { tl } from '@mtcute/tl'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Copy a message (i.e. send the same message,
@@ -79,7 +78,7 @@ export async function sendCopy(
         clearDraft?: boolean
     }
 ): Promise<Message> {
-    const fromPeer = normalizeToInputPeer(await this.resolvePeer(fromChatId))
+    const fromPeer = await this.resolvePeer(fromChatId)
 
     const msg = await this.getMessages(fromPeer, message)
     return msg.sendCopy(toChatId, params)

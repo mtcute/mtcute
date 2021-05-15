@@ -3,6 +3,7 @@ import { TelegramClient } from '../../client'
 import { InputPeerLike, MtCuteNotFoundError } from '../../types'
 import { getBasicPeerType, MAX_CHANNEL_ID } from '@mtcute/core'
 import bigInt from 'big-integer'
+import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Get the `InputPeer` of a known peer id.
@@ -14,9 +15,9 @@ import bigInt from 'big-integer'
 export async function resolvePeer(
     this: TelegramClient,
     peerId: InputPeerLike
-): Promise<tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel> {
+): Promise<tl.TypeInputPeer> {
     // for convenience we also accept tl objects directly
-    if (typeof peerId === 'object') return peerId
+    if (typeof peerId === 'object') return normalizeToInputPeer(peerId)
 
     if (typeof peerId === 'number') {
         const fromStorage = await this.storage.getPeerById(peerId)

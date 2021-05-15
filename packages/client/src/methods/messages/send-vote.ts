@@ -6,10 +6,7 @@ import {
     Poll,
 } from '../../types'
 import { MaybeArray } from '@mtcute/core'
-import {
-    createUsersChatsIndex,
-    normalizeToInputPeer,
-} from '../../utils/peer-utils'
+import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
@@ -33,7 +30,7 @@ export async function sendVote(
     if (options === null) options = []
     if (!Array.isArray(options)) options = [options]
 
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
 
     let poll: Poll | undefined = undefined
     if (options.some((it) => typeof it === 'number')) {

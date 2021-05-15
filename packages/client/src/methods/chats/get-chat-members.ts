@@ -5,9 +5,10 @@ import {
 } from '../../types'
 import { TelegramClient } from '../../client'
 import {
-    createUsersChatsIndex, isInputPeerChannel, isInputPeerChat,
+    createUsersChatsIndex,
+    isInputPeerChannel,
+    isInputPeerChat,
     normalizeToInputChannel,
-    normalizeToInputPeer,
 } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { tl } from '@mtcute/tl'
@@ -70,7 +71,7 @@ export async function getChatMembers(
 ): Promise<ChatMember[]> {
     if (!params) params = {}
 
-    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const chat = await this.resolvePeer(chatId)
 
     if (isInputPeerChat(chat)) {
         const res = await this.call({
@@ -145,7 +146,7 @@ export async function getChatMembers(
         )
 
         const { users } = createUsersChatsIndex(res)
-        return res.participants.map(i => new ChatMember(this, i, users))
+        return res.participants.map((i) => new ChatMember(this, i, users))
     }
 
     throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')

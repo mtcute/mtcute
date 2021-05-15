@@ -6,7 +6,6 @@ import {
     isInputPeerChat,
     isInputPeerUser,
     normalizeToInputChannel,
-    normalizeToInputPeer,
     normalizeToInputUser,
 } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
@@ -42,7 +41,7 @@ export async function getChat(
         }
     }
 
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
 
     let res: tl.TypeChat | tl.TypeUser
     if (isInputPeerChannel(peer)) {

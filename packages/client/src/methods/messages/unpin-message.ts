@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 /**
  * Unpin a message in a group, supergroup, channel or PM.
@@ -19,7 +18,7 @@ export async function unpinMessage(
 ): Promise<void> {
     const res = await this.call({
         _: 'messages.updatePinnedMessage',
-        peer: normalizeToInputPeer(await this.resolvePeer(chatId)),
+        peer: await this.resolvePeer(chatId),
         id: messageId,
         unpin: true
     })

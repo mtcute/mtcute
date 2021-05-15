@@ -6,7 +6,6 @@ import {
     Message,
     ReplyMarkup,
 } from '../../types'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
 import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 
 /**
@@ -94,7 +93,7 @@ export async function sendMedia(
         (media as any).entities
     )
 
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
 
     const res = await this.call({

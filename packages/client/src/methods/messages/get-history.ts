@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, MtCuteArgumentError, MtCuteTypeAssertionError } from '../../types'
-import { createUsersChatsIndex, normalizeToInputPeer } from '../../utils/peer-utils'
+import { InputPeerLike, Message, MtCuteTypeAssertionError } from '../../types'
+import { createUsersChatsIndex, } from '../../utils/peer-utils'
 import { normalizeDate } from '../../utils/misc-utils'
 
 /**
@@ -57,7 +57,7 @@ export async function getHistory(
         params.offsetId ?? (params.reverse && !params.offsetDate ? 1 : 0)
     const limit = params.limit || 100
 
-    const peer = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const peer = await this.resolvePeer(chatId)
 
     const res = await this.call({
         _: 'messages.getHistory',

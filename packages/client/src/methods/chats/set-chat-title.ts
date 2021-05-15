@@ -7,7 +7,6 @@ import {
     isInputPeerChannel,
     isInputPeerChat,
     normalizeToInputChannel,
-    normalizeToInputPeer,
 } from '../../utils/peer-utils'
 
 /**
@@ -24,7 +23,7 @@ export async function setChatTitle(
     chatId: InputPeerLike,
     title: string
 ): Promise<void> {
-    const chat = normalizeToInputPeer(await this.resolvePeer(chatId))
+    const chat = await this.resolvePeer(chatId)
 
     let res
     if (isInputPeerChat(chat)) {
