@@ -406,7 +406,10 @@ async function addDocumentation(obj) {
             let botsCanUse = !!$("h3:contains('Bots can use this method')")
                 .length
             let onlyBotsCanUse =
-                botsCanUse && !!target.description.match(/; for bots only$/)
+                botsCanUse && (
+                    !!target.description.match(/[,;]( for)? bots only$/)
+                    || target.throws.some((it) => it.code === 'USER_BOT_REQUIRED')
+                )
 
             target.available = onlyBotsCanUse
                 ? 'bot'
