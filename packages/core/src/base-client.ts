@@ -458,6 +458,7 @@ export class BaseTelegramClient {
         params?: {
             throwFlood?: boolean
             connection?: TelegramConnection
+            timeout?: number
         }
     ): Promise<tl.RpcCallReturn[T['_']]> {
         if (!this._connected) {
@@ -494,7 +495,7 @@ export class BaseTelegramClient {
 
         for (let i = 0; i < this._rpcRetryCount; i++) {
             try {
-                const res = await connection.sendForResult(message, stack)
+                const res = await connection.sendForResult(message, stack, params?.timeout)
                 await this._cachePeersFrom(res)
 
                 return res
