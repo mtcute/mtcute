@@ -1,6 +1,9 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtCuteInvalidPeerTypeError } from '../../types'
-import { GameHighScore } from '../../types/bots/game-high-score'
+import {
+    InputPeerLike,
+    MtCuteInvalidPeerTypeError,
+    GameHighScore,
+} from '../../types'
 import { tl } from '@mtcute/tl'
 import {
     createUsersChatsIndex,

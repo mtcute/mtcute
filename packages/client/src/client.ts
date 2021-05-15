@@ -160,6 +160,7 @@ import {
     ChatsIndex,
     Dialog,
     FileDownloadParameters,
+    GameHighScore,
     InputChatPermissions,
     InputFileLike,
     InputInlineResult,

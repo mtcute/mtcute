@@ -37,7 +37,8 @@ import {
     ChatEvent,
     ChatInviteLink,
     UsersIndex,
-    ChatsIndex
+    ChatsIndex,
+    GameHighScore
 } from '../types'
 
 // @copy
