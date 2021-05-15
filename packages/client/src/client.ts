@@ -17,6 +17,11 @@ import { startTest } from './methods/auth/start-test'
 import { start } from './methods/auth/start'
 import { answerCallbackQuery } from './methods/bots/answer-callback-query'
 import { answerInlineQuery } from './methods/bots/answer-inline-query'
+import {
+    getGameHighScores,
+    getInlineGameHighScores,
+} from './methods/bots/get-game-high-scores'
+import { setGameScore, setInlineGameScore } from './methods/bots/set-game-score'
 import { addChatMembers } from './methods/chats/add-chat-members'
 import { archiveChats } from './methods/chats/archive-chats'
 import { banChatMember } from './methods/chats/ban-chat-member'
@@ -581,6 +586,84 @@ export interface TelegramClient extends BaseTelegramClient {
              * entities, only the messages that are sent once a result is clicked.
              */
             parseMode?: string | null
+        }
+    ): Promise<void>
+    /**
+     * Get high scores of a game
+     *
+     * @param chatId  ID of the chat where the game was found
+     * @param message  ID of the message containing the game
+     * @param userId  ID of the user to find high scores for
+     */
+    getGameHighScores(
+        chatId: InputPeerLike,
+        message: number,
+        userId?: InputPeerLike
+    ): Promise<GameHighScore[]>
+    /**
+     * Get high scores of a game from an inline message
+     *
+     * @param messageId  ID of the inline message containing the game
+     * @param userId  ID of the user to find high scores for
+     */
+    getInlineGameHighScores(
+        messageId: string | tl.TypeInputBotInlineMessageID,
+        userId?: InputPeerLike
+    ): Promise<GameHighScore[]>
+    /**
+     * Set a score of a user in a game
+     *
+     * @param chatId  Chat where the game was found
+     * @param message  ID of the message where the game was found
+     * @param userId  ID of the user who has scored
+     * @param score  The new score (must be >0)
+     * @param params
+     * @returns  The modified message
+     */
+    setGameScore(
+        chatId: InputPeerLike,
+        message: number,
+        userId: InputPeerLike,
+        score: number,
+        params?: {
+            /**
+             * When `true`, the game message will not be modified
+             * to include the new score
+             */
+            noEdit?: boolean
+
+            /**
+             * Whether to allow user's score to decrease.
+             * This can be useful when fixing mistakes or banning cheaters
+             */
+            force?: boolean
+        }
+    ): Promise<Message>
+    /**
+     * Set a score of a user in a game contained in
+     * an inline message
+     *
+     * @param messageId  ID of the inline message
+     * @param userId  ID of the user who has scored
+     * @param score  The new score (must be >0)
+     * @param params
+     */
+    setInlineGameScore(
+        messageId: string | tl.TypeInputBotInlineMessageID,
+        userId: InputPeerLike,
+        score: number,
+        params?: {
+            /**
+             * When `true`, the game message will not be modified
+             * to include the new score
+             */
+            noEdit?: boolean
+
+            /**
+             * Whether to allow user's score to decrease.
+             * This can be useful when fixing mistakes or banning cheaters
+             */
+            force?: boolean
         }
     ): Promise<void>
     /**
@@ -2877,6 +2960,10 @@ export class TelegramClient extends BaseTelegramClient {
     start = start
     answerCallbackQuery = answerCallbackQuery
     answerInlineQuery = answerInlineQuery
+    getGameHighScores = getGameHighScores
+    getInlineGameHighScores = getInlineGameHighScores
+    setGameScore = setGameScore
+    setInlineGameScore = setInlineGameScore
     addChatMembers = addChatMembers
     archiveChats = archiveChats
     banChatMember = banChatMember
