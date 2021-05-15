@@ -70,9 +70,9 @@ export class MtprotoSession {
         if (!this._authKey) throw new Error('Keys are not set up!')
 
         const length =
-            message instanceof Buffer
+            message.constructor === Buffer
                 ? message.length
-                : SerializationCounter.countNeededBytes(message)
+                : SerializationCounter.countNeededBytes(message as tl.TlObject)
         let padding =
             (32 /* header size */ + length + 12) /* min padding */ % 16
         padding = 12 + (padding ? 16 - padding : 0)
@@ -83,8 +83,8 @@ export class MtprotoSession {
         encryptedWriter.long(messageId)
         encryptedWriter.int32(seqNo)
         encryptedWriter.uint32(length)
-        if (message instanceof Buffer) encryptedWriter.raw(message)
-        else encryptedWriter.object(message)
+        if (message.constructor === Buffer) encryptedWriter.raw(message)
+        else encryptedWriter.object(message as tl.TlObject)
         encryptedWriter.raw(randomBytes(padding))
 
         const innerData = encryptedWriter.result()

@@ -10,29 +10,7 @@ import {
 import { TelegramClient } from '../../client'
 import { MessageEntity } from './message-entity'
 import { makeInspectable } from '../utils'
-import {
-    Audio,
-    Contact,
-    Document,
-    Photo,
-    Dice,
-    Video,
-    Location,
-    LiveLocation,
-    Sticker,
-    Voice,
-    InputMediaLike,
-    Venue,
-    Poll,
-    Invoice,
-    Game,
-    WebPage,
-} from '../media'
-import { parseDocument } from '../media/document-utils'
-import {
-    _callDiscardReasonFromTl,
-    CallDiscardReason,
-} from '../calls/discard-reason'
+import { InputMediaLike, WebPage } from '../media'
 import { _messageActionFromTl, MessageAction } from './message-action'
 import { _messageMediaFromTl, MessageMedia } from './message-media'
 
@@ -694,7 +672,11 @@ export class Message {
      * @param clearMentions  Whether to also clear mentions
      */
     async read(clearMentions = false): Promise<void> {
-        return this.client.readHistory(this.chat.inputPeer, this.raw.id, clearMentions)
+        return this.client.readHistory(
+            this.chat.inputPeer,
+            this.raw.id,
+            clearMentions
+        )
     }
 }
 

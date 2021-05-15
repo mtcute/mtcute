@@ -511,11 +511,11 @@ export class BaseTelegramClient {
                 }
 
                 if (
-                    e instanceof FloodWaitError ||
-                    e instanceof SlowmodeWaitError ||
-                    e instanceof FloodTestPhoneWaitError
+                    e.constructor === FloodWaitError ||
+                    e.constructor === SlowmodeWaitError ||
+                    e.constructor === FloodTestPhoneWaitError
                 ) {
-                    if (!(e instanceof SlowmodeWaitError)) {
+                    if (e.constructor !== SlowmodeWaitError) {
                         // SLOW_MODE_WAIT is chat-specific, not request-specific
                         this._floodWaitedRequests[message._] =
                             Date.now() + e.seconds * 1000
@@ -538,9 +538,9 @@ export class BaseTelegramClient {
                 }
                 if (
                     connection === this.primaryConnection &&
-                    (e instanceof PhoneMigrateError ||
-                        e instanceof UserMigrateError ||
-                        e instanceof NetworkMigrateError)
+                    (e.constructor === PhoneMigrateError ||
+                        e.constructor === UserMigrateError ||
+                        e.constructor === NetworkMigrateError)
                 ) {
                     debug('Migrate error, new dc = %d', e.newDc)
                     await this.changeDc(e.newDc)
