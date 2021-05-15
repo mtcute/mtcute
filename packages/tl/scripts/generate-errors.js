@@ -78,6 +78,15 @@ const inheritanceTable = {
     500: 'InternalError',
 }
 
+const customErrors = [
+    {
+        virtual: true,
+        name: 'RPC_TIMEOUT',
+        codes: '408',
+        description: 'Timeout of {ms} ms exceeded'
+    }
+]
+
 async function main() {
     // relying on slightly more exhaustive than official docs errors.csv from telethon
     const csvText = await fetch(
@@ -92,6 +101,8 @@ async function main() {
             .on('end', () => resolve(ret))
             .on('error', reject)
     })
+
+    csv.push(...customErrors)
 
     js.write(`// This file was auto-generated. Do not edit!
 "use strict";
@@ -183,7 +194,7 @@ exports.${className} = ${className}`)
 
     js.write('const _staticNameErrors = {')
     js.tab()
-    csv.filter((i) => !i.name.match(/_X_|_X$|^X_/)).forEach((err) =>
+    csv.filter((i) => !i.virtual && !i.name.match(/_X_|_X$|^X_/)).forEach((err) =>
         js.write(`'${err.name}': ${err.fclsname},`)
     )
     js.write(`'Timeout': TimeoutError,`)
@@ -194,7 +205,7 @@ exports.${className} = ${className}`)
 
     let match;
 ${allErrors
-    .filter((i) => !!i.name.match(/_X_|_X$|^X_/))
+    .filter((i) => !i.virtual && !!i.name.match(/_X_|_X$|^X_/))
     .map(
         (i) =>
             `    if ((match = obj.errorMessage.match(/${i.name.replace(
