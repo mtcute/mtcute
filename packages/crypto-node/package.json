@@ -13,8 +13,5 @@
         "clean": "node-gyp clean",
         "test": "mocha -r ts-node/register tests/**/*.spec.ts",
         "docs": "npx typedoc"
-    },
-    "dependencies": {
-        "node-gyp": "^8.0.0"
     }
 }

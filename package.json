@@ -23,7 +23,7 @@
         "file-type": "^16.2.0",
         "leemon": "6.2.0",
         "pako": "2.0.2",
-        "ts-mixer": "^5.4.0"
+        "node-gyp": "^8.0.0"
     },
     "devDependencies": {
         "@types/chai": "^4.2.14",
