@@ -4,6 +4,7 @@ import {
     RawUpdateHandler,
     NewMessageHandler,
     EditMessageHandler,
+    DeleteMessageHandler,
     ChatMemberUpdateHandler,
     InlineQueryHandler,
     ChosenInlineResultHandler,
@@ -22,6 +23,7 @@ import { PollUpdate } from './updates/poll-update'
 import { PollVoteUpdate } from './updates/poll-vote'
 import { UserStatusUpdate } from './updates/user-status-update'
 import { UserTypingUpdate } from './updates/user-typing-update'
+import { DeleteMessageUpdate } from './updates/delete-message-update'
 
 function _create<T extends UpdateHandler>(
     type: T['type'],
@@ -121,6 +123,36 @@ export namespace handlers {
         handler?: any
     ): EditMessageHandler {
         return _create('edit_message', filter, handler)
+    }
+
+    /**
+     * Create a delete message handler
+     *
+     * @param handler  Delete message handler
+     */
+    export function deleteMessage(
+        handler: DeleteMessageHandler['callback']
+    ): DeleteMessageHandler
+
+    /**
+     * Create a delete message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Delete message handler
+     */
+    export function deleteMessage<Mod>(
+        filter: UpdateFilter<DeleteMessageUpdate, Mod>,
+        handler: DeleteMessageHandler<
+            filters.Modify<DeleteMessageUpdate, Mod>
+        >['callback']
+    ): DeleteMessageHandler
+
+    /** @internal */
+    export function deleteMessage(
+        filter: any,
+        handler?: any
+    ): DeleteMessageHandler {
+        return _create('delete_message', filter, handler)
     }
 
     /**

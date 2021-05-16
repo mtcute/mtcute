@@ -15,6 +15,7 @@ import { PollUpdate } from './updates/poll-update'
 import { PollVoteUpdate } from './updates/poll-vote'
 import { UserStatusUpdate } from './updates/user-status-update'
 import { UserTypingUpdate } from './updates/user-typing-update'
+import { DeleteMessageUpdate } from './updates/delete-message-update'
 
 interface BaseUpdateHandler<Type, Handler, Checker> {
     type: Type
@@ -57,6 +58,10 @@ export type EditMessageHandler<T = Message> = ParsedUpdateHandler<
     'edit_message',
     T
 >
+export type DeleteMessageHandler<T = DeleteMessageUpdate> = ParsedUpdateHandler<
+    'delete_message',
+    T
+>
 export type ChatMemberUpdateHandler<T = ChatMemberUpdate> = ParsedUpdateHandler<
     'chat_member',
     T
@@ -90,6 +95,7 @@ export type UpdateHandler =
     | RawUpdateHandler
     | NewMessageHandler
     | EditMessageHandler
+    | DeleteMessageHandler
     | ChatMemberUpdateHandler
     | InlineQueryHandler
     | ChosenInlineResultHandler

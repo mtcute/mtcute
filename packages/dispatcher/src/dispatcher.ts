@@ -20,6 +20,7 @@ import {
     RawUpdateHandler,
     NewMessageHandler,
     EditMessageHandler,
+    DeleteMessageHandler,
     ChatMemberUpdateHandler,
     InlineQueryHandler,
     ChosenInlineResultHandler,
@@ -38,6 +39,7 @@ import { PollUpdate } from './updates/poll-update'
 import { PollVoteUpdate } from './updates/poll-vote'
 import { UserStatusUpdate } from './updates/user-status-update'
 import { UserTypingUpdate } from './updates/user-typing-update'
+import { DeleteMessageUpdate } from './updates/delete-message-update'
 
 const noop = () => {}
 
@@ -76,6 +78,10 @@ const callbackQueryParser: UpdateParser = [
 const userTypingParser: UpdateParser = [
     'user_typing',
     (client, upd) => new UserTypingUpdate(client, upd as any),
+]
+const deleteMessageParser: UpdateParser = [
+    'delete_message',
+    (client, upd) => new DeleteMessageUpdate(client, upd as any)
 ]
 
 const PARSERS: Partial<
@@ -117,6 +123,8 @@ const PARSERS: Partial<
     updateChannelUserTyping: userTypingParser,
     updateChatUserTyping: userTypingParser,
     updateUserTyping: userTypingParser,
+    updateDeleteChannelMessages: deleteMessageParser,
+    updateDeleteMessages: deleteMessageParser,
 }
 
 /**
@@ -501,6 +509,38 @@ export class Dispatcher {
     /** @internal */
     onEditMessage(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('editMessage', filter, handler, group)
+    }
+
+    /**
+     * Register a delete message handler without any filters
+     *
+     * @param handler  Delete message handler
+     * @param group  Handler group index
+     * @internal
+     */
+    onDeleteMessage(
+        handler: DeleteMessageHandler['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register a delete message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Delete message handler
+     * @param group  Handler group index
+     */
+    onDeleteMessage<Mod>(
+        filter: UpdateFilter<DeleteMessageUpdate, Mod>,
+        handler: DeleteMessageHandler<
+            filters.Modify<DeleteMessageUpdate, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onDeleteMessage(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('deleteMessage', filter, handler, group)
     }
 
     /**
