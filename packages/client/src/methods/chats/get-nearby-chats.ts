@@ -27,6 +27,7 @@ export async function getNearbyChats(
     })
 
     assertIsUpdatesGroup('contacts.getLocated', res)
+    this._handleUpdate(res, true)
 
     if (!res.updates.length) return []
 
