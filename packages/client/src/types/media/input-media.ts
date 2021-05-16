@@ -2,6 +2,7 @@ import { InputFileLike } from '../files'
 import { tl } from '@mtcute/tl'
 import { Venue } from './venue'
 import { MaybeArray } from '@mtcute/core'
+import { InputInlineResultGame } from '../bots'
 
 interface BaseInputMedia {
     /**
@@ -574,145 +575,166 @@ export namespace InputMedia {
 
     /**
      * Create an animation to be sent
+     *
+     * @param file  Animation
+     * @param params  Additional parameters
      */
     export function animation(
         file: InputFileLike,
-        params?: OmitTypeAndFile<InputMediaVideo>
+        params: OmitTypeAndFile<InputMediaVideo> = {}
     ): InputMediaVideo {
-        return {
-            type: 'video',
-            file,
-            isAnimated: true,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputMediaVideo>
+        ret.type = 'video'
+        ret.file = file
+        ret.isAnimated = true
+        return ret
     }
 
     /**
      * Create an audio to be sent
+     *
+     * @param file  Audio file
+     * @param params  Additional parameters
      */
     export function audio(
         file: InputFileLike,
-        params?: OmitTypeAndFile<InputMediaAudio>
+        params: OmitTypeAndFile<InputMediaAudio> = {}
     ): InputMediaAudio {
-        return {
-            type: 'audio',
-            file,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputMediaAudio>
+        ret.type = 'audio'
+        ret.file = file
+        return ret
     }
 
     /**
      * Create an document to be sent
+     *
+     * @param file  Document
+     * @param params  Additional parameters
      */
     export function document(
         file: InputFileLike,
-        params?: OmitTypeAndFile<InputMediaDocument>
+        params: OmitTypeAndFile<InputMediaDocument> = {}
     ): InputMediaDocument {
-        return {
-            type: 'document',
-            file,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputMediaDocument>
+        ret.type = 'document'
+        ret.file = file
+        return ret
     }
 
     /**
      * Create an photo to be sent
+     *
+     * @param file  Photo
+     * @param params  Additional parameters
      */
     export function photo(
         file: InputFileLike,
-        params?: OmitTypeAndFile<InputMediaPhoto>
+        params: OmitTypeAndFile<InputMediaPhoto> = {}
     ): InputMediaPhoto {
-        return {
-            type: 'photo',
-            file,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputMediaPhoto>
+        ret.type = 'photo'
+        ret.file = file
+        return ret
     }
 
     /**
      * Create an video to be sent
+     *
+     * @param file  Video
+     * @param params  Additional parameters
      */
     export function video(
         file: InputFileLike,
-        params?: OmitTypeAndFile<InputMediaVideo>
+        params: OmitTypeAndFile<InputMediaVideo> = {}
     ): InputMediaVideo {
-        return {
-            type: 'video',
-            file,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputMediaVideo>
+        ret.type = 'video'
+        ret.file = file
+        return ret
     }
 
     /**
-     * Create a voice message to be sent
+     * Create a voice note to be sent
+     *
+     * @param file  Voice note
+     * @param params  Additional parameters
      */
     export function voice(
         file: InputFileLike,
-        params?: OmitTypeAndFile<InputMediaVoice>
+        params: OmitTypeAndFile<InputMediaVoice> = {}
     ): InputMediaVoice {
-        return {
-            type: 'voice',
-            file,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputMediaVoice>
+        ret.type = 'voice'
+        ret.file = file
+        return ret
     }
 
     /**
      * Create a sticker to be sent
+     *
+     * @param file  Sticker
+     * @param params  Additional parameters
      */
     export function sticker(
         file: InputFileLike,
-        params?: OmitTypeAndFile<InputMediaSticker>
+        params: OmitTypeAndFile<InputMediaSticker> = {}
     ): InputMediaSticker {
-        return {
-            type: 'sticker',
-            file,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputMediaSticker>
+        ret.type = 'sticker'
+        ret.file = file
+        return ret
     }
 
     /**
      * Create a venue to be sent
+     *
+     * @param params  Venue parameters
      */
     export function venue(
         params: OmitTypeAndFile<InputMediaVenue>
     ): InputMediaVenue {
-        return {
-            type: 'venue',
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputMediaVenue>
+        ret.type = 'venue'
+        return ret
     }
 
     /**
      * Create a geolocation to be sent
+     *
+     * @param latitude  Latitude of the location
+     * @param longitude  Longitude of the location
+     * @param params  Additional parameters
      */
     export function geo(
         latitude: number,
         longitude: number,
-        params?: OmitTypeAndFile<InputMediaGeo, 'latitude' | 'longitude'>
+        params: OmitTypeAndFile<InputMediaGeo, 'latitude' | 'longitude'> = {}
     ): InputMediaGeo {
-        return {
-            type: 'geo',
-            latitude,
-            longitude,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputMediaGeo>
+        ret.type = 'geo'
+        ret.latitude = latitude
+        ret.longitude = longitude
+        return ret
     }
 
     /**
      * Create a live geolocation to be sent
+     *
+     * @param latitude  Latitude of the current location
+     * @param longitude  Longitude of the current location
+     * @param params  Additional parameters
      */
     export function geoLive(
         latitude: number,
         longitude: number,
-        params?: OmitTypeAndFile<InputMediaGeoLive, 'latitude' | 'longitude'>
+        params: OmitTypeAndFile<InputMediaGeoLive, 'latitude' | 'longitude'> = {}
     ): InputMediaGeoLive {
-        return {
-            type: 'geo_live',
-            latitude,
-            longitude,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputMediaGeoLive>
+        ret.type = 'geo_live'
+        ret.latitude = latitude
+        ret.longitude = longitude
+        return ret
     }
 
     /**
@@ -720,6 +742,8 @@ export namespace InputMedia {
      *
      * For convenience, known dice emojis are available
      * as static members of {@link Dice}.
+     *
+     * @param emoji  Emoji representing the dice
      */
     export function dice(emoji: string): InputMediaDice {
         return {
@@ -730,18 +754,21 @@ export namespace InputMedia {
 
     /**
      * Create a contact to be sent
+     *
+     * @param params  Contact parameters
      */
     export function contact(
         params: OmitTypeAndFile<InputMediaContact>
     ): InputMediaContact {
-        return {
-            type: 'contact',
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputMediaContact>
+        ret.type = 'contact'
+        return ret
     }
 
     /**
      * Create a game to be sent
+     *
+     * @param game  Game short name or TL object representing one
      */
     export function game(game: string | tl.TypeInputGame): InputMediaGame {
         return {
@@ -752,38 +779,41 @@ export namespace InputMedia {
 
     /**
      * Create an invoice to be sent
+     *
+     * @param params  Invoice parameters
      */
     export function invoice(
         params: OmitTypeAndFile<InputMediaInvoice>
     ): InputMediaInvoice {
-        return {
-            type: 'invoice',
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputMediaInvoice>
+        ret.type = 'invoice'
+        return ret
     }
 
     /**
      * Create a poll to be sent
+     *
+     * @param params  Poll parameters
      */
     export function poll(
         params: OmitTypeAndFile<InputMediaPoll>
     ): InputMediaPoll {
-        return {
-            type: 'poll',
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputMediaPoll>
+        ret.type = 'poll'
+        return ret
     }
 
     /**
      * Create a quiz to be sent
+     *
+     * @param params  Quiz parameters
      */
     export function quiz(
         params: OmitTypeAndFile<InputMediaQuiz>
     ): InputMediaQuiz {
-        return {
-            type: 'quiz',
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputMediaQuiz>
+        ret.type = 'quiz'
+        return ret
     }
 
     /**
@@ -793,15 +823,17 @@ export namespace InputMedia {
      * Photo type is only inferred for reused files,
      * newly uploaded photos with `auto` will be
      * uploaded as a document
+     *
+     * @param file  The media file
+     * @param params  Additional parameters
      */
     export function auto(
         file: InputFileLike,
-        params?: OmitTypeAndFile<InputMediaAuto>
+        params: OmitTypeAndFile<InputMediaAuto> = {}
     ): InputMediaAuto {
-        return {
-            type: 'auto',
-            file,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputMediaAuto>
+        ret.type = 'auto'
+        ret.file = file
+        return ret
     }
 }

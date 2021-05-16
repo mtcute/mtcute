@@ -5,7 +5,6 @@ import {
     InputMediaGeo,
     InputMediaGeoLive,
     InputMediaVenue,
-    Venue,
 } from '../../media'
 
 /**
@@ -111,73 +110,99 @@ export type InputInlineMessage =
     | InputInlineMessageGame
 
 export namespace BotInlineMessage {
+    /**
+     * Create a text inline message
+     *
+     * @param text  Message text
+     * @param params
+     */
     export function text(
         text: string,
-        params?: Omit<InputInlineMessageText, 'type' | 'text'>
+        params: Omit<InputInlineMessageText, 'type' | 'text'> = {}
     ): InputInlineMessageText {
-        return {
-            type: 'text',
-            text,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputInlineMessageText>
+        ret.type = 'text'
+        ret.text = text
+        return ret
     }
 
+    /**
+     * Create an inline message containing
+     * media from the result
+     */
     export function media(
-        params?: Omit<InputInlineMessageMedia, 'type'>
+        params: Omit<InputInlineMessageMedia, 'type'> = {}
     ): InputInlineMessageMedia {
-        return {
-            type: 'media',
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputInlineMessageMedia>
+        ret.type = 'media'
+        return ret
     }
 
+    /**
+     * Create an inline message containing a geolocation
+     *
+     * @param latitude  Latitude of the location
+     * @param longitude  Longitude of the location
+     * @param params  Additional parameters
+     */
     export function geo(
         latitude: number,
         longitude: number,
-        params?: Omit<InputInlineMessageGeo, 'type' | 'latitude' | 'longitude'>
+        params: Omit<InputInlineMessageGeo, 'type' | 'latitude' | 'longitude'> = {}
     ): InputInlineMessageGeo {
-        return {
-            type: 'geo',
-            latitude,
-            longitude,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputInlineMessageGeo>
+        ret.type = 'geo'
+        ret.latitude = latitude
+        ret.longitude = longitude
+        return ret
     }
 
+    /**
+     * Create an inline message containing a live geolocation
+     *
+     * @param latitude  Latitude of the current location
+     * @param longitude  Longitude of the current location
+     * @param params  Additional parameters
+     */
     export function geoLive(
         latitude: number,
         longitude: number,
-        params?: Omit<
+        params: Omit<
             InputInlineMessageGeoLive,
             'type' | 'latitude' | 'longitude'
-        >
+        > = {}
     ): InputInlineMessageGeoLive {
-        return {
-            type: 'geo_live',
-            latitude,
-            longitude,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputInlineMessageGeoLive>
+        ret.type = 'geo_live'
+        ret.latitude = latitude
+        ret.longitude = longitude
+        return ret
     }
 
+    /**
+     * Create an inline message containing a venue
+     */
     export function venue(
         params: Omit<InputInlineMessageVenue, 'type'>
     ): InputInlineMessageVenue {
-        return {
-            type: 'venue',
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputInlineMessageVenue>
+        ret.type = 'venue'
+        return ret
     }
 
+    /**
+     * Create an inline message containing a game
+     * from the inline result
+     */
     export function game(
         params: Omit<InputInlineMessageGame, 'type'>
     ): InputInlineMessageGame {
-        return {
-            type: 'game',
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputInlineMessageGame>
+        ret.type = 'game'
+        return ret
     }
 
+    /** @internal */
     export async function _convertToTl(
         client: TelegramClient,
         obj: InputInlineMessage,

@@ -81,11 +81,10 @@ export namespace BotKeyboard {
         buttons: tl.TypeKeyboardButton[][],
         params: Omit<ReplyKeyboardMarkup, 'type' | 'buttons'> = {}
     ): ReplyKeyboardMarkup {
-        return {
-            type: 'reply',
-            buttons,
-            ...params,
-        }
+        const ret = params as tl.Mutable<ReplyKeyboardMarkup>
+        ret.type = 'reply'
+        ret.buttons = buttons
+        return ret
     }
 
     /**
@@ -109,10 +108,9 @@ export namespace BotKeyboard {
     export function forceReply(
         params: Omit<ReplyKeyboardForceReply, 'type'> = {}
     ): ReplyKeyboardForceReply {
-        return {
-            type: 'force_reply',
-            ...params,
-        }
+        const ret = params as tl.Mutable<ReplyKeyboardForceReply>
+        ret.type = 'force_reply'
+        return ret
     }
 
     /**

@@ -1,5 +1,5 @@
 import { tl } from '@mtcute/tl'
-import { BotInlineMessage, InputInlineMessage } from './input-inline-message'
+import { BotInlineMessage, InputInlineMessage, InputInlineMessageGame } from './input-inline-message'
 import { TelegramClient } from '../../../client'
 import { fileIdToInputDocument, fileIdToInputPhoto } from '@mtcute/file-id'
 import { extractFileName } from '../../../utils/file-utils'
@@ -480,82 +480,123 @@ export type InputInlineResult =
     | InputInlineResultContact
 
 export namespace BotInline {
+    /**
+     * Create an inline result containing an article
+     *
+     * @param id  Inline result ID
+     * @param params  Article
+     */
     export function article(
         id: string,
         params: Omit<InputInlineResultArticle, 'type' | 'id'>
     ): InputInlineResultArticle {
-        return {
-            id,
-            type: 'article',
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputInlineResultArticle>
+        ret.id = id
+        ret.type = 'article'
+        return ret
     }
 
+    /**
+     * Create an inline result containing a GIF
+     *
+     * @param id  Inline result ID
+     * @param media  GIF animation
+     * @param params  Additional parameters
+     */
     export function gif(
         id: string,
         media: string | tl.RawInputWebDocument | tl.RawInputDocument,
-        params: Omit<InputInlineResultGif, 'type' | 'id' | 'media'>
+        params: Omit<InputInlineResultGif, 'type' | 'id' | 'media'> = {}
     ): InputInlineResultGif {
-        return {
-            id,
-            media,
-            type: 'gif',
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputInlineResultGif>
+        ret.id = id
+        ret.type = 'gif'
+        ret.media = media
+        return ret
     }
 
+    /**
+     * Create an inline result containing a video
+     *
+     * @param id  Inline result ID
+     * @param media  Video
+     * @param params  Additional parameters
+     */
     export function video(
         id: string,
         media: string | tl.RawInputWebDocument | tl.RawInputDocument,
         params: Omit<InputInlineResultVideo, 'type' | 'id' | 'media'>
     ): InputInlineResultVideo {
-        return {
-            id,
-            type: 'video',
-            media,
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputInlineResultVideo>
+        ret.id = id
+        ret.type = 'video'
+        ret.media = media
+        return ret
     }
 
+    /**
+     * Create an inline result containing an audio file
+     *
+     * @param id  Inline result ID
+     * @param media  Audio file
+     * @param params  Additional parameters
+     */
     export function audio(
         id: string,
         media: string | tl.RawInputWebDocument | tl.RawInputDocument,
         params: Omit<InputInlineResultAudio, 'type' | 'id' | 'media'>
     ): InputInlineResultAudio {
-        return {
-            id,
-            type: 'audio',
-            media,
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputInlineResultAudio>
+        ret.id = id
+        ret.type = 'audio'
+        ret.media = media
+        return ret
     }
 
+    /**
+     * Create an inline result containing a voice note
+     *
+     * @param id  Inline result ID
+     * @param media  Voice note
+     * @param params  Additional parameters
+     */
     export function voice(
         id: string,
         media: string | tl.RawInputWebDocument | tl.RawInputDocument,
         params: Omit<InputInlineResultVoice, 'type' | 'id' | 'media'>
     ): InputInlineResultVoice {
-        return {
-            id,
-            type: 'voice',
-            media,
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputInlineResultVoice>
+        ret.id = id
+        ret.type = 'voice'
+        ret.media = media
+        return ret
     }
 
+    /**
+     * Create an inline result containing a photo
+     *
+     * @param id  Inline result ID
+     * @param media  Photo
+     * @param params  Additional parameters
+     */
     export function photo(
         id: string,
         media: string | tl.RawInputWebDocument | tl.RawInputPhoto,
-        params?: Omit<InputInlineResultPhoto, 'type' | 'id' | 'media'>
+        params: Omit<InputInlineResultPhoto, 'type' | 'id' | 'media'> = {}
     ): InputInlineResultPhoto {
-        return {
-            id,
-            type: 'photo',
-            media,
-            ...(params || {}),
-        }
+        const ret = params as tl.Mutable<InputInlineResultPhoto>
+        ret.id = id
+        ret.type = 'photo'
+        ret.media = media
+        return ret
     }
 
+    /**
+     * Create an inline result containing a sticker
+     *
+     * @param id  Inline result ID
+     * @param media  Sticker
+     */
     export function sticker(
         id: string,
         media: string | tl.RawInputDocument
@@ -567,67 +608,100 @@ export namespace BotInline {
         }
     }
 
+    /**
+     * Create an inline result containing a document
+     * (only PDF and ZIP are supported)
+     *
+     * @param id  Inline result ID
+     * @param media  Document
+     * @param params  Additional parameters
+     */
     export function file(
         id: string,
         media: string | tl.RawInputWebDocument | tl.RawInputDocument,
         params: Omit<InputInlineResultFile, 'type' | 'id' | 'media'>
     ): InputInlineResultFile {
-        return {
-            id,
-            type: 'file',
-            media,
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputInlineResultFile>
+        ret.id = id
+        ret.type = 'file'
+        ret.media = media
+        return ret
     }
 
+    /**
+     * Create an inline result containing a geolocation
+     *
+     * @param id  Inline result ID
+     * @param latitude  Latitude of the location
+     * @param longitude  Longitude of the location
+     * @param params  Additional parameters
+     */
     export function geo(
+        id: string,
         latitude: number,
         longitude: number,
         params: Omit<InputInlineResultGeo, 'type' | 'latitude' | 'longitude'>
     ): InputInlineResultGeo {
-        return {
-            type: 'geo',
-            latitude,
-            longitude,
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputInlineResultGeo>
+        ret.id = id
+        ret.type = 'geo'
+        ret.latitude = latitude
+        ret.longitude = longitude
+        return ret
     }
 
+    /**
+     * Create an inline result containing a venue
+     *
+     * @param id  Inline result ID
+     * @param params  Venue parameters
+     */
     export function venue(
         id: string,
         params: Omit<InputInlineResultVenue, 'type' | 'id'>
     ): InputInlineResultVenue {
-        return {
-            id,
-            type: 'venue',
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputInlineResultVenue>
+        ret.id = id
+        ret.type = 'venue'
+        return ret
     }
 
+    /**
+     * Create an inline result containing a contact
+     *
+     * @param id  Inline result ID
+     * @param params  Contact parameters
+     */
     export function contact(
         id: string,
         params: Omit<InputInlineResultContact, 'type' | 'id'>
     ): InputInlineResultContact {
-        return {
-            id,
-            type: 'contact',
-            ...params,
-        }
+        const ret = params as tl.Mutable<InputInlineResultContact>
+        ret.id = id
+        ret.type = 'contact'
+        return ret
     }
 
+    /**
+     * Create an inline result containing a game
+     *
+     * @param id  Inline result ID
+     * @param shortName  Short name of the game
+     * @param params  Additional parameters
+     */
     export function game(
         id: string,
         shortName: string,
-        params?: Omit<InputInlineResultGame, 'type' | 'id' | 'shortName'>
+        params: Omit<InputInlineResultGame, 'type' | 'id' | 'shortName'> = {}
     ): InputInlineResultGame {
-        return {
-            id,
-            type: 'game',
-            shortName,
-            ...(params || {})
-        }
+        const ret = params as tl.Mutable<InputInlineResultGame>
+        ret.id = id
+        ret.type = 'game'
+        ret.shortName = shortName
+        return ret
     }
 
+    /** @internal */
     export async function _convertToTl(
         client: TelegramClient,
         obj: InputInlineResult,
