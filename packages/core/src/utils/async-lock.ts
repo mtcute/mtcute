@@ -4,8 +4,11 @@ interface OneWayLinkedList<T> {
     n?: OneWayLinkedList<T>
 }
 
-/** @internal */
-export class Lock {
+/**
+ * Simple class implementing a semaphore like
+ * behaviour.
+ */
+export class AsyncLock {
     private _first?: OneWayLinkedList<LockInfo>
     private _last?: OneWayLinkedList<LockInfo>
 

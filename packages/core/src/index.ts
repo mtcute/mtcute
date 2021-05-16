@@ -6,6 +6,7 @@ export * from './types'
 export * from './utils/crypto'
 export * from './utils/peer-utils'
 export * from './utils/tl-json'
+export * from './utils/async-lock'
 
 export { BinaryReader } from './utils/binary/binary-reader'
 export { BinaryWriter } from './utils/binary/binary-writer'

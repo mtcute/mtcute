@@ -186,8 +186,12 @@ import {
     User,
     UsersIndex,
 } from './types'
-import { MaybeArray, MaybeAsync, TelegramConnection } from '@mtcute/core'
-import { Lock } from './utils/lock'
+import {
+    AsyncLock,
+    MaybeArray,
+    MaybeAsync,
+    TelegramConnection,
+} from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
 export interface TelegramClient extends BaseTelegramClient {
@@ -2974,7 +2978,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _connectionsForInline: Record<number, TelegramConnection>
     protected _parseModes: Record<string, IMessageEntityParser>
     protected _defaultParseMode: string | null
-    protected _updLock: Lock
+    protected _updLock: AsyncLock
     protected _pts: number
     protected _date: number
     protected _cpts: Record<number, number>
@@ -2986,7 +2990,7 @@ export class TelegramClient extends BaseTelegramClient {
         this._connectionsForInline = {}
         this._parseModes = {}
         this._defaultParseMode = null
-        this._updLock = new Lock()
+        this._updLock = new AsyncLock()
         // we dont need to initialize state fields since
         // they are always loaded either from the server, or from storage.
 

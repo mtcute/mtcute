@@ -38,14 +38,16 @@ import {
     ChatInviteLink,
     UsersIndex,
     ChatsIndex,
-    GameHighScore
+    GameHighScore,
 } from '../types'
 
 // @copy
-import { MaybeArray, MaybeAsync, TelegramConnection } from '@mtcute/core'
-
-// @copy
-import { Lock } from '../utils/lock'
+import {
+    MaybeArray,
+    MaybeAsync,
+    TelegramConnection,
+    AsyncLock,
+} from '@mtcute/core'
 
 // @copy
 import { tdFileId } from '@mtcute/file-id'

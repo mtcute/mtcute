@@ -7,9 +7,8 @@ import {
     peerToInputPeer,
 } from '../utils/peer-utils'
 import { extractChannelIdFromUpdate } from '../utils/misc-utils'
-import { Lock } from '../utils/lock'
 import bigInt from 'big-integer'
-import { MAX_CHANNEL_ID } from '@mtcute/core'
+import { AsyncLock, MAX_CHANNEL_ID } from '@mtcute/core'
 import { isDummyUpdate, isDummyUpdates } from '../utils/updates-utils'
 import { ChatsIndex, UsersIndex } from '../types'
 
@@ -24,7 +23,7 @@ const debug = require('debug')('mtcute:upds')
 
 // @extension
 interface UpdatesState {
-    _updLock: Lock
+    _updLock: AsyncLock
 
     // accessing storage every time might be expensive,
     // so store everything here, and load & save
@@ -37,7 +36,7 @@ interface UpdatesState {
 
 // @initialize
 function _initializeUpdates(this: TelegramClient) {
-    this._updLock = new Lock()
+    this._updLock = new AsyncLock()
     // we dont need to initialize state fields since
     // they are always loaded either from the server, or from storage.
 
