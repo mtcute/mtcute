@@ -8,6 +8,7 @@ import {
 import { MaybeArray } from '@mtcute/core'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
  * Send or retract a vote in a poll.
@@ -56,12 +57,7 @@ export async function sendVote(
         options: options as Buffer[],
     })
 
-    if (!(res._ === 'updates' || res._ === 'updatesCombined'))
-        throw new MtCuteTypeAssertionError(
-            'messages.sendVote',
-            'updates | updatesCombined',
-            res._
-        )
+    assertIsUpdatesGroup('messages.sendVote', res)
 
     this._handleUpdate(res, true)
 

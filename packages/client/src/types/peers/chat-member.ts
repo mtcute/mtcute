@@ -38,7 +38,7 @@ export class ChatMember {
     constructor(
         client: TelegramClient,
         raw: tl.TypeChatParticipant | tl.TypeChannelParticipant,
-        users: UsersIndex,
+        users: UsersIndex
     ) {
         this.client = client
         this.raw = raw
@@ -51,24 +51,25 @@ export class ChatMember {
      */
     get user(): User {
         if (this._user === undefined) {
-            if (
-                this.raw._ === 'channelParticipantBanned' ||
-                this.raw._ === 'channelParticipantLeft'
-            ) {
-                assertTypeIs(
-                    'ChatMember#user (raw.peer)',
-                    this.raw.peer,
-                    'peerUser'
-                )
-                this._user = new User(
-                    this.client,
-                    this._users[this.raw.peer.userId]
-                )
-            } else {
-                this._user = new User(
-                    this.client,
-                    this._users[this.raw.userId]
-                )
+            switch (this.raw._) {
+                case 'channelParticipantBanned':
+                case 'channelParticipantLeft':
+                    assertTypeIs(
+                        'ChatMember#user (raw.peer)',
+                        this.raw.peer,
+                        'peerUser'
+                    )
+                    this._user = new User(
+                        this.client,
+                        this._users[this.raw.peer.userId]
+                    )
+                    break
+                default:
+                    this._user = new User(
+                        this.client,
+                        this._users[this.raw.userId]
+                    )
+                    break
             }
         }
 
@@ -79,34 +80,23 @@ export class ChatMember {
      * Get the chat member status
      */
     get status(): ChatMember.Status {
-        if (
-            this.raw._ === 'channelParticipant' ||
-            this.raw._ === 'channelParticipantSelf' ||
-            this.raw._ === 'chatParticipant'
-        ) {
-            return 'member'
-        }
-
-        if (
-            this.raw._ === 'channelParticipantCreator' ||
-            this.raw._ === 'chatParticipantCreator'
-        ) {
-            return 'creator'
-        }
-
-        if (
-            this.raw._ === 'channelParticipantAdmin' ||
-            this.raw._ === 'chatParticipantAdmin'
-        ) {
-            return 'admin'
-        }
-
-        if (this.raw._ === 'channelParticipantLeft') {
-            return 'left'
-        }
-
-        if (this.raw._ === 'channelParticipantBanned') {
-            return this.raw.bannedRights.viewMessages ? 'banned' : 'restricted'
+        switch (this.raw._) {
+            case 'channelParticipant':
+            case 'channelParticipantSelf':
+            case 'chatParticipant':
+                return 'member'
+            case 'channelParticipantCreator':
+            case 'chatParticipantCreator':
+                return 'creator'
+            case 'channelParticipantAdmin':
+            case 'chatParticipantAdmin':
+                return 'admin'
+            case 'channelParticipantLeft':
+                return 'left'
+            case 'channelParticipantBanned':
+                return this.raw.bannedRights.viewMessages
+                    ? 'banned'
+                    : 'restricted'
         }
 
         // fallback
@@ -119,10 +109,13 @@ export class ChatMember {
      * `null` for non-admins and in case custom title is not set.
      */
     get title(): string | null {
-        return this.raw._ === 'channelParticipantCreator' ||
-            this.raw._ === 'channelParticipantAdmin'
-            ? this.raw.rank ?? null
-            : null
+        switch (this.raw._) {
+            case 'channelParticipantCreator':
+            case 'channelParticipantAdmin':
+                return this.raw.rank ?? null
+            default:
+                return null
+        }
     }
 
     /**
@@ -131,11 +124,14 @@ export class ChatMember {
      * Not available for creators and left members
      */
     get joinedDate(): Date | null {
-        return this.raw._ === 'channelParticipantCreator' ||
-            this.raw._ === 'chatParticipantCreator' ||
-            this.raw._ === 'channelParticipantLeft'
-            ? null
-            : new Date(this.raw.date * 1000)
+        switch (this.raw._) {
+            case 'channelParticipantCreator':
+            case 'chatParticipantCreator':
+            case 'channelParticipantLeft':
+                return null
+            default:
+                return new Date(this.raw.date * 1000)
+        }
     }
 
     private _invitedBy?: User | null
@@ -149,14 +145,7 @@ export class ChatMember {
      */
     get invitedBy(): User | null {
         if (this._invitedBy === undefined) {
-            if (
-                this.raw._ !== 'chatParticipantCreator' &&
-                this.raw._ !== 'channelParticipantCreator' &&
-                this.raw._ !== 'channelParticipant' &&
-                this.raw._ !== 'channelParticipantBanned' &&
-                this.raw._ !== 'channelParticipantLeft' &&
-                this.raw.inviterId
-            ) {
+            if ('inviterId' in this.raw && this.raw.inviterId) {
                 this._invitedBy = new User(
                     this.client,
                     this._users[this.raw.inviterId]
@@ -244,10 +233,13 @@ export class ChatMember {
      * Also contains whether this admin is anonymous.
      */
     get permissions(): tl.RawChatAdminRights | null {
-        return this.raw._ === 'channelParticipantAdmin' ||
-            this.raw._ === 'channelParticipantCreator'
-            ? this.raw.adminRights
-            : null
+        switch (this.raw._) {
+            case 'channelParticipantAdmin':
+            case 'channelParticipantCreator':
+                return this.raw.adminRights
+            default:
+                return null
+        }
     }
 }
 

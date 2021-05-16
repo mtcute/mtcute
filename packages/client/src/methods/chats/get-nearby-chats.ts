@@ -3,6 +3,7 @@ import { Chat, MtCuteTypeAssertionError } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { getMarkedPeerId } from '@mtcute/core'
 import { tl } from 'packages/tl'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
  * Get nearby chats
@@ -25,13 +26,7 @@ export async function getNearbyChats(
         },
     })
 
-    if (!(res._ === 'updates' || res._ === 'updatesCombined')) {
-        throw new MtCuteTypeAssertionError(
-            'contacts.getLocated',
-            'updates | updatesCombined',
-            res._
-        )
-    }
+    assertIsUpdatesGroup('contacts.getLocated', res)
 
     if (!res.updates.length) return []
 

@@ -3,6 +3,7 @@ import { MaybeArray } from '@mtcute/core'
 import { InputPeerLike, MtCuteInvalidPeerTypeError, MtCuteTypeAssertionError, User } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
  * Delete a single contact from your Telegram contacts list
@@ -56,12 +57,7 @@ export async function deleteContacts(
         id: inputPeers
     })
 
-    if (!(res._ === 'updates' || res._ === 'updatesCombined'))
-        throw new MtCuteTypeAssertionError(
-            'addContact',
-            'updates | updatesCombined',
-            res._
-        )
+    assertIsUpdatesGroup('contacts.deleteContacts', res)
 
     if (single && !res.updates.length) return null
 

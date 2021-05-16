@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+import { MtCuteTypeAssertionError } from '../types'
 
 // dummy updates which are used for methods that return messages.affectedHistory.
 // that is not an update, but it carries info about pts, and we need to handle it
@@ -33,4 +34,14 @@ export function isDummyUpdate(upd: tl.TypeUpdate): boolean {
 /** @internal */
 export function isDummyUpdates(upd: tl.TypeUpdates): boolean {
     return upd._ === 'updates' && upd.updates.length === 1 && isDummyUpdate(upd.updates[0])
+}
+
+/** @internal */
+export function assertIsUpdatesGroup(ctx: string, upd: tl.TypeUpdates): asserts upd is tl.RawUpdates | tl.RawUpdatesCombined {
+    switch (upd._) {
+        case 'updates':
+        case 'updatesCombined':
+            return
+    }
+    throw new MtCuteTypeAssertionError(ctx, 'updates | updatesCombined', upd._)
 }

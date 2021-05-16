@@ -12,28 +12,26 @@ export function parseDocument(
     doc: tl.RawDocument
 ): RawDocument {
     for (const attr of doc.attributes) {
-        if (attr._ === 'documentAttributeAudio') {
-            if (attr.voice) {
-                return new Voice(client, doc, attr)
-            } else {
-                return new Audio(client, doc, attr)
+        switch (attr._) {
+            case 'documentAttributeAudio':
+                if (attr.voice) {
+                    return new Voice(client, doc, attr)
+                } else {
+                    return new Audio(client, doc, attr)
+                }
+            case 'documentAttributeSticker': {
+                const sz = doc.attributes.find(
+                    (it) => it._ === 'documentAttributeImageSize'
+                )! as tl.RawDocumentAttributeImageSize
+                return new Sticker(client, doc, attr, sz)
             }
-        }
-
-        if (attr._ === 'documentAttributeSticker') {
-            const sz = doc.attributes.find(
-                (it) => it._ === 'documentAttributeImageSize'
-            )! as tl.RawDocumentAttributeImageSize
-            return new Sticker(client, doc, attr, sz)
-        }
-
-        if (
-            attr._ === 'documentAttributeVideo' ||
-            // legacy gif
-            (attr._ === 'documentAttributeImageSize' &&
-                doc.mimeType === 'image/gif')
-        ) {
-            return new Video(client, doc, attr)
+            case 'documentAttributeVideo':
+                return new Video(client, doc, attr)
+            case 'documentAttributeImageSize':
+                // legacy gif
+                if (doc.mimeType === 'image/gif') {
+                    return new Video(client, doc, attr)
+                }
         }
     }
 

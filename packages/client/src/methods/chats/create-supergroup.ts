@@ -1,5 +1,6 @@
 import { TelegramClient } from '../../client'
 import { Chat, MtCuteTypeAssertionError } from '../../types'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
  * Create a new supergroup
@@ -20,13 +21,7 @@ export async function createSupergroup(
         megagroup: true
     })
 
-    if (!(res._ === 'updates' || res._ === 'updatesCombined')) {
-        throw new MtCuteTypeAssertionError(
-            'channels.createChannel',
-            'updates | updatesCombined',
-            res._
-        )
-    }
+    assertIsUpdatesGroup('channels.createChannel', res)
 
     this._handleUpdate(res)
 

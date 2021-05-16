@@ -231,88 +231,80 @@ export namespace BotInlineMessage {
         obj: InputInlineMessage,
         parseMode?: string | null
     ): Promise<tl.TypeInputBotInlineMessage> {
-        if (obj.type === 'text') {
-            const [message, entities] = await client['_parseEntities'](
-                obj.text,
-                parseMode,
-                obj.entities
-            )
+        switch (obj.type) {
+            case 'text': {
+                const [message, entities] = await client['_parseEntities'](
+                    obj.text,
+                    parseMode,
+                    obj.entities
+                )
 
-            return {
-                _: 'inputBotInlineMessageText',
-                message,
-                entities,
-                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+                return {
+                    _: 'inputBotInlineMessageText',
+                    message,
+                    entities,
+                    replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+                }
             }
-        }
+            case 'media': {
+                const [message, entities] = await client['_parseEntities'](
+                    obj.text,
+                    parseMode,
+                    obj.entities
+                )
 
-        if (obj.type === 'media') {
-            const [message, entities] = await client['_parseEntities'](
-                obj.text,
-                parseMode,
-                obj.entities
-            )
-
-            return {
-                _: 'inputBotInlineMessageMediaAuto',
-                message,
-                entities,
-                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+                return {
+                    _: 'inputBotInlineMessageMediaAuto',
+                    message,
+                    entities,
+                    replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+                }
             }
+            case 'geo':
+            case 'geo_live':
+                return {
+                    _: 'inputBotInlineMessageMediaGeo',
+                    geoPoint: {
+                        _: 'inputGeoPoint',
+                        lat: obj.latitude,
+                        long: obj.longitude,
+                    },
+                    // fields will be `undefined` if this is a `geo`
+                    heading: (obj as InputMediaGeoLive).heading,
+                    period: (obj as InputMediaGeoLive).period,
+                    proximityNotificationRadius: (obj as InputMediaGeoLive)
+                        .proximityNotificationRadius,
+                    replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+                }
+            case 'venue':
+                return {
+                    _: 'inputBotInlineMessageMediaVenue',
+                    geoPoint: {
+                        _: 'inputGeoPoint',
+                        lat: obj.latitude,
+                        long: obj.longitude,
+                    },
+                    title: obj.title,
+                    address: obj.address,
+                    provider: obj.source?.provider ?? '',
+                    venueId: obj.source?.id ?? '',
+                    venueType: obj.source?.type ?? '',
+                    replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+                }
+            case 'game':
+                return {
+                    _: 'inputBotInlineMessageGame',
+                    replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+                }
+            case 'contact':
+                return {
+                    _: 'inputBotInlineMessageMediaContact',
+                    phoneNumber: obj.phone,
+                    firstName: obj.firstName,
+                    lastName: obj.lastName ?? '',
+                    vcard: obj.vcard ?? '',
+                    replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+                }
         }
-
-        if (obj.type === 'geo' || obj.type === 'geo_live') {
-            return {
-                _: 'inputBotInlineMessageMediaGeo',
-                geoPoint: {
-                    _: 'inputGeoPoint',
-                    lat: obj.latitude,
-                    long: obj.longitude,
-                },
-                // fields will be `undefined` if this is a `geo`
-                heading: (obj as InputMediaGeoLive).heading,
-                period: (obj as InputMediaGeoLive).period,
-                proximityNotificationRadius: (obj as InputMediaGeoLive)
-                    .proximityNotificationRadius,
-                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
-            }
-        }
-
-        if (obj.type === 'venue') {
-            return {
-                _: 'inputBotInlineMessageMediaVenue',
-                geoPoint: {
-                    _: 'inputGeoPoint',
-                    lat: obj.latitude,
-                    long: obj.longitude,
-                },
-                title: obj.title,
-                address: obj.address,
-                provider: obj.source?.provider ?? '',
-                venueId: obj.source?.id ?? '',
-                venueType: obj.source?.type ?? '',
-                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
-            }
-        }
-
-        if (obj.type === 'game') {
-            return {
-                _: 'inputBotInlineMessageGame',
-                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
-            }
-        }
-
-        if (obj.type === 'contact') {
-            return {
-                _: 'inputBotInlineMessageMediaContact',
-                phoneNumber: obj.phone,
-                firstName: obj.firstName,
-                lastName: obj.lastName ?? '',
-                vcard: obj.vcard ?? '',
-                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
-            }
-        }
-
-        return obj as never
     }
 }

@@ -3,6 +3,7 @@ import { InputPeerLike, MtCuteTypeAssertionError, Poll } from '../../types'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
 import bigInt from 'big-integer'
 import { assertTypeIs } from '../../utils/type-assertion'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
  * Close a poll sent by you.
@@ -35,12 +36,7 @@ export async function closePoll(
         },
     })
 
-    if (!(res._ === 'updates' || res._ === 'updatesCombined'))
-        throw new MtCuteTypeAssertionError(
-            'messages.editMessage',
-            'updates | updatesCombined',
-            res._
-        )
+    assertIsUpdatesGroup('messages.editMessage', res)
 
     this._handleUpdate(res, true)
 

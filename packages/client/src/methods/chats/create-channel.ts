@@ -1,5 +1,6 @@
 import { TelegramClient } from '../../client'
 import { Chat, MtCuteTypeAssertionError } from '../../types'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
  * Create a new broadcast channel
@@ -21,13 +22,7 @@ export async function createChannel(
         broadcast: true,
     })
 
-    if (!(res._ === 'updates' || res._ === 'updatesCombined')) {
-        throw new MtCuteTypeAssertionError(
-            'channels.createChannel',
-            'updates | updatesCombined',
-            res._
-        )
-    }
+    assertIsUpdatesGroup('channels.createChannel', res)
 
     this._handleUpdate(res)
 

@@ -127,20 +127,29 @@ export class ChatMemberUpdate {
             // in this case OR is the same as AND, but AND doesn't work well with typescript :shrug:
             if (!old || !cur) return (this._type = 'other')
 
-            if (old._ === 'chatParticipant' || old._ === 'channelParticipant') {
-                if (
-                    cur._ === 'chatParticipantAdmin' ||
-                    cur._ === 'channelParticipantAdmin'
-                ) {
-                    return (this._type = 'promoted')
-                }
+            switch (old._) {
+                case 'chatParticipant':
+                case 'channelParticipant':
+                    switch (cur._) {
+                        case 'chatParticipantAdmin':
+                        case 'channelParticipantAdmin':
+                            return (this._type = 'promoted')
+                        case 'channelParticipantBanned':
+                            // kicked or restricted
+                            if (cur.left) return (this._type = 'kicked')
 
-                if (cur._ === 'channelParticipantBanned') {
-                    // kicked or restricted
-                    if (cur.left) return (this._type = 'kicked')
+                            return (this._type = 'restricted')
+                    }
+                    break
+                case 'chatParticipantCreator':
+                case 'channelParticipantCreator':
+                    return (this._type = 'old_owner')
+            }
 
-                    return (this._type = 'restricted')
-                }
+            switch (cur._) {
+                case 'chatParticipantCreator':
+                case 'channelParticipantCreator':
+                    return (this._type = 'new_owner')
             }
 
             if (
@@ -155,20 +164,6 @@ export class ChatMemberUpdate {
                 cur._ === 'channelParticipant'
             ) {
                 return (this._type = 'demoted')
-            }
-
-            if (
-                old._ === 'chatParticipantCreator' ||
-                old._ === 'channelParticipantCreator'
-            ) {
-                return (this._type = 'old_owner')
-            }
-
-            if (
-                cur._ === 'chatParticipantCreator' ||
-                cur._ === 'channelParticipantCreator'
-            ) {
-                return (this._type = 'new_owner')
             }
 
             return (this._type = 'other')

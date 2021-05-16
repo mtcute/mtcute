@@ -2,6 +2,7 @@ import { TelegramClient } from '../../client'
 import { InputPeerLike, MtCuteInvalidPeerTypeError, MtCuteTypeAssertionError, User } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
  * Add an existing Telegram user as a contact
@@ -48,12 +49,7 @@ export async function addContact(
         addPhonePrivacyException: !!params.sharePhone
     })
 
-    if (!(res._ === 'updates' || res._ === 'updatesCombined'))
-        throw new MtCuteTypeAssertionError(
-            'addContact',
-            'updates | updatesCombined',
-            res._
-        )
+    assertIsUpdatesGroup('contacts.addContact', res)
 
     this._handleUpdate(res)
 

@@ -170,12 +170,16 @@ export class Dialog {
             const peer = this.raw.peer
 
             let chat
-            if (peer._ === 'peerChannel' || peer._ === 'peerChat') {
-                chat = this._chats[
-                    peer._ === 'peerChannel' ? peer.channelId : peer.chatId
-                ]
-            } else {
-                chat = this._users[peer.userId]
+            switch (peer._) {
+                case 'peerChannel':
+                case 'peerChat':
+                    chat = this._chats[
+                        peer._ === 'peerChannel' ? peer.channelId : peer.chatId
+                    ]
+                    break
+                default:
+                    chat = this._users[peer.userId]
+                    break
             }
 
             this._chat = new Chat(this.client, chat)

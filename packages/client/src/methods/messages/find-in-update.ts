@@ -2,6 +2,7 @@ import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { Message, MtCuteTypeAssertionError } from '../../types'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /** @internal */
 export function _findMessageInUpdate(
@@ -9,12 +10,7 @@ export function _findMessageInUpdate(
     res: tl.TypeUpdates,
     isEdit = false
 ): Message {
-    if (!(res._ === 'updates' || res._ === 'updatesCombined'))
-        throw new MtCuteTypeAssertionError(
-            '_findMessageInUpdate',
-            'updates | updatesCombined',
-            res._
-        )
+    assertIsUpdatesGroup('_findMessageInUpdate', res)
 
     this._handleUpdate(res, true)
 

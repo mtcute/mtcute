@@ -332,38 +332,31 @@ export namespace BotKeyboard {
     ): tl.TypeReplyMarkup | undefined {
         if (!obj) return obj
 
-        if (obj.type === 'reply') {
-            return {
-                _: 'replyKeyboardMarkup',
-                resize: obj.resize,
-                singleUse: obj.singleUse,
-                selective: obj.selective,
-                rows: _2dToRows(obj.buttons),
-            }
+        switch (obj.type) {
+            case 'reply':
+                return {
+                    _: 'replyKeyboardMarkup',
+                    resize: obj.resize,
+                    singleUse: obj.singleUse,
+                    selective: obj.selective,
+                    rows: _2dToRows(obj.buttons),
+                }
+            case 'reply_hide':
+                return {
+                    _: 'replyKeyboardHide',
+                    selective: obj.selective,
+                }
+            case 'force_reply':
+                return {
+                    _: 'replyKeyboardForceReply',
+                    singleUse: obj.singleUse,
+                    selective: obj.selective,
+                }
+            case 'inline':
+                return {
+                    _: 'replyInlineMarkup',
+                    rows: _2dToRows(obj.buttons),
+                }
         }
-
-        if (obj.type === 'reply_hide') {
-            return {
-                _: 'replyKeyboardHide',
-                selective: obj.selective,
-            }
-        }
-
-        if (obj.type === 'force_reply') {
-            return {
-                _: 'replyKeyboardForceReply',
-                singleUse: obj.singleUse,
-                selective: obj.selective,
-            }
-        }
-
-        if (obj.type === 'inline') {
-            return {
-                _: 'replyInlineMarkup',
-                rows: _2dToRows(obj.buttons),
-            }
-        }
-
-        return undefined
     }
 }

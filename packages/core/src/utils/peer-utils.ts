@@ -10,11 +10,14 @@ export const MAX_USER_ID = 2147483647
  * Get the bare (non-marked) ID from a {@link tl.TypePeer}
  */
 export function getBarePeerId(peer: tl.TypePeer): number {
-    if (peer._ === 'peerUser') return peer.userId
-    if (peer._ === 'peerChat') return peer.chatId
-    if (peer._ === 'peerChannel') return peer.channelId
-
-    throw new Error('Invalid peer')
+    switch (peer._) {
+        case 'peerUser':
+            return peer.userId
+        case 'peerChat':
+            return peer.chatId
+        case 'peerChannel':
+            return peer.channelId
+    }
 }
 
 /**
@@ -35,17 +38,31 @@ export function getMarkedPeerId(
     peerType?: BasicPeerType | PeerType
 ): number {
     if (typeof peer === 'number') {
-        if (peerType === 'user' || peerType === 'bot') return peer
-        if (peerType === 'chat' || peerType === 'group') return -peer
-        if (peerType === 'channel' || peerType === 'supergroup')
-            return MAX_CHANNEL_ID - peer
+        switch (peerType) {
+            case 'user':
+            case 'bot':
+                return peer
+            case 'chat':
+            case 'group':
+                return -peer
+            case 'channel':
+            case 'supergroup':
+                return MAX_CHANNEL_ID - peer
+        }
         throw new Error('Invalid peer type')
     }
 
-    if (peer._ === 'peerUser' || peer._ === 'inputPeerUser') return peer.userId
-    if (peer._ === 'peerChat' || peer._ === 'inputPeerChat') return -peer.chatId
-    if (peer._ === 'peerChannel' || peer._ === 'inputPeerChannel')
-        return MAX_CHANNEL_ID - peer.channelId
+    switch (peer._) {
+        case 'peerUser':
+        case 'inputPeerUser':
+            return peer.userId
+        case 'peerChat':
+        case 'inputPeerChat':
+            return -peer.chatId
+        case 'peerChannel':
+        case 'inputPeerChannel':
+            return MAX_CHANNEL_ID - peer.channelId
+    }
 
     throw new Error('Invalid peer')
 }
@@ -55,11 +72,14 @@ export function getMarkedPeerId(
  */
 export function getBasicPeerType(peer: tl.TypePeer | number): BasicPeerType {
     if (typeof peer !== 'number') {
-        if (peer._ === 'peerUser') return 'user'
-        if (peer._ === 'peerChat') return 'chat'
-        if (peer._ === 'peerChannel') return 'channel'
-
-        throw new Error('Invalid peer')
+        switch (peer._) {
+            case 'peerUser':
+                return 'user'
+            case 'peerChat':
+                return 'chat'
+            case 'peerChannel':
+                return 'channel'
+        }
     }
 
     if (peer < 0) {
@@ -90,11 +110,16 @@ export function markedPeerIdToBare(peerId: number): number {
  * Convert {@link PeerType} to {@link BasicPeerType}
  */
 export function peerTypeToBasic(type: PeerType): BasicPeerType {
-    if (type === 'bot' || type === 'user') return 'user'
-    if (type === 'group') return 'chat'
-    if (type === 'channel' || type === 'supergroup') return 'channel'
-
-    throw new Error('Invalid peer type')
+    switch (type) {
+        case 'bot':
+        case 'user':
+            return 'user'
+        case 'group':
+            return 'chat'
+        case 'channel':
+        case 'supergroup':
+            return 'channel'
+    }
 }
 
 function comparePeers(
@@ -105,22 +130,28 @@ function comparePeers(
 
     if ('userId' in first) {
         if ('userId' in second) return first.userId === second.userId
-        if (second._ === 'user' || second._ === 'userEmpty')
-            return first.userId === second.id
+        switch (second._) {
+            case 'user':
+            case 'userEmpty':
+                return first.userId === second.id
+        }
     }
     if ('chatId' in first) {
         if ('chatId' in second) return first.chatId === second.chatId
-        if (
-            second._ === 'chat' ||
-            second._ === 'chatForbidden' ||
-            second._ === 'chatEmpty'
-        )
-            return first.chatId === second.id
+        switch (second._) {
+            case 'chat':
+            case 'chatForbidden':
+            case 'chatEmpty':
+                return first.chatId === second.id
+        }
     }
     if ('channelId' in first) {
         if ('channelId' in second) return first.channelId === second.channelId
-        if (second._ === 'channel' || second._ === 'channelForbidden')
-            return first.channelId === second.id
+        switch (second._) {
+            case 'channel':
+            case 'channelForbidden':
+                return first.channelId === second.id
+        }
     }
     return false
 }
@@ -141,31 +172,32 @@ function isRefMessage(msg: tl.TypeMessage, peer: any): boolean | undefined {
 
 function findContext(obj: any, peer: any): [number, number] | undefined {
     if (!peer.min) return undefined
-    if (
-        obj._ === 'updates' ||
-        obj._ === 'updatesCombined' ||
-        obj._ === 'updates.difference' ||
-        obj._ === 'updates.differenceSlice'
-    ) {
-        for (const upd of (obj.updates || obj.otherUpdates) as tl.TypeUpdate[]) {
-            if (
-                (upd._ === 'updateNewMessage' ||
-                    upd._ === 'updateNewChannelMessage' ||
-                    upd._ === 'updateEditMessage' ||
-                    upd._ === 'updateEditChannelMessage') &&
-                isRefMessage(upd.message, peer)
-            ) {
-                return [getMarkedPeerId(upd.message.peerId!), upd.message.id]
+    switch (obj._) {
+        case 'updates':
+        case 'updatesCombined':
+        case 'updates.difference':
+        case 'updates.differenceSlice':
+            for (const upd of (obj.updates ||
+                obj.otherUpdates) as tl.TypeUpdate[]) {
+                switch (upd._) {
+                    case 'updateNewMessage':
+                    case 'updateNewChannelMessage':
+                    case 'updateEditMessage':
+                    case 'updateEditChannelMessage':
+                        if (isRefMessage(upd.message, peer)) {
+                            return [
+                                getMarkedPeerId(upd.message.peerId!),
+                                upd.message.id,
+                            ]
+                        }
+                        break
+                }
             }
-        }
-    }
-
-    if (obj._ === 'updateShortMessage') {
-        return [obj.userId, obj.id]
-    }
-
-    if (obj._ === 'updateShortChatMessage') {
-        return [-obj.chatId, obj.id]
+            break
+        case 'updateShortMessage':
+            return [obj.userId, obj.id]
+        case 'updateShortChatMessage':
+            return [-obj.chatId, obj.id]
     }
 
     if ('messages' in obj || 'newMessages' in obj) {
@@ -193,19 +225,17 @@ export function* getAllPeersFrom(
 > {
     if (typeof obj !== 'object') return
 
-    if (
-        obj._ === 'user' ||
-        obj._ === 'chat' ||
-        obj._ === 'channel' ||
-        obj._ === 'chatForbidden' ||
-        obj._ === 'channelForbidden'
-    ) {
-        yield obj
-        return
-    }
-    if (obj._ === 'userFull') {
-        yield obj.user
-        return
+    switch (obj._) {
+        case 'user':
+        case 'chat':
+        case 'channel':
+        case 'chatForbidden':
+        case 'channelForbidden':
+            yield obj
+            return
+        case 'userFull':
+            yield obj.user
+            return
     }
 
     if (
@@ -216,26 +246,26 @@ export function* getAllPeersFrom(
         yield obj.user
     }
 
-    if (
-        'chat' in obj &&
-        typeof obj.chat === 'object' &&
-        (obj.chat._ === 'chat' ||
-            obj.chat._ === 'channel' ||
-            obj.chat._ === 'chatForbidden' ||
-            obj.chat._ === 'channelForbidden')
-    ) {
-        yield obj.chat
+    if ('chat' in obj && typeof obj.chat === 'object') {
+        switch (obj.chat._) {
+            case 'chat':
+            case 'channel':
+            case 'chatForbidden':
+            case 'channelForbidden':
+                yield obj.chat
+                break
+        }
     }
 
-    if (
-        'channel' in obj &&
-        typeof obj.channel === 'object' &&
-        (obj.channel._ === 'chat' ||
-            obj.channel._ === 'channel' ||
-            obj.channel._ === 'chatForbidden' ||
-            obj.channel._ === 'channelForbidden')
-    ) {
-        yield obj.channel
+    if ('channel' in obj && typeof obj.channel === 'object') {
+        switch (obj.channel._) {
+            case 'chat':
+            case 'channel':
+            case 'chatForbidden':
+            case 'channelForbidden':
+                yield obj.channel
+                break
+        }
     }
 
     if ('users' in obj && Array.isArray(obj.users) && obj.users.length) {
@@ -257,18 +287,19 @@ export function* getAllPeersFrom(
     if ('chats' in obj && Array.isArray(obj.chats) && obj.chats.length) {
         for (const chat of obj.chats) {
             // .chats is sometimes number[]
-            if (
-                typeof chat === 'object' &&
-                (chat._ === 'chat' ||
-                    chat._ === 'channel' ||
-                    chat._ === 'chatForbidden' ||
-                    chat._ === 'channelForbidden')
-            ) {
-                if (chat.min) {
-                    chat.fromMessage = findContext(obj, chat)
-                }
+            if (typeof chat === 'object') {
+                switch (chat._) {
+                    case 'chat':
+                    case 'channel':
+                    case 'chatForbidden':
+                    case 'channelForbidden':
+                        if (chat.min) {
+                            chat.fromMessage = findContext(obj, chat)
+                        }
 
-                yield chat
+                        yield chat
+                        break
+                }
             }
         }
     }

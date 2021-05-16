@@ -38,14 +38,16 @@ export function jsonToTlJson(obj: any): tl.TypeJSONValue {
  * @param obj  TL JSON object to convert
  */
 export function tlJsonToJson(obj: tl.TypeJSONValue): any {
-    if (obj._ === 'jsonNull') return null
-    if (
-        obj._ === 'jsonBool' ||
-        obj._ === 'jsonNumber' ||
-        obj._ === 'jsonString'
-    )
-        return obj.value
-    if (obj._ === 'jsonArray') return obj.value.map(tlJsonToJson)
+    switch (obj._) {
+        case 'jsonNull':
+            return null
+        case 'jsonBool':
+        case 'jsonNumber':
+        case 'jsonString':
+            return obj.value
+        case 'jsonArray':
+            return obj.value.map(tlJsonToJson)
+    }
 
     const ret: any = {}
 

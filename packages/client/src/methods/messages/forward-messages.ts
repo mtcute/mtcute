@@ -12,6 +12,7 @@ import {
     createUsersChatsIndex,
 } from '../../utils/peer-utils'
 import { normalizeDate, randomUlong } from '../../utils/misc-utils'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
  * Forward a single message.
@@ -229,12 +230,7 @@ export async function forwardMessages(
         ),
     })
 
-    if (!(res._ === 'updates' || res._ === 'updatesCombined'))
-        throw new MtCuteTypeAssertionError(
-            'messages.forwardMessages',
-            'updates | updatesCombined',
-            res._
-        )
+    assertIsUpdatesGroup('messages.forwardMessages', res)
 
     this._handleUpdate(res, true)
 
@@ -242,12 +238,12 @@ export async function forwardMessages(
 
     const forwarded: Message[] = []
     res.updates.forEach((upd) => {
-        if (
-            upd._ === 'updateNewMessage' ||
-            upd._ == 'updateNewChannelMessage' ||
-            upd._ === 'updateNewScheduledMessage'
-        ) {
-            forwarded.push(new Message(this, upd.message, users, chats))
+        switch (upd._) {
+            case 'updateNewMessage':
+            case 'updateNewChannelMessage':
+            case 'updateNewScheduledMessage':
+                forwarded.push(new Message(this, upd.message, users, chats))
+                break
         }
     })
 

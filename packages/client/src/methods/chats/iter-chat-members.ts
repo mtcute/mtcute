@@ -1,5 +1,6 @@
 import { TelegramClient } from '../../client'
 import { ChatMember, InputPeerLike } from '../../types'
+import { isInputPeerChat } from '../../utils/peer-utils'
 
 /**
  * Iterate through chat members
@@ -45,7 +46,7 @@ export async function* iterChatMembers(
 
         if (!members.length) break
 
-        if (chat._ === 'inputPeerChat') {
+        if (isInputPeerChat(chat)) {
             total = members.length
         }
 

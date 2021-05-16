@@ -160,37 +160,37 @@ function _createNoDispatchIndex(
         pts: {},
     }
 
-    if (updates._ === 'updates' || updates._ === 'updatesCombined') {
-        updates.updates.forEach((upd) => {
-            const cid = extractChannelIdFromUpdate(upd) ?? 0
-            if (
-                upd._ === 'updateNewMessage' ||
-                upd._ === 'updateNewChannelMessage'
-            ) {
-                if (!ret.msg[cid]) ret.msg[cid] = {}
-                ret.msg[cid][upd.message.id] = true
-            }
+    switch (updates._) {
+        case 'updates':
+        case 'updatesCombined':
+            updates.updates.forEach((upd) => {
+                const cid = extractChannelIdFromUpdate(upd) ?? 0
+                switch (upd._) {
+                    case 'updateNewMessage':
+                    case 'updateNewChannelMessage':
+                        if (!ret.msg[cid]) ret.msg[cid] = {}
+                        ret.msg[cid][upd.message.id] = true
+                        break
+                }
 
-            const pts = 'pts' in upd ? upd.pts : undefined
+                const pts = 'pts' in upd ? upd.pts : undefined
 
-            if (pts) {
-                if (!ret.msg[cid]) ret.msg[cid] = {}
-                ret.msg[cid][pts] = true
-            }
-        })
-    }
+                if (pts) {
+                    if (!ret.msg[cid]) ret.msg[cid] = {}
+                    ret.msg[cid][pts] = true
+                }
+            })
+            break
+        case 'updateShortMessage':
+        case 'updateShortChatMessage':
+        case 'updateShortSentMessage':
+            // these updates are only used for non-channel messages, so we use 0
+            if (!ret.msg[0]) ret.msg[0] = {}
+            if (!ret.pts[0]) ret.pts[0] = {}
 
-    if (
-        updates._ === 'updateShortMessage' ||
-        updates._ === 'updateShortChatMessage' ||
-        updates._ === 'updateShortSentMessage'
-    ) {
-        // these updates are only used for non-channel messages, so we use 0
-        if (!ret.msg[0]) ret.msg[0] = {}
-        if (!ret.pts[0]) ret.pts[0] = {}
-
-        ret.msg[0][updates.id] = true
-        ret.pts[0][updates.pts] = true
+            ret.msg[0][updates.id] = true
+            ret.pts[0][updates.pts] = true
+            break
     }
 
     return ret
@@ -208,11 +208,12 @@ async function _loadDifference(
             qts: 0,
         })
 
-        if (diff._ === 'updates.differenceEmpty') return
-
-        if (diff._ === 'updates.differenceTooLong') {
-            this._pts = diff.pts
-            return
+        switch (diff._) {
+            case 'updates.differenceEmpty':
+                return
+            case 'updates.differenceTooLong':
+                this._pts = diff.pts
+                return
         }
 
         const state =

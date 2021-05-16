@@ -9,6 +9,7 @@ import {
     INVITE_LINK_REGEX,
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
  * Join a channel or supergroup
@@ -29,13 +30,7 @@ export async function joinChat(
                 _: 'messages.importChatInvite',
                 hash: m[1],
             })
-            if (!(res._ === 'updates' || res._ === 'updatesCombined')) {
-                throw new MtCuteTypeAssertionError(
-                    'messages.importChatInvite',
-                    'updates | updatesCombined',
-                    res._
-                )
-            }
+            assertIsUpdatesGroup('messages.importChatInvite', res)
 
             this._handleUpdate(res)
 
@@ -50,13 +45,8 @@ export async function joinChat(
         _: 'channels.joinChannel',
         channel: peer,
     })
-    if (!(res._ === 'updates' || res._ === 'updatesCombined')) {
-        throw new MtCuteTypeAssertionError(
-            'channels.joinChannel',
-            'updates | updatesCombined',
-            res._
-        )
-    }
+
+    assertIsUpdatesGroup('channels.joinChannel', res)
 
     this._handleUpdate(res)
 

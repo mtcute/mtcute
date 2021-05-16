@@ -75,25 +75,29 @@ export function toUniqueFileId(
     }
 
     let writer: BinaryWriter
-    if (inputLocation._ === 'photo') {
-        writer = BinaryWriter.alloc(16)
-        writer.int32(type)
-        writer.long(inputLocation.volumeId)
-        writer.int32(inputLocation.localId)
-    } else if (inputLocation._ === 'web') {
-        writer = BinaryWriter.alloc(
-            Buffer.byteLength(inputLocation.url, 'utf-8') + 8
-        )
-        writer.int32(type)
-        writer.string(inputLocation.url)
-    } else if (inputLocation._ === 'common') {
-        writer = BinaryWriter.alloc(12)
-        writer.int32(type)
-        writer.long(inputLocation.id)
-    } else {
-        throw new td.UnsupportedError(
-            `Unique IDs are not supported for ${(inputLocation as any)._}`
-        )
+    switch (inputLocation._) {
+        case 'photo':
+            writer = BinaryWriter.alloc(16)
+            writer.int32(type)
+            writer.long(inputLocation.volumeId)
+            writer.int32(inputLocation.localId)
+            break
+        case 'web':
+            writer = BinaryWriter.alloc(
+                Buffer.byteLength(inputLocation.url, 'utf-8') + 8
+            )
+            writer.int32(type)
+            writer.string(inputLocation.url)
+            break
+        case 'common':
+            writer = BinaryWriter.alloc(12)
+            writer.int32(type)
+            writer.long(inputLocation.id)
+            break
+        default:
+            throw new td.UnsupportedError(
+                `Unique IDs are not supported for ${(inputLocation as any)._}`
+            )
     }
 
     return encodeUrlSafeBase64(telegramRleEncode(writer.result()))

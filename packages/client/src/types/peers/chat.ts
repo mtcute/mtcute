@@ -56,20 +56,20 @@ export class Chat {
     ) {
         if (!peer) throw new MtCuteArgumentError('peer is not available')
 
-        if (
-            !(
-                peer._ === 'user' ||
-                peer._ === 'chat' ||
-                peer._ === 'channel' ||
-                peer._ === 'chatForbidden' ||
-                peer._ === 'channelForbidden'
-            )
-        )
-            throw new MtCuteTypeAssertionError(
-                'peer',
-                'user | chat | channel',
-                peer._
-            )
+        switch (peer._) {
+            case 'user':
+            case 'chat':
+            case 'channel':
+            case 'chatForbidden':
+            case 'channelForbidden':
+                break
+            default:
+                throw new MtCuteTypeAssertionError(
+                    'peer',
+                    'user | chat | channel',
+                    peer._
+                )
+        }
 
         this.client = client
         this.peer = peer
@@ -87,41 +87,41 @@ export class Chat {
      */
     get inputPeer(): tl.TypeInputPeer {
         if (!this._inputPeer) {
-            if (this.peer._ === 'user') {
-                if (!this.peer.accessHash) {
-                    throw new MtCuteArgumentError(
-                        "Peer's access hash is not available!"
-                    )
-                }
+            switch (this.peer._) {
+                case 'user':
+                    if (!this.peer.accessHash) {
+                        throw new MtCuteArgumentError(
+                            "Peer's access hash is not available!"
+                        )
+                    }
 
-                this._inputPeer = {
-                    _: 'inputPeerUser',
-                    userId: this.peer.id,
-                    accessHash: this.peer.accessHash,
-                }
-            } else if (
-                this.peer._ === 'chat' ||
-                this.peer._ === 'chatForbidden'
-            ) {
-                this._inputPeer = {
-                    _: 'inputPeerChat',
-                    chatId: this.peer.id,
-                }
-            } else if (
-                this.peer._ === 'channel' ||
-                this.peer._ === 'channelForbidden'
-            ) {
-                if (!this.peer.accessHash) {
-                    throw new MtCuteArgumentError(
-                        "Peer's access hash is not available!"
-                    )
-                }
+                    this._inputPeer = {
+                        _: 'inputPeerUser',
+                        userId: this.peer.id,
+                        accessHash: this.peer.accessHash,
+                    }
+                    break
+                case 'chat':
+                case 'chatForbidden':
+                    this._inputPeer = {
+                        _: 'inputPeerChat',
+                        chatId: this.peer.id,
+                    }
+                    break
+                case 'channel':
+                case 'channelForbidden':
+                    if (!this.peer.accessHash) {
+                        throw new MtCuteArgumentError(
+                            "Peer's access hash is not available!"
+                        )
+                    }
 
-                this._inputPeer = {
-                    _: 'inputPeerChannel',
-                    channelId: this.peer.id,
-                    accessHash: this.peer.accessHash,
-                }
+                    this._inputPeer = {
+                        _: 'inputPeerChannel',
+                        channelId: this.peer.id,
+                        accessHash: this.peer.accessHash,
+                    }
+                    break
             }
         }
 
@@ -132,23 +132,23 @@ export class Chat {
     /** Type of chat */
     get type(): Chat.Type {
         if (!this._type) {
-            if (this.peer._ === 'user') {
-                this._type = this.peer.bot ? 'bot' : 'private'
-            } else if (
-                this.peer._ === 'chat' ||
-                this.peer._ === 'chatForbidden'
-            ) {
-                this._type = 'group'
-            } else if (
-                this.peer._ === 'channel' ||
-                this.peer._ === 'channelForbidden'
-            ) {
-                this._type =
-                    this.peer._ === 'channel' && this.peer.gigagroup
-                        ? 'gigagroup'
-                        : this.peer.broadcast
-                        ? 'channel'
-                        : 'supergroup'
+            switch (this.peer._) {
+                case 'user':
+                    this._type = this.peer.bot ? 'bot' : 'private'
+                    break
+                case 'chat':
+                case 'chatForbidden':
+                    this._type = 'group'
+                    break
+                case 'channel':
+                case 'channelForbidden':
+                    this._type =
+                        this.peer._ === 'channel' && this.peer.gigagroup
+                            ? 'gigagroup'
+                            : this.peer.broadcast
+                            ? 'channel'
+                            : 'supergroup'
+                    break
             }
         }
 
@@ -467,12 +467,11 @@ export class Chat {
         users: UsersIndex,
         chats: ChatsIndex
     ): Chat {
-        if (peer._ === 'peerUser') {
-            return new Chat(client, users[peer.userId])
-        }
-
-        if (peer._ === 'peerChat') {
-            return new Chat(client, chats[peer.chatId])
+        switch (peer._) {
+            case 'peerUser':
+                return new Chat(client, users[peer.userId])
+            case 'peerChat':
+                return new Chat(client, chats[peer.chatId])
         }
 
         return new Chat(client, chats[peer.channelId])
@@ -507,8 +506,6 @@ export class Chat {
             return ret
         }
     }
-
-    // todo: bound methods https://github.com/pyrogram/pyrogram/blob/a86656aefcc93cc3d2f5c98227d5da28fcddb136/pyrogram/types/user_and_chats/chat.py#L319
 
     /**
      * Join this chat.

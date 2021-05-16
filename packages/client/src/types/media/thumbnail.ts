@@ -62,12 +62,15 @@ export class Thumbnail extends FileLocation {
         media: tl.RawPhoto | tl.RawDocument,
         sz: tl.TypePhotoSize
     ) {
-        if (sz._ === 'photoSizeEmpty' || sz._ === 'photoCachedSize')
-            throw new MtCuteTypeAssertionError(
-                'sz',
-                'not (photoSizeEmpty | photoCachedSize)',
-                sz._
-            )
+        switch (sz._) {
+            case 'photoSizeEmpty':
+            case 'photoCachedSize':
+                throw new MtCuteTypeAssertionError(
+                    'sz',
+                    'not (photoSizeEmpty | photoCachedSize)',
+                    sz._
+                )
+        }
 
         let location:
             | tl.TypeInputFileLocation

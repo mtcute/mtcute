@@ -184,20 +184,27 @@ export class Message {
             if (!from) {
                 // anon admin, return the chat
                 this._sender = this.chat
-            } else if (from._ === 'peerChannel') {
-                // forwarded channel post
-                this._sender = new Chat(
-                    this.client,
-                    this._chats[from.channelId]
-                )
-            } else if (from._ === 'peerUser') {
-                this._sender = new User(this.client, this._users[from.userId])
             } else
-                throw new MtCuteTypeAssertionError(
-                    'raw.fromId',
-                    'peerUser | peerChannel',
-                    from._
-                )
+                switch (from._) {
+                    case 'peerChannel': // forwarded channel post
+                        this._sender = new Chat(
+                            this.client,
+                            this._chats[from.channelId]
+                        )
+                        break
+                    case 'peerUser':
+                        this._sender = new User(
+                            this.client,
+                            this._users[from.userId]
+                        )
+                        break
+                    default:
+                        throw new MtCuteTypeAssertionError(
+                            'raw.fromId',
+                            'peerUser | peerChannel',
+                            from._
+                        )
+                }
         }
 
         return this._sender

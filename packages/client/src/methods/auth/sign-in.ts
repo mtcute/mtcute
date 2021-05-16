@@ -1,4 +1,4 @@
-import { MtCuteError, User, TermsOfService } from '../../types'
+import { User, TermsOfService } from '../../types'
 import { TelegramClient } from '../../client'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { normalizePhoneNumber } from '../../utils/misc-utils'

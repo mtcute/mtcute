@@ -1,6 +1,7 @@
 import { TelegramClient } from '../../client'
 import { Chat, InputPeerLike, MtCuteTypeAssertionError } from '../../types'
 import { tl } from '@mtcute/tl'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
  * Change default chat permissions for all members.
@@ -32,13 +33,7 @@ export async function setChatDefaultPermissions(
         }
     })
 
-    if (!(res._ === 'updates' || res._ === 'updatesCombined')) {
-        throw new MtCuteTypeAssertionError(
-            'messages.editChatDefaultBannedRights',
-            'updates | updatesCombined',
-            res._
-        )
-    }
+    assertIsUpdatesGroup('messages.editChatDefaultBannedRights', res)
 
     this._handleUpdate(res)
 

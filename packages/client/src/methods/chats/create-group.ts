@@ -3,6 +3,7 @@ import { MaybeArray } from '@mtcute/core'
 import { Chat, InputPeerLike, MtCuteTypeAssertionError } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
  * Create a legacy group chat
@@ -34,13 +35,7 @@ export async function createGroup(
         users: peers
     })
 
-    if (!(res._ === 'updates' || res._ === 'updatesCombined')) {
-        throw new MtCuteTypeAssertionError(
-            'messages.createChat',
-            'updates | updatesCombined',
-            res._
-        )
-    }
+    assertIsUpdatesGroup('messages.createChat', res)
 
     this._handleUpdate(res)
 
