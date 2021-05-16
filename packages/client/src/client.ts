@@ -17,6 +17,7 @@ import { startTest } from './methods/auth/start-test'
 import { start } from './methods/auth/start'
 import { answerCallbackQuery } from './methods/bots/answer-callback-query'
 import { answerInlineQuery } from './methods/bots/answer-inline-query'
+import { getCallbackAnswer } from './methods/bots/get-callback-answer'
 import {
     getGameHighScores,
     getInlineGameHighScores,
@@ -589,6 +590,42 @@ export interface TelegramClient extends BaseTelegramClient {
             parseMode?: string | null
         }
     ): Promise<void>
+    /**
+     * Request a callback answer from a bot,
+     * i.e. click an inline button that contains data.
+     *
+     * @param chatId  Chat ID where the message was found
+     * @param message  ID of the message containing the button
+     * @param data  Data contained in the button
+     * @param params
+     */
+    getCallbackAnswer(
+        chatId: InputPeerLike,
+        message: number,
+        data: string | Buffer,
+        params?: {
+            /**
+             * Timeout for the query in ms.
+             *
+             * Defaults to `10000` (10 sec)
+             */
+            timeout?: number
+
+            /**
+             * Whether this is a "play game" button
+             */
+            game?: boolean
+
+            /**
+             * If the button requires password entry,
+             * your 2FA password.
+             *
+             * Your password is never exposed to the
+             * bot, it is checked by Telegram.
+             */
+            password?: string
+        }
+    ): Promise<tl.messages.TypeBotCallbackAnswer>
     /**
      * Get high scores of a game
      *
@@ -2961,6 +2998,7 @@ export class TelegramClient extends BaseTelegramClient {
     start = start
     answerCallbackQuery = answerCallbackQuery
     answerInlineQuery = answerInlineQuery
+    getCallbackAnswer = getCallbackAnswer
     getGameHighScores = getGameHighScores
     getInlineGameHighScores = getInlineGameHighScores
     setGameScore = setGameScore
