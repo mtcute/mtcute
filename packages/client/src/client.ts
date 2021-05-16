@@ -34,6 +34,7 @@ import { deleteChatPhoto } from './methods/chats/delete-chat-photo'
 import { deleteGroup } from './methods/chats/delete-group'
 import { deleteHistory } from './methods/chats/delete-history'
 import { deleteUserHistory } from './methods/chats/delete-user-history'
+import { editAdminRights } from './methods/chats/edit-admin-rights'
 import { getChatEventLog } from './methods/chats/get-chat-event-log'
 import { getChatMember } from './methods/chats/get-chat-member'
 import { getChatMembers } from './methods/chats/get-chat-members'
@@ -822,6 +823,20 @@ export interface TelegramClient extends BaseTelegramClient {
     deleteUserHistory(
         chatId: InputPeerLike,
         userId: InputPeerLike
+    ): Promise<void>
+    /**
+     * Edit supergroup/channel admin rights of a user.
+     *
+     * @param chatId  Chat ID
+     * @param userId  User ID
+     * @param rights  New admin rights
+     * @param rank  (default: `''`) Custom admin rank
+     */
+    editAdminRights(
+        chatId: InputPeerLike,
+        userId: InputPeerLike,
+        rights: Omit<tl.RawChatAdminRights, '_'>,
+        rank?: string
     ): Promise<void>
     /**
      * Get chat event log ("Recent actions" in official
@@ -3014,6 +3029,7 @@ export class TelegramClient extends BaseTelegramClient {
     deleteGroup = deleteGroup
     deleteHistory = deleteHistory
     deleteUserHistory = deleteUserHistory
+    editAdminRights = editAdminRights
     getChatEventLog = getChatEventLog
     getChatMember = getChatMember
     getChatMembers = getChatMembers
