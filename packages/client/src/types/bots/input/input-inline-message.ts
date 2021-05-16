@@ -2,6 +2,7 @@ import { tl } from '@mtcute/tl'
 import { BotKeyboard, ReplyMarkup } from '../keyboards'
 import { TelegramClient } from '../../../client'
 import {
+    InputMediaContact,
     InputMediaGeo,
     InputMediaGeoLive,
     InputMediaVenue,
@@ -101,6 +102,16 @@ export interface InputInlineMessageGame {
     replyMarkup?: ReplyMarkup
 }
 
+/**
+ * Inline message containing a contact
+ */
+export interface InputInlineMessageContact extends InputMediaContact {
+    /**
+     * Message's reply markup
+     */
+    replyMarkup?: ReplyMarkup
+}
+
 export type InputInlineMessage =
     | InputInlineMessageText
     | InputInlineMessageMedia
@@ -108,6 +119,7 @@ export type InputInlineMessage =
     | InputInlineMessageGeoLive
     | InputInlineMessageVenue
     | InputInlineMessageGame
+    | InputInlineMessageContact
 
 export namespace BotInlineMessage {
     /**
@@ -202,6 +214,17 @@ export namespace BotInlineMessage {
         return ret
     }
 
+    /**
+     * Create an inline message containing a contact
+     */
+    export function contact(
+        params: Omit<InputInlineMessageContact, 'type'>
+    ): InputInlineMessageContact {
+        const ret = params as tl.Mutable<InputInlineMessageContact>
+        ret.type = 'contact'
+        return ret
+    }
+
     /** @internal */
     export async function _convertToTl(
         client: TelegramClient,
@@ -275,6 +298,17 @@ export namespace BotInlineMessage {
         if (obj.type === 'game') {
             return {
                 _: 'inputBotInlineMessageGame',
+                replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+            }
+        }
+
+        if (obj.type === 'contact') {
+            return {
+                _: 'inputBotInlineMessageMediaContact',
+                phoneNumber: obj.phone,
+                firstName: obj.firstName,
+                lastName: obj.lastName ?? '',
+                vcard: obj.vcard ?? '',
                 replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
             }
         }
