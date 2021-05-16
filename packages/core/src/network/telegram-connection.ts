@@ -236,6 +236,7 @@ export class TelegramConnection extends PersistentConnection {
     private _resend(it: PendingMessage, id?: string): void {
         debug('resending %s', it.method)
         this._sendBufferForResult(it).catch(it.promise.reject)
+        if (it.cancel) clearTimeout(it.cancel)
         if (id) delete this._pendingRpcCalls[id]
     }
 
@@ -613,6 +614,13 @@ export class TelegramConnection extends PersistentConnection {
             pending.cancel = setTimeout(() => {
                 const pending = this._pendingRpcCalls[messageIdStr]
                 if (pending) {
+                    this.sendEncryptedMessage({
+                        _: 'mt_rpcDropAnswer',
+                        reqMsgId: messageId,
+                    }).catch(() => {
+                        /* no-op */
+                    })
+
                     const error = new RpcTimeoutError(timeout)
                     if (this.params.niceStacks !== false) {
                         makeNiceStack(error, pending.stack!, pending.method)
