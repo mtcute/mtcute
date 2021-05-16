@@ -8,6 +8,8 @@ import {
 } from '../../types'
 import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 import { tl } from '@mtcute/tl'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { createUsersChatsIndex } from '../../utils/peer-utils'
 
 /**
  * Send a group of media.
@@ -75,7 +77,7 @@ export async function sendMediaGroup(
          */
         clearDraft?: boolean
     }
-): Promise<Message> {
+): Promise<Message[]> {
     if (!params) params = {}
 
     const peer = await this.resolvePeer(chatId)
@@ -123,5 +125,26 @@ export async function sendMediaGroup(
         clearDraft: params.clearDraft,
     })
 
-    return this._findMessageInUpdate(res)
+    assertIsUpdatesGroup('_findMessageInUpdate', res)
+    this._handleUpdate(res, true)
+
+    const { users, chats } = createUsersChatsIndex(res)
+
+    return res.updates
+        .filter(
+            (u) =>
+                u._ === 'updateNewMessage' ||
+                u._ === 'updateNewChannelMessage' ||
+                u._ === 'updateNewScheduledMessage'
+        )
+        .map(
+            (u) =>
+                new Message(
+                    this,
+                    (u as any).message,
+                    users,
+                    chats,
+                    u._ === 'updateNewScheduledMessage'
+                )
+        )
 }

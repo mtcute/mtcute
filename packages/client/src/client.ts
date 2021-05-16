@@ -989,7 +989,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param latitude  Latitude of the location
      * @param longitude  Longitude of the location
-
      */
     getNearbyChats(latitude: number, longitude: number): Promise<Chat[]>
     /**
@@ -2295,7 +2294,7 @@ export interface TelegramClient extends BaseTelegramClient {
              */
             clearDraft?: boolean
         }
-    ): Promise<Message>
+    ): Promise<Message[]>
     /**
      * Send a single media (a photo or a document-based media)
      *
