@@ -32,6 +32,7 @@ interface UpdatesState {
     _date: number
     // _seq: number
     _cpts: Record<number, number>
+    _cptsMod: Record<number, number>
 }
 
 // @initialize
@@ -42,8 +43,10 @@ function _initializeUpdates(this: TelegramClient) {
 
     // channel PTS are not loaded immediately, and instead are cached here
     // after the first time they were retrieved from the storage.
-    // they are later pushed into the storage.
     this._cpts = {}
+    // modified channel pts, to avoid unnecessary
+    // DB calls for not modified cpts
+    this._cptsMod = {}
 }
 
 /**
@@ -98,7 +101,8 @@ export async function _saveStorage(this: TelegramClient): Promise<void> {
         // before any authorization pts will be undefined
         if (this._pts !== undefined) {
             await this.storage.setCommonPts([this._pts, this._date]) // , this._seq])
-            await this.storage.setManyChannelPts(this._cpts)
+            await this.storage.setManyChannelPts(this._cptsMod)
+            this._cptsMod = {}
         }
         if (this._userId !== null) {
             await this.storage.setSelf({
@@ -242,6 +246,7 @@ async function _loadDifference(
             if (upd._ === 'updateChannelTooLong') {
                 if (upd.pts) {
                     this._cpts[upd.channelId] = upd.pts
+                    this._cptsMod[upd.channelId] = upd.pts
                 }
                 await _loadChannelDifference.call(
                     this,
@@ -281,6 +286,7 @@ async function _loadDifference(
                 }
 
                 this._cpts[cid] = pts
+                this._cptsMod[cid] = pts
             }
 
             if (noDispatch && pts) {
@@ -373,6 +379,7 @@ async function _loadChannelDifference(
     }
 
     this._cpts[channelId] = pts
+    this._cptsMod[channelId] = pts
 }
 
 /**
@@ -439,6 +446,7 @@ export function _handleUpdate(
                         if (upd._ === 'updateChannelTooLong') {
                             if (upd.pts) {
                                 this._cpts[upd.channelId] = upd.pts
+                                this._cptsMod[upd.channelId] = upd.pts
                             }
                             await _loadChannelDifference.call(
                                 this,
@@ -495,6 +503,7 @@ export function _handleUpdate(
 
                             if (channelId) {
                                 this._cpts[channelId] = pts
+                                this._cptsMod[channelId] = pts
                             } else {
                                 this._pts = pts
                             }

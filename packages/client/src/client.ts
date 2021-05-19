@@ -2982,6 +2982,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _pts: number
     protected _date: number
     protected _cpts: Record<number, number>
+    protected _cptsMod: Record<number, number>
     constructor(opts: BaseTelegramClient.Options) {
         super(opts)
         this._userId = null
@@ -2996,8 +2997,10 @@ export class TelegramClient extends BaseTelegramClient {
 
         // channel PTS are not loaded immediately, and instead are cached here
         // after the first time they were retrieved from the storage.
-        // they are later pushed into the storage.
         this._cpts = {}
+        // modified channel pts, to avoid unnecessary
+        // DB calls for not modified cpts
+        this._cptsMod = {}
     }
 
     acceptTos = acceptTos
