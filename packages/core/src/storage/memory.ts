@@ -19,8 +19,8 @@ interface MemorySessionState {
     // username -> peer id
     usernameIndex: Record<string, number>
 
-    // common pts, date
-    gpts: [number, number] | null
+    // common pts, date, seq
+    gpts: [number, number, number] | null
     // channel pts
     pts: Record<number, number>
 
@@ -208,11 +208,11 @@ export class MemoryStorage implements ITelegramStorage {
         return this._state.pts[entityId] ?? null
     }
 
-    setCommonPts(val: [number, number]): void {
+    setCommonPts(val: [number, number, number]): void {
         this._state.gpts = val
     }
 
-    getCommonPts(): [number, number] | null {
+    getCommonPts(): [number, number, number] | null {
         return this._state.gpts ?? null
     }
 }

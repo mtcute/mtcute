@@ -103,17 +103,17 @@ export interface ITelegramStorage {
     getPeerByPhone(phone: string): MaybeAsync<tl.TypeInputPeer | null>
 
     /**
-     * Get common `pts` and `date` values (if available)
+     * Get common `pts`, `date` and `seq` values (if available)
      */
-    getCommonPts(): MaybeAsync<[number, number] | null>
+    getCommonPts(): MaybeAsync<[number, number, number] | null>
     /**
      * Get channel `pts` value
      */
     getChannelPts(entityId: number): MaybeAsync<number | null>
     /**
-     * Set common `pts` and `date` values
+     * Set common `pts`, `date` and `seq` values
      */
-    setCommonPts(val: [number, number]): MaybeAsync<void>
+    setCommonPts(val: [number, number, number]): MaybeAsync<void>
     /**
      * Set channels `pts` values in batch.
      * Storage is supposed to replace stored channel `pts` values
