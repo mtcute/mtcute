@@ -2981,6 +2981,10 @@ export class TelegramClient extends BaseTelegramClient {
     protected _updLock: AsyncLock
     protected _pts: number
     protected _date: number
+    protected _seq: number
+    protected _oldPts: number
+    protected _oldDate: number
+    protected _oldSeq: number
     protected _cpts: Record<number, number>
     protected _cptsMod: Record<number, number>
     constructor(opts: BaseTelegramClient.Options) {

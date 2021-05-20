@@ -27,6 +27,12 @@ interface UpdatesState {
     _date: number
     _seq: number
 
+    // old values of the updates statej (i.e. as in DB)
+    // used to avoid redundant storage calls
+    _oldPts: number
+    _oldDate: number
+    _oldSeq: number
+
     _cpts: Record<number, number>
     _cptsMod: Record<number, number>
 }
@@ -70,11 +76,11 @@ export async function _fetchUpdatesState(this: TelegramClient): Promise<void> {
 export async function _loadStorage(this: TelegramClient): Promise<void> {
     // load updates state from the session
     await this.storage.load?.()
-    const state = await this.storage.getCommonPts()
+    const state = await this.storage.getUpdatesState()
     if (state) {
-        this._pts = state[0]
-        this._date = state[1]
-        this._seq = state[2]
+        this._pts = this._oldPts = state[0]
+        this._date = this._oldDate = state[1]
+        this._seq = this._oldSeq = state[2]
     }
     // if no state, don't bother initializing properties
     // since that means that there is no authorization,
@@ -96,7 +102,19 @@ export async function _saveStorage(this: TelegramClient): Promise<void> {
     try {
         // before any authorization pts will be undefined
         if (this._pts !== undefined) {
-            await this.storage.setCommonPts([this._pts, this._date, this._seq])
+            // if old* value is not available, assume it has changed.
+            if (this._oldPts === undefined || this._oldPts !== this._pts)
+                await this.storage.setUpdatesPts(this._pts)
+            if (this._oldDate === undefined || this._oldDate !== this._date)
+                await this.storage.setUpdatesDate(this._date)
+            if (this._oldSeq === undefined || this._oldSeq !== this._seq)
+                await this.storage.setUpdatesSeq(this._seq)
+
+            // update old* values
+            this._oldPts = this._pts
+            this._oldDate = this._date
+            this._oldSeq = this._seq
+
             await this.storage.setManyChannelPts(this._cptsMod)
             this._cptsMod = {}
         }
@@ -426,7 +444,12 @@ export function _handleUpdate(
                         // https://t.me/tdlibchat/5843
                         const nextLocalSeq = this._seq + 1
 
-                        debug('received %s (seq_start=%d, seq_end=%d)', update._, seqStart, update.seq)
+                        debug(
+                            'received %s (seq_start=%d, seq_end=%d)',
+                            update._,
+                            seqStart,
+                            update.seq
+                        )
 
                         if (nextLocalSeq > seqStart)
                             // "the updates were already applied, and must be ignored"
