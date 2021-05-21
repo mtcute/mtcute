@@ -13,6 +13,74 @@ type SerializableObject = {
 
 const isNativeBigIntAvailable = typeof BigInt !== 'undefined' && 'writeBigInt64LE' in Buffer.prototype
 
+function utf8ByteLength (string: string): number {
+    let codePoint
+    const length = string.length
+    let leadSurrogate = null
+    let bytes = 0
+
+    for (let i = 0; i < length; ++i) {
+        codePoint = string.charCodeAt(i)
+
+        // is surrogate component
+        if (codePoint > 0xD7FF && codePoint < 0xE000) {
+            // last char was a lead
+            if (!leadSurrogate) {
+                // no lead yet
+                if (codePoint > 0xDBFF) {
+                    // unexpected trail
+                    bytes += 3
+                    continue
+                } else if (i + 1 === length) {
+                    // unpaired lead
+                    bytes += 3
+                    continue
+                }
+
+                // valid lead
+                leadSurrogate = codePoint
+
+                continue
+            }
+
+            // 2 leads in a row
+            if (codePoint < 0xDC00) {
+                bytes += 3
+                leadSurrogate = codePoint
+                continue
+            }
+
+            // valid surrogate pair
+            codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000
+        } else if (leadSurrogate) {
+            // valid bmp char, but last char was a lead
+            bytes += 3
+        }
+
+        leadSurrogate = null
+
+        // encode utf8
+        if (codePoint < 0x80) {
+            bytes += 1
+        } else if (codePoint < 0x800) {
+            bytes += 2
+        } else if (codePoint < 0x10000) {
+            bytes += 3
+        } else if (codePoint < 0x110000) {
+            bytes += 4
+        } else {
+            throw new Error('Invalid code point')
+        }
+    }
+
+    return bytes
+}
+
+// buffer package for the web detects size by writing the string to an array and checking size
+// that is slow.
+// see https://github.com/feross/buffer/blob/795bbb5bda1b39f1370ebd784bea6107b087e3a7/index.js#L527
+const utfLength = (Buffer.prototype as any)._isBuffer ? utf8ByteLength : Buffer.byteLength
+
 export class SerializationCounter implements ITlBinaryWriter {
     count = 0
     _objectMap = writerMap
@@ -82,7 +150,7 @@ export class SerializationCounter implements ITlBinaryWriter {
     }
 
     string(val: string): void {
-        const length = Buffer.byteLength(val, 'utf-8')
+        const length = utfLength(val)
         let padding
         if (length <= 253) {
             this.count += 1
