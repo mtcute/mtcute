@@ -2,8 +2,10 @@ import bigInt, { BigInteger } from 'big-integer'
 import { inflate } from 'pako'
 import { typedArrayToBuffer } from '../buffer-utils'
 import readerMap, { ITlBinaryReader } from '@mtcute/tl/binary/reader'
-import { ulongToLong } from '../bigint-utils'
+import { bufferToBigInt, longToUlong, ulongToLong } from '../bigint-utils'
 import { tl } from '@mtcute/tl'
+
+const isNativeBigIntAvailable = typeof BigInt !== 'undefined' && 'readBigInt64LE' in Buffer.prototype
 
 export class BinaryReader implements ITlBinaryReader {
     data: Buffer
@@ -33,12 +35,19 @@ export class BinaryReader implements ITlBinaryReader {
     }
 
     long(unsigned = false): BigInteger {
-        const lo = this.data.readUInt32LE(this.pos)
-        const hi = this.data.readUInt32LE(this.pos + 4)
+        let big: BigInteger
+        if (isNativeBigIntAvailable) {
+            const val = this.data.readBigInt64LE(this.pos)
+            big = bigInt(val)
+
+            if (unsigned) big = longToUlong(big)
+        } else {
+            big = bufferToBigInt(this.data, this.pos, 8, true)
+            if (!unsigned) big = ulongToLong(big)
+        }
+
         this.pos += 8
 
-        let big = bigInt(hi).shiftLeft(32).or(lo)
-        if (!unsigned) big = ulongToLong(big)
         return big
     }
 

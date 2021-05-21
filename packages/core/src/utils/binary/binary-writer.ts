@@ -1,5 +1,5 @@
 import { BigInteger } from 'big-integer'
-import { longToUlong } from '../bigint-utils'
+import { longToUlong, ulongToLong, writeBigInt } from '../bigint-utils'
 import writerMap, {
     ITlBinaryWriter,
     TlBinaryWriterFunction,
@@ -10,6 +10,8 @@ type SerializableObject = {
     _: string
     [key: string]: any
 }
+
+const isNativeBigIntAvailable = typeof BigInt !== 'undefined' && 'writeBigInt64LE' in Buffer.prototype
 
 export class SerializationCounter implements ITlBinaryWriter {
     count = 0
@@ -145,12 +147,15 @@ export class BinaryWriter implements ITlBinaryWriter {
     }
 
     long(val: BigInteger): void {
-        val = longToUlong(val)
-        const lo = val.and(0xffffffff).toJSNumber()
-        const hi = val.shiftRight(32).and(0xffffffff).toJSNumber()
-
-        this.buffer.writeUInt32LE(lo, this.pos)
-        this.buffer.writeUInt32LE(hi, this.pos + 4)
+        if (isNativeBigIntAvailable) {
+            val = ulongToLong(val)
+            // if BigInt is supported, `BigInteger` is just a
+            // wrapper over native BigInt, stored in `value`
+            this.buffer.writeBigInt64LE((val as any).value, this.pos)
+        } else {
+            val = longToUlong(val)
+            writeBigInt(this.buffer, val, 8, this.pos, true)
+        }
 
         this.pos += 8
     }
