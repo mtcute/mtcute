@@ -643,13 +643,19 @@ export class BaseTelegramClient {
 
     /**
      * Adds all peers from a given object to entity cache in storage.
+     *
+     * @returns  `true` if there were any `min` peers
      */
-    protected async _cachePeersFrom(obj: any): Promise<void> {
+    protected async _cachePeersFrom(obj: any): Promise<boolean> {
         const parsedPeers: ITelegramStorage.PeerInfo[] = []
 
+        let hadMin = false
+
         for (const peer of getAllPeersFrom(obj)) {
-            if ((peer as any).min && !peer.fromMessage && !(peer as any).bot) {
-                debug('peer is min, but no context was found: %o %o', obj, peer)
+            if ((peer as any).min) {
+                // absolutely incredible min peer handling, courtesy of levlam.
+                // see this thread: https://t.me/tdlibchat/15084
+                hadMin = true
                 continue
             }
 
@@ -658,11 +664,10 @@ export class BaseTelegramClient {
                     parsedPeers.push({
                         id: peer.id,
                         accessHash: peer.accessHash!,
-                        username: peer.username?.toLowerCase() ?? null,
-                        phone: peer.phone ?? null,
-                        type: peer.bot ? 'bot' : 'user',
-                        updated: 0,
-                        fromMessage: peer.fromMessage,
+                        username: peer.username?.toLowerCase(),
+                        phone: peer.phone,
+                        type: 'user',
+                        full: peer,
                     })
                     break
                 case 'chat':
@@ -670,11 +675,8 @@ export class BaseTelegramClient {
                     parsedPeers.push({
                         id: -peer.id,
                         accessHash: bigInt.zero,
-                        username: null,
-                        phone: null,
-                        type: 'group',
-                        updated: 0,
-                        fromMessage: peer.fromMessage,
+                        type: 'chat',
+                        full: peer,
                     })
                     break
                 case 'channel':
@@ -684,12 +686,10 @@ export class BaseTelegramClient {
                         accessHash: peer.accessHash!,
                         username:
                             peer._ === 'channel'
-                                ? peer.username?.toLowerCase() ?? null
-                                : null,
-                        phone: null,
-                        type: peer.broadcast ? 'channel' : 'supergroup',
-                        updated: 0,
-                        fromMessage: peer.fromMessage,
+                                ? peer.username?.toLowerCase()
+                                : undefined,
+                        type: 'channel',
+                        full: peer,
                     })
                     break
             }
@@ -697,5 +697,7 @@ export class BaseTelegramClient {
 
         await this.storage.updatePeers(parsedPeers)
         await this._saveStorage()
+
+        return hadMin
     }
 }

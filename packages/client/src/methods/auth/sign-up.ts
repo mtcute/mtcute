@@ -34,6 +34,7 @@ export async function signUp(
 
     this._userId = res.user.id
     this._isBot = false
+    this._selfChanged = true
     await this._fetchUpdatesState()
     await this._saveStorage()
 

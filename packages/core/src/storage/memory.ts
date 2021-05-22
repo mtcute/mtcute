@@ -2,8 +2,11 @@ import { ITelegramStorage } from './abstract'
 import { MaybeAsync } from '../types'
 import { tl } from '@mtcute/tl'
 import { MAX_CHANNEL_ID } from '../utils/peer-utils'
+import { LruMap } from '../utils/lru-map'
 
 const CURRENT_VERSION = 1
+
+type PeerInfoWithUpdated = ITelegramStorage.PeerInfo & { updated: number }
 
 interface MemorySessionState {
     // forwards compatibility for persistent storages
@@ -13,7 +16,7 @@ interface MemorySessionState {
     authKeys: Record<number, Buffer | null>
 
     // marked peer id -> entity info
-    entities: Record<number, ITelegramStorage.PeerInfo>
+    entities: Record<number, PeerInfoWithUpdated>
     // phone number -> peer id
     phoneIndex: Record<string, number>
     // username -> peer id
@@ -33,8 +36,23 @@ export class MemoryStorage implements ITelegramStorage {
     protected _state: MemorySessionState
     private _cachedInputPeers: Record<number, tl.TypeInputPeer> = {}
 
-    constructor() {
+    private _cachedFull: LruMap<number, tl.TypeUser | tl.TypeChat>
+
+    constructor(params?: {
+        /**
+         * Maximum number of cached full entities.
+         *
+         * Note that full entities are **NOT** persisted
+         * to the disk (in case this storage is backed
+         * by a local storage), and only available within
+         * the current runtime.
+         *
+         * Defaults to `100`, use `0` to disable
+         */
+        cacheSize?: number
+    }) {
         this.reset()
+        this._cachedFull = new LruMap(params?.cacheSize ?? 100)
     }
 
     reset(): void {
@@ -97,13 +115,15 @@ export class MemoryStorage implements ITelegramStorage {
         return this._state.authKeys[dcId] ?? null
     }
 
-    updatePeers(peers: ITelegramStorage.PeerInfo[]): MaybeAsync<void> {
+    updatePeers(peers: PeerInfoWithUpdated[]): MaybeAsync<void> {
         for (const peer of peers) {
+            this._cachedFull.set(peer.id, peer.full)
+
             peer.updated = Date.now()
             const old = this._state.entities[peer.id]
             if (old) {
                 // min peer
-                if (peer.fromMessage) continue
+                // if (peer.fromMessage) continue
 
                 // delete old index entries if needed
                 if (old.username && old.username !== peer.username) {
@@ -121,45 +141,28 @@ export class MemoryStorage implements ITelegramStorage {
         }
     }
 
-    protected _getInputPeer(peerInfo?: ITelegramStorage.PeerInfo): tl.TypeInputPeer | null {
+    protected _getInputPeer(
+        peerInfo?: ITelegramStorage.PeerInfo
+    ): tl.TypeInputPeer | null {
         if (!peerInfo) return null
-        if (peerInfo.type === 'user' || peerInfo.type === 'bot') {
-            if (peerInfo.fromMessage) {
+        switch (peerInfo.type) {
+            case 'user':
                 return {
-                    _: 'inputPeerUserFromMessage',
-                    peer: this.getPeerById(peerInfo.fromMessage[0])!,
-                    msgId: peerInfo.fromMessage[1],
-                    userId: peerInfo.id
+                    _: 'inputPeerUser',
+                    userId: peerInfo.id,
+                    accessHash: peerInfo.accessHash,
                 }
-            }
-            return {
-                _: 'inputPeerUser',
-                userId: peerInfo.id,
-                accessHash: peerInfo.accessHash,
-            }
-        }
-
-        if (peerInfo.type === 'group')
-            return {
-                _: 'inputPeerChat',
-                chatId: -peerInfo.id,
-            }
-
-        if (peerInfo.type === 'channel' || peerInfo.type === 'supergroup') {
-            if (peerInfo.fromMessage) {
+            case 'chat':
                 return {
-                    _: 'inputPeerChannelFromMessage',
-                    peer: this.getPeerById(peerInfo.fromMessage[0])!,
-                    msgId: peerInfo.fromMessage[1],
-                    channelId: peerInfo.id
+                    _: 'inputPeerChat',
+                    chatId: -peerInfo.id,
                 }
-            }
-
-            return {
-                _: 'inputPeerChannel',
-                channelId: MAX_CHANNEL_ID - peerInfo.id,
-                accessHash: peerInfo.accessHash,
-            }
+            case 'channel':
+                return {
+                    _: 'inputPeerChannel',
+                    channelId: MAX_CHANNEL_ID - peerInfo.id,
+                    accessHash: peerInfo.accessHash,
+                }
         }
 
         throw new Error(`Invalid peer type: ${peerInfo.type}`)
@@ -208,11 +211,26 @@ export class MemoryStorage implements ITelegramStorage {
         return this._state.pts[entityId] ?? null
     }
 
-    setCommonPts(val: [number, number, number]): void {
-        this._state.gpts = val
+    getUpdatesState(): MaybeAsync<[number, number, number] | null> {
+        return this._state.gpts ?? null
     }
 
-    getCommonPts(): [number, number, number] | null {
-        return this._state.gpts ?? null
+    setUpdatesPts(val: number): MaybeAsync<void> {
+        if (!this._state.gpts) this._state.gpts = [0, 0, 0]
+        this._state.gpts[0] = val
+    }
+
+    setUpdatesDate(val: number): MaybeAsync<void> {
+        if (!this._state.gpts) this._state.gpts = [0, 0, 0]
+        this._state.gpts[1] = val
+    }
+
+    setUpdatesSeq(val: number): MaybeAsync<void> {
+        if (!this._state.gpts) this._state.gpts = [0, 0, 0]
+        this._state.gpts[2] = val
+    }
+
+    getFullPeerById(id: number): tl.TypeUser | tl.TypeChat | null {
+        return this._cachedFull.get(id) ?? null
     }
 }

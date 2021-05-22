@@ -1,5 +1,5 @@
 import { tl } from '@mtcute/tl'
-import { BasicPeerType, PeerType } from '../types'
+import { BasicPeerType } from '../types'
 
 export const MIN_CHANNEL_ID = -1002147483647
 export const MAX_CHANNEL_ID = -1000000000000
@@ -30,23 +30,20 @@ export function getBarePeerId(peer: tl.TypePeer): number {
  */
 export function getMarkedPeerId(
     peerId: number,
-    peerType: BasicPeerType | PeerType
+    peerType: BasicPeerType
 ): number
 export function getMarkedPeerId(peer: tl.TypePeer | tl.TypeInputPeer): number
 export function getMarkedPeerId(
     peer: tl.TypePeer | tl.TypeInputPeer | number,
-    peerType?: BasicPeerType | PeerType
+    peerType?: BasicPeerType
 ): number {
     if (typeof peer === 'number') {
         switch (peerType) {
             case 'user':
-            case 'bot':
                 return peer
             case 'chat':
-            case 'group':
                 return -peer
             case 'channel':
-            case 'supergroup':
                 return MAX_CHANNEL_ID - peer
         }
         throw new Error('Invalid peer type')
@@ -107,121 +104,13 @@ export function markedPeerIdToBare(peerId: number): number {
 }
 
 /**
- * Convert {@link PeerType} to {@link BasicPeerType}
- */
-export function peerTypeToBasic(type: PeerType): BasicPeerType {
-    switch (type) {
-        case 'bot':
-        case 'user':
-            return 'user'
-        case 'group':
-            return 'chat'
-        case 'channel':
-        case 'supergroup':
-            return 'channel'
-    }
-}
-
-function comparePeers(
-    first: tl.TypePeer | undefined,
-    second: tl.TypePeer | tl.TypeUser | tl.TypeChat
-): boolean {
-    if (!first) return false
-
-    if ('userId' in first) {
-        if ('userId' in second) return first.userId === second.userId
-        switch (second._) {
-            case 'user':
-            case 'userEmpty':
-                return first.userId === second.id
-        }
-    }
-    if ('chatId' in first) {
-        if ('chatId' in second) return first.chatId === second.chatId
-        switch (second._) {
-            case 'chat':
-            case 'chatForbidden':
-            case 'chatEmpty':
-                return first.chatId === second.id
-        }
-    }
-    if ('channelId' in first) {
-        if ('channelId' in second) return first.channelId === second.channelId
-        switch (second._) {
-            case 'channel':
-            case 'channelForbidden':
-                return first.channelId === second.id
-        }
-    }
-    return false
-}
-
-function isRefMessage(msg: tl.TypeMessage, peer: any): boolean | undefined {
-    return (
-        comparePeers(msg.peerId, peer) ||
-        ('fromId' in msg && comparePeers(msg.fromId, peer)) ||
-        ('fwdFrom' in msg &&
-            msg.fwdFrom &&
-            comparePeers(msg.fwdFrom.fromId, peer)) ||
-        ('replies' in msg &&
-            msg.replies &&
-            msg.replies.recentRepliers &&
-            msg.replies.recentRepliers.some((it) => comparePeers(it, peer)))
-    )
-}
-
-function findContext(obj: any, peer: any): [number, number] | undefined {
-    if (!peer.min) return undefined
-    switch (obj._) {
-        case 'updates':
-        case 'updatesCombined':
-        case 'updates.difference':
-        case 'updates.differenceSlice':
-            for (const upd of (obj.updates ||
-                obj.otherUpdates) as tl.TypeUpdate[]) {
-                switch (upd._) {
-                    case 'updateNewMessage':
-                    case 'updateNewChannelMessage':
-                    case 'updateEditMessage':
-                    case 'updateEditChannelMessage':
-                        if (isRefMessage(upd.message, peer)) {
-                            return [
-                                getMarkedPeerId(upd.message.peerId!),
-                                upd.message.id,
-                            ]
-                        }
-                        break
-                }
-            }
-            break
-        case 'updateShortMessage':
-            return [obj.userId, obj.id]
-        case 'updateShortChatMessage':
-            return [-obj.chatId, obj.id]
-    }
-
-    if ('messages' in obj || 'newMessages' in obj) {
-        for (const msg of (obj.messages ||
-            obj.newMessages) as tl.TypeMessage[]) {
-            if (isRefMessage(msg, peer)) {
-                return [getMarkedPeerId(msg.peerId!), msg.id]
-            }
-        }
-    }
-
-    // im not sure if this is exhaustive check or not
-
-    return undefined
-}
-
-/**
  * Extracts all (cacheable) entities from a TlObject or a list of them.
  * Only checks `.user`, `.chat`, `.channel`, `.users` and `.chats` properties
  */
 export function* getAllPeersFrom(
     obj: any
 ): Iterable<
-    (tl.TypeUser | tl.TypeChat) & { fromMessage: [number, number] | undefined }
+    (tl.TypeUser | tl.TypeChat)
 > {
     if (typeof obj !== 'object') return
 
@@ -272,13 +161,6 @@ export function* getAllPeersFrom(
         for (const user of obj.users) {
             // .users is sometimes number[]
             if (typeof user === 'object' && user._ === 'user') {
-                if (user.min && !user.bot) {
-                    // min seems to be set for @Channel_Bot,
-                    // but we don't really need to cache its context
-                    // (we don't need to cache it at all, really, but whatever)
-                    user.fromMessage = findContext(obj, user)
-                }
-
                 yield user
             }
         }
@@ -293,10 +175,6 @@ export function* getAllPeersFrom(
                     case 'channel':
                     case 'chatForbidden':
                     case 'channelForbidden':
-                        if (chat.min) {
-                            chat.fromMessage = findContext(obj, chat)
-                        }
-
                         yield chat
                         break
                 }

@@ -32,6 +32,7 @@ export async function recoverPassword(
 
     this._userId = res.user.id
     this._isBot = false
+    this._selfChanged = true
     await this._saveStorage()
 
     return new User(this, res.user)

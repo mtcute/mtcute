@@ -2985,6 +2985,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _oldPts: number
     protected _oldDate: number
     protected _oldSeq: number
+    protected _selfChanged: boolean
     protected _cpts: Record<number, number>
     protected _cptsMod: Record<number, number>
     constructor(opts: BaseTelegramClient.Options) {
@@ -3005,6 +3006,8 @@ export class TelegramClient extends BaseTelegramClient {
         // modified channel pts, to avoid unnecessary
         // DB calls for not modified cpts
         this._cptsMod = {}
+
+        this._selfChanged = false
     }
 
     acceptTos = acceptTos

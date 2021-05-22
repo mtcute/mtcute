@@ -1,18 +1,16 @@
-import { MaybeAsync, PeerType } from '../types'
+import { BasicPeerType, MaybeAsync } from '../types'
 import { tl } from '@mtcute/tl'
-import { MAX_CHANNEL_ID } from '../utils/peer-utils'
 
 export namespace ITelegramStorage {
     export interface PeerInfo {
         // marked id
         id: number
         accessHash: tl.Long
-        type: PeerType
-        username: string | null
-        phone: string | null
-        updated: number
-        // marked peer id of chat, message id
-        fromMessage?: [number, number]
+        type: BasicPeerType
+        username?: string
+        phone?: string
+
+        full: tl.TypeUser | tl.TypeChat
     }
 
     export interface SelfInfo {
@@ -131,6 +129,18 @@ export interface ITelegramStorage {
      * with given in the object (key is unmarked peer id, value is the `pts`)
      */
     setManyChannelPts(values: Record<number, number>): MaybeAsync<void>
+
+    /**
+     * Get cached peer information by their marked ID.
+     * Return `null` if caching is not supported, or the entity
+     * is not cached (yet).
+     *
+     * This is primarily used when a `min` entity is encountered
+     * in an update, or when a *short* update is encountered.
+     * Returning `null` will require re-fetching that
+     * update with the peers added, which might not be very efficient.
+     */
+    getFullPeerById(id: number): MaybeAsync<tl.TypeUser | tl.TypeChat | null>
 
     // TODO!
     // exportToString(): MaybeAsync<string>
