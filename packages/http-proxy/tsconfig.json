@@ -7,9 +7,9 @@
         "./src"
     ],
     "typedocOptions": {
-        "name": "@mtcute/sqlite",
+        "name": "@mtcute/http-proxy",
         "includeVersion": true,
-        "out": "../../docs/packages/sqlite",
+        "out": "../../docs/packages/http-proxy",
         "listInvalidSymbolLinks": true,
         "excludePrivate": true,
         "entryPoints": [

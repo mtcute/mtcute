@@ -13,12 +13,12 @@ const debug = require('debug')('mtcute:tcp')
 export abstract class TcpTransport
     extends EventEmitter
     implements ICuteTransport {
-    private _currentDc: tl.RawDcOption | null = null
-    private _state: TransportState = TransportState.Idle
-    private _socket: Socket | null = null
+    protected _currentDc: tl.RawDcOption | null = null
+    protected _state: TransportState = TransportState.Idle
+    protected _socket: Socket | null = null
 
     abstract _packetCodec: PacketCodec
-    private _crypto: ICryptoProvider
+    protected _crypto: ICryptoProvider
 
     packetCodecInitialized = false
 

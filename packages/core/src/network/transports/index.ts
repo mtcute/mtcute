@@ -2,6 +2,10 @@ import { TransportFactory } from './abstract'
 
 export * from './abstract'
 export * from './streamed'
+export * from './tcp'
+export * from './tcp-intermediate'
+export * from './websocket'
+export * from './ws-obfuscated'
 
 /** Platform-defined default transport factory */
 export let defaultTransportFactory: TransportFactory
