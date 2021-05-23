@@ -7,9 +7,9 @@
         "./index.ts",
     ],
     "typedocOptions": {
-        "name": "@mtcute/http-proxy",
+        "name": "@mtcute/socks-proxy",
         "includeVersion": true,
-        "out": "../../docs/packages/http-proxy",
+        "out": "../../docs/packages/socks-proxy",
         "listInvalidSymbolLinks": true,
         "excludePrivate": true,
         "entryPoints": [
