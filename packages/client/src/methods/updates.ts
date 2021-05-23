@@ -37,6 +37,10 @@ interface UpdatesState {
     _oldSeq: number
     _selfChanged: boolean
 
+    // whether to catch up channels from the locally stored pts
+    // usually set in start() method based on `catchUp` param
+    _catchUpChannels: boolean
+
     _cpts: Record<number, number>
     _cptsMod: Record<number, number>
 }
@@ -655,20 +659,24 @@ export function _handleUpdate(
                             'ptsCount' in upd ? upd.ptsCount : undefined
 
                         if (pts !== undefined && ptsCount !== undefined) {
-                            let nextLocalPts
+                            let nextLocalPts: number | null = null
                             if (channelId === undefined)
                                 nextLocalPts = this._pts + ptsCount
                             else if (channelId in this._cpts)
                                 nextLocalPts = this._cpts[channelId] + ptsCount
-                            else {
+                            else if (this._catchUpChannels) {
+                                // only load stored channel pts in case
+                                // the user has enabled catching up.
+                                // not loading stored pts effectively disables
+                                // catching up, but doesn't interfere with further
+                                // update gaps
+
                                 const saved = await this.storage.getChannelPts(
                                     channelId
                                 )
                                 if (saved) {
                                     this._cpts[channelId] = saved
                                     nextLocalPts = saved + ptsCount
-                                } else {
-                                    nextLocalPts = null
                                 }
                             }
 

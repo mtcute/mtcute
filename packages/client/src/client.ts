@@ -2986,6 +2986,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _oldDate: number
     protected _oldSeq: number
     protected _selfChanged: boolean
+    protected _catchUpChannels: boolean
     protected _cpts: Record<number, number>
     protected _cptsMod: Record<number, number>
     constructor(opts: BaseTelegramClient.Options) {

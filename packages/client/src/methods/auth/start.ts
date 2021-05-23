@@ -133,6 +133,8 @@ export async function start(
         // user is already authorized
 
         if (!this._disableUpdates) {
+            this._catchUpChannels = !!params.catchUp
+
             if (params.catchUp) {
                 await this.catchUp()
             } else {
