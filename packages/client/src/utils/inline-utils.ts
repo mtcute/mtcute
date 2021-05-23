@@ -1,8 +1,14 @@
 import { tl } from '@mtcute/tl'
-import { encodeUrlSafeBase64, parseUrlSafeBase64 } from '@mtcute/file-id/src/utils'
-import { BinaryReader, BinaryWriter } from '@mtcute/core'
+import {
+    encodeUrlSafeBase64,
+    parseUrlSafeBase64,
+    BinaryReader,
+    BinaryWriter,
+} from '@mtcute/core'
 
-export function parseInlineMessageId(id: string): tl.RawInputBotInlineMessageID {
+export function parseInlineMessageId(
+    id: string
+): tl.RawInputBotInlineMessageID {
     const buf = parseUrlSafeBase64(id)
     const reader = new BinaryReader(buf)
 
@@ -10,11 +16,13 @@ export function parseInlineMessageId(id: string): tl.RawInputBotInlineMessageID 
         _: 'inputBotInlineMessageID',
         dcId: reader.int32(),
         id: reader.long(),
-        accessHash: reader.long()
+        accessHash: reader.long(),
     }
 }
 
-export function encodeInlineMessageId(id: tl.RawInputBotInlineMessageID): string {
+export function encodeInlineMessageId(
+    id: tl.RawInputBotInlineMessageID
+): string {
     const writer = BinaryWriter.alloc(20) // int32, int64, int64
 
     writer.int32(id.dcId)
