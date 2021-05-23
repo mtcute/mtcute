@@ -82,7 +82,7 @@ const userTypingParser: UpdateParser = [
 ]
 const deleteMessageParser: UpdateParser = [
     'delete_message',
-    (client, upd) => new DeleteMessageUpdate(client, upd as any)
+    (client, upd) => new DeleteMessageUpdate(client, upd as any),
 ]
 
 const PARSERS: Partial<
@@ -132,7 +132,10 @@ const PARSERS: Partial<
  * Updates dispatcher
  */
 export class Dispatcher {
-    private _groups: Record<number, UpdateHandler[]> = {}
+    private _groups: Record<
+        number,
+        Record<UpdateHandler['type'], UpdateHandler[]>
+    > = {}
     private _groupsOrder: number[] = []
 
     private _client?: TelegramClient
@@ -220,7 +223,7 @@ export class Dispatcher {
     async dispatchUpdateNow(
         update: tl.TypeUpdate | tl.TypeMessage,
         users: UsersIndex,
-        chats: ChatsIndex,
+        chats: ChatsIndex
     ): Promise<void> {
         return this._dispatchUpdateNowImpl(update, users, chats)
     }
@@ -246,45 +249,73 @@ export class Dispatcher {
         }
 
         outer: for (const grp of this._groupsOrder) {
-            for (const handler of this._groups[grp]) {
-                let result: void | PropagationSymbol
+            const group = this._groups[grp]
 
-                if (
-                    handler.type === 'raw' &&
-                    !isRawMessage &&
-                    (!handler.check ||
-                        (await handler.check(
+            let tryRaw = !isRawMessage
+
+            if (parsedType && parsedType in group) {
+                // raw is not handled here, so we can safely assume this
+                const handlers = group[parsedType] as Exclude<
+                    UpdateHandler,
+                    RawUpdateHandler
+                >[]
+
+                for (const h of handlers) {
+                    let result: void | PropagationSymbol
+
+                    if (!h.check || (await h.check(parsed, this._client))) {
+                        result = await h.callback(parsed, this._client)
+                    } else continue
+
+                    if (result === ContinuePropagation) continue
+                    if (result === StopPropagation) break outer
+                    if (result === StopChildrenPropagation) return
+
+                    tryRaw = false
+                    break
+                }
+            }
+
+            if (tryRaw && 'raw' in group) {
+                const handlers = group['raw'] as RawUpdateHandler[]
+
+                for (const h of handlers) {
+                    let result: void | PropagationSymbol
+
+                    if (
+                        !h.check ||
+                        (await h.check(
                             this._client,
                             update as any,
                             users,
                             chats
-                        )))
-                ) {
-                    result = await handler.callback(
-                        this._client,
-                        update as any,
-                        users,
-                        chats
-                    )
-                } else if (
-                    parsedType &&
-                    handler.type === parsedType &&
-                    (!handler.check ||
-                        (await handler.check(parsed, this._client)))
-                ) {
-                    result = await handler.callback(parsed, this._client)
-                } else continue
+                        ))
+                    ) {
+                        result = await h.callback(
+                            this._client,
+                            update as any,
+                            users,
+                            chats
+                        )
+                    } else continue
 
-                if (result === ContinuePropagation) continue
-                if (result === StopPropagation) break outer
-                if (result === StopChildrenPropagation) return
+                    if (result === ContinuePropagation) continue
+                    if (result === StopPropagation) break outer
+                    if (result === StopChildrenPropagation) return
 
-                break
+                    break
+                }
             }
         }
 
         for (const child of this._children) {
-            await child._dispatchUpdateNowImpl(update, users, chats, parsed, parsedType)
+            await child._dispatchUpdateNowImpl(
+                update,
+                users,
+                chats,
+                parsed,
+                parsedType
+            )
         }
     }
 
@@ -296,12 +327,16 @@ export class Dispatcher {
      */
     addUpdateHandler(handler: UpdateHandler, group = 0): void {
         if (!(group in this._groups)) {
-            this._groups[group] = []
+            this._groups[group] = {} as any
             this._groupsOrder.push(group)
             this._groupsOrder.sort((a, b) => a - b)
         }
 
-        this._groups[group].push(handler)
+        if (!(handler.type in this._groups[group])) {
+            this._groups[group][handler.type] = []
+        }
+
+        this._groups[group][handler.type].push(handler)
     }
 
     /**
@@ -309,24 +344,26 @@ export class Dispatcher {
      * handler group.
      *
      * @param handler  Update handler to remove, its type or `'all'` to remove all
-     * @param group  Handler group index
+     * @param group  Handler group index (-1 to affect all groups)
      * @internal
      */
     removeUpdateHandler(
         handler: UpdateHandler | UpdateHandler['type'] | 'all',
         group = 0
     ): void {
-        if (!(group in this._groups)) {
+        if (group !== -1 && !(group in this._groups)) {
             return
         }
 
         if (typeof handler === 'string') {
             if (handler === 'all') {
-                delete this._groups[group]
+                if (group === -1) {
+                    this._groups = {}
+                } else {
+                    delete this._groups[group]
+                }
             } else {
-                this._groups[group] = this._groups[group].filter(
-                    (h) => h.type !== handler
-                )
+                delete this._groups[group][handler]
             }
             return
         }
@@ -335,9 +372,9 @@ export class Dispatcher {
             return
         }
 
-        const idx = this._groups[group].indexOf(handler)
+        const idx = this._groups[group][handler.type].indexOf(handler)
         if (idx > 0) {
-            this._groups[group].splice(idx, 1)
+            this._groups[group][handler.type].splice(idx, 1)
         }
     }
 
@@ -418,10 +455,19 @@ export class Dispatcher {
     extend(other: Dispatcher): void {
         other._groupsOrder.forEach((group) => {
             if (!(group in this._groups)) {
-                this._groups[group] = []
+                this._groups[group] = other._groups[group]
                 this._groupsOrder.push(group)
+            } else {
+                const otherGrp = other._groups[group] as any
+                const selfGrp = this._groups[group] as any
+                Object.keys(otherGrp).forEach((typ) => {
+                    if (!(typ in selfGrp)) {
+                        selfGrp[typ] = otherGrp[typ]
+                    } else {
+                        selfGrp[typ].push(...otherGrp[typ])
+                    }
+                })
             }
-            this._groups[group].push(...other._groups[group])
         })
 
         this._groupsOrder.sort((a, b) => a - b)
