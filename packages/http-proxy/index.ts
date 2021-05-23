@@ -12,11 +12,18 @@ const debug = require('debug')('mtcute:http-proxy')
 /**
  * An error has occurred while connecting to an HTTP(s) proxy
  */
-export class HttpProxyConnectionError extends Error {}
+export class HttpProxyConnectionError extends Error {
+    readonly proxy: HttpProxySettings
+
+    constructor (proxy: HttpProxySettings, message: string) {
+        super(`Error while connecting to ${proxy.host}:${proxy.port}: ${message}`)
+        this.proxy = proxy
+    }
+}
 
 export interface HttpProxySettings {
     /**
-     * Host of the proxy (e.g. `proxy.example.com`)
+     * Host or IP of the proxy (e.g. `proxy.example.com`, `1.2.3.4`)
      */
     host: string
 
@@ -139,6 +146,7 @@ export abstract class HttpProxiedTcpTransport extends TcpTransport {
                 this._socket!.emit(
                     'error',
                     new HttpProxyConnectionError(
+                        this._proxy,
                         `Server returned invalid protocol: ${proto}`
                     )
                 )
@@ -149,6 +157,7 @@ export abstract class HttpProxiedTcpTransport extends TcpTransport {
                 this._socket!.emit(
                     'error',
                     new HttpProxyConnectionError(
+                        this._proxy,
                         `Server returned error: ${code} ${name}`
                     )
                 )
