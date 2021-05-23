@@ -77,8 +77,8 @@ export class ObfuscatedPacketCodec extends EventEmitter implements PacketCodec {
 
     feed(data: Buffer): void {
         const dec = this._decryptor!.decrypt(data)
-        if (dec.constructor === Buffer) this._inner.feed(dec)
-        else (dec as Promise<Buffer>).then((dec) => this._inner.feed(dec))
+        if (Buffer.isBuffer(dec)) this._inner.feed(dec)
+        else dec.then((dec) => this._inner.feed(dec))
     }
 
     reset(): void {

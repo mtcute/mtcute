@@ -46,7 +46,7 @@ export async function* downloadAsIterable(
             ;(input as tl.Mutable<FileLocation>).location = input.location()
         }
 
-        if (input.location instanceof Buffer) {
+        if (Buffer.isBuffer(input.location)) {
             yield input.location
             return
         }

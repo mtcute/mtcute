@@ -30,7 +30,7 @@ export function downloadToFile(
 
     if (
         params.location instanceof FileLocation &&
-        params.location.location instanceof Buffer
+        Buffer.isBuffer(params.location.location)
     ) {
         // early return for inline files
         const buf = params.location.location

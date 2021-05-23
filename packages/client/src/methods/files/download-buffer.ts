@@ -16,7 +16,7 @@ export async function downloadAsBuffer(
 ): Promise<Buffer> {
     if (
         params.location instanceof FileLocation &&
-        params.location.location instanceof Buffer
+        Buffer.isBuffer(params.location.location)
     ) {
         return params.location.location
     }

@@ -95,7 +95,7 @@ export async function uploadFile(
     let fileName = 'unnamed'
     let fileMime = params.fileMime
 
-    if (file instanceof Buffer) {
+    if (Buffer.isBuffer(file)) {
         fileSize = file.length
         file = bufferToStream(file)
     }
@@ -180,8 +180,8 @@ export async function uploadFile(
             throw new MtCuteArgumentError(
                 `Unexpected EOS (there were only ${idx} parts, but expected ${partCount})`
             )
-        // even though typescript seems to guarantee this, we can't be sure because its js after all
-        if (!(part instanceof Buffer))
+
+        if (!Buffer.isBuffer(part))
             throw new MtCuteArgumentError(`Part ${idx} was not a Buffer!`)
         if (part.length > partSize)
             throw new MtCuteArgumentError(
