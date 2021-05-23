@@ -61,7 +61,8 @@ const baseMessageParser: ParserFunction = (
         client,
         tl.isAnyMessage(upd) ? upd : (upd as any).message,
         users,
-        chats
+        chats,
+        upd._ === 'updateNewScheduledMessage'
     )
 
 const newMessageParser: UpdateParser = ['new_message', baseMessageParser]
