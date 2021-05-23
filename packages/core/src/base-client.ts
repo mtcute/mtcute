@@ -215,7 +215,7 @@ export class BaseTelegramClient {
     // not really connected, but rather "connect() was called"
     private _connected = false
 
-    private _onError?: (err: Error) => void
+    private _onError?: (err: Error, connection?: TelegramConnection) => void
 
     /**
      * The primary {@link TelegramConnection} that is used for
@@ -354,7 +354,7 @@ export class BaseTelegramClient {
             this.storage.setAuthKeyFor(this._primaryDc.id, key)
             await this._saveStorage()
         })
-        this.primaryConnection.on('error', (err) => this._emitError(err))
+        this.primaryConnection.on('error', (err) => this._emitError(err, this.primaryConnection))
     }
 
     /**
@@ -587,7 +587,7 @@ export class BaseTelegramClient {
             inactivityTimeout,
         })
 
-        connection.on('error', (err) => this._emitError(err))
+        connection.on('error', (err) => this._emitError(err, connection))
         connection.authKey = await this.storage.getAuthKeyFor(dc.id)
         connection.connect()
 
@@ -629,13 +629,38 @@ export class BaseTelegramClient {
         this._additionalConnections.splice(idx, 1)
     }
 
-    onError(handler: (err: Error) => void): void {
+    /**
+     * Change transport for the client.
+     *
+     * Can be used, for example, to change proxy at runtime
+     *
+     * This effectively calls `changeTransport()` on
+     * `primaryConnection` and all additional connections.
+     *
+     * @param factory  New transport factory
+     */
+    changeTransport(factory: TransportFactory): void {
+        this.primaryConnection.changeTransport(factory)
+
+        this._additionalConnections.forEach((conn) => conn.changeTransport(factory))
+    }
+
+    /**
+     * Register an error handler for the client
+     *
+     * @param handler
+     *     Error handler. Called with one or two parameters.
+     *     The first one is always the error, and the second is
+     *     the connection in which the error has occurred, in case
+     *     this was connection-related error.
+     */
+    onError(handler: (err: Error, connection?: TelegramConnection) => void): void {
         this._onError = handler
     }
 
-    protected _emitError(err: Error): void {
+    protected _emitError(err: Error, connection?: TelegramConnection): void {
         if (this._onError) {
-            this._onError(err)
+            this._onError(err, connection)
         } else {
             console.error(err)
         }

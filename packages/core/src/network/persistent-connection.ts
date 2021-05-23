@@ -53,8 +53,16 @@ export abstract class PersistentConnection extends EventEmitter {
     protected constructor(params: PersistentConnectionParams) {
         super()
         this.params = params
-        this._transport = params.transportFactory()
-        this._transport.setupCrypto?.(params.crypto)
+        this.changeTransport(params.transportFactory)
+    }
+
+    changeTransport(factory: TransportFactory): void {
+        if (this._transport) {
+            this._transport.close()
+        }
+
+        this._transport = factory()
+        this._transport.setupCrypto?.(this.params.crypto)
 
         this._transport.on('ready', this.onTransportReady.bind(this))
         this._transport.on('message', this.onTransportMessage.bind(this))
