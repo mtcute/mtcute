@@ -220,15 +220,30 @@ export class Dispatcher {
     async dispatchUpdateNow(
         update: tl.TypeUpdate | tl.TypeMessage,
         users: UsersIndex,
-        chats: ChatsIndex
+        chats: ChatsIndex,
+    ): Promise<void> {
+        return this._dispatchUpdateNowImpl(update, users, chats)
+    }
+
+    private async _dispatchUpdateNowImpl(
+        update: tl.TypeUpdate | tl.TypeMessage,
+        users: UsersIndex,
+        chats: ChatsIndex,
+        parsed?: any,
+        parsedType?: Exclude<UpdateHandler['type'], 'raw'> | null
     ): Promise<void> {
         if (!this._client) return
 
         const isRawMessage = tl.isAnyMessage(update)
-        const pair = PARSERS[update._]
-        const parsed = pair
-            ? pair[1](this._client, update, users, chats)
-            : undefined
+        if (parsed === undefined) {
+            const pair = PARSERS[update._]
+            if (pair) {
+                parsed = pair[1](this._client, update, users, chats)
+                parsedType = pair[0]
+            } else {
+                parsed = parsedType = null
+            }
+        }
 
         outer: for (const grp of this._groupsOrder) {
             for (const handler of this._groups[grp]) {
@@ -252,8 +267,8 @@ export class Dispatcher {
                         chats
                     )
                 } else if (
-                    pair &&
-                    handler.type === pair[0] &&
+                    parsedType &&
+                    handler.type === parsedType &&
                     (!handler.check ||
                         (await handler.check(parsed, this._client)))
                 ) {
@@ -269,7 +284,7 @@ export class Dispatcher {
         }
 
         for (const child of this._children) {
-            await child.dispatchUpdateNow(update, users, chats)
+            await child._dispatchUpdateNowImpl(update, users, chats, parsed, parsedType)
         }
     }
 
