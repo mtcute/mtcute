@@ -48,11 +48,6 @@ export interface SocksProxySettings {
     password?: string
 
     /**
-     * Proxy connection headers, if needed
-     */
-    headers?: Record<string, string>
-
-    /**
      * Version of the SOCKS proxy (4 or 5)
      *
      * Defaults to `5`.
