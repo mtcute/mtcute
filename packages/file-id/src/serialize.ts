@@ -1,6 +1,6 @@
 import { tdFileId as td } from './types'
-import { BinaryWriter } from '@mtcute/core/src/utils/binary/binary-writer'
-import { encodeUrlSafeBase64, telegramRleEncode } from './utils'
+import { encodeUrlSafeBase64, BinaryWriter } from '@mtcute/core'
+import { telegramRleEncode } from './utils'
 
 const SUFFIX = Buffer.from([td.CURRENT_VERSION, td.PERSISTENT_ID_VERSION])
 

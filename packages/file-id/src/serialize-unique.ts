@@ -1,6 +1,6 @@
 import { tdFileId, tdFileId as td } from './types'
-import { BinaryWriter } from '@mtcute/core/src/utils/binary/binary-writer'
-import { encodeUrlSafeBase64, telegramRleEncode } from './utils'
+import { encodeUrlSafeBase64, BinaryWriter } from '@mtcute/core'
+import { telegramRleEncode } from './utils'
 import FileType = tdFileId.FileType
 
 type InputUniqueLocation =

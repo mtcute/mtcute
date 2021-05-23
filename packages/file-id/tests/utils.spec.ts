@@ -1,32 +1,9 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import {
-    encodeUrlSafeBase64,
-    parseUrlSafeBase64,
     telegramRleDecode,
     telegramRleEncode,
 } from '../src/utils'
-
-describe('parseUrlSafeBase64', () => {
-    it('should parse url-safe base64', () => {
-        expect(parseUrlSafeBase64('qu7d8aGTeuF6-g').toString('hex')).eq(
-            'aaeeddf1a1937ae17afa'
-        )
-    })
-    it('should parse normal base64', () => {
-        expect(parseUrlSafeBase64('qu7d8aGTeuF6+g==').toString('hex')).eq(
-            'aaeeddf1a1937ae17afa'
-        )
-    })
-})
-
-describe('encodeUrlSafeBase64', () => {
-    it('should encode to url-safe base64', () => {
-        expect(
-            encodeUrlSafeBase64(Buffer.from('aaeeddf1a1937ae17afa', 'hex'))
-        ).eq('qu7d8aGTeuF6-g')
-    })
-})
 
 describe('telegramRleEncode', () => {
     it('should not modify input if there are no \\x00', () => {

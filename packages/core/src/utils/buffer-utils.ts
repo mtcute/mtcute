@@ -53,3 +53,17 @@ export function cloneBuffer(buf: Buffer, start = 0, end = buf.length): Buffer {
     buf.copy(ret, 0, start, end)
     return ret
 }
+
+export function parseUrlSafeBase64(str: string): Buffer {
+    str = str.replace(/-/g, '+').replace(/_/g, '/')
+    while (str.length % 4) str += '='
+    return Buffer.from(str, 'base64')
+}
+
+export function encodeUrlSafeBase64(buf: Buffer): string {
+    return buf
+        .toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/g, '')
+}

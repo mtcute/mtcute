@@ -3,6 +3,8 @@ import { expect } from 'chai'
 import {
     buffersEqual,
     cloneBuffer,
+    encodeUrlSafeBase64,
+    parseUrlSafeBase64,
     randomBytes,
     xorBuffer,
     xorBufferInPlace,
@@ -108,6 +110,27 @@ describe('cloneBuffer', () => {
         expect([...copy]).eql([2, 3, 4])
         orig[0] = 0xff
         expect(copy[0]).not.eql(0xff)
+    })
+})
+
+describe('parseUrlSafeBase64', () => {
+    it('should parse url-safe base64', () => {
+        expect(parseUrlSafeBase64('qu7d8aGTeuF6-g').toString('hex')).eq(
+            'aaeeddf1a1937ae17afa'
+        )
+    })
+    it('should parse normal base64', () => {
+        expect(parseUrlSafeBase64('qu7d8aGTeuF6+g==').toString('hex')).eq(
+            'aaeeddf1a1937ae17afa'
+        )
+    })
+})
+
+describe('encodeUrlSafeBase64', () => {
+    it('should encode to url-safe base64', () => {
+        expect(
+            encodeUrlSafeBase64(Buffer.from('aaeeddf1a1937ae17afa', 'hex'))
+        ).eq('qu7d8aGTeuF6-g')
     })
 })
 

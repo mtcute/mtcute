@@ -1,17 +1,3 @@
-export function parseUrlSafeBase64(str: string): Buffer {
-    str = str.replace(/-/g, '+').replace(/_/g, '/')
-    while (str.length % 4) str += '='
-    return Buffer.from(str, 'base64')
-}
-
-export function encodeUrlSafeBase64(buf: Buffer): string {
-    return buf
-        .toString('base64')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/g, '')
-}
-
 // telegram has some cursed RLE which only encodes consecutive \x00
 
 export function telegramRleEncode(buf: Buffer): Buffer {

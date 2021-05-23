@@ -9,6 +9,7 @@ export * from './utils/tl-json'
 export * from './utils/async-lock'
 export * from './utils/lru-map'
 export * from './utils/function-utils'
+export { encodeUrlSafeBase64, parseUrlSafeBase64 } from './utils/buffer-utils'
 
 export { BinaryReader } from './utils/binary/binary-reader'
 export { BinaryWriter } from './utils/binary/binary-writer'
