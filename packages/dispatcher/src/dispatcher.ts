@@ -128,6 +128,13 @@ const PARSERS: Partial<
     updateDeleteMessages: deleteMessageParser,
 }
 
+const HANDLER_TYPE_TO_UPDATE: Record<string, string[]> = {}
+Object.keys(PARSERS).forEach((upd: keyof typeof PARSERS) => {
+    const handler = PARSERS[upd]![0]
+    if (!(handler in HANDLER_TYPE_TO_UPDATE)) HANDLER_TYPE_TO_UPDATE[handler] = []
+    HANDLER_TYPE_TO_UPDATE[handler].push(upd)
+})
+
 /**
  * Updates dispatcher
  */
@@ -142,6 +149,8 @@ export class Dispatcher {
 
     private _parent?: Dispatcher
     private _children: Dispatcher[] = []
+
+    private _handlersCount: Record<string, number> = {}
 
     /**
      * Create a new dispatcher, optionally binding it to the client.
@@ -238,7 +247,7 @@ export class Dispatcher {
         if (!this._client) return
 
         const isRawMessage = tl.isAnyMessage(update)
-        if (parsed === undefined) {
+        if (parsed === undefined && this._handlersCount[update._]) {
             const pair = PARSERS[update._]
             if (pair) {
                 parsed = pair[1](this._client, update, users, chats)
@@ -336,6 +345,11 @@ export class Dispatcher {
             this._groups[group][handler.type] = []
         }
 
+        HANDLER_TYPE_TO_UPDATE[handler.type].forEach((upd) => {
+            if (!(upd in this._handlersCount)) this._handlersCount[upd] = 0
+            this._handlersCount[upd] += 1
+        })
+
         this._groups[group][handler.type].push(handler)
     }
 
@@ -359,10 +373,20 @@ export class Dispatcher {
             if (handler === 'all') {
                 if (group === -1) {
                     this._groups = {}
+                    this._handlersCount = {}
                 } else {
+                    const grp = this._groups[group] as any
+                    Object.keys(grp).forEach((handler) => {
+                        HANDLER_TYPE_TO_UPDATE[handler].forEach((upd) => {
+                            this._handlersCount[upd] -= grp[handler].length
+                        })
+                    })
                     delete this._groups[group]
                 }
             } else {
+                HANDLER_TYPE_TO_UPDATE[handler].forEach((upd) => {
+                    this._handlersCount[upd] -= this._groups[group][handler].length
+                })
                 delete this._groups[group][handler]
             }
             return
@@ -375,6 +399,10 @@ export class Dispatcher {
         const idx = this._groups[group][handler.type].indexOf(handler)
         if (idx > 0) {
             this._groups[group][handler.type].splice(idx, 1)
+
+            HANDLER_TYPE_TO_UPDATE[handler.type].forEach((upd) => {
+                this._handlersCount[upd] -= 1
+            })
         }
     }
 
