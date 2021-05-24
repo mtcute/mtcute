@@ -325,13 +325,6 @@ export class BaseTelegramClient {
                 }
             }, 60_000)
 
-            if (!this.primaryConnection._initConnectionCalled) {
-                // initial call that will be wrapped with initConnection
-                await this.call({ _: 'help.getConfig' }).catch((err) =>
-                    this.primaryConnection.emit('error', err)
-                )
-            }
-
             // on reconnection we need to call updates.getState so Telegram
             // knows we still want the updates
             if (!this._disableUpdates) {
