@@ -2,16 +2,17 @@ import { TransportFactory } from './abstract'
 
 export * from './abstract'
 export * from './streamed'
+export * from './wrapped'
 export * from './tcp'
-export * from './tcp-intermediate'
 export * from './websocket'
-export * from './ws-obfuscated'
+export * from './intermediate'
+export * from './obfuscated'
 
 /** Platform-defined default transport factory */
 export let defaultTransportFactory: TransportFactory
 if (typeof process !== 'undefined') {
     // we are in node, use tcp transport by default
-    const { TcpIntermediateTransport } = require('./tcp-intermediate')
+    const { TcpIntermediateTransport } = require('./tcp')
     defaultTransportFactory = () => new TcpIntermediateTransport()
 } else {
     // we are in browser (probably), use websocket
@@ -24,7 +25,7 @@ if (typeof process !== 'undefined') {
             )
         }
     } else {
-        const { WebSocketObfuscatedTransport } = require('./ws-obfuscated')
-        defaultTransportFactory = () => new WebSocketObfuscatedTransport()
+        const { WebSocketIntermediateTransport } = require('./websocket')
+        defaultTransportFactory = () => new WebSocketIntermediateTransport()
     }
 }

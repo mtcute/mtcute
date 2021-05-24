@@ -84,6 +84,9 @@ export interface PacketCodec {
     /** Reset codec state (for example, reset buffer) */
     reset(): void
 
+    /** Remove all listeners from a codec, used to safely dispose it */
+    removeAllListeners(): void
+
     /**
      * Emitted when a packet containing a
      * (Transport error)[https://core.telegram.org/mtproto/mtproto-transports#transport-errors] is encountered.

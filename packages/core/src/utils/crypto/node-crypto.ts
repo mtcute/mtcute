@@ -10,7 +10,9 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
     }
 
     createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme {
-        const cipher = nodeCrypto[encrypt ? 'createCipheriv' : 'createDecipheriv'](`aes-${key.length * 8}-ctr`, key, iv)
+        const cipher = nodeCrypto[
+            encrypt ? 'createCipheriv' : 'createDecipheriv'
+        ](`aes-${key.length * 8}-ctr`, key, iv)
 
         const update = (data: Buffer) => cipher.update(data)
 
@@ -30,7 +32,11 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
                 return Buffer.concat([cipher.update(data), cipher.final()])
             },
             decrypt(data: Buffer) {
-                const cipher = nodeCrypto.createDecipheriv(methodName, key, null)
+                const cipher = nodeCrypto.createDecipheriv(
+                    methodName,
+                    key,
+                    null
+                )
                 cipher.setAutoPadding(false)
                 return Buffer.concat([cipher.update(data), cipher.final()])
             },
@@ -65,5 +71,9 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
 
     createMd5(): IHashMethod {
         return nodeCrypto.createHash('md5')
+    }
+
+    hmacSha256(data: Buffer, key: Buffer): MaybeAsync<Buffer> {
+        return nodeCrypto.createHmac('sha256', key).update(data).digest()
     }
 }

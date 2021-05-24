@@ -1,0 +1,17 @@
+{
+    "name": "@mtcute/mtproxy",
+    "private": true,
+    "version": "0.0.0",
+    "description": "MTProto proxy (MTProxy) support for MTCute",
+    "author": "Alisa Sireneva <me@tei.su>",
+    "license": "MIT",
+    "main": "index.ts",
+    "scripts": {
+        "test": "mocha -r ts-node/register tests/**/*.spec.ts",
+        "docs": "npx typedoc",
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@mtcute/core": "^0.0.0"
+    }
+}

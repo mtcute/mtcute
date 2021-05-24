@@ -27,6 +27,7 @@ export interface ICryptoProvider {
         iterations: number
     ): MaybeAsync<Buffer>
     rsaEncrypt(data: Buffer, key: TlPublicKey): MaybeAsync<Buffer>
+    hmacSha256(data: Buffer, key: Buffer): MaybeAsync<Buffer>
 
     // in telegram, iv is always either used only once, or is the same for all calls for the key
     createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme
@@ -78,6 +79,8 @@ export abstract class BaseCryptoProvider implements ICryptoProvider {
     abstract sha1(data: Buffer): MaybeAsync<Buffer>
 
     abstract sha256(data: Buffer): MaybeAsync<Buffer>
+
+    abstract hmacSha256(data: Buffer, key: Buffer): MaybeAsync<Buffer>
 
     abstract createMd5(): IHashMethod
 }

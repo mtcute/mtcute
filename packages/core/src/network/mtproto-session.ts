@@ -112,7 +112,7 @@ export class MtprotoSession {
 
         const authKeyId = reader.raw(8)
         const messageKey = reader.int128()
-        const encryptedData = reader.raw()
+        let encryptedData = reader.raw()
 
         if (!buffersEqual(authKeyId, this._authKeyId!)) {
             debug(
@@ -122,6 +122,13 @@ export class MtprotoSession {
                 this._authKeyId
             )
             return null
+        }
+
+        const padSize = encryptedData.length % 16
+        if (padSize !== 0) {
+            // data came from a codec that uses non-16-based padding.
+            // it is safe to drop those padding bytes
+            encryptedData = encryptedData.slice(0, -padSize)
         }
 
         const ige = await createAesIgeForMessage(

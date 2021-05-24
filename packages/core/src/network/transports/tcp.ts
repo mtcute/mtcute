@@ -3,6 +3,7 @@ import { tl } from '@mtcute/tl'
 import { Socket, connect } from 'net'
 import EventEmitter from 'events'
 import { ICryptoProvider } from '../../utils/crypto'
+import { IntermediatePacketCodec } from './intermediate'
 
 const debug = require('debug')('mtcute:tcp')
 
@@ -39,6 +40,7 @@ export abstract class TcpTransport
             throw new Error('Transport is not IDLE')
 
         if (!this.packetCodecInitialized) {
+            this._packetCodec.setupCrypto?.(this._crypto)
             this._packetCodec.on('error', (err) => this.emit('error', err))
             this._packetCodec.on('packet', (buf) => this.emit('message', buf))
             this.packetCodecInitialized = true
@@ -79,15 +81,20 @@ export abstract class TcpTransport
         debug('%s: connected', this._currentDc!.ipAddress)
         const initialMessage = await this._packetCodec.tag()
 
-        this._socket!.write(initialMessage, (err) => {
-            if (err) {
-                this.emit('error', err)
-                this.close()
-            } else {
-                this._state = TransportState.Ready
-                this.emit('ready')
-            }
-        })
+        if (initialMessage.length) {
+            this._socket!.write(initialMessage, (err) => {
+                if (err) {
+                    this.emit('error', err)
+                    this.close()
+                } else {
+                    this._state = TransportState.Ready
+                    this.emit('ready')
+                }
+            })
+        } else {
+            this._state = TransportState.Ready
+            this.emit('ready')
+        }
     }
 
     async send(bytes: Buffer): Promise<void> {
@@ -100,4 +107,8 @@ export abstract class TcpTransport
             this._socket!.write(framed, (err) => (err ? rej(err) : res()))
         })
     }
+}
+
+export class TcpIntermediateTransport extends TcpTransport {
+    _packetCodec = new IntermediatePacketCodec()
 }

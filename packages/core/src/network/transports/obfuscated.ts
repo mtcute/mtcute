@@ -1,12 +1,8 @@
 import { PacketCodec } from './abstract'
 import { ICryptoProvider, IEncryptionScheme } from '../../utils/crypto'
 import { EventEmitter } from 'events'
-import {
-    buffersEqual,
-    randomBytes,
-} from '../../utils/buffer-utils'
-import { WebSocketTransport } from './websocket'
-import { IntermediatePacketCodec } from './tcp-intermediate'
+import { buffersEqual, randomBytes } from '../../utils/buffer-utils'
+import { WrappedCodec } from './wrapped'
 
 // initial payload can't start with these
 const BAD_HEADERS = [
@@ -17,21 +13,22 @@ const BAD_HEADERS = [
     Buffer.from('eeeeeeee', 'hex'),
 ]
 
-export class ObfuscatedPacketCodec extends EventEmitter implements PacketCodec {
-    private _inner: PacketCodec
-    private _crypto: ICryptoProvider
+interface MtProxyInfo {
+    dcId: number
+    secret: Buffer
+    test: boolean
+    media: boolean
+}
+
+export class ObfuscatedPacketCodec extends WrappedCodec implements PacketCodec {
     private _encryptor?: IEncryptionScheme
     private _decryptor?: IEncryptionScheme
 
-    constructor(inner: PacketCodec) {
-        super()
-        this._inner = inner
-        this._inner.on('error', (err) => this.emit('error', err))
-        this._inner.on('packet', (buf) => this.emit('packet', buf))
-    }
+    private _proxy?: MtProxyInfo
 
-    setupCrypto(crypto: ICryptoProvider): void {
-        this._crypto = crypto
+    constructor(inner: PacketCodec, proxy?: MtProxyInfo) {
+        super(inner)
+        this._proxy = proxy
     }
 
     async tag(): Promise<Buffer> {
@@ -54,16 +51,37 @@ export class ObfuscatedPacketCodec extends EventEmitter implements PacketCodec {
         }
         innerTag.copy(random, 56)
 
+        if (this._proxy) {
+            let dcId = this._proxy.dcId
+            if (this._proxy.test) dcId += 10000
+            if (this._proxy.media) dcId = -dcId
+
+            random.writeInt16LE(dcId, 60)
+        }
+
         const randomRev = Buffer.from(random.slice(8, 56)).reverse()
 
-        const encryptKey = random.slice(8, 40)
+        let encryptKey = random.slice(8, 40)
         const encryptIv = random.slice(40, 56)
 
-        const decryptKey = randomRev.slice(0, 32)
+        let decryptKey = randomRev.slice(0, 32)
         const decryptIv = randomRev.slice(32, 48)
 
+        if (this._proxy) {
+            encryptKey = await this._crypto.sha256(
+                Buffer.concat([encryptKey, this._proxy.secret])
+            )
+            decryptKey = await this._crypto.sha256(
+                Buffer.concat([decryptKey, this._proxy.secret])
+            )
+        }
+
         this._encryptor = this._crypto.createAesCtr(encryptKey, encryptIv, true)
-        this._decryptor = this._crypto.createAesCtr(decryptKey, decryptIv, false)
+        this._decryptor = this._crypto.createAesCtr(
+            decryptKey,
+            decryptIv,
+            false
+        )
 
         const encrypted = await this._encryptor.encrypt(random)
         encrypted.copy(random, 56, 56, 64)
@@ -86,8 +104,4 @@ export class ObfuscatedPacketCodec extends EventEmitter implements PacketCodec {
         delete this._encryptor
         delete this._decryptor
     }
-}
-
-export class WebSocketObfuscatedTransport extends WebSocketTransport {
-    _packetCodec = new ObfuscatedPacketCodec(new IntermediatePacketCodec())
 }

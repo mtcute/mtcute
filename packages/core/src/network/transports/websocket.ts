@@ -4,6 +4,8 @@ import EventEmitter from 'events'
 import { typedArrayToBuffer } from '../../utils/buffer-utils'
 import { ICryptoProvider } from '../../utils/crypto'
 import type WebSocket from 'ws'
+import { IntermediatePacketCodec } from './intermediate'
+import { ObfuscatedPacketCodec } from './obfuscated'
 
 const debug = require('debug')('mtcute:ws')
 
@@ -41,7 +43,7 @@ export abstract class WebSocketTransport
     private _currentDc: tl.RawDcOption | null = null
     private _state: TransportState = TransportState.Idle
     private _socket: WebSocket | null = null
-    private _crypto?: ICryptoProvider
+    private _crypto: ICryptoProvider
 
     abstract _packetCodec: PacketCodec
     packetCodecInitialized = false
@@ -91,7 +93,7 @@ export abstract class WebSocketTransport
             throw new Error('Transport is not IDLE')
 
         if (!this.packetCodecInitialized) {
-            if (this._crypto) this._packetCodec.setupCrypto?.(this._crypto)
+            this._packetCodec.setupCrypto?.(this._crypto)
             this._packetCodec.on('error', (err) => this.emit('error', err))
             this._packetCodec.on('packet', (buf) => this.emit('message', buf))
             this.packetCodecInitialized = true
@@ -148,4 +150,8 @@ export abstract class WebSocketTransport
 
         this._socket!.send(framed)
     }
+}
+
+export class WebSocketIntermediateTransport extends WebSocketTransport {
+    _packetCodec = new ObfuscatedPacketCodec(new IntermediatePacketCodec())
 }

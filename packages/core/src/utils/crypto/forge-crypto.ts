@@ -16,7 +16,9 @@ export class ForgeCryptoProvider extends BaseCryptoProvider {
     }
 
     createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme {
-        const cipher = forge.cipher[encrypt ? 'createCipher' : 'createDecipher']('AES-CTR', key.toString('binary'))
+        const cipher = forge.cipher[
+            encrypt ? 'createCipher' : 'createDecipher'
+        ]('AES-CTR', key.toString('binary'))
         cipher.start({ iv: iv.toString('binary') })
 
         const update = (data: Buffer): Buffer => {
@@ -27,7 +29,7 @@ export class ForgeCryptoProvider extends BaseCryptoProvider {
 
         return {
             encrypt: update,
-            decrypt: update
+            decrypt: update,
         }
     }
 
@@ -44,10 +46,7 @@ export class ForgeCryptoProvider extends BaseCryptoProvider {
                 return Buffer.from(cipher.output.data, 'binary')
             },
             decrypt(data: Buffer) {
-                const cipher = forge.cipher.createDecipher(
-                    'AES-ECB',
-                    keyBuffer
-                )
+                const cipher = forge.cipher.createDecipher('AES-ECB', keyBuffer)
                 cipher.start({})
                 cipher.mode.pad = cipher.mode.unpad = false
                 cipher.update(forge.util.createBuffer(data.toString('binary')))
@@ -99,5 +98,15 @@ export class ForgeCryptoProvider extends BaseCryptoProvider {
             update: (data) => hash.update(data.toString('binary')),
             digest: () => Buffer.from(hash.digest().data, 'binary'),
         }
+    }
+
+    hmacSha256(data: Buffer, key: Buffer): MaybeAsync<Buffer> {
+        const hmac = forge.hmac.create()
+        hmac.start('sha256', key.toString('binary'))
+        hmac.update(data.toString('binary'))
+        return Buffer.from(
+            hmac.digest().data,
+            'binary'
+        )
     }
 }

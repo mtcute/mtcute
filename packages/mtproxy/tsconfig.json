@@ -1,0 +1,19 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./dist"
+    },
+    "include": [
+        "./index.ts",
+    ],
+    "typedocOptions": {
+        "name": "@mtcute/mtproxy",
+        "includeVersion": true,
+        "out": "../../docs/packages/mtproxy",
+        "listInvalidSymbolLinks": true,
+        "excludePrivate": true,
+        "entryPoints": [
+            "./index.ts"
+        ]
+    }
+}
