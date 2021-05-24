@@ -35,7 +35,7 @@ const TLS_START = [
 ]
 
 /**
- * TCP transport that connects via a SOCKS4/5 proxy.
+ * TCP transport that connects via an MTProxy
  */
 export class MtProxyTcpTransport extends TcpTransport {
     readonly _proxy: MtProxySettings
