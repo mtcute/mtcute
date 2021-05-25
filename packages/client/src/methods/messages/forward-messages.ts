@@ -40,6 +40,9 @@ export async function forwardMessages(
         /**
          * If set, the message will be scheduled to this date.
          * When passing a number, a UNIX time in ms is expected.
+         *
+         * You can also pass `0x7FFFFFFE`, this will send the message
+         * once the peer is online
          */
         schedule?: Date | number
     }
@@ -109,6 +112,9 @@ export async function forwardMessages(
          * If set, the forwarding will be scheduled to this date
          * (also applies to caption message).
          * When passing a number, a UNIX time in ms is expected.
+         *
+         * You can also pass `0x7FFFFFFE`, this will send the message
+         * once the peer is online
          */
         schedule?: Date | number
 
@@ -170,6 +176,9 @@ export async function forwardMessages(
         /**
          * If set, the message will be scheduled to this date.
          * When passing a number, a UNIX time in ms is expected.
+         *
+         * You can also pass `0x7FFFFFFE`, this will send the message
+         * once the peer is online
          */
         schedule?: Date | number
 
