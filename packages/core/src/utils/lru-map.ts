@@ -130,55 +130,7 @@ export class LruMap<K extends keyof any, V> {
         }
     }
 
-    // private _setForMap(key: K, value: V) {
-    //     const old = this._items[key]
-    //
-    //     if (old) {
-    //         bring old one to the beginning
-        //
-        // }
-        // if (!this._first) this._first = { v: str }
-        // if (!this._last) this._last = this._first
-        // else {
-        //     this._last.n = { v: str }
-        //     this._last = this._last.n
-        // }
-        //
-        // this._set!.add(str)
-        //
-        // if (this._set!.size > this._capacity && this._first) {
-        //     // remove least recently used
-        //     this._set!.delete(this._first.v)
-        //     this._first = this._first.n
-        // }
-    // }
-
-    // private _hasForMap(str: string) {
-    //     return this._set!.has(str)
-    // }
-
-    // private _setForObj(str: string) {
-    //     if (str in this._obj!) return
-    //
-    //     if (!this._first) this._first = { v: str }
-    //     if (!this._last) this._last = this._first
-    //     else {
-    //         this._last.n = { v: str }
-    //         this._last = this._last.n
-    //     }
-    //
-    //     this._obj![str] = true
-    //
-    //     if (this._objSize === this._capacity) {
-    //         // remove least recently used
-    //         delete this._obj![this._first.v]
-    //         this._first = this._first.n
-    //     } else {
-    //         this._objSize! += 1
-    //     }
-    // }
-    //
-    // private _hasForObj(str: string) {
-    //     return str in this._obj!
-    // }
+    delete(key: K): void {
+        this._del(key)
+    }
 }

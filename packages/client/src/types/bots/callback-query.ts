@@ -3,7 +3,7 @@ import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { Message } from '../messages'
 import { MtCuteArgumentError } from '../errors'
-import { getMarkedPeerId } from '@mtcute/core'
+import { BasicPeerType, getBasicPeerType, getMarkedPeerId } from '@mtcute/core'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
 import { User, UsersIndex } from '../peers'
 
@@ -102,6 +102,26 @@ export class CallbackQuery {
             )
 
         return encodeInlineMessageId(this.raw.msgId)
+    }
+
+    /**
+     * Identifier of the chat where this message was sent
+     */
+    get chatId(): number {
+        if (this.raw._ !== 'updateBotCallbackQuery')
+            throw new MtCuteArgumentError(
+                'Cannot get message id for inline callback'
+            )
+
+        return getMarkedPeerId(this.raw.peer)
+    }
+
+    /**
+     * Basic peer type of the chat where this message was sent,
+     * derived based on {@link chatId}
+     */
+    get chatType(): BasicPeerType {
+        return getBasicPeerType(this.chatId)
     }
 
     /**

@@ -24,13 +24,10 @@ interface BaseUpdateHandler<Type, Handler, Checker> {
     check?: Checker
 }
 
-type ParsedUpdateHandler<Type, Update> = BaseUpdateHandler<
+type ParsedUpdateHandler<Type, Update, State = never> = BaseUpdateHandler<
     Type,
-    (
-        update: Update,
-        client: TelegramClient
-    ) => MaybeAsync<void | PropagationSymbol>,
-    (update: Update, client: TelegramClient) => MaybeAsync<boolean>
+    (update: Update, state: State) => MaybeAsync<void | PropagationSymbol>,
+    (update: Update, state: State) => MaybeAsync<boolean>
 >
 
 export type RawUpdateHandler = BaseUpdateHandler<
@@ -50,13 +47,15 @@ export type RawUpdateHandler = BaseUpdateHandler<
 >
 
 // begin-codegen
-export type NewMessageHandler<T = Message> = ParsedUpdateHandler<
+export type NewMessageHandler<T = Message, S = never> = ParsedUpdateHandler<
     'new_message',
-    T
+    T,
+    S
 >
-export type EditMessageHandler<T = Message> = ParsedUpdateHandler<
+export type EditMessageHandler<T = Message, S = never> = ParsedUpdateHandler<
     'edit_message',
-    T
+    T,
+    S
 >
 export type DeleteMessageHandler<T = DeleteMessageUpdate> = ParsedUpdateHandler<
     'delete_message',
@@ -73,10 +72,10 @@ export type InlineQueryHandler<T = InlineQuery> = ParsedUpdateHandler<
 export type ChosenInlineResultHandler<
     T = ChosenInlineResult
 > = ParsedUpdateHandler<'chosen_inline_result', T>
-export type CallbackQueryHandler<T = CallbackQuery> = ParsedUpdateHandler<
-    'callback_query',
-    T
->
+export type CallbackQueryHandler<
+    T = CallbackQuery,
+    S = never
+> = ParsedUpdateHandler<'callback_query', T, S>
 export type PollUpdateHandler<T = PollUpdate> = ParsedUpdateHandler<'poll', T>
 export type PollVoteHandler<T = PollVoteUpdate> = ParsedUpdateHandler<
     'poll_vote',

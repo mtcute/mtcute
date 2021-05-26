@@ -17,7 +17,7 @@ function parseUpdateTypes() {
     const ret = []
 
     for (const line of lines) {
-        const m = line.match(/^([a-z_]+)(?:: ([a-zA-Z]+))? = ([a-zA-Z]+)$/)
+        const m = line.match(/^([a-z_]+)(?:: ([a-zA-Z]+))? = ([a-zA-Z]+)( \+ State)?$/)
         if (!m) throw new Error(`invalid syntax: ${line}`)
         ret.push({
             typeName: m[1],
@@ -26,6 +26,7 @@ function parseUpdateTypes() {
             funcName: m[2]
                 ? m[2][0].toLowerCase() + m[2].substr(1)
                 : snakeToCamel(m[1]),
+            state: !!m[4]
         })
     }
 
@@ -78,6 +79,31 @@ function toSentence(type, stype = 'inline') {
     } else {
         return `${name[0].toUpperCase()}${name.substr(1)} handler`
     }
+}
+
+function generateHandler() {
+    const lines = []
+    const names = ['RawUpdateHandler']
+
+    // imports must be added manually because yeah
+
+    types.forEach((type) => {
+        if (type.updateType === 'IGNORE') return
+
+        lines.push(
+            `export type ${type.handlerTypeName}Handler<T = ${type.updateType}` +
+            `${type.state ? ', S = never' : ''}> = ParsedUpdateHandler<` +
+            `'${type.typeName}', T${type.state ? ', S' : ''}>`
+        )
+        names.push(`${type.handlerTypeName}Handler`)
+    })
+
+    replaceSections('handler.ts', {
+        codegen:
+            lines.join('\n') +
+            '\n\nexport type UpdateHandler = \n' +
+            names.map((i) => `    | ${i}\n`).join(''),
+    })
 }
 
 function generateBuilders() {
@@ -160,29 +186,6 @@ function generateBuilders() {
     })
 }
 
-function generateHandler() {
-    const lines = []
-    const names = ['RawUpdateHandler']
-
-    // imports must be added manually because yeah
-
-    types.forEach((type) => {
-        if (type.updateType === 'IGNORE') return
-
-        lines.push(
-            `export type ${type.handlerTypeName}Handler<T = ${type.updateType}> = ParsedUpdateHandler<'${type.typeName}', T>`
-        )
-        names.push(`${type.handlerTypeName}Handler`)
-    })
-
-    replaceSections('handler.ts', {
-        codegen:
-            lines.join('\n') +
-            '\n\nexport type UpdateHandler = \n' +
-            names.map((i) => `    | ${i}\n`).join(''),
-    })
-}
-
 function generateDispatcher() {
     const lines = []
     const imports = ['UpdateHandler']
@@ -227,7 +230,7 @@ function generateDispatcher() {
      * @param group  Handler group index
      * @internal
      */
-    on${type.handlerTypeName}(handler: ${type.handlerTypeName}Handler['callback'], group?: number): void
+    on${type.handlerTypeName}(handler: ${type.handlerTypeName}Handler${type.state ? `<${type.updateType}, State extends never ? never : MessageState<State, SceneName>>` : ''}['callback'], group?: number): void
 
     /**
      * Register ${toSentence(type)} with a filter
@@ -238,7 +241,7 @@ function generateDispatcher() {
      */
     on${type.handlerTypeName}<Mod>(
         filter: UpdateFilter<${type.updateType}, Mod>,
-        handler: ${type.handlerTypeName}Handler<filters.Modify<${type.updateType}, Mod>>['callback'],
+        handler: ${type.handlerTypeName}Handler<filters.Modify<${type.updateType}, Mod>${type.state ? ', State extends never ? never : MessageState<State, SceneName>' : ''}>['callback'],
         group?: number
     ): void
 

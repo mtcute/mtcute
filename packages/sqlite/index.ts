@@ -65,6 +65,12 @@ const SCHEMA = `
         value text not null
     );
 
+    create table state (
+        key text primary key,
+        value text not null,
+        expires number
+    );
+
     create table auth_keys (
         dc integer primary key,
         key blob not null
@@ -89,8 +95,9 @@ const SCHEMA = `
 `
 
 const RESET = `
-    delete from kv;
-    delete from auth_keys where key <> 'ver';
+    delete from kv where key <> 'ver';
+    delete from state;
+    delete from auth_keys;
     delete from pts;
     delete from entities
 `
@@ -112,10 +119,20 @@ interface CacheItem {
     full: tl.TypeUser | tl.TypeChat
 }
 
+interface FsmItem {
+    value: any
+    expires?: number
+}
+
 const STATEMENTS = {
     getKv: 'select value from kv where key = ?',
     setKv: 'insert or replace into kv (key, value) values (?, ?)',
     delKv: 'delete from kv where key = ?',
+
+    getState: 'select value, expires from state where key = ?',
+    setState:
+        'insert or replace into state (key, value, expires) values (?, ?, ?)',
+    delState: 'delete from state where key = ?',
 
     getAuth: 'select key from auth_keys where dc = ?',
     setAuth: 'insert or replace into auth_keys (dc, key) values (?, ?)',
@@ -141,14 +158,16 @@ const EMPTY_BUFFER = Buffer.alloc(0)
  *
  * Uses `better-sqlite3` library
  */
-export class SqliteStorage implements ITelegramStorage {
+export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
     private _db: sqlite3.Database
     private _statements: Record<keyof typeof STATEMENTS, sqlite3.Statement>
     private readonly _filename: string
 
     private _pending: [sqlite3.Statement, any[]][] = []
     private _pendingUnimportant: Record<number, any[]> = {}
+
     private _cache?: LruMap<number, CacheItem>
+    private _fsmCache?: LruMap<string, FsmItem>
 
     private _wal?: boolean
 
@@ -179,6 +198,19 @@ export class SqliteStorage implements ITelegramStorage {
             cacheSize?: number
 
             /**
+             * FSM states cache size, in number of keys.
+             *
+             * Recently created/fetched FSM states are cached
+             * in memory to avoid redundant database calls.
+             * If you are having problems with this (e.g. stale
+             * state in case of concurrent accesses), you
+             * can disable this by passing `0`
+             *
+             * Defaults to `100`
+             */
+            fsmCacheSize?: number
+
+            /**
              * By default, WAL mode is enabled, which
              * significantly improves performance.
              * [Learn more](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/performance.md)
@@ -203,9 +235,15 @@ export class SqliteStorage implements ITelegramStorage {
         }
     ) {
         this._filename = filename
+
         if (params?.cacheSize !== 0) {
             this._cache = new LruMap(params?.cacheSize ?? 100)
         }
+
+        if (params?.fsmCacheSize !== 0) {
+            this._fsmCache = new LruMap(params?.fsmCacheSize ?? 100)
+        }
+
         this._wal = !params?.disableWal
 
         this._saveUnimportantLater = throttle(() => {
@@ -519,5 +557,61 @@ export class SqliteStorage implements ITelegramStorage {
         }
 
         return null
+    }
+
+    // IStateStorage implementation
+
+    getState(key: string, parse = true): any | null {
+        let val: FsmItem | undefined = this._fsmCache?.get(key)
+        const cached = val
+        if (!val) {
+            val = this._statements.getState.get(key)
+            if (val && parse) {
+                val.value = JSON.parse(val.value)
+            }
+        }
+
+        if (!val) return null
+        if (val.expires && val.expires < Date.now()) {
+            // expired
+            if (cached) {
+                this._fsmCache!.delete(key)
+            }
+            this._statements.delState.run(key)
+            return null
+        }
+
+        return val.value
+    }
+
+    setState(key: string, state: any, ttl?: number, parse = true): void {
+        const item: FsmItem = {
+            value: state,
+            expires: ttl ? Date.now() + ttl * 1000 : undefined,
+        }
+
+        this._fsmCache?.set(key, item)
+        this._statements.setState.run(
+            key,
+            parse ? JSON.stringify(item.value) : item.value,
+            item.expires
+        )
+    }
+
+    deleteState(key: string): void {
+        this._fsmCache?.delete(key)
+        this._statements.delState.run(key)
+    }
+
+    getCurrentScene(key: string): string | null {
+        return this.getState(`$current_scene_${key}`, false)
+    }
+
+    setCurrentScene(key: string, scene: string, ttl?: number): void {
+        return this.setState(`$current_scene_${key}`, scene, ttl, false)
+    }
+
+    deleteCurrentScene(key: string): void {
+        this.deleteState(`$current_scene_${key}`)
     }
 }

@@ -27,12 +27,15 @@ interface MemorySessionState {
     // channel pts
     pts: Record<number, number>
 
+    // state for fsm (v = value, e = expires)
+    fsm: Record<string, { v: any, e?: number }>
+
     self: ITelegramStorage.SelfInfo | null
 }
 
 const USERNAME_TTL = 86400000 // 24 hours
 
-export class MemoryStorage implements ITelegramStorage {
+export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
     protected _state: MemorySessionState
     private _cachedInputPeers: Record<number, tl.TypeInputPeer> = {}
 
@@ -65,6 +68,7 @@ export class MemoryStorage implements ITelegramStorage {
             usernameIndex: {},
             gpts: null,
             pts: {},
+            fsm: {},
             self: null,
         }
     }
@@ -232,5 +236,39 @@ export class MemoryStorage implements ITelegramStorage {
 
     getFullPeerById(id: number): tl.TypeUser | tl.TypeChat | null {
         return this._cachedFull.get(id) ?? null
+    }
+
+    // IStateStorage implementation
+
+    getState(key: string): any | null {
+        const val = this._state.fsm[key]
+        if (!val) return null
+        if (val.e && val.e < Date.now()) {
+            // expired
+            delete this._state.fsm[key]
+            return null
+        }
+
+        return val.v
+    }
+
+    setState(key: string, state: any, ttl?: number): void {
+        this._state.fsm[key] = { v: state, e: ttl ? Date.now() + (ttl * 1000) : undefined }
+    }
+
+    deleteState(key: string): void {
+        delete this._state.fsm[key]
+    }
+
+    getCurrentScene(key: string): string | null {
+        return this.getState(`$current_scene_${key}`)
+    }
+
+    setCurrentScene(key: string, scene: string, ttl?: number): void {
+        return this.setState(`$current_scene_${key}`, scene, ttl)
+    }
+
+    deleteCurrentScene(key: string): void {
+        delete this._state.fsm[`$current_scene_${key}`]
     }
 }

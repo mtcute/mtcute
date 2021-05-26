@@ -27,6 +27,7 @@ import { MaybeArray } from '@mtcute/core'
 import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
 import { MessageAction } from '@mtcute/client/src/types/messages/message-action'
+import { UpdateState } from './state'
 
 /**
  * Type describing a primitive filter, which is a function taking some `Base`
@@ -98,9 +99,9 @@ import { MessageAction } from '@mtcute/client/src/types/messages/message-action'
  */
 // we need the second parameter because it carries meta information
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type UpdateFilter<Base, Mod = {}> = (
+export type UpdateFilter<Base, Mod = {}, State = never> = (
     update: Base,
-    client: TelegramClient
+    state?: UpdateState<State>
 ) => MaybeAsync<boolean>
 
 export namespace filters {
@@ -674,4 +675,30 @@ export namespace filters {
         CallbackQuery,
         { isInline: true }
     > = (q) => q.isInline
+
+    /**
+     * Create a filter for the cases when the state is empty
+     */
+    export const stateEmpty: UpdateFilter<Message> = async (upd, state) => {
+        if (!state) return false
+        return !(await state.get())
+    }
+
+    /**
+     * Create a filter based on state predicate
+     *
+     * If state exists and matches `predicate`, update passes
+     * this filter, otherwise it doesn't
+     *
+     * @param predicate  State predicate
+     */
+    export const state = <T>(predicate: (state: T) => MaybeAsync<boolean>): UpdateFilter<Message | CallbackQuery, {}, T> => {
+        return async (upd, state) => {
+            if (!state) return false
+            const data = await state.get()
+            if (!data) return false
+
+            return predicate(data)
+        }
+    }
 }

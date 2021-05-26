@@ -1,13 +1,13 @@
-# format: type_name[: handler_type_name] = update_type
+# format: type_name[: handler_type_name] = update_type[ + State]
 # IGNORE as update_type disables filters modification
 raw: RawUpdate = IGNORE
-new_message = Message
-edit_message = Message
+new_message = Message + State
+edit_message = Message + State
 delete_message = DeleteMessageUpdate
 chat_member: ChatMemberUpdate = ChatMemberUpdate
 inline_query = InlineQuery
 chosen_inline_result = ChosenInlineResult
-callback_query = CallbackQuery
+callback_query = CallbackQuery + State
 poll: PollUpdate = PollUpdate
 poll_vote = PollVoteUpdate
 user_status: UserStatusUpdate = UserStatusUpdate
