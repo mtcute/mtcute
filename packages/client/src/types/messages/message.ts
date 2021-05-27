@@ -1,7 +1,7 @@
 import { User, Chat, InputPeerLike, UsersIndex, ChatsIndex } from '../peers'
 import { tl } from '@mtcute/tl'
 import { BotKeyboard, ReplyMarkup } from '../bots'
-import { MAX_CHANNEL_ID } from '@mtcute/core'
+import { getMarkedPeerId, MAX_CHANNEL_ID } from '@mtcute/core'
 import {
     MtCuteArgumentError,
     MtCuteEmptyError,
@@ -42,6 +42,53 @@ export namespace Message {
          * signature of the post author (if present)
          */
         signature?: string
+    }
+
+    /** Information about replies to a message */
+    export interface MessageRepliesInfo {
+        /**
+         * Whether this is a comments thread under a channel post
+         */
+        isComments: false
+
+        /**
+         * Total number of replies
+         */
+        count: number
+
+        /**
+         * Whether this reply thread has unread messages
+         */
+        hasUnread: boolean
+
+        /**
+         * ID of the last message in the thread (if any)
+         */
+        lastMessageId?: number
+
+        /**
+         * ID of the last read message in the thread (if any)
+         */
+        lastReadMessageId?: number
+    }
+
+    /** Information about comments to a channel post */
+    export interface MessageCommentsInfo
+        extends Omit<MessageRepliesInfo, 'isComments'> {
+        /**
+         * Whether this is a comments thread under a channel post
+         */
+        isComments: true
+
+        /**
+         * ID of the discussion group for the post
+         */
+        discussion: number
+
+        /**
+         * IDs of the last few commenters to the post
+         */
+        repliers: number[]
     }
 }
 
@@ -292,6 +339,39 @@ export class Message {
         }
 
         return this._forward
+    }
+
+    private _replies?: Message.MessageRepliesInfo | Message.MessageCommentsInfo
+    /**
+     * Information about comments (for channels) or replies (for groups)
+     */
+    get replies():
+        | Message.MessageRepliesInfo
+        | Message.MessageCommentsInfo
+        | null {
+        if (this.raw._ !== 'message' || !this.raw.replies) return null
+
+        if (!this._replies) {
+            const r = this.raw.replies
+            const obj: Message.MessageRepliesInfo = {
+                isComments: r.comments as false,
+                count: r.replies,
+                hasUnread: r.readMaxId !== undefined && r.readMaxId !== r.maxId,
+                lastMessageId: r.maxId,
+                lastReadMessageId: r.readMaxId,
+            }
+
+            if (r.comments) {
+                const o = (obj as unknown) as Message.MessageCommentsInfo
+                o.discussion = r.channelId!
+                o.repliers =
+                    r.recentRepliers?.map((it) => getMarkedPeerId(it)) ?? []
+            }
+
+            this._replies = obj
+        }
+
+        return this._replies
     }
 
     /**
@@ -552,6 +632,69 @@ export class Message {
                 replyTo: this.id,
             })
         }
+        return this.client.sendMedia(this.chat.inputPeer, media, params)
+    }
+
+    /**
+     * Send a text-only comment to this message.
+     *
+     * If this is a normal message (not a channel post),
+     * a simple reply will be sent.
+     *
+     * If this post does not have comments section,
+     * {@link MtCuteArgumentError} is thrown. To check
+     * if a message has comments, use {@link replies}
+     *
+     * @param text  Text of the message
+     * @param params
+     */
+    commentText(
+        text: string,
+        params?: Parameters<TelegramClient['sendText']>[2]
+    ): ReturnType<TelegramClient['sendText']> {
+        if (this.chat.type !== 'channel') {
+            return this.replyText(text, true, params)
+        }
+
+        if (!this.replies || !this.replies.isComments) {
+            throw new MtCuteArgumentError(
+                'This message does not have comments section'
+            )
+        }
+
+        if (!params) params = {}
+        params.commentTo = this.id
+        return this.client.sendText(this.chat.inputPeer, text, params)
+    }
+
+    /**
+     * Send a media comment to this message
+     * .
+     * If this is a normal message (not a channel post),
+     * a simple reply will be sent.
+     *
+     * If this post does not have comments section,
+     * {@link MtCuteArgumentError} is thrown. To check
+     * if a message has comments, use {@link replies}
+     *
+     * @param media  Media to send
+     * @param params
+     */
+    commentMedia(
+        media: InputMediaLike,
+        params?: Parameters<TelegramClient['sendMedia']>[2]
+    ): ReturnType<TelegramClient['sendMedia']> {
+        if (this.chat.type !== 'channel') {
+            return this.replyMedia(media, true, params)
+        }
+
+        if (!this.replies || !this.replies.isComments) {
+            throw new MtCuteArgumentError(
+                'This message does not have comments section'
+            )
+        }
+        if (!params) params = {}
+        params.commentTo = this.id
         return this.client.sendMedia(this.chat.inputPeer, media, params)
     }
 

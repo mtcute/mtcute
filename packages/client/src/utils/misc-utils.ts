@@ -1,4 +1,4 @@
-import { MaybeDynamic, MtCuteError } from '../types'
+import { MaybeDynamic, Message, MtCuteError } from '../types'
 import { BigInteger } from 'big-integer'
 import { randomBytes } from '@mtcute/core/src/utils/buffer-utils'
 import { bufferToBigInt } from '@mtcute/core/src/utils/bigint-utils'
@@ -25,15 +25,16 @@ export function extractChannelIdFromUpdate(
     upd: tl.TypeUpdate
 ): number | undefined {
     // holy shit
-    const res = 'channelId' in upd
-        ? upd.channelId
-        : 'message' in upd &&
-          typeof upd.message !== 'string' &&
-          'peerId' in upd.message &&
-          upd.message.peerId &&
-          'channelId' in upd.message.peerId
-        ? upd.message.peerId.channelId
-        : undefined
+    const res =
+        'channelId' in upd
+            ? upd.channelId
+            : 'message' in upd &&
+              typeof upd.message !== 'string' &&
+              'peerId' in upd.message &&
+              upd.message.peerId &&
+              'channelId' in upd.message.peerId
+            ? upd.message.peerId.channelId
+            : undefined
     if (res === 0) return undefined
     return res
 }
@@ -44,4 +45,10 @@ export function normalizeDate(
     return date
         ? ~~((typeof date === 'number' ? date : date.getTime()) / 1000)
         : undefined
+}
+
+export function normalizeMessageId(
+    msg: Message | number | undefined
+): number | undefined {
+    return msg ? (typeof msg === 'number' ? msg : msg.id) : undefined
 }

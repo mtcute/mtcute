@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { inputPeerToPeer } from '../../utils/peer-utils'
-import { normalizeDate, randomUlong } from '../../utils/misc-utils'
+import { normalizeDate, normalizeMessageId, randomUlong } from '../../utils/misc-utils'
 import { InputPeerLike, Message, BotKeyboard, ReplyMarkup } from '../../types'
 
 /**
@@ -21,6 +21,13 @@ export async function sendText(
          * Message to reply to. Either a message object or message ID.
          */
         replyTo?: number | Message
+
+        /**
+         * Message to comment to. Either a message object or message ID.
+         *
+         * This overwrites `replyTo` if it was passed
+         */
+        commentTo?: number | Message
 
         /**
          * Parse mode to use to parse entities before sending
@@ -79,19 +86,20 @@ export async function sendText(
         params.entities
     )
 
-    const peer = await this.resolvePeer(chatId)
+    let peer = await this.resolvePeer(chatId)
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
+
+    let replyTo = normalizeMessageId(params.replyTo)
+    if (params.commentTo) {
+        ;[peer, replyTo] = await this._getDiscussionMessage(peer, normalizeMessageId(params.commentTo)!)
+    }
 
     const res = await this.call({
         _: 'messages.sendMessage',
         peer,
         noWebpage: params.disableWebPreview,
         silent: params.silent,
-        replyToMsgId: params.replyTo
-            ? typeof params.replyTo === 'number'
-                ? params.replyTo
-                : params.replyTo.id
-            : undefined,
+        replyToMsgId: replyTo,
         randomId: randomUlong(),
         scheduleDate: normalizeDate(params.schedule),
         replyMarkup,

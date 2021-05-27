@@ -89,6 +89,7 @@ import { editInlineMessage } from './methods/messages/edit-inline-message'
 import { editMessage } from './methods/messages/edit-message'
 import { _findMessageInUpdate } from './methods/messages/find-in-update'
 import { forwardMessages } from './methods/messages/forward-messages'
+import { _getDiscussionMessage } from './methods/messages/get-discussion-message'
 import { getHistory } from './methods/messages/get-history'
 import { getMessageGroup } from './methods/messages/get-message-group'
 import { getMessages } from './methods/messages/get-messages'
@@ -2276,6 +2277,13 @@ export interface TelegramClient extends BaseTelegramClient {
             replyTo?: number | Message
 
             /**
+             * Message to comment to. Either a message object or message ID.
+             *
+             * This overwrites `replyTo` if it was passed
+             */
+            commentTo?: number | Message
+
+            /**
              * Parse mode to use to parse entities before sending
              * the message. Defaults to current default parse mode (if any).
              *
@@ -2347,6 +2355,13 @@ export interface TelegramClient extends BaseTelegramClient {
             replyTo?: number | Message
 
             /**
+             * Message to comment to. Either a message object or message ID.
+             *
+             * This overwrites `replyTo` if it was passed
+             */
+            commentTo?: number | Message
+
+            /**
              * Parse mode to use to parse entities before sending
              * the message. Defaults to current default parse mode (if any).
              *
@@ -2409,6 +2424,13 @@ export interface TelegramClient extends BaseTelegramClient {
             replyTo?: number | Message
 
             /**
+             * Message to comment to. Either a message object or message ID.
+             *
+             * This overwrites `replyTo` if it was passed
+             */
+            commentTo?: number | Message
+
+            /**
              * Parse mode to use to parse entities before sending
              * the message. Defaults to current default parse mode (if any).
              *
@@ -2467,12 +2489,22 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat ID
      * @param status  (default: `'typing'`) Typing status
-     * @param progress  (default: `0`) For `upload_*` and history import actions, progress of the upload
+     * @param params
      */
     sendTyping(
         chatId: InputPeerLike,
         status?: TypingStatus | tl.TypeSendMessageAction,
-        progress?: number
+        params?: {
+            /**
+             * For `upload_*` and history import actions, progress of the upload
+             */
+            progress?: number
+
+            /**
+             * For comment threads, ID of the thread (i.e. top message)
+             */
+            threadId?: number
+        }
     ): Promise<void>
     /**
      * Send or retract a vote in a poll.
@@ -3118,6 +3150,7 @@ export class TelegramClient extends BaseTelegramClient {
     editMessage = editMessage
     protected _findMessageInUpdate = _findMessageInUpdate
     forwardMessages = forwardMessages
+    protected _getDiscussionMessage = _getDiscussionMessage
     getHistory = getHistory
     getMessageGroup = getMessageGroup
     getMessages = getMessages

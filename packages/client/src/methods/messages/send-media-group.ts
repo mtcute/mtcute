@@ -6,7 +6,7 @@ import {
     Message,
     ReplyMarkup,
 } from '../../types'
-import { normalizeDate, randomUlong } from '../../utils/misc-utils'
+import { normalizeDate, normalizeMessageId, randomUlong } from '../../utils/misc-utils'
 import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
@@ -29,6 +29,13 @@ export async function sendMediaGroup(
          * Message to reply to. Either a message object or message ID.
          */
         replyTo?: number | Message
+
+        /**
+         * Message to comment to. Either a message object or message ID.
+         *
+         * This overwrites `replyTo` if it was passed
+         */
+        commentTo?: number | Message
 
         /**
          * Parse mode to use to parse entities before sending
@@ -83,8 +90,13 @@ export async function sendMediaGroup(
 ): Promise<Message[]> {
     if (!params) params = {}
 
-    const peer = await this.resolvePeer(chatId)
+    let peer = await this.resolvePeer(chatId)
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
+
+    let replyTo = normalizeMessageId(params.replyTo)
+    if (params.commentTo) {
+        ;[peer, replyTo] = await this._getDiscussionMessage(peer, normalizeMessageId(params.commentTo)!)
+    }
 
     const multiMedia: tl.RawInputSingleMedia[] = []
 
@@ -117,11 +129,7 @@ export async function sendMediaGroup(
         peer,
         multiMedia,
         silent: params.silent,
-        replyToMsgId: params.replyTo
-            ? typeof params.replyTo === 'number'
-                ? params.replyTo
-                : params.replyTo.id
-            : undefined,
+        replyToMsgId: replyTo,
         randomId: randomUlong(),
         scheduleDate: normalizeDate(params.schedule),
         replyMarkup,

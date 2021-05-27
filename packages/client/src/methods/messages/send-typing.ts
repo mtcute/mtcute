@@ -12,16 +12,27 @@ import { InputPeerLike, TypingStatus } from '../../types'
  *
  * @param chatId  Chat ID
  * @param status  Typing status
- * @param progress  For `upload_*` and history import actions, progress of the upload
+ * @param params
  * @internal
  */
 export async function sendTyping(
     this: TelegramClient,
     chatId: InputPeerLike,
     status: TypingStatus | tl.TypeSendMessageAction = 'typing',
-    progress = 0
+    params?: {
+        /**
+         * For `upload_*` and history import actions, progress of the upload
+         */
+        progress?: number
+
+        /**
+         * For comment threads, ID of the thread (i.e. top message)
+         */
+        threadId?: number
+    }
 ): Promise<void> {
     if (typeof status === 'string') {
+        const progress = params?.progress ?? 0
         switch (status) {
             case 'typing':
                 status = { _: 'sendMessageTypingAction' }
@@ -74,6 +85,7 @@ export async function sendTyping(
     await this.call({
         _: 'messages.setTyping',
         peer: await this.resolvePeer(chatId),
-        action: status
+        action: status,
+        topMsgId: params?.threadId
     })
 }
