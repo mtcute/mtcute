@@ -588,26 +588,50 @@ export class Message {
     }
 
     /**
-     * Send a message in reply to this message.
+     * Send a message as an answer to this message.
      *
-     * By default just sends a message to the same chat,
-     * to make the reply a "real" reply, pass `visible=true`
+     * This just sends a message to the same chat
+     * as this message
      *
      * @param text  Text of the message
-     * @param visible  Whether the reply should be visible
+     * @param params
+     */
+    answerText(
+        text: string,
+        params?: Parameters<TelegramClient['sendText']>[2]
+    ): ReturnType<TelegramClient['sendText']> {
+        return this.client.sendText(this.chat.inputPeer, text, params)
+    }
+
+    /**
+     * Send a media as an answer to this message.
+     *
+     * This just sends a message to the same chat
+     * as this message
+     *
+     * @param media  Media to send
+     * @param params
+     */
+    answerMedia(
+        media: InputMediaLike,
+        params?: Parameters<TelegramClient['sendText']>[2]
+    ): ReturnType<TelegramClient['sendText']> {
+        return this.client.sendMedia(this.chat.inputPeer, media, params)
+    }
+
+    /**
+     * Send a message in reply to this message.
+     *
+     * @param text  Text of the message
      * @param params
      */
     replyText(
         text: string,
-        visible = false,
         params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
-        if (visible) {
-            return this.client.sendText(this.chat.inputPeer, text, {
-                ...(params || {}),
-                replyTo: this.id,
-            })
-        }
+        if (!params) params = {}
+        params.replyTo = this.id
+
         return this.client.sendText(this.chat.inputPeer, text, params)
     }
 
@@ -618,20 +642,15 @@ export class Message {
      * to make the reply a "real" reply, pass `visible=true`
      *
      * @param media  Media to send
-     * @param visible  Whether the reply should be visible
      * @param params
      */
     replyMedia(
         media: InputMediaLike,
-        visible = false,
         params?: Parameters<TelegramClient['sendMedia']>[2]
     ): ReturnType<TelegramClient['sendMedia']> {
-        if (visible) {
-            return this.client.sendMedia(this.chat.inputPeer, media, {
-                ...(params || {}),
-                replyTo: this.id,
-            })
-        }
+        if (!params) params = {}
+        params.replyTo = this.id
+
         return this.client.sendMedia(this.chat.inputPeer, media, params)
     }
 
@@ -653,7 +672,7 @@ export class Message {
         params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
         if (this.chat.type !== 'channel') {
-            return this.replyText(text, true, params)
+            return this.replyText(text, params)
         }
 
         if (!this.replies || !this.replies.isComments) {
@@ -685,7 +704,7 @@ export class Message {
         params?: Parameters<TelegramClient['sendMedia']>[2]
     ): ReturnType<TelegramClient['sendMedia']> {
         if (this.chat.type !== 'channel') {
-            return this.replyMedia(media, true, params)
+            return this.replyMedia(media, params)
         }
 
         if (!this.replies || !this.replies.isComments) {
