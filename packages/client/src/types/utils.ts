@@ -59,6 +59,7 @@ export function makeInspectable(
                 if (
                     val &&
                     typeof val === 'object' &&
+                    !Buffer.isBuffer(val) &&
                     typeof val.toJSON === 'function'
                 ) {
                     val = val.toJSON()
