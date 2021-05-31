@@ -116,7 +116,7 @@ interface SqliteEntity {
 
 interface CacheItem {
     peer: tl.TypeInputPeer
-    full: tl.TypeUser | tl.TypeChat
+    full: tl.TypeUser | tl.TypeChat | null
 }
 
 interface FsmItem {
@@ -267,11 +267,18 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
         // todo: add support for workers (idk if really needed, but still)
     }
 
-    private _readFullPeer(data: Buffer): tl.TypeUser | tl.TypeChat {
+    private _readFullPeer(data: Buffer): tl.TypeUser | tl.TypeChat | null {
         // reuse reader because why not
         this._reader.pos = 0
         this._reader.data = data
-        const obj = this._reader.object()
+        let obj
+        try {
+            obj = this._reader.object()
+        } catch (e) {
+            // object might be from an older tl layer, in which case
+            // it should be ignored (i guess?????)
+            obj = null
+        }
         // remove reference to allow GC-ing
         this._reader.data = EMPTY_BUFFER
         return obj
