@@ -425,14 +425,11 @@ async function _loadDifference(
 
         for (const upd of diff.otherUpdates) {
             if (upd._ === 'updateChannelTooLong') {
-                if (upd.pts) {
-                    this._cpts[upd.channelId] = upd.pts
-                    this._cptsMod[upd.channelId] = upd.pts
-                }
                 await _loadChannelDifference.call(
                     this,
                     upd.channelId,
-                    noDispatch
+                    noDispatch,
+                    upd.pts
                 )
                 continue
             }
@@ -446,22 +443,20 @@ async function _loadDifference(
                 // we only need to check this for channels since for
                 // common pts it is guaranteed by the server
                 // (however i would not really trust telegram server lol)
-                let nextLocalPts
+                let nextLocalPts: number | null = null
                 if (cid in this._cpts) nextLocalPts = this._cpts[cid] + ptsCount
-                else {
+                else if (this._catchUpChannels) {
                     const saved = await this.storage.getChannelPts(cid)
                     if (saved) {
                         this._cpts[cid] = saved
                         nextLocalPts = saved + ptsCount
-                    } else {
-                        nextLocalPts = null
                     }
                 }
 
                 if (nextLocalPts) {
                     if (nextLocalPts > pts) continue
                     if (nextLocalPts < pts) {
-                        await _loadChannelDifference.call(this, cid, noDispatch)
+                        await _loadChannelDifference.call(this, cid, noDispatch, pts)
                         continue
                     }
                 }
@@ -487,7 +482,8 @@ async function _loadDifference(
 async function _loadChannelDifference(
     this: TelegramClient,
     channelId: number,
-    noDispatch?: NoDispatchIndex
+    noDispatch?: NoDispatchIndex,
+    fallbackPts?: number
 ): Promise<void> {
     let channel
     try {
@@ -498,12 +494,16 @@ async function _loadChannelDifference(
         return
     }
 
-    let pts = this._cpts[channelId]
-    if (!pts) {
-        pts = (await this.storage.getChannelPts(channelId)) ?? 0
+    let _pts: number | null | undefined = this._cpts[channelId]
+    if (!_pts && this._catchUpChannels) {
+        _pts = await this.storage.getChannelPts(channelId)
     }
+    if (!_pts) _pts = fallbackPts
 
-    if (!pts) return
+    if (!_pts) return
+
+    // to make TS happy
+    let pts = _pts
 
     for (;;) {
         const diff = await this.call({
@@ -641,14 +641,11 @@ export function _handleUpdate(
 
                     for (const upd of update.updates) {
                         if (upd._ === 'updateChannelTooLong') {
-                            if (upd.pts) {
-                                this._cpts[upd.channelId] = upd.pts
-                                this._cptsMod[upd.channelId] = upd.pts
-                            }
                             await _loadChannelDifference.call(
                                 this,
                                 upd.channelId,
-                                noDispatchIndex
+                                noDispatchIndex,
+                                upd.pts
                             )
                             continue
                         }
@@ -690,7 +687,8 @@ export function _handleUpdate(
                                         await _loadChannelDifference.call(
                                             this,
                                             channelId,
-                                            noDispatchIndex
+                                            noDispatchIndex,
+                                            pts
                                         )
                                         continue
                                     } else {
