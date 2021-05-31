@@ -455,8 +455,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                 chats,
                 parsed,
                 parsedType,
-                parsedState,
-                parsedScene
             )
         }
     }
