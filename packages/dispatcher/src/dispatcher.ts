@@ -753,24 +753,24 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         object: Parameters<StateKeyDelegate>[0]
     ): Promise<UpdateState<S, SceneName>>
     getState<S = State>(
-        key: string | Parameters<StateKeyDelegate>[0]
+        object: string | Parameters<StateKeyDelegate>[0]
     ): MaybeAsync<UpdateState<S, SceneName>> {
         if (!this._storage)
             throw new MtCuteArgumentError(
                 'Cannot use getUpdateState() filter without state storage'
             )
 
-        if (typeof key === 'string') {
+        if (typeof object === 'string') {
             return new UpdateState(
                 this._storage!,
-                key,
+                object,
                 this._scene ?? null,
                 this._sceneScoped,
                 this._customStorage
             )
         }
 
-        return Promise.resolve(this._stateKeyDelegate!(key)).then(
+        return Promise.resolve(this._stateKeyDelegate!(object)).then(
             (key) => {
                 if (!key) {
                     throw new MtCuteArgumentError(
@@ -778,12 +778,33 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                     )
                 }
 
-                return new UpdateState(
-                    this._storage!,
-                    key,
-                    this._scene ?? null,
-                    this._sceneScoped,
-                    this._customStorage
+                if (!this._customStateKeyDelegate) {
+                    return new UpdateState(
+                        this._storage!,
+                        key,
+                        this._scene ?? null,
+                        this._sceneScoped,
+                        this._customStorage
+                    )
+                }
+
+                return Promise.resolve(this._customStateKeyDelegate(object)).then(
+                    (customKey) => {
+                        if (!customKey) {
+                            throw new MtCuteArgumentError(
+                                'Cannot derive custom key from given object'
+                            )
+                        }
+
+                        return new UpdateState(
+                            this._storage!,
+                            key,
+                            this._scene ?? null,
+                            this._sceneScoped,
+                            this._customStorage,
+                            customKey
+                        )
+                    }
                 )
             }
         )
