@@ -71,6 +71,7 @@ function parsePhotoFileLocation(
     reader: BinaryReader,
     version: number
 ): td.RawPhotoRemoteFileLocation {
+    // todo: check how tdlib handles volume ids
     return {
         _: 'photo',
         id: reader.long(),

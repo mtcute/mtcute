@@ -408,7 +408,7 @@ async function addDocumentation(obj) {
             let onlyBotsCanUse =
                 botsCanUse && (
                     !!target.description.match(/[,;]( for)? bots only$/)
-                    || target.throws.some((it) => it.code === 'USER_BOT_REQUIRED')
+                    || (target.throws && target.throws.some((it) => it.code === 'USER_BOT_REQUIRED'))
                 )
 
             target.available = onlyBotsCanUse

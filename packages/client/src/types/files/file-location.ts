@@ -57,28 +57,6 @@ export class FileLocation {
         this.dcId = dcId
     }
 
-    /** @internal */
-    static fromDeprecated(
-        client: TelegramClient,
-        peer: tl.TypeInputPeer,
-        loc: tl.RawFileLocationToBeDeprecated,
-        dcId?: number,
-        big?: boolean
-    ): FileLocation {
-        return new FileLocation(
-            client,
-            {
-                _: 'inputPeerPhotoFileLocation',
-                peer,
-                volumeId: loc.volumeId,
-                localId: loc.localId,
-                big,
-            },
-            undefined,
-            dcId
-        )
-    }
-
     /**
      * Download a file and return it as an iterable, which yields file contents
      * in chunks of a given size. Order of the chunks is guaranteed to be

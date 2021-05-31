@@ -10,6 +10,7 @@ import { MtCuteArgumentError, MtCuteTypeAssertionError } from '../errors'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { makeInspectable } from '../utils'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
+import bigInt from 'big-integer'
 
 /**
  * One size of some thumbnail
@@ -147,20 +148,28 @@ export class Thumbnail extends FileLocation {
      */
     get fileId(): string {
         if (!this._fileId) {
-            if (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive') {
-                throw new MtCuteArgumentError(`Cannot generate a file ID for "${this.raw.type}"`)
+            if (
+                this.raw._ !== 'photoSize' &&
+                this.raw._ !== 'photoSizeProgressive'
+            ) {
+                throw new MtCuteArgumentError(
+                    `Cannot generate a file ID for "${this.raw.type}"`
+                )
             }
 
             this._fileId = toFileId({
-                type: this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
+                type:
+                    this._media._ === 'photo'
+                        ? td.FileType.Photo
+                        : td.FileType.Thumbnail,
                 dcId: this.dcId,
                 fileReference: this._media.fileReference,
                 location: {
                     _: 'photo',
                     id: this._media.id,
                     accessHash: this._media.accessHash,
-                    volumeId: this.raw.location.volumeId,
-                    localId: this.raw.location.localId,
+                    volumeId: bigInt.zero,
+                    localId: 0,
                     source: {
                         _: 'thumbnail',
                         fileType: td.FileType.Photo,
@@ -179,15 +188,24 @@ export class Thumbnail extends FileLocation {
      */
     get uniqueFileId(): string {
         if (!this._uniqueFileId) {
-            if (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive') {
-                throw new MtCuteArgumentError(`Cannot generate a unique file ID for "${this.raw.type}"`)
+            if (
+                this.raw._ !== 'photoSize' &&
+                this.raw._ !== 'photoSizeProgressive'
+            ) {
+                throw new MtCuteArgumentError(
+                    `Cannot generate a unique file ID for "${this.raw.type}"`
+                )
             }
 
-            this._uniqueFileId = toUniqueFileId(td.FileType.Photo, {
-                _: 'photo',
-                volumeId: this.raw.location.volumeId,
-                localId: this.raw.location.localId
-            })
+            this._uniqueFileId = toUniqueFileId(
+                this._media._ === 'photo'
+                    ? td.FileType.Photo
+                    : td.FileType.Thumbnail,
+                {
+                    _: 'common',
+                    id: this._media.id,
+                }
+            )
         }
 
         return this._uniqueFileId

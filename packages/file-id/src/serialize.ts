@@ -43,6 +43,7 @@ export function toFileId(
             writer.long(loc.accessHash)
             break
         case 'photo':
+            // todo: check how tdlib handles volume ids
             writer.long(loc.id)
             writer.long(loc.accessHash)
             writer.long(loc.volumeId)

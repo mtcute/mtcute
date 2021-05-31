@@ -114,8 +114,7 @@ export function fileIdToInputFileLocation(
                         _: 'inputPeerPhotoFileLocation',
                         big: loc.source.big,
                         peer: dialogPhotoToInputPeer(loc.source),
-                        volumeId: loc.volumeId,
-                        localId: loc.localId,
+                        photoId: loc.id,
                     }
                 case 'stickerSetThumbnail':
                     return {
@@ -125,8 +124,7 @@ export function fileIdToInputFileLocation(
                             id: loc.source.id,
                             accessHash: loc.source.accessHash,
                         },
-                        volumeId: loc.volumeId,
-                        localId: loc.localId,
+                        thumbVersion: 0 // todo: check how tdlib stores this
                     }
             }
 
