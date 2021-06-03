@@ -470,3 +470,8 @@ regex:
     repl: stickerset
   - regex: \bonly "foursquare" needs\b
     repl: only "foursquare" and "gplaces" need
+  # gender-neutral pronouns
+  - regex: \bhis\b
+    repl: their
+  - regex: \bhim\b
+    repl: them

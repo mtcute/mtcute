@@ -5,11 +5,7 @@
 // it to the resulting JSON.
 
 async function applyDescriptionsFile(input, yaml) {
-    const {
-        objects: byObjects,
-        arguments: byArguments,
-        regex: byRegex,
-    } = yaml
+    const { objects: byObjects, arguments: byArguments, regex: byRegex } = yaml
 
     // util function to handle text and objects with text for overrides
     function applyOverwrite(where, what) {
@@ -94,7 +90,10 @@ async function applyDescriptionsFile(input, yaml) {
                     for (const filter of rule.filters) {
                         if (filter.objType && filter.objType[0] !== key[0])
                             break args
-                        if (filter.type && !filter.type.split(' | ').includes(arg.type))
+                        if (
+                            filter.type &&
+                            !filter.type.split(' | ').includes(arg.type)
+                        )
                             break args
 
                         // noinspection EqualityComparisonWithCoercionJS
@@ -111,22 +110,25 @@ async function applyDescriptionsFile(input, yaml) {
     // process byRegex
     function replaceRegex(obj, regex) {
         if (!obj.description) return
-        if (!regex._cached) regex._cached = new RegExp(regex.regex, regex.flags)
-        obj.description = obj.description.replace(
-            regex._cached,
-            regex.repl
-        )
+        if (!regex._cached) {
+            let flags = regex.flags || ''
+            if (flags.indexOf('g') === -1) flags += 'g'
+
+            regex._cached = new RegExp(regex.regex, flags)
+        }
+        obj.description = obj.description.replace(regex._cached, regex.repl)
     }
 
     Object.values(index).forEach((obj) => {
         for (const regex of byRegex) {
             replaceRegex(obj, regex)
 
-            if (obj.arguments) obj.arguments.forEach((arg) => replaceRegex(arg, regex))
+            if (obj.arguments)
+                obj.arguments.forEach((arg) => replaceRegex(arg, regex))
         }
     })
 
-    debugger
+    return input
 }
 
 module.exports = {
@@ -134,8 +136,27 @@ module.exports = {
 }
 
 if (require.main === module) {
-    applyDescriptionsFile(require('../raw-schema.json'))
-        .then(console.log)
+    const fs = require('fs')
+    const path = require('path')
+    const yaml = require('js-yaml')
+
+    applyDescriptionsFile(
+        JSON.parse(
+            fs.readFileSync(path.join(__dirname, '../raw-schema.json'), 'utf-8')
+        ),
+        yaml.load(
+            fs.readFileSync(
+                path.join(__dirname, '../descriptions.yaml'),
+                'utf-8'
+            )
+        )
+    )
+        .then((res) =>
+            fs.writeFileSync(
+                path.join(__dirname, '../raw-schema.json'),
+                JSON.stringify(res)
+            )
+        )
         .catch((err) => {
             console.error(err)
             process.exit(1)
