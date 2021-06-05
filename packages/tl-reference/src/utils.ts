@@ -18,3 +18,7 @@ export const isTouchDevice = function (): boolean {
     const query = prefixes.map(i => `(${i}touch-enabled)`).join(',')
     return mq(query)
 }
+
+export const hexConstructorId = (id: number): string => {
+    return '0x' + id.toString(16).padStart(8, '0')
+}

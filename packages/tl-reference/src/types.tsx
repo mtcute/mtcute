@@ -17,6 +17,9 @@ export interface ExtendedTlObject {
         type: string
         predicate: string
         description: string | null
+
+        changed?: 'added' | 'modified' | 'removed'
+        className?: string
     }[]
     throws: {
         name: string

@@ -15,25 +15,42 @@ const FILES = [
 
 async function getLastFetched() {
     return fs.promises
-        .readFile(path.join(__dirname, '../data/history/last-fetched.json'), 'utf8')
+        .readFile(
+            path.join(__dirname, '../data/history/last-fetched.txt'),
+            'utf8'
+        )
         .then((res) => JSON.parse(res))
-        .catch(() => ({
-            ...FILES.reduce((a, b) => {
+        .catch(() =>
+            FILES.reduce((a, b) => {
                 a[b] = UNIX_0
                 return a
-            }, {}),
-        }))
+            }, {})
+        )
 }
 
 async function updateLastFetched(file, time) {
     return getLastFetched().then((state) =>
         fs.promises.writeFile(
-            path.join(__dirname, '../data/history/last-fetched.json'),
+            path.join(__dirname, '../data/history/last-fetched.txt'),
             JSON.stringify({
                 ...state,
                 [file]: time,
             })
         )
+    )
+}
+
+async function getCounts() {
+    return fs.promises
+        .readFile(path.join(__dirname, '../data/history/counts.txt'), 'utf8')
+        .then((res) => JSON.parse(res))
+        .catch(() => ({}))
+}
+
+async function setCounts(obj) {
+    return fs.promises.writeFile(
+        path.join(__dirname, '../data/history/counts.txt'),
+        JSON.stringify(obj)
     )
 }
 
@@ -104,149 +121,23 @@ async function parseRemoteTl(file, commit) {
     return {
         layer,
         content,
-        tl: await convertTlToJson(content, 'api', true),
+        tl: convertToArrays(convertTlToJson(content, 'api', true)),
     }
-}
-
-function createTlDifference(old, mod) {
-    const diff = {
-        added: { classes: [], methods: [], unions: [] },
-        removed: { classes: [], methods: [], unions: [] },
-        modified: { classes: [], methods: [], unions: [] },
-    }
-
-    old = convertToArrays(old.tl)
-    mod = convertToArrays(mod.tl)
-
-    // create index for both old and mod
-    const { oldIndex, modIndex } = (function () {
-        function createIndex(it) {
-            let ret = {}
-            it.classes.forEach((obj) => {
-                obj.uid = 'c_' + obj.name
-                obj._type = 'classes'
-                ret[obj.uid] = obj
-            })
-            it.methods.forEach((obj) => {
-                obj.uid = 'm_' + obj.name
-                obj._type = 'methods'
-                ret[obj.uid] = obj
-            })
-            it.unions.forEach((obj) => {
-                obj.uid = 'u_' + obj.type
-                obj._type = 'unions'
-                ret[obj.uid] = obj
-            })
-            return ret
-        }
-
-        return {
-            oldIndex: createIndex(old),
-            modIndex: createIndex(mod),
-        }
-    })()
-
-    // find difference between constructor arguments
-    function createArgsDifference(old, mod) {
-        const diff = {
-            added: [],
-            removed: [],
-            modified: [],
-        }
-
-        const { oldIndex, modIndex } = (function () {
-            function createIndex(obj) {
-                const ret = {}
-                if (obj.arguments)
-                    obj.arguments.forEach((arg) => (ret[arg.name] = arg))
-                return ret
-            }
-
-            return {
-                oldIndex: createIndex(old),
-                modIndex: createIndex(mod),
-            }
-        })()
-
-        Object.keys(modIndex).forEach((argName) => {
-            if (!(argName in oldIndex)) {
-                diff.added.push(modIndex[argName])
-            } else {
-                const old = oldIndex[argName]
-                const mod = modIndex[argName]
-                if (
-                    old.type !== mod.type ||
-                    old.optional !== mod.optional ||
-                    mod.predicate !== mod.predicate
-                ) {
-                    diff.modified.push({
-                        name: argName,
-                        old: old,
-                        new: mod,
-                    })
-                }
-            }
-        })
-
-        Object.keys(oldIndex).forEach((argName) => {
-            if (!(argName in modIndex)) {
-                diff.removed.push(oldIndex[argName])
-            }
-        })
-
-        return diff
-    }
-
-    Object.keys(modIndex).forEach((uid) => {
-        if (!(uid in oldIndex)) {
-            diff.added[modIndex[uid]._type].push(modIndex[uid])
-        } else {
-            const old = oldIndex[uid]
-            const mod = modIndex[uid]
-
-            const localDiff = {}
-
-            const argDiff = createArgsDifference(old, mod)
-            if (
-                argDiff.removed.length ||
-                argDiff.added.length ||
-                argDiff.modified.length
-            ) {
-                localDiff.arguments = argDiff
-            }
-
-            if (old.id !== mod.id) localDiff.id = { old: old.id, new: mod.id }
-            if (old.type !== mod.type)
-                localDiff.type = { old: old.type, new: mod.type }
-            if (old.returns !== mod.returns)
-                localDiff.returns = { old: old.returns, new: mod.returns }
-
-            if (Object.keys(localDiff).length) {
-                localDiff.name = old.name
-                diff.modified[oldIndex[uid]._type].push(localDiff)
-            }
-        }
-    })
-
-    Object.keys(oldIndex).forEach((uid) => {
-        if (!(uid in modIndex)) {
-            diff.removed[oldIndex[uid]._type].push(oldIndex[uid])
-        }
-    })
-
-    return diff
 }
 
 function fileSafeDateFormat(date) {
     date = new Date(date)
-    return date.toISOString().replace(/[\-:]|\.\d\d\d/g, '')
+    return date
+        .toISOString()
+        .replace(/[\-:]|\.\d\d\d/g, '')
+        .split('T')[0]
 }
 
 function shortSha(sha) {
     return sha.substr(0, 7)
 }
 
-async function fetchHistory(file, since, defaultParent = null) {
+async function fetchHistory(file, since, counts, defaultPrev = null, defaultPrevFile = null) {
     const history = await (async function () {
         const ret = []
         let page = 1
@@ -278,15 +169,23 @@ async function fetchHistory(file, since, defaultParent = null) {
             commit.commit.committer.date
         )}-${shortSha(commit.sha)}.json`
 
+    const uid = (schema, commit) => `${schema.layer}_${shortSha(commit.sha)}`
+
     function writeSchemaToFile(schema, commit) {
         return fs.promises.writeFile(
             path.join(__dirname, `../data/history/${filename(schema, commit)}`),
             JSON.stringify({
+                // layer is ever-incrementing, sha is random, so no collisions
+                uid: uid(schema, commit),
                 tl: JSON.stringify(schema.tl),
                 layer: parseInt(schema.layer),
+                rev:
+                    schema.layer in counts
+                        ? ++counts[schema.layer]
+                        : (counts[schema.layer] = 0),
                 content: schema.content,
-                // idk where parent: '00' comes from but whatever
-                parent: schema.parent && schema.parent !== '00' ? schema.parent : defaultParent,
+                prev: schema.prev ? schema.prev : defaultPrev,
+                prevFile: schema.prevFile ? schema.prevFile : defaultPrevFile,
                 source: {
                     file,
                     date: commit.commit.committer.date,
@@ -315,27 +214,12 @@ async function fetchHistory(file, since, defaultParent = null) {
         const nextSchema = await parseRemoteTl(file, next.sha)
         if (!nextSchema) break
 
-        const diff = createTlDifference(baseSchema, nextSchema)
-
-        await fs.promises.writeFile(
-            path.join(
-                __dirname,
-                `../data/diffs/${shortSha(base.sha)}-${shortSha(next.sha)}.json`
-            ),
-            JSON.stringify({
-                ...diff,
-                // yeah they sometimes update schema w/out changing layer number
-                layer:
-                    baseSchema.layer === nextSchema.layer
-                        ? undefined
-                        : nextSchema.layer,
-            })
-        )
-
-        nextSchema.parent = baseFilename()
+        nextSchema.prev = uid(baseSchema, base)
+        nextSchema.prevFile = baseFilename()
         base = next
         baseSchema = nextSchema
         await updateLastFetched(file, base.commit.committer.date)
+        await setCounts(counts)
         await writeSchemaToFile(baseSchema, base)
         console.log(
             'Fetched commit %s, file %s (%s)',
@@ -346,20 +230,26 @@ async function fetchHistory(file, since, defaultParent = null) {
     }
 
     if (file !== CURRENT_FILE) {
-        await updateLastFetched(file, 'DONE:' + baseFilename())
+        await updateLastFetched(file, `DONE:${uid(baseSchema, base)}:${baseFilename()}`)
     }
 
     console.log('No more commits for %s', file)
 }
 
 async function main() {
-    const last = await getLastFetched()
+    let last = await getLastFetched()
+    const counts = await getCounts()
+
     for (let i = 0; i < FILES.length; i++) {
         const file = FILES[i]
         const prev = FILES[i - 1]
         if (!last[file].startsWith('DONE')) {
             let parent = prev ? last[prev].split(':')[1] : null
-            await fetchHistory(file, last[file], parent)
+            let parentFile = prev ? last[prev].split(':')[2] : null
+
+            await fetchHistory(file, last[file], counts, parent, parentFile)
+
+            last = await getLastFetched()
         }
     }
 
@@ -371,15 +261,16 @@ async function main() {
 
         const fullPath = path.join(__dirname, '../data/history', file)
         const json = JSON.parse(await fs.promises.readFile(fullPath, 'utf-8'))
-        if (json.parent) {
-            const parentPath = path.join(__dirname, '../data/history', json.parent)
-            const parentJson = JSON.parse(
-                await fs.promises.readFile(
-                    parentPath,
-                    'utf-8'
-                )
+        if (json.prev) {
+            const parentPath = path.join(
+                __dirname,
+                '../data/history',
+                json.prevFile
             )
-            parentJson.next = parentPath
+            const parentJson = JSON.parse(
+                await fs.promises.readFile(parentPath, 'utf-8')
+            )
+            parentJson.next = json.uid
             await fs.promises.writeFile(parentPath, JSON.stringify(parentJson))
         }
     }

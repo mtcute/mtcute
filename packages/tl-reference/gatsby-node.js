@@ -71,6 +71,9 @@ exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
 
 const TLObject = path.resolve('./src/templates/tl-object.tsx')
 const TlTypesList = path.resolve('./src/templates/tl-types-list.tsx')
+const TypeHistory = path.resolve('./src/templates/type-history.tsx')
+const TlLayer = path.resolve('./src/templates/tl-layer.tsx')
+const TlDiff = path.resolve('./src/templates/tl-diff.tsx')
 
 exports.createPages = async ({ graphql, actions }) => {
     const result = await graphql(`
@@ -84,6 +87,23 @@ exports.createPages = async ({ graphql, actions }) => {
                     subtypes
                 }
             }
+
+            allTypesJson {
+                nodes {
+                    uid
+                    name
+                    type
+                }
+            }
+
+            allHistoryJson {
+                nodes {
+                    layer
+                    rev
+                    prev
+                    next
+                }
+            }
         }
     `)
 
@@ -95,6 +115,22 @@ exports.createPages = async ({ graphql, actions }) => {
                 ...node,
                 hasSubtypes: !!node.subtypes,
             },
+        })
+    })
+
+    result.data.allTypesJson.nodes.forEach((node) => {
+        actions.createPage({
+            path: `/history/${node.type}/${node.name}`,
+            component: TypeHistory,
+            context: node
+        })
+    })
+
+    result.data.allHistoryJson.nodes.forEach((node) => {
+        actions.createPage({
+            path: `/history/layer${node.layer}${node.rev > 0 ? `-rev${node.rev}` : ''}`,
+            component: TlLayer,
+            context: node
         })
     })
 
@@ -112,14 +148,13 @@ exports.createPages = async ({ graphql, actions }) => {
     `)
 
     result2.data.allTlObject.group.forEach(({ fieldValue: prefix, nodes }) => {
-        const namespaces = [...new Set(nodes.map(i => i.namespace))]
+        const namespaces = [...new Set(nodes.map((i) => i.namespace))]
 
         namespaces.forEach((ns) => {
             let namespace
             if (ns === '$root') namespace = ''
             else namespace = '/' + ns
-
-            ;(['types', 'methods']).forEach((type) => {
+            ;['types', 'methods'].forEach((type) => {
                 actions.createPage({
                     path: `${prefix}${type}${namespace}`,
                     component: TlTypesList,
@@ -128,8 +163,8 @@ exports.createPages = async ({ graphql, actions }) => {
                         ns,
                         type,
                         isTypes: type === 'types',
-                        isMethods: type === 'methods'
-                    }
+                        isMethods: type === 'methods',
+                    },
                 })
             })
         })

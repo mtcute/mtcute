@@ -9,14 +9,14 @@ import clsx from 'clsx'
 const useStyles = makeStyles((theme) =>
     createStyles({
         root: {
-            top: 80,
+            top: 0,
             // Fix IE 11 position sticky issue.
             width: 175,
             flexShrink: 0,
             order: 2,
             position: 'sticky',
             height: 'calc(100vh - 80px)',
-            overflowY: 'auto',
+            overflowX: 'auto',
             padding: theme.spacing(2, 2, 2, 0),
             display: 'none',
             [theme.breakpoints.up('sm')]: {
@@ -37,6 +37,9 @@ const useStyles = makeStyles((theme) =>
             padding: theme.spacing(0.5, 0, 0.5, 1),
             borderLeft: '4px solid transparent',
             boxSizing: 'content-box',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+
             '&:hover': {
                 borderLeft: `4px solid ${
                     theme.palette.type === 'light'

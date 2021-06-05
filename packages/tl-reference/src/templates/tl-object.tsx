@@ -26,6 +26,8 @@ import { Link } from 'gatsby'
 import { LinkToTl } from '../components/objects/link-to-tl'
 import { TableOfContentsItem } from '../components/table-of-contents'
 import { Helmet } from 'react-helmet'
+import { ObjectParameters } from '../components/objects/object-parameters'
+import { ObjectTsCode } from '../components/objects/object-ts-code'
 
 interface GraphqlResult {
     self: ExtendedTlObject
@@ -45,38 +47,6 @@ const useStyles = makeStyles((theme) =>
             '& th, & td': {
                 fontSize: 15,
             },
-        },
-        mono: {
-            fontFamily: 'Fira Mono, Consolas, monospace',
-        },
-        // theme ported from one dark
-        code: {
-            fontFamily: 'Fira Mono, Consolas, monospace',
-            background: '#282c34',
-            color: '#bbbbbb',
-            fontSize: 16,
-            borderRadius: 4,
-            overflowX: 'auto',
-            padding: 8,
-        },
-        keyword: {
-            fontStyle: 'italic',
-            color: '#c678dd',
-        },
-        identifier: {
-            color: '#e5c07b',
-        },
-        property: {
-            color: '#e06c75',
-        },
-        comment: {
-            color: '#5c6370',
-        },
-        string: {
-            color: '#98c379',
-        },
-        bold: {
-            fontWeight: 'bold',
         },
     })
 )
@@ -108,41 +78,6 @@ export default function TlObject({ data }: { data: GraphqlResult }) {
 
     const obj = data.self
     const toc = useToc(obj)
-
-    const keyword = (s: string) =>
-        `<span class='${classes.keyword}'>${s}</span>`
-    const identifier = (s: string) =>
-        `<span class='${classes.identifier}'>${s}</span>`
-    const property = (s: string) =>
-        `<span class='${classes.property}'>${s}</span>`
-    const comment = (s: string) =>
-        `<span class='${classes.comment}'>${s}</span>`
-    const _string = (s: string) => `<span class='${classes.string}'>${s}</span>`
-
-    const typeName = (s: string): string => {
-        if (
-            s === 'string' ||
-            s === 'number' ||
-            s === 'boolean' ||
-            s === 'true'
-        ) {
-            return keyword(s)
-        }
-
-        if (s.substr(s.length - 2) === '[]')
-            return typeName(s.substr(0, s.length - 2)) + '[]'
-
-        return s.split('.').map(identifier).join('.')
-    }
-
-    const code = (s: string) => {
-        return (
-            <pre
-                className={classes.code}
-                dangerouslySetInnerHTML={{ __html: s }}
-            />
-        )
-    }
 
     return (
         <Page toc={toc}>
@@ -222,6 +157,17 @@ export default function TlObject({ data }: { data: GraphqlResult }) {
                             </>
                         )
                     )}
+                    {obj.prefix === '' && (
+                        <>
+                            {' / '}
+                            <MuiLink
+                                component={Link}
+                                to={`/history/${obj.type}/${obj.name}`}
+                            >
+                                history
+                            </MuiLink>
+                        </>
+                    )}
                 </Typography>
             </div>
             <Description
@@ -230,41 +176,7 @@ export default function TlObject({ data }: { data: GraphqlResult }) {
             />
             {obj.type !== 'union' && (
                 <Section id="parameters" title="Parameters">
-                    <Table className={classes.table}>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Type</TableCell>
-                                <TableCell>Description</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {obj.arguments.map((arg) => (
-                                <TableRow key={arg.name}>
-                                    <TableCell>
-                                        <code
-                                            className={
-                                                !arg.optional &&
-                                                arg.type !== '$FlagsBitField'
-                                                    ? classes.bold
-                                                    : undefined
-                                            }
-                                        >
-                                            {arg.name}
-                                        </code>
-                                    </TableCell>
-                                    <TableCell className={classes.mono}>
-                                        {LinkToTl(arg.type)}
-                                        {arg.optional ? '?' : ''}
-                                    </TableCell>
-                                    <Description
-                                        description={arg.description}
-                                        component={TableCell}
-                                    />
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                    <ObjectParameters obj={obj} />
                 </Section>
             )}
             {obj.type === 'union' && (
@@ -343,61 +255,9 @@ export default function TlObject({ data }: { data: GraphqlResult }) {
                     </Table>
                 </Section>
             )}
-            <Typography
-                variant="h4"
-                id="typescript"
-                className={pageClasses.heading}
-            >
-                TypeScript declaration
-            </Typography>
-
-            {/* this is a mess, but who cares */}
-            {code(
-                obj.type === 'union'
-                    ? `${keyword('export type')} ${identifier(obj.ts)} =` +
-                          data.children.nodes
-                              .map(
-                                  (it) =>
-                                      `\n    | ${typeName(
-                                          'tl.' +
-                                              (it.namespace === '$root'
-                                                  ? it.prefix === 'mtproto/'
-                                                      ? 'mtproto.'
-                                                      : ''
-                                                  : it.namespace + '.') +
-                                              it.ts
-                                      )}`
-                              )
-                              .join('')
-                    : `${keyword('export interface')} ${identifier(obj.ts)} {` +
-                          `\n    ${property('_')}: ${_string(
-                              `'${obj.prefix === 'mtproto/' ? 'mt_' : ''}${
-                                  obj.name
-                              }'`
-                          )}` +
-                          obj.arguments
-                              .map((arg) =>
-                                  arg.type === '$FlagsBitField'
-                                      ? comment(
-                                            '\n    // ' +
-                                                arg.name +
-                                                ': TlFlags // handled automatically'
-                                        )
-                                      : `\n    ${property(arg.name)}${
-                                            arg.optional ? '?' : ''
-                                        }: ${typeName(arg.ts)}${
-                                            arg.predicate
-                                                ? ' ' +
-                                                  comment(
-                                                      '// present if ' +
-                                                          arg.predicate
-                                                  )
-                                                : ''
-                                        }`
-                              )
-                              .join('') +
-                          '\n}'
-            )}
+            <Section id="typescript" title="TypeScript declaration">
+                <ObjectTsCode obj={obj} children={data.children?.nodes} />
+            </Section>
         </Page>
     )
 }

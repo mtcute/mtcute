@@ -51,6 +51,11 @@ export const usePageStyles = makeStyles((theme) =>
         paragraph: {
             marginBottom: theme.spacing(2),
         },
+        rev: {
+            fontSize: 16,
+            fontWeight: 500,
+            marginLeft: 2,
+        },
     })
 )
 
@@ -80,7 +85,8 @@ export function Page({
                             <MuiLink href="https://github.com/teidesu/mtcute/tree/master/packages/tl-reference">
                                 open-source
                             </MuiLink>{' '}
-                            and licensed under MIT.<br/>
+                            and licensed under MIT.
+                            <br />
                             This website is not affiliated with Telegram.
                         </Typography>
                     </footer>
@@ -92,7 +98,7 @@ export function Page({
 }
 
 export function Description(params: {
-    description: string | null
+    description?: string | null
     component?: any
     className?: string
 }) {
@@ -129,6 +135,33 @@ export function ListItemTlObject({ node }: { node: ExtendedTlObject }) {
                     </Typography>
                 </MuiLink>
                 <Description description={node.description} />
+            </div>
+            <Divider />
+        </>
+    )
+}
+
+export function ListItemTlLink({
+    name,
+    type,
+    history,
+}: {
+    type: string
+    name: string
+    history?: boolean
+}) {
+    return (
+        <>
+            <div style={{ padding: '16px 32px' }}>
+                <MuiLink
+                    component={Link}
+                    to={`/${history ? 'history/' : ''}${type}/${name}`}
+                >
+                    <Typography variant="h5" color="textPrimary">
+                        {name}
+                    </Typography>
+                </MuiLink>
+                <Description />
             </div>
             <Divider />
         </>

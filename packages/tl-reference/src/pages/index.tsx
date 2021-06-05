@@ -26,6 +26,7 @@ interface Data {
         nodes: [
             {
                 layer: number
+                rev: number
                 source: {
                     date: string
                     commit: string
@@ -34,6 +35,9 @@ interface Data {
             }
         ]
     }
+
+    historySchemas: { totalCount: number }
+    historyTypes: { totalCount: number }
 }
 
 function countMissingDescriptionArguments(
@@ -56,6 +60,8 @@ export default function IndexPage({ data }: { data: Data }) {
     countMissingDescriptionArguments(data.argWithoutDesc, true)
     countMissingDescriptionArguments(data.argWithDesc, false)
 
+    const currentLayer = data.updated.nodes[0]
+
     return (
         <Page
             toc={[
@@ -70,8 +76,17 @@ export default function IndexPage({ data }: { data: Data }) {
                     TL Reference
                 </Typography>
                 <Typography variant="body2">
-                    layer {data.updated.nodes[0].layer} / updated{' '}
-                    {data.updated.nodes[0].source.date}
+                    layer {currentLayer.layer}
+                    {currentLayer.rev > 0 ? ` rev. ${currentLayer.rev}` : ''} /
+                    updated {currentLayer.source.date} /{' '}
+                    <MuiLink
+                        component={Link}
+                        to={`/history/layer${currentLayer.layer}${
+                            currentLayer.rev ? `-rev${currentLayer.rev}` : ''
+                        }`}
+                    >
+                        view source
+                    </MuiLink>
                 </Typography>
             </div>
             <Typography variant="body1" className={classes.paragraph}>
@@ -284,6 +299,13 @@ export default function IndexPage({ data }: { data: Data }) {
                         )
                     })()}
                 </li>
+                <li>
+                    History is available for{' '}
+                    <MuiLink component={Link} to="/history">
+                        <b>{data.historySchemas.totalCount}</b> schemas
+                    </MuiLink>{' '}
+                    and <b>{data.historyTypes.totalCount}</b> types
+                </li>
             </Typography>
         </Page>
     )
@@ -329,6 +351,7 @@ export const query = graphql`
         ) {
             nodes {
                 layer
+                rev
                 source {
                     date(formatString: "DD-MM-YYYY")
                     commit
@@ -362,6 +385,14 @@ export const query = graphql`
                     description
                 }
             }
+        }
+
+        historySchemas: allHistoryJson {
+            totalCount
+        }
+
+        historyTypes: allTypesJson {
+            totalCount
         }
     }
 `

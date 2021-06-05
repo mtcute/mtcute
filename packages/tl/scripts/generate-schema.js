@@ -84,7 +84,7 @@ function getJSType(typ, argName) {
     return normalizeGenerics(typ)
 }
 
-async function convertTlToJson(tlText, tlType, silent = false) {
+function convertTlToJson(tlText, tlType, silent = false) {
     let lines = tlText.split('\n')
     let pos = 0
     let line = lines[0].trim()
@@ -470,9 +470,9 @@ function convertJsonToTl(json) {
     json.methods = json.methods.filter((it) => it.method !== 'http_wait')
     json.constructors.push(httpWait)
 
-    json.constructors.forEach(objectToLine)
+    json.constructors.filter(Boolean).forEach(objectToLine)
     lines.push('---functions---')
-    json.methods.forEach(objectToLine)
+    json.methods.filter(Boolean).forEach(objectToLine)
     return lines.join('\n')
 }
 
@@ -494,14 +494,14 @@ async function main() {
         .then((json) => convertJsonToTl(json))
     let ret = {}
 
-    ret.mtproto = await convertTlToJson(mtprotoTl, 'mtproto')
+    ret.mtproto = convertTlToJson(mtprotoTl, 'mtproto')
 
     console.log('[i] Fetching api.tl')
     let apiTl = await fetch(
         'https://raw.githubusercontent.com/telegramdesktop/tdesktop/dev/Telegram/Resources/tl/api.tl'
     ).then((i) => i.text())
     ret.apiLayer = apiTl.match(/^\/\/ LAYER (\d+)/m)[1]
-    ret.api = await convertTlToJson(apiTl, 'api')
+    ret.api = convertTlToJson(apiTl, 'api')
     await addDocumentation(ret.api)
 
     await applyDescriptionsFile(ret, descriptionsYaml)
@@ -526,7 +526,8 @@ async function main() {
 }
 
 module.exports = {
-    convertTlToJson
+    convertTlToJson,
+    convertJsonToTl
 }
 
 if (require.main === module) {

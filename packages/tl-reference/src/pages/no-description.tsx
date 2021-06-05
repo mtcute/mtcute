@@ -85,7 +85,11 @@ export default function NoDescriptionPage({ data }: { data: Data }) {
                                 </TableCell>
                                 <TableCell>{LinkToTl(node)}</TableCell>
                                 <TableCell>
-                                    {(node.type === 'method' ? 'm_' : 'o_') +
+                                    {(node.type === 'method'
+                                        ? 'm_'
+                                        : node.type === 'union'
+                                        ? 'u_'
+                                        : 'o_') +
                                         (node.prefix === 'mtproto/'
                                             ? 'mt_'
                                             : '') +

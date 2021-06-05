@@ -42,11 +42,11 @@ const pages = [
         name: 'Methods',
         regex: /^(?:\/tl)?(?:\/mtproto)?\/methods?(\/|$)/,
     },
-    // {
-    //     path: '/history',
-    //     name: 'History',
-    //     regex: /^\/history(\/|$)/,
-    // },
+    {
+        path: '/history',
+        name: 'History',
+        regex: /^\/history(\/|$)/,
+    },
 ]
 
 const drawerWidth = 240

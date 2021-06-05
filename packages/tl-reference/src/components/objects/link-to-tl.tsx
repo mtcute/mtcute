@@ -4,26 +4,29 @@ import React from 'react'
 import { ExtendedTlObject } from '../../types'
 
 
-export function LinkToTl(name: string): React.ReactElement
-export function LinkToTl(obj: ExtendedTlObject): React.ReactElement
+export function LinkToTl(name: string, history?: boolean): React.ReactElement
+export function LinkToTl(obj: ExtendedTlObject, history?: boolean): React.ReactElement
 export function LinkToTl(
     prefix: string,
     type: string,
-    name: string
+    name: string,
+    history?: boolean
 ): React.ReactElement
 export function LinkToTl(
     prefix: string | ExtendedTlObject,
-    type?: string,
-    name?: string
+    type?: string | boolean,
+    name?: string,
+    history?: boolean
 ): React.ReactElement {
     if (typeof prefix !== 'string') {
         type = prefix.type
         name = prefix.name
         prefix = prefix.prefix
+        history = !!type
     }
 
     // this kind of invocation is used in parameters table and for return type
-    if (!type && !name) {
+    if ((!type || typeof type === 'boolean') && !name) {
         const fullType = prefix
 
         // core types
@@ -53,10 +56,13 @@ export function LinkToTl(
         }
 
         // must be union since this is from parameters type
+        history = !!type
         prefix = ''
         type = 'union'
         name = fullType
     }
+
+    if (history) type = 'history/' + type
 
     return (
         <MuiLink component={Link} to={`/${prefix}${type}/${name}`}>
