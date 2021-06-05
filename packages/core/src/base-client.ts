@@ -17,6 +17,7 @@ import {
     defaultProductionIpv6Dc,
 } from './utils/default-dcs'
 import {
+    AuthKeyUnregisteredError,
     FloodTestPhoneWaitError,
     FloodWaitError,
     InternalError,
@@ -347,7 +348,9 @@ export class BaseTelegramClient {
             this.storage.setAuthKeyFor(this._primaryDc.id, key)
             await this._saveStorage()
         })
-        this.primaryConnection.on('error', (err) => this._emitError(err, this.primaryConnection))
+        this.primaryConnection.on('error', (err) =>
+            this._emitError(err, this.primaryConnection)
+        )
     }
 
     /**
@@ -488,7 +491,11 @@ export class BaseTelegramClient {
 
         for (let i = 0; i < this._rpcRetryCount; i++) {
             try {
-                const res = await connection.sendForResult(message, stack, params?.timeout)
+                const res = await connection.sendForResult(
+                    message,
+                    stack,
+                    params?.timeout
+                )
                 await this._cachePeersFrom(res)
 
                 return res
@@ -530,16 +537,37 @@ export class BaseTelegramClient {
                         continue
                     }
                 }
-                if (
-                    connection === this.primaryConnection &&
-                    (e.constructor === PhoneMigrateError ||
+
+                if (connection.params.dc.id === this._primaryDc.id) {
+                    if (
+                        e.constructor === PhoneMigrateError ||
                         e.constructor === UserMigrateError ||
-                        e.constructor === NetworkMigrateError)
-                ) {
-                    debug('Migrate error, new dc = %d', e.newDc)
-                    await this.changeDc(e.newDc)
-                    continue
+                        e.constructor === NetworkMigrateError
+                    ) {
+                        debug('Migrate error, new dc = %d', e.newDc)
+                        await this.changeDc(e.newDc)
+                        continue
+                    }
+                } else {
+                    if (e.constructor === AuthKeyUnregisteredError) {
+                        // we can try re-exporting auth from the primary connection
+                        debug('exported auth key error, re-exporting..')
+
+                        const auth = await this.call({
+                            _: 'auth.exportAuthorization',
+                            dcId: connection.params.dc.id,
+                        })
+
+                        await connection.sendForResult({
+                            _: 'auth.importAuthorization',
+                            id: auth.id,
+                            bytes: auth.bytes,
+                        })
+
+                        continue
+                    }
                 }
+
                 throw e
             }
         }
@@ -635,7 +663,9 @@ export class BaseTelegramClient {
     changeTransport(factory: TransportFactory): void {
         this.primaryConnection.changeTransport(factory)
 
-        this._additionalConnections.forEach((conn) => conn.changeTransport(factory))
+        this._additionalConnections.forEach((conn) =>
+            conn.changeTransport(factory)
+        )
     }
 
     /**
@@ -647,7 +677,9 @@ export class BaseTelegramClient {
      *     the connection in which the error has occurred, in case
      *     this was connection-related error.
      */
-    onError(handler: (err: Error, connection?: TelegramConnection) => void): void {
+    onError(
+        handler: (err: Error, connection?: TelegramConnection) => void
+    ): void {
         this._onError = handler
     }
 

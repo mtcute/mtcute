@@ -86,21 +86,21 @@ export async function* downloadAsIterable(
     const requestCurrent = async (): Promise<Buffer> => {
         let result: tl.RpcCallReturn['upload.getFile'] | tl.RpcCallReturn['upload.getWebFile']
         try {
-            result = await connection.sendForResult({
+            result = await this.call({
                 _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
                 location: location as any,
                 offset,
                 limit: chunkSize
-            })
+            }, { connection })
         } catch (e) {
-            if (e instanceof FileMigrateError) {
+            if (e.constructor === FileMigrateError) {
                 connection = this._downloadConnections[e.newDc]
                 if (!connection) {
                     connection = await this.createAdditionalConnection(e.newDc)
                     this._downloadConnections[e.newDc] = connection
                 }
                 return requestCurrent()
-            } else if (e instanceof FilerefUpgradeNeededError) {
+            } else if (e.constructor === FilerefUpgradeNeededError) {
                 // todo: implement someday
                 // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
                 throw new MtCuteUnsupportedError('File ref expired!')
