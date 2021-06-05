@@ -1,0 +1,22 @@
+{
+    "name": "@mtcute/node",
+    "private": true,
+    "version": "0.0.0",
+    "description": "Meta-package for Node JS",
+    "author": "Alisa Sireneva <me@tei.su>",
+    "license": "MIT",
+    "main": "index.ts",
+    "scripts": {
+        "test": "mocha -r ts-node/register tests/**/*.spec.ts",
+        "docs": "npx typedoc",
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@mtcute/client": "^0.0.0",
+        "@mtcute/sqlite": "^0.0.0",
+        "@mtcute/markdown-parser": "^0.0.0",
+        "@mtcute/html-parser": "^0.0.0",
+        "@mtcute/dispatcher": "^0.0.0",
+        "@mtcute/crypto-node": "^0.0.0"
+    }
+}
