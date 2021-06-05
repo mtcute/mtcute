@@ -40,6 +40,16 @@ export async function start(
     this: TelegramClient,
     params: {
         /**
+         * String session exported using {@link TelegramClient.exportSession}.
+         *
+         * This simply calls {@link TelegramClient.importSession} before anything else.
+         *
+         * Note that passed session will be ignored in case storage already
+         * contains authorization.
+         */
+        session?: string
+
+        /**
          * Phone number of the account.
          * If account does not exist, it will be created
          */
@@ -127,6 +137,10 @@ export async function start(
         catchUp?: boolean
     }
 ): Promise<User> {
+    if (params.session) {
+        this.importSession(params.session)
+    }
+
     try {
         const me = await this.getMe()
 

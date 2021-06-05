@@ -5,7 +5,7 @@ interface AuthState {
     // local copy of "self" in storage,
     // so we can use it w/out relying on storage.
     // they are both loaded and saved to storage along with the updates
-    // (see methods/updates/handle-update)
+    // (see methods/updates)
     _userId: number | null
     _isBot: boolean
 }

@@ -141,8 +141,4 @@ export interface ITelegramStorage {
      * update with the peers added, which might not be very efficient.
      */
     getFullPeerById(id: number): MaybeAsync<tl.TypeUser | tl.TypeChat | null>
-
-    // TODO!
-    // exportToString(): MaybeAsync<string>
-    // importFromString(): MaybeAsync<void>
 }

@@ -378,6 +378,16 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     start(params: {
         /**
+         * String session exported using {@link TelegramClient.exportSession}.
+         *
+         * This simply calls {@link TelegramClient.importSession} before anything else.
+         *
+         * Note that passed session will be ignored in case storage already
+         * contains authorization.
+         */
+        session?: string
+
+        /**
          * Phone number of the account.
          * If account does not exist, it will be created
          */

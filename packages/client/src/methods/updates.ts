@@ -30,7 +30,7 @@ interface UpdatesState {
     _date: number
     _seq: number
 
-    // old values of the updates statej (i.e. as in DB)
+    // old values of the updates state (i.e. as in DB)
     // used to avoid redundant storage calls
     _oldPts: number
     _oldDate: number
@@ -106,8 +106,17 @@ export async function _loadStorage(this: TelegramClient): Promise<void> {
 /**
  * @internal
  */
-export async function _saveStorage(this: TelegramClient): Promise<void> {
+export async function _saveStorage(this: TelegramClient, afterImport = false): Promise<void> {
     // save updates state to the session
+
+    if (afterImport) {
+        // we need to get `self` from db and store it
+        const self = await this.storage.getSelf()
+        if (self) {
+            this._userId = self.userId
+            this._isBot = self.isBot
+        }
+    }
 
     try {
         // before any authorization pts will be undefined

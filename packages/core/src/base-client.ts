@@ -32,6 +32,9 @@ import { addPublicKey } from './utils/crypto/keys'
 import { ITelegramStorage, MemoryStorage } from './storage'
 import { getAllPeersFrom, MAX_CHANNEL_ID } from './utils/peer-utils'
 import bigInt from 'big-integer'
+import { BinaryWriter } from './utils/binary/binary-writer'
+import { encodeUrlSafeBase64, parseUrlSafeBase64 } from './utils/buffer-utils'
+import { BinaryReader } from './utils/binary/binary-reader'
 
 const debug = require('debug')('mtcute:base')
 
@@ -226,6 +229,8 @@ export class BaseTelegramClient {
      */
     primaryConnection: TelegramConnection
 
+    private _importFrom?: string
+
     /**
      * Method which is called every time the client receives a new update.
      *
@@ -235,14 +240,6 @@ export class BaseTelegramClient {
      */
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected _handleUpdate(update: tl.TypeUpdates): void {}
-
-    /**
-     * Method which is called for every object
-     *
-     * @param obj
-     */
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected _processApiResponse(obj: tl.TlObject): void {}
 
     constructor(opts: BaseTelegramClient.Options) {
         const apiId =
@@ -291,7 +288,7 @@ export class BaseTelegramClient {
         await this.storage.load?.()
     }
 
-    protected async _saveStorage(): Promise<void> {
+    protected async _saveStorage(afterImport = false): Promise<void> {
         await this.storage.save?.()
     }
 
@@ -370,6 +367,38 @@ export class BaseTelegramClient {
         this.primaryConnection.authKey = await this.storage.getAuthKeyFor(
             this._primaryDc.id
         )
+
+        if (!this.primaryConnection.authKey && this._importFrom) {
+            const buf = parseUrlSafeBase64(this._importFrom)
+            if (buf[0] !== 1) throw new Error(`Invalid session string (version = ${buf[0]})`)
+
+            const reader = new BinaryReader(buf, 1)
+
+            const flags = reader.int32()
+            const hasSelf = flags & 1
+
+            const primaryDc = reader.object()
+            if (primaryDc._ !== 'dcOption') {
+                throw new Error(`Invalid session string (dc._ = ${primaryDc._})`)
+            }
+
+            this._primaryDc = this.primaryConnection.params.dc = primaryDc
+            await this.storage.setDefaultDc(primaryDc)
+
+            if (hasSelf) {
+                const selfId = reader.int32()
+                const selfBot = reader.boolean()
+
+                await this.storage.setSelf({ userId: selfId, isBot: selfBot })
+            }
+
+            const key = reader.bytes()
+            this.primaryConnection.authKey = key
+            await this.storage.setAuthKeyFor(primaryDc.id, key)
+
+            await this._saveStorage(true)
+        }
+
         this.primaryConnection.connect()
     }
 
@@ -749,5 +778,65 @@ export class BaseTelegramClient {
         await this._saveStorage()
 
         return hadMin
+    }
+
+    /**
+     * Export current session to a single *LONG* string, containing
+     * all the needed information.
+     *
+     * > **Warning!** Anyone with this string will be able
+     * > to authorize as you and do anything. Treat this
+     * > as your password, and never give it away!
+     * >
+     * > In case you have accidentally leaked this string,
+     * > make sure to revoke this session in account settings:
+     * > "Privacy & Security" > "Active sessions" >
+     * > find the one containing `mtcute` > Revoke,
+     * > or, in case this is a bot, revoke bot token
+     * > with [@BotFather](//t.me/botfather)
+     */
+    async exportSession(): Promise<string> {
+        if (!this.primaryConnection.authKey)
+            throw new Error('Auth key is not generated yet')
+
+        const writer = BinaryWriter.alloc(512)
+
+        const self = await this.storage.getSelf()
+
+        const version = 1
+        let flags = 0
+
+        if (self) {
+            flags |= 1
+        }
+
+        writer.buffer[0] = version
+        writer.pos += 1
+
+        writer.int32(flags)
+        writer.object(this._primaryDc)
+
+        if (self) {
+            writer.int32(self.userId)
+            writer.boolean(self.isBot)
+        }
+
+        writer.bytes(this.primaryConnection.authKey)
+
+        return encodeUrlSafeBase64(writer.result())
+    }
+
+    /**
+     * Request the session to be imported from the given session string.
+     *
+     * Note that the string will not be parsed and imported right away,
+     * instead, it will be imported when `connect()` is called
+     *
+     * Also note that the session will only be imported in case
+     * the storage is missing authorization (i.e. does not contain
+     * auth key for the primary DC), otherwise it will be ignored.
+     */
+    importSession(session: string): void {
+        this._importFrom = session
     }
 }
