@@ -45,7 +45,7 @@ const pages = [
     {
         path: '/history',
         name: 'History',
-        regex: /^\/history(\/|$)/,
+        regex: /^(?:\/tl)?\/history(\/|$)/,
     },
 ]
 
