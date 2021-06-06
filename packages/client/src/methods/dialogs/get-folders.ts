@@ -5,8 +5,10 @@ import { tl } from '@mtcute/tl'
  * Get list of folders.
  * @internal
  */
-export async function getFolders(this: TelegramClient): Promise<tl.RawDialogFilter[]> {
+export async function getFolders(
+    this: TelegramClient
+): Promise<tl.RawDialogFilter[]> {
     return this.call({
-        _: 'messages.getDialogFilters'
+        _: 'messages.getDialogFilters',
     })
 }

@@ -86,7 +86,7 @@ export class Poll {
                         data: ans.option,
                         voters: res.voters,
                         chosen: !!res.chosen,
-                        correct: !!res.correct
+                        correct: !!res.correct,
                     }
                 } else {
                     return {
@@ -94,7 +94,7 @@ export class Poll {
                         data: ans.option,
                         voters: 0,
                         chosen: false,
-                        correct: false
+                        correct: false,
                     }
                 }
             })
@@ -210,7 +210,7 @@ export class Poll {
                 question: this.raw.question,
                 answers: this.raw.answers,
                 closePeriod: this.raw.closePeriod,
-                closeDate: this.raw.closeDate
+                closeDate: this.raw.closeDate,
             },
         }
     }

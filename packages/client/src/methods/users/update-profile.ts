@@ -32,7 +32,7 @@ export async function updateProfile(
         _: 'account.updateProfile',
         firstName: params.firstName,
         lastName: params.lastName,
-        about: params.bio
+        about: params.bio,
     })
 
     return new User(this, res)

@@ -115,7 +115,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                             language: attribs.language ?? '',
                         }
                         break
-                    case 'a':
+                    case 'a': {
                         const url = attribs.href
                         if (!url) return
 
@@ -150,6 +150,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                             }
                         }
                         break
+                    }
                     default:
                         return
                 }

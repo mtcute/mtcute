@@ -1,5 +1,4 @@
 import { tl } from '@mtcute/tl'
-import { User } from '../peers/user'
 import { makeInspectable } from '../utils'
 
 const entityToType: Partial<

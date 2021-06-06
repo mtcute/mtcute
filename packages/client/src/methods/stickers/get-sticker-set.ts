@@ -14,16 +14,19 @@ export async function getStickerSet(
 ): Promise<StickerSet> {
     let input: tl.TypeInputStickerSet
     if (typeof id === 'string') {
-        input = id === 'emoji' ? {
-            _: 'inputStickerSetAnimatedEmoji'
-        } : {
-            _: 'inputStickerSetShortName',
-            shortName: id
-        }
+        input =
+            id === 'emoji'
+                ? {
+                      _: 'inputStickerSetAnimatedEmoji',
+                  }
+                : {
+                      _: 'inputStickerSetShortName',
+                      shortName: id,
+                  }
     } else if ('dice' in id) {
         input = {
             _: 'inputStickerSetDice',
-            emoticon: id.dice
+            emoticon: id.dice,
         }
     } else {
         input = id
@@ -31,7 +34,7 @@ export async function getStickerSet(
 
     const res = await this.call({
         _: 'messages.getStickerSet',
-        stickerset: input
+        stickerset: input,
     })
 
     return new StickerSet(this, res)

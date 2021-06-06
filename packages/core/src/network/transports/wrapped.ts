@@ -6,7 +6,7 @@ export abstract class WrappedCodec extends EventEmitter {
     protected _crypto: ICryptoProvider
     protected _inner: PacketCodec
 
-    constructor (inner: PacketCodec) {
+    constructor(inner: PacketCodec) {
         super()
         this._inner = inner
         this._inner.on('error', (err) => this.emit('error', err))

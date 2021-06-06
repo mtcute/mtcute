@@ -66,7 +66,11 @@ export abstract class BaseCryptoProvider implements ICryptoProvider {
         return bigIntToBuffer(encryptedBigInt)
     }
 
-    abstract createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme
+    abstract createAesCtr(
+        key: Buffer,
+        iv: Buffer,
+        encrypt: boolean
+    ): IEncryptionScheme
 
     abstract createAesEcb(key: Buffer): IEncryptionScheme
 

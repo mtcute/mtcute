@@ -9,13 +9,16 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  * @param chatId  Chat ID or username
  * @internal
  */
-export async function deleteChannel(this: TelegramClient, chatId: InputPeerLike): Promise<void> {
+export async function deleteChannel(
+    this: TelegramClient,
+    chatId: InputPeerLike
+): Promise<void> {
     const peer = normalizeToInputChannel(await this.resolvePeer(chatId))
     if (!peer) throw new MtCuteInvalidPeerTypeError(chatId, 'channel')
 
     const res = await this.call({
         _: 'channels.deleteChannel',
-        channel: peer
+        channel: peer,
     })
     this._handleUpdate(res)
 }

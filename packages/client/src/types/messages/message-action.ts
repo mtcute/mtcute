@@ -1,6 +1,9 @@
 import { tl } from '@mtcute/tl'
 import { Photo } from '../media'
-import { _callDiscardReasonFromTl, CallDiscardReason } from '../calls/discard-reason'
+import {
+    _callDiscardReasonFromTl,
+    CallDiscardReason,
+} from '../calls/discard-reason'
 import { Message } from './message'
 
 export namespace MessageAction {
@@ -279,7 +282,10 @@ export type MessageAction =
     | null
 
 /** @internal */
-export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): MessageAction {
+export function _messageActionFromTl(
+    this: Message,
+    act: tl.TypeMessageAction
+): MessageAction {
     switch (act._) {
         case 'messageActionChatCreate':
             return {
@@ -329,10 +335,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         case 'messageActionChatEditPhoto':
             return {
                 type: 'photo_changed',
-                photo: new Photo(
-                    this.client,
-                    act.photo as tl.RawPhoto
-                ),
+                photo: new Photo(this.client, act.photo as tl.RawPhoto),
             }
         case 'messageActionChatDeletePhoto':
             return {
@@ -390,12 +393,12 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
             }
         case 'messageActionScreenshotTaken':
             return {
-                type: 'screenshot_taken'
+                type: 'screenshot_taken',
             }
         case 'messageActionBotAllowed':
             return {
                 type: 'bot_allowed',
-                domain: act.domain
+                domain: act.domain,
             }
         case 'messageActionGeoProximityReached':
             if (act.fromId._ !== 'peerUser' || act.toId._ !== 'peerUser') {
@@ -405,7 +408,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                     type: 'geo_proximity',
                     targetId: act.toId.userId,
                     userId: act.fromId.userId,
-                    distance: act.distance
+                    distance: act.distance,
                 }
             }
         case 'messageActionGroupCall':
@@ -413,24 +416,24 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 return {
                     type: 'group_call_ended',
                     call: act.call,
-                    duration: act.duration
+                    duration: act.duration,
                 }
             } else {
                 return {
                     type: 'group_call_started',
-                    call: act.call
+                    call: act.call,
                 }
             }
         case 'messageActionInviteToGroupCall':
             return {
                 type: 'group_call_invite',
                 call: act.call,
-                userIds: act.users
+                userIds: act.users,
             }
         case 'messageActionSetMessagesTTL':
             return {
                 type: 'set_ttl',
-                period: act.period
+                period: act.period,
             }
         default:
             return null

@@ -19,9 +19,7 @@ export async function resolvePeerMany<
 >(
     this: TelegramClient,
     peerIds: InputPeerLike[],
-    normalizer: (
-        obj: tl.TypeInputPeer
-    ) => T | null
+    normalizer: (obj: tl.TypeInputPeer) => T | null
 ): Promise<T[]>
 
 /**

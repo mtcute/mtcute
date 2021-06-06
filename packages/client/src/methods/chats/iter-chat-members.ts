@@ -41,7 +41,7 @@ export async function* iterChatMembers(
             offset,
             limit,
             query: params.query,
-            type: params.type
+            type: params.type,
         })
 
         if (!members.length) break

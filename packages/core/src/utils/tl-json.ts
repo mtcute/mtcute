@@ -5,6 +5,7 @@ import { tl } from '@mtcute/tl'
  *
  * @param obj  Object to be converted
  */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function jsonToTlJson(obj: any): tl.TypeJSONValue {
     if (obj === null || obj === undefined) return { _: 'jsonNull' }
     if (typeof obj === 'boolean') return { _: 'jsonBool', value: obj }

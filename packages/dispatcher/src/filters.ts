@@ -13,7 +13,6 @@ import {
     Photo,
     RawDocument,
     Sticker,
-    TelegramClient,
     User,
     Venue,
     Video,
@@ -309,16 +308,18 @@ export namespace filters {
      *
      * Messages sent to yourself (i.e. Saved Messages) are also "incoming"
      */
-    export const incoming: UpdateFilter<Message, { isOutgoing: false }> = (msg) =>
-        !msg.isOutgoing
+    export const incoming: UpdateFilter<Message, { isOutgoing: false }> = (
+        msg
+    ) => !msg.isOutgoing
 
     /**
      * Filter outgoing messages.
      *
      * Messages sent to yourself (i.e. Saved Messages) are **not** "outgoing"
      */
-    export const outgoing: UpdateFilter<Message, { isOutgoing: true }> = (msg) =>
-        msg.isOutgoing
+    export const outgoing: UpdateFilter<Message, { isOutgoing: true }> = (
+        msg
+    ) => msg.isOutgoing
 
     /**
      * Filter messages that are replies to some other message
@@ -692,7 +693,9 @@ export namespace filters {
      *
      * @param predicate  State predicate
      */
-    export const state = <T>(predicate: (state: T) => MaybeAsync<boolean>): UpdateFilter<Message | CallbackQuery, {}, T> => {
+    export const state = <T>(
+        predicate: (state: T) => MaybeAsync<boolean>
+    ): UpdateFilter<Message | CallbackQuery, {}, T> => {
         return async (upd, state) => {
             if (!state) return false
             const data = await state.get()

@@ -29,7 +29,7 @@ export class LruMap<K extends keyof any, V> {
 
         if (typeof Map === 'undefined' || useObject) {
             const obj = {} as any
-            this._set = (k, v) => obj[k] = v
+            this._set = (k, v) => (obj[k] = v)
             this._has = (k) => k in obj
             this._get = (k) => obj[k]
             this._del = (k) => delete obj[k]
@@ -95,7 +95,7 @@ export class LruMap<K extends keyof any, V> {
 
         item = {
             k: key,
-            v: value
+            v: value,
         }
         this._set(key, item as any)
 

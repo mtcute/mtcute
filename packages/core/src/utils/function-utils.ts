@@ -40,7 +40,7 @@ export function debounce<T extends Function>(
  * @param func  Function to throttle
  * @param delay  Throttle delay
  */
-export function throttle<T extends Function> (func: T, delay: number): T {
+export function throttle<T extends Function>(func: T, delay: number): T {
     let timeout: NodeJS.Timeout | null
 
     return function (this: any) {

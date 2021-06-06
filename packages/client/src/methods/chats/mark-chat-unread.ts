@@ -17,6 +17,6 @@ export async function markChatUnread(
             _: 'inputDialogPeer',
             peer: await this.resolvePeer(chatId),
         },
-        unread: true
+        unread: true,
     })
 }

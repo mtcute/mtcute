@@ -18,7 +18,7 @@ export async function updateUsername(
 
     const res = await this.call({
         _: 'account.updateUsername',
-        username
+        username,
     })
 
     return new User(this, res)

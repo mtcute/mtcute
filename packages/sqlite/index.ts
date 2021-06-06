@@ -310,6 +310,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
     private _runMany: (stmts: [sqlite3.Statement, any[]][]) => void
     private _updateManyPeers: (updates: any[]) => void
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private _upgradeDatabase(from: number): void {
         // not needed (yet) since no versions except 1 //
     }
@@ -591,6 +592,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
         return val.value
     }
 
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     setState(key: string, state: any, ttl?: number, parse = true): void {
         const item: FsmItem = {
             value: state,

@@ -302,10 +302,10 @@ export namespace BotKeyboard {
             text,
             url,
             bot: params.bot ?? {
-                _: 'inputUserSelf'
+                _: 'inputUserSelf',
             },
             fwdText: params.fwdText,
-            requestWriteAccess: params.requestWriteAccess
+            requestWriteAccess: params.requestWriteAccess,
         }
     }
 

@@ -25,7 +25,7 @@ export async function pinMessage(
         peer: await this.resolvePeer(chatId),
         id: messageId,
         silent: !notify,
-        pmOneside: !bothSides
+        pmOneside: !bothSides,
     })
 
     this._handleUpdate(res)

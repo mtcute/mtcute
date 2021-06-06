@@ -9,7 +9,6 @@ import { connect } from 'net'
 // @ts-ignore
 import { normalize } from 'ip6'
 
-
 const debug = require('debug')('mtcute:socks-proxy')
 
 /**
@@ -284,7 +283,7 @@ export abstract class SocksProxiedTcpTransport extends TcpTransport {
                 debug(
                     '[%s:%d] sending CONNECT',
                     this._proxy.host,
-                    this._proxy.port,
+                    this._proxy.port
                 )
 
                 try {

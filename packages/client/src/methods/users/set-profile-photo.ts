@@ -20,8 +20,11 @@ export async function setProfilePhoto(
 ): Promise<Photo> {
     const res = await this.call({
         _: 'photos.uploadProfilePhoto',
-        [type === 'photo' ? 'file' : 'video']: await this._normalizeInputFile(media, {}),
-        videoStartTs: previewSec
+        [type === 'photo' ? 'file' : 'video']: await this._normalizeInputFile(
+            media,
+            {}
+        ),
+        videoStartTs: previewSec,
     })
 
     return new Photo(this, res.photo as tl.RawPhoto)

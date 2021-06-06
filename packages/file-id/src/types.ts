@@ -192,6 +192,7 @@ export namespace tdFileId {
     }
 
     export function isFileIdLike(
+        // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
         obj: any
     ): obj is string | RawFullRemoteFileLocation {
         return (

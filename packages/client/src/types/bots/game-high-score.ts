@@ -12,7 +12,11 @@ export class GameHighScore {
 
     readonly _users: UsersIndex
 
-    constructor (client: TelegramClient, raw: tl.RawHighScore, users: UsersIndex) {
+    constructor(
+        client: TelegramClient,
+        raw: tl.RawHighScore,
+        users: UsersIndex
+    ) {
         this.client = client
         this.raw = raw
         this._users = users

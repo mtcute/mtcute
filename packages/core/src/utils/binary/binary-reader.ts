@@ -5,7 +5,8 @@ import readerMap, { ITlBinaryReader } from '@mtcute/tl/binary/reader'
 import { bufferToBigInt, longToUlong, ulongToLong } from '../bigint-utils'
 import { tl } from '@mtcute/tl'
 
-const isNativeBigIntAvailable = typeof BigInt !== 'undefined' && 'readBigInt64LE' in Buffer.prototype
+const isNativeBigIntAvailable =
+    typeof BigInt !== 'undefined' && 'readBigInt64LE' in Buffer.prototype
 
 export class BinaryReader implements ITlBinaryReader {
     data: Buffer

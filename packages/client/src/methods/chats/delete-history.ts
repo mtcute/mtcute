@@ -32,12 +32,18 @@ export async function deleteHistory(
         justClear: mode === 'clear',
         revoke: mode === 'revoke',
         peer,
-        maxId
+        maxId,
     })
 
     const channel = normalizeToInputChannel(peer)
     if (channel) {
-        this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount, (channel as tl.RawInputChannel).channelId))
+        this._handleUpdate(
+            createDummyUpdate(
+                res.pts,
+                res.ptsCount,
+                (channel as tl.RawInputChannel).channelId
+            )
+        )
     } else {
         this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
     }

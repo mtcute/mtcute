@@ -31,19 +31,23 @@ export async function getNearbyChats(
 
     if (!res.updates.length) return []
 
-    assertTypeIs('contacts.getLocated (@ .updates[0])', res.updates[0], 'updatePeerLocated')
+    assertTypeIs(
+        'contacts.getLocated (@ .updates[0])',
+        res.updates[0],
+        'updatePeerLocated'
+    )
 
     const chats = res.chats.map((it) => new Chat(this, it))
 
     const index: Record<number, Chat> = {}
-    chats.forEach((c) => index[c.id] = c)
+    chats.forEach((c) => (index[c.id] = c))
 
     res.updates[0].peers.forEach((peer) => {
         if (peer._ === 'peerSelfLocated') return
 
         const id = getMarkedPeerId(peer.peer)
         if (index[id]) {
-            (index[id] as tl.Mutable<Chat>).distance = peer.distance
+            ;(index[id] as tl.Mutable<Chat>).distance = peer.distance
         }
     })
 

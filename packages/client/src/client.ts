@@ -164,7 +164,6 @@ import {
     Dialog,
     FileDownloadParameters,
     GameHighScore,
-    InputChatPermissions,
     InputFileLike,
     InputInlineResult,
     InputMediaLike,
@@ -1444,6 +1443,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * > into memory at once. This might cause an issue, so use wisely!
      *
      * @param params  File download parameters
+
      */
     downloadAsBuffer(params: FileDownloadParameters): Promise<Buffer>
     /**
@@ -1452,6 +1452,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param filename  Local file name to which the remote file will be downloaded
      * @param params  File download parameters
+
      */
     downloadToFile(
         filename: string,
@@ -1463,6 +1464,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * consecutive.
      *
      * @param params  Download parameters
+
      */
     downloadAsIterable(
         params: FileDownloadParameters
@@ -1472,6 +1474,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * streaming file contents.
      *
      * @param params  File download parameters
+
      */
     downloadAsStream(params: FileDownloadParameters): Readable
     /**

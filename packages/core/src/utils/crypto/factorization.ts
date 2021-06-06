@@ -58,6 +58,8 @@ function leemonPqFactorizationSync(what: leemonBigint): [Buffer, Buffer] {
         lim = 1 << (i + 18)
 
         for (j = 1; j < lim; j++) {
+            // idk why is this needed, but i'd rather not touch :shrug:
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             ++it
             copy_(a, x)
             copy_(b, x)

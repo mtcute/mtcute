@@ -36,49 +36,49 @@ export async function sendTyping(
         switch (status) {
             case 'typing':
                 status = { _: 'sendMessageTypingAction' }
-                break;
+                break
             case 'cancel':
                 status = { _: 'sendMessageCancelAction' }
-                break;
+                break
             case 'record_video':
                 status = { _: 'sendMessageRecordVideoAction' }
-                break;
+                break
             case 'upload_video':
                 status = { _: 'sendMessageUploadVideoAction', progress }
-                break;
+                break
             case 'record_voice':
                 status = { _: 'sendMessageRecordAudioAction' }
-                break;
+                break
             case 'upload_voice':
                 status = { _: 'sendMessageUploadAudioAction', progress }
-                break;
+                break
             case 'upload_photo':
                 status = { _: 'sendMessageUploadPhotoAction', progress }
-                break;
+                break
             case 'upload_document':
                 status = { _: 'sendMessageUploadDocumentAction', progress }
-                break;
+                break
             case 'geo':
                 status = { _: 'sendMessageGeoLocationAction' }
-                break;
+                break
             case 'contact':
                 status = { _: 'sendMessageChooseContactAction' }
-                break;
+                break
             case 'game':
                 status = { _: 'sendMessageGamePlayAction' }
-                break;
+                break
             case 'record_round':
                 status = { _: 'sendMessageRecordRoundAction' }
-                break;
+                break
             case 'upload_round':
                 status = { _: 'sendMessageUploadRoundAction', progress }
-                break;
+                break
             case 'speak_call':
                 status = { _: 'speakingInGroupCallAction' }
-                break;
+                break
             case 'history_import':
                 status = { _: 'sendMessageHistoryImportAction', progress }
-                break;
+                break
         }
     }
 
@@ -86,6 +86,6 @@ export async function sendTyping(
         _: 'messages.setTyping',
         peer: await this.resolvePeer(chatId),
         action: status,
-        topMsgId: params?.threadId
+        topMsgId: params?.threadId,
     })
 }

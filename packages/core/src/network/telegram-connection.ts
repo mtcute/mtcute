@@ -16,15 +16,18 @@ import {
 import { debounce } from '../utils/function-utils'
 import { bufferToBigInt, ulongToLong } from '../utils/bigint-utils'
 import { randomBytes } from '../utils/buffer-utils'
-import { BadRequestError, createRpcErrorFromTl, RpcError, RpcTimeoutError, TimeoutError } from '@mtcute/tl/errors'
+import {
+    BadRequestError,
+    createRpcErrorFromTl,
+    RpcError,
+    RpcTimeoutError,
+} from '@mtcute/tl/errors'
 import { LruStringSet } from '../utils/lru-string-set'
 
 function makeNiceStack(error: RpcError, stack: string, method?: string) {
-    error.stack = `${error.constructor.name} (${error.code} ${
-        error.text
-    }): ${error.message}\n    at ${
-        method
-    }\n${stack.split('\n').slice(2).join('\n')}`
+    error.stack = `${error.constructor.name} (${error.code} ${error.text}): ${
+        error.message
+    }\n    at ${method}\n${stack.split('\n').slice(2).join('\n')}`
 }
 
 const _debug = require('debug')
@@ -187,7 +190,9 @@ export class TelegramConnection extends PersistentConnection {
         this._sendOnceUsable = []
         sendOnceUsable.forEach((it) => this._resend(it))
 
-        Object.entries(this._pendingRpcCalls).forEach(([id, it]) => this._resend(it, id))
+        Object.entries(this._pendingRpcCalls).forEach(([id, it]) =>
+            this._resend(it, id)
+        )
 
         this._pingInterval = setInterval(() => {
             if (this._pendingPing === null) {
@@ -562,15 +567,19 @@ export class TelegramConnection extends PersistentConnection {
         method: string,
         message: Buffer,
         stack?: string,
-        timeout?: number,
+        timeout?: number
     ): Promise<tl.TlObject>
     async _sendBufferForResult(
         method: string | PendingMessage,
         message?: Buffer,
         stack?: string,
-        timeout?: number,
+        timeout?: number
     ): Promise<tl.TlObject> {
-        if (typeof method === 'string' && this.params.niceStacks !== false && !stack) {
+        if (
+            typeof method === 'string' &&
+            this.params.niceStacks !== false &&
+            !stack
+        ) {
             stack = new Error().stack
         }
 
@@ -580,7 +589,9 @@ export class TelegramConnection extends PersistentConnection {
             // and since we resend them, it will get resent after reconnection and
             // that will be an endless loop of reconnections. we don't want that,
             // and payloads this large are usually a sign of an error in the code.
-            const err = new Error(`Payload is too big (${content.length} > 1044404)`)
+            const err = new Error(
+                `Payload is too big (${content.length} > 1044404)`
+            )
             if (typeof method === 'string') {
                 throw err
             } else {
@@ -645,7 +656,7 @@ export class TelegramConnection extends PersistentConnection {
     async sendForResult<T extends tl.RpcMethod>(
         message: T,
         stack?: string,
-        timeout?: number,
+        timeout?: number
     ): Promise<tl.RpcCallReturn[T['_']]> {
         if (this._usable && this.params.inactivityTimeout)
             this._rescheduleInactivity()

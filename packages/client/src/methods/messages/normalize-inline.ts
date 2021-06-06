@@ -27,7 +27,7 @@ export async function _normalizeInline(
         if (!(id.dcId in this._connectionsForInline)) {
             this._connectionsForInline[
                 id.dcId
-                ] = await this.createAdditionalConnection(id.dcId)
+            ] = await this.createAdditionalConnection(id.dcId)
         }
         connection = this._connectionsForInline[id.dcId]
     }

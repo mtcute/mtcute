@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import {
     CallbackQuery,
     ChatsIndex,
@@ -196,9 +197,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                 this.bindToClient(client)
                 if (storage) {
                     this._storage = storage as any
-                    this._stateKeyDelegate = (
-                        key ?? defaultStateKeyDelegate
-                    ) as any
+                    this._stateKeyDelegate = (key ??
+                        defaultStateKeyDelegate) as any
                 }
             } else if (typeof client === 'function') {
                 // is StateKeyDelegate
@@ -367,7 +367,10 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                 const key = await this._stateKeyDelegate!(parsed)
                 if (key) {
                     let customKey
-                    if (!this._customStateKeyDelegate || (customKey = await this._customStateKeyDelegate(parsed))) {
+                    if (
+                        !this._customStateKeyDelegate ||
+                        (customKey = await this._customStateKeyDelegate(parsed))
+                    ) {
                         parsedState = new UpdateState(
                             this._storage!,
                             key,
@@ -454,7 +457,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                 users,
                 chats,
                 parsed,
-                parsedType,
+                parsedType
             )
         }
     }
@@ -636,9 +639,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         }
 
         if (uid[0] === '$') {
-            throw new MtCuteArgumentError(
-                `Scene UID cannot start with $`
-            )
+            throw new MtCuteArgumentError(`Scene UID cannot start with $`)
         }
 
         if (scene._scene) {
@@ -668,7 +669,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         const idx = this._children.indexOf(child)
         if (idx > -1) {
             child._parent = child._client = undefined
-
             ;(child as any)._stateKeyDelegate = undefined
             ;(child as any)._storage = undefined
             this._children.splice(idx, 1)
@@ -770,44 +770,42 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             )
         }
 
-        return Promise.resolve(this._stateKeyDelegate!(object)).then(
-            (key) => {
-                if (!key) {
-                    throw new MtCuteArgumentError(
-                        'Cannot derive key from given object'
-                    )
-                }
+        return Promise.resolve(this._stateKeyDelegate!(object)).then((key) => {
+            if (!key) {
+                throw new MtCuteArgumentError(
+                    'Cannot derive key from given object'
+                )
+            }
 
-                if (!this._customStateKeyDelegate) {
+            if (!this._customStateKeyDelegate) {
+                return new UpdateState(
+                    this._storage!,
+                    key,
+                    this._scene ?? null,
+                    this._sceneScoped,
+                    this._customStorage
+                )
+            }
+
+            return Promise.resolve(this._customStateKeyDelegate(object)).then(
+                (customKey) => {
+                    if (!customKey) {
+                        throw new MtCuteArgumentError(
+                            'Cannot derive custom key from given object'
+                        )
+                    }
+
                     return new UpdateState(
                         this._storage!,
                         key,
                         this._scene ?? null,
                         this._sceneScoped,
-                        this._customStorage
+                        this._customStorage,
+                        customKey
                     )
                 }
-
-                return Promise.resolve(this._customStateKeyDelegate(object)).then(
-                    (customKey) => {
-                        if (!customKey) {
-                            throw new MtCuteArgumentError(
-                                'Cannot derive custom key from given object'
-                            )
-                        }
-
-                        return new UpdateState(
-                            this._storage!,
-                            key,
-                            this._scene ?? null,
-                            this._sceneScoped,
-                            this._customStorage,
-                            customKey
-                        )
-                    }
-                )
-            }
-        )
+            )
+        })
     }
 
     // addUpdateHandler convenience wrappers //

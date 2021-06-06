@@ -69,10 +69,9 @@ export class MtprotoSession {
     ): Promise<Buffer> {
         if (!this._authKey) throw new Error('Keys are not set up!')
 
-        const length =
-            Buffer.isBuffer(message)
-                ? message.length
-                : SerializationCounter.countNeededBytes(message)
+        const length = Buffer.isBuffer(message)
+            ? message.length
+            : SerializationCounter.countNeededBytes(message)
         let padding =
             (32 /* header size */ + length + 12) /* min padding */ % 16
         padding = 12 + (padding ? 16 - padding : 0)

@@ -288,6 +288,7 @@ export class BaseTelegramClient {
         await this.storage.load?.()
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async _saveStorage(afterImport = false): Promise<void> {
         await this.storage.save?.()
     }
@@ -370,7 +371,8 @@ export class BaseTelegramClient {
 
         if (!this.primaryConnection.authKey && this._importFrom) {
             const buf = parseUrlSafeBase64(this._importFrom)
-            if (buf[0] !== 1) throw new Error(`Invalid session string (version = ${buf[0]})`)
+            if (buf[0] !== 1)
+                throw new Error(`Invalid session string (version = ${buf[0]})`)
 
             const reader = new BinaryReader(buf, 1)
 
@@ -379,7 +381,9 @@ export class BaseTelegramClient {
 
             const primaryDc = reader.object()
             if (primaryDc._ !== 'dcOption') {
-                throw new Error(`Invalid session string (dc._ = ${primaryDc._})`)
+                throw new Error(
+                    `Invalid session string (dc._ = ${primaryDc._})`
+                )
             }
 
             this._primaryDc = this.primaryConnection.params.dc = primaryDc
@@ -725,7 +729,7 @@ export class BaseTelegramClient {
      *
      * @returns  `true` if there were any `min` peers
      */
-    protected async _cachePeersFrom(obj: any): Promise<boolean> {
+    protected async _cachePeersFrom(obj: object): Promise<boolean> {
         const parsedPeers: ITelegramStorage.PeerInfo[] = []
 
         let hadMin = false

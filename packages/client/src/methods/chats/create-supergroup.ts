@@ -18,7 +18,7 @@ export async function createSupergroup(
         _: 'channels.createChannel',
         title,
         about: description,
-        megagroup: true
+        megagroup: true,
     })
 
     assertIsUpdatesGroup('channels.createChannel', res)

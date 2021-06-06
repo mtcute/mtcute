@@ -75,7 +75,10 @@ export async function resolvePeer(
                         accessHash: found.accessHash!,
                     }
             } else {
-                const id = res.peer._ === 'peerChannel' ? res.peer.channelId : res.peer.chatId
+                const id =
+                    res.peer._ === 'peerChannel'
+                        ? res.peer.channelId
+                        : res.peer.chatId
 
                 const found = res.chats.find((it) => it.id === id)
                 if (found)
@@ -85,13 +88,13 @@ export async function resolvePeer(
                             return {
                                 _: 'inputPeerChannel',
                                 channelId: found.id,
-                                accessHash: found.accessHash!
+                                accessHash: found.accessHash!,
                             }
                         case 'chat':
                         case 'chatForbidden':
                             return {
                                 _: 'inputPeerChat',
-                                chatId: found.id
+                                chatId: found.id,
                             }
                     }
             }
@@ -145,7 +148,7 @@ export async function resolvePeer(
 
             return {
                 _: 'inputPeerChat',
-                chatId: -peerId
+                chatId: -peerId,
             }
             // break
         }
@@ -163,7 +166,10 @@ export async function resolvePeer(
             })
 
             const found = res.chats.find((it) => it.id === id)
-            if (found && (found._ === 'channel' || found._ === 'channelForbidden'))
+            if (
+                found &&
+                (found._ === 'channel' || found._ === 'channelForbidden')
+            )
                 return {
                     _: 'inputPeerChannel',
                     channelId: found.id,

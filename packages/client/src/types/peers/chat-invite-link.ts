@@ -20,7 +20,11 @@ export class ChatInviteLink {
 
     readonly _users?: UsersIndex
 
-    constructor (client: TelegramClient, raw: tl.RawChatInviteExported, users?: UsersIndex) {
+    constructor(
+        client: TelegramClient,
+        raw: tl.RawChatInviteExported,
+        users?: UsersIndex
+    ) {
         this.client = client
         this.raw = raw
         this._users = users

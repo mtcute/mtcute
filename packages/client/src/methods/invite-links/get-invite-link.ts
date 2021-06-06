@@ -17,7 +17,7 @@ export async function getInviteLink(
     const res = await this.call({
         _: 'messages.getExportedChatInvite',
         peer: await this.resolvePeer(chatId),
-        link
+        link,
     })
 
     const { users } = createUsersChatsIndex(res)

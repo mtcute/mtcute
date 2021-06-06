@@ -1,5 +1,5 @@
 import { tl } from '@mtcute/tl'
-import { BotInlineMessage, InputInlineMessage, InputInlineMessageGame } from './input-inline-message'
+import { BotInlineMessage, InputInlineMessage } from './input-inline-message'
 import { TelegramClient } from '../../../client'
 import { fileIdToInputDocument, fileIdToInputPhoto } from '@mtcute/file-id'
 import { extractFileName } from '../../../utils/file-utils'
@@ -711,7 +711,12 @@ export namespace BotInline {
             obj: InputInlineResult,
             fallback?: string
         ): tl.RawInputWebDocument | undefined => {
-            if (obj.type !== 'voice' && obj.type !== 'audio' && obj.type !== 'sticker' && obj.type !== 'game') {
+            if (
+                obj.type !== 'voice' &&
+                obj.type !== 'audio' &&
+                obj.type !== 'sticker' &&
+                obj.type !== 'game'
+            ) {
                 if (!obj.thumb || typeof obj.thumb === 'string') {
                     if (!obj.thumb && !fallback) {
                         return undefined
@@ -805,11 +810,13 @@ export namespace BotInline {
                     parseMode
                 )
                 if (sendMessage._ !== 'inputBotInlineMessageGame') {
-                    throw new MtCuteArgumentError('game inline result must contain a game inline message')
+                    throw new MtCuteArgumentError(
+                        'game inline result must contain a game inline message'
+                    )
                 }
             } else {
                 sendMessage = {
-                    _: 'inputBotInlineMessageGame'
+                    _: 'inputBotInlineMessageGame',
                 }
             }
 
@@ -817,7 +824,7 @@ export namespace BotInline {
                 _: 'inputBotInlineResultGame',
                 id: obj.id,
                 shortName: obj.shortName,
-                sendMessage
+                sendMessage,
             }
         }
 
@@ -830,7 +837,9 @@ export namespace BotInline {
             )
         } else {
             if (obj.type === 'venue')
-                throw new MtCuteArgumentError('message bust be supplied for venue inline result')
+                throw new MtCuteArgumentError(
+                    'message bust be supplied for venue inline result'
+                )
 
             if (
                 obj.type === 'video' &&
@@ -856,8 +865,7 @@ export namespace BotInline {
                     phoneNumber: obj.phone,
                     firstName: obj.firstName,
                     lastName: obj.lastName ?? '',
-                    vcard: ''
-
+                    vcard: '',
                 }
             } else {
                 sendMessage = {
@@ -872,12 +880,18 @@ export namespace BotInline {
             | tl.TypeInputDocument
             | tl.TypeInputPhoto
             | undefined = undefined
-        if (obj.type !== 'geo' && obj.type !== 'venue' && obj.type !== 'contact') {
+        if (
+            obj.type !== 'geo' &&
+            obj.type !== 'venue' &&
+            obj.type !== 'contact'
+        ) {
             if (typeof obj.media === 'string') {
                 // file id or url
                 if (obj.media.match(/^https?:\/\//)) {
                     if (obj.type === 'sticker')
-                        throw new MtCuteArgumentError('sticker inline result cannot contain a URL')
+                        throw new MtCuteArgumentError(
+                            'sticker inline result cannot contain a URL'
+                        )
 
                     let mime: string
                     if (obj.type === 'video') mime = 'video/mp4'
@@ -959,7 +973,9 @@ export namespace BotInline {
         // but whatever.
         // ref: https://github.com/tdlib/td/blob/master/td/telegram/InlineQueriesManager.cpp
         if (obj.type === 'contact') {
-            title = obj.lastName?.length ? `${obj.firstName} ${obj.lastName}` : obj.firstName
+            title = obj.lastName?.length
+                ? `${obj.firstName} ${obj.lastName}`
+                : obj.firstName
         } else if (obj.type !== 'sticker') {
             title = obj.title
         }
@@ -972,7 +988,11 @@ export namespace BotInline {
             description = obj.address
         } else if (obj.type === 'contact') {
             description = obj.phone
-        } else if (obj.type !== 'gif' && obj.type !== 'voice' && obj.type !== 'sticker') {
+        } else if (
+            obj.type !== 'gif' &&
+            obj.type !== 'voice' &&
+            obj.type !== 'sticker'
+        ) {
             description = obj.description
         }
 

@@ -97,10 +97,7 @@ export async function* getChatEventLog(
     const chunkSize = Math.min(params.chunkSize ?? 100, total)
 
     const admins: tl.TypeInputUser[] | undefined = params.users
-        ?  await this.resolvePeerMany(
-            params.users,
-            normalizeToInputUser
-        )
+        ? await this.resolvePeerMany(params.users, normalizeToInputUser)
         : undefined
 
     let serverFilter:

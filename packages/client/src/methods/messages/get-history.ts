@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Message, MtCuteTypeAssertionError } from '../../types'
-import { createUsersChatsIndex, } from '../../utils/peer-utils'
+import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { normalizeDate } from '../../utils/misc-utils'
 
 /**

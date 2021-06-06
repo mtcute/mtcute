@@ -24,7 +24,7 @@ export async function createGroup(
 ): Promise<Chat> {
     if (!Array.isArray(users)) users = [users]
 
-    const peers =  await this.resolvePeerMany(
+    const peers = await this.resolvePeerMany(
         users as InputPeerLike[],
         normalizeToInputUser
     )
@@ -32,7 +32,7 @@ export async function createGroup(
     const res = await this.call({
         _: 'messages.createChat',
         title,
-        users: peers
+        users: peers,
     })
 
     assertIsUpdatesGroup('messages.createChat', res)

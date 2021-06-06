@@ -29,7 +29,11 @@ export async function changeCloudPassword(
     )
 
     const oldSrp = await computeSrpParams(this._crypto, pwd, currentPassword)
-    const newHash = await computeNewPasswordHash(this._crypto, algo, newPassword)
+    const newHash = await computeNewPasswordHash(
+        this._crypto,
+        algo,
+        newPassword
+    )
 
     await this.call({
         _: 'account.updatePasswordSettings',
@@ -38,7 +42,7 @@ export async function changeCloudPassword(
             _: 'account.passwordInputSettings',
             newAlgo: algo,
             newPasswordHash: newHash,
-            hint
-        }
+            hint,
+        },
     })
 }

@@ -1,9 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import {
-    telegramRleDecode,
-    telegramRleEncode,
-} from '../src/utils'
+import { telegramRleDecode, telegramRleEncode } from '../src/utils'
 
 describe('telegramRleEncode', () => {
     it('should not modify input if there are no \\x00', () => {

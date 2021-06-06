@@ -4,7 +4,8 @@ import {
     TelegramClient,
     User,
     Location,
-    MtCuteArgumentError, UsersIndex,
+    MtCuteArgumentError,
+    UsersIndex,
 } from '@mtcute/client'
 import { encodeInlineMessageId } from '@mtcute/client/src/utils/inline-utils'
 

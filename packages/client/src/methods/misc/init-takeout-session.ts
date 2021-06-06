@@ -12,8 +12,11 @@ export async function initTakeoutSession(
     this: TelegramClient,
     params: Omit<tl.account.RawInitTakeoutSessionRequest, '_'>
 ): Promise<TakeoutSession> {
-    return new TakeoutSession(this, await this.call({
-        _: 'account.initTakeoutSession',
-        ...params
-    }))
+    return new TakeoutSession(
+        this,
+        await this.call({
+            _: 'account.initTakeoutSession',
+            ...params,
+        })
+    )
 }

@@ -62,7 +62,7 @@ export async function* iterProfilePhotos(
             userId: peer,
             limit: Math.min(limit, total - current),
             offset,
-            maxId
+            maxId,
         })
 
         if (!res.photos.length) break

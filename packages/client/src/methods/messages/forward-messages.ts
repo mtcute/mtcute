@@ -8,9 +8,7 @@ import {
 } from '../../types'
 import { MaybeArray } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
-import {
-    createUsersChatsIndex,
-} from '../../utils/peer-utils'
+import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 

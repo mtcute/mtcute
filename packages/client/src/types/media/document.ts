@@ -3,7 +3,6 @@ import { tl } from '@mtcute/tl'
 import { Thumbnail } from './thumbnail'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
-import { InputMediaLike } from './input-media'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
 /**
@@ -105,7 +104,7 @@ export class RawDocument extends FileLocation {
             _: 'inputDocument',
             id: this.doc.id,
             accessHash: this.doc.accessHash,
-            fileReference: this.doc.fileReference
+            fileReference: this.doc.fileReference,
         }
     }
 
@@ -117,7 +116,7 @@ export class RawDocument extends FileLocation {
     get inputMedia(): tl.TypeInputMedia {
         return {
             _: 'inputMediaDocument',
-            id: this.inputDocument
+            id: this.inputDocument,
         }
     }
 

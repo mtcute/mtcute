@@ -6,13 +6,10 @@
     "license": "MIT",
     "author": "Alisa Sireneva <me@tei.su>",
     "scripts": {
-        "test": "tsc && mocha dist/tests/**/*.spec.js",
-        "build": "tsc",
+        "test": "lerna run test",
+        "build": "lerna run build",
         "lint": "eslint packages/**/*.ts",
-        "generate-schema": "node scripts/generate-schema.js",
-        "generate-code": "node packages/client/scripts/generate-client.js && node scripts/generate-types.js && node scripts/generate-binary-reader.js && node scripts/generate-binary-writer.js && node scripts/post-build.js",
-        "generate-all": "npm run generate-schema && npm run generate-code",
-        "build:doc": "node packages/client/scripts/generate-client.js && typedoc"
+        "format": "prettier --write packages/**/*.ts"
     },
     "dependencies": {
         "big-integer": "1.6.48",

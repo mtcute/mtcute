@@ -28,7 +28,7 @@ interface MemorySessionState {
     pts: Record<number, number>
 
     // state for fsm (v = value, e = expires)
-    fsm: Record<string, { v: any, e?: number }>
+    fsm: Record<string, { v: any; e?: number }>
 
     self: ITelegramStorage.SelfInfo | null
 }
@@ -79,7 +79,7 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
      * Note that this object will be used as-is, so if
      * you plan on using it somewhere else, be sure to copy it beforehand.
      */
-    protected _setStateFrom(obj: any): void {
+    protected _setStateFrom(obj: MemorySessionState): void {
         if (obj.$version !== CURRENT_VERSION) return
 
         // populate indexes if needed
@@ -94,10 +94,12 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
         }
 
         if (populate) {
-            obj.entities.forEach((ent: ITelegramStorage.PeerInfo) => {
-                if (ent.phone) obj.phoneIndex[ent.phone] = ent.id
-                if (ent.username) obj.usernameIndex[ent.username] = ent.id
-            })
+            Object.values(obj.entities).forEach(
+                (ent: ITelegramStorage.PeerInfo) => {
+                    if (ent.phone) obj.phoneIndex[ent.phone] = ent.id
+                    if (ent.username) obj.usernameIndex[ent.username] = ent.id
+                }
+            )
         }
 
         this._state = obj
@@ -252,8 +254,12 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
         return val.v
     }
 
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     setState(key: string, state: any, ttl?: number): void {
-        this._state.fsm[key] = { v: state, e: ttl ? Date.now() + (ttl * 1000) : undefined }
+        this._state.fsm[key] = {
+            v: state,
+            e: ttl ? Date.now() + ttl * 1000 : undefined,
+        }
     }
 
     deleteState(key: string): void {

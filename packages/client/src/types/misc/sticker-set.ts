@@ -107,7 +107,7 @@ export class StickerSet {
         return {
             _: 'inputStickerSetID',
             id: this.brief.id,
-            accessHash: this.brief.accessHash
+            accessHash: this.brief.accessHash,
         }
     }
 
@@ -156,7 +156,7 @@ export class StickerSet {
                 const info: tl.Mutable<StickerSet.StickerInfo> = {
                     alt: sticker.emoji,
                     emoji: '', // populated later
-                    sticker
+                    sticker,
                 }
                 this._stickers!.push(info)
                 index[doc.id.toString()] = info
@@ -183,7 +183,9 @@ export class StickerSet {
      *     In case this object does not contain info about stickers (i.e. {@link isFull} = false)
      */
     getStickersByEmoji(emoji: string): StickerSet.StickerInfo[] {
-        return this.stickers.filter(it => it.alt === emoji || it.emoji.indexOf(emoji) != -1)
+        return this.stickers.filter(
+            (it) => it.alt === emoji || it.emoji.indexOf(emoji) != -1
+        )
     }
 
     /**
@@ -217,13 +219,14 @@ export class StickerSet {
         if (idx < 0) idx = this.full!.documents.length + idx
         const doc = this.full!.documents[idx] as tl.RawDocument
 
-        if (!doc) throw new RangeError(`Sticker set does not have sticker ${idx}`)
+        if (!doc)
+            throw new RangeError(`Sticker set does not have sticker ${idx}`)
 
         return {
             _: 'inputDocument',
             id: doc.id,
             accessHash: doc.accessHash,
-            fileReference: doc.fileReference
+            fileReference: doc.fileReference,
         }
     }
 
@@ -240,7 +243,9 @@ export class StickerSet {
      *     Sticker File ID. In case this is a full sticker set object,
      *     you can also pass index (even negative), and that sticker will be removed
      */
-    async deleteSticker(sticker: number | Parameters<TelegramClient['deleteStickerFromSet']>[0]): Promise<StickerSet> {
+    async deleteSticker(
+        sticker: number | Parameters<TelegramClient['deleteStickerFromSet']>[0]
+    ): Promise<StickerSet> {
         if (typeof sticker === 'number') {
             sticker = this._getInputDocument(sticker)
         }
@@ -262,7 +267,10 @@ export class StickerSet {
      *     you can also pass index (even negative), and that sticker will be removed
      * @param position  New sticker position
      */
-    async moveSticker(sticker: number | Parameters<TelegramClient['moveStickerInSet']>[0], position: number): Promise<StickerSet> {
+    async moveSticker(
+        sticker: number | Parameters<TelegramClient['moveStickerInSet']>[0],
+        position: number
+    ): Promise<StickerSet> {
         if (typeof sticker === 'number') {
             sticker = this._getInputDocument(sticker)
         }
@@ -284,7 +292,9 @@ export class StickerSet {
      *     you can also pass index (even negative), and that sticker
      *     will be used as a thumb
      */
-    async setThumb(thumb: number | Parameters<TelegramClient['setStickerSetThumb']>[1]): Promise<StickerSet> {
+    async setThumb(
+        thumb: number | Parameters<TelegramClient['setStickerSetThumb']>[1]
+    ): Promise<StickerSet> {
         if (typeof thumb === 'number') {
             thumb = this._getInputDocument(thumb)
         }

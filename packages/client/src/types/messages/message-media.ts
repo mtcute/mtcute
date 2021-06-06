@@ -40,7 +40,10 @@ export type MessageMedia =
 // todo: successful_payment, connected_website
 
 /** @internal */
-export function _messageMediaFromTl(this: Message, m: tl.TypeMessageMedia): MessageMedia {
+export function _messageMediaFromTl(
+    this: Message,
+    m: tl.TypeMessageMedia
+): MessageMedia {
     switch (m._) {
         case 'messageMediaPhoto':
             if (!(m.photo?._ === 'photo')) return null

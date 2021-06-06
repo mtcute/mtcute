@@ -36,7 +36,7 @@ export async function createInviteLink(
         _: 'messages.exportChatInvite',
         peer: await this.resolvePeer(chatId),
         expireDate: normalizeDate(params.expires),
-        usageLimit: params.usageLimit
+        usageLimit: params.usageLimit,
     })
 
     return new ChatInviteLink(this, res)

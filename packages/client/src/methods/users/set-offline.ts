@@ -12,6 +12,6 @@ export async function setOffline(
 ): Promise<void> {
     await this.call({
         _: 'account.updateStatus',
-        offline
+        offline,
     })
 }

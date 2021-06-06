@@ -16,14 +16,13 @@ export function _findMessageInUpdate(
 
     for (const u of res.updates) {
         if (
-            isEdit && (
-                u._ === 'updateEditMessage' ||
-                u._ === 'updateEditChannelMessage'
-            ) || !isEdit && (
-                u._ === 'updateNewMessage' ||
-                u._ === 'updateNewChannelMessage' ||
-                u._ === 'updateNewScheduledMessage'
-            )
+            (isEdit &&
+                (u._ === 'updateEditMessage' ||
+                    u._ === 'updateEditChannelMessage')) ||
+            (!isEdit &&
+                (u._ === 'updateNewMessage' ||
+                    u._ === 'updateNewChannelMessage' ||
+                    u._ === 'updateNewScheduledMessage'))
         ) {
             const { users, chats } = createUsersChatsIndex(res)
 

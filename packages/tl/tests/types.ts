@@ -1,3 +1,4 @@
+/* eslint-disable */
 // This is a test for TypeScript typings
 // This file is never executed, only compiled
 

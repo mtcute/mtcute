@@ -16,18 +16,23 @@ export class ChatPhotoSize extends FileLocation {
     readonly peer: tl.TypeInputPeer
     readonly big: boolean
 
-    constructor (
+    constructor(
         client: TelegramClient,
         peer: tl.TypeInputPeer,
         obj: tl.RawUserProfilePhoto | tl.RawChatPhoto,
-        big: boolean,
+        big: boolean
     ) {
-        super(client, {
-            _: 'inputPeerPhotoFileLocation',
-            peer,
-            photoId: obj.photoId,
-            big,
-        }, undefined, obj.dcId)
+        super(
+            client,
+            {
+                _: 'inputPeerPhotoFileLocation',
+                peer,
+                photoId: obj.photoId,
+                big,
+            },
+            undefined,
+            obj.dcId
+        )
 
         this.peer = peer
         this.obj = obj
@@ -39,7 +44,7 @@ export class ChatPhotoSize extends FileLocation {
     /**
      * TDLib and Bot API compatible File ID representing this size
      */
-    get fileId (): string {
+    get fileId(): string {
         if (!this._fileId) {
             const peer = this.peer
 
@@ -77,7 +82,7 @@ export class ChatPhotoSize extends FileLocation {
                         _: 'dialogPhoto',
                         big: this.big,
                         id: bigInt(id),
-                        accessHash: hash
+                        accessHash: hash,
                     },
                 },
             })
@@ -93,10 +98,13 @@ export class ChatPhotoSize extends FileLocation {
     get uniqueFileId(): string {
         if (!this._uniqueFileId) {
             // todo: check how tdlib handles big/small photos here
-            this._uniqueFileId = toUniqueFileId(tdFileId.FileType.ProfilePhoto, {
-                _: 'common',
-                id: this.obj.photoId
-            })
+            this._uniqueFileId = toUniqueFileId(
+                tdFileId.FileType.ProfilePhoto,
+                {
+                    _: 'common',
+                    id: this.obj.photoId,
+                }
+            )
         }
 
         return this._uniqueFileId
@@ -113,10 +121,10 @@ export class ChatPhoto {
     readonly obj: tl.RawUserProfilePhoto | tl.RawChatPhoto
     readonly peer: tl.TypeInputPeer
 
-    constructor (
+    constructor(
         client: TelegramClient,
         peer: tl.TypeInputPeer,
-        obj: tl.RawUserProfilePhoto | tl.RawChatPhoto,
+        obj: tl.RawUserProfilePhoto | tl.RawChatPhoto
     ) {
         this.client = client
         this.peer = peer
@@ -126,7 +134,7 @@ export class ChatPhoto {
     private _smallFile?: ChatPhotoSize
 
     /** Chat photo file location in small resolution (160x160) */
-    get small (): ChatPhotoSize {
+    get small(): ChatPhotoSize {
         if (!this._smallFile) {
             this._smallFile = new ChatPhotoSize(
                 this.client,
@@ -141,9 +149,9 @@ export class ChatPhoto {
 
     private _bigFile: ChatPhotoSize
     /** Chat photo file location in big resolution (640x640) */
-    get big (): ChatPhotoSize {
+    get big(): ChatPhotoSize {
         if (!this._bigFile) {
-            this._bigFile =  new ChatPhotoSize(
+            this._bigFile = new ChatPhotoSize(
                 this.client,
                 this.peer,
                 this.obj,
@@ -159,7 +167,7 @@ export class ChatPhoto {
     /**
      * Chat photo preview in *very* small resolution, if available
      */
-    get thumb (): Buffer | null {
+    get thumb(): Buffer | null {
         if (!this.obj.strippedThumb) return null
 
         if (!this._thumb) {

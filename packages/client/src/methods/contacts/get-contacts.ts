@@ -7,12 +7,10 @@ import { tl } from '@mtcute/tl'
  * Get list of contacts from your Telegram contacts list.
  * @internal
  */
-export async function getContacts(
-    this: TelegramClient
-): Promise<User[]> {
+export async function getContacts(this: TelegramClient): Promise<User[]> {
     const res = await this.call({
         _: 'contacts.getContacts',
-        hash: 0
+        hash: 0,
     })
     assertTypeIs('getContacts', res, 'contacts.contacts')
 

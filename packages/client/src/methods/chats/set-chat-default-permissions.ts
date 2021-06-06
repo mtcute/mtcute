@@ -29,8 +29,8 @@ export async function setChatDefaultPermissions(
         bannedRights: {
             _: 'chatBannedRights',
             untilDate: 0,
-            ...restrictions
-        }
+            ...restrictions,
+        },
     })
 
     assertIsUpdatesGroup('messages.editChatDefaultBannedRights', res)

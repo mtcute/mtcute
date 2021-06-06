@@ -11,7 +11,7 @@ export class Invoice {
     readonly client: TelegramClient
     readonly raw: tl.RawMessageMediaInvoice
 
-    constructor (client: TelegramClient, raw: tl.RawMessageMediaInvoice) {
+    constructor(client: TelegramClient, raw: tl.RawMessageMediaInvoice) {
         this.client = client
         this.raw = raw
     }

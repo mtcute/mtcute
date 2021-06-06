@@ -93,7 +93,9 @@ export async function answerInlineQuery(
 ): Promise<void> {
     if (!params) params = {}
 
-    const tlResults = await Promise.all(results.map(it => BotInline._convertToTl(this, it, params!.parseMode)))
+    const tlResults = await Promise.all(
+        results.map((it) => BotInline._convertToTl(this, it, params!.parseMode))
+    )
 
     await this.call({
         _: 'messages.setInlineBotResults',
@@ -103,10 +105,12 @@ export async function answerInlineQuery(
         gallery: params.gallery,
         private: params.private,
         nextOffset: params.nextOffset,
-        switchPm: params.switchPm ? {
-            _: 'inlineBotSwitchPM',
-            text: params.switchPm.text,
-            startParam: params.switchPm.parameter
-        } : undefined
+        switchPm: params.switchPm
+            ? {
+                  _: 'inlineBotSwitchPM',
+                  text: params.switchPm.text,
+                  startParam: params.switchPm.parameter,
+              }
+            : undefined,
     })
 }

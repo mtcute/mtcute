@@ -160,7 +160,10 @@ export namespace BotInlineMessage {
     export function geo(
         latitude: number,
         longitude: number,
-        params: Omit<InputInlineMessageGeo, 'type' | 'latitude' | 'longitude'> = {}
+        params: Omit<
+            InputInlineMessageGeo,
+            'type' | 'latitude' | 'longitude'
+        > = {}
     ): InputInlineMessageGeo {
         const ret = params as tl.Mutable<InputInlineMessageGeo>
         ret.type = 'geo'

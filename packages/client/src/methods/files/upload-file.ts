@@ -24,7 +24,7 @@ const debug = require('debug')('mtcute:upload')
 
 const OVERRIDE_MIME: Record<string, string> = {
     // tg doesn't interpret `audio/opus` files as voice messages for some reason
-    'audio/opus': 'audio/ogg'
+    'audio/opus': 'audio/ogg',
 }
 
 /**

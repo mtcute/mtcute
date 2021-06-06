@@ -13,7 +13,6 @@ import {
     ChatPreview,
     ChatMember,
     Dialog,
-    InputChatPermissions,
     TermsOfService,
     SentCode,
     MaybeDynamic,

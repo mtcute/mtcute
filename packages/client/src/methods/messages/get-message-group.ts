@@ -24,8 +24,7 @@ export async function getMessageGroup(
     const messages = await this.getMessages(chatId, ids)
     const groupedId = messages.find((it) => it.id === message)!.groupedId
 
-    if (!groupedId)
-        throw new MtCuteArgumentError('This message is not grouped')
+    if (!groupedId) throw new MtCuteArgumentError('This message is not grouped')
 
     return messages.filter((it) => it.groupedId?.eq(groupedId))
 }

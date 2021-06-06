@@ -2,7 +2,6 @@ import { InputFileLike } from '../files'
 import { tl } from '@mtcute/tl'
 import { Venue } from './venue'
 import { MaybeArray } from '@mtcute/core'
-import { InputInlineResultGame } from '../bots'
 
 interface BaseInputMedia {
     /**
@@ -728,7 +727,10 @@ export namespace InputMedia {
     export function geoLive(
         latitude: number,
         longitude: number,
-        params: OmitTypeAndFile<InputMediaGeoLive, 'latitude' | 'longitude'> = {}
+        params: OmitTypeAndFile<
+            InputMediaGeoLive,
+            'latitude' | 'longitude'
+        > = {}
     ): InputMediaGeoLive {
         const ret = params as tl.Mutable<InputMediaGeoLive>
         ret.type = 'geo_live'

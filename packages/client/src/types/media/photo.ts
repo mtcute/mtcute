@@ -4,7 +4,6 @@ import { TelegramClient } from '../../client'
 import { MtCuteArgumentError } from '../errors'
 import { Thumbnail } from './thumbnail'
 import { makeInspectable } from '../utils'
-import { InputMediaLike } from './input-media'
 
 /**
  * A photo

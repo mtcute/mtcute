@@ -40,42 +40,44 @@ export class Location {
      * Create {@link FileLocation} containing
      * server-generated image with the map preview
      */
-    preview(params: {
-        /**
-         * Map width in pixels before applying scale (16-1024)
-         *
-         * Defaults to `128`
-         */
-        width?: number
+    preview(
+        params: {
+            /**
+             * Map width in pixels before applying scale (16-1024)
+             *
+             * Defaults to `128`
+             */
+            width?: number
 
-        /**
-         * Map height in pixels before applying scale (16-1024)
-         *
-         * Defaults to `128`
-         */
-        height?: number
+            /**
+             * Map height in pixels before applying scale (16-1024)
+             *
+             * Defaults to `128`
+             */
+            height?: number
 
-        /**
-         * Map zoom level (13-20)
-         *
-         * Defaults to `15`
-         */
-        zoom?: number
+            /**
+             * Map zoom level (13-20)
+             *
+             * Defaults to `15`
+             */
+            zoom?: number
 
-        /**
-         * Map scale (1-3)
-         *
-         * Defaults to `1`
-         */
-        scale?: number
-    } = {}): FileLocation {
+            /**
+             * Map scale (1-3)
+             *
+             * Defaults to `1`
+             */
+            scale?: number
+        } = {}
+    ): FileLocation {
         return new FileLocation(this.client, {
             _: 'inputWebFileGeoPointLocation',
             geoPoint: {
                 _: 'inputGeoPoint',
                 lat: this.geo.lat,
                 long: this.geo.long,
-                accuracyRadius: this.geo.accuracyRadius
+                accuracyRadius: this.geo.accuracyRadius,
             },
             accessHash: this.geo.accessHash,
             w: params.width ?? 128,
@@ -97,8 +99,8 @@ export class Location {
                 _: 'inputGeoPoint',
                 lat: this.geo.lat,
                 long: this.geo.long,
-                accuracyRadius: this.geo.accuracyRadius
-            }
+                accuracyRadius: this.geo.accuracyRadius,
+            },
         }
     }
 }
@@ -141,11 +143,11 @@ export class LiveLocation extends Location {
                 _: 'inputGeoPoint',
                 lat: this.geo.lat,
                 long: this.geo.long,
-                accuracyRadius: this.geo.accuracyRadius
+                accuracyRadius: this.geo.accuracyRadius,
             },
             heading: this.live.heading,
             period: this.live.period,
-            proximityNotificationRadius: this.live.proximityNotificationRadius
+            proximityNotificationRadius: this.live.proximityNotificationRadius,
         }
     }
 

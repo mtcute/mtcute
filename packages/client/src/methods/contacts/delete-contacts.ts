@@ -1,6 +1,11 @@
 import { TelegramClient } from '../../client'
 import { MaybeArray } from '@mtcute/core'
-import { InputPeerLike, MtCuteInvalidPeerTypeError, MtCuteTypeAssertionError, User } from '../../types'
+import {
+    InputPeerLike,
+    MtCuteInvalidPeerTypeError,
+    MtCuteTypeAssertionError,
+    User,
+} from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
@@ -41,7 +46,7 @@ export async function deleteContacts(
     const single = !Array.isArray(userIds)
     if (single) userIds = [userIds as InputPeerLike]
 
-    const inputPeers =  await this.resolvePeerMany(
+    const inputPeers = await this.resolvePeerMany(
         userIds as InputPeerLike[],
         normalizeToInputUser
     )
@@ -54,7 +59,7 @@ export async function deleteContacts(
 
     const res = await this.call({
         _: 'contacts.deleteContacts',
-        id: inputPeers
+        id: inputPeers,
     })
 
     assertIsUpdatesGroup('contacts.deleteContacts', res)
@@ -63,7 +68,7 @@ export async function deleteContacts(
 
     this._handleUpdate(res)
 
-    const users = res.users.map(user => new User(this, user))
+    const users = res.users.map((user) => new User(this, user))
 
     return single ? users[0] : users
 }

@@ -35,7 +35,7 @@ export async function addPublicKey(
     crypto: ICryptoProvider,
     key: string,
     old = false
-) {
+): Promise<void> {
     const parsed = await parsePublicKey(crypto, key, old)
     keysIndex[parsed.fingerprint] = parsed
 }

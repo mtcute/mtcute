@@ -8,7 +8,11 @@ import {
     FileDownloadParameters,
     FileLocation,
 } from '../../types'
-import { fileIdToInputFileLocation, fileIdToInputWebFileLocation, parseFileId } from '@mtcute/file-id'
+import {
+    fileIdToInputFileLocation,
+    fileIdToInputWebFileLocation,
+    parseFileId,
+} from '@mtcute/file-id'
 
 /**
  * Download a file and return it as an iterable, which yields file contents
@@ -84,14 +88,19 @@ export async function* downloadAsIterable(
     }
 
     const requestCurrent = async (): Promise<Buffer> => {
-        let result: tl.RpcCallReturn['upload.getFile'] | tl.RpcCallReturn['upload.getWebFile']
+        let result:
+            | tl.RpcCallReturn['upload.getFile']
+            | tl.RpcCallReturn['upload.getWebFile']
         try {
-            result = await this.call({
-                _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
-                location: location as any,
-                offset,
-                limit: chunkSize
-            }, { connection })
+            result = await this.call(
+                {
+                    _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
+                    location: location as any,
+                    offset,
+                    limit: chunkSize,
+                },
+                { connection }
+            )
         } catch (e) {
             if (e.constructor === FileMigrateError) {
                 connection = this._downloadConnections[e.newDc]
@@ -116,7 +125,11 @@ export async function* downloadAsIterable(
             )
         }
 
-        if (result._ === 'upload.webFile' && result.size && limit === Infinity) {
+        if (
+            result._ === 'upload.webFile' &&
+            result.size &&
+            limit === Infinity
+        ) {
             limit = result.size
         }
 

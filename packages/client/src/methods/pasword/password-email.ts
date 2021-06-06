@@ -12,7 +12,7 @@ export async function verifyPasswordEmail(
 ): Promise<void> {
     await this.call({
         _: 'account.confirmPasswordEmail',
-        code
+        code,
     })
 }
 
@@ -23,7 +23,7 @@ export async function verifyPasswordEmail(
  */
 export async function resendPasswordEmail(this: TelegramClient): Promise<void> {
     await this.call({
-        _: 'account.resendPasswordEmail'
+        _: 'account.resendPasswordEmail',
     })
 }
 
@@ -34,6 +34,6 @@ export async function resendPasswordEmail(this: TelegramClient): Promise<void> {
  */
 export async function cancelPasswordEmail(this: TelegramClient): Promise<void> {
     await this.call({
-        _: 'account.cancelPasswordEmail'
+        _: 'account.cancelPasswordEmail',
     })
 }

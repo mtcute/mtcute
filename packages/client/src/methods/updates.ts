@@ -106,7 +106,10 @@ export async function _loadStorage(this: TelegramClient): Promise<void> {
 /**
  * @internal
  */
-export async function _saveStorage(this: TelegramClient, afterImport = false): Promise<void> {
+export async function _saveStorage(
+    this: TelegramClient,
+    afterImport = false
+): Promise<void> {
     // save updates state to the session
 
     if (afterImport) {
@@ -312,7 +315,10 @@ async function _fetchPeersForShort(
         case 'updateNewChannelMessage':
         case 'updateEditMessage':
         case 'updateEditChannelMessage': {
-            const msg = upd._ === 'message' || upd._ === 'messageService' ? upd : upd.message
+            const msg =
+                upd._ === 'message' || upd._ === 'messageService'
+                    ? upd
+                    : upd.message
             if (msg._ === 'messageEmpty') return null
 
             // ref: https://github.com/tdlib/td/blob/e1ebf743988edfcf4400cd5d33a664ff941dc13e/td/telegram/UpdatesManager.cpp#L412
@@ -357,13 +363,19 @@ async function _fetchPeersForShort(
                         }
                         break
                     case 'messageActionChatJoinedByLink':
-                        if (!(await fetchPeer(msg.action.inviterId))) return null
+                        if (!(await fetchPeer(msg.action.inviterId)))
+                            return null
                         break
                     case 'messageActionChatDeleteUser':
                         if (!(await fetchPeer(msg.action.userId))) return null
                         break
                     case 'messageActionChatMigrateTo':
-                        if (!(await fetchPeer(MAX_CHANNEL_ID - msg.action.channelId))) return null
+                        if (
+                            !(await fetchPeer(
+                                MAX_CHANNEL_ID - msg.action.channelId
+                            ))
+                        )
+                            return null
                         break
                     case 'messageActionChannelMigrateFrom':
                         if (!(await fetchPeer(-msg.action.chatId))) return null
@@ -465,7 +477,12 @@ async function _loadDifference(
                 if (nextLocalPts) {
                     if (nextLocalPts > pts) continue
                     if (nextLocalPts < pts) {
-                        await _loadChannelDifference.call(this, cid, noDispatch, pts)
+                        await _loadChannelDifference.call(
+                            this,
+                            cid,
+                            noDispatch,
+                            pts
+                        )
                         continue
                     }
                 }
@@ -735,7 +752,10 @@ export function _handleUpdate(
                         this._config = await this.call({ _: 'help.getConfig' })
                     } else {
                         if (!noDispatch) {
-                            const peers = await _fetchPeersForShort.call(this, upd)
+                            const peers = await _fetchPeersForShort.call(
+                                this,
+                                upd
+                            )
                             if (!peers) {
                                 // some peer is not cached.
                                 // need to re-fetch the thing, and cache them on the way

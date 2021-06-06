@@ -5,7 +5,11 @@ import { MtCuteTypeAssertionError } from '../types'
 // that is not an update, but it carries info about pts, and we need to handle it
 
 /** @internal */
-export function createDummyUpdate(pts: number, ptsCount: number, channelId = 0): tl.TypeUpdates {
+export function createDummyUpdate(
+    pts: number,
+    ptsCount: number,
+    channelId = 0
+): tl.TypeUpdates {
     return {
         _: 'updates',
         seq: 0,
@@ -20,24 +24,35 @@ export function createDummyUpdate(pts: number, ptsCount: number, channelId = 0):
                 ptsCount,
                 // since message id cant be negative, using negative 42
                 // here makes it distinctive from real updates
-                messages: [-42]
-            }
-        ]
+                messages: [-42],
+            },
+        ],
     }
 }
 
 /** @internal */
 export function isDummyUpdate(upd: tl.TypeUpdate): boolean {
-    return upd._ === 'updatePinnedChannelMessages' && upd.messages.length === 1 && upd.messages[0] === -42
+    return (
+        upd._ === 'updatePinnedChannelMessages' &&
+        upd.messages.length === 1 &&
+        upd.messages[0] === -42
+    )
 }
 
 /** @internal */
 export function isDummyUpdates(upd: tl.TypeUpdates): boolean {
-    return upd._ === 'updates' && upd.updates.length === 1 && isDummyUpdate(upd.updates[0])
+    return (
+        upd._ === 'updates' &&
+        upd.updates.length === 1 &&
+        isDummyUpdate(upd.updates[0])
+    )
 }
 
 /** @internal */
-export function assertIsUpdatesGroup(ctx: string, upd: tl.TypeUpdates): asserts upd is tl.RawUpdates | tl.RawUpdatesCombined {
+export function assertIsUpdatesGroup(
+    ctx: string,
+    upd: tl.TypeUpdates
+): asserts upd is tl.RawUpdates | tl.RawUpdatesCombined {
     switch (upd._) {
         case 'updates':
         case 'updatesCombined':

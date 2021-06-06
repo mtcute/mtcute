@@ -25,11 +25,13 @@ export async function findFolder(
 
     const folders = await this.getFolders()
 
-    return folders.find((it) => {
-        if (params.id && it.id !== params.id) return false
-        if (params.title && it.title !== params.title) return false
-        if (params.emoji && it.emoticon !== params.emoji) return false
+    return (
+        folders.find((it) => {
+            if (params.id && it.id !== params.id) return false
+            if (params.title && it.title !== params.title) return false
+            if (params.emoji && it.emoticon !== params.emoji) return false
 
-        return true
-    }) ?? null
+            return true
+        }) ?? null
+    )
 }

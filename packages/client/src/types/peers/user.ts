@@ -117,7 +117,10 @@ export class User {
         return this._user.lastName ?? null
     }
 
-    static parseStatus(status: tl.TypeUserStatus, bot = false): User.ParsedStatus {
+    static parseStatus(
+        status: tl.TypeUserStatus,
+        bot = false
+    ): User.ParsedStatus {
         let ret: User.Status
         let date: Date
 
@@ -159,7 +162,10 @@ export class User {
 
     private _parsedStatus?: User.ParsedStatus
     private _parseStatus() {
-        this._parsedStatus = User.parseStatus(this._user.status!, this._user.bot)
+        this._parsedStatus = User.parseStatus(
+            this._user.status!,
+            this._user.bot
+        )
     }
 
     /** User's Last Seen & Online status */

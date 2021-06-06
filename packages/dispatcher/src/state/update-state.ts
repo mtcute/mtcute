@@ -44,7 +44,10 @@ export class UpdateState<State, SceneName extends string = string> {
 
     private _updateLocalKey(): void {
         if (!this._scoped) this._localKey = this._localKeyBase
-        else this._localKey = this._scene ? this._scene + '_' + this._localKeyBase : this._localKeyBase
+        else
+            this._localKey = this._scene
+                ? this._scene + '_' + this._localKeyBase
+                : this._localKeyBase
     }
 
     /**

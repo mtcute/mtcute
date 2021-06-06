@@ -29,7 +29,10 @@ export class FileLocation {
         | tl.TypeInputFileLocation
         | tl.TypeInputWebFileLocation
         | Buffer
-        | (() => tl.TypeInputFileLocation | tl.TypeInputWebFileLocation | Buffer)
+        | (() =>
+              | tl.TypeInputFileLocation
+              | tl.TypeInputWebFileLocation
+              | Buffer)
 
     /**
      * File size in bytes, when available
@@ -47,7 +50,10 @@ export class FileLocation {
             | tl.TypeInputFileLocation
             | tl.TypeInputWebFileLocation
             | Buffer
-            | (() => tl.TypeInputFileLocation | tl.TypeInputWebFileLocation | Buffer),
+            | (() =>
+                  | tl.TypeInputFileLocation
+                  | tl.TypeInputWebFileLocation
+                  | Buffer),
         fileSize?: number,
         dcId?: number
     ) {

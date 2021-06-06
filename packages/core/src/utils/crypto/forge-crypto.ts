@@ -104,9 +104,6 @@ export class ForgeCryptoProvider extends BaseCryptoProvider {
         const hmac = forge.hmac.create()
         hmac.start('sha256', key.toString('binary'))
         hmac.update(data.toString('binary'))
-        return Buffer.from(
-            hmac.digest().data,
-            'binary'
-        )
+        return Buffer.from(hmac.digest().data, 'binary')
     }
 }

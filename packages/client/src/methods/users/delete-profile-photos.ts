@@ -25,6 +25,6 @@ export async function deleteProfilePhotos(
 
     await this.call({
         _: 'photos.deletePhotos',
-        id: photos
+        id: photos,
     })
 }

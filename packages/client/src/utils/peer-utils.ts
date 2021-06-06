@@ -47,7 +47,11 @@ export function normalizeToInputPeer(
 }
 
 export function normalizeToInputUser(
-    res: tl.TypeInputUser | tl.RawInputPeerUser | tl.RawInputPeerUserFromMessage | tl.RawInputPeerSelf
+    res:
+        | tl.TypeInputUser
+        | tl.RawInputPeerUser
+        | tl.RawInputPeerUserFromMessage
+        | tl.RawInputPeerSelf
 ): tl.TypeInputUser
 export function normalizeToInputUser(
     res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
@@ -77,7 +81,10 @@ export function normalizeToInputUser(
 }
 
 export function normalizeToInputChannel(
-    res: tl.TypeInputChannel | tl.RawInputPeerChannel | tl.RawInputPeerChannelFromMessage
+    res:
+        | tl.TypeInputChannel
+        | tl.RawInputPeerChannel
+        | tl.RawInputPeerChannelFromMessage
 ): tl.TypeInputChannel
 export function normalizeToInputChannel(
     res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel

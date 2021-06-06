@@ -25,7 +25,7 @@ export interface UploadedFile {
 }
 
 /** @internal */
-export function isUploadedFile(obj: any): obj is UploadedFile {
+export function isUploadedFile(obj: object): obj is UploadedFile {
     return (
         obj &&
         typeof obj === 'object' &&

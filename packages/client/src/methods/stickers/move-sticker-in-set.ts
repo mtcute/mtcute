@@ -30,7 +30,7 @@ export async function moveStickerInSet(
     const res = await this.call({
         _: 'stickers.changeStickerPosition',
         sticker,
-        position
+        position,
     })
 
     return new StickerSet(this, res)

@@ -26,9 +26,7 @@ export async function getChatPreview(
     })
 
     if (res._ !== 'chatInvite') {
-        throw new MtCuteNotFoundError(
-            `You have already joined this chat!`
-        )
+        throw new MtCuteNotFoundError(`You have already joined this chat!`)
     }
 
     return new ChatPreview(this, res, inviteLink)

@@ -15,8 +15,10 @@ const debug = require('debug')('mtcute:http-proxy')
 export class HttpProxyConnectionError extends Error {
     readonly proxy: HttpProxySettings
 
-    constructor (proxy: HttpProxySettings, message: string) {
-        super(`Error while connecting to ${proxy.host}:${proxy.port}: ${message}`)
+    constructor(proxy: HttpProxySettings, message: string) {
+        super(
+            `Error while connecting to ${proxy.host}:${proxy.port}: ${message}`
+        )
         this.proxy = proxy
     }
 }

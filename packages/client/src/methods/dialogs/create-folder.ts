@@ -36,13 +36,13 @@ export async function createFolder(
         includePeers: [],
         excludePeers: [],
         ...folder,
-        id
+        id,
     }
 
     await this.call({
         _: 'messages.updateDialogFilter',
         id,
-        filter
+        filter,
     })
 
     return filter

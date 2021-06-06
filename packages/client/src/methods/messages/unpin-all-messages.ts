@@ -17,11 +17,13 @@ export async function unpinAllMessages(
 
     const res = await this.call({
         _: 'messages.unpinAllMessages',
-        peer
+        peer,
     })
 
     if (isInputPeerChannel(peer)) {
-        this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount, peer.channelId))
+        this._handleUpdate(
+            createDummyUpdate(res.pts, res.ptsCount, peer.channelId)
+        )
     } else {
         this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
     }

@@ -23,7 +23,7 @@ export async function setSlowMode(
     const res = await this.call({
         _: 'channels.toggleSlowMode',
         channel: chat,
-        seconds
+        seconds,
     })
     this._handleUpdate(res)
 }

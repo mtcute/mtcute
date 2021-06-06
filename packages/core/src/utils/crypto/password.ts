@@ -29,7 +29,10 @@ export async function computeNewPasswordHash(
     algo: tl.RawPasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow,
     password: string
 ): Promise<Buffer> {
-    (algo as tl.Mutable<typeof algo>).salt1 = Buffer.concat([algo.salt1, randomBytes(32)])
+    ;(algo as tl.Mutable<typeof algo>).salt1 = Buffer.concat([
+        algo.salt1,
+        randomBytes(32),
+    ])
 
     const _x = await computePasswordHash(
         crypto,

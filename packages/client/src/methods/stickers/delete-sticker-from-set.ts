@@ -25,7 +25,7 @@ export async function deleteStickerFromSet(
 
     const res = await this.call({
         _: 'stickers.removeStickerFromSet',
-        sticker
+        sticker,
     })
 
     return new StickerSet(this, res)

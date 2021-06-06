@@ -28,10 +28,7 @@ export function getBarePeerId(peer: tl.TypePeer): number {
  * - ID is negated for chats
  * - ID is negated and `1e12` is subtracted for channels
  */
-export function getMarkedPeerId(
-    peerId: number,
-    peerType: BasicPeerType
-): number
+export function getMarkedPeerId(peerId: number, peerType: BasicPeerType): number
 export function getMarkedPeerId(peer: tl.TypePeer | tl.TypeInputPeer): number
 export function getMarkedPeerId(
     peer: tl.TypePeer | tl.TypeInputPeer | number,
@@ -108,10 +105,9 @@ export function markedPeerIdToBare(peerId: number): number {
  * Only checks `.user`, `.chat`, `.channel`, `.users` and `.chats` properties
  */
 export function* getAllPeersFrom(
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     obj: any
-): Iterable<
-    (tl.TypeUser | tl.TypeChat)
-> {
+): Iterable<tl.TypeUser | tl.TypeChat> {
     if (typeof obj !== 'object') return
 
     switch (obj._) {

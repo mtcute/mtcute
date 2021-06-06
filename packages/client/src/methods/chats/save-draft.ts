@@ -20,13 +20,13 @@ export async function saveDraft(
         await this.call({
             _: 'messages.saveDraft',
             peer,
-            ...draft
+            ...draft,
         })
     } else {
         await this.call({
             _: 'messages.saveDraft',
             peer,
-            message: ''
+            message: '',
         })
     }
 }

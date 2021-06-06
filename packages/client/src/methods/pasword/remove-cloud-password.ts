@@ -10,7 +10,7 @@ import { computeSrpParams } from '@mtcute/core'
  */
 export async function removeCloudPassword(
     this: TelegramClient,
-    password: string,
+    password: string
 ): Promise<void> {
     const pwd = await this.call({ _: 'account.getPassword' })
     if (!pwd.hasPassword)
@@ -25,7 +25,7 @@ export async function removeCloudPassword(
             _: 'account.passwordInputSettings',
             newAlgo: { _: 'passwordKdfAlgoUnknown' },
             newPasswordHash: Buffer.alloc(0),
-            hint: ''
-        }
+            hint: '',
+        },
     })
 }

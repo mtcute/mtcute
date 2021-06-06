@@ -132,7 +132,9 @@ export async function* getDialogs(
             (it) => it.id === params!.folder || it.title === params!.folder
         )
         if (!found)
-            throw new MtCuteArgumentError(`Could not find folder ${params.folder}`)
+            throw new MtCuteArgumentError(
+                `Could not find folder ${params.folder}`
+            )
 
         filters = found
     } else {
@@ -143,7 +145,7 @@ export async function* getDialogs(
         if (filters) {
             filters = {
                 ...filters,
-                ...params.filter
+                ...params.filter,
             }
         } else {
             filters = {
@@ -153,7 +155,7 @@ export async function* getDialogs(
                 pinnedPeers: [],
                 includePeers: [],
                 excludePeers: [],
-                ...params.filter
+                ...params.filter,
             }
         }
     }
@@ -164,11 +166,13 @@ export async function* getDialogs(
             _: 'messages.getPeerDialogs',
             peers: filters.pinnedPeers.map((peer) => ({
                 _: 'inputDialogPeer',
-                peer
-            }))
+                peer,
+            })),
         })
 
-        res.dialogs.forEach((dialog: tl.Mutable<tl.TypeDialog>) => dialog.pinned = true)
+        res.dialogs.forEach(
+            (dialog: tl.Mutable<tl.TypeDialog>) => (dialog.pinned = true)
+        )
 
         return res
     }
@@ -243,11 +247,11 @@ export async function* getDialogs(
     }
 
     const filterFolder = filters
-        // if pinned is `only`, this wouldn't be reached
-        // if pinned is `exclude`, we want to exclude them
-        // if pinned is `include`, we already yielded them, so we also want to exclude them
-        // if pinned is `keep`, we want to keep them
-        ? Dialog.filterFolder(filters, pinned !== 'keep')
+        ? // if pinned is `only`, this wouldn't be reached
+          // if pinned is `exclude`, we want to exclude them
+          // if pinned is `include`, we already yielded them, so we also want to exclude them
+          // if pinned is `keep`, we want to keep them
+          Dialog.filterFolder(filters, pinned !== 'keep')
         : undefined
 
     const folderId =

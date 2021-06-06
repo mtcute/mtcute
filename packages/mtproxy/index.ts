@@ -155,7 +155,11 @@ export class MtProxyTcpTransport extends TcpTransport {
 
     private async _handleConnectFakeTls(): Promise<void> {
         try {
-            const hello = await generateFakeTlsHeader(this._fakeTlsDomain!, this._rawSecret, this._crypto)
+            const hello = await generateFakeTlsHeader(
+                this._fakeTlsDomain!,
+                this._rawSecret,
+                this._crypto
+            )
             const helloRand = hello.slice(11, 11 + 32)
 
             const checkHelloResponse = async (buf: Buffer): Promise<void> => {
@@ -166,7 +170,9 @@ export class MtProxyTcpTransport extends TcpTransport {
                     }
 
                     if (first.compare(first, 0, first.length) !== 0) {
-                        throw new Error('First part of hello response is invalid')
+                        throw new Error(
+                            'First part of hello response is invalid'
+                        )
                     }
                     buf = buf.slice(first.length)
 
@@ -180,12 +186,15 @@ export class MtProxyTcpTransport extends TcpTransport {
                 }
 
                 const respRand = resp.slice(11, 11 + 32)
-                const hash = await this._crypto.hmacSha256(Buffer.concat([
-                    helloRand,
-                    resp.slice(0, 11),
-                    Buffer.alloc(32, 0),
-                    resp.slice(11 + 32)
-                ]), this._rawSecret)
+                const hash = await this._crypto.hmacSha256(
+                    Buffer.concat([
+                        helloRand,
+                        resp.slice(0, 11),
+                        Buffer.alloc(32, 0),
+                        resp.slice(11 + 32),
+                    ]),
+                    this._rawSecret
+                )
 
                 if (hash.compare(respRand) !== 0) {
                     throw new Error('Response hash is invalid')
@@ -196,7 +205,9 @@ export class MtProxyTcpTransport extends TcpTransport {
                 try {
                     await checkHelloResponse(buf)
 
-                    this._socket!.on('data', (data) => this._packetCodec.feed(data))
+                    this._socket!.on('data', (data) =>
+                        this._packetCodec.feed(data)
+                    )
                     this._socket!.off('data', packetHandler)
                     this.handleConnect()
                 } catch (e) {

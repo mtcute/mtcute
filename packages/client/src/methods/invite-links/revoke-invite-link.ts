@@ -22,12 +22,15 @@ export async function revokeInviteLink(
         _: 'messages.editExportedChatInvite',
         peer: await this.resolvePeer(chatId),
         link,
-        revoked: true
+        revoked: true,
     })
 
     const { users } = createUsersChatsIndex(res)
 
-    const invite = res._ === 'messages.exportedChatInviteReplaced' ? res.newInvite : res.invite
+    const invite =
+        res._ === 'messages.exportedChatInviteReplaced'
+            ? res.newInvite
+            : res.invite
 
     return new ChatInviteLink(this, invite, users)
 }

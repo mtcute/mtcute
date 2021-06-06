@@ -21,21 +21,22 @@ export async function editFolder(
 ): Promise<tl.RawDialogFilter> {
     if (typeof folder === 'number' || typeof folder === 'string') {
         const old = await this.getFolders()
-        const found = old.find(it => it.id === folder || it.title === folder)
-        if (!found) throw new MtCuteArgumentError(`Could not find a folder ${folder}`)
+        const found = old.find((it) => it.id === folder || it.title === folder)
+        if (!found)
+            throw new MtCuteArgumentError(`Could not find a folder ${folder}`)
 
         folder = found
     }
 
     const filter: tl.RawDialogFilter = {
         ...folder,
-        ...modification
+        ...modification,
     }
 
     await this.call({
         _: 'messages.updateDialogFilter',
         id: folder.id,
-        filter
+        filter,
     })
 
     return filter

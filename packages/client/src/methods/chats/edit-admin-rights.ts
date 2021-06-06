@@ -1,7 +1,10 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtCuteInvalidPeerTypeError } from '../../types'
 import { tl } from '@mtcute/tl'
-import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils'
+import {
+    normalizeToInputChannel,
+    normalizeToInputUser,
+} from '../../utils/peer-utils'
 
 /**
  * Edit supergroup/channel admin rights of a user.
@@ -20,12 +23,10 @@ export async function editAdminRights(
     rank = ''
 ): Promise<void> {
     const chat = normalizeToInputChannel(await this.resolvePeer(chatId))
-    if (!chat)
-        throw new MtCuteInvalidPeerTypeError(chatId, 'channel')
+    if (!chat) throw new MtCuteInvalidPeerTypeError(chatId, 'channel')
 
     const user = normalizeToInputUser(await this.resolvePeer(userId))
-    if (!user)
-        throw new MtCuteInvalidPeerTypeError(userId, 'user')
+    if (!user) throw new MtCuteInvalidPeerTypeError(userId, 'user')
 
     const res = await this.call({
         _: 'channels.editAdmin',
@@ -33,9 +34,9 @@ export async function editAdminRights(
         userId: user,
         adminRights: {
             _: 'chatAdminRights',
-            ...rights
+            ...rights,
         },
-        rank
+        rank,
     })
 
     this._handleUpdate(res)

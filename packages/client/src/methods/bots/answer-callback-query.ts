@@ -55,6 +55,6 @@ export async function answerCallbackQuery(
         cacheTime: params.cacheTime ?? 0,
         alert: params.alert,
         message: params.text,
-        url: params.url
+        url: params.url,
     })
 }

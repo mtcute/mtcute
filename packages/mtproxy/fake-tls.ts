@@ -4,7 +4,7 @@ import {
     ICryptoProvider,
     PacketCodec,
     WrappedCodec,
-    randomBytes
+    randomBytes,
 } from '@mtcute/core'
 import bigInt, { BigInteger } from 'big-integer'
 
@@ -17,9 +17,15 @@ const KEY_MOD = bigInt(
     16
 )
 // 2^255 - 19
-const QUAD_RES_MOD = bigInt('7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed', 16)
+const QUAD_RES_MOD = bigInt(
+    '7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed',
+    16
+)
 // (mod - 1) / 2 = 2^254 - 10
-const QUAD_RES_POW = bigInt('3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6', 16)
+const QUAD_RES_POW = bigInt(
+    '3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6',
+    16
+)
 
 function _getY2(x: BigInteger, mod: BigInteger): BigInteger {
     // returns y = x^3 + x^2 * 486662 + x
@@ -261,7 +267,11 @@ class TlsHelloWriter implements TlsOperationHandler {
 }
 
 /** @internal */
-export async function generateFakeTlsHeader(domain: string, secret: Buffer, crypto: ICryptoProvider): Promise<Buffer> {
+export async function generateFakeTlsHeader(
+    domain: string,
+    secret: Buffer,
+    crypto: ICryptoProvider
+): Promise<Buffer> {
     const domainBuf = Buffer.from(domain)
 
     const writer = new TlsHelloWriter(517, domainBuf)
@@ -309,7 +319,10 @@ export class FakeTlsPacketCodec extends WrappedCodec implements PacketCodec {
         if (packet.length + this._header.length > MAX_TLS_PACKET_LENGTH) {
             const ret: Buffer[] = []
             while (packet.length) {
-                const buf = packet.slice(0, MAX_TLS_PACKET_LENGTH - this._header.length)
+                const buf = packet.slice(
+                    0,
+                    MAX_TLS_PACKET_LENGTH - this._header.length
+                )
                 packet = packet.slice(buf.length)
                 ret.push(this._encodeTls(buf))
             }

@@ -11,9 +11,10 @@ type SerializableObject = {
     [key: string]: any
 }
 
-const isNativeBigIntAvailable = typeof BigInt !== 'undefined' && 'writeBigInt64LE' in Buffer.prototype
+const isNativeBigIntAvailable =
+    typeof BigInt !== 'undefined' && 'writeBigInt64LE' in Buffer.prototype
 
-function utf8ByteLength (string: string): number {
+function utf8ByteLength(string: string): number {
     let codePoint
     const length = string.length
     let leadSurrogate = null
@@ -23,11 +24,11 @@ function utf8ByteLength (string: string): number {
         codePoint = string.charCodeAt(i)
 
         // is surrogate component
-        if (codePoint > 0xD7FF && codePoint < 0xE000) {
+        if (codePoint > 0xd7ff && codePoint < 0xe000) {
             // last char was a lead
             if (!leadSurrogate) {
                 // no lead yet
-                if (codePoint > 0xDBFF) {
+                if (codePoint > 0xdbff) {
                     // unexpected trail
                     bytes += 3
                     continue
@@ -44,14 +45,16 @@ function utf8ByteLength (string: string): number {
             }
 
             // 2 leads in a row
-            if (codePoint < 0xDC00) {
+            if (codePoint < 0xdc00) {
                 bytes += 3
                 leadSurrogate = codePoint
                 continue
             }
 
             // valid surrogate pair
-            codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000
+            codePoint =
+                (((leadSurrogate - 0xd800) << 10) | (codePoint - 0xdc00)) +
+                0x10000
         } else if (leadSurrogate) {
             // valid bmp char, but last char was a lead
             bytes += 3
@@ -79,7 +82,9 @@ function utf8ByteLength (string: string): number {
 // buffer package for the web detects size by writing the string to an array and checking size
 // that is slow.
 // see https://github.com/feross/buffer/blob/795bbb5bda1b39f1370ebd784bea6107b087e3a7/index.js#L527
-const utfLength = (Buffer.prototype as any)._isBuffer ? utf8ByteLength : Buffer.byteLength
+const utfLength = (Buffer.prototype as any)._isBuffer
+    ? utf8ByteLength
+    : Buffer.byteLength
 
 export class SerializationCounter implements ITlBinaryWriter {
     count = 0
@@ -95,39 +100,39 @@ export class SerializationCounter implements ITlBinaryWriter {
         return cnt.count
     }
 
-    boolean(val: boolean): void {
+    boolean(): void {
         this.count += 4
     }
 
-    double(val: number): void {
+    double(): void {
         this.count += 8
     }
 
-    float(val: number): void {
+    float(): void {
         this.count += 4
     }
 
-    int128(val: Buffer): void {
+    int128(): void {
         this.count += 16
     }
 
-    int256(val: Buffer): void {
+    int256(): void {
         this.count += 32
     }
 
-    int32(val: number): void {
+    int32(): void {
         this.count += 4
     }
 
-    uint32(val: number): void {
+    uint32(): void {
         this.count += 4
     }
 
-    long(val: BigInteger): void {
+    long(): void {
         this.count += 8
     }
 
-    rawLong(val: Buffer): void {
+    rawLong(): void {
         this.count += 8
     }
 
@@ -192,7 +197,7 @@ export class BinaryWriter implements ITlBinaryWriter {
     static serializeObject(
         obj: SerializableObject,
         knownSize = -1,
-        objectMap?: any
+        objectMap?: TlWriterMap
     ): Buffer {
         if (knownSize === -1)
             knownSize = SerializationCounter.countNeededBytes(obj)

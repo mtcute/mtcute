@@ -91,8 +91,8 @@ export class Game {
             id: {
                 _: 'inputGameID',
                 id: this.game.id,
-                accessHash: this.game.accessHash
-            }
+                accessHash: this.game.accessHash,
+            },
         }
     }
 }

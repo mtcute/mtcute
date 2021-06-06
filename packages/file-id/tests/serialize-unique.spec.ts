@@ -35,8 +35,14 @@ describe('serializing unique file ids', () => {
 
     it('serializes unique ids for profile pictures', () => {
         // big
-        test('AQADAgATySHBDgAEAwAD0npI3Bb___-wfxjpg7QCPf8pBQABHwQ', 'AQADySHBDgAE_ykFAAE')
+        test(
+            'AQADAgATySHBDgAEAwAD0npI3Bb___-wfxjpg7QCPf8pBQABHwQ',
+            'AQADySHBDgAE_ykFAAE'
+        )
         // small
-        test('AQADAgATySHBDgAEAgAD0npI3Bb___-wfxjpg7QCPf0pBQABHwQ', 'AQADySHBDgAE_SkFAAE')
+        test(
+            'AQADAgATySHBDgAEAgAD0npI3Bb___-wfxjpg7QCPf0pBQABHwQ',
+            'AQADySHBDgAE_SkFAAE'
+        )
     })
 })

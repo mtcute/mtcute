@@ -6,7 +6,11 @@ import {
     Message,
     ReplyMarkup,
 } from '../../types'
-import { normalizeDate, normalizeMessageId, randomUlong } from '../../utils/misc-utils'
+import {
+    normalizeDate,
+    normalizeMessageId,
+    randomUlong,
+} from '../../utils/misc-utils'
 
 /**
  * Send a single media (a photo or a document-based media)
@@ -108,7 +112,10 @@ export async function sendMedia(
 
     let replyTo = normalizeMessageId(params.replyTo)
     if (params.commentTo) {
-        ;[peer, replyTo] = await this._getDiscussionMessage(peer, normalizeMessageId(params.commentTo)!)
+        ;[peer, replyTo] = await this._getDiscussionMessage(
+            peer,
+            normalizeMessageId(params.commentTo)!
+        )
     }
 
     const res = await this.call({

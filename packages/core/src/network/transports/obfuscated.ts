@@ -1,6 +1,5 @@
 import { PacketCodec } from './abstract'
-import { ICryptoProvider, IEncryptionScheme } from '../../utils/crypto'
-import { EventEmitter } from 'events'
+import { IEncryptionScheme } from '../../utils/crypto'
 import { buffersEqual, randomBytes } from '../../utils/buffer-utils'
 import { WrappedCodec } from './wrapped'
 

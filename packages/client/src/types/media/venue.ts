@@ -3,7 +3,6 @@ import { Location } from './location'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
-import bigInt from 'big-integer'
 
 export namespace Venue {
     export interface VenueSource {
@@ -33,7 +32,7 @@ export class Venue {
     readonly client: TelegramClient
     readonly raw: tl.RawMessageMediaVenue
 
-    constructor (client: TelegramClient, raw: tl.RawMessageMediaVenue) {
+    constructor(client: TelegramClient, raw: tl.RawMessageMediaVenue) {
         this.client = client
         this.raw = raw
     }
@@ -106,7 +105,7 @@ export class Venue {
             address: this.raw.address,
             provider: this.raw.provider,
             venueId: this.raw.venueId,
-            venueType: this.raw.venueType
+            venueType: this.raw.venueType,
         }
     }
 }

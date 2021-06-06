@@ -1,7 +1,11 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { inputPeerToPeer } from '../../utils/peer-utils'
-import { normalizeDate, normalizeMessageId, randomUlong } from '../../utils/misc-utils'
+import {
+    normalizeDate,
+    normalizeMessageId,
+    randomUlong,
+} from '../../utils/misc-utils'
 import { InputPeerLike, Message, BotKeyboard, ReplyMarkup } from '../../types'
 
 /**
@@ -91,7 +95,10 @@ export async function sendText(
 
     let replyTo = normalizeMessageId(params.replyTo)
     if (params.commentTo) {
-        ;[peer, replyTo] = await this._getDiscussionMessage(peer, normalizeMessageId(params.commentTo)!)
+        ;[peer, replyTo] = await this._getDiscussionMessage(
+            peer,
+            normalizeMessageId(params.commentTo)!
+        )
     }
 
     const res = await this.call({

@@ -21,8 +21,7 @@ export async function _parseEntities(
         }
         // either explicitly disabled or no available parser
         if (!mode) return [text, []]
-
-        ;([text, entities] = await this._parseModes[mode].parse(text))
+        ;[text, entities] = await this._parseModes[mode].parse(text)
     }
 
     // replace mentionName entities with input ones

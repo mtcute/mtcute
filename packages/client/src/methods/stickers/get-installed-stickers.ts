@@ -17,7 +17,7 @@ export async function getInstalledStickers(
 ): Promise<StickerSet[]> {
     const res = await this.call({
         _: 'messages.getAllStickers',
-        hash: 0
+        hash: 0,
     })
 
     assertTypeIs('getInstalledStickers', res, 'messages.allStickers')

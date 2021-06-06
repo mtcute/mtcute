@@ -29,8 +29,8 @@ export async function _getDiscussionMessage(
         {
             _: 'inputPeerChannel',
             channelId: chat.id,
-            accessHash: chat.accessHash!
+            accessHash: chat.accessHash!,
         },
-        msg.id
+        msg.id,
     ]
 }

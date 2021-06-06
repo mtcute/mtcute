@@ -2,3 +2,11 @@ private/
 docs/
 dist/
 scripts/
+
+packages/tl/errors.js
+packages/tl/errors.d.ts
+packages/tl/index.js
+packages/tl/index.d.ts
+packages/tl/binary/reader.js
+packages/tl/binary/writer.js
+packages/tl/binary/rsa-keys.js

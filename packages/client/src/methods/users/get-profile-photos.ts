@@ -40,7 +40,7 @@ export async function getProfilePhotos(
         userId: peer,
         offset: params.offset ?? 0,
         limit: params.limit ?? 100,
-        maxId: bigInt.zero
+        maxId: bigInt.zero,
     })
 
     return res.photos.map((it) => new Photo(this, it as tl.RawPhoto))

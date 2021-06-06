@@ -10,7 +10,7 @@ export class ChatLocation {
     readonly client: TelegramClient
     readonly raw: tl.RawChannelLocation
 
-    constructor (client: TelegramClient, raw: tl.RawChannelLocation) {
+    constructor(client: TelegramClient, raw: tl.RawChannelLocation) {
         this.client = client
         this.raw = raw
     }
@@ -21,7 +21,10 @@ export class ChatLocation {
      */
     get location(): Location {
         if (!this._location) {
-            this._location = new Location(this.client, this.raw.geoPoint as tl.RawGeoPoint)
+            this._location = new Location(
+                this.client,
+                this.raw.geoPoint as tl.RawGeoPoint
+            )
         }
 
         return this._location

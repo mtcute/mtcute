@@ -10,10 +10,7 @@ import { ObfuscatedPacketCodec } from './obfuscated'
 const debug = require('debug')('mtcute:ws')
 
 let ws: {
-    new (
-        address: string,
-        options?: string
-    ): WebSocket
+    new (address: string, options?: string): WebSocket
 } | null
 if (typeof window === 'undefined' || typeof window.WebSocket === 'undefined') {
     try {
@@ -104,7 +101,8 @@ export abstract class WebSocketTransport
         this._socket = new ws!(
             `wss://${this._subdomains[dc.id]}.${this._baseDomain}/apiws${
                 this._isTest ? '_test' : ''
-            }`, 'binary'
+            }`,
+            'binary'
         )
 
         this._socket.addEventListener('message', (evt) =>

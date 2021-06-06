@@ -351,35 +351,55 @@ function _actionFromTl(
             return {
                 type: 'photo_changed',
                 old: new Photo(this.client, e.prevPhoto as tl.RawPhoto),
-                new: new Photo(this.client, e.newPhoto as tl.RawPhoto)
+                new: new Photo(this.client, e.newPhoto as tl.RawPhoto),
             }
         case 'channelAdminLogEventActionToggleInvites':
             return {
                 type: 'invites_toggled',
                 old: !e.newValue,
-                new: e.newValue
+                new: e.newValue,
             }
         case 'channelAdminLogEventActionToggleSignatures':
             return {
                 type: 'signatures_toggled',
                 old: !e.newValue,
-                new: e.newValue
+                new: e.newValue,
             }
         case 'channelAdminLogEventActionUpdatePinned':
             return {
                 type: 'msg_pinned',
-                message: new Message(this.client, e.message, this._users, this._chats)
+                message: new Message(
+                    this.client,
+                    e.message,
+                    this._users,
+                    this._chats
+                ),
             }
         case 'channelAdminLogEventActionEditMessage':
             return {
                 type: 'msg_edited',
-                old: new Message(this.client, e.prevMessage, this._users, this._chats),
-                new: new Message(this.client, e.newMessage, this._users, this._chats)
+                old: new Message(
+                    this.client,
+                    e.prevMessage,
+                    this._users,
+                    this._chats
+                ),
+                new: new Message(
+                    this.client,
+                    e.newMessage,
+                    this._users,
+                    this._chats
+                ),
             }
         case 'channelAdminLogEventActionDeleteMessage':
             return {
                 type: 'msg_deleted',
-                message: new Message(this.client, e.message, this._users, this._chats)
+                message: new Message(
+                    this.client,
+                    e.message,
+                    this._users,
+                    this._chats
+                ),
             }
         case 'channelAdminLogEventActionParticipantLeave':
             return { type: 'user_left' }
@@ -391,65 +411,84 @@ function _actionFromTl(
         case 'channelAdminLogEventActionParticipantToggleBan':
             return {
                 type: 'user_perms_changed',
-                old: new ChatMember(this.client, e.prevParticipant, this._users),
-                new: new ChatMember(this.client, e.newParticipant, this._users)
+                old: new ChatMember(
+                    this.client,
+                    e.prevParticipant,
+                    this._users
+                ),
+                new: new ChatMember(this.client, e.newParticipant, this._users),
             }
         case 'channelAdminLogEventActionParticipantToggleAdmin':
             return {
                 type: 'user_admin_perms_changed',
-                old: new ChatMember(this.client, e.prevParticipant, this._users),
-                new: new ChatMember(this.client, e.newParticipant, this._users)
+                old: new ChatMember(
+                    this.client,
+                    e.prevParticipant,
+                    this._users
+                ),
+                new: new ChatMember(this.client, e.newParticipant, this._users),
             }
         case 'channelAdminLogEventActionChangeStickerSet':
             return {
                 type: 'stickerset_changed',
                 old: e.prevStickerset,
-                new: e.newStickerset
+                new: e.newStickerset,
             }
         case 'channelAdminLogEventActionTogglePreHistoryHidden':
             return {
                 type: 'history_toggled',
                 old: !e.newValue,
-                new: e.newValue
+                new: e.newValue,
             }
         case 'channelAdminLogEventActionDefaultBannedRights':
             return {
                 type: 'def_perms_changed',
                 old: new ChatPermissions(e.prevBannedRights),
-                new: new ChatPermissions(e.newBannedRights)
+                new: new ChatPermissions(e.newBannedRights),
             }
         case 'channelAdminLogEventActionStopPoll':
             return {
                 type: 'poll_stopped',
-                message: new Message(this.client, e.message, this._users, this._chats)
+                message: new Message(
+                    this.client,
+                    e.message,
+                    this._users,
+                    this._chats
+                ),
             }
         case 'channelAdminLogEventActionChangeLinkedChat':
             return {
                 type: 'linked_chat_changed',
                 old: e.prevValue,
-                new: e.newValue
+                new: e.newValue,
             }
         case 'channelAdminLogEventActionChangeLocation':
             return {
                 type: 'location_changed',
-                old: e.prevValue._ === 'channelLocationEmpty' ? null : new ChatLocation(this.client, e.prevValue),
-                new: e.newValue._ === 'channelLocationEmpty' ? null : new ChatLocation(this.client, e.newValue),
+                old:
+                    e.prevValue._ === 'channelLocationEmpty'
+                        ? null
+                        : new ChatLocation(this.client, e.prevValue),
+                new:
+                    e.newValue._ === 'channelLocationEmpty'
+                        ? null
+                        : new ChatLocation(this.client, e.newValue),
             }
         case 'channelAdminLogEventActionToggleSlowMode':
             return {
                 type: 'slow_mode_changed',
                 old: e.prevValue,
-                new: e.newValue
+                new: e.newValue,
             }
         case 'channelAdminLogEventActionStartGroupCall':
             return {
                 type: 'call_started',
-                call: e.call
+                call: e.call,
             }
         case 'channelAdminLogEventActionDiscardGroupCall':
             return {
                 type: 'call_ended',
-                call: e.call
+                call: e.call,
             }
         case 'channelAdminLogEventActionParticipantMute':
         case 'channelAdminLogEventActionParticipantUnmute':
@@ -459,34 +498,34 @@ function _actionFromTl(
         case 'channelAdminLogEventActionToggleGroupCallSetting':
             return {
                 type: 'call_setting_changed',
-                joinMuted: e.joinMuted
+                joinMuted: e.joinMuted,
             }
         case 'channelAdminLogEventActionParticipantJoinByInvite':
             return {
                 type: 'user_joined_invite',
-                link: new ChatInviteLink(this.client, e.invite, this._users)
+                link: new ChatInviteLink(this.client, e.invite, this._users),
             }
         case 'channelAdminLogEventActionExportedInviteDelete':
             return {
                 type: 'invite_deleted',
-                link: new ChatInviteLink(this.client, e.invite, this._users)
+                link: new ChatInviteLink(this.client, e.invite, this._users),
             }
         case 'channelAdminLogEventActionExportedInviteRevoke':
             return {
                 type: 'invite_revoked',
-                link: new ChatInviteLink(this.client, e.invite, this._users)
+                link: new ChatInviteLink(this.client, e.invite, this._users),
             }
         case 'channelAdminLogEventActionExportedInviteEdit':
             return {
                 type: 'invite_edited',
                 old: new ChatInviteLink(this.client, e.prevInvite, this._users),
-                new: new ChatInviteLink(this.client, e.newInvite, this._users)
+                new: new ChatInviteLink(this.client, e.newInvite, this._users),
             }
         case 'channelAdminLogEventActionChangeHistoryTTL':
             return {
                 type: 'ttl_changed',
                 old: e.prevValue,
-                new: e.newValue
+                new: e.newValue,
             }
         default:
             return null

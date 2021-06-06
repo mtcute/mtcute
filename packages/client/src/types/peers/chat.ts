@@ -416,11 +416,18 @@ export class Chat {
      * Returned only in {@link TelegramClient.getFullChat}
      */
     get location(): ChatLocation | null {
-        if (!this.fullPeer || this.fullPeer._ !== 'channelFull' || this.fullPeer.location?._ !== 'channelLocation')
+        if (
+            !this.fullPeer ||
+            this.fullPeer._ !== 'channelFull' ||
+            this.fullPeer.location?._ !== 'channelLocation'
+        )
             return null
 
         if (!this._location) {
-            this._location = new ChatLocation(this.client, this.fullPeer.location)
+            this._location = new ChatLocation(
+                this.client,
+                this.fullPeer.location
+            )
         }
 
         return this._location

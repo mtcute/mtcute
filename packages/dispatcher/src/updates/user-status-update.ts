@@ -9,10 +9,7 @@ export class UserStatusUpdate {
     readonly client: TelegramClient
     readonly raw: tl.RawUpdateUserStatus
 
-    constructor(
-        client: TelegramClient,
-        raw: tl.RawUpdateUserStatus
-    ) {
+    constructor(client: TelegramClient, raw: tl.RawUpdateUserStatus) {
         this.client = client
         this.raw = raw
     }

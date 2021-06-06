@@ -21,13 +21,13 @@ export async function archiveChats(
         folderPeers.push({
             _: 'inputFolderPeer',
             peer: await this.resolvePeer(chat),
-            folderId: 1
+            folderId: 1,
         })
     }
 
     const updates = await this.call({
         _: 'folders.editPeerFolders',
-        folderPeers
+        folderPeers,
     })
     this._handleUpdate(updates)
 }

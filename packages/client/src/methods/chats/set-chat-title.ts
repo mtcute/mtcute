@@ -1,8 +1,5 @@
 import { TelegramClient } from '../../client'
-import {
-    InputPeerLike,
-    MtCuteInvalidPeerTypeError,
-} from '../../types'
+import { InputPeerLike, MtCuteInvalidPeerTypeError } from '../../types'
 import {
     isInputPeerChannel,
     isInputPeerChat,
@@ -30,13 +27,13 @@ export async function setChatTitle(
         res = await this.call({
             _: 'messages.editChatTitle',
             chatId: chat.chatId,
-            title
+            title,
         })
     } else if (isInputPeerChannel(chat)) {
         res = await this.call({
             _: 'channels.editTitle',
             channel: normalizeToInputChannel(chat),
-            title
+            title,
         })
     } else throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
 

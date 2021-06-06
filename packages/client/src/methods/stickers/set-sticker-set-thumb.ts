@@ -23,19 +23,19 @@ export async function setStickerSetThumb(
          * @param total  Total file size
          */
         progressCallback?: (uploaded: number, total: number) => void
-    },
+    }
 ): Promise<StickerSet> {
     if (typeof id === 'string') {
         id = {
             _: 'inputStickerSetShortName',
-            shortName: id
+            shortName: id,
         }
     }
 
     const res = await this.call({
         _: 'stickers.setStickerSetThumb',
         stickerset: id,
-        thumb: await this._normalizeFileToDocument(thumb, params ?? {})
+        thumb: await this._normalizeFileToDocument(thumb, params ?? {}),
     })
 
     return new StickerSet(this, res)

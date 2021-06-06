@@ -125,7 +125,7 @@ export class Sticker extends RawDocument {
                 point: MASK_POS[raw.n],
                 x: raw.x,
                 y: raw.y,
-                scale: raw.zoom
+                scale: raw.zoom,
             }
         }
 

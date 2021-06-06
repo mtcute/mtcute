@@ -40,7 +40,7 @@ export async function editInviteLink(
         peer: await this.resolvePeer(chatId),
         link,
         expireDate: normalizeDate(params.expires),
-        usageLimit: params.usageLimit
+        usageLimit: params.usageLimit,
     })
 
     const { users } = createUsersChatsIndex(res)

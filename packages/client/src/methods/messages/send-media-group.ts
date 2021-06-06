@@ -6,7 +6,11 @@ import {
     Message,
     ReplyMarkup,
 } from '../../types'
-import { normalizeDate, normalizeMessageId, randomUlong } from '../../utils/misc-utils'
+import {
+    normalizeDate,
+    normalizeMessageId,
+    randomUlong,
+} from '../../utils/misc-utils'
 import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
@@ -95,7 +99,10 @@ export async function sendMediaGroup(
 
     let replyTo = normalizeMessageId(params.replyTo)
     if (params.commentTo) {
-        ;[peer, replyTo] = await this._getDiscussionMessage(peer, normalizeMessageId(params.commentTo)!)
+        ;[peer, replyTo] = await this._getDiscussionMessage(
+            peer,
+            normalizeMessageId(params.commentTo)!
+        )
     }
 
     const multiMedia: tl.RawInputSingleMedia[] = []

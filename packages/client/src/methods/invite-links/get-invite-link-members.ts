@@ -27,14 +27,16 @@ export async function* getInviteLinkMembers(
 
     for (;;) {
         // for some reason ts needs annotation, idk
-        const res: tl.RpcCallReturn['messages.getChatInviteImporters'] = await this.call({
-            _: 'messages.getChatInviteImporters',
-            limit: Math.min(100, limit - current),
-            peer,
-            link,
-            offsetDate,
-            offsetUser,
-        })
+        const res: tl.RpcCallReturn['messages.getChatInviteImporters'] = await this.call(
+            {
+                _: 'messages.getChatInviteImporters',
+                limit: Math.min(100, limit - current),
+                peer,
+                link,
+                offsetDate,
+                offsetUser,
+            }
+        )
 
         if (!res.importers.length) break
 
@@ -45,7 +47,7 @@ export async function* getInviteLinkMembers(
         offsetUser = {
             _: 'inputUser',
             userId: last.userId,
-            accessHash: (users[last.userId] as tl.RawUser).accessHash!
+            accessHash: (users[last.userId] as tl.RawUser).accessHash!,
         }
 
         for (const it of res.importers) {

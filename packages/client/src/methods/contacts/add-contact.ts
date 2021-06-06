@@ -1,5 +1,10 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtCuteInvalidPeerTypeError, MtCuteTypeAssertionError, User } from '../../types'
+import {
+    InputPeerLike,
+    MtCuteInvalidPeerTypeError,
+    MtCuteTypeAssertionError,
+    User,
+} from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
@@ -46,7 +51,7 @@ export async function addContact(
         firstName: params.firstName,
         lastName: params.lastName ?? '',
         phone: params.phone ?? '',
-        addPhonePrivacyException: !!params.sharePhone
+        addPhonePrivacyException: !!params.sharePhone,
     })
 
     assertIsUpdatesGroup('contacts.addContact', res)

@@ -171,7 +171,7 @@ export class Dice {
     get inputMedia(): tl.TypeInputMedia {
         return {
             _: 'inputMediaDice',
-            emoticon: this.obj.emoticon
+            emoticon: this.obj.emoticon,
         }
     }
 }

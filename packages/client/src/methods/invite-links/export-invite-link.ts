@@ -18,7 +18,7 @@ export async function exportInviteLink(
     const res = await this.call({
         _: 'messages.exportChatInvite',
         peer: await this.resolvePeer(chatId),
-        legacyRevokePermanent: true
+        legacyRevokePermanent: true,
     })
 
     return new ChatInviteLink(this, res)

@@ -8,7 +8,8 @@ import { SqliteStorage } from '@mtcute/sqlite'
 export * from '@mtcute/dispatcher'
 
 export namespace NodeTelegramClient {
-    export interface Options extends Omit<BaseTelegramClient.Options, 'storage'> {
+    export interface Options
+        extends Omit<BaseTelegramClient.Options, 'storage'> {
         /**
          * Default parse mode to use.
          *

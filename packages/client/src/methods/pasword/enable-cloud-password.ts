@@ -43,7 +43,7 @@ export async function enableCloudPassword(
             newAlgo: algo,
             newPasswordHash: newHash,
             hint,
-            email
-        }
+            email,
+        },
     })
 }

@@ -124,7 +124,7 @@ export function fileIdToInputFileLocation(
                             id: loc.source.id,
                             accessHash: loc.source.accessHash,
                         },
-                        thumbVersion: 0 // todo: check how tdlib stores this
+                        thumbVersion: 0, // todo: check how tdlib stores this
                     }
             }
 
