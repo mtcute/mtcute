@@ -8,7 +8,7 @@
         "develop": "gatsby develop --port 4040",
         "start": "gatsby develop",
         "build": "gatsby build --prefix-paths",
-        "postbuild": "(rm -rf ../../docs/tl || rd /s /q ..\\..\\docs\\tl) && (mv public ../../docs/tl || move public ../../docs/tl)",
+        "postbuild": "(rm -rf ../docs/tl || rd /s /q ..\\docs\\tl) && (mv public ../docs/tl || move public ../docs/tl)",
         "serve": "gatsby serve --prefix-paths",
         "clean": "gatsby clean"
     },
@@ -23,7 +23,6 @@
         "gatsby-transformer-json": "^3.2.0",
         "react": "^17.0.1",
         "react-dom": "^17.0.1",
-        "@mtcute/tl": "^0.0.0",
         "@material-ui/core": "^4.11.3",
         "@material-ui/icons": "^4.11.2",
         "gatsby-theme-material-ui": "^2.0.1",

@@ -1,5 +1,5 @@
-const rawSchema = require('@mtcute/tl/raw-schema')
-const rawErrors = require('@mtcute/tl/raw-errors')
+const rawSchema = require('../packages/tl/raw-schema')
+const rawErrors = require('../packages/tl/raw-errors')
 const path = require('path')
 const { convertToArrays, prepareData } = require('./scripts/prepare-data')
 
