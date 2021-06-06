@@ -1,4 +1,4 @@
-import { makeInspectable } from '@mtcute/client/src/types/utils'
+import { makeInspectable } from '../utils'
 import { tl } from '@mtcute/tl'
 import { PeerType, User, UsersIndex } from '../peers'
 import { TelegramClient } from '../../client'

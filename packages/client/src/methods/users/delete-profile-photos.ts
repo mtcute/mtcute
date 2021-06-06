@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
 import { MaybeArray } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
-import { fileIdToInputPhoto } from '../../../../file-id'
+import { fileIdToInputPhoto } from '@mtcute/file-id'
 
 /**
  * Delete your own profile photos

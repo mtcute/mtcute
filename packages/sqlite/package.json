@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/sqlite",
     "private": true,
-    "version": "0.0.0",
+    "version": "1.0.0",
     "description": "SQLite-based storage for MTCute",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "MIT",
@@ -12,9 +12,11 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/core": "^0.0.0",
-        "@mtcute/tl": "^0.0.0",
-        "better-sqlite3": "^7.4.0"
+        "@mtcute/core": "^1.0.0",
+        "@mtcute/tl": "~1.129.0",
+        "better-sqlite3": "^7.4.0",
+        "big-integer": "1.6.48",
+        "debug": "^4.3.1"
     },
     "devDependencies": {
         "@types/sqlite3": "^3.1.7",

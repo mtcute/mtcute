@@ -1,7 +1,7 @@
 const {
     convertTlToJson,
     convertJsonToTl,
-} = require('../../tl/scripts/generate-schema')
+} = require('../../packages/tl/scripts/generate-schema')
 const fetch = require('node-fetch')
 const fs = require('fs')
 const path = require('path')

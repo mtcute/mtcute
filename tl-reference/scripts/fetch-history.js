@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { convertTlToJson } = require('../../tl/scripts/generate-schema')
+const { convertTlToJson } = require('../../packages/tl/scripts/generate-schema')
 const fetch = require('node-fetch')
 const qs = require('querystring')
 const { convertToArrays } = require('./prepare-data')

@@ -6,6 +6,8 @@ import { ForgeCryptoProvider } from './forge-crypto'
 export * from './abstract'
 export * from './password'
 
+export { NodeCryptoProvider, ForgeCryptoProvider }
+
 export let defaultCryptoProviderFactory: CryptoProviderFactory
 if (nodeCrypto) {
     defaultCryptoProviderFactory = () => new NodeCryptoProvider()

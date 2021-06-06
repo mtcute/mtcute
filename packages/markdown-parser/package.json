@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/markdown-parser",
     "private": true,
-    "version": "0.0.0",
+    "version": "1.0.0",
     "description": "Markdown entities parser for MTCute",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "MIT",
@@ -13,10 +13,10 @@
         "docs": "npx typedoc"
     },
     "dependencies": {
-        "@mtcute/tl": "^0.0.0",
+        "@mtcute/tl": "~1.129.0",
         "big-integer": "^1.6.48"
     },
     "devDependencies": {
-        "@mtcute/client": "^0.0.0"
+        "@mtcute/client": "^1.0.0"
     }
 }

@@ -1,6 +1,5 @@
-import { NodeCryptoProvider } from '@mtcute/core/src/utils/crypto/node-crypto'
-import { IEncryptionScheme } from '@mtcute/core'
-import { ige256_decrypt, ige256_encrypt } from '../native'
+import { NodeCryptoProvider, IEncryptionScheme } from '@mtcute/core'
+import { ige256_decrypt, ige256_encrypt } from './native'
 
 /**
  * Crypto provider for NodeJS that uses a native extension to improve

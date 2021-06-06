@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/socks-proxy",
     "private": true,
-    "version": "0.0.0",
+    "version": "1.0.0",
     "description": "SOCKS4/5 proxy support for MTCute",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "MIT",
@@ -12,7 +12,8 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/core": "^0.0.0",
-        "ip6": "^0.2.6"
+        "@mtcute/core": "^1.0.0",
+        "ip6": "^0.2.6",
+        "debug": "^4.3.1"
     }
 }

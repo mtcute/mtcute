@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/tl'
 import { MaybeAsync } from '../../types/utils'
 import { ICryptoProvider } from '../../utils/crypto'
+import EventEmitter from 'events'
 
 export enum TransportState {
     /**
@@ -23,25 +24,16 @@ export enum TransportState {
 }
 
 /**
- * Interface declaring a transport to connect to Telegram with.
- * Is usually extended from `EventEmitter` to provide on/once
+ * Interface implementing a transport to interact with Telegram servers.
+ *
+ * Events:
+ *  - `ready` event is emitted once connection has been established: `() => void`
+ *  - `close` event is emitted once connection has been closed: `() => void`
+ *  - `error` event is event is emitted when there was some error
+ *    (either mtproto related or network related): `(error: Error) => void`
+ *  - `message` event is emitted when a mtproto message is received: `(message: Buffer) => void`
  */
-export interface ICuteTransport {
-    /** ready event is emitted once connection has been established */
-    on(event: 'ready', handler: () => void): this
-    once(event: 'ready', handler: () => void): this
-    /** close event is emitted once connection has been closed */
-    on(event: 'close', handler: () => void): this
-    once(event: 'close', handler: () => void): this
-    /** error event is emitted when there was some error (either mtproto related or network related) */
-    on(event: 'error', handler: (error: Error) => void): this
-    once(event: 'error', handler: (error: Error) => void): this
-    /** message event is emitted when a mtproto message is received */
-    on(event: 'message', handler: (message: Buffer) => void): this
-    once(event: 'message', handler: (message: Buffer) => void): this
-    /** used to clean up a transport to be able to recycle them */
-    removeAllListeners(): void
-
+export interface ICuteTransport extends EventEmitter {
     /** returns current state */
     state(): TransportState
     /** returns current DC. should return null if state == IDLE */

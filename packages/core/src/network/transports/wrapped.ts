@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events'
+import EventEmitter from 'events'
 import { PacketCodec } from './abstract'
 import { ICryptoProvider } from '../../utils/crypto'
 

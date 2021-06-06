@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/dispatcher",
     "private": true,
-    "version": "0.0.0",
+    "version": "1.0.0",
     "description": "Updates dispatcher and bot framework for @mtcute/client",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "MIT",
@@ -12,8 +12,10 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/tl": "^0.0.0",
-        "@mtcute/core": "^0.0.0",
-        "@mtcute/client": "^0.0.0"
+        "@mtcute/tl": "~1.129.0",
+        "@mtcute/core": "^1.0.0",
+        "@mtcute/client": "^1.0.0",
+        "es6-symbol": "^3.1.3",
+        "debug": "^4.3.1"
     }
 }

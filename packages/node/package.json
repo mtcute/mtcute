@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/node",
     "private": true,
-    "version": "0.0.0",
+    "version": "1.0.0",
     "description": "Meta-package for Node JS",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "MIT",
@@ -12,11 +12,11 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/client": "^0.0.0",
-        "@mtcute/sqlite": "^0.0.0",
-        "@mtcute/markdown-parser": "^0.0.0",
-        "@mtcute/html-parser": "^0.0.0",
-        "@mtcute/dispatcher": "^0.0.0",
-        "@mtcute/crypto-node": "^0.0.0"
+        "@mtcute/client": "^1.0.0",
+        "@mtcute/sqlite": "^1.0.0",
+        "@mtcute/markdown-parser": "^1.0.0",
+        "@mtcute/html-parser": "^1.0.0",
+        "@mtcute/dispatcher": "^1.0.0",
+        "@mtcute/crypto-node": "^1.0.0"
     }
 }

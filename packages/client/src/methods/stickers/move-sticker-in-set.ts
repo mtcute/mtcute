@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { fileIdToInputDocument, tdFileId } from '../../../../file-id'
+import { fileIdToInputDocument, tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 import { StickerSet } from '../../types'
 

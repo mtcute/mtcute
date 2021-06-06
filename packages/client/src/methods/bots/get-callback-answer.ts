@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
 import { tl } from '@mtcute/tl'
-import { computeSrpParams } from '@mtcute/core/dist'
+import { computeSrpParams } from '@mtcute/core'
 
 /**
  * Request a callback answer from a bot,

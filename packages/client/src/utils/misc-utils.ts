@@ -1,7 +1,6 @@
 import { MaybeDynamic, Message, MtCuteError } from '../types'
 import { BigInteger } from 'big-integer'
-import { randomBytes } from '@mtcute/core/src/utils/buffer-utils'
-import { bufferToBigInt } from '@mtcute/core/src/utils/bigint-utils'
+import { randomBytes, bufferToBigInt } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 export const EMPTY_BUFFER = Buffer.alloc(0)

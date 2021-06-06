@@ -1,10 +1,12 @@
 {
     "name": "@mtcute/crypto-node",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "description": "Native crypto implementation for NodeJS",
     "main": "src/index.ts",
     "private": true,
+    "license": "MIT",
     "scripts": {
+        "build-ts": "tsc",
         "build:dev": "node-gyp -j 16 build --debug",
         "build": "node-gyp configure && node-gyp -j 16 build && tsc",
         "install": "node-gyp configure && node-gyp -j 16 build",
