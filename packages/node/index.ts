@@ -7,6 +7,7 @@ import { SqliteStorage } from '@mtcute/sqlite'
 import { createInterface, Interface as RlInterface } from 'readline'
 
 export * from '@mtcute/dispatcher'
+export * from '@mtcute/client'
 export { SqliteStorage }
 
 let nativeCrypto: typeof NodeNativeCryptoProvider | null

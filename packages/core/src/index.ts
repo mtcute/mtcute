@@ -3,6 +3,9 @@ export * from './network'
 export * from './storage'
 export * from './types'
 
+export * from '@mtcute/tl'
+export * from '@mtcute/tl/errors'
+
 export * from './utils/crypto'
 export * from './utils/peer-utils'
 export * from './utils/tl-json'

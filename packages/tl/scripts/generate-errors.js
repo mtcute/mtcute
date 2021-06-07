@@ -64,7 +64,7 @@ const baseErrors = [
         description:
             'An internal server error occurred while a request was being processed; ' +
             'for example, there was a disruption while accessing a database or file storage.',
-    },
+    }
 ]
 
 const inheritanceTable = {
@@ -83,7 +83,7 @@ const customErrors = [
         virtual: true,
         name: 'RPC_TIMEOUT',
         codes: '408',
-        description: 'Timeout of {ms} ms exceeded'
+        description: 'Timeout of {ms} ms exceeded',
     }
 ]
 
@@ -124,7 +124,10 @@ export declare class RpcError extends Error {
     baseErrors.forEach((it) => (it.base = true))
     const allErrors = [...baseErrors, ...csv]
 
-    fs.writeFileSync(path.join(__dirname, '../raw-errors.json'), JSON.stringify(allErrors))
+    fs.writeFileSync(
+        path.join(__dirname, '../raw-errors.json'),
+        JSON.stringify(allErrors)
+    )
 
     allErrors.forEach((err) => {
         let hasArgument =
@@ -194,12 +197,21 @@ exports.${className} = ${className}`)
 
     js.write('const _staticNameErrors = {')
     js.tab()
-    csv.filter((i) => !i.virtual && !i.name.match(/_X_|_X$|^X_/)).forEach((err) =>
-        js.write(`'${err.name}': ${err.fclsname},`)
-    )
+    csv.filter(
+        (i) => !i.virtual && !i.name.match(/_X_|_X$|^X_/)
+    ).forEach((err) => js.write(`'${err.name}': ${err.fclsname},`))
     js.write(`'Timeout': TimeoutError,`)
     js.untab()
     js.write('};')
+
+    js.write('const _baseCodeErrors = {')
+    js.tab()
+    Object.entries(inheritanceTable).forEach(([code, error]) => {
+        js.write(`${code}: ${error},`)
+    })
+    js.untab()
+    js.write('};')
+
     js.write(`exports.createRpcErrorFromTl = function (obj) {
     if (obj.errorMessage in _staticNameErrors) return new _staticNameErrors[obj.errorMessage]();
 
@@ -214,6 +226,8 @@ ${allErrors
             )}/)) != null) return new ${i.fclsname}(parseInt(match[1]));`
     )
     .join('\n')}
+
+   if (obj.errorCode in _baseCodeErrors) return new _baseCodeErrors[obj.errorCode](obj.errorMessage);
 
     return new RpcError(obj.errorCode, obj.errorMessage);
 }`)
