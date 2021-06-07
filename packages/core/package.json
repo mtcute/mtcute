@@ -12,6 +12,7 @@
         "docs": "npx typedoc"
     },
     "dependencies": {
+        "@types/node": "^15.12.1",
         "@types/events": "^3.0.0",
         "@mtcute/tl": "~1.129.0",
         "leemon": "6.2.0",
@@ -23,8 +24,5 @@
     "devDependencies": {
         "@types/ws": "^7.4.1",
         "ws": "^7.4.4"
-    },
-    "peerDependencies": {
-        "@types/node": "^15.12.1"
     }
 }

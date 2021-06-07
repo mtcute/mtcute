@@ -1,11 +1,13 @@
-import { TelegramClient } from '@mtcute/client'
+import { TelegramClient, User } from '@mtcute/client'
 import { BaseTelegramClient } from '@mtcute/core'
 import { NodeNativeCryptoProvider } from '@mtcute/crypto-node'
 import { HtmlMessageEntityParser } from '@mtcute/html-parser'
 import { MarkdownMessageEntityParser } from '@mtcute/markdown-parser'
 import { SqliteStorage } from '@mtcute/sqlite'
+import { createInterface, Interface as RlInterface } from 'readline'
 
 export * from '@mtcute/dispatcher'
+export { SqliteStorage }
 
 export namespace NodeTelegramClient {
     export interface Options
@@ -33,6 +35,25 @@ export namespace NodeTelegramClient {
     }
 }
 
+let rl: RlInterface | null = null
+
+/**
+ * Tiny wrapper over Node `readline` package
+ * for simpler user input for `.run()` method
+ *
+ * @param text  Text of the question
+ */
+export const input = (text: string): Promise<string> => {
+    if (!rl) {
+        rl = createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        })
+    }
+
+    return new Promise((res) => rl!.question(text, res))
+}
+
 /**
  * Tiny wrapper over `TelegramClient` for usage inside Node JS.
  *
@@ -54,5 +75,16 @@ export class NodeTelegramClient extends TelegramClient {
         this.registerParseMode(new MarkdownMessageEntityParser())
         if (opts.defaultParseMode)
             this.setDefaultParseMode(opts.defaultParseMode)
+    }
+
+    run(
+        params: Parameters<TelegramClient['start']>[0],
+        then?: (user: User) => void | Promise<void>
+    ): void {
+        if (!params.phone) params.phone = () => input('Phone > ')
+        if (!params.code) params.code = () => input('Code > ')
+        if (!params.password) params.password = () => input('2FA password > ')
+
+        return super.run(params, then)
     }
 }

@@ -85,18 +85,50 @@ function publishSinglePackage(name) {
 
         if (name === 'client') {
             // make TelegramClient a class, not an interface
-            const content = fs.readFileSync(
+            const dTsContent = fs.readFileSync(
                 path.join(dir, 'dist/client.d.ts'),
                 'utf8'
             )
 
             fs.writeFileSync(
                 path.join(dir, 'dist/client.d.ts'),
-                content.replace(
+                dTsContent.replace(
                     'export interface TelegramClient',
                     'export class TelegramClient'
                 )
             )
+
+            // make methods prototype methods, not properties
+            let jsContent = fs.readFileSync(
+                path.join(dir, 'dist/client.js'),
+                'utf8'
+            )
+
+            let methods = []
+            jsContent = jsContent.replace(
+                /^\s*this\.([a-zA-Z0-9_]+) = ([a-zA-Z0-9_]+\.[a-zA-Z0-9_]+);\r?\n/gm,
+                (_, name, imported) => {
+                    methods.push(
+                        `TelegramClient.prototype.${name} = ${imported};`
+                    )
+
+                    return ''
+                }
+            )
+
+            const idx = jsContent.indexOf(
+                'exports.TelegramClient = TelegramClient;'
+            )
+            if (idx === -1)
+                throw new Error('client.js exports.TelegramClient not found')
+
+            jsContent =
+                jsContent.substr(0, idx) +
+                methods.join('\n') +
+                '\n' +
+                jsContent.substr(idx)
+
+            fs.writeFileSync(path.join(dir, 'dist/client.js'), jsContent)
         }
 
         if (name === 'crypto-node') {
