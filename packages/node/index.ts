@@ -1,6 +1,6 @@
 import { TelegramClient, User } from '@mtcute/client'
 import { BaseTelegramClient } from '@mtcute/core'
-import { NodeNativeCryptoProvider } from '@mtcute/crypto-node'
+import type { NodeNativeCryptoProvider } from '@mtcute/crypto-node'
 import { HtmlMessageEntityParser } from '@mtcute/html-parser'
 import { MarkdownMessageEntityParser } from '@mtcute/markdown-parser'
 import { SqliteStorage } from '@mtcute/sqlite'
@@ -8,6 +8,11 @@ import { createInterface, Interface as RlInterface } from 'readline'
 
 export * from '@mtcute/dispatcher'
 export { SqliteStorage }
+
+let nativeCrypto: typeof NodeNativeCryptoProvider | null
+try {
+    nativeCrypto = require('@mtcute/crypto-node').NodeNativeCryptoProvider
+} catch (e) {}
 
 export namespace NodeTelegramClient {
     export interface Options
@@ -63,7 +68,7 @@ export const input = (text: string): Promise<string> => {
 export class NodeTelegramClient extends TelegramClient {
     constructor(opts: NodeTelegramClient.Options) {
         super({
-            crypto: () => new NodeNativeCryptoProvider(),
+            crypto: nativeCrypto ? () => new nativeCrypto!() : undefined,
             ...opts,
             storage:
                 typeof opts.storage === 'string'

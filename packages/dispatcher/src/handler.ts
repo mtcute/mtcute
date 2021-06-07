@@ -30,6 +30,16 @@ type ParsedUpdateHandler<Type, Update, State = never> = BaseUpdateHandler<
     (update: Update, state: State) => MaybeAsync<boolean>
 >
 
+export type UpdateInfoForError<T> = T extends ParsedUpdateHandler<
+    infer K,
+    infer Q
+>
+    ? {
+          type: K
+          data: Q
+      }
+    : never
+
 export type RawUpdateHandler = BaseUpdateHandler<
     'raw',
     (

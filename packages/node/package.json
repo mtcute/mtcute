@@ -16,7 +16,6 @@
         "@mtcute/sqlite": "^1.0.0",
         "@mtcute/markdown-parser": "^1.0.0",
         "@mtcute/html-parser": "^1.0.0",
-        "@mtcute/dispatcher": "^1.0.0",
-        "@mtcute/crypto-node": "^1.0.0"
+        "@mtcute/dispatcher": "^1.0.0"
     }
 }

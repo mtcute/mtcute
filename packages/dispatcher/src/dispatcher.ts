@@ -31,6 +31,7 @@ import {
     PollVoteHandler,
     UserStatusUpdateHandler,
     UserTypingHandler,
+    UpdateInfoForError,
 } from './handler'
 // end-codegen-imports
 import { filters, UpdateFilter } from './filters'
@@ -168,6 +169,14 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     private _customStorage?: IStateStorage
 
     private _handlersCount: Record<string, number> = {}
+
+    private _errorHandler?: <
+        T extends Exclude<UpdateHandler, RawUpdateHandler>
+    >(
+        err: Error,
+        update: UpdateInfoForError<T>,
+        state?: UpdateState<State, SceneName>
+    ) => MaybeAsync<void>
 
     /**
      * Create a new dispatcher, that will be used as a child,
@@ -400,22 +409,37 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                     RawUpdateHandler
                 >[]
 
-                for (const h of handlers) {
-                    let result: void | PropagationSymbol
+                try {
+                    for (const h of handlers) {
+                        let result: void | PropagationSymbol
 
-                    if (
-                        !h.check ||
-                        (await h.check(parsed, parsedState as never))
-                    ) {
-                        result = await h.callback(parsed, parsedState as never)
-                    } else continue
+                        if (
+                            !h.check ||
+                            (await h.check(parsed, parsedState as never))
+                        ) {
+                            result = await h.callback(
+                                parsed,
+                                parsedState as never
+                            )
+                        } else continue
 
-                    if (result === ContinuePropagation) continue
-                    if (result === StopPropagation) break outer
-                    if (result === StopChildrenPropagation) return
+                        if (result === ContinuePropagation) continue
+                        if (result === StopPropagation) break outer
+                        if (result === StopChildrenPropagation) return
 
-                    tryRaw = false
-                    break
+                        tryRaw = false
+                        break
+                    }
+                } catch (e) {
+                    if (this._errorHandler) {
+                        await this._errorHandler(
+                            e,
+                            { type: parsedType, data: parsed },
+                            parsedState as never
+                        )
+                    } else {
+                        throw e
+                    }
                 }
             }
 
@@ -540,6 +564,35 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                 this._handlersCount[upd] -= 1
             })
         }
+    }
+
+    /**
+     * Register an error handler.
+     *
+     * This is used locally within this dispatcher
+     * (does not affect children/parent) whenever
+     * an error is thrown inside an update handler.
+     * Not used for raw update handlers
+     *
+     * When an error is thrown, but there is no error
+     * handler, it is propagated to `TelegramClient`.
+     *
+     * There can be at most one error handler.
+     * Pass `null` to remove it.
+     *
+     * @param handler  Error handler
+     */
+    onError(
+        handler:
+            | ((
+                  err: Error,
+                  update: UpdateInfoForError<UpdateHandler>,
+                  state?: UpdateState<State, SceneName>
+              ) => MaybeAsync<void>)
+            | null
+    ): void {
+        if (handler) this._errorHandler = handler
+        else this._errorHandler = undefined
     }
 
     // children //

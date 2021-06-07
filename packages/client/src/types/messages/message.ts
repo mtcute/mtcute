@@ -787,6 +787,20 @@ export class Message {
     }
 
     /**
+     * Forward this message to some chat
+     *
+     * @param peer  Chat where to forward this message
+     * @param params
+     * @returns  Forwarded message
+     */
+    forwardTo(
+        peer: InputPeerLike,
+        params?: Parameters<TelegramClient['forwardMessages']>[3]
+    ): Promise<Message> {
+        return this.client.forwardMessages(peer, this.chat.inputPeer, this.id, params)
+    }
+
+    /**
      * Send this message as a copy (i.e. send the same message,
      * but do not forward it).
      *
