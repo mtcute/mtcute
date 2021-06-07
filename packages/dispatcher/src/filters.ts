@@ -300,7 +300,10 @@ export namespace filters {
      */
     export const chat = <T extends Chat.Type>(
         type: T
-    ): UpdateFilter<Message, { chat: Modify<Chat, { type: T }> }> => (msg) =>
+    ): UpdateFilter<Message, {
+        chat: Modify<Chat, { type: T }>
+        sender: T extends 'private' | 'bot' | 'group' ? User : User | Chat
+    }> => (msg) =>
         msg.chat.type === type
 
     /**

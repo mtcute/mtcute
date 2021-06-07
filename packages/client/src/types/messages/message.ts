@@ -229,8 +229,15 @@ export class Message {
         if (this._sender === undefined) {
             const from = this.raw.fromId
             if (!from) {
-                // anon admin, return the chat
-                this._sender = this.chat
+                if (this.raw.peerId._ === 'peerUser') {
+                    this._sender = new User(
+                        this.client,
+                        this._users[this.raw.peerId.userId]
+                    )
+                } else {
+                    // anon admin, return the chat
+                    this._sender = this.chat
+                }
             } else
                 switch (from._) {
                     case 'peerChannel': // forwarded channel post
