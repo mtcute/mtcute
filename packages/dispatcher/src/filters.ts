@@ -307,6 +307,14 @@ export namespace filters {
         msg.chat.type === type
 
     /**
+     * Filter messages by chat ID
+     */
+    export const chatId = (
+        id: number
+    ): UpdateFilter<Message> => (msg) =>
+        msg.chat.id === id
+
+    /**
      * Filter incoming messages.
      *
      * Messages sent to yourself (i.e. Saved Messages) are also "incoming"

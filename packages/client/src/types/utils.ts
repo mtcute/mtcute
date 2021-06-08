@@ -34,8 +34,6 @@ function getAllGettersNames(obj: object): string[] {
  * > **Note**: This means that all getters must be pure!
  * > (getter that caches after its first invocation is also
  * > considered pure in this case)
- *
- * @internal
  */
 export function makeInspectable(
     obj: Function,
@@ -66,7 +64,7 @@ export function makeInspectable(
                 }
                 ret[it] = val
             } catch (e) {
-                ret[it] = e.message
+                ret[it] = "Error: " + e.message
             }
         })
         return ret

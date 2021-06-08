@@ -40,48 +40,48 @@ export class User {
     /**
      * Underlying raw TL object
      */
-    private _user: tl.RawUser
+    readonly raw: tl.RawUser
 
     constructor(client: TelegramClient, user: tl.TypeUser) {
         assertTypeIs('User#init', user, 'user')
 
         this.client = client
-        this._user = user
+        this.raw = user
     }
 
     /** Unique identifier for this user or bot */
     get id(): number {
-        return this._user.id
+        return this.raw.id
     }
 
     /** Whether this user is you yourself */
     get isSelf(): boolean {
-        return this._user.self!
+        return this.raw.self!
     }
 
     /** Whether this user is in your contacts */
     get isContact(): boolean {
-        return this._user.contact!
+        return this.raw.contact!
     }
 
     /** Whether you both have each other's contact */
     get isMutualContact(): boolean {
-        return this._user.mutualContact!
+        return this.raw.mutualContact!
     }
 
     /** Whether this user is deleted */
     get isDeleted(): boolean {
-        return this._user.deleted!
+        return this.raw.deleted!
     }
 
     /** Whether this user is a bot */
     get isBot(): boolean {
-        return this._user.bot!
+        return this.raw.bot!
     }
 
     /** Whether this user has been verified by Telegram */
     get isVerified(): boolean {
-        return this._user.verified!
+        return this.raw.verified!
     }
 
     /**
@@ -89,32 +89,32 @@ export class User {
      * See {@link restrictionReason} for details
      */
     get isRestricted(): boolean {
-        return this._user.restricted!
+        return this.raw.restricted!
     }
 
     /** Whether this user has been flagged for scam */
     get isScam(): boolean {
-        return this._user.scam!
+        return this.raw.scam!
     }
 
     /** Whether this user has been flagged for impersonation */
     get isFake(): boolean {
-        return this._user.fake!
+        return this.raw.fake!
     }
 
     /** Whether this user is part of the Telegram support team */
     get isSupport(): boolean {
-        return this._user.support!
+        return this.raw.support!
     }
 
     /** User's or bot's first name */
     get firstName(): string {
-        return this._user.firstName ?? 'Deleted Account'
+        return this.raw.firstName ?? 'Deleted Account'
     }
 
     /** User's or bot's last name */
     get lastName(): string | null {
-        return this._user.lastName ?? null
+        return this.raw.lastName ?? null
     }
 
     static parseStatus(
@@ -163,8 +163,8 @@ export class User {
     private _parsedStatus?: User.ParsedStatus
     private _parseStatus() {
         this._parsedStatus = User.parseStatus(
-            this._user.status!,
-            this._user.bot
+            this.raw.status!,
+            this.raw.bot
         )
     }
 
@@ -194,12 +194,12 @@ export class User {
 
     /** User's or bot's username */
     get username(): string | null {
-        return this._user.username ?? null
+        return this.raw.username ?? null
     }
 
     /** IETF language tag of the user's language */
     get language(): string | null {
-        return this._user.langCode ?? null
+        return this.raw.langCode ?? null
     }
 
     /**
@@ -213,27 +213,27 @@ export class User {
      * More info at [Pyrogram FAQ](https://docs.pyrogram.org/faq#what-are-the-ip-addresses-of-telegram-data-centers).
      */
     get dcId(): number | null {
-        return (this._user.photo as any)?.dcId ?? null
+        return (this.raw.photo as any)?.dcId ?? null
     }
 
     /** User's phone number */
     get phoneNumber(): string | null {
-        return this._user.phone ?? null
+        return this.raw.phone ?? null
     }
 
     /**
      * Get this user's input peer for advanced use-cases.
      */
     get inputPeer(): tl.TypeInputPeer {
-        if (!this._user.accessHash)
+        if (!this.raw.accessHash)
             throw new MtCuteArgumentError(
                 "user's access hash is not available!"
             )
 
         return {
             _: 'inputPeerUser',
-            userId: this._user.id,
-            accessHash: this._user.accessHash,
+            userId: this.raw.id,
+            accessHash: this.raw.accessHash,
         }
     }
 
@@ -243,13 +243,13 @@ export class User {
      * Suitable for downloads only
      */
     get photo(): ChatPhoto | null {
-        if (this._user.photo?._ !== 'userProfilePhoto') return null
+        if (this.raw.photo?._ !== 'userProfilePhoto') return null
 
         if (!this._photo) {
             this._photo = new ChatPhoto(
                 this.client,
                 this.inputPeer,
-                this._user.photo
+                this.raw.photo
             )
         }
 
@@ -261,7 +261,7 @@ export class User {
      * This field is available only in case *isRestricted* is `true`
      */
     get restrictions(): ReadonlyArray<tl.RawRestrictionReason> | null {
-        return this._user.restrictionReason ?? null
+        return this.raw.restrictionReason ?? null
     }
 
     /**
@@ -334,7 +334,7 @@ export class User {
      * @param parseMode  Parse mode to use when creating mention
      */
     permanentMention(text?: string | null, parseMode?: string | null): string {
-        if (!this._user.accessHash)
+        if (!this.raw.accessHash)
             throw new MtCuteArgumentError(
                 "user's access hash is not available!"
             )
@@ -352,7 +352,7 @@ export class User {
                 length: text.length,
                 url: `tg://user?id=${
                     this.id
-                }&hash=${this._user.accessHash.toString(16)}`,
+                }&hash=${this.raw.accessHash.toString(16)}`,
             },
         ])
     }

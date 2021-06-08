@@ -5,17 +5,17 @@ import { makeInspectable } from '../utils'
  * Represents the permissions of a user in a {@link Chat}.
  */
 export class ChatPermissions {
-    readonly _bannedRights: tl.RawChatBannedRights
+    readonly raw: tl.RawChatBannedRights
 
     constructor(bannedRights: tl.RawChatBannedRights) {
-        this._bannedRights = bannedRights
+        this.raw = bannedRights
     }
 
     /**
      * Whether users can view messages
      */
     get canViewMessages(): boolean {
-        return !this._bannedRights.viewMessages
+        return !this.raw.viewMessages
     }
 
     /**
@@ -23,7 +23,7 @@ export class ChatPermissions {
      * contacts, locations and venues
      */
     get canSendMessages(): boolean {
-        return !this._bannedRights.sendMessages
+        return !this.raw.sendMessages
     }
 
     /**
@@ -33,7 +33,7 @@ export class ChatPermissions {
      * Implies {@link canSendMessages}
      */
     get canSendMedia(): boolean {
-        return !this._bannedRights.sendMedia
+        return !this.raw.sendMedia
     }
 
     /**
@@ -42,7 +42,7 @@ export class ChatPermissions {
      * Implies {@link canSendMedia}
      */
     get canSendStickers(): boolean {
-        return !this._bannedRights.sendStickers
+        return !this.raw.sendStickers
     }
 
     /**
@@ -51,7 +51,7 @@ export class ChatPermissions {
      * Implies {@link canSendMedia}
      */
     get canSendGifs(): boolean {
-        return !this._bannedRights.sendGifs
+        return !this.raw.sendGifs
     }
 
     /**
@@ -60,7 +60,7 @@ export class ChatPermissions {
      * Implies {@link canSendMedia}
      */
     get canSendGames(): boolean {
-        return !this._bannedRights.sendGames
+        return !this.raw.sendGames
     }
 
     /**
@@ -69,7 +69,7 @@ export class ChatPermissions {
      * Implies {@link canSendMedia}
      */
     get canUseInline(): boolean {
-        return !this._bannedRights.sendInline
+        return !this.raw.sendInline
     }
 
     /**
@@ -78,7 +78,7 @@ export class ChatPermissions {
      * Implies {@link canSendMedia}
      */
     get canAddWebPreviews(): boolean {
-        return !this._bannedRights.embedLinks
+        return !this.raw.embedLinks
     }
 
     /**
@@ -87,7 +87,7 @@ export class ChatPermissions {
      * Implies {@link canSendMessages}
      */
     get canSendPolls(): boolean {
-        return !this._bannedRights.sendPolls
+        return !this.raw.sendPolls
     }
 
     /**
@@ -95,21 +95,21 @@ export class ChatPermissions {
      * photo and other settings.
      */
     get canChangeInfo(): boolean {
-        return !this._bannedRights.changeInfo
+        return !this.raw.changeInfo
     }
 
     /**
      * Whether users can invite other users to the chat
      */
     get canInviteUsers(): boolean {
-        return !this._bannedRights.inviteUsers
+        return !this.raw.inviteUsers
     }
 
     /**
      * Whether users can pin messages
      */
     get canPinMessages(): boolean {
-        return !this._bannedRights.pinMessages
+        return !this.raw.pinMessages
     }
 
     /**
@@ -120,9 +120,9 @@ export class ChatPermissions {
      * will be lifted from a {@link ChatMember}
      */
     get untilDate(): Date | null {
-        return this._bannedRights.untilDate === 0
+        return this.raw.untilDate === 0
             ? null
-            : new Date(this._bannedRights.untilDate * 1000)
+            : new Date(this.raw.untilDate * 1000)
     }
 }
 

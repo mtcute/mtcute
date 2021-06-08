@@ -897,6 +897,8 @@ export function catchUp(this: TelegramClient): Promise<void> {
     // we also use a lock here so new updates are not processed
     // while we are catching up with older ones
 
+    this._catchUpChannels = true
+
     return this._updLock
         .acquire()
         .then(() => _loadDifference.call(this))

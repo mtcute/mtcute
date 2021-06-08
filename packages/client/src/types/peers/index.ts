@@ -32,6 +32,7 @@ export type PeerType = 'user' | 'bot' | 'group' | 'channel' | 'supergroup'
 export type InputPeerLike =
     | string
     | number
+    | tl.TypePeer
     | tl.TypeInputPeer
     | tl.TypeInputUser
     | tl.TypeInputChannel
