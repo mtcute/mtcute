@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import {
-    BotKeyboard,
+    BotKeyboard, InputFileLike,
     InputMediaLike,
     InputPeerLike,
     Message,
@@ -18,6 +18,9 @@ import { createUsersChatsIndex } from '../../utils/peer-utils'
 /**
  * Send a group of media.
  *
+ * To add a caption to the group, add caption to the first
+ * media in the group and don't add caption for any other.
+ *
  * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
  * @param medias  Medias contained in the message.
  * @param params  Additional sending parameters
@@ -27,7 +30,7 @@ import { createUsersChatsIndex } from '../../utils/peer-utils'
 export async function sendMediaGroup(
     this: TelegramClient,
     chatId: InputPeerLike,
-    medias: InputMediaLike[],
+    medias: (InputMediaLike | string)[],
     params?: {
         /**
          * Message to reply to. Either a message object or message ID.
@@ -108,7 +111,15 @@ export async function sendMediaGroup(
     const multiMedia: tl.RawInputSingleMedia[] = []
 
     for (let i = 0; i < medias.length; i++) {
-        const media = medias[i]
+        let media = medias[i]
+
+        if (typeof media === 'string') {
+            media = {
+                type: 'auto',
+                file: media,
+            }
+        }
+
         const inputMedia = await this._normalizeInputMedia(media, {
             progressCallback: params.progressCallback?.bind(null, i),
         })

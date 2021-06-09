@@ -4,7 +4,13 @@ import { MtCuteTypeAssertionError } from '../types'
 // dummy updates which are used for methods that return messages.affectedHistory.
 // that is not an update, but it carries info about pts, and we need to handle it
 
-/** @internal */
+/**
+ * Create a dummy update from PTS and PTS count.
+ *
+ * @param pts  PTS
+ * @param ptsCount  PTS count
+ * @param channelId  Channel ID (bare), if applicable
+ */
 export function createDummyUpdate(
     pts: number,
     ptsCount: number,

@@ -7,5 +7,5 @@ export * from './peers'
 export * from './misc'
 
 export * from './errors'
-export { MaybeDynamic } from './utils'
+export { MaybeDynamic, ArrayWithTotal } from './utils'
 export { MaybeAsync, PartialExcept, PartialOnly } from '@mtcute/core'

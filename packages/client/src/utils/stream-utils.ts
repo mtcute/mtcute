@@ -72,8 +72,18 @@ export function convertWebStreamToNodeReadable(
 
 export async function readStreamUntilEnd(stream: Readable): Promise<Buffer> {
     const chunks = []
+    let length = 0
+
     while (stream.readable) {
-        chunks.push(await stream.read())
+        const c = await stream.read()
+        if (c === null) break
+
+        length += c.length
+        if (length > 2097152000) {
+            throw new Error('File is too big')
+        }
+
+        chunks.push(c)
     }
 
     return Buffer.concat(chunks)

@@ -62,6 +62,8 @@ export function normalizeToInputUser(
     if (tl.isAnyInputUser(res)) return res
 
     switch (res._) {
+        case 'inputPeerSelf':
+            return { _: 'inputUserSelf' }
         case 'inputPeerUser':
             return {
                 _: 'inputUser',

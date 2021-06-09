@@ -85,7 +85,9 @@ export async function getMessages(
 
     const { users, chats } = createUsersChatsIndex(res)
 
-    const ret = res.messages.map((msg) => new Message(this, msg, users, chats))
+    const ret = res.messages
+        .filter((msg) => msg._ !== 'messageEmpty')
+        .map((msg) => new Message(this, msg, users, chats))
 
     return isSingle ? ret[0] : ret
 }

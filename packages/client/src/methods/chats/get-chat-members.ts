@@ -12,6 +12,7 @@ import {
 } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { tl } from '@mtcute/tl'
+import { ArrayWithTotal } from '../../types'
 
 /**
  * Get a chunk of members of some chat.
@@ -68,7 +69,7 @@ export async function getChatMembers(
             | 'contacts'
             | 'mention'
     }
-): Promise<ChatMember[]> {
+): Promise<ArrayWithTotal<ChatMember>> {
     if (!params) params = {}
 
     const chat = await this.resolvePeer(chatId)
@@ -95,7 +96,10 @@ export async function getChatMembers(
 
         const { users } = createUsersChatsIndex(res)
 
-        return members.map((m) => new ChatMember(this, m, users))
+        const ret = members.map((m) => new ChatMember(this, m, users)) as ArrayWithTotal<ChatMember>
+
+        ret.total = ret.length
+        return ret
     }
 
     if (isInputPeerChannel(chat)) {
@@ -146,7 +150,10 @@ export async function getChatMembers(
         )
 
         const { users } = createUsersChatsIndex(res)
-        return res.participants.map((i) => new ChatMember(this, i, users))
+
+        const ret = res.participants.map((i) => new ChatMember(this, i, users)) as ArrayWithTotal<ChatMember>
+        ret.total = res.count
+        return ret
     }
 
     throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')

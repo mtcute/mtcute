@@ -100,9 +100,9 @@ export async function* searchMessages(
 
         const { users, chats } = createUsersChatsIndex(res)
 
-        const msgs = res.messages.map(
-            (msg) => new Message(this, msg, users, chats)
-        )
+        const msgs = res.messages
+            .filter((msg) => msg._ !== 'messageEmpty')
+            .map((msg) => new Message(this, msg, users, chats))
 
         if (!msgs.length) break
 

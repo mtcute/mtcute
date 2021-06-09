@@ -136,6 +136,45 @@ export async function uploadFile(
         file = convertWebStreamToNodeReadable(file)
     }
 
+    if (typeof file === 'object' && 'headers' in file && 'body' in file && 'url' in file) {
+        // fetch() response
+        const length = parseInt(file.headers.get('content-length') || '0')
+        if (!isNaN(length) && length) fileSize = length
+
+        fileMime = file.headers.get('content-type')?.split(';')[0]
+
+        const disposition = file.headers.get('content-disposition')
+        if (disposition) {
+            const idx = disposition.indexOf('filename=')
+
+            if (idx > -1) {
+                const raw = disposition.slice(idx + 9).split(';')[0]
+                fileName = JSON.parse(raw)
+            }
+        }
+
+        if (fileName === 'unnamed') {
+            // try to infer from url
+            const url = new URL(file.url)
+            const name = url.pathname.split('/').pop()
+            if (name && name.indexOf('.') > -1) {
+                fileName = name
+            }
+        }
+
+        if (!file.body)
+            throw new MtCuteArgumentError('Fetch response contains `null` body')
+
+        if (
+            typeof ReadableStream !== 'undefined' &&
+            file.body instanceof ReadableStream
+        ) {
+            file = convertWebStreamToNodeReadable(file.body)
+        } else {
+            file = file.body
+        }
+    }
+
     // override file name and mime (if any)
     if (params.fileName) fileName = params.fileName
 

@@ -155,6 +155,7 @@ import { updateUsername } from './methods/users/update-username'
 import { IMessageEntityParser } from './parser'
 import { Readable } from 'stream'
 import {
+    ArrayWithTotal,
     Chat,
     ChatEvent,
     ChatInviteLink,
@@ -523,7 +524,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param queryId  Inline query ID
      * @param results  Results of the query
      * @param params  Additional parameters
-
      */
     answerInlineQuery(
         queryId: tl.Long,
@@ -984,7 +984,7 @@ export interface TelegramClient extends BaseTelegramClient {
                 | 'contacts'
                 | 'mention'
         }
-    ): Promise<ChatMember[]>
+    ): Promise<ArrayWithTotal<ChatMember>>
     /**
      * Get preview information about a private chat.
      *
@@ -1286,7 +1286,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param folder  Parameters for the folder
      * @returns  Newly created folder
-
      */
     createFolder(
         folder: PartialExcept<tl.RawDialogFilter, 'title'>
@@ -1443,7 +1442,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * > into memory at once. This might cause an issue, so use wisely!
      *
      * @param params  File download parameters
-
      */
     downloadAsBuffer(params: FileDownloadParameters): Promise<Buffer>
     /**
@@ -1452,7 +1450,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param filename  Local file name to which the remote file will be downloaded
      * @param params  File download parameters
-
      */
     downloadToFile(
         filename: string,
@@ -1464,7 +1461,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * consecutive.
      *
      * @param params  Download parameters
-
      */
     downloadAsIterable(
         params: FileDownloadParameters
@@ -1474,7 +1470,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * streaming file contents.
      *
      * @param params  File download parameters
-
      */
     downloadAsStream(params: FileDownloadParameters): Readable
     /**
@@ -1983,7 +1978,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat ID
      * @param message  ID of one of the messages in the group
-
      */
     getMessageGroup(chatId: InputPeerLike, message: number): Promise<Message[]>
     /**
@@ -2275,6 +2269,9 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Send a group of media.
      *
+     * To add a caption to the group, add caption to the first
+     * media in the group and don't add caption for any other.
+     *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param medias  Medias contained in the message.
      * @param params  Additional sending parameters
@@ -2282,7 +2279,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     sendMediaGroup(
         chatId: InputPeerLike,
-        medias: InputMediaLike[],
+        medias: (InputMediaLike | string)[],
         params?: {
             /**
              * Message to reply to. Either a message object or message ID.

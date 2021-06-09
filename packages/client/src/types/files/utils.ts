@@ -14,6 +14,7 @@ import { tdFileId } from '@mtcute/file-id'
  *  - `ReadStream` (for NodeJS, from the `fs` module)
  *  - `ReadableStream` (from the Web API, base readable stream)
  *  - `Readable` (for NodeJS, base readable stream)
+ *  - `Response` (from `window.fetch` or `node-fetch`)
  */
 export type UploadFileLike =
     | Buffer
@@ -21,7 +22,14 @@ export type UploadFileLike =
     | string
     | ReadStream
     | ReadableStream
+    | NodeJS.ReadableStream
     | Readable
+    // fetch() response
+    | {
+          headers: any
+          url: string
+          body: ReadableStream<Uint8Array> | NodeJS.ReadableStream | null
+      }
 
 /**
  * Describes types that can be used as an input

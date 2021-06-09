@@ -4,6 +4,8 @@ import { parseFileId } from './parse'
 import { getBasicPeerType, markedPeerIdToBare } from '@mtcute/core'
 import FileType = tdFileId.FileType
 
+const EMPTY_BUFFER = Buffer.alloc(0)
+
 type FileId = td.RawFullRemoteFileLocation
 
 function dialogPhotoToInputPeer(
@@ -182,14 +184,21 @@ export function fileIdToInputDocument(
     )
         throw new td.ConversionError('inputDocument')
 
-    if (!fileId.fileReference)
-        throw new td.InvalidFileIdError(
-            'Expected document to have file reference'
-        )
+    let fileRef = fileId.fileReference
+    if (!fileId.fileReference) {
+        if (fileId.type === FileType.Sticker) {
+            // older stickers' file IDs don't have file ref
+            fileRef = EMPTY_BUFFER
+        } else {
+            throw new td.InvalidFileIdError(
+                'Expected document to have file reference'
+            )
+        }
+    }
 
     return {
         _: 'inputDocument',
-        fileReference: fileId.fileReference,
+        fileReference: fileRef!,
         id: fileId.location.id,
         accessHash: fileId.location.accessHash,
     }

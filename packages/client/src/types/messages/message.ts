@@ -101,16 +101,6 @@ export class Message {
 
     /**
      * Raw TL object.
-     *
-     * > **Note**: In fact, `raw` can also be {@link tl.RawMessageEmpty}.
-     * > But since it is quite rare, for the simplicity sake
-     * > we don't bother thinking about it (and you shouldn't too).
-     * >
-     * > When the {@link Message} is in fact `messageEmpty`,
-     * > `.empty` will be true and trying to access properties
-     * > that are not available will result in {@link MtCuteEmptyError}.
-     * >
-     * > The only property that is available on an "empty" message is `.id`
      */
     readonly raw: tl.RawMessage | tl.RawMessageService
 
@@ -119,8 +109,6 @@ export class Message {
     /** Map of chats in this message. Mainly for internal use */
     readonly _chats: ChatsIndex
 
-    private _emptyError?: MtCuteEmptyError
-
     constructor(
         client: TelegramClient,
         raw: tl.TypeMessage,
@@ -128,32 +116,17 @@ export class Message {
         chats: ChatsIndex,
         isScheduled = false
     ) {
+        if (raw._ === 'messageEmpty')
+            throw new MtCuteTypeAssertionError('Message#ctor', 'not messageEmpty', 'messageEmpty')
+
         this.client = client
         this._users = users
         this._chats = chats
 
-        // a bit of cheating in terms of types but whatever :shrug:
-        //
-        // using exclude instead of `typeof this.raw` because
-        // TypeMessage might have some other types added, and we'll detect
-        // that at compile time
-        this.raw = raw as Exclude<tl.TypeMessage, tl.RawMessageEmpty>
-        this.empty = raw._ === 'messageEmpty'
+        this.raw = raw
 
-        if (this.empty) {
-            this._emptyError = new MtCuteEmptyError()
-        }
         this.isScheduled = isScheduled
     }
-
-    /**
-     * Whether the message is empty.
-     *
-     * Note that if the message is empty,
-     * accessing any other property except `id` and `raw`
-     * will result in {@link MtCuteEmptyError}
-     */
-    readonly empty: boolean
 
     /**
      * Whether the message is scheduled.
@@ -172,8 +145,6 @@ export class Message {
      * `null` for service messages and non-post messages.
      */
     get views(): number | null {
-        if (this._emptyError) throw this._emptyError
-
         return this.raw._ === 'message' ? this.raw.views ?? null : null
     }
 
@@ -184,8 +155,6 @@ export class Message {
      *  - Messages to yourself (i.e. *Saved Messages*) are incoming (`outgoing = false`)
      */
     get isOutgoing(): boolean {
-        if (this._emptyError) throw this._emptyError
-
         return this.raw.out!
     }
 
@@ -203,8 +172,6 @@ export class Message {
      * `null` for service messages and non-grouped messages
      */
     get groupedId(): tl.Long | null {
-        if (this._emptyError) throw this._emptyError
-
         return this.raw._ === 'message' ? this.raw.groupedId ?? null : null
     }
 
@@ -224,8 +191,6 @@ export class Message {
      * sender is the channel itself.
      */
     get sender(): User | Chat {
-        if (this._emptyError) throw this._emptyError
-
         if (this._sender === undefined) {
             const from = this.raw.fromId
             if (!from) {
@@ -270,8 +235,6 @@ export class Message {
      * Conversation the message belongs to
      */
     get chat(): Chat {
-        if (this._emptyError) throw this._emptyError
-
         if (this._chat === undefined) {
             this._chat = Chat._parseFromMessage(
                 this.client,
@@ -288,8 +251,6 @@ export class Message {
      * Date the message was sent
      */
     get date(): Date {
-        if (this._emptyError) throw this._emptyError
-
         return new Date(this.raw.date * 1000)
     }
 
@@ -299,8 +260,6 @@ export class Message {
      * If this message is a forward, contains info about it.
      */
     get forward(): Message.MessageForwardInfo | null {
-        if (this._emptyError) throw this._emptyError
-
         if (!this._forward) {
             if (this.raw._ !== 'message' || !this.raw.fwdFrom) {
                 this._forward = null
@@ -386,8 +345,6 @@ export class Message {
      * replies to.
      */
     get replyToMessageId(): number | null {
-        if (this._emptyError) throw this._emptyError
-
         return this.raw.replyTo?.replyToMsgId ?? null
     }
 
@@ -395,8 +352,6 @@ export class Message {
      * Whether this message contains mention of the current user
      */
     get isMention(): boolean {
-        if (this._emptyError) throw this._emptyError
-
         return this.raw.mentioned!
     }
 
@@ -406,8 +361,6 @@ export class Message {
      * information about the bot which generated it
      */
     get viaBot(): User | null {
-        if (this._emptyError) throw this._emptyError
-
         if (this._viaBot === undefined) {
             if (this.raw._ === 'messageService' || !this.raw.viaBotId) {
                 this._viaBot = null
@@ -429,8 +382,6 @@ export class Message {
      * (you should handle i18n yourself)
      */
     get text(): string {
-        if (this._emptyError) throw this._emptyError
-
         return this.raw._ === 'messageService' ? '' : this.raw.message
     }
 
@@ -439,8 +390,6 @@ export class Message {
      * Message text/caption entities (may be empty)
      */
     get entities(): ReadonlyArray<MessageEntity> {
-        if (this._emptyError) throw this._emptyError
-
         if (!this._entities) {
             this._entities = []
             if (this.raw._ === 'message' && this.raw.entities?.length) {

@@ -38,6 +38,7 @@ import {
     UsersIndex,
     ChatsIndex,
     GameHighScore,
+    ArrayWithTotal,
 } from '../types'
 
 // @copy
