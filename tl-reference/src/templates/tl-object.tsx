@@ -89,7 +89,7 @@ export default function TlObject({ data }: { data: GraphqlResult }) {
                 <meta
                     name="description"
                     content={
-                        obj.description ||
+                        obj.descriptionExcerpt ||
                         obj.prefix +
                             obj.name +
                             " currently doesn't have a description."
@@ -281,6 +281,7 @@ export const query = graphql`
             type
             name
             description
+            descriptionExcerpt
             namespace
             returns
             available

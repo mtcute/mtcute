@@ -35,6 +35,7 @@ function convertToArrays(ns) {
 }
 
 const marked = require('marked')
+const cheerio = require('cheerio')
 
 const pascalToCamel = (s) => s[0].toLowerCase() + s.substr(1)
 const camelToSnake = (str) =>
@@ -147,8 +148,21 @@ function prepareData(data) {
             }
 
             // render descriptions in markdown
-            if (item.description)
+            if (item.description) {
                 item.description = renderDescription(item.description)
+                item.descriptionExcerpt = cheerio.load(item.description).root().text().trim()
+                if (item.descriptionExcerpt.length > 100) {
+                    const words = item.descriptionExcerpt.split(' ')
+                    let i = 0
+                    let result = words[i++]
+
+                    while (result.length < 90) {
+                        result += ' ' + words[i++]
+                    }
+
+                    item.descriptionExcerpt = result + '...'
+                }
+            }
             if (item.arguments)
                 item.arguments.forEach((arg) => {
                     if (arg.description)

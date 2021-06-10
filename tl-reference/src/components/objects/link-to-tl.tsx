@@ -19,10 +19,10 @@ export function LinkToTl(
     history?: boolean
 ): React.ReactElement {
     if (typeof prefix !== 'string') {
+        history = !!type
         type = prefix.type
         name = prefix.name
         prefix = prefix.prefix
-        history = !!type
     }
 
     // this kind of invocation is used in parameters table and for return type

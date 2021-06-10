@@ -10,6 +10,7 @@ export interface ExtendedTlObject {
     returns: string
     underscore: string
     description: string | null
+    descriptionExcerpt: string
     arguments: {
         ts: string
         optional?: boolean
