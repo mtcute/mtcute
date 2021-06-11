@@ -229,14 +229,11 @@ export namespace filters {
      * > **Note**: This also combines type modification in a way
      * > similar to {@link and}.
      * >
-     * > Using incompatible filters (e.g. using a {@link Message}
-     * > filter and a {@link CallbackQuery} filter in one `every` call
-     * > will result in `unknown` and/or `never` types in the combined
-     * > filter. Watch out for that!
+     * > This method is less efficient than {@link and}
      *
      * @param fns  Filters to combine
      */
-    export function every<Filters extends any[]>(
+    export function every<Filters extends UpdateFilter<T, any>[], T>(
         ...fns: Filters
     ): UpdateFilter<
         ExtractBase<Filters[0]>,
@@ -244,12 +241,31 @@ export namespace filters {
             ExtractMod<ExtractBase<Filters[0]>, Filters[number]>
         >
     > {
-        return async (upd, client) => {
-            for (const fn of fns) {
-                if (!(await fn(upd, client))) return false
+        if (fns.length === 2) return and(fns[0], fns[1])
+
+        return (upd, client) => {
+            let i = 0
+            const max = fns.length
+
+            const next = (): MaybeAsync<boolean> => {
+                if (i === max) return true
+
+                const res = fns[i++](upd, client)
+
+                if (typeof res === 'boolean') {
+                    if (!res) return false
+
+                    return next()
+                }
+
+                return res.then((r: boolean) => {
+                    if (!r) return false
+
+                    return next()
+                })
             }
 
-            return true
+            return next()
         }
     }
 
@@ -261,25 +277,41 @@ export namespace filters {
      * > **Note**: This also combines type modification in a way
      * > similar to {@link or}.
      * >
-     * > Using incompatible filters (e.g. using a {@link Message}
-     * > filter and a {@link CallbackQuery} filter in one `every` call
-     * > will result in `unknown` and/or `never` types in the combined
-     * > filter. Watch out for that!
+     * > This method is less efficient than {@link or}
      *
      * @param fns  Filters to combine
      */
-    export function some<Filters extends any[]>(
+    export function some<Filters extends UpdateFilter<T, any>[], T>(
         ...fns: Filters
     ): UpdateFilter<
         ExtractBase<Filters[0]>,
         ExtractMod<ExtractBase<Filters[0]>, Filters[number]>
     > {
-        return async (upd, client) => {
-            for (const fn of fns) {
-                if (await fn(upd, client)) return true
+        if (fns.length === 2) return or(fns[0], fns[1])
+
+        return (upd, client) => {
+            let i = 0
+            const max = fns.length
+
+            const next = (): MaybeAsync<boolean> => {
+                if (i === max) return false
+
+                const res = fns[i++](upd, client)
+
+                if (typeof res === 'boolean') {
+                    if (res) return true
+
+                    return next()
+                }
+
+                return res.then((r: boolean) => {
+                    if (r) return true
+
+                    return next()
+                })
             }
 
-            return true
+            return next()
         }
     }
 
