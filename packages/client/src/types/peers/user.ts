@@ -4,6 +4,7 @@ import { ChatPhoto } from './chat-photo'
 import { MtCuteArgumentError } from '../errors'
 import { makeInspectable } from '../utils'
 import { assertTypeIs } from '../../utils/type-assertion'
+import { InputMediaLike } from '../media'
 
 export namespace User {
     /**
@@ -355,6 +356,32 @@ export class User {
                 }&hash=${this.raw.accessHash.toString(16)}`,
             },
         ])
+    }
+
+    /**
+     * Send a text message to this user.
+     *
+     * @param text  Text of the message
+     * @param params
+     */
+    sendText(
+        text: string,
+        params?: Parameters<TelegramClient['sendText']>[2]
+    ): ReturnType<TelegramClient['sendText']> {
+        return this.client.sendText(this.inputPeer, text, params)
+    }
+
+    /**
+     * Send a media to this user.
+     *
+     * @param media  Media to send
+     * @param params
+     */
+    sendMedia(
+        media: InputMediaLike,
+        params?: Parameters<TelegramClient['sendText']>[2]
+    ): ReturnType<TelegramClient['sendText']> {
+        return this.client.sendMedia(this.inputPeer, media, params)
     }
 }
 

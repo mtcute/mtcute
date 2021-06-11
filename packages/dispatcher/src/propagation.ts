@@ -27,7 +27,8 @@ export const ContinuePropagation: unique symbol = _sym.for(
     'mtcute:ContinuePropagation'
 )
 
-export type PropagationSymbol =
-    | typeof StopPropagation
-    | typeof ContinuePropagation
-    | typeof StopChildrenPropagation
+export type PropagationSymbol = symbol
+// this seems to cause issues after publishing
+// | typeof StopPropagation
+// | typeof ContinuePropagation
+// | typeof StopChildrenPropagation

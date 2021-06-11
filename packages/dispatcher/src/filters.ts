@@ -27,6 +27,9 @@ import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
 import { MessageAction } from '@mtcute/client/src/types/messages/message-action'
 import { UpdateState } from './state'
+import { UserStatusUpdate } from './updates/user-status-update'
+import { PollVoteUpdate } from './updates/poll-vote'
+import { UserTypingUpdate } from './updates/user-typing-update'
 
 /**
  * Type describing a primitive filter, which is a function taking some `Base`
@@ -332,19 +335,97 @@ export namespace filters {
      */
     export const chat = <T extends Chat.Type>(
         type: T
-    ): UpdateFilter<Message, {
-        chat: Modify<Chat, { type: T }>
-        sender: T extends 'private' | 'bot' | 'group' ? User : User | Chat
-    }> => (msg) =>
-        msg.chat.type === type
+    ): UpdateFilter<
+        Message,
+        {
+            chat: Modify<Chat, { type: T }>
+            sender: T extends 'private' | 'bot' | 'group' ? User : User | Chat
+        }
+    > => (msg) => msg.chat.type === type
 
     /**
-     * Filter messages by chat ID
+     * Filter updates by chat ID(s)
      */
-    export const chatId = (
-        id: number
-    ): UpdateFilter<Message> => (msg) =>
-        msg.chat.id === id
+    export const chatId = (id: MaybeArray<number>): UpdateFilter<Message> => {
+        if (Array.isArray(id)) {
+            const index: Record<number, true> = {}
+            id.forEach((id) => (index[id] = true))
+
+            return (msg) => msg.chat.id in index
+        }
+
+        return (msg) => msg.chat.id === id
+    }
+
+    /**
+     * Filter updates by user ID(s)
+     *
+     * For chat member updates, uses `user.id`
+     */
+    export const userId = (
+        id: MaybeArray<number>
+    ): UpdateFilter<
+        | Message
+        | InlineQuery
+        | ChatMemberUpdate
+        | ChosenInlineResult
+        | CallbackQuery
+        | PollVoteUpdate
+        | UserStatusUpdate
+        | UserTypingUpdate
+    > => {
+        if (Array.isArray(id)) {
+            const index: Record<number, true> = {}
+            id.forEach((id) => (index[id] = true))
+
+            return (upd) => {
+                const ctor = upd.constructor
+
+                if (ctor === Message) {
+                    return (upd as Message).sender.id in index
+                } else {
+                    if (
+                        ctor === UserStatusUpdate ||
+                        ctor === UserTypingUpdate
+                    ) {
+                        return (
+                            (upd as UserStatusUpdate | UserTypingUpdate)
+                                .userId in index
+                        )
+                    } else {
+                        return (
+                            (upd as Exclude<
+                                typeof upd,
+                                Message | UserStatusUpdate | UserTypingUpdate
+                            >).user.id in index
+                        )
+                    }
+                }
+            }
+        }
+
+        return (upd) => {
+            const ctor = upd.constructor
+
+            if (ctor === Message) {
+                return (upd as Message).sender.id === id
+            } else {
+                if (ctor === UserStatusUpdate || ctor === UserTypingUpdate) {
+                    return (
+                        (upd as UserStatusUpdate | UserTypingUpdate).userId ===
+                        id
+                    )
+                } else {
+                    return (
+                        (upd as Exclude<
+                            typeof upd,
+                            Message | UserStatusUpdate | UserTypingUpdate
+                        >).user.id === id
+                    )
+                }
+            }
+        }
+    }
 
     /**
      * Filter incoming messages.
@@ -700,6 +781,36 @@ export namespace filters {
         }
 
         return (upd) => upd.type === types
+    }
+
+    /**
+     * Create a filter for {@link UserStatusUpdate} by new user status
+     *
+     * @param statuses  Update type(s)
+     * @link User.Status
+     */
+    export const userStatus: {
+        <T extends User.Status>(status: T): UpdateFilter<
+            UserStatusUpdate,
+            {
+                type: T
+                lastOnline: T extends 'offline' ? Date : null
+                nextOffline: T extends 'online' ? Date : null
+            }
+        >
+        <T extends User.Status[]>(statuses: T): UpdateFilter<
+            UserStatusUpdate,
+            { type: T[number] }
+        >
+    } = (statuses: MaybeArray<User.Status>): UpdateFilter<UserStatusUpdate> => {
+        if (Array.isArray(statuses)) {
+            const index: Partial<Record<User.Status, true>> = {}
+            statuses.forEach((typ) => (index[typ] = true))
+
+            return (upd) => upd.status in index
+        }
+
+        return (upd) => upd.status === statuses
     }
 
     /**

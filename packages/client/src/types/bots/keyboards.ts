@@ -264,6 +264,20 @@ export namespace BotKeyboard {
     }
 
     /**
+     * Button to pay for a product.
+     *
+     * Used for inline keyboards, not reply!
+     *
+     * **Note**: This type of button must always be
+     * the first button in the first row. Related
+     * invoice is inferred from {@link InputMedia.invoice},
+     * thus this button should only be used with it.
+     */
+    export function pay(text: string): tl.RawKeyboardButtonBuy {
+        return { _: 'keyboardButtonBuy', text }
+    }
+
+    /**
      * Button to authorize a user
      *
      * Used for inline keyboards, not reply!
@@ -307,6 +321,34 @@ export namespace BotKeyboard {
             fwdText: params.fwdText,
             requestWriteAccess: params.requestWriteAccess,
         }
+    }
+
+    /**
+     * Find a button in the keyboard by its text or by predicate
+     *
+     * @param buttons  Two-dimensional array of buttons
+     * @param predicate  Button text or predicate function
+     */
+    export function findButton(
+        buttons: tl.TypeKeyboardButton[][],
+        predicate: string | ((btn: tl.TypeKeyboardButton) => boolean)
+    ): tl.TypeKeyboardButton | null {
+        if (typeof predicate === 'string') {
+            const text = predicate
+            predicate = (btn) => {
+                return 'text' in btn && btn.text === text
+            }
+        }
+
+        for (const row of buttons) {
+            for (const btn of row) {
+                if (predicate(btn)) {
+                    return btn
+                }
+            }
+        }
+
+        return null
     }
 
     /** @internal */

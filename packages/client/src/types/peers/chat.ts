@@ -7,6 +7,7 @@ import { MtCuteArgumentError, MtCuteTypeAssertionError } from '../errors'
 import { makeInspectable } from '../utils'
 import { ChatsIndex, InputPeerLike, User, UsersIndex } from './index'
 import { ChatLocation } from './chat-location'
+import { InputMediaLike } from '../media'
 
 export namespace Chat {
     /**
@@ -558,6 +559,32 @@ export class Chat {
      */
     async readHistory(message = 0, clearMentions = false): Promise<void> {
         return this.client.readHistory(this.inputPeer, message, clearMentions)
+    }
+
+    /**
+     * Send a text message in this chat.
+     *
+     * @param text  Text of the message
+     * @param params
+     */
+    sendText(
+        text: string,
+        params?: Parameters<TelegramClient['sendText']>[2]
+    ): ReturnType<TelegramClient['sendText']> {
+        return this.client.sendText(this.inputPeer, text, params)
+    }
+
+    /**
+     * Send a media in this chat.
+     *
+     * @param media  Media to send
+     * @param params
+     */
+    sendMedia(
+        media: InputMediaLike,
+        params?: Parameters<TelegramClient['sendText']>[2]
+    ): ReturnType<TelegramClient['sendText']> {
+        return this.client.sendMedia(this.inputPeer, media, params)
     }
 }
 
