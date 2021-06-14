@@ -10,12 +10,6 @@ import {
     UsersIndex,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
-import {
-    ContinuePropagation,
-    PropagationSymbol,
-    StopChildrenPropagation,
-    StopPropagation,
-} from './propagation'
 // begin-codegen-imports
 import {
     UpdateHandler,
@@ -45,6 +39,7 @@ import { UserTypingUpdate } from './updates/user-typing-update'
 import { DeleteMessageUpdate } from './updates/delete-message-update'
 import { IStateStorage, UpdateState, StateKeyDelegate } from './state'
 import { defaultStateKeyDelegate } from './state/key'
+import { PropagationAction } from './propagation'
 
 const noop = () => {}
 
@@ -299,9 +294,9 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     }
 
     private async _dispatchUpdateNowImpl(
-        update: tl.TypeUpdate | tl.TypeMessage,
-        users: UsersIndex,
-        chats: ChatsIndex,
+        update: tl.TypeUpdate | tl.TypeMessage | null,
+        users: UsersIndex | null,
+        chats: ChatsIndex | null,
         // this is getting a bit crazy lol
         parsed?: any,
         parsedType?: Exclude<UpdateHandler['type'], 'raw'> | null,
@@ -311,12 +306,12 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     ): Promise<void> {
         if (!this._client) return
 
-        const isRawMessage = tl.isAnyMessage(update)
+        const isRawMessage = update && tl.isAnyMessage(update)
 
-        if (parsed === undefined && this._handlersCount[update._]) {
-            const pair = PARSERS[update._]
+        if (parsed === undefined && this._handlersCount[update!._]) {
+            const pair = PARSERS[update!._]
             if (pair) {
-                parsed = pair[1](this._client, update, users, chats)
+                parsed = pair[1](this._client, update!, users!, chats!)
                 parsedType = pair[0]
             } else {
                 parsed = parsedType = null
@@ -400,7 +395,41 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         outer: for (const grp of this._groupsOrder) {
             const group = this._groups[grp]
 
-            let tryRaw = !isRawMessage
+            if (update && !isRawMessage && 'raw' in group) {
+                const handlers = group['raw'] as RawUpdateHandler[]
+
+                for (const h of handlers) {
+                    let result: void | PropagationAction
+
+                    if (
+                        !h.check ||
+                        (await h.check(
+                            this._client,
+                            update as any,
+                            users!,
+                            chats!
+                        ))
+                    ) {
+                        result = await h.callback(
+                            this._client,
+                            update as any,
+                            users!,
+                            chats!
+                        )
+                    } else continue
+
+                    switch (result) {
+                        case 'continue':
+                            continue
+                        case 'stop':
+                            break outer
+                        case 'stop-children':
+                            return
+                    }
+
+                    break
+                }
+            }
 
             if (parsedType && parsedType in group) {
                 // raw is not handled here, so we can safely assume this
@@ -411,7 +440,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
                 try {
                     for (const h of handlers) {
-                        let result: void | PropagationSymbol
+                        let result: void | PropagationAction
 
                         if (
                             !h.check ||
@@ -423,11 +452,35 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                             )
                         } else continue
 
-                        if (result === ContinuePropagation) continue
-                        if (result === StopPropagation) break outer
-                        if (result === StopChildrenPropagation) return
+                        switch (result) {
+                            case 'continue':
+                                continue
+                            case 'stop':
+                                break outer
+                            case 'stop-children':
+                                return
+                            case 'scene': {
+                                if (!parsedState)
+                                    throw new MtCuteArgumentError('Cannot use ToScene without state')
 
-                        tryRaw = false
+                                const scene = parsedState['_scene']
+
+                                if (!scene)
+                                    throw new MtCuteArgumentError('Cannot use ToScene without entering a scene')
+
+                                return this._scenes[scene]._dispatchUpdateNowImpl(
+                                    update,
+                                    users,
+                                    chats,
+                                    parsed,
+                                    parsedType,
+                                    undefined,
+                                    scene,
+                                    true
+                                )
+                            }
+                        }
+
                         break
                     }
                 } catch (e) {
@@ -440,37 +493,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                     } else {
                         throw e
                     }
-                }
-            }
-
-            if (tryRaw && 'raw' in group) {
-                const handlers = group['raw'] as RawUpdateHandler[]
-
-                for (const h of handlers) {
-                    let result: void | PropagationSymbol
-
-                    if (
-                        !h.check ||
-                        (await h.check(
-                            this._client,
-                            update as any,
-                            users,
-                            chats
-                        ))
-                    ) {
-                        result = await h.callback(
-                            this._client,
-                            update as any,
-                            users,
-                            chats
-                        )
-                    } else continue
-
-                    if (result === ContinuePropagation) continue
-                    if (result === StopPropagation) break outer
-                    if (result === StopChildrenPropagation) return
-
-                    break
                 }
             }
         }
@@ -593,6 +615,25 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     ): void {
         if (handler) this._errorHandler = handler
         else this._errorHandler = undefined
+    }
+
+    /**
+     * Set error handler that will propagate
+     * the error to the parent dispatcher
+     */
+    propagateErrorToParent<T extends Exclude<UpdateHandler, RawUpdateHandler>>(
+        err: Error,
+        update: UpdateInfoForError<T>,
+        state?: UpdateState<State, SceneName>
+    ): MaybeAsync<void> {
+        if (!this.parent)
+            throw new MtCuteArgumentError('This dispatcher is not a child')
+
+        if (this.parent._errorHandler) {
+            return this.parent._errorHandler(err, update, state)
+        } else {
+            throw err
+        }
     }
 
     // children //
@@ -721,11 +762,15 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     removeChild(child: Dispatcher): void {
         const idx = this._children.indexOf(child)
         if (idx > -1) {
-            child._parent = child._client = undefined
-            ;(child as any)._stateKeyDelegate = undefined
-            ;(child as any)._storage = undefined
+            child._unparent()
             this._children.splice(idx, 1)
         }
+    }
+
+    private _unparent(): void {
+        this._parent = this._client = undefined
+        ;(this as any)._stateKeyDelegate = undefined
+        ;(this as any)._storage = undefined
     }
 
     /**
@@ -733,14 +778,20 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * handlers and children to the current.
      *
      * This might be more efficient for simple cases, but do note that the handler
-     * groups will get merged (unlike {@link addChild}, where they
-     * are independent). Also note that unlike with children,
+     * groups, children and scenes will get merged (unlike {@link addChild},
+     * where they are independent). Also note that unlike with children,
      * when adding handlers to `other` *after* you extended
      * the current dispatcher, changes will not be applied.
      *
      * @param other  Other dispatcher
      */
     extend(other: Dispatcher<State, SceneName>): void {
+        if (other._customStorage || other._customStateKeyDelegate) {
+            throw new MtCuteArgumentError(
+                'Provided dispatcher has custom storage and cannot be extended from.'
+            )
+        }
+
         other._groupsOrder.forEach((group) => {
             if (!(group in this._groups)) {
                 this._groups[group] = other._groups[group]
@@ -758,27 +809,87 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             }
         })
 
+        Object.keys(other._handlersCount).forEach((typ) => {
+            this._handlersCount[typ] += other._handlersCount[typ]
+        })
+
+        other._children.forEach((it) => {
+            it._unparent()
+            this.addChild(it as any)
+        })
+
+        if (other._scenes) {
+            Object.keys(other._scenes).forEach((key) => {
+                other._scenes[key]._unparent()
+                if (key in this._scenes) {
+                    // will be overwritten
+                    delete this._scenes[key]
+                }
+
+                this.addScene(
+                    key as any,
+                    other._scenes[key] as any,
+                    other._scenes[key]._sceneScoped as any
+                )
+            })
+        }
+
         this._groupsOrder.sort((a, b) => a - b)
     }
 
     /**
-     * Create a filter based on state predicate
+     * Create a clone of this dispatcher, that has the same handlers,
+     * but is not bound to a client or to a parent dispatcher.
      *
-     * If state exists and matches `predicate`, update passes
-     * this filter, otherwise it doesn't
+     * Custom Storage and key delegate are copied too.
      *
-     * Essentially just a wrapper over {@link filters.state}
+     * By default, child dispatchers (and scenes) are ignored, since
+     * that requires cloning every single one of them recursively
+     * and then binding them back.
      *
-     * @param predicate  State predicate
+     * @param children  Whether to also clone children and scenes
      */
-    state(
-        predicate: (state: State) => MaybeAsync<boolean>
-    ): UpdateFilter<Message, {}, State> {
-        if (!this._storage)
-            throw new MtCuteArgumentError(
-                'Cannot use state() filter without state storage'
+    clone(children = false): Dispatcher<State, SceneName> {
+        const dp = new Dispatcher<State, SceneName>()
+
+        // copy handlers.
+        Object.keys(this._groups).forEach((key) => {
+            const idx = (key as any) as number
+
+            dp._groups[idx] = {} as any
+
+            Object.keys(this._groups[idx]).forEach(
+                (type: UpdateHandler['type']) => {
+                    dp._groups[idx][type] = [...this._groups[idx][type]]
+                }
             )
-        return filters.state(predicate)
+        })
+
+        dp._groupsOrder = [...this._groupsOrder]
+        dp._handlersCount = { ...this._handlersCount }
+        dp._errorHandler = this._errorHandler
+        dp._customStateKeyDelegate = this._customStateKeyDelegate
+        dp._customStorage = this._customStorage
+
+        if (children) {
+            this._children.forEach((it) => {
+                const child = it.clone(true)
+                dp.addChild(child as any)
+            })
+
+            if (this._scenes) {
+                Object.keys(this._scenes).forEach((key) => {
+                    const scene = this._scenes[key].clone(true)
+                    dp.addScene(
+                        key as any,
+                        scene as any,
+                        this._scenes[key]._sceneScoped as any
+                    )
+                })
+            }
+        }
+
+        return dp
     }
 
     /**
@@ -861,6 +972,33 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         })
     }
 
+    /**
+     * Get global state.
+     *
+     * This will load the state for the given object
+     * ignoring local custom storage, key delegate and scene scope.
+     */
+    getGlobalState<T>(object: Parameters<StateKeyDelegate>[0]): Promise<UpdateState<T, SceneName>> {
+        if (!this._parent) {
+            throw new MtCuteArgumentError('This dispatcher does not have a parent')
+        }
+
+        return Promise.resolve(this._stateKeyDelegate!(object)).then((key) => {
+            if (!key) {
+                throw new MtCuteArgumentError(
+                    'Cannot derive key from given object'
+                )
+            }
+
+            return new UpdateState(
+                this._storage!,
+                key,
+                this._scene ?? null,
+                false
+            )
+        })
+    }
+
     // addUpdateHandler convenience wrappers //
 
     private _addKnownHandler(
@@ -930,10 +1068,12 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onNewMessage<Mod>(
-        filter: UpdateFilter<Message, Mod>,
+        filter: UpdateFilter<Message, Mod, State>,
         handler: NewMessageHandler<
             filters.Modify<Message, Mod>,
-            State extends never ? never : UpdateState<State, SceneName>
+            State extends never
+                ? never
+                : UpdateState<State, SceneName>
         >['callback'],
         group?: number
     ): void

@@ -1,34 +1,21 @@
-const _sym = require('es6-symbol')
-
 /**
- * Stop the propagation of the event through any handler groups
- * on the current dispatcher.
+ * Propagation action.
  *
- * However, returning this will still execute children
- */
-export const StopPropagation: unique symbol = _sym.for('mtcute:StopPropagation')
-
-/**
- * Stop the propagation of the event through any handler groups
- * on the current dispatcher, and any of its children.
+ * `Stop`: Stop the propagation of the event through any handler groups
+ * in the current dispatcher. Does not prevent child dispatchers from
+ * being executed.
  *
- * Note that if current dispatcher is a child,
- * this will not prevent from propagating the event
- * to other children of current's parent.
+ * `StopChildren`: Stop the propagation of the event through any handler groups
+ * in the current dispatcher, and any of its children. If current dispatcher
+ * is a child, does not prevent from propagating to its siblings.
+ *
+ * `Continue`: Continue propagating the event inside the same handler group.
+ *
+ * `ToScene`: Used after using `state.enter()` to dispatch the update to the scene
  */
-export const StopChildrenPropagation: unique symbol = _sym.for(
-    'mtcute:StopChildrenPropagation'
-)
-
-/**
- * Continue propagating the event inside the same handler group.
- */
-export const ContinuePropagation: unique symbol = _sym.for(
-    'mtcute:ContinuePropagation'
-)
-
-export type PropagationSymbol = symbol
-// this seems to cause issues after publishing
-// | typeof StopPropagation
-// | typeof ContinuePropagation
-// | typeof StopChildrenPropagation
+export enum PropagationAction {
+    Stop = 'stop',
+    StopChildren = 'stop-children',
+    Continue = 'continue',
+    ToScene = 'scene'
+}

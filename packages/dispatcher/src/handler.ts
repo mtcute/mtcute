@@ -8,7 +8,7 @@ import {
     ChatsIndex,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
-import { PropagationSymbol } from './propagation'
+import { PropagationAction } from './propagation'
 import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
 import { PollUpdate } from './updates/poll-update'
@@ -26,7 +26,7 @@ interface BaseUpdateHandler<Type, Handler, Checker> {
 
 type ParsedUpdateHandler<Type, Update, State = never> = BaseUpdateHandler<
     Type,
-    (update: Update, state: State) => MaybeAsync<void | PropagationSymbol>,
+    (update: Update, state: State) => MaybeAsync<void | PropagationAction>,
     (update: Update, state: State) => MaybeAsync<boolean>
 >
 
@@ -47,7 +47,7 @@ export type RawUpdateHandler = BaseUpdateHandler<
         update: tl.TypeUpdate,
         users: UsersIndex,
         chats: ChatsIndex
-    ) => MaybeAsync<void | PropagationSymbol>,
+    ) => MaybeAsync<void | PropagationAction>,
     (
         client: TelegramClient,
         update: tl.TypeUpdate,
