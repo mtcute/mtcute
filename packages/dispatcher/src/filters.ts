@@ -481,11 +481,20 @@ export namespace filters {
      * Filter service messages by action type
      */
     export const action = <T extends Exclude<MessageAction, null>['type']>(
-        type: T
+        type: MaybeArray<T>
     ): UpdateFilter<
         Message,
         { action: Extract<MessageAction, { type: T }> }
-    > => (msg) => msg.action?.type === type
+    > => {
+        if (Array.isArray(type)) {
+            const index: Partial<Record<T, true>> = {}
+            type.forEach((it) => (index[it] = true))
+
+            return (msg) => (msg.action?.type as any) in index
+        }
+
+        return (msg) => msg.action?.type === type
+    }
 
     /**
      * Filter messages containing a photo
@@ -676,13 +685,13 @@ export namespace filters {
         { match: RegExpMatchArray }
     > => (obj) => {
         let m: RegExpMatchArray | null = null
-        if (obj?.constructor === Message) {
+        if (obj.constructor === Message) {
             m = obj.text.match(regex)
-        } else if (obj?.constructor === InlineQuery) {
+        } else if (obj.constructor === InlineQuery) {
             m = obj.query.match(regex)
-        } else if (obj?.constructor === ChosenInlineResult) {
+        } else if (obj.constructor === ChosenInlineResult) {
             m = obj.id.match(regex)
-        } else if (obj?.constructor === CallbackQuery) {
+        } else if (obj.constructor === CallbackQuery) {
             if (obj.raw.data) m = obj.dataStr!.match(regex)
         }
 

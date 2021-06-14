@@ -6,11 +6,6 @@ import { MaybeAsync } from '@mtcute/core'
  *
  * The key is additionally prefixed with current scene, if any.
  *
- * Defaults to:
- *  - If private chat, `msg.chat.id`
- *  - If group chat, `msg.chat.id + '_' + msg.sender.id`
- *  - If channel, `msg.chat.id`
- *
  * @param msg  Message or callback from which to derive the key
  * @param scene  Current scene UID, or `null` if none
  */

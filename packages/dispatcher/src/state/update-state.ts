@@ -57,7 +57,16 @@ export class UpdateState<State, SceneName extends string = string> {
      * @param fallback  Default state value
      * @param force  Whether to ignore cached state (def. `false`)
      */
-    async get(fallback?: State, force?: boolean): Promise<State>
+    async get(fallback: State, force?: boolean): Promise<State>
+
+    /**
+     * Retrieve the state from the storage, falling back to default
+     * if not found
+     *
+     * @param fallback  Default state value
+     * @param force  Whether to ignore cached state (def. `false`)
+     */
+    async get(fallback?: State, force?: boolean): Promise<State | null>
     /**
      * Retrieve the state from the storage
      *
@@ -88,11 +97,34 @@ export class UpdateState<State, SceneName extends string = string> {
      * Set new state to the storage
      *
      * @param state  New state
-     * @param ttl  TTL for the new state
+     * @param ttl  TTL for the new state (in seconds)
      */
     async set(state: State, ttl?: number): Promise<void> {
         this._cached = state
         await this._localStorage.setState(this._localKey, state, ttl)
+    }
+
+    /**
+     * Merge the given object to the current state.
+     *
+     * > **Note**: If the storage currently has no state,
+     * > then `state` will be used as-is, which might
+     * > result in incorrect typings. Beware!
+     *
+     * Basically a shorthand to calling `.get()`,
+     * modifying and then calling `.set()`
+     *
+     * @param state  State to be merged
+     * @param ttl  TTL for the new state (in seconds)
+     * @param forceLoad  Whether to force load the old state from storage
+     */
+    async merge(state: Partial<State>, ttl?: number, forceLoad = false): Promise<void> {
+        const old = await this.get(forceLoad)
+        if (!old) {
+            await this.set(state as State, ttl)
+        } else {
+            await this.set({ ...old, ...state }, ttl)
+        }
     }
 
     /**
@@ -107,7 +139,7 @@ export class UpdateState<State, SceneName extends string = string> {
      * Enter some scene
      *
      * @param scene  Scene name
-     * @param ttl  TTL for the scene
+     * @param ttl  TTL for the scene (in seconds)
      */
     async enter(scene: SceneName, ttl?: number): Promise<void> {
         this._scene = scene
