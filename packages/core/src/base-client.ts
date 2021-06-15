@@ -327,13 +327,15 @@ export class BaseTelegramClient {
             // on reconnection we need to call updates.getState so Telegram
             // knows we still want the updates
             if (!this._disableUpdates) {
-                try {
-                    await this.call({ _: 'updates.getState' })
-                } catch (e) {
-                    if (!(e instanceof RpcError)) {
-                        this.primaryConnection.reconnect()
+                setTimeout(async () => {
+                    try {
+                        await this.call({ _: 'updates.getState' })
+                    } catch (e) {
+                        if (!(e instanceof RpcError)) {
+                            this.primaryConnection.reconnect()
+                        }
                     }
-                }
+                }, 0)
             }
         })
         this.primaryConnection.on('update', (update) => {
@@ -404,6 +406,15 @@ export class BaseTelegramClient {
         }
 
         this.primaryConnection.connect()
+    }
+
+    /**
+     * Wait until this client is usable (i.e. connection is fully ready)
+     */
+    async waitUntilUsable(): Promise<void> {
+        return new Promise((resolve) => {
+            this.primaryConnection.once('usable', resolve)
+        })
     }
 
     /**
