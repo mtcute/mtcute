@@ -187,6 +187,17 @@ export class MtprotoSession {
         }
 
         const content = innerReader.object()
+
+        const paddingSize = innerData.length - innerReader.pos
+
+        if (paddingSize < 12 || paddingSize > 1024) {
+            debug(
+                'warn: ignoring message with invalid padding size: %d',
+                paddingSize
+            )
+            return null
+        }
+
         return {
             messageId,
             seqNo,
