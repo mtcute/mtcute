@@ -1,4 +1,4 @@
-import { PacketCodec } from './abstract'
+import { IPacketCodec } from './abstract'
 import { IEncryptionScheme } from '../../utils/crypto'
 import { buffersEqual, randomBytes } from '../../utils/buffer-utils'
 import { WrappedCodec } from './wrapped'
@@ -19,13 +19,13 @@ interface MtProxyInfo {
     media: boolean
 }
 
-export class ObfuscatedPacketCodec extends WrappedCodec implements PacketCodec {
+export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec {
     private _encryptor?: IEncryptionScheme
     private _decryptor?: IEncryptionScheme
 
     private _proxy?: MtProxyInfo
 
-    constructor(inner: PacketCodec, proxy?: MtProxyInfo) {
+    constructor(inner: IPacketCodec, proxy?: MtProxyInfo) {
         super(inner)
         this._proxy = proxy
     }

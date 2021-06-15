@@ -1,7 +1,7 @@
 import {
     IntermediatePacketCodec,
     ObfuscatedPacketCodec,
-    PacketCodec,
+    IPacketCodec,
     PaddedIntermediatePacketCodec,
     parseUrlSafeBase64,
     TcpTransport,
@@ -86,7 +86,7 @@ export class MtProxyTcpTransport extends TcpTransport {
         }
     }
 
-    _packetCodec!: PacketCodec
+    _packetCodec!: IPacketCodec
 
     connect(dc: tl.RawDcOption): void {
         if (this._state !== TransportState.Idle)
@@ -110,7 +110,7 @@ export class MtProxyTcpTransport extends TcpTransport {
             }
 
             if (!this._fakeTlsDomain) {
-                let inner: PacketCodec
+                let inner: IPacketCodec
                 if (this._randomPadding) {
                     inner = new PaddedIntermediatePacketCodec()
                 } else {

@@ -64,7 +64,7 @@ export type TransportFactory = () => ICuteTransport
  * When receiving a packet, its content is sent to feed(),
  * and codec is supposed to emit `packet` or `error` event when packet is parsed.
  */
-export interface PacketCodec {
+export interface IPacketCodec {
     /** Initial tag of the codec. Will be sent immediately once connected. */
     tag(): MaybeAsync<Buffer>
 

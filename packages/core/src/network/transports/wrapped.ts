@@ -1,12 +1,12 @@
 import EventEmitter from 'events'
-import { PacketCodec } from './abstract'
+import { IPacketCodec } from './abstract'
 import { ICryptoProvider } from '../../utils/crypto'
 
 export abstract class WrappedCodec extends EventEmitter {
     protected _crypto: ICryptoProvider
-    protected _inner: PacketCodec
+    protected _inner: IPacketCodec
 
-    constructor(inner: PacketCodec) {
+    constructor(inner: IPacketCodec) {
         super()
         this._inner = inner
         this._inner.on('error', (err) => this.emit('error', err))

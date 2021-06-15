@@ -185,14 +185,14 @@ export class TelegramConnection extends PersistentConnection {
     protected onConnectionUsable(): void {
         super.onConnectionUsable()
 
+        Object.entries(this._pendingRpcCalls).forEach(([id, it]) =>
+            this._resend(it, id)
+        )
+
         const sendOnceUsable = this._sendOnceUsable
         // this way in case connection is still invalid (somehow??) messages aren't lost
         this._sendOnceUsable = []
         sendOnceUsable.forEach((it) => this._resend(it))
-
-        Object.entries(this._pendingRpcCalls).forEach(([id, it]) =>
-            this._resend(it, id)
-        )
 
         this._pingInterval = setInterval(() => {
             if (this._pendingPing === null) {

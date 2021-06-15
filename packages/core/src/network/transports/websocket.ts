@@ -1,4 +1,4 @@
-import { ICuteTransport, PacketCodec, TransportState } from './abstract'
+import { ICuteTransport, IPacketCodec, TransportState } from './abstract'
 import { tl } from '@mtcute/tl'
 import EventEmitter from 'events'
 import { typedArrayToBuffer } from '../../utils/buffer-utils'
@@ -42,7 +42,7 @@ export abstract class WebSocketTransport
     private _socket: WebSocket | null = null
     private _crypto: ICryptoProvider
 
-    abstract _packetCodec: PacketCodec
+    abstract _packetCodec: IPacketCodec
     packetCodecInitialized = false
 
     private _baseDomain: string

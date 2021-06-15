@@ -1,6 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { IntermediatePacketCodec } from '../../src/network/transports/tcp-intermediate'
+import { IntermediatePacketCodec } from '../../src/network/transports/intermediate'
 import { TransportError } from '../../src/network/transports/abstract'
 
 describe('IntermediatePacketCodec', () => {

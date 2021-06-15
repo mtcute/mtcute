@@ -1,4 +1,4 @@
-import { ICuteTransport, PacketCodec, TransportState } from './abstract'
+import { ICuteTransport, IPacketCodec, TransportState } from './abstract'
 import { tl } from '@mtcute/tl'
 import { Socket, connect } from 'net'
 import EventEmitter from 'events'
@@ -18,7 +18,7 @@ export abstract class TcpTransport
     protected _state: TransportState = TransportState.Idle
     protected _socket: Socket | null = null
 
-    abstract _packetCodec: PacketCodec
+    abstract _packetCodec: IPacketCodec
     protected _crypto: ICryptoProvider
 
     packetCodecInitialized = false

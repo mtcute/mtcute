@@ -2,7 +2,7 @@ import {
     bigIntToBuffer,
     bufferToBigInt,
     ICryptoProvider,
-    PacketCodec,
+    IPacketCodec,
     WrappedCodec,
     randomBytes,
 } from '@mtcute/core'
@@ -285,7 +285,7 @@ export async function generateFakeTlsHeader(
  * Must only be used inside {@link MtProxyTcpTransport}
  * @internal
  */
-export class FakeTlsPacketCodec extends WrappedCodec implements PacketCodec {
+export class FakeTlsPacketCodec extends WrappedCodec implements IPacketCodec {
     protected _stream = Buffer.alloc(0)
 
     private _header: Buffer
