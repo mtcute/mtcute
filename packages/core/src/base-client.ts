@@ -450,13 +450,14 @@ export class BaseTelegramClient {
         if (this._useIpv6) {
             // first try to find ipv6 dc
             const found = this._config.dcOptions.find(
-                (it) => it.id === id && it.cdn === cdn && it.ipv6
+                (it) =>
+                    it.id === id && it.cdn === cdn && it.ipv6 && !it.tcpoOnly
             )
             if (found) return found
         }
 
         const found = this._config.dcOptions.find(
-            (it) => it.id === id && it.cdn === cdn
+            (it) => it.id === id && it.cdn === cdn && !it.tcpoOnly
         )
         if (found) return found
 
@@ -671,6 +672,19 @@ export class BaseTelegramClient {
             // connection.authKey was already generated at this point
             this.storage.setAuthKeyFor(dc.id, connection.authKey)
             await this._saveStorage()
+        } else {
+            // in case the auth key is invalid
+            const dcId = dc.id
+            connection.on('key-change', async (key) => {
+                // we don't need to export, it will be done by `.call()`
+                // in case this error is returned
+                //
+                // even worse, exporting here will lead to a race condition,
+                // and may result in redundant re-exports.
+
+                this.storage.setAuthKeyFor(dcId, key)
+                await this._saveStorage()
+            })
         }
 
         this._additionalConnections.push(connection)
