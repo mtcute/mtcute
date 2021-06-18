@@ -554,6 +554,7 @@ async function _loadChannelDifference(
             diff.messages.forEach((message) => {
                 if (noDispatch && noDispatch.msg[channelId]?.[message.id])
                     return
+                if (message._ === 'messageEmpty') return
 
                 this.dispatchUpdate(message, users, chats)
             })
@@ -562,6 +563,7 @@ async function _loadChannelDifference(
 
         diff.newMessages.forEach((message) => {
             if (noDispatch && noDispatch.msg[channelId]?.[message.id]) return
+            if (message._ === 'messageEmpty') return
 
             this.dispatchUpdate(message, users, chats)
         })
@@ -576,6 +578,9 @@ async function _loadChannelDifference(
                 // but checking pts here seems like an overkill
                 if (pts && noDispatch.pts[channelId]?.[pts]) return
             }
+
+            if (upd._ === 'updateNewChannelMessage' && upd.message._ === 'messageEmpty')
+                return
 
             this.dispatchUpdate(upd, users, chats)
         })
