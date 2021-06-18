@@ -570,8 +570,8 @@ export class Message {
      */
     answerMedia(
         media: InputMediaLike,
-        params?: Parameters<TelegramClient['sendText']>[2]
-    ): ReturnType<TelegramClient['sendText']> {
+        params?: Parameters<TelegramClient['sendMedia']>[2]
+    ): ReturnType<TelegramClient['sendMedia']> {
         return this.client.sendMedia(this.chat.inputPeer, media, params)
     }
 
