@@ -139,6 +139,8 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                             ;(ent as tl.Mutable<tl.RawMessageEntityMentionName>).userId = userId
                         }
                     } else {
+                        if (url.match(/^\/\//)) url = 'http:' + url
+
                         ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>)._ =
                             'messageEntityTextUrl'
                         ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>).url = url

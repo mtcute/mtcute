@@ -116,7 +116,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                         }
                         break
                     case 'a': {
-                        const url = attribs.href
+                        let url = attribs.href
                         if (!url) return
 
                         const mention = MENTION_REGEX.exec(url)
@@ -142,6 +142,8 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                                 }
                             }
                         } else {
+                            if (url.match(/^\/\//)) url = 'http:' + url
+
                             entity = {
                                 _: 'messageEntityTextUrl',
                                 offset: plainText.length,
