@@ -8,10 +8,12 @@ interface AuthState {
     // (see methods/updates)
     _userId: number | null
     _isBot: boolean
+    _botUsername: string | null
 }
 
 // @initialize
 function _initializeAuthState(this: TelegramClient) {
     this._userId = null
     this._isBot = false
+    this._botUsername = null
 }

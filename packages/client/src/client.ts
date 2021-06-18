@@ -3050,6 +3050,7 @@ export interface TelegramClient extends BaseTelegramClient {
 export class TelegramClient extends BaseTelegramClient {
     protected _userId: number | null
     protected _isBot: boolean
+    protected _botUsername: string | null
     protected _downloadConnections: Record<number, TelegramConnection>
     protected _connectionsForInline: Record<number, TelegramConnection>
     protected _parseModes: Record<string, IMessageEntityParser>
@@ -3069,6 +3070,7 @@ export class TelegramClient extends BaseTelegramClient {
         super(opts)
         this._userId = null
         this._isBot = false
+        this._botUsername = null
         this._downloadConnections = {}
         this._connectionsForInline = {}
         this._parseModes = {}

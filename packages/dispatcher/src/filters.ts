@@ -728,7 +728,7 @@ export namespace filters {
         const commandsRe: Record<string, RegExp> = {}
         commands.forEach((cmd) => {
             commandsRe[cmd] = new RegExp(
-                `^${cmd}(?:\\s|$)`,
+                `^${cmd}(?:\\s|$|@([a-zA-Z0-9_]+?bot)(?:\\s|$))`,
                 caseSensitive ? '' : 'i'
             )
         })
@@ -736,13 +736,29 @@ export namespace filters {
         if (prefixes === null) prefixes = []
         if (typeof prefixes === 'string') prefixes = [prefixes]
 
-        return (msg) => {
+        const check = (msg: Message): MaybeAsync<boolean> => {
             for (const pref of prefixes!) {
                 if (!msg.text.startsWith(pref)) continue
 
                 const withoutPrefix = msg.text.slice(pref.length)
                 for (const cmd of commands) {
-                    if (!withoutPrefix.match(commandsRe[cmd])) continue
+                    const m = withoutPrefix.match(commandsRe[cmd])
+                    if (!m) continue
+
+                    if (m[1] && msg.client['_isBot']) {
+                        // check bot username
+                        if (!msg.client['_botUsername']) {
+                            // need to fetch it first
+
+                            return msg.client.getUsers('self')
+                                .then((self) => {
+                                    msg.client['_botUsername'] = self.username!
+                                    return check(msg)
+                                })
+                        }
+
+                        if (m[1] !== msg.client['_botUsername']) return false
+                    }
 
                     const match = [cmd]
                     // we use .replace to iterate over global regex, not to replace the text
@@ -762,6 +778,8 @@ export namespace filters {
 
             return false
         }
+
+        return check
     }
 
     /**
