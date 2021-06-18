@@ -87,9 +87,11 @@ export class NodeTelegramClient extends TelegramClient {
         params: Parameters<TelegramClient['start']>[0],
         then?: (user: User) => void | Promise<void>
     ): void {
-        if (!params.phone) params.phone = () => input('Phone > ')
-        if (!params.code) params.code = () => input('Code > ')
-        if (!params.password) params.password = () => input('2FA password > ')
+        if (!params.botToken) {
+            if (!params.phone) params.phone = () => input('Phone > ')
+            if (!params.code) params.code = () => input('Code > ')
+            if (!params.password) params.password = () => input('2FA password > ')
+        }
 
         return super.run(params, then)
     }
