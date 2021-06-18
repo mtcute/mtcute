@@ -2360,6 +2360,22 @@ export interface TelegramClient extends BaseTelegramClient {
         media: InputMediaLike | string,
         params?: {
             /**
+             * Override caption for `media`.
+             *
+             * Can be used, for example. when using File IDs
+             * or when using existing InputMedia objects.
+             */
+            caption?: string
+
+            /**
+             * Override entities for `media`.
+             *
+             * Can be used, for example. when using File IDs
+             * or when using existing InputMedia objects.
+             */
+            entities?: tl.TypeMessageEntity[]
+
+            /**
              * Message to reply to. Either a message object or message ID.
              */
             replyTo?: number | Message

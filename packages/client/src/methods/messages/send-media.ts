@@ -11,6 +11,7 @@ import {
     normalizeMessageId,
     randomUlong,
 } from '../../utils/misc-utils'
+import { tl } from '@mtcute/tl'
 
 /**
  * Send a single media (a photo or a document-based media)
@@ -29,6 +30,22 @@ export async function sendMedia(
     chatId: InputPeerLike,
     media: InputMediaLike | string,
     params?: {
+        /**
+         * Override caption for `media`.
+         *
+         * Can be used, for example. when using File IDs
+         * or when using existing InputMedia objects.
+         */
+        caption?: string
+
+        /**
+         * Override entities for `media`.
+         *
+         * Can be used, for example. when using File IDs
+         * or when using existing InputMedia objects.
+         */
+        entities?: tl.TypeMessageEntity[]
+
         /**
          * Message to reply to. Either a message object or message ID.
          */
@@ -102,9 +119,9 @@ export async function sendMedia(
         // some types dont have `caption` field, and ts warns us,
         // but since it's JS, they'll just be `undefined` and properly
         // handled by _parseEntities method
-        (media as any).caption,
+        params.caption || (media as any).caption,
         params.parseMode,
-        (media as any).entities
+        params.entities || (media as any).entities
     )
 
     let peer = await this.resolvePeer(chatId)
