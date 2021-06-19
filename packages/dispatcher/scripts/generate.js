@@ -230,7 +230,22 @@ function generateDispatcher() {
      * @param group  Handler group index
      * @internal
      */
-    on${type.handlerTypeName}(handler: ${type.handlerTypeName}Handler${type.state ? `<${type.updateType}, State extends never ? never : MessageState<State, SceneName>>` : ''}['callback'], group?: number): void
+    on${type.handlerTypeName}(handler: ${type.handlerTypeName}Handler${type.state ? `<${type.updateType}, State extends never ? never : UpdateState<State, SceneName>>` : ''}['callback'], group?: number): void
+
+${type.state ? `
+    /**
+     * Register ${toSentence(type)} with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  ${toSentence(type, 'full')}
+     * @param group  Handler group index
+     */
+    on${type.handlerTypeName}<Mod>(
+        filter: UpdateFilter<${type.updateType}, Mod, State>,
+        handler: ${type.handlerTypeName}Handler<filters.Modify<${type.updateType}, Mod>, State extends never ? never : UpdateState<State, SceneName>>['callback'],
+        group?: number
+    ): void
+    ` : ''}
 
     /**
      * Register ${toSentence(type)} with a filter
@@ -241,7 +256,7 @@ function generateDispatcher() {
      */
     on${type.handlerTypeName}<Mod>(
         filter: UpdateFilter<${type.updateType}, Mod>,
-        handler: ${type.handlerTypeName}Handler<filters.Modify<${type.updateType}, Mod>${type.state ? ', State extends never ? never : MessageState<State, SceneName>' : ''}>['callback'],
+        handler: ${type.handlerTypeName}Handler<filters.Modify<${type.updateType}, Mod>${type.state ? ', State extends never ? never : UpdateState<State, SceneName>' : ''}>['callback'],
         group?: number
     ): void
 

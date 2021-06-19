@@ -25,9 +25,9 @@ import {
     PollVoteHandler,
     UserStatusUpdateHandler,
     UserTypingHandler,
-    UpdateInfoForError,
 } from './handler'
 // end-codegen-imports
+import { UpdateInfoForError } from './handler'
 import { filters, UpdateFilter } from './filters'
 import { handlers } from './builders'
 import { ChatMemberUpdate } from './updates'
@@ -461,14 +461,20 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                                 return
                             case 'scene': {
                                 if (!parsedState)
-                                    throw new MtCuteArgumentError('Cannot use ToScene without state')
+                                    throw new MtCuteArgumentError(
+                                        'Cannot use ToScene without state'
+                                    )
 
                                 const scene = parsedState['_scene']
 
                                 if (!scene)
-                                    throw new MtCuteArgumentError('Cannot use ToScene without entering a scene')
+                                    throw new MtCuteArgumentError(
+                                        'Cannot use ToScene without entering a scene'
+                                    )
 
-                                return this._scenes[scene]._dispatchUpdateNowImpl(
+                                return this._scenes[
+                                    scene
+                                ]._dispatchUpdateNowImpl(
                                     update,
                                     users,
                                     chats,
@@ -978,9 +984,13 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * This will load the state for the given object
      * ignoring local custom storage, key delegate and scene scope.
      */
-    getGlobalState<T>(object: Parameters<StateKeyDelegate>[0]): Promise<UpdateState<T, SceneName>> {
+    getGlobalState<T>(
+        object: Parameters<StateKeyDelegate>[0]
+    ): Promise<UpdateState<T, SceneName>> {
         if (!this._parent) {
-            throw new MtCuteArgumentError('This dispatcher does not have a parent')
+            throw new MtCuteArgumentError(
+                'This dispatcher does not have a parent'
+            )
         }
 
         return Promise.resolve(this._stateKeyDelegate!(object)).then((key) => {
@@ -1071,9 +1081,23 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         filter: UpdateFilter<Message, Mod, State>,
         handler: NewMessageHandler<
             filters.Modify<Message, Mod>,
-            State extends never
-                ? never
-                : UpdateState<State, SceneName>
+            State extends never ? never : UpdateState<State, SceneName>
+        >['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register a new message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  New message handler
+     * @param group  Handler group index
+     */
+    onNewMessage<Mod>(
+        filter: UpdateFilter<Message, Mod>,
+        handler: NewMessageHandler<
+            filters.Modify<Message, Mod>,
+            State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number
     ): void
@@ -1093,6 +1117,22 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     onEditMessage(
         handler: EditMessageHandler<
             Message,
+            State extends never ? never : UpdateState<State, SceneName>
+        >['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register an edit message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Edit message handler
+     * @param group  Handler group index
+     */
+    onEditMessage<Mod>(
+        filter: UpdateFilter<Message, Mod, State>,
+        handler: EditMessageHandler<
+            filters.Modify<Message, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number
@@ -1254,6 +1294,22 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     onCallbackQuery(
         handler: CallbackQueryHandler<
             CallbackQuery,
+            State extends never ? never : UpdateState<State, SceneName>
+        >['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register a callback query handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Callback query handler
+     * @param group  Handler group index
+     */
+    onCallbackQuery<Mod>(
+        filter: UpdateFilter<CallbackQuery, Mod, State>,
+        handler: CallbackQueryHandler<
+            filters.Modify<CallbackQuery, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number
