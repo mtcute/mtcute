@@ -8,6 +8,8 @@ import { createInterface, Interface as RlInterface } from 'readline'
 
 export * from '@mtcute/dispatcher'
 export * from '@mtcute/client'
+export * from '@mtcute/html-parser'
+export * from '@mtcute/markdown-parser'
 export { SqliteStorage }
 
 let nativeCrypto: typeof NodeNativeCryptoProvider | null
