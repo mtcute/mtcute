@@ -516,6 +516,47 @@ export class Chat {
     }
 
     /**
+     * Create a mention for the chat.
+     *
+     * If this is a user, works just like {@link User.mention}.
+     * Otherwise, if the chat has a username, a @username is created
+     * (or text link, if `text` is passed). If it does not, chat title is
+     * simply returned without additional formatting.
+     *
+     * When available and `text` is omitted, this method will return `@username`.
+     * Otherwise, text mention is created for the given (or default) parse mode
+     *
+     * @param text  Text of the mention.
+     * @param parseMode  Parse mode to use when creating mention.
+     * @example
+     * ```typescript
+     * msg.replyText(`Hello, ${msg.chat.mention()`)
+     * ```
+     */
+    mention(text?: string | null, parseMode?: string | null): string {
+        if (this.user) return this.user.mention(text, parseMode)
+
+        if (!text && this.username) {
+            return `@${this.username}`
+        }
+
+        if (!text) text = this.displayName
+        if (!this.username) return text
+
+        if (!parseMode) parseMode = this.client['_defaultParseMode']
+
+        return this.client.getParseMode(parseMode).unparse(text, [
+            {
+                raw: undefined as any,
+                type: 'text_link',
+                offset: 0,
+                length: text.length,
+                url: `https://t.me/${this.username}`
+            },
+        ])
+    }
+
+    /**
      * Join this chat.
      */
     async join(): Promise<void> {
