@@ -798,11 +798,14 @@ export namespace filters {
     }
 
     /**
-     * Filter messages that match a given regular expression.
+     * Filter messages that call the given command(s)..
      *
      * When a command matches, the match array is stored in a
      * type-safe extension field `.commmand` of the {@link Message} object.
-     * First element is the command itself, then the arguments
+     * First element is the command itself, then the arguments.
+     *
+     * If the matched command was a RegExp, the first element is the full
+     * command, then the groups from the command regex, then the arguments.
      *
      * @param commands  Command(s) the filter should look for (w/out prefix)
      * @param prefixes
@@ -811,20 +814,27 @@ export namespace filters {
      * @param caseSensitive
      */
     export const command = (
-        commands: MaybeArray<string>,
+        commands: MaybeArray<string | RegExp>,
         prefixes: MaybeArray<string> | null = '/',
         caseSensitive = false
     ): UpdateFilter<Message, { command: string[] }> => {
-        if (typeof commands === 'string') commands = [commands]
-        commands = commands.map((i) => i.toLowerCase())
+        if (!Array.isArray(commands)) commands = [commands]
+
+        commands = commands.map((i) =>
+            typeof i === 'string' ? i.toLowerCase() : i
+        )
 
         const argumentsRe = /(["'])(.*?)(?<!\\)\1|(\S+)/g
         const unescapeRe = /\\(['"])/
-        const commandsRe: Record<string, RegExp> = {}
+        const commandsRe: RegExp[] = []
         commands.forEach((cmd) => {
-            commandsRe[cmd] = new RegExp(
-                `^${cmd}(?:\\s|$|@([a-zA-Z0-9_]+?bot)(?:\\s|$))`,
-                caseSensitive ? '' : 'i'
+            if (typeof cmd !== 'string') cmd = cmd.source
+
+            commandsRe.push(
+                new RegExp(
+                    `^(${cmd})(?:\\s|$|@([a-zA-Z0-9_]+?bot)(?:\\s|$))`,
+                    caseSensitive ? '' : 'i'
+                )
             )
         })
 
@@ -836,11 +846,12 @@ export namespace filters {
                 if (!msg.text.startsWith(pref)) continue
 
                 const withoutPrefix = msg.text.slice(pref.length)
-                for (const cmd of commands) {
-                    const m = withoutPrefix.match(commandsRe[cmd])
+                for (const regex of commandsRe) {
+                    const m = withoutPrefix.match(regex)
                     if (!m) continue
 
-                    if (m[1] && msg.client['_isBot']) {
+                    const lastGroup = m[m.length - 1]
+                    if (lastGroup && msg.client['_isBot']) {
                         // check bot username
                         if (!msg.client['_botUsername']) {
                             // need to fetch it first
@@ -851,13 +862,14 @@ export namespace filters {
                             })
                         }
 
-                        if (m[1] !== msg.client['_botUsername']) return false
+                        if (lastGroup !== msg.client['_botUsername']) return false
                     }
 
-                    const match = [cmd]
+                    const match = m.slice(1, -1)
+
                     // we use .replace to iterate over global regex, not to replace the text
                     withoutPrefix
-                        .slice(cmd.length)
+                        .slice(m[0].length)
                         .replace(argumentsRe, ($0, $1, $2, $3) => {
                             match.push(
                                 ($2 || $3 || '').replace(unescapeRe, '$1')
