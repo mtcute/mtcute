@@ -77,7 +77,7 @@ export async function editMessage(
         progressCallback?: (uploaded: number, total: number) => void
     }
 ): Promise<Message> {
-    let content: string | undefined
+    let content: string | undefined = undefined
     let entities: tl.TypeMessageEntity[] | undefined
     let media: tl.TypeInputMedia | undefined = undefined
 
@@ -93,7 +93,7 @@ export async function editMessage(
                 params.media.entities
             )
         }
-    } else {
+    } else if (params.text) {
         ;[content, entities] = await this._parseEntities(
             params.text,
             params.parseMode,
