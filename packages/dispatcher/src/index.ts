@@ -5,5 +5,6 @@ export * from './handler'
 export * from './propagation'
 export * from './updates'
 export * from './wizard'
+export * from './callback-data-builder'
 
 export { UpdateState, IStateStorage } from './state'
