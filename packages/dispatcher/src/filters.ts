@@ -424,13 +424,17 @@ export namespace filters {
                         ctor === UserStatusUpdate ||
                         ctor === UserTypingUpdate
                     ) {
-                        const id = (upd as UserStatusUpdate | UserTypingUpdate).userId
-                        return matchSelf && id === upd.client['_userId'] || id in index
+                        const id = (upd as UserStatusUpdate | UserTypingUpdate)
+                            .userId
+                        return (
+                            (matchSelf && id === upd.client['_userId']) ||
+                            id in index
+                        )
                     } else {
                         const user = (upd as Exclude<
                             typeof upd,
                             Message | UserStatusUpdate | UserTypingUpdate
-                            >).user
+                        >).user
 
                         return (
                             (matchSelf && user.isSelf) ||
@@ -565,7 +569,17 @@ export namespace filters {
         type: MaybeArray<T>
     ): UpdateFilter<
         Message,
-        { action: Extract<MessageAction, { type: T }> }
+        {
+            action: Extract<MessageAction, { type: T }>
+            sender: T extends
+                | 'user_joined_link'
+                | 'user_removed'
+                | 'history_cleared'
+                | 'contact_joined'
+                | 'bot_allowed'
+                ? User
+                : User | Chat
+        }
     > => {
         if (Array.isArray(type)) {
             const index: Partial<Record<T, true>> = {}
