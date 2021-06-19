@@ -889,6 +889,15 @@ export namespace filters {
     }
 
     /**
+     * Shorthand filter that matches /start commands sent to bot's
+     * private messages.
+     */
+    export const start = and(
+        chat('private'),
+        command('start')
+    )
+
+    /**
      * Create a filter for {@link ChatMemberUpdate} by update type
      *
      * @param types  Update type(s)
