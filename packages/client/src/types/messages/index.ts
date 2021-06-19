@@ -1,4 +1,6 @@
 export * from './message-entity'
+export * from './message-action'
+export * from './message-media'
 export * from './message'
 export * from './search-filters'
 export * from './draft-message'

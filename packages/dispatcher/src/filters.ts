@@ -21,11 +21,11 @@ import {
     Invoice,
     Game,
     WebPage,
+    MessageAction
 } from '@mtcute/client'
 import { MaybeArray } from '@mtcute/core'
 import { ChatMemberUpdate } from './updates'
 import { ChosenInlineResult } from './updates/chosen-inline-result'
-import { MessageAction } from '@mtcute/client/src/types/messages/message-action'
 import { UpdateState } from './state'
 import { UserStatusUpdate } from './updates/user-status-update'
 import { PollVoteUpdate } from './updates/poll-vote'
