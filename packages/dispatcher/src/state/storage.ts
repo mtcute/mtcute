@@ -58,4 +58,25 @@ export interface IStateStorage {
      * @param key  Key of the state, as defined by {@link StateKeyDelegate}
      */
     deleteCurrentScene(key: string): MaybeAsync<void>
+
+    /**
+     * Get information about a rate limit.
+     *
+     * It is recommended that you use sliding window or leaky bucket
+     * to implement rate limiting ([learn more](https://konghq.com/blog/how-to-design-a-scalable-rate-limiting-algorithm/)),
+     *
+     * @param key  Key of the rate limit
+     * @param limit  Maximum number of requests in `window`
+     * @param window  Window size in seconds
+     * @returns  Tuple containing the number of remaining and
+     *   unix time in ms when the user can try again
+     */
+    getRateLimit(key: string, limit: number, window: number): MaybeAsync<[number, number]>
+
+    /**
+     * Reset a rate limit.
+     *
+     * @param key  Key of the rate limit
+     */
+    resetRateLimit(key: string): MaybeAsync<void>
 }

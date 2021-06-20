@@ -124,6 +124,13 @@ interface FsmItem {
     expires?: number
 }
 
+interface RateLimitItem {
+    // reset
+    res: number
+    // remaining
+    rem: number
+}
+
 const STATEMENTS = {
     getKv: 'select value from kv where key = ?',
     setKv: 'insert or replace into kv (key, value) values (?, ?)',
@@ -168,6 +175,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
     private _cache?: LruMap<number, CacheItem>
     private _fsmCache?: LruMap<string, FsmItem>
+    private _rlCache?: LruMap<string, RateLimitItem>
 
     private _wal?: boolean
 
@@ -211,6 +219,19 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
             fsmCacheSize?: number
 
             /**
+             * Rate limit states cache size, in number of keys.
+             *
+             * Recently created/used rate limits are cached
+             * in memory to avoid redundant database calls.
+             * If you are having problems with this (e.g. stale
+             * state in case of concurrent accesses), you
+             * can disable this by passing `0`
+             *
+             * Defaults to `100`
+             */
+            rlCacheSize?: number
+
+            /**
              * By default, WAL mode is enabled, which
              * significantly improves performance.
              * [Learn more](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/performance.md)
@@ -242,6 +263,10 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
         if (params?.fsmCacheSize !== 0) {
             this._fsmCache = new LruMap(params?.fsmCacheSize ?? 100)
+        }
+
+        if (params?.rlCacheSize !== 0) {
+            this._rlCache = new LruMap(params?.rlCacheSize ?? 100)
         }
 
         this._wal = !params?.disableWal
@@ -622,5 +647,58 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
     deleteCurrentScene(key: string): void {
         this.deleteState(`$current_scene_${key}`)
+    }
+
+    getRateLimit(key: string, limit: number, window: number): [number, number] {
+        // leaky bucket
+        const now = Date.now()
+
+        let val: RateLimitItem | undefined = this._rlCache?.get(key)
+        const cached = val
+        if (!val) {
+            const got = this._statements.getState.get(`$rate_limit_${key}`)
+            if (got) {
+                val = JSON.parse(got.value)
+            }
+        }
+
+        if (!val || val.res < now) {
+            // expired or does not exist
+            const state = {
+                res: now + window * 1000,
+                rem: limit
+            }
+
+            this._statements.setState.run(
+                `$rate_limit_${key}`,
+                JSON.stringify(state),
+                null
+            )
+            this._rlCache?.set(key, state)
+
+            return [state.rem, state.res]
+        }
+
+        if (val.rem > 0) {
+            val.rem -= 1
+
+            this._statements.setState.run(
+                `$rate_limit_${key}`,
+                JSON.stringify(val),
+                null
+            )
+            if (!cached) {
+                // add to cache
+                // if cached, cache is updated since `val === cached`
+                this._rlCache?.set(key, val)
+            }
+        }
+
+        return [val.rem, val.res]
+    }
+
+    resetRateLimit(key: string): void {
+        this._rlCache?.delete(key)
+        this._statements.delState.run(`$rate_limit_${key}`)
     }
 }

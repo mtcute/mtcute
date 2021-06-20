@@ -1,4 +1,14 @@
 import { IStateStorage } from './storage'
+import { MtCuteError } from '@mtcute/client'
+
+/**
+ * Error thrown by `.throttle()`
+ */
+export class RateLimitError extends MtCuteError {
+    constructor (readonly reset: number) {
+        super(`You are being rate limited.`)
+    }
+}
 
 /**
  * State of the current update.
@@ -158,5 +168,36 @@ export class UpdateState<State, SceneName extends string = string> {
         this._scene = null
         this._updateLocalKey()
         await this._storage.deleteCurrentScene(this._key)
+    }
+
+    /**
+     * Rate limit some handler
+     *
+     * > **Note**: `key` is used to prefix the local key
+     * > derived using the given key delegate.
+     *
+     * @param key  Key of the rate limit
+     * @param limit  Maximum number of requests in `window`
+     * @param window  Window size in seconds
+     * @returns  Tuple containing the number of remaining and
+     *   unix time in ms when the user can try again
+     */
+    async throttle(key: string, limit: number, window: number): Promise<[number, number]> {
+        const [remaining, reset] = await this._localStorage.getRateLimit(`${key}:${this._localKey}`, limit, window)
+
+        if (!remaining) {
+            throw new RateLimitError(reset)
+        }
+
+        return [remaining - 1, reset]
+    }
+
+    /**
+     * Reset the rate limit
+     *
+     * @param key  Key of the rate limit
+     */
+    async resetRateLimit(key: string): Promise<void> {
+        await this._localStorage.resetRateLimit(`${key}:${this._localKey}`)
     }
 }

@@ -27,8 +27,24 @@ interface MemorySessionState {
     // channel pts
     pts: Record<number, number>
 
-    // state for fsm (v = value, e = expires)
-    fsm: Record<string, { v: any; e?: number }>
+    // state for fsm
+    fsm: Record<
+        string,
+        {
+            // value
+            v: any
+            // expires
+            e?: number
+        }
+    >
+
+    // state for rate limiter
+    rl: Record<string, {
+        // reset
+        res: number
+        // remaining
+        rem: number
+    }>
 
     self: ITelegramStorage.SelfInfo | null
 }
@@ -69,6 +85,7 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
             gpts: null,
             pts: {},
             fsm: {},
+            rl: {},
             self: null,
         }
     }
@@ -276,5 +293,40 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
 
     deleteCurrentScene(key: string): void {
         delete this._state.fsm[`$current_scene_${key}`]
+    }
+
+    getRateLimit(key: string, limit: number, window: number): [number, number] {
+        // leaky bucket
+        const now = Date.now()
+
+        if (!(key in this._state.rl)) {
+            const state = {
+                res: now + window * 1000,
+                rem: limit
+            }
+
+            this._state.rl[key] = state
+            return [state.rem, state.res]
+        }
+
+        const item = this._state.rl[key]
+        if (item.res < now) {
+            // expired
+
+            const state = {
+                res: now + window * 1000,
+                rem: limit
+            }
+
+            this._state.rl[key] = state
+            return [state.rem, state.res]
+        }
+
+        item.rem = item.rem > 0 ? item.rem - 1 : 0
+        return [item.rem, item.res]
+    }
+
+    resetRateLimit(key: string): void {
+        delete this._state.rl[key]
     }
 }
