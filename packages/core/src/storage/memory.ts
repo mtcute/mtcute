@@ -53,9 +53,12 @@ const USERNAME_TTL = 86400000 // 24 hours
 
 export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
     protected _state: MemorySessionState
-    private _cachedInputPeers: Record<number, tl.TypeInputPeer> = {}
+    private _cachedInputPeers: LruMap<number, tl.TypeInputPeer> = new LruMap(100)
 
     private _cachedFull: LruMap<number, tl.TypeUser | tl.TypeChat>
+
+    private _vacuumTimeout: NodeJS.Timeout
+    private _vacuumInterval: number
 
     constructor(params?: {
         /**
@@ -69,9 +72,31 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
          * Defaults to `100`, use `0` to disable
          */
         cacheSize?: number
+
+        /**
+         * Interval in milliseconds for vacuuming the storage.
+         *
+         * When vacuuming, the storage will remove expired FSM
+         * states to reduce memory usage.
+         *
+         * Defaults to `300_000` (5 minutes)
+         */
+        vacuumInterval?: number
     }) {
         this.reset()
         this._cachedFull = new LruMap(params?.cacheSize ?? 100)
+        this._vacuumInterval = params?.vacuumInterval ?? 300_000
+    }
+
+    load(): void {
+        this._vacuumTimeout = setInterval(
+            this._vacuum.bind(this),
+            this._vacuumInterval
+        )
+    }
+
+    destroy(): void {
+        clearInterval(this._vacuumTimeout)
     }
 
     reset(): void {
@@ -120,6 +145,30 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
         }
 
         this._state = obj
+    }
+
+    private _vacuum(): void {
+        // remove expired entities from fsm and rate limit storages
+
+        const now = Date.now()
+
+        // make references in advance to avoid lookups
+        const state = this._state
+        const fsm = state.fsm
+        const rl = state.rl
+
+        Object.keys(fsm).forEach((key) => {
+            const exp = fsm[key].e
+            if (exp && exp < now) {
+                delete fsm[key]
+            }
+        })
+
+        Object.keys(rl).forEach((key) => {
+            if (rl[key].res < now) {
+                delete rl[key]
+            }
+        })
     }
 
     getDefaultDc(): tl.RawDcOption | null {
@@ -192,10 +241,10 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
     }
 
     getPeerById(peerId: number): tl.TypeInputPeer | null {
-        if (peerId in this._cachedInputPeers)
-            return this._cachedInputPeers[peerId]
+        if (this._cachedInputPeers.has(peerId))
+            return this._cachedInputPeers.get(peerId)!
         const peer = this._getInputPeer(this._state.entities[peerId])
-        if (peer) this._cachedInputPeers[peerId] = peer
+        if (peer) this._cachedInputPeers.set(peerId, peer)
         return peer
     }
 
@@ -302,7 +351,7 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
         if (!(key in this._state.rl)) {
             const state = {
                 res: now + window * 1000,
-                rem: limit
+                rem: limit,
             }
 
             this._state.rl[key] = state
@@ -315,7 +364,7 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
 
             const state = {
                 res: now + window * 1000,
-                rem: limit
+                rem: limit,
             }
 
             this._state.rl[key] = state

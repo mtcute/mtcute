@@ -124,13 +124,6 @@ interface FsmItem {
     expires?: number
 }
 
-interface RateLimitItem {
-    // reset
-    res: number
-    // remaining
-    rem: number
-}
-
 const STATEMENTS = {
     getKv: 'select value from kv where key = ?',
     setKv: 'insert or replace into kv (key, value) values (?, ?)',
@@ -156,6 +149,8 @@ const STATEMENTS = {
     getEntById: 'select * from entities where id = ?',
     getEntByPhone: 'select * from entities where phone = ?',
     getEntByUser: 'select * from entities where username = ?',
+
+    delStaleState: 'delete from state where expires < ?'
 } as const
 
 const EMPTY_BUFFER = Buffer.alloc(0)
@@ -175,13 +170,16 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
     private _cache?: LruMap<number, CacheItem>
     private _fsmCache?: LruMap<string, FsmItem>
-    private _rlCache?: LruMap<string, RateLimitItem>
+    private _rlCache?: LruMap<string, FsmItem>
 
     private _wal?: boolean
 
     private _reader = new BinaryReader(EMPTY_BUFFER)
 
     private _saveUnimportantLater: () => void
+
+    private _vacuumTimeout: NodeJS.Timeout
+    private _vacuumInterval: number
 
     /**
      * @param filename  Database file name, or `:memory:` for in-memory DB
@@ -253,6 +251,16 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
              * Defaults to `30000` (30 sec)
              */
             unimportantSavesDelay?: number
+
+            /**
+             * Interval in milliseconds for vacuuming the storage.
+             *
+             * When vacuuming, the storage will remove expired FSM
+             * states to reduce disk and memory usage.
+             *
+             * Defaults to `300_000` (5 minutes)
+             */
+            vacuumInterval?: number
         }
     ) {
         this._filename = filename
@@ -288,6 +296,9 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
             this._updateManyPeers(items)
             this._pendingUnimportant = {}
         }, params?.unimportantSavesDelay ?? 30000)
+
+
+        this._vacuumInterval = params?.vacuumInterval ?? 300_000
 
         // todo: add support for workers (idk if really needed, but still)
     }
@@ -372,6 +383,11 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
         }
     }
 
+    private _vacuum(): void {
+        this._statements.delStaleState.run(Date.now())
+        // local caches aren't cleared because it would be too expensive
+    }
+
     load(): void {
         this._db = sqlite3(this._filename, {
             verbose: debug.enabled ? debug : null,
@@ -396,6 +412,11 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
                 this._statements.updateCachedEnt.run(it)
             })
         })
+
+        this._vacuumTimeout = setInterval(
+            this._vacuum.bind(this),
+            this._vacuumInterval
+        )
     }
 
     save(): void {
@@ -409,6 +430,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
     destroy(): void {
         this._db.close()
+        clearInterval(this._vacuumTimeout)
     }
 
     reset(): void {
@@ -653,39 +675,39 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
         // leaky bucket
         const now = Date.now()
 
-        let val: RateLimitItem | undefined = this._rlCache?.get(key)
+        let val: FsmItem | undefined = this._rlCache?.get(key)
         const cached = val
         if (!val) {
             const got = this._statements.getState.get(`$rate_limit_${key}`)
             if (got) {
-                val = JSON.parse(got.value)
+                val = got
             }
         }
 
-        if (!val || val.res < now) {
+        if (!val || val.expires! < now) {
             // expired or does not exist
-            const state = {
-                res: now + window * 1000,
-                rem: limit
+            const item: FsmItem = {
+                expires: now + window * 1000,
+                value: limit
             }
 
             this._statements.setState.run(
                 `$rate_limit_${key}`,
-                JSON.stringify(state),
-                null
+                item.value,
+                item.expires
             )
-            this._rlCache?.set(key, state)
+            this._rlCache?.set(key, item)
 
-            return [state.rem, state.res]
+            return [item.value, item.expires!]
         }
 
-        if (val.rem > 0) {
-            val.rem -= 1
+        if (val.value > 0) {
+            val.value -= 1
 
             this._statements.setState.run(
                 `$rate_limit_${key}`,
-                JSON.stringify(val),
-                null
+                val.value,
+                val.expires
             )
             if (!cached) {
                 // add to cache
@@ -694,7 +716,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
             }
         }
 
-        return [val.rem, val.res]
+        return [val.value, val.expires!]
     }
 
     resetRateLimit(key: string): void {
