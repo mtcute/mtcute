@@ -37,6 +37,12 @@ export class WizardScene<State, SceneName extends string = string> extends Dispa
 > {
     private _steps = 0
 
+    private _defaultState: State & WizardInternalState = {} as any
+
+    setDefaultState (defaultState: State): void {
+        this._defaultState = defaultState as State & WizardInternalState
+    }
+
     /**
      * Get the total number of registered steps
      */
@@ -60,7 +66,7 @@ export class WizardScene<State, SceneName extends string = string> extends Dispa
                 const result = await handler(msg, state)
 
                 if (typeof result === 'number') {
-                    await state.merge({ $step: result })
+                    await state.merge({ $step: result }, this._defaultState)
                     return
                 }
 
@@ -70,7 +76,7 @@ export class WizardScene<State, SceneName extends string = string> extends Dispa
                         if (next === this._steps) {
                             await state.exit()
                         } else {
-                            await state.merge({ $step: next })
+                            await state.merge({ $step: next }, this._defaultState)
                         }
                         break
                     }
