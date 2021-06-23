@@ -32,7 +32,7 @@ const OVERRIDE_MIME: Record<string, string> = {
  * sending a message anywhere. Useful when an `InputFile` is required.
  *
  * This method is quite low-level, and you should use other
- * methods like {@link sendDocument} that handle this under the hood.
+ * methods like {@link sendMedia} that handle this under the hood.
  *
  * @param params  Upload parameters
  * @internal

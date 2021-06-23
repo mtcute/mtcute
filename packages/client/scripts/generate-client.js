@@ -107,7 +107,7 @@ async function addSingleMethod(state, fileName) {
                 )
             }
 
-            const isPrivate = name[0] === '_'
+            const isPrivate = name[0] === '_' && name !== '_handleUpdate'
             const isExported = (stmt.modifiers || []).find(
                 (mod) => mod.kind === 92 /* ExportKeyword */
             )

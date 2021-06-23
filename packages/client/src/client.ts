@@ -1477,7 +1477,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * sending a message anywhere. Useful when an `InputFile` is required.
      *
      * This method is quite low-level, and you should use other
-     * methods like {@link sendDocument} that handle this under the hood.
+     * methods like {@link sendMedia} that handle this under the hood.
      *
      * @param params  Upload parameters
      */
@@ -2849,6 +2849,7 @@ export interface TelegramClient extends BaseTelegramClient {
         users: UsersIndex,
         chats: ChatsIndex
     ): void
+    _handleUpdate(update: tl.TypeUpdates, noDispatch?: boolean): void
     /**
      * Catch up with the server by loading missed updates.
      *
@@ -3219,7 +3220,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _loadStorage = _loadStorage
     protected _saveStorage = _saveStorage
     dispatchUpdate = dispatchUpdate
-    protected _handleUpdate = _handleUpdate
+    _handleUpdate = _handleUpdate
     catchUp = catchUp
     blockUser = blockUser
     deleteProfilePhotos = deleteProfilePhotos
