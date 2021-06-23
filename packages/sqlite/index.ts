@@ -604,11 +604,12 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
         const row = this._statements.getEntById.get(id)
         if (row) {
+            const full = this._readFullPeer(row.full)
             this._addToCache(id, {
                 peer: getInputPeer(row),
-                full: this._readFullPeer(row.full),
+                full
             })
-            return row.full
+            return full
         }
 
         return null
