@@ -102,7 +102,8 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
 
                 if (text[pos + 1] !== '(') {
                     // [link text]
-                    // ignore this
+                    // ignore this, and add opening [
+                    result = `${result.substr(0, ent.offset)}[${result.substr(ent.offset)}]`
                     pos += 1
                     continue
                 }

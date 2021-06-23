@@ -587,7 +587,7 @@ describe('MarkdownMessageEntityParser', () => {
         })
 
         it('should ignore empty urls', () => {
-            test('[link]() [link]', [], 'link link')
+            test('[link]() [link]', [], 'link [link]')
         })
 
         it('should ignore unclosed tags', () => {

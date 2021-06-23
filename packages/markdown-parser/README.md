@@ -95,7 +95,7 @@ where `1234567` is the ID of the user you want to mention
 | `[Google](https://google.com)` | [Google](https://google.com) | `<a href="https://google.com">Google</a>`
 | `[__Google__](https://google.com)` | [_Google_](https://google.com) | `<a href="https://google.com"><i>Google</i></a>`
 | `[empty link]()` | empty link | `empty link`
-| `[empty link]` | empty link | `empty link`
+| `[empty link]` | [empty link] | `[empty link]`
 | `[User](tg://user?id=1234567)` | N/A | N/A
 
 ### Nested and overlapping entities
