@@ -1,5 +1,5 @@
 import { IStateStorage } from './storage'
-import { MtCuteError } from '@mtcute/client'
+import { MtCuteArgumentError, MtCuteError } from '@mtcute/client'
 
 /**
  * Error thrown by `.throttle()`
@@ -125,16 +125,22 @@ export class UpdateState<State, SceneName extends string = string> {
      * modifying and then calling `.set()`
      *
      * @param state  State to be merged
+     * @param fallback  Default state
      * @param ttl  TTL for the new state (in seconds)
      * @param forceLoad  Whether to force load the old state from storage
      */
-    async merge(state: Partial<State>, ttl?: number, forceLoad = false): Promise<void> {
+    async merge(state: Partial<State>, fallback?: State, ttl?: number, forceLoad = false): Promise<State> {
         const old = await this.get(forceLoad)
         if (!old) {
-            await this.set(state as State, ttl)
+            if (!fallback)
+                throw new MtCuteArgumentError('Cannot use merge on empty state without fallback.')
+
+            await this.set({ ...fallback, ...state }, ttl)
         } else {
             await this.set({ ...old, ...state }, ttl)
         }
+
+        return this._cached!
     }
 
     /**
