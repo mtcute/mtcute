@@ -1473,6 +1473,33 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     downloadAsStream(params: FileDownloadParameters): Readable
     /**
+     * Normalize a {@link InputFileLike} to `InputFile`,
+     * uploading it if needed.
+     *
+     */
+    _normalizeInputFile(
+        input: InputFileLike,
+        params: {
+            progressCallback?: (uploaded: number, total: number) => void
+            fileName?: string
+            fileSize?: number
+            fileMime?: string
+        }
+    ): Promise<tl.TypeInputFile>
+    /**
+     * Normalize an {@link InputMediaLike} to `InputMedia`,
+     * uploading the file if needed.
+     *
+     */
+    _normalizeInputMedia(
+        media: InputMediaLike,
+        params: {
+            parseMode?: string | null
+            progressCallback?: (uploaded: number, total: number) => void
+        },
+        uploadMedia?: boolean
+    ): Promise<tl.TypeInputMedia>
+    /**
      * Upload a file to Telegram servers, without actually
      * sending a message anywhere. Useful when an `InputFile` is required.
      *
@@ -3162,8 +3189,8 @@ export class TelegramClient extends BaseTelegramClient {
     downloadAsIterable = downloadAsIterable
     downloadAsStream = downloadAsStream
     protected _normalizeFileToDocument = _normalizeFileToDocument
-    protected _normalizeInputFile = _normalizeInputFile
-    protected _normalizeInputMedia = _normalizeInputMedia
+    _normalizeInputFile = _normalizeInputFile
+    _normalizeInputMedia = _normalizeInputMedia
     uploadFile = uploadFile
     createInviteLink = createInviteLink
     editInviteLink = editInviteLink

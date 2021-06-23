@@ -107,7 +107,12 @@ async function addSingleMethod(state, fileName) {
                 )
             }
 
-            const isPrivate = name[0] === '_' && name !== '_handleUpdate'
+            const isPrivate =
+                name[0] === '_' &&
+                name !== '_handleUpdate' &&
+                name !== '_normalizeInputFile' &&
+                name !== '_normalizeInputMedia'
+
             const isExported = (stmt.modifiers || []).find(
                 (mod) => mod.kind === 92 /* ExportKeyword */
             )
