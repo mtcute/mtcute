@@ -819,4 +819,4 @@ export class Message {
     }
 }
 
-makeInspectable(Message, ['empty', 'isScheduled'], ['link'])
+makeInspectable(Message, ['isScheduled'], ['link'])
