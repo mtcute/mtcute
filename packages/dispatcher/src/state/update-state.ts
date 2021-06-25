@@ -1,8 +1,9 @@
 import { IStateStorage } from './storage'
 import { MtCuteArgumentError, MtCuteError } from '@mtcute/client'
+import { sleep } from '@mtcute/core/src/utils/misc-utils'
 
 /**
- * Error thrown by `.throttle()`
+ * Error thrown by `.rateLimit()`
  */
 export class RateLimitError extends MtCuteError {
     constructor (readonly reset: number) {
@@ -177,7 +178,40 @@ export class UpdateState<State, SceneName extends string = string> {
     }
 
     /**
-     * Rate limit some handler
+     * Rate limit some handler.
+     *
+     * When the rate limit exceeds, {@link RateLimitError} is thrown.
+     *
+     * This is a simple rate-limiting solution that uses
+     * the same key as the state. If you need something more
+     * sophisticated and/or customizable, you'll have to implement
+     * your own rate-limiter.
+     *
+     * > **Note**: `key` is used to prefix the local key
+     * > derived using the given key delegate.
+     *
+     * @param key  Key of the rate limit
+     * @param limit  Maximum number of requests in `window`
+     * @param window  Window size in seconds
+     * @returns  Tuple containing the number of remaining and
+     *   unix time in ms when the user can try again
+     */
+    async rateLimit(key: string, limit: number, window: number): Promise<[number, number]> {
+        const [remaining, reset] = await this._localStorage.getRateLimit(`${key}:${this._localKey}`, limit, window)
+
+        if (!remaining) {
+            throw new RateLimitError(reset)
+        }
+
+        return [remaining - 1, reset]
+    }
+
+    /**
+     * Throttle some handler.
+     *
+     * When the rate limit exceeds, this function waits for it to reset.
+     *
+     * This is a simple wrapper over {@link rateLimit}, and follows the same logic.
      *
      * > **Note**: `key` is used to prefix the local key
      * > derived using the given key delegate.
@@ -189,13 +223,14 @@ export class UpdateState<State, SceneName extends string = string> {
      *   unix time in ms when the user can try again
      */
     async throttle(key: string, limit: number, window: number): Promise<[number, number]> {
-        const [remaining, reset] = await this._localStorage.getRateLimit(`${key}:${this._localKey}`, limit, window)
-
-        if (!remaining) {
-            throw new RateLimitError(reset)
+        try {
+            return await this.rateLimit(key, limit, window)
+        } catch (e) {
+            if (e.constructor === RateLimitError) {
+                await sleep(e.reset - Date.now())
+                return this.throttle(key, limit, window)
+            } else throw e
         }
-
-        return [remaining - 1, reset]
     }
 
     /**
