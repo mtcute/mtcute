@@ -1,6 +1,6 @@
 {
     "name": "@mtcute/tl",
-    "version": "1.129.0",
+    "version": "1.130.0",
     "description": "TL schema used for MTCute",
     "main": "index.js",
     "author": "Alisa Sireneva <me@tei.su>",
@@ -20,6 +20,7 @@
         "cheerio": "^1.0.0-rc.5",
         "eager-async-pool": "^1.0.0",
         "csv-parser": "^3.0.0",
-        "js-yaml": "^4.0.0"
+        "js-yaml": "^4.0.0",
+        "crc-32": "^1.2.0"
     }
 }
