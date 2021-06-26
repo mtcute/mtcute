@@ -39,6 +39,7 @@ import {
     ChatsIndex,
     GameHighScore,
     ArrayWithTotal,
+    BotCommands
 } from '../types'
 
 // @copy

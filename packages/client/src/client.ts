@@ -17,12 +17,16 @@ import { startTest } from './methods/auth/start-test'
 import { start } from './methods/auth/start'
 import { answerCallbackQuery } from './methods/bots/answer-callback-query'
 import { answerInlineQuery } from './methods/bots/answer-inline-query'
+import { deleteMyCommands } from './methods/bots/delete-my-commands'
 import { getCallbackAnswer } from './methods/bots/get-callback-answer'
 import {
     getGameHighScores,
     getInlineGameHighScores,
 } from './methods/bots/get-game-high-scores'
+import { getMyCommands } from './methods/bots/get-my-commands'
+import { _normalizeCommandScope } from './methods/bots/normalize-command-scope'
 import { setGameScore, setInlineGameScore } from './methods/bots/set-game-score'
+import { setMyCommands } from './methods/bots/set-my-commands'
 import { addChatMembers } from './methods/chats/add-chat-members'
 import { archiveChats } from './methods/chats/archive-chats'
 import { banChatMember } from './methods/chats/ban-chat-member'
@@ -156,6 +160,7 @@ import { IMessageEntityParser } from './parser'
 import { Readable } from 'stream'
 import {
     ArrayWithTotal,
+    BotCommands,
     Chat,
     ChatEvent,
     ChatInviteLink,
@@ -606,6 +611,27 @@ export interface TelegramClient extends BaseTelegramClient {
         }
     ): Promise<void>
     /**
+     * Delete commands for the current bot and the given scope.
+     *
+     * Does the same as passing `null` to  {@link setMyCommands}
+     *
+     * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
+     *
+     */
+    deleteMyCommands(params?: {
+        /**
+         * Scope of the commands.
+         *
+         * Defaults to `BotScope.default_` (i.e. `botCommandScopeDefault`)
+         */
+        scope?: tl.TypeBotCommandScope | BotCommands.IntermediateScope
+
+        /**
+         * User language applied to the scope.
+         */
+        langCode?: string
+    }): Promise<void>
+    /**
      * Request a callback answer from a bot,
      * i.e. click an inline button that contains data.
      *
@@ -664,6 +690,26 @@ export interface TelegramClient extends BaseTelegramClient {
         userId?: InputPeerLike
     ): Promise<GameHighScore[]>
     /**
+     * Get a list of current bot's commands for the given command scope
+     * and user language. If they are not set, empty set is returned.
+     *
+     * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
+     *
+     */
+    getMyCommands(params?: {
+        /**
+         * Scope of the commands.
+         *
+         * Defaults to `BotScope.default_` (i.e. `botCommandScopeDefault`)
+         */
+        scope?: tl.TypeBotCommandScope | BotCommands.IntermediateScope
+
+        /**
+         * User language applied to the scope.
+         */
+        langCode?: string
+    }): Promise<tl.RawBotCommand[]>
+    /**
      * Set a score of a user in a game
      *
      * @param chatId  Chat where the game was found
@@ -719,6 +765,32 @@ export interface TelegramClient extends BaseTelegramClient {
             force?: boolean
         }
     ): Promise<void>
+    /**
+     * Set or delete commands for the current bot and the given scope
+     *
+     * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
+     *
+     */
+    setMyCommands(params: {
+        /**
+         * New list of bot commands for the given scope.
+         *
+         * Pass empty array or `null` to delete them.
+         */
+        commands: tl.RawBotCommand[] | null
+
+        /**
+         * Scope of the commands.
+         *
+         * Defaults to `BotScope.default_` (i.e. `botCommandScopeDefault`)
+         */
+        scope?: tl.TypeBotCommandScope | BotCommands.IntermediateScope
+
+        /**
+         * User language applied to the scope.
+         */
+        langCode?: string
+    }): Promise<void>
     /**
      * Add new members to a group, supergroup or channel.
      *
@@ -3133,11 +3205,15 @@ export class TelegramClient extends BaseTelegramClient {
     start = start
     answerCallbackQuery = answerCallbackQuery
     answerInlineQuery = answerInlineQuery
+    deleteMyCommands = deleteMyCommands
     getCallbackAnswer = getCallbackAnswer
     getGameHighScores = getGameHighScores
     getInlineGameHighScores = getInlineGameHighScores
+    getMyCommands = getMyCommands
+    protected _normalizeCommandScope = _normalizeCommandScope
     setGameScore = setGameScore
     setInlineGameScore = setInlineGameScore
+    setMyCommands = setMyCommands
     addChatMembers = addChatMembers
     archiveChats = archiveChats
     banChatMember = banChatMember
