@@ -47,6 +47,11 @@ export default function HistoryPage({ data }: { data: GraphqlResult }) {
                 </code>{' '}
                 repository, and older schemas (&lt;14) are fetched directly from
                 Telegram's website.
+                <br />
+                <br />
+                Note that schemas for MTCute are merged from Telegram Desktop
+                and TDLib repositories, and thus may not be exactly the same as
+                in history.
             </Typography>
 
             <Section id="schemas" title="Schemas">

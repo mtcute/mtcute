@@ -8,6 +8,18 @@ const TL_NODE_TYPE = 'TlObject'
 exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
     const { createNode } = actions
 
+    createNode({
+        id: createNodeId(`CurrentTlSchema`),
+        parent: null,
+        children: [],
+        layer: rawSchema.apiLayer,
+        internal: {
+            type: 'CurrentTlSchema',
+            content: JSON.stringify({ layer: rawSchema.apiLayer }),
+            contentDigest: createContentDigest({ layer: rawSchema.apiLayer }),
+        },
+    })
+
     function createForNs(ns, prefix = '') {
         ns.classes.forEach((cls) => {
             createNode({

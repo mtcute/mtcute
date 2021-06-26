@@ -22,18 +22,8 @@ interface Data {
         nodes: { arguments: { description: string | null }[] }[]
     }
 
-    updated: {
-        nodes: [
-            {
-                layer: number
-                rev: number
-                source: {
-                    date: string
-                    commit: string
-                    file: string
-                }
-            }
-        ]
+    currentTlSchema: {
+        layer: string
     }
 
     historySchemas: { totalCount: number }
@@ -60,8 +50,6 @@ export default function IndexPage({ data }: { data: Data }) {
     countMissingDescriptionArguments(data.argWithoutDesc, true)
     countMissingDescriptionArguments(data.argWithDesc, false)
 
-    const currentLayer = data.updated.nodes[0]
-
     return (
         <Page
             toc={[
@@ -76,17 +64,7 @@ export default function IndexPage({ data }: { data: Data }) {
                     TL Reference
                 </Typography>
                 <Typography variant="body2">
-                    layer {currentLayer.layer}
-                    {currentLayer.rev > 0 ? ` rev. ${currentLayer.rev}` : ''} /
-                    updated {currentLayer.source.date} /{' '}
-                    <MuiLink
-                        component={Link}
-                        to={`/history/layer${currentLayer.layer}${
-                            currentLayer.rev ? `-rev${currentLayer.rev}` : ''
-                        }`}
-                    >
-                        view source
-                    </MuiLink>
+                    layer {data.currentTlSchema.layer}
                 </Typography>
             </div>
             <Typography variant="body1" className={classes.paragraph}>
@@ -233,16 +211,7 @@ export default function IndexPage({ data }: { data: Data }) {
                 component="ul"
             >
                 <li>
-                    Generated from layer <b>{data.updated.nodes[0].layer}</b>{' '}
-                    (last updated <b>{data.updated.nodes[0].source.date}</b>,
-                    commit{' '}
-                    <MuiLink
-                        href={`https://github.com/telegramdesktop/tdesktop/blob/${data.updated.nodes[0].source.commit}/${data.updated.nodes[0].source.file}`}
-                        target="_blank"
-                    >
-                        {data.updated.nodes[0].source.commit.substr(0, 7)}
-                    </MuiLink>
-                    )
+                    Generated from layer <b>{data.currentTlSchema.layer}</b>{' '}
                 </li>
                 <li>
                     Current schema contains{' '}
@@ -344,20 +313,8 @@ export const query = graphql`
             totalCount
         }
 
-        updated: allHistoryJson(
-            sort: { fields: source___date, order: DESC }
-            filter: { layer: { ne: null } }
-            limit: 1
-        ) {
-            nodes {
-                layer
-                rev
-                source {
-                    date(formatString: "DD-MM-YYYY")
-                    commit
-                    file
-                }
-            }
+        currentTlSchema {
+            layer
         }
 
         clsWithDesc: allTlObject(filter: { description: { ne: null } }) {
