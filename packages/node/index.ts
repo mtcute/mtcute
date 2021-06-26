@@ -89,10 +89,10 @@ export class NodeTelegramClient extends TelegramClient {
         return new Promise((res) => this._rl!.question(text, res))
     }
 
-    async run(
+    run(
         params: Parameters<TelegramClient['start']>[0],
         then?: (user: User) => void | Promise<void>
-    ): Promise<void> {
+    ): void {
         if (!params.botToken) {
             if (!params.phone) params.phone = () => this.input('Phone > ')
             if (!params.code) params.code = () => this.input('Code > ')
@@ -100,12 +100,14 @@ export class NodeTelegramClient extends TelegramClient {
                 params.password = () => this.input('2FA password > ')
         }
 
-        await super.run(params, then)
+        super.run(params, (user) => {
+            if (this._rl) {
+                this._rl.close()
+                delete this._rl
+            }
 
-        if (this._rl) {
-            this._rl.close()
-            delete this._rl
-        }
+            return then?.(user)
+        })
     }
 
     close(): Promise<void> {
