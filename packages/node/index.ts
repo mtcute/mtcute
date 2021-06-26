@@ -43,25 +43,6 @@ export namespace NodeTelegramClient {
     }
 }
 
-let rl: RlInterface | null = null
-
-/**
- * Tiny wrapper over Node `readline` package
- * for simpler user input for `.run()` method
- *
- * @param text  Text of the question
- */
-export const input = (text: string): Promise<string> => {
-    if (!rl) {
-        rl = createInterface({
-            input: process.stdin,
-            output: process.stdout,
-        })
-    }
-
-    return new Promise((res) => rl!.question(text, res))
-}
-
 /**
  * Tiny wrapper over `TelegramClient` for usage inside Node JS.
  *
@@ -85,16 +66,50 @@ export class NodeTelegramClient extends TelegramClient {
             this.setDefaultParseMode(opts.defaultParseMode)
     }
 
-    run(
-        params: Parameters<TelegramClient['start']>[0],
-        then?: (user: User) => void | Promise<void>
-    ): void {
-        if (!params.botToken) {
-            if (!params.phone) params.phone = () => input('Phone > ')
-            if (!params.code) params.code = () => input('Code > ')
-            if (!params.password) params.password = () => input('2FA password > ')
+    private _rl?: RlInterface
+
+    /**
+     * Tiny wrapper over Node `readline` package
+     * for simpler user input for `.run()` method.
+     *
+     * Associated `readline` interface is closed
+     * after `run()` returns, or with the client.
+     *
+     *
+     * @param text  Text of the question
+     */
+    input(text: string): Promise<string> {
+        if (!this._rl) {
+            this._rl = createInterface({
+                input: process.stdin,
+                output: process.stdout,
+            })
         }
 
-        return super.run(params, then)
+        return new Promise((res) => this._rl!.question(text, res))
+    }
+
+    async run(
+        params: Parameters<TelegramClient['start']>[0],
+        then?: (user: User) => void | Promise<void>
+    ): Promise<void> {
+        if (!params.botToken) {
+            if (!params.phone) params.phone = () => this.input('Phone > ')
+            if (!params.code) params.code = () => this.input('Code > ')
+            if (!params.password)
+                params.password = () => this.input('2FA password > ')
+        }
+
+        await super.run(params, then)
+
+        if (this._rl) {
+            this._rl.close()
+            delete this._rl
+        }
+    }
+
+    close(): Promise<void> {
+        this._rl?.close()
+        return super.close()
     }
 }
