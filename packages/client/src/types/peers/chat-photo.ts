@@ -179,4 +179,4 @@ export class ChatPhoto {
     }
 }
 
-makeInspectable(ChatPhoto)
+makeInspectable(ChatPhoto, [], ['thumb'])

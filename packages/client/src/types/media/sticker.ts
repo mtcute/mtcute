@@ -112,6 +112,13 @@ export class Sticker extends RawDocument {
         return this.attr.stickerset._ === 'inputStickerSetID'
     }
 
+    /**
+     * Input sticker set that it associated with this sticker, if available.
+     */
+    get inputStickerSet(): tl.TypeInputStickerSet | null {
+        return this.attr.stickerset._ === 'inputStickerSetEmpty' ? null : this.attr.stickerset
+    }
+
     private _maskPosition?: Sticker.MaskPosition
     /**
      * Position where this mask should be placed
@@ -158,4 +165,4 @@ export class Sticker extends RawDocument {
     }
 }
 
-makeInspectable(Sticker, ['fileSize', 'dcId'], ['inputMedia'])
+makeInspectable(Sticker, ['fileSize', 'dcId'], ['inputMedia', 'inputDocument'])

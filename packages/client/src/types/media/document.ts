@@ -171,4 +171,4 @@ export class RawDocument extends FileLocation {
  */
 export class Document extends RawDocument {}
 
-makeInspectable(Document, ['fileSize', 'dcId'], ['inputMedia'])
+makeInspectable(Document, ['fileSize', 'dcId'], ['inputMedia', 'inputDocument'])

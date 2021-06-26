@@ -48,4 +48,4 @@ export class Audio extends RawDocument {
     }
 }
 
-makeInspectable(Audio, ['fileSize', 'dcId'], ['inputMedia'])
+makeInspectable(Audio, ['fileSize', 'dcId'], ['inputMedia', 'inputDocument'])

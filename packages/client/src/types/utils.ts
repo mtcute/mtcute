@@ -56,10 +56,11 @@ export function makeInspectable(
         getters.forEach((it) => {
             try {
                 let val = this[it]
-                if (
+                if (Buffer.isBuffer(val)) {
+                    val = val.toString('base64')
+                } else if (
                     val &&
                     typeof val === 'object' &&
-                    !Buffer.isBuffer(val) &&
                     typeof val.toJSON === 'function'
                 ) {
                     val = val.toJSON()
