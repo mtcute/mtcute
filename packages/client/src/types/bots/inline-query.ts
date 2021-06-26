@@ -102,7 +102,7 @@ export class InlineQuery {
      */
     async answer(
         results: InputInlineResult[],
-        params: Parameters<TelegramClient['answerInlineQuery']>[2]
+        params?: Parameters<TelegramClient['answerInlineQuery']>[2]
     ): Promise<void> {
         return this.client.answerInlineQuery(this.raw.queryId, results, params)
     }
