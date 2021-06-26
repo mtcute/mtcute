@@ -28,6 +28,8 @@ export class Photo extends FileLocation {
     /** Biggest available photo height */
     readonly height: number
 
+    private _bestSize?: tl.RawPhotoSize | tl.RawPhotoSizeProgressive
+
     constructor(client: TelegramClient, raw: tl.RawPhoto) {
         const location = {
             _: 'inputPhotoFileLocation',
@@ -38,6 +40,8 @@ export class Photo extends FileLocation {
         } as tl.Mutable<tl.RawInputPhotoFileLocation>
         let size, width, height: number
 
+        let bestSize: tl.RawPhotoSize | tl.RawPhotoSizeProgressive
+
         const progressive = raw.sizes.find(
             (it) => it._ === 'photoSizeProgressive'
         ) as tl.RawPhotoSizeProgressive | undefined
@@ -46,6 +50,8 @@ export class Photo extends FileLocation {
             size = Math.max(...progressive.sizes)
             width = progressive.w
             height = progressive.h
+
+            bestSize = progressive
         } else {
             let max: tl.RawPhotoSize | null = null
             for (const sz of raw.sizes) {
@@ -59,6 +65,8 @@ export class Photo extends FileLocation {
                 size = max.size
                 width = max.w
                 height = max.h
+
+                bestSize = max
             } else {
                 // does this happen at all?
                 throw new MtCuteArgumentError('Photo does not have any sizes')
@@ -66,6 +74,7 @@ export class Photo extends FileLocation {
         }
 
         super(client, location, size, raw.dcId)
+        this._bestSize = bestSize
         this.raw = raw
         this.width = width
         this.height = height
@@ -104,6 +113,44 @@ export class Photo extends FileLocation {
      */
     getThumbnail(type: string): Thumbnail | null {
         return this.thumbnails.find((it) => it.raw.type === type) ?? null
+    }
+
+    private _fileId?: string
+    /**
+     * Get TDLib and Bot API compatible File ID
+     * representing this photo's best thumbnail.
+     */
+    get fileId(): string {
+        if (!this._fileId) {
+            if (!this._bestSize) {
+                throw new MtCuteArgumentError(
+                    'Cannot get File ID for this photo'
+                )
+            }
+
+            this._fileId = this.getThumbnail(this._bestSize.type)!.fileId
+        }
+
+        return this._fileId
+    }
+
+    private _uniqueFileId?: string
+    /**
+     * Get TDLib and Bot API compatible Unique File ID
+     * representing this photo's best thumbnail.
+     */
+    get uniqueFileId(): string {
+        if (!this._uniqueFileId) {
+            if (!this._bestSize) {
+                throw new MtCuteArgumentError(
+                    'Cannot get File ID for this photo'
+                )
+            }
+
+            this._uniqueFileId = this.getThumbnail(this._bestSize.type)!.uniqueFileId
+        }
+
+        return this._uniqueFileId
     }
 
     /**

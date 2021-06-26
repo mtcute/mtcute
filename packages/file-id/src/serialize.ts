@@ -46,7 +46,6 @@ export function toFileId(
             // todo: check how tdlib handles volume ids
             writer.long(loc.id)
             writer.long(loc.accessHash)
-            writer.long(loc.volumeId)
 
             switch (loc.source._) {
                 case 'legacy':
@@ -68,9 +67,34 @@ export function toFileId(
                     writer.long(loc.source.id)
                     writer.long(loc.source.accessHash)
                     break
+                case 'fullLegacy':
+                    writer.int32(5)
+                    writer.long(loc.source.volumeId)
+                    writer.long(loc.source.secret)
+                    writer.int32(loc.source.localId)
+                    break
+                case 'dialogPhotoLegacy':
+                    writer.int32(loc.source.big ? 7 : 6)
+                    writer.long(loc.source.id)
+                    writer.long(loc.source.accessHash)
+                    writer.long(loc.source.volumeId)
+                    writer.int32(loc.source.localId)
+                    break
+                case 'stickerSetThumbnailLegacy':
+                    writer.int32(8)
+                    writer.long(loc.source.id)
+                    writer.long(loc.source.accessHash)
+                    writer.long(loc.source.volumeId)
+                    writer.int32(loc.source.localId)
+                    break
+                case 'stickerSetThumbnailVersion':
+                    writer.int32(8)
+                    writer.long(loc.source.id)
+                    writer.long(loc.source.accessHash)
+                    writer.int32(loc.source.version)
+                    break
             }
 
-            writer.int32(loc.localId)
             break
         case 'common':
             writer.long(loc.id)

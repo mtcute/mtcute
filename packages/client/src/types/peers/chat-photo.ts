@@ -76,8 +76,6 @@ export class ChatPhotoSize extends FileLocation {
                     _: 'photo',
                     id: this.obj.photoId,
                     accessHash: bigInt.zero,
-                    volumeId: bigInt.zero,
-                    localId: 0,
                     source: {
                         _: 'dialogPhoto',
                         big: this.big,
@@ -97,12 +95,15 @@ export class ChatPhotoSize extends FileLocation {
      */
     get uniqueFileId(): string {
         if (!this._uniqueFileId) {
-            // todo: check how tdlib handles big/small photos here
             this._uniqueFileId = toUniqueFileId(
                 tdFileId.FileType.ProfilePhoto,
                 {
-                    _: 'common',
+                    _: 'photo',
                     id: this.obj.photoId,
+                    source: {
+                        _: 'dialogPhoto',
+                        big: this.big
+                    } as any
                 }
             )
         }

@@ -9,7 +9,7 @@ export namespace tdFileId {
     export const WEB_LOCATION_FLAG = 1 << 24
     export const FILE_REFERENCE_FLAG = 1 << 25
 
-    export const CURRENT_VERSION = 31
+    export const CURRENT_VERSION = 32
 
     /**
      * An error occurred while parsing or serializing a File ID
@@ -114,11 +114,55 @@ export namespace tdFileId {
         readonly accessHash: Long
     }
 
+    /**
+     * This photo is a legacy photo containing
+     * volume_id, local_id and secret
+     */
+    export interface RawPhotoSizeSourceFullLegacy {
+        readonly _: 'fullLegacy'
+        readonly volumeId: Long
+        readonly localId: number
+        readonly secret: Long
+    }
+
+    /**
+     * This photo is a legacy dialog photo
+     */
+    export interface RawPhotoSizeSourceDialogPhotoLegacy
+        extends Omit<RawPhotoSizeSourceDialogPhoto, '_'> {
+        readonly _: 'dialogPhotoLegacy'
+        readonly volumeId: Long
+        readonly localId: number
+    }
+
+    /**
+     * This photo is a legacy sticker set thumbnail
+     */
+    export interface RawPhotoSizeSourceStickerSetThumbnailLegacy
+        extends Omit<RawPhotoSizeSourceStickerSetThumbnail, '_'> {
+        readonly _: 'stickerSetThumbnailLegacy'
+        readonly volumeId: Long
+        readonly localId: number
+    }
+
+    /**
+     * This photo is a legacy sticker set identified by a version
+     */
+    export interface RawPhotoSizeSourceStickerSetThumbnailVersion
+        extends Omit<RawPhotoSizeSourceStickerSetThumbnail, '_'> {
+        readonly _: 'stickerSetThumbnailVersion'
+        readonly version: number
+    }
+
     export type TypePhotoSizeSource =
         | RawPhotoSizeSourceLegacy
         | RawPhotoSizeSourceThumbnail
         | RawPhotoSizeSourceDialogPhoto
         | RawPhotoSizeSourceStickerSetThumbnail
+        | RawPhotoSizeSourceFullLegacy
+        | RawPhotoSizeSourceDialogPhotoLegacy
+        | RawPhotoSizeSourceStickerSetThumbnailLegacy
+        | RawPhotoSizeSourceStickerSetThumbnailVersion
 
     /**
      * An external web file
@@ -139,9 +183,7 @@ export namespace tdFileId {
         readonly _: 'photo'
         readonly id: Long
         readonly accessHash: Long
-        readonly volumeId: Long
         readonly source: TypePhotoSizeSource
-        readonly localId: number
     }
 
     /**

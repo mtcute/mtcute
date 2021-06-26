@@ -58,6 +58,59 @@ function parsePhotoSizeSource(reader: BinaryReader): td.TypePhotoSizeSource {
                 id: reader.long(),
                 accessHash: reader.long(),
             }
+        case 5 /* FULL_LEGACY */: {
+            const res: td.RawPhotoSizeSourceFullLegacy = {
+                _: 'fullLegacy',
+                volumeId: reader.long(),
+                secret: reader.long(),
+                localId: reader.int32()
+            }
+
+            if (res.localId < 0) {
+                throw new td.InvalidFileIdError('Wrong local_id (< 0)')
+            }
+
+            return res
+        }
+        case 6 /* DIALOG_PHOTO_SMALL_LEGACY */:
+        case 7 /* DIALOG_PHOTO_BIG_LEGACY */: {
+            const res: td.RawPhotoSizeSourceDialogPhotoLegacy = {
+                _: 'dialogPhotoLegacy',
+                big: variant === 7,
+                id: reader.long(),
+                accessHash: reader.long(),
+                volumeId: reader.long(),
+                localId: reader.int32()
+            }
+
+            if (res.localId < 0) {
+                throw new td.InvalidFileIdError('Wrong local_id (< 0)')
+            }
+
+            return res
+        }
+        case 8 /* STICKERSET_THUMBNAIL_LEGACY */: {
+            const res: td.RawPhotoSizeSourceStickerSetThumbnailLegacy = {
+                _: 'stickerSetThumbnailLegacy',
+                id: reader.long(),
+                accessHash: reader.long(),
+                volumeId: reader.long(),
+                localId: reader.int32()
+            }
+
+            if (res.localId < 0) {
+                throw new td.InvalidFileIdError('Wrong local_id (< 0)')
+            }
+
+            return res
+        }
+        case 9 /* STICKERSET_THUMBNAIL_VERSION */:
+            return {
+                _: 'stickerSetThumbnailVersion',
+                id: reader.long(),
+                accessHash: reader.long(),
+                version: reader.int32()
+            }
         default:
             throw new td.UnsupportedError(
                 `Unsupported photo size source ${variant} (${reader.data.toString(
@@ -72,19 +125,70 @@ function parsePhotoFileLocation(
     version: number
 ): td.RawPhotoRemoteFileLocation {
     // todo: check how tdlib handles volume ids
+
+    const id = reader.long()
+    const accessHash = reader.long()
+    let source: td.TypePhotoSizeSource
+
+    if (version >= 32) {
+        source = parsePhotoSizeSource(reader)
+    } else {
+        const volumeId = reader.long()
+        let localId = 0
+
+        if (version >= 22) {
+            source = parsePhotoSizeSource(reader)
+            localId = reader.int32()
+        } else {
+            source = {
+                _: 'fullLegacy',
+                secret: reader.long(),
+                localId: reader.int32(),
+                volumeId
+            }
+        }
+
+        switch (source._) {
+            case 'legacy':
+                source = {
+                    _: 'fullLegacy',
+                    secret: reader.long(),
+                    localId: reader.int32(),
+                    volumeId
+                }
+                break
+            case 'fullLegacy':
+            case 'thumbnail':
+                break
+            case 'dialogPhoto':
+                source = {
+                    _: 'dialogPhotoLegacy',
+                    id: source.id,
+                    accessHash: source.accessHash,
+                    big: source.big,
+                    localId,
+                    volumeId
+                }
+                break
+            case 'stickerSetThumbnail':
+                source = {
+                    _: 'stickerSetThumbnailLegacy',
+                    id: source.id,
+                    accessHash: source.accessHash,
+                    localId,
+                    volumeId
+                }
+                break
+            default:
+                throw new td.InvalidFileIdError('Invalid PhotoSizeSource in legacy PhotoRemoteFileLocation')
+        }
+    }
+
     return {
         _: 'photo',
-        id: reader.long(),
-        accessHash: reader.long(),
-        volumeId: reader.long(),
-        source:
-            version >= 22
-                ? parsePhotoSizeSource(reader)
-                : {
-                      _: 'legacy',
-                      secret: reader.long(),
-                  },
-        localId: reader.int32(),
+        id,
+        accessHash,
+        source
     }
 }
 
@@ -166,6 +270,7 @@ function fromPersistentIdV23(
                         }
                         break
                     case 'dialogPhoto':
+                    case 'dialogPhotoLegacy':
                         if (fileType !== td.FileType.ProfilePhoto) {
                             throw new td.InvalidFileIdError(
                                 'Invalid FileType in PhotoRemoteFileLocation DialogPhoto'
@@ -173,6 +278,8 @@ function fromPersistentIdV23(
                         }
                         break
                     case 'stickerSetThumbnail':
+                    case 'stickerSetThumbnailLegacy':
+                    case 'stickerSetThumbnailVersion':
                         if (fileType !== td.FileType.Thumbnail) {
                             throw new td.InvalidFileIdError(
                                 'Invalid FileType in PhotoRemoteFileLocation StickerSetThumbnail'

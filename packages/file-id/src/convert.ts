@@ -3,13 +3,14 @@ import { tdFileId, tdFileId as td } from './types'
 import { parseFileId } from './parse'
 import { getBasicPeerType, markedPeerIdToBare } from '@mtcute/core'
 import FileType = tdFileId.FileType
+import bigInt from 'big-integer'
 
 const EMPTY_BUFFER = Buffer.alloc(0)
 
 type FileId = td.RawFullRemoteFileLocation
 
 function dialogPhotoToInputPeer(
-    dialog: td.RawPhotoSizeSourceDialogPhoto
+    dialog: td.RawPhotoSizeSourceDialogPhoto | td.RawPhotoSizeSourceDialogPhotoLegacy
 ): tl.TypeInputPeer {
     const markedPeerId = dialog.id.toJSNumber()
     const peerType = getBasicPeerType(markedPeerId)
@@ -78,13 +79,16 @@ export function fileIdToInputFileLocation(
                             'Expected legacy photo to have file reference'
                         )
 
+                    // for some reason tdlib removed this thing altogether
+                    // https://github.com/tdlib/td/commit/4bb76a7b6f47bf9e0d0d01a72aac579ec73557ee#diff-8cc4f7c60a8261a8cf782e7fb51b95105bfb08710a1c2b63f80a48263ae0fb9bL401
+                    // still leaving this, but not sure if passing 0 as volume_id and local_id is correct at all lol
                     return {
                         _: 'inputPhotoLegacyFileLocation',
                         fileReference: fileId.fileReference,
                         id: loc.id,
                         accessHash: loc.accessHash,
-                        volumeId: loc.volumeId,
-                        localId: loc.localId,
+                        volumeId: bigInt.zero,
+                        localId: 0,
                         secret: loc.source.secret,
                     }
                 case 'thumbnail':
@@ -119,6 +123,9 @@ export function fileIdToInputFileLocation(
                         photoId: loc.id,
                     }
                 case 'stickerSetThumbnail':
+                    // this was also removed from tdlib:
+                    // https://github.com/tdlib/td/commit/4bb76a7b6f47bf9e0d0d01a72aac579ec73557ee#diff-8cc4f7c60a8261a8cf782e7fb51b95105bfb08710a1c2b63f80a48263ae0fb9bR432
+                    // also leaving this one though.
                     return {
                         _: 'inputStickerSetThumb',
                         stickerset: {
@@ -126,7 +133,51 @@ export function fileIdToInputFileLocation(
                             id: loc.source.id,
                             accessHash: loc.source.accessHash,
                         },
-                        thumbVersion: 0, // todo: check how tdlib stores this
+                        thumbVersion: 0,
+                    }
+                case 'fullLegacy':
+                    if (!fileId.fileReference)
+                        throw new td.InvalidFileIdError(
+                            'Expected legacy photo to have file reference'
+                        )
+
+                    return {
+                        _: 'inputPhotoLegacyFileLocation',
+                        fileReference: fileId.fileReference,
+                        id: loc.id,
+                        accessHash: loc.accessHash,
+                        volumeId: loc.source.volumeId,
+                        localId: loc.source.localId,
+                        secret: loc.source.secret,
+                    }
+                case 'dialogPhotoLegacy':
+                    return {
+                        _: 'inputPeerPhotoFileLocationLegacy',
+                        big: loc.source.big,
+                        peer: dialogPhotoToInputPeer(loc.source),
+                        volumeId: loc.source.volumeId,
+                        localId: loc.source.localId,
+                    }
+                case 'stickerSetThumbnailLegacy':
+                    return {
+                        _: 'inputStickerSetThumbLegacy',
+                        stickerset: {
+                            _: 'inputStickerSetID',
+                            id: loc.source.id,
+                            accessHash: loc.source.accessHash,
+                        },
+                        volumeId: loc.source.volumeId,
+                        localId: loc.source.localId,
+                    }
+                case 'stickerSetThumbnailVersion':
+                    return {
+                        _: 'inputStickerSetThumb',
+                        stickerset: {
+                            _: 'inputStickerSetID',
+                            id: loc.source.id,
+                            accessHash: loc.source.accessHash,
+                        },
+                        thumbVersion: loc.source.version
                     }
             }
 

@@ -168,8 +168,6 @@ export class Thumbnail extends FileLocation {
                     _: 'photo',
                     id: this._media.id,
                     accessHash: this._media.accessHash,
-                    volumeId: bigInt.zero,
-                    localId: 0,
                     source: {
                         _: 'thumbnail',
                         fileType: td.FileType.Photo,
@@ -202,8 +200,13 @@ export class Thumbnail extends FileLocation {
                     ? td.FileType.Photo
                     : td.FileType.Thumbnail,
                 {
-                    _: 'common',
+                    _: 'photo',
                     id: this._media.id,
+                    source: {
+                        _: 'thumbnail',
+                        fileType: td.FileType.Photo,
+                        thumbnailType: this.raw.type,
+                    },
                 }
             )
         }
