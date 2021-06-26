@@ -12,6 +12,9 @@ const { applyDescriptionsFile } = require('./process-descriptions-yaml')
 const yaml = require('js-yaml')
 const { snakeToCamel } = require('./common')
 const { asyncPool } = require('eager-async-pool')
+const { mergeSchemas } = require('./merge-schemas')
+const CRC32 = require('crc-32')
+
 const SingleRegex = /^(.+?)(?:#([0-f]{1,8}))?(?: \?)?(?: {(.+?:.+?)})? ((?:.+? )*)= (.+);$/
 
 const transformIgnoreNamespace = (fn, s) => {
@@ -163,11 +166,22 @@ function convertTlToJson(tlText, tlType, silent = false) {
         if (!match) {
             console.warn('Regex failed on:\n"' + line + '"')
         } else {
-            let [, fullName, typeId = '0', generics, args, type] = match
+            let [, fullName, typeId, generics, args, type] = match
             if (fullName in _types || fullName === 'vector') {
                 // vector is parsed manually
                 nextLine()
                 continue
+            }
+
+            if (!typeId) {
+                typeId = CRC32.str(
+                    // normalize
+                    line
+                        .replace(/[{}]|[a-zA-Z0-9_]+:flags\.[0-9]+\?true/g, '')
+                        .replace(/[<>]/g, ' ')
+                        .replace(/ +/g, ' ')
+                        .trim()
+                )
             }
 
             args = args.trim()
@@ -496,12 +510,41 @@ async function main() {
 
     ret.mtproto = convertTlToJson(mtprotoTl, 'mtproto')
 
-    console.log('[i] Fetching api.tl')
-    let apiTl = await fetch(
+    console.log('[i] Fetching api.tl from tdesktop')
+    const apiTlDesktop = await fetch(
         'https://raw.githubusercontent.com/telegramdesktop/tdesktop/dev/Telegram/Resources/tl/api.tl'
     ).then((i) => i.text())
-    ret.apiLayer = apiTl.match(/^\/\/ LAYER (\d+)/m)[1]
-    ret.api = convertTlToJson(apiTl, 'api')
+    const apiDesktopLayer = parseInt(apiTlDesktop.match(/^\/\/ LAYER (\d+)/m)[1])
+
+    console.log('[i] Fetching telegram_api.tl from TDLib')
+    const apiTlTdlib = await fetch(
+        'https://raw.githubusercontent.com/tdlib/td/master/td/generate/scheme/telegram_api.tl'
+    ).then((i) => i.text())
+    const apiTdlibLayer = await fetch('https://raw.githubusercontent.com/tdlib/td/master/td/telegram/Version.h')
+        .then((r) => r.text())
+        .then((res) => parseInt(res.match(/^constexpr int32 MTPROTO_LAYER = (\d+)/m)[1]))
+
+    console.log('[i] tdesktop has layer %d, tdlib has %d', apiDesktopLayer, apiTdlibLayer)
+
+    if (Math.abs(apiDesktopLayer - apiTdlibLayer) > 2) {
+        console.log('[i] Too different layers, using newer one')
+
+        const newer = apiDesktopLayer > apiTdlibLayer ? apiTlDesktop : apiTlTdlib
+        const newerLayer = apiDesktopLayer > apiTdlibLayer ? apiDesktopLayer : apiTdlibLayer
+
+        ret.apiLayer = newerLayer + ''
+        ret.api = convertTlToJson(newer, 'api')
+    } else {
+        console.log('[i] Merging schemas...')
+
+        const first = convertTlToJson(apiTlTdlib, 'api')
+        const second = convertTlToJson(apiTlDesktop, 'api')
+        await mergeSchemas(first, second)
+
+        ret.apiLayer = apiTdlibLayer + ''
+        ret.api = first
+    }
+
     await addDocumentation(ret.api)
 
     await applyDescriptionsFile(ret, descriptionsYaml)
