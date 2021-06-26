@@ -228,7 +228,6 @@ function generateDispatcher() {
      *
      * @param handler  ${toSentence(type, 'full')}
      * @param group  Handler group index
-     * @internal
      */
     on${type.handlerTypeName}(handler: ${type.handlerTypeName}Handler${type.state ? `<${type.updateType}, State extends never ? never : UpdateState<State, SceneName>>` : ''}['callback'], group?: number): void
 

@@ -1060,7 +1060,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  New message handler
      * @param group  Handler group index
-     * @internal
      */
     onNewMessage(
         handler: NewMessageHandler<
@@ -1112,7 +1111,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  Edit message handler
      * @param group  Handler group index
-     * @internal
      */
     onEditMessage(
         handler: EditMessageHandler<
@@ -1164,7 +1162,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  Delete message handler
      * @param group  Handler group index
-     * @internal
      */
     onDeleteMessage(
         handler: DeleteMessageHandler['callback'],
@@ -1196,7 +1193,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  Chat member update handler
      * @param group  Handler group index
-     * @internal
      */
     onChatMemberUpdate(
         handler: ChatMemberUpdateHandler['callback'],
@@ -1228,7 +1224,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  Inline query handler
      * @param group  Handler group index
-     * @internal
      */
     onInlineQuery(handler: InlineQueryHandler['callback'], group?: number): void
 
@@ -1257,7 +1252,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  Chosen inline result handler
      * @param group  Handler group index
-     * @internal
      */
     onChosenInlineResult(
         handler: ChosenInlineResultHandler['callback'],
@@ -1289,7 +1283,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  Callback query handler
      * @param group  Handler group index
-     * @internal
      */
     onCallbackQuery(
         handler: CallbackQueryHandler<
@@ -1341,7 +1334,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  Poll update handler
      * @param group  Handler group index
-     * @internal
      */
     onPollUpdate(handler: PollUpdateHandler['callback'], group?: number): void
 
@@ -1368,7 +1360,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  Poll vote handler
      * @param group  Handler group index
-     * @internal
      */
     onPollVote(handler: PollVoteHandler['callback'], group?: number): void
 
@@ -1397,7 +1388,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  User status update handler
      * @param group  Handler group index
-     * @internal
      */
     onUserStatusUpdate(
         handler: UserStatusUpdateHandler['callback'],
@@ -1429,7 +1419,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  User typing handler
      * @param group  Handler group index
-     * @internal
      */
     onUserTyping(handler: UserTypingHandler['callback'], group?: number): void
 
