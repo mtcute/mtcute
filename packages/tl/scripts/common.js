@@ -48,10 +48,13 @@ const camelToSnake = (s) => {
 }
 const snakeToPascal = (s) => camelToPascal(snakeToCamel(s))
 
+const signedInt32ToUnsigned = (val) => (val < 0 ? val + 0x100000000 : val)
+
 module.exports = {
     createWriter,
     camelToPascal,
     snakeToCamel,
     camelToSnake,
     snakeToPascal,
+    signedInt32ToUnsigned
 }

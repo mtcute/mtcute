@@ -1,7 +1,6 @@
 // used by generate-schema, but since logic is quite large, moved it to a separate file
 const CRC32 = require('crc-32')
-
-const signedInt32ToUnsigned = (val) => (val < 0 ? val + 0x100000000 : val)
+const { signedInt32ToUnsigned } = require('./common')
 
 // converting map from custom type back to tl
 const _types = {

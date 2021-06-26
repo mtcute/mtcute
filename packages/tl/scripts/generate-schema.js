@@ -10,7 +10,7 @@ const path = require('path')
 const cheerio = require('cheerio')
 const { applyDescriptionsFile } = require('./process-descriptions-yaml')
 const yaml = require('js-yaml')
-const { snakeToCamel } = require('./common')
+const { snakeToCamel, signedInt32ToUnsigned } = require('./common')
 const { asyncPool } = require('eager-async-pool')
 const { mergeSchemas } = require('./merge-schemas')
 const CRC32 = require('crc-32')
@@ -133,9 +133,10 @@ function convertTlToJson(tlText, tlType, silent = false) {
             state.type = 'class'
             return nextLine()
         }
-        if (!silent) process.stdout.write(
-            `[${pad(pos)}/${lines.length}] Processing ${tlType}.tl..\r`
-        )
+        if (!silent)
+            process.stdout.write(
+                `[${pad(pos)}/${lines.length}] Processing ${tlType}.tl..\r`
+            )
     }
 
     const ret = {}
@@ -151,9 +152,10 @@ function convertTlToJson(tlText, tlType, silent = false) {
         return ret[name]
     }
 
-    if (!silent) process.stdout.write(
-        `[${pad(pos)}/${lines.length}] Processing ${tlType}.tl..\r`
-    )
+    if (!silent)
+        process.stdout.write(
+            `[${pad(pos)}/${lines.length}] Processing ${tlType}.tl..\r`
+        )
 
     while (!state.stop) {
         if (line === '' || line.startsWith('//')) {
@@ -174,14 +176,20 @@ function convertTlToJson(tlText, tlType, silent = false) {
             }
 
             if (!typeId) {
-                typeId = CRC32.str(
-                    // normalize
-                    line
-                        .replace(/[{}]|[a-zA-Z0-9_]+:flags\.[0-9]+\?true/g, '')
-                        .replace(/[<>]/g, ' ')
-                        .replace(/ +/g, ' ')
-                        .trim()
-                )
+                typeId =
+                    signedInt32ToUnsigned(
+                        CRC32.str(
+                            // normalize
+                            line
+                                .replace(
+                                    /[{};]|[a-zA-Z0-9_]+:flags\.[0-9]+\?true/g,
+                                    ''
+                                )
+                                .replace(/[<>]/g, ' ')
+                                .replace(/ +/g, ' ')
+                                .trim()
+                        )
+                    ) + ''
             }
 
             args = args.trim()
@@ -308,7 +316,8 @@ function convertTlToJson(tlText, tlType, silent = false) {
         })
     })
 
-    if (!silent) console.log(`[${lines.length}/${lines.length}] Processed ${tlType}.tl`)
+    if (!silent)
+        console.log(`[${lines.length}/${lines.length}] Processed ${tlType}.tl`)
 
     return ret
 }
@@ -420,10 +429,12 @@ async function addDocumentation(obj) {
             let botsCanUse = !!$("h3:contains('Bots can use this method')")
                 .length
             let onlyBotsCanUse =
-                botsCanUse && (
-                    !!target.description.match(/[,;]( for)? bots only$/)
-                    || (target.throws && target.throws.some((it) => it.code === 'USER_BOT_REQUIRED'))
-                )
+                botsCanUse &&
+                (!!target.description.match(/[,;]( for)? bots only$/) ||
+                    (target.throws &&
+                        target.throws.some(
+                            (it) => it.code === 'USER_BOT_REQUIRED'
+                        )))
 
             target.available = onlyBotsCanUse
                 ? 'bot'
@@ -514,23 +525,35 @@ async function main() {
     const apiTlDesktop = await fetch(
         'https://raw.githubusercontent.com/telegramdesktop/tdesktop/dev/Telegram/Resources/tl/api.tl'
     ).then((i) => i.text())
-    const apiDesktopLayer = parseInt(apiTlDesktop.match(/^\/\/ LAYER (\d+)/m)[1])
+    const apiDesktopLayer = parseInt(
+        apiTlDesktop.match(/^\/\/ LAYER (\d+)/m)[1]
+    )
 
     console.log('[i] Fetching telegram_api.tl from TDLib')
     const apiTlTdlib = await fetch(
         'https://raw.githubusercontent.com/tdlib/td/master/td/generate/scheme/telegram_api.tl'
     ).then((i) => i.text())
-    const apiTdlibLayer = await fetch('https://raw.githubusercontent.com/tdlib/td/master/td/telegram/Version.h')
+    const apiTdlibLayer = await fetch(
+        'https://raw.githubusercontent.com/tdlib/td/master/td/telegram/Version.h'
+    )
         .then((r) => r.text())
-        .then((res) => parseInt(res.match(/^constexpr int32 MTPROTO_LAYER = (\d+)/m)[1]))
+        .then((res) =>
+            parseInt(res.match(/^constexpr int32 MTPROTO_LAYER = (\d+)/m)[1])
+        )
 
-    console.log('[i] tdesktop has layer %d, tdlib has %d', apiDesktopLayer, apiTdlibLayer)
+    console.log(
+        '[i] tdesktop has layer %d, tdlib has %d',
+        apiDesktopLayer,
+        apiTdlibLayer
+    )
 
     if (Math.abs(apiDesktopLayer - apiTdlibLayer) > 2) {
         console.log('[i] Too different layers, using newer one')
 
-        const newer = apiDesktopLayer > apiTdlibLayer ? apiTlDesktop : apiTlTdlib
-        const newerLayer = apiDesktopLayer > apiTdlibLayer ? apiDesktopLayer : apiTdlibLayer
+        const newer =
+            apiDesktopLayer > apiTdlibLayer ? apiTlDesktop : apiTlTdlib
+        const newerLayer =
+            apiDesktopLayer > apiTdlibLayer ? apiDesktopLayer : apiTdlibLayer
 
         ret.apiLayer = newerLayer + ''
         ret.api = convertTlToJson(newer, 'api')
@@ -570,7 +593,7 @@ async function main() {
 
 module.exports = {
     convertTlToJson,
-    convertJsonToTl
+    convertJsonToTl,
 }
 
 if (require.main === module) {
