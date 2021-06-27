@@ -153,44 +153,26 @@ export namespace BotInlineMessage {
     /**
      * Create an inline message containing a geolocation
      *
-     * @param latitude  Latitude of the location
-     * @param longitude  Longitude of the location
      * @param params  Additional parameters
      */
     export function geo(
-        latitude: number,
-        longitude: number,
-        params: Omit<
-            InputInlineMessageGeo,
-            'type' | 'latitude' | 'longitude'
-        > = {}
+        params: Omit<InputInlineMessageGeo, 'type'>
     ): InputInlineMessageGeo {
         const ret = params as tl.Mutable<InputInlineMessageGeo>
         ret.type = 'geo'
-        ret.latitude = latitude
-        ret.longitude = longitude
         return ret
     }
 
     /**
      * Create an inline message containing a live geolocation
      *
-     * @param latitude  Latitude of the current location
-     * @param longitude  Longitude of the current location
      * @param params  Additional parameters
      */
     export function geoLive(
-        latitude: number,
-        longitude: number,
-        params: Omit<
-            InputInlineMessageGeoLive,
-            'type' | 'latitude' | 'longitude'
-        > = {}
+        params: Omit<InputInlineMessageGeoLive, 'type'>
     ): InputInlineMessageGeoLive {
         const ret = params as tl.Mutable<InputInlineMessageGeoLive>
         ret.type = 'geo_live'
-        ret.latitude = latitude
-        ret.longitude = longitude
         return ret
     }
 

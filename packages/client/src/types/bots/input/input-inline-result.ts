@@ -102,6 +102,11 @@ export interface InputInlineResultGif extends BaseInputInlineResult {
     title?: string
 
     /**
+     * Title of the result
+     */
+    description?: string
+
+    /**
      * Animation thumbnail URL. Defaults to `media`,
      * only applicable in case `media` is a URL
      */
@@ -149,8 +154,6 @@ export interface InputInlineResultVideo extends BaseInputInlineResult {
     /**
      * In case `media` is a URL, whether that URL is a link
      * to an embedded video player.
-     *
-     * In such case, thumbnail must be passed explicitly.
      */
     isEmbed?: boolean
 
@@ -168,7 +171,7 @@ export interface InputInlineResultVideo extends BaseInputInlineResult {
      * Video thumbnail URL (must be jpeg). Defaults to `media`,
      * only applicable in case `media` is a URL.
      *
-     * Must be provided explicitly if this is an embed video.
+     * Must be provided explicitly if this is a video loaded by URL.
      */
     thumb?: string | tl.RawInputWebDocument
 
@@ -324,7 +327,7 @@ export interface InputInlineResultFile extends BaseInputInlineResult {
     type: 'file'
 
     /**
-     * The file itself
+     * The file itself. When using URL, only PDF and ZIP are supported.
      *
      * Can be a URL, a TDLib and Bot API compatible File ID,
      * or a TL object representing either of them.
@@ -335,8 +338,8 @@ export interface InputInlineResultFile extends BaseInputInlineResult {
      * MIME type of the file.
      *
      * Due to some Telegram limitation, you can only send
-     * PDF and ZIP files (`application/pdf` and `application/zip`
-     * MIMEs respectively).
+     * PDF and ZIP files from URL
+     * (`application/pdf` and `application/zip` MIMEs respectively).
      *
      * Must be provided if `media` is a URL
      */
@@ -396,7 +399,9 @@ export interface InputInlineResultGeo extends BaseInputInlineResult {
 /**
  * Inline result containing a venue.
  *
- * If `message` is not passed, an error is thrown.
+ * If `message` is not passed, {@link BotInlineMessage.venue} is used with
+ * given `latitude` and `longitude` were passed.
+ * If they weren't passed either, an error is thrown.
  */
 export interface InputInlineResultVenue extends BaseInputInlineResult {
     type: 'venue'
@@ -410,6 +415,16 @@ export interface InputInlineResultVenue extends BaseInputInlineResult {
      * Address of the venue
      */
     address: string
+
+    /**
+     * Latitude of the geolocation
+     */
+    latitude?: number
+
+    /**
+     * Longitude of the geolocation
+     */
+    longitude?: number
 
     /**
      * Venue thumbnail URL (must be jpeg).
@@ -610,7 +625,7 @@ export namespace BotInline {
 
     /**
      * Create an inline result containing a document
-     * (only PDF and ZIP are supported)
+     * (only PDF and ZIP are supported when using URL)
      *
      * @param id  Inline result ID
      * @param media  Document
@@ -632,21 +647,15 @@ export namespace BotInline {
      * Create an inline result containing a geolocation
      *
      * @param id  Inline result ID
-     * @param latitude  Latitude of the location
-     * @param longitude  Longitude of the location
      * @param params  Additional parameters
      */
     export function geo(
         id: string,
-        latitude: number,
-        longitude: number,
-        params: Omit<InputInlineResultGeo, 'type' | 'latitude' | 'longitude'>
+        params: Omit<InputInlineResultGeo, 'type' | 'id'>
     ): InputInlineResultGeo {
         const ret = params as tl.Mutable<InputInlineResultGeo>
         ret.id = id
         ret.type = 'geo'
-        ret.latitude = latitude
-        ret.longitude = longitude
         return ret
     }
 
@@ -728,7 +737,7 @@ export namespace BotInline {
                         url: obj.thumb || fallback!,
                         mimeType:
                             obj.type === 'gif'
-                                ? obj.thumbMime ?? 'image/jpeg'
+                                ? obj.thumbMime ?? obj.mime ?? 'video/mp4'
                                 : 'image/jpeg',
                         attributes: [],
                     }
@@ -836,12 +845,27 @@ export namespace BotInline {
                 parseMode
             )
         } else {
-            if (obj.type === 'venue')
-                throw new MtCuteArgumentError(
-                    'message bust be supplied for venue inline result'
-                )
-
-            if (
+            if (obj.type === 'venue') {
+                if (obj.latitude && obj.longitude) {
+                    sendMessage = {
+                        _: 'inputBotInlineMessageMediaVenue',
+                        title: obj.title,
+                        address: obj.address,
+                        geoPoint: {
+                            _: 'inputGeoPoint',
+                            lat: obj.latitude,
+                            long: obj.longitude,
+                        },
+                        provider: '',
+                        venueId: '',
+                        venueType: ''
+                    }
+                } else {
+                    throw new MtCuteArgumentError(
+                        'message or location (lat&lon) bust be supplied for venue inline result'
+                    )
+                }
+            } else if (
                 obj.type === 'video' &&
                 obj.isEmbed &&
                 typeof obj.media === 'string'
@@ -897,7 +921,7 @@ export namespace BotInline {
                     if (obj.type === 'video') mime = 'video/mp4'
                     else if (obj.type === 'audio')
                         mime = obj.mime ?? 'audio/mpeg'
-                    else if (obj.type === 'gif') mime = obj.mime ?? 'image/jpeg'
+                    else if (obj.type === 'gif') mime = obj.mime ?? 'video/mp4'
                     else if (obj.type === 'voice') mime = 'audio/ogg'
                     else if (obj.type === 'file') {
                         if (!obj.mime)
@@ -988,11 +1012,7 @@ export namespace BotInline {
             description = obj.address
         } else if (obj.type === 'contact') {
             description = obj.phone
-        } else if (
-            obj.type !== 'gif' &&
-            obj.type !== 'voice' &&
-            obj.type !== 'sticker'
-        ) {
+        } else if (obj.type !== 'voice' && obj.type !== 'sticker') {
             description = obj.description
         }
 
