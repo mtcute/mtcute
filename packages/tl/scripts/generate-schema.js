@@ -473,7 +473,6 @@ async function addDocumentation(obj) {
 // converts telegram's json to tl
 function convertJsonToTl(json) {
     // their json schema uses signed integers for ids, we use unsigned, so we need to convert them
-    const signedInt32ToUnsigned = (val) => (val < 0 ? val + 0x100000000 : val)
 
     const lines = []
     const objectToLine = (cls) => {
@@ -562,7 +561,15 @@ async function main() {
 
         const first = convertTlToJson(apiTlTdlib, 'api')
         const second = convertTlToJson(apiTlDesktop, 'api')
-        await mergeSchemas(first, second)
+
+        const onConflict =
+            apiDesktopLayer === apiTdlibLayer
+                ? null // manual conflict resolving
+                : apiTdlibLayer > apiDesktopLayer // use ctor from newer schema
+                ? 'A'
+                : 'B'
+
+        await mergeSchemas(first, second, onConflict)
 
         ret.apiLayer = apiTdlibLayer + ''
         ret.api = first

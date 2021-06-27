@@ -102,11 +102,11 @@ function createTlSchemaIndex(schema) {
 }
 
 // merge schema `b` into `a` (does not copy)
-async function mergeSchemas(a, b) {
-    const rl = require('readline').createInterface({
+async function mergeSchemas(a, b, conflict = null) {
+    const rl = conflict === null ? require('readline').createInterface({
         input: process.stdin,
         output: process.stdout,
-    })
+    }) : null
 
     const input = (q) => new Promise((res) => rl.question(q, res))
 
@@ -141,21 +141,23 @@ async function mergeSchemas(a, b) {
 
         // check for conflict
         if (objA.id !== objB.id) {
-            console.log('! CONFLICT !')
-            console.log('Schema A (tdlib): %s', stringifyType(objA))
-            console.log('Schema B (tdesktop): %s', stringifyType(objB))
+            let keep = conflict
+            if (conflict === null) {
+                console.log('! CONFLICT !')
+                console.log('Schema A (tdlib): %s', stringifyType(objA))
+                console.log('Schema B (tdesktop): %s', stringifyType(objB))
 
-            let keep
-            while (true) {
-                keep = await input('Which to keep? [A/B] > ')
-                keep = keep.toUpperCase()
+                while (true) {
+                    keep = await input('Which to keep? [A/B] > ')
+                    keep = keep.toUpperCase()
 
-                if (keep !== 'A' && keep !== 'B') {
-                    console.log('Invalid input! Please type A or B')
-                    continue
+                    if (keep !== 'A' && keep !== 'B') {
+                        console.log('Invalid input! Please type A or B')
+                        continue
+                    }
+
+                    break
                 }
-
-                break
             }
 
             if (keep === 'B') {
@@ -191,7 +193,7 @@ async function mergeSchemas(a, b) {
         delete obj._type
     })
 
-    rl.close()
+    if (rl) rl.close()
 }
 
 module.exports = { mergeSchemas }
