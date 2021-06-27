@@ -38,7 +38,7 @@ import { UserStatusUpdate } from './updates/user-status-update'
 import { UserTypingUpdate } from './updates/user-typing-update'
 import { DeleteMessageUpdate } from './updates/delete-message-update'
 import { IStateStorage, UpdateState, StateKeyDelegate } from './state'
-import { defaultStateKeyDelegate } from './state/key'
+import { defaultStateKeyDelegate } from './state'
 import { PropagationAction } from './propagation'
 
 const noop = () => {}
@@ -171,7 +171,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         err: Error,
         update: UpdateInfoForError<T>,
         state?: UpdateState<State, SceneName>
-    ) => MaybeAsync<void>
+    ) => MaybeAsync<boolean>
 
     /**
      * Create a new dispatcher, that will be used as a child,
@@ -491,11 +491,12 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                     }
                 } catch (e) {
                     if (this._errorHandler) {
-                        await this._errorHandler(
+                        const handled = await this._errorHandler(
                             e,
                             { type: parsedType, data: parsed },
                             parsedState as never
                         )
+                        if (!handled) throw e
                     } else {
                         throw e
                     }
@@ -616,7 +617,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                   err: Error,
                   update: UpdateInfoForError<UpdateHandler>,
                   state?: UpdateState<State, SceneName>
-              ) => MaybeAsync<void>)
+              ) => MaybeAsync<boolean>)
             | null
     ): void {
         if (handler) this._errorHandler = handler
@@ -631,7 +632,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         err: Error,
         update: UpdateInfoForError<T>,
         state?: UpdateState<State, SceneName>
-    ): MaybeAsync<void> {
+    ): MaybeAsync<boolean> {
         if (!this.parent)
             throw new MtCuteArgumentError('This dispatcher is not a child')
 
