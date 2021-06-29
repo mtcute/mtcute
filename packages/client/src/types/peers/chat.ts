@@ -157,6 +157,21 @@ export class Chat {
     }
 
     /**
+     * Whether this chat is a group chat
+     * (i.e. not a channel and not PM)
+     */
+    get isGroup(): boolean {
+        switch (this.type) {
+            case 'group':
+            case 'supergroup':
+            case 'gigagroup':
+                return true
+        }
+
+        return false
+    }
+
+    /**
      * Whether this chat has been verified by Telegram.
      * Supergroups, channels and groups only
      */
