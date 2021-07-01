@@ -54,7 +54,7 @@ export function _messageMediaFromTl(
             return new Contact(m)
         case 'messageMediaDocument':
             if (!(m.document?._ === 'document')) return null
-            return parseDocument(this.client, m.document)
+            return parseDocument(this.client, m.document) as MessageMedia
         case 'messageMediaGeo':
             if (!(m.geo._ === 'geoPoint')) return null
             return new Location(this.client, m.geo)

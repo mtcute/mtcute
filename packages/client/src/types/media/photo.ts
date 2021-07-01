@@ -9,6 +9,8 @@ import { makeInspectable } from '../utils'
  * A photo
  */
 export class Photo extends FileLocation {
+    readonly type: 'photo'
+
     /** Raw TL object */
     readonly raw: tl.RawPhoto
 
@@ -78,6 +80,7 @@ export class Photo extends FileLocation {
         this.raw = raw
         this.width = width
         this.height = height
+        this.type = 'photo'
     }
 
     /** Date this photo was sent */

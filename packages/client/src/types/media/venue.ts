@@ -29,6 +29,8 @@ export namespace Venue {
 }
 
 export class Venue {
+    readonly type = 'venue' as const
+
     readonly client: TelegramClient
     readonly raw: tl.RawMessageMediaVenue
 

@@ -5,6 +5,8 @@ import { tl } from '@mtcute/tl'
 import { makeInspectable } from '../utils'
 
 export class Contact {
+    readonly type = 'contact' as const
+
     readonly obj: tl.RawMessageMediaContact
 
     constructor(obj: tl.RawMessageMediaContact) {

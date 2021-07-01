@@ -169,6 +169,8 @@ export class RawDocument extends FileLocation {
  * and only used for documents without any special
  * attributes.
  */
-export class Document extends RawDocument {}
+export class Document extends RawDocument {
+    readonly type = 'document' as const
+}
 
 makeInspectable(Document, ['fileSize', 'dcId'], ['inputMedia', 'inputDocument'])

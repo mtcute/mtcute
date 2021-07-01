@@ -8,6 +8,8 @@ import { MtCuteArgumentError } from '../errors'
  * An invoice
  */
 export class Invoice {
+    readonly type = 'invoice' as const
+
     readonly client: TelegramClient
     readonly raw: tl.RawMessageMediaInvoice
 

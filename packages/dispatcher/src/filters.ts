@@ -21,7 +21,7 @@ import {
     Invoice,
     Game,
     WebPage,
-    MessageAction
+    MessageAction, RawLocation,
 } from '@mtcute/client'
 import { MaybeArray } from '@mtcute/core'
 import { ChatMemberUpdate } from './updates'
@@ -52,7 +52,7 @@ import { UserTypingUpdate } from './updates/user-typing-update'
  * Example without type mod:
  * ```typescript
  *
- * const hasPhoto: UpdateFilter<Message> = msg => msg.media instanceof Photo
+ * const hasPhoto: UpdateFilter<Message> = msg => msg.media?.type === 'photo'
  *
  * // ..later..
  * tg.onNewMessage(hasPhoto, async (msg) => {
@@ -68,7 +68,7 @@ import { UserTypingUpdate } from './updates/user-typing-update'
  * Example with type mod:
  * ```typescript
  *
- * const hasPhoto: UpdateFilter<Message, { media: Photo }> = msg => msg.media instanceof Photo
+ * const hasPhoto: UpdateFilter<Message, { media: Photo }> = msg => msg.media?.type === 'photo'
  *
  * // ..later..
  * tg.onNewMessage(hasPhoto, async (msg) => {
@@ -87,7 +87,7 @@ import { UserTypingUpdate } from './updates/user-typing-update'
  * > Bad example:
  * > ```typescript
  * > // we check for `Photo`, but type contains `Audio`. this will be a problem!
- * > const hasPhoto: UpdateFilter<Message, { media: Audio }> = msg => msg.media instanceof Photo
+ * > const hasPhoto: UpdateFilter<Message, { media: Audio }> = msg => msg.media?.type === 'photo'
  * >
  * > // ..later..
  * > tg.onNewMessage(hasPhoto, async (msg) => {
@@ -595,19 +595,19 @@ export namespace filters {
      * Filter messages containing a photo
      */
     export const photo: UpdateFilter<Message, { media: Photo }> = (msg) =>
-        msg.media?.constructor === Photo
+        msg.media?.type === 'photo'
 
     /**
      * Filter messages containing a dice
      */
     export const dice: UpdateFilter<Message, { media: Dice }> = (msg) =>
-        msg.media?.constructor === Dice
+        msg.media?.type === 'dice'
 
     /**
      * Filter messages containing a contact
      */
     export const contact: UpdateFilter<Message, { media: Contact }> = (msg) =>
-        msg.media?.constructor === Contact
+        msg.media?.type === 'contact'
 
     /**
      * Filter messages containing a document
@@ -615,7 +615,7 @@ export namespace filters {
      * This will also match media like audio, video, voice
      * that also use Documents
      */
-    export const rawDocument: UpdateFilter<Message, { media: RawDocument }> = (
+    export const anyDocument: UpdateFilter<Message, { media: RawDocument }> = (
         msg
     ) => msg.media instanceof RawDocument
 
@@ -625,33 +625,33 @@ export namespace filters {
      * This will not match media like audio, video, voice
      */
     export const document: UpdateFilter<Message, { media: Document }> = (msg) =>
-        msg.media?.constructor === Document
+        msg.media?.type === 'document'
 
     /**
      * Filter messages containing an audio file
      */
     export const audio: UpdateFilter<Message, { media: Audio }> = (msg) =>
-        msg.media?.constructor === Audio
+        msg.media?.type === 'audio'
 
     /**
      * Filter messages containing a voice note
      */
     export const voice: UpdateFilter<Message, { media: Voice }> = (msg) =>
-        msg.media?.constructor === Voice
+        msg.media?.type === 'voice'
 
     /**
      * Filter messages containing a sticker
      */
     export const sticker: UpdateFilter<Message, { media: Sticker }> = (msg) =>
-        msg.media?.constructor === Sticker
+        msg.media?.type === 'sticker'
 
     /**
      * Filter messages containing a video.
      *
      * This includes videos, round messages and animations
      */
-    export const rawVideo: UpdateFilter<Message, { media: Video }> = (msg) =>
-        msg.media?.constructor === Video
+    export const anyVideo: UpdateFilter<Message, { media: Video }> = (msg) =>
+        msg.media?.type === 'video'
 
     /**
      * Filter messages containing a simple video.
@@ -670,7 +670,7 @@ export namespace filters {
             >
         }
     > = (msg) =>
-        msg.media?.constructor === Video &&
+        msg.media?.type === 'video' &&
         !msg.media.isAnimation &&
         !msg.media.isRound
 
@@ -692,7 +692,7 @@ export namespace filters {
             >
         }
     > = (msg) =>
-        msg.media?.constructor === Video &&
+        msg.media?.type === 'video' &&
         msg.media.isAnimation &&
         !msg.media.isRound
 
@@ -711,17 +711,23 @@ export namespace filters {
             >
         }
     > = (msg) =>
-        msg.media?.constructor === Video &&
+        msg.media?.type === 'video' &&
         !msg.media.isAnimation &&
         msg.media.isRound
 
     /**
-     * Filter messages containing a location.
-     *
-     * This includes live locations
+     * Filter messages containing any location (live or static).
      */
-    export const location: UpdateFilter<Message, { media: Location }> = (msg) =>
-        msg.media instanceof Location
+    export const anyLocation: UpdateFilter<Message, { media: Location }> = (msg) =>
+        msg.media instanceof RawLocation
+
+    /**
+     * Filter messages containing a static (non-live) location.
+     */
+    export const location: UpdateFilter<
+        Message,
+        { media: LiveLocation }
+        > = (msg) => msg.media?.type === 'location'
 
     /**
      * Filter messages containing a live location.
@@ -729,37 +735,37 @@ export namespace filters {
     export const liveLocation: UpdateFilter<
         Message,
         { media: LiveLocation }
-    > = (msg) => msg.media?.constructor === LiveLocation
+    > = (msg) => msg.media?.type === 'live_location'
 
     /**
      * Filter messages containing a game.
      */
     export const game: UpdateFilter<Message, { media: Game }> = (msg) =>
-        msg.media?.constructor === Game
+        msg.media?.type === 'game'
 
     /**
      * Filter messages containing a webpage preview.
      */
     export const webpage: UpdateFilter<Message, { media: WebPage }> = (msg) =>
-        msg.media?.constructor === WebPage
+        msg.media?.type === 'web_page'
 
     /**
      * Filter messages containing a venue.
      */
     export const venue: UpdateFilter<Message, { media: Venue }> = (msg) =>
-        msg.media?.constructor === Venue
+        msg.media?.type === 'venue'
 
     /**
      * Filter messages containing a poll.
      */
     export const poll: UpdateFilter<Message, { media: Poll }> = (msg) =>
-        msg.media?.constructor === Poll
+        msg.media?.type === 'poll'
 
     /**
      * Filter messages containing an invoice.
      */
     export const invoice: UpdateFilter<Message, { media: Invoice }> = (msg) =>
-        msg.media?.constructor === Invoice
+        msg.media?.type === 'invoice'
 
     /**
      * Filter objects that match a given regular expression

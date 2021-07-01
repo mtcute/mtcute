@@ -17,6 +17,8 @@ import { MtCuteArgumentError } from '../errors'
  * of my own observations and experiments.
  */
 export class WebPage {
+    readonly type = 'web_page' as const
+
     readonly client: TelegramClient
     readonly raw: tl.RawWebPage
 
@@ -71,7 +73,7 @@ export class WebPage {
      *
      * `unknown` is returned if no type is returned in the TL object.
      */
-    get type(): string {
+    get previewType(): string {
         return this.raw.type || 'unknown'
     }
 

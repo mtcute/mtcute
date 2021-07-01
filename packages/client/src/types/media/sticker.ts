@@ -40,6 +40,8 @@ const MASK_POS = ['forehead', 'eyes', 'mouth', 'chin'] as const
  * A sticker
  */
 export class Sticker extends RawDocument {
+    readonly type = 'sticker' as const
+
     readonly attr: tl.RawDocumentAttributeSticker
     readonly attrSize?: tl.RawDocumentAttributeImageSize
 

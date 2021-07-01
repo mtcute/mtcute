@@ -8,6 +8,8 @@ import { tdFileId } from '@mtcute/file-id'
  * An audio file
  */
 export class Audio extends RawDocument {
+    readonly type = 'audio' as const
+
     readonly doc: tl.RawDocument
     readonly attr: tl.RawDocumentAttributeAudio
 

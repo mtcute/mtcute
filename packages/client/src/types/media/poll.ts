@@ -38,6 +38,8 @@ export namespace Poll {
 }
 
 export class Poll {
+    readonly type = 'poll' as const
+
     readonly client: TelegramClient
     readonly raw: tl.TypePoll
     readonly results?: tl.TypePollResults

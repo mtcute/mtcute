@@ -10,6 +10,8 @@ import { tdFileId } from '@mtcute/file-id'
  * **Note:** Legacy GIF animations are also wrapped with this class.
  */
 export class Video extends RawDocument {
+    readonly type = 'video' as const
+
     readonly attr:
         | tl.RawDocumentAttributeVideo
         | tl.RawDocumentAttributeImageSize

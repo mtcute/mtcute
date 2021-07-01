@@ -5,6 +5,8 @@ import { makeInspectable } from '../utils'
  * A dice or another interactive random emoji.
  */
 export class Dice {
+    readonly type = 'dice' as const
+
     readonly obj: tl.RawMessageMediaDice
 
     /**

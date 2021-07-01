@@ -5,6 +5,8 @@ import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 
 export class Game {
+    readonly type = 'game' as const
+
     readonly game: tl.RawGame
     readonly client: TelegramClient
 
