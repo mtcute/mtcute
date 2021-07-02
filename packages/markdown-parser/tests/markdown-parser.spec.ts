@@ -1,7 +1,7 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import { tl } from '@mtcute/tl'
-import { MessageEntity } from '@mtcute/client'
+import { MessageEntity, RawString } from '@mtcute/client'
 import { MarkdownMessageEntityParser, md } from '../src'
 import bigInt from 'big-integer'
 
@@ -656,6 +656,17 @@ describe('MarkdownMessageEntityParser', () => {
             expect(md`${unsafeString} **text**`).eq('\\_\\_\\[\\]\\_\\_ **text**')
             expect(md`**text** ${unsafeString}`).eq('**text** \\_\\_\\[\\]\\_\\_')
             expect(md`**${unsafeString}**`).eq('**\\_\\_\\[\\]\\_\\_**')
+        })
+
+        it('should skip with RawString', () => {
+            const unsafeString2 = '__[]__'
+            const unsafeString = new RawString('__[]__')
+
+            expect(md`${unsafeString}`).eq('__[]__')
+            expect(md`${unsafeString} ${unsafeString2}`).eq('__[]__ \\_\\_\\[\\]\\_\\_')
+            expect(md`${unsafeString} **text**`).eq('__[]__ **text**')
+            expect(md`**text** ${unsafeString}`).eq('**text** __[]__')
+            expect(md`**${unsafeString} ${unsafeString2}**`).eq('**__[]__ \\_\\_\\[\\]\\_\\_**')
         })
     })
 })

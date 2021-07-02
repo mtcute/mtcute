@@ -2,7 +2,7 @@ import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import { tl } from '@mtcute/tl'
 import { HtmlMessageEntityParser, html } from '../src'
-import { MessageEntity } from '@mtcute/client'
+import { MessageEntity, RawString } from '@mtcute/client'
 import bigInt from 'big-integer'
 
 const createEntity = <T extends tl.TypeMessageEntity['_']>(
@@ -459,6 +459,18 @@ describe('HtmlMessageEntityParser', () => {
             expect(html`${unsafeString} <b>text</b>`).eq('&lt;&amp;&gt; <b>text</b>')
             expect(html`<b>text</b> ${unsafeString}`).eq('<b>text</b> &lt;&amp;&gt;')
             expect(html`<b>${unsafeString}</b>`).eq('<b>&lt;&amp;&gt;</b>')
+        })
+
+        it('should skip with RawString', () => {
+            const unsafeString2 = '<&>'
+            const unsafeString = new RawString('<&>')
+
+            expect(html`${unsafeString}`).eq('<&>')
+            expect(html`${unsafeString} ${unsafeString2}`).eq('<&> &lt;&amp;&gt;')
+            expect(html`${unsafeString} <b>text</b>`).eq('<&> <b>text</b>')
+            expect(html`<b>text</b> ${unsafeString}`).eq('<b>text</b> <&>')
+            expect(html`<b>${unsafeString}</b>`).eq('<b><&></b>')
+            expect(html`<b>${unsafeString} ${unsafeString2}</b>`).eq('<b><&> &lt;&amp;&gt;</b>')
         })
     })
 })

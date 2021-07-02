@@ -1,4 +1,4 @@
-import type { IMessageEntityParser, MessageEntity } from '@mtcute/client'
+import type { IMessageEntityParser, MessageEntity, RawString } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { Parser } from 'htmlparser2'
 import bigInt from 'big-integer'
@@ -13,10 +13,11 @@ const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|
  * const escaped = html`<b>${user.displayName}</b>`
  * ```
  */
-export function html(strings: TemplateStringsArray, ...sub: string[]): string {
+export function html(strings: TemplateStringsArray, ...sub: (string | RawString)[]): string {
     let str = ''
     sub.forEach((it, idx) => {
-        str += strings[idx] + HtmlMessageEntityParser.escape(it)
+        if (typeof it === 'string') it = HtmlMessageEntityParser.escape(it)
+        str += strings[idx] + it
     })
     return str + strings[strings.length - 1]
 }

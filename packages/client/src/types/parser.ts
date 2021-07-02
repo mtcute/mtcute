@@ -38,3 +38,19 @@ export interface IMessageEntityParser {
      */
     unparse(text: string, entities: ReadonlyArray<MessageEntity>): string
 }
+
+/**
+ * Raw string that will not be escaped when passing
+ * to tagged template helpers (like `html` and `md`)
+ */
+export class RawString {
+    raw!: true
+
+    constructor (readonly value: string) {}
+
+    toString(): string {
+        return this.value
+    }
+}
+
+RawString.prototype.raw = true

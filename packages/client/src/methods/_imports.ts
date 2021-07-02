@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 // @copy
-import { IMessageEntityParser } from '../parser'
-
-// @copy
 import { Readable } from 'stream'
 
 // @copy
@@ -41,7 +38,8 @@ import {
     ArrayWithTotal,
     BotCommands,
     MessageMedia,
-    RawDocument
+    RawDocument,
+    IMessageEntityParser
 } from '../types'
 
 // @copy

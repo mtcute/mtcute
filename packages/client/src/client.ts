@@ -157,7 +157,6 @@ import { setProfilePhoto } from './methods/users/set-profile-photo'
 import { unblockUser } from './methods/users/unblock-user'
 import { updateProfile } from './methods/users/update-profile'
 import { updateUsername } from './methods/users/update-username'
-import { IMessageEntityParser } from './parser'
 import { Readable } from 'stream'
 import {
     ArrayWithTotal,
@@ -171,6 +170,7 @@ import {
     Dialog,
     FileDownloadParameters,
     GameHighScore,
+    IMessageEntityParser,
     InputFileLike,
     InputInlineResult,
     InputMediaLike,

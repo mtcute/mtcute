@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
-import { IMessageEntityParser } from '../../parser'
-import { MtCuteError } from '../../types'
+import { MtCuteError, IMessageEntityParser } from '../../types'
 
 /**
  * Register a given {@link IMessageEntityParser} as a parse mode

@@ -8,6 +8,7 @@ import { makeInspectable } from '../utils'
 import { ChatsIndex, InputPeerLike, User, UsersIndex } from './index'
 import { ChatLocation } from './chat-location'
 import { InputMediaLike } from '../media'
+import { RawString } from '../parser'
 
 export namespace Chat {
     /**
@@ -548,7 +549,7 @@ export class Chat {
      * msg.replyText(`Hello, ${msg.chat.mention()`)
      * ```
      */
-    mention(text?: string | null, parseMode?: string | null): string {
+    mention(text?: string | null, parseMode?: string | null): string | RawString {
         if (this.user) return this.user.mention(text, parseMode)
 
         if (!text && this.username) {
@@ -560,7 +561,7 @@ export class Chat {
 
         if (!parseMode) parseMode = this.client['_defaultParseMode']
 
-        return this.client.getParseMode(parseMode).unparse(text, [
+        return new RawString(this.client.getParseMode(parseMode).unparse(text, [
             {
                 raw: undefined as any,
                 type: 'text_link',
@@ -568,7 +569,7 @@ export class Chat {
                 length: text.length,
                 url: `https://t.me/${this.username}`
             },
-        ])
+        ]))
     }
 
     /**

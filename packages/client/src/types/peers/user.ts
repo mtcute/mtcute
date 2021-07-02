@@ -5,6 +5,7 @@ import { MtCuteArgumentError } from '../errors'
 import { makeInspectable } from '../utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { InputMediaLike } from '../media'
+import { RawString } from '../parser'
 
 export namespace User {
     /**
@@ -290,7 +291,7 @@ export class User {
      * msg.replyText(`Hello, ${msg.sender.mention()`)
      * ```
      */
-    mention(text?: string | null, parseMode?: string | null): string {
+    mention(text?: string | null, parseMode?: string | null): string | RawString {
         if (!text && this.username) {
             return `@${this.username}`
         }
@@ -298,7 +299,7 @@ export class User {
         if (!text) text = this.displayName
         if (!parseMode) parseMode = this.client['_defaultParseMode']
 
-        return this.client.getParseMode(parseMode).unparse(text, [
+        return new RawString(this.client.getParseMode(parseMode).unparse(text, [
             {
                 raw: undefined as any,
                 type: 'text_mention',
@@ -306,7 +307,7 @@ export class User {
                 length: text.length,
                 userId: this.id,
             },
-        ])
+        ]))
     }
 
     /**
