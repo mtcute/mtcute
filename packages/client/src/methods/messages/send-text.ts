@@ -13,8 +13,10 @@ import {
     ReplyMarkup,
     UsersIndex,
     MtCuteTypeAssertionError,
+    ChatsIndex,
 } from '../../types'
 import { getMarkedPeerId } from '@mtcute/core'
+import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
  * Send a text message
@@ -128,6 +130,7 @@ export async function sendText(
             _: 'message',
             id: res.id,
             peerId: inputPeerToPeer(peer),
+            fromId: { _: 'peerUser', userId: this._userId! },
             message,
             date: res.date,
             out: res.out,
@@ -135,29 +138,65 @@ export async function sendText(
             entities: res.entities,
         }
 
-        this._pts = res.pts
-        this._date = res.date
-
-        let user = await this.storage.getFullPeerById(
-            getMarkedPeerId(msg.peerId)
-        )
-        if (!user) {
-            user = await this.call({
-                _: 'users.getUsers',
-                id: [normalizeToInputUser(peer)!],
-            }).then((res) => res[0])
-        }
-        if (!user)
-            throw new MtCuteTypeAssertionError(
-                'sendText (@ users.getUsers)',
-                'user',
-                'null'
-            )
+        this._handleUpdate(createDummyUpdate(res.pts, res.date))
 
         const users: UsersIndex = {}
-        users[user.id] = user as tl.RawUser
+        const chats: ChatsIndex = {}
 
-        return new Message(this, msg, users, {})
+        const fetchPeer = async (
+            peer: tl.TypePeer | tl.TypeInputPeer
+        ): Promise<void> => {
+            const id = getMarkedPeerId(peer)
+
+            let cached = await this.storage.getFullPeerById(id)
+            if (!cached) {
+                switch (peer._) {
+                    case 'inputPeerChat':
+                    case 'peerChat':
+                        // resolvePeer does not fetch the chat.
+                        // we need to do it manually
+                        cached = await this.call({
+                            _: 'messages.getChats',
+                            id: [peer.chatId]
+                        }).then((res) => res.chats[0])
+                        break
+                    default:
+                        await this.resolvePeer(peer)
+                        cached = await this.storage.getFullPeerById(id)
+                }
+            }
+
+            if (!cached) {
+                throw new MtCuteTypeAssertionError(
+                    'sendText (@ getFullPeerById)',
+                    'user | chat',
+                    'null'
+                )
+            }
+
+            switch (cached._) {
+                case 'user':
+                    users[cached.id] = cached
+                    break
+                case 'chat':
+                case 'chatForbidden':
+                case 'channel':
+                case 'channelForbidden':
+                    chats[cached.id] = cached
+                    break
+                default:
+                    throw new MtCuteTypeAssertionError(
+                        'sendText (@ users.getUsers)',
+                        'user | chat | channel', // not very accurate, but good enough
+                        cached._
+                    )
+            }
+        }
+
+        await fetchPeer(peer)
+        await fetchPeer(msg.fromId!)
+
+        return new Message(this, msg, users, chats)
     }
 
     return this._findMessageInUpdate(res)
