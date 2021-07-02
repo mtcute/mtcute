@@ -3096,6 +3096,8 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Set a new profile photo or video.
      *
+     * You can also pass a file ID or an InputPhoto to re-use existing photo.
+     *
      * @param type  Media type (photo or video)
      * @param media  Input media file
      * @param previewSec
@@ -3104,7 +3106,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     setProfilePhoto(
         type: 'photo' | 'video',
-        media: InputFileLike,
+        media: InputFileLike | tl.TypeInputPhoto,
         previewSec?: number
     ): Promise<Photo>
     /**
