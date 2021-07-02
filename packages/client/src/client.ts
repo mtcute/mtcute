@@ -79,6 +79,7 @@ import { _normalizeFileToDocument } from './methods/files/normalize-file-to-docu
 import { _normalizeInputFile } from './methods/files/normalize-input-file'
 import { _normalizeInputMedia } from './methods/files/normalize-input-media'
 import { uploadFile } from './methods/files/upload-file'
+import { uploadMedia } from './methods/files/upload-media'
 import { createInviteLink } from './methods/invite-links/create-invite-link'
 import { editInviteLink } from './methods/invite-links/edit-invite-link'
 import { exportInviteLink } from './methods/invite-links/export-invite-link'
@@ -177,10 +178,12 @@ import {
     InputStickerSetItem,
     MaybeDynamic,
     Message,
+    MessageMedia,
     PartialExcept,
     PartialOnly,
     Photo,
     Poll,
+    RawDocument,
     ReplyMarkup,
     SentCode,
     StickerSet,
@@ -1629,6 +1632,24 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         progressCallback?: (uploaded: number, total: number) => void
     }): Promise<UploadedFile>
+    /**
+     * Upload a media to Telegram servers, without actually
+     * sending a message anywhere. Useful when File ID is needed.
+     *
+     * The difference with {@link uploadFile} is that
+     * the returned object will act like a message media
+     * and contain fields like File ID.
+     *
+     * @param media  Media to upload
+     * @param params  (default: `{}`) Upload parameters
+     */
+    uploadMedia(
+        media: InputMediaLike,
+        params?: {
+            peer?: InputPeerLike
+            progressCallback?: (uploaded: number, total: number) => void
+        }
+    ): Promise<Extract<MessageMedia, Photo | RawDocument>>
     /**
      * Create an additional invite link for the chat.
      *
@@ -3270,6 +3291,7 @@ export class TelegramClient extends BaseTelegramClient {
     _normalizeInputFile = _normalizeInputFile
     _normalizeInputMedia = _normalizeInputMedia
     uploadFile = uploadFile
+    uploadMedia = uploadMedia
     createInviteLink = createInviteLink
     editInviteLink = editInviteLink
     exportInviteLink = exportInviteLink
