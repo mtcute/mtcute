@@ -157,6 +157,18 @@ export class Photo extends FileLocation {
     }
 
     /**
+     * Input photo generated from this object.
+     */
+    get inputPhoto(): tl.TypeInputPhoto {
+        return {
+            _: 'inputPhoto',
+            id: this.raw.id,
+            accessHash: this.raw.accessHash,
+            fileReference: this.raw.fileReference,
+        }
+    }
+
+    /**
      * Input media generated from this object,
      * to be used in {@link InputMediaLike} and
      * {@link TelegramClient.sendMedia}
@@ -164,12 +176,7 @@ export class Photo extends FileLocation {
     get inputMedia(): tl.TypeInputMedia {
         return {
             _: 'inputMediaPhoto',
-            id: {
-                _: 'inputPhoto',
-                id: this.raw.id,
-                accessHash: this.raw.accessHash,
-                fileReference: this.raw.fileReference,
-            },
+            id: this.inputPhoto
         }
     }
 }
