@@ -17,9 +17,10 @@ const MASK_POS = {
 } as const
 
 /**
- * Create a new sticker set (only for bots)
+ * Create a new sticker set.
  *
- * Only for bots.
+ * This is the only sticker-related method that
+ * users can use (they allowed it with the "import stickers" update)
  *
  * @param params
  * @returns  Newly created sticker set
@@ -29,7 +30,10 @@ export async function createStickerSet(
     this: TelegramClient,
     params: {
         /**
-         * Owner of the sticker set (must be user)
+         * Owner of the sticker set (must be user).
+         *
+         * If this pack is created from a user account,
+         * can only be `"self"`
          */
         owner: InputPeerLike
 
@@ -42,8 +46,8 @@ export async function createStickerSet(
          * Short name of the sticker set.
          * Can only contain English letters, digits and underscores
          * (i.e. must match `/^[a-zA-Z0-9_]+$/),
-         * and must end with `_by_<bot username>` (`<bot username>` is
-         * case-insensitive).
+         * and (for bots) must end with `_by_<bot username>`
+         * (`<bot username>` is case-insensitive).
          */
         shortName: string
 
