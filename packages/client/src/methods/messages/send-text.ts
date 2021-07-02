@@ -1,12 +1,20 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { inputPeerToPeer } from '../../utils/peer-utils'
+import { inputPeerToPeer, normalizeToInputUser } from '../../utils/peer-utils'
 import {
     normalizeDate,
     normalizeMessageId,
     randomUlong,
 } from '../../utils/misc-utils'
-import { InputPeerLike, Message, BotKeyboard, ReplyMarkup } from '../../types'
+import {
+    InputPeerLike,
+    Message,
+    BotKeyboard,
+    ReplyMarkup,
+    UsersIndex,
+    MtCuteTypeAssertionError,
+} from '../../types'
+import { getMarkedPeerId } from '@mtcute/core'
 
 /**
  * Send a text message
@@ -130,7 +138,26 @@ export async function sendText(
         this._pts = res.pts
         this._date = res.date
 
-        return new Message(this, msg, {}, {})
+        let user = await this.storage.getFullPeerById(
+            getMarkedPeerId(msg.peerId)
+        )
+        if (!user) {
+            user = await this.call({
+                _: 'users.getUsers',
+                id: [normalizeToInputUser(peer)!],
+            }).then((res) => res[0])
+        }
+        if (!user)
+            throw new MtCuteTypeAssertionError(
+                'sendText (@ users.getUsers)',
+                'user',
+                'null'
+            )
+
+        const users: UsersIndex = {}
+        users[user.id] = user as tl.RawUser
+
+        return new Message(this, msg, users, {})
     }
 
     return this._findMessageInUpdate(res)
