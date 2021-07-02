@@ -542,6 +542,9 @@ export class Chat {
      * When available and `text` is omitted, this method will return `@username`.
      * Otherwise, text mention is created for the given (or default) parse mode
      *
+     * Use `null` as `text` (first parameter) to force create a text
+     * mention with display name, even if there is a username.
+     *
      * @param text  Text of the mention.
      * @param parseMode  Parse mode to use when creating mention.
      * @example
@@ -552,7 +555,7 @@ export class Chat {
     mention(text?: string | null, parseMode?: string | null): string | RawString {
         if (this.user) return this.user.mention(text, parseMode)
 
-        if (!text && this.username) {
+        if (text === undefined && this.username) {
             return `@${this.username}`
         }
 
