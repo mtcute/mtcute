@@ -2,7 +2,7 @@ import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import { tl } from '@mtcute/tl'
 import { MessageEntity } from '@mtcute/client'
-import { MarkdownMessageEntityParser } from '../src'
+import { MarkdownMessageEntityParser, md } from '../src'
 import bigInt from 'big-integer'
 
 const createEntity = <T extends tl.TypeMessageEntity['_']>(
@@ -645,6 +645,17 @@ describe('MarkdownMessageEntityParser', () => {
                     'plain ``` pre without linebreaks but with spaces instead ```'
                 )
             })
+        })
+    })
+
+    describe('template', () => {
+        it('should work as a tagged template literal', () => {
+            const unsafeString = '__[]__'
+
+            expect(md`${unsafeString}`).eq('\\_\\_\\[\\]\\_\\_')
+            expect(md`${unsafeString} **text**`).eq('\\_\\_\\[\\]\\_\\_ **text**')
+            expect(md`**text** ${unsafeString}`).eq('**text** \\_\\_\\[\\]\\_\\_')
+            expect(md`**${unsafeString}**`).eq('**\\_\\_\\[\\]\\_\\_**')
         })
     })
 })

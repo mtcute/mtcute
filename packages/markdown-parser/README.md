@@ -12,17 +12,14 @@ This package implements formatting syntax similar to Markdown (CommonMark) but s
 
 ```typescript
 import { TelegramClient } from '@mtcute/client'
-import { MarkdownMessageEntityParser } from '@mtcute/markdown-parser'
+import { MarkdownMessageEntityParser, md } from '@mtcute/markdown-parser'
 
 const tg = new TelegramClient({ ... })
 tg.registerParseMode(new MarkdownMessageEntityParser())
 
 tg.sendText(
     'me',
-    'Hello, **me**! Updates from the feed:\n' +
-        MarkdownMessageEntityParser.escape(
-            await getUpdatesFromFeed()
-        )
+    md`Hello, **me**! Updates from the feed:\n${await getUpdatesFromFeed()}`
 )
 ```
 
@@ -126,7 +123,7 @@ like `"\\_\\_not italic\\_\\_`.
 > **Note**: backslash itself must be escaped like this: ` \\ ` (double backslash).
 >
 > This will look pretty bad in real code, so use escaping only when really needed, and use
-> [`MarkdownMessageEntityParser.escape`](./classes/markdownmessageentityparser.html#escape) or
+> [`MarkdownMessageEntityParser.escape`](./classes/markdownmessageentityparser.html#escape) or `md` or
 > other parse modes (like HTML one provided by [`@mtcute/html-parser`](../html-parser/index.html))) instead.
 
 > In theory, you could escape every single non-markup character, but why would you want to do that 😜

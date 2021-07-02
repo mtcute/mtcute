@@ -1,7 +1,7 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import { tl } from '@mtcute/tl'
-import { HtmlMessageEntityParser } from '../src'
+import { HtmlMessageEntityParser, html } from '../src'
 import { MessageEntity } from '@mtcute/client'
 import bigInt from 'big-integer'
 
@@ -448,6 +448,17 @@ describe('HtmlMessageEntityParser', () => {
 
         it('should ignore empty urls', () => {
             test('<a href="">link</a> <a>link</a>', [], 'link link')
+        })
+    })
+
+    describe('template', () => {
+        it('should work as a tagged template literal', () => {
+            const unsafeString = '<&>'
+
+            expect(html`${unsafeString}`).eq('&lt;&amp;&gt;')
+            expect(html`${unsafeString} <b>text</b>`).eq('&lt;&amp;&gt; <b>text</b>')
+            expect(html`<b>text</b> ${unsafeString}`).eq('<b>text</b> &lt;&amp;&gt;')
+            expect(html`<b>${unsafeString}</b>`).eq('<b>&lt;&amp;&gt;</b>')
         })
     })
 })

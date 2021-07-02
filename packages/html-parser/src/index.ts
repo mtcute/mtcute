@@ -5,6 +5,22 @@ import bigInt from 'big-integer'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 
+/**
+ * Tagged template based helper for escaping entities in HTML
+ *
+ * @example
+ * ```typescript
+ * const escaped = html`<b>${user.displayName}</b>`
+ * ```
+ */
+export function html(strings: TemplateStringsArray, ...sub: string[]): string {
+    let str = ''
+    sub.forEach((it, idx) => {
+        str += strings[idx] + HtmlMessageEntityParser.escape(it)
+    })
+    return str + strings[strings.length - 1]
+}
+
 export namespace HtmlMessageEntityParser {
     /**
      * Syntax highlighter function used in {@link HtmlMessageEntityParser.unparse}

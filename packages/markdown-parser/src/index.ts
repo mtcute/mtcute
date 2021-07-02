@@ -14,6 +14,22 @@ const TAG_PRE = '```'
 const TO_BE_ESCAPED = /[*_\-~`[\\\]]/g
 
 /**
+ * Tagged template based helper for escaping entities in Markdown
+ *
+ * @example
+ * ```typescript
+ * const escaped = md`**${user.displayName}**`
+ * ```
+ */
+export function md(strings: TemplateStringsArray, ...sub: string[]): string {
+    let str = ''
+    sub.forEach((it, idx) => {
+        str += strings[idx] + MarkdownMessageEntityParser.escape(it)
+    })
+    return str + strings[strings.length - 1]
+}
+
+/**
  * Markdown MessageEntity parser.
  *
  * This class is **not** compatible with the Bot API Markdown nor MarkdownV2,

@@ -13,17 +13,14 @@ API ([documented here](https://core.telegram.org/bots/api#html-style))
 
 ```typescript
 import { TelegramClient } from '@mtcute/client'
-import { HtmlMessageEntityParser } from '@mtcute/html-parser'
+import { HtmlMessageEntityParser, html } from '@mtcute/html-parser'
 
 const tg = new TelegramClient({ ... })
 tg.registerParseMode(new HtmlMessageEntityParser())
 
 tg.sendText(
     'me',
-    'Hello, <b>me</b>! Updates from the feed:\n' +
-        HtmlMessageEntityParser.escape(
-            await getUpdatesFromFeed()
-        )
+    html`Hello, <b>me</b>! Updates from the feed:\n${await getUpdatesFromFeed()}`
 )
 ```
 
@@ -94,4 +91,13 @@ bold _and_** _italic_
 Escaping in this parser works exactly the same as in `htmlparser2`.
 
 This means that you can keep `<>&` symbols as-is in some cases. However, when dealing with user input, it is always
-better to use [`HtmlMessageEntityParser.escape`](./classes/htmlmessageentityparser.html#escape)
+better to use [`HtmlMessageEntityParser.escape`](./classes/htmlmessageentityparser.html#escape) or, even better,
+`html` helper:
+
+```typescript
+import { html } from '@mtcute/html-parser'
+
+const username = 'Boris <&>'
+const text = html`Hi, ${username}!`
+console.log(text) // Hi, Boris &amp;lt;&amp;amp;&amp;gt;!
+```
