@@ -1,11 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import {
-    ContinuePropagation,
-    Dispatcher,
-    handlers,
-    StopPropagation,
-} from '../src'
+import { Dispatcher, handlers, PropagationAction } from '../src'
 import { TelegramClient } from '@mtcute/client'
 
 describe('Dispatcher', () => {
@@ -21,19 +16,19 @@ describe('Dispatcher', () => {
             dp.onRawUpdate((cl, upd) => {
                 log.push('(wrap) received ' + upd._)
 
-                return ContinuePropagation
+                return PropagationAction.Continue
             })
             dp.addUpdateHandler(
                 handlers.rawUpdate((cl, upd) => {
                     log.push('(factory) received ' + upd._)
-                    return ContinuePropagation
+                    return PropagationAction.Continue
                 })
             )
             dp.addUpdateHandler({
                 type: 'raw',
                 callback: (cl, upd) => {
                     log.push('(raw) received ' + upd._)
-                    return ContinuePropagation
+                    return PropagationAction.Continue
                 },
             })
 
@@ -58,7 +53,7 @@ describe('Dispatcher', () => {
             dp.onRawUpdate((cl, upd) => {
                 log.push('(no) received ' + upd._)
 
-                return ContinuePropagation
+                return PropagationAction.Continue
             })
 
             dp.onRawUpdate(
@@ -66,7 +61,7 @@ describe('Dispatcher', () => {
                 (cl, upd) => {
                     log.push('(true) received ' + upd._)
 
-                    return ContinuePropagation
+                    return PropagationAction.Continue
                 }
             )
 
@@ -75,7 +70,7 @@ describe('Dispatcher', () => {
                 (cl, upd) => {
                     log.push('(false) received ' + upd._)
 
-                    return ContinuePropagation
+                    return PropagationAction.Continue
                 }
             )
 
@@ -125,7 +120,7 @@ describe('Dispatcher', () => {
 
             dp.onRawUpdate((cl, upd) => {
                 log.push('(grp0) received ' + upd._)
-                return ContinuePropagation
+                return PropagationAction.Continue
             }, 0)
             dp.onRawUpdate((cl, upd) => {
                 log.push('(grp0 2) received ' + upd._)
@@ -157,7 +152,7 @@ describe('Dispatcher', () => {
 
             dp.onRawUpdate((cl, upd) => {
                 log.push('(grp0) received ' + upd._)
-                return ContinuePropagation
+                return PropagationAction.Continue
             }, 0)
             dp.onRawUpdate((cl, upd) => {
                 log.push('(grp0 2) received ' + upd._)
@@ -165,7 +160,7 @@ describe('Dispatcher', () => {
             dp.onRawUpdate((cl, upd) => {
                 log.push('(grp1) received ' + upd._)
 
-                return StopPropagation
+                return PropagationAction.Continue
             }, 1)
             dp.onRawUpdate((cl, upd) => {
                 log.push('(grp1 2) received ' + upd._)
@@ -217,12 +212,12 @@ describe('Dispatcher', () => {
 
             dp.onRawUpdate((cl, upd) => {
                 log.push('(parent 0) received ' + upd._)
-                return ContinuePropagation
+                return PropagationAction.Continue
             }, 0)
 
             dp.onRawUpdate((cl, upd) => {
                 log.push('(parent 1) received ' + upd._)
-                return StopPropagation
+                return PropagationAction.Stop
             }, 1)
 
             dp.onRawUpdate((cl, upd) => {
@@ -231,12 +226,12 @@ describe('Dispatcher', () => {
 
             child.onRawUpdate((cl, upd) => {
                 log.push('(child 0) received ' + upd._)
-                return ContinuePropagation
+                return PropagationAction.Continue
             }, 0)
 
             child.onRawUpdate((cl, upd) => {
                 log.push('(child 1) received ' + upd._)
-                return StopPropagation
+                return PropagationAction.Stop
             }, 1)
 
             child.onRawUpdate((cl, upd) => {

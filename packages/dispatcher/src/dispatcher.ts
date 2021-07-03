@@ -27,7 +27,7 @@ import {
     UserTypingHandler,
 } from './handler'
 // end-codegen-imports
-import { UpdateInfoForError } from './handler'
+import { UpdateInfo } from './handler'
 import { filters, UpdateFilter } from './filters'
 import { handlers } from './builders'
 import { ChatMemberUpdate } from './updates'
@@ -165,13 +165,22 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
     private _handlersCount: Record<string, number> = {}
 
-    private _errorHandler?: <
-        T extends Exclude<UpdateHandler, RawUpdateHandler>
-    >(
+    private _errorHandler?: <T = {}>(
         err: Error,
-        update: UpdateInfoForError<T>,
+        update: UpdateInfo<UpdateHandler> & T,
         state?: UpdateState<State, SceneName>
     ) => MaybeAsync<boolean>
+
+    private _preUpdateHandler?: <T = {}>(
+        update: UpdateInfo<UpdateHandler> & T,
+        state?: UpdateState<State, SceneName>
+    ) => MaybeAsync<PropagationAction | void>
+
+    private _postUpdateHandler?: <T = {}>(
+        handled: boolean,
+        update: UpdateInfo<UpdateHandler> & T,
+        state?: UpdateState<State, SceneName>
+    ) => MaybeAsync<void>
 
     /**
      * Create a new dispatcher, that will be used as a child,
@@ -284,12 +293,13 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param update  Update to process
      * @param users  Map of users
      * @param chats  Map of chats
+     * @returns  Whether the update was handled
      */
     async dispatchUpdateNow(
         update: tl.TypeUpdate | tl.TypeMessage,
         users: UsersIndex,
         chats: ChatsIndex
-    ): Promise<void> {
+    ): Promise<boolean> {
         return this._dispatchUpdateNowImpl(update, users, chats)
     }
 
@@ -303,8 +313,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         parsedState?: UpdateState<State, SceneName> | null,
         parsedScene?: string | null,
         forceScene?: true
-    ): Promise<void> {
-        if (!this._client) return
+    ): Promise<boolean> {
+        if (!this._client) return false
 
         const isRawMessage = update && tl.isAnyMessage(update)
 
@@ -342,11 +352,11 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             if (this._scene) {
                 if (this._scene !== parsedScene)
                     // should not happen, but just in case
-                    return
+                    return false
             } else {
                 if (!this._scenes || !(parsedScene in this._scenes))
                     // not registered scene
-                    return
+                    return false
 
                 return this._scenes[parsedScene]._dispatchUpdateNowImpl(
                     update,
@@ -392,64 +402,50 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             }
         }
 
-        outer: for (const grp of this._groupsOrder) {
-            const group = this._groups[grp]
+        let shouldDispatch = true
+        let shouldDispatchChildren = true
+        let wasHandled = false
 
-            if (update && !isRawMessage && 'raw' in group) {
-                const handlers = group['raw'] as RawUpdateHandler[]
+        const updateInfo = { type: parsedType, data: parsed }
+        switch (
+            await this._preUpdateHandler?.(
+                updateInfo as any,
+                parsedState as any
+            )
+        ) {
+            case 'stop':
+                shouldDispatch = false
+                break
+            case 'stop-children':
+                return false
+        }
 
-                for (const h of handlers) {
-                    let result: void | PropagationAction
+        if (shouldDispatch) {
+            outer: for (const grp of this._groupsOrder) {
+                const group = this._groups[grp]
 
-                    if (
-                        !h.check ||
-                        (await h.check(
-                            this._client,
-                            update as any,
-                            users!,
-                            chats!
-                        ))
-                    ) {
-                        result = await h.callback(
-                            this._client,
-                            update as any,
-                            users!,
-                            chats!
-                        )
-                    } else continue
+                if (update && !isRawMessage && 'raw' in group) {
+                    const handlers = group['raw'] as RawUpdateHandler[]
 
-                    switch (result) {
-                        case 'continue':
-                            continue
-                        case 'stop':
-                            break outer
-                        case 'stop-children':
-                            return
-                    }
-
-                    break
-                }
-            }
-
-            if (parsedType && parsedType in group) {
-                // raw is not handled here, so we can safely assume this
-                const handlers = group[parsedType] as Exclude<
-                    UpdateHandler,
-                    RawUpdateHandler
-                >[]
-
-                try {
                     for (const h of handlers) {
                         let result: void | PropagationAction
 
                         if (
                             !h.check ||
-                            (await h.check(parsed, parsedState as never))
+                            (await h.check(
+                                this._client,
+                                update as any,
+                                users!,
+                                chats!
+                            ))
                         ) {
                             result = await h.callback(
-                                parsed,
-                                parsedState as never
+                                this._client,
+                                update as any,
+                                users!,
+                                chats!
                             )
+                            wasHandled = true
                         } else continue
 
                         switch (result) {
@@ -458,61 +454,109 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                             case 'stop':
                                 break outer
                             case 'stop-children':
-                                return
-                            case 'scene': {
-                                if (!parsedState)
-                                    throw new MtCuteArgumentError(
-                                        'Cannot use ToScene without state'
-                                    )
-
-                                const scene = parsedState['_scene']
-
-                                if (!scene)
-                                    throw new MtCuteArgumentError(
-                                        'Cannot use ToScene without entering a scene'
-                                    )
-
-                                return this._scenes[
-                                    scene
-                                ]._dispatchUpdateNowImpl(
-                                    update,
-                                    users,
-                                    chats,
-                                    parsed,
-                                    parsedType,
-                                    undefined,
-                                    scene,
-                                    true
-                                )
-                            }
+                                shouldDispatchChildren = false
+                                break outer
                         }
 
                         break
                     }
-                } catch (e) {
-                    if (this._errorHandler) {
-                        const handled = await this._errorHandler(
-                            e,
-                            { type: parsedType, data: parsed },
-                            parsedState as never
-                        )
-                        if (!handled) throw e
-                    } else {
-                        throw e
+                }
+
+                if (parsedType && parsedType in group) {
+                    // raw is not handled here, so we can safely assume this
+                    const handlers = group[parsedType] as Exclude<
+                        UpdateHandler,
+                        RawUpdateHandler
+                    >[]
+
+                    try {
+                        for (const h of handlers) {
+                            let result: void | PropagationAction
+
+                            if (
+                                !h.check ||
+                                (await h.check(parsed, parsedState as never))
+                            ) {
+                                result = await h.callback(
+                                    parsed,
+                                    parsedState as never
+                                )
+                                wasHandled = true
+                            } else continue
+
+                            switch (result) {
+                                case 'continue':
+                                    continue
+                                case 'stop':
+                                    break outer
+                                case 'stop-children':
+                                    shouldDispatchChildren = false
+                                    break outer
+                                case 'scene': {
+                                    if (!parsedState)
+                                        throw new MtCuteArgumentError(
+                                            'Cannot use ToScene without state'
+                                        )
+
+                                    const scene = parsedState['_scene']
+
+                                    if (!scene)
+                                        throw new MtCuteArgumentError(
+                                            'Cannot use ToScene without entering a scene'
+                                        )
+
+                                    return this._scenes[
+                                        scene
+                                    ]._dispatchUpdateNowImpl(
+                                        update,
+                                        users,
+                                        chats,
+                                        parsed,
+                                        parsedType,
+                                        undefined,
+                                        scene,
+                                        true
+                                    )
+                                }
+                            }
+
+                            break
+                        }
+                    } catch (e) {
+                        if (this._errorHandler) {
+                            const handled = await this._errorHandler(
+                                e,
+                                updateInfo as any,
+                                parsedState as never
+                            )
+                            if (!handled) throw e
+                        } else {
+                            throw e
+                        }
                     }
                 }
             }
         }
 
-        for (const child of this._children) {
-            await child._dispatchUpdateNowImpl(
-                update,
-                users,
-                chats,
-                parsed,
-                parsedType
-            )
+        if (shouldDispatchChildren) {
+            for (const child of this._children) {
+                wasHandled ||= await child._dispatchUpdateNowImpl(
+                    update,
+                    users,
+                    chats,
+                    parsed,
+                    parsedType
+                )
+            }
         }
+
+        this._postUpdateHandler?.(
+            wasHandled,
+            updateInfo as any,
+            parsedState as any
+        )
+
+        return wasHandled
     }
 
     /**
@@ -611,11 +655,11 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  Error handler
      */
-    onError(
+    onError<T = {}>(
         handler:
             | ((
                   err: Error,
-                  update: UpdateInfoForError<UpdateHandler>,
+                  update: UpdateInfo<UpdateHandler> & T,
                   state?: UpdateState<State, SceneName>
               ) => MaybeAsync<boolean>)
             | null
@@ -625,12 +669,61 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     }
 
     /**
+     * Register pre-update middleware.
+     *
+     * This is used locally within this dispatcher
+     * (does not affect children/parent) before processing
+     * an update, and can be used to skip this update.
+     *
+     * There can be at most one pre-update middleware.
+     * Pass `null` to remove it.
+     *
+     * @param handler  Pre-update middleware
+     */
+    onPreUpdate<T = {}>(
+        handler:
+            | ((
+                  update: UpdateInfo<UpdateHandler> & T,
+                  state?: UpdateState<State, SceneName>
+              ) => MaybeAsync<PropagationAction | void>)
+            | null
+    ): void {
+        if (handler) this._preUpdateHandler = handler
+        else this._preUpdateHandler = undefined
+    }
+
+    /**
+     * Register post-update middleware.
+     *
+     * This is used locally within this dispatcher
+     * (does not affect children/parent) after successfully
+     * processing an update, and can be used for stats.
+     *
+     * There can be at most one post-update middleware.
+     * Pass `null` to remove it.
+     *
+     * @param handler  Pre-update middleware
+     */
+    onPostUpdate<T = {}>(
+        handler:
+            | ((
+                  handled: boolean,
+                  update: UpdateInfo<UpdateHandler> & T,
+                  state?: UpdateState<State, SceneName>
+              ) => MaybeAsync<void>)
+            | null
+    ): void {
+        if (handler) this._postUpdateHandler = handler
+        else this._postUpdateHandler = undefined
+    }
+
+    /**
      * Set error handler that will propagate
      * the error to the parent dispatcher
      */
     propagateErrorToParent<T extends Exclude<UpdateHandler, RawUpdateHandler>>(
         err: Error,
-        update: UpdateInfoForError<T>,
+        update: UpdateInfo<T>,
         state?: UpdateState<State, SceneName>
     ): MaybeAsync<boolean> {
         if (!this.parent)
