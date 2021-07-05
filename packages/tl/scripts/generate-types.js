@@ -170,9 +170,9 @@ const writeSingleSchemaEntry = (type) => {
                     if (arg.description) ts.comment(arg.description)
 
                     ts.write(
-                        `readonly ${arg.name}${arg.optional}: ${fullTypeName(
-                            arg.type
-                        )};`
+                        `readonly ${arg.name}${
+                            arg.optional ? '?' : ''
+                        }: ${fullTypeName(arg.type)};`
                     )
                 })
             }
