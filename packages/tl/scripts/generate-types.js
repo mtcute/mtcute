@@ -170,12 +170,9 @@ const writeSingleSchemaEntry = (type) => {
                     if (arg.description) ts.comment(arg.description)
 
                     ts.write(
-                        `readonly ${arg.name}${
-                            arg.optional ||
-                            (arg.name === 'randomId' && arg.type === 'Long')
-                                ? '?'
-                                : ''
-                        }: ${fullTypeName(arg.type)};`
+                        `readonly ${arg.name}${arg.optional}: ${fullTypeName(
+                            arg.type
+                        )};`
                     )
                 })
             }
@@ -228,7 +225,8 @@ const writeSingleSchemaEntry = (type) => {
             )} = function (obj) {
     switch (obj._) {
     ${union.subtypes
-        .map((typ) => `case '${prefix_}${typ}':`).join('')}return true;
+        .map((typ) => `case '${prefix_}${typ}':`)
+        .join('')}return true;
     }
     return false;
 };`)
