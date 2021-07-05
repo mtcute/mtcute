@@ -6,6 +6,7 @@ import { MtCuteArgumentError } from '../errors'
 import { BasicPeerType, getBasicPeerType, getMarkedPeerId } from '@mtcute/core'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
 import { User, UsersIndex } from '../peers'
+import { MessageNotFoundError } from '@mtcute/core'
 
 /**
  * An incoming callback query, originated from a callback button
@@ -179,6 +180,9 @@ export class CallbackQuery {
     /**
      * Message that contained the callback button that was clicked.
      *
+     * Note that the message may have been deleted, in which case
+     * `MessageNotFoundError` is thrown.
+     *
      * Can only be used if `isInline = false`
      */
     async getMessage(): Promise<Message> {
@@ -187,10 +191,13 @@ export class CallbackQuery {
                 'Cannot get a message for inline callback'
             )
 
-        return this.client.getMessages(
+        const msg = await this.client.getMessages(
             getMarkedPeerId(this.raw.peer),
             this.raw.msgId
         )
+        if (!msg) throw new MessageNotFoundError()
+
+        return msg
     }
 
     /**

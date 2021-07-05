@@ -4,7 +4,6 @@ import { BotKeyboard, ReplyMarkup } from '../bots'
 import { getMarkedPeerId, MAX_CHANNEL_ID } from '@mtcute/core'
 import {
     MtCuteArgumentError,
-    MtCuteEmptyError,
     MtCuteTypeAssertionError,
 } from '../errors'
 import { TelegramClient } from '../../client'
@@ -534,13 +533,18 @@ export class Message {
     /**
      * For replies, fetch the message that is being replied.
      *
-     * @throws MtCuteArgumentError  In case the message is not a reply
+     * Note that even if a message has {@link replyToMessageId},
+     * the message itself may have been deleted, in which case
+     * this method will also return `null`.
      */
-    getReplyTo(): Promise<Message> {
+    getReplyTo(): Promise<Message | null> {
         if (!this.replyToMessageId)
-            throw new MtCuteArgumentError('This message is not a reply!')
+            return Promise.resolve(null)
 
-        return this.client.getMessages(this.chat.inputPeer, this.id, true)
+        if (this.raw.peerId._ === 'peerChannel')
+            return this.client.getMessages(this.chat.inputPeer, this.id, true)
+
+        return this.client.getMessagesUnsafe(this.id, true)
     }
 
     /**

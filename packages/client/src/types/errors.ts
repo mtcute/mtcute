@@ -69,7 +69,8 @@ export class MtCuteInvalidPeerTypeError extends MtCuteError {
 }
 
 /**
- * Trying to access to some property on an "empty" object.
+ * Trying to access to some property on an object that does not
+ * contain that information.
  */
 export class MtCuteEmptyError extends MtCuteError {
     constructor() {

@@ -97,6 +97,7 @@ import { forwardMessages } from './methods/messages/forward-messages'
 import { _getDiscussionMessage } from './methods/messages/get-discussion-message'
 import { getHistory } from './methods/messages/get-history'
 import { getMessageGroup } from './methods/messages/get-message-group'
+import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe'
 import { getMessages } from './methods/messages/get-messages'
 import { iterHistory } from './methods/messages/iter-history'
 import { _normalizeInline } from './methods/messages/normalize-inline'
@@ -2101,9 +2102,42 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getMessageGroup(chatId: InputPeerLike, message: number): Promise<Message[]>
     /**
-     * Get a single message in chat by its ID
+     * Get a single message from PM or legacy group by its ID.
+     * For channels, use {@link getMessages}.
      *
-     * **Note**: this method might return empty message
+     * Unlike {@link getMessages}, this method does not
+     * check if the message belongs to some chat.
+     *
+     * @param messageId  Messages ID
+     * @param [fromReply=false]
+     *     Whether the reply to a given message should be fetched
+     *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
+     */
+    getMessagesUnsafe(
+        messageId: number,
+        fromReply?: boolean
+    ): Promise<Message | null>
+    /**
+     * Get messages from PM or legacy group by their IDs.
+     * For channels, use {@link getMessages}.
+     *
+     * Unlike {@link getMessages}, this method does not
+     * check if the message belongs to some chat.
+     *
+     * Fot messages that were not found, `null` will be
+     * returned at that position.
+     *
+     * @param messageIds  Messages IDs
+     * @param [fromReply=false]
+     *     Whether the reply to a given message should be fetched
+     *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
+     */
+    getMessagesUnsafe(
+        messageIds: number[],
+        fromReply?: boolean
+    ): Promise<(Message | null)[]>
+    /**
+     * Get a single message in chat by its ID
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
      * @param messageId  Messages ID
@@ -2115,11 +2149,12 @@ export interface TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         messageId: number,
         fromReply?: boolean
-    ): Promise<Message>
+    ): Promise<Message | null>
     /**
      * Get messages in chat by their IDs
      *
-     * **Note**: this method might return empty messages
+     * Fot messages that were not found, `null` will be
+     * returned at that position.
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
      * @param messageIds  Messages IDs
@@ -2131,7 +2166,7 @@ export interface TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         messageIds: number[],
         fromReply?: boolean
-    ): Promise<Message[]>
+    ): Promise<(Message | null)[]>
     /**
      * Iterate through a chat history sequentially.
      *
@@ -2568,6 +2603,19 @@ export interface TelegramClient extends BaseTelegramClient {
              * Message to reply to. Either a message object or message ID.
              */
             replyTo?: number | Message
+
+            /**
+             * Whether to throw an error if {@link replyTo}
+             * message does not exist.
+             *
+             * If that message was not found, `NotFoundError` is thrown,
+             * with `text` set to `MESSAGE_NOT_FOUND`.
+             *
+             * Incurs an additional request, so only use when really needed.
+             *
+             * Defaults to `false`
+             */
+            mustReply?: boolean
 
             /**
              * Message to comment to. Either a message object or message ID.
@@ -3321,6 +3369,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _getDiscussionMessage = _getDiscussionMessage
     getHistory = getHistory
     getMessageGroup = getMessageGroup
+    getMessagesUnsafe = getMessagesUnsafe
     getMessages = getMessages
     iterHistory = iterHistory
     protected _normalizeInline = _normalizeInline

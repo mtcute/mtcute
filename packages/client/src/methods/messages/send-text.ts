@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { inputPeerToPeer, normalizeToInputUser } from '../../utils/peer-utils'
+import { inputPeerToPeer } from '../../utils/peer-utils'
 import {
     normalizeDate,
     normalizeMessageId,
@@ -14,8 +14,9 @@ import {
     UsersIndex,
     MtCuteTypeAssertionError,
     ChatsIndex,
+    MtCuteArgumentError,
 } from '../../types'
-import { getMarkedPeerId } from '@mtcute/core'
+import { getMarkedPeerId, MessageNotFoundError } from '@mtcute/core'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
@@ -35,6 +36,19 @@ export async function sendText(
          * Message to reply to. Either a message object or message ID.
          */
         replyTo?: number | Message
+
+        /**
+         * Whether to throw an error if {@link replyTo}
+         * message does not exist.
+         *
+         * If that message was not found, `NotFoundError` is thrown,
+         * with `text` set to `MESSAGE_NOT_FOUND`.
+         *
+         * Incurs an additional request, so only use when really needed.
+         *
+         * Defaults to `false`
+         */
+        mustReply?: boolean
 
         /**
          * Message to comment to. Either a message object or message ID.
@@ -111,6 +125,18 @@ export async function sendText(
         )
     }
 
+    if (params.mustReply) {
+        if (!replyTo)
+            throw new MtCuteArgumentError(
+                'mustReply used, but replyTo was not passed'
+            )
+
+        const msg = await this.getMessages(peer, replyTo)
+
+        if (!msg)
+            throw new MessageNotFoundError()
+    }
+
     const res = await this.call({
         _: 'messages.sendMessage',
         peer,
@@ -124,6 +150,9 @@ export async function sendText(
         entities,
         clearDraft: params.clearDraft,
     })
+    // } catch (e) {
+    //
+    // }
 
     if (res._ === 'updateShortSentMessage') {
         const msg: tl.RawMessage = {
@@ -157,7 +186,7 @@ export async function sendText(
                         // we need to do it manually
                         cached = await this.call({
                             _: 'messages.getChats',
-                            id: [peer.chatId]
+                            id: [peer.chatId],
                         }).then((res) => res.chats[0])
                         break
                     default:

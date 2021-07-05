@@ -1,5 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtCuteArgumentError, Message } from '../../types'
+import { isInputPeerChannel } from '../../utils/peer-utils'
 
 /**
  * Get all messages inside of a message group
@@ -15,16 +16,25 @@ export async function getMessageGroup(
 ): Promise<Message[]> {
     // awesome hack stolen from pyrogram
     // groups have no more than 10 items
+    // however, since for non-channels message ids are shared,
+    // we use larger number.
+    // still, this might not be enough :shrug:
+
+    const peer = await this.resolvePeer(chatId)
+
+    const delta = isInputPeerChannel(peer) ? 9 : 19
 
     const ids: number[] = []
-    for (let i = Math.max(message - 9, 0); i <= message + 9; i++) {
+    for (let i = Math.max(message - delta, 0); i <= message + delta; i++) {
         ids.push(i)
     }
 
     const messages = await this.getMessages(chatId, ids)
-    const groupedId = messages.find((it) => it.id === message)!.groupedId
+    const groupedId = messages.find((it) => it?.id === message)!.groupedId
 
     if (!groupedId) throw new MtCuteArgumentError('This message is not grouped')
 
-    return messages.filter((it) => it.groupedId?.eq(groupedId))
+    return messages.filter(
+        (it) => it && it.groupedId?.eq(groupedId)
+    ) as Message[]
 }

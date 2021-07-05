@@ -84,6 +84,12 @@ const customErrors = [
         name: 'RPC_TIMEOUT',
         codes: '408',
         description: 'Timeout of {ms} ms exceeded',
+    },
+    {
+        virtual: true,
+        name: 'MESSAGE_NOT_FOUND',
+        codes: '404',
+        description: 'Message was not found'
     }
 ]
 

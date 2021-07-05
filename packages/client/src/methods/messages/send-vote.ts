@@ -5,7 +5,7 @@ import {
     MtCuteTypeAssertionError,
     Poll,
 } from '../../types'
-import { MaybeArray } from '@mtcute/core'
+import { MaybeArray, MessageNotFoundError } from '@mtcute/core'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
@@ -36,6 +36,9 @@ export async function sendVote(
     let poll: Poll | undefined = undefined
     if (options.some((it) => typeof it === 'number')) {
         const msg = await this.getMessages(peer, message)
+
+        if (!msg) throw new MessageNotFoundError()
+
         if (!(msg.media instanceof Poll))
             throw new MtCuteArgumentError(
                 'This message does not contain a poll'

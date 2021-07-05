@@ -11,8 +11,6 @@ import { Message, InputPeerLike, MtCuteTypeAssertionError } from '../../types'
 /**
  * Get a single message in chat by its ID
  *
- * **Note**: this method might return empty message
- *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
  * @param messageId  Messages ID
  * @param [fromReply=false]
@@ -25,11 +23,12 @@ export async function getMessages(
     chatId: InputPeerLike,
     messageId: number,
     fromReply?: boolean
-): Promise<Message>
+): Promise<Message | null>
 /**
  * Get messages in chat by their IDs
  *
- * **Note**: this method might return empty messages
+ * Fot messages that were not found, `null` will be
+ * returned at that position.
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
  * @param messageIds  Messages IDs
@@ -43,7 +42,7 @@ export async function getMessages(
     chatId: InputPeerLike,
     messageIds: number[],
     fromReply?: boolean
-): Promise<Message[]>
+): Promise<(Message | null)[]>
 
 /** @internal */
 export async function getMessages(
@@ -51,7 +50,7 @@ export async function getMessages(
     chatId: InputPeerLike,
     messageIds: MaybeArray<number>,
     fromReply = false
-): Promise<MaybeArray<Message>> {
+): Promise<MaybeArray<Message | null>> {
     const peer = await this.resolvePeer(chatId)
 
     const isSingle = !Array.isArray(messageIds)
@@ -63,12 +62,14 @@ export async function getMessages(
         id: it,
     }))
 
+    const isChannel = isInputPeerChannel(peer)
+
     const res = await this.call(
-        isInputPeerChannel(peer)
+        isChannel
             ? {
                   _: 'channels.getMessages',
                   id: ids,
-                  channel: normalizeToInputChannel(peer),
+                  channel: normalizeToInputChannel(peer)!,
               }
             : {
                   _: 'messages.getMessages',
@@ -85,9 +86,31 @@ export async function getMessages(
 
     const { users, chats } = createUsersChatsIndex(res)
 
-    const ret = res.messages
-        .filter((msg) => msg._ !== 'messageEmpty')
-        .map((msg) => new Message(this, msg, users, chats))
+    const ret = res.messages.map((msg) => {
+        if (msg._ === 'messageEmpty') return null
+
+        if (!isChannel) {
+            // make sure that the messages belong to the given chat
+            // (channels have their own message numbering)
+            switch (peer._) {
+                case 'inputPeerSelf':
+                    if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === this._userId))
+                        return null
+                    break;
+                case 'inputPeerUser':
+                case 'inputPeerUserFromMessage':
+                    if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === peer.userId))
+                        return null
+                    break;
+                case 'inputPeerChat':
+                    if (!(msg.peerId._ === 'peerChat' && msg.peerId.chatId === peer.chatId))
+                        return null
+                    break;
+            }
+        }
+
+        return new Message(this, msg, users, chats)
+    })
 
     return isSingle ? ret[0] : ret
 }

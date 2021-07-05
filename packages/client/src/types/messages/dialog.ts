@@ -4,8 +4,7 @@ import { Chat, ChatsIndex, UsersIndex } from '../peers'
 import { Message } from './message'
 import { DraftMessage } from './draft-message'
 import { makeInspectable } from '../utils'
-import { getMarkedPeerId } from '@mtcute/core'
-import { MtCuteEmptyError } from '../errors'
+import { getMarkedPeerId, MessageNotFoundError } from '@mtcute/core'
 
 /**
  * A dialog.
@@ -191,6 +190,8 @@ export class Dialog {
     private _lastMessage?: Message
     /**
      * The latest message sent in this chat
+     *
+     * Throws `MessageNotFoundError` if it was not found
      */
     get lastMessage(): Message {
         if (!this._lastMessage) {
@@ -203,7 +204,7 @@ export class Dialog {
                     this._chats
                 )
             } else {
-                throw new MtCuteEmptyError()
+                throw new MessageNotFoundError()
             }
         }
 
