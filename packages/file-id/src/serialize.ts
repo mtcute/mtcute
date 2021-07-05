@@ -88,7 +88,7 @@ export function toFileId(
                     writer.int32(loc.source.localId)
                     break
                 case 'stickerSetThumbnailVersion':
-                    writer.int32(8)
+                    writer.int32(9)
                     writer.long(loc.source.id)
                     writer.long(loc.source.accessHash)
                     writer.int32(loc.source.version)
