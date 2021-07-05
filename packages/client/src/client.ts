@@ -147,6 +147,7 @@ import { blockUser } from './methods/users/block-user'
 import { deleteProfilePhotos } from './methods/users/delete-profile-photos'
 import { getCommonChats } from './methods/users/get-common-chats'
 import { getMe } from './methods/users/get-me'
+import { getMyUsername } from './methods/users/get-my-username'
 import { getProfilePhotos } from './methods/users/get-profile-photos'
 import { getUsers } from './methods/users/get-users'
 import { iterProfilePhotos } from './methods/users/iter-profile-photos'
@@ -230,10 +231,9 @@ export interface TelegramClient extends BaseTelegramClient {
      * When you log out, you can immediately log back in using
      * the same {@link TelegramClient} instance.
      *
-     * @param resetSession  (default: `false`) Whether to reset the session
      * @returns  On success, `true` is returned
      */
-    logOut(resetSession?: boolean): Promise<true>
+    logOut(): Promise<true>
     /**
      * Recover your password with a recovery code and log in.
      *
@@ -3006,6 +3006,14 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getMe(): Promise<User>
     /**
+     * Get currently authorized user's username.
+     *
+     * This method uses locally available information and
+     * does not call any API methods.
+     *
+     */
+    getMyUsername(): string | null
+    /**
      * Get a list of profile pictures of a user
      *
      * @param userId  User ID, username, phone number, `"me"` or `"self"`
@@ -3177,7 +3185,7 @@ export interface TelegramClient extends BaseTelegramClient {
 export class TelegramClient extends BaseTelegramClient {
     protected _userId: number | null
     protected _isBot: boolean
-    protected _botUsername: string | null
+    protected _selfUsername: string | null
     protected _downloadConnections: Record<number, TelegramConnection>
     protected _connectionsForInline: Record<number, TelegramConnection>
     protected _parseModes: Record<string, IMessageEntityParser>
@@ -3197,7 +3205,7 @@ export class TelegramClient extends BaseTelegramClient {
         super(opts)
         this._userId = null
         this._isBot = false
-        this._botUsername = null
+        this._selfUsername = null
         this._downloadConnections = {}
         this._connectionsForInline = {}
         this._parseModes = {}
@@ -3357,6 +3365,7 @@ export class TelegramClient extends BaseTelegramClient {
     deleteProfilePhotos = deleteProfilePhotos
     getCommonChats = getCommonChats
     getMe = getMe
+    getMyUsername = getMyUsername
     getProfilePhotos = getProfilePhotos
     getUsers = getUsers
     iterProfilePhotos = iterProfilePhotos

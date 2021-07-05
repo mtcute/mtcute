@@ -9,13 +9,17 @@ import { assertTypeIs } from '../../utils/type-assertion'
  */
 export function getMe(this: TelegramClient): Promise<User> {
     return this.call({
-        _: 'users.getFullUser',
-        id: {
-            _: 'inputUserSelf',
-        },
-    }).then((res) => {
-        assertTypeIs('getMe (@ users.getFullUser -> user)', res.user, 'user')
+        _: 'users.getUsers',
+        id: [
+            {
+                _: 'inputUserSelf',
+            },
+        ],
+    }).then(([user]) => {
+        assertTypeIs('getMe (@ users.getUsers)', user, 'user')
 
-        return new User(this, res.user)
+        this._selfUsername = user.username ?? null
+
+        return new User(this, user)
     })
 }

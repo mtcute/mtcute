@@ -6,24 +6,21 @@ import { TelegramClient } from '../../client'
  * When you log out, you can immediately log back in using
  * the same {@link TelegramClient} instance.
  *
- * @param resetSession  Whether to reset the session
  * @returns  On success, `true` is returned
  * @internal
  */
 export async function logOut(
-    this: TelegramClient,
-    resetSession = false
+    this: TelegramClient
 ): Promise<true> {
     await this.call({ _: 'auth.logOut' })
 
-    if (resetSession) {
-        this._userId = null
-        this._isBot = false
-        this._pts = this._seq = this._date = undefined as any
-        this._selfChanged = true
-        this.storage.reset()
-        await this._saveStorage()
-    }
+    this._userId = null
+    this._isBot = false
+    this._pts = this._seq = this._date = undefined as any
+    this._selfUsername = null
+    this._selfChanged = true
+    this.storage.reset()
+    await this._saveStorage()
 
     return true
 }

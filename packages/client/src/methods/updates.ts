@@ -755,6 +755,8 @@ export function _handleUpdate(
                             upd.dcOptions
                     } else if (upd._ === 'updateConfig') {
                         this._config = await this.call({ _: 'help.getConfig' })
+                    } else if (upd._ === 'updateUserName' && upd.userId === this._userId) {
+                        this._selfUsername = upd.username || null
                     } else {
                         if (!noDispatch) {
                             const peers = await _fetchPeersForShort.call(

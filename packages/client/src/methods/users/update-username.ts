@@ -21,5 +21,7 @@ export async function updateUsername(
         username,
     })
 
+    this._selfUsername = username || null
+
     return new User(this, res)
 }

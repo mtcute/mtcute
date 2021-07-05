@@ -859,16 +859,7 @@ export namespace filters {
                     const lastGroup = m[m.length - 1]
                     if (lastGroup && msg.client['_isBot']) {
                         // check bot username
-                        if (!msg.client['_botUsername']) {
-                            // need to fetch it first
-
-                            return msg.client.getUsers('self').then((self) => {
-                                msg.client['_botUsername'] = self.username!
-                                return check(msg)
-                            })
-                        }
-
-                        if (lastGroup !== msg.client['_botUsername']) return false
+                        if (lastGroup !== msg.client['_selfUsername']) return false
                     }
 
                     const match = m.slice(1, -1)

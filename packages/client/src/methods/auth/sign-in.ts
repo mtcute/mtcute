@@ -44,6 +44,7 @@ export async function signIn(
     this._userId = res.user.id
     this._isBot = false
     this._selfChanged = true
+    this._selfUsername = res.user.username ?? null
     await this._fetchUpdatesState()
     await this._saveStorage()
 
