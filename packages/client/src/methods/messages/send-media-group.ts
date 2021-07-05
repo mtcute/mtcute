@@ -3,7 +3,7 @@ import {
     BotKeyboard, InputFileLike,
     InputMediaLike,
     InputPeerLike,
-    Message,
+    Message, MtCuteArgumentError,
     ReplyMarkup,
 } from '../../types'
 import {
@@ -14,6 +14,7 @@ import {
 import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
+import { MessageNotFoundError } from '@mtcute/tl/errors'
 
 /**
  * Send a group of media.
@@ -36,6 +37,19 @@ export async function sendMediaGroup(
          * Message to reply to. Either a message object or message ID.
          */
         replyTo?: number | Message
+
+        /**
+         * Whether to throw an error if {@link replyTo}
+         * message does not exist.
+         *
+         * If that message was not found, `NotFoundError` is thrown,
+         * with `text` set to `MESSAGE_NOT_FOUND`.
+         *
+         * Incurs an additional request, so only use when really needed.
+         *
+         * Defaults to `false`
+         */
+        mustReply?: boolean
 
         /**
          * Message to comment to. Either a message object or message ID.
@@ -106,6 +120,18 @@ export async function sendMediaGroup(
             peer,
             normalizeMessageId(params.commentTo)!
         )
+    }
+
+    if (params.mustReply) {
+        if (!replyTo)
+            throw new MtCuteArgumentError(
+                'mustReply used, but replyTo was not passed'
+            )
+
+        const msg = await this.getMessages(peer, replyTo)
+
+        if (!msg)
+            throw new MessageNotFoundError()
     }
 
     const multiMedia: tl.RawInputSingleMedia[] = []

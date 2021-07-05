@@ -3,7 +3,7 @@ import {
     BotKeyboard,
     InputMediaLike,
     InputPeerLike,
-    Message,
+    Message, MtCuteArgumentError,
     ReplyMarkup,
 } from '../../types'
 import {
@@ -12,6 +12,7 @@ import {
     randomUlong,
 } from '../../utils/misc-utils'
 import { tl } from '@mtcute/tl'
+import { MessageNotFoundError } from '@mtcute/tl/errors'
 
 /**
  * Send a single media (a photo or a document-based media)
@@ -50,6 +51,19 @@ export async function sendMedia(
          * Message to reply to. Either a message object or message ID.
          */
         replyTo?: number | Message
+
+        /**
+         * Whether to throw an error if {@link replyTo}
+         * message does not exist.
+         *
+         * If that message was not found, `NotFoundError` is thrown,
+         * with `text` set to `MESSAGE_NOT_FOUND`.
+         *
+         * Incurs an additional request, so only use when really needed.
+         *
+         * Defaults to `false`
+         */
+        mustReply?: boolean
 
         /**
          * Message to comment to. Either a message object or message ID.
@@ -133,6 +147,18 @@ export async function sendMedia(
             peer,
             normalizeMessageId(params.commentTo)!
         )
+    }
+
+    if (params.mustReply) {
+        if (!replyTo)
+            throw new MtCuteArgumentError(
+                'mustReply used, but replyTo was not passed'
+            )
+
+        const msg = await this.getMessages(peer, replyTo)
+
+        if (!msg)
+            throw new MessageNotFoundError()
     }
 
     const res = await this.call({

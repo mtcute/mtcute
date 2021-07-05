@@ -2400,6 +2400,19 @@ export interface TelegramClient extends BaseTelegramClient {
             replyTo?: number | Message
 
             /**
+             * Whether to throw an error if {@link replyTo}
+             * message does not exist.
+             *
+             * If that message was not found, `NotFoundError` is thrown,
+             * with `text` set to `MESSAGE_NOT_FOUND`.
+             *
+             * Incurs an additional request, so only use when really needed.
+             *
+             * Defaults to `false`
+             */
+            mustReply?: boolean
+
+            /**
              * List of formatting entities to use instead of parsing via a
              * parse mode.
              *
@@ -2440,6 +2453,19 @@ export interface TelegramClient extends BaseTelegramClient {
              * Message to reply to. Either a message object or message ID.
              */
             replyTo?: number | Message
+
+            /**
+             * Whether to throw an error if {@link replyTo}
+             * message does not exist.
+             *
+             * If that message was not found, `NotFoundError` is thrown,
+             * with `text` set to `MESSAGE_NOT_FOUND`.
+             *
+             * Incurs an additional request, so only use when really needed.
+             *
+             * Defaults to `false`
+             */
+            mustReply?: boolean
 
             /**
              * Message to comment to. Either a message object or message ID.
@@ -2534,6 +2560,19 @@ export interface TelegramClient extends BaseTelegramClient {
              * Message to reply to. Either a message object or message ID.
              */
             replyTo?: number | Message
+
+            /**
+             * Whether to throw an error if {@link replyTo}
+             * message does not exist.
+             *
+             * If that message was not found, `NotFoundError` is thrown,
+             * with `text` set to `MESSAGE_NOT_FOUND`.
+             *
+             * Incurs an additional request, so only use when really needed.
+             *
+             * Defaults to `false`
+             */
+            mustReply?: boolean
 
             /**
              * Message to comment to. Either a message object or message ID.
