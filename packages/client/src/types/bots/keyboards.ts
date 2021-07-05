@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+import { BotKeyboardBuilder } from './keyboard-builder'
 
 /**
  * Reply keyboard markup
@@ -57,6 +58,10 @@ export type ReplyMarkup =
  * > in the description.
  */
 export namespace BotKeyboard {
+    export function builder(maxRowWidth?: number | null): BotKeyboardBuilder {
+        return new BotKeyboardBuilder(maxRowWidth)
+    }
+
     /**
      * Create an inline keyboard markup
      *
