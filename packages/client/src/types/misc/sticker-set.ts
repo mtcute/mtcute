@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { makeInspectable } from '../utils'
-import { Sticker } from '../media'
+import { Sticker, Thumbnail } from '../media'
 import { MtCuteEmptyError, MtCuteTypeAssertionError } from '../errors'
 import { parseDocument } from '../media/document-utils'
 import { InputFileLike } from '../files'
@@ -173,6 +173,36 @@ export class StickerSet {
         }
 
         return this._stickers
+    }
+
+    private _thumbnails?: Thumbnail[]
+    /**
+     * Available stickerset thumbnails.
+     *
+     * Returns empty array if not available
+     * (i.e. first sticker should be used as thumbnail)
+     */
+    get thumbnails(): ReadonlyArray<Thumbnail> {
+        if (!this._thumbnails) {
+            this._thumbnails = this.brief.thumbs?.map(
+                (sz) => new Thumbnail(this.client, this.brief, sz)
+            ) ?? []
+        }
+
+        return this._thumbnails
+    }
+
+    /**
+     * Get a stickerset thumbnail by its type.
+     *
+     * Thumbnail types are described in the
+     * [Telegram docs](https://core.telegram.org/api/files#image-thumbnail-types),
+     * and are also available as static members of {@link Thumbnail} for convenience.
+     *
+     * @param type  Thumbnail type
+     */
+    getThumbnail(type: string): Thumbnail | null {
+        return this.thumbnails.find((it) => it.raw.type === type) ?? null
     }
 
     /**

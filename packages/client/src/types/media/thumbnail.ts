@@ -56,11 +56,11 @@ export class Thumbnail extends FileLocation {
     readonly height: number
 
     private _path?: string
-    private _media: tl.RawPhoto | tl.RawDocument
+    private _media: tl.RawPhoto | tl.RawDocument | tl.RawStickerSet
 
     constructor(
         client: TelegramClient,
-        media: tl.RawPhoto | tl.RawDocument,
+        media: tl.RawPhoto | tl.RawDocument | tl.RawStickerSet,
         sz: tl.TypePhotoSize
     ) {
         switch (sz._) {
@@ -91,15 +91,27 @@ export class Thumbnail extends FileLocation {
                 size = Infinity // this doesn't really matter
                 break
             default:
-                location = {
-                    _:
-                        media._ === 'photo'
-                            ? 'inputPhotoFileLocation'
-                            : 'inputDocumentFileLocation',
-                    id: media.id,
-                    fileReference: media.fileReference,
-                    accessHash: media.accessHash,
-                    thumbSize: sz.type,
+                if (media._ === 'stickerSet') {
+                    location = {
+                        _: 'inputStickerSetThumb',
+                        stickerset: {
+                            _: 'inputStickerSetID',
+                            id: media.id,
+                            accessHash: media.accessHash
+                        },
+                        thumbVersion: media.thumbVersion!
+                    }
+                } else {
+                    location = {
+                        _:
+                            media._ === 'photo'
+                                ? 'inputPhotoFileLocation'
+                                : 'inputDocumentFileLocation',
+                        id: media.id,
+                        fileReference: media.fileReference,
+                        accessHash: media.accessHash,
+                        thumbSize: sz.type,
+                    }
                 }
                 width = sz.w
                 height = sz.h
@@ -107,7 +119,12 @@ export class Thumbnail extends FileLocation {
                 break
         }
 
-        super(client, location, size, media.dcId)
+        super(
+            client,
+            location,
+            size,
+            media._ === 'stickerSet' ? media.thumbDcId : media.dcId
+        )
         this.raw = sz
         this.width = width
         this.height = height
@@ -157,24 +174,45 @@ export class Thumbnail extends FileLocation {
                 )
             }
 
-            this._fileId = toFileId({
-                type:
-                    this._media._ === 'photo'
-                        ? td.FileType.Photo
-                        : td.FileType.Thumbnail,
-                dcId: this.dcId,
-                fileReference: this._media.fileReference,
-                location: {
-                    _: 'photo',
-                    id: this._media.id,
-                    accessHash: this._media.accessHash,
-                    source: {
-                        _: 'thumbnail',
-                        fileType: td.FileType.Photo,
-                        thumbnailType: this.raw.type,
+            if (this._media._ === 'stickerSet') {
+                this._fileId = toFileId({
+                    type: td.FileType.Thumbnail,
+                    dcId: this.dcId,
+                    fileReference: null,
+                    location: {
+                        _: 'photo',
+                        id: bigInt.zero,
+                        accessHash: bigInt.zero,
+                        source: {
+                            _: 'stickerSetThumbnailVersion',
+                            id: this._media.id,
+                            accessHash: this._media.accessHash,
+                            version: this._media.thumbVersion!
+                        }
+                    }
+                })
+            } else {
+                this._fileId = toFileId({
+                    type:
+                        this._media._ === 'photo'
+                            ? td.FileType.Photo
+                            : td.FileType.Thumbnail,
+                    dcId: this.dcId,
+                    fileReference: this._media.fileReference,
+                    location: {
+                        _: 'photo',
+                        id: this._media.id,
+                        accessHash: this._media.accessHash,
+                        source: {
+                            _: 'thumbnail',
+                            fileType: this._media._ === 'photo'
+                                ? td.FileType.Photo
+                                : td.FileType.Thumbnail,
+                            thumbnailType: this.raw.type,
+                        },
                     },
-                },
-            })
+                })
+            }
         }
 
         return this._fileId
@@ -195,20 +233,35 @@ export class Thumbnail extends FileLocation {
                 )
             }
 
-            this._uniqueFileId = toUniqueFileId(
-                this._media._ === 'photo'
-                    ? td.FileType.Photo
-                    : td.FileType.Thumbnail,
-                {
+            if (this._media._ === 'stickerSet') {
+                this._uniqueFileId = toUniqueFileId(td.FileType.Thumbnail, {
                     _: 'photo',
-                    id: this._media.id,
+                    id: bigInt.zero,
                     source: {
-                        _: 'thumbnail',
-                        fileType: td.FileType.Photo,
-                        thumbnailType: this.raw.type,
-                    },
-                }
-            )
+                        _: 'stickerSetThumbnailVersion',
+                        id: this._media.id,
+                        accessHash: this._media.accessHash,
+                        version: this._media.thumbVersion!
+                    }
+                })
+            } else {
+                this._uniqueFileId = toUniqueFileId(
+                    this._media._ === 'photo'
+                        ? td.FileType.Photo
+                        : td.FileType.Thumbnail,
+                    {
+                        _: 'photo',
+                        id: this._media.id,
+                        source: {
+                            _: 'thumbnail',
+                            fileType: this._media._ === 'photo'
+                                ? td.FileType.Photo
+                                : td.FileType.Thumbnail,
+                            thumbnailType: this.raw.type,
+                        },
+                    }
+                )
+            }
         }
 
         return this._uniqueFileId
