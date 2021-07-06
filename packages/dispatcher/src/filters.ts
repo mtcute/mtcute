@@ -810,7 +810,7 @@ export namespace filters {
      * type-safe extension field `.commmand` of the {@link Message} object.
      * First element is the command itself, then the arguments.
      *
-     * If the matched command was a RegExp, the first element is the full
+     * If the matched command was a RegExp, the first element is the
      * command, then the groups from the command regex, then the arguments.
      *
      * @param commands  Command(s) the filter should look for (w/out prefix)
@@ -893,6 +893,52 @@ export namespace filters {
         chat('private'),
         command('start')
     )
+
+    /**
+     * Filter for deep links (i.e. `/start <deeplink_parameter>`).
+     *
+     * If the parameter is a regex, groups are added to `msg.command`,
+     * meaning that the first group is available in `msg.command[2]`.
+     */
+    export const deeplink = (params: MaybeArray<string | RegExp>): UpdateFilter<Message, { command: string[] }> => {
+        if (!Array.isArray(params)) {
+            return and(
+                start,
+                (msg: Message & { command: string[] }) => {
+                    if (msg.command.length !== 2) return false
+
+                    const p = msg.command[1]
+                    if (typeof params === 'string' && p === params) return true
+
+                    const m = p.match(params)
+                    if (!m) return false
+
+                    msg.command.push(...m.slice(1))
+                    return true
+                }
+            )
+        }
+
+        return and(
+            start,
+            (msg: Message & { command: string[] }) => {
+                if (msg.command.length !== 2) return false
+
+                const p = msg.command[1]
+                for (const param of params) {
+                    if (typeof param === 'string' && p === param) return true
+
+                    const m = p.match(param)
+                    if (!m) continue
+
+                    msg.command.push(...m.slice(1))
+                    return true
+                }
+
+                return false
+            }
+        )
+    }
 
     /**
      * Create a filter for {@link ChatMemberUpdate} by update type
