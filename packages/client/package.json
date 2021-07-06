@@ -13,7 +13,7 @@
     },
     "dependencies": {
         "@types/node": "^15.12.1",
-        "@mtcute/tl": "~1.130.0",
+        "@mtcute/tl": "~1.131.0",
         "@mtcute/core": "^1.0.0",
         "@mtcute/file-id": "^1.0.0",
         "eager-async-pool": "^1.0.0",
