@@ -10,5 +10,5 @@ git init
 git add --all . > nul 2> nul
 git commit -am deploy  > nul 2> nul
 
-git push -f https://github.com/teidesu/mtcute.git master:gh-pages
+git push -f https://github.com/teidesu/mtcute.git gh-pages
 cd ../
