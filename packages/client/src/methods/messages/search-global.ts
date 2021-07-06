@@ -53,7 +53,7 @@ export async function* searchGlobal(
     const total = params.limit || Infinity
     const limit = Math.min(params.chunkSize || 100, total)
 
-    let offsetDate = 0
+    let offsetRate = 0
     let offsetPeer = { _: 'inputPeerEmpty' } as tl.TypeInputPeer
     let offsetId = 0
 
@@ -65,7 +65,7 @@ export async function* searchGlobal(
             minDate: 0,
             maxDate: 0,
             offsetId,
-            offsetRate: offsetDate,
+            offsetRate,
             offsetPeer: offsetPeer,
             limit: Math.min(limit, total - current),
         })
@@ -86,7 +86,7 @@ export async function* searchGlobal(
         if (!msgs.length) break
 
         const last = msgs[msgs.length - 1]
-        offsetDate = last.raw.date
+        offsetRate = (res as tl.messages.RawMessagesSlice).nextRate ?? last.raw.date
         offsetPeer = last.chat.inputPeer
         offsetId = last.id
 
