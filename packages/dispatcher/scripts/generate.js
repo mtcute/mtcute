@@ -76,6 +76,8 @@ function toSentence(type, stype = 'inline') {
 
     if (stype === 'inline') {
         return `${name[0].match(/[aeiouy]/i) ? 'an' : 'a'} ${name} handler`
+    } else if (stype === 'plain') {
+        return `${name} handler`
     } else {
         return `${name[0].toUpperCase()}${name.substr(1)} handler`
     }
@@ -188,12 +190,23 @@ function generateBuilders() {
 
 function generateDispatcher() {
     const lines = []
+    const declareLines = []
     const imports = ['UpdateHandler']
 
     types.forEach((type) => {
         imports.push(`${type.handlerTypeName}Handler`)
 
         if (type.updateType === 'IGNORE') {
+            declareLines.push(`
+    /**
+     * Register a plain old ${toSentence(type, 'plain')}
+     *
+     * @param name  Event name
+     * @param handler  ${toSentence(type, 'full')}
+     */
+    on(name: '${type.typeName}', handler: ${type.handlerTypeName}Handler['callback']): this
+`)
+
             lines.push(`
     /**
      * Register ${toSentence(type)} without any filters
@@ -222,6 +235,16 @@ function generateDispatcher() {
     }
 `)
         } else {
+            declareLines.push(`
+    /**
+     * Register a plain old ${toSentence(type, 'plain')}
+     *
+     * @param name  Event name
+     * @param handler  ${toSentence(type, 'full')}
+     */
+    on(name: '${type.typeName}', handler: ${type.handlerTypeName}Handler['callback']): this
+
+`)
             lines.push(`
     /**
      * Register ${toSentence(type)} without any filters
@@ -269,6 +292,7 @@ ${type.state ? `
 
     replaceSections('dispatcher.ts', {
         codegen: lines.join('\n'),
+        'codegen-declare': declareLines.join('\n'),
         'codegen-imports':
             'import {\n' +
             imports.map((i) => `    ${i},\n`).join('') +

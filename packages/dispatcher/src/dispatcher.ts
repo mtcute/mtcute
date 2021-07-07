@@ -40,6 +40,7 @@ import { DeleteMessageUpdate } from './updates/delete-message-update'
 import { IStateStorage, UpdateState, StateKeyDelegate } from './state'
 import { defaultStateKeyDelegate } from './state'
 import { PropagationAction } from './propagation'
+import EventEmitter from 'events'
 
 const noop = () => {}
 
@@ -136,10 +137,126 @@ Object.keys(PARSERS).forEach((upd: keyof typeof PARSERS) => {
     HANDLER_TYPE_TO_UPDATE[handler].push(upd)
 })
 
+export declare interface Dispatcher<
+    State = never,
+    SceneName extends string = string
+> {
+    on<T = {}>(
+        name: 'update',
+        handler: (update: UpdateInfo<UpdateHandler> & T) => void
+    ): this
+
+    // begin-codegen-declare
+
+    /**
+     * Register a plain old raw update handler
+     *
+     * @param name  Event name
+     * @param handler  Raw update handler
+     */
+    on(name: 'raw', handler: RawUpdateHandler['callback']): this
+
+    /**
+     * Register a plain old new message handler
+     *
+     * @param name  Event name
+     * @param handler  New message handler
+     */
+    on(name: 'new_message', handler: NewMessageHandler['callback']): this
+
+    /**
+     * Register a plain old edit message handler
+     *
+     * @param name  Event name
+     * @param handler  Edit message handler
+     */
+    on(name: 'edit_message', handler: EditMessageHandler['callback']): this
+
+    /**
+     * Register a plain old delete message handler
+     *
+     * @param name  Event name
+     * @param handler  Delete message handler
+     */
+    on(name: 'delete_message', handler: DeleteMessageHandler['callback']): this
+
+    /**
+     * Register a plain old chat member update handler
+     *
+     * @param name  Event name
+     * @param handler  Chat member update handler
+     */
+    on(name: 'chat_member', handler: ChatMemberUpdateHandler['callback']): this
+
+    /**
+     * Register a plain old inline query handler
+     *
+     * @param name  Event name
+     * @param handler  Inline query handler
+     */
+    on(name: 'inline_query', handler: InlineQueryHandler['callback']): this
+
+    /**
+     * Register a plain old chosen inline result handler
+     *
+     * @param name  Event name
+     * @param handler  Chosen inline result handler
+     */
+    on(
+        name: 'chosen_inline_result',
+        handler: ChosenInlineResultHandler['callback']
+    ): this
+
+    /**
+     * Register a plain old callback query handler
+     *
+     * @param name  Event name
+     * @param handler  Callback query handler
+     */
+    on(name: 'callback_query', handler: CallbackQueryHandler['callback']): this
+
+    /**
+     * Register a plain old poll update handler
+     *
+     * @param name  Event name
+     * @param handler  Poll update handler
+     */
+    on(name: 'poll', handler: PollUpdateHandler['callback']): this
+
+    /**
+     * Register a plain old poll vote handler
+     *
+     * @param name  Event name
+     * @param handler  Poll vote handler
+     */
+    on(name: 'poll_vote', handler: PollVoteHandler['callback']): this
+
+    /**
+     * Register a plain old user status update handler
+     *
+     * @param name  Event name
+     * @param handler  User status update handler
+     */
+    on(name: 'user_status', handler: UserStatusUpdateHandler['callback']): this
+
+    /**
+     * Register a plain old user typing handler
+     *
+     * @param name  Event name
+     * @param handler  User typing handler
+     */
+    on(name: 'user_typing', handler: UserTypingHandler['callback']): this
+
+    // end-codegen-declare
+}
+
 /**
  * Updates dispatcher
  */
-export class Dispatcher<State = never, SceneName extends string = string> {
+export class Dispatcher<
+    State = never,
+    SceneName extends string = string
+> extends EventEmitter {
     private _groups: Record<
         number,
         Record<UpdateHandler['type'], UpdateHandler[]>
@@ -205,6 +322,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         storage?: IStateStorage | StateKeyDelegate,
         key?: StateKeyDelegate
     ) {
+        super()
+
         if (client) {
             if (client instanceof TelegramClient) {
                 this.bindToClient(client)
@@ -421,6 +540,15 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         }
 
         if (shouldDispatch) {
+            if (update && !isRawMessage) {
+                this.emit('raw', update, users, chats)
+            }
+
+            if (parsedType) {
+                this.emit('update', updateInfo)
+                this.emit(parsedType, parsed)
+            }
+
             outer: for (const grp of this._groupsOrder) {
                 const group = this._groups[grp]
 

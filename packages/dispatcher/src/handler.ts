@@ -30,10 +30,7 @@ type ParsedUpdateHandler<Type, Update, State = never> = BaseUpdateHandler<
     (update: Update, state: State) => MaybeAsync<boolean>
 >
 
-export type UpdateInfo<T> = T extends ParsedUpdateHandler<
-    infer K,
-    infer Q
->
+export type UpdateInfo<T> = T extends ParsedUpdateHandler<infer K, infer Q>
     ? {
           readonly type: K
           readonly data: Q
