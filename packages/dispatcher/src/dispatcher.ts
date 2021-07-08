@@ -437,11 +437,16 @@ export class Dispatcher<
 
         const isRawMessage = update && tl.isAnyMessage(update)
 
-        if (parsed === undefined && this._handlersCount[update!._]) {
+        if (parsed === undefined) {
             const pair = PARSERS[update!._]
             if (pair) {
-                parsed = pair[1](this._client, update!, users!, chats!)
-                parsedType = pair[0]
+                if (
+                    this._handlersCount[update!._] ||
+                    this.listenerCount(pair[0])
+                ) {
+                    parsed = pair[1](this._client, update!, users!, chats!)
+                    parsedType = pair[0]
+                }
             } else {
                 parsed = parsedType = null
             }
@@ -524,19 +529,22 @@ export class Dispatcher<
         let shouldDispatch = true
         let shouldDispatchChildren = true
         let wasHandled = false
+        let updateInfo: any = null
 
-        const updateInfo = { type: parsedType, data: parsed }
-        switch (
-            await this._preUpdateHandler?.(
-                updateInfo as any,
-                parsedState as any
-            )
-        ) {
-            case 'stop':
-                shouldDispatch = false
-                break
-            case 'stop-children':
-                return false
+        if (parsed) {
+            updateInfo = { type: parsedType, data: parsed }
+            switch (
+                await this._preUpdateHandler?.(
+                    updateInfo as any,
+                    parsedState as any
+                )
+            ) {
+                case 'stop':
+                    shouldDispatch = false
+                    break
+                case 'stop-children':
+                    return false
+            }
         }
 
         if (shouldDispatch) {
@@ -678,11 +686,13 @@ export class Dispatcher<
             }
         }
 
-        this._postUpdateHandler?.(
-            wasHandled,
-            updateInfo as any,
-            parsedState as any
-        )
+        if (updateInfo) {
+            this._postUpdateHandler?.(
+                wasHandled,
+                updateInfo,
+                parsedState as any
+            )
+        }
 
         return wasHandled
     }
