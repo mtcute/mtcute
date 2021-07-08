@@ -167,7 +167,8 @@ export async function sendText(
             entities: res.entities,
         }
 
-        this._handleUpdate(createDummyUpdate(res.pts, res.date))
+        this._date = res.date
+        this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
 
         const users: UsersIndex = {}
         const chats: ChatsIndex = {}
