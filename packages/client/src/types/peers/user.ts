@@ -382,10 +382,22 @@ export class User {
      * @param params
      */
     sendMedia(
-        media: InputMediaLike,
-        params?: Parameters<TelegramClient['sendText']>[2]
-    ): ReturnType<TelegramClient['sendText']> {
+        media: InputMediaLike | string,
+        params?: Parameters<TelegramClient['sendMedia']>[2]
+    ): ReturnType<TelegramClient['sendMedia']> {
         return this.client.sendMedia(this.inputPeer, media, params)
+    }
+    /**
+     * Send a media group to this user.
+     *
+     * @param medias  Medias to send
+     * @param params
+     */
+    sendMediaGroup(
+        medias: (InputMediaLike | string)[],
+        params?: Parameters<TelegramClient['sendMediaGroup']>[2]
+    ): ReturnType<TelegramClient['sendMediaGroup']> {
+        return this.client.sendMediaGroup(this.inputPeer, medias, params)
     }
 }
 

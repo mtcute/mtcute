@@ -573,10 +573,26 @@ export class Message {
      * @param params
      */
     answerMedia(
-        media: InputMediaLike,
+        media: InputMediaLike | string,
         params?: Parameters<TelegramClient['sendMedia']>[2]
     ): ReturnType<TelegramClient['sendMedia']> {
         return this.client.sendMedia(this.chat.inputPeer, media, params)
+    }
+
+    /**
+     * Send a media group as an answer to this message.
+     *
+     * This just sends a message to the same chat
+     * as this message
+     *
+     * @param medias  Medias to send
+     * @param params
+     */
+    answerMediaGroup(
+        medias: (InputMediaLike | string)[],
+        params?: Parameters<TelegramClient['sendMediaGroup']>[2]
+    ): ReturnType<TelegramClient['sendMediaGroup']> {
+        return this.client.sendMediaGroup(this.chat.inputPeer, medias, params)
     }
 
     /**
@@ -598,20 +614,33 @@ export class Message {
     /**
      * Send a media in reply to this message.
      *
-     * By default just sends a message to the same chat,
-     * to make the reply a "real" reply, pass `visible=true`
-     *
      * @param media  Media to send
      * @param params
      */
     replyMedia(
-        media: InputMediaLike,
+        media: InputMediaLike | string,
         params?: Parameters<TelegramClient['sendMedia']>[2]
     ): ReturnType<TelegramClient['sendMedia']> {
         if (!params) params = {}
         params.replyTo = this.id
 
         return this.client.sendMedia(this.chat.inputPeer, media, params)
+    }
+
+    /**
+     * Send a media group in reply to this message.
+     *
+     * @param medias  Medias to send
+     * @param params
+     */
+    replyMediaGroup(
+        medias: (InputMediaLike | string)[],
+        params?: Parameters<TelegramClient['sendMediaGroup']>[2]
+    ): ReturnType<TelegramClient['sendMediaGroup']> {
+        if (!params) params = {}
+        params.replyTo = this.id
+
+        return this.client.sendMediaGroup(this.chat.inputPeer, medias, params)
     }
 
     /**
@@ -660,7 +689,7 @@ export class Message {
      * @param params
      */
     commentMedia(
-        media: InputMediaLike,
+        media: InputMediaLike | string,
         params?: Parameters<TelegramClient['sendMedia']>[2]
     ): ReturnType<TelegramClient['sendMedia']> {
         if (this.chat.type !== 'channel') {
@@ -675,6 +704,37 @@ export class Message {
         if (!params) params = {}
         params.commentTo = this.id
         return this.client.sendMedia(this.chat.inputPeer, media, params)
+    }
+
+    /**
+     * Send a media group comment to this message
+     * .
+     * If this is a normal message (not a channel post),
+     * a simple reply will be sent.
+     *
+     * If this post does not have comments section,
+     * {@link MtCuteArgumentError} is thrown. To check
+     * if a message has comments, use {@link replies}
+     *
+     * @param medias  Medias to send
+     * @param params
+     */
+    commentMediaGroup(
+        medias: (InputMediaLike | string)[],
+        params?: Parameters<TelegramClient['sendMediaGroup']>[2]
+    ): ReturnType<TelegramClient['sendMediaGroup']> {
+        if (this.chat.type !== 'channel') {
+            return this.replyMediaGroup(medias, params)
+        }
+
+        if (!this.replies || !this.replies.isComments) {
+            throw new MtCuteArgumentError(
+                'This message does not have comments section'
+            )
+        }
+        if (!params) params = {}
+        params.commentTo = this.id
+        return this.client.sendMediaGroup(this.chat.inputPeer, medias, params)
     }
 
     /**
