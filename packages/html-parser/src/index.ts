@@ -1,4 +1,4 @@
-import type { IMessageEntityParser, MessageEntity, RawString } from '@mtcute/client'
+import type { IMessageEntityParser, MessageEntity, FormattedString } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { Parser } from 'htmlparser2'
 import bigInt from 'big-integer'
@@ -13,13 +13,18 @@ const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|
  * const escaped = html`<b>${user.displayName}</b>`
  * ```
  */
-export function html(strings: TemplateStringsArray, ...sub: (string | RawString)[]): string {
+export function html(strings: TemplateStringsArray, ...sub: (string | FormattedString)[]): FormattedString {
     let str = ''
     sub.forEach((it, idx) => {
         if (typeof it === 'string') it = HtmlMessageEntityParser.escape(it)
+        else {
+            if (it.mode && it.mode !== 'html') throw new Error(`Incompatible parse mode: ${it.mode}`)
+            it = it.value
+        }
+
         str += strings[idx] + it
     })
-    return str + strings[strings.length - 1]
+    return { value: str + strings[strings.length - 1], mode: 'html' }
 }
 
 export namespace HtmlMessageEntityParser {

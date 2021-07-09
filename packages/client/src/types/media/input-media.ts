@@ -2,6 +2,7 @@ import { InputFileLike } from '../files'
 import { tl } from '@mtcute/tl'
 import { Venue } from './venue'
 import { MaybeArray } from '@mtcute/core'
+import { FormattedString } from '../parser'
 
 interface BaseInputMedia {
     /**
@@ -12,7 +13,7 @@ interface BaseInputMedia {
     /**
      * Caption of the media
      */
-    caption?: string
+    caption?: string | FormattedString
 
     /**
      * Caption entities of the media.
@@ -517,7 +518,7 @@ export interface InputMediaQuiz extends Omit<InputMediaPoll, 'type'> {
     /**
      * Explanation of the quiz solution
      */
-    solution?: string
+    solution?: string | FormattedString
 
     /**
      * Format entities for `solution`.

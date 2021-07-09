@@ -1,7 +1,7 @@
 import type { IMessageEntityParser, MessageEntity } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import bigInt from 'big-integer'
-import { RawString } from '@mtcute/client'
+import { FormattedString } from '@mtcute/client'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 
@@ -22,13 +22,18 @@ const TO_BE_ESCAPED = /[*_\-~`[\\\]]/g
  * const escaped = md`**${user.displayName}**`
  * ```
  */
-export function md(strings: TemplateStringsArray, ...sub: (string | RawString)[]): string {
+export function md(strings: TemplateStringsArray, ...sub: (string | FormattedString)[]): FormattedString {
     let str = ''
     sub.forEach((it, idx) => {
         if (typeof it === 'string') it = MarkdownMessageEntityParser.escape(it as string)
+        else {
+            if (it.mode && it.mode !== 'markdown') throw new Error(`Incompatible parse mode: ${it.mode}`)
+            it = it.value
+        }
+
         str += strings[idx] + it
     })
-    return str + strings[strings.length - 1]
+    return { value: str + strings[strings.length - 1], mode: 'markdown' }
 }
 
 /**

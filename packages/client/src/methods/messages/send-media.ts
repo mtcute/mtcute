@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import {
-    BotKeyboard,
+    BotKeyboard, FormattedString,
     InputMediaLike,
     InputPeerLike,
     Message, MtCuteArgumentError,
@@ -37,7 +37,7 @@ export async function sendMedia(
          * Can be used, for example. when using File IDs
          * or when using existing InputMedia objects.
          */
-        caption?: string
+        caption?: string | FormattedString
 
         /**
          * Override entities for `media`.

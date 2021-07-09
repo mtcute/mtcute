@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import {
-    BotKeyboard,
+    BotKeyboard, FormattedString,
     InputMediaLike,
     InputPeerLike,
     Message,
@@ -26,7 +26,7 @@ export async function editMessage(
          *
          * When `media` is passed, `media.caption` is used instead
          */
-        text?: string
+        text?: string | FormattedString
 
         /**
          * Parse mode to use to parse entities before sending

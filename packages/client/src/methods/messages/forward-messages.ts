@@ -1,5 +1,6 @@
 import { TelegramClient } from '../../client'
 import {
+    FormattedString,
     InputMediaLike,
     InputPeerLike,
     Message,
@@ -74,7 +75,7 @@ export async function forwardMessages(
          * You can either pass `caption` or `captionMedia`, passing both will
          * result in an error
          */
-        caption?: string
+        caption?: string | FormattedString
 
         /**
          * Optionally, a media caption for your forwarded message(s).
@@ -139,7 +140,7 @@ export async function forwardMessages(
          * You can either pass `caption` or `captionMedia`, passing both will
          * result in an error
          */
-        caption?: string
+        caption?: string | FormattedString
 
         /**
          * Optionally, a media caption for your forwarded message(s).

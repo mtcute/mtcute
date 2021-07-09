@@ -13,9 +13,7 @@ import { MessageEntity } from '../types'
  */
 export interface IMessageEntityParser {
     /**
-     * Default name for the parser.
-     *
-     * Used when registering the parser as a fallback value for `name`
+     * Parser name, which will be used when registering it.
      */
     name: string
 
@@ -29,9 +27,9 @@ export interface IMessageEntityParser {
     parse(text: string): [string, tl.TypeMessageEntity[]]
 
     /**
-     * Add formating to the text given the plain text and the entities.
+     * Add formatting to the text given the plain text and the entities.
      *
-     * **Note** that `unparse(parse(text)) === text` is not always true!
+     * > **Note**: `unparse(parse(text)) === text` is not always true!
      *
      * @param text  Plain text
      * @param entities  Message entities that should be added to the text
@@ -43,14 +41,14 @@ export interface IMessageEntityParser {
  * Raw string that will not be escaped when passing
  * to tagged template helpers (like `html` and `md`)
  */
-export class RawString {
-    raw!: true
-
-    constructor (readonly value: string) {}
+export class FormattedString {
+    /**
+     * @param value  Value that the string holds
+     * @param mode  Name of the parse mode used
+     */
+    constructor (readonly value: string, readonly mode?: string) {}
 
     toString(): string {
         return this.value
     }
 }
-
-RawString.prototype.raw = true

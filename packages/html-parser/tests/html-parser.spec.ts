@@ -2,7 +2,7 @@ import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import { tl } from '@mtcute/tl'
 import { HtmlMessageEntityParser, html } from '../src'
-import { MessageEntity, RawString } from '@mtcute/client'
+import { MessageEntity, FormattedString } from '@mtcute/client'
 import bigInt from 'big-integer'
 
 const createEntity = <T extends tl.TypeMessageEntity['_']>(
@@ -455,22 +455,30 @@ describe('HtmlMessageEntityParser', () => {
         it('should work as a tagged template literal', () => {
             const unsafeString = '<&>'
 
-            expect(html`${unsafeString}`).eq('&lt;&amp;&gt;')
-            expect(html`${unsafeString} <b>text</b>`).eq('&lt;&amp;&gt; <b>text</b>')
-            expect(html`<b>text</b> ${unsafeString}`).eq('<b>text</b> &lt;&amp;&gt;')
-            expect(html`<b>${unsafeString}</b>`).eq('<b>&lt;&amp;&gt;</b>')
+            expect(html`${unsafeString}`.value).eq('&lt;&amp;&gt;')
+            expect(html`${unsafeString} <b>text</b>`.value).eq('&lt;&amp;&gt; <b>text</b>')
+            expect(html`<b>text</b> ${unsafeString}`.value).eq('<b>text</b> &lt;&amp;&gt;')
+            expect(html`<b>${unsafeString}</b>`.value).eq('<b>&lt;&amp;&gt;</b>')
         })
 
-        it('should skip with RawString', () => {
+        it('should skip with FormattedString', () => {
             const unsafeString2 = '<&>'
-            const unsafeString = new RawString('<&>')
+            const unsafeString = new FormattedString('<&>')
 
-            expect(html`${unsafeString}`).eq('<&>')
-            expect(html`${unsafeString} ${unsafeString2}`).eq('<&> &lt;&amp;&gt;')
-            expect(html`${unsafeString} <b>text</b>`).eq('<&> <b>text</b>')
-            expect(html`<b>text</b> ${unsafeString}`).eq('<b>text</b> <&>')
-            expect(html`<b>${unsafeString}</b>`).eq('<b><&></b>')
-            expect(html`<b>${unsafeString} ${unsafeString2}</b>`).eq('<b><&> &lt;&amp;&gt;</b>')
+            expect(html`${unsafeString}`.value).eq('<&>')
+            expect(html`${unsafeString} ${unsafeString2}`.value).eq('<&> &lt;&amp;&gt;')
+            expect(html`${unsafeString} <b>text</b>`.value).eq('<&> <b>text</b>')
+            expect(html`<b>text</b> ${unsafeString}`.value).eq('<b>text</b> <&>')
+            expect(html`<b>${unsafeString}</b>`.value).eq('<b><&></b>')
+            expect(html`<b>${unsafeString} ${unsafeString2}</b>`.value).eq('<b><&> &lt;&amp;&gt;</b>')
+        })
+
+        it('should error with incompatible FormattedString', () => {
+            const unsafeString = new FormattedString('<&>', 'html')
+            const unsafeString2 = new FormattedString('<&>', 'some-other-mode')
+
+            expect(() => html`${unsafeString}`.value).not.throw(Error)
+            expect(() => html`${unsafeString2}`.value).throw(Error)
         })
     })
 })

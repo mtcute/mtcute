@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, ReplyMarkup } from '../../types'
+import { InputPeerLike, Message, FormattedString, ReplyMarkup } from '../../types'
 import { tl } from '@mtcute/tl'
 import { MessageNotFoundError } from '@mtcute/tl/errors'
 
@@ -45,7 +45,7 @@ export async function sendCopy(
         /**
          * New message caption (only used for media)
          */
-        caption?: string
+        caption?: string | FormattedString
 
         /**
          * Parse mode to use to parse `text` entities before sending

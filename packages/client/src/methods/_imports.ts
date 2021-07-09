@@ -39,7 +39,8 @@ import {
     BotCommands,
     MessageMedia,
     RawDocument,
-    IMessageEntityParser
+    IMessageEntityParser,
+    FormattedString
 } from '../types'
 
 // @copy

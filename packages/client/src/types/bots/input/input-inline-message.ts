@@ -7,6 +7,7 @@ import {
     InputMediaGeoLive,
     InputMediaVenue,
 } from '../../media'
+import { FormattedString } from '../../parser'
 
 /**
  * Inline message containing only text
@@ -17,7 +18,7 @@ export interface InputInlineMessageText {
     /**
      * Text of the message
      */
-    text: string
+    text: string | FormattedString
 
     /**
      * Text markup entities.
@@ -46,7 +47,7 @@ export interface InputInlineMessageMedia {
     /**
      * Caption for the media
      */
-    text?: string
+    text?: string | FormattedString
 
     /**
      * Caption markup entities.

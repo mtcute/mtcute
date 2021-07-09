@@ -14,7 +14,7 @@ import {
     UsersIndex,
     MtCuteTypeAssertionError,
     ChatsIndex,
-    MtCuteArgumentError,
+    MtCuteArgumentError, FormattedString,
 } from '../../types'
 import { getMarkedPeerId, MessageNotFoundError } from '@mtcute/core'
 import { createDummyUpdate } from '../../utils/updates-utils'
@@ -30,7 +30,7 @@ import { createDummyUpdate } from '../../utils/updates-utils'
 export async function sendText(
     this: TelegramClient,
     chatId: InputPeerLike,
-    text: string,
+    text: string | FormattedString,
     params?: {
         /**
          * Message to reply to. Either a message object or message ID.

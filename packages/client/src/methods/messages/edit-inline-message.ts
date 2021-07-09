@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { BotKeyboard, InputMediaLike, ReplyMarkup } from '../../types'
+import { BotKeyboard, FormattedString, InputMediaLike, ReplyMarkup } from '../../types'
 import { tl } from '@mtcute/tl'
 
 /**
@@ -20,7 +20,7 @@ export async function editInlineMessage(
          *
          * When `media` is passed, `media.caption` is used instead
          */
-        text?: string
+        text?: string | FormattedString
 
         /**
          * Parse mode to use to parse entities before sending

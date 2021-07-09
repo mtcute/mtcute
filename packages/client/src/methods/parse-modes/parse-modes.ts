@@ -7,15 +7,15 @@ import { MtCuteError, IMessageEntityParser } from '../../types'
  * mode is also set as default.
  *
  * @param parseMode  Parse mode to register
- * @param name  Parse mode name. By default is taken from the object.
  * @throws MtCuteError  When the parse mode with a given name is already registered.
  * @internal
  */
 export function registerParseMode(
     this: TelegramClient,
-    parseMode: IMessageEntityParser,
-    name: string = parseMode.name
+    parseMode: IMessageEntityParser
 ): void {
+    const name = parseMode.name
+
     if (name in this._parseModes) {
         throw new MtCuteError(
             `Parse mode ${name} is already registered. Unregister it first!`

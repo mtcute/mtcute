@@ -12,6 +12,7 @@ import { makeInspectable } from '../utils'
 import { InputMediaLike, WebPage } from '../media'
 import { _messageActionFromTl, MessageAction } from './message-action'
 import { _messageMediaFromTl, MessageMedia } from './message-media'
+import { FormattedString } from '../parser'
 
 /**
  * A message or a service message
@@ -557,7 +558,7 @@ export class Message {
      * @param params
      */
     answerText(
-        text: string,
+        text: string | FormattedString,
         params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
         return this.client.sendText(this.chat.inputPeer, text, params)
@@ -602,7 +603,7 @@ export class Message {
      * @param params
      */
     replyText(
-        text: string,
+        text: string | FormattedString,
         params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
         if (!params) params = {}
@@ -657,7 +658,7 @@ export class Message {
      * @param params
      */
     commentText(
-        text: string,
+        text: string | FormattedString,
         params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
         if (this.chat.type !== 'channel') {
@@ -790,7 +791,7 @@ export class Message {
      * @link TelegramClient.editMessage
      */
     editText(
-        text: string,
+        text: string | FormattedString,
         params?: Omit<Parameters<TelegramClient['editMessage']>[2], 'text'>
     ): Promise<Message> {
         return this.edit({

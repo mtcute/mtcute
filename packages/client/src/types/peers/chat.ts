@@ -8,7 +8,7 @@ import { makeInspectable } from '../utils'
 import { ChatsIndex, InputPeerLike, User, UsersIndex } from './index'
 import { ChatLocation } from './chat-location'
 import { InputMediaLike } from '../media'
-import { RawString } from '../parser'
+import { FormattedString } from '../parser'
 
 export namespace Chat {
     /**
@@ -552,7 +552,7 @@ export class Chat {
      * msg.replyText(`Hello, ${msg.chat.mention()`)
      * ```
      */
-    mention(text?: string | null, parseMode?: string | null): string | RawString {
+    mention(text?: string | null, parseMode?: string | null): string | FormattedString {
         if (this.user) return this.user.mention(text, parseMode)
 
         if (text === undefined && this.username) {
@@ -564,7 +564,7 @@ export class Chat {
 
         if (!parseMode) parseMode = this.client['_defaultParseMode']
 
-        return new RawString(this.client.getParseMode(parseMode).unparse(text, [
+        return new FormattedString(this.client.getParseMode(parseMode).unparse(text, [
             {
                 raw: undefined as any,
                 type: 'text_link',
@@ -628,7 +628,7 @@ export class Chat {
      * @param params
      */
     sendText(
-        text: string,
+        text: string | FormattedString,
         params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
         return this.client.sendText(this.inputPeer, text, params)

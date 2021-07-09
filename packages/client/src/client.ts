@@ -171,6 +171,7 @@ import {
     ChatsIndex,
     Dialog,
     FileDownloadParameters,
+    FormattedString,
     GameHighScore,
     IMessageEntityParser,
     InputFileLike,
@@ -1829,7 +1830,7 @@ export interface TelegramClient extends BaseTelegramClient {
              *
              * When `media` is passed, `media.caption` is used instead
              */
-            text?: string
+            text?: string | FormattedString
 
             /**
              * Parse mode to use to parse entities before sending
@@ -1890,7 +1891,7 @@ export interface TelegramClient extends BaseTelegramClient {
              *
              * When `media` is passed, `media.caption` is used instead
              */
-            text?: string
+            text?: string | FormattedString
 
             /**
              * Parse mode to use to parse entities before sending
@@ -1998,7 +1999,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * You can either pass `caption` or `captionMedia`, passing both will
              * result in an error
              */
-            caption?: string
+            caption?: string | FormattedString
 
             /**
              * Optionally, a media caption for your forwarded message(s).
@@ -2384,7 +2385,7 @@ export interface TelegramClient extends BaseTelegramClient {
             /**
              * New message caption (only used for media)
              */
-            caption?: string
+            caption?: string | FormattedString
 
             /**
              * Parse mode to use to parse `text` entities before sending
@@ -2546,7 +2547,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Can be used, for example. when using File IDs
              * or when using existing InputMedia objects.
              */
-            caption?: string
+            caption?: string | FormattedString
 
             /**
              * Override entities for `media`.
@@ -2636,7 +2637,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     sendText(
         chatId: InputPeerLike,
-        text: string,
+        text: string | FormattedString,
         params?: {
             /**
              * Message to reply to. Either a message object or message ID.
@@ -2785,10 +2786,9 @@ export interface TelegramClient extends BaseTelegramClient {
      * mode is also set as default.
      *
      * @param parseMode  Parse mode to register
-     * @param name  (default: `parseMode.name`) Parse mode name. By default is taken from the object.
      * @throws MtCuteError  When the parse mode with a given name is already registered.
      */
-    registerParseMode(parseMode: IMessageEntityParser, name?: string): void
+    registerParseMode(parseMode: IMessageEntityParser): void
     /**
      * Unregister a parse mode by its name.
      * Will silently fail if given parse mode does not exist.
