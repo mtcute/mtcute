@@ -101,6 +101,7 @@ import { getHistory } from './methods/messages/get-history'
 import { getMessageGroup } from './methods/messages/get-message-group'
 import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe'
 import { getMessages } from './methods/messages/get-messages'
+import { getScheduledMessages } from './methods/messages/get-scheduled-messages'
 import { iterHistory } from './methods/messages/iter-history'
 import { _normalizeInline } from './methods/messages/normalize-inline'
 import { _parseEntities } from './methods/messages/parse-entities'
@@ -111,6 +112,7 @@ import { searchMessages } from './methods/messages/search-messages'
 import { sendCopy } from './methods/messages/send-copy'
 import { sendMediaGroup } from './methods/messages/send-media-group'
 import { sendMedia } from './methods/messages/send-media'
+import { sendScheduled } from './methods/messages/send-scheduled'
 import { sendText } from './methods/messages/send-text'
 import { sendTyping } from './methods/messages/send-typing'
 import { sendVote } from './methods/messages/send-vote'
@@ -2184,6 +2186,29 @@ export interface TelegramClient extends BaseTelegramClient {
         fromReply?: boolean
     ): Promise<(Message | null)[]>
     /**
+     * Get a single scheduled message in chat by its ID
+     *
+     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
+     * @param messageId  Scheduled message ID
+     */
+    getScheduledMessages(
+        chatId: InputPeerLike,
+        messageId: number
+    ): Promise<Message | null>
+    /**
+     * Get scheduled messages in chat by their IDs
+     *
+     * Fot messages that were not found, `null` will be
+     * returned at that position.
+     *
+     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
+     * @param messageIds  Scheduled messages IDs
+     */
+    getScheduledMessages(
+        chatId: InputPeerLike,
+        messageIds: number[]
+    ): Promise<(Message | null)[]>
+    /**
      * Iterate through a chat history sequentially.
      *
      * This method wraps {@link getHistory} to allow processing large
@@ -2643,6 +2668,28 @@ export interface TelegramClient extends BaseTelegramClient {
             clearDraft?: boolean
         }
     ): Promise<Message>
+    /**
+     * Send s previously scheduled message.
+     *
+     * Note that if the message belongs to a media group,
+     * the entire group will be sent, but only
+     * the first message will be returned (in this overload).
+     *
+     * @param peer  Chat where the messages were scheduled
+     * @param id  ID of the message
+     */
+    sendScheduled(peer: InputPeerLike, id: number): Promise<Message>
+    /**
+     * Send previously scheduled message(s)
+     *
+     * Note that if the message belongs to a media group,
+     * the entire group will be sent, and all the messages
+     * will be returned.
+     *
+     * @param peer  Chat where the messages were scheduled
+     * @param ids  ID(s) of the messages
+     */
+    sendScheduled(peer: InputPeerLike, ids: number[]): Promise<Message[]>
     /**
      * Send a text message
      *
@@ -3427,6 +3474,7 @@ export class TelegramClient extends BaseTelegramClient {
     getMessageGroup = getMessageGroup
     getMessagesUnsafe = getMessagesUnsafe
     getMessages = getMessages
+    getScheduledMessages = getScheduledMessages
     iterHistory = iterHistory
     protected _normalizeInline = _normalizeInline
     protected _parseEntities = _parseEntities
@@ -3437,6 +3485,7 @@ export class TelegramClient extends BaseTelegramClient {
     sendCopy = sendCopy
     sendMediaGroup = sendMediaGroup
     sendMedia = sendMedia
+    sendScheduled = sendScheduled
     sendText = sendText
     sendTyping = sendTyping
     sendVote = sendVote
