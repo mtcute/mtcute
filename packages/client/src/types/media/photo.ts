@@ -181,4 +181,4 @@ export class Photo extends FileLocation {
     }
 }
 
-makeInspectable(Photo, ['fileSize', 'dcId', 'width', 'height'], ['inputMedia'])
+makeInspectable(Photo, ['fileSize', 'dcId', 'width', 'height'], ['inputMedia', 'inputPhoto'])
