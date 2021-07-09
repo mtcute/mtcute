@@ -310,7 +310,7 @@ export class User {
                 length: text.length,
                 userId: this.id,
             },
-        ]))
+        ]), parseMode!)
     }
 
     /**
@@ -320,6 +320,11 @@ export class User {
      * contain user's access hash, so even if the user
      * changes their username or the client forgets
      * about that user, it can still be mentioned.
+     *
+     * Telegram might change access hash in some cases,
+     * so it may not exactly be *permanent*. The only way
+     * to actually make it permanent is to send it as a message
+     * somewhere and load it from there if needed.
      *
      * This method is only needed when the result will be
      * stored somewhere outside current MTCute instance,
@@ -338,7 +343,7 @@ export class User {
      * @param text  Mention text
      * @param parseMode  Parse mode to use when creating mention
      */
-    permanentMention(text?: string | null, parseMode?: string | null): string {
+    permanentMention(text?: string | null, parseMode?: string | null): FormattedString {
         if (!this.raw.accessHash)
             throw new MtCuteArgumentError(
                 "user's access hash is not available!"
@@ -349,7 +354,7 @@ export class User {
 
         // since we are just creating a link and not actual tg entity,
         // we can use this hack to create a valid link through our parse mode
-        return this.client.getParseMode(parseMode).unparse(text, [
+        return new FormattedString(this.client.getParseMode(parseMode).unparse(text, [
             {
                 raw: undefined as any,
                 type: 'text_link',
@@ -359,7 +364,7 @@ export class User {
                     this.id
                 }&hash=${this.raw.accessHash.toString(16)}`,
             },
-        ])
+        ]), parseMode!)
     }
 
     /**

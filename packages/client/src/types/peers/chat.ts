@@ -572,7 +572,7 @@ export class Chat {
                 length: text.length,
                 url: `https://t.me/${this.username}`
             },
-        ]))
+        ]), parseMode!)
     }
 
     /**
