@@ -14,17 +14,21 @@ import {
     PollVoteHandler,
     UserStatusUpdateHandler,
     UserTypingHandler,
+    HistoryReadHandler,
 } from './handler'
 // end-codegen-imports
 import { filters, UpdateFilter } from './filters'
 import { CallbackQuery, InlineQuery, Message } from '@mtcute/client'
-import { ChatMemberUpdate } from './updates'
-import { ChosenInlineResult } from './updates/chosen-inline-result'
-import { PollUpdate } from './updates/poll-update'
-import { PollVoteUpdate } from './updates/poll-vote'
-import { UserStatusUpdate } from './updates/user-status-update'
-import { UserTypingUpdate } from './updates/user-typing-update'
-import { DeleteMessageUpdate } from './updates/delete-message-update'
+import {
+    ChatMemberUpdate,
+    ChosenInlineResult,
+    PollUpdate,
+    PollVoteUpdate,
+    UserStatusUpdate,
+    UserTypingUpdate,
+    DeleteMessageUpdate,
+    HistoryReadUpdate,
+} from './updates'
 
 function _create<T extends UpdateHandler>(
     type: T['type'],
@@ -383,6 +387,36 @@ export namespace handlers {
     /** @internal */
     export function userTyping(filter: any, handler?: any): UserTypingHandler {
         return _create('user_typing', filter, handler)
+    }
+
+    /**
+     * Create a history read handler
+     *
+     * @param handler  History read handler
+     */
+    export function historyRead(
+        handler: HistoryReadHandler['callback']
+    ): HistoryReadHandler
+
+    /**
+     * Create a history read handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  History read handler
+     */
+    export function historyRead<Mod>(
+        filter: UpdateFilter<HistoryReadUpdate, Mod>,
+        handler: HistoryReadHandler<
+            filters.Modify<HistoryReadUpdate, Mod>
+        >['callback']
+    ): HistoryReadHandler
+
+    /** @internal */
+    export function historyRead(
+        filter: any,
+        handler?: any
+    ): HistoryReadHandler {
+        return _create('history_read', filter, handler)
     }
 
     // end-codegen

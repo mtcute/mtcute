@@ -25,18 +25,22 @@ import {
     PollVoteHandler,
     UserStatusUpdateHandler,
     UserTypingHandler,
+    HistoryReadHandler,
 } from './handler'
 // end-codegen-imports
 import { UpdateInfo } from './handler'
 import { filters, UpdateFilter } from './filters'
 import { handlers } from './builders'
-import { ChatMemberUpdate } from './updates'
-import { ChosenInlineResult } from './updates/chosen-inline-result'
-import { PollUpdate } from './updates/poll-update'
-import { PollVoteUpdate } from './updates/poll-vote'
-import { UserStatusUpdate } from './updates/user-status-update'
-import { UserTypingUpdate } from './updates/user-typing-update'
-import { DeleteMessageUpdate } from './updates/delete-message-update'
+import {
+    ChatMemberUpdate,
+    ChosenInlineResult,
+    PollUpdate,
+    PollVoteUpdate,
+    UserStatusUpdate,
+    UserTypingUpdate,
+    DeleteMessageUpdate,
+    HistoryReadUpdate,
+} from './updates'
 import { IStateStorage, UpdateState, StateKeyDelegate } from './state'
 import { defaultStateKeyDelegate } from './state'
 import { PropagationAction } from './propagation'
@@ -85,6 +89,10 @@ const deleteMessageParser: UpdateParser = [
     'delete_message',
     (client, upd) => new DeleteMessageUpdate(client, upd as any),
 ]
+const historyReadParser: UpdateParser = [
+    'history_read',
+    (client, upd) => new HistoryReadUpdate(client, upd as any),
+]
 
 const PARSERS: Partial<
     Record<(tl.TypeUpdate | tl.TypeMessage)['_'], UpdateParser>
@@ -127,6 +135,12 @@ const PARSERS: Partial<
     updateUserTyping: userTypingParser,
     updateDeleteChannelMessages: deleteMessageParser,
     updateDeleteMessages: deleteMessageParser,
+    updateReadHistoryInbox: historyReadParser,
+    updateReadHistoryOutbox: historyReadParser,
+    updateReadChannelInbox: historyReadParser,
+    updateReadChannelOutbox: historyReadParser,
+    updateReadChannelDiscussionInbox: historyReadParser,
+    updateReadChannelDiscussionOutbox: historyReadParser,
 }
 
 const HANDLER_TYPE_TO_UPDATE: Record<string, string[]> = {}
@@ -138,7 +152,9 @@ Object.keys(PARSERS).forEach((upd: keyof typeof PARSERS) => {
 })
 
 export declare interface Dispatcher<
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     State = never,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     SceneName extends string = string
 > {
     on<T = {}>(
@@ -246,6 +262,14 @@ export declare interface Dispatcher<
      * @param handler  User typing handler
      */
     on(name: 'user_typing', handler: UserTypingHandler['callback']): this
+
+    /**
+     * Register a plain old history read handler
+     *
+     * @param name  Event name
+     * @param handler  History read handler
+     */
+    on(name: 'history_read', handler: HistoryReadHandler['callback']): this
 
     // end-codegen-declare
 }
@@ -1672,6 +1696,34 @@ export class Dispatcher<
     /** @internal */
     onUserTyping(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('userTyping', filter, handler, group)
+    }
+
+    /**
+     * Register a history read handler without any filters
+     *
+     * @param handler  History read handler
+     * @param group  Handler group index
+     */
+    onHistoryRead(handler: HistoryReadHandler['callback'], group?: number): void
+
+    /**
+     * Register a history read handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  History read handler
+     * @param group  Handler group index
+     */
+    onHistoryRead<Mod>(
+        filter: UpdateFilter<HistoryReadUpdate, Mod>,
+        handler: HistoryReadHandler<
+            filters.Modify<HistoryReadUpdate, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onHistoryRead(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('historyRead', filter, handler, group)
     }
 
     // end-codegen

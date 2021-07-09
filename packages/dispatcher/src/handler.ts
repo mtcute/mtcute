@@ -9,13 +9,16 @@ import {
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { PropagationAction } from './propagation'
-import { ChatMemberUpdate } from './updates'
-import { ChosenInlineResult } from './updates/chosen-inline-result'
-import { PollUpdate } from './updates/poll-update'
-import { PollVoteUpdate } from './updates/poll-vote'
-import { UserStatusUpdate } from './updates/user-status-update'
-import { UserTypingUpdate } from './updates/user-typing-update'
-import { DeleteMessageUpdate } from './updates/delete-message-update'
+import {
+    ChatMemberUpdate,
+    ChosenInlineResult,
+    PollUpdate,
+    PollVoteUpdate,
+    UserStatusUpdate,
+    UserTypingUpdate,
+    DeleteMessageUpdate,
+    HistoryReadUpdate,
+} from './updates'
 
 interface BaseUpdateHandler<Type, Handler, Checker> {
     type: Type
@@ -96,6 +99,10 @@ export type UserTypingHandler<T = UserTypingUpdate> = ParsedUpdateHandler<
     'user_typing',
     T
 >
+export type HistoryReadHandler<T = HistoryReadUpdate> = ParsedUpdateHandler<
+    'history_read',
+    T
+>
 
 export type UpdateHandler =
     | RawUpdateHandler
@@ -110,5 +117,6 @@ export type UpdateHandler =
     | PollVoteHandler
     | UserStatusUpdateHandler
     | UserTypingHandler
+    | HistoryReadHandler
 
 // end-codegen

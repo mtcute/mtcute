@@ -12,3 +12,4 @@ poll: PollUpdate = PollUpdate
 poll_vote = PollVoteUpdate
 user_status: UserStatusUpdate = UserStatusUpdate
 user_typing = UserTypingUpdate
+history_read = HistoryReadUpdate
