@@ -33,8 +33,8 @@ export async function getPeerDialogs(
     this: TelegramClient,
     peers: MaybeArray<InputPeerLike>
 ): Promise<MaybeArray<Dialog>> {
-    const isSingle = Array.isArray(peers)
-    if (!isSingle) peers = [peers as InputPeerLike]
+    const isSingle = !Array.isArray(peers)
+    if (isSingle) peers = [peers as InputPeerLike]
 
     const res = await this.call({
         _: 'messages.getPeerDialogs',
