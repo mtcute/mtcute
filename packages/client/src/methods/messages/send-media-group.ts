@@ -148,7 +148,11 @@ export async function sendMediaGroup(
 
         const inputMedia = await this._normalizeInputMedia(media, {
             progressCallback: params.progressCallback?.bind(null, i),
-        })
+            // i have no fucking clue why we should upload it manually,
+            // but otherwise Telegram throws MEDIA_INVALID
+            // fuck my life
+            uploadPeer: peer
+        }, true)
 
         const [message, entities] = await this._parseEntities(
             // some types dont have `caption` field, and ts warns us,

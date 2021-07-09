@@ -29,6 +29,7 @@ export async function _normalizeInputMedia(
     params: {
         parseMode?: string | null
         progressCallback?: (uploaded: number, total: number) => void
+        uploadPeer?: tl.TypeInputPeer
     },
     uploadMedia = false
 ): Promise<tl.TypeInputMedia> {
@@ -216,6 +217,8 @@ export async function _normalizeInputMedia(
         mime = uploaded.mime
     }
 
+    const uploadPeer = params.uploadPeer ?? { _: 'inputPeerSelf' }
+
     const uploadMediaIfNeeded = async (
         inputMedia: tl.TypeInputMedia,
         photo: boolean
@@ -224,7 +227,7 @@ export async function _normalizeInputMedia(
 
         const res = await this.call({
             _: 'messages.uploadMedia',
-            peer: { _: 'inputPeerSelf' },
+            peer: uploadPeer,
             media: inputMedia,
         })
 

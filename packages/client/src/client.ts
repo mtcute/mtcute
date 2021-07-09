@@ -1587,6 +1587,7 @@ export interface TelegramClient extends BaseTelegramClient {
         params: {
             parseMode?: string | null
             progressCallback?: (uploaded: number, total: number) => void
+            uploadPeer?: tl.TypeInputPeer
         },
         uploadMedia?: boolean
     ): Promise<tl.TypeInputMedia>
