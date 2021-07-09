@@ -212,6 +212,27 @@ export class Dialog {
     }
 
     /**
+     * ID of the last read outgoing message in this dialog
+     */
+    get lastReadOutgoing(): number {
+        return this.raw.readOutboxMaxId
+    }
+
+    /**
+     * ID of the last read ingoing message in this dialog
+     */
+    get lastReadIngoing(): number {
+        return this.raw.readInboxMaxId
+    }
+
+    /**
+     * ID of the last read message in this dialog
+     */
+    get lastRead(): number {
+        return Math.max(this.raw.readOutboxMaxId, this.raw.readInboxMaxId)
+    }
+
+    /**
      * Number of unread messages
      */
     get unreadCount(): number {

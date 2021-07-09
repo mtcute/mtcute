@@ -71,6 +71,8 @@ import { editFolder } from './methods/dialogs/edit-folder'
 import { findFolder } from './methods/dialogs/find-folder'
 import { getDialogs } from './methods/dialogs/get-dialogs'
 import { getFolders } from './methods/dialogs/get-folders'
+import { getPeerDialogs } from './methods/dialogs/get-peer-dialogs'
+import { _parseDialogs } from './methods/dialogs/parse-dialogs'
 import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
 import { downloadAsIterable } from './methods/files/download-iterable'
@@ -1512,6 +1514,18 @@ export interface TelegramClient extends BaseTelegramClient {
      * Get list of folders.
      */
     getFolders(): Promise<tl.RawDialogFilter[]>
+    /**
+     * Get dialogs with certain peers.
+     *
+     * @param peers  Peers for which to fetch dialogs.
+     */
+    getPeerDialogs(peers: InputPeerLike): Promise<Dialog>
+    /**
+     * Get dialogs with certain peers.
+     *
+     * @param peers  Peers for which to fetch dialogs.
+     */
+    getPeerDialogs(peers: InputPeerLike[]): Promise<Dialog[]>
     /**
      * Download a file and return its contents as a Buffer.
      *
@@ -3382,6 +3396,8 @@ export class TelegramClient extends BaseTelegramClient {
     findFolder = findFolder
     getDialogs = getDialogs
     getFolders = getFolders
+    getPeerDialogs = getPeerDialogs
+    protected _parseDialogs = _parseDialogs
     downloadAsBuffer = downloadAsBuffer
     downloadToFile = downloadToFile
     downloadAsIterable = downloadAsIterable

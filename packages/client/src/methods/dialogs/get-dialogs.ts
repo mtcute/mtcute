@@ -177,32 +177,6 @@ export async function* getDialogs(
         return res
     }
 
-    const parseDialogs = (
-        res: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs
-    ): Dialog[] => {
-        if (res._ === 'messages.dialogsNotModified')
-            throw new MtCuteTypeAssertionError(
-                'messages.getPeerDialogs',
-                '!messages.dialogsNotModified',
-                'messages.dialogsNotModified'
-            )
-
-        const { users, chats } = createUsersChatsIndex(res)
-
-        const messages: Record<number, tl.TypeMessage> = {}
-        res.messages.forEach((msg) => {
-            if (!msg.peerId) return
-
-            messages[getMarkedPeerId(msg.peerId)] = msg
-        })
-
-        return res.dialogs
-            .filter((it) => it._ === 'dialog')
-            .map(
-                (it) =>
-                    new Dialog(this, it as tl.RawDialog, users, chats, messages)
-            )
-    }
 
     const pinned = params.pinned ?? 'include'
     let archived = params.archived ?? 'exclude'
@@ -221,7 +195,7 @@ export async function* getDialogs(
                 folderId: archived === 'exclude' ? 0 : 1,
             })
         }
-        if (res) yield* parseDialogs(res)
+        if (res) yield* this._parseDialogs(res)
         return
     }
 
@@ -236,7 +210,7 @@ export async function* getDialogs(
     if (filters && filters.pinnedPeers.length && pinned === 'include') {
         const res = await fetchPinnedDialogsFromFolder()
         if (res) {
-            const dialogs = parseDialogs(res)
+            const dialogs = this._parseDialogs(res)
 
             for (const d of dialogs) {
                 yield d
@@ -257,7 +231,7 @@ export async function* getDialogs(
     const folderId =
         archived === 'keep' ? undefined : archived === 'only' ? 1 : 0
     for (;;) {
-        const dialogs = parseDialogs(
+        const dialogs = this._parseDialogs(
             await this.call({
                 _: 'messages.getDialogs',
                 excludePinned: params.pinned === 'exclude',
