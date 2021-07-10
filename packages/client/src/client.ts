@@ -92,6 +92,7 @@ import { getPrimaryInviteLink } from './methods/invite-links/get-primary-invite-
 import { revokeInviteLink } from './methods/invite-links/revoke-invite-link'
 import { closePoll } from './methods/messages/close-poll'
 import { deleteMessages } from './methods/messages/delete-messages'
+import { deleteScheduledMessages } from './methods/messages/delete-scheduled-messages'
 import { editInlineMessage } from './methods/messages/edit-inline-message'
 import { editMessage } from './methods/messages/edit-message'
 import { _findMessageInUpdate } from './methods/messages/find-in-update'
@@ -1832,6 +1833,16 @@ export interface TelegramClient extends BaseTelegramClient {
         revoke?: boolean
     ): Promise<void>
     /**
+     * Delete scheduled messages.
+     *
+     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
+     * @param ids  Message(s) ID(s) to delete.
+     */
+    deleteScheduledMessages(
+        chatId: InputPeerLike,
+        ids: MaybeArray<number>
+    ): Promise<void>
+    /**
      * Edit sent inline message text, media and reply markup.
      *
      * @param messageId
@@ -3465,6 +3476,7 @@ export class TelegramClient extends BaseTelegramClient {
     revokeInviteLink = revokeInviteLink
     closePoll = closePoll
     deleteMessages = deleteMessages
+    deleteScheduledMessages = deleteScheduledMessages
     editInlineMessage = editInlineMessage
     editMessage = editMessage
     protected _findMessageInUpdate = _findMessageInUpdate
