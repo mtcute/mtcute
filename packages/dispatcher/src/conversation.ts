@@ -133,6 +133,9 @@ export class Conversation {
         this._onHistoryRead = this._onHistoryRead.bind(this)
     }
 
+    /**
+     * Get the input peer that this conversation is with
+     */
     get inputPeer(): tl.TypeInputPeer {
         if (!this._started) {
             throw new MtCuteArgumentError("Conversation hasn't started yet")
@@ -141,6 +144,9 @@ export class Conversation {
         return this._inputPeer
     }
 
+    /**
+     * Start the conversation
+     */
     async start(): Promise<void> {
         if (this._started) return
 
@@ -161,6 +167,9 @@ export class Conversation {
         this.dispatcher.on('history_read', this._onHistoryRead)
     }
 
+    /**
+     * Stop the conversation
+     */
     stop(): void {
         if (!this._started) return
 
@@ -260,6 +269,17 @@ export class Conversation {
         return this._client.readHistory(this._inputPeer, message, clearMentions)
     }
 
+    /**
+     * Helper method that calls {@link start},
+     * the provided function and the {@link stop}.
+     *
+     * It is preferred that you use this function rather than
+     * manually starting and stopping the conversation.
+     *
+     * If you don't stop the conversation, this *will* lead to memory leaks.
+     *
+     * @param handler
+     */
     async with<T>(handler: () => MaybeAsync<T>): Promise<T> {
         await this.start()
 
@@ -282,7 +302,8 @@ export class Conversation {
      * Wait for a new message in the conversation
      *
      * @param filter  Filter for the handler. You can use any filter you can use for dispatcher
-     * @param timeout  Timeout for the handler in ms. Pass `null` to disable. When the timeout is reached, `TimeoutError` is thrown.
+     * @param timeout  Timeout for the handler in ms, def. 15 sec. Pass `null` to disable.
+     *   When the timeout is reached, `TimeoutError` is thrown.
      */
     waitForNewMessage(
         filter?: (msg: Message) => MaybeAsync<boolean>,
@@ -313,10 +334,33 @@ export class Conversation {
         return promise
     }
 
+    /**
+     * Wait for a response for the given message
+     * (def. the last one) in the conversation.
+     *
+     * A message is considered to be a response if
+     * it was sent after the given one.
+     *
+     * @param filter  Filter for the handler. You can use any filter you can use for dispatcher
+     * @param params
+     */
     waitForResponse(
         filter?: (msg: Message) => MaybeAsync<boolean>,
         params?: {
+            /**
+             * Message for which to wait for response for.
+             *
+             * Defaults to last sent/received message
+             */
             message?: number
+
+            /**
+             * Timeout for the handler in ms. Pass `null` to disable.
+             *
+             * When the timeout is reached, `TimeoutError` is thrown.
+             *
+             * Defaults to `15000` (15 sec)
+             */
             timeout?: number | null
         }
     ): Promise<Message> {
@@ -329,10 +373,30 @@ export class Conversation {
         return this.waitForNewMessage(pred, params?.timeout)
     }
 
+    /**
+     * Wait for the reply for the given message'
+     * (def. the last one) in the conversation.
+     *
+     * @param filter  Filter for the handler. You can use any filter you can use for dispatcher
+     * @param params
+     */
     waitForReply(
         filter?: (msg: Message) => MaybeAsync<boolean>,
         params?: {
+            /**
+             * Message for which to wait for reply for.
+             *
+             * Defaults to last sent/received message
+             */
             message?: number
+
+            /**
+             * Timeout for the handler in ms. Pass `null` to disable.
+             *
+             * When the timeout is reached, `TimeoutError` is thrown.
+             *
+             * Defaults to `15000` (15 sec)
+             */
             timeout?: number | null
         }
     ): Promise<Message> {
@@ -363,7 +427,20 @@ export class Conversation {
     async waitForEdit(
         filter?: (msg: Message) => MaybeAsync<boolean>,
         params?: {
+            /**
+             * Message for which to wait for reply for.
+             *
+             * Defaults to last received message
+             */
             message?: number
+
+            /**
+             * Timeout for the handler in ms. Pass `null` to disable.
+             *
+             * When the timeout is reached, `TimeoutError` is thrown.
+             *
+             * Defaults to `15000` (15 sec)
+             */
             timeout?: number | null
         }
     ): Promise<Message> {
@@ -399,6 +476,16 @@ export class Conversation {
         return promise
     }
 
+    /**
+     * Wait for the message to be read by the other party.
+     *
+     * Note that reading the message doesn't mean the response was sent,
+     * and if the response was sent, it doesn't mean that the message was read.
+     *
+     * @param message  Message for which to wait for read for. Defaults to last message.
+     * @param timeout  Timeout for the handler in ms, def. 15 sec. Pass `null` to disable.
+     *   When the timeout is reached, `TimeoutError` is thrown.
+     */
     async waitForRead(message?: number, timeout: number | null = 15000): Promise<void> {
         if (!this._started) {
             throw new MtCuteArgumentError("Conversation hasn't started yet")
@@ -407,7 +494,7 @@ export class Conversation {
         const msgId = message ?? this._lastMessage
         if (!msgId)
             throw new MtCuteArgumentError(
-                'Provide message for which to wait for reply for'
+                'Provide message for which to wait for read for'
             )
 
         // check if the message is already read
