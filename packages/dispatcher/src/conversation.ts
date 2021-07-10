@@ -106,14 +106,25 @@ interface QueuedHandler<T> {
     timeout?: NodeJS.Timeout
 }
 
+/**
+ * Represents a conversation inside some chat.
+ *
+ * A conversation keeps track of any messages sent or edited
+ * since it was started and until it was stopped,
+ * and allows waiting for events in it.
+ *
+ * If you need a conversation across multiple chats,
+ * you should use multiple {@link Conversation} objects
+ * and synchronize them manually.
+ */
 export class Conversation {
     private _inputPeer: tl.TypeInputPeer
     private _chatId: number
     private _client: TelegramClient
     private _started = false
 
-    private _lastMessage?: number
-    private _lastReceivedMessage?: number
+    private _lastMessage: number
+    private _lastReceivedMessage: number
 
     private _queuedNewMessage = new Queue<QueuedHandler<Message>>()
     private _pendingNewMessages = new Queue<Message>()
@@ -145,6 +156,31 @@ export class Conversation {
     }
 
     /**
+     * ID of the very last message in this conversation.
+     */
+    get lastMessage(): number {
+        if (!this._started) {
+            throw new MtCuteArgumentError("Conversation hasn't started yet")
+        }
+
+        return this._lastMessage
+    }
+
+    /**
+     * ID of the last incoming message in this conversation.
+     *
+     * Note that before any messages were received since the {@link start}
+     * of the conversation, this will equal to {@link lastMessage}
+     */
+    get lastReceivedMessage(): number {
+        if (!this._started) {
+            throw new MtCuteArgumentError("Conversation hasn't started yet")
+        }
+
+        return this._lastReceivedMessage
+    }
+
+    /**
      * Start the conversation
      */
     async start(): Promise<void> {
@@ -161,6 +197,9 @@ export class Conversation {
         this._started = true
         this._inputPeer = await client.resolvePeer(this.chat)
         this._chatId = getMarkedPeerId(this._inputPeer)
+
+        const dialog = await client.getPeerDialogs(this._inputPeer)
+        this._lastMessage = this._lastReceivedMessage = dialog.lastMessage.id
 
         this.dispatcher.on('new_message', this._onNewMessage)
         this.dispatcher.on('edit_message', this._onEditMessage)
