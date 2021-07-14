@@ -28,7 +28,7 @@ import {
     HistoryReadHandler,
 } from './handler'
 // end-codegen-imports
-import { UpdateInfo } from './handler'
+import { ParsedUpdate } from './handler'
 import { filters, UpdateFilter } from './filters'
 import { handlers } from './builders'
 import {
@@ -159,7 +159,7 @@ export declare interface Dispatcher<
 > {
     on<T = {}>(
         name: 'update',
-        handler: (update: UpdateInfo<UpdateHandler> & T) => void
+        handler: (update: ParsedUpdate & T) => void
     ): this
 
     // begin-codegen-declare
@@ -308,18 +308,18 @@ export class Dispatcher<
 
     private _errorHandler?: <T = {}>(
         err: Error,
-        update: UpdateInfo<UpdateHandler> & T,
+        update: ParsedUpdate & T,
         state?: UpdateState<State, SceneName>
     ) => MaybeAsync<boolean>
 
     private _preUpdateHandler?: <T = {}>(
-        update: UpdateInfo<UpdateHandler> & T,
+        update: ParsedUpdate & T,
         state?: UpdateState<State, SceneName>
     ) => MaybeAsync<PropagationAction | void>
 
     private _postUpdateHandler?: <T = {}>(
         handled: boolean,
-        update: UpdateInfo<UpdateHandler> & T,
+        update: ParsedUpdate & T,
         state?: UpdateState<State, SceneName>
     ) => MaybeAsync<void>
 
@@ -821,7 +821,7 @@ export class Dispatcher<
         handler:
             | ((
                   err: Error,
-                  update: UpdateInfo<UpdateHandler> & T,
+                  update: ParsedUpdate & T,
                   state?: UpdateState<State, SceneName>
               ) => MaybeAsync<boolean>)
             | null
@@ -845,7 +845,7 @@ export class Dispatcher<
     onPreUpdate<T = {}>(
         handler:
             | ((
-                  update: UpdateInfo<UpdateHandler> & T,
+                  update: ParsedUpdate & T,
                   state?: UpdateState<State, SceneName>
               ) => MaybeAsync<PropagationAction | void>)
             | null
@@ -870,7 +870,7 @@ export class Dispatcher<
         handler:
             | ((
                   handled: boolean,
-                  update: UpdateInfo<UpdateHandler> & T,
+                  update: ParsedUpdate & T,
                   state?: UpdateState<State, SceneName>
               ) => MaybeAsync<void>)
             | null
@@ -883,9 +883,9 @@ export class Dispatcher<
      * Set error handler that will propagate
      * the error to the parent dispatcher
      */
-    propagateErrorToParent<T extends Exclude<UpdateHandler, RawUpdateHandler>>(
+    propagateErrorToParent(
         err: Error,
-        update: UpdateInfo<T>,
+        update: ParsedUpdate,
         state?: UpdateState<State, SceneName>
     ): MaybeAsync<boolean> {
         if (!this.parent)
