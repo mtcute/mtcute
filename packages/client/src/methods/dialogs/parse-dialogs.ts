@@ -2,7 +2,7 @@ import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { Dialog, MtCuteTypeAssertionError } from '../../types'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
-import { getMarkedPeerId } from '@mtcute/core/dist'
+import { getMarkedPeerId } from '@mtcute/core'
 
 /** @internal */
 export function _parseDialogs(
