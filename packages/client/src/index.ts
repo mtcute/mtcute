@@ -2,7 +2,8 @@ export {
     MemoryStorage,
     JsonFileStorage,
     LocalstorageStorage,
-    tl
+    tl,
+    defaultDcs
 } from '@mtcute/core'
 export * from '@mtcute/tl/errors'
 
