@@ -34,7 +34,7 @@ const subdomainsMap: Record<string, string> = {
  * Base for WebSocket transports.
  * Subclasses must provide packet codec in `_packetCodec` property
  */
-export abstract class WebSocketTransport
+export abstract class BaseWebSocketTransport
     extends EventEmitter
     implements ICuteTransport {
     private _currentDc: tl.RawDcOption | null = null
@@ -150,6 +150,6 @@ export abstract class WebSocketTransport
     }
 }
 
-export class WebSocketIntermediateTransport extends WebSocketTransport {
+export class WebSocketTransport extends BaseWebSocketTransport {
     _packetCodec = new ObfuscatedPacketCodec(new IntermediatePacketCodec())
 }

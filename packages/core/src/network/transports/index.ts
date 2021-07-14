@@ -12,8 +12,8 @@ export * from './obfuscated'
 export let defaultTransportFactory: TransportFactory
 if (typeof process !== 'undefined') {
     // we are in node, use tcp transport by default
-    const { TcpIntermediateTransport } = require('./tcp')
-    defaultTransportFactory = () => new TcpIntermediateTransport()
+    const { TcpTransport } = require('./tcp')
+    defaultTransportFactory = () => new TcpTransport()
 } else {
     // we are in browser (probably), use websocket
     // if no websocket, throw an error i guess ¯\_(ツ)_/¯
@@ -25,7 +25,7 @@ if (typeof process !== 'undefined') {
             )
         }
     } else {
-        const { WebSocketIntermediateTransport } = require('./websocket')
-        defaultTransportFactory = () => new WebSocketIntermediateTransport()
+        const { WebSocketTransport } = require('./websocket')
+        defaultTransportFactory = () => new WebSocketTransport()
     }
 }

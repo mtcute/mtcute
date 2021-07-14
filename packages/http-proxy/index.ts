@@ -1,6 +1,6 @@
 import {
     IntermediatePacketCodec,
-    TcpTransport,
+    BaseTcpTransport,
     TransportState,
 } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
@@ -66,7 +66,7 @@ export interface HttpProxySettings {
 /**
  * TCP transport that connects via an HTTP(S) proxy.
  */
-export abstract class HttpProxiedTcpTransport extends TcpTransport {
+export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
     readonly _proxy: HttpProxySettings
 
     constructor(proxy: HttpProxySettings) {
@@ -173,6 +173,6 @@ export abstract class HttpProxiedTcpTransport extends TcpTransport {
     }
 }
 
-export class HttpProxiedIntermediateTcpTransport extends HttpProxiedTcpTransport {
+export class HttpProxyTcpTransport extends BaseHttpProxyTcpTransport {
     _packetCodec = new IntermediatePacketCodec()
 }

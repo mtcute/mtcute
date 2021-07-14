@@ -1,6 +1,6 @@
 import {
     IntermediatePacketCodec,
-    TcpTransport,
+    BaseTcpTransport,
     TransportState,
 } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
@@ -178,7 +178,7 @@ const SOCKS5_ERRORS: Record<number, string> = {
 /**
  * TCP transport that connects via a SOCKS4/5 proxy.
  */
-export abstract class SocksProxiedTcpTransport extends TcpTransport {
+export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
     readonly _proxy: SocksProxySettings
 
     constructor(proxy: SocksProxySettings) {
@@ -472,6 +472,6 @@ export abstract class SocksProxiedTcpTransport extends TcpTransport {
     }
 }
 
-export class SocksProxiedIntermediateTcpTransport extends SocksProxiedTcpTransport {
+export class SocksTcpTransport extends BaseSocksTcpTransport {
     _packetCodec = new IntermediatePacketCodec()
 }

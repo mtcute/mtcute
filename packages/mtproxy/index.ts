@@ -4,7 +4,7 @@ import {
     IPacketCodec,
     PaddedIntermediatePacketCodec,
     parseUrlSafeBase64,
-    TcpTransport,
+    BaseTcpTransport,
     TransportState,
 } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
@@ -37,7 +37,7 @@ const TLS_START = [
 /**
  * TCP transport that connects via an MTProxy
  */
-export class MtProxyTcpTransport extends TcpTransport {
+export class MtProxyTcpTransport extends BaseTcpTransport {
     readonly _proxy: MtProxySettings
 
     private _rawSecret: Buffer

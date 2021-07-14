@@ -11,7 +11,7 @@ const debug = require('debug')('mtcute:tcp')
  * Base for TCP transports.
  * Subclasses must provide packet codec in `_packetCodec` property
  */
-export abstract class TcpTransport
+export abstract class BaseTcpTransport
     extends EventEmitter
     implements ICuteTransport {
     protected _currentDc: tl.RawDcOption | null = null
@@ -109,6 +109,6 @@ export abstract class TcpTransport
     }
 }
 
-export class TcpIntermediateTransport extends TcpTransport {
+export class TcpTransport extends BaseTcpTransport {
     _packetCodec = new IntermediatePacketCodec()
 }
