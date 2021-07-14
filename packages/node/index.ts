@@ -36,7 +36,7 @@ export namespace NodeTelegramClient {
          * You can pass a file name as a simple string,
          * which will be passed directly to `SqliteStorage`
          *
-         * Defaults to SQLite storage in `session.db` file in
+         * Defaults to SQLite storage in `client.session` file in
          * current working directory
          */
         storage?: BaseTelegramClient.Options['storage'] | string
@@ -57,7 +57,7 @@ export class NodeTelegramClient extends TelegramClient {
             storage:
                 typeof opts.storage === 'string'
                     ? new SqliteStorage(opts.storage)
-                    : opts.storage ?? new SqliteStorage('session.db'),
+                    : opts.storage ?? new SqliteStorage('client.session'),
         })
 
         this.registerParseMode(new HtmlMessageEntityParser())
