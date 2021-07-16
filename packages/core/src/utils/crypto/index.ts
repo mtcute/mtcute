@@ -1,5 +1,3 @@
-import { CryptoProviderFactory } from './abstract'
-import { nodeCrypto } from '../buffer-utils'
 import { NodeCryptoProvider } from './node-crypto'
 import { ForgeCryptoProvider } from './forge-crypto'
 
@@ -8,9 +6,7 @@ export * from './password'
 
 export { NodeCryptoProvider, ForgeCryptoProvider }
 
-export let defaultCryptoProviderFactory: CryptoProviderFactory
-if (nodeCrypto) {
-    defaultCryptoProviderFactory = () => new NodeCryptoProvider()
-} else {
-    defaultCryptoProviderFactory = () => new ForgeCryptoProvider()
-}
+import { _defaultCryptoProviderFactory } from '../platform/crypto'
+import { CryptoProviderFactory } from './abstract'
+
+export const defaultCryptoProviderFactory: CryptoProviderFactory = _defaultCryptoProviderFactory

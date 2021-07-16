@@ -43,7 +43,8 @@ export class JsonFileStorage extends JsonMemoryStorage {
         }
     ) {
         super()
-        if (!fs) throw new Error('Node fs module is not available!')
+        if (!fs || !fs.readFile)
+            throw new Error('Node fs module is not available!')
 
         this._filename = filename
         this._safe = params?.safe ?? true

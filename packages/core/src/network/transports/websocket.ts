@@ -105,6 +105,8 @@ export abstract class BaseWebSocketTransport
             'binary'
         )
 
+        this._socket.binaryType = 'arraybuffer'
+
         this._socket.addEventListener('message', (evt) =>
             this._packetCodec.feed(typedArrayToBuffer(evt.data))
         )

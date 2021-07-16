@@ -1,18 +1,16 @@
 import { BaseCryptoProvider, IEncryptionScheme, IHashMethod } from './abstract'
 import { MaybeAsync } from '../../types'
-import { nodeCrypto } from '../buffer-utils'
+import { createCipheriv, createDecipheriv, createHash, createHmac, pbkdf2 } from 'crypto'
 
 export class NodeCryptoProvider extends BaseCryptoProvider {
     constructor() {
         super()
-        if (!nodeCrypto)
-            throw new Error('Cannot use Node crypto functions outside NodeJS!')
     }
 
     createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme {
-        const cipher = nodeCrypto[
-            encrypt ? 'createCipheriv' : 'createDecipheriv'
-        ](`aes-${key.length * 8}-ctr`, key, iv)
+        const cipher = (
+            encrypt ? createCipheriv : createDecipheriv
+        )(`aes-${key.length * 8}-ctr`, key, iv)
 
         const update = (data: Buffer) => cipher.update(data)
 
@@ -27,12 +25,12 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
 
         return {
             encrypt(data: Buffer) {
-                const cipher = nodeCrypto.createCipheriv(methodName, key, null)
+                const cipher = createCipheriv(methodName, key, null)
                 cipher.setAutoPadding(false)
                 return Buffer.concat([cipher.update(data), cipher.final()])
             },
             decrypt(data: Buffer) {
-                const cipher = nodeCrypto.createDecipheriv(
+                const cipher = createDecipheriv(
                     methodName,
                     key,
                     null
@@ -49,7 +47,7 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
         iterations: number
     ): MaybeAsync<Buffer> {
         return new Promise((resolve, reject) =>
-            nodeCrypto.pbkdf2(
+            pbkdf2(
                 password,
                 salt,
                 iterations,
@@ -62,18 +60,18 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
     }
 
     sha1(data: Buffer): Buffer {
-        return nodeCrypto.createHash('sha1').update(data).digest()
+        return createHash('sha1').update(data).digest()
     }
 
     sha256(data: Buffer): Buffer {
-        return nodeCrypto.createHash('sha256').update(data).digest()
+        return createHash('sha256').update(data).digest()
     }
 
     createMd5(): IHashMethod {
-        return nodeCrypto.createHash('md5')
+        return createHash('md5') as any
     }
 
     hmacSha256(data: Buffer, key: Buffer): MaybeAsync<Buffer> {
-        return nodeCrypto.createHmac('sha256', key).update(data).digest()
+        return createHmac('sha256', key).update(data).digest()
     }
 }

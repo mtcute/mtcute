@@ -11,6 +11,11 @@
         "build": "tsc",
         "docs": "npx typedoc"
     },
+    "browser": {
+        "./utils/platform/crypto.js": "./utils/platform/crypto.web.js",
+        "./utils/platform/transport.js": "./utils/platform/transport.web.js",
+        "./storage/json-file.js": false
+    },
     "dependencies": {
         "@types/node": "^15.12.1",
         "@types/events": "^3.0.0",

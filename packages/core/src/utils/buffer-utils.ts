@@ -1,9 +1,4 @@
-export let nodeCrypto: any = null
-if (typeof process !== 'undefined' && typeof require !== 'undefined') {
-    try {
-        nodeCrypto = require('crypto')
-    } catch (e) {}
-}
+export { _randomBytes as randomBytes } from './platform/crypto'
 
 // from https://github.com/feross/typedarray-to-buffer
 // licensed under MIT
@@ -38,14 +33,6 @@ export function xorBufferInPlace(data: Buffer, key: Buffer): void {
     for (let i = 0; i < data.length; i++) {
         data[i] ^= key[i]
     }
-}
-
-export function randomBytes(size: number): Buffer {
-    if (nodeCrypto) return nodeCrypto.randomBytes(size)
-
-    const ret = new Uint8Array(size)
-    crypto.getRandomValues(ret)
-    return typedArrayToBuffer(ret)
 }
 
 export function cloneBuffer(buf: Buffer, start = 0, end = buf.length): Buffer {
