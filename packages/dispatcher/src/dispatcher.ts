@@ -1020,6 +1020,35 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         }
     }
 
+    /**
+     * Register a raw update handler without any filters
+     *
+     * @param handler  Raw update handler
+     * @param group  Handler group index
+     */
+    onRawUpdate(
+        handler: RawUpdateHandler['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register a raw update handler without any filters
+     *
+     * @param filter  Update filter
+     * @param handler  Raw update handler
+     * @param group  Handler group index
+     */
+    onRawUpdate(
+        filter: RawUpdateHandler['check'],
+        handler: RawUpdateHandler['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onRawUpdate(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('raw', filter, handler, group)
+    }
+
     // begin-codegen
 
     /**
