@@ -1,4 +1,3 @@
-import { makeInspectable } from '@mtcute/client/src/types/utils'
 import { tl } from '@mtcute/tl'
 import {
     TelegramClient,
@@ -7,7 +6,8 @@ import {
     MtCuteArgumentError,
     UsersIndex,
 } from '@mtcute/client'
-import { encodeInlineMessageId } from '@mtcute/client/src/utils/inline-utils'
+import { encodeInlineMessageId } from '../../utils/inline-utils'
+import { makeInspectable } from '../utils'
 
 /**
  * An inline result was chosen by the user and sent to some chat

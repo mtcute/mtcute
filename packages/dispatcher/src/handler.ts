@@ -6,52 +6,42 @@ import {
     CallbackQuery,
     UsersIndex,
     ChatsIndex,
+    ChatMemberUpdate,
+    PollVoteUpdate,
+    UserStatusUpdate,
+    ChosenInlineResult,
+    HistoryReadUpdate,
+    DeleteMessageUpdate,
+    PollUpdate,
+    UserTypingUpdate,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { PropagationAction } from './propagation'
-import {
-    ChatMemberUpdate,
-    ChosenInlineResult,
-    PollUpdate,
-    PollVoteUpdate,
-    UserStatusUpdate,
-    UserTypingUpdate,
-    DeleteMessageUpdate,
-    HistoryReadUpdate,
-} from './updates'
 
-interface BaseUpdateHandler<Type, Handler, Checker> {
-    type: Type
+interface BaseUpdateHandler<Name, Handler, Checker> {
+    name: Name
     callback: Handler
 
     check?: Checker
 }
 
-type ParsedUpdateHandler<Type, Update, State = never> = BaseUpdateHandler<
-    Type,
+type ParsedUpdateHandler<Name, Update, State = never> = BaseUpdateHandler<
+    Name,
     (update: Update, state: State) => MaybeAsync<void | PropagationAction>,
     (update: Update, state: State) => MaybeAsync<boolean>
 >
-
-type _ParsedUpdate<T> = T extends ParsedUpdateHandler<infer K, infer Q>
-    ? {
-          readonly type: K
-          readonly data: Q
-      }
-    : never
-export type ParsedUpdate = _ParsedUpdate<UpdateHandler>
 
 export type RawUpdateHandler = BaseUpdateHandler<
     'raw',
     (
         client: TelegramClient,
-        update: tl.TypeUpdate,
+        update: tl.TypeUpdate | tl.TypeMessage,
         users: UsersIndex,
         chats: ChatsIndex
     ) => MaybeAsync<void | PropagationAction>,
     (
         client: TelegramClient,
-        update: tl.TypeUpdate,
+        update: tl.TypeUpdate | tl.TypeMessage,
         users: UsersIndex,
         chats: ChatsIndex
     ) => MaybeAsync<boolean>

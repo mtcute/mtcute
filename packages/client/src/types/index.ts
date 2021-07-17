@@ -5,6 +5,8 @@ export * from './media'
 export * from './messages'
 export * from './peers'
 export * from './misc'
+export * from './updates'
+export * from './conversation'
 
 export * from './errors'
 export * from './parser'

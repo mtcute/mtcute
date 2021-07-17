@@ -1,6 +1,6 @@
 import { TelegramClient, User } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
-import { makeInspectable } from '@mtcute/client/src/types/utils'
+import { makeInspectable } from '../utils'
 
 /**
  * User status has changed

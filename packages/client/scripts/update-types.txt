@@ -1,6 +1,4 @@
 # format: type_name[: handler_type_name] = update_type[ + State]
-# IGNORE as update_type disables filters modification
-raw: RawUpdate = IGNORE
 new_message = Message + State
 edit_message = Message + State
 delete_message = DeleteMessageUpdate

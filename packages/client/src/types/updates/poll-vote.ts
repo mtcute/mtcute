@@ -5,7 +5,7 @@ import {
     UsersIndex,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
-import { makeInspectable } from '@mtcute/client/src/types/utils'
+import { makeInspectable } from '../utils'
 
 /**
  * Some user has voted in a public poll.

@@ -35,6 +35,7 @@ import bigInt from 'big-integer'
 import { BinaryWriter } from './utils/binary/binary-writer'
 import { encodeUrlSafeBase64, parseUrlSafeBase64 } from './utils/buffer-utils'
 import { BinaryReader } from './utils/binary/binary-reader'
+import EventEmitter from 'events'
 
 const debug = require('debug')('mtcute:base')
 
@@ -148,7 +149,7 @@ export namespace BaseTelegramClient {
     }
 }
 
-export class BaseTelegramClient {
+export class BaseTelegramClient extends EventEmitter {
     /**
      * `initConnection` params taken from {@link BaseTelegramClient.Options.initConnectionOptions}.
      */
@@ -242,6 +243,8 @@ export class BaseTelegramClient {
     protected _handleUpdate(update: tl.TypeUpdates): void {}
 
     constructor(opts: BaseTelegramClient.Options) {
+        super()
+
         const apiId =
             typeof opts.apiId === 'string' ? parseInt(opts.apiId) : opts.apiId
         if (isNaN(apiId))

@@ -8,6 +8,15 @@ import {
     MtCuteArgumentError,
     TelegramClient,
     UsersIndex,
+    ChatMemberUpdate,
+    ChosenInlineResult,
+    PollUpdate,
+    PollVoteUpdate,
+    UserStatusUpdate,
+    UserTypingUpdate,
+    DeleteMessageUpdate,
+    HistoryReadUpdate,
+    ParsedUpdate,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 // begin-codegen-imports
@@ -28,262 +37,20 @@ import {
     HistoryReadHandler,
 } from './handler'
 // end-codegen-imports
-import { ParsedUpdate } from './handler'
 import { filters, UpdateFilter } from './filters'
-import { handlers } from './builders'
-import {
-    ChatMemberUpdate,
-    ChosenInlineResult,
-    PollUpdate,
-    PollVoteUpdate,
-    UserStatusUpdate,
-    UserTypingUpdate,
-    DeleteMessageUpdate,
-    HistoryReadUpdate,
-} from './updates'
 import { IStateStorage, UpdateState, StateKeyDelegate } from './state'
 import { defaultStateKeyDelegate } from './state'
 import { PropagationAction } from './propagation'
-import EventEmitter from 'events'
 
 const noop = () => {}
-
-type ParserFunction = (
-    client: TelegramClient,
-    upd: tl.TypeUpdate | tl.TypeMessage,
-    users: UsersIndex,
-    chats: ChatsIndex
-) => any
-type UpdateParser = [Exclude<UpdateHandler['type'], 'raw'>, ParserFunction]
-
-const baseMessageParser: ParserFunction = (
-    client: TelegramClient,
-    upd,
-    users,
-    chats
-) =>
-    new Message(
-        client,
-        tl.isAnyMessage(upd) ? upd : (upd as any).message,
-        users,
-        chats,
-        upd._ === 'updateNewScheduledMessage'
-    )
-
-const newMessageParser: UpdateParser = ['new_message', baseMessageParser]
-const editMessageParser: UpdateParser = ['edit_message', baseMessageParser]
-const chatMemberParser: UpdateParser = [
-    'chat_member',
-    (client, upd, users, chats) =>
-        new ChatMemberUpdate(client, upd as any, users, chats),
-]
-const callbackQueryParser: UpdateParser = [
-    'callback_query',
-    (client, upd, users) => new CallbackQuery(client, upd as any, users),
-]
-const userTypingParser: UpdateParser = [
-    'user_typing',
-    (client, upd) => new UserTypingUpdate(client, upd as any),
-]
-const deleteMessageParser: UpdateParser = [
-    'delete_message',
-    (client, upd) => new DeleteMessageUpdate(client, upd as any),
-]
-const historyReadParser: UpdateParser = [
-    'history_read',
-    (client, upd) => new HistoryReadUpdate(client, upd as any),
-]
-
-const PARSERS: Partial<
-    Record<(tl.TypeUpdate | tl.TypeMessage)['_'], UpdateParser>
-> = {
-    message: newMessageParser,
-    messageEmpty: newMessageParser,
-    messageService: newMessageParser,
-    updateNewMessage: newMessageParser,
-    updateNewChannelMessage: newMessageParser,
-    updateNewScheduledMessage: newMessageParser,
-    updateEditMessage: editMessageParser,
-    updateEditChannelMessage: editMessageParser,
-    updateChatParticipant: chatMemberParser,
-    updateChannelParticipant: chatMemberParser,
-    updateBotInlineQuery: [
-        'inline_query',
-        (client, upd, users) => new InlineQuery(client, upd as any, users),
-    ],
-    updateBotInlineSend: [
-        'chosen_inline_result',
-        (client, upd, users) =>
-            new ChosenInlineResult(client, upd as any, users),
-    ],
-    updateBotCallbackQuery: callbackQueryParser,
-    updateInlineBotCallbackQuery: callbackQueryParser,
-    updateMessagePoll: [
-        'poll',
-        (client, upd, users) => new PollUpdate(client, upd as any, users),
-    ],
-    updateMessagePollVote: [
-        'poll_vote',
-        (client, upd, users) => new PollVoteUpdate(client, upd as any, users),
-    ],
-    updateUserStatus: [
-        'user_status',
-        (client, upd) => new UserStatusUpdate(client, upd as any),
-    ],
-    updateChannelUserTyping: userTypingParser,
-    updateChatUserTyping: userTypingParser,
-    updateUserTyping: userTypingParser,
-    updateDeleteChannelMessages: deleteMessageParser,
-    updateDeleteMessages: deleteMessageParser,
-    updateReadHistoryInbox: historyReadParser,
-    updateReadHistoryOutbox: historyReadParser,
-    updateReadChannelInbox: historyReadParser,
-    updateReadChannelOutbox: historyReadParser,
-    updateReadChannelDiscussionInbox: historyReadParser,
-    updateReadChannelDiscussionOutbox: historyReadParser,
-}
-
-const HANDLER_TYPE_TO_UPDATE: Record<string, string[]> = {}
-Object.keys(PARSERS).forEach((upd: keyof typeof PARSERS) => {
-    const handler = PARSERS[upd]![0]
-    if (!(handler in HANDLER_TYPE_TO_UPDATE))
-        HANDLER_TYPE_TO_UPDATE[handler] = []
-    HANDLER_TYPE_TO_UPDATE[handler].push(upd)
-})
-
-export declare interface Dispatcher<
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    State = never,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    SceneName extends string = string
-> {
-    on<T = {}>(
-        name: 'update',
-        handler: (update: ParsedUpdate & T) => void
-    ): this
-
-    // begin-codegen-declare
-
-    /**
-     * Register a plain old raw update handler
-     *
-     * @param name  Event name
-     * @param handler  Raw update handler
-     */
-    on(name: 'raw', handler: RawUpdateHandler['callback']): this
-
-    /**
-     * Register a plain old new message handler
-     *
-     * @param name  Event name
-     * @param handler  New message handler
-     */
-    on(name: 'new_message', handler: NewMessageHandler['callback']): this
-
-    /**
-     * Register a plain old edit message handler
-     *
-     * @param name  Event name
-     * @param handler  Edit message handler
-     */
-    on(name: 'edit_message', handler: EditMessageHandler['callback']): this
-
-    /**
-     * Register a plain old delete message handler
-     *
-     * @param name  Event name
-     * @param handler  Delete message handler
-     */
-    on(name: 'delete_message', handler: DeleteMessageHandler['callback']): this
-
-    /**
-     * Register a plain old chat member update handler
-     *
-     * @param name  Event name
-     * @param handler  Chat member update handler
-     */
-    on(name: 'chat_member', handler: ChatMemberUpdateHandler['callback']): this
-
-    /**
-     * Register a plain old inline query handler
-     *
-     * @param name  Event name
-     * @param handler  Inline query handler
-     */
-    on(name: 'inline_query', handler: InlineQueryHandler['callback']): this
-
-    /**
-     * Register a plain old chosen inline result handler
-     *
-     * @param name  Event name
-     * @param handler  Chosen inline result handler
-     */
-    on(
-        name: 'chosen_inline_result',
-        handler: ChosenInlineResultHandler['callback']
-    ): this
-
-    /**
-     * Register a plain old callback query handler
-     *
-     * @param name  Event name
-     * @param handler  Callback query handler
-     */
-    on(name: 'callback_query', handler: CallbackQueryHandler['callback']): this
-
-    /**
-     * Register a plain old poll update handler
-     *
-     * @param name  Event name
-     * @param handler  Poll update handler
-     */
-    on(name: 'poll', handler: PollUpdateHandler['callback']): this
-
-    /**
-     * Register a plain old poll vote handler
-     *
-     * @param name  Event name
-     * @param handler  Poll vote handler
-     */
-    on(name: 'poll_vote', handler: PollVoteHandler['callback']): this
-
-    /**
-     * Register a plain old user status update handler
-     *
-     * @param name  Event name
-     * @param handler  User status update handler
-     */
-    on(name: 'user_status', handler: UserStatusUpdateHandler['callback']): this
-
-    /**
-     * Register a plain old user typing handler
-     *
-     * @param name  Event name
-     * @param handler  User typing handler
-     */
-    on(name: 'user_typing', handler: UserTypingHandler['callback']): this
-
-    /**
-     * Register a plain old history read handler
-     *
-     * @param name  Event name
-     * @param handler  History read handler
-     */
-    on(name: 'history_read', handler: HistoryReadHandler['callback']): this
-
-    // end-codegen-declare
-}
 
 /**
  * Updates dispatcher
  */
-export class Dispatcher<
-    State = never,
-    SceneName extends string = string
-> extends EventEmitter {
+export class Dispatcher<State = never, SceneName extends string = string> {
     private _groups: Record<
         number,
-        Record<UpdateHandler['type'], UpdateHandler[]>
+        Record<UpdateHandler['name'], UpdateHandler[]>
     > = {}
     private _groupsOrder: number[] = []
 
@@ -303,8 +70,6 @@ export class Dispatcher<
 
     private _customStateKeyDelegate?: StateKeyDelegate
     private _customStorage?: IStateStorage
-
-    private _handlersCount: Record<string, number> = {}
 
     private _errorHandler?: <T = {}>(
         err: Error,
@@ -346,7 +111,8 @@ export class Dispatcher<
         storage?: IStateStorage | StateKeyDelegate,
         key?: StateKeyDelegate
     ) {
-        super()
+        this.dispatchRawUpdate = this.dispatchRawUpdate.bind(this)
+        this.dispatchUpdate = this.dispatchUpdate.bind(this)
 
         if (client) {
             if (client instanceof TelegramClient) {
@@ -383,7 +149,9 @@ export class Dispatcher<
      * Dispatcher also uses bound client to throw errors
      */
     bindToClient(client: TelegramClient): void {
-        client['dispatchUpdate'] = this.dispatchUpdate.bind(this)
+        client.on('update', this.dispatchUpdate)
+        client.on('raw_update', this.dispatchRawUpdate)
+
         this._client = client
     }
 
@@ -395,9 +163,101 @@ export class Dispatcher<
      */
     unbind(): void {
         if (this._client) {
-            this._client['dispatchUpdate'] = noop
+            this._client.off('update', this.dispatchUpdate)
+            this._client.off('raw_update', this.dispatchRawUpdate)
+
             this._client = undefined
         }
+    }
+
+    /**
+     * Process a raw update with this dispatcher.
+     * Calling this method without bound client will not work.
+     *
+     * Under the hood asynchronously calls {@link dispatchRawUpdateNow}
+     * with error handler set to client's one.
+     *
+     * @param update  Update to process
+     * @param users  Users map
+     * @param chats  Chats map
+     */
+    dispatchRawUpdate(
+        update: tl.TypeUpdate | tl.TypeMessage,
+        users: UsersIndex,
+        chats: ChatsIndex
+    ): void {
+        if (!this._client) return
+
+        // order does not matter in the dispatcher,
+        // so we can handle each update in its own task
+        this.dispatchRawUpdateNow(update, users, chats).catch((err) =>
+            this._client!['_emitError'](err)
+        )
+    }
+
+    /**
+     * Process a raw update right now in the current stack.
+     *
+     * Unlike {@link dispatchRawUpdate}, this does not schedule
+     * the update to be dispatched, but dispatches it immediately,
+     * and after `await`ing this method you can be certain that the update
+     * was fully processed by all the registered handlers, including children.
+     *
+     * @param update  Update to process
+     * @param users  Users map
+     * @param chats  Chats map
+     * @returns  Whether the update was handled
+     */
+    async dispatchRawUpdateNow(
+        update: tl.TypeUpdate | tl.TypeMessage,
+        users: UsersIndex,
+        chats: ChatsIndex
+    ): Promise<boolean> {
+        if (!this._client) return false
+
+        let handled = false
+
+        outer: for (const grp of this._groupsOrder) {
+            const group = this._groups[grp]
+
+            if ('raw' in group) {
+                const handlers = group['raw'] as RawUpdateHandler[]
+
+                for (const h of handlers) {
+                    let result: void | PropagationAction
+
+                    if (
+                        !h.check ||
+                        (await h.check(this._client, update, users, chats))
+                    ) {
+                        result = await h.callback(
+                            this._client,
+                            update,
+                            users,
+                            chats
+                        )
+                        handled = true
+                    } else continue
+
+                    switch (result) {
+                        case 'continue':
+                            continue
+                        case 'stop':
+                            break outer
+                        case 'stop-children':
+                            return handled
+                    }
+
+                    break
+                }
+            }
+        }
+
+        for (const child of this._children) {
+            handled ||= await child.dispatchRawUpdateNow(update, users, chats)
+        }
+
+        return handled
     }
 
     /**
@@ -408,19 +268,13 @@ export class Dispatcher<
      * with error handler set to client's one.
      *
      * @param update  Update to process
-     * @param users  Map of users
-     * @param chats  Map of chats
      */
-    dispatchUpdate(
-        update: tl.TypeUpdate | tl.TypeMessage,
-        users: UsersIndex,
-        chats: ChatsIndex
-    ): void {
+    dispatchUpdate(update: ParsedUpdate): void {
         if (!this._client) return
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
-        this.dispatchUpdateNow(update, users, chats).catch((err) =>
+        this.dispatchUpdateNow(update).catch((err) =>
             this._client!['_emitError'](err)
         )
     }
@@ -434,58 +288,31 @@ export class Dispatcher<
      * was fully processed by all the registered handlers, including children.
      *
      * @param update  Update to process
-     * @param users  Map of users
-     * @param chats  Map of chats
      * @returns  Whether the update was handled
      */
-    async dispatchUpdateNow(
-        update: tl.TypeUpdate | tl.TypeMessage,
-        users: UsersIndex,
-        chats: ChatsIndex
-    ): Promise<boolean> {
-        return this._dispatchUpdateNowImpl(update, users, chats)
+    async dispatchUpdateNow(update: ParsedUpdate): Promise<boolean> {
+        return this._dispatchUpdateNowImpl(update)
     }
 
     private async _dispatchUpdateNowImpl(
-        update: tl.TypeUpdate | tl.TypeMessage | null,
-        users: UsersIndex | null,
-        chats: ChatsIndex | null,
+        update: ParsedUpdate,
         // this is getting a bit crazy lol
-        parsed?: any,
-        parsedType?: Exclude<UpdateHandler['type'], 'raw'> | null,
         parsedState?: UpdateState<State, SceneName> | null,
         parsedScene?: string | null,
         forceScene?: true
     ): Promise<boolean> {
         if (!this._client) return false
 
-        const isRawMessage = update && tl.isAnyMessage(update)
-
-        if (parsed === undefined) {
-            const pair = PARSERS[update!._]
-            if (pair) {
-                if (
-                    this._handlersCount[update!._] ||
-                    this.listenerCount(pair[0])
-                ) {
-                    parsed = pair[1](this._client, update!, users!, chats!)
-                    parsedType = pair[0]
-                }
-            } else {
-                parsed = parsedType = null
-            }
-        }
-
         if (parsedScene === undefined) {
             if (
                 this._storage &&
                 this._scenes &&
-                (parsedType === 'new_message' ||
-                    parsedType === 'edit_message' ||
-                    parsedType === 'callback_query')
+                (update.name === 'new_message' ||
+                    update.name === 'edit_message' ||
+                    update.name === 'callback_query')
             ) {
                 // no need to fetch scene if there are no registered scenes
-                const key = await this._stateKeyDelegate!(parsed)
+                const key = await this._stateKeyDelegate!(update.data)
                 if (key) {
                     parsedScene = await this._storage.getCurrentScene(key)
                 } else {
@@ -508,10 +335,6 @@ export class Dispatcher<
 
                 return this._scenes[parsedScene]._dispatchUpdateNowImpl(
                     update,
-                    users,
-                    chats,
-                    parsed,
-                    parsedType,
                     parsedState,
                     parsedScene,
                     true
@@ -522,16 +345,18 @@ export class Dispatcher<
         if (parsedState === undefined) {
             if (
                 this._storage &&
-                (parsedType === 'new_message' ||
-                    parsedType === 'edit_message' ||
-                    parsedType === 'callback_query')
+                (update.name === 'new_message' ||
+                    update.name === 'edit_message' ||
+                    update.name === 'callback_query')
             ) {
-                const key = await this._stateKeyDelegate!(parsed)
+                const key = await this._stateKeyDelegate!(update.data)
                 if (key) {
                     let customKey
                     if (
                         !this._customStateKeyDelegate ||
-                        (customKey = await this._customStateKeyDelegate(parsed))
+                        (customKey = await this._customStateKeyDelegate(
+                            update.data
+                        ))
                     ) {
                         parsedState = new UpdateState(
                             this._storage!,
@@ -552,79 +377,23 @@ export class Dispatcher<
 
         let shouldDispatch = true
         let shouldDispatchChildren = true
-        let wasHandled = false
-        let updateInfo: any = null
+        let handled = false
 
-        if (parsed) {
-            updateInfo = { type: parsedType, data: parsed }
-            switch (
-                await this._preUpdateHandler?.(
-                    updateInfo as any,
-                    parsedState as any
-                )
-            ) {
-                case 'stop':
-                    shouldDispatch = false
-                    break
-                case 'stop-children':
-                    return false
-            }
+        switch (await this._preUpdateHandler?.(update, parsedState as any)) {
+            case 'stop':
+                shouldDispatch = false
+                break
+            case 'stop-children':
+                return false
         }
 
         if (shouldDispatch) {
-            if (update && !isRawMessage) {
-                this.emit('raw', update, users, chats)
-            }
-
-            if (parsedType) {
-                this.emit('update', updateInfo)
-                this.emit(parsedType, parsed)
-            }
-
             outer: for (const grp of this._groupsOrder) {
                 const group = this._groups[grp]
 
-                if (update && !isRawMessage && 'raw' in group) {
-                    const handlers = group['raw'] as RawUpdateHandler[]
-
-                    for (const h of handlers) {
-                        let result: void | PropagationAction
-
-                        if (
-                            !h.check ||
-                            (await h.check(
-                                this._client,
-                                update as any,
-                                users!,
-                                chats!
-                            ))
-                        ) {
-                            result = await h.callback(
-                                this._client,
-                                update as any,
-                                users!,
-                                chats!
-                            )
-                            wasHandled = true
-                        } else continue
-
-                        switch (result) {
-                            case 'continue':
-                                continue
-                            case 'stop':
-                                break outer
-                            case 'stop-children':
-                                shouldDispatchChildren = false
-                                break outer
-                        }
-
-                        break
-                    }
-                }
-
-                if (parsedType && parsedType in group) {
+                if (update.name in group) {
                     // raw is not handled here, so we can safely assume this
-                    const handlers = group[parsedType] as Exclude<
+                    const handlers = group[update.name] as Exclude<
                         UpdateHandler,
                         RawUpdateHandler
                     >[]
@@ -635,13 +404,16 @@ export class Dispatcher<
 
                             if (
                                 !h.check ||
-                                (await h.check(parsed, parsedState as never))
+                                (await h.check(
+                                    update.data as any,
+                                    parsedState as never
+                                ))
                             ) {
                                 result = await h.callback(
-                                    parsed,
+                                    update.data as any,
                                     parsedState as never
                                 )
-                                wasHandled = true
+                                handled = true
                             } else continue
 
                             switch (result) {
@@ -669,10 +441,6 @@ export class Dispatcher<
                                         scene
                                     ]._dispatchUpdateNowImpl(
                                         update,
-                                        users,
-                                        chats,
-                                        parsed,
-                                        parsedType,
                                         undefined,
                                         scene,
                                         true
@@ -686,7 +454,7 @@ export class Dispatcher<
                         if (this._errorHandler) {
                             const handled = await this._errorHandler(
                                 e,
-                                updateInfo as any,
+                                update,
                                 parsedState as never
                             )
                             if (!handled) throw e
@@ -700,25 +468,13 @@ export class Dispatcher<
 
         if (shouldDispatchChildren) {
             for (const child of this._children) {
-                wasHandled ||= await child._dispatchUpdateNowImpl(
-                    update,
-                    users,
-                    chats,
-                    parsed,
-                    parsedType
-                )
+                handled ||= await child._dispatchUpdateNowImpl(update)
             }
         }
 
-        if (updateInfo) {
-            this._postUpdateHandler?.(
-                wasHandled,
-                updateInfo,
-                parsedState as any
-            )
-        }
+        this._postUpdateHandler?.(handled, update, parsedState as any)
 
-        return wasHandled
+        return handled
     }
 
     /**
@@ -734,28 +490,23 @@ export class Dispatcher<
             this._groupsOrder.sort((a, b) => a - b)
         }
 
-        if (!(handler.type in this._groups[group])) {
-            this._groups[group][handler.type] = []
+        if (!(handler.name in this._groups[group])) {
+            this._groups[group][handler.name] = []
         }
 
-        HANDLER_TYPE_TO_UPDATE[handler.type].forEach((upd) => {
-            if (!(upd in this._handlersCount)) this._handlersCount[upd] = 0
-            this._handlersCount[upd] += 1
-        })
-
-        this._groups[group][handler.type].push(handler)
+        this._groups[group][handler.name].push(handler)
     }
 
     /**
      * Remove an update handler (or handlers) from a given
      * handler group.
      *
-     * @param handler  Update handler to remove, its type or `'all'` to remove all
+     * @param handler  Update handler to remove, its name or `'all'` to remove all
      * @param group  Handler group index (-1 to affect all groups)
      * @internal
      */
     removeUpdateHandler(
-        handler: UpdateHandler | UpdateHandler['type'] | 'all',
+        handler: UpdateHandler | UpdateHandler['name'] | 'all',
         group = 0
     ): void {
         if (group !== -1 && !(group in this._groups)) {
@@ -766,38 +517,22 @@ export class Dispatcher<
             if (handler === 'all') {
                 if (group === -1) {
                     this._groups = {}
-                    this._handlersCount = {}
                 } else {
-                    const grp = this._groups[group] as any
-                    Object.keys(grp).forEach((handler) => {
-                        HANDLER_TYPE_TO_UPDATE[handler].forEach((upd) => {
-                            this._handlersCount[upd] -= grp[handler].length
-                        })
-                    })
                     delete this._groups[group]
                 }
             } else {
-                HANDLER_TYPE_TO_UPDATE[handler].forEach((upd) => {
-                    this._handlersCount[upd] -= this._groups[group][
-                        handler
-                    ].length
-                })
                 delete this._groups[group][handler]
             }
             return
         }
 
-        if (!(handler.type in this._groups[group])) {
+        if (!(handler.name in this._groups[group])) {
             return
         }
 
-        const idx = this._groups[group][handler.type].indexOf(handler)
-        if (idx > 0) {
-            this._groups[group][handler.type].splice(idx, 1)
-
-            HANDLER_TYPE_TO_UPDATE[handler.type].forEach((upd) => {
-                this._handlersCount[upd] -= 1
-            })
+        const idx = this._groups[group][handler.name].indexOf(handler)
+        if (idx > -1) {
+            this._groups[group][handler.name].splice(idx, 1)
         }
     }
 
@@ -1071,10 +806,6 @@ export class Dispatcher<
             }
         })
 
-        Object.keys(other._handlersCount).forEach((typ) => {
-            this._handlersCount[typ] += other._handlersCount[typ]
-        })
-
         other._children.forEach((it) => {
             it._unparent()
             this.addChild(it as any)
@@ -1121,14 +852,13 @@ export class Dispatcher<
             dp._groups[idx] = {} as any
 
             Object.keys(this._groups[idx]).forEach(
-                (type: UpdateHandler['type']) => {
+                (type: UpdateHandler['name']) => {
                     dp._groups[idx][type] = [...this._groups[idx][type]]
                 }
             )
         })
 
         dp._groupsOrder = [...this._groupsOrder]
-        dp._handlersCount = { ...this._handlersCount }
         dp._errorHandler = this._errorHandler
         dp._customStateKeyDelegate = this._customStateKeyDelegate
         dp._customStorage = this._customStorage
@@ -1268,48 +998,29 @@ export class Dispatcher<
     // addUpdateHandler convenience wrappers //
 
     private _addKnownHandler(
-        name: keyof typeof handlers,
+        name: UpdateHandler['name'],
         filter: any,
         handler?: any,
         group?: number
     ): void {
         if (typeof handler === 'number') {
-            this.addUpdateHandler((handlers as any)[name](filter), handler)
+            this.addUpdateHandler({
+                name,
+                callback: filter
+            }, handler)
         } else {
             this.addUpdateHandler(
-                (handlers as any)[name](filter, handler),
+                {
+                    name,
+                    callback: handler,
+                    check: filter
+                },
                 group
             )
         }
     }
 
     // begin-codegen
-
-    /**
-     * Register a raw update handler without any filters
-     *
-     * @param handler  Raw update handler
-     * @param group  Handler group index
-     */
-    onRawUpdate(handler: RawUpdateHandler['callback'], group?: number): void
-
-    /**
-     * Register a raw update handler with a filter
-     *
-     * @param filter  Update filter function
-     * @param handler  Raw update handler
-     * @param group  Handler group index
-     */
-    onRawUpdate(
-        filter: RawUpdateHandler['check'],
-        handler: RawUpdateHandler['callback'],
-        group?: number
-    ): void
-
-    /** @internal */
-    onRawUpdate(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('rawUpdate', filter, handler, group)
-    }
 
     /**
      * Register a new message handler without any filters
@@ -1359,7 +1070,7 @@ export class Dispatcher<
 
     /** @internal */
     onNewMessage(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('newMessage', filter, handler, group)
+        this._addKnownHandler('new_message', filter, handler, group)
     }
 
     /**
@@ -1410,7 +1121,7 @@ export class Dispatcher<
 
     /** @internal */
     onEditMessage(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('editMessage', filter, handler, group)
+        this._addKnownHandler('edit_message', filter, handler, group)
     }
 
     /**
@@ -1441,7 +1152,7 @@ export class Dispatcher<
 
     /** @internal */
     onDeleteMessage(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('deleteMessage', filter, handler, group)
+        this._addKnownHandler('delete_message', filter, handler, group)
     }
 
     /**
@@ -1472,7 +1183,7 @@ export class Dispatcher<
 
     /** @internal */
     onChatMemberUpdate(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('chatMemberUpdate', filter, handler, group)
+        this._addKnownHandler('chat_member', filter, handler, group)
     }
 
     /**
@@ -1500,7 +1211,7 @@ export class Dispatcher<
 
     /** @internal */
     onInlineQuery(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('inlineQuery', filter, handler, group)
+        this._addKnownHandler('inline_query', filter, handler, group)
     }
 
     /**
@@ -1531,7 +1242,7 @@ export class Dispatcher<
 
     /** @internal */
     onChosenInlineResult(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('chosenInlineResult', filter, handler, group)
+        this._addKnownHandler('chosen_inline_result', filter, handler, group)
     }
 
     /**
@@ -1582,7 +1293,7 @@ export class Dispatcher<
 
     /** @internal */
     onCallbackQuery(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('callbackQuery', filter, handler, group)
+        this._addKnownHandler('callback_query', filter, handler, group)
     }
 
     /**
@@ -1608,7 +1319,7 @@ export class Dispatcher<
 
     /** @internal */
     onPollUpdate(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('pollUpdate', filter, handler, group)
+        this._addKnownHandler('poll', filter, handler, group)
     }
 
     /**
@@ -1636,7 +1347,7 @@ export class Dispatcher<
 
     /** @internal */
     onPollVote(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('pollVote', filter, handler, group)
+        this._addKnownHandler('poll_vote', filter, handler, group)
     }
 
     /**
@@ -1667,7 +1378,7 @@ export class Dispatcher<
 
     /** @internal */
     onUserStatusUpdate(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('userStatusUpdate', filter, handler, group)
+        this._addKnownHandler('user_status', filter, handler, group)
     }
 
     /**
@@ -1695,7 +1406,7 @@ export class Dispatcher<
 
     /** @internal */
     onUserTyping(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('userTyping', filter, handler, group)
+        this._addKnownHandler('user_typing', filter, handler, group)
     }
 
     /**
@@ -1723,7 +1434,7 @@ export class Dispatcher<
 
     /** @internal */
     onHistoryRead(filter: any, handler?: any, group?: number): void {
-        this._addKnownHandler('historyRead', filter, handler, group)
+        this._addKnownHandler('history_read', filter, handler, group)
     }
 
     // end-codegen

@@ -8,7 +8,7 @@ import {
     User,
     UsersIndex,
 } from '@mtcute/client'
-import { makeInspectable } from '@mtcute/client/src/types/utils'
+import { makeInspectable } from '../utils'
 
 export namespace ChatMemberUpdate {
     /**

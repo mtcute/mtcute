@@ -4,6 +4,7 @@ const fs = require('fs')
 const prettier = require('prettier')
 // not the best way but who cares lol
 const { createWriter } = require('../../tl/scripts/common')
+const updates = require('./generate-updates')
 
 const targetDir = path.join(__dirname, '../src')
 
@@ -298,6 +299,32 @@ async function main() {
         '\nexport interface TelegramClient extends BaseTelegramClient {'
     )
     output.tab()
+
+    output.write(`/**
+ * Register a raw update handler
+ *
+ * @param name  Event name
+ * @param handler  Raw update handler
+ */
+ on(name: 'raw_update', handler: ((upd: tl.TypeUpdate | tl.TypeMessage, users: UsersIndex, chats: ChatsIndex) => void)): this
+/**
+ * Register a parsed update handler
+ *
+ * @param name  Event name
+ * @param handler  Raw update handler
+ */
+ on(name: 'update', handler: ((upd: ParsedUpdate) => void)): this`)
+
+    updates.types.forEach((type) => {
+        output.write(`/**
+ * Register ${updates.toSentence(type, 'inline')}
+ *
+ * @param name  Event name
+ * @param handler  ${updates.toSentence(type, 'full')}
+ */
+on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this`)
+    })
+
 
     const printer = ts.createPrinter()
 

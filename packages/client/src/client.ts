@@ -142,12 +142,12 @@ import { getStickerSet } from './methods/stickers/get-sticker-set'
 import { moveStickerInSet } from './methods/stickers/move-sticker-in-set'
 import { setStickerSetThumb } from './methods/stickers/set-sticker-set-thumb'
 import {
+    _dispatchUpdate,
     _fetchUpdatesState,
     _handleUpdate,
     _loadStorage,
     _saveStorage,
     catchUp,
-    dispatchUpdate,
 } from './methods/updates'
 import { blockUser } from './methods/users/block-user'
 import { deleteProfilePhotos } from './methods/users/delete-profile-photos'
@@ -168,17 +168,23 @@ import { Readable } from 'stream'
 import {
     ArrayWithTotal,
     BotCommands,
+    CallbackQuery,
     Chat,
     ChatEvent,
     ChatInviteLink,
     ChatMember,
+    ChatMemberUpdate,
     ChatPreview,
     ChatsIndex,
+    ChosenInlineResult,
+    DeleteMessageUpdate,
     Dialog,
     FileDownloadParameters,
     FormattedString,
     GameHighScore,
+    HistoryReadUpdate,
     IMessageEntityParser,
+    InlineQuery,
     InputFileLike,
     InputInlineResult,
     InputMediaLike,
@@ -187,10 +193,13 @@ import {
     MaybeDynamic,
     Message,
     MessageMedia,
+    ParsedUpdate,
     PartialExcept,
     PartialOnly,
     Photo,
     Poll,
+    PollUpdate,
+    PollVoteUpdate,
     RawDocument,
     ReplyMarkup,
     SentCode,
@@ -201,6 +210,8 @@ import {
     UploadFileLike,
     UploadedFile,
     User,
+    UserStatusUpdate,
+    UserTypingUpdate,
     UsersIndex,
 } from './types'
 import {
@@ -212,6 +223,117 @@ import {
 import { tdFileId } from '@mtcute/file-id'
 
 export interface TelegramClient extends BaseTelegramClient {
+    /**
+     * Register a raw update handler
+     *
+     * @param name  Event name
+     * @param handler  Raw update handler
+     */
+    on(
+        name: 'raw_update',
+        handler: (
+            upd: tl.TypeUpdate | tl.TypeMessage,
+            users: UsersIndex,
+            chats: ChatsIndex
+        ) => void
+    ): this
+    /**
+     * Register a parsed update handler
+     *
+     * @param name  Event name
+     * @param handler  Raw update handler
+     */
+    on(name: 'update', handler: (upd: ParsedUpdate) => void): this
+    /**
+     * Register a new message handler
+     *
+     * @param name  Event name
+     * @param handler  New message handler
+     */
+    on(name: 'new_message', handler: (upd: Message) => void): this
+    /**
+     * Register an edit message handler
+     *
+     * @param name  Event name
+     * @param handler  Edit message handler
+     */
+    on(name: 'edit_message', handler: (upd: Message) => void): this
+    /**
+     * Register a delete message handler
+     *
+     * @param name  Event name
+     * @param handler  Delete message handler
+     */
+    on(
+        name: 'delete_message',
+        handler: (upd: DeleteMessageUpdate) => void
+    ): this
+    /**
+     * Register a chat member update handler
+     *
+     * @param name  Event name
+     * @param handler  Chat member update handler
+     */
+    on(name: 'chat_member', handler: (upd: ChatMemberUpdate) => void): this
+    /**
+     * Register an inline query handler
+     *
+     * @param name  Event name
+     * @param handler  Inline query handler
+     */
+    on(name: 'inline_query', handler: (upd: InlineQuery) => void): this
+    /**
+     * Register a chosen inline result handler
+     *
+     * @param name  Event name
+     * @param handler  Chosen inline result handler
+     */
+    on(
+        name: 'chosen_inline_result',
+        handler: (upd: ChosenInlineResult) => void
+    ): this
+    /**
+     * Register a callback query handler
+     *
+     * @param name  Event name
+     * @param handler  Callback query handler
+     */
+    on(name: 'callback_query', handler: (upd: CallbackQuery) => void): this
+    /**
+     * Register a poll update handler
+     *
+     * @param name  Event name
+     * @param handler  Poll update handler
+     */
+    on(name: 'poll', handler: (upd: PollUpdate) => void): this
+    /**
+     * Register a poll vote handler
+     *
+     * @param name  Event name
+     * @param handler  Poll vote handler
+     */
+    on(name: 'poll_vote', handler: (upd: PollVoteUpdate) => void): this
+    /**
+     * Register an user status update handler
+     *
+     * @param name  Event name
+     * @param handler  User status update handler
+     */
+    on(name: 'user_status', handler: (upd: UserStatusUpdate) => void): this
+    /**
+     * Register an user typing handler
+     *
+     * @param name  Event name
+     * @param handler  User typing handler
+     */
+    on(name: 'user_typing', handler: (upd: UserTypingUpdate) => void): this
+    /**
+     * Register a history read handler
+     *
+     * @param name  Event name
+     * @param handler  History read handler
+     */
+    on(name: 'history_read', handler: (upd: HistoryReadUpdate) => void): this
     /**
      * Accept the given TOS
      *
@@ -3110,29 +3232,6 @@ export interface TelegramClient extends BaseTelegramClient {
             progressCallback?: (uploaded: number, total: number) => void
         }
     ): Promise<StickerSet>
-    /**
-     * Base function for update handling. Replace or override this function
-     * and implement your own update handler, and call this function
-     * to handle externally obtained or manually crafted updates.
-     *
-     * Note that this function is called every time an `Update` is received,
-     * not `Updates`. Low-level updates containers are parsed by the library,
-     * and you receive ready to use updates and related entities.
-     * Also note that entity maps may contain entities that are not
-     * used in this particular update, so do not rely on its contents.
-     *
-     * `update` might contain a Message object - in this case,
-     * it should be interpreted as some kind of `updateNewMessage`.
-     *
-     * @param update  Update that has just happened
-     * @param users  Map of users in this update
-     * @param chats  Map of chats in this update
-     */
-    dispatchUpdate(
-        update: tl.TypeUpdate | tl.TypeMessage,
-        users: UsersIndex,
-        chats: ChatsIndex
-    ): void
     _handleUpdate(update: tl.TypeUpdates, noDispatch?: boolean): void
     /**
      * Catch up with the server by loading missed updates.
@@ -3524,7 +3623,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _fetchUpdatesState = _fetchUpdatesState
     protected _loadStorage = _loadStorage
     protected _saveStorage = _saveStorage
-    dispatchUpdate = dispatchUpdate
+    protected _dispatchUpdate = _dispatchUpdate
     _handleUpdate = _handleUpdate
     catchUp = catchUp
     blockUser = blockUser

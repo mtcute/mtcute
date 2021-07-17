@@ -1,104 +1,18 @@
-import { Dispatcher } from './dispatcher'
-import {
-    FormattedString,
-    InputMediaLike,
-    InputPeerLike,
-    MaybeAsync,
-    Message,
-    MtCuteArgumentError,
-    TelegramClient,
-    TimeoutError,
-    tl,
-} from '@mtcute/client'
-import { AsyncLock, getMarkedPeerId } from '@mtcute/core'
+import { AsyncLock, getMarkedPeerId, MaybeAsync } from '@mtcute/core'
 import {
     ControllablePromise,
     createControllablePromise,
 } from '@mtcute/core/src/utils/controllable-promise'
+import { TelegramClient } from '../client'
+import { InputMediaLike } from './media'
+import { MtCuteArgumentError } from './errors'
+import { InputPeerLike } from './peers'
 import { HistoryReadUpdate } from './updates'
-
-interface OneWayLinkedListItem<T> {
-    v: T
-    n?: OneWayLinkedListItem<T>
-}
-
-class Queue<T> {
-    first?: OneWayLinkedListItem<T>
-    last?: OneWayLinkedListItem<T>
-
-    length = 0
-
-    constructor (readonly limit = 0) {
-    }
-
-    push(item: T): void {
-        const it: OneWayLinkedListItem<T> = { v: item }
-        if (!this.first) {
-            this.first = this.last = it
-        } else {
-            this.last!.n = it
-            this.last = it
-        }
-
-        this.length += 1
-
-        if (this.limit) {
-            while (this.first && this.length > this.limit) {
-                this.first = this.first.n
-                this.length -= 1
-            }
-        }
-    }
-
-    empty(): boolean {
-        return this.first === undefined
-    }
-
-    peek(): T | undefined {
-        return this.first?.v
-    }
-
-    pop(): T | undefined {
-        if (!this.first) return undefined
-
-        const it = this.first
-        this.first = this.first.n
-        if (!this.first) this.last = undefined
-
-        this.length -= 1
-        return it.v
-    }
-
-    removeBy(pred: (it: T) => boolean): void {
-        if (!this.first) return
-
-        let prev: OneWayLinkedListItem<T> | undefined = undefined
-        let it = this.first
-        while (it && !pred(it.v)) {
-            if (!it.n) return
-
-            prev = it
-            it = it.n
-        }
-
-        if (!it) return
-
-        if (prev) {
-            prev.n = it.n
-        } else {
-            this.first = it.n
-        }
-
-        if (!this.first) this.last = undefined
-
-        this.length -= 1
-    }
-
-    clear(): void {
-        this.first = this.last = undefined
-        this.length = 0
-    }
-}
+import { FormattedString } from './parser'
+import { Message } from './messages'
+import { tl } from '@mtcute/tl'
+import { TimeoutError } from '@mtcute/tl/errors'
+import { Queue } from '../utils/queue'
 
 interface QueuedHandler<T> {
     promise: ControllablePromise<T>
@@ -120,7 +34,6 @@ interface QueuedHandler<T> {
 export class Conversation {
     private _inputPeer: tl.TypeInputPeer
     private _chatId: number
-    private _client: TelegramClient
     private _started = false
 
     private _lastMessage: number
@@ -136,7 +49,7 @@ export class Conversation {
     private _pendingRead: Record<number, QueuedHandler<void>> = {}
 
     constructor(
-        readonly dispatcher: Dispatcher<any, any>,
+        readonly client: TelegramClient,
         readonly chat: InputPeerLike
     ) {
         this._onNewMessage = this._onNewMessage.bind(this)
@@ -186,24 +99,16 @@ export class Conversation {
     async start(): Promise<void> {
         if (this._started) return
 
-        const client = this.dispatcher['_client']
-        if (!client) {
-            throw new MtCuteArgumentError(
-                'Dispatcher is not bound to a client!'
-            )
-        }
-
-        this._client = client
         this._started = true
-        this._inputPeer = await client.resolvePeer(this.chat)
+        this._inputPeer = await this.client.resolvePeer(this.chat)
         this._chatId = getMarkedPeerId(this._inputPeer)
 
-        const dialog = await client.getPeerDialogs(this._inputPeer)
+        const dialog = await this.client.getPeerDialogs(this._inputPeer)
         this._lastMessage = this._lastReceivedMessage = dialog.lastMessage.id
 
-        this.dispatcher.on('new_message', this._onNewMessage)
-        this.dispatcher.on('edit_message', this._onEditMessage)
-        this.dispatcher.on('history_read', this._onHistoryRead)
+        this.client.on('new_message', this._onNewMessage)
+        this.client.on('edit_message', this._onEditMessage)
+        this.client.on('history_read', this._onHistoryRead)
     }
 
     /**
@@ -212,9 +117,9 @@ export class Conversation {
     stop(): void {
         if (!this._started) return
 
-        this.dispatcher.off('new_message', this._onNewMessage)
-        this.dispatcher.off('edit_message', this._onEditMessage)
-        this.dispatcher.off('history_read', this._onHistoryRead)
+        this.client.off('new_message', this._onNewMessage)
+        this.client.off('edit_message', this._onEditMessage)
+        this.client.off('history_read', this._onHistoryRead)
 
         // reset pending status
         this._queuedNewMessage.clear()
@@ -240,7 +145,7 @@ export class Conversation {
             throw new MtCuteArgumentError("Conversation hasn't started yet")
         }
 
-        const res = await this._client.sendText(this._inputPeer, text, params)
+        const res = await this.client.sendText(this._inputPeer, text, params)
         this._lastMessage = res.id
         return res
     }
@@ -259,7 +164,7 @@ export class Conversation {
             throw new MtCuteArgumentError("Conversation hasn't started yet")
         }
 
-        const res = await this._client.sendMedia(this._inputPeer, media, params)
+        const res = await this.client.sendMedia(this._inputPeer, media, params)
         this._lastMessage = res.id
         return res
     }
@@ -278,7 +183,7 @@ export class Conversation {
             throw new MtCuteArgumentError("Conversation hasn't started yet")
         }
 
-        const res = await this._client.sendMediaGroup(
+        const res = await this.client.sendMediaGroup(
             this._inputPeer,
             medias,
             params
@@ -305,7 +210,7 @@ export class Conversation {
             message = this._lastMessage ?? 0
         }
 
-        return this._client.readHistory(this._inputPeer, message, clearMentions)
+        return this.client.readHistory(this._inputPeer, message, clearMentions)
     }
 
     /**
@@ -537,7 +442,7 @@ export class Conversation {
             )
 
         // check if the message is already read
-        const dialog = await this._client.getPeerDialogs(this._inputPeer)
+        const dialog = await this.client.getPeerDialogs(this._inputPeer)
         if (dialog.lastRead >= msgId) return
 
         const promise = createControllablePromise<void>()
@@ -578,7 +483,7 @@ export class Conversation {
                     this._queuedNewMessage.pop()
                 }
             } catch (e) {
-                this._client['_emitError'](e)
+                this.client['_emitError'](e)
             }
 
             this._lastMessage = this._lastReceivedMessage = msg.id
@@ -603,7 +508,7 @@ export class Conversation {
                 it.promise.resolve(msg)
                 delete this._pendingEditMessage[msg.id]
             }
-        })().catch((e) => this._client['_emitError'](e))
+        })().catch((e) => this.client['_emitError'](e))
     }
 
     private _onHistoryRead(upd: HistoryReadUpdate) {

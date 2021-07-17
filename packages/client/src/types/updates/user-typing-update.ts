@@ -8,7 +8,7 @@ import {
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { getBarePeerId, MAX_CHANNEL_ID } from '@mtcute/core'
-import { makeInspectable } from '@mtcute/client/src/types/utils'
+import { makeInspectable } from '../utils'
 
 /**
  * User's typing status has changed.

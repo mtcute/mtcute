@@ -40,7 +40,18 @@ import {
     MessageMedia,
     RawDocument,
     IMessageEntityParser,
-    FormattedString
+    FormattedString,
+    CallbackQuery,
+    ChatMemberUpdate,
+    ChosenInlineResult,
+    DeleteMessageUpdate,
+    HistoryReadUpdate,
+    InlineQuery,
+    ParsedUpdate,
+    PollUpdate,
+    PollVoteUpdate,
+    UserStatusUpdate,
+    UserTypingUpdate,
 } from '../types'
 
 // @copy

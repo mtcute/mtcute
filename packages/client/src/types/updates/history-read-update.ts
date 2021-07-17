@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/tl'
 import { TelegramClient } from '@mtcute/client'
 import { getMarkedPeerId, MAX_CHANNEL_ID } from '@mtcute/core'
-import { makeInspectable } from '@mtcute/client/src/types/utils'
+import { makeInspectable } from '../utils'
 
 export class HistoryReadUpdate {
     constructor (

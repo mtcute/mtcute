@@ -23,14 +23,14 @@ import {
     WebPage,
     MessageAction,
     RawLocation,
+    ChatMemberUpdate,
+    ChosenInlineResult,
+    UserStatusUpdate,
+    PollVoteUpdate,
+    UserTypingUpdate,
 } from '@mtcute/client'
 import { MaybeArray } from '@mtcute/core'
-import { ChatMemberUpdate } from './updates'
-import { ChosenInlineResult } from './updates/chosen-inline-result'
 import { UpdateState } from './state'
-import { UserStatusUpdate } from './updates/user-status-update'
-import { PollVoteUpdate } from './updates/poll-vote'
-import { UserTypingUpdate } from './updates/user-typing-update'
 
 function extractText(
     obj: Message | InlineQuery | ChosenInlineResult | CallbackQuery

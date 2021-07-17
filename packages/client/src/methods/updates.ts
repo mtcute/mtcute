@@ -14,6 +14,7 @@ import {
 } from '@mtcute/core'
 import { isDummyUpdate, isDummyUpdates } from '../utils/updates-utils'
 import { ChatsIndex, UsersIndex } from '../types'
+import { _parseUpdate } from '../utils/parse-update'
 
 const debug = require('debug')('mtcute:upds')
 
@@ -155,31 +156,21 @@ export async function _saveStorage(
 }
 
 /**
- * Base function for update handling. Replace or override this function
- * and implement your own update handler, and call this function
- * to handle externally obtained or manually crafted updates.
- *
- * Note that this function is called every time an `Update` is received,
- * not `Updates`. Low-level updates containers are parsed by the library,
- * and you receive ready to use updates and related entities.
- * Also note that entity maps may contain entities that are not
- * used in this particular update, so do not rely on its contents.
- *
- * `update` might contain a Message object - in this case,
- * it should be interpreted as some kind of `updateNewMessage`.
- *
- * @param update  Update that has just happened
- * @param users  Map of users in this update
- * @param chats  Map of chats in this update
  * @internal
  */
-export function dispatchUpdate(
+export function _dispatchUpdate(
     this: TelegramClient,
     update: tl.TypeUpdate | tl.TypeMessage,
     users: UsersIndex,
     chats: ChatsIndex
 ): void {
-    // no-op //
+    this.emit('raw_update', update, users, chats)
+
+    const parsed = _parseUpdate(this, update, users, chats)
+    if (parsed) {
+        this.emit('update', parsed)
+        this.emit(parsed.name, parsed.data)
+    }
 }
 
 interface NoDispatchIndex {
@@ -441,7 +432,7 @@ async function _loadDifference(
                 if (noDispatch.msg[cid]?.[message.id]) return
             }
 
-            this.dispatchUpdate(message, users, chats)
+            this._dispatchUpdate(message, users, chats)
         })
 
         for (const upd of diff.otherUpdates) {
@@ -495,7 +486,7 @@ async function _loadDifference(
                 if (noDispatch.pts[cid ?? 0]?.[pts]) continue
             }
 
-            this.dispatchUpdate(upd, users, chats)
+            this._dispatchUpdate(upd, users, chats)
         }
 
         this._pts = state.pts
@@ -556,7 +547,7 @@ async function _loadChannelDifference(
                     return
                 if (message._ === 'messageEmpty') return
 
-                this.dispatchUpdate(message, users, chats)
+                this._dispatchUpdate(message, users, chats)
             })
             break
         }
@@ -565,7 +556,7 @@ async function _loadChannelDifference(
             if (noDispatch && noDispatch.msg[channelId]?.[message.id]) return
             if (message._ === 'messageEmpty') return
 
-            this.dispatchUpdate(message, users, chats)
+            this._dispatchUpdate(message, users, chats)
         })
 
         diff.otherUpdates.forEach((upd) => {
@@ -582,7 +573,7 @@ async function _loadChannelDifference(
             if (upd._ === 'updateNewChannelMessage' && upd.message._ === 'messageEmpty')
                 return
 
-            this.dispatchUpdate(upd, users, chats)
+            this._dispatchUpdate(upd, users, chats)
         })
 
         pts = diff.pts
@@ -728,7 +719,7 @@ export function _handleUpdate(
                             }
 
                             if (!isDummyUpdate(upd) && !noDispatch) {
-                                this.dispatchUpdate(upd, users, chats)
+                                this._dispatchUpdate(upd, users, chats)
                             }
 
                             if (channelId) {
@@ -738,7 +729,7 @@ export function _handleUpdate(
                                 this._pts = pts
                             }
                         } else if (!noDispatch) {
-                            this.dispatchUpdate(upd, users, chats)
+                            this._dispatchUpdate(upd, users, chats)
                         }
                     }
 
@@ -769,7 +760,7 @@ export function _handleUpdate(
                                 return await _loadDifference.call(this)
                             }
 
-                            this.dispatchUpdate(upd, peers.users, peers.chats)
+                            this._dispatchUpdate(upd, peers.users, peers.chats)
                         }
                     }
 
@@ -821,7 +812,7 @@ export function _handleUpdate(
                     this._date = update.date
                     this._pts = update.pts
 
-                    this.dispatchUpdate(message, peers.users, peers.chats)
+                    this._dispatchUpdate(message, peers.users, peers.chats)
                     break
                 }
                 case 'updateShortChatMessage': {
@@ -869,7 +860,7 @@ export function _handleUpdate(
                     this._date = update.date
                     this._pts = update.pts
 
-                    this.dispatchUpdate(message, peers.users, peers.chats)
+                    this._dispatchUpdate(message, peers.users, peers.chats)
                     break
                 }
                 case 'updateShortSentMessage': {
