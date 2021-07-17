@@ -175,5 +175,9 @@ export async function sendMedia(
         clearDraft: params.clearDraft,
     })
 
-    return this._findMessageInUpdate(res)
+    const msg = this._findMessageInUpdate(res)
+
+    this._pushConversationMessage(msg)
+
+    return msg
 }

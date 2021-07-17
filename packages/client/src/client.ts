@@ -73,6 +73,7 @@ import { getDialogs } from './methods/dialogs/get-dialogs'
 import { getFolders } from './methods/dialogs/get-folders'
 import { getPeerDialogs } from './methods/dialogs/get-peer-dialogs'
 import { _parseDialogs } from './methods/dialogs/parse-dialogs'
+import { _pushConversationMessage } from './methods/dialogs/_init-conversation'
 import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
 import { downloadAsIterable } from './methods/files/download-iterable'
@@ -177,6 +178,7 @@ import {
     ChatPreview,
     ChatsIndex,
     ChosenInlineResult,
+    Conversation,
     DeleteMessageUpdate,
     Dialog,
     FileDownloadParameters,
@@ -3445,6 +3447,8 @@ export class TelegramClient extends BaseTelegramClient {
     protected _userId: number | null
     protected _isBot: boolean
     protected _selfUsername: string | null
+    protected _pendingConversations: Record<number, Conversation[]>
+    protected _hasConversations: boolean
     protected _downloadConnections: Record<number, TelegramConnection>
     protected _connectionsForInline: Record<number, TelegramConnection>
     protected _parseModes: Record<string, IMessageEntityParser>
@@ -3465,6 +3469,8 @@ export class TelegramClient extends BaseTelegramClient {
         this._userId = null
         this._isBot = false
         this._selfUsername = null
+        this._pendingConversations = {}
+        this._hasConversations = false
         this._downloadConnections = {}
         this._connectionsForInline = {}
         this._parseModes = {}
@@ -3556,6 +3562,7 @@ export class TelegramClient extends BaseTelegramClient {
     getFolders = getFolders
     getPeerDialogs = getPeerDialogs
     protected _parseDialogs = _parseDialogs
+    protected _pushConversationMessage = _pushConversationMessage
     downloadAsBuffer = downloadAsBuffer
     downloadToFile = downloadToFile
     downloadAsIterable = downloadAsIterable

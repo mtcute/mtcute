@@ -52,6 +52,7 @@ import {
     PollVoteUpdate,
     UserStatusUpdate,
     UserTypingUpdate,
+    Conversation
 } from '../types'
 
 // @copy

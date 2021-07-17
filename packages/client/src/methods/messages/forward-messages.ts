@@ -255,6 +255,8 @@ export async function forwardMessages(
         }
     })
 
+    this._pushConversationMessage(forwarded[forwarded.length - 1])
+
     if (isSingle) return forwarded[0]
     if (captionMessage) forwarded.unshift(captionMessage)
     return forwarded

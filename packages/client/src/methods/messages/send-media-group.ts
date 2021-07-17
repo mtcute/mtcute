@@ -189,7 +189,7 @@ export async function sendMediaGroup(
 
     const { users, chats } = createUsersChatsIndex(res)
 
-    return res.updates
+    const msgs = res.updates
         .filter(
             (u) =>
                 u._ === 'updateNewMessage' ||
@@ -206,4 +206,8 @@ export async function sendMediaGroup(
                     u._ === 'updateNewScheduledMessage'
                 )
         )
+
+    this._pushConversationMessage(msgs[msgs.length - 1])
+
+    return msgs
 }

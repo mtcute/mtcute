@@ -74,5 +74,7 @@ export async function sendScheduled(
                 )
         )
 
+    this._pushConversationMessage(msgs[msgs.length - 1])
+
     return isSingle ? msgs[0] : msgs
 }

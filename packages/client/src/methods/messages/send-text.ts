@@ -226,8 +226,12 @@ export async function sendText(
         await fetchPeer(peer)
         await fetchPeer(msg.fromId!)
 
-        return new Message(this, msg, users, chats)
+        const ret = new Message(this, msg, users, chats)
+        this._pushConversationMessage(ret)
+        return ret
     }
 
-    return this._findMessageInUpdate(res)
+    const msg = this._findMessageInUpdate(res)
+    this._pushConversationMessage(msg)
+    return msg
 }

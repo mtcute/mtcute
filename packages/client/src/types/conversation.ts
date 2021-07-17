@@ -109,6 +109,12 @@ export class Conversation {
         this.client.on('new_message', this._onNewMessage)
         this.client.on('edit_message', this._onEditMessage)
         this.client.on('history_read', this._onHistoryRead)
+
+        if (!(this._chatId in this.client['_pendingConversations'])) {
+            this.client['_pendingConversations'][this._chatId] = []
+        }
+        this.client['_pendingConversations'][this._chatId].push(this)
+        this.client['_hasConversations'] = true
     }
 
     /**
@@ -120,6 +126,15 @@ export class Conversation {
         this.client.off('new_message', this._onNewMessage)
         this.client.off('edit_message', this._onEditMessage)
         this.client.off('history_read', this._onHistoryRead)
+
+        const idx = this.client['_pendingConversations'][this._chatId].indexOf(this)
+        if (idx > -1) { // just in case
+            this.client['_pendingConversations'][this._chatId].splice(idx, 1)
+        }
+        if (!this.client['_pendingConversations'][this._chatId].length) {
+            delete this.client['_pendingConversations'][this._chatId]
+        }
+        this.client['_hasConversations'] = Object.keys(this.client['_pendingConversations']).length > 0
 
         // reset pending status
         this._queuedNewMessage.clear()
@@ -145,9 +160,7 @@ export class Conversation {
             throw new MtCuteArgumentError("Conversation hasn't started yet")
         }
 
-        const res = await this.client.sendText(this._inputPeer, text, params)
-        this._lastMessage = res.id
-        return res
+        return this.client.sendText(this._inputPeer, text, params)
     }
 
     /**
@@ -164,9 +177,7 @@ export class Conversation {
             throw new MtCuteArgumentError("Conversation hasn't started yet")
         }
 
-        const res = await this.client.sendMedia(this._inputPeer, media, params)
-        this._lastMessage = res.id
-        return res
+        return this.client.sendMedia(this._inputPeer, media, params)
     }
 
     /**
@@ -183,13 +194,11 @@ export class Conversation {
             throw new MtCuteArgumentError("Conversation hasn't started yet")
         }
 
-        const res = await this.client.sendMediaGroup(
+        return this.client.sendMediaGroup(
             this._inputPeer,
             medias,
             params
         )
-        this._lastMessage = res[res.length - 1].id
-        return res
     }
 
     /**
