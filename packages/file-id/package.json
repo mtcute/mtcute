@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Support for TDLib and Bot API file ID for MTCute",
     "author": "Alisa Sireneva <me@tei.su>",
-    "license": "MIT",
+    "license": "LGPL-3.0",
     "main": "src/index.ts",
     "scripts": {
         "test": "mocha -r ts-node/register tests/**/*.spec.ts",

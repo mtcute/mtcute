@@ -4,7 +4,7 @@
     "description": "Native crypto implementation for NodeJS",
     "main": "src/index.ts",
     "private": true,
-    "license": "MIT",
+    "license": "LGPL-3.0",
     "scripts": {
         "build-ts": "tsc",
         "build:dev": "node-gyp -j 16 build --debug",

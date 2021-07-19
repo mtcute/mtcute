@@ -4,7 +4,7 @@
     "description": "TL schema used for MTCute",
     "main": "index.js",
     "author": "Alisa Sireneva <me@tei.su>",
-    "license": "MIT",
+    "license": "LGPL-3.0",
     "scripts": {
         "test": "tsc --noEmit tests/types.ts",
         "generate-schema": "node scripts/generate-schema.js",
