@@ -128,6 +128,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                     // ignore this, and add opening [
                     result = `${result.substr(0, ent.offset)}[${result.substr(ent.offset)}]`
                     pos += 1
+                    insideLink = false
                     continue
                 }
 
