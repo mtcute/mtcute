@@ -3,6 +3,7 @@ import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 import { tdFileId } from '@mtcute/file-id'
+import { decodeWaveform } from '../../utils/voice-utils'
 
 /**
  * An voice note.
@@ -35,10 +36,13 @@ export class Voice extends RawDocument {
 
     /**
      * Voice note's waveform
+     *
+     * Represented with integers in range [0, 31],
+     * usually has length of 100
      */
-    get waveform(): Buffer {
-        return this.attr.waveform!
+    get waveform(): number[] {
+        return decodeWaveform(this.attr.waveform!)
     }
 }
 
-makeInspectable(Voice, ['fileSize', 'dcId'], ['inputMedia', 'inputDocument'])
+makeInspectable(Voice, ['fileSize', 'dcId'], ['inputMedia', 'inputDocument', 'waveform'])

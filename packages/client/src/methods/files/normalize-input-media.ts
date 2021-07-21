@@ -16,6 +16,7 @@ import { extractFileName } from '../../utils/file-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 import bigInt from 'big-integer'
 import { normalizeDate } from '../../utils/misc-utils'
+import { encodeWaveform } from '../../utils/voice-utils'
 
 /**
  * Normalize an {@link InputMediaLike} to `InputMedia`,
@@ -381,7 +382,10 @@ export async function _normalizeInputMedia(
             duration: media.duration || 0,
             title: media.type === 'audio' ? media.title : undefined,
             performer: media.type === 'audio' ? media.performer : undefined,
-            waveform: media.type === 'voice' ? media.waveform : undefined,
+            waveform:
+                media.type === 'voice' && media.waveform
+                    ? encodeWaveform(media.waveform)
+                    : undefined,
         })
     }
 
