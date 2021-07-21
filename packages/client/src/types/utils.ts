@@ -29,6 +29,9 @@ function getAllGettersNames(obj: object): string[] {
     return getters
 }
 
+const bufferToJsonOriginal = (Buffer as any).toJSON
+const bufferToJsonInspect = function () { return this.toString('base64') }
+
 /**
  * Small helper function that adds `toJSON` and `util.custom.inspect`
  * methods to a given class based on its getters
@@ -51,25 +54,32 @@ export function makeInspectable(
     // dirty hack to set name for inspect result
     const proto = new Function(`return function ${obj.name}(){}`)().prototype
 
-    obj.prototype.toJSON = function () {
+    obj.prototype.toJSON = function (nested = false) {
+        if (!nested) {
+            (Buffer as any).toJSON = bufferToJsonInspect
+        }
+
         const ret: any = Object.create(proto)
         getters.forEach((it) => {
             try {
                 let val = this[it]
-                if (Buffer.isBuffer(val)) {
-                    val = val.toString('base64')
-                } else if (
+                if (
                     val &&
                     typeof val === 'object' &&
                     typeof val.toJSON === 'function'
                 ) {
-                    val = val.toJSON()
+                    val = val.toJSON(true)
                 }
                 ret[it] = val
             } catch (e) {
                 ret[it] = "Error: " + e.message
             }
         })
+
+        if (!nested) {
+            (Buffer as any).toJSON = bufferToJsonOriginal
+        }
+
         return ret
     }
     if (util) {
