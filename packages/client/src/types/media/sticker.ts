@@ -75,6 +75,19 @@ export class Sticker extends RawDocument {
     }
 
     /**
+     * Whether this sticker is a valid sticker.
+     *
+     * If it is not, then this is probably a WEBP photo
+     * that Telegram treats as a sticker.
+     */
+    get isValidSticker(): boolean {
+        return (
+            this.attrSize !== undefined &&
+            (this.attrSize.w === 512 || this.attrSize.h === 512)
+        )
+    }
+
+    /**
      * Primary emoji associated with this sticker,
      * that is displayed in dialogs list.
      *
@@ -118,7 +131,9 @@ export class Sticker extends RawDocument {
      * Input sticker set that it associated with this sticker, if available.
      */
     get inputStickerSet(): tl.TypeInputStickerSet | null {
-        return this.attr.stickerset._ === 'inputStickerSetEmpty' ? null : this.attr.stickerset
+        return this.attr.stickerset._ === 'inputStickerSetEmpty'
+            ? null
+            : this.attr.stickerset
     }
 
     private _maskPosition?: Sticker.MaskPosition
