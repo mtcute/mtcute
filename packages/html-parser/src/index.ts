@@ -1,4 +1,8 @@
-import type { IMessageEntityParser, MessageEntity, FormattedString } from '@mtcute/client'
+import type {
+    IMessageEntityParser,
+    MessageEntity,
+    FormattedString,
+} from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { Parser } from 'htmlparser2'
 import bigInt from 'big-integer'
@@ -13,12 +17,16 @@ const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|
  * const escaped = html`<b>${user.displayName}</b>`
  * ```
  */
-export function html(strings: TemplateStringsArray, ...sub: (string | FormattedString)[]): FormattedString {
+export function html(
+    strings: TemplateStringsArray,
+    ...sub: (string | FormattedString)[]
+): FormattedString {
     let str = ''
     sub.forEach((it, idx) => {
         if (typeof it === 'string') it = HtmlMessageEntityParser.escape(it)
         else {
-            if (it.mode && it.mode !== 'html') throw new Error(`Incompatible parse mode: ${it.mode}`)
+            if (it.mode && it.mode !== 'html')
+                throw new Error(`Incompatible parse mode: ${it.mode}`)
             it = it.value
         }
 
@@ -26,6 +34,28 @@ export function html(strings: TemplateStringsArray, ...sub: (string | FormattedS
     })
     return { value: str + strings[strings.length - 1], mode: 'html' }
 }
+
+/**
+ * Alias for {@link html} for Prettier users.
+ *
+ * Prettier formats <code>html`...`</code> as normal HTML,
+ * thus may add unwanted line breaks.
+ */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+export declare function htm(
+    strings: TemplateStringsArray,
+    ...sub: (string | FormattedString)[]
+): FormattedString
+
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+export const htm = html
+
+// ts ignores above are a hack so the resulting d.ts contains `htm`
+// as a function and not a variable, thus the ide would highlight
+// it as such (the same way as `html`)
 
 export namespace HtmlMessageEntityParser {
     /**

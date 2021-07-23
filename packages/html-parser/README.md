@@ -30,6 +30,21 @@ tg.sendText(
 supports nearly any HTML. However, since the text is still processed in a custom way for Telegram, the supported subset
 of features is documented below:
 
+## Line breaks
+
+Line breaks are preserved, `<br>` are ignored.
+
+> ⚠️ Warning for **Prettier** users: be aware that Prettier
+> formats tagged template literals with `html` as normal HTML and may add
+> unwanted line breaks.
+>
+> Use `htm` instead (which is just an alias):
+> ```typescript
+> import { htm } from '@mtcute/html-parser'
+>
+> await msg.answerText(htm`Hello, <b>${msg.sender.username}</b>`)
+> ```
+
 ## Inline entities
 
 Inline entities are entities that are in-line with other text. We support these entities:
