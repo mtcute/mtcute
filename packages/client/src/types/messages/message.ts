@@ -828,7 +828,7 @@ export class Message {
      */
     sendCopy(
         toChatId: InputPeerLike,
-        params: Parameters<TelegramClient['sendCopy']>[3]
+        params?: Parameters<TelegramClient['sendCopy']>[3]
     ): Promise<Message> {
         if (!params) params = {}
 
