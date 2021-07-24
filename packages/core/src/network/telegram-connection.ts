@@ -42,6 +42,7 @@ export interface TelegramConnectionParams extends PersistentConnectionParams {
     initConnection: tl.RawInitConnectionRequest
     inactivityTimeout?: number
     niceStacks?: boolean
+    layer: number
 }
 
 const messageHandlers: Record<string, string /* keyof TelegramConnection */> = {
@@ -668,7 +669,7 @@ export class TelegramConnection extends PersistentConnection {
             debug('wrapping %s with initConnection', message._)
             obj = {
                 _: 'invokeWithLayer',
-                layer: tl.CURRENT_LAYER,
+                layer: this.params.layer,
                 query: {
                     ...this.params.initConnection,
                     query: message,

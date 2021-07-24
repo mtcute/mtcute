@@ -146,6 +146,15 @@ export namespace BaseTelegramClient {
          * @default true
          */
         niceStacks?: boolean
+
+        /**
+         * **EXPERT USE ONLY!**
+         *
+         * Override TL layer used for the connection.                                                                                                                                                                                                                                  /;'
+         *
+         * **Does not** change the schema used.
+         */
+        overrideLayer?: number
     }
 }
 
@@ -207,6 +216,7 @@ export class BaseTelegramClient extends EventEmitter {
     protected _primaryDc: tl.RawDcOption
 
     private _niceStacks: boolean
+    readonly _layer: number
 
     private _keepAliveInterval: NodeJS.Timeout
     private _lastRequestTime = 0
@@ -265,6 +275,8 @@ export class BaseTelegramClient extends EventEmitter {
         this._disableUpdates = opts.disableUpdates ?? false
         this._niceStacks = opts.niceStacks ?? true
 
+        this._layer = opts.overrideLayer ?? tl.CURRENT_LAYER
+
         let deviceModel = 'mtcute on '
         if (typeof process !== 'undefined' && typeof require !== 'undefined') {
             const os = require('os')
@@ -310,6 +322,7 @@ export class BaseTelegramClient extends EventEmitter {
             transportFactory: this._transportFactory,
             dc: this._primaryDc,
             reconnectionStrategy: this._reconnectionStrategy,
+            layer: this._layer,
         })
         this.primaryConnection.on('usable', async () => {
             this._keepAliveInterval = setInterval(async () => {
@@ -654,6 +667,7 @@ export class BaseTelegramClient extends EventEmitter {
             transportFactory: this._transportFactory,
             reconnectionStrategy: this._reconnectionStrategy,
             inactivityTimeout,
+            layer: this._layer,
         })
 
         connection.on('error', (err) => this._emitError(err, connection))
