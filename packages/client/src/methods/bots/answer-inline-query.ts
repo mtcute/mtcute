@@ -27,7 +27,7 @@ export async function answerInlineQuery(
          * Whether the results should be displayed as a gallery instead
          * of a vertical list. Only applicable to some media types.
          *
-         * Defaults to `false`
+         * Defaults to `true`
          */
         gallery?: boolean
 
@@ -102,7 +102,7 @@ export async function answerInlineQuery(
         queryId,
         results: tlResults,
         cacheTime: params.cacheTime ?? 300,
-        gallery: params.gallery,
+        gallery: params.gallery ?? true,
         private: params.private,
         nextOffset: params.nextOffset,
         switchPm: params.switchPm
