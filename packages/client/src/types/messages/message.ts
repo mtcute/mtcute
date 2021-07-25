@@ -871,6 +871,16 @@ export class Message {
     }
 
     /**
+     * Get discussion message for some channel post.
+     *
+     * Returns `null` if the post does not have a discussion
+     * message.
+     */
+    async getDiscussionMessage(): Promise<Message | null> {
+        return this.client.getDiscussionMessage(this.chat.inputPeer, this.raw.id)
+    }
+
+    /**
      * Read history in the chat up until this message
      *
      * @param clearMentions  Whether to also clear mentions

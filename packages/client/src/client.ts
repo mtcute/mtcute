@@ -98,7 +98,10 @@ import { editInlineMessage } from './methods/messages/edit-inline-message'
 import { editMessage } from './methods/messages/edit-message'
 import { _findMessageInUpdate } from './methods/messages/find-in-update'
 import { forwardMessages } from './methods/messages/forward-messages'
-import { _getDiscussionMessage } from './methods/messages/get-discussion-message'
+import {
+    _getDiscussionMessage,
+    getDiscussionMessage,
+} from './methods/messages/get-discussion-message'
 import { getHistory } from './methods/messages/get-history'
 import { getMessageGroup } from './methods/messages/get-message-group'
 import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe'
@@ -680,7 +683,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Whether the results should be displayed as a gallery instead
              * of a vertical list. Only applicable to some media types.
              *
-             * Defaults to `false`
+             * Defaults to `true`
              */
             gallery?: boolean
 
@@ -2201,6 +2204,25 @@ export interface TelegramClient extends BaseTelegramClient {
             clearDraft?: boolean
         }
     ): Promise<MaybeArray<Message>>
+    // public version of the same method because why not
+    /**
+     * Get discussion message for some channel post.
+     *
+     * Returns `null` if the post does not have a discussion
+     * message.
+     *
+     * This method might throw `FLOOD_WAIT_X` error in case
+     * the discussion message was not *yet* created. Error
+     * is usually handled by the client, but if you disabled that,
+     * you'll need to handle it manually.
+     *
+     * @param peer  Channel where the post was found
+     * @param message  ID of the channel post
+     */
+    getDiscussionMessage(
+        peer: InputPeerLike,
+        message: number
+    ): Promise<Message | null>
     /**
      * Retrieve a chunk of the chat history.
      *
@@ -3588,6 +3610,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _findMessageInUpdate = _findMessageInUpdate
     forwardMessages = forwardMessages
     protected _getDiscussionMessage = _getDiscussionMessage
+    getDiscussionMessage = getDiscussionMessage
     getHistory = getHistory
     getMessageGroup = getMessageGroup
     getMessagesUnsafe = getMessagesUnsafe

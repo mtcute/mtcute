@@ -1,6 +1,7 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike } from '../../types'
+import { InputPeerLike, Message } from '../../types'
 import { tl } from '@mtcute/tl'
+import { createUsersChatsIndex } from '../../utils/peer-utils'
 
 /** @internal */
 export async function _getDiscussionMessage(
@@ -33,4 +34,44 @@ export async function _getDiscussionMessage(
         },
         msg.id,
     ]
+}
+
+// public version of the same method because why not
+
+/**
+ * Get discussion message for some channel post.
+ *
+ * Returns `null` if the post does not have a discussion
+ * message.
+ *
+ * This method might throw `FLOOD_WAIT_X` error in case
+ * the discussion message was not *yet* created. Error
+ * is usually handled by the client, but if you disabled that,
+ * you'll need to handle it manually.
+ *
+ * @param peer  Channel where the post was found
+ * @param message  ID of the channel post
+ * @internal
+ */
+export async function getDiscussionMessage(
+    this: TelegramClient,
+    peer: InputPeerLike,
+    message: number
+): Promise<Message | null> {
+    const inputPeer = await this.resolvePeer(peer)
+
+    const res = await this.call({
+        _: 'messages.getDiscussionMessage',
+        peer: inputPeer,
+        msgId: message,
+    })
+
+    if (!res.messages.length || res.messages[0]._ === 'messageEmpty')
+        // no discussion message (i guess?), return the same msg
+        return null
+
+    const msg = res.messages[0]
+    const { users, chats } = createUsersChatsIndex(res)
+
+    return new Message(this, msg, users, chats)
 }
