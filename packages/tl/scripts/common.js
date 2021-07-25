@@ -48,7 +48,7 @@ const camelToSnake = (s) => {
 }
 const snakeToPascal = (s) => camelToPascal(snakeToCamel(s))
 
-const signedInt32ToUnsigned = (val) => (val < 0 ? val + 0x100000000 : val)
+const signedInt32ToUnsigned = (val) => val >>> 0
 
 module.exports = {
     createWriter,

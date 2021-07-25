@@ -121,7 +121,7 @@ async function parseRemoteTl(file, commit) {
     return {
         layer,
         content,
-        tl: convertToArrays(convertTlToJson(content, 'api', true)),
+        tl: convertToArrays(await convertTlToJson(content, 'api', true)),
     }
 }
 

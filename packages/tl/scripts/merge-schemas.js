@@ -196,7 +196,7 @@ async function mergeSchemas(a, b, conflict = null) {
     if (rl) rl.close()
 }
 
-module.exports = { mergeSchemas }
+module.exports = { mergeSchemas, stringifyType }
 
 if (require.main === module) {
     const { expect } = require('chai')

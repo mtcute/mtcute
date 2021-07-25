@@ -12,7 +12,7 @@ const { applyDescriptionsFile } = require('./process-descriptions-yaml')
 const yaml = require('js-yaml')
 const { snakeToCamel, signedInt32ToUnsigned } = require('./common')
 const { asyncPool } = require('eager-async-pool')
-const { mergeSchemas } = require('./merge-schemas')
+const { mergeSchemas, stringifyType } = require('./merge-schemas')
 const CRC32 = require('crc-32')
 
 const SingleRegex = /^(.+?)(?:#([0-f]{1,8}))?(?: \?)?(?: {(.+?:.+?)})? ((?:.+? )*)= (.+);$/
@@ -87,7 +87,16 @@ function getJSType(typ, argName) {
     return normalizeGenerics(typ)
 }
 
-function convertTlToJson(tlText, tlType, silent = false) {
+async function convertTlToJson(tlText, tlType, silent = false) {
+    if (tlType === 'api') {
+        tlText =
+            fs.readFileSync(path.join(__dirname, '_prepend.tl'), 'utf8')
+            + '\n---$start-main---\n'
+            + tlText
+            + '\n---$start-append---\n'
+            + fs.readFileSync(path.join(__dirname, 'append.tl'), 'utf8')
+    }
+
     let lines = tlText.split('\n')
     let pos = 0
     let line = lines[0].trim()
@@ -111,6 +120,8 @@ function convertTlToJson(tlText, tlType, silent = false) {
         extends: null,
         blankLines: 0,
         stop: false,
+        part: 'prepend',
+        source: {}
     }
 
     const unions = {}
@@ -130,6 +141,11 @@ function convertTlToJson(tlText, tlType, silent = false) {
             return nextLine()
         }
         if (line && line.startsWith('---types---')) {
+            state.type = 'class'
+            return nextLine()
+        }
+        if (line && line.startsWith('---$start-')) {
+            state.part = line.split('$start-')[1].split('-')[0]
             state.type = 'class'
             return nextLine()
         }
@@ -166,7 +182,7 @@ function convertTlToJson(tlText, tlType, silent = false) {
 
         const match = SingleRegex.exec(line)
         if (!match) {
-            console.warn('Regex failed on:\n"' + line + '"')
+            console.warn(`Regex failed on:\n${line}`)
         } else {
             let [, fullName, typeId, generics, args, type] = match
             if (fullName in _types || fullName === 'vector') {
@@ -189,7 +205,7 @@ function convertTlToJson(tlText, tlType, silent = false) {
                                 .replace(/ +/g, ' ')
                                 .trim()
                         )
-                    ) + ''
+                    ).toString(16)
             }
 
             args = args.trim()
@@ -198,107 +214,143 @@ function convertTlToJson(tlText, tlType, silent = false) {
                     ? args.split(' ').map((j) => j.split(':'))
                     : []
 
-            if (state.type === 'class') {
-                let [namespace, name] = fullName.split('.')
-                if (!name) {
-                    name = namespace
-                    namespace = '$root'
-                }
+            let [namespace, name] = fullName.split('.')
+            if (!name) {
+                name = namespace
+                namespace = '$root'
+            }
 
+            if (state.type === 'class') {
                 if (!unions[type]) unions[type] = []
                 unions[type].push(
                     namespace === '$root' ? name : namespace + '.' + name
                 )
-
-                let r = {
-                    name,
-                    id: parseInt(typeId, 16),
-                    type: getJSType(type),
-                    arguments: [],
-                }
-                if (generics) {
-                    r.generics = generics.split(',').map((it) => {
-                        let [name, superClass] = it.split(':')
-                        return { name, super: getJSType(superClass) }
-                    })
-                }
-                if (args.length) {
-                    r.arguments = args.map(([name, typ]) => {
-                        let [predicate, type] = typ.split('?')
-                        if (!type) {
-                            return {
-                                name: snakeToCamel(name),
-                                type: getJSType(
-                                    typ,
-                                    tlType === 'mtproto'
-                                        ? `mt_${fullName}#${name}`
-                                        : ''
-                                ),
-                            }
-                        }
-                        return {
-                            name: snakeToCamel(name),
-                            type: getJSType(
-                                type,
-                                tlType === 'mtproto'
-                                    ? `mt_${fullName}#${name}`
-                                    : ''
-                            ),
-                            optional: true,
-                            predicate,
-                        }
-                    })
-                }
-
-                getNamespace(namespace).classes.push(r)
-            } else {
-                let [namespace, name] = fullName.split('.')
-                if (!name) {
-                    name = namespace
-                    namespace = '$root'
-                }
-
-                let r = {
-                    name: snakeToCamel(name),
-                    id: parseInt(typeId, 16),
-                    returns: getJSType(type),
-                    arguments: [],
-                }
-                if (generics) {
-                    r.generics = generics.split(',').map((it) => {
-                        let [name, superClass] = it.split(':')
-                        return { name, super: getJSType(superClass) }
-                    })
-                }
-                if (args.length) {
-                    r.arguments = args.map(([name, typ]) => {
-                        let [predicate, type] = typ.split('?')
-                        if (!type) {
-                            return {
-                                name: snakeToCamel(name),
-                                type: getJSType(
-                                    typ,
-                                    tlType === 'mtproto'
-                                        ? `mt_${fullName}#${name}`
-                                        : ''
-                                ),
-                            }
-                        }
-                        return {
-                            name: snakeToCamel(name),
-                            type: getJSType(
-                                type,
-                                tlType === 'mtproto'
-                                    ? `mt_${fullName}#${name}`
-                                    : ''
-                            ),
-                            optional: true,
-                            predicate,
-                        }
-                    })
-                }
-                getNamespace(namespace).methods.push(r)
             }
+
+            let r = {
+                name: state.type === 'class' ? name : snakeToCamel(name),
+                id: parseInt(typeId, 16),
+                [state.type === 'class' ? 'type' : 'returns']: getJSType(type),
+                arguments: [],
+            }
+            if (generics) {
+                r.generics = generics.split(',').map((it) => {
+                    let [name, superClass] = it.split(':')
+                    return { name, super: getJSType(superClass) }
+                })
+            }
+            if (args.length) {
+                r.arguments = args.map(([name, typ]) => {
+                    let [predicate, type] = typ.split('?')
+                    if (!type) {
+                        return {
+                            name: snakeToCamel(name),
+                            type: getJSType(
+                                typ,
+                                tlType === 'mtproto'
+                                    ? `mt_${fullName}#${name}`
+                                    : ''
+                            ),
+                        }
+                    }
+                    return {
+                        name: snakeToCamel(name),
+                        type: getJSType(
+                            type,
+                            tlType === 'mtproto'
+                                ? `mt_${fullName}#${name}`
+                                : ''
+                        ),
+                        optional: true,
+                        predicate,
+                    }
+                })
+            }
+
+            // check for overrides/conflicts
+            if (fullName in state.source) {
+                // this object was already met
+                const source = state.source[fullName]
+                const collection = getNamespace(namespace)[
+                    state.type === 'class' ? 'classes' : 'methods'
+                    ]
+                const oldIdx = collection.findIndex(
+                    (it) => it.name === r.name
+                )
+
+                if (source === state.part) {
+                    console.log(
+                        'warn: %s was met >1 times in %s part, was overridden',
+                        fullName,
+                        source
+                    )
+                    collection.splice(oldIdx, 1)
+                } else {
+                    const former = collection[oldIdx]
+
+                    const latter = r
+
+                    if (former.id === latter.id) {
+                        console.log(
+                            'warn: %s was met in %s, then in %s, was overridden',
+                            fullName,
+                            source,
+                            state.part
+                        )
+                        collection.splice(oldIdx, 1)
+                    } else {
+                        const rl = require('readline').createInterface({
+                            input: process.stdin,
+                            output: process.stdout,
+                        })
+
+                        const input = (q) =>
+                            new Promise((res) => rl.question(q, res))
+
+                        console.log(
+                            `!! Conflict on %s !! First met in %s, then in %s.`,
+                            fullName,
+                            source,
+                            state.part
+                        )
+                        console.log(
+                            'Option A (%s): %s',
+                            source,
+                            stringifyType(former, namespace)
+                        )
+                        console.log(
+                            'Option B (%s): %s',
+                            state.part,
+                            stringifyType(latter, namespace)
+                        )
+
+                        let keep
+                        while (true) {
+                            keep = await input('Which to keep? [A/B] > ')
+                            keep = keep.toUpperCase()
+
+                            if (keep !== 'A' && keep !== 'B') {
+                                console.log('Invalid input! Please type A or B')
+                                continue
+                            }
+
+                            break
+                        }
+
+                        rl.close()
+
+                        if (keep === 'A') {
+                            nextLine()
+                            continue
+                        } else {
+                            collection.splice(oldIdx, 1)
+                        }
+                    }
+                }
+            }
+
+            state.source[fullName] = state.part
+            getNamespace(namespace)[state.type === 'class' ? 'classes' : 'methods'].push(r)
         }
         nextLine()
     }
@@ -518,7 +570,7 @@ async function main() {
         .then((json) => convertJsonToTl(json))
     let ret = {}
 
-    ret.mtproto = convertTlToJson(mtprotoTl, 'mtproto')
+    ret.mtproto = await convertTlToJson(mtprotoTl, 'mtproto')
 
     console.log('[i] Fetching api.tl from tdesktop')
     const apiTlDesktop = await fetch(
@@ -555,12 +607,12 @@ async function main() {
             apiDesktopLayer > apiTdlibLayer ? apiDesktopLayer : apiTdlibLayer
 
         ret.apiLayer = newerLayer + ''
-        ret.api = convertTlToJson(newer, 'api')
+        ret.api = await convertTlToJson(newer, 'api')
     } else {
         console.log('[i] Merging schemas...')
 
-        const first = convertTlToJson(apiTlTdlib, 'api')
-        const second = convertTlToJson(apiTlDesktop, 'api')
+        const first = await convertTlToJson(apiTlTdlib, 'api')
+        const second = await convertTlToJson(apiTlDesktop, 'api')
 
         const onConflict =
             apiDesktopLayer === apiTdlibLayer

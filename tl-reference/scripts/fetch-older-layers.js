@@ -77,7 +77,7 @@ async function main() {
 
     for (const l of layers) {
         const tl = await fetchFromLayer(l)
-        const data = convertTlToJson(tl, 'api', true)
+        const data = await convertTlToJson(tl, 'api', true)
 
         await fs.promises.writeFile(
             path.join(
