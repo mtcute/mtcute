@@ -83,15 +83,17 @@ export async function doAuthorization(
 
     const newNonce = randomBytes(32)
 
+
     const pqInnerData = BinaryWriter.serializeObject({
-        _: 'mt_p_q_inner_data',
+        _: 'mt_p_q_inner_data_dc',
         pq: resPq.pq,
         p,
         q,
         nonce,
         newNonce,
         serverNonce: resPq.serverNonce,
-    } as tl.mtproto.RawP_q_inner_data)
+        dc: connection.params.dc.id
+    } as tl.mtproto.RawP_q_inner_data_dc)
     const encryptedData = await crypto.rsaEncrypt(pqInnerData, publicKey)
     debug('%s: requesting DH params', connection.params.dc.ipAddress)
 
@@ -117,13 +119,14 @@ export async function doAuthorization(
     if (!buffersEqual(serverDhParams.serverNonce, resPq.serverNonce))
         throw Error('Step 2: invalid server nonce from server')
 
-    if (serverDhParams._ === 'mt_server_DH_params_fail') {
-        // why would i want to do that? we are gonna fail anyways.
-        // let expectedNnh = (await crypto.sha1(newNonce)).slice(4, 20)
-        // if (!buffersEqual(serverDhParams.newNonceHash, expectedNnh))
-        //     throw new Error('Step 2: invalid DH fail nonce from server')
-        throw new Error('Step 2: server DH failed')
-    }
+    // type was removed from schema in July 2021
+    // if (serverDhParams._ === 'mt_server_DH_params_fail') {
+    //     // why would i want to do that? we are gonna fail anyways.
+    //     // let expectedNnh = (await crypto.sha1(newNonce)).slice(4, 20)
+    //     // if (!buffersEqual(serverDhParams.newNonceHash, expectedNnh))
+    //     //     throw new Error('Step 2: invalid DH fail nonce from server')
+    //     throw new Error('Step 2: server DH failed')
+    // }
 
     debug('%s: server DH ok', connection.params.dc.ipAddress)
 
