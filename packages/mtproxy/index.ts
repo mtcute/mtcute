@@ -6,8 +6,8 @@ import {
     parseUrlSafeBase64,
     BaseTcpTransport,
     TransportState,
-} from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+} from '@mtqt/core'
+import { tl } from '@mtqt/tl'
 import { connect } from 'net'
 import { FakeTlsPacketCodec, generateFakeTlsHeader } from './fake-tls'
 

@@ -1,8 +1,8 @@
 {
-    "name": "@mtcute/socks-proxy",
+    "name": "@mtqt/socks-proxy",
     "private": true,
     "version": "1.0.0",
-    "description": "SOCKS4/5 proxy support for MTCute",
+    "description": "SOCKS4/5 proxy support for mtqt",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "LGPL-3.0",
     "main": "index.ts",
@@ -12,7 +12,7 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/core": "^1.0.0",
+        "@mtqt/core": "^1.0.0",
         "ip6": "^0.2.6",
         "debug": "^4.3.1"
     }

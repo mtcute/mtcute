@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtCuteInvalidPeerTypeError } from '../../types'
-import { MaybeArray } from '@mtcute/core'
+import { InputPeerLike, MtqtInvalidPeerTypeError } from '../../types'
+import { MaybeArray } from '@mtqt/core'
 import {
     isInputPeerChannel,
     isInputPeerChat,
@@ -52,5 +52,5 @@ export async function addChatMembers(
             fwdLimit: forwardCount,
         })
         this._handleUpdate(updates)
-    } else throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
+    } else throw new MtqtInvalidPeerTypeError(chatId, 'chat or channel')
 }

@@ -3,10 +3,10 @@ import {
     InputFileLike,
     InputPeerLike,
     InputStickerSetItem,
-    MtCuteInvalidPeerTypeError,
+    MtqtInvalidPeerTypeError,
     StickerSet,
 } from '../../types'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 const MASK_POS = {
@@ -94,7 +94,7 @@ export async function createStickerSet(
     }
 ): Promise<StickerSet> {
     const owner = normalizeToInputUser(await this.resolvePeer(params.owner))
-    if (!owner) throw new MtCuteInvalidPeerTypeError(params.owner, 'user')
+    if (!owner) throw new MtqtInvalidPeerTypeError(params.owner, 'user')
 
     const inputStickers: tl.TypeInputStickerSetItem[] = []
 

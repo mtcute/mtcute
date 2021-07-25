@@ -7,7 +7,7 @@
         "./src"
     ],
     "typedocOptions": {
-        "name": "@mtcute/markdown-parser",
+        "name": "@mtqt/markdown-parser",
         "includeVersion": true,
         "out": "../../docs/packages/markdown-parser",
         "listInvalidSymbolLinks": true,

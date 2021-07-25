@@ -1,7 +1,7 @@
 import { BaseTelegramClient, defaultDcs } from '../src'
 
 require('dotenv-flow').config({ path: __dirname + '/../' })
-require('debug').enable('mtcute:*')
+require('debug').enable('mtqt:*')
 
 if (!process.env.API_ID || !process.env.API_HASH) {
     console.warn('Set API_ID and API_HASH env variables')
@@ -45,12 +45,12 @@ const tg = new BaseTelegramClient({
             _: 'auth.signUp',
             phoneNumber: phone,
             phoneCodeHash: res.phoneCodeHash,
-            firstName: 'MTCute E2E',
+            firstName: 'mtqt E2E',
             lastName: '',
         })
     }
 
-    const username = `mtcute_e2e_${numbers}`
+    const username = `mtqt_e2e_${numbers}`
 
     await tg.call({
         _: 'account.updateUsername',

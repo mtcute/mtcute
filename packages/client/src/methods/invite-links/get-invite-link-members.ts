@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
 import { ChatInviteLink, InputPeerLike, User } from '../../types'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 
 /**
  * Iterate over users who have joined

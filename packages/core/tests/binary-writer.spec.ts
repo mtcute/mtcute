@@ -6,8 +6,8 @@ import {
 } from '../src/utils/binary/binary-writer'
 import bigInt from 'big-integer'
 import { randomBytes } from '../src/utils/buffer-utils'
-import { tl } from '@mtcute/tl'
-import { ITlBinaryWriter } from '@mtcute/tl/binary/writer'
+import { tl } from '@mtqt/tl'
+import { ITlBinaryWriter } from '@mtqt/tl/binary/writer'
 
 describe('BinaryWriter', () => {
     const testSingleMethod = (

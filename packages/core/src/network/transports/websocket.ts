@@ -1,5 +1,5 @@
 import { ICuteTransport, IPacketCodec, TransportState } from './abstract'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import EventEmitter from 'events'
 import { typedArrayToBuffer } from '../../utils/buffer-utils'
 import { ICryptoProvider } from '../../utils/crypto'
@@ -7,7 +7,7 @@ import type WebSocket from 'ws'
 import { IntermediatePacketCodec } from './intermediate'
 import { ObfuscatedPacketCodec } from './obfuscated'
 
-const debug = require('debug')('mtcute:ws')
+const debug = require('debug')('mtqt:ws')
 
 let ws: {
     new (address: string, options?: string): WebSocket

@@ -1,13 +1,13 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import {
     Chat,
     ChatInviteLink,
     ChatMember,
     ChatsIndex,
-    TelegramClient,
     User,
     UsersIndex,
-} from '@mtcute/client'
+} from '../'
+import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 
 export namespace ChatMemberUpdate {

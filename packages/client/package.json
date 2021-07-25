@@ -1,8 +1,8 @@
 {
-    "name": "@mtcute/client",
+    "name": "@mtqt/client",
     "private": true,
     "version": "1.0.0",
-    "description": "High-level API over @mtcute/core",
+    "description": "High-level API over @mtqt/core",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "LGPL-3.0",
     "main": "src/index.ts",
@@ -13,9 +13,9 @@
     },
     "dependencies": {
         "@types/node": "^15.12.1",
-        "@mtcute/tl": "~1.131.0",
-        "@mtcute/core": "^1.0.0",
-        "@mtcute/file-id": "^1.0.0",
+        "@mtqt/tl": "~1.131.0",
+        "@mtqt/core": "^1.0.0",
+        "@mtqt/file-id": "^1.0.0",
         "eager-async-pool": "^1.0.0",
         "file-type": "^16.2.0",
         "big-integer": "1.6.48",

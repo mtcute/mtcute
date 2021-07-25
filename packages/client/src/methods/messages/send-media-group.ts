@@ -3,7 +3,7 @@ import {
     BotKeyboard, InputFileLike,
     InputMediaLike,
     InputPeerLike,
-    Message, MtCuteArgumentError,
+    Message, MtqtArgumentError,
     ReplyMarkup,
 } from '../../types'
 import {
@@ -11,10 +11,10 @@ import {
     normalizeMessageId,
     randomUlong,
 } from '../../utils/misc-utils'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
-import { MessageNotFoundError } from '@mtcute/tl/errors'
+import { MessageNotFoundError } from '@mtqt/tl/errors'
 
 /**
  * Send a group of media.
@@ -124,7 +124,7 @@ export async function sendMediaGroup(
 
     if (params.mustReply) {
         if (!replyTo)
-            throw new MtCuteArgumentError(
+            throw new MtqtArgumentError(
                 'mustReply used, but replyTo was not passed'
             )
 

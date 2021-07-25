@@ -4,8 +4,8 @@ export {
     LocalstorageStorage,
     tl,
     defaultDcs
-} from '@mtcute/core'
-export * from '@mtcute/tl/errors'
+} from '@mtqt/core'
+export * from '@mtqt/tl/errors'
 
 export * from './types'
 export * from './client'

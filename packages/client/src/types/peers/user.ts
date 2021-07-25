@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { TelegramClient } from '../../client'
 import { ChatPhoto } from './chat-photo'
-import { MtCuteArgumentError } from '../errors'
+import { MtqtArgumentError } from '../errors'
 import { makeInspectable } from '../utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { InputMediaLike } from '../media'
@@ -228,7 +228,7 @@ export class User {
      */
     get inputPeer(): tl.TypeInputPeer {
         if (!this.raw.accessHash)
-            throw new MtCuteArgumentError(
+            throw new MtqtArgumentError(
                 "user's access hash is not available!"
             )
 
@@ -327,14 +327,14 @@ export class User {
      * somewhere and load it from there if needed.
      *
      * This method is only needed when the result will be
-     * stored somewhere outside current MTCute instance,
+     * stored somewhere outside current mtqt instance,
      * otherwise {@link mention} will be enough.
      *
      * > **Note**: the resulting text can only be used by clients
-     * > that support MTCute notation of permanent
+     * > that support mtqt notation of permanent
      * > mention links (`tg://user?id=123&hash=abc`).
      * >
-     * > Both `@mtcute/html-parser` and `@mtcute/markdown-parser` support it.
+     * > Both `@mtqt/html-parser` and `@mtqt/markdown-parser` support it.
      * >
      * > Also note that these permanent mentions are only
      * > valid for current account, since peer access hashes are
@@ -345,7 +345,7 @@ export class User {
      */
     permanentMention(text?: string | null, parseMode?: string | null): FormattedString {
         if (!this.raw.accessHash)
-            throw new MtCuteArgumentError(
+            throw new MtqtArgumentError(
                 "user's access hash is not available!"
             )
 

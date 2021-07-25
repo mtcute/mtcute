@@ -6,7 +6,7 @@ import {
     Message,
     ReplyMarkup,
 } from '../../types'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 
 /**
  * Edit message text, media, reply markup and schedule date.

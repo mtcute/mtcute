@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 
 export const defaultProductionDc: tl.RawDcOption = {
     _: 'dcOption',

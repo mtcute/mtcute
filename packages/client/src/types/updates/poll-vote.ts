@@ -1,10 +1,6 @@
-import {
-    MtCuteUnsupportedError,
-    TelegramClient,
-    User,
-    UsersIndex,
-} from '@mtcute/client'
-import { tl } from '@mtcute/tl'
+import { MtqtUnsupportedError, User, UsersIndex } from '../'
+import { TelegramClient } from '../../client'
+import { tl } from '@mtqt/tl'
 import { makeInspectable } from '../utils'
 
 /**
@@ -59,7 +55,7 @@ export class PollVoteUpdate {
      *
      * However, most of the major implementations
      * (tested with TDLib and Bot API, official apps
-     * for Android, Desktop, iOS/macOS) and MTCute
+     * for Android, Desktop, iOS/macOS) and mtqt
      * (by default) create `option` as a one-byte `Buffer`,
      * incrementing from `48` (ASCII `0`) up to `57` (ASCII `9`),
      * and ASCII representation would define index in the array.
@@ -79,14 +75,14 @@ export class PollVoteUpdate {
      * described in {@link chosen}.
      * This might break at any time, but seems to be consistent for now.
      *
-     * If something does not add up, {@link MtCuteUnsupportedError} is thrown
+     * If something does not add up, {@link MtqtUnsupportedError} is thrown
      */
     get chosenIndexesAuto(): ReadonlyArray<number> {
         return this.raw.options.map((buf) => {
             if (buf.length > 1)
-                throw new MtCuteUnsupportedError('option had >1 byte')
+                throw new MtqtUnsupportedError('option had >1 byte')
             if (buf[0] < 48 || buf[0] > 57)
-                throw new MtCuteUnsupportedError(
+                throw new MtqtUnsupportedError(
                     'option had first byte out of 0-9 range'
                 )
 

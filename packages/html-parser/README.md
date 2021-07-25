@@ -1,6 +1,6 @@
-# @mtcute/html-parser
+# @mtqt/html-parser
 
-> HTML entities parser for MTCute
+> HTML entities parser for mtqt
 
 This package implements formatting syntax based on HTML, similar to the one available in the Bot
 API ([documented here](https://core.telegram.org/bots/api#html-style))
@@ -12,8 +12,8 @@ API ([documented here](https://core.telegram.org/bots/api#html-style))
 ## Usage
 
 ```typescript
-import { TelegramClient } from '@mtcute/client'
-import { HtmlMessageEntityParser, html } from '@mtcute/html-parser'
+import { TelegramClient } from '@mtqt/client'
+import { HtmlMessageEntityParser, html } from '@mtqt/html-parser'
 
 const tg = new TelegramClient({ ... })
 tg.registerParseMode(new HtmlMessageEntityParser())
@@ -26,7 +26,7 @@ tg.sendText(
 
 ## Syntax
 
-`@mtcute/html-parser` uses [`htmlparser2`](https://www.npmjs.com/package/htmlparser2) under the hood, so the parser
+`@mtqt/html-parser` uses [`htmlparser2`](https://www.npmjs.com/package/htmlparser2) under the hood, so the parser
 supports nearly any HTML. However, since the text is still processed in a custom way for Telegram, the supported subset
 of features is documented below:
 
@@ -40,7 +40,7 @@ Line breaks are preserved, `<br>` are ignored.
 >
 > Use `htm` instead (which is just an alias):
 > ```typescript
-> import { htm } from '@mtcute/html-parser'
+> import { htm } from '@mtqt/html-parser'
 >
 > await msg.answerText(htm`Hello, <b>${msg.sender.username}</b>`)
 > ```
@@ -110,7 +110,7 @@ better to use [`HtmlMessageEntityParser.escape`](./classes/htmlmessageentitypars
 `html` helper:
 
 ```typescript
-import { html } from '@mtcute/html-parser'
+import { html } from '@mtqt/html-parser'
 
 const username = 'Boris <&>'
 const text = html`Hi, ${username}!`

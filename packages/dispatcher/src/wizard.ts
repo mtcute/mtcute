@@ -1,4 +1,4 @@
-import { MaybeAsync, Message } from '@mtcute/client'
+import { MaybeAsync, Message } from '@mtqt/client'
 import { Dispatcher } from './dispatcher'
 import { NewMessageHandler } from './handler'
 import { UpdateState } from './state'

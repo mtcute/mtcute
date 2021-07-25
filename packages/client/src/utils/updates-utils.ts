@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
-import { MtCuteTypeAssertionError } from '../types'
+import { tl } from '@mtqt/tl'
+import { MtqtTypeAssertionError } from '../types'
 
 // dummy updates which are used for methods that return messages.affectedHistory.
 // that is not an update, but it carries info about pts, and we need to handle it
@@ -64,5 +64,5 @@ export function assertIsUpdatesGroup(
         case 'updatesCombined':
             return
     }
-    throw new MtCuteTypeAssertionError(ctx, 'updates | updatesCombined', upd._)
+    throw new MtqtTypeAssertionError(ctx, 'updates | updatesCombined', upd._)
 }

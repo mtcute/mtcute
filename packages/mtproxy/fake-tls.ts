@@ -5,7 +5,7 @@ import {
     IPacketCodec,
     WrappedCodec,
     randomBytes,
-} from '@mtcute/core'
+} from '@mtqt/core'
 import bigInt, { BigInteger } from 'big-integer'
 
 const MAX_TLS_PACKET_LENGTH = 2878

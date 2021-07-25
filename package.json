@@ -1,8 +1,8 @@
 {
-    "name": "mtcute",
+    "name": "mtqt",
     "private": true,
     "version": "1.0.0",
-    "description": "Cute and type-safe library for MTProto (Telegram API) for browser and NodeJS",
+    "description": "Type-safe library for MTProto (Telegram API) for browser and NodeJS",
     "license": "LGPL-3.0",
     "author": "Alisa Sireneva <me@tei.su>",
     "scripts": {

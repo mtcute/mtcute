@@ -1,6 +1,6 @@
 import EventEmitter from 'events'
 import { ICuteTransport, TransportFactory, TransportState } from './transports'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { ReconnectionStrategy } from './reconnection'
 import {
     ControllablePromise,
@@ -8,7 +8,7 @@ import {
 } from '../utils/controllable-promise'
 import { ICryptoProvider } from '../utils/crypto'
 
-const debug = require('debug')('mtcute:conn')
+const debug = require('debug')('mtqt:conn')
 
 export interface PersistentConnectionParams {
     crypto: ICryptoProvider

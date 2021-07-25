@@ -1,8 +1,8 @@
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { makeInspectable } from '../utils'
 import { Sticker, Thumbnail } from '../media'
-import { MtCuteEmptyError, MtCuteTypeAssertionError } from '../errors'
+import { MtqtEmptyError, MtqtTypeAssertionError } from '../errors'
 import { parseDocument } from '../media/document-utils'
 import { InputFileLike } from '../files'
 
@@ -130,11 +130,11 @@ export class StickerSet {
     /**
      * List of stickers inside this stickerset
      *
-     * @throws MtCuteEmptyError
+     * @throws MtqtEmptyError
      *     In case this object does not contain info about stickers (i.e. {@link isFull} = false)
      */
     get stickers(): ReadonlyArray<StickerSet.StickerInfo> {
-        if (!this.isFull) throw new MtCuteEmptyError()
+        if (!this.isFull) throw new MtqtEmptyError()
 
         if (!this._stickers) {
             this._stickers = []
@@ -146,7 +146,7 @@ export class StickerSet {
                     doc as tl.RawDocument
                 )
                 if (!(sticker instanceof Sticker)) {
-                    throw new MtCuteTypeAssertionError(
+                    throw new MtqtTypeAssertionError(
                         'full.documents',
                         'Sticker',
                         sticker.mimeType
@@ -209,7 +209,7 @@ export class StickerSet {
      * Find stickers given their emoji.
      *
      * @param emoji  Emoji to search for
-     * @throws MtCuteEmptyError
+     * @throws MtqtEmptyError
      *     In case this object does not contain info about stickers (i.e. {@link isFull} = false)
      */
     getStickersByEmoji(emoji: string): StickerSet.StickerInfo[] {
@@ -244,7 +244,7 @@ export class StickerSet {
     }
 
     private _getInputDocument(idx: number): tl.TypeInputDocument {
-        if (!this.full) throw new MtCuteEmptyError()
+        if (!this.full) throw new MtqtEmptyError()
 
         if (idx < 0) idx = this.full!.documents.length + idx
         const doc = this.full!.documents[idx] as tl.RawDocument

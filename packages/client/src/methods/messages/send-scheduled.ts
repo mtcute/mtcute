@@ -1,5 +1,5 @@
 import { InputPeerLike, Message } from '../../types'
-import { MaybeArray } from '@mtcute/core'
+import { MaybeArray } from '@mtqt/core'
 import { TelegramClient } from '../../client'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 import { createUsersChatsIndex } from '../../utils/peer-utils'

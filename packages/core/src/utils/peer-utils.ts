@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { BasicPeerType } from '../types'
 
 export const MIN_CHANNEL_ID = -1002147483647

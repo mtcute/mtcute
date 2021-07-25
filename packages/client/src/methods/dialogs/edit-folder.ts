@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
-import { MtCuteArgumentError } from '../../types'
+import { tl } from '@mtqt/tl'
+import { MtqtArgumentError } from '../../types'
 
 /**
  * Edit a folder with given modification
@@ -23,7 +23,7 @@ export async function editFolder(
         const old = await this.getFolders()
         const found = old.find((it) => it.id === folder || it.title === folder)
         if (!found)
-            throw new MtCuteArgumentError(`Could not find a folder ${folder}`)
+            throw new MtqtArgumentError(`Could not find a folder ${folder}`)
 
         folder = found
     }

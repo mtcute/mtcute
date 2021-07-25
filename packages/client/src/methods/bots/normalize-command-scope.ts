@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
-import { BotCommands, MtCuteInvalidPeerTypeError } from '../../types'
+import { tl } from '@mtqt/tl'
+import { BotCommands, MtqtInvalidPeerTypeError } from '../../types'
 import { TelegramClient } from '../../client'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
@@ -25,7 +25,7 @@ export async function _normalizeCommandScope(
             const user = normalizeToInputUser(await this.resolvePeer(scope.user))
 
             if (!user)
-                throw new MtCuteInvalidPeerTypeError(scope.user, 'user')
+                throw new MtqtInvalidPeerTypeError(scope.user, 'user')
 
             return {
                 _: 'botCommandScopePeerUser',

@@ -1,7 +1,7 @@
-import { InputPeerLike, Message, MtCuteInvalidPeerTypeError } from '../../types'
+import { InputPeerLike, Message, MtqtInvalidPeerTypeError } from '../../types'
 import { TelegramClient } from '../../client'
 import { normalizeToInputUser } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 
 /**
  * Set a score of a user in a game
@@ -38,7 +38,7 @@ export async function setGameScore(
 
     const chat = await this.resolvePeer(chatId)
     const user = normalizeToInputUser(await this.resolvePeer(userId))
-    if (!user) throw new MtCuteInvalidPeerTypeError(userId, 'user')
+    if (!user) throw new MtqtInvalidPeerTypeError(userId, 'user')
 
     const res = await this.call({
         _: 'messages.setGameScore',
@@ -85,7 +85,7 @@ export async function setInlineGameScore(
     if (!params) params = {}
 
     const user = normalizeToInputUser(await this.resolvePeer(userId))
-    if (!user) throw new MtCuteInvalidPeerTypeError(userId, 'user')
+    if (!user) throw new MtqtInvalidPeerTypeError(userId, 'user')
 
     const [id, connection] = await this._normalizeInline(messageId)
 

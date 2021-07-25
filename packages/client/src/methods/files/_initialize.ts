@@ -1,4 +1,4 @@
-import { TelegramConnection } from '@mtcute/core'
+import { TelegramConnection } from '@mtqt/core'
 
 import { TelegramClient } from '../../client'
 

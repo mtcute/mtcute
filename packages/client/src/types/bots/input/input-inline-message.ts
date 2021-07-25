@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { BotKeyboard, ReplyMarkup } from '../keyboards'
 import { TelegramClient } from '../../../client'
 import {

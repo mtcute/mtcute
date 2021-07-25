@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { Photo } from './photo'
 import { Video } from './video'
 import { TelegramClient } from '../../client'

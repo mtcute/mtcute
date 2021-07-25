@@ -1,10 +1,10 @@
 import { TelegramClient } from '../../client'
 import { determinePartSize } from '../../utils/file-utils'
-import { tl } from '@mtcute/tl'
-import { FileMigrateError, FilerefUpgradeNeededError } from '@mtcute/tl/errors'
+import { tl } from '@mtqt/tl'
+import { FileMigrateError, FilerefUpgradeNeededError } from '@mtqt/tl/errors'
 import {
-    MtCuteArgumentError,
-    MtCuteUnsupportedError,
+    MtqtArgumentError,
+    MtqtUnsupportedError,
     FileDownloadParameters,
     FileLocation,
 } from '../../types'
@@ -12,7 +12,7 @@ import {
     fileIdToInputFileLocation,
     fileIdToInputWebFileLocation,
     parseFileId,
-} from '@mtcute/file-id'
+} from '@mtqt/file-id'
 
 /**
  * Download a file and return it as an iterable, which yields file contents
@@ -30,13 +30,13 @@ export async function* downloadAsIterable(
         params.partSize ??
         (params.fileSize ? determinePartSize(params.fileSize) : 64)
     if (partSizeKb % 4 !== 0)
-        throw new MtCuteArgumentError(
+        throw new MtqtArgumentError(
             `Invalid part size: ${partSizeKb}. Must be divisible by 4.`
         )
 
     let offset = params.offset ?? 0
     if (offset % 4096 !== 0)
-        throw new MtCuteArgumentError(
+        throw new MtqtArgumentError(
             `Invalid offset: ${offset}. Must be divisible by 4096`
         )
 
@@ -112,7 +112,7 @@ export async function* downloadAsIterable(
             } else if (e.constructor === FilerefUpgradeNeededError) {
                 // todo: implement someday
                 // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
-                throw new MtCuteUnsupportedError('File ref expired!')
+                throw new MtqtUnsupportedError('File ref expired!')
             } else throw e
         }
 
@@ -120,7 +120,7 @@ export async function* downloadAsIterable(
             // we shouldnt receive them since cdnSupported is not set in the getFile request.
             // also, i couldnt find any media that would be downloaded from cdn, so even if
             // i implemented that, i wouldnt be able to test that, so :shrug:
-            throw new MtCuteUnsupportedError(
+            throw new MtqtUnsupportedError(
                 'Received CDN redirect, which is not supported (yet)'
             )
         }

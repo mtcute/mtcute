@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { TelegramClient } from '../client'
 import {
     createUsersChatsIndex,
@@ -11,12 +11,12 @@ import {
     getMarkedPeerId,
     markedPeerIdToBare,
     MAX_CHANNEL_ID,
-} from '@mtcute/core'
+} from '@mtqt/core'
 import { isDummyUpdate, isDummyUpdates } from '../utils/updates-utils'
 import { ChatsIndex, UsersIndex } from '../types'
 import { _parseUpdate } from '../utils/parse-update'
 
-const debug = require('debug')('mtcute:upds')
+const debug = require('debug')('mtqt:upds')
 
 // code in this file is very bad, thanks to Telegram's awesome updates mechanism
 

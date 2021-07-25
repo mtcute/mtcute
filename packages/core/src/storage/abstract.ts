@@ -1,5 +1,5 @@
 import { BasicPeerType, MaybeAsync } from '../types'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 
 export namespace ITelegramStorage {
     export interface PeerInfo {

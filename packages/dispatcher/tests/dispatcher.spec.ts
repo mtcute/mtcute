@@ -1,7 +1,7 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import { Dispatcher, handlers, PropagationAction } from '../src'
-import { TelegramClient } from '@mtcute/client'
+import { TelegramClient } from '@mtqt/client'
 
 describe('Dispatcher', () => {
     // todo: replace with proper mocked TelegramClient

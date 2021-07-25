@@ -1,5 +1,5 @@
 import { makeInspectable } from '../utils'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { TelegramClient } from '../../client'
 import { MessageEntity } from '../messages'
 import bigInt from 'big-integer'

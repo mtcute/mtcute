@@ -1,15 +1,15 @@
 import { TelegramClient } from '../../client'
 import { FileLocation } from '../files'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import {
     inflateSvgPath,
     strippedPhotoToJpg,
     svgPathToFile,
 } from '../../utils/file-utils'
-import { MtCuteArgumentError, MtCuteTypeAssertionError } from '../errors'
+import { MtqtArgumentError, MtqtTypeAssertionError } from '../errors'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { makeInspectable } from '../utils'
-import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
+import { tdFileId as td, toFileId, toUniqueFileId } from '@mtqt/file-id'
 import bigInt from 'big-integer'
 
 /**
@@ -66,7 +66,7 @@ export class Thumbnail extends FileLocation {
         switch (sz._) {
             case 'photoSizeEmpty':
             case 'photoCachedSize':
-                throw new MtCuteTypeAssertionError(
+                throw new MtqtTypeAssertionError(
                     'sz',
                     'not (photoSizeEmpty | photoCachedSize)',
                     sz._
@@ -150,7 +150,7 @@ export class Thumbnail extends FileLocation {
      *
      * See also: https://core.telegram.org/api/files#vector-thumbnails
      *
-     * @throws MtCuteTypeAssertionError  In case {@link raw} is not `tl.RawPhotoPathSize`
+     * @throws MtqtTypeAssertionError  In case {@link raw} is not `tl.RawPhotoPathSize`
      */
     get path(): string {
         assertTypeIs('Thumbnail#path', this.raw, 'photoPathSize')
@@ -169,7 +169,7 @@ export class Thumbnail extends FileLocation {
                 this.raw._ !== 'photoSize' &&
                 this.raw._ !== 'photoSizeProgressive'
             ) {
-                throw new MtCuteArgumentError(
+                throw new MtqtArgumentError(
                     `Cannot generate a file ID for "${this.raw.type}"`
                 )
             }
@@ -228,7 +228,7 @@ export class Thumbnail extends FileLocation {
                 this.raw._ !== 'photoSize' &&
                 this.raw._ !== 'photoSizeProgressive'
             ) {
-                throw new MtCuteArgumentError(
+                throw new MtqtArgumentError(
                     `Cannot generate a unique file ID for "${this.raw.type}"`
                 )
             }

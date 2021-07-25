@@ -1,20 +1,20 @@
-import { TelegramClient, User } from '@mtcute/client'
-import { BaseTelegramClient } from '@mtcute/core'
-import type { NodeNativeCryptoProvider } from '@mtcute/crypto-node'
-import { HtmlMessageEntityParser } from '@mtcute/html-parser'
-import { MarkdownMessageEntityParser } from '@mtcute/markdown-parser'
-import { SqliteStorage } from '@mtcute/sqlite'
+import { TelegramClient, User } from '@mtqt/client'
+import { BaseTelegramClient } from '@mtqt/core'
+import type { NodeNativeCryptoProvider } from '@mtqt/crypto-node'
+import { HtmlMessageEntityParser } from '@mtqt/html-parser'
+import { MarkdownMessageEntityParser } from '@mtqt/markdown-parser'
+import { SqliteStorage } from '@mtqt/sqlite'
 import { createInterface, Interface as RlInterface } from 'readline'
 
-export * from '@mtcute/dispatcher'
-export * from '@mtcute/client'
-export * from '@mtcute/html-parser'
-export * from '@mtcute/markdown-parser'
+export * from '@mtqt/dispatcher'
+export * from '@mtqt/client'
+export * from '@mtqt/html-parser'
+export * from '@mtqt/markdown-parser'
 export { SqliteStorage }
 
 let nativeCrypto: typeof NodeNativeCryptoProvider | null
 try {
-    nativeCrypto = require('@mtcute/crypto-node').NodeNativeCryptoProvider
+    nativeCrypto = require('@mtqt/crypto-node').NodeNativeCryptoProvider
 } catch (e) {}
 
 export namespace NodeTelegramClient {

@@ -2,8 +2,8 @@ import {
     InputMediaLike,
     InputPeerLike,
     MessageMedia,
-    MtCuteArgumentError,
-    MtCuteTypeAssertionError,
+    MtqtArgumentError,
+    MtqtTypeAssertionError,
     Photo, RawDocument,
 } from '../../types'
 import { TelegramClient } from '../../client'
@@ -53,7 +53,7 @@ export async function uploadMedia(
         case 'inputMediaInvoice':
         case 'inputMediaPoll':
         case 'inputMediaDice':
-            throw new MtCuteArgumentError("This media can't be uploaded")
+            throw new MtqtArgumentError("This media can't be uploaded")
     }
 
     const res = await this.call({
@@ -67,7 +67,7 @@ export async function uploadMedia(
     })
 
     if (res._ === 'messageMediaEmpty') {
-        throw new MtCuteTypeAssertionError(
+        throw new MtqtTypeAssertionError(
             'uploadMedia',
             'not messageMediaEmpty',
             'messageMediaEmpty'

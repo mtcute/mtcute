@@ -1,10 +1,10 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { Photo } from './photo'
 import { TelegramClient } from '../../client'
 import { RawDocument } from './document'
 import { parseDocument } from './document-utils'
 import { makeInspectable } from '../utils'
-import { MtCuteArgumentError } from '../errors'
+import { MtqtArgumentError } from '../errors'
 
 /**
  * Web page preview.
@@ -220,7 +220,7 @@ export class WebPage {
      * is only provided to allow using `msg.media.inputMedia`
      */
     get inputMedia(): tl.TypeInputMedia {
-        throw new MtCuteArgumentError('WebPage cannot provide an InputMedia')
+        throw new MtqtArgumentError('WebPage cannot provide an InputMedia')
     }
 }
 

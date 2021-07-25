@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 
 /**
  * Describes a file uploaded to the Telegram servers

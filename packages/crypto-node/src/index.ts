@@ -1,4 +1,4 @@
-import { NodeCryptoProvider, IEncryptionScheme } from '@mtcute/core'
+import { NodeCryptoProvider, IEncryptionScheme } from '@mtqt/core'
 import { ige256_decrypt, ige256_encrypt } from './native'
 
 /**

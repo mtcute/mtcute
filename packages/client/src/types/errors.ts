@@ -1,20 +1,20 @@
 /**
- * Base class for all `@mtcute/client` errors
+ * Base class for all `@mtqt/client` errors
  */
 import { InputPeerLike } from './peers'
 
-export class MtCuteError extends Error {}
+export class MtqtError extends Error {}
 
 /**
  * Method invocation was invalid because some argument
  * passed was invalid.
  */
-export class MtCuteArgumentError extends MtCuteError {}
+export class MtqtArgumentError extends MtqtError {}
 
 /**
  * Could not find peer by provided information
  */
-export class MtCuteNotFoundError extends MtCuteError {}
+export class MtqtNotFoundError extends MtqtError {}
 
 /**
  * Either you requested or the server returned something
@@ -22,7 +22,7 @@ export class MtCuteNotFoundError extends MtCuteError {}
  *
  * Stay tuned for future updates!
  */
-export class MtCuteUnsupportedError extends MtCuteError {}
+export class MtqtUnsupportedError extends MtqtError {}
 
 /**
  * Server returned something of an unexpected type.
@@ -30,7 +30,7 @@ export class MtCuteUnsupportedError extends MtCuteError {}
  * This is usually a problem on library side.
  * Feel free to open an issue about this!
  */
-export class MtCuteTypeAssertionError extends MtCuteError {
+export class MtqtTypeAssertionError extends MtqtError {
     /**
      * Context at which the error occurred.
      * Usually a user-friendly string containing name
@@ -60,7 +60,7 @@ export class MtCuteTypeAssertionError extends MtCuteError {
  * For example, when trying to get common chats
  * while providing another chat as `userId`
  */
-export class MtCuteInvalidPeerTypeError extends MtCuteError {
+export class MtqtInvalidPeerTypeError extends MtqtError {
     constructor(peer: InputPeerLike, expected: string) {
         super(
             `Provided identifier ${JSON.stringify(peer)} is not a ${expected}`
@@ -72,7 +72,7 @@ export class MtCuteInvalidPeerTypeError extends MtCuteError {
  * Trying to access to some property on an object that does not
  * contain that information.
  */
-export class MtCuteEmptyError extends MtCuteError {
+export class MtqtEmptyError extends MtqtError {
     constructor() {
         super('Property is not available on an empty object')
     }

@@ -1,4 +1,4 @@
-# @mtcute/tl-reference
+# TL Reference
 
 [https://mt.tei.su/tl](https://mt.tei.su/tl)
 

@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
-import { MtCuteArgumentError } from '../../types'
+import { MtqtArgumentError } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
-import { computeSrpParams, computeNewPasswordHash } from '@mtcute/core'
+import { computeSrpParams, computeNewPasswordHash } from '@mtqt/core'
 
 /**
  * Change your 2FA password
@@ -19,7 +19,7 @@ export async function changeCloudPassword(
 ): Promise<void> {
     const pwd = await this.call({ _: 'account.getPassword' })
     if (!pwd.hasPassword)
-        throw new MtCuteArgumentError('Cloud password is not enabled')
+        throw new MtqtArgumentError('Cloud password is not enabled')
 
     const algo = pwd.newAlgo
     assertTypeIs(

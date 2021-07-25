@@ -1,10 +1,10 @@
-# MTCute
+# mtqt
 
 ![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)
 
 Work-in-progress library for MTProto in TypeScript.
 
-[🎯 Roadmap (notion.so)](https://www.notion.so/teidesu/MTCute-development-cfccff4fddad4b218f3bea27f784b8b5)
+[🎯 Roadmap (notion.so)](https://teidesu.notion.site/mtqt-development-cfccff4fddad4b218f3bea27f784b8b5)
 | [📦 TL Reference](https://mt.tei.su/tl)
 
 > ⚠️ **Warning**: While this library is WIP, storage
@@ -30,8 +30,8 @@ What is not done yet:
 ## Setting up for development:
 
 ```bash
-git clone https://github.com/teidesu/mtcute
-cd mtcute
+git clone https://github.com/mtqt-dev/mtqt
+cd mtqt
 yarn install
 npx lerna link
 
@@ -44,6 +44,7 @@ yarn generate-code
 
 Some parts were based on code from these projects:
 
-- [Pyrogram](https://pyrogram.org)
+- [TDLib](https://github.com/tdlib/td)
+- [Pyrogram](https://github.com/pyrogram/pyrogram)
 - [Telethon](https://github.com/LonamiWebs/Telethon)
 - [TDesktop](https://github.com/telegramdesktop/tdesktop)

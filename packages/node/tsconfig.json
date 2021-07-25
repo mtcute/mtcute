@@ -7,7 +7,7 @@
         "./index.ts"
     ],
     "typedocOptions": {
-        "name": "@mtcute/node",
+        "name": "@mtqt/node",
         "includeVersion": true,
         "out": "../../docs/packages/node",
         "listInvalidSymbolLinks": true,

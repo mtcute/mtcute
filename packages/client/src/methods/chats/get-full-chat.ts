@@ -1,4 +1,4 @@
-import { Chat, InputPeerLike, MtCuteArgumentError } from '../../types'
+import { Chat, InputPeerLike, MtqtArgumentError } from '../../types'
 import { TelegramClient } from '../../client'
 import {
     INVITE_LINK_REGEX,
@@ -8,13 +8,13 @@ import {
     normalizeToInputChannel,
     normalizeToInputUser,
 } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 
 /**
  * Get full information about a chat.
  *
  * @param chatId  ID of the chat, its username or invite link
- * @throws MtCuteArgumentError
+ * @throws MtqtArgumentError
  *   In case you are trying to get info about private chat that you haven't joined.
  *   Use {@link getChatPreview} instead.
  * @internal
@@ -32,7 +32,7 @@ export async function getFullChat(
             })
 
             if (res._ === 'chatInvite') {
-                throw new MtCuteArgumentError(
+                throw new MtqtArgumentError(
                     `You haven't joined ${JSON.stringify(res.title)}`
                 )
             }

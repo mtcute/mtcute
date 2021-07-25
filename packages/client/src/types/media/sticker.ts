@@ -1,9 +1,9 @@
 import { RawDocument } from './document'
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { makeInspectable } from '../utils'
 import { StickerSet } from '../misc'
-import { tdFileId } from '@mtcute/file-id'
+import { tdFileId } from '@mtqt/file-id'
 
 export namespace Sticker {
     export interface MaskPosition {

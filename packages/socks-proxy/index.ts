@@ -2,14 +2,14 @@ import {
     IntermediatePacketCodec,
     BaseTcpTransport,
     TransportState,
-} from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+} from '@mtqt/core'
+import { tl } from '@mtqt/tl'
 import { connect } from 'net'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { normalize } from 'ip6'
 
-const debug = require('debug')('mtcute:socks-proxy')
+const debug = require('debug')('mtqt:socks-proxy')
 
 /**
  * An error has occurred while connecting to an SOCKS proxy

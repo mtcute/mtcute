@@ -1,7 +1,7 @@
 import { BigInteger } from 'big-integer'
 
 /**
- * Interface describing binary writer compatible with @mtcute/tl
+ * Interface describing binary writer compatible with @mtqt/tl
  * generated binary writers
  */
 export interface ITlBinaryWriter {

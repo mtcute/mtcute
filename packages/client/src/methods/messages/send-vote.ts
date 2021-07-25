@@ -1,11 +1,11 @@
 import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
-    MtCuteArgumentError,
-    MtCuteTypeAssertionError,
+    MtqtArgumentError,
+    MtqtTypeAssertionError,
     Poll,
 } from '../../types'
-import { MaybeArray, MessageNotFoundError } from '@mtcute/core'
+import { MaybeArray, MessageNotFoundError } from '@mtqt/core'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
@@ -40,7 +40,7 @@ export async function sendVote(
         if (!msg) throw new MessageNotFoundError()
 
         if (!(msg.media instanceof Poll))
-            throw new MtCuteArgumentError(
+            throw new MtqtArgumentError(
                 'This message does not contain a poll'
             )
 
@@ -67,7 +67,7 @@ export async function sendVote(
     const upd = res.updates[0]
     assertTypeIs('messages.sendVote (@ .updates[0])', upd, 'updateMessagePoll')
     if (!upd.poll) {
-        throw new MtCuteTypeAssertionError(
+        throw new MtqtTypeAssertionError(
             'messages.sendVote (@ .updates[0].poll)',
             'poll',
             'undefined'

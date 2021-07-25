@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
-import { Message, MtCuteTypeAssertionError } from '../../types'
+import { tl } from '@mtqt/tl'
+import { Message, MtqtTypeAssertionError } from '../../types'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
@@ -36,7 +36,7 @@ export function _findMessageInUpdate(
         }
     }
 
-    throw new MtCuteTypeAssertionError(
+    throw new MtqtTypeAssertionError(
         '_findInUpdate (@ .updates[*])',
         'updateNewMessage | updateNewChannelMessage | updateNewScheduledMessage',
         'none'

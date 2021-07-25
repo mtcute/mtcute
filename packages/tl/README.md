@@ -1,6 +1,6 @@
-# @mtcute/tl
+# @mtqt/tl
 
-> TL schema and related utils used for MTCute.
+> TL schema and related utils used for mtqt.
 
 Generated from TL layer **131** (last updated on 24.07.2021).
 
@@ -14,8 +14,8 @@ so version `1.42.0` means that this version was generated from TL layer 42.
 > ⚠️ **Warning**: Always use strict or tilde constraint to ensure
 > the same schema is used.
 >
-> I.e. use `"@mtcute/tl": "~1.42.0"` or `"@mtcute/tl": "1.42.0"`
-> instead of `"@mtcute/tl": "^1.42.0"`, since the former would also
+> I.e. use `"@mtqt/tl": "~1.42.0"` or `"@mtqt/tl": "1.42.0"`
+> instead of `"@mtqt/tl": "^1.42.0"`, since the former would also
 > match `1.43.0, 1.44.0, ...` and will probably break your build or runtime
 
 - JSON schema, types, binary (de-)serialization and helper functions are generated directly from `.tl` files that are
@@ -27,7 +27,7 @@ so version `1.42.0` means that this version was generated from TL layer 42.
 
 ## Contents
 
-### `@mtcute/tl`
+### `@mtqt/tl`
 
 [Documentation](./modules/index.html)
 
@@ -42,32 +42,32 @@ use-cases for mutable TL objects, so you can use exported
 import statements.
 
 ```typescript
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 const obj: tl.RawInputPeerChat = { _: 'inputPeerChat', chatId: 42 }
 console.log(tl.isAnyInputPeer(obj)) // true
 ```
 
-### `@mtcute/tl/raw-schema`
+### `@mtqt/tl/raw-schema`
 
 [Documentation](./modules/raw_schema.html)
 
 JSON file describing all available TL classes, methods and unions. Can be used to write custom code generators
-> This very file is used to generate binary serialization and TypeScript typings for `@mtcute/tl`.
+> This very file is used to generate binary serialization and TypeScript typings for `@mtqt/tl`.
 
 ```typescript
-import * as tlSchema from '@mtcute/tl/raw-schema'
+import * as tlSchema from '@mtqt/tl/raw-schema'
 console.log(`Current layer: ${tlSchema.apiLayer}`)
 // Current layer: 124
 ```
 
-### `@mtcute/tl/binary/reader`
+### `@mtqt/tl/binary/reader`
 
 [Documentation](./modules/binary_reader.html)
 
 Contains mapping used to read TL objects from binary streams.
 
 ```typescript
-import readerMap from '@mtcute/tl/binary/reader'
+import readerMap from '@mtqt/tl/binary/reader'
 import { BinaryReader } from './binary-reader'
 
 const reader = new BinaryReader(Buffer.from([...]))
@@ -75,14 +75,14 @@ console.log(readerMap[0x5bb8e511 /* mt_message */].call(reader))
 // { _: 'mt_message', ... }
 ```
 
-### `@mtcute/tl/binary/writer`
+### `@mtqt/tl/binary/writer`
 
 [Documentation](./modules/binary_writer.html)
 
 Contains mapping used to write TL objects to binary streams.
 
 ```typescript
-import writerMap from '@mtcute/tl/binary/writer'
+import writerMap from '@mtqt/tl/binary/writer'
 import { BinaryWriter } from './binary-writer'
 
 const writer = new BinaryWriter()

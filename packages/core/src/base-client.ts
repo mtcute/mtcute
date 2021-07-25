@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import {
     CryptoProviderFactory,
     ICryptoProvider,
@@ -26,7 +26,7 @@ import {
     RpcError,
     SlowmodeWaitError,
     UserMigrateError,
-} from '@mtcute/tl/errors'
+} from '@mtqt/tl/errors'
 import { sleep } from './utils/misc-utils'
 import { addPublicKey } from './utils/crypto/keys'
 import { ITelegramStorage, MemoryStorage } from './storage'
@@ -37,7 +37,7 @@ import { encodeUrlSafeBase64, parseUrlSafeBase64 } from './utils/buffer-utils'
 import { BinaryReader } from './utils/binary/binary-reader'
 import EventEmitter from 'events'
 
-const debug = require('debug')('mtcute:base')
+const debug = require('debug')('mtqt:base')
 
 export namespace BaseTelegramClient {
     export interface Options {
@@ -137,7 +137,7 @@ export namespace BaseTelegramClient {
          * If true, RPC errors will have a stack trace of the initial `.call()`
          * or `.sendForResult()` call position, which drastically improves
          * debugging experience.<br>
-         * If false, they will have a stack trace of MTCute internals.
+         * If false, they will have a stack trace of mtqt internals.
          *
          * Internally this creates a stack capture before every RPC call
          * and stores it until the result is received. This might
@@ -277,7 +277,7 @@ export class BaseTelegramClient extends EventEmitter {
 
         this._layer = opts.overrideLayer ?? tl.CURRENT_LAYER
 
-        let deviceModel = 'mtcute on '
+        let deviceModel = 'mtqt on '
         if (typeof process !== 'undefined' && typeof require !== 'undefined') {
             const os = require('os')
             deviceModel += `${os.type()} ${os.arch()} ${os.release()}`
@@ -505,7 +505,7 @@ export class BaseTelegramClient extends EventEmitter {
      * `primaryConnection.sendForResult()` (which is what this method wraps)
      *
      * This method is still quite low-level and you shouldn't use this
-     * when using high-level API provided by `@mtcute/client`.
+     * when using high-level API provided by `@mtqt/client`.
      *
      * @param message  RPC method to call
      * @param params  Additional call parameters
@@ -645,7 +645,7 @@ export class BaseTelegramClient extends EventEmitter {
      * transport and reconnection strategy as the primary connection
      *
      * This method is quite low-level and you shouldn't usually care about this
-     * when using high-level API provided by `@mtcute/client`.
+     * when using high-level API provided by `@mtqt/client`.
      *
      * @param dcId  DC id, to which the connection will be created
      * @param cdn  Whether that DC is a CDN DC
@@ -837,7 +837,7 @@ export class BaseTelegramClient extends EventEmitter {
      * > In case you have accidentally leaked this string,
      * > make sure to revoke this session in account settings:
      * > "Privacy & Security" > "Active sessions" >
-     * > find the one containing `mtcute` > Revoke,
+     * > find the one containing `mtqt` > Revoke,
      * > or, in case this is a bot, revoke bot token
      * > with [@BotFather](//t.me/botfather)
      */

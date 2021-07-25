@@ -3,7 +3,7 @@ import {
     BotKeyboard, FormattedString,
     InputMediaLike,
     InputPeerLike,
-    Message, MtCuteArgumentError,
+    Message, MtqtArgumentError,
     ReplyMarkup,
 } from '../../types'
 import {
@@ -11,8 +11,8 @@ import {
     normalizeMessageId,
     randomUlong,
 } from '../../utils/misc-utils'
-import { tl } from '@mtcute/tl'
-import { MessageNotFoundError } from '@mtcute/tl/errors'
+import { tl } from '@mtqt/tl'
+import { MessageNotFoundError } from '@mtqt/tl/errors'
 
 /**
  * Send a single media (a photo or a document-based media)
@@ -151,7 +151,7 @@ export async function sendMedia(
 
     if (params.mustReply) {
         if (!replyTo)
-            throw new MtCuteArgumentError(
+            throw new MtqtArgumentError(
                 'mustReply used, but replyTo was not passed'
             )
 

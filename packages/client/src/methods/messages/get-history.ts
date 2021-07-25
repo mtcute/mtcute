@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, MtCuteTypeAssertionError } from '../../types'
+import { InputPeerLike, Message, MtqtTypeAssertionError } from '../../types'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { normalizeDate } from '../../utils/misc-utils'
 
@@ -74,7 +74,7 @@ export async function getHistory(
     })
 
     if (res._ === 'messages.messagesNotModified')
-        throw new MtCuteTypeAssertionError(
+        throw new MtqtTypeAssertionError(
             'messages.getHistory',
             '!messages.messagesNotModified',
             res._

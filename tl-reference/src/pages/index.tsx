@@ -77,9 +77,9 @@ export default function IndexPage({ data }: { data: Data }) {
             </Typography>
             <Typography variant="body1" className={classes.paragraph}>
                 Even though this reference is intended to be used with{' '}
-                <MuiLink href="//github.com/teidesu/mtcute">MTCute</MuiLink>{' '}
+                <MuiLink href="//github.com/mtqt-dev/mtqt">mtqt</MuiLink>{' '}
                 library, the objects are common to any other MTProto library.
-                The key difference is that MTCute (and this reference) use{' '}
+                The key difference is that mtqt (and this reference) use{' '}
                 <code>camelCase</code> for arguments, while the original schema
                 and some other libraries use <code>snake_case</code>.
             </Typography>
@@ -112,8 +112,8 @@ export default function IndexPage({ data }: { data: Data }) {
                 <i>Class</i>.
             </Typography>
             <Typography variant="body1" className={classes.paragraph}>
-                In MTCute, all types are exposed as a namespace <code>tl</code>{' '}
-                of package <code>@mtcute/tl</code>. By design, we use immutable
+                In mtqt, all types are exposed as a namespace <code>tl</code>{' '}
+                of package <code>@mtqt/tl</code>. By design, we use immutable
                 plain objects with type discriminator to represent{' '}
                 <i>Classes</i> and <i>Methods</i>, and TypeScript unions to
                 represent <i>Unions</i>.<br />

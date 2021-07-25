@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 
 /**
  * Send an answer to a callback query.

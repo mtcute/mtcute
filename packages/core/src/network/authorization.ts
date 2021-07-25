@@ -1,6 +1,6 @@
 import { TelegramConnection } from './telegram-connection'
 import { buffersEqual, randomBytes, xorBuffer } from '../utils/buffer-utils'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { BinaryReader } from '../utils/binary/binary-reader'
 import {
     BinaryWriter,
@@ -16,7 +16,7 @@ import {
     bufferToBigInt,
 } from '../utils/bigint-utils'
 
-const debug = require('debug')('mtcute:auth')
+const debug = require('debug')('mtqt:auth')
 
 // Heavily based on code from https://github.com/LonamiWebs/Telethon/blob/master/telethon/network/authenticator.py
 

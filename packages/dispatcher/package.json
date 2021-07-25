@@ -1,8 +1,8 @@
 {
-    "name": "@mtcute/dispatcher",
+    "name": "@mtqt/dispatcher",
     "private": true,
     "version": "1.0.0",
-    "description": "Updates dispatcher and bot framework for @mtcute/client",
+    "description": "Updates dispatcher and bot framework for @mtqt/client",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "LGPL-3.0",
     "main": "src/index.ts",
@@ -12,9 +12,9 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/tl": "~1.131.0",
-        "@mtcute/core": "^1.0.0",
-        "@mtcute/client": "^1.0.0",
+        "@mtqt/tl": "~1.131.0",
+        "@mtqt/core": "^1.0.0",
+        "@mtqt/client": "^1.0.0",
         "events": "^3.2.0",
         "debug": "^4.3.1"
     }

@@ -1,11 +1,11 @@
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { FileLocation } from './file-location'
-import { MtCuteArgumentError } from '../errors'
+import { MtqtArgumentError } from '../errors'
 import { makeInspectable } from '../utils'
 
 const STUB_LOCATION = () => {
-    throw new MtCuteArgumentError(
+    throw new MtqtArgumentError(
         'This web document is not downloadable through Telegram'
     )
 }

@@ -1,6 +1,6 @@
 import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { User } from './user'
 import { ChatMember } from './chat-member'
 import { Photo } from '../media'

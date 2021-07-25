@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 import { WebDocument } from '../files/web-document'
-import { MtCuteArgumentError } from '../errors'
+import { MtqtArgumentError } from '../errors'
 
 /**
  * An invoice
@@ -105,7 +105,7 @@ export class Invoice {
      * is only provided to allow using `msg.media.inputMedia`
      */
     get inputMedia(): tl.TypeInputMedia {
-        throw new MtCuteArgumentError('Invoice cannot provide an InputMedia')
+        throw new MtqtArgumentError('Invoice cannot provide an InputMedia')
     }
 }
 

@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import bigInt from 'big-integer'
 import { ChatsIndex, UsersIndex } from '../types'
 

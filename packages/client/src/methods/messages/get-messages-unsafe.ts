@@ -1,10 +1,10 @@
 import { TelegramClient } from '../../client'
-import { MaybeArray } from '@mtcute/core'
+import { MaybeArray } from '@mtqt/core'
 import {
     createUsersChatsIndex,
 } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
-import { Message, MtCuteTypeAssertionError } from '../../types'
+import { tl } from '@mtqt/tl'
+import { Message, MtqtTypeAssertionError } from '../../types'
 
 /**
  * Get a single message from PM or legacy group by its ID.
@@ -67,7 +67,7 @@ export async function getMessagesUnsafe(
     })
 
     if (res._ === 'messages.messagesNotModified')
-        throw new MtCuteTypeAssertionError(
+        throw new MtqtTypeAssertionError(
             'getMessages',
             '!messages.messagesNotModified',
             res._

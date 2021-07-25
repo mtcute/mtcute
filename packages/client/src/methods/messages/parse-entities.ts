@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { TelegramClient } from '../../client'
 import { normalizeToInputUser } from '../../utils/peer-utils'
-import { FormattedString, MtCuteError } from '../../types'
+import { FormattedString, MtqtError } from '../../types'
 
 const empty: [string, undefined] = ['', undefined]
 
@@ -29,7 +29,7 @@ export async function _parseEntities(
         if (!mode) return [text, []]
 
         if (!(mode in this._parseModes)) {
-            throw new MtCuteError(`Parse mode ${mode} is not registered.`)
+            throw new MtqtError(`Parse mode ${mode} is not registered.`)
         }
 
         ;[text, entities] = await this._parseModes[mode].parse(text)

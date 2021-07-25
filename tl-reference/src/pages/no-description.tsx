@@ -54,7 +54,7 @@ export default function NoDescriptionPage({ data }: { data: Data }) {
                 schema that currently do not have a description, neither
                 official nor unofficial. You can improve this reference by
                 adding description to missing items in{' '}
-                <MuiLink href="https://github.com/teidesu/mtcute/blob/master/packages/tl/descriptions.yaml">
+                <MuiLink href="https://github.com/mtqt-dev/mtqt/blob/master/packages/tl/descriptions.yaml">
                     descriptions.yaml
                 </MuiLink>
                 .
@@ -66,7 +66,7 @@ export default function NoDescriptionPage({ data }: { data: Data }) {
                             <TableCell>Type</TableCell>
                             <TableCell>Name</TableCell>
                             <TableCell>
-                                <MuiLink href="https://github.com/teidesu/mtcute/blob/master/packages/tl/descriptions.yaml">
+                                <MuiLink href="https://github.com/mtqt-dev/mtqt/blob/master/packages/tl/descriptions.yaml">
                                     descriptions.yaml
                                 </MuiLink>{' '}
                                 key
@@ -109,7 +109,7 @@ export default function NoDescriptionPage({ data }: { data: Data }) {
                             <TableCell>Type</TableCell>
                             <TableCell>Name</TableCell>
                             <TableCell>
-                                <MuiLink href="https://github.com/teidesu/mtcute/blob/master/packages/tl/descriptions.yaml">
+                                <MuiLink href="https://github.com/mtqt-dev/mtqt/blob/master/packages/tl/descriptions.yaml">
                                     descriptions.yaml
                                 </MuiLink>{' '}
                                 key

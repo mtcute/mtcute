@@ -1,7 +1,7 @@
 /**
  * A phone contact
  */
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { makeInspectable } from '../utils'
 
 export class Contact {

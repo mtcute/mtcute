@@ -1,10 +1,10 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import {
     encodeUrlSafeBase64,
     parseUrlSafeBase64,
     BinaryReader,
     BinaryWriter,
-} from '@mtcute/core'
+} from '@mtqt/core'
 
 export function parseInlineMessageId(
     id: string

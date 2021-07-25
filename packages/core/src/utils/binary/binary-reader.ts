@@ -1,9 +1,9 @@
 import bigInt, { BigInteger } from 'big-integer'
 import { inflate } from 'pako'
 import { typedArrayToBuffer } from '../buffer-utils'
-import readerMap, { ITlBinaryReader } from '@mtcute/tl/binary/reader'
+import readerMap, { ITlBinaryReader } from '@mtqt/tl/binary/reader'
 import { bufferToBigInt, longToUlong, ulongToLong } from '../bigint-utils'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 
 const isNativeBigIntAvailable =
     typeof BigInt !== 'undefined' && 'readBigInt64LE' in Buffer.prototype

@@ -1,10 +1,10 @@
 import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
-    MtCuteInvalidPeerTypeError,
+    MtqtInvalidPeerTypeError,
     GameHighScore,
 } from '../../types'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import {
     createUsersChatsIndex,
     normalizeToInputUser,
@@ -29,7 +29,7 @@ export async function getGameHighScores(
     let user: tl.TypeInputUser
     if (userId) {
         const res = normalizeToInputUser(await this.resolvePeer(userId))
-        if (!res) throw new MtCuteInvalidPeerTypeError(userId, 'user')
+        if (!res) throw new MtqtInvalidPeerTypeError(userId, 'user')
 
         user = res
     } else {
@@ -65,7 +65,7 @@ export async function getInlineGameHighScores(
     let user: tl.TypeInputUser
     if (userId) {
         const res = normalizeToInputUser(await this.resolvePeer(userId))
-        if (!res) throw new MtCuteInvalidPeerTypeError(userId, 'user')
+        if (!res) throw new MtqtInvalidPeerTypeError(userId, 'user')
 
         user = res
     } else {

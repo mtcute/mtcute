@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { inputPeerToPeer } from '../../utils/peer-utils'
 import {
     normalizeDate,
@@ -12,11 +12,11 @@ import {
     BotKeyboard,
     ReplyMarkup,
     UsersIndex,
-    MtCuteTypeAssertionError,
+    MtqtTypeAssertionError,
     ChatsIndex,
-    MtCuteArgumentError, FormattedString,
+    MtqtArgumentError, FormattedString,
 } from '../../types'
-import { getMarkedPeerId, MessageNotFoundError } from '@mtcute/core'
+import { getMarkedPeerId, MessageNotFoundError } from '@mtqt/core'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
@@ -127,7 +127,7 @@ export async function sendText(
 
     if (params.mustReply) {
         if (!replyTo)
-            throw new MtCuteArgumentError(
+            throw new MtqtArgumentError(
                 'mustReply used, but replyTo was not passed'
             )
 
@@ -197,7 +197,7 @@ export async function sendText(
             }
 
             if (!cached) {
-                throw new MtCuteTypeAssertionError(
+                throw new MtqtTypeAssertionError(
                     'sendText (@ getFullPeerById)',
                     'user | chat',
                     'null'
@@ -215,7 +215,7 @@ export async function sendText(
                     chats[cached.id] = cached
                     break
                 default:
-                    throw new MtCuteTypeAssertionError(
+                    throw new MtqtTypeAssertionError(
                         'sendText (@ users.getUsers)',
                         'user | chat | channel', // not very accurate, but good enough
                         cached._

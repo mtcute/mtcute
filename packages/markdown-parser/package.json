@@ -1,8 +1,8 @@
 {
-    "name": "@mtcute/markdown-parser",
+    "name": "@mtqt/markdown-parser",
     "private": true,
     "version": "1.0.0",
-    "description": "Markdown entities parser for MTCute",
+    "description": "Markdown entities parser for mtqt",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "LGPL-3.0",
     "main": "src/index.ts",
@@ -13,10 +13,10 @@
         "docs": "npx typedoc"
     },
     "dependencies": {
-        "@mtcute/tl": "~1.131.0",
+        "@mtqt/tl": "~1.131.0",
         "big-integer": "^1.6.48"
     },
     "devDependencies": {
-        "@mtcute/client": "^1.0.0"
+        "@mtqt/client": "^1.0.0"
     }
 }

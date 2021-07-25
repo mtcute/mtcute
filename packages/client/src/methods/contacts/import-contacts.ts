@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
-import { PartialOnly } from '@mtcute/core'
+import { tl } from '@mtqt/tl'
+import { PartialOnly } from '@mtqt/core'
 import bigInt from 'big-integer'
 
 /**

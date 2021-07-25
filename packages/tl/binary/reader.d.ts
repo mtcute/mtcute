@@ -1,7 +1,7 @@
 import { BigInteger } from 'big-integer'
 
 /**
- * Interface describing binary reader compatible with @mtcute/tl
+ * Interface describing binary reader compatible with @mtqt/tl
  * generated binary readers
  */
 export interface ITlBinaryReader {

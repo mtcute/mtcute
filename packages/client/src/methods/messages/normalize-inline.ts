@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
-import { TelegramConnection } from '@mtcute/core'
+import { tl } from '@mtqt/tl'
+import { TelegramConnection } from '@mtqt/core'
 import { parseInlineMessageId } from '../../utils/inline-utils'
 
 // @extension

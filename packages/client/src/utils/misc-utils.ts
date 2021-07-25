@@ -1,13 +1,13 @@
-import { MaybeDynamic, Message, MtCuteError } from '../types'
+import { MaybeDynamic, Message, MtqtError } from '../types'
 import { BigInteger } from 'big-integer'
-import { randomBytes, bufferToBigInt } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { randomBytes, bufferToBigInt } from '@mtqt/core'
+import { tl } from '@mtqt/tl'
 
 export const EMPTY_BUFFER = Buffer.alloc(0)
 
 export function normalizePhoneNumber(phone: string): string {
     phone = phone.trim().replace(/[+()\s-]/g, '')
-    if (!phone.match(/^\d+$/)) throw new MtCuteError('Invalid phone number')
+    if (!phone.match(/^\d+$/)) throw new MtqtError('Invalid phone number')
 
     return phone
 }

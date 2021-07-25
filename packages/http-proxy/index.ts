@@ -2,12 +2,12 @@ import {
     IntermediatePacketCodec,
     BaseTcpTransport,
     TransportState,
-} from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+} from '@mtqt/core'
+import { tl } from '@mtqt/tl'
 import { connect as connectTcp } from 'net'
 import { connect as connectTls, SecureContextOptions } from 'tls'
 
-const debug = require('debug')('mtcute:http-proxy')
+const debug = require('debug')('mtqt:http-proxy')
 
 /**
  * An error has occurred while connecting to an HTTP(s) proxy

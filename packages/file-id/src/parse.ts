@@ -1,6 +1,6 @@
 import { telegramRleDecode } from './utils'
 import { tdFileId as td } from './types'
-import { BinaryReader, parseUrlSafeBase64 } from '@mtcute/core'
+import { BinaryReader, parseUrlSafeBase64 } from '@mtqt/core'
 
 function parseWebFileLocation(
     reader: BinaryReader

@@ -7,7 +7,7 @@
         "./index.ts",
     ],
     "typedocOptions": {
-        "name": "@mtcute/http-proxy",
+        "name": "@mtqt/http-proxy",
         "includeVersion": true,
         "out": "../../docs/packages/http-proxy",
         "listInvalidSymbolLinks": true,

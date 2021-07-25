@@ -2,13 +2,13 @@ import { TelegramClient } from '../../client'
 import {
     ChatInviteLink,
     InputPeerLike,
-    MtCuteInvalidPeerTypeError,
+    MtqtInvalidPeerTypeError,
 } from '../../types'
 import {
     createUsersChatsIndex,
     normalizeToInputUser,
 } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 
 /**
  * Get invite links created by some administrator in the chat.
@@ -55,7 +55,7 @@ export async function* getInviteLinks(
     const peer = await this.resolvePeer(chatId)
     const admin = normalizeToInputUser(await this.resolvePeer(adminId))
 
-    if (!admin) throw new MtCuteInvalidPeerTypeError(adminId, 'user')
+    if (!admin) throw new MtqtInvalidPeerTypeError(adminId, 'user')
 
     let offsetDate: number | undefined = undefined
     let offsetLink: string | undefined = undefined

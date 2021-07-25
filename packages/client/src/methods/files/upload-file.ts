@@ -9,8 +9,8 @@ import { Readable } from 'stream'
 import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils'
 import { randomUlong } from '../../utils/misc-utils'
 import { fromBuffer } from 'file-type'
-import { tl } from '@mtcute/tl'
-import { MtCuteArgumentError, UploadFileLike, UploadedFile } from '../../types'
+import { tl } from '@mtqt/tl'
+import { MtqtArgumentError, UploadFileLike, UploadedFile } from '../../types'
 import { TelegramClient } from '../../client'
 
 let fs: any = null
@@ -20,7 +20,7 @@ try {
     path = require('path')
 } catch (e) {}
 
-const debug = require('debug')('mtcute:upload')
+const debug = require('debug')('mtqt:upload')
 
 const OVERRIDE_MIME: Record<string, string> = {
     // tg doesn't interpret `audio/opus` files as voice messages for some reason
@@ -109,7 +109,7 @@ export async function uploadFile(
 
     if (typeof file === 'string') {
         if (!fs)
-            throw new MtCuteArgumentError(
+            throw new MtqtArgumentError(
                 'Local paths are only supported for NodeJS!'
             )
         file = fs.createReadStream(file)
@@ -163,7 +163,7 @@ export async function uploadFile(
         }
 
         if (!file.body)
-            throw new MtCuteArgumentError('Fetch response contains `null` body')
+            throw new MtqtArgumentError('Fetch response contains `null` body')
 
         if (
             typeof ReadableStream !== 'undefined' &&
@@ -188,13 +188,13 @@ export async function uploadFile(
     }
 
     if (!(file instanceof Readable))
-        throw new MtCuteArgumentError(
+        throw new MtqtArgumentError(
             'Could not convert input `file` to stream!'
         )
 
     const partSizeKb = params.partSize ?? determinePartSize(fileSize)
     if (partSizeKb > 512)
-        throw new MtCuteArgumentError(`Invalid part size: ${partSizeKb}KB`)
+        throw new MtqtArgumentError(`Invalid part size: ${partSizeKb}KB`)
     const partSize = partSizeKb * 1024
 
     const isBig = fileSize > 10485760 // 10 MB
@@ -216,14 +216,14 @@ export async function uploadFile(
     for (let idx = 0; idx < partCount; idx++) {
         const part = await readBytesFromStream(file, partSize)
         if (!part)
-            throw new MtCuteArgumentError(
+            throw new MtqtArgumentError(
                 `Unexpected EOS (there were only ${idx} parts, but expected ${partCount})`
             )
 
         if (!Buffer.isBuffer(part))
-            throw new MtCuteArgumentError(`Part ${idx} was not a Buffer!`)
+            throw new MtqtArgumentError(`Part ${idx} was not a Buffer!`)
         if (part.length > partSize)
-            throw new MtCuteArgumentError(
+            throw new MtqtArgumentError(
                 `Part ${idx} had invalid size (expected ${partSize}, got ${part.length})`
             )
 

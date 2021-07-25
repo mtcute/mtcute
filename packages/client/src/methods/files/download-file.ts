@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import {
-    MtCuteUnsupportedError,
+    MtqtUnsupportedError,
     FileDownloadParameters,
     FileLocation,
 } from '../../types'
@@ -24,7 +24,7 @@ export function downloadToFile(
     params: FileDownloadParameters
 ): Promise<void> {
     if (!fs)
-        throw new MtCuteUnsupportedError(
+        throw new MtqtUnsupportedError(
             'Downloading to file is only supported in NodeJS'
         )
 

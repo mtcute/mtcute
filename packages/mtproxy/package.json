@@ -1,8 +1,8 @@
 {
-    "name": "@mtcute/mtproxy",
+    "name": "@mtqt/mtproxy",
     "private": true,
     "version": "1.0.0",
-    "description": "MTProto proxy (MTProxy) support for MTCute",
+    "description": "MTProto proxy (MTProxy) support for mtqt",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "LGPL-3.0",
     "main": "index.ts",
@@ -12,7 +12,7 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/core": "^1.0.0",
+        "@mtqt/core": "^1.0.0",
         "big-integer": "1.6.48"
     }
 }

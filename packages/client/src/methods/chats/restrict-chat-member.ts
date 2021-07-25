@@ -1,10 +1,10 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtCuteInvalidPeerTypeError } from '../../types'
+import { InputPeerLike, MtqtInvalidPeerTypeError } from '../../types'
 import {
     isInputPeerChannel,
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { normalizeDate } from '../../utils/misc-utils'
 
 /**
@@ -33,7 +33,7 @@ export async function restrictChatMember(
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
     if (!isInputPeerChannel(chat))
-        throw new MtCuteInvalidPeerTypeError(chatId, 'channel')
+        throw new MtqtInvalidPeerTypeError(chatId, 'channel')
 
     const user = await this.resolvePeer(userId)
 

@@ -14,8 +14,8 @@ import {
     DeleteMessageUpdate,
     PollUpdate,
     UserTypingUpdate,
-} from '@mtcute/client'
-import { tl } from '@mtcute/tl'
+} from '@mtqt/client'
+import { tl } from '@mtqt/tl'
 import { PropagationAction } from './propagation'
 
 interface BaseUpdateHandler<Name, Handler, Checker> {

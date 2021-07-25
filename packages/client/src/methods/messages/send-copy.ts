@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Message, FormattedString, ReplyMarkup } from '../../types'
-import { tl } from '@mtcute/tl'
-import { MessageNotFoundError } from '@mtcute/tl/errors'
+import { tl } from '@mtqt/tl'
+import { MessageNotFoundError } from '@mtqt/tl/errors'
 
 /**
  * Copy a message (i.e. send the same message,

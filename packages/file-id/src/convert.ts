@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { tdFileId, tdFileId as td } from './types'
 import { parseFileId } from './parse'
-import { getBasicPeerType, markedPeerIdToBare } from '@mtcute/core'
+import { getBasicPeerType, markedPeerIdToBare } from '@mtqt/core'
 import FileType = tdFileId.FileType
 import bigInt from 'big-integer'
 

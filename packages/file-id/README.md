@@ -1,6 +1,6 @@
-# `@mtcute/file-id`
+# `@mtqt/file-id`
 
-A package that is used internally by `@mtcute/client` to parse, serialize
+A package that is used internally by `@mtqt/client` to parse, serialize
 and manipulate TDLib and Bot API compatible File IDs, but can also be used
 for any other purposes.
 
@@ -16,17 +16,17 @@ This package also exports namespace `tdFileId`, which contains all the types
 used by the library
 
 ## Dependencies
-This package uses `@mtcute/core` `BinaryReader` and `BinaryWriter` classes to
-work with binary streams. Additionally, it depends on `@mtcute/tl` types to
+This package uses `@mtqt/core` `BinaryReader` and `BinaryWriter` classes to
+work with binary streams. Additionally, it depends on `@mtqt/tl` types to
 allow type-safe code for conversion functions.
 
-Note that `@mtcute/core` itself depends on `@mtcute/tl`, which might
+Note that `@mtqt/core` itself depends on `@mtqt/tl`, which might
 redundantly increase your bundle size in case you don't actually use TL types.
 
 ## Acknowledgements
 This is basically a port of a portion of TDLib APIs, but greatly
 simplified in usage and made to work seamlessly with the rest of the
-MTCute APIs.
+mtqt APIs.
 
 This is a list of files from TDLib repository, from which most of the code was taken:
  - [td/telegram/files/FileManager.cpp](https://github.com/tdlib/td/blob/master/td/telegram/files/FileManager.cpp)

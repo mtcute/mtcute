@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 import { ICryptoProvider } from './abstract'
 import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils'
 import bigInt from 'big-integer'

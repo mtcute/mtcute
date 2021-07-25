@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtCuteInvalidPeerTypeError } from '../../types'
+import { InputPeerLike, MtqtInvalidPeerTypeError } from '../../types'
 import {
     isInputPeerChannel,
     isInputPeerChat,
@@ -41,5 +41,5 @@ export async function unbanChatMember(
         this._handleUpdate(res)
     } else if (isInputPeerChat(chat)) {
         // no-op //
-    } else throw new MtCuteInvalidPeerTypeError(chatId, 'chat or channel')
+    } else throw new MtqtInvalidPeerTypeError(chatId, 'chat or channel')
 }

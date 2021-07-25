@@ -1,5 +1,5 @@
 {
-    "name": "@mtcute/crypto-node",
+    "name": "@mtqt/crypto-node",
     "version": "1.0.0",
     "description": "Native crypto implementation for NodeJS",
     "main": "src/index.ts",
@@ -15,5 +15,8 @@
         "clean": "node-gyp clean",
         "test": "mocha -r ts-node/register tests/**/*.spec.ts",
         "docs": "npx typedoc"
+    },
+    "dependencies": {
+        "@mtqt/core": "^1.0.0"
     }
 }

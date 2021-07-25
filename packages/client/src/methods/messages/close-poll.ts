@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtCuteTypeAssertionError, Poll } from '../../types'
+import { InputPeerLike, MtqtTypeAssertionError, Poll } from '../../types'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
 import bigInt from 'big-integer'
 import { assertTypeIs } from '../../utils/type-assertion'
@@ -47,7 +47,7 @@ export async function closePoll(
         'updateMessagePoll'
     )
     if (!upd.poll) {
-        throw new MtCuteTypeAssertionError(
+        throw new MtqtTypeAssertionError(
             'messages.editMessage (@ .updates[0].poll)',
             'poll',
             'undefined'

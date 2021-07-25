@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
 import { User } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtqt/tl'
 
 /**
  * Get list of contacts from your Telegram contacts list.

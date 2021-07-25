@@ -4,11 +4,11 @@ import {
     InputMediaLike,
     InputPeerLike,
     Message,
-    MtCuteArgumentError,
-    MtCuteTypeAssertionError,
+    MtqtArgumentError,
+    MtqtTypeAssertionError,
 } from '../../types'
-import { MaybeArray } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { MaybeArray } from '@mtqt/core'
+import { tl } from '@mtqt/tl'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { normalizeDate, randomUlong } from '../../utils/misc-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
@@ -197,7 +197,7 @@ export async function forwardMessages(
     // error, instead only first 100 IDs will be forwarded,
     // which is definitely not the best outcome.
     if ((messages as number[]).length > 100)
-        throw new MtCuteArgumentError(
+        throw new MtqtArgumentError(
             'You can forward no more than 100 messages at once'
         )
 
@@ -206,7 +206,7 @@ export async function forwardMessages(
     let captionMessage: Message | null = null
     if (params.caption) {
         if (params.captionMedia)
-            throw new MtCuteArgumentError(
+            throw new MtqtArgumentError(
                 'You can either pass `caption` or `captionMedia`'
             )
 
