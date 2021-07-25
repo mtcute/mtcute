@@ -349,6 +349,14 @@ export class Message {
     }
 
     /**
+     * For replies, ID of the thread (i.e. ID of the top message
+     * in the thread)
+     */
+    get replyToThreadId(): number | null {
+        return this.raw.replyTo?.replyToTopId ?? null
+    }
+
+    /**
      * Whether this message contains mention of the current user
      */
     get isMention(): boolean {
