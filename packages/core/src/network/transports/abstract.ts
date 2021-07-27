@@ -33,7 +33,7 @@ export enum TransportState {
  *    (either mtproto related or network related): `(error: Error) => void`
  *  - `message` event is emitted when a mtproto message is received: `(message: Buffer) => void`
  */
-export interface ICuteTransport extends EventEmitter {
+export interface ITelegramTransport extends EventEmitter {
     /** returns current state */
     state(): TransportState
     /** returns current DC. should return null if state == IDLE */
@@ -43,7 +43,7 @@ export interface ICuteTransport extends EventEmitter {
      * Start trying to connect to a specified DC.
      * Will throw an error if state != IDLE
      */
-    connect(dc: tl.RawDcOption): void
+    connect(dc: tl.RawDcOption, testMode: boolean): void
     /** call to close existing connection to some DC */
     close(): void
     /** send a message */
@@ -57,7 +57,7 @@ export interface ICuteTransport extends EventEmitter {
 }
 
 /** Transport factory function */
-export type TransportFactory = () => ICuteTransport
+export type TransportFactory = () => ITelegramTransport
 
 /**
  * Interface declaring handling of received packets.

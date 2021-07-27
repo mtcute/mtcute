@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import {
     BaseTelegramClient,
     defaultDcs,
-    ICuteTransport,
+    ITelegramTransport, NodeCryptoProvider,
     randomBytes,
     tl,
     TransportState,
@@ -13,7 +13,7 @@ import { sleep } from '../../src/utils/misc-utils'
 
 require('dotenv-flow').config()
 
-class RandomBytesTransport extends EventEmitter implements ICuteTransport {
+class RandomBytesTransport extends EventEmitter implements ITelegramTransport {
     dc: tl.RawDcOption
 
     interval: NodeJS.Timeout | null
@@ -52,6 +52,7 @@ describe('fuzz : transport', function () {
 
     it('RandomBytesTransport (no auth)', async () => {
         const client = new BaseTelegramClient({
+            crypto: () => new NodeCryptoProvider(),
             transport: () => new RandomBytesTransport(),
             apiId: 0,
             apiHash: '',
@@ -76,6 +77,7 @@ describe('fuzz : transport', function () {
 
     it('RandomBytesTransport (with auth)', async () => {
         const client = new BaseTelegramClient({
+            crypto: () => new NodeCryptoProvider(),
             transport: () => new RandomBytesTransport(),
             apiId: 0,
             apiHash: '',

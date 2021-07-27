@@ -15,6 +15,8 @@ import { PersistentConnectionParams } from './network/persistent-connection'
 import {
     defaultProductionDc,
     defaultProductionIpv6Dc,
+    defaultTestDc,
+    defaultTestIpv6Dc,
 } from './utils/default-dcs'
 import {
     AuthKeyUnregisteredError,
@@ -80,6 +82,16 @@ export namespace BaseTelegramClient {
          * Defaults to Production DC 2.
          */
         primaryDc?: tl.RawDcOption
+
+        /**
+         * Whether to connect to test servers.
+         *
+         * If passed, {@link primaryDc} defaults to Test DC 2.
+         *
+         * **Must** be passed if using test servers, even if
+         * you passed custom {@link primaryDc}
+         */
+        testMode?: boolean
 
         /**
          * Additional options for initConnection call.
@@ -190,6 +202,11 @@ export class BaseTelegramClient extends EventEmitter {
     protected readonly _useIpv6: boolean
 
     /**
+     * "Test mode" taken from {@link BaseTelegramClient.Options.testMode}
+     */
+    protected readonly _testMode: boolean
+
+    /**
      * Reconnection strategy taken from {@link BaseTelegramClient.Options.reconnectionStrategy}
      */
     protected readonly _reconnectionStrategy: ReconnectionStrategy<PersistentConnectionParams>
@@ -265,9 +282,16 @@ export class BaseTelegramClient extends EventEmitter {
         this.storage = opts.storage ?? new MemoryStorage()
         this._apiHash = opts.apiHash
         this._useIpv6 = !!opts.useIpv6
+        this._testMode = !!opts.testMode
         this._primaryDc =
             opts.primaryDc ??
-            (this._useIpv6 ? defaultProductionIpv6Dc : defaultProductionDc)
+            (this._testMode
+                ? this._useIpv6
+                    ? defaultTestIpv6Dc
+                    : defaultTestDc
+                : this._useIpv6
+                ? defaultProductionIpv6Dc
+                : defaultProductionDc)
         this._reconnectionStrategy =
             opts.reconnectionStrategy ?? defaultReconnectionStrategy
         this._floodSleepThreshold = opts.floodSleepThreshold ?? 10000
@@ -321,6 +345,7 @@ export class BaseTelegramClient extends EventEmitter {
             initConnection: this._initConnectionParams,
             transportFactory: this._transportFactory,
             dc: this._primaryDc,
+            testMode: this._testMode,
             reconnectionStrategy: this._reconnectionStrategy,
             layer: this._layer,
         })
@@ -662,6 +687,7 @@ export class BaseTelegramClient extends EventEmitter {
         const dc = await this.getDcById(dcId, cdn)
         const connection = new TelegramConnection({
             dc,
+            testMode: this._testMode,
             crypto: this._crypto,
             initConnection: this._initConnectionParams,
             transportFactory: this._transportFactory,

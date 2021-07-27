@@ -1,27 +1,17 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { BaseTelegramClient, defaultDcs, randomBytes } from '../../src'
+import { randomBytes } from '../../src'
 import { sleep } from '../../src/utils/misc-utils'
 import { UserMigrateError } from '@mtqt/tl/errors'
+import { createTestTelegramClient } from '../e2e/utils'
 
 require('dotenv-flow').config()
 
 describe('fuzz : session', async function () {
-    if (!process.env.API_ID || !process.env.API_HASH) {
-        console.warn(
-            'Warning: skipping fuzz session tests (no API_ID or API_HASH)'
-        )
-        return
-    }
-
     this.timeout(45000)
 
     it('random auth_key', async () => {
-        const client = new BaseTelegramClient({
-            apiId: process.env.API_ID!,
-            apiHash: process.env.API_HASH!,
-            primaryDc: defaultDcs.defaultTestDc,
-        })
+        const client = createTestTelegramClient()
 
         // random key
         const initKey = randomBytes(256)
@@ -52,11 +42,7 @@ describe('fuzz : session', async function () {
     })
 
     it('random auth_key for other dc', async () => {
-        const client = new BaseTelegramClient({
-            apiId: process.env.API_ID!,
-            apiHash: process.env.API_HASH!,
-            primaryDc: defaultDcs.defaultTestDc,
-        })
+        const client = createTestTelegramClient()
 
         // random key for dc1
         const initKey = randomBytes(256)
@@ -95,11 +81,7 @@ describe('fuzz : session', async function () {
     }
 
     it('random auth_key for other dc with auth', async () => {
-        const client = new BaseTelegramClient({
-            apiId: process.env.API_ID!,
-            apiHash: process.env.API_HASH!,
-            primaryDc: defaultDcs.defaultTestDc,
-        })
+        const client = createTestTelegramClient()
 
         client.importSession(process.env.USER_SESSION!)
 

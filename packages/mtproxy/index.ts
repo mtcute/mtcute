@@ -43,16 +43,13 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
     private _rawSecret: Buffer
     private _randomPadding = false
     private _fakeTlsDomain: string | null = null
-    private _test: boolean
 
     /**
      * @param proxy  Information about the proxy
-     * @param test  Whether test servers should be used
      */
-    constructor(proxy: MtProxySettings, test = false) {
+    constructor(proxy: MtProxySettings) {
         super()
 
-        this._test = test
         this._proxy = proxy
 
         // validate and parse secret
@@ -88,7 +85,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
 
     _packetCodec!: IPacketCodec
 
-    connect(dc: tl.RawDcOption): void {
+    connect(dc: tl.RawDcOption, testMode: boolean): void {
         if (this._state !== TransportState.Idle)
             throw new Error('Transport is not IDLE')
 
@@ -105,7 +102,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
             const proxy = {
                 dcId: dc.id,
                 media: dc.mediaOnly!,
-                test: this._test,
+                test: testMode,
                 secret: this._rawSecret,
             }
 

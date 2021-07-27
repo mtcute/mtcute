@@ -83,6 +83,9 @@ export async function doAuthorization(
 
     const newNonce = randomBytes(32)
 
+    let dcId = connection.params.dc.id
+    if (connection.params.testMode) dcId += 10000
+    if (connection.params.dc.mediaOnly) dcId = -dcId
 
     const pqInnerData = BinaryWriter.serializeObject({
         _: 'mt_p_q_inner_data_dc',
@@ -92,7 +95,7 @@ export async function doAuthorization(
         nonce,
         newNonce,
         serverNonce: resPq.serverNonce,
-        dc: connection.params.dc.id
+        dc: dcId
     } as tl.mtproto.RawP_q_inner_data_dc)
     const encryptedData = await crypto.rsaEncrypt(pqInnerData, publicKey)
     debug('%s: requesting DH params', connection.params.dc.ipAddress)

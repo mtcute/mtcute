@@ -2,6 +2,7 @@ import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import { BaseTelegramClient, bufferToBigInt, defaultDcs, randomBytes, tl } from '../../src'
 import { sleep } from '../../src/utils/misc-utils'
+import { createTestTelegramClient } from './utils'
 
 require('dotenv-flow').config()
 
@@ -9,11 +10,7 @@ async function createClientPair(
     session1: string,
     session2: string
 ): Promise<[BaseTelegramClient, BaseTelegramClient]> {
-    const client1 = new BaseTelegramClient({
-        apiId: process.env.API_ID!,
-        apiHash: process.env.API_HASH!,
-        primaryDc: defaultDcs.defaultTestDc,
-    })
+    const client1 = createTestTelegramClient()
 
     if (session1.indexOf(':') > -1) {
         // bot token
@@ -28,11 +25,7 @@ async function createClientPair(
         client1.importSession(session1)
     }
 
-    const client2 = new BaseTelegramClient({
-        apiId: process.env.API_ID!,
-        apiHash: process.env.API_HASH!,
-        primaryDc: defaultDcs.defaultTestDc,
-    })
+    const client2 = createTestTelegramClient()
 
     if (session2.indexOf(':') > -1) {
         // bot token
@@ -51,10 +44,6 @@ async function createClientPair(
 }
 
 describe('e2e : receiving updates', function () {
-    if (!process.env.API_ID || !process.env.API_HASH) {
-        console.warn('Warning: skipping e2e updates test (no API_ID or API_HASH)')
-        return
-    }
     if (!process.env.BOT_TOKEN || !process.env.USER_SESSION) {
         console.warn('Warning: skipping e2e updates test (no API_ID or API_HASH)')
         return

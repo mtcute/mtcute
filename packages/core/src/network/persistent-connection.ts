@@ -1,5 +1,5 @@
 import EventEmitter from 'events'
-import { ICuteTransport, TransportFactory, TransportState } from './transports'
+import { ITelegramTransport, TransportFactory, TransportState } from './transports'
 import { tl } from '@mtqt/tl'
 import { ReconnectionStrategy } from './reconnection'
 import {
@@ -14,6 +14,7 @@ export interface PersistentConnectionParams {
     crypto: ICryptoProvider
     transportFactory: TransportFactory
     dc: tl.RawDcOption
+    testMode: boolean
     reconnectionStrategy: ReconnectionStrategy<PersistentConnectionParams>
     inactivityTimeout?: number
 }
@@ -24,7 +25,7 @@ export interface PersistentConnectionParams {
  */
 export abstract class PersistentConnection extends EventEmitter {
     readonly params: PersistentConnectionParams
-    private _transport: ICuteTransport
+    private _transport: ITelegramTransport
 
     private _sendOnceConnected: Buffer[] = []
 
@@ -91,6 +92,11 @@ export abstract class PersistentConnection extends EventEmitter {
     }
 
     onTransportError(err: Error): void {
+        if (this._pendingWaitForMessages.length) {
+            this._pendingWaitForMessages.shift()!.reject(err)
+            return
+        }
+
         this._lastError = err
         this.onError(err)
         // transport is expected to emit `close` after `error`
@@ -145,7 +151,7 @@ export abstract class PersistentConnection extends EventEmitter {
             clearTimeout(this._reconnectionTimeout)
 
         this._inactive = false
-        this._transport.connect(this.params.dc)
+        this._transport.connect(this.params.dc, this.params.testMode)
     }
 
     reconnect(): void {

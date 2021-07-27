@@ -1,32 +1,21 @@
-import { describe, after, it } from 'mocha'
+import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import {
-    BaseTelegramClient, BinaryReader,
+    BinaryReader,
     BinaryWriter,
-    defaultDcs,
     randomBytes,
 } from '../../src'
 import { sleep } from '../../src/utils/misc-utils'
 import { createAesIgeForMessage } from '../../src/utils/crypto/mtproto'
+import { createTestTelegramClient } from '../e2e/utils'
 
 require('dotenv-flow').config()
 
 describe('fuzz : packet', async function () {
-    if (!process.env.API_ID || !process.env.API_HASH) {
-        console.warn(
-            'Warning: skipping fuzz packet test (no API_ID or API_HASH)'
-        )
-        return
-    }
-
     this.timeout(45000)
 
     it('random packet', async () => {
-        const client = new BaseTelegramClient({
-            apiId: process.env.API_ID!,
-            apiHash: process.env.API_HASH!,
-            primaryDc: defaultDcs.defaultTestDc,
-        })
+        const client = createTestTelegramClient()
 
         await client.connect()
         await client.waitUntilUsable()

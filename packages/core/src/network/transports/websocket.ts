@@ -1,4 +1,4 @@
-import { ICuteTransport, IPacketCodec, TransportState } from './abstract'
+import { ITelegramTransport, IPacketCodec, TransportState } from './abstract'
 import { tl } from '@mtqt/tl'
 import EventEmitter from 'events'
 import { typedArrayToBuffer } from '../../utils/buffer-utils'
@@ -36,7 +36,7 @@ const subdomainsMap: Record<string, string> = {
  */
 export abstract class BaseWebSocketTransport
     extends EventEmitter
-    implements ICuteTransport {
+    implements ITelegramTransport {
     private _currentDc: tl.RawDcOption | null = null
     private _state: TransportState = TransportState.Idle
     private _socket: WebSocket | null = null
@@ -46,16 +46,13 @@ export abstract class BaseWebSocketTransport
     packetCodecInitialized = false
 
     private _baseDomain: string
-    private _isTest: boolean
     private _subdomains: Record<string, string>
 
     /**
-     * @param isTest  Whether this transport will be used for test DCs
      * @param baseDomain  Base WebSocket domain
      * @param subdomains  Map of sub-domains (key is DC ID, value is string)
      */
     constructor(
-        isTest = false,
         baseDomain = 'web.telegram.org',
         subdomains = subdomainsMap
     ) {
@@ -66,7 +63,6 @@ export abstract class BaseWebSocketTransport
                 'To use WebSocket transport with NodeJS, install `ws` package.'
             )
 
-        this._isTest = isTest
         this._baseDomain = baseDomain
         this._subdomains = subdomains
 
@@ -85,7 +81,7 @@ export abstract class BaseWebSocketTransport
         return this._currentDc
     }
 
-    connect(dc: tl.RawDcOption): void {
+    connect(dc: tl.RawDcOption, testMode: boolean): void {
         if (this._state !== TransportState.Idle)
             throw new Error('Transport is not IDLE')
 
@@ -100,7 +96,7 @@ export abstract class BaseWebSocketTransport
         this._currentDc = dc
         this._socket = new ws!(
             `wss://${this._subdomains[dc.id]}.${this._baseDomain}/apiws${
-                this._isTest ? '_test' : ''
+                testMode ? '_test' : ''
             }`,
             'binary'
         )

@@ -1,26 +1,19 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { BaseTelegramClient, defaultDcs, TransportState } from '../../src'
+import { TransportState } from '../../src'
 import { sleep } from '../../src/utils/misc-utils'
+import { createTestTelegramClient } from './utils'
 
 require('dotenv-flow').config()
 
 describe('e2e : idle connection', function () {
-    if (!process.env.API_ID || !process.env.API_HASH) {
-        console.warn('Warning: skipping e2e idle connection test (no API_ID or API_HASH)')
-        return
-    }
 
     this.timeout(120000)
 
     // 75s is to make sure ping is sent
 
     it('75s idle to test dc', async () => {
-        const client = new BaseTelegramClient({
-            apiId: process.env.API_ID!,
-            apiHash: process.env.API_HASH!,
-            primaryDc: defaultDcs.defaultTestDc
-        })
+        const client = createTestTelegramClient()
 
         await client.connect()
         await sleep(75000)
@@ -40,11 +33,7 @@ describe('e2e : idle connection', function () {
     }
 
     it('75s idle to test dc with auth', async () => {
-        const client = new BaseTelegramClient({
-            apiId: process.env.API_ID!,
-            apiHash: process.env.API_HASH!,
-            primaryDc: defaultDcs.defaultTestDc
-        })
+        const client = createTestTelegramClient()
 
         client.importSession(process.env.USER_SESSION!)
 

@@ -88,15 +88,18 @@ export async function startTest(
         phone = `99966${dcId}${numbers}`
     }
 
-    // such a smart solution, much wow
-    const code = phone[5] + phone[5] + phone[5] + phone[5] + phone[5] + phone[5]
+    let code = ''
 
     return this.start({
         phone,
-        code,
+        code: () => code,
         firstName: params.firstName,
         lastName: params.lastName,
         acceptTos: params.acceptTos,
-        codeSentCallback: () => {},
+        codeSentCallback: (sent) => {
+            for (let i = 0; i < sent.length; i++) {
+                code += phone![5]
+            }
+        },
     })
 }

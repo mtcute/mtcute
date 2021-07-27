@@ -35,7 +35,6 @@ export namespace SentCode {
      * See {@link DeliveryType} for information on values.
      *
      * Additionally, can be `none` if no more types are available
-     * (this has never occurred in real life though)
      */
     export type NextDeliveryType = Exclude<DeliveryType, 'app'> | 'none'
 }
@@ -83,6 +82,13 @@ export class SentCode {
      */
     get timeout(): number {
         return this.sentCode.timeout ?? 0
+    }
+
+    /**
+     * Length of the code (0 for flash calls)
+     */
+    get length(): number {
+        return 'length' in this.sentCode.type ? this.sentCode.type.length : 0
     }
 }
 

@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@mtqt/core": "^1.0.0",
+        "@mtqt/tl": "~1.131.0",
         "big-integer": "1.6.48"
     }
 }

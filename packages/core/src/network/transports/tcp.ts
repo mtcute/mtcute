@@ -1,4 +1,4 @@
-import { ICuteTransport, IPacketCodec, TransportState } from './abstract'
+import { ITelegramTransport, IPacketCodec, TransportState } from './abstract'
 import { tl } from '@mtqt/tl'
 import { Socket, connect } from 'net'
 import EventEmitter from 'events'
@@ -13,7 +13,7 @@ const debug = require('debug')('mtqt:tcp')
  */
 export abstract class BaseTcpTransport
     extends EventEmitter
-    implements ICuteTransport {
+    implements ITelegramTransport {
     protected _currentDc: tl.RawDcOption | null = null
     protected _state: TransportState = TransportState.Idle
     protected _socket: Socket | null = null
@@ -35,7 +35,7 @@ export abstract class BaseTcpTransport
         return this._currentDc
     }
 
-    connect(dc: tl.RawDcOption): void {
+    connect(dc: tl.RawDcOption, testMode: boolean): void {
         if (this._state !== TransportState.Idle)
             throw new Error('Transport is not IDLE')
 
