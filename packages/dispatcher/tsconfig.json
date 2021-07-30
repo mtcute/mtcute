@@ -7,9 +7,9 @@
         "./src"
     ],
     "typedocOptions": {
-        "name": "@mtqt/client",
+        "name": "@mtqt/dispatcher",
         "includeVersion": true,
-        "out": "../../docs/packages/client",
+        "out": "../../docs/packages/dispatcher",
         "listInvalidSymbolLinks": true,
         "excludePrivate": true,
         "entryPoints": [

@@ -27,20 +27,20 @@ interface UpdatesState {
     // accessing storage every time might be expensive,
     // so store everything here, and load & save
     // every time session is loaded & saved.
-    _pts: number
-    _date: number
-    _seq: number
+    _pts?: number
+    _date?: number
+    _seq?: number
 
     // old values of the updates state (i.e. as in DB)
     // used to avoid redundant storage calls
-    _oldPts: number
-    _oldDate: number
-    _oldSeq: number
+    _oldPts?: number
+    _oldDate?: number
+    _oldSeq?: number
     _selfChanged: boolean
 
     // whether to catch up channels from the locally stored pts
     // usually set in start() method based on `catchUp` param
-    _catchUpChannels: boolean
+    _catchUpChannels?: boolean
 
     _cpts: Record<number, number>
     _cptsMod: Record<number, number>
@@ -129,9 +129,9 @@ export async function _saveStorage(
             if (this._oldPts === undefined || this._oldPts !== this._pts)
                 await this.storage.setUpdatesPts(this._pts)
             if (this._oldDate === undefined || this._oldDate !== this._date)
-                await this.storage.setUpdatesDate(this._date)
+                await this.storage.setUpdatesDate(this._date!)
             if (this._oldSeq === undefined || this._oldSeq !== this._seq)
-                await this.storage.setUpdatesSeq(this._seq)
+                await this.storage.setUpdatesSeq(this._seq!)
 
             // update old* values
             this._oldPts = this._pts
@@ -399,8 +399,8 @@ async function _loadDifference(
     for (;;) {
         const diff = await this.call({
             _: 'updates.getDifference',
-            pts: this._pts,
-            date: this._date,
+            pts: this._pts!,
+            date: this._date!,
             qts: 0,
         })
 
@@ -631,7 +631,7 @@ export function _handleUpdate(
                             : update.seq
                     if (seqStart !== 0) {
                         // https://t.me/tdlibchat/5843
-                        const nextLocalSeq = this._seq + 1
+                        const nextLocalSeq = this._seq! + 1
 
                         debug(
                             'received %s (seq_start=%d, seq_end=%d)',
@@ -680,7 +680,7 @@ export function _handleUpdate(
                         if (pts !== undefined && ptsCount !== undefined) {
                             let nextLocalPts: number | null = null
                             if (channelId === undefined)
-                                nextLocalPts = this._pts + ptsCount
+                                nextLocalPts = this._pts! + ptsCount
                             else if (channelId in this._cpts)
                                 nextLocalPts = this._cpts[channelId] + ptsCount
                             else if (this._catchUpChannels) {
@@ -770,7 +770,7 @@ export function _handleUpdate(
                 case 'updateShortMessage': {
                     if (noDispatch) return
 
-                    const nextLocalPts = this._pts + update.ptsCount
+                    const nextLocalPts = this._pts! + update.ptsCount
                     if (nextLocalPts > update.pts)
                         // "the update was already applied, and must be ignored"
                         return
@@ -818,7 +818,7 @@ export function _handleUpdate(
                 case 'updateShortChatMessage': {
                     if (noDispatch) return
 
-                    const nextLocalPts = this._pts + update.ptsCount
+                    const nextLocalPts = this._pts! + update.ptsCount
                     if (nextLocalPts > update.pts)
                         // "the update was already applied, and must be ignored"
                         return
@@ -867,7 +867,7 @@ export function _handleUpdate(
                     // only store the new pts and date values
                     // we never need to dispatch this
 
-                    const nextLocalPts = this._pts + update.ptsCount
+                    const nextLocalPts = this._pts! + update.ptsCount
                     if (nextLocalPts > update.pts)
                         // "the update was already applied, and must be ignored"
                         return

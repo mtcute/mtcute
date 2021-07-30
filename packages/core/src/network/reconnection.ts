@@ -14,7 +14,7 @@ export type ReconnectionStrategy<T> = (
  * default reconnection strategy: first - immediate reconnection,
  * then 1s with linear increase up to 5s (with 1s step)
  */
-export const defaultReconnectionStrategy: ReconnectionStrategy<never> = (
+export const defaultReconnectionStrategy: ReconnectionStrategy<any> = (
     params,
     lastError,
     consequentFails,

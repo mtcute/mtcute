@@ -57,7 +57,8 @@ export interface ITlBinaryWriter {
 
 export type TlBinaryWriterFunction = (
     this: ITlBinaryWriter,
-    obj: unknown
+    obj: unknown,
+    bare?: boolean
 ) => void
 
 /**

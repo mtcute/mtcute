@@ -16,7 +16,6 @@
         "big-integer": "^1.6.48"
     },
     "devDependencies": {
-        "@mtqt/core": "^1.0.0",
         "cheerio": "^1.0.0-rc.5",
         "eager-async-pool": "^1.0.0",
         "csv-parser": "^3.0.0",

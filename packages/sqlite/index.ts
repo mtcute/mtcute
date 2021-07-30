@@ -161,8 +161,8 @@ const EMPTY_BUFFER = Buffer.alloc(0)
  * Uses `better-sqlite3` library
  */
 export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
-    private _db: sqlite3.Database
-    private _statements: Record<keyof typeof STATEMENTS, sqlite3.Statement>
+    private _db!: sqlite3.Database
+    private _statements!: Record<keyof typeof STATEMENTS, sqlite3.Statement>
     private readonly _filename: string
 
     private _pending: [sqlite3.Statement, any[]][] = []
@@ -178,7 +178,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
     private _saveUnimportantLater: () => void
 
-    private _vacuumTimeout: NodeJS.Timeout
+    private _vacuumTimeout?: NodeJS.Timeout
     private _vacuumInterval: number
 
     /**
@@ -343,8 +343,8 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
         }
     }
 
-    private _runMany: (stmts: [sqlite3.Statement, any[]][]) => void
-    private _updateManyPeers: (updates: any[]) => void
+    private _runMany!: (stmts: [sqlite3.Statement, any[]][]) => void
+    private _updateManyPeers!: (updates: any[]) => void
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private _upgradeDatabase(from: number): void {
@@ -430,7 +430,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
     destroy(): void {
         this._db.close()
-        clearInterval(this._vacuumTimeout)
+        clearInterval(this._vacuumTimeout!)
     }
 
     reset(): void {

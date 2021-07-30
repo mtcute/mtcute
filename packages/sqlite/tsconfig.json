@@ -13,7 +13,7 @@
         "listInvalidSymbolLinks": true,
         "excludePrivate": true,
         "entryPoints": [
-            "./src/index.ts"
+            "./index.ts"
         ]
     }
 }

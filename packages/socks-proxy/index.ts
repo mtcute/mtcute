@@ -2,8 +2,8 @@ import {
     IntermediatePacketCodec,
     BaseTcpTransport,
     TransportState,
+    tl
 } from '@mtqt/core'
-import { tl } from '@mtqt/tl'
 import { connect } from 'net'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

@@ -52,12 +52,12 @@ interface MemorySessionState {
 const USERNAME_TTL = 86400000 // 24 hours
 
 export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
-    protected _state: MemorySessionState
+    protected _state!: MemorySessionState
     private _cachedInputPeers: LruMap<number, tl.TypeInputPeer> = new LruMap(100)
 
     private _cachedFull: LruMap<number, tl.TypeUser | tl.TypeChat>
 
-    private _vacuumTimeout: NodeJS.Timeout
+    private _vacuumTimeout?: NodeJS.Timeout
     private _vacuumInterval: number
 
     constructor(params?: {
@@ -96,7 +96,7 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
     }
 
     destroy(): void {
-        clearInterval(this._vacuumTimeout)
+        clearInterval(this._vacuumTimeout!)
     }
 
     reset(): void {

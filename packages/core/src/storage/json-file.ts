@@ -15,7 +15,7 @@ export class JsonFileStorage extends JsonMemoryStorage {
     private readonly _safe: boolean
     private readonly _cleanup: boolean
 
-    private readonly _unsubscribe: () => void
+    private readonly _unsubscribe?: () => void
 
     constructor(
         filename: string,
@@ -114,7 +114,7 @@ export class JsonFileStorage extends JsonMemoryStorage {
 
     destroy(): void {
         if (this._cleanup) {
-            this._unsubscribe()
+            this._unsubscribe!()
         }
     }
 }

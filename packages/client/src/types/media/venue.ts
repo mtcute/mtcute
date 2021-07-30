@@ -39,7 +39,7 @@ export class Venue {
         this.raw = raw
     }
 
-    private _location: Location
+    private _location?: Location
     /**
      * Geolocation of the venue
      */

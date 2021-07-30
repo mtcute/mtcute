@@ -1,6 +1,5 @@
 import { TelegramClient, User } from '@mtqt/client'
 import { BaseTelegramClient } from '@mtqt/core'
-import type { NodeNativeCryptoProvider } from '@mtqt/crypto-node'
 import { HtmlMessageEntityParser } from '@mtqt/html-parser'
 import { MarkdownMessageEntityParser } from '@mtqt/markdown-parser'
 import { SqliteStorage } from '@mtqt/sqlite'
@@ -12,7 +11,7 @@ export * from '@mtqt/html-parser'
 export * from '@mtqt/markdown-parser'
 export { SqliteStorage }
 
-let nativeCrypto: typeof NodeNativeCryptoProvider | null
+let nativeCrypto: any
 try {
     nativeCrypto = require('@mtqt/crypto-node').NodeNativeCryptoProvider
 } catch (e) {}
@@ -52,7 +51,7 @@ export namespace NodeTelegramClient {
 export class NodeTelegramClient extends TelegramClient {
     constructor(opts: NodeTelegramClient.Options) {
         super({
-            crypto: nativeCrypto ? () => new nativeCrypto!() : undefined,
+            crypto: nativeCrypto ? () => new nativeCrypto() : undefined,
             ...opts,
             storage:
                 typeof opts.storage === 'string'

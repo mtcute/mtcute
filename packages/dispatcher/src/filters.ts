@@ -253,12 +253,12 @@ export namespace filters {
      *
      * @param fns  Filters to combine
      */
-    export function every<Filters extends UpdateFilter<T, any>[], T>(
+    export function every<Filters extends UpdateFilter<any, any>[]>(
         ...fns: Filters
     ): UpdateFilter<
-        ExtractBase<Filters[0]>,
+        UnionToIntersection<ExtractBase<Filters[number]>>,
         UnionToIntersection<
-            ExtractMod<ExtractBase<Filters[0]>, Filters[number]>
+            ExtractMod<ExtractBase<Filters[number]>, Filters[number]>
         >
     > {
         if (fns.length === 2) return and(fns[0], fns[1])
@@ -301,11 +301,11 @@ export namespace filters {
      *
      * @param fns  Filters to combine
      */
-    export function some<Filters extends UpdateFilter<T, any>[], T>(
+    export function some<Filters extends UpdateFilter<any, any>[]>(
         ...fns: Filters
     ): UpdateFilter<
-        ExtractBase<Filters[0]>,
-        ExtractMod<ExtractBase<Filters[0]>, Filters[number]>
+        UnionToIntersection<ExtractBase<Filters[number]>>,
+        ExtractMod<ExtractBase<Filters[number]>, Filters[number]>
     > {
         if (fns.length === 2) return or(fns[0], fns[1])
 
@@ -1034,7 +1034,9 @@ export namespace filters {
         params: MaybeArray<string | RegExp>
     ): UpdateFilter<Message, { command: string[] }> => {
         if (!Array.isArray(params)) {
-            return and(start, (msg: Message & { command: string[] }) => {
+            return and(start, (_msg: Message) => {
+                const msg = _msg as Message & { command: string[] }
+
                 if (msg.command.length !== 2) return false
 
                 const p = msg.command[1]
@@ -1048,7 +1050,9 @@ export namespace filters {
             })
         }
 
-        return and(start, (msg: Message & { command: string[] }) => {
+        return and(start, (_msg: Message) => {
+            const msg = _msg as Message & { command: string[] }
+
             if (msg.command.length !== 2) return false
 
             const p = msg.command[1]

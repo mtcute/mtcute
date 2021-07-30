@@ -11,7 +11,6 @@ import { decodeWaveform } from '../../utils/voice-utils'
 export class Voice extends RawDocument {
     readonly type = 'voice' as const
 
-    readonly doc: tl.RawDocument
     readonly attr: tl.RawDocumentAttributeAudio
 
     protected _fileIdType(): tdFileId.FileType {

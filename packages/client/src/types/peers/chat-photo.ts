@@ -148,7 +148,7 @@ export class ChatPhoto {
         return this._smallFile
     }
 
-    private _bigFile: ChatPhotoSize
+    private _bigFile?: ChatPhotoSize
     /** Chat photo file location in big resolution (640x640) */
     get big(): ChatPhotoSize {
         if (!this._bigFile) {

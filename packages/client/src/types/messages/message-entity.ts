@@ -68,26 +68,26 @@ export class MessageEntity {
     /**
      * Underlying raw TL object
      */
-    readonly raw: tl.TypeMessageEntity
+    readonly raw!: tl.TypeMessageEntity
 
     /**
      * Type of the entity. See {@link MessageEntity.Type} for a list of possible values
      */
-    readonly type: MessageEntity.Type
+    readonly type!: MessageEntity.Type
 
     /**
      * Offset in UTF-16 code units to the start of the entity.
      *
      * Since JS strings are UTF-16, you can use this as-is
      */
-    readonly offset: number
+    readonly offset!: number
 
     /**
      * Length of the entity in UTF-16 code units.
      *
      * Since JS strings are UTF-16, you can use this as-is
      */
-    readonly length: number
+    readonly length!: number
 
     /**
      * When `type=text_link`, contains the URL that would be opened if user taps on the text

@@ -113,7 +113,7 @@ export class UserTypingUpdate {
     }
 
     /**
-     * Fetch the chat where the update has happenned
+     * Fetch the chat where the update has happened
      */
     getChat(): Promise<Chat> {
         return this.client.getChat(this.chatId)

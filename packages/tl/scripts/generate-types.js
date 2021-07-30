@@ -21,6 +21,7 @@ import { BigInteger } from 'big-integer';
  *  - you can use \`{ _: 'error', ... }\` to create needed types
  *  - to check if something is of some type, check \`_\` property of an object
  *  - to check if something is of some union, use \`isAny*()\` functions
+ * @hidden
  */
 export declare namespace tl {
     /**

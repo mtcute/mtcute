@@ -30,7 +30,7 @@ function getAllGettersNames(obj: object): string[] {
 }
 
 const bufferToJsonOriginal = (Buffer as any).toJSON
-const bufferToJsonInspect = function () { return this.toString('base64') }
+const bufferToJsonInspect = function (this: Buffer) { return this.toString('base64') }
 
 /**
  * Small helper function that adds `toJSON` and `util.custom.inspect`

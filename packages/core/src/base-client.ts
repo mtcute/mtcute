@@ -235,7 +235,7 @@ export class BaseTelegramClient extends EventEmitter {
     private _niceStacks: boolean
     readonly _layer: number
 
-    private _keepAliveInterval: NodeJS.Timeout
+    private _keepAliveInterval?: NodeJS.Timeout
     private _lastRequestTime = 0
     private _floodWaitedRequests: Record<string, number> = {}
 
@@ -255,7 +255,7 @@ export class BaseTelegramClient extends EventEmitter {
      *
      * Methods for downloading/uploading files may create additional connections as needed.
      */
-    primaryConnection: TelegramConnection
+    primaryConnection!: TelegramConnection
 
     private _importFrom?: string
 

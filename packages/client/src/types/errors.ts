@@ -50,6 +50,9 @@ export class MtqtTypeAssertionError extends MtqtError {
         super(
             `Type assertion error at ${context}: expected ${expected}, but got ${actual}`
         )
+        this.context = context
+        this.expected = expected
+        this.actual = actual
     }
 }
 

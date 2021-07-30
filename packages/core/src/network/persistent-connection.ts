@@ -25,7 +25,7 @@ export interface PersistentConnectionParams {
  */
 export abstract class PersistentConnection extends EventEmitter {
     readonly params: PersistentConnectionParams
-    private _transport: ITelegramTransport
+    private _transport!: ITelegramTransport
 
     private _sendOnceConnected: Buffer[] = []
 

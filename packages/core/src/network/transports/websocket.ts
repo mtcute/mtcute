@@ -40,7 +40,7 @@ export abstract class BaseWebSocketTransport
     private _currentDc: tl.RawDcOption | null = null
     private _state: TransportState = TransportState.Idle
     private _socket: WebSocket | null = null
-    private _crypto: ICryptoProvider
+    private _crypto!: ICryptoProvider
 
     abstract _packetCodec: IPacketCodec
     packetCodecInitialized = false

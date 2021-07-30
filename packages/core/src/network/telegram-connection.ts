@@ -75,7 +75,7 @@ interface PendingMessage {
 // TODO: error handling basically everywhere, most importantly (de-)serialization errors
 // noinspection JSUnusedLocalSymbols
 export class TelegramConnection extends PersistentConnection {
-    readonly params: TelegramConnectionParams
+    readonly params!: TelegramConnectionParams
 
     private readonly _mtproto: MtprotoSession
 

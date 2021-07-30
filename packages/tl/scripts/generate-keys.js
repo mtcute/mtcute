@@ -1,10 +1,10 @@
 // generates fingerprints for public keys.
 // since they are rarely changed, not included in `generate-code` npm script
 // keys can still be added at runtime, this is just an optimization
-const { parsePublicKey } = require('@mtqt/core/dist/utils/crypto/keys')
+const { parsePublicKey } = require('../../core/dist/utils/crypto/keys')
 const {
     NodeCryptoProvider,
-} = require('@mtqt/core/dist/utils/crypto/node-crypto')
+} = require('../../core/dist/utils/crypto/node-crypto')
 const { createWriter } = require('./common')
 
 // https://github.com/DrKLO/Telegram/blob/a724d96e9c008b609fe188d122aa2922e40de5fc/TMessagesProj/jni/tgnet/Handshake.cpp#L356-L436

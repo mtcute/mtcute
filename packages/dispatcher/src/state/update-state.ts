@@ -19,7 +19,7 @@ export class RateLimitError extends MtqtError {
  */
 export class UpdateState<State, SceneName extends string = string> {
     private _key: string
-    private _localKey: string
+    private _localKey!: string
 
     private _storage: IStateStorage
 

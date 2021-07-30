@@ -35,8 +35,8 @@ export class JsonMemoryStorage extends MemoryStorage {
                 return Object.entries(value)
                     .filter((it) => it[1] !== null)
                     .map(
-                        ([dcId, key]: [string, Buffer]) =>
-                            dcId + ',' + key.toString('base64')
+                        ([dcId, key]) =>
+                            dcId + ',' + (key as Buffer).toString('base64')
                     )
                     .join('|')
             }

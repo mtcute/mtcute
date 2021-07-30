@@ -57,14 +57,14 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     private _client?: TelegramClient
 
     private _parent?: Dispatcher<any>
-    private _children: Dispatcher<any>[] = []
+    private _children: Dispatcher<any, any>[] = []
 
-    private _scenes: Record<string, Dispatcher<any, SceneName>>
+    private _scenes?: Record<string, Dispatcher<any, SceneName>>
     private _scene?: SceneName
     private _sceneScoped?: boolean
 
-    private _storage: State extends never ? undefined : IStateStorage
-    private _stateKeyDelegate: State extends never
+    private _storage?: State extends never ? undefined : IStateStorage
+    private _stateKeyDelegate?: State extends never
         ? undefined
         : StateKeyDelegate
 
@@ -437,7 +437,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                                             'Cannot use ToScene without entering a scene'
                                         )
 
-                                    return this._scenes[
+                                    return this._scenes![
                                         scene
                                     ]._dispatchUpdateNowImpl(
                                         update,
@@ -643,7 +643,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         return this._parent ?? null
     }
 
-    private _prepareChild(child: Dispatcher<any>): void {
+    private _prepareChild(child: Dispatcher<any, any>): void {
         if (child._client) {
             throw new MtqtArgumentError(
                 'Provided dispatcher is ' +
@@ -756,7 +756,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param child  Other dispatcher
      */
-    removeChild(child: Dispatcher): void {
+    removeChild(child: Dispatcher<any, any>): void {
         const idx = this._children.indexOf(child)
         if (idx > -1) {
             child._unparent()
@@ -812,17 +812,19 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         })
 
         if (other._scenes) {
+            if (!this._scenes) this._scenes = {}
+
             Object.keys(other._scenes).forEach((key) => {
-                other._scenes[key]._unparent()
-                if (key in this._scenes) {
+                other._scenes![key]._unparent()
+                if (key in this._scenes!) {
                     // will be overwritten
-                    delete this._scenes[key]
+                    delete this._scenes![key]
                 }
 
                 this.addScene(
                     key as any,
-                    other._scenes[key] as any,
-                    other._scenes[key]._sceneScoped as any
+                    other._scenes![key] as any,
+                    other._scenes![key]._sceneScoped as any
                 )
             })
         }
@@ -851,11 +853,11 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
             dp._groups[idx] = {} as any
 
-            Object.keys(this._groups[idx]).forEach(
-                (type: UpdateHandler['name']) => {
-                    dp._groups[idx][type] = [...this._groups[idx][type]]
-                }
-            )
+            Object.keys(this._groups[idx]).forEach((type) => {
+                dp._groups[idx][type as UpdateHandler['name']] = [
+                    ...this._groups[idx][type as UpdateHandler['name']],
+                ]
+            })
         })
 
         dp._groupsOrder = [...this._groupsOrder]
@@ -871,11 +873,11 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
             if (this._scenes) {
                 Object.keys(this._scenes).forEach((key) => {
-                    const scene = this._scenes[key].clone(true)
+                    const scene = this._scenes![key].clone(true)
                     dp.addScene(
                         key as any,
                         scene as any,
-                        this._scenes[key]._sceneScoped as any
+                        this._scenes![key]._sceneScoped as any
                     )
                 })
             }
@@ -1004,16 +1006,19 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         group?: number
     ): void {
         if (typeof handler === 'number') {
-            this.addUpdateHandler({
-                name,
-                callback: filter
-            }, handler)
+            this.addUpdateHandler(
+                {
+                    name,
+                    callback: filter,
+                },
+                handler
+            )
         } else {
             this.addUpdateHandler(
                 {
                     name,
                     callback: handler,
-                    check: filter
+                    check: filter,
                 },
                 group
             )
@@ -1026,10 +1031,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param handler  Raw update handler
      * @param group  Handler group index
      */
-    onRawUpdate(
-        handler: RawUpdateHandler['callback'],
-        group?: number
-    ): void
+    onRawUpdate(handler: RawUpdateHandler['callback'], group?: number): void
 
     /**
      * Register a raw update handler without any filters

@@ -2,8 +2,8 @@ import {
     IntermediatePacketCodec,
     BaseTcpTransport,
     TransportState,
+    tl
 } from '@mtqt/core'
-import { tl } from '@mtqt/tl'
 import { connect as connectTcp } from 'net'
 import { connect as connectTls, SecureContextOptions } from 'tls'
 

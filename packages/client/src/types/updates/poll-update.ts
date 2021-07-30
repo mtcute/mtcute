@@ -33,7 +33,7 @@ export class PollUpdate {
         return this.raw.pollId
     }
 
-    private _poll: Poll
+    private _poll?: Poll
     /**
      * The poll.
      *

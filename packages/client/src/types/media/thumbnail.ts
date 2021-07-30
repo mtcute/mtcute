@@ -31,16 +31,6 @@ export class Thumbnail extends FileLocation {
     static readonly THUMB_STRIP = 'i'
     static readonly THUMB_OUTLINE = 'j'
 
-    /**
-     * Thumbnail size in bytes
-     */
-    readonly fileSize: number
-
-    /**
-     * DC where the thumbnail is stored
-     */
-    readonly dcId: number
-
     readonly raw: tl.TypePhotoSize
 
     /**
@@ -177,7 +167,7 @@ export class Thumbnail extends FileLocation {
             if (this._media._ === 'stickerSet') {
                 this._fileId = toFileId({
                     type: td.FileType.Thumbnail,
-                    dcId: this.dcId,
+                    dcId: this.dcId!,
                     fileReference: null,
                     location: {
                         _: 'photo',
@@ -197,7 +187,7 @@ export class Thumbnail extends FileLocation {
                         this._media._ === 'photo'
                             ? td.FileType.Photo
                             : td.FileType.Thumbnail,
-                    dcId: this.dcId,
+                    dcId: this.dcId!,
                     fileReference: this._media.fileReference,
                     location: {
                         _: 'photo',

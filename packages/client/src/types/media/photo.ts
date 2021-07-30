@@ -14,16 +14,6 @@ export class Photo extends FileLocation {
     /** Raw TL object */
     readonly raw: tl.RawPhoto
 
-    /**
-     * Photo size in bytes
-     */
-    readonly fileSize: number
-
-    /**
-     * DC where the photo is stored
-     */
-    readonly dcId: number
-
     /** Biggest available photo width */
     readonly width: number
 

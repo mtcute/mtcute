@@ -19,7 +19,7 @@ export abstract class BaseTcpTransport
     protected _socket: Socket | null = null
 
     abstract _packetCodec: IPacketCodec
-    protected _crypto: ICryptoProvider
+    protected _crypto!: ICryptoProvider
 
     packetCodecInitialized = false
 

@@ -9,8 +9,9 @@
         "baseUrl": ".",
         "declaration": true,
         "esModuleInterop": true,
-        "strictNullChecks": true,
+        "strict": true,
         "noImplicitAny": true,
+        "noImplicitThis": true,
         "incremental": true,
         "stripInternal": true
     },

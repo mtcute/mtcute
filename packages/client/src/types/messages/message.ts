@@ -363,7 +363,7 @@ export class Message {
         return this.raw.mentioned!
     }
 
-    private _viaBot: User | null
+    private _viaBot?: User | null
     /**
      * If this message is generated from an inline query,
      * information about the bot which generated it

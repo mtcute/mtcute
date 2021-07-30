@@ -10,7 +10,6 @@ import { tdFileId } from '@mtqt/file-id'
 export class Audio extends RawDocument {
     readonly type = 'audio' as const
 
-    readonly doc: tl.RawDocument
     readonly attr: tl.RawDocumentAttributeAudio
 
     protected _fileIdType(): tdFileId.FileType {

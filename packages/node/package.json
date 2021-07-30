@@ -12,6 +12,7 @@
         "build": "tsc"
     },
     "dependencies": {
+        "@mtqt/core": "^1.0.0",
         "@mtqt/client": "^1.0.0",
         "@mtqt/sqlite": "^1.0.0",
         "@mtqt/markdown-parser": "^1.0.0",

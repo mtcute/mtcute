@@ -3,7 +3,7 @@ import { IPacketCodec } from './abstract'
 import { ICryptoProvider } from '../../utils/crypto'
 
 export abstract class WrappedCodec extends EventEmitter {
-    protected _crypto: ICryptoProvider
+    protected _crypto!: ICryptoProvider
     protected _inner: IPacketCodec
 
     constructor(inner: IPacketCodec) {

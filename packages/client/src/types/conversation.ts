@@ -32,12 +32,12 @@ interface QueuedHandler<T> {
  * and synchronize them manually.
  */
 export class Conversation {
-    private _inputPeer: tl.TypeInputPeer
-    private _chatId: number
+    private _inputPeer!: tl.TypeInputPeer
+    private _chatId!: number
     private _started = false
 
-    private _lastMessage: number
-    private _lastReceivedMessage: number
+    private _lastMessage!: number
+    private _lastReceivedMessage!: number
 
     private _queuedNewMessage = new Queue<QueuedHandler<Message>>()
     private _pendingNewMessages = new Queue<Message>()
