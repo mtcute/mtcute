@@ -288,7 +288,7 @@ export async function generateFakeTlsHeader(
 export class FakeTlsPacketCodec extends WrappedCodec implements IPacketCodec {
     protected _stream = Buffer.alloc(0)
 
-    private _header: Buffer
+    private _header!: Buffer
     private _isFirstTls = true
 
     async tag(): Promise<Buffer> {
