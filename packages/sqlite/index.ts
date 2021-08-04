@@ -91,7 +91,7 @@ const SCHEMA = `
         "full" blob
     );
     create index idx_entities_username on entities (username);
-    create unique index idx_entities_phone on entities (phone);
+    create index idx_entities_phone on entities (phone);
 `
 
 const RESET = `
@@ -147,10 +147,10 @@ const STATEMENTS = {
     upsertEnt:
         'insert or replace into entities (id, hash, type, username, phone, updated, "full") values (?, ?, ?, ?, ?, ?, ?)',
     getEntById: 'select * from entities where id = ?',
-    getEntByPhone: 'select * from entities where phone = ?',
-    getEntByUser: 'select * from entities where username = ?',
+    getEntByPhone: 'select * from entities where phone = ? limit 1',
+    getEntByUser: 'select * from entities where username = ? limit 1',
 
-    delStaleState: 'delete from state where expires < ?'
+    delStaleState: 'delete from state where expires < ?',
 } as const
 
 const EMPTY_BUFFER = Buffer.alloc(0)
@@ -296,7 +296,6 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
             this._updateManyPeers(items)
             this._pendingUnimportant = {}
         }, params?.unimportantSavesDelay ?? 30000)
-
 
         this._vacuumInterval = params?.vacuumInterval ?? 300_000
 
@@ -465,19 +464,24 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
         return this._setToKv('self', self)
     }
 
-    getUpdatesState(): [number, number, number] | null {
+    getUpdatesState(): [number, number, number, number] | null {
         const pts = this._getFromKv('pts')
         if (pts == null) return null
 
-        return [pts, this._getFromKv('date')!, this._getFromKv('seq')!]
-    }
-
-    setCommonPts(val: [number, number] | null): void {
-        return this._setToKv('cpts', val)
+        return [
+            pts,
+            this._getFromKv('qts')!,
+            this._getFromKv('date')!,
+            this._getFromKv('seq')!,
+        ]
     }
 
     setUpdatesPts(val: number): void {
         return this._setToKv('pts', val)
+    }
+
+    setUpdatesQts(val: number): void {
+        return this._setToKv('qts', val)
     }
 
     setUpdatesDate(val: number): void {
@@ -607,7 +611,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
             const full = this._readFullPeer(row.full)
             this._addToCache(id, {
                 peer: getInputPeer(row),
-                full
+                full,
             })
             return full
         }
@@ -689,7 +693,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
             // expired or does not exist
             const item: FsmItem = {
                 expires: now + window * 1000,
-                value: limit
+                value: limit,
             }
 
             this._statements.setState.run(
