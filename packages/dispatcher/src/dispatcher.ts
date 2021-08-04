@@ -17,6 +17,7 @@ import {
     DeleteMessageUpdate,
     HistoryReadUpdate,
     ParsedUpdate,
+    BotStoppedUpdate
 } from '@mtqt/client'
 import { tl } from '@mtqt/tl'
 // begin-codegen-imports
@@ -35,6 +36,7 @@ import {
     UserStatusUpdateHandler,
     UserTypingHandler,
     HistoryReadHandler,
+    BotStoppedHandler,
 } from './handler'
 // end-codegen-imports
 import { filters, UpdateFilter } from './filters'
@@ -1466,6 +1468,34 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     /** @internal */
     onHistoryRead(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('history_read', filter, handler, group)
+    }
+
+    /**
+     * Register a bot stopped handler without any filters
+     *
+     * @param handler  Bot stopped handler
+     * @param group  Handler group index
+     */
+    onBotStopped(handler: BotStoppedHandler['callback'], group?: number): void
+
+    /**
+     * Register a bot stopped handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Bot stopped handler
+     * @param group  Handler group index
+     */
+    onBotStopped<Mod>(
+        filter: UpdateFilter<BotStoppedUpdate, Mod>,
+        handler: BotStoppedHandler<
+            filters.Modify<BotStoppedUpdate, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onBotStopped(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('bot_stopped', filter, handler, group)
     }
 
     // end-codegen

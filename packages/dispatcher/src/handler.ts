@@ -14,6 +14,7 @@ import {
     DeleteMessageUpdate,
     PollUpdate,
     UserTypingUpdate,
+    BotStoppedUpdate
 } from '@mtqt/client'
 import { tl } from '@mtqt/tl'
 import { PropagationAction } from './propagation'
@@ -94,6 +95,10 @@ export type HistoryReadHandler<T = HistoryReadUpdate> = ParsedUpdateHandler<
     'history_read',
     T
 >
+export type BotStoppedHandler<T = BotStoppedUpdate> = ParsedUpdateHandler<
+    'bot_stopped',
+    T
+>
 
 export type UpdateHandler =
     | RawUpdateHandler
@@ -109,5 +114,6 @@ export type UpdateHandler =
     | UserStatusUpdateHandler
     | UserTypingHandler
     | HistoryReadHandler
+    | BotStoppedHandler
 
 // end-codegen

@@ -8,6 +8,7 @@ import { PollVoteUpdate } from './poll-vote'
 import { UserStatusUpdate } from './user-status-update'
 import { UserTypingUpdate } from './user-typing-update'
 import { HistoryReadUpdate } from './history-read-update'
+import { BotStoppedUpdate } from './bot-stopped'
 
 export {
     DeleteMessageUpdate,
@@ -18,6 +19,7 @@ export {
     UserStatusUpdate,
     UserTypingUpdate,
     HistoryReadUpdate,
+    BotStoppedUpdate
 }
 
 // begin-codegen
@@ -34,5 +36,6 @@ export type ParsedUpdate =
     | { name: 'user_status', data: UserStatusUpdate }
     | { name: 'user_typing', data: UserTypingUpdate }
     | { name: 'history_read', data: HistoryReadUpdate }
+    | { name: 'bot_stopped', data: BotStoppedUpdate }
 
 // end-codegen

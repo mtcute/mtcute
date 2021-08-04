@@ -1,6 +1,7 @@
 import { TelegramClient } from '../client'
 import { tl } from '@mtqt/tl'
 import {
+    BotStoppedUpdate,
     CallbackQuery,
     ChatMemberUpdate,
     ChatsIndex,
@@ -110,6 +111,10 @@ const PARSERS: Partial<
     updateReadChannelOutbox: historyReadParser,
     updateReadChannelDiscussionInbox: historyReadParser,
     updateReadChannelDiscussionOutbox: historyReadParser,
+    updateBotStopped: [
+        'bot_stopped',
+        (client, upd, users) => new BotStoppedUpdate(client, upd as any, users),
+    ],
 }
 
 /** @internal */
