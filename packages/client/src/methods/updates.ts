@@ -692,6 +692,20 @@ async function _processSingleUpdate(
             )
     }
 
+    // update local pts/qts
+    if (pts) {
+        if (channelId) {
+            this._cpts[channelId] = pts
+            this._cptsMod[channelId] = pts
+        } else {
+            this._pts = pts
+        }
+    }
+
+    if (qts) {
+        this._qts = qts
+    }
+
     if (isDummyUpdate(upd) || noDispatch) {
         // we needed to check pts/qts, so we couldn't return right away
         return
@@ -734,20 +748,6 @@ async function _processSingleUpdate(
         }
 
         this._dispatchUpdate(upd, peers.users, peers.chats)
-    }
-
-    // update local pts/qts
-    if (pts) {
-        if (channelId) {
-            this._cpts[channelId] = pts
-            this._cptsMod[channelId] = pts
-        } else {
-            this._pts = pts
-        }
-    }
-
-    if (qts) {
-        this._qts = qts
     }
 }
 
