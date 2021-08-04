@@ -22,8 +22,8 @@ interface MemorySessionState {
     // username -> peer id
     usernameIndex: Record<string, number>
 
-    // common pts, date, seq
-    gpts: [number, number, number] | null
+    // common pts, date, seq, qts
+    gpts: [number, number, number, number] | null
     // channel pts
     pts: Record<number, number>
 
@@ -283,23 +283,28 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
         return this._state.pts[entityId] ?? null
     }
 
-    getUpdatesState(): MaybeAsync<[number, number, number] | null> {
+    getUpdatesState(): MaybeAsync<[number, number, number, number] | null> {
         return this._state.gpts ?? null
     }
 
     setUpdatesPts(val: number): MaybeAsync<void> {
-        if (!this._state.gpts) this._state.gpts = [0, 0, 0]
+        if (!this._state.gpts) this._state.gpts = [0, 0, 0, 0]
         this._state.gpts[0] = val
     }
 
-    setUpdatesDate(val: number): MaybeAsync<void> {
-        if (!this._state.gpts) this._state.gpts = [0, 0, 0]
+    setUpdatesQts(val: number): MaybeAsync<void> {
+        if (!this._state.gpts) this._state.gpts = [0, 0, 0, 0]
         this._state.gpts[1] = val
     }
 
-    setUpdatesSeq(val: number): MaybeAsync<void> {
-        if (!this._state.gpts) this._state.gpts = [0, 0, 0]
+    setUpdatesDate(val: number): MaybeAsync<void> {
+        if (!this._state.gpts) this._state.gpts = [0, 0, 0, 0]
         this._state.gpts[2] = val
+    }
+
+    setUpdatesSeq(val: number): MaybeAsync<void> {
+        if (!this._state.gpts) this._state.gpts = [0, 0, 0, 0]
+        this._state.gpts[3] = val
     }
 
     getFullPeerById(id: number): tl.TypeUser | tl.TypeChat | null {

@@ -102,14 +102,18 @@ export interface ITelegramStorage {
 
     /**
      * Get updates state (if available), represented as a tuple
-     * containing: `pts, date, seq`
+     * containing: `pts, qts, date, seq`
      */
-    getUpdatesState(): MaybeAsync<[number, number, number] | null>
+    getUpdatesState(): MaybeAsync<[number, number, number, number] | null>
 
     /**
      * Set common `pts` value
      */
     setUpdatesPts(val: number): MaybeAsync<void>
+    /**
+     * Set common `qts` value
+     */
+    setUpdatesQts(val: number): MaybeAsync<void>
     /**
      * Set updates `date` value
      */
