@@ -127,10 +127,10 @@ export class User {
         let date: Date
 
         const us = status
-        if (!us) {
-            ret = 'long_time_ago'
-        } else if (bot) {
+        if (bot) {
             ret = 'bot'
+        } else if (!us) {
+            ret = 'long_time_ago'
         } else
             switch (us._) {
                 case 'userStatusOnline':
