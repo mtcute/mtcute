@@ -71,11 +71,38 @@ function _initializeUpdates(this: TelegramClient) {
  * @internal
  */
 export async function _fetchUpdatesState(this: TelegramClient): Promise<void> {
-    const state = await this.call({ _: 'updates.getState' })
+    let state = await this.call({ _: 'updates.getState' })
+
+    // for some unknown fucking reason getState may return old qts
+    // call getDifference to get actual values :shrug:
+    loop: for (;;) {
+        const diff = await this.call({
+            _: 'updates.getDifference',
+            pts: state.pts,
+            qts: state.qts,
+            date: state.date,
+        })
+
+        switch (diff._) {
+            case 'updates.differenceEmpty':
+                break loop
+            case 'updates.differenceTooLong': // shouldn't happen, but who knows?
+                ;(state as tl.Mutable<tl.updates.TypeState>).pts = diff.pts
+                break
+            case 'updates.differenceSlice':
+                state = diff.intermediateState
+                break
+            default:
+                state = diff.state
+                break loop
+        }
+    }
+
     this._qts = state.qts
     this._pts = state.pts
     this._date = state.date
     this._seq = state.seq
+
     debug(
         'loaded initial state: pts=%d, qts=%d, date=%d, seq=%d',
         state.pts,
@@ -134,7 +161,7 @@ export async function _saveStorage(
             if (this._oldPts === undefined || this._oldPts !== this._pts)
                 await this.storage.setUpdatesPts(this._pts)
             if (this._oldQts === undefined || this._oldQts !== this._qts)
-                await this.storage.setUpdatesPts(this._qts!)
+                await this.storage.setUpdatesQts(this._qts!)
             if (this._oldDate === undefined || this._oldDate !== this._date)
                 await this.storage.setUpdatesDate(this._date!)
             if (this._oldSeq === undefined || this._oldSeq !== this._seq)
@@ -736,10 +763,7 @@ async function _processSingleUpdate(
     if (!noDispatch) {
         if (!peers) {
             // this is a short update, let's fetch cached peers
-            peers = await _fetchPeersForShort.call(
-                this,
-                upd
-            )
+            peers = await _fetchPeersForShort.call(this, upd)
             if (!peers) {
                 // some peer is not cached.
                 // need to re-fetch the thing, and cache them on the way
@@ -859,12 +883,7 @@ export function _handleUpdate(
                 case 'updateShort': {
                     const upd = update.update
 
-                    await _processSingleUpdate.call(
-                        this,
-                        upd,
-                        null,
-                        noDispatch
-                    )
+                    await _processSingleUpdate.call(this, upd, null, noDispatch)
 
                     this._date = update.date
 
@@ -899,15 +918,10 @@ export function _handleUpdate(
                         _: 'updateNewMessage',
                         message,
                         pts: update.pts,
-                        ptsCount: update.ptsCount
+                        ptsCount: update.ptsCount,
                     }
 
-                    await _processSingleUpdate.call(
-                        this,
-                        upd,
-                        null,
-                        noDispatch
-                    )
+                    await _processSingleUpdate.call(this, upd, null, noDispatch)
 
                     break
                 }
@@ -940,15 +954,10 @@ export function _handleUpdate(
                         _: 'updateNewMessage',
                         message,
                         pts: update.pts,
-                        ptsCount: update.ptsCount
+                        ptsCount: update.ptsCount,
                     }
 
-                    await _processSingleUpdate.call(
-                        this,
-                        upd,
-                        null,
-                        noDispatch
-                    )
+                    await _processSingleUpdate.call(this, upd, null, noDispatch)
 
                     break
                 }
