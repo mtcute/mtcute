@@ -847,7 +847,6 @@ export class BaseTelegramClient extends EventEmitter {
         }
 
         await this.storage.updatePeers(parsedPeers)
-        await this._saveStorage()
 
         return hadMin
     }
