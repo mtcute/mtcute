@@ -236,7 +236,7 @@ export class BaseTelegramClient extends EventEmitter {
     readonly _layer: number
 
     private _keepAliveInterval?: NodeJS.Timeout
-    private _lastRequestTime = 0
+    protected _lastUpdateTime = 0
     private _floodWaitedRequests: Record<string, number> = {}
 
     protected _config?: tl.RawConfig
@@ -332,6 +332,19 @@ export class BaseTelegramClient extends EventEmitter {
         await this.storage.save?.()
     }
 
+    protected _keepAliveAction(): void {
+        // telegram asks to fetch pending updates
+        // if there are no updates for 15 minutes.
+        // core does not have update handling,
+        // so we just use getState so the server knows
+        // we still do need updates
+        this.call({ _: 'updates.getState' }).catch((e) => {
+            if (!(e instanceof RpcError)) {
+                this.primaryConnection.reconnect()
+            }
+        })
+    }
+
     private _cleanupPrimaryConnection(forever = false): void {
         if (forever && this.primaryConnection) this.primaryConnection.destroy()
         if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
@@ -349,25 +362,19 @@ export class BaseTelegramClient extends EventEmitter {
             reconnectionStrategy: this._reconnectionStrategy,
             layer: this._layer,
         })
-        this.primaryConnection.on('usable', async () => {
+        this.primaryConnection.on('usable', async (isReconnection: boolean) => {
+            this._lastUpdateTime = Date.now()
+
             this._keepAliveInterval = setInterval(async () => {
-                // according to telethon, "We need to send some content-related request at least hourly
-                // for Telegram to keep delivering updates, otherwise they will just stop even if we're connected.
-                // Do so every 30 minutes"
-                if (Date.now() - this._lastRequestTime > 1800_000) {
-                    try {
-                        await this.call({ _: 'updates.getState' })
-                    } catch (e) {
-                        if (!(e instanceof RpcError)) {
-                            this.primaryConnection.reconnect()
-                        }
-                    }
+                if (Date.now() - this._lastUpdateTime > 900_000) {
+                    this._keepAliveAction()
+                    this._lastUpdateTime = Date.now()
                 }
             }, 60_000)
 
             // on reconnection we need to call updates.getState so Telegram
             // knows we still want the updates
-            if (!this._disableUpdates) {
+            if (isReconnection && !this._disableUpdates) {
                 setTimeout(async () => {
                     try {
                         await this.call({ _: 'updates.getState' })
@@ -380,6 +387,7 @@ export class BaseTelegramClient extends EventEmitter {
             }
         })
         this.primaryConnection.on('update', (update) => {
+            this._lastUpdateTime = Date.now()
             this._handleUpdate(update)
         })
         this.primaryConnection.on('wait', () =>
@@ -567,8 +575,6 @@ export class BaseTelegramClient extends EventEmitter {
                 query: message,
             } as any // who cares
         }
-
-        this._lastRequestTime = Date.now()
 
         const connection = params?.connection ?? this.primaryConnection
 

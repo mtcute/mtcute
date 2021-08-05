@@ -52,7 +52,8 @@ import {
     PollVoteUpdate,
     UserStatusUpdate,
     UserTypingUpdate,
-    Conversation
+    Conversation,
+    BotStoppedUpdate
 } from '../types'
 
 // @copy

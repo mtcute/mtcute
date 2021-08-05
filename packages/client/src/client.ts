@@ -149,6 +149,7 @@ import {
     _dispatchUpdate,
     _fetchUpdatesState,
     _handleUpdate,
+    _keepAliveAction,
     _loadStorage,
     _saveStorage,
     catchUp,
@@ -172,6 +173,7 @@ import { Readable } from 'stream'
 import {
     ArrayWithTotal,
     BotCommands,
+    BotStoppedUpdate,
     CallbackQuery,
     Chat,
     ChatEvent,
@@ -339,6 +341,13 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param handler  History read handler
      */
     on(name: 'history_read', handler: (upd: HistoryReadUpdate) => void): this
+    /**
+     * Register a bot stopped handler
+     *
+     * @param name  Event name
+     * @param handler  Bot stopped handler
+     */
+    on(name: 'bot_stopped', handler: (upd: BotStoppedUpdate) => void): this
     /**
      * Accept the given TOS
      *
@@ -3660,6 +3669,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _dispatchUpdate = _dispatchUpdate
     _handleUpdate = _handleUpdate
     catchUp = catchUp
+    protected _keepAliveAction = _keepAliveAction
     blockUser = blockUser
     deleteProfilePhotos = deleteProfilePhotos
     getCommonChats = getCommonChats

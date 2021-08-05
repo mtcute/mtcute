@@ -149,6 +149,7 @@ export class TelegramConnection extends PersistentConnection {
                 it.promise.reject(new Error('Connection destroyed'))
             )
             this._mtproto.reset()
+            this.removeAllListeners()
         }
     }
 

@@ -10,7 +10,7 @@ import {
     getBarePeerId,
     getMarkedPeerId,
     markedPeerIdToBare,
-    MAX_CHANNEL_ID,
+    MAX_CHANNEL_ID, RpcError,
 } from '@mtqt/core'
 import { isDummyUpdate, isDummyUpdates } from '../utils/updates-utils'
 import { ChatsIndex, UsersIndex } from '../types'
@@ -1001,4 +1001,10 @@ export function catchUp(this: TelegramClient): Promise<void> {
         .catch((err) => this._emitError(err))
         .then(() => this._updLock.release())
         .then(() => this._saveStorage())
+}
+
+/** @internal */
+export function _keepAliveAction(this: TelegramClient): void {
+    debug('no updates for >15 minutes, catching up')
+    this.catchUp().catch((err) => this._emitError(err))
 }

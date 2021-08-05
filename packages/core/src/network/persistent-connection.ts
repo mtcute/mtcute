@@ -82,12 +82,14 @@ export abstract class PersistentConnection extends EventEmitter {
     }
 
     protected onConnectionUsable(): void {
+        const isReconnection = this._consequentFails > 0
+
         // reset reconnection related state
         this._lastError = null
         this._consequentFails = 0
         this._previousWait = null
         this._usable = true
-        this.emit('usable')
+        this.emit('usable', isReconnection)
         this._rescheduleInactivity()
     }
 
