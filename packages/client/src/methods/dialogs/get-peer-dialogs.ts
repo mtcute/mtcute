@@ -3,7 +3,7 @@ import {
     Dialog,
     InputPeerLike,
 } from '../../types'
-import { MaybeArray } from '@mtqt/core'
+import { MaybeArray } from '@mtcute/core'
 
 /**
  * Get dialogs with certain peers.

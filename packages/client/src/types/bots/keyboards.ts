@@ -1,4 +1,4 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { BotKeyboardBuilder } from './keyboard-builder'
 
 /**

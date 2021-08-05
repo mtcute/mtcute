@@ -1,7 +1,7 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { FileLocation } from '../files'
 import { TelegramClient } from '../../client'
-import { MtqtArgumentError } from '../errors'
+import { MtArgumentError } from '../errors'
 import { Thumbnail } from './thumbnail'
 import { makeInspectable } from '../utils'
 
@@ -61,7 +61,7 @@ export class Photo extends FileLocation {
                 bestSize = max
             } else {
                 // does this happen at all?
-                throw new MtqtArgumentError('Photo does not have any sizes')
+                throw new MtArgumentError('Photo does not have any sizes')
             }
         }
 
@@ -116,7 +116,7 @@ export class Photo extends FileLocation {
     get fileId(): string {
         if (!this._fileId) {
             if (!this._bestSize) {
-                throw new MtqtArgumentError(
+                throw new MtArgumentError(
                     'Cannot get File ID for this photo'
                 )
             }
@@ -135,7 +135,7 @@ export class Photo extends FileLocation {
     get uniqueFileId(): string {
         if (!this._uniqueFileId) {
             if (!this._bestSize) {
-                throw new MtqtArgumentError(
+                throw new MtArgumentError(
                     'Cannot get File ID for this photo'
                 )
             }

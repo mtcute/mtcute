@@ -1,7 +1,7 @@
 import { BigInteger } from 'big-integer'
 import { buffersEqual, randomBytes } from '../utils/buffer-utils'
 import { ICryptoProvider } from '../utils/crypto'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { createAesIgeForMessage } from '../utils/crypto/mtproto'
 import {
     BinaryWriter,
@@ -9,7 +9,7 @@ import {
 } from '../utils/binary/binary-writer'
 import { BinaryReader } from '../utils/binary/binary-reader'
 
-const debug = require('debug')('mtqt:sess')
+const debug = require('debug')('mtcute:sess')
 
 export interface EncryptedMessage {
     messageId: BigInteger

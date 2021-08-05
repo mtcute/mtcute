@@ -1,6 +1,6 @@
 /* THIS FILE WAS AUTO-GENERATED */
-import { BaseTelegramClient } from '@mtqt/core'
-import { tl } from '@mtqt/tl'
+import { BaseTelegramClient } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 import { acceptTos } from './methods/auth/accept-tos'
 import { checkPassword } from './methods/auth/check-password'
 import { getPasswordHint } from './methods/auth/get-password-hint'
@@ -226,8 +226,8 @@ import {
     MaybeArray,
     MaybeAsync,
     TelegramConnection,
-} from '@mtqt/core'
-import { tdFileId } from '@mtqt/file-id'
+} from '@mtcute/core'
+import { tdFileId } from '@mtcute/file-id'
 
 export interface TelegramClient extends BaseTelegramClient {
     /**
@@ -1209,8 +1209,8 @@ export interface TelegramClient extends BaseTelegramClient {
      * Get preview information about a private chat.
      *
      * @param inviteLink  Invite link
-     * @throws MtqtArgumentError  In case invite link has invalid format
-     * @throws MtqtNotFoundError
+     * @throws MtArgumentError  In case invite link has invalid format
+     * @throws MtNotFoundError
      *   In case you are trying to get info about private chat that you have already joined.
      *   Use {@link getChat} or {@link getFullChat} instead.
      */
@@ -1219,7 +1219,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Get basic information about a chat.
      *
      * @param chatId  ID of the chat, its username or invite link
-     * @throws MtqtArgumentError
+     * @throws MtArgumentError
      *   In case you are trying to get info about private chat that you haven't joined.
      *   Use {@link getChatPreview} instead.
      */
@@ -1228,7 +1228,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Get full information about a chat.
      *
      * @param chatId  ID of the chat, its username or invite link
-     * @throws MtqtArgumentError
+     * @throws MtArgumentError
      *   In case you are trying to get info about private chat that you haven't joined.
      *   Use {@link getChatPreview} instead.
      */
@@ -1636,7 +1636,7 @@ export interface TelegramClient extends BaseTelegramClient {
          * use {@link Dialog.filterFolder} instead.
          *
          * When a folder with given ID or title is not found,
-         * {@link MtqtArgumentError} is thrown
+         * {@link MtArgumentError} is thrown
          *
          * By default fetches from "All" folder
          */
@@ -3016,7 +3016,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * mode is also set as default.
      *
      * @param parseMode  Parse mode to register
-     * @throws MtqtError  When the parse mode with a given name is already registered.
+     * @throws MtClientError  When the parse mode with a given name is already registered.
      */
     registerParseMode(parseMode: IMessageEntityParser): void
     /**
@@ -3032,15 +3032,15 @@ export interface TelegramClient extends BaseTelegramClient {
      * Get a {@link IMessageEntityParser} registered under a given name (or a default one).
      *
      * @param name  Name of the parse mode which parser to get.
-     * @throws MtqtError  When the provided parse mode is not registered
-     * @throws MtqtError  When `name` is omitted and there is no default parse mode
+     * @throws MtClientError  When the provided parse mode is not registered
+     * @throws MtClientError  When `name` is omitted and there is no default parse mode
      */
     getParseMode(name?: string | null): IMessageEntityParser
     /**
      * Set a given parse mode as a default one.
      *
      * @param name  Name of the parse mode
-     * @throws MtqtError  When given parse mode is not registered.
+     * @throws MtClientError  When given parse mode is not registered.
      */
     setDefaultParseMode(name: string): void
     /**
@@ -3291,7 +3291,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Get a list of common chats you have with a given user
      *
      * @param userId  User's ID, username or phone number
-     * @throws MtqtInvalidPeerTypeError
+     * @throws MtInvalidPeerTypeError
      */
     getCommonChats(userId: InputPeerLike): Promise<Chat[]>
     /**

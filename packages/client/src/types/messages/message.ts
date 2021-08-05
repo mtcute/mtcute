@@ -1,10 +1,10 @@
 import { User, Chat, InputPeerLike, UsersIndex, ChatsIndex } from '../peers'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { BotKeyboard, ReplyMarkup } from '../bots'
-import { getMarkedPeerId, MAX_CHANNEL_ID } from '@mtqt/core'
+import { getMarkedPeerId, MAX_CHANNEL_ID } from '@mtcute/core'
 import {
-    MtqtArgumentError,
-    MtqtTypeAssertionError,
+    MtArgumentError,
+    MtTypeAssertionError,
 } from '../errors'
 import { TelegramClient } from '../../client'
 import { MessageEntity } from './message-entity'
@@ -117,7 +117,7 @@ export class Message {
         isScheduled = false
     ) {
         if (raw._ === 'messageEmpty')
-            throw new MtqtTypeAssertionError('Message#ctor', 'not messageEmpty', 'messageEmpty')
+            throw new MtTypeAssertionError('Message#ctor', 'not messageEmpty', 'messageEmpty')
 
         this.client = client
         this._users = users
@@ -218,7 +218,7 @@ export class Message {
                         )
                         break
                     default:
-                        throw new MtqtTypeAssertionError(
+                        throw new MtTypeAssertionError(
                             'raw.fromId',
                             'peerUser | peerChannel',
                             from._
@@ -284,7 +284,7 @@ export class Message {
                             )
                             break
                         default:
-                            throw new MtqtTypeAssertionError(
+                            throw new MtTypeAssertionError(
                                 'raw.fwdFrom.fromId',
                                 'peerUser | peerChannel',
                                 fwd.fromId._
@@ -508,7 +508,7 @@ export class Message {
     /**
      * Generated permalink to this message, only for groups and channels
      *
-     * @throws MtqtArgumentError  In case the chat does not support message links
+     * @throws MtArgumentError  In case the chat does not support message links
      */
     get link(): string {
         if (this.chat.type === 'supergroup' || this.chat.type === 'channel') {
@@ -521,7 +521,7 @@ export class Message {
             }
         }
 
-        throw new MtqtArgumentError(
+        throw new MtArgumentError(
             `Cannot generate message link for ${this.chat.type}`
         )
     }
@@ -659,7 +659,7 @@ export class Message {
      * a simple reply will be sent.
      *
      * If this post does not have comments section,
-     * {@link MtqtArgumentError} is thrown. To check
+     * {@link MtArgumentError} is thrown. To check
      * if a message has comments, use {@link replies}
      *
      * @param text  Text of the message
@@ -674,7 +674,7 @@ export class Message {
         }
 
         if (!this.replies || !this.replies.isComments) {
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'This message does not have comments section'
             )
         }
@@ -691,7 +691,7 @@ export class Message {
      * a simple reply will be sent.
      *
      * If this post does not have comments section,
-     * {@link MtqtArgumentError} is thrown. To check
+     * {@link MtArgumentError} is thrown. To check
      * if a message has comments, use {@link replies}
      *
      * @param media  Media to send
@@ -706,7 +706,7 @@ export class Message {
         }
 
         if (!this.replies || !this.replies.isComments) {
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'This message does not have comments section'
             )
         }
@@ -722,7 +722,7 @@ export class Message {
      * a simple reply will be sent.
      *
      * If this post does not have comments section,
-     * {@link MtqtArgumentError} is thrown. To check
+     * {@link MtArgumentError} is thrown. To check
      * if a message has comments, use {@link replies}
      *
      * @param medias  Medias to send
@@ -737,7 +737,7 @@ export class Message {
         }
 
         if (!this.replies || !this.replies.isComments) {
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'This message does not have comments section'
             )
         }
@@ -841,7 +841,7 @@ export class Message {
         if (!params) params = {}
 
         if (this.raw._ === 'messageService') {
-            throw new MtqtArgumentError("Service messages can't be copied")
+            throw new MtArgumentError("Service messages can't be copied")
         }
 
         if (this.media && !(this.media instanceof WebPage)) {

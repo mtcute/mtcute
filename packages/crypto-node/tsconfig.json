@@ -7,7 +7,7 @@
         "./src"
     ],
     "typedocOptions": {
-        "name": "@mtqt/crypto-node",
+        "name": "@mtcute/crypto-node",
         "includeVersion": true,
         "out": "../../docs/packages/crypto-node",
         "listInvalidSymbolLinks": true,

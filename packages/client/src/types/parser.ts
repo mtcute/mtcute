@@ -1,10 +1,10 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { MessageEntity } from '../types'
 
 /**
  * Interface describing a message entity parser.
- * mtqt comes with HTML parser inside `@mtqt/html-parser`
- * and MarkdownV2 parser inside `@mtqt/markdown-parser`,
+ * MTCute comes with HTML parser inside `@mtcute/html-parser`
+ * and MarkdownV2 parser inside `@mtcute/markdown-parser`,
  * implemented similar to how they are described
  * in the [Bot API documentation](https://core.telegram.org/bots/api#formatting-options).
  *

@@ -1,7 +1,7 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtqtNotFoundError } from '../../types'
-import { getBasicPeerType, getMarkedPeerId, MAX_CHANNEL_ID } from '@mtqt/core'
+import { InputPeerLike, MtNotFoundError } from '../../types'
+import { getBasicPeerType, getMarkedPeerId, MAX_CHANNEL_ID } from '@mtcute/core'
 import bigInt from 'big-integer'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
@@ -57,7 +57,7 @@ export async function resolvePeer(
                     accessHash: found.accessHash!,
                 }
 
-            throw new MtqtNotFoundError(
+            throw new MtNotFoundError(
                 `Could not find a peer by phone ${peerId}`
             )
         } else {
@@ -105,7 +105,7 @@ export async function resolvePeer(
                     }
             }
 
-            throw new MtqtNotFoundError(
+            throw new MtNotFoundError(
                 `Could not find a peer by username ${peerId}`
             )
         }
@@ -186,5 +186,5 @@ export async function resolvePeer(
         }
     }
 
-    throw new MtqtNotFoundError(`Could not find a peer by ID ${peerId}`)
+    throw new MtNotFoundError(`Could not find a peer by ID ${peerId}`)
 }

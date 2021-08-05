@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtqtInvalidPeerTypeError } from '../../types'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import {
     createUsersChatsIndex,
     isInputPeerChannel,
@@ -8,9 +8,9 @@ import {
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { ChatMember } from '../../types'
-import { UserNotParticipantError } from '@mtqt/tl/errors'
+import { UserNotParticipantError } from '@mtcute/tl/errors'
 
 /**
  * Get information about a single chat member
@@ -30,7 +30,7 @@ export async function getChatMember(
 
     if (isInputPeerChat(chat)) {
         if (!isInputPeerUser(user))
-            throw new MtqtInvalidPeerTypeError(userId, 'user')
+            throw new MtInvalidPeerTypeError(userId, 'user')
 
         const res = await this.call({
             _: 'messages.getFullChat',
@@ -71,5 +71,5 @@ export async function getChatMember(
         const { users } = createUsersChatsIndex(res)
 
         return new ChatMember(this, res.participant, users)
-    } else throw new MtqtInvalidPeerTypeError(chatId, 'chat or channel')
+    } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 }

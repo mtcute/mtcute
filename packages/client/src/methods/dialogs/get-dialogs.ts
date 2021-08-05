@@ -1,13 +1,13 @@
 import { TelegramClient } from '../../client'
 import {
     Dialog,
-    MtqtArgumentError,
-    MtqtTypeAssertionError,
+    MtArgumentError,
+    MtTypeAssertionError,
 } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
-import { tl } from '@mtqt/tl'
-import { getMarkedPeerId } from '@mtqt/core'
+import { tl } from '@mtcute/tl'
+import { getMarkedPeerId } from '@mtcute/core'
 
 /**
  * Iterate over dialogs.
@@ -103,7 +103,7 @@ export async function* getDialogs(
          * use {@link Dialog.filterFolder} instead.
          *
          * When a folder with given ID or title is not found,
-         * {@link MtqtArgumentError} is thrown
+         * {@link MtArgumentError} is thrown
          *
          * By default fetches from "All" folder
          */
@@ -132,7 +132,7 @@ export async function* getDialogs(
             (it) => it.id === params!.folder || it.title === params!.folder
         )
         if (!found)
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 `Could not find folder ${params.folder}`
             )
 

@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
-import { tl } from '@mtqt/tl'
-import { PartialExcept } from '@mtqt/core'
+import { tl } from '@mtcute/tl'
+import { PartialExcept } from '@mtcute/core'
 
 /**
  * Create a folder from given parameters

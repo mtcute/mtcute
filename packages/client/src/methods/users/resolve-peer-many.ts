@@ -1,4 +1,4 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
 import { asyncPool } from 'eager-async-pool'

@@ -1,13 +1,13 @@
 import {
     BasicPeerType,
     Chat,
-    MtqtUnsupportedError,
+    MtUnsupportedError,
     User,
     TypingStatus,
 } from '../'
 import { TelegramClient } from '../../client'
-import { tl } from '@mtqt/tl'
-import { getBarePeerId, MAX_CHANNEL_ID } from '@mtqt/core'
+import { tl } from '@mtcute/tl'
+import { getBarePeerId, MAX_CHANNEL_ID } from '@mtcute/core'
 import { makeInspectable } from '../utils'
 
 /**
@@ -102,7 +102,7 @@ export class UserTypingUpdate {
                 return 'history_import'
         }
 
-        throw new MtqtUnsupportedError()
+        throw new MtUnsupportedError()
     }
 
     /**

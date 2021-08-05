@@ -1,11 +1,11 @@
-import { MtqtArgumentError } from '../types'
+import { MtArgumentError } from '../types'
 
 export function determinePartSize(fileSize: number): number {
     if (fileSize <= 104857600) return 128 // 100 MB
     if (fileSize <= 786432000) return 256 // 750 MB
     if (fileSize <= 2097152000) return 512 // 2000 MB
 
-    throw new MtqtArgumentError('File is too large')
+    throw new MtArgumentError('File is too large')
 }
 
 /**

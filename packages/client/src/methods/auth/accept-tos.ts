@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { MtqtTypeAssertionError } from '../../types'
+import { MtTypeAssertionError } from '../../types'
 
 /**
  * Accept the given TOS
@@ -20,7 +20,7 @@ export async function acceptTos(
     })
 
     if (!res)
-        throw new MtqtTypeAssertionError(
+        throw new MtTypeAssertionError(
             'help.acceptTermsOfService',
             'true',
             'false'

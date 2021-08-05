@@ -7,7 +7,7 @@
         "./index.ts",
     ],
     "typedocOptions": {
-        "name": "@mtqt/socks-proxy",
+        "name": "@mtcute/socks-proxy",
         "includeVersion": true,
         "out": "../../docs/packages/socks-proxy",
         "listInvalidSymbolLinks": true,

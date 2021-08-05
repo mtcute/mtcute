@@ -1,8 +1,8 @@
 {
-    "name": "@mtqt/sqlite",
+    "name": "@mtcute/sqlite",
     "private": true,
     "version": "1.0.0",
-    "description": "SQLite-based storage for mtqt",
+    "description": "SQLite-based storage for MTCute",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "LGPL-3.0",
     "main": "index.ts",
@@ -12,8 +12,8 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtqt/core": "^1.0.0",
-        "@mtqt/tl": "~1.131.0",
+        "@mtcute/core": "^1.0.0",
+        "@mtcute/tl": "~1.131.0",
         "better-sqlite3": "^7.4.0",
         "big-integer": "1.6.48",
         "debug": "^4.3.1"

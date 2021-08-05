@@ -1,5 +1,5 @@
 {
-    "name": "@mtqt/node",
+    "name": "@mtcute/node",
     "private": true,
     "version": "1.0.0",
     "description": "Meta-package for Node JS",
@@ -12,11 +12,11 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtqt/core": "^1.0.0",
-        "@mtqt/client": "^1.0.0",
-        "@mtqt/sqlite": "^1.0.0",
-        "@mtqt/markdown-parser": "^1.0.0",
-        "@mtqt/html-parser": "^1.0.0",
-        "@mtqt/dispatcher": "^1.0.0"
+        "@mtcute/core": "^1.0.0",
+        "@mtcute/client": "^1.0.0",
+        "@mtcute/sqlite": "^1.0.0",
+        "@mtcute/markdown-parser": "^1.0.0",
+        "@mtcute/html-parser": "^1.0.0",
+        "@mtcute/dispatcher": "^1.0.0"
     }
 }

@@ -1,12 +1,12 @@
 import { TelegramClient } from '../../client'
-import { MaybeArray } from '@mtqt/core'
+import { MaybeArray } from '@mtcute/core'
 import {
     createUsersChatsIndex,
     isInputPeerChannel,
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
-import { tl } from '@mtqt/tl'
-import { Message, InputPeerLike, MtqtTypeAssertionError } from '../../types'
+import { tl } from '@mtcute/tl'
+import { Message, InputPeerLike, MtTypeAssertionError } from '../../types'
 
 /**
  * Get a single message in chat by its ID
@@ -78,7 +78,7 @@ export async function getMessages(
     )
 
     if (res._ === 'messages.messagesNotModified')
-        throw new MtqtTypeAssertionError(
+        throw new MtTypeAssertionError(
             'getMessages',
             '!messages.messagesNotModified',
             res._

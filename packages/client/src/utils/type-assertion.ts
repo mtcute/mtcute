@@ -1,5 +1,5 @@
-import { MtqtTypeAssertionError } from '../types'
-import { tl } from '@mtqt/tl'
+import { MtTypeAssertionError } from '../types'
+import { tl } from '@mtcute/tl'
 
 export function assertTypeIs<T extends tl.TlObject, K extends T['_']>(
     context: string,
@@ -7,6 +7,6 @@ export function assertTypeIs<T extends tl.TlObject, K extends T['_']>(
     expected: K
 ): asserts obj is tl.FindByName<T, K> {
     if (obj._ !== expected) {
-        throw new MtqtTypeAssertionError(context, expected, obj._)
+        throw new MtTypeAssertionError(context, expected, obj._)
     }
 }

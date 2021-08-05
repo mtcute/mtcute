@@ -1,4 +1,4 @@
-import { MaybeAsync } from '@mtqt/core'
+import { MaybeAsync } from '@mtcute/core'
 
 export type MaybeDynamic<T> = MaybeAsync<T> | (() => MaybeAsync<T>)
 

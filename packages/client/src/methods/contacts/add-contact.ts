@@ -1,12 +1,12 @@
 import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
-    MtqtInvalidPeerTypeError,
-    MtqtTypeAssertionError,
+    MtInvalidPeerTypeError,
+    MtTypeAssertionError,
     User,
 } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
@@ -43,7 +43,7 @@ export async function addContact(
     }
 ): Promise<User> {
     const peer = normalizeToInputUser(await this.resolvePeer(userId))
-    if (!peer) throw new MtqtInvalidPeerTypeError(userId, 'user')
+    if (!peer) throw new MtInvalidPeerTypeError(userId, 'user')
 
     const res = await this.call({
         _: 'contacts.addContact',

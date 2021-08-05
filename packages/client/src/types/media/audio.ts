@@ -1,8 +1,8 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { RawDocument } from './document'
 import { makeInspectable } from '../utils'
-import { tdFileId } from '@mtqt/file-id'
+import { tdFileId } from '@mtcute/file-id'
 
 /**
  * An audio file

@@ -1,9 +1,9 @@
 import { FileLocation } from '../files'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { Thumbnail } from './thumbnail'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
-import { tdFileId as td, toFileId, toUniqueFileId } from '@mtqt/file-id'
+import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
 /**
  * A file that is represented as a document in MTProto.

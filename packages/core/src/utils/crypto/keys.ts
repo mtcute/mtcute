@@ -3,7 +3,7 @@ import { BigInteger } from 'big-integer'
 import { parseAsn1, parsePemContents } from '../binary/asn1-parser'
 import { BinaryWriter } from '../binary/binary-writer'
 import { ICryptoProvider } from './abstract'
-import keysIndex, { TlPublicKey } from '@mtqt/tl/binary/rsa-keys'
+import keysIndex, { TlPublicKey } from '@mtcute/tl/binary/rsa-keys'
 
 export async function parsePublicKey(
     crypto: ICryptoProvider,

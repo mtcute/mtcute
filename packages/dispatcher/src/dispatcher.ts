@@ -5,7 +5,7 @@ import {
     InlineQuery,
     MaybeAsync,
     Message,
-    MtqtArgumentError,
+    MtArgumentError,
     TelegramClient,
     UsersIndex,
     ChatMemberUpdate,
@@ -18,8 +18,8 @@ import {
     HistoryReadUpdate,
     ParsedUpdate,
     BotStoppedUpdate
-} from '@mtqt/client'
-import { tl } from '@mtqt/tl'
+} from '@mtcute/client'
+import { tl } from '@mtcute/tl'
 // begin-codegen-imports
 import {
     UpdateHandler,
@@ -428,14 +428,14 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                                     break outer
                                 case 'scene': {
                                     if (!parsedState)
-                                        throw new MtqtArgumentError(
+                                        throw new MtArgumentError(
                                             'Cannot use ToScene without state'
                                         )
 
                                     const scene = parsedState['_scene']
 
                                     if (!scene)
-                                        throw new MtqtArgumentError(
+                                        throw new MtArgumentError(
                                             'Cannot use ToScene without entering a scene'
                                         )
 
@@ -626,7 +626,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         state?: UpdateState<State, SceneName>
     ): MaybeAsync<boolean> {
         if (!this.parent)
-            throw new MtqtArgumentError('This dispatcher is not a child')
+            throw new MtArgumentError('This dispatcher is not a child')
 
         if (this.parent._errorHandler) {
             return this.parent._errorHandler(err, update, state)
@@ -647,7 +647,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
     private _prepareChild(child: Dispatcher<any, any>): void {
         if (child._client) {
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Provided dispatcher is ' +
                     (child._parent
                         ? 'already a child. Use parent.removeChild() before calling addChild()'
@@ -726,17 +726,17 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     ): void {
         if (!this._scenes) this._scenes = {}
         if (uid in this._scenes) {
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 `Scene with UID ${uid} is already registered!`
             )
         }
 
         if (uid[0] === '$') {
-            throw new MtqtArgumentError(`Scene UID cannot start with $`)
+            throw new MtArgumentError(`Scene UID cannot start with $`)
         }
 
         if (scene._scene) {
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 `This dispatcher is already registered as scene ${scene._scene}`
             )
         }
@@ -786,7 +786,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     extend(other: Dispatcher<State, SceneName>): void {
         if (other._customStorage || other._customStateKeyDelegate) {
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Provided dispatcher has custom storage and cannot be extended from.'
             )
         }
@@ -916,7 +916,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         object: string | Parameters<StateKeyDelegate>[0]
     ): MaybeAsync<UpdateState<S, SceneName>> {
         if (!this._storage)
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Cannot use getUpdateState() filter without state storage'
             )
 
@@ -932,7 +932,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
         return Promise.resolve(this._stateKeyDelegate!(object)).then((key) => {
             if (!key) {
-                throw new MtqtArgumentError(
+                throw new MtArgumentError(
                     'Cannot derive key from given object'
                 )
             }
@@ -950,7 +950,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             return Promise.resolve(this._customStateKeyDelegate(object)).then(
                 (customKey) => {
                     if (!customKey) {
-                        throw new MtqtArgumentError(
+                        throw new MtArgumentError(
                             'Cannot derive custom key from given object'
                         )
                     }
@@ -978,14 +978,14 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         object: Parameters<StateKeyDelegate>[0]
     ): Promise<UpdateState<T, SceneName>> {
         if (!this._parent) {
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'This dispatcher does not have a parent'
             )
         }
 
         return Promise.resolve(this._stateKeyDelegate!(object)).then((key) => {
             if (!key) {
-                throw new MtqtArgumentError(
+                throw new MtArgumentError(
                     'Cannot derive key from given object'
                 )
             }

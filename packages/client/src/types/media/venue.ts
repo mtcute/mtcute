@@ -1,4 +1,4 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { Location } from './location'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { makeInspectable } from '../utils'

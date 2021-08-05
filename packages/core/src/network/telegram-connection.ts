@@ -3,7 +3,7 @@ import {
     PersistentConnectionParams,
 } from './persistent-connection'
 import { TransportError } from './transports'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { doAuthorization } from './authorization'
 import { MtprotoSession } from './mtproto-session'
 import { BinaryWriter } from '../utils/binary/binary-writer'
@@ -21,7 +21,7 @@ import {
     createRpcErrorFromTl,
     RpcError,
     RpcTimeoutError,
-} from '@mtqt/tl/errors'
+} from '@mtcute/tl/errors'
 import { LruStringSet } from '../utils/lru-string-set'
 
 function makeNiceStack(error: RpcError, stack: string, method?: string) {
@@ -31,7 +31,7 @@ function makeNiceStack(error: RpcError, stack: string, method?: string) {
 }
 
 const _debug = require('debug')
-const debug = _debug('mtqt:conn')
+const debug = _debug('mtcute:conn')
 
 // hex formatting buffers with %h
 _debug.formatters.h = (v: Buffer): string => v.toString('hex')

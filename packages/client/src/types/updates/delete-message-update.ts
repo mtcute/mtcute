@@ -1,5 +1,5 @@
-import { tl } from '@mtqt/tl'
-import { MAX_CHANNEL_ID } from '@mtqt/core'
+import { tl } from '@mtcute/tl'
+import { MAX_CHANNEL_ID } from '@mtcute/core'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 

@@ -1,11 +1,11 @@
 import { ITelegramTransport, IPacketCodec, TransportState } from './abstract'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { Socket, connect } from 'net'
 import EventEmitter from 'events'
 import { ICryptoProvider } from '../../utils/crypto'
 import { IntermediatePacketCodec } from './intermediate'
 
-const debug = require('debug')('mtqt:tcp')
+const debug = require('debug')('mtcute:tcp')
 
 /**
  * Base for TCP transports.

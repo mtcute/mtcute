@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
-import { InputFileLike, MtqtArgumentError, Photo } from '../../types'
-import { tl } from '@mtqt/tl'
-import { fileIdToInputPhoto, tdFileId } from '@mtqt/file-id'
+import { InputFileLike, MtArgumentError, Photo } from '../../types'
+import { tl } from '@mtcute/tl'
+import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
 
 /**
  * Set a new profile photo or video.
@@ -24,7 +24,7 @@ export async function setProfilePhoto(
     // try parsing media as file id or input photo
     if (tdFileId.isFileIdLike(media) || typeof media === 'object' && tl.isAnyInputPhoto(media)) {
         if (typeof media === 'string' && media.match(/^https?:\/\//)) {
-            throw new MtqtArgumentError('Profile photo can\'t be set from URL.')
+            throw new MtArgumentError('Profile photo can\'t be set from URL.')
         }
 
         if (tdFileId.isFileIdLike(media)) {

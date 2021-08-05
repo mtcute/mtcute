@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { MtqtError, IMessageEntityParser } from '../../types'
+import { MtClientError, IMessageEntityParser } from '../../types'
 
 /**
  * Register a given {@link IMessageEntityParser} as a parse mode
@@ -7,7 +7,7 @@ import { MtqtError, IMessageEntityParser } from '../../types'
  * mode is also set as default.
  *
  * @param parseMode  Parse mode to register
- * @throws MtqtError  When the parse mode with a given name is already registered.
+ * @throws MtClientError  When the parse mode with a given name is already registered.
  * @internal
  */
 export function registerParseMode(
@@ -17,7 +17,7 @@ export function registerParseMode(
     const name = parseMode.name
 
     if (name in this._parseModes) {
-        throw new MtqtError(
+        throw new MtClientError(
             `Parse mode ${name} is already registered. Unregister it first!`
         )
     }
@@ -49,8 +49,8 @@ export function unregisterParseMode(this: TelegramClient, name: string): void {
  * Get a {@link IMessageEntityParser} registered under a given name (or a default one).
  *
  * @param name  Name of the parse mode which parser to get.
- * @throws MtqtError  When the provided parse mode is not registered
- * @throws MtqtError  When `name` is omitted and there is no default parse mode
+ * @throws MtClientError  When the provided parse mode is not registered
+ * @throws MtClientError  When `name` is omitted and there is no default parse mode
  * @internal
  */
 export function getParseMode(
@@ -59,13 +59,13 @@ export function getParseMode(
 ): IMessageEntityParser {
     if (!name) {
         if (!this._defaultParseMode)
-            throw new MtqtError('There is no default parse mode')
+            throw new MtClientError('There is no default parse mode')
 
         name = this._defaultParseMode
     }
 
     if (!(name in this._parseModes)) {
-        throw new MtqtError(`Parse mode ${name} is not registered.`)
+        throw new MtClientError(`Parse mode ${name} is not registered.`)
     }
 
     return this._parseModes[name]
@@ -75,12 +75,12 @@ export function getParseMode(
  * Set a given parse mode as a default one.
  *
  * @param name  Name of the parse mode
- * @throws MtqtError  When given parse mode is not registered.
+ * @throws MtClientError  When given parse mode is not registered.
  * @internal
  */
 export function setDefaultParseMode(this: TelegramClient, name: string): void {
     if (!(name in this._parseModes)) {
-        throw new MtqtError(`Parse mode ${name} is not registered.`)
+        throw new MtClientError(`Parse mode ${name} is not registered.`)
     }
 
     this._defaultParseMode = name

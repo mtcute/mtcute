@@ -1,7 +1,7 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { tl } from '@mtqt/tl'
-import { MessageEntity, FormattedString } from '@mtqt/client'
+import { tl } from '@mtcute/tl'
+import { MessageEntity, FormattedString } from '@mtcute/client'
 import { MarkdownMessageEntityParser, md } from '../src'
 import bigInt from 'big-integer'
 

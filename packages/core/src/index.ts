@@ -3,8 +3,8 @@ export * from './network'
 export * from './storage'
 export * from './types'
 
-export * from '@mtqt/tl'
-export * from '@mtqt/tl/errors'
+export * from '@mtcute/tl'
+export * from '@mtcute/tl/errors'
 
 export * from './utils/crypto'
 export * from './utils/peer-utils'

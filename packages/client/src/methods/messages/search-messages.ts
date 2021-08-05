@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, MtqtTypeAssertionError } from '../../types'
-import { tl } from '@mtqt/tl'
+import { InputPeerLike, Message, MtTypeAssertionError } from '../../types'
+import { tl } from '@mtcute/tl'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { SearchFilters } from '../../types'
 
@@ -92,7 +92,7 @@ export async function* searchMessages(
         })
 
         if (res._ === 'messages.messagesNotModified')
-            throw new MtqtTypeAssertionError(
+            throw new MtTypeAssertionError(
                 'messages.search',
                 '!messages.messagesNotModified',
                 res._

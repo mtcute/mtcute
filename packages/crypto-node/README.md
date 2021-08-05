@@ -1,4 +1,4 @@
-# `@mtqt/crypto-node`
+# `@mtcute/crypto-node`
 Native extension for NodeJS that improves performance of the most used
 cryptographic mode in Telegram (IGE), which is not implemented by OpenSSL.
 
@@ -14,8 +14,8 @@ Then, install the package as usual. The native library will be built automatical
 ## Usage
 
 ```typescript
-import { TelegramClient } from '@mtqt/client'
-import { NodeNativeCryptoProvider } from '@mtqt/crypto-node'
+import { TelegramClient } from '@mtcute/client'
+import { NodeNativeCryptoProvider } from '@mtcute/crypto-node'
 
 const tg = new TelegramClient({
     ...,

@@ -1,4 +1,4 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { Document, RawDocument } from './document'
 import { Audio } from './audio'
 import { TelegramClient } from '../../client'

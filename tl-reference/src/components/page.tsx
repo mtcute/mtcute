@@ -81,8 +81,8 @@ export function Page({
                             variant="body2"
                             className={classes.footer}
                         >
-                            &copy; mtqt TL reference. This website is{' '}
-                            <MuiLink href="https://github.com/mtqt-dev/mtqt/tree/master/tl-reference">
+                            &copy; MTCute TL reference. This website is{' '}
+                            <MuiLink href="https://github.com/mtcute/mtcute/tree/master/tl-reference">
                                 open-source
                             </MuiLink>{' '}
                             and licensed under MIT.

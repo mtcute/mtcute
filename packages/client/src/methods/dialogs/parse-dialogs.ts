@@ -1,8 +1,8 @@
 import { TelegramClient } from '../../client'
-import { tl } from '@mtqt/tl'
-import { Dialog, MtqtTypeAssertionError } from '../../types'
+import { tl } from '@mtcute/tl'
+import { Dialog, MtTypeAssertionError } from '../../types'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
-import { getMarkedPeerId } from '@mtqt/core'
+import { getMarkedPeerId } from '@mtcute/core'
 
 /** @internal */
 export function _parseDialogs(
@@ -10,7 +10,7 @@ export function _parseDialogs(
     res: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs
 ): Dialog[] {
     if (res._ === 'messages.dialogsNotModified')
-        throw new MtqtTypeAssertionError(
+        throw new MtTypeAssertionError(
             'messages.getPeerDialogs',
             '!messages.dialogsNotModified',
             'messages.dialogsNotModified'

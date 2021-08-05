@@ -5,7 +5,7 @@
  *  - `hangup`: The call was ended normally
  *  - `busy`: The call was discarded because the user is in another call
  */
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 
 export type CallDiscardReason = 'missed' | 'disconnect' | 'hangup' | 'busy'
 

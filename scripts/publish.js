@@ -56,9 +56,9 @@ function publishSinglePackage(name) {
                 content = content.replace('/// <reference types="node" />', '')
             }
 
-            if (content.match(/@mtqt\/[a-z]+\/src/)) {
+            if (content.match(/@mtcute\/[a-z]+\/src/)) {
                 changed = true
-                content = content.replace(/(@mtqt\/[a-z]+)\/src/g, '$1')
+                content = content.replace(/(@mtcute\/[a-z]+)\/src/g, '$1')
             }
 
             if (content.trim().match(/^export {};?$/)) {
@@ -75,9 +75,9 @@ function publishSinglePackage(name) {
             let content = fs.readFileSync(f, 'utf8')
             let changed = false
 
-            if (content.match(/@mtqt\/[a-z]+\/src/)) {
+            if (content.match(/@mtcute\/[a-z]+\/src/)) {
                 changed = true
-                content = content.replace(/(@mtqt\/[a-z]+)\/src/g, '$1')
+                content = content.replace(/(@mtcute\/[a-z]+)\/src/g, '$1')
             }
 
             if (changed) fs.writeFileSync(f, content)

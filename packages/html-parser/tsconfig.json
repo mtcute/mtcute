@@ -7,7 +7,7 @@
         "./src"
     ],
     "typedocOptions": {
-        "name": "@mtqt/html-parser",
+        "name": "@mtcute/html-parser",
         "includeVersion": true,
         "out": "../../docs/packages/html-parser",
         "listInvalidSymbolLinks": true,

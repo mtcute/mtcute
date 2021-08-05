@@ -1,4 +1,4 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { MaybeAsync } from '../../types/utils'
 import { ICryptoProvider } from '../../utils/crypto'
 import EventEmitter from 'events'

@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Message } from '../../types'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
 
 /** @internal */

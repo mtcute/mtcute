@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
-import { Chat, MtqtTypeAssertionError } from '../../types'
+import { Chat, MtTypeAssertionError } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
-import { getMarkedPeerId } from '@mtqt/core'
+import { getMarkedPeerId } from '@mtcute/core'
 import { tl } from 'packages/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 

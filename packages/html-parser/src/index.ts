@@ -2,8 +2,8 @@ import type {
     IMessageEntityParser,
     MessageEntity,
     FormattedString,
-} from '@mtqt/client'
-import { tl } from '@mtqt/tl'
+} from '@mtcute/client'
+import { tl } from '@mtcute/tl'
 import { Parser } from 'htmlparser2'
 import bigInt from 'big-integer'
 

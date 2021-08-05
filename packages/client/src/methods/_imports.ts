@@ -62,7 +62,7 @@ import {
     MaybeAsync,
     TelegramConnection,
     AsyncLock,
-} from '@mtqt/core'
+} from '@mtcute/core'
 
 // @copy
-import { tdFileId } from '@mtqt/file-id'
+import { tdFileId } from '@mtcute/file-id'

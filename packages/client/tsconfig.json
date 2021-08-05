@@ -7,7 +7,7 @@
         "./src"
     ],
     "typedocOptions": {
-        "name": "@mtqt/client",
+        "name": "@mtcute/client",
         "includeVersion": true,
         "out": "../../docs/packages/client",
         "listInvalidSymbolLinks": true,

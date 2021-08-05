@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
-import { Chat, InputPeerLike, MtqtTypeAssertionError } from '../../types'
-import { tl } from '@mtqt/tl'
+import { Chat, InputPeerLike, MtTypeAssertionError } from '../../types'
+import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**

@@ -1,5 +1,5 @@
 import type { InlineKeyboardMarkup, ReplyKeyboardMarkup } from './keyboards'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 
 type ButtonLike = tl.TypeKeyboardButton | false | null | undefined | void
 

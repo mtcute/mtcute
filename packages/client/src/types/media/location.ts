@@ -1,5 +1,5 @@
 import { makeInspectable } from '../utils'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { FileLocation } from '../files'
 import { TelegramClient } from '../../client'
 

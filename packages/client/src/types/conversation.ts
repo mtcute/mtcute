@@ -1,17 +1,17 @@
-import { AsyncLock, getMarkedPeerId, MaybeAsync } from '@mtqt/core'
+import { AsyncLock, getMarkedPeerId, MaybeAsync } from '@mtcute/core'
 import {
     ControllablePromise,
     createControllablePromise,
-} from '@mtqt/core/src/utils/controllable-promise'
+} from '@mtcute/core/src/utils/controllable-promise'
 import { TelegramClient } from '../client'
 import { InputMediaLike } from './media'
-import { MtqtArgumentError } from './errors'
+import { MtArgumentError } from './errors'
 import { InputPeerLike } from './peers'
 import { HistoryReadUpdate } from './updates'
 import { FormattedString } from './parser'
 import { Message } from './messages'
-import { tl } from '@mtqt/tl'
-import { TimeoutError } from '@mtqt/tl/errors'
+import { tl } from '@mtcute/tl'
+import { TimeoutError } from '@mtcute/tl/errors'
 import { Queue } from '../utils/queue'
 
 interface QueuedHandler<T> {
@@ -62,7 +62,7 @@ export class Conversation {
      */
     get inputPeer(): tl.TypeInputPeer {
         if (!this._started) {
-            throw new MtqtArgumentError("Conversation hasn't started yet")
+            throw new MtArgumentError("Conversation hasn't started yet")
         }
 
         return this._inputPeer
@@ -73,7 +73,7 @@ export class Conversation {
      */
     get lastMessage(): number {
         if (!this._started) {
-            throw new MtqtArgumentError("Conversation hasn't started yet")
+            throw new MtArgumentError("Conversation hasn't started yet")
         }
 
         return this._lastMessage
@@ -87,7 +87,7 @@ export class Conversation {
      */
     get lastReceivedMessage(): number {
         if (!this._started) {
-            throw new MtqtArgumentError("Conversation hasn't started yet")
+            throw new MtArgumentError("Conversation hasn't started yet")
         }
 
         return this._lastReceivedMessage
@@ -157,7 +157,7 @@ export class Conversation {
         params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
         if (!this._started) {
-            throw new MtqtArgumentError("Conversation hasn't started yet")
+            throw new MtArgumentError("Conversation hasn't started yet")
         }
 
         return this.client.sendText(this._inputPeer, text, params)
@@ -174,7 +174,7 @@ export class Conversation {
         params?: Parameters<TelegramClient['sendMedia']>[2]
     ): ReturnType<TelegramClient['sendMedia']> {
         if (!this._started) {
-            throw new MtqtArgumentError("Conversation hasn't started yet")
+            throw new MtArgumentError("Conversation hasn't started yet")
         }
 
         return this.client.sendMedia(this._inputPeer, media, params)
@@ -191,7 +191,7 @@ export class Conversation {
         params?: Parameters<TelegramClient['sendMediaGroup']>[2]
     ): ReturnType<TelegramClient['sendMediaGroup']> {
         if (!this._started) {
-            throw new MtqtArgumentError("Conversation hasn't started yet")
+            throw new MtArgumentError("Conversation hasn't started yet")
         }
 
         return this.client.sendMediaGroup(
@@ -210,7 +210,7 @@ export class Conversation {
      */
     markRead(message?: number | null, clearMentions = true): Promise<void> {
         if (!this._started) {
-            throw new MtqtArgumentError("Conversation hasn't started yet")
+            throw new MtArgumentError("Conversation hasn't started yet")
         }
 
         if (message === null) {
@@ -263,7 +263,7 @@ export class Conversation {
         timeout: number | null = 15000
     ): Promise<Message> {
         if (!this._started) {
-            throw new MtqtArgumentError("Conversation hasn't started yet")
+            throw new MtArgumentError("Conversation hasn't started yet")
         }
 
         const promise = createControllablePromise<Message>()
@@ -355,7 +355,7 @@ export class Conversation {
     ): Promise<Message> {
         const msgId = params?.message ?? this._lastMessage
         if (!msgId)
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Provide message for which to wait for reply for'
             )
 
@@ -398,12 +398,12 @@ export class Conversation {
         }
     ): Promise<Message> {
         if (!this._started) {
-            throw new MtqtArgumentError("Conversation hasn't started yet")
+            throw new MtArgumentError("Conversation hasn't started yet")
         }
 
         const msgId = params?.message ?? this._lastReceivedMessage
         if (!msgId) {
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Provide message for which to wait for edit for'
             )
         }
@@ -441,12 +441,12 @@ export class Conversation {
      */
     async waitForRead(message?: number, timeout: number | null = 15000): Promise<void> {
         if (!this._started) {
-            throw new MtqtArgumentError("Conversation hasn't started yet")
+            throw new MtArgumentError("Conversation hasn't started yet")
         }
 
         const msgId = message ?? this._lastMessage
         if (!msgId)
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Provide message for which to wait for read for'
             )
 

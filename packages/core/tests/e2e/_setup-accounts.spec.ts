@@ -36,12 +36,12 @@ async function getTestAccount(dcId = 2) {
             _: 'auth.signUp',
             phoneNumber: phone,
             phoneCodeHash: res.phoneCodeHash,
-            firstName: 'mtqt E2E',
+            firstName: 'MTCute E2E',
             lastName: '',
         })
     }
 
-    const username = `mtqt_e2e_${numbers}`
+    const username = `mtcute_e2e_${numbers}`
 
     await tg.call({
         _: 'account.updateUsername',

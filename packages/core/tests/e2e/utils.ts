@@ -1,6 +1,6 @@
 import { BaseTelegramClient, NodeCryptoProvider, TcpTransport } from '../../src'
 
-// require('debug').enable('mtqt:*')
+// require('debug').enable('mtcute:*')
 
 export function createTestTelegramClient() {
     return new BaseTelegramClient({

@@ -1,7 +1,7 @@
-import type { IMessageEntityParser, MessageEntity } from '@mtqt/client'
-import { tl } from '@mtqt/tl'
+import type { IMessageEntityParser, MessageEntity } from '@mtcute/client'
+import { tl } from '@mtcute/tl'
 import bigInt from 'big-integer'
-import { FormattedString } from '@mtqt/client'
+import { FormattedString } from '@mtcute/client'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 

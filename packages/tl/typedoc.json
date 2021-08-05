@@ -1,5 +1,5 @@
 {
-    "name": "@mtqt/tl",
+    "name": "@mtcute/tl",
     "out": "../../docs/packages/tl",
     "includeVersion": true,
     "listInvalidSymbolLinks": false,

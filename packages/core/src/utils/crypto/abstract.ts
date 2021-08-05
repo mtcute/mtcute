@@ -1,5 +1,5 @@
 import { MaybeAsync } from '../../types'
-import { TlPublicKey } from '@mtqt/tl/binary/rsa-keys'
+import { TlPublicKey } from '@mtcute/tl/binary/rsa-keys'
 import { AesModeOfOperationIge } from './common'
 import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils'
 import bigInt from 'big-integer'

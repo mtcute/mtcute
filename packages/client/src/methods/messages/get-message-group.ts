@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtqtArgumentError, Message } from '../../types'
+import { InputPeerLike, MtArgumentError, Message } from '../../types'
 import { isInputPeerChannel } from '../../utils/peer-utils'
 
 /**
@@ -32,7 +32,7 @@ export async function getMessageGroup(
     const messages = await this.getMessages(chatId, ids)
     const groupedId = messages.find((it) => it?.id === message)!.groupedId
 
-    if (!groupedId) throw new MtqtArgumentError('This message is not grouped')
+    if (!groupedId) throw new MtArgumentError('This message is not grouped')
 
     return messages.filter(
         (it) => it && it.groupedId?.eq(groupedId)

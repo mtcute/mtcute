@@ -15,8 +15,8 @@ import {
     PollUpdate,
     UserTypingUpdate,
     BotStoppedUpdate
-} from '@mtqt/client'
-import { tl } from '@mtqt/tl'
+} from '@mtcute/client'
+import { tl } from '@mtcute/tl'
 import { PropagationAction } from './propagation'
 
 interface BaseUpdateHandler<Name, Handler, Checker> {

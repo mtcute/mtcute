@@ -1,6 +1,6 @@
 import { User } from '../'
 import { TelegramClient } from '../../client'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { makeInspectable } from '../utils'
 
 /**

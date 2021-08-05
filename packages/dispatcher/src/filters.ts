@@ -28,8 +28,8 @@ import {
     UserStatusUpdate,
     PollVoteUpdate,
     UserTypingUpdate,
-} from '@mtqt/client'
-import { MaybeArray } from '@mtqt/core'
+} from '@mtcute/client'
+import { MaybeArray } from '@mtcute/core'
 import { UpdateState } from './state'
 
 function extractText(

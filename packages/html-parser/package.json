@@ -1,8 +1,8 @@
 {
-    "name": "@mtqt/html-parser",
+    "name": "@mtcute/html-parser",
     "private": true,
     "version": "1.0.0",
-    "description": "HTML entities parser for mtqt",
+    "description": "HTML entities parser for MTCute",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "LGPL-3.0",
     "main": "src/index.ts",
@@ -13,11 +13,11 @@
         "docs": "npx typedoc"
     },
     "dependencies": {
-        "@mtqt/tl": "~1.131.0",
+        "@mtcute/tl": "~1.131.0",
         "htmlparser2": "^6.0.1",
         "big-integer": "^1.6.48"
     },
     "devDependencies": {
-        "@mtqt/client": "^1.0.0"
+        "@mtcute/client": "^1.0.0"
     }
 }

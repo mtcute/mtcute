@@ -1,4 +1,4 @@
-import { MtqtArgumentError, MtqtNotFoundError } from '../../types'
+import { MtArgumentError, MtNotFoundError } from '../../types'
 import { TelegramClient } from '../../client'
 import { INVITE_LINK_REGEX } from '../../utils/peer-utils'
 import { ChatPreview } from '../../types'
@@ -7,8 +7,8 @@ import { ChatPreview } from '../../types'
  * Get preview information about a private chat.
  *
  * @param inviteLink  Invite link
- * @throws MtqtArgumentError  In case invite link has invalid format
- * @throws MtqtNotFoundError
+ * @throws MtArgumentError  In case invite link has invalid format
+ * @throws MtNotFoundError
  *   In case you are trying to get info about private chat that you have already joined.
  *   Use {@link getChat} or {@link getFullChat} instead.
  * @internal
@@ -18,7 +18,7 @@ export async function getChatPreview(
     inviteLink: string
 ): Promise<ChatPreview> {
     const m = inviteLink.match(INVITE_LINK_REGEX)
-    if (!m) throw new MtqtArgumentError('Invalid invite link')
+    if (!m) throw new MtArgumentError('Invalid invite link')
 
     const res = await this.call({
         _: 'messages.checkChatInvite',
@@ -26,7 +26,7 @@ export async function getChatPreview(
     })
 
     if (res._ !== 'chatInvite') {
-        throw new MtqtNotFoundError(`You have already joined this chat!`)
+        throw new MtNotFoundError(`You have already joined this chat!`)
     }
 
     return new ChatPreview(this, res, inviteLink)

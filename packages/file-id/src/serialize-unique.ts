@@ -1,5 +1,5 @@
 import { tdFileId, tdFileId as td } from './types'
-import { encodeUrlSafeBase64, BinaryWriter } from '@mtqt/core'
+import { encodeUrlSafeBase64, BinaryWriter } from '@mtcute/core'
 import { telegramRleEncode } from './utils'
 import FileType = tdFileId.FileType
 

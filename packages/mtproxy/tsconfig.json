@@ -7,7 +7,7 @@
         "./index.ts",
     ],
     "typedocOptions": {
-        "name": "@mtqt/mtproxy",
+        "name": "@mtcute/mtproxy",
         "includeVersion": true,
         "out": "../../docs/packages/mtproxy",
         "listInvalidSymbolLinks": true,

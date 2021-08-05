@@ -1,9 +1,9 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import type { Readable } from 'stream'
 import type { ReadStream } from 'fs'
 import { UploadedFile } from './uploaded-file'
 import { FileLocation } from './file-location'
-import { tdFileId } from '@mtqt/file-id'
+import { tdFileId } from '@mtcute/file-id'
 
 /**
  * Describes types that can be used in {@link TelegramClient.uploadFile}

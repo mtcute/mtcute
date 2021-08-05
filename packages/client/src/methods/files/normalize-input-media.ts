@@ -2,16 +2,16 @@ import { TelegramClient } from '../../client'
 import {
     InputMediaLike,
     isUploadedFile,
-    MtqtArgumentError,
+    MtArgumentError,
     UploadFileLike,
 } from '../../types'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import {
     fileIdToInputDocument,
     fileIdToInputPhoto,
     parseFileId,
     tdFileId,
-} from '@mtqt/file-id'
+} from '@mtcute/file-id'
 import { extractFileName } from '../../utils/file-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 import bigInt from 'big-integer'

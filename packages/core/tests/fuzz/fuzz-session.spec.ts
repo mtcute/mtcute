@@ -2,7 +2,7 @@ import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import { randomBytes } from '../../src'
 import { sleep } from '../../src/utils/misc-utils'
-import { UserMigrateError } from '@mtqt/tl/errors'
+import { UserMigrateError } from '@mtcute/tl/errors'
 import { createTestTelegramClient } from '../e2e/utils'
 
 require('dotenv-flow').config()

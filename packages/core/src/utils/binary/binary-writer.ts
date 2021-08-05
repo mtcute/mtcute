@@ -4,7 +4,7 @@ import writerMap, {
     ITlBinaryWriter,
     TlBinaryWriterFunction,
     TlWriterMap,
-} from '@mtqt/tl/binary/writer'
+} from '@mtcute/tl/binary/writer'
 
 type SerializableObject = {
     _: string

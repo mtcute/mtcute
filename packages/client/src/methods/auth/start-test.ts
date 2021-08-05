@@ -1,4 +1,4 @@
-import { MaybeDynamic, MtqtArgumentError, User } from '../../types'
+import { MaybeDynamic, MtArgumentError, User } from '../../types'
 import { TelegramClient } from '../../client'
 
 /**
@@ -68,17 +68,17 @@ export async function startTest(
     let phone = params.phone
     if (phone) {
         if (!phone.match(/^99966\d{5}/))
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 `${phone} is an invalid test phone number`
             )
         const id = parseInt(phone[5])
         if (!availableDcs.find((dc) => dc.id === id))
-            throw new MtqtArgumentError(`${phone} has invalid DC ID (${id})`)
+            throw new MtArgumentError(`${phone} has invalid DC ID (${id})`)
     } else {
         let dcId = this._primaryDc.id
         if (params.dcId) {
             if (!availableDcs.find((dc) => dc.id === params!.dcId))
-                throw new MtqtArgumentError(`DC ID is invalid (${dcId})`)
+                throw new MtArgumentError(`DC ID is invalid (${dcId})`)
             dcId = params.dcId
         }
 

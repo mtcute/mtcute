@@ -7,7 +7,7 @@
         "./src"
     ],
     "typedocOptions": {
-        "name": "@mtqt/dispatcher",
+        "name": "@mtcute/dispatcher",
         "includeVersion": true,
         "out": "../../docs/packages/dispatcher",
         "listInvalidSymbolLinks": true,

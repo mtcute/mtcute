@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
-import { MtqtArgumentError } from '../../types'
+import { MtArgumentError } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
-import { computeNewPasswordHash } from '@mtqt/core'
+import { computeNewPasswordHash } from '@mtcute/core'
 
 /**
  * Enable 2FA password on your account
@@ -24,7 +24,7 @@ export async function enableCloudPassword(
 ): Promise<void> {
     const pwd = await this.call({ _: 'account.getPassword' })
     if (pwd.hasPassword)
-        throw new MtqtArgumentError('Cloud password is already enabled')
+        throw new MtArgumentError('Cloud password is already enabled')
 
     const algo = pwd.newAlgo
     assertTypeIs(

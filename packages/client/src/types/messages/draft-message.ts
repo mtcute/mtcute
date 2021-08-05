@@ -1,7 +1,7 @@
 /**
  * A draft message
  */
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { MessageEntity } from './message-entity'
 import { Message } from './message'

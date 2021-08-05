@@ -1,11 +1,11 @@
 import { IStateStorage } from './storage'
-import { MtqtArgumentError, MtqtError } from '@mtqt/client'
-import { sleep } from '@mtqt/core/src/utils/misc-utils'
+import { MtArgumentError, MtClientError } from '@mtcute/client'
+import { sleep } from '@mtcute/core/src/utils/misc-utils'
 
 /**
  * Error thrown by `.rateLimit()`
  */
-export class RateLimitError extends MtqtError {
+export class RateLimitError extends MtClientError {
     constructor (readonly reset: number) {
         super(`You are being rate limited.`)
     }
@@ -134,7 +134,7 @@ export class UpdateState<State, SceneName extends string = string> {
         const old = await this.get(forceLoad)
         if (!old) {
             if (!fallback)
-                throw new MtqtArgumentError('Cannot use merge on empty state without fallback.')
+                throw new MtArgumentError('Cannot use merge on empty state without fallback.')
 
             await this.set({ ...fallback, ...state }, ttl)
         } else {

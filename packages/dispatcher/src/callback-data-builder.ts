@@ -1,5 +1,5 @@
-import { MaybeArray } from '@mtqt/core'
-import { CallbackQuery, MtqtArgumentError } from '@mtqt/client'
+import { MaybeArray } from '@mtcute/core'
+import { CallbackQuery, MtArgumentError } from '@mtcute/client'
 import { UpdateFilter } from './filters'
 
 /**
@@ -36,7 +36,7 @@ export class CallbackDataBuilder<T extends string> {
                     const val = obj[f]
 
                     if (val.indexOf(this.sep) > -1)
-                        throw new MtqtArgumentError(
+                        throw new MtArgumentError(
                             `Value for ${f} ${val} contains separator ${this.sep} and cannot be used.`
                         )
 
@@ -45,7 +45,7 @@ export class CallbackDataBuilder<T extends string> {
                 .join(this.sep)
 
         if (ret.length > 64) {
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Resulting callback data is too long.'
             )
         }
@@ -62,11 +62,11 @@ export class CallbackDataBuilder<T extends string> {
         const parts = data.split(this.sep)
 
         if (parts[0] !== this.prefix) {
-            throw new MtqtArgumentError('Invalid data passed')
+            throw new MtArgumentError('Invalid data passed')
         }
 
         if (parts.length !== this._fields.length + 1) {
-            throw new MtqtArgumentError('Invalid data passed')
+            throw new MtArgumentError('Invalid data passed')
         }
 
         const ret = {} as Record<T, string>

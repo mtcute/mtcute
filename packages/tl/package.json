@@ -1,7 +1,7 @@
 {
-    "name": "@mtqt/tl",
+    "name": "@mtcute/tl",
     "version": "1.131.0",
-    "description": "TL schema used for mtqt",
+    "description": "TL schema used for MTCute",
     "main": "index.js",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "LGPL-3.0",

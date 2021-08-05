@@ -2,8 +2,8 @@ import { TelegramClient } from '../../client'
 import {
     Chat,
     InputPeerLike,
-    MtqtNotFoundError,
-    MtqtTypeAssertionError,
+    MtNotFoundError,
+    MtTypeAssertionError,
 } from '../../types'
 import {
     INVITE_LINK_REGEX,
@@ -39,7 +39,7 @@ export async function joinChat(
     }
 
     const peer = normalizeToInputChannel(await this.resolvePeer(chatId))
-    if (!peer) throw new MtqtNotFoundError()
+    if (!peer) throw new MtNotFoundError()
 
     const res = await this.call({
         _: 'channels.joinChannel',

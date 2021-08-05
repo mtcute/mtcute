@@ -7,7 +7,7 @@
         "./index.ts"
     ],
     "typedocOptions": {
-        "name": "@mtqt/sqlite",
+        "name": "@mtcute/sqlite",
         "includeVersion": true,
         "out": "../../docs/packages/sqlite",
         "listInvalidSymbolLinks": true,

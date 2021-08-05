@@ -1,20 +1,20 @@
 /**
- * Base class for all `@mtqt/client` errors
+ * Base class for all `@mtcute/client` errors
  */
 import { InputPeerLike } from './peers'
 
-export class MtqtError extends Error {}
+export class MtClientError extends Error {}
 
 /**
  * Method invocation was invalid because some argument
  * passed was invalid.
  */
-export class MtqtArgumentError extends MtqtError {}
+export class MtArgumentError extends MtClientError {}
 
 /**
  * Could not find peer by provided information
  */
-export class MtqtNotFoundError extends MtqtError {}
+export class MtNotFoundError extends MtClientError {}
 
 /**
  * Either you requested or the server returned something
@@ -22,7 +22,7 @@ export class MtqtNotFoundError extends MtqtError {}
  *
  * Stay tuned for future updates!
  */
-export class MtqtUnsupportedError extends MtqtError {}
+export class MtUnsupportedError extends MtClientError {}
 
 /**
  * Server returned something of an unexpected type.
@@ -30,7 +30,7 @@ export class MtqtUnsupportedError extends MtqtError {}
  * This is usually a problem on library side.
  * Feel free to open an issue about this!
  */
-export class MtqtTypeAssertionError extends MtqtError {
+export class MtTypeAssertionError extends MtClientError {
     /**
      * Context at which the error occurred.
      * Usually a user-friendly string containing name
@@ -63,7 +63,7 @@ export class MtqtTypeAssertionError extends MtqtError {
  * For example, when trying to get common chats
  * while providing another chat as `userId`
  */
-export class MtqtInvalidPeerTypeError extends MtqtError {
+export class MtInvalidPeerTypeError extends MtClientError {
     constructor(peer: InputPeerLike, expected: string) {
         super(
             `Provided identifier ${JSON.stringify(peer)} is not a ${expected}`
@@ -75,7 +75,7 @@ export class MtqtInvalidPeerTypeError extends MtqtError {
  * Trying to access to some property on an object that does not
  * contain that information.
  */
-export class MtqtEmptyError extends MtqtError {
+export class MtEmptyError extends MtClientError {
     constructor() {
         super('Property is not available on an empty object')
     }

@@ -6,13 +6,13 @@ import {
     ITelegramStorage,
     LruMap,
     MAX_CHANNEL_ID,
-} from '@mtqt/core'
-import { tl } from '@mtqt/tl'
+} from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 import sqlite3 from 'better-sqlite3'
 import bigInt from 'big-integer'
-import { throttle } from '@mtqt/core'
+import { throttle } from '@mtcute/core'
 
-const debug = require('debug')('mtqt:sqlite')
+const debug = require('debug')('mtcute:sqlite')
 
 function serializeAccessHash(hash: tl.Long): Buffer {
     const arr = hash.toArray(256)
@@ -156,7 +156,7 @@ const STATEMENTS = {
 const EMPTY_BUFFER = Buffer.alloc(0)
 
 /**
- * SQLite backed storage for mtqt.
+ * SQLite backed storage for MTCute.
  *
  * Uses `better-sqlite3` library
  */

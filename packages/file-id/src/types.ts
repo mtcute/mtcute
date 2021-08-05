@@ -63,7 +63,7 @@ export namespace tdFileId {
         None,
     }
 
-    // naming convention just like in @mtqt/tl
+    // naming convention just like in @mtcute/tl
 
     // additionally, `_` discriminator is used,
     // so we can interoperate with normal TL objects
@@ -209,7 +209,7 @@ export namespace tdFileId {
      *
      * This type is supposed to be an intermediate step
      * between TL objects and string file IDs,
-     * and if you are using `@mtqt/client`, you don't
+     * and if you are using `@mtcute/client`, you don't
      * really need to care about this type at all.
      */
     export interface RawFullRemoteFileLocation {

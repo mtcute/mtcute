@@ -2,8 +2,8 @@ import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
     Message,
-    MtqtInvalidPeerTypeError,
-    MtqtTypeAssertionError,
+    MtInvalidPeerTypeError,
+    MtTypeAssertionError,
 } from '../../types'
 import {
     isInputPeerChannel,
@@ -45,20 +45,20 @@ export async function banChatMember(
         })
     } else if (isInputPeerChat(chat)) {
         const normUser = normalizeToInputUser(user)
-        if (!normUser) throw new MtqtInvalidPeerTypeError(userId, 'user')
+        if (!normUser) throw new MtInvalidPeerTypeError(userId, 'user')
 
         res = await this.call({
             _: 'messages.deleteChatUser',
             chatId: chat.chatId,
             userId: normUser,
         })
-    } else throw new MtqtInvalidPeerTypeError(chatId, 'chat or channel')
+    } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 
     try {
         return this._findMessageInUpdate(res)
     } catch (e) {
         if (
-            e instanceof MtqtTypeAssertionError &&
+            e instanceof MtTypeAssertionError &&
             e.context === '_findInUpdate (@ .updates[*])'
         ) {
             // no service message

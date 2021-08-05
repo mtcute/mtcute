@@ -7,7 +7,7 @@
         "./src"
     ],
     "typedocOptions": {
-        "name": "@mtqt/file-id",
+        "name": "@mtcute/file-id",
         "includeVersion": true,
         "out": "../../docs/packages/file-id",
         "listInvalidSymbolLinks": true,

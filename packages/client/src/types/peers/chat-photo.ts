@@ -1,12 +1,12 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { FileLocation } from '../files'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 import { strippedPhotoToJpg } from '../../utils/file-utils'
-import { tdFileId, toFileId, toUniqueFileId } from '@mtqt/file-id'
+import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
 import bigInt from 'big-integer'
-import { MAX_CHANNEL_ID } from '@mtqt/core'
-import { MtqtArgumentError } from '../errors'
+import { MAX_CHANNEL_ID } from '@mtcute/core'
+import { MtArgumentError } from '../errors'
 
 /**
  * A size of a chat photo
@@ -65,7 +65,7 @@ export class ChatPhotoSize extends FileLocation {
                     break
                 default:
                     // should not happen
-                    throw new MtqtArgumentError('Input peer was invalid')
+                    throw new MtArgumentError('Input peer was invalid')
             }
 
             this._fileId = toFileId({

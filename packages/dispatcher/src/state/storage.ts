@@ -1,4 +1,4 @@
-import { MaybeAsync } from '@mtqt/core'
+import { MaybeAsync } from '@mtcute/core'
 
 /**
  * Interface for FSM storage for the dispatcher.

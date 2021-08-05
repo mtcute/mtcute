@@ -1,8 +1,8 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { HtmlMessageEntityParser, html } from '../src'
-import { MessageEntity, FormattedString } from '@mtqt/client'
+import { MessageEntity, FormattedString } from '@mtcute/client'
 import bigInt from 'big-integer'
 
 const createEntity = <T extends tl.TypeMessageEntity['_']>(

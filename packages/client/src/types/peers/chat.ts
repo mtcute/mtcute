@@ -1,9 +1,9 @@
 import { ChatPhoto } from './chat-photo'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { ChatPermissions } from './chat-permissions'
 import { TelegramClient } from '../../client'
-import { getMarkedPeerId, MaybeArray } from '@mtqt/core'
-import { MtqtArgumentError, MtqtTypeAssertionError } from '../errors'
+import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
+import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { makeInspectable } from '../utils'
 import { ChatsIndex, InputPeerLike, User, UsersIndex } from './index'
 import { ChatLocation } from './chat-location'
@@ -56,7 +56,7 @@ export class Chat {
         peer: tl.TypeUser | tl.TypeChat,
         fullPeer?: tl.TypeUserFull | tl.TypeChatFull
     ) {
-        if (!peer) throw new MtqtArgumentError('peer is not available')
+        if (!peer) throw new MtArgumentError('peer is not available')
 
         switch (peer._) {
             case 'user':
@@ -66,7 +66,7 @@ export class Chat {
             case 'channelForbidden':
                 break
             default:
-                throw new MtqtTypeAssertionError(
+                throw new MtTypeAssertionError(
                     'peer',
                     'user | chat | channel',
                     peer._
@@ -92,7 +92,7 @@ export class Chat {
             switch (this.peer._) {
                 case 'user':
                     if (!this.peer.accessHash) {
-                        throw new MtqtArgumentError(
+                        throw new MtArgumentError(
                             "Peer's access hash is not available!"
                         )
                     }
@@ -113,7 +113,7 @@ export class Chat {
                 case 'channel':
                 case 'channelForbidden':
                     if (!this.peer.accessHash) {
-                        throw new MtqtArgumentError(
+                        throw new MtArgumentError(
                             "Peer's access hash is not available!"
                         )
                     }

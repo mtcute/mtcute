@@ -1,9 +1,9 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { BotInlineMessage, InputInlineMessage } from './input-inline-message'
 import { TelegramClient } from '../../../client'
-import { fileIdToInputDocument, fileIdToInputPhoto } from '@mtqt/file-id'
+import { fileIdToInputDocument, fileIdToInputPhoto } from '@mtcute/file-id'
 import { extractFileName } from '../../../utils/file-utils'
-import { MtqtArgumentError } from '../../errors'
+import { MtArgumentError } from '../../errors'
 
 interface BaseInputInlineResult {
     /**
@@ -819,7 +819,7 @@ export namespace BotInline {
                     parseMode
                 )
                 if (sendMessage._ !== 'inputBotInlineMessageGame') {
-                    throw new MtqtArgumentError(
+                    throw new MtArgumentError(
                         'game inline result must contain a game inline message'
                     )
                 }
@@ -861,7 +861,7 @@ export namespace BotInline {
                         venueType: ''
                     }
                 } else {
-                    throw new MtqtArgumentError(
+                    throw new MtArgumentError(
                         'message or location (lat&lon) bust be supplied for venue inline result'
                     )
                 }
@@ -913,7 +913,7 @@ export namespace BotInline {
                 // file id or url
                 if (obj.media.match(/^https?:\/\//)) {
                     if (obj.type === 'sticker')
-                        throw new MtqtArgumentError(
+                        throw new MtArgumentError(
                             'sticker inline result cannot contain a URL'
                         )
 
@@ -925,7 +925,7 @@ export namespace BotInline {
                     else if (obj.type === 'voice') mime = 'audio/ogg'
                     else if (obj.type === 'file') {
                         if (!obj.mime)
-                            throw new MtqtArgumentError(
+                            throw new MtArgumentError(
                                 'MIME type must be specified for file inline result'
                             )
 

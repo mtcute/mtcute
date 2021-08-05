@@ -1,6 +1,6 @@
 import { Poll, UsersIndex } from '../'
 import { TelegramClient } from '../../client'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { makeInspectable } from '../utils'
 
 /**
@@ -38,7 +38,7 @@ export class PollUpdate {
      * The poll.
      *
      * Note that sometimes the update does not have the poll
-     * (Telegram limitation), and mtqt creates a stub poll
+     * (Telegram limitation), and MTCute creates a stub poll
      * with empty question, answers and flags
      * (like `quiz`, `public`, etc.)
      *
@@ -48,7 +48,7 @@ export class PollUpdate {
      *
      * Bot API and TDLib do basically the same internally,
      * and thus are able to always provide them,
-     * but mtqt tries to keep it simple in terms of local
+     * but MTCute tries to keep it simple in terms of local
      * storage and only stores the necessary information.
      */
     get poll(): Poll {

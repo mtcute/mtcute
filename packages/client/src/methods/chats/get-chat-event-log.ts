@@ -1,11 +1,11 @@
 import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
-    MtqtInvalidPeerTypeError,
+    MtInvalidPeerTypeError,
     ChatEvent,
 } from '../../types'
-import { tl } from '@mtqt/tl'
-import { MaybeArray } from '@mtqt/core'
+import { tl } from '@mtcute/tl'
+import { MaybeArray } from '@mtcute/core'
 import bigInt from 'big-integer'
 import {
     createUsersChatsIndex,
@@ -86,7 +86,7 @@ export async function* getChatEventLog(
     if (!params) params = {}
 
     const channel = normalizeToInputChannel(await this.resolvePeer(chatId))
-    if (!channel) throw new MtqtInvalidPeerTypeError(chatId, 'channel')
+    if (!channel) throw new MtInvalidPeerTypeError(chatId, 'channel')
 
     let current = 0
     let maxId = params.maxId ?? bigInt.zero

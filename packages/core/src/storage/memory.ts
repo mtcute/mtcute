@@ -1,6 +1,6 @@
 import { ITelegramStorage } from './abstract'
 import { MaybeAsync } from '../types'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { MAX_CHANNEL_ID } from '../utils/peer-utils'
 import { LruMap } from '../utils/lru-map'
 

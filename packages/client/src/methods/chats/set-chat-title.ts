@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtqtInvalidPeerTypeError } from '../../types'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import {
     isInputPeerChannel,
     isInputPeerChat,
@@ -35,7 +35,7 @@ export async function setChatTitle(
             channel: normalizeToInputChannel(chat),
             title,
         })
-    } else throw new MtqtInvalidPeerTypeError(chatId, 'chat or channel')
+    } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 
     this._handleUpdate(res)
 }

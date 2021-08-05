@@ -1,13 +1,13 @@
 import { TelegramClient } from '../../client'
-import { MaybeArray } from '@mtqt/core'
+import { MaybeArray } from '@mtcute/core'
 import {
     InputPeerLike,
-    MtqtInvalidPeerTypeError,
-    MtqtTypeAssertionError,
+    MtInvalidPeerTypeError,
+    MtTypeAssertionError,
     User,
 } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
@@ -52,7 +52,7 @@ export async function deleteContacts(
     )
 
     if (single && !inputPeers.length)
-        throw new MtqtInvalidPeerTypeError(
+        throw new MtInvalidPeerTypeError(
             (userIds as InputPeerLike[])[0],
             'user'
         )

@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
-import { InputFileLike, isUploadedFile, MtqtArgumentError } from '../../types'
-import { tl } from '@mtqt/tl'
-import { tdFileId } from '@mtqt/file-id'
+import { InputFileLike, isUploadedFile, MtArgumentError } from '../../types'
+import { tl } from '@mtcute/tl'
+import { tdFileId } from '@mtcute/file-id'
 
 /**
  * Normalize a {@link InputFileLike} to `InputFile`,
@@ -20,7 +20,7 @@ export async function _normalizeInputFile(
     }
 ): Promise<tl.TypeInputFile> {
     if (typeof input === 'object' && tl.isAnyInputMedia(input)) {
-        throw new MtqtArgumentError(
+        throw new MtArgumentError(
             "InputFile can't be created from an InputMedia"
         )
     } else if (tdFileId.isFileIdLike(input)) {
@@ -31,7 +31,7 @@ export async function _normalizeInputFile(
             })
             return uploaded.inputFile
         } else {
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 "InputFile can't be created from an URL or a File ID"
             )
         }

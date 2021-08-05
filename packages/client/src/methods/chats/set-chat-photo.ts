@@ -3,16 +3,16 @@ import {
     InputFileLike,
     InputPeerLike,
     isUploadedFile,
-    MtqtArgumentError,
-    MtqtInvalidPeerTypeError,
+    MtArgumentError,
+    MtInvalidPeerTypeError,
 } from '../../types'
 import {
     isInputPeerChannel,
     isInputPeerChat,
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
-import { tl } from '@mtqt/tl'
-import { fileIdToInputPhoto, tdFileId } from '@mtqt/file-id'
+import { tl } from '@mtcute/tl'
+import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
 
 /**
  * Set a new chat photo or video.
@@ -36,14 +36,14 @@ export async function setChatPhoto(
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
     if (!(isInputPeerChannel(chat) || isInputPeerChat(chat)))
-        throw new MtqtInvalidPeerTypeError(chatId, 'chat or channel')
+        throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 
     let photo: tl.TypeInputChatPhoto | undefined = undefined
 
     let inputFile: tl.TypeInputFile
     if (tdFileId.isFileIdLike(media)) {
         if (typeof media === 'string' && media.match(/^https?:\/\//))
-            throw new MtqtArgumentError("Chat photo can't be external")
+            throw new MtArgumentError("Chat photo can't be external")
         if (typeof media === 'string' && media.match(/^file:/)) {
             const uploaded = await this.uploadFile({
                 file: media.substr(5),
@@ -62,7 +62,7 @@ export async function setChatPhoto(
                 _: 'inputChatPhoto',
                 id: media.id,
             }
-        } else throw new MtqtArgumentError("Chat photo can't be InputMedia")
+        } else throw new MtArgumentError("Chat photo can't be InputMedia")
     } else if (isUploadedFile(media)) {
         inputFile = media.inputFile
     } else if (typeof media === 'object' && tl.isAnyInputFile(media)) {

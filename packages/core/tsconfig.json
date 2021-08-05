@@ -7,7 +7,7 @@
         "./src"
     ],
     "typedocOptions": {
-        "name": "@mtqt/core",
+        "name": "@mtcute/core",
         "includeVersion": true,
         "out": "../../docs/packages/core",
         "listInvalidSymbolLinks": true,

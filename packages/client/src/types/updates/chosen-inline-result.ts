@@ -1,8 +1,8 @@
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import {
     User,
     Location,
-    MtqtArgumentError,
+    MtArgumentError,
     UsersIndex,
 } from '../'
 import { TelegramClient } from '../../client'
@@ -103,7 +103,7 @@ export class ChosenInlineResult {
         params: Parameters<TelegramClient['editInlineMessage']>[1]
     ): Promise<void> {
         if (!this.raw.msgId)
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'No message ID, make sure you have included reply markup!'
             )
 

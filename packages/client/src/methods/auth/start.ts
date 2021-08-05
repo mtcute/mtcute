@@ -1,6 +1,6 @@
 import {
     MaybeDynamic,
-    MtqtArgumentError,
+    MtArgumentError,
     SentCode,
     TermsOfService,
     User,
@@ -19,7 +19,7 @@ import {
     PhoneCodeHashEmptyError,
     PhoneCodeInvalidError,
     SessionPasswordNeededError,
-} from '@mtqt/tl/errors'
+} from '@mtcute/tl/errors'
 
 /**
  * Start the client in an interactive and declarative manner,
@@ -165,7 +165,7 @@ export async function start(
     }
 
     if (!params.phone && !params.botToken)
-        throw new MtqtArgumentError(
+        throw new MtArgumentError(
             'Neither phone nor bot token were provided'
         )
 
@@ -174,13 +174,13 @@ export async function start(
         phone = normalizePhoneNumber(phone)
 
         if (!params.code)
-            throw new MtqtArgumentError('You must pass `code` to use `phone`')
+            throw new MtArgumentError('You must pass `code` to use `phone`')
     } else {
         const botToken = params.botToken
             ? await resolveMaybeDynamic(params.botToken)
             : null
         if (!botToken)
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Either bot token or phone number must be provided'
             )
 
@@ -219,7 +219,7 @@ export async function start(
                 e instanceof PhoneCodeInvalidError
             ) {
                 if (typeof params.code !== 'function') {
-                    throw new MtqtArgumentError('Provided code was invalid')
+                    throw new MtArgumentError('Provided code was invalid')
                 }
 
                 if (params.invalidCodeCallback) {
@@ -238,7 +238,7 @@ export async function start(
 
     if (has2fa) {
         if (!params.password)
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 '2FA is enabled, but `password` was not provided.'
             )
 
@@ -249,7 +249,7 @@ export async function start(
                 result = await this.checkPassword(password)
             } catch (e) {
                 if (typeof params.password !== 'function') {
-                    throw new MtqtArgumentError(
+                    throw new MtArgumentError(
                         'Provided password was invalid'
                     )
                 }

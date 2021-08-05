@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtqtInvalidPeerTypeError } from '../../types'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
 
 /**
@@ -17,7 +17,7 @@ export async function setChatUsername(
     username: string | null
 ): Promise<void> {
     const chat = normalizeToInputChannel(await this.resolvePeer(chatId))
-    if (!chat) throw new MtqtInvalidPeerTypeError(chatId, 'channel')
+    if (!chat) throw new MtInvalidPeerTypeError(chatId, 'channel')
 
     await this.call({
         _: 'channels.updateUsername',

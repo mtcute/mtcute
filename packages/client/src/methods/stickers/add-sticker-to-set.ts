@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputFileLike, InputStickerSetItem, StickerSet } from '../../types'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 
 const MASK_POS = {
     forehead: 0,

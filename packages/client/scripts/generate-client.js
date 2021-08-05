@@ -281,8 +281,8 @@ async function main() {
 
     output.write(
         '/* THIS FILE WAS AUTO-GENERATED */\n' +
-            "import { BaseTelegramClient } from '@mtqt/core'\n" +
-            "import { tl } from '@mtqt/tl'"
+            "import { BaseTelegramClient } from '@mtcute/core'\n" +
+            "import { tl } from '@mtcute/tl'"
     )
     Object.entries(state.imports).forEach(([module, items]) => {
         items = [...items]

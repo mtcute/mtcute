@@ -1,12 +1,12 @@
 import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { Message } from '../messages'
-import { MtqtArgumentError } from '../errors'
-import { BasicPeerType, getBasicPeerType, getMarkedPeerId } from '@mtqt/core'
+import { MtArgumentError } from '../errors'
+import { BasicPeerType, getBasicPeerType, getMarkedPeerId } from '@mtcute/core'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
 import { User, UsersIndex } from '../peers'
-import { MessageNotFoundError } from '@mtqt/core'
+import { MessageNotFoundError } from '@mtcute/core'
 
 /**
  * An incoming callback query, originated from a callback button
@@ -80,7 +80,7 @@ export class CallbackQuery {
      */
     get inlineMessageId(): tl.TypeInputBotInlineMessageID {
         if (this.raw._ !== 'updateInlineBotCallbackQuery')
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Cannot get inline message id for non-inline callback'
             )
 
@@ -98,7 +98,7 @@ export class CallbackQuery {
      */
     get inlineMessageIdStr(): string {
         if (this.raw._ !== 'updateInlineBotCallbackQuery')
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Cannot get inline message id for non-inline callback'
             )
 
@@ -110,7 +110,7 @@ export class CallbackQuery {
      */
     get chatId(): number {
         if (this.raw._ !== 'updateBotCallbackQuery')
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Cannot get message id for inline callback'
             )
 
@@ -133,7 +133,7 @@ export class CallbackQuery {
      */
     get messageId(): number {
         if (this.raw._ !== 'updateBotCallbackQuery')
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Cannot get message id for inline callback'
             )
 
@@ -187,7 +187,7 @@ export class CallbackQuery {
      */
     async getMessage(): Promise<Message> {
         if (this.raw._ !== 'updateBotCallbackQuery')
-            throw new MtqtArgumentError(
+            throw new MtArgumentError(
                 'Cannot get a message for inline callback'
             )
 

@@ -2,7 +2,7 @@ import { TelegramClient } from '../../client'
 import {
     ChatInviteLink,
     InputPeerLike,
-    MtqtTypeAssertionError,
+    MtTypeAssertionError,
 } from '../../types'
 import { createUsersChatsIndex } from '../../utils/peer-utils'
 
@@ -25,7 +25,7 @@ export async function getPrimaryInviteLink(
     })
 
     if (!res.invites[0]?.permanent)
-        throw new MtqtTypeAssertionError(
+        throw new MtTypeAssertionError(
             'messages.getExportedChatInvites (@ .invites[0].permanent)',
             'true',
             'false'

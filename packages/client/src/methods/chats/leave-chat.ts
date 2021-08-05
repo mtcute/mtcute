@@ -1,4 +1,4 @@
-import { InputPeerLike, MtqtInvalidPeerTypeError } from '../../types'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import { TelegramClient } from '../../client'
 import {
     isInputPeerChannel,
@@ -37,5 +37,5 @@ export async function leaveChat(
         if (clear) {
             await this.deleteHistory(chat)
         }
-    } else throw new MtqtInvalidPeerTypeError(chatId, 'chat or channel')
+    } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 }

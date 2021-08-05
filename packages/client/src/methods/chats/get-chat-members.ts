@@ -1,7 +1,7 @@
 import {
     ChatMember,
     InputPeerLike,
-    MtqtInvalidPeerTypeError,
+    MtInvalidPeerTypeError,
 } from '../../types'
 import { TelegramClient } from '../../client'
 import {
@@ -11,7 +11,7 @@ import {
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { ArrayWithTotal } from '../../types'
 
 /**
@@ -156,5 +156,5 @@ export async function getChatMembers(
         return ret
     }
 
-    throw new MtqtInvalidPeerTypeError(chatId, 'chat or channel')
+    throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 }

@@ -15,7 +15,7 @@ import {
     Voice,
     WebPage,
 } from '../media'
-import { tl } from '@mtqt/tl'
+import { tl } from '@mtcute/tl'
 import { parseDocument } from '../media/document-utils'
 import { Message } from './message'
 

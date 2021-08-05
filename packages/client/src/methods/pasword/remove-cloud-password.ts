@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
-import { MtqtArgumentError } from '../../types'
-import { computeSrpParams } from '@mtqt/core'
+import { MtArgumentError } from '../../types'
+import { computeSrpParams } from '@mtcute/core'
 
 /**
  * Remove 2FA password from your account
@@ -14,7 +14,7 @@ export async function removeCloudPassword(
 ): Promise<void> {
     const pwd = await this.call({ _: 'account.getPassword' })
     if (!pwd.hasPassword)
-        throw new MtqtArgumentError('Cloud password is not enabled')
+        throw new MtArgumentError('Cloud password is not enabled')
 
     const oldSrp = await computeSrpParams(this._crypto, pwd, password)
 
