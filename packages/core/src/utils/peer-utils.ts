@@ -109,6 +109,12 @@ export function* getAllPeersFrom(
     obj: any
 ): Iterable<tl.TypeUser | tl.TypeChat> {
     if (typeof obj !== 'object') return
+    if (Array.isArray(obj)) {
+        for (const it of obj) {
+            yield* getAllPeersFrom(it)
+        }
+        return
+    }
 
     switch (obj._) {
         case 'user':
