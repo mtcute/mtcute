@@ -7,8 +7,6 @@ import {
 import { connect as connectTcp } from 'net'
 import { connect as connectTls, SecureContextOptions } from 'tls'
 
-const debug = require('debug')('mtcute:http-proxy')
-
 /**
  * An error has occurred while connecting to an HTTP(s) proxy
  */
@@ -105,7 +103,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
     }
 
     private _onProxyConnected() {
-        debug(
+        this.log.debug(
             '[%s:%d] connected to proxy, sending CONNECT',
             this._proxy.host,
             this._proxy.port
@@ -135,7 +133,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
 
         this._socket!.write(packet)
         this._socket!.once('data', (msg) => {
-            debug(
+            this.log.debug(
                 '[%s:%d] CONNECT resulted in: %s',
                 this._proxy.host,
                 this._proxy.port,

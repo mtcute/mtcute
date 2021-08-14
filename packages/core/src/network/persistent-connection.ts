@@ -7,8 +7,7 @@ import {
     createControllablePromise,
 } from '../utils/controllable-promise'
 import { ICryptoProvider } from '../utils/crypto'
-
-const debug = require('debug')('mtcute:conn')
+import { Logger } from '../utils/logger'
 
 export interface PersistentConnectionParams {
     crypto: ICryptoProvider
@@ -51,7 +50,7 @@ export abstract class PersistentConnection extends EventEmitter {
 
     protected abstract onMessage(data: Buffer): void
 
-    protected constructor(params: PersistentConnectionParams) {
+    protected constructor(params: PersistentConnectionParams, readonly log: Logger) {
         super()
         this.params = params
         this.changeTransport(params.transportFactory)
@@ -63,7 +62,7 @@ export abstract class PersistentConnection extends EventEmitter {
         }
 
         this._transport = factory()
-        this._transport.setupCrypto?.(this.params.crypto)
+        this._transport.setup?.(this.params.crypto, this.log)
 
         this._transport.on('ready', this.onTransportReady.bind(this))
         this._transport.on('message', this.onTransportMessage.bind(this))
@@ -175,7 +174,7 @@ export abstract class PersistentConnection extends EventEmitter {
         if (!this.params.inactivityTimeout) return
         if (this._inactivityTimeout) clearTimeout(this._inactivityTimeout)
         this._inactivityTimeout = setTimeout(() => {
-            debug(
+            this.log.info(
                 'disconnected because of inactivity for %d',
                 this.params.inactivityTimeout
             )

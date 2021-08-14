@@ -9,8 +9,6 @@ import { connect } from 'net'
 // @ts-ignore
 import { normalize } from 'ip6'
 
-const debug = require('debug')('mtcute:socks-proxy')
-
 /**
  * An error has occurred while connecting to an SOCKS proxy
  */
@@ -234,7 +232,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                 }
                 const code = msg[1]
 
-                debug(
+                this.log.debug(
                     '[%s:%d] CONNECT returned code %d',
                     this._proxy.host,
                     this._proxy.port,
@@ -259,7 +257,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                 }
             }
 
-            debug(
+            this.log.debug(
                 '[%s:%d] connected to proxy, sending CONNECT',
                 this._proxy.host,
                 this._proxy.port
@@ -280,7 +278,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
             let state: 'greeting' | 'auth' | 'connect' = 'greeting'
 
             const sendConnect = () => {
-                debug(
+                this.log.debug(
                     '[%s:%d] sending CONNECT',
                     this._proxy.host,
                     this._proxy.port
@@ -317,7 +315,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
 
                         const chosen = msg[1]
 
-                        debug(
+                        this.log.debug(
                             '[%s:%d] GREETING returned auth method %d',
                             this._proxy.host,
                             this._proxy.port,
@@ -386,7 +384,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                             return
                         }
 
-                        debug(
+                        this.log.debug(
                             '[%s:%d] AUTH returned code %d',
                             this._proxy.host,
                             this._proxy.port,
@@ -421,7 +419,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
 
                         const code = msg[1]
 
-                        debug(
+                        this.log.debug(
                             '[%s:%d] CONNECT returned code %d',
                             this._proxy.host,
                             this._proxy.port,
@@ -451,7 +449,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                 }
             }
 
-            debug(
+            this.log.debug(
                 '[%s:%d] connected to proxy, sending GREETING',
                 this._proxy.host,
                 this._proxy.port

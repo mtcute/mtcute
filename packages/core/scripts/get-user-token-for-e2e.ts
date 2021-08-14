@@ -1,7 +1,6 @@
 import { BaseTelegramClient, defaultDcs } from '../src'
 
 require('dotenv-flow').config({ path: __dirname + '/../' })
-require('debug').enable('mtcute:*')
 
 if (!process.env.API_ID || !process.env.API_HASH) {
     console.warn('Set API_ID and API_HASH env variables')

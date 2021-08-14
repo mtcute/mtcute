@@ -1,5 +1,6 @@
 import { BasicPeerType, MaybeAsync } from '../types'
 import { tl } from '@mtcute/tl'
+import { Logger } from '../utils/logger'
 
 export namespace ITelegramStorage {
     export interface PeerInfo {
@@ -31,6 +32,12 @@ export namespace ITelegramStorage {
  * write updates to the disk when `save()` is called.
  */
 export interface ITelegramStorage {
+    /**
+     * This method is called before any other.
+     * For storages that use logging, logger instance.
+     */
+    setup?(log: Logger): void
+
     /**
      * Load session from some external storage.
      * Should be used either to load session content from file/network/etc

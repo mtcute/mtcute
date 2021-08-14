@@ -23,20 +23,13 @@ import {
     RpcTimeoutError,
 } from '@mtcute/tl/errors'
 import { LruStringSet } from '../utils/lru-string-set'
+import { Logger } from '../utils/logger'
 
 function makeNiceStack(error: RpcError, stack: string, method?: string) {
     error.stack = `${error.constructor.name} (${error.code} ${error.text}): ${
         error.message
     }\n    at ${method}\n${stack.split('\n').slice(2).join('\n')}`
 }
-
-const _debug = require('debug')
-const debug = _debug('mtcute:conn')
-
-// hex formatting buffers with %h
-_debug.formatters.h = (v: Buffer): string => v.toString('hex')
-// true/false formatting with %b
-_debug.formatters.b = (v: any): string => !!v + ''
 
 export interface TelegramConnectionParams extends PersistentConnectionParams {
     initConnection: tl.RawInitConnectionRequest
@@ -112,9 +105,9 @@ export class TelegramConnection extends PersistentConnection {
         this._pendingAcks = []
     }, 500)
 
-    constructor(params: TelegramConnectionParams) {
-        super(params)
-        this._mtproto = new MtprotoSession(this.params.crypto)
+    constructor(params: TelegramConnectionParams, log: Logger) {
+        super(params, log)
+        this._mtproto = new MtprotoSession(this.params.crypto, log.create('session'))
     }
 
     onTransportClose(): void {
@@ -163,7 +156,7 @@ export class TelegramConnection extends PersistentConnection {
     protected onError(error: Error): void {
         // https://core.telegram.org/mtproto/mtproto-_transports#_transport-errors
         if (error instanceof TransportError) {
-            debug('transport error %d (dc %d)', error.code, this.params.dc.id)
+            this.log.error('transport error %d (dc %d)', error.code, this.params.dc.id)
             if (error.code === 404) {
                 this._mtproto.reset()
                 this.emit('key-change', null)
@@ -221,7 +214,7 @@ export class TelegramConnection extends PersistentConnection {
             // if a message is received before authorization,
             // either the server is misbehaving,
             // or there was a problem with authorization.
-            debug('warn: received message before authorization')
+            this.log.warn('warn: received message before authorization')
             return
         }
 
@@ -241,7 +234,7 @@ export class TelegramConnection extends PersistentConnection {
     }
 
     private _resend(it: PendingMessage, id?: string): void {
-        debug('resending %s', it.method)
+        this.log.debug('resending %s', it.method)
         this._sendBufferForResult(it).catch(it.promise.reject)
         if (it.cancel) clearTimeout(it.cancel)
         if (id) delete this._pendingRpcCalls[id]
@@ -260,7 +253,7 @@ export class TelegramConnection extends PersistentConnection {
                 this.onConnectionUsable()
             })
             .catch((err) => {
-                debug('Authorization error: %s', err.message)
+                this.log.error('Authorization error: %s', err.message)
                 this.onError(err)
                 this.reconnect()
             })
@@ -271,7 +264,7 @@ export class TelegramConnection extends PersistentConnection {
         messageId: BigInteger
     ): Promise<void> {
         if (messageId.isEven()) {
-            debug(
+            this.log.warn(
                 'warn: ignoring message with invalid messageId = %s (is even)',
                 messageId
             )
@@ -294,7 +287,7 @@ export class TelegramConnection extends PersistentConnection {
             return
         }
 
-        debug('unknown message received: %o', message)
+        this.log.warn('unknown message received: %o', message)
     }
 
     private _handleContainer(message: tl.mtproto.RawMsg_container): void {
@@ -310,10 +303,10 @@ export class TelegramConnection extends PersistentConnection {
         const reqMsgId = message.reqMsgId.toString(16)
         const pending = this._pendingRpcCalls[reqMsgId]
         if (!pending) {
-            debug('received rpc result for unknown message %s', reqMsgId)
+            this.log.warn('received rpc result for unknown message %s', reqMsgId)
             return
         }
-        debug('handling rpc result for %s (%s)', reqMsgId, pending.method)
+        this.log.request('<<< (%s) %j', pending.method, message.result)
 
         if (message.result._ === 'mt_rpc_error') {
             const error = createRpcErrorFromTl(message.result)
@@ -332,7 +325,7 @@ export class TelegramConnection extends PersistentConnection {
     private _handlePong(message: tl.mtproto.RawPong): void {
         const msgId = message.msgId.toString(16)
 
-        debug('handling pong for %s (ping id %s)', msgId, message.pingId)
+        this.log.debug('handling pong for %s (ping id %s)', msgId, message.pingId)
 
         if (this._pendingPing && message.pingId.eq(this._pendingPing)) {
             this._pendingPing = null
@@ -347,7 +340,7 @@ export class TelegramConnection extends PersistentConnection {
             pending.promise.resolve(message)
             delete this._pendingRpcCalls[msgId]
         } else {
-            debug('pong to unknown ping %o', message)
+            this.log.warn('pong to unknown ping %o', message)
         }
     }
 
@@ -356,7 +349,7 @@ export class TelegramConnection extends PersistentConnection {
     ): Promise<void> {
         const badMsgId = message.badMsgId.toString(16)
 
-        debug(
+        this.log.debug(
             'handling bad_server_salt for msg %s, new salt: %h',
             badMsgId,
             message.newServerSalt
@@ -375,7 +368,7 @@ export class TelegramConnection extends PersistentConnection {
             this._pendingPing = null
             this._pendingPingMsgId = null
         } else {
-            debug('bad_server_salt to unknown message %o', message)
+            this.log.warn('bad_server_salt to unknown message %o', message)
         }
     }
 
@@ -385,7 +378,7 @@ export class TelegramConnection extends PersistentConnection {
     ): Promise<void> {
         const badMsgId = message.badMsgId.toString(16)
 
-        debug('handling bad_msg_notification, code: %d', message.errorCode)
+        this.log.debug('handling bad_msg_notification, code: %d', message.errorCode)
 
         if (message.errorCode === 16 || message.errorCode === 17) {
             // msg_id is either too high or too low
@@ -415,7 +408,7 @@ export class TelegramConnection extends PersistentConnection {
         if (this._pendingRpcCalls[badMsgId]) {
             this._resend(this._pendingRpcCalls[badMsgId], badMsgId)
         } else {
-            debug('bad_msg_notification to unknown message %s', badMsgId)
+            this.log.warn('bad_msg_notification to unknown message %s', badMsgId)
         }
     }
 
@@ -452,7 +445,7 @@ export class TelegramConnection extends PersistentConnection {
             }
         }
 
-        debug(
+        this.log.debug(
             'handling new_session_created (sid = %h), salt: %h',
             this._mtproto._sessionId,
             message.serverSalt
@@ -463,7 +456,7 @@ export class TelegramConnection extends PersistentConnection {
     private _handleDetailedInfo(
         message: tl.mtproto.RawMsg_detailed_info
     ): void {
-        debug(
+        this.log.debug(
             'handling msg_detailed_info (sid = %h), msgId = %s',
             this._mtproto._sessionId,
             message.answerMsgId
@@ -487,7 +480,7 @@ export class TelegramConnection extends PersistentConnection {
     private _handleNewDetailedInfo(
         message: tl.mtproto.RawMsg_new_detailed_info
     ): void {
-        debug(
+        this.log.debug(
             'handling msg_new_detailed_info (sid = %h), msgId = %s',
             this._mtproto._sessionId,
             message.answerMsgId
@@ -510,7 +503,7 @@ export class TelegramConnection extends PersistentConnection {
 
     private _handleFutureSalts(message: tl.mtproto.RawFuture_salts): void {
         // TODO actually handle these salts
-        debug(
+        this.log.debug(
             'handling future_salts (sid = %h), msgId = %s, %d salts',
             this._mtproto._sessionId,
             message.reqMsgId,
@@ -663,11 +656,11 @@ export class TelegramConnection extends PersistentConnection {
         if (this._usable && this.params.inactivityTimeout)
             this._rescheduleInactivity()
 
-        debug('making rpc call %s', message._)
+        this.log.request('>>> %j', message)
 
         let obj: tl.TlObject = message
         if (!this._initConnectionCalled) {
-            debug('wrapping %s with initConnection', message._)
+            this.log.debug('wrapping %s with initConnection', message._)
             obj = {
                 _: 'invokeWithLayer',
                 layer: this.params.layer,

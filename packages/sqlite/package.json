@@ -15,8 +15,7 @@
         "@mtcute/core": "^1.0.0",
         "@mtcute/tl": "~1.131.0",
         "better-sqlite3": "^7.4.0",
-        "big-integer": "1.6.48",
-        "debug": "^4.3.1"
+        "big-integer": "1.6.48"
     },
     "devDependencies": {
         "@types/sqlite3": "^3.1.7",

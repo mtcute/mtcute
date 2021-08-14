@@ -18,7 +18,6 @@
         "@mtcute/file-id": "^1.0.0",
         "eager-async-pool": "^1.0.0",
         "file-type": "^16.2.0",
-        "big-integer": "1.6.48",
-        "debug": "^4.3.1"
+        "big-integer": "1.6.48"
     }
 }

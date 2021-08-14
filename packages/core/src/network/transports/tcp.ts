@@ -4,8 +4,7 @@ import { Socket, connect } from 'net'
 import EventEmitter from 'events'
 import { ICryptoProvider } from '../../utils/crypto'
 import { IntermediatePacketCodec } from './intermediate'
-
-const debug = require('debug')('mtcute:tcp')
+import { Logger } from '../../utils/logger'
 
 /**
  * Base for TCP transports.
@@ -20,11 +19,13 @@ export abstract class BaseTcpTransport
 
     abstract _packetCodec: IPacketCodec
     protected _crypto!: ICryptoProvider
+    protected log!: Logger
 
     packetCodecInitialized = false
 
-    setupCrypto(crypto: ICryptoProvider): void {
+    setup(crypto: ICryptoProvider, log: Logger): void {
         this._crypto = crypto
+        this.log = log.create('tcp')
     }
 
     state(): TransportState {
@@ -35,12 +36,13 @@ export abstract class BaseTcpTransport
         return this._currentDc
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     connect(dc: tl.RawDcOption, testMode: boolean): void {
         if (this._state !== TransportState.Idle)
             throw new Error('Transport is not IDLE')
 
         if (!this.packetCodecInitialized) {
-            this._packetCodec.setupCrypto?.(this._crypto)
+            this._packetCodec.setup?.(this._crypto, this.log)
             this._packetCodec.on('error', (err) => this.emit('error', err))
             this._packetCodec.on('packet', (buf) => this.emit('message', buf))
             this.packetCodecInitialized = true
@@ -61,7 +63,7 @@ export abstract class BaseTcpTransport
 
     close(): void {
         if (this._state === TransportState.Idle) return
-        debug('%s: close', this._currentDc!.ipAddress)
+        this.log.debug('%s: close', this._currentDc!.ipAddress)
 
         this.emit('close')
         this._state = TransportState.Idle
@@ -73,12 +75,12 @@ export abstract class BaseTcpTransport
     }
 
     async handleError(error: Error): Promise<void> {
-        debug('%s: error: %s', this._currentDc!.ipAddress, error.stack)
+        this.log.error('%s: error: %s', this._currentDc!.ipAddress, error.stack)
         this.emit('error', error)
     }
 
     async handleConnect(): Promise<void> {
-        debug('%s: connected', this._currentDc!.ipAddress)
+        this.log.debug('%s: connected', this._currentDc!.ipAddress)
         const initialMessage = await this._packetCodec.tag()
 
         if (initialMessage.length) {

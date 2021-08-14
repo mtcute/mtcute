@@ -16,8 +16,6 @@ import {
     bufferToBigInt,
 } from '../utils/bigint-utils'
 
-const debug = require('debug')('mtcute:auth')
-
 // Heavily based on code from https://github.com/LonamiWebs/Telethon/blob/master/telethon/network/authenticator.py
 
 const DH_SAFETY_RANGE = bigIntTwo.pow(2048 - 64)
@@ -45,9 +43,11 @@ export async function doAuthorization(
         return connection.send(writer.result())
     }
 
+    const log = connection.log.create('auth')
+
     const nonce = randomBytes(16)
     // Step 1: PQ request
-    debug(
+    log.debug(
         '%s: starting PQ handshake, nonce = %h',
         connection.params.dc.ipAddress,
         nonce
@@ -61,7 +61,7 @@ export async function doAuthorization(
     if (resPq._ !== 'mt_resPQ') throw new Error('Step 1: answer was ' + resPq._)
     if (!buffersEqual(resPq.nonce, nonce))
         throw new Error('Step 1: invalid nonce from server')
-    debug('%s: received PQ', connection.params.dc.ipAddress)
+    log.debug('%s: received PQ', connection.params.dc.ipAddress)
 
     // Step 2: DH exchange
     const publicKey = findKeyByFingerprints(resPq.serverPublicKeyFingerprints)
@@ -72,14 +72,14 @@ export async function doAuthorization(
                     .map((i) => i.toString(16))
                     .join(', ')
         )
-    debug(
+    log.debug(
         '%s: found server key, fp = %s',
         connection.params.dc.ipAddress,
         publicKey.fingerprint
     )
 
     const [p, q] = await crypto.factorizePQ(resPq.pq)
-    debug('%s: factorized PQ', connection.params.dc.ipAddress)
+    log.debug('%s: factorized PQ', connection.params.dc.ipAddress)
 
     const newNonce = randomBytes(32)
 
@@ -98,7 +98,7 @@ export async function doAuthorization(
         dc: dcId
     } as tl.mtproto.RawP_q_inner_data_dc)
     const encryptedData = await crypto.rsaEncrypt(pqInnerData, publicKey)
-    debug('%s: requesting DH params', connection.params.dc.ipAddress)
+    log.debug('%s: requesting DH params', connection.params.dc.ipAddress)
 
     await sendPlainMessage({
         _: 'mt_reqDHParams',
@@ -131,7 +131,7 @@ export async function doAuthorization(
     //     throw new Error('Step 2: server DH failed')
     // }
 
-    debug('%s: server DH ok', connection.params.dc.ipAddress)
+    log.debug('%s: server DH ok', connection.params.dc.ipAddress)
 
     if (serverDhParams.encryptedAnswer.length % 16 != 0)
         throw new Error('Step 2: AES block size is invalid')
@@ -234,7 +234,7 @@ export async function doAuthorization(
         clientDhInnerWriter.pos = 0
         clientDhInnerWriter.raw(clientDhInnerHash)
 
-        debug(
+        log.debug(
             '%s: sending client DH (timeOffset = %d)',
             connection.params.dc.ipAddress,
             timeOffset
@@ -260,7 +260,7 @@ export async function doAuthorization(
         if (!buffersEqual(dhGen.serverNonce, resPq.serverNonce))
             throw Error('Step 4: invalid server nonce from server')
 
-        debug('%s: DH result: %s', connection.params.dc.ipAddress, dhGen._)
+        log.debug('%s: DH result: %s', connection.params.dc.ipAddress, dhGen._)
 
         if (dhGen._ === 'mt_dh_gen_fail') {
             // in theory i would be supposed to calculate newNonceHash, but why, we are failing anyway
@@ -284,7 +284,7 @@ export async function doAuthorization(
         if (!buffersEqual(expectedHash.slice(4, 20), dhGen.newNonceHash1))
             throw Error('Step 4: invalid nonce hash from server')
 
-        debug('%s: authorization successful', connection.params.dc.ipAddress)
+        log.info('%s: authorization successful', connection.params.dc.ipAddress)
 
         return [authKey, serverSalt, timeOffset]
     }

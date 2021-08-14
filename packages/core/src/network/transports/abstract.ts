@@ -2,6 +2,7 @@ import { tl } from '@mtcute/tl'
 import { MaybeAsync } from '../../types/utils'
 import { ICryptoProvider } from '../../utils/crypto'
 import EventEmitter from 'events'
+import { Logger } from '../../utils/logger'
 
 export enum TransportState {
     /**
@@ -50,10 +51,12 @@ export interface ITelegramTransport extends EventEmitter {
     send(data: Buffer): Promise<void>
 
     /**
-     * For transports whose codecs use crypto functions.
+     * Provides crypto and logging for the transport.
+     * Not done in constructor to simplify factory.
+     *
      * This method is called before any other.
      */
-    setupCrypto?(crypto: ICryptoProvider): void
+    setup?(crypto: ICryptoProvider, log: Logger): void
 }
 
 /** Transport factory function */
@@ -88,10 +91,10 @@ export interface IPacketCodec {
     on(event: 'packet', handler: (packet: Buffer) => void): void
 
     /**
-     * For codecs that use crypto functions.
+     * For codecs that use crypto functions and/or logging.
      * This method is called before any other.
      */
-    setupCrypto?(crypto: ICryptoProvider): void
+    setup?(crypto: ICryptoProvider, log: Logger): void
 }
 
 /**

@@ -38,8 +38,7 @@ import { BinaryWriter } from './utils/binary/binary-writer'
 import { encodeUrlSafeBase64, parseUrlSafeBase64 } from './utils/buffer-utils'
 import { BinaryReader } from './utils/binary/binary-reader'
 import EventEmitter from 'events'
-
-const debug = require('debug')('mtcute:base')
+import { LogManager } from './utils/logger'
 
 export namespace BaseTelegramClient {
     export interface Options {
@@ -269,6 +268,9 @@ export class BaseTelegramClient extends EventEmitter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected _handleUpdate(update: tl.TypeUpdates): void {}
 
+    readonly log = new LogManager()
+    protected readonly _baseLog = this.log.create('base')
+
     constructor(opts: BaseTelegramClient.Options) {
         super()
 
@@ -298,6 +300,8 @@ export class BaseTelegramClient extends EventEmitter {
         this._rpcRetryCount = opts.rpcRetryCount ?? 5
         this._disableUpdates = opts.disableUpdates ?? false
         this._niceStacks = opts.niceStacks ?? true
+
+        this.storage.setup?.(this._baseLog)
 
         this._layer = opts.overrideLayer ?? tl.CURRENT_LAYER
 
@@ -361,7 +365,7 @@ export class BaseTelegramClient extends EventEmitter {
             testMode: this._testMode,
             reconnectionStrategy: this._reconnectionStrategy,
             layer: this._layer,
-        })
+        }, this.log.create('connection'))
         this.primaryConnection.on('usable', async (isReconnection: boolean) => {
             this._lastUpdateTime = Date.now()
 
@@ -595,7 +599,7 @@ export class BaseTelegramClient extends EventEmitter {
                 lastError = e
 
                 if (e instanceof InternalError) {
-                    debug('Telegram is having internal issues: %s', e)
+                    this._baseLog.warn('Telegram is having internal issues: %s', e)
                     if (e.message === 'WORKER_BUSY_TOO_LONG_RETRY') {
                         // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
                         await sleep(1000)
@@ -624,7 +628,7 @@ export class BaseTelegramClient extends EventEmitter {
                         params?.throwFlood !== true &&
                         e.seconds <= this._floodSleepThreshold
                     ) {
-                        debug('Flood wait for %d seconds', e.seconds)
+                        this._baseLog.info('Flood wait for %d seconds', e.seconds)
                         await sleep(e.seconds * 1000)
                         continue
                     }
@@ -636,14 +640,14 @@ export class BaseTelegramClient extends EventEmitter {
                         e.constructor === UserMigrateError ||
                         e.constructor === NetworkMigrateError
                     ) {
-                        debug('Migrate error, new dc = %d', e.newDc)
+                        this._baseLog.info('Migrate error, new dc = %d', e.newDc)
                         await this.changeDc(e.newDc)
                         continue
                     }
                 } else {
                     if (e.constructor === AuthKeyUnregisteredError) {
                         // we can try re-exporting auth from the primary connection
-                        debug('exported auth key error, re-exporting..')
+                        this._baseLog.warn('exported auth key error, re-exporting..')
 
                         const auth = await this.call({
                             _: 'auth.exportAuthorization',
@@ -700,14 +704,14 @@ export class BaseTelegramClient extends EventEmitter {
             reconnectionStrategy: this._reconnectionStrategy,
             inactivityTimeout,
             layer: this._layer,
-        })
+        }, this.log.create('connection'))
 
         connection.on('error', (err) => this._emitError(err, connection))
         connection.authKey = await this.storage.getAuthKeyFor(dc.id)
         connection.connect()
 
         if (!connection.authKey) {
-            debug('exporting auth to DC %d', dcId)
+            this._baseLog.info('exporting auth to DC %d', dcId)
             const auth = await this.call({
                 _: 'auth.exportAuthorization',
                 dcId,
@@ -807,7 +811,7 @@ export class BaseTelegramClient extends EventEmitter {
         const parsedPeers: ITelegramStorage.PeerInfo[] = []
 
         let hadMin = false
-
+        let count = 0
         for (const peer of getAllPeersFrom(obj)) {
             if ((peer as any).min) {
                 // absolutely incredible min peer handling, courtesy of levlam.
@@ -815,6 +819,8 @@ export class BaseTelegramClient extends EventEmitter {
                 hadMin = true
                 continue
             }
+
+            count += 1
 
             switch (peer._) {
                 case 'user':
@@ -853,6 +859,10 @@ export class BaseTelegramClient extends EventEmitter {
         }
 
         await this.storage.updatePeers(parsedPeers)
+
+        if (count > 0) {
+            this._baseLog.debug('cached %d peers, had min: %b', count, hadMin)
+        }
 
         return hadMin
     }

@@ -66,3 +66,6 @@ import {
 
 // @copy
 import { tdFileId } from '@mtcute/file-id'
+
+// @copy
+import { Logger } from '@mtcute/core/src/utils/logger'

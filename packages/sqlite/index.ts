@@ -11,8 +11,7 @@ import { tl } from '@mtcute/tl'
 import sqlite3 from 'better-sqlite3'
 import bigInt from 'big-integer'
 import { throttle } from '@mtcute/core'
-
-const debug = require('debug')('mtcute:sqlite')
+import { Logger } from '@mtcute/core/src/utils/logger'
 
 function serializeAccessHash(hash: tl.Long): Buffer {
     const arr = hash.toArray(256)
@@ -181,6 +180,8 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
     private _vacuumTimeout?: NodeJS.Timeout
     private _vacuumInterval: number
 
+    private log!: Logger
+
     /**
      * @param filename  Database file name, or `:memory:` for in-memory DB
      * @param params
@@ -302,6 +303,10 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
         // todo: add support for workers (idk if really needed, but still)
     }
 
+    setup(log: Logger): void {
+        this.log = log.create('sqlite')
+    }
+
     private _readFullPeer(data: Buffer): tl.TypeUser | tl.TypeChat | null {
         // reuse reader because why not
         this._reader.pos = 0
@@ -368,14 +373,14 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
             // tables already exist, check version
             this._initializeStatements()
             const version = this._getFromKv('ver')
-            debug('current db version = %d', version)
+            this.log.debug('current db version = %d', version)
             if (version < CURRENT_VERSION) {
                 this._upgradeDatabase(version)
                 this._setToKv('ver', CURRENT_VERSION, true)
             }
         } else {
             // create tables
-            debug('creating tables')
+            this.log.debug('creating tables')
             this._db.exec(SCHEMA)
             this._initializeStatements()
             this._setToKv('ver', CURRENT_VERSION, true)
@@ -389,7 +394,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
     load(): void {
         this._db = sqlite3(this._filename, {
-            verbose: debug.enabled ? debug : null,
+            verbose: this.log.mgr.level === 4 ? this.log.debug : undefined,
         })
 
         this._initialize()

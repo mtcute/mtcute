@@ -12,7 +12,6 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/core": "^1.0.0",
-        "debug": "^4.3.1"
+        "@mtcute/core": "^1.0.0"
     }
 }

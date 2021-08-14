@@ -6,8 +6,7 @@ import { ICryptoProvider } from '../../utils/crypto'
 import type WebSocket from 'ws'
 import { IntermediatePacketCodec } from './intermediate'
 import { ObfuscatedPacketCodec } from './obfuscated'
-
-const debug = require('debug')('mtcute:ws')
+import { Logger } from '../../utils/logger'
 
 let ws: {
     new (address: string, options?: string): WebSocket
@@ -41,6 +40,7 @@ export abstract class BaseWebSocketTransport
     private _state: TransportState = TransportState.Idle
     private _socket: WebSocket | null = null
     private _crypto!: ICryptoProvider
+    protected log!: Logger
 
     abstract _packetCodec: IPacketCodec
     packetCodecInitialized = false
@@ -69,8 +69,9 @@ export abstract class BaseWebSocketTransport
         this.close = this.close.bind(this)
     }
 
-    setupCrypto(crypto: ICryptoProvider): void {
+    setup(crypto: ICryptoProvider, log: Logger): void {
         this._crypto = crypto
+        this.log = log.create('tcp')
     }
 
     state(): TransportState {
@@ -86,7 +87,7 @@ export abstract class BaseWebSocketTransport
             throw new Error('Transport is not IDLE')
 
         if (!this.packetCodecInitialized) {
-            this._packetCodec.setupCrypto?.(this._crypto)
+            this._packetCodec.setup?.(this._crypto, this.log)
             this._packetCodec.on('error', (err) => this.emit('error', err))
             this._packetCodec.on('packet', (buf) => this.emit('message', buf))
             this.packetCodecInitialized = true
@@ -113,7 +114,7 @@ export abstract class BaseWebSocketTransport
 
     close(): void {
         if (this._state === TransportState.Idle) return
-        debug('%s: close', this._currentDc!.ipAddress)
+        this.log.debug('%s: close', this._currentDc!.ipAddress)
 
         this.emit('close')
         this._state = TransportState.Idle
@@ -125,12 +126,12 @@ export abstract class BaseWebSocketTransport
     }
 
     async handleError({ error }: { error: Error }): Promise<void> {
-        debug('%s: error: %s', this._currentDc!.ipAddress, error.stack)
+        this.log.error('%s: error: %s', this._currentDc!.ipAddress, error.stack)
         this.emit('error', error)
     }
 
     async handleConnect(): Promise<void> {
-        debug('%s: connected', this._currentDc!.ipAddress)
+        this.log.debug('%s: connected', this._currentDc!.ipAddress)
         const initialMessage = await this._packetCodec.tag()
 
         this._socket!.send(initialMessage)

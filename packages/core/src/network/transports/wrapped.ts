@@ -1,6 +1,7 @@
 import EventEmitter from 'events'
 import { IPacketCodec } from './abstract'
 import { ICryptoProvider } from '../../utils/crypto'
+import { Logger } from '../../utils/logger'
 
 export abstract class WrappedCodec extends EventEmitter {
     protected _crypto!: ICryptoProvider
@@ -20,8 +21,8 @@ export abstract class WrappedCodec extends EventEmitter {
         return this
     }
 
-    setupCrypto(crypto: ICryptoProvider): void {
+    setup(crypto: ICryptoProvider, log: Logger): void {
         this._crypto = crypto
-        this._inner.setupCrypto?.(crypto)
+        this._inner.setup?.(crypto, log)
     }
 }

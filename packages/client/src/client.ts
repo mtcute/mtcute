@@ -228,6 +228,7 @@ import {
     TelegramConnection,
 } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
+import { Logger } from '@mtcute/core/src/utils/logger'
 
 export interface TelegramClient extends BaseTelegramClient {
     /**
@@ -3499,6 +3500,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _catchUpChannels?: boolean
     protected _cpts: Record<number, number>
     protected _cptsMod: Record<number, number>
+    protected _updsLog: Logger
     constructor(opts: BaseTelegramClient.Options) {
         super(opts)
         this._userId = null
@@ -3522,6 +3524,8 @@ export class TelegramClient extends BaseTelegramClient {
         this._cptsMod = {}
 
         this._selfChanged = false
+
+        this._updsLog = this.log.create('updates')
     }
 
     acceptTos = acceptTos

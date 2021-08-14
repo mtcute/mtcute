@@ -20,7 +20,6 @@ try {
     path = require('path')
 } catch (e) {}
 
-const debug = require('debug')('mtcute:upload')
 
 const OVERRIDE_MIME: Record<string, string> = {
     // tg doesn't interpret `audio/opus` files as voice messages for some reason
@@ -201,7 +200,7 @@ export async function uploadFile(
     const hash = this._crypto.createMd5()
 
     const partCount = ~~((fileSize + partSize - 1) / partSize)
-    debug(
+    this._baseLog.debug(
         'uploading %d bytes file in %d chunks, each %d bytes',
         fileSize,
         partCount,

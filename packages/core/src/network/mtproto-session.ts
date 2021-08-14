@@ -8,8 +8,7 @@ import {
     SerializationCounter,
 } from '../utils/binary/binary-writer'
 import { BinaryReader } from '../utils/binary/binary-reader'
-
-const debug = require('debug')('mtcute:sess')
+import { Logger } from '../utils/logger'
 
 export interface EncryptedMessage {
     messageId: BigInteger
@@ -34,7 +33,7 @@ export class MtprotoSession {
     // default salt: [0x00]*8
     serverSalt: Buffer = Buffer.alloc(8)
 
-    constructor(crypto: ICryptoProvider) {
+    constructor(crypto: ICryptoProvider, readonly log: Logger) {
         this._crypto = crypto
     }
 
@@ -114,7 +113,7 @@ export class MtprotoSession {
         let encryptedData = reader.raw()
 
         if (!buffersEqual(authKeyId, this._authKeyId!)) {
-            debug(
+            this.log.warn(
                 '[%h] warn: received message with unknown authKey = %h (expected %h)',
                 this._sessionId,
                 authKeyId,
@@ -144,8 +143,8 @@ export class MtprotoSession {
             )
         ).slice(8, 24)
         if (!buffersEqual(messageKey, expectedMessageKey)) {
-            debug(
-                '[%h] warn: received message with invalid messageKey = %h (expected %h)',
+            this.log.warn(
+                '[%h] received message with invalid messageKey = %h (expected %h)',
                 this._sessionId,
                 messageKey,
                 expectedMessageKey
@@ -159,8 +158,8 @@ export class MtprotoSession {
         const messageId = innerReader.long(true)
 
         if (!buffersEqual(sessionId, this._sessionId)) {
-            debug(
-                'warn: ignoring message with invalid sessionId = %h',
+            this.log.warn(
+                'ignoring message with invalid sessionId = %h',
                 sessionId
             )
             return null
@@ -170,8 +169,8 @@ export class MtprotoSession {
         const length = innerReader.uint32()
 
         if (length > innerData.length - 32 /* header size */) {
-            debug(
-                'warn: ignoring message with invalid length: %d > %d',
+            this.log.warn(
+                'ignoring message with invalid length: %d > %d',
                 length,
                 innerData.length - 32
             )
@@ -179,8 +178,8 @@ export class MtprotoSession {
         }
 
         if (length % 4 !== 0) {
-            debug(
-                'warn: ignoring message with invalid length: %d is not a multiple of 4',
+            this.log.warn(
+                'ignoring message with invalid length: %d is not a multiple of 4',
                 length
             )
             return null
@@ -191,8 +190,8 @@ export class MtprotoSession {
         const paddingSize = innerData.length - innerReader.pos
 
         if (paddingSize < 12 || paddingSize > 1024) {
-            debug(
-                'warn: ignoring message with invalid padding size: %d',
+            this.log.warn(
+                'ignoring message with invalid padding size: %d',
                 paddingSize
             )
             return null

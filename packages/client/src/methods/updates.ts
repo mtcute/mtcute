@@ -10,13 +10,12 @@ import {
     getBarePeerId,
     getMarkedPeerId,
     markedPeerIdToBare,
-    MAX_CHANNEL_ID, RpcError,
+    MAX_CHANNEL_ID,
 } from '@mtcute/core'
-import { isDummyUpdate, isDummyUpdates } from '../utils/updates-utils'
+import { isDummyUpdate } from '../utils/updates-utils'
 import { ChatsIndex, UsersIndex } from '../types'
 import { _parseUpdate } from '../utils/parse-update'
-
-const debug = require('debug')('mtcute:upds')
+import { Logger } from '@mtcute/core/src/utils/logger'
 
 // code in this file is very bad, thanks to Telegram's awesome updates mechanism
 
@@ -46,6 +45,8 @@ interface UpdatesState {
 
     _cpts: Record<number, number>
     _cptsMod: Record<number, number>
+
+    _updsLog: Logger
 }
 
 // @initialize
@@ -62,6 +63,8 @@ function _initializeUpdates(this: TelegramClient) {
     this._cptsMod = {}
 
     this._selfChanged = false
+
+    this._updsLog = this.log.create('updates')
 }
 
 /**
@@ -103,7 +106,7 @@ export async function _fetchUpdatesState(this: TelegramClient): Promise<void> {
     this._date = state.date
     this._seq = state.seq
 
-    debug(
+    this._updsLog.debug(
         'loaded initial state: pts=%d, qts=%d, date=%d, seq=%d',
         state.pts,
         state.qts,
@@ -463,9 +466,15 @@ async function _loadDifference(
 
         switch (diff._) {
             case 'updates.differenceEmpty':
+                this._updsLog.debug(
+                    'updates.getDifference returned updates.differenceEmpty'
+                )
                 return
             case 'updates.differenceTooLong':
                 this._pts = diff.pts
+                this._updsLog.debug(
+                    'updates.getDifference returned updates.differenceTooLong'
+                )
                 return
         }
 
@@ -473,6 +482,16 @@ async function _loadDifference(
             diff._ === 'updates.difference'
                 ? diff.state
                 : diff.intermediateState
+
+        this._updsLog.debug(
+            'updates.getDifference returned %d messages, %d updates. new pts: %d, qts: %d, seq: %d, final: %b',
+            diff.newMessages.length,
+            diff.otherUpdates.length,
+            state.pts,
+            state.qts,
+            state.seq,
+            diff._ === 'updates.difference'
+        )
 
         await this._cachePeersFrom(diff)
 
@@ -524,8 +543,23 @@ async function _loadDifference(
                 }
 
                 if (nextLocalPts) {
-                    if (nextLocalPts > pts) continue
+                    if (nextLocalPts > pts) {
+                        this._updsLog.debug(
+                            'ignoring %s (in channel %d) because already handled (by pts: exp %d, got %d)',
+                            upd._,
+                            cid,
+                            nextLocalPts,
+                            pts
+                        )
+                        continue
+                    }
                     if (nextLocalPts < pts) {
+                        this._updsLog.debug(
+                            'fetching channel %d difference because gap detected (by pts: exp %d, got %d)',
+                            cid,
+                            nextLocalPts,
+                            pts
+                        )
                         await _loadChannelDifference.call(
                             this,
                             cid,
@@ -550,6 +584,7 @@ async function _loadDifference(
 
         this._pts = state.pts
         this._qts = state.qts
+        this._seq = state.seq
         this._date = state.date
 
         if (diff._ === 'updates.difference') return
@@ -568,6 +603,10 @@ async function _loadChannelDifference(
             await this.resolvePeer(MAX_CHANNEL_ID - channelId)
         )!
     } catch (e) {
+        this._updsLog.warn(
+            'getChannelDifference failed for channel %d: input peer not found',
+            channelId
+        )
         return
     }
 
@@ -591,7 +630,13 @@ async function _loadChannelDifference(
             filter: { _: 'channelMessagesFilterEmpty' },
         })
 
-        if (diff._ === 'updates.channelDifferenceEmpty') break
+        if (diff._ === 'updates.channelDifferenceEmpty') {
+            this._updsLog.debug(
+                'getChannelDifference (cid = %d) returned channelDifferenceEmpty',
+                channelId
+            )
+            break
+        }
 
         await this._cachePeersFrom(diff)
 
@@ -602,6 +647,13 @@ async function _loadChannelDifference(
                 pts = diff.dialog.pts!
             }
 
+            this._updsLog.warn(
+                'getChannelDifference (cid = %d) returned channelDifferenceTooLong. new pts: %d, recent msgs: %d',
+                channelId,
+                pts,
+                diff.messages.length
+            )
+
             diff.messages.forEach((message) => {
                 if (noDispatch && noDispatch.msg[channelId]?.[message.id])
                     return
@@ -611,6 +663,15 @@ async function _loadChannelDifference(
             })
             break
         }
+
+        this._updsLog.warn(
+            'getChannelDifference (cid = %d) returned %d messages, %d updates. new pts: %d, final: %b',
+            channelId,
+            diff.newMessages.length,
+            diff.otherUpdates.length,
+            pts,
+            diff.final
+        )
 
         diff.newMessages.forEach((message) => {
             if (noDispatch && noDispatch.msg[channelId]?.[message.id]) return
@@ -682,10 +743,24 @@ async function _processSingleUpdate(
         }
 
         if (nextLocalPts) {
-            if (nextLocalPts > pts)
+            if (nextLocalPts > pts) {
                 // "the update was already applied, and must be ignored"
+                this._updsLog.debug(
+                    'ignoring %s (cid = %d) because already applied (by pts: exp %d, got %d)',
+                    upd._,
+                    channelId,
+                    nextLocalPts,
+                    pts
+                )
                 return
+            }
             if (nextLocalPts < pts) {
+                this._updsLog.debug(
+                    'fetching difference (cid = %d) because gap detected (by pts: exp %d, got %d)',
+                    channelId,
+                    nextLocalPts,
+                    pts
+                )
                 if (channelId) {
                     // "there's an update gap that must be filled"
                     await _loadChannelDifference.call(
@@ -709,18 +784,40 @@ async function _processSingleUpdate(
         // qts is only used for non-channel updates
         const nextLocalQts = this._qts! + 1
 
-        if (nextLocalQts > qts)
+        if (nextLocalQts > qts) {
             // "the update was already applied, and must be ignored"
+            this._updsLog.debug(
+                'ignoring %s because already applied (by qts: exp %d, got %d)',
+                upd._,
+                nextLocalQts,
+                qts
+            )
             return
-        if (nextLocalQts < qts)
+        }
+        if (nextLocalQts < qts) {
+            this._updsLog.debug(
+                'fetching difference because gap detected (by qts: exp %d, got %d)',
+                upd._,
+                nextLocalQts,
+                qts
+            )
+
             return await _loadDifference.call(
                 this,
                 noDispatch ? _createNoDispatchIndex(upd) : undefined
             )
+        }
     }
 
     // update local pts/qts
     if (pts) {
+        this._updsLog.debug(
+            'received pts-ordered %s (cid = %d), new pts: %d',
+            upd._,
+            channelId,
+            pts
+        )
+
         if (channelId) {
             this._cpts[channelId] = pts
             this._cptsMod[channelId] = pts
@@ -730,6 +827,8 @@ async function _processSingleUpdate(
     }
 
     if (qts) {
+        this._updsLog.debug('received qts-ordered %s, new qts: %d', upd._, qts)
+
         this._qts = qts
     }
 
@@ -765,6 +864,12 @@ async function _processSingleUpdate(
             // this is a short update, let's fetch cached peers
             peers = await _fetchPeersForShort.call(this, upd)
             if (!peers) {
+                this._updsLog.debug(
+                    'fetching difference because some peers were not available for short %s (pts = %d, cid = %d)',
+                    upd._,
+                    pts,
+                    channelId
+                )
                 // some peer is not cached.
                 // need to re-fetch the thing, and cache them on the way
                 return await _loadDifference.call(this)
@@ -785,7 +890,9 @@ export function _handleUpdate(
 ): void {
     // just in case, check that updates state is available
     if (this._pts === undefined) {
-        debug('received an update before updates state is available')
+        this._updsLog.warn(
+            'received an update before updates state is available'
+        )
         return
     }
 
@@ -800,8 +907,6 @@ export function _handleUpdate(
     this._updLock
         .acquire()
         .then(async () => {
-            debug('received %s', update._)
-
             // i tried my best to follow the documentation, but i still may have missed something.
             // feel free to contribute!
             // reference: https://core.telegram.org/api/updates
@@ -824,26 +929,41 @@ export function _handleUpdate(
                         // https://t.me/tdlibchat/5843
                         const nextLocalSeq = this._seq! + 1
 
-                        debug(
-                            'received %s (seq_start=%d, seq_end=%d)',
+                        this._updsLog.debug(
+                            'received %s (seq_start = %d, seq_end = %d)',
                             update._,
                             seqStart,
                             update.seq
                         )
 
-                        if (nextLocalSeq > seqStart)
+                        if (nextLocalSeq > seqStart) {
+                            this._updsLog.debug(
+                                'ignoring updates group because already applied (by seq: exp %d, got %d)',
+                                nextLocalSeq,
+                                seqStart
+                            )
                             // "the updates were already applied, and must be ignored"
                             return
-                        if (nextLocalSeq < seqStart)
+                        }
+                        if (nextLocalSeq < seqStart) {
+                            this._updsLog.debug(
+                                'fetching difference because gap detected (by seq: exp %d, got %d)',
+                                nextLocalSeq,
+                                seqStart
+                            )
                             // "there's an updates gap that must be filled"
                             // loading difference will also load any updates contained
                             // in this update, so we discard it
                             return await _loadDifference.call(this)
+                        }
                     }
 
                     const hasMin = await this._cachePeersFrom(update)
                     if (hasMin) {
                         if (!(await _replaceMinPeers.call(this, update))) {
+                            this._updsLog.debug(
+                                'fetching difference because some peers were min and not cached'
+                            )
                             // some min peer is not cached.
                             // need to re-fetch the thing, and cache them on the way
                             return await _loadDifference.call(this)
@@ -1005,6 +1125,6 @@ export function catchUp(this: TelegramClient): Promise<void> {
 
 /** @internal */
 export function _keepAliveAction(this: TelegramClient): void {
-    debug('no updates for >15 minutes, catching up')
+    this._updsLog.debug('no updates for >15 minutes, catching up')
     this.catchUp().catch((err) => this._emitError(err))
 }
