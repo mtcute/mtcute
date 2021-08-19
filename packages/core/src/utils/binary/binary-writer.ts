@@ -176,7 +176,7 @@ export class SerializationCounter implements ITlBinaryWriter {
 
     vector(fn: TlBinaryWriterFunction, items: unknown[], bare?: boolean): void {
         this.count += bare ? 4 : 8
-        items.forEach((it) => fn.call(this, it))
+        items.forEach((it) => fn.call(this, it, bare))
     }
 }
 
@@ -301,11 +301,11 @@ export class BinaryWriter implements ITlBinaryWriter {
         this._objectMap[obj._].call(this, obj, bare)
     }
 
-    vector(fn: TlBinaryWriterFunction, val: unknown[]): void {
-        this.uint32(0x1cb5c415)
+    vector(fn: TlBinaryWriterFunction, val: unknown[], bare?: boolean): void {
+        if (!bare) this.uint32(0x1cb5c415)
         this.uint32(val.length)
 
-        val.forEach((it) => fn.call(this, it))
+        val.forEach((it) => fn.call(this, it, bare))
     }
 
     result(): Buffer {

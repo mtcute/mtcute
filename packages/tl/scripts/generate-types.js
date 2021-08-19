@@ -162,6 +162,9 @@ const writeSingleSchemaEntry = (type) => {
             ts.tab()
             ts.write(`readonly _: '${prefix}${cls.name}',`)
 
+            let is_mt_message =
+                type === 'mtproto' && cls.name === 'message'
+
             if (cls.arguments && cls.arguments.length) {
                 cls.arguments.forEach((arg) => {
                     if (arg.type === '$FlagsBitField') return
@@ -170,11 +173,15 @@ const writeSingleSchemaEntry = (type) => {
                         arg.type = 'boolean'
                     if (arg.description) ts.comment(arg.description)
 
-                    ts.write(
-                        `readonly ${arg.name}${
-                            arg.optional ? '?' : ''
-                        }: ${fullTypeName(arg.type)};`
-                    )
+                    if (is_mt_message && arg.name === 'body') {
+                        ts.write('readonly body: Buffer;')
+                    } else {
+                        ts.write(
+                            `readonly ${arg.name}${
+                                arg.optional ? '?' : ''
+                            }: ${fullTypeName(arg.type)};`
+                        )
+                    }
                 })
             }
 

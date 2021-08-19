@@ -50,7 +50,7 @@ export interface ITlBinaryWriter {
      *
      * @param fn  Writer function
      * @param items  Items to be written
-     * @param bare  Whether the vector is bare (i.e. vector ID should not be written)
+     * @param bare  Whether the vector is bare (i.e. object ID should not be written)
      */
     vector(fn: TlBinaryWriterFunction, items: unknown[], bare?: boolean): void
 }

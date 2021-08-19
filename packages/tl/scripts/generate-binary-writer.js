@@ -120,13 +120,17 @@ function writeNamespace(nsType) {
                             } else {
                                 write(`_assert_has(obj, '${arg.name}')`)
                             }
-                            write(
-                                `this.${getFunctionCallByTypeName(
-                                    baseTypePrefix,
-                                    arg.type,
-                                    `obj.${arg.name}`
-                                )}`
-                            )
+                            if (is_mt_message && arg.name === 'body') {
+                                write('this.raw(obj.body)')
+                            } else {
+                                write(
+                                    `this.${getFunctionCallByTypeName(
+                                        baseTypePrefix,
+                                        arg.type,
+                                        `obj.${arg.name}`
+                                    )}`
+                                )
+                            }
                             if (arg.optional) {
                                 untab()
                             }

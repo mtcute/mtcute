@@ -80,6 +80,9 @@ function writeNamespace(nsType) {
                 write(`${cls.id}: function () {`)
                 tab()
 
+                let is_mt_message =
+                    nsType === 'mtproto' && cls.name === 'message'
+
                 if (cls.arguments?.length) {
                     write(`var ret = {};`)
                     write(`ret._ = '${prefix}${cls.name}';`)
@@ -106,15 +109,19 @@ function writeNamespace(nsType) {
                                 )
                             }
                         } else {
-                            write(
-                                `ret.${
-                                    arg.name
-                                } = this.${getFunctionCallByTypeName(
-                                    baseTypePrefix,
-                                    arg.type,
-                                    arg
-                                )};`
-                            )
+                            if (is_mt_message && arg.name === 'body') {
+                                write('ret.body = this.raw(ret.bytes)')
+                            } else {
+                                write(
+                                    `ret.${
+                                        arg.name
+                                    } = this.${getFunctionCallByTypeName(
+                                        baseTypePrefix,
+                                        arg.type,
+                                        arg
+                                    )};`
+                                )
+                            }
                         }
                     })
 
