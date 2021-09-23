@@ -73,3 +73,15 @@ export function bufferToBigInt(
 export function randomBigInt(size: number): BigInteger {
     return bufferToBigInt(randomBytes(size))
 }
+
+export function randomBigIntInRange(max: BigInteger, min = bigInt.one): BigInteger {
+    const interval = max.minus(min)
+    if (interval.isNegative()) throw new Error('expected min < max')
+
+    const byteSize = interval.bitLength().divide(8).toJSNumber()
+
+    let result = randomBigInt(byteSize)
+    while (result.gt(interval)) result = result.minus(interval)
+
+    return min.plus(result)
+}

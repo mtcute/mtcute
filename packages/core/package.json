@@ -21,7 +21,6 @@
         "@types/node": "^15.12.1",
         "@types/events": "^3.0.0",
         "@mtcute/tl": "~1.131.0",
-        "leemon": "6.2.0",
         "pako": "2.0.2",
         "big-integer": "1.6.48",
         "events": "3.2.0"
