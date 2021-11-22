@@ -3,11 +3,9 @@ import {
     ChatInviteLink,
     InputPeerLike,
     MtInvalidPeerTypeError,
+    PeersIndex,
 } from '../../types'
-import {
-    createUsersChatsIndex,
-    normalizeToInputUser,
-} from '../../utils/peer-utils'
+import { normalizeToInputUser } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 
 /**
@@ -74,14 +72,14 @@ export async function* getInviteLinks(
 
         if (!res.invites.length) break
 
-        const { users } = createUsersChatsIndex(res)
+        const peers = PeersIndex.from(res)
 
         const last = res.invites[res.invites.length - 1]
         offsetDate = last.date
         offsetLink = last.link
 
         for (const it of res.invites) {
-            yield new ChatInviteLink(this, it, users)
+            yield new ChatInviteLink(this, it, peers)
         }
 
         current += res.invites.length

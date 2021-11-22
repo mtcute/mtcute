@@ -148,14 +148,27 @@ export async function start(
 
         // user is already authorized
 
+        this.log.prefix = `[USER ${me.id}] `
+        this.log.info(
+            'Logged in as %s (ID: %s, username: %s, bot: %s)',
+            me.displayName,
+            me.id,
+            me.username,
+            me.isBot
+        )
+
         if (!this._disableUpdates) {
             this._catchUpChannels = !!params.catchUp
 
-            if (params.catchUp) {
-                await this.catchUp()
-            } else {
+            if (!params.catchUp) {
                 // otherwise we will catch up as soon as we receive a new update
                 await this._fetchUpdatesState()
+            }
+
+            this.startUpdatesLoop()
+
+            if (params.catchUp) {
+                this.catchUp()
             }
         }
 
@@ -165,9 +178,7 @@ export async function start(
     }
 
     if (!params.phone && !params.botToken)
-        throw new MtArgumentError(
-            'Neither phone nor bot token were provided'
-        )
+        throw new MtArgumentError('Neither phone nor bot token were provided')
 
     let phone = params.phone ? await resolveMaybeDynamic(params.phone) : null
     if (phone) {
@@ -249,9 +260,7 @@ export async function start(
                 result = await this.checkPassword(password)
             } catch (e) {
                 if (typeof params.password !== 'function') {
-                    throw new MtArgumentError(
-                        'Provided password was invalid'
-                    )
+                    throw new MtArgumentError('Provided password was invalid')
                 }
 
                 if (e instanceof PasswordHashInvalidError) {

@@ -10,7 +10,7 @@ const LEVEL_NAMES = isTty
           '\x1b[33mWRN\x1b[0m',
           '\x1b[34mINF\x1b[0m',
           '\x1b[36mDBG\x1b[0m',
-          '\x1b[35mREQ\x1b[0m',
+          '\x1b[35mVRB\x1b[0m',
       ]
     : [
           '', // OFF
@@ -18,7 +18,7 @@ const LEVEL_NAMES = isTty
           'WRN',
           'INF',
           'DBG',
-          'REQ',
+          'VRB',
       ]
 const TAG_COLORS = [6, 2, 3, 4, 5, 1].map((i) => `\x1b[3${i};1m`)
 

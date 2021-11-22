@@ -4,23 +4,19 @@ import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 import { strippedPhotoToJpg } from '../../utils/file-utils'
 import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
-import bigInt from 'big-integer'
-import { MAX_CHANNEL_ID } from '@mtcute/core'
 import { MtArgumentError } from '../errors'
+import Long from 'long'
+import { toggleChannelIdMark } from '../../../../core'
 
 /**
  * A size of a chat photo
  */
 export class ChatPhotoSize extends FileLocation {
-    readonly obj: tl.RawUserProfilePhoto | tl.RawChatPhoto
-    readonly peer: tl.TypeInputPeer
-    readonly big: boolean
-
     constructor(
-        client: TelegramClient,
-        peer: tl.TypeInputPeer,
-        obj: tl.RawUserProfilePhoto | tl.RawChatPhoto,
-        big: boolean
+        readonly client: TelegramClient,
+        readonly peer: tl.TypeInputPeer,
+        readonly obj: tl.RawUserProfilePhoto | tl.RawChatPhoto,
+        readonly big: boolean
     ) {
         super(
             client,
@@ -57,10 +53,10 @@ export class ChatPhotoSize extends FileLocation {
                     break
                 case 'inputPeerChat':
                     id = -peer.chatId
-                    hash = bigInt.zero
+                    hash = Long.ZERO
                     break
                 case 'inputPeerChannel':
-                    id = MAX_CHANNEL_ID - peer.channelId
+                    id = toggleChannelIdMark(peer.channelId)
                     hash = peer.accessHash
                     break
                 default:
@@ -75,11 +71,11 @@ export class ChatPhotoSize extends FileLocation {
                 location: {
                     _: 'photo',
                     id: this.obj.photoId,
-                    accessHash: bigInt.zero,
+                    accessHash: Long.ZERO,
                     source: {
                         _: 'dialogPhoto',
                         big: this.big,
-                        id: bigInt(id),
+                        id: id,
                         accessHash: hash,
                     },
                 },

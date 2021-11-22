@@ -1,8 +1,8 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtInvalidPeerTypeError, Photo } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
-import bigInt from 'big-integer'
 import { tl } from '@mtcute/tl'
+import Long from 'long'
 
 /**
  * Get a list of profile pictures of a user
@@ -40,7 +40,7 @@ export async function getProfilePhotos(
         userId: peer,
         offset: params.offset ?? 0,
         limit: params.limit ?? 100,
-        maxId: bigInt.zero,
+        maxId: Long.ZERO,
     })
 
     return res.photos.map((it) => new Photo(this, it as tl.RawPhoto))

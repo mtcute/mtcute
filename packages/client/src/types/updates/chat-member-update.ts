@@ -3,12 +3,12 @@ import {
     Chat,
     ChatInviteLink,
     ChatMember,
-    ChatsIndex,
+    PeersIndex,
     User,
-    UsersIndex,
 } from '../'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
+// todo: check case when restricted user joins chat
 
 export namespace ChatMemberUpdate {
     /**
@@ -46,25 +46,11 @@ export namespace ChatMemberUpdate {
  * of a chat/channel member.
  */
 export class ChatMemberUpdate {
-    readonly client: TelegramClient
-
-    readonly raw: tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant
-
-    /** Map of users in this message. Mainly for internal use */
-    readonly _users: UsersIndex
-    /** Map of chats in this message. Mainly for internal use */
-    readonly _chats: ChatsIndex
-
     constructor(
-        client: TelegramClient,
-        raw: tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant,
-        users: UsersIndex,
-        chats: ChatsIndex
+        readonly client: TelegramClient,
+        readonly raw: tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant,
+        readonly _peers: PeersIndex,
     ) {
-        this.client = client
-        this.raw = raw
-        this._users = users
-        this._chats = chats
     }
 
     /**
@@ -182,7 +168,7 @@ export class ChatMemberUpdate {
                 this.raw._ === 'updateChannelParticipant'
                     ? this.raw.channelId
                     : this.raw.chatId
-            this._chat = new Chat(this.client, this._chats[id])
+            this._chat = new Chat(this.client, this._peers.chat(id))
         }
 
         return this._chat
@@ -196,7 +182,7 @@ export class ChatMemberUpdate {
      */
     get actor(): User {
         if (!this._actor) {
-            this._actor = new User(this.client, this._users[this.raw.actorId])
+            this._actor = new User(this.client, this._peers.user(this.raw.actorId))
         }
 
         return this._actor
@@ -208,7 +194,7 @@ export class ChatMemberUpdate {
      */
     get user(): User {
         if (!this._user) {
-            this._user = new User(this.client, this._users[this.raw.userId])
+            this._user = new User(this.client, this._peers.user(this.raw.userId))
         }
 
         return this._user
@@ -225,7 +211,7 @@ export class ChatMemberUpdate {
             this._oldMember = new ChatMember(
                 this.client,
                 this.raw.prevParticipant,
-                this._users
+                this._peers
             )
         }
 
@@ -243,7 +229,7 @@ export class ChatMemberUpdate {
             this._newMember = new ChatMember(
                 this.client,
                 this.raw.newParticipant,
-                this._users
+                this._peers
             )
         }
 

@@ -1,4 +1,4 @@
-import { AsyncLock, getMarkedPeerId, MaybeAsync } from '@mtcute/core'
+import { AsyncLock, Deque, getMarkedPeerId, MaybeAsync } from '@mtcute/core'
 import {
     ControllablePromise,
     createControllablePromise,
@@ -12,7 +12,6 @@ import { FormattedString } from './parser'
 import { Message } from './messages'
 import { tl } from '@mtcute/tl'
 import { TimeoutError } from '@mtcute/tl/errors'
-import { Queue } from '../utils/queue'
 
 interface QueuedHandler<T> {
     promise: ControllablePromise<T>
@@ -39,12 +38,12 @@ export class Conversation {
     private _lastMessage!: number
     private _lastReceivedMessage!: number
 
-    private _queuedNewMessage = new Queue<QueuedHandler<Message>>()
-    private _pendingNewMessages = new Queue<Message>()
+    private _queuedNewMessage = new Deque<QueuedHandler<Message>>()
+    private _pendingNewMessages = new Deque<Message>()
     private _lock = new AsyncLock()
 
     private _pendingEditMessage: Record<number, QueuedHandler<Message>> = {}
-    private _recentEdits = new Queue<Message>(10)
+    private _recentEdits = new Deque<Message>(10)
 
     private _pendingRead: Record<number, QueuedHandler<void>> = {}
 
@@ -276,7 +275,7 @@ export class Conversation {
             }, timeout)
         }
 
-        this._queuedNewMessage.push({
+        this._queuedNewMessage.pushBack({
             promise,
             check: filter,
             timeout: timer,
@@ -476,12 +475,12 @@ export class Conversation {
     private _onNewMessage(msg: Message) {
         if (msg.chat.id !== this._chatId) return
 
-        if (this._queuedNewMessage.empty()) {
-            this._pendingNewMessages.push(msg)
+        if (!this._queuedNewMessage.length) {
+            this._pendingNewMessages.pushBack(msg)
             return
         }
 
-        const it = this._queuedNewMessage.peek()!
+        const it = this._queuedNewMessage.peekFront()!
 
         // order does matter for new messages
         this._lock.acquire().then(async () => {
@@ -489,7 +488,7 @@ export class Conversation {
                 if (!it.check || (await it.check(msg))) {
                     if (it.timeout) clearTimeout(it.timeout)
                     it.promise.resolve(msg)
-                    this._queuedNewMessage.pop()
+                    this._queuedNewMessage.popFront()
                 }
             } catch (e) {
                 this.client['_emitError'](e)
@@ -507,7 +506,7 @@ export class Conversation {
 
         const it = this._pendingEditMessage[msg.id]
         if (!it && !fromRecent) {
-            this._recentEdits.push(msg)
+            this._recentEdits.pushBack(msg)
             return
         }
 
@@ -536,21 +535,21 @@ export class Conversation {
     }
 
     private _processPendingNewMessages() {
-        if (this._pendingNewMessages.empty()) return
+        if (!this._pendingNewMessages.length) return
 
         let it
-        while ((it = this._pendingNewMessages.pop())) {
+        while ((it = this._pendingNewMessages.popFront())) {
             this._onNewMessage(it)
         }
     }
 
     private _processRecentEdits() {
-        if (this._recentEdits.empty()) return
+        if (!this._recentEdits.length) return
 
-        let it = this._recentEdits.first
-        do {
-            if (!it) break
-            this._onEditMessage(it.v, true)
-        } while ((it = it.n))
+        const iter = this._recentEdits.iter()
+        let it
+        while (!(it = iter.next()).done) {
+            this._onEditMessage(it.value, true)
+        }
     }
 }

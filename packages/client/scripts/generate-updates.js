@@ -1,11 +1,24 @@
 const fs = require('fs')
 const path = require('path')
 const prettier = require('prettier')
-const {
-    snakeToCamel,
-    camelToPascal,
-    camelToSnake,
-} = require('../../tl/scripts/common')
+
+const snakeToCamel = (s) => {
+    return s.replace(/(?<!^|_)(_[a-z0-9])/gi, ($1) => {
+        return $1.substr(1).toUpperCase()
+    })
+}
+
+const camelToPascal = (s) =>
+    s[0].toUpperCase() + s.substr(1)
+
+const camelToSnake = (s) => {
+    return s.replace(
+        /(?<=[a-zA-Z0-9])([A-Z0-9]+(?=[A-Z]|$)|[A-Z0-9])/g,
+        ($1) => {
+            return '_' + $1.toLowerCase()
+        }
+    )
+}
 
 function parseUpdateTypes() {
     const lines = fs

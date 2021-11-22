@@ -2,8 +2,6 @@ const ts = require('typescript')
 const path = require('path')
 const fs = require('fs')
 const prettier = require('prettier')
-// not the best way but who cares lol
-const { createWriter } = require('../../tl/scripts/common')
 const updates = require('./generate-updates')
 
 const targetDir = path.join(__dirname, '../src')
@@ -130,7 +128,7 @@ async function addSingleMethod(state, fileName) {
 
             if (!isExported && !isPrivate) {
                 throwError(
-                    isExported,
+                    stmt,
                     fileName,
                     'Public methods MUST be exported.'
                 )
@@ -228,6 +226,14 @@ async function addSingleMethod(state, fileName) {
                 }
             }
         } else if (stmt.kind === ts.SyntaxKind.InterfaceDeclaration) {
+            if (isCopy) {
+                state.copy.push({
+                    from: relPath,
+                    code: stmt.getText()
+                })
+                continue
+            }
+
             if (!checkForFlag(stmt, '@extension')) continue
             const isExported = (stmt.modifiers || []).find(
                 (mod) => mod.kind === 92 /* ExportKeyword */
@@ -260,7 +266,7 @@ async function addSingleMethod(state, fileName) {
 }
 
 async function main() {
-    const output = createWriter('../src/client.ts', __dirname)
+    const output = fs.createWriteStream(path.join(__dirname, '../src/client.ts'))
     const state = {
         imports: {},
         fields: [],
@@ -282,23 +288,22 @@ async function main() {
     output.write(
         '/* THIS FILE WAS AUTO-GENERATED */\n' +
             "import { BaseTelegramClient } from '@mtcute/core'\n" +
-            "import { tl } from '@mtcute/tl'"
+            "import { tl } from '@mtcute/tl'\n"
     )
     Object.entries(state.imports).forEach(([module, items]) => {
         items = [...items]
-        output.write(`import { ${items.sort().join(', ')} } from '${module}'`)
+        output.write(`import { ${items.sort().join(', ')} } from '${module}'\n`)
     })
 
-    output.write()
+    output.write('\n')
 
     state.copy.forEach(({ from, code }) => {
         output.write(`// from ${from}\n${code}\n`)
     })
 
     output.write(
-        '\nexport interface TelegramClient extends BaseTelegramClient {'
+        '\nexport interface TelegramClient extends BaseTelegramClient {\n'
     )
-    output.tab()
 
     output.write(`/**
  * Register a raw update handler
@@ -306,14 +311,14 @@ async function main() {
  * @param name  Event name
  * @param handler  Raw update handler
  */
- on(name: 'raw_update', handler: ((upd: tl.TypeUpdate | tl.TypeMessage, users: UsersIndex, chats: ChatsIndex) => void)): this
+ on(name: 'raw_update', handler: ((upd: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex) => void)): this
 /**
  * Register a parsed update handler
  *
  * @param name  Event name
  * @param handler  Raw update handler
  */
- on(name: 'update', handler: ((upd: ParsedUpdate) => void)): this`)
+ on(name: 'update', handler: ((upd: ParsedUpdate) => void)): this\n`)
 
     updates.types.forEach((type) => {
         output.write(`/**
@@ -322,7 +327,7 @@ async function main() {
  * @param name  Event name
  * @param handler  ${updates.toSentence(type, 'full')}
  */
-on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this`)
+on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this\n`)
     })
 
 
@@ -441,10 +446,10 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
                 if (!isPrivate && !hasOverloads) {
                     if (!comment.match(/\/\*\*?\s*\*\//))
                         // empty comment, no need to write it
-                        output.write(comment)
+                        output.write(comment + '\n')
 
                     output.write(
-                        `${name}${generics}(${parameters})${returnType}`
+                        `${name}${generics}(${parameters})${returnType}\n`
                     )
                 }
 
@@ -456,27 +461,22 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
             }
         }
     )
-    output.untab()
-    output.write('}')
-
-    output.write(
-        '/** @internal */\nexport class TelegramClient extends BaseTelegramClient {'
-    )
-    output.tab()
-
-    state.fields.forEach(({ code }) => output.write('protected ' + code))
-
-    output.write('constructor(opts: BaseTelegramClient.Options) {')
-    output.tab()
-    output.write('super(opts)')
-    state.init.forEach((code) => {
-        output.write(code)
-    })
-    output.untab()
     output.write('}\n')
 
-    classContents.forEach((line) => output.write(line))
-    output.untab()
+    output.write(
+        '/** @internal */\nexport class TelegramClient extends BaseTelegramClient {\n'
+    )
+
+    state.fields.forEach(({ code }) => output.write(`protected ${code}\n`))
+
+    output.write('constructor(opts: BaseTelegramClient.Options) {\n')
+    output.write('super(opts)\n')
+    state.init.forEach((code) => {
+        output.write(code + '\n')
+    })
+    output.write('}\n')
+
+    classContents.forEach((line) => output.write(line + '\n'))
     output.write('}')
 
     // format the resulting file with prettier

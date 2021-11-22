@@ -19,13 +19,7 @@ import { MtArgumentError } from '../errors'
 export class WebPage {
     readonly type = 'web_page' as const
 
-    readonly client: TelegramClient
-    readonly raw: tl.RawWebPage
-
-    constructor(client: TelegramClient, raw: tl.RawWebPage) {
-        this.client = client
-        this.raw = raw
-    }
+    constructor(readonly client: TelegramClient, readonly raw: tl.RawWebPage) {}
 
     /**
      * Unique ID of the preview

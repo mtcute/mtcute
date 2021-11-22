@@ -3,7 +3,7 @@ import { tdFileId, tdFileId as td } from './types'
 import { parseFileId } from './parse'
 import { getBasicPeerType, markedPeerIdToBare } from '@mtcute/core'
 import FileType = tdFileId.FileType
-import bigInt from 'big-integer'
+import Long from 'long'
 
 const EMPTY_BUFFER = Buffer.alloc(0)
 
@@ -12,7 +12,7 @@ type FileId = td.RawFullRemoteFileLocation
 function dialogPhotoToInputPeer(
     dialog: td.RawPhotoSizeSourceDialogPhoto | td.RawPhotoSizeSourceDialogPhotoLegacy
 ): tl.TypeInputPeer {
-    const markedPeerId = dialog.id.toJSNumber()
+    const markedPeerId = dialog.id
     const peerType = getBasicPeerType(markedPeerId)
     const peerId = markedPeerIdToBare(markedPeerId)
 
@@ -87,7 +87,7 @@ export function fileIdToInputFileLocation(
                         fileReference: fileId.fileReference,
                         id: loc.id,
                         accessHash: loc.accessHash,
-                        volumeId: bigInt.zero,
+                        volumeId: Long.ZERO,
                         localId: 0,
                         secret: loc.source.secret,
                     }

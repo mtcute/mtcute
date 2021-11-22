@@ -1,4 +1,5 @@
 import { TelegramClient } from '../../client'
+import { tl } from '@mtcute/tl'
 
 // @extension
 interface AuthState {
@@ -17,4 +18,5 @@ function _initializeAuthState(this: TelegramClient) {
     this._userId = null
     this._isBot = false
     this._selfUsername = null
+    this.log.prefix = '[USER N/A] '
 }

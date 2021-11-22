@@ -1,4 +1,4 @@
-import { Poll, UsersIndex } from '../'
+import { PeersIndex, Poll } from '../'
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { makeInspectable } from '../utils'
@@ -11,19 +11,11 @@ import { makeInspectable } from '../utils'
  * polls which were sent by this bot
  */
 export class PollUpdate {
-    readonly client: TelegramClient
-    readonly raw: tl.RawUpdateMessagePoll
-
-    readonly _users: UsersIndex
-
     constructor(
-        client: TelegramClient,
-        raw: tl.RawUpdateMessagePoll,
-        users: UsersIndex
+        readonly client: TelegramClient,
+        readonly raw: tl.RawUpdateMessagePoll,
+        readonly _peers: PeersIndex
     ) {
-        this.client = client
-        this.raw = raw
-        this._users = users
     }
 
     /**
@@ -72,7 +64,7 @@ export class PollUpdate {
             this._poll = new Poll(
                 this.client,
                 poll,
-                this._users,
+                this._peers,
                 this.raw.results
             )
         }

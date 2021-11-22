@@ -1,0 +1,25 @@
+{
+    "name": "@mtcute/tl-runtime",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Runtime for TL",
+    "author": "Alisa Sireneva <me@tei.su>",
+    "license": "LGPL-3.0",
+    "main": "src/index.ts",
+    "scripts": {
+        "test": "mocha -r ts-node/register tests/**/*.spec.ts",
+        "docs": "npx typedoc",
+        "build": "tsc"
+    },
+    "browser": {
+        "./platform/gzip.js": "./platform/gzip.web.js"
+    },
+    "dependencies": {
+        "long": "4.0.0",
+        "crc-32": "1.2.0",
+        "pako": "2.0.2"
+    },
+    "devDependencies": {
+        "@types/long": "4.0.1"
+    }
+}

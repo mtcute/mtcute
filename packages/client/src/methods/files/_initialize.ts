@@ -1,10 +1,10 @@
-import { TelegramConnection } from '@mtcute/core'
+import { SessionConnection } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 
 // @extension
 interface FilesExtension {
-    _downloadConnections: Record<number, TelegramConnection>
+    _downloadConnections: Record<number, SessionConnection>
 }
 
 // @initialize

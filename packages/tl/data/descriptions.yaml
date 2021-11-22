@@ -1,0 +1,36 @@
+# This file contains additional descriptions for TL objects,
+# for example for objects/fields that don't have a description
+# from Telegram documentation.
+#
+# By default, these descriptions are used as a fallback,
+# but can also be used to overwrite original documentation.
+#
+# This file is licensed under MIT license.
+
+# Override TL objects' (classes/methods) description, or their arguments' descriptions.
+# Type is defined by the first 2 symbols in key ("c_" for class, "m_" for method, "u_" for union)
+objects:
+
+# Override arguments wherever they are, based on the filters
+arguments:
+  gigagroup: Is this a broadcast group?
+
+# Replace any description, based on regex. Used to fix typos.
+regex:
+  - regex: \bchanel\b
+    repl: channel
+  - regex: \bgeoposition\b
+    repl: geo position
+  - regex: \bgeogroup\b
+    repl: geo group
+  - regex: \bunixdate\b|Unix timestamp
+    repl: UNIX timestamp in seconds
+  - regex: \bstickerset\b
+    repl: stickerset
+  - regex: \bonly "foursquare" needs\b
+    repl: only "foursquare" and "gplaces" need
+  # gender-neutral pronouns
+  - regex: \bhis\b
+    repl: their
+  - regex: \bhim\b
+    repl: them

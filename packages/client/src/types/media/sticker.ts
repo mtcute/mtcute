@@ -42,9 +42,6 @@ const MASK_POS = ['forehead', 'eyes', 'mouth', 'chin'] as const
 export class Sticker extends RawDocument {
     readonly type = 'sticker' as const
 
-    readonly attr: tl.RawDocumentAttributeSticker
-    readonly attrSize?: tl.RawDocumentAttributeImageSize
-
     protected _fileIdType(): tdFileId.FileType {
         return tdFileId.FileType.Sticker
     }
@@ -52,12 +49,10 @@ export class Sticker extends RawDocument {
     constructor(
         client: TelegramClient,
         doc: tl.RawDocument,
-        attr: tl.RawDocumentAttributeSticker,
-        attrSize?: tl.RawDocumentAttributeImageSize
+        readonly attr: tl.RawDocumentAttributeSticker,
+        readonly attrSize?: tl.RawDocumentAttributeImageSize
     ) {
         super(client, doc)
-        this.attr = attr
-        this.attrSize = attrSize
     }
 
     /**
@@ -177,7 +172,7 @@ export class Sticker extends RawDocument {
         const set = await this.getStickerSet()
         if (!set) return ''
 
-        return set.stickers.find((it) => it.sticker.doc.id.eq(this.doc.id))!
+        return set.stickers.find((it) => it.sticker.raw.id.eq(this.raw.id))!
             .emoji
     }
 }

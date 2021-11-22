@@ -1,12 +1,11 @@
 import { TelegramClient } from '../../client'
 import { MaybeArray } from '@mtcute/core'
 import {
-    createUsersChatsIndex,
-    isInputPeerChannel,
-    normalizeToInputChannel,
-} from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
-import { Message, InputPeerLike, MtTypeAssertionError } from '../../types'
+    Message,
+    InputPeerLike,
+    MtTypeAssertionError,
+    PeersIndex,
+} from '../../types'
 
 /**
  * Get a single scheduled message in chat by its ID
@@ -60,12 +59,12 @@ export async function getScheduledMessages(
             res._
         )
 
-    const { users, chats } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
     const ret = res.messages.map((msg) => {
         if (msg._ === 'messageEmpty') return null
 
-        return new Message(this, msg, users, chats)
+        return new Message(this, msg, peers, true)
     })
 
     return isSingle ? ret[0] : ret

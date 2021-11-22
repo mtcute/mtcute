@@ -1,0 +1,21 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./dist"
+    },
+    "include": [
+        "./src/reader.ts",
+        "./src/writer.ts",
+    ],
+    "typedocOptions": {
+        "name": "@mtcute/tl-runtime",
+        "includeVersion": true,
+        "out": "../../docs/packages/tl-runtime",
+        "listInvalidSymbolLinks": true,
+        "excludePrivate": true,
+        "entryPoints": [
+            "./src/reader.ts",
+            "./src/writer.ts"
+        ]
+    }
+}

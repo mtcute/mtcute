@@ -7,13 +7,10 @@ import { TelegramClient } from '../../client'
  * A point on the map
  */
 export class RawLocation {
-    readonly client: TelegramClient
-    readonly geo: tl.RawGeoPoint
-
-    constructor(client: TelegramClient, geo: tl.RawGeoPoint) {
-        this.client = client
-        this.geo = geo
-    }
+    constructor(
+        readonly client: TelegramClient,
+        readonly geo: tl.RawGeoPoint
+    ) {}
 
     /**
      * Geo point latitude
@@ -112,11 +109,8 @@ export class Location extends RawLocation {
 export class LiveLocation extends RawLocation {
     readonly type = 'live_location' as const
 
-    readonly live: tl.RawMessageMediaGeoLive
-
-    constructor(client: TelegramClient, live: tl.RawMessageMediaGeoLive) {
+    constructor(client: TelegramClient, readonly live: tl.RawMessageMediaGeoLive) {
         super(client, live.geo as tl.RawGeoPoint)
-        this.live = live
     }
 
     /**

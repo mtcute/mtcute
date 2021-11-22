@@ -11,8 +11,6 @@ import { decodeWaveform } from '../../utils/voice-utils'
 export class Voice extends RawDocument {
     readonly type = 'voice' as const
 
-    readonly attr: tl.RawDocumentAttributeAudio
-
     protected _fileIdType(): tdFileId.FileType {
         return tdFileId.FileType.VoiceNote
     }
@@ -20,10 +18,9 @@ export class Voice extends RawDocument {
     constructor(
         client: TelegramClient,
         doc: tl.RawDocument,
-        attr: tl.RawDocumentAttributeAudio
+        readonly attr: tl.RawDocumentAttributeAudio
     ) {
         super(client, doc)
-        this.attr = attr
     }
 
     /**

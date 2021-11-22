@@ -2,7 +2,7 @@ import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { User } from './user'
-import { UsersIndex } from './index'
+import { PeersIndex } from './index'
 
 export namespace ChatInviteLink {
     export interface JoinedMember {
@@ -15,19 +15,11 @@ export namespace ChatInviteLink {
  * An invite link
  */
 export class ChatInviteLink {
-    readonly client: TelegramClient
-    readonly raw: tl.RawChatInviteExported
-
-    readonly _users?: UsersIndex
-
     constructor(
-        client: TelegramClient,
-        raw: tl.RawChatInviteExported,
-        users?: UsersIndex
+        readonly client: TelegramClient,
+        readonly raw: tl.RawChatInviteExported,
+        readonly _peers?: PeersIndex
     ) {
-        this.client = client
-        this.raw = raw
-        this._users = users
     }
 
     /**
@@ -45,10 +37,13 @@ export class ChatInviteLink {
      * Creator of the invite link, if available
      */
     get creator(): User | null {
-        if (!this._users) return null
+        if (!this._peers) return null
 
         if (!this._creator) {
-            this._creator = new User(this.client, this._users[this.raw.adminId])
+            this._creator = new User(
+                this.client,
+                this._peers.user(this.raw.adminId)
+            )
         }
 
         return this._creator

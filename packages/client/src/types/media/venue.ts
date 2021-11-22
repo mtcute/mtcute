@@ -31,13 +31,10 @@ export namespace Venue {
 export class Venue {
     readonly type = 'venue' as const
 
-    readonly client: TelegramClient
-    readonly raw: tl.RawMessageMediaVenue
-
-    constructor(client: TelegramClient, raw: tl.RawMessageMediaVenue) {
-        this.client = client
-        this.raw = raw
-    }
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawMessageMediaVenue
+    ) {}
 
     private _location?: Location
     /**

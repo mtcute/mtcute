@@ -1,6 +1,7 @@
 import { BasicPeerType, MaybeAsync } from '../types'
 import { tl } from '@mtcute/tl'
-import { Logger } from '../utils/logger'
+import { Logger } from '../utils'
+import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 export namespace ITelegramStorage {
     export interface PeerInfo {
@@ -35,8 +36,9 @@ export interface ITelegramStorage {
     /**
      * This method is called before any other.
      * For storages that use logging, logger instance.
+     * For storages that use binary storage, binary maps
      */
-    setup?(log: Logger): void
+    setup?(log: Logger, readerMap: TlReaderMap, writerMap: TlWriterMap): void
 
     /**
      * Load session from some external storage.

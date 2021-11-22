@@ -2,6 +2,7 @@ import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import { TelegramClient } from '../../client'
 import { Chat } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import Long from 'long'
 
 /**
  * Get a list of common chats you have with a given user

@@ -7,8 +7,6 @@ import { makeInspectable } from '../utils'
 export class Dice {
     readonly type = 'dice' as const
 
-    readonly obj: tl.RawMessageMediaDice
-
     /**
      * A simple 6-sided dice.
      *
@@ -138,9 +136,7 @@ export class Dice {
      */
     static readonly TYPE_SLOTS = '🎰'
 
-    constructor(obj: tl.RawMessageMediaDice) {
-        this.obj = obj
-    }
+    constructor(readonly obj: tl.RawMessageMediaDice) {}
 
     /**
      * An emoji which was originally sent.

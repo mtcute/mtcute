@@ -1,6 +1,5 @@
 import { tl } from '@mtcute/tl'
-import bigInt from 'big-integer'
-import { ChatsIndex, UsersIndex } from '../types'
+import Long from 'long'
 
 export const INVITE_LINK_REGEX = /^(?:https?:\/\/)?(?:www\.)?(?:t(?:elegram)?\.(?:org|me|dog)\/joinchat\/)([\w-]+)$/i
 
@@ -164,7 +163,7 @@ export function inputPeerToPeer(inp: tl.TypeInputPeer): tl.TypePeer {
 
 export function peerToInputPeer(
     peer: tl.TypePeer,
-    accessHash = bigInt.zero
+    accessHash = Long.ZERO
 ): tl.TypeInputPeer {
     switch (peer._) {
         case 'peerUser':
@@ -178,30 +177,4 @@ export function peerToInputPeer(
         case 'peerChat':
             return { _: 'inputPeerChat', chatId: peer.chatId }
     }
-}
-
-export function createUsersChatsIndex(
-    obj: {
-        users?: tl.TypeUser[]
-        chats?: tl.TypeChat[]
-    },
-    second?: {
-        users?: tl.TypeUser[]
-        chats?: tl.TypeChat[]
-    }
-): {
-    users: UsersIndex
-    chats: ChatsIndex
-} {
-    const users: UsersIndex = {}
-    const chats: ChatsIndex = {}
-    obj.users?.forEach((e) => (users[e.id] = e))
-    obj.chats?.forEach((e) => (chats[e.id] = e))
-
-    if (second) {
-        second.users?.forEach((e) => (users[e.id] = e))
-        second.chats?.forEach((e) => (chats[e.id] = e))
-    }
-
-    return { users, chats }
 }

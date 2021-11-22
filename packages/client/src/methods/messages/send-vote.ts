@@ -3,10 +3,10 @@ import {
     InputPeerLike,
     MtArgumentError,
     MtTypeAssertionError,
+    PeersIndex,
     Poll,
 } from '../../types'
 import { MaybeArray, MessageNotFoundError } from '@mtcute/core'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
@@ -74,7 +74,7 @@ export async function sendVote(
         )
     }
 
-    const { users } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
-    return new Poll(this, upd.poll, users, upd.results)
+    return new Poll(this, upd.poll, peers, upd.results)
 }

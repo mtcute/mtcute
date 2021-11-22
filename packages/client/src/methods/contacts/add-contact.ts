@@ -2,11 +2,9 @@ import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
     MtInvalidPeerTypeError,
-    MtTypeAssertionError,
     User,
 } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**

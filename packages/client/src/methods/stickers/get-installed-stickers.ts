@@ -1,6 +1,7 @@
 import { TelegramClient } from '../../client'
 import { StickerSet } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
+import Long from 'long'
 
 /**
  * Get a list of all installed sticker packs
@@ -17,7 +18,7 @@ export async function getInstalledStickers(
 ): Promise<StickerSet[]> {
     const res = await this.call({
         _: 'messages.getAllStickers',
-        hash: 0,
+        hash: Long.ZERO,
     })
 
     assertTypeIs('getInstalledStickers', res, 'messages.allStickers')

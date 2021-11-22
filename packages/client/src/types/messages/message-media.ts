@@ -69,7 +69,7 @@ export function _messageMediaFromTl(
         case 'messageMediaVenue':
             return new Venue(this.client, m)
         case 'messageMediaPoll':
-            return new Poll(this.client, m.poll, this._users, m.results)
+            return new Poll(this.client, m.poll, this._peers, m.results)
         case 'messageMediaInvoice':
             return new Invoice(this.client, m)
         default:

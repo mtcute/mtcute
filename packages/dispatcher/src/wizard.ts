@@ -1,6 +1,5 @@
 import { MaybeAsync, Message } from '@mtcute/client'
 import { Dispatcher } from './dispatcher'
-import { NewMessageHandler } from './handler'
 import { UpdateState } from './state'
 import { filters } from './filters'
 

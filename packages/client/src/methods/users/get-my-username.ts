@@ -1,6 +1,4 @@
 import { TelegramClient } from '../../client'
-import { User } from '../../types'
-import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Get currently authorized user's username.

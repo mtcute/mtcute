@@ -41,12 +41,17 @@ export async function signIn(
 
     assertTypeIs('signIn (@ auth.signIn -> user)', res.user, 'user')
 
+    this.log.prefix = `[USER ${this._userId}] `
     this._userId = res.user.id
     this._isBot = false
     this._selfChanged = true
     this._selfUsername = res.user.username ?? null
     await this._fetchUpdatesState()
     await this._saveStorage()
+
+    // telegram ignores invokeWithoutUpdates for auth methods
+    if (this._disableUpdates) this.primaryConnection._resetSession()
+    else this.startUpdatesLoop()
 
     return new User(this, res.user)
 }

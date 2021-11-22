@@ -1,5 +1,5 @@
 import { CallbackQuery, Message } from '@mtcute/client'
-import { MaybeAsync } from '@mtcute/core'
+import { longToFastString, MaybeAsync } from '@mtcute/core'
 
 /**
  * Function that determines how the state key is derived.

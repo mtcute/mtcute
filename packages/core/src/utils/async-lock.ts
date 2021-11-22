@@ -1,20 +1,18 @@
+import { Deque } from './deque'
+
 type LockInfo = [Promise<void>, () => void]
-interface OneWayLinkedList<T> {
-    v: T
-    n?: OneWayLinkedList<T>
-}
 
 /**
  * Simple class implementing a semaphore like
  * behaviour.
  */
 export class AsyncLock {
-    private _first?: OneWayLinkedList<LockInfo>
-    private _last?: OneWayLinkedList<LockInfo>
+    private _queue = new Deque<LockInfo>()
 
     async acquire(): Promise<void> {
-        while (this._first) {
-            await this._first.v[0]
+        let info
+        while ((info = this._queue.peekFront())) {
+            await info[0]
         }
 
         let unlock: () => void
@@ -22,18 +20,24 @@ export class AsyncLock {
             unlock = resolve
         })
 
-        if (this._last) {
-            this._last.n = { v: [prom, unlock!] }
-            this._last = this._last.n
-        } else {
-            this._first = this._last = { v: [prom, unlock!] }
-        }
+        this._queue.pushBack([prom, unlock!])
     }
 
     release(): void {
-        if (!this._first) throw new Error('Nothing to release')
-        this._first.v[1]()
-        this._first = this._first.n
-        if (!this._first) this._last = undefined
+        if (!this._queue.length)
+            throw new Error('Nothing to release')
+
+        this._queue.popFront()![1]()
+    }
+
+    with(func: () => Promise<void>): Promise<void> {
+        let err: unknown = null
+        return this.acquire()
+            .then(() => func())
+            .catch((e) => (err = e))
+            .then(() => {
+                this.release()
+                if (err) throw err
+            })
     }
 }

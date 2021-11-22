@@ -1,62 +1,57 @@
 // noinspection SqlResolve
 
 import {
-    BinaryReader,
-    BinaryWriter,
     ITelegramStorage,
+    longFromFastString,
+    longToFastString,
     LruMap,
-    MAX_CHANNEL_ID,
+    TlBinaryWriter,
+    toggleChannelIdMark,
 } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 import sqlite3 from 'better-sqlite3'
-import bigInt from 'big-integer'
 import { throttle } from '@mtcute/core'
 import { Logger } from '@mtcute/core/src/utils/logger'
+import { TlBinaryReader, TlReaderMap, TlWriterMap } from '../tl-runtime'
 
-function serializeAccessHash(hash: tl.Long): Buffer {
-    const arr = hash.toArray(256)
-    arr.value.push(arr.isNegative ? 1 : 0)
-    return Buffer.from(arr.value)
-}
-
-function parseAccessHash(hash: Buffer): tl.Long {
-    const arr = hash.toJSON().data
-    return bigInt.fromArray(arr.slice(0, -1), 256, arr[arr.length - 1] as any)
-}
+// todo: add testMode to "self"
 
 function getInputPeer(
     row: SqliteEntity | ITelegramStorage.PeerInfo
 ): tl.TypeInputPeer {
+    const id = row.id
+
     switch (row.type) {
         case 'user':
             return {
                 _: 'inputPeerUser',
-                userId: row.id,
+                userId: id,
                 accessHash:
                     'accessHash' in row
                         ? row.accessHash
-                        : parseAccessHash(row.hash),
+                        : longFromFastString(row.hash),
             }
         case 'chat':
             return {
                 _: 'inputPeerChat',
-                chatId: -row.id,
+                chatId: -id,
             }
         case 'channel':
             return {
                 _: 'inputPeerChannel',
-                channelId: MAX_CHANNEL_ID - row.id,
+                channelId: toggleChannelIdMark(id),
                 accessHash:
                     'accessHash' in row
                         ? row.accessHash
-                        : parseAccessHash(row.hash),
+                        : longFromFastString(row.hash),
             }
     }
 
     throw new Error(`Invalid peer type: ${row.type}`)
 }
 
-const CURRENT_VERSION = 1
+const CURRENT_VERSION = 2
+
 // language=SQLite
 const SCHEMA = `
     create table kv (
@@ -82,7 +77,7 @@ const SCHEMA = `
 
     create table entities (
         id integer primary key,
-        hash blob not null,
+        hash text not null,
         type text not null,
         username text,
         phone text,
@@ -105,7 +100,7 @@ const USERNAME_TTL = 86400000 // 24 hours
 
 interface SqliteEntity {
     id: number
-    hash: Buffer
+    hash: string
     type: string
     username?: string
     phone?: string
@@ -173,7 +168,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
     private _wal?: boolean
 
-    private _reader = new BinaryReader(EMPTY_BUFFER)
+    private _reader!: TlBinaryReader
 
     private _saveUnimportantLater: () => void
 
@@ -181,6 +176,8 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
     private _vacuumInterval: number
 
     private log!: Logger
+    private readerMap!: TlReaderMap
+    private writerMap!: TlWriterMap
 
     /**
      * @param filename  Database file name, or `:memory:` for in-memory DB
@@ -303,8 +300,11 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
         // todo: add support for workers (idk if really needed, but still)
     }
 
-    setup(log: Logger): void {
+    setup(log: Logger, readerMap: TlReaderMap, writerMap: TlWriterMap): void {
         this.log = log.create('sqlite')
+        this.readerMap = readerMap
+        this.writerMap = writerMap
+        this._reader = new TlBinaryReader(readerMap, EMPTY_BUFFER)
     }
 
     private _readFullPeer(data: Buffer): tl.TypeUser | tl.TypeChat | null {
@@ -352,7 +352,13 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private _upgradeDatabase(from: number): void {
-        // not needed (yet) since no versions except 1 //
+        if (from < 2 || from > CURRENT_VERSION) {
+            // 1 version was skipped during development
+            // yes i am too lazy to make auto-migrations for them
+            throw new Error(
+                'Unsupported session version, please migrate manually'
+            )
+        }
     }
 
     private _initializeStatements(): void {
@@ -371,16 +377,24 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
         if (hasTables) {
             // tables already exist, check version
-            this._initializeStatements()
-            const version = this._getFromKv('ver')
+            const version = this._db
+                .prepare("select value from kv where key = 'ver'")
+                .get().value
+
             this.log.debug('current db version = %d', version)
+
             if (version < CURRENT_VERSION) {
                 this._upgradeDatabase(version)
-                this._setToKv('ver', CURRENT_VERSION, true)
+                this._db
+                    .prepare("update kv set value = ? where key = 'ver'")
+                    .run(CURRENT_VERSION)
             }
+
+            // prepared statements expect latest schema, so we need to upgrade first
+            this._initializeStatements()
         } else {
             // create tables
-            this.log.debug('creating tables')
+            this.log.debug('creating tables, db version = %d', CURRENT_VERSION)
             this._db.exec(SCHEMA)
             this._initializeStatements()
             this._setToKv('ver', CURRENT_VERSION, true)
@@ -394,7 +408,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
 
     load(): void {
         this._db = sqlite3(this._filename, {
-            verbose: this.log.mgr.level === 4 ? this.log.debug : undefined,
+            verbose: this.log.mgr.level === 5 ? this.log.verbose : undefined,
         })
 
         this._initialize()
@@ -533,7 +547,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
                     peer.username,
                     peer.phone,
                     Date.now(),
-                    BinaryWriter.serializeObject(peer.full),
+                    TlBinaryWriter.serializeObject(this.writerMap, peer.full),
                     peer.id,
                 ]
                 cached.full = peer.full
@@ -544,12 +558,15 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
                     this._statements.upsertEnt,
                     [
                         peer.id,
-                        serializeAccessHash(peer.accessHash),
+                        longToFastString(peer.accessHash),
                         peer.type,
                         peer.username,
                         peer.phone,
                         Date.now(),
-                        BinaryWriter.serializeObject(peer.full),
+                        TlBinaryWriter.serializeObject(
+                            this.writerMap,
+                            peer.full
+                        ),
                     ],
                 ])
                 this._addToCache(peer.id, {

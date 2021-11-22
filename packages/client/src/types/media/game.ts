@@ -7,13 +7,7 @@ import { makeInspectable } from '../utils'
 export class Game {
     readonly type = 'game' as const
 
-    readonly game: tl.RawGame
-    readonly client: TelegramClient
-
-    constructor(client: TelegramClient, game: tl.RawGame) {
-        this.client = client
-        this.game = game
-    }
+    constructor(readonly client: TelegramClient, readonly game: tl.RawGame) {}
 
     /**
      * Unique identifier of the game.

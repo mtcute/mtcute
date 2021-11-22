@@ -15,8 +15,19 @@ export function getMe(this: TelegramClient): Promise<User> {
                 _: 'inputUserSelf',
             },
         ],
-    }).then(([user]) => {
+    }).then(async ([user]) => {
         assertTypeIs('getMe (@ users.getUsers)', user, 'user')
+
+        if (this._userId !== user.id) {
+            // there is such possibility, e.g. when
+            // using a string session without `self`,
+            // or logging out and re-logging in
+            // we need to update the fields accordingly,
+            // and force-save the session
+            this._userId = user.id
+            this._isBot = !!user.bot
+            await this._saveStorage()
+        }
 
         this._selfUsername = user.username ?? null
 

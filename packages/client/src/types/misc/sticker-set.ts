@@ -32,7 +32,6 @@ export namespace StickerSet {
  * A stickerset (aka sticker pack)
  */
 export class StickerSet {
-    readonly client: TelegramClient
     readonly brief: tl.RawStickerSet
     readonly full?: tl.messages.RawStickerSet
 
@@ -42,10 +41,9 @@ export class StickerSet {
     readonly isFull: boolean
 
     constructor(
-        client: TelegramClient,
+        readonly client: TelegramClient,
         raw: tl.RawStickerSet | tl.messages.RawStickerSet
     ) {
-        this.client = client
         if (raw._ === 'messages.stickerSet') {
             this.full = raw
             this.brief = raw.set

@@ -7,7 +7,7 @@ import {
 } from '../'
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { getBarePeerId, MAX_CHANNEL_ID } from '@mtcute/core'
+import { getBarePeerId, toggleChannelIdMark } from '@mtcute/core'
 import { makeInspectable } from '../utils'
 
 /**
@@ -16,24 +16,23 @@ import { makeInspectable } from '../utils'
  * This update is valid for 6 seconds.
  */
 export class UserTypingUpdate {
-    readonly client: TelegramClient
-    readonly raw:
-        | tl.RawUpdateUserTyping
-        | tl.RawUpdateChatUserTyping
-        | tl.RawUpdateChannelUserTyping
-
-    constructor(client: TelegramClient, raw: UserTypingUpdate['raw']) {
-        this.client = client
-        this.raw = raw
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw:
+            | tl.RawUpdateUserTyping
+            | tl.RawUpdateChatUserTyping
+            | tl.RawUpdateChannelUserTyping
+    ) {
     }
 
     /**
      * ID of the user whose typing status changed
      */
     get userId(): number {
-        return this.raw._ === 'updateUserTyping'
+        return (this.raw._ === 'updateUserTyping'
             ? this.raw.userId
             : getBarePeerId(this.raw.fromId)
+        )
     }
 
     /**
@@ -49,7 +48,7 @@ export class UserTypingUpdate {
             case 'updateChatUserTyping':
                 return -this.raw.chatId
             case 'updateChannelUserTyping':
-                return MAX_CHANNEL_ID - this.raw.channelId
+                return toggleChannelIdMark(this.raw.channelId)
         }
     }
 

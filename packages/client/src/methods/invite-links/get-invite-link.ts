@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
-import { ChatInviteLink, InputPeerLike } from '../../types'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
+import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
 
 /**
  * Get detailed information about an invite link
@@ -20,7 +19,7 @@ export async function getInviteLink(
         link,
     })
 
-    const { users } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
-    return new ChatInviteLink(this, res.invite, users)
+    return new ChatInviteLink(this, res.invite, peers)
 }

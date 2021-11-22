@@ -31,6 +31,7 @@ import {
 } from '@mtcute/client'
 import { MaybeArray } from '@mtcute/core'
 import { UpdateState } from './state'
+import { tl } from '@mtcute/tl'
 
 function extractText(
     obj: Message | InlineQuery | ChosenInlineResult | CallbackQuery
@@ -135,14 +136,25 @@ export namespace filters {
         ? I
         : never
 
-    type ExtractBase<
-        Filter extends UpdateFilter<any, any>
-    > = Filter extends UpdateFilter<infer I, any> ? I : never
+    type ExtractBase<Filter> = Filter extends UpdateFilter<infer I, any>
+        ? I
+        : never
 
-    type ExtractMod<
-        Base,
-        Filter extends UpdateFilter<Base, any>
-    > = Filter extends UpdateFilter<Base, infer I> ? I : never
+    type ExtractMod<Filter> = Filter extends UpdateFilter<any, infer I>
+        ? I
+        : never
+
+    type ExtractState<Filter> = Filter extends UpdateFilter<any, any, infer I>
+        ? I
+        : never
+
+    type TupleKeys<T extends any[]> = Exclude<keyof T, keyof []>
+    type WrapBase<T extends any[]> = {
+        [K in TupleKeys<T>]: { base: ExtractBase<T[K]> }
+    }
+    type Values<T> = T[keyof T]
+    type UnwrapBase<T> = T extends { base: any } ? T["base"] : never
+    type ExtractBaseMany<Filters extends any[]> = UnwrapBase<UnionToIntersection<Values<WrapBase<Filters>>>>
 
     /**
      * Invert a filter by applying a NOT logical operation:
@@ -156,11 +168,11 @@ export namespace filters {
      *
      * @param fn  Filter to negate
      */
-    export function not<Base, Mod>(
-        fn: UpdateFilter<Base, Mod>
-    ): UpdateFilter<Base, Invert<Base, Mod>> {
-        return (upd, client) => {
-            const res = fn(upd, client)
+    export function not<Base, Mod, State>(
+        fn: UpdateFilter<Base, Mod, State>
+    ): UpdateFilter<Base, Invert<Base, Mod>, State> {
+        return (upd, state) => {
+            const res = fn(upd, state)
 
             if (typeof res === 'boolean') return !res
 
@@ -181,22 +193,22 @@ export namespace filters {
      * @param fn1  First filter
      * @param fn2  Second filter
      */
-    export function and<Base, Mod1, Mod2>(
-        fn1: UpdateFilter<Base, Mod1>,
-        fn2: UpdateFilter<Base, Mod2>
-    ): UpdateFilter<Base, Mod1 & Mod2> {
-        return (upd, client) => {
-            const res1 = fn1(upd, client)
+    export function and<Base, Mod1, Mod2, State1, State2>(
+        fn1: UpdateFilter<Base, Mod1, State1>,
+        fn2: UpdateFilter<Base, Mod2, State2>
+    ): UpdateFilter<Base, Mod1 & Mod2, State1 | State2> {
+        return (upd, state) => {
+            const res1 = fn1(upd, state as any)
             if (typeof res1 === 'boolean') {
                 if (!res1) return false
 
-                return fn2(upd, client)
+                return fn2(upd, state as any)
             }
 
             return res1.then((r1) => {
                 if (!r1) return false
 
-                return fn2(upd, client)
+                return fn2(upd, state as any)
             })
         }
     }
@@ -218,22 +230,22 @@ export namespace filters {
      * @param fn1  First filter
      * @param fn2  Second filter
      */
-    export function or<Base, Mod1, Mod2>(
-        fn1: UpdateFilter<Base, Mod1>,
-        fn2: UpdateFilter<Base, Mod2>
-    ): UpdateFilter<Base, Mod1 | Mod2> {
-        return (upd, cilent) => {
-            const res1 = fn1(upd, cilent)
+    export function or<Base, Mod1, Mod2, State1, State2>(
+        fn1: UpdateFilter<Base, Mod1, State1>,
+        fn2: UpdateFilter<Base, Mod2, State2>
+    ): UpdateFilter<Base, Mod1 | Mod2, State1 | State2> {
+        return (upd, state) => {
+            const res1 = fn1(upd, state as any)
             if (typeof res1 === 'boolean') {
                 if (res1) return true
 
-                return fn2(upd, cilent)
+                return fn2(upd, state as any)
             }
 
             return res1.then((r1) => {
                 if (r1) return true
 
-                return fn2(upd, cilent)
+                return fn2(upd, state as any)
             })
         }
     }
@@ -251,26 +263,28 @@ export namespace filters {
      * >
      * > This method is less efficient than {@link and}
      *
+     * > **Note**: This method *currently* does not propagate state
+     * > type. This might be fixed in the future, but for now either
+     * > use {@link and} or add type manually.
+     *
      * @param fns  Filters to combine
      */
     export function every<Filters extends UpdateFilter<any, any>[]>(
         ...fns: Filters
     ): UpdateFilter<
-        UnionToIntersection<ExtractBase<Filters[number]>>,
-        UnionToIntersection<
-            ExtractMod<ExtractBase<Filters[number]>, Filters[number]>
-        >
+        ExtractBaseMany<Filters>,
+        UnionToIntersection<ExtractMod<Filters[number]>>
     > {
         if (fns.length === 2) return and(fns[0], fns[1])
 
-        return (upd, client) => {
+        return (upd, state) => {
             let i = 0
             const max = fns.length
 
             const next = (): MaybeAsync<boolean> => {
                 if (i === max) return true
 
-                const res = fns[i++](upd, client)
+                const res = fns[i++](upd, state)
 
                 if (typeof res === 'boolean') {
                     if (!res) return false
@@ -299,24 +313,29 @@ export namespace filters {
      * >
      * > This method is less efficient than {@link or}
      *
+     * > **Note**: This method *currently* does not propagate state
+     * > type. This might be fixed in the future, but for now either
+     * > use {@link or} or add type manually.
+     *
      * @param fns  Filters to combine
      */
-    export function some<Filters extends UpdateFilter<any, any>[]>(
+    export function some<Filters extends UpdateFilter<any, any, any>[]>(
         ...fns: Filters
     ): UpdateFilter<
-        UnionToIntersection<ExtractBase<Filters[number]>>,
-        ExtractMod<ExtractBase<Filters[number]>, Filters[number]>
+        ExtractBaseMany<Filters>,
+        ExtractMod<Filters[number]>,
+        ExtractState<Filters[number]>
     > {
         if (fns.length === 2) return or(fns[0], fns[1])
 
-        return (upd, client) => {
+        return (upd, state) => {
             let i = 0
             const max = fns.length
 
             const next = (): MaybeAsync<boolean> => {
                 if (i === max) return false
 
-                const res = fns[i++](upd, client)
+                const res = fns[i++](upd, state)
 
                 if (typeof res === 'boolean') {
                     if (res) return true
@@ -409,7 +428,7 @@ export namespace filters {
      * For chat member updates, uses `user.id`
      */
     export const userId = (
-        id: MaybeArray<number | string>
+        id: MaybeArray<number | string | tl.Long>
     ): UpdateFilter<
         | Message
         | InlineQuery
@@ -420,118 +439,121 @@ export namespace filters {
         | UserStatusUpdate
         | UserTypingUpdate
     > => {
-        if (Array.isArray(id)) {
-            const index: Record<number | string, true> = {}
-            let matchSelf = false
-            id.forEach((id) => {
-                if (id === 'me' || id === 'self') {
-                    matchSelf = true
-                } else {
-                    index[id] = true
-                }
-            })
+        // TODO
+        return () => false
 
-            return (upd) => {
-                const ctor = upd.constructor
-
-                if (ctor === Message) {
-                    const sender = (upd as Message).sender
-                    return (
-                        (matchSelf && sender.isSelf) ||
-                        sender.id in index ||
-                        sender.username! in index
-                    )
-                } else {
-                    if (
-                        ctor === UserStatusUpdate ||
-                        ctor === UserTypingUpdate
-                    ) {
-                        const id = (upd as UserStatusUpdate | UserTypingUpdate)
-                            .userId
-                        return (
-                            (matchSelf && id === upd.client['_userId']) ||
-                            id in index
-                        )
-                    } else {
-                        const user = (upd as Exclude<
-                            typeof upd,
-                            Message | UserStatusUpdate | UserTypingUpdate
-                        >).user
-
-                        return (
-                            (matchSelf && user.isSelf) ||
-                            user.id in index ||
-                            user.username! in index
-                        )
-                    }
-                }
-            }
-        }
-
-        if (id === 'me' || id === 'self') {
-            return (upd) => {
-                const ctor = upd.constructor
-
-                if (ctor === Message) {
-                    return (upd as Message).sender.isSelf
-                } else if (
-                    ctor === UserStatusUpdate ||
-                    ctor === UserTypingUpdate
-                ) {
-                    return (
-                        (upd as UserStatusUpdate | UserTypingUpdate).userId ===
-                        upd.client['_userId']
-                    )
-                } else {
-                    return (upd as Exclude<
-                        typeof upd,
-                        Message | UserStatusUpdate | UserTypingUpdate
-                    >).user.isSelf
-                }
-            }
-        }
-
-        if (typeof id === 'string') {
-            return (upd) => {
-                const ctor = upd.constructor
-
-                if (ctor === Message) {
-                    return (upd as Message).sender.username === id
-                } else if (
-                    ctor === UserStatusUpdate ||
-                    ctor === UserTypingUpdate
-                ) {
-                    // username is not available
-                    return false
-                } else {
-                    return (
-                        (upd as Exclude<
-                            typeof upd,
-                            Message | UserStatusUpdate | UserTypingUpdate
-                        >).user.username === id
-                    )
-                }
-            }
-        }
-
-        return (upd) => {
-            const ctor = upd.constructor
-
-            if (ctor === Message) {
-                return (upd as Message).sender.id === id
-            } else if (ctor === UserStatusUpdate || ctor === UserTypingUpdate) {
-                return (
-                    (upd as UserStatusUpdate | UserTypingUpdate).userId === id
-                )
-            } else {
-                return (
-                    (upd as Exclude<
-                        typeof upd,
-                        Message | UserStatusUpdate | UserTypingUpdate
-                    >).user.id === id
-                )
-            }
-        }
+        // if (Array.isArray(id)) {
+        //     const index: Record<number | string, true> = {}
+        //     let matchSelf = false
+        //     id.forEach((id) => {
+        //         if (id === 'me' || id === 'self') {
+        //             matchSelf = true
+        //         } else {
+        //             index[id] = true
+        //         }
+        //     })
+        //
+        //     return (upd) => {
+        //         const ctor = upd.constructor
+        //
+        //         if (ctor === Message) {
+        //             const sender = (upd as Message).sender
+        //             return (
+        //                 (matchSelf && sender.isSelf) ||
+        //                 sender.id in index ||
+        //                 sender.username! in index
+        //             )
+        //         } else {
+        //             if (
+        //                 ctor === UserStatusUpdate ||
+        //                 ctor === UserTypingUpdate
+        //             ) {
+        //                 const id = (upd as UserStatusUpdate | UserTypingUpdate)
+        //                     .userId
+        //                 return (
+        //                     (matchSelf && id === upd.client['_userId']) ||
+        //                     id in index
+        //                 )
+        //             } else {
+        //                 const user = (upd as Exclude<
+        //                     typeof upd,
+        //                     Message | UserStatusUpdate | UserTypingUpdate
+        //                 >).user
+        //
+        //                 return (
+        //                     (matchSelf && user.isSelf) ||
+        //                     user.id in index ||
+        //                     user.username! in index
+        //                 )
+        //             }
+        //         }
+        //     }
+        // }
+        //
+        // if (id === 'me' || id === 'self') {
+        //     return (upd) => {
+        //         const ctor = upd.constructor
+        //
+        //         if (ctor === Message) {
+        //             return (upd as Message).sender.isSelf
+        //         } else if (
+        //             ctor === UserStatusUpdate ||
+        //             ctor === UserTypingUpdate
+        //         ) {
+        //             return (
+        //                 (upd as UserStatusUpdate | UserTypingUpdate).userId ===
+        //                 upd.client['_userId']
+        //             )
+        //         } else {
+        //             return (upd as Exclude<
+        //                 typeof upd,
+        //                 Message | UserStatusUpdate | UserTypingUpdate
+        //             >).user.isSelf
+        //         }
+        //     }
+        // }
+        //
+        // if (typeof id === 'string') {
+        //     return (upd) => {
+        //         const ctor = upd.constructor
+        //
+        //         if (ctor === Message) {
+        //             return (upd as Message).sender.username === id
+        //         } else if (
+        //             ctor === UserStatusUpdate ||
+        //             ctor === UserTypingUpdate
+        //         ) {
+        //             // username is not available
+        //             return false
+        //         } else {
+        //             return (
+        //                 (upd as Exclude<
+        //                     typeof upd,
+        //                     Message | UserStatusUpdate | UserTypingUpdate
+        //                 >).user.username === id
+        //             )
+        //         }
+        //     }
+        // }
+        //
+        // return (upd) => {
+        //     const ctor = upd.constructor
+        //
+        //     if (ctor === Message) {
+        //         return (upd as Message).sender.id === id
+        //     } else if (ctor === UserStatusUpdate || ctor === UserTypingUpdate) {
+        //         return (
+        //             (upd as UserStatusUpdate | UserTypingUpdate).userId === id
+        //         )
+        //     } else {
+        //         return (
+        //             (upd as Exclude<
+        //                 typeof upd,
+        //                 Message | UserStatusUpdate | UserTypingUpdate
+        //             >).user.id === id
+        //         )
+        //     }
+        // }
     }
 
     /**
@@ -894,7 +916,10 @@ export namespace filters {
 
             return (obj) => {
                 const txt = extractText(obj)
-                return txt != null && txt.toLowerCase().substring(0, str.length) === str
+                return (
+                    txt != null &&
+                    txt.toLowerCase().substring(0, str.length) === str
+                )
             }
         }
 
@@ -925,7 +950,10 @@ export namespace filters {
 
             return (obj) => {
                 const txt = extractText(obj)
-                return txt != null && txt.toLowerCase().substring(0, str.length) === str
+                return (
+                    txt != null &&
+                    txt.toLowerCase().substring(0, str.length) === str
+                )
             }
         }
 

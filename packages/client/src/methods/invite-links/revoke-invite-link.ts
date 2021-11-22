@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
-import { ChatInviteLink, InputPeerLike } from '../../types'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
+import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
 
 /**
  * Revoke an invite link.
@@ -25,12 +24,12 @@ export async function revokeInviteLink(
         revoked: true,
     })
 
-    const { users } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
     const invite =
         res._ === 'messages.exportedChatInviteReplaced'
             ? res.newInvite
             : res.invite
 
-    return new ChatInviteLink(this, invite, users)
+    return new ChatInviteLink(this, invite, peers)
 }

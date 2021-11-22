@@ -10,13 +10,10 @@ import { MtArgumentError } from '../errors'
 export class Invoice {
     readonly type = 'invoice' as const
 
-    readonly client: TelegramClient
-    readonly raw: tl.RawMessageMediaInvoice
-
-    constructor(client: TelegramClient, raw: tl.RawMessageMediaInvoice) {
-        this.client = client
-        this.raw = raw
-    }
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawMessageMediaInvoice
+    ) {}
 
     /**
      * Whether the shipping address was requested

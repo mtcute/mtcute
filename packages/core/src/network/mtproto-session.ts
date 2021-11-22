@@ -1,20 +1,9 @@
-import { BigInteger } from 'big-integer'
 import { buffersEqual, randomBytes } from '../utils/buffer-utils'
-import { ICryptoProvider } from '../utils/crypto'
-import { tl } from '@mtcute/tl'
+import { mtp, tl } from '@mtcute/tl'
 import { createAesIgeForMessage } from '../utils/crypto/mtproto'
-import {
-    BinaryWriter,
-    SerializationCounter,
-} from '../utils/binary/binary-writer'
-import { BinaryReader } from '../utils/binary/binary-reader'
-import { Logger } from '../utils/logger'
-
-export interface EncryptedMessage {
-    messageId: BigInteger
-    seqNo: number
-    content: tl.TlObject
-}
+import { ICryptoProvider, Logger, getRandomInt, randomLong } from '../utils'
+import Long from 'long'
+import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlSerializationCounter, TlWriterMap } from '@mtcute/tl-runtime'
 
 /**
  * Class encapsulating a single MTProto session.
@@ -23,17 +12,25 @@ export interface EncryptedMessage {
 export class MtprotoSession {
     readonly _crypto: ICryptoProvider
 
-    _sessionId = randomBytes(8)
+    _sessionId = randomLong()
 
     _authKey?: Buffer
     _authKeyId?: Buffer
     _authKeyClientSalt?: Buffer
     _authKeyServerSalt?: Buffer
 
-    // default salt: [0x00]*8
-    serverSalt: Buffer = Buffer.alloc(8)
+    _timeOffset = 0
+    _lastMessageId = Long.ZERO
+    _seqNo = 0
 
-    constructor(crypto: ICryptoProvider, readonly log: Logger) {
+    serverSalt = Long.ZERO
+
+    constructor(
+        crypto: ICryptoProvider,
+        readonly log: Logger,
+        readonly _readerMap: TlReaderMap,
+        readonly _writerMap: TlWriterMap
+    ) {
         this._crypto = crypto
     }
 
@@ -43,52 +40,58 @@ export class MtprotoSession {
     }
 
     /** Setup keys based on authKey */
-    async setupKeys(authKey: Buffer): Promise<void> {
-        this._authKey = authKey
-        this._authKeyClientSalt = authKey.slice(88, 120)
-        this._authKeyServerSalt = authKey.slice(96, 128)
-        this._authKeyId = (await this._crypto.sha1(this._authKey)).slice(-8)
+    async setupKeys(authKey?: Buffer | null): Promise<void> {
+        if (authKey) {
+            this._authKey = authKey
+            this._authKeyClientSalt = authKey.slice(88, 120)
+            this._authKeyServerSalt = authKey.slice(96, 128)
+            this._authKeyId = (await this._crypto.sha1(this._authKey)).slice(-8)
+        } else {
+            this._authKey = undefined
+            this._authKeyClientSalt = undefined
+            this._authKeyServerSalt = undefined
+            this._authKeyId = undefined
+        }
     }
 
     /** Reset session by removing authKey and values derived from it */
     reset(): void {
+        this._lastMessageId = Long.ZERO
+        this._seqNo = 0
+
         this._authKey = undefined
         this._authKeyClientSalt = undefined
         this._authKeyServerSalt = undefined
         this._authKeyId = undefined
-        this._sessionId = randomBytes(8)
+        this._sessionId = randomLong()
         // no need to reset server salt
     }
 
+    changeSessionId(): void {
+        this._sessionId = randomLong()
+        this._seqNo = 0
+    }
+
     /** Encrypt a single MTProto message using session's keys */
-    async encryptMessage(
-        message: tl.TlObject | Buffer,
-        messageId: BigInteger,
-        seqNo: number
-    ): Promise<Buffer> {
+    async encryptMessage(message: Buffer): Promise<Buffer> {
         if (!this._authKey) throw new Error('Keys are not set up!')
 
-        const length = Buffer.isBuffer(message)
-            ? message.length
-            : SerializationCounter.countNeededBytes(message)
         let padding =
-            (32 /* header size */ + length + 12) /* min padding */ % 16
+            (16 /* header size */ + message.length + 12) /* min padding */ % 16
         padding = 12 + (padding ? 16 - padding : 0)
-        const encryptedWriter = BinaryWriter.alloc(32 + length + padding)
 
-        encryptedWriter.raw(this.serverSalt!)
-        encryptedWriter.raw(this._sessionId)
-        encryptedWriter.long(messageId)
-        encryptedWriter.int32(seqNo)
-        encryptedWriter.uint32(length)
-        if (Buffer.isBuffer(message)) encryptedWriter.raw(message)
-        else encryptedWriter.object(message as tl.TlObject)
-        encryptedWriter.raw(randomBytes(padding))
+        const buf = Buffer.alloc(16 + message.length + padding)
 
-        const innerData = encryptedWriter.result()
+        buf.writeInt32LE(this.serverSalt!.low)
+        buf.writeInt32LE(this.serverSalt!.high, 4)
+        buf.writeInt32LE(this._sessionId.low, 8)
+        buf.writeInt32LE(this._sessionId.high, 12)
+        message.copy(buf, 16)
+        randomBytes(padding).copy(buf, 16 + message.length)
+
         const messageKey = (
             await this._crypto.sha256(
-                Buffer.concat([this._authKeyClientSalt!, innerData])
+                Buffer.concat([this._authKeyClientSalt!, buf])
             )
         ).slice(8, 24)
         const ige = await createAesIgeForMessage(
@@ -97,20 +100,26 @@ export class MtprotoSession {
             messageKey,
             true
         )
-        const encryptedData = await ige.encrypt(innerData)
+        const encryptedData = await ige.encrypt(buf)
 
         return Buffer.concat([this._authKeyId!, messageKey, encryptedData])
     }
 
     /** Decrypt a single MTProto message using session's keys */
-    async decryptMessage(data: Buffer): Promise<EncryptedMessage | null> {
+    async decryptMessage(
+        data: Buffer,
+        callback: (
+            msgId: tl.Long,
+            seqNo: number,
+            data: TlBinaryReader
+        ) => void
+    ): Promise<void> {
         if (!this._authKey) throw new Error('Keys are not set up!')
 
-        const reader = new BinaryReader(data)
+        const authKeyId = data.slice(0, 8)
+        const messageKey = data.slice(8, 24)
 
-        const authKeyId = reader.raw(8)
-        const messageKey = reader.int128()
-        let encryptedData = reader.raw()
+        let encryptedData = data.slice(24)
 
         if (!buffersEqual(authKeyId, this._authKeyId!)) {
             this.log.warn(
@@ -119,7 +128,7 @@ export class MtprotoSession {
                 authKeyId,
                 this._authKeyId
             )
-            return null
+            return
         }
 
         const padSize = encryptedData.length % 16
@@ -142,6 +151,7 @@ export class MtprotoSession {
                 Buffer.concat([this._authKeyServerSalt!, innerData])
             )
         ).slice(8, 24)
+
         if (!buffersEqual(messageKey, expectedMessageKey)) {
             this.log.warn(
                 '[%h] received message with invalid messageKey = %h (expected %h)',
@@ -149,24 +159,24 @@ export class MtprotoSession {
                 messageKey,
                 expectedMessageKey
             )
-            return null
+            return
         }
 
-        const innerReader = new BinaryReader(innerData)
+        const innerReader = new TlBinaryReader(this._readerMap, innerData)
         innerReader.seek(8) // skip salt
-        const sessionId = innerReader.raw(8)
+        const sessionId = innerReader.long()
         const messageId = innerReader.long(true)
 
-        if (!buffersEqual(sessionId, this._sessionId)) {
+        if (sessionId.neq(this._sessionId)) {
             this.log.warn(
                 'ignoring message with invalid sessionId = %h',
                 sessionId
             )
-            return null
+            return
         }
 
-        const seqNo = innerReader.uint32()
-        const length = innerReader.uint32()
+        const seqNo = innerReader.uint()
+        const length = innerReader.uint()
 
         if (length > innerData.length - 32 /* header size */) {
             this.log.warn(
@@ -174,7 +184,7 @@ export class MtprotoSession {
                 length,
                 innerData.length - 32
             )
-            return null
+            return
         }
 
         if (length % 4 !== 0) {
@@ -182,25 +192,68 @@ export class MtprotoSession {
                 'ignoring message with invalid length: %d is not a multiple of 4',
                 length
             )
-            return null
+            return
         }
 
-        const content = innerReader.object()
-
-        const paddingSize = innerData.length - innerReader.pos
+        const paddingSize = innerData.length - length - 32 // header size
 
         if (paddingSize < 12 || paddingSize > 1024) {
             this.log.warn(
                 'ignoring message with invalid padding size: %d',
                 paddingSize
             )
-            return null
+            return
         }
 
-        return {
-            messageId,
-            seqNo,
-            content,
+        callback(messageId, seqNo, innerReader)
+    }
+
+    getMessageId(): Long {
+        const timeTicks = Date.now()
+        const timeSec = Math.floor(timeTicks / 1000) + this._timeOffset
+        const timeMSec = timeTicks % 1000
+        const random = getRandomInt(0xffff)
+
+        let messageId = new Long((timeMSec << 21) | (random << 3) | 4, timeSec)
+
+        if (this._lastMessageId.gt(messageId)) {
+            messageId = this._lastMessageId.add(4)
         }
+
+        this._lastMessageId = messageId
+
+        return messageId
+    }
+
+    getSeqNo(isContentRelated = true): number {
+        let seqNo = this._seqNo * 2
+
+        if (isContentRelated) {
+            seqNo += 1
+            this._seqNo += 1
+        }
+
+        return seqNo
+    }
+
+    writeMessage(
+        writer: TlBinaryWriter,
+        content: tl.TlObject | mtp.TlObject | Buffer,
+        isContentRelated = true
+    ): Long {
+        const messageId = this.getMessageId()
+        const seqNo = this.getSeqNo(isContentRelated)
+
+        const length = Buffer.isBuffer(content)
+            ? content.length
+            : TlSerializationCounter.countNeededBytes(writer.objectMap!, content)
+
+        writer.long(messageId)
+        writer.int(seqNo)
+        writer.uint(length)
+        if (Buffer.isBuffer(content)) writer.raw(content)
+        else writer.object(content as tl.TlObject)
+
+        return messageId
     }
 }

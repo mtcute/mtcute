@@ -16,19 +16,15 @@ export namespace ChatPreview {
 }
 
 export class ChatPreview {
-    readonly client: TelegramClient
-    readonly invite: tl.RawChatInvite
 
-    /**
-     * Original invite link used to fetch
-     * this preview
-     */
-    readonly link: string
-
-    constructor(client: TelegramClient, raw: tl.RawChatInvite, link: string) {
-        this.client = client
-        this.invite = raw
-        this.link = link
+    constructor(
+        readonly client: TelegramClient,
+        readonly invite: tl.RawChatInvite,
+        /**
+         * Original invite link used to fetch this preview
+         */
+        readonly link: string
+    ) {
     }
 
     /**

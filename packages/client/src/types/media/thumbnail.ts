@@ -10,7 +10,7 @@ import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { makeInspectable } from '../utils'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
-import bigInt from 'big-integer'
+import Long from 'long'
 
 /**
  * One size of some thumbnail
@@ -171,8 +171,8 @@ export class Thumbnail extends FileLocation {
                     fileReference: null,
                     location: {
                         _: 'photo',
-                        id: bigInt.zero,
-                        accessHash: bigInt.zero,
+                        id: Long.ZERO,
+                        accessHash: Long.ZERO,
                         source: {
                             _: 'stickerSetThumbnailVersion',
                             id: this._media.id,
@@ -226,7 +226,7 @@ export class Thumbnail extends FileLocation {
             if (this._media._ === 'stickerSet') {
                 this._uniqueFileId = toUniqueFileId(td.FileType.Thumbnail, {
                     _: 'photo',
-                    id: bigInt.zero,
+                    id: Long.ZERO,
                     source: {
                         _: 'stickerSetThumbnailVersion',
                         id: this._media.id,

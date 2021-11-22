@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { Chat, MtTypeAssertionError } from '../../types'
+import { Chat } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**

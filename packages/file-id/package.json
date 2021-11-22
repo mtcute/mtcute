@@ -12,8 +12,12 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/tl": "~1.131.0",
+        "@mtcute/tl": "^134.0.0",
+        "@mtcute/tl-runtime": "^1.0.0",
         "@mtcute/core": "^1.0.0",
-        "big-integer": "1.6.48"
+        "long": "^4.0.0"
+    },
+    "devDependencies": {
+        "@types/long": "^4.0.1"
     }
 }

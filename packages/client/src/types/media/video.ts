@@ -12,10 +12,6 @@ import { tdFileId } from '@mtcute/file-id'
 export class Video extends RawDocument {
     readonly type = 'video' as const
 
-    readonly attr:
-        | tl.RawDocumentAttributeVideo
-        | tl.RawDocumentAttributeImageSize
-
     protected _fileIdType(): tdFileId.FileType {
         return this.isRound
             ? tdFileId.FileType.VideoNote
@@ -27,10 +23,11 @@ export class Video extends RawDocument {
     constructor(
         client: TelegramClient,
         doc: tl.RawDocument,
-        attr: tl.RawDocumentAttributeVideo | tl.RawDocumentAttributeImageSize
+        readonly attr:
+            | tl.RawDocumentAttributeVideo
+            | tl.RawDocumentAttributeImageSize
     ) {
         super(client, doc)
-        this.attr = attr
     }
 
     /**
@@ -65,7 +62,7 @@ export class Video extends RawDocument {
         if (!this._isAnimation) {
             this._isAnimation =
                 this.attr._ === 'documentAttributeImageSize' ||
-                this.doc.attributes.some(
+                this.raw.attributes.some(
                     (it) => it._ === 'documentAttributeAnimated'
                 )
         }

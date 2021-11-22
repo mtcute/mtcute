@@ -5,7 +5,7 @@ import { Message } from '../messages'
 import { MtArgumentError } from '../errors'
 import { BasicPeerType, getBasicPeerType, getMarkedPeerId } from '@mtcute/core'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
-import { User, UsersIndex } from '../peers'
+import { User, PeersIndex } from '../peers'
 import { MessageNotFoundError } from '@mtcute/core'
 
 /**
@@ -13,22 +13,13 @@ import { MessageNotFoundError } from '@mtcute/core'
  * of an inline keyboard.
  */
 export class CallbackQuery {
-    readonly client: TelegramClient
-    readonly raw:
-        | tl.RawUpdateBotCallbackQuery
-        | tl.RawUpdateInlineBotCallbackQuery
-
-    readonly _users: UsersIndex
-
     constructor(
-        client: TelegramClient,
-        raw: tl.RawUpdateBotCallbackQuery | tl.RawUpdateInlineBotCallbackQuery,
-        users: UsersIndex
-    ) {
-        this.client = client
-        this.raw = raw
-        this._users = users
-    }
+        readonly client: TelegramClient,
+        readonly raw:
+            | tl.RawUpdateBotCallbackQuery
+            | tl.RawUpdateInlineBotCallbackQuery,
+        readonly _peers: PeersIndex
+    ) {}
 
     /**
      * ID of this callback query
@@ -43,7 +34,10 @@ export class CallbackQuery {
      */
     get user(): User {
         if (!this._user) {
-            this._user = new User(this.client, this._users[this.raw.userId])
+            this._user = new User(
+                this.client,
+                this._peers.user(this.raw.userId)
+            )
         }
 
         return this._user

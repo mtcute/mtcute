@@ -1,11 +1,13 @@
+import { LongSet } from './long-utils'
+
 interface OneWayLinkedList<T> {
     v: T
     n?: OneWayLinkedList<T>
 }
 
 /**
- * Simple class implementing LRU-like behaviour for a set
- * of strings, falling back to objects when `Set` is not available.
+ * Simple class implementing LRU-like behaviour for a set,
+ * falling back to objects when `Set` is not available.
  *
  * Used to store recently received message IDs in {@link TelegramConnection}
  *
@@ -13,67 +15,81 @@ interface OneWayLinkedList<T> {
  *
  * @internal
  */
-export class LruStringSet {
+export class LruSet<T> {
     private _capacity: number
-    private _first?: OneWayLinkedList<string>
-    private _last?: OneWayLinkedList<string>
+    private _first?: OneWayLinkedList<T>
+    private _last?: OneWayLinkedList<T>
 
-    private _set?: Set<string>
-    private _obj?: Record<string, true>
+    private _set?: Set<T> | LongSet
+    private _obj?: any
     private _objSize?: number
 
-    constructor(capacity: number, useObject = false) {
+    constructor(capacity: number, useObject = false, forLong = false) {
         this._capacity = capacity
 
-        if (typeof Set === 'undefined' || useObject) {
-            this._obj = {}
+        if (!forLong && (typeof Set === 'undefined' || useObject)) {
+            this._obj = Object.create(null)
             this._objSize = 0
             this.add = this._addForObj.bind(this)
             this.has = this._hasForObj.bind(this)
+            this.clear = this._clearForObj.bind(this)
         } else {
-            this._set = new Set()
+            this._set = forLong ? new LongSet(useObject) : new Set()
             this.add = this._addForSet.bind(this)
             this.has = this._hasForSet.bind(this)
+            this.clear = this._clearForSet.bind(this)
         }
     }
 
-    add: (str: string) => void
-    has: (str: string) => boolean
+    readonly add: (val: T) => void
+    readonly has: (val: T) => boolean
+    readonly clear: () => void
 
-    private _addForSet(str: string) {
-        if (this._set!.has(str)) return
+    private _clearForSet() {
+        this._first = this._last = undefined
+        this._set!.clear()
+    }
 
-        if (!this._first) this._first = { v: str }
+    private _clearForObj() {
+        this._first = this._last = undefined
+        this._obj = {}
+        this._objSize = 0
+    }
+
+    private _addForSet(val: T) {
+        if (this._set!.has(val as any)) return
+
+        if (!this._first) this._first = { v: val }
         if (!this._last) this._last = this._first
         else {
-            this._last.n = { v: str }
+            this._last.n = { v: val }
             this._last = this._last.n
         }
 
-        this._set!.add(str)
+        this._set!.add(val as any)
 
         if (this._set!.size > this._capacity && this._first) {
             // remove least recently used
-            this._set!.delete(this._first.v)
+            this._set!.delete(this._first.v as any)
             this._first = this._first.n
         }
     }
 
-    private _hasForSet(str: string) {
-        return this._set!.has(str)
+    private _hasForSet(val: T) {
+        return this._set!.has(val as any)
     }
 
-    private _addForObj(str: string) {
-        if (str in this._obj!) return
+    private _addForObj(val: T) {
+        if (val in this._obj!) return
 
-        if (!this._first) this._first = { v: str }
+        if (!this._first) this._first = { v: val }
         if (!this._last) this._last = this._first
         else {
-            this._last.n = { v: str }
+            this._last.n = { v: val }
             this._last = this._last.n
         }
 
-        this._obj![str] = true
+        this._obj![val] = true
 
         if (this._objSize === this._capacity) {
             // remove least recently used
@@ -84,7 +100,7 @@ export class LruStringSet {
         }
     }
 
-    private _hasForObj(str: string) {
-        return str in this._obj!
+    private _hasForObj(val: T) {
+        return val in this._obj!
     }
 }

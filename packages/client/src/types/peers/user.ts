@@ -36,18 +36,14 @@ export namespace User {
 }
 
 export class User {
-    /** Client that this user belongs to */
-    readonly client: TelegramClient
-
     /**
      * Underlying raw TL object
      */
     readonly raw: tl.RawUser
 
-    constructor(client: TelegramClient, user: tl.TypeUser) {
+    constructor(readonly client: TelegramClient, user: tl.TypeUser) {
         assertTypeIs('User#init', user, 'user')
 
-        this.client = client
         this.raw = user
     }
 
@@ -163,11 +159,9 @@ export class User {
     }
 
     private _parsedStatus?: User.ParsedStatus
+
     private _parseStatus() {
-        this._parsedStatus = User.parseStatus(
-            this.raw.status!,
-            this.raw.bot
-        )
+        this._parsedStatus = User.parseStatus(this.raw.status!, this.raw.bot)
     }
 
     /** User's Last Seen & Online status */
@@ -228,9 +222,7 @@ export class User {
      */
     get inputPeer(): tl.TypeInputPeer {
         if (!this.raw.accessHash)
-            throw new MtArgumentError(
-                "user's access hash is not available!"
-            )
+            throw new MtArgumentError("user's access hash is not available!")
 
         return {
             _: 'inputPeerUser',
@@ -294,7 +286,10 @@ export class User {
      * msg.replyText(`Hello, ${msg.sender.mention()`)
      * ```
      */
-    mention(text?: string | null, parseMode?: string | null): string | FormattedString {
+    mention(
+        text?: string | null,
+        parseMode?: string | null
+    ): string | FormattedString {
         if (text === undefined && this.username) {
             return `@${this.username}`
         }
@@ -302,15 +297,18 @@ export class User {
         if (!text) text = this.displayName
         if (!parseMode) parseMode = this.client['_defaultParseMode']
 
-        return new FormattedString(this.client.getParseMode(parseMode).unparse(text, [
-            {
-                raw: undefined as any,
-                type: 'text_mention',
-                offset: 0,
-                length: text.length,
-                userId: this.id,
-            },
-        ]), parseMode!)
+        return new FormattedString(
+            this.client.getParseMode(parseMode).unparse(text, [
+                {
+                    raw: undefined as any,
+                    type: 'text_mention',
+                    offset: 0,
+                    length: text.length,
+                    userId: this.raw.id,
+                },
+            ]),
+            parseMode!
+        )
     }
 
     /**
@@ -343,28 +341,32 @@ export class User {
      * @param text  Mention text
      * @param parseMode  Parse mode to use when creating mention
      */
-    permanentMention(text?: string | null, parseMode?: string | null): FormattedString {
+    permanentMention(
+        text?: string | null,
+        parseMode?: string | null
+    ): FormattedString {
         if (!this.raw.accessHash)
-            throw new MtArgumentError(
-                "user's access hash is not available!"
-            )
+            throw new MtArgumentError("user's access hash is not available!")
 
         if (!text) text = this.displayName
         if (!parseMode) parseMode = this.client['_defaultParseMode']
 
         // since we are just creating a link and not actual tg entity,
         // we can use this hack to create a valid link through our parse mode
-        return new FormattedString(this.client.getParseMode(parseMode).unparse(text, [
-            {
-                raw: undefined as any,
-                type: 'text_link',
-                offset: 0,
-                length: text.length,
-                url: `tg://user?id=${
-                    this.id
-                }&hash=${this.raw.accessHash.toString(16)}`,
-            },
-        ]), parseMode!)
+        return new FormattedString(
+            this.client.getParseMode(parseMode).unparse(text, [
+                {
+                    raw: undefined as any,
+                    type: 'text_link',
+                    offset: 0,
+                    length: text.length,
+                    url: `tg://user?id=${
+                        this.id
+                    }&hash=${this.raw.accessHash.toString(16)}`,
+                },
+            ]),
+            parseMode!
+        )
     }
 
     /**
@@ -392,6 +394,7 @@ export class User {
     ): ReturnType<TelegramClient['sendMedia']> {
         return this.client.sendMedia(this.inputPeer, media, params)
     }
+
     /**
      * Send a media group to this user.
      *

@@ -5,7 +5,7 @@ import type {
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { Parser } from 'htmlparser2'
-import bigInt from 'big-integer'
+import Long from 'long'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 
@@ -173,7 +173,9 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
 
                         const mention = MENTION_REGEX.exec(url)
                         if (mention) {
+                            const id = parseInt(mention[1])
                             const accessHash = mention[2]
+
                             if (accessHash) {
                                 entity = {
                                     _: 'inputMessageEntityMentionName',
@@ -181,8 +183,8 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                                     length: 0,
                                     userId: {
                                         _: 'inputUser',
-                                        userId: parseInt(mention[1]),
-                                        accessHash: bigInt(accessHash, 16),
+                                        userId: id,
+                                        accessHash: Long.fromString(accessHash, false, 16),
                                     },
                                 }
                             } else {
@@ -190,7 +192,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                                     _: 'messageEntityMentionName',
                                     offset: plainText.length,
                                     length: 0,
-                                    userId: parseInt(mention[1]),
+                                    userId: id,
                                 }
                             }
                         } else {

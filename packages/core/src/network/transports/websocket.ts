@@ -1,12 +1,10 @@
 import { ITelegramTransport, IPacketCodec, TransportState } from './abstract'
 import { tl } from '@mtcute/tl'
 import EventEmitter from 'events'
-import { typedArrayToBuffer } from '../../utils/buffer-utils'
-import { ICryptoProvider } from '../../utils/crypto'
 import type WebSocket from 'ws'
 import { IntermediatePacketCodec } from './intermediate'
 import { ObfuscatedPacketCodec } from './obfuscated'
-import { Logger } from '../../utils/logger'
+import { typedArrayToBuffer, Logger, ICryptoProvider } from '../../utils'
 
 let ws: {
     new (address: string, options?: string): WebSocket
@@ -69,9 +67,17 @@ export abstract class BaseWebSocketTransport
         this.close = this.close.bind(this)
     }
 
+    private _updateLogPrefix() {
+        if (this._currentDc) {
+            this.log.prefix = `[WS:${this._subdomains[this._currentDc.id]}.${this._baseDomain}] `
+        } else {
+            this.log.prefix = '[WS:disconnected] '
+        }
+    }
+
     setup(crypto: ICryptoProvider, log: Logger): void {
         this._crypto = crypto
-        this.log = log.create('tcp')
+        this.log = log.create('ws')
     }
 
     state(): TransportState {
@@ -102,6 +108,9 @@ export abstract class BaseWebSocketTransport
             'binary'
         )
 
+        this._updateLogPrefix()
+        this.log.debug('connecting to %s (%j)', this._socket.url, dc)
+
         this._socket.binaryType = 'arraybuffer'
 
         this._socket.addEventListener('message', (evt) =>
@@ -114,9 +123,9 @@ export abstract class BaseWebSocketTransport
 
     close(): void {
         if (this._state === TransportState.Idle) return
-        this.log.debug('%s: close', this._currentDc!.ipAddress)
+        this.log.info('close')
 
-        this.emit('close')
+        this.emit('connection closed')
         this._state = TransportState.Idle
         this._socket!.removeEventListener('close', this.close)
         this._socket!.close()
@@ -126,12 +135,12 @@ export abstract class BaseWebSocketTransport
     }
 
     async handleError({ error }: { error: Error }): Promise<void> {
-        this.log.error('%s: error: %s', this._currentDc!.ipAddress, error.stack)
+        this.log.error('error: %s', error.stack)
         this.emit('error', error)
     }
 
     async handleConnect(): Promise<void> {
-        this.log.debug('%s: connected', this._currentDc!.ipAddress)
+        this.log.info('connected')
         const initialMessage = await this._packetCodec.tag()
 
         this._socket!.send(initialMessage)

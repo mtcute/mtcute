@@ -2,21 +2,14 @@
 
 > TL schema and related utils used for MTCute.
 
-Generated from TL layer **131** (last updated on 25.07.2021).
+Generated from TL layer **134** (last updated on 20.11.2021).
 
 ## About
 
 This package contains JSON schema, type declarations, binary (de-)serialization, errors, RSA keys and helper functions.
 
-Package's minor version is always TL schema layer number,
-so version `1.42.0` means that this version was generated from TL layer 42.
-
-> ⚠️ **Warning**: Always use strict or tilde constraint to ensure
-> the same schema is used.
->
-> I.e. use `"@mtcute/tl": "~1.42.0"` or `"@mtcute/tl": "1.42.0"`
-> instead of `"@mtcute/tl": "^1.42.0"`, since the former would also
-> match `1.43.0, 1.44.0, ...` and will probably break your build or runtime
+Package's major version is always TL schema layer number,
+so version `42.0.0` means that this version was generated from TL layer 42.
 
 - JSON schema, types, binary (de-)serialization and helper functions are generated directly from `.tl` files that are
   automatically fetched from [TDesktop repository](https://github.com/telegramdesktop/tdesktop/).

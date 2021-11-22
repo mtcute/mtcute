@@ -1,3 +1,5 @@
+import { LongMap } from './long-utils'
+
 interface TwoWayLinkedList<K, T> {
     // k = key
     k: K
@@ -17,18 +19,24 @@ interface TwoWayLinkedList<K, T> {
  *
  * Uses two-way linked list internally to keep track of insertion/access order
  */
-export class LruMap<K extends keyof any, V> {
+export class LruMap<K, V> {
     private _capacity: number
     private _first?: TwoWayLinkedList<K, V>
     private _last?: TwoWayLinkedList<K, V>
 
     private _size = 0
 
-    constructor(capacity: number, useObject = false) {
+    constructor(capacity: number, useObject = false, forLong = false) {
         this._capacity = capacity
 
-        if (typeof Map === 'undefined' || useObject) {
-            const obj = {} as any
+        if (forLong) {
+            const map = new LongMap(useObject)
+            this._set = map.set.bind(map) as any
+            this._has = map.has.bind(map) as any
+            this._get = map.get.bind(map) as any
+            this._del = map.delete.bind(map) as any
+        } else if (typeof Map === 'undefined' || useObject) {
+            const obj = Object.create(null)
             this._set = (k, v) => (obj[k] = v)
             this._has = (k) => k in obj
             this._get = (k) => obj[k]

@@ -2,32 +2,52 @@ import { tl } from '@mtcute/tl'
 import {
     encodeUrlSafeBase64,
     parseUrlSafeBase64,
-    BinaryReader,
-    BinaryWriter,
+    TlBinaryReader,
+    TlBinaryWriter,
 } from '@mtcute/core'
 
 export function parseInlineMessageId(
     id: string
-): tl.RawInputBotInlineMessageID {
+): tl.TypeInputBotInlineMessageID {
     const buf = parseUrlSafeBase64(id)
-    const reader = new BinaryReader(buf)
+    const reader = TlBinaryReader.manual(buf)
+
+    if (buf.length === 20) {
+        return {
+            _: 'inputBotInlineMessageID',
+            dcId: reader.int(),
+            id: reader.long(),
+            accessHash: reader.long(),
+        }
+    }
 
     return {
-        _: 'inputBotInlineMessageID',
-        dcId: reader.int32(),
-        id: reader.long(),
-        accessHash: reader.long(),
+        _: 'inputBotInlineMessageID64',
+        dcId: reader.int(),
+        ownerId: reader.long(),
+        id: reader.int(),
+        accessHash: reader.long()
     }
 }
 
 export function encodeInlineMessageId(
-    id: tl.RawInputBotInlineMessageID
+    id: tl.TypeInputBotInlineMessageID
 ): string {
-    const writer = BinaryWriter.alloc(20) // int32, int64, int64
-
-    writer.int32(id.dcId)
-    writer.long(id.id)
-    writer.long(id.accessHash)
+    let writer: TlBinaryWriter
+    switch (id._) {
+        case 'inputBotInlineMessageID':
+            writer = TlBinaryWriter.manualAlloc(20)
+            writer.int(id.dcId)
+            writer.long(id.id)
+            writer.long(id.accessHash)
+            break
+        case 'inputBotInlineMessageID64':
+            writer = TlBinaryWriter.manualAlloc(24)
+            writer.int(id.dcId)
+            writer.long(id.ownerId)
+            writer.int(id.id)
+            writer.long(id.accessHash)
+    }
 
     return encodeUrlSafeBase64(writer.result())
 }

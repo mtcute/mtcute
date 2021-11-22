@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtNotFoundError } from '../../types'
-import { getBasicPeerType, getMarkedPeerId, MAX_CHANNEL_ID } from '@mtcute/core'
-import bigInt from 'big-integer'
+import { getBasicPeerType, getMarkedPeerId, toggleChannelIdMark } from '@mtcute/core'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
+import Long from 'long'
 import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
@@ -11,11 +11,13 @@ import { assertTypeIs } from '../../utils/type-assertion'
  * Useful when an `InputPeer` is needed.
  *
  * @param peerId  The peer identifier that you want to extract the `InputPeer` from.
+ * @param force  Whether to force re-fetch the peer from the server
  * @internal
  */
 export async function resolvePeer(
     this: TelegramClient,
-    peerId: InputPeerLike
+    peerId: InputPeerLike,
+    force = false
 ): Promise<tl.TypeInputPeer> {
     // for convenience we also accept tl objects directly
     if (typeof peerId === 'object') {
@@ -26,7 +28,7 @@ export async function resolvePeer(
         }
     }
 
-    if (typeof peerId === 'number') {
+    if (typeof peerId === 'number' && !force) {
         const fromStorage = await this.storage.getPeerById(peerId)
         if (fromStorage) return fromStorage
     }
@@ -42,7 +44,7 @@ export async function resolvePeer(
 
             const res = await this.call({
                 _: 'contacts.getContacts',
-                hash: 0,
+                hash: Long.ZERO,
             })
 
             assertTypeIs('contacts.getContacts', res, 'contacts.contacts')
@@ -62,8 +64,10 @@ export async function resolvePeer(
             )
         } else {
             // username
-            const fromStorage = await this.storage.getPeerByUsername(peerId)
-            if (fromStorage) return fromStorage
+            if (!force) {
+                const fromStorage = await this.storage.getPeerByUsername(peerId)
+                if (fromStorage) return fromStorage
+            }
 
             const res = await this.call({
                 _: 'contacts.resolveUsername',
@@ -122,7 +126,7 @@ export async function resolvePeer(
                     {
                         _: 'inputUser',
                         userId: peerId,
-                        accessHash: bigInt.zero,
+                        accessHash: Long.ZERO,
                     },
                 ],
             })
@@ -159,14 +163,15 @@ export async function resolvePeer(
             // break
         }
         case 'channel': {
-            const id = MAX_CHANNEL_ID - peerId
+            const id = toggleChannelIdMark(peerId as number)
+
             const res = await this.call({
                 _: 'channels.getChannels',
                 id: [
                     {
                         _: 'inputChannel',
-                        channelId: MAX_CHANNEL_ID - peerId,
-                        accessHash: bigInt.zero,
+                        channelId: id,
+                        accessHash: Long.ZERO,
                     },
                 ],
             })

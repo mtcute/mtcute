@@ -1,7 +1,6 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { Dialog, MtTypeAssertionError } from '../../types'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
+import { Dialog, MtTypeAssertionError, PeersIndex } from '../../types'
 import { getMarkedPeerId } from '@mtcute/core'
 
 /** @internal */
@@ -16,7 +15,7 @@ export function _parseDialogs(
             'messages.dialogsNotModified'
         )
 
-    const { users, chats } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
     const messages: Record<number, tl.TypeMessage> = {}
     res.messages.forEach((msg) => {
@@ -27,7 +26,5 @@ export function _parseDialogs(
 
     return res.dialogs
         .filter((it) => it._ === 'dialog')
-        .map(
-            (it) => new Dialog(this, it as tl.RawDialog, users, chats, messages)
-        )
+        .map((it) => new Dialog(this, it as tl.RawDialog, peers, messages))
 }

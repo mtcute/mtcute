@@ -10,8 +10,6 @@ import { tdFileId } from '@mtcute/file-id'
 export class Audio extends RawDocument {
     readonly type = 'audio' as const
 
-    readonly attr: tl.RawDocumentAttributeAudio
-
     protected _fileIdType(): tdFileId.FileType {
         return tdFileId.FileType.Audio
     }
@@ -19,10 +17,9 @@ export class Audio extends RawDocument {
     constructor(
         client: TelegramClient,
         doc: tl.RawDocument,
-        attr: tl.RawDocumentAttributeAudio
+        readonly attr: tl.RawDocumentAttributeAudio
     ) {
         super(client, doc)
-        this.attr = attr
     }
 
     /**

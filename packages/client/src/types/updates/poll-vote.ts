@@ -1,4 +1,4 @@
-import { MtUnsupportedError, User, UsersIndex } from '../'
+import { MtUnsupportedError, User, PeersIndex } from '../'
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { makeInspectable } from '../utils'
@@ -10,19 +10,11 @@ import { makeInspectable } from '../utils'
  * that were sent by this bot.
  */
 export class PollVoteUpdate {
-    readonly client: TelegramClient
-    readonly raw: tl.RawUpdateMessagePollVote
-
-    readonly _users: UsersIndex
-
     constructor(
-        client: TelegramClient,
-        raw: tl.RawUpdateMessagePollVote,
-        users: UsersIndex
+        readonly client: TelegramClient,
+        readonly raw: tl.RawUpdateMessagePollVote,
+        readonly _peers: PeersIndex
     ) {
-        this.client = client
-        this.raw = raw
-        this._users = users
     }
 
     /**
@@ -38,7 +30,7 @@ export class PollVoteUpdate {
      */
     get user(): User {
         if (!this._user) {
-            this._user = new User(this.client, this._users[this.raw.userId])
+            this._user = new User(this.client, this._peers.user(this.raw.userId))
         }
 
         return this._user

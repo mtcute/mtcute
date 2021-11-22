@@ -1,7 +1,6 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, Message } from '../../types'
+import { InputPeerLike, Message, PeersIndex } from '../../types'
 import { tl } from '@mtcute/tl'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
 
 /** @internal */
 export async function _getDiscussionMessage(
@@ -71,7 +70,7 @@ export async function getDiscussionMessage(
         return null
 
     const msg = res.messages[0]
-    const { users, chats } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
-    return new Message(this, msg, users, chats)
+    return new Message(this, msg, peers)
 }

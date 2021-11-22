@@ -3,18 +3,17 @@ import {
     BotKeyboard, InputFileLike,
     InputMediaLike,
     InputPeerLike,
-    Message, MtArgumentError,
+    Message, MtArgumentError, PeersIndex,
     ReplyMarkup,
 } from '../../types'
 import {
     normalizeDate,
     normalizeMessageId,
-    randomUlong,
 } from '../../utils/misc-utils'
 import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { MessageNotFoundError } from '@mtcute/tl/errors'
+import { randomLong } from '@mtcute/core'
 
 /**
  * Send a group of media.
@@ -165,7 +164,7 @@ export async function sendMediaGroup(
 
         multiMedia.push({
             _: 'inputSingleMedia',
-            randomId: randomUlong(),
+            randomId: randomLong(),
             media: inputMedia,
             message,
             entities,
@@ -178,7 +177,7 @@ export async function sendMediaGroup(
         multiMedia,
         silent: params.silent,
         replyToMsgId: replyTo,
-        randomId: randomUlong(),
+        randomId: randomLong(),
         scheduleDate: normalizeDate(params.schedule),
         replyMarkup,
         clearDraft: params.clearDraft,
@@ -187,7 +186,7 @@ export async function sendMediaGroup(
     assertIsUpdatesGroup('_findMessageInUpdate', res)
     this._handleUpdate(res, true)
 
-    const { users, chats } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
     const msgs = res.updates
         .filter(
@@ -201,8 +200,7 @@ export async function sendMediaGroup(
                 new Message(
                     this,
                     (u as any).message,
-                    users,
-                    chats,
+                    peers,
                     u._ === 'updateNewScheduledMessage'
                 )
         )

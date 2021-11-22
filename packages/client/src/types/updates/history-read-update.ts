@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
-import { getMarkedPeerId, MAX_CHANNEL_ID } from '@mtcute/core'
+import { getMarkedPeerId, toggleChannelIdMark } from '@mtcute/core'
 import { makeInspectable } from '../utils'
 
 export class HistoryReadUpdate {
@@ -58,7 +58,7 @@ export class HistoryReadUpdate {
             case 'updateReadChannelInbox':
             case 'updateReadChannelDiscussionOutbox':
             case 'updateReadChannelDiscussionInbox':
-                return MAX_CHANNEL_ID - this.raw.channelId
+                return toggleChannelIdMark(this.raw.channelId)
         }
     }
 

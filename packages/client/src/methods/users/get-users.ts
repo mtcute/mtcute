@@ -1,7 +1,6 @@
 import { InputPeerLike, User } from '../../types'
 import { TelegramClient } from '../../client'
 import { MaybeArray } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**

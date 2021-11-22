@@ -2,9 +2,8 @@ import { TelegramClient } from '../../client'
 import {
     ChatInviteLink,
     InputPeerLike,
-    MtTypeAssertionError,
+    MtTypeAssertionError, PeersIndex,
 } from '../../types'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
 
 /**
  * Get primary invite link of a chat
@@ -31,7 +30,7 @@ export async function getPrimaryInviteLink(
             'false'
         )
 
-    const { users } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
-    return new ChatInviteLink(this, res.invites[0], users)
+    return new ChatInviteLink(this, res.invites[0], peers)
 }

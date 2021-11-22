@@ -12,12 +12,13 @@
         "build": "tsc"
     },
     "dependencies": {
+        "@types/long": "^4.0.1",
         "@types/node": "^15.12.1",
-        "@mtcute/tl": "~1.131.0",
+        "@mtcute/tl": "~134.0",
         "@mtcute/core": "^1.0.0",
         "@mtcute/file-id": "^1.0.0",
         "eager-async-pool": "^1.0.0",
         "file-type": "^16.2.0",
-        "big-integer": "1.6.48"
+        "long": "^4.0.0"
     }
 }

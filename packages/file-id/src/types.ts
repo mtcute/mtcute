@@ -1,6 +1,4 @@
-import { BigInteger } from 'big-integer'
-
-type Long = BigInteger
+import Long from 'long'
 
 export namespace tdFileId {
     export const PERSISTENT_ID_VERSION_OLD = 2
@@ -100,7 +98,7 @@ export namespace tdFileId {
     export interface RawPhotoSizeSourceDialogPhoto {
         readonly _: 'dialogPhoto'
         readonly big: boolean
-        readonly id: Long
+        readonly id: number
         readonly accessHash: Long
     }
 

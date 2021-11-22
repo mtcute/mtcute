@@ -1,18 +1,17 @@
 import { TelegramClient } from '../../client'
 import {
-    BotKeyboard, FormattedString,
+    BotKeyboard,
+    FormattedString,
     InputMediaLike,
     InputPeerLike,
-    Message, MtArgumentError,
+    Message,
+    MtArgumentError,
     ReplyMarkup,
 } from '../../types'
-import {
-    normalizeDate,
-    normalizeMessageId,
-    randomUlong,
-} from '../../utils/misc-utils'
+import { normalizeDate, normalizeMessageId } from '../../utils/misc-utils'
 import { tl } from '@mtcute/tl'
 import { MessageNotFoundError } from '@mtcute/tl/errors'
+import { randomLong } from '@mtcute/core'
 
 /**
  * Send a single media (a photo or a document-based media)
@@ -157,8 +156,7 @@ export async function sendMedia(
 
         const msg = await this.getMessages(peer, replyTo)
 
-        if (!msg)
-            throw new MessageNotFoundError()
+        if (!msg) throw new MessageNotFoundError()
     }
 
     const res = await this.call({
@@ -167,7 +165,7 @@ export async function sendMedia(
         media: inputMedia,
         silent: params.silent,
         replyToMsgId: replyTo,
-        randomId: randomUlong(),
+        randomId: randomLong(),
         scheduleDate: normalizeDate(params.schedule),
         replyMarkup,
         message,

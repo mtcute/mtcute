@@ -1,11 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
 import { MaybeArray } from '@mtcute/core'
-import {
-    isInputPeerChannel,
-    normalizeToInputChannel,
-} from '../../utils/peer-utils'
-import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
  * Delete scheduled messages.

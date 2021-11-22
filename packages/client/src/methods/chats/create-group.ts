@@ -1,8 +1,7 @@
 import { TelegramClient } from '../../client'
 import { MaybeArray } from '@mtcute/core'
-import { Chat, InputPeerLike, MtTypeAssertionError } from '../../types'
+import { Chat, InputPeerLike } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**

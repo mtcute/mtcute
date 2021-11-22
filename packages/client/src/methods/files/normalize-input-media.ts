@@ -2,7 +2,6 @@ import { TelegramClient } from '../../client'
 import {
     InputMediaLike,
     isUploadedFile,
-    MtArgumentError,
     UploadFileLike,
 } from '../../types'
 import { tl } from '@mtcute/tl'
@@ -14,9 +13,9 @@ import {
 } from '@mtcute/file-id'
 import { extractFileName } from '../../utils/file-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
-import bigInt from 'big-integer'
 import { normalizeDate } from '../../utils/misc-utils'
 import { encodeWaveform } from '../../utils/voice-utils'
+import Long from 'long'
 
 /**
  * Normalize an {@link InputMediaLike} to `InputMedia`,
@@ -182,7 +181,7 @@ export async function _normalizeInputMedia(
             poll: {
                 _: 'poll',
                 closed: media.closed,
-                id: bigInt.zero,
+                id: Long.ZERO,
                 publicVoters: media.public,
                 multipleChoice: media.multiple,
                 quiz: media.type === 'quiz',

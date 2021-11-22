@@ -2,7 +2,7 @@ import { TelegramClient } from '../../client'
 import { InputPeerLike, MtInvalidPeerTypeError, Photo } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
-import bigInt from 'big-integer'
+import Long from 'long'
 
 /**
  * Iterate over profile photos
@@ -54,7 +54,7 @@ export async function* iterProfilePhotos(
 
     const limit = Math.min(params.chunkSize || 100, total)
 
-    const maxId = params.maxId || bigInt.zero
+    const maxId = params.maxId || Long.ZERO
 
     for (;;) {
         const res = await this.call({

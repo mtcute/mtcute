@@ -2,8 +2,8 @@ import { makeInspectable } from '../utils'
 import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { MessageEntity } from '../messages'
-import bigInt from 'big-integer'
-import { UsersIndex } from '../peers'
+import { PeersIndex } from '../peers'
+import Long from 'long'
 
 export namespace Poll {
     export interface PollAnswer {
@@ -40,23 +40,12 @@ export namespace Poll {
 export class Poll {
     readonly type = 'poll' as const
 
-    readonly client: TelegramClient
-    readonly raw: tl.TypePoll
-    readonly results?: tl.TypePollResults
-
-    readonly _users: UsersIndex
-
     constructor(
-        client: TelegramClient,
-        raw: tl.TypePoll,
-        users: UsersIndex,
-        results?: tl.TypePollResults
-    ) {
-        this.client = client
-        this.raw = raw
-        this._users = users
-        this.results = results
-    }
+        readonly client: TelegramClient,
+        readonly raw: tl.TypePoll,
+        readonly _peers: PeersIndex,
+        readonly results?: tl.TypePollResults
+    ) {}
 
     /**
      * Unique identifier of the poll
@@ -151,6 +140,7 @@ export class Poll {
     }
 
     private _entities?: MessageEntity[]
+
     /**
      * Format entities for {@link solution}, only available
      * in case you have already answered
@@ -206,7 +196,7 @@ export class Poll {
             poll: {
                 _: 'poll',
                 closed: false,
-                id: bigInt.zero,
+                id: Long.ZERO,
                 publicVoters: this.raw.publicVoters,
                 multipleChoice: this.raw.multipleChoice,
                 question: this.raw.question,

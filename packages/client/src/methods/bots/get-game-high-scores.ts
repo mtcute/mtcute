@@ -3,12 +3,10 @@ import {
     InputPeerLike,
     MtInvalidPeerTypeError,
     GameHighScore,
+    PeersIndex,
 } from '../../types'
 import { tl } from '@mtcute/tl'
-import {
-    createUsersChatsIndex,
-    normalizeToInputUser,
-} from '../../utils/peer-utils'
+import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
  * Get high scores of a game
@@ -43,9 +41,9 @@ export async function getGameHighScores(
         userId: user,
     })
 
-    const { users } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
-    return res.scores.map((score) => new GameHighScore(this, score, users))
+    return res.scores.map((score) => new GameHighScore(this, score, peers))
 }
 
 /**
@@ -81,7 +79,7 @@ export async function getInlineGameHighScores(
         { connection }
     )
 
-    const { users } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
-    return res.scores.map((score) => new GameHighScore(this, score, users))
+    return res.scores.map((score) => new GameHighScore(this, score, peers))
 }

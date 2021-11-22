@@ -8,7 +8,9 @@ import { Message } from '../messages'
 import { ChatPermissions } from './chat-permissions'
 import { ChatLocation } from './chat-location'
 import { ChatInviteLink } from './chat-invite-link'
-import { ChatsIndex, UsersIndex } from './index'
+import { PeersIndex } from './index'
+import { toggleChannelIdMark } from '../../../../core'
+
 
 export namespace ChatEvent {
     /** A user has joined the group (in the case of big groups, info of the user that has joined isn't shown) */
@@ -371,8 +373,7 @@ function _actionFromTl(
                 message: new Message(
                     this.client,
                     e.message,
-                    this._users,
-                    this._chats
+                    this._peers
                 ),
             }
         case 'channelAdminLogEventActionEditMessage':
@@ -381,14 +382,12 @@ function _actionFromTl(
                 old: new Message(
                     this.client,
                     e.prevMessage,
-                    this._users,
-                    this._chats
+                    this._peers
                 ),
                 new: new Message(
                     this.client,
                     e.newMessage,
-                    this._users,
-                    this._chats
+                    this._peers
                 ),
             }
         case 'channelAdminLogEventActionDeleteMessage':
@@ -397,8 +396,7 @@ function _actionFromTl(
                 message: new Message(
                     this.client,
                     e.message,
-                    this._users,
-                    this._chats
+                    this._peers
                 ),
             }
         case 'channelAdminLogEventActionParticipantLeave':
@@ -406,7 +404,7 @@ function _actionFromTl(
         case 'channelAdminLogEventActionParticipantInvite':
             return {
                 type: 'user_invited',
-                member: new ChatMember(this.client, e.participant, this._users),
+                member: new ChatMember(this.client, e.participant, this._peers),
             }
         case 'channelAdminLogEventActionParticipantToggleBan':
             return {
@@ -414,9 +412,9 @@ function _actionFromTl(
                 old: new ChatMember(
                     this.client,
                     e.prevParticipant,
-                    this._users
+                    this._peers
                 ),
-                new: new ChatMember(this.client, e.newParticipant, this._users),
+                new: new ChatMember(this.client, e.newParticipant, this._peers),
             }
         case 'channelAdminLogEventActionParticipantToggleAdmin':
             return {
@@ -424,9 +422,9 @@ function _actionFromTl(
                 old: new ChatMember(
                     this.client,
                     e.prevParticipant,
-                    this._users
+                    this._peers
                 ),
-                new: new ChatMember(this.client, e.newParticipant, this._users),
+                new: new ChatMember(this.client, e.newParticipant, this._peers),
             }
         case 'channelAdminLogEventActionChangeStickerSet':
             return {
@@ -452,15 +450,14 @@ function _actionFromTl(
                 message: new Message(
                     this.client,
                     e.message,
-                    this._users,
-                    this._chats
+                    this._peers
                 ),
             }
         case 'channelAdminLogEventActionChangeLinkedChat':
             return {
                 type: 'linked_chat_changed',
-                old: e.prevValue,
-                new: e.newValue,
+                old: toggleChannelIdMark(e.prevValue),
+                new: toggleChannelIdMark(e.newValue),
             }
         case 'channelAdminLogEventActionChangeLocation':
             return {
@@ -503,23 +500,23 @@ function _actionFromTl(
         case 'channelAdminLogEventActionParticipantJoinByInvite':
             return {
                 type: 'user_joined_invite',
-                link: new ChatInviteLink(this.client, e.invite, this._users),
+                link: new ChatInviteLink(this.client, e.invite, this._peers),
             }
         case 'channelAdminLogEventActionExportedInviteDelete':
             return {
                 type: 'invite_deleted',
-                link: new ChatInviteLink(this.client, e.invite, this._users),
+                link: new ChatInviteLink(this.client, e.invite, this._peers),
             }
         case 'channelAdminLogEventActionExportedInviteRevoke':
             return {
                 type: 'invite_revoked',
-                link: new ChatInviteLink(this.client, e.invite, this._users),
+                link: new ChatInviteLink(this.client, e.invite, this._peers),
             }
         case 'channelAdminLogEventActionExportedInviteEdit':
             return {
                 type: 'invite_edited',
-                old: new ChatInviteLink(this.client, e.prevInvite, this._users),
-                new: new ChatInviteLink(this.client, e.newInvite, this._users),
+                old: new ChatInviteLink(this.client, e.prevInvite, this._peers),
+                new: new ChatInviteLink(this.client, e.newInvite, this._peers),
             }
         case 'channelAdminLogEventActionChangeHistoryTTL':
             return {
@@ -533,22 +530,11 @@ function _actionFromTl(
 }
 
 export class ChatEvent {
-    readonly client: TelegramClient
-    readonly raw: tl.TypeChannelAdminLogEvent
-
-    readonly _users: UsersIndex
-    readonly _chats: ChatsIndex
-
     constructor(
-        client: TelegramClient,
-        raw: tl.TypeChannelAdminLogEvent,
-        users: UsersIndex,
-        chats: ChatsIndex
+        readonly client: TelegramClient,
+        readonly raw: tl.TypeChannelAdminLogEvent,
+        readonly _peers: PeersIndex,
     ) {
-        this.client = client
-        this.raw = raw
-        this._users = users
-        this._chats = chats
     }
 
     /**
@@ -574,7 +560,7 @@ export class ChatEvent {
      */
     get actor(): User {
         if (!this._actor) {
-            this._actor = new User(this.client, this._users[this.raw.userId])
+            this._actor = new User(this.client, this._peers.user(this.raw.userId))
         }
 
         return this._actor

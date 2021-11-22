@@ -1,7 +1,6 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
+import { InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types'
 import {
-    createUsersChatsIndex,
     isInputPeerChannel,
     isInputPeerChat,
     isInputPeerUser,
@@ -48,15 +47,15 @@ export async function getChatMember(
                 ? []
                 : res.fullChat.participants.participants
 
-        const { users } = createUsersChatsIndex(res)
+        const peers = PeersIndex.from(res)
 
         for (const m of members) {
             if (
                 (user._ === 'inputPeerSelf' &&
-                    (users[m.userId] as tl.RawUser).self) ||
+                    (peers.user(m.userId) as tl.RawUser).self) ||
                 (user._ === 'inputPeerUser' && m.userId === user.userId)
             ) {
-                return new ChatMember(this, m, users)
+                return new ChatMember(this, m, peers)
             }
         }
 
@@ -68,8 +67,8 @@ export async function getChatMember(
             participant: user,
         })
 
-        const { users } = createUsersChatsIndex(res)
+        const peers = PeersIndex.from(res)
 
-        return new ChatMember(this, res.participant, users)
+        return new ChatMember(this, res.participant, peers)
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 }

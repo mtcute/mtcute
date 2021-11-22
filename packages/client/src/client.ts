@@ -145,14 +145,31 @@ import { getInstalledStickers } from './methods/stickers/get-installed-stickers'
 import { getStickerSet } from './methods/stickers/get-sticker-set'
 import { moveStickerInSet } from './methods/stickers/move-sticker-in-set'
 import { setStickerSetThumb } from './methods/stickers/set-sticker-set-thumb'
+import { ConditionVariable } from '@mtcute/core/src/utils/condition-variable'
+import {
+    AsyncLock,
+    Deque,
+    MaybeArray,
+    MaybeAsync,
+    SessionConnection,
+    SortedLinkedList,
+} from '@mtcute/core'
+import { RpsMeter } from './utils/rps-meter'
 import {
     _dispatchUpdate,
     _fetchUpdatesState,
     _handleUpdate,
     _keepAliveAction,
     _loadStorage,
+    _onStop,
     _saveStorage,
+    _updatesLoop,
     catchUp,
+    enableRps,
+    getCurrentRpsIncoming,
+    getCurrentRpsProcessing,
+    startUpdatesLoop,
+    stopUpdatesLoop,
 } from './methods/updates'
 import { blockUser } from './methods/users/block-user'
 import { deleteProfilePhotos } from './methods/users/delete-profile-photos'
@@ -181,7 +198,6 @@ import {
     ChatMember,
     ChatMemberUpdate,
     ChatPreview,
-    ChatsIndex,
     ChosenInlineResult,
     Conversation,
     DeleteMessageUpdate,
@@ -203,6 +219,7 @@ import {
     ParsedUpdate,
     PartialExcept,
     PartialOnly,
+    PeersIndex,
     Photo,
     Poll,
     PollUpdate,
@@ -219,16 +236,26 @@ import {
     User,
     UserStatusUpdate,
     UserTypingUpdate,
-    UsersIndex,
 } from './types'
-import {
-    AsyncLock,
-    MaybeArray,
-    MaybeAsync,
-    TelegramConnection,
-} from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 import { Logger } from '@mtcute/core/src/utils/logger'
+
+// from methods/updates.ts
+interface PendingUpdateContainer {
+    upd: tl.TypeUpdates
+    seqStart: number
+    seqEnd: number
+}
+// from methods/updates.ts
+interface PendingUpdate {
+    update: tl.TypeUpdate
+    channelId?: number
+    pts?: number
+    ptsBefore?: number
+    qtsBefore?: number
+    timeout?: number
+    peers?: PeersIndex
+}
 
 export interface TelegramClient extends BaseTelegramClient {
     /**
@@ -241,8 +268,7 @@ export interface TelegramClient extends BaseTelegramClient {
         name: 'raw_update',
         handler: (
             upd: tl.TypeUpdate | tl.TypeMessage,
-            users: UsersIndex,
-            chats: ChatsIndex
+            peers: PeersIndex
         ) => void
     ): this
     /**
@@ -3268,12 +3294,58 @@ export interface TelegramClient extends BaseTelegramClient {
             progressCallback?: (uploaded: number, total: number) => void
         }
     ): Promise<StickerSet>
+    /**
+     * Enable RPS meter.
+     * Only available in NodeJS v10.7.0 and newer
+     *
+     * > **Note**: This may have negative impact on performance
+     *
+     * @param size  Sampling size
+     * @param time  Window time
+     */
+    enableRps(size?: number, time?: number): void
+    /**
+     * Get current average incoming RPS
+     *
+     * Incoming RPS is calculated based on
+     * incoming update containers. Normally,
+     * they should be around the same, except
+     * rare situations when processing rps
+     * may peak.
+     *
+     */
+    getCurrentRpsIncoming(): number
+    /**
+     * Get current average processing RPS
+     *
+     * Processing RPS is calculated based on
+     * dispatched updates. Normally,
+     * they should be around the same, except
+     * rare situations when processing rps
+     * may peak.
+     *
+     */
+    getCurrentRpsProcessing(): number
+    /**
+     * **ADVANCED**
+     *
+     * Manually start updates loop.
+     * Usually done automatically inside {@link start}
+     */
+    startUpdatesLoop(): void
+    /**
+     * **ADVANCED**
+     *
+     * Manually stop updates loop.
+     * Usually done automatically when stopping the client with {@link close}
+     */
+    stopUpdatesLoop(): void
     _handleUpdate(update: tl.TypeUpdates, noDispatch?: boolean): void
     /**
      * Catch up with the server by loading missed updates.
      *
      */
-    catchUp(): Promise<void>
+    catchUp(): void
     /**
      * Block a user
      *
@@ -3413,8 +3485,12 @@ export interface TelegramClient extends BaseTelegramClient {
      * Useful when an `InputPeer` is needed.
      *
      * @param peerId  The peer identifier that you want to extract the `InputPeer` from.
+     * @param force  (default: `false`) Whether to force re-fetch the peer from the server
      */
-    resolvePeer(peerId: InputPeerLike): Promise<tl.TypeInputPeer>
+    resolvePeer(
+        peerId: InputPeerLike,
+        force?: boolean
+    ): Promise<tl.TypeInputPeer>
     /**
      * Change user status to offline or online
      *
@@ -3483,11 +3559,21 @@ export class TelegramClient extends BaseTelegramClient {
     protected _selfUsername: string | null
     protected _pendingConversations: Record<number, Conversation[]>
     protected _hasConversations: boolean
-    protected _downloadConnections: Record<number, TelegramConnection>
-    protected _connectionsForInline: Record<number, TelegramConnection>
+    protected _downloadConnections: Record<number, SessionConnection>
+    protected _connectionsForInline: Record<number, SessionConnection>
     protected _parseModes: Record<string, IMessageEntityParser>
     protected _defaultParseMode: string | null
+    protected _updatesLoopActive: boolean
+    protected _updatesLoopCv: ConditionVariable
+    protected _pendingUpdateContainers: SortedLinkedList<PendingUpdateContainer>
+    protected _pendingPtsUpdates: SortedLinkedList<PendingUpdate>
+    protected _pendingPtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
+    protected _pendingQtsUpdates: SortedLinkedList<PendingUpdate>
+    protected _pendingQtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
+    protected _pendingUnorderedUpdates: Deque<PendingUpdate>
     protected _updLock: AsyncLock
+    protected _rpsIncoming?: RpsMeter
+    protected _rpsProcessing?: RpsMeter
     protected _pts?: number
     protected _qts?: number
     protected _date?: number
@@ -3506,12 +3592,33 @@ export class TelegramClient extends BaseTelegramClient {
         this._userId = null
         this._isBot = false
         this._selfUsername = null
+        this.log.prefix = '[USER N/A] '
         this._pendingConversations = {}
         this._hasConversations = false
         this._downloadConnections = {}
         this._connectionsForInline = {}
         this._parseModes = {}
         this._defaultParseMode = null
+        this._updatesLoopActive = false
+        this._updatesLoopCv = new ConditionVariable()
+
+        this._pendingUpdateContainers = new SortedLinkedList(
+            (a, b) => a.seqStart - b.seqStart
+        )
+        this._pendingPtsUpdates = new SortedLinkedList(
+            (a, b) => a.ptsBefore! - b.ptsBefore!
+        )
+        this._pendingPtsUpdatesPostponed = new SortedLinkedList(
+            (a, b) => a.ptsBefore! - b.ptsBefore!
+        )
+        this._pendingQtsUpdates = new SortedLinkedList(
+            (a, b) => a.qtsBefore! - b.qtsBefore!
+        )
+        this._pendingQtsUpdatesPostponed = new SortedLinkedList(
+            (a, b) => a.qtsBefore! - b.qtsBefore!
+        )
+        this._pendingUnorderedUpdates = new Deque()
+
         this._updLock = new AsyncLock()
         // we dont need to initialize state fields since
         // they are always loaded either from the server, or from storage.
@@ -3527,7 +3634,6 @@ export class TelegramClient extends BaseTelegramClient {
 
         this._updsLog = this.log.create('updates')
     }
-
     acceptTos = acceptTos
     checkPassword = checkPassword
     getPasswordHint = getPasswordHint
@@ -3667,12 +3773,19 @@ export class TelegramClient extends BaseTelegramClient {
     getStickerSet = getStickerSet
     moveStickerInSet = moveStickerInSet
     setStickerSetThumb = setStickerSetThumb
+    enableRps = enableRps
+    getCurrentRpsIncoming = getCurrentRpsIncoming
+    getCurrentRpsProcessing = getCurrentRpsProcessing
     protected _fetchUpdatesState = _fetchUpdatesState
     protected _loadStorage = _loadStorage
+    startUpdatesLoop = startUpdatesLoop
+    stopUpdatesLoop = stopUpdatesLoop
+    protected _onStop = _onStop
     protected _saveStorage = _saveStorage
     protected _dispatchUpdate = _dispatchUpdate
     _handleUpdate = _handleUpdate
     catchUp = catchUp
+    protected _updatesLoop = _updatesLoop
     protected _keepAliveAction = _keepAliveAction
     blockUser = blockUser
     deleteProfilePhotos = deleteProfilePhotos

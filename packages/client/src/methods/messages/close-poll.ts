@@ -1,9 +1,8 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtTypeAssertionError, Poll } from '../../types'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
-import bigInt from 'big-integer'
+import { InputPeerLike, MtTypeAssertionError, PeersIndex, Poll } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import Long from 'long'
 
 /**
  * Close a poll sent by you.
@@ -28,7 +27,7 @@ export async function closePoll(
             _: 'inputMediaPoll',
             poll: {
                 _: 'poll',
-                id: bigInt.zero,
+                id: Long.ZERO,
                 closed: true,
                 question: '',
                 answers: [],
@@ -54,7 +53,7 @@ export async function closePoll(
         )
     }
 
-    const { users } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
-    return new Poll(this, upd.poll, users, upd.results)
+    return new Poll(this, upd.poll, peers, upd.results)
 }

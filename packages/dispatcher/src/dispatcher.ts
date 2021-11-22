@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import {
     CallbackQuery,
-    ChatsIndex,
     InlineQuery,
     MaybeAsync,
     Message,
     MtArgumentError,
     TelegramClient,
-    UsersIndex,
+    PeersIndex,
     ChatMemberUpdate,
     ChosenInlineResult,
     PollUpdate,
@@ -185,14 +184,13 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     dispatchRawUpdate(
         update: tl.TypeUpdate | tl.TypeMessage,
-        users: UsersIndex,
-        chats: ChatsIndex
+        peers: PeersIndex
     ): void {
         if (!this._client) return
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
-        this.dispatchRawUpdateNow(update, users, chats).catch((err) =>
+        this.dispatchRawUpdateNow(update, peers).catch((err) =>
             this._client!['_emitError'](err)
         )
     }
@@ -206,14 +204,12 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * was fully processed by all the registered handlers, including children.
      *
      * @param update  Update to process
-     * @param users  Users map
-     * @param chats  Chats map
+     * @param peers  Peers map
      * @returns  Whether the update was handled
      */
     async dispatchRawUpdateNow(
         update: tl.TypeUpdate | tl.TypeMessage,
-        users: UsersIndex,
-        chats: ChatsIndex
+        peers: PeersIndex
     ): Promise<boolean> {
         if (!this._client) return false
 
@@ -230,13 +226,12 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
                     if (
                         !h.check ||
-                        (await h.check(this._client, update, users, chats))
+                        (await h.check(this._client, update, peers))
                     ) {
                         result = await h.callback(
                             this._client,
                             update,
-                            users,
-                            chats
+                            peers
                         )
                         handled = true
                     } else continue
@@ -256,7 +251,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         }
 
         for (const child of this._children) {
-            handled ||= await child.dispatchRawUpdateNow(update, users, chats)
+            handled ||= await child.dispatchRawUpdateNow(update, peers)
         }
 
         return handled

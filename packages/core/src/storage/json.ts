@@ -1,5 +1,6 @@
 import { MemoryStorage } from './memory'
 import bigInt from 'big-integer'
+import { longFromFastString, longToFastString } from '../utils'
 
 /**
  * Helper class that provides json serialization functions
@@ -21,7 +22,7 @@ export class JsonMemoryStorage extends MemoryStorage {
                 }
 
                 if (key === 'accessHash') {
-                    return bigInt(value, 32)
+                    return longFromFastString(value)
                 }
 
                 return value
@@ -41,7 +42,7 @@ export class JsonMemoryStorage extends MemoryStorage {
                     .join('|')
             }
             if (key === 'accessHash') {
-                return bigInt(value).toString(32)
+                return longToFastString(value)
             }
             return value
         })

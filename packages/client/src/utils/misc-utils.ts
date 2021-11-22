@@ -1,9 +1,5 @@
 import { MaybeDynamic, Message, MtClientError } from '../types'
-import { BigInteger } from 'big-integer'
-import { randomBytes, bufferToBigInt } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
-
-export const EMPTY_BUFFER = Buffer.alloc(0)
 
 export function normalizePhoneNumber(phone: string): string {
     phone = phone.trim().replace(/[+()\s-]/g, '')
@@ -14,10 +10,6 @@ export function normalizePhoneNumber(phone: string): string {
 
 export async function resolveMaybeDynamic<T>(val: MaybeDynamic<T>): Promise<T> {
     return val instanceof Function ? await val() : await val
-}
-
-export function randomUlong(): BigInteger {
-    return bufferToBigInt(randomBytes(8))
 }
 
 export function extractChannelIdFromUpdate(

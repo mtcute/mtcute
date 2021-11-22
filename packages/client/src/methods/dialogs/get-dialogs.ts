@@ -2,12 +2,10 @@ import { TelegramClient } from '../../client'
 import {
     Dialog,
     MtArgumentError,
-    MtTypeAssertionError,
 } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
-import { getMarkedPeerId } from '@mtcute/core'
+import Long from 'long'
 
 /**
  * Iterate over dialogs.
@@ -241,7 +239,7 @@ export async function* getDialogs(
                 offsetPeer,
 
                 limit: chunkSize,
-                hash: 0,
+                hash: Long.ZERO,
             })
         )
         if (!dialogs.length) return

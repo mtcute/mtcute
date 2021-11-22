@@ -1,24 +1,94 @@
-import { TelegramConnection } from './telegram-connection'
-import { buffersEqual, randomBytes, xorBuffer } from '../utils/buffer-utils'
-import { tl } from '@mtcute/tl'
-import { BinaryReader } from '../utils/binary/binary-reader'
 import {
-    BinaryWriter,
-    SerializationCounter,
-} from '../utils/binary/binary-writer'
+    buffersEqual,
+    randomBytes,
+    xorBuffer,
+    xorBufferInPlace,
+} from '../utils/buffer-utils'
+import { mtp } from '@mtcute/tl'
+import { ICryptoProvider, bigIntToBuffer, bufferToBigInt } from '../utils'
 import { findKeyByFingerprints } from '../utils/crypto/keys'
-import { ICryptoProvider } from '../utils/crypto'
 import bigInt from 'big-integer'
 import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto'
+import { SessionConnection } from './session-connection'
+import Long from 'long'
 import {
-    bigIntToBuffer,
-    bigIntTwo,
-    bufferToBigInt,
-} from '../utils/bigint-utils'
+    TlBinaryReader,
+    TlBinaryWriter,
+    TlSerializationCounter,
+} from '@mtcute/tl-runtime'
+import { TlPublicKey } from '@mtcute/tl/binary/rsa-keys'
 
 // Heavily based on code from https://github.com/LonamiWebs/Telethon/blob/master/telethon/network/authenticator.py
 
-const DH_SAFETY_RANGE = bigIntTwo.pow(2048 - 64)
+const DH_SAFETY_RANGE = bigInt[2].pow(2048 - 64)
+
+async function rsaPad(
+    data: Buffer,
+    crypto: ICryptoProvider,
+    key: TlPublicKey
+): Promise<Buffer> {
+    // since Summer 2021, they use "version of RSA with a variant of OAEP+ padding explained below"
+
+    const keyModulus = bigInt(key.modulus, 16)
+    const keyExponent = bigInt(key.exponent, 16)
+
+    if (data.length > 144) {
+        throw new Error('Failed to pad: too big data')
+    }
+
+    data = Buffer.concat([data, randomBytes(192 - data.length)])
+
+    for (;;) {
+        const aesIv = Buffer.alloc(32)
+
+        const aesKey = randomBytes(32)
+
+        const dataWithHash = Buffer.concat([
+            data,
+            await crypto.sha256(Buffer.concat([aesKey, data])),
+        ])
+        // we only need to reverse the data
+        dataWithHash.slice(0, 192).reverse()
+
+        const aes = crypto.createAesIge(aesKey, aesIv)
+        const encrypted = await aes.encrypt(dataWithHash)
+        const encryptedHash = await crypto.sha256(encrypted)
+
+        xorBufferInPlace(aesKey, encryptedHash)
+        const decryptedData = Buffer.concat([aesKey, encrypted])
+
+        const decryptedDataBigint = bufferToBigInt(decryptedData)
+        if (decryptedDataBigint.geq(keyModulus)) {
+            continue
+        }
+
+        const encryptedBigint = decryptedDataBigint.modPow(
+            keyExponent,
+            keyModulus
+        )
+        return bigIntToBuffer(encryptedBigint, 256)
+    }
+}
+
+async function rsaEncrypt(
+    data: Buffer,
+    crypto: ICryptoProvider,
+    key: TlPublicKey
+): Promise<Buffer> {
+    const toEncrypt = Buffer.concat([
+        await crypto.sha1(data),
+        data,
+        // sha1 is always 20 bytes, so we're left with 255 - 20 - x padding
+        randomBytes(235 - data.length),
+    ])
+
+    const encryptedBigInt = bufferToBigInt(toEncrypt).modPow(
+        bigInt(key.exponent, 16),
+        bigInt(key.modulus, 16)
+    )
+
+    return bigIntToBuffer(encryptedBigInt)
+}
 
 /**
  * Execute authorization flow on `connection` using `crypto`.
@@ -26,60 +96,71 @@ const DH_SAFETY_RANGE = bigIntTwo.pow(2048 - 64)
  * Returns tuple: [authKey, serverSalt, timeOffset]
  */
 export async function doAuthorization(
-    connection: TelegramConnection,
+    connection: SessionConnection,
     crypto: ICryptoProvider
-): Promise<[Buffer, Buffer, number]> {
-    function sendPlainMessage(message: tl.TlObject): Promise<void> {
-        const length = SerializationCounter.countNeededBytes(message)
-        const writer = BinaryWriter.alloc(length + 20) // 20 bytes for mtproto header
+): Promise<[Buffer, Long, number]> {
+    const session = connection['_session']
+    const readerMap = session._readerMap
+    const writerMap = session._writerMap
 
-        const messageId = connection['_getMessageId']()
+    function sendPlainMessage(message: mtp.TlObject): Promise<void> {
+        const length = TlSerializationCounter.countNeededBytes(
+            writerMap,
+            message
+        )
+        const writer = TlBinaryWriter.alloc(writerMap, length + 20) // 20 bytes for mtproto header
 
-        writer.long(bigInt.zero)
+        const messageId = session.getMessageId()
+
+        writer.long(Long.ZERO)
         writer.long(messageId)
-        writer.uint32(length)
+        writer.uint(length)
         writer.object(message)
 
         return connection.send(writer.result())
+    }
+
+    async function readNext(): Promise<mtp.TlObject> {
+        return TlBinaryReader.deserializeObject(
+            readerMap,
+            await connection.waitForNextMessage(),
+            20 // skip mtproto header
+        )
     }
 
     const log = connection.log.create('auth')
 
     const nonce = randomBytes(16)
     // Step 1: PQ request
-    log.debug(
-        '%s: starting PQ handshake, nonce = %h',
-        connection.params.dc.ipAddress,
-        nonce
-    )
-    await sendPlainMessage({ _: 'mt_reqPqMulti', nonce })
-    const resPq = BinaryReader.deserializeObject(
-        await connection.waitForNextMessage(),
-        20 // skip mtproto header
-    )
+    log.debug('starting PQ handshake, nonce = %h', nonce)
+
+    await sendPlainMessage({ _: 'mt_req_pq_multi', nonce })
+    const resPq = await readNext()
 
     if (resPq._ !== 'mt_resPQ') throw new Error('Step 1: answer was ' + resPq._)
     if (!buffersEqual(resPq.nonce, nonce))
         throw new Error('Step 1: invalid nonce from server')
-    log.debug('%s: received PQ', connection.params.dc.ipAddress)
+
+    const serverKeys = resPq.serverPublicKeyFingerprints.map((it) =>
+        it.toUnsigned().toString(16)
+    )
+    log.debug('received PQ, keys: %j', serverKeys)
 
     // Step 2: DH exchange
-    const publicKey = findKeyByFingerprints(resPq.serverPublicKeyFingerprints)
+    const publicKey = findKeyByFingerprints(serverKeys)
     if (!publicKey)
         throw new Error(
             'Step 2: Could not find server public key with any of these fingerprints: ' +
-                resPq.serverPublicKeyFingerprints
-                    .map((i) => i.toString(16))
-                    .join(', ')
+                serverKeys.join(', ')
         )
     log.debug(
-        '%s: found server key, fp = %s',
-        connection.params.dc.ipAddress,
-        publicKey.fingerprint
+        'found server key, fp = %s, old = %s',
+        publicKey.fingerprint,
+        publicKey.old
     )
 
     const [p, q] = await crypto.factorizePQ(resPq.pq)
-    log.debug('%s: factorized PQ', connection.params.dc.ipAddress)
+    log.debug('factorized PQ: PQ = %h, P = %h, Q = %h', resPq.pq, p, q)
 
     const newNonce = randomBytes(32)
 
@@ -87,7 +168,7 @@ export async function doAuthorization(
     if (connection.params.testMode) dcId += 10000
     if (connection.params.dc.mediaOnly) dcId = -dcId
 
-    const pqInnerData = BinaryWriter.serializeObject({
+    const _pqInnerData: mtp.RawMt_p_q_inner_data_dc = {
         _: 'mt_p_q_inner_data_dc',
         pq: resPq.pq,
         p,
@@ -95,26 +176,31 @@ export async function doAuthorization(
         nonce,
         newNonce,
         serverNonce: resPq.serverNonce,
-        dc: dcId
-    } as tl.mtproto.RawP_q_inner_data_dc)
-    const encryptedData = await crypto.rsaEncrypt(pqInnerData, publicKey)
-    log.debug('%s: requesting DH params', connection.params.dc.ipAddress)
+        dc: dcId,
+    }
+    const pqInnerData = TlBinaryWriter.serializeObject(writerMap, _pqInnerData)
+
+    const encryptedData = publicKey.old
+        ? await rsaEncrypt(pqInnerData, crypto, publicKey)
+        : await rsaPad(pqInnerData, crypto, publicKey)
+
+    log.debug('requesting DH params')
 
     await sendPlainMessage({
-        _: 'mt_reqDHParams',
+        _: 'mt_req_DH_params',
         nonce,
         serverNonce: resPq.serverNonce,
         p,
         q,
-        publicKeyFingerprint: bigInt(publicKey.fingerprint, 16),
+        publicKeyFingerprint: Long.fromString(publicKey.fingerprint, true, 16),
         encryptedData,
     })
-    const serverDhParams = BinaryReader.deserializeObject(
-        await connection.waitForNextMessage(),
-        20 // skip mtproto header
-    )
+    const serverDhParams = await readNext()
 
-    if (!tl.mtproto.isAnyServer_DH_Params(serverDhParams))
+    if (!mtp.isAnyServer_DH_Params(serverDhParams))
+        throw new Error('Step 2.1: answer was ' + serverDhParams._)
+
+    if (serverDhParams._ !== 'mt_server_DH_params_ok')
         throw new Error('Step 2.1: answer was ' + serverDhParams._)
 
     if (!buffersEqual(serverDhParams.nonce, nonce))
@@ -131,7 +217,7 @@ export async function doAuthorization(
     //     throw new Error('Step 2: server DH failed')
     // }
 
-    log.debug('%s: server DH ok', connection.params.dc.ipAddress)
+    log.debug('server DH ok')
 
     if (serverDhParams.encryptedAnswer.length % 16 != 0)
         throw new Error('Step 2: AES block size is invalid')
@@ -146,8 +232,12 @@ export async function doAuthorization(
 
     const plainTextAnswer = await ige.decrypt(serverDhParams.encryptedAnswer)
     const innerDataHash = plainTextAnswer.slice(0, 20)
-    const serverDhInnerReader = new BinaryReader(plainTextAnswer, 20)
-    const serverDhInner = serverDhInnerReader.object() as tl.TlObject
+    const serverDhInnerReader = new TlBinaryReader(
+        readerMap,
+        plainTextAnswer,
+        20
+    )
+    const serverDhInner = serverDhInnerReader.object() as mtp.TlObject
 
     if (
         !buffersEqual(
@@ -174,7 +264,7 @@ export async function doAuthorization(
     const g = bigInt(serverDhInner.g)
     const gA = bufferToBigInt(serverDhInner.gA)
 
-    let retryId = bigInt.zero
+    let retryId = Long.ZERO
     const serverSalt = xorBuffer(
         newNonce.slice(0, 8),
         resPq.serverNonce.slice(0, 8)
@@ -213,7 +303,7 @@ export async function doAuthorization(
         const gB_buf = bigIntToBuffer(gB, 0, false)
 
         // Step 4: send client DH
-        const clientDhInner: tl.mtproto.RawClient_DH_inner_data = {
+        const clientDhInner: mtp.RawMt_client_DH_inner_data = {
             _: 'mt_client_DH_inner_data',
             nonce,
             serverNonce: resPq.serverNonce,
@@ -221,11 +311,12 @@ export async function doAuthorization(
             gB: gB_buf,
         }
         let innerLength =
-            SerializationCounter.countNeededBytes(clientDhInner) + 20 // for hash
+            TlSerializationCounter.countNeededBytes(writerMap, clientDhInner) +
+            20 // for hash
         const innerPaddingLength = innerLength % 16
         if (innerPaddingLength > 0) innerLength += 16 - innerPaddingLength
 
-        const clientDhInnerWriter = BinaryWriter.alloc(innerLength)
+        const clientDhInnerWriter = TlBinaryWriter.alloc(writerMap, innerLength)
         clientDhInnerWriter.pos = 20
         clientDhInnerWriter.object(clientDhInner)
         const clientDhInnerHash = await crypto.sha1(
@@ -234,25 +325,18 @@ export async function doAuthorization(
         clientDhInnerWriter.pos = 0
         clientDhInnerWriter.raw(clientDhInnerHash)
 
-        log.debug(
-            '%s: sending client DH (timeOffset = %d)',
-            connection.params.dc.ipAddress,
-            timeOffset
-        )
+        log.debug('sending client DH (timeOffset = %d)', timeOffset)
 
         const clientDhEncrypted = await ige.encrypt(clientDhInnerWriter.buffer)
         await sendPlainMessage({
-            _: 'mt_setClientDHParams',
+            _: 'mt_set_client_DH_params',
             nonce,
             serverNonce: resPq.serverNonce,
             encryptedData: clientDhEncrypted,
         })
 
-        const dhGen = BinaryReader.deserializeObject(
-            await connection.waitForNextMessage(),
-            20 // skip mtproto header
-        )
-        if (!tl.mtproto.isAnySet_client_DH_params_answer(dhGen))
+        const dhGen = await readNext()
+        if (!mtp.isAnySet_client_DH_params_answer(dhGen))
             throw new Error('Step 4: answer was ' + dhGen._)
 
         if (!buffersEqual(dhGen.nonce, nonce))
@@ -260,7 +344,7 @@ export async function doAuthorization(
         if (!buffersEqual(dhGen.serverNonce, resPq.serverNonce))
             throw Error('Step 4: invalid server nonce from server')
 
-        log.debug('%s: DH result: %s', connection.params.dc.ipAddress, dhGen._)
+        log.debug('DH result: %s', dhGen._)
 
         if (dhGen._ === 'mt_dh_gen_fail') {
             // in theory i would be supposed to calculate newNonceHash, but why, we are failing anyway
@@ -273,19 +357,24 @@ export async function doAuthorization(
             )
             if (!buffersEqual(expectedHash.slice(4, 20), dhGen.newNonceHash2))
                 throw Error('Step 4: invalid retry nonce hash from server')
-            retryId = bufferToBigInt(authKeyAuxHash)
+            retryId = Long.fromBytesLE(authKeyAuxHash as any)
             continue
         }
 
-        // dhGen._ === 'mt_dh_gen_ok'
+        if (dhGen._ !== 'mt_dh_gen_ok') throw new Error() // unreachable
+
         const expectedHash = await crypto.sha1(
             Buffer.concat([newNonce, Buffer.from([1]), authKeyAuxHash])
         )
         if (!buffersEqual(expectedHash.slice(4, 20), dhGen.newNonceHash1))
             throw Error('Step 4: invalid nonce hash from server')
 
-        log.info('%s: authorization successful', connection.params.dc.ipAddress)
+        log.info('authorization successful')
 
-        return [authKey, serverSalt, timeOffset]
+        return [
+            authKey,
+            new Long(serverSalt.readInt32LE(), serverSalt.readInt32LE(4)),
+            timeOffset,
+        ]
     }
 }

@@ -32,8 +32,7 @@ import {
     Photo,
     ChatEvent,
     ChatInviteLink,
-    UsersIndex,
-    ChatsIndex,
+    PeersIndex,
     GameHighScore,
     ArrayWithTotal,
     BotCommands,
@@ -60,7 +59,7 @@ import {
 import {
     MaybeArray,
     MaybeAsync,
-    TelegramConnection,
+    SessionConnection,
     AsyncLock,
 } from '@mtcute/core'
 

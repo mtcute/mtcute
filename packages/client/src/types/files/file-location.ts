@@ -10,43 +10,22 @@ import { makeInspectable } from '../utils'
  * including ones that are embedded directly into the entity.
  */
 export class FileLocation {
-    /**
-     * Client that was used to create this object
-     */
-    readonly client: TelegramClient
-
-    /**
-     * Location of the file.
-     *
-     * Either a TL object declaring remote file location,
-     * a Buffer containing actual file content (for stripped thumbnails and vector previews),
-     * or a function that will return either of those.
-     *
-     * When a function is passed, it will be lazily resolved the
-     * first time downloading the file.
-     */
-    readonly location:
-        | tl.TypeInputFileLocation
-        | tl.TypeInputWebFileLocation
-        | Buffer
-        | (() =>
-              | tl.TypeInputFileLocation
-              | tl.TypeInputWebFileLocation
-              | Buffer)
-
-    /**
-     * File size in bytes, when available
-     */
-    readonly fileSize?: number
-
-    /**
-     * DC ID of the file, when available
-     */
-    readonly dcId?: number
-
     constructor(
-        client: TelegramClient,
-        location:
+        /**
+         * Client that was used to create this object
+         */
+        readonly client: TelegramClient,
+        /**
+         * Location of the file.
+         *
+         * Either a TL object declaring remote file location,
+         * a Buffer containing actual file content (for stripped thumbnails and vector previews),
+         * or a function that will return either of those.
+         *
+         * When a function is passed, it will be lazily resolved the
+         * first time downloading the file.
+         */
+        readonly location:
             | tl.TypeInputFileLocation
             | tl.TypeInputWebFileLocation
             | Buffer
@@ -54,13 +33,15 @@ export class FileLocation {
                   | tl.TypeInputFileLocation
                   | tl.TypeInputWebFileLocation
                   | Buffer),
-        fileSize?: number,
-        dcId?: number
+        /**
+         * File size in bytes, when available
+         */
+        readonly fileSize?: number,
+        /**
+         * DC ID of the file, when available
+         */
+        readonly dcId?: number
     ) {
-        this.client = client
-        this.location = location
-        this.fileSize = fileSize
-        this.dcId = dcId
     }
 
     /**

@@ -1,7 +1,7 @@
 import type { IMessageEntityParser, MessageEntity } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
-import bigInt from 'big-integer'
 import { FormattedString } from '@mtcute/client'
+import Long from 'long'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 
@@ -156,7 +156,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                             ;(ent as tl.Mutable<tl.RawInputMessageEntityMentionName>).userId = {
                                 _: 'inputUser',
                                 userId,
-                                accessHash: bigInt(accessHash, 16),
+                                accessHash: Long.fromString(accessHash, false,16),
                             }
                         } else {
                             ;(ent as tl.Mutable<tl.RawMessageEntityMentionName>)._ =

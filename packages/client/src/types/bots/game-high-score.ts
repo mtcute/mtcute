@@ -1,26 +1,17 @@
 import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { User, UsersIndex } from '../peers'
+import { PeersIndex, User } from '../peers'
 
 /**
  * Game high score
  */
 export class GameHighScore {
-    readonly client: TelegramClient
-    readonly raw: tl.RawHighScore
-
-    readonly _users: UsersIndex
-
     constructor(
-        client: TelegramClient,
-        raw: tl.RawHighScore,
-        users: UsersIndex
-    ) {
-        this.client = client
-        this.raw = raw
-        this._users = users
-    }
+        readonly client: TelegramClient,
+        readonly raw: tl.RawHighScore,
+        readonly _peers: PeersIndex
+    ) {}
 
     private _user?: User
     /**
@@ -28,7 +19,10 @@ export class GameHighScore {
      */
     get user(): User {
         if (!this._user) {
-            this._user = new User(this.client, this._users[this.raw.userId])
+            this._user = new User(
+                this.client,
+                this._peers.user(this.raw.userId)
+            )
         }
 
         return this._user

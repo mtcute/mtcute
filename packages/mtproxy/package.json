@@ -13,7 +13,6 @@
     },
     "dependencies": {
         "@mtcute/core": "^1.0.0",
-        "@mtcute/tl": "~1.131.0",
         "big-integer": "1.6.48"
     }
 }

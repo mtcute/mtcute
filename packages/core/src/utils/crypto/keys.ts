@@ -1,9 +1,8 @@
-// This file was auto-generated. Do not edit.
-import { BigInteger } from 'big-integer'
 import { parseAsn1, parsePemContents } from '../binary/asn1-parser'
-import { BinaryWriter } from '../binary/binary-writer'
+import { TlBinaryWriter } from '@mtcute/tl-runtime/src/writer'
 import { ICryptoProvider } from './abstract'
 import keysIndex, { TlPublicKey } from '@mtcute/tl/binary/rsa-keys'
+import Long from 'long'
 
 export async function parsePublicKey(
     crypto: ICryptoProvider,
@@ -15,7 +14,8 @@ export async function parsePublicKey(
     const exponent = asn1.children?.[1].value
     if (!modulus || !exponent) throw new Error('Invalid public key')
 
-    const writer = BinaryWriter.alloc(512) // they are actually smaller, about 270 bytes, but idc :D
+    const writer = TlBinaryWriter.manualAlloc(512)
+    // they are actually smaller, about 270 bytes, but idc :D
     writer.bytes(modulus)
     writer.bytes(exponent)
 
@@ -41,11 +41,13 @@ export async function addPublicKey(
 }
 
 export function findKeyByFingerprints(
-    fingerprints: (string | BigInteger)[],
+    fingerprints: (string | Long)[],
     allowOld = false
 ): TlPublicKey | null {
     for (let fp of fingerprints) {
-        if (typeof fp !== 'string') fp = fp.toString(16)
+        if (typeof fp !== 'string') {
+            fp = fp.toUnsigned().toString(16)
+        }
         if (fp in keysIndex) {
             if (keysIndex[fp].old && !allowOld) continue
             return keysIndex[fp]

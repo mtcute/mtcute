@@ -1,7 +1,8 @@
 import { tdFileId, tdFileId as td } from './types'
-import { encodeUrlSafeBase64, BinaryWriter } from '@mtcute/core'
+import { encodeUrlSafeBase64 } from '@mtcute/core'
 import { telegramRleEncode } from './utils'
 import FileType = tdFileId.FileType
+import { TlBinaryWriter } from '@mtcute/tl-runtime'
 
 type InputUniqueLocation =
     | Pick<td.RawWebRemoteFileLocation, '_' | 'url'>
@@ -74,38 +75,38 @@ export function toUniqueFileId(
         }
     }
 
-    let writer: BinaryWriter
+    let writer: TlBinaryWriter
     switch (inputLocation._) {
         case 'photo': {
             const source = inputLocation.source
             switch (source._) {
                 case 'legacy': {
                     // tdlib does not implement this
-                    writer = BinaryWriter.alloc(16)
-                    writer.int32(type)
-                    writer.int32(100)
+                    writer = TlBinaryWriter.manualAlloc(16)
+                    writer.int(type)
+                    writer.int(100)
                     writer.long(source.secret)
                     break
                 }
                 case 'stickerSetThumbnail': {
                     // tdlib does not implement this
-                    writer = BinaryWriter.alloc(24)
-                    writer.int32(type)
-                    writer.int32(150)
+                    writer = TlBinaryWriter.manualAlloc(24)
+                    writer.int(type)
+                    writer.int(150)
                     writer.long(source.id)
                     writer.long(source.accessHash)
                     break
                 }
                 case 'dialogPhoto': {
-                    writer = BinaryWriter.alloc(13)
-                    writer.int32(type)
+                    writer = TlBinaryWriter.manualAlloc(13)
+                    writer.int(type)
                     writer.long(inputLocation.id)
                     writer.raw(Buffer.from([+source.big]))
                     // it doesn't matter to which Dialog the photo belongs
                     break
                 }
                 case 'thumbnail': {
-                    writer = BinaryWriter.alloc(13)
+                    writer = TlBinaryWriter.manualAlloc(13)
 
                     let thumbType = source.thumbnailType.charCodeAt(0)
                     if (thumbType === 97 /* 'a' */) {
@@ -116,7 +117,7 @@ export function toUniqueFileId(
                         thumbType += 5
                     }
 
-                    writer.int32(type)
+                    writer.int(type)
                     writer.long(inputLocation.id)
                     writer.raw(Buffer.from([thumbType]))
                     break
@@ -124,31 +125,31 @@ export function toUniqueFileId(
                 case 'fullLegacy':
                 case 'dialogPhotoLegacy':
                 case 'stickerSetThumbnailLegacy':
-                    writer = BinaryWriter.alloc(16)
-                    writer.int32(type)
+                    writer = TlBinaryWriter.manualAlloc(16)
+                    writer.int(type)
                     writer.long(source.volumeId)
-                    writer.int32(source.localId)
+                    writer.int(source.localId)
                     break
                 case 'stickerSetThumbnailVersion':
-                    writer = BinaryWriter.alloc(17)
-                    writer.int32(type)
+                    writer = TlBinaryWriter.manualAlloc(17)
+                    writer.int(type)
                     writer.raw(Buffer.from([2]))
                     writer.long(source.id)
-                    writer.int32(source.version)
+                    writer.int(source.version)
                     break
             }
             break
         }
         case 'web':
-            writer = BinaryWriter.alloc(
+            writer = TlBinaryWriter.alloc({},
                 Buffer.byteLength(inputLocation.url, 'utf-8') + 8
             )
-            writer.int32(type)
+            writer.int(type)
             writer.string(inputLocation.url)
             break
         case 'common':
-            writer = BinaryWriter.alloc(12)
-            writer.int32(type)
+            writer = TlBinaryWriter.manualAlloc(12)
+            writer.int(type)
             writer.long(inputLocation.id)
             break
         default:

@@ -5,7 +5,7 @@ import { TelegramClient } from '../../client'
 import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
 import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { makeInspectable } from '../utils'
-import { ChatsIndex, InputPeerLike, User, UsersIndex } from './index'
+import { InputPeerLike, PeersIndex, User } from './index'
 import { ChatLocation } from './chat-location'
 import { InputMediaLike } from '../media'
 import { FormattedString } from '../parser'
@@ -33,9 +33,6 @@ export namespace Chat {
  * A chat.
  */
 export class Chat {
-    /** Telegram client used for this chat */
-    readonly client: TelegramClient
-
     /**
      * Raw peer object that this {@link Chat} represents.
      */
@@ -46,15 +43,10 @@ export class Chat {
         | tl.RawChatForbidden
         | tl.RawChannelForbidden
 
-    /**
-     * Raw full peer object that this {@link Chat} represents.
-     */
-    readonly fullPeer?: tl.TypeUserFull | tl.TypeChatFull
-
     constructor(
-        client: TelegramClient,
+        readonly client: TelegramClient,
         peer: tl.TypeUser | tl.TypeChat,
-        fullPeer?: tl.TypeUserFull | tl.TypeChatFull
+        readonly fullPeer?: tl.TypeUserFull | tl.TypeChatFull
     ) {
         if (!peer) throw new MtArgumentError('peer is not available')
 
@@ -478,27 +470,25 @@ export class Chat {
     static _parseFromMessage(
         client: TelegramClient,
         message: tl.RawMessage | tl.RawMessageService,
-        users: UsersIndex,
-        chats: ChatsIndex
+        peers: PeersIndex
     ): Chat {
-        return Chat._parseFromPeer(client, message.peerId, users, chats)
+        return Chat._parseFromPeer(client, message.peerId, peers)
     }
 
     /** @internal */
     static _parseFromPeer(
         client: TelegramClient,
         peer: tl.TypePeer,
-        users: UsersIndex,
-        chats: ChatsIndex
+        peers: PeersIndex
     ): Chat {
         switch (peer._) {
             case 'peerUser':
-                return new Chat(client, users[peer.userId])
+                return new Chat(client, peers.user(peer.userId))
             case 'peerChat':
-                return new Chat(client, chats[peer.chatId])
+                return new Chat(client, peers.chat(peer.chatId))
         }
 
-        return new Chat(client, chats[peer.channelId])
+        return new Chat(client, peers.chat(peer.channelId))
     }
 
     /** @internal */

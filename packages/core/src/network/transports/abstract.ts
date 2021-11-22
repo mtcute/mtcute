@@ -1,8 +1,7 @@
 import { tl } from '@mtcute/tl'
-import { MaybeAsync } from '../../types/utils'
-import { ICryptoProvider } from '../../utils/crypto'
+import { MaybeAsync } from '../../types'
+import { ICryptoProvider, Logger } from '../../utils'
 import EventEmitter from 'events'
-import { Logger } from '../../utils/logger'
 
 export enum TransportState {
     /**

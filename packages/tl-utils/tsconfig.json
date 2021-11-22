@@ -1,0 +1,19 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./dist"
+    },
+    "include": [
+        "./src/**/*.ts"
+    ],
+    "typedocOptions": {
+        "name": "@mtcute/tl-utils",
+        "includeVersion": true,
+        "out": "../../docs/packages/tl-utils",
+        "listInvalidSymbolLinks": true,
+        "excludePrivate": true,
+        "entryPoints": [
+            "./src/**/*.ts"
+        ]
+    }
+}

@@ -3,7 +3,7 @@ import {
     User,
     Location,
     MtArgumentError,
-    UsersIndex,
+    PeersIndex,
 } from '../'
 import { TelegramClient } from '../../client'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
@@ -16,19 +16,11 @@ import { makeInspectable } from '../utils'
  * > Inline feedback in [@BotFather](//t.me/botfather)
  */
 export class ChosenInlineResult {
-    readonly client: TelegramClient
-    readonly raw: tl.RawUpdateBotInlineSend
-
-    readonly _users: UsersIndex
-
     constructor(
-        client: TelegramClient,
-        raw: tl.RawUpdateBotInlineSend,
-        users: UsersIndex
+        readonly client: TelegramClient,
+        readonly raw: tl.RawUpdateBotInlineSend,
+        readonly _peers: PeersIndex
     ) {
-        this.client = client
-        this.raw = raw
-        this._users = users
     }
 
     /**
@@ -45,7 +37,7 @@ export class ChosenInlineResult {
      */
     get user(): User {
         if (!this._user) {
-            this._user = new User(this.client, this._users[this.raw.userId])
+            this._user = new User(this.client, this._peers.user(this.raw.userId))
         }
 
         return this._user

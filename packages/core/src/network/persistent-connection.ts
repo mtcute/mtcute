@@ -6,8 +6,7 @@ import {
     ControllablePromise,
     createControllablePromise,
 } from '../utils/controllable-promise'
-import { ICryptoProvider } from '../utils/crypto'
-import { Logger } from '../utils/logger'
+import { ICryptoProvider, Logger } from '../utils'
 
 export interface PersistentConnectionParams {
     crypto: ICryptoProvider
@@ -20,7 +19,7 @@ export interface PersistentConnectionParams {
 
 /**
  * Base class for persistent connections.
- * Only used for {@link TelegramConnection} and used as a mean of code splitting.
+ * Only used for {@link PersistentConnection} and used as a mean of code splitting.
  */
 export abstract class PersistentConnection extends EventEmitter {
     readonly params: PersistentConnectionParams
@@ -41,8 +40,8 @@ export abstract class PersistentConnection extends EventEmitter {
     // waitForMessage
     private _pendingWaitForMessages: ControllablePromise<Buffer>[] = []
 
-    protected _destroyed = false
-    protected _usable = false
+    _destroyed = false
+    _usable = false
 
     protected abstract onConnected(): void
 

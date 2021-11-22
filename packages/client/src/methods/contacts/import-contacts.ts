@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { PartialOnly } from '@mtcute/core'
-import bigInt from 'big-integer'
+import Long from 'long'
 
 /**
  * Import contacts to your Telegram contacts list.
@@ -13,11 +13,11 @@ export async function importContacts(
     this: TelegramClient,
     contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[]
 ): Promise<tl.contacts.RawImportedContacts> {
-    let seq = bigInt.zero
+    let seq = Long.ZERO
 
     const contactsNorm: tl.RawInputPhoneContact[] = contacts.map((input) => ({
         _: 'inputPhoneContact',
-        clientId: (seq = seq.plus(1)),
+        clientId: (seq = seq.add(1)),
         ...input,
     }))
 

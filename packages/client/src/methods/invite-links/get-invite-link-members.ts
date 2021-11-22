@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
-import { ChatInviteLink, InputPeerLike, User } from '../../types'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
+import { ChatInviteLink, InputPeerLike, PeersIndex, User } from '../../types'
 import { tl } from '@mtcute/tl'
 
 /**
@@ -40,18 +39,18 @@ export async function* getInviteLinkMembers(
 
         if (!res.importers.length) break
 
-        const { users } = createUsersChatsIndex(res)
+        const peers = PeersIndex.from(res)
 
         const last = res.importers[res.importers.length - 1]
         offsetDate = last.date
         offsetUser = {
             _: 'inputUser',
             userId: last.userId,
-            accessHash: (users[last.userId] as tl.RawUser).accessHash!,
+            accessHash: (peers.user(last.userId) as tl.RawUser).accessHash!,
         }
 
         for (const it of res.importers) {
-            const user = new User(this, users[it.userId])
+            const user = new User(this, peers.user(it.userId))
 
             yield {
                 user,

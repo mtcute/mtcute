@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { makeInspectable } from '../utils'
-import { User, UsersIndex } from '../peers'
+import { User, PeersIndex } from '../peers'
 
 /**
  * A user has stopped or restarted the bot.
@@ -13,7 +13,7 @@ export class BotStoppedUpdate {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.RawUpdateBotStopped,
-        readonly _users: UsersIndex
+        readonly _peers: PeersIndex
     ) {}
 
     /**
@@ -31,7 +31,7 @@ export class BotStoppedUpdate {
      */
     get user(): User {
         if (!this._user) {
-            this._user = new User(this.client, this._users[this.raw.userId])
+            this._user = new User(this.client, this._peers.user(this.raw.userId))
         }
 
         return this._user

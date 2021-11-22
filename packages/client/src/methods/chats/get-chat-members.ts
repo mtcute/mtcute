@@ -2,10 +2,10 @@ import {
     ChatMember,
     InputPeerLike,
     MtInvalidPeerTypeError,
+    PeersIndex,
 } from '../../types'
 import { TelegramClient } from '../../client'
 import {
-    createUsersChatsIndex,
     isInputPeerChannel,
     isInputPeerChat,
     normalizeToInputChannel,
@@ -13,6 +13,7 @@ import {
 import { assertTypeIs } from '../../utils/type-assertion'
 import { tl } from '@mtcute/tl'
 import { ArrayWithTotal } from '../../types'
+import Long from 'long'
 
 /**
  * Get a chunk of members of some chat.
@@ -94,9 +95,11 @@ export async function getChatMembers(
         if (params.offset) members = members.slice(params.offset)
         if (params.limit) members = members.slice(0, params.limit)
 
-        const { users } = createUsersChatsIndex(res)
+        const peers = PeersIndex.from(res)
 
-        const ret = members.map((m) => new ChatMember(this, m, users)) as ArrayWithTotal<ChatMember>
+        const ret = members.map(
+            (m) => new ChatMember(this, m, peers)
+        ) as ArrayWithTotal<ChatMember>
 
         ret.total = ret.length
         return ret
@@ -140,7 +143,7 @@ export async function getChatMembers(
             filter,
             offset: params.offset ?? 0,
             limit: params.limit ?? 200,
-            hash: 0,
+            hash: Long.ZERO,
         })
 
         assertTypeIs(
@@ -149,9 +152,11 @@ export async function getChatMembers(
             'channels.channelParticipants'
         )
 
-        const { users } = createUsersChatsIndex(res)
+        const peers = PeersIndex.from(res)
 
-        const ret = res.participants.map((i) => new ChatMember(this, i, users)) as ArrayWithTotal<ChatMember>
+        const ret = res.participants.map(
+            (i) => new ChatMember(this, i, peers)
+        ) as ArrayWithTotal<ChatMember>
         ret.total = res.count
         return ret
     }

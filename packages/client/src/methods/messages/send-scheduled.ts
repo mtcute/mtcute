@@ -1,8 +1,7 @@
-import { InputPeerLike, Message } from '../../types'
+import { InputPeerLike, Message, PeersIndex } from '../../types'
 import { MaybeArray } from '@mtcute/core'
 import { TelegramClient } from '../../client'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
 
 /**
  * Send s previously scheduled message.
@@ -56,7 +55,7 @@ export async function sendScheduled(
     assertIsUpdatesGroup('sendScheduled', res)
     this._handleUpdate(res, true)
 
-    const { users, chats } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
     const msgs = res.updates
         .filter(
@@ -69,8 +68,7 @@ export async function sendScheduled(
                 new Message(
                     this,
                     (u as any).message,
-                    users,
-                    chats
+                    peers
                 )
         )
 

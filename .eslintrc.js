@@ -36,6 +36,7 @@ module.exports = {
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/no-this-alias': 'off',
         'prefer-rest-params': 'off',
+        'no-prototype-builtins': 'off',
         '@typescript-eslint/ban-types': 'off',
         '@typescript-eslint/adjacent-overload-signatures': 'off',
         '@typescript-eslint/no-namespace': 'off',

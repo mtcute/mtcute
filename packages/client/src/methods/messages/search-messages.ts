@@ -1,8 +1,8 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, MtTypeAssertionError } from '../../types'
+import { InputPeerLike, Message, MtTypeAssertionError, PeersIndex } from '../../types'
 import { tl } from '@mtcute/tl'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { SearchFilters } from '../../types'
+import Long from 'long'
 
 /**
  * Search for messages inside a specific chat
@@ -88,7 +88,7 @@ export async function* searchMessages(
             minId: 0,
             maxId: 0,
             fromId: fromUser,
-            hash: 0,
+            hash: Long.ZERO,
         })
 
         if (res._ === 'messages.messagesNotModified')
@@ -98,11 +98,11 @@ export async function* searchMessages(
                 res._
             )
 
-        const { users, chats } = createUsersChatsIndex(res)
+        const peers = PeersIndex.from(res)
 
         const msgs = res.messages
             .filter((msg) => msg._ !== 'messageEmpty')
-            .map((msg) => new Message(this, msg, users, chats))
+            .map((msg) => new Message(this, msg, peers))
 
         if (!msgs.length) break
 

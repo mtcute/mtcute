@@ -6,15 +6,15 @@ import { makeInspectable } from '../utils'
  * Account takeout session
  */
 export class TakeoutSession {
-    private client: TelegramClient
-
     /**
      * Takeout session id
      */
     readonly id: tl.Long
 
-    constructor(client: TelegramClient, session: tl.account.RawTakeout) {
-        this.client = client
+    constructor(
+        readonly client: TelegramClient,
+        session: tl.account.RawTakeout
+    ) {
         this.id = session.id
     }
 

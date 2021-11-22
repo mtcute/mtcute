@@ -21,9 +21,7 @@ const STUB_LOCATION = () => {
  * > To be sure, check `isDownloadable` property.
  */
 export class WebDocument extends FileLocation {
-    readonly raw: tl.TypeWebDocument
-
-    constructor(client: TelegramClient, raw: tl.TypeWebDocument) {
+    constructor(client: TelegramClient, readonly raw: tl.TypeWebDocument) {
         super(
             client,
             raw._ === 'webDocument'

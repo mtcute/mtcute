@@ -5,12 +5,11 @@ import {
     InputPeerLike,
     Message,
     MtArgumentError,
-    MtTypeAssertionError,
+    PeersIndex,
 } from '../../types'
-import { MaybeArray } from '@mtcute/core'
+import { MaybeArray, randomLong } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
-import { normalizeDate, randomUlong } from '../../utils/misc-utils'
+import { normalizeDate } from '../../utils/misc-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
@@ -234,7 +233,7 @@ export async function forwardMessages(
         silent: params.silent,
         scheduleDate: normalizeDate(params.schedule),
         randomId: [...Array((messages as number[]).length)].map(() =>
-            randomUlong()
+            randomLong()
         ),
     })
 
@@ -242,7 +241,7 @@ export async function forwardMessages(
 
     this._handleUpdate(res, true)
 
-    const { users, chats } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
     const forwarded: Message[] = []
     res.updates.forEach((upd) => {
@@ -250,7 +249,14 @@ export async function forwardMessages(
             case 'updateNewMessage':
             case 'updateNewChannelMessage':
             case 'updateNewScheduledMessage':
-                forwarded.push(new Message(this, upd.message, users, chats))
+                forwarded.push(
+                    new Message(
+                        this,
+                        upd.message,
+                        peers,
+                        upd._ === 'updateNewScheduledMessage'
+                    )
+                )
                 break
         }
     })

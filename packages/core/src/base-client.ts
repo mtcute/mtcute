@@ -3,13 +3,19 @@ import {
     CryptoProviderFactory,
     ICryptoProvider,
     defaultCryptoProviderFactory,
-} from './utils/crypto'
+    sleep,
+    getAllPeersFrom,
+    encodeUrlSafeBase64,
+    parseUrlSafeBase64,
+    LogManager,
+    toggleChannelIdMark,
+} from './utils'
 import {
     TransportFactory,
     defaultReconnectionStrategy,
     ReconnectionStrategy,
     defaultTransportFactory,
-    TelegramConnection,
+    SessionConnection,
 } from './network'
 import { PersistentConnectionParams } from './network/persistent-connection'
 import {
@@ -29,16 +35,23 @@ import {
     SlowmodeWaitError,
     UserMigrateError,
 } from '@mtcute/tl/errors'
-import { sleep } from './utils/misc-utils'
 import { addPublicKey } from './utils/crypto/keys'
 import { ITelegramStorage, MemoryStorage } from './storage'
-import { getAllPeersFrom, MAX_CHANNEL_ID } from './utils/peer-utils'
-import bigInt from 'big-integer'
-import { BinaryWriter } from './utils/binary/binary-writer'
-import { encodeUrlSafeBase64, parseUrlSafeBase64 } from './utils/buffer-utils'
-import { BinaryReader } from './utils/binary/binary-reader'
 import EventEmitter from 'events'
-import { LogManager } from './utils/logger'
+import Long from 'long'
+import {
+    ControllablePromise,
+    createControllablePromise,
+} from './utils/controllable-promise'
+import {
+    TlBinaryReader,
+    TlBinaryWriter,
+    TlReaderMap,
+    TlWriterMap,
+} from '@mtcute/tl-runtime'
+
+import defaultReaderMap from '@mtcute/tl/binary/reader'
+import defaultWriterMap from '@mtcute/tl/binary/writer'
 
 export namespace BaseTelegramClient {
     export interface Options {
@@ -166,6 +179,20 @@ export namespace BaseTelegramClient {
          * **Does not** change the schema used.
          */
         overrideLayer?: number
+
+        /**
+         * **EXPERT USE ONLY**
+         *
+         * Override reader map used for the connection.
+         */
+        readerMap?: TlReaderMap
+
+        /**
+         * **EXPERT USE ONLY**
+         *
+         * Override writer map used for the connection.
+         */
+        writerMap?: TlWriterMap
     }
 }
 
@@ -233,6 +260,8 @@ export class BaseTelegramClient extends EventEmitter {
 
     private _niceStacks: boolean
     readonly _layer: number
+    readonly _readerMap: TlReaderMap
+    readonly _writerMap: TlWriterMap
 
     private _keepAliveInterval?: NodeJS.Timeout
     protected _lastUpdateTime = 0
@@ -241,20 +270,20 @@ export class BaseTelegramClient extends EventEmitter {
     protected _config?: tl.RawConfig
     protected _cdnConfig?: tl.RawCdnConfig
 
-    private _additionalConnections: TelegramConnection[] = []
+    private _additionalConnections: SessionConnection[] = []
 
     // not really connected, but rather "connect() was called"
-    private _connected = false
+    private _connected: ControllablePromise<void> | boolean = false
 
-    private _onError?: (err: Error, connection?: TelegramConnection) => void
+    private _onError?: (err: Error, connection?: SessionConnection) => void
 
     /**
-     * The primary {@link TelegramConnection} that is used for
+     * The primary {@link SessionConnection} that is used for
      * most of the communication with Telegram.
      *
      * Methods for downloading/uploading files may create additional connections as needed.
      */
-    primaryConnection!: TelegramConnection
+    primaryConnection!: SessionConnection
 
     private _importFrom?: string
 
@@ -269,7 +298,6 @@ export class BaseTelegramClient extends EventEmitter {
     protected _handleUpdate(update: tl.TypeUpdates): void {}
 
     readonly log = new LogManager()
-    protected readonly _baseLog = this.log.create('base')
 
     constructor(opts: BaseTelegramClient.Options) {
         super()
@@ -301,9 +329,11 @@ export class BaseTelegramClient extends EventEmitter {
         this._disableUpdates = opts.disableUpdates ?? false
         this._niceStacks = opts.niceStacks ?? true
 
-        this.storage.setup?.(this._baseLog)
+        this._layer = opts.overrideLayer ?? tl.LAYER
+        this._readerMap = opts.readerMap ?? defaultReaderMap
+        this._writerMap = opts.writerMap ?? defaultWriterMap
 
-        this._layer = opts.overrideLayer ?? tl.CURRENT_LAYER
+        this.storage.setup?.(this.log, this._readerMap, this._writerMap)
 
         let deviceModel = 'MTCute on '
         if (typeof process !== 'undefined' && typeof require !== 'undefined') {
@@ -337,6 +367,8 @@ export class BaseTelegramClient extends EventEmitter {
     }
 
     protected _keepAliveAction(): void {
+        if (this._disableUpdates) return
+
         // telegram asks to fetch pending updates
         // if there are no updates for 15 minutes.
         // core does not have update handling,
@@ -357,16 +389,23 @@ export class BaseTelegramClient extends EventEmitter {
     private _setupPrimaryConnection(): void {
         this._cleanupPrimaryConnection(true)
 
-        this.primaryConnection = new TelegramConnection({
-            crypto: this._crypto,
-            initConnection: this._initConnectionParams,
-            transportFactory: this._transportFactory,
-            dc: this._primaryDc,
-            testMode: this._testMode,
-            reconnectionStrategy: this._reconnectionStrategy,
-            layer: this._layer,
-        }, this.log.create('connection'))
-        this.primaryConnection.on('usable', async (isReconnection: boolean) => {
+        this.primaryConnection = new SessionConnection(
+            {
+                crypto: this._crypto,
+                initConnection: this._initConnectionParams,
+                transportFactory: this._transportFactory,
+                dc: this._primaryDc,
+                testMode: this._testMode,
+                reconnectionStrategy: this._reconnectionStrategy,
+                layer: this._layer,
+                disableUpdates: this._disableUpdates,
+                readerMap: this._readerMap,
+                writerMap: this._writerMap,
+            },
+            this.log.create('connection')
+        )
+
+        this.primaryConnection.on('usable', async () => {
             this._lastUpdateTime = Date.now()
 
             this._keepAliveInterval = setInterval(async () => {
@@ -375,20 +414,6 @@ export class BaseTelegramClient extends EventEmitter {
                     this._lastUpdateTime = Date.now()
                 }
             }, 60_000)
-
-            // on reconnection we need to call updates.getState so Telegram
-            // knows we still want the updates
-            if (isReconnection && !this._disableUpdates) {
-                setTimeout(async () => {
-                    try {
-                        await this.call({ _: 'updates.getState' })
-                    } catch (e) {
-                        if (!(e instanceof RpcError)) {
-                            this.primaryConnection.reconnect()
-                        }
-                    }
-                }, 0)
-            }
         })
         this.primaryConnection.on('update', (update) => {
             this._lastUpdateTime = Date.now()
@@ -413,26 +438,38 @@ export class BaseTelegramClient extends EventEmitter {
      * implicitly the first time you call {@link call}.
      */
     async connect(): Promise<void> {
+        if (this._connected) {
+            await this._connected
+            return
+        }
+
+        this._connected = createControllablePromise()
+
         await this._loadStorage()
         const primaryDc = await this.storage.getDefaultDc()
         if (primaryDc !== null) this._primaryDc = primaryDc
 
-        this._connected = true
         this._setupPrimaryConnection()
 
-        this.primaryConnection.authKey = await this.storage.getAuthKeyFor(
-            this._primaryDc.id
+        await this.primaryConnection.setupKeys(
+            await this.storage.getAuthKeyFor(this._primaryDc.id)
         )
 
-        if (!this.primaryConnection.authKey && this._importFrom) {
+        if (!this.primaryConnection.getAuthKey() && this._importFrom) {
             const buf = parseUrlSafeBase64(this._importFrom)
             if (buf[0] !== 1)
                 throw new Error(`Invalid session string (version = ${buf[0]})`)
 
-            const reader = new BinaryReader(buf, 1)
+            const reader = new TlBinaryReader(this._readerMap, buf, 1)
 
-            const flags = reader.int32()
+            const flags = reader.int()
             const hasSelf = flags & 1
+
+            if (!(flags & 2) !== !this._testMode) {
+                throw new Error(
+                    'This session string is not for the current backend'
+                )
+            }
 
             const primaryDc = reader.object()
             if (primaryDc._ !== 'dcOption') {
@@ -445,18 +482,21 @@ export class BaseTelegramClient extends EventEmitter {
             await this.storage.setDefaultDc(primaryDc)
 
             if (hasSelf) {
-                const selfId = reader.int32()
+                const selfId = reader.int53()
                 const selfBot = reader.boolean()
 
                 await this.storage.setSelf({ userId: selfId, isBot: selfBot })
             }
 
             const key = reader.bytes()
-            this.primaryConnection.authKey = key
+            await this.primaryConnection.setupKeys(key)
             await this.storage.setAuthKeyFor(primaryDc.id, key)
 
             await this._saveStorage(true)
         }
+
+        this._connected.resolve()
+        this._connected = true
 
         this.primaryConnection.connect()
     }
@@ -471,9 +511,17 @@ export class BaseTelegramClient extends EventEmitter {
     }
 
     /**
+     * Additional cleanup for subclasses.
+     * @protected
+     */
+    protected _onClose(): void {}
+
+    /**
      * Close all connections and finalize the client.
      */
     async close(): Promise<void> {
+        await this._onClose()
+
         this._cleanupPrimaryConnection(true)
         // close additional connections
         this._additionalConnections.forEach((conn) => conn.destroy())
@@ -486,9 +534,14 @@ export class BaseTelegramClient extends EventEmitter {
      * Utility function to find the DC by its ID.
      *
      * @param id  Datacenter ID
+     * @param preferMedia  Whether to prefer media-only DCs
      * @param cdn  Whether the needed DC is a CDN DC
      */
-    async getDcById(id: number, cdn = false): Promise<tl.RawDcOption> {
+    async getDcById(
+        id: number,
+        preferMedia = false,
+        cdn = false
+    ): Promise<tl.RawDcOption> {
         if (!this._config) {
             this._config = await this.call({ _: 'help.getConfig' })
         }
@@ -502,16 +555,45 @@ export class BaseTelegramClient extends EventEmitter {
 
         if (this._useIpv6) {
             // first try to find ipv6 dc
-            const found = this._config.dcOptions.find(
-                (it) =>
-                    it.id === id && it.cdn === cdn && it.ipv6 && !it.tcpoOnly
-            )
+
+            let found
+            if (preferMedia) {
+                found = this._config.dcOptions.find(
+                    (it) =>
+                        it.id === id &&
+                        it.mediaOnly &&
+                        it.cdn === cdn &&
+                        it.ipv6 &&
+                        !it.tcpoOnly
+                )
+            }
+
+            if (!found)
+                found = this._config.dcOptions.find(
+                    (it) =>
+                        it.id === id &&
+                        it.cdn === cdn &&
+                        it.ipv6 &&
+                        !it.tcpoOnly
+                )
+
             if (found) return found
         }
 
-        const found = this._config.dcOptions.find(
-            (it) => it.id === id && it.cdn === cdn && !it.tcpoOnly
-        )
+        let found
+        if (preferMedia) {
+            found = this._config.dcOptions.find(
+                (it) =>
+                    it.id === id &&
+                    it.mediaOnly &&
+                    it.cdn === cdn &&
+                    !it.tcpoOnly
+            )
+        }
+        if (!found)
+            found = this._config.dcOptions.find(
+                (it) => it.id === id && it.cdn === cdn && !it.tcpoOnly
+            )
         if (found) return found
 
         throw new Error(`Could not find${cdn ? ' CDN' : ''} DC ${id}`)
@@ -531,7 +613,7 @@ export class BaseTelegramClient extends EventEmitter {
         this._primaryDc = newDc
         await this.storage.setDefaultDc(newDc)
         await this._saveStorage()
-        this.primaryConnection.changeDc(newDc)
+        await this.primaryConnection.changeDc(newDc)
     }
 
     /**
@@ -551,11 +633,11 @@ export class BaseTelegramClient extends EventEmitter {
         message: T,
         params?: {
             throwFlood?: boolean
-            connection?: TelegramConnection
+            connection?: SessionConnection
             timeout?: number
         }
     ): Promise<tl.RpcCallReturn[T['_']]> {
-        if (!this._connected) {
+        if (this._connected !== true) {
             await this.connect()
         }
 
@@ -573,13 +655,6 @@ export class BaseTelegramClient extends EventEmitter {
             }
         }
 
-        if (this._disableUpdates) {
-            message = {
-                _: 'invokeWithoutUpdates',
-                query: message,
-            } as any // who cares
-        }
-
         const connection = params?.connection ?? this.primaryConnection
 
         let lastError: Error | null = null
@@ -587,7 +662,7 @@ export class BaseTelegramClient extends EventEmitter {
 
         for (let i = 0; i < this._rpcRetryCount; i++) {
             try {
-                const res = await connection.sendForResult(
+                const res = await connection.sendRpc(
                     message,
                     stack,
                     params?.timeout
@@ -599,7 +674,7 @@ export class BaseTelegramClient extends EventEmitter {
                 lastError = e
 
                 if (e instanceof InternalError) {
-                    this._baseLog.warn('Telegram is having internal issues: %s', e)
+                    this.log.warn('Telegram is having internal issues: %s', e)
                     if (e.message === 'WORKER_BUSY_TOO_LONG_RETRY') {
                         // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
                         await sleep(1000)
@@ -628,7 +703,7 @@ export class BaseTelegramClient extends EventEmitter {
                         params?.throwFlood !== true &&
                         e.seconds <= this._floodSleepThreshold
                     ) {
-                        this._baseLog.info('Flood wait for %d seconds', e.seconds)
+                        this.log.info('Flood wait for %d seconds', e.seconds)
                         await sleep(e.seconds * 1000)
                         continue
                     }
@@ -640,21 +715,21 @@ export class BaseTelegramClient extends EventEmitter {
                         e.constructor === UserMigrateError ||
                         e.constructor === NetworkMigrateError
                     ) {
-                        this._baseLog.info('Migrate error, new dc = %d', e.newDc)
+                        this.log.info('Migrate error, new dc = %d', e.newDc)
                         await this.changeDc(e.newDc)
                         continue
                     }
                 } else {
                     if (e.constructor === AuthKeyUnregisteredError) {
                         // we can try re-exporting auth from the primary connection
-                        this._baseLog.warn('exported auth key error, re-exporting..')
+                        this.log.warn('exported auth key error, re-exporting..')
 
                         const auth = await this.call({
                             _: 'auth.exportAuthorization',
                             dcId: connection.params.dc.id,
                         })
 
-                        await connection.sendForResult({
+                        await connection.sendRpc({
                             _: 'auth.importAuthorization',
                             id: auth.id,
                             bytes: auth.bytes,
@@ -691,39 +766,54 @@ export class BaseTelegramClient extends EventEmitter {
      */
     async createAdditionalConnection(
         dcId: number,
-        cdn = false,
-        inactivityTimeout = 300_000
-    ): Promise<TelegramConnection> {
-        const dc = await this.getDcById(dcId, cdn)
-        const connection = new TelegramConnection({
-            dc,
-            testMode: this._testMode,
-            crypto: this._crypto,
-            initConnection: this._initConnectionParams,
-            transportFactory: this._transportFactory,
-            reconnectionStrategy: this._reconnectionStrategy,
-            inactivityTimeout,
-            layer: this._layer,
-        }, this.log.create('connection'))
+        params?: {
+            // todo proper docs
+            // default = false
+            media?: boolean
+            // default = fa;se
+            cdn?: boolean
+            // default = 300_000
+            inactivityTimeout?: number
+            // default = false
+            disableUpdates?: boolean
+        }
+    ): Promise<SessionConnection> {
+        const dc = await this.getDcById(dcId, params?.media, params?.cdn)
+        const connection = new SessionConnection(
+            {
+                dc,
+                testMode: this._testMode,
+                crypto: this._crypto,
+                initConnection: this._initConnectionParams,
+                transportFactory: this._transportFactory,
+                reconnectionStrategy: this._reconnectionStrategy,
+                inactivityTimeout: params?.inactivityTimeout ?? 300_000,
+                layer: this._layer,
+                disableUpdates: params?.disableUpdates,
+                readerMap: this._readerMap,
+                writerMap: this._writerMap,
+            },
+            this.log.create('connection')
+        )
 
         connection.on('error', (err) => this._emitError(err, connection))
-        connection.authKey = await this.storage.getAuthKeyFor(dc.id)
+        await connection.setupKeys(await this.storage.getAuthKeyFor(dc.id))
         connection.connect()
 
-        if (!connection.authKey) {
-            this._baseLog.info('exporting auth to DC %d', dcId)
+        if (!connection.getAuthKey()) {
+            this.log.info('exporting auth to DC %d', dcId)
             const auth = await this.call({
                 _: 'auth.exportAuthorization',
                 dcId,
             })
-            await connection.sendForResult({
+            await connection.sendRpc({
                 _: 'auth.importAuthorization',
                 id: auth.id,
                 bytes: auth.bytes,
             })
 
             // connection.authKey was already generated at this point
-            this.storage.setAuthKeyFor(dc.id, connection.authKey)
+            this.storage.setAuthKeyFor(dc.id, connection.getAuthKey()!)
             await this._saveStorage()
         } else {
             // in case the auth key is invalid
@@ -752,7 +842,7 @@ export class BaseTelegramClient extends EventEmitter {
      * @param connection  Connection created with {@link createAdditionalConnection}
      */
     async destroyAdditionalConnection(
-        connection: TelegramConnection
+        connection: SessionConnection
     ): Promise<void> {
         const idx = this._additionalConnections.indexOf(connection)
         if (idx === -1) return
@@ -789,12 +879,12 @@ export class BaseTelegramClient extends EventEmitter {
      *     this was connection-related error.
      */
     onError(
-        handler: (err: Error, connection?: TelegramConnection) => void
+        handler: (err: Error, connection?: SessionConnection) => void
     ): void {
         this._onError = handler
     }
 
-    protected _emitError(err: Error, connection?: TelegramConnection): void {
+    protected _emitError(err: Error, connection?: SessionConnection): void {
         if (this._onError) {
             this._onError(err, connection)
         } else {
@@ -817,6 +907,7 @@ export class BaseTelegramClient extends EventEmitter {
                 // absolutely incredible min peer handling, courtesy of levlam.
                 // see this thread: https://t.me/tdlibchat/15084
                 hadMin = true
+                this.log.debug('received min peer: %j', peer)
                 continue
             }
 
@@ -837,7 +928,7 @@ export class BaseTelegramClient extends EventEmitter {
                 case 'chatForbidden':
                     parsedPeers.push({
                         id: -peer.id,
-                        accessHash: bigInt.zero,
+                        accessHash: Long.ZERO,
                         type: 'chat',
                         full: peer,
                     })
@@ -845,7 +936,7 @@ export class BaseTelegramClient extends EventEmitter {
                 case 'channel':
                 case 'channelForbidden':
                     parsedPeers.push({
-                        id: MAX_CHANNEL_ID - peer.id,
+                        id: toggleChannelIdMark(peer.id),
                         accessHash: peer.accessHash!,
                         username:
                             peer._ === 'channel'
@@ -861,7 +952,7 @@ export class BaseTelegramClient extends EventEmitter {
         await this.storage.updatePeers(parsedPeers)
 
         if (count > 0) {
-            this._baseLog.debug('cached %d peers, had min: %b', count, hadMin)
+            this.log.debug('cached %d peers', count)
         }
 
         return hadMin
@@ -883,10 +974,10 @@ export class BaseTelegramClient extends EventEmitter {
      * > with [@BotFather](//t.me/botfather)
      */
     async exportSession(): Promise<string> {
-        if (!this.primaryConnection.authKey)
+        if (!this.primaryConnection.getAuthKey())
             throw new Error('Auth key is not generated yet')
 
-        const writer = BinaryWriter.alloc(512)
+        const writer = TlBinaryWriter.alloc(this._writerMap, 512)
 
         const self = await this.storage.getSelf()
 
@@ -897,18 +988,22 @@ export class BaseTelegramClient extends EventEmitter {
             flags |= 1
         }
 
+        if (this._testMode) {
+            flags |= 2
+        }
+
         writer.buffer[0] = version
         writer.pos += 1
 
-        writer.int32(flags)
+        writer.int(flags)
         writer.object(this._primaryDc)
 
         if (self) {
-            writer.int32(self.userId)
+            writer.int53(self.userId)
             writer.boolean(self.isBot)
         }
 
-        writer.bytes(this.primaryConnection.authKey)
+        writer.bytes(this.primaryConnection.getAuthKey()!)
 
         return encodeUrlSafeBase64(writer.result())
     }

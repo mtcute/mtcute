@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { Chat, ChatsIndex, UsersIndex } from '../peers'
+import { Chat, PeersIndex } from '../peers'
 import { Message } from './message'
 import { DraftMessage } from './draft-message'
 import { makeInspectable } from '../utils'
@@ -13,31 +13,12 @@ import { getMarkedPeerId, MessageNotFoundError } from '@mtcute/core'
  * in Telegram's main window.
  */
 export class Dialog {
-    readonly client: TelegramClient
-    readonly raw: tl.RawDialog
-
-    /** Map of users in this object. Mainly for internal use */
-    readonly _users: UsersIndex
-
-    /** Map of chats in this object. Mainly for internal use */
-    readonly _chats: ChatsIndex
-
-    /** Map of messages in this object. Mainly for internal use */
-    readonly _messages: Record<number, tl.TypeMessage>
-
     constructor(
-        client: TelegramClient,
-        raw: tl.RawDialog,
-        users: UsersIndex,
-        chats: ChatsIndex,
-        messages: Record<number, tl.TypeMessage>
-    ) {
-        this.client = client
-        this.raw = raw
-        this._users = users
-        this._chats = chats
-        this._messages = messages
-    }
+        readonly client: TelegramClient,
+        readonly raw: tl.RawDialog,
+        readonly _peers: PeersIndex,
+        readonly _messages: Record<number, tl.TypeMessage>
+    ) {}
 
     /**
      * Find pinned dialogs from a list of dialogs
@@ -172,12 +153,12 @@ export class Dialog {
             switch (peer._) {
                 case 'peerChannel':
                 case 'peerChat':
-                    chat = this._chats[
+                    chat = this._peers.chat(
                         peer._ === 'peerChannel' ? peer.channelId : peer.chatId
-                    ]
+                    )
                     break
                 default:
-                    chat = this._users[peer.userId]
+                    chat = this._peers.user(peer.userId)
                     break
             }
 
@@ -200,8 +181,7 @@ export class Dialog {
                 this._lastMessage = new Message(
                     this.client,
                     this._messages[cid],
-                    this._users,
-                    this._chats
+                    this._peers
                 )
             } else {
                 throw new MessageNotFoundError()

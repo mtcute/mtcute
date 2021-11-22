@@ -124,7 +124,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
                 )
             }
 
-            this._packetCodec.setupCrypto?.(this._crypto)
+            this._packetCodec.setup?.(this._crypto, this.log)
             this._packetCodec.on('error', (err) => this.emit('error', err))
             this._packetCodec.on('packet', (buf) => this.emit('message', buf))
         }

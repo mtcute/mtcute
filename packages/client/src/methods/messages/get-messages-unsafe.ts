@@ -1,10 +1,7 @@
 import { TelegramClient } from '../../client'
 import { MaybeArray } from '@mtcute/core'
-import {
-    createUsersChatsIndex,
-} from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
-import { Message, MtTypeAssertionError } from '../../types'
+import { Message, MtTypeAssertionError, PeersIndex } from '../../types'
 
 /**
  * Get a single message from PM or legacy group by its ID.
@@ -73,14 +70,13 @@ export async function getMessagesUnsafe(
             res._
         )
 
-    const { users, chats } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
-    const ret = res.messages
-        .map((msg) => {
-            if (msg._ === 'messageEmpty') return null
+    const ret = res.messages.map((msg) => {
+        if (msg._ === 'messageEmpty') return null
 
-            return new Message(this, msg, users, chats)
-        })
+        return new Message(this, msg, peers)
+    })
 
     return isSingle ? ret[0] : ret
 }

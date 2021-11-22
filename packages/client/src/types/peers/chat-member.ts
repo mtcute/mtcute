@@ -4,7 +4,7 @@ import { tl } from '@mtcute/tl'
 import { User } from './user'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { ChatPermissions } from './chat-permissions'
-import { UsersIndex } from './index'
+import { PeersIndex } from './index'
 
 export namespace ChatMember {
     /**
@@ -29,21 +29,11 @@ export namespace ChatMember {
  * Information about one chat member
  */
 export class ChatMember {
-    readonly client: TelegramClient
-    readonly raw: tl.TypeChatParticipant | tl.TypeChannelParticipant
-
-    /** Map of users in this object. Mainly for internal use */
-    readonly _users: UsersIndex
-
     constructor(
-        client: TelegramClient,
-        raw: tl.TypeChatParticipant | tl.TypeChannelParticipant,
-        users: UsersIndex
-    ) {
-        this.client = client
-        this.raw = raw
-        this._users = users
-    }
+        readonly client: TelegramClient,
+        readonly raw: tl.TypeChatParticipant | tl.TypeChannelParticipant,
+        readonly _peers: PeersIndex
+    ) {}
 
     private _user?: User
     /**
@@ -59,15 +49,16 @@ export class ChatMember {
                         this.raw.peer,
                         'peerUser'
                     )
+
                     this._user = new User(
                         this.client,
-                        this._users[this.raw.peer.userId]
+                        this._peers.user(this.raw.peer.userId)
                     )
                     break
                 default:
                     this._user = new User(
                         this.client,
-                        this._users[this.raw.userId]
+                        this._peers.user(this.raw.userId)
                     )
                     break
             }
@@ -148,7 +139,7 @@ export class ChatMember {
             if ('inviterId' in this.raw && this.raw.inviterId) {
                 this._invitedBy = new User(
                     this.client,
-                    this._users[this.raw.inviterId]
+                    this._peers.user(this.raw.inviterId)
                 )
             } else {
                 this._invitedBy = null
@@ -169,7 +160,7 @@ export class ChatMember {
             if (this.raw._ === 'channelParticipantAdmin') {
                 this._promotedBy = new User(
                     this.client,
-                    this._users[this.raw.promotedBy]
+                    this._peers.user(this.raw.promotedBy)
                 )
             } else {
                 this._promotedBy = null
@@ -190,7 +181,7 @@ export class ChatMember {
             if (this.raw._ === 'channelParticipantBanned') {
                 this._restrictedBy = new User(
                     this.client,
-                    this._users[this.raw.kickedBy]
+                    this._peers.user(this.raw.kickedBy)
                 )
             } else {
                 this._restrictedBy = null

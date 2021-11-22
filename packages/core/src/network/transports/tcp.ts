@@ -2,9 +2,8 @@ import { ITelegramTransport, IPacketCodec, TransportState } from './abstract'
 import { tl } from '@mtcute/tl'
 import { Socket, connect } from 'net'
 import EventEmitter from 'events'
-import { ICryptoProvider } from '../../utils/crypto'
+import { ICryptoProvider, Logger } from '../../utils'
 import { IntermediatePacketCodec } from './intermediate'
-import { Logger } from '../../utils/logger'
 
 /**
  * Base for TCP transports.
@@ -23,9 +22,18 @@ export abstract class BaseTcpTransport
 
     packetCodecInitialized = false
 
+    private _updateLogPrefix() {
+        if (this._currentDc) {
+            this.log.prefix = `[TCP:${this._currentDc.ipAddress}:${this._currentDc.port}] `
+        } else {
+            this.log.prefix = '[TCP:disconnected] '
+        }
+    }
+
     setup(crypto: ICryptoProvider, log: Logger): void {
         this._crypto = crypto
         this.log = log.create('tcp')
+        this._updateLogPrefix()
     }
 
     state(): TransportState {
@@ -50,6 +58,10 @@ export abstract class BaseTcpTransport
 
         this._state = TransportState.Connecting
         this._currentDc = dc
+        this._updateLogPrefix()
+
+        this.log.debug('connecting to %j', dc)
+
         this._socket = connect(
             dc.port,
             dc.ipAddress,
@@ -63,7 +75,7 @@ export abstract class BaseTcpTransport
 
     close(): void {
         if (this._state === TransportState.Idle) return
-        this.log.debug('%s: close', this._currentDc!.ipAddress)
+        this.log.info('connection closed')
 
         this.emit('close')
         this._state = TransportState.Idle
@@ -75,12 +87,12 @@ export abstract class BaseTcpTransport
     }
 
     async handleError(error: Error): Promise<void> {
-        this.log.error('%s: error: %s', this._currentDc!.ipAddress, error.stack)
+        this.log.error('error: %s', error.stack)
         this.emit('error', error)
     }
 
     async handleConnect(): Promise<void> {
-        this.log.debug('%s: connected', this._currentDc!.ipAddress)
+        this.log.info('connected')
         const initialMessage = await this._packetCodec.tag()
 
         if (initialMessage.length) {

@@ -2,16 +2,15 @@ import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
     MtInvalidPeerTypeError,
-    ChatEvent,
+    ChatEvent, PeersIndex,
 } from '../../types'
 import { tl } from '@mtcute/tl'
 import { MaybeArray } from '@mtcute/core'
-import bigInt from 'big-integer'
 import {
-    createUsersChatsIndex,
     normalizeToInputChannel,
     normalizeToInputUser,
 } from '../../utils/peer-utils'
+import Long from 'long'
 
 /**
  * Get chat event log ("Recent actions" in official
@@ -89,8 +88,8 @@ export async function* getChatEventLog(
     if (!channel) throw new MtInvalidPeerTypeError(chatId, 'channel')
 
     let current = 0
-    let maxId = params.maxId ?? bigInt.zero
-    const minId = params.minId ?? bigInt.zero
+    let maxId = params.maxId ?? Long.ZERO
+    const minId = params.minId ?? Long.ZERO
     const query = params.query ?? ''
 
     const total = params.limit || Infinity
@@ -216,12 +215,12 @@ export async function* getChatEventLog(
 
         if (!res.events.length) break
 
-        const { users, chats } = createUsersChatsIndex(res)
+        const peers = PeersIndex.from(res)
         const last = res.events[res.events.length - 1]
         maxId = last.id
 
         for (const evt of res.events) {
-            const parsed = new ChatEvent(this, evt, users, chats)
+            const parsed = new ChatEvent(this, evt, peers)
 
             if (
                 localFilter &&

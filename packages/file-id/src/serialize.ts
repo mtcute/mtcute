@@ -1,6 +1,7 @@
 import { tdFileId as td } from './types'
-import { encodeUrlSafeBase64, BinaryWriter } from '@mtcute/core'
+import { encodeUrlSafeBase64 } from '@mtcute/core'
 import { telegramRleEncode } from './utils'
+import { TlBinaryWriter } from '@mtcute/tl-runtime'
 
 const SUFFIX = Buffer.from([td.CURRENT_VERSION, td.PERSISTENT_ID_VERSION])
 
@@ -19,7 +20,8 @@ export function toFileId(
     if (loc._ === 'web') type |= td.WEB_LOCATION_FLAG
     if (location.fileReference) type |= td.FILE_REFERENCE_FLAG
 
-    const writer = BinaryWriter.alloc(
+    const writer = TlBinaryWriter.alloc(
+        {},
         loc._ === 'web'
             ? // overhead of the web file id:
               // 8-16 bytes header,
@@ -31,8 +33,8 @@ export function toFileId(
               100
     )
 
-    writer.int32(type)
-    writer.int32(location.dcId)
+    writer.int(type)
+    writer.int(location.dcId)
     if (location.fileReference) {
         writer.bytes(location.fileReference)
     }
@@ -49,49 +51,49 @@ export function toFileId(
 
             switch (loc.source._) {
                 case 'legacy':
-                    writer.int32(0)
+                    writer.int(0)
                     writer.long(loc.source.secret)
                     break
                 case 'thumbnail':
-                    writer.int32(1)
-                    writer.int32(loc.source.fileType)
-                    writer.int32(loc.source.thumbnailType.charCodeAt(0))
+                    writer.int(1)
+                    writer.int(loc.source.fileType)
+                    writer.int(loc.source.thumbnailType.charCodeAt(0))
                     break
                 case 'dialogPhoto':
-                    writer.int32(loc.source.big ? 3 : 2)
-                    writer.long(loc.source.id)
+                    writer.int(loc.source.big ? 3 : 2)
+                    writer.int53(loc.source.id)
                     writer.long(loc.source.accessHash)
                     break
                 case 'stickerSetThumbnail':
-                    writer.int32(4)
+                    writer.int(4)
                     writer.long(loc.source.id)
                     writer.long(loc.source.accessHash)
                     break
                 case 'fullLegacy':
-                    writer.int32(5)
+                    writer.int(5)
                     writer.long(loc.source.volumeId)
                     writer.long(loc.source.secret)
-                    writer.int32(loc.source.localId)
+                    writer.int(loc.source.localId)
                     break
                 case 'dialogPhotoLegacy':
-                    writer.int32(loc.source.big ? 7 : 6)
-                    writer.long(loc.source.id)
+                    writer.int(loc.source.big ? 7 : 6)
+                    writer.int53(loc.source.id)
                     writer.long(loc.source.accessHash)
                     writer.long(loc.source.volumeId)
-                    writer.int32(loc.source.localId)
+                    writer.int(loc.source.localId)
                     break
                 case 'stickerSetThumbnailLegacy':
-                    writer.int32(8)
+                    writer.int(8)
                     writer.long(loc.source.id)
                     writer.long(loc.source.accessHash)
                     writer.long(loc.source.volumeId)
-                    writer.int32(loc.source.localId)
+                    writer.int(loc.source.localId)
                     break
                 case 'stickerSetThumbnailVersion':
-                    writer.int32(9)
+                    writer.int(9)
                     writer.long(loc.source.id)
                     writer.long(loc.source.accessHash)
-                    writer.int32(loc.source.version)
+                    writer.int(loc.source.version)
                     break
             }
 

@@ -1,25 +1,30 @@
 {
     "name": "@mtcute/tl",
-    "version": "1.131.0",
+    "version": "134.0.0",
     "description": "TL schema used for MTCute",
     "main": "index.js",
     "author": "Alisa Sireneva <me@tei.su>",
     "license": "LGPL-3.0",
     "scripts": {
         "test": "tsc --noEmit tests/types.ts",
-        "generate-schema": "node scripts/generate-schema.js",
-        "generate-code": "node scripts/generate-types.js && node scripts/generate-binary-reader.js && node scripts/generate-binary-writer.js && node scripts/generate-errors.js",
-        "generate-all": "npm run generate-schema && npm run generate-code",
+        "fetch-mtp": "node -r ts-node/register scripts/fetch-mtp.ts",
+        "fetch-api": "node -r ts-node/register scripts/fetch-api.ts",
+        "fetch-errors": "node -r ts-node/register scripts/fetch-errors.ts",
+        "docs-cli": "node -r ts-node/register scripts/documentation.ts",
+        "gen-code": "node -r ts-node/register scripts/gen-code.ts",
+        "gen-rsa": "node -r ts-node/register scripts/gen-rsa-keys.ts",
+        "fetch-and-gen": "yarn fetch-api && yarn gen-code",
         "docs": "npx typedoc --options typedoc.json"
     },
     "dependencies": {
-        "big-integer": "^1.6.48"
+        "@types/long": "^4.0.1",
+        "long": "^4.0.0"
     },
     "devDependencies": {
+        "@mtcute/tl-utils": "^1.0.0",
+        "@mtcute/core": "^1.0.0",
         "cheerio": "^1.0.0-rc.5",
-        "eager-async-pool": "^1.0.0",
         "csv-parser": "^3.0.0",
-        "js-yaml": "^4.0.0",
-        "crc-32": "^1.2.0"
+        "js-yaml": "^4.0.0"
     }
 }

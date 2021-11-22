@@ -1,7 +1,6 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { Message, MtTypeAssertionError } from '../../types'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
+import { Message, MtTypeAssertionError, PeersIndex } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /** @internal */
@@ -24,13 +23,12 @@ export function _findMessageInUpdate(
                     u._ === 'updateNewChannelMessage' ||
                     u._ === 'updateNewScheduledMessage'))
         ) {
-            const { users, chats } = createUsersChatsIndex(res)
+            const peers = PeersIndex.from(res)
 
             return new Message(
                 this,
                 u.message,
-                users,
-                chats,
+                peers,
                 u._ === 'updateNewScheduledMessage'
             )
         }

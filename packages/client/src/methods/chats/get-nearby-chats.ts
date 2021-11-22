@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { Chat, MtTypeAssertionError } from '../../types'
+import { Chat } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { getMarkedPeerId } from '@mtcute/core'
 import { tl } from 'packages/tl'

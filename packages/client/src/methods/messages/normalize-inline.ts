@@ -1,11 +1,11 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { TelegramConnection } from '@mtcute/core'
+import { SessionConnection } from '@mtcute/core'
 import { parseInlineMessageId } from '../../utils/inline-utils'
 
 // @extension
 interface InlineExtension {
-    _connectionsForInline: Record<number, TelegramConnection>
+    _connectionsForInline: Record<number, SessionConnection>
 }
 
 // @initialize
@@ -17,7 +17,7 @@ function _initializeInline(this: TelegramClient) {
 export async function _normalizeInline(
     this: TelegramClient,
     id: string | tl.TypeInputBotInlineMessageID
-): Promise<[tl.TypeInputBotInlineMessageID, TelegramConnection]> {
+): Promise<[tl.TypeInputBotInlineMessageID, SessionConnection]> {
     if (typeof id === 'string') {
         id = parseInlineMessageId(id)
     }

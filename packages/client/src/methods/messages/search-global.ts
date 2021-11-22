@@ -1,7 +1,6 @@
 import { TelegramClient } from '../../client'
-import { Message, MtTypeAssertionError } from '../../types'
+import { Message, MtTypeAssertionError, PeersIndex } from '../../types'
 import { tl } from '@mtcute/tl'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
 import { SearchFilters } from '../../types'
 
 /**
@@ -77,11 +76,11 @@ export async function* searchGlobal(
                 res._
             )
 
-        const { users, chats } = createUsersChatsIndex(res)
+        const peers = PeersIndex.from(res)
 
         const msgs = res.messages
             .filter((msg) => msg._ !== 'messageEmpty')
-            .map((msg) => new Message(this, msg, users, chats))
+            .map((msg) => new Message(this, msg, peers))
 
         if (!msgs.length) break
 

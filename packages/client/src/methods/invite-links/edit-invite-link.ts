@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
-import { ChatInviteLink, InputPeerLike } from '../../types'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
+import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
 
 /**
@@ -43,7 +42,7 @@ export async function editInviteLink(
         usageLimit: params.usageLimit,
     })
 
-    const { users } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
-    return new ChatInviteLink(this, res.invite, users)
+    return new ChatInviteLink(this, res.invite, peers)
 }

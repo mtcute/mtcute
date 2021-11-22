@@ -1,7 +1,7 @@
-import { User, Chat, InputPeerLike, UsersIndex, ChatsIndex } from '../peers'
+import { User, Chat, InputPeerLike, PeersIndex } from '../peers'
 import { tl } from '@mtcute/tl'
 import { BotKeyboard, ReplyMarkup } from '../bots'
-import { getMarkedPeerId, MAX_CHANNEL_ID } from '@mtcute/core'
+import { getMarkedPeerId, toggleChannelIdMark } from '@mtcute/core'
 import {
     MtArgumentError,
     MtTypeAssertionError,
@@ -96,43 +96,30 @@ export namespace Message {
  * A Telegram message.
  */
 export class Message {
-    /** Telegram client that received this message */
-    readonly client: TelegramClient
-
     /**
      * Raw TL object.
      */
     readonly raw: tl.RawMessage | tl.RawMessageService
 
-    /** Map of users in this message. Mainly for internal use */
-    readonly _users: UsersIndex
-    /** Map of chats in this message. Mainly for internal use */
-    readonly _chats: ChatsIndex
-
     constructor(
-        client: TelegramClient,
+        readonly client: TelegramClient,
         raw: tl.TypeMessage,
-        users: UsersIndex,
-        chats: ChatsIndex,
-        isScheduled = false
+        readonly _peers: PeersIndex,
+        /**
+         * Whether the message is scheduled.
+         * If it is, then its {@link date} is set to future.
+         */
+        readonly isScheduled = false
     ) {
         if (raw._ === 'messageEmpty')
-            throw new MtTypeAssertionError('Message#ctor', 'not messageEmpty', 'messageEmpty')
-
-        this.client = client
-        this._users = users
-        this._chats = chats
+            throw new MtTypeAssertionError(
+                'Message#ctor',
+                'not messageEmpty',
+                'messageEmpty'
+            )
 
         this.raw = raw
-
-        this.isScheduled = isScheduled
     }
-
-    /**
-     * Whether the message is scheduled.
-     * If it is, then its {@link date} is set to future.
-     */
-    readonly isScheduled: boolean
 
     /** Unique message identifier inside this chat */
     get id(): number {
@@ -197,7 +184,7 @@ export class Message {
                 if (this.raw.peerId._ === 'peerUser') {
                     this._sender = new User(
                         this.client,
-                        this._users[this.raw.peerId.userId]
+                        this._peers.user(this.raw.peerId.userId)
                     )
                 } else {
                     // anon admin, return the chat
@@ -208,13 +195,13 @@ export class Message {
                     case 'peerChannel': // forwarded channel post
                         this._sender = new Chat(
                             this.client,
-                            this._chats[from.channelId]
+                            this._peers.chat(from.channelId)
                         )
                         break
                     case 'peerUser':
                         this._sender = new User(
                             this.client,
-                            this._users[from.userId]
+                            this._peers.user(from.userId)
                         )
                         break
                     default:
@@ -239,8 +226,7 @@ export class Message {
             this._chat = Chat._parseFromMessage(
                 this.client,
                 this.raw,
-                this._users,
-                this._chats
+                this._peers
             )
         }
 
@@ -274,13 +260,13 @@ export class Message {
                         case 'peerChannel':
                             sender = new Chat(
                                 this.client,
-                                this._chats[fwd.fromId.channelId]
+                                this._peers.chat(fwd.fromId.channelId)
                             )
                             break
                         case 'peerUser':
                             sender = new User(
                                 this.client,
-                                this._users[fwd.fromId.userId]
+                                this._peers.user(fwd.fromId.userId)
                             )
                             break
                         default:
@@ -329,7 +315,7 @@ export class Message {
 
             if (r.comments) {
                 const o = (obj as unknown) as Message.MessageCommentsInfo
-                o.discussion = r.channelId!
+                o.discussion = getMarkedPeerId(r.channelId!, 'channel')
                 o.repliers =
                     r.recentRepliers?.map((it) => getMarkedPeerId(it)) ?? []
             }
@@ -375,7 +361,7 @@ export class Message {
             } else {
                 this._viaBot = new User(
                     this.client,
-                    this._users[this.raw.viaBotId]
+                    this._peers.user(this.raw.viaBotId)
                 )
             }
         }
@@ -515,7 +501,7 @@ export class Message {
             if (this.chat.username) {
                 return `https://t.me/${this.chat.username}/${this.id}`
             } else {
-                return `https://t.me/c/${MAX_CHANNEL_ID - this.chat.id}/${
+                return `https://t.me/c/${toggleChannelIdMark(this.chat.id)}/${
                     this.id
                 }`
             }
@@ -547,8 +533,7 @@ export class Message {
      * this method will also return `null`.
      */
     getReplyTo(): Promise<Message | null> {
-        if (!this.replyToMessageId)
-            return Promise.resolve(null)
+        if (!this.replyToMessageId) return Promise.resolve(null)
 
         if (this.raw.peerId._ === 'peerChannel')
             return this.client.getMessages(this.chat.inputPeer, this.id, true)
@@ -795,7 +780,7 @@ export class Message {
      * passing positional `text` as object field.
      *
      * @param text  New message text
-     * @param params  Additional parameters
+     * @param params?  Additional parameters
      * @link TelegramClient.editMessage
      */
     editText(
@@ -819,7 +804,12 @@ export class Message {
         peer: InputPeerLike,
         params?: Parameters<TelegramClient['forwardMessages']>[3]
     ): Promise<Message> {
-        return this.client.forwardMessages(peer, this.chat.inputPeer, this.id, params)
+        return this.client.forwardMessages(
+            peer,
+            this.chat.inputPeer,
+            this.id,
+            params
+        )
     }
 
     /**
@@ -885,7 +875,10 @@ export class Message {
      * message.
      */
     async getDiscussionMessage(): Promise<Message | null> {
-        return this.client.getDiscussionMessage(this.chat.inputPeer, this.raw.id)
+        return this.client.getDiscussionMessage(
+            this.chat.inputPeer,
+            this.raw.id
+        )
     }
 
     /**

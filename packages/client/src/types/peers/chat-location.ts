@@ -7,13 +7,10 @@ import { makeInspectable } from '../utils'
  * Geolocation of a supergroup
  */
 export class ChatLocation {
-    readonly client: TelegramClient
-    readonly raw: tl.RawChannelLocation
-
-    constructor(client: TelegramClient, raw: tl.RawChannelLocation) {
-        this.client = client
-        this.raw = raw
-    }
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawChannelLocation
+    ) {}
 
     private _location?: Location
     /**

@@ -1,21 +1,16 @@
 import { tl } from '@mtcute/tl'
-import { MAX_CHANNEL_ID } from '@mtcute/core'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
+import { toggleChannelIdMark } from '../../../../core'
 
 /**
  * One or more messages were deleted
  */
 export class DeleteMessageUpdate {
-    readonly client: TelegramClient
-    readonly raw: tl.RawUpdateDeleteMessages | tl.RawUpdateDeleteChannelMessages
-
     constructor(
-        client: TelegramClient,
-        raw: tl.RawUpdateDeleteMessages | tl.RawUpdateDeleteChannelMessages
+        readonly client: TelegramClient,
+        readonly raw: tl.RawUpdateDeleteMessages | tl.RawUpdateDeleteChannelMessages
     ) {
-        this.client = client
-        this.raw = raw
     }
 
     /**
@@ -30,7 +25,7 @@ export class DeleteMessageUpdate {
      */
     get channelId(): number | null {
         return this.raw._ === 'updateDeleteChannelMessages'
-            ? MAX_CHANNEL_ID - this.raw.channelId
+            ? toggleChannelIdMark(this.raw.channelId)
             : null
     }
 }

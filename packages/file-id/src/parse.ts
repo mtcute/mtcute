@@ -1,9 +1,10 @@
 import { telegramRleDecode } from './utils'
 import { tdFileId as td } from './types'
-import { BinaryReader, parseUrlSafeBase64 } from '@mtcute/core'
+import { parseUrlSafeBase64 } from '@mtcute/core'
+import { TlBinaryReader } from '@mtcute/tl-runtime'
 
 function parseWebFileLocation(
-    reader: BinaryReader
+    reader: TlBinaryReader
 ): td.RawWebRemoteFileLocation {
     return {
         _: 'web',
@@ -12,8 +13,8 @@ function parseWebFileLocation(
     }
 }
 
-function parsePhotoSizeSource(reader: BinaryReader): td.TypePhotoSizeSource {
-    const variant = reader.int32()
+function parsePhotoSizeSource(reader: TlBinaryReader): td.TypePhotoSizeSource {
+    const variant = reader.int()
     switch (variant) {
         case 0 /* LEGACY */:
             return {
@@ -21,7 +22,7 @@ function parsePhotoSizeSource(reader: BinaryReader): td.TypePhotoSizeSource {
                 secret: reader.long(),
             }
         case 1 /* THUMBNAIL */: {
-            const fileType = reader.int32()
+            const fileType = reader.int()
             if (fileType < 0 || fileType >= td.FileType.Size)
                 throw new td.UnsupportedError(
                     `Unsupported file type: ${fileType} (${reader.data.toString(
@@ -29,7 +30,7 @@ function parsePhotoSizeSource(reader: BinaryReader): td.TypePhotoSizeSource {
                     )})`
                 )
 
-            const thumbnailType = reader.int32()
+            const thumbnailType = reader.int()
             if (thumbnailType < 0 || thumbnailType > 255) {
                 throw new td.InvalidFileIdError(
                     `Wrong thumbnail type: ${thumbnailType} (${reader.data.toString(
@@ -49,7 +50,7 @@ function parsePhotoSizeSource(reader: BinaryReader): td.TypePhotoSizeSource {
             return {
                 _: 'dialogPhoto',
                 big: variant === 3,
-                id: reader.long(),
+                id: reader.int53(),
                 accessHash: reader.long(),
             }
         case 4 /* STICKERSET_THUMBNAIL */:
@@ -63,7 +64,7 @@ function parsePhotoSizeSource(reader: BinaryReader): td.TypePhotoSizeSource {
                 _: 'fullLegacy',
                 volumeId: reader.long(),
                 secret: reader.long(),
-                localId: reader.int32()
+                localId: reader.int(),
             }
 
             if (res.localId < 0) {
@@ -77,10 +78,10 @@ function parsePhotoSizeSource(reader: BinaryReader): td.TypePhotoSizeSource {
             const res: td.RawPhotoSizeSourceDialogPhotoLegacy = {
                 _: 'dialogPhotoLegacy',
                 big: variant === 7,
-                id: reader.long(),
+                id: reader.int53(),
                 accessHash: reader.long(),
                 volumeId: reader.long(),
-                localId: reader.int32()
+                localId: reader.int(),
             }
 
             if (res.localId < 0) {
@@ -95,7 +96,7 @@ function parsePhotoSizeSource(reader: BinaryReader): td.TypePhotoSizeSource {
                 id: reader.long(),
                 accessHash: reader.long(),
                 volumeId: reader.long(),
-                localId: reader.int32()
+                localId: reader.int(),
             }
 
             if (res.localId < 0) {
@@ -109,7 +110,7 @@ function parsePhotoSizeSource(reader: BinaryReader): td.TypePhotoSizeSource {
                 _: 'stickerSetThumbnailVersion',
                 id: reader.long(),
                 accessHash: reader.long(),
-                version: reader.int32()
+                version: reader.int(),
             }
         default:
             throw new td.UnsupportedError(
@@ -121,11 +122,9 @@ function parsePhotoSizeSource(reader: BinaryReader): td.TypePhotoSizeSource {
 }
 
 function parsePhotoFileLocation(
-    reader: BinaryReader,
+    reader: TlBinaryReader,
     version: number
 ): td.RawPhotoRemoteFileLocation {
-    // todo: check how tdlib handles volume ids
-
     const id = reader.long()
     const accessHash = reader.long()
     let source: td.TypePhotoSizeSource
@@ -138,13 +137,13 @@ function parsePhotoFileLocation(
 
         if (version >= 22) {
             source = parsePhotoSizeSource(reader)
-            localId = reader.int32()
+            localId = reader.int()
         } else {
             source = {
                 _: 'fullLegacy',
                 secret: reader.long(),
-                localId: reader.int32(),
-                volumeId
+                localId: reader.int(),
+                volumeId,
             }
         }
 
@@ -153,8 +152,8 @@ function parsePhotoFileLocation(
                 source = {
                     _: 'fullLegacy',
                     secret: reader.long(),
-                    localId: reader.int32(),
-                    volumeId
+                    localId: reader.int(),
+                    volumeId,
                 }
                 break
             case 'fullLegacy':
@@ -167,7 +166,7 @@ function parsePhotoFileLocation(
                     accessHash: source.accessHash,
                     big: source.big,
                     localId,
-                    volumeId
+                    volumeId,
                 }
                 break
             case 'stickerSetThumbnail':
@@ -176,11 +175,13 @@ function parsePhotoFileLocation(
                     id: source.id,
                     accessHash: source.accessHash,
                     localId,
-                    volumeId
+                    volumeId,
                 }
                 break
             default:
-                throw new td.InvalidFileIdError('Invalid PhotoSizeSource in legacy PhotoRemoteFileLocation')
+                throw new td.InvalidFileIdError(
+                    'Invalid PhotoSizeSource in legacy PhotoRemoteFileLocation'
+                )
         }
     }
 
@@ -188,12 +189,12 @@ function parsePhotoFileLocation(
         _: 'photo',
         id,
         accessHash,
-        source
+        source,
     }
 }
 
 function parseCommonFileLocation(
-    reader: BinaryReader
+    reader: TlBinaryReader
 ): td.RawCommonRemoteFileLocation {
     return {
         _: 'common',
@@ -215,9 +216,9 @@ function fromPersistentIdV23(
 
     binary = telegramRleDecode(binary)
 
-    const reader = new BinaryReader(binary)
+    const reader = TlBinaryReader.manual(binary)
 
-    let fileType = reader.int32()
+    let fileType = reader.int()
 
     const isWeb = !!(fileType & td.WEB_LOCATION_FLAG)
     const hasFileReference = !!(fileType & td.FILE_REFERENCE_FLAG)
@@ -230,12 +231,12 @@ function fromPersistentIdV23(
             `Unsupported file type: ${fileType} (${binary.toString('base64')})`
         )
 
-    const dcId = reader.int32()
+    const dcId = reader.int()
 
     let fileReference: Buffer | null = null
     if (hasFileReference) {
         fileReference = reader.bytes()
-        if (fileReference.length === 1 && fileReference[0] === 0x23 /* # */) {
+        if (fileReference!.length === 1 && fileReference![0] === 0x23 /* # */) {
             // "invalid file reference"
             // see https://github.com/tdlib/td/blob/ed291840d3a841bb5b49457c88c57e8467e4a5b0/td/telegram/files/FileLocation.h#L32
             fileReference = null

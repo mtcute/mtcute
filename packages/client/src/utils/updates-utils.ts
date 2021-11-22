@@ -1,5 +1,6 @@
 import { tl } from '@mtcute/tl'
 import { MtTypeAssertionError } from '../types'
+import Long from 'long'
 
 // dummy updates which are used for methods that return messages.affectedHistory.
 // that is not an update, but it carries info about pts, and we need to handle it
@@ -24,34 +25,13 @@ export function createDummyUpdate(
         users: [],
         updates: [
             {
-                _: 'updatePinnedChannelMessages',
+                _: 'dummyUpdate',
                 channelId,
                 pts,
                 ptsCount,
-                // since message id cant be negative, using negative 42
-                // here makes it distinctive from real updates
-                messages: [-42],
             },
         ],
     }
-}
-
-/** @internal */
-export function isDummyUpdate(upd: tl.TypeUpdate): boolean {
-    return (
-        upd._ === 'updatePinnedChannelMessages' &&
-        upd.messages.length === 1 &&
-        upd.messages[0] === -42
-    )
-}
-
-/** @internal */
-export function isDummyUpdates(upd: tl.TypeUpdates): boolean {
-    return (
-        upd._ === 'updates' &&
-        upd.updates.length === 1 &&
-        isDummyUpdate(upd.updates[0])
-    )
 }
 
 /** @internal */

@@ -1,8 +1,7 @@
 import { ITelegramStorage } from './abstract'
 import { MaybeAsync } from '../types'
 import { tl } from '@mtcute/tl'
-import { MAX_CHANNEL_ID } from '../utils/peer-utils'
-import { LruMap } from '../utils/lru-map'
+import { LruMap, toggleChannelIdMark } from '../utils'
 
 const CURRENT_VERSION = 1
 
@@ -232,7 +231,7 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
             case 'channel':
                 return {
                     _: 'inputPeerChannel',
-                    channelId: MAX_CHANNEL_ID - peerInfo.id,
+                    channelId: toggleChannelIdMark(peerInfo.id),
                     accessHash: peerInfo.accessHash,
                 }
         }

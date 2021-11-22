@@ -1,3 +1,3 @@
-export * from './telegram-connection'
+export * from './session-connection'
 export * from './reconnection'
 export * from './transports'

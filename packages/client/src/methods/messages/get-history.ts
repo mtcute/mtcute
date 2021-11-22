@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, MtTypeAssertionError } from '../../types'
-import { createUsersChatsIndex } from '../../utils/peer-utils'
+import { InputPeerLike, Message, MtTypeAssertionError, PeersIndex } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
+import Long from 'long'
 
 /**
  * Retrieve a chunk of the chat history.
@@ -70,7 +70,7 @@ export async function getHistory(
         limit,
         maxId: 0,
         minId: 0,
-        hash: 0,
+        hash: Long.ZERO,
     })
 
     if (res._ === 'messages.messagesNotModified')
@@ -80,11 +80,11 @@ export async function getHistory(
             res._
         )
 
-    const { users, chats } = createUsersChatsIndex(res)
+    const peers = PeersIndex.from(res)
 
     const msgs = res.messages
         .filter((msg) => msg._ !== 'messageEmpty')
-        .map((msg) => new Message(this, msg, users, chats))
+        .map((msg) => new Message(this, msg, peers))
 
     if (params.reverse) msgs.reverse()
 

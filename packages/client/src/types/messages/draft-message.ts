@@ -10,19 +10,11 @@ import { makeInspectable } from '../utils'
 import { InputMediaWithCaption } from '../media'
 
 export class DraftMessage {
-    readonly client: TelegramClient
-    readonly raw: tl.RawDraftMessage
-
-    private _chatId: InputPeerLike
-
     constructor(
-        client: TelegramClient,
-        raw: tl.RawDraftMessage,
-        chatId: InputPeerLike
+        readonly client: TelegramClient,
+        readonly raw: tl.RawDraftMessage,
+        readonly _chatId: InputPeerLike
     ) {
-        this.client = client
-        this.raw = raw
-        this._chatId = chatId
     }
 
     /**

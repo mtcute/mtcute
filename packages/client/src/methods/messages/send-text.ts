@@ -4,19 +4,16 @@ import { inputPeerToPeer } from '../../utils/peer-utils'
 import {
     normalizeDate,
     normalizeMessageId,
-    randomUlong,
 } from '../../utils/misc-utils'
 import {
     InputPeerLike,
     Message,
     BotKeyboard,
     ReplyMarkup,
-    UsersIndex,
     MtTypeAssertionError,
-    ChatsIndex,
-    MtArgumentError, FormattedString,
+    MtArgumentError, FormattedString, PeersIndex,
 } from '../../types'
-import { getMarkedPeerId, MessageNotFoundError } from '@mtcute/core'
+import { getMarkedPeerId, MessageNotFoundError, randomLong } from '@mtcute/core'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
@@ -143,7 +140,7 @@ export async function sendText(
         noWebpage: params.disableWebPreview,
         silent: params.silent,
         replyToMsgId: replyTo,
-        randomId: randomUlong(),
+        randomId: randomLong(),
         scheduleDate: normalizeDate(params.schedule),
         replyMarkup,
         message,
@@ -170,8 +167,7 @@ export async function sendText(
         this._date = res.date
         this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
 
-        const users: UsersIndex = {}
-        const chats: ChatsIndex = {}
+        const peers = new PeersIndex()
 
         const fetchPeer = async (
             peer: tl.TypePeer | tl.TypeInputPeer
@@ -206,13 +202,13 @@ export async function sendText(
 
             switch (cached._) {
                 case 'user':
-                    users[cached.id] = cached
+                    peers.users[cached.id] = cached
                     break
                 case 'chat':
                 case 'chatForbidden':
                 case 'channel':
                 case 'channelForbidden':
-                    chats[cached.id] = cached
+                    peers.chats[cached.id] = cached
                     break
                 default:
                     throw new MtTypeAssertionError(
@@ -226,7 +222,7 @@ export async function sendText(
         await fetchPeer(peer)
         await fetchPeer(msg.fromId!)
 
-        const ret = new Message(this, msg, users, chats)
+        const ret = new Message(this, msg, peers)
         this._pushConversationMessage(ret)
         return ret
     }

@@ -4,8 +4,7 @@ import {
     TelegramClient,
     InlineQuery,
     CallbackQuery,
-    UsersIndex,
-    ChatsIndex,
+    PeersIndex,
     ChatMemberUpdate,
     PollVoteUpdate,
     UserStatusUpdate,
@@ -37,14 +36,12 @@ export type RawUpdateHandler = BaseUpdateHandler<
     (
         client: TelegramClient,
         update: tl.TypeUpdate | tl.TypeMessage,
-        users: UsersIndex,
-        chats: ChatsIndex
+        peers: PeersIndex
     ) => MaybeAsync<void | PropagationAction>,
     (
         client: TelegramClient,
         update: tl.TypeUpdate | tl.TypeMessage,
-        users: UsersIndex,
-        chats: ChatsIndex
+        peers: PeersIndex
     ) => MaybeAsync<boolean>
 >
 

@@ -21,7 +21,9 @@ const FORMATTER_RE = /%[a-zA-Z]/g
 export class Logger {
     private color: number
 
-    constructor(readonly mgr: LogManager, readonly tag: string) {
+    prefix = ''
+
+    constructor(readonly mgr: LogManager, readonly tag: string, readonly parent: Logger = mgr) {
         let hash = 0
 
         for (let i = 0; i < tag.length; i++) {
@@ -32,24 +34,39 @@ export class Logger {
         this.color = Math.abs(hash) % 6
     }
 
+    getPrefix(): string {
+        let s = ''
+
+        let obj: Logger | undefined = this
+        while (obj) {
+            if (obj.prefix) s = obj.prefix + s
+            obj = obj.parent
+        }
+
+        return s
+    }
+
     log(level: number, fmt: string, ...args: any[]): void {
         if (level > this.mgr.level) return
+        if (!this.mgr['_filter'](this.tag)) return
 
         // custom formatters
         if (
             fmt.indexOf('%h') > -1 ||
             fmt.indexOf('%b') > -1 ||
-            fmt.indexOf('%j') > -1
+            fmt.indexOf('%j') > -1 ||
+            fmt.indexOf('%l') > -1
         ) {
             let idx = 0
             fmt = fmt.replace(FORMATTER_RE, (m) => {
-                if (m === '%h' || m === '%b' || m === '%j') {
+                if (m === '%h' || m === '%b' || m === '%j' || m == '%l') {
                     const val = args[idx]
 
                     args.splice(idx, 1)
                     if (m === '%h') return val.toString('hex')
                     if (m === '%b') return !!val + ''
                     if (m === '%j') return JSON.stringify(val)
+                    if (m === '%l') return val + ''
                 }
 
                 idx++
@@ -58,14 +75,14 @@ export class Logger {
             })
         }
 
-        this.mgr.handler(this.color, level, this.tag, fmt, args)
+        this.mgr.handler(this.color, level, this.tag, this.getPrefix() + fmt, args)
     }
 
     readonly error = this.log.bind(this, LogManager.ERROR)
     readonly warn = this.log.bind(this, LogManager.WARN)
     readonly info = this.log.bind(this, LogManager.INFO)
     readonly debug = this.log.bind(this, LogManager.DEBUG)
-    readonly request = this.log.bind(this, LogManager.REQUEST)
+    readonly verbose = this.log.bind(this, LogManager.VERBOSE)
 
     /**
      * Create a {@link Logger} with the given tag
@@ -75,24 +92,30 @@ export class Logger {
      * @param tag  Logger tag
      */
     create(tag: string): Logger {
-        return this.mgr.create(tag)
+        return new Logger(this.mgr, tag, this)
     }
 }
 
+const defaultFilter = () => true
+
 /**
- * Log manager.
- *
- * Does nothing by itself, but allows managing instance logs
+ * Log manager. A logger that allows managing child loggers
  */
-export class LogManager {
+export class LogManager extends Logger {
     static OFF = 0
     static ERROR = 1
     static WARN = 2
     static INFO = 3
     static DEBUG = 4
-    static REQUEST = 5
+    static VERBOSE = 5
 
-    private _cache: Record<string, Logger> = {}
+    constructor () {
+        // workaround because we cant pass this to super
+        super(null as any, 'base')
+        ;(this as any).mgr = this
+    }
+
+    private _filter: (tag: string) => boolean = defaultFilter
 
     level = defaultLogLevel
     handler = _defaultLoggingHandler
@@ -107,9 +130,15 @@ export class LogManager {
      * @param tag  Logger tag
      */
     create(tag: string): Logger {
-        if (!(tag in this._cache)) {
-            this._cache[tag] = new Logger(this, tag)
-        }
-        return this._cache[tag]
+        return new Logger(this, tag)
+    }
+
+    /**
+     * Filter logging by tags.
+     *
+     * @param cb
+     */
+    filter(cb: ((tag: string) => boolean) | null): void {
+        this._filter = cb ?? defaultFilter
     }
 }

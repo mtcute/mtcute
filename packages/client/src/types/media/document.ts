@@ -11,25 +11,20 @@ import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
  * This also includes audios, videos, voices etc.
  */
 export class RawDocument extends FileLocation {
-    /**
-     * Raw TL object with the document itself
-     */
-    readonly doc: tl.RawDocument
-
-    constructor(client: TelegramClient, doc: tl.RawDocument) {
+    constructor(client: TelegramClient, readonly raw: tl.RawDocument) {
         super(
             client,
             {
                 _: 'inputDocumentFileLocation',
-                id: doc.id,
-                fileReference: doc.fileReference,
-                accessHash: doc.accessHash,
+                id: raw.id,
+                fileReference: raw.fileReference,
+                accessHash: raw.accessHash,
                 thumbSize: '',
             },
-            doc.size,
-            doc.dcId
+            raw.size,
+            raw.dcId
         )
-        this.doc = doc
+        this.raw = raw
     }
 
     private _fileName?: string | null
@@ -39,7 +34,7 @@ export class RawDocument extends FileLocation {
      */
     get fileName(): string | null {
         if (this._fileName === undefined) {
-            const attr = this.doc.attributes.find(
+            const attr = this.raw.attributes.find(
                 (it) => it._ === 'documentAttributeFilename'
             )
             this._fileName = attr
@@ -54,14 +49,14 @@ export class RawDocument extends FileLocation {
      * File MIME type, as defined by the sender.
      */
     get mimeType(): string {
-        return this.doc.mimeType
+        return this.raw.mimeType
     }
 
     /**
      * Date the document was sent
      */
     get date(): Date {
-        return new Date(this.doc.date * 1000)
+        return new Date(this.raw.date * 1000)
     }
 
     private _thumbnails?: Thumbnail[]
@@ -72,9 +67,9 @@ export class RawDocument extends FileLocation {
      */
     get thumbnails(): ReadonlyArray<Thumbnail> {
         if (!this._thumbnails) {
-            this._thumbnails = this.doc.thumbs
-                ? this.doc.thumbs.map(
-                      (sz) => new Thumbnail(this.client, this.doc, sz)
+            this._thumbnails = this.raw.thumbs
+                ? this.raw.thumbs.map(
+                      (sz) => new Thumbnail(this.client, this.raw, sz)
                   )
                 : []
         }
@@ -102,9 +97,9 @@ export class RawDocument extends FileLocation {
     get inputDocument(): tl.TypeInputDocument {
         return {
             _: 'inputDocument',
-            id: this.doc.id,
-            accessHash: this.doc.accessHash,
-            fileReference: this.doc.fileReference,
+            id: this.raw.id,
+            accessHash: this.raw.accessHash,
+            fileReference: this.raw.fileReference,
         }
     }
 
@@ -133,12 +128,12 @@ export class RawDocument extends FileLocation {
         if (!this._fileId) {
             this._fileId = toFileId({
                 type: this._fileIdType(),
-                dcId: this.doc.dcId,
-                fileReference: this.doc.fileReference,
+                dcId: this.raw.dcId,
+                fileReference: this.raw.fileReference,
                 location: {
                     _: 'common',
-                    id: this.doc.id,
-                    accessHash: this.doc.accessHash,
+                    id: this.raw.id,
+                    accessHash: this.raw.accessHash,
                 },
             })
         }
@@ -154,7 +149,7 @@ export class RawDocument extends FileLocation {
         if (!this._uniqueFileId) {
             this._uniqueFileId = toUniqueFileId(td.FileType.Document, {
                 _: 'common',
-                id: this.doc.id,
+                id: this.raw.id,
             })
         }
 

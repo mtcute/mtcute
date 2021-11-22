@@ -1,10 +1,25 @@
 import { tl } from '@mtcute/tl'
 import { BasicPeerType } from '../types'
 
-export const MIN_CHANNEL_ID = -1002147483647
-export const MAX_CHANNEL_ID = -1000000000000
-export const MIN_CHAT_ID = -2147483647
-export const MAX_USER_ID = 2147483647
+// src: https://github.com/tdlib/td/blob/master/td/telegram/DialogId.h
+const ZERO_CHANNEL_ID = -1000000000000
+const ZERO_SECRET_CHAT_ID = -2000000000000
+const MAX_SECRET_CHAT_ID = -1997852516353 // ZERO_SECRET_CHAT_ID + 0x7fffffff
+// src: https://github.com/tdlib/td/blob/master/td/telegram/ChatId.h
+// const MAX_CHAT_ID = 999999999999
+const MIN_MARKED_CHAT_ID = -999999999999 // -MAX_CHAT_ID
+// src: https://github.com/tdlib/td/blob/master/td/telegram/UserId.h
+// MAX_USER_ID = (1ll << 40) - 1
+const MAX_USER_ID = 1099511627775
+// src: https://github.com/tdlib/td/blob/master/td/telegram/ChannelId.h
+// the last (1 << 31) - 1 identifiers will be used for secret chat dialog identifiers
+// MAX_CHANNEL_ID = 1000000000000ll - (1ll << 31)
+// const MAX_CHANNEL_ID = 997852516352
+const MIN_MARKED_CHANNEL_ID = -1997852516352 // ZERO_CHANNEL_ID - MAX_CHANNEL_ID
+
+export function toggleChannelIdMark(id: number): number {
+    return ZERO_CHANNEL_ID - id
+}
 
 /**
  * Get the bare (non-marked) ID from a {@link tl.TypePeer}
@@ -20,15 +35,20 @@ export function getBarePeerId(peer: tl.TypePeer): number {
     }
 }
 
+// src: https://github.com/tdlib/td/blob/master/td/telegram/DialogId.cpp
+
 /**
  * Get the marked (non-bare) ID from a {@link tl.TypePeer}
  *
  * *Mark* is bot API compatible, which is:
  * - ID stays the same for users
  * - ID is negated for chats
- * - ID is negated and `1e12` is subtracted for channels
+ * - ID is negated and `-1e12` is subtracted for channels
  */
-export function getMarkedPeerId(peerId: number, peerType: BasicPeerType): number
+export function getMarkedPeerId(
+    peerId: number,
+    peerType: BasicPeerType
+): number
 export function getMarkedPeerId(peer: tl.TypePeer | tl.TypeInputPeer): number
 export function getMarkedPeerId(
     peer: tl.TypePeer | tl.TypeInputPeer | number,
@@ -41,7 +61,7 @@ export function getMarkedPeerId(
             case 'chat':
                 return -peer
             case 'channel':
-                return MAX_CHANNEL_ID - peer
+                return ZERO_CHANNEL_ID - peer
         }
         throw new Error('Invalid peer type')
     }
@@ -55,7 +75,7 @@ export function getMarkedPeerId(
             return -peer.chatId
         case 'peerChannel':
         case 'inputPeerChannel':
-            return MAX_CHANNEL_ID - peer.channelId
+            return ZERO_CHANNEL_ID - peer.channelId
     }
 
     throw new Error('Invalid peer')
@@ -77,9 +97,24 @@ export function getBasicPeerType(peer: tl.TypePeer | number): BasicPeerType {
     }
 
     if (peer < 0) {
-        if (MIN_CHAT_ID <= peer) return 'chat'
-        if (MIN_CHANNEL_ID <= peer && peer < MAX_CHANNEL_ID) return 'channel'
-    } else if (0 < peer && peer <= MAX_USER_ID) {
+        if (MIN_MARKED_CHAT_ID <= peer) {
+            return 'chat'
+        }
+
+        if (
+            MIN_MARKED_CHANNEL_ID <= peer &&
+            peer !== ZERO_CHANNEL_ID
+        )
+            return 'channel'
+
+        if (
+            MAX_SECRET_CHAT_ID <= peer &&
+            peer !== ZERO_SECRET_CHAT_ID
+        ) {
+            // return 'secret'
+            throw new Error('Unsupported')
+        }
+    } else if (peer > 0 && peer <= MAX_USER_ID) {
         return 'user'
     }
 
@@ -88,13 +123,14 @@ export function getBasicPeerType(peer: tl.TypePeer | number): BasicPeerType {
 
 export function markedPeerIdToBare(peerId: number): number {
     const type = getBasicPeerType(peerId)
+
     switch (type) {
         case 'user':
             return peerId
         case 'chat':
             return -peerId
         case 'channel':
-            return MAX_CHANNEL_ID - peerId
+            return toggleChannelIdMark(peerId)
     }
 
     throw new Error('Invalid marked peer id')
