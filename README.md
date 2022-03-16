@@ -1,5 +1,15 @@
 # MTCute
 
+**PROJECT IS NOT DEAD/ABANDONED**
+
+I'm currently a bit struggling to devote enough time for it
+due to IRL stuff. Also due to the stuff I'm working on in
+the project right now, I'm not making any commits not to
+break stuff.
+
+Sorry about that! Will hopefully get my
+hands back on it in late summer of 2022
+
 ![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)
 
 Work-in-progress library for MTProto in TypeScript.
