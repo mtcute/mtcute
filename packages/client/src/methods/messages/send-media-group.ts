@@ -12,7 +12,6 @@ import {
 } from '../../utils/misc-utils'
 import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { MessageNotFoundError } from '@mtcute/tl/errors'
 import { randomLong } from '@mtcute/core'
 
 /**
@@ -130,7 +129,7 @@ export async function sendMediaGroup(
         const msg = await this.getMessages(peer, replyTo)
 
         if (!msg)
-            throw new MessageNotFoundError()
+            throw new tl.errors.MessageNotFoundError()
     }
 
     const multiMedia: tl.RawInputSingleMedia[] = []

@@ -13,7 +13,7 @@ import {
     MtTypeAssertionError,
     MtArgumentError, FormattedString, PeersIndex,
 } from '../../types'
-import { getMarkedPeerId, MessageNotFoundError, randomLong } from '@mtcute/core'
+import { getMarkedPeerId, randomLong } from '@mtcute/core'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
@@ -131,7 +131,7 @@ export async function sendText(
         const msg = await this.getMessages(peer, replyTo)
 
         if (!msg)
-            throw new MessageNotFoundError()
+            throw new tl.errors.MessageNotFoundError()
     }
 
     const res = await this.call({

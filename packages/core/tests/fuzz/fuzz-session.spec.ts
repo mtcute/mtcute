@@ -1,9 +1,8 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { randomBytes } from '../../src'
-import { sleep } from '../../src/utils/misc-utils'
-import { UserMigrateError } from '@mtcute/tl/errors'
+import { randomBytes, sleep } from '../../src'
 import { createTestTelegramClient } from '../e2e/utils'
+import { tl } from '@mtcute/tl'
 
 require('dotenv-flow').config()
 
@@ -62,7 +61,7 @@ describe('fuzz : session', async function () {
         await client.waitUntilUsable()
 
         const conn = await client.createAdditionalConnection(1)
-        await conn.sendForResult({ _: 'help.getConfig' })
+        await conn.sendRpc({ _: 'help.getConfig' })
 
         await sleep(10000)
 
@@ -116,7 +115,7 @@ describe('fuzz : session', async function () {
                 ]
             }, { connection: conn })
         } catch (e) {
-            if (e instanceof UserMigrateError) {
+            if (e instanceof tl.errors.UserMigrateXError) {
                 hadError = true
             }
         }

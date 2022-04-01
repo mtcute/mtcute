@@ -1,6 +1,7 @@
-import { TlEntry, TlFullSchema } from '../types'
+import { TlEntry, TlErrors, TlFullSchema } from '../types'
 import { groupTlEntriesByNamespace, splitNameToNamespace } from '../utils'
-import { camelToPascal, snakeToCamel } from './utils'
+import { camelToPascal, indent, jsComment, snakeToCamel } from './utils'
+import { errorCodeToClassName, generateCodeForErrors } from './errors'
 
 const PRIMITIVE_TO_TS: Record<string, string> = {
     int: 'number',
@@ -14,23 +15,7 @@ const PRIMITIVE_TO_TS: Record<string, string> = {
     Bool: 'boolean',
     true: 'boolean',
     null: 'null',
-    any: 'any'
-}
-
-function jsComment(s: string): string {
-    return (
-        '/**' +
-        s
-            .replace(/(?![^\n]{1,60}$)([^\n]{1,60})\s/g, '$1\n')
-            .replace(/\n|^/g, '\n * ') +
-        '\n */'
-    )
-}
-
-function indent(size: number, s: string): string {
-    let prefix = ''
-    while (size--) prefix += ' '
-    return prefix + s.replace(/\n/g, '\n' + prefix)
+    any: 'any',
 }
 
 function fullTypeName(
@@ -68,7 +53,8 @@ function entryFullTypeName(entry: TlEntry): string {
 
 export function generateTypescriptDefinitionsForTlEntry(
     entry: TlEntry,
-    baseNamespace = 'tl.'
+    baseNamespace = 'tl.',
+    errors?: TlErrors
 ): string {
     let ret = ''
 
@@ -83,6 +69,20 @@ export function generateTypescriptDefinitionsForTlEntry(
             entry.type,
             baseNamespace
         )}}`
+
+        if (errors) {
+            if (errors.userOnly[entry.name]) {
+                comment += `\n\nThis method is **not** available for bots`
+            }
+
+            if (errors.throws[entry.name]) {
+                comment +=
+                    `\n\nThis method *may* throw one of these errors: ` +
+                    errors.throws[entry.name]
+                        .map((it) => `{$see ${errorCodeToClassName(it)}`)
+                        .join(', ')
+            }
+        }
     }
     if (comment) ret += jsComment(comment) + '\n'
 
@@ -172,13 +172,26 @@ ns.LAYER = $LAYER$;
 export function generateTypescriptDefinitionsForTlSchema(
     schema: TlFullSchema,
     layer: number,
-    namespace = 'tl'
+    namespace = 'tl',
+    errors?: TlErrors
 ): [string, string] {
     let ts = PRELUDE.replace('$NS$', namespace).replace('$LAYER$', layer + '')
     let js = PRELUDE_JS.replace('$NS$', namespace).replace(
         '$LAYER$',
         layer + ''
     )
+
+    if (errors) {
+        ts += `\n    namespace errors {\n`
+        js += `ns.errors = {};\n(function(ns){\n`
+
+        const [_ts, _js] = generateCodeForErrors(errors, 'ns.')
+        ts += indent(8, _ts)
+        js += _js
+
+        ts += `}\n`
+        js += `})(ns.errors);\n`
+    }
 
     const namespaces = groupTlEntriesByNamespace(schema.entries)
 

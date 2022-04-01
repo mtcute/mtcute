@@ -1,5 +1,4 @@
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
 
 // @extension
 interface AuthState {

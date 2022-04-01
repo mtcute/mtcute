@@ -6,9 +6,10 @@ import {
     PeersIndex,
     Poll,
 } from '../../types'
-import { MaybeArray, MessageNotFoundError } from '@mtcute/core'
+import { MaybeArray } from '@mtcute/core'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { tl } from '@mtcute/tl'
 
 /**
  * Send or retract a vote in a poll.
@@ -37,7 +38,7 @@ export async function sendVote(
     if (options.some((it) => typeof it === 'number')) {
         const msg = await this.getMessages(peer, message)
 
-        if (!msg) throw new MessageNotFoundError()
+        if (!msg) throw new tl.errors.MessageNotFoundError()
 
         if (!(msg.media instanceof Poll))
             throw new MtArgumentError(

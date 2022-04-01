@@ -494,10 +494,19 @@ export class Chat {
     /** @internal */
     static _parseFull(
         client: TelegramClient,
-        full: tl.messages.RawChatFull | tl.RawUserFull
+        full: tl.messages.RawChatFull | tl.users.TypeUserFull,
     ): Chat {
-        if (full._ === 'userFull') {
-            return new Chat(client, full.user, full)
+        if (full._ === 'users.userFull') {
+            const user = full.users.find((it) => it.id === full.fullUser.id)
+            if (!user || user._ === 'userEmpty') {
+                throw new MtTypeAssertionError(
+                    'Chat._parseFull',
+                    'user',
+                    user?._ ?? 'undefined'
+                )
+            }
+
+            return new Chat(client, user, full.fullUser)
         } else {
             const fullChat = full.fullChat
             let chat: tl.TypeChat | undefined = undefined

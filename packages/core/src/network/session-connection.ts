@@ -13,11 +13,6 @@ import {
     ControllablePromise,
     createCancellablePromise,
 } from '../utils/controllable-promise'
-import {
-    createRpcErrorFromTl,
-    RpcError,
-    RpcTimeoutError,
-} from '@mtcute/tl/errors'
 import { gzipDeflate, gzipInflate } from '@mtcute/tl-runtime/src/platform/gzip'
 import { SortedArray } from '../utils/sorted-array'
 import { EarlyTimer } from '../utils/early-timer'
@@ -96,7 +91,7 @@ type PendingMessage =
 // todo
 const DESTROY_SESSION_ID = Buffer.from('262151e7', 'hex')
 
-function makeNiceStack(error: RpcError, stack: string, method?: string) {
+function makeNiceStack(error: tl.errors.RpcError, stack: string, method?: string) {
     error.stack = `${error.constructor.name} (${error.code} ${error.text}): ${
         error.message
     }\n    at ${method}\n${stack.split('\n').slice(2).join('\n')}`
@@ -526,7 +521,7 @@ export class SessionConnection extends PersistentConnection {
 
             if (rpc.cancelled) return
 
-            const error = createRpcErrorFromTl(res)
+            const error = tl.errors.createRpcErrorFromTl(res)
             if (this.params.niceStacks !== false) {
                 makeNiceStack(error, rpc.stack!, rpc.method)
             }
@@ -1144,7 +1139,7 @@ export class SessionConnection extends PersistentConnection {
         }
 
         if (onTimeout) {
-            const error = new RpcTimeoutError()
+            const error = new tl.errors.RpcTimeoutError()
             if (this.params.niceStacks !== false) {
                 makeNiceStack(error, rpc.stack!, rpc.method)
             }

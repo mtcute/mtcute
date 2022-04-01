@@ -9,6 +9,7 @@ const sentCodeMap: Record<
     'auth.sentCodeTypeCall': 'call',
     'auth.sentCodeTypeFlashCall': 'flash_call',
     'auth.sentCodeTypeSms': 'sms',
+    'auth.sentCodeTypeMissedCall': 'missed_call',
 }
 
 const nextCodeMap: Record<
@@ -18,6 +19,7 @@ const nextCodeMap: Record<
     'auth.codeTypeCall': 'call',
     'auth.codeTypeFlashCall': 'flash_call',
     'auth.codeTypeSms': 'sms',
+    'auth.codeTypeMissedCall': 'missed_call',
 }
 
 export namespace SentCode {
@@ -28,7 +30,7 @@ export namespace SentCode {
      * - `call`: Code is sent via voice call
      * - `flash_call`: Code is the last 5 digits of the caller's phone number
      */
-    export type DeliveryType = 'app' | 'sms' | 'call' | 'flash_call'
+    export type DeliveryType = 'app' | 'sms' | 'call' | 'flash_call' | 'missed_call'
 
     /**
      * Type describing next code delivery type.

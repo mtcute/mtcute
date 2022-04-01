@@ -2,33 +2,32 @@ import { TelegramClient } from '../../client'
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import {
     normalizeToInputChannel,
-    normalizeToInputUser,
+    normalizeToInputPeer,
 } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
- * Delete all messages of a user in a supergroup
+ * Delete all messages of a user (or channel) in a supergroup
  *
  * @param chatId  Chat ID
- * @param userId  User ID
+ * @param participantId  User/channel ID
  * @internal
  */
 export async function deleteUserHistory(
     this: TelegramClient,
     chatId: InputPeerLike,
-    userId: InputPeerLike
+    participantId: InputPeerLike
 ): Promise<void> {
     const channel = normalizeToInputChannel(await this.resolvePeer(chatId))
     if (!channel) throw new MtInvalidPeerTypeError(chatId, 'channel')
 
-    const user = normalizeToInputUser(await this.resolvePeer(userId))
-    if (!user) throw new MtInvalidPeerTypeError(userId, 'user')
+    const peer = normalizeToInputPeer(await this.resolvePeer(participantId))
 
     const res = await this.call({
-        _: 'channels.deleteUserHistory',
+        _: 'channels.deleteParticipantHistory',
         channel,
-        userId: user,
+        participant: peer,
     })
 
     this._handleUpdate(

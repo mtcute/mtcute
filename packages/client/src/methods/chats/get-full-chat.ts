@@ -44,7 +44,7 @@ export async function getFullChat(
 
     const peer = await this.resolvePeer(chatId)
 
-    let res: tl.messages.TypeChatFull | tl.TypeUserFull
+    let res: tl.messages.TypeChatFull | tl.users.TypeUserFull
     if (isInputPeerChannel(peer)) {
         res = await this.call({
             _: 'channels.getFullChannel',

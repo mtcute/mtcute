@@ -15,10 +15,7 @@ import fetch from 'node-fetch'
 import readline from 'readline'
 import { writeTlEntryToString } from '@mtcute/tl-utils/src/stringify'
 import {
-    CORE_DOMAIN,
-    API_SCHEMA_JSON_FILE,
-    TDESKTOP_SCHEMA,
-    TDLIB_SCHEMA,
+    CORE_DOMAIN, API_SCHEMA_JSON_FILE, TDESKTOP_SCHEMA, TDLIB_SCHEMA, COREFORK_DOMAIN
 } from './constants'
 import { fetchRetry } from './utils'
 import {
@@ -69,8 +66,8 @@ async function fetchTdesktopSchema(): Promise<Schema> {
     }
 }
 
-async function fetchCoreSchema(): Promise<Schema> {
-    const html = await fetchRetry(`${CORE_DOMAIN}/schema`)
+async function fetchCoreSchema(domain = CORE_DOMAIN, name = 'Core'): Promise<Schema> {
+    const html = await fetchRetry(`${domain}/schema`)
     const $ = cheerio.load(html)
     // cheerio doesn't always unescape them
     const schema = $('.page_scheme code')
@@ -85,7 +82,7 @@ async function fetchCoreSchema(): Promise<Schema> {
     if (!layer) throw new Error('Layer number not available')
 
     return {
-        name: 'Core',
+        name,
         layer: parseInt(layer[1]),
         content: tlToFullSchema(schema),
     }
@@ -175,6 +172,7 @@ async function main() {
         await fetchTdlibSchema(),
         await fetchTdesktopSchema(),
         await fetchCoreSchema(),
+        await fetchCoreSchema(COREFORK_DOMAIN, 'Corefork'),
         {
             name: 'Custom',
             layer: 0, // handled manually

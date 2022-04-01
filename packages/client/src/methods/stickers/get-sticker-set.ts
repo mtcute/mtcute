@@ -35,6 +35,7 @@ export async function getStickerSet(
     const res = await this.call({
         _: 'messages.getStickerSet',
         stickerset: input,
+        hash: 0
     })
 
     return new StickerSet(this, res)

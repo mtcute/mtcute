@@ -47,6 +47,7 @@
         "inputPrivacyValueDisallowChatParticipants": ["chats"],
         "inputUser": ["user_id"],
         "inputUserFromMessage": ["user_id"],
+        "keyboardButtonUserProfile": ["user_id"],
         "message": ["via_bot_id"],
         "messageActionChannelMigrateFrom": ["chat_id"],
         "messageActionChatAddUser": ["users"],
@@ -120,6 +121,7 @@
         "updateUserTyping": ["user_id"],
         "user": ["id"],
         "userEmpty": ["id"],
+        "userFull": ["id"],
         "webAuthorization": ["bot_id"],
         "_": "Dummy line teehee~"
     },

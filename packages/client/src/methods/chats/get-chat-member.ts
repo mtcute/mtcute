@@ -9,7 +9,6 @@ import {
 import { assertTypeIs } from '../../utils/type-assertion'
 import { tl } from '@mtcute/tl'
 import { ChatMember } from '../../types'
-import { UserNotParticipantError } from '@mtcute/tl/errors'
 
 /**
  * Get information about a single chat member
@@ -59,7 +58,7 @@ export async function getChatMember(
             }
         }
 
-        throw new UserNotParticipantError()
+        throw new tl.errors.UserNotParticipantError()
     } else if (isInputPeerChannel(chat)) {
         const res = await this.call({
             _: 'channels.getParticipant',

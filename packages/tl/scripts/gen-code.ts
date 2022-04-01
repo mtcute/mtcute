@@ -1,8 +1,13 @@
 import { unpackTlSchema } from './schema'
-import { API_SCHEMA_JSON_FILE, MTP_SCHEMA_JSON_FILE, ESM_PRELUDE } from './constants'
+import {
+    API_SCHEMA_JSON_FILE,
+    MTP_SCHEMA_JSON_FILE,
+    ESM_PRELUDE,
+    ERRORS_JSON_FILE,
+} from './constants'
 import { readFile, writeFile } from 'fs/promises'
 import { parseFullTlSchema } from '@mtcute/tl-utils/src/schema'
-import { TlFullSchema } from '@mtcute/tl-utils/src/types'
+import { TlErrors, TlFullSchema } from '@mtcute/tl-utils/src/types'
 import { join } from 'path'
 import { generateTypescriptDefinitionsForTlSchema } from '@mtcute/tl-utils/src/codegen/types'
 import { generateReaderCodeForTlEntries } from '@mtcute/tl-utils/src/codegen/reader'
@@ -16,17 +21,21 @@ const OUT_WRITERS_FILE = join(__dirname, '../binary/writer.js')
 async function generateTypings(
     apiSchema: TlFullSchema,
     apiLayer: number,
-    mtpSchema: TlFullSchema
+    mtpSchema: TlFullSchema,
+    errors: TlErrors
 ) {
     console.log('Generating typings...')
     const [apiTs, apiJs] = generateTypescriptDefinitionsForTlSchema(
         apiSchema,
-        apiLayer
+        apiLayer,
+        undefined,
+        errors
     )
     const [mtpTs, mtpJs] = generateTypescriptDefinitionsForTlSchema(
         mtpSchema,
         0,
-        'mtp'
+        'mtp',
+        errors
     )
 
     await writeFile(
@@ -67,6 +76,10 @@ async function generateWriters(
 }
 
 async function main() {
+    const errors: TlErrors = JSON.parse(
+        await readFile(ERRORS_JSON_FILE, 'utf8')
+    )
+
     const [apiSchema, apiLayer] = unpackTlSchema(
         JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8'))
     )
@@ -74,7 +87,7 @@ async function main() {
         JSON.parse(await readFile(MTP_SCHEMA_JSON_FILE, 'utf8'))
     )
 
-    await generateTypings(apiSchema, apiLayer, mtpSchema)
+    await generateTypings(apiSchema, apiLayer, mtpSchema, errors)
     await generateReaders(apiSchema, mtpSchema)
     await generateWriters(apiSchema, mtpSchema)
 

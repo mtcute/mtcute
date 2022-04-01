@@ -13,7 +13,7 @@
         "docs": "npx typedoc"
     },
     "dependencies": {
-        "@mtcute/tl": "^134.0.0",
+        "@mtcute/tl": "~139.0",
         "long": "^4.0.0"
     },
     "devDependencies": {

@@ -24,17 +24,6 @@ import {
     defaultTestDc,
     defaultTestIpv6Dc,
 } from './utils/default-dcs'
-import {
-    AuthKeyUnregisteredError,
-    FloodTestPhoneWaitError,
-    FloodWaitError,
-    InternalError,
-    NetworkMigrateError,
-    PhoneMigrateError,
-    RpcError,
-    SlowmodeWaitError,
-    UserMigrateError,
-} from '@mtcute/tl/errors'
 import { addPublicKey } from './utils/crypto/keys'
 import { ITelegramStorage, MemoryStorage } from './storage'
 import EventEmitter from 'events'
@@ -375,7 +364,7 @@ export class BaseTelegramClient extends EventEmitter {
         // so we just use getState so the server knows
         // we still do need updates
         this.call({ _: 'updates.getState' }).catch((e) => {
-            if (!(e instanceof RpcError)) {
+            if (!(e instanceof tl.errors.RpcError)) {
                 this.primaryConnection.reconnect()
             }
         })
@@ -651,7 +640,7 @@ export class BaseTelegramClient extends EventEmitter {
                 await sleep(delta)
                 delete this._floodWaitedRequests[message._]
             } else {
-                throw new FloodWaitError(delta / 1000)
+                throw new tl.errors.FloodWaitXError(delta / 1000)
             }
         }
 
@@ -673,7 +662,7 @@ export class BaseTelegramClient extends EventEmitter {
             } catch (e) {
                 lastError = e
 
-                if (e instanceof InternalError) {
+                if (e instanceof tl.errors.InternalError) {
                     this.log.warn('Telegram is having internal issues: %s', e)
                     if (e.message === 'WORKER_BUSY_TOO_LONG_RETRY') {
                         // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
@@ -683,11 +672,11 @@ export class BaseTelegramClient extends EventEmitter {
                 }
 
                 if (
-                    e.constructor === FloodWaitError ||
-                    e.constructor === SlowmodeWaitError ||
-                    e.constructor === FloodTestPhoneWaitError
+                    e.constructor === tl.errors.FloodWaitXError ||
+                    e.constructor === tl.errors.SlowmodeWaitXError ||
+                    e.constructor === tl.errors.FloodTestPhoneWaitXError
                 ) {
-                    if (e.constructor !== SlowmodeWaitError) {
+                    if (e.constructor !== tl.errors.SlowmodeWaitXError) {
                         // SLOW_MODE_WAIT is chat-specific, not request-specific
                         this._floodWaitedRequests[message._] =
                             Date.now() + e.seconds * 1000
@@ -696,7 +685,7 @@ export class BaseTelegramClient extends EventEmitter {
                     // In test servers, FLOOD_WAIT_0 has been observed, and sleeping for
                     // such a short amount will cause retries very fast leading to issues
                     if (e.seconds === 0) {
-                        e.seconds = 1
+                        ;(e as any).seconds = 1
                     }
 
                     if (
@@ -711,16 +700,16 @@ export class BaseTelegramClient extends EventEmitter {
 
                 if (connection.params.dc.id === this._primaryDc.id) {
                     if (
-                        e.constructor === PhoneMigrateError ||
-                        e.constructor === UserMigrateError ||
-                        e.constructor === NetworkMigrateError
+                        e.constructor === tl.errors.PhoneMigrateXError ||
+                        e.constructor === tl.errors.UserMigrateXError ||
+                        e.constructor === tl.errors.NetworkMigrateXError
                     ) {
-                        this.log.info('Migrate error, new dc = %d', e.newDc)
-                        await this.changeDc(e.newDc)
+                        this.log.info('Migrate error, new dc = %d', e.new_dc)
+                        await this.changeDc(e.new_dc)
                         continue
                     }
                 } else {
-                    if (e.constructor === AuthKeyUnregisteredError) {
+                    if (e.constructor === tl.errors.AuthKeyUnregisteredError) {
                         // we can try re-exporting auth from the primary connection
                         this.log.warn('exported auth key error, re-exporting..')
 

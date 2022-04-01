@@ -1,7 +1,6 @@
 import { TelegramClient } from '../../client'
 import { determinePartSize } from '../../utils/file-utils'
 import { tl } from '@mtcute/tl'
-import { FileMigrateError, FilerefUpgradeNeededError } from '@mtcute/tl/errors'
 import {
     MtArgumentError,
     MtUnsupportedError,
@@ -102,14 +101,14 @@ export async function* downloadAsIterable(
                 { connection }
             )
         } catch (e) {
-            if (e.constructor === FileMigrateError) {
-                connection = this._downloadConnections[e.newDc]
+            if (e.constructor === tl.errors.FileMigrateXError) {
+                connection = this._downloadConnections[e.new_dc]
                 if (!connection) {
-                    connection = await this.createAdditionalConnection(e.newDc)
-                    this._downloadConnections[e.newDc] = connection
+                    connection = await this.createAdditionalConnection(e.new_dc)
+                    this._downloadConnections[e.new_dc] = connection
                 }
                 return requestCurrent()
-            } else if (e.constructor === FilerefUpgradeNeededError) {
+            } else if (e.constructor === tl.errors.FilerefUpgradeNeededError) {
                 // todo: implement someday
                 // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
                 throw new MtUnsupportedError('File ref expired!')

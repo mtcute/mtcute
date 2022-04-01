@@ -4,7 +4,7 @@ import { Chat, PeersIndex } from '../peers'
 import { Message } from './message'
 import { DraftMessage } from './draft-message'
 import { makeInspectable } from '../utils'
-import { getMarkedPeerId, MessageNotFoundError } from '@mtcute/core'
+import { getMarkedPeerId } from '@mtcute/core'
 
 /**
  * A dialog.
@@ -184,7 +184,7 @@ export class Dialog {
                     this._peers
                 )
             } else {
-                throw new MessageNotFoundError()
+                throw new tl.errors.MessageNotFoundError()
             }
         }
 

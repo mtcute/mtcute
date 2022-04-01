@@ -42,6 +42,24 @@ export interface TlFullSchema {
     unions: Record<string, TlUnion>
 }
 
+export interface TlError {
+    code: number
+    name: string
+    description?: string
+    virtual?: true
+
+    // internal fields used by generator
+    _auto?: true
+    _paramNames?: string[]
+}
+
+export interface TlErrors {
+    base: TlError[]
+    errors: Record<string, TlError>
+    throws: Record<string, string[]>
+    userOnly: Record<string, 1>
+}
+
 interface BasicDiff<T, K> {
     added: T[]
     removed: T[]

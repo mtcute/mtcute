@@ -5,7 +5,6 @@ export {
     tl,
     defaultDcs
 } from '@mtcute/core'
-export * from '@mtcute/tl/errors'
 
 export * from './types'
 export * from './client'

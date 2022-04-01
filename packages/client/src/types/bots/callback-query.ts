@@ -6,7 +6,6 @@ import { MtArgumentError } from '../errors'
 import { BasicPeerType, getBasicPeerType, getMarkedPeerId } from '@mtcute/core'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
 import { User, PeersIndex } from '../peers'
-import { MessageNotFoundError } from '@mtcute/core'
 
 /**
  * An incoming callback query, originated from a callback button
@@ -189,7 +188,7 @@ export class CallbackQuery {
             getMarkedPeerId(this.raw.peer),
             this.raw.msgId
         )
-        if (!msg) throw new MessageNotFoundError()
+        if (!msg) throw new tl.errors.MessageNotFoundError()
 
         return msg
     }

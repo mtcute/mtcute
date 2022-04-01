@@ -42,13 +42,19 @@ export class StickerSet {
 
     constructor(
         readonly client: TelegramClient,
-        raw: tl.RawStickerSet | tl.messages.RawStickerSet
+        raw: tl.TypeStickerSet | tl.messages.TypeStickerSet
     ) {
         if (raw._ === 'messages.stickerSet') {
             this.full = raw
             this.brief = raw.set
-        } else {
+        } else if (raw._ === 'stickerSet') {
             this.brief = raw
+        } else {
+            throw new MtTypeAssertionError(
+                'StickerSet',
+                'messages.stickerSet | stickerSet',
+                raw._
+            )
         }
 
         this.isFull = raw._ === 'messages.stickerSet'

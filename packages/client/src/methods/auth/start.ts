@@ -11,15 +11,7 @@ import {
     resolveMaybeDynamic,
     normalizePhoneNumber,
 } from '../../utils/misc-utils'
-import {
-    AuthKeyUnregisteredError,
-    PasswordHashInvalidError,
-    PhoneCodeEmptyError,
-    PhoneCodeExpiredError,
-    PhoneCodeHashEmptyError,
-    PhoneCodeInvalidError,
-    SessionPasswordNeededError,
-} from '@mtcute/tl/errors'
+import { tl } from '@mtcute/tl'
 
 /**
  * Start the client in an interactive and declarative manner,
@@ -174,7 +166,7 @@ export async function start(
 
         return me
     } catch (e) {
-        if (!(e instanceof AuthKeyUnregisteredError)) throw e
+        if (!(e instanceof tl.errors.AuthKeyUnregisteredError)) throw e
     }
 
     if (!params.phone && !params.botToken)
@@ -215,19 +207,19 @@ export async function start(
 
     for (;;) {
         const code = await resolveMaybeDynamic(params.code)
-        if (!code) throw new PhoneCodeEmptyError()
+        if (!code) throw new tl.errors.PhoneCodeEmptyError()
 
         try {
             result = await this.signIn(phone, sentCode.phoneCodeHash, code)
         } catch (e) {
-            if (e instanceof SessionPasswordNeededError) {
+            if (e instanceof tl.errors.SessionPasswordNeededError) {
                 has2fa = true
                 break
             } else if (
-                e instanceof PhoneCodeEmptyError ||
-                e instanceof PhoneCodeExpiredError ||
-                e instanceof PhoneCodeHashEmptyError ||
-                e instanceof PhoneCodeInvalidError
+                e instanceof tl.errors.PhoneCodeEmptyError ||
+                e instanceof tl.errors.PhoneCodeExpiredError ||
+                e instanceof tl.errors.PhoneCodeHashEmptyError ||
+                e instanceof tl.errors.PhoneCodeInvalidError
             ) {
                 if (typeof params.code !== 'function') {
                     throw new MtArgumentError('Provided code was invalid')
@@ -263,7 +255,7 @@ export async function start(
                     throw new MtArgumentError('Provided password was invalid')
                 }
 
-                if (e instanceof PasswordHashInvalidError) {
+                if (e instanceof tl.errors.PasswordHashInvalidError) {
                     if (params.invalidCodeCallback) {
                         await params.invalidCodeCallback('password')
                     } else {

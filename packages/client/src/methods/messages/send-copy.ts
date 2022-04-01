@@ -1,7 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Message, FormattedString, ReplyMarkup } from '../../types'
 import { tl } from '@mtcute/tl'
-import { MessageNotFoundError } from '@mtcute/tl/errors'
 
 /**
  * Copy a message (i.e. send the same message,
@@ -99,7 +98,7 @@ export async function sendCopy(
 
     const msg = await this.getMessages(fromPeer, message)
 
-    if (!msg) throw new MessageNotFoundError()
+    if (!msg) throw new tl.errors.MessageNotFoundError()
 
     return msg.sendCopy(toChatId, params)
 }

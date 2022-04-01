@@ -1121,7 +1121,7 @@
   integrity sha512-EaObqwIvayI5a8dCzhFrjKzVwKLxjoG9T6Ppd5CEo07LRKfQ8Yokw54r5+Wq7FaBQ+yXRvQAYPrHwya1/UFt9g==
 
 "@types/integer@*":
-  version "4.0.0"
+  version "5.4.1
   resolved "https://registry.yarnpkg.com/@types/integer/-/integer-4.0.0.tgz#3b778715df72d2cf8ba73bad27bd9d830907f944"
   integrity sha512-2U1i6bIRiqizl6O+ETkp2HhUZIxg7g+burUabh9tzGd0qcszfNaFRaY9bGNlQKgEU7DCsH5qMajRDW5QamWQbw==
 

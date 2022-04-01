@@ -11,7 +11,6 @@ import { HistoryReadUpdate } from './updates'
 import { FormattedString } from './parser'
 import { Message } from './messages'
 import { tl } from '@mtcute/tl'
-import { TimeoutError } from '@mtcute/tl/errors'
 
 interface QueuedHandler<T> {
     promise: ControllablePromise<T>
@@ -270,7 +269,7 @@ export class Conversation {
         let timer: NodeJS.Timeout | undefined = undefined
         if (timeout !== null) {
             timer = setTimeout(() => {
-                promise.reject(new TimeoutError())
+                promise.reject(new tl.errors.TimeoutError())
                 this._queuedNewMessage.removeBy((it) => it.promise === promise)
             }, timeout)
         }
@@ -412,7 +411,7 @@ export class Conversation {
         let timer: NodeJS.Timeout | undefined = undefined
         if (params?.timeout !== null) {
             timer = setTimeout(() => {
-                promise.reject(new TimeoutError())
+                promise.reject(new tl.errors.TimeoutError())
                 delete this._pendingEditMessage[msgId]
             }, params?.timeout ?? 15000)
         }
@@ -458,7 +457,7 @@ export class Conversation {
         let timer: NodeJS.Timeout | undefined = undefined
         if (timeout !== null) {
             timer = setTimeout(() => {
-                promise.reject(new TimeoutError())
+                promise.reject(new tl.errors.TimeoutError())
                 delete this._pendingRead[msgId]
             }, timeout)
         }

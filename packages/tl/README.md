@@ -2,7 +2,7 @@
 
 > TL schema and related utils used for MTCute.
 
-Generated from TL layer **134** (last updated on 20.11.2021).
+Generated from TL layer **139** (last updated on 23.03.2022).
 
 ## About
 
@@ -34,15 +34,31 @@ use-cases for mutable TL objects, so you can use exported
 `tl` is exported as a namespace to allow better code insights, and to avoid cluttering global namespace and very long
 import statements.
 
+MTProto schema is available in namespace `mtp`, also exported by this package.
+
 ```typescript
 import { tl } from '@mtcute/tl'
 const obj: tl.RawInputPeerChat = { _: 'inputPeerChat', chatId: 42 }
 console.log(tl.isAnyInputPeer(obj)) // true
 ```
 
-### `@mtcute/tl/raw-schema`
 
-[Documentation](./modules/raw_schema.html)
+RPC errors are also exposed in this package in `tl.errors` namespace:
+
+```typescript
+import { tl } from '@mtcute/tl'
+try {
+    await client.call(...)
+} catch (e) {
+    if (e instanceof tl.errors.ChatInvalidError) {
+        console.log('invalid chat')
+    } else throw e
+}
+```
+
+### `@mtcute/tl/api-schema`
+
+[Documentation](./modules/api_schema.html)
 
 JSON file describing all available TL classes, methods and unions. Can be used to write custom code generators
 > This very file is used to generate binary serialization and TypeScript typings for `@mtcute/tl`.
