@@ -8,14 +8,18 @@ import { parseTlToEntries } from '@mtcute/tl-utils/src/parse'
 import { parseFullTlSchema } from '@mtcute/tl-utils/src/schema'
 import { mergeTlEntries, mergeTlSchemas } from '@mtcute/tl-utils/src/merge'
 import { TlEntry, TlFullSchema } from '@mtcute/tl-utils/src/types'
-import { readFile, writeFile } from 'fs/promises'
+import { readdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import cheerio from 'cheerio'
 import fetch from 'node-fetch'
 import readline from 'readline'
 import { writeTlEntryToString } from '@mtcute/tl-utils/src/stringify'
 import {
-    CORE_DOMAIN, API_SCHEMA_JSON_FILE, TDESKTOP_SCHEMA, TDLIB_SCHEMA, COREFORK_DOMAIN
+    CORE_DOMAIN,
+    API_SCHEMA_JSON_FILE,
+    TDESKTOP_SCHEMA,
+    TDLIB_SCHEMA,
+    COREFORK_DOMAIN,
 } from './constants'
 import { fetchRetry } from './utils'
 import {
@@ -27,6 +31,7 @@ import { packTlSchema } from './schema'
 
 const README_MD_FILE = join(__dirname, '../README.md')
 const PACKAGE_JSON_FILE = join(__dirname, '../package.json')
+const PACKAGES_DIR = join(__dirname, '../../')
 
 function tlToFullSchema(tl: string): TlFullSchema {
     return parseFullTlSchema(parseTlToEntries(tl))
@@ -66,7 +71,10 @@ async function fetchTdesktopSchema(): Promise<Schema> {
     }
 }
 
-async function fetchCoreSchema(domain = CORE_DOMAIN, name = 'Core'): Promise<Schema> {
+async function fetchCoreSchema(
+    domain = CORE_DOMAIN,
+    name = 'Core'
+): Promise<Schema> {
     const html = await fetchRetry(`${domain}/schema`)
     const $ = cheerio.load(html)
     // cheerio doesn't always unescape them
@@ -115,9 +123,7 @@ async function updatePackageVersion(
 ) {
     const packageJson = JSON.parse(await readFile(PACKAGE_JSON_FILE, 'utf8'))
     const version: string = packageJson.version
-    let [major, minor, patch] = version.split('.').map((i) => parseInt(i))
-
-    patch = 0
+    let [major, minor] = version.split('.').map((i) => parseInt(i))
 
     if (major === currentLayer) {
         console.log('Current version: %s. Bump minor version?', version)
@@ -132,8 +138,40 @@ async function updatePackageVersion(
     }
 
     console.log('Updating package version...')
-    packageJson.version = `${major}.${minor}.${patch}`
+    const versionStr = `${major}.${minor}.0`
+    packageJson.version = versionStr
     await writeFile(PACKAGE_JSON_FILE, JSON.stringify(packageJson, null, 4))
+
+    console.log('Updating dependant packages...')
+
+    for (const dir of await readdir(PACKAGES_DIR, { withFileTypes: true })) {
+        if (!dir.isDirectory()) continue
+
+        const pkgFile = join(PACKAGES_DIR, dir.name, 'package.json')
+
+        let pkg
+        try {
+            pkg = JSON.parse(await readFile(pkgFile, 'utf8'))
+        } catch (e: any) {
+            if (e.code === 'ENOENT') continue
+            throw e
+        }
+
+        if (pkg.dependencies && '@mtcute/tl' in pkg.dependencies) {
+            pkg.dependencies['@mtcute/tl'] = 'workspace:' + versionStr
+        }
+
+        if (pkg.devDependencies && '@mtcute/tl' in pkg.devDependencies) {
+            pkg.devDependencies['@mtcute/tl'] = 'workspace:' + versionStr
+        }
+
+        await writeFile(pkgFile, JSON.stringify(pkg, null, 4) + '\n')
+    }
+
+    // because i am fucking dumb and have adhd and always forget it lol
+    console.log(
+        'Done! Please make sure packages compile before committing and pushing'
+    )
 }
 
 async function overrideInt53(schema: TlFullSchema): Promise<void> {
@@ -150,7 +188,9 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
         overrides.forEach((argName) => {
             const arg = entry.arguments.find((it) => it.name === argName)
             if (!arg) {
-                console.log(`[warn] Cannot override ${entry.name}#${argName}: argument does not exist`)
+                console.log(
+                    `[warn] Cannot override ${entry.name}#${argName}: argument does not exist`
+                )
                 return
             }
 
@@ -159,7 +199,9 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
             } else if (arg.type.toLowerCase() === 'vector<long>') {
                 arg.type = 'vector<int53>'
             } else {
-                console.log(`[warn] Cannot override ${entry.name}#${argName}: argument is not long (${arg.type})`)
+                console.log(
+                    `[warn] Cannot override ${entry.name}#${argName}: argument is not long (${arg.type})`
+                )
             }
         })
     })

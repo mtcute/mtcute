@@ -6,6 +6,7 @@
         "When contributing, please maintain alphabetical key ordering"
     ],
     "class": {
+        "attachMenuBot": ["bot_id"],
         "botInfo": ["user_id"],
         "channel": ["id"],
         "channelAdminLogEvent": ["user_id"],
@@ -85,6 +86,7 @@
         "updateBotCommands": ["bot_id"],
         "updateBotInlineQuery": ["user_id"],
         "updateBotInlineSend": ["user_id"],
+        "updateBotMenuButton": ["bot_id"],
         "updateBotPrecheckoutQuery": ["user_id"],
         "updateBotShippingQuery": ["user_id"],
         "updateBotStopped": ["user_id"],
@@ -119,6 +121,7 @@
         "updateUserPhoto": ["user_id"],
         "updateUserStatus": ["user_id"],
         "updateUserTyping": ["user_id"],
+        "updateWebViewResultSent": ["bot_id"],
         "user": ["id"],
         "userEmpty": ["id"],
         "userFull": ["id"],

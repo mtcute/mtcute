@@ -51,7 +51,7 @@ importers:
     specifiers:
       '@mtcute/core': workspace:^1.0.0
       '@mtcute/file-id': workspace:^1.0.0
-      '@mtcute/tl': workspace:139.0
+      '@mtcute/tl': workspace:140.0.0
       '@types/long': ^4.0.1
       '@types/node': ^15.12.1
       eager-async-pool: ^1.0.0
@@ -69,7 +69,7 @@ importers:
 
   packages/core:
     specifiers:
-      '@mtcute/tl': workspace:139.0
+      '@mtcute/tl': workspace:140.0.0
       '@mtcute/tl-runtime': workspace:^1.0.0
       '@types/events': ^3.0.0
       '@types/node': ^15.12.1
@@ -103,7 +103,7 @@ importers:
     specifiers:
       '@mtcute/client': workspace:^1.0.0
       '@mtcute/core': workspace:^1.0.0
-      '@mtcute/tl': workspace:139.0
+      '@mtcute/tl': workspace:140.0.0
       events: ^3.2.0
     dependencies:
       '@mtcute/client': link:../client
@@ -114,7 +114,7 @@ importers:
   packages/file-id:
     specifiers:
       '@mtcute/core': workspace:^1.0.0
-      '@mtcute/tl': workspace:139.0
+      '@mtcute/tl': workspace:140.0.0
       '@mtcute/tl-runtime': workspace:^1.0.0
       '@types/long': ^4.0.1
       long: ^4.0.0
@@ -129,7 +129,7 @@ importers:
   packages/html-parser:
     specifiers:
       '@mtcute/client': ^1.0.0
-      '@mtcute/tl': workspace:~139.0
+      '@mtcute/tl': workspace:140.0.0
       '@types/long': ^4.0.1
       htmlparser2: ^6.0.1
       long: ^4.0.0
@@ -150,7 +150,7 @@ importers:
   packages/markdown-parser:
     specifiers:
       '@mtcute/client': workspace:^1.0.0
-      '@mtcute/tl': workspace:139.0
+      '@mtcute/tl': workspace:140.0.0
       '@types/long': ^4.0.1
       long: ^4.0.0
     dependencies:

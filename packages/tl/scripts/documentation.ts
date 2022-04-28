@@ -261,7 +261,7 @@ export async function getCachedDocumentation(): Promise<CachedDocumentation | nu
     try {
         const file = await readFile(DOC_CACHE_FILE, 'utf8')
         return JSON.parse(file)
-    } catch (e) {
+    } catch (e: any) {
         if (e.code === 'ENOENT') {
             return null
         }
