@@ -659,7 +659,7 @@ export class BaseTelegramClient extends EventEmitter {
                 await this._cachePeersFrom(res)
 
                 return res
-            } catch (e) {
+            } catch (e: any) {
                 lastError = e
 
                 if (e instanceof tl.errors.InternalError) {

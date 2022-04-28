@@ -1,5 +1,10 @@
-import { typedArrayToBuffer } from '../buffer-utils'
 import { Data, Deflate, inflate } from 'pako'
+
+export function typedArrayToBuffer(arr: NodeJS.TypedArray): Buffer {
+    return ArrayBuffer.isView(arr)
+        ? Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength)
+        : Buffer.from(arr)
+}
 
 export function gzipInflate(buf: Buffer): Buffer {
     return typedArrayToBuffer(inflate(buf))

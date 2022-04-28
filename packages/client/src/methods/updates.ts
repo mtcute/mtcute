@@ -361,7 +361,7 @@ export async function _saveStorage(
         }
 
         await this.storage.save?.()
-    } catch (err) {
+    } catch (err: any) {
         this._emitError(err)
     }
 }

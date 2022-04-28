@@ -225,7 +225,7 @@ export class UpdateState<State, SceneName extends string = string> {
     async throttle(key: string, limit: number, window: number): Promise<[number, number]> {
         try {
             return await this.rateLimit(key, limit, window)
-        } catch (e) {
+        } catch (e: any) {
             if (e.constructor === RateLimitError) {
                 await sleep(e.reset - Date.now())
                 return this.throttle(key, limit, window)

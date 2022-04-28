@@ -100,7 +100,7 @@ export async function* downloadAsIterable(
                 },
                 { connection }
             )
-        } catch (e) {
+        } catch (e: any) {
             if (e.constructor === tl.errors.FileMigrateXError) {
                 connection = this._downloadConnections[e.new_dc]
                 if (!connection) {

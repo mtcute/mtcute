@@ -25,29 +25,16 @@ Work-in-progress library for MTProto in TypeScript.
 > If you encounter errors related to storage, either
 > reset your storage by removing the file, or fix it manually.
 
-What currently works:
-
-- [x] TCP Connection in NodeJS
-- [x] Sending & receiving text messages
-- [x] Uploading & downloading files
-- [x] HTML & Markdown parse modes
-- [x] Type-safe filter system
-
-What is not done yet:
-
-- pretty much everything else
-
 ## Setting up for development:
 
 ```bash
 git clone https://github.com/mtcute/mtcute
 cd mtcute
-yarn install
-npx lerna link
+pnpm install
 
 # generate code from tl schema
 cd packages/tl
-yarn generate-code
+pnpm run gen-code
 ```
 
 ## Acknowledgements

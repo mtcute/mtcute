@@ -1166,7 +1166,7 @@ export class SessionConnection extends PersistentConnection {
 
         try {
             this._doFlush()
-        } catch (e) {
+        } catch (e: any) {
             this.log.error('flush error: %s', e.stack)
             // should not happen unless there's a bug in the code
         }

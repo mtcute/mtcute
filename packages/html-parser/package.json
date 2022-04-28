@@ -13,7 +13,7 @@
         "docs": "npx typedoc"
     },
     "dependencies": {
-        "@mtcute/tl": "~139.0",
+        "@mtcute/tl": "workspace:~139.0",
         "htmlparser2": "^6.0.1",
         "long": "^4.0.0"
     },

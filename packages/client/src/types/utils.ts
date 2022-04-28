@@ -71,7 +71,7 @@ export function makeInspectable(
                     val = val.toJSON(true)
                 }
                 ret[it] = val
-            } catch (e) {
+            } catch (e: any) {
                 ret[it] = "Error: " + e.message
             }
         })

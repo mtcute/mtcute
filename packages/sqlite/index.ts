@@ -7,11 +7,11 @@ import {
     LruMap,
     TlBinaryWriter,
     toggleChannelIdMark,
+    tl,
+    throttle,
+    Logger,
 } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
 import sqlite3 from 'better-sqlite3'
-import { throttle } from '@mtcute/core'
-import { Logger } from '@mtcute/core/src/utils/logger'
 import { TlBinaryReader, TlReaderMap, TlWriterMap } from '../tl-runtime'
 
 // todo: add testMode to "self"
@@ -54,46 +54,57 @@ const CURRENT_VERSION = 2
 
 // language=SQLite
 const SCHEMA = `
-    create table kv (
-        key text primary key,
+    create table kv
+    (
+        key   text primary key,
         value text not null
     );
 
-    create table state (
-        key text primary key,
-        value text not null,
+    create table state
+    (
+        key     text primary key,
+        value   text not null,
         expires number
     );
 
-    create table auth_keys (
-        dc integer primary key,
+    create table auth_keys
+    (
+        dc  integer primary key,
         key blob not null
     );
 
-    create table pts (
+    create table pts
+    (
         channel_id integer primary key,
-        pts integer not null
+        pts        integer not null
     );
 
-    create table entities (
-        id integer primary key,
-        hash text not null,
-        type text not null,
+    create table entities
+    (
+        id       integer primary key,
+        hash     text    not null,
+        type     text    not null,
         username text,
-        phone text,
-        updated integer not null,
-        "full" blob
+        phone    text,
+        updated  integer not null,
+        "full"   blob
     );
     create index idx_entities_username on entities (username);
     create index idx_entities_phone on entities (phone);
 `
 
 const RESET = `
-    delete from kv where key <> 'ver';
-    delete from state;
-    delete from auth_keys;
-    delete from pts;
-    delete from entities
+    delete
+    from kv
+    where key <> 'ver';
+    delete
+    from state;
+    delete
+    from auth_keys;
+    delete
+    from pts;
+    delete
+    from entities
 `
 
 const USERNAME_TTL = 86400000 // 24 hours

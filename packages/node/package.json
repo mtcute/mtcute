@@ -12,11 +12,11 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/core": "^1.0.0",
-        "@mtcute/client": "^1.0.0",
-        "@mtcute/sqlite": "^1.0.0",
-        "@mtcute/markdown-parser": "^1.0.0",
-        "@mtcute/html-parser": "^1.0.0",
-        "@mtcute/dispatcher": "^1.0.0"
+        "@mtcute/core": "workspace:^1.0.0",
+        "@mtcute/client": "workspace:^1.0.0",
+        "@mtcute/sqlite": "workspace:^1.0.0",
+        "@mtcute/markdown-parser": "workspace:^1.0.0",
+        "@mtcute/html-parser": "workspace:^1.0.0",
+        "@mtcute/dispatcher": "workspace:^1.0.0"
     }
 }

@@ -447,7 +447,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
                             break
                         }
-                    } catch (e) {
+                    } catch (e: any) {
                         if (this._errorHandler) {
                             const handled = await this._errorHandler(
                                 e,

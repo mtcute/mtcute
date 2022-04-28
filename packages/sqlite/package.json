@@ -12,8 +12,8 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/core": "^1.0.0",
-        "@mtcute/tl-runtime": "^1.0.0",
+        "@mtcute/core": "workspace:^1.0.0",
+        "@mtcute/tl-runtime": "workspace:^1.0.0",
         "better-sqlite3": "^7.4.0",
         "long": "^4.0.0"
     },

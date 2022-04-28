@@ -17,6 +17,6 @@
         "docs": "npx typedoc"
     },
     "dependencies": {
-        "@mtcute/core": "^1.0.0"
+        "@mtcute/core": "workspace:^1.0.0"
     }
 }

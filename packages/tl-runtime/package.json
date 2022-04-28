@@ -16,10 +16,10 @@
     },
     "dependencies": {
         "long": "4.0.0",
-        "crc-32": "1.2.0",
         "pako": "2.0.2"
     },
     "devDependencies": {
-        "@types/long": "4.0.1"
+        "@types/long": "4.0.1",
+        "@types/pako": "^1.0.1"
     }
 }

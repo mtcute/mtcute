@@ -489,7 +489,7 @@ export class Conversation {
                     it.promise.resolve(msg)
                     this._queuedNewMessage.popFront()
                 }
-            } catch (e) {
+            } catch (e: any) {
                 this.client['_emitError'](e)
             }
 
