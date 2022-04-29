@@ -61,7 +61,7 @@ async function addSingleMethod(state, fileName) {
 
             if (
                 !stmt.importClause.namedBindings ||
-                stmt.importClause.namedBindings.kind !== 264 /* NamedImports */
+                stmt.importClause.namedBindings.kind !== ts.SyntaxKind.NamedImports
             )
                 throwError(stmt, fileName, 'Only named imports are supported!')
 
@@ -113,7 +113,7 @@ async function addSingleMethod(state, fileName) {
                 name !== '_normalizeInputMedia'
 
             const isExported = (stmt.modifiers || []).find(
-                (mod) => mod.kind === 92 /* ExportKeyword */
+                (mod) => mod.kind === ts.SyntaxKind.ExportKeyword
             )
             const isInitialize = checkForFlag(stmt, '@initialize')
             const aliases = (function () {
