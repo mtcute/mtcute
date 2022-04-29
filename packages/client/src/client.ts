@@ -1,6 +1,67 @@
 /* THIS FILE WAS AUTO-GENERATED */
 import { BaseTelegramClient } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
+import { Readable } from 'stream'
+import {
+    ArrayWithTotal,
+    BotCommands,
+    BotStoppedUpdate,
+    CallbackQuery,
+    Chat,
+    ChatEvent,
+    ChatInviteLink,
+    ChatMember,
+    ChatMemberUpdate,
+    ChatPreview,
+    ChosenInlineResult,
+    Conversation,
+    DeleteMessageUpdate,
+    Dialog,
+    FileDownloadParameters,
+    FormattedString,
+    GameHighScore,
+    HistoryReadUpdate,
+    IMessageEntityParser,
+    InlineQuery,
+    InputFileLike,
+    InputInlineResult,
+    InputMediaLike,
+    InputPeerLike,
+    InputStickerSetItem,
+    MaybeDynamic,
+    Message,
+    MessageMedia,
+    ParsedUpdate,
+    PartialExcept,
+    PartialOnly,
+    PeersIndex,
+    Photo,
+    Poll,
+    PollUpdate,
+    PollVoteUpdate,
+    RawDocument,
+    ReplyMarkup,
+    SentCode,
+    StickerSet,
+    TakeoutSession,
+    TermsOfService,
+    TypingStatus,
+    UploadFileLike,
+    UploadedFile,
+    User,
+    UserStatusUpdate,
+    UserTypingUpdate,
+} from './types'
+import {
+    AsyncLock,
+    Deque,
+    MaybeArray,
+    MaybeAsync,
+    SessionConnection,
+    SortedLinkedList,
+} from '@mtcute/core'
+import { tdFileId } from '@mtcute/file-id'
+import { Logger } from '@mtcute/core/src/utils/logger'
 import { acceptTos } from './methods/auth/accept-tos'
 import { checkPassword } from './methods/auth/check-password'
 import { getPasswordHint } from './methods/auth/get-password-hint'
@@ -65,6 +126,7 @@ import { addContact } from './methods/contacts/add-contact'
 import { deleteContacts } from './methods/contacts/delete-contacts'
 import { getContacts } from './methods/contacts/get-contacts'
 import { importContacts } from './methods/contacts/import-contacts'
+import { _pushConversationMessage } from './methods/dialogs/_init-conversation'
 import { createFolder } from './methods/dialogs/create-folder'
 import { deleteFolder } from './methods/dialogs/delete-folder'
 import { editFolder } from './methods/dialogs/edit-folder'
@@ -73,7 +135,6 @@ import { getDialogs } from './methods/dialogs/get-dialogs'
 import { getFolders } from './methods/dialogs/get-folders'
 import { getPeerDialogs } from './methods/dialogs/get-peer-dialogs'
 import { _parseDialogs } from './methods/dialogs/parse-dialogs'
-import { _pushConversationMessage } from './methods/dialogs/_init-conversation'
 import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
 import { downloadAsIterable } from './methods/files/download-iterable'
@@ -121,6 +182,8 @@ import { sendScheduled } from './methods/messages/send-scheduled'
 import { sendText } from './methods/messages/send-text'
 import { sendTyping } from './methods/messages/send-typing'
 import { sendVote } from './methods/messages/send-vote'
+import { translateMessage } from './methods/messages/translate-message'
+import { translateText } from './methods/messages/translate-text'
 import { unpinAllMessages } from './methods/messages/unpin-all-messages'
 import { unpinMessage } from './methods/messages/unpin-message'
 import { initTakeoutSession } from './methods/misc/init-takeout-session'
@@ -146,14 +209,6 @@ import { getStickerSet } from './methods/stickers/get-sticker-set'
 import { moveStickerInSet } from './methods/stickers/move-sticker-in-set'
 import { setStickerSetThumb } from './methods/stickers/set-sticker-set-thumb'
 import { ConditionVariable } from '@mtcute/core/src/utils/condition-variable'
-import {
-    AsyncLock,
-    Deque,
-    MaybeArray,
-    MaybeAsync,
-    SessionConnection,
-    SortedLinkedList,
-} from '@mtcute/core'
 import { RpsMeter } from './utils/rps-meter'
 import {
     _dispatchUpdate,
@@ -186,59 +241,6 @@ import { setProfilePhoto } from './methods/users/set-profile-photo'
 import { unblockUser } from './methods/users/unblock-user'
 import { updateProfile } from './methods/users/update-profile'
 import { updateUsername } from './methods/users/update-username'
-import { Readable } from 'stream'
-import {
-    ArrayWithTotal,
-    BotCommands,
-    BotStoppedUpdate,
-    CallbackQuery,
-    Chat,
-    ChatEvent,
-    ChatInviteLink,
-    ChatMember,
-    ChatMemberUpdate,
-    ChatPreview,
-    ChosenInlineResult,
-    Conversation,
-    DeleteMessageUpdate,
-    Dialog,
-    FileDownloadParameters,
-    FormattedString,
-    GameHighScore,
-    HistoryReadUpdate,
-    IMessageEntityParser,
-    InlineQuery,
-    InputFileLike,
-    InputInlineResult,
-    InputMediaLike,
-    InputPeerLike,
-    InputStickerSetItem,
-    MaybeDynamic,
-    Message,
-    MessageMedia,
-    ParsedUpdate,
-    PartialExcept,
-    PartialOnly,
-    PeersIndex,
-    Photo,
-    Poll,
-    PollUpdate,
-    PollVoteUpdate,
-    RawDocument,
-    ReplyMarkup,
-    SentCode,
-    StickerSet,
-    TakeoutSession,
-    TermsOfService,
-    TypingStatus,
-    UploadFileLike,
-    UploadedFile,
-    User,
-    UserStatusUpdate,
-    UserTypingUpdate,
-} from './types'
-import { tdFileId } from '@mtcute/file-id'
-import { Logger } from '@mtcute/core/src/utils/logger'
 
 // from methods/updates.ts
 interface PendingUpdateContainer {
@@ -1076,14 +1078,14 @@ export interface TelegramClient extends BaseTelegramClient {
         maxId?: number
     ): Promise<void>
     /**
-     * Delete all messages of a user in a supergroup
+     * Delete all messages of a user (or channel) in a supergroup
      *
      * @param chatId  Chat ID
-     * @param userId  User ID
+     * @param participantId  User/channel ID
      */
     deleteUserHistory(
         chatId: InputPeerLike,
-        userId: InputPeerLike
+        participantId: InputPeerLike
     ): Promise<void>
     /**
      * Edit supergroup/channel admin rights of a user.
@@ -3014,6 +3016,40 @@ export interface TelegramClient extends BaseTelegramClient {
         options: null | MaybeArray<number | Buffer>
     ): Promise<Poll>
     /**
+     * Translate message text to a given language.
+     *
+     * Returns `null` if it could not translate the message.
+     *
+     * > **Note**: For now doesn't seem to work, returns null for all messages.
+     *
+     * @param chatId  Chat or user ID
+     * @param messageId  Identifier of the message to translate
+     * @param toLanguage  Target language (two-letter ISO 639-1 language code)
+     * @param fromLanguage  Source language (two-letter ISO 639-1 language code, by default auto-detected)
+     */
+    translateMessage(
+        chatId: InputPeerLike,
+        messageId: number,
+        toLanguage: string,
+        fromLanguage?: string
+    ): Promise<string | null>
+    /**
+     * Translate text to a given language.
+     *
+     * Returns `null` if it could not translate the message.
+     *
+     * > **Note**: For now doesn't seem to work, returns null for all messages.
+     *
+     * @param text  Text to translate
+     * @param toLanguage  Target language (two-letter ISO 639-1 language code)
+     * @param fromLanguage  Source language (two-letter ISO 639-1 language code, by default auto-detected)
+     */
+    translateText(
+        text: string,
+        toLanguage: string,
+        fromLanguage?: string
+    ): Promise<string | null>
+    /**
      * Unpin all pinned messages in a chat.
      *
      * @param chatId  Chat or user ID
@@ -3699,6 +3735,7 @@ export class TelegramClient extends BaseTelegramClient {
     deleteContacts = deleteContacts
     getContacts = getContacts
     importContacts = importContacts
+    protected _pushConversationMessage = _pushConversationMessage
     createFolder = createFolder
     deleteFolder = deleteFolder
     editFolder = editFolder
@@ -3707,7 +3744,6 @@ export class TelegramClient extends BaseTelegramClient {
     getFolders = getFolders
     getPeerDialogs = getPeerDialogs
     protected _parseDialogs = _parseDialogs
-    protected _pushConversationMessage = _pushConversationMessage
     downloadAsBuffer = downloadAsBuffer
     downloadToFile = downloadToFile
     downloadAsIterable = downloadAsIterable
@@ -3753,6 +3789,8 @@ export class TelegramClient extends BaseTelegramClient {
     sendText = sendText
     sendTyping = sendTyping
     sendVote = sendVote
+    translateMessage = translateMessage
+    translateText = translateText
     unpinAllMessages = unpinAllMessages
     unpinMessage = unpinMessage
     initTakeoutSession = initTakeoutSession
