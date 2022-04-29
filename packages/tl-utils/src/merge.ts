@@ -17,13 +17,18 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
     // even if the entry contains id, let's re-calculate it just to be sure
     result.id = computeConstructorIdFromEntry(result)
 
-    const argsIndex: Record<string, TlArgument> = {}
-    let lastTrueFlagIdx = -1
+    const argsIndex: Record<string, true> = {}
+    const flagsLastIndex: Record<string, number> = {}
 
     result.arguments.forEach((arg, idx) => {
-        argsIndex[arg.name] = arg
+        argsIndex[arg.name] = true
 
-        if (arg.predicate && arg.type === 'true') lastTrueFlagIdx = idx
+        if (arg.type === '#') {
+            flagsLastIndex[arg.name] = idx
+        } if (arg.predicate) {
+            const flagsField = arg.predicate.split('.')[0]
+            flagsLastIndex[flagsField] = idx
+        }
     })
 
     for (let i = 1; i < entries.length; i++) {
@@ -60,9 +65,24 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
                 // yay a new arg
                 // we can only add optional true args, since any others will change id
                 // ids match, so this must be the case
+                //
+                // we also need to make sure we put it *after* the respective flags field
 
-                result.arguments.splice(lastTrueFlagIdx += 1, 0, entryArgument)
-                argsIndex[entryArgument.name] = entryArgument
+                const flagsField = entryArgument.predicate!.split('.')[0]
+                const targetIdx = flagsLastIndex[flagsField]
+
+                // targetIdx *must* exist, otherwise ids wouldn't match
+
+                result.arguments.splice(targetIdx + 1, 0, entryArgument)
+                argsIndex[entryArgument.name] = true
+
+                // update last indexes
+                // we also need to update subsequent flags if there are any
+                Object.keys(flagsLastIndex).forEach((flag) => {
+                    if (flagsLastIndex[flag] >= targetIdx) {
+                        flagsLastIndex[flag]++
+                    }
+                })
             }
 
             // args exists both in result and current entry

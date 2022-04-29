@@ -34,30 +34,35 @@ describe('mergeTlEntries', () => {
         test('test = Test;\ntest foo:int = Test;', 'basic info mismatch')
     })
 
-    it('fails on conflicting ids', () => {
-        test('test = Test;\ntest foo:int = Test;', 'basic info mismatch')
-    })
-
     it('merges true flags', () => {
         test(
-            'test = Test;\n' +
-                'test foo:flags.0?true = Test;\n' +
-                'test bar:flags.0?true = Test;\n' +
-                'test baz:flags.1?true = Test;',
-            'test#1c173316 foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;'
+            'test flags:# = Test;\n' +
+                'test flags:# foo:flags.0?true = Test;\n' +
+                'test flags:# bar:flags.0?true = Test;\n' +
+                'test flags:# baz:flags.1?true = Test;',
+            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;'
         )
         test(
-            'test foo:flags.0?true = Test;\n' +
-                'test bar:flags.0?true = Test;\n' +
-                'test baz:flags.1?true = Test;',
-            'test#1c173316 foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;'
+            'test flags:# foo:flags.0?true = Test;\n' +
+                'test flags:# bar:flags.0?true = Test;\n' +
+                'test flags:# baz:flags.1?true = Test;',
+            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;'
         )
         test(
-            'test foo:flags.0?true = Test;\n' +
-                'test foo:flags.0?true bar:flags.0?true = Test;\n' +
-                'test baz:flags.1?true = Test;\n' +
-                'test bar:flags.0?true baz:flags.1?true = Test;',
-            'test#1c173316 foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;'
+            'test flags:# foo:flags.0?true = Test;\n' +
+                'test flags:# foo:flags.0?true bar:flags.0?true = Test;\n' +
+                'test flags:# baz:flags.1?true = Test;\n' +
+                'test flags:# bar:flags.0?true baz:flags.1?true = Test;',
+            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;'
+        )
+    })
+
+    it('merges true flags with multiple flags fields', () => {
+        test(
+            'test flags:# flags2:# = Test;\n' +
+                'test flags:# foo:flags.0?true flags2:# = Test;\n' +
+                'test flags:# flags2:# bar:flags2.0?true = Test;\n',
+            'test#5ca39a98 flags:# foo:flags.0?true flags2:# bar:flags2.0?true = Test;'
         )
     })
 })

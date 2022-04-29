@@ -21,7 +21,7 @@ export function generateReaderCodeForTlEntry(entry: TlEntry): string {
     entry.arguments.forEach((arg) => {
         if (arg.type === '#') {
             const code = `var ${arg.name}=r.uint();`
-                ret = ret.replace('return{', code + 'return{')
+            ret = ret.replace('return{', code + 'return{')
             flagsFields[arg.name] = 1
             return
         }
@@ -34,10 +34,14 @@ export function generateReaderCodeForTlEntry(entry: TlEntry): string {
             const bitIndex = parseInt(s[1])
 
             if (!(fieldName in flagsFields)) {
-                throw new Error(`Invalid predicate: ${arg.predicate} - unknown field`)
+                throw new Error(
+                    `Invalid predicate: ${arg.predicate} - unknown field (in ${entry.name})`
+                )
             }
             if (isNaN(bitIndex) || bitIndex < 0 || bitIndex > 32) {
-                throw new Error(`Invalid predicate: ${arg.predicate} - invalid bit`)
+                throw new Error(
+                    `Invalid predicate: ${arg.predicate} - invalid bit`
+                )
             }
 
             const condition = `${fieldName}&${1 << bitIndex}`
@@ -82,7 +86,11 @@ export function generateReaderCodeForTlEntry(entry: TlEntry): string {
     return ret + '}},'
 }
 
-export function generateReaderCodeForTlEntries(entries: TlEntry[], varName: string, methods = true): string {
+export function generateReaderCodeForTlEntries(
+    entries: TlEntry[],
+    varName: string,
+    methods = true
+): string {
     let ret = `var ${varName}={\n`
 
     entries.forEach((entry) => {
