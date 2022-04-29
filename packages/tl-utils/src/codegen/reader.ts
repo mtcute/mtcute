@@ -14,35 +14,14 @@ export function generateReaderCodeForTlEntry(entry: TlEntry): string {
         return ret + `return{_:'${entry.name}'}},`
     }
 
-    ret += `var o={_:'${entry.name}',`
-
-    let inObject = true
-    function finalizeObject(pos: number) {
-        if (!inObject) return
-
-        for (let i = pos; i < entry.arguments.length; i++) {
-            const arg = entry.arguments[i]
-
-            if (arg.type !== '#') {
-                ret += arg.name + ':void 0,'
-            }
-        }
-        ret += '};'
-
-        inObject = false
-    }
+    ret += `return{_:'${entry.name}',`
 
     const flagsFields: Record<string, 1> = {}
 
-    entry.arguments.forEach((arg, idx) => {
+    entry.arguments.forEach((arg) => {
         if (arg.type === '#') {
             const code = `var ${arg.name}=r.uint();`
-            if (idx === 0) {
-                ret = ret.replace('var o=', code + 'var o=')
-            } else {
-                finalizeObject(idx)
-                ret += code
-            }
+                ret = ret.replace('return{', code + 'return{')
             flagsFields[arg.name] = 1
             return
         }
@@ -64,25 +43,13 @@ export function generateReaderCodeForTlEntry(entry: TlEntry): string {
             const condition = `${fieldName}&${1 << bitIndex}`
 
             if (arg.type === 'true') {
-                if (inObject) {
-                    ret += `${argName}:!!(${condition}),`
-                } else {
-                    ret += `o.${argName}=!!(${condition});`
-                }
+                ret += `${argName}:!!(${condition}),`
                 return
             }
 
-            if (inObject) {
-                ret += `${argName}:${condition}?`
-            } else {
-                ret += `if(${condition})o.${argName}=`
-            }
+            ret += `${argName}:${condition}?`
         } else {
-            if (inObject) {
-                ret += `${argName}:`
-            } else {
-                ret += `o.${argName}=`
-            }
+            ret += `${argName}:`
         }
 
         let vector = false
@@ -105,19 +72,14 @@ export function generateReaderCodeForTlEntry(entry: TlEntry): string {
             ret += `r.${type}()`
         }
 
-        if (arg.predicate && inObject) {
+        if (arg.predicate) {
             ret += ':void 0'
         }
 
-        ret += inObject ? ',' : ';'
+        ret += ','
     })
 
-    if (inObject) {
-        // simple object, direct return
-        return ret.replace('var o=', 'return') + '}},'
-    }
-
-    return ret + 'return o},'
+    return ret + '}},'
 }
 
 export function generateReaderCodeForTlEntries(entries: TlEntry[], varName: string, methods = true): string {

@@ -72,6 +72,21 @@ describe('generateReaderCodeForTlEntry', () => {
         )
     })
 
+    it('generates code for constructors with multiple flags fields', () => {
+        test(
+            'updates.channelDifferenceEmpty#3e11affb flags:# final:flags.0?true pts:int timeout:flags.1?int flags2:# can_delete_channel:flags2.0?true = updates.ChannelDifference;',
+            'var flags=r.uint();',
+            'var flags2=r.uint();',
+            'return{',
+            "_:'updates.channelDifferenceEmpty',",
+            'final:!!(flags&1),',
+            'pts:r.int(),',
+            'timeout:flags&2?r.int():void 0,',
+            'canDeleteChannel:!!(flags2&1),',
+            '}'
+        )
+    })
+
     it('generates code for constructors with vector arguments', () => {
         test(
             'contacts.resolvedPeer#7f077ad9 peer:Peer chats:Vector<Chat> users:Vector<User> = contacts.ResolvedPeer;',

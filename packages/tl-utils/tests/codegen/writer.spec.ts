@@ -70,6 +70,23 @@ describe('generateWriterCodeForTlEntry', () => {
         )
     })
 
+    it('generates code for constructors with multiple flags fields', () => {
+        test(
+            'updates.channelDifferenceEmpty#3e11affb flags:# final:flags.0?true pts:int timeout:flags.1?int flags2:# can_delete_channel:flags2.0?true = updates.ChannelDifference;',
+            'var flags=0;',
+            'if(v.final===true)flags|=1;',
+            'var _timeout=v.timeout!==undefined;',
+            'if(_timeout)flags|=2;',
+            'w.uint(flags);',
+            "h(v,'pts');",
+            'w.int(v.pts);',
+            'if(_timeout)w.int(v.timeout);',
+            'var flags2=0;',
+            'if(v.canDeleteChannel===true)flags2|=1;',
+            'w.uint(flags2);',
+        )
+    })
+
     it('generates code for constructors with vector arguments', () => {
         test(
             'contacts.resolvedPeer#7f077ad9 peer:Peer chats:Vector<Chat> users:Vector<User> = contacts.ResolvedPeer;',
