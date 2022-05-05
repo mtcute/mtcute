@@ -178,6 +178,13 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                             language: attribs.language ?? '',
                         }
                         break
+                    case 'spoiler':
+                        entity = {
+                            _: 'messageEntitySpoiler',
+                            offset: plainText.length,
+                            length: 0,
+                        }
+                        break
                     case 'a': {
                         let url = attribs.href
                         if (!url) return
@@ -343,21 +350,24 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                     break
                 case 'code':
                 case 'pre':
-                case 'blockquote':
                     html.push(
                         `<${type}${
-                            type === 'pre' && entity.language
+                            entity.language
                                 ? ` language="${entity.language}"`
                                 : ''
                         }>${
                             this._syntaxHighlighter && entity.language
                                 ? this._syntaxHighlighter(
                                       entityText,
-                                      entity.language!
+                                      entity.language
                                   )
                                 : entityText
                         }</${type}>`
                     )
+                    break
+                case 'blockquote':
+                case 'spoiler':
+                    html.push(`<${type}>${entityText}</${type}>`)
                     break
                 case 'email':
                     html.push(

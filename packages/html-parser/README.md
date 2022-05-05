@@ -47,6 +47,7 @@ Inline entities are entities that are in-line with other text. We support these 
 | Italic           | `<b>text</b>`                             | _text_                       |
 | Underline        | `<u>text</u>`                             | <u>text</u>                  |
 | Strikethrough    | `<s>text</s>`                             | ~~text~~                     |
+| Spoiler          | `<spoiler>text</spoiler>`                 | N/A                          |
 | Monospace (code) | `<code>text</code>`                       | `text`                       |
 | Text link        | `<a href="https://google.com">Google</a>` | [Google](https://google.com) |
 | Text mention     | `<a href="tg://user?id=1234567">Name</a>` | N/A                          |

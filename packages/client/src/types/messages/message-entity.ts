@@ -17,6 +17,7 @@ const entityToType: Partial<
     messageEntityPhone: 'phone_number',
     messageEntityPre: 'pre',
     messageEntityStrike: 'strikethrough',
+    messageEntitySpoiler: 'spoiler',
     messageEntityTextUrl: 'text_link',
     messageEntityUnderline: 'underline',
     messageEntityUrl: 'url',
@@ -54,6 +55,7 @@ export namespace MessageEntity {
         | 'italic'
         | 'underline'
         | 'strikethrough'
+        | 'spoiler'
         | 'code'
         | 'pre'
         | 'text_link'

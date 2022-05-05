@@ -10,10 +10,11 @@ const TAG_BOLD = '**'
 const TAG_ITALIC = '__'
 const TAG_UNDERLINE = '--'
 const TAG_STRIKE = '~~'
+const TAG_SPOILER = '||'
 const TAG_CODE = '`'
 const TAG_PRE = '```'
 
-const TO_BE_ESCAPED = /[*_\-~`[\\\]]/g
+const TO_BE_ESCAPED = /[*_\-~`[\\\]|]/g
 
 /**
  * Tagged template based helper for escaping entities in Markdown
@@ -248,7 +249,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
 
             if (c === text[pos + 1]) {
                 // maybe (?) start or end of an entity
-                let type: 'Italic' | 'Bold' | 'Underline' | 'Strike' | null =
+                let type: 'Italic' | 'Bold' | 'Underline' | 'Strike' | 'Spoiler' | null =
                     null
                 switch (c) {
                     case '_':
@@ -262,6 +263,9 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                         break
                     case '~':
                         type = 'Strike'
+                        break
+                    case '|':
+                        type = 'Spoiler'
                         break
                 }
 
@@ -351,6 +355,9 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                     break
                 case 'strikethrough':
                     startTag = endTag = TAG_STRIKE
+                    break
+                case 'spoiler':
+                    startTag = endTag = TAG_SPOILER
                     break
                 case 'code':
                     startTag = endTag = TAG_CODE

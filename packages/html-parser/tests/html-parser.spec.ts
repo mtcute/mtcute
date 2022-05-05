@@ -59,15 +59,16 @@ describe('HtmlMessageEntityParser', () => {
             )
         })
 
-        it('should handle <code>, <pre>, <blockquote> tags', () => {
+        it('should handle <code>, <pre>, <blockquote>, <spoiler> tags', () => {
             test(
-                'plain code pre blockquote plain',
+                'plain code pre blockquote spoiler plain',
                 [
                     createEntity('messageEntityCode', 6, 4),
                     createEntity('messageEntityPre', 11, 3),
                     createEntity('messageEntityBlockquote', 15, 10),
+                    createEntity('messageEntitySpoiler', 26, 7),
                 ],
-                'plain <code>code</code> <pre>pre</pre> <blockquote>blockquote</blockquote> plain'
+                'plain <code>code</code> <pre>pre</pre> <blockquote>blockquote</blockquote> <spoiler>spoiler</spoiler> plain'
             )
         })
 
@@ -309,15 +310,16 @@ describe('HtmlMessageEntityParser', () => {
             )
         })
 
-        it('should handle <code>, <pre>, <blockquote> tags', () => {
+        it('should handle <code>, <pre>, <blockquote>, <spoiler> tags', () => {
             test(
-                'plain <code>code</code> <pre>pre</pre> <blockquote>blockquote</blockquote> plain',
+                'plain <code>code</code> <pre>pre</pre> <blockquote>blockquote</blockquote> <spoiler>spoiler</spoiler> plain',
                 [
                     createEntity('messageEntityCode', 6, 4),
                     createEntity('messageEntityPre', 11, 3, { language: '' }),
                     createEntity('messageEntityBlockquote', 15, 10),
+                    createEntity('messageEntitySpoiler', 26, 7),
                 ],
-                'plain code pre blockquote plain'
+                'plain code pre blockquote spoiler plain'
             )
         })
 

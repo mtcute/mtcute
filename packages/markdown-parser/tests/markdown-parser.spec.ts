@@ -51,16 +51,17 @@ describe('MarkdownMessageEntityParser', () => {
             test('some text', [], 'some text')
         })
 
-        it('should handle bold, italic, underline and strikethrough', () => {
+        it('should handle bold, italic, underline, strikethrough and spoiler', () => {
             test(
-                'plain bold italic underline strikethrough plain',
+                'plain bold italic underline strikethrough spoiler plain',
                 [
                     createEntity('messageEntityBold', 6, 4),
                     createEntity('messageEntityItalic', 11, 6),
                     createEntity('messageEntityUnderline', 18, 9),
                     createEntity('messageEntityStrike', 28, 13),
+                    createEntity('messageEntitySpoiler', 42, 7),
                 ],
-                'plain **bold** __italic__ --underline-- ~~strikethrough~~ plain'
+                'plain **bold** __italic__ --underline-- ~~strikethrough~~ ||spoiler|| plain'
             )
         })
 
@@ -294,16 +295,17 @@ describe('MarkdownMessageEntityParser', () => {
             }
         }
 
-        it('should handle bold, italic, underline and strikethrough', () => {
+        it('should handle bold, italic, underline, spoiler and strikethrough', () => {
             test(
-                'plain **bold** __italic__ --underline-- ~~strikethrough~~ plain',
+                'plain **bold** __italic__ --underline-- ~~strikethrough~~ ||spoiler|| plain',
                 [
                     createEntity('messageEntityBold', 6, 4),
                     createEntity('messageEntityItalic', 11, 6),
                     createEntity('messageEntityUnderline', 18, 9),
                     createEntity('messageEntityStrike', 28, 13),
+                    createEntity('messageEntitySpoiler', 42, 7),
                 ],
-                'plain bold italic underline strikethrough plain'
+                'plain bold italic underline strikethrough spoiler plain'
             )
         })
 
