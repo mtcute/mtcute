@@ -13,7 +13,7 @@ interface BaseInputMedia {
     /**
      * Caption of the media
      */
-    caption?: string | FormattedString
+    caption?: string | FormattedString<any>
 
     /**
      * Caption entities of the media.
@@ -522,7 +522,7 @@ export interface InputMediaQuiz extends Omit<InputMediaPoll, 'type'> {
     /**
      * Explanation of the quiz solution
      */
-    solution?: string | FormattedString
+    solution?: string | FormattedString<any>
 
     /**
      * Format entities for `solution`.

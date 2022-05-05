@@ -2025,7 +2025,7 @@ export interface TelegramClient extends BaseTelegramClient {
              *
              * When `media` is passed, `media.caption` is used instead
              */
-            text?: string | FormattedString
+            text?: string | FormattedString<any>
 
             /**
              * Parse mode to use to parse entities before sending
@@ -2086,7 +2086,7 @@ export interface TelegramClient extends BaseTelegramClient {
              *
              * When `media` is passed, `media.caption` is used instead
              */
-            text?: string | FormattedString
+            text?: string | FormattedString<any>
 
             /**
              * Parse mode to use to parse entities before sending
@@ -2194,7 +2194,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * You can either pass `caption` or `captionMedia`, passing both will
              * result in an error
              */
-            caption?: string | FormattedString
+            caption?: string | FormattedString<any>
 
             /**
              * Optionally, a media caption for your forwarded message(s).
@@ -2622,7 +2622,7 @@ export interface TelegramClient extends BaseTelegramClient {
             /**
              * New message caption (only used for media)
              */
-            caption?: string | FormattedString
+            caption?: string | FormattedString<any>
 
             /**
              * Parse mode to use to parse `text` entities before sending
@@ -2784,7 +2784,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Can be used, for example. when using File IDs
              * or when using existing InputMedia objects.
              */
-            caption?: string | FormattedString
+            caption?: string | FormattedString<any>
 
             /**
              * Override entities for `media`.
@@ -2896,7 +2896,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     sendText(
         chatId: InputPeerLike,
-        text: string | FormattedString,
+        text: string | FormattedString<any>,
         params?: {
             /**
              * Message to reply to. Either a message object or message ID.

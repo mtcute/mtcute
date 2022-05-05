@@ -494,7 +494,7 @@ export class Chat {
     /** @internal */
     static _parseFull(
         client: TelegramClient,
-        full: tl.messages.RawChatFull | tl.users.TypeUserFull,
+        full: tl.messages.RawChatFull | tl.users.TypeUserFull
     ): Chat {
         if (full._ === 'users.userFull') {
             const user = full.users.find((it) => it.id === full.fullUser.id)
@@ -551,7 +551,10 @@ export class Chat {
      * msg.replyText(`Hello, ${msg.chat.mention()`)
      * ```
      */
-    mention(text?: string | null, parseMode?: string | null): string | FormattedString {
+    mention<T extends string = any>(
+        text?: string | null,
+        parseMode?: T | null
+    ): string | FormattedString<T> {
         if (this.user) return this.user.mention(text, parseMode)
 
         if (text === undefined && this.username) {
@@ -561,17 +564,20 @@ export class Chat {
         if (!text) text = this.displayName
         if (!this.username) return text
 
-        if (!parseMode) parseMode = this.client['_defaultParseMode']
+        if (!parseMode) parseMode = this.client['_defaultParseMode'] as T
 
-        return new FormattedString(this.client.getParseMode(parseMode).unparse(text, [
-            {
-                raw: undefined as any,
-                type: 'text_link',
-                offset: 0,
-                length: text.length,
-                url: `https://t.me/${this.username}`
-            },
-        ]), parseMode!)
+        return new FormattedString(
+            this.client.getParseMode(parseMode).unparse(text, [
+                {
+                    raw: undefined as any,
+                    type: 'text_link',
+                    offset: 0,
+                    length: text.length,
+                    url: `https://t.me/${this.username}`,
+                },
+            ]),
+            parseMode!
+        )
     }
 
     /**
@@ -645,6 +651,7 @@ export class Chat {
     ): ReturnType<TelegramClient['sendMedia']> {
         return this.client.sendMedia(this.inputPeer, media, params)
     }
+
     /**
      * Send a media group in this chat.
      *

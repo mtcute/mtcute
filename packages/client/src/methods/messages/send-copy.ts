@@ -44,7 +44,7 @@ export async function sendCopy(
         /**
          * New message caption (only used for media)
          */
-        caption?: string | FormattedString
+        caption?: string | FormattedString<any>
 
         /**
          * Parse mode to use to parse `text` entities before sending

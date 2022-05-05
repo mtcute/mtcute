@@ -8,7 +8,7 @@ const empty: [string, undefined] = ['', undefined]
 /** @internal */
 export async function _parseEntities(
     this: TelegramClient,
-    text?: string | FormattedString,
+    text?: string | FormattedString<any>,
     mode?: string | null,
     entities?: tl.TypeMessageEntity[]
 ): Promise<[string, tl.TypeMessageEntity[] | undefined]> {

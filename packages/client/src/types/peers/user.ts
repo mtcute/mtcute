@@ -286,16 +286,16 @@ export class User {
      * msg.replyText(`Hello, ${msg.sender.mention()`)
      * ```
      */
-    mention(
+    mention<T extends string = any>(
         text?: string | null,
-        parseMode?: string | null
-    ): string | FormattedString {
+        parseMode?: T | null
+    ): string | FormattedString<T> {
         if (text === undefined && this.username) {
             return `@${this.username}`
         }
 
         if (!text) text = this.displayName
-        if (!parseMode) parseMode = this.client['_defaultParseMode']
+        if (!parseMode) parseMode = this.client['_defaultParseMode'] as T
 
         return new FormattedString(
             this.client.getParseMode(parseMode).unparse(text, [
@@ -341,15 +341,15 @@ export class User {
      * @param text  Mention text
      * @param parseMode  Parse mode to use when creating mention
      */
-    permanentMention(
+    permanentMention<T extends string = any>(
         text?: string | null,
-        parseMode?: string | null
-    ): FormattedString {
+        parseMode?: T | null
+    ): FormattedString<T> {
         if (!this.raw.accessHash)
             throw new MtArgumentError("user's access hash is not available!")
 
         if (!text) text = this.displayName
-        if (!parseMode) parseMode = this.client['_defaultParseMode']
+        if (!parseMode) parseMode = this.client['_defaultParseMode'] as T
 
         // since we are just creating a link and not actual tg entity,
         // we can use this hack to create a valid link through our parse mode

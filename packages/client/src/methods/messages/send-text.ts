@@ -27,7 +27,7 @@ import { createDummyUpdate } from '../../utils/updates-utils'
 export async function sendText(
     this: TelegramClient,
     chatId: InputPeerLike,
-    text: string | FormattedString,
+    text: string | FormattedString<any>,
     params?: {
         /**
          * Message to reply to. Either a message object or message ID.

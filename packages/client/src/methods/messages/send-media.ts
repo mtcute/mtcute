@@ -35,7 +35,7 @@ export async function sendMedia(
          * Can be used, for example. when using File IDs
          * or when using existing InputMedia objects.
          */
-        caption?: string | FormattedString
+        caption?: string | FormattedString<any>
 
         /**
          * Override entities for `media`.

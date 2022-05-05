@@ -74,7 +74,7 @@ export async function forwardMessages(
          * You can either pass `caption` or `captionMedia`, passing both will
          * result in an error
          */
-        caption?: string | FormattedString
+        caption?: string | FormattedString<any>
 
         /**
          * Optionally, a media caption for your forwarded message(s).
@@ -139,7 +139,7 @@ export async function forwardMessages(
          * You can either pass `caption` or `captionMedia`, passing both will
          * result in an error
          */
-        caption?: string | FormattedString
+        caption?: string | FormattedString<any>
 
         /**
          * Optionally, a media caption for your forwarded message(s).

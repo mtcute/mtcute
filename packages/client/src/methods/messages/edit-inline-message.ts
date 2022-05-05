@@ -20,7 +20,7 @@ export async function editInlineMessage(
          *
          * When `media` is passed, `media.caption` is used instead
          */
-        text?: string | FormattedString
+        text?: string | FormattedString<any>
 
         /**
          * Parse mode to use to parse entities before sending
