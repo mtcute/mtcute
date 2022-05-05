@@ -7,7 +7,8 @@ import { tl } from '@mtcute/tl'
 import { Parser } from 'htmlparser2'
 import Long from 'long'
 
-const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
+const MENTION_REGEX =
+    /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 
 /**
  * Tagged template based helper for escaping entities in HTML
@@ -34,28 +35,6 @@ export function html(
     })
     return { value: str + strings[strings.length - 1], mode: 'html' }
 }
-
-/**
- * Alias for {@link html} for Prettier users.
- *
- * Prettier formats <code>html`...`</code> as normal HTML,
- * thus may add unwanted line breaks.
- */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-export declare function htm(
-    strings: TemplateStringsArray,
-    ...sub: (string | FormattedString)[]
-): FormattedString
-
-/** @internal */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-export const htm = html
-
-// ts ignores above are a hack so the resulting d.ts contains `htm`
-// as a function and not a variable, thus the ide would highlight
-// it as such (the same way as `html`)
 
 export namespace HtmlMessageEntityParser {
     /**
@@ -106,13 +85,45 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
         const stacks: Record<string, tl.Mutable<tl.TypeMessageEntity>[]> = {}
         const entities: tl.TypeMessageEntity[] = []
         let plainText = ''
+        let pendingText = ''
+
+        function processPendingText(tagEnd = false) {
+            if (!pendingText.length) return
+
+            if (!stacks.pre?.length) {
+                pendingText = pendingText.replace(/[^\S\u00A0]+/gs, ' ')
+
+                if (tagEnd) pendingText = pendingText.trimEnd()
+
+                if (!plainText.length || plainText.match(/\s$/)) {
+                    pendingText = pendingText.trimStart()
+                }
+            }
+
+            for (const ents of Object.values(stacks)) {
+                for (const ent of ents) {
+                    ent.length += pendingText.length
+                }
+            }
+
+            plainText += pendingText
+            pendingText = ''
+        }
 
         const parser = new Parser({
             onopentag(name, attribs) {
                 name = name.toLowerCase()
 
+                processPendingText()
+
+                // ignore tags inside pre (except pre)
+                if (name !== 'pre' && stacks.pre?.length) return
+
                 let entity: tl.TypeMessageEntity
                 switch (name) {
+                    case 'br':
+                        plainText += '\n'
+                        return
                     case 'b':
                     case 'strong':
                         entity = {
@@ -184,7 +195,11 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                                     userId: {
                                         _: 'inputUser',
                                         userId: id,
-                                        accessHash: Long.fromString(accessHash, false, 16),
+                                        accessHash: Long.fromString(
+                                            accessHash,
+                                            false,
+                                            16
+                                        ),
                                     },
                                 }
                             } else {
@@ -216,25 +231,33 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                 }
                 stacks[name].push(entity)
             },
-            ontext(data) {
-                for (const ents of Object.values(stacks)) {
-                    for (const ent of ents) {
-                        ent.length += data.length
-                    }
-                }
-
-                plainText += data
-            },
             onclosetag(name: string) {
+                processPendingText(true)
+
+                name = name.toLowerCase()
+
+                // ignore tags inside pre (except pre)
+                if (name !== 'pre' && stacks.pre?.length) return
+
                 const entity = stacks[name]?.pop()
+
                 if (!entity) return // unmatched close tag
-                entities.push(entity)
+
+                // ignore nested pre-s
+                if (name !== 'pre' || !stacks.pre.length) {
+                    entities.push(entity)
+                }
+            },
+            ontext(data) {
+                pendingText += data
             },
         })
 
         parser.write(text)
 
-        return [plainText, entities]
+        processPendingText(true)
+
+        return [plainText.replace(/\u00A0/g, ' '), entities]
     }
 
     unparse(text: string, entities: ReadonlyArray<MessageEntity>): string {

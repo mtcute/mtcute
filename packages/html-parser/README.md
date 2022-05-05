@@ -5,7 +5,7 @@
 This package implements formatting syntax based on HTML, similar to the one available in the Bot
 API ([documented here](https://core.telegram.org/bots/api#html-style))
 
-> **NOTE**: The syntax implemented here is not entirely compatible with Bot API _HTML_.
+> **NOTE**: The syntax implemented here is **incompatible** with Bot API _HTML_.
 >
 > Please read [Syntax](#syntax) below for a detailed explanation
 
@@ -20,7 +20,7 @@ tg.registerParseMode(new HtmlMessageEntityParser())
 
 tg.sendText(
     'me',
-    html`Hello, <b>me</b>! Updates from the feed:\n${await getUpdatesFromFeed()}`
+    html`Hello, <b>me</b>! Updates from the feed:<br>${await getUpdatesFromFeed()}`
 )
 ```
 
@@ -30,34 +30,26 @@ tg.sendText(
 supports nearly any HTML. However, since the text is still processed in a custom way for Telegram, the supported subset
 of features is documented below:
 
-## Line breaks
+## Line breaks and spaces
 
-Line breaks are preserved, `<br>` are ignored.
+Line breaks are **not** preserved, `<br>` is used instead,
+making the syntax very close to the one used when building web pages.
 
-> ⚠️ Warning for **Prettier** users: be aware that Prettier
-> formats tagged template literals with `html` as normal HTML and may add
-> unwanted line breaks.
->
-> Use `htm` instead (which is just an alias):
-> ```typescript
-> import { htm } from '@mtcute/html-parser'
->
-> await msg.answerText(htm`Hello, <b>${msg.sender.username}</b>`)
-> ```
+Multiple spaces and indents are collapsed, when you do need multiple spaces use `&nbsp;` instead.
 
 ## Inline entities
 
 Inline entities are entities that are in-line with other text. We support these entities:
 
-| Name | Code | Result (visual)
-|---|---|---|
-| Bold | `<b>text</b>` | **text**
-| Italic | `<b>text</b>` | _text_
-| Underline | `<u>text</u>` | <u>text</u>
-| Strikethrough | `<s>text</s>` | ~~text~~
-| Monospace (code) | `<code>text</code>` | `text`
-| Text link | `<a href="https://google.com">Google</a>` | [Google](https://google.com)
-| Text mention | `<a href="tg://user?id=1234567">Name</a>` | N/A
+| Name             | Code                                      | Result (visual)              |
+|------------------|-------------------------------------------|------------------------------|
+| Bold             | `<b>text</b>`                             | **text**                     |
+| Italic           | `<b>text</b>`                             | _text_                       |
+| Underline        | `<u>text</u>`                             | <u>text</u>                  |
+| Strikethrough    | `<s>text</s>`                             | ~~text~~                     |
+| Monospace (code) | `<code>text</code>`                       | `text`                       |
+| Text link        | `<a href="https://google.com">Google</a>` | [Google](https://google.com) |
+| Text mention     | `<a href="tg://user?id=1234567">Name</a>` | N/A                          |
 
 > **Note**: `<strong>`, `<em>`, `<ins>`, `<strike>`, `<del>` are not supported because they are redundant
 
@@ -82,10 +74,10 @@ Optionally, language for `<pre>` block can be specified like this:
 > However, since syntax highlighting hasn't been implemented in
 > official Telegram clients, this doesn't really matter 🤷‍♀️
 
-| Code | Result (visual)
-|---|---|
-| <pre>&lt;pre&gt;multiline\ntext&lt;/pre&gt;</pre> | <pre>multiline<br>text</pre>
-| <pre>&lt;pre language="javascript"&gt;<br>  export default 42<br>&lt;/pre&gt;</pre> | <pre>export default 42</pre>
+| Code                                                                                | Result (visual)              |
+|-------------------------------------------------------------------------------------|------------------------------|
+| <pre>&lt;pre&gt;multiline\ntext&lt;/pre&gt;</pre>                                   | <pre>multiline<br>text</pre> |
+| <pre>&lt;pre language="javascript"&gt;<br>  export default 42<br>&lt;/pre&gt;</pre> | <pre>export default 42</pre> |
 
 ## Nested and overlapped entities
 
@@ -94,12 +86,11 @@ as expected!
 
 Overlapping entities are supported in `unparse()`, though.
 
-| Code | Result (visual)
-|---|---|
-| `<b>Welcome back, <i>User</i>!</b>` | **Welcome back, _User_!**
-| `<b>bold <i>and</b> italic</i>` | **bold _and_** italic<br>⚠️ <i>word "italic" is not actually italic!</i>
-| `<b>bold <i>and</i></b><i> italic</i>`<br>⚠️ <i>this is how <code>unparse()</code> handles overlapping entities</i> | **
-bold _and_** _italic_
+| Code                                                                                                                | Result (visual)                                                          |
+|---------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| `<b>Welcome back, <i>User</i>!</b>`                                                                                 | **Welcome back, _User_!**                                                |
+| `<b>bold <i>and</b> italic</i>`                                                                                     | **bold _and_** italic<br>⚠️ <i>word "italic" is not actually italic!</i> |
+| `<b>bold <i>and</i></b><i> italic</i>`<br>⚠️ <i>this is how <code>unparse()</code> handles overlapping entities</i> | **bold _and_** _italic_                                                  |
 
 ## Escaping
 

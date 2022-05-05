@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { tl } from '@mtcute/tl'
 import { HtmlMessageEntityParser, html } from '../src'
 import { MessageEntity, FormattedString } from '@mtcute/client'
-import bigInt from 'big-integer'
+import Long from 'long'
 
 const createEntity = <T extends tl.TypeMessageEntity['_']>(
     type: T,
@@ -257,6 +257,22 @@ describe('HtmlMessageEntityParser', () => {
                 parser
             )
         })
+
+        it('should replace newlines with <br>', () => {
+            test(
+                'plain\n\nplain',
+                [],
+                'plain<br><br>plain'
+            )
+        })
+
+        it('should replace multiple spaces with &nbsp;', () => {
+            test(
+                'plain    plain',
+                [],
+                'plain&nbsp;&nbsp;&nbsp;&nbsp;plain'
+            )
+        })
     })
 
     describe('parse', () => {
@@ -316,7 +332,7 @@ describe('HtmlMessageEntityParser', () => {
                         userId: {
                             _: 'inputUser',
                             userId: 1234567,
-                            accessHash: bigInt('aabbccddaabbccdd', 16),
+                            accessHash: Long.fromString('aabbccddaabbccdd', 16),
                         },
                     }),
                 ],
@@ -334,6 +350,111 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityPre', 35, 9, { language: '' }),
                 ],
                 'plain console.log("Hello, world!") some code plain'
+            )
+        })
+
+        it('should ignore other tags inside <pre>', () => {
+            test(
+                '<pre><b>bold</b> and not bold</pre>',
+                [createEntity('messageEntityPre', 0, 17, { language: '' })],
+                'bold and not bold'
+            )
+            test(
+                '<pre><pre>pre inside pre</pre> so cool</pre>',
+                [createEntity('messageEntityPre', 0, 22, { language: '' })],
+                'pre inside pre so cool'
+            )
+        })
+
+        it('should ignore newlines and indentation', () => {
+            test(
+                'this is some text\n\nwith newlines',
+                [],
+                'this is some text with newlines'
+            )
+            test(
+                '<b>this is some text\n\nwith</b> newlines',
+                [createEntity('messageEntityBold', 0, 22)],
+                'this is some text with newlines'
+            )
+            test(
+                '<b>this is some text ending with\n\n</b> newlines',
+                [createEntity('messageEntityBold', 0, 29)],
+                'this is some text ending with newlines'
+            )
+            test(
+                `
+                this  is  some  indented  text
+                with    newlines     and
+                <b>
+                    indented tags
+                </b> yeah <i>so cool
+                </i>
+                `,
+                [
+                    createEntity('messageEntityBold', 45, 13),
+                    createEntity('messageEntityItalic', 64, 7),
+                ],
+                'this is some indented text with newlines and indented tags yeah so cool'
+            )
+        })
+
+        it('should not ignore newlines and indentation in pre', () => {
+            test(
+                '<pre>this is some text\n\nwith newlines</pre>',
+                [createEntity('messageEntityPre', 0, 32, { language: '' })],
+                'this is some text\n\nwith newlines'
+            )
+
+            // fuck my life
+            const indent = '                '
+            test(
+                `<pre>
+                this  is  some  indented  text
+                with    newlines     and
+                <b>
+                    indented tags
+                </b> yeah <i>so cool
+                </i>
+                </pre>`,
+                [createEntity('messageEntityPre', 0, 203, { language: '' })],
+                '\n' +
+                    indent +
+                    'this  is  some  indented  text\n' +
+                    indent +
+                    'with    newlines     and\n' +
+                    indent +
+                    '\n' +
+                    indent +
+                    '    indented tags\n' +
+                    indent +
+                    ' yeah so cool\n' +
+                    indent +
+                    '\n' +
+                    indent
+            )
+        })
+
+        it('should handle <br>', () => {
+            test(
+                'this is some text<br><br>with actual newlines',
+                [],
+                'this is some text\n\nwith actual newlines'
+            )
+            test(
+                '<b>this is some text<br><br></b>with actual newlines',
+                // note that the <br> (i.e. \n) is not included in the entity
+                // this is expected, and the result is the same
+                [createEntity('messageEntityBold', 0, 17)],
+                'this is some text\n\nwith actual newlines'
+            )
+        })
+
+        it('should handle &nbsp;', () => {
+            test(
+                'one    space, many&nbsp;&nbsp;&nbsp;&nbsp;spaces, and<br>a newline',
+                [],
+                'one space, many    spaces, and\na newline'
             )
         })
 
@@ -456,9 +577,15 @@ describe('HtmlMessageEntityParser', () => {
             const unsafeString = '<&>'
 
             expect(html`${unsafeString}`.value).eq('&lt;&amp;&gt;')
-            expect(html`${unsafeString} <b>text</b>`.value).eq('&lt;&amp;&gt; <b>text</b>')
-            expect(html`<b>text</b> ${unsafeString}`.value).eq('<b>text</b> &lt;&amp;&gt;')
-            expect(html`<b>${unsafeString}</b>`.value).eq('<b>&lt;&amp;&gt;</b>')
+            expect(html`${unsafeString} <b>text</b>`.value).eq(
+                '&lt;&amp;&gt; <b>text</b>'
+            )
+            expect(html`<b>text</b> ${unsafeString}`.value).eq(
+                '<b>text</b> &lt;&amp;&gt;'
+            )
+            expect(html`<b>${unsafeString}</b>`.value).eq(
+                '<b>&lt;&amp;&gt;</b>'
+            )
         })
 
         it('should skip with FormattedString', () => {
@@ -467,10 +594,16 @@ describe('HtmlMessageEntityParser', () => {
 
             expect(html`${unsafeString}`.value).eq('<&>')
             expect(html`${unsafeString} ${unsafeString2}`.value).eq('<&> &lt;&amp;&gt;')
-            expect(html`${unsafeString} <b>text</b>`.value).eq('<&> <b>text</b>')
-            expect(html`<b>text</b> ${unsafeString}`.value).eq('<b>text</b> <&>')
+            expect(html`${unsafeString} <b>text</b>`.value).eq(
+                '<&> <b>text</b>'
+            )
+            expect(html`<b>text</b> ${unsafeString}`.value).eq(
+                '<b>text</b> <&>'
+            )
             expect(html`<b>${unsafeString}</b>`.value).eq('<b><&></b>')
-            expect(html`<b>${unsafeString} ${unsafeString2}</b>`.value).eq('<b><&> &lt;&amp;&gt;</b>')
+            expect(html`<b>${unsafeString} ${unsafeString2}</b>`.value).eq(
+                '<b><&> &lt;&amp;&gt;</b>'
+            )
         })
 
         it('should error with incompatible FormattedString', () => {
