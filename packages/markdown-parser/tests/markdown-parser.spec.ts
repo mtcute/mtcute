@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { tl } from '@mtcute/tl'
 import { MessageEntity, FormattedString } from '@mtcute/client'
 import { MarkdownMessageEntityParser, md } from '../src'
-import bigInt from 'big-integer'
+import Long from 'long'
 
 const createEntity = <T extends tl.TypeMessageEntity['_']>(
     type: T,
@@ -356,7 +356,7 @@ describe('MarkdownMessageEntityParser', () => {
                         userId: {
                             _: 'inputUser',
                             userId: 1234567,
-                            accessHash: bigInt('aabbccddaabbccdd', 16),
+                            accessHash: Long.fromString('aabbccddaabbccdd', 16),
                         },
                     }),
                 ],
@@ -674,6 +674,8 @@ describe('MarkdownMessageEntityParser', () => {
             const unsafeString2 = new FormattedString('<&>', 'some-other-mode')
 
             expect(() => md`${unsafeString}`.value).not.throw(Error)
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             expect(() => md`${unsafeString2}`.value).throw(Error)
         })
     })

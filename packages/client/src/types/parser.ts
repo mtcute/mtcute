@@ -41,12 +41,12 @@ export interface IMessageEntityParser {
  * Raw string that will not be escaped when passing
  * to tagged template helpers (like `html` and `md`)
  */
-export class FormattedString {
+export class FormattedString<T extends string = never> {
     /**
      * @param value  Value that the string holds
      * @param mode  Name of the parse mode used
      */
-    constructor (readonly value: string, readonly mode?: string) {}
+    constructor (readonly value: string, readonly mode?: T) {}
 
     toString(): string {
         return this.value

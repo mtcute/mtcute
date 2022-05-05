@@ -3,7 +3,8 @@ import { tl } from '@mtcute/tl'
 import { FormattedString } from '@mtcute/client'
 import Long from 'long'
 
-const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
+const MENTION_REGEX =
+    /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 
 const TAG_BOLD = '**'
 const TAG_ITALIC = '__'
@@ -22,12 +23,17 @@ const TO_BE_ESCAPED = /[*_\-~`[\\\]]/g
  * const escaped = md`**${user.displayName}**`
  * ```
  */
-export function md(strings: TemplateStringsArray, ...sub: (string | FormattedString)[]): FormattedString {
+export function md(
+    strings: TemplateStringsArray,
+    ...sub: (string | FormattedString<'markdown'>)[]
+): FormattedString<'markdown'> {
     let str = ''
     sub.forEach((it, idx) => {
-        if (typeof it === 'string') it = MarkdownMessageEntityParser.escape(it as string)
+        if (typeof it === 'string')
+            it = MarkdownMessageEntityParser.escape(it as string)
         else {
-            if (it.mode && it.mode !== 'markdown') throw new Error(`Incompatible parse mode: ${it.mode}`)
+            if (it.mode && it.mode !== 'markdown')
+                throw new Error(`Incompatible parse mode: ${it.mode}`)
             it = it.value
         }
 
@@ -126,7 +132,9 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                 if (text[pos + 1] !== '(') {
                     // [link text]
                     // ignore this, and add opening [
-                    result = `${result.substr(0, ent.offset)}[${result.substr(ent.offset)}]`
+                    result = `${result.substr(0, ent.offset)}[${result.substr(
+                        ent.offset
+                    )}]`
                     pos += 1
                     insideLink = false
                     continue
@@ -151,24 +159,34 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                         const userId = parseInt(m[1])
                         const accessHash = m[2]
                         if (accessHash) {
-                            ;(ent as tl.Mutable<tl.RawInputMessageEntityMentionName>)._ =
-                                'inputMessageEntityMentionName'
-                            ;(ent as tl.Mutable<tl.RawInputMessageEntityMentionName>).userId = {
+                            ;(
+                                ent as tl.Mutable<tl.RawInputMessageEntityMentionName>
+                            )._ = 'inputMessageEntityMentionName'
+                            ;(
+                                ent as tl.Mutable<tl.RawInputMessageEntityMentionName>
+                            ).userId = {
                                 _: 'inputUser',
                                 userId,
-                                accessHash: Long.fromString(accessHash, false,16),
+                                accessHash: Long.fromString(
+                                    accessHash,
+                                    false,
+                                    16
+                                ),
                             }
                         } else {
-                            ;(ent as tl.Mutable<tl.RawMessageEntityMentionName>)._ =
-                                'messageEntityMentionName'
-                            ;(ent as tl.Mutable<tl.RawMessageEntityMentionName>).userId = userId
+                            ;(
+                                ent as tl.Mutable<tl.RawMessageEntityMentionName>
+                            )._ = 'messageEntityMentionName'
+                            ;(
+                                ent as tl.Mutable<tl.RawMessageEntityMentionName>
+                            ).userId = userId
                         }
                     } else {
                         if (url.match(/^\/\//)) url = 'http:' + url
-
                         ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>)._ =
                             'messageEntityTextUrl'
-                        ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>).url = url
+                        ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>).url =
+                            url
                     }
                     entities.push(ent)
                 }
@@ -230,12 +248,8 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
 
             if (c === text[pos + 1]) {
                 // maybe (?) start or end of an entity
-                let type:
-                    | 'Italic'
-                    | 'Bold'
-                    | 'Underline'
-                    | 'Strike'
-                    | null = null
+                let type: 'Italic' | 'Bold' | 'Underline' | 'Strike' | null =
+                    null
                 switch (c) {
                     case '_':
                         type = 'Italic'

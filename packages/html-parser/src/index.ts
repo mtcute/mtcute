@@ -20,8 +20,8 @@ const MENTION_REGEX =
  */
 export function html(
     strings: TemplateStringsArray,
-    ...sub: (string | FormattedString)[]
-): FormattedString {
+    ...sub: (string | FormattedString<'html'>)[]
+): FormattedString<'html'> {
     let str = ''
     sub.forEach((it, idx) => {
         if (typeof it === 'string') it = HtmlMessageEntityParser.escape(it)
