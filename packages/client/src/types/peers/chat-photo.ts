@@ -6,7 +6,7 @@ import { strippedPhotoToJpg } from '../../utils/file-utils'
 import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
 import { MtArgumentError } from '../errors'
 import Long from 'long'
-import { toggleChannelIdMark } from '../../../../core'
+import { toggleChannelIdMark } from '@mtcute/core'
 
 /**
  * A size of a chat photo

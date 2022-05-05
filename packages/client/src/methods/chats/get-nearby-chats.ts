@@ -2,7 +2,7 @@ import { TelegramClient } from '../../client'
 import { Chat } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { getMarkedPeerId } from '@mtcute/core'
-import { tl } from 'packages/tl'
+import { tl } from '@mtcute/tl'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**

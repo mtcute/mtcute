@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
-import { toggleChannelIdMark } from '../../../../core'
+import { toggleChannelIdMark } from '@mtcute/core'
 
 /**
  * One or more messages were deleted

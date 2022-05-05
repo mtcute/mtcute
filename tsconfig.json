@@ -1,12 +1,10 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es2018",
+        "target": "es2020",
         "allowJs": true,
         "sourceMap": true,
         "inlineSources": true,
-        "outDir": "dist",
-        "baseUrl": ".",
         "declaration": true,
         "esModuleInterop": true,
         "strict": true,

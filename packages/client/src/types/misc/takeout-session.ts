@@ -1,4 +1,4 @@
-import { tl } from 'packages/tl'
+import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 

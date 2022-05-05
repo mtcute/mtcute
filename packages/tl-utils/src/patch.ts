@@ -1,4 +1,4 @@
-import { TlReaderMap, TlWriterMap } from '../../tl-runtime'
+import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import { parseTlToEntries } from './parse'
 import { generateReaderCodeForTlEntries } from './codegen/reader'
 import { generateWriterCodeForTlEntries } from './codegen/writer'

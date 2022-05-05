@@ -9,7 +9,7 @@ import { ChatPermissions } from './chat-permissions'
 import { ChatLocation } from './chat-location'
 import { ChatInviteLink } from './chat-invite-link'
 import { PeersIndex } from './index'
-import { toggleChannelIdMark } from '../../../../core'
+import { toggleChannelIdMark } from '@mtcute/core'
 
 
 export namespace ChatEvent {
