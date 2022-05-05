@@ -253,16 +253,26 @@ describe('HtmlMessageEntityParser', () => {
                     }),
                     createEntity('messageEntityPre', 35, 9, { language: '' }),
                 ],
-                'plain <pre language="javascript">lang: <b>javascript</b><br>console.log("Hello, world!")</pre> <pre>lang: <b></b><br>some code</pre> plain',
+                'plain <pre language="javascript">lang: <b>javascript</b><br>console.log("Hello, world!")</pre> <pre>some code</pre> plain',
                 parser
             )
         })
 
-        it('should replace newlines with <br>', () => {
+        it('should replace newlines with <br> outside pre', () => {
             test(
                 'plain\n\nplain',
                 [],
                 'plain<br><br>plain'
+            )
+            test(
+                'plain\n\nplain',
+                [createEntity('messageEntityBold', 0, 12)],
+                '<b>plain<br><br>plain</b>'
+            )
+            test(
+                'plain\n\nplain',
+                [createEntity('messageEntityPre', 0, 12)],
+                '<pre>plain\n\nplain</pre>'
             )
         })
 

@@ -275,6 +275,10 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
         if (!text) return text
         if (!entities.length || entities.length === entitiesOffset) {
             return HtmlMessageEntityParser.escape(text)
+                .replace(/\n/g, '<br>')
+                .replace(/ {2,}/g, (match) => {
+                    return '&nbsp;'.repeat(match.length)
+                })
         }
 
         const end = offset + length
@@ -314,15 +318,22 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
             const substr = text.substr(relativeOffset, length)
             if (!substr) continue
 
-            const entityText = this._unparse(
-                substr,
-                entities,
-                i + 1,
-                offset + relativeOffset,
-                length
-            )
-
             const type = entity.type
+
+            let entityText
+
+            if (type === 'pre') {
+                entityText = substr
+            } else {
+                entityText = this._unparse(
+                    substr,
+                    entities,
+                    i + 1,
+                    offset + relativeOffset,
+                    length
+                )
+            }
+
             switch (type) {
                 case 'bold':
                 case 'italic':
@@ -339,7 +350,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                                 ? ` language="${entity.language}"`
                                 : ''
                         }>${
-                            this._syntaxHighlighter
+                            this._syntaxHighlighter && entity.language
                                 ? this._syntaxHighlighter(
                                       entityText,
                                       entity.language!
