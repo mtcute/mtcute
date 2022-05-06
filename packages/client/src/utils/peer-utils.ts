@@ -35,15 +35,17 @@ export function normalizeToInputPeer(
                 channelId: res.channelId,
                 msgId: res.msgId,
                 peer: res.peer,
-           }
-        case 'i"inputUserFromMessage"            return {
-                _: 'i"inputPeerUserFromMessage"                userId: res.userId,
+            }
+        case 'inputUserFromMessage':
+            return {
+                _: 'inputPeerUserFromMessage',
+                userId: res.userId,
                 msgId: res.msgId,
                 peer: res.peer,
-           }
- ;       default:
+            }
+        default:
             assertNever(res)
- ;   }
+    }
 }
 
 export function normalizeToInputUser(

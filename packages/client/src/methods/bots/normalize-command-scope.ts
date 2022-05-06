@@ -26,13 +26,15 @@ export async function _normalizeCommandScope(
             const user = normalizeToInputUser(await this.resolvePeer(scope.user))
 
             if (!user)
-                throw new MtInvalidPeerTypeError(scope.user, 'u"user"
-;            return {
-                _: 'b"botCommandScopePeerUser"                peer: chat,
+                throw new MtInvalidPeerTypeError(scope.user, 'user')
+
+            return {
+                _: 'botCommandScopePeerUser',
+                peer: chat,
                 userId: user
             }
- ;       }
+        }
         default:
             assertNever(scope)
- ;   }
+    }
 }

@@ -5,7 +5,7 @@ import {
     ChatEvent, PeersIndex,
 } from '../../types'
 import { tl } from '@mtcute/tl'
-import { assertNever, MaybeArray } from '@mtcute/core'
+import { assertNever, MaybeArray } from "@mtcute/core";
 import {
     normalizeToInputChannel,
     normalizeToInputUser,
@@ -182,14 +182,17 @@ export async function* getChatEventLog(
                     case 'user_joined_invite':
                         // not documented so idk, enable all
                         serverFilter!.join = true
- ;                       serverFilter!.invite = true
- ;                       serverFilter!.invites = true
- ;                       break
- ;                   case 'i"invite_deleted"                    case 'i"invite_edited"                    case 'i"invite_revoked"                        serverFilter!.invites = true
- ;                       break
- ;                   default:
+                        serverFilter!.invite = true
+                        serverFilter!.invites = true
+                        break
+                    case 'invite_deleted':
+                    case 'invite_edited':
+                    case 'invite_revoked':
+                        serverFilter!.invites = true
+                        break
+                    default:
                         assertNever(type)
- ;               }
+                }
             })
         } else {
             serverFilter = params.filters

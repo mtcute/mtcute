@@ -19,6 +19,7 @@
  *  - `upload_round`: User is uploading a round video message
  *  - `speak_call`: *undocumented* User is speaking in a group call
  *  - `history_import`: *undocumented* User is importing history
+ *  - `sticker`: User is choosing a sticker
  */
 export type TypingStatus =
     | 'typing'
@@ -36,3 +37,4 @@ export type TypingStatus =
     | 'upload_round'
     | 'speak_call'
     | 'history_import'
+    | 'sticker'

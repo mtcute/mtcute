@@ -99,6 +99,8 @@ export class UserTypingUpdate {
                 return 'speak_call'
             case 'sendMessageHistoryImportAction':
                 return 'history_import'
+            case 'sendMessageChooseStickerAction':
+                return 'sticker'
         }
 
         throw new MtUnsupportedError()

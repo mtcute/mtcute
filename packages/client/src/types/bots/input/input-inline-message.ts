@@ -283,13 +283,17 @@ export namespace BotInlineMessage {
                     _: 'inputBotInlineMessageGame',
                     replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
                 }
-            case 'c"contact"                return {
-                    _: 'i"inputBotInlineMessageMediaContact"                    phoneNumber: obj.phone,
+            case 'contact':
+                return {
+                    _: 'inputBotInlineMessageMediaContact',
+                    phoneNumber: obj.phone,
                     firstName: obj.firstName,
-                    lastName: obj.lastName ?? ''""                    vcard: obj.vcard ?? ''""                    replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
-               }
- ;           default:
+                    lastName: obj.lastName ?? '',
+                    vcard: obj.vcard ?? '',
+                    replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+                }
+            default:
                 assertNever(obj)
- ;       }
+        }
     }
 }

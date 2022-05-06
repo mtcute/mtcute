@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/tl'
 import { tdFileId, tdFileId as td } from './types'
 import { parseFileId } from './parse'
-import { assertNever, getBasicPeerType, markedPeerIdToBare } from '@mtcute/core'
+import { assertNever, getBasicPeerType, markedPeerIdToBare } from "@mtcute/core";
 import FileType = tdFileId.FileType
 import Long from 'long'
 
@@ -169,16 +169,19 @@ export function fileIdToInputFileLocation(
                         volumeId: loc.source.volumeId,
                         localId: loc.source.localId,
                     }
-                case 's"stickerSetThumbnailVersion"                    return {
-                        _: 'i"inputStickerSetThumb"                        stickerset: {
-                            _: 'i"inputStickerSetID"                            id: loc.source.id,
+                case 'stickerSetThumbnailVersion':
+                    return {
+                        _: 'inputStickerSetThumb',
+                        stickerset: {
+                            _: 'inputStickerSetID',
+                            id: loc.source.id,
                             accessHash: loc.source.accessHash,
-                       },
+                        },
                         thumbVersion: loc.source.version
                     }
- ;               default:
+                default:
                     assertNever(loc.source)
- ;           }
+            }
 
             throw new td.ConversionError('inputFileLocation')
         }
@@ -205,16 +208,16 @@ export function fileIdToInputFileLocation(
                 }
             } else {
                 return {
-                    _: "inputDocumentFileLocation",
+                    _: 'inputDocumentFileLocation',
                     fileReference: fileId.fileReference,
                     id: loc.id,
                     accessHash: loc.accessHash,
-                    thumbSize: ""
-                };
+                    thumbSize: '',
+                }
             }
         }
         default:
-            assertNever(loc);
+            assertNever(loc)
     }
 }
 

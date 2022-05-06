@@ -1,5 +1,5 @@
 import { CallbackQuery, Message } from '@mtcute/client'
-import { assertNever, MaybeAsync } from '@mtcute/core'
+import { assertNever, MaybeAsync } from "@mtcute/core";
 
 /**
  * Function that determines how the state key is derived.
@@ -29,10 +29,17 @@ export const defaultStateKeyDelegate: StateKeyDelegate = (
 ): string | null => {
     if (upd.constructor === Message) {
         switch (upd.chat.type) {
-            case 'p"private"            case 'b"bot"            case 'c"channel"                return upd.chat.id + ''"";           case 'g"group"            case 's"supergroup"            case 'g"gigagroup"                return `${upd.chat.id}_${upd.sender.id}`
- ;           default:
+            case 'private':
+            case 'bot':
+            case 'channel':
+                return upd.chat.id + ''
+            case 'group':
+            case 'supergroup':
+            case 'gigagroup':
+                return `${upd.chat.id}_${upd.sender.id}`
+            default:
                 assertNever(upd.chat.type)
- ;       }
+        }
     }
 
     if (upd.constructor === CallbackQuery) {

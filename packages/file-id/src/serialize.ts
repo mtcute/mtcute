@@ -1,5 +1,5 @@
 import { tdFileId as td } from './types'
-import { assertNever, encodeUrlSafeBase64 } from '@mtcute/core'
+import { assertNever, encodeUrlSafeBase64 } from "@mtcute/core";
 import { telegramRleEncode } from './utils'
 import { TlBinaryWriter } from '@mtcute/tl-runtime'
 
@@ -86,25 +86,27 @@ export function toFileId(
                     writer.int(8)
                     writer.long(loc.source.id)
                     writer.long(loc.source.accessHash)
-  ;                  writer.long(loc.source.volumeId)
-  ;                  writer.int(loc.source.localId)
-  ;                  break
-  ;              case 'st"stickerSetThumbnailVersion"                   writer.int(9)
-  ;                  writer.long(loc.source.id)
-  ;                  writer.long(loc.source.accessHash)
-  ;                  writer.int(loc.source.version)
-  ;                  break
-  ;              default:
+                    writer.long(loc.source.volumeId)
+                    writer.int(loc.source.localId)
+                    break
+                case 'stickerSetThumbnailVersion':
+                    writer.int(9)
+                    writer.long(loc.source.id)
+                    writer.long(loc.source.accessHash)
+                    writer.int(loc.source.version)
+                    break
+                default:
                     assertNever(loc.source)
-  ;          }
+            }
 
             break
-  ;      case 'co"common"           writer.long(loc.id)
-  ;          writer.long(loc.accessHash)
-  ;          break
-  ;      default:
+        case 'common':
+            writer.long(loc.id)
+            writer.long(loc.accessHash)
+            break
+        default:
             assertNever(loc)
-  ;  }
+    }
 
     return encodeUrlSafeBase64(
         Buffer.concat([telegramRleEncode(writer.result()), SUFFIX])

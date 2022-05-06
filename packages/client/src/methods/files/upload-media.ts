@@ -80,11 +80,17 @@ export async function uploadMedia(
         case 'inputMediaPhoto':
         case 'inputMediaPhotoExternal':
             assertTypeIs('uploadMedia', res, 'messageMediaPhoto')
-            assertTypeIs('u"uploadMedia"res.photo!, 'p"photo"
-;            return new Photo(this, res.photo)
- ;       case 'i"inputMediaUploadedDocument"        case 'i"inputMediaDocument"        case 'i"inputMediaDocumentExternal"            assertTypeIs('u"uploadMedia"res, 'm"messageMediaDocument" ;           assertTypeIs('u"uploadMedia"res.document!, 'd"document"
-;            return parseDocument(this, res.document) as any
- ;       default:
+            assertTypeIs('uploadMedia', res.photo!, 'photo')
+
+            return new Photo(this, res.photo)
+        case 'inputMediaUploadedDocument':
+        case 'inputMediaDocument':
+        case 'inputMediaDocumentExternal':
+            assertTypeIs('uploadMedia', res, 'messageMediaDocument')
+            assertTypeIs('uploadMedia', res.document!, 'document')
+
+            return parseDocument(this, res.document) as any
+        default:
             assertNever(normMedia)
- ;   }
+    }
 }

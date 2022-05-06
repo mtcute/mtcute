@@ -4,8 +4,8 @@ import {
     encodeUrlSafeBase64,
     parseUrlSafeBase64,
     TlBinaryReader,
-    TlBinaryWriter,
-} from '@mtcute/core'
+    TlBinaryWriter
+} from "@mtcute/core";
 
 export function parseInlineMessageId(
     id: string
@@ -39,19 +39,19 @@ export function encodeInlineMessageId(
         case 'inputBotInlineMessageID':
             writer = TlBinaryWriter.manualAlloc(20)
             writer.int(id.dcId)
-;            writer.long(id.id)
-;            writer.long(id.accessHash)
-;            break
-;        case '"inputBotInlineMessageID64"
+            writer.long(id.id)
+            writer.long(id.accessHash)
+            break
+        case 'inputBotInlineMessageID64':
             writer = TlBinaryWriter.manualAlloc(24)
-;            writer.int(id.dcId)
-;            writer.long(id.ownerId)
-;            writer.int(id.id)
-;            writer.long(id.accessHash)
-;            break
-;        default:
+            writer.int(id.dcId)
+            writer.long(id.ownerId)
+            writer.int(id.id)
+            writer.long(id.accessHash)
+            break
+        default:
             assertNever(id)
-;    }
+    }
 
     return encodeUrlSafeBase64(writer.result())
 }

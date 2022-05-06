@@ -127,15 +127,18 @@ export async function getChatMembers(
             case 'bots':
                 filter = { _: 'channelParticipantsBots' }
                 break
- ;           case 'r"recent"                filter = { _: 'c"channelParticipantsRecent"
- ;               break
- ;           case 'a"admins"                filter = { _: 'c"channelParticipantsAdmins"
- ;               break
- ;           case 'c"contacts"                filter = { _: 'c"channelParticipantsContacts"q }
- ;               break
- ;           default:
+            case 'recent':
+                filter = { _: 'channelParticipantsRecent' }
+                break
+            case 'admins':
+                filter = { _: 'channelParticipantsAdmins' }
+                break
+            case 'contacts':
+                filter = { _: 'channelParticipantsContacts', q }
+                break
+            default:
                 assertNever(type)
- ;       }
+        }
 
         const res = await this.call({
             _: 'channels.getParticipants',
