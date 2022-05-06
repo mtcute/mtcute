@@ -31,7 +31,6 @@ import {
 } from '@mtcute/client'
 import { MaybeArray } from '@mtcute/core'
 import { UpdateState } from './state'
-import { tl } from '@mtcute/tl'
 
 function extractText(
     obj: Message | InlineQuery | ChosenInlineResult | CallbackQuery
@@ -428,132 +427,135 @@ export namespace filters {
      * For chat member updates, uses `user.id`
      */
     export const userId = (
-        id: MaybeArray<number | string | tl.Long>
+        id: MaybeArray<number | string>
     ): UpdateFilter<
         | Message
+        | UserStatusUpdate
+        | UserTypingUpdate
         | InlineQuery
         | ChatMemberUpdate
         | ChosenInlineResult
         | CallbackQuery
         | PollVoteUpdate
-        | UserStatusUpdate
-        | UserTypingUpdate
     > => {
-        // TODO
-        return () => false
+        if (Array.isArray(id)) {
+            const index: Record<number | string, true> = {}
+            let matchSelf = false
+            id.forEach((id) => {
+                if (id === 'me' || id === 'self') {
+                    matchSelf = true
+                } else {
+                    index[id] = true
+                }
+            })
 
-        // if (Array.isArray(id)) {
-        //     const index: Record<number | string, true> = {}
-        //     let matchSelf = false
-        //     id.forEach((id) => {
-        //         if (id === 'me' || id === 'self') {
-        //             matchSelf = true
-        //         } else {
-        //             index[id] = true
-        //         }
-        //     })
-        //
-        //     return (upd) => {
-        //         const ctor = upd.constructor
-        //
-        //         if (ctor === Message) {
-        //             const sender = (upd as Message).sender
-        //             return (
-        //                 (matchSelf && sender.isSelf) ||
-        //                 sender.id in index ||
-        //                 sender.username! in index
-        //             )
-        //         } else {
-        //             if (
-        //                 ctor === UserStatusUpdate ||
-        //                 ctor === UserTypingUpdate
-        //             ) {
-        //                 const id = (upd as UserStatusUpdate | UserTypingUpdate)
-        //                     .userId
-        //                 return (
-        //                     (matchSelf && id === upd.client['_userId']) ||
-        //                     id in index
-        //                 )
-        //             } else {
-        //                 const user = (upd as Exclude<
-        //                     typeof upd,
-        //                     Message | UserStatusUpdate | UserTypingUpdate
-        //                 >).user
-        //
-        //                 return (
-        //                     (matchSelf && user.isSelf) ||
-        //                     user.id in index ||
-        //                     user.username! in index
-        //                 )
-        //             }
-        //         }
-        //     }
-        // }
-        //
-        // if (id === 'me' || id === 'self') {
-        //     return (upd) => {
-        //         const ctor = upd.constructor
-        //
-        //         if (ctor === Message) {
-        //             return (upd as Message).sender.isSelf
-        //         } else if (
-        //             ctor === UserStatusUpdate ||
-        //             ctor === UserTypingUpdate
-        //         ) {
-        //             return (
-        //                 (upd as UserStatusUpdate | UserTypingUpdate).userId ===
-        //                 upd.client['_userId']
-        //             )
-        //         } else {
-        //             return (upd as Exclude<
-        //                 typeof upd,
-        //                 Message | UserStatusUpdate | UserTypingUpdate
-        //             >).user.isSelf
-        //         }
-        //     }
-        // }
-        //
-        // if (typeof id === 'string') {
-        //     return (upd) => {
-        //         const ctor = upd.constructor
-        //
-        //         if (ctor === Message) {
-        //             return (upd as Message).sender.username === id
-        //         } else if (
-        //             ctor === UserStatusUpdate ||
-        //             ctor === UserTypingUpdate
-        //         ) {
-        //             // username is not available
-        //             return false
-        //         } else {
-        //             return (
-        //                 (upd as Exclude<
-        //                     typeof upd,
-        //                     Message | UserStatusUpdate | UserTypingUpdate
-        //                 >).user.username === id
-        //             )
-        //         }
-        //     }
-        // }
-        //
-        // return (upd) => {
-        //     const ctor = upd.constructor
-        //
-        //     if (ctor === Message) {
-        //         return (upd as Message).sender.id === id
-        //     } else if (ctor === UserStatusUpdate || ctor === UserTypingUpdate) {
-        //         return (
-        //             (upd as UserStatusUpdate | UserTypingUpdate).userId === id
-        //         )
-        //     } else {
-        //         return (
-        //             (upd as Exclude<
-        //                 typeof upd,
-        //                 Message | UserStatusUpdate | UserTypingUpdate
-        //             >).user.id === id
-        //         )
-        //     }
-        // }
+            return (upd) => {
+                const ctor = upd.constructor
+
+                if (ctor === Message) {
+                    const sender = (upd as Message).sender
+                    return (
+                        (matchSelf && sender.isSelf) ||
+                        sender.id in index ||
+                        sender.username! in index
+                    )
+                } else if (
+                    ctor === UserStatusUpdate ||
+                    ctor === UserTypingUpdate
+                ) {
+                    const id = (upd as UserStatusUpdate | UserTypingUpdate)
+                        .userId
+                    return (
+                        (matchSelf && id === upd.client['_userId']) ||
+                        id in index
+                    )
+                } else {
+                    const user = (
+                        upd as Exclude<
+                            typeof upd,
+                            Message | UserStatusUpdate | UserTypingUpdate
+                        >
+                    ).user
+
+                    return (
+                        (matchSelf && user.isSelf) ||
+                        user.id in index ||
+                        user.username! in index
+                    )
+                }
+            }
+        }
+
+        if (id === 'me' || id === 'self') {
+            return (upd) => {
+                const ctor = upd.constructor
+
+                if (ctor === Message) {
+                    return (upd as Message).sender.isSelf
+                } else if (
+                    ctor === UserStatusUpdate ||
+                    ctor === UserTypingUpdate
+                ) {
+                    return (
+                        (upd as UserStatusUpdate | UserTypingUpdate).userId ===
+                        upd.client['_userId']
+                    )
+                } else {
+                    return (
+                        upd as Exclude<
+                            typeof upd,
+                            Message | UserStatusUpdate | UserTypingUpdate
+                        >
+                    ).user.isSelf
+                }
+            }
+        }
+
+        if (typeof id === 'string') {
+            return (upd) => {
+                const ctor = upd.constructor
+
+                if (ctor === Message) {
+                    return (upd as Message).sender.username === id
+                } else if (
+                    ctor === UserStatusUpdate ||
+                    ctor === UserTypingUpdate
+                ) {
+                    // username is not available
+                    return false
+                } else {
+                    return (
+                        (
+                            upd as Exclude<
+                                typeof upd,
+                                Message | UserStatusUpdate | UserTypingUpdate
+                            >
+                        ).user.username === id
+                    )
+                }
+            }
+        }
+
+        return (upd) => {
+            const ctor = upd.constructor
+
+            if (ctor === Message) {
+                return (upd as Message).sender.id === id
+            } else if (ctor === UserStatusUpdate || ctor === UserTypingUpdate) {
+                return (
+                    (upd as UserStatusUpdate | UserTypingUpdate).userId === id
+                )
+            } else {
+                return (
+                    (
+                        upd as Exclude<
+                            typeof upd,
+                            Message | UserStatusUpdate | UserTypingUpdate
+                        >
+                    ).user.id === id
+                )
+            }
+        }
     }
 
     /**
