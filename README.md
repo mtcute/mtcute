@@ -25,6 +25,18 @@ Work-in-progress library for MTProto in TypeScript.
 > If you encounter errors related to storage, either
 > reset your storage by removing the file, or fix it manually.
 
+## Installation
+
+MTCute is currently only published in my private NPM registry.
+
+You can install it by running:
+
+```bash
+npm config set --location project @mtcute:registry https://npm.tei.su
+
+npm install @mtcute/node # or any other package
+```
+
 ## Setting up for development:
 
 ```bash

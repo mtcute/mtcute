@@ -20,13 +20,11 @@ function publishSinglePackage(name) {
             'binary/rsa-keys.js',
             'binary/writer.d.ts',
             'binary/writer.js',
-            'errors.d.ts',
-            'errors.js',
             'index.d.ts',
             'index.js',
             'raw-errors.json',
-            'raw-schema.d.ts',
-            'raw-schema.json',
+            'mtp-schema.json',
+            'api-schema.json',
             'package.json',
             'README.md',
         ]
@@ -39,7 +37,7 @@ function publishSinglePackage(name) {
     } else {
         // build ts
         cp.execSync(
-            'yarn run ' + (name === 'crypto-node' ? 'build-ts' : 'build'),
+            'pnpm run ' + (name === 'crypto-node' ? 'build-ts' : 'build'),
             {
                 cwd: dir,
                 stdio: 'inherit',
@@ -56,15 +54,9 @@ function publishSinglePackage(name) {
                 content = content.replace('/// <reference types="node" />', '')
             }
 
-            if (content.match(/@mtcute\/[a-z]+\/src/)) {
+            if (content.match(/@mtcute\/[a-z-]+\/src/)) {
                 changed = true
-                content = content.replace(/(@mtcute\/[a-z]+)\/src/g, '$1')
-            }
-
-            if (content.trim().match(/^export {};?$/)) {
-                // no public exports, we can safely remove this module
-                changed = false
-                fs.unlinkSync(f)
+                content = content.replace(/(@mtcute\/[a-z-]+)\/src/g, '$1')
             }
 
             if (changed) fs.writeFileSync(f, content)
@@ -75,9 +67,9 @@ function publishSinglePackage(name) {
             let content = fs.readFileSync(f, 'utf8')
             let changed = false
 
-            if (content.match(/@mtcute\/[a-z]+\/src/)) {
+            if (content.match(/@mtcute\/[a-z-]+\/src/)) {
                 changed = true
-                content = content.replace(/(@mtcute\/[a-z]+)\/src/g, '$1')
+                content = content.replace(/(@mtcute\/[a-z-]+)\/src/g, '$1')
             }
 
             if (changed) fs.writeFileSync(f, content)
@@ -192,8 +184,27 @@ function publishSinglePackage(name) {
         throw new Error(`${name}'s package.json does not contain "main"`)
 
     // since "src" is compiled to "dist", we need to remove that prefix
-    packJson.main = packJson.main.replace(/^(?:\.\/)?src\//, '')
+    packJson.main = packJson.main
+        .replace(/^(?:\.\/)?src\//, '')
+        .replace(/\.ts$/, '.js')
     packJson.private = false
+
+    function replaceWorkspaceDependencies(field) {
+        if (packJson[field]) {
+            const dependencies = packJson[field]
+            for (const name of Object.keys(dependencies)) {
+                const value = dependencies[name]
+                if (value.startsWith('workspace:')) {
+                    dependencies[name] = value.replace('workspace:', '')
+                }
+            }
+        }
+    }
+
+    replaceWorkspaceDependencies('dependencies')
+    replaceWorkspaceDependencies('devDependencies')
+    replaceWorkspaceDependencies('peerDependencies')
+    replaceWorkspaceDependencies('optionalDependencies')
 
     fs.writeFileSync(
         path.join(dir, 'dist/package.json'),
@@ -225,7 +236,7 @@ function publishSinglePackage(name) {
     console.log('[i] Publishing %s', name)
 
     // publish to npm
-    cp.execSync('yarn publish', {
+    cp.execSync('npm publish', {
         cwd: dir,
         stdio: 'inherit',
     })
@@ -243,6 +254,7 @@ if (require.main === module) {
     if (arg === 'all') {
         for (const f of fs.readdirSync(path.join(__dirname, '../packages'))) {
             if (LOCAL.indexOf(f) > -1) continue
+            if (f[0] === '.') continue
 
             publishSinglePackage(f)
         }

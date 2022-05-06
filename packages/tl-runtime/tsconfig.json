@@ -4,8 +4,7 @@
         "outDir": "./dist"
     },
     "include": [
-        "./src/reader.ts",
-        "./src/writer.ts",
+        "./src",
     ],
     "typedocOptions": {
         "name": "@mtcute/tl-runtime",
@@ -14,8 +13,7 @@
         "listInvalidSymbolLinks": true,
         "excludePrivate": true,
         "entryPoints": [
-            "./src/reader.ts",
-            "./src/writer.ts"
+            "./src/index.ts"
         ]
     }
 }

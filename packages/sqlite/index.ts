@@ -10,9 +10,11 @@ import {
     tl,
     throttle,
     Logger,
+    TlBinaryReader,
+    TlReaderMap,
+    TlWriterMap,
 } from '@mtcute/core'
 import sqlite3 from 'better-sqlite3'
-import { TlBinaryReader, TlReaderMap, TlWriterMap } from '../tl-runtime'
 
 // todo: add testMode to "self"
 
