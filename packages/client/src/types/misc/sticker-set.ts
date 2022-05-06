@@ -89,6 +89,13 @@ export class StickerSet {
     }
 
     /**
+     * Whether this stickerset is video (WEBM)
+     */
+    get isVideo(): boolean {
+        return this.brief.videos!
+    }
+
+    /**
      * Date when this stickerset was installed
      */
     get installedDate(): Date | null {

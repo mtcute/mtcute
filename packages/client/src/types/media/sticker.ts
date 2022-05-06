@@ -50,7 +50,7 @@ export class Sticker extends RawDocument {
         client: TelegramClient,
         doc: tl.RawDocument,
         readonly attr: tl.RawDocumentAttributeSticker,
-        readonly attrSize?: tl.RawDocumentAttributeImageSize
+        readonly attr2?: tl.RawDocumentAttributeImageSize | tl.RawDocumentAttributeVideo
     ) {
         super(client, doc)
     }
@@ -59,14 +59,21 @@ export class Sticker extends RawDocument {
      * Sticker width in pixels
      */
     get width(): number {
-        return this.attrSize?.w ?? 512
+        return this.attr2?.w ?? 512
     }
 
     /**
      * Sticker height in pixels
      */
     get height(): number {
-        return this.attrSize?.h ?? 512
+        return this.attr2?.h ?? 512
+    }
+
+    /**
+     * Whether this sticker is a video (WEBM) sticker
+     */
+    get isVideoSticker(): boolean {
+        return this.attr2?._ === 'documentAttributeVideo'
     }
 
     /**
@@ -77,8 +84,8 @@ export class Sticker extends RawDocument {
      */
     get isValidSticker(): boolean {
         return (
-            this.attrSize !== undefined &&
-            (this.attrSize.w === 512 || this.attrSize.h === 512)
+            this.attr2 !== undefined &&
+            (this.attr2.w === 512 || this.attr2.h === 512)
         )
     }
 

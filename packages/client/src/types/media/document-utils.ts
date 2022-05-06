@@ -21,8 +21,12 @@ export function parseDocument(
                 }
             case 'documentAttributeSticker': {
                 const sz = doc.attributes.find(
-                    (it) => it._ === 'documentAttributeImageSize'
-                )! as tl.RawDocumentAttributeImageSize
+                    (it) =>
+                        it._ === 'documentAttributeImageSize' ||
+                        it._ === 'documentAttributeVideo'
+                )! as
+                    | tl.RawDocumentAttributeImageSize
+                    | tl.RawDocumentAttributeVideo
                 return new Sticker(client, doc, attr, sz)
             }
             case 'documentAttributeVideo':
