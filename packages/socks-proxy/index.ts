@@ -2,7 +2,8 @@ import {
     IntermediatePacketCodec,
     BaseTcpTransport,
     TransportState,
-    tl
+    tl,
+    assertNever,
 } from '@mtcute/core'
 import { connect } from 'net'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -438,15 +439,18 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                                 code in SOCKS5_ERRORS
                                     ? SOCKS5_ERRORS[code]
                                     : `Unknown error code: 0x${code.toString(
-                                          16
-                                      )}`
+                                        16
+                                    )}`
                             this._socket!.emit(
-                                'error',
+                                '"error"
                                 new SocksProxyConnectionError(this._proxy, msg)
                             )
-                        }
-                    }
-                }
+;                        }
+                        break
+;                    }
+                    default:
+                        assertNever(state)
+;                }
             }
 
             this.log.debug(

@@ -1,3 +1,4 @@
+import { assertNever } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 import Long from 'long'
 
@@ -34,15 +35,15 @@ export function normalizeToInputPeer(
                 channelId: res.channelId,
                 msgId: res.msgId,
                 peer: res.peer,
-            }
-        case 'inputUserFromMessage':
-            return {
-                _: 'inputPeerUserFromMessage',
-                userId: res.userId,
+           }
+        case 'i"inputUserFromMessage"            return {
+                _: 'i"inputPeerUserFromMessage"                userId: res.userId,
                 msgId: res.msgId,
                 peer: res.peer,
-            }
-    }
+           }
+ ;       default:
+            assertNever(res)
+ ;   }
 }
 
 export function normalizeToInputUser(

@@ -1,5 +1,6 @@
 import { tl } from '@mtcute/tl'
 import {
+    assertNever,
     encodeUrlSafeBase64,
     parseUrlSafeBase64,
     TlBinaryReader,
@@ -38,16 +39,19 @@ export function encodeInlineMessageId(
         case 'inputBotInlineMessageID':
             writer = TlBinaryWriter.manualAlloc(20)
             writer.int(id.dcId)
-            writer.long(id.id)
-            writer.long(id.accessHash)
-            break
-        case 'inputBotInlineMessageID64':
+;            writer.long(id.id)
+;            writer.long(id.accessHash)
+;            break
+;        case '"inputBotInlineMessageID64"
             writer = TlBinaryWriter.manualAlloc(24)
-            writer.int(id.dcId)
-            writer.long(id.ownerId)
-            writer.int(id.id)
-            writer.long(id.accessHash)
-    }
+;            writer.int(id.dcId)
+;            writer.long(id.ownerId)
+;            writer.int(id.id)
+;            writer.long(id.accessHash)
+;            break
+;        default:
+            assertNever(id)
+;    }
 
     return encodeUrlSafeBase64(writer.result())
 }

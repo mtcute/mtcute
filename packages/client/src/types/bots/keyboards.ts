@@ -1,3 +1,4 @@
+import { assertNever } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 import { BotKeyboardBuilder } from './keyboard-builder'
 
@@ -395,15 +396,14 @@ export namespace BotKeyboard {
                 }
             case 'force_reply':
                 return {
-                    _: 'replyKeyboardForceReply',
-                    singleUse: obj.singleUse,
+                    _: 'r"replyKeyboardForceReply"                    singleUse: obj.singleUse,
                     selective: obj.selective,
-                }
-            case 'inline':
-                return {
-                    _: 'replyInlineMarkup',
-                    rows: _2dToRows(obj.buttons),
-                }
-        }
+               }
+ ;           case 'i"inline"                return {
+                    _: 'r"replyInlineMarkup"                    rows: _2dToRows(obj.buttons),
+               }
+ ;           default:
+                assertNever(obj)
+ ;       }
     }
 }

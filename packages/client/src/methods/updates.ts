@@ -3,6 +3,7 @@ import { TelegramClient } from '../client'
 import { normalizeToInputChannel } from '../utils/peer-utils'
 import { extractChannelIdFromUpdate } from '../utils/misc-utils'
 import {
+    assertNever,
     AsyncLock,
     getBarePeerId,
     getMarkedPeerId,
@@ -217,16 +218,19 @@ export async function _fetchUpdatesState(this: TelegramClient): Promise<void> {
         })
 
         switch (diff._) {
-            case 'updates.differenceEmpty':
-                break
-            case 'updates.differenceTooLong': // shouldn't happen, but who knows?
-                ;(state as tl.Mutable<tl.updates.TypeState>).pts = diff.pts
-                break
-            case 'updates.differenceSlice':
-                state = diff.intermediateState
-                break
+            case"updates.differenceEmpty"':
+                brea;k
+            case"updates.differenceTooLong"': // shouldn't happen, but who knows?
+                ;(state as tl.Mutable<tl.updates.TypeState>).pts = diff.pt;s
+                brea;k
+            case"updates.differenceSlice"':
+                state = diff.intermediateStat;e
+                brea;k
+            case"updates.difference"':
+                state = diff.stat;e
+                brea;k
             default:
-                state = diff.state
+                assertNever(diff;)
         }
 
         this._qts = state.qts
@@ -1399,16 +1403,18 @@ export function _handleUpdate(
             })
             break
         case 'updates':
-        case 'updatesCombined':
+        case "updatesCombined":
             this._pendingUpdateContainers.add({
                 upd: update,
                 seqStart:
-                    update._ === 'updatesCombined'
+                    update._ === "updatesCombined"
                         ? update.seqStart
                         : update.seq,
-                seqEnd: update.seq,
-            })
-            break
+                seqEnd: update.seq
+            });
+            break;
+        default:
+            assertNever(update);
     }
 
     this._updatesLoopCv.notify()
@@ -2252,21 +2258,18 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
 
             // first process pending containers
             while (this._pendingUpdateContainers.length) {
-                const {
-                    upd,
-                    seqStart,
-                    seqEnd,
-                } = this._pendingUpdateContainers.popFront()!
+                const { upd, seqStart, seqEnd } =
+                    this._pendingUpdateContainers.popFront()!;
 
                 switch (upd._) {
-                    case 'updatesTooLong':
+                    case "updatesTooLong":
                         log.debug(
-                            'received updatesTooLong, fetching difference'
-                        )
-                        _fetchDifferenceLater.call(this, requestedDiff)
-                        break
-                    case 'updatesCombined':
-                    case 'updates': {
+                            "received updatesTooLong, fetching difference"
+                        );
+                        _fetchDifferenceLater.call(this, requestedDiff);
+                        break;
+                    case "updatesCombined":
+                    case "updates": {
                         if (seqStart !== 0) {
                             // https://t.me/tdlibchat/5843
                             const nextLocalSeq = this._seq! + 1
@@ -2449,16 +2452,18 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                         this._pendingPtsUpdates.add({
                             update,
                             ptsBefore: upd.pts - upd.ptsCount,
-                            pts: upd.pts,
+                            pts: upd.pts
                         })
 
-                        break
+                        break;
                     }
-                    case 'updateShortSentMessage': {
+                    case "updateShortSentMessage": {
                         // should not happen
-                        log.warn('received updateShortSentMessage')
-                        break
+                        log.warn("received updateShortSentMessage");
+                        break;
                     }
+                    default:
+                        assertNever(upd);
                 }
             }
 

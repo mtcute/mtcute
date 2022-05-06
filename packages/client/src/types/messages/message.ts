@@ -1,11 +1,8 @@
 import { User, Chat, InputPeerLike, PeersIndex } from '../peers'
 import { tl } from '@mtcute/tl'
 import { BotKeyboard, ReplyMarkup } from '../bots'
-import { getMarkedPeerId, toggleChannelIdMark } from '@mtcute/core'
-import {
-    MtArgumentError,
-    MtTypeAssertionError,
-} from '../errors'
+import { assertNever, getMarkedPeerId, toggleChannelIdMark } from '@mtcute/core'
+import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { TelegramClient } from '../../client'
 import { MessageEntity } from './message-entity'
 import { makeInspectable } from '../utils'
@@ -480,8 +477,7 @@ export class Message {
                         }
                         break
                     default:
-                        markup = null
-                        break
+                        assertNever(rm)
                 }
 
                 this._markup = markup

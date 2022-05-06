@@ -1,5 +1,5 @@
 import { tdFileId, tdFileId as td } from './types'
-import { encodeUrlSafeBase64 } from '@mtcute/core'
+import { assertNever, encodeUrlSafeBase64 } from '@mtcute/core'
 import { telegramRleEncode } from './utils'
 import FileType = tdFileId.FileType
 import { TlBinaryWriter } from '@mtcute/tl-runtime'
@@ -141,7 +141,8 @@ export function toUniqueFileId(
             break
         }
         case 'web':
-            writer = TlBinaryWriter.alloc({},
+            writer = TlBinaryWriter.alloc(
+                {},
                 Buffer.byteLength(inputLocation.url, 'utf-8') + 8
             )
             writer.int(type)
@@ -153,9 +154,7 @@ export function toUniqueFileId(
             writer.long(inputLocation.id)
             break
         default:
-            throw new td.UnsupportedError(
-                `Unique IDs are not supported for ${(inputLocation as any)._}`
-            )
+            assertNever(inputLocation)
     }
 
     return encodeUrlSafeBase64(telegramRleEncode(writer.result()))

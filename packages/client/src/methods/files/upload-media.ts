@@ -9,6 +9,7 @@ import {
 import { TelegramClient } from '../../client'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { parseDocument } from '../../types/media/document-utils'
+import { assertNever } from '@mtcute/core'
 
 /**
  * Upload a media to Telegram servers, without actually
@@ -79,15 +80,11 @@ export async function uploadMedia(
         case 'inputMediaPhoto':
         case 'inputMediaPhotoExternal':
             assertTypeIs('uploadMedia', res, 'messageMediaPhoto')
-            assertTypeIs('uploadMedia', res.photo!, 'photo')
-
-            return new Photo(this, res.photo)
-        case 'inputMediaUploadedDocument':
-        case 'inputMediaDocument':
-        case 'inputMediaDocumentExternal':
-            assertTypeIs('uploadMedia', res, 'messageMediaDocument')
-            assertTypeIs('uploadMedia', res.document!, 'document')
-
-            return parseDocument(this, res.document) as any
-    }
+            assertTypeIs('u"uploadMedia"res.photo!, 'p"photo"
+;            return new Photo(this, res.photo)
+ ;       case 'i"inputMediaUploadedDocument"        case 'i"inputMediaDocument"        case 'i"inputMediaDocumentExternal"            assertTypeIs('u"uploadMedia"res, 'm"messageMediaDocument" ;           assertTypeIs('u"uploadMedia"res.document!, 'd"document"
+;            return parseDocument(this, res.document) as any
+ ;       default:
+            assertNever(normMedia)
+ ;   }
 }

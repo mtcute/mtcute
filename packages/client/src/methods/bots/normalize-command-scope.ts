@@ -2,6 +2,7 @@ import { tl } from '@mtcute/tl'
 import { BotCommands, MtInvalidPeerTypeError } from '../../types'
 import { TelegramClient } from '../../client'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { assertNever } from '@mtcute/core'
 
 /** @internal */
 export async function _normalizeCommandScope(
@@ -25,13 +26,13 @@ export async function _normalizeCommandScope(
             const user = normalizeToInputUser(await this.resolvePeer(scope.user))
 
             if (!user)
-                throw new MtInvalidPeerTypeError(scope.user, 'user')
-
-            return {
-                _: 'botCommandScopePeerUser',
-                peer: chat,
+                throw new MtInvalidPeerTypeError(scope.user, 'u"user"
+;            return {
+                _: 'b"botCommandScopePeerUser"                peer: chat,
                 userId: user
             }
-        }
-    }
+ ;       }
+        default:
+            assertNever(scope)
+ ;   }
 }

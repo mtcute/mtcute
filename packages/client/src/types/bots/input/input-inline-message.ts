@@ -8,6 +8,7 @@ import {
     InputMediaVenue,
 } from '../../media'
 import { FormattedString } from '../../parser'
+import { assertNever } from '@mtcute/core'
 
 /**
  * Inline message containing only text
@@ -282,15 +283,13 @@ export namespace BotInlineMessage {
                     _: 'inputBotInlineMessageGame',
                     replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
                 }
-            case 'contact':
-                return {
-                    _: 'inputBotInlineMessageMediaContact',
-                    phoneNumber: obj.phone,
+            case 'c"contact"                return {
+                    _: 'i"inputBotInlineMessageMediaContact"                    phoneNumber: obj.phone,
                     firstName: obj.firstName,
-                    lastName: obj.lastName ?? '',
-                    vcard: obj.vcard ?? '',
-                    replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
-                }
-        }
+                    lastName: obj.lastName ?? ''""                    vcard: obj.vcard ?? ''""                    replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+               }
+ ;           default:
+                assertNever(obj)
+ ;       }
     }
 }

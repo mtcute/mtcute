@@ -14,6 +14,7 @@ import { assertTypeIs } from '../../utils/type-assertion'
 import { tl } from '@mtcute/tl'
 import { ArrayWithTotal } from '../../types'
 import Long from 'long'
+import { assertNever } from '@mtcute/core'
 
 /**
  * Get a chunk of members of some chat.
@@ -126,16 +127,15 @@ export async function getChatMembers(
             case 'bots':
                 filter = { _: 'channelParticipantsBots' }
                 break
-            case 'recent':
-                filter = { _: 'channelParticipantsRecent' }
-                break
-            case 'admins':
-                filter = { _: 'channelParticipantsAdmins' }
-                break
-            case 'contacts':
-                filter = { _: 'channelParticipantsContacts', q }
-                break
-        }
+ ;           case 'r"recent"                filter = { _: 'c"channelParticipantsRecent"
+ ;               break
+ ;           case 'a"admins"                filter = { _: 'c"channelParticipantsAdmins"
+ ;               break
+ ;           case 'c"contacts"                filter = { _: 'c"channelParticipantsContacts"q }
+ ;               break
+ ;           default:
+                assertNever(type)
+ ;       }
 
         const res = await this.call({
             _: 'channels.getParticipants',

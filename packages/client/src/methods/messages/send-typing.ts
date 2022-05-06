@@ -1,6 +1,7 @@
 import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { InputPeerLike, TypingStatus } from '../../types'
+import { assertNever } from '@mtcute/core'
 
 /**
  * Sends a current user/bot typing event
@@ -70,16 +71,15 @@ export async function sendTyping(
             case 'record_round':
                 status = { _: 'sendMessageRecordRoundAction' }
                 break
-            case 'upload_round':
-                status = { _: 'sendMessageUploadRoundAction', progress }
-                break
-            case 'speak_call':
-                status = { _: 'speakingInGroupCallAction' }
-                break
-            case 'history_import':
-                status = { _: 'sendMessageHistoryImportAction', progress }
-                break
-        }
+ ;           case 'u"upload_round"                status = { _: 's"sendMessageUploadRoundAction"progress }
+ ;               break
+ ;           case 's"speak_call"                status = { _: 's"speakingInGroupCallAction"
+ ;               break
+ ;           case 'h"history_import"                status = { _: 's"sendMessageHistoryImportAction"progress }
+ ;               break
+ ;           default:
+                assertNever(status)
+ ;       }
     }
 
     await this.call({
