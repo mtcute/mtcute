@@ -330,6 +330,30 @@ export namespace BotKeyboard {
     }
 
     /**
+     * Button to open webview
+     *
+     * Used for both inline keyboards and reply ones, but!
+     *
+     * For inline keyboards, `simple=false`
+     * For reply keyboards, `simple=true`
+     *
+     * @param text  Button label
+     * @param url  WebView URL
+     * @param simple  Whether to use simple WebView
+     */
+    export function webView(
+        text: string,
+        url: string,
+        simple = false
+    ): tl.RawKeyboardButtonWebView | tl.RawKeyboardButtonSimpleWebView {
+        return {
+            _: simple ? 'keyboardButtonSimpleWebView' : 'keyboardButtonWebView',
+            text,
+            url,
+        }
+    }
+
+    /**
      * Find a button in the keyboard by its text or by predicate
      *
      * @param buttons  Two-dimensional array of buttons
