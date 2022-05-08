@@ -2,7 +2,7 @@ import { assertNever } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 import Long from 'long'
 
-export const INVITE_LINK_REGEX = /^(?:https?:\/\/)?(?:www\.)?(?:t(?:elegram)?\.(?:org|me|dog)\/joinchat\/)([\w-]+)$/i
+export const INVITE_LINK_REGEX = /^(?:https?:\/\/)?(?:www\.)?(?:t(?:elegram)?\.(?:org|me|dog)\/(?:joinchat\/|\+))([\w-]+)$/i
 
 // helpers to normalize result of `resolvePeer` function
 
