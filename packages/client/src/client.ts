@@ -79,6 +79,7 @@ import { start } from './methods/auth/start'
 import { answerCallbackQuery } from './methods/bots/answer-callback-query'
 import { answerInlineQuery } from './methods/bots/answer-inline-query'
 import { deleteMyCommands } from './methods/bots/delete-my-commands'
+import { getBotMenuButton } from './methods/bots/get-bot-menu-button'
 import { getCallbackAnswer } from './methods/bots/get-callback-answer'
 import {
     getGameHighScores,
@@ -86,6 +87,7 @@ import {
 } from './methods/bots/get-game-high-scores'
 import { getMyCommands } from './methods/bots/get-my-commands'
 import { _normalizeCommandScope } from './methods/bots/normalize-command-scope'
+import { setBotMenuButton } from './methods/bots/set-bot-menu-button'
 import { setGameScore, setInlineGameScore } from './methods/bots/set-game-score'
 import { setMyCommands } from './methods/bots/set-my-commands'
 import { setMyDefaultRights } from './methods/bots/set-my-default-rights'
@@ -810,6 +812,11 @@ export interface TelegramClient extends BaseTelegramClient {
         langCode?: string
     }): Promise<void>
     /**
+     * Fetches the menu button set for the given user.
+     *
+     */
+    getBotMenuButton(user: InputPeerLike): Promise<tl.TypeBotMenuButton>
+    /**
      * Request a callback answer from a bot,
      * i.e. click an inline button that contains data.
      *
@@ -887,6 +894,14 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         langCode?: string
     }): Promise<tl.RawBotCommand[]>
+    /**
+     * Sets a menu button for the given user.
+     *
+     */
+    setBotMenuButton(
+        user: InputPeerLike,
+        button: tl.TypeBotMenuButton
+    ): Promise<void>
     /**
      * Set a score of a user in a game
      *
@@ -3698,11 +3713,13 @@ export class TelegramClient extends BaseTelegramClient {
     answerCallbackQuery = answerCallbackQuery
     answerInlineQuery = answerInlineQuery
     deleteMyCommands = deleteMyCommands
+    getBotMenuButton = getBotMenuButton
     getCallbackAnswer = getCallbackAnswer
     getGameHighScores = getGameHighScores
     getInlineGameHighScores = getInlineGameHighScores
     getMyCommands = getMyCommands
     protected _normalizeCommandScope = _normalizeCommandScope
+    setBotMenuButton = setBotMenuButton
     setGameScore = setGameScore
     setInlineGameScore = setInlineGameScore
     setMyCommands = setMyCommands
