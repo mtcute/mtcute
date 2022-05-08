@@ -88,6 +88,7 @@ import { getMyCommands } from './methods/bots/get-my-commands'
 import { _normalizeCommandScope } from './methods/bots/normalize-command-scope'
 import { setGameScore, setInlineGameScore } from './methods/bots/set-game-score'
 import { setMyCommands } from './methods/bots/set-my-commands'
+import { setMyDefaultRights } from './methods/bots/set-my-default-rights'
 import { addChatMembers } from './methods/chats/add-chat-members'
 import { archiveChats } from './methods/chats/archive-chats'
 import { banChatMember } from './methods/chats/ban-chat-member'
@@ -968,6 +969,16 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         langCode?: string
     }): Promise<void>
+    /**
+     * Sets the default chat permissions for the bot in the supergroup or channel.
+     *
+     * @param target  Whether to target groups or channels.
+     * @param rights  The default chat permissions.
+     */
+    setMyDefaultRights(
+        target: 'channel' | 'group',
+        rights: Omit<tl.RawChatAdminRights, '_'>
+    ): Promise<void>
     /**
      * Add new members to a group, supergroup or channel.
      *
@@ -3695,6 +3706,7 @@ export class TelegramClient extends BaseTelegramClient {
     setGameScore = setGameScore
     setInlineGameScore = setInlineGameScore
     setMyCommands = setMyCommands
+    setMyDefaultRights = setMyDefaultRights
     addChatMembers = addChatMembers
     archiveChats = archiveChats
     banChatMember = banChatMember
