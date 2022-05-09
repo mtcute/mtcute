@@ -1,7 +1,7 @@
 import { TlEntry, TlFullSchema } from '@mtcute/tl-utils/src/types'
 import cheerio from 'cheerio'
 import { splitNameToNamespace } from '@mtcute/tl-utils/src/utils'
-import { snakeToCamel } from '@mtcute/tl-utils/src/codegen/utils'
+import { camelToPascal, snakeToCamel } from '@mtcute/tl-utils/src/codegen/utils'
 import {
     API_SCHEMA_JSON_FILE,
     CORE_DOMAIN,
@@ -48,11 +48,16 @@ function normalizeLinks(url: string, el: Cheerio): void {
             (m = href.match(/\/(constructor|method|union)\/([^#?]+)(?:\?|#|$)/))
         ) {
             let [, type, name] = m
-            if (type === 'method') {
-                const [ns, n] = splitNameToNamespace(name)
-                const q = snakeToCamel(n)
-                name = ns ? ns + '.' + q : q
+            const [ns, n] = splitNameToNamespace(name)
+            let q = camelToPascal(snakeToCamel(n))
+
+            if (type === 'method' || type === 'constructor') {
+                q = 'Raw' + q + (type === 'method' ? 'Request' : '')
+            } else {
+                q = 'Type' + q
             }
+
+            name = ns ? ns + '.' + q : q
 
             it.replaceWith(`{@link ${name}}`)
         }
@@ -84,8 +89,14 @@ export async function fetchDocumentation(
             'Chrome/87.0.4280.88 Safari/537.36',
     }
 
+    const index = await fetchRetry(`${CORE_DOMAIN}/schema`, { headers })
+    const actualLayer = cheerio
+        .load(index)('.dev_layer_select .dropdown-toggle')
+        .text()
+        .match(/layer (\d+)/i)![1]
+
     const ret: CachedDocumentation = {
-        updated: `${new Date().toLocaleString('ru-RU')} (layer ${layer})`,
+        updated: `${new Date().toLocaleString('ru-RU')} (layer ${actualLayer})`,
         classes: {},
         methods: {},
         unions: {},
@@ -135,7 +146,7 @@ export async function fetchDocumentation(
             const cols = el.find('td')
             if (!cols.length) return // <thead>
 
-            const name = snakeToCamel(cols.first().text().trim())
+            const name = cols.first().text().trim()
             const description = cols.last().html()!.trim()
 
             if (description) {
@@ -177,9 +188,8 @@ export async function fetchDocumentation(
                 : 'user'
         }
 
-        ret[entry.kind === 'class' ? 'classes' : 'methods'][
-            entry.name
-        ] = retClass
+        ret[entry.kind === 'class' ? 'classes' : 'methods'][entry.name] =
+            retClass
     }
 
     for (const name in schema.unions) {
