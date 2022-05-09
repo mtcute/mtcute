@@ -1,6 +1,8 @@
 import { assertNever } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 import { BotKeyboardBuilder } from './keyboard-builder'
+import { normalizeToInputUser } from '../../utils/peer-utils'
+import { MtInvalidPeerTypeError } from '../errors'
 
 /**
  * Reply keyboard markup
@@ -350,6 +352,28 @@ export namespace BotKeyboard {
             _: simple ? 'keyboardButtonSimpleWebView' : 'keyboardButtonWebView',
             text,
             url,
+        }
+    }
+
+    /**
+     * Button to open user profile
+     *
+     * @param text  Text of the button
+     * @param user  User to be opened (use {@link TelegramClient.resolvePeer})
+     */
+    export function userProfile(
+        text: string,
+        user: tl.TypeInputPeer
+    ): tl.RawInputKeyboardButtonUserProfile {
+        const userId = normalizeToInputUser(user)
+        if (!userId) {
+            throw new MtInvalidPeerTypeError(user, 'user')
+        }
+
+        return {
+            _: 'inputKeyboardButtonUserProfile',
+            text,
+            userId,
         }
     }
 
