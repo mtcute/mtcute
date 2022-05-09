@@ -12,3 +12,5 @@ user_status: UserStatusUpdate = UserStatusUpdate
 user_typing = UserTypingUpdate
 history_read = HistoryReadUpdate
 bot_stopped = BotStoppedUpdate
+bot_chat_join_request = BotChatJoinRequestUpdate
+chat_join_request = ChatJoinRequestUpdate

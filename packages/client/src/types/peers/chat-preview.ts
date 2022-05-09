@@ -16,7 +16,6 @@ export namespace ChatPreview {
 }
 
 export class ChatPreview {
-
     constructor(
         readonly client: TelegramClient,
         readonly invite: tl.RawChatInvite,
@@ -24,8 +23,7 @@ export class ChatPreview {
          * Original invite link used to fetch this preview
          */
         readonly link: string
-    ) {
-    }
+    ) {}
 
     /**
      * Title of the chat
@@ -38,9 +36,16 @@ export class ChatPreview {
      * Type of the chat
      */
     get type(): ChatPreview.Type {
-        if (!this.invite.channel) return 'group'
         if (this.invite.broadcast) return 'channel'
-        return 'supergroup'
+        if (this.invite.megagroup || this.invite.channel) return 'supergroup'
+        return 'group'
+    }
+
+    /**
+     * Whether this chat is public
+     */
+    get public(): boolean {
+        return this.invite.public!
     }
 
     /**
@@ -82,6 +87,14 @@ export class ChatPreview {
         }
 
         return this._someMembers
+    }
+
+    /**
+     * Whether by using this link you'll also need
+     * to wait for admin approval.
+     */
+    get withApproval(): boolean {
+        return this.invite.requestNeeded!
     }
 
     /**

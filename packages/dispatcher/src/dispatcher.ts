@@ -16,7 +16,9 @@ import {
     DeleteMessageUpdate,
     HistoryReadUpdate,
     ParsedUpdate,
-    BotStoppedUpdate
+    BotStoppedUpdate,
+    BotChatJoinRequestUpdate,
+    ChatJoinRequestUpdate,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 // begin-codegen-imports
@@ -36,6 +38,8 @@ import {
     UserTypingHandler,
     HistoryReadHandler,
     BotStoppedHandler,
+    BotChatJoinRequestHandler,
+    ChatJoinRequestHandler,
 } from './handler'
 // end-codegen-imports
 import { filters, UpdateFilter } from './filters'
@@ -228,11 +232,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                         !h.check ||
                         (await h.check(this._client, update, peers))
                     ) {
-                        result = await h.callback(
-                            this._client,
-                            update,
-                            peers
-                        )
+                        result = await h.callback(this._client, update, peers)
                         handled = true
                     } else continue
 
@@ -846,7 +846,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
         // copy handlers.
         Object.keys(this._groups).forEach((key) => {
-            const idx = (key as any) as number
+            const idx = key as any as number
 
             dp._groups[idx] = {} as any
 
@@ -927,9 +927,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
         return Promise.resolve(this._stateKeyDelegate!(object)).then((key) => {
             if (!key) {
-                throw new MtArgumentError(
-                    'Cannot derive key from given object'
-                )
+                throw new MtArgumentError('Cannot derive key from given object')
             }
 
             if (!this._customStateKeyDelegate) {
@@ -973,16 +971,12 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         object: Parameters<StateKeyDelegate>[0]
     ): Promise<UpdateState<T, SceneName>> {
         if (!this._parent) {
-            throw new MtArgumentError(
-                'This dispatcher does not have a parent'
-            )
+            throw new MtArgumentError('This dispatcher does not have a parent')
         }
 
         return Promise.resolve(this._stateKeyDelegate!(object)).then((key) => {
             if (!key) {
-                throw new MtArgumentError(
-                    'Cannot derive key from given object'
-                )
+                throw new MtArgumentError('Cannot derive key from given object')
             }
 
             return new UpdateState(
@@ -1491,6 +1485,68 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     /** @internal */
     onBotStopped(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('bot_stopped', filter, handler, group)
+    }
+
+    /**
+     * Register a bot chat join request handler without any filters
+     *
+     * @param handler  Bot chat join request handler
+     * @param group  Handler group index
+     */
+    onBotChatJoinRequest(
+        handler: BotChatJoinRequestHandler['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register a bot chat join request handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Bot chat join request handler
+     * @param group  Handler group index
+     */
+    onBotChatJoinRequest<Mod>(
+        filter: UpdateFilter<BotChatJoinRequestUpdate, Mod>,
+        handler: BotChatJoinRequestHandler<
+            filters.Modify<BotChatJoinRequestUpdate, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onBotChatJoinRequest(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('bot_chat_join_request', filter, handler, group)
+    }
+
+    /**
+     * Register a chat join request handler without any filters
+     *
+     * @param handler  Chat join request handler
+     * @param group  Handler group index
+     */
+    onChatJoinRequest(
+        handler: ChatJoinRequestHandler['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register a chat join request handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Chat join request handler
+     * @param group  Handler group index
+     */
+    onChatJoinRequest<Mod>(
+        filter: UpdateFilter<ChatJoinRequestUpdate, Mod>,
+        handler: ChatJoinRequestHandler<
+            filters.Modify<ChatJoinRequestUpdate, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onChatJoinRequest(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('chat_join_request', filter, handler, group)
     }
 
     // end-codegen

@@ -7,18 +7,41 @@ import { tl } from '@mtcute/tl'
  * the chat with the given invite link.
  *
  * @param chatId  Chat ID
- * @param link  Invite link
- * @param limit  Maximum number of users to return (by default returns all)
+ * @param params  Additional params
  * @internal
  */
 export async function* getInviteLinkMembers(
     this: TelegramClient,
     chatId: InputPeerLike,
-    link: string,
-    limit = Infinity
+    params: {
+        /**
+         * Invite link for which to get members
+         */
+        link?: string
+
+        /**
+         * Maximum number of users to return (by default returns all)
+         */
+        limit?: number
+
+        /**
+         * Whether to get users who have requested to join
+         * the chat but weren't accepted yet
+         */
+        requested?: boolean
+
+        /**
+         * Search for a user in the pending join requests list
+         * (only works if {@see requested} is true)
+         *
+         * Doesn't work when {@see link} is set (Telegram limitation)
+         */
+        requestedSearch?: string
+    }
 ): AsyncIterableIterator<ChatInviteLink.JoinedMember> {
     const peer = await this.resolvePeer(chatId)
 
+    const limit = params.limit ?? Infinity
     let current = 0
 
     let offsetDate = 0
@@ -31,7 +54,9 @@ export async function* getInviteLinkMembers(
                 _: 'messages.getChatInviteImporters',
                 limit: Math.min(100, limit - current),
                 peer,
-                link,
+                link: params.link,
+                requested: params.requested,
+                q: params.requestedSearch,
                 offsetDate,
                 offsetUser,
             }
@@ -55,6 +80,9 @@ export async function* getInviteLinkMembers(
             yield {
                 user,
                 date: new Date(it.date * 1000),
+                isPendingRequest: it.requested!,
+                bio: it.about,
+                approvedBy: it.approvedBy
             }
         }
 

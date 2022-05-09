@@ -13,7 +13,9 @@ import {
     DeleteMessageUpdate,
     PollUpdate,
     UserTypingUpdate,
-    BotStoppedUpdate
+    BotStoppedUpdate,
+    BotChatJoinRequestUpdate,
+    ChatJoinRequestUpdate,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 import { PropagationAction } from './propagation'
@@ -68,9 +70,8 @@ export type InlineQueryHandler<T = InlineQuery> = ParsedUpdateHandler<
     'inline_query',
     T
 >
-export type ChosenInlineResultHandler<
-    T = ChosenInlineResult
-> = ParsedUpdateHandler<'chosen_inline_result', T>
+export type ChosenInlineResultHandler<T = ChosenInlineResult> =
+    ParsedUpdateHandler<'chosen_inline_result', T>
 export type CallbackQueryHandler<
     T = CallbackQuery,
     S = never
@@ -96,6 +97,10 @@ export type BotStoppedHandler<T = BotStoppedUpdate> = ParsedUpdateHandler<
     'bot_stopped',
     T
 >
+export type BotChatJoinRequestHandler<T = BotChatJoinRequestUpdate> =
+    ParsedUpdateHandler<'bot_chat_join_request', T>
+export type ChatJoinRequestHandler<T = ChatJoinRequestUpdate> =
+    ParsedUpdateHandler<'chat_join_request', T>
 
 export type UpdateHandler =
     | RawUpdateHandler
@@ -112,5 +117,7 @@ export type UpdateHandler =
     | UserTypingHandler
     | HistoryReadHandler
     | BotStoppedHandler
+    | BotChatJoinRequestHandler
+    | ChatJoinRequestHandler
 
 // end-codegen

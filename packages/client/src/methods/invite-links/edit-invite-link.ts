@@ -32,6 +32,12 @@ export async function editInviteLink(
          * Integer in range `[1, 99999]` or `Infinity`,
          */
         usageLimit?: number
+
+        /**
+         * Whether users to be joined via this link need to be
+         * approved by an admin
+         */
+        withApproval?: boolean
     }
 ): Promise<ChatInviteLink> {
     const res = await this.call({
@@ -40,6 +46,7 @@ export async function editInviteLink(
         link,
         expireDate: normalizeDate(params.expires),
         usageLimit: params.usageLimit,
+        requestNeeded: params.withApproval
     })
 
     const peers = PeersIndex.from(res)

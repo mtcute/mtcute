@@ -6,8 +6,29 @@ import { PeersIndex } from './index'
 
 export namespace ChatInviteLink {
     export interface JoinedMember {
+        /**
+         * User who joined the chat
+         */
         user: User
+
+        /**
+         * Date when the user joined the chat
+         */
         date: Date
+
+        /**
+         * Whether the user currently has a pending join request
+         */
+        isPendingRequest: boolean
+        /**
+         * For users with pending requests,
+         * contains bio of the user that requested to join
+         */
+        bio?: string
+        /**
+         * The administrator that approved the join request of the user
+         */
+        approvedBy?: number
     }
 }
 
@@ -19,17 +40,27 @@ export class ChatInviteLink {
         readonly client: TelegramClient,
         readonly raw: tl.RawChatInviteExported,
         readonly _peers?: PeersIndex
-    ) {
-    }
+    ) {}
 
     /**
      * The invite link as a `t.me/joinchat/` string.
      *
      * If the link was created by another administrator, the second
      * part of the link will be censored with `...` (e.g. `https://t.me/joinchat/BGxxHIg4...`
+     *
+     * See also: {@link isMyLink}
      */
     get link(): string {
         return this.raw.link
+    }
+
+    /**
+     * Whether this invite link was created by the current user.
+     *
+     * If so, {@link link} will be a full invite link.
+     */
+    get isMyLink(): boolean {
+        return this.creator?.isSelf ?? !this.raw.link.endsWith('...')
     }
 
     private _creator?: User
@@ -99,6 +130,23 @@ export class ChatInviteLink {
      */
     get usage(): number {
         return this.raw.usage ?? 0
+    }
+
+    /**
+     * Whether users joined by this link need to be
+     * approved by the group administrator before they can join
+     */
+    get approvalNeeded(): boolean {
+        return this.raw.requestNeeded!
+    }
+
+    /**
+     * Number of users currently awaiting admin approval.
+     *
+     * 0 in case the link is not using approvals
+     */
+    get pendingApprovals(): number {
+        return this.raw.requested ?? 0
     }
 }
 

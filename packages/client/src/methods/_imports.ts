@@ -52,7 +52,9 @@ import {
     UserStatusUpdate,
     UserTypingUpdate,
     Conversation,
-    BotStoppedUpdate
+    BotStoppedUpdate,
+    BotChatJoinRequestUpdate,
+    ChatJoinRequestUpdate,
 } from '../types'
 
 // @copy

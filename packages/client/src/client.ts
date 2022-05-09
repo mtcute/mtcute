@@ -4,12 +4,14 @@ import { tl } from '@mtcute/tl'
 import { Readable } from 'stream'
 import {
     ArrayWithTotal,
+    BotChatJoinRequestUpdate,
     BotCommands,
     BotStoppedUpdate,
     CallbackQuery,
     Chat,
     ChatEvent,
     ChatInviteLink,
+    ChatJoinRequestUpdate,
     ChatMember,
     ChatMemberUpdate,
     ChatPreview,
@@ -154,6 +156,8 @@ import { getInviteLinkMembers } from './methods/invite-links/get-invite-link-mem
 import { getInviteLink } from './methods/invite-links/get-invite-link'
 import { getInviteLinks } from './methods/invite-links/get-invite-links'
 import { getPrimaryInviteLink } from './methods/invite-links/get-primary-invite-link'
+import { hideAllJoinRequests } from './methods/invite-links/hide-all-join-requests'
+import { hideJoinRequest } from './methods/invite-links/hide-join-request'
 import { revokeInviteLink } from './methods/invite-links/revoke-invite-link'
 import { closePoll } from './methods/messages/close-poll'
 import { deleteMessages } from './methods/messages/delete-messages'
@@ -380,6 +384,26 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param handler  Bot stopped handler
      */
     on(name: 'bot_stopped', handler: (upd: BotStoppedUpdate) => void): this
+    /**
+     * Register a bot chat join request handler
+     *
+     * @param name  Event name
+     * @param handler  Bot chat join request handler
+     */
+    on(
+        name: 'bot_chat_join_request',
+        handler: (upd: BotChatJoinRequestUpdate) => void
+    ): this
+    /**
+     * Register a chat join request handler
+     *
+     * @param name  Event name
+     * @param handler  Chat join request handler
+     */
+    on(
+        name: 'chat_join_request',
+        handler: (upd: ChatJoinRequestUpdate) => void
+    ): this
     /**
      * Accept the given TOS
      *
@@ -1320,6 +1344,10 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Join a channel or supergroup
      *
+     * When using with invite links, this method may throw RPC error
+     * `INVITE_REQUEST_SENT`, which means that you need to wait for admin approval.
+     * You will get into the chat once they do so.
+     *
      * @param chatId
      *   Chat identifier. Either an invite link (`t.me/joinchat/*`), a username (`@username`)
      *   or ID of the linked supergroup or channel.
@@ -1887,6 +1915,12 @@ export interface TelegramClient extends BaseTelegramClient {
              * Integer in range `[1, 99999]` or `Infinity`, defaults to `Infinity`
              */
             usageLimit?: number
+
+            /**
+             * Whether users to be joined via this link need to be
+             * approved by an admin
+             */
+            withApproval?: boolean
         }
     ): Promise<ChatInviteLink>
     /**
@@ -1917,6 +1951,12 @@ export interface TelegramClient extends BaseTelegramClient {
              * Integer in range `[1, 99999]` or `Infinity`,
              */
             usageLimit?: number
+
+            /**
+             * Whether users to be joined via this link need to be
+             * approved by an admin
+             */
+            withApproval?: boolean
         }
     ): Promise<ChatInviteLink>
     /**
@@ -1934,13 +1974,35 @@ export interface TelegramClient extends BaseTelegramClient {
      * the chat with the given invite link.
      *
      * @param chatId  Chat ID
-     * @param link  Invite link
-     * @param limit  (default: `Infinity`) Maximum number of users to return (by default returns all)
+     * @param params  Additional params
      */
     getInviteLinkMembers(
         chatId: InputPeerLike,
-        link: string,
-        limit?: number
+        params: {
+            /**
+             * Invite link for which to get members
+             */
+            link?: string
+
+            /**
+             * Maximum number of users to return (by default returns all)
+             */
+            limit?: number
+
+            /**
+             * Whether to get users who have requested to join
+             * the chat but weren't accepted yet
+             */
+            requested?: boolean
+
+            /**
+             * Search for a user in the pending join requests list
+             * (only works if {@see requested} is true)
+             *
+             * Doesn't work when {@see link} is set (Telegram limitation)
+             */
+            requestedSearch?: string
+        }
     ): AsyncIterableIterator<ChatInviteLink.JoinedMember>
     /**
      * Get detailed information about an invite link
@@ -1989,6 +2051,32 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  Chat ID
      */
     getPrimaryInviteLink(chatId: InputPeerLike): Promise<ChatInviteLink>
+    /**
+     * Approve or deny multiple join requests to a chat.
+     *
+     * @param peer  Chat/channel ID
+     * @param user  User ID
+     * @param action  Whether to approve or deny the join requests
+     * @param link  Invite link to target
+     */
+    hideAllJoinRequests(
+        peer: InputPeerLike,
+        user: InputPeerLike,
+        action: 'approve' | 'deny',
+        link?: string
+    ): Promise<void>
+    /**
+     * Approve or deny join request to a chat.
+     *
+     * @param peer  Chat/channel ID
+     * @param user  User ID
+     * @param action  Whether to approve or deny the join request
+     */
+    hideJoinRequest(
+        peer: InputPeerLike,
+        user: InputPeerLike,
+        action: 'approve' | 'deny'
+    ): Promise<void>
     /**
      * Revoke an invite link.
      *
@@ -3789,6 +3877,8 @@ export class TelegramClient extends BaseTelegramClient {
     getInviteLink = getInviteLink
     getInviteLinks = getInviteLinks
     getPrimaryInviteLink = getPrimaryInviteLink
+    hideAllJoinRequests = hideAllJoinRequests
+    hideJoinRequest = hideJoinRequest
     revokeInviteLink = revokeInviteLink
     closePoll = closePoll
     deleteMessages = deleteMessages

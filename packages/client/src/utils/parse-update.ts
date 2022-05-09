@@ -1,8 +1,9 @@
 import { TelegramClient } from '../client'
 import { tl } from '@mtcute/tl'
 import {
+    BotChatJoinRequestUpdate,
     BotStoppedUpdate,
-    CallbackQuery,
+    CallbackQuery, ChatJoinRequestUpdate,
     ChatMemberUpdate,
     ChosenInlineResult,
     DeleteMessageUpdate,
@@ -13,8 +14,8 @@ import {
     PollUpdate,
     PollVoteUpdate,
     UserStatusUpdate,
-    UserTypingUpdate,
-} from '../types'
+    UserTypingUpdate
+} from "../types";
 
 type ParserFunction = (
     client: TelegramClient,
@@ -108,8 +109,16 @@ const PARSERS: Partial<
     updateReadChannelDiscussionOutbox: historyReadParser,
     updateBotStopped: [
         'bot_stopped',
-        (client, upd, users) => new BotStoppedUpdate(client, upd as any, users),
+        (client, upd, peers) => new BotStoppedUpdate(client, upd as any, peers),
     ],
+    updateBotChatInviteRequester: [
+        'bot_chat_join_request',
+        (client, upd, peers) => new BotChatJoinRequestUpdate(client, upd as any, peers),
+    ],
+    updatePendingJoinRequests: [
+        'chat_join_request',
+        (client, upd, peers) => new ChatJoinRequestUpdate(client, upd as any, peers),
+    ]
 }
 
 /** @internal */

@@ -9,6 +9,8 @@ import { UserStatusUpdate } from './user-status-update'
 import { UserTypingUpdate } from './user-typing-update'
 import { HistoryReadUpdate } from './history-read-update'
 import { BotStoppedUpdate } from './bot-stopped'
+import { BotChatJoinRequestUpdate } from './bot-chat-join-request'
+import { ChatJoinRequestUpdate } from './chat-join-request'
 
 export {
     DeleteMessageUpdate,
@@ -19,7 +21,9 @@ export {
     UserStatusUpdate,
     UserTypingUpdate,
     HistoryReadUpdate,
-    BotStoppedUpdate
+    BotStoppedUpdate,
+    BotChatJoinRequestUpdate,
+    ChatJoinRequestUpdate,
 }
 
 // begin-codegen
@@ -37,5 +41,7 @@ export type ParsedUpdate =
     | { name: 'user_typing', data: UserTypingUpdate }
     | { name: 'history_read', data: HistoryReadUpdate }
     | { name: 'bot_stopped', data: BotStoppedUpdate }
+    | { name: 'bot_chat_join_request', data: BotChatJoinRequestUpdate }
+    | { name: 'chat_join_request', data: ChatJoinRequestUpdate }
 
 // end-codegen

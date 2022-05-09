@@ -28,7 +28,8 @@ import {
     UserStatusUpdate,
     PollVoteUpdate,
     UserTypingUpdate,
-} from '@mtcute/client'
+    BotChatJoinRequestUpdate,
+} from "@mtcute/client";
 import { MaybeArray } from '@mtcute/core'
 import { UpdateState } from './state'
 
@@ -437,6 +438,7 @@ export namespace filters {
         | ChosenInlineResult
         | CallbackQuery
         | PollVoteUpdate
+        | BotChatJoinRequestUpdate
     > => {
         if (Array.isArray(id)) {
             const index: Record<number | string, true> = {}

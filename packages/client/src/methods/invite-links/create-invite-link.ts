@@ -28,6 +28,12 @@ export async function createInviteLink(
          * Integer in range `[1, 99999]` or `Infinity`, defaults to `Infinity`
          */
         usageLimit?: number
+
+        /**
+         * Whether users to be joined via this link need to be
+         * approved by an admin
+         */
+        withApproval?: boolean
     }
 ): Promise<ChatInviteLink> {
     if (!params) params = {}
@@ -37,6 +43,7 @@ export async function createInviteLink(
         peer: await this.resolvePeer(chatId),
         expireDate: normalizeDate(params.expires),
         usageLimit: params.usageLimit,
+        requestNeeded: params.withApproval
     })
 
     return new ChatInviteLink(this, res)
