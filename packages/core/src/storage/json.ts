@@ -1,5 +1,4 @@
 import { MemoryStorage } from './memory'
-import bigInt from 'big-integer'
 import { longFromFastString, longToFastString } from '../utils'
 
 /**
