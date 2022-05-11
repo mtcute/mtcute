@@ -45,4 +45,15 @@ export class PeersIndex {
 
         return r
     }
+
+    get(peer: tl.TypePeer): tl.TypeUser | tl.TypeChat {
+        switch (peer._) {
+            case 'peerUser':
+                return this.user(peer.userId)
+            case 'peerChat':
+                return this.chat(peer.chatId)
+            case 'peerChannel':
+                return this.chat(peer.channelId)
+        }
+    }
 }
