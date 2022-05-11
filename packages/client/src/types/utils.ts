@@ -29,7 +29,7 @@ function getAllGettersNames(obj: object): string[] {
     return getters
 }
 
-const bufferToJsonOriginal = (Buffer as any).toJSON
+const bufferToJsonOriginal = Buffer.prototype.toJSON
 const bufferToJsonInspect = function (this: Buffer) { return this.toString('base64') }
 
 /**
@@ -77,7 +77,7 @@ export function makeInspectable(
         })
 
         if (!nested) {
-            (Buffer as any).toJSON = bufferToJsonOriginal
+            Buffer.prototype.toJSON = bufferToJsonOriginal
         }
 
         return ret
