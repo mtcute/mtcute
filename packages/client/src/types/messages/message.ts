@@ -1,11 +1,8 @@
 import { User, Chat, InputPeerLike, PeersIndex } from '../peers'
 import { tl } from '@mtcute/tl'
 import { BotKeyboard, ReplyMarkup } from '../bots'
-import { assertNever, getMarkedPeerId, toggleChannelIdMark } from "@mtcute/core";
-import {
-    MtArgumentError,
-    MtTypeAssertionError,
-} from '../errors'
+import { assertNever, getMarkedPeerId, toggleChannelIdMark } from '@mtcute/core'
+import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { TelegramClient } from '../../client'
 import { MessageEntity } from './message-entity'
 import { makeInspectable } from '../utils'
@@ -13,6 +10,7 @@ import { InputMediaLike, WebPage } from '../media'
 import { _messageActionFromTl, MessageAction } from './message-action'
 import { _messageMediaFromTl, MessageMedia } from './message-media'
 import { FormattedString } from '../parser'
+import { MessageReactions } from './reactions'
 
 /**
  * A message or a service message
@@ -314,7 +312,7 @@ export class Message {
             }
 
             if (r.comments) {
-                const o = (obj as unknown) as Message.MessageCommentsInfo
+                const o = obj as unknown as Message.MessageCommentsInfo
                 o.discussion = getMarkedPeerId(r.channelId!, 'channel')
                 o.repliers =
                     r.recentRepliers?.map((it) => getMarkedPeerId(it)) ?? []
@@ -488,6 +486,34 @@ export class Message {
         }
 
         return this._markup
+    }
+
+    /**
+     * Whether this message can be forwarded
+     *
+     * `false` for service mesasges and private restricted chats/chanenls
+     */
+    get canBeForwarded(): boolean {
+        return this.raw._ === 'message' && !this.raw.noforwards
+    }
+
+    private _reactions?: MessageReactions | null
+    get reactions(): MessageReactions | null {
+        if (this._reactions === undefined) {
+            if (this.raw._ === 'messageService' || !this.raw.reactions) {
+                this._reactions = null
+            } else {
+                this._reactions = new MessageReactions(
+                    this.client,
+                    this.raw.id,
+                    getMarkedPeerId(this.raw.peerId),
+                    this.raw.reactions,
+                    this._peers
+                )
+            }
+        }
+
+        return this._reactions
     }
 
     /**
@@ -890,6 +916,21 @@ export class Message {
             this.chat.inputPeer,
             this.raw.id,
             clearMentions
+        )
+    }
+
+    /**
+     * React to this message
+     *
+     * @param emoji  Reaction emoji
+     * @param big  Whether to use a big reaction
+     */
+    async react(emoji: string | null, big?: boolean): Promise<Message> {
+        return this.client.sendReaction(
+            this.chat.inputPeer,
+            this.raw.id,
+            emoji,
+            big
         )
     }
 }

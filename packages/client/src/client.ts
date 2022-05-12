@@ -33,9 +33,11 @@ import {
     MaybeDynamic,
     Message,
     MessageMedia,
+    MessageReactions,
     ParsedUpdate,
     PartialExcept,
     PartialOnly,
+    PeerReaction,
     PeersIndex,
     Photo,
     Poll,
@@ -172,19 +174,23 @@ import {
 } from './methods/messages/get-discussion-message'
 import { getHistory } from './methods/messages/get-history'
 import { getMessageGroup } from './methods/messages/get-message-group'
+import { getMessageReactions } from './methods/messages/get-message-reactions'
 import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe'
 import { getMessages } from './methods/messages/get-messages'
+import { getReactionUsers } from './methods/messages/get-reaction-users'
 import { getScheduledMessages } from './methods/messages/get-scheduled-messages'
 import { iterHistory } from './methods/messages/iter-history'
 import { _normalizeInline } from './methods/messages/normalize-inline'
 import { _parseEntities } from './methods/messages/parse-entities'
 import { pinMessage } from './methods/messages/pin-message'
 import { readHistory } from './methods/messages/read-history'
+import { readReactions } from './methods/messages/read-reactions'
 import { searchGlobal } from './methods/messages/search-global'
 import { searchMessages } from './methods/messages/search-messages'
 import { sendCopy } from './methods/messages/send-copy'
 import { sendMediaGroup } from './methods/messages/send-media-group'
 import { sendMedia } from './methods/messages/send-media'
+import { sendReaction } from './methods/messages/send-reaction'
 import { sendScheduled } from './methods/messages/send-scheduled'
 import { sendText } from './methods/messages/send-text'
 import { sendTyping } from './methods/messages/send-typing'
@@ -2431,6 +2437,36 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getMessageGroup(chatId: InputPeerLike, message: number): Promise<Message[]>
     /**
+     * Get reactions to a message.
+     *
+     * > Apps should short-poll reactions for visible messages
+     * > (that weren't sent by the user) once every 15-30 seconds,
+     * > but only if `message.reactions` is set
+     *
+     * @param chatId  ID of the chat with the message
+     * @param messages  Message ID
+     * @returns  Reactions to the corresponding message, or `null` if there are none
+     */
+    getMessageReactions(
+        chatId: InputPeerLike,
+        messages: number
+    ): Promise<MessageReactions | null>
+    /**
+     * Get reactions to messages.
+     *
+     * > Apps should short-poll reactions for visible messages
+     * > (that weren't sent by the user) once every 15-30 seconds,
+     * > but only if `message.reactions` is set
+     *
+     * @param chatId  ID of the chat with messages
+     * @param messages  Message IDs
+     * @returns  Reactions to corresponding messages, or `null` if there are none
+     */
+    getMessageReactions(
+        chatId: InputPeerLike,
+        messages: number[]
+    ): Promise<(MessageReactions | null)[]>
+    /**
      * Get a single message from PM or legacy group by its ID.
      * For channels, use {@link getMessages}.
      *
@@ -2496,6 +2532,37 @@ export interface TelegramClient extends BaseTelegramClient {
         messageIds: number[],
         fromReply?: boolean
     ): Promise<(Message | null)[]>
+    /**
+     * Get users who have reacted to the message.
+     *
+     * @param chatId  Chat ID
+     * @param messageId  Message ID
+     * @param params
+     */
+    getReactionUsers(
+        chatId: InputPeerLike,
+        messageId: number,
+        params?: {
+            /**
+             * Get only reactions with the specified emoji
+             */
+            emoji?: string
+
+            /**
+             * Limit the number of events returned.
+             *
+             * Defaults to `Infinity`, i.e. all events are returned
+             */
+            limit?: number
+
+            /**
+             * Chunk size, usually not needed.
+             *
+             * Defaults to `100`
+             */
+            chunkSize?: number
+        }
+    ): AsyncIterableIterator<PeerReaction>
     /**
      * Get a single scheduled message in chat by its ID
      *
@@ -2603,6 +2670,12 @@ export interface TelegramClient extends BaseTelegramClient {
         message?: number,
         clearMentions?: boolean
     ): Promise<void>
+    /**
+     * Mark all reactions in chat as read.
+     *
+     * @param chatId  Chat ID
+     */
+    readReactions(chatId: InputPeerLike): Promise<void>
     /**
      * Search for messages globally from all of your chats
      *
@@ -2978,6 +3051,21 @@ export interface TelegramClient extends BaseTelegramClient {
              */
             clearDraft?: boolean
         }
+    ): Promise<Message>
+    /**
+     * Send or remove a reaction.
+     *
+     * @param chatId  Chat ID with the message to react to
+     * @param message  Message ID to react to
+     * @param emoji  Reaction emoji (or `null` to remove)
+     * @param big  (default: `false`) Whether to use a big reaction
+     * @returns  Message to which the reaction was sent
+     */
+    sendReaction(
+        chatId: InputPeerLike,
+        message: number,
+        emoji: string | null,
+        big?: boolean
     ): Promise<Message>
     /**
      * Send s previously scheduled message.
@@ -3891,19 +3979,23 @@ export class TelegramClient extends BaseTelegramClient {
     getDiscussionMessage = getDiscussionMessage
     getHistory = getHistory
     getMessageGroup = getMessageGroup
+    getMessageReactions = getMessageReactions
     getMessagesUnsafe = getMessagesUnsafe
     getMessages = getMessages
+    getReactionUsers = getReactionUsers
     getScheduledMessages = getScheduledMessages
     iterHistory = iterHistory
     protected _normalizeInline = _normalizeInline
     protected _parseEntities = _parseEntities
     pinMessage = pinMessage
     readHistory = readHistory
+    readReactions = readReactions
     searchGlobal = searchGlobal
     searchMessages = searchMessages
     sendCopy = sendCopy
     sendMediaGroup = sendMediaGroup
     sendMedia = sendMedia
+    sendReaction = sendReaction
     sendScheduled = sendScheduled
     sendText = sendText
     sendTyping = sendTyping

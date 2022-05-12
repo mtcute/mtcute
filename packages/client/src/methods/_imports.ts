@@ -55,6 +55,8 @@ import {
     BotStoppedUpdate,
     BotChatJoinRequestUpdate,
     ChatJoinRequestUpdate,
+    PeerReaction,
+    MessageReactions,
 } from '../types'
 
 // @copy
