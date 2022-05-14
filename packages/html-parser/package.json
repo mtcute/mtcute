@@ -18,7 +18,7 @@
         "long": "^4.0.0"
     },
     "devDependencies": {
-        "@mtcute/client": "^1.0.0",
+        "@mtcute/client": "workspace:^1.0.0",
         "@types/long": "^4.0.1"
     }
 }

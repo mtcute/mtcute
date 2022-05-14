@@ -28,6 +28,7 @@
     },
     "devDependencies": {
         "@types/ws": "^7.4.1",
+        "@types/long": "^4.0.2",
         "ws": "^7.4.4"
     }
 }

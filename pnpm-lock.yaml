@@ -74,6 +74,7 @@ importers:
       '@mtcute/tl': workspace:142.0.0
       '@mtcute/tl-runtime': workspace:^1.0.0
       '@types/events': ^3.0.0
+      '@types/long': ^4.0.2
       '@types/node': ^15.12.1
       '@types/ws': ^7.4.1
       big-integer: 1.6.48
@@ -89,6 +90,7 @@ importers:
       events: 3.2.0
       long: 4.0.0
     devDependencies:
+      '@types/long': 4.0.2
       '@types/ws': 7.4.7
       ws: 7.5.7
 
@@ -130,7 +132,7 @@ importers:
 
   packages/html-parser:
     specifiers:
-      '@mtcute/client': ^1.0.0
+      '@mtcute/client': workspace:^1.0.0
       '@mtcute/tl': workspace:142.0.0
       '@types/long': ^4.0.1
       htmlparser2: ^6.0.1
