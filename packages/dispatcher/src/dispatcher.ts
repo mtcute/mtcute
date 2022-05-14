@@ -996,7 +996,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         handler?: any,
         group?: number
     ): void {
-        if (typeof handler === 'number') {
+        if (typeof handler === 'number' || typeof handler === 'undefined') {
             this.addUpdateHandler(
                 {
                     name,
