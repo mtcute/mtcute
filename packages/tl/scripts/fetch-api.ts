@@ -132,6 +132,8 @@ async function updatePackageVersion(
         if (res.trim().toLowerCase() === 'n') {
             return
         }
+
+        minor += 1
     } else {
         major = currentLayer
         minor = 0

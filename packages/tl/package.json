@@ -1,6 +1,6 @@
 {
     "name": "@mtcute/tl",
-    "version": "142.0.0",
+    "version": "142.1.0",
     "description": "TL schema used for MTCute",
     "main": "index.js",
     "author": "Alisa Sireneva <me@tei.su>",

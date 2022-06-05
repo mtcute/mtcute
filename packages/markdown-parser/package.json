@@ -13,7 +13,7 @@
         "docs": "npx typedoc"
     },
     "dependencies": {
-        "@mtcute/tl": "workspace:142.0.0",
+        "@mtcute/tl": "workspace:142.1.0",
         "long": "^4.0.0"
     },
     "devDependencies": {
