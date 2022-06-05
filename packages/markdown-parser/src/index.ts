@@ -26,12 +26,18 @@ const TO_BE_ESCAPED = /[*_\-~`[\\\]|]/g
  */
 export function md(
     strings: TemplateStringsArray,
-    ...sub: (string | FormattedString<'markdown'>)[]
+    ...sub: (
+        | string
+        | FormattedString<'markdown'>
+        | boolean
+        | undefined
+        | null
+    )[]
 ): FormattedString<'markdown'> {
     let str = ''
     sub.forEach((it, idx) => {
-        if (typeof it === 'string')
-            it = MarkdownMessageEntityParser.escape(it as string)
+        if (typeof it === 'boolean' || !it) return
+        if (typeof it === 'string') it = MarkdownMessageEntityParser.escape(it)
         else {
             if (it.mode && it.mode !== 'markdown')
                 throw new Error(`Incompatible parse mode: ${it.mode}`)
@@ -249,8 +255,13 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
 
             if (c === text[pos + 1]) {
                 // maybe (?) start or end of an entity
-                let type: 'Italic' | 'Bold' | 'Underline' | 'Strike' | 'Spoiler' | null =
-                    null
+                let type:
+                    | 'Italic'
+                    | 'Bold'
+                    | 'Underline'
+                    | 'Strike'
+                    | 'Spoiler'
+                    | null = null
                 switch (c) {
                     case '_':
                         type = 'Italic'
