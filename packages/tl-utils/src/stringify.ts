@@ -2,9 +2,9 @@ import { TlEntry } from './types'
 
 function normalizeType(s: string): string {
     return s
+        .replace(/^bytes/, 'string')
         .replace(/</g, ' ')
         .replace(/>/g, '')
-        .replace('bytes', 'string')
         .replace('int53', 'long')
 }
 
