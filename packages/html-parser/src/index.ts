@@ -26,8 +26,12 @@ export function html(
     sub.forEach((it, idx) => {
         if (typeof it === 'boolean' || !it) return
 
-        if (typeof it === 'string') it = HtmlMessageEntityParser.escape(it)
-        else {
+        if (typeof it === 'string') {
+            it = HtmlMessageEntityParser.escape(
+                it,
+                !!str.match(/=['"]$/)
+            )
+        } else {
             if (it.mode && it.mode !== 'html')
                 throw new Error(`Incompatible parse mode: ${it.mode}`)
             it = it.value
