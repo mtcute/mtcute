@@ -151,7 +151,7 @@ export class Conversation {
      * @param params
      */
     async sendText(
-        text: string | FormattedString,
+        text: string | FormattedString<any>,
         params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
         if (!this._started) {

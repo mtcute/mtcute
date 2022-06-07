@@ -576,7 +576,7 @@ export class Message {
      * @param params
      */
     answerText(
-        text: string | FormattedString,
+        text: string | FormattedString<any>,
         params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
         return this.client.sendText(this.chat.inputPeer, text, params)
@@ -621,7 +621,7 @@ export class Message {
      * @param params
      */
     replyText(
-        text: string | FormattedString,
+        text: string | FormattedString<any>,
         params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
         if (!params) params = {}
@@ -676,7 +676,7 @@ export class Message {
      * @param params
      */
     commentText(
-        text: string | FormattedString,
+        text: string | FormattedString<any>,
         params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
         if (this.chat.type !== 'channel') {
@@ -809,7 +809,7 @@ export class Message {
      * @link TelegramClient.editMessage
      */
     editText(
-        text: string | FormattedString,
+        text: string | FormattedString<any>,
         params?: Omit<Parameters<TelegramClient['editMessage']>[2], 'text'>
     ): Promise<Message> {
         return this.edit({

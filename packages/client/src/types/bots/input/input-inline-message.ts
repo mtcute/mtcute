@@ -19,7 +19,7 @@ export interface InputInlineMessageText {
     /**
      * Text of the message
      */
-    text: string | FormattedString
+    text: string | FormattedString<any>
 
     /**
      * Text markup entities.
@@ -48,7 +48,7 @@ export interface InputInlineMessageMedia {
     /**
      * Caption for the media
      */
-    text?: string | FormattedString
+    text?: string | FormattedString<any>
 
     /**
      * Caption markup entities.

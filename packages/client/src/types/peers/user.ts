@@ -376,7 +376,7 @@ export class User {
      * @param params
      */
     sendText(
-        text: string | FormattedString,
+        text: string | FormattedString<any>,
         params?: Parameters<TelegramClient['sendText']>[2]
     ): ReturnType<TelegramClient['sendText']> {
         return this.client.sendText(this.inputPeer, text, params)
