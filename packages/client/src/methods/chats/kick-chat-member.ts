@@ -1,6 +1,7 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
 import { isInputPeerChannel } from '../../utils/peer-utils'
+import { sleep } from '@mtcute/core'
 
 /**
  * Kick a user from a chat.
@@ -23,6 +24,8 @@ export async function kickChatMember(
 
     // not needed in case this is a legacy group
     if (isInputPeerChannel(chat)) {
+        // i fucking love telegram serverside race conditions
+        await sleep(1000)
         await this.unbanChatMember(chat, user)
     }
 }
