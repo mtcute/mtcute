@@ -43,3 +43,38 @@ export async function createAesIgeForMessage(
 
     return crypto.createAesIge(key, iv)
 }
+
+export async function createAesIgeForMessageOld(
+    crypto: ICryptoProvider,
+    authKey: Buffer,
+    messageKey: Buffer,
+    client: boolean
+): Promise<IEncryptionScheme> {
+    const x = client ? 0 : 8
+    const sha1a = await crypto.sha1(
+        Buffer.concat([messageKey, authKey.slice(x, 32 + x)])
+    )
+    const sha1b = await crypto.sha1(
+        Buffer.concat([authKey.slice(32 + x, 48 + x), messageKey, authKey.slice(48 + x, 64 + x)])
+    )
+    const sha1c = await crypto.sha1(
+        Buffer.concat([authKey.slice(64 + x, 96 + x), messageKey])
+    )
+    const sha1d = await crypto.sha1(
+        Buffer.concat([messageKey, authKey.slice(96 + x, 128 + x)])
+    )
+
+    const key = Buffer.concat([
+        sha1a.slice(0, 8),
+        sha1b.slice(8, 20),
+        sha1c.slice(4, 16),
+    ])
+    const iv = Buffer.concat([
+        sha1a.slice(8, 20),
+        sha1b.slice(0, 8),
+        sha1c.slice(16, 20),
+        sha1d.slice(0, 8),
+    ])
+
+    return crypto.createAesIge(key, iv)
+}
