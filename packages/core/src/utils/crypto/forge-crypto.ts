@@ -59,15 +59,17 @@ export class ForgeCryptoProvider extends BaseCryptoProvider {
     pbkdf2(
         password: Buffer,
         salt: Buffer,
-        iterations: number
+        iterations: number,
+        keylen = 64,
+        algo = 'sha512'
     ): MaybeAsync<Buffer> {
         return new Promise((resolve, reject) =>
             forge.pkcs5.pbkdf2(
                 password.toString('binary'),
                 salt.toString('binary'),
                 iterations,
-                64,
-                forge.md.sha512.create(),
+                keylen,
+                forge.md[algo].create(),
                 (err: Error | null, buf: string) =>
                     err !== null
                         ? reject(err)

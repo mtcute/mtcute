@@ -53,10 +53,13 @@ export abstract class BaseCryptoProvider implements ICryptoProvider {
 
     abstract createAesEcb(key: Buffer): IEncryptionScheme
 
+    // algo: sha1 or sha512 (default sha512)
     abstract pbkdf2(
         password: Buffer,
         salt: Buffer,
-        iterations: number
+        iterations: number,
+        keylen?: number, // = 64
+        algo?: string
     ): MaybeAsync<Buffer>
 
     abstract sha1(data: Buffer): MaybeAsync<Buffer>

@@ -44,15 +44,17 @@ export class NodeCryptoProvider extends BaseCryptoProvider {
     pbkdf2(
         password: Buffer,
         salt: Buffer,
-        iterations: number
+        iterations: number,
+        keylen = 64,
+        algo = 'sha512',
     ): MaybeAsync<Buffer> {
         return new Promise((resolve, reject) =>
             pbkdf2(
                 password,
                 salt,
                 iterations,
-                64,
-                'sha512',
+                keylen,
+                algo,
                 (err: Error | null, buf: Buffer) =>
                     err !== null ? reject(err) : resolve(buf)
             )
