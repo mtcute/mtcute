@@ -319,9 +319,15 @@ export class Chat {
      * Returned only in {@link TelegramClient.getFullChat}
      */
     get inviteLink(): string | null {
-        return this.fullPeer && this.fullPeer._ !== 'userFull'
-            ? this.fullPeer.exportedInvite?.link ?? null
-            : null
+        if (this.fullPeer && this.fullPeer._ !== 'userFull') {
+            switch (this.fullPeer.exportedInvite?._) {
+                case 'chatInvitePublicJoinRequests':
+                    return null
+                case 'chatInviteExported':
+                    return this.fullPeer.exportedInvite.link
+            }
+        }
+        return null
     }
 
     /**

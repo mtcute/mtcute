@@ -120,21 +120,25 @@ export async function* getDialogs(
     if (!params) params = {}
 
     // fetch folder if needed
-    let filters: tl.RawDialogFilter | undefined
+    let filters: tl.TypeDialogFilter | undefined
     if (
         typeof params.folder === 'string' ||
         typeof params.folder === 'number'
     ) {
         const folders = await this.getFolders()
-        const found = folders.find(
-            (it) => it.id === params!.folder || it.title === params!.folder
-        )
+        const found = folders.find((it) => {
+            if (it._ === 'dialogFilterDefault' ) {
+                return params!.folder === 0
+            }
+
+            return it.id === params!.folder || it.title === params!.folder
+        })
         if (!found)
             throw new MtArgumentError(
                 `Could not find folder ${params.folder}`
             )
 
-        filters = found
+        filters = found as tl.RawDialogFilter
     } else {
         filters = params.folder
     }
@@ -147,19 +151,13 @@ export async function* getDialogs(
             }
         } else {
             filters = {
-                _: 'dialogFilter',
-                id: 0,
-                title: '',
-                pinnedPeers: [],
-                includePeers: [],
-                excludePeers: [],
-                ...params.filter,
+                _: 'dialogFilterDefault'
             }
         }
     }
 
     const fetchPinnedDialogsFromFolder = async (): Promise<tl.messages.RawPeerDialogs | null> => {
-        if (!filters || !filters.pinnedPeers.length) return null
+        if (!filters || filters._ === 'dialogFilterDefault' || !filters.pinnedPeers.length) return null
         const res = await this.call({
             _: 'messages.getPeerDialogs',
             peers: filters.pinnedPeers.map((peer) => ({
@@ -180,7 +178,7 @@ export async function* getDialogs(
     let archived = params.archived ?? 'exclude'
 
     if (filters) {
-        archived = filters.excludeArchived ? 'exclude' : 'keep'
+        archived = filters._ !== 'dialogFilterDefault' && filters.excludeArchived ? 'exclude' : 'keep'
     }
 
     if (pinned === 'only') {
@@ -205,7 +203,7 @@ export async function* getDialogs(
     let offsetDate = normalizeDate(params.offsetDate) ?? 0
     let offsetPeer = params.offsetPeer ?? { _: 'inputPeerEmpty' }
 
-    if (filters && filters.pinnedPeers.length && pinned === 'include') {
+    if (filters && filters._ !== 'dialogFilterDefault' && filters.pinnedPeers.length && pinned === 'include') {
         const res = await fetchPinnedDialogsFromFolder()
         if (res) {
             const dialogs = this._parseDialogs(res)

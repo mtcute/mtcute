@@ -7,6 +7,7 @@
     ],
     "class": {
         "attachMenuBot": ["bot_id"],
+        "autoDownloadSettings": ["video_size_max", "file_size_max"],
         "botInfo": ["user_id"],
         "channel": ["id"],
         "channelAdminLogEvent": ["user_id"],
@@ -33,9 +34,12 @@
         "chatParticipantsForbidden": ["chat_id"],
         "contact": ["user_id"],
         "contactStatus": ["user_id"],
+        "document": ["size"],
         "encryptedChat": ["admin_id", "participant_id"],
         "encryptedChatRequested": ["admin_id", "participant_id"],
         "encryptedChatWaiting": ["admin_id", "participant_id"],
+        "encryptedFile": ["size"],
+        "fileHash": ["offset"],
         "highScore": ["user_id"],
         "importedContact": ["user_id"],
         "inputChannel": ["channel_id"],
@@ -80,6 +84,7 @@
         "privacyValueDisallowUsers": ["users"],
         "recentMeUrlChat": ["chat_id"],
         "recentMeUrlUser": ["user_id"],
+        "secureFile": ["size"],
         "statsGroupTopAdmin": ["user_id"],
         "statsGroupTopInviter": ["user_id"],
         "statsGroupTopPoster": ["user_id"],
@@ -134,6 +139,7 @@
     "method": {
         "account.acceptAuthorization": ["bot_id"],
         "account.getAuthorizationForm": ["bot_id"],
+        "account.initTakeoutSession": ["file_max_size"],
         "account.registerDevice": ["other_uids"],
         "account.unregisterDevice": ["other_uids"],
         "messages.addChatUser": ["chat_id"],
@@ -145,8 +151,13 @@
         "messages.getAllChats": ["except_ids"],
         "messages.getChats": ["id"],
         "messages.getCommonChats": ["max_id"],
+        "messages.getDocumentByHash": ["size"],
         "messages.getFullChat": ["chat_id"],
         "messages.migrateChat": ["chat_id"],
+        "upload.getCdnFile": ["offset"],
+        "upload.getCdnFileHashes": ["offset"],
+        "upload.getFile": ["offset"],
+        "upload.getFileHashes": ["offset"],
         "_": "Dummy line teehee~"
     }
 }

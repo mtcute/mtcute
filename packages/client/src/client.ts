@@ -142,6 +142,7 @@ import { getDialogs } from './methods/dialogs/get-dialogs'
 import { getFolders } from './methods/dialogs/get-folders'
 import { getPeerDialogs } from './methods/dialogs/get-peer-dialogs'
 import { _parseDialogs } from './methods/dialogs/parse-dialogs'
+import { setFoldersOrder } from './methods/dialogs/set-folders'
 import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
 import { downloadAsIterable } from './methods/files/download-iterable'
@@ -1743,7 +1744,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get list of folders.
      */
-    getFolders(): Promise<tl.RawDialogFilter[]>
+    getFolders(): Promise<tl.TypeDialogFilter[]>
     /**
      * Get dialogs with certain peers.
      *
@@ -1756,6 +1757,13 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param peers  Peers for which to fetch dialogs.
      */
     getPeerDialogs(peers: InputPeerLike[]): Promise<Dialog[]>
+    /**
+     * Reorder folders
+     *
+     * Order is folder's ID (0 = default folder)
+     *
+     */
+    setFoldersOrder(order: number[]): Promise<void>
     /**
      * Download a file and return its contents as a Buffer.
      *
@@ -3949,6 +3957,7 @@ export class TelegramClient extends BaseTelegramClient {
     getFolders = getFolders
     getPeerDialogs = getPeerDialogs
     protected _parseDialogs = _parseDialogs
+    setFoldersOrder = setFoldersOrder
     downloadAsBuffer = downloadAsBuffer
     downloadToFile = downloadToFile
     downloadAsIterable = downloadAsIterable

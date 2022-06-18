@@ -2,9 +2,9 @@ import { TelegramClient } from '../../client'
 import {
     ChatInviteLink,
     InputPeerLike,
-    MtInvalidPeerTypeError,
-    PeersIndex,
-} from '../../types'
+    MtInvalidPeerTypeError, MtTypeAssertionError,
+    PeersIndex
+} from "../../types";
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
 
@@ -75,6 +75,9 @@ export async function* getInviteLinks(
         const peers = PeersIndex.from(res)
 
         const last = res.invites[res.invites.length - 1]
+        if (last._ === 'chatInvitePublicJoinRequests') {
+            throw new MtTypeAssertionError('getInviteLinks', 'chatInviteExported', last._)
+        }
         offsetDate = last.date
         offsetLink = last.link
 

@@ -49,9 +49,13 @@ export class Dialog {
      * @param excludePinned  Whether to exclude pinned folders
      */
     static filterFolder(
-        folder: tl.RawDialogFilter,
+        folder: tl.TypeDialogFilter,
         excludePinned = true
     ): (val: Dialog) => boolean {
+        if (folder._ === 'dialogFilterDefault') {
+            return () => true
+        }
+
         const pinned: Record<number, true> = {}
         const include: Record<number, true> = {}
         const exclude: Record<number, true> = {}
@@ -171,8 +175,6 @@ export class Dialog {
     private _lastMessage?: Message
     /**
      * The latest message sent in this chat
-     *
-     * Throws `MessageNotFoundError` if it was not found
      */
     get lastMessage(): Message {
         if (!this._lastMessage) {

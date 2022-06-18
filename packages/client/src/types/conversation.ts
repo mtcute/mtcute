@@ -102,8 +102,13 @@ export class Conversation {
         this._chatId = getMarkedPeerId(this._inputPeer)
 
         const dialog = await this.client.getPeerDialogs(this._inputPeer)
-        this._lastMessage = this._lastReceivedMessage = dialog.lastMessage.id
-
+        try {
+            this._lastMessage = this._lastReceivedMessage = dialog.lastMessage.id
+        } catch (e) {
+            if (e instanceof tl.errors.MessageNotFoundError) {
+                this._lastMessage = this._lastReceivedMessage = 0
+            } else throw e
+        }
         this.client.on('new_message', this._onNewMessage)
         this.client.on('edit_message', this._onEditMessage)
         this.client.on('history_read', this._onHistoryRead)

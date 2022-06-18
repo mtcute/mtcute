@@ -23,7 +23,14 @@ export async function getPrimaryInviteLink(
         revoked: false,
     })
 
-    if (!res.invites[0]?.permanent)
+    if (res.invites[0]?._ !== 'chatInviteExported')
+        throw new MtTypeAssertionError(
+            'messages.getExportedChatInvites (@ .invites[0])',
+            'chatInviteExported',
+            res.invites[0]?._
+        )
+
+    if (!res.invites[0].permanent)
         throw new MtTypeAssertionError(
             'messages.getExportedChatInvites (@ .invites[0].permanent)',
             'true',

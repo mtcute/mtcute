@@ -19,13 +19,16 @@ export async function editFolder(
     folder: tl.RawDialogFilter | number | string,
     modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>
 ): Promise<tl.RawDialogFilter> {
+    if (folder === 0) {
+        throw new MtArgumentError('Cannot modify default folder')
+    }
     if (typeof folder === 'number' || typeof folder === 'string') {
         const old = await this.getFolders()
-        const found = old.find((it) => it.id === folder || it.title === folder)
+        const found = old.find((it) => it._ === 'dialogFilter' && (it.id === folder || it.title === folder))
         if (!found)
             throw new MtArgumentError(`Could not find a folder ${folder}`)
 
-        folder = found
+        folder = found as tl.RawDialogFilter
     }
 
     const filter: tl.RawDialogFilter = {
