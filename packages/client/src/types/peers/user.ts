@@ -105,6 +105,11 @@ export class User {
         return this.raw.support!
     }
 
+    /** Whether this user has Premium subscription */
+    get isPremium(): boolean {
+        return this.raw.premium!
+    }
+
     /** User's or bot's first name */
     get firstName(): string {
         return this.raw.firstName ?? 'Deleted Account'

@@ -437,6 +437,18 @@ export class Message {
         return this._media!
     }
 
+    /**
+     * Whether this is a premium media
+     * (e.g. >2gb file or fullscreen sticker)
+     */
+    get isPremiumMedia(): boolean {
+        return (
+            this.raw._ === 'message' &&
+            this.raw.media?._ === 'messageMediaDocument' &&
+            this.raw.media.nopremium!
+        )
+    }
+
     private _markup?: ReplyMarkup | null
     /**
      * Reply markup provided with this message, if any.
