@@ -316,6 +316,8 @@ export async function forwardMessages(
             silent: params.silent,
             schedule: params.schedule,
             clearDraft: params.clearDraft,
+            forbidForwards: params.forbidForwards,
+            sendAs: params.sendAs
         })
     } else if (params.captionMedia) {
         captionMessage = await this.sendMedia(toPeer, params.captionMedia, {
@@ -323,6 +325,8 @@ export async function forwardMessages(
             silent: params.silent,
             schedule: params.schedule,
             clearDraft: params.clearDraft,
+            forbidForwards: params.forbidForwards,
+            sendAs: params.sendAs
         })
     }
 
