@@ -95,6 +95,14 @@ export async function forwardMessages(
          * Whether to forward without caption (implies {@link noAuthor})
          */
         noCaption?: boolean
+
+        /**
+         * Whether to disallow further forwards of this message.
+         *
+         * Only for bots, works even if the target chat does not
+         * have content protection.
+         */
+        forbidForwards?: boolean
     }
 ): Promise<Message>
 
@@ -184,6 +192,14 @@ export async function forwardMessages(
          * Whether to forward without caption (implies {@link noAuthor})
          */
         noCaption?: boolean
+
+        /**
+         * Whether to disallow further forwards of this message.
+         *
+         * Only for bots, works even if the target chat does not
+         * have content protection.
+         */
+        forbidForwards?: boolean
     }
 ): Promise<MaybeArray<Message>>
 
@@ -258,6 +274,14 @@ export async function forwardMessages(
          * Whether to forward without caption (implies {@link noAuthor})
          */
         noCaption?: boolean
+
+        /**
+         * Whether to disallow further forwards of this message.
+         *
+         * Only for bots, works even if the target chat does not
+         * have content protection.
+         */
+        forbidForwards?: boolean
     }
 ): Promise<MaybeArray<Message>> {
     if (!params) params = {}
@@ -309,6 +333,7 @@ export async function forwardMessages(
         ),
         dropAuthor: params.noAuthor,
         dropMediaCaptions: params.noCaption,
+        noforwards: params.forbidForwards
     })
 
     assertIsUpdatesGroup('messages.forwardMessages', res)

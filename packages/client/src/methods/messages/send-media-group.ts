@@ -105,6 +105,14 @@ export async function sendMediaGroup(
          * Defaults to `false`
          */
         clearDraft?: boolean
+
+        /**
+         * Whether to disallow further forwards of this message.
+         *
+         * Only for bots, works even if the target chat does not
+         * have content protection.
+         */
+        forbidForwards?: boolean
     }
 ): Promise<Message[]> {
     if (!params) params = {}
@@ -180,6 +188,7 @@ export async function sendMediaGroup(
         scheduleDate: normalizeDate(params.schedule),
         replyMarkup,
         clearDraft: params.clearDraft,
+        noforwards: params.forbidForwards
     })
 
     assertIsUpdatesGroup('_findMessageInUpdate', res)

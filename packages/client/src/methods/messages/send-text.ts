@@ -101,6 +101,14 @@ export async function sendText(
          * Defaults to `false`
          */
         clearDraft?: boolean
+
+        /**
+         * Whether to disallow further forwards of this message.
+         *
+         * Only for bots, works even if the target chat does not
+         * have content protection.
+         */
+        forbidForwards?: boolean
     }
 ): Promise<Message> {
     if (!params) params = {}
@@ -146,10 +154,8 @@ export async function sendText(
         message,
         entities,
         clearDraft: params.clearDraft,
+        noforwards: params.forbidForwards
     })
-    // } catch (e) {
-    //
-    // }
 
     if (res._ === 'updateShortSentMessage') {
         const msg: tl.RawMessage = {

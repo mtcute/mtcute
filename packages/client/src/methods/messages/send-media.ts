@@ -114,6 +114,14 @@ export async function sendMedia(
          * Defaults to `false`
          */
         clearDraft?: boolean
+
+        /**
+         * Whether to disallow further forwards of this message.
+         *
+         * Only for bots, works even if the target chat does not
+         * have content protection.
+         */
+        forbidForwards?: boolean
     }
 ): Promise<Message> {
     if (!params) params = {}
@@ -170,6 +178,7 @@ export async function sendMedia(
         message,
         entities,
         clearDraft: params.clearDraft,
+        noforwards: params.forbidForwards
     })
 
     const msg = this._findMessageInUpdate(res)
