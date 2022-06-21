@@ -31,18 +31,70 @@ export async function forwardMessages(
     message: number,
     params?: {
         /**
-         * Whether to forward this message silently.
+         * Optionally, a caption for your forwarded message(s).
+         * It will be sent as a separate message before the forwarded messages.
+         *
+         * You can either pass `caption` or `captionMedia`, passing both will
+         * result in an error
+         */
+        caption?: string | FormattedString<any>
+
+        /**
+         * Optionally, a media caption for your forwarded message(s).
+         * It will be sent as a separate message before the forwarded messages.
+         *
+         * You can either pass `caption` or `captionMedia`, passing both will
+         * result in an error
+         */
+        captionMedia?: InputMediaLike
+
+        /**
+         * Parse mode to use to parse entities in caption.
+         * Defaults to current default parse mode (if any).
+         *
+         * Passing `null` will explicitly disable formatting.
+         */
+        parseMode?: string | null
+
+        /**
+         * List of formatting entities in caption to use instead
+         * of parsing via a parse mode.
+         *
+         * **Note:** Passing this makes the method ignore {@link parseMode}
+         */
+        entities?: tl.TypeMessageEntity[]
+
+        /**
+         * Whether to forward silently (also applies to caption message).
          */
         silent?: boolean
 
         /**
-         * If set, the message will be scheduled to this date.
+         * If set, the forwarding will be scheduled to this date
+         * (also applies to caption message).
          * When passing a number, a UNIX time in ms is expected.
          *
          * You can also pass `0x7FFFFFFE`, this will send the message
          * once the peer is online
          */
         schedule?: Date | number
+
+        /**
+         * Whether to clear draft after sending this message (only used for caption)
+         *
+         * Defaults to `false`
+         */
+        clearDraft?: boolean
+
+        /**
+         * Whether to forward without author
+         */
+        noAuthor?: boolean
+
+        /**
+         * Whether to forward without caption (implies {@link noAuthor})
+         */
+        noCaption?: boolean
     }
 ): Promise<Message>
 
@@ -122,6 +174,16 @@ export async function forwardMessages(
          * Defaults to `false`
          */
         clearDraft?: boolean
+
+        /**
+         * Whether to forward without author
+         */
+        noAuthor?: boolean
+
+        /**
+         * Whether to forward without caption (implies {@link noAuthor})
+         */
+        noCaption?: boolean
     }
 ): Promise<MaybeArray<Message>>
 
@@ -186,6 +248,16 @@ export async function forwardMessages(
          * Defaults to `false`
          */
         clearDraft?: boolean
+
+        /**
+         * Whether to forward without author
+         */
+        noAuthor?: boolean
+
+        /**
+         * Whether to forward without caption (implies {@link noAuthor})
+         */
+        noCaption?: boolean
     }
 ): Promise<MaybeArray<Message>> {
     if (!params) params = {}
@@ -235,6 +307,8 @@ export async function forwardMessages(
         randomId: [...Array((messages as number[]).length)].map(() =>
             randomLong()
         ),
+        dropAuthor: params.noAuthor,
+        dropMediaCaptions: params.noCaption,
     })
 
     assertIsUpdatesGroup('messages.forwardMessages', res)
