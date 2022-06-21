@@ -31,7 +31,14 @@ export class Thumbnail extends FileLocation {
     static readonly THUMB_STRIP = 'i'
     static readonly THUMB_OUTLINE = 'j'
 
-    readonly raw: tl.TypePhotoSize
+    /** Animated profile pictures preview */
+    static readonly THUMB_VIDEO_PROFILE = 'u'
+    /** Trimmed and downscaled video previews */
+    static readonly THUMB_VIDEO_PREVIEW = 'v'
+    /** Fullscreen animation for Premium stickers */
+    static readonly THUMB_VIDEO_FULLSCREEN = 'f'
+
+    readonly raw: tl.TypePhotoSize | tl.TypeVideoSize
 
     /**
      * Thumbnail width
@@ -51,7 +58,7 @@ export class Thumbnail extends FileLocation {
     constructor(
         client: TelegramClient,
         media: tl.RawPhoto | tl.RawDocument | tl.RawStickerSet,
-        sz: tl.TypePhotoSize
+        sz: tl.TypePhotoSize | tl.TypeVideoSize
     ) {
         switch (sz._) {
             case 'photoSizeEmpty':
@@ -87,9 +94,9 @@ export class Thumbnail extends FileLocation {
                         stickerset: {
                             _: 'inputStickerSetID',
                             id: media.id,
-                            accessHash: media.accessHash
+                            accessHash: media.accessHash,
                         },
-                        thumbVersion: media.thumbVersion!
+                        thumbVersion: media.thumbVersion!,
                     }
                 } else {
                     location = {
@@ -100,12 +107,15 @@ export class Thumbnail extends FileLocation {
                         id: media.id,
                         fileReference: media.fileReference,
                         accessHash: media.accessHash,
-                        thumbSize: sz.type,
+                        thumbSize: sz.type === 'u' ? '\x00' : sz.type,
                     }
                 }
                 width = sz.w
                 height = sz.h
-                size = sz._ === 'photoSize' ? sz.size : Math.max(...sz.sizes)
+                size =
+                    sz._ === 'photoSizeProgressive'
+                        ? Math.max(...sz.sizes)
+                        : sz.size
                 break
         }
 
@@ -123,6 +133,10 @@ export class Thumbnail extends FileLocation {
         if (sz._ === 'photoPathSize') {
             this._path = inflateSvgPath(sz.bytes)
         }
+    }
+
+    get isVideo(): boolean {
+        return this.raw._ === 'videoSize'
     }
 
     /**
@@ -152,12 +166,16 @@ export class Thumbnail extends FileLocation {
     /**
      * Get TDLib and Bot API compatible File ID
      * representing this thumbnail.
+     *
+     * > **Note:** You can't use this file id to send a thumbnail,
+     * > only to download it.
      */
     get fileId(): string {
         if (!this._fileId) {
             if (
                 this.raw._ !== 'photoSize' &&
-                this.raw._ !== 'photoSizeProgressive'
+                this.raw._ !== 'photoSizeProgressive' &&
+                this.raw._ !== 'videoSize'
             ) {
                 throw new MtArgumentError(
                     `Cannot generate a file ID for "${this.raw.type}"`
@@ -177,9 +195,9 @@ export class Thumbnail extends FileLocation {
                             _: 'stickerSetThumbnailVersion',
                             id: this._media.id,
                             accessHash: this._media.accessHash,
-                            version: this._media.thumbVersion!
-                        }
-                    }
+                            version: this._media.thumbVersion!,
+                        },
+                    },
                 })
             } else {
                 this._fileId = toFileId({
@@ -195,10 +213,12 @@ export class Thumbnail extends FileLocation {
                         accessHash: this._media.accessHash,
                         source: {
                             _: 'thumbnail',
-                            fileType: this._media._ === 'photo'
-                                ? td.FileType.Photo
-                                : td.FileType.Thumbnail,
-                            thumbnailType: this.raw.type,
+                            fileType:
+                                this._media._ === 'photo'
+                                    ? td.FileType.Photo
+                                    : td.FileType.Thumbnail,
+                            thumbnailType:
+                                this.raw.type === 'u' ? '\x00' : this.raw.type,
                         },
                     },
                 })
@@ -216,7 +236,8 @@ export class Thumbnail extends FileLocation {
         if (!this._uniqueFileId) {
             if (
                 this.raw._ !== 'photoSize' &&
-                this.raw._ !== 'photoSizeProgressive'
+                this.raw._ !== 'photoSizeProgressive' &&
+                this.raw._ !== 'videoSize'
             ) {
                 throw new MtArgumentError(
                     `Cannot generate a unique file ID for "${this.raw.type}"`
@@ -231,8 +252,8 @@ export class Thumbnail extends FileLocation {
                         _: 'stickerSetThumbnailVersion',
                         id: this._media.id,
                         accessHash: this._media.accessHash,
-                        version: this._media.thumbVersion!
-                    }
+                        version: this._media.thumbVersion!,
+                    },
                 })
             } else {
                 this._uniqueFileId = toUniqueFileId(
@@ -244,10 +265,11 @@ export class Thumbnail extends FileLocation {
                         id: this._media.id,
                         source: {
                             _: 'thumbnail',
-                            fileType: this._media._ === 'photo'
-                                ? td.FileType.Photo
-                                : td.FileType.Thumbnail,
-                            thumbnailType: this.raw.type,
+                            fileType:
+                                this._media._ === 'photo'
+                                    ? td.FileType.Photo
+                                    : td.FileType.Thumbnail,
+                            thumbnailType: this.raw.type === 'u' ? '\x00' : this.raw.type,
                         },
                     }
                 )

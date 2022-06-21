@@ -67,11 +67,16 @@ export class RawDocument extends FileLocation {
      */
     get thumbnails(): ReadonlyArray<Thumbnail> {
         if (!this._thumbnails) {
-            this._thumbnails = this.raw.thumbs
-                ? this.raw.thumbs.map(
-                      (sz) => new Thumbnail(this.client, this.raw, sz)
-                  )
-                : []
+            const arr: Thumbnail[] = []
+
+            this.raw.thumbs?.forEach((sz) =>
+                arr.push(new Thumbnail(this.client, this.raw, sz))
+            )
+            this.raw.videoThumbs?.forEach((sz) =>
+                arr.push(new Thumbnail(this.client, this.raw, sz))
+            )
+
+            this._thumbnails = arr
         }
 
         return this._thumbnails

@@ -440,8 +440,9 @@ export class Message {
     /**
      * Whether this is a premium media
      * (e.g. >2gb file or fullscreen sticker)
+     * that was forwarded without author by a non-premium user
      */
-    get isPremiumMedia(): boolean {
+    get isForwardedPremiumMedia(): boolean {
         return (
             this.raw._ === 'message' &&
             this.raw.media?._ === 'messageMediaDocument' &&

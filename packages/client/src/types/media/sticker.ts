@@ -77,6 +77,13 @@ export class Sticker extends RawDocument {
     }
 
     /**
+     * Whether this sticker is a video (WEBM) sticker
+     */
+    get isPremiumSticker(): boolean {
+        return !!this.raw.videoThumbs?.some(s => s.type === 'f')
+    }
+
+    /**
      * Whether this sticker is a valid sticker.
      *
      * If it is not, then this is probably a WEBP photo
