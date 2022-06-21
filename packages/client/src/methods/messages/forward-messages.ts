@@ -282,6 +282,11 @@ export async function forwardMessages(
          * have content protection.
          */
         forbidForwards?: boolean
+
+        /**
+         * Peer to use when sending the message.
+         */
+        sendAs?: InputPeerLike
     }
 ): Promise<MaybeArray<Message>> {
     if (!params) params = {}
@@ -333,7 +338,8 @@ export async function forwardMessages(
         ),
         dropAuthor: params.noAuthor,
         dropMediaCaptions: params.noCaption,
-        noforwards: params.forbidForwards
+        noforwards: params.forbidForwards,
+        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined
     })
 
     assertIsUpdatesGroup('messages.forwardMessages', res)

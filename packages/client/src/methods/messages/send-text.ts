@@ -109,6 +109,11 @@ export async function sendText(
          * have content protection.
          */
         forbidForwards?: boolean
+
+        /**
+         * Peer to use when sending the message.
+         */
+        sendAs?: InputPeerLike
     }
 ): Promise<Message> {
     if (!params) params = {}
@@ -154,7 +159,8 @@ export async function sendText(
         message,
         entities,
         clearDraft: params.clearDraft,
-        noforwards: params.forbidForwards
+        noforwards: params.forbidForwards,
+        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined
     })
 
     if (res._ === 'updateShortSentMessage') {
