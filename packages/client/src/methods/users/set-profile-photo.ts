@@ -22,21 +22,26 @@ export async function setProfilePhoto(
     previewSec?: number
 ): Promise<Photo> {
     // try parsing media as file id or input photo
-    if (tdFileId.isFileIdLike(media) || typeof media === 'object' && tl.isAnyInputPhoto(media)) {
+    if (
+        tdFileId.isFileIdLike(media) ||
+        (typeof media === 'object' && tl.isAnyInputPhoto(media))
+    ) {
         if (typeof media === 'string' && media.match(/^https?:\/\//)) {
-            throw new MtArgumentError('Profile photo can\'t be set from URL.')
+            throw new MtArgumentError("Profile photo can't be set from URL.")
         }
 
-        if (tdFileId.isFileIdLike(media)) {
-            media = fileIdToInputPhoto(media)
+        if (typeof media !== 'string' || !media.match(/^file:/)) {
+            if (tdFileId.isFileIdLike(media)) {
+                media = fileIdToInputPhoto(media)
+            }
+
+            const res = await this.call({
+                _: 'photos.updateProfilePhoto',
+                id: media,
+            })
+
+            return new Photo(this, res.photo as tl.RawPhoto)
         }
-
-        const res = await this.call({
-            _: 'photos.updateProfilePhoto',
-            id: media
-        })
-
-        return new Photo(this, res.photo as tl.RawPhoto)
     }
 
     const res = await this.call({

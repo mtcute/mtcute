@@ -107,7 +107,7 @@ export class Thumbnail extends FileLocation {
                         id: media.id,
                         fileReference: media.fileReference,
                         accessHash: media.accessHash,
-                        thumbSize: sz.type === 'u' ? '\x00' : sz.type,
+                        thumbSize: sz.type,
                     }
                 }
                 width = sz.w

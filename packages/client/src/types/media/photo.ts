@@ -78,6 +78,13 @@ export class Photo extends FileLocation {
         return new Date(this.raw.date * 1000)
     }
 
+    /**
+     * Whether this photo is an animated profile picture
+     */
+    get isAnimated(): boolean {
+        return !!this.raw.videoSizes?.some(s => s.type === 'u')
+    }
+
     private _thumbnails?: Thumbnail[]
     /**
      * Available thumbnails.
@@ -89,6 +96,9 @@ export class Photo extends FileLocation {
         if (!this._thumbnails) {
             this._thumbnails = this.raw.sizes.map(
                 (sz) => new Thumbnail(this.client, this.raw, sz)
+            )
+            this.raw.videoSizes?.forEach((sz) =>
+                this._thumbnails!.push(new Thumbnail(this.client, this.raw, sz))
             )
         }
 
@@ -116,9 +126,7 @@ export class Photo extends FileLocation {
     get fileId(): string {
         if (!this._fileId) {
             if (!this._bestSize) {
-                throw new MtArgumentError(
-                    'Cannot get File ID for this photo'
-                )
+                throw new MtArgumentError('Cannot get File ID for this photo')
             }
 
             this._fileId = this.getThumbnail(this._bestSize.type)!.fileId
@@ -135,12 +143,12 @@ export class Photo extends FileLocation {
     get uniqueFileId(): string {
         if (!this._uniqueFileId) {
             if (!this._bestSize) {
-                throw new MtArgumentError(
-                    'Cannot get File ID for this photo'
-                )
+                throw new MtArgumentError('Cannot get File ID for this photo')
             }
 
-            this._uniqueFileId = this.getThumbnail(this._bestSize.type)!.uniqueFileId
+            this._uniqueFileId = this.getThumbnail(
+                this._bestSize.type
+            )!.uniqueFileId
         }
 
         return this._uniqueFileId
@@ -166,9 +174,13 @@ export class Photo extends FileLocation {
     get inputMedia(): tl.TypeInputMedia {
         return {
             _: 'inputMediaPhoto',
-            id: this.inputPhoto
+            id: this.inputPhoto,
         }
     }
 }
 
-makeInspectable(Photo, ['fileSize', 'dcId', 'width', 'height'], ['inputMedia', 'inputPhoto'])
+makeInspectable(
+    Photo,
+    ['fileSize', 'dcId', 'width', 'height'],
+    ['inputMedia', 'inputPhoto']
+)
