@@ -76,12 +76,14 @@ describe('generateReaderCodeForTlEntry', () => {
         test(
             'updates.channelDifferenceEmpty#3e11affb flags:# final:flags.0?true pts:int timeout:flags.1?int flags2:# can_delete_channel:flags2.0?true = updates.ChannelDifference;',
             'var flags=r.uint();',
+            'var pts=r.int();',
+            'var timeout=flags&2?r.int():void 0;',
             'var flags2=r.uint();',
             'return{',
             "_:'updates.channelDifferenceEmpty',",
             'final:!!(flags&1),',
-            'pts:r.int(),',
-            'timeout:flags&2?r.int():void 0,',
+            "pts:pts,",
+            "timeout:timeout,",
             'canDeleteChannel:!!(flags2&1),',
             '}'
         )

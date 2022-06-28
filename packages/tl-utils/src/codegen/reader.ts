@@ -14,22 +14,31 @@ export function generateReaderCodeForTlEntry(entry: TlEntry, includeFlags = fals
         return ret + `return{_:'${entry.name}'}},`
     }
 
-    ret += `return{_:'${entry.name}',`
+    let beforeReturn = ''
+    let returnCode = `_:'${entry.name}',`
 
     const flagsFields: Record<string, 1> = {}
+    let lastFlagIdx = -1
 
-    entry.arguments.forEach((arg) => {
+    entry.arguments.forEach((arg, idx) => {
         if (arg.type === '#') {
-            const code = `var ${arg.name}=r.uint();`
-            ret = ret.replace('return{', code + 'return{')
+            lastFlagIdx = idx
             flagsFields[arg.name] = 1
+        }
+    })
+
+    entry.arguments.forEach((arg, idx) => {
+        if (arg.type === '#') {
+            beforeReturn += `var ${arg.name}=r.uint();`
 
             if (includeFlags) {
-                ret += `${arg.name}:${arg.name},`
+                returnCode += `${arg.name}:${arg.name},`
             }
 
             return
         }
+
+        const isBeforeLastFlag = lastFlagIdx > idx
 
         const argName = snakeToCamel(arg.name)
 
@@ -52,13 +61,23 @@ export function generateReaderCodeForTlEntry(entry: TlEntry, includeFlags = fals
             const condition = `${fieldName}&${1 << bitIndex}`
 
             if (arg.type === 'true') {
-                ret += `${argName}:!!(${condition}),`
+                returnCode += `${argName}:!!(${condition}),`
                 return
             }
 
-            ret += `${argName}:${condition}?`
+            if (isBeforeLastFlag) {
+                beforeReturn += `var ${argName}=${condition}?`
+                returnCode += `${argName}:${argName},`
+            } else {
+                returnCode += `${argName}:${condition}?`
+            }
         } else {
-            ret += `${argName}:`
+            if (isBeforeLastFlag) {
+                beforeReturn += `var ${argName}=`
+                returnCode += `${argName}:${argName},`
+            } else {
+                returnCode += `${argName}:`
+            }
         }
 
         let vector = false
@@ -75,20 +94,26 @@ export function generateReaderCodeForTlEntry(entry: TlEntry, includeFlags = fals
             type = 'object'
         }
 
+        let code
         if (vector) {
-            ret += `r.vector(r.${type})`
+            code = `r.vector(r.${type})`
         } else {
-            ret += `r.${type}()`
+            code = `r.${type}()`
         }
 
         if (arg.predicate) {
-            ret += ':void 0'
+            code += ':void 0'
         }
 
-        ret += ','
+
+        if (isBeforeLastFlag) {
+            beforeReturn += code + ';'
+        } else {
+            returnCode += code + ','
+        }
     })
 
-    return ret + '}},'
+    return `${ret}${beforeReturn}return{${returnCode}}},`
 }
 
 export function generateReaderCodeForTlEntries(
