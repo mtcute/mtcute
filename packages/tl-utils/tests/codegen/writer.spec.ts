@@ -83,7 +83,7 @@ describe('generateWriterCodeForTlEntry', () => {
             'if(_timeout)w.int(v.timeout);',
             'var flags2=0;',
             'if(v.canDeleteChannel===true)flags2|=1;',
-            'w.uint(flags2);',
+            'w.uint(flags2);'
         )
     })
 
@@ -119,6 +119,19 @@ describe('generateWriterCodeForTlEntry', () => {
             'w.int(v.layer);',
             "h(v,'query');",
             'w.object(v.query);'
+        )
+    })
+
+    it('generates code with raw flags for constructors with flags', () => {
+        const entry = parseTlToEntries('test flags:# flags2:# = Test;')[0]
+        expect(generateWriterCodeForTlEntry(entry, true)).eq(
+            `'${entry.name}':function(w,v){${[
+                `w.uint(${entry.id});`,
+                'var flags=v.flags;',
+                'w.uint(flags);',
+                'var flags2=v.flags2;',
+                'w.uint(flags2);',
+            ].join('')}},`
         )
     })
 })

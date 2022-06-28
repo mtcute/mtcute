@@ -54,7 +54,8 @@ function entryFullTypeName(entry: TlEntry): string {
 export function generateTypescriptDefinitionsForTlEntry(
     entry: TlEntry,
     baseNamespace = 'tl.',
-    errors?: TlErrors
+    errors?: TlErrors,
+    withFlags = false
 ): string {
     let ret = ''
 
@@ -86,17 +87,34 @@ export function generateTypescriptDefinitionsForTlEntry(
     }
     if (comment) ret += jsComment(comment) + '\n'
 
-    ret += `interface ${entryFullTypeName(entry)} {\n    _: '${entry.name}';\n`
+    let genericsString = ''
+    const genericsIndex: Record<string, 1> = {}
+    if (entry.generics?.length) {
+        genericsString = '<'
+        entry.generics.forEach((it, idx) => {
+            const tsType =
+                it.type === 'Type'
+                    ? 'tl.TlObject'
+                    : fullTypeName(it.type, baseNamespace)
 
-    const genericsIndex: Record<string, string> = {}
-    if (entry.generics) {
-        entry.generics.forEach((it) => {
-            genericsIndex[it.name] = it.type
+            genericsIndex[it.name] = 1
+            if (idx !== 0) genericsString += ', '
+            genericsString += `${it.name} extends ${tsType}`
         })
+        genericsString += '>'
     }
 
+    ret += `interface ${entryFullTypeName(entry)}${genericsString} {\n    _: '${
+        entry.name
+    }';\n`
+
     entry.arguments.forEach((arg) => {
-        if (arg.type === '#') return
+        if (arg.type === '#') {
+            if (withFlags) {
+                ret += `    ${arg.name}: number;\n`
+            }
+            return
+        }
 
         if (arg.comment) {
             ret += indent(4, jsComment(arg.comment)) + '\n'
@@ -112,12 +130,7 @@ export function generateTypescriptDefinitionsForTlEntry(
         if (type[0] === '!') type = type.substr(1)
 
         if (type in genericsIndex) {
-            type = genericsIndex[type]
-
-            if (type === 'Type') {
-                type = 'any'
-                typeFinal = true
-            }
+            typeFinal = true
         }
 
         if (!typeFinal) type = fullTypeName(arg.type, baseNamespace)

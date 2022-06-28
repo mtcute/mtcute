@@ -5,7 +5,7 @@ import { snakeToCamel } from './utils'
 /**
  * Returns code as an object entry
  */
-export function generateReaderCodeForTlEntry(entry: TlEntry): string {
+export function generateReaderCodeForTlEntry(entry: TlEntry, includeFlags = false): string {
     if (entry.id === 0) entry.id = computeConstructorIdFromEntry(entry)
 
     let ret = `${entry.id}:function(r){`
@@ -23,6 +23,11 @@ export function generateReaderCodeForTlEntry(entry: TlEntry): string {
             const code = `var ${arg.name}=r.uint();`
             ret = ret.replace('return{', code + 'return{')
             flagsFields[arg.name] = 1
+
+            if (includeFlags) {
+                ret += `${arg.name}:${arg.name},`
+            }
+
             return
         }
 

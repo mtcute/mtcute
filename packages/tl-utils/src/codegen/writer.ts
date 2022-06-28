@@ -14,7 +14,10 @@ export const TL_WRITER_PRELUDE =
  *
  * `h` (has) function should be available
  */
-export function generateWriterCodeForTlEntry(entry: TlEntry): string {
+export function generateWriterCodeForTlEntry(
+    entry: TlEntry,
+    withFlags = false
+): string {
     if (entry.id === 0) entry.id = computeConstructorIdFromEntry(entry)
 
     let ret = `'${entry.name}':function(w${
@@ -27,7 +30,7 @@ export function generateWriterCodeForTlEntry(entry: TlEntry): string {
 
     entry.arguments.forEach((arg) => {
         if (arg.type === '#') {
-            ret += `var ${arg.name}=0;`
+            ret += `var ${arg.name}=${withFlags ? `v.${arg.name}` : '0'};`
 
             entry.arguments.forEach((arg1) => {
                 let s
@@ -99,14 +102,15 @@ export function generateWriterCodeForTlEntry(entry: TlEntry): string {
 export function generateWriterCodeForTlEntries(
     entries: TlEntry[],
     varName: string,
-    prelude = true
+    prelude = true,
+    withFlags = false
 ): string {
     let ret = ''
     if (prelude) ret += TL_WRITER_PRELUDE
     ret += `var ${varName}={\n`
 
     entries.forEach((entry) => {
-        ret += generateWriterCodeForTlEntry(entry) + '\n'
+        ret += generateWriterCodeForTlEntry(entry, withFlags) + '\n'
     })
 
     return ret + '}'

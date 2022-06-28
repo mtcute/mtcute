@@ -121,4 +121,19 @@ describe('generateReaderCodeForTlEntry', () => {
             '}'
         )
     })
+
+    it('generates code with raw flags for constructors with flags', () => {
+        const entry = parseTlToEntries('test flags:# flags2:# = Test;')[0]
+        expect(generateReaderCodeForTlEntry(entry, true)).eq(
+            `${entry.id}:function(r){${[
+                'var flags=r.uint();',
+                'var flags2=r.uint();',
+                'return{',
+                "_:'test',",
+                'flags:flags,',
+                'flags2:flags2,',
+                '}',
+            ].join('')}},`
+        )
+    })
 })

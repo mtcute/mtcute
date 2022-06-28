@@ -131,8 +131,28 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
             '---functions---\ninvokeWithoutUpdates#bf9459b7 {X:Type} query:!X = X;',
             'interface RawInvokeWithoutUpdatesRequest<X extends tl.TlObject> {',
             "    _: 'invokeWithoutUpdates';",
-            "    query: X;",
+            '    query: X;',
             '}'
+        )
+    })
+
+    it('generates code with raw flags for constructors with flags', () => {
+        const entry = parseTlToEntries('test flags:# flags2:# = Test;')[0]
+        expect(
+            generateTypescriptDefinitionsForTlEntry(
+                entry,
+                undefined,
+                undefined,
+                true
+            )
+        ).eq(
+            [
+                'interface RawTest {',
+                "    _: 'test';",
+                '    flags: number;',
+                '    flags2: number;',
+                '}',
+            ].join('\n')
         )
     })
 })
@@ -248,7 +268,7 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
     it('writes schemas with namespaces', () => {
         test(
             'test = Test;\n' +
-            'test2 = Test;\n' +
+                'test2 = Test;\n' +
                 'test.test = test.Test;\n' +
                 'test.test2 = test.Test;\n' +
                 '---functions---\n' +
@@ -306,14 +326,16 @@ type TlObject =
     | tl.test.RawGetTestRequest
 `.trim(),
             ],
-            [`
+            [
+                `
 ns.isAnyTest = _isAny('Test');
 ns.test = {};
 (function(ns){
 ns.isAnyTest = _isAny('test.Test');
 })(ns.test);
 _types = JSON.parse('{"test":"Test","test2":"Test","test.test":"test.Test","test.test2":"test.Test"}');
-`.trim()]
+`.trim(),
+            ]
         )
     })
 })
