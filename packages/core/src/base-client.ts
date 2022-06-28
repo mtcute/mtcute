@@ -576,12 +576,14 @@ export class BaseTelegramClient extends EventEmitter {
                     it.id === id &&
                     it.mediaOnly &&
                     it.cdn === cdn &&
-                    !it.tcpoOnly
+                    !it.tcpoOnly &&
+                    !it.ipv6
             )
         }
         if (!found)
             found = this._config.dcOptions.find(
-                (it) => it.id === id && it.cdn === cdn && !it.tcpoOnly
+                (it) =>
+                    it.id === id && it.cdn === cdn && !it.tcpoOnly && !it.ipv6
             )
         if (found) return found
 
