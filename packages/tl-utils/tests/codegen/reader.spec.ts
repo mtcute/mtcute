@@ -75,10 +75,10 @@ describe('generateReaderCodeForTlEntry', () => {
     it('generates code for constructors with multiple flags fields', () => {
         test(
             'updates.channelDifferenceEmpty#3e11affb flags:# final:flags.0?true pts:int timeout:flags.1?int flags2:# can_delete_channel:flags2.0?true = updates.ChannelDifference;',
-            'var flags=r.uint();',
-            'var pts=r.int();',
-            'var timeout=flags&2?r.int():void 0;',
-            'var flags2=r.uint();',
+            'var flags=r.uint(),',
+            'pts=r.int(),',
+            'timeout=flags&2?r.int():void 0,',
+            'flags2=r.uint();',
             'return{',
             "_:'updates.channelDifferenceEmpty',",
             'final:!!(flags&1),',
@@ -128,8 +128,8 @@ describe('generateReaderCodeForTlEntry', () => {
         const entry = parseTlToEntries('test flags:# flags2:# = Test;')[0]
         expect(generateReaderCodeForTlEntry(entry, true)).eq(
             `${entry.id}:function(r){${[
-                'var flags=r.uint();',
-                'var flags2=r.uint();',
+                'var flags=r.uint(),',
+                'flags2=r.uint();',
                 'return{',
                 "_:'test',",
                 'flags:flags,',

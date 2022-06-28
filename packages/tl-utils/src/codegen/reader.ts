@@ -5,13 +5,16 @@ import { snakeToCamel } from './utils'
 /**
  * Returns code as an object entry
  */
-export function generateReaderCodeForTlEntry(entry: TlEntry, includeFlags = false): string {
+export function generateReaderCodeForTlEntry(
+    entry: TlEntry,
+    includeFlags = false
+): string {
     if (entry.id === 0) entry.id = computeConstructorIdFromEntry(entry)
 
-    let ret = `${entry.id}:function(r){`
+    const pre = `${entry.id}:function(r){`
 
     if (!entry.arguments.length) {
-        return ret + `return{_:'${entry.name}'}},`
+        return pre + `return{_:'${entry.name}'}},`
     }
 
     let beforeReturn = ''
@@ -105,7 +108,6 @@ export function generateReaderCodeForTlEntry(entry: TlEntry, includeFlags = fals
             code += ':void 0'
         }
 
-
         if (isBeforeLastFlag) {
             beforeReturn += code + ';'
         } else {
@@ -113,7 +115,7 @@ export function generateReaderCodeForTlEntry(entry: TlEntry, includeFlags = fals
         }
     })
 
-    return `${ret}${beforeReturn}return{${returnCode}}},`
+    return `${pre}${beforeReturn.replace(/;var /g, ',')}return{${returnCode}}},`
 }
 
 export function generateReaderCodeForTlEntries(
