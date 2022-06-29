@@ -28,6 +28,7 @@ import {
     getCachedDocumentation,
 } from './documentation'
 import { packTlSchema } from './schema'
+import { bumpVersion } from '../../../scripts/version'
 
 const README_MD_FILE = join(__dirname, '../README.md')
 const PACKAGE_JSON_FILE = join(__dirname, '../package.json')
@@ -144,36 +145,7 @@ async function updatePackageVersion(
     packageJson.version = versionStr
     await writeFile(PACKAGE_JSON_FILE, JSON.stringify(packageJson, null, 4))
 
-    console.log('Updating dependant packages...')
-
-    for (const dir of await readdir(PACKAGES_DIR, { withFileTypes: true })) {
-        if (!dir.isDirectory()) continue
-
-        const pkgFile = join(PACKAGES_DIR, dir.name, 'package.json')
-
-        let pkg
-        try {
-            pkg = JSON.parse(await readFile(pkgFile, 'utf8'))
-        } catch (e: any) {
-            if (e.code === 'ENOENT') continue
-            throw e
-        }
-
-        if (pkg.dependencies && '@mtcute/tl' in pkg.dependencies) {
-            pkg.dependencies['@mtcute/tl'] = 'workspace:' + versionStr
-        }
-
-        if (pkg.devDependencies && '@mtcute/tl' in pkg.devDependencies) {
-            pkg.devDependencies['@mtcute/tl'] = 'workspace:' + versionStr
-        }
-
-        await writeFile(pkgFile, JSON.stringify(pkg, null, 4) + '\n')
-    }
-
-    // because i am fucking dumb and have adhd and always forget it lol
-    console.log(
-        'Done! Please make sure packages compile before committing and pushing'
-    )
+    bumpVersion('tl', versionStr)
 }
 
 async function overrideInt53(schema: TlFullSchema): Promise<void> {

@@ -22,6 +22,7 @@ importers:
       nyc: ^15.1.0
       prettier: ^2.6.2
       rimraf: ^3.0.2
+      semver: ^7.3.7
       ts-node: ^10.7.0
       typedoc: ^0.22.15
       typescript: ^4.6.4
@@ -45,6 +46,7 @@ importers:
       nyc: 15.1.0
       prettier: 2.6.2
       rimraf: 3.0.2
+      semver: 7.3.7
       ts-node: 10.7.0_mocf6w6juzjyi26vrxr4oqpfq4
       typedoc: 0.22.15_typescript@4.6.4
       typescript: 4.6.4
@@ -53,7 +55,7 @@ importers:
     specifiers:
       '@mtcute/core': workspace:^1.0.0
       '@mtcute/file-id': workspace:^1.0.0
-      '@mtcute/tl': workspace:142.0.0
+      '@mtcute/tl': workspace:143.0.0
       '@types/long': ^4.0.1
       '@types/node': ^15.12.1
       eager-async-pool: ^1.0.0
@@ -71,7 +73,7 @@ importers:
 
   packages/core:
     specifiers:
-      '@mtcute/tl': workspace:142.0.0
+      '@mtcute/tl': workspace:143.0.0
       '@mtcute/tl-runtime': workspace:^1.0.0
       '@types/events': ^3.0.0
       '@types/long': ^4.0.2
@@ -85,12 +87,12 @@ importers:
       '@mtcute/tl': link:../tl
       '@mtcute/tl-runtime': link:../tl-runtime
       '@types/events': 3.0.0
+      '@types/long': 4.0.2
       '@types/node': 15.14.9
       big-integer: 1.6.48
       events: 3.2.0
       long: 4.0.0
     devDependencies:
-      '@types/long': 4.0.2
       '@types/ws': 7.4.7
       ws: 7.5.7
 
@@ -107,7 +109,7 @@ importers:
     specifiers:
       '@mtcute/client': workspace:^1.0.0
       '@mtcute/core': workspace:^1.0.0
-      '@mtcute/tl': workspace:142.0.0
+      '@mtcute/tl': workspace:143.0.0
       events: ^3.2.0
     dependencies:
       '@mtcute/client': link:../client
@@ -118,7 +120,7 @@ importers:
   packages/file-id:
     specifiers:
       '@mtcute/core': workspace:^1.0.0
-      '@mtcute/tl': workspace:142.0.0
+      '@mtcute/tl': workspace:143.0.0
       '@mtcute/tl-runtime': workspace:^1.0.0
       '@types/long': ^4.0.1
       long: ^4.0.0
@@ -133,7 +135,7 @@ importers:
   packages/html-parser:
     specifiers:
       '@mtcute/client': workspace:^1.0.0
-      '@mtcute/tl': workspace:142.0.0
+      '@mtcute/tl': workspace:143.0.0
       '@types/long': ^4.0.1
       htmlparser2: ^6.0.1
       long: ^4.0.0
@@ -154,7 +156,7 @@ importers:
   packages/markdown-parser:
     specifiers:
       '@mtcute/client': workspace:^1.0.0
-      '@mtcute/tl': workspace:142.0.0
+      '@mtcute/tl': workspace:143.0.0
       '@types/long': ^4.0.1
       long: ^4.0.0
     dependencies:
@@ -426,6 +428,8 @@ packages:
     resolution: {integrity: sha512-vqUSBLP8dQHFPdPi9bc5GK9vRkYHJ49fsZdtoJ8EQ8ibpwk5rPKfvNIwChB0KVXcIjcepEBBd2VHC5r9Gy8ueg==}
     engines: {node: '>=6.0.0'}
     hasBin: true
+    dependencies:
+      '@babel/types': 7.17.0
     dev: true
 
   /@babel/template/7.16.7:
@@ -1084,6 +1088,8 @@ packages:
       ssri: 9.0.0
       tar: 6.1.11
       unique-filename: 1.1.1
+    transitivePeerDependencies:
+      - bluebird
     dev: false
 
   /caching-transform/4.0.0:
@@ -2352,6 +2358,7 @@ packages:
       socks-proxy-agent: 6.2.0
       ssri: 9.0.0
     transitivePeerDependencies:
+      - bluebird
       - supports-color
     dev: false
 
@@ -2572,6 +2579,7 @@ packages:
       tar: 6.1.11
       which: 2.0.2
     transitivePeerDependencies:
+      - bluebird
       - supports-color
     dev: false
 
@@ -2864,6 +2872,11 @@ packages:
 
   /promise-inflight/1.0.1:
     resolution: {integrity: sha1-mEcocL8igTL8vdhoEputEsPAKeM=}
+    peerDependencies:
+      bluebird: '*'
+    peerDependenciesMeta:
+      bluebird:
+        optional: true
     dev: false
 
   /promise-retry/2.0.1:
