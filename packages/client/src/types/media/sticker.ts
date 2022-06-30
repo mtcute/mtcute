@@ -1,9 +1,10 @@
-import { RawDocument } from './document'
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
+import { tdFileId } from '@mtcute/file-id'
+
+import { TelegramClient } from '../../client'
+import { RawDocument } from './document'
 import { makeInspectable } from '../utils'
 import { StickerSet } from '../misc'
-import { tdFileId } from '@mtcute/file-id'
 
 export namespace Sticker {
     export interface MaskPosition {
@@ -50,7 +51,9 @@ export class Sticker extends RawDocument {
         client: TelegramClient,
         doc: tl.RawDocument,
         readonly attr: tl.RawDocumentAttributeSticker,
-        readonly attr2?: tl.RawDocumentAttributeImageSize | tl.RawDocumentAttributeVideo
+        readonly attr2?:
+            | tl.RawDocumentAttributeImageSize
+            | tl.RawDocumentAttributeVideo
     ) {
         super(client, doc)
     }
@@ -80,7 +83,7 @@ export class Sticker extends RawDocument {
      * Whether this sticker is a video (WEBM) sticker
      */
     get isPremiumSticker(): boolean {
-        return !!this.raw.videoThumbs?.some(s => s.type === 'f')
+        return !!this.raw.videoThumbs?.some((s) => s.type === 'f')
     }
 
     /**

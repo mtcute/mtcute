@@ -1,6 +1,7 @@
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import { InputFileLike } from '../../types'
-import { tl } from '@mtcute/tl'
 import { assertTypeIs } from '../../utils/type-assertion'
 
 /**

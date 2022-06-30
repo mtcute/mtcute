@@ -1,4 +1,5 @@
 import bigInt, { BigInteger } from 'big-integer'
+
 import { randomBytes } from './buffer-utils'
 
 export function bigIntToBuffer(
@@ -39,7 +40,10 @@ export function randomBigInt(size: number): BigInteger {
     return bufferToBigInt(randomBytes(size))
 }
 
-export function randomBigIntInRange(max: BigInteger, min = bigInt.one): BigInteger {
+export function randomBigIntInRange(
+    max: BigInteger,
+    min = bigInt.one
+): BigInteger {
     const interval = max.minus(min)
     if (interval.isNegative()) throw new Error('expected min < max')
 

@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/tl'
-import { ICryptoProvider } from './abstract'
-import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils'
 import bigInt from 'big-integer'
+import { tl } from '@mtcute/tl'
+
 import { randomBytes, xorBuffer } from '../buffer-utils'
+import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils'
+import { ICryptoProvider } from './abstract'
 
 export async function computePasswordHash(
     crypto: ICryptoProvider,

@@ -9,4 +9,5 @@ export { NodeCryptoProvider, ForgeCryptoProvider }
 import { _defaultCryptoProviderFactory } from '../platform/crypto'
 import { CryptoProviderFactory } from './abstract'
 
-export const defaultCryptoProviderFactory: CryptoProviderFactory = _defaultCryptoProviderFactory
+export const defaultCryptoProviderFactory: CryptoProviderFactory =
+    _defaultCryptoProviderFactory

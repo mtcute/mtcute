@@ -1,6 +1,5 @@
+import { buffersEqual, randomBytes, IEncryptionScheme } from '../../utils'
 import { IPacketCodec } from './abstract'
-import { IEncryptionScheme } from '../../utils/crypto'
-import { buffersEqual, randomBytes } from '../../utils/buffer-utils'
 import { WrappedCodec } from './wrapped'
 
 // initial payload can't start with these
@@ -19,7 +18,10 @@ interface MtProxyInfo {
     media: boolean
 }
 
-export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec {
+export class ObfuscatedPacketCodec
+    extends WrappedCodec
+    implements IPacketCodec
+{
     private _encryptor?: IEncryptionScheme
     private _decryptor?: IEncryptionScheme
 

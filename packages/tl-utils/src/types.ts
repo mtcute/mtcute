@@ -83,6 +83,7 @@ export interface TlEntryDiff {
     id?: PropertyDiff<number>
     generics?: PropertyDiff<TlGeneric[] | undefined>
     arguments?: BasicDiff<TlArgument, TlArgumentDiff>
+    comment?: PropertyDiff<string | undefined>
 }
 
 interface TlUnionDiff {
@@ -113,5 +114,5 @@ export const TL_PRIMITIVES = {
     Bool: 1,
     true: 1,
     null: 1,
-    Object: true
+    Object: true,
 } as const

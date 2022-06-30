@@ -1,5 +1,5 @@
-import { MemoryStorage } from './memory'
 import { longFromFastString, longToFastString } from '../utils'
+import { MemoryStorage } from './memory'
 
 /**
  * Helper class that provides json serialization functions

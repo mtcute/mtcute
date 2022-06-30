@@ -2,7 +2,8 @@ import { TelegramClient } from '../../client'
 import {
     ChatInviteLink,
     InputPeerLike,
-    MtTypeAssertionError, PeersIndex,
+    MtTypeAssertionError,
+    PeersIndex,
 } from '../../types'
 
 /**

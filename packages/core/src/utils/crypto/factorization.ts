@@ -1,5 +1,10 @@
-import { bigIntToBuffer, bufferToBigInt, randomBigIntInRange } from '../bigint-utils'
 import bigInt, { BigInteger } from 'big-integer'
+
+import {
+    bigIntToBuffer,
+    bufferToBigInt,
+    randomBigIntInRange,
+} from '../bigint-utils'
 
 export function factorizePQSync(pq: Buffer): [Buffer, Buffer] {
     const pq_ = bufferToBigInt(pq)
@@ -16,10 +21,7 @@ export function factorizePQSync(pq: Buffer): [Buffer, Buffer] {
         q = n
     }
 
-    return [
-        bigIntToBuffer(p),
-        bigIntToBuffer(q),
-    ]
+    return [bigIntToBuffer(p), bigIntToBuffer(q)]
 }
 
 function PollardRhoBrent(n: BigInteger): BigInteger {

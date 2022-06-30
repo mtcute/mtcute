@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import { ChatPhoto } from './chat-photo'
 import { MtArgumentError } from '../errors'

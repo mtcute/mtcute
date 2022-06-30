@@ -25,7 +25,7 @@ export function createCancellablePromise<T = any>(
     onCancel: () => void
 ): ControllablePromise<T> & CancellablePromise<T> {
     const promise = createControllablePromise()
-    ;((promise as unknown) as CancellablePromise<T>).cancel = () => {
+    ;(promise as unknown as CancellablePromise<T>).cancel = () => {
         promise.reject(new PromiseCancelledError())
         onCancel()
     }

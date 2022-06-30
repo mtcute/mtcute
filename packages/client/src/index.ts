@@ -3,7 +3,7 @@ export {
     JsonFileStorage,
     LocalstorageStorage,
     tl,
-    defaultDcs
+    defaultDcs,
 } from '@mtcute/core'
 
 export * from './types'

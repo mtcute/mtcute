@@ -1,7 +1,8 @@
-import { tdFileId as td } from './types'
-import { assertNever, encodeUrlSafeBase64 } from "@mtcute/core";
-import { telegramRleEncode } from './utils'
+import { assertNever, encodeUrlSafeBase64 } from '@mtcute/core'
 import { TlBinaryWriter } from '@mtcute/tl-runtime'
+
+import { tdFileId as td } from './types'
+import { telegramRleEncode } from './utils'
 
 const SUFFIX = Buffer.from([td.CURRENT_VERSION, td.PERSISTENT_ID_VERSION])
 

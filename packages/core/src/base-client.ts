@@ -1,4 +1,13 @@
+import Long from 'long'
+import EventEmitter from 'events'
 import { tl } from '@mtcute/tl'
+import {
+    TlBinaryReader,
+    TlBinaryWriter,
+    TlReaderMap,
+    TlWriterMap,
+} from '@mtcute/tl-runtime'
+
 import {
     CryptoProviderFactory,
     ICryptoProvider,
@@ -9,7 +18,14 @@ import {
     parseUrlSafeBase64,
     LogManager,
     toggleChannelIdMark,
+    defaultProductionDc,
+    defaultProductionIpv6Dc,
+    defaultTestDc,
+    defaultTestIpv6Dc,
+    ControllablePromise,
+    createControllablePromise,
 } from './utils'
+import { addPublicKey } from './utils/crypto/keys'
 import {
     TransportFactory,
     defaultReconnectionStrategy,
@@ -18,26 +34,7 @@ import {
     SessionConnection,
 } from './network'
 import { PersistentConnectionParams } from './network/persistent-connection'
-import {
-    defaultProductionDc,
-    defaultProductionIpv6Dc,
-    defaultTestDc,
-    defaultTestIpv6Dc,
-} from './utils/default-dcs'
-import { addPublicKey } from './utils/crypto/keys'
 import { ITelegramStorage, MemoryStorage } from './storage'
-import EventEmitter from 'events'
-import Long from 'long'
-import {
-    ControllablePromise,
-    createControllablePromise,
-} from './utils/controllable-promise'
-import {
-    TlBinaryReader,
-    TlBinaryWriter,
-    TlReaderMap,
-    TlWriterMap,
-} from '@mtcute/tl-runtime'
 
 import defaultReaderMap from '@mtcute/tl/binary/reader'
 import defaultWriterMap from '@mtcute/tl/binary/writer'

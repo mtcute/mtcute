@@ -156,9 +156,12 @@ export class TlBinaryWriter {
 
     int53(val: number): void {
         // inlined fromNumber from Long
-        this.buffer.writeInt32LE((val % TWO_PWR_32_DBL) | 0, this.pos)
+        this.buffer.writeInt32LE(val % TWO_PWR_32_DBL | 0, this.pos)
         if (val < 0) {
-            this.buffer.writeInt32LE((val / TWO_PWR_32_DBL - 1) | 0, this.pos + 4)
+            this.buffer.writeInt32LE(
+                (val / TWO_PWR_32_DBL - 1) | 0,
+                this.pos + 4
+            )
         } else {
             this.buffer.writeInt32LE((val / TWO_PWR_32_DBL) | 0, this.pos + 4)
         }

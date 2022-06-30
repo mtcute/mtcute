@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+
 import { makeInspectable } from '../utils'
 
 const sentCodeMap: Record<
@@ -30,7 +31,12 @@ export namespace SentCode {
      * - `call`: Code is sent via voice call
      * - `flash_call`: Code is the last 5 digits of the caller's phone number
      */
-    export type DeliveryType = 'app' | 'sms' | 'call' | 'flash_call' | 'missed_call'
+    export type DeliveryType =
+        | 'app'
+        | 'sms'
+        | 'call'
+        | 'flash_call'
+        | 'missed_call'
 
     /**
      * Type describing next code delivery type.

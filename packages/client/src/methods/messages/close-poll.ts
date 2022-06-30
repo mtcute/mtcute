@@ -1,8 +1,14 @@
+import Long from 'long'
+
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtTypeAssertionError, PeersIndex, Poll } from '../../types'
+import {
+    InputPeerLike,
+    MtTypeAssertionError,
+    PeersIndex,
+    Poll,
+} from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import Long from 'long'
 
 /**
  * Close a poll sent by you.

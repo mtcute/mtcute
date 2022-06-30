@@ -1,8 +1,8 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { parseFileId } from '../src/parse'
+import { parseFileId } from '../src'
 import { tdFileId as td } from '../src/types'
-import bigInt from 'big-integer'
+import Long from 'long'
 
 // test file IDs are partially taken from https://github.com/luckydonald/telegram_file_id
 
@@ -23,8 +23,8 @@ describe('parsing file ids', () => {
                 ),
                 location: {
                     _: 'common',
-                    accessHash: bigInt('5232780349138767832'),
-                    id: bigInt('541175087705905756'),
+                    accessHash: Long.fromString('5232780349138767832'),
+                    id: Long.fromString('541175087705905756'),
                 },
                 type: td.FileType.Sticker,
             }
@@ -40,8 +40,8 @@ describe('parsing file ids', () => {
                 ),
                 location: {
                     _: 'common',
-                    accessHash: bigInt('-4610306729174144868'),
-                    id: bigInt('5213102278772264052'),
+                    accessHash: Long.fromString('-4610306729174144868'),
+                    id: Long.fromString('5213102278772264052'),
                 },
                 type: td.FileType.Document,
             }
@@ -60,15 +60,13 @@ describe('parsing file ids', () => {
                 ),
                 location: {
                     _: 'photo',
-                    accessHash: bigInt('5232780349138767832'),
-                    id: bigInt('541175087705905756'),
-                    localId: 601,
+                    accessHash: Long.fromString('5232780349138767832'),
+                    id: Long.fromString('541175087705905756'),
                     source: {
                         _: 'thumbnail',
                         fileType: td.FileType.Thumbnail,
                         thumbnailType: 'm',
                     },
-                    volumeId: bigInt('250829997'),
                 },
                 type: td.FileType.Thumbnail,
             }
@@ -83,16 +81,16 @@ describe('parsing file ids', () => {
             fileReference: null,
             location: {
                 _: 'photo',
-                accessHash: bigInt.zero,
-                id: bigInt.zero,
-                localId: 172874,
+                accessHash: Long.ZERO,
+                id: Long.ZERO,
                 source: {
-                    _: 'dialogPhoto',
-                    id: bigInt('-452451701'),
-                    accessHash: bigInt.zero,
+                    _: 'dialogPhotoLegacy',
+                    id: -452451701,
+                    accessHash: Long.ZERO,
                     big: true,
+                    localId: 172874,
+                    volumeId: Long.fromString('200116400297'),
                 },
-                volumeId: bigInt('200116400297'),
             },
             type: td.FileType.ProfilePhoto,
         })
@@ -104,16 +102,16 @@ describe('parsing file ids', () => {
             fileReference: null,
             location: {
                 _: 'photo',
-                accessHash: bigInt.zero,
-                id: bigInt.zero,
-                localId: 172872,
+                accessHash: Long.ZERO,
+                id: Long.ZERO,
                 source: {
-                    _: 'dialogPhoto',
-                    id: bigInt('-452451701'),
-                    accessHash: bigInt.zero,
+                    _: 'dialogPhotoLegacy',
+                    id: -452451701,
+                    accessHash: Long.ZERO,
                     big: false,
+                    localId: 172872,
+                    volumeId: Long.fromString('200116400297'),
                 },
-                volumeId: bigInt('200116400297'),
             },
             type: td.FileType.ProfilePhoto,
         })
@@ -127,16 +125,16 @@ describe('parsing file ids', () => {
             fileReference: null,
             location: {
                 _: 'photo',
-                accessHash: bigInt.zero,
-                id: bigInt.zero,
-                localId: 338431,
+                accessHash: Long.ZERO,
+                id: Long.ZERO,
                 source: {
-                    _: 'dialogPhoto',
-                    id: bigInt('-1001326609710'),
-                    accessHash: bigInt('4396274664911437744'),
+                    _: 'dialogPhotoLegacy',
+                    id: -1001326609710,
+                    accessHash: Long.fromString('4396274664911437744'),
                     big: true,
+                    localId: 338431,
+                    volumeId: Long.fromString('247538121'),
                 },
-                volumeId: bigInt('247538121'),
             },
             type: td.FileType.ProfilePhoto,
         })
@@ -147,16 +145,16 @@ describe('parsing file ids', () => {
             fileReference: null,
             location: {
                 _: 'photo',
-                accessHash: bigInt.zero,
-                id: bigInt.zero,
-                localId: 338429,
+                accessHash: Long.ZERO,
+                id: Long.ZERO,
                 source: {
-                    _: 'dialogPhoto',
-                    id: bigInt('-1001326609710'),
-                    accessHash: bigInt('4396274664911437744'),
+                    _: 'dialogPhotoLegacy',
+                    id: -1001326609710,
+                    accessHash: Long.fromString('4396274664911437744'),
                     big: false,
+                    volumeId: Long.fromString('247538121'),
+                    localId: 338429,
                 },
-                volumeId: bigInt('247538121'),
             },
             type: td.FileType.ProfilePhoto,
         })
@@ -169,8 +167,8 @@ describe('parsing file ids', () => {
             fileReference: null,
             location: {
                 _: 'common',
-                accessHash: bigInt('2166960137789870152'),
-                id: bigInt('1282363671355326586'),
+                accessHash: Long.fromString('2166960137789870152'),
+                id: Long.fromString('1282363671355326586'),
             },
             type: td.FileType.Sticker,
         })

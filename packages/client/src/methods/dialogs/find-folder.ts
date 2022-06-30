@@ -1,5 +1,6 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
 import { MtArgumentError } from '../../types'
 
 /**
@@ -26,13 +27,13 @@ export async function findFolder(
     const folders = await this.getFolders()
 
     return (
-        folders.find((it) => {
+        (folders.find((it) => {
             if (it._ === 'dialogFilterDefault') return false
             if (params.id && it.id !== params.id) return false
             if (params.title && it.title !== params.title) return false
             if (params.emoji && it.emoticon !== params.emoji) return false
 
             return true
-        }) as tl.RawDialogFilter ?? null
+        }) as tl.RawDialogFilter) ?? null
     )
 }

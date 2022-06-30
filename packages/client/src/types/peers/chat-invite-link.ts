@@ -1,9 +1,10 @@
+import { tl } from '@mtcute/tl'
+
 import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
 import { User } from './user'
 import { PeersIndex } from './index'
-import { MtTypeAssertionError } from "../errors";
+import { MtTypeAssertionError } from '../errors'
 
 export namespace ChatInviteLink {
     export interface JoinedMember {
@@ -45,7 +46,11 @@ export class ChatInviteLink {
         readonly _peers?: PeersIndex
     ) {
         if (raw._ === 'chatInvitePublicJoinRequests') {
-            throw new MtTypeAssertionError('ChatInviteLink', 'chatInviteExported', raw._)
+            throw new MtTypeAssertionError(
+                'ChatInviteLink',
+                'chatInviteExported',
+                raw._
+            )
         }
         this.raw = raw
     }

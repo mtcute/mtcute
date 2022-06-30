@@ -1,6 +1,7 @@
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import { ChatInviteLink, InputPeerLike, PeersIndex, User } from '../../types'
-import { tl } from '@mtcute/tl'
 
 /**
  * Iterate over users who have joined
@@ -49,8 +50,8 @@ export async function* getInviteLinkMembers(
 
     for (;;) {
         // for some reason ts needs annotation, idk
-        const res: tl.RpcCallReturn['messages.getChatInviteImporters'] = await this.call(
-            {
+        const res: tl.RpcCallReturn['messages.getChatInviteImporters'] =
+            await this.call({
                 _: 'messages.getChatInviteImporters',
                 limit: Math.min(100, limit - current),
                 peer,
@@ -59,8 +60,7 @@ export async function* getInviteLinkMembers(
                 q: params.requestedSearch,
                 offsetDate,
                 offsetUser,
-            }
-        )
+            })
 
         if (!res.importers.length) break
 
@@ -82,7 +82,7 @@ export async function* getInviteLinkMembers(
                 date: new Date(it.date * 1000),
                 isPendingRequest: it.requested!,
                 bio: it.about,
-                approvedBy: it.approvedBy
+                approvedBy: it.approvedBy,
             }
         }
 

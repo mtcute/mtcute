@@ -1,5 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
+
 import { mergeTlEntries, mergeTlSchemas } from '../src/merge'
 import { parseTlToEntries } from '../src/parse'
 import { writeTlEntryToString } from '../src/stringify'
@@ -81,7 +82,10 @@ describe('mergeTlSchemas', () => {
         )
 
         expect(
-            writeTlEntriesToString(res.entries, { omitPrimitives: true, tdlibComments: true })
+            writeTlEntriesToString(res.entries, {
+                omitPrimitives: true,
+                tdlibComments: true,
+            })
         ).eq(expected.join('\n'))
     }
 

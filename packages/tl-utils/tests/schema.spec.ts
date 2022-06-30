@@ -1,5 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
+
 import { TlEntry } from '../src/types'
 import { writeTlEntriesToString } from '../src/schema'
 
@@ -132,7 +133,7 @@ describe('writeTlEntriesToString', () => {
         }
         const method: TlEntry = {
             ...cls,
-            kind: 'method'
+            kind: 'method',
         }
 
         test(
@@ -146,7 +147,7 @@ describe('writeTlEntriesToString', () => {
             '---functions---',
             'error#c4b9f9bb code:int text:string = Error;',
             '---types---',
-            'error#c4b9f9bb code:int text:string = Error;',
+            'error#c4b9f9bb code:int text:string = Error;'
         )
     })
 })

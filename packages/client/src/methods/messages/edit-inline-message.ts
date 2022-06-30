@@ -1,6 +1,12 @@
-import { TelegramClient } from '../../client'
-import { BotKeyboard, FormattedString, InputMediaLike, ReplyMarkup } from '../../types'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
+import {
+    BotKeyboard,
+    FormattedString,
+    InputMediaLike,
+    ReplyMarkup,
+} from '../../types'
 
 /**
  * Edit sent inline message text, media and reply markup.

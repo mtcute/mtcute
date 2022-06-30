@@ -1,7 +1,8 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { InputPeerLike, MtInvalidPeerTypeError } from "../../types";
-import { normalizeToInputUser } from "../../utils/peer-utils";
+
+import { TelegramClient } from '../../client'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
+import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
  * Fetches the menu button set for the given user.

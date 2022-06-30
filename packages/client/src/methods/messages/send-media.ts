@@ -1,3 +1,6 @@
+import { tl } from '@mtcute/tl'
+import { randomLong } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import {
     BotKeyboard,
@@ -9,8 +12,6 @@ import {
     ReplyMarkup,
 } from '../../types'
 import { normalizeDate, normalizeMessageId } from '../../utils/misc-utils'
-import { tl } from '@mtcute/tl'
-import { randomLong } from '@mtcute/core'
 
 /**
  * Send a single media (a photo or a document-based media)
@@ -184,7 +185,9 @@ export async function sendMedia(
         entities,
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined
+        sendAs: params.sendAs
+            ? await this.resolvePeer(params.sendAs)
+            : undefined,
     })
 
     const msg = this._findMessageInUpdate(res)

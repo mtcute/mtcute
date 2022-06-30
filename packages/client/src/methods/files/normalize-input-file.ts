@@ -1,7 +1,8 @@
-import { TelegramClient } from '../../client'
-import { InputFileLike, isUploadedFile, MtArgumentError } from '../../types'
 import { tl } from '@mtcute/tl'
 import { tdFileId } from '@mtcute/file-id'
+
+import { TelegramClient } from '../../client'
+import { InputFileLike, isUploadedFile, MtArgumentError } from '../../types'
 
 /**
  * Normalize a {@link InputFileLike} to `InputFile`,
@@ -26,7 +27,7 @@ export async function _normalizeInputFile(
     } else if (tdFileId.isFileIdLike(input)) {
         if (typeof input === 'string' && input.match(/^file:/)) {
             const uploaded = await this.uploadFile({
-                file: input.substr(5),
+                file: input.substring(5),
                 ...params,
             })
             return uploaded.inputFile

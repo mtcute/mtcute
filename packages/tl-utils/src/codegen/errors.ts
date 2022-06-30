@@ -3,13 +3,8 @@ import { TlError, TlErrors } from '../types'
 
 export function errorCodeToClassName(code: string): string {
     let str =
-        camelToPascal(
-            snakeToCamel(
-                code
-                    .toLowerCase()
-                    .replace(/ /g, '_')
-            )
-        ) + 'Error'
+        camelToPascal(snakeToCamel(code.toLowerCase().replace(/ /g, '_'))) +
+        'Error'
     if (str[0].match(/\d/)) {
         str = '_' + str
     }

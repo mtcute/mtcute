@@ -1,7 +1,8 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { InputPeerLike, MtInvalidPeerTypeError } from "../../types";
-import { normalizeToInputUser } from "../../utils/peer-utils";
+
+import { TelegramClient } from '../../client'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
+import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
  * Sets a menu button for the given user.
@@ -21,6 +22,6 @@ export async function setBotMenuButton(
     await this.call({
         _: 'bots.setBotMenuButton',
         userId,
-        button
+        button,
     })
 }

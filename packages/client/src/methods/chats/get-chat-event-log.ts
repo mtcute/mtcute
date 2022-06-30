@@ -1,16 +1,18 @@
+import Long from 'long'
+import { tl } from '@mtcute/tl'
+import { assertNever, MaybeArray } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
     MtInvalidPeerTypeError,
-    ChatEvent, PeersIndex,
+    ChatEvent,
+    PeersIndex,
 } from '../../types'
-import { tl } from '@mtcute/tl'
-import { assertNever, MaybeArray } from "@mtcute/core";
 import {
     normalizeToInputChannel,
     normalizeToInputUser,
 } from '../../utils/peer-utils'
-import Long from 'long'
 
 /**
  * Get chat event log ("Recent actions" in official

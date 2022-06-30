@@ -1,10 +1,7 @@
-import { TelegramClient } from '../../client'
-import {
-    InputPeerLike,
-    PeerReaction,
-    PeersIndex,
-} from '../../types'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
+import { InputPeerLike, PeerReaction, PeersIndex } from '../../types'
 
 /**
  * Get users who have reacted to the message.

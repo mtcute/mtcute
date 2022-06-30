@@ -1,7 +1,8 @@
-import { makeInspectable } from '../utils'
 import { tl } from '@mtcute/tl'
-import { PeersIndex, PeerType, User } from '../peers'
+
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../utils'
+import { PeersIndex, PeerType, User } from '../peers'
 import { Location } from '../media'
 import { InputInlineResult } from './input'
 
@@ -18,8 +19,7 @@ export class InlineQuery {
         readonly client: TelegramClient,
         readonly raw: tl.RawUpdateBotInlineQuery,
         readonly _peers: PeersIndex
-    ) {
-    }
+    ) {}
 
     /**
      * Unique query ID
@@ -34,7 +34,10 @@ export class InlineQuery {
      */
     get user(): User {
         if (!this._user) {
-            this._user = new User(this.client, this._peers.user(this.raw.userId))
+            this._user = new User(
+                this.client,
+                this._peers.user(this.raw.userId)
+            )
         }
 
         return this._user

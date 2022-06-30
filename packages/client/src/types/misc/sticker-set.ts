@@ -1,5 +1,6 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 import { Sticker, Thumbnail } from '../media'
 import { MtEmptyError, MtTypeAssertionError } from '../errors'
@@ -195,9 +196,10 @@ export class StickerSet {
      */
     get thumbnails(): ReadonlyArray<Thumbnail> {
         if (!this._thumbnails) {
-            this._thumbnails = this.brief.thumbs?.map(
-                (sz) => new Thumbnail(this.client, this.brief, sz)
-            ) ?? []
+            this._thumbnails =
+                this.brief.thumbs?.map(
+                    (sz) => new Thumbnail(this.client, this.brief, sz)
+                ) ?? []
         }
 
         return this._thumbnails

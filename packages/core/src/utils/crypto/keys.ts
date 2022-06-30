@@ -1,8 +1,9 @@
-import { parseAsn1, parsePemContents } from '../binary/asn1-parser'
-import { TlBinaryWriter } from '@mtcute/tl-runtime/src/writer'
-import { ICryptoProvider } from './abstract'
-import keysIndex, { TlPublicKey } from '@mtcute/tl/binary/rsa-keys'
 import Long from 'long'
+import { TlBinaryWriter } from '@mtcute/tl-runtime'
+import keysIndex, { TlPublicKey } from '@mtcute/tl/binary/rsa-keys'
+
+import { parseAsn1, parsePemContents } from '../binary/asn1-parser'
+import { ICryptoProvider } from './abstract'
 
 export async function parsePublicKey(
     crypto: ICryptoProvider,

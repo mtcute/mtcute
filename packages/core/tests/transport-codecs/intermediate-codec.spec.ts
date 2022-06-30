@@ -1,7 +1,7 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { IntermediatePacketCodec } from '../../src/network/transports/intermediate'
-import { TransportError } from '../../src/network/transports/abstract'
+
+import { IntermediatePacketCodec, TransportError } from '../../src'
 
 describe('IntermediatePacketCodec', () => {
     it('should return correct tag', () => {

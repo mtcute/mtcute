@@ -1,5 +1,5 @@
-import { IEncryptionScheme } from './abstract'
 import { xorBufferInPlace } from '../buffer-utils'
+import { IEncryptionScheme } from './abstract'
 
 export class AesModeOfOperationIge implements IEncryptionScheme {
     private _key: Buffer

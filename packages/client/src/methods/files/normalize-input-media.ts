@@ -1,9 +1,4 @@
-import { TelegramClient } from '../../client'
-import {
-    InputMediaLike,
-    isUploadedFile,
-    UploadFileLike,
-} from '../../types'
+import Long from 'long'
 import { tl } from '@mtcute/tl'
 import {
     fileIdToInputDocument,
@@ -11,11 +6,13 @@ import {
     parseFileId,
     tdFileId,
 } from '@mtcute/file-id'
+
+import { TelegramClient } from '../../client'
+import { InputMediaLike, isUploadedFile, UploadFileLike } from '../../types'
 import { extractFileName } from '../../utils/file-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { normalizeDate } from '../../utils/misc-utils'
 import { encodeWaveform } from '../../utils/voice-utils'
-import Long from 'long'
 
 /**
  * Normalize an {@link InputMediaLike} to `InputMedia`,
@@ -292,7 +289,7 @@ export async function _normalizeInputMedia(
                 media.type === 'photo'
             )
         } else if (typeof input === 'string' && input.match(/^file:/)) {
-            await upload(input.substr(5))
+            await upload(input.substring(5))
         } else {
             const parsed =
                 typeof input === 'string' ? parseFileId(input) : input

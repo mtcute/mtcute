@@ -1,9 +1,10 @@
+import { createInterface, Interface as RlInterface } from 'readline'
+
 import { TelegramClient, User } from '@mtcute/client'
 import { BaseTelegramClient } from '@mtcute/core'
 import { HtmlMessageEntityParser } from '@mtcute/html-parser'
 import { MarkdownMessageEntityParser } from '@mtcute/markdown-parser'
 import { SqliteStorage } from '@mtcute/sqlite'
-import { createInterface, Interface as RlInterface } from 'readline'
 
 export * from '@mtcute/dispatcher'
 export * from '@mtcute/client'

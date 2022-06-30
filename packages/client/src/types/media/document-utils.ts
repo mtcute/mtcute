@@ -1,7 +1,8 @@
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
 import { Document, RawDocument } from './document'
 import { Audio } from './audio'
-import { TelegramClient } from '../../client'
 import { Video } from './video'
 import { Voice } from './voice'
 import { Sticker } from './sticker'

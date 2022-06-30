@@ -1,5 +1,6 @@
-import { TelegramClient } from '../../client'
 import { MaybeArray } from '@mtcute/core'
+
+import { TelegramClient } from '../../client'
 import {
     Message,
     InputPeerLike,

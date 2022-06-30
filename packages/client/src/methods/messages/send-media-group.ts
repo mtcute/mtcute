@@ -1,18 +1,18 @@
+import { tl } from '@mtcute/tl'
+import { randomLong } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import {
-    BotKeyboard, InputFileLike,
+    BotKeyboard,
     InputMediaLike,
     InputPeerLike,
-    Message, MtArgumentError, PeersIndex,
+    Message,
+    MtArgumentError,
+    PeersIndex,
     ReplyMarkup,
 } from '../../types'
-import {
-    normalizeDate,
-    normalizeMessageId,
-} from '../../utils/misc-utils'
-import { tl } from '@mtcute/tl'
+import { normalizeDate, normalizeMessageId } from '../../utils/misc-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { randomLong } from '@mtcute/core'
 
 /**
  * Send a group of media.
@@ -141,8 +141,7 @@ export async function sendMediaGroup(
 
         const msg = await this.getMessages(peer, replyTo)
 
-        if (!msg)
-            throw new tl.errors.MessageNotFoundError()
+        if (!msg) throw new tl.errors.MessageNotFoundError()
     }
 
     const multiMedia: tl.RawInputSingleMedia[] = []
@@ -157,13 +156,17 @@ export async function sendMediaGroup(
             }
         }
 
-        const inputMedia = await this._normalizeInputMedia(media, {
-            progressCallback: params.progressCallback?.bind(null, i),
-            // i have no fucking clue why we should upload it manually,
-            // but otherwise Telegram throws MEDIA_INVALID
-            // fuck my life
-            uploadPeer: peer
-        }, true)
+        const inputMedia = await this._normalizeInputMedia(
+            media,
+            {
+                progressCallback: params.progressCallback?.bind(null, i),
+                // i have no fucking clue why we should upload it manually,
+                // but otherwise Telegram throws MEDIA_INVALID
+                // fuck my life
+                uploadPeer: peer,
+            },
+            true
+        )
 
         const [message, entities] = await this._parseEntities(
             // some types dont have `caption` field, and ts warns us,
@@ -194,7 +197,9 @@ export async function sendMediaGroup(
         replyMarkup,
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined
+        sendAs: params.sendAs
+            ? await this.resolvePeer(params.sendAs)
+            : undefined,
     })
 
     assertIsUpdatesGroup('_findMessageInUpdate', res)

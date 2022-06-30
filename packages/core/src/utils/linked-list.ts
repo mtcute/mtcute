@@ -9,8 +9,7 @@ export class SortedLinkedList<T> {
     _last?: LinkedListItem<T>
     _size = 0
 
-    constructor(private comparator: (a: T, b: T) => number) {
-    }
+    constructor(private comparator: (a: T, b: T) => number) {}
 
     get length(): number {
         return this._size

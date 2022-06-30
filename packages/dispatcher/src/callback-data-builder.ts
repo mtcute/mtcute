@@ -1,5 +1,6 @@
 import { MaybeArray } from '@mtcute/core'
 import { CallbackQuery, MtArgumentError } from '@mtcute/client'
+
 import { UpdateFilter } from './filters'
 
 /**
@@ -45,9 +46,7 @@ export class CallbackDataBuilder<T extends string> {
                 .join(this.sep)
 
         if (ret.length > 64) {
-            throw new MtArgumentError(
-                'Resulting callback data is too long.'
-            )
+            throw new MtArgumentError('Resulting callback data is too long.')
         }
 
         return ret
@@ -109,6 +108,7 @@ export class CallbackDataBuilder<T extends string> {
                         .join('|')})`
                 )
             } else {
+                // noinspection SuspiciousTypeOfGuard
                 parts.push(
                     typeof value === 'string' ? value : (value as RegExp).source
                 )
@@ -122,13 +122,12 @@ export class CallbackDataBuilder<T extends string> {
         return (query) => {
             const m = query.dataStr?.match(regex)
             if (!m) return false
-            ;(query as CallbackQuery & {
-                match: Record<T, string>
-            }).match = this.parse(m[0])
+            ;(
+                query as CallbackQuery & {
+                    match: Record<T, string>
+                }
+            ).match = this.parse(m[0])
             return true
         }
     }
 }
-
-const a = new CallbackDataBuilder('post', 'foo', 'bar')
-

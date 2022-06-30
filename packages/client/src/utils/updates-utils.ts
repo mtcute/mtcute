@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+
 import { MtTypeAssertionError } from '../types'
 
 // dummy updates which are used for methods that return messages.affectedHistory.

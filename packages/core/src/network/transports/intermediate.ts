@@ -1,6 +1,6 @@
+import { randomBytes } from '../../utils'
 import { IPacketCodec, TransportError } from './abstract'
 import { StreamedCodec } from './streamed'
-import { randomBytes } from '../../utils/buffer-utils'
 
 const TAG = Buffer.from([0xee, 0xee, 0xee, 0xee])
 const PADDED_TAG = Buffer.from([0xdd, 0xdd, 0xdd, 0xdd])
@@ -11,7 +11,8 @@ const PADDED_TAG = Buffer.from([0xdd, 0xdd, 0xdd, 0xdd])
  */
 export class IntermediatePacketCodec
     extends StreamedCodec
-    implements IPacketCodec {
+    implements IPacketCodec
+{
     tag(): Buffer {
         return TAG
     }

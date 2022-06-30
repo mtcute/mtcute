@@ -1,16 +1,19 @@
-import { tl } from '@mtcute/tl'
-import { tdFileId, tdFileId as td } from './types'
-import { parseFileId } from './parse'
-import { assertNever, getBasicPeerType, markedPeerIdToBare } from "@mtcute/core";
-import FileType = tdFileId.FileType
 import Long from 'long'
+import { tl } from '@mtcute/tl'
+import { assertNever, getBasicPeerType, markedPeerIdToBare } from '@mtcute/core'
+
+import { tdFileId as td } from './types'
+import { parseFileId } from './parse'
+import FileType = td.FileType
 
 const EMPTY_BUFFER = Buffer.alloc(0)
 
 type FileId = td.RawFullRemoteFileLocation
 
 function dialogPhotoToInputPeer(
-    dialog: td.RawPhotoSizeSourceDialogPhoto | td.RawPhotoSizeSourceDialogPhotoLegacy
+    dialog:
+        | td.RawPhotoSizeSourceDialogPhoto
+        | td.RawPhotoSizeSourceDialogPhotoLegacy
 ): tl.TypeInputPeer {
     const markedPeerId = dialog.id
     const peerType = getBasicPeerType(markedPeerId)
@@ -177,7 +180,7 @@ export function fileIdToInputFileLocation(
                             id: loc.source.id,
                             accessHash: loc.source.accessHash,
                         },
-                        thumbVersion: loc.source.version
+                        thumbVersion: loc.source.version,
                     }
                 default:
                     assertNever(loc.source)

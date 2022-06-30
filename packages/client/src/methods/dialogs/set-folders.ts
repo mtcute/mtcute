@@ -1,5 +1,4 @@
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
 
 /**
  * Reorder folders
@@ -14,6 +13,6 @@ export async function setFoldersOrder(
 ): Promise<void> {
     await this.call({
         _: 'messages.updateDialogFiltersOrder',
-        order
+        order,
     })
 }

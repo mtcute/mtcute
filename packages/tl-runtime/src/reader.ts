@@ -1,5 +1,6 @@
-import { gzipInflate } from './platform/gzip'
 import Long from 'long'
+
+import { gzipInflate } from './platform/gzip'
 
 const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 

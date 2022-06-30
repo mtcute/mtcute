@@ -1,3 +1,5 @@
+import { tl } from '@mtcute/tl'
+
 import {
     Audio,
     Contact,
@@ -15,7 +17,6 @@ import {
     Voice,
     WebPage,
 } from '../media'
-import { tl } from '@mtcute/tl'
 import { parseDocument } from '../media/document-utils'
 import { Message } from './message'
 

@@ -1,9 +1,10 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { tl } from '@mtcute/tl'
-import { HtmlMessageEntityParser, html } from '../src'
-import { MessageEntity, FormattedString } from '@mtcute/client'
 import Long from 'long'
+import { tl } from '@mtcute/tl'
+import { MessageEntity, FormattedString } from '@mtcute/client'
+
+import { HtmlMessageEntityParser, html } from '../src'
 
 const createEntity = <T extends tl.TypeMessageEntity['_']>(
     type: T,
@@ -260,11 +261,7 @@ describe('HtmlMessageEntityParser', () => {
         })
 
         it('should replace newlines with <br> outside pre', () => {
-            test(
-                'plain\n\nplain',
-                [],
-                'plain<br><br>plain'
-            )
+            test('plain\n\nplain', [], 'plain<br><br>plain')
             test(
                 'plain\n\nplain',
                 [createEntity('messageEntityBold', 0, 12)],
@@ -278,11 +275,7 @@ describe('HtmlMessageEntityParser', () => {
         })
 
         it('should replace multiple spaces with &nbsp;', () => {
-            test(
-                'plain    plain',
-                [],
-                'plain&nbsp;&nbsp;&nbsp;&nbsp;plain'
-            )
+            test('plain    plain', [], 'plain&nbsp;&nbsp;&nbsp;&nbsp;plain')
         })
     })
 
@@ -605,7 +598,9 @@ describe('HtmlMessageEntityParser', () => {
             const unsafeString = new FormattedString('<&>')
 
             expect(html`${unsafeString}`.value).eq('<&>')
-            expect(html`${unsafeString} ${unsafeString2}`.value).eq('<&> &lt;&amp;&gt;')
+            expect(html`${unsafeString} ${unsafeString2}`.value).eq(
+                '<&> &lt;&amp;&gt;'
+            )
             expect(html`${unsafeString} <b>text</b>`.value).eq(
                 '<&> <b>text</b>'
             )

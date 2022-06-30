@@ -1,7 +1,5 @@
-/**
- * A draft message
- */
 import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import { MessageEntity } from './message-entity'
 import { Message } from './message'
@@ -9,13 +7,16 @@ import { InputPeerLike } from '../peers'
 import { makeInspectable } from '../utils'
 import { InputMediaWithCaption } from '../media'
 
+
+/**
+ * A draft message
+ */
 export class DraftMessage {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.RawDraftMessage,
         readonly _chatId: InputPeerLike
-    ) {
-    }
+    ) {}
 
     /**
      * Text of the draft message

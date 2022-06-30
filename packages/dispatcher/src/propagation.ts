@@ -17,5 +17,5 @@ export enum PropagationAction {
     Stop = 'stop',
     StopChildren = 'stop-children',
     Continue = 'continue',
-    ToScene = 'scene'
+    ToScene = 'scene',
 }

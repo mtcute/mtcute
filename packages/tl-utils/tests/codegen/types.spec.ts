@@ -1,5 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
+
 import { parseTlToEntries } from '../../src/parse'
 import {
     generateTypescriptDefinitionsForTlEntry,

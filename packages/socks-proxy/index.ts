@@ -1,14 +1,15 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { normalize } from 'ip6'
+import { connect } from 'net'
+
 import {
     IntermediatePacketCodec,
     BaseTcpTransport,
     TransportState,
     tl,
-    assertNever
-} from "@mtcute/core";
-import { connect } from 'net'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { normalize } from 'ip6'
+    assertNever,
+} from '@mtcute/core'
 
 /**
  * An error has occurred while connecting to an SOCKS proxy
@@ -448,7 +449,8 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                         }
                         break
                     }
-                    default: assertNever(state)
+                    default:
+                        assertNever(state)
                 }
             }
 

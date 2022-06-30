@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+
 import { Photo } from '../media'
 import {
     _callDiscardReasonFromTl,

@@ -30,7 +30,9 @@ function getAllGettersNames(obj: object): string[] {
 }
 
 const bufferToJsonOriginal = Buffer.prototype.toJSON
-const bufferToJsonInspect = function (this: Buffer) { return this.toString('base64') }
+const bufferToJsonInspect = function (this: Buffer) {
+    return this.toString('base64')
+}
 
 /**
  * Small helper function that adds `toJSON` and `util.custom.inspect`
@@ -56,7 +58,7 @@ export function makeInspectable(
 
     obj.prototype.toJSON = function (nested = false) {
         if (!nested) {
-            (Buffer as any).toJSON = bufferToJsonInspect
+            ;(Buffer as any).toJSON = bufferToJsonInspect
         }
 
         const ret: any = Object.create(proto)
@@ -72,7 +74,7 @@ export function makeInspectable(
                 }
                 ret[it] = val
             } catch (e: any) {
-                ret[it] = "Error: " + e.message
+                ret[it] = 'Error: ' + e.message
             }
         })
 

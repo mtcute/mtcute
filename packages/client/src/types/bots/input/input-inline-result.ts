@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/tl'
-import { BotInlineMessage, InputInlineMessage } from './input-inline-message'
+
 import { TelegramClient } from '../../../client'
+import { BotInlineMessage, InputInlineMessage } from './input-inline-message'
 import { fileIdToInputDocument, fileIdToInputPhoto } from '@mtcute/file-id'
 import { extractFileName } from '../../../utils/file-utils'
 import { MtArgumentError } from '../../errors'
@@ -858,7 +859,7 @@ export namespace BotInline {
                         },
                         provider: '',
                         venueId: '',
-                        venueType: ''
+                        venueType: '',
                     }
                 } else {
                     throw new MtArgumentError(

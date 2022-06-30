@@ -1,5 +1,7 @@
 // noinspection SqlResolve
 
+import sqlite3 from 'better-sqlite3'
+
 import {
     ITelegramStorage,
     longFromFastString,
@@ -14,7 +16,6 @@ import {
     TlReaderMap,
     TlWriterMap,
 } from '@mtcute/core'
-import sqlite3 from 'better-sqlite3'
 
 // todo: add testMode to "self"
 

@@ -1,7 +1,8 @@
+import { computeNewPasswordHash } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import { MtArgumentError } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
-import { computeNewPasswordHash } from '@mtcute/core'
 
 /**
  * Enable 2FA password on your account

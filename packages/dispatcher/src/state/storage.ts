@@ -71,7 +71,11 @@ export interface IStateStorage {
      * @returns  Tuple containing the number of remaining and
      *   unix time in ms when the user can try again
      */
-    getRateLimit(key: string, limit: number, window: number): MaybeAsync<[number, number]>
+    getRateLimit(
+        key: string,
+        limit: number,
+        window: number
+    ): MaybeAsync<[number, number]>
 
     /**
      * Reset a rate limit.

@@ -1,8 +1,14 @@
-import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, MtTypeAssertionError, PeersIndex } from '../../types'
-import { tl } from '@mtcute/tl'
-import { SearchFilters } from '../../types'
 import Long from 'long'
+import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
+import {
+    InputPeerLike,
+    Message,
+    MtTypeAssertionError,
+    PeersIndex,
+} from '../../types'
+import { SearchFilters } from '../../types'
 
 /**
  * Search for messages inside a specific chat

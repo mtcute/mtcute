@@ -1,17 +1,18 @@
+import { tl } from '@mtcute/tl'
+import {
+    fileIdToInputFileLocation,
+    fileIdToInputWebFileLocation,
+    parseFileId,
+} from '@mtcute/file-id'
+
 import { TelegramClient } from '../../client'
 import { determinePartSize } from '../../utils/file-utils'
-import { tl } from '@mtcute/tl'
 import {
     MtArgumentError,
     MtUnsupportedError,
     FileDownloadParameters,
     FileLocation,
 } from '../../types'
-import {
-    fileIdToInputFileLocation,
-    fileIdToInputWebFileLocation,
-    parseFileId,
-} from '@mtcute/file-id'
 
 /**
  * Download a file and return it as an iterable, which yields file contents

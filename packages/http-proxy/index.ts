@@ -2,7 +2,7 @@ import {
     IntermediatePacketCodec,
     BaseTcpTransport,
     TransportState,
-    tl
+    tl,
 } from '@mtcute/core'
 import { connect as connectTcp } from 'net'
 import { connect as connectTls, SecureContextOptions } from 'tls'

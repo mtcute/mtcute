@@ -13,8 +13,7 @@ export async function deleteGroup(
     chatId: InputPeerLike
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
-    if (!isInputPeerChat(chat))
-        throw new MtInvalidPeerTypeError(chatId, 'chat')
+    if (!isInputPeerChat(chat)) throw new MtInvalidPeerTypeError(chatId, 'chat')
 
     const res = await this.call({
         _: 'messages.deleteChatUser',

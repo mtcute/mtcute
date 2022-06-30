@@ -1,5 +1,6 @@
-import { InputPeerLike, Message, PeersIndex } from '../../types'
 import { MaybeArray } from '@mtcute/core'
+
+import { InputPeerLike, Message, PeersIndex } from '../../types'
 import { TelegramClient } from '../../client'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
@@ -49,7 +50,7 @@ export async function sendScheduled(
     const res = await this.call({
         _: 'messages.sendScheduledMessages',
         peer: await this.resolvePeer(peer),
-        id: (ids as number[])
+        id: ids as number[],
     })
 
     assertIsUpdatesGroup('sendScheduled', res)
@@ -60,17 +61,9 @@ export async function sendScheduled(
     const msgs = res.updates
         .filter(
             (u) =>
-                u._ === 'updateNewMessage' ||
-                u._ === 'updateNewChannelMessage'
+                u._ === 'updateNewMessage' || u._ === 'updateNewChannelMessage'
         )
-        .map(
-            (u) =>
-                new Message(
-                    this,
-                    (u as any).message,
-                    peers
-                )
-        )
+        .map((u) => new Message(this, (u as any).message, peers))
 
     this._pushConversationMessage(msgs[msgs.length - 1])
 

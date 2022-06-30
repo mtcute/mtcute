@@ -95,9 +95,8 @@ export class Deque<T> {
     pushFront(item: T): void {
         if (item === undefined) throw new Error('item can not be undefined')
 
-        this._elements[
-            (this._head = (this._head - 1) & (this._capacity - 1))
-        ] = item
+        this._elements[(this._head = (this._head - 1) & (this._capacity - 1))] =
+            item
 
         if (this._head === this._tail) {
             this._resize()

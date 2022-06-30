@@ -1,8 +1,8 @@
-import { tdFileId, tdFileId as td } from './types'
-import { assertNever, encodeUrlSafeBase64 } from "@mtcute/core";
-import { telegramRleEncode } from './utils'
-import FileType = tdFileId.FileType
+import { assertNever, encodeUrlSafeBase64 } from '@mtcute/core'
 import { TlBinaryWriter } from '@mtcute/tl-runtime'
+
+import { tdFileId as td } from './types'
+import { telegramRleEncode } from './utils'
 
 type InputUniqueLocation =
     | Pick<td.RawWebRemoteFileLocation, '_' | 'url'>
@@ -25,11 +25,11 @@ export function toUniqueFileId(
     location: Omit<td.RawFullRemoteFileLocation, '_'>
 ): string
 export function toUniqueFileId(
-    type: FileType,
+    type: td.FileType,
     location: InputUniqueLocation
 ): string
 export function toUniqueFileId(
-    first: FileType | Omit<td.RawFullRemoteFileLocation, '_'>,
+    first: td.FileType | Omit<td.RawFullRemoteFileLocation, '_'>,
     second?: InputUniqueLocation
 ): string {
     const inputType = typeof first === 'number' ? first : first.type
@@ -141,7 +141,8 @@ export function toUniqueFileId(
             break
         }
         case 'web':
-            writer = TlBinaryWriter.alloc({},
+            writer = TlBinaryWriter.alloc(
+                {},
                 Buffer.byteLength(inputLocation.url, 'utf-8') + 8
             )
             writer.int(type)

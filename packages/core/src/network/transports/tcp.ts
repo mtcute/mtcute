@@ -1,8 +1,9 @@
-import { ITelegramTransport, IPacketCodec, TransportState } from './abstract'
-import { tl } from '@mtcute/tl'
-import { Socket, connect } from 'net'
 import EventEmitter from 'events'
+import { Socket, connect } from 'net'
+import { tl } from '@mtcute/tl'
+
 import { ICryptoProvider, Logger } from '../../utils'
+import { ITelegramTransport, IPacketCodec, TransportState } from './abstract'
 import { IntermediatePacketCodec } from './intermediate'
 
 /**
@@ -11,7 +12,8 @@ import { IntermediatePacketCodec } from './intermediate'
  */
 export abstract class BaseTcpTransport
     extends EventEmitter
-    implements ITelegramTransport {
+    implements ITelegramTransport
+{
     protected _currentDc: tl.RawDcOption | null = null
     protected _state: TransportState = TransportState.Idle
     protected _socket: Socket | null = null

@@ -1,7 +1,8 @@
-import { InputFileLike } from '../files'
 import { tl } from '@mtcute/tl'
-import { Venue } from './venue'
 import { MaybeArray } from '@mtcute/core'
+
+import { InputFileLike } from '../files'
+import { Venue } from './venue'
 import { FormattedString } from '../parser'
 
 interface BaseInputMedia {

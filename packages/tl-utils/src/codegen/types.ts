@@ -127,7 +127,7 @@ export function generateTypescriptDefinitionsForTlEntry(
         let type = arg.type
         let typeFinal = false
 
-        if (type[0] === '!') type = type.substr(1)
+        if (type[0] === '!') type = type.substring(1)
 
         if (type in genericsIndex) {
             typeFinal = true

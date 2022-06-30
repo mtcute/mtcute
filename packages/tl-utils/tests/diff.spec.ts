@@ -1,5 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
+
 import { parseTlToEntries } from '../src/parse'
 import { TlEntryDiff, TlSchemaDiff } from '../src/types'
 import {
@@ -212,7 +213,6 @@ describe('generateTlSchemasDifference', () => {
                                     arguments: [],
                                 },
                             ],
-                            methods: [],
                         },
                     ],
                     added: [],
@@ -240,7 +240,6 @@ describe('generateTlSchemasDifference', () => {
                                     arguments: [],
                                 },
                             ],
-                            methods: [],
                         },
                     ],
                     removed: [],
@@ -280,14 +279,14 @@ describe('generateTlSchemasDifference', () => {
                                         arguments: [],
                                     },
                                 ],
-                                modified: []
+                                modified: [],
                             },
                             methods: {
                                 added: [],
                                 removed: [],
-                                modified: []
-                            }
-                        }
+                                modified: [],
+                            },
+                        },
                     ],
                 },
             }
@@ -313,10 +312,11 @@ describe('generateTlSchemasDifference', () => {
                                         arguments: [
                                             {
                                                 name: 'foo',
-                                                type: 'Foo'
-                                            }
+                                                type: 'Foo',
+                                            },
                                         ],
-                                    },{
+                                    },
+                                    {
                                         kind: 'class',
                                         name: 'test3',
                                         id: 704164487,
@@ -333,8 +333,9 @@ describe('generateTlSchemasDifference', () => {
                                         arguments: [
                                             {
                                                 name: 'foo',
-                                                type: 'int'
-                                            }],
+                                                type: 'int',
+                                            },
+                                        ],
                                     },
                                     {
                                         kind: 'class',
@@ -344,14 +345,14 @@ describe('generateTlSchemasDifference', () => {
                                         arguments: [],
                                     },
                                 ],
-                                modified: []
+                                modified: [],
                             },
                             methods: {
                                 added: [],
                                 removed: [],
-                                modified: []
-                            }
-                        }
+                                modified: [],
+                            },
+                        },
                     ],
                 },
             }
@@ -381,7 +382,6 @@ describe('generateTlSchemasDifference', () => {
                                     arguments: [],
                                 },
                             ],
-                            methods: [],
                         },
                     ],
                     removed: [
@@ -403,7 +403,6 @@ describe('generateTlSchemasDifference', () => {
                                     arguments: [],
                                 },
                             ],
-                            methods: [],
                         },
                     ],
                     modified: [],

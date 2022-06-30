@@ -1,12 +1,12 @@
-import { IStateStorage } from './storage'
 import { MtArgumentError, MtClientError } from '@mtcute/client'
-import { sleep } from '@mtcute/core/src/utils/misc-utils'
+import { sleep } from '@mtcute/core'
+import { IStateStorage } from './storage'
 
 /**
  * Error thrown by `.rateLimit()`
  */
 export class RateLimitError extends MtClientError {
-    constructor (readonly reset: number) {
+    constructor(readonly reset: number) {
         super(`You are being rate limited.`)
     }
 }
@@ -130,11 +130,18 @@ export class UpdateState<State, SceneName extends string = string> {
      * @param ttl  TTL for the new state (in seconds)
      * @param forceLoad  Whether to force load the old state from storage
      */
-    async merge(state: Partial<State>, fallback?: State, ttl?: number, forceLoad = false): Promise<State> {
+    async merge(
+        state: Partial<State>,
+        fallback?: State,
+        ttl?: number,
+        forceLoad = false
+    ): Promise<State> {
         const old = await this.get(forceLoad)
         if (!old) {
             if (!fallback)
-                throw new MtArgumentError('Cannot use merge on empty state without fallback.')
+                throw new MtArgumentError(
+                    'Cannot use merge on empty state without fallback.'
+                )
 
             await this.set({ ...fallback, ...state }, ttl)
         } else {
@@ -196,8 +203,16 @@ export class UpdateState<State, SceneName extends string = string> {
      * @returns  Tuple containing the number of remaining and
      *   unix time in ms when the user can try again
      */
-    async rateLimit(key: string, limit: number, window: number): Promise<[number, number]> {
-        const [remaining, reset] = await this._localStorage.getRateLimit(`${key}:${this._localKey}`, limit, window)
+    async rateLimit(
+        key: string,
+        limit: number,
+        window: number
+    ): Promise<[number, number]> {
+        const [remaining, reset] = await this._localStorage.getRateLimit(
+            `${key}:${this._localKey}`,
+            limit,
+            window
+        )
 
         if (!remaining) {
             throw new RateLimitError(reset)
@@ -222,7 +237,11 @@ export class UpdateState<State, SceneName extends string = string> {
      * @returns  Tuple containing the number of remaining and
      *   unix time in ms when the user can try again
      */
-    async throttle(key: string, limit: number, window: number): Promise<[number, number]> {
+    async throttle(
+        key: string,
+        limit: number,
+        window: number
+    ): Promise<[number, number]> {
         try {
             return await this.rateLimit(key, limit, window)
         } catch (e: any) {

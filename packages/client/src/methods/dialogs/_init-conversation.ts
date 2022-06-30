@@ -1,6 +1,7 @@
+import { getMarkedPeerId } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import { Conversation, Message } from '../../types'
-import { getMarkedPeerId } from '@mtcute/core'
 
 // @extension
 interface ConversationsState {

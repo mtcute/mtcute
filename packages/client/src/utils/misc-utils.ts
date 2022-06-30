@@ -1,5 +1,6 @@
-import { MaybeDynamic, Message, MtClientError } from '../types'
 import { tl } from '@mtcute/tl'
+
+import { MaybeDynamic, Message, MtClientError } from '../types'
 
 export function normalizePhoneNumber(phone: string): string {
     phone = phone.trim().replace(/[+()\s-]/g, '')

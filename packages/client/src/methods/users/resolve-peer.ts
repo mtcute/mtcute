@@ -1,9 +1,14 @@
+import Long from 'long'
 import { tl } from '@mtcute/tl'
+import {
+    getBasicPeerType,
+    getMarkedPeerId,
+    toggleChannelIdMark,
+} from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtNotFoundError } from '../../types'
-import { getBasicPeerType, getMarkedPeerId, toggleChannelIdMark } from '@mtcute/core'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
-import Long from 'long'
 import { assertTypeIs } from '../../utils/type-assertion'
 
 /**

@@ -1,5 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
+
 import { TlEntry } from '../src/types'
 import { parseTlToEntries } from '../src/parse'
 
@@ -288,14 +289,14 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
                 '//but multiline\n\n' +
                 '//yet another at the end',
             {
-                onOrphanComment: (s) => orphaned.push(s)
+                onOrphanComment: (s) => orphaned.push(s),
             }
         )
 
         expect(orphaned).eql([
             'some comment idk',
             'another comment but multiline',
-            'yet another at the end'
+            'yet another at the end',
         ])
     })
 })

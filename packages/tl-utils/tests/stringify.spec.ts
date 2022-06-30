@@ -1,5 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
+
 import { TlEntry } from '../src/types'
 import { writeTlEntryToString } from '../src/stringify'
 
@@ -33,7 +34,10 @@ describe('writeTlEntryToString', () => {
 
     it('writes constructors without parameters', () => {
         test(make('auth.logOut', 'Bool'), 'auth.logOut = Bool;')
-        test(make('auth.resetAuthorizations', 'Bool'), 'auth.resetAuthorizations = Bool;')
+        test(
+            make('auth.resetAuthorizations', 'Bool'),
+            'auth.resetAuthorizations = Bool;'
+        )
     })
 
     it('writes constructor id if available', () => {
@@ -98,7 +102,7 @@ describe('writeTlEntryToString', () => {
                 'flags:#',
                 'dark:flags.0?true',
                 'format:flags.1?string',
-                'theme:flags.1?InputTheme',
+                'theme:flags.1?InputTheme'
             ),
             'account.installTheme flags:# dark:flags.0?true format:flags.1?string theme:flags.1?InputTheme = Bool;'
         )
@@ -109,8 +113,8 @@ describe('writeTlEntryToString', () => {
         entry.generics = [
             {
                 name: 'X',
-                type: 'Type'
-            }
+                type: 'Type',
+            },
         ]
         test(entry, 'invokeAfterMsg {X:Type} msg_id:long query:!X = X;')
     })

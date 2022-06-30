@@ -1,7 +1,8 @@
 import { tl } from '@mtcute/tl'
+import { toggleChannelIdMark } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
-import { toggleChannelIdMark } from '@mtcute/core'
 
 /**
  * One or more messages were deleted
@@ -9,9 +10,10 @@ import { toggleChannelIdMark } from '@mtcute/core'
 export class DeleteMessageUpdate {
     constructor(
         readonly client: TelegramClient,
-        readonly raw: tl.RawUpdateDeleteMessages | tl.RawUpdateDeleteChannelMessages
-    ) {
-    }
+        readonly raw:
+            | tl.RawUpdateDeleteMessages
+            | tl.RawUpdateDeleteChannelMessages
+    ) {}
 
     /**
      * IDs of the messages which were deleted

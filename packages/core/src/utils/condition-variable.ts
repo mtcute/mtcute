@@ -3,7 +3,7 @@ export class ConditionVariable {
     private _timeout?: NodeJS.Timeout
 
     wait(timeout?: number): Promise<void> {
-        const prom = new Promise<void>((resolve) =>{
+        const prom = new Promise<void>((resolve) => {
             this._notify = resolve
         })
 

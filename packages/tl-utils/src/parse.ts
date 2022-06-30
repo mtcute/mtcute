@@ -2,7 +2,8 @@ import { computeConstructorIdFromString } from './ctor-id'
 import { TL_PRIMITIVES, TlEntry } from './types'
 import { parseTdlibStyleComment } from './utils'
 
-const SINGLE_REGEX = /^(.+?)(?:#([0-9a-f]{1,8}))?(?: \?)?(?: {(.+?:.+?)})? ((?:.+? )*)= (.+);$/
+const SINGLE_REGEX =
+    /^(.+?)(?:#([0-9a-f]{1,8}))?(?: \?)?(?: {(.+?:.+?)})? ((?:.+? )*)= (.+);$/
 
 function applyPrefix(prefix: string, type: string): string {
     if (type in TL_PRIMITIVES) return type
@@ -46,12 +47,12 @@ export function parseTlToEntries(
         if (line.match(/^\/\//)) {
             if (currentComment) {
                 if (line[2] === '-') {
-                    currentComment += '\n' + line.substr(3).trim()
+                    currentComment += '\n' + line.substring(3).trim()
                 } else {
-                    currentComment += ' ' + line.substr(2).trim()
+                    currentComment += ' ' + line.substring(2).trim()
                 }
             } else {
-                currentComment = line.substr(2).trim()
+                currentComment = line.substring(2).trim()
             }
 
             return

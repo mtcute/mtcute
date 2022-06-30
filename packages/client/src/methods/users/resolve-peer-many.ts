@@ -1,7 +1,8 @@
+import { asyncPool } from 'eager-async-pool'
 import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { asyncPool } from 'eager-async-pool'
 
 /**
  * Get multiple `InputPeer`s at once,
@@ -45,11 +46,8 @@ export async function resolvePeerMany(
         obj: tl.TypeInputPeer
     ) => tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | null
 ): Promise<(tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[]> {
-    const ret: (
-        | tl.TypeInputPeer
-        | tl.TypeInputUser
-        | tl.TypeInputChannel
-    )[] = []
+    const ret: (tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[] =
+        []
 
     if (peerIds.length < 10) {
         // no point in using async pool for <10 peers

@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+
 import { MtArgumentError } from '../errors'
 
 const ERROR_MSG =

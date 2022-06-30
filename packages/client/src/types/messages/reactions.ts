@@ -1,7 +1,8 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { makeInspectable } from '../utils'
 import { getMarkedPeerId } from '@mtcute/core'
+
+import { TelegramClient } from '../../client'
+import { makeInspectable } from '../utils'
 import { PeersIndex, User } from '../peers'
 import { assertTypeIs } from '../../utils/type-assertion'
 
@@ -110,7 +111,9 @@ export class MessageReactions {
     /**
      * Get the users who reacted to this message
      */
-    getUsers(params?: Parameters<TelegramClient['getReactionUsers']>[2]): AsyncIterableIterator<PeerReaction> {
+    getUsers(
+        params?: Parameters<TelegramClient['getReactionUsers']>[2]
+    ): AsyncIterableIterator<PeerReaction> {
         return this.client.getReactionUsers(this.messageId, this.chatId, params)
     }
 }

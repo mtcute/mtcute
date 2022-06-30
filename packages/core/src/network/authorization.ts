@@ -1,22 +1,23 @@
-import {
-    buffersEqual,
-    randomBytes,
-    xorBuffer,
-    xorBufferInPlace,
-} from '../utils/buffer-utils'
-import { mtp } from '@mtcute/tl'
-import { ICryptoProvider, bigIntToBuffer, bufferToBigInt } from '../utils'
-import { findKeyByFingerprints } from '../utils/crypto/keys'
 import bigInt from 'big-integer'
-import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto'
-import { SessionConnection } from './session-connection'
 import Long from 'long'
+import { mtp } from '@mtcute/tl'
 import {
     TlBinaryReader,
     TlBinaryWriter,
     TlSerializationCounter,
 } from '@mtcute/tl-runtime'
 import { TlPublicKey } from '@mtcute/tl/binary/rsa-keys'
+
+import { findKeyByFingerprints } from '../utils/crypto/keys'
+import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto'
+import {
+    buffersEqual,
+    randomBytes,
+    xorBuffer,
+    xorBufferInPlace,
+} from '../utils/buffer-utils'
+import { ICryptoProvider, bigIntToBuffer, bufferToBigInt } from '../utils'
+import { SessionConnection } from './session-connection'
 
 // Heavily based on code from https://github.com/LonamiWebs/Telethon/blob/master/telethon/network/authenticator.py
 

@@ -1,5 +1,6 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
 import { FileLocation } from './file-location'
 import { MtArgumentError } from '../errors'
 import { makeInspectable } from '../utils'

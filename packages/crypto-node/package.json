@@ -14,7 +14,7 @@
         "rebuild:dev": "node-gyp configure --debug && node-gyp -j 16 rebuild --debug",
         "rebuild": "node-gyp configure && node-gyp -j 16 rebuild",
         "clean": "node-gyp clean",
-        "test": "mocha -r ts-node/register tests/**/*.spec.ts",
+        "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
         "docs": "npx typedoc"
     },
     "dependencies": {

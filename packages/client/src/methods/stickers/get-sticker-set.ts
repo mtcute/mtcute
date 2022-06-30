@@ -1,5 +1,6 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
 import { StickerSet } from '../../types'
 
 /**
@@ -35,7 +36,7 @@ export async function getStickerSet(
     const res = await this.call({
         _: 'messages.getStickerSet',
         stickerset: input,
-        hash: 0
+        hash: 0,
     })
 
     return new StickerSet(this, res)

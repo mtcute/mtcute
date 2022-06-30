@@ -1,12 +1,14 @@
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import {
-    BotKeyboard, FormattedString,
+    BotKeyboard,
+    FormattedString,
     InputMediaLike,
     InputPeerLike,
     Message,
     ReplyMarkup,
 } from '../../types'
-import { tl } from '@mtcute/tl'
 
 /**
  * Edit message text, media, reply markup and schedule date.

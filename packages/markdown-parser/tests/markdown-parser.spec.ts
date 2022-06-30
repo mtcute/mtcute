@@ -1,9 +1,10 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import Long from 'long'
 import { tl } from '@mtcute/tl'
 import { MessageEntity, FormattedString } from '@mtcute/client'
+
 import { MarkdownMessageEntityParser, md } from '../src'
-import Long from 'long'
 
 const createEntity = <T extends tl.TypeMessageEntity['_']>(
     type: T,
@@ -655,8 +656,12 @@ describe('MarkdownMessageEntityParser', () => {
             const unsafeString = '__[]__'
 
             expect(md`${unsafeString}`.value).eq('\\_\\_\\[\\]\\_\\_')
-            expect(md`${unsafeString} **text**`.value).eq('\\_\\_\\[\\]\\_\\_ **text**')
-            expect(md`**text** ${unsafeString}`.value).eq('**text** \\_\\_\\[\\]\\_\\_')
+            expect(md`${unsafeString} **text**`.value).eq(
+                '\\_\\_\\[\\]\\_\\_ **text**'
+            )
+            expect(md`**text** ${unsafeString}`.value).eq(
+                '**text** \\_\\_\\[\\]\\_\\_'
+            )
             expect(md`**${unsafeString}**`.value).eq('**\\_\\_\\[\\]\\_\\_**')
         })
 
@@ -665,10 +670,14 @@ describe('MarkdownMessageEntityParser', () => {
             const unsafeString = new FormattedString('__[]__')
 
             expect(md`${unsafeString}`.value).eq('__[]__')
-            expect(md`${unsafeString} ${unsafeString2}`.value).eq('__[]__ \\_\\_\\[\\]\\_\\_')
+            expect(md`${unsafeString} ${unsafeString2}`.value).eq(
+                '__[]__ \\_\\_\\[\\]\\_\\_'
+            )
             expect(md`${unsafeString} **text**`.value).eq('__[]__ **text**')
             expect(md`**text** ${unsafeString}`.value).eq('**text** __[]__')
-            expect(md`**${unsafeString} ${unsafeString2}**`.value).eq('**__[]__ \\_\\_\\[\\]\\_\\_**')
+            expect(md`**${unsafeString} ${unsafeString2}**`.value).eq(
+                '**__[]__ \\_\\_\\[\\]\\_\\_**'
+            )
         })
 
         it('should error with incompatible FormattedString', () => {

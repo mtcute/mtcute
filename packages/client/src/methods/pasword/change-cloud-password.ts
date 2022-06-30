@@ -1,7 +1,8 @@
+import { computeSrpParams, computeNewPasswordHash } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import { MtArgumentError } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
-import { computeSrpParams, computeNewPasswordHash } from '@mtcute/core'
 
 /**
  * Change your 2FA password

@@ -1,7 +1,8 @@
+import Long from 'long'
+
 import { TelegramClient } from '../../client'
 import { User } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
-import Long from 'long'
 
 /**
  * Get list of contacts from your Telegram contacts list.

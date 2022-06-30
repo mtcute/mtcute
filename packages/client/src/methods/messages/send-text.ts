@@ -1,19 +1,19 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
+import { getMarkedPeerId, randomLong } from '@mtcute/core'
+
+import { TelegramClient } from '../../client'
 import { inputPeerToPeer } from '../../utils/peer-utils'
-import {
-    normalizeDate,
-    normalizeMessageId,
-} from '../../utils/misc-utils'
+import { normalizeDate, normalizeMessageId } from '../../utils/misc-utils'
 import {
     InputPeerLike,
     Message,
     BotKeyboard,
     ReplyMarkup,
     MtTypeAssertionError,
-    MtArgumentError, FormattedString, PeersIndex,
+    MtArgumentError,
+    FormattedString,
+    PeersIndex,
 } from '../../types'
-import { getMarkedPeerId, randomLong } from '@mtcute/core'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
@@ -143,8 +143,7 @@ export async function sendText(
 
         const msg = await this.getMessages(peer, replyTo)
 
-        if (!msg)
-            throw new tl.errors.MessageNotFoundError()
+        if (!msg) throw new tl.errors.MessageNotFoundError()
     }
 
     const res = await this.call({
@@ -160,7 +159,9 @@ export async function sendText(
         entities,
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined
+        sendAs: params.sendAs
+            ? await this.resolvePeer(params.sendAs)
+            : undefined,
     })
 
     if (res._ === 'updateShortSentMessage') {

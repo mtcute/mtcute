@@ -1,8 +1,11 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { NodeCryptoProvider } from '../src/utils/crypto/node-crypto'
-import { ForgeCryptoProvider } from '../src/utils/crypto/forge-crypto'
-import { ICryptoProvider } from '../src/utils/crypto/abstract'
+
+import {
+    ICryptoProvider,
+    ForgeCryptoProvider,
+    NodeCryptoProvider,
+} from '../src'
 
 export function testCryptoProvider(c: ICryptoProvider): void {
     it('should calculate sha1', async () => {

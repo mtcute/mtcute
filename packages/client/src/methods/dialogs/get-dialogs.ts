@@ -1,11 +1,9 @@
-import { TelegramClient } from '../../client'
-import {
-    Dialog,
-    MtArgumentError,
-} from '../../types'
-import { normalizeDate } from '../../utils/misc-utils'
-import { tl } from '@mtcute/tl'
 import Long from 'long'
+import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
+import { Dialog, MtArgumentError } from '../../types'
+import { normalizeDate } from '../../utils/misc-utils'
 
 /**
  * Iterate over dialogs.
@@ -127,16 +125,14 @@ export async function* getDialogs(
     ) {
         const folders = await this.getFolders()
         const found = folders.find((it) => {
-            if (it._ === 'dialogFilterDefault' ) {
+            if (it._ === 'dialogFilterDefault') {
                 return params!.folder === 0
             }
 
             return it.id === params!.folder || it.title === params!.folder
         })
         if (!found)
-            throw new MtArgumentError(
-                `Could not find folder ${params.folder}`
-            )
+            throw new MtArgumentError(`Could not find folder ${params.folder}`)
 
         filters = found as tl.RawDialogFilter
     } else {
@@ -151,34 +147,42 @@ export async function* getDialogs(
             }
         } else {
             filters = {
-                _: 'dialogFilterDefault'
+                _: 'dialogFilterDefault',
             }
         }
     }
 
-    const fetchPinnedDialogsFromFolder = async (): Promise<tl.messages.RawPeerDialogs | null> => {
-        if (!filters || filters._ === 'dialogFilterDefault' || !filters.pinnedPeers.length) return null
-        const res = await this.call({
-            _: 'messages.getPeerDialogs',
-            peers: filters.pinnedPeers.map((peer) => ({
-                _: 'inputDialogPeer',
-                peer,
-            })),
-        })
+    const fetchPinnedDialogsFromFolder =
+        async (): Promise<tl.messages.RawPeerDialogs | null> => {
+            if (
+                !filters ||
+                filters._ === 'dialogFilterDefault' ||
+                !filters.pinnedPeers.length
+            )
+                return null
+            const res = await this.call({
+                _: 'messages.getPeerDialogs',
+                peers: filters.pinnedPeers.map((peer) => ({
+                    _: 'inputDialogPeer',
+                    peer,
+                })),
+            })
 
-        res.dialogs.forEach(
-            (dialog: tl.Mutable<tl.TypeDialog>) => (dialog.pinned = true)
-        )
+            res.dialogs.forEach(
+                (dialog: tl.Mutable<tl.TypeDialog>) => (dialog.pinned = true)
+            )
 
-        return res
-    }
-
+            return res
+        }
 
     const pinned = params.pinned ?? 'include'
     let archived = params.archived ?? 'exclude'
 
     if (filters) {
-        archived = filters._ !== 'dialogFilterDefault' && filters.excludeArchived ? 'exclude' : 'keep'
+        archived =
+            filters._ !== 'dialogFilterDefault' && filters.excludeArchived
+                ? 'exclude'
+                : 'keep'
     }
 
     if (pinned === 'only') {
@@ -203,7 +207,12 @@ export async function* getDialogs(
     let offsetDate = normalizeDate(params.offsetDate) ?? 0
     let offsetPeer = params.offsetPeer ?? { _: 'inputPeerEmpty' }
 
-    if (filters && filters._ !== 'dialogFilterDefault' && filters.pinnedPeers.length && pinned === 'include') {
+    if (
+        filters &&
+        filters._ !== 'dialogFilterDefault' &&
+        filters.pinnedPeers.length &&
+        pinned === 'include'
+    ) {
         const res = await fetchPinnedDialogsFromFolder()
         if (res) {
             const dialogs = this._parseDialogs(res)

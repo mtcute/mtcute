@@ -1,5 +1,6 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
 
 /**
  * Sets the default chat permissions for the bot in the supergroup or channel.
@@ -14,10 +15,13 @@ export async function setMyDefaultRights(
     rights: Omit<tl.RawChatAdminRights, '_'>
 ): Promise<void> {
     await this.call({
-        _: target === 'group' ? 'bots.setBotGroupDefaultAdminRights' : 'bots.setBotBroadcastDefaultAdminRights',
+        _:
+            target === 'group'
+                ? 'bots.setBotGroupDefaultAdminRights'
+                : 'bots.setBotBroadcastDefaultAdminRights',
         adminRights: {
             _: 'chatAdminRights',
-            ...rights
+            ...rights,
         },
     })
 }

@@ -1,5 +1,6 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 import { User, PeersIndex } from '../peers'
 
@@ -23,7 +24,6 @@ export class BotStoppedUpdate {
         return this.raw.userId
     }
 
-
     private _user?: User
 
     /**
@@ -31,7 +31,10 @@ export class BotStoppedUpdate {
      */
     get user(): User {
         if (!this._user) {
-            this._user = new User(this.client, this._peers.user(this.raw.userId))
+            this._user = new User(
+                this.client,
+                this._peers.user(this.raw.userId)
+            )
         }
 
         return this._user

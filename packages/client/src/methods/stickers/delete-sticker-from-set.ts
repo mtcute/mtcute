@@ -1,7 +1,8 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { StickerSet } from '../../types'
 import { fileIdToInputDocument, tdFileId } from '@mtcute/file-id'
+
+import { TelegramClient } from '../../client'
+import { StickerSet } from '../../types'
 
 /**
  * Delete a sticker from a sticker set

@@ -1,5 +1,7 @@
-import { Chat, InputPeerLike, MtArgumentError } from '../../types'
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
+import { Chat, InputPeerLike, MtArgumentError } from '../../types'
 import {
     INVITE_LINK_REGEX,
     isInputPeerChannel,
@@ -8,7 +10,6 @@ import {
     normalizeToInputChannel,
     normalizeToInputUser,
 } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
 
 /**
  * Get full information about a chat.

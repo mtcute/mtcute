@@ -1,6 +1,7 @@
+import { MaybeArray } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { MaybeArray } from '@mtcute/core'
 
 /**
  * Delete scheduled messages.
@@ -12,7 +13,7 @@ import { MaybeArray } from '@mtcute/core'
 export async function deleteScheduledMessages(
     this: TelegramClient,
     chatId: InputPeerLike,
-    ids: MaybeArray<number>,
+    ids: MaybeArray<number>
 ): Promise<void> {
     if (!Array.isArray(ids)) ids = [ids]
 
@@ -21,7 +22,7 @@ export async function deleteScheduledMessages(
     const res = await this.call({
         _: 'messages.deleteScheduledMessages',
         peer,
-        id: ids
+        id: ids,
     })
 
     this._handleUpdate(res)

@@ -6,3 +6,6 @@ src/tl/types.d.ts
 src/tl/types.js
 src/tl/binary/reader.js
 src/tl/binary/writer.js
+
+**/dist
+*.d.ts

@@ -1,8 +1,9 @@
-import { RawDocument } from './document'
 import { tl } from '@mtcute/tl'
+import { tdFileId } from '@mtcute/file-id'
+
+import { RawDocument } from './document'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
-import { tdFileId } from '@mtcute/file-id'
 
 /**
  * A video, round video message or GIF animation.

@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
+import { User } from '../../types'
 import { normalizePhoneNumber } from '../../utils/misc-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
-import { User } from '../../types'
 
 /**
  * Register a new user in Telegram.

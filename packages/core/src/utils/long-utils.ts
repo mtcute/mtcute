@@ -59,7 +59,6 @@ export function longFromFastString(val: string, unsigned = false): Long {
     return new Long(low, high, unsigned)
 }
 
-
 /**
  * Map with Longs as key.
  *
@@ -159,7 +158,7 @@ export class LongMap<V> {
     }
 
     private *_valuesForObj(): IterableIterator<V> {
-        yield * (Object.values(this._obj!) as any)
+        yield* Object.values(this._obj!) as any
     }
 
     private _clearForObj(): void {

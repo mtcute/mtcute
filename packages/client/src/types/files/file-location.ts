@@ -1,6 +1,7 @@
-import { tl } from '@mtcute/tl'
-import { TelegramClient } from '../../client'
 import { Readable } from 'stream'
+import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 
 /**
@@ -41,8 +42,7 @@ export class FileLocation {
          * DC ID of the file, when available
          */
         readonly dcId?: number
-    ) {
-    }
+    ) {}
 
     /**
      * Download a file and return it as an iterable, which yields file contents

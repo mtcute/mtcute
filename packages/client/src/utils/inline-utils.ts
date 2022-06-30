@@ -4,8 +4,8 @@ import {
     encodeUrlSafeBase64,
     parseUrlSafeBase64,
     TlBinaryReader,
-    TlBinaryWriter
-} from "@mtcute/core";
+    TlBinaryWriter,
+} from '@mtcute/core'
 
 export function parseInlineMessageId(
     id: string
@@ -27,7 +27,7 @@ export function parseInlineMessageId(
         dcId: reader.int(),
         ownerId: reader.long(),
         id: reader.int(),
-        accessHash: reader.long()
+        accessHash: reader.long(),
     }
 }
 

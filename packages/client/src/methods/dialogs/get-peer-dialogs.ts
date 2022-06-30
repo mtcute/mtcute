@@ -1,9 +1,7 @@
-import { TelegramClient } from '../../client'
-import {
-    Dialog,
-    InputPeerLike,
-} from '../../types'
 import { MaybeArray } from '@mtcute/core'
+
+import { TelegramClient } from '../../client'
+import { Dialog, InputPeerLike } from '../../types'
 
 /**
  * Get dialogs with certain peers.

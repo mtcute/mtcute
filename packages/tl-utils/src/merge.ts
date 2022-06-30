@@ -1,4 +1,4 @@
-import { TlArgument, TlEntry, TlFullSchema } from './types'
+import { TlEntry, TlFullSchema } from './types'
 import { computeConstructorIdFromEntry } from './ctor-id'
 
 export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
@@ -25,7 +25,8 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
 
         if (arg.type === '#') {
             flagsLastIndex[arg.name] = idx
-        } if (arg.predicate) {
+        }
+        if (arg.predicate) {
             const flagsField = arg.predicate.split('.')[0]
             flagsLastIndex[flagsField] = idx
         }

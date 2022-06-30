@@ -1,8 +1,9 @@
+import Long from 'long'
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtInvalidPeerTypeError, Photo } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
-import Long from 'long'
 
 /**
  * Iterate over profile photos

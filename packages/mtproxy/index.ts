@@ -1,3 +1,4 @@
+import { connect } from 'net'
 import {
     IntermediatePacketCodec,
     ObfuscatedPacketCodec,
@@ -6,9 +7,9 @@ import {
     parseUrlSafeBase64,
     BaseTcpTransport,
     TransportState,
-    tl
+    tl,
 } from '@mtcute/core'
-import { connect } from 'net'
+
 import { FakeTlsPacketCodec, generateFakeTlsHeader } from './fake-tls'
 
 export interface MtProxySettings {

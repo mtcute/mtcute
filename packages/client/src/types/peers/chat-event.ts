@@ -1,6 +1,8 @@
+import { tl } from '@mtcute/tl'
+import { toggleChannelIdMark } from '@mtcute/core'
+
 import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
-import { tl } from '@mtcute/tl'
 import { User } from './user'
 import { ChatMember } from './chat-member'
 import { Photo } from '../media'
@@ -9,8 +11,6 @@ import { ChatPermissions } from './chat-permissions'
 import { ChatLocation } from './chat-location'
 import { ChatInviteLink } from './chat-invite-link'
 import { PeersIndex } from './index'
-import { toggleChannelIdMark } from "@mtcute/core"
-
 
 export namespace ChatEvent {
     /** A user has joined the group (in the case of big groups, info of the user that has joined isn't shown) */
@@ -370,34 +370,18 @@ function _actionFromTl(
         case 'channelAdminLogEventActionUpdatePinned':
             return {
                 type: 'msg_pinned',
-                message: new Message(
-                    this.client,
-                    e.message,
-                    this._peers
-                ),
+                message: new Message(this.client, e.message, this._peers),
             }
         case 'channelAdminLogEventActionEditMessage':
             return {
                 type: 'msg_edited',
-                old: new Message(
-                    this.client,
-                    e.prevMessage,
-                    this._peers
-                ),
-                new: new Message(
-                    this.client,
-                    e.newMessage,
-                    this._peers
-                ),
+                old: new Message(this.client, e.prevMessage, this._peers),
+                new: new Message(this.client, e.newMessage, this._peers),
             }
         case 'channelAdminLogEventActionDeleteMessage':
             return {
                 type: 'msg_deleted',
-                message: new Message(
-                    this.client,
-                    e.message,
-                    this._peers
-                ),
+                message: new Message(this.client, e.message, this._peers),
             }
         case 'channelAdminLogEventActionParticipantLeave':
             return { type: 'user_left' }
@@ -447,11 +431,7 @@ function _actionFromTl(
         case 'channelAdminLogEventActionStopPoll':
             return {
                 type: 'poll_stopped',
-                message: new Message(
-                    this.client,
-                    e.message,
-                    this._peers
-                ),
+                message: new Message(this.client, e.message, this._peers),
             }
         case 'channelAdminLogEventActionChangeLinkedChat':
             return {
@@ -533,9 +513,8 @@ export class ChatEvent {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.TypeChannelAdminLogEvent,
-        readonly _peers: PeersIndex,
-    ) {
-    }
+        readonly _peers: PeersIndex
+    ) {}
 
     /**
      * Event ID.
@@ -560,7 +539,10 @@ export class ChatEvent {
      */
     get actor(): User {
         if (!this._actor) {
-            this._actor = new User(this.client, this._peers.user(this.raw.userId))
+            this._actor = new User(
+                this.client,
+                this._peers.user(this.raw.userId)
+            )
         }
 
         return this._actor

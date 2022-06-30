@@ -1,12 +1,13 @@
+import Long from 'long'
+import { toggleChannelIdMark } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
+import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
+
 import { FileLocation } from '../files'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 import { strippedPhotoToJpg } from '../../utils/file-utils'
-import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
 import { MtArgumentError } from '../errors'
-import Long from 'long'
-import { toggleChannelIdMark } from '@mtcute/core'
 
 /**
  * A size of a chat photo
@@ -98,8 +99,8 @@ export class ChatPhotoSize extends FileLocation {
                     id: this.obj.photoId,
                     source: {
                         _: 'dialogPhoto',
-                        big: this.big
-                    } as any
+                        big: this.big,
+                    } as any,
                 }
             )
         }

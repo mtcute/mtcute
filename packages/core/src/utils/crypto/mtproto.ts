@@ -55,7 +55,11 @@ export async function createAesIgeForMessageOld(
         Buffer.concat([messageKey, authKey.slice(x, 32 + x)])
     )
     const sha1b = await crypto.sha1(
-        Buffer.concat([authKey.slice(32 + x, 48 + x), messageKey, authKey.slice(48 + x, 64 + x)])
+        Buffer.concat([
+            authKey.slice(32 + x, 48 + x),
+            messageKey,
+            authKey.slice(48 + x, 64 + x),
+        ])
     )
     const sha1c = await crypto.sha1(
         Buffer.concat([authKey.slice(64 + x, 96 + x), messageKey])

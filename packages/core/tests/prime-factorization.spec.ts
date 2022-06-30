@@ -1,5 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
+
 import { factorizePQSync } from '../src/utils/crypto/factorization'
 
 describe('prime factorization', function () {

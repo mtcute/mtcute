@@ -1,6 +1,7 @@
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
-import { tl } from '@mtcute/tl'
 import {
     normalizeToInputChannel,
     normalizeToInputUser,

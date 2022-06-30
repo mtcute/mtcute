@@ -1,11 +1,7 @@
 import { tl } from '@mtcute/tl'
-import {
-    User,
-    Location,
-    MtArgumentError,
-    PeersIndex,
-} from '../'
+
 import { TelegramClient } from '../../client'
+import { User, Location, MtArgumentError, PeersIndex } from '../'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
 import { makeInspectable } from '../utils'
 
@@ -20,8 +16,7 @@ export class ChosenInlineResult {
         readonly client: TelegramClient,
         readonly raw: tl.RawUpdateBotInlineSend,
         readonly _peers: PeersIndex
-    ) {
-    }
+    ) {}
 
     /**
      * Unique identifier of the chosen result,
@@ -37,7 +32,10 @@ export class ChosenInlineResult {
      */
     get user(): User {
         if (!this._user) {
-            this._user = new User(this.client, this._peers.user(this.raw.userId))
+            this._user = new User(
+                this.client,
+                this._peers.user(this.raw.userId)
+            )
         }
 
         return this._user

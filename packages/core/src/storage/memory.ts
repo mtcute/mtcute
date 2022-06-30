@@ -1,7 +1,8 @@
-import { ITelegramStorage } from './abstract'
-import { MaybeAsync } from '../types'
 import { tl } from '@mtcute/tl'
+
 import { LruMap, toggleChannelIdMark } from '../utils'
+import { MaybeAsync } from '../types'
+import { ITelegramStorage } from './abstract'
 
 const CURRENT_VERSION = 1
 
@@ -38,12 +39,15 @@ interface MemorySessionState {
     >
 
     // state for rate limiter
-    rl: Record<string, {
-        // reset
-        res: number
-        // remaining
-        rem: number
-    }>
+    rl: Record<
+        string,
+        {
+            // reset
+            res: number
+            // remaining
+            rem: number
+        }
+    >
 
     self: ITelegramStorage.SelfInfo | null
 }
@@ -52,7 +56,9 @@ const USERNAME_TTL = 86400000 // 24 hours
 
 export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
     protected _state!: MemorySessionState
-    private _cachedInputPeers: LruMap<number, tl.TypeInputPeer> = new LruMap(100)
+    private _cachedInputPeers: LruMap<number, tl.TypeInputPeer> = new LruMap(
+        100
+    )
 
     private _cachedFull: LruMap<number, tl.TypeUser | tl.TypeChat>
 

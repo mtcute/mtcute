@@ -1,7 +1,8 @@
-import { BasicPeerType, MaybeAsync } from '../types'
 import { tl } from '@mtcute/tl'
-import { Logger } from '../utils'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+
+import { Logger } from '../utils'
+import { BasicPeerType, MaybeAsync } from '../types'
 
 export namespace ITelegramStorage {
     export interface PeerInfo {

@@ -1,5 +1,5 @@
-import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import { TelegramClient } from '../../client'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
 
 // @alias=deleteSupergroup

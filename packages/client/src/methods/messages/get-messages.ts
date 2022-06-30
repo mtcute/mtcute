@@ -1,11 +1,17 @@
-import { TelegramClient } from '../../client'
+import { tl } from '@mtcute/tl'
 import { MaybeArray } from '@mtcute/core'
+
+import { TelegramClient } from '../../client'
 import {
     isInputPeerChannel,
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
-import { Message, InputPeerLike, MtTypeAssertionError, PeersIndex } from '../../types'
+import {
+    Message,
+    InputPeerLike,
+    MtTypeAssertionError,
+    PeersIndex,
+} from '../../types'
 
 /**
  * Get a single message in chat by its ID
@@ -93,18 +99,33 @@ export async function getMessages(
             // (channels have their own message numbering)
             switch (peer._) {
                 case 'inputPeerSelf':
-                    if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === this._userId))
+                    if (
+                        !(
+                            msg.peerId._ === 'peerUser' &&
+                            msg.peerId.userId === this._userId
+                        )
+                    )
                         return null
-                    break;
+                    break
                 case 'inputPeerUser':
                 case 'inputPeerUserFromMessage':
-                    if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === peer.userId))
+                    if (
+                        !(
+                            msg.peerId._ === 'peerUser' &&
+                            msg.peerId.userId === peer.userId
+                        )
+                    )
                         return null
-                    break;
+                    break
                 case 'inputPeerChat':
-                    if (!(msg.peerId._ === 'peerChat' && msg.peerId.chatId === peer.chatId))
+                    if (
+                        !(
+                            msg.peerId._ === 'peerChat' &&
+                            msg.peerId.chatId === peer.chatId
+                        )
+                    )
                         return null
-                    break;
+                    break
             }
         }
 

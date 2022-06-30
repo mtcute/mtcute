@@ -1,5 +1,5 @@
-import { User } from '../../types'
 import { TelegramClient } from '../../client'
+import { User } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
 
 /**

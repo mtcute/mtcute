@@ -9,9 +9,7 @@ import { TelegramClient } from '../../client'
  * @returns  On success, `true` is returned
  * @internal
  */
-export async function logOut(
-    this: TelegramClient
-): Promise<true> {
+export async function logOut(this: TelegramClient): Promise<true> {
     await this.call({ _: 'auth.logOut' })
 
     this._userId = null

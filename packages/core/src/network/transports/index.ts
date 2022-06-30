@@ -11,4 +11,5 @@ export * from './obfuscated'
 import { _defaultTransportFactory } from '../../utils/platform/transport'
 
 /** Platform-defined default transport factory */
-export const defaultTransportFactory: TransportFactory = _defaultTransportFactory
+export const defaultTransportFactory: TransportFactory =
+    _defaultTransportFactory

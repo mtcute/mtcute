@@ -1,23 +1,33 @@
+import Long from 'long'
+import { mtp, tl } from '@mtcute/tl'
+import {
+    TlBinaryReader,
+    TlBinaryWriter,
+    TlReaderMap,
+    TlSerializationCounter,
+    TlWriterMap,
+} from '@mtcute/tl-runtime'
+import { gzipDeflate, gzipInflate } from '@mtcute/tl-runtime/src/platform/gzip'
+
+import {
+    Logger,
+    LongMap,
+    randomLong,
+    removeFromLongArray,
+    Deque,
+    LruSet,
+    SortedArray,
+    EarlyTimer,
+    ControllablePromise,
+    createCancellablePromise,
+} from '../utils'
+import { MtprotoSession } from './mtproto-session'
+import { doAuthorization } from './authorization'
+import { TransportError } from './transports'
 import {
     PersistentConnection,
     PersistentConnectionParams,
 } from './persistent-connection'
-import { mtp, tl } from '@mtcute/tl'
-import { Logger, LongMap, randomLong, removeFromLongArray } from '../utils'
-import { MtprotoSession } from './mtproto-session'
-import { doAuthorization } from './authorization'
-import { TransportError } from './transports'
-import Long from 'long'
-import { LruSet } from '../utils/lru-string-set'
-import {
-    ControllablePromise,
-    createCancellablePromise,
-} from '../utils/controllable-promise'
-import { gzipDeflate, gzipInflate } from '@mtcute/tl-runtime/src/platform/gzip'
-import { SortedArray } from '../utils/sorted-array'
-import { EarlyTimer } from '../utils/early-timer'
-import { Deque } from '../utils'
-import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlSerializationCounter, TlWriterMap } from '@mtcute/tl-runtime'
 
 export interface SessionConnectionParams extends PersistentConnectionParams {
     initConnection: tl.RawInitConnectionRequest
@@ -91,7 +101,11 @@ type PendingMessage =
 // todo
 const DESTROY_SESSION_ID = Buffer.from('262151e7', 'hex')
 
-function makeNiceStack(error: tl.errors.RpcError, stack: string, method?: string) {
+function makeNiceStack(
+    error: tl.errors.RpcError,
+    stack: string,
+    method?: string
+) {
     error.stack = `${error.constructor.name} (${error.code} ${error.text}): ${
         error.message
     }\n    at ${method}\n${stack.split('\n').slice(2).join('\n')}`
@@ -372,10 +386,7 @@ export class SessionConnection extends PersistentConnection {
         this._handleMessage(messageId, message.object())
     }
 
-    private _handleMessage(
-        messageId: Long,
-        message: mtp.TlObject
-    ): void {
+    private _handleMessage(messageId: Long, message: mtp.TlObject): void {
         if (messageId.isEven()) {
             this.log.warn(
                 'warn: ignoring message with invalid messageId = %s (is even)',
@@ -1051,7 +1062,7 @@ export class SessionConnection extends PersistentConnection {
 
         this.log.verbose('>>> %j', obj)
 
-        let content = TlBinaryWriter.serializeObject(this._writerMap,obj)
+        let content = TlBinaryWriter.serializeObject(this._writerMap, obj)
 
         if (content.length > 1044404) {
             // if you send larger payloads, telegram will just close connection,
@@ -1299,7 +1310,10 @@ export class SessionConnection extends PersistentConnection {
                     msgIds: getStateMsgIds,
                 }
 
-                getStateRequest = TlBinaryWriter.serializeObject(this._writerMap, obj)
+                getStateRequest = TlBinaryWriter.serializeObject(
+                    this._writerMap,
+                    obj
+                )
                 packetSize += getStateRequest.length + 16
                 messageCount += 1
             }

@@ -1,10 +1,11 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { LruStringSet } from '../src/utils/lru-string-set'
+
+import { LruSet } from '../src'
 
 describe('LruStringSet', () => {
     it('Set backend', () => {
-        const set = new LruStringSet(2)
+        const set = new LruSet(2)
 
         set.add('first')
         expect(set.has('first')).true
@@ -31,7 +32,7 @@ describe('LruStringSet', () => {
     })
 
     it('Object backend', () => {
-        const set = new LruStringSet(2, true)
+        const set = new LruSet(2, true)
 
         set.add('first')
         expect(set.has('first')).true

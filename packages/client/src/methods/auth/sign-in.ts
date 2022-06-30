@@ -1,5 +1,5 @@
-import { User, TermsOfService } from '../../types'
 import { TelegramClient } from '../../client'
+import { User, TermsOfService } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { normalizePhoneNumber } from '../../utils/misc-utils'
 

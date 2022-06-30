@@ -23,7 +23,11 @@ export class Logger {
 
     prefix = ''
 
-    constructor(readonly mgr: LogManager, readonly tag: string, readonly parent: Logger = mgr) {
+    constructor(
+        readonly mgr: LogManager,
+        readonly tag: string,
+        readonly parent: Logger = mgr
+    ) {
         let hash = 0
 
         for (let i = 0; i < tag.length; i++) {
@@ -75,7 +79,13 @@ export class Logger {
             })
         }
 
-        this.mgr.handler(this.color, level, this.tag, this.getPrefix() + fmt, args)
+        this.mgr.handler(
+            this.color,
+            level,
+            this.tag,
+            this.getPrefix() + fmt,
+            args
+        )
     }
 
     readonly error = this.log.bind(this, LogManager.ERROR)
@@ -109,7 +119,7 @@ export class LogManager extends Logger {
     static DEBUG = 4
     static VERBOSE = 5
 
-    constructor () {
+    constructor() {
         // workaround because we cant pass this to super
         super(null as any, 'base')
         ;(this as any).mgr = this

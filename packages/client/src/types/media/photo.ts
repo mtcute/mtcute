@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/tl'
-import { FileLocation } from '../files'
+
 import { TelegramClient } from '../../client'
+import { FileLocation } from '../files'
 import { MtArgumentError } from '../errors'
 import { Thumbnail } from './thumbnail'
 import { makeInspectable } from '../utils'
@@ -82,7 +83,7 @@ export class Photo extends FileLocation {
      * Whether this photo is an animated profile picture
      */
     get isAnimated(): boolean {
-        return !!this.raw.videoSizes?.some(s => s.type === 'u')
+        return !!this.raw.videoSizes?.some((s) => s.type === 'u')
     }
 
     private _thumbnails?: Thumbnail[]

@@ -1,10 +1,11 @@
-import { ITelegramTransport, IPacketCodec, TransportState } from './abstract'
-import { tl } from '@mtcute/tl'
-import EventEmitter from 'events'
 import type WebSocket from 'ws'
+import EventEmitter from 'events'
+import { tl } from '@mtcute/tl'
+
+import { typedArrayToBuffer, Logger, ICryptoProvider } from '../../utils'
+import { ITelegramTransport, IPacketCodec, TransportState } from './abstract'
 import { IntermediatePacketCodec } from './intermediate'
 import { ObfuscatedPacketCodec } from './obfuscated'
-import { typedArrayToBuffer, Logger, ICryptoProvider } from '../../utils'
 
 let ws: {
     new (address: string, options?: string): WebSocket
@@ -33,7 +34,8 @@ const subdomainsMap: Record<string, string> = {
  */
 export abstract class BaseWebSocketTransport
     extends EventEmitter
-    implements ITelegramTransport {
+    implements ITelegramTransport
+{
     private _currentDc: tl.RawDcOption | null = null
     private _state: TransportState = TransportState.Idle
     private _socket: WebSocket | null = null
@@ -50,10 +52,7 @@ export abstract class BaseWebSocketTransport
      * @param baseDomain  Base WebSocket domain
      * @param subdomains  Map of sub-domains (key is DC ID, value is string)
      */
-    constructor(
-        baseDomain = 'web.telegram.org',
-        subdomains = subdomainsMap
-    ) {
+    constructor(baseDomain = 'web.telegram.org', subdomains = subdomainsMap) {
         super()
 
         if (!ws)
@@ -69,7 +68,9 @@ export abstract class BaseWebSocketTransport
 
     private _updateLogPrefix() {
         if (this._currentDc) {
-            this.log.prefix = `[WS:${this._subdomains[this._currentDc.id]}.${this._baseDomain}] `
+            this.log.prefix = `[WS:${this._subdomains[this._currentDc.id]}.${
+                this._baseDomain
+            }] `
         } else {
             this.log.prefix = '[WS:disconnected] '
         }

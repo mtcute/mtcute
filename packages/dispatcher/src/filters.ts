@@ -29,8 +29,9 @@ import {
     PollVoteUpdate,
     UserTypingUpdate,
     BotChatJoinRequestUpdate,
-} from "@mtcute/client";
+} from '@mtcute/client'
 import { MaybeArray } from '@mtcute/core'
+
 import { UpdateState } from './state'
 
 function extractText(
@@ -153,8 +154,10 @@ export namespace filters {
         [K in TupleKeys<T>]: { base: ExtractBase<T[K]> }
     }
     type Values<T> = T[keyof T]
-    type UnwrapBase<T> = T extends { base: any } ? T["base"] : never
-    type ExtractBaseMany<Filters extends any[]> = UnwrapBase<UnionToIntersection<Values<WrapBase<Filters>>>>
+    type UnwrapBase<T> = T extends { base: any } ? T['base'] : never
+    type ExtractBaseMany<Filters extends any[]> = UnwrapBase<
+        UnionToIntersection<Values<WrapBase<Filters>>>
+    >
 
     /**
      * Invert a filter by applying a NOT logical operation:
@@ -374,15 +377,20 @@ export namespace filters {
     /**
      * Filter messages by chat type
      */
-    export const chat = <T extends Chat.Type>(
-        type: T
-    ): UpdateFilter<
-        Message,
-        {
-            chat: Modify<Chat, { type: T }>
-            sender: T extends 'private' | 'bot' | 'group' ? User : User | Chat
-        }
-    > => (msg) => msg.chat.type === type
+    export const chat =
+        <T extends Chat.Type>(
+            type: T
+        ): UpdateFilter<
+            Message,
+            {
+                chat: Modify<Chat, { type: T }>
+                sender: T extends 'private' | 'bot' | 'group'
+                    ? User
+                    : User | Chat
+            }
+        > =>
+        (msg) =>
+            msg.chat.type === type
 
     /**
      * Filter updates by chat ID(s) or username(s)
@@ -696,20 +704,26 @@ export namespace filters {
     /**
      * Filter messages containing a regular sticker (not animated/webm)
      */
-    export const regularSticker: UpdateFilter<Message, { media: Sticker }> = (msg) =>
-        msg.media?.type === 'sticker' && !msg.media.isAnimated && !msg.media.isVideoSticker
+    export const regularSticker: UpdateFilter<Message, { media: Sticker }> = (
+        msg
+    ) =>
+        msg.media?.type === 'sticker' &&
+        !msg.media.isAnimated &&
+        !msg.media.isVideoSticker
 
     /**
      * Filter messages containing an animated sticker
      */
-    export const animatedSticker: UpdateFilter<Message, { media: Sticker }> = (msg) =>
-        msg.media?.type === 'sticker' && msg.media.isAnimated
+    export const animatedSticker: UpdateFilter<Message, { media: Sticker }> = (
+        msg
+    ) => msg.media?.type === 'sticker' && msg.media.isAnimated
 
     /**
      * Filter messages containing a video (webm) sticker
      */
-    export const videoSticker: UpdateFilter<Message, { media: Sticker }> = (msg) =>
-        msg.media?.type === 'sticker' && msg.media.isVideoSticker
+    export const videoSticker: UpdateFilter<Message, { media: Sticker }> = (
+        msg
+    ) => msg.media?.type === 'sticker' && msg.media.isVideoSticker
 
     /**
      * Filter messages containing a video.
@@ -845,23 +859,25 @@ export namespace filters {
      *
      * @param regex  Regex to be matched
      */
-    export const regex = (
-        regex: RegExp
-    ): UpdateFilter<
-        Message | InlineQuery | ChosenInlineResult | CallbackQuery,
-        { match: RegExpMatchArray }
-    > => (obj) => {
-        const txt = extractText(obj)
-        if (!txt) return false
+    export const regex =
+        (
+            regex: RegExp
+        ): UpdateFilter<
+            Message | InlineQuery | ChosenInlineResult | CallbackQuery,
+            { match: RegExpMatchArray }
+        > =>
+        (obj) => {
+            const txt = extractText(obj)
+            if (!txt) return false
 
-        const m = txt.match(regex)
+            const m = txt.match(regex)
 
-        if (m) {
-            ;(obj as any).match = m
-            return true
+            if (m) {
+                ;(obj as any).match = m
+                return true
+            }
+            return false
         }
-        return false
-    }
 
     /**
      * Filter objects which contain the exact text given

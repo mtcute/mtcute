@@ -1,12 +1,17 @@
 import EventEmitter from 'events'
-import { ITelegramTransport, TransportFactory, TransportState } from './transports'
 import { tl } from '@mtcute/tl'
-import { ReconnectionStrategy } from './reconnection'
+
 import {
     ControllablePromise,
     createControllablePromise,
 } from '../utils/controllable-promise'
 import { ICryptoProvider, Logger } from '../utils'
+import { ReconnectionStrategy } from './reconnection'
+import {
+    ITelegramTransport,
+    TransportFactory,
+    TransportState,
+} from './transports'
 
 export interface PersistentConnectionParams {
     crypto: ICryptoProvider
@@ -49,7 +54,10 @@ export abstract class PersistentConnection extends EventEmitter {
 
     protected abstract onMessage(data: Buffer): void
 
-    protected constructor(params: PersistentConnectionParams, readonly log: Logger) {
+    protected constructor(
+        params: PersistentConnectionParams,
+        readonly log: Logger
+    ) {
         super()
         this.params = params
         this.changeTransport(params.transportFactory)

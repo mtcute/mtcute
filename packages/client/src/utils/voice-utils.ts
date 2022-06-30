@@ -6,7 +6,7 @@ export function decodeWaveform(wf: Buffer): number[] {
 
     const lastIdx = valuesCount - 1
 
-    // Read each 5 bit of encoded5bit as 0-31 unsigned char.
+    // Read each 5 bit of encoded 5bit as 0-31 unsigned char.
     // We count the index of the byte in which the desired 5-bit sequence starts.
     // And then we read a uint16 starting from that byte to guarantee to get all of those 5 bits.
     //
@@ -32,7 +32,6 @@ export function decodeWaveform(wf: Buffer): number[] {
 
     return result
 }
-
 
 export function encodeWaveform(wf: number[]): Buffer {
     const bitsCount = wf.length * 5

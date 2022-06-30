@@ -28,20 +28,20 @@ export {
 
 // begin-codegen
 export type ParsedUpdate =
-    | { name: 'new_message', data: Message }
-    | { name: 'edit_message', data: Message }
-    | { name: 'delete_message', data: DeleteMessageUpdate }
-    | { name: 'chat_member', data: ChatMemberUpdate }
-    | { name: 'inline_query', data: InlineQuery }
-    | { name: 'chosen_inline_result', data: ChosenInlineResult }
-    | { name: 'callback_query', data: CallbackQuery }
-    | { name: 'poll', data: PollUpdate }
-    | { name: 'poll_vote', data: PollVoteUpdate }
-    | { name: 'user_status', data: UserStatusUpdate }
-    | { name: 'user_typing', data: UserTypingUpdate }
-    | { name: 'history_read', data: HistoryReadUpdate }
-    | { name: 'bot_stopped', data: BotStoppedUpdate }
-    | { name: 'bot_chat_join_request', data: BotChatJoinRequestUpdate }
-    | { name: 'chat_join_request', data: ChatJoinRequestUpdate }
+    | { name: 'new_message'; data: Message }
+    | { name: 'edit_message'; data: Message }
+    | { name: 'delete_message'; data: DeleteMessageUpdate }
+    | { name: 'chat_member'; data: ChatMemberUpdate }
+    | { name: 'inline_query'; data: InlineQuery }
+    | { name: 'chosen_inline_result'; data: ChosenInlineResult }
+    | { name: 'callback_query'; data: CallbackQuery }
+    | { name: 'poll'; data: PollUpdate }
+    | { name: 'poll_vote'; data: PollVoteUpdate }
+    | { name: 'user_status'; data: UserStatusUpdate }
+    | { name: 'user_typing'; data: UserTypingUpdate }
+    | { name: 'history_read'; data: HistoryReadUpdate }
+    | { name: 'bot_stopped'; data: BotStoppedUpdate }
+    | { name: 'bot_chat_join_request'; data: BotChatJoinRequestUpdate }
+    | { name: 'chat_join_request'; data: ChatJoinRequestUpdate }
 
 // end-codegen

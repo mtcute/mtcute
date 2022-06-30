@@ -1,7 +1,8 @@
-import { TelegramClient } from '../../client'
-import { MaybeArray } from '@mtcute/core'
-import { InputPeerLike } from '../../types'
 import { tl } from '@mtcute/tl'
+import { MaybeArray } from '@mtcute/core'
+
+import { TelegramClient } from '../../client'
+import { InputPeerLike } from '../../types'
 
 /**
  * Unarchive one or more chats

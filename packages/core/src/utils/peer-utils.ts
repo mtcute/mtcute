@@ -45,10 +45,7 @@ export function getBarePeerId(peer: tl.TypePeer): number {
  * - ID is negated for chats
  * - ID is negated and `-1e12` is subtracted for channels
  */
-export function getMarkedPeerId(
-    peerId: number,
-    peerType: BasicPeerType
-): number
+export function getMarkedPeerId(peerId: number, peerType: BasicPeerType): number
 export function getMarkedPeerId(peer: tl.TypePeer | tl.TypeInputPeer): number
 export function getMarkedPeerId(
     peer: tl.TypePeer | tl.TypeInputPeer | number,
@@ -101,16 +98,10 @@ export function getBasicPeerType(peer: tl.TypePeer | number): BasicPeerType {
             return 'chat'
         }
 
-        if (
-            MIN_MARKED_CHANNEL_ID <= peer &&
-            peer !== ZERO_CHANNEL_ID
-        )
+        if (MIN_MARKED_CHANNEL_ID <= peer && peer !== ZERO_CHANNEL_ID)
             return 'channel'
 
-        if (
-            MAX_SECRET_CHAT_ID <= peer &&
-            peer !== ZERO_SECRET_CHAT_ID
-        ) {
+        if (MAX_SECRET_CHAT_ID <= peer && peer !== ZERO_SECRET_CHAT_ID) {
             // return 'secret'
             throw new Error('Unsupported')
         }

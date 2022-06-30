@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/tl'
-import { Photo } from './photo'
+
 import { TelegramClient } from '../../client'
+import { Photo } from './photo'
 import { RawDocument } from './document'
 import { parseDocument } from './document-utils'
 import { makeInspectable } from '../utils'

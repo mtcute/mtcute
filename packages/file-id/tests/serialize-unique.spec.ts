@@ -1,7 +1,7 @@
 import { describe } from 'mocha'
 import { expect } from 'chai'
-import { parseFileId } from '../src/parse'
-import { toUniqueFileId } from '../src/serialize-unique'
+
+import { parseFileId, toUniqueFileId } from '../src'
 
 // test file IDs are partially taken from https://github.com/luckydonald/telegram_file_id
 
@@ -25,7 +25,7 @@ describe('serializing unique file ids', () => {
         )
         test(
             'AAMCAgADGQEAAQmfM2CK3TQgOwp3Ts51J5qfDPyix5xgAAJ0DAAC56hYSJxo-8105gTAT_bYoy4AAwEAB20AA0JBAAIfBA',
-            'AQADT_bYoy4AA0JBAAI'
+            'AQADdAwAAueoWEhy'
         )
         test(
             'CAACAgIAAxkBAAEJny9gituz1_V_uSKBUuG_nhtzEtFOeQACXFoAAuCjggfYjw_KAAGSnkgfBA',

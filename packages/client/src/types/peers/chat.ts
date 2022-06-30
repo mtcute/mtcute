@@ -1,8 +1,9 @@
-import { ChatPhoto } from './chat-photo'
 import { tl } from '@mtcute/tl'
+import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
+
+import { ChatPhoto } from './chat-photo'
 import { ChatPermissions } from './chat-permissions'
 import { TelegramClient } from '../../client'
-import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
 import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { makeInspectable } from '../utils'
 import { InputPeerLike, PeersIndex, User } from './index'

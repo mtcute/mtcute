@@ -9,7 +9,7 @@ export class EarlyTimer {
 
     private _handler: () => void = () => {}
 
-    constructor () {
+    constructor() {
         this.emitNow = this.emitNow.bind(this)
     }
 

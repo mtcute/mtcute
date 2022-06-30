@@ -1,6 +1,7 @@
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { tl } from '@mtcute/tl'
 
 /**
  * Save or delete a draft message associated with some chat

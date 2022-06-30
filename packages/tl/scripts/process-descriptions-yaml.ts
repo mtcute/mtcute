@@ -1,7 +1,4 @@
-import {
-    CachedDocumentation,
-    CachedDocumentationEntry,
-} from './documentation'
+import { CachedDocumentation, CachedDocumentationEntry } from './documentation'
 
 type MaybeOverwrite =
     | string

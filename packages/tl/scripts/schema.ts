@@ -21,11 +21,14 @@ export interface TlPackedSchema {
     u: Record<string, string>
 }
 
-export function packTlSchema(schema: TlFullSchema, layer: number): TlPackedSchema {
+export function packTlSchema(
+    schema: TlFullSchema,
+    layer: number
+): TlPackedSchema {
     const ret: TlPackedSchema = {
         l: layer,
         e: schema.entries,
-        u: {}
+        u: {},
     }
 
     for (const name in schema.unions) {

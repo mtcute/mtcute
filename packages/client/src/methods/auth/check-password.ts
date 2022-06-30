@@ -1,6 +1,7 @@
+import { computeSrpParams } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import { User } from '../../types'
-import { computeSrpParams } from '@mtcute/core'
 import { assertTypeIs } from '../../utils/type-assertion'
 
 /**

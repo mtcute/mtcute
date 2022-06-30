@@ -1,5 +1,6 @@
-import { assertNever } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
+import { assertNever } from '@mtcute/core'
+
 import { BotKeyboardBuilder } from './keyboard-builder'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { MtInvalidPeerTypeError } from '../errors'

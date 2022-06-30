@@ -1,8 +1,9 @@
 import { tl } from '@mtcute/tl'
-import { BotCommands, MtInvalidPeerTypeError } from '../../types'
-import { TelegramClient } from '../../client'
-import { normalizeToInputUser } from '../../utils/peer-utils'
 import { assertNever } from '@mtcute/core'
+
+import { TelegramClient } from '../../client'
+import { BotCommands, MtInvalidPeerTypeError } from '../../types'
+import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /** @internal */
 export async function _normalizeCommandScope(
@@ -17,21 +18,25 @@ export async function _normalizeCommandScope(
             const peer = await this.resolvePeer(scope.peer)
 
             return {
-                _: scope.type === 'peer' ? 'botCommandScopePeer' : 'botCommandScopePeerAdmins',
-                peer
+                _:
+                    scope.type === 'peer'
+                        ? 'botCommandScopePeer'
+                        : 'botCommandScopePeerAdmins',
+                peer,
             }
         }
         case 'member': {
             const chat = await this.resolvePeer(scope.chat)
-            const user = normalizeToInputUser(await this.resolvePeer(scope.user))
+            const user = normalizeToInputUser(
+                await this.resolvePeer(scope.user)
+            )
 
-            if (!user)
-                throw new MtInvalidPeerTypeError(scope.user, 'user')
+            if (!user) throw new MtInvalidPeerTypeError(scope.user, 'user')
 
             return {
                 _: 'botCommandScopePeerUser',
                 peer: chat,
-                userId: user
+                userId: user,
             }
         }
         default:

@@ -1,8 +1,9 @@
-import { RawDocument } from './document'
 import { tl } from '@mtcute/tl'
+import { tdFileId } from '@mtcute/file-id'
+
+import { RawDocument } from './document'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
-import { tdFileId } from '@mtcute/file-id'
 import { decodeWaveform } from '../../utils/voice-utils'
 
 /**
@@ -41,4 +42,8 @@ export class Voice extends RawDocument {
     }
 }
 
-makeInspectable(Voice, ['fileSize', 'dcId'], ['inputMedia', 'inputDocument', 'waveform'])
+makeInspectable(
+    Voice,
+    ['fileSize', 'dcId'],
+    ['inputMedia', 'inputDocument', 'waveform']
+)

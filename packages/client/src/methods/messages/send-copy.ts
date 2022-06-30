@@ -1,6 +1,12 @@
-import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, FormattedString, ReplyMarkup } from '../../types'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
+import {
+    InputPeerLike,
+    Message,
+    FormattedString,
+    ReplyMarkup,
+} from '../../types'
 
 /**
  * Copy a message (i.e. send the same message,

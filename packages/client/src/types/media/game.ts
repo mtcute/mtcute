@@ -1,7 +1,8 @@
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
 import { Photo } from './photo'
 import { Video } from './video'
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 
 export class Game {

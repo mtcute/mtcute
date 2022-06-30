@@ -1,3 +1,6 @@
+import { tl } from '@mtcute/tl'
+import { MaybeArray, randomLong } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import {
     FormattedString,
@@ -7,8 +10,6 @@ import {
     MtArgumentError,
     PeersIndex,
 } from '../../types'
-import { MaybeArray, randomLong } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
 import { normalizeDate } from '../../utils/misc-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
@@ -317,7 +318,7 @@ export async function forwardMessages(
             schedule: params.schedule,
             clearDraft: params.clearDraft,
             forbidForwards: params.forbidForwards,
-            sendAs: params.sendAs
+            sendAs: params.sendAs,
         })
     } else if (params.captionMedia) {
         captionMessage = await this.sendMedia(toPeer, params.captionMedia, {
@@ -326,7 +327,7 @@ export async function forwardMessages(
             schedule: params.schedule,
             clearDraft: params.clearDraft,
             forbidForwards: params.forbidForwards,
-            sendAs: params.sendAs
+            sendAs: params.sendAs,
         })
     }
 
@@ -343,7 +344,9 @@ export async function forwardMessages(
         dropAuthor: params.noAuthor,
         dropMediaCaptions: params.noCaption,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined
+        sendAs: params.sendAs
+            ? await this.resolvePeer(params.sendAs)
+            : undefined,
     })
 
     assertIsUpdatesGroup('messages.forwardMessages', res)

@@ -1,3 +1,5 @@
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
@@ -6,7 +8,6 @@ import {
     PeersIndex,
 } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { tl } from '@mtcute/tl'
 
 /**
  * Send or remove a reaction.

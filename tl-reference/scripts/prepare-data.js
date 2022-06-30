@@ -37,16 +37,16 @@ function convertToArrays(ns) {
 const marked = require('marked')
 const cheerio = require('cheerio')
 
-const pascalToCamel = (s) => s[0].toLowerCase() + s.substr(1)
+const pascalToCamel = (s) => s[0].toLowerCase() + s.substring(1)
 const camelToSnake = (str) =>
     str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
-const camelToPascal = (s) => s[0].toUpperCase() + s.substr(1)
+const camelToPascal = (s) => s[0].toUpperCase() + s.substring(1)
 
 function renderDescription(description) {
     return marked(
         description.replace(/{@link (.+?)}/g, (_, name) => {
             if (name.startsWith('tl.')) {
-                let [ns, type] = name.substr(3).split('.')
+                let [ns, type] = name.substring(3).split('.')
                 if (!type) {
                     type = ns
                     ns = undefined
@@ -114,7 +114,7 @@ function prepareData(data) {
             }
             const fullTypeName = (type) => {
                 if (type === 'X') return 'any'
-                if (type[0] === '%') type = type.substr(1)
+                if (type[0] === '%') type = type.substring(1)
                 if (prefix_ === 'mt_' && type === 'Object') return 'tl.TlObject'
                 if (
                     type === 'number' ||

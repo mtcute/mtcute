@@ -1,5 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
+
 import {
     computeConstructorIdFromEntry,
     computeConstructorIdFromString,
@@ -155,7 +156,7 @@ describe('computeConstructorIdFromEntry', () => {
                 'flags:#',
                 'dark:flags.0?true',
                 'format:flags.1?string',
-                'theme:flags.1?InputTheme',
+                'theme:flags.1?InputTheme'
             ),
             0x7ae43737
         )
@@ -166,8 +167,8 @@ describe('computeConstructorIdFromEntry', () => {
         entry.generics = [
             {
                 name: 'X',
-                type: 'Type'
-            }
+                type: 'Type',
+            },
         ]
         test(entry, 0xcb9f372d)
     })

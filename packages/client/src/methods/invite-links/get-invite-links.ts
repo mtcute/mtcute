@@ -1,12 +1,14 @@
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import {
     ChatInviteLink,
     InputPeerLike,
-    MtInvalidPeerTypeError, MtTypeAssertionError,
-    PeersIndex
-} from "../../types";
+    MtInvalidPeerTypeError,
+    MtTypeAssertionError,
+    PeersIndex,
+} from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
-import { tl } from '@mtcute/tl'
 
 /**
  * Get invite links created by some administrator in the chat.
@@ -59,16 +61,15 @@ export async function* getInviteLinks(
     let offsetLink: string | undefined = undefined
 
     for (;;) {
-        const res: tl.RpcCallReturn['messages.getExportedChatInvites'] = await this.call(
-            {
+        const res: tl.RpcCallReturn['messages.getExportedChatInvites'] =
+            await this.call({
                 _: 'messages.getExportedChatInvites',
                 peer,
                 adminId: admin,
                 limit: Math.min(chunkSize, total - current),
                 offsetDate,
                 offsetLink,
-            }
-        )
+            })
 
         if (!res.invites.length) break
 
@@ -76,7 +77,11 @@ export async function* getInviteLinks(
 
         const last = res.invites[res.invites.length - 1]
         if (last._ === 'chatInvitePublicJoinRequests') {
-            throw new MtTypeAssertionError('getInviteLinks', 'chatInviteExported', last._)
+            throw new MtTypeAssertionError(
+                'getInviteLinks',
+                'chatInviteExported',
+                last._
+            )
         }
         offsetDate = last.date
         offsetLink = last.link

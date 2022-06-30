@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+
 import { InputPeerLike } from '../peers'
 
 /**
@@ -15,14 +16,16 @@ export namespace BotCommands {
      *
      * Used to avoid manually resolving peers.
      */
-    export type IntermediateScope = {
-        type: 'peer' | 'peer_admins'
-        peer: InputPeerLike
-    } | {
-        type: 'member'
-        chat: InputPeerLike
-        user: InputPeerLike
-    }
+    export type IntermediateScope =
+        | {
+              type: 'peer' | 'peer_admins'
+              peer: InputPeerLike
+          }
+        | {
+              type: 'member'
+              chat: InputPeerLike
+              user: InputPeerLike
+          }
 
     /**
      * Default commands scope.
@@ -30,28 +33,28 @@ export namespace BotCommands {
      * Used if no commands with a narrower scope are available.
      */
     export const default_: tl.RawBotCommandScopeDefault = {
-        _: 'botCommandScopeDefault'
+        _: 'botCommandScopeDefault',
     } as const
 
     /**
      * Scope that covers all private chats
      */
     export const allPrivate: tl.RawBotCommandScopeUsers = {
-        _: 'botCommandScopeUsers'
+        _: 'botCommandScopeUsers',
     } as const
 
     /**
      * Scope that covers all group chats (both legacy and supergroups)
      */
     export const allGroups: tl.RawBotCommandScopeChats = {
-        _: 'botCommandScopeChats'
+        _: 'botCommandScopeChats',
     } as const
 
     /**
      * Scope that covers all group chat administrators (both legacy and supergroups)
      */
     export const allGroupAdmins: tl.RawBotCommandScopeChatAdmins = {
-        _: 'botCommandScopeChatAdmins'
+        _: 'botCommandScopeChatAdmins',
     } as const
 
     /**
@@ -61,7 +64,7 @@ export namespace BotCommands {
     export function peer(peer: InputPeerLike): IntermediateScope {
         return {
             type: 'peer',
-            peer
+            peer,
         }
     }
 
@@ -71,18 +74,21 @@ export namespace BotCommands {
     export function groupAdmins(peer: InputPeerLike): IntermediateScope {
         return {
             type: 'peer_admins',
-            peer
+            peer,
         }
     }
 
     /**
      * Scope that covers a specific user in a specific group
      */
-    export function groupMember(chat: InputPeerLike, user: InputPeerLike): IntermediateScope {
+    export function groupMember(
+        chat: InputPeerLike,
+        user: InputPeerLike
+    ): IntermediateScope {
         return {
             type: 'member',
             chat,
-            user
+            user,
         }
     }
 
@@ -92,11 +98,14 @@ export namespace BotCommands {
      * @param command  Bot command (without slash)
      * @param description  Command description
      */
-    export function cmd(command: string, description: string): tl.RawBotCommand {
+    export function cmd(
+        command: string,
+        description: string
+    ): tl.RawBotCommand {
         return {
             _: 'botCommand',
             command,
-            description
+            description,
         }
     }
 }

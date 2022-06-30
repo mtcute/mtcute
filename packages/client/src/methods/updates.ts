@@ -1,7 +1,4 @@
 import { tl } from '@mtcute/tl'
-import { TelegramClient } from '../client'
-import { normalizeToInputChannel } from '../utils/peer-utils'
-import { extractChannelIdFromUpdate } from '../utils/misc-utils'
 import {
     assertNever,
     AsyncLock,
@@ -9,10 +6,15 @@ import {
     getMarkedPeerId,
     markedPeerIdToBare,
     toggleChannelIdMark,
+    Logger,
 } from '@mtcute/core'
+
+import { TelegramClient } from '../client'
+import { normalizeToInputChannel } from '../utils/peer-utils'
+import { extractChannelIdFromUpdate } from '../utils/misc-utils'
 import { MtArgumentError, PeersIndex } from '../types'
 import { _parseUpdate } from '../utils/parse-update'
-import { Logger } from '@mtcute/core/src/utils/logger'
+
 // @copy
 import { ConditionVariable } from '@mtcute/core/src/utils/condition-variable'
 // @copy

@@ -1,7 +1,8 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
-import { InputPeerLike, TypingStatus } from '../../types'
 import { assertNever } from '@mtcute/core'
+
+import { TelegramClient } from '../../client'
+import { InputPeerLike, TypingStatus } from '../../types'
 
 /**
  * Sends a current user/bot typing event

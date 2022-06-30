@@ -1,7 +1,13 @@
-import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, MtTypeAssertionError, PeersIndex } from '../../types'
-import { normalizeDate } from '../../utils/misc-utils'
 import Long from 'long'
+
+import { TelegramClient } from '../../client'
+import {
+    InputPeerLike,
+    Message,
+    MtTypeAssertionError,
+    PeersIndex,
+} from '../../types'
+import { normalizeDate } from '../../utils/misc-utils'
 
 /**
  * Retrieve a chunk of the chat history.

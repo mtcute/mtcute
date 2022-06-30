@@ -9,7 +9,7 @@ export class RpsMeter {
             throw new Error('RPS meter is not supported on this platform')
 
         this._hits = new Deque<bigint>(size)
-        this.time = BigInt(time) * BigInt(1e+6)
+        this.time = BigInt(time) * BigInt(1e6)
     }
 
     hit(): void {
@@ -36,6 +36,6 @@ export class RpsMeter {
         const hits = this._hits.length - idx
 
         // average load per second
-        return hits * 1e9 / Number(now - first.value)
+        return (hits * 1e9) / Number(now - first.value)
     }
 }

@@ -1,6 +1,7 @@
-import { PeersIndex, Poll } from '../'
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
+import { PeersIndex, Poll } from '../'
 import { makeInspectable } from '../utils'
 
 /**
@@ -15,8 +16,7 @@ export class PollUpdate {
         readonly client: TelegramClient,
         readonly raw: tl.RawUpdateMessagePoll,
         readonly _peers: PeersIndex
-    ) {
-    }
+    ) {}
 
     /**
      * Unique poll ID

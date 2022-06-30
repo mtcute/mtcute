@@ -1,5 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
+
 import { telegramRleDecode, telegramRleEncode } from '../src/utils'
 
 describe('telegramRleEncode', () => {

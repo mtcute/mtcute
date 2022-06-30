@@ -1,6 +1,7 @@
+import { MaybeArray } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
-import { MaybeArray } from '@mtcute/core'
 import {
     isInputPeerChannel,
     isInputPeerChat,

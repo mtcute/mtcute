@@ -1,3 +1,6 @@
+import { tl } from '@mtcute/tl'
+import { MaybeArray } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
@@ -6,10 +9,8 @@ import {
     PeersIndex,
     Poll,
 } from '../../types'
-import { MaybeArray } from '@mtcute/core'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { tl } from '@mtcute/tl'
 
 /**
  * Send or retract a vote in a poll.
@@ -41,9 +42,7 @@ export async function sendVote(
         if (!msg) throw new tl.errors.MessageNotFoundError()
 
         if (!(msg.media instanceof Poll))
-            throw new MtArgumentError(
-                'This message does not contain a poll'
-            )
+            throw new MtArgumentError('This message does not contain a poll')
 
         poll = msg.media
         options = options.map((opt) => {

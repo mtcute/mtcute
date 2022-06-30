@@ -1,5 +1,5 @@
-import { FileDownloadParameters, FileLocation } from '../../types'
 import { TelegramClient } from '../../client'
+import { FileDownloadParameters, FileLocation } from '../../types'
 
 /**
  * Download a file and return its contents as a Buffer.

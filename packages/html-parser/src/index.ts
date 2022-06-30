@@ -1,11 +1,11 @@
+import { Parser } from 'htmlparser2'
+import Long from 'long'
 import type {
     IMessageEntityParser,
     MessageEntity,
     FormattedString,
+    tl,
 } from '@mtcute/client'
-import { tl } from '@mtcute/tl'
-import { Parser } from 'htmlparser2'
-import Long from 'long'
 
 const MENTION_REGEX =
     /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
@@ -27,10 +27,7 @@ export function html(
         if (typeof it === 'boolean' || !it) return
 
         if (typeof it === 'string') {
-            it = HtmlMessageEntityParser.escape(
-                it,
-                !!str.match(/=['"]$/)
-            )
+            it = HtmlMessageEntityParser.escape(it, !!str.match(/=['"]$/))
         } else {
             if (it.mode && it.mode !== 'html')
                 throw new Error(`Incompatible parse mode: ${it.mode}`)

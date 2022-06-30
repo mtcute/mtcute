@@ -1,7 +1,8 @@
+import Long from 'long'
+
 import { TelegramClient } from '../../client'
 import { StickerSet } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
-import Long from 'long'
 
 /**
  * Get a list of all installed sticker packs

@@ -1,6 +1,7 @@
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import { Message, MtTypeAssertionError, PeersIndex } from '../../types'
-import { tl } from '@mtcute/tl'
 import { SearchFilters } from '../../types'
 
 /**
@@ -85,7 +86,8 @@ export async function* searchGlobal(
         if (!msgs.length) break
 
         const last = msgs[msgs.length - 1]
-        offsetRate = (res as tl.messages.RawMessagesSlice).nextRate ?? last.raw.date
+        offsetRate =
+            (res as tl.messages.RawMessagesSlice).nextRate ?? last.raw.date
         offsetPeer = last.chat.inputPeer
         offsetId = last.id
 

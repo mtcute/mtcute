@@ -6,7 +6,6 @@ export function splitNameToNamespace(name: string): [string | null, string] {
     return [null, name]
 }
 
-
 export function parseTdlibStyleComment(str: string): Record<string, string> {
     const obj: Record<string, string> = {}
 
@@ -24,7 +23,9 @@ export function parseTdlibStyleComment(str: string): Record<string, string> {
     return obj
 }
 
-export function groupTlEntriesByNamespace(entries: TlEntry[]): Record<string, TlEntry[]> {
+export function groupTlEntriesByNamespace(
+    entries: TlEntry[]
+): Record<string, TlEntry[]> {
     const ret: Record<string, TlEntry[]> = {}
 
     entries.forEach((entry) => {

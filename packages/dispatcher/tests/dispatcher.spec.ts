@@ -1,47 +1,34 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { Dispatcher, handlers, PropagationAction } from '../src'
-import { TelegramClient } from '@mtcute/client'
+import { Dispatcher, PropagationAction } from '../src'
+import { PeersIndex, TelegramClient } from '@mtcute/client'
 
 describe('Dispatcher', () => {
     // todo: replace with proper mocked TelegramClient
     const client = new TelegramClient({ apiId: 0, apiHash: '' })
+    const emptyPeers = new PeersIndex()
 
     describe('Raw updates', () => {
         it('registers and unregisters handlers for raw updates', async () => {
             const dp = new Dispatcher(client)
-
             const log: string[] = []
 
             dp.onRawUpdate((cl, upd) => {
-                log.push('(wrap) received ' + upd._)
-
+                log.push(`(first) received ${upd._}`)
                 return PropagationAction.Continue
             })
-            dp.addUpdateHandler(
-                handlers.rawUpdate((cl, upd) => {
-                    log.push('(factory) received ' + upd._)
-                    return PropagationAction.Continue
-                })
-            )
-            dp.addUpdateHandler({
-                type: 'raw',
-                callback: (cl, upd) => {
-                    log.push('(raw) received ' + upd._)
-                    return PropagationAction.Continue
-                },
+            dp.onRawUpdate((cl, upd) => {
+                log.push(`(second) received ${upd._}`)
+                return PropagationAction.Continue
             })
 
-            await dp.dispatchUpdateNow({ _: 'updateConfig' }, {}, {})
-
+            await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
             dp.removeUpdateHandler('raw')
-
-            await dp.dispatchUpdateNow({ _: 'updateConfig' }, {}, {})
+            await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
 
             expect(log).eql([
-                '(wrap) received updateConfig',
-                '(factory) received updateConfig',
-                '(raw) received updateConfig',
+                '(first) received updateConfig',
+                '(second) received updateConfig',
             ])
         })
 
@@ -74,7 +61,7 @@ describe('Dispatcher', () => {
                 }
             )
 
-            await dp.dispatchUpdateNow({ _: 'updateConfig' }, {}, {})
+            await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
 
             expect(log).eql([
                 '(no) received updateConfig',
@@ -104,7 +91,7 @@ describe('Dispatcher', () => {
                 log.push('(grp2) received ' + upd._)
             }, 2)
 
-            await dp.dispatchUpdateNow({ _: 'updateConfig' }, {}, {})
+            await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
 
             expect(log).eql([
                 '(grp0) received updateConfig',
@@ -135,7 +122,7 @@ describe('Dispatcher', () => {
                 log.push('(grp2) received ' + upd._)
             }, 2)
 
-            await dp.dispatchUpdateNow({ _: 'updateConfig' }, {}, {})
+            await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
 
             expect(log).eql([
                 '(grp0) received updateConfig',
@@ -145,7 +132,7 @@ describe('Dispatcher', () => {
             ])
         })
 
-        it('allows stopping any further propagation with StopPropagation', async () => {
+        it('allows stopping any further propagation with Stop', async () => {
             const dp = new Dispatcher(client)
 
             const log: string[] = []
@@ -160,7 +147,7 @@ describe('Dispatcher', () => {
             dp.onRawUpdate((cl, upd) => {
                 log.push('(grp1) received ' + upd._)
 
-                return PropagationAction.Continue
+                return PropagationAction.Stop
             }, 1)
             dp.onRawUpdate((cl, upd) => {
                 log.push('(grp1 2) received ' + upd._)
@@ -169,7 +156,7 @@ describe('Dispatcher', () => {
                 log.push('(grp2) received ' + upd._)
             }, 2)
 
-            await dp.dispatchUpdateNow({ _: 'updateConfig' }, {}, {})
+            await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
 
             expect(log).eql([
                 '(grp0) received updateConfig',
@@ -195,7 +182,7 @@ describe('Dispatcher', () => {
                 log.push('(child) received ' + upd._)
             })
 
-            await dp.dispatchUpdateNow({ _: 'updateConfig' }, {}, {})
+            await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
 
             expect(log).eql([
                 '(parent) received updateConfig',
@@ -238,7 +225,7 @@ describe('Dispatcher', () => {
                 log.push('(child 2) received ' + upd._)
             }, 1)
 
-            await dp.dispatchUpdateNow({ _: 'updateConfig' }, {}, {})
+            await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
 
             expect(log).eql([
                 '(parent 0) received updateConfig',

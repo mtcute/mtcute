@@ -20,6 +20,13 @@ export function generateTlEntriesDifference(
         name: a.name,
     }
 
+    if (a.comment !== b.comment) {
+        diff.comment = {
+            old: a.comment,
+            new: b.comment,
+        }
+    }
+
     if (a.id !== b.id) {
         let oldId = a.id
         let newId = b.id
@@ -190,11 +197,7 @@ export function generateTlSchemasDifference(
 
         const entryDiff = generateTlEntriesDifference(entry, other)
 
-        if (
-            entryDiff.id ||
-            entryDiff.generics ||
-            entryDiff.arguments
-        ) {
+        if (entryDiff.id || entryDiff.generics || entryDiff.arguments) {
             diff[kind].modified.push(entryDiff)
         }
     })

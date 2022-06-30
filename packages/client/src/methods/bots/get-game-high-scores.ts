@@ -1,3 +1,5 @@
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
@@ -5,7 +7,6 @@ import {
     GameHighScore,
     PeersIndex,
 } from '../../types'
-import { tl } from '@mtcute/tl'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**

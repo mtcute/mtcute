@@ -1,26 +1,29 @@
-import { TelegramClient } from '../client'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../client'
 import {
     BotChatJoinRequestUpdate,
     BotStoppedUpdate,
-    CallbackQuery, ChatJoinRequestUpdate,
+    CallbackQuery,
+    ChatJoinRequestUpdate,
     ChatMemberUpdate,
     ChosenInlineResult,
     DeleteMessageUpdate,
     HistoryReadUpdate,
     InlineQuery,
     Message,
-    ParsedUpdate, PeersIndex,
+    ParsedUpdate,
+    PeersIndex,
     PollUpdate,
     PollVoteUpdate,
     UserStatusUpdate,
-    UserTypingUpdate
-} from "../types";
+    UserTypingUpdate,
+} from '../types'
 
 type ParserFunction = (
     client: TelegramClient,
     upd: tl.TypeUpdate | tl.TypeMessage,
-    peers: PeersIndex,
+    peers: PeersIndex
 ) => any
 type UpdateParser = [ParsedUpdate['name'], ParserFunction]
 
@@ -40,8 +43,7 @@ const newMessageParser: UpdateParser = ['new_message', baseMessageParser]
 const editMessageParser: UpdateParser = ['edit_message', baseMessageParser]
 const chatMemberParser: UpdateParser = [
     'chat_member',
-    (client, upd, peers) =>
-        new ChatMemberUpdate(client, upd as any, peers),
+    (client, upd, peers) => new ChatMemberUpdate(client, upd as any, peers),
 ]
 const callbackQueryParser: UpdateParser = [
     'callback_query',
@@ -113,12 +115,14 @@ const PARSERS: Partial<
     ],
     updateBotChatInviteRequester: [
         'bot_chat_join_request',
-        (client, upd, peers) => new BotChatJoinRequestUpdate(client, upd as any, peers),
+        (client, upd, peers) =>
+            new BotChatJoinRequestUpdate(client, upd as any, peers),
     ],
     updatePendingJoinRequests: [
         'chat_join_request',
-        (client, upd, peers) => new ChatJoinRequestUpdate(client, upd as any, peers),
-    ]
+        (client, upd, peers) =>
+            new ChatJoinRequestUpdate(client, upd as any, peers),
+    ],
 }
 
 /** @internal */

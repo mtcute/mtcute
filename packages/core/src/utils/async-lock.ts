@@ -24,8 +24,7 @@ export class AsyncLock {
     }
 
     release(): void {
-        if (!this._queue.length)
-            throw new Error('Nothing to release')
+        if (!this._queue.length) throw new Error('Nothing to release')
 
         this._queue.popFront()![1]()
     }

@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 import { WebDocument } from '../files/web-document'

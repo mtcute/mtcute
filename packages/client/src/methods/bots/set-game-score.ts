@@ -1,7 +1,8 @@
-import { InputPeerLike, Message, MtInvalidPeerTypeError } from '../../types'
-import { TelegramClient } from '../../client'
-import { normalizeToInputUser } from '../../utils/peer-utils'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
+import { InputPeerLike, Message, MtInvalidPeerTypeError } from '../../types'
+import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
  * Set a score of a user in a game

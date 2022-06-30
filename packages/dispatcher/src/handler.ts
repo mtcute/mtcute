@@ -18,6 +18,7 @@ import {
     ChatJoinRequestUpdate,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
+
 import { PropagationAction } from './propagation'
 
 interface BaseUpdateHandler<Name, Handler, Checker> {

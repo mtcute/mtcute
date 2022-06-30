@@ -21,6 +21,7 @@ import {
     ChatJoinRequestUpdate,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
+
 // begin-codegen-imports
 import {
     UpdateHandler,
@@ -42,12 +43,15 @@ import {
     ChatJoinRequestHandler,
 } from './handler'
 // end-codegen-imports
-import { filters, UpdateFilter } from './filters'
-import { IStateStorage, UpdateState, StateKeyDelegate } from './state'
-import { defaultStateKeyDelegate } from './state'
-import { PropagationAction } from './propagation'
 
-const noop = () => {}
+import { filters, UpdateFilter } from './filters'
+import {
+    IStateStorage,
+    UpdateState,
+    StateKeyDelegate,
+    defaultStateKeyDelegate,
+} from './state'
+import { PropagationAction } from './propagation'
 
 /**
  * Updates dispatcher
@@ -183,8 +187,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * with error handler set to client's one.
      *
      * @param update  Update to process
-     * @param users  Users map
-     * @param chats  Chats map
+     * @param peers Peers index
      */
     dispatchRawUpdate(
         update: tl.TypeUpdate | tl.TypeMessage,

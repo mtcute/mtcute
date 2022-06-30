@@ -1,7 +1,8 @@
+import { sleep } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
 import { isInputPeerChannel } from '../../utils/peer-utils'
-import { sleep } from '@mtcute/core'
 
 /**
  * Kick a user from a chat.

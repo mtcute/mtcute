@@ -1,12 +1,7 @@
 import { tl } from '@mtcute/tl'
-import {
-    Chat,
-    ChatInviteLink,
-    ChatMember,
-    PeersIndex,
-    User,
-} from '../'
+
 import { TelegramClient } from '../../client'
+import { Chat, ChatInviteLink, ChatMember, PeersIndex, User } from '../'
 import { makeInspectable } from '../utils'
 // todo: check case when restricted user joins chat
 
@@ -48,10 +43,11 @@ export namespace ChatMemberUpdate {
 export class ChatMemberUpdate {
     constructor(
         readonly client: TelegramClient,
-        readonly raw: tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant,
-        readonly _peers: PeersIndex,
-    ) {
-    }
+        readonly raw:
+            | tl.RawUpdateChatParticipant
+            | tl.RawUpdateChannelParticipant,
+        readonly _peers: PeersIndex
+    ) {}
 
     /**
      * Date of the event
@@ -182,7 +178,10 @@ export class ChatMemberUpdate {
      */
     get actor(): User {
         if (!this._actor) {
-            this._actor = new User(this.client, this._peers.user(this.raw.actorId))
+            this._actor = new User(
+                this.client,
+                this._peers.user(this.raw.actorId)
+            )
         }
 
         return this._actor
@@ -194,7 +193,10 @@ export class ChatMemberUpdate {
      */
     get user(): User {
         if (!this._user) {
-            this._user = new User(this.client, this._peers.user(this.raw.userId))
+            this._user = new User(
+                this.client,
+                this._peers.user(this.raw.userId)
+            )
         }
 
         return this._user

@@ -1,5 +1,4 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike } from '../../types'
 
 /**
  * Translate text to a given language.

@@ -46,7 +46,7 @@ export async function editInviteLink(
         link,
         expireDate: normalizeDate(params.expires),
         usageLimit: params.usageLimit,
-        requestNeeded: params.withApproval
+        requestNeeded: params.withApproval,
     })
 
     const peers = PeersIndex.from(res)

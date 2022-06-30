@@ -1,3 +1,5 @@
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import {
     InputFileLike,
@@ -6,7 +8,6 @@ import {
     MtInvalidPeerTypeError,
     StickerSet,
 } from '../../types'
-import { tl } from '@mtcute/tl'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 const MASK_POS = {

@@ -1,4 +1,5 @@
 import { NodeCryptoProvider, IEncryptionScheme } from '@mtcute/core'
+
 import { ige256_decrypt, ige256_encrypt } from './native'
 
 /**

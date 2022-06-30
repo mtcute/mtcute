@@ -1,5 +1,6 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
+
 import { generateReaderCodeForTlEntry } from '../../src/codegen/reader'
 import { parseTlToEntries } from '../../src/parse'
 
@@ -82,8 +83,8 @@ describe('generateReaderCodeForTlEntry', () => {
             'return{',
             "_:'updates.channelDifferenceEmpty',",
             'final:!!(flags&1),',
-            "pts:pts,",
-            "timeout:timeout,",
+            'pts:pts,',
+            'timeout:timeout,',
             'canDeleteChannel:!!(flags2&1),',
             '}'
         )

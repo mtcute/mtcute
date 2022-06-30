@@ -1,5 +1,5 @@
-import { BaseCryptoProvider, IEncryptionScheme, IHashMethod } from './abstract'
 import { MaybeAsync } from '../../types'
+import { BaseCryptoProvider, IEncryptionScheme, IHashMethod } from './abstract'
 
 let forge: any = null
 try {

@@ -115,10 +115,10 @@ function publishSinglePackage(name) {
                 throw new Error('client.js exports.TelegramClient not found')
 
             jsContent =
-                jsContent.substr(0, idx) +
+                jsContent.substring(0, idx) +
                 methods.join('\n') +
                 '\n' +
-                jsContent.substr(idx)
+                jsContent.substring(idx)
 
             fs.writeFileSync(path.join(dir, 'dist/client.js'), jsContent)
         }

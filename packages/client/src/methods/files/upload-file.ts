@@ -1,17 +1,18 @@
+import type { ReadStream } from 'fs'
+import { Readable } from 'stream'
+import { fromBuffer } from 'file-type'
+import { tl } from '@mtcute/tl'
+import { randomLong } from '@mtcute/core'
+
+import { TelegramClient } from '../../client'
 import {
     bufferToStream,
     convertWebStreamToNodeReadable,
     readBytesFromStream,
     readStreamUntilEnd,
 } from '../../utils/stream-utils'
-import type { ReadStream } from 'fs'
-import { Readable } from 'stream'
 import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils'
-import { fromBuffer } from 'file-type'
-import { tl } from '@mtcute/tl'
 import { MtArgumentError, UploadFileLike, UploadedFile } from '../../types'
-import { TelegramClient } from '../../client'
-import { randomLong } from '@mtcute/core'
 
 let fs: any = null
 let path: any = null
@@ -19,7 +20,6 @@ try {
     fs = require('fs')
     path = require('path')
 } catch (e) {}
-
 
 const OVERRIDE_MIME: Record<string, string> = {
     // tg doesn't interpret `audio/opus` files as voice messages for some reason
@@ -135,7 +135,12 @@ export async function uploadFile(
         file = convertWebStreamToNodeReadable(file)
     }
 
-    if (typeof file === 'object' && 'headers' in file && 'body' in file && 'url' in file) {
+    if (
+        typeof file === 'object' &&
+        'headers' in file &&
+        'body' in file &&
+        'url' in file
+    ) {
         // fetch() response
         const length = parseInt(file.headers.get('content-length') || '0')
         if (!isNaN(length) && length) fileSize = length
@@ -187,9 +192,7 @@ export async function uploadFile(
     }
 
     if (!(file instanceof Readable))
-        throw new MtArgumentError(
-            'Could not convert input `file` to stream!'
-        )
+        throw new MtArgumentError('Could not convert input `file` to stream!')
 
     const partSizeKb = params.partSize ?? determinePartSize(fileSize)
     if (partSizeKb > 512)

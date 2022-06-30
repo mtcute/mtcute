@@ -1,7 +1,8 @@
-import { TelegramClient } from '../../client'
-import { Chat, ChatInviteLink, PeersIndex, User } from '../peers'
 import { tl } from '@mtcute/tl'
 import { getBarePeerId, getMarkedPeerId } from '@mtcute/core'
+
+import { TelegramClient } from '../../client'
+import { Chat, ChatInviteLink, PeersIndex, User } from '../peers'
 import { makeInspectable } from '../utils'
 
 /**

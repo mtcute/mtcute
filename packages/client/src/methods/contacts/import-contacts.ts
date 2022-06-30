@@ -1,7 +1,8 @@
-import { TelegramClient } from '../../client'
+import Long from 'long'
 import { tl } from '@mtcute/tl'
 import { PartialOnly } from '@mtcute/core'
-import Long from 'long'
+
+import { TelegramClient } from '../../client'
 
 /**
  * Import contacts to your Telegram contacts list.

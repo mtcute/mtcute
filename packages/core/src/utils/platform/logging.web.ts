@@ -5,7 +5,7 @@ const LEVEL_NAMES = [
     'WRN',
     'INF',
     'DBG',
-    'VRB'
+    'VRB',
 ]
 const COLORS = [
     '', // OFF

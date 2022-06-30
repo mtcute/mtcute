@@ -1,12 +1,9 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import {
-    TlBinaryWriter,
-    TlSerializationCounter,
-    TlWriterMap
-} from '../src'
 import Long from 'long'
 import { randomBytes } from 'crypto'
+
+import { TlBinaryWriter, TlSerializationCounter, TlWriterMap } from '../src'
 
 describe('TlBinaryWriter', () => {
     const testSingleMethod = (
@@ -37,8 +34,12 @@ describe('TlBinaryWriter', () => {
     it('should write int53', () => {
         expect(testSingleMethod(8, (w) => w.int53(0))).eq('0000000000000000')
         expect(testSingleMethod(8, (w) => w.int53(1))).eq('0100000000000000')
-        expect(testSingleMethod(8, (w) => w.int53(67305985))).eq('0102030400000000')
-        expect(testSingleMethod(8, (w) => w.int53(281479271743489))).eq('0100010001000100')
+        expect(testSingleMethod(8, (w) => w.int53(67305985))).eq(
+            '0102030400000000'
+        )
+        expect(testSingleMethod(8, (w) => w.int53(281479271743489))).eq(
+            '0100010001000100'
+        )
         expect(testSingleMethod(8, (w) => w.int53(-1))).eq('ffffffffffffffff')
     })
 
@@ -47,10 +48,14 @@ describe('TlBinaryWriter', () => {
             'ffffffffffffffff'
         )
         expect(
-            testSingleMethod(8, (w) => w.long(Long.fromString('8671175386481439762')))
+            testSingleMethod(8, (w) =>
+                w.long(Long.fromString('8671175386481439762'))
+            )
         ).eq('1234567812345678')
         expect(
-            testSingleMethod(8, (w) => w.long(Long.fromString('-6700480189419895787')))
+            testSingleMethod(8, (w) =>
+                w.long(Long.fromString('-6700480189419895787'))
+            )
         ).eq('15c415b5c41c03a3')
     })
 
@@ -138,10 +143,14 @@ describe('TlBinaryWriter', () => {
         expect(length).eq(20)
 
         expect(
-            testSingleMethod(length, (w) => {
-                w.object(object1)
-                w.object(object2)
-            }, stubObjectsMap)
+            testSingleMethod(
+                length,
+                (w) => {
+                    w.object(object1)
+                    w.object(object2)
+                },
+                stubObjectsMap
+            )
         ).eq('efbeadde01000000addecefadec0adba02000000')
     })
 
@@ -161,16 +170,20 @@ describe('TlBinaryWriter', () => {
         }
 
         const length =
-            TlSerializationCounter.countNeededBytes(stubObjectsMap, object1,) +
-            TlSerializationCounter.countNeededBytes(stubObjectsMap, object2,) +
-            TlSerializationCounter.countNeededBytes(stubObjectsMap, object3,) +
+            TlSerializationCounter.countNeededBytes(stubObjectsMap, object1) +
+            TlSerializationCounter.countNeededBytes(stubObjectsMap, object2) +
+            TlSerializationCounter.countNeededBytes(stubObjectsMap, object3) +
             8 // because technically in tl vector can't be top-level, but whatever :shrug:
         expect(length).eq(48)
 
         expect(
-            testSingleMethod(length, (w) => {
-                w.vector(w.object as any, [object1, object2, object3])
-            }, stubObjectsMap)
+            testSingleMethod(
+                length,
+                (w) => {
+                    w.vector(w.object as any, [object1, object2, object3])
+                },
+                stubObjectsMap
+            )
         ).eq(
             '15c4b51c03000000efbeadde01000000addecefadec0adba020000003d0cbfbe15c4b51c020000000100000002000000'
         )
@@ -190,17 +203,19 @@ describe('TlBinaryWriter', () => {
                     'hex'
                 ),
                 pq: Buffer.from('17ED48941A08F981', 'hex'),
-                serverPublicKeyFingerprints: [Long.fromString('c3b42b026ce86b21', 16)],
+                serverPublicKeyFingerprints: [
+                    Long.fromString('c3b42b026ce86b21', 16),
+                ],
             }
 
             const map: TlWriterMap = {
-                'mt_resPQ': function (w, obj) {
+                mt_resPQ: function (w, obj) {
                     w.uint(85337187)
                     w.int128(obj.nonce)
                     w.int128(obj.serverNonce)
                     w.bytes(obj.pq)
                     w.vector(w.long, obj.serverPublicKeyFingerprints)
-                }
+                },
             }
 
             const length =
@@ -209,13 +224,17 @@ describe('TlBinaryWriter', () => {
 
             expect(length).eq(expected.length / 2)
             expect(
-                testSingleMethod(length, (w) => {
-                    w.long(Long.ZERO) // authKeyId
-                    w.long(Long.fromString('51E57AC91E83C801', true, 16)) // messageId
-                    w.uint(64) // messageLength
+                testSingleMethod(
+                    length,
+                    (w) => {
+                        w.long(Long.ZERO) // authKeyId
+                        w.long(Long.fromString('51E57AC91E83C801', true, 16)) // messageId
+                        w.uint(64) // messageLength
 
-                    w.object(resPq)
-                }, map)
+                        w.object(resPq)
+                    },
+                    map
+                )
             ).eq(expected)
         })
     })

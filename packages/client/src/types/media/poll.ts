@@ -1,9 +1,10 @@
-import { makeInspectable } from '../utils'
+import Long from 'long'
 import { tl } from '@mtcute/tl'
+
+import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
 import { MessageEntity } from '../messages'
 import { PeersIndex } from '../peers'
-import Long from 'long'
 
 export namespace Poll {
     export interface PollAnswer {

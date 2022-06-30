@@ -1,8 +1,10 @@
+import { tl } from '@mtcute/tl'
 import { AsyncLock, Deque, getMarkedPeerId, MaybeAsync } from '@mtcute/core'
 import {
     ControllablePromise,
     createControllablePromise,
 } from '@mtcute/core/src/utils/controllable-promise'
+
 import { TelegramClient } from '../client'
 import { InputMediaLike } from './media'
 import { MtArgumentError } from './errors'
@@ -10,7 +12,6 @@ import { InputPeerLike } from './peers'
 import { HistoryReadUpdate } from './updates'
 import { FormattedString } from './parser'
 import { Message } from './messages'
-import { tl } from '@mtcute/tl'
 
 interface QueuedHandler<T> {
     promise: ControllablePromise<T>
@@ -46,10 +47,7 @@ export class Conversation {
 
     private _pendingRead: Record<number, QueuedHandler<void>> = {}
 
-    constructor(
-        readonly client: TelegramClient,
-        readonly chat: InputPeerLike
-    ) {
+    constructor(readonly client: TelegramClient, readonly chat: InputPeerLike) {
         this._onNewMessage = this._onNewMessage.bind(this)
         this._onEditMessage = this._onEditMessage.bind(this)
         this._onHistoryRead = this._onHistoryRead.bind(this)
@@ -103,7 +101,8 @@ export class Conversation {
 
         const dialog = await this.client.getPeerDialogs(this._inputPeer)
         try {
-            this._lastMessage = this._lastReceivedMessage = dialog.lastMessage.id
+            this._lastMessage = this._lastReceivedMessage =
+                dialog.lastMessage.id
         } catch (e) {
             if (e instanceof tl.errors.MessageNotFoundError) {
                 this._lastMessage = this._lastReceivedMessage = 0
@@ -130,14 +129,17 @@ export class Conversation {
         this.client.off('edit_message', this._onEditMessage)
         this.client.off('history_read', this._onHistoryRead)
 
-        const idx = this.client['_pendingConversations'][this._chatId].indexOf(this)
-        if (idx > -1) { // just in case
+        const idx =
+            this.client['_pendingConversations'][this._chatId].indexOf(this)
+        if (idx > -1) {
+            // just in case
             this.client['_pendingConversations'][this._chatId].splice(idx, 1)
         }
         if (!this.client['_pendingConversations'][this._chatId].length) {
             delete this.client['_pendingConversations'][this._chatId]
         }
-        this.client['_hasConversations'] = Object.keys(this.client['_pendingConversations']).length > 0
+        this.client['_hasConversations'] =
+            Object.keys(this.client['_pendingConversations']).length > 0
 
         // reset pending status
         this._queuedNewMessage.clear()
@@ -197,11 +199,7 @@ export class Conversation {
             throw new MtArgumentError("Conversation hasn't started yet")
         }
 
-        return this.client.sendMediaGroup(
-            this._inputPeer,
-            medias,
-            params
-        )
+        return this.client.sendMediaGroup(this._inputPeer, medias, params)
     }
 
     /**
@@ -442,7 +440,10 @@ export class Conversation {
      * @param timeout  Timeout for the handler in ms, def. 15 sec. Pass `null` to disable.
      *   When the timeout is reached, `TimeoutError` is thrown.
      */
-    async waitForRead(message?: number, timeout: number | null = 15000): Promise<void> {
+    async waitForRead(
+        message?: number,
+        timeout: number | null = 15000
+    ): Promise<void> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
         }
@@ -474,7 +475,6 @@ export class Conversation {
 
         return promise
     }
-
 
     private _onNewMessage(msg: Message) {
         if (msg.chat.id !== this._chatId) return
@@ -514,7 +514,7 @@ export class Conversation {
             return
         }
 
-        (async () => {
+        ;(async () => {
             if (!it.check || (await it.check(msg))) {
                 if (it.timeout) clearTimeout(it.timeout)
                 it.promise.resolve(msg)

@@ -1,10 +1,11 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
+import { getMarkedPeerId } from '@mtcute/core'
+
+import { TelegramClient } from '../../client'
 import { Chat, PeersIndex } from '../peers'
 import { Message } from './message'
 import { DraftMessage } from './draft-message'
 import { makeInspectable } from '../utils'
-import { getMarkedPeerId } from '@mtcute/core'
 
 /**
  * A dialog.

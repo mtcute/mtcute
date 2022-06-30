@@ -1,6 +1,9 @@
+import Long from 'long'
+import { tl } from '@mtcute/tl'
+import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
+
 import { TelegramClient } from '../../client'
 import { FileLocation } from '../files'
-import { tl } from '@mtcute/tl'
 import {
     inflateSvgPath,
     strippedPhotoToJpg,
@@ -9,8 +12,6 @@ import {
 import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { makeInspectable } from '../utils'
-import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
-import Long from 'long'
 
 /**
  * One size of some thumbnail
@@ -269,7 +270,8 @@ export class Thumbnail extends FileLocation {
                                 this._media._ === 'photo'
                                     ? td.FileType.Photo
                                     : td.FileType.Thumbnail,
-                            thumbnailType: this.raw.type === 'u' ? '\x00' : this.raw.type,
+                            thumbnailType:
+                                this.raw.type === 'u' ? '\x00' : this.raw.type,
                         },
                     }
                 )

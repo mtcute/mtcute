@@ -14,8 +14,7 @@ export class PollVoteUpdate {
         readonly client: TelegramClient,
         readonly raw: tl.RawUpdateMessagePollVote,
         readonly _peers: PeersIndex
-    ) {
-    }
+    ) {}
 
     /**
      * Unique poll ID
@@ -30,7 +29,10 @@ export class PollVoteUpdate {
      */
     get user(): User {
         if (!this._user) {
-            this._user = new User(this.client, this._peers.user(this.raw.userId))
+            this._user = new User(
+                this.client,
+                this._peers.user(this.raw.userId)
+            )
         }
 
         return this._user

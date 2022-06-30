@@ -1,3 +1,6 @@
+import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
 import {
     MaybeDynamic,
     MtArgumentError,
@@ -6,12 +9,10 @@ import {
     User,
     MaybeAsync,
 } from '../../types'
-import { TelegramClient } from '../../client'
 import {
     resolveMaybeDynamic,
     normalizePhoneNumber,
 } from '../../utils/misc-utils'
-import { tl } from '@mtcute/tl'
 
 /**
  * Start the client in an interactive and declarative manner,

@@ -1,8 +1,9 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { TlBinaryReader, TlReaderMap } from '../src'
 import Long from 'long'
 import { randomBytes } from 'crypto'
+
+import { TlBinaryReader, TlReaderMap } from '../src'
 
 describe('TlBinaryReader', () => {
     it('should read int32', () => {
@@ -12,10 +13,7 @@ describe('TlBinaryReader', () => {
             67305985
         )
         expect(
-            new TlBinaryReader(
-                {},
-                Buffer.from([0xff, 0xff, 0xff, 0xff])
-            ).int()
+            new TlBinaryReader({}, Buffer.from([0xff, 0xff, 0xff, 0xff])).int()
         ).eq(-1)
     })
 
@@ -26,22 +24,23 @@ describe('TlBinaryReader', () => {
             67305985
         )
         expect(
-            new TlBinaryReader(
-                {},
-                Buffer.from([0xff, 0xff, 0xff, 0xff])
-            ).uint()
+            new TlBinaryReader({}, Buffer.from([0xff, 0xff, 0xff, 0xff])).uint()
         ).eq(4294967295)
     })
 
     it('should read int53', () => {
-        expect(TlBinaryReader.manual(Buffer.from([0, 0, 0, 0, 0, 0, 0, 0])).int53()).eq(0)
-        expect(TlBinaryReader.manual(Buffer.from([1, 0, 0, 0, 0, 0, 0, 0])).int53()).eq(1)
-        expect(TlBinaryReader.manual(Buffer.from([1, 2, 3, 4, 0, 0, 0, 0])).int53()).eq(
-            67305985
-        )
-        expect(TlBinaryReader.manual(Buffer.from([1, 0, 1, 0, 1, 0, 1, 0])).int53()).eq(
-            281479271743489
-        )
+        expect(
+            TlBinaryReader.manual(Buffer.from([0, 0, 0, 0, 0, 0, 0, 0])).int53()
+        ).eq(0)
+        expect(
+            TlBinaryReader.manual(Buffer.from([1, 0, 0, 0, 0, 0, 0, 0])).int53()
+        ).eq(1)
+        expect(
+            TlBinaryReader.manual(Buffer.from([1, 2, 3, 4, 0, 0, 0, 0])).int53()
+        ).eq(67305985)
+        expect(
+            TlBinaryReader.manual(Buffer.from([1, 0, 1, 0, 1, 0, 1, 0])).int53()
+        ).eq(281479271743489)
         expect(
             new TlBinaryReader(
                 {},
@@ -120,9 +119,9 @@ describe('TlBinaryReader', () => {
         expect([
             ...TlBinaryReader.manual(Buffer.from([1, 2, 3, 4])).raw(2),
         ]).eql([1, 2])
-        expect([
-            ...TlBinaryReader.manual(Buffer.from([1, 2, 3, 4])).raw(),
-        ]).eql([1, 2, 3, 4])
+        expect([...TlBinaryReader.manual(Buffer.from([1, 2, 3, 4])).raw()]).eql(
+            [1, 2, 3, 4]
+        )
         expect([
             ...TlBinaryReader.manual(Buffer.from([1, 2, 3, 4])).raw(0),
         ]).eql([])

@@ -1,5 +1,5 @@
-import { SentCode } from '../../types'
 import { TelegramClient } from '../../client'
+import { SentCode } from '../../types'
 import { normalizePhoneNumber } from '../../utils/misc-utils'
 
 /**

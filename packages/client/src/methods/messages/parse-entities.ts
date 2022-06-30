@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { FormattedString, MtClientError } from '../../types'
@@ -32,7 +33,7 @@ export async function _parseEntities(
             throw new MtClientError(`Parse mode ${mode} is not registered.`)
         }
 
-        ;[text, entities] = await this._parseModes[mode].parse(text)
+        ;[text, entities] = this._parseModes[mode].parse(text)
     }
 
     // replace mentionName entities with input ones

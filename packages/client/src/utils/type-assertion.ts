@@ -1,5 +1,6 @@
-import { MtTypeAssertionError } from '../types'
 import { tl } from '@mtcute/tl'
+
+import { MtTypeAssertionError } from '../types'
 
 export function assertTypeIs<T extends tl.TlObject, K extends T['_']>(
     context: string,

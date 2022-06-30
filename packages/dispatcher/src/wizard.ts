@@ -1,4 +1,5 @@
 import { MaybeAsync, Message } from '@mtcute/client'
+
 import { Dispatcher } from './dispatcher'
 import { UpdateState } from './state'
 import { filters } from './filters'
@@ -18,7 +19,7 @@ import { filters } from './filters'
 export enum WizardSceneAction {
     Next = 'next',
     Stay = 'stay',
-    Exit = 'exit'
+    Exit = 'exit',
 }
 
 interface WizardInternalState {
@@ -30,15 +31,15 @@ interface WizardInternalState {
  * that can be used to simplify implementing
  * step-by-step scenes.
  */
-export class WizardScene<State, SceneName extends string = string> extends Dispatcher<
-    State & WizardInternalState,
-    SceneName
-> {
+export class WizardScene<
+    State,
+    SceneName extends string = string
+> extends Dispatcher<State & WizardInternalState, SceneName> {
     private _steps = 0
 
     private _defaultState: State & WizardInternalState = {} as any
 
-    setDefaultState (defaultState: State): void {
+    setDefaultState(defaultState: State): void {
         this._defaultState = defaultState as State & WizardInternalState
     }
 
@@ -52,15 +53,20 @@ export class WizardScene<State, SceneName extends string = string> extends Dispa
     /**
      * Add a step to the wizard
      */
-    addStep(handler: (msg: Message, state: UpdateState<State, SceneName>) => MaybeAsync<WizardSceneAction | number>): void {
+    addStep(
+        handler: (
+            msg: Message,
+            state: UpdateState<State, SceneName>
+        ) => MaybeAsync<WizardSceneAction | number>
+    ): void {
         const step = this._steps++
 
-        const filter = filters.state<WizardInternalState>((it) => it.$step === step)
+        const filter = filters.state<WizardInternalState>(
+            (it) => it.$step === step
+        )
 
         this.onNewMessage(
-            step === 0
-                ? filters.or(filters.stateEmpty, filter)
-                : filter,
+            step === 0 ? filters.or(filters.stateEmpty, filter) : filter,
             async (msg: Message, state) => {
                 const result = await handler(msg, state)
 
@@ -75,7 +81,10 @@ export class WizardScene<State, SceneName extends string = string> extends Dispa
                         if (next === this._steps) {
                             await state.exit()
                         } else {
-                            await state.merge({ $step: next }, this._defaultState)
+                            await state.merge(
+                                { $step: next },
+                                this._defaultState
+                            )
                         }
                         break
                     }

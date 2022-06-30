@@ -1,9 +1,16 @@
-import { buffersEqual, randomBytes } from '../utils/buffer-utils'
-import { mtp, tl } from '@mtcute/tl'
-import { createAesIgeForMessage } from '../utils/crypto/mtproto'
-import { ICryptoProvider, Logger, getRandomInt, randomLong } from '../utils'
 import Long from 'long'
-import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlSerializationCounter, TlWriterMap } from '@mtcute/tl-runtime'
+import { mtp, tl } from '@mtcute/tl'
+import {
+    TlBinaryReader,
+    TlBinaryWriter,
+    TlReaderMap,
+    TlSerializationCounter,
+    TlWriterMap,
+} from '@mtcute/tl-runtime'
+
+import { createAesIgeForMessage } from '../utils/crypto/mtproto'
+import { buffersEqual, randomBytes } from '../utils/buffer-utils'
+import { ICryptoProvider, Logger, getRandomInt, randomLong } from '../utils'
 
 /**
  * Class encapsulating a single MTProto session.
@@ -108,11 +115,7 @@ export class MtprotoSession {
     /** Decrypt a single MTProto message using session's keys */
     async decryptMessage(
         data: Buffer,
-        callback: (
-            msgId: tl.Long,
-            seqNo: number,
-            data: TlBinaryReader
-        ) => void
+        callback: (msgId: tl.Long, seqNo: number, data: TlBinaryReader) => void
     ): Promise<void> {
         if (!this._authKey) throw new Error('Keys are not set up!')
 
@@ -246,7 +249,10 @@ export class MtprotoSession {
 
         const length = Buffer.isBuffer(content)
             ? content.length
-            : TlSerializationCounter.countNeededBytes(writer.objectMap!, content)
+            : TlSerializationCounter.countNeededBytes(
+                  writer.objectMap!,
+                  content
+              )
 
         writer.long(messageId)
         writer.int(seqNo)

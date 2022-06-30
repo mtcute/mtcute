@@ -1,9 +1,10 @@
+import { tl } from '@mtcute/tl'
+
+import { makeInspectable } from '../utils'
+
 /**
  * A phone contact
  */
-import { tl } from '@mtcute/tl'
-import { makeInspectable } from '../utils'
-
 export class Contact {
     readonly type = 'contact' as const
 

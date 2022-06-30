@@ -1,6 +1,8 @@
 import { tl } from '@mtcute/tl'
-import { BotKeyboard, ReplyMarkup } from '../keyboards'
+import { assertNever } from '@mtcute/core'
+
 import { TelegramClient } from '../../../client'
+import { BotKeyboard, ReplyMarkup } from '../keyboards'
 import {
     InputMediaContact,
     InputMediaGeo,
@@ -8,7 +10,6 @@ import {
     InputMediaVenue,
 } from '../../media'
 import { FormattedString } from '../../parser'
-import { assertNever } from '@mtcute/core'
 
 /**
  * Inline message containing only text

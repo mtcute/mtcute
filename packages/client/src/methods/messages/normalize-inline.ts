@@ -1,6 +1,7 @@
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
 import { SessionConnection } from '@mtcute/core'
+
+import { TelegramClient } from '../../client'
 import { parseInlineMessageId } from '../../utils/inline-utils'
 
 // @extension
@@ -25,9 +26,8 @@ export async function _normalizeInline(
     let connection = this.primaryConnection
     if (id.dcId !== connection.params.dc.id) {
         if (!(id.dcId in this._connectionsForInline)) {
-            this._connectionsForInline[
-                id.dcId
-            ] = await this.createAdditionalConnection(id.dcId)
+            this._connectionsForInline[id.dcId] =
+                await this.createAdditionalConnection(id.dcId)
         }
         connection = this._connectionsForInline[id.dcId]
     }
