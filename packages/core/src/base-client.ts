@@ -394,9 +394,10 @@ export class BaseTelegramClient extends EventEmitter {
             this.log.create('connection')
         )
 
-        this.primaryConnection.on('usable', async () => {
+        this.primaryConnection.on('usable', () => {
             this._lastUpdateTime = Date.now()
 
+            if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
             this._keepAliveInterval = setInterval(async () => {
                 if (Date.now() - this._lastUpdateTime > 900_000) {
                     this._keepAliveAction()
