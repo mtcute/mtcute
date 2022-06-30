@@ -251,7 +251,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         }
 
         for (const child of this._children) {
-            handled ||= await child.dispatchRawUpdateNow(update, peers)
+            const childHandled = await child.dispatchRawUpdateNow(update, peers)
+            handled ||= childHandled
         }
 
         return handled
@@ -465,7 +466,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
         if (shouldDispatchChildren) {
             for (const child of this._children) {
-                handled ||= await child._dispatchUpdateNowImpl(update)
+                const childHandled = await child._dispatchUpdateNowImpl(update)
+                handled ||= childHandled
             }
         }
 
