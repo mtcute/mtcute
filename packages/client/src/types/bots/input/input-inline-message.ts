@@ -132,7 +132,7 @@ export namespace BotInlineMessage {
      * @param params
      */
     export function text(
-        text: string,
+        text: string | FormattedString<any>,
         params: Omit<InputInlineMessageText, 'type' | 'text'> = {}
     ): InputInlineMessageText {
         const ret = params as tl.Mutable<InputInlineMessageText>
