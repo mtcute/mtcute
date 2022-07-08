@@ -5,12 +5,7 @@ import { InputFileLike } from '../files'
 import { Venue } from './venue'
 import { FormattedString } from '../parser'
 
-interface BaseInputMedia {
-    /**
-     * File to be sent
-     */
-    file: InputFileLike
-
+interface CaptionMixin {
     /**
      * Caption of the media
      */
@@ -21,6 +16,13 @@ interface BaseInputMedia {
      * If passed, parse mode is ignored
      */
     entities?: tl.TypeMessageEntity[]
+}
+
+interface FileMixin {
+    /**
+     * File to be sent
+     */
+    file: InputFileLike
 
     /**
      * Override file name for the file.
@@ -58,14 +60,14 @@ interface BaseInputMedia {
  * newly uploaded photos with `auto` will be
  * uploaded as a document
  */
-export interface InputMediaAuto extends BaseInputMedia {
+export interface InputMediaAuto extends FileMixin, CaptionMixin {
     type: 'auto'
 }
 
 /**
  * An audio file or voice message to be sent
  */
-export interface InputMediaAudio extends BaseInputMedia {
+export interface InputMediaAudio extends FileMixin, CaptionMixin {
     type: 'audio'
 
     /**
@@ -104,7 +106,7 @@ export interface InputMediaAudio extends BaseInputMedia {
 /**
  * Voice message to be sent
  */
-export interface InputMediaVoice extends BaseInputMedia {
+export interface InputMediaVoice extends FileMixin, CaptionMixin {
     type: 'voice'
 
     /**
@@ -129,7 +131,7 @@ export interface InputMediaVoice extends BaseInputMedia {
 /**
  * A generic file to be sent
  */
-export interface InputMediaDocument extends BaseInputMedia {
+export interface InputMediaDocument extends FileMixin, CaptionMixin {
     type: 'document'
 
     /**
@@ -147,18 +149,15 @@ export interface InputMediaDocument extends BaseInputMedia {
 /**
  * A photo to be sent
  */
-export interface InputMediaPhoto extends BaseInputMedia {
+export interface InputMediaPhoto extends FileMixin, CaptionMixin {
     type: 'photo'
 }
 
 /**
  * A sticker to be sent
  */
-export interface InputMediaSticker extends BaseInputMedia {
+export interface InputMediaSticker extends FileMixin, CaptionMixin {
     type: 'sticker'
-
-    caption?: never
-    entities?: never
 
     /**
      * Whether this sticker is animated?
@@ -184,7 +183,7 @@ export interface InputMediaSticker extends BaseInputMedia {
 /**
  * A video to be sent
  */
-export interface InputMediaVideo extends BaseInputMedia {
+export interface InputMediaVideo extends FileMixin, CaptionMixin {
     type: 'video'
 
     /**
@@ -244,7 +243,7 @@ export interface InputMediaVideo extends BaseInputMedia {
 /**
  * A geolocation to be sent
  */
-export interface InputMediaGeo {
+export interface InputMediaGeo extends CaptionMixin {
     type: 'geo'
 
     /**
@@ -301,7 +300,7 @@ export interface InputMediaGeoLive extends Omit<InputMediaGeo, 'type'> {
  * Note that dice result value is generated randomly on the server,
  * you can't influence it in any way!
  */
-export interface InputMediaDice {
+export interface InputMediaDice extends CaptionMixin {
     type: 'dice'
 
     /**
@@ -313,7 +312,7 @@ export interface InputMediaDice {
 /**
  * A venue to be sent
  */
-export interface InputMediaVenue {
+export interface InputMediaVenue extends CaptionMixin {
     type: 'venue'
 
     /**
@@ -345,7 +344,7 @@ export interface InputMediaVenue {
 /**
  * A contact to be sent
  */
-export interface InputMediaContact {
+export interface InputMediaContact extends CaptionMixin {
     type: 'contact'
 
     /**
@@ -373,7 +372,7 @@ export interface InputMediaContact {
 /**
  * A game to be sent
  */
-export interface InputMediaGame {
+export interface InputMediaGame extends CaptionMixin {
     type: 'game'
 
     /**
@@ -385,7 +384,7 @@ export interface InputMediaGame {
 /**
  * An invoice to be sent (see https://core.telegram.org/bots/payments)
  */
-export interface InputMediaInvoice {
+export interface InputMediaInvoice extends CaptionMixin {
     type: 'invoice'
 
     /**
@@ -440,8 +439,12 @@ export interface InputMediaInvoice {
 
 /**
  * A simple poll to be sent
+ *
+ * > **Note**: when using user account,
+ * > the poll can't be sent to PMs, only to channels/groups,
+ * > otherwise there will be `MEDIA_INVALID` error.
  */
-export interface InputMediaPoll {
+export interface InputMediaPoll extends CaptionMixin {
     type: 'poll'
 
     /**
@@ -533,23 +536,6 @@ export interface InputMediaQuiz extends Omit<InputMediaPoll, 'type'> {
 }
 
 /**
- * Input media that can have a caption.
- *
- * Note that meta-fields (like `duration`) are only
- * applicable if `file` is {@link UploadFileLike},
- * otherwise they are ignored.
- *
- * A subset of {@link InputMediaLike}
- */
-export type InputMediaWithCaption =
-    | InputMediaAudio
-    | InputMediaVoice
-    | InputMediaDocument
-    | InputMediaPhoto
-    | InputMediaVideo
-    | InputMediaAuto
-
-/**
  * Input media that can be sent somewhere.
  *
  * Note that meta-fields (like `duration`) are only
@@ -559,7 +545,12 @@ export type InputMediaWithCaption =
  * @link InputMedia
  */
 export type InputMediaLike =
-    | InputMediaWithCaption
+    | InputMediaAudio
+    | InputMediaVoice
+    | InputMediaDocument
+    | InputMediaPhoto
+    | InputMediaVideo
+    | InputMediaAuto
     | InputMediaSticker
     | InputMediaVenue
     | InputMediaGeo
@@ -752,12 +743,12 @@ export namespace InputMedia {
      * as static members of {@link Dice}.
      *
      * @param emoji  Emoji representing the dice
+     * @param params  Additional parameters
      */
-    export function dice(emoji: string): InputMediaDice {
-        return {
-            type: 'dice',
-            emoji,
-        }
+    export function dice(emoji: string, params: CaptionMixin): InputMediaDice {
+        const ret = params as tl.Mutable<InputMediaDice>
+        ret.type = 'dice'
+        return ret
     }
 
     /**

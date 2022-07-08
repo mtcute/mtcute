@@ -5,8 +5,7 @@ import { MessageEntity } from './message-entity'
 import { Message } from './message'
 import { InputPeerLike } from '../peers'
 import { makeInspectable } from '../utils'
-import { InputMediaWithCaption } from '../media'
-
+import { InputMediaLike } from '../media'
 
 /**
  * A draft message
@@ -94,17 +93,14 @@ export class DraftMessage {
      * @link TelegramClient.sendMedia
      */
     sendWithMedia(
-        media: InputMediaWithCaption,
+        media: InputMediaLike,
         params?: Parameters<TelegramClient['sendMedia']>[2]
     ): Promise<Message> {
-        if (!media.caption) {
-            media.caption = this.raw.message
-            media.entities = this.raw.entities
-        }
-
         return this.client.sendMedia(this._chatId, media, {
             clearDraft: true,
             replyTo: this.raw.replyToMsgId,
+            caption: this.raw.message,
+            entities: this.raw.entities,
             ...(params || {}),
         })
     }
