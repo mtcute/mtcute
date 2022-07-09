@@ -69,7 +69,14 @@ export class Logger {
                     args.splice(idx, 1)
                     if (m === '%h') return val.toString('hex')
                     if (m === '%b') return !!val + ''
-                    if (m === '%j') return JSON.stringify(val)
+                    if (m === '%j') return JSON.stringify(val, (k, v) => {
+                        if (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data)) {
+                            let str = Buffer.from(v.data).toString('base64')
+                            if (str.length > 300) str = str.slice(0, 300) + '...'
+                            return str
+                        }
+                        return v
+                    })
                     if (m === '%l') return val + ''
                 }
 
