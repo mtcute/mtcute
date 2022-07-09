@@ -97,16 +97,28 @@ export async function editInlineMessage(
         )
     }
 
-    await this.call(
-        {
-            _: 'messages.editInlineBotMessage',
-            id,
-            noWebpage: params.disableWebPreview,
-            replyMarkup: BotKeyboard._convertToTl(params.replyMarkup),
-            message: content,
-            entities,
-            media,
-        },
-        { connection }
-    )
+    let retries = 3
+    while (retries--) {
+        try {
+            await this.call(
+                {
+                    _: 'messages.editInlineBotMessage',
+                    id,
+                    noWebpage: params.disableWebPreview,
+                    replyMarkup: BotKeyboard._convertToTl(params.replyMarkup),
+                    message: content,
+                    entities,
+                    media,
+                },
+                { connection }
+            )
+            return
+        } catch (e) {
+            if (e instanceof tl.errors.MediaEmptyError) {
+                continue
+            }
+
+            throw e
+        }
+    }
 }
