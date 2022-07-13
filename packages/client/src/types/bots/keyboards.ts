@@ -50,6 +50,7 @@ export type ReplyMarkup =
     | ReplyKeyboardHide
     | ReplyKeyboardForceReply
     | InlineKeyboardMarkup
+    | tl.TypeReplyMarkup
 
 /**
  * Convenience methods wrapping TL
@@ -435,6 +436,7 @@ export namespace BotKeyboard {
         obj?: ReplyMarkup
     ): tl.TypeReplyMarkup | undefined {
         if (!obj) return obj
+        if (tl.isAnyReplyMarkup(obj)) return obj
 
         switch (obj.type) {
             case 'reply':
