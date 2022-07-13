@@ -335,22 +335,17 @@ export namespace BotKeyboard {
     /**
      * Button to open webview
      *
-     * Used for both inline keyboards and reply ones, but!
-     *
-     * For inline keyboards, `simple=false`
-     * For reply keyboards, `simple=true`
+     * Used for both inline keyboards and reply ones
      *
      * @param text  Button label
      * @param url  WebView URL
-     * @param simple  Whether to use simple WebView
      */
     export function webView(
         text: string,
-        url: string,
-        simple = false
-    ): tl.RawKeyboardButtonWebView | tl.RawKeyboardButtonSimpleWebView {
+        url: string
+    ): tl.RawKeyboardButtonWebView {
         return {
-            _: simple ? 'keyboardButtonSimpleWebView' : 'keyboardButtonWebView',
+            _: 'keyboardButtonWebView',
             text,
             url,
         }
@@ -415,12 +410,24 @@ export namespace BotKeyboard {
 
     /** @internal */
     export function _2dToRows(
-        arr: tl.TypeKeyboardButton[][]
+        arr: tl.TypeKeyboardButton[][],
+        inline: boolean
     ): tl.RawKeyboardButtonRow[] {
-        return arr.map((row) => ({
-            _: 'keyboardButtonRow',
-            buttons: row,
-        }))
+        return arr.map((row) => {
+            if (!inline) {
+                // le cringe
+                row.forEach((btn) => {
+                    if (btn._ === 'keyboardButtonWebView') {
+                        ;(btn as any)._ = 'keyboardButtonSimpleWebView'
+                    }
+                })
+            }
+
+            return {
+                _: 'keyboardButtonRow',
+                buttons: row,
+            }
+        })
     }
 
     /** @internal */
@@ -436,7 +443,7 @@ export namespace BotKeyboard {
                     resize: obj.resize,
                     singleUse: obj.singleUse,
                     selective: obj.selective,
-                    rows: _2dToRows(obj.buttons),
+                    rows: _2dToRows(obj.buttons, false),
                 }
             case 'reply_hide':
                 return {
@@ -452,7 +459,7 @@ export namespace BotKeyboard {
             case 'inline':
                 return {
                     _: 'replyInlineMarkup',
-                    rows: _2dToRows(obj.buttons),
+                    rows: _2dToRows(obj.buttons, true),
                 }
             default:
                 assertNever(obj)
