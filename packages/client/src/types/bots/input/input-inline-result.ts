@@ -714,9 +714,9 @@ export namespace BotInline {
     /** @internal */
     export async function _convertToTl(
         client: TelegramClient,
-        obj: InputInlineResult,
+        results: InputInlineResult[],
         parseMode?: string | null
-    ): Promise<tl.TypeInputBotInlineResult> {
+    ): Promise<[boolean, tl.TypeInputBotInlineResult[]]> {
         const normalizeThumb = (
             obj: InputInlineResult,
             fallback?: string
@@ -748,306 +748,331 @@ export namespace BotInline {
             }
         }
 
-        if (obj.type === 'article') {
-            let sendMessage: tl.TypeInputBotInlineMessage
-            if (obj.message) {
-                sendMessage = await BotInlineMessage._convertToTl(
-                    client,
-                    obj.message,
-                    parseMode
-                )
-            } else {
-                let message = obj.title
-                const entities: tl.TypeMessageEntity[] = [
-                    {
-                        _: 'messageEntityBold',
-                        offset: 0,
-                        length: message.length,
-                    },
-                ]
+        const items: tl.TypeInputBotInlineResult[] = []
 
-                if (obj.url) {
-                    entities.push({
-                        _: 'messageEntityTextUrl',
-                        url: obj.url,
-                        offset: 0,
-                        length: message.length,
-                    })
-                }
+        let isGallery = false
+        let forceVertical = false
 
-                if (obj.description) {
-                    message += '\n' + obj.description
-                }
+        for (const obj of results) {
+            switch (obj.type) {
+                case 'article': {
+                    forceVertical = true
 
-                sendMessage = {
-                    _: 'inputBotInlineMessageText',
-                    message,
-                    entities,
-                }
-            }
+                    let sendMessage: tl.TypeInputBotInlineMessage
+                    if (obj.message) {
+                        sendMessage = await BotInlineMessage._convertToTl(
+                            client,
+                            obj.message,
+                            parseMode
+                        )
+                    } else {
+                        let message = obj.title
+                        const entities: tl.TypeMessageEntity[] = [
+                            {
+                                _: 'messageEntityBold',
+                                offset: 0,
+                                length: message.length,
+                            },
+                        ]
 
-            return {
-                _: 'inputBotInlineResult',
-                id: obj.id,
-                type: obj.type,
-                title: obj.title,
-                description: obj.description,
-                url: obj.hideUrl ? undefined : obj.url,
-                content:
-                    obj.url && obj.hideUrl
-                        ? {
-                              _: 'inputWebDocument',
-                              url: obj.url,
-                              mimeType: 'text/html',
-                              size: 0,
-                              attributes: [],
-                          }
-                        : undefined,
-                thumb:
-                    typeof obj.thumb === 'string'
-                        ? normalizeThumb(obj)
-                        : obj.thumb,
-                sendMessage,
-            }
-        }
+                        if (obj.url) {
+                            entities.push({
+                                _: 'messageEntityTextUrl',
+                                url: obj.url,
+                                offset: 0,
+                                length: message.length,
+                            })
+                        }
 
-        if (obj.type === 'game') {
-            let sendMessage: tl.TypeInputBotInlineMessage
-            if (obj.message) {
-                sendMessage = await BotInlineMessage._convertToTl(
-                    client,
-                    obj.message,
-                    parseMode
-                )
-                if (sendMessage._ !== 'inputBotInlineMessageGame') {
-                    throw new MtArgumentError(
-                        'game inline result must contain a game inline message'
-                    )
-                }
-            } else {
-                sendMessage = {
-                    _: 'inputBotInlineMessageGame',
-                }
-            }
+                        if (obj.description) {
+                            message += '\n' + obj.description
+                        }
 
-            return {
-                _: 'inputBotInlineResultGame',
-                id: obj.id,
-                shortName: obj.shortName,
-                sendMessage,
-            }
-        }
+                        sendMessage = {
+                            _: 'inputBotInlineMessageText',
+                            message,
+                            entities,
+                        }
+                    }
 
-        let sendMessage: tl.TypeInputBotInlineMessage
-        if (obj.message) {
-            sendMessage = await BotInlineMessage._convertToTl(
-                client,
-                obj.message,
-                parseMode
-            )
-        } else {
-            if (obj.type === 'venue') {
-                if (obj.latitude && obj.longitude) {
-                    sendMessage = {
-                        _: 'inputBotInlineMessageMediaVenue',
+                    items.push({
+                        _: 'inputBotInlineResult',
+                        id: obj.id,
+                        type: obj.type,
                         title: obj.title,
-                        address: obj.address,
+                        description: obj.description,
+                        url: obj.hideUrl ? undefined : obj.url,
+                        content:
+                            obj.url && obj.hideUrl
+                                ? {
+                                    _: 'inputWebDocument',
+                                    url: obj.url,
+                                    mimeType: 'text/html',
+                                    size: 0,
+                                    attributes: [],
+                                }
+                                : undefined,
+                        thumb:
+                            typeof obj.thumb === 'string'
+                                ? normalizeThumb(obj)
+                                : obj.thumb,
+                        sendMessage,
+                    })
+                    continue
+                }
+                case 'game': {
+                    let sendMessage: tl.TypeInputBotInlineMessage
+                    if (obj.message) {
+                        sendMessage = await BotInlineMessage._convertToTl(
+                            client,
+                            obj.message,
+                            parseMode
+                        )
+                        if (sendMessage._ !== 'inputBotInlineMessageGame') {
+                            throw new MtArgumentError(
+                                'game inline result must contain a game inline message'
+                            )
+                        }
+                    } else {
+                        sendMessage = {
+                            _: 'inputBotInlineMessageGame',
+                        }
+                    }
+
+                    items.push({
+                        _: 'inputBotInlineResultGame',
+                        id: obj.id,
+                        shortName: obj.shortName,
+                        sendMessage,
+                    })
+                    continue
+                }
+                case 'gif':
+                case 'photo':
+                case 'sticker':
+                    isGallery = true
+                    break
+                case 'audio':
+                case 'contact':
+                case 'voice':
+                    forceVertical = true
+            }
+
+            let sendMessage: tl.TypeInputBotInlineMessage
+            if (obj.message) {
+                sendMessage = await BotInlineMessage._convertToTl(
+                    client,
+                    obj.message,
+                    parseMode
+                )
+            } else {
+                if (obj.type === 'venue') {
+                    if (obj.latitude && obj.longitude) {
+                        sendMessage = {
+                            _: 'inputBotInlineMessageMediaVenue',
+                            title: obj.title,
+                            address: obj.address,
+                            geoPoint: {
+                                _: 'inputGeoPoint',
+                                lat: obj.latitude,
+                                long: obj.longitude,
+                            },
+                            provider: '',
+                            venueId: '',
+                            venueType: '',
+                        }
+                    } else {
+                        throw new MtArgumentError(
+                            'message or location (lat&lon) bust be supplied for venue inline result'
+                        )
+                    }
+                } else if (
+                    obj.type === 'video' &&
+                    obj.isEmbed &&
+                    typeof obj.media === 'string'
+                ) {
+                    sendMessage = {
+                        _: 'inputBotInlineMessageText',
+                        message: obj.media,
+                    }
+                } else if (obj.type === 'geo') {
+                    sendMessage = {
+                        _: 'inputBotInlineMessageMediaGeo',
                         geoPoint: {
                             _: 'inputGeoPoint',
                             lat: obj.latitude,
                             long: obj.longitude,
                         },
-                        provider: '',
-                        venueId: '',
-                        venueType: '',
+                    }
+                } else if (obj.type === 'contact') {
+                    sendMessage = {
+                        _: 'inputBotInlineMessageMediaContact',
+                        phoneNumber: obj.phone,
+                        firstName: obj.firstName,
+                        lastName: obj.lastName ?? '',
+                        vcard: '',
                     }
                 } else {
-                    throw new MtArgumentError(
-                        'message or location (lat&lon) bust be supplied for venue inline result'
-                    )
-                }
-            } else if (
-                obj.type === 'video' &&
-                obj.isEmbed &&
-                typeof obj.media === 'string'
-            ) {
-                sendMessage = {
-                    _: 'inputBotInlineMessageText',
-                    message: obj.media,
-                }
-            } else if (obj.type === 'geo') {
-                sendMessage = {
-                    _: 'inputBotInlineMessageMediaGeo',
-                    geoPoint: {
-                        _: 'inputGeoPoint',
-                        lat: obj.latitude,
-                        long: obj.longitude,
-                    },
-                }
-            } else if (obj.type === 'contact') {
-                sendMessage = {
-                    _: 'inputBotInlineMessageMediaContact',
-                    phoneNumber: obj.phone,
-                    firstName: obj.firstName,
-                    lastName: obj.lastName ?? '',
-                    vcard: '',
-                }
-            } else {
-                sendMessage = {
-                    _: 'inputBotInlineMessageMediaAuto',
-                    message: '',
+                    sendMessage = {
+                        _: 'inputBotInlineMessageMediaAuto',
+                        message: '',
+                    }
                 }
             }
-        }
 
-        let media:
-            | tl.TypeInputWebDocument
-            | tl.TypeInputDocument
-            | tl.TypeInputPhoto
-            | undefined = undefined
-        if (
-            obj.type !== 'geo' &&
-            obj.type !== 'venue' &&
-            obj.type !== 'contact'
-        ) {
-            if (typeof obj.media === 'string') {
-                // file id or url
-                if (obj.media.match(/^https?:\/\//)) {
-                    if (obj.type === 'sticker')
-                        throw new MtArgumentError(
-                            'sticker inline result cannot contain a URL'
-                        )
-
-                    let mime: string
-                    if (obj.type === 'video') mime = 'video/mp4'
-                    else if (obj.type === 'audio')
-                        mime = obj.mime ?? 'audio/mpeg'
-                    else if (obj.type === 'gif') mime = obj.mime ?? 'video/mp4'
-                    else if (obj.type === 'voice') mime = 'audio/ogg'
-                    else if (obj.type === 'file') {
-                        if (!obj.mime)
+            let media:
+                | tl.TypeInputWebDocument
+                | tl.TypeInputDocument
+                | tl.TypeInputPhoto
+                | undefined = undefined
+            if (
+                obj.type !== 'geo' &&
+                obj.type !== 'venue' &&
+                obj.type !== 'contact'
+            ) {
+                if (typeof obj.media === 'string') {
+                    // file id or url
+                    if (obj.media.match(/^https?:\/\//)) {
+                        if (obj.type === 'sticker')
                             throw new MtArgumentError(
-                                'MIME type must be specified for file inline result'
+                                'sticker inline result cannot contain a URL'
                             )
 
-                        mime = obj.mime
-                    } else mime = 'image/jpeg'
+                        let mime: string
+                        if (obj.type === 'video') mime = 'video/mp4'
+                        else if (obj.type === 'audio')
+                            mime = obj.mime ?? 'audio/mpeg'
+                        else if (obj.type === 'gif') mime = obj.mime ?? 'video/mp4'
+                        else if (obj.type === 'voice') mime = 'audio/ogg'
+                        else if (obj.type === 'file') {
+                            if (!obj.mime)
+                                throw new MtArgumentError(
+                                    'MIME type must be specified for file inline result'
+                                )
 
-                    const attributes: tl.TypeDocumentAttribute[] = []
+                            mime = obj.mime
+                        } else mime = 'image/jpeg'
 
-                    if (
-                        (obj.type === 'video' ||
-                            obj.type === 'gif' ||
-                            obj.type === 'photo') &&
-                        obj.width &&
-                        obj.height
-                    ) {
-                        if (obj.type !== 'photo' && obj.duration) {
+                        const attributes: tl.TypeDocumentAttribute[] = []
+
+                        if (
+                            (obj.type === 'video' ||
+                                obj.type === 'gif' ||
+                                obj.type === 'photo') &&
+                            obj.width &&
+                            obj.height
+                        ) {
+                            if (obj.type !== 'photo' && obj.duration) {
+                                attributes.push({
+                                    _: 'documentAttributeVideo',
+                                    w: obj.width,
+                                    h: obj.height,
+                                    duration: obj.duration,
+                                })
+                            } else {
+                                attributes.push({
+                                    _: 'documentAttributeImageSize',
+                                    w: obj.width,
+                                    h: obj.height,
+                                })
+                            }
+                        } else if (obj.type === 'audio' || obj.type === 'voice') {
                             attributes.push({
-                                _: 'documentAttributeVideo',
-                                w: obj.width,
-                                h: obj.height,
-                                duration: obj.duration,
-                            })
-                        } else {
-                            attributes.push({
-                                _: 'documentAttributeImageSize',
-                                w: obj.width,
-                                h: obj.height,
+                                _: 'documentAttributeAudio',
+                                voice: obj.type === 'voice',
+                                duration: obj.duration ?? 0,
+                                title: obj.type === 'audio' ? obj.title : '',
+                                performer:
+                                    obj.type === 'audio' ? obj.performer : '',
                             })
                         }
-                    } else if (obj.type === 'audio' || obj.type === 'voice') {
+
                         attributes.push({
-                            _: 'documentAttributeAudio',
-                            voice: obj.type === 'voice',
-                            duration: obj.duration ?? 0,
-                            title: obj.type === 'audio' ? obj.title : '',
-                            performer:
-                                obj.type === 'audio' ? obj.performer : '',
+                            _: 'documentAttributeFilename',
+                            fileName: extractFileName(obj.media),
                         })
-                    }
 
-                    attributes.push({
-                        _: 'documentAttributeFilename',
-                        fileName: extractFileName(obj.media),
-                    })
-
-                    media = {
-                        _: 'inputWebDocument',
-                        url: obj.media,
-                        mimeType: mime,
-                        size: 0,
-                        attributes,
+                        media = {
+                            _: 'inputWebDocument',
+                            url: obj.media,
+                            mimeType: mime,
+                            size: 0,
+                            attributes,
+                        }
+                    } else if (obj.type === 'photo') {
+                        media = fileIdToInputPhoto(obj.media)
+                    } else {
+                        media = fileIdToInputDocument(obj.media)
                     }
-                } else if (obj.type === 'photo') {
-                    media = fileIdToInputPhoto(obj.media)
                 } else {
-                    media = fileIdToInputDocument(obj.media)
+                    media = obj.media
                 }
-            } else {
-                media = obj.media
             }
-        }
 
-        let title: string | undefined = undefined
-        let description: string | undefined = undefined
+            let title: string | undefined = undefined
+            let description: string | undefined = undefined
 
-        // incredible hacks by durov team.
-        // i honestly don't understand why didn't they just
-        // make a bunch of types, as they normally do,
-        // but whatever.
-        // ref: https://github.com/tdlib/td/blob/master/td/telegram/InlineQueriesManager.cpp
-        if (obj.type === 'contact') {
-            title = obj.lastName?.length
-                ? `${obj.firstName} ${obj.lastName}`
-                : obj.firstName
-        } else if (obj.type !== 'sticker') {
-            title = obj.title
-        }
+            // incredible hacks by durov team.
+            // i honestly don't understand why didn't they just
+            // make a bunch of types, as they normally do,
+            // but whatever.
+            // ref: https://github.com/tdlib/td/blob/master/td/telegram/InlineQueriesManager.cpp
+            if (obj.type === 'contact') {
+                title = obj.lastName?.length
+                    ? `${obj.firstName} ${obj.lastName}`
+                    : obj.firstName
+            } else if (obj.type !== 'sticker') {
+                title = obj.title
+            }
 
-        if (obj.type === 'audio') {
-            description = obj.performer
-        } else if (obj.type === 'geo') {
-            description = `${obj.latitude} ${obj.longitude}`
-        } else if (obj.type === 'venue') {
-            description = obj.address
-        } else if (obj.type === 'contact') {
-            description = obj.phone
-        } else if (obj.type !== 'voice' && obj.type !== 'sticker') {
-            description = obj.description
-        }
+            if (obj.type === 'audio') {
+                description = obj.performer
+            } else if (obj.type === 'geo') {
+                description = `${obj.latitude} ${obj.longitude}`
+            } else if (obj.type === 'venue') {
+                description = obj.address
+            } else if (obj.type === 'contact') {
+                description = obj.phone
+            } else if (obj.type !== 'voice' && obj.type !== 'sticker') {
+                description = obj.description
+            }
 
-        if (!media || media._ === 'inputWebDocument') {
-            return {
-                _: 'inputBotInlineResult',
+            if (!media || media._ === 'inputWebDocument') {
+                items.push({
+                    _: 'inputBotInlineResult',
+                    id: obj.id,
+                    type: obj.type,
+                    title,
+                    description,
+                    content: media,
+                    thumb: normalizeThumb(obj, media?.url),
+                    sendMessage,
+                })
+                continue
+            }
+
+            if (media._ === 'inputPhoto') {
+                items.push({
+                    _: 'inputBotInlineResultPhoto',
+                    id: obj.id,
+                    type: obj.type,
+                    photo: media,
+                    sendMessage,
+                })
+                continue
+            }
+
+            items.push({
+                _: 'inputBotInlineResultDocument',
                 id: obj.id,
                 type: obj.type,
                 title,
                 description,
-                content: media,
-                thumb: normalizeThumb(obj, media?.url),
+                document: media,
                 sendMessage,
-            }
+            })
         }
 
-        if (media._ === 'inputPhoto') {
-            return {
-                _: 'inputBotInlineResultPhoto',
-                id: obj.id,
-                type: obj.type,
-                photo: media,
-                sendMessage,
-            }
-        }
-
-        return {
-            _: 'inputBotInlineResultDocument',
-            id: obj.id,
-            type: obj.type,
-            title,
-            description,
-            document: media,
-            sendMessage,
-        }
+        return [isGallery && !forceVertical, items]
     }
 }

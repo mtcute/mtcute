@@ -28,7 +28,10 @@ export async function answerInlineQuery(
          * Whether the results should be displayed as a gallery instead
          * of a vertical list. Only applicable to some media types.
          *
-         * Defaults to `true`
+         * In some cases changing this may lead to the results not being
+         * displayed by the client.
+         *
+         * Default is derived automatically based on result types
          */
         gallery?: boolean
 
@@ -94,16 +97,14 @@ export async function answerInlineQuery(
 ): Promise<void> {
     if (!params) params = {}
 
-    const tlResults = await Promise.all(
-        results.map((it) => BotInline._convertToTl(this, it, params!.parseMode))
-    )
+    const [gallery, tlResults] = await BotInline._convertToTl(this, results, params!.parseMode)
 
     await this.call({
         _: 'messages.setInlineBotResults',
         queryId,
         results: tlResults,
         cacheTime: params.cacheTime ?? 300,
-        gallery: params.gallery ?? true,
+        gallery: params.gallery ?? gallery,
         private: params.private,
         nextOffset: params.nextOffset,
         switchPm: params.switchPm
