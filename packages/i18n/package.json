@@ -1,0 +1,18 @@
+{
+    "name": "@mtcute/i18n",
+    "private": true,
+    "version": "1.0.0",
+    "description": "I18n for MTCute",
+    "author": "Alisa Sireneva <me@tei.su>",
+    "license": "LGPL-3.0",
+    "main": "src/index.ts",
+    "scripts": {
+        "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
+        "coverage": "nyc npm run test",
+        "build": "tsc",
+        "docs": "npx typedoc"
+    },
+    "dependencies": {
+        "@mtcute/client": "workspace:^1.0.0"
+    }
+}

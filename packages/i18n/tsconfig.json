@@ -1,0 +1,19 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./dist"
+    },
+    "include": [
+        "./src"
+    ],
+    "typedocOptions": {
+        "name": "@mtcute/html-parser",
+        "includeVersion": true,
+        "out": "../../docs/packages/html-parser",
+        "listInvalidSymbolLinks": true,
+        "excludePrivate": true,
+        "entryPoints": [
+            "./src/index.ts"
+        ]
+    }
+}

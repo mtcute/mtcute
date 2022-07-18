@@ -4,6 +4,7 @@ export {
     LocalstorageStorage,
     tl,
     defaultDcs,
+    assertNever,
 } from '@mtcute/core'
 
 export * from './types'
