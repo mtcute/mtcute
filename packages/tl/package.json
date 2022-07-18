@@ -3,7 +3,7 @@
     "version": "143.0.0",
     "description": "TL schema used for MTCute",
     "main": "index.js",
-    "author": "Alisa Sireneva <me@tei.su>",
+    "author": "Alina Sireneva <me@tei.su>",
     "license": "LGPL-3.0",
     "scripts": {
         "test": "tsc --noEmit --esModuleInterop tests/types.ts",

@@ -2,7 +2,7 @@
     "name": "@mtcute/crypto-node",
     "version": "1.0.0",
     "description": "Native crypto implementation for NodeJS",
-    "author": "Alisa Sireneva <me@tei.su>",
+    "author": "Alina Sireneva <me@tei.su>",
     "main": "src/index.ts",
     "private": true,
     "license": "LGPL-3.0",
