@@ -1,9 +1,12 @@
-import { ParsedUpdate } from '@mtcute/client'
+import { FormattedString, ParsedUpdate } from '@mtcute/client'
 
 type Values<T> = T[keyof T]
 type SafeGet<T, K extends string> = T extends Record<K, any> ? T[K] : never
 
-export type I18nValue = string | ((...args: any[]) => string)
+export type I18nValue =
+    | string
+    | FormattedString<any>
+    | ((...args: any[]) => string | FormattedString<any>)
 
 type NestedKeysDelimited<T> = Values<{
     [key in Extract<keyof T, string>]: T[key] extends I18nValue
@@ -28,7 +31,7 @@ export type MtcuteI18nFunction<Strings> = <
     lang: ParsedUpdate['data'] | string | null,
     key: K,
     ...params: ExtractParameter<Strings, K>
-) => string
+) => string | FormattedString<any>
 
 export type OtherLanguageWrap<Strings> = {
     [key in keyof Strings]?: Strings[key] extends I18nValue
