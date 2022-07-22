@@ -180,7 +180,6 @@ import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe'
 import { getMessages } from './methods/messages/get-messages'
 import { getReactionUsers } from './methods/messages/get-reaction-users'
 import { getScheduledMessages } from './methods/messages/get-scheduled-messages'
-import { iterHistory } from './methods/messages/iter-history'
 import { _normalizeInline } from './methods/messages/normalize-inline'
 import { _parseEntities } from './methods/messages/parse-entities'
 import { pinMessage } from './methods/messages/pin-message'
@@ -2473,10 +2472,7 @@ export interface TelegramClient extends BaseTelegramClient {
         message: number
     ): Promise<Message | null>
     /**
-     * Retrieve a chunk of the chat history.
-     *
-     * You can get up to 100 messages with one call.
-     * For larger chunks, use {@link iterHistory}.
+     * Iterate through a chat history sequentially.
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param params  Additional fetch parameters
@@ -2487,7 +2483,8 @@ export interface TelegramClient extends BaseTelegramClient {
             /**
              * Limits the number of messages to be retrieved.
              *
-             * Defaults to `100`.
+             * By default, no limit is applied and all messages
+             * are returned.
              */
             limit?: number
 
@@ -2507,6 +2504,22 @@ export interface TelegramClient extends BaseTelegramClient {
             offsetId?: number
 
             /**
+             * Minimum message ID to return
+             *
+             * Defaults to `0` (disabled).
+             */
+            minId?: number
+
+            /**
+             * Maximum message ID to return.
+             *
+             * > *Seems* to work the same as {@link offsetId}
+             *
+             * Defaults to `0` (disabled).
+             */
+            maxId?: number
+
+            /**
              * Pass a date (`Date` or Unix time in ms) as an offset to retrieve
              * only older messages starting from that date.
              */
@@ -2516,8 +2529,16 @@ export interface TelegramClient extends BaseTelegramClient {
              * Pass `true` to retrieve messages in reversed order (from older to recent)
              */
             reverse?: boolean
+
+            /**
+             * Chunk size, which will be passed as `limit` parameter
+             * to {@link getHistory}. Usually you shouldn't care about this.
+             *
+             * Defaults to `100`
+             */
+            chunkSize?: number
         }
-    ): Promise<Message[]>
+    ): AsyncIterableIterator<Message>
     /**
      * Get all messages inside of a message group
      *
@@ -2675,61 +2696,6 @@ export interface TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         messageIds: number[]
     ): Promise<(Message | null)[]>
-    /**
-     * Iterate through a chat history sequentially.
-     *
-     * This method wraps {@link getHistory} to allow processing large
-     * groups of messages or entire chats.
-     *
-     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
-     * @param params  Additional fetch parameters
-     */
-    iterHistory(
-        chatId: InputPeerLike,
-        params?: {
-            /**
-             * Limits the number of messages to be retrieved.
-             *
-             * By default, no limit is applied and all messages
-             * are returned.
-             */
-            limit?: number
-
-            /**
-             * Sequential number of the first message to be returned.
-             * Defaults to 0 (most recent message).
-             *
-             * Negative values are also accepted and are useful
-             * in case you set `offsetId` or `offsetDate`.
-             */
-            offset?: number
-
-            /**
-             * Pass a message identifier as an offset to retrieve
-             * only older messages starting from that message
-             */
-            offsetId?: number
-
-            /**
-             * Pass a date (`Date` or Unix time in ms) as an offset to retrieve
-             * only older messages starting from that date.
-             */
-            offsetDate?: number | Date
-
-            /**
-             * Pass `true` to retrieve messages in reversed order (from older to recent)
-             */
-            reverse?: boolean
-
-            /**
-             * Chunk size, which will be passed as `limit` parameter
-             * to {@link getHistory}. Usually you shouldn't care about this.
-             *
-             * Defaults to `100`
-             */
-            chunkSize?: number
-        }
-    ): AsyncIterableIterator<Message>
     /**
      * Pin a message in a group, supergroup, channel or PM.
      *
@@ -4157,7 +4123,6 @@ export class TelegramClient extends BaseTelegramClient {
     getMessages = getMessages
     getReactionUsers = getReactionUsers
     getScheduledMessages = getScheduledMessages
-    iterHistory = iterHistory
     protected _normalizeInline = _normalizeInline
     protected _parseEntities = _parseEntities
     pinMessage = pinMessage
