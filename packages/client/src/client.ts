@@ -757,7 +757,10 @@ export interface TelegramClient extends BaseTelegramClient {
              * Whether the results should be displayed as a gallery instead
              * of a vertical list. Only applicable to some media types.
              *
-             * Defaults to `true`
+             * In some cases changing this may lead to the results not being
+             * displayed by the client.
+             *
+             * Default is derived automatically based on result types
              */
             gallery?: boolean
 
@@ -2818,11 +2821,55 @@ export interface TelegramClient extends BaseTelegramClient {
             query?: string
 
             /**
-             * Sequential number of the first message to be returned.
+             * Offset ID for the search. Only messages earlier than this
+             * ID will be returned.
              *
-             * Defaults to `0`.
+             * Defaults to `0` (for the latest message).
+             */
+            offsetId?: number
+
+            /**
+             * Offset from the {@link offsetId}. Only used for the
+             * first chunk
+             *
+             * Defaults to `0` (for the same message as {@link offsetId}).
              */
             offset?: number
+
+            /**
+             * Minimum message ID to return
+             *
+             * Defaults to `0` (disabled).
+             */
+            minId?: number
+
+            /**
+             * Maximum message ID to return.
+             *
+             * > *Seems* to work the same as {@link offsetId}
+             *
+             * Defaults to `0` (disabled).
+             */
+            maxId?: number
+
+            /**
+             * Minimum message date to return
+             *
+             * Defaults to `0` (disabled).
+             */
+            minDate?: number | Date
+
+            /**
+             * Maximum message date to return
+             *
+             * Defaults to `0` (disabled).
+             */
+            maxDate?: number | Date
+
+            /**
+             * Thread ID to return only messages from this thread.
+             */
+            threadId?: number
 
             /**
              * Limits the number of messages to be retrieved.

@@ -9,6 +9,7 @@ import {
     PeersIndex,
 } from '../../types'
 import { SearchFilters } from '../../types'
+import { normalizeDate } from '../../utils/misc-utils'
 
 /**
  * Search for messages inside a specific chat
@@ -30,11 +31,55 @@ export async function* searchMessages(
         query?: string
 
         /**
-         * Sequential number of the first message to be returned.
+         * Offset ID for the search. Only messages earlier than this
+         * ID will be returned.
          *
-         * Defaults to `0`.
+         * Defaults to `0` (for the latest message).
+         */
+        offsetId?: number
+
+        /**
+         * Offset from the {@link offsetId}. Only used for the
+         * first chunk
+         *
+         * Defaults to `0` (for the same message as {@link offsetId}).
          */
         offset?: number
+
+        /**
+         * Minimum message ID to return
+         *
+         * Defaults to `0` (disabled).
+         */
+        minId?: number
+
+        /**
+         * Maximum message ID to return.
+         *
+         * > *Seems* to work the same as {@link offsetId}
+         *
+         * Defaults to `0` (disabled).
+         */
+        maxId?: number
+
+        /**
+         * Minimum message date to return
+         *
+         * Defaults to `0` (disabled).
+         */
+        minDate?: number | Date
+
+        /**
+         * Maximum message date to return
+         *
+         * Defaults to `0` (disabled).
+         */
+        maxDate?: number | Date
+
+        /**
+         * Thread ID to return only messages from this thread.
+         */
+        threadId?: number
 
         /**
          * Limits the number of messages to be retrieved.
@@ -70,7 +115,13 @@ export async function* searchMessages(
     if (!params) params = {}
 
     let current = 0
+    let offsetId = params.offsetId || 0
     let offset = params.offset || 0
+
+    const minDate = normalizeDate(params.minDate) ?? 0
+    const maxDate = normalizeDate(params.maxDate) ?? 0
+    const minId = params.minId ?? 0
+    const maxId = params.maxId ?? 0
 
     const total = params.limit || Infinity
     const limit = Math.min(params.chunkSize || 100, total)
@@ -86,13 +137,13 @@ export async function* searchMessages(
             peer,
             q: params.query || '',
             filter: params.filter || SearchFilters.Empty,
-            minDate: 0,
-            maxDate: 0,
-            offsetId: 0,
+            minDate,
+            maxDate,
+            offsetId,
             addOffset: offset,
             limit: Math.min(limit, total - current),
-            minId: 0,
-            maxId: 0,
+            minId,
+            maxId,
             fromId: fromUser,
             hash: Long.ZERO,
         })
@@ -104,6 +155,9 @@ export async function* searchMessages(
                 res._
             )
 
+        // for successive chunks, we need to reset the offset
+        offset = 0
+
         const peers = PeersIndex.from(res)
 
         const msgs = res.messages
@@ -112,7 +166,7 @@ export async function* searchMessages(
 
         if (!msgs.length) break
 
-        offset += msgs.length
+        offsetId = res.messages[res.messages.length - 1].id
         yield* msgs
 
         current += msgs.length
