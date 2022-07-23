@@ -339,7 +339,7 @@ export class BaseTelegramClient extends EventEmitter {
             langCode: 'en',
             ...(opts.initConnectionOptions ?? {}),
             apiId,
-            query: null,
+            query: null as any,
         }
     }
 

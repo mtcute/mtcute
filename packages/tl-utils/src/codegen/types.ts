@@ -99,7 +99,7 @@ export function generateTypescriptDefinitionsForTlEntry(
 
             genericsIndex[it.name] = 1
             if (idx !== 0) genericsString += ', '
-            genericsString += `${it.name} extends ${tsType}`
+            genericsString += `${it.name} extends ${tsType} = ${tsType}`
         })
         genericsString += '>'
     }

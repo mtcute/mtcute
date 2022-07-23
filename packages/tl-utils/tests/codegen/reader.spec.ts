@@ -73,6 +73,20 @@ describe('generateReaderCodeForTlEntry', () => {
         )
     })
 
+    it('generates code for constructors with arguments before flags field', () => {
+        test(
+            'poll#86e18161 id:long flags:# quiz:flags.3?true question:string = Poll;',
+            'var id=r.long(),',
+            'flags=r.uint();',
+            'return{',
+            "_:'poll',",
+            'id:id,',
+            'quiz:!!(flags&8),',
+            'question:r.string(),',
+            '}'
+        )
+    })
+
     it('generates code for constructors with multiple flags fields', () => {
         test(
             'updates.channelDifferenceEmpty#3e11affb flags:# final:flags.0?true pts:int timeout:flags.1?int flags2:# can_delete_channel:flags2.0?true = updates.ChannelDifference;',
