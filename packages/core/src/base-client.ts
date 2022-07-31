@@ -272,6 +272,7 @@ export class BaseTelegramClient extends EventEmitter {
     primaryConnection!: SessionConnection
 
     private _importFrom?: string
+    private _importForce?: boolean
 
     /**
      * Method which is called every time the client receives a new update.
@@ -442,7 +443,7 @@ export class BaseTelegramClient extends EventEmitter {
             await this.storage.getAuthKeyFor(this._primaryDc.id)
         )
 
-        if (!this.primaryConnection.getAuthKey() && this._importFrom) {
+        if ((this._importForce || !this.primaryConnection.getAuthKey()) && this._importFrom) {
             const buf = parseUrlSafeBase64(this._importFrom)
             if (buf[0] !== 1)
                 throw new Error(`Invalid session string (version = ${buf[0]})`)
@@ -1006,8 +1007,12 @@ export class BaseTelegramClient extends EventEmitter {
      * Also note that the session will only be imported in case
      * the storage is missing authorization (i.e. does not contain
      * auth key for the primary DC), otherwise it will be ignored.
+     *
+     * @param session  Session string to import
+     * @param force  Whether to overwrite existing session
      */
-    importSession(session: string): void {
+    importSession(session: string, force = false): void {
         this._importFrom = session
+        this._importForce = force
     }
 }

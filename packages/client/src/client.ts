@@ -601,6 +601,11 @@ export interface TelegramClient extends BaseTelegramClient {
         session?: string
 
         /**
+         * Whether to overwrite existing session.
+         */
+        sessionForce?: boolean
+
+        /**
          * Phone number of the account.
          * If account does not exist, it will be created
          */

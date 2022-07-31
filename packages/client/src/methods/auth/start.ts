@@ -43,6 +43,11 @@ export async function start(
         session?: string
 
         /**
+         * Whether to overwrite existing session.
+         */
+        sessionForce?: boolean
+
+        /**
          * Phone number of the account.
          * If account does not exist, it will be created
          */
@@ -133,7 +138,7 @@ export async function start(
     }
 ): Promise<User> {
     if (params.session) {
-        this.importSession(params.session)
+        this.importSession(params.session, params.sessionForce)
     }
 
     try {
