@@ -3,6 +3,7 @@ import { getBarePeerId } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { ChatInviteLink, PeersIndex, User } from '../peers'
+import { makeInspectable } from '../utils'
 
 /**
  * This update is sent when a user requests to join a chat
@@ -95,3 +96,5 @@ export class ChatJoinRequestUpdate {
         })
     }
 }
+
+makeInspectable(ChatJoinRequestUpdate)
