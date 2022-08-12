@@ -82,7 +82,7 @@ function bumpVersion(packageName, version) {
                         depName === pkgName &&
                         !semver.satisfies(version, depVersionRange)
                     ) {
-                        obj[depName] = `workspace:^${version}`
+                        obj[`@mtcute/${depName}`] = `workspace:^${version}`
                         console.log(` - updated dependency ${depName} at ${json.name}`)
                         packageJsonChanged.add(json.name.slice(8))
                     }
