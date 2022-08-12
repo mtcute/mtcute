@@ -2,6 +2,7 @@ import { TlEntry, TlFullSchema } from '@mtcute/tl-utils/src/types'
 import cheerio from 'cheerio'
 import { splitNameToNamespace } from '@mtcute/tl-utils/src/utils'
 import { camelToPascal, snakeToCamel } from '@mtcute/tl-utils/src/codegen/utils'
+import { PRIMITIVE_TO_TS } from '@mtcute/tl-utils/src/codegen/types'
 import {
     API_SCHEMA_JSON_FILE,
     BLOGFORK_DOMAIN,
@@ -51,6 +52,12 @@ function normalizeLinks(url: string, el: Cheerio): void {
         ) {
             let [, type, name] = m
             const [ns, n] = splitNameToNamespace(name)
+
+            if (PRIMITIVE_TO_TS[n]) {
+                it.replaceWith(PRIMITIVE_TO_TS[n])
+                return
+            }
+
             let q = camelToPascal(snakeToCamel(n))
 
             if (type === 'method' || type === 'constructor') {

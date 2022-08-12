@@ -3,7 +3,7 @@ import { groupTlEntriesByNamespace, splitNameToNamespace } from '../utils'
 import { camelToPascal, indent, jsComment, snakeToCamel } from './utils'
 import { errorCodeToClassName, generateCodeForErrors } from './errors'
 
-const PRIMITIVE_TO_TS: Record<string, string> = {
+export const PRIMITIVE_TO_TS: Record<string, string> = {
     int: 'number',
     long: 'Long',
     int53: 'number',
@@ -16,6 +16,8 @@ const PRIMITIVE_TO_TS: Record<string, string> = {
     true: 'boolean',
     null: 'null',
     any: 'any',
+    boolFalse: 'false',
+    boolTrue: 'true',
 }
 
 function fullTypeName(
