@@ -22,12 +22,13 @@ function fullTypeName(
     type: string,
     baseNamespace: string,
     namespace = true,
-    method = false
+    method = false,
+    link = false
 ): string {
     if (type in PRIMITIVE_TO_TS) return PRIMITIVE_TO_TS[type]
     let m
     if ((m = type.match(/^[Vv]ector[< ](.+?)[> ]$/))) {
-        return fullTypeName(m[1], baseNamespace) + '[]'
+        return fullTypeName(m[1], baseNamespace, namespace, method, link) + '[]'
     }
 
     const [ns, name] = splitNameToNamespace(type)
@@ -43,6 +44,8 @@ function fullTypeName(
     res += camelToPascal(name)
 
     if (method) res += 'Request'
+
+    if (link) res = `{@link ${res}}`
 
     return res
 }
@@ -66,10 +69,13 @@ export function generateTypescriptDefinitionsForTlEntry(
     if (entry.kind === 'method' && !entry.generics) {
         if (comment) comment += '\n\n'
 
-        comment += `RPC method returns {@see ${fullTypeName(
+        comment += `RPC method returns ${fullTypeName(
             entry.type,
-            baseNamespace
-        )}}`
+            baseNamespace,
+            true,
+            false,
+            true
+        )}`
 
         if (errors) {
             if (errors.userOnly[entry.name]) {
