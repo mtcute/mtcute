@@ -65,66 +65,92 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
         )
     })
 
-    it('adds comments', () => {
-        test(
-            '// This is a test constructor\ntest = Test;',
-            '/**',
-            ' * This is a test constructor',
-            ' */',
-            'interface RawTest {',
-            "    _: 'test';",
-            '}'
-        )
-        test(
-            '// @description This is a test constructor\n' +
-                '// @field Some field\n' +
-                'test field:int = Test;',
-            '/**',
-            ' * This is a test constructor',
-            ' */',
-            'interface RawTest {',
-            "    _: 'test';",
-            '    /**',
-            '     * Some field',
-            '     */',
-            '    field: number;',
-            '}'
-        )
-        test(
-            '---functions---\n// This is a test method\ntest = Test;',
-            '/**',
-            ' * This is a test method',
-            ' * ',
-            ' * RPC method returns {@see tl.TypeTest}',
-            ' */',
-            'interface RawTestRequest {',
-            "    _: 'test';",
-            '}'
-        )
+    describe('comments', () => {
+        it('adds tl style comments', () => {
+            test(
+                '// This is a test constructor\n' + 'test = Test;',
+                '/**',
+                ' * This is a test constructor',
+                ' */',
+                'interface RawTest {',
+                "    _: 'test';",
+                '}'
+            )
+            test(
+                '---functions---\n' +
+                    '// This is a test method\n' +
+                    'test = Test;',
+                '/**',
+                ' * This is a test method',
+                ' * ',
+                ' * RPC method returns {@link tl.TypeTest}',
+                ' */',
+                'interface RawTestRequest {',
+                "    _: 'test';",
+                '}'
+            )
+        })
 
-        test(
-            '// This is a test constructor with a very very very very very very very very long comment\ntest = Test;',
-            '/**',
-            ' * This is a test constructor with a very very very very very',
-            ' * very very very long comment',
-            ' */',
-            'interface RawTest {',
-            "    _: 'test';",
-            '}'
-        )
+        it('adds tdlib style comments', () => {
+            test(
+                '// @description This is a test constructor\n' +
+                    '// @field Some field\n' +
+                    'test field:int = Test;',
+                '/**',
+                ' * This is a test constructor',
+                ' */',
+                'interface RawTest {',
+                "    _: 'test';",
+                '    /**',
+                '     * Some field',
+                '     */',
+                '    field: number;',
+                '}'
+            )
+        })
 
-        test(
-            '---functions---\n// This is a test method with a very very very very very very very very long comment\ntest = Test;',
-            '/**',
-            ' * This is a test method with a very very very very very very',
-            ' * very very long comment',
-            ' * ',
-            ' * RPC method returns {@see tl.TypeTest}',
-            ' */',
-            'interface RawTestRequest {',
-            "    _: 'test';",
-            '}'
-        )
+        it('wraps long comments', () => {
+            test(
+                '// This is a test constructor with a very very very very very very very very long comment\n' +
+                'test = Test;',
+                '/**',
+                ' * This is a test constructor with a very very very very very',
+                ' * very very very long comment',
+                ' */',
+                'interface RawTest {',
+                "    _: 'test';",
+                '}'
+            )
+
+            test(
+                '---functions---\n' +
+                '// This is a test method with a very very very very very very very very long comment\n' +
+                'test = Test;',
+                '/**',
+                ' * This is a test method with a very very very very very very',
+                ' * very very long comment',
+                ' * ',
+                ' * RPC method returns {@link tl.TypeTest}',
+                ' */',
+                'interface RawTestRequest {',
+                "    _: 'test';",
+                '}'
+            )
+        })
+
+        it('should not break @link tags', () => {
+            test(
+                '// This is a test constructor with a very long comment {@link whatever} more text\n' +
+                'test = Test;',
+                '/**',
+                ' * This is a test constructor with a very long comment',
+                ' * {@link whatever} more text',
+                ' */',
+                'interface RawTest {',
+                "    _: 'test';",
+                '}'
+            )
+        })
     })
 
     it('writes generic types', () => {
@@ -242,7 +268,7 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
                 "    _: 'test';",
                 '}',
                 '/**',
-                ' * RPC method returns {@see tl.TypeTest}',
+                ' * RPC method returns {@link tl.TypeTest}',
                 ' */',
                 'interface RawGetTestRequest {',
                 "    _: 'getTest';",
@@ -284,7 +310,7 @@ interface RawTest2 {
     _: 'test2';
 }
 /**
- * RPC method returns {@see tl.TypeTest}
+ * RPC method returns {@link tl.TypeTest}
  */
 interface RawGetTestRequest {
     _: 'getTest';
@@ -303,7 +329,7 @@ namespace test {
         _: 'test.test2';
     }
     /**
-     * RPC method returns {@see tl.test.TypeTest}
+     * RPC method returns {@link tl.test.TypeTest}
      */
     interface RawGetTestRequest {
         _: 'test.getTest';
