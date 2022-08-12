@@ -10,12 +10,14 @@ export const camelToPascal = (s: string): string =>
 export function jsComment(s: string): string {
     return (
         '/**' +
-        // awesome hack not to break up {@link} links
+        // awesome hack not to break up {@link} links and <a href
         s
             .replace(/{@link (.*?)}/g, '{@link$1}')
+            .replace(/<a href/g, '<ahref')
             .replace(/(?![^\n]{1,60}$)([^\n]{1,60})\s/g, '$1\n')
             .replace(/\n|^/g, '\n * ')
-            .replace(/{@link(.*)?}/, '{@link $1}') +
+            .replace(/{@link(.*)?}/g, '{@link $1}')
+            .replace(/<ahref/g, '<a href') +
         '\n */'
     )
 }
