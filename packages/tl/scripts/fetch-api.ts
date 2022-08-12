@@ -4,23 +4,28 @@
 //
 // Conflicts merging is interactive, so we can't put this in CI
 
-import { parseTlToEntries } from '@mtcute/tl-utils/src/parse'
-import { parseFullTlSchema } from '@mtcute/tl-utils/src/schema'
-import { mergeTlEntries, mergeTlSchemas } from '@mtcute/tl-utils/src/merge'
-import { TlEntry, TlFullSchema } from '@mtcute/tl-utils/src/types'
+import {
+    parseTlToEntries,
+    parseFullTlSchema,
+    mergeTlEntries,
+    mergeTlSchemas,
+    TlEntry,
+    TlFullSchema,
+    writeTlEntryToString,
+} from '@mtcute/tl-utils'
 import { readdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import cheerio from 'cheerio'
 import fetch from 'node-fetch'
-import readline from 'readline'
-import { writeTlEntryToString } from '@mtcute/tl-utils/src/stringify'
+import * as readline from 'readline'
 import {
     CORE_DOMAIN,
     API_SCHEMA_JSON_FILE,
     TDESKTOP_SCHEMA,
     TDLIB_SCHEMA,
-    COREFORK_DOMAIN, BLOGFORK_DOMAIN
-} from "./constants";
+    COREFORK_DOMAIN,
+    BLOGFORK_DOMAIN,
+} from './constants'
 import { fetchRetry } from './utils'
 import {
     applyDocumentation,

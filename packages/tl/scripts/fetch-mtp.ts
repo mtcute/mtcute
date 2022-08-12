@@ -3,7 +3,7 @@
 import cheerio from 'cheerio'
 import { CORE_DOMAIN, MTP_SCHEMA_JSON_FILE } from './constants'
 import { fetchRetry } from './utils'
-import { parseTlToEntries } from '@mtcute/tl-utils/src/parse'
+import { parseTlToEntries } from '@mtcute/tl-utils'
 import { writeFile } from 'fs/promises'
 
 async function fetchMtprotoSchema(): Promise<string> {

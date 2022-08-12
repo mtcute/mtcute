@@ -1,5 +1,6 @@
-import { TlError, TlErrors } from '@mtcute/tl-utils/src/types'
+import { TlError, TlErrors } from '@mtcute/tl-utils'
 import fetch from 'node-fetch'
+// @ts-ignore
 import csvParser from 'csv-parser'
 import { writeFile } from 'fs/promises'
 import { ERRORS_JSON_FILE } from './constants'

@@ -6,12 +6,15 @@ import {
     ERRORS_JSON_FILE,
 } from './constants'
 import { readFile, writeFile } from 'fs/promises'
-import { parseFullTlSchema } from '@mtcute/tl-utils/src/schema'
-import { TlErrors, TlFullSchema } from '@mtcute/tl-utils/src/types'
+import {
+    parseFullTlSchema,
+    TlErrors,
+    TlFullSchema,
+    generateTypescriptDefinitionsForTlSchema,
+    generateReaderCodeForTlEntries,
+    generateWriterCodeForTlEntries,
+} from '@mtcute/tl-utils'
 import { join } from 'path'
-import { generateTypescriptDefinitionsForTlSchema } from '@mtcute/tl-utils/src/codegen/types'
-import { generateReaderCodeForTlEntries } from '@mtcute/tl-utils/src/codegen/reader'
-import { generateWriterCodeForTlEntries } from '@mtcute/tl-utils/src/codegen/writer'
 
 const OUT_TYPINGS_FILE = join(__dirname, '../index.d.ts')
 const OUT_TYPINGS_JS_FILE = join(__dirname, '../index.js')

@@ -1,8 +1,12 @@
-import { TlEntry, TlFullSchema } from '@mtcute/tl-utils/src/types'
+import {
+    TlEntry,
+    TlFullSchema,
+    splitNameToNamespace,
+    camelToPascal,
+    snakeToCamel,
+    PRIMITIVE_TO_TS,
+} from '@mtcute/tl-utils'
 import cheerio from 'cheerio'
-import { splitNameToNamespace } from '@mtcute/tl-utils/src/utils'
-import { camelToPascal, snakeToCamel } from '@mtcute/tl-utils/src/codegen/utils'
-import { PRIMITIVE_TO_TS } from '@mtcute/tl-utils/src/codegen/types'
 import {
     API_SCHEMA_JSON_FILE,
     BLOGFORK_DOMAIN,
