@@ -10,7 +10,8 @@ export const MTP_SCHEMA_JSON_FILE = join(__dirname, '../mtp-schema.json')
 export const ERRORS_JSON_FILE = join(__dirname, '../raw-errors.json')
 
 export const CORE_DOMAIN = 'https://core.telegram.org'
-export const COREFORK_DOMAIN = 'https://core.telegram.org'
+export const COREFORK_DOMAIN = 'https://corefork.telegram.org'
+export const BLOGFORK_DOMAIN = 'https://blogfork.telegram.org'
 
 export const TDESKTOP_SCHEMA =
     'https://raw.githubusercontent.com/telegramdesktop/tdesktop/dev/Telegram/Resources/tl/api.tl'

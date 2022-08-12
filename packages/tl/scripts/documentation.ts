@@ -4,7 +4,9 @@ import { splitNameToNamespace } from '@mtcute/tl-utils/src/utils'
 import { camelToPascal, snakeToCamel } from '@mtcute/tl-utils/src/codegen/utils'
 import {
     API_SCHEMA_JSON_FILE,
+    BLOGFORK_DOMAIN,
     CORE_DOMAIN,
+    COREFORK_DOMAIN,
     DESCRIPTIONS_YAML_FILE,
     DOC_CACHE_FILE,
 } from './constants'
@@ -77,6 +79,30 @@ function extractDescription($: CheerioInit) {
 // from https://github.com/sindresorhus/cli-spinners/blob/main/spinners.json
 const PROGRESS_CHARS = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 
+async function chooseDomainForDocs(
+    headers: Record<string, string>
+): Promise<[number, string]> {
+    let maxLayer = 0
+    let maxDomain = ''
+
+    for (const domain of [CORE_DOMAIN, COREFORK_DOMAIN, BLOGFORK_DOMAIN]) {
+        const index = await fetchRetry(`${domain}/schema`, { headers })
+        const actualLayer = parseInt(
+            cheerio
+                .load(index)('.dev_layer_select .dropdown-toggle')
+                .text()
+                .match(/layer (\d+)/i)![1]
+        )
+
+        if (actualLayer > maxLayer) {
+            maxLayer = actualLayer
+            maxDomain = domain
+        }
+    }
+
+    return [maxLayer, maxDomain]
+}
+
 export async function fetchDocumentation(
     schema: TlFullSchema,
     layer: number,
@@ -89,14 +115,14 @@ export async function fetchDocumentation(
             'Chrome/87.0.4280.88 Safari/537.36',
     }
 
-    const index = await fetchRetry(`${CORE_DOMAIN}/schema`, { headers })
-    const actualLayer = cheerio
-        .load(index)('.dev_layer_select .dropdown-toggle')
-        .text()
-        .match(/layer (\d+)/i)![1]
+    const [actualLayer, domain] = await chooseDomainForDocs(headers)
+
+    console.log('Using domain %s (has layer %s)', domain, actualLayer)
 
     const ret: CachedDocumentation = {
-        updated: `${new Date().toLocaleString('ru-RU')} (layer ${actualLayer})`,
+        updated: `${new Date().toLocaleString(
+            'ru-RU'
+        )} (layer ${actualLayer}) - from ${domain}`,
         classes: {},
         methods: {},
         unions: {},
@@ -118,7 +144,7 @@ export async function fetchDocumentation(
     for (const entry of schema.entries) {
         log(`📥 ${entry.kind} ${entry.name}`)
 
-        const url = `${CORE_DOMAIN}/${
+        const url = `${domain}/${
             entry.kind === 'class' ? 'constructor' : 'method'
         }/${entry.name}`
 
@@ -197,7 +223,7 @@ export async function fetchDocumentation(
 
         log(`📥 union ${name}`)
 
-        const url = `${CORE_DOMAIN}/type/${name}`
+        const url = `${domain}/type/${name}`
 
         const html = await fetchRetry(url, {
             headers,

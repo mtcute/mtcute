@@ -19,8 +19,8 @@ import {
     API_SCHEMA_JSON_FILE,
     TDESKTOP_SCHEMA,
     TDLIB_SCHEMA,
-    COREFORK_DOMAIN,
-} from './constants'
+    COREFORK_DOMAIN, BLOGFORK_DOMAIN
+} from "./constants";
 import { fetchRetry } from './utils'
 import {
     applyDocumentation,
@@ -189,6 +189,7 @@ async function main() {
         await fetchTdesktopSchema(),
         await fetchCoreSchema(),
         await fetchCoreSchema(COREFORK_DOMAIN, 'Corefork'),
+        await fetchCoreSchema(BLOGFORK_DOMAIN, 'Blogfork'),
         {
             name: 'Custom',
             layer: 0, // handled manually
