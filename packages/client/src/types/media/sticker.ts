@@ -5,6 +5,7 @@ import { TelegramClient } from '../../client'
 import { RawDocument } from './document'
 import { makeInspectable } from '../utils'
 import { StickerSet } from '../misc'
+import { MtArgumentError } from '../errors'
 
 export namespace Sticker {
     export interface MaskPosition {
@@ -139,6 +140,18 @@ export class Sticker extends RawDocument {
         return this.attr._ === 'documentAttributeCustomEmoji'
             ? this.attr?.free ?? false
             : false
+    }
+
+    /**
+     * If this is a custom emoji, its unique ID
+     * that can be used in {@link TelegramClient#getCustomEmojis}
+     */
+    get customEmojiId(): tl.Long {
+        if (this.attr._ !== 'documentAttributeCustomEmoji') {
+            throw new MtArgumentError('This is not a custom emoji')
+        }
+
+        return this.raw.id
     }
 
     /**
