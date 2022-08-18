@@ -20,7 +20,8 @@ export function parseDocument(
                 } else {
                     return new Audio(client, doc, attr)
                 }
-            case 'documentAttributeSticker': {
+            case 'documentAttributeSticker':
+            case 'documentAttributeCustomEmoji': {
                 const sz = doc.attributes.find(
                     (it) =>
                         it._ === 'documentAttributeImageSize' ||
@@ -28,6 +29,7 @@ export function parseDocument(
                 )! as
                     | tl.RawDocumentAttributeImageSize
                     | tl.RawDocumentAttributeVideo
+
                 return new Sticker(client, doc, attr, sz)
             }
             case 'documentAttributeVideo':

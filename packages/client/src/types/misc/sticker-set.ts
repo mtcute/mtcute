@@ -30,7 +30,7 @@ export namespace StickerSet {
 }
 
 /**
- * A stickerset (aka sticker pack)
+ * A sticker set (aka sticker pack)
  */
 export class StickerSet {
     readonly brief: tl.RawStickerSet
@@ -62,7 +62,8 @@ export class StickerSet {
     }
 
     /**
-     * Whether this stickerset was archived (due to too many saved stickers in the current account)
+     * Whether this sticker set was archived
+     * (due to too many saved stickers in the current account)
      */
     get isArchived(): boolean {
         return this.brief.archived!
@@ -76,28 +77,37 @@ export class StickerSet {
     }
 
     /**
-     * Whether this stickerset is a set of masks
+     * Type of the stickers in this set
      */
-    get isMasks(): boolean {
-        return this.brief.masks!
+    get type(): Sticker.Type {
+        if (this.brief.masks) {
+            return 'mask'
+        }
+
+        if (this.brief.emojis) {
+            return 'emoji'
+        }
+
+        return 'sticker'
     }
 
     /**
-     * Whether this stickerset is animated
+     * Source file type of the stickers in this set
      */
-    get isAnimated(): boolean {
-        return this.brief.animated!
+    get sourceType(): Sticker.SourceType {
+        if (this.brief.animated) {
+            return 'animated'
+        }
+
+        if (this.brief.videos) {
+            return 'video'
+        }
+
+        return 'static'
     }
 
     /**
-     * Whether this stickerset is video (WEBM)
-     */
-    get isVideo(): boolean {
-        return this.brief.videos!
-    }
-
-    /**
-     * Date when this stickerset was installed
+     * Date when this sticker set was installed
      */
     get installedDate(): Date | null {
         return this.brief.installedDate
@@ -106,7 +116,7 @@ export class StickerSet {
     }
 
     /**
-     * Number of stickers in this stickerset
+     * Number of stickers in this sticker set
      */
     get count(): number {
         return this.brief.count
@@ -124,14 +134,14 @@ export class StickerSet {
     }
 
     /**
-     * Title of the stickerset
+     * Title of the sticker set
      */
     get title(): string {
         return this.brief.title
     }
 
     /**
-     * Short name of stickerset to use in `tg://addstickers?set=short_name`
+     * Short name of sticker set to use in `tg://addstickers?set=short_name`
      * or `https://t.me/addstickers/short_name`
      */
     get shortName(): string {
@@ -140,7 +150,7 @@ export class StickerSet {
 
     private _stickers?: StickerSet.StickerInfo[]
     /**
-     * List of stickers inside this stickerset
+     * List of stickers inside this sticker set
      *
      * @throws MtEmptyError
      *     In case this object does not contain info about stickers (i.e. {@link isFull} = false)
@@ -189,7 +199,7 @@ export class StickerSet {
 
     private _thumbnails?: Thumbnail[]
     /**
-     * Available stickerset thumbnails.
+     * Available sticker set thumbnails.
      *
      * Returns empty array if not available
      * (i.e. first sticker should be used as thumbnail)
@@ -206,7 +216,7 @@ export class StickerSet {
     }
 
     /**
-     * Get a stickerset thumbnail by its type.
+     * Get a sticker set thumbnail by its type.
      *
      * Thumbnail types are described in the
      * [Telegram docs](https://core.telegram.org/api/files#image-thumbnail-types),
@@ -232,7 +242,7 @@ export class StickerSet {
     }
 
     /**
-     * Get full stickerset object.
+     * Get full sticker set object.
      *
      * If this object is already full, this method will just
      * return `this`

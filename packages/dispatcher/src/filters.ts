@@ -702,28 +702,20 @@ export namespace filters {
         msg.media?.type === 'sticker'
 
     /**
-     * Filter messages containing a regular sticker (not animated/webm)
+     * Filter messages containing a sticker by its type
      */
-    export const regularSticker: UpdateFilter<Message, { media: Sticker }> = (
-        msg
-    ) =>
-        msg.media?.type === 'sticker' &&
-        !msg.media.isAnimated &&
-        !msg.media.isVideoSticker
+    export const stickerByType =
+        (type: Sticker.Type): UpdateFilter<Message, { media: Sticker }> =>
+        (msg) =>
+            msg.media?.type === 'sticker' && msg.media.stickerType === type
 
     /**
-     * Filter messages containing an animated sticker
+     * Filter messages containing a sticker by its source file type
      */
-    export const animatedSticker: UpdateFilter<Message, { media: Sticker }> = (
-        msg
-    ) => msg.media?.type === 'sticker' && msg.media.isAnimated
-
-    /**
-     * Filter messages containing a video (webm) sticker
-     */
-    export const videoSticker: UpdateFilter<Message, { media: Sticker }> = (
-        msg
-    ) => msg.media?.type === 'sticker' && msg.media.isVideoSticker
+    export const stickerBySourceType =
+        (type: Sticker.SourceType): UpdateFilter<Message, { media: Sticker }> =>
+        (msg) =>
+            msg.media?.type === 'sticker' && msg.media.sourceType === type
 
     /**
      * Filter messages containing a video.

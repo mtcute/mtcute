@@ -7,7 +7,7 @@ import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { TelegramClient } from '../../client'
 import { MessageEntity } from './message-entity'
 import { makeInspectable } from '../utils'
-import { InputMediaLike, WebPage } from '../media'
+import { InputMediaLike, Sticker, WebPage } from '../media'
 import { _messageActionFromTl, MessageAction } from './message-action'
 import { _messageMediaFromTl, MessageMedia } from './message-media'
 import { FormattedString } from '../parser'
@@ -945,6 +945,16 @@ export class Message {
             this.raw.id,
             emoji,
             big
+        )
+    }
+
+    async getCustomEmojis(): Promise<Sticker[]> {
+        if (this.raw._ === 'messageService' || !this.raw.entities) return []
+
+        return this.client.getCustomEmojis(
+            this.raw.entities
+                .filter((it) => it._ === 'messageEntityCustomEmoji')
+                .map((it) => (it as tl.RawMessageEntityCustomEmoji).documentId)
         )
     }
 }

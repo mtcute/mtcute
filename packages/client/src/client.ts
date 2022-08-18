@@ -46,6 +46,7 @@ import {
     RawDocument,
     ReplyMarkup,
     SentCode,
+    Sticker,
     StickerSet,
     TakeoutSession,
     TermsOfService,
@@ -217,6 +218,7 @@ import { removeCloudPassword } from './methods/pasword/remove-cloud-password'
 import { addStickerToSet } from './methods/stickers/add-sticker-to-set'
 import { createStickerSet } from './methods/stickers/create-sticker-set'
 import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set'
+import { getCustomEmojis } from './methods/stickers/get-custom-emojis'
 import { getInstalledStickers } from './methods/stickers/get-installed-stickers'
 import { getStickerSet } from './methods/stickers/get-sticker-set'
 import { moveStickerInSet } from './methods/stickers/move-sticker-in-set'
@@ -2018,9 +2020,9 @@ export interface TelegramClient extends BaseTelegramClient {
 
             /**
              * Search for a user in the pending join requests list
-             * (only works if {@see requested} is true)
+             * (only works if {@link requested} is true)
              *
-             * Doesn't work when {@see link} is set (Telegram limitation)
+             * Doesn't work when {@link link} is set (Telegram limitation)
              */
             requestedSearch?: string
         }
@@ -3559,14 +3561,18 @@ export interface TelegramClient extends BaseTelegramClient {
         shortName: string
 
         /**
-         * Whether this is a set of masks
+         * Type of the stickers in this set.
+         * Defaults to `sticker`, i.e. regular stickers.
+         *
+         * Creating `emoji` stickers via API is not supported yet
          */
-        masks?: boolean
+        type?: Sticker.Type
 
         /**
-         * Whether this is a set of animated stickers
+         * File source type for the stickers in this set.
+         * Defaults to `static`, i.e. regular WEBP stickers.
          */
-        animated?: boolean
+        sourceType?: Sticker.SourceType
 
         /**
          * List of stickers to be immediately added into the pack.
@@ -3616,6 +3622,12 @@ export interface TelegramClient extends BaseTelegramClient {
             | tdFileId.RawFullRemoteFileLocation
             | tl.TypeInputDocument
     ): Promise<StickerSet>
+    /**
+     * Get custom emoji stickers by their IDs
+     *
+     * @param ids  IDs of the stickers (as defined in {@link MessageEntity.emojiId})
+     */
+    getCustomEmojis(ids: tl.Long[]): Promise<Sticker[]>
     /**
      * Get a list of all installed sticker packs
      *
@@ -3933,7 +3945,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     updateUsername(username: string | null): Promise<User>
 }
-/** @internal */
+
 export class TelegramClient extends BaseTelegramClient {
     protected _userId: number | null
     protected _isBot: boolean
@@ -4161,6 +4173,7 @@ export class TelegramClient extends BaseTelegramClient {
     addStickerToSet = addStickerToSet
     createStickerSet = createStickerSet
     deleteStickerFromSet = deleteStickerFromSet
+    getCustomEmojis = getCustomEmojis
     getInstalledStickers = getInstalledStickers
     getStickerSet = getStickerSet
     moveStickerInSet = moveStickerInSet

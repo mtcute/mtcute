@@ -33,9 +33,9 @@ export async function* getInviteLinkMembers(
 
         /**
          * Search for a user in the pending join requests list
-         * (only works if {@see requested} is true)
+         * (only works if {@link requested} is true)
          *
-         * Doesn't work when {@see link} is set (Telegram limitation)
+         * Doesn't work when {@link link} is set (Telegram limitation)
          */
         requestedSearch?: string
     }

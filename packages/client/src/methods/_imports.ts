@@ -57,6 +57,7 @@ import {
     ChatJoinRequestUpdate,
     PeerReaction,
     MessageReactions,
+    Sticker
 } from '../types'
 
 // @copy

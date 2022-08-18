@@ -22,6 +22,7 @@ const entityToType: Partial<
     messageEntityTextUrl: 'text_link',
     messageEntityUnderline: 'underline',
     messageEntityUrl: 'url',
+    messageEntityCustomEmoji: 'emoji',
 }
 
 export namespace MessageEntity {
@@ -43,6 +44,7 @@ export namespace MessageEntity {
      *   - 'text_link': for clickable text URLs.
      *   - 'text_mention': for users without usernames (see {@link MessageEntity.user} below).
      *   - 'blockquote': A blockquote
+     *   - 'emoji': A custom emoji
      */
     export type Type =
         | 'mention'
@@ -62,6 +64,7 @@ export namespace MessageEntity {
         | 'text_link'
         | 'text_mention'
         | 'blockquote'
+        | 'emoji'
 }
 
 /**
@@ -107,6 +110,13 @@ export class MessageEntity {
      */
     readonly language?: string
 
+    /**
+     * When `type=emoji`, ID of the custom emoji.
+     * The emoji itself must be loaded separately (and presumably cached)
+     * using {@link TelegramClient#getCustomEmojis}
+     */
+    readonly emojiId?: tl.Long
+
     static _parse(obj: tl.TypeMessageEntity): MessageEntity | null {
         const type = entityToType[obj._]
         if (!type) return null
@@ -120,6 +130,7 @@ export class MessageEntity {
             userId:
                 obj._ === 'messageEntityMentionName' ? obj.userId : undefined,
             language: obj._ === 'messageEntityPre' ? obj.language : undefined,
+            emojiId: obj._ === 'messageEntityCustomEmoji' ? obj.documentId : undefined,
         }
     }
 }

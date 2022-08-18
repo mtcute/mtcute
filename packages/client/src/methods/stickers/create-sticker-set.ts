@@ -5,7 +5,9 @@ import {
     InputFileLike,
     InputPeerLike,
     InputStickerSetItem,
+    MtArgumentError,
     MtInvalidPeerTypeError,
+    Sticker,
     StickerSet,
 } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
@@ -53,14 +55,18 @@ export async function createStickerSet(
         shortName: string
 
         /**
-         * Whether this is a set of masks
+         * Type of the stickers in this set.
+         * Defaults to `sticker`, i.e. regular stickers.
+         *
+         * Creating `emoji` stickers via API is not supported yet
          */
-        masks?: boolean
+        type?: Sticker.Type
 
         /**
-         * Whether this is a set of animated stickers
+         * File source type for the stickers in this set.
+         * Defaults to `static`, i.e. regular WEBP stickers.
          */
-        animated?: boolean
+        sourceType?: Sticker.SourceType
 
         /**
          * List of stickers to be immediately added into the pack.
@@ -94,6 +100,12 @@ export async function createStickerSet(
         ) => void
     }
 ): Promise<StickerSet> {
+    if (params.type === 'emoji') {
+        throw new MtArgumentError(
+            'Creating emoji stickers is not supported yet by the API'
+        )
+    }
+
     const owner = normalizeToInputUser(await this.resolvePeer(params.owner))
     if (!owner) throw new MtInvalidPeerTypeError(params.owner, 'user')
 
@@ -125,8 +137,11 @@ export async function createStickerSet(
 
     const res = await this.call({
         _: 'stickers.createStickerSet',
-        animated: params.animated,
-        masks: params.masks,
+        animated: params.sourceType === 'animated',
+        videos: params.sourceType === 'video',
+        masks: params.type === 'mask',
+        // currently not supported
+        // emojis: params.type === 'emoji',
         userId: owner,
         title: params.title,
         shortName: params.shortName,

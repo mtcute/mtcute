@@ -33,6 +33,22 @@ export namespace Sticker {
          */
         scale: number
     }
+
+    /**
+     * Type of the sticker
+     * - `sticker`: regular sticker
+     * - `mask`: mask sticker
+     * - `emoji`: custom emoji
+     */
+    export type Type = 'sticker' | 'mask' | 'emoji'
+
+    /**
+     * Sticker source file type
+     * - `static`: static sticker (webp)
+     * - `animated`: animated sticker (gzipped lottie json)
+     * - `video`: video sticker (webm)
+     */
+    export type SourceType = 'static' | 'animated' | 'video'
 }
 
 const MASK_POS = ['forehead', 'eyes', 'mouth', 'chin'] as const
@@ -50,7 +66,9 @@ export class Sticker extends RawDocument {
     constructor(
         client: TelegramClient,
         doc: tl.RawDocument,
-        readonly attr: tl.RawDocumentAttributeSticker,
+        readonly attr:
+            | tl.RawDocumentAttributeSticker
+            | tl.RawDocumentAttributeCustomEmoji,
         readonly attr2?:
             | tl.RawDocumentAttributeImageSize
             | tl.RawDocumentAttributeVideo
@@ -73,14 +91,8 @@ export class Sticker extends RawDocument {
     }
 
     /**
-     * Whether this sticker is a video (WEBM) sticker
-     */
-    get isVideoSticker(): boolean {
-        return this.attr2?._ === 'documentAttributeVideo'
-    }
-
-    /**
-     * Whether this sticker is a video (WEBM) sticker
+     * Whether this sticker is a premium sticker
+     * (has premium fullscreen animation)
      */
     get isPremiumSticker(): boolean {
         return !!this.raw.videoThumbs?.some((s) => s.type === 'f')
@@ -109,27 +121,50 @@ export class Sticker extends RawDocument {
      * Some stickers have multiple associated emojis,
      * but only one is returned here. This is Telegram's
      * limitation! Use {@link getAllEmojis} instead.
+     *
+     * For custom emojis, this alt should be used as a fallback
+     * text that will be "behind" the custom emoji entity.
      */
     get emoji(): string {
         return this.attr.alt
     }
 
     /**
-     * Whether the sticker is animated.
+     * Whether this custom emoji can be used by non-premium users.
+     * `false` if this is not a custom emoji.
      *
-     * Animated stickers are represented as gzipped
-     * lottie json files, and have MIME `application/x-tgsticker`,
-     * while normal stickers are WEBP images and have MIME `image/webp`
+     * > Not sure if there are any such stickers currently.
      */
-    get isAnimated(): boolean {
-        return this.mimeType === 'application/x-tgsticker'
+    get customEmojiFree(): boolean {
+        return this.attr._ === 'documentAttributeCustomEmoji'
+            ? this.attr?.free ?? false
+            : false
     }
 
     /**
-     * Whether this is a mask
+     * Type of the sticker
      */
-    get isMask(): boolean {
-        return this.attr.mask!
+    get stickerType(): Sticker.Type {
+        if (this.attr._ === 'documentAttributeSticker') {
+            return this.attr.mask ? 'mask' : 'sticker'
+        } else if (this.attr._ === 'documentAttributeCustomEmoji') {
+            return 'emoji'
+        } else {
+            return 'sticker'
+        }
+    }
+
+    /**
+     * Type of the file representing the sticker
+     */
+    get sourceType(): Sticker.SourceType {
+        if (this.attr2?._ === 'documentAttributeVideo') {
+            return 'video'
+        } else {
+            return this.mimeType === 'application/x-tgsticker'
+                ? 'animated'
+                : 'static'
+        }
     }
 
     /**
@@ -153,7 +188,8 @@ export class Sticker extends RawDocument {
      * Position where this mask should be placed
      */
     get maskPosition(): Sticker.MaskPosition | null {
-        if (!this.attr.maskCoords) return null
+        if (this.attr._ !== 'documentAttributeSticker' || !this.attr.maskCoords)
+            return null
 
         const raw = this.attr.maskCoords
         if (!this._maskPosition) {
