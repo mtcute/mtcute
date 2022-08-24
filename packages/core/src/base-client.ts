@@ -826,10 +826,11 @@ export class BaseTelegramClient extends EventEmitter {
     }
 
     /**
-     * Destroy a connection that was previously created using {@link createAdditionalConnection}.
+     * Destroy a connection that was previously created using
+     * {@link BaseTelegramClient.createAdditionalConnection}.
      * Passing any other connection will not have any effect.
      *
-     * @param connection  Connection created with {@link createAdditionalConnection}
+     * @param connection  Connection created with {@link BaseTelegramClient.createAdditionalConnection}
      */
     async destroyAdditionalConnection(
         connection: SessionConnection

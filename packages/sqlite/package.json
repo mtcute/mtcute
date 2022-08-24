@@ -7,7 +7,7 @@
     "license": "LGPL-3.0",
     "main": "index.ts",
     "scripts": {
-        "docs": "npx typedoc",
+        "docs": "typedoc",
         "build": "tsc"
     },
     "dependencies": {
@@ -17,6 +17,7 @@
         "long": "^4.0.0"
     },
     "devDependencies": {
+        "@mtcute/dispatcher": "workspace:^1.0.0",
         "@types/sqlite3": "^3.1.7",
         "@types/better-sqlite3": "^5.4.1",
         "@types/long": "^4.0.1"

@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+import { IStateStorage } from '@mtcute/dispatcher'
 
 import { LruMap, toggleChannelIdMark } from '../utils'
 import { MaybeAsync } from '../types'
@@ -8,7 +9,7 @@ const CURRENT_VERSION = 1
 
 type PeerInfoWithUpdated = ITelegramStorage.PeerInfo & { updated: number }
 
-interface MemorySessionState {
+export interface MemorySessionState {
     // forwards compatibility for persistent storages
     $version: typeof CURRENT_VERSION
 
@@ -54,7 +55,7 @@ interface MemorySessionState {
 
 const USERNAME_TTL = 86400000 // 24 hours
 
-export class MemoryStorage implements ITelegramStorage /*, IStateStorage */ {
+export class MemoryStorage implements ITelegramStorage, IStateStorage {
     protected _state!: MemorySessionState
     private _cachedInputPeers: LruMap<number, tl.TypeInputPeer> = new LruMap(
         100

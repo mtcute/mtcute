@@ -1,5 +1,7 @@
 # `@mtcute/file-id`
 
+![](./coverage.svg)
+
 A package that is used internally by `@mtcute/client` to parse, serialize
 and manipulate TDLib and Bot API compatible File IDs, but can also be used
 for any other purposes.
@@ -14,14 +16,6 @@ This package exports a number of functions, namely:
 
 This package also exports namespace `tdFileId`, which contains all the types
 used by the library
-
-## Dependencies
-This package uses `@mtcute/core` `BinaryReader` and `BinaryWriter` classes to
-work with binary streams. Additionally, it depends on `@mtcute/tl` types to
-allow type-safe code for conversion functions.
-
-Note that `@mtcute/core` itself depends on `@mtcute/tl`, which might
-redundantly increase your bundle size in case you don't actually use TL types.
 
 ## Acknowledgements
 This is basically a port of a portion of TDLib APIs, but greatly

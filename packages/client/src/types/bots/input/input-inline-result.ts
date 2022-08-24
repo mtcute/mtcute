@@ -6,7 +6,7 @@ import { fileIdToInputDocument, fileIdToInputPhoto } from '@mtcute/file-id'
 import { extractFileName } from '../../../utils/file-utils'
 import { MtArgumentError } from '../../errors'
 
-interface BaseInputInlineResult {
+export interface BaseInputInlineResult {
     /**
      * Unique ID of the result
      */

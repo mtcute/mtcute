@@ -10,7 +10,7 @@
         "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
         "coverage": "nyc npm run test",
         "build": "tsc",
-        "docs": "npx typedoc"
+        "docs": "typedoc"
     },
     "dependencies": {
         "@mtcute/client": "workspace:^1.0.0"

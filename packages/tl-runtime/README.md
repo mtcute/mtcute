@@ -1,5 +1,7 @@
 # @mtcute/tl-runtime
 
+![](./coverage.svg)
+
 This package contains runtime for TL (de-)serialization.
 It only contains binary reader and writer implementations,
 and is used by `@mtcute/core`.

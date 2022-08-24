@@ -91,6 +91,13 @@ export class User {
         return this.raw.restricted!
     }
 
+    /**
+     * Reason why this bot was restricted
+     */
+    get restrictionReason(): tl.TypeRestrictionReason[] {
+        return this.raw.restrictionReason ?? []
+    }
+
     /** Whether this user has been flagged for scam */
     get isScam(): boolean {
         return this.raw.scam!

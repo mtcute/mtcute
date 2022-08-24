@@ -5,15 +5,5 @@
     },
     "include": [
         "./src"
-    ],
-    "typedocOptions": {
-        "name": "@mtcute/markdown-parser",
-        "includeVersion": true,
-        "out": "../../docs/packages/markdown-parser",
-        "listInvalidSymbolLinks": true,
-        "excludePrivate": true,
-        "entryPoints": [
-            "./src/index.ts"
-        ]
-    }
+    ]
 }

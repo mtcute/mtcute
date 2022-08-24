@@ -10,7 +10,11 @@
         "name": "@mtcute/core",
         "includeVersion": true,
         "out": "../../docs/packages/core",
-        "listInvalidSymbolLinks": true,
+        "validation": {
+            "notExported": true,
+            "invalidLink": true,
+            "notDocumented": false
+        },
         "excludePrivate": true,
         "entryPoints": [
             "./src/index.ts"

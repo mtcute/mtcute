@@ -16,6 +16,7 @@ import {
     TlReaderMap,
     TlWriterMap,
 } from '@mtcute/core'
+import { IStateStorage } from '@mtcute/dispatcher'
 
 // todo: add testMode to "self"
 
@@ -168,7 +169,7 @@ const EMPTY_BUFFER = Buffer.alloc(0)
  *
  * Uses `better-sqlite3` library
  */
-export class SqliteStorage implements ITelegramStorage /*, IStateStorage */ {
+export class SqliteStorage implements ITelegramStorage, IStateStorage {
     private _db!: sqlite3.Database
     private _statements!: Record<keyof typeof STATEMENTS, sqlite3.Statement>
     private readonly _filename: string

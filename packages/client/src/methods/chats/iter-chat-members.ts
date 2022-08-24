@@ -19,7 +19,7 @@ export async function* iterChatMembers(
     params?: Parameters<TelegramClient['getChatMembers']>[1] & {
         /**
          * Chunk size, which will be passed as `limit` parameter
-         * to {@link getChatMembers}. Usually you shouldn't care about this.
+         * to {@link TelegramClient.getChatMembers}. Usually you shouldn't care about this.
          *
          * Defaults to `200`
          */

@@ -5,15 +5,5 @@
     },
     "include": [
         "./src"
-    ],
-    "typedocOptions": {
-        "name": "@mtcute/crypto-node",
-        "includeVersion": true,
-        "out": "../../docs/packages/crypto-node",
-        "listInvalidSymbolLinks": true,
-        "excludePrivate": true,
-        "entryPoints": [
-            "./src/index.ts"
-        ]
-    }
+    ]
 }

@@ -2,7 +2,7 @@ import { tl } from '@mtcute/tl'
 
 import type { InlineKeyboardMarkup, ReplyKeyboardMarkup } from './keyboards'
 
-type ButtonLike = tl.TypeKeyboardButton | false | null | undefined | void
+export type ButtonLike = tl.TypeKeyboardButton | false | null | undefined | void
 
 /**
  * Builder for bot keyboards

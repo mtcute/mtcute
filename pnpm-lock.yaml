@@ -1,4 +1,4 @@
-lockfileVersion: 5.4
+lockfileVersion: 5.3
 
 importers:
 
@@ -24,7 +24,8 @@ importers:
       rimraf: ^3.0.2
       semver: ^7.3.7
       ts-node: ^10.8.1
-      typedoc: ^0.23.2
+      typedoc: ^0.23.10
+      typedoc-plugin-coverage: ^2.0.0
       typescript: ^4.7.4
     dependencies:
       node-gyp: 9.0.0
@@ -34,8 +35,8 @@ importers:
       '@types/node': 14.18.16
       '@types/node-forge': 1.0.2
       '@types/ws': 7.4.7
-      '@typescript-eslint/eslint-plugin': 4.33.0_3ekaj7j3owlolnuhj3ykrb7u7i
-      '@typescript-eslint/parser': 4.33.0_hxadhbs2xogijvk7vq4t2azzbu
+      '@typescript-eslint/eslint-plugin': 4.33.0_d91404fd3b7596e5b6874ef0a887f4fa
+      '@typescript-eslint/parser': 4.33.0_eslint@7.32.0+typescript@4.7.4
       chai: 4.3.6
       dotenv-flow: 3.2.0
       eslint: 7.32.0
@@ -47,15 +48,16 @@ importers:
       prettier: 2.6.2
       rimraf: 3.0.2
       semver: 7.3.7
-      ts-node: 10.8.1_n4ne3vfoqubxgiypogr36fpdje
-      typedoc: 0.23.2_typescript@4.7.4
+      ts-node: 10.8.1_6f1a4dd4ae850373230f71a3bf15e349
+      typedoc: 0.23.10_typescript@4.7.4
+      typedoc-plugin-coverage: 2.0.0_typedoc@0.23.10
       typescript: 4.7.4
 
   packages/client:
     specifiers:
       '@mtcute/core': workspace:^1.0.0
       '@mtcute/file-id': workspace:^1.0.0
-      '@mtcute/tl': workspace:143.0.0
+      '@mtcute/tl': workspace:^144.0.0
       '@types/long': ^4.0.1
       '@types/node': ^15.12.1
       eager-async-pool: ^1.0.0
@@ -73,7 +75,8 @@ importers:
 
   packages/core:
     specifiers:
-      '@mtcute/tl': workspace:143.0.0
+      '@mtcute/dispatcher': workspace:^1.0.0
+      '@mtcute/tl': workspace:^144.0.0
       '@mtcute/tl-runtime': workspace:^1.0.0
       '@types/events': ^3.0.0
       '@types/long': ^4.0.2
@@ -93,6 +96,7 @@ importers:
       events: 3.2.0
       long: 4.0.0
     devDependencies:
+      '@mtcute/dispatcher': link:../dispatcher
       '@types/ws': 7.4.7
       ws: 7.5.7
 
@@ -109,7 +113,7 @@ importers:
     specifiers:
       '@mtcute/client': workspace:^1.0.0
       '@mtcute/core': workspace:^1.0.0
-      '@mtcute/tl': workspace:143.0.0
+      '@mtcute/tl': workspace:^144.0.0
       events: ^3.2.0
     dependencies:
       '@mtcute/client': link:../client
@@ -120,7 +124,7 @@ importers:
   packages/file-id:
     specifiers:
       '@mtcute/core': workspace:^1.0.0
-      '@mtcute/tl': workspace:143.0.0
+      '@mtcute/tl': workspace:^144.0.0
       '@mtcute/tl-runtime': workspace:^1.0.0
       '@types/long': ^4.0.1
       long: ^4.0.0
@@ -135,7 +139,7 @@ importers:
   packages/html-parser:
     specifiers:
       '@mtcute/client': workspace:^1.0.0
-      '@mtcute/tl': workspace:143.0.0
+      '@mtcute/tl': workspace:^144.0.0
       '@types/long': ^4.0.1
       htmlparser2: ^6.0.1
       long: ^4.0.0
@@ -162,7 +166,7 @@ importers:
   packages/markdown-parser:
     specifiers:
       '@mtcute/client': workspace:^1.0.0
-      '@mtcute/tl': workspace:143.0.0
+      '@mtcute/tl': workspace:^144.0.0
       '@types/long': ^4.0.1
       long: ^4.0.0
     dependencies:
@@ -207,6 +211,7 @@ importers:
   packages/sqlite:
     specifiers:
       '@mtcute/core': workspace:^1.0.0
+      '@mtcute/dispatcher': workspace:^1.0.0
       '@mtcute/tl-runtime': workspace:^1.0.0
       '@types/better-sqlite3': ^5.4.1
       '@types/long': ^4.0.1
@@ -219,6 +224,7 @@ importers:
       better-sqlite3: 7.5.1
       long: 4.0.0
     devDependencies:
+      '@mtcute/dispatcher': link:../dispatcher
       '@types/better-sqlite3': 5.4.3
       '@types/long': 4.0.2
       '@types/sqlite3': 3.1.8
@@ -697,7 +703,7 @@ packages:
       '@types/node': 14.18.16
     dev: true
 
-  /@typescript-eslint/eslint-plugin/4.33.0_3ekaj7j3owlolnuhj3ykrb7u7i:
+  /@typescript-eslint/eslint-plugin/4.33.0_d91404fd3b7596e5b6874ef0a887f4fa:
     resolution: {integrity: sha512-aINiAxGVdOl1eJyVjaWn/YcVAq4Gi/Yo35qHGCnqbWVz61g39D0h23veY/MA0rFFGfxK7TySg2uwDeNv+JgVpg==}
     engines: {node: ^10.12.0 || >=12.0.0}
     peerDependencies:
@@ -708,8 +714,8 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@typescript-eslint/experimental-utils': 4.33.0_hxadhbs2xogijvk7vq4t2azzbu
-      '@typescript-eslint/parser': 4.33.0_hxadhbs2xogijvk7vq4t2azzbu
+      '@typescript-eslint/experimental-utils': 4.33.0_eslint@7.32.0+typescript@4.7.4
+      '@typescript-eslint/parser': 4.33.0_eslint@7.32.0+typescript@4.7.4
       '@typescript-eslint/scope-manager': 4.33.0
       debug: 4.3.4
       eslint: 7.32.0
@@ -723,7 +729,7 @@ packages:
       - supports-color
     dev: true
 
-  /@typescript-eslint/experimental-utils/4.33.0_hxadhbs2xogijvk7vq4t2azzbu:
+  /@typescript-eslint/experimental-utils/4.33.0_eslint@7.32.0+typescript@4.7.4:
     resolution: {integrity: sha512-zeQjOoES5JFjTnAhI5QY7ZviczMzDptls15GFsI6jyUOq0kOf9+WonkhtlIhh0RgHRnqj5gdNxW5j1EvAyYg6Q==}
     engines: {node: ^10.12.0 || >=12.0.0}
     peerDependencies:
@@ -741,7 +747,7 @@ packages:
       - typescript
     dev: true
 
-  /@typescript-eslint/parser/4.33.0_hxadhbs2xogijvk7vq4t2azzbu:
+  /@typescript-eslint/parser/4.33.0_eslint@7.32.0+typescript@4.7.4:
     resolution: {integrity: sha512-ZohdsbXadjGBSK0/r+d87X0SBmKzOq4/S5nzK6SBgJspFo9/CUDJ7hjayuze+JK7CZQLDMroqytp7pOcFKTxZA==}
     engines: {node: ^10.12.0 || >=12.0.0}
     peerDependencies:
@@ -1089,8 +1095,6 @@ packages:
       ssri: 9.0.0
       tar: 6.1.11
       unique-filename: 1.1.1
-    transitivePeerDependencies:
-      - bluebird
     dev: false
 
   /caching-transform/4.0.0:
@@ -2359,12 +2363,11 @@ packages:
       socks-proxy-agent: 6.2.0
       ssri: 9.0.0
     transitivePeerDependencies:
-      - bluebird
       - supports-color
     dev: false
 
-  /marked/4.0.17:
-    resolution: {integrity: sha512-Wfk0ATOK5iPxM4ptrORkFemqroz0ZDxp5MWfYA7H/F+wO17NRWV5Ypxi6p3g2Xmw2bKeiYOl6oVnLHKxBA0VhA==}
+  /marked/4.0.18:
+    resolution: {integrity: sha512-wbLDJ7Zh0sqA0Vdg6aqlbT+yPxqLblpAZh1mK2+AO2twQkPywvvqQNfEPVwSSRjZ7dZcdeVBIAgiO7MMp3Dszw==}
     engines: {node: '>= 12'}
     hasBin: true
     dev: true
@@ -2587,7 +2590,6 @@ packages:
       tar: 6.1.11
       which: 2.0.2
     transitivePeerDependencies:
-      - bluebird
       - supports-color
     dev: false
 
@@ -2880,11 +2882,6 @@ packages:
 
   /promise-inflight/1.0.1:
     resolution: {integrity: sha1-mEcocL8igTL8vdhoEputEsPAKeM=}
-    peerDependencies:
-      bluebird: '*'
-    peerDependenciesMeta:
-      bluebird:
-        optional: true
     dev: false
 
   /promise-retry/2.0.1:
@@ -3324,7 +3321,7 @@ packages:
     resolution: {integrity: sha1-gYT9NH2snNwYWZLzpmIuFLnZq2o=}
     dev: true
 
-  /ts-node/10.8.1_n4ne3vfoqubxgiypogr36fpdje:
+  /ts-node/10.8.1_6f1a4dd4ae850373230f71a3bf15e349:
     resolution: {integrity: sha512-Wwsnao4DQoJsN034wePSg5nZiw4YKXf56mPIAeD6wVmiv+RytNSWqc2f3fKvcUoV+Yn2+yocD71VOfQHbmVX4g==}
     hasBin: true
     peerDependencies:
@@ -3407,15 +3404,24 @@ packages:
       is-typedarray: 1.0.0
     dev: true
 
-  /typedoc/0.23.2_typescript@4.7.4:
-    resolution: {integrity: sha512-THpC4vtb3wu1yck6YHzEc4ck6W4lScf8TD0Rg7XAetDih8BzP+ErYO0/6DtdzYcZyKkDwEoujkMeWW7CffCbrQ==}
+  /typedoc-plugin-coverage/2.0.0_typedoc@0.23.10:
+    resolution: {integrity: sha512-IJsYW0SvV2RUWfUBWuCG2cXTv+FiPDlls9+JlUlct3N41c1hV01ZOLKmZpEVelrvNSU3SnxxA8mkct3BQm2v0g==}
+    engines: {node: '>= 14'}
+    peerDependencies:
+      typedoc: ^0.22.12 || 0.23.x
+    dependencies:
+      typedoc: 0.23.10_typescript@4.7.4
+    dev: true
+
+  /typedoc/0.23.10_typescript@4.7.4:
+    resolution: {integrity: sha512-03EUiu/ZuScUBMnY6p0lY+HTH8SwhzvRE3gImoemdPDWXPXlks83UGTx++lyquWeB1MTwm9D9Ca8RIjkK3AFfQ==}
     engines: {node: '>= 14.14'}
     hasBin: true
     peerDependencies:
       typescript: 4.6.x || 4.7.x
     dependencies:
       lunr: 2.3.9
-      marked: 4.0.17
+      marked: 4.0.18
       minimatch: 5.1.0
       shiki: 0.10.1
       typescript: 4.7.4

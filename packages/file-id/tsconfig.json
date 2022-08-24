@@ -5,15 +5,5 @@
     },
     "include": [
         "./src"
-    ],
-    "typedocOptions": {
-        "name": "@mtcute/file-id",
-        "includeVersion": true,
-        "out": "../../docs/packages/file-id",
-        "listInvalidSymbolLinks": true,
-        "excludePrivate": true,
-        "entryPoints": [
-            "./src/index.ts"
-        ]
-    }
+    ]
 }

@@ -5,15 +5,5 @@
     },
     "include": [
         "./index.ts",
-    ],
-    "typedocOptions": {
-        "name": "@mtcute/http-proxy",
-        "includeVersion": true,
-        "out": "../../docs/packages/http-proxy",
-        "listInvalidSymbolLinks": true,
-        "excludePrivate": true,
-        "entryPoints": [
-            "./index.ts"
-        ]
-    }
+    ]
 }

@@ -467,8 +467,8 @@ export interface TelegramClient extends BaseTelegramClient {
      * Errors that were encountered while calling {@link start}
      * and `then` will be emitted as usual, and can be caught with {@link onError}
      *
-     * @param params  Parameters to be passed to {@link params}
-     * @param then  Function to be called after {@link start} returns
+     * @param params  Parameters to be passed to {@link TelegramClient.start}
+     * @param then  Function to be called after {@link TelegramClient.start} returns
      */
     run(
         params: Parameters<TelegramClient['start']>[0],
@@ -673,7 +673,7 @@ export interface TelegramClient extends BaseTelegramClient {
          * to show a GUI alert of some kind.
          * Defaults to `console.log`.
          *
-         * This method is called *before* {@link code}.
+         * This method is called *before* {@link TelegramClient.start.params.code}.
          *
          * @param code
          */
@@ -1350,7 +1350,7 @@ export interface TelegramClient extends BaseTelegramClient {
         params?: Parameters<TelegramClient['getChatMembers']>[1] & {
             /**
              * Chunk size, which will be passed as `limit` parameter
-             * to {@link getChatMembers}. Usually you shouldn't care about this.
+             * to {@link TelegramClient.getChatMembers}. Usually you shouldn't care about this.
              *
              * Defaults to `200`
              */
@@ -2538,8 +2538,7 @@ export interface TelegramClient extends BaseTelegramClient {
             reverse?: boolean
 
             /**
-             * Chunk size, which will be passed as `limit` parameter
-             * to {@link getHistory}. Usually you shouldn't care about this.
+             * Chunk size. Usually you shouldn't care about this.
              *
              * Defaults to `100`
              */

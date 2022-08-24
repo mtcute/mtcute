@@ -70,8 +70,7 @@ export async function* getHistory(
         reverse?: boolean
 
         /**
-         * Chunk size, which will be passed as `limit` parameter
-         * to {@link getHistory}. Usually you shouldn't care about this.
+         * Chunk size. Usually you shouldn't care about this.
          *
          * Defaults to `100`
          */

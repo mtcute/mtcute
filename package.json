@@ -9,7 +9,8 @@
         "test-all": "pnpm run -r test",
         "lint": "eslint \"packages/**/*.ts\"",
         "format": "prettier --write \"packages/**/*.ts\"",
-        "publish-all": "node scripts/publish.js all"
+        "publish-all": "node scripts/publish.js all",
+        "docs": "pnpm run -r docs"
     },
     "dependencies": {
         "node-gyp": "^9.0.0"
@@ -29,7 +30,8 @@
         "node-forge": "^1.3.1",
         "prettier": "^2.6.2",
         "ts-node": "^10.8.1",
-        "typedoc": "^0.23.2",
+        "typedoc": "^0.23.10",
+        "typedoc-plugin-coverage": "^2.0.0",
         "typescript": "^4.7.4",
         "nyc": "^15.1.0",
         "rimraf": "^3.0.2",

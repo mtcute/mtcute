@@ -60,13 +60,13 @@ export interface TlErrors {
     userOnly: Record<string, 1>
 }
 
-interface BasicDiff<T, K> {
+export interface BasicDiff<T, K> {
     added: T[]
     removed: T[]
     modified: K[]
 }
 
-interface PropertyDiff<T> {
+export interface PropertyDiff<T> {
     old: T
     new: T
 }
@@ -86,7 +86,7 @@ export interface TlEntryDiff {
     comment?: PropertyDiff<string | undefined>
 }
 
-interface TlUnionDiff {
+export interface TlUnionDiff {
     name: string
     classes: BasicDiff<TlEntry, never>
     methods: BasicDiff<TlEntry, never>

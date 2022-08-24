@@ -7,6 +7,7 @@ export * from './peers'
 export * from './misc'
 export * from './updates'
 export * from './conversation'
+export * from './calls'
 
 export * from './errors'
 export * from './parser'

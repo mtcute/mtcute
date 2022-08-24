@@ -4,7 +4,7 @@ import { TlBinaryWriter } from '@mtcute/tl-runtime'
 import { tdFileId as td } from './types'
 import { telegramRleEncode } from './utils'
 
-type InputUniqueLocation =
+export type InputUniqueLocation =
     | Pick<td.RawWebRemoteFileLocation, '_' | 'url'>
     | Pick<td.RawPhotoRemoteFileLocation, '_' | 'id' | 'source'>
     | Pick<td.RawCommonRemoteFileLocation, '_' | 'id'>

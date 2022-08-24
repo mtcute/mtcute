@@ -191,7 +191,7 @@ export function generateCodeForErrors(
             idx = 0
             comment += it.description.replace(
                 /%[a-z]/g,
-                () => `{@see ${placeholders[idx++]}}`
+                () => `{@link ${placeholders[idx++]}}`
             )
         } else {
             description = `"Unknown RPC error: [${it.code}:${it.name}]"`

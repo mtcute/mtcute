@@ -9,7 +9,7 @@
     "scripts": {
         "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
         "build": "tsc",
-        "docs": "npx typedoc"
+        "docs": "typedoc"
     },
     "browser": {
         "./utils/platform/crypto.js": "./utils/platform/crypto.web.js",
@@ -28,6 +28,7 @@
         "events": "3.2.0"
     },
     "devDependencies": {
+        "@mtcute/dispatcher": "workspace:^1.0.0",
         "@types/ws": "^7.4.1",
         "ws": "^7.4.4"
     }

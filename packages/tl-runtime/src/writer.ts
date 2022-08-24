@@ -7,8 +7,6 @@ const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
  */
 export type TlWriterMap = Record<string, (w: any, val: any) => void>
 
-type SerializableObject = { _: string }
-
 export class TlSerializationCounter {
     count = 0
 
@@ -16,7 +14,7 @@ export class TlSerializationCounter {
 
     static countNeededBytes(
         objectMap: TlWriterMap,
-        obj: SerializableObject
+        obj: { _: string }
     ): number {
         const cnt = new TlSerializationCounter(objectMap)
         cnt.object(obj)
@@ -94,7 +92,7 @@ export class TlSerializationCounter {
         this.count += TlSerializationCounter.countBytesOverhead(length) + length
     }
 
-    object(obj: SerializableObject): void {
+    object(obj: { _: string }): void {
         if (!this.objectMap[obj._]) throw new Error(`Unknown object ${obj._}`)
         this.objectMap[obj._](this, obj)
     }
@@ -132,7 +130,7 @@ export class TlBinaryWriter {
 
     static serializeObject(
         objectMap: TlWriterMap,
-        obj: SerializableObject,
+        obj: { _: string },
         knownSize = -1
     ): Buffer {
         if (knownSize === -1)
@@ -238,7 +236,7 @@ export class TlBinaryWriter {
         this.bytes(Buffer.from(val, 'utf-8'))
     }
 
-    object(obj: SerializableObject): void {
+    object(obj: { _: string }): void {
         const fn = this.objectMap![obj._]
         if (!fn) throw new Error(`Unknown object ${obj._}`)
         fn(this, obj)

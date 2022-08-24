@@ -13,8 +13,7 @@
         "docs-cli": "node -r ts-node/register scripts/documentation.ts",
         "gen-code": "node -r ts-node/register scripts/gen-code.ts",
         "gen-rsa": "node -r ts-node/register scripts/gen-rsa-keys.ts",
-        "fetch-and-gen": "yarn fetch-api && yarn gen-code",
-        "docs": "npx typedoc --options typedoc.json"
+        "fetch-and-gen": "yarn fetch-api && yarn gen-code"
     },
     "dependencies": {
         "@types/long": "^4.0.1",
@@ -28,5 +27,8 @@
         "js-yaml": "^4.0.0",
         "node-fetch": "^2.6.1",
         "@types/node-fetch": "^2.5.10"
+    },
+    "typedoc": {
+        "entryPoint": "index.d.ts"
     }
 }

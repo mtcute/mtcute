@@ -5,15 +5,4 @@
     },
     "include": [
         "./src"
-    ],
-    "typedocOptions": {
-        "name": "@mtcute/dispatcher",
-        "includeVersion": true,
-        "out": "../../docs/packages/dispatcher",
-        "listInvalidSymbolLinks": true,
-        "excludePrivate": true,
-        "entryPoints": [
-            "./src/index.ts"
-        ]
-    }
-}
+    ]

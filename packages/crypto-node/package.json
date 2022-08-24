@@ -15,7 +15,7 @@
         "rebuild": "node-gyp configure && node-gyp -j 16 rebuild",
         "clean": "node-gyp clean",
         "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
-        "docs": "npx typedoc"
+        "docs": "typedoc"
     },
     "dependencies": {
         "@mtcute/core": "workspace:^1.0.0"

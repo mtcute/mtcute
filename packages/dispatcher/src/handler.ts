@@ -21,14 +21,14 @@ import { tl } from '@mtcute/tl'
 
 import { PropagationAction } from './propagation'
 
-interface BaseUpdateHandler<Name, Handler, Checker> {
+export interface BaseUpdateHandler<Name, Handler, Checker> {
     name: Name
     callback: Handler
 
     check?: Checker
 }
 
-type ParsedUpdateHandler<Name, Update, State = never> = BaseUpdateHandler<
+export type ParsedUpdateHandler<Name, Update, State = never> = BaseUpdateHandler<
     Name,
     (update: Update, state: State) => MaybeAsync<void | PropagationAction>,
     (update: Update, state: State) => MaybeAsync<boolean>

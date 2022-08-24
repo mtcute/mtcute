@@ -5,7 +5,7 @@ import { InputFileLike } from '../files'
 import { Venue } from './venue'
 import { FormattedString } from '../parser'
 
-interface CaptionMixin {
+export interface CaptionMixin {
     /**
      * Caption of the media
      */
@@ -18,7 +18,7 @@ interface CaptionMixin {
     entities?: tl.TypeMessageEntity[]
 }
 
-interface FileMixin {
+export interface FileMixin {
     /**
      * File to be sent
      */
@@ -564,7 +564,7 @@ export type InputMediaLike =
     | tl.TypeInputMedia
 
 export namespace InputMedia {
-    type OmitTypeAndFile<
+    export type OmitTypeAndFile<
         T extends InputMediaLike,
         K extends keyof T = never
     > = Omit<T, 'type' | 'file' | K>

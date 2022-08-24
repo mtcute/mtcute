@@ -106,7 +106,7 @@ export class Message {
         readonly _peers: PeersIndex,
         /**
          * Whether the message is scheduled.
-         * If it is, then its {@link date} is set to future.
+         * If it is, then its {@link Message.date} is set to future.
          */
         readonly isScheduled = false
     ) {

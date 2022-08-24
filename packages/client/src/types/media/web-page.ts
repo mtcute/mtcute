@@ -190,7 +190,7 @@ export class WebPage {
      *
      * Seems that this is only used for `document` previews.
      *
-     * Can be a {@link Animation}, {@link Photo}, {@link Video},
+     * Can be a {@link Photo}, {@link Video},
      * {@link Audio}, {@link Document}.
      */
     get document(): RawDocument | null {

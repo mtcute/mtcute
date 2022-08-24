@@ -5,15 +5,5 @@
     },
     "include": [
         "./src",
-    ],
-    "typedocOptions": {
-        "name": "@mtcute/tl-runtime",
-        "includeVersion": true,
-        "out": "../../docs/packages/tl-runtime",
-        "listInvalidSymbolLinks": true,
-        "excludePrivate": true,
-        "entryPoints": [
-            "./src/index.ts"
-        ]
-    }
+    ]
 }

@@ -113,7 +113,7 @@ export async function start(
          * to show a GUI alert of some kind.
          * Defaults to `console.log`.
          *
-         * This method is called *before* {@link code}.
+         * This method is called *before* {@link TelegramClient.start.params.code}.
          *
          * @param code
          */

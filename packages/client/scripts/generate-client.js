@@ -464,7 +464,7 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
     output.write('}\n')
 
     output.write(
-        '/** @internal */\nexport class TelegramClient extends BaseTelegramClient {\n'
+        '\nexport class TelegramClient extends BaseTelegramClient {\n'
     )
 
     state.fields.forEach(({ code }) => output.write(`protected ${code}\n`))

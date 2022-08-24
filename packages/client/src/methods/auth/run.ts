@@ -9,8 +9,8 @@ import { User } from '../../types'
  * Errors that were encountered while calling {@link start}
  * and `then` will be emitted as usual, and can be caught with {@link onError}
  *
- * @param params  Parameters to be passed to {@link params}
- * @param then  Function to be called after {@link start} returns
+ * @param params  Parameters to be passed to {@link TelegramClient.start}
+ * @param then  Function to be called after {@link TelegramClient.start} returns
  * @internal
  */
 export function run(

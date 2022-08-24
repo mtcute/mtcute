@@ -4,7 +4,7 @@ import { Photo } from '../media'
 import {
     _callDiscardReasonFromTl,
     CallDiscardReason,
-} from '../calls/discard-reason'
+} from '../calls'
 import { Message } from './message'
 
 export namespace MessageAction {
@@ -200,7 +200,7 @@ export namespace MessageAction {
 
     /**
      * A user is in proximity of another user
-     * (see [Proximity alerts]{https://core.telegram.org/api/live-location#proximity-alert})
+     * (see [Proximity alerts](https://core.telegram.org/api/live-location#proximity-alert))
      */
     export interface ActionGeoProximity {
         readonly type: 'geo_proximity'

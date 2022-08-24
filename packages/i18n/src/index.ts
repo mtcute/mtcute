@@ -2,6 +2,8 @@ import { MtArgumentError, ParsedUpdate } from '@mtcute/client'
 import { I18nValue, MtcuteI18nFunction, OtherLanguageWrap } from './types'
 import { createI18nStringsIndex, extractLanguageFromUpdate } from './utils'
 
+export * from './types'
+
 export interface MtcuteI18nParameters<Strings> {
     /**
      * Primary language which will also be used as a fallback

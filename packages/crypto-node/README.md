@@ -1,4 +1,7 @@
 # `@mtcute/crypto-node`
+
+![](./coverage.svg)
+
 Native extension for NodeJS that improves performance of the most used
 cryptographic mode in Telegram (IGE), which is not implemented by OpenSSL.
 
