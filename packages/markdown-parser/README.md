@@ -82,7 +82,10 @@ Defined like this: `[Link text](https://example.com)`.
 - `[` (opening square bracket) inside link text will be treated like a normal character.
 
 A markdown-style link can also be used to define a name mention like this: `[Name](tg://user?id=1234567)`,
-where `1234567` is the ID of the user you want to mention
+where `1234567` is the ID of the user you want to mention.
+
+Additionally, a markdown-style link can be used to define a custom emoji like this:
+`[😄](tg://emoji?id=123456)`, where `123456` is ID of the emoji.
 
 > **Note**: It is up to the client to look up user's input entity by ID.
 > In most cases, you can only use IDs of users that were seen by the client while using given storage.
@@ -98,6 +101,7 @@ where `1234567` is the ID of the user you want to mention
 | `[empty link]()`                   | empty link                     | `empty link`                                     |
 | `[empty link]`                     | [empty link]                   | `[empty link]`                                   |
 | `[User](tg://user?id=1234567)`     | N/A                            | N/A                                              |
+| `[😄](tg://emoji?id=123456)`       | N/A                            | N/A                                              |
 
 ### Nested and overlapping entities
 

@@ -4,6 +4,8 @@ import { FormattedString } from '@mtcute/client'
 
 const MENTION_REGEX =
     /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
+const EMOJI_REGEX =
+    /^tg:\/\/emoji\?id=(-?\d+)/
 
 const TAG_BOLD = '**'
 const TAG_ITALIC = '__'
@@ -160,7 +162,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                 if (url.length) {
                     ent.length = result.length - ent.offset
 
-                    const m = url.match(MENTION_REGEX)
+                    let m = url.match(MENTION_REGEX)
                     if (m) {
                         const userId = parseInt(m[1])
                         const accessHash = m[2]
@@ -187,6 +189,13 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                                 ent as tl.Mutable<tl.RawMessageEntityMentionName>
                             ).userId = userId
                         }
+                    } else if ((m = EMOJI_REGEX.exec(url))) {
+                        ;(
+                            ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>
+                        )._ = 'messageEntityCustomEmoji'
+                        ;(
+                            ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>
+                        ).documentId = Long.fromString(m[1])
                     } else {
                         if (url.match(/^\/\//)) url = 'http:' + url
                         ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>)._ =
