@@ -1,13 +1,11 @@
 # @mtcute/html-parser
 
-![](./coverage.svg)
-
 > HTML entities parser for MTCute
 
 This package implements formatting syntax based on HTML, similar to the one available in the Bot
 API ([documented here](https://core.telegram.org/bots/api#html-style))
 
-> **NOTE**: The syntax implemented here is **not** compatible with Bot API _HTML_.
+> **NOTE**: The syntax implemented here is **incompatible** with Bot API _HTML_.
 >
 > Please read [Syntax](#syntax) below for a detailed explanation
 
@@ -53,6 +51,7 @@ Inline entities are entities that are in-line with other text. We support these 
 | Monospace (code) | `<code>text</code>`                       | `text`                       |
 | Text link        | `<a href="https://google.com">Google</a>` | [Google](https://google.com) |
 | Text mention     | `<a href="tg://user?id=1234567">Name</a>` | N/A                          |
+| Custom emoji     | `<emoji id="12345">😄</emoji>`            | N/A                          |
 
 > **Note**: `<strong>`, `<em>`, `<ins>`, `<strike>`, `<del>` are not supported because they are redundant
 

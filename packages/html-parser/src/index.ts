@@ -188,6 +188,18 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                             length: 0,
                         }
                         break
+                    case 'emoji': {
+                        const id = attribs.id
+                        if (!id || !id.match(/^-?\d+$/)) return
+
+                        entity = {
+                            _: 'messageEntityCustomEmoji',
+                            offset: plainText.length,
+                            length: 0,
+                            documentId: Long.fromString(id),
+                        }
+                        break
+                    }
                     case 'a': {
                         let url = attribs.href
                         if (!url) return
