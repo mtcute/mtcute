@@ -1,7 +1,5 @@
 # `@mtcute/file-id`
 
-![](./coverage.svg)
-
 A package that is used internally by `@mtcute/client` to parse, serialize
 and manipulate TDLib and Bot API compatible File IDs, but can also be used
 for any other purposes.

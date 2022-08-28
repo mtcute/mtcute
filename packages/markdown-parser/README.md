@@ -1,7 +1,5 @@
 # @mtcute/markdown-parser
 
-![](./coverage.svg)
-
 > Markdown entities parser for MTCute
 
 This package implements formatting syntax similar to Markdown (CommonMark) but slightly adjusted and simplified.

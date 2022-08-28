@@ -1,7 +1,5 @@
 # @mtcute/sqlite
 
-![](./coverage.svg)
-
 SQLite backed storage for mtcute.
 
 ## Usage

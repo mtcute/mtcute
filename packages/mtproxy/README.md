@@ -1,7 +1,5 @@
 # @mtcute/mtproxy
 
-![](./coverage.svg)
-
 MTProto proxy (MTProxy) transport for mtcute.
 
 ## Usage

@@ -1,7 +1,5 @@
 # @mtcute/socks-proxy
 
-![](./coverage.svg)
-
 Socks4/5 proxy transport for mtcute.
 
 ## Usage

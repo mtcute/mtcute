@@ -1,7 +1,5 @@
 # @mtcute/http-proxy
 
-![](./coverage.svg)
-
 HTTP(s) proxy transport for mtcute.
 
 ## Usage

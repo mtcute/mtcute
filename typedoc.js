@@ -5,13 +5,12 @@ module.exports = {
     validation: {
         notExported: true,
         invalidLink: true,
-        notDocumented: false,
+        notDocumented: true,
     },
     excludePrivate: true,
     excludeExternals: true,
     exclude: ['**/*/dist', '**/*/node_modules'],
     plugin: [
-        'typedoc-plugin-coverage',
         path.join(__dirname, 'scripts/totally-great-typedoc-plugin.js'),
     ],
 }
