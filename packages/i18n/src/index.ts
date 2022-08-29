@@ -8,6 +8,7 @@ import {
 import { createI18nStringsIndex, extractLanguageFromUpdate } from './utils'
 
 export * from './types'
+export { extractLanguageFromUpdate } from './utils'
 
 export interface MtcuteI18nParameters<Strings, Input> {
     /**
