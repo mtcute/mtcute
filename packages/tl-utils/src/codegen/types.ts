@@ -3,6 +3,9 @@ import { groupTlEntriesByNamespace, splitNameToNamespace } from '../utils'
 import { camelToPascal, indent, jsComment, snakeToCamel } from './utils'
 import { errorCodeToClassName, generateCodeForErrors } from './errors'
 
+/**
+ * Mapping of TL primitive types to TS types
+ */
 export const PRIMITIVE_TO_TS: Record<string, string> = {
     int: 'number',
     long: 'Long',
@@ -56,6 +59,14 @@ function entryFullTypeName(entry: TlEntry): string {
     return fullTypeName(entry.name, '', false, entry.kind === 'method')
 }
 
+/**
+ * Generate TypeScript definitions for a given entry
+ *
+ * @param entry  Entry to generate definitions for
+ * @param baseNamespace  Base TL namespace containing the entries
+ * @param errors  Errors information object
+ * @param withFlags  Whether to include `flags` field in the type
+ */
 export function generateTypescriptDefinitionsForTlEntry(
     entry: TlEntry,
     baseNamespace = 'tl.',
@@ -189,7 +200,15 @@ ns.$extendTypes = function(types) {
 ns.LAYER = $LAYER$;
 `
 
-// returns pair of generated ts and js code
+/**
+ * Generate TypeScript definitions for a given TL schema
+ *
+ * @param schema  TL schema to generate definitions for
+ * @param layer  Layer of the schema
+ * @param namespace  namespace of the schema
+ * @param errors  Errors information object
+ * @returns  Tuple containing `[ts, js]` code
+ */
 export function generateTypescriptDefinitionsForTlSchema(
     schema: TlFullSchema,
     layer: number,

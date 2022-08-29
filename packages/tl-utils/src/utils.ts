@@ -1,11 +1,25 @@
 import { TlEntry } from './types'
 
+/**
+ * Split qualified TL entry name into namespace and name
+ *
+ * @param name  Qualified TL entry name
+ * @returns  Namespace (if any) and name
+ * @example `splitNameToNamespace('messages.sendMessage') => ['messages', 'sendMessage']`
+ * @example `splitNameToNamespace('updatesTooLong') => [null, 'updatesTooLong']`
+ */
 export function splitNameToNamespace(name: string): [string | null, string] {
     const s = name.split('.')
     if (s.length === 2) return s as [string, string]
     return [null, name]
 }
 
+/**
+ * Parse TDLib style comment describing arguments of a TL entry
+ *
+ * @param str  TDLib style comment
+ * @returns  Mapping of argument names to argument descriptions
+ */
 export function parseTdlibStyleComment(str: string): Record<string, string> {
     const obj: Record<string, string> = {}
 
@@ -23,6 +37,12 @@ export function parseTdlibStyleComment(str: string): Record<string, string> {
     return obj
 }
 
+/**
+ * Group TL entries by their namespace
+ *
+ * @param entries  Entries to group
+ * @returns  Mapping of namespace to entries. Base namespace is `''` (empty string).
+ */
 export function groupTlEntriesByNamespace(
     entries: TlEntry[]
 ): Record<string, TlEntry[]> {

@@ -1,6 +1,12 @@
 import { camelToPascal, jsComment, snakeToCamel } from './utils'
 import { TlError, TlErrors } from '../types'
 
+/**
+ * Transform TL error name to JS error name
+ *
+ * @param code  TL error code
+ * @example  'MSG_ID_INVALID' -> 'MsgIdInvalidError'
+ */
 export function errorCodeToClassName(code: string): string {
     let str =
         camelToPascal(snakeToCamel(code.toLowerCase().replace(/ /g, '_'))) +
@@ -105,6 +111,13 @@ function placeholderType(name: string): string {
     return 'number'
 }
 
+/**
+ * Generate code for given TL errors
+ *
+ * @param errors  Errors to generate code for
+ * @param exports  Prefix for exports object
+ * @returns  Tuple containing `[ts, js]` code
+ */
 export function generateCodeForErrors(
     errors: TlErrors,
     exports = 'exports.'

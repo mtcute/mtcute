@@ -3,7 +3,11 @@ import { computeConstructorIdFromEntry } from '../ctor-id'
 import { snakeToCamel } from './utils'
 
 /**
- * Returns code as an object entry
+ * Generate binary reader code for a given entry.
+ *
+ * @param entry  Entry to generate reader for
+ * @param includeFlags  Whether to include `flags` field in the result object
+ * @returns  Code as a writers map entry
  */
 export function generateReaderCodeForTlEntry(
     entry: TlEntry,
@@ -118,6 +122,13 @@ export function generateReaderCodeForTlEntry(
     return `${pre}${beforeReturn.replace(/;var /g, ',')}return{${returnCode}}},`
 }
 
+/**
+ * Generate binary reader code for a given schema.
+ *
+ * @param entries  Entries to generate reader for
+ * @param varName  Name of the variable containing the result
+ * @param methods  Whether to include method readers
+ */
 export function generateReaderCodeForTlEntries(
     entries: TlEntry[],
     varName: string,

@@ -2,7 +2,7 @@ import { TL_PRIMITIVES, TlEntry } from '../types'
 import { computeConstructorIdFromEntry } from '../ctor-id'
 import { snakeToCamel } from './utils'
 
-export const TL_WRITER_PRELUDE =
+const TL_WRITER_PRELUDE =
     'function h(o, p){' +
     'var q=o[p];' +
     'if(q===void 0)' +
@@ -10,9 +10,12 @@ export const TL_WRITER_PRELUDE =
     'return q}\n'
 
 /**
- * Returns code as an object entry.
- *
+ * Generate writer code for a single entry.
  * `h` (has) function should be available
+ *
+ * @param entry  Entry to generate writer for
+ * @param withFlags  Whether to include `flags` field in the result object
+ * @returns  Code as a readers map entry
  */
 export function generateWriterCodeForTlEntry(
     entry: TlEntry,
@@ -99,6 +102,14 @@ export function generateWriterCodeForTlEntry(
     return ret + '},'
 }
 
+/**
+ * Generate writer code for a given TL schema.
+ *
+ * @param entries  Entries to generate writers for
+ * @param varName  Name of the variable to use for the writers map
+ * @param prelude  Whether to include the prelude (containing `h` function)
+ * @param withFlags  Whether to include `flags` field in the result object
+ */
 export function generateWriterCodeForTlEntries(
     entries: TlEntry[],
     varName: string,

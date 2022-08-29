@@ -1,6 +1,13 @@
 import { TlEntry, TlFullSchema } from './types'
 import { computeConstructorIdFromEntry } from './ctor-id'
 
+/**
+ * Merge multiple TL entries into a single entry.
+ *
+ * Note: this will only succeed if all entries have the same ID.
+ *
+ * @param entries  Entries to merge
+ */
 export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
     const first = entries[0]
 
@@ -94,6 +101,12 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
     return result
 }
 
+/**
+ * Merge multiple TL schemas into a single schema.
+ *
+ * @param schemas  Schemas to merge
+ * @param onConflict  Callback to handle conflicts
+ */
 export async function mergeTlSchemas(
     schemas: TlFullSchema[],
     onConflict: (

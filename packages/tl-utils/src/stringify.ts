@@ -8,6 +8,14 @@ function normalizeType(s: string): string {
         .replace('int53', 'long')
 }
 
+/**
+ * Generate TL definition for a given entry.
+ *
+ * @param entry  Entry to generate definition for
+ * @param forIdComputation
+ *   Whether to generate definition for constructor ID computation
+ *   (it has slightly different syntax, will not contain `true` flags, etc.)
+ */
 export function writeTlEntryToString(
     entry: TlEntry,
     forIdComputation = false

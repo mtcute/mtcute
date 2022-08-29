@@ -8,6 +8,17 @@ function evalForResult(js: string): any {
     return new Function(js)()
 }
 
+/**
+ * Patch runtime TL schema (readers and writers map) with the given schema.
+ *
+ * Entries in the schema will override the ones in the existing one.
+ * Original readers and writers will be preserved, new ones will be returned.
+ *
+ * @param schema  Schema containing new entries
+ * @param readers  Original readers map
+ * @param writers  Original writers map
+ * @returns  New readers and writers map
+ */
 export function patchRuntimeTlSchema(
     schema: string,
     readers: TlReaderMap,

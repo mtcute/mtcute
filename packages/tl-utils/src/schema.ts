@@ -5,6 +5,12 @@ import { writeTlEntryToString } from './stringify'
 const replaceNewlineInComment = (s: string): string =>
     s.replace(/\n/g, '\n//- ')
 
+/**
+ * Parse TL entries into a full schema object
+ * by creating indexes on the entries.
+ *
+ * @param entries  Entries to parse
+ */
 export function parseFullTlSchema(entries: TlEntry[]): TlFullSchema {
     const ret: TlFullSchema = {
         entries,
@@ -34,11 +40,29 @@ export function parseFullTlSchema(entries: TlEntry[]): TlFullSchema {
     return ret
 }
 
+/**
+ * Write TL entries to schema text
+ *
+ * @param entries  Entries to write
+ * @param params  Additional parameters
+ */
 export function writeTlEntriesToString(
     entries: TlEntry[],
     params?: {
+        /**
+         * Whether to force compute IDs if one is not present
+         */
         computeIds?: boolean
+
+        /**
+         * Whether to use TDLib style comments for arguments
+         */
         tdlibComments?: boolean
+
+        /**
+         * Whether to omit prelude containing primitive types
+         * (like `int`, `string`, etc.)
+         */
         omitPrimitives?: boolean
     }
 ): string {

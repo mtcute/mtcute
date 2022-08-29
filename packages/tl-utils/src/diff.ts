@@ -8,6 +8,12 @@ import {
 } from './types'
 import { computeConstructorIdFromEntry } from './ctor-id'
 
+/**
+ * Compute difference between two TL entries.
+ *
+ * @param a  Entry A (field `old` in diff)
+ * @param b  Entry B (field `new` in diff)
+ */
 export function generateTlEntriesDifference(
     a: TlEntry,
     b: TlEntry
@@ -125,6 +131,12 @@ export function generateTlEntriesDifference(
     return diff
 }
 
+/**
+ * Compute difference between two TL schemas.
+ *
+ * @param a  Entry A (field `old` in diff)
+ * @param b  Entry B (field `new` in diff)
+ */
 export function generateTlSchemasDifference(
     a: TlFullSchema,
     b: TlFullSchema

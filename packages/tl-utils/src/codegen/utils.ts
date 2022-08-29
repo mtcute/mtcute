@@ -1,12 +1,24 @@
+/**
+ * Transform snake_case string to camelCase string
+ * @param s  Snake_case string
+ */
 export const snakeToCamel = (s: string): string => {
     return s.replace(/(?<!^|_)(_[a-z0-9])/gi, ($1) => {
         return $1.substring(1).toUpperCase()
     })
 }
 
+/**
+ * Transform camelCase string to PascalCase string
+ * @param s  camelCase string
+ */
 export const camelToPascal = (s: string): string =>
     s[0].toUpperCase() + s.substring(1)
 
+/**
+ * Format a string as a JS documentation comment
+ * @param s  Comment to format
+ */
 export function jsComment(s: string): string {
     return (
         '/**' +
@@ -23,6 +35,12 @@ export function jsComment(s: string): string {
     )
 }
 
+/**
+ * Indent the string with the given amount of spaces
+ *
+ * @param size  Number of spaces to indent with
+ * @param s  String to indent
+ */
 export function indent(size: number, s: string): string {
     let prefix = ''
     while (size--) prefix += ' '

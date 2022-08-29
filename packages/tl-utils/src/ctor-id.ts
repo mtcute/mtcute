@@ -3,6 +3,11 @@ import CRC32 from 'crc-32'
 import { TlEntry } from './types'
 import { writeTlEntryToString } from './stringify'
 
+/**
+ * Computes the constructor id for a given TL entry string.
+ *
+ * @param line  Line containing TL entry definition
+ */
 export function computeConstructorIdFromString(line: string): number {
     return (
         CRC32.str(
@@ -20,6 +25,11 @@ export function computeConstructorIdFromString(line: string): number {
     )
 }
 
+/**
+ * Computes the constructor id for a given TL entry.
+ *
+ * @param entry  TL entry
+ */
 export function computeConstructorIdFromEntry(entry: TlEntry): number {
     return CRC32.str(writeTlEntryToString(entry, true)) >>> 0
 }

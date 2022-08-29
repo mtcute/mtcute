@@ -7,6 +7,5 @@ module.exports = {
         '../../docs/packages/' +
         require('./package.json').name.replace(/^@.+\//, '')
     ),
-    entryPoints: ['./src'],
-    entryPointStrategy: 'expand',
+    entryPoints: ['./src/index.ts'],
 }

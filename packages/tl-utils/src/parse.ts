@@ -14,13 +14,44 @@ function applyPrefix(prefix: string, type: string): string {
     return prefix + type
 }
 
+/**
+ * Parse TL schema into a list of entries.
+ *
+ * @param tl  TL schema
+ * @param params  Additional parameters
+ */
 export function parseTlToEntries(
     tl: string,
     params?: {
+        /**
+         * Whether to throw an error if a line failed to parse
+         */
         panicOnError?: boolean
+
+        /**
+         * Function to be called if there was an error while parsing a line
+         *
+         * @param err  Error
+         * @param line  Line that failed to parse
+         * @param num  Line number
+         */
         onError?: (err: Error, line: string, num: number) => void
+
+        /**
+         * Function to be called a comment is found not belonging to any entry
+         *
+         * @param comment  Comment text
+         */
         onOrphanComment?: (comment: string) => void
+
+        /**
+         * Prefix to be applied to all types
+         */
         prefix?: string
+
+        /**
+         * Whether to apply the prefix to arguments as well
+         */
         applyPrefixToArguments?: boolean
     }
 ): TlEntry[] {
