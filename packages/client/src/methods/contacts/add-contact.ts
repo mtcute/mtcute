@@ -36,8 +36,7 @@ export async function addContact(
         sharePhone?: boolean
     }
 ): Promise<User> {
-    const peer = normalizeToInputUser(await this.resolvePeer(userId))
-    if (!peer) throw new MtInvalidPeerTypeError(userId, 'user')
+    const peer = normalizeToInputUser(await this.resolvePeer(userId), userId)
 
     const res = await this.call({
         _: 'contacts.addContact',

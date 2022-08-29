@@ -26,12 +26,11 @@ export async function _normalizeCommandScope(
             }
         }
         case 'member': {
-            const chat = await this.resolvePeer(scope.chat)
             const user = normalizeToInputUser(
-                await this.resolvePeer(scope.user)
+                await this.resolvePeer(scope.user),
+                scope.user
             )
-
-            if (!user) throw new MtInvalidPeerTypeError(scope.user, 'user')
+            const chat = await this.resolvePeer(scope.chat)
 
             return {
                 _: 'botCommandScopePeerUser',

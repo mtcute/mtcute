@@ -14,14 +14,9 @@ export async function setBotMenuButton(
     user: InputPeerLike,
     button: tl.TypeBotMenuButton
 ): Promise<void> {
-    const userId = normalizeToInputUser(await this.resolvePeer(user))
-    if (!userId) {
-        throw new MtInvalidPeerTypeError(user, 'user')
-    }
-
     await this.call({
         _: 'bots.setBotMenuButton',
-        userId,
+        userId: normalizeToInputUser(await this.resolvePeer(user), user),
         button,
     })
 }

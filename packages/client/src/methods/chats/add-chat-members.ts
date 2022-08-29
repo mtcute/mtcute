@@ -32,7 +32,6 @@ export async function addChatMembers(
     if (isInputPeerChat(chat)) {
         for (const user of users) {
             const p = normalizeToInputUser(await this.resolvePeer(user))
-            if (!p) continue
 
             const updates = await this.call({
                 _: 'messages.addChatUser',

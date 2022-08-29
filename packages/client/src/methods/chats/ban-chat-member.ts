@@ -44,13 +44,10 @@ export async function banChatMember(
             },
         })
     } else if (isInputPeerChat(chat)) {
-        const normUser = normalizeToInputUser(user)
-        if (!normUser) throw new MtInvalidPeerTypeError(userId, 'user')
-
         res = await this.call({
             _: 'messages.deleteChatUser',
             chatId: chat.chatId,
-            userId: normUser,
+            userId: normalizeToInputUser(user),
         })
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 

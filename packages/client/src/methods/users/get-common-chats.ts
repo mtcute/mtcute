@@ -14,12 +14,9 @@ export async function getCommonChats(
     this: TelegramClient,
     userId: InputPeerLike
 ): Promise<Chat[]> {
-    const peer = normalizeToInputUser(await this.resolvePeer(userId))
-    if (!peer) throw new MtInvalidPeerTypeError(userId, 'user')
-
     return this.call({
         _: 'messages.getCommonChats',
-        userId: peer,
+        userId: normalizeToInputUser(await this.resolvePeer(userId), userId),
         maxId: 0,
         limit: 100,
     }).then((res) => res.chats.map((it) => new Chat(this, it)))

@@ -86,8 +86,7 @@ export async function* getChatEventLog(
 ): AsyncIterableIterator<ChatEvent> {
     if (!params) params = {}
 
-    const channel = normalizeToInputChannel(await this.resolvePeer(chatId))
-    if (!channel) throw new MtInvalidPeerTypeError(chatId, 'channel')
+    const channel = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
 
     let current = 0
     let maxId = params.maxId ?? Long.ZERO

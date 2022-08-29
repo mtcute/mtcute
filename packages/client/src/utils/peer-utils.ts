@@ -1,6 +1,7 @@
 import Long from 'long'
 import { tl } from '@mtcute/tl'
 import { assertNever } from '@mtcute/core'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../types'
 
 export const INVITE_LINK_REGEX =
     /^(?:https?:\/\/)?(?:www\.)?(?:t(?:elegram)?\.(?:org|me|dog)\/(?:joinchat\/|\+))([\w-]+)$/i
@@ -50,18 +51,9 @@ export function normalizeToInputPeer(
 }
 
 export function normalizeToInputUser(
-    res:
-        | tl.TypeInputUser
-        | tl.RawInputPeerUser
-        | tl.RawInputPeerUserFromMessage
-        | tl.RawInputPeerSelf
-): tl.TypeInputUser
-export function normalizeToInputUser(
-    res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
-): tl.TypeInputUser | null
-export function normalizeToInputUser(
-    res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
-): tl.TypeInputUser | null {
+    res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel,
+    input?: InputPeerLike
+): tl.TypeInputUser {
     if (tl.isAnyInputUser(res)) return res
 
     switch (res._) {
@@ -82,21 +74,13 @@ export function normalizeToInputUser(
             }
     }
 
-    return null
+    throw new MtInvalidPeerTypeError(input ?? res, 'user')
 }
 
 export function normalizeToInputChannel(
-    res:
-        | tl.TypeInputChannel
-        | tl.RawInputPeerChannel
-        | tl.RawInputPeerChannelFromMessage
-): tl.TypeInputChannel
-export function normalizeToInputChannel(
-    res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
-): tl.TypeInputChannel | null
-export function normalizeToInputChannel(
-    res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
-): tl.TypeInputChannel | null {
+    res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel,
+    input?: InputPeerLike
+): tl.TypeInputChannel {
     if (tl.isAnyInputChannel(res)) return res
 
     switch (res._) {
@@ -115,7 +99,7 @@ export function normalizeToInputChannel(
             }
     }
 
-    return null
+    throw new MtInvalidPeerTypeError(input ?? res, 'user')
 }
 
 export function isInputPeerUser(

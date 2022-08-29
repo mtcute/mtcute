@@ -16,12 +16,9 @@ export async function setChatUsername(
     chatId: InputPeerLike,
     username: string | null
 ): Promise<void> {
-    const chat = normalizeToInputChannel(await this.resolvePeer(chatId))
-    if (!chat) throw new MtInvalidPeerTypeError(chatId, 'channel')
-
     await this.call({
         _: 'channels.updateUsername',
-        channel: chat,
+        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
         username: username || '',
     })
 }

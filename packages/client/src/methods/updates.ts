@@ -1800,7 +1800,7 @@ async function _fetchChannelDifference(
     try {
         channel = normalizeToInputChannel(
             await this.resolvePeer(toggleChannelIdMark(channelId))
-        )!
+        )
     } catch (e) {
         this._updsLog.warn(
             'fetchChannelDifference failed for channel %d: input peer not found',

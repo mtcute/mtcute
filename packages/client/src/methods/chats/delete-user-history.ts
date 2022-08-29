@@ -2,10 +2,7 @@ import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
-import {
-    normalizeToInputChannel,
-    normalizeToInputPeer,
-} from '../../utils/peer-utils'
+import { normalizeToInputChannel } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
@@ -20,10 +17,9 @@ export async function deleteUserHistory(
     chatId: InputPeerLike,
     participantId: InputPeerLike
 ): Promise<void> {
-    const channel = normalizeToInputChannel(await this.resolvePeer(chatId))
-    if (!channel) throw new MtInvalidPeerTypeError(chatId, 'channel')
+    const channel = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
 
-    const peer = normalizeToInputPeer(await this.resolvePeer(participantId))
+    const peer = await this.resolvePeer(participantId)
 
     const res = await this.call({
         _: 'channels.deleteParticipantHistory',

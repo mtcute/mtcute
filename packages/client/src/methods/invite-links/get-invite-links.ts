@@ -53,9 +53,7 @@ export async function* getInviteLinks(
     const chunkSize = Math.min(params.chunkSize ?? 100, total)
 
     const peer = await this.resolvePeer(chatId)
-    const admin = normalizeToInputUser(await this.resolvePeer(adminId))
-
-    if (!admin) throw new MtInvalidPeerTypeError(adminId, 'user')
+    const admin = normalizeToInputUser(await this.resolvePeer(adminId), adminId)
 
     let offsetDate: number | undefined = undefined
     let offsetLink: string | undefined = undefined

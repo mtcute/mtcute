@@ -37,9 +37,8 @@ export async function setGameScore(
 ): Promise<Message> {
     if (!params) params = {}
 
+    const user = normalizeToInputUser(await this.resolvePeer(userId), userId)
     const chat = await this.resolvePeer(chatId)
-    const user = normalizeToInputUser(await this.resolvePeer(userId))
-    if (!user) throw new MtInvalidPeerTypeError(userId, 'user')
 
     const res = await this.call({
         _: 'messages.setGameScore',
@@ -85,8 +84,7 @@ export async function setInlineGameScore(
 ): Promise<void> {
     if (!params) params = {}
 
-    const user = normalizeToInputUser(await this.resolvePeer(userId))
-    if (!user) throw new MtInvalidPeerTypeError(userId, 'user')
+    const user = normalizeToInputUser(await this.resolvePeer(userId), userId)
 
     const [id, connection] = await this._normalizeInline(messageId)
 

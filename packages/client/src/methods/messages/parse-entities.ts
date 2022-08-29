@@ -41,7 +41,8 @@ export async function _parseEntities(
         if (ent._ === 'messageEntityMentionName') {
             try {
                 const inputPeer = normalizeToInputUser(
-                    await this.resolvePeer(ent.userId)
+                    await this.resolvePeer(ent.userId),
+                    ent.userId
                 )
 
                 // not a user

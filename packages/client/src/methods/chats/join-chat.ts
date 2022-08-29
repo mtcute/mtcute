@@ -37,12 +37,9 @@ export async function joinChat(
         }
     }
 
-    const peer = normalizeToInputChannel(await this.resolvePeer(chatId))
-    if (!peer) throw new MtNotFoundError()
-
     const res = await this.call({
         _: 'channels.joinChannel',
-        channel: peer,
+        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
     })
 
     assertIsUpdatesGroup('channels.joinChannel', res)

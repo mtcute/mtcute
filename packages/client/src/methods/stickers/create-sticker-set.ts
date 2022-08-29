@@ -106,8 +106,7 @@ export async function createStickerSet(
         )
     }
 
-    const owner = normalizeToInputUser(await this.resolvePeer(params.owner))
-    if (!owner) throw new MtInvalidPeerTypeError(params.owner, 'user')
+    const owner = normalizeToInputUser(await this.resolvePeer(params.owner), params.owner)
 
     const inputStickers: tl.TypeInputStickerSetItem[] = []
 

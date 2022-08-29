@@ -18,10 +18,7 @@ export async function hideAllJoinRequests(
     action: 'approve' | 'deny',
     link?: string
 ): Promise<void> {
-    const userId = normalizeToInputUser(await this.resolvePeer(user))
-    if (!userId) {
-        throw new MtInvalidPeerTypeError(user, 'user')
-    }
+    const userId = normalizeToInputUser(await this.resolvePeer(user), user)
 
     await this.call({
         _: 'messages.hideAllChatJoinRequests',

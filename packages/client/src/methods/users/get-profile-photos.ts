@@ -33,12 +33,9 @@ export async function getProfilePhotos(
 ): Promise<Photo[]> {
     if (!params) params = {}
 
-    const peer = normalizeToInputUser(await this.resolvePeer(userId))
-    if (!peer) throw new MtInvalidPeerTypeError(userId, 'user')
-
     const res = await this.call({
         _: 'photos.getUserPhotos',
-        userId: peer,
+        userId: normalizeToInputUser(await this.resolvePeer(userId), userId),
         offset: params.offset ?? 0,
         limit: params.limit ?? 100,
         maxId: Long.ZERO,

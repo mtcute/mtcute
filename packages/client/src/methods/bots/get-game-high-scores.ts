@@ -27,10 +27,7 @@ export async function getGameHighScores(
 
     let user: tl.TypeInputUser
     if (userId) {
-        const res = normalizeToInputUser(await this.resolvePeer(userId))
-        if (!res) throw new MtInvalidPeerTypeError(userId, 'user')
-
-        user = res
+        user = normalizeToInputUser(await this.resolvePeer(userId), userId)
     } else {
         user = { _: 'inputUserEmpty' }
     }
@@ -63,10 +60,7 @@ export async function getInlineGameHighScores(
 
     let user: tl.TypeInputUser
     if (userId) {
-        const res = normalizeToInputUser(await this.resolvePeer(userId))
-        if (!res) throw new MtInvalidPeerTypeError(userId, 'user')
-
-        user = res
+        user = normalizeToInputUser(await this.resolvePeer(userId), userId)
     } else {
         user = { _: 'inputUserEmpty' }
     }

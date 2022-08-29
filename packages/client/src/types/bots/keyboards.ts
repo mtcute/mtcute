@@ -362,15 +362,10 @@ export namespace BotKeyboard {
         text: string,
         user: tl.TypeInputPeer
     ): tl.RawInputKeyboardButtonUserProfile {
-        const userId = normalizeToInputUser(user)
-        if (!userId) {
-            throw new MtInvalidPeerTypeError(user, 'user')
-        }
-
         return {
             _: 'inputKeyboardButtonUserProfile',
             text,
-            userId,
+            userId: normalizeToInputUser(user),
         }
     }
 

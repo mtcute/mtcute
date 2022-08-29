@@ -46,8 +46,7 @@ export async function* iterProfilePhotos(
 ): AsyncIterableIterator<Photo> {
     if (!params) params = {}
 
-    const peer = normalizeToInputUser(await this.resolvePeer(userId))
-    if (!peer) throw new MtInvalidPeerTypeError(userId, 'user')
+    const peer = normalizeToInputUser(await this.resolvePeer(userId), userId)
 
     let offset = params.offset || 0
     let current = 0

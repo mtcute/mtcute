@@ -23,11 +23,8 @@ export async function editAdminRights(
     rights: Omit<tl.RawChatAdminRights, '_'>,
     rank = ''
 ): Promise<void> {
-    const chat = normalizeToInputChannel(await this.resolvePeer(chatId))
-    if (!chat) throw new MtInvalidPeerTypeError(chatId, 'channel')
-
-    const user = normalizeToInputUser(await this.resolvePeer(userId))
-    if (!user) throw new MtInvalidPeerTypeError(userId, 'user')
+    const chat = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
+    const user = normalizeToInputUser(await this.resolvePeer(userId), userId)
 
     const res = await this.call({
         _: 'channels.editAdmin',

@@ -2,7 +2,7 @@ import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { isInputPeerChannel, normalizeToInputChannel } from "../../utils/peer-utils";
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
@@ -36,13 +36,12 @@ export async function deleteHistory(
         maxId,
     })
 
-    const channel = normalizeToInputChannel(peer)
-    if (channel) {
+    if (isInputPeerChannel(peer)) {
         this._handleUpdate(
             createDummyUpdate(
                 res.pts,
                 res.ptsCount,
-                (channel as tl.RawInputChannel).channelId
+                peer.channelId
             )
         )
     } else {

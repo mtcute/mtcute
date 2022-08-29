@@ -74,7 +74,7 @@ export async function getMessages(
             ? {
                   _: 'channels.getMessages',
                   id: ids,
-                  channel: normalizeToInputChannel(peer)!,
+                  channel: normalizeToInputChannel(peer),
               }
             : {
                   _: 'messages.getMessages',

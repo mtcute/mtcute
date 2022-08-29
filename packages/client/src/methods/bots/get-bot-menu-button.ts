@@ -13,13 +13,8 @@ export async function getBotMenuButton(
     this: TelegramClient,
     user: InputPeerLike
 ): Promise<tl.TypeBotMenuButton> {
-    const userId = normalizeToInputUser(await this.resolvePeer(user))
-    if (!userId) {
-        throw new MtInvalidPeerTypeError(user, 'user')
-    }
-
     return await this.call({
         _: 'bots.getBotMenuButton',
-        userId,
+        userId: normalizeToInputUser(await this.resolvePeer(user), user),
     })
 }
