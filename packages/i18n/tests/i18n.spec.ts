@@ -91,4 +91,18 @@ describe('i18n', () => {
 
         expect(tr(message, 'direct')).to.equal('Привет')
     })
+
+    it('should accept custom adapters', () => {
+        const tr = createMtcuteI18n({
+            primaryLanguage: {
+                name: 'en',
+                strings: en,
+            },
+            otherLanguages: { ru },
+            adapter: (num: number) => num === 1 ? 'en' : 'ru',
+        })
+
+        expect(tr(1, 'direct')).to.equal('Hello')
+        expect(tr(2, 'direct')).to.equal('Привет')
+    })
 })

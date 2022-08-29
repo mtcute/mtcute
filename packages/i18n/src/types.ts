@@ -25,10 +25,12 @@ type ExtractParameter<Strings, K extends string> = GetValueNested<
     ? R
     : never
 
-export type MtcuteI18nFunction<Strings> = <
+export type MtcuteI18nAdapter<Input> = (obj: Input) => string | null | undefined
+
+export type MtcuteI18nFunction<Strings, Input = ParsedUpdate['data']> = <
     K extends NestedKeysDelimited<Strings>
 >(
-    lang: ParsedUpdate['data'] | string | null,
+    lang: Input | string | null,
     key: K,
     ...params: ExtractParameter<Strings, K>
 ) => string | FormattedString<any>

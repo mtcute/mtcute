@@ -1,10 +1,15 @@
 import { MtArgumentError, ParsedUpdate } from '@mtcute/client'
-import { I18nValue, MtcuteI18nFunction, OtherLanguageWrap } from './types'
+import {
+    I18nValue,
+    MtcuteI18nAdapter,
+    MtcuteI18nFunction,
+    OtherLanguageWrap,
+} from './types'
 import { createI18nStringsIndex, extractLanguageFromUpdate } from './utils'
 
 export * from './types'
 
-export interface MtcuteI18nParameters<Strings> {
+export interface MtcuteI18nParameters<Strings, Input> {
     /**
      * Primary language which will also be used as a fallback
      */
@@ -28,15 +33,21 @@ export interface MtcuteI18nParameters<Strings> {
      * Defaults to {@link primaryLanguage}
      */
     defaultLanguage?: string
+
+    /**
+     * Adapter that will be used to extract language from the update.
+     */
+    adapter?: MtcuteI18nAdapter<Input>
 }
 
-export function createMtcuteI18n<Strings>(
-    params: MtcuteI18nParameters<Strings>
-): MtcuteI18nFunction<Strings> {
+export function createMtcuteI18n<Strings, Input>(
+    params: MtcuteI18nParameters<Strings, Input>
+): MtcuteI18nFunction<Strings, Input> {
     const {
         primaryLanguage,
         otherLanguages,
         defaultLanguage = primaryLanguage.name,
+        adapter = extractLanguageFromUpdate as any as MtcuteI18nAdapter<Input>,
     } = params
 
     const indexes: Record<string, Record<string, I18nValue>> = {}
@@ -54,11 +65,15 @@ export function createMtcuteI18n<Strings>(
         )
     }
 
-    const tr = (lang: ParsedUpdate['data'] | string | null, key: string, ...params: any[]) => {
+    const tr = (
+        lang: Input | string | null,
+        key: string,
+        ...params: any[]
+    ) => {
         if (lang === null) lang = defaultLanguage
 
-        if (typeof lang === 'object') {
-            lang = extractLanguageFromUpdate(lang) ?? defaultLanguage
+        if (typeof lang !== 'string') {
+            lang = adapter(lang) ?? defaultLanguage
         }
 
         const strings = indexes[lang] ?? fallbackIndex
@@ -72,5 +87,5 @@ export function createMtcuteI18n<Strings>(
         return val
     }
 
-    return tr as MtcuteI18nFunction<Strings>
+    return tr as MtcuteI18nFunction<Strings, Input>
 }
