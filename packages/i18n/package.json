@@ -11,8 +11,5 @@
         "coverage": "nyc npm run test",
         "build": "tsc",
         "docs": "typedoc"
-    },
-    "dependencies": {
-        "@mtcute/client": "workspace:^1.0.0"
     }
 }

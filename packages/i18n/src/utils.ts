@@ -1,20 +1,10 @@
-import {
-    ParsedUpdate,
-    assertNever,
-    User,
-    Message,
-    DeleteMessageUpdate,
-    ChatMemberUpdate,
-    InlineQuery,
-    ChosenInlineResult,
-    CallbackQuery,
-    PollUpdate,
-    PollVoteUpdate,
-    UserStatusUpdate,
-    BotStoppedUpdate,
-    BotChatJoinRequestUpdate,
-} from '@mtcute/client'
+import type { ParsedUpdate } from '@mtcute/client'
 import { I18nValue } from './types'
+
+let client: any
+try {
+    client = require('@mtcute/client')
+} catch (e) {}
 
 export function createI18nStringsIndex(
     strings: Record<string, any>
@@ -41,27 +31,25 @@ export function createI18nStringsIndex(
 export function extractLanguageFromUpdate(
     update: ParsedUpdate['data']
 ): string | null | undefined {
-    switch (update.constructor) {
-        case Message:
+    if (!client) {
+        throw new Error(
+            '@mtcute/client is not installed, you must provide your own adapter'
+        )
+    }
+
+    const upd = update as any
+    switch (upd.constructor) {
+        case client.Message:
             // if sender is Chat it will just be undefined
-            return ((update as Message).sender as User).language
-        case ChatMemberUpdate:
-        case InlineQuery:
-        case ChosenInlineResult:
-        case CallbackQuery:
-        case PollVoteUpdate:
-        case BotStoppedUpdate:
-        case BotChatJoinRequestUpdate:
-            return (
-                update as
-                    | ChatMemberUpdate
-                    | InlineQuery
-                    | ChosenInlineResult
-                    | CallbackQuery
-                    | PollVoteUpdate
-                    | BotStoppedUpdate
-                    | BotChatJoinRequestUpdate
-            ).user.language
+            return upd.sender.language
+        case client.ChatMemberUpdate:
+        case client.InlineQuery:
+        case client.ChosenInlineResult:
+        case client.CallbackQuery:
+        case client.PollVoteUpdate:
+        case client.BotStoppedUpdate:
+        case client.BotChatJoinRequestUpdate:
+            return upd.user.language
     }
 
     return null
