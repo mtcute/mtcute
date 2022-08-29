@@ -9,11 +9,9 @@ interface OneWayLinkedList<T> {
  * Simple class implementing LRU-like behaviour for a set,
  * falling back to objects when `Set` is not available.
  *
- * Used to store recently received message IDs in {@link TelegramConnection}
+ * Used to store recently received message IDs in {@link SessionConnection}
  *
  * Uses one-way linked list internally to keep track of insertion order
- *
- * @internal
  */
 export class LruSet<T> {
     private _capacity: number

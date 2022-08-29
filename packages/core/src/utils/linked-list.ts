@@ -4,6 +4,9 @@ interface LinkedListItem<T> {
     p?: LinkedListItem<T>
 }
 
+/**
+ * A sorted linked list.
+ */
 export class SortedLinkedList<T> {
     _first?: LinkedListItem<T>
     _last?: LinkedListItem<T>

@@ -7,6 +7,11 @@ import {
     TlBinaryWriter,
 } from '@mtcute/core'
 
+/**
+ * Parse TDLib style inline message ID
+ *
+ * @param id  Inline message ID
+ */
 export function parseInlineMessageId(
     id: string
 ): tl.TypeInputBotInlineMessageID {
@@ -31,6 +36,11 @@ export function parseInlineMessageId(
     }
 }
 
+/**
+ * Generate TDLib style inline message ID
+ *
+ * @param id  Inline message ID object
+ */
 export function encodeInlineMessageId(
     id: tl.TypeInputBotInlineMessageID
 ): string {

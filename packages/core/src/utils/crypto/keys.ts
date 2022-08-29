@@ -5,6 +5,14 @@ import keysIndex, { TlPublicKey } from '@mtcute/tl/binary/rsa-keys'
 import { parseAsn1, parsePemContents } from '../binary/asn1-parser'
 import { ICryptoProvider } from './abstract'
 
+/**
+ * Parse PEM-encoded RSA public key information into modulus and exponent
+ * and compute its fingerprint as defined by MTProto.
+ *
+ * @param crypto  Crypto provider
+ * @param key  PEM-encoded RSA public key
+ * @param old  Whether this is an "old" key
+ */
 export async function parsePublicKey(
     crypto: ICryptoProvider,
     key: string,
@@ -32,6 +40,13 @@ export async function parsePublicKey(
     }
 }
 
+/**
+ * Add public key to the global index.
+ *
+ * @param crypto  Crypto provider
+ * @param key  PEM-encoded RSA public key
+ * @param old  Whether this is an "old" key
+ */
 export async function addPublicKey(
     crypto: ICryptoProvider,
     key: string,
@@ -41,6 +56,12 @@ export async function addPublicKey(
     keysIndex[parsed.fingerprint] = parsed
 }
 
+/**
+ * Get public key by its fingerprint.
+ *
+ * @param fingerprints  Fingerprints to match. The first one to match is returned.
+ * @param allowOld  Whether to allow "old" keys
+ */
 export function findKeyByFingerprints(
     fingerprints: (string | Long)[],
     allowOld = false

@@ -17,6 +17,9 @@ const MAX_USER_ID = 1099511627775
 // const MAX_CHANNEL_ID = 997852516352
 const MIN_MARKED_CHANNEL_ID = -1997852516352 // ZERO_CHANNEL_ID - MAX_CHANNEL_ID
 
+/**
+ * Add or remove channel marker from ID
+ */
 export function toggleChannelIdMark(id: number): number {
     return ZERO_CHANNEL_ID - id
 }
@@ -46,9 +49,9 @@ export function getBarePeerId(peer: tl.TypePeer): number {
  * - ID is negated and `-1e12` is subtracted for channels
  */
 export function getMarkedPeerId(peerId: number, peerType: BasicPeerType): number
-export function getMarkedPeerId(peer: tl.TypePeer | tl.TypeInputPeer): number
+export function getMarkedPeerId(peer: tl.TypePeer | tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel): number
 export function getMarkedPeerId(
-    peer: tl.TypePeer | tl.TypeInputPeer | number,
+    peer: tl.TypePeer | tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | number,
     peerType?: BasicPeerType
 ): number {
     if (typeof peer === 'number') {
@@ -66,12 +69,14 @@ export function getMarkedPeerId(
     switch (peer._) {
         case 'peerUser':
         case 'inputPeerUser':
+        case 'inputUser':
             return peer.userId
         case 'peerChat':
         case 'inputPeerChat':
             return -peer.chatId
         case 'peerChannel':
         case 'inputPeerChannel':
+        case 'inputChannel':
             return ZERO_CHANNEL_ID - peer.channelId
     }
 
@@ -112,6 +117,11 @@ export function getBasicPeerType(peer: tl.TypePeer | number): BasicPeerType {
     throw new Error(`Invalid marked peer id: ${peer}`)
 }
 
+/**
+ * Extract bare peer ID from marked ID.
+ *
+ * @param peerId  Marked peer ID
+ */
 export function markedPeerIdToBare(peerId: number): number {
     const type = getBasicPeerType(peerId)
 

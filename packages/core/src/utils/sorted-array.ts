@@ -1,13 +1,15 @@
-type Comparator<T> = (a: T, b: T) => number
+//
+//
 
-// Comparator is always called like:
-// comparator(itemFromSortedArray, yourItem)
-
+/**
+ * Array that adds elements in sorted order.
+ *
+ * Comparator is always called like: comparator(itemFromSortedArray, yourItem)
+ */
 export class SortedArray<T> {
     readonly raw: T[]
-    comparator: Comparator<T>
 
-    constructor(array: T[] = [], comparator: Comparator<T>) {
+    constructor(array: T[] = [], readonly comparator: (a: T, b: T) => number) {
         this.raw = array.sort(comparator)
         this.comparator = comparator
     }

@@ -1,9 +1,21 @@
 import { deflateSync, gunzipSync } from 'zlib'
 
+/**
+ * Decompress a buffer with gzip.
+ * @param buf  Buffer to decompress
+ */
 export function gzipInflate(buf: Buffer): Buffer {
     return gunzipSync(buf)
 }
 
+/**
+ * Compress a buffer with gzip.
+ *
+ * @param buf  Buffer to compress
+ * @param maxRatio
+ *   Maximum compression ratio. If the resulting buffer is smaller than
+ *   `buf.length * ratio`, `null` is returned.
+ */
 export function gzipDeflate(buf: Buffer, maxRatio?: number): Buffer | null {
     if (maxRatio) {
         try {

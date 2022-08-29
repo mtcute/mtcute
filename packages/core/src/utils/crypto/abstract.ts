@@ -43,7 +43,7 @@ export interface ICryptoProvider {
     factorizePQ(pq: Buffer): MaybeAsync<[Buffer, Buffer]>
 }
 
-export abstract class BaseCryptoProvider implements ICryptoProvider {
+export abstract class BaseCryptoProvider {
     createAesIge(key: Buffer, iv: Buffer): IEncryptionScheme {
         return new AesModeOfOperationIge(key, iv, this.createAesEcb(key))
     }
@@ -54,29 +54,7 @@ export abstract class BaseCryptoProvider implements ICryptoProvider {
 
     initialize(): void {}
 
-    abstract createAesCtr(
-        key: Buffer,
-        iv: Buffer,
-        encrypt: boolean
-    ): IEncryptionScheme
-
     abstract createAesEcb(key: Buffer): IEncryptionScheme
-
-    abstract pbkdf2(
-        password: Buffer,
-        salt: Buffer,
-        iterations: number,
-        keylen?: number, // = 64
-        algo?: string // sha1 or sha512 (default sha512)
-    ): MaybeAsync<Buffer>
-
-    abstract sha1(data: Buffer): MaybeAsync<Buffer>
-
-    abstract sha256(data: Buffer): MaybeAsync<Buffer>
-
-    abstract hmacSha256(data: Buffer, key: Buffer): MaybeAsync<Buffer>
-
-    abstract createMd5(): IHashMethod
 }
 
 export type CryptoProviderFactory = () => ICryptoProvider

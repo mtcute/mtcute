@@ -7,9 +7,17 @@ import {
 } from 'crypto'
 
 import { MaybeAsync } from '../../types'
-import { BaseCryptoProvider, IEncryptionScheme, IHashMethod } from './abstract'
+import {
+    BaseCryptoProvider,
+    ICryptoProvider,
+    IEncryptionScheme,
+    IHashMethod,
+} from './abstract'
 
-export class NodeCryptoProvider extends BaseCryptoProvider {
+export class NodeCryptoProvider
+    extends BaseCryptoProvider
+    implements ICryptoProvider
+{
     constructor() {
         super()
     }

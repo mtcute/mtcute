@@ -12,6 +12,9 @@ import {
 
 import { FakeTlsPacketCodec, generateFakeTlsHeader } from './fake-tls'
 
+/**
+ * MTProto proxy settings
+ */
 export interface MtProxySettings {
     /**
      * Host or IP of the proxy (e.g. `proxy.example.com`, `1.2.3.4`)

@@ -1,6 +1,6 @@
 # @mtcute/sqlite
 
-SQLite backed storage for mtcute.
+SQLite backed storage for mtcute, based on `better-sqlite3`
 
 ## Usage
 

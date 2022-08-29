@@ -2,6 +2,10 @@ import { tl } from '@mtcute/tl'
 
 import { MaybeDynamic, Message, MtClientError } from '../types'
 
+/**
+ * Normalize phone number by stripping formatting
+ * @param phone  Phone number
+ */
 export function normalizePhoneNumber(phone: string): string {
     phone = phone.trim().replace(/[+()\s-]/g, '')
     if (!phone.match(/^\d+$/)) throw new MtClientError('Invalid phone number')

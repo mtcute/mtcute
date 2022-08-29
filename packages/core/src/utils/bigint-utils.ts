@@ -2,6 +2,13 @@ import bigInt, { BigInteger } from 'big-integer'
 
 import { randomBytes } from './buffer-utils'
 
+/**
+ * Convert a big integer to a buffer
+ *
+ * @param value  Value to convert
+ * @param length  Length of the resulting buffer (by default it's computed automatically)
+ * @param le  Whether to use little-endian encoding
+ */
 export function bigIntToBuffer(
     value: BigInteger,
     length = 0,
@@ -23,6 +30,14 @@ export function bigIntToBuffer(
     return buffer
 }
 
+/**
+ * Convert a buffer to a big integer
+ *
+ * @param buffer  Buffer to convert
+ * @param offset  Offset to start reading from
+ * @param length  Length to read
+ * @param le  Whether to use little-endian encoding
+ */
 export function bufferToBigInt(
     buffer: Buffer,
     offset = 0,
@@ -36,10 +51,20 @@ export function bufferToBigInt(
     return bigInt.fromArray(arr, 256)
 }
 
+/**
+ * Generate a random big integer of the given size (in bytes)
+ * @param size  Size in bytes
+ */
 export function randomBigInt(size: number): BigInteger {
     return bufferToBigInt(randomBytes(size))
 }
 
+/**
+ * Generate a random big integer in the range [min, max)
+ *
+ * @param max  Maximum value (exclusive)
+ * @param min  Minimum value (inclusive)
+ */
 export function randomBigIntInRange(
     max: BigInteger,
     min = bigInt.one

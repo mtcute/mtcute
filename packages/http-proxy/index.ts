@@ -21,6 +21,9 @@ export class HttpProxyConnectionError extends Error {
     }
 }
 
+/**
+ * HTTP(s) proxy settings
+ */
 export interface HttpProxySettings {
     /**
      * Host or IP of the proxy (e.g. `proxy.example.com`, `1.2.3.4`)
@@ -171,6 +174,12 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
     }
 }
 
+/**
+ * HTTP(s) TCP transport using an intermediate packet codec.
+ *
+ * Should be the one passed as `transport` to {@link TelegramClient} constructor
+ * (unless you want to use a custom codec).
+ */
 export class HttpProxyTcpTransport extends BaseHttpProxyTcpTransport {
     _packetCodec = new IntermediatePacketCodec()
 }

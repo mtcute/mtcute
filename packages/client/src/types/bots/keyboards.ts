@@ -216,7 +216,7 @@ export namespace BotKeyboard {
      * @param data  Callback data (1-64 bytes). String will be converted to `Buffer`
      * @param requiresPassword
      *   Whether the user should verify their identity by entering 2FA password.
-     *   See more: [tl.RawKeyboardButtonCallback#requiresPassword](../../tl/interfaces/index.tl.rawkeyboardbuttoncallback.html#requirespassword)
+     *   See more: {@link tl.RawKeyboardButtonCallback#requiresPassword}
      */
     export function callback(
         text: string,
@@ -293,7 +293,7 @@ export namespace BotKeyboard {
      * Used for inline keyboards, not reply!
      *
      * @param text  Button label
-     * @param url  Authorization URL (see [TL Reference](https://mt.tei.su/tl/class/inputKeyboardButtonUrlAuth))
+     * @param url  Authorization URL (see {@link tl.RawInputKeyboardButtonUrlAuth})
      * @param params
      */
     export function urlAuth(

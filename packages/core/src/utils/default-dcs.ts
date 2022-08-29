@@ -1,5 +1,6 @@
 import { tl } from '@mtcute/tl'
 
+/** @internal */
 export const defaultProductionDc: tl.RawDcOption = {
     _: 'dcOption',
     ipAddress: '149.154.167.50',
@@ -7,6 +8,7 @@ export const defaultProductionDc: tl.RawDcOption = {
     id: 2,
 }
 
+/** @internal */
 export const defaultProductionIpv6Dc: tl.RawDcOption = {
     _: 'dcOption',
     ipAddress: '2001:67c:4e8:f002::a',
@@ -15,6 +17,7 @@ export const defaultProductionIpv6Dc: tl.RawDcOption = {
     id: 2,
 }
 
+/** @internal */
 export const defaultTestDc: tl.RawDcOption = {
     _: 'dcOption',
     ipAddress: '149.154.167.40',
@@ -22,6 +25,7 @@ export const defaultTestDc: tl.RawDcOption = {
     id: 2,
 }
 
+/** @internal */
 export const defaultTestIpv6Dc: tl.RawDcOption = {
     _: 'dcOption',
     ipAddress: '2001:67c:4e8:f002::e',

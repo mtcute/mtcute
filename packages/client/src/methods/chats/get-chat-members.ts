@@ -58,7 +58,7 @@ export async function getChatMembers(
          *  - `recent`: get recent members
          *  - `admins`: get only administrators (and creator)
          *  - `contacts`: get only contacts
-         *  - `mention`: get users that can be mentioned ([learn more](https://mt.tei.su/tl/class/channelParticipantsMentions))
+         *  - `mention`: get users that can be mentioned (see {@link tl.RawChannelParticipantsMentions})
          *
          *  Only used for channels and supergroups. Defaults to `recent`
          */

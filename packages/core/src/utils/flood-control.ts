@@ -6,6 +6,9 @@ interface FloodControlLimit {
     pos: number
 }
 
+/**
+ * Flood limiter, based on TDlib
+ */
 export class FloodControl {
     private _wakeupAt = 1
     private _withoutUpdate = 0

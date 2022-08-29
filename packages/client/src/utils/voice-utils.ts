@@ -1,3 +1,9 @@
+/**
+ * Decode 5-bit encoded voice message waveform into
+ * an array of waveform values (0-32).
+ *
+ * @param wf  Encoded waveform
+ */
 export function decodeWaveform(wf: Buffer): number[] {
     const bitsCount = wf.length * 8
     const valuesCount = ~~(bitsCount / 5)
@@ -33,6 +39,12 @@ export function decodeWaveform(wf: Buffer): number[] {
     return result
 }
 
+/**
+ * Encode an array of waveform values into
+ * 5-bit encoded voice message waveform into
+ *
+ * @param wf  Waveform values
+ */
 export function encodeWaveform(wf: number[]): Buffer {
     const bitsCount = wf.length * 5
     const bytesCount = ~~(bitsCount + 7) / 8

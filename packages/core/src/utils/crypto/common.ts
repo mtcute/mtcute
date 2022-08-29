@@ -1,6 +1,9 @@
 import { xorBufferInPlace } from '../buffer-utils'
 import { IEncryptionScheme } from './abstract'
 
+/**
+ * AES mode of operation IGE implementation in JS
+ */
 export class AesModeOfOperationIge implements IEncryptionScheme {
     private _key: Buffer
     private _iv: Buffer

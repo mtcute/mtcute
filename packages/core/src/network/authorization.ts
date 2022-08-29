@@ -94,7 +94,7 @@ async function rsaEncrypt(
 /**
  * Execute authorization flow on `connection` using `crypto`.
  *
- * Returns tuple: [authKey, serverSalt, timeOffset]
+ * @returns  tuple: [authKey, serverSalt, timeOffset]
  */
 export async function doAuthorization(
     connection: SessionConnection,

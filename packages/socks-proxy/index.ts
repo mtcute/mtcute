@@ -25,6 +25,9 @@ export class SocksProxyConnectionError extends Error {
     }
 }
 
+/**
+ * Settings for a SOCKS4/5 proxy
+ */
 export interface SocksProxySettings {
     /**
      * Host or IP of the proxy (e.g. `proxy.example.com`, `1.2.3.4`)
@@ -49,7 +52,7 @@ export interface SocksProxySettings {
     /**
      * Version of the SOCKS proxy (4 or 5)
      *
-     * Defaults to `5`.
+     * @default `5`
      */
     version?: 4 | 5
 }
@@ -475,6 +478,12 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
     }
 }
 
+/**
+ * Socks TCP transport using an intermediate packet codec.
+ *
+ * Should be the one passed as `transport` to {@link TelegramClient} constructor
+ * (unless you want to use a custom codec).
+ */
 export class SocksTcpTransport extends BaseSocksTcpTransport {
     _packetCodec = new IntermediatePacketCodec()
 }

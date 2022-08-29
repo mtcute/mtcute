@@ -1,12 +1,20 @@
 import { MaybeAsync } from '../../types'
-import { BaseCryptoProvider, IEncryptionScheme, IHashMethod } from './abstract'
+import {
+    BaseCryptoProvider,
+    ICryptoProvider,
+    IEncryptionScheme,
+    IHashMethod,
+} from './abstract'
 
 let forge: any = null
 try {
     forge = require('node-forge')
 } catch (e) {}
 
-export class ForgeCryptoProvider extends BaseCryptoProvider {
+export class ForgeCryptoProvider
+    extends BaseCryptoProvider
+    implements ICryptoProvider
+{
     constructor() {
         super()
         if (!forge)

@@ -1,3 +1,6 @@
+/**
+ * Class implementing a condition variable like behaviour.
+ */
 export class ConditionVariable {
     private _notify?: () => void
     private _timeout?: NodeJS.Timeout

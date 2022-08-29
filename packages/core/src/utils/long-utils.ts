@@ -1,6 +1,11 @@
 import Long from 'long'
 import { getRandomInt } from './misc-utils'
 
+/**
+ * Get a random Long
+ *
+ * @param unsigned  Whether the number should be unsigned
+ */
 export function randomLong(unsigned = false): Long {
     const lo = getRandomInt(0xffffffff)
     const hi = getRandomInt(0xffffffff)
@@ -8,6 +13,12 @@ export function randomLong(unsigned = false): Long {
     return new Long(lo, hi, unsigned)
 }
 
+/**
+ * Remove a Long from an array
+ *
+ * @param arr  Array to remove from
+ * @param val  Value to remove
+ */
 export function removeFromLongArray(arr: Long[], val: Long): boolean {
     for (let i = 0; i < arr.length; i++) {
         const v = arr[i]

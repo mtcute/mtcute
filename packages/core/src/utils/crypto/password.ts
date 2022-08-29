@@ -5,13 +5,22 @@ import { randomBytes, xorBuffer } from '../buffer-utils'
 import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils'
 import { ICryptoProvider } from './abstract'
 
+/**
+ * Compute password hash as defined by MTProto.
+ *
+ * See https://core.telegram.org/api/srp#checking-the-password-with-srp
+ *
+ * @param crypto  Crypto provider
+ * @param password  Password
+ * @param salt1  Salt 1
+ * @param salt2  Salt 2
+ */
 export async function computePasswordHash(
     crypto: ICryptoProvider,
     password: Buffer,
     salt1: Buffer,
     salt2: Buffer
 ): Promise<Buffer> {
-    // https://core.telegram.org/api/srp#checking-the-password-with-srp
     const SH = (data: Buffer, salt: Buffer) =>
         crypto.sha256(Buffer.concat([salt, data, salt]))
     const PH1 = async (pwd: Buffer, salt1: Buffer, salt2: Buffer) =>
@@ -25,6 +34,13 @@ export async function computePasswordHash(
     return PH2(password, salt1, salt2)
 }
 
+/**
+ * Compute new password SRP hash as defined by MTProto.
+ *
+ * @param crypto  Crypto provider
+ * @param algo  KDF algorithm
+ * @param password  Password
+ */
 export async function computeNewPasswordHash(
     crypto: ICryptoProvider,
     algo: tl.RawPasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow,
@@ -49,6 +65,13 @@ export async function computeNewPasswordHash(
     return bigIntToBuffer(g.modPow(x, p), 256)
 }
 
+/**
+ * Compute SRP check parameters for 2fa password as defined by MTProto.
+ *
+ * @param crypto  Crypto provider
+ * @param request  SRP request
+ * @param password  2fa password
+ */
 export async function computeSrpParams(
     crypto: ICryptoProvider,
     request: tl.account.RawPassword,

@@ -1,6 +1,14 @@
 import { IEncryptionScheme, ICryptoProvider } from './abstract'
 
-// returns tuple: [key, iv]
+/**
+ * Generate AES key and IV from nonces as defined by MTProto.
+ * Used in authorization flow.
+ *
+ * @param crypto  Crypto provider
+ * @param serverNonce  Server nonce
+ * @param newNonce  New nonce
+ * @returns  Tuple: `[key, iv]`
+ */
 export async function generateKeyAndIvFromNonce(
     crypto: ICryptoProvider,
     serverNonce: Buffer,
@@ -16,6 +24,15 @@ export async function generateKeyAndIvFromNonce(
     return [key, iv]
 }
 
+/**
+ * Create AES IGE instance for message (given auth key and message key)
+ * as defined by MTProto v2.
+ *
+ * @param crypto  Crypto provider
+ * @param authKey  Authorization key
+ * @param messageKey  Message key
+ * @param client  Whether this is a client to server message
+ */
 export async function createAesIgeForMessage(
     crypto: ICryptoProvider,
     authKey: Buffer,
@@ -44,6 +61,15 @@ export async function createAesIgeForMessage(
     return crypto.createAesIge(key, iv)
 }
 
+/**
+ * Create AES IGE instance for file (given auth key and message key)
+ * as defined by MTProto v1.
+ *
+ * @param crypto  Crypto provider
+ * @param authKey  Authorization key
+ * @param messageKey  Message key
+ * @param client  Whether this is a client to server message
+ */
 export async function createAesIgeForMessageOld(
     crypto: ICryptoProvider,
     authKey: Buffer,

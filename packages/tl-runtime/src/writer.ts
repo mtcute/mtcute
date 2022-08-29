@@ -7,11 +7,26 @@ const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
  */
 export type TlWriterMap = Record<string, (w: any, val: any) => void>
 
+/**
+ * Counter of the required number of bytes to encode a given object.
+ *
+ * Used as a pre-pass before using {@link TlBinaryWriter}
+ * to avoid unnecessary allocations.
+ */
 export class TlSerializationCounter {
     count = 0
 
+    /**
+     * @param objectMap  Writers map
+     */
     constructor(readonly objectMap: TlWriterMap) {}
 
+    /**
+     * Count bytes required to serialize the given object.
+     *
+     * @param objectMap  Writers map
+     * @param obj  Object to count bytes for
+     */
     static countNeededBytes(
         objectMap: TlWriterMap,
         obj: { _: string }
@@ -21,6 +36,12 @@ export class TlSerializationCounter {
         return cnt.count
     }
 
+    /**
+     * Count overhead in bytes for the given number of bytes when
+     * encoded as `bytes` TL type.
+     *
+     * @param size  Number of bytes
+     */
     static countBytesOverhead(size: number): number {
         let res = 0
 
@@ -103,10 +124,25 @@ export class TlSerializationCounter {
     }
 }
 
+/**
+ * Writer for TL objects.
+ */
 export class TlBinaryWriter {
+    /**
+     * Underlying buffer.
+     */
     buffer: Buffer
+
+    /**
+     * Current position in the buffer.
+     */
     pos: number
 
+    /**
+     * @param objectMap  Writers map
+     * @param buffer  Buffer to write to
+     * @param start  Position to start writing at
+     */
     constructor(
         readonly objectMap: TlWriterMap | undefined,
         buffer: Buffer,
@@ -116,18 +152,43 @@ export class TlBinaryWriter {
         this.pos = start
     }
 
+    /**
+     * Create a new writer with the given size.
+     *
+     * @param objectMap  Writers map
+     * @param size  Size of the writer's buffer
+     */
     static alloc(objectMap: TlWriterMap, size: number): TlBinaryWriter {
         return new TlBinaryWriter(objectMap, Buffer.allocUnsafe(size))
     }
 
+    /**
+     * Create a new writer without objects map for manual usage
+     *
+     * @param buffer  Buffer to write to
+     * @param start  Position to start writing at
+     */
     static manual(buffer: Buffer, start = 0): TlBinaryWriter {
         return new TlBinaryWriter(undefined, buffer, start)
     }
 
+    /**
+     * Create a new writer without objects map for manual usage
+     * with a given size
+     *
+     * @param size  Size of the writer's buffer
+     */
     static manualAlloc(size: number): TlBinaryWriter {
         return new TlBinaryWriter(undefined, Buffer.allocUnsafe(size))
     }
 
+    /**
+     * Serialize a single object
+     *
+     * @param objectMap  Writers map
+     * @param obj  Object to serialize
+     * @param knownSize  In case the size is known, pass it here
+     */
     static serializeObject(
         objectMap: TlWriterMap,
         obj: { _: string },
@@ -193,6 +254,10 @@ export class TlBinaryWriter {
         this.pos += 4
     }
 
+    /**
+     * Write raw bytes to the buffer
+     * @param val  Buffer to write
+     */
     raw(val: Buffer): void {
         val.copy(this.buffer, this.pos)
         this.pos += val.length
@@ -249,6 +314,9 @@ export class TlBinaryWriter {
         val.forEach((it) => fn.call(this, it, bare))
     }
 
+    /**
+     * Get the resulting buffer
+     */
     result(): Buffer {
         return this.buffer.slice(0, this.pos)
     }

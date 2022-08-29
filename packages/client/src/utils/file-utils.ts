@@ -1,9 +1,14 @@
 import { MtArgumentError } from '../types'
 
+/**
+ * Given file size, determine the appropriate chunk size (in KB)
+ * for upload/download operations.
+ */
 export function determinePartSize(fileSize: number): number {
     if (fileSize <= 104857600) return 128 // 100 MB
     if (fileSize <= 786432000) return 256 // 750 MB
     if (fileSize <= 2097152000) return 512 // 2000 MB
+    if (fileSize <= 4194304000) return 1024 // 4000 MB
 
     throw new MtArgumentError('File is too large')
 }
@@ -50,6 +55,9 @@ const JPEG_HEADER = Buffer.from(
 )
 const JPEG_FOOTER = Buffer.from('ffd9', 'hex')
 
+/**
+ * Convert stripped JPEG (from `photoStrippedSize`) to full JPEG
+ */
 export function strippedPhotoToJpg(stripped: Buffer): Buffer {
     if (stripped.length < 3 || stripped[0] !== 1) {
         return stripped
@@ -64,6 +72,10 @@ export function strippedPhotoToJpg(stripped: Buffer): Buffer {
 const SVG_LOOKUP =
     'AACAAAAHAAALMAAAQASTAVAAAZaacaaaahaaalmaaaqastava.az0123456789-,'
 
+/**
+ * Inflate compressed preview SVG path to full SVG path
+ * @param encoded
+ */
 export function inflateSvgPath(encoded: Buffer): string {
     let path = 'M'
     const len = encoded.length
@@ -87,6 +99,10 @@ export function inflateSvgPath(encoded: Buffer): string {
     return path
 }
 
+/**
+ * Convert SVG path to SVG file
+ * @param path
+ */
 export function svgPathToFile(path: string): Buffer {
     return Buffer.from(
         '<?xml version="1.0" encoding="utf-8"?>' +
@@ -101,6 +117,11 @@ export function svgPathToFile(path: string): Buffer {
 
 const FILENAME_REGEX = /^(?:file:)?(\/?.+[/\\])*(.+\..+)$/
 
+/**
+ * Get file name from file path
+ *
+ * @param path  File path
+ */
 export function extractFileName(path: string): string {
     const m = path.match(FILENAME_REGEX)
     if (m) return m[2]

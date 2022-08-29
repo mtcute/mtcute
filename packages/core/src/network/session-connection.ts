@@ -113,6 +113,9 @@ function makeNiceStack(
 
 let nextConnectionUid = 0
 
+/**
+ * A connection to a single DC.
+ */
 export class SessionConnection extends PersistentConnection {
     readonly params!: SessionConnectionParams
 

@@ -11,7 +11,7 @@ const BAD_HEADERS = [
     Buffer.from('eeeeeeee', 'hex'),
 ]
 
-interface MtProxyInfo {
+export interface MtProxyInfo {
     dcId: number
     secret: Buffer
     test: boolean

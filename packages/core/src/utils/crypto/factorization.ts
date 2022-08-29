@@ -6,6 +6,10 @@ import {
     randomBigIntInRange,
 } from '../bigint-utils'
 
+/**
+ * Factorize `p*q` to `p` and `q` synchronously using Brent-Pollard rho algorithm
+ * @param pq
+ */
 export function factorizePQSync(pq: Buffer): [Buffer, Buffer] {
     const pq_ = bufferToBigInt(pq)
 

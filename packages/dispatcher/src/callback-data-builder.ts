@@ -8,7 +8,7 @@ import { UpdateFilter } from './filters'
  *
  * This can be used to simplify management of different callbacks.
  *
- * [Learn more in the docs](//mt.tei.su/guide/topics/keyboards.html#callback-data-builders)
+ * [Learn more in the docs](/guide/topics/keyboards.html#callback-data-builders)
  */
 export class CallbackDataBuilder<T extends string> {
     private readonly _fields: T[]

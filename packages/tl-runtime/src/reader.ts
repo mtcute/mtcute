@@ -18,10 +18,25 @@ const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
  */
 export type TlReaderMap = Record<number, (r: any) => any>
 
+/**
+ * Reader for TL objects.
+ */
 export class TlBinaryReader {
+    /**
+     * Underlying buffer.
+     */
     data: Buffer
+
+    /**
+     * Position in the buffer.
+     */
     pos = 0
 
+    /**
+     * @param objectsMap  Readers map
+     * @param data  Buffer to read from
+     * @param start  Position to start reading from
+     */
     constructor(
         readonly objectsMap: TlReaderMap | undefined,
         data: Buffer,
@@ -31,10 +46,23 @@ export class TlBinaryReader {
         this.pos = start
     }
 
+    /**
+     * Create a new reader without objects map for manual usage
+     *
+     * @param data  Buffer to read from
+     * @param start  Position to start reading from
+     */
     static manual(data: Buffer, start = 0): TlBinaryReader {
         return new TlBinaryReader(undefined, data, start)
     }
 
+    /**
+     * Deserialize a single object
+     *
+     * @param objectsMap  Readers map
+     * @param data  Buffer to read from
+     * @param start  Position to start reading from
+     */
     static deserializeObject(
         objectsMap: TlReaderMap,
         data: Buffer,
@@ -55,6 +83,9 @@ export class TlBinaryReader {
         return res
     }
 
+    /**
+     * Get the next {@link uint} without advancing the reader cursor
+     */
     peekUint(): number {
         // e.g. for checking ctor number
         return this.data.readUInt32LE(this.pos)
@@ -98,6 +129,10 @@ export class TlBinaryReader {
         )
     }
 
+    /**
+     * Read raw bytes of the given length
+     * @param bytes  Length of the buffer to read
+     */
     raw(bytes = -1): Buffer {
         if (bytes === -1) bytes = this.data.length - this.pos
 
@@ -188,10 +223,20 @@ export class TlBinaryReader {
         return ret
     }
 
+    /**
+     * Advance the reader cursor by the given amount of bytes
+     *
+     * @param delta  Amount of bytes to advance (can be negative)
+     */
     seek(delta: number): void {
         this.seekTo(this.pos + delta)
     }
 
+    /**
+     * Seek to the given position
+     *
+     * @param pos  Position to seek to
+     */
     seekTo(pos: number): void {
         if (pos >= this.data.length || pos < 0)
             throw new RangeError('New position is out of range')

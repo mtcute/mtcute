@@ -1,3 +1,8 @@
+/**
+ * Sleep for the given number of ms
+ *
+ * @param ms  Number of ms to sleep
+ */
 export const sleep = (ms: number): Promise<void> =>
     new Promise((resolve) => setTimeout(resolve, ms))
 

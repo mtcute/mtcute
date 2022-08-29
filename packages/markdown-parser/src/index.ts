@@ -1,6 +1,5 @@
 import Long from 'long'
-import type { IMessageEntityParser, MessageEntity, tl } from '@mtcute/client'
-import { FormattedString } from '@mtcute/client'
+import type { IMessageEntityParser, MessageEntity, tl, FormattedString } from '@mtcute/client'
 
 const MENTION_REGEX =
     /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
@@ -60,7 +59,6 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
     name = 'markdown'
 
     /**
-     * Escape the text so it can be safely used inside Markdown code.
      *
      * @param str  String to be escaped
      */
@@ -398,6 +396,10 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                 case 'text_mention':
                     startTag = '['
                     endTag = `](tg://user?id=${entity.userId!})`
+                    break
+                case 'emoji':
+                    startTag = '['
+                    endTag = `](tg://emoji?id=${entity.emojiId!})`
                     break
                 default:
                     continue

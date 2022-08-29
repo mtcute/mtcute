@@ -18,6 +18,9 @@ try {
 } catch (e) {}
 
 export namespace NodeTelegramClient {
+    /**
+     * Options for {@link NodeTelegramClient}
+     */
     export interface Options
         extends Omit<BaseTelegramClient.Options, 'storage'> {
         /**
@@ -44,10 +47,14 @@ export namespace NodeTelegramClient {
 }
 
 /**
- * Tiny wrapper over `TelegramClient` for usage inside Node JS.
+ * Tiny wrapper over {@link TelegramClient} for usage inside Node JS.
  *
  * This automatically sets the parse modes, native
  * crypto addon and defaults to SQLite session.
+ *
+ * Documentation for this class only contains the
+ * difference between {@link TelegramClient} and {@link NodeTelegramClient}.
+ * For the complete documentation, please refer to {@link TelegramClient}.
  */
 export class NodeTelegramClient extends TelegramClient {
     constructor(opts: NodeTelegramClient.Options) {
@@ -74,7 +81,6 @@ export class NodeTelegramClient extends TelegramClient {
      *
      * Associated `readline` interface is closed
      * after `run()` returns, or with the client.
-     *
      *
      * @param text  Text of the question
      */
