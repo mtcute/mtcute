@@ -62,8 +62,8 @@ export type MtcuteI18nFunction<Strings, Input> = <
  * other than the primary one. Used to provide type safety.
  */
 export type OtherLanguageWrap<Strings> = {
-    [key in keyof Strings]?: Strings[key] extends I18nValue
-        ? I18nValue
+    [key in keyof Strings]?: Strings[key] extends I18nValue<infer A>
+        ? I18nValue<A>
         : Strings[key] extends Record<string, any>
         ? OtherLanguageWrap<Strings[key]>
         : never

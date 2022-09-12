@@ -18,6 +18,7 @@ const ru: OtherLanguageWrap<typeof en> = {
     basic: {
         hello: 'Привет',
         // world: () => 'Мир',
+        // welcome: (name: number) => `Привет ${name}`,
         welcome: (name: string) => `Привет ${name}`,
     },
 }
