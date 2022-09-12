@@ -1,4 +1,3 @@
-import { MtArgumentError, ParsedUpdate } from '@mtcute/client'
 import {
     I18nValue,
     MtcuteI18nAdapter,
@@ -21,7 +20,7 @@ export interface MtcuteI18nParameters<Strings, Input> {
         name: string
 
         /**
-         * Strings for the language.
+         * Strings for the language. Can be a function to support backrefs
          */
         strings: Strings
     }
@@ -61,7 +60,7 @@ export function createMtcuteI18n<Strings, Input>(
     }
 
     if (!(defaultLanguage in indexes)) {
-        throw new MtArgumentError(
+        throw new TypeError(
             'defaultLanguage is not a registered language'
         )
     }

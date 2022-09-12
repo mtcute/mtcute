@@ -1,8 +1,9 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { createMtcuteI18n } from '../src'
-import { OtherLanguageWrap } from '../src/types'
+import { createMtcuteI18n, OtherLanguageWrap } from '../src'
 import { Message, PeersIndex } from '@mtcute/client'
+import { createPluralEnglish, pluralizeEnglish } from '../src/plurals/english'
+import { createPluralRussian } from '../src/plurals/russian'
 
 describe('i18n', () => {
     const en = {
@@ -16,18 +17,27 @@ describe('i18n', () => {
                 fn: () => 'Hello',
             },
         },
+        plural: createPluralEnglish('a message', (n) => `${n} messages`),
+        plural2: createPluralEnglish(
+            'a message',
+            (n: number, s: string) => `${n} messages from ${s}`
+        ),
+        plural3: (n: number) =>
+            `${n} ${pluralizeEnglish(n, 'message', 'messages')}`,
     }
     const ru: OtherLanguageWrap<typeof en> = {
         direct: 'Привет',
-        // fn: () => 'World',
         withArgs: (name: string) => `Привет ${name}`,
-        // withArgsObj: ({ name }: { name: string }) => `Welcome ${name}`,
         nested: {
-            // string: 'Hello',
             nested: {
                 fn: 'Привет',
             },
         },
+        plural: createPluralRussian(
+            (n) => `${n} сообщение`,
+            (n) => `${n} сообщения`,
+            (n) => `${n === 0 ? 'нет' : n} сообщений`
+        ),
     }
 
     const tr = createMtcuteI18n({
@@ -99,10 +109,32 @@ describe('i18n', () => {
                 strings: en,
             },
             otherLanguages: { ru },
-            adapter: (num: number) => num === 1 ? 'en' : 'ru',
+            adapter: (num: number) => (num === 1 ? 'en' : 'ru'),
         })
 
         expect(tr(1, 'direct')).to.equal('Hello')
         expect(tr(2, 'direct')).to.equal('Привет')
+    })
+
+    describe('plurals', () => {
+        it('should pluralize correctly in english', () => {
+            expect(tr('en', 'plural', 1)).to.equal('a message')
+            expect(tr('en', 'plural', 2)).to.equal('2 messages')
+
+            expect(tr('en', 'plural2', 1, 'baka')).to.equal('a message')
+            expect(tr('en', 'plural2', 2, 'baka')).to.equal(
+                '2 messages from baka'
+            )
+
+            expect(tr('en', 'plural3', 1)).to.equal('1 message')
+            expect(tr('en', 'plural3', 2)).to.equal('2 messages')
+        })
+
+        it('should pluralize correctly in russian', () => {
+            expect(tr('ru', 'plural', 0)).to.equal('нет сообщений')
+            expect(tr('ru', 'plural', 1)).to.equal('1 сообщение')
+            expect(tr('ru', 'plural', 2)).to.equal('2 сообщения')
+            expect(tr('ru', 'plural', 5)).to.equal('5 сообщений')
+        })
     })
 })
