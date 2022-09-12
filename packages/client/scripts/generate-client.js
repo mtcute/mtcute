@@ -443,7 +443,7 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
                 )
 
             for (const name of [origName, ...aliases]) {
-                if (!isPrivate && !hasOverloads) {
+                if (!hasOverloads) {
                     if (!comment.match(/\/\*\*?\s*\*\//))
                         // empty comment, no need to write it
                         output.write(comment + '\n')
@@ -455,7 +455,7 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
 
                 if (!overload) {
                     classContents.push(
-                        `${isPrivate ? 'protected ' : ''}${name} = ${origName}`
+                        `${name} = ${origName}`
                     )
                 }
             }

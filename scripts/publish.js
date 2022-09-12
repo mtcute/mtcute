@@ -76,19 +76,19 @@ function publishSinglePackage(name) {
         }
 
         if (name === 'client') {
-            // make TelegramClient a class, not an interface
-            const dTsContent = fs.readFileSync(
-                path.join(dir, 'dist/client.d.ts'),
-                'utf8'
-            )
-
-            fs.writeFileSync(
-                path.join(dir, 'dist/client.d.ts'),
-                dTsContent.replace(
-                    'export interface TelegramClient',
-                    'export class TelegramClient'
-                )
-            )
+            // // make TelegramClient a class, not an interface
+            // const dTsContent = fs.readFileSync(
+            //     path.join(dir, 'dist/client.d.ts'),
+            //     'utf8'
+            // )
+            //
+            // fs.writeFileSync(
+            //     path.join(dir, 'dist/client.d.ts'),
+            //     dTsContent.replace(
+            //         'export interface TelegramClient',
+            //         'export class TelegramClient'
+            //     )
+            // )
 
             // make methods prototype methods, not properties
             let jsContent = fs.readFileSync(

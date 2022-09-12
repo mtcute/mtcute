@@ -934,6 +934,10 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         langCode?: string
     }): Promise<tl.RawBotCommand[]>
+
+    _normalizeCommandScope(
+        scope: tl.TypeBotCommandScope | BotCommands.IntermediateScope
+    ): Promise<tl.TypeBotCommandScope>
     /**
      * Sets a menu button for the given user.
      *
@@ -1597,6 +1601,8 @@ export interface TelegramClient extends BaseTelegramClient {
     importContacts(
         contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[]
     ): Promise<tl.contacts.RawImportedContacts>
+
+    _pushConversationMessage(msg: Message, incoming?: boolean): void
     /**
      * Create a folder from given parameters
      *
@@ -1766,6 +1772,10 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param peers  Peers for which to fetch dialogs.
      */
     getPeerDialogs(peers: InputPeerLike[]): Promise<Dialog[]>
+
+    _parseDialogs(
+        res: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs
+    ): Dialog[]
     /**
      * Reorder folders
      *
@@ -1810,6 +1820,12 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param params  File download parameters
      */
     downloadAsStream(params: FileDownloadParameters): Readable
+    _normalizeFileToDocument(
+        file: InputFileLike | tl.TypeInputDocument,
+        params: {
+            progressCallback?: (uploaded: number, total: number) => void
+        }
+    ): Promise<tl.TypeInputDocument>
     /**
      * Normalize a {@link InputFileLike} to `InputFile`,
      * uploading it if needed.
@@ -2274,6 +2290,8 @@ export interface TelegramClient extends BaseTelegramClient {
             progressCallback?: (uploaded: number, total: number) => void
         }
     ): Promise<Message>
+
+    _findMessageInUpdate(res: tl.TypeUpdates, isEdit?: boolean): Message
     /**
      * Forward a single message.
      *
@@ -2459,6 +2477,11 @@ export interface TelegramClient extends BaseTelegramClient {
             forbidForwards?: boolean
         }
     ): Promise<MaybeArray<Message>>
+
+    _getDiscussionMessage(
+        peer: InputPeerLike,
+        message: number
+    ): Promise<[tl.TypeInputPeer, number]>
     // public version of the same method because why not
     /**
      * Get discussion message for some channel post.
@@ -2707,6 +2730,16 @@ export interface TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         messageIds: number[]
     ): Promise<(Message | null)[]>
+
+    _normalizeInline(
+        id: string | tl.TypeInputBotInlineMessageID
+    ): Promise<[tl.TypeInputBotInlineMessageID, SessionConnection]>
+
+    _parseEntities(
+        text?: string | FormattedString<any>,
+        mode?: string | null,
+        entities?: tl.TypeMessageEntity[]
+    ): Promise<[string, tl.TypeMessageEntity[] | undefined]>
     /**
      * Pin a message in a group, supergroup, channel or PM.
      *
@@ -3724,6 +3757,13 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getCurrentRpsProcessing(): number
     /**
+     * Fetch updates state from the server.
+     * Meant to be used right after authorization,
+     * but before force-saving the session.
+     */
+    _fetchUpdatesState(): Promise<void>
+    _loadStorage(): Promise<void>
+    /**
      * **ADVANCED**
      *
      * Manually start updates loop.
@@ -3737,12 +3777,25 @@ export interface TelegramClient extends BaseTelegramClient {
      * Usually done automatically when stopping the client with {@link close}
      */
     stopUpdatesLoop(): void
+
+    _onStop(): void
+    _saveStorage(afterImport?: boolean): Promise<void>
+    _dispatchUpdate(
+        update: tl.TypeUpdate | tl.TypeMessage,
+        peers: PeersIndex
+    ): void
     _handleUpdate(update: tl.TypeUpdates, noDispatch?: boolean): void
     /**
      * Catch up with the server by loading missed updates.
      *
      */
     catchUp(): void
+    // todo: updateChannelTooLong with catchUpChannels disabled should not trigger getDifference (?)
+    // todo: when min peer or similar use pts_before as base pts for channels
+
+    _updatesLoop(): Promise<void>
+
+    _keepAliveAction(): void
     /**
      * Block a user
      *
@@ -4053,7 +4106,7 @@ export class TelegramClient extends BaseTelegramClient {
     getGameHighScores = getGameHighScores
     getInlineGameHighScores = getInlineGameHighScores
     getMyCommands = getMyCommands
-    protected _normalizeCommandScope = _normalizeCommandScope
+    _normalizeCommandScope = _normalizeCommandScope
     setBotMenuButton = setBotMenuButton
     setGameScore = setGameScore
     setInlineGameScore = setInlineGameScore
@@ -4099,7 +4152,7 @@ export class TelegramClient extends BaseTelegramClient {
     deleteContacts = deleteContacts
     getContacts = getContacts
     importContacts = importContacts
-    protected _pushConversationMessage = _pushConversationMessage
+    _pushConversationMessage = _pushConversationMessage
     createFolder = createFolder
     deleteFolder = deleteFolder
     editFolder = editFolder
@@ -4107,13 +4160,13 @@ export class TelegramClient extends BaseTelegramClient {
     getDialogs = getDialogs
     getFolders = getFolders
     getPeerDialogs = getPeerDialogs
-    protected _parseDialogs = _parseDialogs
+    _parseDialogs = _parseDialogs
     setFoldersOrder = setFoldersOrder
     downloadAsBuffer = downloadAsBuffer
     downloadToFile = downloadToFile
     downloadAsIterable = downloadAsIterable
     downloadAsStream = downloadAsStream
-    protected _normalizeFileToDocument = _normalizeFileToDocument
+    _normalizeFileToDocument = _normalizeFileToDocument
     _normalizeInputFile = _normalizeInputFile
     _normalizeInputMedia = _normalizeInputMedia
     uploadFile = uploadFile
@@ -4133,9 +4186,9 @@ export class TelegramClient extends BaseTelegramClient {
     deleteScheduledMessages = deleteScheduledMessages
     editInlineMessage = editInlineMessage
     editMessage = editMessage
-    protected _findMessageInUpdate = _findMessageInUpdate
+    _findMessageInUpdate = _findMessageInUpdate
     forwardMessages = forwardMessages
-    protected _getDiscussionMessage = _getDiscussionMessage
+    _getDiscussionMessage = _getDiscussionMessage
     getDiscussionMessage = getDiscussionMessage
     getHistory = getHistory
     getMessageGroup = getMessageGroup
@@ -4144,8 +4197,8 @@ export class TelegramClient extends BaseTelegramClient {
     getMessages = getMessages
     getReactionUsers = getReactionUsers
     getScheduledMessages = getScheduledMessages
-    protected _normalizeInline = _normalizeInline
-    protected _parseEntities = _parseEntities
+    _normalizeInline = _normalizeInline
+    _parseEntities = _parseEntities
     pinMessage = pinMessage
     readHistory = readHistory
     readReactions = readReactions
@@ -4185,17 +4238,17 @@ export class TelegramClient extends BaseTelegramClient {
     enableRps = enableRps
     getCurrentRpsIncoming = getCurrentRpsIncoming
     getCurrentRpsProcessing = getCurrentRpsProcessing
-    protected _fetchUpdatesState = _fetchUpdatesState
-    protected _loadStorage = _loadStorage
+    _fetchUpdatesState = _fetchUpdatesState
+    _loadStorage = _loadStorage
     startUpdatesLoop = startUpdatesLoop
     stopUpdatesLoop = stopUpdatesLoop
-    protected _onStop = _onStop
-    protected _saveStorage = _saveStorage
-    protected _dispatchUpdate = _dispatchUpdate
+    _onStop = _onStop
+    _saveStorage = _saveStorage
+    _dispatchUpdate = _dispatchUpdate
     _handleUpdate = _handleUpdate
     catchUp = catchUp
-    protected _updatesLoop = _updatesLoop
-    protected _keepAliveAction = _keepAliveAction
+    _updatesLoop = _updatesLoop
+    _keepAliveAction = _keepAliveAction
     blockUser = blockUser
     deleteProfilePhotos = deleteProfilePhotos
     getCommonChats = getCommonChats
