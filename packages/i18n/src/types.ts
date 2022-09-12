@@ -68,3 +68,17 @@ export type OtherLanguageWrap<Strings> = {
         ? OtherLanguageWrap<Strings[key]>
         : never
 }
+/**
+ * Wrapper type for i18n object containing strings for a language
+ * other than the primary one. Used to provide type safety.
+ *
+ * Unlike {@link OtherLanguageWrap}, this type requires all strings
+ * from the primary language to be present
+ */
+export type OtherLanguageWrapExhaustive<Strings> = {
+    [key in keyof Strings]: Strings[key] extends I18nValue<infer A>
+        ? I18nValue<A>
+        : Strings[key] extends Record<string, any>
+        ? OtherLanguageWrapExhaustive<Strings[key]>
+        : never
+}
