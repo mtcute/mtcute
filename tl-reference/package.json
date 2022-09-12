@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "description": "TL reference",
-    "author": "Alisa Sireneva <me@tei.su>",
+    "author": "Alina Sireneva <me@tei.su>",
     "scripts": {
         "develop": "gatsby develop --port 4040",
         "start": "gatsby develop",
