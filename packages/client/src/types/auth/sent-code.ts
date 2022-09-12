@@ -11,6 +11,8 @@ const sentCodeMap: Record<
     'auth.sentCodeTypeFlashCall': 'flash_call',
     'auth.sentCodeTypeSms': 'sms',
     'auth.sentCodeTypeMissedCall': 'missed_call',
+    'auth.sentCodeTypeEmailCode': 'email',
+    'auth.sentCodeTypeSetUpEmailRequired': 'email_required',
 }
 
 const nextCodeMap: Record<
@@ -37,6 +39,8 @@ export namespace SentCode {
         | 'call'
         | 'flash_call'
         | 'missed_call'
+        | 'email'
+        | 'email_required'
 
     /**
      * Type describing next code delivery type.
@@ -51,20 +55,14 @@ export namespace SentCode {
  * Information about sent confirmation code
  */
 export class SentCode {
-    /**
-     * Underlying raw TL object
-     */
-    readonly sentCode: tl.auth.TypeSentCode
-
-    constructor(obj: tl.auth.TypeSentCode) {
-        this.sentCode = obj
+    constructor(readonly raw: tl.auth.TypeSentCode) {
     }
 
     /**
      * Type of currently sent confirmation code
      */
     get type(): SentCode.DeliveryType {
-        return sentCodeMap[this.sentCode.type._]
+        return sentCodeMap[this.raw.type._]
     }
 
     /**
@@ -72,8 +70,8 @@ export class SentCode {
      * if you call {@link TelegramClient.resendCode}.
      */
     get nextType(): SentCode.NextDeliveryType {
-        return this.sentCode.nextType
-            ? nextCodeMap[this.sentCode.nextType._]
+        return this.raw.nextType
+            ? nextCodeMap[this.raw.nextType._]
             : 'none'
     }
 
@@ -82,21 +80,21 @@ export class SentCode {
      * (like {@link TelegramClient.signIn} and {@link TelegramClient.signUp})
      */
     get phoneCodeHash(): string {
-        return this.sentCode.phoneCodeHash
+        return this.raw.phoneCodeHash
     }
 
     /**
      * Delay in seconds to wait before calling {@link TelegramClient.resendCode}
      */
     get timeout(): number {
-        return this.sentCode.timeout ?? 0
+        return this.raw.timeout ?? 0
     }
 
     /**
      * Length of the code (0 for flash calls)
      */
     get length(): number {
-        return 'length' in this.sentCode.type ? this.sentCode.type.length : 0
+        return 'length' in this.raw.type ? this.raw.type.length : 0
     }
 }
 

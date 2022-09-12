@@ -8,13 +8,14 @@ import {
     PeersIndex,
 } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import Long from 'long'
 
 /**
  * Send or remove a reaction.
  *
  * @param chatId  Chat ID with the message to react to
  * @param message  Message ID to react to
- * @param emoji  Reaction emoji (or `null` to remove)
+ * @param emoji  Reaction emoji (if `tl.Long` then this is a custom emoji) or `null` to remove
  * @param big  Whether to use a big reaction
  * @returns  Message to which the reaction was sent
  * @internal
@@ -23,14 +24,28 @@ export async function sendReaction(
     this: TelegramClient,
     chatId: InputPeerLike,
     message: number,
-    emoji: string | null,
+    emoji: string | tl.Long | null,
     big = false
 ): Promise<Message> {
     const res = await this.call({
         _: 'messages.sendReaction',
         peer: await this.resolvePeer(chatId),
         msgId: message,
-        reaction: emoji ?? undefined,
+        reaction: [
+            Long.isLong(emoji)
+                ? {
+                      _: 'reactionCustomEmoji',
+                      documentId: emoji,
+                  }
+                : emoji
+                ? {
+                      _: 'reactionEmoji',
+                      emoticon: emoji,
+                  }
+                : {
+                      _: 'reactionEmpty',
+                  },
+        ],
         big,
     })
 

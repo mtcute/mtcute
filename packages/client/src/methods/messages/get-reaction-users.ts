@@ -22,6 +22,11 @@ export async function* getReactionUsers(
         emoji?: string
 
         /**
+         * Get only reactions with the specified custom emoji
+         */
+        customEmoji?: tl.Long
+
+        /**
          * Limit the number of events returned.
          *
          * Defaults to `Infinity`, i.e. all events are returned
@@ -51,7 +56,19 @@ export async function* getReactionUsers(
                 _: 'messages.getMessageReactionsList',
                 peer,
                 id: messageId,
-                reaction: params.emoji,
+                reaction: params.customEmoji
+                    ? {
+                          _: 'reactionCustomEmoji',
+                          documentId: params.customEmoji,
+                      }
+                    : params.emoji
+                    ? {
+                          _: 'reactionEmoji',
+                          emoticon: params.emoji,
+                      }
+                    : {
+                          _: 'reactionEmpty',
+                      },
                 limit: Math.min(chunkSize, total - current),
                 offset,
             })

@@ -17,7 +17,22 @@ export class PeerReaction {
      * Emoji representing the reaction
      */
     get emoji(): string {
-        return this.raw.reaction!
+        const r = this.raw.reaction
+        switch (r._) {
+            case 'reactionCustomEmoji':
+                return r.documentId.toString()
+            case 'reactionEmoji':
+                return r.emoticon
+            case 'reactionEmpty':
+                return ''
+        }
+    }
+
+    /**
+     * Whether this reaction is a custom emoji
+     */
+    get isCustomEmoji(): boolean {
+        return this.raw.reaction._ === 'reactionCustomEmoji'
     }
 
     /**

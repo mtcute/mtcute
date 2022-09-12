@@ -2665,6 +2665,11 @@ export interface TelegramClient extends BaseTelegramClient {
             emoji?: string
 
             /**
+             * Get only reactions with the specified custom emoji
+             */
+            customEmoji?: tl.Long
+
+            /**
              * Limit the number of events returned.
              *
              * Defaults to `Infinity`, i.e. all events are returned
@@ -3188,14 +3193,14 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat ID with the message to react to
      * @param message  Message ID to react to
-     * @param emoji  Reaction emoji (or `null` to remove)
+     * @param emoji  Reaction emoji (if `tl.Long` then this is a custom emoji) or `null` to remove
      * @param big  (default: `false`) Whether to use a big reaction
      * @returns  Message to which the reaction was sent
      */
     sendReaction(
         chatId: InputPeerLike,
         message: number,
-        emoji: string | null,
+        emoji: string | tl.Long | null,
         big?: boolean
     ): Promise<Message>
     /**
