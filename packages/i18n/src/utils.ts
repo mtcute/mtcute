@@ -6,6 +6,11 @@ try {
     client = require('@mtcute/client')
 } catch (e) {}
 
+/**
+ * Create an index of i18n strings delimited by "."
+ *
+ * @param strings  Strings object
+ */
 export function createI18nStringsIndex(
     strings: Record<string, any>
 ): Record<string, I18nValue> {
@@ -28,6 +33,12 @@ export function createI18nStringsIndex(
     return ret
 }
 
+/**
+ * Extract language from `@mtcute/client` update. Can be used for customized
+ * adapters or external i18n libraries.
+ *
+ * @param update  Update to extract language from
+ */
 export function extractLanguageFromUpdate(
     update: ParsedUpdate['data']
 ): string | null | undefined {

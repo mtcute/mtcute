@@ -1,5 +1,13 @@
 import { I18nValue, I18nValueDynamic } from '../types'
 
+/**
+ * Pluralize a value by Russian rules
+ *
+ * @param n  Number of items
+ * @param one  Value for "one" (1 стол, 21 стол)
+ * @param few  Value for "few" (2 стола, 42 стола)
+ * @param many  Value for "many" (5 столов, 100 столов, 0 столов, нет столов)
+ */
 export function pluralizeRussian<T>(
     n: number,
     one: T,
@@ -20,6 +28,13 @@ export function pluralizeRussian<T>(
     return many
 }
 
+/**
+ * Create a complex Russian pluralized value
+ *
+ * @param one  Value for "one" (1 стол, 21 стол)
+ * @param few  Value for "few" (2 стола, 42 стола)
+ * @param many  Value for "many" (5 столов, 100 столов, 0 столов, нет столов)
+ */
 export function createPluralRussian<Args extends any[] = []>(
     one: I18nValue<[number, ...Args]>,
     few: I18nValue<[number, ...Args]>,
