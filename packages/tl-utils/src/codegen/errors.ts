@@ -213,7 +213,7 @@ export function generateCodeForErrors(
         if (it.virtual) {
             if (comment) comment += '\n\n'
             comment +=
-                'This is a *virtual* error, meaning that it may only occur when using MTCute APIs (not MTProto)'
+                'This is a *virtual* error, meaning that it may only occur when using mtcute APIs (not MTProto)'
         }
 
         if (wildcard) {

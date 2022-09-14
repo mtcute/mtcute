@@ -2,7 +2,7 @@
     "name": "@mtcute/i18n",
     "private": true,
     "version": "1.0.0",
-    "description": "I18n for MTCute",
+    "description": "I18n for mtcute",
     "author": "Alina Sireneva <me@tei.su>",
     "license": "LGPL-3.0",
     "main": "src/index.ts",

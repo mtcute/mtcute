@@ -165,7 +165,7 @@ const STATEMENTS = {
 const EMPTY_BUFFER = Buffer.alloc(0)
 
 /**
- * SQLite backed storage for MTCute.
+ * SQLite backed storage for mtcute.
  *
  * Uses `better-sqlite3` library
  */

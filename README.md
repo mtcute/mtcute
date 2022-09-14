@@ -1,4 +1,4 @@
-# MTCute
+# mtcute
 
 **PROJECT IS NOT DEAD/ABANDONED**
 
@@ -27,7 +27,7 @@ Work-in-progress library for MTProto in TypeScript.
 
 ## Installation
 
-MTCute is currently only published in my private NPM registry.
+mtcute is currently only published in my private NPM registry.
 
 You can install it by running:
 

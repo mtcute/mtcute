@@ -338,11 +338,11 @@ export class User {
      * somewhere and load it from there if needed.
      *
      * This method is only needed when the result will be
-     * stored somewhere outside current MTCute instance,
+     * stored somewhere outside current mtcute instance,
      * otherwise {@link mention} will be enough.
      *
      * > **Note**: the resulting text can only be used by clients
-     * > that support MTCute notation of permanent
+     * > that support mtcute notation of permanent
      * > mention links (`tg://user?id=123&hash=abc`).
      * >
      * > Both `@mtcute/html-parser` and `@mtcute/markdown-parser` support it.

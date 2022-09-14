@@ -2,7 +2,7 @@
     "name": "@mtcute/html-parser",
     "private": true,
     "version": "1.0.0",
-    "description": "HTML entities parser for MTCute",
+    "description": "HTML entities parser for mtcute",
     "author": "Alina Sireneva <me@tei.su>",
     "license": "LGPL-3.0",
     "main": "src/index.ts",

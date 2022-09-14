@@ -49,7 +49,7 @@ export class PollVoteUpdate {
      *
      * However, most of the major implementations
      * (tested with TDLib and Bot API, official apps
-     * for Android, Desktop, iOS/macOS) and MTCute
+     * for Android, Desktop, iOS/macOS) and mtcute
      * (by default) create `option` as a one-byte `Buffer`,
      * incrementing from `48` (ASCII `0`) up to `57` (ASCII `9`),
      * and ASCII representation would define index in the array.

@@ -1,6 +1,6 @@
 # @mtcute/tl
 
-> TL schema and related utils used for MTCute.
+> TL schema and related utils used for mtcute.
 
 Generated from TL layer **145** (last updated on 03.09.2022).
 

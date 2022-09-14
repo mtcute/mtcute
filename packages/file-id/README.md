@@ -18,7 +18,7 @@ used by the library
 ## Acknowledgements
 This is basically a port of a portion of TDLib APIs, but greatly
 simplified in usage and made to work seamlessly with the rest of the
-MTCute APIs.
+mtcute APIs.
 
 This is a list of files from TDLib repository, from which most of the code was taken:
  - [td/telegram/files/FileManager.cpp](https://github.com/tdlib/td/blob/master/td/telegram/files/FileManager.cpp)

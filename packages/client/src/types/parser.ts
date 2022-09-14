@@ -4,7 +4,7 @@ import { MessageEntity } from '../types'
 
 /**
  * Interface describing a message entity parser.
- * MTCute comes with HTML parser inside `@mtcute/html-parser`
+ * mtcute comes with HTML parser inside `@mtcute/html-parser`
  * and MarkdownV2 parser inside `@mtcute/markdown-parser`,
  * implemented similar to how they are described
  * in the [Bot API documentation](https://core.telegram.org/bots/api#formatting-options).

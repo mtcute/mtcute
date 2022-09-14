@@ -1,6 +1,6 @@
 # @mtcute/html-parser
 
-> HTML entities parser for MTCute
+> HTML entities parser for mtcute
 
 This package implements formatting syntax based on HTML, similar to the one available in the Bot
 API ([documented here](https://core.telegram.org/bots/api#html-style))

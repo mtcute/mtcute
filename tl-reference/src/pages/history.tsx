@@ -49,7 +49,7 @@ export default function HistoryPage({ data }: { data: GraphqlResult }) {
                 Telegram's website.
                 <br />
                 <br />
-                Note that schemas for MTCute are merged from Telegram Desktop
+                Note that schemas for mtcute are merged from Telegram Desktop
                 and TDLib repositories, and thus may not be exactly the same as
                 in history.
             </Typography>

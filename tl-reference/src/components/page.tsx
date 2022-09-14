@@ -81,7 +81,7 @@ export function Page({
                             variant="body2"
                             className={classes.footer}
                         >
-                            &copy; MTCute TL reference. This website is{' '}
+                            &copy; mtcute TL reference. This website is{' '}
                             <MuiLink href="https://github.com/mtcute/mtcute/tree/master/tl-reference">
                                 open-source
                             </MuiLink>{' '}

@@ -1,6 +1,6 @@
 # @mtcute/markdown-parser
 
-> Markdown entities parser for MTCute
+> Markdown entities parser for mtcute
 
 This package implements formatting syntax similar to Markdown (CommonMark) but slightly adjusted and simplified.
 

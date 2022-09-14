@@ -147,7 +147,7 @@ export namespace BaseTelegramClient {
          * If true, RPC errors will have a stack trace of the initial `.call()`
          * or `.sendForResult()` call position, which drastically improves
          * debugging experience.<br>
-         * If false, they will have a stack trace of MTCute internals.
+         * If false, they will have a stack trace of mtcute internals.
          *
          * Internally this creates a stack capture before every RPC call
          * and stores it until the result is received. This might
@@ -322,7 +322,7 @@ export class BaseTelegramClient extends EventEmitter {
 
         this.storage.setup?.(this.log, this._readerMap, this._writerMap)
 
-        let deviceModel = 'MTCute on '
+        let deviceModel = 'mtcute on '
         if (typeof process !== 'undefined' && typeof require !== 'undefined') {
             const os = require('os')
             deviceModel += `${os.type()} ${os.arch()} ${os.release()}`
@@ -960,7 +960,7 @@ export class BaseTelegramClient extends EventEmitter {
      * > In case you have accidentally leaked this string,
      * > make sure to revoke this session in account settings:
      * > "Privacy & Security" > "Active sessions" >
-     * > find the one containing `MTCute` > Revoke,
+     * > find the one containing `mtcute` > Revoke,
      * > or, in case this is a bot, revoke bot token
      * > with [@BotFather](//t.me/botfather)
      */
