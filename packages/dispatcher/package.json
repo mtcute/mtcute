@@ -12,7 +12,7 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/tl": "workspace:^145.0.0",
+        "@mtcute/tl": "workspace:^146.0.0",
         "@mtcute/core": "workspace:^1.0.0",
         "@mtcute/client": "workspace:^1.0.0",
         "events": "^3.2.0"
