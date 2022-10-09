@@ -38,6 +38,7 @@ import { ITelegramStorage, MemoryStorage } from './storage'
 
 import defaultReaderMap from '@mtcute/tl/binary/reader'
 import defaultWriterMap from '@mtcute/tl/binary/writer'
+import { readStringSession, writeStringSession } from "./utils/string-session";
 
 export namespace BaseTelegramClient {
     export interface Options {
@@ -444,41 +445,23 @@ export class BaseTelegramClient extends EventEmitter {
         )
 
         if ((this._importForce || !this.primaryConnection.getAuthKey()) && this._importFrom) {
-            const buf = parseUrlSafeBase64(this._importFrom)
-            if (buf[0] !== 1)
-                throw new Error(`Invalid session string (version = ${buf[0]})`)
+            const data = readStringSession(this._readerMap, this._importFrom)
 
-            const reader = new TlBinaryReader(this._readerMap, buf, 1)
-
-            const flags = reader.int()
-            const hasSelf = flags & 1
-
-            if (!(flags & 2) !== !this._testMode) {
+            if (data.testMode !== !this._testMode) {
                 throw new Error(
                     'This session string is not for the current backend'
                 )
             }
 
-            const primaryDc = reader.object()
-            if (primaryDc._ !== 'dcOption') {
-                throw new Error(
-                    `Invalid session string (dc._ = ${primaryDc._})`
-                )
+            this._primaryDc = this.primaryConnection.params.dc = data.primaryDc
+            await this.storage.setDefaultDc(data.primaryDc)
+
+            if (data.self) {
+                await this.storage.setSelf(data.self)
             }
 
-            this._primaryDc = this.primaryConnection.params.dc = primaryDc
-            await this.storage.setDefaultDc(primaryDc)
-
-            if (hasSelf) {
-                const selfId = reader.int53()
-                const selfBot = reader.boolean()
-
-                await this.storage.setSelf({ userId: selfId, isBot: selfBot })
-            }
-
-            const key = reader.bytes()
-            await this.primaryConnection.setupKeys(key)
-            await this.storage.setAuthKeyFor(primaryDc.id, key)
+            await this.primaryConnection.setupKeys(data.authKey)
+            await this.storage.setAuthKeyFor(data.primaryDc.id, data.authKey)
 
             await this._saveStorage(true)
         }
@@ -968,35 +951,13 @@ export class BaseTelegramClient extends EventEmitter {
         if (!this.primaryConnection.getAuthKey())
             throw new Error('Auth key is not generated yet')
 
-        const writer = TlBinaryWriter.alloc(this._writerMap, 512)
-
-        const self = await this.storage.getSelf()
-
-        const version = 1
-        let flags = 0
-
-        if (self) {
-            flags |= 1
-        }
-
-        if (this._testMode) {
-            flags |= 2
-        }
-
-        writer.buffer[0] = version
-        writer.pos += 1
-
-        writer.int(flags)
-        writer.object(this._primaryDc)
-
-        if (self) {
-            writer.int53(self.userId)
-            writer.boolean(self.isBot)
-        }
-
-        writer.bytes(this.primaryConnection.getAuthKey()!)
-
-        return encodeUrlSafeBase64(writer.result())
+        return writeStringSession(this._writerMap, {
+            version: 1,
+            self: await this.storage.getSelf(),
+            testMode: this._testMode,
+            primaryDc: this._primaryDc,
+            authKey: this.primaryConnection.getAuthKey()!,
+        })
     }
 
     /**
