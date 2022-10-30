@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
 
-import { TelegramClient } from '../client'
+import { TelegramClient } from '../../client'
 import {
     BotChatJoinRequestUpdate,
     BotStoppedUpdate,
@@ -18,7 +18,7 @@ import {
     PollVoteUpdate,
     UserStatusUpdate,
     UserTypingUpdate,
-} from '../types'
+} from '../index'
 
 type ParserFunction = (
     client: TelegramClient,

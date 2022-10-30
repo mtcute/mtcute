@@ -13,7 +13,7 @@ import { TelegramClient } from '../client'
 import { normalizeToInputChannel } from '../utils/peer-utils'
 import { extractChannelIdFromUpdate } from '../utils/misc-utils'
 import { MtArgumentError, PeersIndex } from '../types'
-import { _parseUpdate } from '../utils/parse-update'
+import { _parseUpdate } from '../types/updates/parse-update'
 
 // @copy
 import { ConditionVariable } from '@mtcute/core/src/utils/condition-variable'
