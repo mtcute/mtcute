@@ -30,11 +30,10 @@ export class PreCheckoutQuery {
      * User who sent the query
      */
     get user(): User {
-        if (!this._user) {
-            this._user = new User(this.client, this._peers.user(this.userId))
-        }
-
-        return this._user
+        return (this._user ??= new User(
+            this.client,
+            this._peers.user(this.userId)
+        ))
     }
 
     /**

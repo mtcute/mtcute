@@ -113,14 +113,9 @@ export class MessageReactions {
             return []
         }
 
-        if (!this._recentReactions) {
-            this._recentReactions = this.raw.recentReactions.map(
-                (reaction) =>
-                    new PeerReaction(this.client, reaction, this._peers)
-            )
-        }
-
-        return this._recentReactions
+        return (this._recentReactions ??= this.raw.recentReactions.map(
+            (reaction) => new PeerReaction(this.client, reaction, this._peers)
+        ))
     }
 
     /**

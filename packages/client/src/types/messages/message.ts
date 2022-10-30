@@ -403,7 +403,7 @@ export class Message {
      *
      * For unsupported events, use `.raw.action` directly.
      */
-    get action(): MessageAction {
+    get action(): MessageAction | null {
         if (!this._action) {
             if (this.raw._ === 'message') {
                 this._action = null
@@ -412,7 +412,7 @@ export class Message {
             }
         }
 
-        return this._action!
+        return this._action
     }
 
     private _media?: MessageMedia
@@ -431,7 +431,11 @@ export class Message {
             ) {
                 this._media = null
             } else {
-                this._media = _messageMediaFromTl(this.client, this._peers, this.raw.media)
+                this._media = _messageMediaFromTl(
+                    this.client,
+                    this._peers,
+                    this.raw.media
+                )
             }
         }
 

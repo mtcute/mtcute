@@ -205,14 +205,10 @@ export class StickerSet {
      * (i.e. first sticker should be used as thumbnail)
      */
     get thumbnails(): ReadonlyArray<Thumbnail> {
-        if (!this._thumbnails) {
-            this._thumbnails =
-                this.brief.thumbs?.map(
-                    (sz) => new Thumbnail(this.client, this.brief, sz)
-                ) ?? []
-        }
-
-        return this._thumbnails
+        return (this._thumbnails ??=
+            this.brief.thumbs?.map(
+                (sz) => new Thumbnail(this.client, this.brief, sz)
+            ) ?? [])
     }
 
     /**

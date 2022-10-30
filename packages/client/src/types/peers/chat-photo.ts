@@ -91,21 +91,17 @@ export class ChatPhotoSize extends FileLocation {
      * TDLib and Bot API compatible unique File ID representing this size
      */
     get uniqueFileId(): string {
-        if (!this._uniqueFileId) {
-            this._uniqueFileId = toUniqueFileId(
-                tdFileId.FileType.ProfilePhoto,
-                {
-                    _: 'photo',
-                    id: this.obj.photoId,
-                    source: {
-                        _: 'dialogPhoto',
-                        big: this.big,
-                    } as any,
-                }
-            )
-        }
-
-        return this._uniqueFileId
+        return (this._uniqueFileId ??= toUniqueFileId(
+            tdFileId.FileType.ProfilePhoto,
+            {
+                _: 'photo',
+                id: this.obj.photoId,
+                source: {
+                    _: 'dialogPhoto',
+                    big: this.big,
+                } as any,
+            }
+        ))
     }
 }
 
@@ -133,31 +129,24 @@ export class ChatPhoto {
 
     /** Chat photo file location in small resolution (160x160) */
     get small(): ChatPhotoSize {
-        if (!this._smallFile) {
-            this._smallFile = new ChatPhotoSize(
-                this.client,
-                this.peer,
-                this.obj,
-                false
-            )
-        }
-
-        return this._smallFile
+        return (this._smallFile ??= new ChatPhotoSize(
+            this.client,
+            this.peer,
+            this.obj,
+            false
+        ))
     }
 
     private _bigFile?: ChatPhotoSize
+
     /** Chat photo file location in big resolution (640x640) */
     get big(): ChatPhotoSize {
-        if (!this._bigFile) {
-            this._bigFile = new ChatPhotoSize(
-                this.client,
-                this.peer,
-                this.obj,
-                true
-            )
-        }
-
-        return this._bigFile
+        return (this._bigFile ??= new ChatPhotoSize(
+            this.client,
+            this.peer,
+            this.obj,
+            true
+        ))
     }
 
     private _thumb?: Buffer
@@ -168,11 +157,7 @@ export class ChatPhoto {
     get thumb(): Buffer | null {
         if (!this.obj.strippedThumb) return null
 
-        if (!this._thumb) {
-            this._thumb = strippedPhotoToJpg(this.obj.strippedThumb)
-        }
-
-        return this._thumb
+        return (this._thumb ??= strippedPhotoToJpg(this.obj.strippedThumb))
     }
 }
 

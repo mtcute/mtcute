@@ -30,14 +30,10 @@ export class BotStoppedUpdate {
      * User who stopped or restarted the bot
      */
     get user(): User {
-        if (!this._user) {
-            this._user = new User(
-                this.client,
-                this._peers.user(this.raw.userId)
-            )
-        }
-
-        return this._user
+        return (this._user ??= new User(
+            this.client,
+            this._peers.user(this.raw.userId)
+        ))
     }
 
     /**

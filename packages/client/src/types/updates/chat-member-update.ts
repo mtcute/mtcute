@@ -177,14 +177,10 @@ export class ChatMemberUpdate {
      * Can be chat/channel administrator or the {@link user} themself.
      */
     get actor(): User {
-        if (!this._actor) {
-            this._actor = new User(
-                this.client,
-                this._peers.user(this.raw.actorId)
-            )
-        }
-
-        return this._actor
+        return (this._actor ??= new User(
+            this.client,
+            this._peers.user(this.raw.actorId)
+        ))
     }
 
     private _user?: User
@@ -192,14 +188,10 @@ export class ChatMemberUpdate {
      * User representing the chat member whose status was changed.
      */
     get user(): User {
-        if (!this._user) {
-            this._user = new User(
-                this.client,
-                this._peers.user(this.raw.userId)
-            )
-        }
-
-        return this._user
+        return (this._user ??= new User(
+            this.client,
+            this._peers.user(this.raw.userId)
+        ))
     }
 
     private _oldMember?: ChatMember
@@ -209,15 +201,11 @@ export class ChatMemberUpdate {
     get oldMember(): ChatMember | null {
         if (!this.raw.prevParticipant) return null
 
-        if (!this._oldMember) {
-            this._oldMember = new ChatMember(
-                this.client,
-                this.raw.prevParticipant,
-                this._peers
-            )
-        }
-
-        return this._oldMember
+        return (this._oldMember ??= new ChatMember(
+            this.client,
+            this.raw.prevParticipant,
+            this._peers
+        ))
     }
 
     private _newMember?: ChatMember
@@ -227,15 +215,11 @@ export class ChatMemberUpdate {
     get newMember(): ChatMember | null {
         if (!this.raw.newParticipant) return null
 
-        if (!this._newMember) {
-            this._newMember = new ChatMember(
-                this.client,
-                this.raw.newParticipant,
-                this._peers
-            )
-        }
-
-        return this._newMember
+        return (this._newMember ??= new ChatMember(
+            this.client,
+            this.raw.newParticipant,
+            this._peers
+        ))
     }
 
     private _inviteLink?: ChatInviteLink
@@ -245,11 +229,10 @@ export class ChatMemberUpdate {
     get inviteLink(): ChatInviteLink | null {
         if (!this.raw.invite) return null
 
-        if (!this._inviteLink) {
-            this._inviteLink = new ChatInviteLink(this.client, this.raw.invite)
-        }
-
-        return this._inviteLink
+        return (this._inviteLink ??= new ChatInviteLink(
+            this.client,
+            this.raw.invite
+        ))
     }
 }
 

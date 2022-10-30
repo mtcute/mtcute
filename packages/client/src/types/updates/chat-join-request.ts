@@ -41,13 +41,9 @@ export class ChatJoinRequestUpdate {
      * Users who recently requested to join the chat
      */
     get recentRequesters(): User[] {
-        if (!this._recentRequesters) {
-            this._recentRequesters = this.raw.recentRequesters.map(
-                (id) => new User(this.client, this._peers.user(id))
-            )
-        }
-
-        return this._recentRequesters
+        return (this._recentRequesters ??= this.raw.recentRequesters.map(
+            (id) => new User(this.client, this._peers.user(id))
+        ))
     }
 
     /**

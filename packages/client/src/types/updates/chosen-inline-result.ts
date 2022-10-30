@@ -31,14 +31,10 @@ export class ChosenInlineResult {
      * User who has chosen the query
      */
     get user(): User {
-        if (!this._user) {
-            this._user = new User(
-                this.client,
-                this._peers.user(this.raw.userId)
-            )
-        }
-
-        return this._user
+        return (this._user ??= new User(
+            this.client,
+            this._peers.user(this.raw.userId)
+        ))
     }
 
     /**
@@ -56,11 +52,7 @@ export class ChosenInlineResult {
     get location(): Location | null {
         if (this.raw.geo?._ !== 'geoPoint') return null
 
-        if (!this._location) {
-            this._location = new Location(this.client, this.raw.geo)
-        }
-
-        return this._location
+        return (this._location ??= new Location(this.client, this.raw.geo))
     }
 
     /**

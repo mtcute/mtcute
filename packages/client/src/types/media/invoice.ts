@@ -41,15 +41,11 @@ export class InvoiceExtendedMediaPreview {
             return null
         }
 
-        if (!this._thumbnail) {
-            this._thumbnail = new Thumbnail(
-                this.client,
-                this.raw,
-                this.raw.thumb
-            )
-        }
-
-        return this._thumbnail
+        return (this._thumbnail ??= new Thumbnail(
+            this.client,
+            this.raw,
+            this.raw.thumb
+        ))
     }
 
     /**
@@ -107,11 +103,7 @@ export class Invoice {
     get photo(): WebDocument | null {
         if (!this.raw.photo) return null
 
-        if (!this._photo) {
-            this._photo = new WebDocument(this.client, this.raw.photo)
-        }
-
-        return this._photo
+        return (this._photo ??= new WebDocument(this.client, this.raw.photo))
     }
 
     /**
@@ -168,14 +160,10 @@ export class Invoice {
         if (this.raw.extendedMedia?._ !== 'messageExtendedMediaPreview')
             throw new MtArgumentError('No extended media preview available')
 
-        if (!this._extendedMediaPreview) {
-            this._extendedMediaPreview = new InvoiceExtendedMediaPreview(
-                this.client,
-                this.raw.extendedMedia
-            )
-        }
-
-        return this._extendedMediaPreview
+        return (this._extendedMediaPreview ??= new InvoiceExtendedMediaPreview(
+            this.client,
+            this.raw.extendedMedia
+        ))
     }
 
     private _extendedMedia?: MessageMedia
@@ -185,19 +173,15 @@ export class Invoice {
      * Otherwise, throws an error.
      */
     get extendedMedia(): MessageMedia {
-        if (this.raw.extendedMedia?._ !== "messageExtendedMedia") {
+        if (this.raw.extendedMedia?._ !== 'messageExtendedMedia') {
             throw new MtArgumentError('No extended media available')
         }
 
-        if (!this._extendedMedia) {
-            this._extendedMedia = _messageMediaFromTl(
-                this.client,
-                null,
-                this.raw.extendedMedia.media
-            )
-        }
-
-        return this._extendedMedia
+        return (this._extendedMedia ??= _messageMediaFromTl(
+            this.client,
+            null,
+            this.raw.extendedMedia.media
+        ))
     }
 
     /**

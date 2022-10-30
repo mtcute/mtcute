@@ -31,14 +31,10 @@ export class BotChatJoinRequestUpdate {
      * Object containing the chat information.
      */
     get chat(): Chat {
-        if (!this._chat) {
-            this._chat = new Chat(
-                this.client,
-                this._peers.chat(getBarePeerId(this.raw.peer))
-            )
-        }
-
-        return this._chat
+        return (this._chat ??= new Chat(
+            this.client,
+            this._peers.chat(getBarePeerId(this.raw.peer))
+        ))
     }
 
     /**
@@ -53,14 +49,10 @@ export class BotChatJoinRequestUpdate {
      * Object containing the user information.
      */
     get user(): User {
-        if (!this._user) {
-            this._user = new User(
-                this.client,
-                this._peers.user(this.raw.userId)
-            )
-        }
-
-        return this._user
+        return (this._user ??= new User(
+            this.client,
+            this._peers.user(this.raw.userId)
+        ))
     }
 
     /**
@@ -83,11 +75,10 @@ export class BotChatJoinRequestUpdate {
      * Invite link used to request joining.
      */
     get invite(): ChatInviteLink {
-        if (!this._invite) {
-            this._invite = new ChatInviteLink(this.client, this.raw.invite)
-        }
-
-        return this._invite
+        return (this._invite ??= new ChatInviteLink(
+            this.client,
+            this.raw.invite
+        ))
     }
 
     /**

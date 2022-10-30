@@ -18,14 +18,10 @@ export class ChatLocation {
      * Location of the chat
      */
     get location(): Location {
-        if (!this._location) {
-            this._location = new Location(
-                this.client,
-                this.raw.geoPoint as tl.RawGeoPoint
-            )
-        }
-
-        return this._location
+        return (this._location ??= new Location(
+            this.client,
+            this.raw.geoPoint as tl.RawGeoPoint
+        ))
     }
 
     /**

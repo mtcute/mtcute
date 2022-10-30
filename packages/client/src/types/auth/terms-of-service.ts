@@ -36,13 +36,9 @@ export class TermsOfService {
      * Terms of Service entities text
      */
     get entities(): ReadonlyArray<MessageEntity> {
-        if (!this._entities) {
-            this._entities = this.tos.entities
-                .map((it) => MessageEntity._parse(it))
-                .filter((it) => it !== null) as MessageEntity[]
-        }
-
-        return this._entities
+        return (this._entities ??= this.tos.entities
+            .map((it) => MessageEntity._parse(it))
+            .filter((it) => it !== null) as MessageEntity[])
     }
 }
 

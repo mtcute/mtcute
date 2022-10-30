@@ -252,15 +252,11 @@ export class User {
     get photo(): ChatPhoto | null {
         if (this.raw.photo?._ !== 'userProfilePhoto') return null
 
-        if (!this._photo) {
-            this._photo = new ChatPhoto(
-                this.client,
-                this.inputPeer,
-                this.raw.photo
-            )
-        }
-
-        return this._photo
+        return (this._photo ??= new ChatPhoto(
+            this.client,
+            this.inputPeer,
+            this.raw.photo
+        ))
     }
 
     /**

@@ -60,15 +60,11 @@ export class Video extends RawDocument {
      * (represented either by actual GIF or a silent MP4 video)
      */
     get isAnimation(): boolean {
-        if (!this._isAnimation) {
-            this._isAnimation =
-                this.attr._ === 'documentAttributeImageSize' ||
-                this.raw.attributes.some(
-                    (it) => it._ === 'documentAttributeAnimated'
-                )
-        }
-
-        return this._isAnimation
+        return (this._isAnimation ??=
+            this.attr._ === 'documentAttributeImageSize' ||
+            this.raw.attributes.some(
+                (it) => it._ === 'documentAttributeAnimated'
+            ))
     }
 
     /**

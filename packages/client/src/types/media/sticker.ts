@@ -204,8 +204,8 @@ export class Sticker extends RawDocument {
         if (this.attr._ !== 'documentAttributeSticker' || !this.attr.maskCoords)
             return null
 
-        const raw = this.attr.maskCoords
         if (!this._maskPosition) {
+            const raw = this.attr.maskCoords
             this._maskPosition = {
                 point: MASK_POS[raw.n],
                 x: raw.x,

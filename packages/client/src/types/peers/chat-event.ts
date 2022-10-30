@@ -538,23 +538,15 @@ export class ChatEvent {
      * Actor of the event
      */
     get actor(): User {
-        if (!this._actor) {
-            this._actor = new User(
-                this.client,
-                this._peers.user(this.raw.userId)
-            )
-        }
-
-        return this._actor
+        return (this._actor ??= new User(
+            this.client,
+            this._peers.user(this.raw.userId)
+        ))
     }
 
     private _action?: ChatEvent.Action
     get action(): ChatEvent.Action {
-        if (!this._action) {
-            this._action = _actionFromTl.call(this, this.raw.action)
-        }
-
-        return this._action!
+        return (this._action ??= _actionFromTl.call(this, this.raw.action))
     }
 }
 

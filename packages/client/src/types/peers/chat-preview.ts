@@ -63,11 +63,7 @@ export class ChatPreview {
     get photo(): Photo | null {
         if (this.invite.photo._ === 'photoEmpty') return null
 
-        if (!this._photo) {
-            this._photo = new Photo(this.client, this.invite.photo)
-        }
-
-        return this._photo
+        return (this._photo ??= new Photo(this.client, this.invite.photo))
     }
 
     private _someMembers?: User[]
@@ -79,15 +75,9 @@ export class ChatPreview {
      * ordered before others.
      */
     get someMembers(): ReadonlyArray<User> {
-        if (!this._someMembers) {
-            this._someMembers = this.invite.participants
-                ? this.invite.participants.map(
-                      (it) => new User(this.client, it)
-                  )
-                : []
-        }
-
-        return this._someMembers
+        return (this._someMembers ??= this.invite.participants
+            ? this.invite.participants.map((it) => new User(this.client, it))
+            : [])
     }
 
     /**

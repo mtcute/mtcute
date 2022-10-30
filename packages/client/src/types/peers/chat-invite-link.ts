@@ -83,14 +83,10 @@ export class ChatInviteLink {
     get creator(): User | null {
         if (!this._peers) return null
 
-        if (!this._creator) {
-            this._creator = new User(
-                this.client,
-                this._peers.user(this.raw.adminId)
-            )
-        }
-
-        return this._creator
+        return (this._creator ??= new User(
+            this.client,
+            this._peers.user(this.raw.adminId)
+        ))
     }
 
     /**

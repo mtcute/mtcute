@@ -45,11 +45,7 @@ export class Game {
     get photo(): Photo | null {
         if (this.game.photo._ === 'photoEmpty') return null
 
-        if (!this._photo) {
-            this._photo = new Photo(this.client, this.game.photo)
-        }
-
-        return this._photo
+        return (this._photo ??= new Photo(this.client, this.game.photo))
     }
 
     private _animation?: Video | null

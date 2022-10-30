@@ -131,20 +131,16 @@ export class RawDocument extends FileLocation {
      * representing this document.
      */
     get fileId(): string {
-        if (!this._fileId) {
-            this._fileId = toFileId({
-                type: this._fileIdType(),
-                dcId: this.raw.dcId,
-                fileReference: this.raw.fileReference,
-                location: {
-                    _: 'common',
-                    id: this.raw.id,
-                    accessHash: this.raw.accessHash,
-                },
-            })
-        }
-
-        return this._fileId
+        return (this._fileId ??= toFileId({
+            type: this._fileIdType(),
+            dcId: this.raw.dcId,
+            fileReference: this.raw.fileReference,
+            location: {
+                _: 'common',
+                id: this.raw.id,
+                accessHash: this.raw.accessHash,
+            },
+        }))
     }
 
     protected _uniqueFileId?: string
@@ -152,14 +148,10 @@ export class RawDocument extends FileLocation {
      * Get a unique File ID representing this document.
      */
     get uniqueFileId(): string {
-        if (!this._uniqueFileId) {
-            this._uniqueFileId = toUniqueFileId(td.FileType.Document, {
-                _: 'common',
-                id: this.raw.id,
-            })
-        }
-
-        return this._uniqueFileId
+        return (this._uniqueFileId ??= toUniqueFileId(td.FileType.Document, {
+            _: 'common',
+            id: this.raw.id,
+        }))
     }
 }
 

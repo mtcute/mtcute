@@ -33,14 +33,10 @@ export class CallbackQuery {
      * User who has pressed the button
      */
     get user(): User {
-        if (!this._user) {
-            this._user = new User(
-                this.client,
-                this._peers.user(this.raw.userId)
-            )
-        }
-
-        return this._user
+        return (this._user ??= new User(
+            this.client,
+            this._peers.user(this.raw.userId)
+        ))
     }
 
     /**
@@ -155,11 +151,7 @@ export class CallbackQuery {
     get dataStr(): string | null {
         if (!this.raw.data) return null
 
-        if (!this._dataStr) {
-            this._dataStr = this.raw.data.toString('utf8')
-        }
-
-        return this._dataStr
+        return (this._dataStr ??= this.raw.data.toString('utf8'))
     }
 
     /**

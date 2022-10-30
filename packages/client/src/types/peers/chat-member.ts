@@ -200,11 +200,9 @@ export class ChatMember {
     get restrictions(): ChatPermissions | null {
         if (this.raw._ !== 'channelParticipantBanned') return null
 
-        if (!this._restrictions) {
-            this._restrictions = new ChatPermissions(this.raw.bannedRights)
-        }
-
-        return this._restrictions
+        return (this._restrictions ??= new ChatPermissions(
+            this.raw.bannedRights
+        ))
     }
 
     /**

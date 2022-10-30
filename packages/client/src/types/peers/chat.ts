@@ -281,15 +281,11 @@ export class Chat {
         )
             return null
 
-        if (!this._photo) {
-            this._photo = new ChatPhoto(
-                this.client,
-                this.inputPeer,
-                this.peer.photo
-            )
-        }
-
-        return this._photo
+        return (this._photo ??= new ChatPhoto(
+            this.client,
+            this.inputPeer,
+            this.peer.photo
+        ))
     }
 
     /**
@@ -386,11 +382,9 @@ export class Chat {
         if (!('bannedRights' in this.peer && this.peer.bannedRights))
             return null
 
-        if (!this._permissions) {
-            this._permissions = new ChatPermissions(this.peer.bannedRights)
-        }
-
-        return this._permissions
+        return (this._permissions ??= new ChatPermissions(
+            this.peer.bannedRights
+        ))
     }
 
     /**
@@ -403,13 +397,9 @@ export class Chat {
         )
             return null
 
-        if (!this._permissions) {
-            this._permissions = new ChatPermissions(
-                this.peer.defaultBannedRights
-            )
-        }
-
-        return this._permissions
+        return (this._permissions ??= new ChatPermissions(
+            this.peer.defaultBannedRights
+        ))
     }
 
     /**
@@ -439,14 +429,10 @@ export class Chat {
         )
             return null
 
-        if (!this._location) {
-            this._location = new ChatLocation(
-                this.client,
-                this.fullPeer.location
-            )
-        }
-
-        return this._location
+        return (this._location ??= new ChatLocation(
+            this.client,
+            this.fullPeer.location
+        ))
     }
 
     private _linkedChat?: Chat
@@ -469,8 +455,7 @@ export class Chat {
     get user(): User | null {
         if (this.peer._ !== 'user') return null
 
-        if (!this._user) this._user = new User(this.client, this.peer)
-        return this._user
+        return (this._user ??= new User(this.client, this.peer))
     }
 
     /** @internal */
