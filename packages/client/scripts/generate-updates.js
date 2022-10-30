@@ -99,7 +99,7 @@ function toSentence(type, stype = 'inline') {
 function generateParsedUpdate() {
     replaceSections('types/updates/index.ts', {
         codegen: 'export type ParsedUpdate =\n'
-            + types.map((typ) => `    | { name: '${typ.typeName}', data: ${typ.updateType} }\n`).join(''),
+            + types.map((typ) => `    | { name: '${typ.typeName}'; data: ${typ.updateType} }\n`).join(''),
     })
 }
 
