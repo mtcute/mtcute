@@ -4,3 +4,5 @@ errors.d.ts
 errors.js
 binary/reader.js
 binary/writer.js
+
+diff.json

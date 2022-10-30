@@ -6,6 +6,7 @@ export const DESCRIPTIONS_YAML_FILE = join(
     '../data/descriptions.yaml'
 )
 export const API_SCHEMA_JSON_FILE = join(__dirname, '../api-schema.json')
+export const API_SCHEMA_DIFF_JSON_FILE = join(__dirname, '../diff.json')
 export const MTP_SCHEMA_JSON_FILE = join(__dirname, '../mtp-schema.json')
 export const ERRORS_JSON_FILE = join(__dirname, '../raw-errors.json')
 

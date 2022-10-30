@@ -12,6 +12,7 @@ import {
     TlEntry,
     TlFullSchema,
     writeTlEntryToString,
+    generateTlSchemasDifference,
 } from '@mtcute/tl-utils'
 import { readdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
@@ -25,6 +26,7 @@ import {
     TDLIB_SCHEMA,
     COREFORK_DOMAIN,
     BLOGFORK_DOMAIN,
+    API_SCHEMA_DIFF_JSON_FILE,
 } from './constants'
 import { fetchRetry } from './utils'
 import {
@@ -32,7 +34,7 @@ import {
     fetchDocumentation,
     getCachedDocumentation,
 } from './documentation'
-import { packTlSchema } from './schema'
+import { packTlSchema, unpackTlSchema } from "./schema";
 import { bumpVersion } from '../../../scripts/version'
 
 const README_MD_FILE = join(__dirname, '../README.md')
@@ -312,6 +314,16 @@ async function main() {
     applyDocumentation(resultSchema, docs)
 
     await overrideInt53(resultSchema)
+
+    console.log('Writing diff to file...')
+    const oldSchema = unpackTlSchema(JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')))
+    await writeFile(
+        API_SCHEMA_DIFF_JSON_FILE,
+        JSON.stringify({
+            layer: [oldSchema[1], resultLayer],
+            diff: generateTlSchemasDifference(oldSchema[0], resultSchema),
+        }, null, 4)
+    )
 
     console.log('Writing result to file...')
     await writeFile(
