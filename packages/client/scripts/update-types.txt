@@ -14,3 +14,4 @@ history_read = HistoryReadUpdate
 bot_stopped = BotStoppedUpdate
 bot_chat_join_request = BotChatJoinRequestUpdate
 chat_join_request = ChatJoinRequestUpdate
+pre_checkout_query = PreCheckoutQuery

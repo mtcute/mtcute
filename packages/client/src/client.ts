@@ -43,6 +43,7 @@ import {
     Poll,
     PollUpdate,
     PollVoteUpdate,
+    PreCheckoutQuery,
     RawDocument,
     ReplyMarkup,
     SentCode,
@@ -83,6 +84,7 @@ import { startTest } from './methods/auth/start-test'
 import { start } from './methods/auth/start'
 import { answerCallbackQuery } from './methods/bots/answer-callback-query'
 import { answerInlineQuery } from './methods/bots/answer-inline-query'
+import { answerPreCheckoutQuery } from './methods/bots/answer-pre-checkout-query'
 import { deleteMyCommands } from './methods/bots/delete-my-commands'
 import { getBotMenuButton } from './methods/bots/get-bot-menu-button'
 import { getCallbackAnswer } from './methods/bots/get-callback-answer'
@@ -411,6 +413,16 @@ export interface TelegramClient extends BaseTelegramClient {
     on(
         name: 'chat_join_request',
         handler: (upd: ChatJoinRequestUpdate) => void
+    ): this
+    /**
+     * Register a pre checkout query handler
+     *
+     * @param name  Event name
+     * @param handler  Pre checkout query handler
+     */
+    on(
+        name: 'pre_checkout_query',
+        handler: (upd: PreCheckoutQuery) => void
     ): this
     /**
      * Accept the given TOS
@@ -830,6 +842,13 @@ export interface TelegramClient extends BaseTelegramClient {
             parseMode?: string | null
         }
     ): Promise<void>
+    /**
+     * Answer a pre-checkout query.
+     *
+     * @param queryId  Pre-checkout query ID
+     * @param error  If pre-checkout is rejected, error message to show to the user
+     */
+    answerPreCheckoutQuery(queryId: tl.Long, error?: string): Promise<void>
     /**
      * Delete commands for the current bot and the given scope.
      *
@@ -4100,6 +4119,7 @@ export class TelegramClient extends BaseTelegramClient {
     start = start
     answerCallbackQuery = answerCallbackQuery
     answerInlineQuery = answerInlineQuery
+    answerPreCheckoutQuery = answerPreCheckoutQuery
     deleteMyCommands = deleteMyCommands
     getBotMenuButton = getBotMenuButton
     getCallbackAnswer = getCallbackAnswer

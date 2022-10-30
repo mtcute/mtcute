@@ -18,6 +18,7 @@ import {
     PollVoteUpdate,
     UserStatusUpdate,
     UserTypingUpdate,
+    PreCheckoutQuery
 } from '../index'
 
 type ParserFunction = (
@@ -123,6 +124,10 @@ const PARSERS: Partial<
         (client, upd, peers) =>
             new ChatJoinRequestUpdate(client, upd as any, peers),
     ],
+    updateBotPrecheckoutQuery: [
+        'pre_checkout_query',
+        (client, upd, peers) => new PreCheckoutQuery(client, upd as any, peers),
+    ]
 }
 
 /** @internal */

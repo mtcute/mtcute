@@ -11,6 +11,7 @@ import { HistoryReadUpdate } from './history-read-update'
 import { BotStoppedUpdate } from './bot-stopped'
 import { BotChatJoinRequestUpdate } from './bot-chat-join-request'
 import { ChatJoinRequestUpdate } from './chat-join-request'
+import { PreCheckoutQuery } from './pre-checkout-query'
 
 export {
     DeleteMessageUpdate,
@@ -24,6 +25,7 @@ export {
     BotStoppedUpdate,
     BotChatJoinRequestUpdate,
     ChatJoinRequestUpdate,
+    PreCheckoutQuery,
 }
 
 // begin-codegen
@@ -43,5 +45,6 @@ export type ParsedUpdate =
     | { name: 'bot_stopped'; data: BotStoppedUpdate }
     | { name: 'bot_chat_join_request'; data: BotChatJoinRequestUpdate }
     | { name: 'chat_join_request'; data: ChatJoinRequestUpdate }
+    | { name: 'pre_checkout_query'; data: PreCheckoutQuery }
 
 // end-codegen

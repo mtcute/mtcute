@@ -16,6 +16,7 @@ import {
     BotStoppedUpdate,
     BotChatJoinRequestUpdate,
     ChatJoinRequestUpdate,
+    PreCheckoutQuery,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 
@@ -28,7 +29,11 @@ export interface BaseUpdateHandler<Name, Handler, Checker> {
     check?: Checker
 }
 
-export type ParsedUpdateHandler<Name, Update, State = never> = BaseUpdateHandler<
+export type ParsedUpdateHandler<
+    Name,
+    Update,
+    State = never
+> = BaseUpdateHandler<
     Name,
     (update: Update, state: State) => MaybeAsync<void | PropagationAction>,
     (update: Update, state: State) => MaybeAsync<boolean>
@@ -102,6 +107,10 @@ export type BotChatJoinRequestHandler<T = BotChatJoinRequestUpdate> =
     ParsedUpdateHandler<'bot_chat_join_request', T>
 export type ChatJoinRequestHandler<T = ChatJoinRequestUpdate> =
     ParsedUpdateHandler<'chat_join_request', T>
+export type PreCheckoutQueryHandler<T = PreCheckoutQuery> = ParsedUpdateHandler<
+    'pre_checkout_query',
+    T
+>
 
 export type UpdateHandler =
     | RawUpdateHandler
@@ -120,5 +129,6 @@ export type UpdateHandler =
     | BotStoppedHandler
     | BotChatJoinRequestHandler
     | ChatJoinRequestHandler
+    | PreCheckoutQueryHandler
 
 // end-codegen

@@ -19,6 +19,7 @@ import {
     BotStoppedUpdate,
     BotChatJoinRequestUpdate,
     ChatJoinRequestUpdate,
+    PreCheckoutQuery,
 } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
 
@@ -41,6 +42,7 @@ import {
     BotStoppedHandler,
     BotChatJoinRequestHandler,
     ChatJoinRequestHandler,
+    PreCheckoutQueryHandler,
 } from './handler'
 // end-codegen-imports
 
@@ -1552,6 +1554,37 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     /** @internal */
     onChatJoinRequest(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('chat_join_request', filter, handler, group)
+    }
+
+    /**
+     * Register a pre checkout query handler without any filters
+     *
+     * @param handler  Pre checkout query handler
+     * @param group  Handler group index
+     */
+    onPreCheckoutQuery(
+        handler: PreCheckoutQueryHandler['callback'],
+        group?: number
+    ): void
+
+    /**
+     * Register a pre checkout query handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Pre checkout query handler
+     * @param group  Handler group index
+     */
+    onPreCheckoutQuery<Mod>(
+        filter: UpdateFilter<PreCheckoutQuery, Mod>,
+        handler: PreCheckoutQueryHandler<
+            filters.Modify<PreCheckoutQuery, Mod>
+        >['callback'],
+        group?: number
+    ): void
+
+    /** @internal */
+    onPreCheckoutQuery(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('pre_checkout_query', filter, handler, group)
     }
 
     // end-codegen
