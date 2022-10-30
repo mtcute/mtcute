@@ -431,7 +431,7 @@ export class Message {
             ) {
                 this._media = null
             } else {
-                this._media = _messageMediaFromTl.call(this, this.raw.media)
+                this._media = _messageMediaFromTl(this.client, this._peers, this.raw.media)
             }
         }
 

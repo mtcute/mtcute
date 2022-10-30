@@ -132,6 +132,9 @@ export async function _normalizeInputMedia(
                 data: JSON.stringify(media.providerData),
             },
             startParam: media.startParam,
+            extendedMedia: media.extendedMedia
+                ? await this._normalizeInputMedia(media.extendedMedia, params)
+                : undefined,
         }
     }
 

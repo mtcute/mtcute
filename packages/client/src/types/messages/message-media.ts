@@ -19,6 +19,9 @@ import {
 } from '../media'
 import { parseDocument } from '../media/document-utils'
 import { Message } from './message'
+import { TelegramClient } from '../../client'
+import { PeersIndex } from '../peers'
+import { MtTypeAssertionError } from '../errors'
 
 /** A media inside of a {@link Message} */
 export type MessageMedia =
@@ -38,41 +41,53 @@ export type MessageMedia =
     | Poll
     | Invoice
     | null
+
 // todo: successful_payment, connected_website
 
 /** @internal */
 export function _messageMediaFromTl(
-    this: Message,
+    client: TelegramClient,
+    peers: PeersIndex | null,
     m: tl.TypeMessageMedia
 ): MessageMedia {
     switch (m._) {
         case 'messageMediaPhoto':
             if (!(m.photo?._ === 'photo')) return null
-            return new Photo(this.client, m.photo)
+            return new Photo(client, m.photo)
         case 'messageMediaDice':
             return new Dice(m)
         case 'messageMediaContact':
             return new Contact(m)
         case 'messageMediaDocument':
             if (!(m.document?._ === 'document')) return null
-            return parseDocument(this.client, m.document) as MessageMedia
+            return parseDocument(client, m.document) as MessageMedia
         case 'messageMediaGeo':
             if (!(m.geo._ === 'geoPoint')) return null
-            return new Location(this.client, m.geo)
+            return new Location(client, m.geo)
         case 'messageMediaGeoLive':
             if (!(m.geo._ === 'geoPoint')) return null
-            return new LiveLocation(this.client, m)
+            return new LiveLocation(client, m)
         case 'messageMediaGame':
-            return new Game(this.client, m.game)
+            return new Game(client, m.game)
         case 'messageMediaWebPage':
             if (!(m.webpage._ === 'webPage')) return null
-            return new WebPage(this.client, m.webpage)
+            return new WebPage(client, m.webpage)
         case 'messageMediaVenue':
-            return new Venue(this.client, m)
+            return new Venue(client, m)
         case 'messageMediaPoll':
-            return new Poll(this.client, m.poll, this._peers, m.results)
+            if (!peers) {
+                // should only be possible in extended media
+                // (and afaik polls can't be there)
+                throw new MtTypeAssertionError(
+                    "can't create poll without peers index",
+                    'PeersIndex',
+                    'null'
+                )
+            }
+
+            return new Poll(client, m.poll, peers, m.results)
         case 'messageMediaInvoice':
-            return new Invoice(this.client, m)
+            return new Invoice(client, m)
         default:
             return null
     }

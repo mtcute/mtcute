@@ -435,6 +435,11 @@ export interface InputMediaInvoice extends CaptionMixin {
      * Can be a URL, or a TL object with input web document
      */
     photo?: string | tl.TypeInputWebDocument
+
+    /**
+     * Extended media (i.e. media that will be available once the invoice is paid)
+     */
+    extendedMedia?: InputMediaLike
 }
 
 /**

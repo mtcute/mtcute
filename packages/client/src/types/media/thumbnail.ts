@@ -54,11 +54,19 @@ export class Thumbnail extends FileLocation {
     readonly height: number
 
     private _path?: string
-    private _media: tl.RawPhoto | tl.RawDocument | tl.RawStickerSet
+    private _media:
+        | tl.RawPhoto
+        | tl.RawDocument
+        | tl.RawStickerSet
+        | tl.RawMessageExtendedMediaPreview
 
     constructor(
         client: TelegramClient,
-        media: tl.RawPhoto | tl.RawDocument | tl.RawStickerSet,
+        media:
+            | tl.RawPhoto
+            | tl.RawDocument
+            | tl.RawStickerSet
+            | tl.RawMessageExtendedMediaPreview,
         sz: tl.TypePhotoSize | tl.TypeVideoSize
     ) {
         switch (sz._) {
@@ -99,6 +107,13 @@ export class Thumbnail extends FileLocation {
                         },
                         thumbVersion: media.thumbVersion!,
                     }
+                } else if (media._ === 'messageExtendedMediaPreview') {
+                    // according to tdlib and tdesktop sources, sz can only be photoStrippedSize
+                    throw new MtTypeAssertionError(
+                        'messageExtendedMediaPreview#thumb',
+                        'photoStrippedSize',
+                        sz._
+                    )
                 } else {
                     location = {
                         _:
@@ -124,7 +139,11 @@ export class Thumbnail extends FileLocation {
             client,
             location,
             size,
-            media._ === 'stickerSet' ? media.thumbDcId : media.dcId
+            media._ === 'stickerSet'
+                ? media.thumbDcId
+                : media._ === 'messageExtendedMediaPreview'
+                ? 0
+                : media.dcId
         )
         this.raw = sz
         this.width = width
@@ -176,7 +195,8 @@ export class Thumbnail extends FileLocation {
             if (
                 this.raw._ !== 'photoSize' &&
                 this.raw._ !== 'photoSizeProgressive' &&
-                this.raw._ !== 'videoSize'
+                this.raw._ !== 'videoSize' ||
+                this._media._ === 'messageExtendedMediaPreview' // just for type safety
             ) {
                 throw new MtArgumentError(
                     `Cannot generate a file ID for "${this.raw.type}"`
@@ -238,7 +258,8 @@ export class Thumbnail extends FileLocation {
             if (
                 this.raw._ !== 'photoSize' &&
                 this.raw._ !== 'photoSizeProgressive' &&
-                this.raw._ !== 'videoSize'
+                this.raw._ !== 'videoSize' ||
+                this._media._ === 'messageExtendedMediaPreview' // just for type safety
             ) {
                 throw new MtArgumentError(
                     `Cannot generate a unique file ID for "${this.raw.type}"`

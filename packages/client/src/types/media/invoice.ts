@@ -3,7 +3,63 @@ import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
 import { WebDocument } from '../files/web-document'
-import { MtArgumentError } from '../errors'
+import { MtArgumentError, MtTypeAssertionError } from '../errors'
+import { _messageMediaFromTl, MessageMedia } from '../messages'
+import { Thumbnail } from './thumbnail'
+
+/**
+ * Information about invoice's extended media.
+ *  - `none`: there is no extended media in this invoice
+ *  - `preview`: there is only a preview of this invoice's media ({@link Invoice.extendedMediaPreview})
+ *  - `full`: there is a full version of this invoice's media available ({@link Invoice.extendedMedia})
+ */
+export type InvoiceExtendedMediaState = 'none' | 'preview' | 'full'
+
+export class InvoiceExtendedMediaPreview {
+    constructor(
+        public readonly client: TelegramClient,
+        public readonly raw: tl.RawMessageExtendedMediaPreview
+    ) {}
+
+    /**
+     * Width of the preview, in pixels (if available, else 0)
+     */
+    get width(): number {
+        return this.raw.w ?? 0
+    }
+
+    /**
+     * Height of the preview, in pixels (if available, else 0)
+     */
+    get height(): number {
+        return this.raw.h ?? 0
+    }
+
+    private _thumbnail?: Thumbnail
+    get thumbnail(): Thumbnail | null {
+        if (!this.raw.thumb) {
+            return null
+        }
+
+        if (!this._thumbnail) {
+            this._thumbnail = new Thumbnail(
+                this.client,
+                this.raw,
+                this.raw.thumb
+            )
+        }
+
+        return this._thumbnail
+    }
+
+    /**
+     * If this is a video, the duration of the video,
+     * in seconds (if available, else 0)
+     */
+    get videoDuration(): number {
+        return this.raw.videoDuration ?? 0
+    }
+}
 
 /**
  * An invoice
@@ -93,6 +149,58 @@ export class Invoice {
     }
 
     /**
+     * If this invoice has extended media
+     */
+    get extendedMediaState(): InvoiceExtendedMediaState {
+        if (!this.raw.extendedMedia) return 'none'
+        if (this.raw.extendedMedia._ === 'messageExtendedMediaPreview')
+            return 'preview'
+        return 'full'
+    }
+
+    private _extendedMediaPreview?: InvoiceExtendedMediaPreview
+    /**
+     * Get the invoice's extended media preview.
+     * Only available if {@link extendedMediaState} is `preview`.
+     * Otherwise, throws an error.
+     */
+    get extendedMediaPreview(): InvoiceExtendedMediaPreview {
+        if (this.raw.extendedMedia?._ !== 'messageExtendedMediaPreview')
+            throw new MtArgumentError('No extended media preview available')
+
+        if (!this._extendedMediaPreview) {
+            this._extendedMediaPreview = new InvoiceExtendedMediaPreview(
+                this.client,
+                this.raw.extendedMedia
+            )
+        }
+
+        return this._extendedMediaPreview
+    }
+
+    private _extendedMedia?: MessageMedia
+    /**
+     * Get the invoice's extended media.
+     * Only available if {@link extendedMediaState} is `full`.
+     * Otherwise, throws an error.
+     */
+    get extendedMedia(): MessageMedia {
+        if (this.raw.extendedMedia?._ !== "messageExtendedMedia") {
+            throw new MtArgumentError('No extended media available')
+        }
+
+        if (!this._extendedMedia) {
+            this._extendedMedia = _messageMediaFromTl(
+                this.client,
+                null,
+                this.raw.extendedMedia.media
+            )
+        }
+
+        return this._extendedMedia
+    }
+
+    /**
      * Input media TL object generated from this object,
      * to be used inside {@link InputMediaLike} and
      * {@link TelegramClient.sendMedia}.
@@ -108,3 +216,4 @@ export class Invoice {
 }
 
 makeInspectable(Invoice, undefined, ['inputMedia'])
+makeInspectable(InvoiceExtendedMediaPreview)
