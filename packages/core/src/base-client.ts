@@ -889,9 +889,17 @@ export class BaseTelegramClient extends EventEmitter {
 
             switch (peer._) {
                 case 'user':
+                    if (!peer.accessHash) {
+                        this.log.warn(
+                            'received user without access hash: %j',
+                            peer
+                        )
+                        continue
+                    }
+
                     parsedPeers.push({
                         id: peer.id,
-                        accessHash: peer.accessHash!,
+                        accessHash: peer.accessHash,
                         username: peer.username?.toLowerCase(),
                         phone: peer.phone,
                         type: 'user',
@@ -909,9 +917,16 @@ export class BaseTelegramClient extends EventEmitter {
                     break
                 case 'channel':
                 case 'channelForbidden':
+                    if (!peer.accessHash) {
+                        this.log.warn(
+                            'received user without access hash: %j',
+                            peer
+                        )
+                        continue
+                    }
                     parsedPeers.push({
                         id: toggleChannelIdMark(peer.id),
-                        accessHash: peer.accessHash!,
+                        accessHash: peer.accessHash,
                         username:
                             peer._ === 'channel'
                                 ? peer.username?.toLowerCase()

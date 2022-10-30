@@ -7,7 +7,7 @@ import {
 } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtNotFoundError } from '../../types'
+import { InputPeerLike, MtNotFoundError, MtTypeAssertionError } from "../../types";
 import { normalizeToInputPeer } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 
@@ -83,35 +83,58 @@ export async function resolvePeer(
                 const id = res.peer.userId
 
                 const found = res.users.find((it) => it.id === id)
-                if (found && found._ === 'user')
+                if (found && found._ === 'user') {
+                    if (!found.accessHash) {
+                        // no access hash, we can't use it
+                        // this may happen when bot resolves a username
+                        // of a user who hasn't started a conversation with it
+                        throw new MtNotFoundError(
+                            `Peer (user) with username ${peerId} was found, but it has no access hash`
+                        )
+                    }
+
                     return {
                         _: 'inputPeerUser',
                         userId: found.id,
-                        accessHash: found.accessHash!,
+                        accessHash: found.accessHash,
                     }
-            } else {
-                const id =
-                    res.peer._ === 'peerChannel'
-                        ? res.peer.channelId
-                        : res.peer.chatId
-
+                }
+            } else if (res.peer._ === 'peerChannel') {
+                const id = res.peer.channelId
                 const found = res.chats.find((it) => it.id === id)
-                if (found)
-                    switch (found._) {
-                        case 'channel':
-                        case 'channelForbidden':
-                            return {
-                                _: 'inputPeerChannel',
-                                channelId: found.id,
-                                accessHash: found.accessHash!,
-                            }
-                        case 'chat':
-                        case 'chatForbidden':
-                            return {
-                                _: 'inputPeerChat',
-                                chatId: found.id,
-                            }
+
+                if (found) {
+                    if (!(found._ === 'channel' || found._ === 'channelForbidden')) {
+                        // chats can't have usernames
+                        // furthermore, our id is a channel id, so it must be a channel
+                        // this should never happen, unless Telegram goes crazy
+                        throw new MtTypeAssertionError(
+                            'contacts.resolveUsername#chats',
+                            'channel',
+                            found._
+                        )
                     }
+
+                    if (!found.accessHash) {
+                        // shouldn't happen? but just in case
+                        throw new MtNotFoundError(
+                            `Peer (channel) with username ${peerId} was found, but it has no access hash`
+                        )
+                    }
+
+                    return {
+                        _: 'inputPeerChannel',
+                        channelId: found.id,
+                        accessHash: found.accessHash,
+                    }
+                }
+            } else {
+                // chats can't have usernames
+                throw new MtTypeAssertionError(
+                    'contacts.resolveUsername',
+                    'user or channel',
+                    res.peer._
+                )
             }
 
             throw new MtNotFoundError(
@@ -137,12 +160,20 @@ export async function resolvePeer(
             })
 
             const found = res.find((it) => it.id === peerId)
-            if (found && found._ === 'user')
+            if (found && found._ === 'user') {
+                if (!found.accessHash) {
+                    // shouldn't happen? but just in case
+                    throw new MtNotFoundError(
+                        `Peer (user) with username ${peerId} was found, but it has no access hash`
+                    )
+                }
+
                 return {
                     _: 'inputPeerUser',
                     userId: found.id,
-                    accessHash: found.accessHash!,
+                    accessHash: found.accessHash,
                 }
+            }
 
             break
         }
@@ -185,12 +216,20 @@ export async function resolvePeer(
             if (
                 found &&
                 (found._ === 'channel' || found._ === 'channelForbidden')
-            )
+            ) {
+                if (!found.accessHash) {
+                    // shouldn't happen? but just in case
+                    throw new MtNotFoundError(
+                        `Peer (channel) with username ${peerId} was found, but it has no access hash`
+                    )
+                }
+
                 return {
                     _: 'inputPeerChannel',
                     channelId: found.id,
-                    accessHash: found.accessHash!,
+                    accessHash: found.accessHash ?? Long.ZERO,
                 }
+            }
 
             break
         }
