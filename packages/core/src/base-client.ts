@@ -35,6 +35,8 @@ import {
 import { addPublicKey } from './utils/crypto/keys'
 import { readStringSession, writeStringSession } from './utils/string-session'
 
+import { ConfigManager } from './network/config-manager'
+
 export interface BaseTelegramClientOptions {
     /**
      * API ID from my.telegram.org
@@ -247,8 +249,9 @@ export class BaseTelegramClient extends EventEmitter {
     protected _lastUpdateTime = 0
     private _floodWaitedRequests: Record<string, number> = {}
 
-    protected _config?: tl.RawConfig
-    protected _cdnConfig?: tl.RawCdnConfig
+    protected _config = new ConfigManager(() =>
+        this.call({ _: 'help.getConfig' })
+    )
 
     private _additionalConnections: SessionConnection[] = []
 
@@ -499,88 +502,14 @@ export class BaseTelegramClient extends EventEmitter {
     async close(): Promise<void> {
         await this._onClose()
 
+        this._config.destroy()
+
         this._cleanupPrimaryConnection(true)
         // close additional connections
         this._additionalConnections.forEach((conn) => conn.destroy())
 
         await this._saveStorage()
         await this.storage.destroy?.()
-    }
-
-    /**
-     * Utility function to find the DC by its ID.
-     *
-     * @param id  Datacenter ID
-     * @param preferMedia  Whether to prefer media-only DCs
-     * @param cdn  Whether the needed DC is a CDN DC
-     */
-    async getDcById(
-        id: number,
-        preferMedia = false,
-        cdn = false,
-    ): Promise<tl.RawDcOption> {
-        if (!this._config) {
-            this._config = await this.call({ _: 'help.getConfig' })
-        }
-
-        if (cdn && !this._cdnConfig) {
-            this._cdnConfig = await this.call({ _: 'help.getCdnConfig' })
-
-            for (const key of this._cdnConfig.publicKeys) {
-                await addPublicKey(this._crypto, key.publicKey)
-            }
-        }
-
-        if (this._useIpv6) {
-            // first try to find ipv6 dc
-
-            let found
-
-            if (preferMedia) {
-                found = this._config.dcOptions.find(
-                    (it) =>
-                        it.id === id &&
-                        it.mediaOnly &&
-                        it.cdn === cdn &&
-                        it.ipv6 &&
-                        !it.tcpoOnly,
-                )
-            }
-
-            if (!found) {
-                found = this._config.dcOptions.find(
-                    (it) =>
-                        it.id === id &&
-                        it.cdn === cdn &&
-                        it.ipv6 &&
-                        !it.tcpoOnly,
-                )
-            }
-
-            if (found) return found
-        }
-
-        let found
-
-        if (preferMedia) {
-            found = this._config.dcOptions.find(
-                (it) =>
-                    it.id === id &&
-                    it.mediaOnly &&
-                    it.cdn === cdn &&
-                    !it.tcpoOnly &&
-                    !it.ipv6,
-            )
-        }
-        if (!found) {
-            found = this._config.dcOptions.find(
-                (it) =>
-                    it.id === id && it.cdn === cdn && !it.tcpoOnly && !it.ipv6,
-            )
-        }
-        if (found) return found
-
-        throw new Error(`Could not find${cdn ? ' CDN' : ''} DC ${id}`)
     }
 
     /**
@@ -591,7 +520,12 @@ export class BaseTelegramClient extends EventEmitter {
      */
     async changeDc(newDc: tl.RawDcOption | number): Promise<void> {
         if (typeof newDc === 'number') {
-            newDc = await this.getDcById(newDc)
+            const res = await this._config.findOption({
+                dcId: newDc,
+                allowIpv6: this._useIpv6,
+            })
+            if (!res) throw new Error('DC not found')
+            newDc = res
         }
 
         this._primaryDc = newDc
@@ -764,7 +698,13 @@ export class BaseTelegramClient extends EventEmitter {
             disableUpdates?: boolean
         },
     ): Promise<SessionConnection> {
-        const dc = await this.getDcById(dcId, params?.media, params?.cdn)
+        const dc = await this._config.findOption({
+            dcId,
+            preferMedia: params?.media,
+            cdn: params?.cdn,
+            allowIpv6: this._useIpv6,
+        })
+        if (!dc) throw new Error('DC not found')
         const connection = new SessionConnection(
             {
                 dc,
