@@ -41,6 +41,7 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
     layer: number
     disableUpdates?: boolean
     isMainConnection: boolean
+    usePfs?: boolean
 
     readerMap: TlReaderMap
     writerMap: TlWriterMap
@@ -77,6 +78,10 @@ export class SessionConnection extends PersistentConnection {
     private _lastPingMsgId = Long.ZERO
     private _lastSessionCreatedUid = Long.ZERO
 
+    private _isPfsBindingPending = false
+    private _isPfsBindingPendingInBackground = false
+    private _pfsUpdateTimeout?: NodeJS.Timeout
+
     private _readerMap: TlReaderMap
     private _writerMap: TlWriterMap
 
@@ -94,16 +99,15 @@ export class SessionConnection extends PersistentConnection {
 
     async changeDc(dc: tl.RawDcOption, authKey?: Buffer | null): Promise<void> {
         this._session.reset()
-        await this._session.setupKeys(authKey)
+        await this._session._authKey.setup(authKey)
         await super.changeDc(dc)
     }
 
-    setupKeys(authKey: Buffer | null): Promise<void> {
-        return this._session.setupKeys(authKey)
-    }
+    getAuthKey(temp = false): Buffer | null {
+        const key = temp ? this._session._authKeyTemp : this._session._authKey
 
-    getAuthKey(): Buffer | undefined {
-        return this._session._authKey
+        if (!key.ready) return null
+        return key.key
     }
 
     onTransportClose(): void {
@@ -130,10 +134,12 @@ export class SessionConnection extends PersistentConnection {
     }
 
     protected async onConnected(): Promise<void> {
-        if (this._session.authorized) {
-            this.onConnectionUsable()
-        } else {
+        if (!this._session._authKey.ready) {
+            this.log.debug('no perm auth key, authorizing...')
             this._authorize()
+        } else {
+            this.log.debug('auth keys are already available')
+            this.onConnectionUsable()
         }
     }
 
@@ -193,7 +199,7 @@ export class SessionConnection extends PersistentConnection {
     private _authorize(): void {
         doAuthorization(this, this.params.crypto)
             .then(async ([authKey, serverSalt, timeOffset]) => {
-                await this._session.setupKeys(authKey)
+                await this._session._authKey.setup(authKey)
                 this._session.serverSalt = serverSalt
                 this._session._timeOffset = timeOffset
 
@@ -209,7 +215,7 @@ export class SessionConnection extends PersistentConnection {
     }
 
     protected async onMessage(data: Buffer): Promise<void> {
-        if (!this._session.authorized) {
+        if (!this._session._authKey.ready) {
             // if a message is received before authorization,
             // either the server is misbehaving,
             // or there was a problem with authorization.
@@ -219,7 +225,11 @@ export class SessionConnection extends PersistentConnection {
         }
 
         try {
-            await this._session.decryptMessage(data, this._handleRawMessage)
+            await this._session._authKey.decryptMessage(
+                data,
+                this._session._sessionId,
+                this._handleRawMessage
+            )
         } catch (err) {
             this.log.error('failed to decrypt message: %s\ndata: %h', err, data)
         }
@@ -1123,7 +1133,7 @@ export class SessionConnection extends PersistentConnection {
     }
 
     private _flush(): void {
-        if (!this._session.authorized || this._current429Timeout) {
+        if (!this._session._authKey.ready || this._current429Timeout) {
             // it will be flushed once connection is usable
             return
         }
@@ -1551,8 +1561,12 @@ export class SessionConnection extends PersistentConnection {
             rootMsgId,
         )
 
-        this._session
-            .encryptMessage(result)
+        this._session._authKey
+            .encryptMessage(
+                result,
+                this._session.serverSalt,
+                this._session._sessionId
+            )
             .then((enc) => this.send(enc))
             .catch((err) => {
                 this.log.error(
