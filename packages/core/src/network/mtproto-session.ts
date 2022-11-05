@@ -11,7 +11,75 @@ import {
 
 import { getRandomInt, ICryptoProvider, Logger, randomLong } from '../utils'
 import { buffersEqual, randomBytes } from '../utils/buffer-utils'
+import {
+    ICryptoProvider,
+    Logger,
+    getRandomInt,
+    randomLong,
+    ControllablePromise,
+    LruSet,
+    Deque,
+    SortedArray,
+    LongMap,
+} from '../utils'
 import { createAesIgeForMessage } from '../utils/crypto/mtproto'
+
+export interface PendingRpc {
+    method: string
+    data: Buffer
+    promise: ControllablePromise
+    stack?: string
+    gzipOverhead?: number
+
+    sent?: boolean
+    msgId?: Long
+    seqNo?: number
+    containerId?: Long
+    acked?: boolean
+    initConn?: boolean
+    getState?: number
+    cancelled?: boolean
+    timeout?: number
+}
+
+export type PendingMessage =
+    | {
+          _: 'rpc'
+          rpc: PendingRpc
+      }
+    | {
+          _: 'container'
+          msgIds: Long[]
+      }
+    | {
+          _: 'state'
+          msgIds: Long[]
+          containerId: Long
+      }
+    | {
+          _: 'resend'
+          msgIds: Long[]
+          containerId: Long
+      }
+    | {
+          _: 'ping'
+          pingId: Long
+          containerId: Long
+      }
+    | {
+          _: 'destroy_session'
+          sessionId: Long
+          containerId: Long
+      }
+    | {
+          _: 'cancel'
+          msgId: Long
+          containerId: Long
+      }
+    | {
+          _: 'future_salts'
+          containerId: Long
+      }
 
 /**
  * Class encapsulating a single MTProto session.
@@ -33,6 +101,27 @@ export class MtprotoSession {
 
     serverSalt = Long.ZERO
 
+    /// state ///
+    // recent msg ids
+    recentOutgoingMsgIds = new LruSet<Long>(1000, false, true)
+    recentIncomingMsgIds = new LruSet<Long>(1000, false, true)
+
+    // queues
+    queuedRpc = new Deque<PendingRpc>()
+    queuedAcks: Long[] = []
+    queuedStateReq: Long[] = []
+    queuedResendReq: Long[] = []
+    queuedCancelReq: Long[] = []
+    getStateSchedule = new SortedArray<PendingRpc>(
+        [],
+        (a, b) => a.getState! - b.getState!
+    )
+
+    // requests info
+    pendingMessages = new LongMap<PendingMessage>()
+
+    initConnectionCalled = false
+
     constructor(
         crypto: ICryptoProvider,
         readonly log: Logger,
@@ -40,6 +129,7 @@ export class MtprotoSession {
         readonly _writerMap: TlWriterMap,
     ) {
         this._crypto = crypto
+        this.log.prefix = `[SESSION ${this._sessionId.toString(16)}] `
     }
 
     /** Whether session contains authKey */
@@ -50,11 +140,13 @@ export class MtprotoSession {
     /** Setup keys based on authKey */
     async setupKeys(authKey?: Buffer | null): Promise<void> {
         if (authKey) {
+            this.log.debug('setting up keys')
             this._authKey = authKey
             this._authKeyClientSalt = authKey.slice(88, 120)
             this._authKeyServerSalt = authKey.slice(96, 128)
             this._authKeyId = (await this._crypto.sha1(this._authKey)).slice(-8)
         } else {
+            this.log.debug('resetting keys')
             this._authKey = undefined
             this._authKeyClientSalt = undefined
             this._authKeyServerSalt = undefined
@@ -62,22 +154,76 @@ export class MtprotoSession {
         }
     }
 
-    /** Reset session by removing authKey and values derived from it */
+    /**
+     * Reset session by removing authKey and values derived from it,
+     * as well as resetting session state
+     */
     reset(): void {
-        this._lastMessageId = Long.ZERO
-        this._seqNo = 0
-
         this._authKey = undefined
         this._authKeyClientSalt = undefined
         this._authKeyServerSalt = undefined
         this._authKeyId = undefined
-        this._sessionId = randomLong()
-        // no need to reset server salt
+
+        this.resetState()
     }
 
-    changeSessionId(): void {
-        this._sessionId = randomLong()
+    /**
+     * Reset session state and generate a new session ID.
+     *
+     * By default, also cancels any pending RPC requests.
+     * If `keepPending` is set to `true`, pending requests will be kept
+     */
+    resetState(keepPending = false): void {
+        this._lastMessageId = Long.ZERO
         this._seqNo = 0
+
+        this._sessionId = randomLong()
+        this.log.debug('session reset, new sid = %l', this._sessionId)
+        this.log.prefix = `[SESSION ${this._sessionId.toString(16)}] `
+
+        // reset session state
+
+        if (!keepPending) {
+            for (const info of this.pendingMessages.values()) {
+                if (info._ === 'rpc') {
+                    info.rpc.promise.reject(new Error('Session is reset'))
+                }
+            }
+            this.pendingMessages.clear()
+        }
+
+        this.recentOutgoingMsgIds.clear()
+        this.recentIncomingMsgIds.clear()
+
+        if (!keepPending) {
+            while (this.queuedRpc.length) {
+                const rpc = this.queuedRpc.popFront()!
+
+                if (rpc.sent === false) {
+                    rpc.promise.reject(new Error('Session is reset'))
+                }
+            }
+        }
+
+        this.queuedAcks.length = 0
+        this.queuedStateReq.length = 0
+        this.queuedResendReq.length = 0
+        this.getStateSchedule.clear()
+    }
+
+    enqueueRpc(rpc: PendingRpc, force?: boolean): boolean {
+        // already queued or cancelled
+        if ((!force && !rpc.sent) || rpc.cancelled) return false
+
+        rpc.sent = false
+        rpc.containerId = undefined
+        this.log.debug(
+            'enqueued %s for sending (msg_id = %s)',
+            rpc.method,
+            rpc.msgId || 'n/a'
+        )
+        this.queuedRpc.pushBack(rpc)
+        return true
     }
 
     /** Encrypt a single MTProto message using session's keys */

@@ -6,7 +6,9 @@ import { ICryptoProvider, Logger } from '../utils'
 import {
     ControllablePromise,
     createControllablePromise,
-} from '../utils/controllable-promise'
+    ICryptoProvider,
+    Logger,
+} from '../utils'
 import { ReconnectionStrategy } from './reconnection'
 import {
     ITelegramTransport,
@@ -23,11 +25,15 @@ export interface PersistentConnectionParams {
     inactivityTimeout?: number
 }
 
+let nextConnectionUid = 0
+
 /**
  * Base class for persistent connections.
  * Only used for {@link PersistentConnection} and used as a mean of code splitting.
  */
 export abstract class PersistentConnection extends EventEmitter {
+    private _uid = nextConnectionUid++
+
     readonly params: PersistentConnectionParams
     private _transport!: ITelegramTransport
 
@@ -62,6 +68,18 @@ export abstract class PersistentConnection extends EventEmitter {
         super()
         this.params = params
         this.changeTransport(params.transportFactory)
+    }
+
+    private _updateLogPrefix() {
+        this.log.prefix = `[UID ${this._uid}, DC ${this.params.dc.id}] `
+    }
+
+    async changeDc(dc: tl.RawDcOption): Promise<void> {
+        this.log.debug('dc changed to: %j', dc)
+
+        this.params.dc = dc
+        this._updateLogPrefix()
+        this.reconnect()
     }
 
     changeTransport(factory: TransportFactory): void {

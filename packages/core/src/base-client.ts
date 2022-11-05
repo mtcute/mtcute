@@ -7,6 +7,9 @@ import defaultReaderMap from '@mtcute/tl/binary/reader'
 import defaultWriterMap from '@mtcute/tl/binary/writer'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
+import defaultReaderMap from '@mtcute/tl/binary/reader'
+import defaultWriterMap from '@mtcute/tl/binary/writer'
+
 import {
     defaultReconnectionStrategy,
     defaultTransportFactory,
@@ -22,6 +25,10 @@ import {
     createControllablePromise,
     CryptoProviderFactory,
     defaultCryptoProviderFactory,
+    sleep,
+    getAllPeersFrom,
+    LogManager,
+    toggleChannelIdMark,
     defaultProductionDc,
     defaultProductionIpv6Dc,
     defaultTestDc,
@@ -31,11 +38,26 @@ import {
     LogManager,
     sleep,
     toggleChannelIdMark,
+    ControllablePromise,
+    createControllablePromise,
+    readStringSession,
+    writeStringSession
 } from './utils'
 import { addPublicKey } from './utils/crypto/keys'
 import { readStringSession, writeStringSession } from './utils/string-session'
 
+import {
+    TransportFactory,
+    defaultReconnectionStrategy,
+    ReconnectionStrategy,
+    defaultTransportFactory,
+    SessionConnection,
+} from './network'
+import { PersistentConnectionParams } from './network/persistent-connection'
+import { ITelegramStorage, MemoryStorage } from './storage'
+
 import { ConfigManager } from './network/config-manager'
+import { NetworkManager } from "./network/network-manager";
 
 export interface BaseTelegramClientOptions {
     /**
@@ -66,27 +88,27 @@ export interface BaseTelegramClientOptions {
      */
     useIpv6?: boolean
 
-    /**
-     * Primary DC to use for initial connection.
-     * This does not mean this will be the only DC used,
-     * nor that this DC will actually be primary, this only
-     * determines the first DC the library will try to connect to.
-     * Can be used to connect to other networks (like test DCs).
-     *
-     * When session already contains primary DC, this parameter is ignored.
-     * Defaults to Production DC 2.
-     */
-    primaryDc?: tl.RawDcOption
+        /**
+         * Primary DC to use for initial connection.
+         * This does not mean this will be the only DC used,
+         * nor that this DC will actually be primary, this only
+         * determines the first DC the library will try to connect to.
+         * Can be used to connect to other networks (like test DCs).
+         *
+         * When session already contains primary DC, this parameter is ignored.
+         * Defaults to Production DC 2.
+         */
+        defaultDc?: tl.RawDcOption
 
-    /**
-     * Whether to connect to test servers.
-     *
-     * If passed, {@link primaryDc} defaults to Test DC 2.
-     *
-     * **Must** be passed if using test servers, even if
-     * you passed custom {@link primaryDc}
-     */
-    testMode?: boolean
+        /**
+         * Whether to connect to test servers.
+         *
+         * If passed, {@link defaultDc} defaults to Test DC 2.
+         *
+         * **Must** be passed if using test servers, even if
+         * you passed custom {@link defaultDc}
+         */
+        testMode?: boolean
 
     /**
      * Additional options for initConnection call.
@@ -180,19 +202,9 @@ export interface BaseTelegramClientOptions {
 
 export class BaseTelegramClient extends EventEmitter {
     /**
-     * `initConnection` params taken from {@link BaseTelegramClient.Options.initConnectionOptions}.
-     */
-    protected readonly _initConnectionParams: tl.RawInitConnectionRequest
-
-    /**
      * Crypto provider taken from {@link BaseTelegramClient.Options.crypto}
      */
     protected readonly _crypto: ICryptoProvider
-
-    /**
-     * Transport factory taken from {@link BaseTelegramClient.Options.transport}
-     */
-    protected readonly _transportFactory: TransportFactory
 
     /**
      * Telegram storage taken from {@link BaseTelegramClient.Options.storage}
@@ -215,11 +227,6 @@ export class BaseTelegramClient extends EventEmitter {
     protected readonly _testMode: boolean
 
     /**
-     * Reconnection strategy taken from {@link BaseTelegramClient.Options.reconnectionStrategy}
-     */
-    protected readonly _reconnectionStrategy: ReconnectionStrategy<PersistentConnectionParams>
-
-    /**
      * Flood sleep threshold taken from {@link BaseTelegramClient.Options.floodSleepThreshold}
      */
     protected readonly _floodSleepThreshold: number
@@ -230,22 +237,16 @@ export class BaseTelegramClient extends EventEmitter {
     protected readonly _rpcRetryCount: number
 
     /**
-     * "Disable updates" taken from {@link BaseTelegramClient.Options.disableUpdates}
-     */
-    protected readonly _disableUpdates: boolean
-
-    /**
-     * Primary DC taken from {@link BaseTelegramClient.Options.primaryDc},
+     * Primary DC taken from {@link BaseTelegramClient.Options.defaultDc},
      * loaded from session or changed by other means (like redirecting).
      */
-    protected _primaryDc: tl.RawDcOption
+    protected _defaultDc: tl.RawDcOption
 
     private _niceStacks: boolean
     readonly _layer: number
     readonly _readerMap: TlReaderMap
     readonly _writerMap: TlWriterMap
 
-    private _keepAliveInterval?: NodeJS.Timeout
     protected _lastUpdateTime = 0
     private _floodWaitedRequests: Record<string, number> = {}
 
@@ -259,14 +260,6 @@ export class BaseTelegramClient extends EventEmitter {
     private _connected: ControllablePromise<void> | boolean = false
 
     private _onError?: (err: unknown, connection?: SessionConnection) => void
-
-    /**
-     * The primary {@link SessionConnection} that is used for
-     * most of the communication with Telegram.
-     *
-     * Methods for downloading/uploading files may create additional connections as needed.
-     */
-    primaryConnection!: SessionConnection
 
     private _importFrom?: string
     private _importForce?: boolean
@@ -282,6 +275,7 @@ export class BaseTelegramClient extends EventEmitter {
     protected _handleUpdate(update: tl.TypeUpdates): void {}
 
     readonly log = new LogManager()
+    readonly network: NetworkManager
 
     constructor(opts: BaseTelegramClientOptions) {
         super()
@@ -293,14 +287,13 @@ export class BaseTelegramClient extends EventEmitter {
             throw new Error('apiId must be a number or a numeric string!')
         }
 
-        this._transportFactory = opts.transport ?? defaultTransportFactory
         this._crypto = (opts.crypto ?? defaultCryptoProviderFactory)()
         this.storage = opts.storage ?? new MemoryStorage()
         this._apiHash = opts.apiHash
         this._useIpv6 = Boolean(opts.useIpv6)
         this._testMode = Boolean(opts.testMode)
 
-        let dc = opts.primaryDc
+        let dc = opts.defaultDc
 
         if (!dc) {
             if (this._testMode) {
@@ -312,42 +305,33 @@ export class BaseTelegramClient extends EventEmitter {
             }
         }
 
-        this._primaryDc = dc
+        this._defaultDc = dc
         this._reconnectionStrategy =
             opts.reconnectionStrategy ?? defaultReconnectionStrategy
         this._floodSleepThreshold = opts.floodSleepThreshold ?? 10000
         this._rpcRetryCount = opts.rpcRetryCount ?? 5
-        this._disableUpdates = opts.disableUpdates ?? false
         this._niceStacks = opts.niceStacks ?? true
 
         this._layer = opts.overrideLayer ?? tl.LAYER
         this._readerMap = opts.readerMap ?? defaultReaderMap
         this._writerMap = opts.writerMap ?? defaultWriterMap
 
-        this.storage.setup?.(this.log, this._readerMap, this._writerMap)
-
-        let deviceModel = 'mtcute on '
-        if (typeof process !== 'undefined' && typeof require !== 'undefined') {
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const os = require('os')
-            deviceModel += `${os.type()} ${os.arch()} ${os.release()}`
-        } else if (typeof navigator !== 'undefined') {
-            deviceModel += navigator.userAgent
-        } else deviceModel += 'unknown'
-
-        this._initConnectionParams = {
-            _: 'initConnection',
-            deviceModel,
-            systemVersion: '1.0',
-            appVersion: '1.0.0',
-            systemLangCode: 'en',
-            langPack: '', // "langPacks are for official apps only"
-            langCode: 'en',
-            ...(opts.initConnectionOptions ?? {}),
+        this.network = new NetworkManager({
             apiId,
+            crypto: this._crypto,
+            disableUpdates: opts.disableUpdates ?? false,
+            initConnectionOptions: opts.initConnectionOptions,
+            layer: this._layer,
+            log: this.log,
+            readerMap: this._readerMap,
+            writerMap: this._writerMap,
+            reconnectionStrategy: opts.reconnectionStrategy,
+            storage: this.storage,
+            testMode: this._testMode,
+            transport: opts.transport,
+        }, this._config)
 
-            query: null as any,
-        }
+        this.storage.setup?.(this.log, this._readerMap, this._writerMap)
     }
 
     protected async _loadStorage(): Promise<void> {
@@ -433,6 +417,7 @@ export class BaseTelegramClient extends EventEmitter {
      */
     async connect(): Promise<void> {
         if (this._connected) {
+            // avoid double-connect
             await this._connected
 
             return
@@ -442,16 +427,14 @@ export class BaseTelegramClient extends EventEmitter {
 
         await this._loadStorage()
         const primaryDc = await this.storage.getDefaultDc()
-        if (primaryDc !== null) this._primaryDc = primaryDc
+        if (primaryDc !== null) this._defaultDc = primaryDc
 
-        this._setupPrimaryConnection()
+        const defaultDcAuthKey = await this.storage.getAuthKeyFor(this._defaultDc.id)
 
-        await this.primaryConnection.setupKeys(
-            await this.storage.getAuthKeyFor(this._primaryDc.id),
-        )
+        // await this.primaryConnection.setupKeys()
 
         if (
-            (this._importForce || !this.primaryConnection.getAuthKey()) &&
+            (this._importForce || !defaultDcAuthKey) &&
             this._importFrom
         ) {
             const data = readStringSession(this._readerMap, this._importFrom)
@@ -462,23 +445,23 @@ export class BaseTelegramClient extends EventEmitter {
                 )
             }
 
-            this._primaryDc = this.primaryConnection.params.dc = data.primaryDc
+            this._defaultDc = data.primaryDc
             await this.storage.setDefaultDc(data.primaryDc)
 
             if (data.self) {
                 await this.storage.setSelf(data.self)
             }
 
-            await this.primaryConnection.setupKeys(data.authKey)
+            // await this.primaryConnection.setupKeys(data.authKey)
             await this.storage.setAuthKeyFor(data.primaryDc.id, data.authKey)
 
             await this._saveStorage(true)
         }
 
+        this.network.connect(this._defaultDc)
+
         this._connected.resolve()
         this._connected = true
-
-        this.primaryConnection.connect()
     }
 
     /**
@@ -486,7 +469,8 @@ export class BaseTelegramClient extends EventEmitter {
      */
     async waitUntilUsable(): Promise<void> {
         return new Promise((resolve) => {
-            this.primaryConnection.once('usable', resolve)
+            // todo
+            // this.primaryConnection.once('usable', resolve)
         })
     }
 
@@ -503,8 +487,8 @@ export class BaseTelegramClient extends EventEmitter {
         await this._onClose()
 
         this._config.destroy()
+        this.network.destroy()
 
-        this._cleanupPrimaryConnection(true)
         // close additional connections
         this._additionalConnections.forEach((conn) => conn.destroy())
 
@@ -528,10 +512,11 @@ export class BaseTelegramClient extends EventEmitter {
             newDc = res
         }
 
-        this._primaryDc = newDc
+        this._defaultDc = newDc
         await this.storage.setDefaultDc(newDc)
         await this._saveStorage()
-        await this.primaryConnection.changeDc(newDc)
+        // todo
+        // await this.primaryConnection.changeDc(newDc)
     }
 
     /**
@@ -555,6 +540,7 @@ export class BaseTelegramClient extends EventEmitter {
             timeout?: number
         },
     ): Promise<tl.RpcCallReturn[T['_']]> {
+        // todo move to network manager
         if (this._connected !== true) {
             await this.connect()
         }
@@ -574,14 +560,12 @@ export class BaseTelegramClient extends EventEmitter {
             }
         }
 
-        const connection = params?.connection ?? this.primaryConnection
-
         let lastError: Error | null = null
         const stack = this._niceStacks ? new Error().stack : undefined
 
         for (let i = 0; i < this._rpcRetryCount; i++) {
             try {
-                const res = await connection.sendRpc(
+                const res = await this.network['_primaryDc']!.mainConnection.sendRpc(
                     message,
                     stack,
                     params?.timeout,
@@ -629,35 +613,35 @@ export class BaseTelegramClient extends EventEmitter {
                     }
                 }
 
-                if (connection.params.dc.id === this._primaryDc.id) {
-                    if (
-                        e.constructor === tl.errors.PhoneMigrateXError ||
-                        e.constructor === tl.errors.UserMigrateXError ||
-                        e.constructor === tl.errors.NetworkMigrateXError
-                    ) {
-                        this.log.info('Migrate error, new dc = %d', e.new_dc)
-                        await this.changeDc(e.new_dc)
-                        continue
-                    }
-                } else if (
-                    e.constructor === tl.errors.AuthKeyUnregisteredError
-                ) {
-                    // we can try re-exporting auth from the primary connection
-                    this.log.warn('exported auth key error, re-exporting..')
-
-                    const auth = await this.call({
-                        _: 'auth.exportAuthorization',
-                        dcId: connection.params.dc.id,
-                    })
-
-                    await connection.sendRpc({
-                        _: 'auth.importAuthorization',
-                        id: auth.id,
-                        bytes: auth.bytes,
-                    })
-
-                    continue
-                }
+                // if (connection.params.dc.id === this._defaultDc.id) {
+                //     if (
+                //         e.constructor === tl.errors.PhoneMigrateXError ||
+                //         e.constructor === tl.errors.UserMigrateXError ||
+                //         e.constructor === tl.errors.NetworkMigrateXError
+                //     ) {
+                //         this.log.info('Migrate error, new dc = %d', e.new_dc)
+                //         await this.changeDc(e.new_dc)
+                //         continue
+                //     }
+                // } else {
+                //     if (e.constructor === tl.errors.AuthKeyUnregisteredError) {
+                //         // we can try re-exporting auth from the primary connection
+                //         this.log.warn('exported auth key error, re-exporting..')
+                //
+                //         const auth = await this.call({
+                //             _: 'auth.exportAuthorization',
+                //             dcId: connection.params.dc.id,
+                //         })
+                //
+                //         await connection.sendRpc({
+                //             _: 'auth.importAuthorization',
+                //             id: auth.id,
+                //             bytes: auth.bytes,
+                //         })
+                //
+                //         continue
+                //     }
+                // }
 
                 throw e
             }
@@ -666,100 +650,100 @@ export class BaseTelegramClient extends EventEmitter {
         throw lastError
     }
 
-    /**
-     * Creates an additional connection to a given DC.
-     * This will use auth key for that DC that was already stored
-     * in the session, or generate a new auth key by exporting
-     * authorization from primary DC and importing it to the new DC.
-     * New connection will use the same crypto provider, `initConnection`,
-     * transport and reconnection strategy as the primary connection
-     *
-     * This method is quite low-level and you shouldn't usually care about this
-     * when using high-level API provided by `@mtcute/client`.
-     *
-     * @param dcId  DC id, to which the connection will be created
-     * @param cdn  Whether that DC is a CDN DC
-     * @param inactivityTimeout
-     *   Inactivity timeout for the connection (in ms), after which the transport will be closed.
-     *   Note that connection can still be used normally, it's just the transport which is closed.
-     *   Defaults to 5 min
-     */
-    async createAdditionalConnection(
-        dcId: number,
-        params?: {
-            // todo proper docs
-            // default = false
-            media?: boolean
-            // default = fa;se
-            cdn?: boolean
-            // default = 300_000
-            inactivityTimeout?: number
-            // default = false
-            disableUpdates?: boolean
-        },
-    ): Promise<SessionConnection> {
-        const dc = await this._config.findOption({
-            dcId,
-            preferMedia: params?.media,
-            cdn: params?.cdn,
-            allowIpv6: this._useIpv6,
-        })
-        if (!dc) throw new Error('DC not found')
-        const connection = new SessionConnection(
-            {
-                dc,
-                testMode: this._testMode,
-                crypto: this._crypto,
-                initConnection: this._initConnectionParams,
-                transportFactory: this._transportFactory,
-                reconnectionStrategy: this._reconnectionStrategy,
-                inactivityTimeout: params?.inactivityTimeout ?? 300_000,
-                layer: this._layer,
-                disableUpdates: params?.disableUpdates,
-                readerMap: this._readerMap,
-                writerMap: this._writerMap,
-            },
-            this.log.create('connection'),
-        )
-
-        connection.on('error', (err) => this._emitError(err, connection))
-        await connection.setupKeys(await this.storage.getAuthKeyFor(dc.id))
-        connection.connect()
-
-        if (!connection.getAuthKey()) {
-            this.log.info('exporting auth to DC %d', dcId)
-            const auth = await this.call({
-                _: 'auth.exportAuthorization',
-                dcId,
-            })
-            await connection.sendRpc({
-                _: 'auth.importAuthorization',
-                id: auth.id,
-                bytes: auth.bytes,
-            })
-
-            // connection.authKey was already generated at this point
-            this.storage.setAuthKeyFor(dc.id, connection.getAuthKey()!)
-            await this._saveStorage()
-        } else {
-            // in case the auth key is invalid
-            const dcId = dc.id
-            connection.on('key-change', async (key) => {
-                // we don't need to export, it will be done by `.call()`
-                // in case this error is returned
-                //
-                // even worse, exporting here will lead to a race condition,
-                // and may result in redundant re-exports.
-
-                this.storage.setAuthKeyFor(dcId, key)
-                await this._saveStorage()
-            })
-        }
-
-        this._additionalConnections.push(connection)
-
-        return connection
-    }
+    // /**
+    //  * Creates an additional connection to a given DC.
+    //  * This will use auth key for that DC that was already stored
+    //  * in the session, or generate a new auth key by exporting
+    //  * authorization from primary DC and importing it to the new DC.
+    //  * New connection will use the same crypto provider, `initConnection`,
+    //  * transport and reconnection strategy as the primary connection
+    //  *
+    //  * This method is quite low-level and you shouldn't usually care about this
+    //  * when using high-level API provided by `@mtcute/client`.
+    //  *
+    //  * @param dcId  DC id, to which the connection will be created
+    //  * @param cdn  Whether that DC is a CDN DC
+    //  * @param inactivityTimeout
+    //  *   Inactivity timeout for the connection (in ms), after which the transport will be closed.
+    //  *   Note that connection can still be used normally, it's just the transport which is closed.
+    //  *   Defaults to 5 min
+    //  */
+    // async createAdditionalConnection(
+    //     dcId: number,
+    //     params?: {
+    //         // todo proper docs
+    //         // default = false
+    //         media?: boolean
+    //         // default = fa;se
+    //         cdn?: boolean
+    //         // default = 300_000
+    //         inactivityTimeout?: number
+    //         // default = false
+    //         disableUpdates?: boolean
+    //     }
+    // ): Promise<SessionConnection> {
+    //     const dc = await this._config.findOption({
+    //         dcId,
+    //         preferMedia: params?.media,
+    //         cdn: params?.cdn,
+    //         allowIpv6: this._useIpv6,
+    //     })
+    //     if (!dc) throw new Error('DC not found')
+    //     const connection = new SessionConnection(
+    //         {
+    //             dc,
+    //             testMode: this._testMode,
+    //             crypto: this._crypto,
+    //             initConnection: this._initConnectionParams,
+    //             transportFactory: this._transportFactory,
+    //             reconnectionStrategy: this._reconnectionStrategy,
+    //             inactivityTimeout: params?.inactivityTimeout ?? 300_000,
+    //             layer: this._layer,
+    //             disableUpdates: params?.disableUpdates,
+    //             readerMap: this._readerMap,
+    //             writerMap: this._writerMap,
+    //         },
+    //         this.log.create('connection')
+    //     )
+    //
+    //     connection.on('error', (err) => this._emitError(err, connection))
+    //     await connection.setupKeys(await this.storage.getAuthKeyFor(dc.id))
+    //     connection.connect()
+    //
+    //     if (!connection.getAuthKey()) {
+    //         this.log.info('exporting auth to DC %d', dcId)
+    //         const auth = await this.call({
+    //             _: 'auth.exportAuthorization',
+    //             dcId,
+    //         })
+    //         await connection.sendRpc({
+    //             _: 'auth.importAuthorization',
+    //             id: auth.id,
+    //             bytes: auth.bytes,
+    //         })
+    //
+    //         // connection.authKey was already generated at this point
+    //         this.storage.setAuthKeyFor(dc.id, connection.getAuthKey()!)
+    //         await this._saveStorage()
+    //     } else {
+    //         // in case the auth key is invalid
+    //         const dcId = dc.id
+    //         connection.on('key-change', async (key) => {
+    //             // we don't need to export, it will be done by `.call()`
+    //             // in case this error is returned
+    //             //
+    //             // even worse, exporting here will lead to a race condition,
+    //             // and may result in redundant re-exports.
+    //
+    //             this.storage.setAuthKeyFor(dcId, key)
+    //             await this._saveStorage()
+    //         })
+    //     }
+    //
+    //     this._additionalConnections.push(connection)
+    //
+    //     return connection
+    // }
 
     /**
      * Destroy a connection that was previously created using
@@ -789,7 +773,8 @@ export class BaseTelegramClient extends EventEmitter {
      * @param factory  New transport factory
      */
     changeTransport(factory: TransportFactory): void {
-        this.primaryConnection.changeTransport(factory)
+        // todo
+        // this.primaryConnection.changeTransport(factory)
 
         this._additionalConnections.forEach((conn) =>
             conn.changeTransport(factory),
@@ -915,16 +900,16 @@ export class BaseTelegramClient extends EventEmitter {
      * > with [@BotFather](//t.me/botfather)
      */
     async exportSession(): Promise<string> {
-        if (!this.primaryConnection.getAuthKey()) {
-            throw new Error('Auth key is not generated yet')
-        }
+        // todo
+        // if (!this.primaryConnection.getAuthKey())
+        //     throw new Error('Auth key is not generated yet')
 
         return writeStringSession(this._writerMap, {
             version: 1,
             self: await this.storage.getSelf(),
             testMode: this._testMode,
-            primaryDc: this._primaryDc,
-            authKey: this.primaryConnection.getAuthKey()!,
+            primaryDc: this._defaultDc,
+            authKey: Buffer.from([]) //this.primaryConnection.getAuthKey()!,
         })
     }
 

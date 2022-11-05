@@ -59,7 +59,7 @@ describe('fuzz : transport', function () {
             transport: () => new RandomBytesTransport(),
             apiId: 0,
             apiHash: '',
-            primaryDc: defaultDcs.defaultTestDc,
+            defaultDc: defaultDcs.defaultTestDc,
         })
         client.log.level = 0
 
@@ -85,7 +85,7 @@ describe('fuzz : transport', function () {
             transport: () => new RandomBytesTransport(),
             apiId: 0,
             apiHash: '',
-            primaryDc: defaultDcs.defaultTestDc,
+            defaultDc: defaultDcs.defaultTestDc,
         })
         client.log.level = 0
 

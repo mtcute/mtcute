@@ -25,6 +25,7 @@ import {
     removeFromLongArray,
     SortedArray,
 } from '../utils'
+import { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session'
 import { doAuthorization } from './authorization'
 import { MtprotoSession } from './mtproto-session'
 import {
@@ -39,67 +40,11 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
     niceStacks?: boolean
     layer: number
     disableUpdates?: boolean
+    isMainConnection: boolean
 
     readerMap: TlReaderMap
     writerMap: TlWriterMap
 }
-
-interface PendingRpc {
-    method: string
-    data: Buffer
-    promise: ControllablePromise
-    stack?: string
-    gzipOverhead?: number
-
-    sent?: boolean
-    msgId?: Long
-    seqNo?: number
-    containerId?: Long
-    acked?: boolean
-    initConn?: boolean
-    getState?: number
-    cancelled?: boolean
-    timeout?: NodeJS.Timeout
-}
-
-type PendingMessage =
-    | {
-          _: 'rpc'
-          rpc: PendingRpc
-      }
-    | {
-          _: 'container'
-          msgIds: Long[]
-      }
-    | {
-          _: 'state'
-          msgIds: Long[]
-          containerId: Long
-      }
-    | {
-          _: 'resend'
-          msgIds: Long[]
-          containerId: Long
-      }
-    | {
-          _: 'ping'
-          pingId: Long
-          containerId: Long
-      }
-    | {
-          _: 'destroy_session'
-          sessionId: Long
-          containerId: Long
-      }
-    | {
-          _: 'cancel'
-          msgId: Long
-          containerId: Long
-      }
-    | {
-          _: 'future_salts'
-          containerId: Long
-      }
 
 // destroy_session#e7512126 session_id:long
 // todo
@@ -115,61 +60,31 @@ function makeNiceStack(
     }\n    at ${method}\n${stack.split('\n').slice(2).join('\n')}`
 }
 
-let nextConnectionUid = 0
-
 /**
  * A connection to a single DC.
  */
 export class SessionConnection extends PersistentConnection {
     readonly params!: SessionConnectionParams
 
-    private _uid = nextConnectionUid++
-    private _session: MtprotoSession
     private _flushTimer = new EarlyTimer()
-
-    /// internal state ///
-
-    // recent msg ids
-    private _recentOutgoingMsgIds = new LruSet<Long>(1000, false, true)
-    private _recentIncomingMsgIds = new LruSet<Long>(1000, false, true)
-
-    // queues
-    private _queuedRpc = new Deque<PendingRpc>()
-    private _queuedAcks: Long[] = []
-    private _queuedStateReq: Long[] = []
-    private _queuedResendReq: Long[] = []
-    private _queuedCancelReq: Long[] = []
     private _queuedDestroySession: Long[] = []
-    private _getStateSchedule = new SortedArray<PendingRpc>(
-        [],
-        (a, b) => a.getState! - b.getState!,
-    )
 
-    // requests info
-    private _pendingMessages = new LongMap<PendingMessage>()
-
-    private _initConnectionCalled = false
+    private _next429Timeout = 1000
+    private _current429Timeout?: NodeJS.Timeout
 
     private _lastPingRtt = NaN
     private _lastPingTime = 0
     private _lastPingMsgId = Long.ZERO
     private _lastSessionCreatedUid = Long.ZERO
 
-    private _next429Timeout = 1000
-    private _current429Timeout?: NodeJS.Timeout
-
     private _readerMap: TlReaderMap
     private _writerMap: TlWriterMap
 
-    constructor(params: SessionConnectionParams, log: Logger) {
-        super(params, log.create('conn'))
-        this._updateLogPrefix()
-        this._session = new MtprotoSession(
-            params.crypto,
-            log.create('session'),
-            params.readerMap,
-            params.writerMap,
-        )
+    constructor(
+        params: SessionConnectionParams,
+        readonly _session: MtprotoSession
+    ) {
+        super(params, _session.log.create('conn'))
         this._flushTimer.onTimeout(this._flush.bind(this))
 
         this._readerMap = params.readerMap
@@ -177,18 +92,10 @@ export class SessionConnection extends PersistentConnection {
         this._handleRawMessage = this._handleRawMessage.bind(this)
     }
 
-    private _updateLogPrefix() {
-        this.log.prefix = `[UID ${this._uid}, DC ${this.params.dc.id}] `
-    }
-
-    async changeDc(dc: tl.RawDcOption, authKey?: Buffer): Promise<void> {
-        this.log.debug('dc changed (has_auth_key = %b) to: %j', authKey, dc)
-        this._updateLogPrefix()
-
+    async changeDc(dc: tl.RawDcOption, authKey?: Buffer | null): Promise<void> {
         this._session.reset()
         await this._session.setupKeys(authKey)
-        this.params.dc = dc
-        this.reconnect()
+        await super.changeDc(dc)
     }
 
     setupKeys(authKey: Buffer | null): Promise<void> {
@@ -212,37 +119,12 @@ export class SessionConnection extends PersistentConnection {
     }
 
     reset(forever = false): void {
-        this._initConnectionCalled = false
+        this._session.initConnectionCalled = false
         this._resetLastPing(true)
         this._flushTimer.reset()
         clearTimeout(this._current429Timeout!)
 
         if (forever) {
-            // reset all the queues, cancel all pending messages, etc
-            this._session.reset()
-
-            for (const info of this._pendingMessages.values()) {
-                if (info._ === 'rpc') {
-                    info.rpc.promise.reject(new Error('Connection destroyed'))
-                }
-            }
-            this._pendingMessages.clear()
-
-            this._recentOutgoingMsgIds.clear()
-            this._recentIncomingMsgIds.clear()
-
-            while (this._queuedRpc.length) {
-                const rpc = this._queuedRpc.popFront()!
-
-                if (rpc.sent === false) {
-                    rpc.promise.reject(new Error('Connection destroyed'))
-                }
-            }
-
-            this._queuedAcks.length = 0
-            this._queuedStateReq.length = 0
-            this._queuedResendReq.length = 0
-            this._getStateSchedule.clear()
             this.removeAllListeners()
         }
     }
@@ -284,11 +166,11 @@ export class SessionConnection extends PersistentConnection {
                     timeout,
                 )
 
-                for (const msgId of this._pendingMessages.keys()) {
-                    const info = this._pendingMessages.get(msgId)!
+                for (const msgId of this._session.pendingMessages.keys()) {
+                    const info = this._session.pendingMessages.get(msgId)!
 
                     if (info._ === 'container') {
-                        this._pendingMessages.delete(msgId)
+                        this._session.pendingMessages.delete(msgId)
                     } else {
                         this._onMessageFailed(msgId, 'transport flood', true)
                     }
@@ -415,15 +297,15 @@ export class SessionConnection extends PersistentConnection {
             return
         }
 
-        if (this._recentIncomingMsgIds.has(messageId)) {
+        if (this._session.recentIncomingMsgIds.has(messageId)) {
             this.log.warn('warn: ignoring duplicate message %s', messageId)
 
             return
         }
         const message = message_ as mtp.TlObject
 
-        this.log.verbose('received %s (msg_id: %s)', message._, messageId)
-        this._recentIncomingMsgIds.add(messageId)
+        this.log.verbose('received %s (msg_id: %l)', message._, messageId)
+        this._session.recentIncomingMsgIds.add(messageId)
 
         switch (message._) {
             case 'mt_msgs_ack':
@@ -490,6 +372,17 @@ export class SessionConnection extends PersistentConnection {
                         this._rescheduleInactivity()
                     }
 
+                    if (this.params.disableUpdates) {
+                        this.log.warn(
+                            'received updates, but updates are disabled'
+                        )
+                        break
+                    }
+                    if (!this.params.isMainConnection) {
+                        this.log.warn('received updates on non-main connection')
+                        break
+                    }
+
                     this.emit('update', message)
 
                     return
@@ -522,8 +415,7 @@ export class SessionConnection extends PersistentConnection {
             return
         }
 
-        const msg = this._pendingMessages.get(reqMsgId)
-
+        const msg = this._session.pendingMessages.get(reqMsgId)
         if (!msg) {
             let result
 
@@ -538,7 +430,7 @@ export class SessionConnection extends PersistentConnection {
             )
 
             // check if the msg is one of the recent ones
-            if (this._recentOutgoingMsgIds.has(reqMsgId)) {
+            if (this._session.recentOutgoingMsgIds.has(reqMsgId)) {
                 this.log.debug(
                     'received rpc_result again for %l (contains %s)',
                     reqMsgId,
@@ -573,7 +465,7 @@ export class SessionConnection extends PersistentConnection {
 
         // initConnection call was definitely received and
         // processed by the server, so we no longer need to use it
-        if (rpc.initConn) this._initConnectionCalled = true
+        if (rpc.initConn) this._session.initConnectionCalled = true
 
         this.log.verbose('<<< (%s) %j', rpc.method, result)
 
@@ -610,11 +502,11 @@ export class SessionConnection extends PersistentConnection {
         }
 
         this._onMessageAcked(reqMsgId)
-        this._pendingMessages.delete(reqMsgId)
+        this._session.pendingMessages.delete(reqMsgId)
     }
 
     private _onMessageAcked(msgId: Long, inContainer = false): void {
-        const msg = this._pendingMessages.get(msgId)
+        const msg = this._session.pendingMessages.get(msgId)
 
         if (!msg) {
             this.log.warn('received ack for unknown message %l', msgId)
@@ -633,7 +525,7 @@ export class SessionConnection extends PersistentConnection {
                 msg.msgIds.forEach((msgId) => this._onMessageAcked(msgId, true))
 
                 // we no longer need info about the container
-                this._pendingMessages.delete(msgId)
+                this._session.pendingMessages.delete(msgId)
                 break
 
             case 'rpc': {
@@ -650,19 +542,19 @@ export class SessionConnection extends PersistentConnection {
                 if (
                     !inContainer &&
                     rpc.containerId &&
-                    this._pendingMessages.has(rpc.containerId)
+                    this._session.pendingMessages.has(rpc.containerId)
                 ) {
                     // ack all the messages in that container
                     this._onMessageAcked(rpc.containerId)
                 }
 
                 // this message could also already be in some queue,
-                removeFromLongArray(this._queuedStateReq, msgId)
-                removeFromLongArray(this._queuedResendReq, msgId)
+                removeFromLongArray(this._session.queuedStateReq, msgId)
+                removeFromLongArray(this._session.queuedResendReq, msgId)
 
                 // if resend/state was already requested, it will simply be ignored
 
-                this._getStateSchedule.remove(rpc)
+                this._session.getStateSchedule.remove(rpc)
                 break
             }
             default:
@@ -681,8 +573,7 @@ export class SessionConnection extends PersistentConnection {
         reason: string,
         inContainer = false,
     ): void {
-        const msgInfo = this._pendingMessages.get(msgId)
-
+        const msgInfo = this._session.pendingMessages.get(msgId)
         if (!msgInfo) {
             this.log.debug(
                 'unknown message %l failed because of %s',
@@ -725,26 +616,26 @@ export class SessionConnection extends PersistentConnection {
                 )
 
                 // since the query was rejected, we can let it reassign msg_id to avoid containers
-                this._pendingMessages.delete(msgId)
+                this._session.pendingMessages.delete(msgId)
                 rpc.msgId = undefined
                 this._enqueueRpc(rpc, true)
 
                 if (
                     !inContainer &&
                     rpc.containerId &&
-                    this._pendingMessages.has(rpc.containerId)
+                    this._session.pendingMessages.has(rpc.containerId)
                 ) {
                     // fail all the messages in that container
                     this._onMessageFailed(rpc.containerId, reason)
                 }
 
                 // this message could also already be in some queue,
-                removeFromLongArray(this._queuedStateReq, msgId)
-                removeFromLongArray(this._queuedResendReq, msgId)
+                removeFromLongArray(this._session.queuedStateReq, msgId)
+                removeFromLongArray(this._session.queuedResendReq, msgId)
 
                 // if resend/state was already requested, it will simply be ignored
 
-                this._getStateSchedule.remove(rpc)
+                this._session.getStateSchedule.remove(rpc)
 
                 break
             }
@@ -755,7 +646,7 @@ export class SessionConnection extends PersistentConnection {
                     msgInfo.msgIds.length,
                     reason,
                 )
-                this._queuedResendReq.splice(0, 0, ...msgInfo.msgIds)
+                this._session.queuedResendReq.splice(0, 0, ...msgInfo.msgIds)
                 this._flushTimer.emitWhenIdle()
                 break
             case 'state':
@@ -765,32 +656,31 @@ export class SessionConnection extends PersistentConnection {
                     msgInfo.msgIds.length,
                     reason,
                 )
-                this._queuedStateReq.splice(0, 0, ...msgInfo.msgIds)
+                this._session.queuedStateReq.splice(0, 0, ...msgInfo.msgIds)
                 this._flushTimer.emitWhenIdle()
                 break
         }
 
-        this._pendingMessages.delete(msgId)
+        this._session.pendingMessages.delete(msgId)
     }
 
     private _resetLastPing(withTime = false): void {
         if (withTime) this._lastPingTime = 0
 
         if (!this._lastPingMsgId.isZero()) {
-            this._pendingMessages.delete(this._lastPingMsgId)
+            this._session.pendingMessages.delete(this._lastPingMsgId)
         }
 
         this._lastPingMsgId = Long.ZERO
     }
 
     private _registerOutgoingMsgId(msgId: Long): Long {
-        this._recentOutgoingMsgIds.add(msgId)
-
+        this._session.recentOutgoingMsgIds.add(msgId)
         return msgId
     }
 
     private _onPong({ msgId, pingId }: mtp.RawMt_pong): void {
-        const info = this._pendingMessages.get(msgId)
+        const info = this._session.pendingMessages.get(msgId)
 
         if (!info) {
             this.log.warn(
@@ -916,14 +806,14 @@ export class SessionConnection extends PersistentConnection {
             firstMsgId,
         )
 
-        for (const msgId of this._pendingMessages.keys()) {
-            const val = this._pendingMessages.get(msgId)!
+        for (const msgId of this._session.pendingMessages.keys()) {
+            const val = this._session.pendingMessages.get(msgId)!
 
             if (val._ === 'container') {
                 if (msgId.lt(firstMsgId)) {
                     // all messages in this container will be resent
                     // info about this container is no longer needed
-                    this._pendingMessages.delete(msgId)
+                    this._session.pendingMessages.delete(msgId)
                 }
 
                 return
@@ -944,8 +834,7 @@ export class SessionConnection extends PersistentConnection {
         answerMsgId: Long,
     ): void {
         if (!msgId.isZero()) {
-            const info = this._pendingMessages.get(msgId)
-
+            const info = this._session.pendingMessages.get(msgId)
             if (!info) {
                 this.log.info(
                     'received message info about unknown message %l',
@@ -986,14 +875,14 @@ export class SessionConnection extends PersistentConnection {
 
         if (
             !answerMsgId.isZero() &&
-            !this._recentIncomingMsgIds.has(answerMsgId)
+            !this._session.recentIncomingMsgIds.has(answerMsgId)
         ) {
             this.log.debug(
                 'received message info for %l, but answer (%l) was not received yet',
                 msgId,
                 answerMsgId,
             )
-            this._queuedResendReq.push(answerMsgId)
+            this._session.queuedResendReq.push(answerMsgId)
             this._flushTimer.emitWhenIdle()
 
             return
@@ -1019,7 +908,7 @@ export class SessionConnection extends PersistentConnection {
     }
 
     private _onMsgsStateInfo(msg: mtp.RawMt_msgs_state_info): void {
-        const info = this._pendingMessages.get(msg.reqMsgId)
+        const info = this._session.pendingMessages.get(msg.reqMsgId)
 
         if (!info) {
             this.log.warn(
@@ -1044,43 +933,28 @@ export class SessionConnection extends PersistentConnection {
     }
 
     private _enqueueRpc(rpc: PendingRpc, force?: boolean) {
-        // already queued or cancelled
-        if ((!force && !rpc.sent) || rpc.cancelled) return
-
-        rpc.sent = false
-        rpc.containerId = undefined
-        this.log.debug(
-            'enqueued %s for sending (msg_id = %s)',
-            rpc.method,
-            rpc.msgId || 'n/a',
-        )
-        this._queuedRpc.pushBack(rpc)
-
-        this._flushTimer.emitWhenIdle()
+        if (this._session.enqueueRpc(rpc, force))
+            this._flushTimer.emitWhenIdle()
     }
 
     _resetSession(): void {
         this._queuedDestroySession.push(this._session._sessionId)
 
+        this._session.resetState(true)
         this.reconnect()
-        this._session.changeSessionId()
-        this.log.debug('session reset, new sid = %l', this._session._sessionId)
 
         // once we receive new_session_created, all pending messages will be resent.
-        // clear getState/resend queues because they are not needed anymore
-        this._queuedStateReq.length = 0
-        this._queuedResendReq.length = 0
         this._flushTimer.reset()
     }
 
     private _sendAck(msgId: Long): void {
-        if (this._queuedAcks.length === 0) {
+        if (this._session.queuedAcks.length === 0) {
             this._flushTimer.emitBeforeNext(30000)
         }
 
-        this._queuedAcks.push(msgId)
+        this._session.queuedAcks.push(msgId)
 
-        if (this._queuedAcks.length >= 100) {
+        if (this._session.queuedAcks.length >= 100) {
             this._flushTimer.emitNow()
         }
     }
@@ -1110,7 +984,7 @@ export class SessionConnection extends PersistentConnection {
             }
         }
 
-        if (!this._initConnectionCalled) {
+        if (!this._session.initConnectionCalled) {
             // we will wrap every rpc call with initConnection
             // until some of the requests wrapped with it is
             // either acked or returns rpc_result
@@ -1239,12 +1113,12 @@ export class SessionConnection extends PersistentConnection {
         rpc.cancelled = true
 
         if (rpc.msgId) {
-            this._queuedCancelReq.push(rpc.msgId)
+            this._session.queuedCancelReq.push(rpc.msgId)
             this._flushTimer.emitWhenIdle()
         } else {
             // in case rpc wasn't sent yet (or had some error),
             // we can simply remove it from queue
-            this._queuedRpc.remove(rpc)
+            this._session.queuedRpc.remove(rpc)
         }
     }
 
@@ -1265,10 +1139,10 @@ export class SessionConnection extends PersistentConnection {
         // if there are more queued requests, flush immediately
         // (they likely didn't fit into one message)
         if (
-            this._queuedRpc.length ||
-            this._queuedAcks.length ||
-            this._queuedStateReq.length ||
-            this._queuedResendReq.length
+            this._session.queuedRpc.length ||
+            this._session.queuedAcks.length ||
+            this._session.queuedStateReq.length ||
+            this._session.queuedResendReq.length
         ) {
             this._flush()
         } else {
@@ -1279,7 +1153,7 @@ export class SessionConnection extends PersistentConnection {
     private _doFlush(): void {
         this.log.debug(
             'flushing send queue. queued rpc: %d',
-            this._queuedRpc.length,
+            this._session.queuedRpc.length
         )
 
         // oh bloody hell mate
@@ -1312,14 +1186,13 @@ export class SessionConnection extends PersistentConnection {
 
         const now = Date.now()
 
-        if (this._queuedAcks.length) {
-            let acks = this._queuedAcks
-
+        if (this._session.queuedAcks.length) {
+            let acks = this._session.queuedAcks
             if (acks.length > 8192) {
-                this._queuedAcks = acks.slice(8192)
+                this._session.queuedAcks = acks.slice(8192)
                 acks = acks.slice(0, 8192)
             } else {
-                this._queuedAcks = []
+                this._session.queuedAcks = []
             }
 
             const obj: mtp.RawMt_msgs_ack = {
@@ -1341,7 +1214,7 @@ export class SessionConnection extends PersistentConnection {
                     "didn't receive pong for previous ping (msg_id = %l)",
                     this._lastPingMsgId,
                 )
-                this._pendingMessages.delete(this._lastPingMsgId)
+                this._session.pendingMessages.delete(this._lastPingMsgId)
             }
 
             pingId = randomLong()
@@ -1358,25 +1231,27 @@ export class SessionConnection extends PersistentConnection {
         }
 
         {
-            if (this._queuedStateReq.length) {
-                let ids = this._queuedStateReq
-
+            if (this._session.queuedStateReq.length) {
+                let ids = this._session.queuedStateReq
                 if (ids.length > 8192) {
-                    this._queuedStateReq = ids.slice(8192)
+                    this._session.queuedStateReq = ids.slice(8192)
                     ids = ids.slice(0, 8192)
                 } else {
-                    this._queuedStateReq = []
+                    this._session.queuedStateReq = []
                 }
                 getStateMsgIds = ids
             }
 
-            const idx = this._getStateSchedule.index(
+            const idx = this._session.getStateSchedule.index(
                 { getState: now } as any,
                 true,
             )
 
             if (idx > 0) {
-                const toGetState = this._getStateSchedule.raw.splice(0, idx)
+                const toGetState = this._session.getStateSchedule.raw.splice(
+                    0,
+                    idx
+                )
                 if (!getStateMsgIds) getStateMsgIds = []
                 toGetState.forEach((it) => getStateMsgIds!.push(it.msgId!))
             }
@@ -1396,14 +1271,13 @@ export class SessionConnection extends PersistentConnection {
             }
         }
 
-        if (this._queuedResendReq.length) {
-            resendMsgIds = this._queuedResendReq
-
+        if (this._session.queuedResendReq.length) {
+            resendMsgIds = this._session.queuedResendReq
             if (resendMsgIds.length > 8192) {
-                this._queuedResendReq = resendMsgIds.slice(8192)
+                this._session.queuedResendReq = resendMsgIds.slice(8192)
                 resendMsgIds = resendMsgIds.slice(0, 8192)
             } else {
-                this._queuedResendReq = []
+                this._session.queuedResendReq = []
             }
 
             const obj: mtp.RawMt_msg_resend_req = {
@@ -1416,16 +1290,16 @@ export class SessionConnection extends PersistentConnection {
             messageCount += 1
         }
 
-        if (this._queuedCancelReq.length) {
-            containerMessageCount += this._queuedCancelReq.length
-            containerSize += this._queuedCancelReq.length * 28
-            cancelRpcs = this._queuedCancelReq
-            this._queuedCancelReq = []
+        if (this._session.queuedCancelReq.length) {
+            containerMessageCount += this._session.queuedCancelReq.length
+            containerSize += this._session.queuedCancelReq.length * 28
+            cancelRpcs = this._session.queuedCancelReq
+            this._session.queuedCancelReq = []
         }
 
         if (this._queuedDestroySession.length) {
-            containerMessageCount += this._queuedCancelReq.length
-            containerSize += this._queuedCancelReq.length * 28
+            containerMessageCount += this._session.queuedCancelReq.length
+            containerSize += this._session.queuedCancelReq.length * 28
             destroySessions = this._queuedDestroySession
             this._queuedDestroySession = []
         }
@@ -1434,11 +1308,11 @@ export class SessionConnection extends PersistentConnection {
         const rpcToSend: PendingRpc[] = []
 
         while (
-            this._queuedRpc.length &&
+            this._session.queuedRpc.length &&
             containerSize < 32768 && // 2^15
             containerMessageCount < 1020
         ) {
-            const msg = this._queuedRpc.popFront()!
+            const msg = this._session.queuedRpc.popFront()!
             if (msg.cancelled) continue
 
             // note: we don't check for <2^15 here
@@ -1497,7 +1371,7 @@ export class SessionConnection extends PersistentConnection {
                 pingId: pingId!,
                 containerId: pingMsgId,
             }
-            this._pendingMessages.set(pingMsgId, pingPending)
+            this._session.pendingMessages.set(pingMsgId, pingPending)
             otherPendings.push(pingPending)
         }
 
@@ -1510,7 +1384,7 @@ export class SessionConnection extends PersistentConnection {
                 msgIds: getStateMsgIds!,
                 containerId: getStateMsgId,
             }
-            this._pendingMessages.set(getStateMsgId, getStatePending)
+            this._session.pendingMessages.set(getStateMsgId, getStatePending)
             otherPendings.push(getStatePending)
         }
 
@@ -1523,7 +1397,7 @@ export class SessionConnection extends PersistentConnection {
                 msgIds: resendMsgIds!,
                 containerId: resendMsgId,
             }
-            this._pendingMessages.set(resendMsgId, resendPending)
+            this._session.pendingMessages.set(resendMsgId, resendPending)
             otherPendings.push(resendPending)
         }
 
@@ -1541,7 +1415,7 @@ export class SessionConnection extends PersistentConnection {
                     msgId,
                     containerId: cancelMsgId,
                 }
-                this._pendingMessages.set(cancelMsgId, pending)
+                this._session.pendingMessages.set(cancelMsgId, pending)
                 otherPendings.push(pending)
             })
         }
@@ -1560,7 +1434,7 @@ export class SessionConnection extends PersistentConnection {
                     sessionId,
                     containerId: msgId,
                 }
-                this._pendingMessages.set(msgId, pending)
+                this._session.pendingMessages.set(msgId, pending)
                 otherPendings.push(pending)
             })
         }
@@ -1584,7 +1458,7 @@ export class SessionConnection extends PersistentConnection {
 
                 msg.msgId = msgId
                 msg.seqNo = seqNo
-                this._pendingMessages.set(msgId, {
+                this._session.pendingMessages.set(msgId, {
                     _: 'rpc',
                     rpc: msg,
                 })
@@ -1599,11 +1473,11 @@ export class SessionConnection extends PersistentConnection {
 
             // (re-)schedule get_state if needed
             if (msg.getState) {
-                this._getStateSchedule.remove(msg)
+                this._session.getStateSchedule.remove(msg)
             }
             if (!msg.acked) {
                 msg.getState = getStateTime
-                this._getStateSchedule.insert(msg)
+                this._session.getStateSchedule.insert(msg)
             }
 
             writer.long(this._registerOutgoingMsgId(msg.msgId))
@@ -1650,7 +1524,10 @@ export class SessionConnection extends PersistentConnection {
                 })
             }
 
-            this._pendingMessages.set(containerId, { _: 'container', msgIds })
+            this._session.pendingMessages.set(containerId, {
+                _: 'container',
+                msgIds,
+            })
         }
 
         const result = writer.result()
@@ -1685,7 +1562,8 @@ export class SessionConnection extends PersistentConnection {
                 )
 
                 // put acks in the front so they are the first to be sent
-                if (ackMsgIds) this._queuedAcks.splice(0, 0, ...ackMsgIds)
+                if (ackMsgIds)
+                    this._session.queuedAcks.splice(0, 0, ...ackMsgIds)
                 this._onMessageFailed(rootMsgId, 'unknown error')
             })
     }
