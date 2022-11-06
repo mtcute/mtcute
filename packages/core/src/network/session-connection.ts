@@ -1308,8 +1308,8 @@ export class SessionConnection extends PersistentConnection {
         }
 
         if (this._queuedDestroySession.length) {
-            containerMessageCount += this._session.queuedCancelReq.length
-            containerSize += this._session.queuedCancelReq.length * 28
+            containerMessageCount += this._queuedDestroySession.length
+            containerSize += this._queuedDestroySession.length * 28
             destroySessions = this._queuedDestroySession
             this._queuedDestroySession = []
         }
