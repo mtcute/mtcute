@@ -57,7 +57,7 @@ import { PersistentConnectionParams } from './network/persistent-connection'
 import { ITelegramStorage, MemoryStorage } from './storage'
 
 import { ConfigManager } from './network/config-manager'
-import { NetworkManager } from "./network/network-manager";
+import { NetworkManager, NetworkManagerExtraParams } from "./network/network-manager";
 
 export interface BaseTelegramClientOptions {
     /**
@@ -176,14 +176,19 @@ export interface BaseTelegramClientOptions {
      */
     niceStacks?: boolean
 
-    /**
-     * **EXPERT USE ONLY!**
-     *
-     * Override TL layer used for the connection.
-     *
-     * **Does not** change the schema used.
-     */
-    overrideLayer?: number
+        /**
+         * Extra parameters for {@link NetworkManager}
+         */
+        network?: NetworkManagerExtraParams
+
+        /**
+         * **EXPERT USE ONLY!**
+         *
+         * Override TL layer used for the connection.                                                                                                                                                                                                                                  /;'
+         *
+         * **Does not** change the schema used.
+         */
+        overrideLayer?: number
 
     /**
      * **EXPERT USE ONLY**
@@ -329,6 +334,7 @@ export class BaseTelegramClient extends EventEmitter {
             storage: this.storage,
             testMode: this._testMode,
             transport: opts.transport,
+            ...(opts.network ?? {}),
         }, this._config)
 
         this.storage.setup?.(this.log, this._readerMap, this._writerMap)

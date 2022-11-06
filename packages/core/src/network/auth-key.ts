@@ -30,6 +30,8 @@ export class AuthKey {
         this.clientSalt = authKey.slice(88, 120)
         this.serverSalt = authKey.slice(96, 128)
         this.id = (await this._crypto.sha1(authKey)).slice(-8)
+
+        this.log.verbose('auth key set up, id = %h', this.id)
     }
 
     async encryptMessage(

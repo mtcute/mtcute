@@ -24,6 +24,12 @@ import {
     randomLong,
     removeFromLongArray,
     SortedArray,
+    EarlyTimer,
+    ControllablePromise,
+    createCancellablePromise,
+    randomBytes,
+    longFromBuffer,
+    createControllablePromise,
 } from '../utils'
 import { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session'
 import { doAuthorization } from './authorization'
@@ -33,6 +39,9 @@ import {
     PersistentConnectionParams,
 } from './persistent-connection'
 import { TransportError } from './transports'
+import { createAesIgeForMessageOld } from '../utils/crypto/mtproto'
+
+const TEMP_AUTH_KEY_EXPIRY = 300 // 86400 fixme
 
 export interface SessionConnectionParams extends PersistentConnectionParams {
     initConnection: tl.RawInitConnectionRequest
@@ -47,9 +56,8 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
     writerMap: TlWriterMap
 }
 
-// destroy_session#e7512126 session_id:long
-// todo
-const DESTROY_SESSION_ID = Buffer.from('262151e7', 'hex')
+// destroy_auth_key#d1435160 = DestroyAuthKeyRes;
+const DESTROY_AUTH_KEY = Buffer.from('605134d1', 'hex')
 
 function makeNiceStack(
     error: tl.errors.RpcError,
@@ -69,6 +77,12 @@ export class SessionConnection extends PersistentConnection {
 
     private _flushTimer = new EarlyTimer()
     private _queuedDestroySession: Long[] = []
+
+    // waitForMessage
+    private _pendingWaitForUnencrypted: [
+        ControllablePromise<Buffer>,
+        NodeJS.Timeout
+    ][] = []
 
     private _next429Timeout = 1000
     private _current429Timeout?: NodeJS.Timeout
@@ -112,6 +126,12 @@ export class SessionConnection extends PersistentConnection {
 
     onTransportClose(): void {
         super.onTransportClose()
+
+        Object.values(this._pendingWaitForUnencrypted).forEach(([prom, timeout]) => {
+            prom.reject(new Error('Connection closed'))
+            clearTimeout(timeout)
+        })
+
         this.emit('disconnect')
 
         this.reset()
@@ -134,11 +154,16 @@ export class SessionConnection extends PersistentConnection {
     }
 
     protected async onConnected(): Promise<void> {
+        // check if we have all the needed keys
         if (!this._session._authKey.ready) {
-            this.log.debug('no perm auth key, authorizing...')
+            this.log.info('no perm auth key, authorizing...')
             this._authorize()
+            // todo: if we use pfs, we can also start temp key exchange here
+        } else if (this.params.usePfs && !this._session._authKeyTemp.ready) {
+            this.log.info('no perm auth key but using pfs, authorizing')
+            this._authorizePfs()
         } else {
-            this.log.debug('auth keys are already available')
+            this.log.info('auth keys are already available')
             this.onConnectionUsable()
         }
     }
@@ -149,12 +174,45 @@ export class SessionConnection extends PersistentConnection {
             this.log.error('transport error %d', error.code)
 
             if (error.code === 404) {
+                // if we are using pfs, this could be due to the server
+                // forgetting our temp key (which is kinda weird but expected)
+
+                if (this.params.usePfs) {
+                    if (
+                        !this._isPfsBindingPending &&
+                        this._session._authKeyTemp.ready
+                    ) {
+                        // this is important! we must reset temp auth key before
+                        // we proceed with new temp key derivation.
+                        // otherwise, we can end up in an infinite loop in case it
+                        // was actually perm_key that got 404-ed
+                        //
+                        // if temp key binding is already in process in background,
+                        // _authorizePfs will mark it as foreground to prevent new
+                        // queries from being sent (to avoid even more 404s)
+                        this._session._authKeyTemp.reset()
+                        this._authorizePfs()
+                        this._onAllFailed('temp key expired, binding started')
+                        return
+                    } else if (this._isPfsBindingPending) {
+                        this._onAllFailed('temp key expired, binding pending')
+                        return
+                    }
+
+                    // otherwise, 404 must be referencing the perm_key
+                }
+
+                // there happened a little trolling
                 this._session.reset()
                 this.emit('key-change', null)
                 this._authorize()
 
                 return
             }
+
+            this.log.error('transport error %d', error.code)
+            // all pending queries must be resent
+            this._onAllFailed(`transport error ${error.code}`)
 
             if (error.code === 429) {
                 // all active queries must be resent
@@ -172,21 +230,11 @@ export class SessionConnection extends PersistentConnection {
                     timeout,
                 )
 
-                for (const msgId of this._session.pendingMessages.keys()) {
-                    const info = this._session.pendingMessages.get(msgId)!
-
-                    if (info._ === 'container') {
-                        this._session.pendingMessages.delete(msgId)
-                    } else {
-                        this._onMessageFailed(msgId, 'transport flood', true)
-                    }
-                }
-
                 return
             }
         }
 
-        this.emit('error', error)
+        this.emit('err', error)
     }
 
     protected onConnectionUsable() {
@@ -205,7 +253,11 @@ export class SessionConnection extends PersistentConnection {
 
                 this.emit('key-change', authKey)
 
-                this.onConnectionUsable()
+                if (this.params.usePfs) {
+                    return this._authorizePfs()
+                } else {
+                    this.onConnectionUsable()
+                }
             })
             .catch((err) => {
                 this.log.error('Authorization error: %s', err.message)
@@ -214,7 +266,218 @@ export class SessionConnection extends PersistentConnection {
             })
     }
 
+    private _authorizePfs(background = false): void {
+        if (this._isPfsBindingPending) return
+        if (this._pfsUpdateTimeout) {
+            clearTimeout(this._pfsUpdateTimeout)
+            this._pfsUpdateTimeout = undefined
+        }
+
+        if (this._isPfsBindingPendingInBackground) {
+            // e.g. temp key has expired while we were binding a key in the background
+            // in this case, we shouldn't start pfs binding again, and instead wait for
+            // current operation to complete
+            this._isPfsBindingPendingInBackground = false
+            this._isPfsBindingPending = true
+            return
+        }
+
+        if (background) {
+            this._isPfsBindingPendingInBackground = true
+        } else {
+            this._isPfsBindingPending = true
+        }
+
+        doAuthorization(this, this.params.crypto, TEMP_AUTH_KEY_EXPIRY)
+            .then(async ([tempAuthKey, tempServerSalt]) => {
+                const tempKey = await this._session._authKeyTempSecondary
+                await tempKey.setup(tempAuthKey)
+
+                const msgId = this._session.getMessageId()
+
+                this.log.debug(
+                    'binding temp_auth_key (%h) to perm_auth_key (%h), msg_id = %l...',
+                    tempKey.id,
+                    this._session._authKey.id,
+                    msgId
+                )
+
+                // we now need to bind the key
+                const inner: mtp.RawMt_bind_auth_key_inner = {
+                    _: 'mt_bind_auth_key_inner',
+                    nonce: randomLong(),
+                    tempAuthKeyId: longFromBuffer(tempKey.id),
+                    permAuthKeyId: longFromBuffer(this._session._authKey.id),
+                    tempSessionId: this._session._sessionId,
+                    expiresAt:
+                        Math.floor(Date.now() / 1000) + TEMP_AUTH_KEY_EXPIRY,
+                }
+
+                // encrypt using mtproto v1 (fucking kill me plz)
+
+                const writer = TlBinaryWriter.alloc(this.params.writerMap, 80)
+                // = 40 (inner length) + 32 (mtproto header) + 8 (pad 72 so mod 16 = 0)
+
+                writer.raw(randomBytes(16))
+                writer.long(msgId)
+                writer.int(0) // seq_no
+                writer.int(40) // msg_len
+                writer.object(inner)
+
+                const msgWithoutPadding = writer.result()
+                writer.raw(randomBytes(8))
+                const msgWithPadding = writer.result()
+
+                const hash = await this.params.crypto.sha1(msgWithoutPadding)
+                const msgKey = hash.slice(4, 20)
+
+                const ige = await createAesIgeForMessageOld(
+                    this.params.crypto,
+                    this._session._authKey.key,
+                    msgKey,
+                    true
+                )
+                const encryptedData = await ige.encrypt(msgWithPadding)
+                const encryptedMessage = Buffer.concat([
+                    this._session._authKey.id,
+                    msgKey,
+                    encryptedData,
+                ])
+
+                const promise = createControllablePromise()
+
+                // encrypt the message using temp key and same msg id
+                // this is a bit of a hack, but it works
+                //
+                // hacking inside main send loop to allow sending
+                // with another key is just too much hassle.
+                // we could just always use temp key if one is available,
+                // but that way we won't be able to refresh the key
+                // that is about to expire in the background without
+                // interrupting actual message flow
+                // decrypting is trivial though, since key id
+                // is in the first bytes of the message, and is never used later on.
+
+                this._session.pendingMessages.set(msgId, {
+                    _: 'bind',
+                    promise,
+                })
+
+                const request: tl.auth.RawBindTempAuthKeyRequest = {
+                    _: 'auth.bindTempAuthKey',
+                    permAuthKeyId: inner.permAuthKeyId,
+                    nonce: inner.nonce,
+                    expiresAt: inner.expiresAt,
+                    encryptedMessage,
+                }
+                const reqSize = TlSerializationCounter.countNeededBytes(
+                    this._writerMap,
+                    request
+                )
+                const reqWriter = TlBinaryWriter.alloc(
+                    this._writerMap,
+                    reqSize + 16
+                )
+                reqWriter.long(this._registerOutgoingMsgId(msgId))
+                reqWriter.uint(this._session.getSeqNo())
+                reqWriter.uint(reqSize)
+                reqWriter.object(request)
+
+                // we can now send it as is
+                const requestEncrypted = await tempKey.encryptMessage(
+                    reqWriter.result(),
+                    tempServerSalt,
+                    this._session._sessionId
+                )
+                await this.send(requestEncrypted)
+
+                const res: mtp.RawMt_rpc_error | boolean = await promise
+
+                this._session.pendingMessages.delete(msgId)
+
+                if (typeof res === 'object') {
+                    this.log.error(
+                        'failed to bind temp key: %s:%s',
+                        res.errorCode,
+                        res.errorMessage
+                    )
+                    throw new Error('Failed to bind temporary key')
+                }
+
+                // now we can swap the keys (secondary becomes primary,
+                // and primary is not immediately forgot because messages using it may still be in flight)
+
+                this._session._authKeyTempSecondary = this._session._authKeyTemp
+                this._session._authKeyTemp = tempKey
+                this._session.serverSalt = tempServerSalt
+
+                this.log.debug(
+                    'temp key has been bound, exp = %d',
+                    inner.expiresAt
+                )
+
+                this._isPfsBindingPending = false
+                this._isPfsBindingPendingInBackground = false
+
+                // we must re-init connection after binding temp key
+                this._session.initConnectionCalled = false
+
+                this.emit('tmp-key-change', tempAuthKey, inner.expiresAt)
+                this.onConnectionUsable()
+
+                // set a timeout to update temp auth key in advance to avoid interruption
+                this._pfsUpdateTimeout = setTimeout(() => {
+                    this._pfsUpdateTimeout = undefined
+                    this.log.debug('temp key is expiring soon')
+                    this._authorizePfs(true)
+                }, (TEMP_AUTH_KEY_EXPIRY - 60) * 1000)
+            })
+            .catch((err) => {
+                this.log.error('PFS Authorization error: %s', err.message)
+
+                if (this._isPfsBindingPendingInBackground) {
+                    this._isPfsBindingPendingInBackground = false
+                    // if we are in background, we can just retry
+                    return this._authorizePfs(true)
+                }
+
+                this._isPfsBindingPending = false
+                this.onError(err)
+                this.reconnect()
+            })
+    }
+
+    waitForUnencryptedMessage(timeout = 5000): Promise<Buffer> {
+        const promise = createControllablePromise<Buffer>()
+        const timeoutId = setTimeout(() => {
+            promise.reject(new Error('Timeout'))
+            this._pendingWaitForUnencrypted =
+                this._pendingWaitForUnencrypted.filter(
+                    (it) => it[0] !== promise
+                )
+        }, timeout)
+        this._pendingWaitForUnencrypted.push([promise, timeoutId])
+
+        return promise
+    }
+
     protected async onMessage(data: Buffer): Promise<void> {
+        if (data.readInt32LE(0) === 0 && data.readInt32LE(4) === 0) {
+            // auth_key_id = 0, meaning it's an unencrypted message used for authorization
+
+            if (this._pendingWaitForUnencrypted.length) {
+                const [promise, timeout] = this._pendingWaitForUnencrypted.shift()!
+                clearTimeout(timeout)
+                promise.resolve(data)
+            } else {
+                this.log.debug(
+                    'unencrypted message received, but no one is waiting for it'
+                )
+            }
+
+            return
+        }
+
         if (!this._session._authKey.ready) {
             // if a message is received before authorization,
             // either the server is misbehaving,
@@ -225,11 +488,7 @@ export class SessionConnection extends PersistentConnection {
         }
 
         try {
-            await this._session._authKey.decryptMessage(
-                data,
-                this._session._sessionId,
-                this._handleRawMessage
-            )
+            await this._session.decryptMessage(data, this._handleRawMessage)
         } catch (err) {
             this.log.error('failed to decrypt message: %s\ndata: %h', err, data)
         }
@@ -376,6 +635,10 @@ export class SessionConnection extends PersistentConnection {
                     message,
                 )
                 break
+            case 'mt_destroy_session_ok':
+            case 'mt_destroy_session_none':
+                this._onDestroySessionResult(message)
+                break
             default:
                 if (tl.isAnyUpdates(message)) {
                     if (this._usable && this.params.inactivityTimeout) {
@@ -386,6 +649,8 @@ export class SessionConnection extends PersistentConnection {
                         this.log.warn(
                             'received updates, but updates are disabled'
                         )
+                        // likely due to some request in the session missing invokeWithoutUpdates
+                        // todo: reset session
                         break
                     }
                     if (!this.params.isMainConnection) {
@@ -457,7 +722,13 @@ export class SessionConnection extends PersistentConnection {
             return
         }
 
+        // special case for auth key binding
         if (msg._ !== 'rpc') {
+            if (msg._ === 'bind') {
+                msg.promise.resolve(result)
+                return
+            }
+
             this.log.error(
                 'received rpc_result for %s request %l',
                 msg._,
@@ -466,6 +737,7 @@ export class SessionConnection extends PersistentConnection {
 
             return
         }
+
         const rpc = msg.rpc
 
         const customReader = this._readerMap._results![rpc.method]
@@ -475,7 +747,9 @@ export class SessionConnection extends PersistentConnection {
 
         // initConnection call was definitely received and
         // processed by the server, so we no longer need to use it
-        if (rpc.initConn) this._session.initConnectionCalled = true
+        if (rpc.initConn) {
+            this._session.initConnectionCalled = true
+        }
 
         this.log.verbose('<<< (%s) %j', rpc.method, result)
 
@@ -488,6 +762,44 @@ export class SessionConnection extends PersistentConnection {
                 reqMsgId,
                 rpc.method,
             )
+
+            if (res.errorMessage === 'AUTH_KEY_PERM_EMPTY') {
+                // happens when temp auth key is not yet bound
+                // this shouldn't happen as we block any outbound communications
+                // until the temp key is derived and bound.
+                //
+                // i think it is also possible for the error to be returned
+                // when the temp key has expired, but this still shouldn't happen
+                // but this is tg, so something may go wrong, and we will receive this as an error
+                // (for god's sake why is this not in mtproto and instead hacked into the app layer)
+                this._authorizePfs()
+                this._onMessageFailed(reqMsgId, 'AUTH_KEY_PERM_EMPTY', true)
+                return
+            }
+
+            if (res.errorMessage === 'CONNECTION_NOT_INITED') {
+                // this seems to sometimes happen when using pfs
+                // no idea why, but tdlib also seems to handle these, so whatever
+
+                this._session.initConnectionCalled = false
+                this._onMessageFailed(reqMsgId, res.errorMessage, true)
+
+                // just setting this flag is not enough because the message
+                // is already serialized, so we do this awesome hack
+                this.sendRpc({ _: 'help.getNearestDc' })
+                    .then(() => {
+                        this.log.debug(
+                            'additional help.getNearestDc for initConnection ok'
+                        )
+                    })
+                    .catch((err) => {
+                        this.log.debug(
+                            'additional help.getNearestDc for initConnection error: %s',
+                            err
+                        )
+                    })
+                return
+            }
 
             if (rpc.cancelled) return
 
@@ -567,6 +879,8 @@ export class SessionConnection extends PersistentConnection {
                 this._session.getStateSchedule.remove(rpc)
                 break
             }
+            case 'bind':
+                break // do nothing, wait for the result
             default:
                 if (!inContainer) {
                     this.log.warn(
@@ -575,6 +889,31 @@ export class SessionConnection extends PersistentConnection {
                         msgId,
                     )
                 }
+        }
+    }
+
+    private _onAllFailed(reason: string) {
+        // called when all the pending messages are to be resent
+        // e.g. when server returns 429
+
+        // most service messages can be omitted as stale
+        this._resetLastPing(true)
+
+        for (const msgId of this._session.pendingMessages.keys()) {
+            const info = this._session.pendingMessages.get(msgId)!
+
+            switch (info._) {
+                case 'container':
+                case 'state':
+                case 'resend':
+                case 'ping':
+                    // no longer relevant
+                    this._session.pendingMessages.delete(msgId)
+                    break
+                default:
+                    this._onMessageFailed(msgId, reason, true)
+                    break
+            }
         }
     }
 
@@ -669,6 +1008,13 @@ export class SessionConnection extends PersistentConnection {
                 this._session.queuedStateReq.splice(0, 0, ...msgInfo.msgIds)
                 this._flushTimer.emitWhenIdle()
                 break
+            case 'bind':
+                this.log.debug(
+                    'temp key binding request %l failed because of %s, retrying',
+                    msgId,
+                    reason
+                )
+                msgInfo.promise.reject(Error(reason))
         }
 
         this._session.pendingMessages.delete(msgId)
@@ -778,6 +1124,8 @@ export class SessionConnection extends PersistentConnection {
                 // something went very wrong, we need to reset the session
                 this.log.error(
                     'received bad_msg_notification for msg_id = %l, code = %d. session will be reset',
+                    msg.badMsgId,
+                    msg.errorCode
                 )
                 this._resetSession()
                 break
@@ -818,6 +1166,14 @@ export class SessionConnection extends PersistentConnection {
 
         for (const msgId of this._session.pendingMessages.keys()) {
             const val = this._session.pendingMessages.get(msgId)!
+
+            if (val._ === 'bind') {
+                // should NOT happen.
+                if (msgId.lt(firstMsgId)) {
+                    this._onMessageFailed(msgId, 'received in wrong session')
+                }
+                continue
+            }
 
             if (val._ === 'container') {
                 if (msgId.lt(firstMsgId)) {
@@ -940,6 +1296,24 @@ export class SessionConnection extends PersistentConnection {
         }
 
         this._onMessagesInfo(info.msgIds, msg.info)
+    }
+
+    private _onDestroySessionResult(msg: mtp.TypeDestroySessionRes): void {
+        const reqMsgId = this._session.destroySessionIdToMsgId.get(
+            msg.sessionId
+        )
+        if (!reqMsgId) {
+            this.log.warn(
+                'received %s for unknown session %h',
+                msg._,
+                msg.sessionId
+            )
+            return
+        }
+
+        this._session.destroySessionIdToMsgId.delete(msg.sessionId)
+        this._session.pendingMessages.delete(reqMsgId)
+        this.log.debug('received %s for session %h', msg._, msg.sessionId)
     }
 
     private _enqueueRpc(rpc: PendingRpc, force?: boolean) {
@@ -1133,7 +1507,11 @@ export class SessionConnection extends PersistentConnection {
     }
 
     private _flush(): void {
-        if (!this._session._authKey.ready || this._current429Timeout) {
+        if (
+            !this._session._authKey.ready ||
+            this._isPfsBindingPending ||
+            this._current429Timeout
+        ) {
             // it will be flushed once connection is usable
             return
         }
@@ -1362,7 +1740,7 @@ export class SessionConnection extends PersistentConnection {
 
         const otherPendings: Exclude<
             PendingMessage,
-            { _: 'rpc' | 'container' }
+            { _: 'rpc' | 'container' | 'bind' }
         >[] = []
 
         if (ackRequest) {
@@ -1445,6 +1823,7 @@ export class SessionConnection extends PersistentConnection {
                     containerId: msgId,
                 }
                 this._session.pendingMessages.set(msgId, pending)
+                this._session.destroySessionIdToMsgId.set(sessionId, msgId)
                 otherPendings.push(pending)
             })
         }
@@ -1561,12 +1940,8 @@ export class SessionConnection extends PersistentConnection {
             rootMsgId,
         )
 
-        this._session._authKey
-            .encryptMessage(
-                result,
-                this._session.serverSalt,
-                this._session._sessionId
-            )
+        this._session
+            .encryptMessage(result)
             .then((enc) => this.send(enc))
             .catch((err) => {
                 this.log.error(

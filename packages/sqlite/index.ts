@@ -54,61 +54,64 @@ function getInputPeer(
     throw new Error(`Invalid peer type: ${row.type}`)
 }
 
-const CURRENT_VERSION = 2
+const CURRENT_VERSION = 3
 
-// language=SQLite
+// language=SQLite format=false
+const TEMP_AUTH_TABLE = `
+    create table temp_auth_keys (
+        dc integer not null,
+        idx integer not null,
+        key blob not null,
+        expires integer not null,
+        primary key (dc, idx)
+    );
+`
+
+// language=SQLite format=false
 const SCHEMA = `
-    create table kv
-    (
-        key   text primary key,
+    create table kv (
+        key text primary key,
         value text not null
     );
 
-    create table state
-    (
-        key     text primary key,
-        value   text not null,
+    create table state (
+        key text primary key,
+        value text not null,
         expires number
     );
 
-    create table auth_keys
-    (
-        dc  integer primary key,
+    create table auth_keys (
+        dc integer primary key,
         key blob not null
     );
 
-    create table pts
-    (
+    ${TEMP_AUTH_TABLE}
+
+    create table pts (
         channel_id integer primary key,
-        pts        integer not null
+        pts integer not null
     );
 
-    create table entities
-    (
-        id       integer primary key,
-        hash     text    not null,
-        type     text    not null,
+    create table entities (
+        id integer primary key,
+        hash text not null,
+        type text not null,
         username text,
-        phone    text,
-        updated  integer not null,
-        "full"   blob
+        phone text,
+        updated integer not null,
+        "full" blob
     );
     create index idx_entities_username on entities (username);
     create index idx_entities_phone on entities (phone);
 `
 
+// language=SQLite format=false
 const RESET = `
-    delete
-    from kv
-    where key <> 'ver';
-    delete
-    from state;
-    delete
-    from auth_keys;
-    delete
-    from pts;
-    delete
-    from entities
+    delete from kv where key <> 'ver';
+    delete from state;
+    delete from auth_keys;
+    delete from pts;
+    delete from entities
 `
 
 const USERNAME_TTL = 86400000 // 24 hours
@@ -144,8 +147,14 @@ const STATEMENTS = {
     delState: 'delete from state where key = ?',
 
     getAuth: 'select key from auth_keys where dc = ?',
+    getAuthTemp:
+        'select key from temp_auth_keys where dc = ? and idx = ? and expires > ?',
     setAuth: 'insert or replace into auth_keys (dc, key) values (?, ?)',
+    setAuthTemp:
+        'insert or replace into temp_auth_keys (dc, idx, key, expires) values (?, ?, ?, ?)',
     delAuth: 'delete from auth_keys where dc = ?',
+    delAuthTemp: 'delete from temp_auth_keys where dc = ? and idx = ?',
+    delAllAuthTemp: 'delete from temp_auth_keys where dc = ?',
 
     getPts: 'select pts from pts where channel_id = ?',
     setPts: 'insert or replace into pts (channel_id, pts) values (?, ?)',
@@ -376,6 +385,17 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
                 'Unsupported session version, please migrate manually',
             )
         }
+
+        if (from === 2) {
+            // PFS support added
+            this._db.exec(TEMP_AUTH_TABLE)
+            from = 3
+        }
+
+        if (from !== CURRENT_VERSION) {
+            // an assertion just in case i messed up
+            throw new Error('Migration incomplete')
+        }
     }
 
     private _initializeStatements(): void {
@@ -481,10 +501,15 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         return this._getFromKv('def_dc')
     }
 
-    getAuthKeyFor(dcId: number): Buffer | null {
-        const row = this._statements.getAuth.get(dcId)
+    getAuthKeyFor(dcId: number, tempIndex?: number): Promise<Buffer | null> {
+        let row
+        if (tempIndex !== undefined) {
+            row = this._statements.getAuthTemp.get(dcId, tempIndex, Date.now())
+        } else {
+            row = this._statements.getAuth.get(dcId)
+        }
 
-        return row ? (row as { key: Buffer }).key : null
+        return row ? row.key : null
     }
 
     setAuthKeyFor(dcId: number, key: Buffer | null): void {
@@ -492,6 +517,27 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
             key === null ? this._statements.delAuth : this._statements.setAuth,
             key === null ? [dcId] : [dcId, key],
         ])
+    }
+
+    setTempAuthKeyFor(
+        dcId: number,
+        index: number,
+        key: Buffer | null,
+        expires: number
+    ): void {
+        this._pending.push([
+            key === null
+                ? this._statements.delAuthTemp
+                : this._statements.setAuthTemp,
+            key === null ? [dcId, index] : [dcId, index, key, expires],
+        ])
+    }
+
+    dropAuthKeysFor(dcId: number): void {
+        this._pending.push(
+            [this._statements.delAuth, [dcId]],
+            [this._statements.delAllAuthTemp, [dcId]]
+        )
     }
 
     getSelf(): ITelegramStorage.SelfInfo | null {

@@ -80,6 +80,10 @@ export type PendingMessage =
           _: 'future_salts'
           containerId: Long
       }
+    | {
+          _: 'bind'
+          promise: ControllablePromise
+      }
 
 /**
  * Class encapsulating a single MTProto session and storing
@@ -89,6 +93,8 @@ export class MtprotoSession {
     _sessionId = randomLong()
 
     _authKey = new AuthKey(this._crypto, this.log, this._readerMap)
+    _authKeyTemp = new AuthKey(this._crypto, this.log, this._readerMap)
+    _authKeyTempSecondary = new AuthKey(this._crypto, this.log, this._readerMap)
 
     _timeOffset = 0
     _lastMessageId = Long.ZERO
@@ -114,6 +120,7 @@ export class MtprotoSession {
 
     // requests info
     pendingMessages = new LongMap<PendingMessage>()
+    destroySessionIdToMsgId = new LongMap<Long>()
 
     initConnectionCalled = false
 
@@ -131,6 +138,8 @@ export class MtprotoSession {
      */
     reset(): void {
         this._authKey.reset()
+        this._authKeyTemp.reset()
+        this._authKeyTempSecondary.reset()
 
         this.resetState()
     }
@@ -146,7 +155,7 @@ export class MtprotoSession {
         this._seqNo = 0
 
         this._sessionId = randomLong()
-        this.log.debug('session reset, new sid = %l', this._sessionId)
+        this.log.debug('session reset, new sid = %h', this._sessionId)
         this.log.prefix = `[SESSION ${this._sessionId.toString(16)}] `
 
         // reset session state
@@ -220,6 +229,42 @@ export class MtprotoSession {
         }
 
         return seqNo
+    }
+
+    /** Encrypt a single MTProto message using session's keys */
+    async encryptMessage(message: Buffer): Promise<Buffer> {
+        const key = this._authKeyTemp.ready ? this._authKeyTemp : this._authKey
+        return key.encryptMessage(message, this.serverSalt, this._sessionId)
+    }
+
+    /** Decrypt a single MTProto message using session's keys */
+    async decryptMessage(
+        data: Buffer,
+        callback: Parameters<AuthKey['decryptMessage']>[2]
+    ): Promise<void> {
+        if (!this._authKey.ready) throw new Error('Keys are not set up!')
+
+        const authKeyId = data.slice(0, 8)
+
+        let key: AuthKey
+        if (this._authKey.match(authKeyId)) {
+            key = this._authKey
+        } else if (this._authKeyTemp.match(authKeyId)) {
+            key = this._authKeyTemp
+        } else if (this._authKeyTempSecondary.match(authKeyId)) {
+            key = this._authKeyTempSecondary
+        } else {
+            this.log.warn(
+                'received message with unknown authKey = %h (expected %h or %h or %h)',
+                authKeyId,
+                this._authKey.id,
+                this._authKeyTemp.id,
+                this._authKeyTempSecondary.id,
+            )
+            return
+        }
+
+        return key.decryptMessage(data, this._sessionId, callback)
     }
 
     writeMessage(

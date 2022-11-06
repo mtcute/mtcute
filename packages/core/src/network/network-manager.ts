@@ -31,6 +31,7 @@ export class DcConnectionManager {
         disableUpdates: this.manager.params.disableUpdates,
         readerMap: this.manager.params.readerMap,
         writerMap: this.manager.params.writerMap,
+        usePfs: this.manager.params.usePfs,
         isMainConnection: false,
     })
 
@@ -44,6 +45,10 @@ export class DcConnectionManager {
     )
 }
 
+/**
+ * Params passed into {@link NetworkManager} by {@link TelegramClient}.
+ * This type is intended for internal usage only.
+ */
 export interface NetworkManagerParams {
     storage: ITelegramStorage
     crypto: ICryptoProvider
@@ -61,6 +66,18 @@ export interface NetworkManagerParams {
     layer: number
     readerMap: TlReaderMap
     writerMap: TlWriterMap
+}
+
+/**
+ * Additional params passed into {@link NetworkManager} by the user
+ * that customize the behavior of the manager
+ */
+export interface NetworkManagerExtraParams {
+    /**
+     * Whether to use PFS (Perfect Forward Secrecy) for all connections.
+     * This is disabled by default
+     */
+    usePfs?: boolean
 }
 
 export class NetworkManager {
@@ -93,7 +110,7 @@ export class NetworkManager {
     }
 
     constructor(
-        readonly params: NetworkManagerParams,
+        readonly params: NetworkManagerParams & NetworkManagerExtraParams,
         readonly config: ConfigManager
     ) {
         let deviceModel = 'mtcute on '

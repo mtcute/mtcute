@@ -78,12 +78,27 @@ export interface ITelegramStorage {
     /**
      * Get auth_key for a given DC
      * (returning null will start authorization)
+     * For temp keys: should also return null if the key has expired
+     *
+     * @param dcId DC ID
+     * @param tempIndex  Index of the temporary key (usually 0, used for multi-connections)
      */
-    getAuthKeyFor(dcId: number): MaybeAsync<Buffer | null>
+    getAuthKeyFor(dcId: number, tempIndex?: number): MaybeAsync<Buffer | null>
     /**
      * Set auth_key for a given DC
      */
     setAuthKeyFor(dcId: number, key: Buffer | null): MaybeAsync<void>
+    /**
+     * Set temp_auth_key for a given DC
+     * expiresAt is unix time in ms
+     */
+    setTempAuthKeyFor(dcId: number, index: number, key: Buffer | null, expiresAt: number): MaybeAsync<void>
+    /**
+     * Remove all saved auth keys (both temp and perm)
+     * for the given DC. Used when perm_key becomes invalid,
+     * meaning all temp_keys also become invalid
+     */
+    dropAuthKeysFor(dcId: number): MaybeAsync<void>
 
     /**
      * Get information about currently logged in user (if available)

@@ -102,6 +102,7 @@ async function rsaEncrypt(
 export async function doAuthorization(
     connection: SessionConnection,
     crypto: ICryptoProvider,
+    expiresIn?: number
 ): Promise<[Buffer, Long, number]> {
     // eslint-disable-next-line dot-notation
     const session = connection['_session']
@@ -128,16 +129,17 @@ export async function doAuthorization(
     async function readNext(): Promise<mtp.TlObject> {
         return TlBinaryReader.deserializeObject(
             readerMap,
-            await connection.waitForNextMessage(),
-            20, // skip mtproto header
+            await connection.waitForUnencryptedMessage(),
+            20 // skip mtproto header
         )
     }
 
     const log = connection.log.create('auth')
+    if (expiresIn) log.prefix = '[PFS] '
 
     const nonce = randomBytes(16)
     // Step 1: PQ request
-    log.debug('starting PQ handshake, nonce = %h', nonce)
+    log.debug('starting PQ handshake (temp = %b), nonce = %h', expiresIn, nonce)
 
     await sendPlainMessage({ _: 'mt_req_pq_multi', nonce })
     const resPq = await readNext()
@@ -175,8 +177,8 @@ export async function doAuthorization(
     if (connection.params.testMode) dcId += 10000
     if (connection.params.dc.mediaOnly) dcId = -dcId
 
-    const _pqInnerData: mtp.RawMt_p_q_inner_data_dc = {
-        _: 'mt_p_q_inner_data_dc',
+    const _pqInnerData: mtp.TypeP_Q_inner_data = {
+        _: expiresIn ? 'mt_p_q_inner_data_temp_dc' : 'mt_p_q_inner_data_dc',
         pq: resPq.pq,
         p,
         q,
@@ -184,6 +186,7 @@ export async function doAuthorization(
         newNonce,
         serverNonce: resPq.serverNonce,
         dc: dcId,
+        expiresIn: expiresIn! // whatever
     }
     const pqInnerData = TlBinaryWriter.serializeObject(writerMap, _pqInnerData)
 

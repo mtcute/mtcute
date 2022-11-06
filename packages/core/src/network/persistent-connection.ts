@@ -30,6 +30,7 @@ let nextConnectionUid = 0
 /**
  * Base class for persistent connections.
  * Only used for {@link PersistentConnection} and used as a mean of code splitting.
+ * This class doesn't know anything about MTProto, it just manages the transport.
  */
 export abstract class PersistentConnection extends EventEmitter {
     private _uid = nextConnectionUid++
@@ -48,9 +49,6 @@ export abstract class PersistentConnection extends EventEmitter {
     // inactivity timeout
     private _inactivityTimeout: NodeJS.Timeout | null = null
     private _inactive = false
-
-    // waitForMessage
-    private _pendingWaitForMessages: ControllablePromise<Buffer>[] = []
 
     _destroyed = false
     _usable = false
@@ -91,7 +89,7 @@ export abstract class PersistentConnection extends EventEmitter {
         this._transport.setup?.(this.params.crypto, this.log)
 
         this._transport.on('ready', this.onTransportReady.bind(this))
-        this._transport.on('message', this.onTransportMessage.bind(this))
+        this._transport.on('message', this.onMessage.bind(this))
         this._transport.on('error', this.onTransportError.bind(this))
         this._transport.on('close', this.onTransportClose.bind(this))
     }
@@ -119,32 +117,12 @@ export abstract class PersistentConnection extends EventEmitter {
     }
 
     onTransportError(err: Error): void {
-        if (this._pendingWaitForMessages.length) {
-            this._pendingWaitForMessages.shift()!.reject(err)
-
-            return
-        }
-
         this._lastError = err
         this.onError(err)
         // transport is expected to emit `close` after `error`
     }
 
-    onTransportMessage(data: Buffer): void {
-        if (this._pendingWaitForMessages.length) {
-            this._pendingWaitForMessages.shift()!.resolve(data)
-
-            return
-        }
-
-        this.onMessage(data)
-    }
-
     onTransportClose(): void {
-        Object.values(this._pendingWaitForMessages).forEach((prom) =>
-            prom.reject(new Error('Connection closed')),
-        )
-
         // transport closed because of inactivity
         // obviously we dont want to reconnect then
         if (this._inactive) return
@@ -218,12 +196,5 @@ export abstract class PersistentConnection extends EventEmitter {
         } else {
             this._sendOnceConnected.push(data)
         }
-    }
-
-    waitForNextMessage(): Promise<Buffer> {
-        const promise = createControllablePromise<Buffer>()
-        this._pendingWaitForMessages.push(promise)
-
-        return promise
     }
 }
