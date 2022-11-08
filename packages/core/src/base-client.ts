@@ -334,6 +334,7 @@ export class BaseTelegramClient extends EventEmitter {
             storage: this.storage,
             testMode: this._testMode,
             transport: opts.transport,
+            _emitError: this._emitError.bind(this),
             ...(opts.network ?? {}),
         }, this._config)
 
@@ -881,9 +882,8 @@ export class BaseTelegramClient extends EventEmitter {
             }
         }
 
-        await this.storage.updatePeers(parsedPeers)
-
         if (count > 0) {
+            await this.storage.updatePeers(parsedPeers)
             this.log.debug('cached %d peers', count)
         }
 

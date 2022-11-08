@@ -10,7 +10,7 @@ import { MtprotoSession } from './mtproto-session'
 
 export class MultiSessionConnection extends EventEmitter {
     private _log: Logger
-    private _sessions: MtprotoSession[]
+    readonly _sessions: MtprotoSession[]
 
     constructor(
         readonly params: SessionConnectionParams,
@@ -88,6 +88,7 @@ export class MultiSessionConnection extends EventEmitter {
         if (this._connections.length > this._count) {
             // destroy extra connections
             for (let i = this._connections.length - 1; i >= this._count; i--) {
+                this._connections[i].removeAllListeners()
                 this._connections[i].destroy()
             }
 
@@ -97,10 +98,17 @@ export class MultiSessionConnection extends EventEmitter {
 
         // create new connections
         for (let i = this._connections.length; i < this._count; i++) {
-            const session = this.params.isMainConnection ? this._sessions[i] : this._sessions[0]
+            const session = this.params.isMainConnection
+                ? this._sessions[i]
+                : this._sessions[0]
             const conn = new SessionConnection(this.params, session)
 
             conn.on('update', (update) => this.emit('update', update))
+            conn.on('error', (err) => this.emit('error', err, conn))
+            conn.on('key-change', (key) => this.emit('key-change', i, key))
+            conn.on('tmp-key-change', (key, expires) =>
+                this.emit('tmp-key-change', i, key, expires)
+            )
 
             this._connections.push(conn)
         }
@@ -128,7 +136,9 @@ export class MultiSessionConnection extends EventEmitter {
             let minIdx = 0
             for (let i = 0; i < this._connections.length; i++) {
                 const conn = this._connections[i]
-                const total = conn._session.queuedRpc.length + conn._session.pendingMessages.size()
+                const total =
+                    conn._session.queuedRpc.length +
+                    conn._session.pendingMessages.size()
 
                 if (total < min) {
                     min = total
@@ -156,5 +166,11 @@ export class MultiSessionConnection extends EventEmitter {
         for (const conn of this._connections) {
             conn.connect()
         }
+    }
+
+    async setAuthKey(authKey: Buffer | null, temp = false, idx = 0): Promise<void> {
+        const session = this._sessions[idx]
+        const key = temp ? session._authKeyTemp : session._authKey
+        await key.setup(authKey)
     }
 }

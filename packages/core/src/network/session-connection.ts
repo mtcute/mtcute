@@ -41,7 +41,7 @@ import {
 import { TransportError } from './transports'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto'
 
-const TEMP_AUTH_KEY_EXPIRY = 300 // 86400 fixme
+const TEMP_AUTH_KEY_EXPIRY = 86400
 
 export interface SessionConnectionParams extends PersistentConnectionParams {
     initConnection: tl.RawInitConnectionRequest
@@ -57,7 +57,7 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
 }
 
 // destroy_auth_key#d1435160 = DestroyAuthKeyRes;
-const DESTROY_AUTH_KEY = Buffer.from('605134d1', 'hex')
+// const DESTROY_AUTH_KEY = Buffer.from('605134d1', 'hex')
 
 function makeNiceStack(
     error: tl.errors.RpcError,
@@ -160,7 +160,7 @@ export class SessionConnection extends PersistentConnection {
             this._authorize()
             // todo: if we use pfs, we can also start temp key exchange here
         } else if (this.params.usePfs && !this._session._authKeyTemp.ready) {
-            this.log.info('no perm auth key but using pfs, authorizing')
+            this.log.info('no temp auth key but using pfs, authorizing')
             this._authorizePfs()
         } else {
             this.log.info('auth keys are already available')
@@ -234,7 +234,7 @@ export class SessionConnection extends PersistentConnection {
             }
         }
 
-        this.emit('err', error)
+        this.emit('error', error)
     }
 
     protected onConnectionUsable() {

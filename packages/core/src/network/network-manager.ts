@@ -10,16 +10,10 @@ import {
 import { PersistentConnectionParams } from './persistent-connection'
 import { ConfigManager } from './config-manager'
 import { MultiSessionConnection } from './multi-session-connection'
-import { SessionConnectionParams } from './session-connection'
+import { SessionConnection, SessionConnectionParams } from "./session-connection";
 import { ITelegramStorage } from '../storage'
 
 export class DcConnectionManager {
-    constructor(
-        readonly manager: NetworkManager,
-        readonly dcId: number,
-        private _dc: tl.RawDcOption
-    ) {}
-
     private __baseConnectionParams = (): SessionConnectionParams => ({
         crypto: this.manager.params.crypto,
         initConnection: this.manager._initConnectionParams,
@@ -43,6 +37,38 @@ export class DcConnectionManager {
         1,
         this.manager._log
     )
+
+    constructor(
+        readonly manager: NetworkManager,
+        readonly dcId: number,
+        private _dc: tl.RawDcOption
+    ) {
+        this._setupStorageHandlers(this.mainConnection)
+    }
+
+    private _setupStorageHandlers(connection: MultiSessionConnection): void {
+        connection.on('key-change', (idx, key) => {
+            this.manager._log.debug('key change for dc %d from connection %d', this.dcId, idx)
+            this.manager._storage.setAuthKeyFor(this.dcId, key)
+        })
+        connection.on('tmp-key-change', (idx, key, expires) => {
+            this.manager._log.debug('temp key change for dc %d from connection %d', this.dcId, idx)
+            this.manager._storage.setTempAuthKeyFor(this.dcId, idx, key, expires * 1000)
+        })
+    }
+
+    async loadKeys(): Promise<void> {
+        const permanent = await this.manager._storage.getAuthKeyFor(this.dcId)
+
+        await this.mainConnection.setAuthKey(permanent)
+
+        if (this.manager.params.usePfs) {
+            for (let i = 0; i < this.mainConnection._sessions.length; i++) {
+                const temp = await this.manager._storage.getAuthKeyFor(this.dcId, i)
+                await this.mainConnection.setAuthKey(temp, true, i)
+            }
+        }
+    }
 }
 
 /**
@@ -66,6 +92,7 @@ export interface NetworkManagerParams {
     layer: number
     readerMap: TlReaderMap
     writerMap: TlWriterMap
+    _emitError: (err: Error, connection?: SessionConnection) => void
 }
 
 /**
@@ -82,6 +109,7 @@ export interface NetworkManagerExtraParams {
 
 export class NetworkManager {
     readonly _log = this.params.log.create('network')
+    readonly _storage = this.params.storage
 
     readonly _initConnectionParams: tl.RawInitConnectionRequest
     readonly _transportFactory: TransportFactory
@@ -92,6 +120,8 @@ export class NetworkManager {
 
     private _keepAliveInterval?: NodeJS.Timeout
     private _keepAliveAction = this._defaultKeepAliveAction.bind(this)
+    private _lastUpdateTime = 0
+    private _updateHandler: (upd: tl.TypeUpdates) => void = () => {}
 
     private _defaultKeepAliveAction(): void {
         if (this._keepAliveInterval) return
@@ -160,9 +190,7 @@ export class NetworkManager {
 
         this._primaryDc = dc
 
-        // todo add handlers
-        /*
-        this.primaryConnection.on('usable', () => {
+        dc.mainConnection.on('usable', () => {
             this._lastUpdateTime = Date.now()
 
             if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
@@ -173,22 +201,19 @@ export class NetworkManager {
                 }
             }, 60_000)
         })
-        this.primaryConnection.on('update', (update) => {
+        dc.mainConnection.on('update', (update) => {
             this._lastUpdateTime = Date.now()
-            this._handleUpdate(update)
+            this._updateHandler(update)
         })
-        this.primaryConnection.on('wait', () =>
-            this._cleanupPrimaryConnection()
+        // dc.mainConnection.on('wait', () =>
+        //     this._cleanupPrimaryConnection()
+        // )
+        dc.mainConnection.on('error', (err, conn) =>
+            this.params._emitError(err, conn)
         )
-        this.primaryConnection.on('key-change', async (key) => {
-            this.storage.setAuthKeyFor(this._defaultDc.id, key)
-            await this._saveStorage()
-        })
-        this.primaryConnection.on('error', (err) =>
-            this._emitError(err, this.primaryConnection)
-        )
-         */
-        dc.mainConnection.connect()
+        dc.loadKeys()
+            .catch((e) => this.params._emitError(e))
+            .then(() => dc.mainConnection.connect())
     }
 
     /**
