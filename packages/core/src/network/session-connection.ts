@@ -153,26 +153,34 @@ export class SessionConnection extends PersistentConnection {
         }
     }
 
-    protected async onConnected(): Promise<void> {
+    onConnected(): void {
         // check if we have all the needed keys
         if (!this._session._authKey.ready) {
+            if (!this.params.isMainConnection) {
+                this.log.info('no auth key, waiting for main connection')
+                // once it is done, we will be notified
+                return
+            }
+
             this.log.info('no perm auth key, authorizing...')
             this._authorize()
             // todo: if we use pfs, we can also start temp key exchange here
-        } else if (this.params.usePfs && !this._session._authKeyTemp.ready) {
+            return
+        }
+
+        if (this.params.usePfs && !this._session._authKeyTemp.ready) {
             this.log.info('no temp auth key but using pfs, authorizing')
             this._authorizePfs()
-        } else {
-            this.log.info('auth keys are already available')
-            this.onConnectionUsable()
+            return
         }
+
+        this.log.info('auth keys are already available')
+        this.onConnectionUsable()
     }
 
     protected onError(error: Error): void {
         // https://core.telegram.org/mtproto/mtproto-_transports#_transport-errors
         if (error instanceof TransportError) {
-            this.log.error('transport error %d', error.code)
-
             if (error.code === 404) {
                 // if we are using pfs, this could be due to the server
                 // forgetting our temp key (which is kinda weird but expected)
@@ -182,6 +190,8 @@ export class SessionConnection extends PersistentConnection {
                         !this._isPfsBindingPending &&
                         this._session._authKeyTemp.ready
                     ) {
+                        this.log.info('transport error 404, reauthorizing pfs')
+
                         // this is important! we must reset temp auth key before
                         // we proceed with new temp key derivation.
                         // otherwise, we can end up in an infinite loop in case it
@@ -195,15 +205,18 @@ export class SessionConnection extends PersistentConnection {
                         this._onAllFailed('temp key expired, binding started')
                         return
                     } else if (this._isPfsBindingPending) {
+                        this.log.info('transport error 404, pfs binding in progress')
+
                         this._onAllFailed('temp key expired, binding pending')
                         return
                     }
 
                     // otherwise, 404 must be referencing the perm_key
+                    this.log.info('transport error 404, reauthorizing')
                 }
 
                 // there happened a little trolling
-                this._session.reset()
+                this._session.reset(true)
                 this.emit('key-change', null)
                 this._authorize()
 
@@ -244,12 +257,29 @@ export class SessionConnection extends PersistentConnection {
         this._flushTimer.emitBeforeNext(1000)
     }
 
-    private _authorize(): void {
+    _authorize(): void {
+        if (this._session.authorizationPending) {
+            this.log.info('_authorize(): authorization already in progress')
+            return
+        }
+
+        if (!this.params.isMainConnection) {
+            // we don't authorize on non-main connections
+            this.log.debug('_authorize(): non-main connection, requesting...')
+            this.emit('request-auth')
+            return
+        }
+
+        this._session.authorizationPending = true
+        this.emit('auth-begin')
+
         doAuthorization(this, this.params.crypto)
             .then(async ([authKey, serverSalt, timeOffset]) => {
                 await this._session._authKey.setup(authKey)
                 this._session.serverSalt = serverSalt
                 this._session._timeOffset = timeOffset
+
+                this._session.authorizationPending = false
 
                 this.emit('key-change', authKey)
 
@@ -260,6 +290,7 @@ export class SessionConnection extends PersistentConnection {
                 }
             })
             .catch((err) => {
+                this._session.authorizationPending = false
                 this.log.error('Authorization error: %s', err.message)
                 this.onError(err)
                 this.reconnect()

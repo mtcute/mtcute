@@ -123,6 +123,7 @@ export class MtprotoSession {
     destroySessionIdToMsgId = new LongMap<Long>()
 
     initConnectionCalled = false
+    authorizationPending = false
 
     constructor(
         readonly _crypto: ICryptoProvider,
@@ -136,10 +137,12 @@ export class MtprotoSession {
     /**
      * Reset session by resetting auth key(s) and session state
      */
-    reset(): void {
-        this._authKey.reset()
-        this._authKeyTemp.reset()
-        this._authKeyTempSecondary.reset()
+    reset(withAuthKey = false): void {
+        if (withAuthKey) {
+            this._authKey.reset()
+            this._authKeyTemp.reset()
+            this._authKeyTempSecondary.reset()
+        }
 
         this.resetState()
     }

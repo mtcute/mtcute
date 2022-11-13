@@ -1,7 +1,7 @@
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import { tl } from '@mtcute/tl'
 
-import { createControllablePromise, ICryptoProvider, Logger } from '../utils'
+import { ICryptoProvider, Logger } from '../utils'
 import { defaultTransportFactory, TransportFactory } from './transports'
 import {
     defaultReconnectionStrategy,
@@ -10,66 +10,13 @@ import {
 import { PersistentConnectionParams } from './persistent-connection'
 import { ConfigManager } from './config-manager'
 import { MultiSessionConnection } from './multi-session-connection'
-import { SessionConnection, SessionConnectionParams } from "./session-connection";
+import {
+    SessionConnection,
+    SessionConnectionParams,
+} from './session-connection'
 import { ITelegramStorage } from '../storage'
 
-export class DcConnectionManager {
-    private __baseConnectionParams = (): SessionConnectionParams => ({
-        crypto: this.manager.params.crypto,
-        initConnection: this.manager._initConnectionParams,
-        transportFactory: this.manager._transportFactory,
-        dc: this._dc,
-        testMode: this.manager.params.testMode,
-        reconnectionStrategy: this.manager._reconnectionStrategy,
-        layer: this.manager.params.layer,
-        disableUpdates: this.manager.params.disableUpdates,
-        readerMap: this.manager.params.readerMap,
-        writerMap: this.manager.params.writerMap,
-        usePfs: this.manager.params.usePfs,
-        isMainConnection: false,
-    })
-
-    mainConnection = new MultiSessionConnection(
-        {
-            ...this.__baseConnectionParams(),
-            isMainConnection: true,
-        },
-        1,
-        this.manager._log
-    )
-
-    constructor(
-        readonly manager: NetworkManager,
-        readonly dcId: number,
-        private _dc: tl.RawDcOption
-    ) {
-        this._setupStorageHandlers(this.mainConnection)
-    }
-
-    private _setupStorageHandlers(connection: MultiSessionConnection): void {
-        connection.on('key-change', (idx, key) => {
-            this.manager._log.debug('key change for dc %d from connection %d', this.dcId, idx)
-            this.manager._storage.setAuthKeyFor(this.dcId, key)
-        })
-        connection.on('tmp-key-change', (idx, key, expires) => {
-            this.manager._log.debug('temp key change for dc %d from connection %d', this.dcId, idx)
-            this.manager._storage.setTempAuthKeyFor(this.dcId, idx, key, expires * 1000)
-        })
-    }
-
-    async loadKeys(): Promise<void> {
-        const permanent = await this.manager._storage.getAuthKeyFor(this.dcId)
-
-        await this.mainConnection.setAuthKey(permanent)
-
-        if (this.manager.params.usePfs) {
-            for (let i = 0; i < this.mainConnection._sessions.length; i++) {
-                const temp = await this.manager._storage.getAuthKeyFor(this.dcId, i)
-                await this.mainConnection.setAuthKey(temp, true, i)
-            }
-        }
-    }
-}
+export type ConnectionKind = 'main' | 'upload' | 'download' | 'download-small'
 
 /**
  * Params passed into {@link NetworkManager} by {@link TelegramClient}.
@@ -105,6 +52,126 @@ export interface NetworkManagerExtraParams {
      * This is disabled by default
      */
     usePfs?: boolean
+
+    /**
+     * Connection count for each connection kind
+     */
+    connectionCount?: Partial<Record<ConnectionKind, number>>
+}
+
+export class DcConnectionManager {
+    private __baseConnectionParams = (): SessionConnectionParams => ({
+        crypto: this.manager.params.crypto,
+        initConnection: this.manager._initConnectionParams,
+        transportFactory: this.manager._transportFactory,
+        dc: this._dc,
+        testMode: this.manager.params.testMode,
+        reconnectionStrategy: this.manager._reconnectionStrategy,
+        layer: this.manager.params.layer,
+        disableUpdates: this.manager.params.disableUpdates,
+        readerMap: this.manager.params.readerMap,
+        writerMap: this.manager.params.writerMap,
+        usePfs: this.manager.params.usePfs,
+        isMainConnection: false,
+    })
+
+    mainConnection = new MultiSessionConnection(
+        {
+            ...this.__baseConnectionParams(),
+            isMainConnection: true,
+        },
+        this.manager.params.connectionCount?.main ?? 1,
+        this.manager._log
+    )
+
+    constructor(
+        readonly manager: NetworkManager,
+        readonly dcId: number,
+        private _dc: tl.RawDcOption
+    ) {
+        this._setupMulti(this.mainConnection, 'main')
+    }
+
+    private _setupMulti(
+        connection: MultiSessionConnection,
+        kind: ConnectionKind
+    ): void {
+        connection.on('key-change', (idx, key) => {
+            if (kind !== 'main') {
+                // main connection is responsible for authorization,
+                // and keys are then sent to other connections
+                this.manager._log.warn(
+                    'got key-change from non-main connection'
+                )
+                return
+            }
+
+            this.manager._log.debug(
+                'key change for dc %d from connection %d',
+                this.dcId,
+                idx
+            )
+            this.manager._storage.setAuthKeyFor(this.dcId, key)
+
+            // send key to other connections
+            // todo
+        })
+        connection.on('tmp-key-change', (idx, key, expires) => {
+            if (kind !== 'main') {
+                this.manager._log.warn(
+                    'got tmp-key-change from non-main connection'
+                )
+                return
+            }
+
+            this.manager._log.debug(
+                'temp key change for dc %d from connection %d',
+                this.dcId,
+                idx
+            )
+            this.manager._storage.setTempAuthKeyFor(
+                this.dcId,
+                idx,
+                key,
+                expires * 1000
+            )
+        })
+
+        connection.on('auth-begin', () => {
+            // we need to propagate auth-begin to all connections
+            // to avoid them sending requests before auth is complete
+            if (kind !== 'main') {
+                this.manager._log.warn(
+                    'got auth-begin from non-main connection'
+                )
+                return
+            }
+
+            // reset key on non-main connections
+            // this event was already propagated to additional main connections
+            // todo
+        })
+
+        connection.on('request-auth', () => {
+            this.mainConnection.requestAuth()
+        })
+    }
+
+    async loadKeys(): Promise<void> {
+        const permanent = await this.manager._storage.getAuthKeyFor(this.dcId)
+
+        await this.mainConnection.setAuthKey(permanent)
+
+        if (this.manager.params.usePfs) {
+            for (let i = 0; i < this.mainConnection._sessions.length; i++) {
+                const temp = await this.manager._storage.getAuthKeyFor(
+                    this.dcId,
+                    i
+                )
+                await this.mainConnection.setAuthKey(temp, true, i)
+            }
+        }
+    }
 }
 
 export class NetworkManager {

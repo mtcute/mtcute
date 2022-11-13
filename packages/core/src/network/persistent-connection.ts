@@ -66,6 +66,7 @@ export abstract class PersistentConnection extends EventEmitter {
         super()
         this.params = params
         this.changeTransport(params.transportFactory)
+        this._updateLogPrefix()
     }
 
     private _updateLogPrefix() {

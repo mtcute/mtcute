@@ -70,14 +70,18 @@ export class MultiSessionConnection extends EventEmitter {
         }
 
         while (this._sessions.length < this._count) {
-            this._sessions.push(
-                new MtprotoSession(
-                    this.params.crypto,
-                    this._log.create('session'),
-                    this.params.readerMap,
-                    this.params.writerMap
-                )
+            const idx = this._sessions.length
+            const session = new MtprotoSession(
+                this.params.crypto,
+                this._log.create('session'),
+                this.params.readerMap,
+                this.params.writerMap
             )
+
+            // brvh
+            if (idx !== 0) session._authKey = this._sessions[0]._authKey
+
+            this._sessions.push(session)
         }
     }
 
@@ -101,26 +105,49 @@ export class MultiSessionConnection extends EventEmitter {
             const session = this.params.isMainConnection
                 ? this._sessions[i]
                 : this._sessions[0]
-            const conn = new SessionConnection(this.params, session)
+            const conn = new SessionConnection(
+                {
+                    ...this.params,
+                    isMainConnection: this.params.isMainConnection && i === 0,
+                },
+                session
+            )
 
             conn.on('update', (update) => this.emit('update', update))
             conn.on('error', (err) => this.emit('error', err, conn))
-            conn.on('key-change', (key) => this.emit('key-change', i, key))
+            conn.on('key-change', (key) => {
+                this.emit('key-change', i, key)
+
+                // notify other connections
+                for (const conn_ of this._connections) {
+                    if (conn_ === conn) continue
+                    conn_.onConnected()
+                }
+            })
             conn.on('tmp-key-change', (key, expires) =>
                 this.emit('tmp-key-change', i, key, expires)
             )
+            conn.on('auth-begin', () => {
+                this._log.debug('received auth-begin from connection %d', i)
+                this.emit('auth-begin', i)
+
+                // we need to reset temp auth keys if there are any left
+
+                this._connections.forEach((conn_) => {
+                    conn_._session._authKeyTemp.reset()
+                    if (conn_ !== conn) conn_.reconnect()
+                })
+            })
+            conn.on('usable', () => this.emit('usable', i))
+            conn.on('request-auth', () => this.emit('request-auth', i))
 
             this._connections.push(conn)
         }
     }
 
     destroy(): void {
-        for (const conn of this._connections) {
-            conn.destroy()
-        }
-        for (const session of this._sessions) {
-            session.reset()
-        }
+        this._connections.forEach((conn) => conn.destroy())
+        this._sessions.forEach((sess) => sess.reset())
     }
 
     private _nextConnection = 0
@@ -168,9 +195,17 @@ export class MultiSessionConnection extends EventEmitter {
         }
     }
 
-    async setAuthKey(authKey: Buffer | null, temp = false, idx = 0): Promise<void> {
+    async setAuthKey(
+        authKey: Buffer | null,
+        temp = false,
+        idx = 0
+    ): Promise<void> {
         const session = this._sessions[idx]
         const key = temp ? session._authKeyTemp : session._authKey
         await key.setup(authKey)
+    }
+
+    requestAuth(): void {
+        this._connections[0]._authorize()
     }
 }
