@@ -92,6 +92,7 @@ export class SessionConnection extends PersistentConnection {
     private _lastPingMsgId = Long.ZERO
     private _lastSessionCreatedUid = Long.ZERO
 
+    private _usePfs = this.params.usePfs ?? false
     private _isPfsBindingPending = false
     private _isPfsBindingPendingInBackground = false
     private _pfsUpdateTimeout?: NodeJS.Timeout
@@ -122,6 +123,21 @@ export class SessionConnection extends PersistentConnection {
 
         if (!key.ready) return null
         return key.key
+    }
+
+    setUsePfs(usePfs: boolean): void {
+        if (this._usePfs === usePfs) return
+
+        this.log.debug('use pfs changed to %s', usePfs)
+        this._usePfs = usePfs
+        if (!usePfs) {
+            this._isPfsBindingPending = false
+            this._isPfsBindingPendingInBackground = false
+            this._session._authKeyTemp.reset()
+            clearTimeout(this._pfsUpdateTimeout!)
+        }
+
+        this._resetSession()
     }
 
     onTransportClose(): void {
@@ -168,7 +184,7 @@ export class SessionConnection extends PersistentConnection {
             return
         }
 
-        if (this.params.usePfs && !this._session._authKeyTemp.ready) {
+        if (this._usePfs && !this._session._authKeyTemp.ready) {
             this.log.info('no temp auth key but using pfs, authorizing')
             this._authorizePfs()
             return
@@ -185,7 +201,7 @@ export class SessionConnection extends PersistentConnection {
                 // if we are using pfs, this could be due to the server
                 // forgetting our temp key (which is kinda weird but expected)
 
-                if (this.params.usePfs) {
+                if (this._usePfs) {
                     if (
                         !this._isPfsBindingPending &&
                         this._session._authKeyTemp.ready
@@ -283,7 +299,7 @@ export class SessionConnection extends PersistentConnection {
 
                 this.emit('key-change', authKey)
 
-                if (this.params.usePfs) {
+                if (this._usePfs) {
                     return this._authorizePfs()
                 } else {
                     this.onConnectionUsable()
@@ -321,6 +337,11 @@ export class SessionConnection extends PersistentConnection {
 
         doAuthorization(this, this.params.crypto, TEMP_AUTH_KEY_EXPIRY)
             .then(async ([tempAuthKey, tempServerSalt]) => {
+                if (!this._usePfs) {
+                    this.log.info('pfs has been disabled while generating temp key')
+                    return
+                }
+
                 const tempKey = await this._session._authKeyTempSecondary
                 await tempKey.setup(tempAuthKey)
 
@@ -425,6 +446,11 @@ export class SessionConnection extends PersistentConnection {
                 const res: mtp.RawMt_rpc_error | boolean = await promise
 
                 this._session.pendingMessages.delete(msgId)
+
+                if (!this._usePfs) {
+                    this.log.info('pfs has been disabled while binding temp key')
+                    return
+                }
 
                 if (typeof res === 'object') {
                     this.log.error(

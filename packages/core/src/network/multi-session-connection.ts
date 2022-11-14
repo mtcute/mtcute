@@ -11,6 +11,7 @@ import { MtprotoSession } from './mtproto-session'
 export class MultiSessionConnection extends EventEmitter {
     private _log: Logger
     readonly _sessions: MtprotoSession[]
+    private _enforcePfs = false
 
     constructor(
         readonly params: SessionConnectionParams,
@@ -19,6 +20,7 @@ export class MultiSessionConnection extends EventEmitter {
     ) {
         super()
         this._log = log.create('multi')
+        this._enforcePfs = _count > 1 && params.isMainConnection
 
         this._sessions = []
         this._updateConnections()
@@ -28,10 +30,17 @@ export class MultiSessionConnection extends EventEmitter {
 
     setCount(count: number, doUpdate = true): void {
         this._count = count
-        if (doUpdate) this._updateConnections()
+
+        if (doUpdate) this._updateConnections(true)
     }
 
     private _updateSessions(): void {
+        this._log.debug(
+            'updating sessions count: %d -> %d',
+            this._sessions.length,
+            this._count
+        )
+
         // there are two cases
         // 1. this msc is main, in which case every connection should have its own session
         // 2. this msc is not main, in which case all connections should share the same session
@@ -85,9 +94,26 @@ export class MultiSessionConnection extends EventEmitter {
         }
     }
 
-    private _updateConnections(): void {
+    private _updateConnections(active = false): void {
         this._updateSessions()
         if (this._connections.length === this._count) return
+
+        this._log.debug(
+            'updating connections count: %d -> %d',
+            this._connections.length,
+            this._count
+        )
+
+        const newEnforcePfs = this._count > 1 && this.params.isMainConnection
+        const enforcePfsChanged = newEnforcePfs !== this._enforcePfs
+        if (enforcePfsChanged) {
+            this._log.debug(
+                'enforcePfs changed: %s -> %s',
+                this._enforcePfs,
+                newEnforcePfs
+            )
+            this._enforcePfs = newEnforcePfs
+        }
 
         if (this._connections.length > this._count) {
             // destroy extra connections
@@ -100,6 +126,12 @@ export class MultiSessionConnection extends EventEmitter {
             return
         }
 
+        if (enforcePfsChanged) {
+            this._connections.forEach((conn) => {
+                conn.setUsePfs(this.params.usePfs || this._enforcePfs)
+            })
+        }
+
         // create new connections
         for (let i = this._connections.length; i < this._count; i++) {
             const session = this.params.isMainConnection
@@ -108,6 +140,7 @@ export class MultiSessionConnection extends EventEmitter {
             const conn = new SessionConnection(
                 {
                     ...this.params,
+                    usePfs: this.params.usePfs || this._enforcePfs,
                     isMainConnection: this.params.isMainConnection && i === 0,
                 },
                 session
@@ -142,6 +175,7 @@ export class MultiSessionConnection extends EventEmitter {
             conn.on('request-auth', () => this.emit('request-auth', i))
 
             this._connections.push(conn)
+            if (active) conn.connect()
         }
     }
 
