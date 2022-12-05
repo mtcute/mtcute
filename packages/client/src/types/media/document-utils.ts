@@ -12,6 +12,29 @@ export function parseDocument(
     client: TelegramClient,
     doc: tl.RawDocument
 ): RawDocument {
+    const stickerAttr = doc.attributes.find(
+        (a) =>
+            a._ === 'documentAttributeSticker' ||
+            a._ === 'documentAttributeCustomEmoji'
+    )
+
+    if (stickerAttr) {
+        const sz = doc.attributes.find(
+            (it) =>
+                it._ === 'documentAttributeImageSize' ||
+                it._ === 'documentAttributeVideo'
+        )! as tl.RawDocumentAttributeImageSize | tl.RawDocumentAttributeVideo
+
+        return new Sticker(
+            client,
+            doc,
+            stickerAttr as
+                | tl.RawDocumentAttributeSticker
+                | tl.RawDocumentAttributeCustomEmoji,
+            sz
+        )
+    }
+
     for (const attr of doc.attributes) {
         switch (attr._) {
             case 'documentAttributeAudio':
@@ -20,18 +43,6 @@ export function parseDocument(
                 } else {
                     return new Audio(client, doc, attr)
                 }
-            case 'documentAttributeSticker':
-            case 'documentAttributeCustomEmoji': {
-                const sz = doc.attributes.find(
-                    (it) =>
-                        it._ === 'documentAttributeImageSize' ||
-                        it._ === 'documentAttributeVideo'
-                )! as
-                    | tl.RawDocumentAttributeImageSize
-                    | tl.RawDocumentAttributeVideo
-
-                return new Sticker(client, doc, attr, sz)
-            }
             case 'documentAttributeVideo':
                 return new Video(client, doc, attr)
             case 'documentAttributeImageSize':
