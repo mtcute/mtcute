@@ -103,6 +103,8 @@
         "updateChannelMessageForwards": ["channel_id"],
         "updateChannelMessageViews": ["channel_id"],
         "updateChannelParticipant": ["channel_id", "actor_id", "user_id"],
+        "updateChannelPinnedTopic": ["channel_id"],
+        "updateChannelPinnedTopics": ["channel_id"],
         "updateChannelReadMessagesContents": ["channel_id"],
         "updateChannelTooLong": ["channel_id"],
         "updateChannelUserTyping": ["channel_id"],

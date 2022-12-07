@@ -13,7 +13,7 @@
         "docs": "typedoc"
     },
     "dependencies": {
-        "@mtcute/tl": "workspace:^147.0.0",
+        "@mtcute/tl": "workspace:^150.0.0",
         "long": "^4.0.0"
     },
     "devDependencies": {

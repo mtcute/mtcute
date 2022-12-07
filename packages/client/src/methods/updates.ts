@@ -2209,7 +2209,8 @@ async function _onUpdate(
             break
         case 'updateUserName':
             if (upd.userId === this._userId) {
-                this._selfUsername = upd.username || null
+                this._selfUsername =
+                    upd.usernames.find((it) => it.active)?.username ?? null
             }
             break
     }

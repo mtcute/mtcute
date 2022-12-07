@@ -13,6 +13,7 @@ const sentCodeMap: Record<
     'auth.sentCodeTypeMissedCall': 'missed_call',
     'auth.sentCodeTypeEmailCode': 'email',
     'auth.sentCodeTypeSetUpEmailRequired': 'email_required',
+    "auth.sentCodeTypeFragmentSms": 'fragment'
 }
 
 const nextCodeMap: Record<
@@ -23,6 +24,7 @@ const nextCodeMap: Record<
     'auth.codeTypeFlashCall': 'flash_call',
     'auth.codeTypeSms': 'sms',
     'auth.codeTypeMissedCall': 'missed_call',
+    'auth.codeTypeFragmentSms': 'fragment',
 }
 
 export namespace SentCode {
@@ -41,6 +43,7 @@ export namespace SentCode {
         | 'missed_call'
         | 'email'
         | 'email_required'
+        | 'fragment'
 
     /**
      * Type describing next code delivery type.
