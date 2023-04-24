@@ -1,21 +1,9 @@
 # mtcute
 
-**PROJECT IS NOT DEAD/ABANDONED**
+**PROJECT IS ABANDONED**
 
-I'm currently a bit struggling to devote enough time for it
-due to IRL stuff. Also due to the stuff I'm working on in
-the project right now, I'm not making any commits not to
-break stuff.
-
-Sorry about that! Will hopefully get my
-hands back on it in late summer of 2022
-
-![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)
-
-Work-in-progress library for MTProto in TypeScript.
-
-[🎯 Roadmap (notion.so)](https://teidesu.notion.site/MTCute-development-cfccff4fddad4b218f3bea27f784b8b5)
-| [📦 TL Reference](https://mt.tei.su/tl)
+If anyone would like to take over it, feel free to DM me.  
+Meanwhile, check out other MTProto libraries in JS, or, better yet, use TDLib for god's sake.
 
 > ⚠️ **Warning**: While this library is WIP, storage
 > format *will* change without changing format version
