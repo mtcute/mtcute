@@ -616,7 +616,7 @@ export class BaseTelegramClient extends EventEmitter {
 
         // do not send requests that are in flood wait
         if (message._ in this._floodWaitedRequests) {
-            const delta = Date.now() - this._floodWaitedRequests[message._]
+            const delta = this._floodWaitedRequests[message._] - Date.now()
             if (delta <= 3000) {
                 // flood waits below 3 seconds are "ignored"
                 delete this._floodWaitedRequests[message._]
