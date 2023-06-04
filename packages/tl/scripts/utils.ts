@@ -1,5 +1,3 @@
-import fetch, { RequestInit } from 'node-fetch'
-
 export async function fetchRetry(
     url: string,
     params?: RequestInit,

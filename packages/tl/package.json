@@ -16,17 +16,14 @@
         "fetch-and-gen": "yarn fetch-api && yarn gen-code"
     },
     "dependencies": {
-        "@types/long": "^4.0.1",
-        "long": "^4.0.0"
+        "long": "5.2.3"
     },
     "devDependencies": {
         "@mtcute/tl-utils": "workspace:^1.0.0",
         "@mtcute/core": "workspace:^1.0.0",
-        "cheerio": "^1.0.0-rc.5",
-        "csv-parser": "^3.0.0",
-        "js-yaml": "^4.0.0",
-        "node-fetch": "^2.6.1",
-        "@types/node-fetch": "^2.5.10"
+        "cheerio": "1.0.0-rc.12",
+        "csv-parser": "3.0.0",
+        "js-yaml": "4.1.0"
     },
     "typedoc": {
         "entryPoint": "index.d.ts"

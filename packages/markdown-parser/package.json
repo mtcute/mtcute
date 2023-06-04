@@ -14,10 +14,9 @@
     },
     "dependencies": {
         "@mtcute/tl": "workspace:^150.0.0",
-        "long": "^4.0.0"
+        "long": "5.2.3"
     },
     "devDependencies": {
-        "@mtcute/client": "workspace:^1.0.0",
-        "@types/long": "^4.0.1"
+        "@mtcute/client": "workspace:^1.0.0"
     }
 }

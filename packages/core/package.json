@@ -3,7 +3,7 @@
     "private": true,
     "version": "1.0.0",
     "description": "Core functions and base MTProto client",
-    "author": "Alina Sireneva <me@tei.su>",
+    "author": "Alina Sireneva <alina@tei.su>",
     "license": "LGPL-3.0",
     "main": "src/index.ts",
     "scripts": {
@@ -18,18 +18,17 @@
         "./storage/json-file.js": false
     },
     "dependencies": {
-        "@types/node": "^15.12.1",
-        "@types/events": "^3.0.0",
-        "@types/long": "^4.0.2",
+        "@types/node": "18.16.0",
+        "@types/events": "3.0.0",
         "@mtcute/tl": "workspace:^150.0.0",
         "@mtcute/tl-runtime": "workspace:^1.0.0",
-        "big-integer": "1.6.48",
-        "long": "^4.0.0",
+        "big-integer": "1.6.51",
+        "long": "5.2.3",
         "events": "3.2.0"
     },
     "devDependencies": {
         "@mtcute/dispatcher": "workspace:^1.0.0",
-        "@types/ws": "^7.4.1",
-        "ws": "^7.4.4"
+        "@types/ws": "8.5.4",
+        "ws": "8.13.0"
     }
 }

@@ -15,6 +15,6 @@
         "@mtcute/tl": "workspace:^150.0.0",
         "@mtcute/core": "workspace:^1.0.0",
         "@mtcute/client": "workspace:^1.0.0",
-        "events": "^3.2.0"
+        "events": "3.2.0"
     }
 }

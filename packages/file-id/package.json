@@ -15,9 +15,6 @@
         "@mtcute/tl": "workspace:^150.0.0",
         "@mtcute/tl-runtime": "workspace:^1.0.0",
         "@mtcute/core": "workspace:^1.0.0",
-        "long": "^4.0.0"
-    },
-    "devDependencies": {
-        "@types/long": "^4.0.1"
+        "long": "5.2.3"
     }
 }

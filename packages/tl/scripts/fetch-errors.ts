@@ -1,5 +1,4 @@
 import { TlError, TlErrors } from '@mtcute/tl-utils'
-import fetch from 'node-fetch'
 // @ts-ignore
 import csvParser from 'csv-parser'
 import { writeFile } from 'fs/promises'
@@ -142,6 +141,10 @@ async function fetchFromTelegram(errors: TlErrors) {
 
 async function fetchFromTelethon(errors: TlErrors) {
     const csv = await fetch(ERRORS_PAGE_TELETHON)
+    if (!csv.body) {
+        throw new Error('No body in response')
+    }
+
     const parser = csvParser()
 
     function addError(name: string, codes: string, description: string): void {

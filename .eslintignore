@@ -1,7 +1,6 @@
 private/
 docs/
 dist/
-scripts/
 
 packages/tl/errors.js
 packages/tl/errors.d.ts

@@ -15,11 +15,10 @@
         "./platform/gzip.js": "./platform/gzip.web.js"
     },
     "dependencies": {
-        "long": "4.0.0",
-        "pako": "2.0.2"
+        "long": "5.2.3",
+        "pako": "2.1.0"
     },
     "devDependencies": {
-        "@types/long": "4.0.1",
-        "@types/pako": "^1.0.1"
+        "@types/pako": "2.0.0"
     }
 }

@@ -17,7 +17,6 @@ import {
 import { readdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import cheerio from 'cheerio'
-import fetch from 'node-fetch'
 import * as readline from 'readline'
 import {
     CORE_DOMAIN,
