@@ -1,12 +1,12 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
 import { IntermediatePacketCodec, TransportError } from '../../src'
 
 describe('IntermediatePacketCodec', () => {
     it('should return correct tag', () => {
         expect(new IntermediatePacketCodec().tag().toString('hex')).eq(
-            'eeeeeeee'
+            'eeeeeeee',
         )
     })
 

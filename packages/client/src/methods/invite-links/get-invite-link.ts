@@ -11,7 +11,7 @@ import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
 export async function getInviteLink(
     this: TelegramClient,
     chatId: InputPeerLike,
-    link: string
+    link: string,
 ): Promise<ChatInviteLink> {
     const res = await this.call({
         _: 'messages.getExportedChatInvite',

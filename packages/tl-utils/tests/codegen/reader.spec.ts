@@ -1,5 +1,5 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
 import { generateReaderCodeForTlEntry } from '../../src/codegen/reader'
 import { parseTlToEntries } from '../../src/parse'
@@ -8,14 +8,14 @@ describe('generateReaderCodeForTlEntry', () => {
     const test = (tl: string, ...js: string[]) => {
         const entry = parseTlToEntries(tl)[0]
         expect(generateReaderCodeForTlEntry(entry)).eq(
-            `${entry.id}:function(r){${js.join('')}},`
+            `${entry.id}:function(r){${js.join('')}},`,
         )
     }
 
     it('generates code for constructors without arguments', () => {
         test(
             'topPeerCategoryBotsPM#ab661b5b = TopPeerCategory;',
-            "return{_:'topPeerCategoryBotsPM'}"
+            "return{_:'topPeerCategoryBotsPM'}",
         )
     })
 
@@ -27,7 +27,7 @@ describe('generateReaderCodeForTlEntry', () => {
             'dcId:r.int(),',
             'id:r.long(),',
             'accessHash:r.long(),',
-            '}'
+            '}',
         )
         test(
             'contact#145ade0b user_id:long mutual:Bool = Contact;',
@@ -35,7 +35,7 @@ describe('generateReaderCodeForTlEntry', () => {
             "_:'contact',",
             'userId:r.long(),',
             'mutual:r.boolean(),',
-            '}'
+            '}',
         )
         test(
             'maskCoords#aed6dbb2 n:int x:double y:double zoom:double = MaskCoords;',
@@ -45,7 +45,7 @@ describe('generateReaderCodeForTlEntry', () => {
             'x:r.double(),',
             'y:r.double(),',
             'zoom:r.double(),',
-            '}'
+            '}',
         )
     })
 
@@ -56,7 +56,7 @@ describe('generateReaderCodeForTlEntry', () => {
             'return{',
             "_:'messages.messageEditData',",
             'caption:!!(flags&1),',
-            '}'
+            '}',
         )
     })
 
@@ -69,7 +69,7 @@ describe('generateReaderCodeForTlEntry', () => {
             'final:!!(flags&1),',
             'pts:r.int(),',
             'timeout:flags&2?r.int():void 0,',
-            '}'
+            '}',
         )
     })
 
@@ -83,7 +83,7 @@ describe('generateReaderCodeForTlEntry', () => {
             'id:id,',
             'quiz:!!(flags&8),',
             'question:r.string(),',
-            '}'
+            '}',
         )
     })
 
@@ -100,7 +100,7 @@ describe('generateReaderCodeForTlEntry', () => {
             'pts:pts,',
             'timeout:timeout,',
             'canDeleteChannel:!!(flags2&1),',
-            '}'
+            '}',
         )
     })
 
@@ -112,7 +112,7 @@ describe('generateReaderCodeForTlEntry', () => {
             'peer:r.object(),',
             'chats:r.vector(r.object),',
             'users:r.vector(r.object),',
-            '}'
+            '}',
         )
     })
 
@@ -124,7 +124,7 @@ describe('generateReaderCodeForTlEntry', () => {
             "_:'messages.getWebPagePreview',",
             'message:r.string(),',
             'entities:flags&8?r.vector(r.object):void 0,',
-            '}'
+            '}',
         )
     })
 
@@ -135,7 +135,7 @@ describe('generateReaderCodeForTlEntry', () => {
             "_:'invokeWithLayer',",
             'layer:r.int(),',
             'query:r.object(),',
-            '}'
+            '}',
         )
     })
 
@@ -150,7 +150,7 @@ describe('generateReaderCodeForTlEntry', () => {
                 'flags:flags,',
                 'flags2:flags2,',
                 '}',
-            ].join('')}},`
+            ].join('')}},`,
         )
     })
 })

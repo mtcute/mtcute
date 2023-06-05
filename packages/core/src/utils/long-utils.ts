@@ -1,4 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// ^^ because of performance reasons
 import Long from 'long'
+
 import { getRandomInt } from './misc-utils'
 
 /**
@@ -22,9 +25,11 @@ export function randomLong(unsigned = false): Long {
 export function removeFromLongArray(arr: Long[], val: Long): boolean {
     for (let i = 0; i < arr.length; i++) {
         const v = arr[i]
+
         // v === val for the case when the exact same object was passed
         if (v === val || v.eq(val)) {
             arr.splice(i, 1)
+
             return true
         }
     }
@@ -64,8 +69,7 @@ export function longFromFastString(val: string, unsigned = false): Long {
     const low = parseInt(parts[0])
     const high = parseInt(parts[1])
 
-    if (isNaN(low) || isNaN(high))
-        throw new Error(`Invalid long fast string: ${val}`)
+    if (isNaN(low) || isNaN(high)) { throw new Error(`Invalid long fast string: ${val}`) }
 
     return new Long(low, high, unsigned)
 }

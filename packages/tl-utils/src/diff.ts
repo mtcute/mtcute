@@ -1,3 +1,4 @@
+import { computeConstructorIdFromEntry } from './ctor-id'
 import {
     TlArgument,
     TlArgumentDiff,
@@ -6,7 +7,6 @@ import {
     TlFullSchema,
     TlSchemaDiff,
 } from './types'
-import { computeConstructorIdFromEntry } from './ctor-id'
 
 /**
  * Compute difference between two TL entries.
@@ -16,7 +16,7 @@ import { computeConstructorIdFromEntry } from './ctor-id'
  */
 export function generateTlEntriesDifference(
     a: TlEntry,
-    b: TlEntry
+    b: TlEntry,
 ): TlEntryDiff {
     if (a.kind !== b.kind || a.name !== b.name) {
         throw new Error('Incompatible entries')
@@ -79,6 +79,7 @@ export function generateTlEntriesDifference(
 
         if (!(arg.name in oldArgsIndex)) {
             argsDiff.added.push(arg)
+
             return
         }
 
@@ -139,7 +140,7 @@ export function generateTlEntriesDifference(
  */
 export function generateTlSchemasDifference(
     a: TlFullSchema,
-    b: TlFullSchema
+    b: TlFullSchema,
 ): TlSchemaDiff {
     // schemas already contain indexes, so we don't need to make our own
 
@@ -172,6 +173,7 @@ export function generateTlSchemasDifference(
 
         // check union
         const union = a.unions[entry.type]
+
         if (!(entry.type in b.unions) && !(entry.type in unionDiffIndex2)) {
             // deleted union
             unionDiffIndex2[entry.type] = 1
@@ -202,6 +204,7 @@ export function generateTlSchemasDifference(
                 const unionDiff = unionDiffIndex[entry.type]
                 unionDiff[kind].removed.push(entry)
             }
+
             return
         }
 
@@ -219,6 +222,7 @@ export function generateTlSchemasDifference(
 
         // check union
         const union = b.unions[entry.type]
+
         if (!(entry.type in a.unions) && !(entry.type in unionDiffIndex2)) {
             // added union
             unionDiffIndex2[entry.type] = 1
@@ -249,6 +253,7 @@ export function generateTlSchemasDifference(
                 const unionDiff = unionDiffIndex[entry.type]
                 unionDiff[kind].added.push(entry)
             }
+
             return
         }
     })

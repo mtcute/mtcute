@@ -34,7 +34,7 @@ export async function addContact(
          * with the newly created contact (defaults to `false`)
          */
         sharePhone?: boolean
-    }
+    },
 ): Promise<User> {
     const peer = normalizeToInputUser(await this.resolvePeer(userId), userId)
 
@@ -44,7 +44,7 @@ export async function addContact(
         firstName: params.firstName,
         lastName: params.lastName ?? '',
         phone: params.phone ?? '',
-        addPhonePrivacyException: !!params.sharePhone,
+        addPhonePrivacyException: Boolean(params.sharePhone),
     })
 
     assertIsUpdatesGroup('contacts.addContact', res)

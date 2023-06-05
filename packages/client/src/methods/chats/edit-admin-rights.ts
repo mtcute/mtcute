@@ -21,7 +21,7 @@ export async function editAdminRights(
     chatId: InputPeerLike,
     userId: InputPeerLike,
     rights: Omit<tl.RawChatAdminRights, '_'>,
-    rank = ''
+    rank = '',
 ): Promise<void> {
     const chat = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
     const user = normalizeToInputUser(await this.resolvePeer(userId), userId)

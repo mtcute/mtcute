@@ -11,7 +11,7 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  */
 export async function deleteChannel(
     this: TelegramClient,
-    chatId: InputPeerLike
+    chatId: InputPeerLike,
 ): Promise<void> {
     const res = await this.call({
         _: 'channels.deleteChannel',

@@ -1,11 +1,11 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import { randomBytes } from 'crypto'
-import { tl } from '@mtcute/tl'
+import { describe, it } from 'mocha'
 
 import { sleep } from '../../src'
 import { createTestTelegramClient } from './utils'
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv-flow').config()
 
 describe('fuzz : session', async function () {
@@ -36,8 +36,8 @@ describe('fuzz : session', async function () {
 
         expect(errors.length).eq(0)
 
-        expect((await client.storage.getAuthKeyFor(2))!.toString('hex')).not.eq(
-            initKey.toString('hex')
+        expect((await client.storage.getAuthKeyFor(2))?.toString('hex')).not.eq(
+            initKey.toString('hex'),
         )
     })
 
@@ -70,8 +70,8 @@ describe('fuzz : session', async function () {
 
         expect(errors.length).eq(0)
 
-        expect((await client.storage.getAuthKeyFor(1))!.toString('hex')).not.eq(
-            initKey.toString('hex')
+        expect((await client.storage.getAuthKeyFor(1))?.toString('hex')).not.eq(
+            initKey.toString('hex'),
         )
     })
 })

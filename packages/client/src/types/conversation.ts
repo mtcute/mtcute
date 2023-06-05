@@ -1,17 +1,18 @@
-import { tl } from '@mtcute/tl'
+/* eslint-disable dot-notation */
 import { AsyncLock, Deque, getMarkedPeerId, MaybeAsync } from '@mtcute/core'
 import {
     ControllablePromise,
     createControllablePromise,
 } from '@mtcute/core/src/utils/controllable-promise'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../client'
-import { InputMediaLike } from './media'
 import { MtArgumentError } from './errors'
+import { InputMediaLike } from './media'
+import { Message } from './messages'
+import { FormattedString } from './parser'
 import { InputPeerLike } from './peers'
 import { HistoryReadUpdate } from './updates'
-import { FormattedString } from './parser'
-import { Message } from './messages'
 
 interface QueuedHandler<T> {
     promise: ControllablePromise<T>
@@ -100,6 +101,7 @@ export class Conversation {
         this._chatId = getMarkedPeerId(this._inputPeer)
 
         const dialog = await this.client.getPeerDialogs(this._inputPeer)
+
         try {
             this._lastMessage = this._lastReceivedMessage =
                 dialog.lastMessage.id
@@ -129,17 +131,20 @@ export class Conversation {
         this.client.off('edit_message', this._onEditMessage)
         this.client.off('history_read', this._onHistoryRead)
 
+        const pending = this.client['_pendingConversations']
+
         const idx =
-            this.client['_pendingConversations'][this._chatId].indexOf(this)
+        pending[this._chatId].indexOf(this)
+
         if (idx > -1) {
             // just in case
-            this.client['_pendingConversations'][this._chatId].splice(idx, 1)
+            pending[this._chatId].splice(idx, 1)
         }
-        if (!this.client['_pendingConversations'][this._chatId].length) {
-            delete this.client['_pendingConversations'][this._chatId]
+        if (!pending[this._chatId].length) {
+            delete pending[this._chatId]
         }
         this.client['_hasConversations'] =
-            Object.keys(this.client['_pendingConversations']).length > 0
+            Object.keys(pending).length > 0
 
         // reset pending status
         this._queuedNewMessage.clear()
@@ -158,8 +163,8 @@ export class Conversation {
      * @param params
      */
     async sendText(
-        text: string | FormattedString<any>,
-        params?: Parameters<TelegramClient['sendText']>[2]
+        text: string | FormattedString<string>,
+        params?: Parameters<TelegramClient['sendText']>[2],
     ): ReturnType<TelegramClient['sendText']> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
@@ -176,7 +181,7 @@ export class Conversation {
      */
     async sendMedia(
         media: InputMediaLike | string,
-        params?: Parameters<TelegramClient['sendMedia']>[2]
+        params?: Parameters<TelegramClient['sendMedia']>[2],
     ): ReturnType<TelegramClient['sendMedia']> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
@@ -193,7 +198,7 @@ export class Conversation {
      */
     async sendMediaGroup(
         medias: (InputMediaLike | string)[],
-        params?: Parameters<TelegramClient['sendMediaGroup']>[2]
+        params?: Parameters<TelegramClient['sendMediaGroup']>[2],
     ): ReturnType<TelegramClient['sendMediaGroup']> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
@@ -239,6 +244,7 @@ export class Conversation {
 
         let err: unknown
         let res: T
+
         try {
             res = await handler()
         } catch (e) {
@@ -261,7 +267,7 @@ export class Conversation {
      */
     waitForNewMessage(
         filter?: (msg: Message) => MaybeAsync<boolean>,
-        timeout: number | null = 15000
+        timeout: number | null = 15000,
     ): Promise<Message> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
@@ -270,6 +276,7 @@ export class Conversation {
         const promise = createControllablePromise<Message>()
 
         let timer: NodeJS.Timeout | undefined = undefined
+
         if (timeout !== null) {
             timer = setTimeout(() => {
                 promise.reject(new tl.errors.TimeoutError())
@@ -316,13 +323,13 @@ export class Conversation {
              * Defaults to `15000` (15 sec)
              */
             timeout?: number | null
-        }
+        },
     ): Promise<Message> {
         const msgId = params?.message ?? this._lastMessage ?? 0
 
-        const pred = filter
-            ? (msg: Message) => (msg.id > msgId ? filter(msg) : false)
-            : (msg: Message) => msg.id > msgId
+        const pred = filter ?
+            (msg: Message) => (msg.id > msgId ? filter(msg) : false) :
+            (msg: Message) => msg.id > msgId
 
         return this.waitForNewMessage(pred, params?.timeout)
     }
@@ -352,18 +359,20 @@ export class Conversation {
              * Defaults to `15000` (15 sec)
              */
             timeout?: number | null
-        }
+        },
     ): Promise<Message> {
         const msgId = params?.message ?? this._lastMessage
-        if (!msgId)
-            throw new MtArgumentError(
-                'Provide message for which to wait for reply for'
-            )
 
-        const pred = filter
-            ? (msg: Message) =>
-                  msg.replyToMessageId === msgId ? filter(msg) : false
-            : (msg: Message) => msg.replyToMessageId === msgId
+        if (!msgId) {
+            throw new MtArgumentError(
+                'Provide message for which to wait for reply for',
+            )
+        }
+
+        const pred = filter ?
+            (msg: Message) =>
+                msg.replyToMessageId === msgId ? filter(msg) : false :
+            (msg: Message) => msg.replyToMessageId === msgId
 
         return this.waitForNewMessage(pred, params?.timeout)
     }
@@ -396,22 +405,24 @@ export class Conversation {
              * Defaults to `15000` (15 sec)
              */
             timeout?: number | null
-        }
+        },
     ): Promise<Message> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
         }
 
         const msgId = params?.message ?? this._lastReceivedMessage
+
         if (!msgId) {
             throw new MtArgumentError(
-                'Provide message for which to wait for edit for'
+                'Provide message for which to wait for edit for',
             )
         }
 
         const promise = createControllablePromise<Message>()
 
         let timer: NodeJS.Timeout | undefined = undefined
+
         if (params?.timeout !== null) {
             timer = setTimeout(() => {
                 promise.reject(new tl.errors.TimeoutError())
@@ -442,17 +453,19 @@ export class Conversation {
      */
     async waitForRead(
         message?: number,
-        timeout: number | null = 15000
+        timeout: number | null = 15000,
     ): Promise<void> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
         }
 
         const msgId = message ?? this._lastMessage
-        if (!msgId)
+
+        if (!msgId) {
             throw new MtArgumentError(
-                'Provide message for which to wait for read for'
+                'Provide message for which to wait for read for',
             )
+        }
 
         // check if the message is already read
         const dialog = await this.client.getPeerDialogs(this._inputPeer)
@@ -461,6 +474,7 @@ export class Conversation {
         const promise = createControllablePromise<void>()
 
         let timer: NodeJS.Timeout | undefined = undefined
+
         if (timeout !== null) {
             timer = setTimeout(() => {
                 promise.reject(new tl.errors.TimeoutError())
@@ -481,6 +495,7 @@ export class Conversation {
 
         if (!this._queuedNewMessage.length) {
             this._pendingNewMessages.pushBack(msg)
+
             return
         }
 
@@ -494,7 +509,7 @@ export class Conversation {
                     it.promise.resolve(msg)
                     this._queuedNewMessage.popFront()
                 }
-            } catch (e: any) {
+            } catch (e: unknown) {
                 this.client['_emitError'](e)
             }
 
@@ -509,12 +524,14 @@ export class Conversation {
         if (msg.chat.id !== this._chatId) return
 
         const it = this._pendingEditMessage[msg.id]
+
         if (!it && !fromRecent) {
             this._recentEdits.pushBack(msg)
+
             return
         }
 
-        ;(async () => {
+        (async () => {
             if (!it.check || (await it.check(msg))) {
                 if (it.timeout) clearTimeout(it.timeout)
                 it.promise.resolve(msg)
@@ -528,20 +545,21 @@ export class Conversation {
 
         const lastRead = upd.maxReadId
 
-        Object.keys(this._pendingRead).forEach((msgId: any) => {
+        for (const msgId in this._pendingRead) {
             if (parseInt(msgId) <= lastRead) {
                 const it = this._pendingRead[msgId]
                 if (it.timeout) clearTimeout(it.timeout)
                 it.promise.resolve()
                 delete this._pendingRead[msgId]
             }
-        })
+        }
     }
 
     private _processPendingNewMessages() {
         if (!this._pendingNewMessages.length) return
 
         let it
+
         while ((it = this._pendingNewMessages.popFront())) {
             this._onNewMessage(it)
         }
@@ -552,6 +570,7 @@ export class Conversation {
 
         const iter = this._recentEdits.iter()
         let it
+
         while (!(it = iter.next()).done) {
             this._onEditMessage(it.value, true)
         }

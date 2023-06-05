@@ -1,7 +1,9 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { Dispatcher, PropagationAction } from '../src'
+import { describe, it } from 'mocha'
+
 import { PeersIndex, TelegramClient } from '@mtcute/client'
+
+import { Dispatcher, PropagationAction } from '../src'
 
 describe('Dispatcher', () => {
     // todo: replace with proper mocked TelegramClient
@@ -15,10 +17,12 @@ describe('Dispatcher', () => {
 
             dp.onRawUpdate((cl, upd) => {
                 log.push(`(first) received ${upd._}`)
+
                 return PropagationAction.Continue
             })
             dp.onRawUpdate((cl, upd) => {
                 log.push(`(second) received ${upd._}`)
+
                 return PropagationAction.Continue
             })
 
@@ -49,7 +53,7 @@ describe('Dispatcher', () => {
                     log.push('(true) received ' + upd._)
 
                     return PropagationAction.Continue
-                }
+                },
             )
 
             dp.onRawUpdate(
@@ -58,7 +62,7 @@ describe('Dispatcher', () => {
                     log.push('(false) received ' + upd._)
 
                     return PropagationAction.Continue
-                }
+                },
             )
 
             await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
@@ -107,6 +111,7 @@ describe('Dispatcher', () => {
 
             dp.onRawUpdate((cl, upd) => {
                 log.push('(grp0) received ' + upd._)
+
                 return PropagationAction.Continue
             }, 0)
             dp.onRawUpdate((cl, upd) => {
@@ -139,6 +144,7 @@ describe('Dispatcher', () => {
 
             dp.onRawUpdate((cl, upd) => {
                 log.push('(grp0) received ' + upd._)
+
                 return PropagationAction.Continue
             }, 0)
             dp.onRawUpdate((cl, upd) => {
@@ -199,11 +205,13 @@ describe('Dispatcher', () => {
 
             dp.onRawUpdate((cl, upd) => {
                 log.push('(parent 0) received ' + upd._)
+
                 return PropagationAction.Continue
             }, 0)
 
             dp.onRawUpdate((cl, upd) => {
                 log.push('(parent 1) received ' + upd._)
+
                 return PropagationAction.Stop
             }, 1)
 
@@ -213,11 +221,13 @@ describe('Dispatcher', () => {
 
             child.onRawUpdate((cl, upd) => {
                 log.push('(child 0) received ' + upd._)
+
                 return PropagationAction.Continue
             }, 0)
 
             child.onRawUpdate((cl, upd) => {
                 log.push('(child 1) received ' + upd._)
+
                 return PropagationAction.Stop
             }, 1)
 

@@ -1,4 +1,4 @@
-import { buffersEqual, randomBytes, IEncryptionScheme } from '../../utils'
+import { buffersEqual, IEncryptionScheme, randomBytes } from '../../utils'
 import { IPacketCodec } from './abstract'
 import { WrappedCodec } from './wrapped'
 
@@ -20,8 +20,7 @@ export interface MtProxyInfo {
 
 export class ObfuscatedPacketCodec
     extends WrappedCodec
-    implements IPacketCodec
-{
+    implements IPacketCodec {
     private _encryptor?: IEncryptionScheme
     private _decryptor?: IEncryptionScheme
 
@@ -34,9 +33,11 @@ export class ObfuscatedPacketCodec
 
     async tag(): Promise<Buffer> {
         let random: Buffer
+
         r: for (;;) {
             random = randomBytes(64)
             if (random[0] === 0xef) continue
+
             for (const h of BAD_HEADERS) {
                 if (buffersEqual(random.slice(0, h.length), h)) continue r
             }
@@ -46,6 +47,7 @@ export class ObfuscatedPacketCodec
         }
 
         let innerTag = await this._inner.tag()
+
         if (innerTag.length !== 4) {
             const b = innerTag[0]
             innerTag = Buffer.from([b, b, b, b])
@@ -70,10 +72,10 @@ export class ObfuscatedPacketCodec
 
         if (this._proxy) {
             encryptKey = await this._crypto.sha256(
-                Buffer.concat([encryptKey, this._proxy.secret])
+                Buffer.concat([encryptKey, this._proxy.secret]),
             )
             decryptKey = await this._crypto.sha256(
-                Buffer.concat([decryptKey, this._proxy.secret])
+                Buffer.concat([decryptKey, this._proxy.secret]),
             )
         }
 
@@ -81,7 +83,7 @@ export class ObfuscatedPacketCodec
         this._decryptor = this._crypto.createAesCtr(
             decryptKey,
             decryptIv,
-            false
+            false,
         )
 
         const encrypted = await this._encryptor.encrypt(random)

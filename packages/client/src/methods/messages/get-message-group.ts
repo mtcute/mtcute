@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtArgumentError, Message } from '../../types'
+import { InputPeerLike, Message, MtArgumentError } from '../../types'
 import { isInputPeerChannel } from '../../utils/peer-utils'
 
 /**
@@ -12,7 +12,7 @@ import { isInputPeerChannel } from '../../utils/peer-utils'
 export async function getMessageGroup(
     this: TelegramClient,
     chatId: InputPeerLike,
-    message: number
+    message: number,
 ): Promise<Message[]> {
     // awesome hack stolen from pyrogram
     // groups have no more than 10 items
@@ -25,6 +25,7 @@ export async function getMessageGroup(
     const delta = isInputPeerChannel(peer) ? 9 : 19
 
     const ids: number[] = []
+
     for (let i = Math.max(message - delta, 0); i <= message + delta; i++) {
         ids.push(i)
     }
@@ -35,6 +36,6 @@ export async function getMessageGroup(
     if (!groupedId) throw new MtArgumentError('This message is not grouped')
 
     return messages.filter(
-        (it) => it && it.groupedId?.eq(groupedId)
+        (it) => it && it.groupedId?.eq(groupedId),
     ) as Message[]
 }

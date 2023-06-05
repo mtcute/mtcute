@@ -1,7 +1,7 @@
 import { TlEntry, TlErrors, TlFullSchema } from '../types'
 import { groupTlEntriesByNamespace, splitNameToNamespace } from '../utils'
-import { camelToPascal, indent, jsComment, snakeToCamel } from './utils'
 import { errorCodeToClassName, generateCodeForErrors } from './errors'
+import { camelToPascal, indent, jsComment, snakeToCamel } from './utils'
 
 /**
  * Mapping of TL primitive types to TS types
@@ -28,10 +28,11 @@ function fullTypeName(
     baseNamespace: string,
     namespace = true,
     method = false,
-    link = false
+    link = false,
 ): string {
     if (type in PRIMITIVE_TO_TS) return PRIMITIVE_TO_TS[type]
     let m
+
     if ((m = type.match(/^[Vv]ector[< ](.+?)[> ]$/))) {
         return fullTypeName(m[1], baseNamespace, namespace, method, link) + '[]'
     }
@@ -71,11 +72,12 @@ export function generateTypescriptDefinitionsForTlEntry(
     entry: TlEntry,
     baseNamespace = 'tl.',
     errors?: TlErrors,
-    withFlags = false
+    withFlags = false,
 ): string {
     let ret = ''
 
     let comment = ''
+
     if (entry.comment) {
         comment = entry.comment
     }
@@ -87,17 +89,17 @@ export function generateTypescriptDefinitionsForTlEntry(
             baseNamespace,
             true,
             false,
-            true
+            true,
         )}`
 
         if (errors) {
             if (errors.userOnly[entry.name]) {
-                comment += `\n\nThis method is **not** available for bots`
+                comment += '\n\nThis method is **not** available for bots'
             }
 
             if (errors.throws[entry.name]) {
                 comment +=
-                    `\n\nThis method *may* throw one of these errors: ` +
+                    '\n\nThis method *may* throw one of these errors: ' +
                     errors.throws[entry.name]
                         .map((it) => `{$see ${errorCodeToClassName(it)}`)
                         .join(', ')
@@ -108,13 +110,14 @@ export function generateTypescriptDefinitionsForTlEntry(
 
     let genericsString = ''
     const genericsIndex: Record<string, 1> = {}
+
     if (entry.generics?.length) {
         genericsString = '<'
         entry.generics.forEach((it, idx) => {
             const tsType =
-                it.type === 'Type'
-                    ? 'tl.TlObject'
-                    : fullTypeName(it.type, baseNamespace)
+                it.type === 'Type' ?
+                    'tl.TlObject' :
+                    fullTypeName(it.type, baseNamespace)
 
             genericsIndex[it.name] = 1
             if (idx !== 0) genericsString += ', '
@@ -132,6 +135,7 @@ export function generateTypescriptDefinitionsForTlEntry(
             if (withFlags) {
                 ret += `    ${arg.name}: number;\n`
             }
+
             return
         }
 
@@ -213,31 +217,29 @@ export function generateTypescriptDefinitionsForTlSchema(
     schema: TlFullSchema,
     layer: number,
     namespace = 'tl',
-    errors?: TlErrors
+    errors?: TlErrors,
 ): [string, string] {
-    let ts = PRELUDE.replace('$NS$', namespace).replace('$LAYER$', layer + '')
+    let ts = PRELUDE.replace('$NS$', namespace).replace('$LAYER$', String(layer))
     let js = PRELUDE_JS.replace('$NS$', namespace).replace(
         '$LAYER$',
-        layer + ''
+        String(layer),
     )
 
     if (errors) {
-        ts += `\n    namespace errors {\n`
-        js += `ns.errors = {};\n(function(ns){\n`
+        ts += '\n    namespace errors {\n'
+        js += 'ns.errors = {};\n(function(ns){\n'
 
         const [_ts, _js] = generateCodeForErrors(errors, 'ns.')
         ts += indent(8, _ts)
         js += _js
 
-        ts += `}\n`
-        js += `})(ns.errors);\n`
+        ts += '}\n'
+        js += '})(ns.errors);\n'
     }
 
     const namespaces = groupTlEntriesByNamespace(schema.entries)
 
     for (const ns in namespaces) {
-        if (!namespaces.hasOwnProperty(ns)) continue
-
         const entries = namespaces[ns]
         const indentSize = ns === '' ? 4 : 8
 
@@ -257,16 +259,17 @@ export function generateTypescriptDefinitionsForTlSchema(
                     indentSize,
                     generateTypescriptDefinitionsForTlEntry(
                         entry,
-                        namespace + '.'
-                    )
+                        namespace + '.',
+                    ),
                 ) + '\n'
         })
 
         ts += indent(indentSize, 'interface RpcCallReturn')
+
         if (ns === '') {
             let first = true
+
             for (const ns in namespaces) {
-                if (!namespaces.hasOwnProperty(ns)) continue
                 if (ns === '') continue
 
                 if (first) {
@@ -285,15 +288,16 @@ export function generateTypescriptDefinitionsForTlSchema(
             if (entry.kind !== 'method') return
 
             let type
+
             if (entry.generics) {
                 for (let i = 0; i < entry.generics.length; i++) {
                     const g = entry.generics[i]
 
                     if (g.name === entry.type) {
                         type =
-                            g.type === 'Type'
-                                ? 'any'
-                                : fullTypeName(g.type, namespace + '.')
+                            g.type === 'Type' ?
+                                'any' :
+                                fullTypeName(g.type, namespace + '.')
                         break
                     }
                 }
@@ -313,8 +317,6 @@ export function generateTypescriptDefinitionsForTlSchema(
         }
 
         for (const name in unions) {
-            if (!unions.hasOwnProperty(name)) continue
-
             const union = schema.unions[name]
 
             if (union.comment) {
@@ -334,7 +336,7 @@ export function generateTypescriptDefinitionsForTlSchema(
             ts +=
                 indent(
                     indentSize,
-                    `function isAny${typeWithoutNs}(o: object): o is ${typeName}`
+                    `function isAny${typeWithoutNs}(o: object): o is ${typeName}`,
                 ) + '\n'
             js += `ns.isAny${typeWithoutNs} = _isAny('${name}');\n`
         }
@@ -349,9 +351,8 @@ export function generateTypescriptDefinitionsForTlSchema(
     }
 
     let first = true
-    for (const name in schema.methods) {
-        if (!schema.methods.hasOwnProperty(name)) continue
 
+    for (const name in schema.methods) {
         if (first) {
             ts += indent(4, 'type RpcMethod =') + '\n'
             first = false
@@ -361,7 +362,7 @@ export function generateTypescriptDefinitionsForTlSchema(
         ts +=
             indent(
                 8,
-                '| ' + fullTypeName(entry.name, namespace + '.', true, true)
+                '| ' + fullTypeName(entry.name, namespace + '.', true, true),
             ) + '\n'
     }
 
@@ -382,8 +383,8 @@ export function generateTypescriptDefinitionsForTlSchema(
                         entry.name,
                         namespace + '.',
                         true,
-                        entry.kind === 'method'
-                    )
+                        entry.kind === 'method',
+                    ),
             ) + '\n'
     })
 

@@ -9,7 +9,7 @@ import { MtTypeAssertionError } from '../../types'
  */
 export async function acceptTos(
     this: TelegramClient,
-    tosId: string
+    tosId: string,
 ): Promise<boolean> {
     const res = await this.call({
         _: 'help.acceptTermsOfService',
@@ -19,12 +19,13 @@ export async function acceptTos(
         },
     })
 
-    if (!res)
+    if (!res) {
         throw new MtTypeAssertionError(
             'help.acceptTermsOfService',
             'true',
-            'false'
+            'false',
         )
+    }
 
     return true
 }

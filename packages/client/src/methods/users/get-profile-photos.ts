@@ -1,4 +1,5 @@
 import Long from 'long'
+
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -29,7 +30,7 @@ export async function getProfilePhotos(
          * Defaults to `100`
          */
         limit?: number
-    }
+    },
 ): Promise<Photo[]> {
     if (!params) params = {}
 

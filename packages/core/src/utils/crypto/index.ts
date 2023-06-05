@@ -1,10 +1,10 @@
-import { NodeCryptoProvider } from './node-crypto'
 import { ForgeCryptoProvider } from './forge-crypto'
+import { NodeCryptoProvider } from './node-crypto'
 
 export * from './abstract'
 export * from './password'
 
-export { NodeCryptoProvider, ForgeCryptoProvider }
+export { ForgeCryptoProvider, NodeCryptoProvider }
 
 import { _defaultCryptoProviderFactory } from '../platform/crypto'
 import { CryptoProviderFactory } from './abstract'

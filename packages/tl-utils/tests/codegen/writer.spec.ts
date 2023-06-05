@@ -1,8 +1,8 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
-import { parseTlToEntries } from '../../src/parse'
 import { generateWriterCodeForTlEntry } from '../../src/codegen/writer'
+import { parseTlToEntries } from '../../src/parse'
 
 describe('generateWriterCodeForTlEntry', () => {
     const test = (tl: string, ...js: string[]) => {
@@ -10,7 +10,7 @@ describe('generateWriterCodeForTlEntry', () => {
         expect(generateWriterCodeForTlEntry(entry)).eq(
             `'${entry.name}':function(w${
                 entry.arguments.length ? ',v' : ''
-            }){w.uint(${entry.id});${js.join('')}},`
+            }){w.uint(${entry.id});${js.join('')}},`,
         )
     }
 
@@ -26,14 +26,14 @@ describe('generateWriterCodeForTlEntry', () => {
             "h(v,'id');",
             'w.long(v.id);',
             "h(v,'accessHash');",
-            'w.long(v.accessHash);'
+            'w.long(v.accessHash);',
         )
         test(
             'contact#145ade0b user_id:long mutual:Bool = Contact;',
             "h(v,'userId');",
             'w.long(v.userId);',
             "h(v,'mutual');",
-            'w.boolean(v.mutual);'
+            'w.boolean(v.mutual);',
         )
         test(
             'maskCoords#aed6dbb2 n:int x:double y:double zoom:double = MaskCoords;',
@@ -44,7 +44,7 @@ describe('generateWriterCodeForTlEntry', () => {
             "h(v,'y');",
             'w.double(v.y);',
             "h(v,'zoom');",
-            'w.double(v.zoom);'
+            'w.double(v.zoom);',
         )
     })
 
@@ -53,7 +53,7 @@ describe('generateWriterCodeForTlEntry', () => {
             'messages.messageEditData#26b5dde6 flags:# caption:flags.0?true = messages.MessageEditData;',
             'var flags=0;',
             'if(v.caption===true)flags|=1;',
-            'w.uint(flags);'
+            'w.uint(flags);',
         )
     })
 
@@ -67,7 +67,7 @@ describe('generateWriterCodeForTlEntry', () => {
             'w.uint(flags);',
             "h(v,'pts');",
             'w.int(v.pts);',
-            'if(_timeout)w.int(v.timeout);'
+            'if(_timeout)w.int(v.timeout);',
         )
     })
 
@@ -84,7 +84,7 @@ describe('generateWriterCodeForTlEntry', () => {
             'if(_timeout)w.int(v.timeout);',
             'var flags2=0;',
             'if(v.canDeleteChannel===true)flags2|=1;',
-            'w.uint(flags2);'
+            'w.uint(flags2);',
         )
     })
 
@@ -96,7 +96,7 @@ describe('generateWriterCodeForTlEntry', () => {
             "h(v,'chats');",
             'w.vector(w.object, v.chats);',
             "h(v,'users');",
-            'w.vector(w.object, v.users);'
+            'w.vector(w.object, v.users);',
         )
     })
 
@@ -109,7 +109,7 @@ describe('generateWriterCodeForTlEntry', () => {
             'w.uint(flags);',
             "h(v,'message');",
             'w.string(v.message);',
-            'if(_entities)w.vector(w.object, v.entities);'
+            'if(_entities)w.vector(w.object, v.entities);',
         )
     })
 
@@ -119,7 +119,7 @@ describe('generateWriterCodeForTlEntry', () => {
             "h(v,'layer');",
             'w.int(v.layer);',
             "h(v,'query');",
-            'w.object(v.query);'
+            'w.object(v.query);',
         )
     })
 
@@ -132,7 +132,7 @@ describe('generateWriterCodeForTlEntry', () => {
                 'w.uint(flags);',
                 'var flags2=v.flags2;',
                 'w.uint(flags2);',
-            ].join('')}},`
+            ].join('')}},`,
         )
     })
 })

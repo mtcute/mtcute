@@ -10,8 +10,8 @@ import {
     Photo,
     RawDocument,
 } from '../../types'
-import { assertTypeIs } from '../../utils/type-assertion'
 import { parseDocument } from '../../types/media/document-utils'
+import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Upload a media to Telegram servers, without actually
@@ -42,7 +42,7 @@ export async function uploadMedia(
          * @param total  Total file size
          */
         progressCallback?: (uploaded: number, total: number) => void
-    } = {}
+    } = {},
 ): Promise<Extract<MessageMedia, Photo | RawDocument>> {
     const normMedia = await this._normalizeInputMedia(media, params, false)
 
@@ -61,11 +61,11 @@ export async function uploadMedia(
 
     const res = await this.call({
         _: 'messages.uploadMedia',
-        peer: params.peer
-            ? await this.resolvePeer(params.peer)
-            : {
-                  _: 'inputPeerSelf',
-              },
+        peer: params.peer ?
+            await this.resolvePeer(params.peer) :
+            {
+                _: 'inputPeerSelf',
+            },
         media: normMedia,
     })
 
@@ -73,7 +73,7 @@ export async function uploadMedia(
         throw new MtTypeAssertionError(
             'uploadMedia',
             'not messageMediaEmpty',
-            'messageMediaEmpty'
+            'messageMediaEmpty',
         )
     }
 
@@ -91,6 +91,7 @@ export async function uploadMedia(
             assertTypeIs('uploadMedia', res, 'messageMediaDocument')
             assertTypeIs('uploadMedia', res.document!, 'document')
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return parseDocument(this, res.document) as any
         default:
             assertNever(normMedia)

@@ -1,5 +1,6 @@
-import { NodeCryptoProvider, IEncryptionScheme } from '@mtcute/core'
+import { IEncryptionScheme, NodeCryptoProvider } from '@mtcute/core'
 
+// eslint-disable-next-line camelcase
 import { ige256_decrypt, ige256_encrypt } from './native'
 
 /**

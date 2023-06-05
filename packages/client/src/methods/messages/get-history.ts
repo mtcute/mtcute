@@ -1,3 +1,5 @@
+import Long from 'long'
+
 import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
@@ -6,7 +8,6 @@ import {
     PeersIndex,
 } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
-import Long from 'long'
 
 /**
  * Iterate through a chat history sequentially.
@@ -75,7 +76,7 @@ export async function* getHistory(
          * Defaults to `100`
          */
         chunkSize?: number
-    }
+    },
 ): AsyncIterableIterator<Message> {
     if (!params) params = {}
 
@@ -110,12 +111,13 @@ export async function* getHistory(
             hash: Long.ZERO,
         })
 
-        if (res._ === 'messages.messagesNotModified')
+        if (res._ === 'messages.messagesNotModified') {
             throw new MtTypeAssertionError(
                 'messages.getHistory',
                 '!messages.messagesNotModified',
-                res._
+                res._,
             )
+        }
 
         const peers = PeersIndex.from(res)
 

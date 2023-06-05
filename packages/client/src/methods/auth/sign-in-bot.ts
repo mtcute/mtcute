@@ -12,7 +12,7 @@ import { assertTypeIs } from '../../utils/type-assertion'
  */
 export async function signInBot(
     this: TelegramClient,
-    token: string
+    token: string,
 ): Promise<User> {
     const res = await this.call({
         _: 'auth.importBotAuthorization',
@@ -25,12 +25,12 @@ export async function signInBot(
     assertTypeIs(
         'signInBot (@ auth.importBotAuthorization)',
         res,
-        'auth.authorization'
+        'auth.authorization',
     )
     assertTypeIs(
         'signInBot (@ auth.importBotAuthorization -> user)',
         res.user,
-        'user'
+        'user',
     )
 
     this.log.prefix = `[USER ${this._userId}] `

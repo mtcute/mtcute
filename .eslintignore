@@ -1,6 +1,12 @@
+node_modules/
+.husky/
+.idea/
+
 private/
 docs/
 dist/
+
+*.json
 
 packages/tl/errors.js
 packages/tl/errors.d.ts

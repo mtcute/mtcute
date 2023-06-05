@@ -15,7 +15,7 @@ export class PollUpdate {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.RawUpdateMessagePoll,
-        readonly _peers: PeersIndex
+        readonly _peers: PeersIndex,
     ) {}
 
     /**
@@ -46,6 +46,7 @@ export class PollUpdate {
     get poll(): Poll {
         if (!this._poll) {
             let poll = this.raw.poll
+
             if (!poll) {
                 // create stub poll
                 poll = {
@@ -65,7 +66,7 @@ export class PollUpdate {
                 this.client,
                 poll,
                 this._peers,
-                this.raw.results
+                this.raw.results,
             )
         }
 

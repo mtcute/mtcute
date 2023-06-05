@@ -1,9 +1,9 @@
 import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { InputPeerLike, PeersIndex, MessageReactions } from '../../types'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { InputPeerLike, MessageReactions, PeersIndex } from '../../types'
 import { assertTypeIs } from '../../utils/type-assertion'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
  * Get reactions to a message.
@@ -47,9 +47,10 @@ export async function getMessageReactions(
 export async function getMessageReactions(
     this: TelegramClient,
     chatId: InputPeerLike,
-    messages: MaybeArray<number>
+    messages: MaybeArray<number>,
 ): Promise<MaybeArray<MessageReactions | null>> {
     const single = !Array.isArray(messages)
+
     if (!Array.isArray(messages)) {
         messages = [messages]
     }
@@ -76,7 +77,7 @@ export async function getMessageReactions(
         assertTypeIs(
             'messages.getMessagesReactions',
             update,
-            'updateMessageReactions'
+            'updateMessageReactions',
         )
 
         index[update.msgId] = new MessageReactions(
@@ -84,7 +85,7 @@ export async function getMessageReactions(
             update.msgId,
             getMarkedPeerId(update.peer),
             update.reactions,
-            peers
+            peers,
         )
     }
 

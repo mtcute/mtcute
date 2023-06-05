@@ -11,8 +11,7 @@ const PADDED_TAG = Buffer.from([0xdd, 0xdd, 0xdd, 0xdd])
  */
 export class IntermediatePacketCodec
     extends StreamedCodec
-    implements IPacketCodec
-{
+    implements IPacketCodec {
     tag(): Buffer {
         return TAG
     }
@@ -21,6 +20,7 @@ export class IntermediatePacketCodec
         const ret = Buffer.alloc(packet.length + 4)
         ret.writeUInt32LE(packet.length)
         packet.copy(ret, 4)
+
         return ret
     }
 
@@ -44,6 +44,7 @@ export class IntermediatePacketCodec
 
             return true
         }
+
         return false
     }
 }
@@ -66,6 +67,7 @@ export class PaddedIntermediatePacketCodec extends IntermediatePacketCodec {
         ret.writeUInt32LE(packet.length + padSize)
         packet.copy(ret, 4)
         padding.copy(ret, 4 + ret.length)
+
         return ret
     }
 }

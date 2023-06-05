@@ -11,7 +11,7 @@ import { createDummyUpdate } from '../../utils/updates-utils'
  */
 export async function unpinAllMessages(
     this: TelegramClient,
-    chatId: InputPeerLike
+    chatId: InputPeerLike,
 ): Promise<void> {
     const peer = await this.resolvePeer(chatId)
 
@@ -22,7 +22,7 @@ export async function unpinAllMessages(
 
     if (isInputPeerChannel(peer)) {
         this._handleUpdate(
-            createDummyUpdate(res.pts, res.ptsCount, peer.channelId)
+            createDummyUpdate(res.pts, res.ptsCount, peer.channelId),
         )
     } else {
         this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))

@@ -1,6 +1,6 @@
-import { tl } from '@mtcute/tl'
 import { MaybeArray } from '@mtcute/core'
 import { fileIdToInputPhoto } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 
@@ -12,7 +12,7 @@ import { TelegramClient } from '../../client'
  */
 export async function deleteProfilePhotos(
     this: TelegramClient,
-    ids: MaybeArray<string | tl.TypeInputPhoto>
+    ids: MaybeArray<string | tl.TypeInputPhoto>,
 ): Promise<void> {
     if (!Array.isArray(ids)) ids = [ids]
 

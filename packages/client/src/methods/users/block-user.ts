@@ -1,5 +1,5 @@
-import { InputPeerLike } from '../../types'
 import { TelegramClient } from '../../client'
+import { InputPeerLike } from '../../types'
 
 /**
  * Block a user
@@ -9,7 +9,7 @@ import { TelegramClient } from '../../client'
  */
 export async function blockUser(
     this: TelegramClient,
-    id: InputPeerLike
+    id: InputPeerLike,
 ): Promise<void> {
     await this.call({
         _: 'contacts.block',

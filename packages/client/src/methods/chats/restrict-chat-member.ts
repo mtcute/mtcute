@@ -2,11 +2,11 @@ import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
+import { normalizeDate } from '../../utils/misc-utils'
 import {
     isInputPeerChannel,
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
-import { normalizeDate } from '../../utils/misc-utils'
 
 /**
  * Restrict a user in a supergroup.
@@ -30,11 +30,11 @@ export async function restrictChatMember(
     chatId: InputPeerLike,
     userId: InputPeerLike,
     restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>,
-    until?: number | Date
+    until?: number | Date,
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
-    if (!isInputPeerChannel(chat))
-        throw new MtInvalidPeerTypeError(chatId, 'channel')
+
+    if (!isInputPeerChannel(chat)) { throw new MtInvalidPeerTypeError(chatId, 'channel') }
 
     const user = await this.resolvePeer(userId)
 

@@ -7,6 +7,7 @@ export function telegramRleEncode(buf: Buffer): Buffer {
 
     for (let i = 0; i < len; i++) {
         const cur = buf[i]
+
         if (cur === 0) {
             count += 1
         } else {
@@ -33,6 +34,7 @@ export function telegramRleDecode(buf: Buffer): Buffer {
 
     for (let i = 0; i < len; i++) {
         const cur = buf[i]
+
         if (prev === 0) {
             for (let j = 0; j < cur; j++) {
                 ret.push(prev)
@@ -45,5 +47,6 @@ export function telegramRleDecode(buf: Buffer): Buffer {
     }
 
     if (prev !== -1) ret.push(prev)
+
     return Buffer.from(ret)
 }

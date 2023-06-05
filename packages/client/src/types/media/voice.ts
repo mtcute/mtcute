@@ -1,10 +1,10 @@
-import { tl } from '@mtcute/tl'
 import { tdFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
-import { RawDocument } from './document'
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../utils'
 import { decodeWaveform } from '../../utils/voice-utils'
+import { makeInspectable } from '../utils'
+import { RawDocument } from './document'
 
 /**
  * An voice note.
@@ -19,7 +19,7 @@ export class Voice extends RawDocument {
     constructor(
         client: TelegramClient,
         doc: tl.RawDocument,
-        readonly attr: tl.RawDocumentAttributeAudio
+        readonly attr: tl.RawDocumentAttributeAudio,
     ) {
         super(client, doc)
     }
@@ -45,5 +45,5 @@ export class Voice extends RawDocument {
 makeInspectable(
     Voice,
     ['fileSize', 'dcId'],
-    ['inputMedia', 'inputDocument', 'waveform']
+    ['inputMedia', 'inputDocument', 'waveform'],
 )

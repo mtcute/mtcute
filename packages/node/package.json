@@ -3,7 +3,7 @@
     "private": true,
     "version": "1.0.0",
     "description": "Meta-package for Node JS",
-    "author": "Alina Sireneva <me@tei.su>",
+    "author": "Alina Sireneva <alina@tei.su>",
     "license": "LGPL-3.0",
     "main": "index.ts",
     "scripts": {

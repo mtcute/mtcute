@@ -1,4 +1,5 @@
 import Long from 'long'
+
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -7,8 +8,7 @@ import {
     Message,
     MtTypeAssertionError,
     PeersIndex,
-} from '../../types'
-import { SearchFilters } from '../../types'
+    SearchFilters } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
 
 /**
@@ -110,7 +110,7 @@ export async function* searchMessages(
          * Defaults to `100`
          */
         chunkSize?: number
-    }
+    },
 ): AsyncIterableIterator<Message> {
     if (!params) params = {}
 
@@ -148,12 +148,13 @@ export async function* searchMessages(
             hash: Long.ZERO,
         })
 
-        if (res._ === 'messages.messagesNotModified')
+        if (res._ === 'messages.messagesNotModified') {
             throw new MtTypeAssertionError(
                 'messages.search',
                 '!messages.messagesNotModified',
-                res._
+                res._,
             )
+        }
 
         // for successive chunks, we need to reset the offset
         offset = 0

@@ -22,6 +22,8 @@ export function gzipDeflate(buf: Buffer, maxRatio?: number): Buffer | null {
             return deflateSync(buf, {
                 maxOutputLength: Math.floor(buf.length * maxRatio),
             })
+        // hot path, avoid additional runtime checks
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
             if (e.code === 'ERR_BUFFER_TOO_LARGE') {
                 return null

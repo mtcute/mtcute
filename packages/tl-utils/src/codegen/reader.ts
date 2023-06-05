@@ -1,5 +1,5 @@
-import { TL_PRIMITIVES, TlEntry } from '../types'
 import { computeConstructorIdFromEntry } from '../ctor-id'
+import { TL_PRIMITIVES, TlEntry } from '../types'
 import { snakeToCamel } from './utils'
 
 /**
@@ -11,7 +11,7 @@ import { snakeToCamel } from './utils'
  */
 export function generateReaderCodeForTlEntry(
     entry: TlEntry,
-    includeFlags = false
+    includeFlags = false,
 ): string {
     if (entry.id === 0) entry.id = computeConstructorIdFromEntry(entry)
 
@@ -56,12 +56,12 @@ export function generateReaderCodeForTlEntry(
 
             if (!(fieldName in flagsFields)) {
                 throw new Error(
-                    `Invalid predicate: ${arg.predicate} - unknown field (in ${entry.name})`
+                    `Invalid predicate: ${arg.predicate} - unknown field (in ${entry.name})`,
                 )
             }
             if (isNaN(bitIndex) || bitIndex < 0 || bitIndex > 32) {
                 throw new Error(
-                    `Invalid predicate: ${arg.predicate} - invalid bit`
+                    `Invalid predicate: ${arg.predicate} - invalid bit`,
                 )
             }
 
@@ -69,6 +69,7 @@ export function generateReaderCodeForTlEntry(
 
             if (arg.type === 'true') {
                 returnCode += `${argName}:!!(${condition}),`
+
                 return
             }
 
@@ -78,18 +79,17 @@ export function generateReaderCodeForTlEntry(
             } else {
                 returnCode += `${argName}:${condition}?`
             }
+        } else if (isBeforeLastFlag) {
+            beforeReturn += `var ${argName}=`
+            returnCode += `${argName}:${argName},`
         } else {
-            if (isBeforeLastFlag) {
-                beforeReturn += `var ${argName}=`
-                returnCode += `${argName}:${argName},`
-            } else {
-                returnCode += `${argName}:`
-            }
+            returnCode += `${argName}:`
         }
 
         let vector = false
         let type = arg.type
         const m = type.match(/^[Vv]ector[< ](.+?)[> ]$/)
+
         if (m) {
             vector = true
             type = m[1]
@@ -102,6 +102,7 @@ export function generateReaderCodeForTlEntry(
         }
 
         let code
+
         if (vector) {
             code = `r.vector(r.${type})`
         } else {
@@ -132,7 +133,7 @@ export function generateReaderCodeForTlEntry(
 export function generateReaderCodeForTlEntries(
     entries: TlEntry[],
     varName: string,
-    methods = true
+    methods = true,
 ): string {
     let ret = `var ${varName}={\n`
 

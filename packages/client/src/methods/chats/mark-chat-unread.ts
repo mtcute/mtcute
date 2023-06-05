@@ -9,7 +9,7 @@ import { InputPeerLike } from '../../types'
  */
 export async function markChatUnread(
     this: TelegramClient,
-    chatId: InputPeerLike
+    chatId: InputPeerLike,
 ): Promise<void> {
     await this.call({
         _: 'messages.markDialogUnread',

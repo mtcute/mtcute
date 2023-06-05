@@ -1,8 +1,9 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import Long from 'long'
+import { describe, it } from 'mocha'
+
 import { parseFileId } from '../src'
 import { tdFileId as td } from '../src/types'
-import Long from 'long'
 
 // test file IDs are partially taken from https://github.com/luckydonald/telegram_file_id
 
@@ -19,7 +20,7 @@ describe('parsing file ids', () => {
                 dcId: 2,
                 fileReference: Buffer.from(
                     '0100099f2f608adbb3d7f57fb9228152e1bf9e1b7312d14e79',
-                    'hex'
+                    'hex',
                 ),
                 location: {
                     _: 'common',
@@ -27,7 +28,7 @@ describe('parsing file ids', () => {
                     id: Long.fromString('541175087705905756'),
                 },
                 type: td.FileType.Sticker,
-            }
+            },
         )
         test(
             'BQACAgIAAxkBAAEJnzNgit00IDsKd07OdSeanwz8osecYAACdAwAAueoWEicaPvNdOYEwB8E',
@@ -36,7 +37,7 @@ describe('parsing file ids', () => {
                 dcId: 2,
                 fileReference: Buffer.from(
                     '0100099f33608add34203b0a774ece75279a9f0cfca2c79c60',
-                    'hex'
+                    'hex',
                 ),
                 location: {
                     _: 'common',
@@ -44,7 +45,7 @@ describe('parsing file ids', () => {
                     id: Long.fromString('5213102278772264052'),
                 },
                 type: td.FileType.Document,
-            }
+            },
         )
     })
 
@@ -56,7 +57,7 @@ describe('parsing file ids', () => {
                 dcId: 2,
                 fileReference: Buffer.from(
                     '0100099f2f608adbb3d7f57fb9228152e1bf9e1b7312d14e79',
-                    'hex'
+                    'hex',
                 ),
                 location: {
                     _: 'photo',
@@ -69,7 +70,7 @@ describe('parsing file ids', () => {
                     },
                 },
                 type: td.FileType.Thumbnail,
-            }
+            },
         )
     })
 

@@ -9,6 +9,7 @@ import { InputPeerLike } from '../peers'
  * You can learn more about bot command scopes in
  * [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
  */
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace BotCommands {
     /**
      * Intermediate bot scope, that is converted to
@@ -83,7 +84,7 @@ export namespace BotCommands {
      */
     export function groupMember(
         chat: InputPeerLike,
-        user: InputPeerLike
+        user: InputPeerLike,
     ): IntermediateScope {
         return {
             type: 'member',
@@ -100,7 +101,7 @@ export namespace BotCommands {
      */
     export function cmd(
         command: string,
-        description: string
+        description: string,
     ): tl.RawBotCommand {
         return {
             _: 'botCommand',

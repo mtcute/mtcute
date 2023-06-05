@@ -1,9 +1,10 @@
 import { Parser } from 'htmlparser2'
 import Long from 'long'
+
 import type {
+    FormattedString,
     IMessageEntityParser,
     MessageEntity,
-    FormattedString,
     tl,
 } from '@mtcute/client'
 
@@ -27,29 +28,27 @@ export function html(
         if (typeof it === 'boolean' || !it) return
 
         if (typeof it === 'string') {
-            it = HtmlMessageEntityParser.escape(it, !!str.match(/=['"]$/))
+            it = HtmlMessageEntityParser.escape(it, Boolean(str.match(/=['"]$/)))
         } else {
-            if (it.mode && it.mode !== 'html')
-                throw new Error(`Incompatible parse mode: ${it.mode}`)
+            if (it.mode && it.mode !== 'html') { throw new Error(`Incompatible parse mode: ${it.mode}`) }
             it = it.value
         }
 
         str += strings[idx] + it
     })
+
     return { value: str + strings[strings.length - 1], mode: 'html' }
 }
 
-export namespace HtmlMessageEntityParser {
-    /**
-     * Syntax highlighter function used in {@link HtmlMessageEntityParser.unparse}
-     *
-     * Must be sync (this might change in the future) and must return valid HTML.
-     */
-    export type SyntaxHighlighter = (code: string, language: string) => string
+/**
+ * Syntax highlighter function used in {@link HtmlMessageEntityParser.unparse}
+ *
+ * Must be sync (this might change in the future) and must return valid HTML.
+ */
+export type SyntaxHighlighter = (code: string, language: string) => string
 
-    export interface Options {
-        syntaxHighlighter?: SyntaxHighlighter
-    }
+export interface HtmlMessageEntityParserOptions {
+    syntaxHighlighter?: SyntaxHighlighter
 }
 
 /**
@@ -62,9 +61,9 @@ export namespace HtmlMessageEntityParser {
 export class HtmlMessageEntityParser implements IMessageEntityParser {
     name = 'html'
 
-    private readonly _syntaxHighlighter?: HtmlMessageEntityParser.SyntaxHighlighter
+    private readonly _syntaxHighlighter?: SyntaxHighlighter
 
-    constructor(options?: HtmlMessageEntityParser.Options) {
+    constructor(options?: HtmlMessageEntityParserOptions) {
         this._syntaxHighlighter = options?.syntaxHighlighter
     }
 
@@ -123,9 +122,11 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                 if (name !== 'pre' && stacks.pre?.length) return
 
                 let entity: tl.TypeMessageEntity
+
                 switch (name) {
                     case 'br':
                         plainText += '\n'
+
                         return
                     case 'b':
                     case 'strong':
@@ -188,6 +189,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                             length: 0,
                         }
                         break
+
                     case 'emoji': {
                         const id = attribs.id
                         if (!id || !id.match(/^-?\d+$/)) return
@@ -205,6 +207,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                         if (!url) return
 
                         const mention = MENTION_REGEX.exec(url)
+
                         if (mention) {
                             const id = parseInt(mention[1])
                             const accessHash = mention[2]
@@ -220,7 +223,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                                         accessHash: Long.fromString(
                                             accessHash,
                                             false,
-                                            16
+                                            16,
                                         ),
                                     },
                                 }
@@ -292,9 +295,10 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
         entities: ReadonlyArray<MessageEntity>,
         entitiesOffset = 0,
         offset = 0,
-        length = text.length
+        length = text.length,
     ): string {
         if (!text) return text
+
         if (!entities.length || entities.length === entitiesOffset) {
             return HtmlMessageEntityParser.escape(text)
                 .replace(/\n/g, '<br>')
@@ -314,26 +318,27 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
 
             let entOffset = entity.offset
             let length = entity.length
+
             if (entOffset < 0) {
                 length += entOffset
                 entOffset = 0
             }
 
             let relativeOffset = entOffset - offset
+
             if (relativeOffset > lastOffset) {
                 // add missing plain text
                 html.push(
                     HtmlMessageEntityParser.escape(
-                        text.substring(lastOffset, relativeOffset)
-                    )
+                        text.substring(lastOffset, relativeOffset),
+                    ),
                 )
             } else if (relativeOffset < lastOffset) {
                 length -= lastOffset - relativeOffset
                 relativeOffset = lastOffset
             }
 
-            if (length <= 0 || relativeOffset >= end || relativeOffset < 0)
-                continue
+            if (length <= 0 || relativeOffset >= end || relativeOffset < 0) { continue }
 
             let skip = false
 
@@ -352,7 +357,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                     entities,
                     i + 1,
                     offset + relativeOffset,
-                    length
+                    length,
                 )
             }
 
@@ -367,17 +372,17 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                 case 'pre':
                     html.push(
                         `<${type}${
-                            entity.language
-                                ? ` language="${entity.language}"`
-                                : ''
+                            entity.language ?
+                                ` language="${entity.language}"` :
+                                ''
                         }>${
-                            this._syntaxHighlighter && entity.language
-                                ? this._syntaxHighlighter(
-                                      entityText,
-                                      entity.language
-                                  )
-                                : entityText
-                        }</${type}>`
+                            this._syntaxHighlighter && entity.language ?
+                                this._syntaxHighlighter(
+                                    entityText,
+                                    entity.language,
+                                ) :
+                                entityText
+                        }</${type}>`,
                     )
                     break
                 case 'blockquote':
@@ -386,7 +391,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                     break
                 case 'email':
                     html.push(
-                        `<a href="mailto:${entityText}">${entityText}</a>`
+                        `<a href="mailto:${entityText}">${entityText}</a>`,
                     )
                     break
                 case 'url':
@@ -395,14 +400,18 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                 case 'text_link':
                     html.push(
                         `<a href="${HtmlMessageEntityParser.escape(
+                            // todo improve typings
+
                             entity.url!,
-                            true
-                        )}">${entityText}</a>`
+                            true,
+                        )}">${entityText}</a>`,
                     )
                     break
                 case 'text_mention':
                     html.push(
-                        `<a href="tg://user?id=${entity.userId!}">${entityText}</a>`
+                        // todo improve typings
+
+                        `<a href="tg://user?id=${entity.userId!}">${entityText}</a>`,
                     )
                     break
                 default:

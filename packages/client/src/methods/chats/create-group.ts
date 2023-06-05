@@ -20,13 +20,13 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 export async function createGroup(
     this: TelegramClient,
     title: string,
-    users: MaybeArray<InputPeerLike>
+    users: MaybeArray<InputPeerLike>,
 ): Promise<Chat> {
     if (!Array.isArray(users)) users = [users]
 
     const peers = await this.resolvePeerMany(
         users as InputPeerLike[],
-        normalizeToInputUser
+        normalizeToInputUser,
     )
 
     const res = await this.call({

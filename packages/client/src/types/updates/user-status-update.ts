@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { User } from '../'
+import { User, UserParsedStatus, UserStatus } from '../'
 import { makeInspectable } from '../utils'
 
 /**
@@ -10,7 +10,7 @@ import { makeInspectable } from '../utils'
 export class UserStatusUpdate {
     constructor(
         readonly client: TelegramClient,
-        readonly raw: tl.RawUpdateUserStatus
+        readonly raw: tl.RawUpdateUserStatus,
     ) {}
 
     /**
@@ -20,7 +20,7 @@ export class UserStatusUpdate {
         return this.raw.userId
     }
 
-    private _parsedStatus?: User.ParsedStatus
+    private _parsedStatus?: UserParsedStatus
 
     private _parseStatus() {
         this._parsedStatus = User.parseStatus(this.raw.status)
@@ -29,8 +29,9 @@ export class UserStatusUpdate {
     /**
      * User's new Last Seen & Online status
      */
-    get status(): User.Status {
+    get status(): UserStatus {
         if (!this._parsedStatus) this._parseStatus()
+
         return this._parsedStatus!.status
     }
 
@@ -40,6 +41,7 @@ export class UserStatusUpdate {
      */
     get lastOnline(): Date | null {
         if (!this._parsedStatus) this._parseStatus()
+
         return this._parsedStatus!.lastOnline
     }
 
@@ -49,6 +51,7 @@ export class UserStatusUpdate {
      */
     get nextOffline(): Date | null {
         if (!this._parsedStatus) this._parseStatus()
+
         return this._parsedStatus!.nextOffline
     }
 

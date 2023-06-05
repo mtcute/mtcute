@@ -26,7 +26,7 @@ export async function editInlineMessage(
          *
          * When `media` is passed, `media.caption` is used instead
          */
-        text?: string | FormattedString<any>
+        text?: string | FormattedString<string>
 
         /**
          * Parse mode to use to parse entities before sending
@@ -69,7 +69,7 @@ export async function editInlineMessage(
          * @param total  Total file size in bytes
          */
         progressCallback?: (uploaded: number, total: number) => void
-    }
+    },
 ): Promise<void> {
     let content: string | undefined = undefined
     let entities: tl.TypeMessageEntity[] | undefined
@@ -83,21 +83,22 @@ export async function editInlineMessage(
         // if there's no caption in input media (i.e. not present or undefined),
         // user wants to keep current caption, thus `content` needs to stay `undefined`
         if ('caption' in params.media && params.media.caption !== undefined) {
-            ;[content, entities] = await this._parseEntities(
+            [content, entities] = await this._parseEntities(
                 params.media.caption,
                 params.parseMode,
-                params.media.entities
+                params.media.entities,
             )
         }
     } else if (params.text) {
-        ;[content, entities] = await this._parseEntities(
+        [content, entities] = await this._parseEntities(
             params.text,
             params.parseMode,
-            params.entities
+            params.entities,
         )
     }
 
     let retries = 3
+
     while (retries--) {
         try {
             await this.call(
@@ -110,8 +111,9 @@ export async function editInlineMessage(
                     entities,
                     media,
                 },
-                { connection }
+                { connection },
             )
+
             return
         } catch (e) {
             if (e instanceof tl.errors.MediaEmptyError) {

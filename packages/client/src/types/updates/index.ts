@@ -1,31 +1,30 @@
 import { CallbackQuery, InlineQuery, Message } from '../..'
-
-import { DeleteMessageUpdate } from './delete-message-update'
+import { BotChatJoinRequestUpdate } from './bot-chat-join-request'
+import { BotStoppedUpdate } from './bot-stopped'
+import { ChatJoinRequestUpdate } from './chat-join-request'
 import { ChatMemberUpdate } from './chat-member-update'
 import { ChosenInlineResult } from './chosen-inline-result'
+import { DeleteMessageUpdate } from './delete-message-update'
+import { HistoryReadUpdate } from './history-read-update'
 import { PollUpdate } from './poll-update'
 import { PollVoteUpdate } from './poll-vote'
+import { PreCheckoutQuery } from './pre-checkout-query'
 import { UserStatusUpdate } from './user-status-update'
 import { UserTypingUpdate } from './user-typing-update'
-import { HistoryReadUpdate } from './history-read-update'
-import { BotStoppedUpdate } from './bot-stopped'
-import { BotChatJoinRequestUpdate } from './bot-chat-join-request'
-import { ChatJoinRequestUpdate } from './chat-join-request'
-import { PreCheckoutQuery } from './pre-checkout-query'
 
 export {
-    DeleteMessageUpdate,
+    BotChatJoinRequestUpdate,
+    BotStoppedUpdate,
+    ChatJoinRequestUpdate,
     ChatMemberUpdate,
     ChosenInlineResult,
+    DeleteMessageUpdate,
+    HistoryReadUpdate,
     PollUpdate,
     PollVoteUpdate,
+    PreCheckoutQuery,
     UserStatusUpdate,
     UserTypingUpdate,
-    HistoryReadUpdate,
-    BotStoppedUpdate,
-    BotChatJoinRequestUpdate,
-    ChatJoinRequestUpdate,
-    PreCheckoutQuery,
 }
 
 // begin-codegen

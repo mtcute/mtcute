@@ -1,10 +1,12 @@
-import { TlPublicKey } from '../binary/rsa-keys'
+import { createReadStream } from 'fs'
+import { writeFile } from 'fs/promises'
 import { join } from 'path'
 import readline from 'readline'
-import { createReadStream } from 'fs'
+
 import { NodeCryptoProvider } from '@mtcute/core/src/utils/crypto'
 import { parsePublicKey } from '@mtcute/core/src/utils/crypto/keys'
-import { writeFile } from 'fs/promises'
+
+import { TlPublicKey } from '../binary/rsa-keys'
 import { ESM_PRELUDE } from './constants'
 
 const IN_TXT_FILE = join(__dirname, '.rsa-keys.txt')
@@ -57,7 +59,7 @@ async function main() {
         ESM_PRELUDE +
             "exports.default=JSON.parse('" +
             JSON.stringify(obj) +
-            "');"
+            "');",
     )
 }
 

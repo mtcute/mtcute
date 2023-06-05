@@ -11,7 +11,7 @@ import { normalizePhoneNumber } from '../../utils/misc-utils'
  */
 export async function sendCode(
     this: TelegramClient,
-    phone: string
+    phone: string,
 ): Promise<SentCode> {
     phone = normalizePhoneNumber(phone)
 

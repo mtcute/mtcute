@@ -12,7 +12,7 @@ import { User } from '../../types'
  */
 export async function updateUsername(
     this: TelegramClient,
-    username: string | null
+    username: string | null,
 ): Promise<User> {
     if (username === null) username = ''
 

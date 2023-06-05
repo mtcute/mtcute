@@ -1,27 +1,27 @@
 // noinspection SqlResolve
 
-import sqlite3 from 'better-sqlite3'
+import sqlite3, { Options } from 'better-sqlite3'
 
 import {
     ITelegramStorage,
+    Logger,
     longFromFastString,
     longToFastString,
     LruMap,
-    TlBinaryWriter,
-    toggleChannelIdMark,
-    tl,
     throttle,
-    Logger,
+    tl,
     TlBinaryReader,
+    TlBinaryWriter,
     TlReaderMap,
     TlWriterMap,
+    toggleChannelIdMark,
 } from '@mtcute/core'
 import { IStateStorage } from '@mtcute/dispatcher'
 
 // todo: add testMode to "self"
 
 function getInputPeer(
-    row: SqliteEntity | ITelegramStorage.PeerInfo
+    row: SqliteEntity | ITelegramStorage.PeerInfo,
 ): tl.TypeInputPeer {
     const id = row.id
 
@@ -31,9 +31,9 @@ function getInputPeer(
                 _: 'inputPeerUser',
                 userId: id,
                 accessHash:
-                    'accessHash' in row
-                        ? row.accessHash
-                        : longFromFastString(row.hash),
+                    'accessHash' in row ?
+                        row.accessHash :
+                        longFromFastString(row.hash),
             }
         case 'chat':
             return {
@@ -45,9 +45,9 @@ function getInputPeer(
                 _: 'inputPeerChannel',
                 channelId: toggleChannelIdMark(id),
                 accessHash:
-                    'accessHash' in row
-                        ? row.accessHash
-                        : longFromFastString(row.hash),
+                    'accessHash' in row ?
+                        row.accessHash :
+                        longFromFastString(row.hash),
             }
     }
 
@@ -128,8 +128,8 @@ interface CacheItem {
     full: tl.TypeUser | tl.TypeChat | null
 }
 
-interface FsmItem {
-    value: any
+interface FsmItem<T = unknown> {
+    value: T
     expires?: number
 }
 
@@ -174,8 +174,8 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     private _statements!: Record<keyof typeof STATEMENTS, sqlite3.Statement>
     private readonly _filename: string
 
-    private _pending: [sqlite3.Statement, any[]][] = []
-    private _pendingUnimportant: Record<number, any[]> = {}
+    private _pending: [sqlite3.Statement, unknown[]][] = []
+    private _pendingUnimportant: Record<number, unknown[]> = {}
 
     private _cache?: LruMap<number, CacheItem>
     private _fsmCache?: LruMap<string, FsmItem>
@@ -274,7 +274,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
              * Defaults to `300_000` (5 minutes)
              */
             vacuumInterval?: number
-        }
+        },
     ) {
         this._filename = filename
 
@@ -327,6 +327,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         this._reader.pos = 0
         this._reader.data = data
         let obj
+
         try {
             obj = this._reader.object()
         } catch (e) {
@@ -336,7 +337,8 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         }
         // remove reference to allow GC-ing
         this._reader.data = EMPTY_BUFFER
-        return obj
+
+        return obj as tl.TypeUser | tl.TypeChat | null
     }
 
     private _addToCache(id: number, item: CacheItem): void {
@@ -345,12 +347,13 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         }
     }
 
-    private _getFromKv(key: string): any {
-        const row = this._statements.getKv.get(key)
+    private _getFromKv<T>(key: string): T | null {
+        const row = this._statements.getKv.get(key) as { value: string } | null
+
         return row ? JSON.parse(row.value) : null
     }
 
-    private _setToKv(key: string, value: any, now = false): void {
+    private _setToKv(key: string, value: unknown, now = false): void {
         const query =
             value === null ? this._statements.delKv : this._statements.setKv
         const params = value === null ? [key] : [key, JSON.stringify(value)]
@@ -362,39 +365,39 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         }
     }
 
-    private _runMany!: (stmts: [sqlite3.Statement, any[]][]) => void
-    private _updateManyPeers!: (updates: any[]) => void
+    private _runMany!: (stmts: [sqlite3.Statement, unknown[]][]) => void
+    private _updateManyPeers!: (updates: unknown[]) => void
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private _upgradeDatabase(from: number): void {
         if (from < 2 || from > CURRENT_VERSION) {
             // 1 version was skipped during development
             // yes i am too lazy to make auto-migrations for them
             throw new Error(
-                'Unsupported session version, please migrate manually'
+                'Unsupported session version, please migrate manually',
             )
         }
     }
 
     private _initializeStatements(): void {
-        this._statements = {} as any
+        this._statements = {} as unknown as typeof this._statements
         Object.entries(STATEMENTS).forEach(([name, sql]) => {
-            ;(this._statements as any)[name] = this._db.prepare(sql)
+            this._statements[name as keyof typeof this._statements] = this._db.prepare(sql)
         })
     }
 
     private _initialize(): void {
         const hasTables = this._db
             .prepare(
-                "select name from sqlite_master where type = 'table' and name = 'kv'"
+                "select name from sqlite_master where type = 'table' and name = 'kv'",
             )
             .get()
 
         if (hasTables) {
             // tables already exist, check version
-            const version = this._db
+            const versionResult = this._db
                 .prepare("select value from kv where key = 'ver'")
-                .get().value
+                .get()
+            const version = (versionResult as { value: number }).value
 
             this.log.debug('current db version = %d', version)
 
@@ -423,7 +426,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
 
     load(): void {
         this._db = sqlite3(this._filename, {
-            verbose: this.log.mgr.level === 5 ? this.log.verbose : undefined,
+            verbose: this.log.mgr.level === 5 ? this.log.verbose as Options['verbose'] : undefined,
         })
 
         this._initialize()
@@ -435,20 +438,20 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
 
         // helper methods
         this._runMany = this._db.transaction((stmts) => {
-            stmts.forEach((stmt: [sqlite3.Statement, any[]]) => {
+            stmts.forEach((stmt: [sqlite3.Statement, unknown[]]) => {
                 stmt[0].run(stmt[1])
             })
         })
 
         this._updateManyPeers = this._db.transaction((data) => {
-            data.forEach((it: any[]) => {
+            data.forEach((it: unknown[]) => {
                 this._statements.updateCachedEnt.run(it)
             })
         })
 
         this._vacuumTimeout = setInterval(
             this._vacuum.bind(this),
-            this._vacuumInterval
+            this._vacuumInterval,
         )
     }
 
@@ -463,7 +466,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
 
     destroy(): void {
         this._db.close()
-        clearInterval(this._vacuumTimeout!)
+        clearInterval(this._vacuumTimeout)
     }
 
     reset(): void {
@@ -478,9 +481,10 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         return this._getFromKv('def_dc')
     }
 
-    getAuthKeyFor(dcId: number): Promise<Buffer | null> {
+    getAuthKeyFor(dcId: number): Buffer | null {
         const row = this._statements.getAuth.get(dcId)
-        return row ? row.key : null
+
+        return row ? (row as { key: Buffer }).key : null
     }
 
     setAuthKeyFor(dcId: number, key: Buffer | null): void {
@@ -499,14 +503,14 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     }
 
     getUpdatesState(): [number, number, number, number] | null {
-        const pts = this._getFromKv('pts')
+        const pts = this._getFromKv<number>('pts')
         if (pts == null) return null
 
         return [
             pts,
-            this._getFromKv('qts')!,
-            this._getFromKv('date')!,
-            this._getFromKv('seq')!,
+            this._getFromKv<number>('qts') ?? 0,
+            this._getFromKv<number>('date') ?? 0,
+            this._getFromKv<number>('seq') ?? 0,
         ]
     }
 
@@ -528,7 +532,8 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
 
     getChannelPts(entityId: number): number | null {
         const row = this._statements.getPts.get(entityId)
-        return row ? row.pts : null
+
+        return row ? (row as { pts: number }).pts : null
     }
 
     setManyChannelPts(values: Record<number, number>): void {
@@ -580,12 +585,12 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
                         Date.now(),
                         TlBinaryWriter.serializeObject(
                             this.writerMap,
-                            peer.full
+                            peer.full,
                         ),
                     ],
                 ])
                 this._addToCache(peer.id, {
-                    peer: getInputPeer(peer)!,
+                    peer: getInputPeer(peer),
                     full: peer.full,
                 })
             }
@@ -596,13 +601,15 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         const cached = this._cache?.get(peerId)
         if (cached) return cached.peer
 
-        const row = this._statements.getEntById.get(peerId)
+        const row = this._statements.getEntById.get(peerId) as SqliteEntity | null
+
         if (row) {
             const peer = getInputPeer(row)
             this._addToCache(peerId, {
                 peer,
                 full: this._readFullPeer(row.full),
             })
+
             return peer
         }
 
@@ -610,13 +617,15 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     }
 
     getPeerByPhone(phone: string): tl.TypeInputPeer | null {
-        const row = this._statements.getEntByPhone.get(phone)
+        const row = this._statements.getEntByPhone.get(phone) as SqliteEntity | null
+
         if (row) {
             const peer = getInputPeer(row)
             this._addToCache(row.id, {
                 peer,
                 full: this._readFullPeer(row.full),
             })
+
             return peer
         }
 
@@ -624,7 +633,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     }
 
     getPeerByUsername(username: string): tl.TypeInputPeer | null {
-        const row = this._statements.getEntByUser.get(username.toLowerCase())
+        const row = this._statements.getEntByUser.get(username.toLowerCase()) as SqliteEntity | null
         if (!row || Date.now() - row.updated > USERNAME_TTL) return null
 
         if (row) {
@@ -633,6 +642,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
                 peer,
                 full: this._readFullPeer(row.full),
             })
+
             return peer
         }
 
@@ -643,13 +653,15 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         const cached = this._cache?.get(id)
         if (cached) return cached.full
 
-        const row = this._statements.getEntById.get(id)
+        const row = this._statements.getEntById.get(id) as SqliteEntity | null
+
         if (row) {
             const full = this._readFullPeer(row.full)
             this._addToCache(id, {
                 peer: getInputPeer(row),
                 full,
             })
+
             return full
         }
 
@@ -658,31 +670,36 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
 
     // IStateStorage implementation
 
-    getState(key: string, parse = true): any | null {
+    getState(key: string, parse = true): unknown | null {
         let val: FsmItem | undefined = this._fsmCache?.get(key)
         const cached = val
+
         if (!val) {
-            val = this._statements.getState.get(key)
+            val = this._statements.getState.get(key) as FsmItem | undefined
+
             if (val && parse) {
-                val.value = JSON.parse(val.value)
+                val.value = JSON.parse(val.value as string)
             }
         }
 
         if (!val) return null
+
         if (val.expires && val.expires < Date.now()) {
             // expired
             if (cached) {
+                // hot path. if it's cached, then cache is definitely enabled
+
                 this._fsmCache!.delete(key)
             }
             this._statements.delState.run(key)
+
             return null
         }
 
         return val.value
     }
 
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    setState(key: string, state: any, ttl?: number, parse = true): void {
+    setState(key: string, state: unknown, ttl?: number, parse = true): void {
         const item: FsmItem = {
             value: state,
             expires: ttl ? Date.now() + ttl * 1000 : undefined,
@@ -692,7 +709,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         this._statements.setState.run(
             key,
             parse ? JSON.stringify(item.value) : item.value,
-            item.expires
+            item.expires,
         )
     }
 
@@ -702,7 +719,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     }
 
     getCurrentScene(key: string): string | null {
-        return this.getState(`$current_scene_${key}`, false)
+        return this.getState(`$current_scene_${key}`, false) as string | null
     }
 
     setCurrentScene(key: string, scene: string, ttl?: number): void {
@@ -717,18 +734,22 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         // leaky bucket
         const now = Date.now()
 
-        let val: FsmItem | undefined = this._rlCache?.get(key)
+        let val = this._rlCache?.get(key) as FsmItem<number> | undefined
         const cached = val
+
         if (!val) {
             const got = this._statements.getState.get(`$rate_limit_${key}`)
+
             if (got) {
-                val = got
+                val = got as FsmItem<number>
             }
         }
 
+        // hot path. rate limit fsm entries always have an expiration date
+
         if (!val || val.expires! < now) {
             // expired or does not exist
-            const item: FsmItem = {
+            const item: FsmItem<number> = {
                 expires: now + window * 1000,
                 value: limit,
             }
@@ -736,7 +757,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
             this._statements.setState.run(
                 `$rate_limit_${key}`,
                 item.value,
-                item.expires
+                item.expires,
             )
             this._rlCache?.set(key, item)
 
@@ -749,8 +770,9 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
             this._statements.setState.run(
                 `$rate_limit_${key}`,
                 val.value,
-                val.expires
+                val.expires,
             )
+
             if (!cached) {
                 // add to cache
                 // if cached, cache is updated since `val === cached`

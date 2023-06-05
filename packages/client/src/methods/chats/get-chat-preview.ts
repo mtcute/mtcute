@@ -1,7 +1,6 @@
 import { TelegramClient } from '../../client'
-import { MtArgumentError, MtNotFoundError } from '../../types'
+import { ChatPreview, MtArgumentError, MtNotFoundError } from '../../types'
 import { INVITE_LINK_REGEX } from '../../utils/peer-utils'
-import { ChatPreview } from '../../types'
 
 /**
  * Get preview information about a private chat.
@@ -15,7 +14,7 @@ import { ChatPreview } from '../../types'
  */
 export async function getChatPreview(
     this: TelegramClient,
-    inviteLink: string
+    inviteLink: string,
 ): Promise<ChatPreview> {
     const m = inviteLink.match(INVITE_LINK_REGEX)
     if (!m) throw new MtArgumentError('Invalid invite link')
@@ -26,7 +25,7 @@ export async function getChatPreview(
     })
 
     if (res._ !== 'chatInvite') {
-        throw new MtNotFoundError(`You have already joined this chat!`)
+        throw new MtNotFoundError('You have already joined this chat!')
     }
 
     return new ChatPreview(this, res, inviteLink)

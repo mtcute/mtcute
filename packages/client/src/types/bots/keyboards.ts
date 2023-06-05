@@ -1,9 +1,8 @@
-import { tl } from '@mtcute/tl'
 import { assertNever } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
-import { BotKeyboardBuilder } from './keyboard-builder'
 import { normalizeToInputUser } from '../../utils/peer-utils'
-import { MtInvalidPeerTypeError } from '../errors'
+import { BotKeyboardBuilder } from './keyboard-builder'
 
 /**
  * Reply keyboard markup
@@ -62,6 +61,7 @@ export type ReplyMarkup =
  * > with inline reply markup, unless stated otherwise
  * > in the description.
  */
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace BotKeyboard {
     export function builder(maxRowWidth?: number | null): BotKeyboardBuilder {
         return new BotKeyboardBuilder(maxRowWidth)
@@ -73,7 +73,7 @@ export namespace BotKeyboard {
      * @param buttons  Two-dimensional array of buttons
      */
     export function inline(
-        buttons: tl.TypeKeyboardButton[][]
+        buttons: tl.TypeKeyboardButton[][],
     ): InlineKeyboardMarkup {
         return {
             type: 'inline',
@@ -89,11 +89,12 @@ export namespace BotKeyboard {
      */
     export function reply(
         buttons: tl.TypeKeyboardButton[][],
-        params: Omit<ReplyKeyboardMarkup, 'type' | 'buttons'> = {}
+        params: Omit<ReplyKeyboardMarkup, 'type' | 'buttons'> = {},
     ): ReplyKeyboardMarkup {
         const ret = params as tl.Mutable<ReplyKeyboardMarkup>
         ret.type = 'reply'
         ret.buttons = buttons
+
         return ret
     }
 
@@ -116,10 +117,11 @@ export namespace BotKeyboard {
      * Force the user to send a reply
      */
     export function forceReply(
-        params: Omit<ReplyKeyboardForceReply, 'type'> = {}
+        params: Omit<ReplyKeyboardForceReply, 'type'> = {},
     ): ReplyKeyboardForceReply {
         const ret = params as tl.Mutable<ReplyKeyboardForceReply>
         ret.type = 'force_reply'
+
         return ret
     }
 
@@ -146,7 +148,7 @@ export namespace BotKeyboard {
      * @param text  Button text
      */
     export function requestContact(
-        text: string
+        text: string,
     ): tl.RawKeyboardButtonRequestPhone {
         return {
             _: 'keyboardButtonRequestPhone',
@@ -163,7 +165,7 @@ export namespace BotKeyboard {
      * @param text  Button text
      */
     export function requestGeo(
-        text: string
+        text: string,
     ): tl.RawKeyboardButtonRequestGeoLocation {
         return {
             _: 'keyboardButtonRequestGeoLocation',
@@ -182,7 +184,7 @@ export namespace BotKeyboard {
      */
     export function requestPoll(
         text: string,
-        quiz?: boolean
+        quiz?: boolean,
     ): tl.RawKeyboardButtonRequestPoll {
         return {
             _: 'keyboardButtonRequestPoll',
@@ -221,7 +223,7 @@ export namespace BotKeyboard {
     export function callback(
         text: string,
         data: string | Buffer,
-        requiresPassword?: boolean
+        requiresPassword?: boolean,
     ): tl.RawKeyboardButtonCallback {
         return {
             _: 'keyboardButtonCallback',
@@ -249,7 +251,7 @@ export namespace BotKeyboard {
     export function switchInline(
         text: string,
         query = '',
-        currentChat?: boolean
+        currentChat?: boolean,
     ): tl.RawKeyboardButtonSwitchInline {
         return {
             _: 'keyboardButtonSwitchInline',
@@ -319,7 +321,7 @@ export namespace BotKeyboard {
              * Defaults to current bot
              */
             bot?: tl.TypeInputUser
-        } = {}
+        } = {},
     ): tl.RawInputKeyboardButtonUrlAuth {
         return {
             _: 'inputKeyboardButtonUrlAuth',
@@ -343,7 +345,7 @@ export namespace BotKeyboard {
      */
     export function webView(
         text: string,
-        url: string
+        url: string,
     ): tl.RawKeyboardButtonWebView {
         return {
             _: 'keyboardButtonWebView',
@@ -360,7 +362,7 @@ export namespace BotKeyboard {
      */
     export function userProfile(
         text: string,
-        user: tl.TypeInputPeer
+        user: tl.TypeInputPeer,
     ): tl.RawInputKeyboardButtonUserProfile {
         return {
             _: 'inputKeyboardButtonUserProfile',
@@ -377,10 +379,11 @@ export namespace BotKeyboard {
      */
     export function findButton(
         buttons: tl.TypeKeyboardButton[][],
-        predicate: string | ((btn: tl.TypeKeyboardButton) => boolean)
+        predicate: string | ((btn: tl.TypeKeyboardButton) => boolean),
     ): tl.TypeKeyboardButton | null {
         if (typeof predicate === 'string') {
             const text = predicate
+
             predicate = (btn) => {
                 return 'text' in btn && btn.text === text
             }
@@ -399,7 +402,7 @@ export namespace BotKeyboard {
 
     /** @internal */
     export function _rowsTo2d(
-        rows: tl.RawKeyboardButtonRow[]
+        rows: tl.RawKeyboardButtonRow[],
     ): tl.TypeKeyboardButton[][] {
         return rows.map((it) => it.buttons)
     }
@@ -407,16 +410,15 @@ export namespace BotKeyboard {
     /** @internal */
     export function _2dToRows(
         arr: tl.TypeKeyboardButton[][],
-        inline: boolean
+        inline: boolean,
     ): tl.RawKeyboardButtonRow[] {
         return arr.map((row) => {
             if (!inline) {
                 // le cringe
-                row.forEach((btn) => {
-                    if (btn._ === 'keyboardButtonWebView') {
-                        ;(btn as any)._ = 'keyboardButtonSimpleWebView'
-                    }
-                })
+                row = row.map((btn) => btn._ === 'keyboardButtonWebView' ? ({
+                    ...btn,
+                    _: 'keyboardButtonSimpleWebView',
+                }) : btn)
             }
 
             return {
@@ -428,7 +430,7 @@ export namespace BotKeyboard {
 
     /** @internal */
     export function _convertToTl(
-        obj?: ReplyMarkup
+        obj?: ReplyMarkup,
     ): tl.TypeReplyMarkup | undefined {
         if (!obj) return obj
         if (tl.isAnyReplyMarkup(obj)) return obj

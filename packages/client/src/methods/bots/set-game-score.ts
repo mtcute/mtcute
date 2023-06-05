@@ -33,7 +33,7 @@ export async function setGameScore(
          * This can be useful when fixing mistakes or banning cheaters
          */
         force?: boolean
-    }
+    },
 ): Promise<Message> {
     if (!params) params = {}
 
@@ -80,7 +80,7 @@ export async function setInlineGameScore(
          * This can be useful when fixing mistakes or banning cheaters
          */
         force?: boolean
-    }
+    },
 ): Promise<void> {
     if (!params) params = {}
 
@@ -97,6 +97,6 @@ export async function setInlineGameScore(
             editMessage: !params.noEdit,
             force: params.force,
         },
-        { connection }
+        { connection },
     )
 }

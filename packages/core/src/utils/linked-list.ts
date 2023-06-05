@@ -41,6 +41,7 @@ export class SortedLinkedList<T> {
         if (!this._first) this._last = undefined
 
         this._size -= 1
+
         return it.v
     }
 
@@ -51,12 +52,14 @@ export class SortedLinkedList<T> {
             this._first = this._last = it
         } else {
             let cur: LinkedListItem<T> | undefined = this._first
+
             while (cur && this.comparator(cur.v, it.v) < 0) {
                 cur = cur.n
             }
 
             if (!cur) {
                 // reached end, the item should be new last
+
                 this._last!.n = it
                 it.p = this._last
                 this._last = it

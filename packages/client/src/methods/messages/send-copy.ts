@@ -2,9 +2,9 @@ import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
+    FormattedString,
     InputPeerLike,
     Message,
-    FormattedString,
     ReplyMarkup,
 } from '../../types'
 
@@ -50,7 +50,7 @@ export async function sendCopy(
         /**
          * New message caption (only used for media)
          */
-        caption?: string | FormattedString<any>
+        caption?: string | FormattedString<string>
 
         /**
          * Parse mode to use to parse `text` entities before sending
@@ -98,7 +98,7 @@ export async function sendCopy(
          * Defaults to `false`
          */
         clearDraft?: boolean
-    }
+    },
 ): Promise<Message> {
     const fromPeer = await this.resolvePeer(fromChatId)
 

@@ -1,13 +1,14 @@
 import Long from 'long'
-import { toggleChannelIdMark } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
-import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
-import { FileLocation } from '../files'
+import { toggleChannelIdMark } from '@mtcute/core'
+import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
+
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../utils'
 import { strippedPhotoToJpg } from '../../utils/file-utils'
 import { MtArgumentError } from '../errors'
+import { FileLocation } from '../files'
+import { makeInspectable } from '../utils'
 
 /**
  * A size of a chat photo
@@ -17,7 +18,7 @@ export class ChatPhotoSize extends FileLocation {
         readonly client: TelegramClient,
         readonly peer: tl.TypeInputPeer,
         readonly obj: tl.RawUserProfilePhoto | tl.RawChatPhoto,
-        readonly big: boolean
+        readonly big: boolean,
     ) {
         super(
             client,
@@ -28,7 +29,7 @@ export class ChatPhotoSize extends FileLocation {
                 big,
             },
             undefined,
-            obj.dcId
+            obj.dcId,
         )
 
         this.peer = peer
@@ -47,6 +48,7 @@ export class ChatPhotoSize extends FileLocation {
 
             let id: number
             let hash: tl.Long
+
             switch (peer._) {
                 case 'inputPeerUser':
                     id = peer.userId
@@ -99,8 +101,10 @@ export class ChatPhotoSize extends FileLocation {
                 source: {
                     _: 'dialogPhoto',
                     big: this.big,
+                // will be looked into in MTQ-37
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
-            }
+            },
         ))
     }
 }
@@ -118,7 +122,7 @@ export class ChatPhoto {
     constructor(
         client: TelegramClient,
         peer: tl.TypeInputPeer,
-        obj: tl.RawUserProfilePhoto | tl.RawChatPhoto
+        obj: tl.RawUserProfilePhoto | tl.RawChatPhoto,
     ) {
         this.client = client
         this.peer = peer
@@ -133,7 +137,7 @@ export class ChatPhoto {
             this.client,
             this.peer,
             this.obj,
-            false
+            false,
         ))
     }
 
@@ -145,7 +149,7 @@ export class ChatPhoto {
             this.client,
             this.peer,
             this.obj,
-            true
+            true,
         ))
     }
 

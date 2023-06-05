@@ -1,11 +1,11 @@
-import { tl } from '@mtcute/tl'
 import { getMarkedPeerId } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { Chat, PeersIndex } from '../peers'
-import { Message } from './message'
-import { DraftMessage } from './draft-message'
 import { makeInspectable } from '../utils'
+import { DraftMessage } from './draft-message'
+import { Message } from './message'
 
 /**
  * A dialog.
@@ -18,7 +18,7 @@ export class Dialog {
         readonly client: TelegramClient,
         readonly raw: tl.RawDialog,
         readonly _peers: PeersIndex,
-        readonly _messages: Record<number, tl.TypeMessage>
+        readonly _messages: Record<number, tl.TypeMessage>,
     ) {}
 
     /**
@@ -29,7 +29,7 @@ export class Dialog {
      */
     static findPinned(
         dialogs: Dialog[],
-        folder?: tl.RawDialogFilter
+        folder?: tl.RawDialogFilter,
     ): Dialog[] {
         if (folder) {
             const index: Record<number, true> = {}
@@ -39,6 +39,7 @@ export class Dialog {
 
             return dialogs.filter((i) => index[i.chat.id])
         }
+
         return dialogs.filter((i) => i.isPinned)
     }
 
@@ -51,7 +52,7 @@ export class Dialog {
      */
     static filterFolder(
         folder: tl.TypeDialogFilter,
-        excludePinned = true
+        excludePinned = true,
     ): (val: Dialog) => boolean {
         if (folder._ === 'dialogFilterDefault') {
             return () => true
@@ -89,19 +90,16 @@ export class Dialog {
             if (folder.excludeArchived && dialog.isArchived) return false
 
             // inclusions based on chat type
-            if (folder.contacts && chat.type === 'private' && chat.isContact)
-                return true
+            if (folder.contacts && chat.type === 'private' && chat.isContact) { return true }
             if (
                 folder.nonContacts &&
                 chat.type === 'private' &&
                 !chat.isContact
-            )
-                return true
+            ) { return true }
             if (
                 folder.groups &&
                 (chat.type === 'group' || chat.type === 'supergroup')
-            )
-                return true
+            ) { return true }
             if (folder.broadcasts && chat.type === 'channel') return true
             if (folder.bots && chat.type === 'bot') return true
 
@@ -155,11 +153,12 @@ export class Dialog {
             const peer = this.raw.peer
 
             let chat
+
             switch (peer._) {
                 case 'peerChannel':
                 case 'peerChat':
                     chat = this._peers.chat(
-                        peer._ === 'peerChannel' ? peer.channelId : peer.chatId
+                        peer._ === 'peerChannel' ? peer.channelId : peer.chatId,
                     )
                     break
                 default:
@@ -180,11 +179,12 @@ export class Dialog {
     get lastMessage(): Message {
         if (!this._lastMessage) {
             const cid = this.chat.id
+
             if (cid in this._messages) {
                 this._lastMessage = new Message(
                     this.client,
                     this._messages[cid],
-                    this._peers
+                    this._peers,
                 )
             } else {
                 throw new tl.errors.MessageNotFoundError()
@@ -239,7 +239,7 @@ export class Dialog {
                 this._draftMessage = new DraftMessage(
                     this.client,
                     this.raw.draft,
-                    this.chat.inputPeer
+                    this.chat.inputPeer,
                 )
             } else {
                 this._draftMessage = null

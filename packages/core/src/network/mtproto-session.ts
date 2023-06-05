@@ -1,4 +1,5 @@
 import Long from 'long'
+
 import { mtp, tl } from '@mtcute/tl'
 import {
     TlBinaryReader,
@@ -8,9 +9,9 @@ import {
     TlWriterMap,
 } from '@mtcute/tl-runtime'
 
-import { createAesIgeForMessage } from '../utils/crypto/mtproto'
+import { getRandomInt, ICryptoProvider, Logger, randomLong } from '../utils'
 import { buffersEqual, randomBytes } from '../utils/buffer-utils'
-import { ICryptoProvider, Logger, getRandomInt, randomLong } from '../utils'
+import { createAesIgeForMessage } from '../utils/crypto/mtproto'
 
 /**
  * Class encapsulating a single MTProto session.
@@ -36,7 +37,7 @@ export class MtprotoSession {
         crypto: ICryptoProvider,
         readonly log: Logger,
         readonly _readerMap: TlReaderMap,
-        readonly _writerMap: TlWriterMap
+        readonly _writerMap: TlWriterMap,
     ) {
         this._crypto = crypto
     }
@@ -98,14 +99,14 @@ export class MtprotoSession {
 
         const messageKey = (
             await this._crypto.sha256(
-                Buffer.concat([this._authKeyClientSalt!, buf])
+                Buffer.concat([this._authKeyClientSalt!, buf]),
             )
         ).slice(8, 24)
         const ige = await createAesIgeForMessage(
             this._crypto,
             this._authKey,
             messageKey,
-            true
+            true,
         )
         const encryptedData = await ige.encrypt(buf)
 
@@ -115,7 +116,7 @@ export class MtprotoSession {
     /** Decrypt a single MTProto message using session's keys */
     async decryptMessage(
         data: Buffer,
-        callback: (msgId: tl.Long, seqNo: number, data: TlBinaryReader) => void
+        callback: (msgId: tl.Long, seqNo: number, data: TlBinaryReader) => void,
     ): Promise<void> {
         if (!this._authKey) throw new Error('Keys are not set up!')
 
@@ -129,12 +130,14 @@ export class MtprotoSession {
                 '[%h] warn: received message with unknown authKey = %h (expected %h)',
                 this._sessionId,
                 authKeyId,
-                this._authKeyId
+                this._authKeyId,
             )
+
             return
         }
 
         const padSize = encryptedData.length % 16
+
         if (padSize !== 0) {
             // data came from a codec that uses non-16-based padding.
             // it is safe to drop those padding bytes
@@ -145,13 +148,13 @@ export class MtprotoSession {
             this._crypto,
             this._authKey!,
             messageKey,
-            false
+            false,
         )
         const innerData = await ige.decrypt(encryptedData)
 
         const expectedMessageKey = (
             await this._crypto.sha256(
-                Buffer.concat([this._authKeyServerSalt!, innerData])
+                Buffer.concat([this._authKeyServerSalt!, innerData]),
             )
         ).slice(8, 24)
 
@@ -160,8 +163,9 @@ export class MtprotoSession {
                 '[%h] received message with invalid messageKey = %h (expected %h)',
                 this._sessionId,
                 messageKey,
-                expectedMessageKey
+                expectedMessageKey,
             )
+
             return
         }
 
@@ -173,8 +177,9 @@ export class MtprotoSession {
         if (sessionId.neq(this._sessionId)) {
             this.log.warn(
                 'ignoring message with invalid sessionId = %h',
-                sessionId
+                sessionId,
             )
+
             return
         }
 
@@ -185,16 +190,18 @@ export class MtprotoSession {
             this.log.warn(
                 'ignoring message with invalid length: %d > %d',
                 length,
-                innerData.length - 32
+                innerData.length - 32,
             )
+
             return
         }
 
         if (length % 4 !== 0) {
             this.log.warn(
                 'ignoring message with invalid length: %d is not a multiple of 4',
-                length
+                length,
             )
+
             return
         }
 
@@ -203,8 +210,9 @@ export class MtprotoSession {
         if (paddingSize < 12 || paddingSize > 1024) {
             this.log.warn(
                 'ignoring message with invalid padding size: %d',
-                paddingSize
+                paddingSize,
             )
+
             return
         }
 
@@ -242,17 +250,17 @@ export class MtprotoSession {
     writeMessage(
         writer: TlBinaryWriter,
         content: tl.TlObject | mtp.TlObject | Buffer,
-        isContentRelated = true
+        isContentRelated = true,
     ): Long {
         const messageId = this.getMessageId()
         const seqNo = this.getSeqNo(isContentRelated)
 
-        const length = Buffer.isBuffer(content)
-            ? content.length
-            : TlSerializationCounter.countNeededBytes(
+        const length = Buffer.isBuffer(content) ?
+            content.length :
+            TlSerializationCounter.countNeededBytes(
                   writer.objectMap!,
-                  content
-              )
+                  content,
+            )
 
         writer.long(messageId)
         writer.int(seqNo)

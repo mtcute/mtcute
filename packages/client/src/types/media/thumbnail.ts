@@ -1,16 +1,17 @@
 import Long from 'long'
-import { tl } from '@mtcute/tl'
+
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { FileLocation } from '../files'
 import {
     inflateSvgPath,
     strippedPhotoToJpg,
     svgPathToFile,
 } from '../../utils/file-utils'
-import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { assertTypeIs } from '../../utils/type-assertion'
+import { MtArgumentError, MtTypeAssertionError } from '../errors'
+import { FileLocation } from '../files'
 import { makeInspectable } from '../utils'
 
 /**
@@ -67,7 +68,7 @@ export class Thumbnail extends FileLocation {
             | tl.RawDocument
             | tl.RawStickerSet
             | tl.RawMessageExtendedMediaPreview,
-        sz: tl.TypePhotoSize | tl.TypeVideoSize
+        sz: tl.TypePhotoSize | tl.TypeVideoSize,
     ) {
         switch (sz._) {
             case 'photoSizeEmpty':
@@ -75,7 +76,7 @@ export class Thumbnail extends FileLocation {
                 throw new MtTypeAssertionError(
                     'sz',
                     'not (photoSizeEmpty | photoCachedSize)',
-                    sz._
+                    sz._,
                 )
         }
 
@@ -83,7 +84,7 @@ export class Thumbnail extends FileLocation {
             | tl.TypeInputFileLocation
             | Buffer
             | (() => tl.TypeInputFileLocation | Buffer)
-        let size, width, height: number
+        let size; let width; let height: number
 
         switch (sz._) {
             case 'photoStrippedSize':
@@ -112,14 +113,14 @@ export class Thumbnail extends FileLocation {
                     throw new MtTypeAssertionError(
                         'messageExtendedMediaPreview#thumb',
                         'photoStrippedSize',
-                        sz._
+                        sz._,
                     )
                 } else {
                     location = {
                         _:
-                            media._ === 'photo'
-                                ? 'inputPhotoFileLocation'
-                                : 'inputDocumentFileLocation',
+                            media._ === 'photo' ?
+                                'inputPhotoFileLocation' :
+                                'inputDocumentFileLocation',
                         id: media.id,
                         fileReference: media.fileReference,
                         accessHash: media.accessHash,
@@ -129,22 +130,23 @@ export class Thumbnail extends FileLocation {
                 width = sz.w
                 height = sz.h
                 size =
-                    sz._ === 'photoSizeProgressive'
-                        ? Math.max(...sz.sizes)
-                        : sz.size
+                    sz._ === 'photoSizeProgressive' ?
+                        Math.max(...sz.sizes) :
+                        sz.size
                 break
         }
 
-        super(
-            client,
-            location,
-            size,
-            media._ === 'stickerSet'
-                ? media.thumbDcId
-                : media._ === 'messageExtendedMediaPreview'
-                ? 0
-                : media.dcId
-        )
+        let dcId: number | undefined
+
+        if (media._ === 'stickerSet') {
+            dcId = media.thumbDcId
+        } else if (media._ === 'messageExtendedMediaPreview') {
+            dcId = 0
+        } else {
+            dcId = media.dcId
+        }
+
+        super(client, location, size, dcId)
         this.raw = sz
         this.width = width
         this.height = height
@@ -199,7 +201,7 @@ export class Thumbnail extends FileLocation {
                 this._media._ === 'messageExtendedMediaPreview' // just for type safety
             ) {
                 throw new MtArgumentError(
-                    `Cannot generate a file ID for "${this.raw.type}"`
+                    `Cannot generate a file ID for "${this.raw.type}"`,
                 )
             }
 
@@ -223,9 +225,9 @@ export class Thumbnail extends FileLocation {
             } else {
                 this._fileId = toFileId({
                     type:
-                        this._media._ === 'photo'
-                            ? td.FileType.Photo
-                            : td.FileType.Thumbnail,
+                        this._media._ === 'photo' ?
+                            td.FileType.Photo :
+                            td.FileType.Thumbnail,
                     dcId: this.dcId!,
                     fileReference: this._media.fileReference,
                     location: {
@@ -235,9 +237,9 @@ export class Thumbnail extends FileLocation {
                         source: {
                             _: 'thumbnail',
                             fileType:
-                                this._media._ === 'photo'
-                                    ? td.FileType.Photo
-                                    : td.FileType.Thumbnail,
+                                this._media._ === 'photo' ?
+                                    td.FileType.Photo :
+                                    td.FileType.Thumbnail,
                             thumbnailType:
                                 this.raw.type === 'u' ? '\x00' : this.raw.type,
                         },
@@ -262,7 +264,7 @@ export class Thumbnail extends FileLocation {
                 this._media._ === 'messageExtendedMediaPreview' // just for type safety
             ) {
                 throw new MtArgumentError(
-                    `Cannot generate a unique file ID for "${this.raw.type}"`
+                    `Cannot generate a unique file ID for "${this.raw.type}"`,
                 )
             }
 
@@ -279,22 +281,22 @@ export class Thumbnail extends FileLocation {
                 })
             } else {
                 this._uniqueFileId = toUniqueFileId(
-                    this._media._ === 'photo'
-                        ? td.FileType.Photo
-                        : td.FileType.Thumbnail,
+                    this._media._ === 'photo' ?
+                        td.FileType.Photo :
+                        td.FileType.Thumbnail,
                     {
                         _: 'photo',
                         id: this._media.id,
                         source: {
                             _: 'thumbnail',
                             fileType:
-                                this._media._ === 'photo'
-                                    ? td.FileType.Photo
-                                    : td.FileType.Thumbnail,
+                                this._media._ === 'photo' ?
+                                    td.FileType.Photo :
+                                    td.FileType.Thumbnail,
                             thumbnailType:
                                 this.raw.type === 'u' ? '\x00' : this.raw.type,
                         },
-                    }
+                    },
                 )
             }
         }

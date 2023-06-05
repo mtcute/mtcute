@@ -1,37 +1,35 @@
 import { tl } from '@mtcute/tl'
 
-import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
-import { User } from './user'
-import { PeersIndex } from './index'
 import { MtTypeAssertionError } from '../errors'
+import { makeInspectable } from '../utils'
+import { PeersIndex } from './index'
+import { User } from './user'
 
-export namespace ChatInviteLink {
-    export interface JoinedMember {
-        /**
-         * User who joined the chat
-         */
-        user: User
+export interface ChatInviteLinkJoinedMember {
+    /**
+     * User who joined the chat
+     */
+    user: User
 
-        /**
-         * Date when the user joined the chat
-         */
-        date: Date
+    /**
+     * Date when the user joined the chat
+     */
+    date: Date
 
-        /**
-         * Whether the user currently has a pending join request
-         */
-        isPendingRequest: boolean
-        /**
-         * For users with pending requests,
-         * contains bio of the user that requested to join
-         */
-        bio?: string
-        /**
-         * The administrator that approved the join request of the user
-         */
-        approvedBy?: number
-    }
+    /**
+     * Whether the user currently has a pending join request
+     */
+    isPendingRequest: boolean
+    /**
+     * For users with pending requests,
+     * contains bio of the user that requested to join
+     */
+    bio?: string
+    /**
+     * The administrator that approved the join request of the user
+     */
+    approvedBy?: number
 }
 
 /**
@@ -43,13 +41,13 @@ export class ChatInviteLink {
     constructor(
         readonly client: TelegramClient,
         raw: tl.TypeExportedChatInvite,
-        readonly _peers?: PeersIndex
+        readonly _peers?: PeersIndex,
     ) {
         if (raw._ === 'chatInvitePublicJoinRequests') {
             throw new MtTypeAssertionError(
                 'ChatInviteLink',
                 'chatInviteExported',
-                raw._
+                raw._,
             )
         }
         this.raw = raw
@@ -85,7 +83,7 @@ export class ChatInviteLink {
 
         return (this._creator ??= new User(
             this.client,
-            this._peers.user(this.raw.adminId)
+            this._peers.user(this.raw.adminId),
         ))
     }
 

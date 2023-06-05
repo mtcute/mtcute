@@ -1,4 +1,5 @@
 import { asyncPool } from 'eager-async-pool'
+
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -44,7 +45,7 @@ export async function resolvePeerMany(
     peerIds: InputPeerLike[],
     normalizer?: (
         obj: tl.TypeInputPeer
-    ) => tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | null
+    ) => tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | null,
 ): Promise<(tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[]> {
     const ret: (tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[] =
         []
@@ -57,6 +58,7 @@ export async function resolvePeerMany(
 
         for (const value of res) {
             const norm = normalizer(value)
+
             if (norm) {
                 ret.push(norm)
             }
@@ -67,7 +69,7 @@ export async function resolvePeerMany(
             peerIds,
             {
                 limit: 10,
-            }
+            },
         )) {
             if (error) {
                 throw error
@@ -78,11 +80,13 @@ export async function resolvePeerMany(
                 ret.push(value)
             } else {
                 const norm = normalizer(value)
+
                 if (norm) {
                     ret.push(norm)
                 }
             }
         }
     }
+
     return ret
 }

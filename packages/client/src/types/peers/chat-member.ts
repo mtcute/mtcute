@@ -1,30 +1,28 @@
 import { tl } from '@mtcute/tl'
 
-import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
-import { User } from './user'
 import { assertTypeIs } from '../../utils/type-assertion'
+import { makeInspectable } from '../utils'
 import { ChatPermissions } from './chat-permissions'
 import { PeersIndex } from './index'
+import { User } from './user'
 
-export namespace ChatMember {
-    /**
-     * Status of the member:
-     *  - `creator`: user is the creator of the chat
-     *  - `admin`: user has admin rights in the chat
-     *  - `member`: user is a normal member of the chat
-     *  - `restricted`: user has some restrictions applied
-     *  - `banned`: user was banned from the chat
-     *  - `left`: user left the chat on their own
-     */
-    export type Status =
-        | 'creator'
-        | 'admin'
-        | 'member'
-        | 'restricted'
-        | 'banned'
-        | 'left'
-}
+/**
+ * Status of the member:
+ *  - `creator`: user is the creator of the chat
+ *  - `admin`: user has admin rights in the chat
+ *  - `member`: user is a normal member of the chat
+ *  - `restricted`: user has some restrictions applied
+ *  - `banned`: user was banned from the chat
+ *  - `left`: user left the chat on their own
+ */
+export type ChatMemberStatus =
+    | 'creator'
+    | 'admin'
+    | 'member'
+    | 'restricted'
+    | 'banned'
+    | 'left'
 
 /**
  * Information about one chat member
@@ -33,7 +31,7 @@ export class ChatMember {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.TypeChatParticipant | tl.TypeChannelParticipant,
-        readonly _peers: PeersIndex
+        readonly _peers: PeersIndex,
     ) {}
 
     private _user?: User
@@ -48,18 +46,18 @@ export class ChatMember {
                     assertTypeIs(
                         'ChatMember#user (raw.peer)',
                         this.raw.peer,
-                        'peerUser'
+                        'peerUser',
                     )
 
                     this._user = new User(
                         this.client,
-                        this._peers.user(this.raw.peer.userId)
+                        this._peers.user(this.raw.peer.userId),
                     )
                     break
                 default:
                     this._user = new User(
                         this.client,
-                        this._peers.user(this.raw.userId)
+                        this._peers.user(this.raw.userId),
                     )
                     break
             }
@@ -71,7 +69,7 @@ export class ChatMember {
     /**
      * Get the chat member status
      */
-    get status(): ChatMember.Status {
+    get status(): ChatMemberStatus {
         switch (this.raw._) {
             case 'channelParticipant':
             case 'channelParticipantSelf':
@@ -86,9 +84,9 @@ export class ChatMember {
             case 'channelParticipantLeft':
                 return 'left'
             case 'channelParticipantBanned':
-                return this.raw.bannedRights.viewMessages
-                    ? 'banned'
-                    : 'restricted'
+                return this.raw.bannedRights.viewMessages ?
+                    'banned' :
+                    'restricted'
         }
 
         // fallback
@@ -140,7 +138,7 @@ export class ChatMember {
             if ('inviterId' in this.raw && this.raw.inviterId) {
                 this._invitedBy = new User(
                     this.client,
-                    this._peers.user(this.raw.inviterId)
+                    this._peers.user(this.raw.inviterId),
                 )
             } else {
                 this._invitedBy = null
@@ -161,7 +159,7 @@ export class ChatMember {
             if (this.raw._ === 'channelParticipantAdmin') {
                 this._promotedBy = new User(
                     this.client,
-                    this._peers.user(this.raw.promotedBy)
+                    this._peers.user(this.raw.promotedBy),
                 )
             } else {
                 this._promotedBy = null
@@ -182,7 +180,7 @@ export class ChatMember {
             if (this.raw._ === 'channelParticipantBanned') {
                 this._restrictedBy = new User(
                     this.client,
-                    this._peers.user(this.raw.kickedBy)
+                    this._peers.user(this.raw.kickedBy),
                 )
             } else {
                 this._restrictedBy = null
@@ -201,7 +199,7 @@ export class ChatMember {
         if (this.raw._ !== 'channelParticipantBanned') return null
 
         return (this._restrictions ??= new ChatPermissions(
-            this.raw.bannedRights
+            this.raw.bannedRights,
         ))
     }
 
@@ -211,9 +209,9 @@ export class ChatMember {
      * Makes sense only when `status = restricted or staus = banned`
      */
     get isMember(): boolean {
-        return this.raw._ === 'channelParticipantBanned'
-            ? !this.raw.left
-            : this.raw._ !== 'channelParticipantLeft'
+        return this.raw._ === 'channelParticipantBanned' ?
+            !this.raw.left :
+            this.raw._ !== 'channelParticipantLeft'
     }
 
     /**

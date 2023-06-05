@@ -1,3 +1,4 @@
+/* eslint-disable dot-notation */
 import { getMarkedPeerId } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
@@ -19,7 +20,7 @@ function _initializeConversation(this: TelegramClient) {
 export function _pushConversationMessage(
     this: TelegramClient,
     msg: Message,
-    incoming = false
+    incoming = false,
 ): void {
     // shortcut
     if (!this._hasConversations) return

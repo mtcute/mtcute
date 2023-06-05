@@ -1,14 +1,15 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
 import { mergeTlEntries, mergeTlSchemas } from '../src/merge'
 import { parseTlToEntries } from '../src/parse'
-import { writeTlEntryToString } from '../src/stringify'
 import { parseFullTlSchema, writeTlEntriesToString } from '../src/schema'
+import { writeTlEntryToString } from '../src/stringify'
 
 describe('mergeTlEntries', () => {
     const test = (tl: string, expected: string) => {
         const res = mergeTlEntries(parseTlToEntries(tl))
+
         if (typeof res === 'string') {
             expect(res).eq(expected)
         } else {
@@ -19,7 +20,7 @@ describe('mergeTlEntries', () => {
     it('fails on conflicting kinds', () => {
         test(
             'test = Test;\n---functions---\ntest = Test;',
-            'basic info mismatch'
+            'basic info mismatch',
         )
     })
 
@@ -41,20 +42,20 @@ describe('mergeTlEntries', () => {
                 'test flags:# foo:flags.0?true = Test;\n' +
                 'test flags:# bar:flags.0?true = Test;\n' +
                 'test flags:# baz:flags.1?true = Test;',
-            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;'
+            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;',
         )
         test(
             'test flags:# foo:flags.0?true = Test;\n' +
                 'test flags:# bar:flags.0?true = Test;\n' +
                 'test flags:# baz:flags.1?true = Test;',
-            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;'
+            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;',
         )
         test(
             'test flags:# foo:flags.0?true = Test;\n' +
                 'test flags:# foo:flags.0?true bar:flags.0?true = Test;\n' +
                 'test flags:# baz:flags.1?true = Test;\n' +
                 'test flags:# bar:flags.0?true baz:flags.1?true = Test;',
-            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;'
+            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;',
         )
     })
 
@@ -63,7 +64,7 @@ describe('mergeTlEntries', () => {
             'test flags:# flags2:# = Test;\n' +
                 'test flags:# foo:flags.0?true flags2:# = Test;\n' +
                 'test flags:# flags2:# bar:flags2.0?true = Test;\n',
-            'test#5ca39a98 flags:# foo:flags.0?true flags2:# bar:flags2.0?true = Test;'
+            'test#5ca39a98 flags:# foo:flags.0?true flags2:# bar:flags2.0?true = Test;',
         )
     })
 })
@@ -76,16 +77,16 @@ describe('mergeTlSchemas', () => {
     ) => {
         const res = await mergeTlSchemas(
             schemas.map((tl) =>
-                parseFullTlSchema(parseTlToEntries(tl.join('\n')))
+                parseFullTlSchema(parseTlToEntries(tl.join('\n'))),
             ),
-            (opts) => opts[onConflict]
+            (opts) => opts[onConflict],
         )
 
         expect(
             writeTlEntriesToString(res.entries, {
                 omitPrimitives: true,
                 tdlibComments: true,
-            })
+            }),
         ).eq(expected.join('\n'))
     }
 
@@ -100,7 +101,7 @@ describe('mergeTlSchemas', () => {
             'testClass = Test;',
             'testClass2 = Test;',
             '---functions---',
-            'testMethod = Test;'
+            'testMethod = Test;',
         )
     })
 
@@ -112,7 +113,7 @@ describe('mergeTlSchemas', () => {
                 ['test foo:flags.0?true bar:flags.0?true = Test;'],
             ],
             0,
-            'test#1c173316 foo:flags.0?true bar:flags.0?true = Test;'
+            'test#1c173316 foo:flags.0?true bar:flags.0?true = Test;',
         )
     })
 
@@ -124,7 +125,7 @@ describe('mergeTlSchemas', () => {
                 ['test baz:int = Test;'],
             ],
             0,
-            'test foo:int = Test;'
+            'test foo:int = Test;',
         )
         test(
             [
@@ -133,7 +134,7 @@ describe('mergeTlSchemas', () => {
                 ['test baz:int = Test;'],
             ],
             1,
-            'test foo:int = Test;'
+            'test foo:int = Test;',
         )
         test([['test foo:int = Test;'], [], ['test bar:int = Test;']], 1, '')
     })
@@ -150,7 +151,7 @@ describe('mergeTlSchemas', () => {
             ],
             0,
             '// @description test ctor',
-            'test#1c173316 foo:flags.0?true bar:flags.0?true = Test;'
+            'test#1c173316 foo:flags.0?true bar:flags.0?true = Test;',
         )
     })
 
@@ -167,7 +168,7 @@ describe('mergeTlSchemas', () => {
             0,
             '// @foo foo comment',
             '// @bar bar comment',
-            'test#1c173316 foo:flags.0?true bar:flags.0?true = Test;'
+            'test#1c173316 foo:flags.0?true bar:flags.0?true = Test;',
         )
     })
 })

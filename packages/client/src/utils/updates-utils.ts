@@ -15,7 +15,7 @@ import { MtTypeAssertionError } from '../types'
 export function createDummyUpdate(
     pts: number,
     ptsCount: number,
-    channelId = 0
+    channelId = 0,
 ): tl.TypeUpdates {
     return {
         _: 'updates',
@@ -37,7 +37,7 @@ export function createDummyUpdate(
 /** @internal */
 export function assertIsUpdatesGroup(
     ctx: string,
-    upd: tl.TypeUpdates
+    upd: tl.TypeUpdates,
 ): asserts upd is tl.RawUpdates | tl.RawUpdatesCombined {
     switch (upd._) {
         case 'updates':

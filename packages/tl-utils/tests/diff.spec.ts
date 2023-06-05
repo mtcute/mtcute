@@ -1,13 +1,13 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
-import { parseTlToEntries } from '../src/parse'
-import { TlEntryDiff, TlSchemaDiff } from '../src/types'
 import {
     generateTlEntriesDifference,
     generateTlSchemasDifference,
 } from '../src/diff'
+import { parseTlToEntries } from '../src/parse'
 import { parseFullTlSchema } from '../src/schema'
+import { TlEntryDiff, TlSchemaDiff } from '../src/types'
 
 describe('generateTlEntriesDifference', () => {
     const test = (tl: string[], expected: TlEntryDiff) => {
@@ -106,7 +106,7 @@ describe('generateTlEntriesDifference', () => {
                         },
                     ],
                 },
-            }
+            },
         )
     })
 })
@@ -115,7 +115,7 @@ describe('generateTlSchemasDifference', () => {
     const test = (
         tl1: string[],
         tl2: string[],
-        expected: Partial<TlSchemaDiff>
+        expected: Partial<TlSchemaDiff>,
     ) => {
         const a = parseFullTlSchema(parseTlToEntries(tl1.join('\n')))
         const b = parseFullTlSchema(parseTlToEntries(tl2.join('\n')))
@@ -218,7 +218,7 @@ describe('generateTlSchemasDifference', () => {
                     added: [],
                     modified: [],
                 },
-            }
+            },
         )
     })
 
@@ -245,7 +245,7 @@ describe('generateTlSchemasDifference', () => {
                     removed: [],
                     modified: [],
                 },
-            }
+            },
         )
     })
 
@@ -289,7 +289,7 @@ describe('generateTlSchemasDifference', () => {
                         },
                     ],
                 },
-            }
+            },
         )
 
         test(
@@ -355,7 +355,7 @@ describe('generateTlSchemasDifference', () => {
                         },
                     ],
                 },
-            }
+            },
         )
 
         test(
@@ -407,7 +407,7 @@ describe('generateTlSchemasDifference', () => {
                     ],
                     modified: [],
                 },
-            }
+            },
         )
     })
 })

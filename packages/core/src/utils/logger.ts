@@ -1,13 +1,16 @@
 import { _defaultLoggingHandler } from './platform/logging'
 
 let defaultLogLevel = 2
+
 if (typeof process !== 'undefined') {
-    const envLogLevel = parseInt(process.env.MTCUTE_LOG_LEVEL!)
+    const envLogLevel = parseInt(process.env.MTCUTE_LOG_LEVEL ?? '')
+
     if (!isNaN(envLogLevel)) {
         defaultLogLevel = envLogLevel
     }
 } else if (typeof localStorage !== 'undefined') {
     const localLogLevel = parseInt(localStorage.MTCUTE_LOG_LEVEL)
+
     if (!isNaN(localLogLevel)) {
         defaultLogLevel = localLogLevel
     }
@@ -26,7 +29,7 @@ export class Logger {
     constructor(
         readonly mgr: LogManager,
         readonly tag: string,
-        readonly parent: Logger = mgr
+        readonly parent: Logger = mgr,
     ) {
         let hash = 0
 
@@ -41,7 +44,9 @@ export class Logger {
     getPrefix(): string {
         let s = ''
 
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         let obj: Logger | undefined = this
+
         while (obj) {
             if (obj.prefix) s = obj.prefix + s
             obj = obj.parent
@@ -50,8 +55,9 @@ export class Logger {
         return s
     }
 
-    log(level: number, fmt: string, ...args: any[]): void {
+    log(level: number, fmt: string, ...args: unknown[]): void {
         if (level > this.mgr.level) return
+        // eslint-disable-next-line dot-notation
         if (!this.mgr['_filter'](this.tag)) return
 
         // custom formatters
@@ -63,21 +69,26 @@ export class Logger {
         ) {
             let idx = 0
             fmt = fmt.replace(FORMATTER_RE, (m) => {
-                if (m === '%h' || m === '%b' || m === '%j' || m == '%l') {
+                if (m === '%h' || m === '%b' || m === '%j' || m === '%l') {
                     const val = args[idx]
 
                     args.splice(idx, 1)
-                    if (m === '%h') return val.toString('hex')
-                    if (m === '%b') return !!val + ''
-                    if (m === '%j') return JSON.stringify(val, (k, v) => {
-                        if (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data)) {
-                            let str = Buffer.from(v.data).toString('base64')
-                            if (str.length > 300) str = str.slice(0, 300) + '...'
-                            return str
-                        }
-                        return v
-                    })
-                    if (m === '%l') return val + ''
+                    if (m === '%h') return Buffer.isBuffer(val) ? val.toString('hex') : String(val)
+                    if (m === '%b') return String(Boolean(val))
+
+                    if (m === '%j') {
+                        return JSON.stringify(val, (k, v) => {
+                            if (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data)) {
+                                let str = Buffer.from(v.data).toString('base64')
+                                if (str.length > 300) str = str.slice(0, 300) + '...'
+
+                                return str
+                            }
+
+                            return v
+                        })
+                    }
+                    if (m === '%l') return String(val)
                 }
 
                 idx++
@@ -91,7 +102,7 @@ export class Logger {
             level,
             this.tag,
             this.getPrefix() + fmt,
-            args
+            args,
         )
     }
 
@@ -128,7 +139,9 @@ export class LogManager extends Logger {
 
     constructor() {
         // workaround because we cant pass this to super
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         super(null as any, 'base')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(this as any).mgr = this
     }
 

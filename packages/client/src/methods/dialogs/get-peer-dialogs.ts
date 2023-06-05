@@ -29,7 +29,7 @@ export async function getPeerDialogs(
  */
 export async function getPeerDialogs(
     this: TelegramClient,
-    peers: MaybeArray<InputPeerLike>
+    peers: MaybeArray<InputPeerLike>,
 ): Promise<MaybeArray<Dialog>> {
     const isSingle = !Array.isArray(peers)
     if (isSingle) peers = [peers as InputPeerLike]
@@ -41,10 +41,11 @@ export async function getPeerDialogs(
                 peers.map((it) => ({
                     _: 'inputDialogPeer',
                     peer: it,
-                }))
+                })),
         ),
     })
 
     const dialogs = this._parseDialogs(res)
+
     return isSingle ? dialogs[0] : dialogs
 }

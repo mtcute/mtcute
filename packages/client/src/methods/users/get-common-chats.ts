@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
-import { Chat } from '../../types'
+import { Chat, InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
@@ -12,7 +11,7 @@ import { normalizeToInputUser } from '../../utils/peer-utils'
  */
 export async function getCommonChats(
     this: TelegramClient,
-    userId: InputPeerLike
+    userId: InputPeerLike,
 ): Promise<Chat[]> {
     return this.call({
         _: 'messages.getCommonChats',

@@ -13,7 +13,7 @@ const SUFFIX = Buffer.from([td.CURRENT_VERSION, td.PERSISTENT_ID_VERSION])
  * @param location  Information about file location
  */
 export function toFileId(
-    location: Omit<td.RawFullRemoteFileLocation, '_'>
+    location: Omit<td.RawFullRemoteFileLocation, '_'>,
 ): string {
     const loc = location.location
 
@@ -23,19 +23,18 @@ export function toFileId(
 
     const writer = TlBinaryWriter.alloc(
         {},
-        loc._ === 'web'
-            ? // overhead of the web file id:
-              // 8-16 bytes header,
-              // 8 bytes for access hash,
-              // up to 4 bytes for url
-              Buffer.byteLength(loc.url, 'utf8') + 32
-            : // longest file ids are around 80 bytes, so i guess
-              // we are safe with allocating 100 bytes
-              100
+        loc._ === 'web' ? // overhead of the web file id:
+        // 8-16 bytes header,
+        // 8 bytes for access hash,
+        // up to 4 bytes for url
+            Buffer.byteLength(loc.url, 'utf8') + 32 : // longest file ids are around 80 bytes, so i guess
+        // we are safe with allocating 100 bytes
+            100,
     )
 
     writer.int(type)
     writer.int(location.dcId)
+
     if (location.fileReference) {
         writer.bytes(location.fileReference)
     }
@@ -110,6 +109,6 @@ export function toFileId(
     }
 
     return encodeUrlSafeBase64(
-        Buffer.concat([telegramRleEncode(writer.result()), SUFFIX])
+        Buffer.concat([telegramRleEncode(writer.result()), SUFFIX]),
     )
 }

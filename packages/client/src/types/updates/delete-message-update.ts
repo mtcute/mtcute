@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { toggleChannelIdMark } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
@@ -12,7 +12,7 @@ export class DeleteMessageUpdate {
         readonly client: TelegramClient,
         readonly raw:
             | tl.RawUpdateDeleteMessages
-            | tl.RawUpdateDeleteChannelMessages
+            | tl.RawUpdateDeleteChannelMessages,
     ) {}
 
     /**
@@ -26,9 +26,9 @@ export class DeleteMessageUpdate {
      * Marked ID of the channel where the messages were deleted
      */
     get channelId(): number | null {
-        return this.raw._ === 'updateDeleteChannelMessages'
-            ? toggleChannelIdMark(this.raw.channelId)
-            : null
+        return this.raw._ === 'updateDeleteChannelMessages' ?
+            toggleChannelIdMark(this.raw.channelId) :
+            null
     }
 }
 

@@ -1,19 +1,19 @@
-import { tl } from '@mtcute/tl'
 import { getMarkedPeerId, randomLong } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { inputPeerToPeer } from '../../utils/peer-utils'
-import { normalizeDate, normalizeMessageId } from '../../utils/misc-utils'
 import {
+    BotKeyboard,
+    FormattedString,
     InputPeerLike,
     Message,
-    BotKeyboard,
-    ReplyMarkup,
-    MtTypeAssertionError,
     MtArgumentError,
-    FormattedString,
+    MtTypeAssertionError,
     PeersIndex,
+    ReplyMarkup,
 } from '../../types'
+import { normalizeDate, normalizeMessageId } from '../../utils/misc-utils'
+import { inputPeerToPeer } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
@@ -27,7 +27,7 @@ import { createDummyUpdate } from '../../utils/updates-utils'
 export async function sendText(
     this: TelegramClient,
     chatId: InputPeerLike,
-    text: string | FormattedString<any>,
+    text: string | FormattedString<string>,
     params?: {
         /**
          * Message to reply to. Either a message object or message ID.
@@ -114,32 +114,34 @@ export async function sendText(
          * Peer to use when sending the message.
          */
         sendAs?: InputPeerLike
-    }
+    },
 ): Promise<Message> {
     if (!params) params = {}
 
     const [message, entities] = await this._parseEntities(
         text,
         params.parseMode,
-        params.entities
+        params.entities,
     )
 
     let peer = await this.resolvePeer(chatId)
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
 
     let replyTo = normalizeMessageId(params.replyTo)
+
     if (params.commentTo) {
-        ;[peer, replyTo] = await this._getDiscussionMessage(
+        [peer, replyTo] = await this._getDiscussionMessage(
             peer,
-            normalizeMessageId(params.commentTo)!
+            normalizeMessageId(params.commentTo)!,
         )
     }
 
     if (params.mustReply) {
-        if (!replyTo)
+        if (!replyTo) {
             throw new MtArgumentError(
-                'mustReply used, but replyTo was not passed'
+                'mustReply used, but replyTo was not passed',
             )
+        }
 
         const msg = await this.getMessages(peer, replyTo)
 
@@ -159,9 +161,9 @@ export async function sendText(
         entities,
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs
-            ? await this.resolvePeer(params.sendAs)
-            : undefined,
+        sendAs: params.sendAs ?
+            await this.resolvePeer(params.sendAs) :
+            undefined,
     })
 
     if (res._ === 'updateShortSentMessage') {
@@ -183,11 +185,12 @@ export async function sendText(
         const peers = new PeersIndex()
 
         const fetchPeer = async (
-            peer: tl.TypePeer | tl.TypeInputPeer
+            peer: tl.TypePeer | tl.TypeInputPeer,
         ): Promise<void> => {
             const id = getMarkedPeerId(peer)
 
             let cached = await this.storage.getFullPeerById(id)
+
             if (!cached) {
                 switch (peer._) {
                     case 'inputPeerChat':
@@ -209,7 +212,7 @@ export async function sendText(
                 throw new MtTypeAssertionError(
                     'sendText (@ getFullPeerById)',
                     'user | chat',
-                    'null'
+                    'null',
                 )
             }
 
@@ -227,7 +230,7 @@ export async function sendText(
                     throw new MtTypeAssertionError(
                         'sendText (@ users.getUsers)',
                         'user | chat | channel', // not very accurate, but good enough
-                        cached._
+                        cached._,
                     )
             }
         }
@@ -237,10 +240,12 @@ export async function sendText(
 
         const ret = new Message(this, msg, peers)
         this._pushConversationMessage(ret)
+
         return ret
     }
 
     const msg = this._findMessageInUpdate(res)
     this._pushConversationMessage(msg)
+
     return msg
 }

@@ -1,7 +1,8 @@
 import { tl } from '@mtcute/tl'
-import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlWriterMap } from "@mtcute/tl-runtime/dist";
-import { encodeUrlSafeBase64, parseUrlSafeBase64 } from "./buffer-utils";
+import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+
 import { ITelegramStorage } from '../storage'
+import { encodeUrlSafeBase64, parseUrlSafeBase64 } from './buffer-utils'
 
 export interface StringSessionData {
     version: number
@@ -13,11 +14,12 @@ export interface StringSessionData {
 
 export function writeStringSession(
     writerMap: TlWriterMap,
-    data: StringSessionData
+    data: StringSessionData,
 ): string {
     const writer = TlBinaryWriter.alloc(writerMap, 512)
 
     const version = data.version
+
     if (version !== 1) {
         throw new Error(`Unsupported string session version: ${version}`)
     }
@@ -50,23 +52,25 @@ export function writeStringSession(
 
 export function readStringSession(readerMap: TlReaderMap, data: string): StringSessionData {
     const buf = parseUrlSafeBase64(data)
-    if (buf[0] !== 1)
-        throw new Error(`Invalid session string (version = ${buf[0]})`)
+
+    if (buf[0] !== 1) { throw new Error(`Invalid session string (version = ${buf[0]})`) }
 
     const reader = new TlBinaryReader(readerMap, buf, 1)
 
     const flags = reader.int()
     const hasSelf = flags & 1
-    const testMode = !!(flags & 2)
+    const testMode = Boolean(flags & 2)
 
-    const primaryDc = reader.object()
+    const primaryDc = reader.object() as tl.TypeDcOption
+
     if (primaryDc._ !== 'dcOption') {
         throw new Error(
-            `Invalid session string (dc._ = ${primaryDc._})`
+            `Invalid session string (dc._ = ${primaryDc._})`,
         )
     }
 
     let self: ITelegramStorage.SelfInfo | null = null
+
     if (hasSelf) {
         const selfId = reader.int53()
         const selfBot = reader.boolean()

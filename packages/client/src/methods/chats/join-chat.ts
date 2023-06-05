@@ -20,10 +20,11 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  */
 export async function joinChat(
     this: TelegramClient,
-    chatId: InputPeerLike
+    chatId: InputPeerLike,
 ): Promise<Chat> {
     if (typeof chatId === 'string') {
         const m = chatId.match(INVITE_LINK_REGEX)
+
         if (m) {
             const res = await this.call({
                 _: 'messages.importChatInvite',

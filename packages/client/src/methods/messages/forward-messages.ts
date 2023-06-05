@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { MaybeArray, randomLong } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
@@ -38,7 +38,7 @@ export async function forwardMessages(
          * You can either pass `caption` or `captionMedia`, passing both will
          * result in an error
          */
-        caption?: string | FormattedString<any>
+        caption?: string | FormattedString<string>
 
         /**
          * Optionally, a media caption for your forwarded message(s).
@@ -135,7 +135,7 @@ export async function forwardMessages(
          * You can either pass `caption` or `captionMedia`, passing both will
          * result in an error
          */
-        caption?: string | FormattedString<any>
+        caption?: string | FormattedString<string>
 
         /**
          * Optionally, a media caption for your forwarded message(s).
@@ -218,7 +218,7 @@ export async function forwardMessages(
          * You can either pass `caption` or `captionMedia`, passing both will
          * result in an error
          */
-        caption?: string | FormattedString<any>
+        caption?: string | FormattedString<string>
 
         /**
          * Optionally, a media caption for your forwarded message(s).
@@ -288,7 +288,7 @@ export async function forwardMessages(
          * Peer to use when sending the message.
          */
         sendAs?: InputPeerLike
-    }
+    },
 ): Promise<MaybeArray<Message>> {
     if (!params) params = {}
     const isSingle = !Array.isArray(messages)
@@ -297,19 +297,22 @@ export async function forwardMessages(
     // sending more than 100 will not result in a server-sent
     // error, instead only first 100 IDs will be forwarded,
     // which is definitely not the best outcome.
-    if ((messages as number[]).length > 100)
+    if ((messages as number[]).length > 100) {
         throw new MtArgumentError(
-            'You can forward no more than 100 messages at once'
+            'You can forward no more than 100 messages at once',
         )
+    }
 
     const toPeer = await this.resolvePeer(toChatId)
 
     let captionMessage: Message | null = null
+
     if (params.caption) {
-        if (params.captionMedia)
+        if (params.captionMedia) {
             throw new MtArgumentError(
-                'You can either pass `caption` or `captionMedia`'
+                'You can either pass `caption` or `captionMedia`',
             )
+        }
 
         captionMessage = await this.sendText(toPeer, params.caption, {
             parseMode: params.parseMode,
@@ -339,14 +342,14 @@ export async function forwardMessages(
         silent: params.silent,
         scheduleDate: normalizeDate(params.schedule),
         randomId: [...Array((messages as number[]).length)].map(() =>
-            randomLong()
+            randomLong(),
         ),
         dropAuthor: params.noAuthor,
         dropMediaCaptions: params.noCaption,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs
-            ? await this.resolvePeer(params.sendAs)
-            : undefined,
+        sendAs: params.sendAs ?
+            await this.resolvePeer(params.sendAs) :
+            undefined,
     })
 
     assertIsUpdatesGroup('messages.forwardMessages', res)
@@ -366,8 +369,8 @@ export async function forwardMessages(
                         this,
                         upd.message,
                         peers,
-                        upd._ === 'updateNewScheduledMessage'
-                    )
+                        upd._ === 'updateNewScheduledMessage',
+                    ),
                 )
                 break
         }
@@ -377,5 +380,6 @@ export async function forwardMessages(
 
     if (isSingle) return forwarded[0]
     if (captionMessage) forwarded.unshift(captionMessage)
+
     return forwarded
 }

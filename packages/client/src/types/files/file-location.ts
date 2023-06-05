@@ -1,4 +1,5 @@
 import { Readable } from 'stream'
+
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -41,7 +42,7 @@ export class FileLocation {
         /**
          * DC ID of the file, when available
          */
-        readonly dcId?: number
+        readonly dcId?: number,
     ) {}
 
     /**

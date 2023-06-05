@@ -10,7 +10,7 @@ function generateHandler() {
         lines.push(
             `export type ${type.handlerTypeName}Handler<T = ${type.updateType}` +
             `${type.state ? ', S = never' : ''}> = ParsedUpdateHandler<` +
-            `'${type.typeName}', T${type.state ? ', S' : ''}>`
+            `'${type.typeName}', T${type.state ? ', S' : ''}>`,
         )
         names.push(`${type.handlerTypeName}Handler`)
     })
@@ -78,11 +78,10 @@ ${type.state ? `
         codegen: lines.join('\n'),
         'codegen-imports':
             'import {\n' +
-            imports.map((i) => `    ${i},\n`).join('') +
+            imports.sort().map((i) => `    ${i},\n`).join('') +
             "} from './handler'",
     }, __dirname)
 }
-
 
 async function main() {
     generateHandler()

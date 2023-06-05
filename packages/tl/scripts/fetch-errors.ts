@@ -1,7 +1,8 @@
-import { TlError, TlErrors } from '@mtcute/tl-utils'
-// @ts-ignore
 import csvParser from 'csv-parser'
 import { writeFile } from 'fs/promises'
+
+import { TlError, TlErrors } from '@mtcute/tl-utils'
+
 import { ERRORS_JSON_FILE } from './constants'
 
 const ERRORS_PAGE_TG = 'https://corefork.telegram.org/api/errors'
@@ -85,11 +86,12 @@ virtualErrors.forEach((it) => (it.virtual = true))
 async function fetchFromTelegram(errors: TlErrors) {
     const page = await fetch(ERRORS_PAGE_TG).then((it) => it.text())
     const jsonUrl = page.match(
-        /can be found <a href="([^"]+)">here »<\/a>/i
-    )![1]
+        /can be found <a href="([^"]+)">here »<\/a>/i,
+    )?.[1]
+    if (!jsonUrl) throw new Error('Cannot find JSON URL')
 
     const json = await fetch(new URL(jsonUrl, ERRORS_PAGE_TG)).then((it) =>
-        it.json()
+        it.json(),
     )
 
     // since nobody fucking guarantees that .descriptions
@@ -101,6 +103,7 @@ async function fetchFromTelegram(errors: TlErrors) {
             const thrownBy = json.errors[code][name]
 
             const _code = parseInt(code)
+
             if (isNaN(_code)) {
                 throw new Error(`Invalid code: ${code}`)
             }
@@ -141,6 +144,7 @@ async function fetchFromTelegram(errors: TlErrors) {
 
 async function fetchFromTelethon(errors: TlErrors) {
     const csv = await fetch(ERRORS_PAGE_TELETHON)
+
     if (!csv.body) {
         throw new Error('No body in response')
     }
@@ -152,6 +156,7 @@ async function fetchFromTelethon(errors: TlErrors) {
         if (name === 'TIMEOUT') return
 
         const code = parseInt(codes)
+
         if (isNaN(code)) {
             throw new Error(`Invalid code: ${codes} (name: ${name})`)
         }
@@ -169,6 +174,7 @@ async function fetchFromTelethon(errors: TlErrors) {
         }
 
         const obj = errors.errors[name]
+
         if (obj._auto) {
             obj.code = code
             delete obj._auto
@@ -184,6 +190,7 @@ async function fetchFromTelethon(errors: TlErrors) {
                     obj._paramNames = []
                 }
                 obj._paramNames.push(name)
+
                 return '%d'
             })
 
@@ -194,13 +201,14 @@ async function fetchFromTelethon(errors: TlErrors) {
     }
 
     return new Promise<void>((resolve, reject) => {
-        csv.body
-            .pipe(parser)
+        parser
             .on('data', ({ name, codes, description }) =>
-                addError(name, codes, description)
+                addError(name, codes, description),
             )
             .on('end', resolve)
             .on('error', reject)
+
+        csv.text().then((it) => parser.write(it)).catch(reject)
     })
 }
 
@@ -223,6 +231,7 @@ async function main() {
     virtualErrors.forEach((err) => {
         if (errors.errors[err.name]) {
             console.log(`Error ${err.name} already exists and is not virtual`)
+
             return
         }
 

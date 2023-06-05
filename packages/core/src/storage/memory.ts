@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/tl'
 import { IStateStorage } from '@mtcute/dispatcher'
+import { tl } from '@mtcute/tl'
 
-import { LruMap, toggleChannelIdMark } from '../utils'
 import { MaybeAsync } from '../types'
+import { LruMap, toggleChannelIdMark } from '../utils'
 import { ITelegramStorage } from './abstract'
 
 const CURRENT_VERSION = 1
@@ -33,7 +33,7 @@ export interface MemorySessionState {
         string,
         {
             // value
-            v: any
+            v: unknown
             // expires
             e?: number
         }
@@ -58,7 +58,7 @@ const USERNAME_TTL = 86400000 // 24 hours
 export class MemoryStorage implements ITelegramStorage, IStateStorage {
     protected _state!: MemorySessionState
     private _cachedInputPeers: LruMap<number, tl.TypeInputPeer> = new LruMap(
-        100
+        100,
     )
 
     private _cachedFull: LruMap<number, tl.TypeUser | tl.TypeChat>
@@ -97,12 +97,12 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
     load(): void {
         this._vacuumTimeout = setInterval(
             this._vacuum.bind(this),
-            this._vacuumInterval
+            this._vacuumInterval,
         )
     }
 
     destroy(): void {
-        clearInterval(this._vacuumTimeout!)
+        clearInterval(this._vacuumTimeout)
     }
 
     reset(): void {
@@ -132,6 +132,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
 
         // populate indexes if needed
         let populate = false
+
         if (!obj.phoneIndex) {
             obj.phoneIndex = {}
             populate = true
@@ -146,7 +147,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
                 (ent: ITelegramStorage.PeerInfo) => {
                     if (ent.phone) obj.phoneIndex[ent.phone] = ent.id
                     if (ent.username) obj.usernameIndex[ent.username] = ent.id
-                }
+                },
             )
         }
 
@@ -165,6 +166,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
 
         Object.keys(fsm).forEach((key) => {
             const exp = fsm[key].e
+
             if (exp && exp < now) {
                 delete fsm[key]
             }
@@ -199,6 +201,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
 
             peer.updated = Date.now()
             const old = this._state.entities[peer.id]
+
             if (old) {
                 // min peer
                 // if (peer.fromMessage) continue
@@ -212,17 +215,17 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
                 }
             }
 
-            if (peer.username)
-                this._state.usernameIndex[peer.username.toLowerCase()] = peer.id
+            if (peer.username) { this._state.usernameIndex[peer.username.toLowerCase()] = peer.id }
             if (peer.phone) this._state.phoneIndex[peer.phone] = peer.id
             this._state.entities[peer.id] = peer
         }
     }
 
     protected _getInputPeer(
-        peerInfo?: ITelegramStorage.PeerInfo
+        peerInfo?: ITelegramStorage.PeerInfo,
     ): tl.TypeInputPeer | null {
         if (!peerInfo) return null
+
         switch (peerInfo.type) {
             case 'user':
                 return {
@@ -247,16 +250,18 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
     }
 
     getPeerById(peerId: number): tl.TypeInputPeer | null {
-        if (this._cachedInputPeers.has(peerId))
+        if (this._cachedInputPeers.has(peerId)) {
             return this._cachedInputPeers.get(peerId)!
+        }
         const peer = this._getInputPeer(this._state.entities[peerId])
         if (peer) this._cachedInputPeers.set(peerId, peer)
+
         return peer
     }
 
     getPeerByPhone(phone: string): tl.TypeInputPeer | null {
         return this._getInputPeer(
-            this._state.entities[this._state.phoneIndex[phone]]
+            this._state.entities[this._state.phoneIndex[phone]],
         )
     }
 
@@ -280,9 +285,9 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
     }
 
     setManyChannelPts(values: Record<number, number>): void {
-        Object.keys(values).forEach((id: any) => {
+        for (const id in values) {
             this._state.pts[id] = values[id]
-        })
+        }
     }
 
     getChannelPts(entityId: number): number | null {
@@ -319,20 +324,21 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
 
     // IStateStorage implementation
 
-    getState(key: string): any | null {
+    getState(key: string): unknown | null {
         const val = this._state.fsm[key]
         if (!val) return null
+
         if (val.e && val.e < Date.now()) {
             // expired
             delete this._state.fsm[key]
+
             return null
         }
 
         return val.v
     }
 
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    setState(key: string, state: any, ttl?: number): void {
+    setState(key: string, state: unknown, ttl?: number): void {
         this._state.fsm[key] = {
             v: state,
             e: ttl ? Date.now() + ttl * 1000 : undefined,
@@ -344,7 +350,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
     }
 
     getCurrentScene(key: string): string | null {
-        return this.getState(`$current_scene_${key}`)
+        return this.getState(`$current_scene_${key}`) as string | null
     }
 
     setCurrentScene(key: string, scene: string, ttl?: number): void {
@@ -366,10 +372,12 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
             }
 
             this._state.rl[key] = state
+
             return [state.rem, state.res]
         }
 
         const item = this._state.rl[key]
+
         if (item.res < now) {
             // expired
 
@@ -379,10 +387,12 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
             }
 
             this._state.rl[key] = state
+
             return [state.rem, state.res]
         }
 
         item.rem = item.rem > 0 ? item.rem - 1 : 0
+
         return [item.rem, item.res]
     }
 

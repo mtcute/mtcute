@@ -1,5 +1,5 @@
-import { TL_PRIMITIVES, TlEntry } from '../types'
 import { computeConstructorIdFromEntry } from '../ctor-id'
+import { TL_PRIMITIVES, TlEntry } from '../types'
 import { snakeToCamel } from './utils'
 
 const TL_WRITER_PRELUDE =
@@ -19,7 +19,7 @@ const TL_WRITER_PRELUDE =
  */
 export function generateWriterCodeForTlEntry(
     entry: TlEntry,
-    withFlags = false
+    withFlags = false,
 ): string {
     if (entry.id === 0) entry.id = computeConstructorIdFromEntry(entry)
 
@@ -37,18 +37,19 @@ export function generateWriterCodeForTlEntry(
 
             entry.arguments.forEach((arg1) => {
                 let s
+
                 if (
                     !arg1.predicate ||
                     (s = arg1.predicate.split('.'))[0] !== arg.name
-                )
-                    return
+                ) { return }
 
                 const arg1Name = snakeToCamel(arg1.name)
 
                 const bitIndex = parseInt(s[1])
+
                 if (isNaN(bitIndex) || bitIndex < 0 || bitIndex > 32) {
                     throw new Error(
-                        `Invalid predicate: ${arg1.predicate} - invalid bit`
+                        `Invalid predicate: ${arg1.predicate} - invalid bit`,
                     )
                 }
 
@@ -65,6 +66,7 @@ export function generateWriterCodeForTlEntry(
 
             ret += `w.uint(${arg.name});`
             flagsFields[arg.name] = 1
+
             return
         }
 
@@ -73,6 +75,7 @@ export function generateWriterCodeForTlEntry(
         let vector = false
         let type = arg.type
         const m = type.match(/^[Vv]ector[< ](.+?)[> ]$/)
+
         if (m) {
             vector = true
             type = m[1]
@@ -114,7 +117,7 @@ export function generateWriterCodeForTlEntries(
     entries: TlEntry[],
     varName: string,
     prelude = true,
-    withFlags = false
+    withFlags = false,
 ): string {
     let ret = ''
     if (prelude) ret += TL_WRITER_PRELUDE

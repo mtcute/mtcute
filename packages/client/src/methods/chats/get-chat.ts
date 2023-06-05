@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/tl'
 
-import { Chat, InputPeerLike, MtArgumentError } from '../../types'
 import { TelegramClient } from '../../client'
+import { Chat, InputPeerLike, MtArgumentError } from '../../types'
 import {
     INVITE_LINK_REGEX,
     isInputPeerChannel,
@@ -22,10 +22,11 @@ import {
  */
 export async function getChat(
     this: TelegramClient,
-    chatId: InputPeerLike
+    chatId: InputPeerLike,
 ): Promise<Chat> {
     if (typeof chatId === 'string') {
         const m = chatId.match(INVITE_LINK_REGEX)
+
         if (m) {
             const res = await this.call({
                 _: 'messages.checkChatInvite',
@@ -34,7 +35,7 @@ export async function getChat(
 
             if (res._ === 'chatInvite') {
                 throw new MtArgumentError(
-                    `You haven't joined ${JSON.stringify(res.title)}`
+                    `You haven't joined ${JSON.stringify(res.title)}`,
                 )
             }
 

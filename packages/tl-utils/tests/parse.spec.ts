@@ -1,8 +1,8 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
-import { TlEntry } from '../src/types'
 import { parseTlToEntries } from '../src/parse'
+import { TlEntry } from '../src/types'
 
 describe('tl parser', () => {
     const test = (tl: string, expected: TlEntry[]) => {
@@ -32,7 +32,7 @@ true#3fedd339 = True;
 boolFalse#bc799737 = Bool;
 boolTrue#997275b5 = Bool;
 `,
-            []
+            [],
         )
     })
 
@@ -85,7 +85,7 @@ boolTrue#997275b5 = Bool;
                         },
                     ],
                 },
-            ]
+            ],
         )
     })
 
@@ -112,7 +112,7 @@ boolTrue#997275b5 = Bool;
                         },
                     ],
                 },
-            ]
+            ],
         )
     })
 
@@ -142,7 +142,7 @@ boolTrue#997275b5 = Bool;
                         },
                     ],
                 },
-            ]
+            ],
         )
     })
 
@@ -193,7 +193,7 @@ boolTrue#997275b5 = Bool;
                         },
                     ],
                 },
-            ]
+            ],
         )
     })
 
@@ -204,7 +204,7 @@ invokeWithLayer {X:Type} layer:int query:!X = X;
 help.promoData flags:# proxy:flags.0?true expires:int peer:Peer chats:Vector<Chat> users:Vector<User> psa_type:flags.1?string psa_message:flags.2?string = help.PromoData;
 account.getAccountTTL = AccountDaysTTL;
 users.getUsers id:Vector<InputUser> = Vector<User>;
-`
+`,
         )
         expect(items[0].id).eq(0xda9b0d0d)
         expect(items[1].id).eq(0x8c39793f)
@@ -277,7 +277,7 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
                         'accessible to the user. If the file database is disabled, then the corresponding object ' +
                         'with the file must be preloaded by the application',
                 },
-            ]
+            ],
         )
     })
 
@@ -290,7 +290,7 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
                 '//yet another at the end',
             {
                 onOrphanComment: (s) => orphaned.push(s),
-            }
+            },
         )
 
         expect(orphaned).eql([

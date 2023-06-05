@@ -26,6 +26,7 @@ export class BotKeyboardBuilder {
             if (!btn) return
 
             row.push(btn)
+
             if (row.length === this.maxRowWidth) {
                 this._buttons.push(row)
                 row = []
@@ -96,11 +97,12 @@ export class BotKeyboardBuilder {
      * Return contents of this builder as a reply keyboard
      */
     asReply(
-        params: Omit<ReplyKeyboardMarkup, 'type' | 'buttons'> = {}
+        params: Omit<ReplyKeyboardMarkup, 'type' | 'buttons'> = {},
     ): ReplyKeyboardMarkup {
         const ret = params as tl.Mutable<ReplyKeyboardMarkup>
         ret.type = 'reply'
         ret.buttons = this._buttons
+
         return ret
     }
 }

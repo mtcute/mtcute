@@ -1,11 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { JsonMemoryStorage } from './json'
 
 let fs: any = null
+
 try {
     fs = require('fs')
 } catch (e) {}
 
 let exitHook: any = null
+
 try {
     exitHook = require('exit-hook')
 } catch (e) {}
@@ -40,19 +43,19 @@ export class JsonFileStorage extends JsonMemoryStorage {
              * Defaults to `true` if `exit-hook` is installed, otherwise `false`
              */
             cleanup?: boolean
-        }
+        },
     ) {
         super()
-        if (!fs || !fs.readFile)
-            throw new Error('Node fs module is not available!')
+
+        if (!fs || !fs.readFile) { throw new Error('Node fs module is not available!') }
 
         this._filename = filename
         this._safe = params?.safe ?? true
-        this._cleanup = params?.cleanup ?? !!exitHook
+        this._cleanup = params?.cleanup ?? Boolean(exitHook)
 
         if (this._cleanup && !exitHook) {
             throw new Error(
-                'Cleanup on exit is supported through `exit-hook` library, install it first!'
+                'Cleanup on exit is supported through `exit-hook` library, install it first!',
             )
         }
 
@@ -69,9 +72,10 @@ export class JsonFileStorage extends JsonMemoryStorage {
                         this._filename,
                         'utf-8',
                         (err?: Error, data?: string) =>
-                            err ? rej(err) : res(data!)
-                    )
-                )
+
+                            err ? rej(err) : res(data!),
+                    ),
+                ),
             )
         } catch (e) {}
     }
@@ -90,10 +94,10 @@ export class JsonFileStorage extends JsonMemoryStorage {
                             (err?: any) => {
                                 if (err && err.code !== 'ENOENT') reject(err)
                                 else resolve()
-                            }
+                            },
                         )
                     } else resolve()
-                }
+                },
             )
         })
     }
@@ -114,7 +118,7 @@ export class JsonFileStorage extends JsonMemoryStorage {
 
     destroy(): void {
         if (this._cleanup) {
-            this._unsubscribe!()
+            this._unsubscribe?.()
         }
     }
 }

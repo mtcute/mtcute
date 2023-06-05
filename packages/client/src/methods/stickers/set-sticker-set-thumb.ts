@@ -24,7 +24,7 @@ export async function setStickerSetThumb(
          * @param total  Total file size
          */
         progressCallback?: (uploaded: number, total: number) => void
-    }
+    },
 ): Promise<StickerSet> {
     if (typeof id === 'string') {
         id = {

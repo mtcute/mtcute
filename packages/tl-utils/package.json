@@ -3,7 +3,7 @@
     "private": true,
     "version": "1.0.0",
     "description": "Utils for working with TL schema",
-    "author": "Alina Sireneva <me@tei.su>",
+    "author": "Alina Sireneva <alina@tei.su>",
     "license": "LGPL-3.0",
     "main": "src/index.ts",
     "scripts": {

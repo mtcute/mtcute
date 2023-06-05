@@ -10,7 +10,7 @@ import { makeInspectable } from '../utils'
 export class ChatLocation {
     constructor(
         readonly client: TelegramClient,
-        readonly raw: tl.RawChannelLocation
+        readonly raw: tl.RawChannelLocation,
     ) {}
 
     private _location?: Location
@@ -20,7 +20,7 @@ export class ChatLocation {
     get location(): Location {
         return (this._location ??= new Location(
             this.client,
-            this.raw.geoPoint as tl.RawGeoPoint
+            this.raw.geoPoint as tl.RawGeoPoint,
         ))
     }
 

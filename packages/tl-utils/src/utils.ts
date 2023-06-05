@@ -11,6 +11,7 @@ import { TlEntry } from './types'
 export function splitNameToNamespace(name: string): [string | null, string] {
     const s = name.split('.')
     if (s.length === 2) return s as [string, string]
+
     return [null, name]
 }
 
@@ -24,6 +25,7 @@ export function parseTdlibStyleComment(str: string): Record<string, string> {
     const obj: Record<string, string> = {}
 
     let pos = str.indexOf('@')
+
     while (pos !== -1 && pos < str.length) {
         let nameEnd = str.indexOf(' ', pos)
         if (nameEnd === -1) nameEnd = str.length
@@ -44,7 +46,7 @@ export function parseTdlibStyleComment(str: string): Record<string, string> {
  * @returns  Mapping of namespace to entries. Base namespace is `''` (empty string).
  */
 export function groupTlEntriesByNamespace(
-    entries: TlEntry[]
+    entries: TlEntry[],
 ): Record<string, TlEntry[]> {
     const ret: Record<string, TlEntry[]> = {}
 

@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/tl'
 import { getBarePeerId } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { ChatInviteLink, PeersIndex, User } from '../peers'
+import { ChatInviteLinkJoinedMember, PeersIndex, User } from '../peers'
 import { makeInspectable } from '../utils'
 
 /**
@@ -16,7 +16,7 @@ export class ChatJoinRequestUpdate {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.RawUpdatePendingJoinRequests,
-        readonly _peers: PeersIndex
+        readonly _peers: PeersIndex,
     ) {}
 
     // in this update, peers index only contains
@@ -42,7 +42,7 @@ export class ChatJoinRequestUpdate {
      */
     get recentRequesters(): User[] {
         return (this._recentRequesters ??= this.raw.recentRequesters.map(
-            (id) => new User(this.client, this._peers.user(id))
+            (id) => new User(this.client, this._peers.user(id)),
         ))
     }
 
@@ -57,12 +57,12 @@ export class ChatJoinRequestUpdate {
      * Approve or deny the last requested user
      */
     hideLast(
-        action: Parameters<TelegramClient['hideJoinRequest']>[2]
+        action: Parameters<TelegramClient['hideJoinRequest']>[2],
     ): Promise<void> {
         return this.client.hideJoinRequest(
             this.chatId,
             this.raw.recentRequesters[0],
-            action
+            action,
         )
     }
 
@@ -71,7 +71,7 @@ export class ChatJoinRequestUpdate {
      * (the ones available in {@link recentRequesters})
      */
     async hideAllRecent(
-        action: Parameters<TelegramClient['hideJoinRequest']>[2]
+        action: Parameters<TelegramClient['hideJoinRequest']>[2],
     ): Promise<void> {
         for (const id of this.raw.recentRequesters) {
             await this.client.hideJoinRequest(this.chatId, id, action)
@@ -84,7 +84,7 @@ export class ChatJoinRequestUpdate {
     fetchAll(params?: {
         limit?: number
         search?: string
-    }): AsyncIterableIterator<ChatInviteLink.JoinedMember> {
+    }): AsyncIterableIterator<ChatInviteLinkJoinedMember> {
         return this.client.getInviteLinkMembers(this.chatId, {
             limit: params?.limit,
             requested: true,

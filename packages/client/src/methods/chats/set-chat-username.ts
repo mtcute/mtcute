@@ -14,7 +14,7 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
 export async function setChatUsername(
     this: TelegramClient,
     chatId: InputPeerLike,
-    username: string | null
+    username: string | null,
 ): Promise<void> {
     await this.call({
         _: 'channels.updateUsername',

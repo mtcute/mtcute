@@ -25,14 +25,14 @@ export type StateKeyDelegate = (
  *    - If in group/channel/supergroup (i.e. `upd.chatType !== 'user'`), `upd.chatId + '_' + upd.user.id`
  */
 export const defaultStateKeyDelegate: StateKeyDelegate = (
-    upd
+    upd,
 ): string | null => {
     if (upd.constructor === Message) {
         switch (upd.chat.type) {
             case 'private':
             case 'bot':
             case 'channel':
-                return upd.chat.id + ''
+                return String(upd.chat.id)
             case 'group':
             case 'supergroup':
             case 'gigagroup':
@@ -45,6 +45,7 @@ export const defaultStateKeyDelegate: StateKeyDelegate = (
     if (upd.constructor === CallbackQuery) {
         if (upd.isInline) return null
         if (upd.chatType === 'user') return `${upd.user.id}`
+
         return `${upd.chatId}_${upd.user.id}`
     }
 

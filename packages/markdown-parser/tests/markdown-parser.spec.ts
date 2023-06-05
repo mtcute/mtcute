@@ -1,8 +1,9 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import Long from 'long'
+import { describe, it } from 'mocha'
+
+import { FormattedString, MessageEntity } from '@mtcute/client'
 import { tl } from '@mtcute/tl'
-import { MessageEntity, FormattedString } from '@mtcute/client'
 
 import { MarkdownMessageEntityParser, md } from '../src'
 
@@ -13,14 +14,14 @@ const createEntity = <T extends tl.TypeMessageEntity['_']>(
     additional?: Omit<
         tl.FindByName<tl.TypeMessageEntity, T>,
         '_' | 'offset' | 'length'
-    >
+    >,
 ): tl.TypeMessageEntity => {
     return {
         _: type,
         offset,
         length,
         ...(additional ?? {}),
-    } as any // idc really, its not that important
+    } as tl.TypeMessageEntity // idc really, its not that important
 }
 
 const createEntities = (entities: tl.TypeMessageEntity[]): MessageEntity[] => {
@@ -37,9 +38,10 @@ describe('MarkdownMessageEntityParser', () => {
             text: string,
             entities: tl.TypeMessageEntity[],
             expected: string | string[],
-            _parser = parser
+            _parser = parser,
         ): void => {
             const result = _parser.unparse(text, createEntities(entities))
+
             if (Array.isArray(expected)) {
                 expect(expected).to.include(result)
             } else {
@@ -62,7 +64,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityStrike', 28, 13),
                     createEntity('messageEntitySpoiler', 42, 7),
                 ],
-                'plain **bold** __italic__ --underline-- ~~strikethrough~~ ||spoiler|| plain'
+                'plain **bold** __italic__ --underline-- ~~strikethrough~~ ||spoiler|| plain',
             )
         })
 
@@ -74,7 +76,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityPre', 11, 3),
                     createEntity('messageEntityCode', 15, 11),
                 ],
-                'plain `code` ```\npre\n``` `\\_\\_ignored\\_\\_` plain'
+                'plain `code` ```\npre\n``` `\\_\\_ignored\\_\\_` plain',
             )
         })
 
@@ -91,7 +93,7 @@ describe('MarkdownMessageEntityParser', () => {
                     }),
                     createEntity('messageEntityEmail', 51, 12),
                 ],
-                'plain https://google.com [google](https://google.com) @durov [Pavel Durov](tg://user?id=36265675) mail@mail.ru plain'
+                'plain https://google.com [google](https://google.com) @durov [Pavel Durov](tg://user?id=36265675) mail@mail.ru plain',
             )
         })
 
@@ -104,7 +106,7 @@ describe('MarkdownMessageEntityParser', () => {
                     }),
                     createEntity('messageEntityPre', 35, 9, { language: '' }),
                 ],
-                'plain ```javascript\nconsole.log("Hello, world!")\n``` ```\nsome code\n``` plain'
+                'plain ```javascript\nconsole.log("Hello, world!")\n``` ```\nsome code\n``` plain',
             )
         })
 
@@ -115,7 +117,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', 0, 5),
                     createEntity('messageEntityBold', 7, 5),
                 ],
-                '**Hello**, **world**'
+                '**Hello**, **world**',
             )
         })
 
@@ -126,7 +128,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', -2, 7),
                     createEntity('messageEntityBold', 7, 10),
                 ],
-                '**Hello**, **world**'
+                '**Hello**, **world**',
             )
         })
 
@@ -134,7 +136,7 @@ describe('MarkdownMessageEntityParser', () => {
             test(
                 'Hello, world',
                 [createEntity('messageEntityBold', 50, 5)],
-                'Hello, world'
+                'Hello, world',
             )
         })
 
@@ -150,7 +152,7 @@ describe('MarkdownMessageEntityParser', () => {
                     // not the most obvious order, but who cares :D
                     // we support this syntax in parse()
                     'plain **Hello,__** world__ plain',
-                ]
+                ],
             )
         })
 
@@ -161,7 +163,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 0, 24),
                     createEntity('messageEntityBold', 15, 8),
                 ],
-                '__Welcome to the **gym zone**!__'
+                '__Welcome to the **gym zone**!__',
             )
         })
 
@@ -175,7 +177,7 @@ describe('MarkdownMessageEntityParser', () => {
                 [
                     '__Welcome to the **gym zone!**__',
                     '__Welcome to the **gym zone!__**',
-                ]
+                ],
             )
             test(
                 'Welcome to the gym zone!',
@@ -186,7 +188,7 @@ describe('MarkdownMessageEntityParser', () => {
                 [
                     '**Welcome to the __gym zone!__**',
                     '**Welcome to the __gym zone!**__',
-                ]
+                ],
             )
             test(
                 'Welcome to the gym zone!',
@@ -197,7 +199,7 @@ describe('MarkdownMessageEntityParser', () => {
                 [
                     '__**Welcome** to the gym zone!__',
                     '**__Welcome** to the gym zone!__',
-                ]
+                ],
             )
             test(
                 'Welcome to the gym zone!',
@@ -210,7 +212,7 @@ describe('MarkdownMessageEntityParser', () => {
                     '__**Welcome to the gym zone!__**',
                     '**__Welcome to the gym zone!**__',
                     '**__Welcome to the gym zone!__**',
-                ]
+                ],
             )
         })
 
@@ -221,7 +223,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 0, 14),
                     createEntity('messageEntityBold', 8, 10),
                 ],
-                '__Welcome **to the__ gym** zone!'
+                '__Welcome **to the__ gym** zone!',
             )
             test(
                 'plain bold bold!italic bold!italic!underline underline plain',
@@ -233,7 +235,7 @@ describe('MarkdownMessageEntityParser', () => {
                 [
                     'plain **bold __bold!italic --bold!italic!underline**__ underline-- plain',
                     'plain **bold __bold!italic --bold!italic!underline__** underline-- plain',
-                ]
+                ],
             )
             test(
                 'plain bold bold!italic bold!italic!underline italic!underline underline plain',
@@ -242,7 +244,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 11, 50),
                     createEntity('messageEntityUnderline', 23, 48),
                 ],
-                'plain **bold __bold!italic --bold!italic!underline** italic!underline__ underline-- plain'
+                'plain **bold __bold!italic --bold!italic!underline** italic!underline__ underline-- plain',
             )
         })
 
@@ -254,7 +256,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', 13, 2),
                     createEntity('messageEntityItalic', 17, 5),
                 ],
-                "__best flower__: **🌸**. __don't__ you even doubt it."
+                "__best flower__: **🌸**. __don't__ you even doubt it.",
             )
         })
 
@@ -265,7 +267,7 @@ describe('MarkdownMessageEntityParser', () => {
                 // holy shit
                 '/* /*/* /*/*/* __/_ /_/_ /_/_/___ /- /-/- /-/-/- /~ /~/~ /~/~/~ /[ /[/[ /` /`/` /`/`/` /`/`/`/` // ////'
                     // so we don't have to escape every single backslash lol
-                    .replace(/\//g, '\\')
+                    .replace(/\//g, '\\'),
             )
             test(
                 '* ** *** _ __ ___ - -- ---',
@@ -276,8 +278,8 @@ describe('MarkdownMessageEntityParser', () => {
                 ],
                 '/* /*/* /*/*/* __/_ /_/_ /_/_/___ __/- /-/-__ /-/-/-'.replace(
                     /\//g,
-                    '\\'
-                )
+                    '\\',
+                ),
             )
         })
     })
@@ -286,9 +288,10 @@ describe('MarkdownMessageEntityParser', () => {
         const test = (
             texts: string | string[],
             expectedEntities: tl.TypeMessageEntity[],
-            expectedText: string
+            expectedText: string,
         ): void => {
             if (!Array.isArray(texts)) texts = [texts]
+
             for (const text of texts) {
                 const [_text, entities] = parser.parse(text)
                 expect(_text).eql(expectedText)
@@ -306,7 +309,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityStrike', 28, 13),
                     createEntity('messageEntitySpoiler', 42, 7),
                 ],
-                'plain bold italic underline strikethrough spoiler plain'
+                'plain bold italic underline strikethrough spoiler plain',
             )
         })
 
@@ -322,19 +325,19 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityPre', 11, 3, { language: '' }),
                     createEntity('messageEntityCode', 15, 11),
                 ],
-                'plain code pre __ignored__ plain'
+                'plain code pre __ignored__ plain',
             )
 
             test(
                 'plain ```\npre with ` and ``\n``` plain',
                 [createEntity('messageEntityPre', 6, 17, { language: '' })],
-                'plain pre with ` and `` plain'
+                'plain pre with ` and `` plain',
             )
 
             test(
                 'plain ```\npre with \n`\n and \n``\nend\n``` plain',
                 [createEntity('messageEntityPre', 6, 24, { language: '' })],
-                'plain pre with \n`\n and \n``\nend plain'
+                'plain pre with \n`\n and \n``\nend plain',
             )
         })
 
@@ -349,7 +352,7 @@ describe('MarkdownMessageEntityParser', () => {
                         userId: 36265675,
                     }),
                 ],
-                'plain https://google.com google @durov Pavel Durov plain'
+                'plain https://google.com google @durov Pavel Durov plain',
             )
 
             test(
@@ -363,7 +366,7 @@ describe('MarkdownMessageEntityParser', () => {
                         },
                     }),
                 ],
-                'user'
+                'user',
             )
         })
 
@@ -376,7 +379,7 @@ describe('MarkdownMessageEntityParser', () => {
                     }),
                     createEntity('messageEntityPre', 35, 9, { language: '' }),
                 ],
-                'plain console.log("Hello, world!") some code plain'
+                'plain console.log("Hello, world!") some code plain',
             )
         })
 
@@ -387,7 +390,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', 0, 5),
                     createEntity('messageEntityBold', 7, 5),
                 ],
-                'Hello, world'
+                'Hello, world',
             )
         })
 
@@ -402,7 +405,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 0, 14),
                     createEntity('messageEntityBold', 8, 10),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
 
             // resulting order will depend on the order in which the closing ** or __ are passed,
@@ -414,7 +417,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 11, 33),
                     createEntity('messageEntityUnderline', 23, 31),
                 ],
-                'plain bold bold-italic bold-italic-underline underline plain'
+                'plain bold bold-italic bold-italic-underline underline plain',
             )
             test(
                 'plain **bold __bold-italic --bold-italic-underline__** underline-- plain',
@@ -423,7 +426,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', 6, 38),
                     createEntity('messageEntityUnderline', 23, 31),
                 ],
-                'plain bold bold-italic bold-italic-underline underline plain'
+                'plain bold bold-italic bold-italic-underline underline plain',
             )
 
             test(
@@ -433,7 +436,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 11, 50),
                     createEntity('messageEntityUnderline', 23, 48),
                 ],
-                'plain bold bold-italic bold-italic-underline italic-underline underline plain'
+                'plain bold bold-italic bold-italic-underline italic-underline underline plain',
             )
         })
 
@@ -447,7 +450,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', 6, 6),
                     createEntity('messageEntityItalic', 12, 6),
                 ],
-                'plain Hello, world plain'
+                'plain Hello, world plain',
             )
         })
 
@@ -458,7 +461,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', 15, 8),
                     createEntity('messageEntityItalic', 0, 24),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
 
             test(
@@ -469,7 +472,7 @@ describe('MarkdownMessageEntityParser', () => {
                         url: 'https://google.com',
                     }),
                 ],
-                'plain google plain'
+                'plain google plain',
             )
             test(
                 'plain [plain __google__ plain](https://google.com) plain',
@@ -479,7 +482,7 @@ describe('MarkdownMessageEntityParser', () => {
                         url: 'https://google.com',
                     }),
                 ],
-                'plain plain google plain plain'
+                'plain plain google plain plain',
             )
         })
 
@@ -491,7 +494,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', 15, 9),
                     createEntity('messageEntityItalic', 0, 24),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
             test(
                 '__Welcome to the **gym zone!__**',
@@ -499,7 +502,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 0, 24),
                     createEntity('messageEntityBold', 15, 9),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
 
             test(
@@ -508,7 +511,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 15, 9),
                     createEntity('messageEntityBold', 0, 24),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
             test(
                 '**Welcome to the __gym zone!**__',
@@ -516,7 +519,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', 0, 24),
                     createEntity('messageEntityItalic', 15, 9),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
 
             test(
@@ -528,7 +531,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', 0, 7),
                     createEntity('messageEntityItalic', 0, 24),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
 
             test(
@@ -540,7 +543,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', 0, 24),
                     createEntity('messageEntityItalic', 0, 24),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
             test(
                 [
@@ -551,7 +554,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 0, 24),
                     createEntity('messageEntityBold', 0, 24),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
         })
 
@@ -563,7 +566,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', 13, 2),
                     createEntity('messageEntityItalic', 17, 5),
                 ],
-                "best flower: 🌸. don't you even doubt it."
+                "best flower: 🌸. don't you even doubt it.",
             )
         })
 
@@ -571,21 +574,21 @@ describe('MarkdownMessageEntityParser', () => {
             test(
                 '/* /*/* /*/*/* __/_ /_/_ /_/_/___ /- /-/- /-/-/- /~ /~/~ /~/~/~ /[ /[/[ /` /`/` /`/`/` /`/`/`/` // ////'.replace(
                     /\//g,
-                    '\\'
+                    '\\',
                 ),
                 [createEntity('messageEntityItalic', 9, 8)],
-                '* ** *** _ __ ___ - -- --- ~ ~~ ~~~ [ [[ ` `` ``` ```` \\ \\\\'
+                '* ** *** _ __ ___ - -- --- ~ ~~ ~~~ [ [[ ` `` ``` ```` \\ \\\\',
             )
             test(
                 '/* /*/* /*/*/* __/_ /_/_ /_/_/___ __/- /-/-__ /-/-/-'.replace(
                     /\//g,
-                    '\\'
+                    '\\',
                 ),
                 [
                     createEntity('messageEntityItalic', 9, 8),
                     createEntity('messageEntityItalic', 18, 4),
                 ],
-                '* ** *** _ __ ___ - -- ---'
+                '* ** *** _ __ ___ - -- ---',
             )
         })
 
@@ -597,40 +600,40 @@ describe('MarkdownMessageEntityParser', () => {
             test(
                 'plain ```\npre closed with single backtick`',
                 [],
-                'plain pre closed with single backtick`'
+                'plain pre closed with single backtick`',
             )
             test(
                 'plain ```\npre closed with single backtick\n`',
                 [],
-                'plain pre closed with single backtick\n`'
+                'plain pre closed with single backtick\n`',
             )
 
             test(
                 'plain ```\npre closed with double backticks`',
                 [],
-                'plain pre closed with double backticks`'
+                'plain pre closed with double backticks`',
             )
             test(
                 'plain ```\npre closed with double backticks\n`',
                 [],
-                'plain pre closed with double backticks\n`'
+                'plain pre closed with double backticks\n`',
             )
 
             test('plain __italic but unclosed', [], 'plain italic but unclosed')
             test(
                 'plain __italic and **also bold but both unclosed',
                 [],
-                'plain italic and also bold but both unclosed'
+                'plain italic and also bold but both unclosed',
             )
             test(
                 'plain __italic and **also bold but italic closed__',
                 [createEntity('messageEntityItalic', 6, 38)],
-                'plain italic and also bold but italic closed'
+                'plain italic and also bold but italic closed',
             )
             test(
                 'plain __italic and **also bold but bold closed**',
                 [createEntity('messageEntityBold', 17, 25)],
-                'plain italic and also bold but bold closed'
+                'plain italic and also bold but bold closed',
             )
         })
 
@@ -645,7 +648,7 @@ describe('MarkdownMessageEntityParser', () => {
             it('should throw an error on malformed pres', () => {
                 testThrows('plain ```pre without linebreaks```')
                 testThrows(
-                    'plain ``` pre without linebreaks but with spaces instead ```'
+                    'plain ``` pre without linebreaks but with spaces instead ```',
                 )
             })
         })
@@ -657,10 +660,10 @@ describe('MarkdownMessageEntityParser', () => {
 
             expect(md`${unsafeString}`.value).eq('\\_\\_\\[\\]\\_\\_')
             expect(md`${unsafeString} **text**`.value).eq(
-                '\\_\\_\\[\\]\\_\\_ **text**'
+                '\\_\\_\\[\\]\\_\\_ **text**',
             )
             expect(md`**text** ${unsafeString}`.value).eq(
-                '**text** \\_\\_\\[\\]\\_\\_'
+                '**text** \\_\\_\\[\\]\\_\\_',
             )
             expect(md`**${unsafeString}**`.value).eq('**\\_\\_\\[\\]\\_\\_**')
         })
@@ -671,12 +674,12 @@ describe('MarkdownMessageEntityParser', () => {
 
             expect(md`${unsafeString}`.value).eq('__[]__')
             expect(md`${unsafeString} ${unsafeString2}`.value).eq(
-                '__[]__ \\_\\_\\[\\]\\_\\_'
+                '__[]__ \\_\\_\\[\\]\\_\\_',
             )
             expect(md`${unsafeString} **text**`.value).eq('__[]__ **text**')
             expect(md`**text** ${unsafeString}`.value).eq('**text** __[]__')
             expect(md`**${unsafeString} ${unsafeString2}**`.value).eq(
-                '**__[]__ \\_\\_\\[\\]\\_\\_**'
+                '**__[]__ \\_\\_\\[\\]\\_\\_**',
             )
         })
 

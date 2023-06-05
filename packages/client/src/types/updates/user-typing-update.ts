@@ -1,13 +1,13 @@
-import { tl } from '@mtcute/tl'
 import { getBarePeerId, toggleChannelIdMark } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
     BasicPeerType,
     Chat,
     MtUnsupportedError,
-    User,
     TypingStatus,
+    User,
 } from '../'
 import { makeInspectable } from '../utils'
 
@@ -22,16 +22,16 @@ export class UserTypingUpdate {
         readonly raw:
             | tl.RawUpdateUserTyping
             | tl.RawUpdateChatUserTyping
-            | tl.RawUpdateChannelUserTyping
+            | tl.RawUpdateChannelUserTyping,
     ) {}
 
     /**
      * ID of the user whose typing status changed
      */
     get userId(): number {
-        return this.raw._ === 'updateUserTyping'
-            ? this.raw.userId
-            : getBarePeerId(this.raw.fromId)
+        return this.raw._ === 'updateUserTyping' ?
+            this.raw.userId :
+            getBarePeerId(this.raw.fromId)
     }
 
     /**

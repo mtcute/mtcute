@@ -14,7 +14,7 @@ import { assertTypeIs } from '../../utils/type-assertion'
  */
 export async function checkPassword(
     this: TelegramClient,
-    password: string
+    password: string,
 ): Promise<User> {
     const res = await this.call({
         _: 'auth.checkPassword',
@@ -23,19 +23,19 @@ export async function checkPassword(
             await this.call({
                 _: 'account.getPassword',
             }),
-            password
+            password,
         ),
     })
 
     assertTypeIs(
         'checkPassword (@ auth.checkPassword)',
         res,
-        'auth.authorization'
+        'auth.authorization',
     )
     assertTypeIs(
         'checkPassword (@ auth.checkPassword -> user)',
         res.user,
-        'user'
+        'user',
     )
 
     this.log.prefix = `[USER ${this._userId}] `

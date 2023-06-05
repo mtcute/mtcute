@@ -3,7 +3,7 @@
     "version": "150.0.0",
     "description": "TL schema used for mtcute",
     "main": "index.js",
-    "author": "Alina Sireneva <me@tei.su>",
+    "author": "Alina Sireneva <alina@tei.su>",
     "license": "LGPL-3.0",
     "scripts": {
         "test": "tsc --noEmit --esModuleInterop tests/types.ts",
@@ -19,8 +19,9 @@
         "long": "5.2.3"
     },
     "devDependencies": {
-        "@mtcute/tl-utils": "workspace:^1.0.0",
         "@mtcute/core": "workspace:^1.0.0",
+        "@mtcute/tl-utils": "workspace:^1.0.0",
+        "@types/js-yaml": "^4.0.5",
         "cheerio": "1.0.0-rc.12",
         "csv-parser": "3.0.0",
         "js-yaml": "4.1.0"

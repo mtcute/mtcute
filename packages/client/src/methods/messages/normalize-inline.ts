@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { SessionConnection } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { parseInlineMessageId } from '../../utils/inline-utils'
@@ -17,13 +17,14 @@ function _initializeInline(this: TelegramClient) {
 /** @internal */
 export async function _normalizeInline(
     this: TelegramClient,
-    id: string | tl.TypeInputBotInlineMessageID
+    id: string | tl.TypeInputBotInlineMessageID,
 ): Promise<[tl.TypeInputBotInlineMessageID, SessionConnection]> {
     if (typeof id === 'string') {
         id = parseInlineMessageId(id)
     }
 
     let connection = this.primaryConnection
+
     if (id.dcId !== connection.params.dc.id) {
         if (!(id.dcId in this._connectionsForInline)) {
             this._connectionsForInline[id.dcId] =

@@ -14,7 +14,7 @@ export class TakeoutSession {
 
     constructor(
         readonly client: TelegramClient,
-        session: tl.account.RawTakeout
+        session: tl.account.RawTakeout,
     ) {
         this.id = session.id
     }
@@ -32,7 +32,7 @@ export class TakeoutSession {
         message: T,
         params?: {
             throwFlood: boolean
-        }
+        },
     ): Promise<tl.RpcCallReturn[T['_']]> {
         return this.client.call(
             {
@@ -40,7 +40,7 @@ export class TakeoutSession {
                 takeoutId: this.id,
                 query: message,
             },
-            params
+            params,
         )
     }
 
@@ -62,18 +62,20 @@ export class TakeoutSession {
      *     Returning `true` will use takeout session, `false` will not.
      */
     createProxy(predicate?: (obj: tl.TlObject) => boolean): TelegramClient {
-        const boundCall: TakeoutSession['call'] = predicate
-            ? (obj, params) => {
-                  if (predicate(obj)) {
-                      return this.call(obj, params)
-                  }
-                  return this.client.call(obj, params)
-              }
-            : this.call.bind(this)
+        const boundCall: TakeoutSession['call'] = predicate ?
+            (obj, params) => {
+                if (predicate(obj)) {
+                    return this.call(obj, params)
+                }
+
+                return this.client.call(obj, params)
+            } :
+            this.call.bind(this)
 
         return new Proxy(this.client, {
             get(target, prop, receiver) {
                 if (prop === 'call') return boundCall
+
                 return Reflect.get(target, prop, receiver)
             },
         })

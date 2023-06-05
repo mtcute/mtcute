@@ -1,8 +1,7 @@
-import { tl } from '@mtcute/tl'
 import { assertNever } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../../client'
-import { BotKeyboard, ReplyMarkup } from '../keyboards'
 import {
     InputMediaContact,
     InputMediaGeo,
@@ -10,6 +9,7 @@ import {
     InputMediaVenue,
 } from '../../media'
 import { FormattedString } from '../../parser'
+import { BotKeyboard, ReplyMarkup } from '../keyboards'
 
 /**
  * Inline message containing only text
@@ -20,7 +20,7 @@ export interface InputInlineMessageText {
     /**
      * Text of the message
      */
-    text: string | FormattedString<any>
+    text: string | FormattedString<string>
 
     /**
      * Text markup entities.
@@ -49,7 +49,7 @@ export interface InputInlineMessageMedia {
     /**
      * Caption for the media
      */
-    text?: string | FormattedString<any>
+    text?: string | FormattedString<string>
 
     /**
      * Caption markup entities.
@@ -124,6 +124,7 @@ export type InputInlineMessage =
     | InputInlineMessageGame
     | InputInlineMessageContact
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace BotInlineMessage {
     /**
      * Create a text inline message
@@ -132,12 +133,13 @@ export namespace BotInlineMessage {
      * @param params
      */
     export function text(
-        text: string | FormattedString<any>,
-        params: Omit<InputInlineMessageText, 'type' | 'text'> = {}
+        text: string | FormattedString<string>,
+        params: Omit<InputInlineMessageText, 'type' | 'text'> = {},
     ): InputInlineMessageText {
         const ret = params as tl.Mutable<InputInlineMessageText>
         ret.type = 'text'
         ret.text = text
+
         return ret
     }
 
@@ -146,10 +148,11 @@ export namespace BotInlineMessage {
      * media from the result
      */
     export function media(
-        params: Omit<InputInlineMessageMedia, 'type'> = {}
+        params: Omit<InputInlineMessageMedia, 'type'> = {},
     ): InputInlineMessageMedia {
         const ret = params as tl.Mutable<InputInlineMessageMedia>
         ret.type = 'media'
+
         return ret
     }
 
@@ -159,10 +162,11 @@ export namespace BotInlineMessage {
      * @param params  Additional parameters
      */
     export function geo(
-        params: Omit<InputInlineMessageGeo, 'type'>
+        params: Omit<InputInlineMessageGeo, 'type'>,
     ): InputInlineMessageGeo {
         const ret = params as tl.Mutable<InputInlineMessageGeo>
         ret.type = 'geo'
+
         return ret
     }
 
@@ -172,10 +176,11 @@ export namespace BotInlineMessage {
      * @param params  Additional parameters
      */
     export function geoLive(
-        params: Omit<InputInlineMessageGeoLive, 'type'>
+        params: Omit<InputInlineMessageGeoLive, 'type'>,
     ): InputInlineMessageGeoLive {
         const ret = params as tl.Mutable<InputInlineMessageGeoLive>
         ret.type = 'geo_live'
+
         return ret
     }
 
@@ -183,10 +188,11 @@ export namespace BotInlineMessage {
      * Create an inline message containing a venue
      */
     export function venue(
-        params: Omit<InputInlineMessageVenue, 'type'>
+        params: Omit<InputInlineMessageVenue, 'type'>,
     ): InputInlineMessageVenue {
         const ret = params as tl.Mutable<InputInlineMessageVenue>
         ret.type = 'venue'
+
         return ret
     }
 
@@ -195,10 +201,11 @@ export namespace BotInlineMessage {
      * from the inline result
      */
     export function game(
-        params: Omit<InputInlineMessageGame, 'type'>
+        params: Omit<InputInlineMessageGame, 'type'>,
     ): InputInlineMessageGame {
         const ret = params as tl.Mutable<InputInlineMessageGame>
         ret.type = 'game'
+
         return ret
     }
 
@@ -206,10 +213,11 @@ export namespace BotInlineMessage {
      * Create an inline message containing a contact
      */
     export function contact(
-        params: Omit<InputInlineMessageContact, 'type'>
+        params: Omit<InputInlineMessageContact, 'type'>,
     ): InputInlineMessageContact {
         const ret = params as tl.Mutable<InputInlineMessageContact>
         ret.type = 'contact'
+
         return ret
     }
 
@@ -217,14 +225,14 @@ export namespace BotInlineMessage {
     export async function _convertToTl(
         client: TelegramClient,
         obj: InputInlineMessage,
-        parseMode?: string | null
+        parseMode?: string | null,
     ): Promise<tl.TypeInputBotInlineMessage> {
         switch (obj.type) {
             case 'text': {
-                const [message, entities] = await client['_parseEntities'](
+                const [message, entities] = await client._parseEntities(
                     obj.text,
                     parseMode,
-                    obj.entities
+                    obj.entities,
                 )
 
                 return {
@@ -235,10 +243,10 @@ export namespace BotInlineMessage {
                 }
             }
             case 'media': {
-                const [message, entities] = await client['_parseEntities'](
+                const [message, entities] = await client._parseEntities(
                     obj.text,
                     parseMode,
-                    obj.entities
+                    obj.entities,
                 )
 
                 return {

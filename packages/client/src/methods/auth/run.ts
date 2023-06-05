@@ -16,7 +16,7 @@ import { User } from '../../types'
 export function run(
     this: TelegramClient,
     params: Parameters<TelegramClient['start']>[0],
-    then?: (user: User) => void | Promise<void>
+    then?: (user: User) => void | Promise<void>,
 ): void {
     this.start(params)
         .then(then)

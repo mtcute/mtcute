@@ -16,7 +16,7 @@ import { isInputPeerChannel } from '../../utils/peer-utils'
 export async function kickChatMember(
     this: TelegramClient,
     chatId: InputPeerLike,
-    userId: InputPeerLike
+    userId: InputPeerLike,
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
     const user = await this.resolvePeer(userId)

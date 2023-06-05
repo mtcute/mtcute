@@ -1,15 +1,15 @@
-import { TlEntry, TlFullSchema, parseFullTlSchema } from '@mtcute/tl-utils'
+import { parseFullTlSchema, TlEntry, TlFullSchema } from '@mtcute/tl-utils'
 
-interface TlPackedUnion {
-    // name
-    n: string
-    // comment
-    d?: string
-    // methods
-    m: string[]
-    // classes
-    c: string[]
-}
+// interface TlPackedUnion {
+//     // name
+//     n: string
+//     // comment
+//     d?: string
+//     // methods
+//     m: string[]
+//     // classes
+//     c: string[]
+// }
 
 export interface TlPackedSchema {
     // layer
@@ -22,7 +22,7 @@ export interface TlPackedSchema {
 
 export function packTlSchema(
     schema: TlFullSchema,
-    layer: number
+    layer: number,
 ): TlPackedSchema {
     const ret: TlPackedSchema = {
         l: layer,
@@ -31,7 +31,6 @@ export function packTlSchema(
     }
 
     for (const name in schema.unions) {
-        if (!schema.unions.hasOwnProperty(name)) continue
         const union = schema.unions[name]
 
         if (union.comment) {
@@ -46,7 +45,6 @@ export function unpackTlSchema(schema: TlPackedSchema): [TlFullSchema, number] {
     const res = parseFullTlSchema(schema.e)
 
     for (const name in schema.u) {
-        if (!schema.u.hasOwnProperty(name)) continue
         if (!res.unions[name]) continue
 
         res.unions[name].comment = schema.u[name]

@@ -16,7 +16,7 @@ export async function hideAllJoinRequests(
     peer: InputPeerLike,
     user: InputPeerLike,
     action: 'approve' | 'deny',
-    link?: string
+    link?: string,
 ): Promise<void> {
     const userId = normalizeToInputUser(await this.resolvePeer(user), user)
 

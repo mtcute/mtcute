@@ -1,9 +1,9 @@
-import { tl } from '@mtcute/tl'
 import { tdFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
-import { RawDocument } from './document'
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
+import { RawDocument } from './document'
 
 /**
  * A video, round video message or GIF animation.
@@ -14,11 +14,10 @@ export class Video extends RawDocument {
     readonly type = 'video' as const
 
     protected _fileIdType(): tdFileId.FileType {
-        return this.isRound
-            ? tdFileId.FileType.VideoNote
-            : this.isAnimation
-            ? tdFileId.FileType.Animation
-            : tdFileId.FileType.Video
+        if (this.isRound) return tdFileId.FileType.VideoNote
+        if (this.isAnimation) return tdFileId.FileType.Animation
+
+        return tdFileId.FileType.Video
     }
 
     constructor(
@@ -26,7 +25,7 @@ export class Video extends RawDocument {
         doc: tl.RawDocument,
         readonly attr:
             | tl.RawDocumentAttributeVideo
-            | tl.RawDocumentAttributeImageSize
+            | tl.RawDocumentAttributeImageSize,
     ) {
         super(client, doc)
     }
@@ -63,7 +62,7 @@ export class Video extends RawDocument {
         return (this._isAnimation ??=
             this.attr._ === 'documentAttributeImageSize' ||
             this.raw.attributes.some(
-                (it) => it._ === 'documentAttributeAnimated'
+                (it) => it._ === 'documentAttributeAnimated',
             ))
     }
 
@@ -72,7 +71,7 @@ export class Video extends RawDocument {
      */
     get isRound(): boolean {
         return (
-            this.attr._ === 'documentAttributeVideo' && !!this.attr.roundMessage
+            this.attr._ === 'documentAttributeVideo' && Boolean(this.attr.roundMessage)
         )
     }
 

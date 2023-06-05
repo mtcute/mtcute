@@ -1,8 +1,9 @@
 import bigInt from 'big-integer'
+
 import { tl } from '@mtcute/tl'
 
-import { randomBytes, xorBuffer } from '../buffer-utils'
 import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils'
+import { randomBytes, xorBuffer } from '../buffer-utils'
 import { ICryptoProvider } from './abstract'
 
 /**
@@ -19,7 +20,7 @@ export async function computePasswordHash(
     crypto: ICryptoProvider,
     password: Buffer,
     salt1: Buffer,
-    salt2: Buffer
+    salt2: Buffer,
 ): Promise<Buffer> {
     const SH = (data: Buffer, salt: Buffer) =>
         crypto.sha256(Buffer.concat([salt, data, salt]))
@@ -28,7 +29,7 @@ export async function computePasswordHash(
     const PH2 = async (pwd: Buffer, salt1: Buffer, salt2: Buffer) =>
         SH(
             await crypto.pbkdf2(await PH1(pwd, salt1, salt2), salt1, 100000),
-            salt2
+            salt2,
         )
 
     return PH2(password, salt1, salt2)
@@ -44,9 +45,9 @@ export async function computePasswordHash(
 export async function computeNewPasswordHash(
     crypto: ICryptoProvider,
     algo: tl.RawPasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow,
-    password: string
+    password: string,
 ): Promise<Buffer> {
-    ;(algo as tl.Mutable<typeof algo>).salt1 = Buffer.concat([
+    (algo as tl.Mutable<typeof algo>).salt1 = Buffer.concat([
         algo.salt1,
         randomBytes(32),
     ])
@@ -55,7 +56,7 @@ export async function computeNewPasswordHash(
         crypto,
         Buffer.from(password),
         algo.salt1,
-        algo.salt2
+        algo.salt2,
     )
 
     const g = bigInt(algo.g)
@@ -75,7 +76,7 @@ export async function computeNewPasswordHash(
 export async function computeSrpParams(
     crypto: ICryptoProvider,
     request: tl.account.RawPassword,
-    password: string
+    password: string,
 ): Promise<tl.RawInputCheckPasswordSRP> {
     // nice naming thx durov
     if (
@@ -90,10 +91,18 @@ export async function computeSrpParams(
 
     // here and after: underscored variables are buffers, non-underscored are bigInts
 
+    if (!request.srpB) {
+        throw new Error('SRP_B is not present in the request')
+    }
+
+    if (!request.srpId) {
+        throw new Error('SRP_ID is not present in the request')
+    }
+
     const g = bigInt(algo.g)
     const _g = bigIntToBuffer(g, 256)
     const p = bufferToBigInt(algo.p)
-    const gB = bufferToBigInt(request.srpB!)
+    const gB = bufferToBigInt(request.srpB)
 
     const a = bufferToBigInt(randomBytes(256))
     const gA = g.modPow(a, p)
@@ -104,12 +113,12 @@ export async function computeSrpParams(
     const [_k, _u, _x] = await Promise.all([
         // maybe, just maybe this will be a bit faster with some crypto providers
         /* k = */ crypto.sha256(Buffer.concat([algo.p, _g])),
-        /* u = */ crypto.sha256(Buffer.concat([_gA, request.srpB!])),
+        /* u = */ crypto.sha256(Buffer.concat([_gA, request.srpB])),
         /* x = */ computePasswordHash(
             crypto,
             Buffer.from(password),
             algo.salt1,
-            algo.salt2
+            algo.salt2,
         ),
     ])
     const k = bufferToBigInt(_k)
@@ -130,14 +139,14 @@ export async function computeSrpParams(
             await H(algo.salt1),
             await H(algo.salt2),
             _gA,
-            request.srpB!,
+            request.srpB,
             _kA,
-        ])
+        ]),
     )
 
     return {
         _: 'inputCheckPasswordSRP',
-        srpId: request.srpId!,
+        srpId: request.srpId,
         A: _gA,
         M1: _M1,
     }

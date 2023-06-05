@@ -19,11 +19,27 @@ export class PeersIndex {
 
         obj.users?.forEach((user) => {
             index.users[user.id] = user
-            if ((user as any).min) index.hasMin = true
+
+            if ((user as Exclude<typeof user, tl.RawUserEmpty>).min) {
+                index.hasMin = true
+            }
         })
         obj.chats?.forEach((chat) => {
             index.chats[chat.id] = chat
-            if ((chat as any).min) index.hasMin = true
+
+            if (
+                (
+                    chat as Exclude<
+                        typeof chat,
+                        | tl.RawChatEmpty
+                        | tl.RawChat
+                        | tl.RawChatForbidden
+                        | tl.RawChannelForbidden
+                    >
+                ).min
+            ) {
+                index.hasMin = true
+            }
         })
 
         return index
@@ -31,6 +47,7 @@ export class PeersIndex {
 
     user(id: number): tl.TypeUser {
         const r = this.users[id]
+
         if (!r) {
             throw new MtArgumentError(ERROR_MSG)
         }
@@ -40,6 +57,7 @@ export class PeersIndex {
 
     chat(id: number): tl.TypeChat {
         const r = this.chats[id]
+
         if (!r) {
             throw new MtArgumentError(ERROR_MSG)
         }

@@ -1,6 +1,8 @@
 import Long from 'long'
-import { tl } from '@mtcute/tl'
+
 import { assertNever } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
+
 import { InputPeerLike, MtInvalidPeerTypeError } from '../types'
 
 export const INVITE_LINK_REGEX =
@@ -9,7 +11,7 @@ export const INVITE_LINK_REGEX =
 // helpers to normalize result of `resolvePeer` function
 
 export function normalizeToInputPeer(
-    res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
+    res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel,
 ): tl.TypeInputPeer {
     if (tl.isAnyInputPeer(res)) return res
 
@@ -52,7 +54,7 @@ export function normalizeToInputPeer(
 
 export function normalizeToInputUser(
     res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel,
-    input?: InputPeerLike
+    input?: InputPeerLike,
 ): tl.TypeInputUser {
     if (tl.isAnyInputUser(res)) return res
 
@@ -79,7 +81,7 @@ export function normalizeToInputUser(
 
 export function normalizeToInputChannel(
     res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel,
-    input?: InputPeerLike
+    input?: InputPeerLike,
 ): tl.TypeInputChannel {
     if (tl.isAnyInputChannel(res)) return res
 
@@ -103,7 +105,7 @@ export function normalizeToInputChannel(
 }
 
 export function isInputPeerUser(
-    obj: tl.TypeInputPeer
+    obj: tl.TypeInputPeer,
 ): obj is
     | tl.RawInputPeerUser
     | tl.RawInputPeerUserFromMessage
@@ -114,22 +116,24 @@ export function isInputPeerUser(
         case 'inputPeerSelf':
             return true
     }
+
     return false
 }
 
 export function isInputPeerChannel(
-    obj: tl.TypeInputPeer
+    obj: tl.TypeInputPeer,
 ): obj is tl.RawInputPeerChannel | tl.RawInputPeerChannelFromMessage {
     switch (obj._) {
         case 'inputPeerChannel':
         case 'inputPeerChannelFromMessage':
             return true
     }
+
     return false
 }
 
 export function isInputPeerChat(
-    obj: tl.TypeInputPeer
+    obj: tl.TypeInputPeer,
 ): obj is tl.RawInputPeerChat {
     return obj._ === 'inputPeerChat'
 }
@@ -151,7 +155,7 @@ export function inputPeerToPeer(inp: tl.TypeInputPeer): tl.TypePeer {
 
 export function peerToInputPeer(
     peer: tl.TypePeer,
-    accessHash = Long.ZERO
+    accessHash = Long.ZERO,
 ): tl.TypeInputPeer {
     switch (peer._) {
         case 'peerUser':

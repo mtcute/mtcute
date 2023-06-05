@@ -1,10 +1,11 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import Long from 'long'
-import { tl } from '@mtcute/tl'
-import { MessageEntity, FormattedString } from '@mtcute/client'
+import { describe, it } from 'mocha'
 
-import { HtmlMessageEntityParser, html } from '../src'
+import { FormattedString, MessageEntity } from '@mtcute/client'
+import { tl } from '@mtcute/tl'
+
+import { html, HtmlMessageEntityParser } from '../src'
 
 const createEntity = <T extends tl.TypeMessageEntity['_']>(
     type: T,
@@ -13,14 +14,14 @@ const createEntity = <T extends tl.TypeMessageEntity['_']>(
     additional?: Omit<
         tl.FindByName<tl.TypeMessageEntity, T>,
         '_' | 'offset' | 'length'
-    >
+    >,
 ): tl.TypeMessageEntity => {
     return {
         _: type,
         offset,
         length,
         ...(additional ?? {}),
-    } as any // idc really, its not that important
+    } as tl.TypeMessageEntity
 }
 
 const createEntities = (entities: tl.TypeMessageEntity[]): MessageEntity[] => {
@@ -37,7 +38,7 @@ describe('HtmlMessageEntityParser', () => {
             text: string,
             entities: tl.TypeMessageEntity[],
             expected: string,
-            _parser = parser
+            _parser = parser,
         ): void => {
             expect(_parser.unparse(text, createEntities(entities))).eq(expected)
         }
@@ -56,7 +57,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityUnderline', 18, 9),
                     createEntity('messageEntityStrike', 28, 13),
                 ],
-                'plain <b>bold</b> <i>italic</i> <u>underline</u> <s>strikethrough</s> plain'
+                'plain <b>bold</b> <i>italic</i> <u>underline</u> <s>strikethrough</s> plain',
             )
         })
 
@@ -69,7 +70,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBlockquote', 15, 10),
                     createEntity('messageEntitySpoiler', 26, 7),
                 ],
-                'plain <code>code</code> <pre>pre</pre> <blockquote>blockquote</blockquote> <spoiler>spoiler</spoiler> plain'
+                'plain <code>code</code> <pre>pre</pre> <blockquote>blockquote</blockquote> <spoiler>spoiler</spoiler> plain',
             )
         })
 
@@ -87,7 +88,7 @@ describe('HtmlMessageEntityParser', () => {
                     }),
                     createEntity('messageEntityEmail', 51, 12),
                 ],
-                'plain <a href="https://google.com">https://google.com</a> <a href="https://google.com">google</a> @durov <a href="tg://user?id=36265675">Pavel Durov</a> <a href="mailto:mail@mail.ru">mail@mail.ru</a> plain'
+                'plain <a href="https://google.com">https://google.com</a> <a href="https://google.com">google</a> @durov <a href="tg://user?id=36265675">Pavel Durov</a> <a href="mailto:mail@mail.ru">mail@mail.ru</a> plain',
             )
         })
 
@@ -100,7 +101,7 @@ describe('HtmlMessageEntityParser', () => {
                     }),
                     createEntity('messageEntityPre', 35, 9, { language: '' }),
                 ],
-                'plain <pre language="javascript">console.log("Hello, world!")</pre> <pre>some code</pre> plain'
+                'plain <pre language="javascript">console.log("Hello, world!")</pre> <pre>some code</pre> plain',
             )
         })
 
@@ -111,7 +112,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', 0, 5),
                     createEntity('messageEntityBold', 7, 5),
                 ],
-                '<b>Hello</b>, <b>world</b>'
+                '<b>Hello</b>, <b>world</b>',
             )
         })
 
@@ -122,7 +123,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', -2, 7),
                     createEntity('messageEntityBold', 7, 10),
                 ],
-                '<b>Hello</b>, <b>world</b>'
+                '<b>Hello</b>, <b>world</b>',
             )
         })
 
@@ -130,7 +131,7 @@ describe('HtmlMessageEntityParser', () => {
             test(
                 'Hello, world',
                 [createEntity('messageEntityBold', 50, 5)],
-                'Hello, world'
+                'Hello, world',
             )
         })
 
@@ -141,7 +142,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', 6, 6),
                     createEntity('messageEntityItalic', 12, 6),
                 ],
-                'plain <b>Hello,</b><i> world</i> plain'
+                'plain <b>Hello,</b><i> world</i> plain',
             )
         })
 
@@ -152,7 +153,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 0, 24),
                     createEntity('messageEntityBold', 15, 8),
                 ],
-                '<i>Welcome to the <b>gym zone</b>!</i>'
+                '<i>Welcome to the <b>gym zone</b>!</i>',
             )
         })
 
@@ -163,7 +164,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 0, 24),
                     createEntity('messageEntityBold', 15, 9),
                 ],
-                '<i>Welcome to the <b>gym zone!</b></i>'
+                '<i>Welcome to the <b>gym zone!</b></i>',
             )
             test(
                 'Welcome to the gym zone!',
@@ -171,7 +172,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', 0, 24),
                     createEntity('messageEntityItalic', 15, 9),
                 ],
-                '<b>Welcome to the <i>gym zone!</i></b>'
+                '<b>Welcome to the <i>gym zone!</i></b>',
             )
             test(
                 'Welcome to the gym zone!',
@@ -179,7 +180,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 0, 24),
                     createEntity('messageEntityBold', 0, 7),
                 ],
-                '<i><b>Welcome</b> to the gym zone!</i>'
+                '<i><b>Welcome</b> to the gym zone!</i>',
             )
             test(
                 'Welcome to the gym zone!',
@@ -187,7 +188,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 0, 24),
                     createEntity('messageEntityBold', 0, 24),
                 ],
-                '<i><b>Welcome to the gym zone!</b></i>'
+                '<i><b>Welcome to the gym zone!</b></i>',
             )
         })
 
@@ -198,7 +199,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 0, 14),
                     createEntity('messageEntityBold', 8, 10),
                 ],
-                '<i>Welcome <b>to the</b></i><b> gym</b> zone!'
+                '<i>Welcome <b>to the</b></i><b> gym</b> zone!',
             )
             test(
                 'plain bold bold-italic bold-italic-underline underline plain',
@@ -207,7 +208,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 11, 33),
                     createEntity('messageEntityUnderline', 23, 31),
                 ],
-                'plain <b>bold <i>bold-italic <u>bold-italic-underline</u></i></b><u> underline</u> plain'
+                'plain <b>bold <i>bold-italic <u>bold-italic-underline</u></i></b><u> underline</u> plain',
             )
             test(
                 'plain bold bold-italic bold-italic-underline italic-underline underline plain',
@@ -217,7 +218,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityUnderline', 23, 48),
                 ],
                 // not the most efficient way (in the second part we could do <u><i>...</i>...</u>), but whatever
-                'plain <b>bold <i>bold-italic <u>bold-italic-underline</u></i></b><i><u> italic-underline</u></i><u> underline</u> plain'
+                'plain <b>bold <i>bold-italic <u>bold-italic-underline</u></i></b><i><u> italic-underline</u></i><u> underline</u> plain',
             )
         })
 
@@ -229,7 +230,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', 13, 2),
                     createEntity('messageEntityItalic', 17, 5),
                 ],
-                "<i>best flower</i>: <b>🌸</b>. <i>don't</i> you even doubt it."
+                "<i>best flower</i>: <b>🌸</b>. <i>don't</i> you even doubt it.",
             )
         })
 
@@ -237,7 +238,7 @@ describe('HtmlMessageEntityParser', () => {
             test(
                 '<&> < & > <&>',
                 [createEntity('messageEntityBold', 4, 5)],
-                '&lt;&amp;&gt; <b>&lt; &amp; &gt;</b> &lt;&amp;&gt;'
+                '&lt;&amp;&gt; <b>&lt; &amp; &gt;</b> &lt;&amp;&gt;',
             )
         })
 
@@ -256,7 +257,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityPre', 35, 9, { language: '' }),
                 ],
                 'plain <pre language="javascript">lang: <b>javascript</b><br>console.log("Hello, world!")</pre> <pre>some code</pre> plain',
-                parser
+                parser,
             )
         })
 
@@ -265,12 +266,12 @@ describe('HtmlMessageEntityParser', () => {
             test(
                 'plain\n\nplain',
                 [createEntity('messageEntityBold', 0, 12)],
-                '<b>plain<br><br>plain</b>'
+                '<b>plain<br><br>plain</b>',
             )
             test(
                 'plain\n\nplain',
                 [createEntity('messageEntityPre', 0, 12)],
-                '<pre>plain\n\nplain</pre>'
+                '<pre>plain\n\nplain</pre>',
             )
         })
 
@@ -283,7 +284,7 @@ describe('HtmlMessageEntityParser', () => {
         const test = (
             text: string,
             expectedEntities: tl.TypeMessageEntity[],
-            expectedText: string
+            expectedText: string,
         ): void => {
             const [_text, entities] = parser.parse(text)
             expect(_text).eql(expectedText)
@@ -299,7 +300,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityUnderline', 18, 9),
                     createEntity('messageEntityStrike', 28, 13),
                 ],
-                'plain bold italic underline strikethrough plain'
+                'plain bold italic underline strikethrough plain',
             )
         })
 
@@ -312,7 +313,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBlockquote', 15, 10),
                     createEntity('messageEntitySpoiler', 26, 7),
                 ],
-                'plain code pre blockquote spoiler plain'
+                'plain code pre blockquote spoiler plain',
             )
         })
 
@@ -327,7 +328,7 @@ describe('HtmlMessageEntityParser', () => {
                         userId: 36265675,
                     }),
                 ],
-                'plain https://google.com google @durov Pavel Durov plain'
+                'plain https://google.com google @durov Pavel Durov plain',
             )
 
             test(
@@ -341,7 +342,7 @@ describe('HtmlMessageEntityParser', () => {
                         },
                     }),
                 ],
-                'user'
+                'user',
             )
         })
 
@@ -354,7 +355,7 @@ describe('HtmlMessageEntityParser', () => {
                     }),
                     createEntity('messageEntityPre', 35, 9, { language: '' }),
                 ],
-                'plain console.log("Hello, world!") some code plain'
+                'plain console.log("Hello, world!") some code plain',
             )
         })
 
@@ -362,12 +363,12 @@ describe('HtmlMessageEntityParser', () => {
             test(
                 '<pre><b>bold</b> and not bold</pre>',
                 [createEntity('messageEntityPre', 0, 17, { language: '' })],
-                'bold and not bold'
+                'bold and not bold',
             )
             test(
                 '<pre><pre>pre inside pre</pre> so cool</pre>',
                 [createEntity('messageEntityPre', 0, 22, { language: '' })],
-                'pre inside pre so cool'
+                'pre inside pre so cool',
             )
         })
 
@@ -375,17 +376,17 @@ describe('HtmlMessageEntityParser', () => {
             test(
                 'this is some text\n\nwith newlines',
                 [],
-                'this is some text with newlines'
+                'this is some text with newlines',
             )
             test(
                 '<b>this is some text\n\nwith</b> newlines',
                 [createEntity('messageEntityBold', 0, 22)],
-                'this is some text with newlines'
+                'this is some text with newlines',
             )
             test(
                 '<b>this is some text ending with\n\n</b> newlines',
                 [createEntity('messageEntityBold', 0, 29)],
-                'this is some text ending with newlines'
+                'this is some text ending with newlines',
             )
             test(
                 `
@@ -400,7 +401,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', 45, 13),
                     createEntity('messageEntityItalic', 64, 7),
                 ],
-                'this is some indented text with newlines and indented tags yeah so cool'
+                'this is some indented text with newlines and indented tags yeah so cool',
             )
         })
 
@@ -408,7 +409,7 @@ describe('HtmlMessageEntityParser', () => {
             test(
                 '<pre>this is some text\n\nwith newlines</pre>',
                 [createEntity('messageEntityPre', 0, 32, { language: '' })],
-                'this is some text\n\nwith newlines'
+                'this is some text\n\nwith newlines',
             )
 
             // fuck my life
@@ -436,7 +437,7 @@ describe('HtmlMessageEntityParser', () => {
                     ' yeah so cool\n' +
                     indent +
                     '\n' +
-                    indent
+                    indent,
             )
         })
 
@@ -444,14 +445,14 @@ describe('HtmlMessageEntityParser', () => {
             test(
                 'this is some text<br><br>with actual newlines',
                 [],
-                'this is some text\n\nwith actual newlines'
+                'this is some text\n\nwith actual newlines',
             )
             test(
                 '<b>this is some text<br><br></b>with actual newlines',
                 // note that the <br> (i.e. \n) is not included in the entity
                 // this is expected, and the result is the same
                 [createEntity('messageEntityBold', 0, 17)],
-                'this is some text\n\nwith actual newlines'
+                'this is some text\n\nwith actual newlines',
             )
         })
 
@@ -459,7 +460,7 @@ describe('HtmlMessageEntityParser', () => {
             test(
                 'one    space, many&nbsp;&nbsp;&nbsp;&nbsp;spaces, and<br>a newline',
                 [],
-                'one space, many    spaces, and\na newline'
+                'one space, many    spaces, and\na newline',
             )
         })
 
@@ -470,7 +471,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', 0, 5),
                     createEntity('messageEntityBold', 7, 5),
                 ],
-                'Hello, world'
+                'Hello, world',
             )
         })
 
@@ -485,7 +486,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', 6, 6),
                     createEntity('messageEntityItalic', 12, 6),
                 ],
-                'plain Hello, world plain'
+                'plain Hello, world plain',
             )
         })
 
@@ -496,7 +497,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', 15, 8),
                     createEntity('messageEntityItalic', 0, 24),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
         })
 
@@ -507,7 +508,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', 15, 9),
                     createEntity('messageEntityItalic', 0, 24),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
             test(
                 '<b>Welcome to the <i>gym zone!</i></b>',
@@ -515,7 +516,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 15, 9),
                     createEntity('messageEntityBold', 0, 24),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
             test(
                 '<i><b>Welcome</b> to the gym zone!</i>',
@@ -523,7 +524,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', 0, 7),
                     createEntity('messageEntityItalic', 0, 24),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
             test(
                 '<i><b>Welcome to the gym zone!</b></i>',
@@ -531,7 +532,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', 0, 24),
                     createEntity('messageEntityItalic', 0, 24),
                 ],
-                'Welcome to the gym zone!'
+                'Welcome to the gym zone!',
             )
         })
 
@@ -543,7 +544,7 @@ describe('HtmlMessageEntityParser', () => {
                     createEntity('messageEntityBold', 13, 2),
                     createEntity('messageEntityItalic', 17, 5),
                 ],
-                "best flower: 🌸. don't you even doubt it."
+                "best flower: 🌸. don't you even doubt it.",
             )
         })
 
@@ -551,7 +552,7 @@ describe('HtmlMessageEntityParser', () => {
             test(
                 '<&> <b>< & ></b> <&>',
                 [createEntity('messageEntityBold', 4, 5)],
-                '<&> < & > <&>'
+                '<&> < & > <&>',
             )
         })
 
@@ -564,7 +565,7 @@ describe('HtmlMessageEntityParser', () => {
                         url: '/?a="hello"&b',
                     }),
                 ],
-                '<&> < & > <&> link'
+                '<&> < & > <&> link',
             )
         })
 
@@ -583,13 +584,13 @@ describe('HtmlMessageEntityParser', () => {
 
             expect(html`${unsafeString}`.value).eq('&lt;&amp;&gt;')
             expect(html`${unsafeString} <b>text</b>`.value).eq(
-                '&lt;&amp;&gt; <b>text</b>'
+                '&lt;&amp;&gt; <b>text</b>',
             )
             expect(html`<b>text</b> ${unsafeString}`.value).eq(
-                '<b>text</b> &lt;&amp;&gt;'
+                '<b>text</b> &lt;&amp;&gt;',
             )
             expect(html`<b>${unsafeString}</b>`.value).eq(
-                '<b>&lt;&amp;&gt;</b>'
+                '<b>&lt;&amp;&gt;</b>',
             )
         })
 
@@ -599,17 +600,17 @@ describe('HtmlMessageEntityParser', () => {
 
             expect(html`${unsafeString}`.value).eq('<&>')
             expect(html`${unsafeString} ${unsafeString2}`.value).eq(
-                '<&> &lt;&amp;&gt;'
+                '<&> &lt;&amp;&gt;',
             )
             expect(html`${unsafeString} <b>text</b>`.value).eq(
-                '<&> <b>text</b>'
+                '<&> <b>text</b>',
             )
             expect(html`<b>text</b> ${unsafeString}`.value).eq(
-                '<b>text</b> <&>'
+                '<b>text</b> <&>',
             )
             expect(html`<b>${unsafeString}</b>`.value).eq('<b><&></b>')
             expect(html`<b>${unsafeString} ${unsafeString2}</b>`.value).eq(
-                '<b><&> &lt;&amp;&gt;</b>'
+                '<b><&> &lt;&amp;&gt;</b>',
             )
         })
 

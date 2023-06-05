@@ -18,7 +18,7 @@ export interface IStateStorage {
      *
      * @param key  Key of the state, as defined by {@link StateKeyDelegate}
      */
-    getState(key: string): MaybeAsync<any | null>
+    getState(key: string): MaybeAsync<unknown | null>
 
     /**
      * Save state to the storage
@@ -27,7 +27,7 @@ export interface IStateStorage {
      * @param state  Object representing the state
      * @param ttl  TTL for the state, in seconds
      */
-    setState(key: string, state: any, ttl?: number): MaybeAsync<void>
+    setState(key: string, state: unknown, ttl?: number): MaybeAsync<void>
 
     /**
      * Delete state from the storage

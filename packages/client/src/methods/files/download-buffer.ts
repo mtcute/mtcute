@@ -12,7 +12,7 @@ import { FileDownloadParameters, FileLocation } from '../../types'
  */
 export async function downloadAsBuffer(
     this: TelegramClient,
-    params: FileDownloadParameters
+    params: FileDownloadParameters,
 ): Promise<Buffer> {
     if (
         params.location instanceof FileLocation &&

@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { MaybeArray } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
@@ -12,7 +12,7 @@ import { InputPeerLike } from '../../types'
  */
 export async function unarchiveChats(
     this: TelegramClient,
-    chats: MaybeArray<InputPeerLike>
+    chats: MaybeArray<InputPeerLike>,
 ): Promise<void> {
     if (!Array.isArray(chats)) chats = [chats]
 

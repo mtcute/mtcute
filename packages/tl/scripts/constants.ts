@@ -3,7 +3,7 @@ import { join } from 'path'
 export const DOC_CACHE_FILE = join(__dirname, '.documentation.cache.json')
 export const DESCRIPTIONS_YAML_FILE = join(
     __dirname,
-    '../data/descriptions.yaml'
+    '../data/descriptions.yaml',
 )
 export const API_SCHEMA_JSON_FILE = join(__dirname, '../api-schema.json')
 export const API_SCHEMA_DIFF_JSON_FILE = join(__dirname, '../diff.json')

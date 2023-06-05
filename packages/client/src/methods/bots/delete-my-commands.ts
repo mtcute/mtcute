@@ -26,13 +26,13 @@ export async function deleteMyCommands(
          * User language applied to the scope.
          */
         langCode?: string
-    }
+    },
 ): Promise<void> {
-    const scope: tl.TypeBotCommandScope = params?.scope
-        ? await this._normalizeCommandScope(params.scope)
-        : {
-              _: 'botCommandScopeDefault',
-          }
+    const scope: tl.TypeBotCommandScope = params?.scope ?
+        await this._normalizeCommandScope(params.scope) :
+        {
+            _: 'botCommandScopeDefault',
+        }
 
     await this.call({
         _: 'bots.resetBotCommands',

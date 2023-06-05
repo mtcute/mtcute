@@ -11,19 +11,20 @@ import { StickerSet } from '../../types'
  */
 export async function getStickerSet(
     this: TelegramClient,
-    id: string | { dice: string } | tl.TypeInputStickerSet
+    id: string | { dice: string } | tl.TypeInputStickerSet,
 ): Promise<StickerSet> {
     let input: tl.TypeInputStickerSet
+
     if (typeof id === 'string') {
         input =
-            id === 'emoji'
-                ? {
-                      _: 'inputStickerSetAnimatedEmoji',
-                  }
-                : {
-                      _: 'inputStickerSetShortName',
-                      shortName: id,
-                  }
+            id === 'emoji' ?
+                {
+                    _: 'inputStickerSetAnimatedEmoji',
+                } :
+                {
+                    _: 'inputStickerSetShortName',
+                    shortName: id,
+                }
     } else if ('dice' in id) {
         input = {
             _: 'inputStickerSetDice',

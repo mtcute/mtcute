@@ -32,14 +32,14 @@ export async function getUsers(
 /** @internal */
 export async function getUsers(
     this: TelegramClient,
-    ids: MaybeArray<InputPeerLike>
+    ids: MaybeArray<InputPeerLike>,
 ): Promise<MaybeArray<User>> {
     const isArray = Array.isArray(ids)
     if (!isArray) ids = [ids as InputPeerLike]
 
     const inputPeers = await this.resolvePeerMany(
         ids as InputPeerLike[],
-        normalizeToInputUser
+        normalizeToInputUser,
     )
 
     let res = await this.call({
@@ -49,7 +49,7 @@ export async function getUsers(
 
     res = res.filter((it) => it._ !== 'userEmpty')
 
-    return isArray
-        ? res.map((it) => new User(this, it))
-        : new User(this, res[0])
+    return isArray ?
+        res.map((it) => new User(this, it)) :
+        new User(this, res[0])
 }

@@ -42,7 +42,7 @@ const defaultTheme = new DefaultTheme(new Renderer(new Application()))
 function packageNameFromPath(path) {
     return path
         .slice(PACKAGES_DIR.length + 1)
-        .split(/[\/\\]/)[0]
+        .split(/[/\\]/)[0]
 }
 
 function load(app) {
@@ -87,12 +87,14 @@ function recursivelyVisit(ctx, reflection, callback) {
     if (reflection.comment) {
         // maybe fix links in the comment
         let idx = 0
+
         for (const it of reflection.comment.summary) {
             if (it.tag === '@link') {
                 const name = it.text
                 // unlike normal references, here we don't have a symbol,
                 // so we can only manually hardcode some known references
                 let link = ''
+
                 if (name.startsWith('tl.')) {
                     // todo link to tl reference
                     link = 'https://google.com'
@@ -100,22 +102,22 @@ function recursivelyVisit(ctx, reflection, callback) {
                     const [base, path] = name.split('.')
 
                     const knownClasses = {
-                        'TelegramClient': 'client',
-                        'ChosenInlineResult': 'client',
-                        'CallbackQuery': 'client',
-                        'Chat': 'client',
-                        'ChatMember': 'client',
-                        'ChatMemberUpdate': 'client',
-                        'Message': 'client',
-                        'UserStatusUpdate': 'client',
-                        'UserTypingUpdate': 'client',
-                        'PollVoteUpdate': 'client',
-                        'PollUpdate': 'client',
-                        'HistoryReadUpdate': 'client',
-                        'DeleteMessageUpdate': 'client',
-                        'ChatJoinRequestUpdate': 'client',
-                        'BotChatJoinRequestUpdate': 'client',
-                        'SessionConnection': 'core'
+                        TelegramClient: 'client',
+                        ChosenInlineResult: 'client',
+                        CallbackQuery: 'client',
+                        Chat: 'client',
+                        ChatMember: 'client',
+                        ChatMemberUpdate: 'client',
+                        Message: 'client',
+                        UserStatusUpdate: 'client',
+                        UserTypingUpdate: 'client',
+                        PollVoteUpdate: 'client',
+                        PollUpdate: 'client',
+                        HistoryReadUpdate: 'client',
+                        DeleteMessageUpdate: 'client',
+                        ChatJoinRequestUpdate: 'client',
+                        BotChatJoinRequestUpdate: 'client',
+                        SessionConnection: 'core',
                     }
 
                     if (knownClasses[base]) {
@@ -220,8 +222,8 @@ function fixTyped(project, typed, field, callback) {
 }
 
 function fixType(project, type) {
-    if (isReferenceType(type) && isReferenceTypeBroken(type))
-        return findReferenceType(type, project)
+    if (isReferenceType(type) && isReferenceTypeBroken(type)) { return findReferenceType(type, project) }
+
     return type
 }
 
@@ -229,6 +231,7 @@ function getNamespacedName(symbol) {
     if (!symbol.parent) return symbol.name.text
 
     let parts = [symbol.name.text]
+
     while (symbol.parent) {
         symbol = symbol.parent
 
@@ -283,6 +286,7 @@ function findReferenceType(type, project) {
             // awesome hack
             reflection.name = namespacedName
             const urls = defaultTheme.buildUrls(reflection, [])
+
             if (!urls[0]) {
                 throw new Error(`No url for ${qualifiedName}`)
             }
@@ -294,10 +298,11 @@ function findReferenceType(type, project) {
             if (prefix === null) return type
 
             reflection.url = path.join(`../${pkgName}/${urls[0].url}`)
+
             if (prefix) {
                 reflection.url = reflection.url.replace(
-                    /\/([^\/]+?)\.html$/,
-                    `/${prefix}$1.html`
+                    /\/([^/]+?)\.html$/,
+                    `/${prefix}$1.html`,
                 )
             }
         }
@@ -307,8 +312,9 @@ function findReferenceType(type, project) {
         const newType = ReferenceType.createResolvedReference(
             qualifiedName,
             reflection,
-            project
+            project,
         )
+
         if (type.typeArguments) {
             newType.typeArguments = type.typeArguments
         }
@@ -321,8 +327,10 @@ function findReferenceType(type, project) {
 
 function* walkDirectory(dir) {
     const dirents = fs.readdirSync(dir, { withFileTypes: true })
+
     for (const dirent of dirents) {
         const res = path.resolve(dir, dirent.name)
+
         if (dirent.isDirectory()) {
             yield* walkDirectory(res)
         } else {
@@ -357,9 +365,9 @@ function getModuleExports(module, filename, prefix = '') {
                     ...getFileExports(
                         path.resolve(
                             path.dirname(filename),
-                            exportDeclaration.moduleSpecifier.text
-                        )
-                    )
+                            exportDeclaration.moduleSpecifier.text,
+                        ),
+                    ),
                 )
             }
         }
@@ -367,7 +375,7 @@ function getModuleExports(module, filename, prefix = '') {
         if (
             Array.isArray(statement.modifiers) &&
             statement.modifiers.some(
-                (m) => m.kind === ts.SyntaxKind.ExportKeyword
+                (m) => m.kind === ts.SyntaxKind.ExportKeyword,
             )
         ) {
             if (statement.declarationList) {
@@ -381,7 +389,7 @@ function getModuleExports(module, filename, prefix = '') {
 
         if (statement.kind === ts.SyntaxKind.ModuleDeclaration) {
             exports.push(
-                ...getModuleExports(statement.body, filename, `${statement.name.text}.`)
+                ...getModuleExports(statement.body, filename, `${statement.name.text}.`),
             )
         }
     }
@@ -413,7 +421,7 @@ function getFileExports(filename) {
         filename,
         fs.readFileSync(filename, 'utf8'),
         ts.ScriptTarget.ES2015,
-        true
+        true,
     )
 
     const exports = getModuleExports(sourceFile, filename)
@@ -429,6 +437,7 @@ function determineUrlPrefix(pkgFileName, symbol) {
     const cacheKey = `${pkgFileName}!${symbol.getSourceFile().fileName}@${
         symbol.pos
     }`
+
     if (cacheKey in determineUrlPrefix._cache) {
         return determineUrlPrefix._cache[cacheKey]
     }
@@ -451,10 +460,13 @@ function determineUrlPrefix(pkgFileName, symbol) {
     switch (tdConfig.entryPointStrategy) {
         case 'expand': {
             const possiblePoints = []
+
             for (const dir of tdConfig.entryPoints) {
                 const fullDir = path.join(PACKAGES_DIR, pkgName, dir)
+
                 for (const file of walkDirectory(fullDir)) {
                     const exports = getFileExports(file)
+
                     if (exports.includes(symbolName)) {
                         possiblePoints.push(path.relative(fullDir, file))
                         break
@@ -465,7 +477,7 @@ function determineUrlPrefix(pkgFileName, symbol) {
             if (possiblePoints.length) {
                 // shortest one wins
                 entryPoint = possiblePoints.sort((a, b) => {
-                    return a.match(/[\/\\]/g).length - b.match(/[\/\\]/g).length
+                    return a.match(/[/\\]/g).length - b.match(/[/\\]/g).length
                 })[0]
             }
 
@@ -475,8 +487,9 @@ function determineUrlPrefix(pkgFileName, symbol) {
         case 'resolve':
             for (const file of tdConfig.entryPoints) {
                 const exports = getFileExports(
-                    path.join(PACKAGES_DIR, pkgName, file)
+                    path.join(PACKAGES_DIR, pkgName, file),
                 )
+
                 if (exports.includes(symbolName)) {
                     entryPoint = file
                     break
@@ -485,14 +498,15 @@ function determineUrlPrefix(pkgFileName, symbol) {
             break
         default:
             throw new Error(
-                `Unsupported entryPointStrategy: ${tdConfig.entryPointStrategy}`
+                `Unsupported entryPointStrategy: ${tdConfig.entryPointStrategy}`,
             )
     }
 
     if (!entryPoint) {
         console.warn(
-            `warning: could not find entry point for ${symbolName}`
+            `warning: could not find entry point for ${symbolName}`,
         )
+
         return null
     }
 
@@ -502,10 +516,11 @@ function determineUrlPrefix(pkgFileName, symbol) {
         // exported from root namespace, no prefix thus
         prefix = ''
     } else {
-        prefix = entryPoint.replace(/\.ts$/, '').replace(/[\/\\]/g, '') + '.'
+        prefix = entryPoint.replace(/\.ts$/, '').replace(/[/\\]/g, '') + '.'
     }
 
     determineUrlPrefix._cache[cacheKey] = prefix
+
     return prefix
 }
 

@@ -1,56 +1,54 @@
-import { tl } from '@mtcute/tl'
 import { tdFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { RawDocument } from './document'
-import { makeInspectable } from '../utils'
-import { StickerSet } from '../misc'
 import { MtArgumentError } from '../errors'
+import { StickerSet } from '../misc'
+import { makeInspectable } from '../utils'
+import { RawDocument } from './document'
 
-export namespace Sticker {
-    export interface MaskPosition {
-        /**
-         * The part of the face relative where the mask should be placed
-         */
-        point: 'forehead' | 'eyes' | 'mouth' | 'chin'
-
-        /**
-         * Shift by X-axis measured in widths of the mask scaled to
-         * the face size, from left to right. For example, choosing
-         * -1.0 will place mask just to the left of the default
-         * mask position.
-         */
-        x: number
-
-        /**
-         * Shift by Y-axis measured in heights of the mask scaled to
-         * the face size, from top to bottom. For example, 1.0
-         * will place the mask just below the default mask position.
-         */
-        y: number
-
-        /**
-         * Mask scaling coefficient. For example, 2.0 means double size.
-         */
-        scale: number
-    }
+export interface MaskPosition {
+    /**
+     * The part of the face relative where the mask should be placed
+     */
+    point: 'forehead' | 'eyes' | 'mouth' | 'chin'
 
     /**
-     * Type of the sticker
-     * - `sticker`: regular sticker
-     * - `mask`: mask sticker
-     * - `emoji`: custom emoji
+     * Shift by X-axis measured in widths of the mask scaled to
+     * the face size, from left to right. For example, choosing
+     * -1.0 will place mask just to the left of the default
+     * mask position.
      */
-    export type Type = 'sticker' | 'mask' | 'emoji'
+    x: number
 
     /**
-     * Sticker source file type
-     * - `static`: static sticker (webp)
-     * - `animated`: animated sticker (gzipped lottie json)
-     * - `video`: video sticker (webm)
+     * Shift by Y-axis measured in heights of the mask scaled to
+     * the face size, from top to bottom. For example, 1.0
+     * will place the mask just below the default mask position.
      */
-    export type SourceType = 'static' | 'animated' | 'video'
+    y: number
+
+    /**
+     * Mask scaling coefficient. For example, 2.0 means double size.
+     */
+    scale: number
 }
+
+/**
+ * Type of the sticker
+ * - `sticker`: regular sticker
+ * - `mask`: mask sticker
+ * - `emoji`: custom emoji
+ */
+export type StickerType = 'sticker' | 'mask' | 'emoji'
+
+/**
+ * Sticker source file type
+ * - `static`: static sticker (webp)
+ * - `animated`: animated sticker (gzipped lottie json)
+ * - `video`: video sticker (webm)
+ */
+export type StickerSourceType = 'static' | 'animated' | 'video'
 
 const MASK_POS = ['forehead', 'eyes', 'mouth', 'chin'] as const
 
@@ -72,7 +70,7 @@ export class Sticker extends RawDocument {
             | tl.RawDocumentAttributeCustomEmoji,
         readonly attr2?:
             | tl.RawDocumentAttributeImageSize
-            | tl.RawDocumentAttributeVideo
+            | tl.RawDocumentAttributeVideo,
     ) {
         super(client, doc)
     }
@@ -96,7 +94,7 @@ export class Sticker extends RawDocument {
      * (has premium fullscreen animation)
      */
     get isPremiumSticker(): boolean {
-        return !!this.raw.videoThumbs?.some((s) => s.type === 'f')
+        return Boolean(this.raw.videoThumbs?.some((s) => s.type === 'f'))
     }
 
     /**
@@ -137,9 +135,9 @@ export class Sticker extends RawDocument {
      * > Not sure if there are any such stickers currently.
      */
     get customEmojiFree(): boolean {
-        return this.attr._ === 'documentAttributeCustomEmoji'
-            ? this.attr?.free ?? false
-            : false
+        return this.attr._ === 'documentAttributeCustomEmoji' ?
+            this.attr?.free ?? false :
+            false
     }
 
     /**
@@ -157,27 +155,27 @@ export class Sticker extends RawDocument {
     /**
      * Type of the sticker
      */
-    get stickerType(): Sticker.Type {
+    get stickerType(): StickerType {
         if (this.attr._ === 'documentAttributeSticker') {
             return this.attr.mask ? 'mask' : 'sticker'
         } else if (this.attr._ === 'documentAttributeCustomEmoji') {
             return 'emoji'
-        } else {
-            return 'sticker'
         }
+
+        return 'sticker'
     }
 
     /**
      * Type of the file representing the sticker
      */
-    get sourceType(): Sticker.SourceType {
+    get sourceType(): StickerSourceType {
         if (this.attr2?._ === 'documentAttributeVideo') {
             return 'video'
-        } else {
-            return this.mimeType === 'application/x-tgsticker'
-                ? 'animated'
-                : 'static'
         }
+
+        return this.mimeType === 'application/x-tgsticker' ?
+            'animated' :
+            'static'
     }
 
     /**
@@ -191,18 +189,17 @@ export class Sticker extends RawDocument {
      * Input sticker set that it associated with this sticker, if available.
      */
     get inputStickerSet(): tl.TypeInputStickerSet | null {
-        return this.attr.stickerset._ === 'inputStickerSetEmpty'
-            ? null
-            : this.attr.stickerset
+        return this.attr.stickerset._ === 'inputStickerSetEmpty' ?
+            null :
+            this.attr.stickerset
     }
 
-    private _maskPosition?: Sticker.MaskPosition
+    private _maskPosition?: MaskPosition
     /**
      * Position where this mask should be placed
      */
-    get maskPosition(): Sticker.MaskPosition | null {
-        if (this.attr._ !== 'documentAttributeSticker' || !this.attr.maskCoords)
-            return null
+    get maskPosition(): MaskPosition | null {
+        if (this.attr._ !== 'documentAttributeSticker' || !this.attr.maskCoords) { return null }
 
         if (!this._maskPosition) {
             const raw = this.attr.maskCoords

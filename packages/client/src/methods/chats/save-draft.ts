@@ -13,7 +13,7 @@ import { InputPeerLike } from '../../types'
 export async function saveDraft(
     this: TelegramClient,
     chatId: InputPeerLike,
-    draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>
+    draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>,
 ): Promise<void> {
     const peer = await this.resolvePeer(chatId)
 

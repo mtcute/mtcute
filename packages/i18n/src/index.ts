@@ -1,4 +1,5 @@
 import {
+    I18nStrings,
     I18nValue,
     MtcuteI18nAdapter,
     MtcuteI18nFunction,
@@ -9,7 +10,7 @@ import { createI18nStringsIndex, extractLanguageFromUpdate } from './utils'
 export * from './types'
 export { extractLanguageFromUpdate } from './utils'
 
-export interface MtcuteI18nParameters<Strings, Input> {
+export interface MtcuteI18nParameters<Strings extends I18nStrings, Input> {
     /**
      * Primary language which will also be used as a fallback
      */
@@ -20,7 +21,7 @@ export interface MtcuteI18nParameters<Strings, Input> {
         name: string
 
         /**
-         * Strings for the language. Can be a function to support backrefs
+         * Strings for the language.
          */
         strings: Strings
     }
@@ -40,35 +41,36 @@ export interface MtcuteI18nParameters<Strings, Input> {
     adapter?: MtcuteI18nAdapter<Input>
 }
 
-export function createMtcuteI18n<Strings, Input>(
-    params: MtcuteI18nParameters<Strings, Input>
+export function createMtcuteI18n<Strings extends I18nStrings, Input>(
+    params: MtcuteI18nParameters<Strings, Input>,
 ): MtcuteI18nFunction<Strings, Input> {
     const {
         primaryLanguage,
         otherLanguages,
         defaultLanguage = primaryLanguage.name,
-        adapter = extractLanguageFromUpdate as any as MtcuteI18nAdapter<Input>,
+        adapter = extractLanguageFromUpdate as unknown as MtcuteI18nAdapter<Input>,
     } = params
 
     const indexes: Record<string, Record<string, I18nValue>> = {}
     const fallbackIndex = (indexes[primaryLanguage.name] =
         createI18nStringsIndex(primaryLanguage.strings))
+
     if (otherLanguages) {
         Object.keys(otherLanguages).forEach((lang) => {
-            indexes[lang] = createI18nStringsIndex(otherLanguages[lang])
+            indexes[lang] = createI18nStringsIndex(otherLanguages[lang] as I18nStrings)
         })
     }
 
     if (!(defaultLanguage in indexes)) {
         throw new TypeError(
-            'defaultLanguage is not a registered language'
+            'defaultLanguage is not a registered language',
         )
     }
 
     const tr = (
         lang: Input | string | null,
         key: string,
-        ...params: any[]
+        ...params: unknown[]
     ) => {
         if (lang === null) lang = defaultLanguage
 

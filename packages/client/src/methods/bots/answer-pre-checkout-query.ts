@@ -12,7 +12,7 @@ import { TelegramClient } from '../../client'
 export async function answerPreCheckoutQuery(
     this: TelegramClient,
     queryId: tl.Long,
-    error?: string
+    error?: string,
 ): Promise<void> {
     await this.call({
         _: 'messages.setBotPrecheckoutResults',

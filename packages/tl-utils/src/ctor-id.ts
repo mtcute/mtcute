@@ -1,7 +1,7 @@
 import CRC32 from 'crc-32'
 
-import { TlEntry } from './types'
 import { writeTlEntryToString } from './stringify'
+import { TlEntry } from './types'
 
 /**
  * Computes the constructor id for a given TL entry string.
@@ -15,12 +15,12 @@ export function computeConstructorIdFromString(line: string): number {
             line
                 .replace(
                     /[{};]|[a-zA-Z0-9_]+:flags\.[0-9]+\?true|#[0-9a-f]{1,8}/g,
-                    ''
+                    '',
                 )
                 .replace(/[<>]/g, ' ')
                 .replace(/ +/g, ' ')
                 .replace(':bytes', ':string')
-                .trim()
+                .trim(),
         ) >>> 0
     )
 }

@@ -15,7 +15,7 @@ import { createDummyUpdate } from '../../utils/updates-utils'
 export async function deleteUserHistory(
     this: TelegramClient,
     chatId: InputPeerLike,
-    participantId: InputPeerLike
+    participantId: InputPeerLike,
 ): Promise<void> {
     const channel = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
 
@@ -31,7 +31,7 @@ export async function deleteUserHistory(
         createDummyUpdate(
             res.pts,
             res.ptsCount,
-            (channel as tl.RawInputChannel).channelId
-        )
+            (channel as tl.RawInputChannel).channelId,
+        ),
     )
 }

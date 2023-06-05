@@ -16,7 +16,7 @@ const camelToSnake = (s) => {
         /(?<=[a-zA-Z0-9])([A-Z0-9]+(?=[A-Z]|$)|[A-Z0-9])/g,
         ($1) => {
             return '_' + $1.toLowerCase()
-        }
+        },
     )
 }
 
@@ -36,10 +36,10 @@ function parseUpdateTypes() {
             typeName: m[1],
             handlerTypeName: m[2] || camelToPascal(snakeToCamel(m[1])),
             updateType: m[3],
-            funcName: m[2]
-                ? m[2][0].toLowerCase() + m[2].substr(1)
-                : snakeToCamel(m[1]),
-            state: !!m[4]
+            funcName: m[2] ?
+                m[2][0].toLowerCase() + m[2].substr(1) :
+                snakeToCamel(m[1]),
+            state: Boolean(m[4]),
         })
     }
 
@@ -54,6 +54,7 @@ function replaceSections(filename, sections, dir = __dirname) {
     const findMarker = (marker) => {
         const idx = lines.findIndex((line) => line.trim() === `// ${marker}`)
         if (idx === -1) throw new Error(marker + ' not found')
+
         return idx
     }
 
@@ -91,15 +92,15 @@ function toSentence(type, stype = 'inline') {
         return `${name[0].match(/[aeiouy]/i) ? 'an' : 'a'} ${name} handler`
     } else if (stype === 'plain') {
         return `${name} handler`
-    } else {
-        return `${name[0].toUpperCase()}${name.substr(1)} handler`
     }
+
+    return `${name[0].toUpperCase()}${name.substr(1)} handler`
 }
 
 function generateParsedUpdate() {
     replaceSections('types/updates/index.ts', {
-        codegen: 'export type ParsedUpdate =\n'
-            + types.map((typ) => `    | { name: '${typ.typeName}'; data: ${typ.updateType} }\n`).join(''),
+        codegen: 'export type ParsedUpdate =\n' +
+            types.map((typ) => `    | { name: '${typ.typeName}'; data: ${typ.updateType} }\n`).join(''),
     })
 }
 

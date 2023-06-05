@@ -13,7 +13,7 @@ import { assertTypeIs } from '../../utils/type-assertion'
  */
 export async function getCustomEmojis(
     this: TelegramClient,
-    ids: tl.Long[]
+    ids: tl.Long[],
 ): Promise<Sticker[]> {
     const res = await this.call({
         _: 'messages.getCustomEmojiDocuments',
@@ -24,11 +24,12 @@ export async function getCustomEmojis(
         assertTypeIs('getCustomEmojis', it, 'document')
 
         const doc = parseDocument(this, it)
-        if ((doc as Sticker).type !== 'sticker') {
+
+        if (doc.type !== 'sticker') {
             throw new MtTypeAssertionError(
                 'getCustomEmojis',
                 'sticker',
-                (doc as any).type
+                doc.type,
             )
         }
 

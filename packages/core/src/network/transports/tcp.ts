@@ -1,9 +1,10 @@
 import EventEmitter from 'events'
-import { Socket, connect } from 'net'
+import { connect, Socket } from 'net'
+
 import { tl } from '@mtcute/tl'
 
 import { ICryptoProvider, Logger } from '../../utils'
-import { ITelegramTransport, IPacketCodec, TransportState } from './abstract'
+import { IPacketCodec, ITelegramTransport, TransportState } from './abstract'
 import { IntermediatePacketCodec } from './intermediate'
 
 /**
@@ -12,8 +13,7 @@ import { IntermediatePacketCodec } from './intermediate'
  */
 export abstract class BaseTcpTransport
     extends EventEmitter
-    implements ITelegramTransport
-{
+    implements ITelegramTransport {
     protected _currentDc: tl.RawDcOption | null = null
     protected _state: TransportState = TransportState.Idle
     protected _socket: Socket | null = null
@@ -48,8 +48,7 @@ export abstract class BaseTcpTransport
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     connect(dc: tl.RawDcOption, testMode: boolean): void {
-        if (this._state !== TransportState.Idle)
-            throw new Error('Transport is not IDLE')
+        if (this._state !== TransportState.Idle) { throw new Error('Transport is not IDLE') }
 
         if (!this.packetCodecInitialized) {
             this._packetCodec.setup?.(this._crypto, this.log)
@@ -67,7 +66,7 @@ export abstract class BaseTcpTransport
         this._socket = connect(
             dc.port,
             dc.ipAddress,
-            this.handleConnect.bind(this)
+            this.handleConnect.bind(this),
         )
 
         this._socket.on('data', (data) => this._packetCodec.feed(data))
@@ -114,8 +113,7 @@ export abstract class BaseTcpTransport
     }
 
     async send(bytes: Buffer): Promise<void> {
-        if (this._state !== TransportState.Ready)
-            throw new Error('Transport is not READY')
+        if (this._state !== TransportState.Ready) { throw new Error('Transport is not READY') }
 
         const framed = await this._packetCodec.encode(bytes)
 

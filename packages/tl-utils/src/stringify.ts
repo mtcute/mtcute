@@ -18,7 +18,7 @@ function normalizeType(s: string): string {
  */
 export function writeTlEntryToString(
     entry: TlEntry,
-    forIdComputation = false
+    forIdComputation = false,
 ): string {
     let str = entry.name
 

@@ -15,7 +15,7 @@ import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
 export async function revokeInviteLink(
     this: TelegramClient,
     chatId: InputPeerLike,
-    link: string
+    link: string,
 ): Promise<ChatInviteLink> {
     const res = await this.call({
         _: 'messages.editExportedChatInvite',
@@ -27,9 +27,9 @@ export async function revokeInviteLink(
     const peers = PeersIndex.from(res)
 
     const invite =
-        res._ === 'messages.exportedChatInviteReplaced'
-            ? res.newInvite
-            : res.invite
+        res._ === 'messages.exportedChatInviteReplaced' ?
+            res.newInvite :
+            res.invite
 
     return new ChatInviteLink(this, invite, peers)
 }

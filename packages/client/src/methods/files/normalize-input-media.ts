@@ -1,17 +1,18 @@
 import Long from 'long'
-import { tl } from '@mtcute/tl'
+
 import {
     fileIdToInputDocument,
     fileIdToInputPhoto,
     parseFileId,
     tdFileId,
 } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputMediaLike, isUploadedFile, UploadFileLike } from '../../types'
 import { extractFileName } from '../../utils/file-utils'
-import { assertTypeIs } from '../../utils/type-assertion'
 import { normalizeDate } from '../../utils/misc-utils'
+import { assertTypeIs } from '../../utils/type-assertion'
 import { encodeWaveform } from '../../utils/voice-utils'
 
 /**
@@ -28,7 +29,7 @@ export async function _normalizeInputMedia(
         progressCallback?: (uploaded: number, total: number) => void
         uploadPeer?: tl.TypeInputPeer
     },
-    uploadMedia = false
+    uploadMedia = false,
 ): Promise<tl.TypeInputMedia> {
     // my condolences to those poor souls who are going to maintain this (myself included)
 
@@ -99,13 +100,13 @@ export async function _normalizeInputMedia(
         return {
             _: 'inputMediaGame',
             id:
-                typeof media.game === 'string'
-                    ? {
-                          _: 'inputGameShortName',
-                          botId: { _: 'inputUserSelf' },
-                          shortName: media.game,
-                      }
-                    : media.game,
+                typeof media.game === 'string' ?
+                    {
+                        _: 'inputGameShortName',
+                        botId: { _: 'inputUserSelf' },
+                        shortName: media.game,
+                    } :
+                    media.game,
         }
     }
 
@@ -115,15 +116,15 @@ export async function _normalizeInputMedia(
             title: media.title,
             description: media.description,
             photo:
-                typeof media.photo === 'string'
-                    ? {
-                          _: 'inputWebDocument',
-                          url: media.photo,
-                          mimeType: 'image/jpeg',
-                          size: 0,
-                          attributes: [],
-                      }
-                    : media.photo,
+                typeof media.photo === 'string' ?
+                    {
+                        _: 'inputWebDocument',
+                        url: media.photo,
+                        mimeType: 'image/jpeg',
+                        size: 0,
+                        attributes: [],
+                    } :
+                    media.photo,
             invoice: media.invoice,
             payload: media.payload,
             provider: media.token,
@@ -132,9 +133,9 @@ export async function _normalizeInputMedia(
                 data: JSON.stringify(media.providerData),
             },
             startParam: media.startParam,
-            extendedMedia: media.extendedMedia
-                ? await this._normalizeInputMedia(media.extendedMedia, params)
-                : undefined,
+            extendedMedia: media.extendedMedia ?
+                await this._normalizeInputMedia(media.extendedMedia, params) :
+                undefined,
         }
     }
 
@@ -168,10 +169,10 @@ export async function _normalizeInputMedia(
             })
 
             if (media.solution) {
-                ;[solution, solutionEntities] = await this._parseEntities(
+                [solution, solutionEntities] = await this._parseEntities(
                     media.solution,
                     params.parseMode,
-                    media.solutionEntities
+                    media.solutionEntities,
                 )
             }
         }
@@ -201,16 +202,21 @@ export async function _normalizeInputMedia(
     let mime = 'application/octet-stream'
 
     const upload = async (file: UploadFileLike): Promise<void> => {
+        let sendMime
+
+        if (media.type === 'sticker') {
+            sendMime = media.isAnimated ?
+                'application/x-tgsticker' :
+                'image/webp'
+        } else {
+            sendMime = media.fileMime
+        }
+
         const uploaded = await this.uploadFile({
             file,
             progressCallback: params.progressCallback,
             fileName: media.fileName,
-            fileMime:
-                media.type === 'sticker'
-                    ? media.isAnimated
-                        ? 'application/x-tgsticker'
-                        : 'image/webp'
-                    : media.fileMime,
+            fileMime: sendMime,
             fileSize: media.fileSize,
         })
         inputFile = uploaded.inputFile
@@ -221,7 +227,7 @@ export async function _normalizeInputMedia(
 
     const uploadMediaIfNeeded = async (
         inputMedia: tl.TypeInputMedia,
-        photo: boolean
+        photo: boolean,
     ): Promise<tl.TypeInputMedia> => {
         if (!uploadMedia) return inputMedia
 
@@ -235,12 +241,12 @@ export async function _normalizeInputMedia(
             assertTypeIs(
                 'normalizeInputMedia (@ messages.uploadMedia)',
                 res,
-                'messageMediaPhoto'
+                'messageMediaPhoto',
             )
             assertTypeIs(
                 'normalizeInputMedia (@ messages.uploadMedia)',
                 res.photo!,
-                'photo'
+                'photo',
             )
 
             return {
@@ -253,43 +259,43 @@ export async function _normalizeInputMedia(
                 },
                 ttlSeconds: media.ttlSeconds,
             }
-        } else {
-            assertTypeIs(
-                'normalizeInputMedia (@ messages.uploadMedia)',
-                res,
-                'messageMediaDocument'
-            )
-            assertTypeIs(
-                'normalizeInputMedia (@ messages.uploadMedia)',
+        }
+        assertTypeIs(
+            'normalizeInputMedia (@ messages.uploadMedia)',
+            res,
+            'messageMediaDocument',
+        )
+        assertTypeIs(
+            'normalizeInputMedia (@ messages.uploadMedia)',
                 res.document!,
-                'document'
-            )
+                'document',
+        )
 
-            return {
-                _: 'inputMediaDocument',
-                id: {
-                    _: 'inputDocument',
-                    id: res.document.id,
-                    accessHash: res.document.accessHash,
-                    fileReference: res.document.fileReference,
-                },
-                ttlSeconds: media.ttlSeconds,
-            }
+        return {
+            _: 'inputMediaDocument',
+            id: {
+                _: 'inputDocument',
+                id: res.document.id,
+                accessHash: res.document.accessHash,
+                fileReference: res.document.fileReference,
+            },
+            ttlSeconds: media.ttlSeconds,
         }
     }
 
     const input = media.file
+
     if (tdFileId.isFileIdLike(input)) {
         if (typeof input === 'string' && input.match(/^https?:\/\//)) {
             return uploadMediaIfNeeded(
                 {
                     _:
-                        media.type === 'photo'
-                            ? 'inputMediaPhotoExternal'
-                            : 'inputMediaDocumentExternal',
+                        media.type === 'photo' ?
+                            'inputMediaPhotoExternal' :
+                            'inputMediaDocumentExternal',
                     url: input,
                 },
-                media.type === 'photo'
+                media.type === 'photo',
             )
         } else if (typeof input === 'string' && input.match(/^file:/)) {
             await upload(input.substring(5))
@@ -306,18 +312,18 @@ export async function _normalizeInputMedia(
                 return uploadMediaIfNeeded(
                     {
                         _:
-                            parsed.type === tdFileId.FileType.Photo
-                                ? 'inputMediaPhotoExternal'
-                                : 'inputMediaDocumentExternal',
+                            parsed.type === tdFileId.FileType.Photo ?
+                                'inputMediaPhotoExternal' :
+                                'inputMediaDocumentExternal',
                         url: parsed.location.url,
                     },
-                    parsed.type === tdFileId.FileType.Photo
+                    parsed.type === tdFileId.FileType.Photo,
                 )
-            } else {
-                return {
-                    _: 'inputMediaDocument',
-                    id: fileIdToInputDocument(parsed),
-                }
+            }
+
+            return {
+                _: 'inputMediaDocument',
+                id: fileIdToInputDocument(parsed),
             }
         }
     } else if (typeof input === 'object' && tl.isAnyInputMedia(input)) {
@@ -340,7 +346,7 @@ export async function _normalizeInputMedia(
                 file: inputFile,
                 ttlSeconds: media.ttlSeconds,
             },
-            true
+            true,
         )
     }
 
@@ -355,9 +361,9 @@ export async function _normalizeInputMedia(
             _: 'documentAttributeFilename',
             fileName:
                 media.fileName ||
-                (typeof media.file === 'string'
-                    ? extractFileName(media.file)
-                    : 'unnamed'),
+                (typeof media.file === 'string' ?
+                    extractFileName(media.file) :
+                    'unnamed'),
         })
     }
 
@@ -370,8 +376,8 @@ export async function _normalizeInputMedia(
             supportsStreaming: media.supportsStreaming,
             roundMessage: media.isRound,
         })
-        if (media.isAnimated)
-            attributes.push({ _: 'documentAttributeAnimated' })
+
+        if (media.isAnimated) { attributes.push({ _: 'documentAttributeAnimated' }) }
     }
 
     if (media.type === 'audio' || media.type === 'voice') {
@@ -382,9 +388,9 @@ export async function _normalizeInputMedia(
             title: media.type === 'audio' ? media.title : undefined,
             performer: media.type === 'audio' ? media.performer : undefined,
             waveform:
-                media.type === 'voice' && media.waveform
-                    ? encodeWaveform(media.waveform)
-                    : undefined,
+                media.type === 'voice' && media.waveform ?
+                    encodeWaveform(media.waveform) :
+                    undefined,
         })
     }
 
@@ -409,6 +415,6 @@ export async function _normalizeInputMedia(
             attributes,
             ttlSeconds: media.ttlSeconds,
         },
-        false
+        false,
     )
 }

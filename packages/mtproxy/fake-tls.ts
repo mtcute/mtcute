@@ -1,12 +1,13 @@
+import bigInt, { BigInteger } from 'big-integer'
+
 import {
     bigIntToBuffer,
     bufferToBigInt,
     ICryptoProvider,
     IPacketCodec,
-    WrappedCodec,
     randomBytes,
+    WrappedCodec,
 } from '@mtcute/core'
-import bigInt, { BigInteger } from 'big-integer'
 
 const MAX_TLS_PACKET_LENGTH = 2878
 const TLS_FIRST_PREFIX = Buffer.from('140303000101', 'hex')
@@ -14,17 +15,17 @@ const TLS_FIRST_PREFIX = Buffer.from('140303000101', 'hex')
 // ref: https://github.com/tdlib/td/blob/master/td/mtproto/TlsInit.cpp
 const KEY_MOD = bigInt(
     '7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed',
-    16
+    16,
 )
 // 2^255 - 19
 const QUAD_RES_MOD = bigInt(
     '7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed',
-    16
+    16,
 )
 // (mod - 1) / 2 = 2^254 - 10
 const QUAD_RES_POW = bigInt(
     '3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6',
-    16
+    16,
 )
 
 function _getY2(x: BigInteger, mod: BigInteger): BigInteger {
@@ -80,8 +81,8 @@ function executeTlsOperations(h: TlsOperationHandler): void {
     h.string(
         Buffer.from(
             '130113021303c02bc02fc02cc030cca9cca8c013c014009c009d002f003501000193',
-            'hex'
-        )
+            'hex',
+        ),
     )
     h.grease(2)
     h.string(Buffer.from('00000000', 'hex'))
@@ -98,8 +99,8 @@ function executeTlsOperations(h: TlsOperationHandler): void {
     h.string(
         Buffer.from(
             '001d00170018000b00020100002300000010000e000c02683208687474702f312e31000500050100000000000d0012001004030804040105030805050108060601001200000033002b0029',
-            'hex'
-        )
+            'hex',
+        ),
     )
     h.grease(4)
     h.string(Buffer.from('000100001d0020', 'hex'))
@@ -222,6 +223,7 @@ class TlsHelloWriter implements TlsOperationHandler {
 
             let x = bufferToBigInt(key)
             const y = _getY2(x, KEY_MOD)
+
             if (_isQuadraticResidue(y)) {
                 for (let i = 0; i < 3; i++) {
                     x = _getDoubleX(x, KEY_MOD)
@@ -229,6 +231,7 @@ class TlsHelloWriter implements TlsOperationHandler {
 
                 const key = bigIntToBuffer(x, 32, true)
                 this.string(key)
+
                 return
             }
         }
@@ -240,7 +243,12 @@ class TlsHelloWriter implements TlsOperationHandler {
     }
 
     endScope() {
-        const begin = this._scopes.pop()!
+        const begin = this._scopes.pop()
+
+        if (begin === undefined) {
+            throw new Error('endScope called without beginScope')
+        }
+
         const end = this.pos
         const size = end - begin - 2
 
@@ -270,12 +278,13 @@ class TlsHelloWriter implements TlsOperationHandler {
 export async function generateFakeTlsHeader(
     domain: string,
     secret: Buffer,
-    crypto: ICryptoProvider
+    crypto: ICryptoProvider,
 ): Promise<Buffer> {
     const domainBuf = Buffer.from(domain)
 
     const writer = new TlsHelloWriter(517, domainBuf)
     executeTlsOperations(writer)
+
     return writer.finish(secret, crypto)
 }
 
@@ -293,6 +302,7 @@ export class FakeTlsPacketCodec extends WrappedCodec implements IPacketCodec {
 
     async tag(): Promise<Buffer> {
         this._header = await this._inner.tag()
+
         return Buffer.alloc(0)
     }
 
@@ -307,10 +317,11 @@ export class FakeTlsPacketCodec extends WrappedCodec implements IPacketCodec {
 
         if (this._isFirstTls) {
             this._isFirstTls = false
+
             return Buffer.concat([TLS_FIRST_PREFIX, header, packet])
-        } else {
-            return Buffer.concat([header, packet])
         }
+
+        return Buffer.concat([header, packet])
     }
 
     async encode(packet: Buffer): Promise<Buffer> {
@@ -318,14 +329,16 @@ export class FakeTlsPacketCodec extends WrappedCodec implements IPacketCodec {
 
         if (packet.length + this._header.length > MAX_TLS_PACKET_LENGTH) {
             const ret: Buffer[] = []
+
             while (packet.length) {
                 const buf = packet.slice(
                     0,
-                    MAX_TLS_PACKET_LENGTH - this._header.length
+                    MAX_TLS_PACKET_LENGTH - this._header.length,
                 )
                 packet = packet.slice(buf.length)
                 ret.push(this._encodeTls(buf))
             }
+
             return Buffer.concat(ret)
         }
 
@@ -346,6 +359,7 @@ export class FakeTlsPacketCodec extends WrappedCodec implements IPacketCodec {
                 )
             ) {
                 this.emit('error', new Error('Invalid TLS header'))
+
                 return
             }
 

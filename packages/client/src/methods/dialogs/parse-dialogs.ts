@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { getMarkedPeerId } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { Dialog, MtTypeAssertionError, PeersIndex } from '../../types'
@@ -7,14 +7,15 @@ import { Dialog, MtTypeAssertionError, PeersIndex } from '../../types'
 /** @internal */
 export function _parseDialogs(
     this: TelegramClient,
-    res: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs
+    res: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs,
 ): Dialog[] {
-    if (res._ === 'messages.dialogsNotModified')
+    if (res._ === 'messages.dialogsNotModified') {
         throw new MtTypeAssertionError(
             'messages.getPeerDialogs',
             '!messages.dialogsNotModified',
-            'messages.dialogsNotModified'
+            'messages.dialogsNotModified',
         )
+    }
 
     const peers = PeersIndex.from(res)
 

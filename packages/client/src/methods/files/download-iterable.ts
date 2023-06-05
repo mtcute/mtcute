@@ -1,18 +1,18 @@
-import { tl } from '@mtcute/tl'
 import {
     fileIdToInputFileLocation,
     fileIdToInputWebFileLocation,
     parseFileId,
 } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { determinePartSize } from '../../utils/file-utils'
 import {
-    MtArgumentError,
-    MtUnsupportedError,
     FileDownloadParameters,
     FileLocation,
+    MtArgumentError,
+    MtUnsupportedError,
 } from '../../types'
+import { determinePartSize } from '../../utils/file-utils'
 
 /**
  * Download a file and return it as an iterable, which yields file contents
@@ -24,21 +24,25 @@ import {
  */
 export async function* downloadAsIterable(
     this: TelegramClient,
-    params: FileDownloadParameters
+    params: FileDownloadParameters,
 ): AsyncIterableIterator<Buffer> {
     const partSizeKb =
         params.partSize ??
         (params.fileSize ? determinePartSize(params.fileSize) : 64)
-    if (partSizeKb % 4 !== 0)
+
+    if (partSizeKb % 4 !== 0) {
         throw new MtArgumentError(
-            `Invalid part size: ${partSizeKb}. Must be divisible by 4.`
+            `Invalid part size: ${partSizeKb}. Must be divisible by 4.`,
         )
+    }
 
     let offset = params.offset ?? 0
-    if (offset % 4096 !== 0)
+
+    if (offset % 4096 !== 0) {
         throw new MtArgumentError(
-            `Invalid offset: ${offset}. Must be divisible by 4096`
+            `Invalid offset: ${offset}. Must be divisible by 4096`,
         )
+    }
 
     let dcId = params.dcId
     let fileSize = params.fileSize
@@ -47,18 +51,21 @@ export async function* downloadAsIterable(
     let location: tl.TypeInputFileLocation | tl.TypeInputWebFileLocation
     if (input instanceof FileLocation) {
         if (typeof input.location === 'function') {
-            ;(input as tl.Mutable<FileLocation>).location = input.location()
+            (input as tl.Mutable<FileLocation>).location = input.location()
         }
 
         if (Buffer.isBuffer(input.location)) {
             yield input.location
+
             return
         }
         if (!dcId) dcId = input.dcId
         if (!fileSize) fileSize = input.fileSize
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         location = input.location as any
     } else if (typeof input === 'string') {
         const parsed = parseFileId(input)
+
         if (parsed.location._ === 'web') {
             location = fileIdToInputWebFileLocation(parsed)
         } else {
@@ -75,13 +82,14 @@ export async function* downloadAsIterable(
 
     let limit =
         params.limit ??
-        (fileSize
-            ? // derive limit from chunk size, file size and offset
-              ~~((fileSize + chunkSize - offset - 1) / chunkSize)
-            : // we will receive an error when we have reached the end anyway
-              Infinity)
+        // derive limit from chunk size, file size and offset
+        (fileSize ?
+            ~~((fileSize + chunkSize - offset - 1) / chunkSize) :
+        // we will receive an error when we have reached the end anyway
+            Infinity)
 
     let connection = this._downloadConnections[dcId]
+
     if (!connection) {
         connection = await this.createAdditionalConnection(dcId)
         this._downloadConnections[dcId] = connection
@@ -91,23 +99,28 @@ export async function* downloadAsIterable(
         let result:
             | tl.RpcCallReturn['upload.getFile']
             | tl.RpcCallReturn['upload.getWebFile']
+
         try {
             result = await this.call(
                 {
                     _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     location: location as any,
                     offset,
                     limit: chunkSize,
                 },
-                { connection }
+                { connection },
             )
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
             if (e.constructor === tl.errors.FileMigrateXError) {
                 connection = this._downloadConnections[e.new_dc]
+
                 if (!connection) {
                     connection = await this.createAdditionalConnection(e.new_dc)
                     this._downloadConnections[e.new_dc] = connection
                 }
+
                 return requestCurrent()
             } else if (e.constructor === tl.errors.FilerefUpgradeNeededError) {
                 // todo: implement someday
@@ -121,7 +134,7 @@ export async function* downloadAsIterable(
             // also, i couldnt find any media that would be downloaded from cdn, so even if
             // i implemented that, i wouldnt be able to test that, so :shrug:
             throw new MtUnsupportedError(
-                'Received CDN redirect, which is not supported (yet)'
+                'Received CDN redirect, which is not supported (yet)',
             )
         }
 
@@ -138,9 +151,11 @@ export async function* downloadAsIterable(
 
     for (let i = 0; i < limit; i++) {
         const buf = await requestCurrent()
-        if (buf.length === 0)
+
+        if (buf.length === 0) {
             // we've reached the end
             return
+        }
 
         yield buf
         offset += chunkSize

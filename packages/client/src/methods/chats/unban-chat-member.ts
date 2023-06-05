@@ -22,7 +22,7 @@ import {
 export async function unbanChatMember(
     this: TelegramClient,
     chatId: InputPeerLike,
-    userId: InputPeerLike
+    userId: InputPeerLike,
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
     const user = await this.resolvePeer(userId)

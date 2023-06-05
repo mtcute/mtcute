@@ -11,7 +11,7 @@ import { normalizeToInputUser } from '../../utils/peer-utils'
  */
 export async function getBotMenuButton(
     this: TelegramClient,
-    user: InputPeerLike
+    user: InputPeerLike,
 ): Promise<tl.TypeBotMenuButton> {
     return await this.call({
         _: 'bots.getBotMenuButton',

@@ -18,7 +18,7 @@ export async function pinMessage(
     chatId: InputPeerLike,
     messageId: number,
     notify = false,
-    bothSides = false
+    bothSides = false,
 ): Promise<void> {
     const res = await this.call({
         _: 'messages.updatePinnedMessage',

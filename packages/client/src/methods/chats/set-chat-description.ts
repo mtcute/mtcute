@@ -13,7 +13,7 @@ import { InputPeerLike } from '../../types'
 export async function setChatDescription(
     this: TelegramClient,
     chatId: InputPeerLike,
-    description: string
+    description: string,
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
 

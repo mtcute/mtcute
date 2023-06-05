@@ -4,41 +4,44 @@
 //
 // Conflicts merging is interactive, so we can't put this in CI
 
+import * as cheerio from 'cheerio'
+import { readFile, writeFile } from 'fs/promises'
+import { join } from 'path'
+import * as readline from 'readline'
+
+import { hasPresentKey } from '@mtcute/core'
 import {
-    parseTlToEntries,
-    parseFullTlSchema,
+    generateTlSchemasDifference,
     mergeTlEntries,
     mergeTlSchemas,
+    parseFullTlSchema,
+    parseTlToEntries,
     TlEntry,
     TlFullSchema,
     writeTlEntryToString,
-    generateTlSchemasDifference,
 } from '@mtcute/tl-utils'
-import { readdir, readFile, writeFile } from 'fs/promises'
-import { join } from 'path'
-import cheerio from 'cheerio'
-import * as readline from 'readline'
+
 import {
-    CORE_DOMAIN,
+    API_SCHEMA_DIFF_JSON_FILE,
     API_SCHEMA_JSON_FILE,
+    BLOGFORK_DOMAIN,
+    CORE_DOMAIN,
+    COREFORK_DOMAIN,
     TDESKTOP_SCHEMA,
     TDLIB_SCHEMA,
-    COREFORK_DOMAIN,
-    BLOGFORK_DOMAIN,
-    API_SCHEMA_DIFF_JSON_FILE,
 } from './constants'
-import { fetchRetry } from './utils'
 import {
     applyDocumentation,
     fetchDocumentation,
     getCachedDocumentation,
 } from './documentation'
-import { packTlSchema, unpackTlSchema } from "./schema";
-import { bumpVersion } from '../../../scripts/version'
+import { packTlSchema, unpackTlSchema } from './schema'
+import { fetchRetry } from './utils'
+
+import { bumpVersion } from '~scripts/version'
 
 const README_MD_FILE = join(__dirname, '../README.md')
 const PACKAGE_JSON_FILE = join(__dirname, '../package.json')
-const PACKAGES_DIR = join(__dirname, '../../')
 
 function tlToFullSchema(tl: string): TlFullSchema {
     return parseFullTlSchema(parseTlToEntries(tl))
@@ -53,7 +56,7 @@ interface Schema {
 async function fetchTdlibSchema(): Promise<Schema> {
     const schema = await fetchRetry(TDLIB_SCHEMA)
     const versionHtml = await fetch(
-        'https://raw.githubusercontent.com/tdlib/td/master/td/telegram/Version.h'
+        'https://raw.githubusercontent.com/tdlib/td/master/td/telegram/Version.h',
     ).then((i) => i.text())
 
     const layer = versionHtml.match(/^constexpr int32 MTPROTO_LAYER = (\d+)/m)
@@ -80,7 +83,7 @@ async function fetchTdesktopSchema(): Promise<Schema> {
 
 async function fetchCoreSchema(
     domain = CORE_DOMAIN,
-    name = 'Core'
+    name = 'Core',
 ): Promise<Schema> {
     const html = await fetchRetry(`${domain}/schema`)
     const $ = cheerio.load(html)
@@ -119,14 +122,14 @@ async function updateReadme(currentLayer: number) {
         README_MD_FILE,
         oldReadme.replace(
             /^Generated from TL layer \*\*\d+\*\* \(last updated on \d+\.\d+\.\d+\)\.$/m,
-            `Generated from TL layer **${currentLayer}** (last updated on ${today}).`
-        )
+            `Generated from TL layer **${currentLayer}** (last updated on ${today}).`,
+        ),
     )
 }
 
 async function updatePackageVersion(
     rl: readline.Interface,
-    currentLayer: number
+    currentLayer: number,
 ) {
     const packageJson = JSON.parse(await readFile(PACKAGE_JSON_FILE, 'utf8'))
     const version: string = packageJson.version
@@ -158,7 +161,7 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
     console.log('Applying int53 overrides...')
 
     const config = JSON.parse(
-        await readFile(join(__dirname, '../data/int53-overrides.json'), 'utf8')
+        await readFile(join(__dirname, '../data/int53-overrides.json'), 'utf8'),
     )
 
     schema.entries.forEach((entry) => {
@@ -167,10 +170,12 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
 
         overrides.forEach((argName) => {
             const arg = entry.arguments.find((it) => it.name === argName)
+
             if (!arg) {
                 console.log(
-                    `[warn] Cannot override ${entry.name}#${argName}: argument does not exist`
+                    `[warn] Cannot override ${entry.name}#${argName}: argument does not exist`,
                 )
+
                 return
             }
 
@@ -180,7 +185,7 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
                 arg.type = 'vector<int53>'
             } else {
                 console.log(
-                    `[warn] Cannot override ${entry.name}#${argName}: argument is not long (${arg.type})`
+                    `[warn] Cannot override ${entry.name}#${argName}: argument is not long (${arg.type})`,
                 )
             }
         })
@@ -200,7 +205,7 @@ async function main() {
             name: 'Custom',
             layer: 0, // handled manually
             content: tlToFullSchema(
-                await readFile(join(__dirname, '../data/custom.tl'), 'utf8')
+                await readFile(join(__dirname, '../data/custom.tl'), 'utf8'),
             ),
         },
     ]
@@ -211,8 +216,8 @@ async function main() {
             ' - %s (layer %d): %d entries',
             schema.name,
             schema.layer,
-            schema.content.entries.length
-        )
+            schema.content.entries.length,
+        ),
     )
 
     const resultLayer = Math.max(...schemas.map((it) => it.layer))
@@ -234,13 +239,14 @@ async function main() {
             let chooseOptions: ConflictOption[] = []
 
             const customEntry = options[options.length - 1]
+
             if (customEntry.entry) {
                 // if there is custom entry in conflict, we must present it, otherwise something may go wrong
                 chooseOptions = options
             } else {
                 // first of all, prefer entries from the latest layer
                 const fromLastSchema = options.filter(
-                    (opt) => opt.schema.layer === resultLayer
+                    (opt) => opt.schema.layer === resultLayer,
                 )
 
                 // if there is only one schema on the latest layer, we can simply return it
@@ -251,8 +257,8 @@ async function main() {
                 // and we can merge the ones from the latest layer
                 const mergedEntry = mergeTlEntries(
                     fromLastSchema
-                        .filter((opt) => opt.entry)
-                        .map((opt) => opt.entry!)
+                        .map((opt) => opt.entry)
+                        .filter(Boolean),
                 )
                 if (typeof mergedEntry === 'string') {
                     // merge failed, so there is in fact some conflict
@@ -260,38 +266,37 @@ async function main() {
                 } else return mergedEntry
             }
 
-            let nonEmptyOptions = chooseOptions.filter((opt) => opt.entry)
+            const nonEmptyOptions = chooseOptions.filter(hasPresentKey('entry'))
 
             console.log(
                 'Conflict detected at %s %s:',
-                nonEmptyOptions[0].entry!.kind,
-                nonEmptyOptions[0].entry!.name
+                nonEmptyOptions[0].entry?.kind,
+                nonEmptyOptions[0].entry?.name,
             )
             console.log('0. Remove')
             nonEmptyOptions.forEach((opt, idx) => {
                 console.log(
-                    `${idx + 1}. ${opt.schema.name}: ${writeTlEntryToString(
-                        opt.entry!
-                    )}`
+                    `${idx + 1}. ${opt.schema.name}: ${writeTlEntryToString(opt.entry)}`,
                 )
             })
 
             while (true) {
                 const res = parseInt(
-                    await input(rl, `[0-${nonEmptyOptions.length}] > `)
+                    await input(rl, `[0-${nonEmptyOptions.length}] > `),
                 )
-                if (isNaN(res) || res < 0 || res > nonEmptyOptions.length)
-                    continue
+
+                if (isNaN(res) || res < 0 || res > nonEmptyOptions.length) { continue }
 
                 if (res === 0) return undefined
+
                 return nonEmptyOptions[res - 1].entry
             }
-        }
+        },
     )
 
     console.log(
         'Done! Final schema contains %d entries',
-        resultSchema.entries.length
+        resultSchema.entries.length,
     )
 
     let docs = await getCachedDocumentation()
@@ -321,13 +326,13 @@ async function main() {
         JSON.stringify({
             layer: [oldSchema[1], resultLayer],
             diff: generateTlSchemasDifference(oldSchema[0], resultSchema),
-        }, null, 4)
+        }, null, 4),
     )
 
     console.log('Writing result to file...')
     await writeFile(
         API_SCHEMA_JSON_FILE,
-        JSON.stringify(packTlSchema(resultSchema, resultLayer))
+        JSON.stringify(packTlSchema(resultSchema, resultLayer)),
     )
 
     console.log('Updating README.md...')

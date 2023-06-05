@@ -1,4 +1,4 @@
-import { IEncryptionScheme, ICryptoProvider } from './abstract'
+import { ICryptoProvider, IEncryptionScheme } from './abstract'
 
 /**
  * Generate AES key and IV from nonces as defined by MTProto.
@@ -12,7 +12,7 @@ import { IEncryptionScheme, ICryptoProvider } from './abstract'
 export async function generateKeyAndIvFromNonce(
     crypto: ICryptoProvider,
     serverNonce: Buffer,
-    newNonce: Buffer
+    newNonce: Buffer,
 ): Promise<[Buffer, Buffer]> {
     const hash1 = await crypto.sha1(Buffer.concat([newNonce, serverNonce]))
     const hash2 = await crypto.sha1(Buffer.concat([serverNonce, newNonce]))
@@ -37,14 +37,14 @@ export async function createAesIgeForMessage(
     crypto: ICryptoProvider,
     authKey: Buffer,
     messageKey: Buffer,
-    client: boolean
+    client: boolean,
 ): Promise<IEncryptionScheme> {
     const x = client ? 0 : 8
     const sha256a = await crypto.sha256(
-        Buffer.concat([messageKey, authKey.slice(x, 36 + x)])
+        Buffer.concat([messageKey, authKey.slice(x, 36 + x)]),
     )
     const sha256b = await crypto.sha256(
-        Buffer.concat([authKey.slice(40 + x, 76 + x), messageKey])
+        Buffer.concat([authKey.slice(40 + x, 76 + x), messageKey]),
     )
 
     const key = Buffer.concat([
@@ -74,24 +74,24 @@ export async function createAesIgeForMessageOld(
     crypto: ICryptoProvider,
     authKey: Buffer,
     messageKey: Buffer,
-    client: boolean
+    client: boolean,
 ): Promise<IEncryptionScheme> {
     const x = client ? 0 : 8
     const sha1a = await crypto.sha1(
-        Buffer.concat([messageKey, authKey.slice(x, 32 + x)])
+        Buffer.concat([messageKey, authKey.slice(x, 32 + x)]),
     )
     const sha1b = await crypto.sha1(
         Buffer.concat([
             authKey.slice(32 + x, 48 + x),
             messageKey,
             authKey.slice(48 + x, 64 + x),
-        ])
+        ]),
     )
     const sha1c = await crypto.sha1(
-        Buffer.concat([authKey.slice(64 + x, 96 + x), messageKey])
+        Buffer.concat([authKey.slice(64 + x, 96 + x), messageKey]),
     )
     const sha1d = await crypto.sha1(
-        Buffer.concat([messageKey, authKey.slice(96 + x, 128 + x)])
+        Buffer.concat([messageKey, authKey.slice(96 + x, 128 + x)]),
     )
 
     const key = Buffer.concat([

@@ -1,6 +1,7 @@
 import Long from 'long'
-import { TlBinaryWriter } from '@mtcute/tl-runtime'
+
 import keysIndex, { TlPublicKey } from '@mtcute/tl/binary/rsa-keys'
+import { TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { parseAsn1, parsePemContents } from '../binary/asn1-parser'
 import { ICryptoProvider } from './abstract'
@@ -16,7 +17,7 @@ import { ICryptoProvider } from './abstract'
 export async function parsePublicKey(
     crypto: ICryptoProvider,
     key: string,
-    old = false
+    old = false,
 ): Promise<TlPublicKey> {
     const asn1 = parseAsn1(parsePemContents(key))
     const modulus = asn1.children?.[0].value
@@ -50,7 +51,7 @@ export async function parsePublicKey(
 export async function addPublicKey(
     crypto: ICryptoProvider,
     key: string,
-    old = false
+    old = false,
 ): Promise<void> {
     const parsed = await parsePublicKey(crypto, key, old)
     keysIndex[parsed.fingerprint] = parsed
@@ -64,7 +65,7 @@ export async function addPublicKey(
  */
 export function findKeyByFingerprints(
     fingerprints: (string | Long)[],
-    allowOld = false
+    allowOld = false,
 ): TlPublicKey | null {
     for (let fp of fingerprints) {
         if (typeof fp !== 'string') {
@@ -72,9 +73,11 @@ export function findKeyByFingerprints(
         }
         if (fp in keysIndex) {
             if (keysIndex[fp].old && !allowOld) continue
+
             return keysIndex[fp]
         }
     }
     if (!allowOld) return findKeyByFingerprints(fingerprints, true)
+
     return null
 }

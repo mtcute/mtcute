@@ -24,6 +24,7 @@ export class FloodControl {
 
     addEvent(now: number): void {
         this._events.push(now)
+
         if (this._withoutUpdate > 0) {
             this._withoutUpdate -= 1
         } else {
@@ -61,13 +62,13 @@ export class FloodControl {
             if (limit.count + limit.pos < this._events.length) {
                 this._wakeupAt = Math.max(
                     this._wakeupAt,
-                    this._events[limit.pos] + limit.duration
+                    this._events[limit.pos] + limit.duration,
                 )
                 this._withoutUpdate = 0
             } else {
                 this._withoutUpdate = Math.min(
                     this._withoutUpdate,
-                    limit.count + limit.pos - this._events.length - 1
+                    limit.count + limit.pos - this._events.length - 1,
                 )
             }
 

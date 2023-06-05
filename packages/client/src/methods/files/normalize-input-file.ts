@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { tdFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputFileLike, isUploadedFile, MtArgumentError } from '../../types'
@@ -18,11 +18,11 @@ export async function _normalizeInputFile(
         fileName?: string
         fileSize?: number
         fileMime?: string
-    }
+    },
 ): Promise<tl.TypeInputFile> {
     if (typeof input === 'object' && tl.isAnyInputMedia(input)) {
         throw new MtArgumentError(
-            "InputFile can't be created from an InputMedia"
+            "InputFile can't be created from an InputMedia",
         )
     } else if (tdFileId.isFileIdLike(input)) {
         if (typeof input === 'string' && input.match(/^file:/)) {
@@ -30,12 +30,12 @@ export async function _normalizeInputFile(
                 file: input.substring(5),
                 ...params,
             })
+
             return uploaded.inputFile
-        } else {
-            throw new MtArgumentError(
-                "InputFile can't be created from an URL or a File ID"
-            )
         }
+        throw new MtArgumentError(
+            "InputFile can't be created from an URL or a File ID",
+        )
     } else if (isUploadedFile(input)) {
         return input.inputFile
     } else if (typeof input === 'object' && tl.isAnyInputFile(input)) {
@@ -45,6 +45,7 @@ export async function _normalizeInputFile(
             file: input,
             ...params,
         })
+
         return uploaded.inputFile
     }
 }

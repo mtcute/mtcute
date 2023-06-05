@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../utils'
-import { PeersIndex, PeerType, User } from '../peers'
 import { Location } from '../media'
+import { PeersIndex, PeerType, User } from '../peers'
+import { makeInspectable } from '../utils'
 import { InputInlineResult } from './input'
 
 const PEER_TYPE_MAP: Record<tl.TypeInlineQueryPeerType['_'], PeerType> = {
@@ -18,7 +18,7 @@ export class InlineQuery {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.RawUpdateBotInlineQuery,
-        readonly _peers: PeersIndex
+        readonly _peers: PeersIndex,
     ) {}
 
     /**
@@ -35,7 +35,7 @@ export class InlineQuery {
     get user(): User {
         return (this._user ??= new User(
             this.client,
-            this._peers.user(this.raw.userId)
+            this._peers.user(this.raw.userId),
         ))
     }
 
@@ -88,7 +88,7 @@ export class InlineQuery {
      */
     async answer(
         results: InputInlineResult[],
-        params?: Parameters<TelegramClient['answerInlineQuery']>[2]
+        params?: Parameters<TelegramClient['answerInlineQuery']>[2],
     ): Promise<void> {
         return this.client.answerInlineQuery(this.raw.queryId, results, params)
     }

@@ -1,5 +1,6 @@
 import Long from 'long'
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace tdFileId {
     export const PERSISTENT_ID_VERSION_OLD = 2
     export const PERSISTENT_ID_VERSION = 4
@@ -232,12 +233,11 @@ export namespace tdFileId {
     }
 
     export function isFileIdLike(
-        // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-        obj: any
+        obj: unknown,
     ): obj is string | RawFullRemoteFileLocation {
         return (
             typeof obj === 'string' ||
-            (typeof obj === 'object' && obj._ === 'remoteFileLocation')
+            (obj !== null && typeof obj === 'object' && (obj as { _: unknown })._ === 'remoteFileLocation')
         )
     }
 }

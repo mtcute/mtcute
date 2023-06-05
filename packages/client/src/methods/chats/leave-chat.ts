@@ -16,7 +16,7 @@ import {
 export async function leaveChat(
     this: TelegramClient,
     chatId: InputPeerLike,
-    clear = false
+    clear = false,
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
 

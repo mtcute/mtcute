@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { computeSrpParams } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
@@ -40,9 +40,10 @@ export async function getCallbackAnswer(
          * bot, it is checked by Telegram.
          */
         password?: string
-    }
+    },
 ): Promise<tl.messages.TypeBotCallbackAnswer> {
     let password: tl.TypeInputCheckPasswordSRP | undefined = undefined
+
     if (params?.password) {
         const pwd = await this.call({ _: 'account.getPassword' })
         password = await computeSrpParams(this._crypto, pwd, params.password)
@@ -57,6 +58,6 @@ export async function getCallbackAnswer(
             password,
             game: params?.game,
         },
-        { timeout: params?.timeout ?? 10000 }
+        { timeout: params?.timeout ?? 10000 },
     )
 }

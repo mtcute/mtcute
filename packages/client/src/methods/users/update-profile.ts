@@ -26,7 +26,7 @@ export async function updateProfile(
          * New bio (max 70 chars). Pass `''` (empty string) to remove it
          */
         bio?: string
-    }
+    },
 ): Promise<User> {
     const res = await this.call({
         _: 'account.updateProfile',

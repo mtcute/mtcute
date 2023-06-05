@@ -15,7 +15,7 @@ import { assertTypeIs } from '../../utils/type-assertion'
  * @internal
  */
 export async function getInstalledStickers(
-    this: TelegramClient
+    this: TelegramClient,
 ): Promise<StickerSet[]> {
     const res = await this.call({
         _: 'messages.getAllStickers',

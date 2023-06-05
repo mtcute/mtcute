@@ -31,13 +31,13 @@ export async function setMyCommands(
          * User language applied to the scope.
          */
         langCode?: string
-    }
+    },
 ): Promise<void> {
-    const scope: tl.TypeBotCommandScope = params.scope
-        ? await this._normalizeCommandScope(params.scope)
-        : {
-              _: 'botCommandScopeDefault',
-          }
+    const scope: tl.TypeBotCommandScope = params.scope ?
+        await this._normalizeCommandScope(params.scope) :
+        {
+            _: 'botCommandScopeDefault',
+        }
 
     if (params.commands?.length) {
         await this.call({

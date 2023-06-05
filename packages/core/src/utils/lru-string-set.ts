@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// ^^ because of performance reasons
+import Long from 'long'
+
 import { LongSet } from './long-utils'
 
 interface OneWayLinkedList<T> {
@@ -13,13 +17,13 @@ interface OneWayLinkedList<T> {
  *
  * Uses one-way linked list internally to keep track of insertion order
  */
-export class LruSet<T> {
+export class LruSet<T extends string | number | Long> {
     private _capacity: number
     private _first?: OneWayLinkedList<T>
     private _last?: OneWayLinkedList<T>
 
     private _set?: Set<T> | LongSet
-    private _obj?: any
+    private _obj?: object
     private _objSize?: number
 
     constructor(capacity: number, useObject = false, forLong = false) {
@@ -58,6 +62,7 @@ export class LruSet<T> {
         if (this._set!.has(val as any)) return
 
         if (!this._first) this._first = { v: val }
+
         if (!this._last) this._last = this._first
         else {
             this._last.n = { v: val }
@@ -78,20 +83,21 @@ export class LruSet<T> {
     }
 
     private _addForObj(val: T) {
-        if (val in this._obj!) return
+        if ((val as any) in this._obj!) return
 
         if (!this._first) this._first = { v: val }
+
         if (!this._last) this._last = this._first
         else {
             this._last.n = { v: val }
             this._last = this._last.n
         }
 
-        this._obj![val] = true
+        (this._obj as any)[val] = true
 
         if (this._objSize === this._capacity) {
             // remove least recently used
-            delete this._obj![this._first.v]
+            delete (this._obj as any)[this._first.v]
             this._first = this._first.n
         } else {
             this._objSize! += 1
@@ -99,6 +105,6 @@ export class LruSet<T> {
     }
 
     private _hasForObj(val: T) {
-        return val in this._obj!
+        return (val as any) in this._obj!
     }
 }

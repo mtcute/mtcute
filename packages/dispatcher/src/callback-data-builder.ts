@@ -1,5 +1,5 @@
-import { MaybeArray } from '@mtcute/core'
 import { CallbackQuery, MtArgumentError } from '@mtcute/client'
+import { MaybeArray } from '@mtcute/core'
 
 import { UpdateFilter } from './filters'
 
@@ -36,10 +36,11 @@ export class CallbackDataBuilder<T extends string> {
                 .map((f) => {
                     const val = obj[f]
 
-                    if (val.indexOf(this.sep) > -1)
+                    if (val.indexOf(this.sep) > -1) {
                         throw new MtArgumentError(
-                            `Value for ${f} ${val} contains separator ${this.sep} and cannot be used.`
+                            `Value for ${f} ${val} contains separator ${this.sep} and cannot be used.`,
                         )
+                    }
 
                     return val
                 })
@@ -72,6 +73,7 @@ export class CallbackDataBuilder<T extends string> {
         parts.forEach((it, idx) => {
             ret[this._fields[idx - 1]] = it
         })
+
         return ret
     }
 
@@ -85,7 +87,7 @@ export class CallbackDataBuilder<T extends string> {
      * @param params
      */
     filter(
-        params: Partial<Record<T, MaybeArray<string | RegExp>>>
+        params: Partial<Record<T, MaybeArray<string | RegExp>>>,
     ): UpdateFilter<
         CallbackQuery,
         {
@@ -97,26 +99,28 @@ export class CallbackDataBuilder<T extends string> {
         this._fields.forEach((field) => {
             if (!(field in params)) {
                 parts.push(`[^${this.sep}]*?`)
+
                 return
             }
 
-            const value = params[field]!
+            const value = params[field]
+
             if (Array.isArray(value)) {
                 parts.push(
                     `(${value
                         .map((i) => (typeof i === 'string' ? i : i.source))
-                        .join('|')})`
+                        .join('|')})`,
                 )
             } else {
                 // noinspection SuspiciousTypeOfGuard
                 parts.push(
-                    typeof value === 'string' ? value : (value as RegExp).source
+                    typeof value === 'string' ? value : (value as RegExp).source,
                 )
             }
         })
 
         const regex = new RegExp(
-            `^${this.prefix}${this.sep}${parts.join(this.sep)}$`
+            `^${this.prefix}${this.sep}${parts.join(this.sep)}$`,
         )
 
         return (query) => {
@@ -127,6 +131,7 @@ export class CallbackDataBuilder<T extends string> {
                     match: Record<T, string>
                 }
             ).match = this.parse(m[0])
+
             return true
         }
     }

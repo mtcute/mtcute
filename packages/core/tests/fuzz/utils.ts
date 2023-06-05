@@ -11,5 +11,6 @@ export function createTestTelegramClient() {
         testMode: true,
     })
     tg.log.level = 0
+
     return tg
 }

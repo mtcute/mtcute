@@ -18,7 +18,7 @@ import {
 export async function setChatTitle(
     this: TelegramClient,
     chatId: InputPeerLike,
-    title: string
+    title: string,
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
 

@@ -52,33 +52,36 @@ export async function startTest(
          * If true, TOS will not be displayed and `tosCallback` will not be called.
          */
         acceptTos?: boolean
-    }
+    },
 ): Promise<User> {
     if (!params) params = {}
 
-    if (params.logout)
+    if (params.logout) {
         try {
             await this.logOut()
         } catch (e) {}
+    }
 
     const availableDcs = await this.call({
         _: 'help.getConfig',
     }).then((res) => res.dcOptions)
 
     let phone = params.phone
+
     if (phone) {
-        if (!phone.match(/^99966\d{5}/))
+        if (!phone.match(/^99966\d{5}/)) {
             throw new MtArgumentError(
-                `${phone} is an invalid test phone number`
+                `${phone} is an invalid test phone number`,
             )
+        }
         const id = parseInt(phone[5])
-        if (!availableDcs.find((dc) => dc.id === id))
-            throw new MtArgumentError(`${phone} has invalid DC ID (${id})`)
+
+        if (!availableDcs.find((dc) => dc.id === id)) { throw new MtArgumentError(`${phone} has invalid DC ID (${id})`) }
     } else {
         let dcId = this._primaryDc.id
+
         if (params.dcId) {
-            if (!availableDcs.find((dc) => dc.id === params!.dcId))
-                throw new MtArgumentError(`DC ID is invalid (${dcId})`)
+            if (!availableDcs.find((dc) => dc.id === params!.dcId)) { throw new MtArgumentError(`DC ID is invalid (${dcId})`) }
             dcId = params.dcId
         }
 

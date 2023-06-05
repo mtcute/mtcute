@@ -44,5 +44,6 @@ export function jsComment(s: string): string {
 export function indent(size: number, s: string): string {
     let prefix = ''
     while (size--) prefix += ' '
+
     return prefix + s.replace(/\n/g, '\n' + prefix)
 }

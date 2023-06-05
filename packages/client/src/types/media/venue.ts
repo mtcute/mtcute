@@ -1,32 +1,30 @@
 import { tl } from '@mtcute/tl'
 
-import { Location } from './location'
+import { TelegramClient } from '../../client'
 import { assertTypeIs } from '../../utils/type-assertion'
 import { makeInspectable } from '../utils'
-import { TelegramClient } from '../../client'
+import { Location } from './location'
 
-export namespace Venue {
-    export interface VenueSource {
-        /**
-         * Provider name (`foursquare` or `gplaces` for Google Places)
-         */
-        provider?: 'foursquare' | 'gplaces'
+export interface VenueSource {
+    /**
+     * Provider name (`foursquare` or `gplaces` for Google Places)
+     */
+    provider?: 'foursquare' | 'gplaces'
 
-        /**
-         * Venue ID in the provider's DB
-         */
-        id: string
+    /**
+     * Venue ID in the provider's DB
+     */
+    id: string
 
-        /**
-         * Venue type in the provider's DB
-         *
-         * - [Supported types for Foursquare](https://developer.foursquare.com/docs/build-with-foursquare/categories/)
-         *   (use names, lowercase them, replace spaces and " & " with `_` (underscore) and remove other symbols,
-         *   and use `/` (slash) as hierarchy separator)
-         * - [Supported types for Google Places](https://developers.google.com/places/web-service/supported_types)
-         */
-        type: string
-    }
+    /**
+     * Venue type in the provider's DB
+     *
+     * - [Supported types for Foursquare](https://developer.foursquare.com/docs/build-with-foursquare/categories/)
+     *   (use names, lowercase them, replace spaces and " & " with `_` (underscore) and remove other symbols,
+     *   and use `/` (slash) as hierarchy separator)
+     * - [Supported types for Google Places](https://developers.google.com/places/web-service/supported_types)
+     */
+    type: string
 }
 
 export class Venue {
@@ -34,7 +32,7 @@ export class Venue {
 
     constructor(
         readonly client: TelegramClient,
-        readonly raw: tl.RawMessageMediaVenue
+        readonly raw: tl.RawMessageMediaVenue,
     ) {}
 
     private _location?: Location
@@ -67,11 +65,11 @@ export class Venue {
     /**
      * When available, source from where this venue was acquired
      */
-    get source(): Venue.VenueSource | null {
+    get source(): VenueSource | null {
         if (!this.raw.provider) return null
 
         return {
-            provider: this.raw.provider as Venue.VenueSource['provider'],
+            provider: this.raw.provider as VenueSource['provider'],
             id: this.raw.venueId,
             type: this.raw.venueType,
         }

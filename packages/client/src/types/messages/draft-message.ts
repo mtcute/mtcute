@@ -1,11 +1,11 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { MessageEntity } from './message-entity'
-import { Message } from './message'
+import { InputMediaLike } from '../media'
 import { InputPeerLike } from '../peers'
 import { makeInspectable } from '../utils'
-import { InputMediaLike } from '../media'
+import { Message } from './message'
+import { MessageEntity } from './message-entity'
 
 /**
  * A draft message
@@ -14,7 +14,7 @@ export class DraftMessage {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.RawDraftMessage,
-        readonly _chatId: InputPeerLike
+        readonly _chatId: InputPeerLike,
     ) {}
 
     /**
@@ -52,6 +52,7 @@ export class DraftMessage {
     get entities(): ReadonlyArray<MessageEntity> {
         if (!this._entities) {
             this._entities = []
+
             if (this.raw.entities?.length) {
                 for (const ent of this.raw.entities) {
                     const parsed = MessageEntity._parse(ent)
@@ -94,7 +95,7 @@ export class DraftMessage {
      */
     sendWithMedia(
         media: InputMediaLike,
-        params?: Parameters<TelegramClient['sendMedia']>[2]
+        params?: Parameters<TelegramClient['sendMedia']>[2],
     ): Promise<Message> {
         return this.client.sendMedia(this._chatId, media, {
             clearDraft: true,

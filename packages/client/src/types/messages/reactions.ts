@@ -1,16 +1,16 @@
-import { tl } from '@mtcute/tl'
 import { getMarkedPeerId } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../utils'
-import { PeersIndex, User } from '../peers'
 import { assertTypeIs } from '../../utils/type-assertion'
+import { PeersIndex, User } from '../peers'
+import { makeInspectable } from '../utils'
 
 export class PeerReaction {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.RawMessagePeerReaction,
-        readonly _peers: PeersIndex
+        readonly _peers: PeersIndex,
     ) {}
 
     /**
@@ -18,6 +18,7 @@ export class PeerReaction {
      */
     get emoji(): string {
         const r = this.raw.reaction
+
         switch (r._) {
             case 'reactionCustomEmoji':
                 return r.documentId.toString()
@@ -67,7 +68,7 @@ export class PeerReaction {
 
             this._user = new User(
                 this.client,
-                this._peers.user(this.raw.peerId.userId)
+                this._peers.user(this.raw.peerId.userId),
             )
         }
 
@@ -83,7 +84,7 @@ export class MessageReactions {
         readonly messageId: number,
         readonly chatId: number,
         readonly raw: tl.RawMessageReactions,
-        readonly _peers: PeersIndex
+        readonly _peers: PeersIndex,
     ) {}
 
     /**
@@ -114,7 +115,7 @@ export class MessageReactions {
         }
 
         return (this._recentReactions ??= this.raw.recentReactions.map(
-            (reaction) => new PeerReaction(this.client, reaction, this._peers)
+            (reaction) => new PeerReaction(this.client, reaction, this._peers),
         ))
     }
 
@@ -122,7 +123,7 @@ export class MessageReactions {
      * Get the users who reacted to this message
      */
     getUsers(
-        params?: Parameters<TelegramClient['getReactionUsers']>[2]
+        params?: Parameters<TelegramClient['getReactionUsers']>[2],
     ): AsyncIterableIterator<PeerReaction> {
         return this.client.getReactionUsers(this.messageId, this.chatId, params)
     }

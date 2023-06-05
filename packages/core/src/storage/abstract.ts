@@ -1,9 +1,10 @@
 import { tl } from '@mtcute/tl'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import { Logger } from '../utils'
 import { BasicPeerType, MaybeAsync } from '../types'
+import { Logger } from '../utils'
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ITelegramStorage {
     export interface PeerInfo {
         // marked id

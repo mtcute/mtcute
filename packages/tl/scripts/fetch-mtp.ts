@@ -1,14 +1,17 @@
 // Downloads latest MTProto .tl schema
 
-import cheerio from 'cheerio'
+import * as cheerio from 'cheerio'
+import { writeFile } from 'fs/promises'
+
+import { parseTlToEntries } from '@mtcute/tl-utils'
+
 import { CORE_DOMAIN, MTP_SCHEMA_JSON_FILE } from './constants'
 import { fetchRetry } from './utils'
-import { parseTlToEntries } from '@mtcute/tl-utils'
-import { writeFile } from 'fs/promises'
 
 async function fetchMtprotoSchema(): Promise<string> {
     const html = await fetchRetry(`${CORE_DOMAIN}/schema/mtproto`)
     const $ = cheerio.load(html)
+
     // cheerio doesn't always unescape them
     return $('#dev_page_content pre code')
         .text()
@@ -34,10 +37,15 @@ async function main() {
                 'mt_message',
                 'mt_msg_copy',
                 'mt_gzip_packed',
-            ].indexOf(it.name) === -1
+            ].indexOf(it.name) === -1,
     )
 
-    const rpcResult = entries.find((it) => it.name === 'mt_rpc_result')!
+    const rpcResult = entries.find((it) => it.name === 'mt_rpc_result')
+
+    if (!rpcResult) {
+        throw new Error('mt_rpc_result not found')
+    }
+
     rpcResult.arguments.forEach((arg) => {
         if (arg.name === 'result') {
             arg.type = 'any'

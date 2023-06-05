@@ -1,5 +1,5 @@
-import { IMessageEntityParser } from '../../types'
 import { TelegramClient } from '../../client'
+import { IMessageEntityParser } from '../../types'
 
 // @extension
 interface ParseModesExtension {

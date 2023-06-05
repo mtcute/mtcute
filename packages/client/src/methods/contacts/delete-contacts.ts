@@ -36,21 +36,22 @@ export async function deleteContacts(
 /** @internal */
 export async function deleteContacts(
     this: TelegramClient,
-    userIds: MaybeArray<InputPeerLike>
+    userIds: MaybeArray<InputPeerLike>,
 ): Promise<MaybeArray<User> | null> {
     const single = !Array.isArray(userIds)
     if (single) userIds = [userIds as InputPeerLike]
 
     const inputPeers = await this.resolvePeerMany(
         userIds as InputPeerLike[],
-        normalizeToInputUser
+        normalizeToInputUser,
     )
 
-    if (single && !inputPeers.length)
+    if (single && !inputPeers.length) {
         throw new MtInvalidPeerTypeError(
             (userIds as InputPeerLike[])[0],
-            'user'
+            'user',
         )
+    }
 
     const res = await this.call({
         _: 'contacts.deleteContacts',

@@ -1,186 +1,181 @@
-import Long from 'long'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import EventEmitter from 'events'
+import Long from 'long'
+
 import { tl } from '@mtcute/tl'
+import defaultReaderMap from '@mtcute/tl/binary/reader'
+import defaultWriterMap from '@mtcute/tl/binary/writer'
 import {
-    TlBinaryReader,
-    TlBinaryWriter,
     TlReaderMap,
     TlWriterMap,
 } from '@mtcute/tl-runtime'
 
 import {
+    defaultReconnectionStrategy,
+    defaultTransportFactory,
+    ReconnectionStrategy,
+    SessionConnection,
+    TransportFactory,
+} from './network'
+import { PersistentConnectionParams } from './network/persistent-connection'
+import { ITelegramStorage, MemoryStorage } from './storage'
+import {
+    ControllablePromise,
+    createControllablePromise,
     CryptoProviderFactory,
-    ICryptoProvider,
     defaultCryptoProviderFactory,
-    sleep,
-    getAllPeersFrom,
-    encodeUrlSafeBase64,
-    parseUrlSafeBase64,
-    LogManager,
-    toggleChannelIdMark,
     defaultProductionDc,
     defaultProductionIpv6Dc,
     defaultTestDc,
     defaultTestIpv6Dc,
-    ControllablePromise,
-    createControllablePromise,
+    getAllPeersFrom,
+    ICryptoProvider,
+    LogManager,
+    sleep,
+    toggleChannelIdMark,
 } from './utils'
 import { addPublicKey } from './utils/crypto/keys'
-import {
-    TransportFactory,
-    defaultReconnectionStrategy,
-    ReconnectionStrategy,
-    defaultTransportFactory,
-    SessionConnection,
-} from './network'
-import { PersistentConnectionParams } from './network/persistent-connection'
-import { ITelegramStorage, MemoryStorage } from './storage'
+import { readStringSession, writeStringSession } from './utils/string-session'
 
-import defaultReaderMap from '@mtcute/tl/binary/reader'
-import defaultWriterMap from '@mtcute/tl/binary/writer'
-import { readStringSession, writeStringSession } from "./utils/string-session";
+export interface BaseTelegramClientOptions {
+    /**
+     * API ID from my.telegram.org
+     */
+    apiId: number | string
+    /**
+     * API hash from my.telegram.org
+     */
+    apiHash: string
 
-export namespace BaseTelegramClient {
-    export interface Options {
-        /**
-         * API ID from my.telegram.org
-         */
-        apiId: number | string
-        /**
-         * API hash from my.telegram.org
-         */
-        apiHash: string
+    /**
+     * Telegram storage to use.
+     * If omitted, {@link MemoryStorage} is used
+     */
+    storage?: ITelegramStorage
 
-        /**
-         * Telegram storage to use.
-         * If omitted, {@link MemoryStorage} is used
-         */
-        storage?: ITelegramStorage
+    /**
+     * Cryptography provider factory to allow delegating
+     * crypto to native addon, worker, etc.
+     */
+    crypto?: CryptoProviderFactory
 
-        /**
-         * Cryptography provider factory to allow delegating
-         * crypto to native addon, worker, etc.
-         */
-        crypto?: CryptoProviderFactory
+    /**
+     * Whether to use IPv6 datacenters
+     * (IPv6 will be preferred when choosing a DC by id)
+     * (default: false)
+     */
+    useIpv6?: boolean
 
-        /**
-         * Whether to use IPv6 datacenters
-         * (IPv6 will be preferred when choosing a DC by id)
-         * (default: false)
-         */
-        useIpv6?: boolean
+    /**
+     * Primary DC to use for initial connection.
+     * This does not mean this will be the only DC used,
+     * nor that this DC will actually be primary, this only
+     * determines the first DC the library will try to connect to.
+     * Can be used to connect to other networks (like test DCs).
+     *
+     * When session already contains primary DC, this parameter is ignored.
+     * Defaults to Production DC 2.
+     */
+    primaryDc?: tl.RawDcOption
 
-        /**
-         * Primary DC to use for initial connection.
-         * This does not mean this will be the only DC used,
-         * nor that this DC will actually be primary, this only
-         * determines the first DC the library will try to connect to.
-         * Can be used to connect to other networks (like test DCs).
-         *
-         * When session already contains primary DC, this parameter is ignored.
-         * Defaults to Production DC 2.
-         */
-        primaryDc?: tl.RawDcOption
+    /**
+     * Whether to connect to test servers.
+     *
+     * If passed, {@link primaryDc} defaults to Test DC 2.
+     *
+     * **Must** be passed if using test servers, even if
+     * you passed custom {@link primaryDc}
+     */
+    testMode?: boolean
 
-        /**
-         * Whether to connect to test servers.
-         *
-         * If passed, {@link primaryDc} defaults to Test DC 2.
-         *
-         * **Must** be passed if using test servers, even if
-         * you passed custom {@link primaryDc}
-         */
-        testMode?: boolean
+    /**
+     * Additional options for initConnection call.
+     * `apiId` and `query` are not available and will be ignored.
+     * Omitted values will be filled with defaults
+     */
+    initConnectionOptions?: Partial<
+        Omit<tl.RawInitConnectionRequest, 'apiId' | 'query'>
+    >
 
-        /**
-         * Additional options for initConnection call.
-         * `apiId` and `query` are not available and will be ignored.
-         * Omitted values will be filled with defaults
-         */
-        initConnectionOptions?: Partial<
-            Omit<tl.RawInitConnectionRequest, 'apiId' | 'query'>
-        >
+    /**
+     * Transport factory to use in the client.
+     * Defaults to platform-specific transport: WebSocket on the web, TCP in node
+     */
+    transport?: TransportFactory
 
-        /**
-         * Transport factory to use in the client.
-         * Defaults to platform-specific transport: WebSocket on the web, TCP in node
-         */
-        transport?: TransportFactory
+    /**
+     * Reconnection strategy.
+     * Defaults to simple reconnection strategy: first 0ms, then up to 5s (increasing by 1s)
+     */
+    reconnectionStrategy?: ReconnectionStrategy<PersistentConnectionParams>
 
-        /**
-         * Reconnection strategy.
-         * Defaults to simple reconnection strategy: first 0ms, then up to 5s (increasing by 1s)
-         */
-        reconnectionStrategy?: ReconnectionStrategy<PersistentConnectionParams>
+    /**
+     * Maximum duration of a flood_wait that will be waited automatically.
+     * Flood waits above this threshold will throw a FloodWaitError.
+     * Set to 0 to disable. Can be overridden with `throwFlood` parameter in call() params
+     *
+     * @default 10000
+     */
+    floodSleepThreshold?: number
 
-        /**
-         * Maximum duration of a flood_wait that will be waited automatically.
-         * Flood waits above this threshold will throw a FloodWaitError.
-         * Set to 0 to disable. Can be overridden with `throwFlood` parameter in call() params
-         *
-         * @default 10000
-         */
-        floodSleepThreshold?: number
+    /**
+     * Maximum number of retries when calling RPC methods.
+     * Call is retried when InternalError or FloodWaitError is encountered.
+     * Can be set to Infinity.
+     *
+     * @default 5
+     */
+    rpcRetryCount?: number
 
-        /**
-         * Maximum number of retries when calling RPC methods.
-         * Call is retried when InternalError or FloodWaitError is encountered.
-         * Can be set to Infinity.
-         *
-         * @default 5
-         */
-        rpcRetryCount?: number
+    /**
+     * If true, every single API call will be wrapped with `tl.invokeWithoutUpdates`,
+     * effectively disabling the server-sent events for the clients.
+     * May be useful in some cases.
+     *
+     * Note that this only wraps calls made with `.call()` within the primary
+     * connection. Additional connections and direct `.sendForResult()` calls
+     * must be wrapped manually.
+     *
+     * @default false
+     */
+    disableUpdates?: boolean
 
-        /**
-         * If true, every single API call will be wrapped with `tl.invokeWithoutUpdates`,
-         * effectively disabling the server-sent events for the clients.
-         * May be useful in some cases.
-         *
-         * Note that this only wraps calls made with `.call()` within the primary
-         * connection. Additional connections and direct `.sendForResult()` calls
-         * must be wrapped manually.
-         *
-         * @default false
-         */
-        disableUpdates?: boolean
+    /**
+     * If true, RPC errors will have a stack trace of the initial `.call()`
+     * or `.sendForResult()` call position, which drastically improves
+     * debugging experience.<br>
+     * If false, they will have a stack trace of mtcute internals.
+     *
+     * Internally this creates a stack capture before every RPC call
+     * and stores it until the result is received. This might
+     * use a lot more memory than normal, thus can be disabled here.
+     *
+     * @default true
+     */
+    niceStacks?: boolean
 
-        /**
-         * If true, RPC errors will have a stack trace of the initial `.call()`
-         * or `.sendForResult()` call position, which drastically improves
-         * debugging experience.<br>
-         * If false, they will have a stack trace of mtcute internals.
-         *
-         * Internally this creates a stack capture before every RPC call
-         * and stores it until the result is received. This might
-         * use a lot more memory than normal, thus can be disabled here.
-         *
-         * @default true
-         */
-        niceStacks?: boolean
+    /**
+     * **EXPERT USE ONLY!**
+     *
+     * Override TL layer used for the connection.
+     *
+     * **Does not** change the schema used.
+     */
+    overrideLayer?: number
 
-        /**
-         * **EXPERT USE ONLY!**
-         *
-         * Override TL layer used for the connection.                                                                                                                                                                                                                                  /;'
-         *
-         * **Does not** change the schema used.
-         */
-        overrideLayer?: number
+    /**
+     * **EXPERT USE ONLY**
+     *
+     * Override reader map used for the connection.
+     */
+    readerMap?: TlReaderMap
 
-        /**
-         * **EXPERT USE ONLY**
-         *
-         * Override reader map used for the connection.
-         */
-        readerMap?: TlReaderMap
-
-        /**
-         * **EXPERT USE ONLY**
-         *
-         * Override writer map used for the connection.
-         */
-        writerMap?: TlWriterMap
-    }
+    /**
+     * **EXPERT USE ONLY**
+     *
+     * Override writer map used for the connection.
+     */
+    writerMap?: TlWriterMap
 }
 
 export class BaseTelegramClient extends EventEmitter {
@@ -262,7 +257,7 @@ export class BaseTelegramClient extends EventEmitter {
     // not really connected, but rather "connect() was called"
     private _connected: ControllablePromise<void> | boolean = false
 
-    private _onError?: (err: Error, connection?: SessionConnection) => void
+    private _onError?: (err: unknown, connection?: SessionConnection) => void
 
     /**
      * The primary {@link SessionConnection} that is used for
@@ -287,29 +282,32 @@ export class BaseTelegramClient extends EventEmitter {
 
     readonly log = new LogManager()
 
-    constructor(opts: BaseTelegramClient.Options) {
+    constructor(opts: BaseTelegramClientOptions) {
         super()
 
         const apiId =
             typeof opts.apiId === 'string' ? parseInt(opts.apiId) : opts.apiId
-        if (isNaN(apiId))
-            throw new Error('apiId must be a number or a numeric string!')
+
+        if (isNaN(apiId)) { throw new Error('apiId must be a number or a numeric string!') }
 
         this._transportFactory = opts.transport ?? defaultTransportFactory
         this._crypto = (opts.crypto ?? defaultCryptoProviderFactory)()
         this.storage = opts.storage ?? new MemoryStorage()
         this._apiHash = opts.apiHash
-        this._useIpv6 = !!opts.useIpv6
-        this._testMode = !!opts.testMode
-        this._primaryDc =
-            opts.primaryDc ??
-            (this._testMode
-                ? this._useIpv6
-                    ? defaultTestIpv6Dc
-                    : defaultTestDc
-                : this._useIpv6
-                ? defaultProductionIpv6Dc
-                : defaultProductionDc)
+        this._useIpv6 = Boolean(opts.useIpv6)
+        this._testMode = Boolean(opts.testMode)
+
+        let dc = opts.primaryDc
+
+        if (!dc) {
+            if (this._testMode) {
+                dc = this._useIpv6 ? defaultTestIpv6Dc : defaultTestDc
+            } else {
+                dc = this._useIpv6 ? defaultProductionIpv6Dc : defaultProductionDc
+            }
+        }
+
+        this._primaryDc = dc
         this._reconnectionStrategy =
             opts.reconnectionStrategy ?? defaultReconnectionStrategy
         this._floodSleepThreshold = opts.floodSleepThreshold ?? 10000
@@ -325,6 +323,7 @@ export class BaseTelegramClient extends EventEmitter {
 
         let deviceModel = 'mtcute on '
         if (typeof process !== 'undefined' && typeof require !== 'undefined') {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const os = require('os')
             deviceModel += `${os.type()} ${os.arch()} ${os.release()}`
         } else if (typeof navigator !== 'undefined') {
@@ -341,6 +340,7 @@ export class BaseTelegramClient extends EventEmitter {
             langCode: 'en',
             ...(opts.initConnectionOptions ?? {}),
             apiId,
+
             query: null as any,
         }
     }
@@ -390,7 +390,7 @@ export class BaseTelegramClient extends EventEmitter {
                 readerMap: this._readerMap,
                 writerMap: this._writerMap,
             },
-            this.log.create('connection')
+            this.log.create('connection'),
         )
 
         this.primaryConnection.on('usable', () => {
@@ -409,14 +409,14 @@ export class BaseTelegramClient extends EventEmitter {
             this._handleUpdate(update)
         })
         this.primaryConnection.on('wait', () =>
-            this._cleanupPrimaryConnection()
+            this._cleanupPrimaryConnection(),
         )
         this.primaryConnection.on('key-change', async (key) => {
             this.storage.setAuthKeyFor(this._primaryDc.id, key)
             await this._saveStorage()
         })
         this.primaryConnection.on('error', (err) =>
-            this._emitError(err, this.primaryConnection)
+            this._emitError(err, this.primaryConnection),
         )
     }
 
@@ -429,6 +429,7 @@ export class BaseTelegramClient extends EventEmitter {
     async connect(): Promise<void> {
         if (this._connected) {
             await this._connected
+
             return
         }
 
@@ -441,7 +442,7 @@ export class BaseTelegramClient extends EventEmitter {
         this._setupPrimaryConnection()
 
         await this.primaryConnection.setupKeys(
-            await this.storage.getAuthKeyFor(this._primaryDc.id)
+            await this.storage.getAuthKeyFor(this._primaryDc.id),
         )
 
         if ((this._importForce || !this.primaryConnection.getAuthKey()) && this._importFrom) {
@@ -449,7 +450,7 @@ export class BaseTelegramClient extends EventEmitter {
 
             if (data.testMode !== !this._testMode) {
                 throw new Error(
-                    'This session string is not for the current backend'
+                    'This session string is not for the current backend',
                 )
             }
 
@@ -511,7 +512,7 @@ export class BaseTelegramClient extends EventEmitter {
     async getDcById(
         id: number,
         preferMedia = false,
-        cdn = false
+        cdn = false,
     ): Promise<tl.RawDcOption> {
         if (!this._config) {
             this._config = await this.call({ _: 'help.getConfig' })
@@ -519,6 +520,7 @@ export class BaseTelegramClient extends EventEmitter {
 
         if (cdn && !this._cdnConfig) {
             this._cdnConfig = await this.call({ _: 'help.getCdnConfig' })
+
             for (const key of this._cdnConfig.publicKeys) {
                 await addPublicKey(this._crypto, key.publicKey)
             }
@@ -528,6 +530,7 @@ export class BaseTelegramClient extends EventEmitter {
             // first try to find ipv6 dc
 
             let found
+
             if (preferMedia) {
                 found = this._config.dcOptions.find(
                     (it) =>
@@ -535,23 +538,25 @@ export class BaseTelegramClient extends EventEmitter {
                         it.mediaOnly &&
                         it.cdn === cdn &&
                         it.ipv6 &&
-                        !it.tcpoOnly
+                        !it.tcpoOnly,
                 )
             }
 
-            if (!found)
+            if (!found) {
                 found = this._config.dcOptions.find(
                     (it) =>
                         it.id === id &&
                         it.cdn === cdn &&
                         it.ipv6 &&
-                        !it.tcpoOnly
+                        !it.tcpoOnly,
                 )
+            }
 
             if (found) return found
         }
 
         let found
+
         if (preferMedia) {
             found = this._config.dcOptions.find(
                 (it) =>
@@ -559,14 +564,15 @@ export class BaseTelegramClient extends EventEmitter {
                     it.mediaOnly &&
                     it.cdn === cdn &&
                     !it.tcpoOnly &&
-                    !it.ipv6
+                    !it.ipv6,
             )
         }
-        if (!found)
+        if (!found) {
             found = this._config.dcOptions.find(
                 (it) =>
-                    it.id === id && it.cdn === cdn && !it.tcpoOnly && !it.ipv6
+                    it.id === id && it.cdn === cdn && !it.tcpoOnly && !it.ipv6,
             )
+        }
         if (found) return found
 
         throw new Error(`Could not find${cdn ? ' CDN' : ''} DC ${id}`)
@@ -608,7 +614,7 @@ export class BaseTelegramClient extends EventEmitter {
             throwFlood?: boolean
             connection?: SessionConnection
             timeout?: number
-        }
+        },
     ): Promise<tl.RpcCallReturn[T['_']]> {
         if (this._connected !== true) {
             await this.connect()
@@ -617,6 +623,7 @@ export class BaseTelegramClient extends EventEmitter {
         // do not send requests that are in flood wait
         if (message._ in this._floodWaitedRequests) {
             const delta = this._floodWaitedRequests[message._] - Date.now()
+
             if (delta <= 3000) {
                 // flood waits below 3 seconds are "ignored"
                 delete this._floodWaitedRequests[message._]
@@ -638,7 +645,7 @@ export class BaseTelegramClient extends EventEmitter {
                 const res = await connection.sendRpc(
                     message,
                     stack,
-                    params?.timeout
+                    params?.timeout,
                 )
                 await this._cachePeersFrom(res)
 
@@ -648,6 +655,7 @@ export class BaseTelegramClient extends EventEmitter {
 
                 if (e instanceof tl.errors.InternalError) {
                     this.log.warn('Telegram is having internal issues: %s', e)
+
                     if (e.message === 'WORKER_BUSY_TOO_LONG_RETRY') {
                         // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
                         await sleep(1000)
@@ -669,7 +677,7 @@ export class BaseTelegramClient extends EventEmitter {
                     // In test servers, FLOOD_WAIT_0 has been observed, and sleeping for
                     // such a short amount will cause retries very fast leading to issues
                     if (e.seconds === 0) {
-                        ;(e as any).seconds = 1
+                        (e as any).seconds = 1
                     }
 
                     if (
@@ -692,24 +700,22 @@ export class BaseTelegramClient extends EventEmitter {
                         await this.changeDc(e.new_dc)
                         continue
                     }
-                } else {
-                    if (e.constructor === tl.errors.AuthKeyUnregisteredError) {
-                        // we can try re-exporting auth from the primary connection
-                        this.log.warn('exported auth key error, re-exporting..')
+                } else if (e.constructor === tl.errors.AuthKeyUnregisteredError) {
+                    // we can try re-exporting auth from the primary connection
+                    this.log.warn('exported auth key error, re-exporting..')
 
-                        const auth = await this.call({
-                            _: 'auth.exportAuthorization',
-                            dcId: connection.params.dc.id,
-                        })
+                    const auth = await this.call({
+                        _: 'auth.exportAuthorization',
+                        dcId: connection.params.dc.id,
+                    })
 
-                        await connection.sendRpc({
-                            _: 'auth.importAuthorization',
-                            id: auth.id,
-                            bytes: auth.bytes,
-                        })
+                    await connection.sendRpc({
+                        _: 'auth.importAuthorization',
+                        id: auth.id,
+                        bytes: auth.bytes,
+                    })
 
-                        continue
-                    }
+                    continue
                 }
 
                 throw e
@@ -749,7 +755,7 @@ export class BaseTelegramClient extends EventEmitter {
             inactivityTimeout?: number
             // default = false
             disableUpdates?: boolean
-        }
+        },
     ): Promise<SessionConnection> {
         const dc = await this.getDcById(dcId, params?.media, params?.cdn)
         const connection = new SessionConnection(
@@ -766,7 +772,7 @@ export class BaseTelegramClient extends EventEmitter {
                 readerMap: this._readerMap,
                 writerMap: this._writerMap,
             },
-            this.log.create('connection')
+            this.log.create('connection'),
         )
 
         connection.on('error', (err) => this._emitError(err, connection))
@@ -816,7 +822,7 @@ export class BaseTelegramClient extends EventEmitter {
      * @param connection  Connection created with {@link BaseTelegramClient.createAdditionalConnection}
      */
     async destroyAdditionalConnection(
-        connection: SessionConnection
+        connection: SessionConnection,
     ): Promise<void> {
         const idx = this._additionalConnections.indexOf(connection)
         if (idx === -1) return
@@ -839,7 +845,7 @@ export class BaseTelegramClient extends EventEmitter {
         this.primaryConnection.changeTransport(factory)
 
         this._additionalConnections.forEach((conn) =>
-            conn.changeTransport(factory)
+            conn.changeTransport(factory),
         )
     }
 
@@ -852,13 +858,11 @@ export class BaseTelegramClient extends EventEmitter {
      *     the connection in which the error has occurred, in case
      *     this was connection-related error.
      */
-    onError(
-        handler: (err: Error, connection?: SessionConnection) => void
-    ): void {
+    onError(handler: typeof this._onError): void {
         this._onError = handler
     }
 
-    protected _emitError(err: Error, connection?: SessionConnection): void {
+    protected _emitError(err: unknown, connection?: SessionConnection): void {
         if (this._onError) {
             this._onError(err, connection)
         } else {
@@ -876,7 +880,8 @@ export class BaseTelegramClient extends EventEmitter {
 
         let hadMin = false
         let count = 0
-        for (const peer of getAllPeersFrom(obj)) {
+
+        for (const peer of getAllPeersFrom(obj as any)) {
             if ((peer as any).min) {
                 // absolutely incredible min peer handling, courtesy of levlam.
                 // see this thread: https://t.me/tdlibchat/15084
@@ -892,7 +897,7 @@ export class BaseTelegramClient extends EventEmitter {
                     if (!peer.accessHash) {
                         this.log.warn(
                             'received user without access hash: %j',
-                            peer
+                            peer,
                         )
                         continue
                     }
@@ -920,7 +925,7 @@ export class BaseTelegramClient extends EventEmitter {
                     if (!peer.accessHash) {
                         this.log.warn(
                             'received user without access hash: %j',
-                            peer
+                            peer,
                         )
                         continue
                     }
@@ -928,9 +933,9 @@ export class BaseTelegramClient extends EventEmitter {
                         id: toggleChannelIdMark(peer.id),
                         accessHash: peer.accessHash,
                         username:
-                            peer._ === 'channel'
-                                ? peer.username?.toLowerCase()
-                                : undefined,
+                            peer._ === 'channel' ?
+                                peer.username?.toLowerCase() :
+                                undefined,
                         type: 'channel',
                         full: peer,
                     })
@@ -963,8 +968,7 @@ export class BaseTelegramClient extends EventEmitter {
      * > with [@BotFather](//t.me/botfather)
      */
     async exportSession(): Promise<string> {
-        if (!this.primaryConnection.getAuthKey())
-            throw new Error('Auth key is not generated yet')
+        if (!this.primaryConnection.getAuthKey()) { throw new Error('Auth key is not generated yet') }
 
         return writeStringSession(this._writerMap, {
             version: 1,

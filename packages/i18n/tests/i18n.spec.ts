@@ -1,7 +1,9 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
-import { createMtcuteI18n, OtherLanguageWrap } from '../src'
+import { describe, it } from 'mocha'
+
 import { Message, PeersIndex } from '@mtcute/client'
+
+import { createMtcuteI18n, OtherLanguageWrap } from '../src'
 import { createPluralEnglish, pluralizeEnglish } from '../src/plurals/english'
 import { createPluralRussian } from '../src/plurals/russian'
 
@@ -20,7 +22,7 @@ describe('i18n', () => {
         plural: createPluralEnglish('a message', (n) => `${n} messages`),
         plural2: createPluralEnglish(
             'a message',
-            (n: number, s: string) => `${n} messages from ${s}`
+            (n: number, s: string) => `${n} messages from ${s}`,
         ),
         plural3: (n: number) =>
             `${n} ${pluralizeEnglish(n, 'message', 'messages')}`,
@@ -36,7 +38,7 @@ describe('i18n', () => {
         plural: createPluralRussian(
             (n) => `${n} сообщение`,
             (n) => `${n} сообщения`,
-            (n) => `${n === 0 ? 'нет' : n} сообщений`
+            (n) => `${n === 0 ? 'нет' : n} сообщений`,
         ),
     }
 
@@ -60,7 +62,7 @@ describe('i18n', () => {
         expect(tr('en', 'withArgs', '')).to.equal('Welcome ')
         expect(tr('en', 'withArgs', 'John')).to.equal('Welcome John')
         expect(tr('en', 'withArgsObj', { name: 'John' })).to.equal(
-            'Welcome John'
+            'Welcome John',
         )
     })
 
@@ -78,7 +80,7 @@ describe('i18n', () => {
     it('should fallback to primary language when string is not translated', () => {
         expect(tr('ru', 'fn')).to.equal('World')
         expect(tr('ru', 'withArgsObj', { name: 'Ваня' })).to.equal(
-            'Welcome Ваня'
+            'Welcome Ваня',
         )
         expect(tr('ru', 'nested.string')).to.equal('Hello')
     })
@@ -90,13 +92,13 @@ describe('i18n', () => {
 
     it('should parse language from a message', () => {
         const message = new Message(
-            null as any,
-            { _: 'message', peerId: { _: 'peerUser', userId: 1 } } as any,
+            null as never,
+            { _: 'message', peerId: { _: 'peerUser', userId: 1 } } as never,
             PeersIndex.from({
                 users: [
                     { _: 'user', id: 1, firstName: 'Пыня', langCode: 'ru' },
                 ],
-            })
+            }),
         )
 
         expect(tr(message, 'direct')).to.equal('Привет')
@@ -123,7 +125,7 @@ describe('i18n', () => {
 
             expect(tr('en', 'plural2', 1, 'baka')).to.equal('a message')
             expect(tr('en', 'plural2', 2, 'baka')).to.equal(
-                '2 messages from baka'
+                '2 messages from baka',
             )
 
             expect(tr('en', 'plural3', 1)).to.equal('1 message')

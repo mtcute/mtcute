@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { getBarePeerId, getMarkedPeerId } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { Chat, ChatInviteLink, PeersIndex, User } from '../peers'
@@ -16,7 +16,7 @@ export class BotChatJoinRequestUpdate {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.RawUpdateBotChatInviteRequester,
-        readonly _peers: PeersIndex
+        readonly _peers: PeersIndex,
     ) {}
 
     /**
@@ -33,7 +33,7 @@ export class BotChatJoinRequestUpdate {
     get chat(): Chat {
         return (this._chat ??= new Chat(
             this.client,
-            this._peers.chat(getBarePeerId(this.raw.peer))
+            this._peers.chat(getBarePeerId(this.raw.peer)),
         ))
     }
 
@@ -51,7 +51,7 @@ export class BotChatJoinRequestUpdate {
     get user(): User {
         return (this._user ??= new User(
             this.client,
-            this._peers.user(this.raw.userId)
+            this._peers.user(this.raw.userId),
         ))
     }
 
@@ -77,7 +77,7 @@ export class BotChatJoinRequestUpdate {
     get invite(): ChatInviteLink {
         return (this._invite ??= new ChatInviteLink(
             this.client,
-            this.raw.invite
+            this.raw.invite,
         ))
     }
 
@@ -85,12 +85,12 @@ export class BotChatJoinRequestUpdate {
      * Approve or deny the request.
      */
     hide(
-        action: Parameters<TelegramClient['hideJoinRequest']>[2]
+        action: Parameters<TelegramClient['hideJoinRequest']>[2],
     ): Promise<void> {
         return this.client.hideJoinRequest(
             this.chat.inputPeer,
             this.user.inputPeer,
-            action
+            action,
         )
     }
 }

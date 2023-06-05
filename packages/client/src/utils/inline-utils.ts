@@ -1,4 +1,3 @@
-import { tl } from '@mtcute/tl'
 import {
     assertNever,
     encodeUrlSafeBase64,
@@ -6,6 +5,7 @@ import {
     TlBinaryReader,
     TlBinaryWriter,
 } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 /**
  * Parse TDLib style inline message ID
@@ -13,7 +13,7 @@ import {
  * @param id  Inline message ID
  */
 export function parseInlineMessageId(
-    id: string
+    id: string,
 ): tl.TypeInputBotInlineMessageID {
     const buf = parseUrlSafeBase64(id)
     const reader = TlBinaryReader.manual(buf)
@@ -42,9 +42,10 @@ export function parseInlineMessageId(
  * @param id  Inline message ID object
  */
 export function encodeInlineMessageId(
-    id: tl.TypeInputBotInlineMessageID
+    id: tl.TypeInputBotInlineMessageID,
 ): string {
     let writer: TlBinaryWriter
+
     switch (id._) {
         case 'inputBotInlineMessageID':
             writer = TlBinaryWriter.manualAlloc(20)

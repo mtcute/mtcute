@@ -1,7 +1,7 @@
 export async function fetchRetry(
     url: string,
     params?: RequestInit,
-    retries = 5
+    retries = 5,
 ): Promise<string> {
     while (true) {
         try {

@@ -1,6 +1,7 @@
-import { MtUnsupportedError, User, PeersIndex } from '../'
-import { TelegramClient } from '../../client'
 import { tl } from '@mtcute/tl'
+
+import { TelegramClient } from '../../client'
+import { MtUnsupportedError, PeersIndex, User } from '../'
 import { makeInspectable } from '../utils'
 
 /**
@@ -13,7 +14,7 @@ export class PollVoteUpdate {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.RawUpdateMessagePollVote,
-        readonly _peers: PeersIndex
+        readonly _peers: PeersIndex,
     ) {}
 
     /**
@@ -30,7 +31,7 @@ export class PollVoteUpdate {
     get user(): User {
         return (this._user ??= new User(
             this.client,
-            this._peers.user(this.raw.userId)
+            this._peers.user(this.raw.userId),
         ))
     }
 
@@ -69,12 +70,12 @@ export class PollVoteUpdate {
      */
     get chosenIndexesAuto(): ReadonlyArray<number> {
         return this.raw.options.map((buf) => {
-            if (buf.length > 1)
-                throw new MtUnsupportedError('option had >1 byte')
-            if (buf[0] < 48 || buf[0] > 57)
+            if (buf.length > 1) { throw new MtUnsupportedError('option had >1 byte') }
+            if (buf[0] < 48 || buf[0] > 57) {
                 throw new MtUnsupportedError(
-                    'option had first byte out of 0-9 range'
+                    'option had first byte out of 0-9 range',
                 )
+            }
 
             return buf[0] - 48
         })

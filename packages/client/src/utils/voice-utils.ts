@@ -22,6 +22,7 @@ export function decodeWaveform(wf: Buffer): number[] {
     // So we read in a general way all the entries except the last one.
 
     const result: number[] = []
+
     for (let i = 0, j = 0; i < lastIdx; i++, j += 5) {
         const byteIdx = ~~(j / 8)
         const bitShift = j % 8
@@ -31,9 +32,9 @@ export function decodeWaveform(wf: Buffer): number[] {
     const lastByteIdx = ~~((lastIdx * 5) / 8)
     const lastBitShift = (lastIdx * 5) % 8
     const lastValue =
-        lastByteIdx === wf.length - 1
-            ? wf[lastByteIdx]
-            : wf.readUInt16LE(lastByteIdx)
+        lastByteIdx === wf.length - 1 ?
+            wf[lastByteIdx] :
+            wf.readUInt16LE(lastByteIdx)
     result[lastIdx] = (lastValue >> lastBitShift) & 0b11111
 
     return result

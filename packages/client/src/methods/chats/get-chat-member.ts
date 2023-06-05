@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types'
+import { ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types'
 import {
     isInputPeerChannel,
     isInputPeerChat,
@@ -9,7 +9,6 @@ import {
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
-import { ChatMember } from '../../types'
 
 /**
  * Get information about a single chat member
@@ -22,14 +21,13 @@ import { ChatMember } from '../../types'
 export async function getChatMember(
     this: TelegramClient,
     chatId: InputPeerLike,
-    userId: InputPeerLike
+    userId: InputPeerLike,
 ): Promise<ChatMember> {
     const user = await this.resolvePeer(userId)
     const chat = await this.resolvePeer(chatId)
 
     if (isInputPeerChat(chat)) {
-        if (!isInputPeerUser(user))
-            throw new MtInvalidPeerTypeError(userId, 'user')
+        if (!isInputPeerUser(user)) { throw new MtInvalidPeerTypeError(userId, 'user') }
 
         const res = await this.call({
             _: 'messages.getFullChat',
@@ -39,13 +37,13 @@ export async function getChatMember(
         assertTypeIs(
             'getChatMember (@ messages.getFullChat)',
             res.fullChat,
-            'chatFull'
+            'chatFull',
         )
 
         const members =
-            res.fullChat.participants._ === 'chatParticipantsForbidden'
-                ? []
-                : res.fullChat.participants.participants
+            res.fullChat.participants._ === 'chatParticipantsForbidden' ?
+                [] :
+                res.fullChat.participants.participants
 
         const peers = PeersIndex.from(res)
 

@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
@@ -33,18 +33,18 @@ export async function setChatPhoto(
     chatId: InputPeerLike,
     type: 'photo' | 'video',
     media: InputFileLike,
-    previewSec?: number
+    previewSec?: number,
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
-    if (!(isInputPeerChannel(chat) || isInputPeerChat(chat)))
-        throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+
+    if (!(isInputPeerChannel(chat) || isInputPeerChat(chat))) { throw new MtInvalidPeerTypeError(chatId, 'chat or channel') }
 
     let photo: tl.TypeInputChatPhoto | undefined = undefined
 
     let inputFile: tl.TypeInputFile
+
     if (tdFileId.isFileIdLike(media)) {
-        if (typeof media === 'string' && media.match(/^https?:\/\//))
-            throw new MtArgumentError("Chat photo can't be external")
+        if (typeof media === 'string' && media.match(/^https?:\/\//)) { throw new MtArgumentError("Chat photo can't be external") }
         if (typeof media === 'string' && media.match(/^file:/)) {
             const uploaded = await this.uploadFile({
                 file: media.substring(5),
@@ -84,6 +84,7 @@ export async function setChatPhoto(
     }
 
     let res
+
     if (isInputPeerChat(chat)) {
         res = await this.call({
             _: 'messages.editChatPhoto',

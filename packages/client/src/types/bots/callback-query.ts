@@ -1,12 +1,12 @@
-import { tl } from '@mtcute/tl'
 import { BasicPeerType, getBasicPeerType, getMarkedPeerId } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
-import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
-import { Message } from '../messages'
-import { MtArgumentError } from '../errors'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
-import { User, PeersIndex } from '../peers'
+import { MtArgumentError } from '../errors'
+import { Message } from '../messages'
+import { PeersIndex, User } from '../peers'
+import { makeInspectable } from '../utils'
 
 /**
  * An incoming callback query, originated from a callback button
@@ -18,7 +18,7 @@ export class CallbackQuery {
         readonly raw:
             | tl.RawUpdateBotCallbackQuery
             | tl.RawUpdateInlineBotCallbackQuery,
-        readonly _peers: PeersIndex
+        readonly _peers: PeersIndex,
     ) {}
 
     /**
@@ -35,7 +35,7 @@ export class CallbackQuery {
     get user(): User {
         return (this._user ??= new User(
             this.client,
-            this._peers.user(this.raw.userId)
+            this._peers.user(this.raw.userId),
         ))
     }
 
@@ -69,10 +69,11 @@ export class CallbackQuery {
      * Is only available in case `isInline = true`
      */
     get inlineMessageId(): tl.TypeInputBotInlineMessageID {
-        if (this.raw._ !== 'updateInlineBotCallbackQuery')
+        if (this.raw._ !== 'updateInlineBotCallbackQuery') {
             throw new MtArgumentError(
-                'Cannot get inline message id for non-inline callback'
+                'Cannot get inline message id for non-inline callback',
             )
+        }
 
         return this.raw.msgId
     }
@@ -87,10 +88,11 @@ export class CallbackQuery {
      * Is only available in case `isInline = true`
      */
     get inlineMessageIdStr(): string {
-        if (this.raw._ !== 'updateInlineBotCallbackQuery')
+        if (this.raw._ !== 'updateInlineBotCallbackQuery') {
             throw new MtArgumentError(
-                'Cannot get inline message id for non-inline callback'
+                'Cannot get inline message id for non-inline callback',
             )
+        }
 
         return encodeInlineMessageId(this.raw.msgId)
     }
@@ -99,10 +101,11 @@ export class CallbackQuery {
      * Identifier of the chat where this message was sent
      */
     get chatId(): number {
-        if (this.raw._ !== 'updateBotCallbackQuery')
+        if (this.raw._ !== 'updateBotCallbackQuery') {
             throw new MtArgumentError(
-                'Cannot get message id for inline callback'
+                'Cannot get message id for inline callback',
             )
+        }
 
         return getMarkedPeerId(this.raw.peer)
     }
@@ -122,10 +125,11 @@ export class CallbackQuery {
      * Is only available in case `isInline = false`
      */
     get messageId(): number {
-        if (this.raw._ !== 'updateBotCallbackQuery')
+        if (this.raw._ !== 'updateBotCallbackQuery') {
             throw new MtArgumentError(
-                'Cannot get message id for inline callback'
+                'Cannot get message id for inline callback',
             )
+        }
 
         return this.raw.msgId
     }
@@ -172,14 +176,15 @@ export class CallbackQuery {
      * Can only be used if `isInline = false`
      */
     async getMessage(): Promise<Message> {
-        if (this.raw._ !== 'updateBotCallbackQuery')
+        if (this.raw._ !== 'updateBotCallbackQuery') {
             throw new MtArgumentError(
-                'Cannot get a message for inline callback'
+                'Cannot get a message for inline callback',
             )
+        }
 
         const msg = await this.client.getMessages(
             getMarkedPeerId(this.raw.peer),
-            this.raw.msgId
+            this.raw.msgId,
         )
         if (!msg) throw new tl.errors.MessageNotFoundError()
 
@@ -190,7 +195,7 @@ export class CallbackQuery {
      * Answer this query
      */
     async answer(
-        params?: Parameters<TelegramClient['answerCallbackQuery']>[1]
+        params?: Parameters<TelegramClient['answerCallbackQuery']>[1],
     ): Promise<void> {
         return this.client.answerCallbackQuery(this.raw.queryId, params)
     }
@@ -199,19 +204,18 @@ export class CallbackQuery {
      * Edit the message that originated this callback query
      */
     async editMessage(
-        params: Parameters<TelegramClient['editInlineMessage']>[1]
+        params: Parameters<TelegramClient['editInlineMessage']>[1],
     ): Promise<void> {
         // we can use editInlineMessage as a parameter since they share most of the parameters,
         // except the ones that won't apply to already sent message anyways.
         if (this.raw._ === 'updateInlineBotCallbackQuery') {
             return this.client.editInlineMessage(this.raw.msgId, params)
-        } else {
-            await this.client.editMessage(
-                getMarkedPeerId(this.raw.peer),
-                this.raw.msgId,
-                params
-            )
         }
+        await this.client.editMessage(
+            getMarkedPeerId(this.raw.peer),
+            this.raw.msgId,
+            params,
+        )
     }
 }
 

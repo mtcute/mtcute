@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { assertNever } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike, TypingStatus } from '../../types'
@@ -31,10 +31,11 @@ export async function sendTyping(
          * For comment threads, ID of the thread (i.e. top message)
          */
         threadId?: number
-    }
+    },
 ): Promise<void> {
     if (typeof status === 'string') {
         const progress = params?.progress ?? 0
+
         switch (status) {
             case 'typing':
                 status = { _: 'sendMessageTypingAction' }

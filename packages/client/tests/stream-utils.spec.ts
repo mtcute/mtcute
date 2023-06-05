@@ -1,6 +1,7 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 import { Readable } from 'stream'
+
 import { readStreamUntilEnd } from '../src/utils/stream-utils'
 
 describe('readStreamUntilEnd', () => {
@@ -14,7 +15,7 @@ describe('readStreamUntilEnd', () => {
         })
 
         expect((await readStreamUntilEnd(stream)).toString('hex')).eq(
-            'aaeeffff33ee'
+            'aaeeffff33ee',
         )
     })
 })

@@ -25,7 +25,7 @@ import {
 export async function banChatMember(
     this: TelegramClient,
     chatId: InputPeerLike,
-    userId: InputPeerLike
+    userId: InputPeerLike,
 ): Promise<Message | null> {
     const chat = await this.resolvePeer(chatId)
     const user = await this.resolvePeer(userId)

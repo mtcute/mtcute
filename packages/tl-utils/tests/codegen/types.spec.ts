@@ -1,11 +1,11 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
-import { parseTlToEntries } from '../../src/parse'
 import {
     generateTypescriptDefinitionsForTlEntry,
     generateTypescriptDefinitionsForTlSchema,
 } from '../../src/codegen/types'
+import { parseTlToEntries } from '../../src/parse'
 import { parseFullTlSchema } from '../../src/schema'
 
 describe('generateTypescriptDefinitionsForTlEntry', () => {
@@ -26,7 +26,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
             '    e: Buffer;',
             '    f: boolean;',
             '    g: number[];',
-            '}'
+            '}',
         )
     })
 
@@ -35,7 +35,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
             'test.test = Test;',
             'interface RawTest {',
             "    _: 'test.test';",
-            '}'
+            '}',
         )
     })
 
@@ -48,7 +48,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
             '    bar: tl.TypeBar[];',
             '    baz: tl.namespace.TypeBaz;',
             '    egg: tl.namespace.TypeEgg[];',
-            '}'
+            '}',
         )
     })
 
@@ -61,7 +61,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
             '    b?: string;',
             '    c?: tl.TypeFoo;',
             '    d?: tl.namespace.TypeFoo[];',
-            '}'
+            '}',
         )
     })
 
@@ -74,7 +74,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
                 ' */',
                 'interface RawTest {',
                 "    _: 'test';",
-                '}'
+                '}',
             )
             test(
                 '---functions---\n' +
@@ -87,7 +87,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
                 ' */',
                 'interface RawTestRequest {',
                 "    _: 'test';",
-                '}'
+                '}',
             )
         })
 
@@ -105,7 +105,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
                 '     * Some field',
                 '     */',
                 '    field: number;',
-                '}'
+                '}',
             )
         })
 
@@ -119,7 +119,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
                 ' */',
                 'interface RawTest {',
                 "    _: 'test';",
-                '}'
+                '}',
             )
 
             test(
@@ -134,7 +134,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
                 ' */',
                 'interface RawTestRequest {',
                 "    _: 'test';",
-                '}'
+                '}',
             )
         })
 
@@ -148,7 +148,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
                 ' */',
                 'interface RawTest {',
                 "    _: 'test';",
-                '}'
+                '}',
             )
         })
     })
@@ -159,7 +159,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
             'interface RawInvokeWithoutUpdatesRequest<X extends tl.TlObject> {',
             "    _: 'invokeWithoutUpdates';",
             '    query: X;',
-            '}'
+            '}',
         )
     })
 
@@ -170,8 +170,8 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
                 entry,
                 undefined,
                 undefined,
-                true
-            )
+                true,
+            ),
         ).eq(
             [
                 'interface RawTest {',
@@ -179,7 +179,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
                 '    flags: number;',
                 '    flags2: number;',
                 '}',
-            ].join('\n')
+            ].join('\n'),
         )
     })
 })
@@ -191,13 +191,13 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
 
         let [codeTs, codeJs] = generateTypescriptDefinitionsForTlSchema(
             schema,
-            0
+            0,
         )
 
         // skip prelude
         codeTs = codeTs.substring(
             codeTs.indexOf('-readonly [P in keyof T]: T[P]') + 37,
-            codeTs.length - 1
+            codeTs.length - 1,
         )
         // unindent first level
         codeTs = codeTs.replace(/^ {4}/gm, '')
@@ -205,7 +205,7 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
         // skip prelude
         codeJs = codeJs.substring(
             codeJs.indexOf('ns.LAYER = 0;') + 14,
-            codeJs.length - 15
+            codeJs.length - 15,
         )
 
         expect(codeTs.trim()).eq(ts.join('\n'))
@@ -230,7 +230,7 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
             [
                 "ns.isAnyTest = _isAny('Test');",
                 '_types = JSON.parse(\'{"test":"Test"}\');',
-            ]
+            ],
         )
     })
 
@@ -256,7 +256,7 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
             [
                 "ns.isAnyTest = _isAny('Test');",
                 '_types = JSON.parse(\'{"test":"Test","test2":"Test"}\');',
-            ]
+            ],
         )
     })
 
@@ -288,7 +288,7 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
             [
                 "ns.isAnyTest = _isAny('Test');",
                 '_types = JSON.parse(\'{"test":"Test"}\');',
-            ]
+            ],
         )
     })
 
@@ -362,7 +362,7 @@ ns.isAnyTest = _isAny('test.Test');
 })(ns.test);
 _types = JSON.parse('{"test":"Test","test2":"Test","test.test":"test.Test","test.test2":"test.Test"}');
 `.trim(),
-            ]
+            ],
         )
     })
 })

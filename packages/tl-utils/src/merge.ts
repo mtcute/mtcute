@@ -1,5 +1,5 @@
-import { TlEntry, TlFullSchema } from './types'
 import { computeConstructorIdFromEntry } from './ctor-id'
+import { TlEntry, TlFullSchema } from './types'
 
 /**
  * Merge multiple TL entries into a single entry.
@@ -55,8 +55,7 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
             result.name !== entry.name ||
             result.type !== entry.type ||
             result.id !== ctorId
-        )
-            return 'basic info mismatch'
+        ) { return 'basic info mismatch' }
 
         // since we re-calculated id manually, we can skip checking
         // generics and arguments, and get straight to merging
@@ -73,10 +72,13 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
                 // yay a new arg
                 // we can only add optional true args, since any others will change id
                 // ids match, so this must be the case
-                //
+                if (!entryArgument.predicate) {
+                    throw new Error('new argument is not optional')
+                }
+
                 // we also need to make sure we put it *after* the respective flags field
 
-                const flagsField = entryArgument.predicate!.split('.')[0]
+                const flagsField = entryArgument.predicate.split('.')[0]
                 const targetIdx = flagsLastIndex[flagsField]
 
                 // targetIdx *must* exist, otherwise ids wouldn't match
@@ -112,7 +114,7 @@ export async function mergeTlSchemas(
     onConflict: (
         options: (TlEntry | undefined)[],
         reason: string
-    ) => TlEntry | undefined | Promise<TlEntry | undefined>
+    ) => TlEntry | undefined | Promise<TlEntry | undefined>,
 ): Promise<TlFullSchema> {
     const result: TlFullSchema = {
         entries: [],
@@ -133,9 +135,9 @@ export async function mergeTlSchemas(
             const kind = entry.kind === 'class' ? 'classes' : 'methods'
             const index = result[kind]
             const conflictIndex =
-                entry.kind === 'class'
-                    ? resolvedConflictsClasses
-                    : resolvedConflictsMethods
+                entry.kind === 'class' ?
+                    resolvedConflictsClasses :
+                    resolvedConflictsMethods
 
             if (entry.name in conflictIndex) {
                 // this entry was manually processed by user after a conflict
@@ -156,7 +158,7 @@ export async function mergeTlSchemas(
                 // merge conflict
                 // find all candidates from all schemas and let the user decide
                 const candidates = schemas.map(
-                    (schema) => schema[kind][entry.name]
+                    (schema) => schema[kind][entry.name],
                 )
 
                 const chosen = await onConflict(candidates, merged)
@@ -176,8 +178,6 @@ export async function mergeTlSchemas(
         }
 
         for (const name in schema.unions) {
-            if (!schema.unions.hasOwnProperty(name)) continue
-
             const union = schema.unions[name]
 
             if (!(name in result.unions)) {
@@ -200,8 +200,6 @@ export async function mergeTlSchemas(
         const index = result[kind]
 
         for (const name in index) {
-            if (!index.hasOwnProperty(name)) continue
-
             const entry = index[name]
 
             result.entries.push(entry)

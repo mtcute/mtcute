@@ -1,21 +1,20 @@
 import Long from 'long'
-import { tl } from '@mtcute/tl'
+
 import { assertNever } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
-    ChatMember,
+    ArrayWithTotal, ChatMember,
     InputPeerLike,
     MtInvalidPeerTypeError,
-    PeersIndex,
-} from '../../types'
+    PeersIndex } from '../../types'
 import {
     isInputPeerChannel,
     isInputPeerChat,
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
-import { ArrayWithTotal } from '../../types'
 
 /**
  * Get a chunk of members of some chat.
@@ -71,7 +70,7 @@ export async function getChatMembers(
             | 'admins'
             | 'contacts'
             | 'mention'
-    }
+    },
 ): Promise<ArrayWithTotal<ChatMember>> {
     if (!params) params = {}
 
@@ -86,13 +85,13 @@ export async function getChatMembers(
         assertTypeIs(
             'getChatMember (@ messages.getFullChat)',
             res.fullChat,
-            'chatFull'
+            'chatFull',
         )
 
         let members =
-            res.fullChat.participants._ === 'chatParticipantsForbidden'
-                ? []
-                : res.fullChat.participants.participants
+            res.fullChat.participants._ === 'chatParticipantsForbidden' ?
+                [] :
+                res.fullChat.participants.participants
 
         if (params.offset) members = members.slice(params.offset)
         if (params.limit) members = members.slice(0, params.limit)
@@ -100,10 +99,11 @@ export async function getChatMembers(
         const peers = PeersIndex.from(res)
 
         const ret = members.map(
-            (m) => new ChatMember(this, m, peers)
+            (m) => new ChatMember(this, m, peers),
         ) as ArrayWithTotal<ChatMember>
 
         ret.total = ret.length
+
         return ret
     }
 
@@ -112,6 +112,7 @@ export async function getChatMembers(
         const type = params.type ?? 'recent'
 
         let filter: tl.TypeChannelParticipantsFilter
+
         switch (type) {
             case 'all':
                 filter = { _: 'channelParticipantsSearch', q }
@@ -153,15 +154,16 @@ export async function getChatMembers(
         assertTypeIs(
             'getChatMembers (@ channels.getParticipants)',
             res,
-            'channels.channelParticipants'
+            'channels.channelParticipants',
         )
 
         const peers = PeersIndex.from(res)
 
         const ret = res.participants.map(
-            (i) => new ChatMember(this, i, peers)
+            (i) => new ChatMember(this, i, peers),
         ) as ArrayWithTotal<ChatMember>
         ret.total = res.count
+
         return ret
     }
 

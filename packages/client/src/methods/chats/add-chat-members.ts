@@ -23,7 +23,7 @@ export async function addChatMembers(
     this: TelegramClient,
     chatId: InputPeerLike,
     users: MaybeArray<InputPeerLike>,
-    forwardCount = 100
+    forwardCount = 100,
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
 
@@ -47,7 +47,7 @@ export async function addChatMembers(
             channel: normalizeToInputChannel(chat),
             users: await this.resolvePeerMany(
                 users as InputPeerLike[],
-                normalizeToInputUser
+                normalizeToInputUser,
             ),
             fwdLimit: forwardCount,
         })

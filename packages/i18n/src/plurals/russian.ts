@@ -12,7 +12,7 @@ export function pluralizeRussian<T>(
     n: number,
     one: T,
     few: T,
-    many: T
+    many: T,
 ): T {
     // reference: https://unicode-org.github.io/cldr-staging/charts/latest/supplemental/language_plural_rules.html#ru
 
@@ -25,6 +25,7 @@ export function pluralizeRussian<T>(
 
     if (mod10 === 1 && mod100 !== 11) return one
     if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few
+
     return many
 }
 
@@ -35,14 +36,15 @@ export function pluralizeRussian<T>(
  * @param few  Value for "few" (2 стола, 42 стола)
  * @param many  Value for "many" (5 столов, 100 столов, 0 столов, нет столов)
  */
-export function createPluralRussian<Args extends any[] = []>(
+export function createPluralRussian<Args extends unknown[] = []>(
     one: I18nValue<[number, ...Args]>,
     few: I18nValue<[number, ...Args]>,
-    many: I18nValue<[number, ...Args]>
+    many: I18nValue<[number, ...Args]>,
 ): I18nValueDynamic<[number, ...Args]> {
     return (n, ...args) => {
         const val = pluralizeRussian(n, one, few, many)
         if (typeof val === 'function') return val(n, ...args)
+
         return val
     }
 }

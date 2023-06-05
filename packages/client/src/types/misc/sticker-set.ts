@@ -1,32 +1,30 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../utils'
-import { Sticker, Thumbnail } from '../media'
 import { MtEmptyError, MtTypeAssertionError } from '../errors'
-import { parseDocument } from '../media/document-utils'
 import { InputFileLike } from '../files'
+import { MaskPosition, Sticker, StickerSourceType, StickerType, Thumbnail } from '../media'
+import { parseDocument } from '../media/document-utils'
+import { makeInspectable } from '../utils'
 
-export namespace StickerSet {
+/**
+ * Information about one sticker inside the set
+ */
+export interface StickerInfo {
     /**
-     * Information about one sticker inside the set
+     * Primary alt emoji that is displayed in dialogs list
      */
-    export interface StickerInfo {
-        /**
-         * Primary alt emoji that is displayed in dialogs list
-         */
-        readonly alt: string
+    readonly alt: string
 
-        /**
-         * One or more emojis representing this sticker
-         */
-        readonly emoji: string
+    /**
+     * One or more emojis representing this sticker
+     */
+    readonly emoji: string
 
-        /**
-         * Document with the actual sticker
-         */
-        readonly sticker: Sticker
-    }
+    /**
+     * Document with the actual sticker
+     */
+    readonly sticker: Sticker
 }
 
 /**
@@ -43,7 +41,7 @@ export class StickerSet {
 
     constructor(
         readonly client: TelegramClient,
-        raw: tl.TypeStickerSet | tl.messages.TypeStickerSet
+        raw: tl.TypeStickerSet | tl.messages.TypeStickerSet,
     ) {
         if (raw._ === 'messages.stickerSet') {
             this.full = raw
@@ -54,7 +52,7 @@ export class StickerSet {
             throw new MtTypeAssertionError(
                 'StickerSet',
                 'messages.stickerSet | stickerSet',
-                raw._
+                raw._,
             )
         }
 
@@ -79,7 +77,7 @@ export class StickerSet {
     /**
      * Type of the stickers in this set
      */
-    get type(): Sticker.Type {
+    get type(): StickerType {
         if (this.brief.masks) {
             return 'mask'
         }
@@ -94,7 +92,7 @@ export class StickerSet {
     /**
      * Source file type of the stickers in this set
      */
-    get sourceType(): Sticker.SourceType {
+    get sourceType(): StickerSourceType {
         if (this.brief.animated) {
             return 'animated'
         }
@@ -110,9 +108,9 @@ export class StickerSet {
      * Date when this sticker set was installed
      */
     get installedDate(): Date | null {
-        return this.brief.installedDate
-            ? new Date(this.brief.installedDate * 1000)
-            : null
+        return this.brief.installedDate ?
+            new Date(this.brief.installedDate * 1000) :
+            null
     }
 
     /**
@@ -148,34 +146,35 @@ export class StickerSet {
         return this.brief.shortName
     }
 
-    private _stickers?: StickerSet.StickerInfo[]
+    private _stickers?: StickerInfo[]
     /**
      * List of stickers inside this sticker set
      *
      * @throws MtEmptyError
      *     In case this object does not contain info about stickers (i.e. {@link isFull} = false)
      */
-    get stickers(): ReadonlyArray<StickerSet.StickerInfo> {
+    get stickers(): ReadonlyArray<StickerInfo> {
         if (!this.isFull) throw new MtEmptyError()
 
         if (!this._stickers) {
             this._stickers = []
-            const index: Record<string, tl.Mutable<StickerSet.StickerInfo>> = {}
+            const index: Record<string, tl.Mutable<StickerInfo>> = {}
 
             this.full!.documents.forEach((doc) => {
                 const sticker = parseDocument(
                     this.client,
-                    doc as tl.RawDocument
+                    doc as tl.RawDocument,
                 )
+
                 if (!(sticker instanceof Sticker)) {
                     throw new MtTypeAssertionError(
                         'full.documents',
                         'Sticker',
-                        sticker.mimeType
+                        sticker.mimeType,
                     )
                 }
 
-                const info: tl.Mutable<StickerSet.StickerInfo> = {
+                const info: tl.Mutable<StickerInfo> = {
                     alt: sticker.emoji,
                     emoji: '', // populated later
                     sticker,
@@ -187,6 +186,7 @@ export class StickerSet {
             this.full!.packs.forEach((pack) => {
                 pack.documents.forEach((id) => {
                     const sid = id.toString()
+
                     if (sid in index) {
                         index[sid].emoji += pack.emoticon
                     }
@@ -207,7 +207,7 @@ export class StickerSet {
     get thumbnails(): ReadonlyArray<Thumbnail> {
         return (this._thumbnails ??=
             this.brief.thumbs?.map(
-                (sz) => new Thumbnail(this.client, this.brief, sz)
+                (sz) => new Thumbnail(this.client, this.brief, sz),
             ) ?? [])
     }
 
@@ -231,9 +231,9 @@ export class StickerSet {
      * @throws MtEmptyError
      *     In case this object does not contain info about stickers (i.e. {@link isFull} = false)
      */
-    getStickersByEmoji(emoji: string): StickerSet.StickerInfo[] {
+    getStickersByEmoji(emoji: string): StickerInfo[] {
         return this.stickers.filter(
-            (it) => it.alt === emoji || it.emoji.indexOf(emoji) != -1
+            (it) => it.alt === emoji || it.emoji.indexOf(emoji) !== -1,
         )
     }
 
@@ -268,8 +268,7 @@ export class StickerSet {
         if (idx < 0) idx = this.full!.documents.length + idx
         const doc = this.full!.documents[idx] as tl.RawDocument
 
-        if (!doc)
-            throw new RangeError(`Sticker set does not have sticker ${idx}`)
+        if (!doc) { throw new RangeError(`Sticker set does not have sticker ${idx}`) }
 
         return {
             _: 'inputDocument',
@@ -293,7 +292,7 @@ export class StickerSet {
      *     you can also pass index (even negative), and that sticker will be removed
      */
     async deleteSticker(
-        sticker: number | Parameters<TelegramClient['deleteStickerFromSet']>[0]
+        sticker: number | Parameters<TelegramClient['deleteStickerFromSet']>[0],
     ): Promise<StickerSet> {
         if (typeof sticker === 'number') {
             sticker = this._getInputDocument(sticker)
@@ -318,7 +317,7 @@ export class StickerSet {
      */
     async moveSticker(
         sticker: number | Parameters<TelegramClient['moveStickerInSet']>[0],
-        position: number
+        position: number,
     ): Promise<StickerSet> {
         if (typeof sticker === 'number') {
             sticker = this._getInputDocument(sticker)
@@ -342,7 +341,7 @@ export class StickerSet {
      *     will be used as a thumb
      */
     async setThumb(
-        thumb: number | Parameters<TelegramClient['setStickerSetThumb']>[1]
+        thumb: number | Parameters<TelegramClient['setStickerSetThumb']>[1],
     ): Promise<StickerSet> {
         if (typeof thumb === 'number') {
             thumb = this._getInputDocument(thumb)
@@ -378,5 +377,5 @@ export interface InputStickerSetItem {
      * In case this is a mask sticker,
      * position of the mask
      */
-    maskPosition?: Sticker.MaskPosition
+    maskPosition?: MaskPosition
 }

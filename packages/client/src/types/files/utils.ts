@@ -1,10 +1,11 @@
-import type { Readable } from 'stream'
 import type { ReadStream } from 'fs'
-import { tl } from '@mtcute/tl'
-import { tdFileId } from '@mtcute/file-id'
+import type { Readable } from 'stream'
 
-import { UploadedFile } from './uploaded-file'
+import { tdFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
+
 import { FileLocation } from './file-location'
+import { UploadedFile } from './uploaded-file'
 
 /**
  * Describes types that can be used in {@link TelegramClient.uploadFile}
@@ -27,7 +28,7 @@ export type UploadFileLike =
     | Readable
     // fetch() response
     | {
-          headers: any
+          headers: Headers
           url: string
           body: ReadableStream<Uint8Array> | NodeJS.ReadableStream | null
       }

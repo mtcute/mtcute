@@ -1,333 +1,331 @@
-import { tl } from '@mtcute/tl'
 import { toggleChannelIdMark } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
-import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
-import { User } from './user'
-import { ChatMember } from './chat-member'
 import { Photo } from '../media'
 import { Message } from '../messages'
-import { ChatPermissions } from './chat-permissions'
-import { ChatLocation } from './chat-location'
+import { makeInspectable } from '../utils'
 import { ChatInviteLink } from './chat-invite-link'
+import { ChatLocation } from './chat-location'
+import { ChatMember } from './chat-member'
+import { ChatPermissions } from './chat-permissions'
 import { PeersIndex } from './index'
-
-export namespace ChatEvent {
-    /** A user has joined the group (in the case of big groups, info of the user that has joined isn't shown) */
-    export interface ActionUserJoined {
-        type: 'user_joined'
-    }
-
-    /** A user has joined the group using an invite link */
-    export interface ActionUserJoinedInvite {
-        type: 'user_joined_invite'
-
-        /** Invite link user to join */
-        link: ChatInviteLink
-    }
-
-    /** A user has left the group (in the case of big groups, info of the user that has joined isn't shown) */
-    export interface ActionUserLeft {
-        type: 'user_left'
-    }
-
-    /** A user was invited to the group */
-    export interface ActionUserInvited {
-        type: 'user_invited'
-
-        /** Member who has been invited */
-        member: ChatMember
-    }
-
-    /** Group title has been changed */
-    export interface ActionTitleChanged {
-        type: 'title_changed'
-
-        /** Old chat title */
-        old: string
-
-        /** New chat title */
-        new: string
-    }
-
-    /** Group description has been changed */
-    export interface ActionDescriptionChanged {
-        type: 'description_changed'
-
-        /** Old description */
-        old: string
-
-        /** New description */
-        new: string
-    }
-
-    /** Group username has been changed */
-    export interface ActionUsernameChanged {
-        type: 'username_changed'
-
-        /** Old username */
-        old: string
-
-        /** New username */
-        new: string
-    }
-
-    /** Group photo has been changed */
-    export interface ActionPhotoChanged {
-        type: 'photo_changed'
-
-        /** Old photo */
-        old: Photo
-
-        /** New photo */
-        new: Photo
-    }
-
-    /** Invites were enabled/disabled */
-    export interface ActionInvitesToggled {
-        type: 'invites_toggled'
-
-        /** Old value */
-        old: boolean
-
-        /** New value */
-        new: boolean
-    }
-
-    /** Signatures were enabled/disabled */
-    export interface ActionSignaturesToggled {
-        type: 'signatures_toggled'
-
-        /** Old value */
-        old: boolean
-
-        /** New value */
-        new: boolean
-    }
-
-    /** A message has been pinned */
-    export interface ActionMessagePinned {
-        type: 'msg_pinned'
-
-        /** Message which was pinned */
-        message: Message
-    }
-
-    /** A message has been edited */
-    export interface ActionMessageEdited {
-        type: 'msg_edited'
-
-        /** Old message */
-        old: Message
-
-        /** New message */
-        new: Message
-    }
-
-    /** A message has been deleted */
-    export interface ActionMessageDeleted {
-        type: 'msg_deleted'
-
-        /** Message which was deleted */
-        message: Message
-    }
-
-    /** User's permissions were changed */
-    export interface ActionUserPermissionsChanged {
-        type: 'user_perms_changed'
-
-        /** Information about member before change */
-        old: ChatMember
-
-        /** Information about member after change */
-        new: ChatMember
-    }
-
-    /** User's admin permissions were changed */
-    export interface ActionUserAdminPermissionsChanged {
-        type: 'user_admin_perms_changed'
-
-        /** Information about member before change */
-        old: ChatMember
-
-        /** Information about member after change */
-        new: ChatMember
-    }
-
-    /** Group stickerset has been changed */
-    export interface ActionStickersetChanged {
-        type: 'stickerset_changed'
-
-        /** Old stickerset */
-        old: tl.TypeInputStickerSet
-
-        /** New stickerset */
-        new: tl.TypeInputStickerSet
-    }
-
-    /** History visibility for new users has been toggled */
-    export interface ActionHistoryToggled {
-        type: 'history_toggled'
-
-        /** Old value (`false` if new users can see history) */
-        old: boolean
-
-        /** New value (`false` if new users can see history) */
-        new: boolean
-    }
-
-    /** Group default permissions have been changed */
-    export interface ActionDefaultPermissionsChanged {
-        type: 'def_perms_changed'
-
-        /** Old default permissions */
-        old: ChatPermissions
-
-        /** New default permissions */
-        new: ChatPermissions
-    }
-
-    /** Poll has been stopped */
-    export interface ActionPollStopped {
-        type: 'poll_stopped'
-
-        /** Message containing the poll */
-        message: Message
-    }
-
-    /** Linked chat has been changed */
-    export interface ActionLinkedChatChanged {
-        type: 'linked_chat_changed'
-
-        /** ID of the old linked chat */
-        old: number
-
-        /** ID of the new linked chat */
-        new: number
-    }
-
-    /** Group location has been changed */
-    export interface ActionLocationChanged {
-        type: 'location_changed'
-
-        /** Old location */
-        old: ChatLocation | null
-
-        /** New location */
-        new: ChatLocation | null
-    }
-
-    /** Group slow mode delay has been changed */
-    export interface ActionSlowModeChanged {
-        type: 'slow_mode_changed'
-
-        /** Old delay (can be 0) */
-        old: number
-
-        /** New delay (can be 0) */
-        new: number
-    }
-
-    /** Group call has been started */
-    export interface ActionCallStarted {
-        type: 'call_started'
-
-        /** TL object representing the call */
-        call: tl.TypeInputGroupCall
-    }
-
-    /** Group call has ended */
-    export interface ActionCallEnded {
-        type: 'call_ended'
-
-        /** TL object representing the call */
-        call: tl.TypeInputGroupCall
-    }
-
-    /** Group call "join muted" setting has been changed */
-    export interface ActionCallSettingChanged {
-        type: 'call_setting_changed'
-
-        /** Whether new call participants should join muted */
-        joinMuted: boolean
-    }
-
-    /** Invite link has been deleted */
-    export interface ActionInviteLinkDeleted {
-        type: 'invite_deleted'
-
-        /** Invite link which was deleted */
-        link: ChatInviteLink
-    }
-
-    /** Invite link has been edited */
-    export interface ActionInviteLinkEdited {
-        type: 'invite_edited'
-
-        /** Old invite link */
-        old: ChatInviteLink
-
-        /** New invite link */
-        new: ChatInviteLink
-    }
-
-    /** Invite link has been revoked */
-    export interface ActionInviteLinkRevoked {
-        type: 'invite_revoked'
-
-        /** Invite link which was revoked */
-        link: ChatInviteLink
-    }
-
-    /** History TTL has been changed */
-    export interface ActionTtlChanged {
-        type: 'ttl_changed'
-
-        /** Old TTL value (can be 0) */
-        old: number
-
-        /** New TTL value (can be 0) */
-        new: number
-    }
-
-    /** Chat event action (`null` if unsupported) */
-    export type Action =
-        | ActionUserJoined
-        | ActionUserLeft
-        | ActionUserInvited
-        | ActionTitleChanged
-        | ActionDescriptionChanged
-        | ActionUsernameChanged
-        | ActionPhotoChanged
-        | ActionInvitesToggled
-        | ActionSignaturesToggled
-        | ActionMessagePinned
-        | ActionMessageEdited
-        | ActionMessageDeleted
-        | ActionUserPermissionsChanged
-        | ActionUserAdminPermissionsChanged
-        | ActionStickersetChanged
-        | ActionHistoryToggled
-        | ActionDefaultPermissionsChanged
-        | ActionPollStopped
-        | ActionLinkedChatChanged
-        | ActionLocationChanged
-        | ActionSlowModeChanged
-        | ActionCallStarted
-        | ActionCallEnded
-        | ActionCallSettingChanged
-        | ActionUserJoinedInvite
-        | ActionInviteLinkDeleted
-        | ActionInviteLinkEdited
-        | ActionInviteLinkRevoked
-        | ActionTtlChanged
-        | null
+import { User } from './user'
+
+/** A user has joined the group (in the case of big groups, info of the user that has joined isn't shown) */
+export interface ChatActionUserJoined {
+    type: 'user_joined'
 }
+
+/** A user has joined the group using an invite link */
+export interface ChatActionUserJoinedInvite {
+    type: 'user_joined_invite'
+
+    /** Invite link user to join */
+    link: ChatInviteLink
+}
+
+/** A user has left the group (in the case of big groups, info of the user that has joined isn't shown) */
+export interface ChatActionUserLeft {
+    type: 'user_left'
+}
+
+/** A user was invited to the group */
+export interface ChatActionUserInvited {
+    type: 'user_invited'
+
+    /** Member who has been invited */
+    member: ChatMember
+}
+
+/** Group title has been changed */
+export interface ChatActionTitleChanged {
+    type: 'title_changed'
+
+    /** Old chat title */
+    old: string
+
+    /** New chat title */
+    new: string
+}
+
+/** Group description has been changed */
+export interface ChatActionDescriptionChanged {
+    type: 'description_changed'
+
+    /** Old description */
+    old: string
+
+    /** New description */
+    new: string
+}
+
+/** Group username has been changed */
+export interface ChatActionUsernameChanged {
+    type: 'username_changed'
+
+    /** Old username */
+    old: string
+
+    /** New username */
+    new: string
+}
+
+/** Group photo has been changed */
+export interface ChatActionPhotoChanged {
+    type: 'photo_changed'
+
+    /** Old photo */
+    old: Photo
+
+    /** New photo */
+    new: Photo
+}
+
+/** Invites were enabled/disabled */
+export interface ChatActionInvitesToggled {
+    type: 'invites_toggled'
+
+    /** Old value */
+    old: boolean
+
+    /** New value */
+    new: boolean
+}
+
+/** Signatures were enabled/disabled */
+export interface ChatActionSignaturesToggled {
+    type: 'signatures_toggled'
+
+    /** Old value */
+    old: boolean
+
+    /** New value */
+    new: boolean
+}
+
+/** A message has been pinned */
+export interface ChatActionMessagePinned {
+    type: 'msg_pinned'
+
+    /** Message which was pinned */
+    message: Message
+}
+
+/** A message has been edited */
+export interface ChatActionMessageEdited {
+    type: 'msg_edited'
+
+    /** Old message */
+    old: Message
+
+    /** New message */
+    new: Message
+}
+
+/** A message has been deleted */
+export interface ChatActionMessageDeleted {
+    type: 'msg_deleted'
+
+    /** Message which was deleted */
+    message: Message
+}
+
+/** User's permissions were changed */
+export interface ChatActionUserPermissionsChanged {
+    type: 'user_perms_changed'
+
+    /** Information about member before change */
+    old: ChatMember
+
+    /** Information about member after change */
+    new: ChatMember
+}
+
+/** User's admin permissions were changed */
+export interface ChatActionUserAdminPermissionsChanged {
+    type: 'user_admin_perms_changed'
+
+    /** Information about member before change */
+    old: ChatMember
+
+    /** Information about member after change */
+    new: ChatMember
+}
+
+/** Group stickerset has been changed */
+export interface ChatActionStickersetChanged {
+    type: 'stickerset_changed'
+
+    /** Old stickerset */
+    old: tl.TypeInputStickerSet
+
+    /** New stickerset */
+    new: tl.TypeInputStickerSet
+}
+
+/** History visibility for new users has been toggled */
+export interface ChatActionHistoryToggled {
+    type: 'history_toggled'
+
+    /** Old value (`false` if new users can see history) */
+    old: boolean
+
+    /** New value (`false` if new users can see history) */
+    new: boolean
+}
+
+/** Group default permissions have been changed */
+export interface ChatActionDefaultPermissionsChanged {
+    type: 'def_perms_changed'
+
+    /** Old default permissions */
+    old: ChatPermissions
+
+    /** New default permissions */
+    new: ChatPermissions
+}
+
+/** Poll has been stopped */
+export interface ChatActionPollStopped {
+    type: 'poll_stopped'
+
+    /** Message containing the poll */
+    message: Message
+}
+
+/** Linked chat has been changed */
+export interface ChatActionLinkedChatChanged {
+    type: 'linked_chat_changed'
+
+    /** ID of the old linked chat */
+    old: number
+
+    /** ID of the new linked chat */
+    new: number
+}
+
+/** Group location has been changed */
+export interface ChatActionLocationChanged {
+    type: 'location_changed'
+
+    /** Old location */
+    old: ChatLocation | null
+
+    /** New location */
+    new: ChatLocation | null
+}
+
+/** Group slow mode delay has been changed */
+export interface ChatActionSlowModeChanged {
+    type: 'slow_mode_changed'
+
+    /** Old delay (can be 0) */
+    old: number
+
+    /** New delay (can be 0) */
+    new: number
+}
+
+/** Group call has been started */
+export interface ChatActionCallStarted {
+    type: 'call_started'
+
+    /** TL object representing the call */
+    call: tl.TypeInputGroupCall
+}
+
+/** Group call has ended */
+export interface ChatActionCallEnded {
+    type: 'call_ended'
+
+    /** TL object representing the call */
+    call: tl.TypeInputGroupCall
+}
+
+/** Group call "join muted" setting has been changed */
+export interface ChatActionCallSettingChanged {
+    type: 'call_setting_changed'
+
+    /** Whether new call participants should join muted */
+    joinMuted: boolean
+}
+
+/** Invite link has been deleted */
+export interface ChatActionInviteLinkDeleted {
+    type: 'invite_deleted'
+
+    /** Invite link which was deleted */
+    link: ChatInviteLink
+}
+
+/** Invite link has been edited */
+export interface ChatActionInviteLinkEdited {
+    type: 'invite_edited'
+
+    /** Old invite link */
+    old: ChatInviteLink
+
+    /** New invite link */
+    new: ChatInviteLink
+}
+
+/** Invite link has been revoked */
+export interface ChatActionInviteLinkRevoked {
+    type: 'invite_revoked'
+
+    /** Invite link which was revoked */
+    link: ChatInviteLink
+}
+
+/** History TTL has been changed */
+export interface ChatActionTtlChanged {
+    type: 'ttl_changed'
+
+    /** Old TTL value (can be 0) */
+    old: number
+
+    /** New TTL value (can be 0) */
+    new: number
+}
+
+/** Chat event action (`null` if unsupported) */
+export type ChatAction =
+    | ChatActionUserJoined
+    | ChatActionUserLeft
+    | ChatActionUserInvited
+    | ChatActionTitleChanged
+    | ChatActionDescriptionChanged
+    | ChatActionUsernameChanged
+    | ChatActionPhotoChanged
+    | ChatActionInvitesToggled
+    | ChatActionSignaturesToggled
+    | ChatActionMessagePinned
+    | ChatActionMessageEdited
+    | ChatActionMessageDeleted
+    | ChatActionUserPermissionsChanged
+    | ChatActionUserAdminPermissionsChanged
+    | ChatActionStickersetChanged
+    | ChatActionHistoryToggled
+    | ChatActionDefaultPermissionsChanged
+    | ChatActionPollStopped
+    | ChatActionLinkedChatChanged
+    | ChatActionLocationChanged
+    | ChatActionSlowModeChanged
+    | ChatActionCallStarted
+    | ChatActionCallEnded
+    | ChatActionCallSettingChanged
+    | ChatActionUserJoinedInvite
+    | ChatActionInviteLinkDeleted
+    | ChatActionInviteLinkEdited
+    | ChatActionInviteLinkRevoked
+    | ChatActionTtlChanged
+    | null
 
 function _actionFromTl(
     this: ChatEvent,
-    e: tl.TypeChannelAdminLogEventAction
-): ChatEvent.Action {
+    e: tl.TypeChannelAdminLogEventAction,
+): ChatAction {
     switch (e._) {
         case 'channelAdminLogEventActionParticipantJoin':
             return { type: 'user_joined' }
@@ -396,7 +394,7 @@ function _actionFromTl(
                 old: new ChatMember(
                     this.client,
                     e.prevParticipant,
-                    this._peers
+                    this._peers,
                 ),
                 new: new ChatMember(this.client, e.newParticipant, this._peers),
             }
@@ -406,7 +404,7 @@ function _actionFromTl(
                 old: new ChatMember(
                     this.client,
                     e.prevParticipant,
-                    this._peers
+                    this._peers,
                 ),
                 new: new ChatMember(this.client, e.newParticipant, this._peers),
             }
@@ -443,13 +441,13 @@ function _actionFromTl(
             return {
                 type: 'location_changed',
                 old:
-                    e.prevValue._ === 'channelLocationEmpty'
-                        ? null
-                        : new ChatLocation(this.client, e.prevValue),
+                    e.prevValue._ === 'channelLocationEmpty' ?
+                        null :
+                        new ChatLocation(this.client, e.prevValue),
                 new:
-                    e.newValue._ === 'channelLocationEmpty'
-                        ? null
-                        : new ChatLocation(this.client, e.newValue),
+                    e.newValue._ === 'channelLocationEmpty' ?
+                        null :
+                        new ChatLocation(this.client, e.newValue),
             }
         case 'channelAdminLogEventActionToggleSlowMode':
             return {
@@ -513,7 +511,7 @@ export class ChatEvent {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.TypeChannelAdminLogEvent,
-        readonly _peers: PeersIndex
+        readonly _peers: PeersIndex,
     ) {}
 
     /**
@@ -540,12 +538,12 @@ export class ChatEvent {
     get actor(): User {
         return (this._actor ??= new User(
             this.client,
-            this._peers.user(this.raw.userId)
+            this._peers.user(this.raw.userId),
         ))
     }
 
-    private _action?: ChatEvent.Action
-    get action(): ChatEvent.Action {
+    private _action?: ChatAction
+    get action(): ChatAction {
         return (this._action ??= _actionFromTl.call(this, this.raw.action))
     }
 }

@@ -1,7 +1,7 @@
 import { TelegramClient } from '../../client'
-import { User, TermsOfService } from '../../types'
-import { assertTypeIs } from '../../utils/type-assertion'
+import { TermsOfService, User } from '../../types'
 import { normalizePhoneNumber } from '../../utils/misc-utils'
+import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Authorize a user in Telegram with a valid confirmation code.
@@ -22,7 +22,7 @@ export async function signIn(
     this: TelegramClient,
     phone: string,
     phoneCodeHash: string,
-    phoneCode: string
+    phoneCode: string,
 ): Promise<User | TermsOfService | false> {
     phone = normalizePhoneNumber(phone)
 

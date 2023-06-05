@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { User, Location, MtArgumentError, PeersIndex } from '../'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
+import { Location, MtArgumentError, PeersIndex, User } from '../'
 import { makeInspectable } from '../utils'
 
 /**
@@ -15,7 +15,7 @@ export class ChosenInlineResult {
     constructor(
         readonly client: TelegramClient,
         readonly raw: tl.RawUpdateBotInlineSend,
-        readonly _peers: PeersIndex
+        readonly _peers: PeersIndex,
     ) {}
 
     /**
@@ -33,7 +33,7 @@ export class ChosenInlineResult {
     get user(): User {
         return (this._user ??= new User(
             this.client,
-            this._peers.user(this.raw.userId)
+            this._peers.user(this.raw.userId),
         ))
     }
 
@@ -82,12 +82,13 @@ export class ChosenInlineResult {
     }
 
     async editMessage(
-        params: Parameters<TelegramClient['editInlineMessage']>[1]
+        params: Parameters<TelegramClient['editInlineMessage']>[1],
     ): Promise<void> {
-        if (!this.raw.msgId)
+        if (!this.raw.msgId) {
             throw new MtArgumentError(
-                'No message ID, make sure you have included reply markup!'
+                'No message ID, make sure you have included reply markup!',
             )
+        }
 
         return this.client.editInlineMessage(this.raw.msgId, params)
     }

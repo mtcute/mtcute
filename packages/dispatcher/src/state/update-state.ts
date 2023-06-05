@@ -1,5 +1,6 @@
 import { MtArgumentError, MtClientError } from '@mtcute/client'
 import { sleep } from '@mtcute/core'
+
 import { IStateStorage } from './storage'
 
 /**
@@ -7,7 +8,7 @@ import { IStateStorage } from './storage'
  */
 export class RateLimitError extends MtClientError {
     constructor(readonly reset: number) {
-        super(`You are being rate limited.`)
+        super('You are being rate limited.')
     }
 }
 
@@ -36,7 +37,7 @@ export class UpdateState<State, SceneName extends string = string> {
         scene: SceneName | null,
         scoped?: boolean,
         customStorage?: IStateStorage,
-        customKey?: string
+        customKey?: string,
     ) {
         this._storage = storage
         this._key = key
@@ -55,10 +56,11 @@ export class UpdateState<State, SceneName extends string = string> {
 
     private _updateLocalKey(): void {
         if (!this._scoped) this._localKey = this._localKeyBase
-        else
-            this._localKey = this._scene
-                ? this._scene + '_' + this._localKeyBase
-                : this._localKeyBase
+        else {
+            this._localKey = this._scene ?
+                this._scene + '_' + this._localKeyBase :
+                this._localKeyBase
+        }
     }
 
     /**
@@ -86,7 +88,7 @@ export class UpdateState<State, SceneName extends string = string> {
     async get(force?: boolean): Promise<State | null>
     async get(
         fallback?: State | boolean,
-        force?: boolean
+        force?: boolean,
     ): Promise<State | null> {
         if (typeof fallback === 'boolean') {
             force = fallback
@@ -95,12 +97,14 @@ export class UpdateState<State, SceneName extends string = string> {
 
         if (!force && this._cached !== undefined) {
             if (!this._cached && fallback) return fallback
+
             return this._cached
         }
 
-        let res = await this._localStorage.getState(this._localKey)
+        let res = await this._localStorage.getState(this._localKey) as State | null
         if (!res && fallback) res = fallback
         this._cached = res
+
         return res
     }
 
@@ -119,8 +123,7 @@ export class UpdateState<State, SceneName extends string = string> {
      * Merge the given object to the current state.
      *
      * > **Note**: If the storage currently has no state,
-     * > then `state` will be used as-is, which might
-     * > result in incorrect typings. Beware!
+     * > then `fallback` must be provided.
      *
      * Basically a shorthand to calling `.get()`,
      * modifying and then calling `.set()`
@@ -134,19 +137,23 @@ export class UpdateState<State, SceneName extends string = string> {
         state: Partial<State>,
         fallback?: State,
         ttl?: number,
-        forceLoad = false
+        forceLoad = false,
     ): Promise<State> {
         const old = await this.get(forceLoad)
+
         if (!old) {
-            if (!fallback)
+            if (!fallback) {
                 throw new MtArgumentError(
-                    'Cannot use merge on empty state without fallback.'
+                    'Cannot use merge on empty state without fallback.',
                 )
+            }
 
             await this.set({ ...fallback, ...state }, ttl)
         } else {
             await this.set({ ...old, ...state }, ttl)
         }
+
+        // _cached is set by .set()
 
         return this._cached!
     }
@@ -206,12 +213,12 @@ export class UpdateState<State, SceneName extends string = string> {
     async rateLimit(
         key: string,
         limit: number,
-        window: number
+        window: number,
     ): Promise<[number, number]> {
         const [remaining, reset] = await this._localStorage.getRateLimit(
             `${key}:${this._localKey}`,
             limit,
-            window
+            window,
         )
 
         if (!remaining) {
@@ -240,15 +247,18 @@ export class UpdateState<State, SceneName extends string = string> {
     async throttle(
         key: string,
         limit: number,
-        window: number
+        window: number,
     ): Promise<[number, number]> {
         try {
             return await this.rateLimit(key, limit, window)
-        } catch (e: any) {
-            if (e.constructor === RateLimitError) {
+        } catch (e: unknown) {
+            if (e instanceof RateLimitError) {
                 await sleep(e.reset - Date.now())
+
                 return this.throttle(key, limit, window)
-            } else throw e
+            }
+
+            throw e
         }
     }
 

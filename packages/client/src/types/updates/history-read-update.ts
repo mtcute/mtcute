@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { getMarkedPeerId, toggleChannelIdMark } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'
@@ -13,7 +13,7 @@ export class HistoryReadUpdate {
             | tl.RawUpdateReadChannelInbox
             | tl.RawUpdateReadChannelOutbox
             | tl.RawUpdateReadChannelDiscussionInbox
-            | tl.RawUpdateReadChannelDiscussionOutbox
+            | tl.RawUpdateReadChannelDiscussionOutbox,
     ) {}
 
     /**

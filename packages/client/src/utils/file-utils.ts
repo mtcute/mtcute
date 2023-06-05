@@ -26,7 +26,7 @@ export function isProbablyPlainText(buf: Buffer): boolean {
                     it === 0x0a || // LF
                     it === 0x09
                 ) // Tab
-            )
+            ),
     )
 }
 
@@ -51,7 +51,7 @@ const JPEG_HEADER = Buffer.from(
         '8797a82838485868788898a92939495969798999aa2a3a4a5a6a7a8a9aab2b3b4b5' +
         'b6b7b8b9bac2c3c4c5c6c7c8c9cad2d3d4d5d6d7d8d9dae2e3e4e5e6e7e8e9eaf2f' +
         '3f4f5f6f7f8f9faffda000c03010002110311003f00',
-    'hex'
+    'hex',
 )
 const JPEG_FOOTER = Buffer.from('ffd9', 'hex')
 
@@ -66,6 +66,7 @@ export function strippedPhotoToJpg(stripped: Buffer): Buffer {
     const result = Buffer.concat([JPEG_HEADER, stripped.slice(3), JPEG_FOOTER])
     result[164] = stripped[1]
     result[166] = stripped[2]
+
     return result
 }
 
@@ -82,6 +83,7 @@ export function inflateSvgPath(encoded: Buffer): string {
 
     for (let i = 0; i < len; i++) {
         const num = encoded[i]
+
         if (num >= 192) {
             // 128 + 64
             path += SVG_LOOKUP[num - 192]
@@ -111,7 +113,7 @@ export function svgPathToFile(path: string): Buffer {
             '<path d="' +
             path +
             '"/>' +
-            '</svg>'
+            '</svg>',
     )
 }
 
@@ -125,5 +127,6 @@ const FILENAME_REGEX = /^(?:file:)?(\/?.+[/\\])*(.+\..+)$/
 export function extractFileName(path: string): string {
     const m = path.match(FILENAME_REGEX)
     if (m) return m[2]
+
     return ''
 }

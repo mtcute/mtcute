@@ -5,6 +5,8 @@ const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 /**
  * Mapping of TL object names to writer functions.
  */
+// avoid unnecessary type complexity
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TlWriterMap = Record<string, (w: any, val: any) => void>
 
 /**
@@ -29,10 +31,11 @@ export class TlSerializationCounter {
      */
     static countNeededBytes(
         objectMap: TlWriterMap,
-        obj: { _: string }
+        obj: { _: string },
     ): number {
         const cnt = new TlSerializationCounter(objectMap)
         cnt.object(obj)
+
         return cnt.count
     }
 
@@ -46,6 +49,7 @@ export class TlSerializationCounter {
         let res = 0
 
         let padding
+
         if (size <= 253) {
             res += 1
             padding = (size + 1) % 4
@@ -118,7 +122,7 @@ export class TlSerializationCounter {
         this.objectMap[obj._](this, obj)
     }
 
-    vector(fn: Function, items: unknown[]): void {
+    vector(fn: (item: unknown) => void, items: unknown[]): void {
         this.count += 8
         items.forEach((it) => fn.call(this, it))
     }
@@ -146,7 +150,7 @@ export class TlBinaryWriter {
     constructor(
         readonly objectMap: TlWriterMap | undefined,
         buffer: Buffer,
-        start = 0
+        start = 0,
     ) {
         this.buffer = buffer
         this.pos = start
@@ -192,14 +196,14 @@ export class TlBinaryWriter {
     static serializeObject(
         objectMap: TlWriterMap,
         obj: { _: string },
-        knownSize = -1
+        knownSize = -1,
     ): Buffer {
-        if (knownSize === -1)
-            knownSize = TlSerializationCounter.countNeededBytes(objectMap, obj)
+        if (knownSize === -1) { knownSize = TlSerializationCounter.countNeededBytes(objectMap, obj) }
 
         const writer = TlBinaryWriter.alloc(objectMap, knownSize)
 
         writer.object(obj)
+
         return writer.buffer
     }
 
@@ -216,10 +220,11 @@ export class TlBinaryWriter {
     int53(val: number): void {
         // inlined fromNumber from Long
         this.buffer.writeInt32LE(val % TWO_PWR_32_DBL | 0, this.pos)
+
         if (val < 0) {
             this.buffer.writeInt32LE(
                 (val / TWO_PWR_32_DBL - 1) | 0,
-                this.pos + 4
+                this.pos + 4,
             )
         } else {
             this.buffer.writeInt32LE((val / TWO_PWR_32_DBL) | 0, this.pos + 4)
@@ -276,6 +281,7 @@ export class TlBinaryWriter {
     bytes(val: Buffer): void {
         const length = val.length
         let padding
+
         if (length <= 253) {
             this.buffer[this.pos++] = val.length
             padding = (length + 1) % 4
@@ -301,13 +307,15 @@ export class TlBinaryWriter {
         this.bytes(Buffer.from(val, 'utf-8'))
     }
 
-    object(obj: { _: string }): void {
+    // hot path, avoid additional runtime checks
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    object(obj: any): void {
         const fn = this.objectMap![obj._]
         if (!fn) throw new Error(`Unknown object ${obj._}`)
         fn(this, obj)
     }
 
-    vector(fn: Function, val: unknown[], bare?: boolean): void {
+    vector(fn: (item: unknown, bare?: boolean) => void, val: unknown[], bare?: boolean): void {
         if (!bare) this.uint(0x1cb5c415)
         this.uint(val.length)
 

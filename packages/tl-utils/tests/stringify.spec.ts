@@ -1,8 +1,8 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
-import { TlEntry } from '../src/types'
 import { writeTlEntryToString } from '../src/stringify'
+import { TlEntry } from '../src/types'
 
 describe('writeTlEntryToString', () => {
     const make = (name: string, type: string, ...args: string[]): TlEntry => ({
@@ -13,17 +13,18 @@ describe('writeTlEntryToString', () => {
         arguments: args.map((arg) => {
             const a = arg.split(':')
             const t = a[1].split('?')
+
             if (t[1]) {
                 return {
                     name: a[0],
                     type: t[1],
                     predicate: t[0],
                 }
-            } else {
-                return {
-                    name: a[0],
-                    type: t[0],
-                }
+            }
+
+            return {
+                name: a[0],
+                type: t[0],
             }
         }),
     })
@@ -36,7 +37,7 @@ describe('writeTlEntryToString', () => {
         test(make('auth.logOut', 'Bool'), 'auth.logOut = Bool;')
         test(
             make('auth.resetAuthorizations', 'Bool'),
-            'auth.resetAuthorizations = Bool;'
+            'auth.resetAuthorizations = Bool;',
         )
     })
 
@@ -51,9 +52,9 @@ describe('writeTlEntryToString', () => {
             make(
                 'auth.exportAuthorization',
                 'auth.ExportedAuthorization',
-                'dc_id:int'
+                'dc_id:int',
             ),
-            'auth.exportAuthorization dc_id:int = auth.ExportedAuthorization;'
+            'auth.exportAuthorization dc_id:int = auth.ExportedAuthorization;',
         )
     })
 
@@ -62,9 +63,9 @@ describe('writeTlEntryToString', () => {
             make(
                 'account.deleteSecureValue',
                 'Bool',
-                'types:Vector<SecureValueType>'
+                'types:Vector<SecureValueType>',
             ),
-            'account.deleteSecureValue types:Vector<SecureValueType> = Bool;'
+            'account.deleteSecureValue types:Vector<SecureValueType> = Bool;',
         )
     })
 
@@ -73,9 +74,9 @@ describe('writeTlEntryToString', () => {
             make(
                 'account.getSecureValue',
                 'Vector<SecureValue>',
-                'types:Vector<SecureValueType>'
+                'types:Vector<SecureValueType>',
             ),
-            'account.getSecureValue types:Vector<SecureValueType> = Vector<SecureValue>;'
+            'account.getSecureValue types:Vector<SecureValueType> = Vector<SecureValue>;',
         )
     })
 
@@ -88,9 +89,9 @@ describe('writeTlEntryToString', () => {
                 'file:InputFile',
                 'thumb:flags.0?InputFile',
                 'file_name:string',
-                'mime_type:string'
+                'mime_type:string',
             ),
-            'account.uploadTheme flags:# file:InputFile thumb:flags.0?InputFile file_name:string mime_type:string = Document;'
+            'account.uploadTheme flags:# file:InputFile thumb:flags.0?InputFile file_name:string mime_type:string = Document;',
         )
     })
 
@@ -102,9 +103,9 @@ describe('writeTlEntryToString', () => {
                 'flags:#',
                 'dark:flags.0?true',
                 'format:flags.1?string',
-                'theme:flags.1?InputTheme'
+                'theme:flags.1?InputTheme',
             ),
-            'account.installTheme flags:# dark:flags.0?true format:flags.1?string theme:flags.1?InputTheme = Bool;'
+            'account.installTheme flags:# dark:flags.0?true format:flags.1?string theme:flags.1?InputTheme = Bool;',
         )
     })
 

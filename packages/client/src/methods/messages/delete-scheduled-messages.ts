@@ -13,7 +13,7 @@ import { InputPeerLike } from '../../types'
 export async function deleteScheduledMessages(
     this: TelegramClient,
     chatId: InputPeerLike,
-    ids: MaybeArray<number>
+    ids: MaybeArray<number>,
 ): Promise<void> {
     if (!Array.isArray(ids)) ids = [ids]
 

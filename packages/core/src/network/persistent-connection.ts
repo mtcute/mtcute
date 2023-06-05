@@ -1,11 +1,12 @@
 import EventEmitter from 'events'
+
 import { tl } from '@mtcute/tl'
 
+import { ICryptoProvider, Logger } from '../utils'
 import {
     ControllablePromise,
     createControllablePromise,
 } from '../utils/controllable-promise'
-import { ICryptoProvider, Logger } from '../utils'
 import { ReconnectionStrategy } from './reconnection'
 import {
     ITelegramTransport,
@@ -56,7 +57,7 @@ export abstract class PersistentConnection extends EventEmitter {
 
     protected constructor(
         params: PersistentConnectionParams,
-        readonly log: Logger
+        readonly log: Logger,
     ) {
         super()
         this.params = params
@@ -102,6 +103,7 @@ export abstract class PersistentConnection extends EventEmitter {
     onTransportError(err: Error): void {
         if (this._pendingWaitForMessages.length) {
             this._pendingWaitForMessages.shift()!.reject(err)
+
             return
         }
 
@@ -113,6 +115,7 @@ export abstract class PersistentConnection extends EventEmitter {
     onTransportMessage(data: Buffer): void {
         if (this._pendingWaitForMessages.length) {
             this._pendingWaitForMessages.shift()!.resolve(data)
+
             return
         }
 
@@ -121,7 +124,7 @@ export abstract class PersistentConnection extends EventEmitter {
 
     onTransportClose(): void {
         Object.values(this._pendingWaitForMessages).forEach((prom) =>
-            prom.reject(new Error('Connection closed'))
+            prom.reject(new Error('Connection closed')),
         )
 
         // transport closed because of inactivity
@@ -134,7 +137,7 @@ export abstract class PersistentConnection extends EventEmitter {
             this.params,
             this._lastError,
             this._consequentFails,
-            this._previousWait
+            this._previousWait,
         )
         if (wait === false) return this.destroy()
 
@@ -142,8 +145,7 @@ export abstract class PersistentConnection extends EventEmitter {
 
         this._previousWait = wait
 
-        if (this._reconnectionTimeout != null)
-            clearTimeout(this._reconnectionTimeout)
+        if (this._reconnectionTimeout != null) { clearTimeout(this._reconnectionTimeout) }
         this._reconnectionTimeout = setTimeout(() => {
             if (this._destroyed) return
             this._reconnectionTimeout = null
@@ -152,11 +154,10 @@ export abstract class PersistentConnection extends EventEmitter {
     }
 
     connect(): void {
-        if (this._transport.state() !== TransportState.Idle)
-            throw new Error('Connection is already opened!')
+        if (this._transport.state() !== TransportState.Idle) { throw new Error('Connection is already opened!') }
         if (this._destroyed) throw new Error('Connection is already destroyed!')
-        if (this._reconnectionTimeout != null)
-            clearTimeout(this._reconnectionTimeout)
+
+        if (this._reconnectionTimeout != null) { clearTimeout(this._reconnectionTimeout) }
 
         this._inactive = false
         this._transport.connect(this.params.dc, this.params.testMode)
@@ -167,10 +168,8 @@ export abstract class PersistentConnection extends EventEmitter {
     }
 
     destroy(): void {
-        if (this._reconnectionTimeout != null)
-            clearTimeout(this._reconnectionTimeout)
-        if (this._inactivityTimeout != null)
-            clearTimeout(this._inactivityTimeout)
+        if (this._reconnectionTimeout != null) { clearTimeout(this._reconnectionTimeout) }
+        if (this._inactivityTimeout != null) { clearTimeout(this._inactivityTimeout) }
 
         this._transport.close()
         this._transport.removeAllListeners()
@@ -183,7 +182,7 @@ export abstract class PersistentConnection extends EventEmitter {
         this._inactivityTimeout = setTimeout(() => {
             this.log.info(
                 'disconnected because of inactivity for %d',
-                this.params.inactivityTimeout
+                this.params.inactivityTimeout,
             )
             this._inactive = true
             this._inactivityTimeout = null

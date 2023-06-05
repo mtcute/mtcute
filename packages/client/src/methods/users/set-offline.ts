@@ -8,7 +8,7 @@ import { TelegramClient } from '../../client'
  */
 export async function setOffline(
     this: TelegramClient,
-    offline = true
+    offline = true,
 ): Promise<void> {
     await this.call({
         _: 'account.updateStatus',

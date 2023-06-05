@@ -11,7 +11,15 @@
         "noImplicitAny": true,
         "noImplicitThis": true,
         "incremental": true,
-        "stripInternal": true
+        "stripInternal": true,
+        "skipLibCheck": true,
+        "paths": {
+            "~scripts/*": ["./scripts/*"],
+        },
+        "typeRoots": [
+            "./node_modules/@types",
+            "./tsfixes.d.ts"
+        ]
     },
     "exclude": [
         "private",

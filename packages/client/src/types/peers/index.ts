@@ -1,16 +1,16 @@
 import { tl } from '@mtcute/tl'
 
-export * from './user'
 export * from './chat'
-export * from './chat-preview'
-export * from './chat-permissions'
-export * from './chat-member'
 export * from './chat-event'
-export * from './chat-photo'
-export * from './chat-location'
 export * from './chat-invite-link'
-export * from './typing-status'
+export * from './chat-location'
+export * from './chat-member'
+export * from './chat-permissions'
+export * from './chat-photo'
+export * from './chat-preview'
 export * from './peers-index'
+export * from './typing-status'
+export * from './user'
 
 /**
  * Peer types that have one-to-one relation to tl.Peer* types.

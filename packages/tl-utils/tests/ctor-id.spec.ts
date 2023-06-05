@@ -1,5 +1,5 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
 import {
     computeConstructorIdFromEntry,
@@ -24,35 +24,35 @@ describe('computeConstructorIdFromString', () => {
     it('computes for constructors with simple parameters', () => {
         test(
             'auth.exportAuthorization dc_id:int = auth.ExportedAuthorization;',
-            0xe5bfffcd
+            0xe5bfffcd,
         )
     })
 
     it('computes for constructors with vector parameters', () => {
         test(
             'account.deleteSecureValue types:Vector<SecureValueType> = Bool;',
-            0xb880bc4b
+            0xb880bc4b,
         )
     })
 
     it('computes for constructors with vector return type', () => {
         test(
             'account.getSecureValue types:Vector<SecureValueType> = Vector<SecureValue>;',
-            0x73665bc2
+            0x73665bc2,
         )
     })
 
     it('computes for constructors with optional parameters', () => {
         test(
             'account.uploadTheme flags:# file:InputFile thumb:flags.0?InputFile file_name:string mime_type:string = Document;',
-            0x1c3db333
+            0x1c3db333,
         )
     })
 
     it('computes for constructors with optional true parameters', () => {
         test(
             'account.installTheme flags:# dark:flags.0?true format:flags.1?string theme:flags.1?InputTheme = Bool;',
-            0x7ae43737
+            0x7ae43737,
         )
     })
 
@@ -70,17 +70,18 @@ describe('computeConstructorIdFromEntry', () => {
         arguments: args.map((arg) => {
             const a = arg.split(':')
             const t = a[1].split('?')
+
             if (t[1]) {
                 return {
                     name: a[0],
                     type: t[1],
                     predicate: t[0],
                 }
-            } else {
-                return {
-                    name: a[0],
-                    type: t[0],
-                }
+            }
+
+            return {
+                name: a[0],
+                type: t[0],
             }
         }),
     })
@@ -105,9 +106,9 @@ describe('computeConstructorIdFromEntry', () => {
             make(
                 'auth.exportAuthorization',
                 'auth.ExportedAuthorization',
-                'dc_id:int'
+                'dc_id:int',
             ),
-            0xe5bfffcd
+            0xe5bfffcd,
         )
     })
 
@@ -116,9 +117,9 @@ describe('computeConstructorIdFromEntry', () => {
             make(
                 'account.deleteSecureValue',
                 'Bool',
-                'types:Vector<SecureValueType>'
+                'types:Vector<SecureValueType>',
             ),
-            0xb880bc4b
+            0xb880bc4b,
         )
     })
 
@@ -127,9 +128,9 @@ describe('computeConstructorIdFromEntry', () => {
             make(
                 'account.getSecureValue',
                 'Vector<SecureValue>',
-                'types:Vector<SecureValueType>'
+                'types:Vector<SecureValueType>',
             ),
-            0x73665bc2
+            0x73665bc2,
         )
     })
 
@@ -142,9 +143,9 @@ describe('computeConstructorIdFromEntry', () => {
                 'file:InputFile',
                 'thumb:flags.0?InputFile',
                 'file_name:string',
-                'mime_type:string'
+                'mime_type:string',
             ),
-            0x1c3db333
+            0x1c3db333,
         )
     })
 
@@ -156,9 +157,9 @@ describe('computeConstructorIdFromEntry', () => {
                 'flags:#',
                 'dark:flags.0?true',
                 'format:flags.1?string',
-                'theme:flags.1?InputTheme'
+                'theme:flags.1?InputTheme',
             ),
-            0x7ae43737
+            0x7ae43737,
         )
     })
 

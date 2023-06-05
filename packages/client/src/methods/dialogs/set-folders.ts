@@ -9,7 +9,7 @@ import { TelegramClient } from '../../client'
  */
 export async function setFoldersOrder(
     this: TelegramClient,
-    order: number[]
+    order: number[],
 ): Promise<void> {
     await this.call({
         _: 'messages.updateDialogFiltersOrder',

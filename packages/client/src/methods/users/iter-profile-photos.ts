@@ -1,4 +1,5 @@
 import Long from 'long'
+
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -42,7 +43,7 @@ export async function* iterProfilePhotos(
          * with IDs less than the set one
          */
         maxId?: tl.Long
-    }
+    },
 ): AsyncIterableIterator<Photo> {
     if (!params) params = {}
 

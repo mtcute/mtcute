@@ -11,22 +11,24 @@ function bumpVersion(packageName, version) {
                 return JSON.parse(
                     fs.readFileSync(
                         path.join(__dirname, '../packages', name, 'package.json'),
-                        'utf-8'
-                    )
+                        'utf-8',
+                    ),
                 )
             } catch (e) {
                 if (e.code !== 'ENOENT') throw e
+
                 return null
             }
         })
         .filter(Boolean)
     const packageJsonChanged = new Set()
 
-// i am pretty fucking sure there is a better way to do this, but whatever
-// im tired as fuck and hadnt had sleep for a while
+    // i am pretty fucking sure there is a better way to do this, but whatever
+    // im tired as fuck and hadnt had sleep for a while
 
     const newVersions = { [packageName]: version }
     let hadChanges = true
+
     while (hadChanges) {
         hadChanges = false
 
@@ -70,7 +72,7 @@ function bumpVersion(packageName, version) {
         for (const json of packageJsons) {
             if (json.name === `@mtcute/${pkgName}`) continue
 
-            function updateDependencies(obj) {
+            const updateDependencies = (obj) => {
                 if (!obj) return
                 Object.keys(obj).forEach((depName) => {
                     if (!depName.startsWith('@mtcute/')) return
@@ -104,7 +106,7 @@ function bumpVersion(packageName, version) {
 
         fs.writeFileSync(
             path.join(__dirname, '../packages', name, 'package.json'),
-            JSON.stringify(json, null, 4)
+            JSON.stringify(json, null, 4),
         )
     })
 
@@ -116,6 +118,7 @@ function bumpVersion(packageName, version) {
 if (require.main === module) {
     const packageName = process.argv[2]
     const version = process.argv[3]
+
     if (!packageName || !version) {
         console.log('Usage: version.js <packageName> <version>')
         process.exit(0)

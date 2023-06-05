@@ -48,7 +48,7 @@ export class MtTypeAssertionError extends MtClientError {
 
     constructor(context: string, expected: string, actual: string) {
         super(
-            `Type assertion error at ${context}: expected ${expected}, but got ${actual}`
+            `Type assertion error at ${context}: expected ${expected}, but got ${actual}`,
         )
         this.context = context
         this.expected = expected
@@ -66,7 +66,7 @@ export class MtTypeAssertionError extends MtClientError {
 export class MtInvalidPeerTypeError extends MtClientError {
     constructor(peer: InputPeerLike, expected: string) {
         super(
-            `Provided identifier ${JSON.stringify(peer)} is not a ${expected}`
+            `Provided identifier ${JSON.stringify(peer)} is not a ${expected}`,
         )
     }
 }

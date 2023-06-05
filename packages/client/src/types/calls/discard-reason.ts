@@ -12,7 +12,7 @@ export type CallDiscardReason = 'missed' | 'disconnect' | 'hangup' | 'busy'
 
 /** @internal */
 export function _callDiscardReasonFromTl(
-    raw: tl.TypePhoneCallDiscardReason
+    raw: tl.TypePhoneCallDiscardReason,
 ): CallDiscardReason {
     switch (raw._) {
         case 'phoneCallDiscardReasonMissed':
@@ -30,7 +30,7 @@ export function _callDiscardReasonFromTl(
 
 /** @internal */
 export function _callDiscardReasonToTl(
-    r: CallDiscardReason
+    r: CallDiscardReason,
 ): tl.TypePhoneCallDiscardReason {
     switch (r) {
         case 'missed':

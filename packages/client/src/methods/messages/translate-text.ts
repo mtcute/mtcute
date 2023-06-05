@@ -16,7 +16,7 @@ export async function translateText(
     this: TelegramClient,
     text: string,
     toLanguage: string,
-    fromLanguage?: string
+    fromLanguage?: string,
 ): Promise<string | null> {
     const res = await this.call({
         _: 'messages.translateText',

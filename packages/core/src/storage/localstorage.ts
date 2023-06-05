@@ -5,6 +5,7 @@ export class LocalstorageStorage extends JsonMemoryStorage {
 
     constructor(key: string) {
         super()
+
         if (typeof localStorage === 'undefined') {
             throw new Error('localStorage is not available!')
         }

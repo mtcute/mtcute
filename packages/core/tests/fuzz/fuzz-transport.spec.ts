@@ -1,28 +1,30 @@
-import { describe, it } from 'mocha'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect } from 'chai'
-import { EventEmitter } from 'events'
 import { randomBytes } from 'crypto'
+import { EventEmitter } from 'events'
+import { describe, it } from 'mocha'
 
 import {
     BaseTelegramClient,
     defaultDcs,
     ITelegramTransport,
-    tl,
-    TransportState,
     NodeCryptoProvider,
     sleep,
+    tl,
+    TransportState,
 } from '../../src'
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv-flow').config()
 
 class RandomBytesTransport extends EventEmitter implements ITelegramTransport {
     dc!: tl.RawDcOption
-    interval!: NodeJS.Timeout | null
+    interval?: NodeJS.Timeout
 
     close(): void {
-        clearInterval(this.interval!)
+        clearInterval(this.interval)
         this.emit('close')
-        this.interval = null
+        this.interval = undefined
     }
 
     connect(dc: tl.RawDcOption): void {
@@ -39,7 +41,7 @@ class RandomBytesTransport extends EventEmitter implements ITelegramTransport {
         return this.dc
     }
 
-    send(data: Buffer): Promise<void> {
+    send(_data: Buffer): Promise<void> {
         return Promise.resolve()
     }
 
@@ -101,15 +103,17 @@ describe('fuzz : transport', function () {
         let hadNonNull = false
 
         const decryptMessage =
+            // eslint-disable-next-line dot-notation
             client.primaryConnection['_session'].decryptMessage
 
         // ехал any через any
         // видит any - any, any
         // сунул any any в any
         // any any any any
+        // eslint-disable-next-line dot-notation
         ;(client.primaryConnection['_session'] as any).decryptMessage = (
             buf: any,
-            cb: any
+            cb: any,
         ) =>
             decryptMessage.call(this, buf, (...args: any[]) => {
                 cb(...(args as any))

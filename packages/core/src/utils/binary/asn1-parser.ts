@@ -7,7 +7,7 @@
 export function parsePemContents(pem: string): Buffer {
     return Buffer.from(
         pem.replace(/^-----(BEGIN|END)( RSA)? PUBLIC KEY-----$|\n/gm, ''),
-        'base64'
+        'base64',
     )
 }
 
@@ -28,22 +28,23 @@ const EDEEPN = 60
 const EDEEP = `element nested over ${EDEEPN} layers deep (probably a malformed file)`
 
 // Container Types are Sequence 0x30, Container Array? (0xA0, 0xA1)
-// Value Types are Boolean 0x01, Integer 0x02, Null 0x05, Object ID 0x06, String 0x0C, 0x16, 0x13, 0x1e Value Array? (0x82)
+// Value Types are Boolean 0x01, Integer 0x02, Null 0x05, Object ID 0x06, String 0x0C, 0x16, 0x13, 0x1e
+// Value Array? (0x82)
 // Bit String (0x03) and Octet String (0x04) may be values or containers
 // Sometimes Bit String is used as a container (RSA Pub Spki)
 const CTYPES: Record<number, true> = {
-    0x30: true,
-    0x31: true,
-    0xa0: true,
-    0xa1: true,
+    '48': true,
+    '49': true,
+    '160': true,
+    '161': true,
 }
 const VTYPES: Record<number, true> = {
-    0x01: true,
-    0x02: true,
-    0x05: true,
-    0x06: true,
-    0x0c: true,
-    0x82: true,
+    '1': true,
+    '2': true,
+    '5': true,
+    '6': true,
+    '12': true,
+    '130': true,
 }
 
 /**
@@ -72,7 +73,7 @@ export function parseAsn1(data: Buffer): Asn1Object {
 
         // High-order bit Integers have a leading 0x00 to signify that they are positive.
         // Bit Streams use the first byte to signify padding, which x.509 doesn't use.
-        if (0x00 === buf[index] && (0x02 === asn1.type || 0x03 === asn1.type)) {
+        if (buf[index] === 0x00 && (asn1.type === 0x02 || asn1.type === 0x03)) {
             // However, 0x00 on its own is a valid number
             if (asn1.length > 1) {
                 index += 1
@@ -83,6 +84,7 @@ export function parseAsn1(data: Buffer): Asn1Object {
 
         function parseChildren(eager = false) {
             asn1.children = []
+
             while (
                 iters < ELOOPN &&
                 index < 2 + asn1.length + asn1.lengthSize
@@ -92,18 +94,19 @@ export function parseAsn1(data: Buffer): Asn1Object {
                 child = parseAsn1Inner(
                     buf.slice(index, index + adjustedLen),
                     depth,
-                    eager
+                    eager,
                 )
                 depth.length -= 1
                 // The numbers don't match up exactly and I don't remember why...
                 // probably something with adjustedLen or some such, but the tests pass
                 index += 2 + child.lengthSize + child.length
+
                 if (index > 2 + asn1.lengthSize + asn1.length) {
                     throw new Error(
                         `Parse error: child value length (${child.length}) is ` +
                             `greater than remaining parent length (${
                                 asn1.length - index
-                            } = ${asn1.length} - ${index})`
+                            } = ${asn1.length} - ${index})`,
                     )
                 }
                 asn1.children.push(child)
@@ -116,6 +119,7 @@ export function parseAsn1(data: Buffer): Asn1Object {
             }
 
             delete asn1.value
+
             return asn1
         }
 
@@ -126,6 +130,7 @@ export function parseAsn1(data: Buffer): Asn1Object {
 
         // Return types that are _always_ values
         asn1.value = buf.slice(index, index + adjustedLen)
+
         if (VTYPES[asn1.type]) {
             return asn1
         }
@@ -136,16 +141,19 @@ export function parseAsn1(data: Buffer): Asn1Object {
             return parseChildren(true)
         } catch (e) {
             if (asn1.children) asn1.children.length = 0
+
             return asn1
         }
     }
 
     const asn1 = parseAsn1Inner(data, [])
     const len = data.length
+
     if (len !== 2 + asn1.lengthSize + asn1.length) {
         throw new Error(
-            'Length of buffer does not match length of ASN.1 sequence.'
+            'Length of buffer does not match length of ASN.1 sequence.',
         )
     }
+
     return asn1
 }

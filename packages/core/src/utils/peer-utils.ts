@@ -1,4 +1,5 @@
 import { tl } from '@mtcute/tl'
+
 import { BasicPeerType } from '../types'
 
 // src: https://github.com/tdlib/td/blob/master/td/telegram/DialogId.h
@@ -50,9 +51,10 @@ export function getBarePeerId(peer: tl.TypePeer): number {
  */
 export function getMarkedPeerId(peerId: number, peerType: BasicPeerType): number
 export function getMarkedPeerId(peer: tl.TypePeer | tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel): number
+
 export function getMarkedPeerId(
     peer: tl.TypePeer | tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | number,
-    peerType?: BasicPeerType
+    peerType?: BasicPeerType,
 ): number {
     if (typeof peer === 'number') {
         switch (peerType) {
@@ -103,8 +105,7 @@ export function getBasicPeerType(peer: tl.TypePeer | number): BasicPeerType {
             return 'chat'
         }
 
-        if (MIN_MARKED_CHANNEL_ID <= peer && peer !== ZERO_CHANNEL_ID)
-            return 'channel'
+        if (MIN_MARKED_CHANNEL_ID <= peer && peer !== ZERO_CHANNEL_ID) { return 'channel' }
 
         if (MAX_SECRET_CHAT_ID <= peer && peer !== ZERO_SECRET_CHAT_ID) {
             // return 'secret'
@@ -142,14 +143,15 @@ export function markedPeerIdToBare(peerId: number): number {
  * Only checks `.user`, `.chat`, `.channel`, `.users` and `.chats` properties
  */
 export function* getAllPeersFrom(
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    obj: any
+    obj: tl.TlObject | tl.TlObject[],
 ): Iterable<tl.TypeUser | tl.TypeChat> {
     if (typeof obj !== 'object') return
+
     if (Array.isArray(obj)) {
         for (const it of obj) {
             yield* getAllPeersFrom(it)
         }
+
         return
     }
 
@@ -160,9 +162,7 @@ export function* getAllPeersFrom(
         case 'chatForbidden':
         case 'channelForbidden':
             yield obj
-            return
-        case 'userFull':
-            yield obj.user
+
             return
     }
 

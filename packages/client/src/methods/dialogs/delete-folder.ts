@@ -10,7 +10,7 @@ import { TelegramClient } from '../../client'
  */
 export async function deleteFolder(
     this: TelegramClient,
-    id: number | tl.RawDialogFilter
+    id: number | tl.RawDialogFilter,
 ): Promise<void> {
     await this.call({
         _: 'messages.updateDialogFilter',

@@ -1,11 +1,14 @@
-import {
-    IntermediatePacketCodec,
-    BaseTcpTransport,
-    TransportState,
-    tl,
-} from '@mtcute/core'
+// ^^ because of this._socket. we know it's not null, almost everywhere, but TS doesn't
+
 import { connect as connectTcp } from 'net'
 import { connect as connectTls, SecureContextOptions } from 'tls'
+
+import {
+    BaseTcpTransport,
+    IntermediatePacketCodec,
+    tl,
+    TransportState,
+} from '@mtcute/core'
 
 /**
  * An error has occurred while connecting to an HTTP(s) proxy
@@ -15,7 +18,7 @@ export class HttpProxyConnectionError extends Error {
 
     constructor(proxy: HttpProxySettings, message: string) {
         super(
-            `Error while connecting to ${proxy.host}:${proxy.port}: ${message}`
+            `Error while connecting to ${proxy.host}:${proxy.port}: ${message}`,
         )
         this.proxy = proxy
     }
@@ -76,8 +79,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
     }
 
     connect(dc: tl.RawDcOption): void {
-        if (this._state !== TransportState.Idle)
-            throw new Error('Transport is not IDLE')
+        if (this._state !== TransportState.Idle) { throw new Error('Transport is not IDLE') }
 
         if (!this.packetCodecInitialized) {
             this._packetCodec.on('error', (err) => this.emit('error', err))
@@ -88,18 +90,18 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
         this._state = TransportState.Connecting
         this._currentDc = dc
 
-        this._socket = this._proxy.tls
-            ? connectTls(
-                  this._proxy.port,
-                  this._proxy.host,
-                  this._proxy.tlsOptions,
-                  this._onProxyConnected.bind(this)
-              )
-            : connectTcp(
-                  this._proxy.port,
-                  this._proxy.host,
-                  this._onProxyConnected.bind(this)
-              )
+        this._socket = this._proxy.tls ?
+            connectTls(
+                this._proxy.port,
+                this._proxy.host,
+                this._proxy.tlsOptions,
+                this._onProxyConnected.bind(this),
+            ) :
+            connectTcp(
+                this._proxy.port,
+                this._proxy.host,
+                this._onProxyConnected.bind(this),
+            )
 
         this._socket.on('error', this.handleError.bind(this))
         this._socket.on('close', this.close.bind(this))
@@ -109,7 +111,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
         this.log.debug(
             '[%s:%d] connected to proxy, sending CONNECT',
             this._proxy.host,
-            this._proxy.port
+            this._proxy.port,
         )
 
         let ip = `${this._currentDc!.ipAddress}:${this._currentDc!.port}`
@@ -118,10 +120,11 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
         const headers = {
             ...(this._proxy.headers ?? {}),
         }
-        headers['Host'] = ip
+        headers.Host = ip
 
         if (this._proxy.user) {
             let auth = this._proxy.user
+
             if (this._proxy.password) {
                 auth += ':' + this._proxy.password
             }
@@ -131,7 +134,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
         headers['Proxy-Connection'] = 'Keep-Alive'
 
         const packet = `CONNECT ${ip} HTTP/1.1${Object.keys(headers).map(
-            (k) => `\r\n${k}: ${headers[k]}`
+            (k) => `\r\n${k}: ${headers[k]}`,
         )}\r\n\r\n`
 
         this._socket!.write(packet)
@@ -140,19 +143,21 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
                 '[%s:%d] CONNECT resulted in: %s',
                 this._proxy.host,
                 this._proxy.port,
-                msg
+                msg,
             )
 
             const [proto, code, name] = msg.toString().split(' ')
+
             if (!proto.match(/^HTTP\/1.[01]$/i)) {
                 // wtf?
                 this._socket!.emit(
                     'error',
                     new HttpProxyConnectionError(
                         this._proxy,
-                        `Server returned invalid protocol: ${proto}`
-                    )
+                        `Server returned invalid protocol: ${proto}`,
+                    ),
                 )
+
                 return
             }
 
@@ -161,9 +166,10 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
                     'error',
                     new HttpProxyConnectionError(
                         this._proxy,
-                        `Server returned error: ${code} ${name}`
-                    )
+                        `Server returned error: ${code} ${name}`,
+                    ),
                 )
+
                 return
             }
 

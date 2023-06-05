@@ -1,11 +1,13 @@
 import { TelegramClient } from '../../client'
 import {
-    MtUnsupportedError,
     FileDownloadParameters,
     FileLocation,
+    MtUnsupportedError,
 } from '../../types'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let fs: any = null
+
 try {
     fs = require('fs')
 } catch (e) {}
@@ -21,12 +23,13 @@ try {
 export function downloadToFile(
     this: TelegramClient,
     filename: string,
-    params: FileDownloadParameters
+    params: FileDownloadParameters,
 ): Promise<void> {
-    if (!fs)
+    if (!fs) {
         throw new MtUnsupportedError(
-            'Downloading to file is only supported in NodeJS'
+            'Downloading to file is only supported in NodeJS',
         )
+    }
 
     if (
         params.location instanceof FileLocation &&
@@ -34,6 +37,7 @@ export function downloadToFile(
     ) {
         // early return for inline files
         const buf = params.location.location
+
         return new Promise((resolve, reject) => {
             fs.writeFile(filename, buf, (err?: Error) => {
                 if (err) reject(err)

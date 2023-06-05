@@ -53,7 +53,7 @@ export function parseTlToEntries(
          * Whether to apply the prefix to arguments as well
          */
         applyPrefixToArguments?: boolean
-    }
+    },
 ): TlEntry[] {
     const ret: TlEntry[] = []
 
@@ -72,6 +72,7 @@ export function parseTlToEntries(
             }
 
             currentComment = ''
+
             return
         }
 
@@ -91,15 +92,18 @@ export function parseTlToEntries(
 
         if (line === '---functions---') {
             currentKind = 'method'
+
             return
         }
 
         if (line === '---types---') {
             currentKind = 'class'
+
             return
         }
 
         const match = SINGLE_REGEX.exec(line)
+
         if (!match) {
             const err = new Error(`Failed to parse line ${idx + 1}: ${line}`)
 
@@ -115,21 +119,22 @@ export function parseTlToEntries(
         }
 
         const [, typeName, typeId, generics, args, type] = match
+
         if (typeName in TL_PRIMITIVES) {
             return
         }
 
-        const typeIdNum = typeId
-            ? parseInt(typeId, 16)
-            : computeConstructorIdFromString(line)
+        const typeIdNum = typeId ?
+            parseInt(typeId, 16) :
+            computeConstructorIdFromString(line)
 
         const argsParsed =
-            args && !args.match(/\[ [a-z]+ ]/i)
-                ? args
-                      .trim()
-                      .split(' ')
-                      .map((j) => j.split(':'))
-                : []
+            args && !args.match(/\[ [a-z]+ ]/i) ?
+                args
+                    .trim()
+                    .split(' ')
+                    .map((j) => j.split(':')) :
+                []
 
         const entry: TlEntry = {
             kind: currentKind,
@@ -142,6 +147,7 @@ export function parseTlToEntries(
         if (generics) {
             entry.generics = generics.split(',').map((it) => {
                 const [name, type] = it.split(':')
+
                 return { name, type }
             })
         }

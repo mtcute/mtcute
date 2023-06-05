@@ -13,7 +13,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 export async function createChannel(
     this: TelegramClient,
     title: string,
-    description = ''
+    description = '',
 ): Promise<Chat> {
     const res = await this.call({
         _: 'channels.createChannel',

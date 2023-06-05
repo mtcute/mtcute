@@ -1,39 +1,37 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { ChatPhoto } from './chat-photo'
-import { MtArgumentError } from '../errors'
-import { makeInspectable } from '../utils'
 import { assertTypeIs } from '../../utils/type-assertion'
+import { MtArgumentError } from '../errors'
 import { InputMediaLike } from '../media'
 import { FormattedString } from '../parser'
+import { makeInspectable } from '../utils'
+import { ChatPhoto } from './chat-photo'
 
-export namespace User {
-    /**
-     * User's Last Seen & Online status.
-     * Can be one of the following:
-     *  - `online`, user is online right now.
-     *  - `offline`, user is currently offline.
-     *  - `recently`, user with hidden last seen time who was online between 1 second and 2-3 days ago.
-     *  - `within_week`, user with hidden last seen time who was online between 2-3 and seven days ago.
-     *  - `within_month`, user with hidden last seen time who was online between 6-7 days and a month ago.
-     *  - `long_time_ago`, blocked user or user with hidden last seen time who was online more than a month ago.
-     *  - `bot`, for bots.
-     */
-    export type Status =
-        | 'online'
-        | 'offline'
-        | 'recently'
-        | 'within_week'
-        | 'within_month'
-        | 'long_time_ago'
-        | 'bot'
+/**
+ * User's Last Seen & Online status.
+ * Can be one of the following:
+ *  - `online`, user is online right now.
+ *  - `offline`, user is currently offline.
+ *  - `recently`, user with hidden last seen time who was online between 1 second and 2-3 days ago.
+ *  - `within_week`, user with hidden last seen time who was online between 2-3 and seven days ago.
+ *  - `within_month`, user with hidden last seen time who was online between 6-7 days and a month ago.
+ *  - `long_time_ago`, blocked user or user with hidden last seen time who was online more than a month ago.
+ *  - `bot`, for bots.
+ */
+export type UserStatus =
+    | 'online'
+    | 'offline'
+    | 'recently'
+    | 'within_week'
+    | 'within_month'
+    | 'long_time_ago'
+    | 'bot'
 
-    export interface ParsedStatus {
-        status: User.Status
-        lastOnline: Date | null
-        nextOffline: Date | null
-    }
+export interface UserParsedStatus {
+    status: UserStatus
+    lastOnline: Date | null
+    nextOffline: Date | null
 }
 
 export class User {
@@ -130,17 +128,18 @@ export class User {
 
     static parseStatus(
         status: tl.TypeUserStatus,
-        bot = false
-    ): User.ParsedStatus {
-        let ret: User.Status
+        bot = false,
+    ): UserParsedStatus {
+        let ret: UserStatus
         let date: Date
 
         const us = status
+
         if (bot) {
             ret = 'bot'
         } else if (!us) {
             ret = 'long_time_ago'
-        } else
+        } else {
             switch (us._) {
                 case 'userStatusOnline':
                     ret = 'online'
@@ -163,6 +162,7 @@ export class User {
                     ret = 'long_time_ago'
                     break
             }
+        }
 
         return {
             status: ret,
@@ -171,15 +171,16 @@ export class User {
         }
     }
 
-    private _parsedStatus?: User.ParsedStatus
+    private _parsedStatus?: UserParsedStatus
 
     private _parseStatus() {
         this._parsedStatus = User.parseStatus(this.raw.status!, this.raw.bot)
     }
 
     /** User's Last Seen & Online status */
-    get status(): User.Status {
+    get status(): UserStatus {
         if (!this._parsedStatus) this._parseStatus()
+
         return this._parsedStatus!.status
     }
 
@@ -189,6 +190,7 @@ export class User {
      */
     get lastOnline(): Date | null {
         if (!this._parsedStatus) this._parseStatus()
+
         return this._parsedStatus!.lastOnline
     }
 
@@ -198,6 +200,7 @@ export class User {
      */
     get nextOffline(): Date | null {
         if (!this._parsedStatus) this._parseStatus()
+
         return this._parsedStatus!.nextOffline
     }
 
@@ -222,7 +225,7 @@ export class User {
      * More info at [Pyrogram FAQ](https://docs.pyrogram.org/faq#what-are-the-ip-addresses-of-telegram-data-centers).
      */
     get dcId(): number | null {
-        return (this.raw.photo as any)?.dcId ?? null
+        return (this.raw.photo as Exclude<typeof this.raw.photo, tl.RawUserProfilePhotoEmpty>)?.dcId ?? null
     }
 
     /** User's phone number */
@@ -234,8 +237,7 @@ export class User {
      * Get this user's input peer for advanced use-cases.
      */
     get inputPeer(): tl.TypeInputPeer {
-        if (!this.raw.accessHash)
-            throw new MtArgumentError("user's access hash is not available!")
+        if (!this.raw.accessHash) { throw new MtArgumentError("user's access hash is not available!") }
 
         return {
             _: 'inputPeerUser',
@@ -255,7 +257,7 @@ export class User {
         return (this._photo ??= new ChatPhoto(
             this.client,
             this.inputPeer,
-            this.raw.photo
+            this.raw.photo,
         ))
     }
 
@@ -276,6 +278,7 @@ export class User {
     get displayName(): string {
         if (!this.firstName) return 'Deleted Account'
         if (this.lastName) return `${this.firstName} ${this.lastName}`
+
         return this.firstName
     }
 
@@ -295,20 +298,22 @@ export class User {
      * msg.replyText(`Hello, ${msg.sender.mention()`)
      * ```
      */
-    mention<T extends string = any>(
+    mention<T extends string = string>(
         text?: string | null,
-        parseMode?: T | null
+        parseMode?: T | null,
     ): string | FormattedString<T> {
         if (text === undefined && this.username) {
             return `@${this.username}`
         }
 
         if (!text) text = this.displayName
+        // eslint-disable-next-line dot-notation
         if (!parseMode) parseMode = this.client['_defaultParseMode'] as T
 
         return new FormattedString(
             this.client.getParseMode(parseMode).unparse(text, [
                 {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     raw: undefined as any,
                     type: 'text_mention',
                     offset: 0,
@@ -316,7 +321,7 @@ export class User {
                     userId: this.raw.id,
                 },
             ]),
-            parseMode!
+            parseMode!,
         )
     }
 
@@ -350,14 +355,14 @@ export class User {
      * @param text  Mention text
      * @param parseMode  Parse mode to use when creating mention
      */
-    permanentMention<T extends string = any>(
+    permanentMention<T extends string = string>(
         text?: string | null,
-        parseMode?: T | null
+        parseMode?: T | null,
     ): FormattedString<T> {
-        if (!this.raw.accessHash)
-            throw new MtArgumentError("user's access hash is not available!")
+        if (!this.raw.accessHash) { throw new MtArgumentError("user's access hash is not available!") }
 
         if (!text) text = this.displayName
+        // eslint-disable-next-line dot-notation
         if (!parseMode) parseMode = this.client['_defaultParseMode'] as T
 
         // since we are just creating a link and not actual tg entity,
@@ -365,6 +370,7 @@ export class User {
         return new FormattedString(
             this.client.getParseMode(parseMode).unparse(text, [
                 {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     raw: undefined as any,
                     type: 'text_link',
                     offset: 0,
@@ -374,7 +380,7 @@ export class User {
                     }&hash=${this.raw.accessHash.toString(16)}`,
                 },
             ]),
-            parseMode!
+            parseMode!,
         )
     }
 
@@ -385,8 +391,8 @@ export class User {
      * @param params
      */
     sendText(
-        text: string | FormattedString<any>,
-        params?: Parameters<TelegramClient['sendText']>[2]
+        text: string | FormattedString<string>,
+        params?: Parameters<TelegramClient['sendText']>[2],
     ): ReturnType<TelegramClient['sendText']> {
         return this.client.sendText(this.inputPeer, text, params)
     }
@@ -399,7 +405,7 @@ export class User {
      */
     sendMedia(
         media: InputMediaLike | string,
-        params?: Parameters<TelegramClient['sendMedia']>[2]
+        params?: Parameters<TelegramClient['sendMedia']>[2],
     ): ReturnType<TelegramClient['sendMedia']> {
         return this.client.sendMedia(this.inputPeer, media, params)
     }
@@ -412,7 +418,7 @@ export class User {
      */
     sendMediaGroup(
         medias: (InputMediaLike | string)[],
-        params?: Parameters<TelegramClient['sendMediaGroup']>[2]
+        params?: Parameters<TelegramClient['sendMediaGroup']>[2],
     ): ReturnType<TelegramClient['sendMediaGroup']> {
         return this.client.sendMediaGroup(this.inputPeer, medias, params)
     }

@@ -12,7 +12,7 @@ import { InputPeerLike } from '../../types'
  */
 export async function archiveChats(
     this: TelegramClient,
-    chats: MaybeArray<InputPeerLike>
+    chats: MaybeArray<InputPeerLike>,
 ): Promise<void> {
     if (!Array.isArray(chats)) chats = [chats]
 

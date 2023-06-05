@@ -14,7 +14,7 @@ export async function hideJoinRequest(
     this: TelegramClient,
     peer: InputPeerLike,
     user: InputPeerLike,
-    action: 'approve' | 'deny'
+    action: 'approve' | 'deny',
 ): Promise<void> {
     const userId = normalizeToInputUser(await this.resolvePeer(user), user)
 

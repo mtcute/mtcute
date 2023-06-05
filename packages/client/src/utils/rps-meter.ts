@@ -5,8 +5,7 @@ export class RpsMeter {
     time: bigint
 
     constructor(readonly size = 500, time = 5000) {
-        if (typeof process === 'undefined' || !process.hrtime.bigint)
-            throw new Error('RPS meter is not supported on this platform')
+        if (typeof process === 'undefined' || !process.hrtime.bigint) { throw new Error('RPS meter is not supported on this platform') }
 
         this._hits = new Deque<bigint>(size)
         this.time = BigInt(time) * BigInt(1e6)
@@ -26,6 +25,7 @@ export class RpsMeter {
         const iter = this._hits.iter()
         let first = iter.next()
         let idx = 0
+
         while (!first.done && first.value < window) {
             first = iter.next()
             idx += 1

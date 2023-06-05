@@ -1,15 +1,17 @@
-import type WebSocket from 'ws'
 import EventEmitter from 'events'
+import type WebSocket from 'ws'
+
 import { tl } from '@mtcute/tl'
 
-import { typedArrayToBuffer, Logger, ICryptoProvider } from '../../utils'
-import { ITelegramTransport, IPacketCodec, TransportState } from './abstract'
+import { ICryptoProvider, Logger, typedArrayToBuffer } from '../../utils'
+import { IPacketCodec, ITelegramTransport, TransportState } from './abstract'
 import { IntermediatePacketCodec } from './intermediate'
 import { ObfuscatedPacketCodec } from './obfuscated'
 
 let ws: {
     new (address: string, options?: string): WebSocket
 } | null
+
 if (typeof window === 'undefined' || typeof window.WebSocket === 'undefined') {
     try {
         ws = require('ws')
@@ -17,15 +19,16 @@ if (typeof window === 'undefined' || typeof window.WebSocket === 'undefined') {
         ws = null
     }
 } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ws = window.WebSocket as any
 }
 
 const subdomainsMap: Record<string, string> = {
-    1: 'pluto',
-    2: 'venus',
-    3: 'aurora',
-    4: 'vesta',
-    5: 'flora',
+    '1': 'pluto',
+    '2': 'venus',
+    '3': 'aurora',
+    '4': 'vesta',
+    '5': 'flora',
 }
 
 /**
@@ -34,8 +37,7 @@ const subdomainsMap: Record<string, string> = {
  */
 export abstract class BaseWebSocketTransport
     extends EventEmitter
-    implements ITelegramTransport
-{
+    implements ITelegramTransport {
     private _currentDc: tl.RawDcOption | null = null
     private _state: TransportState = TransportState.Idle
     private _socket: WebSocket | null = null
@@ -55,10 +57,11 @@ export abstract class BaseWebSocketTransport
     constructor(baseDomain = 'web.telegram.org', subdomains = subdomainsMap) {
         super()
 
-        if (!ws)
+        if (!ws) {
             throw new Error(
-                'To use WebSocket transport with NodeJS, install `ws` package.'
+                'To use WebSocket transport with NodeJS, install `ws` package.',
             )
+        }
 
         this._baseDomain = baseDomain
         this._subdomains = subdomains
@@ -90,8 +93,7 @@ export abstract class BaseWebSocketTransport
     }
 
     connect(dc: tl.RawDcOption, testMode: boolean): void {
-        if (this._state !== TransportState.Idle)
-            throw new Error('Transport is not IDLE')
+        if (this._state !== TransportState.Idle) { throw new Error('Transport is not IDLE') }
 
         if (!this.packetCodecInitialized) {
             this._packetCodec.setup?.(this._crypto, this.log)
@@ -106,7 +108,7 @@ export abstract class BaseWebSocketTransport
             `wss://${this._subdomains[dc.id]}.${this._baseDomain}/apiws${
                 testMode ? '_test' : ''
             }`,
-            'binary'
+            'binary',
         )
 
         this._updateLogPrefix()
@@ -115,7 +117,8 @@ export abstract class BaseWebSocketTransport
         this._socket.binaryType = 'arraybuffer'
 
         this._socket.addEventListener('message', (evt) =>
-            this._packetCodec.feed(typedArrayToBuffer(evt.data))
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            this._packetCodec.feed(typedArrayToBuffer(evt.data as any)),
         )
         this._socket.addEventListener('open', this.handleConnect.bind(this))
         this._socket.addEventListener('error', this.handleError.bind(this))
@@ -150,8 +153,7 @@ export abstract class BaseWebSocketTransport
     }
 
     async send(bytes: Buffer): Promise<void> {
-        if (this._state !== TransportState.Ready)
-            throw new Error('Transport is not READY')
+        if (this._state !== TransportState.Ready) { throw new Error('Transport is not READY') }
 
         const framed = await this._packetCodec.encode(bytes)
 

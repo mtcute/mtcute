@@ -22,10 +22,11 @@ import {
  */
 export async function getFullChat(
     this: TelegramClient,
-    chatId: InputPeerLike
+    chatId: InputPeerLike,
 ): Promise<Chat> {
     if (typeof chatId === 'string') {
         const m = chatId.match(INVITE_LINK_REGEX)
+
         if (m) {
             const res = await this.call({
                 _: 'messages.checkChatInvite',
@@ -34,7 +35,7 @@ export async function getFullChat(
 
             if (res._ === 'chatInvite') {
                 throw new MtArgumentError(
-                    `You haven't joined ${JSON.stringify(res.title)}`
+                    `You haven't joined ${JSON.stringify(res.title)}`,
                 )
             }
 

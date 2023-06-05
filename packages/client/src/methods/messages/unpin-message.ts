@@ -14,7 +14,7 @@ import { InputPeerLike } from '../../types'
 export async function unpinMessage(
     this: TelegramClient,
     chatId: InputPeerLike,
-    messageId: number
+    messageId: number,
 ): Promise<void> {
     const res = await this.call({
         _: 'messages.updatePinnedMessage',

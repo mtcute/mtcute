@@ -1,4 +1,5 @@
 import EventEmitter from 'events'
+
 import { tl } from '@mtcute/tl'
 
 import { MaybeAsync } from '../../types'

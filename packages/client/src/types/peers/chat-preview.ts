@@ -1,20 +1,18 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../utils'
 import { Photo } from '../media'
-import { User } from './user'
+import { makeInspectable } from '../utils'
 import { Chat } from './chat'
+import { User } from './user'
 
-export namespace ChatPreview {
-    /**
-     * Chat type. Can be:
-     *  - `group`: Legacy group
-     *  - `supergroup`: Supergroup
-     *  - `channel`: Broadcast channel
-     */
-    export type Type = 'group' | 'supergroup' | 'channel'
-}
+/**
+ * Chat type. Can be:
+ *  - `group`: Legacy group
+ *  - `supergroup`: Supergroup
+ *  - `channel`: Broadcast channel
+ */
+export type ChatPreviewType = 'group' | 'supergroup' | 'channel'
 
 export class ChatPreview {
     constructor(
@@ -23,7 +21,7 @@ export class ChatPreview {
         /**
          * Original invite link used to fetch this preview
          */
-        readonly link: string
+        readonly link: string,
     ) {}
 
     /**
@@ -36,9 +34,10 @@ export class ChatPreview {
     /**
      * Type of the chat
      */
-    get type(): ChatPreview.Type {
+    get type(): ChatPreviewType {
         if (this.invite.broadcast) return 'channel'
         if (this.invite.megagroup || this.invite.channel) return 'supergroup'
+
         return 'group'
     }
 
@@ -75,9 +74,9 @@ export class ChatPreview {
      * ordered before others.
      */
     get someMembers(): ReadonlyArray<User> {
-        return (this._someMembers ??= this.invite.participants
-            ? this.invite.participants.map((it) => new User(this.client, it))
-            : [])
+        return (this._someMembers ??= this.invite.participants ?
+            this.invite.participants.map((it) => new User(this.client, it)) :
+            [])
     }
 
     /**

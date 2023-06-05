@@ -1,12 +1,17 @@
+import * as cheerio from 'cheerio'
+import { readFile, writeFile } from 'fs/promises'
+import jsYaml from 'js-yaml'
+import { createInterface } from 'readline'
+
 import {
+    camelToPascal,
+    PRIMITIVE_TO_TS,
+    snakeToCamel,
+    splitNameToNamespace,
     TlEntry,
     TlFullSchema,
-    splitNameToNamespace,
-    camelToPascal,
-    snakeToCamel,
-    PRIMITIVE_TO_TS,
 } from '@mtcute/tl-utils'
-import cheerio from 'cheerio'
+
 import {
     API_SCHEMA_JSON_FILE,
     BLOGFORK_DOMAIN,
@@ -15,17 +20,9 @@ import {
     DESCRIPTIONS_YAML_FILE,
     DOC_CACHE_FILE,
 } from './constants'
-import { fetchRetry } from './utils'
-import { readFile, writeFile } from 'fs/promises'
-// @ts-ignore
-import jsYaml from 'js-yaml'
 import { applyDescriptionsYamlFile } from './process-descriptions-yaml'
 import { packTlSchema, unpackTlSchema } from './schema'
-
-type Cheerio = typeof cheerio['root'] extends () => infer T ? T : never
-type CheerioInit = typeof cheerio['load'] extends (...a: any[]) => infer T
-    ? T
-    : never
+import { fetchRetry } from './utils'
 
 export interface CachedDocumentationEntry {
     comment?: string
@@ -41,24 +38,28 @@ export interface CachedDocumentation {
     unions: Record<string, string>
 }
 
-function normalizeLinks(url: string, el: Cheerio): void {
+function normalizeLinks(url: string, el: cheerio.Cheerio<cheerio.Element>): void {
     el.find('a').each((i, _it) => {
-        const it = cheerio(_it)
+        const it = cheerio.default(_it)
+        let href = it.attr('href')
+        if (!href) return
 
-        if (it.attr('href')![0] === '#') return
+        if (href[0] === '#') return
 
-        it.attr('href', new URL(it.attr('href')!, url).href)
-        let href = it.attr('href')!
+        href = new URL(href, url).href
+        it.attr('href', href)
 
         let m
+
         if (
             (m = href.match(/\/(constructor|method|union)\/([^#?]+)(?:\?|#|$)/))
         ) {
-            let [, type, name] = m
+            const [, type, name] = m
             const [ns, n] = splitNameToNamespace(name)
 
             if (PRIMITIVE_TO_TS[n]) {
                 it.replaceWith(PRIMITIVE_TO_TS[n])
+
                 return
             }
 
@@ -70,19 +71,20 @@ function normalizeLinks(url: string, el: Cheerio): void {
                 q = 'Type' + q
             }
 
-            name = ns ? ns + '.' + q : q
+            const fullName = ns ? ns + '.' + q : q
 
-            it.replaceWith(`{@link ${name}}`)
+            it.replaceWith(`{@link ${fullName}}`)
         }
     })
 }
 
-function extractDescription($: CheerioInit) {
+function extractDescription($: cheerio.CheerioAPI) {
     return $('.page_scheme')
         .prevAll('p')
         .get()
         .reverse()
-        .map((el) => $(el).html()!.trim())
+        .map((el) => $(el).html()?.trim())
+        .filter(Boolean)
         .join('\n\n')
         .trim()
 }
@@ -91,19 +93,23 @@ function extractDescription($: CheerioInit) {
 const PROGRESS_CHARS = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 
 async function chooseDomainForDocs(
-    headers: Record<string, string>
+    headers: Record<string, string>,
 ): Promise<[number, string]> {
     let maxLayer = 0
     let maxDomain = ''
 
     for (const domain of [CORE_DOMAIN, COREFORK_DOMAIN, BLOGFORK_DOMAIN]) {
         const index = await fetchRetry(`${domain}/schema`, { headers })
-        const actualLayer = parseInt(
-            cheerio
-                .load(index)('.dev_layer_select .dropdown-toggle')
-                .text()
-                .match(/layer (\d+)/i)![1]
-        )
+        const layerMatch = cheerio
+            .load(index)('.dev_layer_select .dropdown-toggle')
+            .text()
+            .match(/layer (\d+)/i)
+
+        if (!layerMatch) {
+            throw new Error(`Failed to parse layer from ${domain}`)
+        }
+
+        const actualLayer = parseInt(layerMatch[1])
 
         if (actualLayer > maxLayer) {
             maxLayer = actualLayer
@@ -117,7 +123,7 @@ async function chooseDomainForDocs(
 export async function fetchDocumentation(
     schema: TlFullSchema,
     layer: number,
-    silent = !process.stdout.isTTY
+    silent = !process.stdout.isTTY,
 ): Promise<CachedDocumentation> {
     const headers = {
         cookie: `stel_dev_layer=${layer}`,
@@ -132,7 +138,7 @@ export async function fetchDocumentation(
 
     const ret: CachedDocumentation = {
         updated: `${new Date().toLocaleString(
-            'ru-RU'
+            'ru-RU',
         )} (layer ${actualLayer}) - from ${domain}`,
         classes: {},
         methods: {},
@@ -184,7 +190,7 @@ export async function fetchDocumentation(
             if (!cols.length) return // <thead>
 
             const name = cols.first().text().trim()
-            const description = cols.last().html()!.trim()
+            const description = cols.last().html()?.trim()
 
             if (description) {
                 if (!retClass.arguments) retClass.arguments = {}
@@ -199,12 +205,12 @@ export async function fetchDocumentation(
 
             errorsTable.find('tr').each((idx, _el) => {
                 const el = $(_el)
-                let cols = el.find('td')
+                const cols = el.find('td')
                 if (!cols.length) return // <thead>
 
-                let code = parseInt($(cols[0]).text())
-                let name = $(cols[1]).text()
-                let comment = $(cols[2]).text()
+                const code = parseInt($(cols[0]).text())
+                const name = $(cols[1]).text()
+                const comment = $(cols[2]).text()
 
                 if (name === 'USER_BOT_REQUIRED') userBotRequired = true
 
@@ -212,17 +218,19 @@ export async function fetchDocumentation(
                 retClass.throws.push({ code, name, comment })
             })
 
-            const botsCanUse = !!$('#bots-can-use-this-method').length
+            const botsCanUse = Boolean($('#bots-can-use-this-method').length)
             const onlyBotsCanUse =
                 botsCanUse &&
-                (!!description.match(/[,;]( for)? bots only$/) ||
+                (Boolean(description.match(/[,;]( for)? bots only$/)) ||
                     userBotRequired)
 
-            retClass.available = onlyBotsCanUse
-                ? 'bot'
-                : botsCanUse
-                ? 'both'
-                : 'user'
+            if (onlyBotsCanUse) {
+                retClass.available = 'bot'
+            } else if (botsCanUse) {
+                retClass.available = 'both'
+            } else {
+                retClass.available = 'user'
+            }
         }
 
         ret[entry.kind === 'class' ? 'classes' : 'methods'][entry.name] =
@@ -230,8 +238,6 @@ export async function fetchDocumentation(
     }
 
     for (const name in schema.unions) {
-        if (!schema.unions.hasOwnProperty(name)) continue
-
         log(`📥 union ${name}`)
 
         const url = `${domain}/type/${name}`
@@ -253,7 +259,7 @@ export async function fetchDocumentation(
     log('✨ Patching descriptions')
 
     const descriptionsYaml = jsYaml.load(
-        await readFile(DESCRIPTIONS_YAML_FILE, 'utf8')
+        await readFile(DESCRIPTIONS_YAML_FILE, 'utf8'),
     )
     applyDescriptionsYamlFile(ret, descriptionsYaml)
 
@@ -268,7 +274,7 @@ export async function fetchDocumentation(
 
 export function applyDocumentation(
     schema: TlFullSchema,
-    docs: CachedDocumentation
+    docs: CachedDocumentation,
 ) {
     for (let i = 0; i < 2; i++) {
         const kind = i === 0 ? 'classes' : 'methods'
@@ -276,8 +282,7 @@ export function applyDocumentation(
         const objIndex = schema[kind]
         const docIndex = docs[kind]
 
-        for (let name in docIndex) {
-            if (!docIndex.hasOwnProperty(name)) continue
+        for (const name in docIndex) {
             if (!(name in objIndex)) continue
 
             const obj = objIndex[name]
@@ -286,18 +291,19 @@ export function applyDocumentation(
             if (doc.comment) obj.comment = doc.comment
             if (doc.throws) obj.throws = doc.throws
             if (doc.available) obj.available = doc.available
+
             if (doc.arguments) {
+                const args = doc.arguments
                 obj.arguments.forEach((arg) => {
-                    if (arg.name in doc.arguments!) {
-                        arg.comment = doc.arguments![arg.name]
+                    if (arg.name in args) {
+                        arg.comment = args[arg.name]
                     }
                 })
             }
         }
     }
 
-    for (let name in schema.unions) {
-        if (!schema.unions.hasOwnProperty(name)) continue
+    for (const name in schema.unions) {
         if (!(name in docs.unions)) continue
 
         schema.unions[name].comment = docs.unions[name]
@@ -307,9 +313,10 @@ export function applyDocumentation(
 export async function getCachedDocumentation(): Promise<CachedDocumentation | null> {
     try {
         const file = await readFile(DOC_CACHE_FILE, 'utf8')
+
         return JSON.parse(file)
-    } catch (e: any) {
-        if (e.code === 'ENOENT') {
+    } catch (e: unknown) {
+        if (e && typeof e === 'object' && 'code' in e && e.code === 'ENOENT') {
             return null
         }
         throw e
@@ -323,7 +330,7 @@ async function main() {
         console.log('Cached documentation: %d', cached.updated)
     }
 
-    const rl = require('readline').createInterface({
+    const rl = createInterface({
         input: process.stdin,
         output: process.stdout,
     })
@@ -338,6 +345,7 @@ async function main() {
         console.log('3. Apply documentation to schema')
 
         const act = parseInt(await input('[0-3] > '))
+
         if (isNaN(act) || act < 0 || act > 3) {
             console.log('Invalid action')
             continue
@@ -347,7 +355,7 @@ async function main() {
 
         if (act === 1) {
             const [schema, layer] = unpackTlSchema(
-                JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8'))
+                JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')),
             )
             cached = await fetchDocumentation(schema, layer)
         }
@@ -359,7 +367,7 @@ async function main() {
             }
 
             const descriptionsYaml = jsYaml.load(
-                await readFile(DESCRIPTIONS_YAML_FILE, 'utf8')
+                await readFile(DESCRIPTIONS_YAML_FILE, 'utf8'),
             )
             applyDescriptionsYamlFile(cached, descriptionsYaml)
 
@@ -373,13 +381,13 @@ async function main() {
             }
 
             const [schema, layer] = unpackTlSchema(
-                JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8'))
+                JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')),
             )
 
             applyDocumentation(schema, cached)
             await writeFile(
                 API_SCHEMA_JSON_FILE,
-                JSON.stringify(packTlSchema(schema, layer))
+                JSON.stringify(packTlSchema(schema, layer)),
             )
         }
     }

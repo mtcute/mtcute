@@ -39,7 +39,7 @@ export async function* getReactionUsers(
          * Defaults to `100`
          */
         chunkSize?: number
-    }
+    },
 ): AsyncIterableIterator<PeerReaction> {
     if (!params) params = {}
 
@@ -50,25 +50,31 @@ export async function* getReactionUsers(
     const total = params.limit || Infinity
     const chunkSize = Math.min(params.chunkSize ?? 100, total)
 
+    let reaction: tl.TypeReaction
+
+    if (params.customEmoji) {
+        reaction = {
+            _: 'reactionCustomEmoji',
+            documentId: params.customEmoji,
+        }
+    } else if (params.emoji) {
+        reaction = {
+            _: 'reactionEmoji',
+            emoticon: params.emoji,
+        }
+    } else {
+        reaction = {
+            _: 'reactionEmpty',
+        }
+    }
+
     for (;;) {
         const res: tl.RpcCallReturn['messages.getMessageReactionsList'] =
             await this.call({
                 _: 'messages.getMessageReactionsList',
                 peer,
                 id: messageId,
-                reaction: params.customEmoji
-                    ? {
-                          _: 'reactionCustomEmoji',
-                          documentId: params.customEmoji,
-                      }
-                    : params.emoji
-                    ? {
-                          _: 'reactionEmoji',
-                          emoticon: params.emoji,
-                      }
-                    : {
-                          _: 'reactionEmpty',
-                      },
+                reaction,
                 limit: Math.min(chunkSize, total - current),
                 offset,
             })

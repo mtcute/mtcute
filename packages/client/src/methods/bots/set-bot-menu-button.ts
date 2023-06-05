@@ -12,7 +12,7 @@ import { normalizeToInputUser } from '../../utils/peer-utils'
 export async function setBotMenuButton(
     this: TelegramClient,
     user: InputPeerLike,
-    button: tl.TypeBotMenuButton
+    button: tl.TypeBotMenuButton,
 ): Promise<void> {
     await this.call({
         _: 'bots.setBotMenuButton',

@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { PartialExcept } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 
@@ -15,7 +15,7 @@ import { TelegramClient } from '../../client'
  */
 export async function createFolder(
     this: TelegramClient,
-    folder: PartialExcept<tl.RawDialogFilter, 'title'>
+    folder: PartialExcept<tl.RawDialogFilter, 'title'>,
 ): Promise<tl.RawDialogFilter> {
     let id = folder.id
 

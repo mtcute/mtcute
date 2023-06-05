@@ -1,6 +1,6 @@
-import { TlEntry, TlFullSchema } from './types'
 import { computeConstructorIdFromEntry } from './ctor-id'
 import { writeTlEntryToString } from './stringify'
+import { TlEntry, TlFullSchema } from './types'
 
 const replaceNewlineInComment = (s: string): string =>
     s.replace(/\n/g, '\n//- ')
@@ -64,7 +64,7 @@ export function writeTlEntriesToString(
          * (like `int`, `string`, etc.)
          */
         omitPrimitives?: boolean
-    }
+    },
 ): string {
     const lines: string[] = []
 
@@ -100,7 +100,7 @@ boolTrue#997275b5 = Bool;
         if (entry.comment) {
             if (params?.tdlibComments) {
                 lines.push(
-                    `// @description ${replaceNewlineInComment(entry.comment)}`
+                    `// @description ${replaceNewlineInComment(entry.comment)}`,
                 )
             } else {
                 lines.push(`// ${replaceNewlineInComment(entry.comment)}`)
@@ -112,8 +112,8 @@ boolTrue#997275b5 = Bool;
                 if (arg.comment) {
                     lines.push(
                         `// @${arg.name} ${replaceNewlineInComment(
-                            arg.comment
-                        )}`
+                            arg.comment,
+                        )}`,
                     )
                 }
             })

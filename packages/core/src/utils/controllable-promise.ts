@@ -1,7 +1,7 @@
 /**
  * A promise that can be resolved or rejected from outside.
  */
-export type ControllablePromise<T = any> = Promise<T> & {
+export type ControllablePromise<T = unknown> = Promise<T> & {
     resolve(val: T): void
     reject(err?: unknown): void
 }
@@ -9,7 +9,7 @@ export type ControllablePromise<T = any> = Promise<T> & {
 /**
  * A promise that can be cancelled.
  */
-export type CancellablePromise<T = any> = Promise<T> & {
+export type CancellablePromise<T = unknown> = Promise<T> & {
     cancel(): void
 }
 
@@ -21,15 +21,19 @@ export class PromiseCancelledError extends Error {}
 /**
  * Creates a promise that can be resolved or rejected from outside.
  */
-export function createControllablePromise<T = any>(): ControllablePromise<T> {
-    let _resolve: any
-    let _reject: any
+export function createControllablePromise<T = unknown>(): ControllablePromise<T> {
+    let _resolve: ControllablePromise<T>['resolve']
+    let _reject: ControllablePromise<T>['reject']
     const promise = new Promise<T>((resolve, reject) => {
         _resolve = resolve
         _reject = reject
     })
-    ;(promise as ControllablePromise<T>).resolve = _resolve
-    ;(promise as ControllablePromise<T>).reject = _reject
+    // ts doesn't like this, but it's fine
+
+    ;(promise as ControllablePromise<T>).resolve = _resolve!
+
+    ;(promise as ControllablePromise<T>).reject = _reject!
+
     return promise as ControllablePromise<T>
 }
 
@@ -38,13 +42,17 @@ export function createControllablePromise<T = any>(): ControllablePromise<T> {
  *
  * @param onCancel  Callback to call when cancellation is requested
  */
-export function createCancellablePromise<T = any>(
-    onCancel: () => void
+export function createCancellablePromise<T = unknown>(
+    onCancel: () => void,
 ): ControllablePromise<T> & CancellablePromise<T> {
+    // todo rethink this in MTQ-20
+
     const promise = createControllablePromise()
+
     ;(promise as unknown as CancellablePromise<T>).cancel = () => {
         promise.reject(new PromiseCancelledError())
         onCancel()
     }
+
     return promise as ControllablePromise<T> & CancellablePromise<T>
 }

@@ -13,20 +13,22 @@ import { createDummyUpdate } from '../../utils/updates-utils'
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
  * @param ids  Message(s) ID(s) to delete.
- * @param revoke  Whether to "revoke" (i.e. delete for both sides). Only used for chats and private chats.
+ * @param revoke  Whether to "revoke" (i.e. delete for both sides).
+ *      Only used for chats and private chats.
  * @internal
  */
 export async function deleteMessages(
     this: TelegramClient,
     chatId: InputPeerLike,
     ids: MaybeArray<number>,
-    revoke = true
+    revoke = true,
 ): Promise<void> {
     if (!Array.isArray(ids)) ids = [ids]
 
     const peer = await this.resolvePeer(chatId)
 
     let upd
+
     if (isInputPeerChannel(peer)) {
         const channel = normalizeToInputChannel(peer)
         const res = await this.call({

@@ -1,15 +1,15 @@
-import { tl } from '@mtcute/tl'
 import { MaybeArray } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { InputFileLike } from '../files'
-import { Venue } from './venue'
 import { FormattedString } from '../parser'
+import { VenueSource } from './venue'
 
 export interface CaptionMixin {
     /**
      * Caption of the media
      */
-    caption?: string | FormattedString<any>
+    caption?: string | FormattedString<string>
 
     /**
      * Caption entities of the media.
@@ -338,7 +338,7 @@ export interface InputMediaVenue extends CaptionMixin {
     /**
      * When available, source from where this venue was acquired
      */
-    source?: Venue.VenueSource
+    source?: VenueSource
 }
 
 /**
@@ -422,7 +422,7 @@ export interface InputMediaInvoice extends CaptionMixin {
      * description of required fields should be provided by
      * the payment provider.
      */
-    providerData: any
+    providerData: unknown
 
     /**
      * Start parameter for the bot
@@ -531,7 +531,7 @@ export interface InputMediaQuiz extends Omit<InputMediaPoll, 'type'> {
     /**
      * Explanation of the quiz solution
      */
-    solution?: string | FormattedString<any>
+    solution?: string | FormattedString<string>
 
     /**
      * Format entities for `solution`.
@@ -568,6 +568,7 @@ export type InputMediaLike =
     | InputMediaQuiz
     | tl.TypeInputMedia
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace InputMedia {
     export type OmitTypeAndFile<
         T extends InputMediaLike,
@@ -582,12 +583,13 @@ export namespace InputMedia {
      */
     export function animation(
         file: InputFileLike,
-        params: OmitTypeAndFile<InputMediaVideo> = {}
+        params: OmitTypeAndFile<InputMediaVideo> = {},
     ): InputMediaVideo {
         const ret = params as tl.Mutable<InputMediaVideo>
         ret.type = 'video'
         ret.file = file
         ret.isAnimated = true
+
         return ret
     }
 
@@ -599,11 +601,12 @@ export namespace InputMedia {
      */
     export function audio(
         file: InputFileLike,
-        params: OmitTypeAndFile<InputMediaAudio> = {}
+        params: OmitTypeAndFile<InputMediaAudio> = {},
     ): InputMediaAudio {
         const ret = params as tl.Mutable<InputMediaAudio>
         ret.type = 'audio'
         ret.file = file
+
         return ret
     }
 
@@ -615,11 +618,12 @@ export namespace InputMedia {
      */
     export function document(
         file: InputFileLike,
-        params: OmitTypeAndFile<InputMediaDocument> = {}
+        params: OmitTypeAndFile<InputMediaDocument> = {},
     ): InputMediaDocument {
         const ret = params as tl.Mutable<InputMediaDocument>
         ret.type = 'document'
         ret.file = file
+
         return ret
     }
 
@@ -631,11 +635,12 @@ export namespace InputMedia {
      */
     export function photo(
         file: InputFileLike,
-        params: OmitTypeAndFile<InputMediaPhoto> = {}
+        params: OmitTypeAndFile<InputMediaPhoto> = {},
     ): InputMediaPhoto {
         const ret = params as tl.Mutable<InputMediaPhoto>
         ret.type = 'photo'
         ret.file = file
+
         return ret
     }
 
@@ -647,11 +652,12 @@ export namespace InputMedia {
      */
     export function video(
         file: InputFileLike,
-        params: OmitTypeAndFile<InputMediaVideo> = {}
+        params: OmitTypeAndFile<InputMediaVideo> = {},
     ): InputMediaVideo {
         const ret = params as tl.Mutable<InputMediaVideo>
         ret.type = 'video'
         ret.file = file
+
         return ret
     }
 
@@ -663,11 +669,12 @@ export namespace InputMedia {
      */
     export function voice(
         file: InputFileLike,
-        params: OmitTypeAndFile<InputMediaVoice> = {}
+        params: OmitTypeAndFile<InputMediaVoice> = {},
     ): InputMediaVoice {
         const ret = params as tl.Mutable<InputMediaVoice>
         ret.type = 'voice'
         ret.file = file
+
         return ret
     }
 
@@ -679,11 +686,12 @@ export namespace InputMedia {
      */
     export function sticker(
         file: InputFileLike,
-        params: OmitTypeAndFile<InputMediaSticker> = {}
+        params: OmitTypeAndFile<InputMediaSticker> = {},
     ): InputMediaSticker {
         const ret = params as tl.Mutable<InputMediaSticker>
         ret.type = 'sticker'
         ret.file = file
+
         return ret
     }
 
@@ -693,10 +701,11 @@ export namespace InputMedia {
      * @param params  Venue parameters
      */
     export function venue(
-        params: OmitTypeAndFile<InputMediaVenue>
+        params: OmitTypeAndFile<InputMediaVenue>,
     ): InputMediaVenue {
         const ret = params as tl.Mutable<InputMediaVenue>
         ret.type = 'venue'
+
         return ret
     }
 
@@ -710,12 +719,13 @@ export namespace InputMedia {
     export function geo(
         latitude: number,
         longitude: number,
-        params: OmitTypeAndFile<InputMediaGeo, 'latitude' | 'longitude'> = {}
+        params: OmitTypeAndFile<InputMediaGeo, 'latitude' | 'longitude'> = {},
     ): InputMediaGeo {
         const ret = params as tl.Mutable<InputMediaGeo>
         ret.type = 'geo'
         ret.latitude = latitude
         ret.longitude = longitude
+
         return ret
     }
 
@@ -732,12 +742,13 @@ export namespace InputMedia {
         params: OmitTypeAndFile<
             InputMediaGeoLive,
             'latitude' | 'longitude'
-        > = {}
+        > = {},
     ): InputMediaGeoLive {
         const ret = params as tl.Mutable<InputMediaGeoLive>
         ret.type = 'geo_live'
         ret.latitude = latitude
         ret.longitude = longitude
+
         return ret
     }
 
@@ -753,6 +764,7 @@ export namespace InputMedia {
     export function dice(emoji: string, params: CaptionMixin): InputMediaDice {
         const ret = params as tl.Mutable<InputMediaDice>
         ret.type = 'dice'
+
         return ret
     }
 
@@ -762,10 +774,11 @@ export namespace InputMedia {
      * @param params  Contact parameters
      */
     export function contact(
-        params: OmitTypeAndFile<InputMediaContact>
+        params: OmitTypeAndFile<InputMediaContact>,
     ): InputMediaContact {
         const ret = params as tl.Mutable<InputMediaContact>
         ret.type = 'contact'
+
         return ret
     }
 
@@ -787,10 +800,11 @@ export namespace InputMedia {
      * @param params  Invoice parameters
      */
     export function invoice(
-        params: OmitTypeAndFile<InputMediaInvoice>
+        params: OmitTypeAndFile<InputMediaInvoice>,
     ): InputMediaInvoice {
         const ret = params as tl.Mutable<InputMediaInvoice>
         ret.type = 'invoice'
+
         return ret
     }
 
@@ -800,10 +814,11 @@ export namespace InputMedia {
      * @param params  Poll parameters
      */
     export function poll(
-        params: OmitTypeAndFile<InputMediaPoll>
+        params: OmitTypeAndFile<InputMediaPoll>,
     ): InputMediaPoll {
         const ret = params as tl.Mutable<InputMediaPoll>
         ret.type = 'poll'
+
         return ret
     }
 
@@ -813,10 +828,11 @@ export namespace InputMedia {
      * @param params  Quiz parameters
      */
     export function quiz(
-        params: OmitTypeAndFile<InputMediaQuiz>
+        params: OmitTypeAndFile<InputMediaQuiz>,
     ): InputMediaQuiz {
         const ret = params as tl.Mutable<InputMediaQuiz>
         ret.type = 'quiz'
+
         return ret
     }
 
@@ -833,11 +849,12 @@ export namespace InputMedia {
      */
     export function auto(
         file: InputFileLike,
-        params: OmitTypeAndFile<InputMediaAuto> = {}
+        params: OmitTypeAndFile<InputMediaAuto> = {},
     ): InputMediaAuto {
         const ret = params as tl.Mutable<InputMediaAuto>
         ret.type = 'auto'
         ret.file = file
+
         return ret
     }
 }

@@ -38,7 +38,7 @@ export async function editInviteLink(
          * approved by an admin
          */
         withApproval?: boolean
-    }
+    },
 ): Promise<ChatInviteLink> {
     const res = await this.call({
         _: 'messages.editExportedChatInvite',

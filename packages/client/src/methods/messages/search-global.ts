@@ -1,8 +1,7 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { Message, MtTypeAssertionError, PeersIndex } from '../../types'
-import { SearchFilters } from '../../types'
+import { Message, MtTypeAssertionError, PeersIndex, SearchFilters } from '../../types'
 
 /**
  * Search for messages globally from all of your chats
@@ -44,7 +43,7 @@ export async function* searchGlobal(
          * Defaults to `100`
          */
         chunkSize?: number
-    }
+    },
 ): AsyncIterableIterator<Message> {
     if (!params) params = {}
 
@@ -70,12 +69,13 @@ export async function* searchGlobal(
             limit: Math.min(limit, total - current),
         })
 
-        if (res._ === 'messages.messagesNotModified')
+        if (res._ === 'messages.messagesNotModified') {
             throw new MtTypeAssertionError(
                 'messages.searchGlobal',
                 '!messages.messagesNotModified',
-                res._
+                res._,
             )
+        }
 
         const peers = PeersIndex.from(res)
 

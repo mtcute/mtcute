@@ -6,21 +6,24 @@ import {
     IHashMethod,
 } from './abstract'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let forge: any = null
+
 try {
     forge = require('node-forge')
 } catch (e) {}
 
 export class ForgeCryptoProvider
     extends BaseCryptoProvider
-    implements ICryptoProvider
-{
+    implements ICryptoProvider {
     constructor() {
         super()
-        if (!forge)
+
+        if (!forge) {
             throw new Error(
-                'For ForgeCryptoProvider you must have node-forge installed!'
+                'For ForgeCryptoProvider you must have node-forge installed!',
             )
+        }
     }
 
     createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme {
@@ -32,6 +35,7 @@ export class ForgeCryptoProvider
         const update = (data: Buffer): Buffer => {
             cipher.output.data = ''
             cipher.update(forge.util.createBuffer(data.toString('binary')))
+
             return Buffer.from(cipher.output.data, 'binary')
         }
 
@@ -51,6 +55,7 @@ export class ForgeCryptoProvider
                 cipher.mode.pad = cipher.mode.unpad = false
                 cipher.update(forge.util.createBuffer(data.toString('binary')))
                 cipher.finish()
+
                 return Buffer.from(cipher.output.data, 'binary')
             },
             decrypt(data: Buffer) {
@@ -59,6 +64,7 @@ export class ForgeCryptoProvider
                 cipher.mode.pad = cipher.mode.unpad = false
                 cipher.update(forge.util.createBuffer(data.toString('binary')))
                 cipher.finish()
+
                 return Buffer.from(cipher.output.data, 'binary')
             },
         }
@@ -69,7 +75,7 @@ export class ForgeCryptoProvider
         salt: Buffer,
         iterations: number,
         keylen = 64,
-        algo = 'sha512'
+        algo = 'sha512',
     ): MaybeAsync<Buffer> {
         return new Promise((resolve, reject) =>
             forge.pkcs5.pbkdf2(
@@ -79,10 +85,10 @@ export class ForgeCryptoProvider
                 keylen,
                 forge.md[algo].create(),
                 (err: Error | null, buf: string) =>
-                    err !== null
-                        ? reject(err)
-                        : resolve(Buffer.from(buf, 'binary'))
-            )
+                    err !== null ?
+                        reject(err) :
+                        resolve(Buffer.from(buf, 'binary')),
+            ),
         )
     }
 
@@ -90,7 +96,7 @@ export class ForgeCryptoProvider
         return Buffer.from(
             forge.md.sha1.create().update(data.toString('binary')).digest()
                 .data,
-            'binary'
+            'binary',
         )
     }
 
@@ -98,12 +104,13 @@ export class ForgeCryptoProvider
         return Buffer.from(
             forge.md.sha256.create().update(data.toString('binary')).digest()
                 .data,
-            'binary'
+            'binary',
         )
     }
 
     createMd5(): IHashMethod {
         const hash = forge.md.md5.create()
+
         return {
             update: (data) => hash.update(data.toString('binary')),
             digest: () => Buffer.from(hash.digest().data, 'binary'),
@@ -114,6 +121,7 @@ export class ForgeCryptoProvider
         const hmac = forge.hmac.create()
         hmac.start('sha256', key.toString('binary'))
         hmac.update(data.toString('binary'))
+
         return Buffer.from(hmac.digest().data, 'binary')
     }
 }

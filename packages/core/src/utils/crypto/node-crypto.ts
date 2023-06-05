@@ -16,8 +16,7 @@ import {
 
 export class NodeCryptoProvider
     extends BaseCryptoProvider
-    implements ICryptoProvider
-{
+    implements ICryptoProvider {
     constructor() {
         super()
     }
@@ -26,7 +25,7 @@ export class NodeCryptoProvider
         const cipher = (encrypt ? createCipheriv : createDecipheriv)(
             `aes-${key.length * 8}-ctr`,
             key,
-            iv
+            iv,
         )
 
         const update = (data: Buffer) => cipher.update(data)
@@ -44,11 +43,13 @@ export class NodeCryptoProvider
             encrypt(data: Buffer) {
                 const cipher = createCipheriv(methodName, key, null)
                 cipher.setAutoPadding(false)
+
                 return Buffer.concat([cipher.update(data), cipher.final()])
             },
             decrypt(data: Buffer) {
                 const cipher = createDecipheriv(methodName, key, null)
                 cipher.setAutoPadding(false)
+
                 return Buffer.concat([cipher.update(data), cipher.final()])
             },
         }
@@ -59,7 +60,7 @@ export class NodeCryptoProvider
         salt: Buffer,
         iterations: number,
         keylen = 64,
-        algo = 'sha512'
+        algo = 'sha512',
     ): MaybeAsync<Buffer> {
         return new Promise((resolve, reject) =>
             pbkdf2(
@@ -69,8 +70,8 @@ export class NodeCryptoProvider
                 keylen,
                 algo,
                 (err: Error | null, buf: Buffer) =>
-                    err !== null ? reject(err) : resolve(buf)
-            )
+                    err !== null ? reject(err) : resolve(buf),
+            ),
         )
     }
 
@@ -83,7 +84,7 @@ export class NodeCryptoProvider
     }
 
     createMd5(): IHashMethod {
-        return createHash('md5') as any
+        return createHash('md5') as unknown as IHashMethod
     }
 
     hmacSha256(data: Buffer, key: Buffer): MaybeAsync<Buffer> {

@@ -1,10 +1,10 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { FileLocation } from '../files'
 import { MtArgumentError } from '../errors'
-import { Thumbnail } from './thumbnail'
+import { FileLocation } from '../files'
 import { makeInspectable } from '../utils'
+import { Thumbnail } from './thumbnail'
 
 /**
  * A photo
@@ -31,13 +31,14 @@ export class Photo extends FileLocation {
             accessHash: raw.accessHash,
             thumbSize: '',
         } as tl.Mutable<tl.RawInputPhotoFileLocation>
-        let size, width, height: number
+        let size; let width; let height: number
 
         let bestSize: tl.RawPhotoSize | tl.RawPhotoSizeProgressive
 
         const progressive = raw.sizes.find(
-            (it) => it._ === 'photoSizeProgressive'
+            (it) => it._ === 'photoSizeProgressive',
         ) as tl.RawPhotoSizeProgressive | undefined
+
         if (progressive) {
             location.thumbSize = progressive.type
             size = Math.max(...progressive.sizes)
@@ -47,6 +48,7 @@ export class Photo extends FileLocation {
             bestSize = progressive
         } else {
             let max: tl.RawPhotoSize | null = null
+
             for (const sz of raw.sizes) {
                 if (sz._ === 'photoSize' && (!max || sz.size > max.size)) {
                     max = sz
@@ -83,7 +85,7 @@ export class Photo extends FileLocation {
      * Whether this photo is an animated profile picture
      */
     get isAnimated(): boolean {
-        return !!this.raw.videoSizes?.some((s) => s.type === 'u')
+        return Boolean(this.raw.videoSizes?.some((s) => s.type === 'u'))
     }
 
     private _thumbnails?: Thumbnail[]
@@ -96,10 +98,10 @@ export class Photo extends FileLocation {
     get thumbnails(): ReadonlyArray<Thumbnail> {
         if (!this._thumbnails) {
             this._thumbnails = this.raw.sizes.map(
-                (sz) => new Thumbnail(this.client, this.raw, sz)
+                (sz) => new Thumbnail(this.client, this.raw, sz),
             )
             this.raw.videoSizes?.forEach((sz) =>
-                this._thumbnails!.push(new Thumbnail(this.client, this.raw, sz))
+                this._thumbnails!.push(new Thumbnail(this.client, this.raw, sz)),
             )
         }
 
@@ -148,7 +150,7 @@ export class Photo extends FileLocation {
             }
 
             this._uniqueFileId = this.getThumbnail(
-                this._bestSize.type
+                this._bestSize.type,
             )!.uniqueFileId
         }
 
@@ -183,5 +185,5 @@ export class Photo extends FileLocation {
 makeInspectable(
     Photo,
     ['fileSize', 'dcId', 'width', 'height'],
-    ['inputMedia', 'inputPhoto']
+    ['inputMedia', 'inputPhoto'],
 )

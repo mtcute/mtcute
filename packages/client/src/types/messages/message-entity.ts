@@ -3,7 +3,7 @@ import { tl } from '@mtcute/tl'
 import { makeInspectable } from '../utils'
 
 const entityToType: Partial<
-    Record<tl.TypeMessageEntity['_'], MessageEntity.Type>
+    Record<tl.TypeMessageEntity['_'], MessageEntityType>
 > = {
     messageEntityBlockquote: 'blockquote',
     messageEntityBold: 'bold',
@@ -25,52 +25,50 @@ const entityToType: Partial<
     messageEntityCustomEmoji: 'emoji',
 }
 
-export namespace MessageEntity {
-    /**
-     * Type of the entity. Can be:
-     *   - 'mention': `@username`.
-     *   - 'hashtag': `#hashtag`.
-     *   - 'cashtag': `$USD`.
-     *   - 'bot_command': `/start`.
-     *   - 'url': `https://example.com` (see {@link MessageEntity.url}).
-     *   - 'email': `example@example.com`.
-     *   - 'phone_number': `+42000`.
-     *   - 'bold': **bold text**.
-     *   - 'italic': *italic text*.
-     *   - 'underline': <u>underlined</u> text.
-     *   - 'strikethrough': <s>strikethrough</s> text.
-     *   - 'code': `monospaced` string.
-     *   - 'pre': `monospaced` block (see {@link MessageEntity.language}).
-     *   - 'text_link': for clickable text URLs.
-     *   - 'text_mention': for users without usernames (see {@link MessageEntity.user} below).
-     *   - 'blockquote': A blockquote
-     *   - 'emoji': A custom emoji
-     */
-    export type Type =
-        | 'mention'
-        | 'hashtag'
-        | 'cashtag'
-        | 'bot_command'
-        | 'url'
-        | 'email'
-        | 'phone_number'
-        | 'bold'
-        | 'italic'
-        | 'underline'
-        | 'strikethrough'
-        | 'spoiler'
-        | 'code'
-        | 'pre'
-        | 'text_link'
-        | 'text_mention'
-        | 'blockquote'
-        | 'emoji'
-}
+/**
+ * Type of the entity. Can be:
+ *   - 'mention': `@username`.
+ *   - 'hashtag': `#hashtag`.
+ *   - 'cashtag': `$USD`.
+ *   - 'bot_command': `/start`.
+ *   - 'url': `https://example.com` (see {@link MessageEntity.url}).
+ *   - 'email': `example@example.com`.
+ *   - 'phone_number': `+42000`.
+ *   - 'bold': **bold text**.
+ *   - 'italic': *italic text*.
+ *   - 'underline': <u>underlined</u> text.
+ *   - 'strikethrough': <s>strikethrough</s> text.
+ *   - 'code': `monospaced` string.
+ *   - 'pre': `monospaced` block (see {@link MessageEntity.language}).
+ *   - 'text_link': for clickable text URLs.
+ *   - 'text_mention': for users without usernames (see {@link MessageEntity.user} below).
+ *   - 'blockquote': A blockquote
+ *   - 'emoji': A custom emoji
+ */
+export type MessageEntityType =
+    | 'mention'
+    | 'hashtag'
+    | 'cashtag'
+    | 'bot_command'
+    | 'url'
+    | 'email'
+    | 'phone_number'
+    | 'bold'
+    | 'italic'
+    | 'underline'
+    | 'strikethrough'
+    | 'spoiler'
+    | 'code'
+    | 'pre'
+    | 'text_link'
+    | 'text_mention'
+    | 'blockquote'
+    | 'emoji'
 
 /**
  * One special entity in a text message (like mention, hashtag, URL, etc.)
  */
-export class MessageEntity {
+export class MessageEntity<Type extends MessageEntityType = MessageEntityType> {
     /**
      * Underlying raw TL object
      */
@@ -79,7 +77,7 @@ export class MessageEntity {
     /**
      * Type of the entity. See {@link MessageEntity.Type} for a list of possible values
      */
-    readonly type!: MessageEntity.Type
+    readonly type!: MessageEntityType
 
     /**
      * Offset in UTF-16 code units to the start of the entity.
@@ -98,7 +96,7 @@ export class MessageEntity {
     /**
      * When `type=text_link`, contains the URL that would be opened if user taps on the text
      */
-    readonly url?: string
+    readonly url?: Type extends 'text_link' ? string : never
 
     /**
      * When `type=text_mention`, contains the ID of the user mentioned.

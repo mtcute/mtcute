@@ -9,7 +9,7 @@ import { InputPeerLike } from '../../types'
  */
 export async function unblockUser(
     this: TelegramClient,
-    id: InputPeerLike
+    id: InputPeerLike,
 ): Promise<void> {
     await this.call({
         _: 'contacts.unblock',

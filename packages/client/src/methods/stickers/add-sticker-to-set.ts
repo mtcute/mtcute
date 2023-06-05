@@ -34,7 +34,7 @@ export async function addStickerToSet(
          * @param total  Total file size
          */
         progressCallback?: (uploaded: number, total: number) => void
-    }
+    },
 ): Promise<StickerSet> {
     if (typeof id === 'string') {
         id = {
@@ -50,18 +50,18 @@ export async function addStickerToSet(
             _: 'inputStickerSetItem',
             document: await this._normalizeFileToDocument(
                 sticker.file,
-                params ?? {}
+                params ?? {},
             ),
             emoji: sticker.emojis,
-            maskCoords: sticker.maskPosition
-                ? {
-                      _: 'maskCoords',
-                      n: MASK_POS[sticker.maskPosition.point],
-                      x: sticker.maskPosition.x,
-                      y: sticker.maskPosition.y,
-                      zoom: sticker.maskPosition.scale,
-                  }
-                : undefined,
+            maskCoords: sticker.maskPosition ?
+                {
+                    _: 'maskCoords',
+                    n: MASK_POS[sticker.maskPosition.point as keyof typeof MASK_POS],
+                    x: sticker.maskPosition.x,
+                    y: sticker.maskPosition.y,
+                    zoom: sticker.maskPosition.scale,
+                } :
+                undefined,
         },
     })
 

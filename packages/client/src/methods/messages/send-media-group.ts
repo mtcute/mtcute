@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { randomLong } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
@@ -118,7 +118,7 @@ export async function sendMediaGroup(
          * Peer to use when sending the message.
          */
         sendAs?: InputPeerLike
-    }
+    },
 ): Promise<Message[]> {
     if (!params) params = {}
 
@@ -126,18 +126,20 @@ export async function sendMediaGroup(
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
 
     let replyTo = normalizeMessageId(params.replyTo)
+
     if (params.commentTo) {
-        ;[peer, replyTo] = await this._getDiscussionMessage(
+        [peer, replyTo] = await this._getDiscussionMessage(
             peer,
-            normalizeMessageId(params.commentTo)!
+            normalizeMessageId(params.commentTo)!,
         )
     }
 
     if (params.mustReply) {
-        if (!replyTo)
+        if (!replyTo) {
             throw new MtArgumentError(
-                'mustReply used, but replyTo was not passed'
+                'mustReply used, but replyTo was not passed',
             )
+        }
 
         const msg = await this.getMessages(peer, replyTo)
 
@@ -165,16 +167,16 @@ export async function sendMediaGroup(
                 // fuck my life
                 uploadPeer: peer,
             },
-            true
+            true,
         )
 
         const [message, entities] = await this._parseEntities(
             // some types dont have `caption` field, and ts warns us,
             // but since it's JS, they'll just be `undefined` and properly
             // handled by _parseEntities method
-            (media as any).caption,
+            (media as Extract<typeof media, { caption?: unknown }>).caption,
             params.parseMode,
-            (media as any).entities
+            (media as Extract<typeof media, { entities?: unknown }>).entities,
         )
 
         multiMedia.push({
@@ -197,9 +199,9 @@ export async function sendMediaGroup(
         replyMarkup,
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs
-            ? await this.resolvePeer(params.sendAs)
-            : undefined,
+        sendAs: params.sendAs ?
+            await this.resolvePeer(params.sendAs) :
+            undefined,
     })
 
     assertIsUpdatesGroup('_findMessageInUpdate', res)
@@ -209,19 +211,19 @@ export async function sendMediaGroup(
 
     const msgs = res.updates
         .filter(
-            (u) =>
+            (u): u is tl.RawUpdateNewMessage | tl.RawUpdateNewChannelMessage | tl.RawUpdateNewScheduledMessage =>
                 u._ === 'updateNewMessage' ||
                 u._ === 'updateNewChannelMessage' ||
-                u._ === 'updateNewScheduledMessage'
+                u._ === 'updateNewScheduledMessage',
         )
         .map(
             (u) =>
                 new Message(
                     this,
-                    (u as any).message,
+                    u.message,
                     peers,
-                    u._ === 'updateNewScheduledMessage'
-                )
+                    u._ === 'updateNewScheduledMessage',
+                ),
         )
 
     this._pushConversationMessage(msgs[msgs.length - 1])

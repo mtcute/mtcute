@@ -21,17 +21,17 @@ export async function enableCloudPassword(
     this: TelegramClient,
     password: string,
     hint?: string,
-    email?: string
+    email?: string,
 ): Promise<void> {
     const pwd = await this.call({ _: 'account.getPassword' })
-    if (pwd.hasPassword)
-        throw new MtArgumentError('Cloud password is already enabled')
+
+    if (pwd.hasPassword) { throw new MtArgumentError('Cloud password is already enabled') }
 
     const algo = pwd.newAlgo
     assertTypeIs(
         'account.getPassword',
         algo,
-        'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow'
+        'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow',
     )
 
     const newHash = await computeNewPasswordHash(this._crypto, algo, password)

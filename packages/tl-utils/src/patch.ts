@@ -1,10 +1,10 @@
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import { parseTlToEntries } from './parse'
 import { generateReaderCodeForTlEntries } from './codegen/reader'
 import { generateWriterCodeForTlEntries } from './codegen/writer'
+import { parseTlToEntries } from './parse'
 
-function evalForResult(js: string): any {
+function evalForResult<T>(js: string): T {
     return new Function(js)()
 }
 
@@ -22,7 +22,7 @@ function evalForResult(js: string): any {
 export function patchRuntimeTlSchema(
     schema: string,
     readers: TlReaderMap,
-    writers: TlWriterMap
+    writers: TlWriterMap,
 ): {
     readerMap: TlReaderMap
     writerMap: TlWriterMap
@@ -32,8 +32,8 @@ export function patchRuntimeTlSchema(
     const readersCode = generateReaderCodeForTlEntries(entries, '_', false)
     const writersCode = generateWriterCodeForTlEntries(entries, '_', true)
 
-    const newReaders = evalForResult(readersCode.replace('var _=', 'return'))
-    const newWriters = evalForResult(writersCode.replace('var _=', 'return'))
+    const newReaders = evalForResult<TlReaderMap>(readersCode.replace('var _=', 'return'))
+    const newWriters = evalForResult<TlWriterMap>(writersCode.replace('var _=', 'return'))
 
     return {
         readerMap: {

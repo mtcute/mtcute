@@ -34,7 +34,7 @@ export async function createInviteLink(
          * approved by an admin
          */
         withApproval?: boolean
-    }
+    },
 ): Promise<ChatInviteLink> {
     if (!params) params = {}
 

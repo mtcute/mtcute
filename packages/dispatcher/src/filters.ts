@@ -1,41 +1,48 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// ^^ will be looked into in MTQ-29
 import {
     Audio,
+    BotChatJoinRequestUpdate,
     CallbackQuery,
     Chat,
+    ChatMemberUpdate,
+    ChatType,
+    ChosenInlineResult,
     Contact,
     Dice,
     Document,
+    Game,
     InlineQuery,
+    Invoice,
     LiveLocation,
     Location,
     MaybeAsync,
     Message,
+    MessageAction,
     Photo,
+    Poll,
+    PollVoteUpdate,
     RawDocument,
+    RawLocation,
     Sticker,
+    StickerSourceType,
+    StickerType,
     User,
+    UserStatus,
+    UserStatusUpdate,
+    UserTypingUpdate,
     Venue,
     Video,
     Voice,
-    Poll,
-    Invoice,
-    Game,
     WebPage,
-    MessageAction,
-    RawLocation,
-    ChatMemberUpdate,
-    ChosenInlineResult,
-    UserStatusUpdate,
-    PollVoteUpdate,
-    UserTypingUpdate,
-    BotChatJoinRequestUpdate,
 } from '@mtcute/client'
+import { ChatMemberUpdateType } from '@mtcute/client/src/types/updates/chat-member-update'
 import { MaybeArray } from '@mtcute/core'
 
 import { UpdateState } from './state'
 
 function extractText(
-    obj: Message | InlineQuery | ChosenInlineResult | CallbackQuery
+    obj: Message | InlineQuery | ChosenInlineResult | CallbackQuery,
 ): string | null {
     if (obj.constructor === Message) {
         return obj.text
@@ -119,12 +126,13 @@ function extractText(
  * > like `and`, `or`, etc. Those are meant to be inferred by the compiler!
  */
 // we need the second parameter because it carries meta information
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/ban-types
 export type UpdateFilter<Base, Mod = {}, State = never> = (
     update: Base,
     state?: UpdateState<State>
 ) => MaybeAsync<boolean>
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace filters {
     export type Modify<Base, Mod> = Omit<Base, keyof Mod> & Mod
     export type Invert<Base, Mod> = {
@@ -172,7 +180,7 @@ export namespace filters {
      * @param fn  Filter to negate
      */
     export function not<Base, Mod, State>(
-        fn: UpdateFilter<Base, Mod, State>
+        fn: UpdateFilter<Base, Mod, State>,
     ): UpdateFilter<Base, Invert<Base, Mod>, State> {
         return (upd, state) => {
             const res = fn(upd, state)
@@ -198,10 +206,11 @@ export namespace filters {
      */
     export function and<Base, Mod1, Mod2, State1, State2>(
         fn1: UpdateFilter<Base, Mod1, State1>,
-        fn2: UpdateFilter<Base, Mod2, State2>
+        fn2: UpdateFilter<Base, Mod2, State2>,
     ): UpdateFilter<Base, Mod1 & Mod2, State1 | State2> {
         return (upd, state) => {
             const res1 = fn1(upd, state as any)
+
             if (typeof res1 === 'boolean') {
                 if (!res1) return false
 
@@ -235,10 +244,11 @@ export namespace filters {
      */
     export function or<Base, Mod1, Mod2, State1, State2>(
         fn1: UpdateFilter<Base, Mod1, State1>,
-        fn2: UpdateFilter<Base, Mod2, State2>
+        fn2: UpdateFilter<Base, Mod2, State2>,
     ): UpdateFilter<Base, Mod1 | Mod2, State1 | State2> {
         return (upd, state) => {
             const res1 = fn1(upd, state as any)
+
             if (typeof res1 === 'boolean') {
                 if (res1) return true
 
@@ -378,8 +388,8 @@ export namespace filters {
      * Filter messages by chat type
      */
     export const chat =
-        <T extends Chat.Type>(
-            type: T
+        <T extends ChatType>(
+            type: T,
         ): UpdateFilter<
             Message,
             {
@@ -389,14 +399,14 @@ export namespace filters {
                     : User | Chat
             }
         > =>
-        (msg) =>
-            msg.chat.type === type
+            (msg) =>
+                msg.chat.type === type
 
     /**
      * Filter updates by chat ID(s) or username(s)
      */
     export const chatId = (
-        id: MaybeArray<number | string>
+        id: MaybeArray<number | string>,
     ): UpdateFilter<Message> => {
         if (Array.isArray(id)) {
             const index: Record<number | string, true> = {}
@@ -412,6 +422,7 @@ export namespace filters {
             return (msg) =>
                 (matchSelf && msg.chat.isSelf) ||
                 msg.chat.id in index ||
+
                 msg.chat.username! in index
         }
 
@@ -436,7 +447,7 @@ export namespace filters {
      * For chat member updates, uses `user.id`
      */
     export const userId = (
-        id: MaybeArray<number | string>
+        id: MaybeArray<number | string>,
     ): UpdateFilter<
         | Message
         | UserStatusUpdate
@@ -464,9 +475,11 @@ export namespace filters {
 
                 if (ctor === Message) {
                     const sender = (upd as Message).sender
+
                     return (
                         (matchSelf && sender.isSelf) ||
                         sender.id in index ||
+
                         sender.username! in index
                     )
                 } else if (
@@ -475,24 +488,26 @@ export namespace filters {
                 ) {
                     const id = (upd as UserStatusUpdate | UserTypingUpdate)
                         .userId
+
                     return (
+                        // eslint-disable-next-line dot-notation
                         (matchSelf && id === upd.client['_userId']) ||
                         id in index
                     )
-                } else {
-                    const user = (
+                }
+                const user = (
                         upd as Exclude<
                             typeof upd,
                             Message | UserStatusUpdate | UserTypingUpdate
                         >
-                    ).user
+                ).user
 
-                    return (
-                        (matchSelf && user.isSelf) ||
+                return (
+                    (matchSelf && user.isSelf) ||
                         user.id in index ||
+
                         user.username! in index
-                    )
-                }
+                )
             }
         }
 
@@ -508,16 +523,17 @@ export namespace filters {
                 ) {
                     return (
                         (upd as UserStatusUpdate | UserTypingUpdate).userId ===
+                        // eslint-disable-next-line dot-notation
                         upd.client['_userId']
                     )
-                } else {
-                    return (
+                }
+
+                return (
                         upd as Exclude<
                             typeof upd,
                             Message | UserStatusUpdate | UserTypingUpdate
                         >
-                    ).user.isSelf
-                }
+                ).user.isSelf
             }
         }
 
@@ -533,16 +549,16 @@ export namespace filters {
                 ) {
                     // username is not available
                     return false
-                } else {
-                    return (
-                        (
+                }
+
+                return (
+                    (
                             upd as Exclude<
                                 typeof upd,
                                 Message | UserStatusUpdate | UserTypingUpdate
                             >
-                        ).user.username === id
-                    )
-                }
+                    ).user.username === id
+                )
             }
         }
 
@@ -555,16 +571,16 @@ export namespace filters {
                 return (
                     (upd as UserStatusUpdate | UserTypingUpdate).userId === id
                 )
-            } else {
-                return (
-                    (
+            }
+
+            return (
+                (
                         upd as Exclude<
                             typeof upd,
                             Message | UserStatusUpdate | UserTypingUpdate
                         >
-                    ).user.id === id
-                )
-            }
+                ).user.id === id
+            )
         }
     }
 
@@ -574,7 +590,7 @@ export namespace filters {
      * Messages sent to yourself (i.e. Saved Messages) are also "incoming"
      */
     export const incoming: UpdateFilter<Message, { isOutgoing: false }> = (
-        msg
+        msg,
     ) => !msg.isOutgoing
 
     /**
@@ -583,14 +599,14 @@ export namespace filters {
      * Messages sent to yourself (i.e. Saved Messages) are **not** "outgoing"
      */
     export const outgoing: UpdateFilter<Message, { isOutgoing: true }> = (
-        msg
+        msg,
     ) => msg.isOutgoing
 
     /**
      * Filter messages that are replies to some other message
      */
     export const reply: UpdateFilter<Message, { replyToMessageId: number }> = (
-        msg
+        msg,
     ) => msg.replyToMessageId !== null
 
     /**
@@ -622,7 +638,7 @@ export namespace filters {
      * Filter service messages by action type
      */
     export const action = <T extends Exclude<MessageAction, null>['type']>(
-        type: MaybeArray<T>
+        type: MaybeArray<T>,
     ): UpdateFilter<
         Message,
         {
@@ -672,7 +688,7 @@ export namespace filters {
      * that also use Documents
      */
     export const anyDocument: UpdateFilter<Message, { media: RawDocument }> = (
-        msg
+        msg,
     ) => msg.media instanceof RawDocument
 
     /**
@@ -705,17 +721,17 @@ export namespace filters {
      * Filter messages containing a sticker by its type
      */
     export const stickerByType =
-        (type: Sticker.Type): UpdateFilter<Message, { media: Sticker }> =>
-        (msg) =>
-            msg.media?.type === 'sticker' && msg.media.stickerType === type
+        (type: StickerType): UpdateFilter<Message, { media: Sticker }> =>
+            (msg) =>
+                msg.media?.type === 'sticker' && msg.media.stickerType === type
 
     /**
      * Filter messages containing a sticker by its source file type
      */
     export const stickerBySourceType =
-        (type: Sticker.SourceType): UpdateFilter<Message, { media: Sticker }> =>
-        (msg) =>
-            msg.media?.type === 'sticker' && msg.media.sourceType === type
+        (type: StickerSourceType): UpdateFilter<Message, { media: Sticker }> =>
+            (msg) =>
+                msg.media?.type === 'sticker' && msg.media.sourceType === type
 
     /**
      * Filter messages containing a video.
@@ -791,14 +807,14 @@ export namespace filters {
      * Filter messages containing any location (live or static).
      */
     export const anyLocation: UpdateFilter<Message, { media: Location }> = (
-        msg
+        msg,
     ) => msg.media instanceof RawLocation
 
     /**
      * Filter messages containing a static (non-live) location.
      */
     export const location: UpdateFilter<Message, { media: LiveLocation }> = (
-        msg
+        msg,
     ) => msg.media?.type === 'location'
 
     /**
@@ -853,23 +869,25 @@ export namespace filters {
      */
     export const regex =
         (
-            regex: RegExp
+            regex: RegExp,
         ): UpdateFilter<
             Message | InlineQuery | ChosenInlineResult | CallbackQuery,
             { match: RegExpMatchArray }
         > =>
-        (obj) => {
-            const txt = extractText(obj)
-            if (!txt) return false
+            (obj) => {
+                const txt = extractText(obj)
+                if (!txt) return false
 
-            const m = txt.match(regex)
+                const m = txt.match(regex)
 
-            if (m) {
-                ;(obj as any).match = m
-                return true
+                if (m) {
+                    (obj as any).match = m
+
+                    return true
+                }
+
+                return false
             }
-            return false
-        }
 
     /**
      * Filter objects which contain the exact text given
@@ -883,12 +901,13 @@ export namespace filters {
      */
     export const equals = (
         str: string,
-        ignoreCase = false
+        ignoreCase = false,
     ): UpdateFilter<
         Message | InlineQuery | ChosenInlineResult | CallbackQuery
     > => {
         if (ignoreCase) {
             str = str.toLowerCase()
+
             return (obj) => extractText(obj)?.toLowerCase() === str
         }
 
@@ -907,20 +926,23 @@ export namespace filters {
      */
     export const contains = (
         str: string,
-        ignoreCase = false
+        ignoreCase = false,
     ): UpdateFilter<
         Message | InlineQuery | ChosenInlineResult | CallbackQuery
     > => {
         if (ignoreCase) {
             str = str.toLowerCase()
+
             return (obj) => {
                 const txt = extractText(obj)
+
                 return txt != null && txt.toLowerCase().indexOf(str) > -1
             }
         }
 
         return (obj) => {
             const txt = extractText(obj)
+
             return txt != null && txt.indexOf(str) > -1
         }
     }
@@ -937,7 +959,7 @@ export namespace filters {
      */
     export const startsWith = (
         str: string,
-        ignoreCase = false
+        ignoreCase = false,
     ): UpdateFilter<
         Message | InlineQuery | ChosenInlineResult | CallbackQuery
     > => {
@@ -946,6 +968,7 @@ export namespace filters {
 
             return (obj) => {
                 const txt = extractText(obj)
+
                 return (
                     txt != null &&
                     txt.toLowerCase().substring(0, str.length) === str
@@ -955,6 +978,7 @@ export namespace filters {
 
         return (obj) => {
             const txt = extractText(obj)
+
             return txt != null && txt.substring(0, str.length) === str
         }
     }
@@ -971,7 +995,7 @@ export namespace filters {
      */
     export const endsWith = (
         str: string,
-        ignoreCase = false
+        ignoreCase = false,
     ): UpdateFilter<
         Message | InlineQuery | ChosenInlineResult | CallbackQuery
     > => {
@@ -980,6 +1004,7 @@ export namespace filters {
 
             return (obj) => {
                 const txt = extractText(obj)
+
                 return (
                     txt != null &&
                     txt.toLowerCase().substring(0, str.length) === str
@@ -989,6 +1014,7 @@ export namespace filters {
 
         return (obj) => {
             const txt = extractText(obj)
+
             return txt != null && txt.substring(0, str.length) === str
         }
     }
@@ -1012,12 +1038,12 @@ export namespace filters {
     export const command = (
         commands: MaybeArray<string | RegExp>,
         prefixes: MaybeArray<string> | null = '/',
-        caseSensitive = false
+        caseSensitive = false,
     ): UpdateFilter<Message, { command: string[] }> => {
         if (!Array.isArray(commands)) commands = [commands]
 
         commands = commands.map((i) =>
-            typeof i === 'string' ? i.toLowerCase() : i
+            typeof i === 'string' ? i.toLowerCase() : i,
         )
 
         const argumentsRe = /(["'])(.*?)(?<!\\)\1|(\S+)/g
@@ -1029,28 +1055,33 @@ export namespace filters {
             commandsRe.push(
                 new RegExp(
                     `^(${cmd})(?:\\s|$|@([a-zA-Z0-9_]+?bot)(?:\\s|$))`,
-                    caseSensitive ? '' : 'i'
-                )
+                    caseSensitive ? '' : 'i',
+                ),
             )
         })
 
         if (prefixes === null) prefixes = []
         if (typeof prefixes === 'string') prefixes = [prefixes]
 
+        const _prefixes = prefixes
+
         const check = (msg: Message): MaybeAsync<boolean> => {
-            for (const pref of prefixes!) {
+            for (const pref of _prefixes) {
                 if (!msg.text.startsWith(pref)) continue
 
                 const withoutPrefix = msg.text.slice(pref.length)
+
                 for (const regex of commandsRe) {
                     const m = withoutPrefix.match(regex)
                     if (!m) continue
 
                     const lastGroup = m[m.length - 1]
+
+                    // eslint-disable-next-line dot-notation
                     if (lastGroup && msg.client['_isBot']) {
                         // check bot username
-                        if (lastGroup !== msg.client['_selfUsername'])
-                            return false
+                        // eslint-disable-next-line dot-notation
+                        if (lastGroup !== msg.client['_selfUsername']) { return false }
                     }
 
                     const match = m.slice(1, -1)
@@ -1060,12 +1091,13 @@ export namespace filters {
                         .slice(m[0].length)
                         .replace(argumentsRe, ($0, $1, $2, $3) => {
                             match.push(
-                                ($2 || $3 || '').replace(unescapeRe, '$1')
+                                ($2 || $3 || '').replace(unescapeRe, '$1'),
                             )
 
                             return ''
                         })
                     ;(msg as Message & { command: string[] }).command = match
+
                     return true
                 }
             }
@@ -1089,7 +1121,7 @@ export namespace filters {
      * meaning that the first group is available in `msg.command[2]`.
      */
     export const deeplink = (
-        params: MaybeArray<string | RegExp>
+        params: MaybeArray<string | RegExp>,
     ): UpdateFilter<Message, { command: string[] }> => {
         if (!Array.isArray(params)) {
             return and(start, (_msg: Message) => {
@@ -1104,6 +1136,7 @@ export namespace filters {
                 if (!m) return false
 
                 msg.command.push(...m.slice(1))
+
                 return true
             })
         }
@@ -1114,6 +1147,7 @@ export namespace filters {
             if (msg.command.length !== 2) return false
 
             const p = msg.command[1]
+
             for (const param of params) {
                 if (typeof param === 'string' && p === param) return true
 
@@ -1121,6 +1155,7 @@ export namespace filters {
                 if (!m) continue
 
                 msg.command.push(...m.slice(1))
+
                 return true
             }
 
@@ -1135,19 +1170,19 @@ export namespace filters {
      * @link ChatMemberUpdate.Type
      */
     export const chatMember: {
-        <T extends ChatMemberUpdate.Type>(type: T): UpdateFilter<
+        <T extends ChatMemberUpdateType>(type: T): UpdateFilter<
             ChatMemberUpdate,
             { type: T }
         >
-        <T extends ChatMemberUpdate.Type[]>(types: T): UpdateFilter<
+        <T extends ChatMemberUpdateType[]>(types: T): UpdateFilter<
             ChatMemberUpdate,
             { type: T[number] }
         >
     } = (
-        types: MaybeArray<ChatMemberUpdate.Type>
+        types: MaybeArray<ChatMemberUpdateType>,
     ): UpdateFilter<ChatMemberUpdate> => {
         if (Array.isArray(types)) {
-            const index: Partial<Record<ChatMemberUpdate.Type, true>> = {}
+            const index: Partial<Record<ChatMemberUpdateType, true>> = {}
             types.forEach((typ) => (index[typ] = true))
 
             return (upd) => upd.type in index
@@ -1163,7 +1198,7 @@ export namespace filters {
      * @link User.Status
      */
     export const userStatus: {
-        <T extends User.Status>(status: T): UpdateFilter<
+        <T extends UserStatus>(status: T): UpdateFilter<
             UserStatusUpdate,
             {
                 type: T
@@ -1171,13 +1206,13 @@ export namespace filters {
                 nextOffline: T extends 'online' ? Date : null
             }
         >
-        <T extends User.Status[]>(statuses: T): UpdateFilter<
+        <T extends UserStatus[]>(statuses: T): UpdateFilter<
             UserStatusUpdate,
             { type: T[number] }
         >
-    } = (statuses: MaybeArray<User.Status>): UpdateFilter<UserStatusUpdate> => {
+    } = (statuses: MaybeArray<UserStatus>): UpdateFilter<UserStatusUpdate> => {
         if (Array.isArray(statuses)) {
-            const index: Partial<Record<User.Status, true>> = {}
+            const index: Partial<Record<UserStatus, true>> = {}
             statuses.forEach((typ) => (index[typ] = true))
 
             return (upd) => upd.status in index
@@ -1209,6 +1244,7 @@ export namespace filters {
      */
     export const stateEmpty: UpdateFilter<Message> = async (upd, state) => {
         if (!state) return false
+
         return !(await state.get())
     }
 
@@ -1221,7 +1257,8 @@ export namespace filters {
      * @param predicate  State predicate
      */
     export const state = <T>(
-        predicate: (state: T) => MaybeAsync<boolean>
+        predicate: (state: T) => MaybeAsync<boolean>,
+    // eslint-disable-next-line @typescript-eslint/ban-types
     ): UpdateFilter<Message | CallbackQuery, {}, T> => {
         return async (upd, state) => {
             if (!state) return false

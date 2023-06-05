@@ -20,7 +20,7 @@ export class EarlyTimer {
     emitWhenIdle(): void {
         if (this._immediate) return
 
-        clearTimeout(this._timeout!)
+        clearTimeout(this._timeout)
         this._timeoutTs = Date.now()
 
         if (typeof setImmediate !== 'undefined') {
@@ -67,10 +67,10 @@ export class EarlyTimer {
      */
     reset(): void {
         if (this._immediate) {
-            clearImmediate(this._immediate!)
+            clearImmediate(this._immediate)
             this._immediate = undefined
         } else {
-            clearTimeout(this._timeout!)
+            clearTimeout(this._timeout)
         }
         this._timeoutTs = undefined
     }

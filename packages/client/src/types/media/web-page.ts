@@ -1,11 +1,11 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { Photo } from './photo'
+import { MtArgumentError } from '../errors'
+import { makeInspectable } from '../utils'
 import { RawDocument } from './document'
 import { parseDocument } from './document-utils'
-import { makeInspectable } from '../utils'
-import { MtArgumentError } from '../errors'
+import { Photo } from './photo'
 
 /**
  * Web page preview.

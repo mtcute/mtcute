@@ -23,7 +23,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 export async function closePoll(
     this: TelegramClient,
     chatId: InputPeerLike,
-    message: number
+    message: number,
 ): Promise<Poll> {
     const res = await this.call({
         _: 'messages.editMessage',
@@ -49,13 +49,14 @@ export async function closePoll(
     assertTypeIs(
         'messages.editMessage (@ .updates[0])',
         upd,
-        'updateMessagePoll'
+        'updateMessagePoll',
     )
+
     if (!upd.poll) {
         throw new MtTypeAssertionError(
             'messages.editMessage (@ .updates[0].poll)',
             'poll',
-            'undefined'
+            'undefined',
         )
     }
 

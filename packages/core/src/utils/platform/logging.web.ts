@@ -30,7 +30,7 @@ export const _defaultLoggingHandler = (
     level: number,
     tag: string,
     fmt: string,
-    args: any[]
+    args: unknown[],
 ): void => {
     console.log(
         BASE_FORMAT + fmt,
@@ -41,6 +41,6 @@ export const _defaultLoggingHandler = (
         TAG_COLORS[color],
         tag,
         '',
-        ...args
+        ...args,
     )
 }

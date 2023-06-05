@@ -25,7 +25,7 @@ export class JsonMemoryStorage extends MemoryStorage {
                 }
 
                 return value
-            })
+            }),
         )
     }
 
@@ -36,13 +36,14 @@ export class JsonMemoryStorage extends MemoryStorage {
                     .filter((it) => it[1] !== null)
                     .map(
                         ([dcId, key]) =>
-                            dcId + ',' + (key as Buffer).toString('base64')
+                            dcId + ',' + (key as Buffer).toString('base64'),
                     )
                     .join('|')
             }
             if (key === 'accessHash') {
                 return longToFastString(value)
             }
+
             return value
         })
     }

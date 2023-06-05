@@ -1,5 +1,5 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
 import {
     buffersEqual,
@@ -117,12 +117,12 @@ describe('cloneBuffer', () => {
 describe('parseUrlSafeBase64', () => {
     it('should parse url-safe base64', () => {
         expect(parseUrlSafeBase64('qu7d8aGTeuF6-g').toString('hex')).eq(
-            'aaeeddf1a1937ae17afa'
+            'aaeeddf1a1937ae17afa',
         )
     })
     it('should parse normal base64', () => {
         expect(parseUrlSafeBase64('qu7d8aGTeuF6+g==').toString('hex')).eq(
-            'aaeeddf1a1937ae17afa'
+            'aaeeddf1a1937ae17afa',
         )
     })
 })
@@ -130,7 +130,7 @@ describe('parseUrlSafeBase64', () => {
 describe('encodeUrlSafeBase64', () => {
     it('should encode to url-safe base64', () => {
         expect(
-            encodeUrlSafeBase64(Buffer.from('aaeeddf1a1937ae17afa', 'hex'))
+            encodeUrlSafeBase64(Buffer.from('aaeeddf1a1937ae17afa', 'hex')),
         ).eq('qu7d8aGTeuF6-g')
     })
 })

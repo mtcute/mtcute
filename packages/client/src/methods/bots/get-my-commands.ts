@@ -25,15 +25,15 @@ export async function getMyCommands(
          * User language applied to the scope.
          */
         langCode?: string
-    }
+    },
 ): Promise<tl.RawBotCommand[]> {
     return this.call({
         _: 'bots.getBotCommands',
-        scope: params?.scope
-            ? await this._normalizeCommandScope(params.scope)
-            : {
-                  _: 'botCommandScopeDefault',
-              },
+        scope: params?.scope ?
+            await this._normalizeCommandScope(params.scope) :
+            {
+                _: 'botCommandScopeDefault',
+            },
         langCode: params?.langCode ?? '',
     })
 }

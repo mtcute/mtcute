@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { ChatInviteLink, InputPeerLike, PeersIndex, User } from '../../types'
+import { ChatInviteLinkJoinedMember, InputPeerLike, PeersIndex, User } from '../../types'
 
 /**
  * Iterate over users who have joined
@@ -38,8 +38,8 @@ export async function* getInviteLinkMembers(
          * Doesn't work when {@link link} is set (Telegram limitation)
          */
         requestedSearch?: string
-    }
-): AsyncIterableIterator<ChatInviteLink.JoinedMember> {
+    },
+): AsyncIterableIterator<ChatInviteLinkJoinedMember> {
     const peer = await this.resolvePeer(chatId)
 
     const limit = params.limit ?? Infinity

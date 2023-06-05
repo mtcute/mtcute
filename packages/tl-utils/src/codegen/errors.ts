@@ -1,5 +1,5 @@
-import { camelToPascal, jsComment, snakeToCamel } from './utils'
 import { TlError, TlErrors } from '../types'
+import { camelToPascal, jsComment, snakeToCamel } from './utils'
 
 /**
  * Transform TL error name to JS error name
@@ -11,9 +11,11 @@ export function errorCodeToClassName(code: string): string {
     let str =
         camelToPascal(snakeToCamel(code.toLowerCase().replace(/ /g, '_'))) +
         'Error'
+
     if (str[0].match(/\d/)) {
         str = '_' + str
     }
+
     return str
 }
 
@@ -66,20 +68,22 @@ const TL_BUILDER_TEMPLATE_JS = `
 }
 `.trim()
 
-const template = (str: string, params: Record<string, any>): string => {
-    return str.replace(/{([a-z]+)}/gi, (_, name) => params[name] ?? '')
+const template = (str: string, params: Record<string, string | number>): string => {
+    return str.replace(/{([a-z]+)}/gi, (_, name) => String(params[name] ?? ''))
 }
 
 function parseCode(
     err: string,
-    placeholders?: string[]
+    placeholders_?: string[],
 ): [string, string[], boolean] {
     let addPlaceholders = false
 
-    if (!placeholders) {
-        placeholders = []
+    if (!placeholders_) {
+        placeholders_ = []
         addPlaceholders = true
     }
+
+    const placeholders = placeholders_
 
     let wildcard = false
 
@@ -90,21 +94,22 @@ function parseCode(
             }
 
             if (addPlaceholders) {
-                const idx = placeholders!.length
-                placeholders!.push(`duration${idx === 0 ? '' : idx}`)
+                const idx = placeholders.length
+                placeholders.push(`duration${idx === 0 ? '' : idx}`)
             }
 
             return 'X'
         })
         .replace(/_\*$/, () => {
             wildcard = true
+
             return ''
         })
 
     return [err, placeholders, wildcard]
 }
 
-function placeholderType(name: string): string {
+function placeholderType(_name: string): string {
     // if (!name.startsWith('duration')) {
     //     throw new Error('Invalid placeholder name')
     // }
@@ -120,7 +125,7 @@ function placeholderType(name: string): string {
  */
 export function generateCodeForErrors(
     errors: TlErrors,
-    exports = 'exports.'
+    exports = 'exports.',
 ): [string, string] {
     let ts = RPC_ERROR_CLASS_TS
     let js = template(RPC_ERROR_CLASS_JS, { exports })
@@ -163,7 +168,7 @@ export function generateCodeForErrors(
 
         const [name, placeholders, wildcard] = parseCode(
             it.name,
-            it._paramNames
+            it._paramNames,
         )
 
         const className = errorCodeToClassName(name)
@@ -183,18 +188,19 @@ export function generateCodeForErrors(
             template(ERROR_PRELUDE, {
                 className,
                 base: baseClass,
-                arguments: wildcard
-                    ? 'code, description'
-                    : placeholders.join(', '),
+                arguments: wildcard ?
+                    'code, description' :
+                    placeholders.join(', '),
             }) + '{\n'
 
         let description
         let comment = ''
+
         if (it.description) {
             let idx = 0
             description = JSON.stringify(it.description).replace(
                 /%[a-z]/g,
-                () => `" + ${placeholders[idx++]} + "`
+                () => `" + ${placeholders[idx++]} + "`,
             )
 
             if (wildcard) {
@@ -204,7 +210,7 @@ export function generateCodeForErrors(
             idx = 0
             comment += it.description.replace(
                 /%[a-z]/g,
-                () => `{@link ${placeholders[idx++]}}`
+                () => `{@link ${placeholders[idx++]}}`,
             )
         } else {
             description = `"Unknown RPC error: [${it.code}:${it.name}]"`
@@ -256,12 +262,14 @@ export function generateCodeForErrors(
 
     // and now we need to implement it
     js += 'const _byName = {\n'
+
     for (const [name, cls] of Object.entries(errorClasses)) {
         js += `'${name.replace(/%[a-z]/gi, 'X')}': ${cls},\n`
     }
     js += '};\n'
 
     js += 'const _byCode = {\n'
+
     for (const [code, cls] of Object.entries(baseErrorsClasses)) {
         js += `${code}: ${cls},\n`
     }

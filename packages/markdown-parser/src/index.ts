@@ -1,5 +1,6 @@
 import Long from 'long'
-import type { IMessageEntityParser, MessageEntity, tl, FormattedString } from '@mtcute/client'
+
+import type { FormattedString, IMessageEntityParser, MessageEntity, tl } from '@mtcute/client'
 
 const MENTION_REGEX =
     /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
@@ -37,15 +38,16 @@ export function md(
     let str = ''
     sub.forEach((it, idx) => {
         if (typeof it === 'boolean' || !it) return
+
         if (typeof it === 'string') it = MarkdownMessageEntityParser.escape(it)
         else {
-            if (it.mode && it.mode !== 'markdown')
-                throw new Error(`Incompatible parse mode: ${it.mode}`)
+            if (it.mode && it.mode !== 'markdown') { throw new Error(`Incompatible parse mode: ${it.mode}`) }
             it = it.value
         }
 
         str += strings[idx] + it
     })
+
     return { value: str + strings[strings.length - 1], mode: 'markdown' }
 }
 
@@ -82,6 +84,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
         let insideLink = false
 
         let pos = 0
+
         while (pos < len) {
             const c = text[pos]
 
@@ -93,6 +96,8 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
 
             if (insideCode) {
                 if (c === '`') {
+                    // we can be certain that we're inside code
+
                     const ent = stacks.code.pop()!
                     ent.length = result.length - ent.offset
                     entities.push(ent)
@@ -108,22 +113,25 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
             if (insidePre) {
                 if (c === '`' || (c === '\n' && text[pos + 1] === '`')) {
                     if (c === '\n') pos += 1
+
                     if (text[pos + 1] === '`' && text[pos + 2] === '`') {
+                        // we can be certain that we're inside pre
+
                         const ent = stacks.pre.pop()!
                         ent.length = result.length - ent.offset
                         entities.push(ent)
                         insidePre = false
                         pos += 3
                         continue
-                    } else {
-                        // closed with single or double backtick
-                        // i.e. not closed actually! this is totally valid md:
-                        // ```javascript
-                        // const a = ``;
-                        // ```
 
-                        // compensate that `pos` change we made earlier
-                        if (c === '\n') pos -= 1
+                    // closed with single or double backtick
+                    // i.e. not closed actually! this is totally valid md:
+                    // ```javascript
+                    // const a = ``;
+                    // ```
+                    // compensate that `pos` change we made earliers
+                    } else if (c === '\n') {
+                        pos -= 1
                     }
                 }
 
@@ -133,13 +141,15 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
             }
 
             if (insideLink && c === ']') {
+                // we can be certain that we're inside link
+
                 const ent = stacks.link.pop()!
 
                 if (text[pos + 1] !== '(') {
                     // [link text]
                     // ignore this, and add opening [
                     result = `${result.substr(0, ent.offset)}[${result.substr(
-                        ent.offset
+                        ent.offset,
                     )}]`
                     pos += 1
                     insideLink = false
@@ -148,24 +158,26 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
 
                 pos += 2
                 let url = ''
+
                 while (pos < text.length && text[pos] !== ')') {
                     url += text[pos++]
                 }
 
                 pos += 1 // )
 
-                if (pos > text.length)
-                    throw new Error('Malformed LINK entity, expected )')
+                if (pos > text.length) { throw new Error('Malformed LINK entity, expected )') }
 
                 if (url.length) {
                     ent.length = result.length - ent.offset
 
                     let m = url.match(MENTION_REGEX)
+
                     if (m) {
                         const userId = parseInt(m[1])
                         const accessHash = m[2]
+
                         if (accessHash) {
-                            ;(
+                            (
                                 ent as tl.Mutable<tl.RawInputMessageEntityMentionName>
                             )._ = 'inputMessageEntityMentionName'
                             ;(
@@ -176,11 +188,11 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                                 accessHash: Long.fromString(
                                     accessHash,
                                     false,
-                                    16
+                                    16,
                                 ),
                             }
                         } else {
-                            ;(
+                            (
                                 ent as tl.Mutable<tl.RawMessageEntityMentionName>
                             )._ = 'messageEntityMentionName'
                             ;(
@@ -188,7 +200,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                             ).userId = userId
                         }
                     } else if ((m = EMOJI_REGEX.exec(url))) {
-                        ;(
+                        (
                             ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>
                         )._ = 'messageEntityCustomEmoji'
                         ;(
@@ -215,12 +227,14 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                 stacks.link.push({
                     offset: result.length,
                     length: 0,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any) // other fields are added after the second part
                 continue
             }
 
             if (c === '`') {
                 const isPre = text[pos + 1] === '`' && text[pos + 2] === '`'
+
                 if (isPre) {
                     pos += 3
                     let language = ''
@@ -232,10 +246,11 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                     // newline
                     pos += 1
 
-                    if (pos > text.length)
+                    if (pos > text.length) {
                         throw new Error(
-                            'Malformed PRE entity, expected LF after ```'
+                            'Malformed PRE entity, expected LF after ```',
                         )
+                    }
 
                     if (!('pre' in stacks)) stacks.pre = []
                     stacks.pre.push({
@@ -268,6 +283,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                     | 'Strike'
                     | 'Spoiler'
                     | null = null
+
                 switch (c) {
                     case '_':
                         type = 'Italic'
@@ -293,11 +309,14 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                     if (isBegin) {
                         stacks[type].push({
                             // this is valid, but idk how to make typescript happy
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             _: ('messageEntity' + type) as any,
                             offset: result.length,
                             length: 0,
                         })
                     } else {
+                        // valid because isBegin is false
+
                         const ent = stacks[type].pop()!
                         ent.length = result.length - ent.offset
                         entities.push(ent)
@@ -321,6 +340,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
         const escaped: number[] = []
         text = text.replace(TO_BE_ESCAPED, (s, pos: number) => {
             escaped.push(pos)
+
             return '\\' + s
         })
         const hasEscaped = escaped.length > 0
@@ -359,7 +379,8 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                 end += escapedPos
             }
 
-            let startTag, endTag: string
+            let startTag; let endTag: string
+
             switch (type) {
                 case 'bold':
                     startTag = endTag = TAG_BOLD
@@ -391,15 +412,15 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                     break
                 case 'text_link':
                     startTag = '['
-                    endTag = `](${entity.url!})`
+                    endTag = `](${entity.url})`
                     break
                 case 'text_mention':
                     startTag = '['
-                    endTag = `](tg://user?id=${entity.userId!})`
+                    endTag = `](tg://user?id=${entity.userId})`
                     break
                 case 'emoji':
                     startTag = '['
-                    endTag = `](tg://emoji?id=${entity.emojiId!})`
+                    endTag = `](tg://emoji?id=${entity.emojiId})`
                     break
                 default:
                     continue

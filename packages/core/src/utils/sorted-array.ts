@@ -24,19 +24,23 @@ export class SortedArray<T> {
             item.forEach((it) => {
                 ind = this.insert(it)
             })
+
             return ind
         }
 
         if (this.raw.length === 0) {
             this.raw.push(item)
+
             return 0
         }
 
         // find insert position
         let lo = 0
         let hi = this.raw.length
+
         while (lo < hi) {
             const mid = Math.floor((lo + hi) / 2)
+
             if (this.comparator(this.raw[mid], item) > 0) {
                 hi = mid
             } else {
@@ -45,6 +49,7 @@ export class SortedArray<T> {
         }
 
         this.raw.splice(lo, 0, item)
+
         return lo
     }
 
@@ -53,9 +58,11 @@ export class SortedArray<T> {
     index(item: T, closest = false): number {
         let lo = 0
         let hi = this.raw.length
+
         while (lo < hi) {
             const mid = Math.floor((lo + hi) / 2)
             const cmp = this.comparator(this.raw[mid], item)
+
             if (cmp === 0) {
                 return mid
             }
@@ -65,6 +72,7 @@ export class SortedArray<T> {
                 lo = mid + 1
             }
         }
+
         return closest ? lo : -1
     }
 
@@ -81,6 +89,7 @@ export class SortedArray<T> {
 
     find(item: T): T | null {
         const ind = this.index(item)
+
         return ind === -1 ? null : this.raw[ind]
     }
 

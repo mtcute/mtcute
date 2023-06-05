@@ -16,7 +16,7 @@ import {
  */
 export async function deleteChatPhoto(
     this: TelegramClient,
-    chatId: InputPeerLike
+    chatId: InputPeerLike,
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
 

@@ -5,17 +5,16 @@ import { tl } from '@mtcute/tl'
  *
  * @param obj  Object to be converted
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function jsonToTlJson(obj: any): tl.TypeJSONValue {
+
+export function jsonToTlJson(obj: unknown): tl.TypeJSONValue {
     if (obj === null || obj === undefined) return { _: 'jsonNull' }
     if (typeof obj === 'boolean') return { _: 'jsonBool', value: obj }
     if (typeof obj === 'number') return { _: 'jsonNumber', value: obj }
     if (typeof obj === 'string') return { _: 'jsonString', value: obj }
-    if (Array.isArray(obj))
-        return { _: 'jsonArray', value: obj.map(jsonToTlJson) }
 
-    if (typeof obj !== 'object')
-        throw new Error(`Unsupported type: ${typeof obj}`)
+    if (Array.isArray(obj)) { return { _: 'jsonArray', value: obj.map(jsonToTlJson) } }
+
+    if (typeof obj !== 'object') { throw new Error(`Unsupported type: ${typeof obj}`) }
 
     const items: tl.TypeJSONObjectValue[] = []
 
@@ -38,7 +37,7 @@ export function jsonToTlJson(obj: any): tl.TypeJSONValue {
  *
  * @param obj  TL JSON object to convert
  */
-export function tlJsonToJson(obj: tl.TypeJSONValue): any {
+export function tlJsonToJson(obj: tl.TypeJSONValue): unknown {
     switch (obj._) {
         case 'jsonNull':
             return null
@@ -50,7 +49,7 @@ export function tlJsonToJson(obj: tl.TypeJSONValue): any {
             return obj.value.map(tlJsonToJson)
     }
 
-    const ret: any = {}
+    const ret: Record<string, unknown> = {}
 
     obj.value.forEach((item) => {
         ret[item.key] = tlJsonToJson(item.value)

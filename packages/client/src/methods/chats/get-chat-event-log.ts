@@ -1,12 +1,13 @@
 import Long from 'long'
-import { tl } from '@mtcute/tl'
+
 import { assertNever, MaybeArray } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
-    InputPeerLike,
-    MtInvalidPeerTypeError,
+    ChatAction,
     ChatEvent,
+    InputPeerLike,
     PeersIndex,
 } from '../../types'
 import {
@@ -67,7 +68,7 @@ export async function* getChatEventLog(
          */
         filters?:
             | tl.TypeChannelAdminLogEventsFilter
-            | MaybeArray<Exclude<ChatEvent.Action, null>['type']>
+            | MaybeArray<Exclude<ChatAction, null>['type']>
 
         /**
          * Limit the number of events returned.
@@ -82,7 +83,7 @@ export async function* getChatEventLog(
          * Defaults to `100`
          */
         chunkSize?: number
-    }
+    },
 ): AsyncIterableIterator<ChatEvent> {
     if (!params) params = {}
 
@@ -96,14 +97,15 @@ export async function* getChatEventLog(
     const total = params.limit || Infinity
     const chunkSize = Math.min(params.chunkSize ?? 100, total)
 
-    const admins: tl.TypeInputUser[] | undefined = params.users
-        ? await this.resolvePeerMany(params.users, normalizeToInputUser)
-        : undefined
+    const admins: tl.TypeInputUser[] | undefined = params.users ?
+        await this.resolvePeerMany(params.users, normalizeToInputUser) :
+        undefined
 
     let serverFilter:
         | tl.Mutable<tl.TypeChannelAdminLogEventsFilter>
         | undefined = undefined
     let localFilter: Record<string, true> | undefined = undefined
+
     if (params.filters) {
         if (
             typeof params.filters === 'string' ||
@@ -119,6 +121,7 @@ export async function* getChatEventLog(
 
             input.forEach((type) => {
                 localFilter![type] = true
+
                 switch (type) {
                     case 'user_joined':
                         serverFilter!.join = true
@@ -224,8 +227,7 @@ export async function* getChatEventLog(
             if (
                 localFilter &&
                 (!parsed.action || !localFilter[parsed.action.type])
-            )
-                continue
+            ) { continue }
 
             current += 1
             yield parsed

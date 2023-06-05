@@ -2,8 +2,8 @@ import { MaybeArray } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import {
-    Message,
     InputPeerLike,
+    Message,
     MtTypeAssertionError,
     PeersIndex,
 } from '../../types'
@@ -40,7 +40,7 @@ export async function getScheduledMessages(
 export async function getScheduledMessages(
     this: TelegramClient,
     chatId: InputPeerLike,
-    messageIds: MaybeArray<number>
+    messageIds: MaybeArray<number>,
 ): Promise<MaybeArray<Message | null>> {
     const peer = await this.resolvePeer(chatId)
 
@@ -53,12 +53,13 @@ export async function getScheduledMessages(
         id: messageIds as number[],
     })
 
-    if (res._ === 'messages.messagesNotModified')
+    if (res._ === 'messages.messagesNotModified') {
         throw new MtTypeAssertionError(
             'getMessages',
             '!messages.messagesNotModified',
-            res._
+            res._,
         )
+    }
 
     const peers = PeersIndex.from(res)
 

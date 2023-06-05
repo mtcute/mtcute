@@ -1,41 +1,40 @@
 import Long from 'long'
+
 import { tl } from '@mtcute/tl'
 
-import { makeInspectable } from '../utils'
 import { TelegramClient } from '../../client'
 import { MessageEntity } from '../messages'
 import { PeersIndex } from '../peers'
+import { makeInspectable } from '../utils'
 
-export namespace Poll {
-    export interface PollAnswer {
-        /**
-         * Answer text
-         */
-        text: string
+export interface PollAnswer {
+    /**
+     * Answer text
+     */
+    text: string
 
-        /**
-         * Answer data, to be passed to
-         * {@link TelegramClient.sendVote}
-         */
-        data: Buffer
+    /**
+     * Answer data, to be passed to
+     * {@link TelegramClient.sendVote}
+     */
+    data: Buffer
 
-        /**
-         * Number of people who has chosen this result.
-         * If not available (i.e. not voted yet), defaults to `0`
-         */
-        voters: number
+    /**
+     * Number of people who has chosen this result.
+     * If not available (i.e. not voted yet), defaults to `0`
+     */
+    voters: number
 
-        /**
-         * Whether this answer was chosen by the current user
-         */
-        chosen: boolean
+    /**
+     * Whether this answer was chosen by the current user
+     */
+    chosen: boolean
 
-        /**
-         * Whether this answer is correct (for quizzes).
-         * Not available before choosing an answer, and defaults to `false`
-         */
-        correct: boolean
-    }
+    /**
+     * Whether this answer is correct (for quizzes).
+     * Not available before choosing an answer, and defaults to `false`
+     */
+    correct: boolean
 }
 
 export class Poll {
@@ -45,7 +44,7 @@ export class Poll {
         readonly client: TelegramClient,
         readonly raw: tl.TypePoll,
         readonly _peers: PeersIndex,
-        readonly results?: tl.TypePollResults
+        readonly results?: tl.TypePollResults,
     ) {}
 
     /**
@@ -62,32 +61,33 @@ export class Poll {
         return this.raw.question
     }
 
-    private _answers?: Poll.PollAnswer[]
+    private _answers?: PollAnswer[]
     /**
      * List of answers in this poll
      */
-    get answers(): ReadonlyArray<Poll.PollAnswer> {
+    get answers(): ReadonlyArray<PollAnswer> {
         if (!this._answers) {
             const results = this.results?.results
 
             this._answers = this.raw.answers.map((ans, idx) => {
                 if (results) {
                     const res = results[idx]
+
                     return {
                         text: ans.text,
                         data: ans.option,
                         voters: res.voters,
-                        chosen: !!res.chosen,
-                        correct: !!res.correct,
+                        chosen: Boolean(res.chosen),
+                        correct: Boolean(res.correct),
                     }
-                } else {
-                    return {
-                        text: ans.text,
-                        data: ans.option,
-                        voters: 0,
-                        chosen: false,
-                        correct: false,
-                    }
+                }
+
+                return {
+                    text: ans.text,
+                    data: ans.option,
+                    voters: 0,
+                    chosen: false,
+                    correct: false,
                 }
             })
         }
@@ -151,6 +151,7 @@ export class Poll {
 
         if (!this._entities) {
             this._entities = []
+
             if (this.results.solutionEntities?.length) {
                 for (const ent of this.results.solutionEntities) {
                     const parsed = MessageEntity._parse(ent)

@@ -18,7 +18,7 @@ import { MtArgumentError } from '../../types'
 export async function editFolder(
     this: TelegramClient,
     folder: tl.RawDialogFilter | number | string,
-    modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>
+    modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>,
 ): Promise<tl.RawDialogFilter> {
     if (folder === 0) {
         throw new MtArgumentError('Cannot modify default folder')
@@ -28,10 +28,10 @@ export async function editFolder(
         const found = old.find(
             (it) =>
                 it._ === 'dialogFilter' &&
-                (it.id === folder || it.title === folder)
+                (it.id === folder || it.title === folder),
         )
-        if (!found)
-            throw new MtArgumentError(`Could not find a folder ${folder}`)
+
+        if (!found) { throw new MtArgumentError(`Could not find a folder ${folder}`) }
 
         folder = found as tl.RawDialogFilter
     }

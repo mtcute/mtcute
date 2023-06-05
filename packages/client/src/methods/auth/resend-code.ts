@@ -15,7 +15,7 @@ import { normalizePhoneNumber } from '../../utils/misc-utils'
 export async function resendCode(
     this: TelegramClient,
     phone: string,
-    phoneCodeHash: string
+    phoneCodeHash: string,
 ): Promise<SentCode> {
     phone = normalizePhoneNumber(phone)
 

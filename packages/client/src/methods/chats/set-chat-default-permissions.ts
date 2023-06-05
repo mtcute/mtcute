@@ -20,7 +20,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 export async function setChatDefaultPermissions(
     this: TelegramClient,
     chatId: InputPeerLike,
-    restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>
+    restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>,
 ): Promise<Chat> {
     const peer = await this.resolvePeer(chatId)
 

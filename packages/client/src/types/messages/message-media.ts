@@ -1,5 +1,7 @@
 import { tl } from '@mtcute/tl'
 
+import { TelegramClient } from '../../client'
+import { MtTypeAssertionError } from '../errors'
 import {
     Audio,
     Contact,
@@ -18,10 +20,7 @@ import {
     WebPage,
 } from '../media'
 import { parseDocument } from '../media/document-utils'
-import { Message } from './message'
-import { TelegramClient } from '../../client'
 import { PeersIndex } from '../peers'
-import { MtTypeAssertionError } from '../errors'
 
 /** A media inside of a {@link Message} */
 export type MessageMedia =
@@ -48,11 +47,12 @@ export type MessageMedia =
 export function _messageMediaFromTl(
     client: TelegramClient,
     peers: PeersIndex | null,
-    m: tl.TypeMessageMedia
+    m: tl.TypeMessageMedia,
 ): MessageMedia {
     switch (m._) {
         case 'messageMediaPhoto':
             if (!(m.photo?._ === 'photo')) return null
+
             return new Photo(client, m.photo)
         case 'messageMediaDice':
             return new Dice(m)
@@ -60,17 +60,21 @@ export function _messageMediaFromTl(
             return new Contact(m)
         case 'messageMediaDocument':
             if (!(m.document?._ === 'document')) return null
+
             return parseDocument(client, m.document) as MessageMedia
         case 'messageMediaGeo':
             if (!(m.geo._ === 'geoPoint')) return null
+
             return new Location(client, m.geo)
         case 'messageMediaGeoLive':
             if (!(m.geo._ === 'geoPoint')) return null
+
             return new LiveLocation(client, m)
         case 'messageMediaGame':
             return new Game(client, m.game)
         case 'messageMediaWebPage':
             if (!(m.webpage._ === 'webPage')) return null
+
             return new WebPage(client, m.webpage)
         case 'messageMediaVenue':
             return new Venue(client, m)
@@ -81,7 +85,7 @@ export function _messageMediaFromTl(
                 throw new MtTypeAssertionError(
                     "can't create poll without peers index",
                     'PeersIndex',
-                    'null'
+                    'null',
                 )
             }
 

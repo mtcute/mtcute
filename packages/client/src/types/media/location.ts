@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../utils'
 import { FileLocation } from '../files'
+import { makeInspectable } from '../utils'
 
 /**
  * A point on the map
@@ -10,7 +10,7 @@ import { FileLocation } from '../files'
 export class RawLocation {
     constructor(
         readonly client: TelegramClient,
-        readonly geo: tl.RawGeoPoint
+        readonly geo: tl.RawGeoPoint,
     ) {}
 
     /**
@@ -67,7 +67,7 @@ export class RawLocation {
              * Defaults to `1`
              */
             scale?: number
-        } = {}
+        } = {},
     ): FileLocation {
         return new FileLocation(this.client, {
             _: 'inputWebFileGeoPointLocation',
@@ -112,7 +112,7 @@ export class LiveLocation extends RawLocation {
 
     constructor(
         client: TelegramClient,
-        readonly live: tl.RawMessageMediaGeoLive
+        readonly live: tl.RawMessageMediaGeoLive,
     ) {
         super(client, live.geo as tl.RawGeoPoint)
     }

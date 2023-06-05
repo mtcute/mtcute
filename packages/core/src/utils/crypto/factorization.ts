@@ -16,7 +16,8 @@ export function factorizePQSync(pq: Buffer): [Buffer, Buffer] {
     const n = PollardRhoBrent(pq_)
     const m = pq_.divide(n)
 
-    let p, q
+    let p; let q
+
     if (n.lt(m)) {
         p = n
         q = m
@@ -38,7 +39,8 @@ function PollardRhoBrent(n: BigInteger): BigInteger {
     let r = bigInt.one
     let q = bigInt.one
 
-    let ys: BigInteger, x: BigInteger
+    let ys: BigInteger
+    let x: BigInteger
 
     while (g.eq(bigInt.one)) {
         x = y
@@ -46,8 +48,10 @@ function PollardRhoBrent(n: BigInteger): BigInteger {
         // y = ((y * y) % n + c) % n
 
         let k = bigInt.zero
+
         while (k.lt(r) && g.eq(1)) {
             ys = y
+
             for (
                 let i = bigInt.zero;
                 i.lt(bigInt.min(m, r.minus(k)));
@@ -66,12 +70,14 @@ function PollardRhoBrent(n: BigInteger): BigInteger {
         r = r.multiply(bigInt[2])
     }
 
-    if (g.eq(n))
+    if (g.eq(n)) {
         do {
             ys = ys!.multiply(ys!).mod(n).plus(c).mod(n)
             // ys = ((ys * ys) % n + c) % n
+
             g = bigInt.gcd(x!.minus(ys), n)
         } while (g.leq(bigInt.one))
+    }
 
     return g
 }

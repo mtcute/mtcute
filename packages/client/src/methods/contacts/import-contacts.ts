@@ -1,6 +1,7 @@
 import Long from 'long'
-import { tl } from '@mtcute/tl'
+
 import { PartialOnly } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 
@@ -12,7 +13,7 @@ import { TelegramClient } from '../../client'
  */
 export async function importContacts(
     this: TelegramClient,
-    contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[]
+    contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[],
 ): Promise<tl.contacts.RawImportedContacts> {
     let seq = Long.ZERO
 

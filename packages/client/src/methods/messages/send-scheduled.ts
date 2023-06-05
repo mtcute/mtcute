@@ -1,7 +1,7 @@
-import { MaybeArray } from '@mtcute/core'
+import { MaybeArray, tl } from '@mtcute/core'
 
-import { InputPeerLike, Message, PeersIndex } from '../../types'
 import { TelegramClient } from '../../client'
+import { InputPeerLike, Message, PeersIndex } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
@@ -42,7 +42,7 @@ export async function sendScheduled(
 export async function sendScheduled(
     this: TelegramClient,
     peer: InputPeerLike,
-    ids: MaybeArray<number>
+    ids: MaybeArray<number>,
 ): Promise<MaybeArray<Message>> {
     const isSingle = !Array.isArray(ids)
     if (isSingle) ids = [ids as number]
@@ -60,10 +60,10 @@ export async function sendScheduled(
 
     const msgs = res.updates
         .filter(
-            (u) =>
-                u._ === 'updateNewMessage' || u._ === 'updateNewChannelMessage'
+            (u): u is Extract<typeof u, tl.RawUpdateNewMessage | tl.RawUpdateNewChannelMessage> =>
+                u._ === 'updateNewMessage' || u._ === 'updateNewChannelMessage',
         )
-        .map((u) => new Message(this, (u as any).message, peers))
+        .map((u) => new Message(this, u.message, peers))
 
     this._pushConversationMessage(msgs[msgs.length - 1])
 

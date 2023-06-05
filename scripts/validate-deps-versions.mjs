@@ -1,6 +1,7 @@
-import { fileURLToPath } from 'url'
-import { getPackageJsons } from './utils.mjs'
 import semver from 'semver'
+import { fileURLToPath } from 'url'
+
+import { getPackageJsons } from './utils.mjs'
 
 export async function validateDepsVersions() {
     const packageJsons = await getPackageJsons()
@@ -23,7 +24,7 @@ export async function validateDepsVersions() {
                 Object.entries(versions[depName]).forEach(([pkgName, pkgDepVersions]) => {
                     if (!semver.satisfies(depVersions, pkgDepVersions)) {
                         errors.push(
-                            `- at ${json.name} -> ${key} has ${depName}@${depVersions}, but ${pkgName} has @${pkgDepVersions}`
+                            `- at ${json.name} -> ${key} has ${depName}@${depVersions}, but ${pkgName} has @${pkgDepVersions}`,
                         )
                     }
                 })
@@ -47,12 +48,10 @@ export async function validateDepsVersions() {
     console.log('✅ All external dependencies match!')
 }
 
-
 if (import.meta.url.startsWith('file:')) {
-    const modulePath = fileURLToPath(import.meta.url);
+    const modulePath = fileURLToPath(import.meta.url)
+
     if (process.argv[1] === modulePath) {
         validateDepsVersions().catch(console.error)
     }
-  }
-
-  
+}

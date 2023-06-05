@@ -8,7 +8,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 export function _findMessageInUpdate(
     this: TelegramClient,
     res: tl.TypeUpdates,
-    isEdit = false
+    isEdit = false,
 ): Message {
     assertIsUpdatesGroup('_findMessageInUpdate', res)
 
@@ -30,7 +30,7 @@ export function _findMessageInUpdate(
                 this,
                 u.message,
                 peers,
-                u._ === 'updateNewScheduledMessage'
+                u._ === 'updateNewScheduledMessage',
             )
         }
     }
@@ -38,6 +38,6 @@ export function _findMessageInUpdate(
     throw new MtTypeAssertionError(
         '_findInUpdate (@ .updates[*])',
         'updateNewMessage | updateNewChannelMessage | updateNewScheduledMessage',
-        'none'
+        'none',
     )
 }

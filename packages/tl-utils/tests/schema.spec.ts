@@ -1,8 +1,8 @@
-import { describe, it } from 'mocha'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
-import { TlEntry } from '../src/types'
 import { writeTlEntriesToString } from '../src/schema'
+import { TlEntry } from '../src/types'
 
 describe('writeTlEntriesToString', () => {
     const test = (
@@ -14,7 +14,7 @@ describe('writeTlEntriesToString', () => {
             writeTlEntriesToString(entries, {
                 omitPrimitives: true,
                 ...params,
-            })
+            }),
         ).eq(expected.join('\n'))
     }
 
@@ -39,7 +39,7 @@ describe('writeTlEntriesToString', () => {
         test(
             [obj],
             { computeIds: false },
-            'error code:int text:string = Error;'
+            'error code:int text:string = Error;',
         )
         test([obj], {}, 'error#c4b9f9bb code:int text:string = Error;')
     })
@@ -69,7 +69,7 @@ describe('writeTlEntriesToString', () => {
             [obj],
             {},
             '// An error',
-            'error#c4b9f9bb code:int text:string = Error;'
+            'error#c4b9f9bb code:int text:string = Error;',
         )
 
         obj.comment += '\nVery error'
@@ -78,7 +78,7 @@ describe('writeTlEntriesToString', () => {
             {},
             '// An error',
             '//- Very error',
-            'error#c4b9f9bb code:int text:string = Error;'
+            'error#c4b9f9bb code:int text:string = Error;',
         )
     })
 
@@ -110,7 +110,7 @@ describe('writeTlEntriesToString', () => {
             '//- Very error',
             '// @code Error code',
             '// @text Error description',
-            'error#c4b9f9bb code:int text:string = Error;'
+            'error#c4b9f9bb code:int text:string = Error;',
         )
     })
 
@@ -147,7 +147,7 @@ describe('writeTlEntriesToString', () => {
             '---functions---',
             'error#c4b9f9bb code:int text:string = Error;',
             '---types---',
-            'error#c4b9f9bb code:int text:string = Error;'
+            'error#c4b9f9bb code:int text:string = Error;',
         )
     })
 })

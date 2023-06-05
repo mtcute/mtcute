@@ -1,3 +1,5 @@
+import Long from 'long'
+
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -8,7 +10,6 @@ import {
     PeersIndex,
 } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import Long from 'long'
 
 /**
  * Send or remove a reaction.
@@ -25,27 +26,31 @@ export async function sendReaction(
     chatId: InputPeerLike,
     message: number,
     emoji: string | tl.Long | null,
-    big = false
+    big = false,
 ): Promise<Message> {
+    let reaction: tl.TypeReaction
+
+    if (Long.isLong(emoji)) {
+        reaction = {
+            _: 'reactionCustomEmoji',
+            documentId: emoji,
+        }
+    } else if (emoji) {
+        reaction = {
+            _: 'reactionEmoji',
+            emoticon: emoji,
+        }
+    } else {
+        reaction = {
+            _: 'reactionEmpty',
+        }
+    }
+
     const res = await this.call({
         _: 'messages.sendReaction',
         peer: await this.resolvePeer(chatId),
         msgId: message,
-        reaction: [
-            Long.isLong(emoji)
-                ? {
-                      _: 'reactionCustomEmoji',
-                      documentId: emoji,
-                  }
-                : emoji
-                ? {
-                      _: 'reactionEmoji',
-                      emoticon: emoji,
-                  }
-                : {
-                      _: 'reactionEmpty',
-                  },
-        ],
+        reaction: [reaction],
         big,
     })
 
@@ -60,13 +65,14 @@ export async function sendReaction(
     this._handleUpdate(res, true)
 
     const upd = res.updates.find(
-        (it) => it._ === 'updateEditChannelMessage'
+        (it) => it._ === 'updateEditChannelMessage',
     ) as tl.RawUpdateEditChannelMessage | undefined
+
     if (!upd) {
         throw new MtTypeAssertionError(
             'messages.sendReaction (@ .updates[*])',
             'updateEditChannelMessage',
-            'undefined'
+            'undefined',
         )
     }
 

@@ -1,7 +1,10 @@
-import type { ParsedUpdate } from '@mtcute/client'
-import { I18nValue } from './types'
+import type { BotChatJoinRequestUpdate, BotStoppedUpdate, CallbackQuery, ChatMemberUpdate, ChosenInlineResult, InlineQuery, Message, ParsedUpdate, PollVoteUpdate, User } from '@mtcute/client'
 
+import { I18nStrings, I18nValue } from './types'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let client: any
+
 try {
     client = require('@mtcute/client')
 } catch (e) {}
@@ -12,18 +15,18 @@ try {
  * @param strings  Strings object
  */
 export function createI18nStringsIndex(
-    strings: Record<string, any>
+    strings: I18nStrings,
 ): Record<string, I18nValue> {
     const ret: Record<string, I18nValue> = {}
 
-    function add(obj: Record<string, any>, prefix: string) {
+    function add(obj: I18nStrings, prefix: string) {
         for (const key in obj) {
             const val = obj[key]
 
-            if (typeof val === 'object') {
+            if (typeof val === 'object' && !('value' in val)) {
                 add(val, prefix + key + '.')
             } else {
-                ret[prefix + key] = val
+                ret[prefix + key] = val as string
             }
         }
     }
@@ -40,19 +43,18 @@ export function createI18nStringsIndex(
  * @param update  Update to extract language from
  */
 export function extractLanguageFromUpdate(
-    update: ParsedUpdate['data']
+    update: ParsedUpdate['data'],
 ): string | null | undefined {
     if (!client) {
         throw new Error(
-            '@mtcute/client is not installed, you must provide your own adapter'
+            '@mtcute/client is not installed, you must provide your own adapter',
         )
     }
 
-    const upd = update as any
-    switch (upd.constructor) {
+    switch (update.constructor) {
         case client.Message:
             // if sender is Chat it will just be undefined
-            return upd.sender.language
+            return ((update as Message).sender as User).language
         case client.ChatMemberUpdate:
         case client.InlineQuery:
         case client.ChosenInlineResult:
@@ -60,7 +62,16 @@ export function extractLanguageFromUpdate(
         case client.PollVoteUpdate:
         case client.BotStoppedUpdate:
         case client.BotChatJoinRequestUpdate:
-            return upd.user.language
+            return (
+                update as
+                    | ChatMemberUpdate
+                    | InlineQuery
+                    | ChosenInlineResult
+                    | CallbackQuery
+                    | PollVoteUpdate
+                    | BotStoppedUpdate
+                    | BotChatJoinRequestUpdate
+            ).user.language
     }
 
     return null

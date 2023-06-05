@@ -1,11 +1,11 @@
 import { parseUrlSafeBase64 } from '@mtcute/core'
 import { TlBinaryReader } from '@mtcute/tl-runtime'
 
-import { telegramRleDecode } from './utils'
 import { tdFileId as td } from './types'
+import { telegramRleDecode } from './utils'
 
 function parseWebFileLocation(
-    reader: TlBinaryReader
+    reader: TlBinaryReader,
 ): td.RawWebRemoteFileLocation {
     return {
         _: 'web',
@@ -16,6 +16,7 @@ function parseWebFileLocation(
 
 function parsePhotoSizeSource(reader: TlBinaryReader): td.TypePhotoSizeSource {
     const variant = reader.int()
+
     switch (variant) {
         case 0 /* LEGACY */:
             return {
@@ -24,19 +25,22 @@ function parsePhotoSizeSource(reader: TlBinaryReader): td.TypePhotoSizeSource {
             }
         case 1 /* THUMBNAIL */: {
             const fileType = reader.int()
-            if (fileType < 0 || fileType >= td.FileType.Size)
+
+            if (fileType < 0 || fileType >= td.FileType.Size) {
                 throw new td.UnsupportedError(
                     `Unsupported file type: ${fileType} (${reader.data.toString(
-                        'base64'
-                    )})`
+                        'base64',
+                    )})`,
                 )
+            }
 
             const thumbnailType = reader.int()
+
             if (thumbnailType < 0 || thumbnailType > 255) {
                 throw new td.InvalidFileIdError(
                     `Wrong thumbnail type: ${thumbnailType} (${reader.data.toString(
-                        'base64'
-                    )})`
+                        'base64',
+                    )})`,
                 )
             }
 
@@ -116,15 +120,15 @@ function parsePhotoSizeSource(reader: TlBinaryReader): td.TypePhotoSizeSource {
         default:
             throw new td.UnsupportedError(
                 `Unsupported photo size source ${variant} (${reader.data.toString(
-                    'base64'
-                )})`
+                    'base64',
+                )})`,
             )
     }
 }
 
 function parsePhotoFileLocation(
     reader: TlBinaryReader,
-    version: number
+    version: number,
 ): td.RawPhotoRemoteFileLocation {
     const id = reader.long()
     const accessHash = reader.long()
@@ -181,7 +185,7 @@ function parsePhotoFileLocation(
                 break
             default:
                 throw new td.InvalidFileIdError(
-                    'Invalid PhotoSizeSource in legacy PhotoRemoteFileLocation'
+                    'Invalid PhotoSizeSource in legacy PhotoRemoteFileLocation',
                 )
         }
     }
@@ -195,7 +199,7 @@ function parsePhotoFileLocation(
 }
 
 function parseCommonFileLocation(
-    reader: TlBinaryReader
+    reader: TlBinaryReader,
 ): td.RawCommonRemoteFileLocation {
     return {
         _: 'common',
@@ -206,14 +210,15 @@ function parseCommonFileLocation(
 
 function fromPersistentIdV23(
     binary: Buffer,
-    version: number
+    version: number,
 ): td.RawFullRemoteFileLocation {
-    if (version < 0 || version > td.CURRENT_VERSION)
+    if (version < 0 || version > td.CURRENT_VERSION) {
         throw new td.UnsupportedError(
             `Unsupported file ID v3 subversion: ${version} (${binary.toString(
-                'base64'
-            )})`
+                'base64',
+            )})`,
         )
+    }
 
     binary = telegramRleDecode(binary)
 
@@ -221,23 +226,26 @@ function fromPersistentIdV23(
 
     let fileType = reader.int()
 
-    const isWeb = !!(fileType & td.WEB_LOCATION_FLAG)
-    const hasFileReference = !!(fileType & td.FILE_REFERENCE_FLAG)
+    const isWeb = Boolean(fileType & td.WEB_LOCATION_FLAG)
+    const hasFileReference = Boolean(fileType & td.FILE_REFERENCE_FLAG)
 
     fileType &= ~td.WEB_LOCATION_FLAG
     fileType &= ~td.FILE_REFERENCE_FLAG
 
-    if (fileType < 0 || fileType >= td.FileType.Size)
+    if (fileType < 0 || fileType >= td.FileType.Size) {
         throw new td.UnsupportedError(
-            `Unsupported file type: ${fileType} (${binary.toString('base64')})`
+            `Unsupported file type: ${fileType} (${binary.toString('base64')})`,
         )
+    }
 
     const dcId = reader.int()
 
     let fileReference: Buffer | null = null
+
     if (hasFileReference) {
         fileReference = reader.bytes()
-        if (fileReference!.length === 1 && fileReference![0] === 0x23 /* # */) {
+
+        if (fileReference.length === 1 && fileReference[0] === 0x23 /* # */) {
             // "invalid file reference"
             // see https://github.com/tdlib/td/blob/ed291840d3a841bb5b49457c88c57e8467e4a5b0/td/telegram/files/FileLocation.h#L32
             fileReference = null
@@ -245,6 +253,7 @@ function fromPersistentIdV23(
     }
 
     let location: td.TypeRemoteFileLocation
+
     if (isWeb) {
         location = parseWebFileLocation(reader)
     } else {
@@ -267,7 +276,7 @@ function fromPersistentIdV23(
                                 fileType !== td.FileType.EncryptedThumbnail)
                         ) {
                             throw new td.InvalidFileIdError(
-                                'Invalid FileType in PhotoRemoteFileLocation Thumbnail'
+                                'Invalid FileType in PhotoRemoteFileLocation Thumbnail',
                             )
                         }
                         break
@@ -275,7 +284,7 @@ function fromPersistentIdV23(
                     case 'dialogPhotoLegacy':
                         if (fileType !== td.FileType.ProfilePhoto) {
                             throw new td.InvalidFileIdError(
-                                'Invalid FileType in PhotoRemoteFileLocation DialogPhoto'
+                                'Invalid FileType in PhotoRemoteFileLocation DialogPhoto',
                             )
                         }
                         break
@@ -284,7 +293,7 @@ function fromPersistentIdV23(
                     case 'stickerSetThumbnailVersion':
                         if (fileType !== td.FileType.Thumbnail) {
                             throw new td.InvalidFileIdError(
-                                'Invalid FileType in PhotoRemoteFileLocation StickerSetThumbnail'
+                                'Invalid FileType in PhotoRemoteFileLocation StickerSetThumbnail',
                             )
                         }
                         break
@@ -311,8 +320,8 @@ function fromPersistentIdV23(
             default:
                 throw new td.UnsupportedError(
                     `Invalid file type: ${fileType} (${binary.toString(
-                        'base64'
-                    )})`
+                        'base64',
+                    )})`,
                 )
         }
     }
@@ -332,6 +341,7 @@ function fromPersistentIdV2(binary: Buffer) {
 
 function fromPersistentIdV3(binary: Buffer) {
     const subversion = binary[binary.length - 2]
+
     return fromPersistentIdV23(binary.slice(0, -2), subversion)
 }
 
@@ -341,7 +351,7 @@ function fromPersistentIdV3(binary: Buffer) {
  * @param fileId  File ID as a base-64 encoded string or Buffer
  */
 export function parseFileId(
-    fileId: string | Buffer
+    fileId: string | Buffer,
 ): td.RawFullRemoteFileLocation {
     if (typeof fileId === 'string') fileId = parseUrlSafeBase64(fileId)
 
@@ -356,6 +366,6 @@ export function parseFileId(
     }
 
     throw new td.UnsupportedError(
-        `Unsupported file ID version: ${version} (${fileId.toString('base64')})`
+        `Unsupported file ID version: ${version} (${fileId.toString('base64')})`,
     )
 }

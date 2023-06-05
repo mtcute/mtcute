@@ -2,16 +2,16 @@ import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
+    MaybeAsync,
     MaybeDynamic,
     MtArgumentError,
     SentCode,
     TermsOfService,
     User,
-    MaybeAsync,
 } from '../../types'
 import {
-    resolveMaybeDynamic,
     normalizePhoneNumber,
+    resolveMaybeDynamic,
 } from '../../utils/misc-utils'
 
 /**
@@ -135,7 +135,7 @@ export async function start(
          * Defaults to `false`.
          */
         catchUp?: boolean
-    }
+    },
 ): Promise<User> {
     if (params.session) {
         this.importSession(params.session, params.sessionForce)
@@ -152,11 +152,11 @@ export async function start(
             me.displayName,
             me.id,
             me.username,
-            me.isBot
+            me.isBot,
         )
 
         if (!this._disableUpdates) {
-            this._catchUpChannels = !!params.catchUp
+            this._catchUpChannels = Boolean(params.catchUp)
 
             if (!params.catchUp) {
                 // otherwise we will catch up as soon as we receive a new update
@@ -175,28 +175,30 @@ export async function start(
         if (!(e instanceof tl.errors.AuthKeyUnregisteredError)) throw e
     }
 
-    if (!params.phone && !params.botToken)
-        throw new MtArgumentError('Neither phone nor bot token were provided')
+    if (!params.phone && !params.botToken) { throw new MtArgumentError('Neither phone nor bot token were provided') }
 
     let phone = params.phone ? await resolveMaybeDynamic(params.phone) : null
+
     if (phone) {
         phone = normalizePhoneNumber(phone)
 
-        if (!params.code)
-            throw new MtArgumentError('You must pass `code` to use `phone`')
+        if (!params.code) { throw new MtArgumentError('You must pass `code` to use `phone`') }
     } else {
-        const botToken = params.botToken
-            ? await resolveMaybeDynamic(params.botToken)
-            : null
-        if (!botToken)
+        const botToken = params.botToken ?
+            await resolveMaybeDynamic(params.botToken) :
+            null
+
+        if (!botToken) {
             throw new MtArgumentError(
-                'Either bot token or phone number must be provided'
+                'Either bot token or phone number must be provided',
             )
+        }
 
         return await this.signInBot(botToken)
     }
 
     let sentCode = await this.sendCode(phone)
+
     if (params.forceSms && sentCode.type === 'app') {
         sentCode = await this.resendCode(phone, sentCode.phoneCodeHash)
     }
@@ -246,10 +248,11 @@ export async function start(
     }
 
     if (has2fa) {
-        if (!params.password)
+        if (!params.password) {
             throw new MtArgumentError(
-                '2FA is enabled, but `password` was not provided.'
+                '2FA is enabled, but `password` was not provided.',
             )
+        }
 
         for (;;) {
             const password = await resolveMaybeDynamic(params.password)
@@ -299,7 +302,7 @@ export async function start(
         phone,
         sentCode.phoneCodeHash,
         await resolveMaybeDynamic(params.firstName ?? 'User'),
-        await resolveMaybeDynamic(params.lastName)
+        await resolveMaybeDynamic(params.lastName),
     )
 
     if (tosId) {

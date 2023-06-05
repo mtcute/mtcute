@@ -1,12 +1,12 @@
 import { TransportFactory } from './abstract'
 
 export * from './abstract'
-export * from './streamed'
-export * from './wrapped'
-export * from './tcp'
-export * from './websocket'
 export * from './intermediate'
 export * from './obfuscated'
+export * from './streamed'
+export * from './tcp'
+export * from './websocket'
+export * from './wrapped'
 
 import { _defaultTransportFactory } from '../../utils/platform/transport'
 

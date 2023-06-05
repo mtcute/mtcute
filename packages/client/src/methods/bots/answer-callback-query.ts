@@ -46,7 +46,7 @@ export async function answerCallbackQuery(
          * with a deep-link parameter.
          */
         url?: string
-    }
+    },
 ): Promise<void> {
     if (!params) params = {}
 

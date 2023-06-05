@@ -19,10 +19,9 @@ export async function findFolder(
         title?: string
         emoji?: string
         id?: number
-    }
+    },
 ): Promise<tl.RawDialogFilter | null> {
-    if (!params.title && !params.emoji && !params.id)
-        throw new MtArgumentError('One of search parameters must be passed')
+    if (!params.title && !params.emoji && !params.id) { throw new MtArgumentError('One of search parameters must be passed') }
 
     const folders = await this.getFolders()
 

@@ -1,3 +1,4 @@
+// ^^ because of performance reasons
 const MIN_INITIAL_CAPACITY = 8
 
 // System.arraycopy from java
@@ -6,7 +7,7 @@ function arraycopy<T>(
     srcPos: number,
     dest: T[],
     destPos: number,
-    length: number
+    length: number,
 ) {
     for (let i = 0; i < length; i++) {
         dest[destPos + i] = src[srcPos + i]
@@ -30,9 +31,10 @@ export class Deque<T> {
 
     constructor(
         minCapacity = MIN_INITIAL_CAPACITY,
-        readonly maxLength = Infinity
+        readonly maxLength = Infinity,
     ) {
         let capacity = minCapacity
+
         if (capacity >= MIN_INITIAL_CAPACITY) {
             // Find the best power of two to hold elements.
             // >= because array can't be full
@@ -179,18 +181,16 @@ export class Deque<T> {
             }
             els[h] = undefined
             this._head = (h + 1) & mask
+        } else if (i < t) {
+            // copy null tail as well
+            arraycopy(els, i + 1, els, i, back)
+            this._tail = t - 1
         } else {
-            if (i < t) {
-                // copy null tail as well
-                arraycopy(els, i + 1, els, i, back)
-                this._tail = t - 1
-            } else {
-                // wrap
-                arraycopy(els, i + 1, els, i, mask - i)
-                els[mask] = els[0]
-                arraycopy(els, 1, els, 0, t)
-                this._tail = (t - 1) & mask
-            }
+            // wrap
+            arraycopy(els, i + 1, els, i, mask - i)
+            els[mask] = els[0]
+            arraycopy(els, 1, els, 0, t)
+            this._tail = (t - 1) & mask
         }
     }
 
@@ -198,9 +198,11 @@ export class Deque<T> {
         const mask = this._capacity - 1
         let i = this._head
         let val: T | undefined
+
         while ((val = this._elements[i]) !== undefined) {
             if (item === val) {
                 this._delete(i)
+
                 return
             }
             i = (i + 1) & mask
@@ -211,9 +213,11 @@ export class Deque<T> {
         const mask = this._capacity - 1
         let i = this._head
         let val: T | undefined
+
         while ((val = this._elements[i]) !== undefined) {
             if (pred(val)) {
                 this._delete(i)
+
                 return
             }
             i = (i + 1) & mask

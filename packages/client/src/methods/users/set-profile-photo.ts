@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputFileLike, MtArgumentError, Photo } from '../../types'
@@ -20,7 +20,7 @@ export async function setProfilePhoto(
     this: TelegramClient,
     type: 'photo' | 'video',
     media: InputFileLike | tl.TypeInputPhoto,
-    previewSec?: number
+    previewSec?: number,
 ): Promise<Photo> {
     // try parsing media as file id or input photo
     if (
@@ -49,7 +49,7 @@ export async function setProfilePhoto(
         _: 'photos.uploadProfilePhoto',
         [type === 'photo' ? 'file' : 'video']: await this._normalizeInputFile(
             media,
-            {}
+            {},
         ),
         videoStartTs: previewSec,
     })

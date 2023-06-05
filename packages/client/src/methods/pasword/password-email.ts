@@ -8,7 +8,7 @@ import { TelegramClient } from '../../client'
  */
 export async function verifyPasswordEmail(
     this: TelegramClient,
-    code: string
+    code: string,
 ): Promise<void> {
     await this.call({
         _: 'account.confirmPasswordEmail',

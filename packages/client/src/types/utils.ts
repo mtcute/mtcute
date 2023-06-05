@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MaybeAsync } from '@mtcute/core'
 
 export type MaybeDynamic<T> = MaybeAsync<T> | (() => MaybeAsync<T>)
@@ -5,6 +6,7 @@ export type MaybeDynamic<T> = MaybeAsync<T> | (() => MaybeAsync<T>)
 export type ArrayWithTotal<T> = T[] & { total: number }
 
 let util: any | null = null
+
 try {
     util = require('util')
 } catch (e) {}
@@ -30,6 +32,7 @@ function getAllGettersNames(obj: object): string[] {
 }
 
 const bufferToJsonOriginal = Buffer.prototype.toJSON
+
 const bufferToJsonInspect = function (this: Buffer) {
     return this.toString('base64')
 }
@@ -43,9 +46,9 @@ const bufferToJsonInspect = function (this: Buffer) {
  * > considered pure in this case)
  */
 export function makeInspectable(
-    obj: Function,
+    obj: new (...args: any[]) => any,
     props?: string[],
-    hide?: string[]
+    hide?: string[],
 ): void {
     const getters: string[] = props ? props : []
 
@@ -58,13 +61,14 @@ export function makeInspectable(
 
     obj.prototype.toJSON = function (nested = false) {
         if (!nested) {
-            ;(Buffer as any).toJSON = bufferToJsonInspect
+            (Buffer as any).toJSON = bufferToJsonInspect
         }
 
         const ret: any = Object.create(proto)
         getters.forEach((it) => {
             try {
                 let val = this[it]
+
                 if (
                     val &&
                     typeof val === 'object' &&

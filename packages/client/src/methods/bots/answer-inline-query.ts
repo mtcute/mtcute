@@ -93,7 +93,7 @@ export async function answerInlineQuery(
          * entities, only the messages that are sent once a result is clicked.
          */
         parseMode?: string | null
-    }
+    },
 ): Promise<void> {
     if (!params) params = {}
 
@@ -107,12 +107,12 @@ export async function answerInlineQuery(
         gallery: params.gallery ?? gallery,
         private: params.private,
         nextOffset: params.nextOffset,
-        switchPm: params.switchPm
-            ? {
-                  _: 'inlineBotSwitchPM',
-                  text: params.switchPm.text,
-                  startParam: params.switchPm.parameter,
-              }
-            : undefined,
+        switchPm: params.switchPm ?
+            {
+                _: 'inlineBotSwitchPM',
+                text: params.switchPm.text,
+                startParam: params.switchPm.parameter,
+            } :
+            undefined,
     })
 }

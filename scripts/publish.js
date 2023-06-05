@@ -37,11 +37,11 @@ function publishSinglePackage(name) {
     } else {
         // build ts
         cp.execSync(
-            'pnpm run ' + (name === 'crypto-node' ? 'build-ts' : 'build'),
+            'pnpm run build',
             {
                 cwd: dir,
                 stdio: 'inherit',
-            }
+            },
         )
 
         // remove reference comments
@@ -93,7 +93,7 @@ function publishSinglePackage(name) {
             // make methods prototype methods, not properties
             let jsContent = fs.readFileSync(
                 path.join(dir, 'dist/client.js'),
-                'utf8'
+                'utf8',
             )
 
             let methods = []
@@ -101,18 +101,18 @@ function publishSinglePackage(name) {
                 /^\s*this\.([a-zA-Z0-9_]+) = ([a-zA-Z0-9_]+\.[a-zA-Z0-9_]+);\r?\n/gm,
                 (_, name, imported) => {
                     methods.push(
-                        `TelegramClient.prototype.${name} = ${imported};`
+                        `TelegramClient.prototype.${name} = ${imported};`,
                     )
 
                     return ''
-                }
+                },
             )
 
             const idx = jsContent.indexOf(
-                'exports.TelegramClient = TelegramClient;'
+                'exports.TelegramClient = TelegramClient;',
             )
-            if (idx === -1)
-                throw new Error('client.js exports.TelegramClient not found')
+
+            if (idx === -1) { throw new Error('client.js exports.TelegramClient not found') }
 
             jsContent =
                 jsContent.substring(0, idx) +
@@ -131,19 +131,19 @@ function publishSinglePackage(name) {
 
             const bindingGyp = fs.readFileSync(
                 path.join(dir, 'binding.gyp'),
-                'utf8'
+                'utf8',
             )
             fs.writeFileSync(
                 path.join(dir, 'dist/binding.gyp'),
                 bindingGyp
                     // replace paths to crypto
-                    .replace(/"\.\.\/crypto/g, '"crypto')
+                    .replace(/"\.\.\/crypto/g, '"crypto'),
             )
 
             for (const f of fs.readdirSync(path.join(dir, 'lib'))) {
                 const content = fs.readFileSync(
                     path.join(dir, 'lib', f),
-                    'utf8'
+                    'utf8',
                 )
 
                 fs.writeFileSync(
@@ -152,36 +152,36 @@ function publishSinglePackage(name) {
                         // replace paths to crypto
                         .replace(
                             /#include "\.\.\/\.\.\/crypto/g,
-                            '#include "../crypto'
-                        )
+                            '#include "../crypto',
+                        ),
                 )
             }
 
             for (const f of fs.readdirSync(path.join(dir, '../crypto'))) {
                 fs.copyFileSync(
                     path.join(dir, '../crypto', f),
-                    path.join(dir, 'dist/crypto', f)
+                    path.join(dir, 'dist/crypto', f),
                 )
             }
 
             const nativeJs = fs.readFileSync(
                 path.join(dir, 'dist/native.js'),
-                'utf8'
+                'utf8',
             )
 
             fs.writeFileSync(
                 path.join(dir, 'dist/native.js'),
-                nativeJs.replace(/'\.\.\/build/g, "'./build")
+                nativeJs.replace(/'\.\.\/build/g, "'./build"),
             )
         }
     }
 
     // copy package.json, replacing private with false
     const packJson = JSON.parse(
-        fs.readFileSync(path.join(dir, 'package.json'), 'utf8')
+        fs.readFileSync(path.join(dir, 'package.json'), 'utf8'),
     )
-    if (!packJson.main)
-        throw new Error(`${name}'s package.json does not contain "main"`)
+
+    if (!packJson.main) { throw new Error(`${name}'s package.json does not contain "main"`) }
 
     // since "src" is compiled to "dist", we need to remove that prefix
     packJson.main = packJson.main
@@ -192,8 +192,10 @@ function publishSinglePackage(name) {
     function replaceWorkspaceDependencies(field) {
         if (packJson[field]) {
             const dependencies = packJson[field]
+
             for (const name of Object.keys(dependencies)) {
                 const value = dependencies[name]
+
                 if (value.startsWith('workspace:')) {
                     dependencies[name] = value.replace('workspace:', '')
                 }
@@ -208,14 +210,14 @@ function publishSinglePackage(name) {
 
     fs.writeFileSync(
         path.join(dir, 'dist/package.json'),
-        JSON.stringify(packJson, null, 4)
+        JSON.stringify(packJson, null, 4),
     )
 
     // copy tsconfig
     try {
         fs.copyFileSync(
             path.join(__dirname, '../tsconfig.json'),
-            path.join(dir, 'dist/tsconfig.json')
+            path.join(dir, 'dist/tsconfig.json'),
         )
     } catch (e) {
         if (e.code !== 'ENOENT') throw e
@@ -225,7 +227,7 @@ function publishSinglePackage(name) {
     try {
         fs.copyFileSync(
             path.join(dir, 'README.md'),
-            path.join(dir, 'dist/README.md')
+            path.join(dir, 'dist/README.md'),
         )
     } catch (e) {
         if (e.code !== 'ENOENT') throw e
@@ -246,6 +248,7 @@ const LOCAL = ['crypto']
 
 if (require.main === module) {
     const arg = process.argv[2]
+
     if (!arg) {
         console.log('Usage: publish.js <package name | all>')
         process.exit(0)

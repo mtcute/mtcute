@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// ^^ because of performance reasons
 import { LongMap } from './long-utils'
 
 interface TwoWayLinkedList<K, T> {
@@ -19,7 +21,7 @@ interface TwoWayLinkedList<K, T> {
  *
  * Uses two-way linked list internally to keep track of insertion/access order
  */
-export class LruMap<K, V> {
+export class LruMap<K extends string | number, V> {
     private _capacity: number
     private _first?: TwoWayLinkedList<K, V>
     private _last?: TwoWayLinkedList<K, V>
@@ -73,6 +75,7 @@ export class LruMap<K, V> {
 
         item.p = undefined
         item.n = this._first
+
         if (this._first) {
             this._first.p = item
         }
@@ -84,6 +87,7 @@ export class LruMap<K, V> {
         if (!item) return undefined
 
         this._markUsed(item)
+
         return item.v
     }
 
@@ -98,6 +102,7 @@ export class LruMap<K, V> {
             // already in cache, update
             item.v = value
             this._markUsed(item)
+
             return
         }
 
@@ -117,9 +122,11 @@ export class LruMap<K, V> {
 
         this._first = item
         this._size += 1
+
         if (this._size > this._capacity) {
             // remove the last item
             const oldest = this._last
+
             if (oldest) {
                 if (oldest.p) {
                     this._last = oldest.p

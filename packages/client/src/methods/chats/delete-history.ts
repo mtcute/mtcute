@@ -2,7 +2,7 @@ import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import { isInputPeerChannel, normalizeToInputChannel } from "../../utils/peer-utils";
+import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
@@ -24,7 +24,7 @@ export async function deleteHistory(
     this: TelegramClient,
     chat: InputPeerLike,
     mode: 'delete' | 'clear' | 'revoke' = 'delete',
-    maxId = 0
+    maxId = 0,
 ): Promise<void> {
     const peer = await this.resolvePeer(chat)
 
@@ -41,8 +41,8 @@ export async function deleteHistory(
             createDummyUpdate(
                 res.pts,
                 res.ptsCount,
-                peer.channelId
-            )
+                peer.channelId,
+            ),
         )
     } else {
         this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))

@@ -1,6 +1,6 @@
-import { describe, it } from 'mocha'
-import { expect } from 'chai'
 import bigInt from 'big-integer'
+import { expect } from 'chai'
+import { describe, it } from 'mocha'
 
 import { bigIntToBuffer, bufferToBigInt } from '../src'
 
@@ -37,7 +37,7 @@ describe('bigIntToBuffer', () => {
             0x15, 0xc4, 0x15, 0xb5,
         ])
         expect([...bigIntToBuffer(bigInt('9341376580368336208'), 8, true)]).eql(
-            [...Buffer.from('81A33C81D2020550', 'hex').reverse()]
+            [...Buffer.from('81A33C81D2020550', 'hex').reverse()],
         )
     })
 })
@@ -49,24 +49,24 @@ describe('bufferToBigInt', () => {
                 Buffer.from([0xa0, 0x26, 0xdc]),
                 0,
                 3,
-                false
-            ).toString()
+                false,
+            ).toString(),
         ).eq('10495708')
         expect(
             bufferToBigInt(
                 Buffer.from([0x00, 0xa0, 0x26, 0xdc]),
                 0,
                 4,
-                false
-            ).toString()
+                false,
+            ).toString(),
         ).eq('10495708')
         expect(
             bufferToBigInt(
                 Buffer.from([0xb5, 0x15, 0xc4, 0x15]),
                 0,
                 4,
-                false
-            ).toString()
+                false,
+            ).toString(),
         ).eq('3038102549')
     })
 
@@ -76,24 +76,24 @@ describe('bufferToBigInt', () => {
                 Buffer.from([0xdc, 0x26, 0xa0]),
                 0,
                 3,
-                true
-            ).toString()
+                true,
+            ).toString(),
         ).eq('10495708')
         expect(
             bufferToBigInt(
                 Buffer.from([0xdc, 0x26, 0xa0, 0x00]),
                 0,
                 4,
-                true
-            ).toString()
+                true,
+            ).toString(),
         ).eq('10495708')
         expect(
             bufferToBigInt(
                 Buffer.from([0x15, 0xc4, 0x15, 0xb5]),
                 0,
                 4,
-                true
-            ).toString()
+                true,
+            ).toString(),
         ).eq('3038102549')
     })
 })

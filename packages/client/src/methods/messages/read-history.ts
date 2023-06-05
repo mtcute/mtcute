@@ -18,7 +18,7 @@ export async function readHistory(
     this: TelegramClient,
     chatId: InputPeerLike,
     message = 0,
-    clearMentions = false
+    clearMentions = false,
 ): Promise<void> {
     const peer = await this.resolvePeer(chatId)
 
@@ -30,7 +30,7 @@ export async function readHistory(
 
         if (isInputPeerChannel(peer)) {
             this._handleUpdate(
-                createDummyUpdate(res.pts, res.ptsCount, peer.channelId)
+                createDummyUpdate(res.pts, res.ptsCount, peer.channelId),
             )
         } else {
             this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))

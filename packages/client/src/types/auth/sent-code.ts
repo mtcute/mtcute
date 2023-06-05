@@ -4,7 +4,7 @@ import { makeInspectable } from '../utils'
 
 const sentCodeMap: Record<
     tl.auth.TypeSentCodeType['_'],
-    SentCode.DeliveryType
+    SentCodeDeliveryType
 > = {
     'auth.sentCodeTypeApp': 'app',
     'auth.sentCodeTypeCall': 'call',
@@ -13,12 +13,12 @@ const sentCodeMap: Record<
     'auth.sentCodeTypeMissedCall': 'missed_call',
     'auth.sentCodeTypeEmailCode': 'email',
     'auth.sentCodeTypeSetUpEmailRequired': 'email_required',
-    "auth.sentCodeTypeFragmentSms": 'fragment'
+    'auth.sentCodeTypeFragmentSms': 'fragment',
 }
 
 const nextCodeMap: Record<
     tl.auth.TypeCodeType['_'],
-    SentCode.NextDeliveryType
+    NextCodeDeliveryType
 > = {
     'auth.codeTypeCall': 'call',
     'auth.codeTypeFlashCall': 'flash_call',
@@ -27,32 +27,30 @@ const nextCodeMap: Record<
     'auth.codeTypeFragmentSms': 'fragment',
 }
 
-export namespace SentCode {
-    /**
-     * Type describing code delivery type.
-     * - `app`: Code is delivered via Telegram account
-     * - `sms`: Code is sent via SMS
-     * - `call`: Code is sent via voice call
-     * - `flash_call`: Code is the last 5 digits of the caller's phone number
-     */
-    export type DeliveryType =
-        | 'app'
-        | 'sms'
-        | 'call'
-        | 'flash_call'
-        | 'missed_call'
-        | 'email'
-        | 'email_required'
-        | 'fragment'
+/**
+ * Type describing code delivery type.
+ * - `app`: Code is delivered via Telegram account
+ * - `sms`: Code is sent via SMS
+ * - `call`: Code is sent via voice call
+ * - `flash_call`: Code is the last 5 digits of the caller's phone number
+ */
+export type SentCodeDeliveryType =
+    | 'app'
+    | 'sms'
+    | 'call'
+    | 'flash_call'
+    | 'missed_call'
+    | 'email'
+    | 'email_required'
+    | 'fragment'
 
-    /**
-     * Type describing next code delivery type.
-     * See {@link DeliveryType} for information on values.
-     *
-     * Additionally, can be `none` if no more types are available
-     */
-    export type NextDeliveryType = Exclude<DeliveryType, 'app'> | 'none'
-}
+/**
+ * Type describing next code delivery type.
+ * See {@link DeliveryType} for information on values.
+ *
+ * Additionally, can be `none` if no more types are available
+ */
+export type NextCodeDeliveryType = Exclude<SentCodeDeliveryType, 'app'> | 'none'
 
 /**
  * Information about sent confirmation code
@@ -64,7 +62,7 @@ export class SentCode {
     /**
      * Type of currently sent confirmation code
      */
-    get type(): SentCode.DeliveryType {
+    get type(): SentCodeDeliveryType {
         return sentCodeMap[this.raw.type._]
     }
 
@@ -72,10 +70,10 @@ export class SentCode {
      * Type of the confirmation code that will be sent
      * if you call {@link TelegramClient.resendCode}.
      */
-    get nextType(): SentCode.NextDeliveryType {
-        return this.raw.nextType
-            ? nextCodeMap[this.raw.nextType._]
-            : 'none'
+    get nextType(): NextCodeDeliveryType {
+        return this.raw.nextType ?
+            nextCodeMap[this.raw.nextType._] :
+            'none'
     }
 
     /**

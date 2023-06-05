@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { MtClientError, IMessageEntityParser } from '../../types'
+import { IMessageEntityParser, MtClientError } from '../../types'
 
 /**
  * Register a given {@link IMessageEntityParser} as a parse mode
@@ -12,13 +12,13 @@ import { MtClientError, IMessageEntityParser } from '../../types'
  */
 export function registerParseMode(
     this: TelegramClient,
-    parseMode: IMessageEntityParser
+    parseMode: IMessageEntityParser,
 ): void {
     const name = parseMode.name
 
     if (name in this._parseModes) {
         throw new MtClientError(
-            `Parse mode ${name} is already registered. Unregister it first!`
+            `Parse mode ${name} is already registered. Unregister it first!`,
         )
     }
     this._parseModes[name] = parseMode
@@ -55,11 +55,10 @@ export function unregisterParseMode(this: TelegramClient, name: string): void {
  */
 export function getParseMode(
     this: TelegramClient,
-    name?: string | null
+    name?: string | null,
 ): IMessageEntityParser {
     if (!name) {
-        if (!this._defaultParseMode)
-            throw new MtClientError('There is no default parse mode')
+        if (!this._defaultParseMode) { throw new MtClientError('There is no default parse mode') }
 
         name = this._defaultParseMode
     }

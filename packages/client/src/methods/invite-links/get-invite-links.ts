@@ -44,7 +44,7 @@ export async function* getInviteLinks(
          * Defaults to `100`
          */
         chunkSize?: number
-    }
+    },
 ): AsyncIterableIterator<ChatInviteLink> {
     if (!params) params = {}
 
@@ -74,11 +74,12 @@ export async function* getInviteLinks(
         const peers = PeersIndex.from(res)
 
         const last = res.invites[res.invites.length - 1]
+
         if (last._ === 'chatInvitePublicJoinRequests') {
             throw new MtTypeAssertionError(
                 'getInviteLinks',
                 'chatInviteExported',
-                last._
+                last._,
             )
         }
         offsetDate = last.date

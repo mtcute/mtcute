@@ -1,10 +1,10 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../utils'
+import { MtArgumentError } from '../errors'
 import { WebDocument } from '../files/web-document'
-import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { _messageMediaFromTl, MessageMedia } from '../messages'
+import { makeInspectable } from '../utils'
 import { Thumbnail } from './thumbnail'
 
 /**
@@ -18,7 +18,7 @@ export type InvoiceExtendedMediaState = 'none' | 'preview' | 'full'
 export class InvoiceExtendedMediaPreview {
     constructor(
         public readonly client: TelegramClient,
-        public readonly raw: tl.RawMessageExtendedMediaPreview
+        public readonly raw: tl.RawMessageExtendedMediaPreview,
     ) {}
 
     /**
@@ -44,7 +44,7 @@ export class InvoiceExtendedMediaPreview {
         return (this._thumbnail ??= new Thumbnail(
             this.client,
             this.raw,
-            this.raw.thumb
+            this.raw.thumb,
         ))
     }
 
@@ -65,7 +65,7 @@ export class Invoice {
 
     constructor(
         readonly client: TelegramClient,
-        readonly raw: tl.RawMessageMediaInvoice
+        readonly raw: tl.RawMessageMediaInvoice,
     ) {}
 
     /**
@@ -145,8 +145,9 @@ export class Invoice {
      */
     get extendedMediaState(): InvoiceExtendedMediaState {
         if (!this.raw.extendedMedia) return 'none'
-        if (this.raw.extendedMedia._ === 'messageExtendedMediaPreview')
-            return 'preview'
+
+        if (this.raw.extendedMedia._ === 'messageExtendedMediaPreview') { return 'preview' }
+
         return 'full'
     }
 
@@ -157,12 +158,11 @@ export class Invoice {
      * Otherwise, throws an error.
      */
     get extendedMediaPreview(): InvoiceExtendedMediaPreview {
-        if (this.raw.extendedMedia?._ !== 'messageExtendedMediaPreview')
-            throw new MtArgumentError('No extended media preview available')
+        if (this.raw.extendedMedia?._ !== 'messageExtendedMediaPreview') { throw new MtArgumentError('No extended media preview available') }
 
         return (this._extendedMediaPreview ??= new InvoiceExtendedMediaPreview(
             this.client,
-            this.raw.extendedMedia
+            this.raw.extendedMedia,
         ))
     }
 
@@ -180,7 +180,7 @@ export class Invoice {
         return (this._extendedMedia ??= _messageMediaFromTl(
             this.client,
             null,
-            this.raw.extendedMedia.media
+            this.raw.extendedMedia.media,
         ))
     }
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -16,10 +17,9 @@ import {
     PeersIndex,
     PollUpdate,
     PollVoteUpdate,
+    PreCheckoutQuery,
     UserStatusUpdate,
-    UserTypingUpdate,
-    PreCheckoutQuery
-} from '../index'
+    UserTypingUpdate } from '../index'
 
 type ParserFunction = (
     client: TelegramClient,
@@ -31,13 +31,13 @@ type UpdateParser = [ParsedUpdate['name'], ParserFunction]
 const baseMessageParser: ParserFunction = (
     client: TelegramClient,
     upd,
-    peers
+    peers,
 ) =>
     new Message(
         client,
         tl.isAnyMessage(upd) ? upd : (upd as any).message,
         peers,
-        upd._ === 'updateNewScheduledMessage'
+        upd._ === 'updateNewScheduledMessage',
     )
 
 const newMessageParser: UpdateParser = ['new_message', baseMessageParser]
@@ -127,22 +127,23 @@ const PARSERS: Partial<
     updateBotPrecheckoutQuery: [
         'pre_checkout_query',
         (client, upd, peers) => new PreCheckoutQuery(client, upd as any, peers),
-    ]
+    ],
 }
 
 /** @internal */
 export function _parseUpdate(
     client: TelegramClient,
     update: tl.TypeUpdate | tl.TypeMessage,
-    peers: PeersIndex
+    peers: PeersIndex,
 ): ParsedUpdate | null {
     const pair = PARSERS[update._]
+
     if (pair) {
         return {
             name: pair[0],
             data: pair[1](client, update, peers),
         }
-    } else {
-        return null
     }
+
+    return null
 }

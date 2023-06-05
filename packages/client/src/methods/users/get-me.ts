@@ -25,7 +25,7 @@ export function getMe(this: TelegramClient): Promise<User> {
             // we need to update the fields accordingly,
             // and force-save the session
             this._userId = user.id
-            this._isBot = !!user.bot
+            this._isBot = Boolean(user.bot)
             await this._saveStorage()
         }
 

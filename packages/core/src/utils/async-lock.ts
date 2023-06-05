@@ -11,6 +11,7 @@ export class AsyncLock {
 
     async acquire(): Promise<void> {
         let info
+
         while ((info = this._queue.peekFront())) {
             await info[0]
         }
@@ -31,6 +32,7 @@ export class AsyncLock {
 
     with(func: () => Promise<void>): Promise<void> {
         let err: unknown = null
+
         return this.acquire()
             .then(() => func())
             .catch((e) => (err = e))

@@ -1,7 +1,7 @@
 import { Readable } from 'stream'
 
 import { TelegramClient } from '../../client'
-import { FileLocation, FileDownloadParameters } from '../../types'
+import { FileDownloadParameters, FileLocation } from '../../types'
 import { bufferToStream } from '../../utils/stream-utils'
 
 /**
@@ -13,7 +13,7 @@ import { bufferToStream } from '../../utils/stream-utils'
  */
 export function downloadAsStream(
     this: TelegramClient,
-    params: FileDownloadParameters
+    params: FileDownloadParameters,
 ): Readable {
     if (
         params.location instanceof FileLocation &&

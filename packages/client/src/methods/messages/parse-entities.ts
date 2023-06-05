@@ -1,17 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { normalizeToInputUser } from '../../utils/peer-utils'
 import { FormattedString, MtClientError } from '../../types'
+import { normalizeToInputUser } from '../../utils/peer-utils'
 
 const empty: [string, undefined] = ['', undefined]
 
 /** @internal */
 export async function _parseEntities(
     this: TelegramClient,
-    text?: string | FormattedString<any>,
+    text?: string | FormattedString<string>,
     mode?: string | null,
-    entities?: tl.TypeMessageEntity[]
+    entities?: tl.TypeMessageEntity[],
 ): Promise<[string, tl.TypeMessageEntity[] | undefined]> {
     if (!text) {
         return empty
@@ -33,7 +34,7 @@ export async function _parseEntities(
             throw new MtClientError(`Parse mode ${mode} is not registered.`)
         }
 
-        ;[text, entities] = this._parseModes[mode].parse(text)
+        [text, entities] = this._parseModes[mode].parse(text)
     }
 
     // replace mentionName entities with input ones
@@ -42,12 +43,13 @@ export async function _parseEntities(
             try {
                 const inputPeer = normalizeToInputUser(
                     await this.resolvePeer(ent.userId),
-                    ent.userId
+                    ent.userId,
                 )
 
                 // not a user
                 if (!inputPeer) continue
-                ;(ent as any)._ = 'inputMessageEntityMentionName'
+
+                (ent as any)._ = 'inputMessageEntityMentionName'
                 ;(ent as any).userId = inputPeer
             } catch (e) {}
         }

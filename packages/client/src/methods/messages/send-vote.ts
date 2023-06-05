@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { MaybeArray } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
@@ -28,7 +28,7 @@ export async function sendVote(
     this: TelegramClient,
     chatId: InputPeerLike,
     message: number,
-    options: null | MaybeArray<number | Buffer>
+    options: null | MaybeArray<number | Buffer>,
 ): Promise<Poll> {
     if (options === null) options = []
     if (!Array.isArray(options)) options = [options]
@@ -36,19 +36,20 @@ export async function sendVote(
     const peer = await this.resolvePeer(chatId)
 
     let poll: Poll | undefined = undefined
+
     if (options.some((it) => typeof it === 'number')) {
         const msg = await this.getMessages(peer, message)
 
         if (!msg) throw new tl.errors.MessageNotFoundError()
 
-        if (!(msg.media instanceof Poll))
-            throw new MtArgumentError('This message does not contain a poll')
+        if (!(msg.media instanceof Poll)) { throw new MtArgumentError('This message does not contain a poll') }
 
         poll = msg.media
         options = options.map((opt) => {
             if (typeof opt === 'number') {
                 return poll!.raw.answers[opt].option
             }
+
             return opt
         })
     }
@@ -66,11 +67,12 @@ export async function sendVote(
 
     const upd = res.updates[0]
     assertTypeIs('messages.sendVote (@ .updates[0])', upd, 'updateMessagePoll')
+
     if (!upd.poll) {
         throw new MtTypeAssertionError(
             'messages.sendVote (@ .updates[0].poll)',
             'poll',
-            'undefined'
+            'undefined',
         )
     }
 

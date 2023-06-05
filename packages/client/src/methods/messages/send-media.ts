@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { randomLong } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
@@ -36,7 +36,7 @@ export async function sendMedia(
          * Can be used, for example. when using File IDs
          * or when using existing InputMedia objects.
          */
-        caption?: string | FormattedString<any>
+        caption?: string | FormattedString<string>
 
         /**
          * Override entities for `media`.
@@ -128,7 +128,7 @@ export async function sendMedia(
          * Peer to use when sending the message.
          */
         sendAs?: InputPeerLike
-    }
+    },
 ): Promise<Message> {
     if (!params) params = {}
 
@@ -145,27 +145,29 @@ export async function sendMedia(
         // some types dont have `caption` field, and ts warns us,
         // but since it's JS, they'll just be `undefined` and properly
         // handled by _parseEntities method
-        params.caption || (media as any).caption,
+        params.caption || (media as Extract<typeof media, { caption?: unknown }>).caption,
         params.parseMode,
-        params.entities || (media as any).entities
+        params.entities || (media as Extract<typeof media, { entities?: unknown }>).entities,
     )
 
     let peer = await this.resolvePeer(chatId)
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
 
     let replyTo = normalizeMessageId(params.replyTo)
+
     if (params.commentTo) {
-        ;[peer, replyTo] = await this._getDiscussionMessage(
+        [peer, replyTo] = await this._getDiscussionMessage(
             peer,
-            normalizeMessageId(params.commentTo)!
+            normalizeMessageId(params.commentTo)!,
         )
     }
 
     if (params.mustReply) {
-        if (!replyTo)
+        if (!replyTo) {
             throw new MtArgumentError(
-                'mustReply used, but replyTo was not passed'
+                'mustReply used, but replyTo was not passed',
             )
+        }
 
         const msg = await this.getMessages(peer, replyTo)
 
@@ -185,9 +187,9 @@ export async function sendMedia(
         entities,
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs
-            ? await this.resolvePeer(params.sendAs)
-            : undefined,
+        sendAs: params.sendAs ?
+            await this.resolvePeer(params.sendAs) :
+            undefined,
     })
 
     const msg = this._findMessageInUpdate(res)

@@ -24,7 +24,7 @@ export async function* iterChatMembers(
          * Defaults to `200`
          */
         chunkSize?: number
-    }
+    },
 ): AsyncIterableIterator<ChatMember> {
     if (!params) params = {}
 

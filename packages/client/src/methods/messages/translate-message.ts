@@ -19,7 +19,7 @@ export async function translateMessage(
     chatId: InputPeerLike,
     messageId: number,
     toLanguage: string,
-    fromLanguage?: string
+    fromLanguage?: string,
 ): Promise<string | null> {
     const res = await this.call({
         _: 'messages.translateText',

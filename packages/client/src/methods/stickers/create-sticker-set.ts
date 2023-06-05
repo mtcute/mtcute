@@ -6,9 +6,9 @@ import {
     InputPeerLike,
     InputStickerSetItem,
     MtArgumentError,
-    MtInvalidPeerTypeError,
-    Sticker,
     StickerSet,
+    StickerSourceType,
+    StickerType,
 } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
@@ -60,13 +60,13 @@ export async function createStickerSet(
          *
          * Creating `emoji` stickers via API is not supported yet
          */
-        type?: Sticker.Type
+        type?: StickerType
 
         /**
          * File source type for the stickers in this set.
          * Defaults to `static`, i.e. regular WEBP stickers.
          */
-        sourceType?: Sticker.SourceType
+        sourceType?: StickerSourceType
 
         /**
          * List of stickers to be immediately added into the pack.
@@ -98,11 +98,11 @@ export async function createStickerSet(
             uploaded: number,
             total: number
         ) => void
-    }
+    },
 ): Promise<StickerSet> {
     if (params.type === 'emoji') {
         throw new MtArgumentError(
-            'Creating emoji stickers is not supported yet by the API'
+            'Creating emoji stickers is not supported yet by the API',
         )
     }
 
@@ -111,6 +111,7 @@ export async function createStickerSet(
     const inputStickers: tl.TypeInputStickerSetItem[] = []
 
     let i = 0
+
     for (const sticker of params.stickers) {
         const progressCallback = params.progressCallback?.bind(null, i)
 
@@ -120,15 +121,15 @@ export async function createStickerSet(
                 progressCallback,
             }),
             emoji: sticker.emojis,
-            maskCoords: sticker.maskPosition
-                ? {
-                      _: 'maskCoords',
-                      n: MASK_POS[sticker.maskPosition.point],
-                      x: sticker.maskPosition.x,
-                      y: sticker.maskPosition.y,
-                      zoom: sticker.maskPosition.scale,
-                  }
-                : undefined,
+            maskCoords: sticker.maskPosition ?
+                {
+                    _: 'maskCoords',
+                    n: MASK_POS[sticker.maskPosition.point as keyof typeof MASK_POS],
+                    x: sticker.maskPosition.x,
+                    y: sticker.maskPosition.y,
+                    zoom: sticker.maskPosition.scale,
+                } :
+                undefined,
         })
 
         i += 1
@@ -145,9 +146,9 @@ export async function createStickerSet(
         title: params.title,
         shortName: params.shortName,
         stickers: inputStickers,
-        thumb: params.thumb
-            ? await this._normalizeFileToDocument(params.thumb, {})
-            : undefined,
+        thumb: params.thumb ?
+            await this._normalizeFileToDocument(params.thumb, {}) :
+            undefined,
     })
 
     return new StickerSet(this, res)

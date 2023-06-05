@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../utils'
 import { Photo } from './photo'
 import { Video } from './video'
-import { makeInspectable } from '../utils'
 
 export class Game {
     readonly type = 'game' as const
@@ -57,15 +57,16 @@ export class Game {
 
         if (this._animation === undefined) {
             const attr = this.game.document.attributes.find(
-                (it) => it._ === 'documentAttributeVideo'
+                (it) => it._ === 'documentAttributeVideo',
             ) as tl.RawDocumentAttributeVideo | undefined
+
             if (!attr) {
                 this._animation = null
             } else {
                 this._animation = new Video(
                     this.client,
                     this.game.document,
-                    attr
+                    attr,
                 )
             }
         }

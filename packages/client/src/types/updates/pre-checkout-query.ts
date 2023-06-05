@@ -1,14 +1,14 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../utils'
 import { PeersIndex, User } from '../peers'
+import { makeInspectable } from '../utils'
 
 export class PreCheckoutQuery {
     constructor(
         public readonly client: TelegramClient,
         public readonly raw: tl.RawUpdateBotPrecheckoutQuery,
-        public readonly _peers: PeersIndex
+        public readonly _peers: PeersIndex,
     ) {}
 
     /**
@@ -32,7 +32,7 @@ export class PreCheckoutQuery {
     get user(): User {
         return (this._user ??= new User(
             this.client,
-            this._peers.user(this.userId)
+            this._peers.user(this.userId),
         ))
     }
 
@@ -49,6 +49,7 @@ export class PreCheckoutQuery {
      */
     get paymentInfo(): tl.RawPaymentRequestedInfo | null {
         if (!this.raw.info) return null
+
         return this.raw.info
     }
 

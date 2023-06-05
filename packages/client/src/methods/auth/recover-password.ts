@@ -12,7 +12,7 @@ import { assertTypeIs } from '../../utils/type-assertion'
  */
 export async function recoverPassword(
     this: TelegramClient,
-    recoveryCode: string
+    recoveryCode: string,
 ): Promise<User> {
     const res = await this.call({
         _: 'auth.recoverPassword',
@@ -22,12 +22,12 @@ export async function recoverPassword(
     assertTypeIs(
         'recoverPassword (@ auth.recoverPassword)',
         res,
-        'auth.authorization'
+        'auth.authorization',
     )
     assertTypeIs(
         'recoverPassword (@ auth.recoverPassword -> user)',
         res.user,
-        'user'
+        'user',
     )
 
     this._userId = res.user.id

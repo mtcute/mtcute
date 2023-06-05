@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { fileIdToInputDocument, tdFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { StickerSet } from '../../types'
@@ -18,7 +18,7 @@ import { StickerSet } from '../../types'
  */
 export async function deleteStickerFromSet(
     this: TelegramClient,
-    sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument
+    sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument,
 ): Promise<StickerSet> {
     if (tdFileId.isFileIdLike(sticker)) {
         sticker = fileIdToInputDocument(sticker)

@@ -28,14 +28,18 @@ export function toUniqueFileId(
     type: td.FileType,
     location: InputUniqueLocation
 ): string
+
 export function toUniqueFileId(
     first: td.FileType | Omit<td.RawFullRemoteFileLocation, '_'>,
-    second?: InputUniqueLocation
+    second?: InputUniqueLocation,
 ): string {
     const inputType = typeof first === 'number' ? first : first.type
+    // guaranteed by type signature
+
     const inputLocation = typeof first === 'number' ? second! : first.location
 
     let type
+
     if (inputLocation._ === 'web') {
         type = 0
     } else {
@@ -70,15 +74,17 @@ export function toUniqueFileId(
                 break
             default:
                 throw new td.InvalidFileIdError(
-                    `Invalid file type: ${inputType}`
+                    `Invalid file type: ${inputType}`,
                 )
         }
     }
 
     let writer: TlBinaryWriter
+
     switch (inputLocation._) {
         case 'photo': {
             const source = inputLocation.source
+
             switch (source._) {
                 case 'legacy': {
                     // tdlib does not implement this
@@ -101,7 +107,7 @@ export function toUniqueFileId(
                     writer = TlBinaryWriter.manualAlloc(13)
                     writer.int(type)
                     writer.long(inputLocation.id)
-                    writer.raw(Buffer.from([+source.big]))
+                    writer.raw(Buffer.from([Number(source.big)]))
                     // it doesn't matter to which Dialog the photo belongs
                     break
                 }
@@ -109,6 +115,7 @@ export function toUniqueFileId(
                     writer = TlBinaryWriter.manualAlloc(13)
 
                     let thumbType = source.thumbnailType.charCodeAt(0)
+
                     if (thumbType === 97 /* 'a' */) {
                         thumbType = 0
                     } else if (thumbType === 99 /* 'c' */) {
@@ -143,7 +150,7 @@ export function toUniqueFileId(
         case 'web':
             writer = TlBinaryWriter.alloc(
                 {},
-                Buffer.byteLength(inputLocation.url, 'utf-8') + 8
+                Buffer.byteLength(inputLocation.url, 'utf-8') + 8,
             )
             writer.int(type)
             writer.string(inputLocation.url)

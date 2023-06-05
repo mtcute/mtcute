@@ -1,17 +1,17 @@
-import { tl } from '@mtcute/tl'
 import { MaybeArray } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
+import {
+    InputPeerLike,
+    Message,
+    MtTypeAssertionError,
+    PeersIndex,
+} from '../../types'
 import {
     isInputPeerChannel,
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
-import {
-    Message,
-    InputPeerLike,
-    MtTypeAssertionError,
-    PeersIndex,
-} from '../../types'
 
 /**
  * Get a single message in chat by its ID
@@ -54,7 +54,7 @@ export async function getMessages(
     this: TelegramClient,
     chatId: InputPeerLike,
     messageIds: MaybeArray<number>,
-    fromReply = false
+    fromReply = false,
 ): Promise<MaybeArray<Message | null>> {
     const peer = await this.resolvePeer(chatId)
 
@@ -70,24 +70,25 @@ export async function getMessages(
     const isChannel = isInputPeerChannel(peer)
 
     const res = await this.call(
-        isChannel
-            ? {
-                  _: 'channels.getMessages',
-                  id: ids,
-                  channel: normalizeToInputChannel(peer),
-              }
-            : {
-                  _: 'messages.getMessages',
-                  id: ids,
-              }
+        isChannel ?
+            {
+                _: 'channels.getMessages',
+                id: ids,
+                channel: normalizeToInputChannel(peer),
+            } :
+            {
+                _: 'messages.getMessages',
+                id: ids,
+            },
     )
 
-    if (res._ === 'messages.messagesNotModified')
+    if (res._ === 'messages.messagesNotModified') {
         throw new MtTypeAssertionError(
             'getMessages',
             '!messages.messagesNotModified',
-            res._
+            res._,
         )
+    }
 
     const peers = PeersIndex.from(res)
 
@@ -104,8 +105,7 @@ export async function getMessages(
                             msg.peerId._ === 'peerUser' &&
                             msg.peerId.userId === this._userId
                         )
-                    )
-                        return null
+                    ) { return null }
                     break
                 case 'inputPeerUser':
                 case 'inputPeerUserFromMessage':
@@ -114,8 +114,7 @@ export async function getMessages(
                             msg.peerId._ === 'peerUser' &&
                             msg.peerId.userId === peer.userId
                         )
-                    )
-                        return null
+                    ) { return null }
                     break
                 case 'inputPeerChat':
                     if (
@@ -123,8 +122,7 @@ export async function getMessages(
                             msg.peerId._ === 'peerChat' &&
                             msg.peerId.chatId === peer.chatId
                         )
-                    )
-                        return null
+                    ) { return null }
                     break
             }
         }

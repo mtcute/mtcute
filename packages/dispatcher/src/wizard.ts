@@ -1,8 +1,8 @@
 import { MaybeAsync, Message } from '@mtcute/client'
 
 import { Dispatcher } from './dispatcher'
-import { UpdateState } from './state'
 import { filters } from './filters'
+import { UpdateState } from './state'
 
 /**
  * Action for the wizard scene.
@@ -37,7 +37,7 @@ export class WizardScene<
 > extends Dispatcher<State & WizardInternalState, SceneName> {
     private _steps = 0
 
-    private _defaultState: State & WizardInternalState = {} as any
+    private _defaultState: State & WizardInternalState = {} as State & WizardInternalState
 
     setDefaultState(defaultState: State): void {
         this._defaultState = defaultState as State & WizardInternalState
@@ -57,12 +57,12 @@ export class WizardScene<
         handler: (
             msg: Message,
             state: UpdateState<State, SceneName>
-        ) => MaybeAsync<WizardSceneAction | number>
+        ) => MaybeAsync<WizardSceneAction | number>,
     ): void {
         const step = this._steps++
 
         const filter = filters.state<WizardInternalState>(
-            (it) => it.$step === step
+            (it) => it.$step === step,
         )
 
         this.onNewMessage(
@@ -72,18 +72,20 @@ export class WizardScene<
 
                 if (typeof result === 'number') {
                     await state.merge({ $step: result }, this._defaultState)
+
                     return
                 }
 
                 switch (result) {
                     case 'next': {
                         const next = step + 1
+
                         if (next === this._steps) {
                             await state.exit()
                         } else {
                             await state.merge(
                                 { $step: next },
-                                this._defaultState
+                                this._defaultState,
                             )
                         }
                         break
@@ -92,7 +94,7 @@ export class WizardScene<
                         await state.exit()
                         break
                 }
-            }
+            },
         )
     }
 }

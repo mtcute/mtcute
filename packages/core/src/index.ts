@@ -6,7 +6,4 @@ export * from './utils'
 
 /** @hidden */
 export * from '@mtcute/tl'
-/** @hidden */
 export * from '@mtcute/tl-runtime'
-
-export { defaultDcs } from './utils/default-dcs'

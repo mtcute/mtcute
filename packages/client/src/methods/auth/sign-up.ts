@@ -17,7 +17,7 @@ export async function signUp(
     phone: string,
     phoneCodeHash: string,
     firstName: string,
-    lastName = ''
+    lastName = '',
 ): Promise<User> {
     phone = normalizePhoneNumber(phone)
 

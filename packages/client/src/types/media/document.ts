@@ -1,17 +1,19 @@
-import { tl } from '@mtcute/tl'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
-import { FileLocation } from '../files'
-import { Thumbnail } from './thumbnail'
 import { TelegramClient } from '../../client'
+import { FileLocation } from '../files'
 import { makeInspectable } from '../utils'
+import { Thumbnail } from './thumbnail'
 
 /**
  * A file that is represented as a document in MTProto.
  *
  * This also includes audios, videos, voices etc.
  */
-export class RawDocument extends FileLocation {
+export abstract class RawDocument extends FileLocation {
+    abstract type: string
+
     constructor(client: TelegramClient, readonly raw: tl.RawDocument) {
         super(
             client,
@@ -23,7 +25,7 @@ export class RawDocument extends FileLocation {
                 thumbSize: '',
             },
             raw.size,
-            raw.dcId
+            raw.dcId,
         )
         this.raw = raw
     }
@@ -36,11 +38,11 @@ export class RawDocument extends FileLocation {
     get fileName(): string | null {
         if (this._fileName === undefined) {
             const attr = this.raw.attributes.find(
-                (it) => it._ === 'documentAttributeFilename'
+                (it) => it._ === 'documentAttributeFilename',
             )
-            this._fileName = attr
-                ? (attr as tl.RawDocumentAttributeFilename).fileName
-                : null
+            this._fileName = attr ?
+                (attr as tl.RawDocumentAttributeFilename).fileName :
+                null
         }
 
         return this._fileName
@@ -71,10 +73,10 @@ export class RawDocument extends FileLocation {
             const arr: Thumbnail[] = []
 
             this.raw.thumbs?.forEach((sz) =>
-                arr.push(new Thumbnail(this.client, this.raw, sz))
+                arr.push(new Thumbnail(this.client, this.raw, sz)),
             )
             this.raw.videoThumbs?.forEach((sz) =>
-                arr.push(new Thumbnail(this.client, this.raw, sz))
+                arr.push(new Thumbnail(this.client, this.raw, sz)),
             )
 
             this._thumbnails = arr

@@ -7,7 +7,7 @@ import { TelegramClient } from '../../client'
  * @internal
  */
 export async function getFolders(
-    this: TelegramClient
+    this: TelegramClient,
 ): Promise<tl.TypeDialogFilter[]> {
     return this.call({
         _: 'messages.getDialogFilters',

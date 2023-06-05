@@ -1,73 +1,19 @@
 /* THIS FILE WAS AUTO-GENERATED */
-import { BaseTelegramClient } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
 import { Readable } from 'stream'
-import {
-    ArrayWithTotal,
-    BotChatJoinRequestUpdate,
-    BotCommands,
-    BotStoppedUpdate,
-    CallbackQuery,
-    Chat,
-    ChatEvent,
-    ChatInviteLink,
-    ChatJoinRequestUpdate,
-    ChatMember,
-    ChatMemberUpdate,
-    ChatPreview,
-    ChosenInlineResult,
-    Conversation,
-    DeleteMessageUpdate,
-    Dialog,
-    FileDownloadParameters,
-    FormattedString,
-    GameHighScore,
-    HistoryReadUpdate,
-    IMessageEntityParser,
-    InlineQuery,
-    InputFileLike,
-    InputInlineResult,
-    InputMediaLike,
-    InputPeerLike,
-    InputStickerSetItem,
-    MaybeDynamic,
-    Message,
-    MessageMedia,
-    MessageReactions,
-    ParsedUpdate,
-    PartialExcept,
-    PartialOnly,
-    PeerReaction,
-    PeersIndex,
-    Photo,
-    Poll,
-    PollUpdate,
-    PollVoteUpdate,
-    PreCheckoutQuery,
-    RawDocument,
-    ReplyMarkup,
-    SentCode,
-    Sticker,
-    StickerSet,
-    TakeoutSession,
-    TermsOfService,
-    TypingStatus,
-    UploadFileLike,
-    UploadedFile,
-    User,
-    UserStatusUpdate,
-    UserTypingUpdate,
-} from './types'
-import {
-    AsyncLock,
+
+import { AsyncLock,
+    BaseTelegramClient, BaseTelegramClientOptions,
     Deque,
     MaybeArray,
     MaybeAsync,
     SessionConnection,
     SortedLinkedList,
 } from '@mtcute/core'
-import { tdFileId } from '@mtcute/file-id'
+import { ConditionVariable } from '@mtcute/core/src/utils/condition-variable'
 import { Logger } from '@mtcute/core/src/utils/logger'
+import { tdFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
+
 import { acceptTos } from './methods/auth/accept-tos'
 import { checkPassword } from './methods/auth/check-password'
 import { getPasswordHint } from './methods/auth/get-password-hint'
@@ -77,11 +23,11 @@ import { resendCode } from './methods/auth/resend-code'
 import { run } from './methods/auth/run'
 import { sendCode } from './methods/auth/send-code'
 import { sendRecoveryCode } from './methods/auth/send-recovery-code'
-import { signInBot } from './methods/auth/sign-in-bot'
 import { signIn } from './methods/auth/sign-in'
+import { signInBot } from './methods/auth/sign-in-bot'
 import { signUp } from './methods/auth/sign-up'
-import { startTest } from './methods/auth/start-test'
 import { start } from './methods/auth/start'
+import { startTest } from './methods/auth/start-test'
 import { answerCallbackQuery } from './methods/bots/answer-callback-query'
 import { answerInlineQuery } from './methods/bots/answer-inline-query'
 import { answerPreCheckoutQuery } from './methods/bots/answer-pre-checkout-query'
@@ -110,11 +56,11 @@ import { deleteGroup } from './methods/chats/delete-group'
 import { deleteHistory } from './methods/chats/delete-history'
 import { deleteUserHistory } from './methods/chats/delete-user-history'
 import { editAdminRights } from './methods/chats/edit-admin-rights'
+import { getChat } from './methods/chats/get-chat'
 import { getChatEventLog } from './methods/chats/get-chat-event-log'
 import { getChatMember } from './methods/chats/get-chat-member'
 import { getChatMembers } from './methods/chats/get-chat-members'
 import { getChatPreview } from './methods/chats/get-chat-preview'
-import { getChat } from './methods/chats/get-chat'
 import { getFullChat } from './methods/chats/get-full-chat'
 import { getNearbyChats } from './methods/chats/get-nearby-chats'
 import { iterChatMembers } from './methods/chats/iter-chat-members'
@@ -158,8 +104,8 @@ import { uploadMedia } from './methods/files/upload-media'
 import { createInviteLink } from './methods/invite-links/create-invite-link'
 import { editInviteLink } from './methods/invite-links/edit-invite-link'
 import { exportInviteLink } from './methods/invite-links/export-invite-link'
-import { getInviteLinkMembers } from './methods/invite-links/get-invite-link-members'
 import { getInviteLink } from './methods/invite-links/get-invite-link'
+import { getInviteLinkMembers } from './methods/invite-links/get-invite-link-members'
 import { getInviteLinks } from './methods/invite-links/get-invite-links'
 import { getPrimaryInviteLink } from './methods/invite-links/get-primary-invite-link'
 import { hideAllJoinRequests } from './methods/invite-links/hide-all-join-requests'
@@ -179,8 +125,8 @@ import {
 import { getHistory } from './methods/messages/get-history'
 import { getMessageGroup } from './methods/messages/get-message-group'
 import { getMessageReactions } from './methods/messages/get-message-reactions'
-import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe'
 import { getMessages } from './methods/messages/get-messages'
+import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe'
 import { getReactionUsers } from './methods/messages/get-reaction-users'
 import { getScheduledMessages } from './methods/messages/get-scheduled-messages'
 import { _normalizeInline } from './methods/messages/normalize-inline'
@@ -191,8 +137,8 @@ import { readReactions } from './methods/messages/read-reactions'
 import { searchGlobal } from './methods/messages/search-global'
 import { searchMessages } from './methods/messages/search-messages'
 import { sendCopy } from './methods/messages/send-copy'
-import { sendMediaGroup } from './methods/messages/send-media-group'
 import { sendMedia } from './methods/messages/send-media'
+import { sendMediaGroup } from './methods/messages/send-media-group'
 import { sendReaction } from './methods/messages/send-reaction'
 import { sendScheduled } from './methods/messages/send-scheduled'
 import { sendText } from './methods/messages/send-text'
@@ -225,8 +171,6 @@ import { getInstalledStickers } from './methods/stickers/get-installed-stickers'
 import { getStickerSet } from './methods/stickers/get-sticker-set'
 import { moveStickerInSet } from './methods/stickers/move-sticker-in-set'
 import { setStickerSetThumb } from './methods/stickers/set-sticker-set-thumb'
-import { ConditionVariable } from '@mtcute/core/src/utils/condition-variable'
-import { RpsMeter } from './utils/rps-meter'
 import {
     _dispatchUpdate,
     _fetchUpdatesState,
@@ -251,13 +195,74 @@ import { getMyUsername } from './methods/users/get-my-username'
 import { getProfilePhotos } from './methods/users/get-profile-photos'
 import { getUsers } from './methods/users/get-users'
 import { iterProfilePhotos } from './methods/users/iter-profile-photos'
-import { resolvePeerMany } from './methods/users/resolve-peer-many'
 import { resolvePeer } from './methods/users/resolve-peer'
+import { resolvePeerMany } from './methods/users/resolve-peer-many'
 import { setOffline } from './methods/users/set-offline'
 import { setProfilePhoto } from './methods/users/set-profile-photo'
 import { unblockUser } from './methods/users/unblock-user'
 import { updateProfile } from './methods/users/update-profile'
 import { updateUsername } from './methods/users/update-username'
+import {
+    ArrayWithTotal,
+    BotChatJoinRequestUpdate,
+    BotCommands,
+    BotStoppedUpdate,
+    CallbackQuery,
+    Chat,
+    ChatAction,
+    ChatEvent,
+    ChatInviteLink,
+    ChatInviteLinkJoinedMember,
+    ChatJoinRequestUpdate,
+    ChatMember,
+    ChatMemberUpdate,
+    ChatPreview,
+    ChosenInlineResult,
+    Conversation,
+    DeleteMessageUpdate,
+    Dialog,
+    FileDownloadParameters,
+    FormattedString,
+    GameHighScore,
+    HistoryReadUpdate,
+    IMessageEntityParser,
+    InlineQuery,
+    InputFileLike,
+    InputInlineResult,
+    InputMediaLike,
+    InputPeerLike,
+    InputStickerSetItem,
+    MaybeDynamic,
+    Message,
+    MessageMedia,
+    MessageReactions,
+    ParsedUpdate,
+    PartialExcept,
+    PartialOnly,
+    PeerReaction,
+    PeersIndex,
+    Photo,
+    Poll,
+    PollUpdate,
+    PollVoteUpdate,
+    PreCheckoutQuery,
+    RawDocument,
+    ReplyMarkup,
+    SentCode,
+    Sticker,
+    StickerSet,
+    StickerSourceType,
+    StickerType,
+    TakeoutSession,
+    TermsOfService,
+    TypingStatus,
+    UploadedFile,
+    UploadFileLike,
+    User,
+    UserStatusUpdate,
+    UserTypingUpdate,
+} from './types'
+import { RpsMeter } from './utils/rps-meter'
 
 // from methods/updates.ts
 interface PendingUpdateContainer {
@@ -1241,7 +1246,7 @@ export interface TelegramClient extends BaseTelegramClient {
              */
             filters?:
                 | tl.TypeChannelAdminLogEventsFilter
-                | MaybeArray<Exclude<ChatEvent.Action, null>['type']>
+                | MaybeArray<Exclude<ChatAction, null>['type']>
 
             /**
              * Limit the number of events returned.
@@ -2061,7 +2066,7 @@ export interface TelegramClient extends BaseTelegramClient {
              */
             requestedSearch?: string
         }
-    ): AsyncIterableIterator<ChatInviteLink.JoinedMember>
+    ): AsyncIterableIterator<ChatInviteLinkJoinedMember>
     /**
      * Get detailed information about an invite link
      *
@@ -2164,7 +2169,8 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param ids  Message(s) ID(s) to delete.
-     * @param revoke  (default: `true`) Whether to "revoke" (i.e. delete for both sides). Only used for chats and private chats.
+     * @param revoke  (default: `true`) Whether to "revoke" (i.e. delete for both sides).
+     *      Only used for chats and private chats.
      */
     deleteMessages(
         chatId: InputPeerLike,
@@ -2197,7 +2203,7 @@ export interface TelegramClient extends BaseTelegramClient {
              *
              * When `media` is passed, `media.caption` is used instead
              */
-            text?: string | FormattedString<any>
+            text?: string | FormattedString<string>
 
             /**
              * Parse mode to use to parse entities before sending
@@ -2258,7 +2264,7 @@ export interface TelegramClient extends BaseTelegramClient {
              *
              * When `media` is passed, `media.caption` is used instead
              */
-            text?: string | FormattedString<any>
+            text?: string | FormattedString<string>
 
             /**
              * Parse mode to use to parse entities before sending
@@ -2334,7 +2340,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * You can either pass `caption` or `captionMedia`, passing both will
              * result in an error
              */
-            caption?: string | FormattedString<any>
+            caption?: string | FormattedString<string>
 
             /**
              * Optionally, a media caption for your forwarded message(s).
@@ -2428,7 +2434,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * You can either pass `caption` or `captionMedia`, passing both will
              * result in an error
              */
-            caption?: string | FormattedString<any>
+            caption?: string | FormattedString<string>
 
             /**
              * Optionally, a media caption for your forwarded message(s).
@@ -2755,7 +2761,7 @@ export interface TelegramClient extends BaseTelegramClient {
     ): Promise<[tl.TypeInputBotInlineMessageID, SessionConnection]>
 
     _parseEntities(
-        text?: string | FormattedString<any>,
+        text?: string | FormattedString<string>,
         mode?: string | null,
         entities?: tl.TypeMessageEntity[]
     ): Promise<[string, tl.TypeMessageEntity[] | undefined]>
@@ -2971,7 +2977,7 @@ export interface TelegramClient extends BaseTelegramClient {
             /**
              * New message caption (only used for media)
              */
-            caption?: string | FormattedString<any>
+            caption?: string | FormattedString<string>
 
             /**
              * Parse mode to use to parse `text` entities before sending
@@ -3146,7 +3152,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Can be used, for example. when using File IDs
              * or when using existing InputMedia objects.
              */
-            caption?: string | FormattedString<any>
+            caption?: string | FormattedString<string>
 
             /**
              * Override entities for `media`.
@@ -3286,7 +3292,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     sendText(
         chatId: InputPeerLike,
-        text: string | FormattedString<any>,
+        text: string | FormattedString<string>,
         params?: {
             /**
              * Message to reply to. Either a message object or message ID.
@@ -3622,13 +3628,13 @@ export interface TelegramClient extends BaseTelegramClient {
          *
          * Creating `emoji` stickers via API is not supported yet
          */
-        type?: Sticker.Type
+        type?: StickerType
 
         /**
          * File source type for the stickers in this set.
          * Defaults to `static`, i.e. regular WEBP stickers.
          */
-        sourceType?: Sticker.SourceType
+        sourceType?: StickerSourceType
 
         /**
          * List of stickers to be immediately added into the pack.
@@ -4056,7 +4062,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _cpts: Record<number, number>
     protected _cptsMod: Record<number, number>
     protected _updsLog: Logger
-    constructor(opts: BaseTelegramClient.Options) {
+    constructor(opts: BaseTelegramClientOptions) {
         super(opts)
         this._userId = null
         this._isBot = false
@@ -4072,19 +4078,19 @@ export class TelegramClient extends BaseTelegramClient {
         this._updatesLoopCv = new ConditionVariable()
 
         this._pendingUpdateContainers = new SortedLinkedList(
-            (a, b) => a.seqStart - b.seqStart
+            (a, b) => a.seqStart - b.seqStart,
         )
         this._pendingPtsUpdates = new SortedLinkedList(
-            (a, b) => a.ptsBefore! - b.ptsBefore!
+            (a, b) => a.ptsBefore! - b.ptsBefore!,
         )
         this._pendingPtsUpdatesPostponed = new SortedLinkedList(
-            (a, b) => a.ptsBefore! - b.ptsBefore!
+            (a, b) => a.ptsBefore! - b.ptsBefore!,
         )
         this._pendingQtsUpdates = new SortedLinkedList(
-            (a, b) => a.qtsBefore! - b.qtsBefore!
+            (a, b) => a.qtsBefore! - b.qtsBefore!,
         )
         this._pendingQtsUpdatesPostponed = new SortedLinkedList(
-            (a, b) => a.qtsBefore! - b.qtsBefore!
+            (a, b) => a.qtsBefore! - b.qtsBefore!,
         )
         this._pendingUnorderedUpdates = new Deque()
 

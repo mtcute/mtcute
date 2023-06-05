@@ -1,5 +1,5 @@
-import { tl } from '@mtcute/tl'
 import { getMarkedPeerId } from '@mtcute/core'
+import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { Chat } from '../../types'
@@ -16,7 +16,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 export async function getNearbyChats(
     this: TelegramClient,
     latitude: number,
-    longitude: number
+    longitude: number,
 ): Promise<Chat[]> {
     const res = await this.call({
         _: 'contacts.getLocated',
@@ -35,7 +35,7 @@ export async function getNearbyChats(
     assertTypeIs(
         'contacts.getLocated (@ .updates[0])',
         res.updates[0],
-        'updatePeerLocated'
+        'updatePeerLocated',
     )
 
     const chats = res.chats.map((it) => new Chat(this, it))
@@ -47,8 +47,9 @@ export async function getNearbyChats(
         if (peer._ === 'peerSelfLocated') return
 
         const id = getMarkedPeerId(peer.peer)
+
         if (index[id]) {
-            ;(index[id] as tl.Mutable<Chat>).distance = peer.distance
+            (index[id] as tl.Mutable<Chat>).distance = peer.distance
         }
     })
 

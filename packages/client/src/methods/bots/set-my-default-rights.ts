@@ -12,13 +12,13 @@ import { TelegramClient } from '../../client'
 export async function setMyDefaultRights(
     this: TelegramClient,
     target: 'channel' | 'group',
-    rights: Omit<tl.RawChatAdminRights, '_'>
+    rights: Omit<tl.RawChatAdminRights, '_'>,
 ): Promise<void> {
     await this.call({
         _:
-            target === 'group'
-                ? 'bots.setBotGroupDefaultAdminRights'
-                : 'bots.setBotBroadcastDefaultAdminRights',
+            target === 'group' ?
+                'bots.setBotGroupDefaultAdminRights' :
+                'bots.setBotBroadcastDefaultAdminRights',
         adminRights: {
             _: 'chatAdminRights',
             ...rights,

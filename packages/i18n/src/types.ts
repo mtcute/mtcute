@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { FormattedString } from '@mtcute/client'
 
 type Values<T> = T[keyof T]
-type SafeGet<T, K extends string> = T extends Record<K, any> ? T[K] : never
+type SafeGet<T, K extends string> = T extends Record<K, unknown> ? T[K] : never
 
 /**
  * Literal translated value, represented by (optionally formatted) string
  */
-export type I18nValueLiteral = string | FormattedString<any>
+export type I18nValueLiteral = string | FormattedString<string>
 /**
  * Dynamic translated value, represented by a
  * function resolving to a literal one
@@ -21,6 +23,15 @@ export type I18nValueDynamic<Args extends any[] = any[]> = (
 export type I18nValue<Args extends any[] = any[]> =
     | I18nValueLiteral
     | I18nValueDynamic<Args>
+
+/**
+ * Strings dictionary
+ *
+ * Note that `value` key is reserved for internal needs, and cannot be used.
+ */
+export interface I18nStrings {
+    [key: string]: I18nValue | I18nStrings
+}
 
 type NestedKeysDelimited<T> = Values<{
     [key in Extract<keyof T, string>]: T[key] extends I18nValue
@@ -55,7 +66,7 @@ export type MtcuteI18nFunction<Strings, Input> = <
     lang: Input | string | null,
     key: K,
     ...params: ExtractParameter<Strings, K>
-) => string | FormattedString<any>
+) => string | FormattedString<string>
 
 /**
  * Wrapper type for i18n object containing strings for a language
@@ -64,7 +75,7 @@ export type MtcuteI18nFunction<Strings, Input> = <
 export type OtherLanguageWrap<Strings> = {
     [key in keyof Strings]?: Strings[key] extends I18nValue<infer A>
         ? I18nValue<A>
-        : Strings[key] extends Record<string, any>
+        : Strings[key] extends Record<string, unknown>
         ? OtherLanguageWrap<Strings[key]>
         : never
 }
@@ -78,7 +89,7 @@ export type OtherLanguageWrap<Strings> = {
 export type OtherLanguageWrapExhaustive<Strings> = {
     [key in keyof Strings]: Strings[key] extends I18nValue<infer A>
         ? I18nValue<A>
-        : Strings[key] extends Record<string, any>
+        : Strings[key] extends Record<string, unknown>
         ? OtherLanguageWrapExhaustive<Strings[key]>
         : never
 }
