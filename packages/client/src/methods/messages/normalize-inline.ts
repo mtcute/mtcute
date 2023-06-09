@@ -23,15 +23,17 @@ export async function _normalizeInline(
         id = parseInlineMessageId(id)
     }
 
-    let connection = this.primaryConnection
-
-    if (id.dcId !== connection.params.dc.id) {
-        if (!(id.dcId in this._connectionsForInline)) {
-            this._connectionsForInline[id.dcId] =
-                await this.createAdditionalConnection(id.dcId)
-        }
-        connection = this._connectionsForInline[id.dcId]
-    }
-
-    return [id, connection]
+    // let connection = this.primaryConnection
+    //
+    // if (id.dcId !== connection.params.dc.id) {
+    //     if (!(id.dcId in this._connectionsForInline)) {
+    //         this._connectionsForInline[id.dcId] =
+    //             await this.createAdditionalConnection(id.dcId)
+    //     }
+    //     connection = this._connectionsForInline[id.dcId]
+    // }
+    //
+    // return [id, connection]
+    // fixme
+    throw new Error('TODO')
 }

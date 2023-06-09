@@ -1,20 +1,20 @@
-import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import { tl } from '@mtcute/tl'
+import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
+import { ITelegramStorage } from '../storage'
 import { ICryptoProvider, Logger } from '../utils'
-import { defaultTransportFactory, TransportFactory } from './transports'
+import { ConfigManager } from './config-manager'
+import { MultiSessionConnection } from './multi-session-connection'
+import { PersistentConnectionParams } from './persistent-connection'
 import {
     defaultReconnectionStrategy,
     ReconnectionStrategy,
 } from './reconnection'
-import { PersistentConnectionParams } from './persistent-connection'
-import { ConfigManager } from './config-manager'
-import { MultiSessionConnection } from './multi-session-connection'
 import {
     SessionConnection,
     SessionConnectionParams,
 } from './session-connection'
-import { ITelegramStorage } from '../storage'
+import { defaultTransportFactory, TransportFactory } from './transports'
 
 export type ConnectionKind = 'main' | 'upload' | 'download' | 'download-small'
 
@@ -81,35 +81,36 @@ export class DcConnectionManager {
             isMainConnection: true,
         },
         this.manager.params.connectionCount?.main ?? 1,
-        this.manager._log
+        this.manager._log,
     )
 
     constructor(
         readonly manager: NetworkManager,
         readonly dcId: number,
-        private _dc: tl.RawDcOption
+        private _dc: tl.RawDcOption,
     ) {
         this._setupMulti(this.mainConnection, 'main')
     }
 
     private _setupMulti(
         connection: MultiSessionConnection,
-        kind: ConnectionKind
+        kind: ConnectionKind,
     ): void {
         connection.on('key-change', (idx, key) => {
             if (kind !== 'main') {
                 // main connection is responsible for authorization,
                 // and keys are then sent to other connections
                 this.manager._log.warn(
-                    'got key-change from non-main connection'
+                    'got key-change from non-main connection',
                 )
+
                 return
             }
 
             this.manager._log.debug(
                 'key change for dc %d from connection %d',
                 this.dcId,
-                idx
+                idx,
             )
             this.manager._storage.setAuthKeyFor(this.dcId, key)
 
@@ -119,21 +120,22 @@ export class DcConnectionManager {
         connection.on('tmp-key-change', (idx, key, expires) => {
             if (kind !== 'main') {
                 this.manager._log.warn(
-                    'got tmp-key-change from non-main connection'
+                    'got tmp-key-change from non-main connection',
                 )
+
                 return
             }
 
             this.manager._log.debug(
                 'temp key change for dc %d from connection %d',
                 this.dcId,
-                idx
+                idx,
             )
             this.manager._storage.setTempAuthKeyFor(
                 this.dcId,
                 idx,
                 key,
-                expires * 1000
+                expires * 1000,
             )
         })
 
@@ -142,8 +144,9 @@ export class DcConnectionManager {
             // to avoid them sending requests before auth is complete
             if (kind !== 'main') {
                 this.manager._log.warn(
-                    'got auth-begin from non-main connection'
+                    'got auth-begin from non-main connection',
                 )
+
                 return
             }
 
@@ -166,7 +169,7 @@ export class DcConnectionManager {
             for (let i = 0; i < this.mainConnection._sessions.length; i++) {
                 const temp = await this.manager._storage.getAuthKeyFor(
                     this.dcId,
-                    i
+                    i,
                 )
                 await this.mainConnection.setAuthKey(temp, true, i)
             }
@@ -208,19 +211,23 @@ export class NetworkManager {
 
     constructor(
         readonly params: NetworkManagerParams & NetworkManagerExtraParams,
-        readonly config: ConfigManager
+        readonly config: ConfigManager,
     ) {
         let deviceModel = 'mtcute on '
         let appVersion = 'unknown'
         if (typeof process !== 'undefined' && typeof require !== 'undefined') {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const os = require('os')
             deviceModel += `${os.type()} ${os.arch()} ${os.release()}`
+
             try {
                 // for production builds
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
                 appVersion = require('../package.json').version
             } catch (e) {
                 try {
                     // for development builds (additional /src/ in path)
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
                     appVersion = require('../../package.json').version
                 } catch (e) {}
             }
@@ -238,6 +245,7 @@ export class NetworkManager {
             langCode: 'en',
             ...(params.initConnectionOptions ?? {}),
             apiId: params.apiId,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             query: null as any,
         }
 
@@ -276,7 +284,7 @@ export class NetworkManager {
         //     this._cleanupPrimaryConnection()
         // )
         dc.mainConnection.on('error', (err, conn) =>
-            this.params._emitError(err, conn)
+            this.params._emitError(err, conn),
         )
         dc.loadKeys()
             .catch((e) => this.params._emitError(e))
@@ -297,7 +305,7 @@ export class NetworkManager {
         this._dcConnections[defaultDc.id] = new DcConnectionManager(
             this,
             defaultDc.id,
-            defaultDc
+            defaultDc,
         )
         this._switchPrimaryDc(this._dcConnections[defaultDc.id])
     }

@@ -10,7 +10,6 @@ import {
     FileDownloadParameters,
     FileLocation,
     MtArgumentError,
-    MtUnsupportedError,
 } from '../../types'
 import { determinePartSize } from '../../utils/file-utils'
 
@@ -36,7 +35,7 @@ export async function* downloadAsIterable(
         )
     }
 
-    let offset = params.offset ?? 0
+    const offset = params.offset ?? 0
 
     if (offset % 4096 !== 0) {
         throw new MtArgumentError(
@@ -80,7 +79,7 @@ export async function* downloadAsIterable(
 
     const chunkSize = partSizeKb * 1024
 
-    let limit =
+    const limit =
         params.limit ??
         // derive limit from chunk size, file size and offset
         (fileSize ?
@@ -88,78 +87,81 @@ export async function* downloadAsIterable(
         // we will receive an error when we have reached the end anyway
             Infinity)
 
-    let connection = this._downloadConnections[dcId]
+    // fixme
+    throw new Error('TODO')
 
-    if (!connection) {
-        connection = await this.createAdditionalConnection(dcId)
-        this._downloadConnections[dcId] = connection
-    }
+    // let connection = this._downloadConnections[dcId]
 
-    const requestCurrent = async (): Promise<Buffer> => {
-        let result:
-            | tl.RpcCallReturn['upload.getFile']
-            | tl.RpcCallReturn['upload.getWebFile']
-
-        try {
-            result = await this.call(
-                {
-                    _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    location: location as any,
-                    offset,
-                    limit: chunkSize,
-                },
-                { connection },
-            )
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (e: any) {
-            if (e.constructor === tl.errors.FileMigrateXError) {
-                connection = this._downloadConnections[e.new_dc]
-
-                if (!connection) {
-                    connection = await this.createAdditionalConnection(e.new_dc)
-                    this._downloadConnections[e.new_dc] = connection
-                }
-
-                return requestCurrent()
-            } else if (e.constructor === tl.errors.FilerefUpgradeNeededError) {
-                // todo: implement someday
-                // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
-                throw new MtUnsupportedError('File ref expired!')
-            } else throw e
-        }
-
-        if (result._ === 'upload.fileCdnRedirect') {
-            // we shouldnt receive them since cdnSupported is not set in the getFile request.
-            // also, i couldnt find any media that would be downloaded from cdn, so even if
-            // i implemented that, i wouldnt be able to test that, so :shrug:
-            throw new MtUnsupportedError(
-                'Received CDN redirect, which is not supported (yet)',
-            )
-        }
-
-        if (
-            result._ === 'upload.webFile' &&
-            result.size &&
-            limit === Infinity
-        ) {
-            limit = result.size
-        }
-
-        return result.bytes
-    }
-
-    for (let i = 0; i < limit; i++) {
-        const buf = await requestCurrent()
-
-        if (buf.length === 0) {
-            // we've reached the end
-            return
-        }
-
-        yield buf
-        offset += chunkSize
-
-        params.progressCallback?.(offset, limit)
-    }
+    // if (!connection) {
+    //     connection = await this.createAdditionalConnection(dcId)
+    //     this._downloadConnections[dcId] = connection
+    // }
+    //
+    // const requestCurrent = async (): Promise<Buffer> => {
+    //     let result:
+    //         | tl.RpcCallReturn['upload.getFile']
+    //         | tl.RpcCallReturn['upload.getWebFile']
+    //
+    //     try {
+    //         result = await this.call(
+    //             {
+    //                 _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
+    //                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //                 location: location as any,
+    //                 offset,
+    //                 limit: chunkSize,
+    //             },
+    //             { connection },
+    //         )
+    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //     } catch (e: any) {
+    //         if (e.constructor === tl.errors.FileMigrateXError) {
+    //             connection = this._downloadConnections[e.new_dc]
+    //
+    //             if (!connection) {
+    //                 connection = await this.createAdditionalConnection(e.new_dc)
+    //                 this._downloadConnections[e.new_dc] = connection
+    //             }
+    //
+    //             return requestCurrent()
+    //         } else if (e.constructor === tl.errors.FilerefUpgradeNeededError) {
+    //             // todo: implement someday
+    //             // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
+    //             throw new MtUnsupportedError('File ref expired!')
+    //         } else throw e
+    //     }
+    //
+    //     if (result._ === 'upload.fileCdnRedirect') {
+    //         // we shouldnt receive them since cdnSupported is not set in the getFile request.
+    //         // also, i couldnt find any media that would be downloaded from cdn, so even if
+    //         // i implemented that, i wouldnt be able to test that, so :shrug:
+    //         throw new MtUnsupportedError(
+    //             'Received CDN redirect, which is not supported (yet)',
+    //         )
+    //     }
+    //
+    //     if (
+    //         result._ === 'upload.webFile' &&
+    //         result.size &&
+    //         limit === Infinity
+    //     ) {
+    //         limit = result.size
+    //     }
+    //
+    //     return result.bytes
+    // }
+    //
+    // for (let i = 0; i < limit; i++) {
+    //     const buf = await requestCurrent()
+    //
+    //     if (buf.length === 0) {
+    //         // we've reached the end
+    //         return
+    //     }
+    //
+    //     yield buf
+    //     offset += chunkSize
+    //
+    //     params.progressCallback?.(offset, limit)
+    // }
 }

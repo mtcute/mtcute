@@ -102,7 +102,7 @@ async function rsaEncrypt(
 export async function doAuthorization(
     connection: SessionConnection,
     crypto: ICryptoProvider,
-    expiresIn?: number
+    expiresIn?: number,
 ): Promise<[Buffer, Long, number]> {
     // eslint-disable-next-line dot-notation
     const session = connection['_session']
@@ -130,7 +130,7 @@ export async function doAuthorization(
         return TlBinaryReader.deserializeObject(
             readerMap,
             await connection.waitForUnencryptedMessage(),
-            20 // skip mtproto header
+            20, // skip mtproto header
         )
     }
 
@@ -186,7 +186,7 @@ export async function doAuthorization(
         newNonce,
         serverNonce: resPq.serverNonce,
         dc: dcId,
-        expiresIn: expiresIn! // whatever
+        expiresIn: expiresIn!, // whatever
     }
     const pqInnerData = TlBinaryWriter.serializeObject(writerMap, _pqInnerData)
 

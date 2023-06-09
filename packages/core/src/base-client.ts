@@ -7,16 +7,13 @@ import defaultReaderMap from '@mtcute/tl/binary/reader'
 import defaultWriterMap from '@mtcute/tl/binary/writer'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import defaultReaderMap from '@mtcute/tl/binary/reader'
-import defaultWriterMap from '@mtcute/tl/binary/writer'
-
 import {
-    defaultReconnectionStrategy,
-    defaultTransportFactory,
     ReconnectionStrategy,
     SessionConnection,
     TransportFactory,
 } from './network'
+import { ConfigManager } from './network/config-manager'
+import { NetworkManager, NetworkManagerExtraParams } from './network/network-manager'
 import { PersistentConnectionParams } from './network/persistent-connection'
 import { ITelegramStorage, MemoryStorage } from './storage'
 import { MustEqual } from './types'
@@ -25,10 +22,6 @@ import {
     createControllablePromise,
     CryptoProviderFactory,
     defaultCryptoProviderFactory,
-    sleep,
-    getAllPeersFrom,
-    LogManager,
-    toggleChannelIdMark,
     defaultProductionDc,
     defaultProductionIpv6Dc,
     defaultTestDc,
@@ -36,28 +29,11 @@ import {
     getAllPeersFrom,
     ICryptoProvider,
     LogManager,
+    readStringSession,
     sleep,
     toggleChannelIdMark,
-    ControllablePromise,
-    createControllablePromise,
-    readStringSession,
-    writeStringSession
+    writeStringSession,
 } from './utils'
-import { addPublicKey } from './utils/crypto/keys'
-import { readStringSession, writeStringSession } from './utils/string-session'
-
-import {
-    TransportFactory,
-    defaultReconnectionStrategy,
-    ReconnectionStrategy,
-    defaultTransportFactory,
-    SessionConnection,
-} from './network'
-import { PersistentConnectionParams } from './network/persistent-connection'
-import { ITelegramStorage, MemoryStorage } from './storage'
-
-import { ConfigManager } from './network/config-manager'
-import { NetworkManager, NetworkManagerExtraParams } from "./network/network-manager";
 
 export interface BaseTelegramClientOptions {
     /**
@@ -184,7 +160,7 @@ export interface BaseTelegramClientOptions {
         /**
          * **EXPERT USE ONLY!**
          *
-         * Override TL layer used for the connection.                                                                                                                                                                                                                                  /;'
+         * Override TL layer used for the connection.
          *
          * **Does not** change the schema used.
          */
@@ -207,42 +183,42 @@ export interface BaseTelegramClientOptions {
 
 export class BaseTelegramClient extends EventEmitter {
     /**
-     * Crypto provider taken from {@link BaseTelegramClient.Options.crypto}
+     * Crypto provider taken from {@link BaseTelegramClientOptions.crypto}
      */
     protected readonly _crypto: ICryptoProvider
 
     /**
-     * Telegram storage taken from {@link BaseTelegramClient.Options.storage}
+     * Telegram storage taken from {@link BaseTelegramClientOptions.storage}
      */
     readonly storage: ITelegramStorage
 
     /**
-     * API hash taken from {@link BaseTelegramClient.Options.apiHash}
+     * API hash taken from {@link BaseTelegramClientOptions.apiHash}
      */
     protected readonly _apiHash: string
 
     /**
-     * "Use IPv6" taken from {@link BaseTelegramClient.Options.useIpv6}
+     * "Use IPv6" taken from {@link BaseTelegramClientOptions.useIpv6}
      */
     protected readonly _useIpv6: boolean
 
     /**
-     * "Test mode" taken from {@link BaseTelegramClient.Options.testMode}
+     * "Test mode" taken from {@link BaseTelegramClientOptions.testMode}
      */
     protected readonly _testMode: boolean
 
     /**
-     * Flood sleep threshold taken from {@link BaseTelegramClient.Options.floodSleepThreshold}
+     * Flood sleep threshold taken from {@link BaseTelegramClientOptions.floodSleepThreshold}
      */
     protected readonly _floodSleepThreshold: number
 
     /**
-     * RPC retry count taken from {@link BaseTelegramClient.Options.rpcRetryCount}
+     * RPC retry count taken from {@link BaseTelegramClientOptions.rpcRetryCount}
      */
     protected readonly _rpcRetryCount: number
 
     /**
-     * Primary DC taken from {@link BaseTelegramClient.Options.defaultDc},
+     * Primary DC taken from {@link BaseTelegramClientOptions.defaultDc},
      * loaded from session or changed by other means (like redirecting).
      */
     protected _defaultDc: tl.RawDcOption
@@ -256,7 +232,7 @@ export class BaseTelegramClient extends EventEmitter {
     private _floodWaitedRequests: Record<string, number> = {}
 
     protected _config = new ConfigManager(() =>
-        this.call({ _: 'help.getConfig' })
+        this.call({ _: 'help.getConfig' }),
     )
 
     private _additionalConnections: SessionConnection[] = []
@@ -311,8 +287,6 @@ export class BaseTelegramClient extends EventEmitter {
         }
 
         this._defaultDc = dc
-        this._reconnectionStrategy =
-            opts.reconnectionStrategy ?? defaultReconnectionStrategy
         this._floodSleepThreshold = opts.floodSleepThreshold ?? 10000
         this._rpcRetryCount = opts.rpcRetryCount ?? 5
         this._niceStacks = opts.niceStacks ?? true
@@ -348,72 +322,6 @@ export class BaseTelegramClient extends EventEmitter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async _saveStorage(afterImport = false): Promise<void> {
         await this.storage.save?.()
-    }
-
-    protected _keepAliveAction(): void {
-        if (this._disableUpdates) return
-
-        // telegram asks to fetch pending updates
-        // if there are no updates for 15 minutes.
-        // core does not have update handling,
-        // so we just use getState so the server knows
-        // we still do need updates
-        this.call({ _: 'updates.getState' }).catch((e) => {
-            if (!(e instanceof tl.errors.RpcError)) {
-                this.primaryConnection.reconnect()
-            }
-        })
-    }
-
-    private _cleanupPrimaryConnection(forever = false): void {
-        if (forever && this.primaryConnection) this.primaryConnection.destroy()
-        if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
-    }
-
-    private _setupPrimaryConnection(): void {
-        this._cleanupPrimaryConnection(true)
-
-        this.primaryConnection = new SessionConnection(
-            {
-                crypto: this._crypto,
-                initConnection: this._initConnectionParams,
-                transportFactory: this._transportFactory,
-                dc: this._primaryDc,
-                testMode: this._testMode,
-                reconnectionStrategy: this._reconnectionStrategy,
-                layer: this._layer,
-                disableUpdates: this._disableUpdates,
-                readerMap: this._readerMap,
-                writerMap: this._writerMap,
-            },
-            this.log.create('connection'),
-        )
-
-        this.primaryConnection.on('usable', () => {
-            this._lastUpdateTime = Date.now()
-
-            if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
-            this._keepAliveInterval = setInterval(async () => {
-                if (Date.now() - this._lastUpdateTime > 900_000) {
-                    this._keepAliveAction()
-                    this._lastUpdateTime = Date.now()
-                }
-            }, 60_000)
-        })
-        this.primaryConnection.on('update', (update) => {
-            this._lastUpdateTime = Date.now()
-            this._handleUpdate(update)
-        })
-        this.primaryConnection.on('wait', () =>
-            this._cleanupPrimaryConnection(),
-        )
-        this.primaryConnection.on('key-change', async (key) => {
-            this.storage.setAuthKeyFor(this._primaryDc.id, key)
-            await this._saveStorage()
-        })
-        this.primaryConnection.on('error', (err) =>
-            this._emitError(err, this.primaryConnection),
-        )
     }
 
     /**
@@ -475,7 +383,7 @@ export class BaseTelegramClient extends EventEmitter {
      * Wait until this client is usable (i.e. connection is fully ready)
      */
     async waitUntilUsable(): Promise<void> {
-        return new Promise((resolve) => {
+        return new Promise((_resolve) => {
             // todo
             // this.primaryConnection.once('usable', resolve)
         })
@@ -572,6 +480,8 @@ export class BaseTelegramClient extends EventEmitter {
 
         for (let i = 0; i < this._rpcRetryCount; i++) {
             try {
+                // fixme temporary hack
+                // eslint-disable-next-line dot-notation
                 const res = await this.network['_primaryDc']!.mainConnection.sendRpc(
                     message,
                     stack,
@@ -915,7 +825,7 @@ export class BaseTelegramClient extends EventEmitter {
             self: await this.storage.getSelf(),
             testMode: this._testMode,
             primaryDc: this._defaultDc,
-            authKey: Buffer.from([]) //this.primaryConnection.getAuthKey()!,
+            authKey: Buffer.from([]), //this.primaryConnection.getAuthKey()!,
         })
     }
 

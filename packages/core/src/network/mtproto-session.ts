@@ -8,21 +8,17 @@ import {
     TlWriterMap,
 } from '@mtcute/tl-runtime'
 
-import { getRandomInt, ICryptoProvider, Logger, randomLong } from '../utils'
-import { buffersEqual, randomBytes } from '../utils/buffer-utils'
-import {
+import { ControllablePromise,
+    Deque,
+    getRandomInt,
     ICryptoProvider,
     Logger,
-    getRandomInt,
-    randomLong,
-    ControllablePromise,
-    LruSet,
-    Deque,
-    SortedArray,
     LongMap,
+    LruSet,
+    randomLong,
+    SortedArray,
 } from '../utils'
 import { AuthKey } from './auth-key'
-import { createAesIgeForMessage } from '../utils/crypto/mtproto'
 
 export interface PendingRpc {
     method: string
@@ -39,7 +35,7 @@ export interface PendingRpc {
     initConn?: boolean
     getState?: number
     cancelled?: boolean
-    timeout?: number
+    timeout?: NodeJS.Timeout
 }
 
 export type PendingMessage =
@@ -115,7 +111,7 @@ export class MtprotoSession {
     queuedCancelReq: Long[] = []
     getStateSchedule = new SortedArray<PendingRpc>(
         [],
-        (a, b) => a.getState! - b.getState!
+        (a, b) => a.getState! - b.getState!,
     )
 
     // requests info
@@ -200,9 +196,10 @@ export class MtprotoSession {
         this.log.debug(
             'enqueued %s for sending (msg_id = %s)',
             rpc.method,
-            rpc.msgId || 'n/a'
+            rpc.msgId || 'n/a',
         )
         this.queuedRpc.pushBack(rpc)
+
         return true
     }
 
@@ -237,19 +234,21 @@ export class MtprotoSession {
     /** Encrypt a single MTProto message using session's keys */
     async encryptMessage(message: Buffer): Promise<Buffer> {
         const key = this._authKeyTemp.ready ? this._authKeyTemp : this._authKey
+
         return key.encryptMessage(message, this.serverSalt, this._sessionId)
     }
 
     /** Decrypt a single MTProto message using session's keys */
     async decryptMessage(
         data: Buffer,
-        callback: Parameters<AuthKey['decryptMessage']>[2]
+        callback: Parameters<AuthKey['decryptMessage']>[2],
     ): Promise<void> {
         if (!this._authKey.ready) throw new Error('Keys are not set up!')
 
         const authKeyId = data.slice(0, 8)
 
         let key: AuthKey
+
         if (this._authKey.match(authKeyId)) {
             key = this._authKey
         } else if (this._authKeyTemp.match(authKeyId)) {
@@ -264,6 +263,7 @@ export class MtprotoSession {
                 this._authKeyTemp.id,
                 this._authKeyTempSecondary.id,
             )
+
             return
         }
 

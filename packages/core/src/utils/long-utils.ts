@@ -26,9 +26,9 @@ export function randomLong(unsigned = false): Long {
 export function longFromBuffer(buf: Buffer, unsigned = false, le = true): Long {
     if (le) {
         return new Long(buf.readInt32LE(0), buf.readInt32LE(4), unsigned)
-    } else {
-        return new Long(buf.readInt32BE(4), buf.readInt32BE(0), unsigned)
     }
+
+    return new Long(buf.readInt32BE(4), buf.readInt32BE(0), unsigned)
 }
 
 /**

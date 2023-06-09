@@ -1,12 +1,13 @@
 import EventEmitter from 'events'
+
 import { tl } from '@mtcute/tl'
 
 import { Logger } from '../utils'
+import { MtprotoSession } from './mtproto-session'
 import {
     SessionConnection,
     SessionConnectionParams,
 } from './session-connection'
-import { MtprotoSession } from './mtproto-session'
 
 export class MultiSessionConnection extends EventEmitter {
     private _log: Logger
@@ -16,7 +17,7 @@ export class MultiSessionConnection extends EventEmitter {
     constructor(
         readonly params: SessionConnectionParams,
         private _count: number,
-        log: Logger
+        log: Logger,
     ) {
         super()
         this._log = log.create('multi')
@@ -38,7 +39,7 @@ export class MultiSessionConnection extends EventEmitter {
         this._log.debug(
             'updating sessions count: %d -> %d',
             this._sessions.length,
-            this._count
+            this._count,
         )
 
         // there are two cases
@@ -52,8 +53,8 @@ export class MultiSessionConnection extends EventEmitter {
                         this.params.crypto,
                         this._log.create('session'),
                         this.params.readerMap,
-                        this.params.writerMap
-                    )
+                        this.params.writerMap,
+                    ),
                 )
             }
 
@@ -75,6 +76,7 @@ export class MultiSessionConnection extends EventEmitter {
             }
 
             this._sessions.splice(this._count)
+
             return
         }
 
@@ -84,7 +86,7 @@ export class MultiSessionConnection extends EventEmitter {
                 this.params.crypto,
                 this._log.create('session'),
                 this.params.readerMap,
-                this.params.writerMap
+                this.params.writerMap,
             )
 
             // brvh
@@ -101,16 +103,17 @@ export class MultiSessionConnection extends EventEmitter {
         this._log.debug(
             'updating connections count: %d -> %d',
             this._connections.length,
-            this._count
+            this._count,
         )
 
         const newEnforcePfs = this._count > 1 && this.params.isMainConnection
         const enforcePfsChanged = newEnforcePfs !== this._enforcePfs
+
         if (enforcePfsChanged) {
             this._log.debug(
                 'enforcePfs changed: %s -> %s',
                 this._enforcePfs,
-                newEnforcePfs
+                newEnforcePfs,
             )
             this._enforcePfs = newEnforcePfs
         }
@@ -123,6 +126,7 @@ export class MultiSessionConnection extends EventEmitter {
             }
 
             this._connections.splice(this._count)
+
             return
         }
 
@@ -134,16 +138,16 @@ export class MultiSessionConnection extends EventEmitter {
 
         // create new connections
         for (let i = this._connections.length; i < this._count; i++) {
-            const session = this.params.isMainConnection
-                ? this._sessions[i]
-                : this._sessions[0]
+            const session = this.params.isMainConnection ?
+                this._sessions[i] :
+                this._sessions[0]
             const conn = new SessionConnection(
                 {
                     ...this.params,
                     usePfs: this.params.usePfs || this._enforcePfs,
                     isMainConnection: this.params.isMainConnection && i === 0,
                 },
-                session
+                session,
             )
 
             conn.on('update', (update) => this.emit('update', update))
@@ -158,7 +162,7 @@ export class MultiSessionConnection extends EventEmitter {
                 }
             })
             conn.on('tmp-key-change', (key, expires) =>
-                this.emit('tmp-key-change', i, key, expires)
+                this.emit('tmp-key-change', i, key, expires),
             )
             conn.on('auth-begin', () => {
                 this._log.debug('received auth-begin from connection %d', i)
@@ -189,12 +193,13 @@ export class MultiSessionConnection extends EventEmitter {
     sendRpc<T extends tl.RpcMethod>(
         request: T,
         stack?: string,
-        timeout?: number
+        timeout?: number,
     ): Promise<tl.RpcCallReturn[T['_']]> {
         if (this.params.isMainConnection) {
             // find the least loaded connection
             let min = Infinity
             let minIdx = 0
+
             for (let i = 0; i < this._connections.length; i++) {
                 const conn = this._connections[i]
                 const total =
@@ -219,7 +224,7 @@ export class MultiSessionConnection extends EventEmitter {
 
     async changeDc(dc: tl.RawDcOption, authKey?: Buffer | null): Promise<void> {
         await Promise.all(
-            this._connections.map((conn) => conn.changeDc(dc, authKey))
+            this._connections.map((conn) => conn.changeDc(dc, authKey)),
         )
     }
 
@@ -232,7 +237,7 @@ export class MultiSessionConnection extends EventEmitter {
     async setAuthKey(
         authKey: Buffer | null,
         temp = false,
-        idx = 0
+        idx = 0,
     ): Promise<void> {
         const session = this._sessions[idx]
         const key = temp ? session._authKeyTemp : session._authKey

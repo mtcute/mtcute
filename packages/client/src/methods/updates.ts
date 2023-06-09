@@ -1211,15 +1211,16 @@ async function _onUpdate(
             // we just needed to apply new pts values
             return
         case 'updateDcOptions':
-            if (!this._config) {
-                this._config = await this.call({ _: 'help.getConfig' })
-            } else {
-                (this._config as tl.Mutable<tl.TypeConfig>).dcOptions =
-                    upd.dcOptions
-            }
+            // fixme - forward to ConfigManager
+            // if (!this._config) {
+            //     this._config = await this.call({ _: 'help.getConfig' })
+            // } else {
+            //     (this._config as tl.Mutable<tl.TypeConfig>).dcOptions =
+            //         upd.dcOptions
+            // }
             break
         case 'updateConfig':
-            this._config = await this.call({ _: 'help.getConfig' })
+            // this._config = await this.call({ _: 'help.getConfig' })
             break
         case 'updateUserName':
             if (upd.userId === this._userId) {

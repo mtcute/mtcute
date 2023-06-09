@@ -2,10 +2,7 @@ import EventEmitter from 'events'
 
 import { tl } from '@mtcute/tl'
 
-import { ICryptoProvider, Logger } from '../utils'
 import {
-    ControllablePromise,
-    createControllablePromise,
     ICryptoProvider,
     Logger,
 } from '../utils'

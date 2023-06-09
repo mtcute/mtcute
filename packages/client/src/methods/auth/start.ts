@@ -155,7 +155,8 @@ export async function start(
             me.isBot,
         )
 
-        if (!this._disableUpdates) {
+        // todo where is this._disableUpdates?
+        if (!false) {
             this._catchUpChannels = Boolean(params.catchUp)
 
             if (!params.catchUp) {

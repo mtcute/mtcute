@@ -73,7 +73,13 @@ export class Logger {
                     const val = args[idx]
 
                     args.splice(idx, 1)
-                    if (m === '%h') return Buffer.isBuffer(val) ? val.toString('hex') : val.toString(16)
+
+                    if (m === '%h') {
+                        if (Buffer.isBuffer(val)) return val.toString('hex')
+                        if (typeof val === 'number') return val.toString(16)
+
+                        return String(val)
+                    }
                     if (m === '%b') return String(Boolean(val))
 
                     if (m === '%j') {

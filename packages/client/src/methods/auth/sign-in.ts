@@ -50,8 +50,10 @@ export async function signIn(
     await this._saveStorage()
 
     // telegram ignores invokeWithoutUpdates for auth methods
-    if (this._disableUpdates) this.primaryConnection._resetSession()
-    else this.startUpdatesLoop()
+    // todo where is this._disableUpdates?
+    // if (this._disableUpdates) this.primaryConnection._resetSession()
+    // else
+    this.startUpdatesLoop()
 
     return new User(this, res.user)
 }

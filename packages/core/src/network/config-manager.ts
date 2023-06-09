@@ -28,7 +28,7 @@ export class ConfigManager {
             if (this._updateTimeout) clearTimeout(this._updateTimeout)
             this._updateTimeout = setTimeout(
                 () => this.update(),
-                (config.expires - Date.now() / 1000) * 1000
+                (config.expires - Date.now() / 1000) * 1000,
             )
 
             for (const cb of this._listeners) cb(config)
@@ -50,6 +50,7 @@ export class ConfigManager {
 
     async get(): Promise<tl.RawConfig> {
         if (this.isStale) await this.update()
+
         return this._config!
     }
 

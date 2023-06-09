@@ -1,8 +1,10 @@
-import { TlBinaryReader, TlReaderMap } from '@mtcute/tl-runtime'
-import { buffersEqual, ICryptoProvider, Logger, randomBytes } from '../utils'
 import Long from 'long'
-import { createAesIgeForMessage } from '../utils/crypto/mtproto'
+
 import { tl } from '@mtcute/tl'
+import { TlBinaryReader, TlReaderMap } from '@mtcute/tl-runtime'
+
+import { buffersEqual, ICryptoProvider, Logger, randomBytes } from '../utils'
+import { createAesIgeForMessage } from '../utils/crypto/mtproto'
 
 export class AuthKey {
     ready = false
@@ -15,7 +17,7 @@ export class AuthKey {
     constructor(
         readonly _crypto: ICryptoProvider,
         readonly log: Logger,
-        readonly _readerMap: TlReaderMap
+        readonly _readerMap: TlReaderMap,
     ) {}
 
     match(keyId: Buffer): boolean {
@@ -37,7 +39,7 @@ export class AuthKey {
     async encryptMessage(
         message: Buffer,
         serverSalt: Long,
-        sessionId: Long
+        sessionId: Long,
     ): Promise<Buffer> {
         if (!this.ready) throw new Error('Keys are not set up!')
 
@@ -61,7 +63,7 @@ export class AuthKey {
             this._crypto,
             this.key,
             messageKey,
-            true
+            true,
         )
         const encryptedData = await ige.encrypt(buf)
 
@@ -71,7 +73,7 @@ export class AuthKey {
     async decryptMessage(
         data: Buffer,
         sessionId: Long,
-        callback: (msgId: tl.Long, seqNo: number, data: TlBinaryReader) => void
+        callback: (msgId: tl.Long, seqNo: number, data: TlBinaryReader) => void,
     ): Promise<void> {
         const messageKey = data.slice(8, 24)
         const encryptedData = data.slice(24)
@@ -80,13 +82,13 @@ export class AuthKey {
             this._crypto,
             this.key,
             messageKey,
-            false
+            false,
         )
         const innerData = await ige.decrypt(encryptedData)
 
         const expectedMessageKey = (
             await this._crypto.sha256(
-                Buffer.concat([this.serverSalt, innerData])
+                Buffer.concat([this.serverSalt, innerData]),
             )
         ).slice(8, 24)
 
@@ -94,8 +96,9 @@ export class AuthKey {
             this.log.warn(
                 '[%h] received message with invalid messageKey = %h (expected %h)',
                 messageKey,
-                expectedMessageKey
+                expectedMessageKey,
             )
+
             return
         }
 
@@ -107,8 +110,9 @@ export class AuthKey {
         if (sessionId_.neq(sessionId)) {
             this.log.warn(
                 'ignoring message with invalid sessionId = %h',
-                sessionId_
+                sessionId_,
             )
+
             return
         }
 
@@ -119,16 +123,18 @@ export class AuthKey {
             this.log.warn(
                 'ignoring message with invalid length: %d > %d',
                 length,
-                innerData.length - 32
+                innerData.length - 32,
             )
+
             return
         }
 
         if (length % 4 !== 0) {
             this.log.warn(
                 'ignoring message with invalid length: %d is not a multiple of 4',
-                length
+                length,
             )
+
             return
         }
 
@@ -137,8 +143,9 @@ export class AuthKey {
         if (paddingSize < 12 || paddingSize > 1024) {
             this.log.warn(
                 'ignoring message with invalid padding size: %d',
-                paddingSize
+                paddingSize,
             )
+
             return
         }
 

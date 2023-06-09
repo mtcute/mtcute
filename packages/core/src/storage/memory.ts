@@ -195,7 +195,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         dcId: number,
         index: number,
         key: Buffer | null,
-        expiresAt: number
+        expiresAt: number,
     ): void {
         const k = `${dcId}:${index}`
         this._state.authKeysTemp[k] = key
@@ -210,8 +210,8 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         if (tempIndex !== undefined) {
             const k = `${dcId}:${tempIndex}`
 
-            if (Date.now() > (this._state.authKeysTempExpiry[k] ?? 0))
-                return null
+            if (Date.now() > (this._state.authKeysTempExpiry[k] ?? 0)) { return null }
+
             return this._state.authKeysTemp[k]
         }
 

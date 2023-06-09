@@ -501,15 +501,16 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         return this._getFromKv('def_dc')
     }
 
-    getAuthKeyFor(dcId: number, tempIndex?: number): Promise<Buffer | null> {
+    getAuthKeyFor(dcId: number, tempIndex?: number): Buffer | null {
         let row
+
         if (tempIndex !== undefined) {
             row = this._statements.getAuthTemp.get(dcId, tempIndex, Date.now())
         } else {
             row = this._statements.getAuth.get(dcId)
         }
 
-        return row ? row.key : null
+        return row ? (row as { key: Buffer }).key : null
     }
 
     setAuthKeyFor(dcId: number, key: Buffer | null): void {
@@ -523,12 +524,12 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         dcId: number,
         index: number,
         key: Buffer | null,
-        expires: number
+        expires: number,
     ): void {
         this._pending.push([
-            key === null
-                ? this._statements.delAuthTemp
-                : this._statements.setAuthTemp,
+            key === null ?
+                this._statements.delAuthTemp :
+                this._statements.setAuthTemp,
             key === null ? [dcId, index] : [dcId, index, key, expires],
         ])
     }
@@ -536,7 +537,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     dropAuthKeysFor(dcId: number): void {
         this._pending.push(
             [this._statements.delAuth, [dcId]],
-            [this._statements.delAllAuthTemp, [dcId]]
+            [this._statements.delAllAuthTemp, [dcId]],
         )
     }
 

@@ -79,6 +79,7 @@ export async function startTest(
         if (!availableDcs.find((dc) => dc.id === id)) { throw new MtArgumentError(`${phone} has invalid DC ID (${id})`) }
     } else {
         let dcId = this._defaultDc.id
+
         if (params.dcId) {
             if (!availableDcs.find((dc) => dc.id === params!.dcId)) { throw new MtArgumentError(`DC ID is invalid (${dcId})`) }
             dcId = params.dcId
