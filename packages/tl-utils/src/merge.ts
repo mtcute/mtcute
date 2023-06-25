@@ -33,10 +33,10 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
         if (arg.type === '#') {
             flagsLastIndex[arg.name] = idx
         }
-        if (arg.predicate) {
-            const flagsField = arg.predicate.split('.')[0]
-            flagsLastIndex[flagsField] = idx
-        }
+        // if (arg.predicate) {
+        //     const flagsField = arg.predicate.split('.')[0]
+        //     flagsLastIndex[flagsField] = idx
+        // }
     })
 
     for (let i = 1; i < entries.length; i++) {
@@ -55,7 +55,9 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
             result.name !== entry.name ||
             result.type !== entry.type ||
             result.id !== ctorId
-        ) { return 'basic info mismatch' }
+        ) {
+            return 'basic info mismatch'
+        }
 
         // since we re-calculated id manually, we can skip checking
         // generics and arguments, and get straight to merging
@@ -72,13 +74,14 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
                 // yay a new arg
                 // we can only add optional true args, since any others will change id
                 // ids match, so this must be the case
-                if (!entryArgument.predicate) {
+                if (!entryArgument.typeModifiers?.predicate) {
                     throw new Error('new argument is not optional')
                 }
 
                 // we also need to make sure we put it *after* the respective flags field
 
-                const flagsField = entryArgument.predicate.split('.')[0]
+                const flagsField =
+                    entryArgument.typeModifiers.predicate.split('.')[0]
                 const targetIdx = flagsLastIndex[flagsField]
 
                 // targetIdx *must* exist, otherwise ids wouldn't match

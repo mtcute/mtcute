@@ -29,11 +29,21 @@ export function patchRuntimeTlSchema(
 } {
     const entries = parseTlToEntries(schema)
 
-    const readersCode = generateReaderCodeForTlEntries(entries, '_', false)
-    const writersCode = generateWriterCodeForTlEntries(entries, '_', true)
+    const readersCode = generateReaderCodeForTlEntries(entries, {
+        variableName: '_',
+        includeMethods: false,
+    })
+    const writersCode = generateWriterCodeForTlEntries(entries, {
+        variableName: '_',
+        includePrelude: true,
+    })
 
-    const newReaders = evalForResult<TlReaderMap>(readersCode.replace('var _=', 'return'))
-    const newWriters = evalForResult<TlWriterMap>(writersCode.replace('var _=', 'return'))
+    const newReaders = evalForResult<TlReaderMap>(
+        readersCode.replace('var _=', 'return'),
+    )
+    const newWriters = evalForResult<TlWriterMap>(
+        writersCode.replace('var _=', 'return'),
+    )
 
     return {
         readerMap: {

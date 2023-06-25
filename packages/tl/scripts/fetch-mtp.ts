@@ -24,10 +24,7 @@ async function main() {
     const schema = await fetchMtprotoSchema()
 
     console.log('Parsing...')
-    let entries = parseTlToEntries(schema, {
-        prefix: 'mt_',
-        applyPrefixToArguments: true,
-    })
+    let entries = parseTlToEntries(schema, { prefix: 'mt_' })
 
     // remove manually parsed types
     entries = entries.filter(

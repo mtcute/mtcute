@@ -1,4 +1,63 @@
 /**
+ * Modifiers for {@link TlArgument.type}
+ */
+export interface TlArgumentModifiers {
+    /**
+     * Predicate of the argument
+     * @example `flags.3`
+     */
+    predicate?: string
+
+    /**
+     * Whether `type` is in fact a `Vector`
+     * @example `type=long, isVector=true => Vector<long>
+     */
+    isVector?: boolean
+
+    /**
+     * Whether `type` is in fact a `vector` (a bare vector, not to be confused with `Vector`).
+     *
+     * The difference between `Vector<T>` and `vector<T>` is that in the latter case
+     * constructor ID of the vector itself (1cb5c415) is omitted
+     *
+     * @example `type=long, isVector=false, isBareVector=true => vector<long>
+     */
+    isBareVector?: boolean
+
+    /**
+     * Whether `type` is in fact a "bare" type (a %-prefixed type) from within a union.
+     *
+     * The difference between `T` and `%T` is that in the latter case
+     * constructor ID of `T` is omitted.
+     *
+     * Note: If there are more than 1 types within that union, this syntax is not valid.
+     *
+     * @example `type=Message, isBare=true => %Message
+     */
+    isBareUnion?: boolean
+
+    /**
+     * Whether `type` is in fact a "bare" type (a %-prefixed type)
+     *
+     * The difference between `T` and `%T` is that in the latter case
+     * constructor ID of `T` is omitted.
+     *
+     * The difference with {@link isBareUnion} is in the kind of `type`.
+     * For {@link isBareUnion}, `type` is a name of a union (e.g. `Message`),
+     * for {@link isBareType} it is a name of a type (e.g. `message`).
+     */
+    isBareType?: boolean
+
+    /**
+     * For simplicity, when {@link isBareUnion} or {@link isBareType} is true,
+     * this field contains the constructor ID of the type being referenced.
+     *
+     * May still be undefined if the constructor ID is not known.
+     */
+    constructorId?: number
+}
+
+/**
  * An argument of a TL entry
  */
 export interface TlArgument {
@@ -8,15 +67,14 @@ export interface TlArgument {
     name: string
 
     /**
-     * Type of the argument
+     * Type of the argument. Usually a name of a Union, but not always
      */
     type: string
 
     /**
-     * Predicate of the argument
-     * @example `flags.3`
+     * Modifiers for {@link type}
      */
-    predicate?: string
+    typeModifiers?: TlArgumentModifiers
 
     /**
      * Comment of the argument
@@ -267,11 +325,6 @@ export interface TlArgumentDiff {
      * Type of the argument diff
      */
     type?: PropertyDiff<string>
-
-    /**
-     * Predicate of the argument diff
-     */
-    predicate?: PropertyDiff<string | undefined>
 
     /**
      * Comment of the argument diff

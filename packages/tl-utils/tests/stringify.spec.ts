@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
 import { writeTlEntryToString } from '../src/stringify'
-import { TlEntry } from '../src/types'
+import { TlArgument, TlEntry } from '../src/types'
 
 describe('writeTlEntryToString', () => {
     const make = (name: string, type: string, ...args: string[]): TlEntry => ({
@@ -18,14 +18,16 @@ describe('writeTlEntryToString', () => {
                 return {
                     name: a[0],
                     type: t[1],
-                    predicate: t[0],
-                }
+                    typeModifiers: {
+                        predicate: t[0],
+                    },
+                } satisfies TlArgument
             }
 
             return {
                 name: a[0],
                 type: t[0],
-            }
+            } satisfies TlArgument
         }),
     })
 

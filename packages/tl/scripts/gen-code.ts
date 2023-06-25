@@ -56,11 +56,16 @@ async function generateReaders(
 ) {
     console.log('Generating readers...')
 
-    let code = generateReaderCodeForTlEntries(apiSchema.entries, 'r', false)
+    let code = generateReaderCodeForTlEntries(apiSchema.entries, {
+        variableName: 'm',
+        includeMethods: false,
+    })
 
-    const mtpCode = generateReaderCodeForTlEntries(mtpSchema.entries, '')
-    code = code.substring(0, code.length - 1) + mtpCode.substring(7)
-    code += '\nexports.default = r;'
+    const mtpCode = generateReaderCodeForTlEntries(mtpSchema.entries, {
+        variableName: 'm',
+    })
+    code = code.substring(0, code.length - 1) + mtpCode.substring(8)
+    code += '\nexports.default = m;'
 
     await writeFile(OUT_READERS_FILE, ESM_PRELUDE + code)
 }
@@ -71,11 +76,16 @@ async function generateWriters(
 ) {
     console.log('Generating writers...')
 
-    let code = generateWriterCodeForTlEntries(apiSchema.entries, 'r')
+    let code = generateWriterCodeForTlEntries(apiSchema.entries, {
+        variableName: 'm',
+    })
 
-    const mtpCode = generateWriterCodeForTlEntries(mtpSchema.entries, '', false)
+    const mtpCode = generateWriterCodeForTlEntries(mtpSchema.entries, {
+        variableName: 'm',
+        includePrelude: false,
+    })
     code = code.substring(0, code.length - 1) + mtpCode.substring(7)
-    code += '\nexports.default = r;'
+    code += '\nexports.default = m;'
 
     await writeFile(OUT_WRITERS_FILE, ESM_PRELUDE + code)
 }

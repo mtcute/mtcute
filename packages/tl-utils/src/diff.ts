@@ -7,6 +7,7 @@ import {
     TlFullSchema,
     TlSchemaDiff,
 } from './types'
+import { stringifyArgumentType } from './utils'
 
 /**
  * Compute difference between two TL entries.
@@ -89,17 +90,16 @@ export function generateTlEntriesDifference(
             name: arg.name,
         }
 
-        if (arg.type !== oldArg.type) {
-            diff.type = {
-                old: oldArg.type,
-                new: arg.type,
-            }
-        }
+        const argStr = stringifyArgumentType(arg.type, arg.typeModifiers)
+        const oldArgStr = stringifyArgumentType(
+            oldArg.type,
+            oldArg.typeModifiers,
+        )
 
-        if (arg.predicate !== oldArg.predicate) {
-            diff.predicate = {
-                old: oldArg.predicate,
-                new: arg.predicate,
+        if (argStr !== oldArgStr) {
+            diff.type = {
+                old: oldArgStr,
+                new: argStr,
             }
         }
 
@@ -110,7 +110,7 @@ export function generateTlEntriesDifference(
             }
         }
 
-        if (diff.type || diff.predicate || diff.comment) {
+        if (diff.type || diff.comment) {
             argsDiff.modified.push(diff)
         }
     })

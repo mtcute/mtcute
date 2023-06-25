@@ -2,8 +2,39 @@ import { computeConstructorIdFromEntry } from '../ctor-id'
 import { TL_PRIMITIVES, TlEntry } from '../types'
 import { snakeToCamel } from './utils'
 
+export interface WriterCodegenOptions {
+    /**
+     * Whether to use `flags` field from the input
+     * @default false
+     */
+    includeFlags?: boolean
+
+    /**
+     * Name of the variable to use for the writers map
+     * @default 'm'
+     */
+    variableName?: string
+
+    /**
+     * Whether to include prelude code (function `h`)
+     */
+    includePrelude?: boolean
+
+    /**
+     * Whether to generate bare writer (without constructor id write)
+     */
+    bare?: boolean
+}
+
+const DEFAULT_OPTIONS: WriterCodegenOptions = {
+    includeFlags: false,
+    variableName: 'm',
+    includePrelude: true,
+    bare: false,
+}
+
 const TL_WRITER_PRELUDE =
-    'function h(o, p){' +
+    'function h(o,p){' +
     'var q=o[p];' +
     'if(q===void 0)' +
     "throw Error('Object '+o._+' is missing required property '+p);" +
@@ -11,37 +42,42 @@ const TL_WRITER_PRELUDE =
 
 /**
  * Generate writer code for a single entry.
- * `h` (has) function should be available
+ * `h` (has) function from the prelude should be available
  *
  * @param entry  Entry to generate writer for
- * @param withFlags  Whether to include `flags` field in the result object
+ * @param params  Options
  * @returns  Code as a readers map entry
  */
 export function generateWriterCodeForTlEntry(
     entry: TlEntry,
-    withFlags = false,
+    params = DEFAULT_OPTIONS,
 ): string {
+    const { bare, includeFlags, variableName } = {
+        ...DEFAULT_OPTIONS,
+        ...params,
+    }
+
     if (entry.id === 0) entry.id = computeConstructorIdFromEntry(entry)
 
-    let ret = `'${entry.name}':function(w${
-        entry.arguments.length ? ',v' : ''
-    }){`
+    const name = bare ? entry.id : `'${entry.name}'`
+    let ret = `${name}:function(w${entry.arguments.length ? ',v' : ''}){`
 
-    ret += `w.uint(${entry.id});`
+    if (!bare) ret += `w.uint(${entry.id});`
 
     const flagsFields: Record<string, 1> = {}
 
     entry.arguments.forEach((arg) => {
         if (arg.type === '#') {
-            ret += `var ${arg.name}=${withFlags ? `v.${arg.name}` : '0'};`
+            ret += `var ${arg.name}=${includeFlags ? `v.${arg.name}` : '0'};`
 
             entry.arguments.forEach((arg1) => {
+                const predicate = arg1.typeModifiers?.predicate
+
                 let s
 
-                if (
-                    !arg1.predicate ||
-                    (s = arg1.predicate.split('.'))[0] !== arg.name
-                ) { return }
+                if (!predicate || (s = predicate.split('.'))[0] !== arg.name) {
+                    return
+                }
 
                 const arg1Name = snakeToCamel(arg1.name)
 
@@ -49,7 +85,7 @@ export function generateWriterCodeForTlEntry(
 
                 if (isNaN(bitIndex) || bitIndex < 0 || bitIndex > 32) {
                     throw new Error(
-                        `Invalid predicate: ${arg1.predicate} - invalid bit`,
+                        `Invalid predicate: ${predicate} - invalid bit`,
                     )
                 }
 
@@ -57,7 +93,10 @@ export function generateWriterCodeForTlEntry(
 
                 if (arg1.type === 'true') {
                     ret += `if(v.${arg1Name}===true)${action}`
-                } else if (arg1.type.match(/^[Vv]ector/)) {
+                } else if (
+                    arg1.typeModifiers?.isVector ||
+                    arg1.typeModifiers?.isBareVector
+                ) {
                     ret += `var _${arg1Name}=v.${arg1Name}&&v.${arg1Name}.length;if(_${arg1Name})${action}`
                 } else {
                     ret += `var _${arg1Name}=v.${arg1Name}!==undefined;if(_${arg1Name})${action}`
@@ -72,21 +111,16 @@ export function generateWriterCodeForTlEntry(
 
         const argName = snakeToCamel(arg.name)
 
-        let vector = false
         let type = arg.type
-        const m = type.match(/^[Vv]ector[< ](.+?)[> ]$/)
 
-        if (m) {
-            vector = true
-            type = m[1]
-        }
+        let accessor = `v.${argName}`
 
-        if (arg.predicate) {
+        if (arg.typeModifiers?.predicate) {
             if (type === 'true') return // included in flags
 
             ret += `if(_${argName})`
         } else {
-            ret += `h(v,'${argName}');`
+            accessor = `h(v,'${argName}')`
         }
 
         if (type in TL_PRIMITIVES) {
@@ -95,10 +129,26 @@ export function generateWriterCodeForTlEntry(
             type = 'object'
         }
 
-        if (vector) {
-            ret += `w.vector(w.${type}, v.${argName});`
+        let writer = `w.${type}`
+        const isBare =
+            arg.typeModifiers?.isBareType || arg.typeModifiers?.isBareUnion
+
+        if (isBare) {
+            if (!arg.typeModifiers?.constructorId) {
+                throw new Error(
+                    `Cannot generate writer for ${entry.name}#${arg.name} - no constructor id referenced`,
+                )
+            }
+
+            writer = `${variableName}._bare[${arg.typeModifiers.constructorId}]`
+        }
+
+        if (arg.typeModifiers?.isVector) {
+            ret += `w.vector(${writer},${accessor});`
+        } else if (arg.typeModifiers?.isBareVector) {
+            ret += `w.vector(${writer},${accessor},1);`
         } else {
-            ret += `w.${type}(v.${argName});`
+            ret += `${writer}(${isBare ? 'w,' : ''}${accessor});`
         }
     })
 
@@ -109,23 +159,47 @@ export function generateWriterCodeForTlEntry(
  * Generate writer code for a given TL schema.
  *
  * @param entries  Entries to generate writers for
- * @param varName  Name of the variable to use for the writers map
- * @param prelude  Whether to include the prelude (containing `h` function)
- * @param withFlags  Whether to include `flags` field in the result object
+ * @param params  Codegen options
  */
 export function generateWriterCodeForTlEntries(
     entries: TlEntry[],
-    varName: string,
-    prelude = true,
-    withFlags = false,
+    params = DEFAULT_OPTIONS,
 ): string {
-    let ret = ''
-    if (prelude) ret += TL_WRITER_PRELUDE
-    ret += `var ${varName}={\n`
+    const { includePrelude, variableName } = { ...DEFAULT_OPTIONS, ...params }
 
+    let ret = ''
+    if (includePrelude) ret += TL_WRITER_PRELUDE
+    ret += `var ${variableName}={\n`
+
+    const usedAsBareIds: Record<number, 1> = {}
     entries.forEach((entry) => {
-        ret += generateWriterCodeForTlEntry(entry, withFlags) + '\n'
+        ret += generateWriterCodeForTlEntry(entry, params) + '\n'
+
+        entry.arguments.forEach((arg) => {
+            if (arg.typeModifiers?.constructorId) {
+                usedAsBareIds[arg.typeModifiers.constructorId] = 1
+            }
+        })
     })
+
+    if (Object.keys(usedAsBareIds).length) {
+        ret += '_bare:{\n'
+
+        Object.keys(usedAsBareIds).forEach((id) => {
+            const entry = entries.find((e) => e.id === parseInt(id))
+
+            if (!entry) {
+                return
+            }
+
+            ret +=
+                generateWriterCodeForTlEntry(entry, {
+                    ...params,
+                    bare: true,
+                }) + '\n'
+        })
+        ret += '}'
+    }
 
     return ret + '}'
 }

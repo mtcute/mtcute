@@ -1,4 +1,5 @@
 import { TlEntry } from './types'
+import { stringifyArgumentType } from './utils'
 
 function normalizeType(s: string): string {
     return s
@@ -39,18 +40,22 @@ export function writeTlEntryToString(
     }
 
     for (const arg of entry.arguments) {
-        if (forIdComputation && arg.predicate && arg.type === 'true') continue
+        if (
+            forIdComputation &&
+            arg.typeModifiers?.predicate &&
+            arg.type === 'true'
+        ) {
+            continue
+        }
 
         str += arg.name + ':'
 
-        if (arg.predicate) {
-            str += arg.predicate + '?'
-        }
+        const type = stringifyArgumentType(arg.type, arg.typeModifiers)
 
         if (forIdComputation) {
-            str += normalizeType(arg.type) + ' '
+            str += normalizeType(type) + ' '
         } else {
-            str += arg.type + ' '
+            str += type + ' '
         }
     }
 

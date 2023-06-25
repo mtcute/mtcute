@@ -1,12 +1,15 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { parseTlToEntries } from '../src/parse'
-import { TlEntry } from '../src/types'
+import { parseTlToEntries, TlEntry } from '../src'
 
 describe('tl parser', () => {
-    const test = (tl: string, expected: TlEntry[]) => {
-        expect(parseTlToEntries(tl)).eql(expected)
+    const test = (
+        tl: string,
+        expected: TlEntry[],
+        params?: Parameters<typeof parseTlToEntries>[1],
+    ) => {
+        expect(parseTlToEntries(tl, params)).eql(expected)
     }
 
     it('skips empty lines and comments', () => {
@@ -67,6 +70,132 @@ boolTrue#997275b5 = Bool;
                 ],
             },
         ])
+    })
+
+    it('parses vectors', () => {
+        test('msg_resend_req#7d861a08 msg_ids:Vector<long> = MsgResendReq;', [
+            {
+                kind: 'class',
+                name: 'msg_resend_req',
+                id: 0x7d861a08,
+                type: 'MsgResendReq',
+                arguments: [
+                    {
+                        name: 'msg_ids',
+                        type: 'long',
+                        typeModifiers: {
+                            isVector: true,
+                        },
+                    },
+                ],
+            },
+        ])
+    })
+
+    it('parses bare vectors', () => {
+        // note: not from schema, schema uses bare `future_salt` instead
+        test(
+            'future_salts#ae500895 req_msg_id:long now:int salts:vector<FutureSalt> = FutureSalts;',
+            [
+                {
+                    kind: 'class',
+                    name: 'future_salts',
+                    id: 0xae500895,
+                    type: 'FutureSalts',
+                    arguments: [
+                        {
+                            name: 'req_msg_id',
+                            type: 'long',
+                        },
+                        {
+                            name: 'now',
+                            type: 'int',
+                        },
+                        {
+                            name: 'salts',
+                            type: 'FutureSalt',
+                            typeModifiers: {
+                                isBareVector: true,
+                            },
+                        },
+                    ],
+                },
+            ],
+        )
+    })
+
+    it('parses bare unions', () => {
+        test(
+            'message#0949d9dc = Message;\n' + // stub so we can reference it
+                'msg_container#73f1f8dc messages:vector<%Message> = MessageContainer;',
+            [
+                {
+                    kind: 'class',
+                    name: 'message',
+                    id: 0x0949d9dc,
+                    type: 'Message',
+                    arguments: [],
+                },
+                {
+                    kind: 'class',
+                    name: 'msg_container',
+                    id: 0x73f1f8dc,
+                    type: 'MessageContainer',
+                    arguments: [
+                        {
+                            name: 'messages',
+                            type: 'Message',
+                            typeModifiers: {
+                                isBareVector: true,
+                                isBareUnion: true,
+                                constructorId: 0x0949d9dc,
+                            },
+                        },
+                    ],
+                },
+            ],
+        )
+    })
+
+    it('parses bare types', () => {
+        test(
+            'future_salt#0949d9dc = FutureSalt;\n' + // stub so we can reference it
+                'future_salts#ae500895 req_msg_id:long now:int salts:vector<future_salt> = FutureSalts;',
+            [
+                {
+                    kind: 'class',
+                    name: 'future_salt',
+                    id: 0x0949d9dc,
+                    type: 'FutureSalt',
+                    arguments: [],
+                },
+                {
+                    kind: 'class',
+                    name: 'future_salts',
+                    id: 0xae500895,
+                    type: 'FutureSalts',
+                    arguments: [
+                        {
+                            name: 'req_msg_id',
+                            type: 'long',
+                        },
+                        {
+                            name: 'now',
+                            type: 'int',
+                        },
+                        {
+                            name: 'salts',
+                            type: 'future_salt',
+                            typeModifiers: {
+                                isBareVector: true,
+                                isBareType: true,
+                                constructorId: 0x0949d9dc,
+                            },
+                        },
+                    ],
+                },
+            ],
+        )
     })
 
     it('parses methods with arguments', () => {
@@ -148,7 +277,7 @@ boolTrue#997275b5 = Bool;
 
     it('parses predicates', () => {
         test(
-            'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer chats:Vector<Chat> users:Vector<User> psa_type:flags.1?string psa_message:flags.2?string = help.PromoData;',
+            'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer psa_type:flags.1?string psa_message:flags.2?string = help.PromoData;',
             [
                 {
                     kind: 'class',
@@ -163,7 +292,9 @@ boolTrue#997275b5 = Bool;
                         {
                             name: 'proxy',
                             type: 'true',
-                            predicate: 'flags.0',
+                            typeModifiers: {
+                                predicate: 'flags.0',
+                            },
                         },
                         {
                             name: 'expires',
@@ -174,22 +305,18 @@ boolTrue#997275b5 = Bool;
                             type: 'Peer',
                         },
                         {
-                            name: 'chats',
-                            type: 'Vector<Chat>',
-                        },
-                        {
-                            name: 'users',
-                            type: 'Vector<User>',
-                        },
-                        {
                             name: 'psa_type',
                             type: 'string',
-                            predicate: 'flags.1',
+                            typeModifiers: {
+                                predicate: 'flags.1',
+                            },
                         },
                         {
                             name: 'psa_message',
                             type: 'string',
-                            predicate: 'flags.2',
+                            typeModifiers: {
+                                predicate: 'flags.2',
+                            },
                         },
                     ],
                 },
@@ -298,5 +425,43 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
             'another comment but multiline',
             'yet another at the end',
         ])
+    })
+
+    it('applies prefix to constructors', () => {
+        test(
+            'future_salt#0949d9dc = FutureSalt;\n' + // stub to reference
+                'future_salts#ae500895 salts:vector<future_salt> current:FutureSalt = FutureSalts;',
+            [
+                {
+                    kind: 'class',
+                    name: 'mt_future_salt',
+                    id: 0x0949d9dc,
+                    type: 'FutureSalt',
+                    arguments: [],
+                },
+                {
+                    kind: 'class',
+                    name: 'mt_future_salts',
+                    id: 0xae500895,
+                    type: 'FutureSalts',
+                    arguments: [
+                        {
+                            name: 'salts',
+                            type: 'mt_future_salt',
+                            typeModifiers: {
+                                isBareVector: true,
+                                isBareType: true,
+                                constructorId: 0x0949d9dc,
+                            },
+                        },
+                        {
+                            name: 'current',
+                            type: 'FutureSalt', // prefix is not applied to non-constructors
+                        },
+                    ],
+                },
+            ],
+            { prefix: 'mt_' },
+        )
     })
 })

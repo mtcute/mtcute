@@ -1,5 +1,6 @@
 import CRC32 from 'crc-32'
 
+import { parseTlToEntries } from './parse'
 import { writeTlEntryToString } from './stringify'
 import { TlEntry } from './types'
 
@@ -9,19 +10,8 @@ import { TlEntry } from './types'
  * @param line  Line containing TL entry definition
  */
 export function computeConstructorIdFromString(line: string): number {
-    return (
-        CRC32.str(
-            // normalize
-            line
-                .replace(
-                    /[{};]|[a-zA-Z0-9_]+:flags\.[0-9]+\?true|#[0-9a-f]{1,8}/g,
-                    '',
-                )
-                .replace(/[<>]/g, ' ')
-                .replace(/ +/g, ' ')
-                .replace(':bytes', ':string')
-                .trim(),
-        ) >>> 0
+    return computeConstructorIdFromEntry(
+        parseTlToEntries(line, { forIdComputation: true })[0],
     )
 }
 

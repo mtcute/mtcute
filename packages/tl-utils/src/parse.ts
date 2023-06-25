@@ -1,18 +1,9 @@
 import { computeConstructorIdFromString } from './ctor-id'
-import { TL_PRIMITIVES, TlEntry } from './types'
-import { parseTdlibStyleComment } from './utils'
+import { TL_PRIMITIVES, TlArgument, TlEntry } from './types'
+import { parseArgumentType, parseTdlibStyleComment } from './utils'
 
 const SINGLE_REGEX =
     /^(.+?)(?:#([0-9a-f]{1,8}))?(?: \?)?(?: {(.+?:.+?)})? ((?:.+? )*)= (.+);$/
-
-function applyPrefix(prefix: string, type: string): string {
-    if (type in TL_PRIMITIVES) return type
-
-    const m = type.match(/^[Vv]ector[< ](.+?)[> ]$/)
-    if (m) return `Vector<${applyPrefix(prefix, m[1])}>`
-
-    return prefix + type
-}
 
 /**
  * Parse TL schema into a list of entries.
@@ -50,12 +41,16 @@ export function parseTlToEntries(
         prefix?: string
 
         /**
-         * Whether to apply the prefix to arguments as well
+         * Whether this invocation is for computing constructor ids.
+         * If true, the `id` field will be set to 0 for all entries.
          */
-        applyPrefixToArguments?: boolean
+        forIdComputation?: boolean
     },
 ): TlEntry[] {
     const ret: TlEntry[] = []
+
+    const entries: Record<string, TlEntry> = {}
+    const unions: Record<string, TlEntry[]> = {}
 
     const lines = tl.split('\n')
 
@@ -124,9 +119,11 @@ export function parseTlToEntries(
             return
         }
 
-        const typeIdNum = typeId ?
-            parseInt(typeId, 16) :
-            computeConstructorIdFromString(line)
+        let typeIdNum = typeId ? parseInt(typeId, 16) : 0
+
+        if (typeIdNum === 0 && !params?.forIdComputation) {
+            typeIdNum = computeConstructorIdFromString(line)
+        }
 
         const argsParsed =
             args && !args.match(/\[ [a-z]+ ]/i) ?
@@ -138,7 +135,7 @@ export function parseTlToEntries(
 
         const entry: TlEntry = {
             kind: currentKind,
-            name: prefix + typeName,
+            name: typeName,
             id: typeIdNum,
             type,
             arguments: [],
@@ -153,31 +150,18 @@ export function parseTlToEntries(
         }
 
         if (argsParsed.length) {
-            argsParsed.forEach(([name, typ]) => {
-                let [predicate, type] = typ.split('?')
-
-                if (!type) {
-                    // no predicate, `predicate` is the type
-
-                    if (params?.applyPrefixToArguments) {
-                        predicate = applyPrefix(prefix, predicate)
-                    }
-                    entry.arguments.push({
-                        name,
-                        type: predicate,
-                    })
-                } else {
-                    // there is a predicate
-
-                    if (params?.applyPrefixToArguments) {
-                        type = applyPrefix(prefix, type)
-                    }
-                    entry.arguments.push({
-                        name,
-                        type,
-                        predicate,
-                    })
+            argsParsed.forEach(([name, type_]) => {
+                const [type, modifiers] = parseArgumentType(type_)
+                const item: TlArgument = {
+                    name,
+                    type,
                 }
+
+                if (Object.keys(modifiers).length) {
+                    item.typeModifiers = modifiers
+                }
+
+                entry.arguments.push(item)
             })
         }
 
@@ -201,11 +185,59 @@ export function parseTlToEntries(
         }
 
         ret.push(entry)
+        entries[entry.name] = entry
+
+        if (entry.kind === 'class') {
+            if (!unions[entry.type]) unions[entry.type] = []
+            unions[entry.type].push(entry)
+        }
     })
 
     if (currentComment && params?.onOrphanComment) {
         params.onOrphanComment(currentComment)
     }
+
+    // post-process:
+    // - find arguments where type is not a union and put corresponding modifiers
+    // - apply prefix
+    ret.forEach((entry, entryIdx) => {
+        entry.arguments.forEach((arg) => {
+            const type = arg.type
+
+            if (type in TL_PRIMITIVES) {
+                return
+            }
+
+            if (type in unions && arg.typeModifiers?.isBareUnion) {
+                if (unions[type].length !== 1) {
+                    const err = new Error(
+                        `Union ${type} has more than one entry, cannot use it like %${type} (found in ${entry.name}#${arg.name})`,
+                    )
+
+                    if (params?.panicOnError) {
+                        throw err
+                    } else if (params?.onError) {
+                        params.onError(err, '', entryIdx)
+                    } else {
+                        console.warn(err)
+                    }
+                }
+                arg.typeModifiers.constructorId = unions[type][0].id
+            } else if (type in entries) {
+                if (!arg.typeModifiers) arg.typeModifiers = {}
+                arg.typeModifiers.isBareType = true
+                arg.typeModifiers.constructorId = entries[type].id
+
+                if (prefix) {
+                    arg.type = prefix + arg.type
+                }
+            }
+        })
+
+        if (prefix) {
+            entry.name = prefix + entry.name
+        }
+    })
 
     return ret
 }

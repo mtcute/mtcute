@@ -4,9 +4,9 @@ import { describe, it } from 'mocha'
 import {
     generateTypescriptDefinitionsForTlEntry,
     generateTypescriptDefinitionsForTlSchema,
-} from '../../src/codegen/types'
-import { parseTlToEntries } from '../../src/parse'
-import { parseFullTlSchema } from '../../src/schema'
+    parseFullTlSchema,
+    parseTlToEntries,
+} from '../../src'
 
 describe('generateTypescriptDefinitionsForTlEntry', () => {
     const test = (tl: string, ...ts: string[]) => {
@@ -112,7 +112,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
         it('wraps long comments', () => {
             test(
                 '// This is a test constructor with a very very very very very very very very long comment\n' +
-                'test = Test;',
+                    'test = Test;',
                 '/**',
                 ' * This is a test constructor with a very very very very very',
                 ' * very very very long comment',
@@ -124,8 +124,8 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
 
             test(
                 '---functions---\n' +
-                '// This is a test method with a very very very very very very very very long comment\n' +
-                'test = Test;',
+                    '// This is a test method with a very very very very very very very very long comment\n' +
+                    'test = Test;',
                 '/**',
                 ' * This is a test method with a very very very very very very',
                 ' * very very long comment',
@@ -141,7 +141,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
         it('should not break @link tags', () => {
             test(
                 '// This is a test constructor with a very long comment {@link whatever} more text\n' +
-                'test = Test;',
+                    'test = Test;',
                 '/**',
                 ' * This is a test constructor with a very long comment',
                 ' * {@link whatever} more text',
@@ -156,7 +156,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
     it('writes generic types', () => {
         test(
             '---functions---\ninvokeWithoutUpdates#bf9459b7 {X:Type} query:!X = X;',
-            'interface RawInvokeWithoutUpdatesRequest<X extends tl.TlObject> {',
+            'interface RawInvokeWithoutUpdatesRequest<X extends tl.TlObject = tl.TlObject> {',
             "    _: 'invokeWithoutUpdates';",
             '    query: X;',
             '}',

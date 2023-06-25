@@ -1,12 +1,15 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { generateWriterCodeForTlEntry } from '../../src/codegen/writer'
-import { parseTlToEntries } from '../../src/parse'
+import {
+    generateWriterCodeForTlEntries,
+    generateWriterCodeForTlEntry,
+    parseTlToEntries,
+} from '../../src'
 
 describe('generateWriterCodeForTlEntry', () => {
     const test = (tl: string, ...js: string[]) => {
-        const entry = parseTlToEntries(tl)[0]
+        const entry = parseTlToEntries(tl).slice(-1)[0]
         expect(generateWriterCodeForTlEntry(entry)).eq(
             `'${entry.name}':function(w${
                 entry.arguments.length ? ',v' : ''
@@ -21,30 +24,21 @@ describe('generateWriterCodeForTlEntry', () => {
     it('generates code for constructors with simple arguments', () => {
         test(
             'inputBotInlineMessageID#890c3d89 dc_id:int id:long access_hash:long = InputBotInlineMessageID;',
-            "h(v,'dcId');",
-            'w.int(v.dcId);',
-            "h(v,'id');",
-            'w.long(v.id);',
-            "h(v,'accessHash');",
-            'w.long(v.accessHash);',
+            "w.int(h(v,'dcId'));",
+            "w.long(h(v,'id'));",
+            "w.long(h(v,'accessHash'));",
         )
         test(
             'contact#145ade0b user_id:long mutual:Bool = Contact;',
-            "h(v,'userId');",
-            'w.long(v.userId);',
-            "h(v,'mutual');",
-            'w.boolean(v.mutual);',
+            "w.long(h(v,'userId'));",
+            "w.boolean(h(v,'mutual'));",
         )
         test(
             'maskCoords#aed6dbb2 n:int x:double y:double zoom:double = MaskCoords;',
-            "h(v,'n');",
-            'w.int(v.n);',
-            "h(v,'x');",
-            'w.double(v.x);',
-            "h(v,'y');",
-            'w.double(v.y);',
-            "h(v,'zoom');",
-            'w.double(v.zoom);',
+            "w.int(h(v,'n'));",
+            "w.double(h(v,'x'));",
+            "w.double(h(v,'y'));",
+            "w.double(h(v,'zoom'));",
         )
     })
 
@@ -65,8 +59,7 @@ describe('generateWriterCodeForTlEntry', () => {
             'var _timeout=v.timeout!==undefined;',
             'if(_timeout)flags|=2;',
             'w.uint(flags);',
-            "h(v,'pts');",
-            'w.int(v.pts);',
+            "w.int(h(v,'pts'));",
             'if(_timeout)w.int(v.timeout);',
         )
     })
@@ -79,8 +72,7 @@ describe('generateWriterCodeForTlEntry', () => {
             'var _timeout=v.timeout!==undefined;',
             'if(_timeout)flags|=2;',
             'w.uint(flags);',
-            "h(v,'pts');",
-            'w.int(v.pts);',
+            "w.int(h(v,'pts'));",
             'if(_timeout)w.int(v.timeout);',
             'var flags2=0;',
             'if(v.canDeleteChannel===true)flags2|=1;',
@@ -91,12 +83,9 @@ describe('generateWriterCodeForTlEntry', () => {
     it('generates code for constructors with vector arguments', () => {
         test(
             'contacts.resolvedPeer#7f077ad9 peer:Peer chats:Vector<Chat> users:Vector<User> = contacts.ResolvedPeer;',
-            "h(v,'peer');",
-            'w.object(v.peer);',
-            "h(v,'chats');",
-            'w.vector(w.object, v.chats);',
-            "h(v,'users');",
-            'w.vector(w.object, v.users);',
+            "w.object(h(v,'peer'));",
+            "w.vector(w.object,h(v,'chats'));",
+            "w.vector(w.object,h(v,'users'));",
         )
     })
 
@@ -107,25 +96,55 @@ describe('generateWriterCodeForTlEntry', () => {
             'var _entities=v.entities&&v.entities.length;',
             'if(_entities)flags|=8;',
             'w.uint(flags);',
-            "h(v,'message');",
-            'w.string(v.message);',
-            'if(_entities)w.vector(w.object, v.entities);',
+            "w.string(h(v,'message'));",
+            'if(_entities)w.vector(w.object,v.entities);',
         )
     })
 
     it('generates code for constructors with generics', () => {
         test(
             'invokeWithLayer#da9b0d0d {X:Type} layer:int query:!X = X;',
-            "h(v,'layer');",
-            'w.int(v.layer);',
-            "h(v,'query');",
-            'w.object(v.query);',
+            "w.int(h(v,'layer'));",
+            "w.object(h(v,'query'));",
+        )
+    })
+
+    it('generates code for bare vectors', () => {
+        test(
+            'message#0949d9dc = Message;\n' +
+                'msg_container#73f1f8dc messages:vector<%Message> = MessageContainer;',
+            "w.vector(m._bare[155834844],h(v,'messages'),1);",
+        )
+        test(
+            'future_salt#0949d9dc = FutureSalt;\n' +
+                'future_salts#ae500895 salts:Vector<future_salt> current:FutureSalt = FutureSalts;',
+            "w.vector(m._bare[155834844],h(v,'salts'));",
+            "w.object(h(v,'current'));",
+        )
+    })
+
+    it('generates code for bare types', () => {
+        const entries = parseTlToEntries(
+            'future_salt#0949d9dc salt:bytes = FutureSalt;\n' +
+                'future_salts#ae500895 salts:vector<future_salt> current:future_salt = FutureSalts;',
+        )
+
+        expect(
+            generateWriterCodeForTlEntries(entries, { includePrelude: false }),
+        ).eq(
+            `
+            var m={
+                'future_salt':function(w,v){w.uint(155834844);w.bytes(h(v,'salt'));},
+                'future_salts':function(w,v){w.uint(2924480661);w.vector(m._bare[155834844],h(v,'salts'),1);m._bare[155834844](w,h(v,'current'));},
+                _bare:{
+                    155834844:function(w,v){w.bytes(h(v,'salt'));},
+            }}`.replace(/^\s+/gm, ''),
         )
     })
 
     it('generates code with raw flags for constructors with flags', () => {
         const entry = parseTlToEntries('test flags:# flags2:# = Test;')[0]
-        expect(generateWriterCodeForTlEntry(entry, true)).eq(
+        expect(generateWriterCodeForTlEntry(entry, { includeFlags: true })).eq(
             `'${entry.name}':function(w,v){${[
                 `w.uint(${entry.id});`,
                 'var flags=v.flags;',

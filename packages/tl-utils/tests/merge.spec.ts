@@ -44,18 +44,19 @@ describe('mergeTlEntries', () => {
                 'test flags:# baz:flags.1?true = Test;',
             'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;',
         )
+        // ordering of optional flags should not matter
         test(
             'test flags:# foo:flags.0?true = Test;\n' +
                 'test flags:# bar:flags.0?true = Test;\n' +
                 'test flags:# baz:flags.1?true = Test;',
-            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;',
+            'test#e86481ba flags:# bar:flags.0?true baz:flags.1?true foo:flags.0?true = Test;',
         )
         test(
             'test flags:# foo:flags.0?true = Test;\n' +
                 'test flags:# foo:flags.0?true bar:flags.0?true = Test;\n' +
                 'test flags:# baz:flags.1?true = Test;\n' +
                 'test flags:# bar:flags.0?true baz:flags.1?true = Test;',
-            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;',
+            'test#e86481ba flags:# bar:flags.0?true baz:flags.1?true foo:flags.0?true = Test;',
         )
     })
 

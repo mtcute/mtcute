@@ -1,12 +1,11 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { generateReaderCodeForTlEntry } from '../../src/codegen/reader'
-import { parseTlToEntries } from '../../src/parse'
+import { generateReaderCodeForTlEntry, parseTlToEntries } from '../../src'
 
 describe('generateReaderCodeForTlEntry', () => {
     const test = (tl: string, ...js: string[]) => {
-        const entry = parseTlToEntries(tl)[0]
+        const entry = parseTlToEntries(tl).slice(-1)[0]
         expect(generateReaderCodeForTlEntry(entry)).eq(
             `${entry.id}:function(r){${js.join('')}},`,
         )
@@ -139,9 +138,38 @@ describe('generateReaderCodeForTlEntry', () => {
         )
     })
 
+    it('generates code for bare types', () => {
+        test(
+            'message#0949d9dc = Message;\n' +
+                'msg_container#73f1f8dc messages:vector<%Message> = MessageContainer;',
+            'return{',
+            "_:'msg_container',",
+            'messages:r.vector(m[155834844],1),',
+            '}',
+        )
+        test(
+            'future_salt#0949d9dc = FutureSalt;\n' +
+                'future_salts#ae500895 salts:Vector<future_salt> current:FutureSalt = FutureSalts;',
+            'return{',
+            "_:'future_salts',",
+            'salts:r.vector(m[155834844]),',
+            'current:r.object(),',
+            '}',
+        )
+        test(
+            'future_salt#0949d9dc = FutureSalt;\n' +
+                'future_salts#ae500895 salts:vector<future_salt> current:future_salt = FutureSalts;',
+            'return{',
+            "_:'future_salts',",
+            'salts:r.vector(m[155834844],1),',
+            'current:m[155834844](r),',
+            '}',
+        )
+    })
+
     it('generates code with raw flags for constructors with flags', () => {
         const entry = parseTlToEntries('test flags:# flags2:# = Test;')[0]
-        expect(generateReaderCodeForTlEntry(entry, true)).eq(
+        expect(generateReaderCodeForTlEntry(entry, { includeFlags: true })).eq(
             `${entry.id}:function(r){${[
                 'var flags=r.uint(),',
                 'flags2=r.uint();',

@@ -4,8 +4,9 @@ import { describe, it } from 'mocha'
 import {
     computeConstructorIdFromEntry,
     computeConstructorIdFromString,
-} from '../src/ctor-id'
-import { TlEntry } from '../src/types'
+    TlArgument,
+    TlEntry,
+} from '../src'
 
 describe('computeConstructorIdFromString', () => {
     const test = (tl: string, expected: number) => {
@@ -75,8 +76,10 @@ describe('computeConstructorIdFromEntry', () => {
                 return {
                     name: a[0],
                     type: t[1],
-                    predicate: t[0],
-                }
+                    typeModifiers: {
+                        predicate: t[0],
+                    },
+                } satisfies TlArgument
             }
 
             return {

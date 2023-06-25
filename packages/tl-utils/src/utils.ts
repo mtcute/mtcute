@@ -1,4 +1,4 @@
-import { TlEntry } from './types'
+import { TlArgumentModifiers, TlEntry } from './types'
 
 /**
  * Split qualified TL entry name into namespace and name
@@ -59,4 +59,44 @@ export function groupTlEntriesByNamespace(
     })
 
     return ret
+}
+
+export function stringifyArgumentType(
+    type: string,
+    modifiers?: TlArgumentModifiers,
+) {
+    if (!modifiers) return type
+    let ret = type
+
+    if (modifiers?.isBareUnion) ret = `%${ret}`
+    if (modifiers?.isVector) ret = `Vector<${ret}>`
+    else if (modifiers?.isBareVector) ret = `vector<${ret}>`
+    if (modifiers.predicate) ret = `${modifiers.predicate}?${ret}`
+
+    return ret
+}
+
+export function parseArgumentType(type: string): [string, TlArgumentModifiers] {
+    const modifiers: TlArgumentModifiers = {}
+    const [predicate, type_] = type.split('?')
+
+    if (type_) {
+        modifiers.predicate = predicate
+        type = type_
+    }
+
+    if (type.startsWith('Vector<')) {
+        modifiers.isVector = true
+        type = type.substring(7, type.length - 1)
+    } else if (type.startsWith('vector<') || type.startsWith('%vector<')) {
+        modifiers.isBareVector = true
+        type = type.substring(7, type.length - 1)
+    }
+
+    if (type.startsWith('%')) {
+        modifiers.isBareUnion = true
+        type = type.substring(1)
+    }
+
+    return [type, modifiers]
 }

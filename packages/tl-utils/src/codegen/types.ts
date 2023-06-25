@@ -31,11 +31,6 @@ function fullTypeName(
     link = false,
 ): string {
     if (type in PRIMITIVE_TO_TS) return PRIMITIVE_TO_TS[type]
-    let m
-
-    if ((m = type.match(/^[Vv]ector[< ](.+?)[> ]$/))) {
-        return fullTypeName(m[1], baseNamespace, namespace, method, link) + '[]'
-    }
 
     const [ns, name] = splitNameToNamespace(type)
     let res = baseNamespace
@@ -145,7 +140,7 @@ export function generateTypescriptDefinitionsForTlEntry(
 
         ret += `    ${snakeToCamel(arg.name)}`
 
-        if (arg.predicate) ret += '?'
+        if (arg.typeModifiers?.predicate) ret += '?'
 
         let type = arg.type
         let typeFinal = false
@@ -157,6 +152,10 @@ export function generateTypescriptDefinitionsForTlEntry(
         }
 
         if (!typeFinal) type = fullTypeName(arg.type, baseNamespace)
+
+        if (arg.typeModifiers?.isVector || arg.typeModifiers?.isBareVector) {
+            type += '[]'
+        }
 
         ret += `: ${type};\n`
     })
@@ -219,7 +218,10 @@ export function generateTypescriptDefinitionsForTlSchema(
     namespace = 'tl',
     errors?: TlErrors,
 ): [string, string] {
-    let ts = PRELUDE.replace('$NS$', namespace).replace('$LAYER$', String(layer))
+    let ts = PRELUDE.replace('$NS$', namespace).replace(
+        '$LAYER$',
+        String(layer),
+    )
     let js = PRELUDE_JS.replace('$NS$', namespace).replace(
         '$LAYER$',
         String(layer),

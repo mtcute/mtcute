@@ -2,17 +2,44 @@ import { computeConstructorIdFromEntry } from '../ctor-id'
 import { TL_PRIMITIVES, TlEntry } from '../types'
 import { snakeToCamel } from './utils'
 
+export interface ReaderCodegenOptions {
+    /**
+     * Whether to include `flags` field in the result object
+     * @default false
+     */
+    includeFlags?: boolean
+
+    /**
+     * Name of the variable to use for the readers map
+     * @default 'm'
+     */
+    variableName?: string
+
+    /**
+     * Whether to include methods in the readers map
+     */
+    includeMethods?: boolean
+}
+
+const DEFAULT_OPTIONS: ReaderCodegenOptions = {
+    includeFlags: false,
+    variableName: 'm',
+    includeMethods: false,
+}
+
 /**
  * Generate binary reader code for a given entry.
  *
  * @param entry  Entry to generate reader for
- * @param includeFlags  Whether to include `flags` field in the result object
+ * @param params  Options
  * @returns  Code as a writers map entry
  */
 export function generateReaderCodeForTlEntry(
     entry: TlEntry,
-    includeFlags = false,
+    params = DEFAULT_OPTIONS,
 ): string {
+    const { variableName, includeFlags } = { ...DEFAULT_OPTIONS, ...params }
+
     if (entry.id === 0) entry.id = computeConstructorIdFromEntry(entry)
 
     const pre = `${entry.id}:function(r){`
@@ -49,20 +76,19 @@ export function generateReaderCodeForTlEntry(
 
         const argName = snakeToCamel(arg.name)
 
-        if (arg.predicate) {
-            const s = arg.predicate.split('.')
+        if (arg.typeModifiers?.predicate) {
+            const predicate = arg.typeModifiers.predicate
+            const s = predicate.split('.')
             const fieldName = s[0]
             const bitIndex = parseInt(s[1])
 
             if (!(fieldName in flagsFields)) {
                 throw new Error(
-                    `Invalid predicate: ${arg.predicate} - unknown field (in ${entry.name})`,
+                    `Invalid predicate: ${predicate} - unknown field (in ${entry.name})`,
                 )
             }
             if (isNaN(bitIndex) || bitIndex < 0 || bitIndex > 32) {
-                throw new Error(
-                    `Invalid predicate: ${arg.predicate} - invalid bit`,
-                )
+                throw new Error(`Invalid predicate: ${predicate} - invalid bit`)
             }
 
             const condition = `${fieldName}&${1 << bitIndex}`
@@ -86,30 +112,39 @@ export function generateReaderCodeForTlEntry(
             returnCode += `${argName}:`
         }
 
-        let vector = false
         let type = arg.type
-        const m = type.match(/^[Vv]ector[< ](.+?)[> ]$/)
-
-        if (m) {
-            vector = true
-            type = m[1]
-        }
 
         if (type in TL_PRIMITIVES) {
-            if (type === 'Bool') type = 'boolean'
+            if (type === 'Bool' || type === 'bool') type = 'boolean'
         } else {
             type = 'object'
         }
 
-        let code
+        let reader = `r.${type}`
+        const isBare =
+            arg.typeModifiers?.isBareType || arg.typeModifiers?.isBareUnion
 
-        if (vector) {
-            code = `r.vector(r.${type})`
-        } else {
-            code = `r.${type}()`
+        if (isBare) {
+            if (!arg.typeModifiers?.constructorId) {
+                throw new Error(
+                    `Cannot generate reader for ${entry.name}#${arg.name} - no constructor id referenced`,
+                )
+            }
+
+            reader = `${variableName}[${arg.typeModifiers.constructorId}]`
         }
 
-        if (arg.predicate) {
+        let code
+
+        if (arg.typeModifiers?.isVector) {
+            code = `r.vector(${reader})`
+        } else if (arg.typeModifiers?.isBareVector) {
+            code = `r.vector(${reader},1)`
+        } else {
+            code = `${reader}(${isBare ? 'r' : ''})`
+        }
+
+        if (arg.typeModifiers?.predicate) {
             code += ':void 0'
         }
 
@@ -127,20 +162,19 @@ export function generateReaderCodeForTlEntry(
  * Generate binary reader code for a given schema.
  *
  * @param entries  Entries to generate reader for
- * @param varName  Name of the variable containing the result
- * @param methods  Whether to include method readers
+ * @param params  Codegen options
  */
 export function generateReaderCodeForTlEntries(
     entries: TlEntry[],
-    varName: string,
-    methods = true,
+    params = DEFAULT_OPTIONS,
 ): string {
-    let ret = `var ${varName}={\n`
+    const { variableName, includeMethods } = { ...DEFAULT_OPTIONS, ...params }
+    let ret = `var ${variableName}={\n`
 
     entries.forEach((entry) => {
-        if (entry.kind === 'method' && !methods) return
+        if (entry.kind === 'method' && !includeMethods) return
 
-        ret += generateReaderCodeForTlEntry(entry) + '\n'
+        ret += generateReaderCodeForTlEntry(entry, params) + '\n'
     })
 
     return ret + '}'

@@ -99,9 +99,9 @@ describe('generateTlEntriesDifference', () => {
                         },
                         {
                             name: 'egg',
-                            predicate: {
-                                old: 'flags.0',
-                                new: 'flags.1',
+                            type: {
+                                old: 'flags.0?Egg',
+                                new: 'flags.1?Egg',
                             },
                         },
                     ],

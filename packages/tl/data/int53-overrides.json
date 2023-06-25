@@ -1,7 +1,8 @@
 {
     "What is this?": [
         "It is guaranteed that user/chat/channel ids fit in int53,",
-        "so we can safely replace `long` with `int53` there.",
+        "as well as file size (up to 4 gigs),",
+        "so we can safely replace `long` with `int53` for simpler usage from within JS.",
         "Note: this is a non-exhaustive list",
         "When contributing, please maintain alphabetical key ordering"
     ],
