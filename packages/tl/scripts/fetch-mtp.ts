@@ -34,20 +34,9 @@ async function main() {
                 'mt_message',
                 'mt_msg_copy',
                 'mt_gzip_packed',
+                'mt_rpc_result',
             ].indexOf(it.name) === -1,
     )
-
-    const rpcResult = entries.find((it) => it.name === 'mt_rpc_result')
-
-    if (!rpcResult) {
-        throw new Error('mt_rpc_result not found')
-    }
-
-    rpcResult.arguments.forEach((arg) => {
-        if (arg.name === 'result') {
-            arg.type = 'any'
-        }
-    })
 
     // mtproto is handled internally, for simplicity we make them all classes
     entries.forEach((entry) => {

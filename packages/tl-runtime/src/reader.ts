@@ -18,7 +18,10 @@ const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
  */
 // avoid unnecessary type complexity
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type TlReaderMap = Record<number, (r: any) => unknown>
+export type TlReaderMap = Record<number, (r: any) => unknown> & {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _results?: Record<string, (r: any) => unknown>
+}
 
 /**
  * Reader for TL objects.
@@ -157,7 +160,8 @@ export class TlBinaryReader {
 
     bytes(): Buffer {
         const firstByte = this.data[this.pos++]
-        let length; let padding
+        let length
+        let padding
 
         if (firstByte === 254) {
             length =
@@ -183,7 +187,9 @@ export class TlBinaryReader {
     object(): unknown {
         const id = this.uint()
 
-        if (id === 0x1cb5c415 /* vector */) { return this.vector(this.object, true) }
+        if (id === 0x1cb5c415 /* vector */) {
+            return this.vector(this.object, true)
+        }
         if (id === 0x3072cfa1 /* gzip_packed */) return this.gzip()
         if (id === 0xbc799737 /* boolFalse */) return false
         if (id === 0x997275b5 /* boolTrue */) return true
@@ -251,7 +257,9 @@ export class TlBinaryReader {
      * @param pos  Position to seek to
      */
     seekTo(pos: number): void {
-        if (pos >= this.data.length || pos < 0) { throw new RangeError('New position is out of range') }
+        if (pos >= this.data.length || pos < 0) {
+            throw new RangeError('New position is out of range')
+        }
         this.pos = pos
     }
 }

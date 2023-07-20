@@ -101,7 +101,7 @@ export function normalizeToInputChannel(
             }
     }
 
-    throw new MtInvalidPeerTypeError(input ?? res, 'user')
+    throw new MtInvalidPeerTypeError(input ?? res, 'channel')
 }
 
 export function isInputPeerUser(

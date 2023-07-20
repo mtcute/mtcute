@@ -1,4 +1,4 @@
-import { TlArgumentModifiers, TlEntry } from './types'
+import { TlEntry, TlTypeModifiers } from './types'
 
 /**
  * Split qualified TL entry name into namespace and name
@@ -63,7 +63,7 @@ export function groupTlEntriesByNamespace(
 
 export function stringifyArgumentType(
     type: string,
-    modifiers?: TlArgumentModifiers,
+    modifiers?: TlTypeModifiers,
 ) {
     if (!modifiers) return type
     let ret = type
@@ -76,8 +76,8 @@ export function stringifyArgumentType(
     return ret
 }
 
-export function parseArgumentType(type: string): [string, TlArgumentModifiers] {
-    const modifiers: TlArgumentModifiers = {}
+export function parseArgumentType(type: string): [string, TlTypeModifiers] {
+    const modifiers: TlTypeModifiers = {}
     const [predicate, type_] = type.split('?')
 
     if (type_) {

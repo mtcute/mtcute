@@ -45,7 +45,11 @@ const README_MD_FILE = join(__dirname, '../README.md')
 const PACKAGE_JSON_FILE = join(__dirname, '../package.json')
 
 function tlToFullSchema(tl: string): TlFullSchema {
-    return parseFullTlSchema(parseTlToEntries(tl))
+    return parseFullTlSchema(
+        parseTlToEntries(tl, {
+            parseMethodTypes: true,
+        }),
+    )
 }
 
 interface Schema {

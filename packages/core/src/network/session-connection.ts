@@ -394,6 +394,13 @@ export class SessionConnection extends PersistentConnection {
             return
         }
 
+        if (message.peekUint() === 0xf35c6d01) {
+            // rpc_result
+            message.uint()
+
+            return this._onRpcResult(message)
+        }
+
         // we are safe.. i guess
         this._handleMessage(messageId, message.object())
     }
@@ -433,9 +440,6 @@ export class SessionConnection extends PersistentConnection {
         }
 
         switch (message._) {
-            case 'mt_rpc_result':
-                this._onRpcResult(message)
-                break
             case 'mt_pong':
                 this._onPong(message)
                 break
@@ -482,7 +486,9 @@ export class SessionConnection extends PersistentConnection {
                 break
             default:
                 if (tl.isAnyUpdates(message)) {
-                    if (this._usable && this.params.inactivityTimeout) { this._rescheduleInactivity() }
+                    if (this._usable && this.params.inactivityTimeout) {
+                        this._rescheduleInactivity()
+                    }
 
                     this.emit('update', message)
 
@@ -493,13 +499,24 @@ export class SessionConnection extends PersistentConnection {
         }
     }
 
-    private _onRpcResult({ result, reqMsgId }: mtp.RawMt_rpc_result): void {
-        if (this._usable && this.params.inactivityTimeout) { this._rescheduleInactivity() }
+    private _onRpcResult(message: TlBinaryReader): void {
+        if (this._usable && this.params.inactivityTimeout) {
+            this._rescheduleInactivity()
+        }
+
+        const reqMsgId = message.long()
 
         if (reqMsgId.isZero()) {
+            let resultType
+
+            try {
+                resultType = (message.object() as any)._
+            } catch (err) {
+                resultType = message.peekUint()
+            }
             this.log.warn(
                 'received rpc_result with %s with req_msg_id = 0',
-                result._,
+                resultType,
             )
 
             return
@@ -508,12 +525,24 @@ export class SessionConnection extends PersistentConnection {
         const msg = this._pendingMessages.get(reqMsgId)
 
         if (!msg) {
+            let result
+
+            try {
+                result = message.object() as any
+            } catch (err) {
+                result = '[failed to parse]'
+            }
+            this.log.warn(
+                'received rpc_result with %s with req_msg_id = 0',
+                result,
+            )
+
             // check if the msg is one of the recent ones
             if (this._recentOutgoingMsgIds.has(reqMsgId)) {
                 this.log.debug(
                     'received rpc_result again for %l (contains %s)',
                     reqMsgId,
-                    result._,
+                    result,
                 )
             } else {
                 this.log.warn(
@@ -536,6 +565,11 @@ export class SessionConnection extends PersistentConnection {
             return
         }
         const rpc = msg.rpc
+
+        const customReader = this._readerMap._results![rpc.method]
+        const result: any = customReader ?
+            customReader(message) :
+            message.object()
 
         // initConnection call was definitely received and
         // processed by the server, so we no longer need to use it
@@ -1056,7 +1090,9 @@ export class SessionConnection extends PersistentConnection {
         stack?: string,
         timeout?: number,
     ): Promise<tl.RpcCallReturn[T['_']]> {
-        if (this._usable && this.params.inactivityTimeout) { this._rescheduleInactivity() }
+        if (this._usable && this.params.inactivityTimeout) {
+            this._rescheduleInactivity()
+        }
 
         if (!stack && this.params.niceStacks !== false) {
             stack = new Error().stack
@@ -1162,7 +1198,7 @@ export class SessionConnection extends PersistentConnection {
             timeout: undefined,
         }
 
-        const promise = createCancellablePromise(
+        const promise = createCancellablePromise<any>(
             this._cancelRpc.bind(this, pending),
         )
         pending.promise = promise

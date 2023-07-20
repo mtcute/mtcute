@@ -7,7 +7,10 @@ const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
  */
 // avoid unnecessary type complexity
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type TlWriterMap = Record<string, (w: any, val: any) => void>
+export type TlWriterMap = Record<string, (w: any, val: any) => void> & {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _bare?: Record<number, (w: any, val: any) => void>
+}
 
 /**
  * Counter of the required number of bytes to encode a given object.
@@ -198,7 +201,9 @@ export class TlBinaryWriter {
         obj: { _: string },
         knownSize = -1,
     ): Buffer {
-        if (knownSize === -1) { knownSize = TlSerializationCounter.countNeededBytes(objectMap, obj) }
+        if (knownSize === -1) {
+            knownSize = TlSerializationCounter.countNeededBytes(objectMap, obj)
+        }
 
         const writer = TlBinaryWriter.alloc(objectMap, knownSize)
 
@@ -315,7 +320,11 @@ export class TlBinaryWriter {
         fn(this, obj)
     }
 
-    vector(fn: (item: unknown, bare?: boolean) => void, val: unknown[], bare?: boolean): void {
+    vector(
+        fn: (item: unknown, bare?: boolean) => void,
+        val: unknown[],
+        bare?: boolean,
+    ): void {
         if (!bare) this.uint(0x1cb5c415)
         this.uint(val.length)
 

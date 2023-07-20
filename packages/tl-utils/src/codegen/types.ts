@@ -1,4 +1,4 @@
-import { TlEntry, TlErrors, TlFullSchema } from '../types'
+import { TlEntry, TlErrors, TlFullSchema, TlTypeModifiers } from '../types'
 import { groupTlEntriesByNamespace, splitNameToNamespace } from '../utils'
 import { errorCodeToClassName, generateCodeForErrors } from './errors'
 import { camelToPascal, indent, jsComment, snakeToCamel } from './utils'
@@ -26,10 +26,31 @@ export const PRIMITIVE_TO_TS: Record<string, string> = {
 function fullTypeName(
     type: string,
     baseNamespace: string,
-    namespace = true,
-    method = false,
-    link = false,
+    {
+        namespace = true,
+        method = false,
+        link = false,
+        typeModifiers,
+    }: {
+        namespace?: boolean
+        method?: boolean
+        link?: boolean
+        typeModifiers?: TlTypeModifiers
+    } = {},
 ): string {
+    if (typeModifiers) {
+        const inner = fullTypeName(type, baseNamespace, {
+            namespace,
+            method,
+            link,
+        })
+
+        if (typeModifiers.isVector || typeModifiers.isBareVector) {
+            if (link) return `${inner} array`
+
+            return `${inner}[]`
+        }
+    }
     if (type in PRIMITIVE_TO_TS) return PRIMITIVE_TO_TS[type]
 
     const [ns, name] = splitNameToNamespace(type)
@@ -52,7 +73,10 @@ function fullTypeName(
 }
 
 function entryFullTypeName(entry: TlEntry): string {
-    return fullTypeName(entry.name, '', false, entry.kind === 'method')
+    return fullTypeName(entry.name, '', {
+        namespace: false,
+        method: entry.kind === 'method',
+    })
 }
 
 /**
@@ -82,9 +106,7 @@ export function generateTypescriptDefinitionsForTlEntry(
         comment += `RPC method returns ${fullTypeName(
             entry.type,
             baseNamespace,
-            true,
-            false,
-            true,
+            { link: true, typeModifiers: entry.typeModifiers },
         )}`
 
         if (errors) {
@@ -151,10 +173,10 @@ export function generateTypescriptDefinitionsForTlEntry(
             typeFinal = true
         }
 
-        if (!typeFinal) type = fullTypeName(arg.type, baseNamespace)
-
-        if (arg.typeModifiers?.isVector || arg.typeModifiers?.isBareVector) {
-            type += '[]'
+        if (!typeFinal) {
+            type = fullTypeName(arg.type, baseNamespace, {
+                typeModifiers: arg.typeModifiers,
+            })
         }
 
         ret += `: ${type};\n`
@@ -306,7 +328,9 @@ export function generateTypescriptDefinitionsForTlSchema(
             }
 
             if (!type) {
-                type = fullTypeName(entry.type, namespace + '.')
+                type = fullTypeName(entry.type, namespace + '.', {
+                    typeModifiers: entry.typeModifiers,
+                })
             }
 
             ts += indent(indentSize + 4, `'${entry.name}': ${type}`) + '\n'
@@ -324,7 +348,7 @@ export function generateTypescriptDefinitionsForTlSchema(
             if (union.comment) {
                 ts += indent(indentSize, jsComment(union.comment)) + '\n'
             }
-            const typeName = fullTypeName(name, '', false)
+            const typeName = fullTypeName(name, '', { namespace: false })
             const typeWithoutNs = typeName.substring(4)
             ts += indent(indentSize, `type ${typeName} = `)
 
@@ -364,7 +388,8 @@ export function generateTypescriptDefinitionsForTlSchema(
         ts +=
             indent(
                 8,
-                '| ' + fullTypeName(entry.name, namespace + '.', true, true),
+                '| ' +
+                    fullTypeName(entry.name, namespace + '.', { method: true }),
             ) + '\n'
     }
 
@@ -381,12 +406,9 @@ export function generateTypescriptDefinitionsForTlSchema(
             indent(
                 8,
                 '| ' +
-                    fullTypeName(
-                        entry.name,
-                        namespace + '.',
-                        true,
-                        entry.kind === 'method',
-                    ),
+                    fullTypeName(entry.name, namespace + '.', {
+                        method: entry.kind === 'method',
+                    }),
             ) + '\n'
     })
 

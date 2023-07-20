@@ -13,7 +13,7 @@ const SINGLE_REGEX =
  */
 export function parseTlToEntries(
     tl: string,
-    params?: {
+    params: {
         /**
          * Whether to throw an error if a line failed to parse
          */
@@ -45,7 +45,12 @@ export function parseTlToEntries(
          * If true, the `id` field will be set to 0 for all entries.
          */
         forIdComputation?: boolean
-    },
+
+        /**
+         * Whether to parse typeModifiers for method return types
+         */
+        parseMethodTypes?: boolean
+    } = {},
 ): TlEntry[] {
     const ret: TlEntry[] = []
 
@@ -56,13 +61,13 @@ export function parseTlToEntries(
 
     let currentKind: TlEntry['kind'] = 'class'
     let currentComment = ''
-    const prefix = params?.prefix ?? ''
+    const prefix = params.prefix ?? ''
 
     lines.forEach((line, idx) => {
         line = line.trim()
 
         if (line === '') {
-            if (params?.onOrphanComment) {
+            if (params.onOrphanComment) {
                 params.onOrphanComment(currentComment)
             }
 
@@ -102,9 +107,9 @@ export function parseTlToEntries(
         if (!match) {
             const err = new Error(`Failed to parse line ${idx + 1}: ${line}`)
 
-            if (params?.panicOnError) {
+            if (params.panicOnError) {
                 throw err
-            } else if (params?.onError) {
+            } else if (params.onError) {
                 params.onError(err, line, idx + 1)
             } else {
                 console.warn(err)
@@ -121,7 +126,7 @@ export function parseTlToEntries(
 
         let typeIdNum = typeId ? parseInt(typeId, 16) : 0
 
-        if (typeIdNum === 0 && !params?.forIdComputation) {
+        if (typeIdNum === 0 && !params.forIdComputation) {
             typeIdNum = computeConstructorIdFromString(line)
         }
 
@@ -139,6 +144,15 @@ export function parseTlToEntries(
             id: typeIdNum,
             type,
             arguments: [],
+        }
+
+        if (entry.kind === 'method' && params.parseMethodTypes) {
+            const [type, modifiers] = parseArgumentType(entry.type)
+            entry.type = type
+
+            if (Object.keys(modifiers).length) {
+                entry.typeModifiers = modifiers
+            }
         }
 
         if (generics) {
@@ -193,14 +207,29 @@ export function parseTlToEntries(
         }
     })
 
-    if (currentComment && params?.onOrphanComment) {
+    if (currentComment && params.onOrphanComment) {
         params.onOrphanComment(currentComment)
     }
 
     // post-process:
+    // - add return type ctor id for methods
     // - find arguments where type is not a union and put corresponding modifiers
     // - apply prefix
     ret.forEach((entry, entryIdx) => {
+        if (params.parseMethodTypes && entry.kind === 'method') {
+            const type = entry.type
+
+            if (type in unions && unions[type].length === 1) {
+                if (!entry.typeModifiers) entry.typeModifiers = {}
+
+                entry.typeModifiers.constructorId = unions[type][0].id
+            } else if (type in entries) {
+                if (!entry.typeModifiers) entry.typeModifiers = {}
+                entry.typeModifiers.isBareType = true
+                entry.typeModifiers.constructorId = entries[type].id
+            }
+        }
+
         entry.arguments.forEach((arg) => {
             const type = arg.type
 
@@ -214,9 +243,9 @@ export function parseTlToEntries(
                         `Union ${type} has more than one entry, cannot use it like %${type} (found in ${entry.name}#${arg.name})`,
                     )
 
-                    if (params?.panicOnError) {
+                    if (params.panicOnError) {
                         throw err
-                    } else if (params?.onError) {
+                    } else if (params.onError) {
                         params.onError(err, '', entryIdx)
                     } else {
                         console.warn(err)

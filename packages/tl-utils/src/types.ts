@@ -1,7 +1,7 @@
 /**
  * Modifiers for {@link TlArgument.type}
  */
-export interface TlArgumentModifiers {
+export interface TlTypeModifiers {
     /**
      * Predicate of the argument
      * @example `flags.3`
@@ -74,7 +74,7 @@ export interface TlArgument {
     /**
      * Modifiers for {@link type}
      */
-    typeModifiers?: TlArgumentModifiers
+    typeModifiers?: TlTypeModifiers
 
     /**
      * Comment of the argument
@@ -120,6 +120,11 @@ export interface TlEntry {
      * Type of the entry
      */
     type: string
+
+    /**
+     * For methods (where {@link type} is the return type), modifiers for {@link type}
+     */
+    typeModifiers?: TlTypeModifiers
 
     /**
      * Comment of the entry

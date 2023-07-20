@@ -59,6 +59,7 @@ async function generateReaders(
     let code = generateReaderCodeForTlEntries(apiSchema.entries, {
         variableName: 'm',
         includeMethods: false,
+        includeMethodResults: true,
     })
 
     const mtpCode = generateReaderCodeForTlEntries(mtpSchema.entries, {

@@ -62,7 +62,10 @@ export function writeTlEntryToString(
     if (forIdComputation) {
         str += '= ' + normalizeType(entry.type)
     } else {
-        str += '= ' + entry.type + ';'
+        const type = entry.typeModifiers ?
+            stringifyArgumentType(entry.type, entry.typeModifiers) :
+            entry.type
+        str += '= ' + type + ';'
     }
 
     return str

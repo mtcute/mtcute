@@ -15,14 +15,16 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
         kind: first.kind,
         name: first.name,
         type: first.type,
+        typeModifiers: first.typeModifiers,
         id: first.id,
         comment: first.comment,
         generics: first.generics,
         arguments: first.arguments,
     }
 
-    // even if the entry contains id, let's re-calculate it just to be sure
-    result.id = computeConstructorIdFromEntry(result)
+    if (result.id === 0) {
+        result.id = computeConstructorIdFromEntry(result)
+    }
 
     const argsIndex: Record<string, true> = {}
     const flagsLastIndex: Record<string, number> = {}

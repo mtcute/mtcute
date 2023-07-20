@@ -1,3 +1,5 @@
-declare const __tlReaderMap: Record<number, (r: unknown) => unknown>
+declare const __tlReaderMap: Record<number, (r: unknown) => unknown> & {
+    _results: Record<string, (r: unknown) => unknown>
+}
 // eslint-disable-next-line import/no-default-export
 export default __tlReaderMap

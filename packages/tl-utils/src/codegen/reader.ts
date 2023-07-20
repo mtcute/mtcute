@@ -19,12 +19,23 @@ export interface ReaderCodegenOptions {
      * Whether to include methods in the readers map
      */
     includeMethods?: boolean
+
+    /**
+     * Whether to include `._results` field in the result object,
+     * containing a map of methods names to their result readers.
+     *
+     * Requires `parseMethodTypes` to be `true` when parsing the TL schema.
+     *
+     * **Note**: will only work for primitives and vectors of primitives
+     */
+    includeMethodResults?: boolean
 }
 
 const DEFAULT_OPTIONS: ReaderCodegenOptions = {
     includeFlags: false,
     variableName: 'm',
     includeMethods: false,
+    includeMethodResults: false,
 }
 
 /**
@@ -176,6 +187,35 @@ export function generateReaderCodeForTlEntries(
 
         ret += generateReaderCodeForTlEntry(entry, params) + '\n'
     })
+
+    if (params.includeMethodResults) {
+        ret += '_results:{\n'
+
+        entries.forEach((entry) => {
+            if (entry.kind !== 'method') return
+
+            const pre = `'${entry.name}':function(r){return `
+
+            const isVector =
+                entry.typeModifiers?.isVector ||
+                entry.typeModifiers?.isBareVector
+            const post = entry.typeModifiers?.isBareVector ? ',1' : ''
+
+            if (entry.type in TL_PRIMITIVES) {
+                const type = entry.type
+                // booleans can be properly parsed as they have own constructor ids
+                if (type === 'Bool' || type === 'bool') return
+
+                if (isVector) {
+                    ret += `${pre}r.vector(r.${type}${post})},\n`
+                } else {
+                    ret += `${pre}r.${type}()},\n`
+                }
+            }
+        })
+
+        ret += '},\n'
+    }
 
     return ret + '}'
 }

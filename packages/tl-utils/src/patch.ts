@@ -27,11 +27,12 @@ export function patchRuntimeTlSchema(
     readerMap: TlReaderMap
     writerMap: TlWriterMap
 } {
-    const entries = parseTlToEntries(schema)
+    const entries = parseTlToEntries(schema, { parseMethodTypes: true })
 
     const readersCode = generateReaderCodeForTlEntries(entries, {
         variableName: '_',
         includeMethods: false,
+        includeMethodResults: true,
     })
     const writersCode = generateWriterCodeForTlEntries(entries, {
         variableName: '_',
@@ -49,10 +50,21 @@ export function patchRuntimeTlSchema(
         readerMap: {
             ...readers,
             ...newReaders,
+            _results: {
+                ...readers._results,
+                ...newReaders._results,
+            },
         },
+        // ts is not smart enough
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         writerMap: {
             ...writers,
             ...newWriters,
+            _bare: {
+                ...writers._bare,
+                ...newWriters._bare,
+            },
         },
     }
 }
