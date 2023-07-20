@@ -93,6 +93,8 @@ export async function uploadMedia(
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return parseDocument(this, res.document) as any
+        case 'inputMediaStory':
+            throw new MtArgumentError("This media (story) can't be uploaded")
         default:
             assertNever(normMedia)
     }

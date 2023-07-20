@@ -46,6 +46,7 @@ import {
     InputStickerSetItem,
     MaybeDynamic,
     Message,
+    MessageEntity,
     MessageMedia,
     MessageReactions,
     ParsedUpdate,

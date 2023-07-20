@@ -296,10 +296,7 @@ export class Message {
     /**
      * Information about comments (for channels) or replies (for groups)
      */
-    get replies():
-        | MessageRepliesInfo
-        | MessageCommentsInfo
-        | null {
+    get replies(): MessageRepliesInfo | MessageCommentsInfo | null {
         if (this.raw._ !== 'message' || !this.raw.replies) return null
 
         if (!this._replies) {
@@ -330,6 +327,8 @@ export class Message {
      * replies to.
      */
     get replyToMessageId(): number | null {
+        if (this.raw.replyTo?._ !== 'messageReplyHeader') return null
+
         return this.raw.replyTo?.replyToMsgId ?? null
     }
 
@@ -338,6 +337,8 @@ export class Message {
      * in the thread)
      */
     get replyToThreadId(): number | null {
+        if (this.raw.replyTo?._ !== 'messageReplyHeader') return null
+
         return this.raw.replyTo?.replyToTopId ?? null
     }
 
@@ -542,7 +543,10 @@ export class Message {
      * @throws MtArgumentError  In case the chat does not support message links
      */
     get link(): string {
-        if (this.chat.type === 'supergroup' || this.chat.type === 'channel') {
+        if (
+            this.chat.chatType === 'supergroup' ||
+            this.chat.chatType === 'channel'
+        ) {
             if (this.chat.username) {
                 return `https://t.me/${this.chat.username}/${this.id}`
             }
@@ -553,7 +557,7 @@ export class Message {
         }
 
         throw new MtArgumentError(
-            `Cannot generate message link for ${this.chat.type}`,
+            `Cannot generate message link for ${this.chat.chatType}`,
         )
     }
 
@@ -580,7 +584,9 @@ export class Message {
     getReplyTo(): Promise<Message | null> {
         if (!this.replyToMessageId) return Promise.resolve(null)
 
-        if (this.raw.peerId._ === 'peerChannel') { return this.client.getMessages(this.chat.inputPeer, this.id, true) }
+        if (this.raw.peerId._ === 'peerChannel') {
+            return this.client.getMessages(this.chat.inputPeer, this.id, true)
+        }
 
         return this.client.getMessagesUnsafe(this.id, true)
     }
@@ -698,7 +704,7 @@ export class Message {
         text: string | FormattedString<string>,
         params?: Parameters<TelegramClient['sendText']>[2],
     ): ReturnType<TelegramClient['sendText']> {
-        if (this.chat.type !== 'channel') {
+        if (this.chat.chatType !== 'channel') {
             return this.replyText(text, params)
         }
 
@@ -731,7 +737,7 @@ export class Message {
         media: InputMediaLike | string,
         params?: Parameters<TelegramClient['sendMedia']>[2],
     ): ReturnType<TelegramClient['sendMedia']> {
-        if (this.chat.type !== 'channel') {
+        if (this.chat.chatType !== 'channel') {
             return this.replyMedia(media, params)
         }
 
@@ -763,7 +769,7 @@ export class Message {
         medias: (InputMediaLike | string)[],
         params?: Parameters<TelegramClient['sendMediaGroup']>[2],
     ): ReturnType<TelegramClient['sendMediaGroup']> {
-        if (this.chat.type !== 'channel') {
+        if (this.chat.chatType !== 'channel') {
             return this.replyMediaGroup(medias, params)
         }
 

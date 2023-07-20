@@ -12,6 +12,7 @@ const PEER_TYPE_MAP: Record<tl.TypeInlineQueryPeerType['_'], PeerType> = {
     inlineQueryPeerTypeMegagroup: 'supergroup',
     inlineQueryPeerTypePM: 'user',
     inlineQueryPeerTypeSameBotPM: 'bot',
+    inlineQueryPeerTypeBotPM: 'bot',
 }
 
 export class InlineQuery {

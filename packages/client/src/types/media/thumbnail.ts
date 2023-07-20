@@ -40,6 +40,11 @@ export class Thumbnail extends FileLocation {
     /** Fullscreen animation for Premium stickers */
     static readonly THUMB_VIDEO_FULLSCREEN = 'f'
 
+    /** (non-standard) Emoji-based markup for profile photo */
+    static readonly THUMB_EMOJI_MARKUP = 'pfp_em'
+    /** (non-standard) Sticker-based markup for profile photo */
+    static readonly THUMB_STICKER_MARKUP = 'pfp_st'
+
     readonly raw: tl.TypePhotoSize | tl.TypeVideoSize
 
     /**
@@ -84,7 +89,9 @@ export class Thumbnail extends FileLocation {
             | tl.TypeInputFileLocation
             | Buffer
             | (() => tl.TypeInputFileLocation | Buffer)
-        let size; let width; let height: number
+        let size
+        let width
+        let height: number
 
         switch (sz._) {
             case 'photoStrippedSize':
@@ -96,6 +103,16 @@ export class Thumbnail extends FileLocation {
                 location = () => svgPathToFile(this._path!)
                 width = height = NaN
                 size = Infinity // this doesn't really matter
+                break
+            case 'videoSizeEmojiMarkup':
+            case 'videoSizeStickerMarkup':
+                location = () => {
+                    throw new MtArgumentError(
+                        'Cannot download thumbnail with emoji/sticker markup, try other size',
+                    )
+                }
+                width = height = NaN
+                size = Infinity
                 break
             default:
                 if (media._ === 'stickerSet') {
@@ -165,6 +182,9 @@ export class Thumbnail extends FileLocation {
      * Thumbnail type
      */
     get type(): string {
+        if (this.raw._ === 'videoSizeEmojiMarkup') { return Thumbnail.THUMB_EMOJI_MARKUP }
+        if (this.raw._ === 'videoSizeStickerMarkup') { return Thumbnail.THUMB_STICKER_MARKUP }
+
         return this.raw.type
     }
 
@@ -195,13 +215,13 @@ export class Thumbnail extends FileLocation {
     get fileId(): string {
         if (!this._fileId) {
             if (
-                this.raw._ !== 'photoSize' &&
-                this.raw._ !== 'photoSizeProgressive' &&
-                this.raw._ !== 'videoSize' ||
+                (this.raw._ !== 'photoSize' &&
+                    this.raw._ !== 'photoSizeProgressive' &&
+                    this.raw._ !== 'videoSize') ||
                 this._media._ === 'messageExtendedMediaPreview' // just for type safety
             ) {
                 throw new MtArgumentError(
-                    `Cannot generate a file ID for "${this.raw.type}"`,
+                    `Cannot generate a file ID for "${this.type}"`,
                 )
             }
 
@@ -258,13 +278,13 @@ export class Thumbnail extends FileLocation {
     get uniqueFileId(): string {
         if (!this._uniqueFileId) {
             if (
-                this.raw._ !== 'photoSize' &&
-                this.raw._ !== 'photoSizeProgressive' &&
-                this.raw._ !== 'videoSize' ||
+                (this.raw._ !== 'photoSize' &&
+                    this.raw._ !== 'photoSizeProgressive' &&
+                    this.raw._ !== 'videoSize') ||
                 this._media._ === 'messageExtendedMediaPreview' // just for type safety
             ) {
                 throw new MtArgumentError(
-                    `Cannot generate a unique file ID for "${this.raw.type}"`,
+                    `Cannot generate a unique file ID for "${this.type}"`,
                 )
             }
 

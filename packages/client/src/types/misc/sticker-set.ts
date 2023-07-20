@@ -3,7 +3,13 @@ import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { MtEmptyError, MtTypeAssertionError } from '../errors'
 import { InputFileLike } from '../files'
-import { MaskPosition, Sticker, StickerSourceType, StickerType, Thumbnail } from '../media'
+import {
+    MaskPosition,
+    Sticker,
+    StickerSourceType,
+    StickerType,
+    Thumbnail,
+} from '../media'
 import { parseDocument } from '../media/document-utils'
 import { makeInspectable } from '../utils'
 
@@ -221,7 +227,7 @@ export class StickerSet {
      * @param type  Thumbnail type
      */
     getThumbnail(type: string): Thumbnail | null {
-        return this.thumbnails.find((it) => it.raw.type === type) ?? null
+        return this.thumbnails.find((it) => it.type === type) ?? null
     }
 
     /**
@@ -268,7 +274,9 @@ export class StickerSet {
         if (idx < 0) idx = this.full!.documents.length + idx
         const doc = this.full!.documents[idx] as tl.RawDocument
 
-        if (!doc) { throw new RangeError(`Sticker set does not have sticker ${idx}`) }
+        if (!doc) {
+            throw new RangeError(`Sticker set does not have sticker ${idx}`)
+        }
 
         return {
             _: 'inputDocument',

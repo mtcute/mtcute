@@ -2,24 +2,20 @@ import { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../utils'
 
-const sentCodeMap: Record<
-    tl.auth.TypeSentCodeType['_'],
-    SentCodeDeliveryType
-> = {
-    'auth.sentCodeTypeApp': 'app',
-    'auth.sentCodeTypeCall': 'call',
-    'auth.sentCodeTypeFlashCall': 'flash_call',
-    'auth.sentCodeTypeSms': 'sms',
-    'auth.sentCodeTypeMissedCall': 'missed_call',
-    'auth.sentCodeTypeEmailCode': 'email',
-    'auth.sentCodeTypeSetUpEmailRequired': 'email_required',
-    'auth.sentCodeTypeFragmentSms': 'fragment',
-}
+const sentCodeMap: Record<tl.auth.TypeSentCodeType['_'], SentCodeDeliveryType> =
+    {
+        'auth.sentCodeTypeApp': 'app',
+        'auth.sentCodeTypeCall': 'call',
+        'auth.sentCodeTypeFlashCall': 'flash_call',
+        'auth.sentCodeTypeSms': 'sms',
+        'auth.sentCodeTypeMissedCall': 'missed_call',
+        'auth.sentCodeTypeEmailCode': 'email',
+        'auth.sentCodeTypeSetUpEmailRequired': 'email_required',
+        'auth.sentCodeTypeFragmentSms': 'fragment',
+        'auth.sentCodeTypeFirebaseSms': 'firebase',
+    }
 
-const nextCodeMap: Record<
-    tl.auth.TypeCodeType['_'],
-    NextCodeDeliveryType
-> = {
+const nextCodeMap: Record<tl.auth.TypeCodeType['_'], NextCodeDeliveryType> = {
     'auth.codeTypeCall': 'call',
     'auth.codeTypeFlashCall': 'flash_call',
     'auth.codeTypeSms': 'sms',
@@ -33,6 +29,12 @@ const nextCodeMap: Record<
  * - `sms`: Code is sent via SMS
  * - `call`: Code is sent via voice call
  * - `flash_call`: Code is the last 5 digits of the caller's phone number
+ * - `missed_call`: Code is the last 5 digits of the caller's phone number
+ * - `email`: Code is sent via Email
+ * - `email_required`: Code sending via email setup is required
+ * - `fragment`: Code is sent via Fragment anonymous numbers
+ * - `firebase`: Code is sent via Firebase
+ * - `Success`: Code is not needed, you're already logged in (only for future auth tokens)
  */
 export type SentCodeDeliveryType =
     | 'app'
@@ -43,6 +45,8 @@ export type SentCodeDeliveryType =
     | 'email'
     | 'email_required'
     | 'fragment'
+    | 'firebase'
+    | 'success'
 
 /**
  * Type describing next code delivery type.
@@ -56,8 +60,7 @@ export type NextCodeDeliveryType = Exclude<SentCodeDeliveryType, 'app'> | 'none'
  * Information about sent confirmation code
  */
 export class SentCode {
-    constructor(readonly raw: tl.auth.TypeSentCode) {
-    }
+    constructor(readonly raw: tl.auth.RawSentCode) {}
 
     /**
      * Type of currently sent confirmation code
@@ -71,9 +74,7 @@ export class SentCode {
      * if you call {@link TelegramClient.resendCode}.
      */
     get nextType(): NextCodeDeliveryType {
-        return this.raw.nextType ?
-            nextCodeMap[this.raw.nextType._] :
-            'none'
+        return this.raw.nextType ? nextCodeMap[this.raw.nextType._] : 'none'
     }
 
     /**

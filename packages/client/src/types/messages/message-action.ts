@@ -1,9 +1,6 @@
 import { tl } from '@mtcute/tl'
 
-import {
-    _callDiscardReasonFromTl,
-    CallDiscardReason,
-} from '../calls'
+import { _callDiscardReasonFromTl, CallDiscardReason } from '../calls'
 import { Photo } from '../media'
 import { Message } from './message'
 
@@ -194,7 +191,7 @@ export interface ActionBotAllowed {
     readonly type: 'bot_allowed'
 
     /** Domain where the user has logged in */
-    readonly domain: string
+    readonly domain?: string
 }
 
 /**

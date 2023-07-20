@@ -400,14 +400,14 @@ export namespace filters {
             }
         > =>
             (msg) =>
-                msg.chat.type === type
+                msg.chat.chatType === type
 
     /**
      * Filter updates by chat ID(s) or username(s)
      */
     export const chatId = (
         id: MaybeArray<number | string>,
-    ): UpdateFilter<Message> => {
+    ): UpdateFilter<Message | PollVoteUpdate> => {
         if (Array.isArray(id)) {
             const index: Record<number | string, true> = {}
             let matchSelf = false
@@ -419,22 +419,53 @@ export namespace filters {
                 }
             })
 
-            return (msg) =>
-                (matchSelf && msg.chat.isSelf) ||
-                msg.chat.id in index ||
+            return (upd) => {
+                if (upd.constructor === PollVoteUpdate) {
+                    const peer = upd.peer
 
-                msg.chat.username! in index
+                    return peer.type === 'chat' && peer.id in index
+                }
+
+                const chat = (upd as Exclude<typeof upd, PollVoteUpdate>).chat
+
+                return (
+                    (matchSelf && chat.isSelf) ||
+                    chat.id in index ||
+                    chat.username! in index
+                )
+            }
         }
 
         if (id === 'me' || id === 'self') {
-            return (msg) => msg.chat.isSelf
+            return (upd) => {
+                if (upd.constructor === PollVoteUpdate) {
+                    return upd.peer.type === 'chat' && upd.peer.isSelf
+                }
+
+                return (upd as Exclude<typeof upd, PollVoteUpdate>).chat.isSelf
+            }
         }
 
         if (typeof id === 'string') {
-            return (msg) => msg.chat.username === id
+            return (upd) => {
+                if (upd.constructor === PollVoteUpdate) {
+                    return upd.peer.type === 'chat' && upd.peer.username === id
+                }
+
+                return (
+                    (upd as Exclude<typeof upd, PollVoteUpdate>).chat
+                        .username === id
+                )
+            }
         }
 
-        return (msg) => msg.chat.id === id
+        return (upd) => {
+            if (upd.constructor === PollVoteUpdate) {
+                return upd.peer.type === 'chat' && upd.peer.id === id
+            }
+
+            return (upd as Exclude<typeof upd, PollVoteUpdate>).chat.id === id
+        }
     }
 
     /**
@@ -479,7 +510,6 @@ export namespace filters {
                     return (
                         (matchSelf && sender.isSelf) ||
                         sender.id in index ||
-
                         sender.username! in index
                     )
                 } else if (
@@ -494,19 +524,31 @@ export namespace filters {
                         (matchSelf && id === upd.client['_userId']) ||
                         id in index
                     )
+                } else if (ctor === PollVoteUpdate) {
+                    const peer = (upd as PollVoteUpdate).peer
+                    if (peer.type !== 'user') return false
+
+                    return (
+                        (matchSelf && peer.isSelf) ||
+                        peer.id in index ||
+                        peer.username! in index
+                    )
                 }
+
                 const user = (
-                        upd as Exclude<
-                            typeof upd,
-                            Message | UserStatusUpdate | UserTypingUpdate
-                        >
+                    upd as Exclude<
+                        typeof upd,
+                        | Message
+                        | UserStatusUpdate
+                        | UserTypingUpdate
+                        | PollVoteUpdate
+                    >
                 ).user
 
                 return (
                     (matchSelf && user.isSelf) ||
-                        user.id in index ||
-
-                        user.username! in index
+                    user.id in index ||
+                    user.username! in index
                 )
             }
         }
@@ -526,13 +568,21 @@ export namespace filters {
                         // eslint-disable-next-line dot-notation
                         upd.client['_userId']
                     )
+                } else if (ctor === PollVoteUpdate) {
+                    const peer = (upd as PollVoteUpdate).peer
+                    if (peer.type !== 'user') return false
+
+                    return peer.isSelf
                 }
 
                 return (
-                        upd as Exclude<
-                            typeof upd,
-                            Message | UserStatusUpdate | UserTypingUpdate
-                        >
+                    upd as Exclude<
+                        typeof upd,
+                        | Message
+                        | UserStatusUpdate
+                        | UserTypingUpdate
+                        | PollVoteUpdate
+                    >
                 ).user.isSelf
             }
         }
@@ -549,14 +599,22 @@ export namespace filters {
                 ) {
                     // username is not available
                     return false
+                } else if (ctor === PollVoteUpdate) {
+                    const peer = (upd as PollVoteUpdate).peer
+                    if (peer.type !== 'user') return false
+
+                    return peer.username === id
                 }
 
                 return (
                     (
-                            upd as Exclude<
-                                typeof upd,
-                                Message | UserStatusUpdate | UserTypingUpdate
-                            >
+                        upd as Exclude<
+                            typeof upd,
+                            | Message
+                            | UserStatusUpdate
+                            | UserTypingUpdate
+                            | PollVoteUpdate
+                        >
                     ).user.username === id
                 )
             }
@@ -571,14 +629,22 @@ export namespace filters {
                 return (
                     (upd as UserStatusUpdate | UserTypingUpdate).userId === id
                 )
+            } else if (ctor === PollVoteUpdate) {
+                const peer = (upd as PollVoteUpdate).peer
+                if (peer.type !== 'user') return false
+
+                return peer.id === id
             }
 
             return (
                 (
-                        upd as Exclude<
-                            typeof upd,
-                            Message | UserStatusUpdate | UserTypingUpdate
-                        >
+                    upd as Exclude<
+                        typeof upd,
+                        | Message
+                        | UserStatusUpdate
+                        | UserTypingUpdate
+                        | PollVoteUpdate
+                    >
                 ).user.id === id
             )
         }
@@ -1081,7 +1147,9 @@ export namespace filters {
                     if (lastGroup && msg.client['_isBot']) {
                         // check bot username
                         // eslint-disable-next-line dot-notation
-                        if (lastGroup !== msg.client['_selfUsername']) { return false }
+                        if (lastGroup !== msg.client['_selfUsername']) {
+                            return false
+                        }
                     }
 
                     const match = m.slice(1, -1)
@@ -1258,7 +1326,7 @@ export namespace filters {
      */
     export const state = <T>(
         predicate: (state: T) => MaybeAsync<boolean>,
-    // eslint-disable-next-line @typescript-eslint/ban-types
+        // eslint-disable-next-line @typescript-eslint/ban-types
     ): UpdateFilter<Message | CallbackQuery, {}, T> => {
         return async (upd, state) => {
             if (!state) return false

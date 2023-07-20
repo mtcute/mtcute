@@ -35,6 +35,8 @@ export interface UserParsedStatus {
 }
 
 export class User {
+    readonly type = 'user' as const
+
     /**
      * Underlying raw TL object
      */
@@ -225,7 +227,14 @@ export class User {
      * More info at [Pyrogram FAQ](https://docs.pyrogram.org/faq#what-are-the-ip-addresses-of-telegram-data-centers).
      */
     get dcId(): number | null {
-        return (this.raw.photo as Exclude<typeof this.raw.photo, tl.RawUserProfilePhotoEmpty>)?.dcId ?? null
+        return (
+            (
+                this.raw.photo as Exclude<
+                    typeof this.raw.photo,
+                    tl.RawUserProfilePhotoEmpty
+                >
+            )?.dcId ?? null
+        )
     }
 
     /** User's phone number */
@@ -237,7 +246,9 @@ export class User {
      * Get this user's input peer for advanced use-cases.
      */
     get inputPeer(): tl.TypeInputPeer {
-        if (!this.raw.accessHash) { throw new MtArgumentError("user's access hash is not available!") }
+        if (!this.raw.accessHash) {
+            throw new MtArgumentError("user's access hash is not available!")
+        }
 
         return {
             _: 'inputPeerUser',
@@ -359,7 +370,9 @@ export class User {
         text?: string | null,
         parseMode?: T | null,
     ): FormattedString<T> {
-        if (!this.raw.accessHash) { throw new MtArgumentError("user's access hash is not available!") }
+        if (!this.raw.accessHash) {
+            throw new MtArgumentError("user's access hash is not available!")
+        }
 
         if (!text) text = this.displayName
         // eslint-disable-next-line dot-notation

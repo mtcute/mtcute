@@ -1,6 +1,7 @@
 import { TelegramClient } from '../../client'
 import { SentCode } from '../../types'
 import { normalizePhoneNumber } from '../../utils/misc-utils'
+import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Send the confirmation code to the given phone number
@@ -22,6 +23,8 @@ export async function sendCode(
         apiHash: this._apiHash,
         settings: { _: 'codeSettings' },
     })
+
+    assertTypeIs('sendCode', res, 'auth.sentCode')
 
     return new SentCode(res)
 }

@@ -31,7 +31,9 @@ export class Photo extends FileLocation {
             accessHash: raw.accessHash,
             thumbSize: '',
         } as tl.Mutable<tl.RawInputPhotoFileLocation>
-        let size; let width; let height: number
+        let size
+        let width
+        let height: number
 
         let bestSize: tl.RawPhotoSize | tl.RawPhotoSizeProgressive
 
@@ -84,8 +86,25 @@ export class Photo extends FileLocation {
     /**
      * Whether this photo is an animated profile picture
      */
-    get isAnimated(): boolean {
-        return Boolean(this.raw.videoSizes?.some((s) => s.type === 'u'))
+    get isAnimatedAvatar(): boolean {
+        return Boolean(
+            this.raw.videoSizes?.some(
+                (s) => s._ === 'videoSize' && s.type === 'u',
+            ),
+        )
+    }
+
+    /**
+     * Whether this photo is an animated profile picture, built from an emoji/sticker markup
+     */
+    get isMarkupAvatar(): boolean {
+        return Boolean(
+            this.raw.videoSizes?.some(
+                (s) =>
+                    s._ === 'videoSizeEmojiMarkup' ||
+                    s._ === 'videoSizeStickerMarkup',
+            ),
+        )
     }
 
     private _thumbnails?: Thumbnail[]
@@ -118,7 +137,7 @@ export class Photo extends FileLocation {
      * @param type  Thumbnail type
      */
     getThumbnail(type: string): Thumbnail | null {
-        return this.thumbnails.find((it) => it.raw.type === type) ?? null
+        return this.thumbnails.find((it) => it.type === type) ?? null
     }
 
     private _fileId?: string

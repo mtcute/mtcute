@@ -1,8 +1,10 @@
 /* THIS FILE WAS AUTO-GENERATED */
 import { Readable } from 'stream'
 
-import { AsyncLock,
-    BaseTelegramClient, BaseTelegramClientOptions,
+import {
+    AsyncLock,
+    BaseTelegramClient,
+    BaseTelegramClientOptions,
     Deque,
     MaybeArray,
     MaybeAsync,
@@ -234,6 +236,7 @@ import {
     InputStickerSetItem,
     MaybeDynamic,
     Message,
+    MessageEntity,
     MessageMedia,
     MessageReactions,
     ParsedUpdate,
@@ -3441,7 +3444,7 @@ export interface TelegramClient extends BaseTelegramClient {
         messageId: number,
         toLanguage: string,
         fromLanguage?: string
-    ): Promise<string | null>
+    ): Promise<[string, MessageEntity[]] | null>
     /**
      * Translate text to a given language.
      *

@@ -28,7 +28,7 @@ export const defaultStateKeyDelegate: StateKeyDelegate = (
     upd,
 ): string | null => {
     if (upd.constructor === Message) {
-        switch (upd.chat.type) {
+        switch (upd.chat.chatType) {
             case 'private':
             case 'bot':
             case 'channel':
@@ -38,7 +38,7 @@ export const defaultStateKeyDelegate: StateKeyDelegate = (
             case 'gigagroup':
                 return `${upd.chat.id}_${upd.sender.id}`
             default:
-                assertNever(upd.chat.type)
+                assertNever(upd.chat.chatType)
         }
     }
 

@@ -71,16 +71,30 @@ export class Dialog {
         folder.includePeers.forEach((peer) => {
             include[getMarkedPeerId(peer)] = true
         })
+
+        if (folder._ === 'dialogFilterChatlist') {
+            return (dialog) => {
+                const chatId = dialog.chat.id
+
+                if (excludePinned && pinned[chatId]) return false
+
+                return include[chatId] || pinned[chatId]
+            }
+        }
+
         folder.excludePeers.forEach((peer) => {
             exclude[getMarkedPeerId(peer)] = true
         })
 
         return (dialog) => {
             const chat = dialog.chat
+            const chatId = dialog.chat.id
+            const chatType = dialog.chat.chatType
 
             // manual exclusion/inclusion and pins
-            if (include[chat.id]) return true
-            if (exclude[chat.id] || pinned[chat.id]) return false
+            if (include[chatId]) return true
+
+            if (exclude[chatId] || (excludePinned && pinned[chatId])) { return false }
 
             // exclusions based on status
             if (folder.excludeRead && !dialog.isUnread) return false
@@ -90,18 +104,24 @@ export class Dialog {
             if (folder.excludeArchived && dialog.isArchived) return false
 
             // inclusions based on chat type
-            if (folder.contacts && chat.type === 'private' && chat.isContact) { return true }
+            if (folder.contacts && chatType === 'private' && chat.isContact) {
+                return true
+            }
             if (
                 folder.nonContacts &&
-                chat.type === 'private' &&
+                chatType === 'private' &&
                 !chat.isContact
-            ) { return true }
+            ) {
+                return true
+            }
             if (
                 folder.groups &&
-                (chat.type === 'group' || chat.type === 'supergroup')
-            ) { return true }
-            if (folder.broadcasts && chat.type === 'channel') return true
-            if (folder.bots && chat.type === 'bot') return true
+                (chatType === 'group' || chatType === 'supergroup')
+            ) {
+                return true
+            }
+            if (folder.broadcasts && chatType === 'channel') return true
+            if (folder.bots && chatType === 'bot') return true
 
             return false
         }

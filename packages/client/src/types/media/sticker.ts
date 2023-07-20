@@ -94,7 +94,11 @@ export class Sticker extends RawDocument {
      * (has premium fullscreen animation)
      */
     get isPremiumSticker(): boolean {
-        return Boolean(this.raw.videoThumbs?.some((s) => s.type === 'f'))
+        return Boolean(
+            this.raw.videoThumbs?.some(
+                (s) => s._ === 'videoSize' && s.type === 'f',
+            ),
+        )
     }
 
     /**
@@ -199,7 +203,12 @@ export class Sticker extends RawDocument {
      * Position where this mask should be placed
      */
     get maskPosition(): MaskPosition | null {
-        if (this.attr._ !== 'documentAttributeSticker' || !this.attr.maskCoords) { return null }
+        if (
+            this.attr._ !== 'documentAttributeSticker' ||
+            !this.attr.maskCoords
+        ) {
+            return null
+        }
 
         if (!this._maskPosition) {
             const raw = this.attr.maskCoords

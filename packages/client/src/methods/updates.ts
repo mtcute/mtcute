@@ -554,13 +554,25 @@ async function _fetchPeersForShort(
             if (!(await fetchPeer(msg.peerId))) return null
             if (!(await fetchPeer(msg.fromId))) return null
 
-            if (msg.replyTo && !(await fetchPeer(msg.replyTo.replyToPeerId))) { return null }
+            if (msg.replyTo) {
+                if (
+                    msg.replyTo._ === 'messageReplyHeader' &&
+                    !(await fetchPeer(msg.replyTo.replyToPeerId))
+                ) { return null }
+                if (
+                    msg.replyTo._ === 'messageReplyStoryHeader' &&
+                    !(await fetchPeer(msg.replyTo.userId))
+                ) { return null }
+            }
+
             if (msg._ !== 'messageService') {
                 if (
                     msg.fwdFrom &&
                     (!(await fetchPeer(msg.fwdFrom.fromId)) ||
                         !(await fetchPeer(msg.fwdFrom.savedFromPeer)))
-                ) { return null }
+                ) {
+                    return null
+                }
                 if (!(await fetchPeer(msg.viaBotId))) return null
 
                 if (msg.entities) {
@@ -577,7 +589,9 @@ async function _fetchPeersForShort(
                             if (
                                 msg.media.userId &&
                                 !(await fetchPeer(msg.media.userId))
-                            ) { return null }
+                            ) {
+                                return null
+                            }
                     }
                 }
             } else {
@@ -590,7 +604,9 @@ async function _fetchPeersForShort(
                         }
                         break
                     case 'messageActionChatJoinedByLink':
-                        if (!(await fetchPeer(msg.action.inviterId))) { return null }
+                        if (!(await fetchPeer(msg.action.inviterId))) {
+                            return null
+                        }
                         break
                     case 'messageActionChatDeleteUser':
                         if (!(await fetchPeer(msg.action.userId))) return null
@@ -600,7 +616,9 @@ async function _fetchPeersForShort(
                             !(await fetchPeer(
                                 toggleChannelIdMark(msg.action.channelId),
                             ))
-                        ) { return null }
+                        ) {
+                            return null
+                        }
                         break
                     case 'messageActionChannelMigrateFrom':
                         if (!(await fetchPeer(-msg.action.chatId))) return null
@@ -627,7 +645,10 @@ async function _fetchPeersForShort(
 }
 
 function _isMessageEmpty(upd: tl.TypeUpdate): boolean {
-    return (upd as Extract<typeof upd, { message: object }>).message?._ === 'messageEmpty'
+    return (
+        (upd as Extract<typeof upd, { message: object }>).message?._ ===
+        'messageEmpty'
+    )
 }
 
 /**
@@ -1557,7 +1578,9 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                 let localPts
 
                 if (!pending.channelId) localPts = this._pts!
-                else if (pending.channelId in this._cpts) { localPts = this._cpts[pending.channelId] }
+                else if (pending.channelId in this._cpts) {
+                    localPts = this._cpts[pending.channelId]
+                }
 
                 // channel pts from storage will be available because we loaded it earlier
                 if (!localPts) {

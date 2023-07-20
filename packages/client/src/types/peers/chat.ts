@@ -32,6 +32,8 @@ export type ChatType =
  * A chat.
  */
 export class Chat {
+    readonly type = 'chat' as const
+
     /**
      * Raw peer object that this {@link Chat} represents.
      */
@@ -121,32 +123,32 @@ export class Chat {
         return this._inputPeer!
     }
 
-    private _type?: ChatType
+    private _chatType?: ChatType
     /** Type of chat */
-    get type(): ChatType {
-        if (!this._type) {
+    get chatType(): ChatType {
+        if (!this._chatType) {
             switch (this.peer._) {
                 case 'user':
-                    this._type = this.peer.bot ? 'bot' : 'private'
+                    this._chatType = this.peer.bot ? 'bot' : 'private'
                     break
                 case 'chat':
                 case 'chatForbidden':
-                    this._type = 'group'
+                    this._chatType = 'group'
                     break
                 case 'channel':
                 case 'channelForbidden':
                     if (this.peer._ === 'channel' && this.peer.gigagroup) {
-                        this._type = 'gigagroup'
+                        this._chatType = 'gigagroup'
                     } else if (this.peer.broadcast) {
-                        this._type = 'channel'
+                        this._chatType = 'channel'
                     } else {
-                        this._type = 'supergroup'
+                        this._chatType = 'supergroup'
                     }
                     break
             }
         }
 
-        return this._type!
+        return this._chatType!
     }
 
     /**
@@ -154,7 +156,7 @@ export class Chat {
      * (i.e. not a channel and not PM)
      */
     get isGroup(): boolean {
-        switch (this.type) {
+        switch (this.chatType) {
             case 'group':
             case 'supergroup':
             case 'gigagroup':
@@ -375,7 +377,10 @@ export class Chat {
         //     null
 
         if (this.fullPeer && this.fullPeer._ !== 'userFull') {
-            if (this.fullPeer._ === 'chatFull' && this.fullPeer.participants._ === 'chatParticipants') {
+            if (
+                this.fullPeer._ === 'chatFull' &&
+                this.fullPeer.participants._ === 'chatParticipants'
+            ) {
                 return this.fullPeer.participants.participants.length
             } else if (this.fullPeer._ === 'channelFull') {
                 return this.fullPeer.participantsCount ?? null

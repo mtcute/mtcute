@@ -1,5 +1,7 @@
+import { isPresent } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
-import { InputPeerLike } from '../../types'
+import { InputPeerLike, MessageEntity } from '../../types'
 
 /**
  * Translate message text to a given language.
@@ -20,18 +22,19 @@ export async function translateMessage(
     messageId: number,
     toLanguage: string,
     fromLanguage?: string,
-): Promise<string | null> {
+): Promise<[string, MessageEntity[]] | null> {
     const res = await this.call({
         _: 'messages.translateText',
         peer: await this.resolvePeer(chatId),
-        msgId: messageId,
+        id: [messageId],
         fromLang: fromLanguage,
         toLang: toLanguage,
     })
 
-    if (res._ === 'messages.translateNoResult') {
-        return null
-    }
-
-    return res.text
+    return [
+        res.result[0].text,
+        res.result[0].entities
+            .map((it) => MessageEntity._parse(it))
+            .filter(isPresent),
+    ]
 }

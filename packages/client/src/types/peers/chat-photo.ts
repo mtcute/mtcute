@@ -101,8 +101,8 @@ export class ChatPhotoSize extends FileLocation {
                 source: {
                     _: 'dialogPhoto',
                     big: this.big,
-                // will be looked into in MTQ-37
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    // will be looked into in MTQ-37
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
             },
         ))
@@ -115,28 +115,27 @@ makeInspectable(ChatPhotoSize, ['dcId', 'big'])
  * A chat photo
  */
 export class ChatPhoto {
-    readonly client: TelegramClient
-    readonly obj: tl.RawUserProfilePhoto | tl.RawChatPhoto
-    readonly peer: tl.TypeInputPeer
-
     constructor(
-        client: TelegramClient,
-        peer: tl.TypeInputPeer,
-        obj: tl.RawUserProfilePhoto | tl.RawChatPhoto,
-    ) {
-        this.client = client
-        this.peer = peer
-        this.obj = obj
-    }
+        readonly client: TelegramClient,
+        readonly peer: tl.TypeInputPeer,
+        readonly raw: tl.RawUserProfilePhoto | tl.RawChatPhoto,
+    ) {}
 
     private _smallFile?: ChatPhotoSize
+
+    /**
+     * Whether this photo is personal (i.e. you set it yourself for this peer)
+     */
+    get isPersonal(): boolean {
+        return this.raw._ === 'userProfilePhoto' && this.raw.personal!
+    }
 
     /** Chat photo file location in small resolution (160x160) */
     get small(): ChatPhotoSize {
         return (this._smallFile ??= new ChatPhotoSize(
             this.client,
             this.peer,
-            this.obj,
+            this.raw,
             false,
         ))
     }
@@ -148,7 +147,7 @@ export class ChatPhoto {
         return (this._bigFile ??= new ChatPhotoSize(
             this.client,
             this.peer,
-            this.obj,
+            this.raw,
             true,
         ))
     }
@@ -159,9 +158,9 @@ export class ChatPhoto {
      * Chat photo preview in *very* small resolution, if available
      */
     get thumb(): Buffer | null {
-        if (!this.obj.strippedThumb) return null
+        if (!this.raw.strippedThumb) return null
 
-        return (this._thumb ??= strippedPhotoToJpg(this.obj.strippedThumb))
+        return (this._thumb ??= strippedPhotoToJpg(this.raw.strippedThumb))
     }
 }
 

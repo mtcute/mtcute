@@ -1,7 +1,8 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { MtUnsupportedError, PeersIndex, User } from '../'
+import { assertTypeIs } from '../../utils/type-assertion'
+import { Chat, MtUnsupportedError, PeersIndex, User } from '../'
 import { makeInspectable } from '../utils'
 
 /**
@@ -24,14 +25,25 @@ export class PollVoteUpdate {
         return this.raw.pollId
     }
 
-    private _user?: User
+    private _peer?: User | Chat
     /**
-     * User who has voted
+     * Peer who has voted
      */
-    get user(): User {
-        return (this._user ??= new User(
+    get peer(): User | Chat {
+        if (this._peer) return this._peer
+
+        if (this.raw.peer._ === 'peerUser') {
+            return (this._peer = new User(
+                this.client,
+                this._peers.user(this.raw.peer.userId),
+            ))
+        }
+
+        assertTypeIs('PollVoteUpdate.peer', this.raw.peer, 'peerChannel')
+
+        return (this._peer = new User(
             this.client,
-            this._peers.user(this.raw.userId),
+            this._peers.user(this.raw.peer.channelId),
         ))
     }
 
@@ -70,7 +82,9 @@ export class PollVoteUpdate {
      */
     get chosenIndexesAuto(): ReadonlyArray<number> {
         return this.raw.options.map((buf) => {
-            if (buf.length > 1) { throw new MtUnsupportedError('option had >1 byte') }
+            if (buf.length > 1) {
+                throw new MtUnsupportedError('option had >1 byte')
+            }
             if (buf[0] < 48 || buf[0] > 57) {
                 throw new MtUnsupportedError(
                     'option had first byte out of 0-9 range',

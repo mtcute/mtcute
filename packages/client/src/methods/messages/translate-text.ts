@@ -20,14 +20,16 @@ export async function translateText(
 ): Promise<string | null> {
     const res = await this.call({
         _: 'messages.translateText',
-        text,
+        text: [
+            {
+                _: 'textWithEntities',
+                text,
+                entities: [],
+            },
+        ],
         fromLang: fromLanguage,
         toLang: toLanguage,
     })
 
-    if (res._ === 'messages.translateNoResult') {
-        return null
-    }
-
-    return res.text
+    return res.result[0].text
 }

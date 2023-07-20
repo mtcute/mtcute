@@ -95,7 +95,16 @@ export abstract class RawDocument extends FileLocation {
      * @param type  Thumbnail type
      */
     getThumbnail(type: string): Thumbnail | null {
-        return this.thumbnails.find((it) => it.raw.type === type) ?? null
+        return (
+            this.thumbnails.find((it) => {
+                if (
+                    it.raw._ === 'videoSizeEmojiMarkup' ||
+                    it.raw._ === 'videoSizeStickerMarkup'
+                ) { return false }
+
+                return it.raw.type === type
+            }) ?? null
+        )
     }
 
     /**
