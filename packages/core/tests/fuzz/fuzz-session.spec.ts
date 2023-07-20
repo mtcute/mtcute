@@ -20,9 +20,9 @@ describe('fuzz : session', async function () {
 
         // client is supposed to handle this and generate a new key
 
-        const errors: Error[] = []
+        const errors: unknown[] = []
 
-        const errorHandler = (err: Error) => {
+        const errorHandler = (err: unknown) => {
             errors.push(err)
         }
 
@@ -50,9 +50,9 @@ describe('fuzz : session', async function () {
 
         // client is supposed to handle this and generate a new key
 
-        const errors: Error[] = []
+        const errors: unknown[] = []
 
-        const errorHandler = (err: Error) => {
+        const errorHandler = (err: unknown) => {
             errors.push(err)
         }
 

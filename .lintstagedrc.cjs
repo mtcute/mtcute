@@ -14,7 +14,7 @@ module.exports = {
         return [
             `prettier --write ${filenames.join(' ')}`,
             `eslint --fix ${filenames.join(' ')}`,
-            ...[...modifiedPackages].map((pkg) => `pnpm -C packages/${pkg} build --noEmit`)
+            ...[...modifiedPackages].map((pkg) => `pnpm -C packages/${pkg} run --if-present build --noEmit`)
         ]
     }
 }

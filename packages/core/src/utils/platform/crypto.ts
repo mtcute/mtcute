@@ -1,6 +1,7 @@
 import { randomBytes } from 'crypto'
 
-import { NodeCryptoProvider } from '../crypto'
+// noinspection ES6PreferShortImport
+import { NodeCryptoProvider } from '../crypto/node-crypto'
 
 /** @internal */
 export const _defaultCryptoProviderFactory = () => new NodeCryptoProvider()

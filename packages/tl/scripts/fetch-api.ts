@@ -9,7 +9,7 @@ import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import * as readline from 'readline'
 
-import { hasPresentKey } from '@mtcute/core'
+import { hasPresentKey, isPresent } from '@mtcute/core'
 import {
     generateTlSchemasDifference,
     mergeTlEntries,
@@ -27,6 +27,7 @@ import {
     BLOGFORK_DOMAIN,
     CORE_DOMAIN,
     COREFORK_DOMAIN,
+    TDESKTOP_LAYER,
     TDESKTOP_SCHEMA,
     TDLIB_SCHEMA,
 } from './constants'
@@ -71,7 +72,8 @@ async function fetchTdlibSchema(): Promise<Schema> {
 
 async function fetchTdesktopSchema(): Promise<Schema> {
     const schema = await fetchRetry(TDESKTOP_SCHEMA)
-    const layer = schema.match(/^\/\/ LAYER (\d+)/m)
+    const layerFile = await fetchRetry(TDESKTOP_LAYER)
+    const layer = `${schema}\n\n${layerFile}`.match(/^\/\/ LAYER (\d+)/m)
     if (!layer) throw new Error('Layer number not available')
 
     return {
@@ -256,9 +258,7 @@ async function main() {
                 // if they are all the same, it's just conflict between layers,
                 // and we can merge the ones from the latest layer
                 const mergedEntry = mergeTlEntries(
-                    fromLastSchema
-                        .map((opt) => opt.entry)
-                        .filter(Boolean),
+                    fromLastSchema.map((opt) => opt.entry).filter(isPresent),
                 )
                 if (typeof mergedEntry === 'string') {
                     // merge failed, so there is in fact some conflict
@@ -276,7 +276,9 @@ async function main() {
             console.log('0. Remove')
             nonEmptyOptions.forEach((opt, idx) => {
                 console.log(
-                    `${idx + 1}. ${opt.schema.name}: ${writeTlEntryToString(opt.entry)}`,
+                    `${idx + 1}. ${opt.schema.name}: ${writeTlEntryToString(
+                        opt.entry,
+                    )}`,
                 )
             })
 
@@ -285,7 +287,9 @@ async function main() {
                     await input(rl, `[0-${nonEmptyOptions.length}] > `),
                 )
 
-                if (isNaN(res) || res < 0 || res > nonEmptyOptions.length) { continue }
+                if (isNaN(res) || res < 0 || res > nonEmptyOptions.length) {
+                    continue
+                }
 
                 if (res === 0) return undefined
 
@@ -320,13 +324,19 @@ async function main() {
     await overrideInt53(resultSchema)
 
     console.log('Writing diff to file...')
-    const oldSchema = unpackTlSchema(JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')))
+    const oldSchema = unpackTlSchema(
+        JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')),
+    )
     await writeFile(
         API_SCHEMA_DIFF_JSON_FILE,
-        JSON.stringify({
-            layer: [oldSchema[1], resultLayer],
-            diff: generateTlSchemasDifference(oldSchema[0], resultSchema),
-        }, null, 4),
+        JSON.stringify(
+            {
+                layer: [oldSchema[1], resultLayer],
+                diff: generateTlSchemasDifference(oldSchema[0], resultSchema),
+            },
+            null,
+            4,
+        ),
     )
 
     console.log('Writing result to file...')

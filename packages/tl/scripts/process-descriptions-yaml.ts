@@ -52,7 +52,11 @@ export function applyDescriptionsYamlFile(
     input: CachedDocumentation,
     yaml: unknown,
 ) {
-    const { objects: byObjects, arguments: byArguments, regex: byRegex } = yaml as DescriptionsYaml
+    const {
+        objects: byObjects,
+        arguments: byArguments,
+        regex: byRegex,
+    } = yaml as DescriptionsYaml
 
     // first create an index of all classes and methods
     const objIndex: Record<string, CachedDocumentationEntry> = {}
@@ -98,7 +102,8 @@ export function applyDescriptionsYamlFile(
 
     // process byArguments
     for (const i in objIndex) {
-        const obj = objIndex[i]
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const obj = objIndex[i] as any
 
         for (const arg in byArguments) {
             if (obj.arguments && !(arg in obj.arguments)) continue

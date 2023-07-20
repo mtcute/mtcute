@@ -20,7 +20,7 @@
     "dependencies": {
         "@types/node": "18.16.0",
         "@types/events": "3.0.0",
-        "@mtcute/tl": "workspace:^150.0.0",
+        "@mtcute/tl": "workspace:^160.0.0",
         "@mtcute/tl-runtime": "workspace:^1.0.0",
         "big-integer": "1.6.51",
         "long": "5.2.3",

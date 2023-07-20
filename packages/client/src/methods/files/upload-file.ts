@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { fileTypeFromBuffer } from 'file-type'
+import { fromBuffer as fileTypeFromBuffer } from 'file-type'
 import type { ReadStream } from 'fs'
 import { Readable } from 'stream'
 
@@ -172,7 +172,9 @@ export async function uploadFile(
             }
         }
 
-        if (!file.body) { throw new MtArgumentError('Fetch response contains `null` body') }
+        if (!file.body) {
+            throw new MtArgumentError('Fetch response contains `null` body')
+        }
 
         if (
             typeof ReadableStream !== 'undefined' &&
@@ -197,11 +199,15 @@ export async function uploadFile(
         file = bufferToStream(buffer)
     }
 
-    if (!(file instanceof Readable)) { throw new MtArgumentError('Could not convert input `file` to stream!') }
+    if (!(file instanceof Readable)) {
+        throw new MtArgumentError('Could not convert input `file` to stream!')
+    }
 
     const partSizeKb = params.partSize ?? determinePartSize(fileSize)
 
-    if (partSizeKb > 512) { throw new MtArgumentError(`Invalid part size: ${partSizeKb}KB`) }
+    if (partSizeKb > 512) {
+        throw new MtArgumentError(`Invalid part size: ${partSizeKb}KB`)
+    }
     const partSize = partSizeKb * 1024
 
     const isBig = fileSize > 10485760 // 10 MB
@@ -229,7 +235,9 @@ export async function uploadFile(
             )
         }
 
-        if (!Buffer.isBuffer(part)) { throw new MtArgumentError(`Part ${idx} was not a Buffer!`) }
+        if (!Buffer.isBuffer(part)) {
+            throw new MtArgumentError(`Part ${idx} was not a Buffer!`)
+        }
         if (part.length > partSize) {
             throw new MtArgumentError(
                 `Part ${idx} had invalid size (expected ${partSize}, got ${part.length})`,

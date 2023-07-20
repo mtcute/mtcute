@@ -1,18 +1,18 @@
 {
     "name": "@mtcute/tl",
-    "version": "150.0.0",
+    "version": "160.0.0",
     "description": "TL schema used for mtcute",
     "main": "index.js",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "LGPL-3.0",
     "scripts": {
         "test": "tsc --noEmit --esModuleInterop tests/types.ts",
-        "fetch-mtp": "node -r ts-node/register scripts/fetch-mtp.ts",
-        "fetch-api": "node -r ts-node/register scripts/fetch-api.ts",
-        "fetch-errors": "node -r ts-node/register scripts/fetch-errors.ts",
-        "docs-cli": "node -r ts-node/register scripts/documentation.ts",
-        "gen-code": "node -r ts-node/register scripts/gen-code.ts",
-        "gen-rsa": "node -r ts-node/register scripts/gen-rsa-keys.ts",
+        "fetch-mtp": "ts-node scripts/fetch-mtp.ts",
+        "fetch-api": "ts-node scripts/fetch-api.ts",
+        "fetch-errors": "ts-node scripts/fetch-errors.ts",
+        "docs-cli": "ts-node scripts/documentation.ts",
+        "gen-code": "ts-node scripts/gen-code.ts",
+        "gen-rsa": "ts-node scripts/gen-rsa-keys.ts",
         "fetch-and-gen": "yarn fetch-api && yarn gen-code"
     },
     "dependencies": {

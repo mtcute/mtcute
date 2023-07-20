@@ -13,7 +13,7 @@
         "docs": "typedoc"
     },
     "dependencies": {
-        "@mtcute/tl": "workspace:^150.0.0",
+        "@mtcute/tl": "workspace:^160.0.0",
         "htmlparser2": "^6.0.1",
         "long": "5.2.3"
     },

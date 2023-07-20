@@ -15,7 +15,9 @@ export const COREFORK_DOMAIN = 'https://corefork.telegram.org'
 export const BLOGFORK_DOMAIN = 'https://blogfork.telegram.org'
 
 export const TDESKTOP_SCHEMA =
-    'https://raw.githubusercontent.com/telegramdesktop/tdesktop/dev/Telegram/Resources/tl/api.tl'
+    'https://raw.githubusercontent.com/telegramdesktop/tdesktop/dev/Telegram/SourceFiles/mtproto/scheme/api.tl'
+export const TDESKTOP_LAYER =
+    'https://raw.githubusercontent.com/telegramdesktop/tdesktop/dev/Telegram/SourceFiles/mtproto/scheme/layer.tl'
 export const TDLIB_SCHEMA =
     'https://raw.githubusercontent.com/tdlib/td/master/td/generate/scheme/telegram_api.tl'
 
