@@ -153,7 +153,12 @@ export async function sendText(
         peer,
         noWebpage: params.disableWebPreview,
         silent: params.silent,
-        replyToMsgId: replyTo,
+        replyTo: replyTo ?
+            {
+                _: 'inputReplyToMessage',
+                replyToMsgId: replyTo,
+            } :
+            undefined,
         randomId: randomLong(),
         scheduleDate: normalizeDate(params.schedule),
         replyMarkup,

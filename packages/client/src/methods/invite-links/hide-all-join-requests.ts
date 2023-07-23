@@ -24,7 +24,6 @@ export async function hideAllJoinRequests(
         _: 'messages.hideAllChatJoinRequests',
         approved: action === 'approve',
         peer: await this.resolvePeer(peer),
-        userId,
         link,
     })
 }

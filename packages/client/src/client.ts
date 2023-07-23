@@ -3093,12 +3093,6 @@ export interface TelegramClient extends BaseTelegramClient {
             schedule?: Date | number
 
             /**
-             * For bots: inline or reply markup or an instruction
-             * to hide a reply keyboard or to force a reply.
-             */
-            replyMarkup?: ReplyMarkup
-
-            /**
              * Function that will be called after some part has been uploaded.
              * Only used when a file that requires uploading is passed,
              * and not used when uploading a thumbnail.
@@ -3437,13 +3431,11 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  Chat or user ID
      * @param messageId  Identifier of the message to translate
      * @param toLanguage  Target language (two-letter ISO 639-1 language code)
-     * @param fromLanguage  Source language (two-letter ISO 639-1 language code, by default auto-detected)
      */
     translateMessage(
         chatId: InputPeerLike,
         messageId: number,
-        toLanguage: string,
-        fromLanguage?: string
+        toLanguage: string
     ): Promise<[string, MessageEntity[]] | null>
     /**
      * Translate text to a given language.
@@ -3454,13 +3446,8 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param text  Text to translate
      * @param toLanguage  Target language (two-letter ISO 639-1 language code)
-     * @param fromLanguage  Source language (two-letter ISO 639-1 language code, by default auto-detected)
      */
-    translateText(
-        text: string,
-        toLanguage: string,
-        fromLanguage?: string
-    ): Promise<string | null>
+    translateText(text: string, toLanguage: string): Promise<string | null>
     /**
      * Unpin all pinned messages in a chat.
      *

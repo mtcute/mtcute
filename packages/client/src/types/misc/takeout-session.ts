@@ -1,3 +1,4 @@
+import { MustEqual } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -29,7 +30,7 @@ export class TakeoutSession {
      * @param params  Additional call parameters
      */
     async call<T extends tl.RpcMethod>(
-        message: T,
+        message: MustEqual<T, tl.RpcMethod>,
         params?: {
             throwFlood: boolean
         },
@@ -39,7 +40,8 @@ export class TakeoutSession {
                 _: 'invokeWithTakeout',
                 takeoutId: this.id,
                 query: message,
-            },
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
             params,
         )
     }

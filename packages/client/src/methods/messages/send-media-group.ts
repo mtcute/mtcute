@@ -79,12 +79,6 @@ export async function sendMediaGroup(
         schedule?: Date | number
 
         /**
-         * For bots: inline or reply markup or an instruction
-         * to hide a reply keyboard or to force a reply.
-         */
-        replyMarkup?: ReplyMarkup
-
-        /**
          * Function that will be called after some part has been uploaded.
          * Only used when a file that requires uploading is passed,
          * and not used when uploading a thumbnail.
@@ -123,7 +117,6 @@ export async function sendMediaGroup(
     if (!params) params = {}
 
     let peer = await this.resolvePeer(chatId)
-    const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
 
     let replyTo = normalizeMessageId(params.replyTo)
 
@@ -193,10 +186,13 @@ export async function sendMediaGroup(
         peer,
         multiMedia,
         silent: params.silent,
-        replyToMsgId: replyTo,
-        randomId: randomLong(),
+        replyTo: replyTo ?
+            {
+                _: 'inputReplyToMessage',
+                replyToMsgId: replyTo,
+            } :
+            undefined,
         scheduleDate: normalizeDate(params.schedule),
-        replyMarkup,
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
         sendAs: params.sendAs ?
@@ -211,7 +207,12 @@ export async function sendMediaGroup(
 
     const msgs = res.updates
         .filter(
-            (u): u is tl.RawUpdateNewMessage | tl.RawUpdateNewChannelMessage | tl.RawUpdateNewScheduledMessage =>
+            (
+                u,
+            ): u is
+                | tl.RawUpdateNewMessage
+                | tl.RawUpdateNewChannelMessage
+                | tl.RawUpdateNewScheduledMessage =>
                 u._ === 'updateNewMessage' ||
                 u._ === 'updateNewChannelMessage' ||
                 u._ === 'updateNewScheduledMessage',

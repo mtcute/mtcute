@@ -5,10 +5,7 @@ import Long from 'long'
 import { tl } from '@mtcute/tl'
 import defaultReaderMap from '@mtcute/tl/binary/reader'
 import defaultWriterMap from '@mtcute/tl/binary/writer'
-import {
-    TlReaderMap,
-    TlWriterMap,
-} from '@mtcute/tl-runtime'
+import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import {
     defaultReconnectionStrategy,
@@ -19,6 +16,7 @@ import {
 } from './network'
 import { PersistentConnectionParams } from './network/persistent-connection'
 import { ITelegramStorage, MemoryStorage } from './storage'
+import { MustEqual } from './types'
 import {
     ControllablePromise,
     createControllablePromise,
@@ -288,7 +286,9 @@ export class BaseTelegramClient extends EventEmitter {
         const apiId =
             typeof opts.apiId === 'string' ? parseInt(opts.apiId) : opts.apiId
 
-        if (isNaN(apiId)) { throw new Error('apiId must be a number or a numeric string!') }
+        if (isNaN(apiId)) {
+            throw new Error('apiId must be a number or a numeric string!')
+        }
 
         this._transportFactory = opts.transport ?? defaultTransportFactory
         this._crypto = (opts.crypto ?? defaultCryptoProviderFactory)()
@@ -303,7 +303,9 @@ export class BaseTelegramClient extends EventEmitter {
             if (this._testMode) {
                 dc = this._useIpv6 ? defaultTestIpv6Dc : defaultTestDc
             } else {
-                dc = this._useIpv6 ? defaultProductionIpv6Dc : defaultProductionDc
+                dc = this._useIpv6 ?
+                    defaultProductionIpv6Dc :
+                    defaultProductionDc
             }
         }
 
@@ -445,7 +447,10 @@ export class BaseTelegramClient extends EventEmitter {
             await this.storage.getAuthKeyFor(this._primaryDc.id),
         )
 
-        if ((this._importForce || !this.primaryConnection.getAuthKey()) && this._importFrom) {
+        if (
+            (this._importForce || !this.primaryConnection.getAuthKey()) &&
+            this._importFrom
+        ) {
             const data = readStringSession(this._readerMap, this._importFrom)
 
             if (data.testMode !== !this._testMode) {
@@ -609,7 +614,7 @@ export class BaseTelegramClient extends EventEmitter {
      * @param params  Additional call parameters
      */
     async call<T extends tl.RpcMethod>(
-        message: T,
+        message: MustEqual<T, tl.RpcMethod>,
         params?: {
             throwFlood?: boolean
             connection?: SessionConnection
@@ -700,7 +705,9 @@ export class BaseTelegramClient extends EventEmitter {
                         await this.changeDc(e.new_dc)
                         continue
                     }
-                } else if (e.constructor === tl.errors.AuthKeyUnregisteredError) {
+                } else if (
+                    e.constructor === tl.errors.AuthKeyUnregisteredError
+                ) {
                     // we can try re-exporting auth from the primary connection
                     this.log.warn('exported auth key error, re-exporting..')
 
@@ -968,7 +975,9 @@ export class BaseTelegramClient extends EventEmitter {
      * > with [@BotFather](//t.me/botfather)
      */
     async exportSession(): Promise<string> {
-        if (!this.primaryConnection.getAuthKey()) { throw new Error('Auth key is not generated yet') }
+        if (!this.primaryConnection.getAuthKey()) {
+            throw new Error('Auth key is not generated yet')
+        }
 
         return writeStringSession(this._writerMap, {
             version: 1,

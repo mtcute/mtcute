@@ -13,7 +13,6 @@ import { InputPeerLike, MessageEntity } from '../../types'
  * @param chatId  Chat or user ID
  * @param messageId  Identifier of the message to translate
  * @param toLanguage  Target language (two-letter ISO 639-1 language code)
- * @param fromLanguage  Source language (two-letter ISO 639-1 language code, by default auto-detected)
  * @internal
  */
 export async function translateMessage(
@@ -21,13 +20,11 @@ export async function translateMessage(
     chatId: InputPeerLike,
     messageId: number,
     toLanguage: string,
-    fromLanguage?: string,
 ): Promise<[string, MessageEntity[]] | null> {
     const res = await this.call({
         _: 'messages.translateText',
         peer: await this.resolvePeer(chatId),
         id: [messageId],
-        fromLang: fromLanguage,
         toLang: toLanguage,
     })
 

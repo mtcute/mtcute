@@ -49,7 +49,6 @@ export async function addChatMembers(
                 users as InputPeerLike[],
                 normalizeToInputUser,
             ),
-            fwdLimit: forwardCount,
         })
         this._handleUpdate(updates)
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')

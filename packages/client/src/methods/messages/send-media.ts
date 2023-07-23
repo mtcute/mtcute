@@ -145,9 +145,11 @@ export async function sendMedia(
         // some types dont have `caption` field, and ts warns us,
         // but since it's JS, they'll just be `undefined` and properly
         // handled by _parseEntities method
-        params.caption || (media as Extract<typeof media, { caption?: unknown }>).caption,
+        params.caption ||
+            (media as Extract<typeof media, { caption?: unknown }>).caption,
         params.parseMode,
-        params.entities || (media as Extract<typeof media, { entities?: unknown }>).entities,
+        params.entities ||
+            (media as Extract<typeof media, { entities?: unknown }>).entities,
     )
 
     let peer = await this.resolvePeer(chatId)
@@ -179,7 +181,12 @@ export async function sendMedia(
         peer,
         media: inputMedia,
         silent: params.silent,
-        replyToMsgId: replyTo,
+        replyTo: replyTo ?
+            {
+                _: 'inputReplyToMessage',
+                replyToMsgId: replyTo,
+            } :
+            undefined,
         randomId: randomLong(),
         scheduleDate: normalizeDate(params.schedule),
         replyMarkup,
