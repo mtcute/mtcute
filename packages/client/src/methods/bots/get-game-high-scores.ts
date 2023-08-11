@@ -1,12 +1,8 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    GameHighScore,
-    InputPeerLike,
-    MtInvalidPeerTypeError,
-    PeersIndex,
-} from '../../types'
+import { GameHighScore, InputPeerLike, PeersIndex } from '../../types'
+import { normalizeInlineId } from '../../utils/inline-utils'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
@@ -57,7 +53,7 @@ export async function getInlineGameHighScores(
     messageId: string | tl.TypeInputBotInlineMessageID,
     userId?: InputPeerLike,
 ): Promise<GameHighScore[]> {
-    const [id, connection] = await this._normalizeInline(messageId)
+    const id = await normalizeInlineId(messageId)
 
     let user: tl.TypeInputUser
 
@@ -73,7 +69,7 @@ export async function getInlineGameHighScores(
             id,
             userId: user,
         },
-        { connection },
+        { dcId: id.dcId },
     )
 
     const peers = PeersIndex.from(res)

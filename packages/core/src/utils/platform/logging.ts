@@ -2,7 +2,7 @@ import { isatty } from 'tty'
 
 const isTty = isatty(process.stdout.fd)
 
-const BASE_FORMAT = isTty ? '[%s] [%s] %s%s\x1b[0m - ' : '[%s] [%s] %s - '
+const BASE_FORMAT = isTty ? '%s [%s] [%s%s\x1b[0m] ' : '%s [%s] [%s] '
 const LEVEL_NAMES = isTty ?
     [
         '', // OFF

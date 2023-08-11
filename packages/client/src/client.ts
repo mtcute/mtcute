@@ -131,7 +131,6 @@ import { getMessages } from './methods/messages/get-messages'
 import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe'
 import { getReactionUsers } from './methods/messages/get-reaction-users'
 import { getScheduledMessages } from './methods/messages/get-scheduled-messages'
-import { _normalizeInline } from './methods/messages/normalize-inline'
 import { _parseEntities } from './methods/messages/parse-entities'
 import { pinMessage } from './methods/messages/pin-message'
 import { readHistory } from './methods/messages/read-history'
@@ -2759,10 +2758,6 @@ export interface TelegramClient extends BaseTelegramClient {
         messageIds: number[]
     ): Promise<(Message | null)[]>
 
-    _normalizeInline(
-        id: string | tl.TypeInputBotInlineMessageID
-    ): Promise<[tl.TypeInputBotInlineMessageID, SessionConnection]>
-
     _parseEntities(
         text?: string | FormattedString<string>,
         mode?: string | null,
@@ -4025,7 +4020,6 @@ export class TelegramClient extends BaseTelegramClient {
     protected _pendingConversations: Record<number, Conversation[]>
     protected _hasConversations: boolean
     protected _downloadConnections: Record<number, SessionConnection>
-    protected _connectionsForInline: Record<number, SessionConnection>
     protected _parseModes: Record<string, IMessageEntityParser>
     protected _defaultParseMode: string | null
     protected _updatesLoopActive: boolean
@@ -4061,7 +4055,6 @@ export class TelegramClient extends BaseTelegramClient {
         this._pendingConversations = {}
         this._hasConversations = false
         this._downloadConnections = {}
-        this._connectionsForInline = {}
         this._parseModes = {}
         this._defaultParseMode = null
         this._updatesLoopActive = false
@@ -4213,7 +4206,6 @@ export class TelegramClient extends BaseTelegramClient {
     getMessages = getMessages
     getReactionUsers = getReactionUsers
     getScheduledMessages = getScheduledMessages
-    _normalizeInline = _normalizeInline
     _parseEntities = _parseEntities
     pinMessage = pinMessage
     readHistory = readHistory

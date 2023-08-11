@@ -13,7 +13,11 @@ import {
     TransportFactory,
 } from './network'
 import { ConfigManager } from './network/config-manager'
-import { NetworkManager, NetworkManagerExtraParams } from './network/network-manager'
+import {
+    NetworkManager,
+    NetworkManagerExtraParams,
+    RpcCallOptions,
+} from './network/network-manager'
 import { PersistentConnectionParams } from './network/persistent-connection'
 import { ITelegramStorage, MemoryStorage } from './storage'
 import { MustEqual } from './types'
@@ -30,7 +34,6 @@ import {
     ICryptoProvider,
     LogManager,
     readStringSession,
-    sleep,
     toggleChannelIdMark,
     writeStringSession,
 } from './utils'
@@ -64,27 +67,27 @@ export interface BaseTelegramClientOptions {
      */
     useIpv6?: boolean
 
-        /**
-         * Primary DC to use for initial connection.
-         * This does not mean this will be the only DC used,
-         * nor that this DC will actually be primary, this only
-         * determines the first DC the library will try to connect to.
-         * Can be used to connect to other networks (like test DCs).
-         *
-         * When session already contains primary DC, this parameter is ignored.
-         * Defaults to Production DC 2.
-         */
-        defaultDc?: tl.RawDcOption
+    /**
+     * Primary DC to use for initial connection.
+     * This does not mean this will be the only DC used,
+     * nor that this DC will actually be primary, this only
+     * determines the first DC the library will try to connect to.
+     * Can be used to connect to other networks (like test DCs).
+     *
+     * When session already contains primary DC, this parameter is ignored.
+     * Defaults to Production DC 2.
+     */
+    defaultDc?: tl.RawDcOption
 
-        /**
-         * Whether to connect to test servers.
-         *
-         * If passed, {@link defaultDc} defaults to Test DC 2.
-         *
-         * **Must** be passed if using test servers, even if
-         * you passed custom {@link defaultDc}
-         */
-        testMode?: boolean
+    /**
+     * Whether to connect to test servers.
+     *
+     * If passed, {@link defaultDc} defaults to Test DC 2.
+     *
+     * **Must** be passed if using test servers, even if
+     * you passed custom {@link defaultDc}
+     */
+    testMode?: boolean
 
     /**
      * Additional options for initConnection call.
@@ -123,7 +126,7 @@ export interface BaseTelegramClientOptions {
      *
      * @default 5
      */
-    rpcRetryCount?: number
+    maxRetryCount?: number
 
     /**
      * If true, every single API call will be wrapped with `tl.invokeWithoutUpdates`,
@@ -152,19 +155,19 @@ export interface BaseTelegramClientOptions {
      */
     niceStacks?: boolean
 
-        /**
-         * Extra parameters for {@link NetworkManager}
-         */
-        network?: NetworkManagerExtraParams
+    /**
+     * Extra parameters for {@link NetworkManager}
+     */
+    network?: NetworkManagerExtraParams
 
-        /**
-         * **EXPERT USE ONLY!**
-         *
-         * Override TL layer used for the connection.
-         *
-         * **Does not** change the schema used.
-         */
-        overrideLayer?: number
+    /**
+     * **EXPERT USE ONLY!**
+     *
+     * Override TL layer used for the connection.
+     *
+     * **Does not** change the schema used.
+     */
+    overrideLayer?: number
 
     /**
      * **EXPERT USE ONLY**
@@ -208,16 +211,6 @@ export class BaseTelegramClient extends EventEmitter {
     protected readonly _testMode: boolean
 
     /**
-     * Flood sleep threshold taken from {@link BaseTelegramClientOptions.floodSleepThreshold}
-     */
-    protected readonly _floodSleepThreshold: number
-
-    /**
-     * RPC retry count taken from {@link BaseTelegramClientOptions.rpcRetryCount}
-     */
-    protected readonly _rpcRetryCount: number
-
-    /**
      * Primary DC taken from {@link BaseTelegramClientOptions.defaultDc},
      * loaded from session or changed by other means (like redirecting).
      */
@@ -229,7 +222,6 @@ export class BaseTelegramClient extends EventEmitter {
     readonly _writerMap: TlWriterMap
 
     protected _lastUpdateTime = 0
-    private _floodWaitedRequests: Record<string, number> = {}
 
     protected _config = new ConfigManager(() =>
         this.call({ _: 'help.getConfig' }),
@@ -287,30 +279,35 @@ export class BaseTelegramClient extends EventEmitter {
         }
 
         this._defaultDc = dc
-        this._floodSleepThreshold = opts.floodSleepThreshold ?? 10000
-        this._rpcRetryCount = opts.rpcRetryCount ?? 5
         this._niceStacks = opts.niceStacks ?? true
 
         this._layer = opts.overrideLayer ?? tl.LAYER
         this._readerMap = opts.readerMap ?? defaultReaderMap
         this._writerMap = opts.writerMap ?? defaultWriterMap
 
-        this.network = new NetworkManager({
-            apiId,
-            crypto: this._crypto,
-            disableUpdates: opts.disableUpdates ?? false,
-            initConnectionOptions: opts.initConnectionOptions,
-            layer: this._layer,
-            log: this.log,
-            readerMap: this._readerMap,
-            writerMap: this._writerMap,
-            reconnectionStrategy: opts.reconnectionStrategy,
-            storage: this.storage,
-            testMode: this._testMode,
-            transport: opts.transport,
-            _emitError: this._emitError.bind(this),
-            ...(opts.network ?? {}),
-        }, this._config)
+        this.network = new NetworkManager(
+            {
+                apiId,
+                crypto: this._crypto,
+                disableUpdates: opts.disableUpdates ?? false,
+                initConnectionOptions: opts.initConnectionOptions,
+                layer: this._layer,
+                log: this.log,
+                readerMap: this._readerMap,
+                writerMap: this._writerMap,
+                reconnectionStrategy: opts.reconnectionStrategy,
+                storage: this.storage,
+                testMode: this._testMode,
+                transport: opts.transport,
+                _emitError: this._emitError.bind(this),
+                floodSleepThreshold: opts.floodSleepThreshold ?? 10000,
+                maxRetryCount: opts.maxRetryCount ?? 5,
+                isPremium: false, // todo fixme
+                useIpv6: Boolean(opts.useIpv6),
+                ...(opts.network ?? {}),
+            },
+            this._config,
+        )
 
         this.storage.setup?.(this.log, this._readerMap, this._writerMap)
     }
@@ -338,25 +335,27 @@ export class BaseTelegramClient extends EventEmitter {
             return
         }
 
-        this._connected = createControllablePromise()
+        const promise = (this._connected = createControllablePromise())
 
         await this._loadStorage()
         const primaryDc = await this.storage.getDefaultDc()
         if (primaryDc !== null) this._defaultDc = primaryDc
 
-        const defaultDcAuthKey = await this.storage.getAuthKeyFor(this._defaultDc.id)
+        const defaultDcAuthKey = await this.storage.getAuthKeyFor(
+            this._defaultDc.id,
+        )
 
-        // await this.primaryConnection.setupKeys()
-
-        if (
-            (this._importForce || !defaultDcAuthKey) &&
-            this._importFrom
-        ) {
+        if ((this._importForce || !defaultDcAuthKey) && this._importFrom) {
             const data = readStringSession(this._readerMap, this._importFrom)
 
-            if (data.testMode !== !this._testMode) {
+            if (data.testMode !== this._testMode) {
                 throw new Error(
-                    'This session string is not for the current backend',
+                    'This session string is not for the current backend. ' +
+                        `Session is ${
+                            data.testMode ? 'test' : 'prod'
+                        }, but the client is ${
+                            this._testMode ? 'test' : 'prod'
+                        }`,
                 )
             }
 
@@ -373,10 +372,13 @@ export class BaseTelegramClient extends EventEmitter {
             await this._saveStorage(true)
         }
 
-        this.network.connect(this._defaultDc)
-
-        this._connected.resolve()
-        this._connected = true
+        this.network
+            .connect(this._defaultDc)
+            .then(() => {
+                promise.resolve()
+                this._connected = true
+            })
+            .catch((err) => this._emitError(err))
     }
 
     /**
@@ -449,122 +451,18 @@ export class BaseTelegramClient extends EventEmitter {
      */
     async call<T extends tl.RpcMethod>(
         message: MustEqual<T, tl.RpcMethod>,
-        params?: {
-            throwFlood?: boolean
-            connection?: SessionConnection
-            timeout?: number
-        },
+        params?: RpcCallOptions,
     ): Promise<tl.RpcCallReturn[T['_']]> {
-        // todo move to network manager
         if (this._connected !== true) {
             await this.connect()
         }
 
-        // do not send requests that are in flood wait
-        if (message._ in this._floodWaitedRequests) {
-            const delta = this._floodWaitedRequests[message._] - Date.now()
-
-            if (delta <= 3000) {
-                // flood waits below 3 seconds are "ignored"
-                delete this._floodWaitedRequests[message._]
-            } else if (delta <= this._floodSleepThreshold) {
-                await sleep(delta)
-                delete this._floodWaitedRequests[message._]
-            } else {
-                throw new tl.errors.FloodWaitXError(delta / 1000)
-            }
-        }
-
-        let lastError: Error | null = null
         const stack = this._niceStacks ? new Error().stack : undefined
 
-        for (let i = 0; i < this._rpcRetryCount; i++) {
-            try {
-                // fixme temporary hack
-                // eslint-disable-next-line dot-notation
-                const res = await this.network['_primaryDc']!.mainConnection.sendRpc(
-                    message,
-                    stack,
-                    params?.timeout,
-                )
-                await this._cachePeersFrom(res)
+        const res = await this.network.call(message, params, stack)
+        await this._cachePeersFrom(res)
 
-                return res
-            } catch (e: any) {
-                lastError = e
-
-                if (e instanceof tl.errors.InternalError) {
-                    this.log.warn('Telegram is having internal issues: %s', e)
-
-                    if (e.message === 'WORKER_BUSY_TOO_LONG_RETRY') {
-                        // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
-                        await sleep(1000)
-                    }
-                    continue
-                }
-
-                if (
-                    e.constructor === tl.errors.FloodWaitXError ||
-                    e.constructor === tl.errors.SlowmodeWaitXError ||
-                    e.constructor === tl.errors.FloodTestPhoneWaitXError
-                ) {
-                    if (e.constructor !== tl.errors.SlowmodeWaitXError) {
-                        // SLOW_MODE_WAIT is chat-specific, not request-specific
-                        this._floodWaitedRequests[message._] =
-                            Date.now() + e.seconds * 1000
-                    }
-
-                    // In test servers, FLOOD_WAIT_0 has been observed, and sleeping for
-                    // such a short amount will cause retries very fast leading to issues
-                    if (e.seconds === 0) {
-                        (e as any).seconds = 1
-                    }
-
-                    if (
-                        params?.throwFlood !== true &&
-                        e.seconds <= this._floodSleepThreshold
-                    ) {
-                        this.log.info('Flood wait for %d seconds', e.seconds)
-                        await sleep(e.seconds * 1000)
-                        continue
-                    }
-                }
-
-                // if (connection.params.dc.id === this._defaultDc.id) {
-                //     if (
-                //         e.constructor === tl.errors.PhoneMigrateXError ||
-                //         e.constructor === tl.errors.UserMigrateXError ||
-                //         e.constructor === tl.errors.NetworkMigrateXError
-                //     ) {
-                //         this.log.info('Migrate error, new dc = %d', e.new_dc)
-                //         await this.changeDc(e.new_dc)
-                //         continue
-                //     }
-                // } else {
-                //     if (e.constructor === tl.errors.AuthKeyUnregisteredError) {
-                //         // we can try re-exporting auth from the primary connection
-                //         this.log.warn('exported auth key error, re-exporting..')
-                //
-                //         const auth = await this.call({
-                //             _: 'auth.exportAuthorization',
-                //             dcId: connection.params.dc.id,
-                //         })
-                //
-                //         await connection.sendRpc({
-                //             _: 'auth.importAuthorization',
-                //             id: auth.id,
-                //             bytes: auth.bytes,
-                //         })
-                //
-                //         continue
-                //     }
-                // }
-
-                throw e
-            }
-        }
-
-        throw lastError
+        return res
     }
 
     // /**
@@ -707,7 +605,9 @@ export class BaseTelegramClient extends EventEmitter {
      *     the connection in which the error has occurred, in case
      *     this was connection-related error.
      */
-    onError(handler: typeof this._onError): void {
+    onError(
+        handler: (err: unknown, connection?: SessionConnection) => void,
+    ): void {
         this._onError = handler
     }
 
@@ -816,16 +716,18 @@ export class BaseTelegramClient extends EventEmitter {
      * > with [@BotFather](//t.me/botfather)
      */
     async exportSession(): Promise<string> {
-        // todo
-        // if (!this.primaryConnection.getAuthKey())
-        //     throw new Error('Auth key is not generated yet')
+        const primaryDc = await this.storage.getDefaultDc()
+        if (!primaryDc) throw new Error('No default DC set')
+
+        const authKey = await this.storage.getAuthKeyFor(primaryDc.id)
+        if (!authKey) throw new Error('Auth key is not ready yet')
 
         return writeStringSession(this._writerMap, {
             version: 1,
             self: await this.storage.getSelf(),
             testMode: this._testMode,
-            primaryDc: this._defaultDc,
-            authKey: Buffer.from([]), //this.primaryConnection.getAuthKey()!,
+            primaryDc,
+            authKey,
         })
     }
 
@@ -837,7 +739,7 @@ export class BaseTelegramClient extends EventEmitter {
      *
      * Also note that the session will only be imported in case
      * the storage is missing authorization (i.e. does not contain
-     * auth key for the primary DC), otherwise it will be ignored.
+     * auth key for the primary DC), otherwise it will be ignored (unless `force).
      *
      * @param session  Session string to import
      * @param force  Whether to overwrite existing session

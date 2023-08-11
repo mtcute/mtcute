@@ -2,10 +2,7 @@ import EventEmitter from 'events'
 
 import { tl } from '@mtcute/tl'
 
-import {
-    ICryptoProvider,
-    Logger,
-} from '../utils'
+import { ICryptoProvider, Logger } from '../utils'
 import { ReconnectionStrategy } from './reconnection'
 import {
     ITelegramTransport,
@@ -45,7 +42,7 @@ export abstract class PersistentConnection extends EventEmitter {
 
     // inactivity timeout
     private _inactivityTimeout: NodeJS.Timeout | null = null
-    private _inactive = false
+    private _inactive = true
 
     _destroyed = false
     _usable = false
@@ -63,19 +60,14 @@ export abstract class PersistentConnection extends EventEmitter {
         super()
         this.params = params
         this.changeTransport(params.transportFactory)
-        this._updateLogPrefix()
+
+        this.log.prefix = `[UID ${this._uid}] `
+
+        this._onInactivityTimeout = this._onInactivityTimeout.bind(this)
     }
 
-    private _updateLogPrefix() {
-        this.log.prefix = `[UID ${this._uid}, DC ${this.params.dc.id}] `
-    }
-
-    async changeDc(dc: tl.RawDcOption): Promise<void> {
-        this.log.debug('dc changed to: %j', dc)
-
-        this.params.dc = dc
-        this._updateLogPrefix()
-        this.reconnect()
+    get isConnected(): boolean {
+        return this._transport.state() !== TransportState.Idle
     }
 
     changeTransport(factory: TransportFactory): void {
@@ -139,7 +131,9 @@ export abstract class PersistentConnection extends EventEmitter {
 
         this._previousWait = wait
 
-        if (this._reconnectionTimeout != null) { clearTimeout(this._reconnectionTimeout) }
+        if (this._reconnectionTimeout != null) {
+            clearTimeout(this._reconnectionTimeout)
+        }
         this._reconnectionTimeout = setTimeout(() => {
             if (this._destroyed) return
             this._reconnectionTimeout = null
@@ -148,10 +142,14 @@ export abstract class PersistentConnection extends EventEmitter {
     }
 
     connect(): void {
-        if (this._transport.state() !== TransportState.Idle) { throw new Error('Connection is already opened!') }
+        if (this.isConnected) {
+            throw new Error('Connection is already opened!')
+        }
         if (this._destroyed) throw new Error('Connection is already destroyed!')
 
-        if (this._reconnectionTimeout != null) { clearTimeout(this._reconnectionTimeout) }
+        if (this._reconnectionTimeout != null) {
+            clearTimeout(this._reconnectionTimeout)
+        }
 
         this._inactive = false
         this._transport.connect(this.params.dc, this.params.testMode)
@@ -162,8 +160,12 @@ export abstract class PersistentConnection extends EventEmitter {
     }
 
     destroy(): void {
-        if (this._reconnectionTimeout != null) { clearTimeout(this._reconnectionTimeout) }
-        if (this._inactivityTimeout != null) { clearTimeout(this._inactivityTimeout) }
+        if (this._reconnectionTimeout != null) {
+            clearTimeout(this._reconnectionTimeout)
+        }
+        if (this._inactivityTimeout != null) {
+            clearTimeout(this._inactivityTimeout)
+        }
 
         this._transport.close()
         this._transport.removeAllListeners()
@@ -173,15 +175,32 @@ export abstract class PersistentConnection extends EventEmitter {
     protected _rescheduleInactivity(): void {
         if (!this.params.inactivityTimeout) return
         if (this._inactivityTimeout) clearTimeout(this._inactivityTimeout)
-        this._inactivityTimeout = setTimeout(() => {
-            this.log.info(
-                'disconnected because of inactivity for %d',
-                this.params.inactivityTimeout,
-            )
-            this._inactive = true
-            this._inactivityTimeout = null
-            this._transport.close()
-        }, this.params.inactivityTimeout)
+        this._inactivityTimeout = setTimeout(
+            this._onInactivityTimeout,
+            this.params.inactivityTimeout,
+        )
+    }
+
+    protected _onInactivityTimeout(): void {
+        this.log.info(
+            'disconnected because of inactivity for %d',
+            this.params.inactivityTimeout,
+        )
+        this._inactive = true
+        this._inactivityTimeout = null
+        this._transport.close()
+    }
+
+    setInactivityTimeout(timeout?: number): void {
+        this.params.inactivityTimeout = timeout
+
+        if (this._inactivityTimeout) {
+            clearTimeout(this._inactivityTimeout)
+        }
+
+        if (timeout) {
+            this._rescheduleInactivity()
+        }
     }
 
     async send(data: Buffer): Promise<void> {

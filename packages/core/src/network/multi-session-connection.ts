@@ -18,9 +18,11 @@ export class MultiSessionConnection extends EventEmitter {
         readonly params: SessionConnectionParams,
         private _count: number,
         log: Logger,
+        logPrefix = '',
     ) {
         super()
         this._log = log.create('multi')
+        if (logPrefix) this._log.prefix = `[${logPrefix}] `
         this._enforcePfs = _count > 1 && params.isMainConnection
 
         this._sessions = []
@@ -183,9 +185,13 @@ export class MultiSessionConnection extends EventEmitter {
         }
     }
 
+    _destroyed = false
     destroy(): void {
         this._connections.forEach((conn) => conn.destroy())
         this._sessions.forEach((sess) => sess.reset())
+        this.removeAllListeners()
+
+        this._destroyed = true
     }
 
     private _nextConnection = 0
@@ -222,16 +228,16 @@ export class MultiSessionConnection extends EventEmitter {
         ].sendRpc(request, stack, timeout)
     }
 
-    async changeDc(dc: tl.RawDcOption, authKey?: Buffer | null): Promise<void> {
-        await Promise.all(
-            this._connections.map((conn) => conn.changeDc(dc, authKey)),
-        )
-    }
-
     connect(): void {
         for (const conn of this._connections) {
             conn.connect()
         }
+    }
+
+    ensureConnected(): void {
+        if (this._connections[0].isConnected) return
+
+        this.connect()
     }
 
     async setAuthKey(
@@ -242,6 +248,41 @@ export class MultiSessionConnection extends EventEmitter {
         const session = this._sessions[idx]
         const key = temp ? session._authKeyTemp : session._authKey
         await key.setup(authKey)
+    }
+
+    setInactivityTimeout(timeout?: number): void {
+        this._log.debug('setting inactivity timeout to %s', timeout)
+
+        // for future connections (if any)
+        this.params.inactivityTimeout = timeout
+
+        // for current connections
+        for (const conn of this._connections) {
+            conn.setInactivityTimeout(timeout)
+        }
+    }
+
+    notifyKeyChange(): void {
+        // only expected to be called on non-main connections
+        const session = this._sessions[0]
+
+        if (this.params.usePfs && !session._authKeyTemp.ready) {
+            this._log.debug(
+                'temp auth key needed but not ready, ignoring key change',
+            )
+
+            return
+        }
+
+        if (this._sessions[0].queuedRpc.length) {
+            // there are pending requests, we need to reconnect.
+            this._log.debug(
+                'notifying key change on the connection due to queued rpc',
+            )
+            this._connections[0].onConnected()
+        }
+
+        // connection is idle, we don't need to notify it
     }
 
     requestAuth(): void {

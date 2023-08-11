@@ -70,12 +70,11 @@ export class ConfigManager {
         if (this.isStale) await this.update()
 
         const options = this._config!.dcOptions.filter((opt) => {
-            if (opt.id === params.dcId) return true
+            if (opt.tcpoOnly) return false // unsupported
             if (opt.ipv6 && !params.allowIpv6) return false
             if (opt.cdn && !params.cdn) return false
-            if (opt.tcpoOnly) return false // unsupported
 
-            return true
+            return opt.id === params.dcId
         })
 
         if (params.preferMedia && params.preferIpv6) {
