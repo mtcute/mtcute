@@ -12,6 +12,6 @@
     },
     "dependencies": {
         "@mtcute/core": "workspace:^1.0.0",
-        "ip6": "0.2.10"
+        "ip6": "0.2.7"
     }
 }

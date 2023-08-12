@@ -30,7 +30,7 @@ export abstract class PersistentConnection extends EventEmitter {
     private _uid = nextConnectionUid++
 
     readonly params: PersistentConnectionParams
-    private _transport!: ITelegramTransport
+    protected _transport!: ITelegramTransport
 
     private _sendOnceConnected: Buffer[] = []
 

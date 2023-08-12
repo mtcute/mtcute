@@ -500,7 +500,7 @@ export class NetworkManager {
                 dcId,
                 allowIpv6: this.params.useIpv6,
                 preferIpv6: this.params.useIpv6,
-                preferMedia: dcId !== this._primaryDc?.dcId,
+                allowMedia: false,
                 cdn: false,
             })
 
@@ -541,14 +541,6 @@ export class NetworkManager {
             dcId: manager.dcId,
         })
 
-        // manager.ensureMainConnection()
-        //
-        // if (!manager.main._sessions[0]._authKey.ready) {
-        //     await manager.loadKeys()
-        // }
-        //
-        // manager.main.ensureConnected()
-
         const res = await this.call(
             {
                 _: 'auth.importAuthorization',
@@ -584,13 +576,26 @@ export class NetworkManager {
     }
 
     async notifyLoggedIn(auth: tl.auth.TypeAuthorization): Promise<void> {
-        if (auth._ === 'auth.authorizationSignUpRequired') return
+        if (
+            auth._ === 'auth.authorizationSignUpRequired' ||
+            auth.user._ === 'userEmpty'
+        ) { return }
 
         if (auth.tmpSessions) {
             this._primaryDc?.main.setCount(auth.tmpSessions)
         }
 
-        // await this.exportAuth()
+        await this.exportAuth()
+    }
+
+    resetSessions(): void {
+        const dc = this._primaryDc
+        if (!dc) return
+
+        dc.main.resetSessions()
+        dc.upload.resetSessions()
+        dc.download.resetSessions()
+        dc.downloadSmall.resetSessions()
     }
 
     private _onConfigChanged(config: tl.RawConfig): void {
@@ -607,6 +612,7 @@ export class NetworkManager {
             allowIpv6: this.params.useIpv6,
             preferIpv6: this.params.useIpv6,
             cdn: false,
+            allowMedia: false,
         })
 
         if (!option) {
@@ -748,6 +754,19 @@ export class NetworkManager {
         }
 
         throw lastError
+    }
+
+    setUpdateHandler(handler: NetworkManager['_updateHandler']): void {
+        this._updateHandler = handler
+    }
+
+    changeTransport(factory: TransportFactory): void {
+        Object.values(this._dcConnections).forEach((dc) => {
+            dc.main.changeTransport(factory)
+            dc.upload.changeTransport(factory)
+            dc.download.changeTransport(factory)
+            dc.downloadSmall.changeTransport(factory)
+        })
     }
 
     destroy(): void {

@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 importers:
 
   .:
@@ -272,8 +276,8 @@ importers:
         specifier: workspace:^1.0.0
         version: link:../core
       ip6:
-        specifier: 0.2.10
-        version: 0.2.10
+        specifier: 0.2.7
+        version: 0.2.7
 
   packages/sqlite:
     dependencies:
@@ -3012,6 +3016,7 @@ packages:
   /iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
+    requiresBuild: true
     dependencies:
       safer-buffer: 2.1.2
     dev: false
@@ -3067,8 +3072,8 @@ packages:
       side-channel: 1.0.4
     dev: true
 
-  /ip6@0.2.10:
-    resolution: {integrity: sha512-1LdpyKjhvepd6EbAU6rW4g14vuYtx5TnJX9TfZZBhsM6DsyPQLNzW12rtbUqXBMwqFrLVV/Gcxv0GNFvJp2cYA==}
+  /ip6@0.2.7:
+    resolution: {integrity: sha512-zEzGsxn4Uw33TByv0DdX/RRh+VsGfEctOp7CvJq/b4JEjY9OvPB58dsMYiEwIVLsIWHZSJPn3XG8mP9Qv3TG3g==}
     hasBin: true
     dev: false
 
@@ -4580,6 +4585,7 @@ packages:
 
   /safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
+    requiresBuild: true
     dev: false
     optional: true
 

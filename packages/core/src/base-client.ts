@@ -227,8 +227,6 @@ export class BaseTelegramClient extends EventEmitter {
         this.call({ _: 'help.getConfig' }),
     )
 
-    private _additionalConnections: SessionConnection[] = []
-
     // not really connected, but rather "connect() was called"
     private _connected: ControllablePromise<void> | boolean = false
 
@@ -335,6 +333,9 @@ export class BaseTelegramClient extends EventEmitter {
             return
         }
 
+        // we cant do this in constructor because we need to support subclassing
+        this.network.setUpdateHandler(this._handleUpdate.bind(this))
+
         const promise = (this._connected = createControllablePromise())
 
         await this._loadStorage()
@@ -406,34 +407,8 @@ export class BaseTelegramClient extends EventEmitter {
         this._config.destroy()
         this.network.destroy()
 
-        // close additional connections
-        this._additionalConnections.forEach((conn) => conn.destroy())
-
         await this._saveStorage()
         await this.storage.destroy?.()
-    }
-
-    /**
-     * Change primary DC and write that fact to the storage.
-     * Will immediately reconnect to another DC.
-     *
-     * @param newDc  New DC or its ID
-     */
-    async changeDc(newDc: tl.RawDcOption | number): Promise<void> {
-        if (typeof newDc === 'number') {
-            const res = await this._config.findOption({
-                dcId: newDc,
-                allowIpv6: this._useIpv6,
-            })
-            if (!res) throw new Error('DC not found')
-            newDc = res
-        }
-
-        this._defaultDc = newDc
-        await this.storage.setDefaultDc(newDc)
-        await this._saveStorage()
-        // todo
-        // await this.primaryConnection.changeDc(newDc)
     }
 
     /**
@@ -465,118 +440,6 @@ export class BaseTelegramClient extends EventEmitter {
         return res
     }
 
-    // /**
-    //  * Creates an additional connection to a given DC.
-    //  * This will use auth key for that DC that was already stored
-    //  * in the session, or generate a new auth key by exporting
-    //  * authorization from primary DC and importing it to the new DC.
-    //  * New connection will use the same crypto provider, `initConnection`,
-    //  * transport and reconnection strategy as the primary connection
-    //  *
-    //  * This method is quite low-level and you shouldn't usually care about this
-    //  * when using high-level API provided by `@mtcute/client`.
-    //  *
-    //  * @param dcId  DC id, to which the connection will be created
-    //  * @param cdn  Whether that DC is a CDN DC
-    //  * @param inactivityTimeout
-    //  *   Inactivity timeout for the connection (in ms), after which the transport will be closed.
-    //  *   Note that connection can still be used normally, it's just the transport which is closed.
-    //  *   Defaults to 5 min
-    //  */
-    // async createAdditionalConnection(
-    //     dcId: number,
-    //     params?: {
-    //         // todo proper docs
-    //         // default = false
-    //         media?: boolean
-    //         // default = fa;se
-    //         cdn?: boolean
-    //         // default = 300_000
-    //         inactivityTimeout?: number
-    //         // default = false
-    //         disableUpdates?: boolean
-    //     }
-    // ): Promise<SessionConnection> {
-    //     const dc = await this._config.findOption({
-    //         dcId,
-    //         preferMedia: params?.media,
-    //         cdn: params?.cdn,
-    //         allowIpv6: this._useIpv6,
-    //     })
-    //     if (!dc) throw new Error('DC not found')
-    //     const connection = new SessionConnection(
-    //         {
-    //             dc,
-    //             testMode: this._testMode,
-    //             crypto: this._crypto,
-    //             initConnection: this._initConnectionParams,
-    //             transportFactory: this._transportFactory,
-    //             reconnectionStrategy: this._reconnectionStrategy,
-    //             inactivityTimeout: params?.inactivityTimeout ?? 300_000,
-    //             layer: this._layer,
-    //             disableUpdates: params?.disableUpdates,
-    //             readerMap: this._readerMap,
-    //             writerMap: this._writerMap,
-    //         },
-    //         this.log.create('connection')
-    //     )
-    //
-    //     connection.on('error', (err) => this._emitError(err, connection))
-    //     await connection.setupKeys(await this.storage.getAuthKeyFor(dc.id))
-    //     connection.connect()
-    //
-    //     if (!connection.getAuthKey()) {
-    //         this.log.info('exporting auth to DC %d', dcId)
-    //         const auth = await this.call({
-    //             _: 'auth.exportAuthorization',
-    //             dcId,
-    //         })
-    //         await connection.sendRpc({
-    //             _: 'auth.importAuthorization',
-    //             id: auth.id,
-    //             bytes: auth.bytes,
-    //         })
-    //
-    //         // connection.authKey was already generated at this point
-    //         this.storage.setAuthKeyFor(dc.id, connection.getAuthKey()!)
-    //         await this._saveStorage()
-    //     } else {
-    //         // in case the auth key is invalid
-    //         const dcId = dc.id
-    //         connection.on('key-change', async (key) => {
-    //             // we don't need to export, it will be done by `.call()`
-    //             // in case this error is returned
-    //             //
-    //             // even worse, exporting here will lead to a race condition,
-    //             // and may result in redundant re-exports.
-    //
-    //             this.storage.setAuthKeyFor(dcId, key)
-    //             await this._saveStorage()
-    //         })
-    //     }
-    //
-    //     this._additionalConnections.push(connection)
-    //
-    //     return connection
-    // }
-
-    /**
-     * Destroy a connection that was previously created using
-     * {@link BaseTelegramClient.createAdditionalConnection}.
-     * Passing any other connection will not have any effect.
-     *
-     * @param connection  Connection created with {@link BaseTelegramClient.createAdditionalConnection}
-     */
-    async destroyAdditionalConnection(
-        connection: SessionConnection,
-    ): Promise<void> {
-        const idx = this._additionalConnections.indexOf(connection)
-        if (idx === -1) return
-
-        await connection.destroy()
-        this._additionalConnections.splice(idx, 1)
-    }
-
     /**
      * Change transport for the client.
      *
@@ -589,11 +452,7 @@ export class BaseTelegramClient extends EventEmitter {
      */
     changeTransport(factory: TransportFactory): void {
         // todo
-        // this.primaryConnection.changeTransport(factory)
-
-        this._additionalConnections.forEach((conn) =>
-            conn.changeTransport(factory),
-        )
+        this.network.changeTransport(factory)
     }
 
     /**

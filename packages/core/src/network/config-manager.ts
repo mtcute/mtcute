@@ -64,6 +64,7 @@ export class ConfigManager {
         dcId: number
         allowIpv6?: boolean
         preferIpv6?: boolean
+        allowMedia?: boolean
         preferMedia?: boolean
         cdn?: boolean
     }): Promise<tl.RawDcOption | undefined> {
@@ -72,6 +73,7 @@ export class ConfigManager {
         const options = this._config!.dcOptions.filter((opt) => {
             if (opt.tcpoOnly) return false // unsupported
             if (opt.ipv6 && !params.allowIpv6) return false
+            if (opt.mediaOnly && !params.allowMedia) return false
             if (opt.cdn && !params.cdn) return false
 
             return opt.id === params.dcId

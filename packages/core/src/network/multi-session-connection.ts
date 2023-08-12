@@ -8,6 +8,7 @@ import {
     SessionConnection,
     SessionConnectionParams,
 } from './session-connection'
+import { TransportFactory } from './transports'
 
 export class MultiSessionConnection extends EventEmitter {
     private _log: Logger
@@ -292,5 +293,19 @@ export class MultiSessionConnection extends EventEmitter {
 
     requestAuth(): void {
         this._connections[0]._authorize()
+    }
+
+    resetSessions(): void {
+        if (this.params.isMainConnection) {
+            for (const conn of this._connections) {
+                conn._resetSession()
+            }
+        } else {
+            this._connections[0]._resetSession()
+        }
+    }
+
+    changeTransport(factory: TransportFactory): void {
+        this._connections.forEach((conn) => conn.changeTransport(factory))
     }
 }

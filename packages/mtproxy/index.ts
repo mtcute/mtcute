@@ -91,10 +91,20 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
         }
     }
 
+    getMtproxyInfo(): tl.RawInputClientProxy {
+        return {
+            _: 'inputClientProxy',
+            address: this._proxy.host,
+            port: this._proxy.port,
+        }
+    }
+
     _packetCodec!: IPacketCodec
 
     connect(dc: tl.RawDcOption, testMode: boolean): void {
-        if (this._state !== TransportState.Idle) { throw new Error('Transport is not IDLE') }
+        if (this._state !== TransportState.Idle) {
+            throw new Error('Transport is not IDLE')
+        }
 
         if (this._packetCodec && this._currentDc?.id !== dc.id) {
             // dc changed, thus the codec's init will change too

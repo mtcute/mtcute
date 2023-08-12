@@ -58,6 +58,8 @@ export interface ITelegramTransport extends EventEmitter {
      * This method is called before any other.
      */
     setup?(crypto: ICryptoProvider, log: Logger): void
+
+    getMtproxyInfo?(): tl.RawInputClientProxy
 }
 
 /** Transport factory function */

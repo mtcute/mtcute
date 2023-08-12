@@ -261,7 +261,7 @@ export class SessionConnection extends PersistentConnection {
             }
         }
 
-        this.emit('error', error)
+        this.emit('api-error', error)
     }
 
     protected onConnectionUsable() {
@@ -271,7 +271,10 @@ export class SessionConnection extends PersistentConnection {
             // we must send some user-related rpc to the server to make sure that
             // it will send us updates
             this.sendRpc({ _: 'updates.getState' }).catch((err: any) => {
-                this.log.warn('failed to send updates.getState: %s', err)
+                this.log.warn(
+                    'failed to send updates.getState: %s',
+                    err.text || err.message,
+                )
             })
         }
 
@@ -1453,11 +1456,13 @@ export class SessionConnection extends PersistentConnection {
                 method,
                 this.params.layer,
             )
+            const proxy = this._transport.getMtproxyInfo?.()
             obj = {
                 _: 'invokeWithLayer',
                 layer: this.params.layer,
                 query: {
                     ...this.params.initConnection,
+                    proxy,
                     query: obj,
                 },
             }

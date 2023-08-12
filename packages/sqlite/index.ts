@@ -401,7 +401,8 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     private _initializeStatements(): void {
         this._statements = {} as unknown as typeof this._statements
         Object.entries(STATEMENTS).forEach(([name, sql]) => {
-            this._statements[name as keyof typeof this._statements] = this._db.prepare(sql)
+            this._statements[name as keyof typeof this._statements] =
+                this._db.prepare(sql)
         })
     }
 
@@ -417,7 +418,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
             const versionResult = this._db
                 .prepare("select value from kv where key = 'ver'")
                 .get()
-            const version = (versionResult as { value: number }).value
+            const version = Number((versionResult as { value: number }).value)
 
             this.log.debug('current db version = %d', version)
 
@@ -446,7 +447,10 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
 
     load(): void {
         this._db = sqlite3(this._filename, {
-            verbose: this.log.mgr.level === 5 ? this.log.verbose as Options['verbose'] : undefined,
+            verbose:
+                this.log.mgr.level === 5 ?
+                    (this.log.verbose as Options['verbose']) :
+                    undefined,
         })
 
         this._initialize()
@@ -648,7 +652,9 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         const cached = this._cache?.get(peerId)
         if (cached) return cached.peer
 
-        const row = this._statements.getEntById.get(peerId) as SqliteEntity | null
+        const row = this._statements.getEntById.get(
+            peerId,
+        ) as SqliteEntity | null
 
         if (row) {
             const peer = getInputPeer(row)
@@ -664,7 +670,9 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     }
 
     getPeerByPhone(phone: string): tl.TypeInputPeer | null {
-        const row = this._statements.getEntByPhone.get(phone) as SqliteEntity | null
+        const row = this._statements.getEntByPhone.get(
+            phone,
+        ) as SqliteEntity | null
 
         if (row) {
             const peer = getInputPeer(row)
@@ -680,7 +688,9 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     }
 
     getPeerByUsername(username: string): tl.TypeInputPeer | null {
-        const row = this._statements.getEntByUser.get(username.toLowerCase()) as SqliteEntity | null
+        const row = this._statements.getEntByUser.get(
+            username.toLowerCase(),
+        ) as SqliteEntity | null
         if (!row || Date.now() - row.updated > USERNAME_TTL) return null
 
         if (row) {
