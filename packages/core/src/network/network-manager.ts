@@ -82,7 +82,7 @@ export interface NetworkManagerExtraParams {
      * Connection count for each connection kind
      *
      * Defaults to TDLib logic:
-     *   - main: 1 (should not be changed manually)
+     *   - main: handled internally, **cannot be changed here**
      *   - upload: if premium or dc id is other than 2 or 4, then 8, otherwise 4
      *   - download: if premium then 8, otherwise 2
      *   - downloadSmall: if premium then 8, otherwise 2
@@ -195,6 +195,12 @@ export class DcConnectionManager {
         'DOWNLOAD_SMALL',
     )
 
+    private get _mainConnectionCount() {
+        if (!this.isPrimary) return 1
+
+        return this.manager.config.getNow()?.tmpSessions ?? 1
+    }
+
     constructor(
         readonly manager: NetworkManager,
         readonly dcId: number,
@@ -212,11 +218,7 @@ export class DcConnectionManager {
 
         this.main = new MultiSessionConnection(
             mainParams,
-            this.manager._connectionCount(
-                'main',
-                this._dc.id,
-                this.manager.params.isPremium,
-            ),
+            this._mainConnectionCount,
             this._log,
             'MAIN',
         )
@@ -442,6 +444,9 @@ export class NetworkManager {
             params.reconnectionStrategy ?? defaultReconnectionStrategy
         this._connectionCount =
             params.connectionCount ?? defaultConnectionCountDelegate
+
+        this._onConfigChanged = this._onConfigChanged.bind(this)
+        config.onConfigUpdate(this._onConfigChanged)
     }
 
     private _switchPrimaryDc(dc: DcConnectionManager) {
@@ -462,6 +467,15 @@ export class NetworkManager {
                     this._lastUpdateTime = Date.now()
                 }
             }, 60_000)
+
+            Promise.resolve(this._storage.getSelf()).then((self) => {
+                if (self?.isBot) {
+                    // bots may receive tmpSessions, which we should respect
+                    this.config
+                        .update(true)
+                        .catch((e) => this.params._emitError(e))
+                }
+            })
         })
         dc.main.on('update', (update) => {
             this._lastUpdateTime = Date.now()
@@ -566,6 +580,22 @@ export class NetworkManager {
 
             const manager = await this._getOtherDc(dc)
             await this._exportAuthTo(manager)
+        }
+    }
+
+    async notifyLoggedIn(auth: tl.auth.TypeAuthorization): Promise<void> {
+        if (auth._ === 'auth.authorizationSignUpRequired') return
+
+        if (auth.tmpSessions) {
+            this._primaryDc?.main.setCount(auth.tmpSessions)
+        }
+
+        // await this.exportAuth()
+    }
+
+    private _onConfigChanged(config: tl.RawConfig): void {
+        if (config.tmpSessions) {
+            this._primaryDc?.main.setCount(config.tmpSessions)
         }
     }
 
@@ -723,7 +753,11 @@ export class NetworkManager {
     destroy(): void {
         for (const dc of Object.values(this._dcConnections)) {
             dc.main.destroy()
+            dc.upload.destroy()
+            dc.download.destroy()
+            dc.downloadSmall.destroy()
         }
         if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
+        this.config.offConfigUpdate(this._onConfigChanged)
     }
 }

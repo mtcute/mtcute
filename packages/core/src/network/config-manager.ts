@@ -16,8 +16,8 @@ export class ConfigManager {
         return !this._config || this._config.expires < Date.now() / 1000
     }
 
-    update(): Promise<void> {
-        if (!this.isStale) return Promise.resolve()
+    update(force = false): Promise<void> {
+        if (!force && !this.isStale) return Promise.resolve()
         if (this._updatingPromise) return this._updatingPromise
 
         return (this._updatingPromise = this._update().then((config) => {

@@ -148,11 +148,16 @@ export class MultiSessionConnection extends EventEmitter {
                     ...this.params,
                     usePfs: this.params.usePfs || this._enforcePfs,
                     isMainConnection: this.params.isMainConnection && i === 0,
+                    withUpdates:
+                        this.params.isMainConnection &&
+                        !this.params.disableUpdates,
                 },
                 session,
             )
 
-            conn.on('update', (update) => this.emit('update', update))
+            if (this.params.isMainConnection) {
+                conn.on('update', (update) => this.emit('update', update))
+            }
             conn.on('error', (err) => this.emit('error', err, conn))
             conn.on('key-change', (key) => {
                 this.emit('key-change', i, key)

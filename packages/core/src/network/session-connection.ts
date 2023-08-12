@@ -39,6 +39,7 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
     niceStacks?: boolean
     layer: number
     disableUpdates?: boolean
+    withUpdates?: boolean
     isMainConnection: boolean
     usePfs?: boolean
 
@@ -265,6 +266,14 @@ export class SessionConnection extends PersistentConnection {
 
     protected onConnectionUsable() {
         super.onConnectionUsable()
+
+        if (this.params.withUpdates) {
+            // we must send some user-related rpc to the server to make sure that
+            // it will send us updates
+            this.sendRpc({ _: 'updates.getState' }).catch((err: any) => {
+                this.log.warn('failed to send updates.getState: %s', err)
+            })
+        }
 
         // just in case
         this._flushTimer.emitBeforeNext(1000)
@@ -714,10 +723,6 @@ export class SessionConnection extends PersistentConnection {
                         )
                         // likely due to some request in the session missing invokeWithoutUpdates
                         // todo: reset session
-                        break
-                    }
-                    if (!this.params.isMainConnection) {
-                        this.log.warn('received updates on non-main connection')
                         break
                     }
 
