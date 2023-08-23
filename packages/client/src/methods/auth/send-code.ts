@@ -19,7 +19,7 @@ export async function sendCode(
     const res = await this.call({
         _: 'auth.sendCode',
         phoneNumber: phone,
-        apiId: this._initConnectionParams.apiId,
+        apiId: this.network._initConnectionParams.apiId,
         apiHash: this._apiHash,
         settings: { _: 'codeSettings' },
     })

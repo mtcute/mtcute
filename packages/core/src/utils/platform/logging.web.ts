@@ -1,4 +1,4 @@
-const BASE_FORMAT = '[%s] [%с%s%с] %c%s%c - '
+const BASE_FORMAT = '%s [%с%s%с] [%c%s%c] '
 const LEVEL_NAMES = [
     '', // OFF
     'ERR',

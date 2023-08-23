@@ -1,4 +1,4 @@
-import { MustEqual } from '@mtcute/core'
+import { MustEqual, RpcCallOptions } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -31,9 +31,7 @@ export class TakeoutSession {
      */
     async call<T extends tl.RpcMethod>(
         message: MustEqual<T, tl.RpcMethod>,
-        params?: {
-            throwFlood: boolean
-        },
+        params?: RpcCallOptions,
     ): Promise<tl.RpcCallReturn[T['_']]> {
         return this.client.call(
             {

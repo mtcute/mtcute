@@ -58,8 +58,8 @@ export class EarlyTimer {
      * Emit the timer right now
      */
     emitNow(): void {
-        this._handler()
         this.reset()
+        this._handler()
     }
 
     /**

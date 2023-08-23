@@ -3,10 +3,6 @@ import EventEmitter from 'events'
 import { tl } from '@mtcute/tl'
 
 import { ICryptoProvider, Logger } from '../utils'
-import {
-    ControllablePromise,
-    createControllablePromise,
-} from '../utils/controllable-promise'
 import { ReconnectionStrategy } from './reconnection'
 import {
     ITelegramTransport,
@@ -23,13 +19,18 @@ export interface PersistentConnectionParams {
     inactivityTimeout?: number
 }
 
+let nextConnectionUid = 0
+
 /**
  * Base class for persistent connections.
  * Only used for {@link PersistentConnection} and used as a mean of code splitting.
+ * This class doesn't know anything about MTProto, it just manages the transport.
  */
 export abstract class PersistentConnection extends EventEmitter {
+    private _uid = nextConnectionUid++
+
     readonly params: PersistentConnectionParams
-    private _transport!: ITelegramTransport
+    protected _transport!: ITelegramTransport
 
     private _sendOnceConnected: Buffer[] = []
 
@@ -41,10 +42,7 @@ export abstract class PersistentConnection extends EventEmitter {
 
     // inactivity timeout
     private _inactivityTimeout: NodeJS.Timeout | null = null
-    private _inactive = false
-
-    // waitForMessage
-    private _pendingWaitForMessages: ControllablePromise<Buffer>[] = []
+    private _inactive = true
 
     _destroyed = false
     _usable = false
@@ -62,6 +60,14 @@ export abstract class PersistentConnection extends EventEmitter {
         super()
         this.params = params
         this.changeTransport(params.transportFactory)
+
+        this.log.prefix = `[UID ${this._uid}] `
+
+        this._onInactivityTimeout = this._onInactivityTimeout.bind(this)
+    }
+
+    get isConnected(): boolean {
+        return this._transport.state() !== TransportState.Idle
     }
 
     changeTransport(factory: TransportFactory): void {
@@ -73,18 +79,36 @@ export abstract class PersistentConnection extends EventEmitter {
         this._transport.setup?.(this.params.crypto, this.log)
 
         this._transport.on('ready', this.onTransportReady.bind(this))
-        this._transport.on('message', this.onTransportMessage.bind(this))
+        this._transport.on('message', this.onMessage.bind(this))
         this._transport.on('error', this.onTransportError.bind(this))
         this._transport.on('close', this.onTransportClose.bind(this))
     }
 
     onTransportReady(): void {
         // transport ready does not mean actual mtproto is ready
-
         if (this._sendOnceConnected.length) {
-            this._transport.send(Buffer.concat(this._sendOnceConnected))
+            const sendNext = () => {
+                if (!this._sendOnceConnected.length) {
+                    this.onConnected()
+
+                    return
+                }
+
+                const data = this._sendOnceConnected.shift()!
+                this._transport
+                    .send(data)
+                    .then(sendNext)
+                    .catch((err) => {
+                        this.log.error('error sending queued data: %s', err)
+                        this._sendOnceConnected.unshift(data)
+                    })
+            }
+
+            sendNext()
+
+            return
         }
-        this._sendOnceConnected = []
+
         this.onConnected()
     }
 
@@ -101,32 +125,12 @@ export abstract class PersistentConnection extends EventEmitter {
     }
 
     onTransportError(err: Error): void {
-        if (this._pendingWaitForMessages.length) {
-            this._pendingWaitForMessages.shift()!.reject(err)
-
-            return
-        }
-
         this._lastError = err
         this.onError(err)
         // transport is expected to emit `close` after `error`
     }
 
-    onTransportMessage(data: Buffer): void {
-        if (this._pendingWaitForMessages.length) {
-            this._pendingWaitForMessages.shift()!.resolve(data)
-
-            return
-        }
-
-        this.onMessage(data)
-    }
-
     onTransportClose(): void {
-        Object.values(this._pendingWaitForMessages).forEach((prom) =>
-            prom.reject(new Error('Connection closed')),
-        )
-
         // transport closed because of inactivity
         // obviously we dont want to reconnect then
         if (this._inactive) return
@@ -139,13 +143,20 @@ export abstract class PersistentConnection extends EventEmitter {
             this._consequentFails,
             this._previousWait,
         )
-        if (wait === false) return this.destroy()
+
+        if (wait === false) {
+            this.destroy()
+
+            return
+        }
 
         this.emit('wait', wait)
 
         this._previousWait = wait
 
-        if (this._reconnectionTimeout != null) { clearTimeout(this._reconnectionTimeout) }
+        if (this._reconnectionTimeout != null) {
+            clearTimeout(this._reconnectionTimeout)
+        }
         this._reconnectionTimeout = setTimeout(() => {
             if (this._destroyed) return
             this._reconnectionTimeout = null
@@ -154,10 +165,14 @@ export abstract class PersistentConnection extends EventEmitter {
     }
 
     connect(): void {
-        if (this._transport.state() !== TransportState.Idle) { throw new Error('Connection is already opened!') }
+        if (this.isConnected) {
+            throw new Error('Connection is already opened!')
+        }
         if (this._destroyed) throw new Error('Connection is already destroyed!')
 
-        if (this._reconnectionTimeout != null) { clearTimeout(this._reconnectionTimeout) }
+        if (this._reconnectionTimeout != null) {
+            clearTimeout(this._reconnectionTimeout)
+        }
 
         this._inactive = false
         this._transport.connect(this.params.dc, this.params.testMode)
@@ -168,8 +183,12 @@ export abstract class PersistentConnection extends EventEmitter {
     }
 
     destroy(): void {
-        if (this._reconnectionTimeout != null) { clearTimeout(this._reconnectionTimeout) }
-        if (this._inactivityTimeout != null) { clearTimeout(this._inactivityTimeout) }
+        if (this._reconnectionTimeout != null) {
+            clearTimeout(this._reconnectionTimeout)
+        }
+        if (this._inactivityTimeout != null) {
+            clearTimeout(this._inactivityTimeout)
+        }
 
         this._transport.close()
         this._transport.removeAllListeners()
@@ -179,15 +198,32 @@ export abstract class PersistentConnection extends EventEmitter {
     protected _rescheduleInactivity(): void {
         if (!this.params.inactivityTimeout) return
         if (this._inactivityTimeout) clearTimeout(this._inactivityTimeout)
-        this._inactivityTimeout = setTimeout(() => {
-            this.log.info(
-                'disconnected because of inactivity for %d',
-                this.params.inactivityTimeout,
-            )
-            this._inactive = true
-            this._inactivityTimeout = null
-            this._transport.close()
-        }, this.params.inactivityTimeout)
+        this._inactivityTimeout = setTimeout(
+            this._onInactivityTimeout,
+            this.params.inactivityTimeout,
+        )
+    }
+
+    protected _onInactivityTimeout(): void {
+        this.log.info(
+            'disconnected because of inactivity for %d',
+            this.params.inactivityTimeout,
+        )
+        this._inactive = true
+        this._inactivityTimeout = null
+        this._transport.close()
+    }
+
+    setInactivityTimeout(timeout?: number): void {
+        this.params.inactivityTimeout = timeout
+
+        if (this._inactivityTimeout) {
+            clearTimeout(this._inactivityTimeout)
+        }
+
+        if (timeout) {
+            this._rescheduleInactivity()
+        }
     }
 
     async send(data: Buffer): Promise<void> {
@@ -200,12 +236,5 @@ export abstract class PersistentConnection extends EventEmitter {
         } else {
             this._sendOnceConnected.push(data)
         }
-    }
-
-    waitForNextMessage(): Promise<Buffer> {
-        const promise = createControllablePromise<Buffer>()
-        this._pendingWaitForMessages.push(promise)
-
-        return promise
     }
 }

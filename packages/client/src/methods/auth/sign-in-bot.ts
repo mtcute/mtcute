@@ -17,7 +17,7 @@ export async function signInBot(
     const res = await this.call({
         _: 'auth.importBotAuthorization',
         flags: 0,
-        apiId: this._initConnectionParams.apiId,
+        apiId: this.network._initConnectionParams.apiId,
         apiHash: this._apiHash,
         botAuthToken: token,
     })
@@ -33,16 +33,19 @@ export async function signInBot(
         'user',
     )
 
-    this.log.prefix = `[USER ${this._userId}] `
     this._userId = res.user.id
+    this.log.prefix = `[USER ${this._userId}] `
     this._isBot = true
     this._selfUsername = res.user.username!
     this._selfChanged = true
+
+    await this.network.notifyLoggedIn(res)
+
     await this._fetchUpdatesState()
     await this._saveStorage()
 
     // telegram ignores invokeWithoutUpdates for auth methods
-    if (this._disableUpdates) this.primaryConnection._resetSession()
+    if (this.network.params.disableUpdates) this.network.resetSessions()
     else this.startUpdatesLoop()
 
     return new User(this, res.user)

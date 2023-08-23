@@ -2,12 +2,7 @@
 import { Readable } from 'stream'
 
 // @copy
-import {
-    AsyncLock,
-    MaybeArray,
-    MaybeAsync,
-    SessionConnection,
-} from '@mtcute/core'
+import { AsyncLock, MaybeArray, MaybeAsync } from '@mtcute/core'
 // @copy
 import { Logger } from '@mtcute/core/src/utils/logger'
 // @copy

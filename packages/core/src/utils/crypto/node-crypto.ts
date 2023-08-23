@@ -11,7 +11,6 @@ import {
     BaseCryptoProvider,
     ICryptoProvider,
     IEncryptionScheme,
-    IHashMethod,
 } from './abstract'
 
 export class NodeCryptoProvider
@@ -81,10 +80,6 @@ export class NodeCryptoProvider
 
     sha256(data: Buffer): Buffer {
         return createHash('sha256').update(data).digest()
-    }
-
-    createMd5(): IHashMethod {
-        return createHash('md5') as unknown as IHashMethod
     }
 
     hmacSha256(data: Buffer, key: Buffer): MaybeAsync<Buffer> {

@@ -181,6 +181,10 @@ module.exports = {
             ],
             globals: { Atomics: 'readonly', SharedArrayBuffer: 'readonly' },
             parser: '@typescript-eslint/parser',
+            parserOptions: {
+                project: true,
+                tsconfigRootDir: __dirname,
+            },
             plugins: ['@typescript-eslint'],
             rules: {
                 // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#supported-rules

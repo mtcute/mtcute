@@ -38,16 +38,18 @@ export async function checkPassword(
         'user',
     )
 
-    this.log.prefix = `[USER ${this._userId}] `
     this._userId = res.user.id
+    this.log.prefix = `[USER ${this._userId}] `
     this._isBot = false
     this._selfChanged = true
     this._selfUsername = res.user.username ?? null
+    await this.network.notifyLoggedIn(res)
+
     await this._fetchUpdatesState()
     await this._saveStorage()
 
     // telegram ignores invokeWithoutUpdates for auth methods
-    if (this._disableUpdates) this.primaryConnection._resetSession()
+    if (this.network.params.disableUpdates) this.network.resetSessions()
     else this.startUpdatesLoop()
 
     return new User(this, res.user)

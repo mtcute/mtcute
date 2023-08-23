@@ -8,12 +8,6 @@ export interface IEncryptionScheme {
     decrypt(data: Buffer): MaybeAsync<Buffer>
 }
 
-export interface IHashMethod {
-    update(data: Buffer): MaybeAsync<void>
-
-    digest(): MaybeAsync<Buffer>
-}
-
 export interface ICryptoProvider {
     initialize?(): MaybeAsync<void>
 
@@ -37,8 +31,6 @@ export interface ICryptoProvider {
     createAesIge(key: Buffer, iv: Buffer): IEncryptionScheme
 
     createAesEcb(key: Buffer): IEncryptionScheme
-
-    createMd5(): IHashMethod
 
     factorizePQ(pq: Buffer): MaybeAsync<[Buffer, Buffer]>
 }

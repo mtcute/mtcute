@@ -97,7 +97,7 @@ export interface FileDownloadParameters {
     offset?: number
 
     /**
-     * Number of chunks (!) of that given size that will be downloaded.
+     * Number of bytes to be downloaded.
      * By default, downloads the entire file
      */
     limit?: number

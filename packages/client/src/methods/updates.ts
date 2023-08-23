@@ -558,11 +558,15 @@ async function _fetchPeersForShort(
                 if (
                     msg.replyTo._ === 'messageReplyHeader' &&
                     !(await fetchPeer(msg.replyTo.replyToPeerId))
-                ) { return null }
+                ) {
+                    return null
+                }
                 if (
                     msg.replyTo._ === 'messageReplyStoryHeader' &&
                     !(await fetchPeer(msg.replyTo.userId))
-                ) { return null }
+                ) {
+                    return null
+                }
             }
 
             if (msg._ !== 'messageService') {
@@ -791,7 +795,7 @@ async function _fetchChannelDifference(
     if (!_pts) _pts = fallbackPts
 
     if (!_pts) {
-        this._updsLog.warn(
+        this._updsLog.debug(
             'fetchChannelDifference failed for channel %d: base pts not available',
             channelId,
         )
@@ -956,19 +960,13 @@ async function _fetchDifference(
     this: TelegramClient,
     requestedDiff: Record<number, Promise<void>>,
 ): Promise<void> {
-    let isFirst = true
-
     for (;;) {
-        const diff = await this.call(
-            {
-                _: 'updates.getDifference',
-                pts: this._pts!,
-                date: this._date!,
-                qts: this._qts!,
-            },
-            // { flush: !isFirst }
-        )
-        isFirst = false
+        const diff = await this.call({
+            _: 'updates.getDifference',
+            pts: this._pts!,
+            date: this._date!,
+            qts: this._qts!,
+        })
 
         switch (diff._) {
             case 'updates.differenceEmpty':
@@ -1210,16 +1208,21 @@ async function _onUpdate(
         case 'dummyUpdate':
             // we just needed to apply new pts values
             return
-        case 'updateDcOptions':
-            if (!this._config) {
-                this._config = await this.call({ _: 'help.getConfig' })
+        case 'updateDcOptions': {
+            const config = this.network.config.getNow()
+
+            if (config) {
+                this.network.config.setConfig({
+                    ...config,
+                    dcOptions: upd.dcOptions,
+                })
             } else {
-                (this._config as tl.Mutable<tl.TypeConfig>).dcOptions =
-                    upd.dcOptions
+                await this.network.config.update(true)
             }
             break
+        }
         case 'updateConfig':
-            this._config = await this.call({ _: 'help.getConfig' })
+            await this.network.config.update(true)
             break
         case 'updateUserName':
             if (upd.userId === this._userId) {
@@ -1753,10 +1756,12 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                 log.debug(
                     'waiting for %d pending diffs before processing unordered: %j',
                     pendingDiffs.length,
-                    Object.keys(requestedDiff), // fixme
+                    Object.keys(requestedDiff),
                 )
 
-                // this.primaryConnection._flushSendQueue() // fixme
+                // is this necessary?
+                // this.primaryConnection._flushSendQueue()
+
                 await Promise.all(pendingDiffs)
 
                 // diff results may as well contain new diffs to be requested
@@ -1764,7 +1769,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                 log.debug(
                     'pending diffs awaited, new diffs requested: %d (%j)',
                     pendingDiffs.length,
-                    Object.keys(requestedDiff), // fixme
+                    Object.keys(requestedDiff),
                 )
             }
 
@@ -1784,11 +1789,12 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                 log.debug(
                     'waiting for %d pending diffs after processing unordered: %j',
                     pendingDiffs.length,
-                    Object.keys(requestedDiff), // fixme
+                    Object.keys(requestedDiff),
                 )
 
-                // fixme
+                // is this necessary?
                 // this.primaryConnection._flushSendQueue()
+
                 await Promise.all(pendingDiffs)
 
                 // diff results may as well contain new diffs to be requested
@@ -1796,7 +1802,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                 log.debug(
                     'pending diffs awaited, new diffs requested: %d (%j)',
                     pendingDiffs.length,
-                    Object.keys(requestedDiff), // fixme
+                    Object.keys(requestedDiff),
                 )
             }
 
@@ -1815,5 +1821,4 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
 export function _keepAliveAction(this: TelegramClient): void {
     this._updsLog.debug('no updates for >15 minutes, catching up')
     this._handleUpdate({ _: 'updatesTooLong' })
-    // this.catchUp().catch((err) => this._emitError(err))
 }

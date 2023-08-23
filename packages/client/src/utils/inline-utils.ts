@@ -66,3 +66,11 @@ export function encodeInlineMessageId(
 
     return encodeUrlSafeBase64(writer.result())
 }
+
+export function normalizeInlineId(id: string | tl.TypeInputBotInlineMessageID) {
+    if (typeof id === 'string') {
+        return parseInlineMessageId(id)
+    }
+
+    return id
+}

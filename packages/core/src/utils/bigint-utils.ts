@@ -16,7 +16,9 @@ export function bigIntToBuffer(
 ): Buffer {
     const array = value.toArray(256).value
 
-    if (length !== 0 && array.length > length) { throw new Error('Value out of bounds') }
+    if (length !== 0 && array.length > length) {
+        throw new Error('Value out of bounds')
+    }
 
     if (length !== 0) {
         // padding
@@ -61,6 +63,23 @@ export function randomBigInt(size: number): BigInteger {
 }
 
 /**
+ * Generate a random big integer of the given size (in bits)
+ * @param bits
+ */
+export function randomBigIntBits(bits: number): BigInteger {
+    let num = randomBigInt(Math.ceil(bits / 8))
+
+    const bitLength = num.bitLength()
+
+    if (bitLength.gt(bits)) {
+        const toTrim = bigInt.randBetween(bitLength.minus(bits), 8)
+        num = num.shiftRight(toTrim)
+    }
+
+    return num
+}
+
+/**
  * Generate a random big integer in the range [min, max)
  *
  * @param max  Maximum value (exclusive)
@@ -79,4 +98,21 @@ export function randomBigIntInRange(
     while (result.gt(interval)) result = result.minus(interval)
 
     return min.plus(result)
+}
+
+/**
+ * Compute the multiplicity of 2 in the prime factorization of n
+ * @param n
+ */
+export function twoMultiplicity(n: BigInteger): BigInteger {
+    if (n === bigInt.zero) return bigInt.zero
+
+    let m = bigInt.zero
+    let pow = bigInt.one
+
+    while (true) {
+        if (!n.and(pow).isZero()) return m
+        m = m.plus(bigInt.one)
+        pow = pow.shiftLeft(1)
+    }
 }

@@ -73,14 +73,27 @@ export class Logger {
                     const val = args[idx]
 
                     args.splice(idx, 1)
-                    if (m === '%h') return Buffer.isBuffer(val) ? val.toString('hex') : String(val)
+
+                    if (m === '%h') {
+                        if (Buffer.isBuffer(val)) return val.toString('hex')
+                        if (typeof val === 'number') return val.toString(16)
+
+                        return String(val)
+                    }
                     if (m === '%b') return String(Boolean(val))
 
                     if (m === '%j') {
                         return JSON.stringify(val, (k, v) => {
-                            if (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data)) {
+                            if (
+                                typeof v === 'object' &&
+                                v.type === 'Buffer' &&
+                                Array.isArray(v.data)
+                            ) {
                                 let str = Buffer.from(v.data).toString('base64')
-                                if (str.length > 300) str = str.slice(0, 300) + '...'
+
+                                if (str.length > 300) {
+                                    str = str.slice(0, 300) + '...'
+                                }
 
                                 return str
                             }
@@ -137,10 +150,10 @@ export class LogManager extends Logger {
     static DEBUG = 4
     static VERBOSE = 5
 
-    constructor() {
+    constructor(tag = 'base') {
         // workaround because we cant pass this to super
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        super(null as any, 'base')
+        super(null as any, tag)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(this as any).mgr = this
     }

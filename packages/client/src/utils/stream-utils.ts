@@ -35,7 +35,9 @@ class NodeReadable extends Readable {
                     return
                 }
                 if (this.push(res.value)) {
-                    return doRead()
+                    doRead()
+
+                    return
                 }
                 this._reading = false
                 this._reader.releaseLock()
@@ -49,7 +51,9 @@ class NodeReadable extends Readable {
             const promise = new Promise<void>((resolve) => {
                 this._doneReading = resolve
             })
-            promise.then(() => this._handleDestroy(err, callback))
+            promise.then(() => {
+                this._handleDestroy(err, callback)
+            })
         } else {
             this._handleDestroy(err, callback)
         }
@@ -71,26 +75,6 @@ export function convertWebStreamToNodeReadable(
     return new NodeReadable(webStream, opts)
 }
 
-export async function readStreamUntilEnd(stream: Readable): Promise<Buffer> {
-    const chunks = []
-    let length = 0
-
-    while (stream.readable) {
-        const c = await stream.read()
-        if (c === null) break
-
-        length += c.length
-
-        if (length > 2097152000) {
-            throw new Error('File is too big')
-        }
-
-        chunks.push(c)
-    }
-
-    return Buffer.concat(chunks)
-}
-
 export function bufferToStream(buf: Buffer): Readable {
     return new Readable({
         read() {
@@ -109,15 +93,17 @@ export async function readBytesFromStream(
     let res = stream.read(size)
 
     if (!res) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             stream.on('readable', function handler() {
                 res = stream.read(size)
 
                 if (res) {
                     stream.off('readable', handler)
+                    stream.off('error', reject)
                     resolve(res)
                 }
             })
+            stream.on('error', reject)
         })
     }
 

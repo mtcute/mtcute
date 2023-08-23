@@ -17,6 +17,21 @@ export function randomLong(unsigned = false): Long {
 }
 
 /**
+ * Read a Long from a buffer
+ *
+ * @param buf  Buffer to read from
+ * @param unsigned  Whether the number should be unsigned
+ * @param le  Whether the number is little-endian
+ */
+export function longFromBuffer(buf: Buffer, unsigned = false, le = true): Long {
+    if (le) {
+        return new Long(buf.readInt32LE(0), buf.readInt32LE(4), unsigned)
+    }
+
+    return new Long(buf.readInt32BE(4), buf.readInt32BE(0), unsigned)
+}
+
+/**
  * Remove a Long from an array
  *
  * @param arr  Array to remove from

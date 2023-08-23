@@ -3,7 +3,6 @@ import {
     BaseCryptoProvider,
     ICryptoProvider,
     IEncryptionScheme,
-    IHashMethod,
 } from './abstract'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -106,15 +105,6 @@ export class ForgeCryptoProvider
                 .data,
             'binary',
         )
-    }
-
-    createMd5(): IHashMethod {
-        const hash = forge.md.md5.create()
-
-        return {
-            update: (data) => hash.update(data.toString('binary')),
-            digest: () => Buffer.from(hash.digest().data, 'binary'),
-        }
     }
 
     hmacSha256(data: Buffer, key: Buffer): MaybeAsync<Buffer> {

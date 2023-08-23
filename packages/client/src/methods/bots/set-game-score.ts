@@ -2,6 +2,7 @@ import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Message, MtInvalidPeerTypeError } from '../../types'
+import { normalizeInlineId } from '../../utils/inline-utils'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
@@ -86,7 +87,7 @@ export async function setInlineGameScore(
 
     const user = normalizeToInputUser(await this.resolvePeer(userId), userId)
 
-    const [id, connection] = await this._normalizeInline(messageId)
+    const id = await normalizeInlineId(messageId)
 
     await this.call(
         {
@@ -97,6 +98,6 @@ export async function setInlineGameScore(
             editMessage: !params.noEdit,
             force: params.force,
         },
-        { connection },
+        { dcId: id.dcId },
     )
 }

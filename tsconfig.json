@@ -9,6 +9,7 @@
         "inlineSources": true,
         "declaration": true,
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "strict": true,
         "noImplicitAny": true,
         "noImplicitThis": true,

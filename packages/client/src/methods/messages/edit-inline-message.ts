@@ -7,6 +7,7 @@ import {
     InputMediaLike,
     ReplyMarkup,
 } from '../../types'
+import { normalizeInlineId } from '../../utils/inline-utils'
 
 /**
  * Edit sent inline message text, media and reply markup.
@@ -75,7 +76,7 @@ export async function editInlineMessage(
     let entities: tl.TypeMessageEntity[] | undefined
     let media: tl.TypeInputMedia | undefined = undefined
 
-    const [id, connection] = await this._normalizeInline(messageId)
+    const id = await normalizeInlineId(messageId)
 
     if (params.media) {
         media = await this._normalizeInputMedia(params.media, params, true)
@@ -111,7 +112,7 @@ export async function editInlineMessage(
                     entities,
                     media,
                 },
-                { connection },
+                { dcId: id.dcId },
             )
 
             return

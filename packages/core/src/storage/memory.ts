@@ -15,6 +15,8 @@ export interface MemorySessionState {
 
     defaultDc: tl.RawDcOption | null
     authKeys: Record<number, Buffer | null>
+    authKeysTemp: Record<string, Buffer | null>
+    authKeysTempExpiry: Record<string, number>
 
     // marked peer id -> entity info
     entities: Record<number, PeerInfoWithUpdated>
@@ -110,6 +112,8 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
             $version: CURRENT_VERSION,
             defaultDc: null,
             authKeys: {},
+            authKeysTemp: {},
+            authKeysTempExpiry: {},
             entities: {},
             phoneIndex: {},
             usernameIndex: {},
@@ -187,12 +191,41 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         this._state.defaultDc = dc
     }
 
+    setTempAuthKeyFor(
+        dcId: number,
+        index: number,
+        key: Buffer | null,
+        expiresAt: number,
+    ): void {
+        const k = `${dcId}:${index}`
+        this._state.authKeysTemp[k] = key
+        this._state.authKeysTempExpiry[k] = expiresAt
+    }
+
     setAuthKeyFor(dcId: number, key: Buffer | null): void {
         this._state.authKeys[dcId] = key
     }
 
-    getAuthKeyFor(dcId: number): Buffer | null {
+    getAuthKeyFor(dcId: number, tempIndex?: number): Buffer | null {
+        if (tempIndex !== undefined) {
+            const k = `${dcId}:${tempIndex}`
+
+            if (Date.now() > (this._state.authKeysTempExpiry[k] ?? 0)) { return null }
+
+            return this._state.authKeysTemp[k]
+        }
+
         return this._state.authKeys[dcId] ?? null
+    }
+
+    dropAuthKeysFor(dcId: number): void {
+        this._state.authKeys[dcId] = null
+        Object.keys(this._state.authKeysTemp).forEach((key) => {
+            if (key.startsWith(`${dcId}:`)) {
+                delete this._state.authKeysTemp[key]
+                delete this._state.authKeysTempExpiry[key]
+            }
+        })
     }
 
     updatePeers(peers: PeerInfoWithUpdated[]): MaybeAsync<void> {

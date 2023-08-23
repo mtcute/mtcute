@@ -64,8 +64,11 @@ async function addSingleMethod(state, fileName) {
 
             if (
                 !stmt.importClause.namedBindings ||
-                stmt.importClause.namedBindings.kind !== ts.SyntaxKind.NamedImports
-            ) { throwError(stmt, fileName, 'Only named imports are supported!') }
+                stmt.importClause.namedBindings.kind !==
+                    ts.SyntaxKind.NamedImports
+            ) {
+                throwError(stmt, fileName, 'Only named imports are supported!')
+            }
 
             let module = stmt.moduleSpecifier.text
 
@@ -131,11 +134,7 @@ async function addSingleMethod(state, fileName) {
             })()
 
             if (!isExported && !isPrivate) {
-                throwError(
-                    stmt,
-                    fileName,
-                    'Public methods MUST be exported.',
-                )
+                throwError(stmt, fileName, 'Public methods MUST be exported.')
             }
 
             if (isExported && !checkForFlag(stmt, '@internal')) {
@@ -182,16 +181,20 @@ async function addSingleMethod(state, fileName) {
                 )
             }
 
-            const returnsExported = (stmt.body ?
-                ts.getLeadingCommentRanges(fileFullText, stmt.body.pos + 2) ||
-                  (stmt.statements &&
-                      stmt.statements.length &&
-                      ts.getLeadingCommentRanges(
-                          fileFullText,
-                          stmt.statements[0].pos,
-                      )) ||
-                  [] :
-                []
+            const returnsExported = (
+                stmt.body ?
+                    ts.getLeadingCommentRanges(
+                        fileFullText,
+                        stmt.body.pos + 2,
+                    ) ||
+                      (stmt.statements &&
+                          stmt.statements.length &&
+                          ts.getLeadingCommentRanges(
+                              fileFullText,
+                              stmt.statements[0].pos,
+                          )) ||
+                      [] :
+                    []
             )
                 .map((range) => fileFullText.substring(range.pos, range.end))
                 .join('\n')
@@ -275,7 +278,9 @@ async function addSingleMethod(state, fileName) {
 }
 
 async function main() {
-    const output = fs.createWriteStream(path.join(__dirname, '../src/client.ts'))
+    const output = fs.createWriteStream(
+        path.join(__dirname, '../src/client.ts'),
+    )
     const state = {
         imports: {},
         fields: [],
@@ -295,7 +300,8 @@ async function main() {
     }
 
     output.write(
-        '/* THIS FILE WAS AUTO-GENERATED */\n' +
+        '/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging, @typescript-eslint/unified-signatures */\n' +
+            '/* THIS FILE WAS AUTO-GENERATED */\n' +
             "import { BaseTelegramClient, BaseTelegramClientOptions } from '@mtcute/core'\n" +
             "import { tl } from '@mtcute/tl'\n",
     )
@@ -336,7 +342,9 @@ async function main() {
  * @param name  Event name
  * @param handler  ${updates.toSentence(type, 'full')}
  */
-on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this\n`)
+on(name: '${type.typeName}', handler: ((upd: ${
+    type.updateType
+}) => void)): this\n`)
     })
 
     const printer = ts.createPrinter()
@@ -406,7 +414,9 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
                         it.initializer = undefined
 
                         const deleteParents = (obj) => {
-                            if (Array.isArray(obj)) { return obj.forEach((it) => deleteParents(it)) }
+                            if (Array.isArray(obj)) {
+                                return obj.forEach((it) => deleteParents(it))
+                            }
 
                             if (obj.parent) delete obj.parent
 
@@ -455,7 +465,7 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
             for (const name of [origName, ...aliases]) {
                 if (!hasOverloads) {
                     if (!comment.match(/\/\*\*?\s*\*\//)) {
-                    // empty comment, no need to write it
+                        // empty comment, no need to write it
                         output.write(comment + '\n')
                     }
 
@@ -465,18 +475,14 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
                 }
 
                 if (!overload) {
-                    classContents.push(
-                        `${name} = ${origName}`,
-                    )
+                    classContents.push(`${name} = ${origName}`)
                 }
             }
         },
     )
     output.write('}\n')
 
-    output.write(
-        '\nexport class TelegramClient extends BaseTelegramClient {\n',
-    )
+    output.write('\nexport class TelegramClient extends BaseTelegramClient {\n')
 
     state.fields.forEach(({ code }) => output.write(`protected ${code}\n`))
 
@@ -501,10 +507,9 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
     await fs.promises.writeFile(targetFile, fullSource)
 
     // fix using eslint
-    require('child_process').execSync(
-        `pnpm exec eslint --fix ${targetFile}`,
-        { stdio: 'inherit' },
-    )
+    require('child_process').execSync(`pnpm exec eslint --fix ${targetFile}`, {
+        stdio: 'inherit',
+    })
 }
 
 main().catch(console.error)

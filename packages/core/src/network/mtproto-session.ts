@@ -2,30 +2,96 @@ import Long from 'long'
 
 import { mtp, tl } from '@mtcute/tl'
 import {
-    TlBinaryReader,
     TlBinaryWriter,
     TlReaderMap,
     TlSerializationCounter,
     TlWriterMap,
 } from '@mtcute/tl-runtime'
 
-import { getRandomInt, ICryptoProvider, Logger, randomLong } from '../utils'
-import { buffersEqual, randomBytes } from '../utils/buffer-utils'
-import { createAesIgeForMessage } from '../utils/crypto/mtproto'
+import {
+    ControllablePromise,
+    Deque,
+    getRandomInt,
+    ICryptoProvider,
+    Logger,
+    LongMap,
+    LruSet,
+    randomLong,
+    SortedArray,
+} from '../utils'
+import { AuthKey } from './auth-key'
+
+export interface PendingRpc {
+    method: string
+    data: Buffer
+    promise: ControllablePromise
+    stack?: string
+    gzipOverhead?: number
+
+    sent?: boolean
+    msgId?: Long
+    seqNo?: number
+    containerId?: Long
+    acked?: boolean
+    initConn?: boolean
+    getState?: number
+    cancelled?: boolean
+    timeout?: NodeJS.Timeout
+}
+
+export type PendingMessage =
+    | {
+          _: 'rpc'
+          rpc: PendingRpc
+      }
+    | {
+          _: 'container'
+          msgIds: Long[]
+      }
+    | {
+          _: 'state'
+          msgIds: Long[]
+          containerId: Long
+      }
+    | {
+          _: 'resend'
+          msgIds: Long[]
+          containerId: Long
+      }
+    | {
+          _: 'ping'
+          pingId: Long
+          containerId: Long
+      }
+    | {
+          _: 'destroy_session'
+          sessionId: Long
+          containerId: Long
+      }
+    | {
+          _: 'cancel'
+          msgId: Long
+          containerId: Long
+      }
+    | {
+          _: 'future_salts'
+          containerId: Long
+      }
+    | {
+          _: 'bind'
+          promise: ControllablePromise
+      }
 
 /**
- * Class encapsulating a single MTProto session.
- * Provides means to en-/decrypt messages
+ * Class encapsulating a single MTProto session and storing
+ * all the relevant state
  */
 export class MtprotoSession {
-    readonly _crypto: ICryptoProvider
-
     _sessionId = randomLong()
 
-    _authKey?: Buffer
-    _authKeyId?: Buffer
-    _authKeyClientSalt?: Buffer
-    _authKeyServerSalt?: Buffer
+    _authKey = new AuthKey(this._crypto, this.log, this._readerMap)
+    _authKeyTemp = new AuthKey(this._crypto, this.log, this._readerMap)
+    _authKeyTempSecondary = new AuthKey(this._crypto, this.log, this._readerMap)
 
     _timeOffset = 0
     _lastMessageId = Long.ZERO
@@ -33,190 +99,129 @@ export class MtprotoSession {
 
     serverSalt = Long.ZERO
 
+    /// state ///
+    // recent msg ids
+    recentOutgoingMsgIds = new LruSet<Long>(1000, false, true)
+    recentIncomingMsgIds = new LruSet<Long>(1000, false, true)
+
+    // queues
+    queuedRpc = new Deque<PendingRpc>()
+    queuedAcks: Long[] = []
+    queuedStateReq: Long[] = []
+    queuedResendReq: Long[] = []
+    queuedCancelReq: Long[] = []
+    getStateSchedule = new SortedArray<PendingRpc>(
+        [],
+        (a, b) => a.getState! - b.getState!,
+    )
+
+    // requests info
+    pendingMessages = new LongMap<PendingMessage>()
+    destroySessionIdToMsgId = new LongMap<Long>()
+
+    lastPingRtt = NaN
+    lastPingTime = 0
+    lastPingMsgId = Long.ZERO
+    lastSessionCreatedUid = Long.ZERO
+
+    initConnectionCalled = false
+    authorizationPending = false
+
+    next429Timeout = 1000
+    current429Timeout?: NodeJS.Timeout
+    next429ResetTimeout?: NodeJS.Timeout
+
     constructor(
-        crypto: ICryptoProvider,
+        readonly _crypto: ICryptoProvider,
         readonly log: Logger,
         readonly _readerMap: TlReaderMap,
         readonly _writerMap: TlWriterMap,
     ) {
-        this._crypto = crypto
+        this.log.prefix = `[SESSION ${this._sessionId.toString(16)}] `
     }
 
-    /** Whether session contains authKey */
-    get authorized(): boolean {
-        return this._authKey !== undefined
+    get hasPendingMessages(): boolean {
+        return Boolean(
+            this.queuedRpc.length ||
+                this.queuedAcks.length ||
+                this.queuedStateReq.length ||
+                this.queuedResendReq.length,
+        )
     }
 
-    /** Setup keys based on authKey */
-    async setupKeys(authKey?: Buffer | null): Promise<void> {
-        if (authKey) {
-            this._authKey = authKey
-            this._authKeyClientSalt = authKey.slice(88, 120)
-            this._authKeyServerSalt = authKey.slice(96, 128)
-            this._authKeyId = (await this._crypto.sha1(this._authKey)).slice(-8)
-        } else {
-            this._authKey = undefined
-            this._authKeyClientSalt = undefined
-            this._authKeyServerSalt = undefined
-            this._authKeyId = undefined
+    /**
+     * Reset session by resetting auth key(s) and session state
+     */
+    reset(withAuthKey = false): void {
+        if (withAuthKey) {
+            this._authKey.reset()
+            this._authKeyTemp.reset()
+            this._authKeyTempSecondary.reset()
         }
+
+        clearTimeout(this.current429Timeout)
+        this.resetState()
+        this.resetLastPing(true)
     }
 
-    /** Reset session by removing authKey and values derived from it */
-    reset(): void {
+    /**
+     * Reset session state and generate a new session ID.
+     *
+     * By default, also cancels any pending RPC requests.
+     * If `keepPending` is set to `true`, pending requests will be kept
+     */
+    resetState(keepPending = false): void {
         this._lastMessageId = Long.ZERO
         this._seqNo = 0
 
-        this._authKey = undefined
-        this._authKeyClientSalt = undefined
-        this._authKeyServerSalt = undefined
-        this._authKeyId = undefined
         this._sessionId = randomLong()
-        // no need to reset server salt
+        this.log.debug('session reset, new sid = %h', this._sessionId)
+        this.log.prefix = `[SESSION ${this._sessionId.toString(16)}] `
+
+        // reset session state
+
+        if (!keepPending) {
+            for (const info of this.pendingMessages.values()) {
+                if (info._ === 'rpc') {
+                    info.rpc.promise.reject(new Error('Session is reset'))
+                }
+            }
+            this.pendingMessages.clear()
+        }
+
+        this.recentOutgoingMsgIds.clear()
+        this.recentIncomingMsgIds.clear()
+
+        if (!keepPending) {
+            while (this.queuedRpc.length) {
+                const rpc = this.queuedRpc.popFront()!
+
+                if (rpc.sent === false) {
+                    rpc.promise.reject(new Error('Session is reset'))
+                }
+            }
+        }
+
+        this.queuedAcks.length = 0
+        this.queuedStateReq.length = 0
+        this.queuedResendReq.length = 0
+        this.getStateSchedule.clear()
     }
 
-    changeSessionId(): void {
-        this._sessionId = randomLong()
-        this._seqNo = 0
-    }
+    enqueueRpc(rpc: PendingRpc, force?: boolean): boolean {
+        // already queued or cancelled
+        if ((!force && !rpc.sent) || rpc.cancelled) return false
 
-    /** Encrypt a single MTProto message using session's keys */
-    async encryptMessage(message: Buffer): Promise<Buffer> {
-        if (!this._authKey) throw new Error('Keys are not set up!')
-
-        let padding =
-            (16 /* header size */ + message.length + 12) /* min padding */ % 16
-        padding = 12 + (padding ? 16 - padding : 0)
-
-        const buf = Buffer.alloc(16 + message.length + padding)
-
-        buf.writeInt32LE(this.serverSalt!.low)
-        buf.writeInt32LE(this.serverSalt!.high, 4)
-        buf.writeInt32LE(this._sessionId.low, 8)
-        buf.writeInt32LE(this._sessionId.high, 12)
-        message.copy(buf, 16)
-        randomBytes(padding).copy(buf, 16 + message.length)
-
-        const messageKey = (
-            await this._crypto.sha256(
-                Buffer.concat([this._authKeyClientSalt!, buf]),
-            )
-        ).slice(8, 24)
-        const ige = await createAesIgeForMessage(
-            this._crypto,
-            this._authKey,
-            messageKey,
-            true,
+        rpc.sent = false
+        rpc.containerId = undefined
+        this.log.debug(
+            'enqueued %s for sending (msg_id = %s)',
+            rpc.method,
+            rpc.msgId || 'n/a',
         )
-        const encryptedData = await ige.encrypt(buf)
+        this.queuedRpc.pushBack(rpc)
 
-        return Buffer.concat([this._authKeyId!, messageKey, encryptedData])
-    }
-
-    /** Decrypt a single MTProto message using session's keys */
-    async decryptMessage(
-        data: Buffer,
-        callback: (msgId: tl.Long, seqNo: number, data: TlBinaryReader) => void,
-    ): Promise<void> {
-        if (!this._authKey) throw new Error('Keys are not set up!')
-
-        const authKeyId = data.slice(0, 8)
-        const messageKey = data.slice(8, 24)
-
-        let encryptedData = data.slice(24)
-
-        if (!buffersEqual(authKeyId, this._authKeyId!)) {
-            this.log.warn(
-                '[%h] warn: received message with unknown authKey = %h (expected %h)',
-                this._sessionId,
-                authKeyId,
-                this._authKeyId,
-            )
-
-            return
-        }
-
-        const padSize = encryptedData.length % 16
-
-        if (padSize !== 0) {
-            // data came from a codec that uses non-16-based padding.
-            // it is safe to drop those padding bytes
-            encryptedData = encryptedData.slice(0, -padSize)
-        }
-
-        const ige = await createAesIgeForMessage(
-            this._crypto,
-            this._authKey!,
-            messageKey,
-            false,
-        )
-        const innerData = await ige.decrypt(encryptedData)
-
-        const expectedMessageKey = (
-            await this._crypto.sha256(
-                Buffer.concat([this._authKeyServerSalt!, innerData]),
-            )
-        ).slice(8, 24)
-
-        if (!buffersEqual(messageKey, expectedMessageKey)) {
-            this.log.warn(
-                '[%h] received message with invalid messageKey = %h (expected %h)',
-                this._sessionId,
-                messageKey,
-                expectedMessageKey,
-            )
-
-            return
-        }
-
-        const innerReader = new TlBinaryReader(this._readerMap, innerData)
-        innerReader.seek(8) // skip salt
-        const sessionId = innerReader.long()
-        const messageId = innerReader.long(true)
-
-        if (sessionId.neq(this._sessionId)) {
-            this.log.warn(
-                'ignoring message with invalid sessionId = %h',
-                sessionId,
-            )
-
-            return
-        }
-
-        const seqNo = innerReader.uint()
-        const length = innerReader.uint()
-
-        if (length > innerData.length - 32 /* header size */) {
-            this.log.warn(
-                'ignoring message with invalid length: %d > %d',
-                length,
-                innerData.length - 32,
-            )
-
-            return
-        }
-
-        if (length % 4 !== 0) {
-            this.log.warn(
-                'ignoring message with invalid length: %d is not a multiple of 4',
-                length,
-            )
-
-            return
-        }
-
-        const paddingSize = innerData.length - length - 32 // header size
-
-        if (paddingSize < 12 || paddingSize > 1024) {
-            this.log.warn(
-                'ignoring message with invalid padding size: %d',
-                paddingSize,
-            )
-
-            return
-        }
-
-        callback(messageId, seqNo, innerReader)
+        return true
     }
 
     getMessageId(): Long {
@@ -237,14 +242,53 @@ export class MtprotoSession {
     }
 
     getSeqNo(isContentRelated = true): number {
-        let seqNo = this._seqNo * 2
+        let seqNo = this._seqNo
 
         if (isContentRelated) {
             seqNo += 1
-            this._seqNo += 1
+            this._seqNo += 2
         }
 
         return seqNo
+    }
+
+    /** Encrypt a single MTProto message using session's keys */
+    async encryptMessage(message: Buffer): Promise<Buffer> {
+        const key = this._authKeyTemp.ready ? this._authKeyTemp : this._authKey
+
+        return key.encryptMessage(message, this.serverSalt, this._sessionId)
+    }
+
+    /** Decrypt a single MTProto message using session's keys */
+    async decryptMessage(
+        data: Buffer,
+        callback: Parameters<AuthKey['decryptMessage']>[2],
+    ): Promise<void> {
+        if (!this._authKey.ready) throw new Error('Keys are not set up!')
+
+        const authKeyId = data.slice(0, 8)
+
+        let key: AuthKey
+
+        if (this._authKey.match(authKeyId)) {
+            key = this._authKey
+        } else if (this._authKeyTemp.match(authKeyId)) {
+            key = this._authKeyTemp
+        } else if (this._authKeyTempSecondary.match(authKeyId)) {
+            key = this._authKeyTempSecondary
+        } else {
+            this.log.warn(
+                'received message with unknown authKey = %h (expected %h or %h or %h)',
+                authKeyId,
+                this._authKey.id,
+                this._authKeyTemp.id,
+                this._authKeyTempSecondary.id,
+            )
+
+            return
+        }
+
+        return key.decryptMessage(data, this._sessionId, callback)
     }
 
     writeMessage(
@@ -269,5 +313,44 @@ export class MtprotoSession {
         else writer.object(content as tl.TlObject)
 
         return messageId
+    }
+
+    onTransportFlood(callback: () => void) {
+        if (this.current429Timeout) return // already waiting
+
+        // all active queries must be resent after a timeout
+        this.resetLastPing(true)
+
+        const timeout = this.next429Timeout
+
+        this.next429Timeout = Math.min(this.next429Timeout * 2, 32000)
+        clearTimeout(this.current429Timeout)
+        clearTimeout(this.next429ResetTimeout)
+
+        this.current429Timeout = setTimeout(() => {
+            this.current429Timeout = undefined
+            callback()
+        }, timeout)
+        this.next429ResetTimeout = setTimeout(() => {
+            this.next429ResetTimeout = undefined
+            this.next429Timeout = 1000
+        }, 60000)
+
+        this.log.debug(
+            'transport flood, waiting for %d ms before proceeding',
+            timeout,
+        )
+
+        return Date.now() + timeout
+    }
+
+    resetLastPing(withTime = false): void {
+        if (withTime) this.lastPingTime = 0
+
+        if (!this.lastPingMsgId.isZero()) {
+            this.pendingMessages.delete(this.lastPingMsgId)
+        }
+
+        this.lastPingMsgId = Long.ZERO
     }
 }
