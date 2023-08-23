@@ -266,6 +266,13 @@ export class MultiSessionConnection extends EventEmitter {
         await key.setup(authKey)
     }
 
+    resetAuthKeys(): void {
+        for (const session of this._sessions) {
+            session.reset(true)
+        }
+        this.notifyKeyChange()
+    }
+
     setInactivityTimeout(timeout?: number): void {
         this._log.debug('setting inactivity timeout to %s', timeout)
 

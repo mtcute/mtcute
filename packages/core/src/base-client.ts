@@ -300,14 +300,23 @@ export class BaseTelegramClient extends EventEmitter {
                 _emitError: this._emitError.bind(this),
                 floodSleepThreshold: opts.floodSleepThreshold ?? 10000,
                 maxRetryCount: opts.maxRetryCount ?? 5,
-                isPremium: false, // todo fixme
+                isPremium: false,
                 useIpv6: Boolean(opts.useIpv6),
+                keepAliveAction: this._keepAliveAction.bind(this),
                 ...(opts.network ?? {}),
             },
             this._config,
         )
 
         this.storage.setup?.(this.log, this._readerMap, this._writerMap)
+    }
+
+    protected _keepAliveAction(): void {
+        // core does not have update handling, so we just use getState so the server knows
+        // we still do need updates
+        this.call({ _: 'updates.getState' }).catch((e) => {
+            this.log.error('failed to send keep-alive: %s', e)
+        })
     }
 
     protected async _loadStorage(): Promise<void> {
@@ -380,16 +389,6 @@ export class BaseTelegramClient extends EventEmitter {
                 this._connected = true
             })
             .catch((err) => this._emitError(err))
-    }
-
-    /**
-     * Wait until this client is usable (i.e. connection is fully ready)
-     */
-    async waitUntilUsable(): Promise<void> {
-        return new Promise((_resolve) => {
-            // todo
-            // this.primaryConnection.once('usable', resolve)
-        })
     }
 
     /**

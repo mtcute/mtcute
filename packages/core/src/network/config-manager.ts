@@ -23,16 +23,20 @@ export class ConfigManager {
         return (this._updatingPromise = this._update().then((config) => {
             if (this._destroyed) return
 
-            this._config = config
-
-            if (this._updateTimeout) clearTimeout(this._updateTimeout)
-            this._updateTimeout = setTimeout(
-                () => this.update(),
-                (config.expires - Date.now() / 1000) * 1000,
-            )
-
-            for (const cb of this._listeners) cb(config)
+            this.setConfig(config)
         }))
+    }
+
+    setConfig(config: tl.RawConfig): void {
+        this._config = config
+
+        if (this._updateTimeout) clearTimeout(this._updateTimeout)
+        this._updateTimeout = setTimeout(
+            () => this.update(),
+            (config.expires - Date.now() / 1000) * 1000,
+        )
+
+        for (const cb of this._listeners) cb(config)
     }
 
     onConfigUpdate(cb: (config: tl.RawConfig) => void): void {

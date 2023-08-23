@@ -58,6 +58,7 @@ export interface NetworkManagerParams {
     writerMap: TlWriterMap
     isPremium: boolean
     _emitError: (err: Error, connection?: SessionConnection) => void
+    keepAliveAction: () => void
 }
 
 export type ConnectionCountDelegate = (
@@ -77,7 +78,7 @@ const defaultConnectionCountDelegate: ConnectionCountDelegate = (
         case 'upload':
             return isPremium || (dcId !== 2 && dcId !== 4) ? 8 : 4
         case 'download':
-            return 8 // fixme isPremium ? 8 : 2
+            return isPremium ? 8 : 2
         case 'downloadSmall':
             return 2
     }
@@ -191,24 +192,7 @@ export class DcConnectionManager {
     )
 
     download = new MultiSessionConnection(
-        // this.__baseConnectionParams(),
-        // fixme
-        {
-            ...this.__baseConnectionParams(),
-            dc: {
-                _: 'dcOption',
-                ipv6: false,
-                mediaOnly: true,
-                tcpoOnly: false,
-                cdn: false,
-                static: false,
-                thisPortOnly: false,
-                id: 2,
-                ipAddress: '149.154.167.222',
-                port: 443,
-                secret: undefined,
-            },
-        },
+        this.__baseConnectionParams(),
         this.manager._connectionCount(
             'download',
             this._dc.id,
@@ -341,7 +325,9 @@ export class DcConnectionManager {
 
             // reset key on non-main connections
             // this event was already propagated to additional main connections
-            // todo
+            this.upload.resetAuthKeys()
+            this.download.resetAuthKeys()
+            this.downloadSmall.resetAuthKeys()
         })
 
         connection.on('request-auth', () => {
@@ -433,25 +419,8 @@ export class NetworkManager {
     protected _primaryDc?: DcConnectionManager
 
     private _keepAliveInterval?: NodeJS.Timeout
-    private _keepAliveAction = this._defaultKeepAliveAction.bind(this)
     private _lastUpdateTime = 0
     private _updateHandler: (upd: tl.TypeUpdates) => void = () => {}
-
-    private _defaultKeepAliveAction(): void {
-        if (this._keepAliveInterval) return
-
-        // todo
-        // telegram asks to fetch pending updates
-        // if there are no updates for 15 minutes.
-        // core does not have update handling,
-        // so we just use getState so the server knows
-        // we still do need updates
-        // this.call({ _: 'updates.getState' }).catch((e) => {
-        //     if (!(e instanceof tl.errors.RpcError)) {
-        //         this.primaryConnection.reconnect()
-        //     }
-        // })
-    }
 
     constructor(
         readonly params: NetworkManagerParams & NetworkManagerExtraParams,
@@ -517,7 +486,10 @@ export class NetworkManager {
             if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
             this._keepAliveInterval = setInterval(async () => {
                 if (Date.now() - this._lastUpdateTime > 900_000) {
-                    this._keepAliveAction()
+                    // telegram asks to fetch pending updates if there are no updates for 15 minutes.
+                    // it is up to the user to decide whether to do it or not
+
+                    this.params.keepAliveAction()
                     this._lastUpdateTime = Date.now()
                 }
             }, 60_000)
@@ -535,9 +507,6 @@ export class NetworkManager {
             this._lastUpdateTime = Date.now()
             this._updateHandler(update)
         })
-        // dc.mainConnection.on('wait', () =>
-        //     this._cleanupPrimaryConnection()
-        // )
 
         dc.loadKeys()
             .catch((e) => {

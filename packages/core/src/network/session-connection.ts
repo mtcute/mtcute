@@ -704,7 +704,6 @@ export class SessionConnection extends PersistentConnection {
                             'received updates, but updates are disabled',
                         )
                         // likely due to some request in the session missing invokeWithoutUpdates
-                        // todo: reset session
                         break
                     }
 
