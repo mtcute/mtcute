@@ -1,3 +1,4 @@
+import { ConditionVariable, ConnectionKind } from '@mtcute/core'
 import {
     fileIdToInputFileLocation,
     fileIdToInputWebFileLocation,
@@ -10,8 +11,15 @@ import {
     FileDownloadParameters,
     FileLocation,
     MtArgumentError,
+    MtUnsupportedError,
 } from '../../types'
 import { determinePartSize } from '../../utils/file-utils'
+
+// small files (less than 128 kb) are downloaded using the "downloadSmall" pool
+// furthermore, if the file is small and is located on our main DC, it will be downloaded
+// using the current main connection
+const SMALL_FILE_MAX_SIZE = 131072
+const REQUESTS_PER_CONNECTION = 3 // some arbitrary magic value that seems to work best
 
 /**
  * Download a file and return it as an iterable, which yields file contents
@@ -25,16 +33,6 @@ export async function* downloadAsIterable(
     this: TelegramClient,
     params: FileDownloadParameters,
 ): AsyncIterableIterator<Buffer> {
-    const partSizeKb =
-        params.partSize ??
-        (params.fileSize ? determinePartSize(params.fileSize) : 64)
-
-    if (partSizeKb % 4 !== 0) {
-        throw new MtArgumentError(
-            `Invalid part size: ${partSizeKb}. Must be divisible by 4.`,
-        )
-    }
-
     const offset = params.offset ?? 0
 
     if (offset % 4096 !== 0) {
@@ -77,91 +75,151 @@ export async function* downloadAsIterable(
     // we will receive a FileMigrateError in case this is invalid
     if (!dcId) dcId = this._defaultDc.id
 
+    const partSizeKb =
+        params.partSize ?? (fileSize ? determinePartSize(fileSize) : 64)
+
+    if (partSizeKb % 4 !== 0) {
+        throw new MtArgumentError(
+            `Invalid part size: ${partSizeKb}. Must be divisible by 4.`,
+        )
+    }
+
     const chunkSize = partSizeKb * 1024
 
-    const limit =
-        params.limit ??
-        // derive limit from chunk size, file size and offset
-        (fileSize ?
-            ~~((fileSize + chunkSize - offset - 1) / chunkSize) :
-        // we will receive an error when we have reached the end anyway
-            Infinity)
+    let limitBytes = params.limit ?? fileSize ?? Infinity
+    if (limitBytes === 0) return
 
-    // fixme
-    throw new Error('TODO')
+    let numChunks =
+        limitBytes === Infinity ?
+            Infinity :
+            ~~((limitBytes + chunkSize - offset - 1) / chunkSize)
 
-    // let connection = this._downloadConnections[dcId]
+    let nextChunkIdx = 0
+    let nextWorkerChunkIdx = 0
+    const nextChunkCv = new ConditionVariable()
+    const buffer: Record<number, Buffer> = {}
 
-    // if (!connection) {
-    //     connection = await this.createAdditionalConnection(dcId)
-    //     this._downloadConnections[dcId] = connection
-    // }
-    //
-    // const requestCurrent = async (): Promise<Buffer> => {
-    //     let result:
-    //         | tl.RpcCallReturn['upload.getFile']
-    //         | tl.RpcCallReturn['upload.getWebFile']
-    //
-    //     try {
-    //         result = await this.call(
-    //             {
-    //                 _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
-    //                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //                 location: location as any,
-    //                 offset,
-    //                 limit: chunkSize,
-    //             },
-    //             { connection },
-    //         )
-    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //     } catch (e: any) {
-    //         if (e.constructor === tl.errors.FileMigrateXError) {
-    //             connection = this._downloadConnections[e.new_dc]
-    //
-    //             if (!connection) {
-    //                 connection = await this.createAdditionalConnection(e.new_dc)
-    //                 this._downloadConnections[e.new_dc] = connection
-    //             }
-    //
-    //             return requestCurrent()
-    //         } else if (e.constructor === tl.errors.FilerefUpgradeNeededError) {
-    //             // todo: implement someday
-    //             // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
-    //             throw new MtUnsupportedError('File ref expired!')
-    //         } else throw e
-    //     }
-    //
-    //     if (result._ === 'upload.fileCdnRedirect') {
-    //         // we shouldnt receive them since cdnSupported is not set in the getFile request.
-    //         // also, i couldnt find any media that would be downloaded from cdn, so even if
-    //         // i implemented that, i wouldnt be able to test that, so :shrug:
-    //         throw new MtUnsupportedError(
-    //             'Received CDN redirect, which is not supported (yet)',
-    //         )
-    //     }
-    //
-    //     if (
-    //         result._ === 'upload.webFile' &&
-    //         result.size &&
-    //         limit === Infinity
-    //     ) {
-    //         limit = result.size
-    //     }
-    //
-    //     return result.bytes
-    // }
-    //
-    // for (let i = 0; i < limit; i++) {
-    //     const buf = await requestCurrent()
-    //
-    //     if (buf.length === 0) {
-    //         // we've reached the end
-    //         return
-    //     }
-    //
-    //     yield buf
-    //     offset += chunkSize
-    //
-    //     params.progressCallback?.(offset, limit)
-    // }
+    const isSmall = fileSize && fileSize <= SMALL_FILE_MAX_SIZE
+    let connectionKind: ConnectionKind
+
+    if (isSmall) {
+        connectionKind =
+            dcId === this.network.getPrimaryDcId() ? 'main' : 'downloadSmall'
+    } else {
+        connectionKind = 'download'
+    }
+    const poolSize = this.network.getPoolSize(connectionKind, dcId)
+
+    this.log.debug(
+        'Downloading file of size %d from dc %d using %s connection pool (pool size: %d)',
+        limitBytes,
+        dcId,
+        connectionKind,
+        poolSize,
+    )
+
+    const downloadChunk = async (
+        chunk = nextWorkerChunkIdx++,
+    ): Promise<void> => {
+        let result:
+            | tl.RpcCallReturn['upload.getFile']
+            | tl.RpcCallReturn['upload.getWebFile']
+
+        try {
+            result = await this.call(
+                {
+                    _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    location: location as any,
+                    offset: chunkSize * chunk,
+                    limit: chunkSize,
+                },
+                { dcId, kind: connectionKind },
+            )
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (e: any) {
+            if (e.constructor === tl.errors.FileMigrateXError) {
+                dcId = e.new_dc
+
+                return downloadChunk(chunk)
+            } else if (e.constructor === tl.errors.FilerefUpgradeNeededError) {
+                // todo: implement someday
+                // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
+                throw new MtUnsupportedError('File ref expired!')
+            } else throw e
+        }
+
+        if (result._ === 'upload.fileCdnRedirect') {
+            // we shouldnt receive them since cdnSupported is not set in the getFile request.
+            // also, i couldnt find any media that would be downloaded from cdn, so even if
+            // i implemented that, i wouldnt be able to test that, so :shrug:
+            throw new MtUnsupportedError(
+                'Received CDN redirect, which is not supported (yet)',
+            )
+        }
+
+        if (
+            result._ === 'upload.webFile' &&
+            result.size &&
+            limitBytes === Infinity
+        ) {
+            limitBytes = result.size
+            numChunks = ~~((limitBytes + chunkSize - offset - 1) / chunkSize)
+        }
+
+        buffer[chunk] = result.bytes
+
+        if (chunk === nextChunkIdx) {
+            nextChunkCv.notify()
+        }
+
+        if (
+            nextWorkerChunkIdx < numChunks &&
+            result.bytes.length === chunkSize
+        ) {
+            return downloadChunk()
+        }
+    }
+
+    let error: unknown = undefined
+    Promise.all(
+        Array.from(
+            { length: Math.min(poolSize * REQUESTS_PER_CONNECTION, numChunks) },
+            downloadChunk,
+        ),
+    )
+        .catch((e) => {
+            this.log.debug('download workers errored: %s', e.message)
+            error = e
+            nextChunkCv.notify()
+        })
+        .then(() => {
+            this.log.debug('download workers finished')
+        })
+
+    let position = offset
+
+    while (position < limitBytes) {
+        await nextChunkCv.wait()
+
+        if (error) throw error
+
+        while (nextChunkIdx in buffer) {
+            const buf = buffer[nextChunkIdx]
+            delete buffer[nextChunkIdx]
+
+            position += buf.length
+
+            params.progressCallback?.(position, limitBytes)
+
+            yield buf
+
+            nextChunkIdx++
+
+            if (buf.length < chunkSize) {
+                // we received the last chunk
+                return
+            }
+        }
+    }
 }

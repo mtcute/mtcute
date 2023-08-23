@@ -75,18 +75,12 @@ export class SessionConnection extends PersistentConnection {
         NodeJS.Timeout
     ][] = []
 
-    private _next429Timeout = 1000
-    private _current429Timeout?: NodeJS.Timeout
-
-    private _lastPingRtt = NaN
-    private _lastPingTime = 0
-    private _lastPingMsgId = Long.ZERO
-    private _lastSessionCreatedUid = Long.ZERO
-
     private _usePfs = this.params.usePfs ?? false
     private _isPfsBindingPending = false
     private _isPfsBindingPendingInBackground = false
     private _pfsUpdateTimeout?: NodeJS.Timeout
+
+    private _inactivityPendingFlush = false
 
     private _readerMap: TlReaderMap
     private _writerMap: TlWriterMap
@@ -149,9 +143,7 @@ export class SessionConnection extends PersistentConnection {
 
     reset(forever = false): void {
         this._session.initConnectionCalled = false
-        this._resetLastPing(true)
         this._flushTimer.reset()
-        clearTimeout(this._current429Timeout!)
 
         if (forever) {
             this.removeAllListeners()
@@ -242,26 +234,15 @@ export class SessionConnection extends PersistentConnection {
             this._onAllFailed(`transport error ${error.code}`)
 
             if (error.code === 429) {
-                // all active queries must be resent
-                const timeout = this._next429Timeout
-
-                this._next429Timeout = Math.min(this._next429Timeout * 2, 16000)
-                clearTimeout(this._current429Timeout!)
-                this._current429Timeout = setTimeout(() => {
-                    this._current429Timeout = undefined
-                    this._flushTimer.emitNow()
-                }, timeout)
-
-                this.log.debug(
-                    'transport flood, waiting for %d ms before proceeding',
-                    timeout,
+                this._session.onTransportFlood(
+                    this.emit.bind(this, 'flood-done'),
                 )
 
                 return
             }
         }
 
-        this.emit('api-error', error)
+        this.emit('error', error)
     }
 
     protected onConnectionUsable() {
@@ -622,9 +603,7 @@ export class SessionConnection extends PersistentConnection {
             // rpc_result
             message.uint()
 
-            this._sendAck(messageId)
-
-            return this._onRpcResult(message)
+            return this._onRpcResult(messageId, message)
         }
 
         // we are safe.. i guess
@@ -648,7 +627,7 @@ export class SessionConnection extends PersistentConnection {
         }
         const message = message_ as mtp.TlObject
 
-        this.log.verbose('received %s (msg_id: %l)', message._, messageId)
+        this.log.debug('received %s (msg_id: %l)', message._, messageId)
         this._session.recentIncomingMsgIds.add(messageId)
 
         switch (message._) {
@@ -738,7 +717,7 @@ export class SessionConnection extends PersistentConnection {
         }
     }
 
-    private _onRpcResult(message: TlBinaryReader): void {
+    private _onRpcResult(messageId: Long, message: TlBinaryReader): void {
         if (this._usable && this.params.inactivityTimeout) {
             this._rescheduleInactivity()
         }
@@ -790,9 +769,12 @@ export class SessionConnection extends PersistentConnection {
             return
         }
 
+        this._sendAck(messageId)
+
         // special case for auth key binding
         if (msg._ !== 'rpc') {
             if (msg._ === 'bind') {
+                this._sendAck(messageId)
                 msg.promise.resolve(message.object())
 
                 return
@@ -902,7 +884,9 @@ export class SessionConnection extends PersistentConnection {
         const msg = this._session.pendingMessages.get(msgId)
 
         if (!msg) {
-            this.log.warn('received ack for unknown message %l', msgId)
+            if (!this._session.recentOutgoingMsgIds.has(msgId)) {
+                this.log.warn('received ack for unknown message %l', msgId)
+            }
 
             return
         }
@@ -969,7 +953,6 @@ export class SessionConnection extends PersistentConnection {
         // e.g. when server returns 429
 
         // most service messages can be omitted as stale
-        this._resetLastPing(true)
 
         for (const msgId of this._session.pendingMessages.keys()) {
             const info = this._session.pendingMessages.get(msgId)!
@@ -1025,7 +1008,7 @@ export class SessionConnection extends PersistentConnection {
                     reason,
                 )
                 // restart ping
-                this._resetLastPing(true)
+                this._session.resetLastPing(true)
                 break
 
             case 'rpc': {
@@ -1093,16 +1076,6 @@ export class SessionConnection extends PersistentConnection {
         this._session.pendingMessages.delete(msgId)
     }
 
-    private _resetLastPing(withTime = false): void {
-        if (withTime) this._lastPingTime = 0
-
-        if (!this._lastPingMsgId.isZero()) {
-            this._session.pendingMessages.delete(this._lastPingMsgId)
-        }
-
-        this._lastPingMsgId = Long.ZERO
-    }
-
     private _registerOutgoingMsgId(msgId: Long): Long {
         this._session.recentOutgoingMsgIds.add(msgId)
 
@@ -1142,8 +1115,8 @@ export class SessionConnection extends PersistentConnection {
             )
         }
 
-        const rtt = Date.now() - this._lastPingTime
-        this._lastPingRtt = rtt
+        const rtt = Date.now() - this._session.lastPingTime
+        this._session.lastPingRtt = rtt
 
         if (info.containerId.neq(msgId)) {
             this._onMessageAcked(info.containerId)
@@ -1155,7 +1128,7 @@ export class SessionConnection extends PersistentConnection {
             pingId,
             rtt,
         )
-        this._resetLastPing()
+        this._session.resetLastPing()
     }
 
     private _onBadServerSalt(msg: mtp.RawMt_bad_server_salt): void {
@@ -1211,7 +1184,7 @@ export class SessionConnection extends PersistentConnection {
         serverSalt,
         uniqueId,
     }: mtp.RawMt_new_session_created): void {
-        if (uniqueId.eq(this._lastSessionCreatedUid)) {
+        if (uniqueId.eq(this._session.lastSessionCreatedUid)) {
             this.log.debug(
                 'received new_session_created with the same uid = %l, ignoring',
                 uniqueId,
@@ -1221,7 +1194,7 @@ export class SessionConnection extends PersistentConnection {
         }
 
         if (
-            !this._lastSessionCreatedUid.isZero() &&
+            !this._session.lastSessionCreatedUid.isZero() &&
             !this.params.disableUpdates
         ) {
             // force the client to fetch missed updates
@@ -1277,10 +1250,12 @@ export class SessionConnection extends PersistentConnection {
             const info = this._session.pendingMessages.get(msgId)
 
             if (!info) {
-                this.log.info(
-                    'received message info about unknown message %l',
-                    msgId,
-                )
+                if (!this._session.recentOutgoingMsgIds.has(msgId)) {
+                    this.log.warn(
+                        'received message info about unknown message %l',
+                        msgId,
+                    )
+                }
 
                 return
             }
@@ -1417,7 +1392,7 @@ export class SessionConnection extends PersistentConnection {
         this._session.queuedAcks.push(msgId)
 
         if (this._session.queuedAcks.length >= 100) {
-            this._flushTimer.emitNow()
+            this._flushTimer.emitWhenIdle()
         }
     }
 
@@ -1586,49 +1561,36 @@ export class SessionConnection extends PersistentConnection {
         }
     }
 
-    private get _hasPendingServiceMessages(): boolean {
-        return Boolean(
-            this._session.queuedRpc.length ||
-                this._session.queuedAcks.length ||
-                this._session.queuedStateReq.length ||
-                this._session.queuedResendReq.length,
-        )
-    }
-
     protected _onInactivityTimeout() {
         // we should send all pending acks and other service messages
         // before dropping the connection
 
-        if (!this._hasPendingServiceMessages) {
+        if (!this._session.hasPendingMessages) {
             this.log.debug('no pending service messages, closing connection')
             super._onInactivityTimeout()
 
             return
         }
 
-        this._flush(() => {
-            if (this._hasPendingServiceMessages) {
-                // the callback will be called again once all pending messages are sent
-                return
-            }
-
-            this.log.debug('pending service messages sent, closing connection')
-            this._flushTimer.reset()
-            super._onInactivityTimeout()
-        })
+        this._inactivityPendingFlush = true
+        this._flush()
     }
 
-    private _flush(callback?: () => void): void {
+    flushWhenIdle(): void {
+        this._flushTimer.emitWhenIdle()
+    }
+
+    private _flush(): void {
         if (
             !this._session._authKey.ready ||
             this._isPfsBindingPending ||
-            this._current429Timeout
+            this._session.current429Timeout
         ) {
             this.log.debug(
                 'skipping flush, connection is not usable (auth key ready = %b, pfs binding pending = %b, 429 timeout = %b)',
                 this._session._authKey.ready,
                 this._isPfsBindingPending,
-                Boolean(this._current429Timeout),
+                Boolean(this._session.current429Timeout),
             )
 
             // it will be flushed once connection is usable
@@ -1636,7 +1598,7 @@ export class SessionConnection extends PersistentConnection {
         }
 
         try {
-            this._doFlush(callback)
+            this._doFlush()
         } catch (e: any) {
             this.log.error('flush error: %s', e.stack)
             // should not happen unless there's a bug in the code
@@ -1645,19 +1607,22 @@ export class SessionConnection extends PersistentConnection {
         // schedule next flush
         // if there are more queued requests, flush immediately
         // (they likely didn't fit into one message)
-        if (
-            this._session.queuedRpc.length ||
-            this._session.queuedAcks.length ||
-            this._session.queuedStateReq.length ||
-            this._session.queuedResendReq.length
-        ) {
-            this._flush(callback)
+        if (this._session.hasPendingMessages) {
+            // we schedule it on the next tick, so we can load-balance
+            // between multiple connections using the same session
+            this._flushTimer.emitWhenIdle()
+        } else if (this._inactivityPendingFlush) {
+            this.log.debug('pending messages sent, closing connection')
+            this._flushTimer.reset()
+            this._inactivityPendingFlush = false
+
+            super._onInactivityTimeout()
         } else {
-            this._flushTimer.emitBefore(this._lastPingTime + 60000)
+            this._flushTimer.emitBefore(this._session.lastPingTime + 60000)
         }
     }
 
-    private _doFlush(callback?: () => void): void {
+    private _doFlush(): void {
         this.log.debug(
             'flushing send queue. queued rpc: %d',
             this._session.queuedRpc.length,
@@ -1716,13 +1681,15 @@ export class SessionConnection extends PersistentConnection {
 
         const getStateTime = now + 1500
 
-        if (now - this._lastPingTime > 60000) {
-            if (!this._lastPingMsgId.isZero()) {
+        if (now - this._session.lastPingTime > 60000) {
+            if (!this._session.lastPingMsgId.isZero()) {
                 this.log.warn(
                     "didn't receive pong for previous ping (msg_id = %l)",
-                    this._lastPingMsgId,
+                    this._session.lastPingMsgId,
                 )
-                this._session.pendingMessages.delete(this._lastPingMsgId)
+                this._session.pendingMessages.delete(
+                    this._session.lastPingMsgId,
+                )
             }
 
             pingId = randomLong()
@@ -1731,7 +1698,7 @@ export class SessionConnection extends PersistentConnection {
                 pingId,
             }
 
-            this._lastPingTime = Date.now()
+            this._session.lastPingTime = Date.now()
 
             pingRequest = TlBinaryWriter.serializeObject(this._writerMap, obj)
             containerSize += pingRequest.length + 16
@@ -1836,13 +1803,17 @@ export class SessionConnection extends PersistentConnection {
             // if message was already assigned a msg_id,
             // we must wrap it in a container with a newer msg_id
             if (msg.msgId) forceContainer = true
+
+            // having >1 upload.getFile within a container seems to cause flood_wait errors
+            // also a crutch for load-balancing
+            if (msg.method === 'upload.getFile') break
         }
 
         packetSize += containerSize
         messageCount += containerMessageCount + rpcToSend.length
 
         if (!messageCount) {
-            this.log.debug('flush failed: nothing to flush')
+            this.log.debug('flush did not happen: nothing to flush')
 
             return
         }
@@ -1875,7 +1846,7 @@ export class SessionConnection extends PersistentConnection {
             pingMsgId = this._registerOutgoingMsgId(
                 this._session.writeMessage(writer, pingRequest),
             )
-            this._lastPingMsgId = pingMsgId
+            this._session.lastPingMsgId = pingMsgId
             const pingPending: PendingMessage = {
                 _: 'ping',
                 pingId: pingId!,
@@ -2065,7 +2036,6 @@ export class SessionConnection extends PersistentConnection {
         this._session
             .encryptMessage(result)
             .then((enc) => this.send(enc))
-            .then(callback)
             .catch((err) => {
                 this.log.error(
                     'error while sending pending messages (root msg_id = %l): %s',

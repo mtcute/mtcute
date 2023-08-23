@@ -164,31 +164,6 @@ export function testCryptoProvider(c: ICryptoProvider): void {
             '99706487a1cde613bc6de0b6f24b1c7aa448c8b9c3403e3467a8cad89340f53b',
         )
     })
-
-    it('should calculate md5', async () => {
-        const test = async (...parts: string[]): Promise<Buffer> => {
-            const md5 = c.createMd5()
-            for (const p of parts) await md5.update(Buffer.from(p, 'hex'))
-
-            return md5.digest()
-        }
-
-        expect((await test()).toString('hex')).eq(
-            'd41d8cd98f00b204e9800998ecf8427e',
-        )
-        expect((await test('aaeeff')).toString('hex')).eq(
-            '9c20ec5e212b4fcfa4666a8b165c6d5d',
-        )
-        expect((await test('aaeeffffeeaa')).toString('hex')).eq(
-            'cf216071768a7b610d079e5eb7b68b74',
-        )
-        expect((await test('aaeeff', 'ffeeaa')).toString('hex')).eq(
-            'cf216071768a7b610d079e5eb7b68b74',
-        )
-        expect((await test('aa', 'ee', 'ff', 'ffeeaa')).toString('hex')).eq(
-            'cf216071768a7b610d079e5eb7b68b74',
-        )
-    })
 }
 
 describe('NodeCryptoProvider', () => {

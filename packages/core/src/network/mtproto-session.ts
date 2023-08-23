@@ -8,7 +8,8 @@ import {
     TlWriterMap,
 } from '@mtcute/tl-runtime'
 
-import { ControllablePromise,
+import {
+    ControllablePromise,
     Deque,
     getRandomInt,
     ICryptoProvider,
@@ -118,8 +119,17 @@ export class MtprotoSession {
     pendingMessages = new LongMap<PendingMessage>()
     destroySessionIdToMsgId = new LongMap<Long>()
 
+    lastPingRtt = NaN
+    lastPingTime = 0
+    lastPingMsgId = Long.ZERO
+    lastSessionCreatedUid = Long.ZERO
+
     initConnectionCalled = false
     authorizationPending = false
+
+    next429Timeout = 1000
+    current429Timeout?: NodeJS.Timeout
+    next429ResetTimeout?: NodeJS.Timeout
 
     constructor(
         readonly _crypto: ICryptoProvider,
@@ -128,6 +138,15 @@ export class MtprotoSession {
         readonly _writerMap: TlWriterMap,
     ) {
         this.log.prefix = `[SESSION ${this._sessionId.toString(16)}] `
+    }
+
+    get hasPendingMessages(): boolean {
+        return Boolean(
+            this.queuedRpc.length ||
+                this.queuedAcks.length ||
+                this.queuedStateReq.length ||
+                this.queuedResendReq.length,
+        )
     }
 
     /**
@@ -140,7 +159,9 @@ export class MtprotoSession {
             this._authKeyTempSecondary.reset()
         }
 
+        clearTimeout(this.current429Timeout)
         this.resetState()
+        this.resetLastPing(true)
     }
 
     /**
@@ -221,11 +242,11 @@ export class MtprotoSession {
     }
 
     getSeqNo(isContentRelated = true): number {
-        let seqNo = this._seqNo * 2
+        let seqNo = this._seqNo
 
         if (isContentRelated) {
             seqNo += 1
-            this._seqNo += 1
+            this._seqNo += 2
         }
 
         return seqNo
@@ -292,5 +313,44 @@ export class MtprotoSession {
         else writer.object(content as tl.TlObject)
 
         return messageId
+    }
+
+    onTransportFlood(callback: () => void) {
+        if (this.current429Timeout) return // already waiting
+
+        // all active queries must be resent after a timeout
+        this.resetLastPing(true)
+
+        const timeout = this.next429Timeout
+
+        this.next429Timeout = Math.min(this.next429Timeout * 2, 32000)
+        clearTimeout(this.current429Timeout)
+        clearTimeout(this.next429ResetTimeout)
+
+        this.current429Timeout = setTimeout(() => {
+            this.current429Timeout = undefined
+            callback()
+        }, timeout)
+        this.next429ResetTimeout = setTimeout(() => {
+            this.next429ResetTimeout = undefined
+            this.next429Timeout = 1000
+        }, 60000)
+
+        this.log.debug(
+            'transport flood, waiting for %d ms before proceeding',
+            timeout,
+        )
+
+        return Date.now() + timeout
+    }
+
+    resetLastPing(withTime = false): void {
+        if (withTime) this.lastPingTime = 0
+
+        if (!this.lastPingMsgId.isZero()) {
+            this.pendingMessages.delete(this.lastPingMsgId)
+        }
+
+        this.lastPingMsgId = Long.ZERO
     }
 }

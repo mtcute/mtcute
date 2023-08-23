@@ -133,8 +133,7 @@ export class Conversation {
 
         const pending = this.client['_pendingConversations']
 
-        const idx =
-        pending[this._chatId].indexOf(this)
+        const idx = pending[this._chatId].indexOf(this)
 
         if (idx > -1) {
             // just in case
@@ -143,8 +142,7 @@ export class Conversation {
         if (!pending[this._chatId].length) {
             delete pending[this._chatId]
         }
-        this.client['_hasConversations'] =
-            Object.keys(pending).length > 0
+        this.client['_hasConversations'] = Object.keys(pending).length > 0
 
         // reset pending status
         this._queuedNewMessage.clear()
@@ -279,6 +277,7 @@ export class Conversation {
 
         if (timeout !== null) {
             timer = setTimeout(() => {
+                console.log('timed out')
                 promise.reject(new tl.errors.TimeoutError())
                 this._queuedNewMessage.removeBy((it) => it.promise === promise)
             }, timeout)
@@ -537,7 +536,9 @@ export class Conversation {
                 it.promise.resolve(msg)
                 delete this._pendingEditMessage[msg.id]
             }
-        })().catch((e) => this.client['_emitError'](e))
+        })().catch((e) => {
+            this.client['_emitError'](e)
+        })
     }
 
     private _onHistoryRead(upd: HistoryReadUpdate) {

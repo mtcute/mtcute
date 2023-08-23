@@ -245,7 +245,7 @@ export class BaseTelegramClient extends EventEmitter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected _handleUpdate(update: tl.TypeUpdates): void {}
 
-    readonly log = new LogManager()
+    readonly log = new LogManager('client')
     readonly network: NetworkManager
 
     constructor(opts: BaseTelegramClientOptions) {
@@ -451,7 +451,6 @@ export class BaseTelegramClient extends EventEmitter {
      * @param factory  New transport factory
      */
     changeTransport(factory: TransportFactory): void {
-        // todo
         this.network.changeTransport(factory)
     }
 

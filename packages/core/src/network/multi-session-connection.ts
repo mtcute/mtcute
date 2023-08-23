@@ -32,42 +32,47 @@ export class MultiSessionConnection extends EventEmitter {
 
     protected _connections: SessionConnection[] = []
 
-    setCount(count: number, doUpdate = true): void {
+    setCount(count: number, connect = this.params.isMainConnection): void {
         this._count = count
 
-        if (doUpdate) this._updateConnections(true)
+        this._updateConnections(connect)
     }
 
     private _updateSessions(): void {
+        // there are two cases
+        // 1. this msc is main, in which case every connection should have its own session
+        // 2. this msc is not main, in which case all connections should share the same session
+        // if (!this.params.isMainConnection) {
+        //     // case 2
+        //     this._log.debug(
+        //         'updating sessions count: %d -> 1',
+        //         this._sessions.length,
+        //     )
+        //
+        //     if (this._sessions.length === 0) {
+        //         this._sessions.push(
+        //             new MtprotoSession(
+        //                 this.params.crypto,
+        //                 this._log.create('session'),
+        //                 this.params.readerMap,
+        //                 this.params.writerMap,
+        //             ),
+        //         )
+        //     }
+        //
+        //     // shouldn't happen, but just in case
+        //     while (this._sessions.length > 1) {
+        //         this._sessions.pop()!.reset()
+        //     }
+        //
+        //     return
+        // }
+
         this._log.debug(
             'updating sessions count: %d -> %d',
             this._sessions.length,
             this._count,
         )
-
-        // there are two cases
-        // 1. this msc is main, in which case every connection should have its own session
-        // 2. this msc is not main, in which case all connections should share the same session
-        if (!this.params.isMainConnection) {
-            // case 2
-            if (this._sessions.length === 0) {
-                this._sessions.push(
-                    new MtprotoSession(
-                        this.params.crypto,
-                        this._log.create('session'),
-                        this.params.readerMap,
-                        this.params.writerMap,
-                    ),
-                )
-            }
-
-            // shouldn't happen, but just in case
-            while (this._sessions.length > 1) {
-                this._sessions.pop()!.reset()
-            }
-
-            return
-        }
 
         // case 1
         if (this._sessions.length === this._count) return
@@ -99,7 +104,7 @@ export class MultiSessionConnection extends EventEmitter {
         }
     }
 
-    private _updateConnections(active = false): void {
+    private _updateConnections(connect = false): void {
         this._updateSessions()
         if (this._connections.length === this._count) return
 
@@ -141,9 +146,8 @@ export class MultiSessionConnection extends EventEmitter {
 
         // create new connections
         for (let i = this._connections.length; i < this._count; i++) {
-            const session = this.params.isMainConnection ?
-                this._sessions[i] :
-                this._sessions[0]
+            const session = this._sessions[i] // this.params.isMainConnection ? // :
+            // this._sessions[0]
             const conn = new SessionConnection(
                 {
                     ...this.params,
@@ -185,9 +189,14 @@ export class MultiSessionConnection extends EventEmitter {
             })
             conn.on('usable', () => this.emit('usable', i))
             conn.on('request-auth', () => this.emit('request-auth', i))
+            conn.on('flood-done', () => {
+                this._log.debug('received flood-done from connection %d', i)
+
+                this._connections.forEach((it) => it.flushWhenIdle())
+            })
 
             this._connections.push(conn)
-            if (active) conn.connect()
+            if (connect) conn.connect()
         }
     }
 
@@ -207,31 +216,32 @@ export class MultiSessionConnection extends EventEmitter {
         stack?: string,
         timeout?: number,
     ): Promise<tl.RpcCallReturn[T['_']]> {
-        if (this.params.isMainConnection) {
-            // find the least loaded connection
-            let min = Infinity
-            let minIdx = 0
+        // if (this.params.isMainConnection) {
+        // find the least loaded connection
+        let min = Infinity
+        let minIdx = 0
 
-            for (let i = 0; i < this._connections.length; i++) {
-                const conn = this._connections[i]
-                const total =
-                    conn._session.queuedRpc.length +
-                    conn._session.pendingMessages.size()
+        for (let i = 0; i < this._connections.length; i++) {
+            const conn = this._connections[i]
+            const total =
+                conn._session.queuedRpc.length +
+                conn._session.pendingMessages.size()
 
-                if (total < min) {
-                    min = total
-                    minIdx = i
-                }
+            if (total < min) {
+                min = total
+                minIdx = i
             }
-
-            return this._connections[minIdx].sendRpc(request, stack, timeout)
         }
+
+        return this._connections[minIdx].sendRpc(request, stack, timeout)
+        // }
 
         // round-robin connections
         // since they all share the same session, it doesn't matter which one we use
-        return this._connections[
-            this._nextConnection++ % this._connections.length
-        ].sendRpc(request, stack, timeout)
+        // the connection chosen here will only affect the first attempt at sending
+        // return this._connections[
+        //     this._nextConnection++ % this._connections.length
+        // ].sendRpc(request, stack, timeout)
     }
 
     connect(): void {
@@ -307,5 +317,9 @@ export class MultiSessionConnection extends EventEmitter {
 
     changeTransport(factory: TransportFactory): void {
         this._connections.forEach((conn) => conn.changeTransport(factory))
+    }
+
+    getPoolSize(): number {
+        return this._connections.length
     }
 }

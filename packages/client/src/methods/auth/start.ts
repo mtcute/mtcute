@@ -155,8 +155,9 @@ export async function start(
             me.isBot,
         )
 
-        // todo where is this._disableUpdates?
-        if (!false) {
+        this.network.setIsPremium(me.isPremium)
+
+        if (!this.network.params.disableUpdates) {
             this._catchUpChannels = Boolean(params.catchUp)
 
             if (!params.catchUp) {
@@ -176,14 +177,18 @@ export async function start(
         if (!(e instanceof tl.errors.AuthKeyUnregisteredError)) throw e
     }
 
-    if (!params.phone && !params.botToken) { throw new MtArgumentError('Neither phone nor bot token were provided') }
+    if (!params.phone && !params.botToken) {
+        throw new MtArgumentError('Neither phone nor bot token were provided')
+    }
 
     let phone = params.phone ? await resolveMaybeDynamic(params.phone) : null
 
     if (phone) {
         phone = normalizePhoneNumber(phone)
 
-        if (!params.code) { throw new MtArgumentError('You must pass `code` to use `phone`') }
+        if (!params.code) {
+            throw new MtArgumentError('You must pass `code` to use `phone`')
+        }
     } else {
         const botToken = params.botToken ?
             await resolveMaybeDynamic(params.botToken) :

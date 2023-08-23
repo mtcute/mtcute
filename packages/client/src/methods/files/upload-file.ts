@@ -3,7 +3,7 @@ import { fromBuffer as fileTypeFromBuffer } from 'file-type'
 import type { ReadStream } from 'fs'
 import { Readable } from 'stream'
 
-import { randomLong } from '@mtcute/core'
+import { AsyncLock, randomLong } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -13,7 +13,6 @@ import {
     bufferToStream,
     convertWebStreamToNodeReadable,
     readBytesFromStream,
-    readStreamUntilEnd,
 } from '../../utils/stream-utils'
 
 let fs: any = null
@@ -28,6 +27,14 @@ const OVERRIDE_MIME: Record<string, string> = {
     // tg doesn't interpret `audio/opus` files as voice messages for some reason
     'audio/opus': 'audio/ogg',
 }
+
+// small files (less than 128 kb) are uploaded using the current connection and not the "upload" pool
+const SMALL_FILE_MAX_SIZE = 131072
+const BIG_FILE_MIN_SIZE = 10485760 // files >10 MB are considered "big"
+const DEFAULT_FILE_NAME = 'unnamed'
+const REQUESTS_PER_CONNECTION = 3
+const MAX_PART_COUNT = 4000 // 512 kb * 4000 = 2000 MiB
+const MAX_PART_COUNT_PREMIUM = 8000 // 512 kb * 8000 = 4000 MiB
 
 /**
  * Upload a file to Telegram servers, without actually
@@ -60,13 +67,14 @@ export async function uploadFile(
 
         /**
          * Total file size. Automatically inferred for Buffer, File and local files.
-         *
-         * When using with streams, if `fileSize` is not passed, the entire file is
-         * first loaded into memory to determine file size, and used as a Buffer later.
-         * This might be a major performance bottleneck, so be sure to provide file size
-         * when using streams and file size is known (which often is the case).
          */
         fileSize?: number
+
+        /**
+         * If the file size is unknown, you can provide an estimate,
+         * which will be used to determine appropriate part size.
+         */
+        estimatedSize?: number
 
         /**
          * File MIME type. By default is automatically inferred from magic number
@@ -83,10 +91,15 @@ export async function uploadFile(
         partSize?: number
 
         /**
+         * Number of parts to be sent in parallel per connection.
+         */
+        requestsPerConnection?: number
+
+        /**
          * Function that will be called after some part has been uploaded.
          *
          * @param uploaded  Number of bytes already uploaded
-         * @param total  Total file size
+         * @param total  Total file size, if known
          */
         progressCallback?: (uploaded: number, total: number) => void
     },
@@ -94,7 +107,7 @@ export async function uploadFile(
     // normalize params
     let file = params.file
     let fileSize = -1 // unknown
-    let fileName = 'unnamed'
+    let fileName = DEFAULT_FILE_NAME
     let fileMime = params.fileMime
 
     if (Buffer.isBuffer(file)) {
@@ -162,12 +175,12 @@ export async function uploadFile(
             }
         }
 
-        if (fileName === 'unnamed') {
+        if (fileName === DEFAULT_FILE_NAME) {
             // try to infer from url
             const url = new URL(file.url)
             const name = url.pathname.split('/').pop()
 
-            if (name && name.indexOf('.') > -1) {
+            if (name && name.includes('.')) {
                 fileName = name
             }
         }
@@ -192,42 +205,88 @@ export async function uploadFile(
     // set file size if not automatically inferred
     if (fileSize === -1 && params.fileSize) fileSize = params.fileSize
 
-    if (fileSize === -1) {
-        // load the entire stream into memory
-        const buffer = await readStreamUntilEnd(file as Readable)
-        fileSize = buffer.length
-        file = bufferToStream(buffer)
+    let partSizeKb = params.partSize
+
+    if (!partSizeKb) {
+        if (fileSize === -1) {
+            partSizeKb = params.estimatedSize ?
+                determinePartSize(params.estimatedSize) :
+                64
+        } else {
+            partSizeKb = determinePartSize(fileSize)
+        }
     }
 
     if (!(file instanceof Readable)) {
         throw new MtArgumentError('Could not convert input `file` to stream!')
     }
 
-    const partSizeKb = params.partSize ?? determinePartSize(fileSize)
-
     if (partSizeKb > 512) {
         throw new MtArgumentError(`Invalid part size: ${partSizeKb}KB`)
     }
     const partSize = partSizeKb * 1024
 
-    const isBig = fileSize > 10485760 // 10 MB
-    const hash = this._crypto.createMd5()
+    let partCount =
+        fileSize === -1 ? -1 : ~~((fileSize + partSize - 1) / partSize)
+    const maxPartCount = this.network.params.isPremium ?
+        MAX_PART_COUNT_PREMIUM :
+        MAX_PART_COUNT
 
-    const partCount = ~~((fileSize + partSize - 1) / partSize)
+    if (partCount > maxPartCount) {
+        throw new MtArgumentError(
+            `File is too large (max ${maxPartCount} parts, got ${partCount})`,
+        )
+    }
+
+    const isBig = fileSize === -1 || fileSize > BIG_FILE_MIN_SIZE
+    const isSmall = fileSize !== -1 && fileSize < SMALL_FILE_MAX_SIZE
+    const connectionKind = isSmall ? 'main' : 'upload'
+    const connectionPoolSize = Math.min(
+        this.network.getPoolSize(connectionKind),
+        partCount,
+    )
+    const requestsPerConnection =
+        params.requestsPerConnection ?? REQUESTS_PER_CONNECTION
+
     this.log.debug(
-        'uploading %d bytes file in %d chunks, each %d bytes',
+        'uploading %d bytes file in %d chunks, each %d bytes in %s connection pool of size %d',
         fileSize,
         partCount,
         partSize,
+        connectionKind,
+        connectionPoolSize,
     )
 
     // why is the file id generated by the client?
     // isn't the server supposed to generate it and handle collisions?
     const fileId = randomLong()
-    let pos = 0
+    const stream = file
 
-    for (let idx = 0; idx < partCount; idx++) {
-        const part = await readBytesFromStream(file, partSize)
+    let pos = 0
+    let idx = 0
+    const lock = new AsyncLock()
+
+    const uploadNextPart = async (): Promise<void> => {
+        const thisIdx = idx++
+
+        let part
+
+        try {
+            await lock.acquire()
+            part = await readBytesFromStream(stream, partSize)
+        } finally {
+            lock.release()
+        }
+
+        if (fileSize === -1 && stream.readableEnded) {
+            fileSize = pos + (part?.length ?? 0)
+            partCount = ~~((fileSize + partSize - 1) / partSize)
+            this.log.debug(
+                'readable ended, file size = %d, part count = %d',
+                fileSize,
+                partCount,
+            )
+        }
 
         if (!part) {
             throw new MtArgumentError(
@@ -236,15 +295,15 @@ export async function uploadFile(
         }
 
         if (!Buffer.isBuffer(part)) {
-            throw new MtArgumentError(`Part ${idx} was not a Buffer!`)
+            throw new MtArgumentError(`Part ${thisIdx} was not a Buffer!`)
         }
         if (part.length > partSize) {
             throw new MtArgumentError(
-                `Part ${idx} had invalid size (expected ${partSize}, got ${part.length})`,
+                `Part ${thisIdx} had invalid size (expected ${partSize}, got ${part.length})`,
             )
         }
 
-        if (idx === 0 && fileMime === undefined) {
+        if (thisIdx === 0 && fileMime === undefined) {
             const fileType = await fileTypeFromBuffer(part)
             fileMime = fileType?.mime
 
@@ -260,36 +319,42 @@ export async function uploadFile(
             }
         }
 
-        if (!isBig) {
-            // why md5 only small files?
-            // big files have more chance of corruption, but whatever
-            // also isn't integrity guaranteed by mtproto?
-            await hash.update(part)
-        }
-
-        pos += part.length
-
         // why
         const request = isBig ?
             ({
                 _: 'upload.saveBigFilePart',
                 fileId,
-                filePart: idx,
+                filePart: thisIdx,
                 fileTotalParts: partCount,
                 bytes: part,
-            } as tl.upload.RawSaveBigFilePartRequest) :
+            } satisfies tl.upload.RawSaveBigFilePartRequest) :
             ({
                 _: 'upload.saveFilePart',
                 fileId,
-                filePart: idx,
+                filePart: thisIdx,
                 bytes: part,
-            } as tl.upload.RawSaveFilePartRequest)
+            } satisfies tl.upload.RawSaveFilePartRequest)
 
-        const result = await this.call(request)
+        const result = await this.call(request, { kind: connectionKind })
         if (!result) throw new Error(`Failed to upload part ${idx}`)
 
+        pos += part.length
+
         params.progressCallback?.(pos, fileSize)
+
+        if (idx === partCount) return
+
+        return uploadNextPart()
     }
+
+    await Promise.all(
+        Array.from(
+            {
+                length: connectionPoolSize * requestsPerConnection,
+            },
+            uploadNextPart,
+        ),
+    )
 
     let inputFile: tl.TypeInputFile
 
@@ -306,7 +371,7 @@ export async function uploadFile(
             id: fileId,
             parts: partCount,
             name: fileName,
-            md5Checksum: (await hash.digest()).toString('hex'),
+            md5Checksum: '', // tdlib doesn't do this, why should we?
         }
     }
 

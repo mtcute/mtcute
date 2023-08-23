@@ -48,7 +48,9 @@ export abstract class BaseTcpTransport
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     connect(dc: tl.RawDcOption, testMode: boolean): void {
-        if (this._state !== TransportState.Idle) { throw new Error('Transport is not IDLE') }
+        if (this._state !== TransportState.Idle) {
+            throw new Error('Transport is not IDLE')
+        }
 
         if (!this.packetCodecInitialized) {
             this._packetCodec.setup?.(this._crypto, this.log)
@@ -69,7 +71,9 @@ export abstract class BaseTcpTransport
             this.handleConnect.bind(this),
         )
 
-        this._socket.on('data', (data) => this._packetCodec.feed(data))
+        this._socket.on('data', (data) => {
+            this._packetCodec.feed(data)
+        })
         this._socket.on('error', this.handleError.bind(this))
         this._socket.on('close', this.close.bind(this))
     }
@@ -87,7 +91,7 @@ export abstract class BaseTcpTransport
         this._packetCodec.reset()
     }
 
-    async handleError(error: Error): Promise<void> {
+    handleError(error: Error): void {
         this.log.error('error: %s', error.stack)
         this.emit('error', error)
     }
@@ -99,7 +103,11 @@ export abstract class BaseTcpTransport
         if (initialMessage.length) {
             this._socket!.write(initialMessage, (err) => {
                 if (err) {
-                    this.emit('error', err)
+                    this.log.error(
+                        'failed to write initial message: %s',
+                        err.stack,
+                    )
+                    this.emit('error')
                     this.close()
                 } else {
                     this._state = TransportState.Ready
@@ -113,12 +121,20 @@ export abstract class BaseTcpTransport
     }
 
     async send(bytes: Buffer): Promise<void> {
-        if (this._state !== TransportState.Ready) { throw new Error('Transport is not READY') }
+        if (this._state !== TransportState.Ready) {
+            throw new Error('Transport is not READY')
+        }
 
         const framed = await this._packetCodec.encode(bytes)
 
-        return new Promise((res, rej) => {
-            this._socket!.write(framed, (err) => (err ? rej(err) : res()))
+        return new Promise((resolve, reject) => {
+            this._socket!.write(framed, (error) => {
+                if (error) {
+                    reject(error)
+                } else {
+                    resolve()
+                }
+            })
         })
     }
 }

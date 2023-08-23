@@ -86,11 +86,29 @@ export abstract class PersistentConnection extends EventEmitter {
 
     onTransportReady(): void {
         // transport ready does not mean actual mtproto is ready
-
         if (this._sendOnceConnected.length) {
-            this._transport.send(Buffer.concat(this._sendOnceConnected))
+            const sendNext = () => {
+                if (!this._sendOnceConnected.length) {
+                    this.onConnected()
+
+                    return
+                }
+
+                const data = this._sendOnceConnected.shift()!
+                this._transport
+                    .send(data)
+                    .then(sendNext)
+                    .catch((err) => {
+                        this.log.error('error sending queued data: %s', err)
+                        this._sendOnceConnected.unshift(data)
+                    })
+            }
+
+            sendNext()
+
+            return
         }
-        this._sendOnceConnected = []
+
         this.onConnected()
     }
 
@@ -125,7 +143,12 @@ export abstract class PersistentConnection extends EventEmitter {
             this._consequentFails,
             this._previousWait,
         )
-        if (wait === false) return this.destroy()
+
+        if (wait === false) {
+            this.destroy()
+
+            return
+        }
 
         this.emit('wait', wait)
 

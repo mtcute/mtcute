@@ -558,11 +558,15 @@ async function _fetchPeersForShort(
                 if (
                     msg.replyTo._ === 'messageReplyHeader' &&
                     !(await fetchPeer(msg.replyTo.replyToPeerId))
-                ) { return null }
+                ) {
+                    return null
+                }
                 if (
                     msg.replyTo._ === 'messageReplyStoryHeader' &&
                     !(await fetchPeer(msg.replyTo.userId))
-                ) { return null }
+                ) {
+                    return null
+                }
             }
 
             if (msg._ !== 'messageService') {
@@ -791,7 +795,7 @@ async function _fetchChannelDifference(
     if (!_pts) _pts = fallbackPts
 
     if (!_pts) {
-        this._updsLog.warn(
+        this._updsLog.debug(
             'fetchChannelDifference failed for channel %d: base pts not available',
             channelId,
         )

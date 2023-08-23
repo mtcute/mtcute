@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
 /* THIS FILE WAS AUTO-GENERATED */
 import { Readable } from 'stream'
 
@@ -8,7 +9,6 @@ import {
     Deque,
     MaybeArray,
     MaybeAsync,
-    SessionConnection,
     SortedLinkedList,
 } from '@mtcute/core'
 import { ConditionVariable } from '@mtcute/core/src/utils/condition-variable'
@@ -1908,13 +1908,14 @@ export interface TelegramClient extends BaseTelegramClient {
 
         /**
          * Total file size. Automatically inferred for Buffer, File and local files.
-         *
-         * When using with streams, if `fileSize` is not passed, the entire file is
-         * first loaded into memory to determine file size, and used as a Buffer later.
-         * This might be a major performance bottleneck, so be sure to provide file size
-         * when using streams and file size is known (which often is the case).
          */
         fileSize?: number
+
+        /**
+         * If the file size is unknown, you can provide an estimate,
+         * which will be used to determine appropriate part size.
+         */
+        estimatedSize?: number
 
         /**
          * File MIME type. By default is automatically inferred from magic number
@@ -1931,10 +1932,15 @@ export interface TelegramClient extends BaseTelegramClient {
         partSize?: number
 
         /**
+         * Number of parts to be sent in parallel per connection.
+         */
+        requestsPerConnection?: number
+
+        /**
          * Function that will be called after some part has been uploaded.
          *
          * @param uploaded  Number of bytes already uploaded
-         * @param total  Total file size
+         * @param total  Total file size, if known
          */
         progressCallback?: (uploaded: number, total: number) => void
     }): Promise<UploadedFile>
@@ -4019,7 +4025,6 @@ export class TelegramClient extends BaseTelegramClient {
     protected _selfUsername: string | null
     protected _pendingConversations: Record<number, Conversation[]>
     protected _hasConversations: boolean
-    protected _downloadConnections: Record<number, SessionConnection>
     protected _parseModes: Record<string, IMessageEntityParser>
     protected _defaultParseMode: string | null
     protected _updatesLoopActive: boolean
@@ -4054,7 +4059,6 @@ export class TelegramClient extends BaseTelegramClient {
         this.log.prefix = '[USER N/A] '
         this._pendingConversations = {}
         this._hasConversations = false
-        this._downloadConnections = {}
         this._parseModes = {}
         this._defaultParseMode = null
         this._updatesLoopActive = false

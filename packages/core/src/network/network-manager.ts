@@ -2,7 +2,12 @@ import { tl } from '@mtcute/tl'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { ITelegramStorage } from '../storage'
-import { ICryptoProvider, Logger, sleep } from '../utils'
+import {
+    createControllablePromise,
+    ICryptoProvider,
+    Logger,
+    sleep,
+} from '../utils'
 import { ConfigManager } from './config-manager'
 import { MultiSessionConnection } from './multi-session-connection'
 import { PersistentConnectionParams } from './persistent-connection'
@@ -17,6 +22,16 @@ import {
 import { defaultTransportFactory, TransportFactory } from './transports'
 
 export type ConnectionKind = 'main' | 'upload' | 'download' | 'downloadSmall'
+
+const CLIENT_ERRORS = {
+    '303': 1,
+    '400': 1,
+    '401': 1,
+    '403': 1,
+    '404': 1,
+    '406': 1,
+    '420': 1,
+}
 
 /**
  * Params passed into {@link NetworkManager} by {@link TelegramClient}.
@@ -62,8 +77,9 @@ const defaultConnectionCountDelegate: ConnectionCountDelegate = (
         case 'upload':
             return isPremium || (dcId !== 2 && dcId !== 4) ? 8 : 4
         case 'download':
+            return 8 // fixme isPremium ? 8 : 2
         case 'downloadSmall':
-            return isPremium ? 8 : 2
+            return 2
     }
 }
 
@@ -79,13 +95,14 @@ export interface NetworkManagerExtraParams {
     usePfs?: boolean
 
     /**
-     * Connection count for each connection kind
+     * Connection count for each connection kind.
+     * The function should be pure to avoid unexpected behavior.
      *
      * Defaults to TDLib logic:
      *   - main: handled internally, **cannot be changed here**
      *   - upload: if premium or dc id is other than 2 or 4, then 8, otherwise 4
      *   - download: if premium then 8, otherwise 2
-     *   - downloadSmall: if premium then 8, otherwise 2
+     *   - downloadSmall: 2
      */
     connectionCount?: ConnectionCountDelegate
 
@@ -174,7 +191,24 @@ export class DcConnectionManager {
     )
 
     download = new MultiSessionConnection(
-        this.__baseConnectionParams(),
+        // this.__baseConnectionParams(),
+        // fixme
+        {
+            ...this.__baseConnectionParams(),
+            dc: {
+                _: 'dcOption',
+                ipv6: false,
+                mediaOnly: true,
+                tcpoOnly: false,
+                cdn: false,
+                static: false,
+                thisPortOnly: false,
+                id: 2,
+                ipAddress: '149.154.167.222',
+                port: 443,
+                secret: undefined,
+            },
+        },
         this.manager._connectionCount(
             'download',
             this._dc.id,
@@ -313,6 +347,10 @@ export class DcConnectionManager {
         connection.on('request-auth', () => {
             this.main.requestAuth()
         })
+
+        connection.on('error', (err, conn) => {
+            this.manager.params._emitError(err, conn)
+        })
     }
 
     setIsPrimary(isPrimary: boolean): void {
@@ -326,6 +364,22 @@ export class DcConnectionManager {
                 this.manager.params.inactivityTimeout ?? 60_000,
             )
         }
+    }
+
+    setIsPremium(isPremium: boolean): void {
+        this.upload.setCount(
+            this.manager._connectionCount('upload', this._dc.id, isPremium),
+        )
+        this.download.setCount(
+            this.manager._connectionCount('download', this._dc.id, isPremium),
+        )
+        this.downloadSmall.setCount(
+            this.manager._connectionCount(
+                'downloadSmall',
+                this._dc.id,
+                isPremium,
+            ),
+        )
     }
 
     async loadKeys(): Promise<boolean> {
@@ -471,9 +525,9 @@ export class NetworkManager {
             Promise.resolve(this._storage.getSelf()).then((self) => {
                 if (self?.isBot) {
                     // bots may receive tmpSessions, which we should respect
-                    this.config
-                        .update(true)
-                        .catch((e) => this.params._emitError(e))
+                    this.config.update(true).catch((e) => {
+                        this.params._emitError(e)
+                    })
                 }
             })
         })
@@ -485,35 +539,54 @@ export class NetworkManager {
         //     this._cleanupPrimaryConnection()
         // )
 
-        dc.main.on('error', (err, conn) => this.params._emitError(err, conn))
-
         dc.loadKeys()
-            .catch((e) => this.params._emitError(e))
-            .then(() => dc.main.ensureConnected())
+            .catch((e) => {
+                this.params._emitError(e)
+            })
+            .then(() => {
+                dc.main.ensureConnected()
+            })
     }
 
+    private _dcCreationPromise: Record<number, Promise<void>> = {}
     async _getOtherDc(dcId: number): Promise<DcConnectionManager> {
         if (!this._dcConnections[dcId]) {
+            if (dcId in this._dcCreationPromise) {
+                this._log.debug('waiting for DC %d to be created', dcId)
+                await this._dcCreationPromise[dcId]
+
+                return this._dcConnections[dcId]
+            }
+
+            const promise = createControllablePromise<void>()
+            this._dcCreationPromise[dcId] = promise
+
             this._log.debug('creating new DC %d', dcId)
 
-            const dcOption = await this.config.findOption({
-                dcId,
-                allowIpv6: this.params.useIpv6,
-                preferIpv6: this.params.useIpv6,
-                allowMedia: false,
-                cdn: false,
-            })
+            try {
+                const dcOption = await this.config.findOption({
+                    dcId,
+                    allowIpv6: this.params.useIpv6,
+                    preferIpv6: this.params.useIpv6,
+                    allowMedia: true,
+                    preferMedia: true,
+                    cdn: false,
+                })
 
-            if (!dcOption) {
-                throw new Error(`Could not find DC ${dcId}`)
+                if (!dcOption) {
+                    throw new Error(`Could not find DC ${dcId}`)
+                }
+                const dc = new DcConnectionManager(this, dcId, dcOption)
+
+                if (!(await dc.loadKeys())) {
+                    dc.main.requestAuth()
+                }
+
+                this._dcConnections[dcId] = dc
+                promise.resolve()
+            } catch (e) {
+                promise.reject(e)
             }
-            const dc = new DcConnectionManager(this, dcId, dcOption)
-
-            if (!(await dc.loadKeys())) {
-                dc.main.requestAuth()
-            }
-
-            this._dcConnections[dcId] = dc
         }
 
         return this._dcConnections[dcId]
@@ -532,7 +605,7 @@ export class NetworkManager {
 
         const dc = new DcConnectionManager(this, defaultDc.id, defaultDc)
         this._dcConnections[defaultDc.id] = dc
-        await this._switchPrimaryDc(dc)
+        this._switchPrimaryDc(dc)
     }
 
     private async _exportAuthTo(manager: DcConnectionManager): Promise<void> {
@@ -575,15 +648,27 @@ export class NetworkManager {
         }
     }
 
+    setIsPremium(isPremium: boolean): void {
+        this._log.debug('setting isPremium to %s', isPremium)
+        this.params.isPremium = isPremium
+        Object.values(this._dcConnections).forEach((dc) => {
+            dc.setIsPremium(isPremium)
+        })
+    }
+
     async notifyLoggedIn(auth: tl.auth.TypeAuthorization): Promise<void> {
         if (
             auth._ === 'auth.authorizationSignUpRequired' ||
             auth.user._ === 'userEmpty'
-        ) { return }
+        ) {
+            return
+        }
 
         if (auth.tmpSessions) {
             this._primaryDc?.main.setCount(auth.tmpSessions)
         }
+
+        this.setIsPremium(auth.user.premium!)
 
         await this.exportAuth()
     }
@@ -689,8 +774,12 @@ export class NetworkManager {
             } catch (e: any) {
                 lastError = e
 
-                if (e instanceof tl.errors.InternalError) {
-                    this._log.warn('Telegram is having internal issues: %s', e)
+                if (e.code && !(e.code in CLIENT_ERRORS)) {
+                    this._log.warn(
+                        'Telegram is having internal issues: %d %s, retrying',
+                        e.code,
+                        e.message,
+                    )
 
                     if (e.message === 'WORKER_BUSY_TOO_LONG_RETRY') {
                         // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
@@ -767,6 +856,32 @@ export class NetworkManager {
             dc.download.changeTransport(factory)
             dc.downloadSmall.changeTransport(factory)
         })
+    }
+
+    getPoolSize(kind: ConnectionKind, dcId?: number) {
+        const dc = dcId ? this._dcConnections[dcId] : this._primaryDc
+
+        if (!dc) {
+            if (!this._primaryDc) {
+                throw new Error('Not connected to any DC')
+            }
+
+            // guess based on the provided delegate. it is most likely correct,
+            // but we should give actual values if possible
+            return this._connectionCount(
+                kind,
+                dcId ?? this._primaryDc.dcId,
+                this.params.isPremium,
+            )
+        }
+
+        return dc[kind].getPoolSize()
+    }
+
+    getPrimaryDcId() {
+        if (!this._primaryDc) throw new Error('Not connected to any DC')
+
+        return this._primaryDc.dcId
     }
 
     destroy(): void {

@@ -5,10 +5,9 @@ import { MtArgumentError } from '../types'
  * for upload/download operations.
  */
 export function determinePartSize(fileSize: number): number {
-    if (fileSize <= 104857600) return 128 // 100 MB
+    if (fileSize <= 262078465) return 128 // 200 MB
     if (fileSize <= 786432000) return 256 // 750 MB
     if (fileSize <= 2097152000) return 512 // 2000 MB
-    if (fileSize <= 4194304000) return 1024 // 4000 MB
 
     throw new MtArgumentError('File is too large')
 }
