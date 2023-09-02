@@ -112,8 +112,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
             this.packetCodecInitialized = false
             this._packetCodec.reset()
             this._packetCodec.removeAllListeners()
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            delete (this as any)._packetCodec
+            delete (this as Partial<MtProxyTcpTransport>)._packetCodec
         }
 
         if (!this._packetCodec) {
@@ -155,12 +154,16 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
             this._socket = connect(
                 this._proxy.port,
                 this._proxy.host,
+                // MTQ-55
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 this._handleConnectFakeTls.bind(this),
             )
         } else {
             this._socket = connect(
                 this._proxy.port,
                 this._proxy.host,
+                // MTQ-55
+
                 this.handleConnect.bind(this),
             )
             this._socket.on('data', (data) => this._packetCodec.feed(data))
@@ -219,18 +222,17 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
                 }
             }
 
-            const packetHandler = async (buf: Buffer): Promise<void> => {
-                try {
-                    await checkHelloResponse(buf)
+            const packetHandler = (buf: Buffer): void => {
+                checkHelloResponse(buf)
+                    .then(() => {
+                        this._socket!.off('data', packetHandler)
+                        this._socket!.on('data', (data) =>
+                            this._packetCodec.feed(data),
+                        )
 
-                    this._socket!.on('data', (data) =>
-                        this._packetCodec.feed(data),
-                    )
-                    this._socket!.off('data', packetHandler)
-                    this.handleConnect()
-                } catch (e) {
-                    this._socket!.emit('error', e)
-                }
+                        return this.handleConnect()
+                    })
+                    .catch((err) => this._socket!.emit('error', err))
             }
 
             this._socket!.write(hello)

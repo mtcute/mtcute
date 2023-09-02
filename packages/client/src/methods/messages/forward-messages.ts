@@ -291,13 +291,18 @@ export async function forwardMessages(
     },
 ): Promise<MaybeArray<Message>> {
     if (!params) params = {}
-    const isSingle = !Array.isArray(messages)
-    if (isSingle) messages = [messages as number]
+
+    let isSingle = false
+
+    if (!Array.isArray(messages)) {
+        isSingle = true
+        messages = [messages]
+    }
 
     // sending more than 100 will not result in a server-sent
     // error, instead only first 100 IDs will be forwarded,
     // which is definitely not the best outcome.
-    if ((messages as number[]).length > 100) {
+    if (messages.length > 100) {
         throw new MtArgumentError(
             'You can forward no more than 100 messages at once',
         )
@@ -338,12 +343,10 @@ export async function forwardMessages(
         _: 'messages.forwardMessages',
         toPeer,
         fromPeer: await this.resolvePeer(fromChatId),
-        id: messages as number[],
+        id: messages,
         silent: params.silent,
         scheduleDate: normalizeDate(params.schedule),
-        randomId: [...Array((messages as number[]).length)].map(() =>
-            randomLong(),
-        ),
+        randomId: Array.from({ length: messages.length }, () => randomLong()),
         dropAuthor: params.noAuthor,
         dropMediaCaptions: params.noCaption,
         noforwards: params.forbidForwards,

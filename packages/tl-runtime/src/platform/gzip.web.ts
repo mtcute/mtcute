@@ -10,6 +10,8 @@ export function gzipInflate(buf: Buffer): Buffer {
     return typedArrayToBuffer(inflate(buf))
 }
 
+const ERROR_SIZE_LIMIT_REACHED = 'ERR_SIZE_LIMIT_REACHED'
+
 class DeflateLimited extends Deflate {
     constructor(readonly limit: number) {
         super()
@@ -21,7 +23,9 @@ class DeflateLimited extends Deflate {
         this._size += (chunk as Uint8Array).length
 
         if (this._size > this.limit) {
-            throw 'ERR_SIZE'
+            // caught locally
+            // eslint-disable-next-line @typescript-eslint/no-throw-literal
+            throw ERROR_SIZE_LIMIT_REACHED
         }
 
         super.onData(chunk)
@@ -36,9 +40,9 @@ export function gzipDeflate(buf: Buffer, maxRatio?: number): Buffer | null {
     try {
         deflator.push(buf, true)
     } catch (e) {
-        if (e === 'ERR_SIZE') return null
+        if (e === ERROR_SIZE_LIMIT_REACHED) return null
         throw e
     }
 
-    return typedArrayToBuffer(deflator.result as Uint8Array)
+    return typedArrayToBuffer(deflator.result)
 }

@@ -16,7 +16,7 @@ export { SqliteStorage }
 let nativeCrypto: any
 
 try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line
     nativeCrypto = require('@mtcute/crypto-node').NodeNativeCryptoProvider
 } catch (e) {}
 
@@ -57,6 +57,7 @@ export interface NodeTelegramClientOptions
 export class NodeTelegramClient extends TelegramClient {
     constructor(opts: NodeTelegramClientOptions) {
         super({
+            // eslint-disable-next-line
             crypto: nativeCrypto ? () => new nativeCrypto() : undefined,
             ...opts,
             storage:
@@ -68,7 +69,9 @@ export class NodeTelegramClient extends TelegramClient {
         this.registerParseMode(new HtmlMessageEntityParser())
         this.registerParseMode(new MarkdownMessageEntityParser())
 
-        if (opts.defaultParseMode) { this.setDefaultParseMode(opts.defaultParseMode) }
+        if (opts.defaultParseMode) {
+            this.setDefaultParseMode(opts.defaultParseMode)
+        }
     }
 
     private _rl?: RlInterface
@@ -98,7 +101,9 @@ export class NodeTelegramClient extends TelegramClient {
             if (!params.phone) params.phone = () => this.input('Phone > ')
             if (!params.code) params.code = () => this.input('Code > ')
 
-            if (!params.password) { params.password = () => this.input('2FA password > ') }
+            if (!params.password) {
+                params.password = () => this.input('2FA password > ')
+            }
         }
 
         return super.start(params).then((user) => {

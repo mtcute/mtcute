@@ -7,6 +7,7 @@
         "./binary/reader.d.ts",
         "./binary/writer.d.ts",
         "./binary/rsa-keys.d.ts",
-        "./scripts"
+        "./scripts",
+        "./tests/types.ts"
     ]
 }

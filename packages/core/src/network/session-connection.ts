@@ -115,7 +115,7 @@ export class SessionConnection extends PersistentConnection {
             this._isPfsBindingPending = false
             this._isPfsBindingPendingInBackground = false
             this._session._authKeyTemp.reset()
-            clearTimeout(this._pfsUpdateTimeout!)
+            clearTimeout(this._pfsUpdateTimeout)
         }
 
         this._resetSession()
@@ -296,7 +296,7 @@ export class SessionConnection extends PersistentConnection {
                 }
                 this.onConnectionUsable()
             })
-            .catch((err) => {
+            .catch((err: Error) => {
                 this._session.authorizationPending = false
                 this.log.error('Authorization error: %s', err.message)
                 this.onError(err)
@@ -338,7 +338,7 @@ export class SessionConnection extends PersistentConnection {
                     return
                 }
 
-                const tempKey = await this._session._authKeyTempSecondary
+                const tempKey = this._session._authKeyTempSecondary
                 await tempKey.setup(tempAuthKey)
 
                 const msgId = this._session.getMessageId()
@@ -490,7 +490,7 @@ export class SessionConnection extends PersistentConnection {
                     this._authorizePfs(true)
                 }, (TEMP_AUTH_KEY_EXPIRY - 60) * 1000)
             })
-            .catch((err) => {
+            .catch((err: Error) => {
                 this.log.error('PFS Authorization error: %s', err.message)
 
                 if (this._isPfsBindingPendingInBackground) {
@@ -699,6 +699,8 @@ export class SessionConnection extends PersistentConnection {
                         this._rescheduleInactivity()
                     }
 
+                    this.log.verbose('<<< %j', message)
+
                     if (this.params.disableUpdates) {
                         this.log.warn(
                             'received updates, but updates are disabled',
@@ -727,6 +729,7 @@ export class SessionConnection extends PersistentConnection {
             let resultType
 
             try {
+                // eslint-disable-next-line
                 resultType = (message.object() as any)._
             } catch (err) {
                 resultType = message.peekUint()
@@ -745,6 +748,7 @@ export class SessionConnection extends PersistentConnection {
             let result
 
             try {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 result = message.object() as any
             } catch (err) {
                 result = '[failed to parse]'
@@ -1490,6 +1494,7 @@ export class SessionConnection extends PersistentConnection {
 
         const pending: PendingRpc = {
             method,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             promise: undefined as any, // because we need the object to make a promise
             data: content,
             stack,
@@ -1599,7 +1604,7 @@ export class SessionConnection extends PersistentConnection {
         try {
             this._doFlush()
         } catch (e: any) {
-            this.log.error('flush error: %s', e.stack)
+            this.log.error('flush error: %s', (e as Error).stack)
             // should not happen unless there's a bug in the code
         }
 
@@ -1718,7 +1723,7 @@ export class SessionConnection extends PersistentConnection {
             }
 
             const idx = this._session.getStateSchedule.index(
-                { getState: now } as any,
+                { getState: now } as PendingRpc,
                 true,
             )
 
@@ -2035,7 +2040,7 @@ export class SessionConnection extends PersistentConnection {
         this._session
             .encryptMessage(result)
             .then((enc) => this.send(enc))
-            .catch((err) => {
+            .catch((err: Error) => {
                 this.log.error(
                     'error while sending pending messages (root msg_id = %l): %s',
                     rootMsgId,

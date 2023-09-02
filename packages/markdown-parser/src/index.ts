@@ -1,11 +1,15 @@
 import Long from 'long'
 
-import type { FormattedString, IMessageEntityParser, MessageEntity, tl } from '@mtcute/client'
+import type {
+    FormattedString,
+    IMessageEntityParser,
+    MessageEntity,
+    tl,
+} from '@mtcute/client'
 
 const MENTION_REGEX =
     /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
-const EMOJI_REGEX =
-    /^tg:\/\/emoji\?id=(-?\d+)/
+const EMOJI_REGEX = /^tg:\/\/emoji\?id=(-?\d+)/
 
 const TAG_BOLD = '**'
 const TAG_ITALIC = '__'
@@ -41,7 +45,9 @@ export function md(
 
         if (typeof it === 'string') it = MarkdownMessageEntityParser.escape(it)
         else {
-            if (it.mode && it.mode !== 'markdown') { throw new Error(`Incompatible parse mode: ${it.mode}`) }
+            if (it.mode && it.mode !== 'markdown') {
+                throw new Error(`Incompatible parse mode: ${it.mode}`)
+            }
             it = it.value
         }
 
@@ -124,12 +130,12 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                         pos += 3
                         continue
 
-                    // closed with single or double backtick
-                    // i.e. not closed actually! this is totally valid md:
-                    // ```javascript
-                    // const a = ``;
-                    // ```
-                    // compensate that `pos` change we made earliers
+                        // closed with single or double backtick
+                        // i.e. not closed actually! this is totally valid md:
+                        // ```javascript
+                        // const a = ``;
+                        // ```
+                        // compensate that `pos` change we made earliers
                     } else if (c === '\n') {
                         pos -= 1
                     }
@@ -165,7 +171,9 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
 
                 pos += 1 // )
 
-                if (pos > text.length) { throw new Error('Malformed LINK entity, expected )') }
+                if (pos > text.length) {
+                    throw new Error('Malformed LINK entity, expected )')
+                }
 
                 if (url.length) {
                     ent.length = result.length - ent.offset
@@ -200,9 +208,8 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                             ).userId = userId
                         }
                     } else if ((m = EMOJI_REGEX.exec(url))) {
-                        (
-                            ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>
-                        )._ = 'messageEntityCustomEmoji'
+                        (ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>)._ =
+                            'messageEntityCustomEmoji'
                         ;(
                             ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>
                         ).documentId = Long.fromString(m[1])
@@ -224,10 +231,11 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                 pos += 1
                 insideLink = true
                 if (!('link' in stacks)) stacks.link = []
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 stacks.link.push({
                     offset: result.length,
                     length: 0,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any) // other fields are added after the second part
                 continue
             }
@@ -308,9 +316,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
 
                     if (isBegin) {
                         stacks[type].push({
-                            // this is valid, but idk how to make typescript happy
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            _: ('messageEntity' + type) as any,
+                            _: `messageEntity${type}`,
                             offset: result.length,
                             length: 0,
                         })
@@ -379,7 +385,8 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                 end += escapedPos
             }
 
-            let startTag; let endTag: string
+            let startTag
+            let endTag: string
 
             switch (type) {
                 case 'bold':
@@ -420,7 +427,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                     break
                 case 'emoji':
                     startTag = '['
-                    endTag = `](tg://emoji?id=${entity.emojiId})`
+                    endTag = `](tg://emoji?id=${entity.emojiId!.toString()})`
                     break
                 default:
                     continue

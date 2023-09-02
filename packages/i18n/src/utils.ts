@@ -1,12 +1,11 @@
-import type { BotChatJoinRequestUpdate, BotStoppedUpdate, CallbackQuery, ChatMemberUpdate, ChosenInlineResult, InlineQuery, Message, ParsedUpdate, PollVoteUpdate, User } from '@mtcute/client'
+import type * as clientNs from '@mtcute/client'
 
 import { I18nStrings, I18nValue } from './types'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let client: any
+let client: typeof clientNs
 
 try {
-    client = require('@mtcute/client')
+    client = require('@mtcute/client') as typeof clientNs
 } catch (e) {}
 
 /**
@@ -43,7 +42,7 @@ export function createI18nStringsIndex(
  * @param update  Update to extract language from
  */
 export function extractLanguageFromUpdate(
-    update: ParsedUpdate['data'],
+    update: clientNs.ParsedUpdate['data'],
 ): string | null | undefined {
     if (!client) {
         throw new Error(
@@ -54,23 +53,26 @@ export function extractLanguageFromUpdate(
     switch (update.constructor) {
         case client.Message:
             // if sender is Chat it will just be undefined
-            return ((update as Message).sender as User).language
+            return ((update as clientNs.Message).sender as clientNs.User)
+                .language
+        case client.PollVoteUpdate:
+            // if peer is Chat it will just be undefined
+            return ((update as clientNs.PollVoteUpdate).peer as clientNs.User)
+                .language
         case client.ChatMemberUpdate:
         case client.InlineQuery:
         case client.ChosenInlineResult:
         case client.CallbackQuery:
-        case client.PollVoteUpdate:
         case client.BotStoppedUpdate:
         case client.BotChatJoinRequestUpdate:
             return (
                 update as
-                    | ChatMemberUpdate
-                    | InlineQuery
-                    | ChosenInlineResult
-                    | CallbackQuery
-                    | PollVoteUpdate
-                    | BotStoppedUpdate
-                    | BotChatJoinRequestUpdate
+                    | clientNs.ChatMemberUpdate
+                    | clientNs.InlineQuery
+                    | clientNs.ChosenInlineResult
+                    | clientNs.CallbackQuery
+                    | clientNs.BotStoppedUpdate
+                    | clientNs.BotChatJoinRequestUpdate
             ).user.language
     }
 

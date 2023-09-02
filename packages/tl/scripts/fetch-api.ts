@@ -36,7 +36,7 @@ import {
     fetchDocumentation,
     getCachedDocumentation,
 } from './documentation'
-import { packTlSchema, unpackTlSchema } from './schema'
+import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema'
 import { fetchRetry } from './utils'
 
 import { bumpVersion } from '~scripts/version'
@@ -137,8 +137,10 @@ async function updatePackageVersion(
     rl: readline.Interface,
     currentLayer: number,
 ) {
-    const packageJson = JSON.parse(await readFile(PACKAGE_JSON_FILE, 'utf8'))
-    const version: string = packageJson.version
+    const packageJson = JSON.parse(
+        await readFile(PACKAGE_JSON_FILE, 'utf8'),
+    ) as { version: string }
+    const version = packageJson.version
     let [major, minor] = version.split('.').map((i) => parseInt(i))
 
     if (major === currentLayer) {
@@ -168,7 +170,7 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
 
     const config = JSON.parse(
         await readFile(join(__dirname, '../data/int53-overrides.json'), 'utf8'),
-    )
+    ) as Record<string, Record<string, string[]>>
 
     schema.entries.forEach((entry) => {
         const overrides: string[] | undefined = config[entry.kind][entry.name]
@@ -274,8 +276,8 @@ async function main() {
 
             console.log(
                 'Conflict detected at %s %s:',
-                nonEmptyOptions[0].entry?.kind,
-                nonEmptyOptions[0].entry?.name,
+                nonEmptyOptions[0].entry.kind,
+                nonEmptyOptions[0].entry.name,
             )
             console.log('0. Remove')
             nonEmptyOptions.forEach((opt, idx) => {
@@ -329,7 +331,9 @@ async function main() {
 
     console.log('Writing diff to file...')
     const oldSchema = unpackTlSchema(
-        JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')),
+        JSON.parse(
+            await readFile(API_SCHEMA_JSON_FILE, 'utf8'),
+        ) as TlPackedSchema,
     )
     await writeFile(
         API_SCHEMA_DIFF_JSON_FILE,

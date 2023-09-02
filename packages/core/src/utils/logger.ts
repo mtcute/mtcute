@@ -9,7 +9,7 @@ if (typeof process !== 'undefined') {
         defaultLogLevel = envLogLevel
     }
 } else if (typeof localStorage !== 'undefined') {
-    const localLogLevel = parseInt(localStorage.MTCUTE_LOG_LEVEL)
+    const localLogLevel = parseInt(localStorage.MTCUTE_LOG_LEVEL as string)
 
     if (!isNaN(localLogLevel)) {
         defaultLogLevel = localLogLevel
@@ -62,10 +62,10 @@ export class Logger {
 
         // custom formatters
         if (
-            fmt.indexOf('%h') > -1 ||
-            fmt.indexOf('%b') > -1 ||
-            fmt.indexOf('%j') > -1 ||
-            fmt.indexOf('%l') > -1
+            fmt.includes('%h') ||
+            fmt.includes('%b') ||
+            fmt.includes('%j') ||
+            fmt.includes('%l')
         ) {
             let idx = 0
             fmt = fmt.replace(FORMATTER_RE, (m) => {
@@ -89,7 +89,9 @@ export class Logger {
                                 v.type === 'Buffer' &&
                                 Array.isArray(v.data)
                             ) {
-                                let str = Buffer.from(v.data).toString('base64')
+                                let str = Buffer.from(
+                                    v.data as number[],
+                                ).toString('base64')
 
                                 if (str.length > 300) {
                                     str = str.slice(0, 300) + '...'
@@ -98,6 +100,7 @@ export class Logger {
                                 return str
                             }
 
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                             return v
                         })
                     }
@@ -152,7 +155,7 @@ export class LogManager extends Logger {
 
     constructor(tag = 'base') {
         // workaround because we cant pass this to super
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-argument
         super(null as any, tag)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(this as any).mgr = this

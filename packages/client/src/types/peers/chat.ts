@@ -120,7 +120,7 @@ export class Chat {
             }
         }
 
-        return this._inputPeer!
+        return this._inputPeer
     }
 
     private _chatType?: ChatType
@@ -148,7 +148,7 @@ export class Chat {
             }
         }
 
-        return this._chatType!
+        return this._chatType
     }
 
     /**
@@ -594,7 +594,7 @@ export class Chat {
         return new FormattedString(
             this.client.getParseMode(parseMode).unparse(text, [
                 {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    // eslint-disable-next-line
                     raw: undefined as any,
                     type: 'text_link',
                     offset: 0,
@@ -602,7 +602,7 @@ export class Chat {
                     url: `https://t.me/${this.username}`,
                 },
             ]),
-            parseMode!,
+            parseMode,
         )
     }
 

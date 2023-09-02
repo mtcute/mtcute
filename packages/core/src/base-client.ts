@@ -388,7 +388,7 @@ export class BaseTelegramClient extends EventEmitter {
                 promise.resolve()
                 this._connected = true
             })
-            .catch((err) => this._emitError(err))
+            .catch((err: Error) => this._emitError(err))
     }
 
     /**
@@ -401,7 +401,7 @@ export class BaseTelegramClient extends EventEmitter {
      * Close all connections and finalize the client.
      */
     async close(): Promise<void> {
-        await this._onClose()
+        this._onClose()
 
         this._config.destroy()
         this.network.destroy()
@@ -436,6 +436,7 @@ export class BaseTelegramClient extends EventEmitter {
         const res = await this.network.call(message, params, stack)
         await this._cachePeersFrom(res)
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return res
     }
 
@@ -487,7 +488,7 @@ export class BaseTelegramClient extends EventEmitter {
         let hadMin = false
         let count = 0
 
-        for (const peer of getAllPeersFrom(obj as any)) {
+        for (const peer of getAllPeersFrom(obj as tl.TlObject)) {
             if ((peer as any).min) {
                 // absolutely incredible min peer handling, courtesy of levlam.
                 // see this thread: https://t.me/tdlibchat/15084

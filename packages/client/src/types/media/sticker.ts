@@ -140,7 +140,7 @@ export class Sticker extends RawDocument {
      */
     get customEmojiFree(): boolean {
         return this.attr._ === 'documentAttributeCustomEmoji' ?
-            this.attr?.free ?? false :
+            this.attr.free ?? false :
             false
     }
 

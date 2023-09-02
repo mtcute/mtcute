@@ -79,7 +79,9 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
     }
 
     connect(dc: tl.RawDcOption): void {
-        if (this._state !== TransportState.Idle) { throw new Error('Transport is not IDLE') }
+        if (this._state !== TransportState.Idle) {
+            throw new Error('Transport is not IDLE')
+        }
 
         if (!this.packetCodecInitialized) {
             this._packetCodec.on('error', (err) => this.emit('error', err))
@@ -133,9 +135,10 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
         }
         headers['Proxy-Connection'] = 'Keep-Alive'
 
-        const packet = `CONNECT ${ip} HTTP/1.1${Object.keys(headers).map(
-            (k) => `\r\n${k}: ${headers[k]}`,
-        )}\r\n\r\n`
+        const headersStr = Object.keys(headers)
+            .map((k) => `\r\n${k}: ${headers[k]}`)
+            .join('')
+        const packet = `CONNECT ${ip} HTTP/1.1${headersStr}\r\n\r\n`
 
         this._socket!.write(packet)
         this._socket!.once('data', (msg) => {

@@ -14,7 +14,8 @@ export async function logOut(this: TelegramClient): Promise<true> {
 
     this._userId = null
     this._isBot = false
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // some implicit magic in favor of performance
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
     this._pts = this._seq = this._date = undefined as any
     this._selfUsername = null
     this._selfChanged = true

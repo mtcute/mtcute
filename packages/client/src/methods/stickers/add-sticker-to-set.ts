@@ -56,7 +56,7 @@ export async function addStickerToSet(
             maskCoords: sticker.maskPosition ?
                 {
                     _: 'maskCoords',
-                    n: MASK_POS[sticker.maskPosition.point as keyof typeof MASK_POS],
+                    n: MASK_POS[sticker.maskPosition.point],
                     x: sticker.maskPosition.x,
                     y: sticker.maskPosition.y,
                     zoom: sticker.maskPosition.scale,

@@ -1,4 +1,4 @@
-/* eslint-disable max-depth */
+/* eslint-disable */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types */
 // ^^ will be looked into in MTQ-29
 
@@ -122,7 +122,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     constructor(
         client?: TelegramClient | IStateStorage | StateKeyDelegate,
         storage?: IStateStorage | StateKeyDelegate,
-        key?: StateKeyDelegate,
+        key?: StateKeyDelegate
     ) {
         this.dispatchRawUpdate = this.dispatchRawUpdate.bind(this)
         this.dispatchUpdate = this.dispatchUpdate.bind(this)
@@ -196,15 +196,14 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     dispatchRawUpdate(
         update: tl.TypeUpdate | tl.TypeMessage,
-        peers: PeersIndex,
+        peers: PeersIndex
     ): void {
         if (!this._client) return
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
         this.dispatchRawUpdateNow(update, peers).catch((err) =>
-            // eslint-disable-next-line dot-notation
-            this._client!['_emitError'](err),
+            this._client!['_emitError'](err)
         )
     }
 
@@ -222,7 +221,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     async dispatchRawUpdateNow(
         update: tl.TypeUpdate | tl.TypeMessage,
-        peers: PeersIndex,
+        peers: PeersIndex
     ): Promise<boolean> {
         if (!this._client) return false
 
@@ -282,8 +281,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
         this.dispatchUpdateNow(update).catch((err) =>
-            // eslint-disable-next-line dot-notation
-            this._client!['_emitError'](err),
+            this._client!['_emitError'](err)
         )
     }
 
@@ -307,7 +305,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         // this is getting a bit crazy lol
         parsedState?: UpdateState<State, SceneName> | null,
         parsedScene?: string | null,
-        forceScene?: true,
+        forceScene?: true
     ): Promise<boolean> {
         if (!this._client) return false
 
@@ -349,7 +347,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                     update,
                     parsedState,
                     parsedScene,
-                    true,
+                    true
                 )
             }
         }
@@ -369,17 +367,16 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                     if (
                         !this._customStateKeyDelegate ||
                         (customKey = await this._customStateKeyDelegate(
-                            update.data,
+                            update.data
                         ))
                     ) {
                         parsedState = new UpdateState(
-
-                            this._storage!,
+                            this._storage,
                             key,
                             this._scene ?? null,
                             this._sceneScoped,
                             this._customStorage,
-                            customKey,
+                            customKey
                         )
                     }
                 } else {
@@ -421,12 +418,12 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                                 !h.check ||
                                 (await h.check(
                                     update.data as any,
-                                    parsedState as never,
+                                    parsedState as never
                                 ))
                             ) {
                                 result = await h.callback(
                                     update.data as any,
-                                    parsedState as never,
+                                    parsedState as never
                                 )
                                 handled = true
                             } else continue
@@ -443,16 +440,15 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                                 case 'scene': {
                                     if (!parsedState) {
                                         throw new MtArgumentError(
-                                            'Cannot use ToScene without state',
+                                            'Cannot use ToScene without state'
                                         )
                                     }
 
-                                    // eslint-disable-next-line dot-notation
                                     const scene = parsedState['_scene']
 
                                     if (!scene) {
                                         throw new MtArgumentError(
-                                            'Cannot use ToScene without entering a scene',
+                                            'Cannot use ToScene without entering a scene'
                                         )
                                     }
 
@@ -462,7 +458,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                                         update,
                                         undefined,
                                         scene,
-                                        true,
+                                        true
                                     )
                                 }
                             }
@@ -474,7 +470,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                             const handled = await this._errorHandler(
                                 e,
                                 update,
-                                parsedState as never,
+                                parsedState as never
                             )
                             if (!handled) throw e
                         } else {
@@ -527,7 +523,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     removeUpdateHandler(
         handler: UpdateHandler | UpdateHandler['name'] | 'all',
-        group = 0,
+        group = 0
     ): void {
         if (group !== -1 && !(group in this._groups)) {
             return
@@ -581,7 +577,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                   update: ParsedUpdate & T,
                   state?: UpdateState<State, SceneName>
               ) => MaybeAsync<boolean>)
-            | null,
+            | null
     ): void {
         if (handler) this._errorHandler = handler
         else this._errorHandler = undefined
@@ -605,7 +601,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                   update: ParsedUpdate & T,
                   state?: UpdateState<State, SceneName>
               ) => MaybeAsync<PropagationAction | void>)
-            | null,
+            | null
     ): void {
         if (handler) this._preUpdateHandler = handler
         else this._preUpdateHandler = undefined
@@ -630,7 +626,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                   update: ParsedUpdate & T,
                   state?: UpdateState<State, SceneName>
               ) => MaybeAsync<void>)
-            | null,
+            | null
     ): void {
         if (handler) this._postUpdateHandler = handler
         else this._postUpdateHandler = undefined
@@ -643,9 +639,11 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     propagateErrorToParent(
         err: Error,
         update: ParsedUpdate,
-        state?: UpdateState<State, SceneName>,
+        state?: UpdateState<State, SceneName>
     ): MaybeAsync<boolean> {
-        if (!this.parent) { throw new MtArgumentError('This dispatcher is not a child') }
+        if (!this.parent) {
+            throw new MtArgumentError('This dispatcher is not a child')
+        }
 
         if (this.parent._errorHandler) {
             return this.parent._errorHandler(err, update, state)
@@ -667,9 +665,9 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         if (child._client) {
             throw new MtArgumentError(
                 'Provided dispatcher is ' +
-                    (child._parent ?
-                        'already a child. Use parent.removeChild() before calling addChild()' :
-                        'already bound to a client. Use unbind() before calling addChild()'),
+                    (child._parent
+                        ? 'already a child. Use parent.removeChild() before calling addChild()'
+                        : 'already bound to a client. Use unbind() before calling addChild()')
             )
         }
 
@@ -695,7 +693,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param child  Other dispatcher
      */
     addChild(child: Dispatcher<State, SceneName>): void {
-        if (this._children.indexOf(child) > -1) return
+        if (this._children.includes(child)) return
 
         this._prepareChild(child)
         this._children.push(child)
@@ -740,13 +738,13 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     addScene(
         uid: SceneName,
         scene: Dispatcher<any, SceneName>,
-        scoped = true,
+        scoped = true
     ): void {
         if (!this._scenes) this._scenes = {}
 
         if (uid in this._scenes) {
             throw new MtArgumentError(
-                `Scene with UID ${uid} is already registered!`,
+                `Scene with UID ${uid} is already registered!`
             )
         }
 
@@ -756,7 +754,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
         if (scene._scene) {
             throw new MtArgumentError(
-                `This dispatcher is already registered as scene ${scene._scene}`,
+                `This dispatcher is already registered as scene ${scene._scene}`
             )
         }
 
@@ -807,7 +805,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     extend(other: Dispatcher<State, SceneName>): void {
         if (other._customStorage || other._customStateKeyDelegate) {
             throw new MtArgumentError(
-                'Provided dispatcher has custom storage and cannot be extended from.',
+                'Provided dispatcher has custom storage and cannot be extended from.'
             )
         }
 
@@ -849,7 +847,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                 this.addScene(
                     key as any,
                     myScenes[key] as any,
-                    myScenes[key]._sceneScoped as any,
+                    myScenes[key]._sceneScoped as any
                 )
             })
         }
@@ -903,7 +901,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                         key as any,
                         scene as any,
 
-                        this._scenes![key]._sceneScoped as any,
+                        this._scenes![key]._sceneScoped as any
                     )
                 })
             }
@@ -937,22 +935,21 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         object: Parameters<StateKeyDelegate>[0]
     ): Promise<UpdateState<S, SceneName>>
     getState<S = State>(
-        object: string | Parameters<StateKeyDelegate>[0],
+        object: string | Parameters<StateKeyDelegate>[0]
     ): MaybeAsync<UpdateState<S, SceneName>> {
         if (!this._storage) {
             throw new MtArgumentError(
-                'Cannot use getUpdateState() filter without state storage',
+                'Cannot use getUpdateState() filter without state storage'
             )
         }
 
         if (typeof object === 'string') {
             return new UpdateState(
-
-                this._storage!,
+                this._storage,
                 object,
                 this._scene ?? null,
                 this._sceneScoped,
-                this._customStorage,
+                this._customStorage
             )
         }
 
@@ -963,12 +960,11 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
             if (!this._customStateKeyDelegate) {
                 return new UpdateState(
-
                     this._storage!,
                     key,
                     this._scene ?? null,
                     this._sceneScoped,
-                    this._customStorage,
+                    this._customStorage
                 )
             }
 
@@ -976,20 +972,19 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                 (customKey) => {
                     if (!customKey) {
                         throw new MtArgumentError(
-                            'Cannot derive custom key from given object',
+                            'Cannot derive custom key from given object'
                         )
                     }
 
                     return new UpdateState(
-
                         this._storage!,
                         key,
                         this._scene ?? null,
                         this._sceneScoped,
                         this._customStorage,
-                        customKey,
+                        customKey
                     )
-                },
+                }
             )
         })
     }
@@ -1001,7 +996,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * ignoring local custom storage, key delegate and scene scope.
      */
     getGlobalState<T>(
-        object: Parameters<StateKeyDelegate>[0],
+        object: Parameters<StateKeyDelegate>[0]
     ): Promise<UpdateState<T, SceneName>> {
         if (!this._parent) {
             throw new MtArgumentError('This dispatcher does not have a parent')
@@ -1013,11 +1008,10 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             }
 
             return new UpdateState(
-
                 this._storage!,
                 key,
                 this._scene ?? null,
-                false,
+                false
             )
         })
     }
@@ -1028,7 +1022,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         name: UpdateHandler['name'],
         filter: any,
         handler?: any,
-        group?: number,
+        group?: number
     ): void {
         if (typeof handler === 'number' || typeof handler === 'undefined') {
             this.addUpdateHandler(
@@ -1036,7 +1030,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                     name,
                     callback: filter,
                 },
-                handler,
+                handler
             )
         } else {
             this.addUpdateHandler(
@@ -1045,7 +1039,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                     callback: handler,
                     check: filter,
                 },
-                group,
+                group
             )
         }
     }

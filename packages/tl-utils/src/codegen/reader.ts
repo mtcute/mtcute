@@ -188,6 +188,23 @@ export function generateReaderCodeForTlEntries(
         ret += generateReaderCodeForTlEntry(entry, params) + '\n'
     })
 
+    const usedInBareVector: Record<string, 1> = {}
+    ret.replace(
+        new RegExp(`(?<=r\\.vector\\(${variableName}\\[)(\\d+)(?=])`, 'g'),
+        (_, id: string) => {
+            usedInBareVector[id] = 1
+
+            return _
+        },
+    )
+
+    for (const id of Object.keys(usedInBareVector)) {
+        ret = ret.replace(
+            new RegExp(`(?<=^${id}:function\\()r(?=\\))`, 'gm'),
+            'r=this',
+        )
+    }
+
     if (params.includeMethodResults) {
         ret += '_results:{\n'
 

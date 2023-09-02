@@ -1,3 +1,5 @@
+import type * as forgeNs from 'node-forge'
+
 import { MaybeAsync } from '../../types'
 import {
     BaseCryptoProvider,
@@ -5,11 +7,11 @@ import {
     IEncryptionScheme,
 } from './abstract'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let forge: any = null
+type forge = typeof forgeNs
+let forge: forge | null = null
 
 try {
-    forge = require('node-forge')
+    forge = require('node-forge') as forge
 } catch (e) {}
 
 export class ForgeCryptoProvider
@@ -26,14 +28,14 @@ export class ForgeCryptoProvider
     }
 
     createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme {
-        const cipher = forge.cipher[
+        const cipher = forge!.cipher[
             encrypt ? 'createCipher' : 'createDecipher'
         ]('AES-CTR', key.toString('binary'))
         cipher.start({ iv: iv.toString('binary') })
 
         const update = (data: Buffer): Buffer => {
             cipher.output.data = ''
-            cipher.update(forge.util.createBuffer(data.toString('binary')))
+            cipher.update(forge!.util.createBuffer(data.toString('binary')))
 
             return Buffer.from(cipher.output.data, 'binary')
         }
@@ -49,19 +51,24 @@ export class ForgeCryptoProvider
 
         return {
             encrypt(data: Buffer) {
-                const cipher = forge.cipher.createCipher('AES-ECB', keyBuffer)
+                const cipher = forge!.cipher.createCipher('AES-ECB', keyBuffer)
                 cipher.start({})
+                // @ts-expect-error  wrong types
                 cipher.mode.pad = cipher.mode.unpad = false
-                cipher.update(forge.util.createBuffer(data.toString('binary')))
+                cipher.update(forge!.util.createBuffer(data.toString('binary')))
                 cipher.finish()
 
                 return Buffer.from(cipher.output.data, 'binary')
             },
             decrypt(data: Buffer) {
-                const cipher = forge.cipher.createDecipher('AES-ECB', keyBuffer)
+                const cipher = forge!.cipher.createDecipher(
+                    'AES-ECB',
+                    keyBuffer,
+                )
                 cipher.start({})
+                // @ts-expect-error  wrong types
                 cipher.mode.pad = cipher.mode.unpad = false
-                cipher.update(forge.util.createBuffer(data.toString('binary')))
+                cipher.update(forge!.util.createBuffer(data.toString('binary')))
                 cipher.finish()
 
                 return Buffer.from(cipher.output.data, 'binary')
@@ -77,12 +84,13 @@ export class ForgeCryptoProvider
         algo = 'sha512',
     ): MaybeAsync<Buffer> {
         return new Promise((resolve, reject) =>
-            forge.pkcs5.pbkdf2(
+            forge!.pkcs5.pbkdf2(
                 password.toString('binary'),
                 salt.toString('binary'),
                 iterations,
                 keylen,
-                forge.md[algo].create(),
+                // eslint-disable-next-line
+                (forge!.md as any)[algo].create(),
                 (err: Error | null, buf: string) =>
                     err !== null ?
                         reject(err) :
@@ -93,7 +101,7 @@ export class ForgeCryptoProvider
 
     sha1(data: Buffer): MaybeAsync<Buffer> {
         return Buffer.from(
-            forge.md.sha1.create().update(data.toString('binary')).digest()
+            forge!.md.sha1.create().update(data.toString('binary')).digest()
                 .data,
             'binary',
         )
@@ -101,14 +109,14 @@ export class ForgeCryptoProvider
 
     sha256(data: Buffer): MaybeAsync<Buffer> {
         return Buffer.from(
-            forge.md.sha256.create().update(data.toString('binary')).digest()
+            forge!.md.sha256.create().update(data.toString('binary')).digest()
                 .data,
             'binary',
         )
     }
 
     hmacSha256(data: Buffer, key: Buffer): MaybeAsync<Buffer> {
-        const hmac = forge.hmac.create()
+        const hmac = forge!.hmac.create()
         hmac.start('sha256', key.toString('binary'))
         hmac.update(data.toString('binary'))
 

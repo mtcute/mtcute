@@ -209,18 +209,18 @@ export namespace filters {
         fn2: UpdateFilter<Base, Mod2, State2>,
     ): UpdateFilter<Base, Mod1 & Mod2, State1 | State2> {
         return (upd, state) => {
-            const res1 = fn1(upd, state as any)
+            const res1 = fn1(upd, state as UpdateState<State1>)
 
             if (typeof res1 === 'boolean') {
                 if (!res1) return false
 
-                return fn2(upd, state as any)
+                return fn2(upd, state as UpdateState<State2>)
             }
 
             return res1.then((r1) => {
                 if (!r1) return false
 
-                return fn2(upd, state as any)
+                return fn2(upd, state as UpdateState<State2>)
             })
         }
     }
@@ -247,18 +247,18 @@ export namespace filters {
         fn2: UpdateFilter<Base, Mod2, State2>,
     ): UpdateFilter<Base, Mod1 | Mod2, State1 | State2> {
         return (upd, state) => {
-            const res1 = fn1(upd, state as any)
+            const res1 = fn1(upd, state as UpdateState<State1>)
 
             if (typeof res1 === 'boolean') {
                 if (res1) return true
 
-                return fn2(upd, state as any)
+                return fn2(upd, state as UpdateState<State2>)
             }
 
             return res1.then((r1) => {
                 if (r1) return true
 
-                return fn2(upd, state as any)
+                return fn2(upd, state as UpdateState<State2>)
             })
         }
     }
@@ -947,7 +947,7 @@ export namespace filters {
                 const m = txt.match(regex)
 
                 if (m) {
-                    (obj as any).match = m
+                    (obj as typeof obj & { match: RegExpMatchArray }).match = m
 
                     return true
                 }
@@ -1002,14 +1002,14 @@ export namespace filters {
             return (obj) => {
                 const txt = extractText(obj)
 
-                return txt != null && txt.toLowerCase().indexOf(str) > -1
+                return txt != null && txt.toLowerCase().includes(str)
             }
         }
 
         return (obj) => {
             const txt = extractText(obj)
 
-            return txt != null && txt.indexOf(str) > -1
+            return txt != null && txt.includes(str)
         }
     }
 
@@ -1157,13 +1157,16 @@ export namespace filters {
                     // we use .replace to iterate over global regex, not to replace the text
                     withoutPrefix
                         .slice(m[0].length)
-                        .replace(argumentsRe, ($0, $1, $2, $3) => {
-                            match.push(
-                                ($2 || $3 || '').replace(unescapeRe, '$1'),
-                            )
+                        .replace(
+                            argumentsRe,
+                            ($0, $1, $2: string, $3: string) => {
+                                match.push(
+                                    ($2 || $3 || '').replace(unescapeRe, '$1'),
+                                )
 
-                            return ''
-                        })
+                                return ''
+                            },
+                        )
                     ;(msg as Message & { command: string[] }).command = match
 
                     return true

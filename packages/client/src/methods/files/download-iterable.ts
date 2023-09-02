@@ -47,19 +47,20 @@ export async function* downloadAsIterable(
     const input = params.location
     let location: tl.TypeInputFileLocation | tl.TypeInputWebFileLocation
     if (input instanceof FileLocation) {
-        if (typeof input.location === 'function') {
-            (input as tl.Mutable<FileLocation>).location = input.location()
+        let locationInner = input.location
+
+        if (typeof locationInner === 'function') {
+            locationInner = locationInner()
         }
 
-        if (Buffer.isBuffer(input.location)) {
-            yield input.location
+        if (Buffer.isBuffer(locationInner)) {
+            yield locationInner
 
             return
         }
         if (!dcId) dcId = input.dcId
         if (!fileSize) fileSize = input.fileSize
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        location = input.location as any
+        location = locationInner
     } else if (typeof input === 'string') {
         const parsed = parseFileId(input)
 
@@ -129,7 +130,7 @@ export async function* downloadAsIterable(
             result = await this.call(
                 {
                     _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    // eslint-disable-next-line
                     location: location as any,
                     offset: chunkSize * chunk,
                     limit: chunkSize,
@@ -182,7 +183,7 @@ export async function* downloadAsIterable(
     }
 
     let error: unknown = undefined
-    Promise.all(
+    void Promise.all(
         Array.from(
             { length: Math.min(poolSize * REQUESTS_PER_CONNECTION, numChunks) },
             downloadChunk,
@@ -202,6 +203,7 @@ export async function* downloadAsIterable(
     while (position < limitBytes) {
         await nextChunkCv.wait()
 
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
         if (error) throw error
 
         while (nextChunkIdx in buffer) {

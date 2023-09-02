@@ -8,7 +8,11 @@ import {
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtNotFoundError, MtTypeAssertionError } from '../../types'
+import {
+    InputPeerLike,
+    MtNotFoundError,
+    MtTypeAssertionError,
+} from '../../types'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
 import { assertTypeIs } from '../../utils/type-assertion'
 
@@ -109,7 +113,12 @@ export async function resolvePeer(
                 const found = res.chats.find((it) => it.id === id)
 
                 if (found) {
-                    if (!(found._ === 'channel' || found._ === 'channelForbidden')) {
+                    if (
+                        !(
+                            found._ === 'channel' ||
+                            found._ === 'channelForbidden'
+                        )
+                    ) {
                         // chats can't have usernames
                         // furthermore, our id is a channel id, so it must be a channel
                         // this should never happen, unless Telegram goes crazy
@@ -205,7 +214,7 @@ export async function resolvePeer(
             // break
         }
         case 'channel': {
-            const id = toggleChannelIdMark(peerId as number)
+            const id = toggleChannelIdMark(peerId)
 
             const res = await this.call({
                 _: 'channels.getChannels',

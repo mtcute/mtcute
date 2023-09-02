@@ -251,6 +251,7 @@ export class Conversation {
 
         this.stop()
 
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
         if (err) throw err
 
         return res!
@@ -501,7 +502,7 @@ export class Conversation {
         const it = this._queuedNewMessage.peekFront()!
 
         // order does matter for new messages
-        this._lock.acquire().then(async () => {
+        void this._lock.acquire().then(async () => {
             try {
                 if (!it.check || (await it.check(msg))) {
                     if (it.timeout) clearTimeout(it.timeout)

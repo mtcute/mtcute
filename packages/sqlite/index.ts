@@ -359,7 +359,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     private _getFromKv<T>(key: string): T | null {
         const row = this._statements.getKv.get(key) as { value: string } | null
 
-        return row ? JSON.parse(row.value) : null
+        return row ? (JSON.parse(row.value) as T) : null
     }
 
     private _setToKv(key: string, value: unknown, now = false): void {
@@ -375,7 +375,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     }
 
     private _runMany!: (stmts: [sqlite3.Statement, unknown[]][]) => void
-    private _updateManyPeers!: (updates: unknown[]) => void
+    private _updateManyPeers!: (updates: unknown[][]) => void
 
     private _upgradeDatabase(from: number): void {
         if (from < 2 || from > CURRENT_VERSION) {
@@ -461,14 +461,16 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         }
 
         // helper methods
-        this._runMany = this._db.transaction((stmts) => {
-            stmts.forEach((stmt: [sqlite3.Statement, unknown[]]) => {
-                stmt[0].run(stmt[1])
-            })
-        })
+        this._runMany = this._db.transaction(
+            (stmts: [sqlite3.Statement, unknown[]][]) => {
+                stmts.forEach((stmt) => {
+                    stmt[0].run(stmt[1])
+                })
+            },
+        )
 
-        this._updateManyPeers = this._db.transaction((data) => {
-            data.forEach((it: unknown[]) => {
+        this._updateManyPeers = this._db.transaction((data: unknown[][]) => {
+            data.forEach((it: unknown) => {
                 this._statements.updateCachedEnt.run(it)
             })
         })
@@ -727,7 +729,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
 
     // IStateStorage implementation
 
-    getState(key: string, parse = true): unknown | null {
+    getState(key: string, parse = true): unknown {
         let val: FsmItem | undefined = this._fsmCache?.get(key)
         const cached = val
 

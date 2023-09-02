@@ -53,7 +53,7 @@ export async function getInlineGameHighScores(
     messageId: string | tl.TypeInputBotInlineMessageID,
     userId?: InputPeerLike,
 ): Promise<GameHighScore[]> {
-    const id = await normalizeInlineId(messageId)
+    const id = normalizeInlineId(messageId)
 
     let user: tl.TypeInputUser
 

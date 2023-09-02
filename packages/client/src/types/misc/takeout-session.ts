@@ -33,6 +33,7 @@ export class TakeoutSession {
         message: MustEqual<T, tl.RpcMethod>,
         params?: RpcCallOptions,
     ): Promise<tl.RpcCallReturn[T['_']]> {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this.client.call(
             {
                 _: 'invokeWithTakeout',
@@ -76,6 +77,7 @@ export class TakeoutSession {
             get(target, prop, receiver) {
                 if (prop === 'call') return boundCall
 
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return Reflect.get(target, prop, receiver)
             },
         })

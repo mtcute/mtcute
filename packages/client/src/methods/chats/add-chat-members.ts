@@ -45,10 +45,7 @@ export async function addChatMembers(
         const updates = await this.call({
             _: 'channels.inviteToChannel',
             channel: normalizeToInputChannel(chat),
-            users: await this.resolvePeerMany(
-                users as InputPeerLike[],
-                normalizeToInputUser,
-            ),
+            users: await this.resolvePeerMany(users, normalizeToInputUser),
         })
         this._handleUpdate(updates)
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')

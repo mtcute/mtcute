@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // ^^ will be looked into in MTQ-35
 
+import { getMarkedPeerId } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -36,6 +36,26 @@ export type ChatMemberUpdateType =
     | 'old_owner'
     | 'new_owner'
     | 'other'
+
+function extractPeerId(
+    raw?: tl.TypeChatParticipant | tl.TypeChannelParticipant,
+) {
+    if (!raw) return 0
+
+    if (tl.isAnyChatParticipant(raw)) {
+        return raw.userId
+    }
+
+    switch (raw._) {
+        case 'channelParticipant':
+        case 'channelParticipantSelf':
+        case 'channelParticipantCreator':
+        case 'channelParticipantAdmin':
+            return raw.userId
+        default:
+            return getMarkedPeerId(raw.peer)
+    }
+}
 
 /**
  * Update representing a change in the status
@@ -82,12 +102,8 @@ export class ChatMemberUpdate {
             const old = this.raw.prevParticipant
             const cur = this.raw.newParticipant
 
-            const oldId =
-                (old && ((old as any).userId || (old as any).peer.userId)) ||
-                null
-            const curId =
-                (cur && ((cur as any).userId || (cur as any).peer.userId)) ||
-                null
+            const oldId = extractPeerId(old)
+            const curId = extractPeerId(cur)
 
             const actorId = this.raw.actorId
 

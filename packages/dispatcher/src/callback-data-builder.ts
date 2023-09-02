@@ -36,7 +36,7 @@ export class CallbackDataBuilder<T extends string> {
                 .map((f) => {
                     const val = obj[f]
 
-                    if (val.indexOf(this.sep) > -1) {
+                    if (val.includes(this.sep)) {
                         throw new MtArgumentError(
                             `Value for ${f} ${val} contains separator ${this.sep} and cannot be used.`,
                         )

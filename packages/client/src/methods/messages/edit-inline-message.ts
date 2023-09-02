@@ -76,7 +76,7 @@ export async function editInlineMessage(
     let entities: tl.TypeMessageEntity[] | undefined
     let media: tl.TypeInputMedia | undefined = undefined
 
-    const id = await normalizeInlineId(messageId)
+    const id = normalizeInlineId(messageId)
 
     if (params.media) {
         media = await this._normalizeInputMedia(params.media, params, true)

@@ -60,7 +60,10 @@ export function generateWriterCodeForTlEntry(
     if (entry.id === 0) entry.id = computeConstructorIdFromEntry(entry)
 
     const name = bare ? entry.id : `'${entry.name}'`
-    let ret = `${name}:function(w${entry.arguments.length ? ',v' : ''}){`
+    const defaultWriter = bare ? '=this' : ''
+    let ret = `${name}:function(w${defaultWriter}${
+        entry.arguments.length ? ',v' : ''
+    }){`
 
     if (!bare) ret += `w.uint(${entry.id});`
 

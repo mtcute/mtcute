@@ -15,7 +15,7 @@ export class LocalstorageStorage extends JsonMemoryStorage {
 
     load(): void {
         try {
-            this._loadJson(localStorage[this._key])
+            this._loadJson(localStorage[this._key] as string)
         } catch (e) {}
     }
 

@@ -96,28 +96,31 @@ export abstract class BaseTcpTransport
         this.emit('error', error)
     }
 
-    async handleConnect(): Promise<void> {
+    handleConnect(): void {
         this.log.info('connected')
-        const initialMessage = await this._packetCodec.tag()
 
-        if (initialMessage.length) {
-            this._socket!.write(initialMessage, (err) => {
-                if (err) {
-                    this.log.error(
-                        'failed to write initial message: %s',
-                        err.stack,
-                    )
-                    this.emit('error')
-                    this.close()
+        Promise.resolve(this._packetCodec.tag())
+            .then((initialMessage) => {
+                if (initialMessage.length) {
+                    this._socket!.write(initialMessage, (err) => {
+                        if (err) {
+                            this.log.error(
+                                'failed to write initial message: %s',
+                                err.stack,
+                            )
+                            this.emit('error')
+                            this.close()
+                        } else {
+                            this._state = TransportState.Ready
+                            this.emit('ready')
+                        }
+                    })
                 } else {
                     this._state = TransportState.Ready
                     this.emit('ready')
                 }
             })
-        } else {
-            this._state = TransportState.Ready
-            this.emit('ready')
-        }
+            .catch((err) => this.emit('error', err))
     }
 
     async send(bytes: Buffer): Promise<void> {

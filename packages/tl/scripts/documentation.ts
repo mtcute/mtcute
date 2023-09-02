@@ -21,7 +21,7 @@ import {
     DOC_CACHE_FILE,
 } from './constants'
 import { applyDescriptionsYamlFile } from './process-descriptions-yaml'
-import { packTlSchema, unpackTlSchema } from './schema'
+import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema'
 import { fetchRetry } from './utils'
 
 export interface CachedDocumentationEntry {
@@ -38,7 +38,10 @@ export interface CachedDocumentation {
     unions: Record<string, string>
 }
 
-function normalizeLinks(url: string, el: cheerio.Cheerio<cheerio.Element>): void {
+function normalizeLinks(
+    url: string,
+    el: cheerio.Cheerio<cheerio.Element>,
+): void {
     el.find('a').each((i, _it) => {
         const it = cheerio.default(_it)
         let href = it.attr('href')
@@ -314,7 +317,7 @@ export async function getCachedDocumentation(): Promise<CachedDocumentation | nu
     try {
         const file = await readFile(DOC_CACHE_FILE, 'utf8')
 
-        return JSON.parse(file)
+        return JSON.parse(file) as CachedDocumentation
     } catch (e: unknown) {
         if (e && typeof e === 'object' && 'code' in e && e.code === 'ENOENT') {
             return null
@@ -355,7 +358,9 @@ async function main() {
 
         if (act === 1) {
             const [schema, layer] = unpackTlSchema(
-                JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')),
+                JSON.parse(
+                    await readFile(API_SCHEMA_JSON_FILE, 'utf8'),
+                ) as TlPackedSchema,
             )
             cached = await fetchDocumentation(schema, layer)
         }
@@ -381,7 +386,9 @@ async function main() {
             }
 
             const [schema, layer] = unpackTlSchema(
-                JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')),
+                JSON.parse(
+                    await readFile(API_SCHEMA_JSON_FILE, 'utf8'),
+                ) as TlPackedSchema,
             )
 
             applyDocumentation(schema, cached)

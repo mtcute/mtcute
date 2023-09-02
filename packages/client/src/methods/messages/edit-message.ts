@@ -114,6 +114,6 @@ export async function editMessage(
         media,
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line
     return this._findMessageInUpdate(res, true) as any
 }

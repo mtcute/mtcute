@@ -18,7 +18,7 @@ export interface IStateStorage {
      *
      * @param key  Key of the state, as defined by {@link StateKeyDelegate}
      */
-    getState(key: string): MaybeAsync<unknown | null>
+    getState(key: string): MaybeAsync<unknown>
 
     /**
      * Save state to the storage

@@ -98,8 +98,13 @@ export class ObfuscatedPacketCodec
 
     feed(data: Buffer): void {
         const dec = this._decryptor!.decrypt(data)
+
         if (Buffer.isBuffer(dec)) this._inner.feed(dec)
-        else dec.then((dec) => this._inner.feed(dec))
+        else {
+            dec.then((dec) => this._inner.feed(dec)).catch((err) =>
+                this.emit('error', err),
+            )
+        }
     }
 
     reset(): void {

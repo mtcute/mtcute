@@ -940,7 +940,7 @@ function _fetchChannelDifferenceLater(
     fallbackPts?: number,
     force = false,
 ): void {
-    if (!requestedDiff[channelId]) {
+    if (!(channelId in requestedDiff)) {
         requestedDiff[channelId] = _fetchChannelDifference
             .call(this, channelId, fallbackPts, force)
             .catch((err) => {
@@ -1074,7 +1074,7 @@ function _fetchDifferenceLater(
     this: TelegramClient,
     requestedDiff: Record<number, Promise<void>>,
 ): void {
-    if (!requestedDiff[0]) {
+    if (!(0 in requestedDiff)) {
         requestedDiff[0] = _fetchDifference
             .call(this, requestedDiff)
             .catch((err) => {

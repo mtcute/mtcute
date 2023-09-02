@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { expect } from 'chai'
 import { randomBytes } from 'crypto'
 import Long from 'long'

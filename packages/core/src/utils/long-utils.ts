@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-return */
 // ^^ because of performance reasons
 import Long from 'long'
 
@@ -84,7 +85,9 @@ export function longFromFastString(val: string, unsigned = false): Long {
     const low = parseInt(parts[0])
     const high = parseInt(parts[1])
 
-    if (isNaN(low) || isNaN(high)) { throw new Error(`Invalid long fast string: ${val}`) }
+    if (isNaN(low) || isNaN(high)) {
+        throw new Error(`Invalid long fast string: ${val}`)
+    }
 
     return new Long(low, high, unsigned)
 }
@@ -166,19 +169,19 @@ export class LongMap<V> {
     }
 
     private _setForObj(key: Long, value: V): void {
-        this._obj![longToFastString(key)] = value
+        this._obj[longToFastString(key)] = value
     }
 
     private _hasForObj(key: Long): boolean {
-        return longToFastString(key) in this._obj!
+        return longToFastString(key) in this._obj
     }
 
     private _getForObj(key: Long): V | undefined {
-        return this._obj![longToFastString(key)]
+        return this._obj[longToFastString(key)]
     }
 
     private _deleteForObj(key: Long): void {
-        delete this._obj![longToFastString(key)]
+        delete this._obj[longToFastString(key)]
     }
 
     private *_keysForObj(unsigned?: boolean): IterableIterator<Long> {
@@ -188,7 +191,7 @@ export class LongMap<V> {
     }
 
     private *_valuesForObj(): IterableIterator<V> {
-        yield* Object.values(this._obj!) as any
+        yield* Object.values(this._obj) as any
     }
 
     private _clearForObj(): void {
@@ -254,22 +257,22 @@ export class LongSet {
 
     private _addForObj(val: Long) {
         const k = longToFastString(val)
-        if (k in this._obj!) return
+        if (k in this._obj) return
 
-        this._obj![k] = true
+        this._obj[k] = true
         this._objSize! += 1
     }
 
     private _deleteForObj(val: Long) {
         const k = longToFastString(val)
-        if (!(k in this._obj!)) return
+        if (!(k in this._obj)) return
 
-        delete this._obj![k]
+        delete this._obj[k]
         this._objSize! -= 1
     }
 
     private _hasForObj(val: Long) {
-        return longToFastString(val) in this._obj!
+        return longToFastString(val) in this._obj
     }
 
     private _clearForObj() {

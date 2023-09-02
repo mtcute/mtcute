@@ -33,6 +33,6 @@ export async function getCustomEmojis(
             )
         }
 
-        return doc as Sticker
+        return doc
     })
 }

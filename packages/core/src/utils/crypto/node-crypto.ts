@@ -16,10 +16,6 @@ import {
 export class NodeCryptoProvider
     extends BaseCryptoProvider
     implements ICryptoProvider {
-    constructor() {
-        super()
-    }
-
     createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme {
         const cipher = (encrypt ? createCipheriv : createDecipheriv)(
             `aes-${key.length * 8}-ctr`,

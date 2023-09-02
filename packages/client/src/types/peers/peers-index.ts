@@ -6,8 +6,8 @@ const ERROR_MSG =
     'Given peer is not available in this index. This is most likely an internal library error.'
 
 export class PeersIndex {
-    readonly users: Record<number, tl.TypeUser> = Object.create(null)
-    readonly chats: Record<number, tl.TypeChat> = Object.create(null)
+    readonly users: Record<number, tl.TypeUser> = {}
+    readonly chats: Record<number, tl.TypeChat> = {}
 
     hasMin = false
 

@@ -26,6 +26,7 @@ export function downloadAsStream(
         async read() {},
     })
 
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setTimeout(async () => {
         try {
             for await (const chunk of this.downloadAsIterable(params)) {

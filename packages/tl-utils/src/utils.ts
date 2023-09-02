@@ -68,9 +68,9 @@ export function stringifyArgumentType(
     if (!modifiers) return type
     let ret = type
 
-    if (modifiers?.isBareUnion) ret = `%${ret}`
-    if (modifiers?.isVector) ret = `Vector<${ret}>`
-    else if (modifiers?.isBareVector) ret = `vector<${ret}>`
+    if (modifiers.isBareUnion) ret = `%${ret}`
+    if (modifiers.isVector) ret = `Vector<${ret}>`
+    else if (modifiers.isBareVector) ret = `vector<${ret}>`
     if (modifiers.predicate) ret = `${modifiers.predicate}?${ret}`
 
     return ret

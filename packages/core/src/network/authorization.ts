@@ -178,6 +178,7 @@ async function rsaPad(
         const decryptedDataBigint = bufferToBigInt(decryptedData)
 
         if (decryptedDataBigint.geq(keyModulus)) {
+            console.log('retrying because decrypted data is too big')
             continue
         }
 
@@ -224,6 +225,7 @@ export async function doAuthorization(
     const session = connection['_session']
     const readerMap = session._readerMap
     const writerMap = session._writerMap
+    const log = connection.log.create('auth')
 
     function sendPlainMessage(message: mtp.TlObject): Promise<void> {
         const length = TlSerializationCounter.countNeededBytes(
@@ -234,6 +236,7 @@ export async function doAuthorization(
 
         const messageId = session.getMessageId()
 
+        log.verbose('[PLAIN] >>> %j', message)
         writer.long(Long.ZERO)
         writer.long(messageId)
         writer.uint(length)
@@ -243,14 +246,17 @@ export async function doAuthorization(
     }
 
     async function readNext(): Promise<mtp.TlObject> {
-        return TlBinaryReader.deserializeObject(
+        const res = TlBinaryReader.deserializeObject<mtp.TlObject>(
             readerMap,
             await connection.waitForUnencryptedMessage(),
             20, // skip mtproto header
         )
+
+        log.verbose('[PLAIN] <<< %j', res)
+
+        return res
     }
 
-    const log = connection.log.create('auth')
     if (expiresIn) log.prefix = '[PFS] '
 
     const nonce = randomBytes(16)
@@ -508,8 +514,7 @@ export async function doAuthorization(
             if (!buffersEqual(expectedHash.slice(4, 20), dhGen.newNonceHash2)) {
                 throw Error('Step 4: invalid retry nonce hash from server')
             }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            retryId = Long.fromBytesLE(authKeyAuxHash as any)
+            retryId = Long.fromBytesLE(authKeyAuxHash as unknown as number[])
             continue
         }
 

@@ -1,7 +1,7 @@
 // ^^ because of this._socket. we know it's not null, almost everywhere, but TS doesn't
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+// @ts-expect-error
 import { normalize } from 'ip6'
 import { connect } from 'net'
 
@@ -115,8 +115,12 @@ function buildSocks5Auth(username: string, password: string) {
     const usernameBuf = Buffer.from(username)
     const passwordBuf = Buffer.from(password)
 
-    if (usernameBuf.length > 255) { throw new Error(`Too long username (${usernameBuf.length} > 255)`) }
-    if (passwordBuf.length > 255) { throw new Error(`Too long password (${passwordBuf.length} > 255)`) }
+    if (usernameBuf.length > 255) {
+        throw new Error(`Too long username (${usernameBuf.length} > 255)`)
+    }
+    if (passwordBuf.length > 255) {
+        throw new Error(`Too long password (${passwordBuf.length} > 255)`)
+    }
 
     const buf = Buffer.alloc(3 + usernameBuf.length + passwordBuf.length)
     buf[0] = 0x01 // VER of auth
@@ -129,7 +133,8 @@ function buildSocks5Auth(username: string, password: string) {
 }
 
 function writeIpv6(ip: string, buf: Buffer, offset: number): void {
-    ip = normalize(ip)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    ip = normalize(ip) as string
     const parts = ip.split(':')
 
     if (parts.length !== 8) {
@@ -193,9 +198,14 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
     constructor(proxy: SocksProxySettings) {
         super()
 
-        if (proxy.version != null && proxy.version !== 4 && proxy.version !== 5) {
+        if (
+            proxy.version != null &&
+            proxy.version !== 4 &&
+            proxy.version !== 5
+        ) {
             throw new SocksProxyConnectionError(
                 proxy,
+
                 `Invalid SOCKS version: ${proxy.version}`,
             )
         }
@@ -204,7 +214,9 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
     }
 
     connect(dc: tl.RawDcOption): void {
-        if (this._state !== TransportState.Idle) { throw new Error('Transport is not IDLE') }
+        if (this._state !== TransportState.Idle) {
+            throw new Error('Transport is not IDLE')
+        }
 
         if (!this.packetCodecInitialized) {
             this._packetCodec.on('error', (err) => this.emit('error', err))

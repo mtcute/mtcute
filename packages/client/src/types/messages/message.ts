@@ -329,7 +329,7 @@ export class Message {
     get replyToMessageId(): number | null {
         if (this.raw.replyTo?._ !== 'messageReplyHeader') return null
 
-        return this.raw.replyTo?.replyToMsgId ?? null
+        return this.raw.replyTo.replyToMsgId ?? null
     }
 
     /**
@@ -339,7 +339,7 @@ export class Message {
     get replyToThreadId(): number | null {
         if (this.raw.replyTo?._ !== 'messageReplyHeader') return null
 
-        return this.raw.replyTo?.replyToTopId ?? null
+        return this.raw.replyTo.replyToTopId ?? null
     }
 
     /**

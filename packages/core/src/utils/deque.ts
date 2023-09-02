@@ -51,7 +51,7 @@ export class Deque<T> {
             }
         }
 
-        this._elements = new Array(capacity)
+        this._elements = new Array<T | undefined>(capacity)
         this._capacity = capacity
     }
 
@@ -63,7 +63,7 @@ export class Deque<T> {
         const newCapacity = n << 1
         if (newCapacity < 0) throw new Error('Deque is too big')
 
-        const arr = new Array(newCapacity)
+        const arr = new Array<T | undefined>(newCapacity)
 
         // copy items to the new array
         // copy head till the end of arr
@@ -251,7 +251,7 @@ export class Deque<T> {
     }
 
     clear(): void {
-        this._elements = new Array(this._capacity)
+        this._elements = new Array<T | undefined>(this._capacity)
         this._head = this._tail = 0
     }
 }

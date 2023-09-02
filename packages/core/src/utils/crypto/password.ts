@@ -81,7 +81,7 @@ export async function computeSrpParams(
     // nice naming thx durov
     if (
         !request.currentAlgo ||
-        request.currentAlgo?._ !==
+        request.currentAlgo._ !==
             'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow'
     ) {
         throw new Error(`Unknown algo ${request.currentAlgo?._}`)

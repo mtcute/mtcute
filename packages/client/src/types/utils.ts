@@ -1,14 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-argument */
 import { MaybeAsync } from '@mtcute/core'
 
 export type MaybeDynamic<T> = MaybeAsync<T> | (() => MaybeAsync<T>)
 
 export type ArrayWithTotal<T> = T[] & { total: number }
 
-let util: any | null = null
+let util: typeof import('util') | null = null
 
 try {
-    util = require('util')
+    util = require('util') as typeof import('util')
 } catch (e) {}
 
 // get all property names. unlike Object.getOwnPropertyNames,
@@ -21,7 +22,7 @@ function getAllGettersNames(obj: object): string[] {
             if (
                 prop !== '__proto__' &&
                 Object.getOwnPropertyDescriptor(obj, prop)?.get &&
-                getters.indexOf(prop) === -1
+                !getters.includes(prop)
             ) {
                 getters.push(prop)
             }
@@ -53,10 +54,11 @@ export function makeInspectable(
     const getters: string[] = props ? props : []
 
     for (const key of getAllGettersNames(obj.prototype)) {
-        if (!hide || hide.indexOf(key) === -1) getters.push(key)
+        if (!hide || !hide.includes(key)) getters.push(key)
     }
 
     // dirty hack to set name for inspect result
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     const proto = new Function(`return function ${obj.name}(){}`)().prototype
 
     obj.prototype.toJSON = function (nested = false) {
@@ -86,6 +88,7 @@ export function makeInspectable(
             Buffer.prototype.toJSON = bufferToJsonOriginal
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return ret
     }
     if (util) {

@@ -98,6 +98,7 @@ export class ChatPhotoSize extends FileLocation {
             {
                 _: 'photo',
                 id: this.obj.photoId,
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 source: {
                     _: 'dialogPhoto',
                     big: this.big,

@@ -5,11 +5,10 @@ import {
     MtUnsupportedError,
 } from '../../types'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let fs: any = null
+let fs: typeof import('fs') | null = null
 
 try {
-    fs = require('fs')
+    fs = require('fs') as typeof import('fs')
 } catch (e) {}
 
 /**
@@ -39,7 +38,7 @@ export function downloadToFile(
         const buf = params.location.location
 
         return new Promise((resolve, reject) => {
-            fs.writeFile(filename, buf, (err?: Error) => {
+            fs!.writeFile(filename, buf, (err) => {
                 if (err) reject(err)
                 else resolve()
             })

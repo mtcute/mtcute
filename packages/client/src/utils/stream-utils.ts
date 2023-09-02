@@ -21,27 +21,30 @@ class NodeReadable extends Readable {
         this._reading = true
 
         const doRead = () => {
-            this._reader.read().then((res) => {
-                if (this._doneReading) {
+            this._reader
+                .read()
+                .then((res) => {
+                    if (this._doneReading) {
+                        this._reading = false
+                        this._reader.releaseLock()
+                        this._doneReading()
+                    }
+                    if (res.done) {
+                        this.push(null)
+                        this._reading = false
+                        this._reader.releaseLock()
+
+                        return
+                    }
+                    if (this.push(res.value)) {
+                        doRead()
+
+                        return
+                    }
                     this._reading = false
                     this._reader.releaseLock()
-                    this._doneReading()
-                }
-                if (res.done) {
-                    this.push(null)
-                    this._reading = false
-                    this._reader.releaseLock()
-
-                    return
-                }
-                if (this.push(res.value)) {
-                    doRead()
-
-                    return
-                }
-                this._reading = false
-                this._reader.releaseLock()
-            })
+                })
+                .catch((err) => this.emit('error', err))
         }
         doRead()
     }
@@ -51,9 +54,11 @@ class NodeReadable extends Readable {
             const promise = new Promise<void>((resolve) => {
                 this._doneReading = resolve
             })
-            promise.then(() => {
-                this._handleDestroy(err, callback)
-            })
+            promise
+                .then(() => {
+                    this._handleDestroy(err, callback)
+                })
+                .catch((err) => this.emit('error', err))
         } else {
             this._handleDestroy(err, callback)
         }
@@ -63,8 +68,10 @@ class NodeReadable extends Readable {
         err: Error | null,
         callback: (error?: Error | null) => void,
     ) {
-        this._webStream.cancel()
-        super._destroy(err, callback)
+        this._webStream
+            .cancel()
+            .then(() => super._destroy(err, callback))
+            .catch((err: Error) => callback(err))
     }
 }
 
@@ -90,12 +97,12 @@ export async function readBytesFromStream(
 ): Promise<Buffer | null> {
     if (stream.readableEnded) return null
 
-    let res = stream.read(size)
+    let res = stream.read(size) as Buffer
 
     if (!res) {
         return new Promise((resolve, reject) => {
             stream.on('readable', function handler() {
-                res = stream.read(size)
+                res = stream.read(size) as Buffer
 
                 if (res) {
                     stream.off('readable', handler)

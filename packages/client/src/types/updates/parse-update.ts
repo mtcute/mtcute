@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-argument */
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -19,13 +19,14 @@ import {
     PollVoteUpdate,
     PreCheckoutQuery,
     UserStatusUpdate,
-    UserTypingUpdate } from '../index'
+    UserTypingUpdate,
+} from '../index'
 
 type ParserFunction = (
     client: TelegramClient,
     upd: tl.TypeUpdate | tl.TypeMessage,
     peers: PeersIndex
-) => any
+) => ParsedUpdate['data']
 type UpdateParser = [ParsedUpdate['name'], ParserFunction]
 
 const baseMessageParser: ParserFunction = (
@@ -35,7 +36,9 @@ const baseMessageParser: ParserFunction = (
 ) =>
     new Message(
         client,
-        tl.isAnyMessage(upd) ? upd : (upd as any).message,
+        tl.isAnyMessage(upd) ?
+            upd :
+            (upd as { message: tl.TypeMessage }).message,
         peers,
         upd._ === 'updateNewScheduledMessage',
     )
@@ -142,7 +145,7 @@ export function _parseUpdate(
         return {
             name: pair[0],
             data: pair[1](client, update, peers),
-        }
+        } as ParsedUpdate
     }
 
     return null

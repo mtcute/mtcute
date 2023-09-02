@@ -83,6 +83,13 @@ const virtualErrors: TlError[] = [
 ]
 virtualErrors.forEach((it) => (it.virtual = true))
 
+interface TelegramErrorsSpec {
+    errors: Record<string, Record<string, string[]>>
+    descriptions: Record<string, string>
+    user_only: string[]
+    bot_only: string[]
+}
+
 async function fetchFromTelegram(errors: TlErrors) {
     const page = await fetch(ERRORS_PAGE_TG).then((it) => it.text())
     const jsonUrl = page.match(
@@ -90,9 +97,9 @@ async function fetchFromTelegram(errors: TlErrors) {
     )?.[1]
     if (!jsonUrl) throw new Error('Cannot find JSON URL')
 
-    const json = await fetch(new URL(jsonUrl, ERRORS_PAGE_TG)).then((it) =>
+    const json = (await fetch(new URL(jsonUrl, ERRORS_PAGE_TG)).then((it) =>
         it.json(),
-    )
+    )) as TelegramErrorsSpec
 
     // since nobody fucking guarantees that .descriptions
     // will have description for each described here (or vice versa),
@@ -120,7 +127,7 @@ async function fetchFromTelegram(errors: TlErrors) {
                     errors.throws[method] = []
                 }
 
-                if (errors.throws[method].indexOf(name) === -1) {
+                if (!errors.throws[method].includes(name)) {
                     errors.throws[method].push(name)
                 }
             }
@@ -185,14 +192,17 @@ async function fetchFromTelethon(errors: TlErrors) {
         // names for better code insights
         // we also prefer description from telegram, if it's available and doesn't use placeholders
         if (description) {
-            const desc = description.replace(/{([a-z0-9_]+)}/gi, (_, name) => {
-                if (!obj._paramNames) {
-                    obj._paramNames = []
-                }
-                obj._paramNames.push(name)
+            const desc = description.replace(
+                /{([a-z0-9_]+)}/gi,
+                (_, name: string) => {
+                    if (!obj._paramNames) {
+                        obj._paramNames = []
+                    }
+                    obj._paramNames.push(name)
 
-                return '%d'
-            })
+                    return '%d'
+                },
+            )
 
             if (!obj.description || obj._paramNames?.length) {
                 obj.description = desc
@@ -202,13 +212,24 @@ async function fetchFromTelethon(errors: TlErrors) {
 
     return new Promise<void>((resolve, reject) => {
         parser
-            .on('data', ({ name, codes, description }) =>
-                addError(name, codes, description),
+            .on(
+                'data',
+                ({
+                    name,
+                    codes,
+                    description,
+                }: {
+                    name: string
+                    codes: string
+                    description: string
+                }) => addError(name, codes, description),
             )
             .on('end', resolve)
             .on('error', reject)
 
-        csv.text().then((it) => parser.write(it)).catch(reject)
+        csv.text()
+            .then((it) => parser.write(it))
+            .catch(reject)
     })
 }
 
@@ -229,7 +250,7 @@ async function main() {
     await fetchFromTelethon(errors)
 
     virtualErrors.forEach((err) => {
-        if (errors.errors[err.name]) {
+        if (err.name in errors.errors) {
             console.log(`Error ${err.name} already exists and is not virtual`)
 
             return

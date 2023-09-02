@@ -91,7 +91,7 @@ export async function uploadMedia(
             assertTypeIs('uploadMedia', res, 'messageMediaDocument')
             assertTypeIs('uploadMedia', res.document!, 'document')
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line
             return parseDocument(this, res.document) as any
         case 'inputMediaStory':
             throw new MtArgumentError("This media (story) can't be uploaded")

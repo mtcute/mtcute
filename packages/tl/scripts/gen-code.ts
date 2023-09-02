@@ -6,6 +6,7 @@ import {
     generateTypescriptDefinitionsForTlSchema,
     generateWriterCodeForTlEntries,
     parseFullTlSchema,
+    TlEntry,
     TlErrors,
     TlFullSchema,
 } from '@mtcute/tl-utils'
@@ -16,7 +17,7 @@ import {
     ESM_PRELUDE,
     MTP_SCHEMA_JSON_FILE,
 } from './constants'
-import { unpackTlSchema } from './schema'
+import { TlPackedSchema, unpackTlSchema } from './schema'
 
 const OUT_TYPINGS_FILE = join(__dirname, '../index.d.ts')
 const OUT_TYPINGS_JS_FILE = join(__dirname, '../index.js')
@@ -92,15 +93,17 @@ async function generateWriters(
 }
 
 async function main() {
-    const errors: TlErrors = JSON.parse(
+    const errors = JSON.parse(
         await readFile(ERRORS_JSON_FILE, 'utf8'),
-    )
+    ) as TlErrors
 
     const [apiSchema, apiLayer] = unpackTlSchema(
-        JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')),
+        JSON.parse(
+            await readFile(API_SCHEMA_JSON_FILE, 'utf8'),
+        ) as TlPackedSchema,
     )
     const mtpSchema = parseFullTlSchema(
-        JSON.parse(await readFile(MTP_SCHEMA_JSON_FILE, 'utf8')),
+        JSON.parse(await readFile(MTP_SCHEMA_JSON_FILE, 'utf8')) as TlEntry[],
     )
 
     await generateTypings(apiSchema, apiLayer, mtpSchema, errors)

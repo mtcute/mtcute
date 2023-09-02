@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+import { tl } from '@mtcute/tl'
+
 import { longFromFastString, longToFastString } from '../utils'
-import { MemoryStorage } from './memory'
+import { MemorySessionState, MemoryStorage } from './memory'
 
 /**
  * Helper class that provides json serialization functions
@@ -12,7 +15,7 @@ export class JsonMemoryStorage extends MemoryStorage {
                 if (key === 'authKeys') {
                     const ret: Record<string, Buffer> = {}
 
-                    value.split('|').forEach((pair: string) => {
+                    ;(value as string).split('|').forEach((pair: string) => {
                         const [dcId, b64] = pair.split(',')
                         ret[dcId] = Buffer.from(b64, 'base64')
                     })
@@ -21,27 +24,26 @@ export class JsonMemoryStorage extends MemoryStorage {
                 }
 
                 if (key === 'accessHash') {
-                    return longFromFastString(value)
+                    return longFromFastString(value as string)
                 }
 
                 return value
-            }),
+            }) as MemorySessionState,
         )
     }
 
     protected _saveJson(): string {
         return JSON.stringify(this._state, (key, value) => {
             if (key === 'authKeys') {
-                return Object.entries(value)
-                    .filter((it) => it[1] !== null)
-                    .map(
-                        ([dcId, key]) =>
-                            dcId + ',' + (key as Buffer).toString('base64'),
-                    )
+                const value_ = value as Record<string, Buffer | null>
+
+                return Object.entries(value_)
+                    .filter((it): it is [string, Buffer] => it[1] !== null)
+                    .map(([dcId, key]) => dcId + ',' + key.toString('base64'))
                     .join('|')
             }
             if (key === 'accessHash') {
-                return longToFastString(value)
+                return longToFastString(value as tl.Long)
             }
 
             return value

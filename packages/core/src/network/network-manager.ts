@@ -250,7 +250,7 @@ export class DcConnectionManager {
     private _setupMulti(kind: ConnectionKind): void {
         const connection = this[kind]
 
-        connection.on('key-change', (idx, key) => {
+        connection.on('key-change', (idx, key: Buffer | null) => {
             if (kind !== 'main') {
                 // main connection is responsible for authorization,
                 // and keys are then sent to other connections
@@ -266,51 +266,58 @@ export class DcConnectionManager {
                 this.dcId,
                 idx,
             )
-            this.manager._storage.setAuthKeyFor(this.dcId, key)
 
             // send key to other connections
             Promise.all([
+                this.manager._storage.setAuthKeyFor(this.dcId, key),
                 this.upload.setAuthKey(key),
                 this.download.setAuthKey(key),
                 this.downloadSmall.setAuthKey(key),
-            ]).then(() => {
-                this.upload.notifyKeyChange()
-                this.download.notifyKeyChange()
-                this.downloadSmall.notifyKeyChange()
-            })
+            ])
+                .then(() => {
+                    this.upload.notifyKeyChange()
+                    this.download.notifyKeyChange()
+                    this.downloadSmall.notifyKeyChange()
+                })
+                .catch((e: Error) => this.manager.params._emitError(e))
         })
-        connection.on('tmp-key-change', (idx, key, expires) => {
-            if (kind !== 'main') {
-                this.manager._log.warn(
-                    'got tmp-key-change from non-main connection, ignoring',
+        connection.on(
+            'tmp-key-change',
+            (idx: number, key: Buffer | null, expires: number) => {
+                if (kind !== 'main') {
+                    this.manager._log.warn(
+                        'got tmp-key-change from non-main connection, ignoring',
+                    )
+
+                    return
+                }
+
+                this.manager._log.debug(
+                    'temp key change for dc %d from connection %d',
+                    this.dcId,
+                    idx,
                 )
 
-                return
-            }
-
-            this.manager._log.debug(
-                'temp key change for dc %d from connection %d',
-                this.dcId,
-                idx,
-            )
-            this.manager._storage.setTempAuthKeyFor(
-                this.dcId,
-                idx,
-                key,
-                expires * 1000,
-            )
-
-            // send key to other connections
-            Promise.all([
-                this.upload.setAuthKey(key, true),
-                this.download.setAuthKey(key, true),
-                this.downloadSmall.setAuthKey(key, true),
-            ]).then(() => {
-                this.upload.notifyKeyChange()
-                this.download.notifyKeyChange()
-                this.downloadSmall.notifyKeyChange()
-            })
-        })
+                // send key to other connections
+                Promise.all([
+                    this.manager._storage.setTempAuthKeyFor(
+                        this.dcId,
+                        idx,
+                        key,
+                        expires * 1000,
+                    ),
+                    this.upload.setAuthKey(key, true),
+                    this.download.setAuthKey(key, true),
+                    this.downloadSmall.setAuthKey(key, true),
+                ])
+                    .then(() => {
+                        this.upload.notifyKeyChange()
+                        this.download.notifyKeyChange()
+                        this.downloadSmall.notifyKeyChange()
+                    })
+                    .catch((e: Error) => this.manager.params._emitError(e))
+            },
+        )
 
         connection.on('auth-begin', () => {
             // we need to propagate auth-begin to all connections
@@ -334,7 +341,7 @@ export class DcConnectionManager {
             this.main.requestAuth()
         })
 
-        connection.on('error', (err, conn) => {
+        connection.on('error', (err: Error, conn: SessionConnection) => {
             this.manager.params._emitError(err, conn)
         })
     }
@@ -429,19 +436,21 @@ export class NetworkManager {
         let deviceModel = 'mtcute on '
         let appVersion = 'unknown'
         if (typeof process !== 'undefined' && typeof require !== 'undefined') {
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const os = require('os')
+            const os = require('os') as typeof import('os')
             deviceModel += `${os.type()} ${os.arch()} ${os.release()}`
 
             try {
                 // for production builds
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                appVersion = require('../package.json').version
+
+                appVersion = (require('../package.json') as { version: string })
+                    .version
             } catch (e) {
                 try {
                     // for development builds (additional /src/ in path)
-                    // eslint-disable-next-line @typescript-eslint/no-var-requires
-                    appVersion = require('../../package.json').version
+
+                    appVersion = (
+                        require('../../package.json') as { version: string }
+                    ).version
                 } catch (e) {}
             }
         } else if (typeof navigator !== 'undefined') {
@@ -458,7 +467,7 @@ export class NetworkManager {
             langCode: 'en',
             ...(params.initConnectionOptions ?? {}),
             apiId: params.apiId,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line
             query: null as any,
         }
 
@@ -484,7 +493,7 @@ export class NetworkManager {
             this._lastUpdateTime = Date.now()
 
             if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
-            this._keepAliveInterval = setInterval(async () => {
+            this._keepAliveInterval = setInterval(() => {
                 if (Date.now() - this._lastUpdateTime > 900_000) {
                     // telegram asks to fetch pending updates if there are no updates for 15 minutes.
                     // it is up to the user to decide whether to do it or not
@@ -494,27 +503,21 @@ export class NetworkManager {
                 }
             }, 60_000)
 
-            Promise.resolve(this._storage.getSelf()).then((self) => {
-                if (self?.isBot) {
-                    // bots may receive tmpSessions, which we should respect
-                    this.config.update(true).catch((e) => {
-                        this.params._emitError(e)
-                    })
-                }
-            })
+            Promise.resolve(this._storage.getSelf())
+                .then((self) => {
+                    if (self?.isBot) {
+                        // bots may receive tmpSessions, which we should respect
+                        return this.config.update(true)
+                    }
+                })
+                .catch((e: Error) => this.params._emitError(e))
         })
-        dc.main.on('update', (update) => {
+        dc.main.on('update', (update: tl.TypeUpdates) => {
             this._lastUpdateTime = Date.now()
             this._updateHandler(update)
         })
 
-        dc.loadKeys()
-            .catch((e) => {
-                this.params._emitError(e)
-            })
-            .then(() => {
-                dc.main.ensureConnected()
-            })
+        return dc.loadKeys().then(() => dc.main.ensureConnected())
     }
 
     private _dcCreationPromise: Record<number, Promise<void>> = {}
@@ -574,7 +577,7 @@ export class NetworkManager {
 
         const dc = new DcConnectionManager(this, defaultDc.id, defaultDc)
         this._dcConnections[defaultDc.id] = dc
-        this._switchPrimaryDc(dc)
+        await this._switchPrimaryDc(dc)
     }
 
     private async _exportAuthTo(manager: DcConnectionManager): Promise<void> {
@@ -681,9 +684,9 @@ export class NetworkManager {
             )
         }
 
-        this._storage.setDefaultDc(option)
+        await this._storage.setDefaultDc(option)
 
-        this._switchPrimaryDc(this._dcConnections[newDc])
+        await this._switchPrimaryDc(this._dcConnections[newDc])
     }
 
     private _floodWaitedRequests: Record<string, number> = {}
@@ -738,10 +741,11 @@ export class NetworkManager {
                     this._lastUpdateTime = Date.now()
                 }
 
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return res
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (e: any) {
-                lastError = e
+                lastError = e as Error
 
                 if (e.code && !(e.code in CLIENT_ERRORS)) {
                     this._log.warn(
@@ -811,7 +815,7 @@ export class NetworkManager {
             }
         }
 
-        throw lastError
+        throw lastError!
     }
 
     setUpdateHandler(handler: NetworkManager['_updateHandler']): void {

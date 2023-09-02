@@ -689,7 +689,7 @@ describe('MarkdownMessageEntityParser', () => {
 
             expect(() => md`${unsafeString}`.value).not.throw(Error)
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
+            // @ts-expect-error
             expect(() => md`${unsafeString2}`.value).throw(Error)
         })
     })

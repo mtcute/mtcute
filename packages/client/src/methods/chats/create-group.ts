@@ -24,10 +24,7 @@ export async function createGroup(
 ): Promise<Chat> {
     if (!Array.isArray(users)) users = [users]
 
-    const peers = await this.resolvePeerMany(
-        users as InputPeerLike[],
-        normalizeToInputUser,
-    )
+    const peers = await this.resolvePeerMany(users, normalizeToInputUser)
 
     const res = await this.call({
         _: 'messages.createChat',

@@ -176,7 +176,7 @@ module.exports = {
             files: ['**/*.ts', '**/*.tsx'],
             env: { browser: true, es6: true, node: true },
             extends: [
-                'plugin:@typescript-eslint/recommended',
+                'plugin:@typescript-eslint/strict-type-checked',
                 'plugin:import/typescript',
             ],
             globals: { Atomics: 'readonly', SharedArrayBuffer: 'readonly' },
@@ -213,6 +213,18 @@ module.exports = {
                 ],
                 '@typescript-eslint/no-non-null-assertion': 'off', // todo MTQ-36
                 '@typescript-eslint/no-empty-function': 'off',
+                '@typescript-eslint/no-confusing-void-expression': 'off',
+                '@typescript-eslint/no-unnecessary-condition': 'off',
+                '@typescript-eslint/no-var-requires': 'off',
+                '@typescript-eslint/restrict-template-expressions': [
+                    'error',
+                    { allowNever: true },
+                ],
+                '@typescript-eslint/no-unsafe-enum-comparison': 'off',
+                '@typescript-eslint/no-invalid-void-type': 'off',
+                '@typescript-eslint/unbound-method': 'off',
+                '@typescript-eslint/no-dynamic-delete': 'off',
+                '@typescript-eslint/no-unsafe-member-access': 'off',
             },
             settings: {
                 'import/resolver': {

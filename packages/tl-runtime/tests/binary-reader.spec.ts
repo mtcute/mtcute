@@ -1,3 +1,5 @@
+// eslint-disable-next-line max-len
+/* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return */
 import { expect } from 'chai'
 import { randomBytes } from 'crypto'
 import Long from 'long'

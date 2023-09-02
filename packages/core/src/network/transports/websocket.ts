@@ -1,5 +1,4 @@
 import EventEmitter from 'events'
-import type WebSocket from 'ws'
 
 import { tl } from '@mtcute/tl'
 
@@ -14,13 +13,13 @@ let ws: {
 
 if (typeof window === 'undefined' || typeof window.WebSocket === 'undefined') {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ws = require('ws')
     } catch (e) {
         ws = null
     }
 } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ws = window.WebSocket as any
+    ws = window.WebSocket
 }
 
 const subdomainsMap: Record<string, string> = {
@@ -93,7 +92,9 @@ export abstract class BaseWebSocketTransport
     }
 
     connect(dc: tl.RawDcOption, testMode: boolean): void {
-        if (this._state !== TransportState.Idle) { throw new Error('Transport is not IDLE') }
+        if (this._state !== TransportState.Idle) {
+            throw new Error('Transport is not IDLE')
+        }
 
         if (!this.packetCodecInitialized) {
             this._packetCodec.setup?.(this._crypto, this.log)
@@ -117,8 +118,9 @@ export abstract class BaseWebSocketTransport
         this._socket.binaryType = 'arraybuffer'
 
         this._socket.addEventListener('message', (evt) =>
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            this._packetCodec.feed(typedArrayToBuffer(evt.data as any)),
+            this._packetCodec.feed(
+                typedArrayToBuffer(evt.data as NodeJS.TypedArray),
+            ),
         )
         this._socket.addEventListener('open', this.handleConnect.bind(this))
         this._socket.addEventListener('error', this.handleError.bind(this))
@@ -138,22 +140,32 @@ export abstract class BaseWebSocketTransport
         this._packetCodec.reset()
     }
 
-    async handleError({ error }: { error: Error }): Promise<void> {
+    handleError(event: Event | { error: Error }): void {
+        const error =
+            'error' in event ?
+                event.error :
+                new Error('unknown WebSocket error')
+
         this.log.error('error: %s', error.stack)
         this.emit('error', error)
     }
 
-    async handleConnect(): Promise<void> {
+    handleConnect(): void {
         this.log.info('connected')
-        const initialMessage = await this._packetCodec.tag()
 
-        this._socket!.send(initialMessage)
-        this._state = TransportState.Ready
-        this.emit('ready')
+        Promise.resolve(this._packetCodec.tag())
+            .then((initialMessage) => {
+                this._socket!.send(initialMessage)
+                this._state = TransportState.Ready
+                this.emit('ready')
+            })
+            .catch((err) => this.emit('error', err))
     }
 
     async send(bytes: Buffer): Promise<void> {
-        if (this._state !== TransportState.Ready) { throw new Error('Transport is not READY') }
+        if (this._state !== TransportState.Ready) {
+            throw new Error('Transport is not READY')
+        }
 
         const framed = await this._packetCodec.encode(bytes)
 

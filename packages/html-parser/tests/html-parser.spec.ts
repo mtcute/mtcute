@@ -620,7 +620,7 @@ describe('HtmlMessageEntityParser', () => {
 
             expect(() => html`${unsafeString}`.value).not.throw(Error)
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
+            // @ts-expect-error
             expect(() => html`${unsafeString2}`.value).throw(Error)
         })
     })

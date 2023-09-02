@@ -239,7 +239,7 @@ export class StickerSet {
      */
     getStickersByEmoji(emoji: string): StickerInfo[] {
         return this.stickers.filter(
-            (it) => it.alt === emoji || it.emoji.indexOf(emoji) !== -1,
+            (it) => it.alt === emoji || it.emoji.includes(emoji),
         )
     }
 
@@ -271,8 +271,8 @@ export class StickerSet {
     private _getInputDocument(idx: number): tl.TypeInputDocument {
         if (!this.full) throw new MtEmptyError()
 
-        if (idx < 0) idx = this.full!.documents.length + idx
-        const doc = this.full!.documents[idx] as tl.RawDocument
+        if (idx < 0) idx = this.full.documents.length + idx
+        const doc = this.full.documents[idx] as tl.RawDocument
 
         if (!doc) {
             throw new RangeError(`Sticker set does not have sticker ${idx}`)

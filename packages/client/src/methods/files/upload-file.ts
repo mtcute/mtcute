@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fromBuffer as fileTypeFromBuffer } from 'file-type'
 import type { ReadStream } from 'fs'
 import { Readable } from 'stream'
@@ -15,12 +14,12 @@ import {
     readBytesFromStream,
 } from '../../utils/stream-utils'
 
-let fs: any = null
-let path: any = null
+let fs: typeof import('fs') | null = null
+let path: typeof import('path') | null = null
 
 try {
-    fs = require('fs')
-    path = require('path')
+    fs = require('fs') as typeof import('fs')
+    path = require('path') as typeof import('path')
 } catch (e) {}
 
 const OVERRIDE_MIME: Record<string, string> = {
@@ -132,15 +131,12 @@ export async function uploadFile(
     }
 
     if (fs && file instanceof fs.ReadStream) {
-        fileName = path.basename((file as ReadStream).path.toString())
+        fileName = path!.basename(file.path.toString())
         fileSize = await new Promise((res, rej) => {
-            fs.stat(
-                (file as ReadStream).path.toString(),
-                (err?: any, stat?: any) => {
-                    if (err) rej(err)
-                    res(stat.size)
-                },
-            )
+            fs!.stat((file as ReadStream).path.toString(), (err, stat) => {
+                if (err) rej(err)
+                res(stat.size)
+            })
         })
         // fs.ReadStream is a subclass of Readable, no conversion needed
     }
@@ -171,7 +167,7 @@ export async function uploadFile(
 
             if (idx > -1) {
                 const raw = disposition.slice(idx + 9).split(';')[0]
-                fileName = JSON.parse(raw)
+                fileName = JSON.parse(raw) as string
             }
         }
 

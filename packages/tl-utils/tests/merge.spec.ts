@@ -91,8 +91,8 @@ describe('mergeTlSchemas', () => {
         ).eq(expected.join('\n'))
     }
 
-    it('merges different constructors', () => {
-        test(
+    it('merges different constructors', async () => {
+        await test(
             [
                 ['testClass = Test;'],
                 ['testClass2 = Test;'],
@@ -106,8 +106,8 @@ describe('mergeTlSchemas', () => {
         )
     })
 
-    it('merges true flags in constructors', () => {
-        test(
+    it('merges true flags in constructors', async () => {
+        await test(
             [
                 ['test foo:flags.0?true = Test;'],
                 ['test bar:flags.0?true = Test;'],
@@ -118,8 +118,8 @@ describe('mergeTlSchemas', () => {
         )
     })
 
-    it('resolves conflict using user-provided option', () => {
-        test(
+    it('resolves conflict using user-provided option', async () => {
+        await test(
             [
                 ['test foo:int = Test;'],
                 ['test bar:int = Test;'],
@@ -128,7 +128,7 @@ describe('mergeTlSchemas', () => {
             0,
             'test foo:int = Test;',
         )
-        test(
+        await test(
             [
                 ['test foo:int = Test;'],
                 ['test bar:int = Test;'],
@@ -137,11 +137,15 @@ describe('mergeTlSchemas', () => {
             1,
             'test foo:int = Test;',
         )
-        test([['test foo:int = Test;'], [], ['test bar:int = Test;']], 1, '')
+        await test(
+            [['test foo:int = Test;'], [], ['test bar:int = Test;']],
+            1,
+            '',
+        )
     })
 
-    it('merges comments', () => {
-        test(
+    it('merges comments', async () => {
+        await test(
             [
                 ['test foo:flags.0?true = Test;'],
                 ['// test ctor', 'test bar:flags.0?true = Test;'],
@@ -156,8 +160,8 @@ describe('mergeTlSchemas', () => {
         )
     })
 
-    it('merges arguments comments', () => {
-        test(
+    it('merges arguments comments', async () => {
+        await test(
             [
                 ['test foo:flags.0?true = Test;'],
                 ['// @bar bar comment', 'test bar:flags.0?true = Test;'],

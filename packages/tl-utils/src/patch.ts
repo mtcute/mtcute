@@ -5,7 +5,8 @@ import { generateWriterCodeForTlEntries } from './codegen/writer'
 import { parseTlToEntries } from './parse'
 
 function evalForResult<T>(js: string): T {
-    return new Function(js)()
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    return new Function(js)() as T
 }
 
 /**
@@ -57,7 +58,7 @@ export function patchRuntimeTlSchema(
         },
         // ts is not smart enough
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+        // @ts-expect-error
         writerMap: {
             ...writers,
             ...newWriters,

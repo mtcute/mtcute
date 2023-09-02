@@ -1,16 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import type * as exitHookNs from 'exit-hook'
+import type * as fsNs from 'fs'
+
 import { JsonMemoryStorage } from './json'
 
-let fs: any = null
+type fs = typeof fsNs
+let fs: fs | null = null
 
 try {
-    fs = require('fs')
+    fs = require('fs') as fs
 } catch (e) {}
 
-let exitHook: any = null
+type exitHook = typeof exitHookNs
+let exitHook: exitHook | null = null
 
 try {
-    exitHook = require('exit-hook')
+    exitHook = require('exit-hook') as exitHook
 } catch (e) {}
 
 export class JsonFileStorage extends JsonMemoryStorage {
@@ -47,7 +51,9 @@ export class JsonFileStorage extends JsonMemoryStorage {
     ) {
         super()
 
-        if (!fs || !fs.readFile) { throw new Error('Node fs module is not available!') }
+        if (!fs || !fs.readFile) {
+            throw new Error('Node fs module is not available!')
+        }
 
         this._filename = filename
         this._safe = params?.safe ?? true
@@ -60,7 +66,9 @@ export class JsonFileStorage extends JsonMemoryStorage {
         }
 
         if (this._cleanup) {
-            this._unsubscribe = exitHook(this._onProcessExit.bind(this))
+            this._unsubscribe = exitHook!.default(
+                this._onProcessExit.bind(this),
+            )
         }
     }
 
@@ -68,12 +76,8 @@ export class JsonFileStorage extends JsonMemoryStorage {
         try {
             this._loadJson(
                 await new Promise((res, rej) =>
-                    fs.readFile(
-                        this._filename,
-                        'utf-8',
-                        (err?: Error, data?: string) =>
-
-                            err ? rej(err) : res(data!),
+                    fs!.readFile(this._filename, 'utf-8', (err, data) =>
+                        err ? rej(err) : res(data),
                     ),
                 ),
             )
@@ -82,16 +86,16 @@ export class JsonFileStorage extends JsonMemoryStorage {
 
     save(): Promise<void> {
         return new Promise((resolve, reject) => {
-            fs.writeFile(
+            fs!.writeFile(
                 this._safe ? this._filename + '.tmp' : this._filename,
                 this._saveJson(),
-                (err?: Error) => {
+                (err) => {
                     if (err) reject(err)
                     else if (this._safe) {
-                        fs.rename(
+                        fs!.rename(
                             this._filename + '.tmp',
                             this._filename,
-                            (err?: any) => {
+                            (err) => {
                                 if (err && err.code !== 'ENOENT') reject(err)
                                 else resolve()
                             },
@@ -106,12 +110,12 @@ export class JsonFileStorage extends JsonMemoryStorage {
         // on exit handler must be synchronous, thus we use sync methods here
 
         try {
-            fs.writeFileSync(this._filename, this._saveJson())
+            fs!.writeFileSync(this._filename, this._saveJson())
         } catch (e) {}
 
         if (this._safe) {
             try {
-                fs.unlinkSync(this._filename + '.tmp')
+                fs!.unlinkSync(this._filename + '.tmp')
             } catch (e) {}
         }
     }

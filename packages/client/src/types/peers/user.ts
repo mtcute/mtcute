@@ -324,7 +324,7 @@ export class User {
         return new FormattedString(
             this.client.getParseMode(parseMode).unparse(text, [
                 {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    // eslint-disable-next-line
                     raw: undefined as any,
                     type: 'text_mention',
                     offset: 0,
@@ -332,7 +332,7 @@ export class User {
                     userId: this.raw.id,
                 },
             ]),
-            parseMode!,
+            parseMode,
         )
     }
 
@@ -383,7 +383,7 @@ export class User {
         return new FormattedString(
             this.client.getParseMode(parseMode).unparse(text, [
                 {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    // eslint-disable-next-line
                     raw: undefined as any,
                     type: 'text_link',
                     offset: 0,
@@ -393,7 +393,7 @@ export class User {
                     }&hash=${this.raw.accessHash.toString(16)}`,
                 },
             ]),
-            parseMode!,
+            parseMode,
         )
     }
 

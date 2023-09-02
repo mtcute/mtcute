@@ -97,7 +97,11 @@ export async function answerInlineQuery(
 ): Promise<void> {
     if (!params) params = {}
 
-    const [gallery, tlResults] = await BotInline._convertToTl(this, results, params!.parseMode)
+    const [gallery, tlResults] = await BotInline._convertToTl(
+        this,
+        results,
+        params.parseMode,
+    )
 
     await this.call({
         _: 'messages.setInlineBotResults',

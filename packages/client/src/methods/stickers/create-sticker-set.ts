@@ -106,7 +106,10 @@ export async function createStickerSet(
         )
     }
 
-    const owner = normalizeToInputUser(await this.resolvePeer(params.owner), params.owner)
+    const owner = normalizeToInputUser(
+        await this.resolvePeer(params.owner),
+        params.owner,
+    )
 
     const inputStickers: tl.TypeInputStickerSetItem[] = []
 
@@ -124,7 +127,7 @@ export async function createStickerSet(
             maskCoords: sticker.maskPosition ?
                 {
                     _: 'maskCoords',
-                    n: MASK_POS[sticker.maskPosition.point as keyof typeof MASK_POS],
+                    n: MASK_POS[sticker.maskPosition.point],
                     x: sticker.maskPosition.x,
                     y: sticker.maskPosition.y,
                     zoom: sticker.maskPosition.scale,

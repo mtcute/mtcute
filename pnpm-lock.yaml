@@ -157,6 +157,9 @@ importers:
       '@types/ws':
         specifier: 8.5.4
         version: 8.5.4
+      exit-hook:
+        specifier: ^4.0.0
+        version: 4.0.0
       ws:
         specifier: 8.13.0
         version: 8.13.0
@@ -2440,6 +2443,11 @@ packages:
       onetime: 6.0.0
       signal-exit: 3.0.7
       strip-final-newline: 3.0.0
+    dev: true
+
+  /exit-hook@4.0.0:
+    resolution: {integrity: sha512-Fqs7ChZm72y40wKjOFXBKg7nJZvQJmewP5/7LtePDdnah/+FH9Hp5sgMujSCMPXlxOAW2//1jrW9pnsY7o20vQ==}
+    engines: {node: '>=18'}
     dev: true
 
   /exit-on-epipe@1.0.1:

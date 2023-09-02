@@ -87,7 +87,7 @@ export async function setInlineGameScore(
 
     const user = normalizeToInputUser(await this.resolvePeer(userId), userId)
 
-    const id = await normalizeInlineId(messageId)
+    const id = normalizeInlineId(messageId)
 
     await this.call(
         {

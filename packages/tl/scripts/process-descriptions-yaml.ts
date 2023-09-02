@@ -66,7 +66,7 @@ export function applyDescriptionsYamlFile(
         prefix: string,
     ) {
         for (const name in obj) {
-            objIndex[prefix + name] = obj[name]
+            objIndex[prefix + name] = obj[name]!
         }
     }
 
@@ -75,7 +75,7 @@ export function applyDescriptionsYamlFile(
 
     // process byObjects
     for (const name in byObjects) {
-        const rules = byObjects[name]
+        const rules = byObjects[name]!
         const obj = objIndex[name]
 
         if (!obj) continue
@@ -88,7 +88,7 @@ export function applyDescriptionsYamlFile(
         if (rules.arguments) {
             for (const arg in rules.arguments) {
                 const repl = unwrapMaybe(
-                    rules.arguments[arg],
+                    rules.arguments[arg]!,
                     obj.arguments !== undefined && arg in obj.arguments,
                 )
 
@@ -102,15 +102,14 @@ export function applyDescriptionsYamlFile(
 
     // process byArguments
     for (const i in objIndex) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const obj = objIndex[i] as any
+        const obj = objIndex[i]!
 
         for (const arg in byArguments) {
             if (obj.arguments && !(arg in obj.arguments)) continue
 
             const repl = unwrapMaybe(
-                byArguments[arg],
-                Boolean(obj.arguments) && arg in obj.arguments,
+                byArguments[arg]!,
+                Boolean(obj.arguments && arg in obj.arguments),
             )
 
             if (repl) {
@@ -126,7 +125,7 @@ export function applyDescriptionsYamlFile(
 
         if (!rule._cached) {
             let flags = rule.flags || ''
-            if (flags.indexOf('g') === -1) flags += 'g'
+            if (!flags.includes('g')) flags += 'g'
 
             rule._cached = new RegExp(rule.regex, flags)
         }
@@ -135,7 +134,7 @@ export function applyDescriptionsYamlFile(
     }
 
     for (const i in objIndex) {
-        const obj = objIndex[i]
+        const obj = objIndex[i]!
 
         byRegex.forEach((rule) => {
             obj.comment = applyRegex(obj.comment, rule)

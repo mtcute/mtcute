@@ -32,7 +32,7 @@ export class ConfigManager {
 
         if (this._updateTimeout) clearTimeout(this._updateTimeout)
         this._updateTimeout = setTimeout(
-            () => this.update(),
+            () => void this.update().catch(() => {}),
             (config.expires - Date.now() / 1000) * 1000,
         )
 

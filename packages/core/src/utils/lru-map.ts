@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-return */
 // ^^ because of performance reasons
 import { LongMap } from './long-utils'
 
@@ -130,7 +131,7 @@ export class LruMap<K extends string | number, V> {
             if (oldest) {
                 if (oldest.p) {
                     this._last = oldest.p
-                    this._last!.n = undefined
+                    this._last.n = undefined
                 } else {
                     // exhausted
                     this._last = undefined

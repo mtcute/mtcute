@@ -210,7 +210,9 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         if (tempIndex !== undefined) {
             const k = `${dcId}:${tempIndex}`
 
-            if (Date.now() > (this._state.authKeysTempExpiry[k] ?? 0)) { return null }
+            if (Date.now() > (this._state.authKeysTempExpiry[k] ?? 0)) {
+                return null
+            }
 
             return this._state.authKeysTemp[k]
         }
@@ -248,7 +250,9 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
                 }
             }
 
-            if (peer.username) { this._state.usernameIndex[peer.username.toLowerCase()] = peer.id }
+            if (peer.username) {
+                this._state.usernameIndex[peer.username.toLowerCase()] = peer.id
+            }
             if (peer.phone) this._state.phoneIndex[peer.phone] = peer.id
             this._state.entities[peer.id] = peer
         }
@@ -357,7 +361,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
 
     // IStateStorage implementation
 
-    getState(key: string): unknown | null {
+    getState(key: string): unknown {
         const val = this._state.fsm[key]
         if (!val) return null
 

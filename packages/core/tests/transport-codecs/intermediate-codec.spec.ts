@@ -12,7 +12,7 @@ describe('IntermediatePacketCodec', () => {
 
     it('should correctly parse immediate framing', (done) => {
         const codec = new IntermediatePacketCodec()
-        codec.on('packet', (data) => {
+        codec.on('packet', (data: Buffer) => {
             expect([...data]).eql([5, 1, 2, 3, 4])
             done()
         })
@@ -21,7 +21,7 @@ describe('IntermediatePacketCodec', () => {
 
     it('should correctly parse incomplete framing', (done) => {
         const codec = new IntermediatePacketCodec()
-        codec.on('packet', (data) => {
+        codec.on('packet', (data: Buffer) => {
             expect([...data]).eql([5, 1, 2, 3, 4])
             done()
         })
@@ -34,7 +34,7 @@ describe('IntermediatePacketCodec', () => {
 
         let number = 0
 
-        codec.on('packet', (data) => {
+        codec.on('packet', (data: Buffer) => {
             if (number === 0) {
                 expect([...data]).eql([5, 1, 2, 3, 4])
                 number = 1
@@ -51,7 +51,7 @@ describe('IntermediatePacketCodec', () => {
     it('should correctly parse transport errors', (done) => {
         const codec = new IntermediatePacketCodec()
 
-        codec.on('error', (err) => {
+        codec.on('error', (err: TransportError) => {
             expect(err).to.have.instanceOf(TransportError)
             expect(err.code).eq(404)
             done()
@@ -63,7 +63,7 @@ describe('IntermediatePacketCodec', () => {
     it('should reset when called reset()', (done) => {
         const codec = new IntermediatePacketCodec()
 
-        codec.on('packet', (data) => {
+        codec.on('packet', (data: Buffer) => {
             expect([...data]).eql([1, 2, 3, 4, 5])
             done()
         })
