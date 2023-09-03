@@ -975,59 +975,55 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Set a score of a user in a game
      *
-     * @param chatId  Chat where the game was found
-     * @param message  ID of the message where the game was found
-     * @param userId  ID of the user who has scored
-     * @param score  The new score (must be >0)
      * @param params
      * @returns  The modified message
      */
-    setGameScore(
-        chatId: InputPeerLike,
-        message: number,
-        userId: InputPeerLike,
-        score: number,
-        params?: {
-            /**
-             * When `true`, the game message will not be modified
-             * to include the new score
-             */
-            noEdit?: boolean
+    setGameScore(params: {
+        /** Chat where the game was found */
+        chatId: InputPeerLike
+        /** ID of the message where the game was found */
+        message: number
+        /** ID of the user who has scored */
+        userId: InputPeerLike
+        /** The new score (must be >0) */
+        score: number
+        /**
+         * When `true`, the game message will not be modified
+         * to include the new score
+         */
+        noEdit?: boolean
 
-            /**
-             * Whether to allow user's score to decrease.
-             * This can be useful when fixing mistakes or banning cheaters
-             */
-            force?: boolean
-        }
-    ): Promise<Message>
+        /**
+         * Whether to allow user's score to decrease.
+         * This can be useful when fixing mistakes or banning cheaters
+         */
+        force?: boolean
+    }): Promise<Message>
     /**
      * Set a score of a user in a game contained in
      * an inline message
      *
-     * @param messageId  ID of the inline message
-     * @param userId  ID of the user who has scored
-     * @param score  The new score (must be >0)
      * @param params
      */
-    setInlineGameScore(
-        messageId: string | tl.TypeInputBotInlineMessageID,
-        userId: InputPeerLike,
-        score: number,
-        params?: {
-            /**
-             * When `true`, the game message will not be modified
-             * to include the new score
-             */
-            noEdit?: boolean
+    setInlineGameScore(params: {
+        /** ID of the inline message */
+        messageId: string | tl.TypeInputBotInlineMessageID
+        /** ID of the user who has scored */
+        userId: InputPeerLike
+        /** The new score (must be >0) */
+        score: number
+        /**
+         * When `true`, the game message will not be modified
+         * to include the new score
+         */
+        noEdit?: boolean
 
-            /**
-             * Whether to allow user's score to decrease.
-             * This can be useful when fixing mistakes or banning cheaters
-             */
-            force?: boolean
-        }
-    ): Promise<void>
+        /**
+         * Whether to allow user's score to decrease.
+         * This can be useful when fixing mistakes or banning cheaters
+         */
+        force?: boolean
+    }): Promise<void>
     /**
      * Set or delete commands for the current bot and the given scope
      *

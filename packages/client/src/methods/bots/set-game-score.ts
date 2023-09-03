@@ -8,21 +8,21 @@ import { normalizeToInputUser } from '../../utils/peer-utils'
 /**
  * Set a score of a user in a game
  *
- * @param chatId  Chat where the game was found
- * @param message  ID of the message where the game was found
- * @param userId  ID of the user who has scored
- * @param score  The new score (must be >0)
  * @param params
  * @returns  The modified message
  * @internal
  */
 export async function setGameScore(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    message: number,
-    userId: InputPeerLike,
-    score: number,
-    params?: {
+    params: {
+        /** Chat where the game was found */
+        chatId: InputPeerLike
+        /** ID of the message where the game was found */
+        message: number
+        /** ID of the user who has scored */
+        userId: InputPeerLike
+        /** The new score (must be >0) */
+        score: number
         /**
          * When `true`, the game message will not be modified
          * to include the new score
@@ -36,7 +36,7 @@ export async function setGameScore(
         force?: boolean
     },
 ): Promise<Message> {
-    if (!params) params = {}
+    const { chatId, message, userId, score, noEdit, force } = params
 
     const user = normalizeToInputUser(await this.resolvePeer(userId), userId)
     const chat = await this.resolvePeer(chatId)
@@ -47,8 +47,8 @@ export async function setGameScore(
         id: message,
         userId: user,
         score,
-        editMessage: !params.noEdit,
-        force: params.force,
+        editMessage: !noEdit,
+        force,
     })
 
     return this._findMessageInUpdate(res, true)
@@ -58,18 +58,18 @@ export async function setGameScore(
  * Set a score of a user in a game contained in
  * an inline message
  *
- * @param messageId  ID of the inline message
- * @param userId  ID of the user who has scored
- * @param score  The new score (must be >0)
  * @param params
  * @internal
  */
 export async function setInlineGameScore(
     this: TelegramClient,
-    messageId: string | tl.TypeInputBotInlineMessageID,
-    userId: InputPeerLike,
-    score: number,
-    params?: {
+    params: {
+        /** ID of the inline message */
+        messageId: string | tl.TypeInputBotInlineMessageID
+        /** ID of the user who has scored */
+        userId: InputPeerLike
+        /** The new score (must be >0) */
+        score: number
         /**
          * When `true`, the game message will not be modified
          * to include the new score
@@ -83,7 +83,7 @@ export async function setInlineGameScore(
         force?: boolean
     },
 ): Promise<void> {
-    if (!params) params = {}
+    const { messageId, userId, score, noEdit, force } = params
 
     const user = normalizeToInputUser(await this.resolvePeer(userId), userId)
 
@@ -95,8 +95,8 @@ export async function setInlineGameScore(
             id,
             userId: user,
             score,
-            editMessage: !params.noEdit,
-            force: params.force,
+            editMessage: !noEdit,
+            force: force,
         },
         { dcId: id.dcId },
     )
