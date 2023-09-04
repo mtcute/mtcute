@@ -1,7 +1,6 @@
 {
     "compilerOptions": {
         "outDir": "./dist",
-        "baseUrl": "./",
         "module": "commonjs",
         "target": "es2020",
         "allowJs": true,
@@ -17,7 +16,7 @@
         "stripInternal": true,
         "skipLibCheck": true,
         "paths": {
-            "~scripts/*": ["scripts/*"],
+            "~scripts/*": ["./scripts/*"],
         },
         "typeRoots": [
             "./node_modules/@types",
