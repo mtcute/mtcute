@@ -174,7 +174,7 @@ export async function start(
 
         return me
     } catch (e) {
-        if (!(e instanceof tl.errors.AuthKeyUnregisteredError)) throw e
+        if (!tl.RpcError.is(e, 'AUTH_KEY_UNREGISTERED')) throw e
     }
 
     if (!params.phone && !params.botToken) {
@@ -221,19 +221,21 @@ export async function start(
 
     for (;;) {
         const code = await resolveMaybeDynamic(params.code)
-        if (!code) throw new tl.errors.PhoneCodeEmptyError()
+        if (!code) throw new tl.RpcError(400, 'PHONE_CODE_EMPTY')
 
         try {
             result = await this.signIn(phone, sentCode.phoneCodeHash, code)
         } catch (e) {
-            if (e instanceof tl.errors.SessionPasswordNeededError) {
+            if (!tl.RpcError.is(e)) throw e
+
+            if (e.is('SESSION_PASSWORD_NEEDED')) {
                 has2fa = true
                 break
             } else if (
-                e instanceof tl.errors.PhoneCodeEmptyError ||
-                e instanceof tl.errors.PhoneCodeExpiredError ||
-                e instanceof tl.errors.PhoneCodeHashEmptyError ||
-                e instanceof tl.errors.PhoneCodeInvalidError
+                e.is('PHONE_CODE_EMPTY') ||
+                e.is('PHONE_CODE_EXPIRED') ||
+                e.is('PHONE_CODE_INVALID') ||
+                e.is('PHONE_CODE_HASH_EMPTY')
             ) {
                 if (typeof params.code !== 'function') {
                     throw new MtArgumentError('Provided code was invalid')
@@ -270,7 +272,7 @@ export async function start(
                     throw new MtArgumentError('Provided password was invalid')
                 }
 
-                if (e instanceof tl.errors.PasswordHashInvalidError) {
+                if (tl.RpcError.is(e, 'PASSWORD_HASH_INVALID')) {
                     if (params.invalidCodeCallback) {
                         await params.invalidCodeCallback('password')
                     } else {

@@ -1,6 +1,6 @@
 import { TlEntry, TlErrors, TlFullSchema, TlTypeModifiers } from '../types'
 import { groupTlEntriesByNamespace, splitNameToNamespace } from '../utils'
-import { errorCodeToClassName, generateCodeForErrors } from './errors'
+import { generateCodeForErrors } from './errors'
 import { camelToPascal, indent, jsComment, snakeToCamel } from './utils'
 
 /**
@@ -117,9 +117,7 @@ export function generateTypescriptDefinitionsForTlEntry(
             if (errors.throws[entry.name]) {
                 comment +=
                     '\n\nThis method *may* throw one of these errors: ' +
-                    errors.throws[entry.name]
-                        .map((it) => `{$see ${errorCodeToClassName(it)}`)
-                        .join(', ')
+                    errors.throws[entry.name].join(', ')
             }
         }
     }
@@ -250,15 +248,16 @@ export function generateTypescriptDefinitionsForTlSchema(
     )
 
     if (errors) {
-        ts += '\n    namespace errors {\n'
-        js += 'ns.errors = {};\n(function(ns){\n'
+        // ts += '\n    namespace errors {\n'
+        // js += 'ns.errors = {};\n(function(ns){\n'
 
         const [_ts, _js] = generateCodeForErrors(errors, 'ns.')
-        ts += indent(8, _ts)
+        // ts += indent(8, _ts)
+        ts += _ts
         js += _js
 
-        ts += '}\n'
-        js += '})(ns.errors);\n'
+        // ts += '}\n'
+        // js += '})(ns.errors);\n'
     }
 
     const namespaces = groupTlEntriesByNamespace(schema.entries)

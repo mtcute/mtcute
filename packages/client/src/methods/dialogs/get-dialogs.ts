@@ -134,7 +134,9 @@ export async function* getDialogs(
             return it.id === params!.folder || it.title === params!.folder
         })
 
-        if (!found) { throw new MtArgumentError(`Could not find folder ${params.folder}`) }
+        if (!found) {
+            throw new MtArgumentError(`Could not find folder ${params.folder}`)
+        }
 
         filters = found as tl.RawDialogFilter
     } else {
@@ -160,7 +162,9 @@ export async function* getDialogs(
                 !filters ||
                 filters._ === 'dialogFilterDefault' ||
                 !filters.pinnedPeers.length
-            ) { return null }
+            ) {
+                return null
+            }
             const res = await this.call({
                 _: 'messages.getPeerDialogs',
                 peers: filters.pinnedPeers.map((peer) => ({
@@ -229,8 +233,7 @@ export async function* getDialogs(
         }
     }
 
-    const filterFolder = filters ?
-    // if pinned is `only`, this wouldn't be reached
+    const filterFolder = filters ? // if pinned is `only`, this wouldn't be reached
     // if pinned is `exclude`, we want to exclude them
     // if pinned is `include`, we already yielded them, so we also want to exclude them
     // if pinned is `keep`, we want to keep them
@@ -266,7 +269,7 @@ export async function* getDialogs(
         const last = dialogs[dialogs.length - 1]
         offsetPeer = last.chat.inputPeer
         offsetId = last.raw.topMessage
-        offsetDate = normalizeDate(last.lastMessage.date)!
+        offsetDate = normalizeDate(last.lastMessage?.date) ?? 0
 
         for (const d of dialogs) {
             if (filterFolder && !filterFolder(d)) continue

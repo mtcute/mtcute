@@ -10,7 +10,7 @@ import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
-    MtNotFoundError,
+    MtPeerNotFoundError,
     MtTypeAssertionError,
 } from '../../types'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
@@ -72,7 +72,7 @@ export async function resolvePeer(
                 }
             }
 
-            throw new MtNotFoundError(
+            throw new MtPeerNotFoundError(
                 `Could not find a peer by phone ${peerId}`,
             )
         } else {
@@ -97,7 +97,7 @@ export async function resolvePeer(
                         // no access hash, we can't use it
                         // this may happen when bot resolves a username
                         // of a user who hasn't started a conversation with it
-                        throw new MtNotFoundError(
+                        throw new MtPeerNotFoundError(
                             `Peer (user) with username ${peerId} was found, but it has no access hash`,
                         )
                     }
@@ -131,7 +131,7 @@ export async function resolvePeer(
 
                     if (!found.accessHash) {
                         // shouldn't happen? but just in case
-                        throw new MtNotFoundError(
+                        throw new MtPeerNotFoundError(
                             `Peer (channel) with username ${peerId} was found, but it has no access hash`,
                         )
                     }
@@ -151,7 +151,7 @@ export async function resolvePeer(
                 )
             }
 
-            throw new MtNotFoundError(
+            throw new MtPeerNotFoundError(
                 `Could not find a peer by username ${peerId}`,
             )
         }
@@ -178,7 +178,7 @@ export async function resolvePeer(
             if (found && found._ === 'user') {
                 if (!found.accessHash) {
                     // shouldn't happen? but just in case
-                    throw new MtNotFoundError(
+                    throw new MtPeerNotFoundError(
                         `Peer (user) with username ${peerId} was found, but it has no access hash`,
                     )
                 }
@@ -235,7 +235,7 @@ export async function resolvePeer(
             ) {
                 if (!found.accessHash) {
                     // shouldn't happen? but just in case
-                    throw new MtNotFoundError(
+                    throw new MtPeerNotFoundError(
                         `Peer (channel) with username ${peerId} was found, but it has no access hash`,
                     )
                 }
@@ -251,5 +251,5 @@ export async function resolvePeer(
         }
     }
 
-    throw new MtNotFoundError(`Could not find a peer by ID ${peerId}`)
+    throw new MtPeerNotFoundError(`Could not find a peer by ID ${peerId}`)
 }

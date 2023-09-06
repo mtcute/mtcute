@@ -23,7 +23,7 @@
         "@mtcute/tl-utils": "workspace:^1.0.0",
         "@types/js-yaml": "^4.0.5",
         "cheerio": "1.0.0-rc.12",
-        "csv-parser": "3.0.0",
+        "csv-parse": "^5.5.0",
         "js-yaml": "4.1.0"
     },
     "typedoc": {

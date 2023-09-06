@@ -237,11 +237,6 @@ export interface TlError {
      */
     description?: string
 
-    /**
-     * Whether this is a "virtual" error (only thrown by mtcute itself)
-     */
-    virtual?: true
-
     // internal fields used by generator
 
     /** @hidden */
@@ -255,9 +250,9 @@ export interface TlError {
  */
 export interface TlErrors {
     /**
-     * Base errors
+     * Base errors (map of error names to error code, e.g. `BAD_REQUEST: 400`)
      */
-    base: TlError[]
+    base: Record<string, number>
 
     /**
      * Index of errors by name
@@ -275,6 +270,11 @@ export interface TlErrors {
      * Index of the methods only usable by user
      */
     userOnly: Record<string, 1>
+
+    /**
+     * Index of the methods only usable by bots
+     */
+    botOnly: Record<string, 1>
 }
 
 /**

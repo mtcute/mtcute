@@ -3,7 +3,7 @@ import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
-import { MtArgumentError } from '../errors'
+import { MtArgumentError, MtMessageNotFoundError } from '../errors'
 import { Message } from '../messages'
 import { PeersIndex, User } from '../peers'
 import { makeInspectable } from '../utils'
@@ -182,11 +182,15 @@ export class CallbackQuery {
             )
         }
 
-        const msg = await this.client.getMessages(
-            getMarkedPeerId(this.raw.peer),
-            this.raw.msgId,
-        )
-        if (!msg) throw new tl.errors.MessageNotFoundError()
+        const msg = await this.client.getMessages(this.raw.peer, this.raw.msgId)
+
+        if (!msg) {
+            throw new MtMessageNotFoundError(
+                getMarkedPeerId(this.raw.peer),
+                this.raw.msgId,
+                'with button',
+            )
+        }
 
         return msg
     }

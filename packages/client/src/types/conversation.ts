@@ -7,7 +7,7 @@ import {
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../client'
-import { MtArgumentError } from './errors'
+import { MtArgumentError, MtTimeoutError } from './errors'
 import { InputMediaLike } from './media'
 import { Message } from './messages'
 import { FormattedString } from './parser'
@@ -101,14 +101,12 @@ export class Conversation {
         this._chatId = getMarkedPeerId(this._inputPeer)
 
         const dialog = await this.client.getPeerDialogs(this._inputPeer)
+        const lastMessage = dialog.lastMessage
 
-        try {
-            this._lastMessage = this._lastReceivedMessage =
-                dialog.lastMessage.id
-        } catch (e) {
-            if (e instanceof tl.errors.MessageNotFoundError) {
-                this._lastMessage = this._lastReceivedMessage = 0
-            } else throw e
+        if (lastMessage) {
+            this._lastMessage = this._lastReceivedMessage = lastMessage.id
+        } else {
+            this._lastMessage = this._lastReceivedMessage = 0
         }
         this.client.on('new_message', this._onNewMessage)
         this.client.on('edit_message', this._onEditMessage)
@@ -279,7 +277,7 @@ export class Conversation {
         if (timeout !== null) {
             timer = setTimeout(() => {
                 console.log('timed out')
-                promise.reject(new tl.errors.TimeoutError())
+                promise.reject(new MtTimeoutError(timeout))
                 this._queuedNewMessage.removeBy((it) => it.promise === promise)
             }, timeout)
         }
@@ -422,12 +420,13 @@ export class Conversation {
         const promise = createControllablePromise<Message>()
 
         let timer: NodeJS.Timeout | undefined = undefined
+        const timeout = params?.timeout
 
-        if (params?.timeout !== null) {
+        if (timeout) {
             timer = setTimeout(() => {
-                promise.reject(new tl.errors.TimeoutError())
+                promise.reject(new MtTimeoutError(timeout))
                 delete this._pendingEditMessage[msgId]
-            }, params?.timeout ?? 15000)
+            }, timeout)
         }
 
         this._pendingEditMessage[msgId] = {
@@ -477,7 +476,7 @@ export class Conversation {
 
         if (timeout !== null) {
             timer = setTimeout(() => {
-                promise.reject(new tl.errors.TimeoutError())
+                promise.reject(new MtTimeoutError(timeout))
                 delete this._pendingRead[msgId]
             }, timeout)
         }

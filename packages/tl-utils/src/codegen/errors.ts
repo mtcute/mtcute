@@ -1,112 +1,94 @@
-import { TlError, TlErrors } from '../types'
-import { camelToPascal, jsComment, snakeToCamel } from './utils'
+import { TlErrors } from '../types'
+import { snakeToCamel } from './utils'
 
-/**
- * Transform TL error name to JS error name
- *
- * @param code  TL error code
- * @example  'MSG_ID_INVALID' -> 'MsgIdInvalidError'
- */
-export function errorCodeToClassName(code: string): string {
-    let str =
-        camelToPascal(snakeToCamel(code.toLowerCase().replace(/ /g, '_'))) +
-        'Error'
-
-    if (str[0].match(/\d/)) {
-        str = '_' + str
-    }
-
-    return str
+const TEMPLATE_JS = `
+const _descriptionsMap = {
+{descriptionsMap}
 }
-
-const RPC_ERROR_CLASS_JS = `
 class RpcError extends Error {
-    constructor(code, text, description) {
-        super(description);
+    constructor(code, name) {
+        super(_descriptionsMap[name] || 'Unknown RPC error: [' + code + ':' + name + ']');
         this.code = code;
-        this.text = text;
+        this.name = name;
     }
+
+    static is(err, name) { return err.constructor === RpcError && (!name || err.name === name); }
+    is(name) { return this.name === name; }
 }
+RpcError.fromTl = function (obj) {
+    const err = new RpcError(obj.errorCode, obj.errorMessage);
+
+    if (err in _descriptionsMap) return err;
+
+    let match;
+{matchers}
+
+    return err
+}
+{statics}
 {exports}RpcError = RpcError;
 `.trimStart()
 
-const RPC_ERROR_CLASS_TS = `
+const TEMPLATE_TS = `
+type MtErrorText =
+{texts}
+    | (string & {}) // to keep hints
+
+interface MtErrorArgMap {
+{argMap}
+}
+
+type RpcErrorWithArgs<T extends string> =
+    RpcError & { text: T } & (T extends keyof MtErrorArgMap ? (RpcError & MtErrorArgMap[T]) : {});
+
 export class RpcError extends Error {
+{statics}
+
     readonly code: number;
-    readonly text: string;
-    constructor(code: number, text: string, description?: string);
+    readonly text: MtErrorText;
+    constructor(code: number, text: MtErrorText);
+
+    is<const T extends MtErrorText>(text: T): this is RpcErrorWithArgs<T>;
+    static is<const T extends MtErrorText>(err: unknown): err is RpcError;
+    static is<const T extends MtErrorText>(err: unknown, text: T): err is RpcErrorWithArgs<T>;
+    static create<const T extends MtErrorText>(code: number, text: T): RpcErrorWithArgs<T>;
+    static fromTl(obj: object): RpcError;
 }
 `.trimStart()
 
-const BASE_ERROR_JS = `
-class {className} extends RpcError {
-    constructor(name, description) {
-        super({code}, name, description);
-    }
-}
-{exports}{className} = {className}
-`
-const BASE_ERROR_TS = `
-export class {className} extends RpcError {
-    constructor(name: string, description: string);
-}
-`.trimStart()
-
-const ERROR_PRELUDE = `{ts}class {className} extends {base} {
-    constructor({arguments})`
-
-const TL_BUILDER_TEMPLATE_JS = `
-{exports}createRpcErrorFromTl = function (obj) {
-    if (obj.errorMessage in _byName) return new _byName[obj.errorMessage]();
-
-    let match;
-    {inner}
-
-    if (obj.errorCode in _byCode) return new _byCode[obj.errorCode](obj.errorMessage);
-
-    return new RpcError(obj.errorCode, obj.errorMessage);
-}
-`.trim()
-
-const template = (str: string, params: Record<string, string | number>): string => {
+const template = (
+    str: string,
+    params: Record<string, string | number>,
+): string => {
     return str.replace(/{([a-z]+)}/gi, (_, name) => String(params[name] ?? ''))
 }
 
-function parseCode(
-    err: string,
-    placeholders_?: string[],
-): [string, string[], boolean] {
+function parseCode(err: string, placeholders_?: string[]): [string, string[]] {
     let addPlaceholders = false
 
     if (!placeholders_) {
         placeholders_ = []
         addPlaceholders = true
+    } else {
+        placeholders_ = placeholders_.map(snakeToCamel)
     }
 
     const placeholders = placeholders_
 
-    let wildcard = false
+    err = err.replace(/%[a-z]/g, (placeholder) => {
+        if (placeholder !== '%d') {
+            throw new Error(`Unsupported placeholder: ${placeholder}`)
+        }
 
-    err = err
-        .replace(/%[a-z]/g, (ph) => {
-            if (ph !== '%d') {
-                throw new Error(`Unsupported placeholder: ${ph}`)
-            }
+        if (addPlaceholders) {
+            const idx = placeholders.length
+            placeholders.push(`duration${idx === 0 ? '' : idx}`)
+        }
 
-            if (addPlaceholders) {
-                const idx = placeholders.length
-                placeholders.push(`duration${idx === 0 ? '' : idx}`)
-            }
+        return placeholder
+    })
 
-            return 'X'
-        })
-        .replace(/_\*$/, () => {
-            wildcard = true
-
-            return ''
-        })
-
-    return [err, placeholders, wildcard]
+    return [err, placeholders]
 }
 
 function placeholderType(_name: string): string {
@@ -127,164 +109,55 @@ export function generateCodeForErrors(
     errors: TlErrors,
     exports = 'exports.',
 ): [string, string] {
-    let ts = RPC_ERROR_CLASS_TS
-    let js = template(RPC_ERROR_CLASS_JS, { exports })
+    let descriptionsMap = ''
+    let texts = ''
+    let argMap = ''
+    let matchers = ''
+    let staticsJs = ''
+    let staticsTs = ''
 
-    const baseErrorsClasses: Record<number, string> = {}
-
-    for (const it of errors.base) {
-        const className = errorCodeToClassName(it.name)
-        baseErrorsClasses[it.code] = className
-
-        if (it.description) ts += jsComment(it.description) + '\n'
-        ts +=
-            template(BASE_ERROR_TS, {
-                className,
-            }) + '\n'
-        js += template(BASE_ERROR_JS, {
-            className,
-            code: it.code,
-            exports,
-        })
+    for (const [name, code] of Object.entries(errors.base)) {
+        staticsJs += `RpcError.${name} = ${code};\n`
+        staticsTs += `    static ${name} = ${code};\n`
     }
 
-    const errorClasses: Record<string, string> = {}
-    const wildcardClasses: [string, string][] = []
-    const withPlaceholders: [string, string][] = []
+    for (const error of Object.values(errors.errors)) {
+        const [name, placeholders] = parseCode(error.name, error._paramNames)
 
-    function findBaseClass(it: TlError) {
-        for (const [prefix, cls] of wildcardClasses) {
-            if (it.name.startsWith(prefix)) return cls
+        if (error.description) {
+            descriptionsMap += `    '${name}': ${JSON.stringify(
+                error.description,
+            )},\n`
         }
 
-        return baseErrorsClasses[it.code] ?? 'RpcError'
-    }
+        texts += `    | '${name}'\n`
 
-    for (const it of Object.values(errors.errors)) {
-        if (it._auto) {
-            // information about the error is incomplete
-            continue
-        }
-
-        const [name, placeholders, wildcard] = parseCode(
-            it.name,
-            it._paramNames,
-        )
-
-        const className = errorCodeToClassName(name)
-        const baseClass = findBaseClass(it)
-
-        if (!it.virtual && !wildcard) {
-            errorClasses[it.name] = className
-        }
-        if (wildcard) {
-            wildcardClasses.push([it.name.replace('*', ''), className])
-        }
         if (placeholders.length) {
-            withPlaceholders.push([it.name, className])
-        }
+            const placeholderTypes = placeholders.map(placeholderType)
+            argMap +=
+                `    '${name}': { ` +
+                placeholders
+                    .map((it, i) => `${it}: ${placeholderTypes[i]}`)
+                    .join(', ') +
+                ' },\n'
 
-        js +=
-            template(ERROR_PRELUDE, {
-                className,
-                base: baseClass,
-                arguments: wildcard ?
-                    'code, description' :
-                    placeholders.join(', '),
-            }) + '{\n'
-
-        let description
-        let comment = ''
-
-        if (it.description) {
-            let idx = 0
-            description = JSON.stringify(it.description).replace(
-                /%[a-z]/g,
-                () => `" + ${placeholders[idx++]} + "`,
+            const regex = name.replace('%d', '(\\d+)')
+            const setters = placeholders.map(
+                (it, i) => `err.${it} = parseInt(match[${i + 1}])`,
             )
-
-            if (wildcard) {
-                description = description.replace(/"$/, ': " + description')
-            }
-
-            idx = 0
-            comment += it.description.replace(
-                /%[a-z]/g,
-                () => `{@link ${placeholders[idx++]}}`,
-            )
-        } else {
-            description = `"Unknown RPC error: [${it.code}:${it.name}]"`
+            const settersStr =
+                setters.length > 1 ? `{ ${setters.join('; ')} }` : setters[0]
+            matchers += `    if ((match=obj.errorMessage.match(/^${regex}$/))!=null)${settersStr}\n`
         }
-
-        if (it.virtual) {
-            if (comment) comment += '\n\n'
-            comment +=
-                'This is a *virtual* error, meaning that it may only occur when using mtcute APIs (not MTProto)'
-        }
-
-        if (wildcard) {
-            if (comment) comment += '\n\n'
-            comment +=
-                'This is an *abstract* error, meaning that only its subclasses may occur when using the API'
-        }
-
-        if (comment) ts += jsComment(comment) + '\n'
-        ts +=
-            template(ERROR_PRELUDE, {
-                ts: 'export ',
-                className,
-                base: baseClass,
-                arguments: placeholders
-                    .map((it) => `${it}: ${placeholderType(it)}`)
-                    .join(', '),
-            }) + ';'
-
-        if (baseClass === 'RpcError') {
-            js += `super(${it.code}, '${it.name}', ${description});`
-        } else if (wildcard) {
-            js += `super(code, ${description});`
-        } else {
-            js += `super('${it.name}', ${description});`
-        }
-
-        for (const ph of placeholders) {
-            js += `\nthis.${ph} = ${ph};`
-            ts += `\n    readonly ${ph}: ${placeholderType(ph)}`
-        }
-
-        js += '\n    }\n}\n'
-        js += `${exports}${className} = ${className};\n`
-
-        ts += '\n}\n'
     }
 
-    ts += 'export function createRpcErrorFromTl (obj: object): RpcError;\n'
-
-    // and now we need to implement it
-    js += 'const _byName = {\n'
-
-    for (const [name, cls] of Object.entries(errorClasses)) {
-        js += `'${name.replace(/%[a-z]/gi, 'X')}': ${cls},\n`
-    }
-    js += '};\n'
-
-    js += 'const _byCode = {\n'
-
-    for (const [code, cls] of Object.entries(baseErrorsClasses)) {
-        js += `${code}: ${cls},\n`
-    }
-    js += '};\n'
-
-    // finally, the function itself
-
-    let inner = ''
-
-    for (const [name, cls] of withPlaceholders) {
-        const regex = name.replace('%d', '(\\d+)')
-        inner += `if ((match=obj.errorMessage.match(/^${regex}$/))!=null)return new ${cls}(parseInt(match[1]));\n`
-    }
-
-    js += template(TL_BUILDER_TEMPLATE_JS, { inner, exports })
-
-    return [ts, js]
+    return [
+        template(TEMPLATE_TS, { statics: staticsTs, texts, argMap }),
+        template(TEMPLATE_JS, {
+            exports,
+            statics: staticsJs,
+            descriptionsMap,
+            matchers,
+        }),
+    ]
 }

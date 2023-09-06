@@ -2,6 +2,7 @@ import { getMarkedPeerId } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
+import { MtMessageNotFoundError } from '../errors'
 import { Chat, PeersIndex } from '../peers'
 import { makeInspectable } from '../utils'
 import { DraftMessage } from './draft-message'
@@ -94,7 +95,9 @@ export class Dialog {
             // manual exclusion/inclusion and pins
             if (include[chatId]) return true
 
-            if (exclude[chatId] || (excludePinned && pinned[chatId])) { return false }
+            if (exclude[chatId] || (excludePinned && pinned[chatId])) {
+                return false
+            }
 
             // exclusions based on status
             if (folder.excludeRead && !dialog.isUnread) return false
@@ -196,7 +199,7 @@ export class Dialog {
     /**
      * The latest message sent in this chat
      */
-    get lastMessage(): Message {
+    get lastMessage(): Message | null {
         if (!this._lastMessage) {
             const cid = this.chat.id
 
@@ -207,7 +210,7 @@ export class Dialog {
                     this._peers,
                 )
             } else {
-                throw new tl.errors.MessageNotFoundError()
+                throw new MtMessageNotFoundError(cid, 0)
             }
         }
 

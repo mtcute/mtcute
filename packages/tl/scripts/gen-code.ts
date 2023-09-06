@@ -41,7 +41,6 @@ async function generateTypings(
         mtpSchema,
         0,
         'mtp',
-        errors,
     )
 
     await writeFile(

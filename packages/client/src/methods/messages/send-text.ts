@@ -8,6 +8,7 @@ import {
     InputPeerLike,
     Message,
     MtArgumentError,
+    MtMessageNotFoundError,
     MtTypeAssertionError,
     PeersIndex,
     ReplyMarkup,
@@ -145,7 +146,13 @@ export async function sendText(
 
         const msg = await this.getMessages(peer, replyTo)
 
-        if (!msg) throw new tl.errors.MessageNotFoundError()
+        if (!msg) {
+            throw new MtMessageNotFoundError(
+                getMarkedPeerId(peer),
+                replyTo,
+                'to reply to',
+            )
+        }
     }
 
     const res = await this.call({

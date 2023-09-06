@@ -12,9 +12,26 @@ export class MtClientError extends Error {}
 export class MtArgumentError extends MtClientError {}
 
 /**
- * Could not find peer by provided information
+ * Could not find a peer by the provided information
  */
-export class MtNotFoundError extends MtClientError {}
+export class MtPeerNotFoundError extends MtClientError {}
+
+/**
+ * Could not find a message by the provided information
+ */
+export class MtMessageNotFoundError extends MtClientError {
+    constructor(
+        readonly peerId: number,
+        readonly messageId: number,
+        readonly context?: string,
+    ) {
+        super(
+            `Message${
+                context ? ' ' + context : ''
+            } ${messageId} not found in ${peerId}`,
+        )
+    }
+}
 
 /**
  * Either you requested or the server returned something
@@ -78,5 +95,11 @@ export class MtInvalidPeerTypeError extends MtClientError {
 export class MtEmptyError extends MtClientError {
     constructor() {
         super('Property is not available on an empty object')
+    }
+}
+
+export class MtTimeoutError extends MtClientError {
+    constructor(readonly timeout?: number) {
+        super(`Request timed out${timeout ? ` after ${timeout}ms` : ''}`)
     }
 }

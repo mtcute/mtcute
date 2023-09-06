@@ -1,10 +1,11 @@
-import { MaybeArray } from '@mtcute/core'
+import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
     MtArgumentError,
+    MtMessageNotFoundError,
     MtTypeAssertionError,
     PeersIndex,
     Poll,
@@ -40,9 +41,17 @@ export async function sendVote(
     if (options.some((it) => typeof it === 'number')) {
         const msg = await this.getMessages(peer, message)
 
-        if (!msg) throw new tl.errors.MessageNotFoundError()
+        if (!msg) {
+            throw new MtMessageNotFoundError(
+                getMarkedPeerId(peer),
+                message,
+                'to vote in',
+            )
+        }
 
-        if (!(msg.media instanceof Poll)) { throw new MtArgumentError('This message does not contain a poll') }
+        if (!(msg.media instanceof Poll)) {
+            throw new MtArgumentError('This message does not contain a poll')
+        }
 
         poll = msg.media
         options = options.map((opt) => {

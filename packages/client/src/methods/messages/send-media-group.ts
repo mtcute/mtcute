@@ -1,4 +1,4 @@
-import { randomLong } from '@mtcute/core'
+import { getMarkedPeerId, randomLong } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -8,6 +8,7 @@ import {
     InputPeerLike,
     Message,
     MtArgumentError,
+    MtMessageNotFoundError,
     PeersIndex,
     ReplyMarkup,
 } from '../../types'
@@ -136,7 +137,13 @@ export async function sendMediaGroup(
 
         const msg = await this.getMessages(peer, replyTo)
 
-        if (!msg) throw new tl.errors.MessageNotFoundError()
+        if (!msg) {
+            throw new MtMessageNotFoundError(
+                getMarkedPeerId(peer),
+                replyTo,
+                'to reply to',
+            )
+        }
     }
 
     const multiMedia: tl.RawInputSingleMedia[] = []

@@ -24,13 +24,13 @@ import { defaultTransportFactory, TransportFactory } from './transports'
 export type ConnectionKind = 'main' | 'upload' | 'download' | 'downloadSmall'
 
 const CLIENT_ERRORS = {
-    '303': 1,
-    '400': 1,
-    '401': 1,
-    '403': 1,
-    '404': 1,
-    '406': 1,
-    '420': 1,
+    [tl.RpcError.BAD_REQUEST]: 1,
+    [tl.RpcError.UNAUTHORIZED]: 1,
+    [tl.RpcError.FORBIDDEN]: 1,
+    [tl.RpcError.NOT_FOUND]: 1,
+    [tl.RpcError.FLOOD]: 1,
+    [tl.RpcError.SEE_OTHER]: 1,
+    [tl.RpcError.NOT_ACCEPTABLE]: 1,
 }
 
 /**
@@ -714,7 +714,12 @@ export class NetworkManager {
                 await sleep(delta)
                 delete this._floodWaitedRequests[message._]
             } else {
-                throw new tl.errors.FloodWaitXError(delta / 1000)
+                const err = tl.RpcError.create(
+                    tl.RpcError.FLOOD,
+                    'FLOOD_WAIT_%d',
+                )
+                err.seconds = Math.ceil(delta / 1000)
+                throw err
             }
         }
 
@@ -747,14 +752,16 @@ export class NetworkManager {
             } catch (e: any) {
                 lastError = e as Error
 
-                if (e.code && !(e.code in CLIENT_ERRORS)) {
+                if (!tl.RpcError.is(e)) continue
+
+                if (!(e.code in CLIENT_ERRORS)) {
                     this._log.warn(
                         'Telegram is having internal issues: %d %s, retrying',
                         e.code,
                         e.message,
                     )
 
-                    if (e.message === 'WORKER_BUSY_TOO_LONG_RETRY') {
+                    if (e.text === 'WORKER_BUSY_TOO_LONG_RETRY') {
                         // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
                         await sleep(1000)
                     }
@@ -762,11 +769,11 @@ export class NetworkManager {
                 }
 
                 if (
-                    e.constructor === tl.errors.FloodWaitXError ||
-                    e.constructor === tl.errors.SlowmodeWaitXError ||
-                    e.constructor === tl.errors.FloodTestPhoneWaitXError
+                    e.is('FLOOD_WAIT_%d') ||
+                    e.is('SLOWMODE_WAIT_%d') ||
+                    e.is('FLOOD_TEST_PHONE_WAIT_%d')
                 ) {
-                    if (e.constructor !== tl.errors.SlowmodeWaitXError) {
+                    if (e.text !== 'SLOWMODE_WAIT_%d') {
                         // SLOW_MODE_WAIT is chat-specific, not request-specific
                         this._floodWaitedRequests[message._] =
                             Date.now() + e.seconds * 1000
@@ -775,7 +782,7 @@ export class NetworkManager {
                     // In test servers, FLOOD_WAIT_0 has been observed, and sleeping for
                     // such a short amount will cause retries very fast leading to issues
                     if (e.seconds === 0) {
-                        (e as tl.Mutable<typeof e>).seconds = 1
+                        e.seconds = 1
                     }
 
                     if (e.seconds <= floodSleepThreshold) {
@@ -787,21 +794,19 @@ export class NetworkManager {
 
                 if (manager === this._primaryDc) {
                     if (
-                        e.constructor === tl.errors.PhoneMigrateXError ||
-                        e.constructor === tl.errors.UserMigrateXError ||
-                        e.constructor === tl.errors.NetworkMigrateXError
+                        e.is('PHONE_MIGRATE_%d') ||
+                        e.is('NETWORK_MIGRATE_%d') ||
+                        e.is('USER_MIGRATE_%d')
                     ) {
-                        this._log.info('Migrate error, new dc = %d', e.new_dc)
+                        this._log.info('Migrate error, new dc = %d', e.newDc)
 
-                        await this.changePrimaryDc(e.new_dc)
+                        await this.changePrimaryDc(e.newDc)
                         manager = this._primaryDc!
                         multi = manager[kind]
 
                         continue
                     }
-                } else if (
-                    e.constructor === tl.errors.AuthKeyUnregisteredError
-                ) {
+                } else if (e.is('AUTH_KEY_UNREGISTERED')) {
                     // we can try re-exporting auth from the primary connection
                     this._log.warn(
                         'exported auth key error, trying re-exporting..',

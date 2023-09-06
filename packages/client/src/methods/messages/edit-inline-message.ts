@@ -117,7 +117,7 @@ export async function editInlineMessage(
 
             return
         } catch (e) {
-            if (e instanceof tl.errors.MediaEmptyError) {
+            if (tl.RpcError.is(e, 'MEDIA_EMPTY')) {
                 continue
             }
 

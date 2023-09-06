@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { ChatPreview, MtArgumentError, MtNotFoundError } from '../../types'
+import { ChatPreview, MtArgumentError, MtPeerNotFoundError } from '../../types'
 import { INVITE_LINK_REGEX } from '../../utils/peer-utils'
 
 /**
@@ -25,7 +25,7 @@ export async function getChatPreview(
     })
 
     if (res._ !== 'chatInvite') {
-        throw new MtNotFoundError('You have already joined this chat!')
+        throw new MtPeerNotFoundError('You have already joined this chat!')
     }
 
     return new ChatPreview(this, res, inviteLink)

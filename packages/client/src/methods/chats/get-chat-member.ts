@@ -1,7 +1,12 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types'
+import {
+    ChatMember,
+    InputPeerLike,
+    MtInvalidPeerTypeError,
+    PeersIndex,
+} from '../../types'
 import {
     isInputPeerChannel,
     isInputPeerChat,
@@ -27,7 +32,9 @@ export async function getChatMember(
     const chat = await this.resolvePeer(chatId)
 
     if (isInputPeerChat(chat)) {
-        if (!isInputPeerUser(user)) { throw new MtInvalidPeerTypeError(userId, 'user') }
+        if (!isInputPeerUser(user)) {
+            throw new MtInvalidPeerTypeError(userId, 'user')
+        }
 
         const res = await this.call({
             _: 'messages.getFullChat',
@@ -57,7 +64,7 @@ export async function getChatMember(
             }
         }
 
-        throw new tl.errors.UserNotParticipantError()
+        throw new tl.RpcError(404, 'USER_NOT_PARTICIPANT')
     } else if (isInputPeerChannel(chat)) {
         const res = await this.call({
             _: 'channels.getParticipant',

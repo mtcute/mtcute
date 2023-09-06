@@ -50,12 +50,8 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
 // destroy_auth_key#d1435160 = DestroyAuthKeyRes;
 // const DESTROY_AUTH_KEY = Buffer.from('605134d1', 'hex')
 
-function makeNiceStack(
-    error: tl.errors.RpcError,
-    stack: string,
-    method?: string,
-) {
-    error.stack = `${error.constructor.name} (${error.code} ${error.text}): ${
+function makeNiceStack(error: tl.RpcError, stack: string, method?: string) {
+    error.stack = `RpcError (${error.code} ${error.text}): ${
         error.message
     }\n    at ${method}\n${stack.split('\n').slice(2).join('\n')}`
 }
@@ -859,7 +855,7 @@ export class SessionConnection extends PersistentConnection {
 
             if (rpc.cancelled) return
 
-            const error = tl.errors.createRpcErrorFromTl(res)
+            const error = tl.RpcError.fromTl(res)
 
             if (this.params.niceStacks !== false) {
                 makeNiceStack(error, rpc.stack!, rpc.method)
@@ -1544,7 +1540,8 @@ export class SessionConnection extends PersistentConnection {
         }
 
         if (onTimeout) {
-            const error = new tl.errors.RpcTimeoutError()
+            // todo: replace with MtTimeoutError
+            const error = new tl.RpcError(-503, 'Timeout')
 
             if (this.params.niceStacks !== false) {
                 makeNiceStack(error, rpc.stack!, rpc.method)

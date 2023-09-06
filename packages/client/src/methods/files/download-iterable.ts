@@ -137,13 +137,14 @@ export async function* downloadAsIterable(
                 },
                 { dcId, kind: connectionKind },
             )
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (e: any) {
-            if (e.constructor === tl.errors.FileMigrateXError) {
-                dcId = e.new_dc
+        } catch (e: unknown) {
+            if (!tl.RpcError.is(e)) throw e
+
+            if (e.is('FILE_MIGRATE_%d')) {
+                dcId = e.newDc
 
                 return downloadChunk(chunk)
-            } else if (e.constructor === tl.errors.FilerefUpgradeNeededError) {
+            } else if (e.is('FILEREF_UPGRADE_NEEDED')) {
                 // todo: implement someday
                 // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
                 throw new MtUnsupportedError('File ref expired!')
