@@ -2,18 +2,16 @@ import { TlErrors } from '../types'
 import { snakeToCamel } from './utils'
 
 const TEMPLATE_JS = `
-const _descriptionsMap = {
-{descriptionsMap}
-}
+const _descriptionsMap = JSON.parse('{descriptionsMap}')
 class RpcError extends Error {
-    constructor(code, name) {
-        super(_descriptionsMap[name] || 'Unknown RPC error: [' + code + ':' + name + ']');
+    constructor(code, text) {
+        super(_descriptionsMap[text] || 'Unknown RPC error: [' + code + ':' + text + ']');
         this.code = code;
-        this.name = name;
+        this.text = text;
     }
 
-    static is(err, name) { return err.constructor === RpcError && (!name || err.name === name); }
-    is(name) { return this.name === name; }
+    static is(err, text) { return err.constructor === RpcError && (!text || err.text === text); }
+    is(text) { return this.text === text; }
 }
 RpcError.fromTl = function (obj) {
     const err = new RpcError(obj.errorCode, obj.errorMessage);
@@ -109,7 +107,7 @@ export function generateCodeForErrors(
     errors: TlErrors,
     exports = 'exports.',
 ): [string, string] {
-    let descriptionsMap = ''
+    const descriptionsMap: Record<string, string> = {}
     let texts = ''
     let argMap = ''
     let matchers = ''
@@ -125,9 +123,7 @@ export function generateCodeForErrors(
         const [name, placeholders] = parseCode(error.name, error._paramNames)
 
         if (error.description) {
-            descriptionsMap += `    '${name}': ${JSON.stringify(
-                error.description,
-            )},\n`
+            descriptionsMap[name] = error.description
         }
 
         texts += `    | '${name}'\n`
@@ -142,12 +138,10 @@ export function generateCodeForErrors(
                 ' },\n'
 
             const regex = name.replace('%d', '(\\d+)')
-            const setters = placeholders.map(
-                (it, i) => `err.${it} = parseInt(match[${i + 1}])`,
-            )
-            const settersStr =
-                setters.length > 1 ? `{ ${setters.join('; ')} }` : setters[0]
-            matchers += `    if ((match=obj.errorMessage.match(/^${regex}$/))!=null)${settersStr}\n`
+            const setters = placeholders
+                .map((it, i) => `err.${it} = parseInt(match[${i + 1}])`)
+                .join('; ')
+            matchers += `    if ((match=obj.errorMessage.match(/^${regex}$/))!=null){ err.text = '${name}'; ${setters} }\n`
         }
     }
 
@@ -156,7 +150,10 @@ export function generateCodeForErrors(
         template(TEMPLATE_JS, {
             exports,
             statics: staticsJs,
-            descriptionsMap,
+            descriptionsMap: JSON.stringify(descriptionsMap).replace(
+                /'/g,
+                "\\'",
+            ),
             matchers,
         }),
     ]
