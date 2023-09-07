@@ -170,6 +170,7 @@ module.exports = {
         'import/no-relative-packages': 'error',
         'import/no-mutable-exports': 'error',
         'import/no-default-export': 'error',
+        'no-console': ['error', { allow: ['warn', 'error'] }],
     },
     overrides: [
         {
@@ -231,6 +232,12 @@ module.exports = {
                     node: true,
                     typescript: true,
                 },
+            },
+        },
+        {
+            files: ['**/scripts/**'],
+            rules: {
+                'no-console': 'off',
             },
         },
     ],

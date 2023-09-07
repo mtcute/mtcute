@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'

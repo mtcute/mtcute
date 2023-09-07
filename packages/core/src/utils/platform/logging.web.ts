@@ -32,6 +32,7 @@ export const _defaultLoggingHandler = (
     fmt: string,
     args: unknown[],
 ): void => {
+    // eslint-disable-next-line no-console
     console.log(
         BASE_FORMAT + fmt,
         new Date().toISOString(),

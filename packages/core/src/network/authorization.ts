@@ -178,7 +178,6 @@ async function rsaPad(
         const decryptedDataBigint = bufferToBigInt(decryptedData)
 
         if (decryptedDataBigint.geq(keyModulus)) {
-            console.log('retrying because decrypted data is too big')
             continue
         }
 

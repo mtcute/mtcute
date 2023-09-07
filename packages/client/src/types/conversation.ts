@@ -276,7 +276,6 @@ export class Conversation {
 
         if (timeout !== null) {
             timer = setTimeout(() => {
-                console.log('timed out')
                 promise.reject(new MtTimeoutError(timeout))
                 this._queuedNewMessage.removeBy((it) => it.promise === promise)
             }, timeout)
