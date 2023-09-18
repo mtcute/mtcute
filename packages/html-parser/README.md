@@ -35,23 +35,23 @@ of features is documented below:
 Line breaks are **not** preserved, `<br>` is used instead,
 making the syntax very close to the one used when building web pages.
 
-Multiple spaces and indents are collapsed, when you do need multiple spaces use `&nbsp;` instead.
+Multiple spaces and indents are collapsed (except in `pre`), when you do need multiple spaces use `&nbsp;` instead.
 
 ## Inline entities
 
 Inline entities are entities that are in-line with other text. We support these entities:
 
-| Name             | Code                                      | Result (visual)              |
-|------------------|-------------------------------------------|------------------------------|
-| Bold             | `<b>text</b>`                             | **text**                     |
-| Italic           | `<b>text</b>`                             | _text_                       |
-| Underline        | `<u>text</u>`                             | <u>text</u>                  |
-| Strikethrough    | `<s>text</s>`                             | ~~text~~                     |
-| Spoiler          | `<spoiler>text</spoiler>`                 | N/A                          |
-| Monospace (code) | `<code>text</code>`                       | `text`                       |
-| Text link        | `<a href="https://google.com">Google</a>` | [Google](https://google.com) |
-| Text mention     | `<a href="tg://user?id=1234567">Name</a>` | N/A                          |
-| Custom emoji     | `<emoji id="12345">😄</emoji>`            | N/A                          |
+| Name             | Code                                                             | Result (visual)              |
+| ---------------- | ---------------------------------------------------------------- | ---------------------------- |
+| Bold             | `<b>text</b>`                                                    | **text**                     |
+| Italic           | `<b>text</b>`                                                    | _text_                       |
+| Underline        | `<u>text</u>`                                                    | <u>text</u>                  |
+| Strikethrough    | `<s>text</s>`                                                    | ~~text~~                     |
+| Spoiler          | `<spoiler>text</spoiler>` (or `tg-spoiler`)                      | N/A                          |
+| Monospace (code) | `<code>text</code>`                                              | `text`                       |
+| Text link        | `<a href="https://google.com">Google</a>`                        | [Google](https://google.com) |
+| Text mention     | `<a href="tg://user?id=1234567">Name</a>`                        | N/A                          |
+| Custom emoji     | `<emoji id="12345">😄</emoji>` (or `<tg-emoji emoji-id="...">`) | N/A                          |
 
 > **Note**: `<strong>`, `<em>`, `<ins>`, `<strike>`, `<del>` are not supported because they are redundant
 
@@ -60,7 +60,7 @@ Inline entities are entities that are in-line with other text. We support these 
 >
 > Alternatively, you can explicitly provide access hash like this:
 > `<a href="tg://user?id=1234567&hash=abc">Name</a>`, where `abc` is user's access hash
-> written as a base-16 *unsigned* integer. Order of the parameters does matter, i.e.
+> written as a hexadecimal integer. Order of the parameters does matter, i.e.
 > `tg://user?hash=abc&id=1234567` will not be processed as expected.
 
 ## Block entities
@@ -74,10 +74,10 @@ Optionally, language for `<pre>` block can be specified like this:
 ```
 
 > However, since syntax highlighting hasn't been implemented in
-> official Telegram clients, this doesn't really matter 🤷‍♀️
+> official Telegram clients except WebA, this doesn't really matter 🤷‍♀️
 
 | Code                                                                                | Result (visual)              |
-|-------------------------------------------------------------------------------------|------------------------------|
+| ----------------------------------------------------------------------------------- | ---------------------------- |
 | <pre>&lt;pre&gt;multiline\ntext&lt;/pre&gt;</pre>                                   | <pre>multiline<br>text</pre> |
 | <pre>&lt;pre language="javascript"&gt;<br>  export default 42<br>&lt;/pre&gt;</pre> | <pre>export default 42</pre> |
 

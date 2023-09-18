@@ -188,6 +188,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                         }
                         break
                     case 'spoiler':
+                    case 'tg-spoiler':
                         entity = {
                             _: 'messageEntitySpoiler',
                             offset: plainText.length,
@@ -195,8 +196,9 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                         }
                         break
 
-                    case 'emoji': {
-                        const id = attribs.id
+                    case 'emoji':
+                    case 'tg-emoji': {
+                        const id = attribs.id || attribs['emoji-id']
                         if (!id || !id.match(/^-?\d+$/)) return
 
                         entity = {
