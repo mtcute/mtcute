@@ -16,12 +16,12 @@ export function registerParseMode(
 ): void {
     const name = parseMode.name
 
-    if (name in this._parseModes) {
+    if (this._parseModes.has(name)) {
         throw new MtClientError(
             `Parse mode ${name} is already registered. Unregister it first!`,
         )
     }
-    this._parseModes[name] = parseMode
+    this._parseModes.set(name, parseMode)
 
     if (!this._defaultParseMode) {
         this._defaultParseMode = name
@@ -38,10 +38,11 @@ export function registerParseMode(
  * @internal
  */
 export function unregisterParseMode(this: TelegramClient, name: string): void {
-    delete this._parseModes[name]
+    this._parseModes.delete(name)
 
     if (this._defaultParseMode === name) {
-        this._defaultParseMode = Object.keys(this._defaultParseMode)[0] ?? null
+        const [first] = this._parseModes.keys()
+        this._defaultParseMode = first ?? null
     }
 }
 
@@ -58,16 +59,20 @@ export function getParseMode(
     name?: string | null,
 ): IMessageEntityParser {
     if (!name) {
-        if (!this._defaultParseMode) { throw new MtClientError('There is no default parse mode') }
+        if (!this._defaultParseMode) {
+            throw new MtClientError('There is no default parse mode')
+        }
 
         name = this._defaultParseMode
     }
 
-    if (!(name in this._parseModes)) {
+    const mode = this._parseModes.get(name)
+
+    if (!mode) {
         throw new MtClientError(`Parse mode ${name} is not registered.`)
     }
 
-    return this._parseModes[name]
+    return mode
 }
 
 /**
@@ -78,7 +83,7 @@ export function getParseMode(
  * @internal
  */
 export function setDefaultParseMode(this: TelegramClient, name: string): void {
-    if (!(name in this._parseModes)) {
+    if (!this._parseModes.has(name)) {
         throw new MtClientError(`Parse mode ${name} is not registered.`)
     }
 

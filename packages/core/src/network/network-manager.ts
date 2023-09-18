@@ -420,7 +420,7 @@ export class NetworkManager {
     readonly _reconnectionStrategy: ReconnectionStrategy<PersistentConnectionParams>
     readonly _connectionCount: ConnectionCountDelegate
 
-    protected readonly _dcConnections: Record<number, DcConnectionManager> = {}
+    protected readonly _dcConnections = new Map<number, DcConnectionManager>()
     protected _primaryDc?: DcConnectionManager
 
     private _keepAliveInterval?: NodeJS.Timeout
@@ -545,18 +545,18 @@ export class NetworkManager {
         return dc.loadKeys().then(() => dc.main.ensureConnected())
     }
 
-    private _dcCreationPromise: Record<number, Promise<void>> = {}
+    private _dcCreationPromise = new Map<number, Promise<void>>()
     async _getOtherDc(dcId: number): Promise<DcConnectionManager> {
-        if (!this._dcConnections[dcId]) {
-            if (dcId in this._dcCreationPromise) {
+        if (!this._dcConnections.has(dcId)) {
+            if (this._dcCreationPromise.has(dcId)) {
                 this._log.debug('waiting for DC %d to be created', dcId)
-                await this._dcCreationPromise[dcId]
+                await this._dcCreationPromise.get(dcId)
 
-                return this._dcConnections[dcId]
+                return this._dcConnections.get(dcId)!
             }
 
             const promise = createControllablePromise<void>()
-            this._dcCreationPromise[dcId] = promise
+            this._dcCreationPromise.set(dcId, promise)
 
             this._log.debug('creating new DC %d', dcId)
 
@@ -569,14 +569,14 @@ export class NetworkManager {
                     dc.main.requestAuth()
                 }
 
-                this._dcConnections[dcId] = dc
+                this._dcConnections.set(dcId, dc)
                 promise.resolve()
             } catch (e) {
                 promise.reject(e)
             }
         }
 
-        return this._dcConnections[dcId]
+        return this._dcConnections.get(dcId)!
     }
 
     /**
@@ -589,13 +589,13 @@ export class NetworkManager {
             throw new Error('Default DCs must be the same')
         }
 
-        if (this._dcConnections[defaultDcs.main.id]) {
+        if (this._dcConnections.has(defaultDcs.main.id)) {
             // shouldn't happen
             throw new Error('DC manager already exists')
         }
 
         const dc = new DcConnectionManager(this, defaultDcs.main.id, defaultDcs)
-        this._dcConnections[defaultDcs.main.id] = dc
+        this._dcConnections.set(defaultDcs.main.id, dc)
         await this._switchPrimaryDc(dc)
     }
 
@@ -648,9 +648,10 @@ export class NetworkManager {
     setIsPremium(isPremium: boolean): void {
         this._log.debug('setting isPremium to %s', isPremium)
         this.params.isPremium = isPremium
-        Object.values(this._dcConnections).forEach((dc) => {
+
+        for (const dc of this._dcConnections.values()) {
             dc.setIsPremium(isPremium)
-        })
+        }
     }
 
     // future-proofing. should probably remove once the implementation is stable
@@ -693,20 +694,19 @@ export class NetworkManager {
 
         const options = await this._findDcOptions(newDc)
 
-        if (!this._dcConnections[newDc]) {
-            this._dcConnections[newDc] = new DcConnectionManager(
-                this,
+        if (!this._dcConnections.has(newDc)) {
+            this._dcConnections.set(
                 newDc,
-                options,
+                new DcConnectionManager(this, newDc, options),
             )
         }
 
         await this._storage.setDefaultDcs(options)
 
-        await this._switchPrimaryDc(this._dcConnections[newDc])
+        await this._switchPrimaryDc(this._dcConnections.get(newDc)!)
     }
 
-    private _floodWaitedRequests: Record<string, number> = {}
+    private _floodWaitedRequests = new Map<string, number>()
     async call<T extends tl.RpcMethod>(
         message: T,
         params?: RpcCallOptions,
@@ -721,15 +721,15 @@ export class NetworkManager {
         const maxRetryCount = params?.maxRetryCount ?? this.params.maxRetryCount
 
         // do not send requests that are in flood wait
-        if (message._ in this._floodWaitedRequests) {
-            const delta = this._floodWaitedRequests[message._] - Date.now()
+        if (this._floodWaitedRequests.has(message._)) {
+            const delta = this._floodWaitedRequests.get(message._)! - Date.now()
 
             if (delta <= 3000) {
                 // flood waits below 3 seconds are "ignored"
-                delete this._floodWaitedRequests[message._]
+                this._floodWaitedRequests.delete(message._)
             } else if (delta <= this.params.floodSleepThreshold) {
                 await sleep(delta)
-                delete this._floodWaitedRequests[message._]
+                this._floodWaitedRequests.delete(message._)
             } else {
                 const err = tl.RpcError.create(
                     tl.RpcError.FLOOD,
@@ -792,8 +792,10 @@ export class NetworkManager {
                 ) {
                     if (e.text !== 'SLOWMODE_WAIT_%d') {
                         // SLOW_MODE_WAIT is chat-specific, not request-specific
-                        this._floodWaitedRequests[message._] =
-                            Date.now() + e.seconds * 1000
+                        this._floodWaitedRequests.set(
+                            message._,
+                            Date.now() + e.seconds * 1000,
+                        )
                     }
 
                     // In test servers, FLOOD_WAIT_0 has been observed, and sleeping for
@@ -845,16 +847,16 @@ export class NetworkManager {
     }
 
     changeTransport(factory: TransportFactory): void {
-        Object.values(this._dcConnections).forEach((dc) => {
+        for (const dc of this._dcConnections.values()) {
             dc.main.changeTransport(factory)
             dc.upload.changeTransport(factory)
             dc.download.changeTransport(factory)
             dc.downloadSmall.changeTransport(factory)
-        })
+        }
     }
 
     getPoolSize(kind: ConnectionKind, dcId?: number) {
-        const dc = dcId ? this._dcConnections[dcId] : this._primaryDc
+        const dc = dcId ? this._dcConnections.get(dcId) : this._primaryDc
 
         if (!dc) {
             if (!this._primaryDc) {
@@ -880,7 +882,7 @@ export class NetworkManager {
     }
 
     destroy(): void {
-        for (const dc of Object.values(this._dcConnections)) {
+        for (const dc of this._dcConnections.values()) {
             dc.main.destroy()
             dc.upload.destroy()
             dc.download.destroy()

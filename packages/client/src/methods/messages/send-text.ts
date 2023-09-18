@@ -230,13 +230,13 @@ export async function sendText(
 
             switch (cached._) {
                 case 'user':
-                    peers.users[cached.id] = cached
+                    peers.users.set(cached.id, cached)
                     break
                 case 'chat':
                 case 'chatForbidden':
                 case 'channel':
                 case 'channelForbidden':
-                    peers.chats[cached.id] = cached
+                    peers.chats.set(cached.id, cached)
                     break
                 default:
                     throw new MtTypeAssertionError(

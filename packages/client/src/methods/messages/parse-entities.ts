@@ -30,11 +30,13 @@ export async function _parseEntities(
         // either explicitly disabled or no available parser
         if (!mode) return [text, []]
 
-        if (!(mode in this._parseModes)) {
+        const modeImpl = this._parseModes.get(mode)
+
+        if (!modeImpl) {
             throw new MtClientError(`Parse mode ${mode} is not registered.`)
         }
 
-        [text, entities] = this._parseModes[mode].parse(text)
+        [text, entities] = modeImpl.parse(text)
     }
 
     // replace mentionName entities with input ones

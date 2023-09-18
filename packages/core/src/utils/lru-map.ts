@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 // ^^ because of performance reasons
 import { LongMap } from './long-utils'
 
@@ -15,8 +15,7 @@ interface TwoWayLinkedList<K, T> {
 }
 
 /**
- * Simple class implementing LRU-like behaviour for a map,
- * falling back to objects when `Map` is not available.
+ * Simple class implementing LRU-like behaviour for a Map
  *
  * Can be used to handle local cache of *something*
  *
@@ -27,36 +26,15 @@ export class LruMap<K extends string | number, V> {
     private _first?: TwoWayLinkedList<K, V>
     private _last?: TwoWayLinkedList<K, V>
 
+    private _map: Map<K, TwoWayLinkedList<K, V>>
+
     private _size = 0
 
-    constructor(capacity: number, useObject = false, forLong = false) {
+    constructor(capacity: number, forLong = false) {
         this._capacity = capacity
 
-        if (forLong) {
-            const map = new LongMap(useObject)
-            this._set = map.set.bind(map) as any
-            this._has = map.has.bind(map) as any
-            this._get = map.get.bind(map) as any
-            this._del = map.delete.bind(map) as any
-        } else if (typeof Map === 'undefined' || useObject) {
-            const obj = Object.create(null)
-            this._set = (k, v) => (obj[k] = v)
-            this._has = (k) => k in obj
-            this._get = (k) => obj[k]
-            this._del = (k) => delete obj[k]
-        } else {
-            const map = new Map()
-            this._set = map.set.bind(map)
-            this._has = map.has.bind(map)
-            this._get = map.get.bind(map)
-            this._del = map.delete.bind(map)
-        }
+        this._map = forLong ? (new LongMap() as any) : new Map()
     }
-
-    private readonly _set: (key: K, value: V) => void
-    private readonly _has: (key: K) => boolean
-    private readonly _get: (key: K) => TwoWayLinkedList<K, V> | undefined
-    private readonly _del: (key: K) => void
 
     private _markUsed(item: TwoWayLinkedList<K, V>): void {
         if (item === this._first) {
@@ -84,7 +62,7 @@ export class LruMap<K extends string | number, V> {
     }
 
     get(key: K): V | undefined {
-        const item = this._get(key)
+        const item = this._map.get(key)
         if (!item) return undefined
 
         this._markUsed(item)
@@ -93,7 +71,7 @@ export class LruMap<K extends string | number, V> {
     }
 
     has(key: K): boolean {
-        return this._has(key)
+        return this._map.has(key)
     }
 
     private _remove(item: TwoWayLinkedList<K, V>): void {
@@ -108,12 +86,12 @@ export class LruMap<K extends string | number, V> {
 
         // remove strong refs to and from the item
         item.p = item.n = undefined
-        this._del(item.k)
+        this._map.delete(item.k)
         this._size -= 1
     }
 
     set(key: K, value: V): void {
-        let item = this._get(key)
+        let item = this._map.get(key)
 
         if (item) {
             // already in cache, update
@@ -130,7 +108,7 @@ export class LruMap<K extends string | number, V> {
             n: undefined,
             p: undefined,
         }
-        this._set(key, item as any)
+        this._map.set(key, item as any)
 
         if (this._first) {
             this._first.p = item
@@ -154,7 +132,7 @@ export class LruMap<K extends string | number, V> {
     }
 
     delete(key: K): void {
-        const item = this._get(key)
+        const item = this._map.get(key)
         if (item) this._remove(item)
     }
 }

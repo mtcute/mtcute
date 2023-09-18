@@ -65,12 +65,19 @@ export class Logger {
             fmt.includes('%h') ||
             fmt.includes('%b') ||
             fmt.includes('%j') ||
+            fmt.includes('%J') ||
             fmt.includes('%l')
         ) {
             let idx = 0
             fmt = fmt.replace(FORMATTER_RE, (m) => {
-                if (m === '%h' || m === '%b' || m === '%j' || m === '%l') {
-                    const val = args[idx]
+                if (
+                    m === '%h' ||
+                    m === '%b' ||
+                    m === '%j' ||
+                    m === '%J' ||
+                    m === '%l'
+                ) {
+                    let val = args[idx]
 
                     args.splice(idx, 1)
 
@@ -82,7 +89,9 @@ export class Logger {
                     }
                     if (m === '%b') return String(Boolean(val))
 
-                    if (m === '%j') {
+                    if (m === '%j' || m === '%J') {
+                        if (m === '%J') { val = [...(val as IterableIterator<unknown>)] }
+
                         return JSON.stringify(val, (k, v) => {
                             if (
                                 typeof v === 'object' &&

@@ -1,3 +1,4 @@
+import { LongMap } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -164,7 +165,7 @@ export class StickerSet {
 
         if (!this._stickers) {
             this._stickers = []
-            const index: Record<string, tl.Mutable<StickerInfo>> = {}
+            const index = new LongMap<tl.Mutable<StickerInfo>>()
 
             this.full!.documents.forEach((doc) => {
                 const sticker = parseDocument(
@@ -186,15 +187,15 @@ export class StickerSet {
                     sticker,
                 }
                 this._stickers!.push(info)
-                index[doc.id.toString()] = info
+                index.set(doc.id, info)
             })
 
             this.full!.packs.forEach((pack) => {
                 pack.documents.forEach((id) => {
-                    const sid = id.toString()
+                    const item = index.get(id)
 
-                    if (sid in index) {
-                        index[sid].emoji += pack.emoticon
+                    if (item) {
+                        item.emoji += pack.emoticon
                     }
                 })
             })

@@ -611,10 +611,10 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         return row ? (row as { pts: number }).pts : null
     }
 
-    setManyChannelPts(values: Record<number, number>): void {
-        Object.entries(values).forEach(([cid, pts]) => {
+    setManyChannelPts(values: Map<number, number>): void {
+        for (const [cid, pts] of values) {
             this._pending.push([this._statements.setPts, [cid, pts]])
-        })
+        }
     }
 
     updatePeers(peers: ITelegramStorage.PeerInfo[]): void {

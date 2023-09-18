@@ -6,13 +6,13 @@ import { Conversation, Message } from '../../types'
 
 // @extension
 interface ConversationsState {
-    _pendingConversations: Record<number, Conversation[]>
+    _pendingConversations: Map<number, Conversation[]>
     _hasConversations: boolean
 }
 
 // @initialize
 function _initializeConversation(this: TelegramClient) {
-    this._pendingConversations = {}
+    this._pendingConversations = new Map()
     this._hasConversations = false
 }
 
@@ -28,7 +28,7 @@ export function _pushConversationMessage(
     const chatId = getMarkedPeerId(msg.raw.peerId)
     const msgId = msg.raw.id
 
-    this._pendingConversations[chatId].forEach((conv) => {
+    this._pendingConversations.get(chatId)?.forEach((conv) => {
         conv['_lastMessage'] = msgId
         if (incoming) conv['_lastReceivedMessage'] = msgId
     })

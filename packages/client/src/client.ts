@@ -4019,9 +4019,9 @@ export class TelegramClient extends BaseTelegramClient {
     protected _userId: number | null
     protected _isBot: boolean
     protected _selfUsername: string | null
-    protected _pendingConversations: Record<number, Conversation[]>
+    protected _pendingConversations: Map<number, Conversation[]>
     protected _hasConversations: boolean
-    protected _parseModes: Record<string, IMessageEntityParser>
+    protected _parseModes: Map<string, IMessageEntityParser>
     protected _defaultParseMode: string | null
     protected _updatesLoopActive: boolean
     protected _updatesLoopCv: ConditionVariable
@@ -4044,8 +4044,8 @@ export class TelegramClient extends BaseTelegramClient {
     protected _oldSeq?: number
     protected _selfChanged: boolean
     protected _catchUpChannels?: boolean
-    protected _cpts: Record<number, number>
-    protected _cptsMod: Record<number, number>
+    protected _cpts: Map<number, number>
+    protected _cptsMod: Map<number, number>
     protected _updsLog: Logger
     constructor(opts: BaseTelegramClientOptions) {
         super(opts)
@@ -4053,9 +4053,9 @@ export class TelegramClient extends BaseTelegramClient {
         this._isBot = false
         this._selfUsername = null
         this.log.prefix = '[USER N/A] '
-        this._pendingConversations = {}
+        this._pendingConversations = new Map()
         this._hasConversations = false
-        this._parseModes = {}
+        this._parseModes = new Map()
         this._defaultParseMode = null
         this._updatesLoopActive = false
         this._updatesLoopCv = new ConditionVariable()
@@ -4083,10 +4083,10 @@ export class TelegramClient extends BaseTelegramClient {
 
         // channel PTS are not loaded immediately, and instead are cached here
         // after the first time they were retrieved from the storage.
-        this._cpts = {}
+        this._cpts = new Map()
         // modified channel pts, to avoid unnecessary
         // DB calls for not modified cpts
-        this._cptsMod = {}
+        this._cptsMod = new Map()
 
         this._selfChanged = false
 

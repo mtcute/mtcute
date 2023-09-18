@@ -168,7 +168,7 @@ export interface ITelegramStorage {
      * Storage is supposed to replace stored channel `pts` values
      * with given in the object (key is unmarked peer id, value is the `pts`)
      */
-    setManyChannelPts(values: Record<number, number>): MaybeAsync<void>
+    setManyChannelPts(values: Map<number, number>): MaybeAsync<void>
 
     /**
      * Get cached peer information by their marked ID.

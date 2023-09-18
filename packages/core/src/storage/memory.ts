@@ -14,24 +14,24 @@ export interface MemorySessionState {
     $version: typeof CURRENT_VERSION
 
     defaultDcs: ITelegramStorage.DcOptions | null
-    authKeys: Record<number, Buffer | null>
-    authKeysTemp: Record<string, Buffer | null>
-    authKeysTempExpiry: Record<string, number>
+    authKeys: Map<number, Buffer>
+    authKeysTemp: Map<string, Buffer>
+    authKeysTempExpiry: Map<string, number>
 
     // marked peer id -> entity info
-    entities: Record<number, PeerInfoWithUpdated>
+    entities: Map<number, PeerInfoWithUpdated>
     // phone number -> peer id
-    phoneIndex: Record<string, number>
+    phoneIndex: Map<string, number>
     // username -> peer id
-    usernameIndex: Record<string, number>
+    usernameIndex: Map<string, number>
 
     // common pts, date, seq, qts
     gpts: [number, number, number, number] | null
     // channel pts
-    pts: Record<number, number>
+    pts: Map<number, number>
 
     // state for fsm
-    fsm: Record<
+    fsm: Map<
         string,
         {
             // value
@@ -42,7 +42,7 @@ export interface MemorySessionState {
     >
 
     // state for rate limiter
-    rl: Record<
+    rl: Map<
         string,
         {
             // reset
@@ -111,16 +111,16 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         this._state = {
             $version: CURRENT_VERSION,
             defaultDcs: null,
-            authKeys: {},
-            authKeysTemp: {},
-            authKeysTempExpiry: {},
-            entities: {},
-            phoneIndex: {},
-            usernameIndex: {},
+            authKeys: new Map(),
+            authKeysTemp: new Map(),
+            authKeysTempExpiry: new Map(),
+            entities: new Map(),
+            phoneIndex: new Map(),
+            usernameIndex: new Map(),
             gpts: null,
-            pts: {},
-            fsm: {},
-            rl: {},
+            pts: new Map(),
+            fsm: new Map(),
+            rl: new Map(),
             self: null,
         }
     }
@@ -138,19 +138,20 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         let populate = false
 
         if (!obj.phoneIndex) {
-            obj.phoneIndex = {}
+            obj.phoneIndex = new Map()
             populate = true
         }
         if (!obj.usernameIndex) {
-            obj.usernameIndex = {}
+            obj.usernameIndex = new Map()
             populate = true
         }
 
         if (populate) {
             Object.values(obj.entities).forEach(
                 (ent: ITelegramStorage.PeerInfo) => {
-                    if (ent.phone) obj.phoneIndex[ent.phone] = ent.id
-                    if (ent.username) obj.usernameIndex[ent.username] = ent.id
+                    if (ent.phone) obj.phoneIndex.set(ent.phone, ent.id)
+
+                    if (ent.username) { obj.usernameIndex.set(ent.username, ent.id) }
                 },
             )
         }
@@ -168,19 +169,17 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         const fsm = state.fsm
         const rl = state.rl
 
-        Object.keys(fsm).forEach((key) => {
-            const exp = fsm[key].e
-
-            if (exp && exp < now) {
-                delete fsm[key]
+        for (const [key, item] of fsm) {
+            if (item.e && item.e < now) {
+                fsm.delete(key)
             }
-        })
+        }
 
-        Object.keys(rl).forEach((key) => {
-            if (rl[key].res < now) {
-                delete rl[key]
+        for (const [key, item] of rl) {
+            if (item.res < now) {
+                rl.delete(key)
             }
-        })
+        }
     }
 
     getDefaultDcs(): ITelegramStorage.DcOptions | null {
@@ -198,36 +197,47 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         expiresAt: number,
     ): void {
         const k = `${dcId}:${index}`
-        this._state.authKeysTemp[k] = key
-        this._state.authKeysTempExpiry[k] = expiresAt
+
+        if (key) {
+            this._state.authKeysTemp.set(k, key)
+            this._state.authKeysTempExpiry.set(k, expiresAt)
+        } else {
+            this._state.authKeysTemp.delete(k)
+            this._state.authKeysTempExpiry.delete(k)
+        }
     }
 
     setAuthKeyFor(dcId: number, key: Buffer | null): void {
-        this._state.authKeys[dcId] = key
+        if (key) {
+            this._state.authKeys.set(dcId, key)
+        } else {
+            this._state.authKeys.delete(dcId)
+        }
     }
 
     getAuthKeyFor(dcId: number, tempIndex?: number): Buffer | null {
         if (tempIndex !== undefined) {
             const k = `${dcId}:${tempIndex}`
 
-            if (Date.now() > (this._state.authKeysTempExpiry[k] ?? 0)) {
+            if (Date.now() > (this._state.authKeysTempExpiry.get(k) ?? 0)) {
                 return null
             }
 
-            return this._state.authKeysTemp[k]
+            return this._state.authKeysTemp.get(k) ?? null
         }
 
-        return this._state.authKeys[dcId] ?? null
+        return this._state.authKeys.get(dcId) ?? null
     }
 
     dropAuthKeysFor(dcId: number): void {
-        this._state.authKeys[dcId] = null
-        Object.keys(this._state.authKeysTemp).forEach((key) => {
+        this._state.authKeys.delete(dcId)
+
+        for (const key of this._state.authKeysTemp.keys()) {
             if (key.startsWith(`${dcId}:`)) {
-                delete this._state.authKeysTemp[key]
-                delete this._state.authKeysTempExpiry[key]
+                this._state.authKeysTemp.delete(key)
+                this._state.authKeysTempExpiry.delete(key)
             }
-        })
+        }
     }
 
     updatePeers(peers: PeerInfoWithUpdated[]): MaybeAsync<void> {
@@ -235,26 +245,25 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
             this._cachedFull.set(peer.id, peer.full)
 
             peer.updated = Date.now()
-            const old = this._state.entities[peer.id]
+            const old = this._state.entities.get(peer.id)
 
             if (old) {
-                // min peer
-                // if (peer.fromMessage) continue
-
                 // delete old index entries if needed
-                if (old.username && old.username !== peer.username) {
-                    delete this._state.usernameIndex[old.username]
+                if (old.username && peer.username !== old.username) {
+                    this._state.usernameIndex.delete(old.username)
                 }
                 if (old.phone && old.phone !== peer.phone) {
-                    delete this._state.phoneIndex[old.phone]
+                    this._state.phoneIndex.delete(old.phone)
                 }
             }
 
             if (peer.username) {
-                this._state.usernameIndex[peer.username.toLowerCase()] = peer.id
+                this._state.usernameIndex.set(peer.username, peer.id)
             }
-            if (peer.phone) this._state.phoneIndex[peer.phone] = peer.id
-            this._state.entities[peer.id] = peer
+
+            if (peer.phone) this._state.phoneIndex.set(peer.phone, peer.id)
+
+            this._state.entities.set(peer.id, peer)
         }
     }
 
@@ -290,22 +299,23 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         if (this._cachedInputPeers.has(peerId)) {
             return this._cachedInputPeers.get(peerId)!
         }
-        const peer = this._getInputPeer(this._state.entities[peerId])
+        const peer = this._getInputPeer(this._state.entities.get(peerId))
         if (peer) this._cachedInputPeers.set(peerId, peer)
 
         return peer
     }
 
     getPeerByPhone(phone: string): tl.TypeInputPeer | null {
-        return this._getInputPeer(
-            this._state.entities[this._state.phoneIndex[phone]],
-        )
+        const peerId = this._state.phoneIndex.get(phone)
+        if (!peerId) return null
+
+        return this._getInputPeer(this._state.entities.get(peerId))
     }
 
     getPeerByUsername(username: string): tl.TypeInputPeer | null {
-        const id = this._state.usernameIndex[username.toLowerCase()]
+        const id = this._state.usernameIndex.get(username.toLowerCase())
         if (!id) return null
-        const peer = this._state.entities[id]
+        const peer = this._state.entities.get(id)
         if (!peer) return null
 
         if (Date.now() - peer.updated > USERNAME_TTL) return null
@@ -321,14 +331,14 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         this._state.self = self
     }
 
-    setManyChannelPts(values: Record<number, number>): void {
-        for (const id in values) {
-            this._state.pts[id] = values[id]
+    setManyChannelPts(values: Map<number, number>): void {
+        for (const [id, pts] of values) {
+            this._state.pts.set(id, pts)
         }
     }
 
     getChannelPts(entityId: number): number | null {
-        return this._state.pts[entityId] ?? null
+        return this._state.pts.get(entityId) ?? null
     }
 
     getUpdatesState(): MaybeAsync<[number, number, number, number] | null> {
@@ -362,12 +372,12 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
     // IStateStorage implementation
 
     getState(key: string): unknown {
-        const val = this._state.fsm[key]
+        const val = this._state.fsm.get(key)
         if (!val) return null
 
         if (val.e && val.e < Date.now()) {
             // expired
-            delete this._state.fsm[key]
+            this._state.fsm.delete(key)
 
             return null
         }
@@ -376,14 +386,14 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
     }
 
     setState(key: string, state: unknown, ttl?: number): void {
-        this._state.fsm[key] = {
+        this._state.fsm.set(key, {
             v: state,
             e: ttl ? Date.now() + ttl * 1000 : undefined,
-        }
+        })
     }
 
     deleteState(key: string): void {
-        delete this._state.fsm[key]
+        this._state.fsm.delete(key)
     }
 
     getCurrentScene(key: string): string | null {
@@ -395,25 +405,25 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
     }
 
     deleteCurrentScene(key: string): void {
-        delete this._state.fsm[`$current_scene_${key}`]
+        this._state.fsm.delete(`$current_scene_${key}`)
     }
 
     getRateLimit(key: string, limit: number, window: number): [number, number] {
         // leaky bucket
         const now = Date.now()
 
-        if (!(key in this._state.rl)) {
+        const item = this._state.rl.get(key)
+
+        if (!item) {
             const state = {
                 res: now + window * 1000,
                 rem: limit,
             }
 
-            this._state.rl[key] = state
+            this._state.rl.set(key, state)
 
             return [state.rem, state.res]
         }
-
-        const item = this._state.rl[key]
 
         if (item.res < now) {
             // expired
@@ -423,7 +433,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
                 rem: limit,
             }
 
-            this._state.rl[key] = state
+            this._state.rl.set(key, state)
 
             return [state.rem, state.res]
         }
@@ -434,6 +444,6 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
     }
 
     resetRateLimit(key: string): void {
-        delete this._state.rl[key]
+        this._state.rl.delete(key)
     }
 }

@@ -1,9 +1,6 @@
 /* eslint-disable dot-notation */
 import { AsyncLock, Deque, getMarkedPeerId, MaybeAsync } from '@mtcute/core'
-import {
-    ControllablePromise,
-    createControllablePromise,
-} from '@mtcute/core/src/utils/controllable-promise'
+import { ControllablePromise, createControllablePromise } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../client'
@@ -43,10 +40,10 @@ export class Conversation {
     private _pendingNewMessages = new Deque<Message>()
     private _lock = new AsyncLock()
 
-    private _pendingEditMessage: Record<number, QueuedHandler<Message>> = {}
+    private _pendingEditMessage: Map<number, QueuedHandler<Message>> = new Map()
     private _recentEdits = new Deque<Message>(10)
 
-    private _pendingRead: Record<number, QueuedHandler<void>> = {}
+    private _pendingRead: Map<number, QueuedHandler<void>> = new Map()
 
     constructor(readonly client: TelegramClient, readonly chat: InputPeerLike) {
         this._onNewMessage = this._onNewMessage.bind(this)
@@ -112,10 +109,10 @@ export class Conversation {
         this.client.on('edit_message', this._onEditMessage)
         this.client.on('history_read', this._onHistoryRead)
 
-        if (!(this._chatId in this.client['_pendingConversations'])) {
-            this.client['_pendingConversations'][this._chatId] = []
+        if (this.client['_pendingConversations'].has(this._chatId)) {
+            this.client['_pendingConversations'].set(this._chatId, [])
         }
-        this.client['_pendingConversations'][this._chatId].push(this)
+        this.client['_pendingConversations'].get(this._chatId)!.push(this)
         this.client['_hasConversations'] = true
     }
 
@@ -129,25 +126,26 @@ export class Conversation {
         this.client.off('edit_message', this._onEditMessage)
         this.client.off('history_read', this._onHistoryRead)
 
-        const pending = this.client['_pendingConversations']
+        const pending = this.client['_pendingConversations'].get(this._chatId)
+        const pendingIdx = pending?.indexOf(this) ?? -1
 
-        const idx = pending[this._chatId].indexOf(this)
-
-        if (idx > -1) {
+        if (pendingIdx > -1) {
             // just in case
-            pending[this._chatId].splice(idx, 1)
+            pending!.splice(pendingIdx, 1)
         }
-        if (!pending[this._chatId].length) {
-            delete pending[this._chatId]
+        if (pending && !pending.length) {
+            this.client['_pendingConversations'].delete(this._chatId)
         }
-        this.client['_hasConversations'] = Object.keys(pending).length > 0
+        this.client['_hasConversations'] = Boolean(
+            this.client['_pendingConversations'].size,
+        )
 
         // reset pending status
         this._queuedNewMessage.clear()
         this._pendingNewMessages.clear()
-        this._pendingEditMessage = {}
+        this._pendingEditMessage.clear()
         this._recentEdits.clear()
-        this._pendingRead = {}
+        this._pendingRead.clear()
 
         this._started = false
     }
@@ -424,15 +422,15 @@ export class Conversation {
         if (timeout) {
             timer = setTimeout(() => {
                 promise.reject(new MtTimeoutError(timeout))
-                delete this._pendingEditMessage[msgId]
+                this._pendingEditMessage.delete(msgId)
             }, timeout)
         }
 
-        this._pendingEditMessage[msgId] = {
+        this._pendingEditMessage.set(msgId, {
             promise,
             check: filter,
             timeout: timer,
-        }
+        })
 
         this._processRecentEdits()
 
@@ -476,14 +474,14 @@ export class Conversation {
         if (timeout !== null) {
             timer = setTimeout(() => {
                 promise.reject(new MtTimeoutError(timeout))
-                delete this._pendingRead[msgId]
+                this._pendingRead.delete(msgId)
             }, timeout)
         }
 
-        this._pendingRead[msgId] = {
+        this._pendingRead.set(msgId, {
             promise,
             timeout: timer,
-        }
+        })
 
         return promise
     }
@@ -521,10 +519,12 @@ export class Conversation {
     private _onEditMessage(msg: Message, fromRecent = false) {
         if (msg.chat.id !== this._chatId) return
 
-        const it = this._pendingEditMessage[msg.id]
+        const it = this._pendingEditMessage.get(msg.id)
 
-        if (!it && !fromRecent) {
-            this._recentEdits.pushBack(msg)
+        if (!it) {
+            if (!fromRecent) {
+                this._recentEdits.pushBack(msg)
+            }
 
             return
         }
@@ -533,7 +533,7 @@ export class Conversation {
             if (!it.check || (await it.check(msg))) {
                 if (it.timeout) clearTimeout(it.timeout)
                 it.promise.resolve(msg)
-                delete this._pendingEditMessage[msg.id]
+                this._pendingEditMessage.delete(msg.id)
             }
         })().catch((e) => {
             this.client['_emitError'](e)
@@ -545,12 +545,12 @@ export class Conversation {
 
         const lastRead = upd.maxReadId
 
-        for (const msgId in this._pendingRead) {
-            if (parseInt(msgId) <= lastRead) {
-                const it = this._pendingRead[msgId]
+        for (const msgId of this._pendingRead.keys()) {
+            if (msgId <= lastRead) {
+                const it = this._pendingRead.get(msgId)!
                 if (it.timeout) clearTimeout(it.timeout)
                 it.promise.resolve()
-                delete this._pendingRead[msgId]
+                this._pendingRead.delete(msgId)
             }
         }
     }

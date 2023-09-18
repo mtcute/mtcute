@@ -101,8 +101,8 @@ export class MtprotoSession {
 
     /// state ///
     // recent msg ids
-    recentOutgoingMsgIds = new LruSet<Long>(1000, false, true)
-    recentIncomingMsgIds = new LruSet<Long>(1000, false, true)
+    recentOutgoingMsgIds = new LruSet<Long>(1000, true)
+    recentIncomingMsgIds = new LruSet<Long>(1000, true)
 
     // queues
     queuedRpc = new Deque<PendingRpc>()

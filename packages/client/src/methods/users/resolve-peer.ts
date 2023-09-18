@@ -78,7 +78,9 @@ export async function resolvePeer(
         } else {
             // username
             if (!force) {
-                const fromStorage = await this.storage.getPeerByUsername(peerId)
+                const fromStorage = await this.storage.getPeerByUsername(
+                    peerId.toLowerCase(),
+                )
                 if (fromStorage) return fromStorage
             }
 

@@ -3,13 +3,13 @@ import { IMessageEntityParser } from '../../types'
 
 // @extension
 interface ParseModesExtension {
-    _parseModes: Record<string, IMessageEntityParser>
+    _parseModes: Map<string, IMessageEntityParser>
     _defaultParseMode: string | null
 }
 
 // @initialize
 function _initializeParseModes(this: TelegramClient) {
-    this._parseModes = {}
+    this._parseModes = new Map()
     this._defaultParseMode = null
 }
 
