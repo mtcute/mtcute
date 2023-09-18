@@ -13,7 +13,7 @@ export interface MemorySessionState {
     // forwards compatibility for persistent storages
     $version: typeof CURRENT_VERSION
 
-    defaultDc: tl.RawDcOption | null
+    defaultDcs: ITelegramStorage.DcOptions | null
     authKeys: Record<number, Buffer | null>
     authKeysTemp: Record<string, Buffer | null>
     authKeysTempExpiry: Record<string, number>
@@ -110,7 +110,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
     reset(): void {
         this._state = {
             $version: CURRENT_VERSION,
-            defaultDc: null,
+            defaultDcs: null,
             authKeys: {},
             authKeysTemp: {},
             authKeysTempExpiry: {},
@@ -183,12 +183,12 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         })
     }
 
-    getDefaultDc(): tl.RawDcOption | null {
-        return this._state.defaultDc
+    getDefaultDcs(): ITelegramStorage.DcOptions | null {
+        return this._state.defaultDcs
     }
 
-    setDefaultDc(dc: tl.RawDcOption | null): void {
-        this._state.defaultDc = dc
+    setDefaultDcs(dcs: ITelegramStorage.DcOptions | null): void {
+        this._state.defaultDcs = dcs
     }
 
     setTempAuthKeyFor(

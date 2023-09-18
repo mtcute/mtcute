@@ -155,6 +155,7 @@ export class MultiSessionConnection extends EventEmitter {
                     isMainConnection: this.params.isMainConnection && i === 0,
                     withUpdates:
                         this.params.isMainConnection &&
+                        this.params.isMainDcConnection &&
                         !this.params.disableUpdates,
                 },
                 session,

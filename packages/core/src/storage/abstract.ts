@@ -21,6 +21,11 @@ export namespace ITelegramStorage {
         isBot: boolean
         userId: number
     }
+
+    export interface DcOptions {
+        main: tl.RawDcOption
+        media: tl.RawDcOption
+    }
 }
 
 /**
@@ -68,12 +73,12 @@ export interface ITelegramStorage {
     /**
      * Set default datacenter to use with this session.
      */
-    setDefaultDc(dc: tl.RawDcOption | null): MaybeAsync<void>
+    setDefaultDcs(dcs: ITelegramStorage.DcOptions | null): MaybeAsync<void>
     /**
      * Get default datacenter for this session
      * (by default should return null)
      */
-    getDefaultDc(): MaybeAsync<tl.RawDcOption | null>
+    getDefaultDcs(): MaybeAsync<ITelegramStorage.DcOptions | null>
 
     /**
      * Get auth_key for a given DC
@@ -92,7 +97,12 @@ export interface ITelegramStorage {
      * Set temp_auth_key for a given DC
      * expiresAt is unix time in ms
      */
-    setTempAuthKeyFor(dcId: number, index: number, key: Buffer | null, expiresAt: number): MaybeAsync<void>
+    setTempAuthKeyFor(
+        dcId: number,
+        index: number,
+        key: Buffer | null,
+        expiresAt: number
+    ): MaybeAsync<void>
     /**
      * Remove all saved auth keys (both temp and perm)
      * for the given DC. Used when perm_key becomes invalid,

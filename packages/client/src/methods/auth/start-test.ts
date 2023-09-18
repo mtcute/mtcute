@@ -76,12 +76,16 @@ export async function startTest(
         }
         const id = parseInt(phone[5])
 
-        if (!availableDcs.find((dc) => dc.id === id)) { throw new MtArgumentError(`${phone} has invalid DC ID (${id})`) }
+        if (!availableDcs.find((dc) => dc.id === id)) {
+            throw new MtArgumentError(`${phone} has invalid DC ID (${id})`)
+        }
     } else {
-        let dcId = this._defaultDc.id
+        let dcId = this._defaultDcs.main.id
 
         if (params.dcId) {
-            if (!availableDcs.find((dc) => dc.id === params!.dcId)) { throw new MtArgumentError(`DC ID is invalid (${dcId})`) }
+            if (!availableDcs.find((dc) => dc.id === params!.dcId)) {
+                throw new MtArgumentError(`DC ID is invalid (${dcId})`)
+            }
             dcId = params.dcId
         }
 

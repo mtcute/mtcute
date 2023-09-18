@@ -54,7 +54,7 @@ function getInputPeer(
     throw new Error(`Invalid peer type: ${row.type}`)
 }
 
-const CURRENT_VERSION = 3
+const CURRENT_VERSION = 4
 
 // language=SQLite format=false
 const TEMP_AUTH_TABLE = `
@@ -392,6 +392,28 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
             from = 3
         }
 
+        if (from === 3) {
+            // media dc support added
+            const oldDc = this._db
+                .prepare("select value from kv where key = 'def_dc'")
+                .get()
+
+            if (oldDc) {
+                const oldDcValue = JSON.parse(
+                    (oldDc as { value: string }).value,
+                ) as tl.RawDcOption
+                this._db
+                    .prepare("update kv set value = ? where key = 'def_dc'")
+                    .run([
+                        JSON.stringify({
+                            main: oldDcValue,
+                            media: oldDcValue,
+                        }),
+                    ])
+            }
+            from = 4
+        }
+
         if (from !== CURRENT_VERSION) {
             // an assertion just in case i messed up
             throw new Error('Migration incomplete')
@@ -499,11 +521,11 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         this._db.exec(RESET)
     }
 
-    setDefaultDc(dc: tl.RawDcOption | null): void {
+    setDefaultDcs(dc: ITelegramStorage.DcOptions | null): void {
         return this._setToKv('def_dc', dc)
     }
 
-    getDefaultDc(): tl.RawDcOption | null {
+    getDefaultDcs(): ITelegramStorage.DcOptions | null {
         return this._getFromKv('def_dc')
     }
 

@@ -74,7 +74,7 @@ export async function* downloadAsIterable(
     const isWeb = tl.isAnyInputWebFileLocation(location)
 
     // we will receive a FileMigrateError in case this is invalid
-    if (!dcId) dcId = this._defaultDc.id
+    if (!dcId) dcId = this._defaultDcs.main.id
 
     const partSizeKb =
         params.partSize ?? (fileSize ? determinePartSize(fileSize) : 64)

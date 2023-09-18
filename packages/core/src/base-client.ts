@@ -77,7 +77,7 @@ export interface BaseTelegramClientOptions {
      * When session already contains primary DC, this parameter is ignored.
      * Defaults to Production DC 2.
      */
-    defaultDc?: tl.RawDcOption
+    defaultDcs?: ITelegramStorage.DcOptions
 
     /**
      * Whether to connect to test servers.
@@ -211,10 +211,10 @@ export class BaseTelegramClient extends EventEmitter {
     protected readonly _testMode: boolean
 
     /**
-     * Primary DC taken from {@link BaseTelegramClientOptions.defaultDc},
+     * Primary DCs taken from {@link BaseTelegramClientOptions.defaultDcs},
      * loaded from session or changed by other means (like redirecting).
      */
-    protected _defaultDc: tl.RawDcOption
+    protected _defaultDcs: ITelegramStorage.DcOptions
 
     private _niceStacks: boolean
     readonly _layer: number
@@ -264,7 +264,7 @@ export class BaseTelegramClient extends EventEmitter {
         this._useIpv6 = Boolean(opts.useIpv6)
         this._testMode = Boolean(opts.testMode)
 
-        let dc = opts.defaultDc
+        let dc = opts.defaultDcs
 
         if (!dc) {
             if (this._testMode) {
@@ -276,7 +276,7 @@ export class BaseTelegramClient extends EventEmitter {
             }
         }
 
-        this._defaultDc = dc
+        this._defaultDcs = dc
         this._niceStacks = opts.niceStacks ?? true
 
         this._layer = opts.overrideLayer ?? tl.LAYER
@@ -348,11 +348,11 @@ export class BaseTelegramClient extends EventEmitter {
         const promise = (this._connected = createControllablePromise())
 
         await this._loadStorage()
-        const primaryDc = await this.storage.getDefaultDc()
-        if (primaryDc !== null) this._defaultDc = primaryDc
+        const primaryDc = await this.storage.getDefaultDcs()
+        if (primaryDc !== null) this._defaultDcs = primaryDc
 
         const defaultDcAuthKey = await this.storage.getAuthKeyFor(
-            this._defaultDc.id,
+            this._defaultDcs.main.id,
         )
 
         if ((this._importForce || !defaultDcAuthKey) && this._importFrom) {
@@ -369,21 +369,24 @@ export class BaseTelegramClient extends EventEmitter {
                 )
             }
 
-            this._defaultDc = data.primaryDc
-            await this.storage.setDefaultDc(data.primaryDc)
+            this._defaultDcs = data.primaryDcs
+            await this.storage.setDefaultDcs(data.primaryDcs)
 
             if (data.self) {
                 await this.storage.setSelf(data.self)
             }
 
             // await this.primaryConnection.setupKeys(data.authKey)
-            await this.storage.setAuthKeyFor(data.primaryDc.id, data.authKey)
+            await this.storage.setAuthKeyFor(
+                data.primaryDcs.main.id,
+                data.authKey,
+            )
 
             await this._saveStorage(true)
         }
 
         this.network
-            .connect(this._defaultDc)
+            .connect(this._defaultDcs)
             .then(() => {
                 promise.resolve()
                 this._connected = true
@@ -574,17 +577,17 @@ export class BaseTelegramClient extends EventEmitter {
      * > with [@BotFather](//t.me/botfather)
      */
     async exportSession(): Promise<string> {
-        const primaryDc = await this.storage.getDefaultDc()
-        if (!primaryDc) throw new Error('No default DC set')
+        const primaryDcs = await this.storage.getDefaultDcs()
+        if (!primaryDcs) throw new Error('No default DC set')
 
-        const authKey = await this.storage.getAuthKeyFor(primaryDc.id)
+        const authKey = await this.storage.getAuthKeyFor(primaryDcs.main.id)
         if (!authKey) throw new Error('Auth key is not ready yet')
 
         return writeStringSession(this._writerMap, {
-            version: 1,
+            version: 2,
             self: await this.storage.getSelf(),
             testMode: this._testMode,
-            primaryDc,
+            primaryDcs,
             authKey,
         })
     }

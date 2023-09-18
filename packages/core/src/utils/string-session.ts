@@ -1,5 +1,10 @@
 import { tl } from '@mtcute/tl'
-import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import {
+    TlBinaryReader,
+    TlBinaryWriter,
+    TlReaderMap,
+    TlWriterMap,
+} from '@mtcute/tl-runtime'
 
 import { ITelegramStorage } from '../storage'
 import { encodeUrlSafeBase64, parseUrlSafeBase64 } from './buffer-utils'
@@ -7,7 +12,7 @@ import { encodeUrlSafeBase64, parseUrlSafeBase64 } from './buffer-utils'
 export interface StringSessionData {
     version: number
     testMode: boolean
-    primaryDc: tl.TypeDcOption
+    primaryDcs: ITelegramStorage.DcOptions
     self?: ITelegramStorage.SelfInfo | null
     authKey: Buffer
 }
@@ -20,7 +25,7 @@ export function writeStringSession(
 
     const version = data.version
 
-    if (version !== 1) {
+    if (version !== 1 && version !== 2) {
         throw new Error(`Unsupported string session version: ${version}`)
     }
 
@@ -38,7 +43,12 @@ export function writeStringSession(
     writer.pos += 1
 
     writer.int(flags)
-    writer.object(data.primaryDc)
+    writer.object(data.primaryDcs.main)
+
+    if (version >= 2 && data.primaryDcs.media !== data.primaryDcs.main) {
+        flags |= 4
+        writer.object(data.primaryDcs.media)
+    }
 
     if (data.self) {
         writer.int53(data.self.userId)
@@ -50,23 +60,32 @@ export function writeStringSession(
     return encodeUrlSafeBase64(writer.result())
 }
 
-export function readStringSession(readerMap: TlReaderMap, data: string): StringSessionData {
+export function readStringSession(
+    readerMap: TlReaderMap,
+    data: string,
+): StringSessionData {
     const buf = parseUrlSafeBase64(data)
 
-    if (buf[0] !== 1) { throw new Error(`Invalid session string (version = ${buf[0]})`) }
+    const version = buf[0]
+
+    if (version !== 1 && version !== 2) {
+        throw new Error(`Invalid session string (version = ${version})`)
+    }
 
     const reader = new TlBinaryReader(readerMap, buf, 1)
 
     const flags = reader.int()
     const hasSelf = flags & 1
     const testMode = Boolean(flags & 2)
+    const hasMedia = version >= 2 && Boolean(flags & 4)
 
     const primaryDc = reader.object() as tl.TypeDcOption
+    const primaryMediaDc = hasMedia ?
+        (reader.object() as tl.TypeDcOption) :
+        primaryDc
 
     if (primaryDc._ !== 'dcOption') {
-        throw new Error(
-            `Invalid session string (dc._ = ${primaryDc._})`,
-        )
+        throw new Error(`Invalid session string (dc._ = ${primaryDc._})`)
     }
 
     let self: ITelegramStorage.SelfInfo | null = null
@@ -86,7 +105,10 @@ export function readStringSession(readerMap: TlReaderMap, data: string): StringS
     return {
         version: 1,
         testMode,
-        primaryDc,
+        primaryDcs: {
+            main: primaryDc,
+            media: primaryMediaDc,
+        },
         self,
         authKey: key,
     }

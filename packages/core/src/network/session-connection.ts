@@ -41,6 +41,7 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
     disableUpdates?: boolean
     withUpdates?: boolean
     isMainConnection: boolean
+    isMainDcConnection: boolean
     usePfs?: boolean
 
     readerMap: TlReaderMap

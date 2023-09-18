@@ -164,7 +164,7 @@ export class DcConnectionManager {
         crypto: this.manager.params.crypto,
         initConnection: this.manager._initConnectionParams,
         transportFactory: this.manager._transportFactory,
-        dc: this._dc,
+        dc: this._dcs.media,
         testMode: this.manager.params.testMode,
         reconnectionStrategy: this.manager._reconnectionStrategy,
         layer: this.manager.params.layer,
@@ -173,6 +173,7 @@ export class DcConnectionManager {
         writerMap: this.manager.params.writerMap,
         usePfs: this.manager.params.usePfs,
         isMainConnection: false,
+        isMainDcConnection: this.isPrimary,
         inactivityTimeout: this.manager.params.inactivityTimeout ?? 60_000,
     })
 
@@ -184,7 +185,7 @@ export class DcConnectionManager {
         this.__baseConnectionParams(),
         this.manager._connectionCount(
             'upload',
-            this._dc.id,
+            this.dcId,
             this.manager.params.isPremium,
         ),
         this._log,
@@ -195,7 +196,7 @@ export class DcConnectionManager {
         this.__baseConnectionParams(),
         this.manager._connectionCount(
             'download',
-            this._dc.id,
+            this.dcId,
             this.manager.params.isPremium,
         ),
         this._log,
@@ -206,7 +207,7 @@ export class DcConnectionManager {
         this.__baseConnectionParams(),
         this.manager._connectionCount(
             'downloadSmall',
-            this._dc.id,
+            this.dcId,
             this.manager.params.isPremium,
         ),
         this._log,
@@ -222,13 +223,14 @@ export class DcConnectionManager {
     constructor(
         readonly manager: NetworkManager,
         readonly dcId: number,
-        readonly _dc: tl.RawDcOption,
+        readonly _dcs: ITelegramStorage.DcOptions,
         public isPrimary = false,
     ) {
         this._log.prefix = `[DC ${dcId}] `
 
         const mainParams = this.__baseConnectionParams()
         mainParams.isMainConnection = true
+        mainParams.dc = _dcs.main
 
         if (isPrimary) {
             mainParams.inactivityTimeout = undefined
@@ -361,17 +363,13 @@ export class DcConnectionManager {
 
     setIsPremium(isPremium: boolean): void {
         this.upload.setCount(
-            this.manager._connectionCount('upload', this._dc.id, isPremium),
+            this.manager._connectionCount('upload', this.dcId, isPremium),
         )
         this.download.setCount(
-            this.manager._connectionCount('download', this._dc.id, isPremium),
+            this.manager._connectionCount('download', this.dcId, isPremium),
         )
         this.downloadSmall.setCount(
-            this.manager._connectionCount(
-                'downloadSmall',
-                this._dc.id,
-                isPremium,
-            ),
+            this.manager._connectionCount('downloadSmall', this.dcId, isPremium),
         )
     }
 
@@ -481,6 +479,33 @@ export class NetworkManager {
         config.onConfigUpdate(this._onConfigChanged)
     }
 
+    private async _findDcOptions(
+        dcId: number,
+    ): Promise<ITelegramStorage.DcOptions> {
+        const main = await this.config.findOption({
+            dcId,
+            allowIpv6: this.params.useIpv6,
+            preferIpv6: this.params.useIpv6,
+            allowMedia: false,
+            cdn: false,
+        })
+
+        const media = await this.config.findOption({
+            dcId,
+            allowIpv6: this.params.useIpv6,
+            preferIpv6: this.params.useIpv6,
+            allowMedia: true,
+            preferMedia: true,
+            cdn: false,
+        })
+
+        if (!main || !media) {
+            throw new Error(`Could not find DC ${dcId}`)
+        }
+
+        return { main, media }
+    }
+
     private _switchPrimaryDc(dc: DcConnectionManager) {
         if (this._primaryDc && this._primaryDc !== dc) {
             this._primaryDc.setIsPrimary(false)
@@ -536,19 +561,9 @@ export class NetworkManager {
             this._log.debug('creating new DC %d', dcId)
 
             try {
-                const dcOption = await this.config.findOption({
-                    dcId,
-                    allowIpv6: this.params.useIpv6,
-                    preferIpv6: this.params.useIpv6,
-                    allowMedia: true,
-                    preferMedia: true,
-                    cdn: false,
-                })
+                const dcOptions = await this._findDcOptions(dcId)
 
-                if (!dcOption) {
-                    throw new Error(`Could not find DC ${dcId}`)
-                }
-                const dc = new DcConnectionManager(this, dcId, dcOption)
+                const dc = new DcConnectionManager(this, dcId, dcOptions)
 
                 if (!(await dc.loadKeys())) {
                     dc.main.requestAuth()
@@ -567,56 +582,66 @@ export class NetworkManager {
     /**
      * Perform initial connection to the default DC
      *
-     * @param defaultDc  Default DC to connect to
+     * @param defaultDcs  Default DCs to connect to
      */
-    async connect(defaultDc: tl.RawDcOption): Promise<void> {
-        if (this._dcConnections[defaultDc.id]) {
+    async connect(defaultDcs: ITelegramStorage.DcOptions): Promise<void> {
+        if (defaultDcs.main.id !== defaultDcs.media.id) {
+            throw new Error('Default DCs must be the same')
+        }
+
+        if (this._dcConnections[defaultDcs.main.id]) {
             // shouldn't happen
             throw new Error('DC manager already exists')
         }
 
-        const dc = new DcConnectionManager(this, defaultDc.id, defaultDc)
-        this._dcConnections[defaultDc.id] = dc
+        const dc = new DcConnectionManager(this, defaultDcs.main.id, defaultDcs)
+        this._dcConnections[defaultDcs.main.id] = dc
         await this._switchPrimaryDc(dc)
     }
 
+    private _pendingExports: Record<number, Promise<void>> = {}
     private async _exportAuthTo(manager: DcConnectionManager): Promise<void> {
-        const auth = await this.call({
-            _: 'auth.exportAuthorization',
-            dcId: manager.dcId,
-        })
+        if (manager.dcId in this._pendingExports) {
+            this._log.debug('waiting for auth export to dc %d', manager.dcId)
 
-        const res = await this.call(
-            {
-                _: 'auth.importAuthorization',
-                id: auth.id,
-                bytes: auth.bytes,
-            },
-            { manager },
-        )
+            return this._pendingExports[manager.dcId]
+        }
 
-        if (res._ !== 'auth.authorization') {
-            throw new Error(
-                `Unexpected response from auth.importAuthorization: ${res._}`,
+        this._log.debug('exporting auth to dc %d', manager.dcId)
+        const promise = createControllablePromise<void>()
+        this._pendingExports[manager.dcId] = promise
+
+        try {
+            const auth = await this.call({
+                _: 'auth.exportAuthorization',
+                dcId: manager.dcId,
+            })
+
+            const res = await this.call(
+                {
+                    _: 'auth.importAuthorization',
+                    id: auth.id,
+                    bytes: auth.bytes,
+                },
+                { manager },
             )
-        }
-    }
 
-    async exportAuth(): Promise<void> {
-        const dcs: Record<number, number> = {}
-        const config = await this.config.get()
+            if (res._ !== 'auth.authorization') {
+                throw new Error(
+                    `Unexpected response from auth.importAuthorization: ${res._}`,
+                )
+            }
 
-        for (const dc of config.dcOptions) {
-            if (dc.cdn) continue
-            dcs[dc.id] = dc.id
-        }
-
-        for (const dc of Object.values(dcs)) {
-            if (dc === this._primaryDc!.dcId) continue
-            this._log.debug('exporting auth for dc %d', dc)
-
-            const manager = await this._getOtherDc(dc)
-            await this._exportAuthTo(manager)
+            promise.resolve()
+            delete this._pendingExports[manager.dcId]
+        } catch (e) {
+            this._log.warn(
+                'failed to export auth to dc %d: %s',
+                manager.dcId,
+                e,
+            )
+            promise.reject(e)
+            throw e
         }
     }
 
@@ -628,6 +653,8 @@ export class NetworkManager {
         })
     }
 
+    // future-proofing. should probably remove once the implementation is stable
+    // eslint-disable-next-line @typescript-eslint/require-await
     async notifyLoggedIn(auth: tl.auth.TypeAuthorization): Promise<void> {
         if (
             auth._ === 'auth.authorizationSignUpRequired' ||
@@ -642,7 +669,7 @@ export class NetworkManager {
 
         this.setIsPremium(auth.user.premium!)
 
-        await this.exportAuth()
+        // await this.exportAuth()
     }
 
     resetSessions(): void {
@@ -664,27 +691,17 @@ export class NetworkManager {
     async changePrimaryDc(newDc: number): Promise<void> {
         if (newDc === this._primaryDc?.dcId) return
 
-        const option = await this.config.findOption({
-            dcId: newDc,
-            allowIpv6: this.params.useIpv6,
-            preferIpv6: this.params.useIpv6,
-            cdn: false,
-            allowMedia: false,
-        })
-
-        if (!option) {
-            throw new Error(`DC ${newDc} not found`)
-        }
+        const options = await this._findDcOptions(newDc)
 
         if (!this._dcConnections[newDc]) {
             this._dcConnections[newDc] = new DcConnectionManager(
                 this,
                 newDc,
-                option,
+                options,
             )
         }
 
-        await this._storage.setDefaultDc(option)
+        await this._storage.setDefaultDcs(options)
 
         await this._switchPrimaryDc(this._dcConnections[newDc])
     }
