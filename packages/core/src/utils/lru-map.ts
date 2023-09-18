@@ -96,6 +96,22 @@ export class LruMap<K extends string | number, V> {
         return this._has(key)
     }
 
+    private _remove(item: TwoWayLinkedList<K, V>): void {
+        if (item.p) {
+            this._last = item.p
+            this._last.n = undefined
+        } else {
+            // exhausted
+            this._last = undefined
+            this._first = undefined
+        }
+
+        // remove strong refs to and from the item
+        item.p = item.n = undefined
+        this._del(item.k)
+        this._size -= 1
+    }
+
     set(key: K, value: V): void {
         let item = this._get(key)
 
@@ -110,6 +126,9 @@ export class LruMap<K extends string | number, V> {
         item = {
             k: key,
             v: value,
+            // for jit to optimize stuff
+            n: undefined,
+            p: undefined,
         }
         this._set(key, item as any)
 
@@ -129,24 +148,13 @@ export class LruMap<K extends string | number, V> {
             const oldest = this._last
 
             if (oldest) {
-                if (oldest.p) {
-                    this._last = oldest.p
-                    this._last.n = undefined
-                } else {
-                    // exhausted
-                    this._last = undefined
-                    this._first = undefined
-                }
-
-                // remove strong refs to and from the item
-                oldest.p = oldest.n = undefined
-                this._del(oldest.k)
-                this._size -= 1
+                this._remove(oldest)
             }
         }
     }
 
     delete(key: K): void {
-        this._del(key)
+        const item = this._get(key)
+        if (item) this._remove(item)
     }
 }
