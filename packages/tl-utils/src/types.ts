@@ -426,5 +426,5 @@ export const TL_PRIMITIVES = {
     Bool: 1,
     true: 1,
     null: 1,
-    Object: true,
+    Object: 1,
 } as const

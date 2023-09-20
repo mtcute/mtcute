@@ -1,5 +1,5 @@
 import { computeConstructorIdFromEntry } from './ctor-id'
-import { TlEntry, TlFullSchema } from './types'
+import { TlArgument, TlEntry, TlFullSchema } from './types'
 
 /**
  * Merge multiple TL entries into a single entry.
@@ -18,27 +18,28 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
         typeModifiers: first.typeModifiers,
         id: first.id,
         comment: first.comment,
-        generics: first.generics,
-        arguments: first.arguments,
+        generics: first.generics?.map((it) => ({ ...it })),
+        arguments: first.arguments.map((it) => ({ ...it })),
     }
 
     if (result.id === 0) {
         result.id = computeConstructorIdFromEntry(result)
     }
 
-    const argsIndex: Record<string, true> = {}
+    const argsIndex: Record<string, TlArgument> = {}
     const flagsLastIndex: Record<string, number> = {}
 
     result.arguments.forEach((arg, idx) => {
-        argsIndex[arg.name] = true
+        argsIndex[arg.name] = arg
 
         if (arg.type === '#') {
             flagsLastIndex[arg.name] = idx
         }
-        // if (arg.predicate) {
-        //     const flagsField = arg.predicate.split('.')[0]
-        //     flagsLastIndex[flagsField] = idx
-        // }
+
+        if (arg.typeModifiers?.predicate) {
+            const flagsField = arg.typeModifiers.predicate.split('.')[0]
+            flagsLastIndex[flagsField] = idx
+        }
     })
 
     for (let i = 1; i < entries.length; i++) {
@@ -89,7 +90,7 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
                 // targetIdx *must* exist, otherwise ids wouldn't match
 
                 result.arguments.splice(targetIdx + 1, 0, entryArgument)
-                argsIndex[entryArgument.name] = true
+                argsIndex[entryArgument.name] = entryArgument
 
                 // update last indexes
                 // we also need to update subsequent flags if there are any
@@ -98,10 +99,17 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
                         flagsLastIndex[flag]++
                     }
                 })
+
+                continue
             }
 
             // args exists both in result and current entry
             // since ctor ids match, it must be the same, so we don't need to check
+            // we still need to merge comments though
+
+            if (!resultArgument.comment && entryArgument.comment) {
+                resultArgument.comment = entryArgument.comment
+            }
         }
     }
 

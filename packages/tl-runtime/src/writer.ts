@@ -10,6 +10,7 @@ const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 export type TlWriterMap = Record<string, (w: any, val: any) => void> & {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _bare?: Record<number, (w: any, val: any) => void>
+    _staticSize: Record<string, number>
 }
 
 /**
@@ -165,7 +166,10 @@ export class TlBinaryWriter {
      * @param objectMap  Writers map
      * @param size  Size of the writer's buffer
      */
-    static alloc(objectMap: TlWriterMap, size: number): TlBinaryWriter {
+    static alloc(
+        objectMap: TlWriterMap | undefined,
+        size: number,
+    ): TlBinaryWriter {
         return new TlBinaryWriter(objectMap, Buffer.allocUnsafe(size))
     }
 
@@ -202,7 +206,9 @@ export class TlBinaryWriter {
         knownSize = -1,
     ): Buffer {
         if (knownSize === -1) {
-            knownSize = TlSerializationCounter.countNeededBytes(objectMap, obj)
+            knownSize =
+                objectMap._staticSize[obj._] ||
+                TlSerializationCounter.countNeededBytes(objectMap, obj)
         }
 
         const writer = TlBinaryWriter.alloc(objectMap, knownSize)

@@ -21,15 +21,16 @@ export function toFileId(
     if (loc._ === 'web') type |= td.WEB_LOCATION_FLAG
     if (location.fileReference) type |= td.FILE_REFERENCE_FLAG
 
+    // overhead of the web file id:
+    // 8-16 bytes header,
+    // 8 bytes for access hash,
+    // up to 4 bytes for url
+    //
+    // longest file ids are around 80 bytes, so i guess
+    // we are safe with allocating 100 bytes
     const writer = TlBinaryWriter.alloc(
-        {},
-        loc._ === 'web' ? // overhead of the web file id:
-        // 8-16 bytes header,
-        // 8 bytes for access hash,
-        // up to 4 bytes for url
-            Buffer.byteLength(loc.url, 'utf8') + 32 : // longest file ids are around 80 bytes, so i guess
-        // we are safe with allocating 100 bytes
-            100,
+        undefined,
+        loc._ === 'web' ? Buffer.byteLength(loc.url, 'utf8') + 32 : 100,
     )
 
     writer.int(type)

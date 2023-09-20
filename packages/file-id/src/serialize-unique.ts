@@ -149,7 +149,7 @@ export function toUniqueFileId(
         }
         case 'web':
             writer = TlBinaryWriter.alloc(
-                {},
+                undefined,
                 Buffer.byteLength(inputLocation.url, 'utf-8') + 8,
             )
             writer.int(type)

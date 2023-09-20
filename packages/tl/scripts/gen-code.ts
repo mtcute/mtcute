@@ -77,15 +77,14 @@ async function generateWriters(
 ) {
     console.log('Generating writers...')
 
-    let code = generateWriterCodeForTlEntries(apiSchema.entries, {
-        variableName: 'm',
-    })
+    let code = generateWriterCodeForTlEntries(
+        [...apiSchema.entries, ...mtpSchema.entries],
+        {
+            variableName: 'm',
+            includeStaticSizes: true,
+        },
+    )
 
-    const mtpCode = generateWriterCodeForTlEntries(mtpSchema.entries, {
-        variableName: 'm',
-        includePrelude: false,
-    })
-    code = code.substring(0, code.length - 1) + mtpCode.substring(7)
     code += '\nexports.default = m;'
 
     await writeFile(OUT_WRITERS_FILE, ESM_PRELUDE + code)

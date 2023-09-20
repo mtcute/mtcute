@@ -10,7 +10,7 @@ describe('TlBinaryWriter', () => {
     const testSingleMethod = (
         size: number,
         fn: (w: TlBinaryWriter) => void,
-        map: TlWriterMap = {},
+        map?: TlWriterMap,
     ): string => {
         const w = TlBinaryWriter.alloc(map, size)
         fn(w)
@@ -126,6 +126,8 @@ describe('TlBinaryWriter', () => {
             w.uint(0xbebf0c3d)
             w.vector(w.int, obj.vec)
         },
+        // eslint-disable-next-line
+        _staticSize: {} as any,
     }
 
     it('should write tg-encoded objects', () => {
@@ -218,6 +220,8 @@ describe('TlBinaryWriter', () => {
                     w.bytes(obj.pq)
                     w.vector(w.long, obj.serverPublicKeyFingerprints)
                 },
+                // eslint-disable-next-line
+                _staticSize: {} as any,
             }
 
             const length =

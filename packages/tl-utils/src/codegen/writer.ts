@@ -1,3 +1,4 @@
+import { calculateStaticSizes } from '../calculator'
 import { computeConstructorIdFromEntry } from '../ctor-id'
 import { TL_PRIMITIVES, TlEntry } from '../types'
 import { snakeToCamel } from './utils'
@@ -21,6 +22,11 @@ export interface WriterCodegenOptions {
     includePrelude?: boolean
 
     /**
+     * Whether to include `_staticSize` field
+     */
+    includeStaticSizes?: boolean
+
+    /**
      * Whether to generate bare writer (without constructor id write)
      */
     bare?: boolean
@@ -31,6 +37,7 @@ const DEFAULT_OPTIONS: WriterCodegenOptions = {
     variableName: 'm',
     includePrelude: true,
     bare: false,
+    includeStaticSizes: false,
 }
 
 const TL_WRITER_PRELUDE =
@@ -168,7 +175,10 @@ export function generateWriterCodeForTlEntries(
     entries: TlEntry[],
     params = DEFAULT_OPTIONS,
 ): string {
-    const { includePrelude, variableName } = { ...DEFAULT_OPTIONS, ...params }
+    const { includePrelude, variableName, includeStaticSizes } = {
+        ...DEFAULT_OPTIONS,
+        ...params,
+    }
 
     let ret = ''
     if (includePrelude) ret += TL_WRITER_PRELUDE
@@ -201,7 +211,19 @@ export function generateWriterCodeForTlEntries(
                     bare: true,
                 }) + '\n'
         })
-        ret += '}'
+        ret += '},\n'
+    }
+
+    if (includeStaticSizes) {
+        ret += '_staticSize:{\n'
+
+        const staticSizes = calculateStaticSizes(entries)
+
+        Object.keys(staticSizes).forEach((name) => {
+            ret += `'${name}':${staticSizes[name]},\n`
+        })
+
+        ret += '},\n'
     }
 
     return ret + '}'
