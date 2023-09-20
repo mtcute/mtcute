@@ -54,14 +54,13 @@ npm install @mtcute/node # or any other package
 ## Setting up for development:
 
 ```bash
-fnm use # or `nvm use`
 git clone https://github.com/mtcute/mtcute
+fnm use # or `nvm use`
 cd mtcute
 pnpm install --frozen-lockfile
 
 # generate code from tl schema
-cd packages/tl
-pnpm run gen-code
+pnpm -C packages/tl run gen-code
 ```
 
 ## cat in a readme 🐈

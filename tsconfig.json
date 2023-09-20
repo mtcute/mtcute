@@ -29,8 +29,6 @@
         ]
     },
     "exclude": [
-        "private",
-        "node_modules",
-        "dist"
+        "**/node_modules",
     ]
 }

@@ -1,0 +1,37 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+#
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # This job uses a matrix strategy to run the job four times, once for each specified Node version. For more information, see "[AUTOTITLE](/actions/using-jobs/using-a-matrix-for-your-jobs)."
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - run: pnpm install --frozen-lockfile
+      - name: 'TL codegen'
+        run: pnpm -C packages/tl run gen-code
+      - name: 'TypeScript'
+        run: pnpm run lint:tsc
+      - name: 'ESLint'
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
+        run: pnpm run lint
+      - run: pnpm run test:all
