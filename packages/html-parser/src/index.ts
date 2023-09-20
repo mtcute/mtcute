@@ -97,7 +97,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
         function processPendingText(tagEnd = false) {
             if (!pendingText.length) return
 
-            if (!stacks.pre.length) {
+            if (!stacks.pre?.length) {
                 pendingText = pendingText.replace(/[^\S\u00A0]+/gs, ' ')
 
                 if (tagEnd) pendingText = pendingText.trimEnd()
@@ -124,7 +124,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                 processPendingText()
 
                 // ignore tags inside pre (except pre)
-                if (name !== 'pre' && stacks.pre.length) return
+                if (name !== 'pre' && stacks.pre?.length) return
 
                 let entity: tl.TypeMessageEntity
 
@@ -269,14 +269,14 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                 name = name.toLowerCase()
 
                 // ignore tags inside pre (except pre)
-                if (name !== 'pre' && stacks.pre.length) return
+                if (name !== 'pre' && stacks.pre?.length) return
 
-                const entity = stacks[name].pop()
+                const entity = stacks[name]?.pop()
 
                 if (!entity) return // unmatched close tag
 
                 // ignore nested pre-s
-                if (name !== 'pre' || !stacks.pre.length) {
+                if (name !== 'pre' || !stacks.pre?.length) {
                     entities.push(entity)
                 }
             },

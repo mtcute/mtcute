@@ -116,7 +116,7 @@ export function generateCodeForErrors(
 
     for (const [name, code] of Object.entries(errors.base)) {
         staticsJs += `RpcError.${name} = ${code};\n`
-        staticsTs += `    static ${name} = ${code};\n`
+        staticsTs += `    static ${name}: ${code};\n`
     }
 
     for (const error of Object.values(errors.errors)) {

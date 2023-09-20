@@ -53,14 +53,14 @@ describe('mergeTlEntries', () => {
             'test flags:# foo:flags.0?true = Test;\n' +
                 'test flags:# bar:flags.0?true = Test;\n' +
                 'test flags:# baz:flags.1?true = Test;',
-            'test#e86481ba flags:# bar:flags.0?true baz:flags.1?true foo:flags.0?true = Test;',
+            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;',
         )
         test(
             'test flags:# foo:flags.0?true = Test;\n' +
                 'test flags:# foo:flags.0?true bar:flags.0?true = Test;\n' +
                 'test flags:# baz:flags.1?true = Test;\n' +
                 'test flags:# bar:flags.0?true baz:flags.1?true = Test;',
-            'test#e86481ba flags:# bar:flags.0?true baz:flags.1?true foo:flags.0?true = Test;',
+            'test#e86481ba flags:# foo:flags.0?true bar:flags.0?true baz:flags.1?true = Test;',
         )
     })
 
@@ -118,7 +118,7 @@ describe('mergeTlSchemas', () => {
                 ['test foo:flags.0?true bar:flags.0?true = Test;'],
             ],
             0,
-            'test#1c173316 bar:flags.0?true foo:flags.0?true = Test;',
+            'test#1c173316 foo:flags.0?true bar:flags.0?true = Test;',
         )
     })
 
@@ -160,7 +160,7 @@ describe('mergeTlSchemas', () => {
             ],
             0,
             '// @description test ctor',
-            'test#1c173316 bar:flags.0?true foo:flags.0?true = Test;',
+            'test#1c173316 foo:flags.0?true bar:flags.0?true = Test;',
         )
     })
 

@@ -9,7 +9,8 @@ import { tl } from '../'
 readerMap[0].call(null, null)
 writerMap['mt_message'].call(null, null, {})
 
-const error: tl.errors.RpcError = new tl.errors.BadRequestError(
-    'BAD_REQUEST',
-    'Client has issued an invalid request'
-)
+const error: tl.RpcError = tl.RpcError.create(400, 'BAD_REQUEST')
+
+if (error.is('FLOOD_WAIT_%d')) {
+    const a: number = error.seconds
+}

@@ -138,7 +138,8 @@ describe('generateWriterCodeForTlEntry', () => {
                 'future_salts':function(w,v){w.uint(2924480661);w.vector(m._bare[155834844],h(v,'salts'),1);m._bare[155834844](w,h(v,'current'));},
                 _bare:{
                     155834844:function(w=this,v){w.bytes(h(v,'salt'));},
-            }}`.replace(/^\s+/gm, ''),
+                },
+            }`.replace(/^\s+/gm, ''),
         )
     })
 
