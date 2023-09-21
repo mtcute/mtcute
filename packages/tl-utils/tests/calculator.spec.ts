@@ -41,6 +41,13 @@ describe('calculateStaticSizes', () => {
         )
     })
 
+    it('correctly skips constructors with vector fields', () => {
+        test(
+            'help.promoData#8c39793f psa_type:Vector<int> = help.PromoData;',
+            {},
+        )
+    })
+
     it('correctly handles static-sized children', () => {
         test(
             'peerUser#9db1bc6d user_id:int53 = Peer;\n' +

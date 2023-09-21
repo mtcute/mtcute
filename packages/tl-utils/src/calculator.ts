@@ -50,6 +50,14 @@ export function calculateStaticSizes(
                 return null
             }
 
+            if (
+                arg.typeModifiers?.isVector ||
+                arg.typeModifiers?.isBareVector
+            ) {
+                // cant be static sized
+                return null
+            }
+
             let unionSize
 
             if (arg.type in PRIMITIVES_SIZES) {
