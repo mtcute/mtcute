@@ -1,4 +1,5 @@
-import { ConditionVariable, ConnectionKind } from '@mtcute/core'
+import { ConnectionKind } from '@mtcute/core'
+import { ConditionVariable } from '@mtcute/core/utils'
 import {
     fileIdToInputFileLocation,
     fileIdToInputWebFileLocation,

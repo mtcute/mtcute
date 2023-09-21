@@ -1,4 +1,5 @@
-import { MaybeArray, randomLong } from '@mtcute/core'
+import { MaybeArray } from '@mtcute/core'
+import { randomLong } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'

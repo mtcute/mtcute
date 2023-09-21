@@ -6,6 +6,7 @@ import {
     CallbackQuery,
     Chat,
     ChatMemberUpdate,
+    ChatMemberUpdateType,
     ChatType,
     ChosenInlineResult,
     Contact,
@@ -36,7 +37,6 @@ import {
     Voice,
     WebPage,
 } from '@mtcute/client'
-import { ChatMemberUpdateType } from '@mtcute/client/src/types/updates/chat-member-update'
 import { MaybeArray } from '@mtcute/core'
 
 import { UpdateState } from './state'

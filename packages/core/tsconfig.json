@@ -5,7 +5,8 @@
     },
     "include": [
         "./src",
-        "./tests"
+        "./tests",
+        "./utils.ts",
     ],
     "typedocOptions": {
         "name": "@mtcute/core",

@@ -1,4 +1,5 @@
-import { assertNever, encodeUrlSafeBase64 } from '@mtcute/core'
+import { assertNever } from '@mtcute/core'
+import { encodeUrlSafeBase64 } from '@mtcute/core/utils'
 import { TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { tdFileId as td } from './types'

@@ -1,4 +1,4 @@
-import { sleep } from '@mtcute/core'
+import { sleep } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'

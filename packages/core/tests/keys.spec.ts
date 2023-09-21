@@ -1,8 +1,7 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { NodeCryptoProvider } from '../src'
-import { parsePublicKey } from '../src/utils/crypto/keys'
+import { NodeCryptoProvider, parsePublicKey } from '../utils'
 
 const crypto = new NodeCryptoProvider()
 

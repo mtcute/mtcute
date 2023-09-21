@@ -1,4 +1,4 @@
-import { computeSrpParams } from '@mtcute/core'
+import { computeSrpParams } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
 import { User } from '../../types'

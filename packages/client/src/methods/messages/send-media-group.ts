@@ -1,4 +1,5 @@
-import { getMarkedPeerId, randomLong } from '@mtcute/core'
+import { getMarkedPeerId } from '@mtcute/core'
+import { randomLong } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'

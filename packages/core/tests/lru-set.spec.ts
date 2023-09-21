@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import Long from 'long'
 import { describe, it } from 'mocha'
 
-import { LruSet } from '../src'
+import { LruSet } from '../utils'
 
 describe('LruSet', () => {
     describe('for strings', () => {

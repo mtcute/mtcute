@@ -2,7 +2,7 @@ import { CallbackQuery, InlineQuery, Message } from '../..'
 import { BotChatJoinRequestUpdate } from './bot-chat-join-request'
 import { BotStoppedUpdate } from './bot-stopped'
 import { ChatJoinRequestUpdate } from './chat-join-request'
-import { ChatMemberUpdate } from './chat-member-update'
+import { ChatMemberUpdate, ChatMemberUpdateType } from './chat-member-update'
 import { ChosenInlineResult } from './chosen-inline-result'
 import { DeleteMessageUpdate } from './delete-message-update'
 import { HistoryReadUpdate } from './history-read-update'
@@ -17,6 +17,7 @@ export {
     BotStoppedUpdate,
     ChatJoinRequestUpdate,
     ChatMemberUpdate,
+    ChatMemberUpdateType,
     ChosenInlineResult,
     DeleteMessageUpdate,
     HistoryReadUpdate,

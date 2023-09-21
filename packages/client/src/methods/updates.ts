@@ -1,17 +1,16 @@
 /* eslint-disable max-depth */
+import { assertNever } from '@mtcute/core'
 import {
-    assertNever,
     AsyncLock,
+    ConditionVariable,
+    Deque,
     getBarePeerId,
     getMarkedPeerId,
     Logger,
     markedPeerIdToBare,
+    SortedLinkedList,
     toggleChannelIdMark,
-} from '@mtcute/core'
-// @copy
-import { Deque, SortedLinkedList } from '@mtcute/core'
-// @copy
-import { ConditionVariable } from '@mtcute/core/src/utils/condition-variable'
+} from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../client'

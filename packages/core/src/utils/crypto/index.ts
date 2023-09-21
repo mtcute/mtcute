@@ -2,6 +2,7 @@ import { ForgeCryptoProvider } from './forge-crypto'
 import { NodeCryptoProvider } from './node-crypto'
 
 export * from './abstract'
+export * from './keys'
 export * from './password'
 
 export { ForgeCryptoProvider, NodeCryptoProvider }

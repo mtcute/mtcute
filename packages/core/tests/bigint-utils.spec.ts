@@ -2,7 +2,7 @@ import bigInt from 'big-integer'
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { bigIntToBuffer, bufferToBigInt } from '../src'
+import { bigIntToBuffer, bufferToBigInt } from '../utils'
 
 // since bigIntToBuffer is a tiny wrapper over writeBigInt, no need to test it individually
 describe('bigIntToBuffer', () => {

@@ -5,7 +5,7 @@ import {
     ForgeCryptoProvider,
     ICryptoProvider,
     NodeCryptoProvider,
-} from '../src'
+} from '../utils'
 
 export function testCryptoProvider(c: ICryptoProvider): void {
     it('should calculate sha1', async () => {

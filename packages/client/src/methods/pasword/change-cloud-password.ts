@@ -1,4 +1,4 @@
-import { computeNewPasswordHash, computeSrpParams } from '@mtcute/core'
+import { computeNewPasswordHash, computeSrpParams } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
 import { MtArgumentError } from '../../types'
@@ -20,7 +20,9 @@ export async function changeCloudPassword(
 ): Promise<void> {
     const pwd = await this.call({ _: 'account.getPassword' })
 
-    if (!pwd.hasPassword) { throw new MtArgumentError('Cloud password is not enabled') }
+    if (!pwd.hasPassword) {
+        throw new MtArgumentError('Cloud password is not enabled')
+    }
 
     const algo = pwd.newAlgo
     assertTypeIs(

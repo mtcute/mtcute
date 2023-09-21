@@ -1,4 +1,4 @@
-import { LongMap } from '@mtcute/core'
+import { LongMap } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'

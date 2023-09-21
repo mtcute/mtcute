@@ -1,4 +1,4 @@
-import { isPresent } from '@mtcute/core'
+import { isPresent } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MessageEntity } from '../../types'

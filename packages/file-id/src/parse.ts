@@ -1,4 +1,4 @@
-import { parseUrlSafeBase64 } from '@mtcute/core'
+import { parseUrlSafeBase64 } from '@mtcute/core/utils'
 import { TlBinaryReader } from '@mtcute/tl-runtime'
 
 import { tdFileId as td } from './types'

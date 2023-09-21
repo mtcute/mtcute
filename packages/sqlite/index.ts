@@ -4,11 +4,6 @@ import sqlite3, { Options } from 'better-sqlite3'
 
 import {
     ITelegramStorage,
-    Logger,
-    longFromFastString,
-    longToFastString,
-    LruMap,
-    throttle,
     tl,
     TlBinaryReader,
     TlBinaryWriter,
@@ -16,6 +11,13 @@ import {
     TlWriterMap,
     toggleChannelIdMark,
 } from '@mtcute/core'
+import {
+    Logger,
+    longFromFastString,
+    longToFastString,
+    LruMap,
+    throttle,
+} from '@mtcute/core/utils'
 import { IStateStorage } from '@mtcute/dispatcher'
 
 // todo: add testMode to "self"

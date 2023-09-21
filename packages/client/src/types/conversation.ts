@@ -1,6 +1,11 @@
 /* eslint-disable dot-notation */
-import { AsyncLock, Deque, getMarkedPeerId, MaybeAsync } from '@mtcute/core'
-import { ControllablePromise, createControllablePromise } from '@mtcute/core'
+import { getMarkedPeerId, MaybeAsync } from '@mtcute/core'
+import {
+    AsyncLock,
+    ControllablePromise,
+    createControllablePromise,
+    Deque,
+} from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../client'

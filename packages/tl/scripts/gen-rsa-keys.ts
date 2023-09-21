@@ -3,8 +3,7 @@ import { writeFile } from 'fs/promises'
 import { join } from 'path'
 import readline from 'readline'
 
-import { NodeCryptoProvider } from '@mtcute/core/src/utils/crypto'
-import { parsePublicKey } from '@mtcute/core/src/utils/crypto/keys'
+import { NodeCryptoProvider, parsePublicKey } from '@mtcute/core/utils'
 
 import { TlPublicKey } from '../binary/rsa-keys'
 import { ESM_PRELUDE } from './constants'

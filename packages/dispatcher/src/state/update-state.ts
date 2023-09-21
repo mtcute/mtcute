@@ -1,5 +1,5 @@
 import { MtArgumentError, MtClientError } from '@mtcute/client'
-import { sleep } from '@mtcute/core'
+import { sleep } from '@mtcute/core/utils'
 
 import { IStateStorage } from './storage'
 
@@ -101,7 +101,9 @@ export class UpdateState<State, SceneName extends string = string> {
             return this._cached
         }
 
-        let res = await this._localStorage.getState(this._localKey) as State | null
+        let res = (await this._localStorage.getState(
+            this._localKey,
+        )) as State | null
         if (!res && fallback) res = fallback
         this._cached = res
 

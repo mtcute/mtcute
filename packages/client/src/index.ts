@@ -5,7 +5,6 @@ export * from './utils/peer-utils'
 export { createDummyUpdate } from './utils/updates-utils'
 export {
     assertNever,
-    defaultDcs,
     JsonFileStorage,
     LocalstorageStorage,
     MemoryStorage,

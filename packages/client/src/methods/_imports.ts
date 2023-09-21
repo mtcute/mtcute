@@ -2,9 +2,15 @@
 import { Readable } from 'stream'
 
 // @copy
-import { AsyncLock, MaybeArray, MaybeAsync } from '@mtcute/core'
+import { MaybeArray, MaybeAsync } from '@mtcute/core'
 // @copy
-import { Logger } from '@mtcute/core/src/utils/logger'
+import {
+    AsyncLock,
+    ConditionVariable,
+    Deque,
+    Logger,
+    SortedLinkedList,
+} from '@mtcute/core/utils'
 // @copy
 import { tdFileId } from '@mtcute/file-id'
 

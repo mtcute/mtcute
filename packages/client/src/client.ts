@@ -3,16 +3,18 @@
 import { Readable } from 'stream'
 
 import {
-    AsyncLock,
     BaseTelegramClient,
     BaseTelegramClientOptions,
-    Deque,
     MaybeArray,
     MaybeAsync,
-    SortedLinkedList,
 } from '@mtcute/core'
-import { ConditionVariable } from '@mtcute/core/src/utils/condition-variable'
-import { Logger } from '@mtcute/core/src/utils/logger'
+import {
+    AsyncLock,
+    ConditionVariable,
+    Deque,
+    Logger,
+    SortedLinkedList,
+} from '@mtcute/core/utils'
 import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 

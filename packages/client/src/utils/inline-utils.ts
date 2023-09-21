@@ -1,10 +1,5 @@
-import {
-    assertNever,
-    encodeUrlSafeBase64,
-    parseUrlSafeBase64,
-    TlBinaryReader,
-    TlBinaryWriter,
-} from '@mtcute/core'
+import { assertNever, TlBinaryReader, TlBinaryWriter } from '@mtcute/core'
+import { encodeUrlSafeBase64, parseUrlSafeBase64 } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 /**

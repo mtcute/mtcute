@@ -8,10 +8,10 @@ import {
     IPacketCodec,
     ObfuscatedPacketCodec,
     PaddedIntermediatePacketCodec,
-    parseUrlSafeBase64,
     tl,
     TransportState,
 } from '@mtcute/core'
+import { parseUrlSafeBase64 } from '@mtcute/core/utils'
 
 import { FakeTlsPacketCodec, generateFakeTlsHeader } from './fake-tls'
 

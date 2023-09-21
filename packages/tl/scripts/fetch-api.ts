@@ -9,7 +9,7 @@ import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import * as readline from 'readline'
 
-import { hasPresentKey, isPresent } from '@mtcute/core'
+import { hasPresentKey, isPresent } from '@mtcute/core/utils'
 import {
     generateTlSchemasDifference,
     mergeTlEntries,

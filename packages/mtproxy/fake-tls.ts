@@ -1,13 +1,12 @@
 import bigInt, { BigInteger } from 'big-integer'
 
+import { IPacketCodec, WrappedCodec } from '@mtcute/core'
 import {
     bigIntToBuffer,
     bufferToBigInt,
     ICryptoProvider,
-    IPacketCodec,
     randomBytes,
-    WrappedCodec,
-} from '@mtcute/core'
+} from '@mtcute/core/utils'
 
 const MAX_TLS_PACKET_LENGTH = 2878
 const TLS_FIRST_PREFIX = Buffer.from('140303000101', 'hex')
