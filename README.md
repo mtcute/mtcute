@@ -1,5 +1,7 @@
 # mtcute
 
+![CI badge](https://github.com/mtcute/mtcute/actions/workflows/test.yaml/badge.svg)
+
 **PROJECT IS IN A HIATUS**
 > not really, but that's probably the best way to describe it
 
