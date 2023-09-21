@@ -40,6 +40,7 @@ export type MessageMedia =
     | Poll
     | Invoice
     | null
+export type MessageMediaType = Exclude<MessageMedia, null>['type']
 
 // todo: successful_payment, connected_website
 
