@@ -1,5 +1,5 @@
-import { CallbackQuery, MtArgumentError } from '@mtcute/client'
-import { MaybeArray } from '@mtcute/core'
+import { CallbackQuery } from '@mtcute/client'
+import { MaybeArray, MtArgumentError } from '@mtcute/core'
 
 import { UpdateFilter } from './filters'
 

@@ -1,8 +1,8 @@
-import { getMarkedPeerId } from '@mtcute/core'
+import { getMarkedPeerId, MtTypeAssertionError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { Dialog, MtTypeAssertionError, PeersIndex } from '../../types'
+import { Dialog, PeersIndex } from '../../types'
 
 /** @internal */
 export function _parseDialogs(

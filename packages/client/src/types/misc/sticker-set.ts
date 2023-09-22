@@ -1,8 +1,9 @@
+import { MtTypeAssertionError } from '@mtcute/core'
 import { LongMap } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { MtEmptyError, MtTypeAssertionError } from '../errors'
+import { MtEmptyError } from '../errors'
 import { InputFileLike } from '../files'
 import {
     MaskPosition,

@@ -1,5 +1,10 @@
 /* eslint-disable dot-notation */
-import { getMarkedPeerId, MaybeAsync } from '@mtcute/core'
+import {
+    getMarkedPeerId,
+    MaybeAsync,
+    MtArgumentError,
+    MtTimeoutError,
+} from '@mtcute/core'
 import {
     AsyncLock,
     ControllablePromise,
@@ -9,7 +14,6 @@ import {
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../client'
-import { MtArgumentError, MtTimeoutError } from './errors'
 import { InputMediaLike } from './media'
 import { Message } from './messages'
 import { FormattedString } from './parser'

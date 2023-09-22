@@ -1,8 +1,9 @@
 import Long from 'long'
 
+import { assertTypeIs } from '@mtcute/core/utils'
+
 import { TelegramClient } from '../../client'
 import { StickerSet } from '../../types'
-import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Get a list of all installed sticker packs

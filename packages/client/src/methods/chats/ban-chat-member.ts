@@ -1,10 +1,7 @@
+import { MtTypeAssertionError } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
-import {
-    InputPeerLike,
-    Message,
-    MtInvalidPeerTypeError,
-    MtTypeAssertionError,
-} from '../../types'
+import { InputPeerLike, Message, MtInvalidPeerTypeError } from '../../types'
 import {
     isInputPeerChannel,
     isInputPeerChat,

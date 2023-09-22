@@ -1,14 +1,10 @@
 import Long from 'long'
 
+import { MtTypeAssertionError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    InputPeerLike,
-    Message,
-    MtTypeAssertionError,
-    PeersIndex,
-    SearchFilters } from '../../types'
+import { InputPeerLike, Message, PeersIndex, SearchFilters } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
 
 /**

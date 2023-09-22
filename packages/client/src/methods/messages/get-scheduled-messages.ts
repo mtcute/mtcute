@@ -1,12 +1,7 @@
-import { MaybeArray } from '@mtcute/core'
+import { MaybeArray, MtTypeAssertionError } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import {
-    InputPeerLike,
-    Message,
-    MtTypeAssertionError,
-    PeersIndex,
-} from '../../types'
+import { InputPeerLike, Message, PeersIndex } from '../../types'
 
 /**
  * Get a single scheduled message in chat by its ID

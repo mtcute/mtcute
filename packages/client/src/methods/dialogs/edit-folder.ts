@@ -1,7 +1,7 @@
+import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { MtArgumentError } from '../../types'
 
 /**
  * Edit a folder with given modification
@@ -31,7 +31,9 @@ export async function editFolder(
                 (it.id === folder || it.title === folder),
         )
 
-        if (!found) { throw new MtArgumentError(`Could not find a folder ${folder}`) }
+        if (!found) {
+            throw new MtArgumentError(`Could not find a folder ${folder}`)
+        }
 
         folder = found as tl.RawDialogFilter
     }

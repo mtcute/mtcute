@@ -1,7 +1,7 @@
+import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { MtArgumentError } from '../errors'
 import { FileLocation } from '../files'
 import { makeInspectable } from '../utils'
 import { Thumbnail } from './thumbnail'

@@ -1,7 +1,7 @@
+import { MtTypeAssertionError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { MtTypeAssertionError } from '../errors'
 import { makeInspectable } from '../utils'
 import { PeersIndex } from './index'
 import { User } from './user'

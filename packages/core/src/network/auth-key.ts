@@ -3,6 +3,7 @@ import Long from 'long'
 import { tl } from '@mtcute/tl'
 import { TlBinaryReader, TlReaderMap } from '@mtcute/tl-runtime'
 
+import { MtcuteError } from '../types'
 import { buffersEqual, ICryptoProvider, Logger, randomBytes } from '../utils'
 import { createAesIgeForMessage } from '../utils/crypto/mtproto'
 
@@ -41,7 +42,7 @@ export class AuthKey {
         serverSalt: Long,
         sessionId: Long,
     ): Promise<Buffer> {
-        if (!this.ready) throw new Error('Keys are not set up!')
+        if (!this.ready) throw new MtcuteError('Keys are not set up!')
 
         let padding =
             (16 /* header size */ + message.length + 12) /* min padding */ % 16

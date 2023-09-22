@@ -1,9 +1,9 @@
+import { MtArgumentError } from '@mtcute/core'
 import { fileIdToInputDocument, fileIdToInputPhoto } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../../client'
 import { extractFileName } from '../../../utils/file-utils'
-import { MtArgumentError } from '../../errors'
 import { BotInlineMessage, InputInlineMessage } from './input-inline-message'
 
 export interface BaseInputInlineResult {
@@ -903,8 +903,8 @@ export namespace BotInline {
                 }
             } else if (
                 obj.type === 'video' &&
-                    obj.isEmbed &&
-                    typeof obj.media === 'string'
+                obj.isEmbed &&
+                typeof obj.media === 'string'
             ) {
                 sendMessage = {
                     _: 'inputBotInlineMessageText',
@@ -956,8 +956,9 @@ export namespace BotInline {
 
                         let mime: string
                         if (obj.type === 'video') mime = 'video/mp4'
-                        else if (obj.type === 'audio') { mime = obj.mime ?? 'audio/mpeg' } else if (obj.type === 'gif') mime = obj.mime ?? 'video/mp4'
-                        else if (obj.type === 'voice') mime = 'audio/ogg'
+                        else if (obj.type === 'audio') {
+                            mime = obj.mime ?? 'audio/mpeg'
+                        } else if (obj.type === 'gif') { mime = obj.mime ?? 'video/mp4' } else if (obj.type === 'voice') mime = 'audio/ogg'
                         else if (obj.type === 'file') {
                             if (!obj.mime) {
                                 throw new MtArgumentError(
@@ -991,7 +992,10 @@ export namespace BotInline {
                                     h: obj.height,
                                 })
                             }
-                        } else if (obj.type === 'audio' || obj.type === 'voice') {
+                        } else if (
+                            obj.type === 'audio' ||
+                            obj.type === 'voice'
+                        ) {
                             attributes.push({
                                 _: 'documentAttributeAudio',
                                 voice: obj.type === 'voice',

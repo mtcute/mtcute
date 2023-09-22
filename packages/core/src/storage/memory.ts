@@ -151,7 +151,9 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
                 (ent: ITelegramStorage.PeerInfo) => {
                     if (ent.phone) obj.phoneIndex.set(ent.phone, ent.id)
 
-                    if (ent.username) { obj.usernameIndex.set(ent.username, ent.id) }
+                    if (ent.username) {
+                        obj.usernameIndex.set(ent.username, ent.id)
+                    }
                 },
             )
         }
@@ -291,8 +293,6 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
                     accessHash: peerInfo.accessHash,
                 }
         }
-
-        throw new Error(`Invalid peer type: ${peerInfo.type}`)
     }
 
     getPeerById(peerId: number): tl.TypeInputPeer | null {

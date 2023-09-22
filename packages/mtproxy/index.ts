@@ -6,6 +6,9 @@ import {
     BaseTcpTransport,
     IntermediatePacketCodec,
     IPacketCodec,
+    MtcuteError,
+    MtSecurityError,
+    MtUnsupportedError,
     ObfuscatedPacketCodec,
     PaddedIntermediatePacketCodec,
     tl,
@@ -71,11 +74,11 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
         }
 
         if (secret.length > 17 + MAX_DOMAIN_LENGTH) {
-            throw new Error('Invalid secret: too long')
+            throw new MtSecurityError('Invalid secret: too long')
         }
 
         if (secret.length < 16) {
-            throw new Error('Invalid secret: too short')
+            throw new MtSecurityError('Invalid secret: too short')
         }
 
         if (secret.length === 16) {
@@ -87,7 +90,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
             this._rawSecret = secret.slice(1, 17)
             this._fakeTlsDomain = secret.slice(17).toString()
         } else {
-            throw new Error('Unsupported secret')
+            throw new MtUnsupportedError('Unsupported secret')
         }
     }
 
@@ -103,7 +106,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
 
     connect(dc: tl.RawDcOption, testMode: boolean): void {
         if (this._state !== TransportState.Idle) {
-            throw new Error('Transport is not IDLE')
+            throw new MtcuteError('Transport is not IDLE')
         }
 
         if (this._packetCodec && this._currentDc?.id !== dc.id) {
@@ -190,7 +193,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
                     }
 
                     if (first.compare(first, 0, first.length) !== 0) {
-                        throw new Error(
+                        throw new MtSecurityError(
                             'First part of hello response is invalid',
                         )
                     }
@@ -218,7 +221,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
                 )
 
                 if (hash.compare(respRand) !== 0) {
-                    throw new Error('Response hash is invalid')
+                    throw new MtSecurityError('Response hash is invalid')
                 }
             }
 

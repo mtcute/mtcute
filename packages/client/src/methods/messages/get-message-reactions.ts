@@ -1,8 +1,8 @@
 import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
+import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MessageReactions, PeersIndex } from '../../types'
-import { assertTypeIs } from '../../utils/type-assertion'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**

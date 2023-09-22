@@ -1,4 +1,4 @@
-import { MtArgumentError, MtClientError } from '@mtcute/client'
+import { MtArgumentError, MtcuteError } from '@mtcute/core'
 import { sleep } from '@mtcute/core/utils'
 
 import { IStateStorage } from './storage'
@@ -6,7 +6,7 @@ import { IStateStorage } from './storage'
 /**
  * Error thrown by `.rateLimit()`
  */
-export class RateLimitError extends MtClientError {
+export class RateLimitError extends MtcuteError {
     constructor(readonly reset: number) {
         super('You are being rate limited.')
     }

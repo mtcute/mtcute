@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { FormattedString, MtClientError } from '../../types'
+import { FormattedString } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 const empty: [string, undefined] = ['', undefined]
@@ -33,7 +34,7 @@ export async function _parseEntities(
         const modeImpl = this._parseModes.get(mode)
 
         if (!modeImpl) {
-            throw new MtClientError(`Parse mode ${mode} is not registered.`)
+            throw new MtArgumentError(`Parse mode ${mode} is not registered.`)
         }
 
         [text, entities] = modeImpl.parse(text)

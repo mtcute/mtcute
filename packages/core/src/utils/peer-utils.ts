@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
 
-import { BasicPeerType } from '../types'
+import { BasicPeerType, MtArgumentError, MtUnsupportedError } from '../types'
 
 // src: https://github.com/tdlib/td/blob/master/td/telegram/DialogId.h
 const ZERO_CHANNEL_ID = -1000000000000
@@ -50,10 +50,21 @@ export function getBarePeerId(peer: tl.TypePeer): number {
  * - ID is negated and `-1e12` is subtracted for channels
  */
 export function getMarkedPeerId(peerId: number, peerType: BasicPeerType): number
-export function getMarkedPeerId(peer: tl.TypePeer | tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel): number
+export function getMarkedPeerId(
+    peer:
+        | tl.TypePeer
+        | tl.TypeInputPeer
+        | tl.TypeInputUser
+        | tl.TypeInputChannel
+): number
 
 export function getMarkedPeerId(
-    peer: tl.TypePeer | tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | number,
+    peer:
+        | tl.TypePeer
+        | tl.TypeInputPeer
+        | tl.TypeInputUser
+        | tl.TypeInputChannel
+        | number,
     peerType?: BasicPeerType,
 ): number {
     if (typeof peer === 'number') {
@@ -65,7 +76,7 @@ export function getMarkedPeerId(
             case 'channel':
                 return ZERO_CHANNEL_ID - peer
         }
-        throw new Error('Invalid peer type')
+        throw new MtArgumentError('Invalid peer type')
     }
 
     switch (peer._) {
@@ -82,7 +93,7 @@ export function getMarkedPeerId(
             return ZERO_CHANNEL_ID - peer.channelId
     }
 
-    throw new Error('Invalid peer')
+    throw new MtArgumentError('Invalid peer')
 }
 
 /**
@@ -105,17 +116,19 @@ export function getBasicPeerType(peer: tl.TypePeer | number): BasicPeerType {
             return 'chat'
         }
 
-        if (MIN_MARKED_CHANNEL_ID <= peer && peer !== ZERO_CHANNEL_ID) { return 'channel' }
+        if (MIN_MARKED_CHANNEL_ID <= peer && peer !== ZERO_CHANNEL_ID) {
+            return 'channel'
+        }
 
         if (MAX_SECRET_CHAT_ID <= peer && peer !== ZERO_SECRET_CHAT_ID) {
             // return 'secret'
-            throw new Error('Unsupported')
+            throw new MtUnsupportedError('Secret chats are not supported')
         }
     } else if (peer > 0 && peer <= MAX_USER_ID) {
         return 'user'
     }
 
-    throw new Error(`Invalid marked peer id: ${peer}`)
+    throw new MtArgumentError(`Invalid marked peer id: ${peer}`)
 }
 
 /**
@@ -134,8 +147,6 @@ export function markedPeerIdToBare(peerId: number): number {
         case 'channel':
             return toggleChannelIdMark(peerId)
     }
-
-    throw new Error('Invalid marked peer id')
 }
 
 /**

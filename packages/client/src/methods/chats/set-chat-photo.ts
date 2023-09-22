@@ -1,3 +1,4 @@
+import { MtArgumentError } from '@mtcute/core'
 import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
@@ -6,7 +7,6 @@ import {
     InputFileLike,
     InputPeerLike,
     isUploadedFile,
-    MtArgumentError,
     MtInvalidPeerTypeError,
 } from '../../types'
 import {
@@ -37,14 +37,18 @@ export async function setChatPhoto(
 ): Promise<void> {
     const chat = await this.resolvePeer(chatId)
 
-    if (!(isInputPeerChannel(chat) || isInputPeerChat(chat))) { throw new MtInvalidPeerTypeError(chatId, 'chat or channel') }
+    if (!(isInputPeerChannel(chat) || isInputPeerChat(chat))) {
+        throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+    }
 
     let photo: tl.TypeInputChatPhoto | undefined = undefined
 
     let inputFile: tl.TypeInputFile
 
     if (tdFileId.isFileIdLike(media)) {
-        if (typeof media === 'string' && media.match(/^https?:\/\//)) { throw new MtArgumentError("Chat photo can't be external") }
+        if (typeof media === 'string' && media.match(/^https?:\/\//)) {
+            throw new MtArgumentError("Chat photo can't be external")
+        }
         if (typeof media === 'string' && media.match(/^file:/)) {
             const uploaded = await this.uploadFile({
                 file: media.substring(5),

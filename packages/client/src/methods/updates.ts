@@ -1,5 +1,5 @@
 /* eslint-disable max-depth */
-import { assertNever } from '@mtcute/core'
+import { assertNever, MtArgumentError } from '@mtcute/core'
 import {
     AsyncLock,
     ConditionVariable,
@@ -14,7 +14,7 @@ import {
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../client'
-import { MtArgumentError, PeersIndex } from '../types'
+import { PeersIndex } from '../types'
 import { _parseUpdate } from '../types/updates/parse-update'
 import { extractChannelIdFromUpdate } from '../utils/misc-utils'
 import { normalizeToInputChannel } from '../utils/peer-utils'

@@ -1,8 +1,8 @@
 import { getMarkedPeerId } from '@mtcute/core'
+import { assertTypeIs } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { assertTypeIs } from '../../utils/type-assertion'
 import { PeersIndex, User } from '../peers'
 import { makeInspectable } from '../utils'
 

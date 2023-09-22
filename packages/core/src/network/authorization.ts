@@ -10,6 +10,11 @@ import {
 } from '@mtcute/tl-runtime'
 
 import {
+    MtArgumentError,
+    MtSecurityError,
+    MtTypeAssertionError,
+} from '../types'
+import {
     bigIntToBuffer,
     bufferToBigInt,
     ICryptoProvider,
@@ -24,6 +29,7 @@ import {
 import { findKeyByFingerprints } from '../utils/crypto/keys'
 import { millerRabin } from '../utils/crypto/miller-rabin'
 import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto'
+import { mtpAssertTypeIs } from '../utils/type-assertions'
 import { SessionConnection } from './session-connection'
 
 // Heavily based on code from https://github.com/LonamiWebs/Telethon/blob/master/telethon/network/authenticator.py
@@ -57,14 +63,16 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
             dhPrime.lesserOrEquals(TWO_POW_2047) ||
             dhPrime.greaterOrEquals(TWO_POW_2048)
         ) {
-            throw new Error('Step 3: dh_prime is not in the 2048-bit range')
+            throw new MtSecurityError(
+                'Step 3: dh_prime is not in the 2048-bit range',
+            )
         }
 
         if (!millerRabin(dhPrime)) {
-            throw new Error('Step 3: dh_prime is not prime')
+            throw new MtSecurityError('Step 3: dh_prime is not prime')
         }
         if (!millerRabin(dhPrime.minus(1).divide(2))) {
-            throw new Error(
+            throw new MtSecurityError(
                 'Step 3: dh_prime is not a safe prime - (dh_prime-1)/2 is not prime',
             )
         }
@@ -91,12 +99,16 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
     switch (g) {
         case 2:
             if (dhPrime.mod(8).notEquals(7)) {
-                throw new Error('Step 3: ivalid g - dh_prime mod 8 != 7')
+                throw new MtSecurityError(
+                    'Step 3: ivalid g - dh_prime mod 8 != 7',
+                )
             }
             break
         case 3:
             if (dhPrime.mod(3).notEquals(2)) {
-                throw new Error('Step 3: ivalid g - dh_prime mod 3 != 2')
+                throw new MtSecurityError(
+                    'Step 3: ivalid g - dh_prime mod 3 != 2',
+                )
             }
             break
         case 4:
@@ -105,7 +117,7 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
             const mod = dhPrime.mod(5)
 
             if (mod.notEquals(1) && mod.notEquals(4)) {
-                throw new Error(
+                throw new MtSecurityError(
                     'Step 3: ivalid g - dh_prime mod 5 != 1 && dh_prime mod 5 != 4',
                 )
             }
@@ -115,7 +127,7 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
             const mod = dhPrime.mod(24)
 
             if (mod.notEquals(19) && mod.notEquals(23)) {
-                throw new Error(
+                throw new MtSecurityError(
                     'Step 3: ivalid g - dh_prime mod 24 != 19 && dh_prime mod 24 != 23',
                 )
             }
@@ -125,14 +137,14 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
             const mod = dhPrime.mod(7)
 
             if (mod.notEquals(3) && mod.notEquals(5) && mod.notEquals(6)) {
-                throw new Error(
+                throw new MtSecurityError(
                     'Step 3: ivalid g - dh_prime mod 7 != 3 && dh_prime mod 7 != 5 && dh_prime mod 7 != 6',
                 )
             }
             break
         }
         default:
-            throw new Error(`Step 3: ivalid g - unknown g = ${g}`)
+            throw new MtSecurityError(`Step 3: ivalid g - unknown g = ${g}`)
     }
 
     checkedPrime.generators.push(g)
@@ -151,7 +163,7 @@ async function rsaPad(
     const keyExponent = bigInt(key.exponent, 16)
 
     if (data.length > 144) {
-        throw new Error('Failed to pad: too big data')
+        throw new MtArgumentError('Failed to pad: too big data')
     }
 
     data = Buffer.concat([data, randomBytes(192 - data.length)])
@@ -265,10 +277,10 @@ export async function doAuthorization(
     await sendPlainMessage({ _: 'mt_req_pq_multi', nonce })
     const resPq = await readNext()
 
-    if (resPq._ !== 'mt_resPQ') throw new Error('Step 1: answer was ' + resPq._)
+    mtpAssertTypeIs('auth step 1', resPq, 'mt_resPQ')
 
     if (!buffersEqual(resPq.nonce, nonce)) {
-        throw new Error('Step 1: invalid nonce from server')
+        throw new MtSecurityError('Step 1: invalid nonce from server')
     }
 
     const serverKeys = resPq.serverPublicKeyFingerprints.map((it) =>
@@ -280,7 +292,7 @@ export async function doAuthorization(
     const publicKey = findKeyByFingerprints(serverKeys)
 
     if (!publicKey) {
-        throw new Error(
+        throw new MtSecurityError(
             'Step 2: Could not find server public key with any of these fingerprints: ' +
                 serverKeys.join(', '),
         )
@@ -330,19 +342,13 @@ export async function doAuthorization(
     })
     const serverDhParams = await readNext()
 
-    if (!mtp.isAnyServer_DH_Params(serverDhParams)) {
-        throw new Error('Step 2.1: answer was ' + serverDhParams._)
-    }
-
-    if (serverDhParams._ !== 'mt_server_DH_params_ok') {
-        throw new Error('Step 2.1: answer was ' + serverDhParams._)
-    }
+    mtpAssertTypeIs('auth step 2', serverDhParams, 'mt_server_DH_params_ok')
 
     if (!buffersEqual(serverDhParams.nonce, nonce)) {
-        throw Error('Step 2: invalid nonce from server')
+        throw new MtSecurityError('Step 2: invalid nonce from server')
     }
     if (!buffersEqual(serverDhParams.serverNonce, resPq.serverNonce)) {
-        throw Error('Step 2: invalid server nonce from server')
+        throw new MtSecurityError('Step 2: invalid server nonce from server')
     }
 
     // type was removed from schema in July 2021
@@ -350,14 +356,14 @@ export async function doAuthorization(
     //     // why would i want to do that? we are gonna fail anyways.
     //     // let expectedNnh = (await crypto.sha1(newNonce)).slice(4, 20)
     //     // if (!buffersEqual(serverDhParams.newNonceHash, expectedNnh))
-    //     //     throw new Error('Step 2: invalid DH fail nonce from server')
-    //     throw new Error('Step 2: server DH failed')
+    //     //     throw new MtSecurityError('Step 2: invalid DH fail nonce from server')
+    //     throw new MtSecurityError('Step 2: server DH failed')
     // }
 
     log.debug('server DH ok')
 
     if (serverDhParams.encryptedAnswer.length % 16 !== 0) {
-        throw new Error('Step 2: AES block size is invalid')
+        throw new MtSecurityError('Step 2: AES block size is invalid')
     }
 
     // Step 3: complete DH exchange
@@ -385,12 +391,11 @@ export async function doAuthorization(
             ),
         )
     ) {
-        throw new Error('Step 3: invalid inner data hash')
+        throw new MtSecurityError('Step 3: invalid inner data hash')
     }
 
-    if (serverDhInner._ !== 'mt_server_DH_inner_data') {
-        throw Error('Step 3: inner data was ' + serverDhInner._)
-    }
+    mtpAssertTypeIs('auth step 3', serverDhInner, 'mt_server_DH_inner_data')
+
     if (!buffersEqual(serverDhInner.nonce, nonce)) {
         throw Error('Step 3: invalid nonce from server')
     }
@@ -424,28 +429,28 @@ export async function doAuthorization(
             g.lesserOrEquals(1) ||
             g.greaterOrEquals(dhPrime.minus(bigInt.one))
         ) {
-            throw new Error('g is not within (1, dh_prime - 1)')
+            throw new MtSecurityError('g is not within (1, dh_prime - 1)')
         }
         if (
             gA.lesserOrEquals(1) ||
             gA.greaterOrEquals(dhPrime.minus(bigInt.one))
         ) {
-            throw new Error('g_a is not within (1, dh_prime - 1)')
+            throw new MtSecurityError('g_a is not within (1, dh_prime - 1)')
         }
         if (
             gB.lesserOrEquals(1) ||
             gB.greaterOrEquals(dhPrime.minus(bigInt.one))
         ) {
-            throw new Error('g_b is not within (1, dh_prime - 1)')
+            throw new MtSecurityError('g_b is not within (1, dh_prime - 1)')
         }
 
         if (gA.lt(DH_SAFETY_RANGE) || gA.gt(dhPrime.minus(DH_SAFETY_RANGE))) {
-            throw new Error(
+            throw new MtSecurityError(
                 'g_a is not within (2^{2048-64}, dh_prime - 2^{2048-64})',
             )
         }
         if (gB.lt(DH_SAFETY_RANGE) || gB.gt(dhPrime.minus(DH_SAFETY_RANGE))) {
-            throw new Error(
+            throw new MtSecurityError(
                 'g_b is not within (2^{2048-64}, dh_prime - 2^{2048-64})',
             )
         }
@@ -488,7 +493,11 @@ export async function doAuthorization(
         const dhGen = await readNext()
 
         if (!mtp.isAnySet_client_DH_params_answer(dhGen)) {
-            throw new Error('Step 4: answer was ' + dhGen._)
+            throw new MtTypeAssertionError(
+                'auth step 4',
+                'set_client_DH_params_answer',
+                dhGen._,
+            )
         }
 
         if (!buffersEqual(dhGen.nonce, nonce)) {
@@ -502,7 +511,11 @@ export async function doAuthorization(
 
         if (dhGen._ === 'mt_dh_gen_fail') {
             // in theory i would be supposed to calculate newNonceHash, but why, we are failing anyway
-            throw new Error('Step 4: server DH returned failure')
+            throw new MtTypeAssertionError(
+                'auth step 4',
+                '!mt_dh_gen_fail',
+                dhGen._,
+            )
         }
 
         if (dhGen._ === 'mt_dh_gen_retry') {

@@ -9,6 +9,7 @@ import {
     assertNever,
     BaseTcpTransport,
     IntermediatePacketCodec,
+    MtArgumentError,
     tl,
     TransportState,
 } from '@mtcute/core'
@@ -63,13 +64,13 @@ function writeIpv4(ip: string, buf: Buffer, offset: number): void {
     const parts = ip.split('.')
 
     if (parts.length !== 4) {
-        throw new Error('Invalid IPv4 address')
+        throw new MtArgumentError('Invalid IPv4 address')
     }
     for (let i = 0; i < 4; i++) {
         const n = parseInt(parts[i])
 
         if (isNaN(n) || n < 0 || n > 255) {
-            throw new Error('Invalid IPv4 address')
+            throw new MtArgumentError('Invalid IPv4 address')
         }
 
         buf[offset + i] = n
@@ -116,10 +117,14 @@ function buildSocks5Auth(username: string, password: string) {
     const passwordBuf = Buffer.from(password)
 
     if (usernameBuf.length > 255) {
-        throw new Error(`Too long username (${usernameBuf.length} > 255)`)
+        throw new MtArgumentError(
+            `Too long username (${usernameBuf.length} > 255)`,
+        )
     }
     if (passwordBuf.length > 255) {
-        throw new Error(`Too long password (${passwordBuf.length} > 255)`)
+        throw new MtArgumentError(
+            `Too long password (${passwordBuf.length} > 255)`,
+        )
     }
 
     const buf = Buffer.alloc(3 + usernameBuf.length + passwordBuf.length)
@@ -138,14 +143,14 @@ function writeIpv6(ip: string, buf: Buffer, offset: number): void {
     const parts = ip.split(':')
 
     if (parts.length !== 8) {
-        throw new Error('Invalid IPv6 address')
+        throw new MtArgumentError('Invalid IPv6 address')
     }
 
     for (let i = 0, j = offset; i < 8; i++, j += 2) {
         const n = parseInt(parts[i])
 
         if (isNaN(n) || n < 0 || n > 0xffff) {
-            throw new Error('Invalid IPv6 address')
+            throw new MtArgumentError('Invalid IPv6 address')
         }
 
         buf.writeUInt16BE(n, j)
@@ -215,7 +220,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
 
     connect(dc: tl.RawDcOption): void {
         if (this._state !== TransportState.Idle) {
-            throw new Error('Transport is not IDLE')
+            throw new MtArgumentError('Transport is not IDLE')
         }
 
         if (!this.packetCodecInitialized) {

@@ -1,16 +1,19 @@
-import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
+import {
+    getMarkedPeerId,
+    MaybeArray,
+    MtArgumentError,
+    MtTypeAssertionError,
+} from '@mtcute/core'
+import { assertTypeIs } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
     InputPeerLike,
-    MtArgumentError,
     MtMessageNotFoundError,
-    MtTypeAssertionError,
     PeersIndex,
     Poll,
 } from '../../types'
-import { assertTypeIs } from '../../utils/type-assertion'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**

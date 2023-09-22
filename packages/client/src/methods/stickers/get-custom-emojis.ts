@@ -1,9 +1,10 @@
+import { MtTypeAssertionError } from '@mtcute/core'
+import { assertTypeIs } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { MtTypeAssertionError, Sticker } from '../../types'
+import { Sticker } from '../../types'
 import { parseDocument } from '../../types/media/document-utils'
-import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Get custom emoji stickers by their IDs

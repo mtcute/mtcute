@@ -7,6 +7,7 @@ import {
 } from '@mtcute/tl-runtime'
 
 import { ITelegramStorage } from '../storage'
+import { MtArgumentError } from '../types'
 import { encodeUrlSafeBase64, parseUrlSafeBase64 } from './buffer-utils'
 
 export interface StringSessionData {
@@ -26,7 +27,9 @@ export function writeStringSession(
     const version = data.version
 
     if (version !== 1 && version !== 2) {
-        throw new Error(`Unsupported string session version: ${version}`)
+        throw new MtArgumentError(
+            `Unsupported string session version: ${version}`,
+        )
     }
 
     let flags = 0
@@ -85,7 +88,9 @@ export function readStringSession(
         primaryDc
 
     if (primaryDc._ !== 'dcOption') {
-        throw new Error(`Invalid session string (dc._ = ${primaryDc._})`)
+        throw new MtArgumentError(
+            `Invalid session string (dc._ = ${primaryDc._})`,
+        )
     }
 
     let self: ITelegramStorage.SelfInfo | null = null

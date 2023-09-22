@@ -1,20 +1,22 @@
 import Long from 'long'
 
 import { assertNever } from '@mtcute/core'
+import { assertTypeIs } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
-    ArrayWithTotal, ChatMember,
+    ArrayWithTotal,
+    ChatMember,
     InputPeerLike,
     MtInvalidPeerTypeError,
-    PeersIndex } from '../../types'
+    PeersIndex,
+} from '../../types'
 import {
     isInputPeerChannel,
     isInputPeerChat,
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
-import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Get a chunk of members of some chat.

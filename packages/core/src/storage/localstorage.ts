@@ -1,3 +1,4 @@
+import { MtUnsupportedError } from '../types'
 import { JsonMemoryStorage } from './json'
 
 export class LocalstorageStorage extends JsonMemoryStorage {
@@ -7,7 +8,7 @@ export class LocalstorageStorage extends JsonMemoryStorage {
         super()
 
         if (typeof localStorage === 'undefined') {
-            throw new Error('localStorage is not available!')
+            throw new MtUnsupportedError('localStorage is not available!')
         }
 
         this._key = key

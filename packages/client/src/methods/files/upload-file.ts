@@ -2,11 +2,12 @@ import { fromBuffer as fileTypeFromBuffer } from 'file-type'
 import type { ReadStream } from 'fs'
 import { Readable } from 'stream'
 
+import { MtArgumentError } from '@mtcute/core'
 import { AsyncLock, randomLong } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { MtArgumentError, UploadedFile, UploadFileLike } from '../../types'
+import { UploadedFile, UploadFileLike } from '../../types'
 import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils'
 import {
     bufferToStream,

@@ -1,5 +1,7 @@
+import { MtArgumentError } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
-import { ChatPreview, MtArgumentError, MtPeerNotFoundError } from '../../types'
+import { ChatPreview, MtPeerNotFoundError } from '../../types'
 import { INVITE_LINK_REGEX } from '../../utils/peer-utils'
 
 /**

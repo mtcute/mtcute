@@ -2,6 +2,7 @@ import bigInt from 'big-integer'
 
 import { tl } from '@mtcute/tl'
 
+import { MtSecurityError, MtUnsupportedError } from '../../types'
 import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils'
 import { randomBytes, xorBuffer } from '../buffer-utils'
 import { ICryptoProvider } from './abstract'
@@ -84,7 +85,7 @@ export async function computeSrpParams(
         request.currentAlgo._ !==
             'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow'
     ) {
-        throw new Error(`Unknown algo ${request.currentAlgo?._}`)
+        throw new MtUnsupportedError(`Unknown algo ${request.currentAlgo?._}`)
     }
 
     const algo = request.currentAlgo
@@ -92,11 +93,11 @@ export async function computeSrpParams(
     // here and after: underscored variables are buffers, non-underscored are bigInts
 
     if (!request.srpB) {
-        throw new Error('SRP_B is not present in the request')
+        throw new MtSecurityError('SRP_B is not present in the request')
     }
 
     if (!request.srpId) {
-        throw new Error('SRP_ID is not present in the request')
+        throw new MtSecurityError('SRP_ID is not present in the request')
     }
 
     const g = bigInt(algo.g)

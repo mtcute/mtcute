@@ -2,6 +2,7 @@ import EventEmitter from 'events'
 
 import { tl } from '@mtcute/tl'
 
+import { MtcuteError, MtUnsupportedError } from '../../types'
 import { ICryptoProvider, Logger, typedArrayToBuffer } from '../../utils'
 import { IPacketCodec, ITelegramTransport, TransportState } from './abstract'
 import { IntermediatePacketCodec } from './intermediate'
@@ -57,7 +58,7 @@ export abstract class BaseWebSocketTransport
         super()
 
         if (!ws) {
-            throw new Error(
+            throw new MtUnsupportedError(
                 'To use WebSocket transport with NodeJS, install `ws` package.',
             )
         }
@@ -93,7 +94,7 @@ export abstract class BaseWebSocketTransport
 
     connect(dc: tl.RawDcOption, testMode: boolean): void {
         if (this._state !== TransportState.Idle) {
-            throw new Error('Transport is not IDLE')
+            throw new MtcuteError('Transport is not IDLE')
         }
 
         if (!this.packetCodecInitialized) {
@@ -164,7 +165,7 @@ export abstract class BaseWebSocketTransport
 
     async send(bytes: Buffer): Promise<void> {
         if (this._state !== TransportState.Ready) {
-            throw new Error('Transport is not READY')
+            throw new MtcuteError('Transport is not READY')
         }
 
         const framed = await this._packetCodec.encode(bytes)

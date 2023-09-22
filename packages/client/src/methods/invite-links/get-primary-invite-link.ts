@@ -1,10 +1,7 @@
+import { MtTypeAssertionError } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
-import {
-    ChatInviteLink,
-    InputPeerLike,
-    MtTypeAssertionError,
-    PeersIndex,
-} from '../../types'
+import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
 
 /**
  * Get primary invite link of a chat

@@ -8,6 +8,7 @@ import {
     TlWriterMap,
 } from '@mtcute/tl-runtime'
 
+import { MtcuteError } from '../types'
 import {
     ControllablePromise,
     Deque,
@@ -183,7 +184,7 @@ export class MtprotoSession {
         if (!keepPending) {
             for (const info of this.pendingMessages.values()) {
                 if (info._ === 'rpc') {
-                    info.rpc.promise.reject(new Error('Session is reset'))
+                    info.rpc.promise.reject(new MtcuteError('Session is reset'))
                 }
             }
             this.pendingMessages.clear()
@@ -197,7 +198,7 @@ export class MtprotoSession {
                 const rpc = this.queuedRpc.popFront()!
 
                 if (rpc.sent === false) {
-                    rpc.promise.reject(new Error('Session is reset'))
+                    rpc.promise.reject(new MtcuteError('Session is reset'))
                 }
             }
         }
@@ -264,7 +265,7 @@ export class MtprotoSession {
         data: Buffer,
         callback: Parameters<AuthKey['decryptMessage']>[2],
     ): Promise<void> {
-        if (!this._authKey.ready) throw new Error('Keys are not set up!')
+        if (!this._authKey.ready) throw new MtcuteError('Keys are not set up!')
 
         const authKeyId = data.slice(0, 8)
 

@@ -1,6 +1,7 @@
 import type * as exitHookNs from 'exit-hook'
 import type * as fsNs from 'fs'
 
+import { MtUnsupportedError } from '../types'
 import { JsonMemoryStorage } from './json'
 
 type fs = typeof fsNs
@@ -52,7 +53,7 @@ export class JsonFileStorage extends JsonMemoryStorage {
         super()
 
         if (!fs || !fs.readFile) {
-            throw new Error('Node fs module is not available!')
+            throw new MtUnsupportedError('Node fs module is not available!')
         }
 
         this._filename = filename
@@ -60,7 +61,7 @@ export class JsonFileStorage extends JsonMemoryStorage {
         this._cleanup = params?.cleanup ?? Boolean(exitHook)
 
         if (this._cleanup && !exitHook) {
-            throw new Error(
+            throw new MtUnsupportedError(
                 'Cleanup on exit is supported through `exit-hook` library, install it first!',
             )
         }

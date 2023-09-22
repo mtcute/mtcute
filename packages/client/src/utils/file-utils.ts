@@ -1,4 +1,4 @@
-import { MtArgumentError } from '../types'
+import { MtArgumentError } from '@mtcute/core'
 
 /**
  * Given file size, determine the appropriate chunk size (in KB)

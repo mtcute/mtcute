@@ -1,9 +1,14 @@
-import { BasicPeerType, getBasicPeerType, getMarkedPeerId } from '@mtcute/core'
+import {
+    BasicPeerType,
+    getBasicPeerType,
+    getMarkedPeerId,
+    MtArgumentError,
+} from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
-import { MtArgumentError, MtMessageNotFoundError } from '../errors'
+import { MtMessageNotFoundError } from '../errors'
 import { Message } from '../messages'
 import { PeersIndex, User } from '../peers'
 import { makeInspectable } from '../utils'

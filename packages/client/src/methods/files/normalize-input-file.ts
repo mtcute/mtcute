@@ -1,8 +1,9 @@
+import { MtArgumentError } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { InputFileLike, isUploadedFile, MtArgumentError } from '../../types'
+import { InputFileLike, isUploadedFile } from '../../types'
 
 /**
  * Normalize a {@link InputFileLike} to `InputFile`,

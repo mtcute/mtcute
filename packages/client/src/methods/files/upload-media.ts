@@ -1,17 +1,19 @@
-import { assertNever } from '@mtcute/core'
+import {
+    assertNever,
+    MtArgumentError,
+    MtTypeAssertionError,
+} from '@mtcute/core'
+import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
 import {
     InputMediaLike,
     InputPeerLike,
     MessageMedia,
-    MtArgumentError,
-    MtTypeAssertionError,
     Photo,
     RawDocument,
 } from '../../types'
 import { parseDocument } from '../../types/media/document-utils'
-import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Upload a media to Telegram servers, without actually

@@ -1,5 +1,7 @@
 import { tl } from '@mtcute/tl'
 
+import { MtArgumentError } from '../types'
+
 /**
  * Convert a JS object to TL JSON
  *
@@ -12,9 +14,13 @@ export function jsonToTlJson(obj: unknown): tl.TypeJSONValue {
     if (typeof obj === 'number') return { _: 'jsonNumber', value: obj }
     if (typeof obj === 'string') return { _: 'jsonString', value: obj }
 
-    if (Array.isArray(obj)) { return { _: 'jsonArray', value: obj.map(jsonToTlJson) } }
+    if (Array.isArray(obj)) {
+        return { _: 'jsonArray', value: obj.map(jsonToTlJson) }
+    }
 
-    if (typeof obj !== 'object') { throw new Error(`Unsupported type: ${typeof obj}`) }
+    if (typeof obj !== 'object') {
+        throw new MtArgumentError(`Unsupported type: ${typeof obj}`)
+    }
 
     const items: tl.TypeJSONObjectValue[] = []
 

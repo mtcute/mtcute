@@ -1,4 +1,4 @@
-import { getMarkedPeerId } from '@mtcute/core'
+import { getMarkedPeerId, MtArgumentError } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
@@ -8,7 +8,6 @@ import {
     InputMediaLike,
     InputPeerLike,
     Message,
-    MtArgumentError,
     MtMessageNotFoundError,
     PeersIndex,
     ReplyMarkup,

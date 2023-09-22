@@ -1,5 +1,6 @@
 import Long from 'long'
 
+import { assertTypeIs } from '@mtcute/core/utils'
 import {
     fileIdToInputDocument,
     fileIdToInputPhoto,
@@ -12,7 +13,6 @@ import { TelegramClient } from '../../client'
 import { InputMediaLike, isUploadedFile, UploadFileLike } from '../../types'
 import { extractFileName } from '../../utils/file-utils'
 import { normalizeDate } from '../../utils/misc-utils'
-import { assertTypeIs } from '../../utils/type-assertion'
 import { encodeWaveform } from '../../utils/voice-utils'
 
 /**
@@ -267,8 +267,8 @@ export async function _normalizeInputMedia(
         )
         assertTypeIs(
             'normalizeInputMedia (@ messages.uploadMedia)',
-                res.document!,
-                'document',
+            res.document!,
+            'document',
         )
 
         return {
@@ -377,7 +377,9 @@ export async function _normalizeInputMedia(
             roundMessage: media.isRound,
         })
 
-        if (media.isAnimated) { attributes.push({ _: 'documentAttributeAnimated' }) }
+        if (media.isAnimated) {
+            attributes.push({ _: 'documentAttributeAnimated' })
+        }
     }
 
     if (media.type === 'audio' || media.type === 'voice') {

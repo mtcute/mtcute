@@ -1,7 +1,7 @@
+import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { MtArgumentError } from '../../types'
 
 /**
  * Find a folder by its parameter.
@@ -21,7 +21,9 @@ export async function findFolder(
         id?: number
     },
 ): Promise<tl.RawDialogFilter | null> {
-    if (!params.title && !params.emoji && !params.id) { throw new MtArgumentError('One of search parameters must be passed') }
+    if (!params.title && !params.emoji && !params.id) {
+        throw new MtArgumentError('One of search parameters must be passed')
+    }
 
     const folders = await this.getFolders()
 

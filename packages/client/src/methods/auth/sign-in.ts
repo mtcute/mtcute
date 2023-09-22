@@ -1,7 +1,8 @@
+import { assertTypeIs } from '@mtcute/core/utils'
+
 import { TelegramClient } from '../../client'
 import { TermsOfService, User } from '../../types'
 import { normalizePhoneNumber } from '../../utils/misc-utils'
-import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Authorize a user in Telegram with a valid confirmation code.

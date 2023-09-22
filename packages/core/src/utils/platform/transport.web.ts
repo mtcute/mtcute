@@ -1,11 +1,13 @@
 import { WebSocketTransport } from '../../network'
+import { MtUnsupportedError } from '../../types'
 
 /** @internal */
 export const _defaultTransportFactory =
-    typeof WebSocket === 'undefined' ? // if no websocket, throw an error i guess ¯\_(ツ)_/¯
+    // if no websocket, throw an error i guess ¯\_(ツ)_/¯
     // (user can still implement something on their own)
+    typeof WebSocket === 'undefined' ?
         () => {
-            throw new Error(
+            throw new MtUnsupportedError(
                 'Neither TCP nor WebSocket are available. Please pass a Transport factory explicitly',
             )
         } :

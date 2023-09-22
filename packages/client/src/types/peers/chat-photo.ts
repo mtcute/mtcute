@@ -1,12 +1,11 @@
 import Long from 'long'
 
-import { toggleChannelIdMark } from '@mtcute/core'
+import { MtArgumentError, toggleChannelIdMark } from '@mtcute/core'
 import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { strippedPhotoToJpg } from '../../utils/file-utils'
-import { MtArgumentError } from '../errors'
 import { FileLocation } from '../files'
 import { makeInspectable } from '../utils'
 

@@ -12,6 +12,7 @@ import {
 } from '@mtcute/tl-runtime'
 import { gzipDeflate, gzipInflate } from '@mtcute/tl-runtime/src/platform/gzip'
 
+import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types'
 import {
     ControllablePromise,
     createCancellablePromise,
@@ -123,7 +124,7 @@ export class SessionConnection extends PersistentConnection {
 
         Object.values(this._pendingWaitForUnencrypted).forEach(
             ([prom, timeout]) => {
-                prom.reject(new Error('Connection closed'))
+                prom.reject(new MtcuteError('Connection closed'))
                 clearTimeout(timeout)
             },
         )
@@ -456,7 +457,7 @@ export class SessionConnection extends PersistentConnection {
                         res.errorCode,
                         res.errorMessage,
                     )
-                    throw new Error('Failed to bind temporary key')
+                    throw new MtcuteError('Failed to bind temporary key')
                 }
 
                 // now we can swap the keys (secondary becomes primary,
@@ -506,7 +507,7 @@ export class SessionConnection extends PersistentConnection {
     waitForUnencryptedMessage(timeout = 5000): Promise<Buffer> {
         const promise = createControllablePromise<Buffer>()
         const timeoutId = setTimeout(() => {
-            promise.reject(new Error('Timeout'))
+            promise.reject(new MtTimeoutError(timeout))
             this._pendingWaitForUnencrypted =
                 this._pendingWaitForUnencrypted.filter(
                     (it) => it[0] !== promise,
@@ -1453,7 +1454,9 @@ export class SessionConnection extends PersistentConnection {
             // and since we resend them, it will get resent after reconnection and
             // that will be an endless loop of reconnections. we don't want that,
             // and payloads this large are usually a sign of an error in the code.
-            throw new Error(`Payload is too big (${content.length} > 1044404)`)
+            throw new MtArgumentError(
+                `Payload is too big (${content.length} > 1044404)`,
+            )
         }
 
         // gzip
@@ -1533,7 +1536,7 @@ export class SessionConnection extends PersistentConnection {
 
     private _cancelRpc(rpc: PendingRpc, onTimeout = false): void {
         if (rpc.cancelled && !onTimeout) {
-            throw new Error('RPC was already cancelled')
+            throw new MtcuteError('RPC was already cancelled')
         }
 
         if (!onTimeout && rpc.timeout) {

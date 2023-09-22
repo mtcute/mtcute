@@ -1,9 +1,10 @@
 import Long from 'long'
 
+import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { Dialog, MtArgumentError } from '../../types'
+import { Dialog } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
 
 /**
@@ -233,10 +234,11 @@ export async function* getDialogs(
         }
     }
 
-    const filterFolder = filters ? // if pinned is `only`, this wouldn't be reached
+    // if pinned is `only`, this wouldn't be reached
     // if pinned is `exclude`, we want to exclude them
     // if pinned is `include`, we already yielded them, so we also want to exclude them
     // if pinned is `keep`, we want to keep them
+    const filterFolder = filters ?
         Dialog.filterFolder(filters, pinned !== 'keep') :
         undefined
 

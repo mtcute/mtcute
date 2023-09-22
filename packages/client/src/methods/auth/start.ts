@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
+import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
     MaybeAsync,
     MaybeDynamic,
-    MtArgumentError,
     SentCode,
     TermsOfService,
     User,

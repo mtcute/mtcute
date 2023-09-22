@@ -1,7 +1,8 @@
+import { assertTypeIs } from '@mtcute/core/utils'
+
 import { TelegramClient } from '../../client'
 import { SentCode } from '../../types'
 import { normalizePhoneNumber } from '../../utils/misc-utils'
-import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Send the confirmation code to the given phone number

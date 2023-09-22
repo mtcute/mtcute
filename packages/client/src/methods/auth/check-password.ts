@@ -1,8 +1,7 @@
-import { computeSrpParams } from '@mtcute/core/utils'
+import { assertTypeIs, computeSrpParams } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
 import { User } from '../../types'
-import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Check your Two-Step verification password and log in

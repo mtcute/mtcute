@@ -6,6 +6,7 @@ import { connect as connectTls, SecureContextOptions } from 'tls'
 import {
     BaseTcpTransport,
     IntermediatePacketCodec,
+    MtcuteError,
     tl,
     TransportState,
 } from '@mtcute/core'
@@ -80,7 +81,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
 
     connect(dc: tl.RawDcOption): void {
         if (this._state !== TransportState.Idle) {
-            throw new Error('Transport is not IDLE')
+            throw new MtcuteError('Transport is not IDLE')
         }
 
         if (!this.packetCodecInitialized) {

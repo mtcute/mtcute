@@ -2,6 +2,7 @@ import EventEmitter from 'events'
 
 import { tl } from '@mtcute/tl'
 
+import { MtcuteError } from '../types'
 import { ICryptoProvider, Logger } from '../utils'
 import { ReconnectionStrategy } from './reconnection'
 import {
@@ -166,9 +167,9 @@ export abstract class PersistentConnection extends EventEmitter {
 
     connect(): void {
         if (this.isConnected) {
-            throw new Error('Connection is already opened!')
+            throw new MtcuteError('Connection is already opened!')
         }
-        if (this._destroyed) throw new Error('Connection is already destroyed!')
+        if (this._destroyed) { throw new MtcuteError('Connection is already destroyed!') }
 
         if (this._reconnectionTimeout != null) {
             clearTimeout(this._reconnectionTimeout)

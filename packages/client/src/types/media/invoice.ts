@@ -1,7 +1,7 @@
+import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { MtArgumentError } from '../errors'
 import { WebDocument } from '../files/web-document'
 import { _messageMediaFromTl, MessageMedia } from '../messages'
 import { makeInspectable } from '../utils'
@@ -146,7 +146,9 @@ export class Invoice {
     get extendedMediaState(): InvoiceExtendedMediaState {
         if (!this.raw.extendedMedia) return 'none'
 
-        if (this.raw.extendedMedia._ === 'messageExtendedMediaPreview') { return 'preview' }
+        if (this.raw.extendedMedia._ === 'messageExtendedMediaPreview') {
+            return 'preview'
+        }
 
         return 'full'
     }
@@ -158,7 +160,9 @@ export class Invoice {
      * Otherwise, throws an error.
      */
     get extendedMediaPreview(): InvoiceExtendedMediaPreview {
-        if (this.raw.extendedMedia?._ !== 'messageExtendedMediaPreview') { throw new MtArgumentError('No extended media preview available') }
+        if (this.raw.extendedMedia?._ !== 'messageExtendedMediaPreview') {
+            throw new MtArgumentError('No extended media preview available')
+        }
 
         return (this._extendedMediaPreview ??= new InvoiceExtendedMediaPreview(
             this.client,

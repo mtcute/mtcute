@@ -2,12 +2,14 @@ import { tl } from '@mtcute/tl'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { ITelegramStorage } from '../storage'
+import { MtArgumentError, MtcuteError } from '../types'
 import {
     createControllablePromise,
     ICryptoProvider,
     Logger,
     sleep,
 } from '../utils'
+import { assertTypeIs } from '../utils/type-assertions'
 import { ConfigManager } from './config-manager'
 import { MultiSessionConnection } from './multi-session-connection'
 import { PersistentConnectionParams } from './persistent-connection'
@@ -500,7 +502,7 @@ export class NetworkManager {
         })
 
         if (!main || !media) {
-            throw new Error(`Could not find DC ${dcId}`)
+            throw new MtArgumentError(`Could not find DC ${dcId}`)
         }
 
         return { main, media }
@@ -586,12 +588,12 @@ export class NetworkManager {
      */
     async connect(defaultDcs: ITelegramStorage.DcOptions): Promise<void> {
         if (defaultDcs.main.id !== defaultDcs.media.id) {
-            throw new Error('Default DCs must be the same')
+            throw new MtArgumentError('Default DCs must be the same')
         }
 
         if (this._dcConnections.has(defaultDcs.main.id)) {
             // shouldn't happen
-            throw new Error('DC manager already exists')
+            throw new MtArgumentError('DC manager already exists')
         }
 
         const dc = new DcConnectionManager(this, defaultDcs.main.id, defaultDcs)
@@ -626,11 +628,7 @@ export class NetworkManager {
                 { manager },
             )
 
-            if (res._ !== 'auth.authorization') {
-                throw new Error(
-                    `Unexpected response from auth.importAuthorization: ${res._}`,
-                )
-            }
+            assertTypeIs('auth.importAuthorization', res, 'auth.authorization')
 
             promise.resolve()
             delete this._pendingExports[manager.dcId]
@@ -713,7 +711,7 @@ export class NetworkManager {
         stack?: string,
     ): Promise<tl.RpcCallReturn[T['_']]> {
         if (!this._primaryDc) {
-            throw new Error('Not connected to any DC')
+            throw new MtcuteError('Not connected to any DC')
         }
 
         const floodSleepThreshold =
@@ -860,7 +858,7 @@ export class NetworkManager {
 
         if (!dc) {
             if (!this._primaryDc) {
-                throw new Error('Not connected to any DC')
+                throw new MtcuteError('Not connected to any DC')
             }
 
             // guess based on the provided delegate. it is most likely correct,
@@ -876,7 +874,7 @@ export class NetworkManager {
     }
 
     getPrimaryDcId() {
-        if (!this._primaryDc) throw new Error('Not connected to any DC')
+        if (!this._primaryDc) throw new MtcuteError('Not connected to any DC')
 
         return this._primaryDc.dcId
     }

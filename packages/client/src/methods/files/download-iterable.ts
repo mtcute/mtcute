@@ -1,4 +1,8 @@
-import { ConnectionKind } from '@mtcute/core'
+import {
+    ConnectionKind,
+    MtArgumentError,
+    MtUnsupportedError,
+} from '@mtcute/core'
 import { ConditionVariable } from '@mtcute/core/utils'
 import {
     fileIdToInputFileLocation,
@@ -8,12 +12,7 @@ import {
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    FileDownloadParameters,
-    FileLocation,
-    MtArgumentError,
-    MtUnsupportedError,
-} from '../../types'
+import { FileDownloadParameters, FileLocation } from '../../types'
 import { determinePartSize } from '../../utils/file-utils'
 
 // small files (less than 128 kb) are downloaded using the "downloadSmall" pool

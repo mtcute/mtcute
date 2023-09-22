@@ -1,9 +1,14 @@
-import { assertNever, getMarkedPeerId, toggleChannelIdMark } from '@mtcute/core'
+import {
+    assertNever,
+    getMarkedPeerId,
+    MtArgumentError,
+    MtTypeAssertionError,
+    toggleChannelIdMark,
+} from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { BotKeyboard, ReplyMarkup } from '../bots'
-import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { InputMediaLike, Sticker, WebPage } from '../media'
 import { FormattedString } from '../parser'
 import { Chat, InputPeerLike, PeersIndex, User } from '../peers'

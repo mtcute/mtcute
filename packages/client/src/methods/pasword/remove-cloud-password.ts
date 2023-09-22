@@ -1,7 +1,7 @@
+import { MtArgumentError } from '@mtcute/core'
 import { computeSrpParams } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
-import { MtArgumentError } from '../../types'
 
 /**
  * Remove 2FA password from your account

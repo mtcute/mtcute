@@ -14,7 +14,6 @@ import {
     InlineQuery,
     MaybeAsync,
     Message,
-    MtArgumentError,
     ParsedUpdate,
     PeersIndex,
     PollUpdate,
@@ -56,6 +55,7 @@ import {
     StateKeyDelegate,
     UpdateState,
 } from './state'
+import { MtArgumentError } from '@mtcute/core'
 
 /**
  * Updates dispatcher

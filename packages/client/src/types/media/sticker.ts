@@ -1,8 +1,8 @@
+import { MtArgumentError } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { MtArgumentError } from '../errors'
 import { StickerSet } from '../misc'
 import { makeInspectable } from '../utils'
 import { RawDocument } from './document'

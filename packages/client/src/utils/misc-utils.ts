@@ -1,6 +1,7 @@
+import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
-import { MaybeDynamic, Message, MtClientError } from '../types'
+import { MaybeDynamic, Message } from '../types'
 
 /**
  * Normalize phone number by stripping formatting
@@ -8,7 +9,7 @@ import { MaybeDynamic, Message, MtClientError } from '../types'
  */
 export function normalizePhoneNumber(phone: string): string {
     phone = phone.trim().replace(/[+()\s-]/g, '')
-    if (!phone.match(/^\d+$/)) throw new MtClientError('Invalid phone number')
+    if (!phone.match(/^\d+$/)) throw new MtArgumentError('Invalid phone number')
 
     return phone
 }
@@ -25,7 +26,13 @@ export function extractChannelIdFromUpdate(
 
     if ('channelId' in upd) {
         res = upd.channelId
-    } else if ('message' in upd && typeof upd.message !== 'string' && 'peerId' in upd.message && upd.message.peerId && 'channelId' in upd.message.peerId) {
+    } else if (
+        'message' in upd &&
+        typeof upd.message !== 'string' &&
+        'peerId' in upd.message &&
+        upd.message.peerId &&
+        'channelId' in upd.message.peerId
+    ) {
         res = upd.message.peerId.channelId
     }
 

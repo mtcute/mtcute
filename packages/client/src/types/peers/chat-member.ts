@@ -1,7 +1,7 @@
+import { assertTypeIs } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { assertTypeIs } from '../../utils/type-assertion'
 import { makeInspectable } from '../utils'
 import { ChatPermissions } from './chat-permissions'
 import { PeersIndex } from './index'

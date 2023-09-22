@@ -1,4 +1,8 @@
-import { getMarkedPeerId } from '@mtcute/core'
+import {
+    getMarkedPeerId,
+    MtArgumentError,
+    MtTypeAssertionError,
+} from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
@@ -8,9 +12,7 @@ import {
     FormattedString,
     InputPeerLike,
     Message,
-    MtArgumentError,
     MtMessageNotFoundError,
-    MtTypeAssertionError,
     PeersIndex,
     ReplyMarkup,
 } from '../../types'

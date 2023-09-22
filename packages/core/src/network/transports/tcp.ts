@@ -3,6 +3,7 @@ import { connect, Socket } from 'net'
 
 import { tl } from '@mtcute/tl'
 
+import { MtcuteError } from '../../types'
 import { ICryptoProvider, Logger } from '../../utils'
 import { IPacketCodec, ITelegramTransport, TransportState } from './abstract'
 import { IntermediatePacketCodec } from './intermediate'
@@ -49,7 +50,7 @@ export abstract class BaseTcpTransport
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     connect(dc: tl.RawDcOption, testMode: boolean): void {
         if (this._state !== TransportState.Idle) {
-            throw new Error('Transport is not IDLE')
+            throw new MtcuteError('Transport is not IDLE')
         }
 
         if (!this.packetCodecInitialized) {
@@ -125,7 +126,7 @@ export abstract class BaseTcpTransport
 
     async send(bytes: Buffer): Promise<void> {
         if (this._state !== TransportState.Ready) {
-            throw new Error('Transport is not READY')
+            throw new MtcuteError('Transport is not READY')
         }
 
         const framed = await this._packetCodec.encode(bytes)

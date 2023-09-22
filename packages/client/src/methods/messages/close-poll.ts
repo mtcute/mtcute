@@ -1,13 +1,10 @@
 import Long from 'long'
 
+import { MtTypeAssertionError } from '@mtcute/core'
+import { assertTypeIs } from '@mtcute/core/utils'
+
 import { TelegramClient } from '../../client'
-import {
-    InputPeerLike,
-    MtTypeAssertionError,
-    PeersIndex,
-    Poll,
-} from '../../types'
-import { assertTypeIs } from '../../utils/type-assertion'
+import { InputPeerLike, PeersIndex, Poll } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**

@@ -1,7 +1,8 @@
+import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { Chat, InputPeerLike, MtArgumentError } from '../../types'
+import { Chat, InputPeerLike } from '../../types'
 import {
     INVITE_LINK_REGEX,
     isInputPeerChannel,

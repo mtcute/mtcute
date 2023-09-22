@@ -1,8 +1,9 @@
+import { MtArgumentError } from '@mtcute/core'
 import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { InputFileLike, MtArgumentError, Photo } from '../../types'
+import { InputFileLike, Photo } from '../../types'
 
 /**
  * Set a new profile photo or video.

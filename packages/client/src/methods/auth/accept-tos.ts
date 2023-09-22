@@ -1,5 +1,6 @@
+import { MtTypeAssertionError } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
-import { MtTypeAssertionError } from '../../types'
 
 /**
  * Accept the given TOS

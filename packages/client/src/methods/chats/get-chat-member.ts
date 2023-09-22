@@ -1,3 +1,4 @@
+import { assertTypeIs } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -13,7 +14,6 @@ import {
     isInputPeerUser,
     normalizeToInputChannel,
 } from '../../utils/peer-utils'
-import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Get information about a single chat member

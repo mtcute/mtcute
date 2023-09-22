@@ -1,5 +1,7 @@
 import Long from 'long'
 
+import { MtArgumentError, MtTypeAssertionError } from '@mtcute/core'
+import { assertTypeIs } from '@mtcute/core/utils'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
@@ -9,8 +11,6 @@ import {
     strippedPhotoToJpg,
     svgPathToFile,
 } from '../../utils/file-utils'
-import { assertTypeIs } from '../../utils/type-assertion'
-import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { FileLocation } from '../files'
 import { makeInspectable } from '../utils'
 
@@ -182,8 +182,12 @@ export class Thumbnail extends FileLocation {
      * Thumbnail type
      */
     get type(): string {
-        if (this.raw._ === 'videoSizeEmojiMarkup') { return Thumbnail.THUMB_EMOJI_MARKUP }
-        if (this.raw._ === 'videoSizeStickerMarkup') { return Thumbnail.THUMB_STICKER_MARKUP }
+        if (this.raw._ === 'videoSizeEmojiMarkup') {
+            return Thumbnail.THUMB_EMOJI_MARKUP
+        }
+        if (this.raw._ === 'videoSizeStickerMarkup') {
+            return Thumbnail.THUMB_STICKER_MARKUP
+        }
 
         return this.raw.type
     }

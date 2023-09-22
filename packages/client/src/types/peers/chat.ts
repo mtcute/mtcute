@@ -1,8 +1,12 @@
-import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
+import {
+    getMarkedPeerId,
+    MaybeArray,
+    MtArgumentError,
+    MtTypeAssertionError,
+} from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { MtArgumentError, MtTypeAssertionError } from '../errors'
 import { InputMediaLike } from '../media'
 import { FormattedString } from '../parser'
 import { makeInspectable } from '../utils'

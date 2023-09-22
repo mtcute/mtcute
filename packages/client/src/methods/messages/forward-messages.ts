@@ -1,4 +1,4 @@
-import { MaybeArray } from '@mtcute/core'
+import { MaybeArray, MtArgumentError } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
@@ -8,7 +8,6 @@ import {
     InputMediaLike,
     InputPeerLike,
     Message,
-    MtArgumentError,
     PeersIndex,
 } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'

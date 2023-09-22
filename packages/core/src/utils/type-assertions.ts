@@ -1,3 +1,7 @@
+import { mtp, tl } from '@mtcute/tl'
+
+import { MtTypeAssertionError } from '../types'
+
 // mostly taken from https://github.com/robertmassaioli/ts-is-present
 
 export function isPresent<T>(t: T | undefined | null | void): t is T {
@@ -46,7 +50,29 @@ export function hasValueAtKey<K extends string | number | symbol, V>(
     k: K,
     v: V,
 ) {
-    return function <T> (a: T & { [k in K]: unknown }): a is T & { [k in K]: V } {
+    return function <T> (
+        a: T & { [k in K]: unknown },
+    ): a is T & { [k in K]: V } {
         return a[k] === v
+    }
+}
+
+export function assertTypeIs<T extends tl.TlObject, K extends T['_']>(
+    context: string,
+    obj: T,
+    expected: K,
+): asserts obj is tl.FindByName<T, K> {
+    if (obj._ !== expected) {
+        throw new MtTypeAssertionError(context, expected, obj._)
+    }
+}
+
+export function mtpAssertTypeIs<T extends mtp.TlObject, K extends T['_']>(
+    context: string,
+    obj: T,
+    expected: K,
+): asserts obj is mtp.FindByName<T, K> {
+    if (obj._ !== expected) {
+        throw new MtTypeAssertionError(context, expected, obj._)
     }
 }

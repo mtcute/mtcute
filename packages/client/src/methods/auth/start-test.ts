@@ -1,5 +1,7 @@
+import { MtArgumentError } from '@mtcute/core'
+
 import { TelegramClient } from '../../client'
-import { MaybeDynamic, MtArgumentError, User } from '../../types'
+import { MaybeDynamic, User } from '../../types'
 
 /**
  * Utility function to quickly authorize on test DC

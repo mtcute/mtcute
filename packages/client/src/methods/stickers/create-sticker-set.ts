@@ -1,3 +1,4 @@
+import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -5,7 +6,6 @@ import {
     InputFileLike,
     InputPeerLike,
     InputStickerSetItem,
-    MtArgumentError,
     StickerSet,
     StickerSourceType,
     StickerType,

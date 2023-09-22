@@ -1,6 +1,7 @@
+import { assertTypeIs } from '@mtcute/core/utils'
+
 import { TelegramClient } from '../../client'
 import { User } from '../../types'
-import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Authorize a bot using its token issued by [@BotFather](//t.me/BotFather)

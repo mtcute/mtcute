@@ -1,8 +1,9 @@
 import Long from 'long'
 
+import { assertTypeIs } from '@mtcute/core/utils'
+
 import { TelegramClient } from '../../client'
 import { User } from '../../types'
-import { assertTypeIs } from '../../utils/type-assertion'
 
 /**
  * Get list of contacts from your Telegram contacts list.

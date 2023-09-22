@@ -1,8 +1,9 @@
+import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
-import { Location, MtArgumentError, PeersIndex, User } from '../'
+import { Location, PeersIndex, User } from '../'
 import { makeInspectable } from '../utils'
 
 /**

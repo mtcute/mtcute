@@ -1,13 +1,8 @@
-import { MaybeArray } from '@mtcute/core'
+import { MaybeArray, MtTypeAssertionError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    InputPeerLike,
-    Message,
-    MtTypeAssertionError,
-    PeersIndex,
-} from '../../types'
+import { InputPeerLike, Message, PeersIndex } from '../../types'
 import {
     isInputPeerChannel,
     normalizeToInputChannel,
@@ -105,7 +100,9 @@ export async function getMessages(
                             msg.peerId._ === 'peerUser' &&
                             msg.peerId.userId === this._userId
                         )
-                    ) { return null }
+                    ) {
+                        return null
+                    }
                     break
                 case 'inputPeerUser':
                 case 'inputPeerUserFromMessage':
@@ -114,7 +111,9 @@ export async function getMessages(
                             msg.peerId._ === 'peerUser' &&
                             msg.peerId.userId === peer.userId
                         )
-                    ) { return null }
+                    ) {
+                        return null
+                    }
                     break
                 case 'inputPeerChat':
                     if (
@@ -122,7 +121,9 @@ export async function getMessages(
                             msg.peerId._ === 'peerChat' &&
                             msg.peerId.chatId === peer.chatId
                         )
-                    ) { return null }
+                    ) {
+                        return null
+                    }
                     break
             }
         }

@@ -1,7 +1,8 @@
+import { MtTypeAssertionError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { Message, MtTypeAssertionError, PeersIndex, SearchFilters } from '../../types'
+import { Message, PeersIndex, SearchFilters } from '../../types'
 
 /**
  * Search for messages globally from all of your chats

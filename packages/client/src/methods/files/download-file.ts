@@ -1,10 +1,7 @@
-import { TelegramClient } from '../../client'
-import {
-    FileDownloadParameters,
-    FileLocation,
-    MtUnsupportedError,
-} from '../../types'
+import { MtUnsupportedError } from '@mtcute/core'
 
+import { TelegramClient } from '../../client'
+import { FileDownloadParameters, FileLocation } from '../../types'
 let fs: typeof import('fs') | null = null
 
 try {
