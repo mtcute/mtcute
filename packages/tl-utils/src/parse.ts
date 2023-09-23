@@ -2,8 +2,7 @@ import { computeConstructorIdFromString } from './ctor-id'
 import { TL_PRIMITIVES, TlArgument, TlEntry } from './types'
 import { parseArgumentType, parseTdlibStyleComment } from './utils'
 
-const SINGLE_REGEX =
-    /^(.+?)(?:#([0-9a-f]{1,8}))?(?: \?)?(?: {(.+?:.+?)})? ((?:.+? )*)= (.+);$/
+const SINGLE_REGEX = /^(.+?)(?:#([0-9a-f]{1,8}))?(?: \?)?(?: {(.+?:.+?)})? ((?:.+? )*)= (.+);$/
 
 /**
  * Parse TL schema into a list of entries.

@@ -7,9 +7,7 @@ import { tl } from '@mtcute/tl'
  *
  * @param id  Inline message ID
  */
-export function parseInlineMessageId(
-    id: string,
-): tl.TypeInputBotInlineMessageID {
+export function parseInlineMessageId(id: string): tl.TypeInputBotInlineMessageID {
     const buf = parseUrlSafeBase64(id)
     const reader = TlBinaryReader.manual(buf)
 
@@ -36,9 +34,7 @@ export function parseInlineMessageId(
  *
  * @param id  Inline message ID object
  */
-export function encodeInlineMessageId(
-    id: tl.TypeInputBotInlineMessageID,
-): string {
+export function encodeInlineMessageId(id: tl.TypeInputBotInlineMessageID): string {
     let writer: TlBinaryWriter
 
     switch (id._) {

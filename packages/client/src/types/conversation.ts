@@ -1,16 +1,6 @@
 /* eslint-disable dot-notation */
-import {
-    getMarkedPeerId,
-    MaybeAsync,
-    MtArgumentError,
-    MtTimeoutError,
-} from '@mtcute/core'
-import {
-    AsyncLock,
-    ControllablePromise,
-    createControllablePromise,
-    Deque,
-} from '@mtcute/core/utils'
+import { getMarkedPeerId, MaybeAsync, MtArgumentError, MtTimeoutError } from '@mtcute/core'
+import { AsyncLock, ControllablePromise, createControllablePromise, Deque } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../client'
@@ -145,9 +135,7 @@ export class Conversation {
         if (pending && !pending.length) {
             this.client['_pendingConversations'].delete(this._chatId)
         }
-        this.client['_hasConversations'] = Boolean(
-            this.client['_pendingConversations'].size,
-        )
+        this.client['_hasConversations'] = Boolean(this.client['_pendingConversations'].size)
 
         // reset pending status
         this._queuedNewMessage.clear()
@@ -368,14 +356,11 @@ export class Conversation {
         const msgId = params?.message ?? this._lastMessage
 
         if (!msgId) {
-            throw new MtArgumentError(
-                'Provide message for which to wait for reply for',
-            )
+            throw new MtArgumentError('Provide message for which to wait for reply for')
         }
 
         const pred = filter ?
-            (msg: Message) =>
-                msg.replyToMessageId === msgId ? filter(msg) : false :
+            (msg: Message) => (msg.replyToMessageId === msgId ? filter(msg) : false) :
             (msg: Message) => msg.replyToMessageId === msgId
 
         return this.waitForNewMessage(pred, params?.timeout)
@@ -418,9 +403,7 @@ export class Conversation {
         const msgId = params?.message ?? this._lastReceivedMessage
 
         if (!msgId) {
-            throw new MtArgumentError(
-                'Provide message for which to wait for edit for',
-            )
+            throw new MtArgumentError('Provide message for which to wait for edit for')
         }
 
         const promise = createControllablePromise<Message>()
@@ -456,10 +439,7 @@ export class Conversation {
      * @param timeout  Timeout for the handler in ms, def. 15 sec. Pass `null` to disable.
      *   When the timeout is reached, `TimeoutError` is thrown.
      */
-    async waitForRead(
-        message?: number,
-        timeout: number | null = 15000,
-    ): Promise<void> {
+    async waitForRead(message?: number, timeout: number | null = 15000): Promise<void> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
         }
@@ -467,9 +447,7 @@ export class Conversation {
         const msgId = message ?? this._lastMessage
 
         if (!msgId) {
-            throw new MtArgumentError(
-                'Provide message for which to wait for read for',
-            )
+            throw new MtArgumentError('Provide message for which to wait for read for')
         }
 
         // check if the message is already read

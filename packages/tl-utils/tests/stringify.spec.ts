@@ -37,10 +37,7 @@ describe('writeTlEntryToString', () => {
 
     it('writes constructors without parameters', () => {
         test(make('auth.logOut', 'Bool'), 'auth.logOut = Bool;')
-        test(
-            make('auth.resetAuthorizations', 'Bool'),
-            'auth.resetAuthorizations = Bool;',
-        )
+        test(make('auth.resetAuthorizations', 'Bool'), 'auth.resetAuthorizations = Bool;')
     })
 
     it('writes constructor id if available', () => {
@@ -51,33 +48,21 @@ describe('writeTlEntryToString', () => {
 
     it('writes constructors with simple parameters', () => {
         test(
-            make(
-                'auth.exportAuthorization',
-                'auth.ExportedAuthorization',
-                'dc_id:int',
-            ),
+            make('auth.exportAuthorization', 'auth.ExportedAuthorization', 'dc_id:int'),
             'auth.exportAuthorization dc_id:int = auth.ExportedAuthorization;',
         )
     })
 
     it('computes for constructors with vector parameters', () => {
         test(
-            make(
-                'account.deleteSecureValue',
-                'Bool',
-                'types:Vector<SecureValueType>',
-            ),
+            make('account.deleteSecureValue', 'Bool', 'types:Vector<SecureValueType>'),
             'account.deleteSecureValue types:Vector<SecureValueType> = Bool;',
         )
     })
 
     it('computes for constructors with vector return type', () => {
         test(
-            make(
-                'account.getSecureValue',
-                'Vector<SecureValue>',
-                'types:Vector<SecureValueType>',
-            ),
+            make('account.getSecureValue', 'Vector<SecureValue>', 'types:Vector<SecureValueType>'),
             'account.getSecureValue types:Vector<SecureValueType> = Vector<SecureValue>;',
         )
     })

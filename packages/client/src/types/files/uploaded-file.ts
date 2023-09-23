@@ -26,11 +26,5 @@ export interface UploadedFile {
 
 /** @internal */
 export function isUploadedFile(obj: object): obj is UploadedFile {
-    return (
-        obj &&
-        typeof obj === 'object' &&
-        'inputFile' in obj &&
-        'size' in obj &&
-        'mime' in obj
-    )
+    return obj && typeof obj === 'object' && 'inputFile' in obj && 'size' in obj && 'mime' in obj
 }

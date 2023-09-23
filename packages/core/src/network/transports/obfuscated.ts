@@ -18,9 +18,7 @@ export interface MtProxyInfo {
     media: boolean
 }
 
-export class ObfuscatedPacketCodec
-    extends WrappedCodec
-    implements IPacketCodec {
+export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec {
     private _encryptor?: IEncryptionScheme
     private _decryptor?: IEncryptionScheme
 
@@ -71,20 +69,12 @@ export class ObfuscatedPacketCodec
         const decryptIv = randomRev.slice(32, 48)
 
         if (this._proxy) {
-            encryptKey = await this._crypto.sha256(
-                Buffer.concat([encryptKey, this._proxy.secret]),
-            )
-            decryptKey = await this._crypto.sha256(
-                Buffer.concat([decryptKey, this._proxy.secret]),
-            )
+            encryptKey = await this._crypto.sha256(Buffer.concat([encryptKey, this._proxy.secret]))
+            decryptKey = await this._crypto.sha256(Buffer.concat([decryptKey, this._proxy.secret]))
         }
 
         this._encryptor = this._crypto.createAesCtr(encryptKey, encryptIv, true)
-        this._decryptor = this._crypto.createAesCtr(
-            decryptKey,
-            decryptIv,
-            false,
-        )
+        this._decryptor = this._crypto.createAesCtr(decryptKey, decryptIv, false)
 
         const encrypted = await this._encryptor.encrypt(random)
         encrypted.copy(random, 56, 56, 64)
@@ -101,9 +91,7 @@ export class ObfuscatedPacketCodec
 
         if (Buffer.isBuffer(dec)) this._inner.feed(dec)
         else {
-            dec.then((dec) => this._inner.feed(dec)).catch((err) =>
-                this.emit('error', err),
-            )
+            dec.then((dec) => this._inner.feed(dec)).catch((err) => this.emit('error', err))
         }
     }
 

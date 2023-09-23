@@ -1,12 +1,7 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import {
-    computeConstructorIdFromEntry,
-    computeConstructorIdFromString,
-    TlArgument,
-    TlEntry,
-} from '../src'
+import { computeConstructorIdFromEntry, computeConstructorIdFromString, TlArgument, TlEntry } from '../src'
 
 describe('computeConstructorIdFromString', () => {
     const test = (tl: string, expected: number) => {
@@ -23,24 +18,15 @@ describe('computeConstructorIdFromString', () => {
     })
 
     it('computes for constructors with simple parameters', () => {
-        test(
-            'auth.exportAuthorization dc_id:int = auth.ExportedAuthorization;',
-            0xe5bfffcd,
-        )
+        test('auth.exportAuthorization dc_id:int = auth.ExportedAuthorization;', 0xe5bfffcd)
     })
 
     it('computes for constructors with vector parameters', () => {
-        test(
-            'account.deleteSecureValue types:Vector<SecureValueType> = Bool;',
-            0xb880bc4b,
-        )
+        test('account.deleteSecureValue types:Vector<SecureValueType> = Bool;', 0xb880bc4b)
     })
 
     it('computes for constructors with vector return type', () => {
-        test(
-            'account.getSecureValue types:Vector<SecureValueType> = Vector<SecureValue>;',
-            0x73665bc2,
-        )
+        test('account.getSecureValue types:Vector<SecureValueType> = Vector<SecureValue>;', 0x73665bc2)
     })
 
     it('computes for constructors with optional parameters', () => {
@@ -105,36 +91,15 @@ describe('computeConstructorIdFromEntry', () => {
     })
 
     it('computes for constructors with simple parameters', () => {
-        test(
-            make(
-                'auth.exportAuthorization',
-                'auth.ExportedAuthorization',
-                'dc_id:int',
-            ),
-            0xe5bfffcd,
-        )
+        test(make('auth.exportAuthorization', 'auth.ExportedAuthorization', 'dc_id:int'), 0xe5bfffcd)
     })
 
     it('computes for constructors with vector parameters', () => {
-        test(
-            make(
-                'account.deleteSecureValue',
-                'Bool',
-                'types:Vector<SecureValueType>',
-            ),
-            0xb880bc4b,
-        )
+        test(make('account.deleteSecureValue', 'Bool', 'types:Vector<SecureValueType>'), 0xb880bc4b)
     })
 
     it('computes for constructors with vector return type', () => {
-        test(
-            make(
-                'account.getSecureValue',
-                'Vector<SecureValue>',
-                'types:Vector<SecureValueType>',
-            ),
-            0x73665bc2,
-        )
+        test(make('account.getSecureValue', 'Vector<SecureValue>', 'types:Vector<SecureValueType>'), 0x73665bc2)
     })
 
     it('computes for constructors with optional parameters', () => {

@@ -82,10 +82,7 @@ export namespace BotCommands {
     /**
      * Scope that covers a specific user in a specific group
      */
-    export function groupMember(
-        chat: InputPeerLike,
-        user: InputPeerLike,
-    ): IntermediateScope {
+    export function groupMember(chat: InputPeerLike, user: InputPeerLike): IntermediateScope {
         return {
             type: 'member',
             chat,
@@ -99,10 +96,7 @@ export namespace BotCommands {
      * @param command  Bot command (without slash)
      * @param description  Command description
      */
-    export function cmd(
-        command: string,
-        description: string,
-    ): tl.RawBotCommand {
+    export function cmd(command: string, description: string): tl.RawBotCommand {
         return {
             _: 'botCommand',
             command,

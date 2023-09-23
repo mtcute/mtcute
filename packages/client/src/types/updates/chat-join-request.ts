@@ -56,23 +56,15 @@ export class ChatJoinRequestUpdate {
     /**
      * Approve or deny the last requested user
      */
-    hideLast(
-        action: Parameters<TelegramClient['hideJoinRequest']>[2],
-    ): Promise<void> {
-        return this.client.hideJoinRequest(
-            this.chatId,
-            this.raw.recentRequesters[0],
-            action,
-        )
+    hideLast(action: Parameters<TelegramClient['hideJoinRequest']>[2]): Promise<void> {
+        return this.client.hideJoinRequest(this.chatId, this.raw.recentRequesters[0], action)
     }
 
     /**
      * Approve or deny all recent requests
      * (the ones available in {@link recentRequesters})
      */
-    async hideAllRecent(
-        action: Parameters<TelegramClient['hideJoinRequest']>[2],
-    ): Promise<void> {
+    async hideAllRecent(action: Parameters<TelegramClient['hideJoinRequest']>[2]): Promise<void> {
         for (const id of this.raw.recentRequesters) {
             await this.client.hideJoinRequest(this.chatId, id, action)
         }
@@ -81,10 +73,7 @@ export class ChatJoinRequestUpdate {
     /**
      * Fetch all pending join requests for this chat
      */
-    fetchAll(params?: {
-        limit?: number
-        search?: string
-    }): AsyncIterableIterator<ChatInviteLinkJoinedMember> {
+    fetchAll(params?: { limit?: number; search?: string }): AsyncIterableIterator<ChatInviteLinkJoinedMember> {
         return this.client.getInviteLinkMembers(this.chatId, {
             limit: params?.limit,
             requested: true,

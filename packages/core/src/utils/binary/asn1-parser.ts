@@ -5,10 +5,7 @@
  * In fact just strips begin/end tags and parses the rest as Base64
  */
 export function parsePemContents(pem: string): Buffer {
-    return Buffer.from(
-        pem.replace(/^-----(BEGIN|END)( RSA)? PUBLIC KEY-----$|\n/gm, ''),
-        'base64',
-    )
+    return Buffer.from(pem.replace(/^-----(BEGIN|END)( RSA)? PUBLIC KEY-----$|\n/gm, ''), 'base64')
 }
 
 // based on https://git.coolaj86.com/coolaj86/asn1-parser.js/src/branch/master/asn1-parser.js
@@ -85,17 +82,10 @@ export function parseAsn1(data: Buffer): Asn1Object {
         function parseChildren(eager = false) {
             asn1.children = []
 
-            while (
-                iters < ELOOPN &&
-                index < 2 + asn1.length + asn1.lengthSize
-            ) {
+            while (iters < ELOOPN && index < 2 + asn1.length + asn1.lengthSize) {
                 iters += 1
                 depth.length += 1
-                child = parseAsn1Inner(
-                    buf.slice(index, index + adjustedLen),
-                    depth,
-                    eager,
-                )
+                child = parseAsn1Inner(buf.slice(index, index + adjustedLen), depth, eager)
                 depth.length -= 1
                 // The numbers don't match up exactly and I don't remember why...
                 // probably something with adjustedLen or some such, but the tests pass
@@ -104,9 +94,7 @@ export function parseAsn1(data: Buffer): Asn1Object {
                 if (index > 2 + asn1.lengthSize + asn1.length) {
                     throw new Error(
                         `Parse error: child value length (${child.length}) is ` +
-                            `greater than remaining parent length (${
-                                asn1.length - index
-                            } = ${asn1.length} - ${index})`,
+                            `greater than remaining parent length (${asn1.length - index} = ${asn1.length} - ${index})`,
                     )
                 }
                 asn1.children.push(child)
@@ -150,9 +138,7 @@ export function parseAsn1(data: Buffer): Asn1Object {
     const len = data.length
 
     if (len !== 2 + asn1.lengthSize + asn1.length) {
-        throw new Error(
-            'Length of buffer does not match length of ASN.1 sequence.',
-        )
+        throw new Error('Length of buffer does not match length of ASN.1 sequence.')
     }
 
     return asn1

@@ -35,10 +35,4 @@ export type PeerType = 'user' | 'bot' | 'group' | 'channel' | 'supergroup'
  * > Telegram has moved to int64 IDs. Though, Levin [has confirmed](https://t.me/tdlibchat/25075)
  * > that new IDs *will* still fit into int53, meaning JS integers are fine.
  */
-export type InputPeerLike =
-    | string
-    | number
-    | tl.TypePeer
-    | tl.TypeInputPeer
-    | tl.TypeInputUser
-    | tl.TypeInputChannel
+export type InputPeerLike = string | number | tl.TypePeer | tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel

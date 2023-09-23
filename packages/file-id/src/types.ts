@@ -127,8 +127,7 @@ export namespace tdFileId {
     /**
      * This photo is a legacy dialog photo
      */
-    export interface RawPhotoSizeSourceDialogPhotoLegacy
-        extends Omit<RawPhotoSizeSourceDialogPhoto, '_'> {
+    export interface RawPhotoSizeSourceDialogPhotoLegacy extends Omit<RawPhotoSizeSourceDialogPhoto, '_'> {
         readonly _: 'dialogPhotoLegacy'
         readonly volumeId: Long
         readonly localId: number
@@ -232,9 +231,7 @@ export namespace tdFileId {
         readonly location: TypeRemoteFileLocation
     }
 
-    export function isFileIdLike(
-        obj: unknown,
-    ): obj is string | RawFullRemoteFileLocation {
+    export function isFileIdLike(obj: unknown): obj is string | RawFullRemoteFileLocation {
         return (
             typeof obj === 'string' ||
             (obj !== null && typeof obj === 'object' && (obj as { _: unknown })._ === 'remoteFileLocation')

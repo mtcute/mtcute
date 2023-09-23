@@ -11,25 +11,14 @@ import { User } from '../../types'
  * @throws BadRequestError  In case the code is invalid
  * @internal
  */
-export async function recoverPassword(
-    this: TelegramClient,
-    recoveryCode: string,
-): Promise<User> {
+export async function recoverPassword(this: TelegramClient, recoveryCode: string): Promise<User> {
     const res = await this.call({
         _: 'auth.recoverPassword',
         code: recoveryCode,
     })
 
-    assertTypeIs(
-        'recoverPassword (@ auth.recoverPassword)',
-        res,
-        'auth.authorization',
-    )
-    assertTypeIs(
-        'recoverPassword (@ auth.recoverPassword -> user)',
-        res.user,
-        'user',
-    )
+    assertTypeIs('recoverPassword (@ auth.recoverPassword)', res, 'auth.authorization')
+    assertTypeIs('recoverPassword (@ auth.recoverPassword -> user)', res.user, 'user')
 
     this._userId = res.user.id
     this._isBot = false

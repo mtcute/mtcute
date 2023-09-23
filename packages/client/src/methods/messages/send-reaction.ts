@@ -60,16 +60,12 @@ export async function sendReaction(
 
     this._handleUpdate(res, true)
 
-    const upd = res.updates.find(
-        (it) => it._ === 'updateEditChannelMessage',
-    ) as tl.RawUpdateEditChannelMessage | undefined
+    const upd = res.updates.find((it) => it._ === 'updateEditChannelMessage') as
+        | tl.RawUpdateEditChannelMessage
+        | undefined
 
     if (!upd) {
-        throw new MtTypeAssertionError(
-            'messages.sendReaction (@ .updates[*])',
-            'updateEditChannelMessage',
-            'undefined',
-        )
+        throw new MtTypeAssertionError('messages.sendReaction (@ .updates[*])', 'updateEditChannelMessage', 'undefined')
     }
 
     const peers = PeersIndex.from(res)

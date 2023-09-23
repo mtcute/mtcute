@@ -9,11 +9,7 @@ import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { UploadedFile, UploadFileLike } from '../../types'
 import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils'
-import {
-    bufferToStream,
-    convertWebStreamToNodeReadable,
-    readBytesFromStream,
-} from '../../utils/stream-utils'
+import { bufferToStream, convertWebStreamToNodeReadable, readBytesFromStream } from '../../utils/stream-utils'
 
 let fs: typeof import('fs') | null = null
 let path: typeof import('path') | null = null
@@ -124,9 +120,7 @@ export async function uploadFile(
 
     if (typeof file === 'string') {
         if (!fs) {
-            throw new MtArgumentError(
-                'Local paths are only supported for NodeJS!',
-            )
+            throw new MtArgumentError('Local paths are only supported for NodeJS!')
         }
         file = fs.createReadStream(file)
     }
@@ -142,19 +136,11 @@ export async function uploadFile(
         // fs.ReadStream is a subclass of Readable, no conversion needed
     }
 
-    if (
-        typeof ReadableStream !== 'undefined' &&
-        file instanceof ReadableStream
-    ) {
+    if (typeof ReadableStream !== 'undefined' && file instanceof ReadableStream) {
         file = convertWebStreamToNodeReadable(file)
     }
 
-    if (
-        typeof file === 'object' &&
-        'headers' in file &&
-        'body' in file &&
-        'url' in file
-    ) {
+    if (typeof file === 'object' && 'headers' in file && 'body' in file && 'url' in file) {
         // fetch() response
         const length = parseInt(file.headers.get('content-length') || '0')
         if (!isNaN(length) && length) fileSize = length
@@ -186,10 +172,7 @@ export async function uploadFile(
             throw new MtArgumentError('Fetch response contains `null` body')
         }
 
-        if (
-            typeof ReadableStream !== 'undefined' &&
-            file.body instanceof ReadableStream
-        ) {
+        if (typeof ReadableStream !== 'undefined' && file.body instanceof ReadableStream) {
             file = convertWebStreamToNodeReadable(file.body)
         } else {
             file = file.body
@@ -206,9 +189,7 @@ export async function uploadFile(
 
     if (!partSizeKb) {
         if (fileSize === -1) {
-            partSizeKb = params.estimatedSize ?
-                determinePartSize(params.estimatedSize) :
-                64
+            partSizeKb = params.estimatedSize ? determinePartSize(params.estimatedSize) : 64
         } else {
             partSizeKb = determinePartSize(fileSize)
         }
@@ -223,27 +204,18 @@ export async function uploadFile(
     }
     const partSize = partSizeKb * 1024
 
-    let partCount =
-        fileSize === -1 ? -1 : ~~((fileSize + partSize - 1) / partSize)
-    const maxPartCount = this.network.params.isPremium ?
-        MAX_PART_COUNT_PREMIUM :
-        MAX_PART_COUNT
+    let partCount = fileSize === -1 ? -1 : ~~((fileSize + partSize - 1) / partSize)
+    const maxPartCount = this.network.params.isPremium ? MAX_PART_COUNT_PREMIUM : MAX_PART_COUNT
 
     if (partCount > maxPartCount) {
-        throw new MtArgumentError(
-            `File is too large (max ${maxPartCount} parts, got ${partCount})`,
-        )
+        throw new MtArgumentError(`File is too large (max ${maxPartCount} parts, got ${partCount})`)
     }
 
     const isBig = fileSize === -1 || fileSize > BIG_FILE_MIN_SIZE
     const isSmall = fileSize !== -1 && fileSize < SMALL_FILE_MAX_SIZE
     const connectionKind = isSmall ? 'main' : 'upload'
-    const connectionPoolSize = Math.min(
-        this.network.getPoolSize(connectionKind),
-        partCount,
-    )
-    const requestsPerConnection =
-        params.requestsPerConnection ?? REQUESTS_PER_CONNECTION
+    const connectionPoolSize = Math.min(this.network.getPoolSize(connectionKind), partCount)
+    const requestsPerConnection = params.requestsPerConnection ?? REQUESTS_PER_CONNECTION
 
     this.log.debug(
         'uploading %d bytes file in %d chunks, each %d bytes in %s connection pool of size %d',
@@ -278,26 +250,18 @@ export async function uploadFile(
         if (fileSize === -1 && stream.readableEnded) {
             fileSize = pos + (part?.length ?? 0)
             partCount = ~~((fileSize + partSize - 1) / partSize)
-            this.log.debug(
-                'readable ended, file size = %d, part count = %d',
-                fileSize,
-                partCount,
-            )
+            this.log.debug('readable ended, file size = %d, part count = %d', fileSize, partCount)
         }
 
         if (!part) {
-            throw new MtArgumentError(
-                `Unexpected EOS (there were only ${idx} parts, but expected ${partCount})`,
-            )
+            throw new MtArgumentError(`Unexpected EOS (there were only ${idx} parts, but expected ${partCount})`)
         }
 
         if (!Buffer.isBuffer(part)) {
             throw new MtArgumentError(`Part ${thisIdx} was not a Buffer!`)
         }
         if (part.length > partSize) {
-            throw new MtArgumentError(
-                `Part ${thisIdx} had invalid size (expected ${partSize}, got ${part.length})`,
-            )
+            throw new MtArgumentError(`Part ${thisIdx} had invalid size (expected ${partSize}, got ${part.length})`)
         }
 
         if (thisIdx === 0 && fileMime === undefined) {
@@ -310,9 +274,7 @@ export async function uploadFile(
                 // if all 8 bytes are printable ASCII characters,
                 // the entire file is probably plain text
                 const isPlainText = isProbablyPlainText(part.slice(0, 8))
-                fileMime = isPlainText ?
-                    'text/plain' :
-                    'application/octet-stream'
+                fileMime = isPlainText ? 'text/plain' : 'application/octet-stream'
             }
         }
 

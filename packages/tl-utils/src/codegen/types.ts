@@ -103,11 +103,10 @@ export function generateTypescriptDefinitionsForTlEntry(
     if (entry.kind === 'method' && !entry.generics) {
         if (comment) comment += '\n\n'
 
-        comment += `RPC method returns ${fullTypeName(
-            entry.type,
-            baseNamespace,
-            { link: true, typeModifiers: entry.typeModifiers },
-        )}`
+        comment += `RPC method returns ${fullTypeName(entry.type, baseNamespace, {
+            link: true,
+            typeModifiers: entry.typeModifiers,
+        })}`
 
         if (errors) {
             if (errors.userOnly[entry.name]) {
@@ -115,9 +114,7 @@ export function generateTypescriptDefinitionsForTlEntry(
             }
 
             if (errors.throws[entry.name]) {
-                comment +=
-                    '\n\nThis method *may* throw one of these errors: ' +
-                    errors.throws[entry.name].join(', ')
+                comment += '\n\nThis method *may* throw one of these errors: ' + errors.throws[entry.name].join(', ')
             }
         }
     }
@@ -129,10 +126,7 @@ export function generateTypescriptDefinitionsForTlEntry(
     if (entry.generics?.length) {
         genericsString = '<'
         entry.generics.forEach((it, idx) => {
-            const tsType =
-                it.type === 'Type' ?
-                    'tl.TlObject' :
-                    fullTypeName(it.type, baseNamespace)
+            const tsType = it.type === 'Type' ? 'tl.TlObject' : fullTypeName(it.type, baseNamespace)
 
             genericsIndex[it.name] = 1
             if (idx !== 0) genericsString += ', '
@@ -141,9 +135,7 @@ export function generateTypescriptDefinitionsForTlEntry(
         genericsString += '>'
     }
 
-    ret += `interface ${entryFullTypeName(entry)}${genericsString} {\n    _: '${
-        entry.name
-    }';\n`
+    ret += `interface ${entryFullTypeName(entry)}${genericsString} {\n    _: '${entry.name}';\n`
 
     entry.arguments.forEach((arg) => {
         if (arg.type === '#') {
@@ -238,14 +230,8 @@ export function generateTypescriptDefinitionsForTlSchema(
     namespace = 'tl',
     errors?: TlErrors,
 ): [string, string] {
-    let ts = PRELUDE.replace('$NS$', namespace).replace(
-        '$LAYER$',
-        String(layer),
-    )
-    let js = PRELUDE_JS.replace('$NS$', namespace).replace(
-        '$LAYER$',
-        String(layer),
-    )
+    let ts = PRELUDE.replace('$NS$', namespace).replace('$LAYER$', String(layer))
+    let js = PRELUDE_JS.replace('$NS$', namespace).replace('$LAYER$', String(layer))
 
     if (errors) {
         // ts += '\n    namespace errors {\n'
@@ -277,14 +263,7 @@ export function generateTypescriptDefinitionsForTlSchema(
                 unions[entry.type] = 1
             }
 
-            ts +=
-                indent(
-                    indentSize,
-                    generateTypescriptDefinitionsForTlEntry(
-                        entry,
-                        namespace + '.',
-                    ),
-                ) + '\n'
+            ts += indent(indentSize, generateTypescriptDefinitionsForTlEntry(entry, namespace + '.')) + '\n'
         })
 
         ts += indent(indentSize, 'interface RpcCallReturn')
@@ -317,10 +296,7 @@ export function generateTypescriptDefinitionsForTlSchema(
                     const g = entry.generics[i]
 
                     if (g.name === entry.type) {
-                        type =
-                            g.type === 'Type' ?
-                                'any' :
-                                fullTypeName(g.type, namespace + '.')
+                        type = g.type === 'Type' ? 'any' : fullTypeName(g.type, namespace + '.')
                         break
                     }
                 }
@@ -358,11 +334,7 @@ export function generateTypescriptDefinitionsForTlSchema(
 
             ts += '\n'
 
-            ts +=
-                indent(
-                    indentSize,
-                    `function isAny${typeWithoutNs}(o: object): o is ${typeName}`,
-                ) + '\n'
+            ts += indent(indentSize, `function isAny${typeWithoutNs}(o: object): o is ${typeName}`) + '\n'
             js += `ns.isAny${typeWithoutNs} = _isAny('${name}');\n`
         }
 
@@ -384,12 +356,7 @@ export function generateTypescriptDefinitionsForTlSchema(
         }
 
         const entry = schema.methods[name]
-        ts +=
-            indent(
-                8,
-                '| ' +
-                    fullTypeName(entry.name, namespace + '.', { method: true }),
-            ) + '\n'
+        ts += indent(8, '| ' + fullTypeName(entry.name, namespace + '.', { method: true })) + '\n'
     }
 
     ts += '\n' + indent(4, 'type TlObject =') + '\n'

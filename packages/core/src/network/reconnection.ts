@@ -7,7 +7,7 @@ export type ReconnectionStrategy<T> = (
     params: T,
     lastError: Error | null,
     consequentFails: number,
-    previousWait: number | null
+    previousWait: number | null,
 ) => number | false
 
 /**

@@ -35,9 +35,7 @@ export async function deleteHistory(
     })
 
     if (isInputPeerChannel(peer)) {
-        this._handleUpdate(
-            createDummyUpdate(res.pts, res.ptsCount, peer.channelId),
-        )
+        this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount, peer.channelId))
     } else {
         this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
     }

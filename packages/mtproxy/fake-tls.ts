@@ -1,31 +1,17 @@
 import bigInt, { BigInteger } from 'big-integer'
 
 import { IPacketCodec, WrappedCodec } from '@mtcute/core'
-import {
-    bigIntToBuffer,
-    bufferToBigInt,
-    ICryptoProvider,
-    randomBytes,
-} from '@mtcute/core/utils'
+import { bigIntToBuffer, bufferToBigInt, ICryptoProvider, randomBytes } from '@mtcute/core/utils'
 
 const MAX_TLS_PACKET_LENGTH = 2878
 const TLS_FIRST_PREFIX = Buffer.from('140303000101', 'hex')
 
 // ref: https://github.com/tdlib/td/blob/master/td/mtproto/TlsInit.cpp
-const KEY_MOD = bigInt(
-    '7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed',
-    16,
-)
+const KEY_MOD = bigInt('7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed', 16)
 // 2^255 - 19
-const QUAD_RES_MOD = bigInt(
-    '7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed',
-    16,
-)
+const QUAD_RES_MOD = bigInt('7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed', 16)
 // (mod - 1) / 2 = 2^254 - 10
-const QUAD_RES_POW = bigInt(
-    '3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6',
-    16,
-)
+const QUAD_RES_POW = bigInt('3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6', 16)
 
 function _getY2(x: BigInteger, mod: BigInteger): BigInteger {
     // returns y = x^3 + x^2 * 486662 + x
@@ -77,12 +63,7 @@ function executeTlsOperations(h: TlsOperationHandler): void {
     h.random(32)
     h.string(Buffer.from('0020', 'hex'))
     h.grease(0)
-    h.string(
-        Buffer.from(
-            '130113021303c02bc02fc02cc030cca9cca8c013c014009c009d002f003501000193',
-            'hex',
-        ),
-    )
+    h.string(Buffer.from('130113021303c02bc02fc02cc030cca9cca8c013c014009c009d002f003501000193', 'hex'))
     h.grease(2)
     h.string(Buffer.from('00000000', 'hex'))
     h.beginScope()
@@ -274,11 +255,7 @@ class TlsHelloWriter implements TlsOperationHandler {
 }
 
 /** @internal */
-export async function generateFakeTlsHeader(
-    domain: string,
-    secret: Buffer,
-    crypto: ICryptoProvider,
-): Promise<Buffer> {
+export async function generateFakeTlsHeader(domain: string, secret: Buffer, crypto: ICryptoProvider): Promise<Buffer> {
     const domainBuf = Buffer.from(domain)
 
     const writer = new TlsHelloWriter(517, domainBuf)
@@ -330,10 +307,7 @@ export class FakeTlsPacketCodec extends WrappedCodec implements IPacketCodec {
             const ret: Buffer[] = []
 
             while (packet.length) {
-                const buf = packet.slice(
-                    0,
-                    MAX_TLS_PACKET_LENGTH - this._header.length,
-                )
+                const buf = packet.slice(0, MAX_TLS_PACKET_LENGTH - this._header.length)
                 packet = packet.slice(buf.length)
                 ret.push(this._encodeTls(buf))
             }
@@ -350,13 +324,7 @@ export class FakeTlsPacketCodec extends WrappedCodec implements IPacketCodec {
         for (;;) {
             if (this._stream.length < 5) return
 
-            if (
-                !(
-                    this._stream[0] === 0x17 &&
-                    this._stream[1] === 0x03 &&
-                    this._stream[2] === 0x03
-                )
-            ) {
+            if (!(this._stream[0] === 0x17 && this._stream[1] === 0x03 && this._stream[2] === 0x03)) {
                 this.emit('error', new Error('Invalid TLS header'))
 
                 return

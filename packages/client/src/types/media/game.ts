@@ -56,18 +56,14 @@ export class Game {
         if (this.game.document?._ !== 'document') return null
 
         if (this._animation === undefined) {
-            const attr = this.game.document.attributes.find(
-                (it) => it._ === 'documentAttributeVideo',
-            ) as tl.RawDocumentAttributeVideo | undefined
+            const attr = this.game.document.attributes.find((it) => it._ === 'documentAttributeVideo') as
+                | tl.RawDocumentAttributeVideo
+                | undefined
 
             if (!attr) {
                 this._animation = null
             } else {
-                this._animation = new Video(
-                    this.client,
-                    this.game.document,
-                    attr,
-                )
+                this._animation = new Video(this.client, this.game.document, attr)
             }
         }
 

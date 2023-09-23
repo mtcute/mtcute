@@ -1,14 +1,8 @@
 import Long from 'long'
 
-import type {
-    FormattedString,
-    IMessageEntityParser,
-    MessageEntity,
-    tl,
-} from '@mtcute/client'
+import type { FormattedString, IMessageEntityParser, MessageEntity, tl } from '@mtcute/client'
 
-const MENTION_REGEX =
-    /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
+const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 const EMOJI_REGEX = /^tg:\/\/emoji\?id=(-?\d+)/
 
 const TAG_BOLD = '**'
@@ -31,13 +25,7 @@ const TO_BE_ESCAPED = /[*_\-~`[\\\]|]/g
  */
 export function md(
     strings: TemplateStringsArray,
-    ...sub: (
-        | string
-        | FormattedString<'markdown'>
-        | boolean
-        | undefined
-        | null
-    )[]
+    ...sub: (string | FormattedString<'markdown'> | boolean | undefined | null)[]
 ): FormattedString<'markdown'> {
     let str = ''
     sub.forEach((it, idx) => {
@@ -154,9 +142,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                 if (text[pos + 1] !== '(') {
                     // [link text]
                     // ignore this, and add opening [
-                    result = `${result.substr(0, ent.offset)}[${result.substr(
-                        ent.offset,
-                    )}]`
+                    result = `${result.substr(0, ent.offset)}[${result.substr(ent.offset)}]`
                     pos += 1
                     insideLink = false
                     continue
@@ -185,40 +171,24 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                         const accessHash = m[2]
 
                         if (accessHash) {
-                            (
-                                ent as tl.Mutable<tl.RawInputMessageEntityMentionName>
-                            )._ = 'inputMessageEntityMentionName'
-                            ;(
-                                ent as tl.Mutable<tl.RawInputMessageEntityMentionName>
-                            ).userId = {
+                            (ent as tl.Mutable<tl.RawInputMessageEntityMentionName>)._ =
+                                'inputMessageEntityMentionName'
+                            ;(ent as tl.Mutable<tl.RawInputMessageEntityMentionName>).userId = {
                                 _: 'inputUser',
                                 userId,
-                                accessHash: Long.fromString(
-                                    accessHash,
-                                    false,
-                                    16,
-                                ),
+                                accessHash: Long.fromString(accessHash, false, 16),
                             }
                         } else {
-                            (
-                                ent as tl.Mutable<tl.RawMessageEntityMentionName>
-                            )._ = 'messageEntityMentionName'
-                            ;(
-                                ent as tl.Mutable<tl.RawMessageEntityMentionName>
-                            ).userId = userId
+                            (ent as tl.Mutable<tl.RawMessageEntityMentionName>)._ = 'messageEntityMentionName'
+                            ;(ent as tl.Mutable<tl.RawMessageEntityMentionName>).userId = userId
                         }
                     } else if ((m = EMOJI_REGEX.exec(url))) {
-                        (ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>)._ =
-                            'messageEntityCustomEmoji'
-                        ;(
-                            ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>
-                        ).documentId = Long.fromString(m[1])
+                        (ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>)._ = 'messageEntityCustomEmoji'
+                        ;(ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>).documentId = Long.fromString(m[1])
                     } else {
                         if (url.match(/^\/\//)) url = 'http:' + url
-                        ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>)._ =
-                            'messageEntityTextUrl'
-                        ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>).url =
-                            url
+                        ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>)._ = 'messageEntityTextUrl'
+                        ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>).url = url
                     }
                     entities.push(ent)
                 }
@@ -255,9 +225,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                     pos += 1
 
                     if (pos > text.length) {
-                        throw new Error(
-                            'Malformed PRE entity, expected LF after ```',
-                        )
+                        throw new Error('Malformed PRE entity, expected LF after ```')
                     }
 
                     if (!('pre' in stacks)) stacks.pre = []
@@ -284,13 +252,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
 
             if (c === text[pos + 1]) {
                 // maybe (?) start or end of an entity
-                let type:
-                    | 'Italic'
-                    | 'Bold'
-                    | 'Underline'
-                    | 'Strike'
-                    | 'Spoiler'
-                    | null = null
+                let type: 'Italic' | 'Bold' | 'Underline' | 'Strike' | 'Spoiler' | null = null
 
                 switch (c) {
                     case '_':
@@ -368,18 +330,12 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                 // determine number of escape chars since the beginning of the string
                 let escapedPos = 0
 
-                while (
-                    escapedPos < escaped.length &&
-                    escaped[escapedPos] < start
-                ) {
+                while (escapedPos < escaped.length && escaped[escapedPos] < start) {
                     escapedPos += 1
                 }
                 start += escapedPos
 
-                while (
-                    escapedPos < escaped.length &&
-                    escaped[escapedPos] <= end
-                ) {
+                while (escapedPos < escaped.length && escaped[escapedPos] <= end) {
                     escapedPos += 1
                 }
                 end += escapedPos

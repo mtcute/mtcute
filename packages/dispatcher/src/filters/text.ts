@@ -1,17 +1,10 @@
 // ^^ will be looked into in MTQ-29
 
-import {
-    CallbackQuery,
-    ChosenInlineResult,
-    InlineQuery,
-    Message,
-} from '@mtcute/client'
+import { CallbackQuery, ChosenInlineResult, InlineQuery, Message } from '@mtcute/client'
 
 import { UpdateFilter } from './types'
 
-function extractText(
-    obj: Message | InlineQuery | ChosenInlineResult | CallbackQuery,
-): string | null {
+function extractText(obj: Message | InlineQuery | ChosenInlineResult | CallbackQuery): string | null {
     if (obj.constructor === Message) {
         return obj.text
     } else if (obj.constructor === InlineQuery) {
@@ -40,10 +33,7 @@ function extractText(
 export const regex =
     (
         regex: RegExp,
-    ): UpdateFilter<
-        Message | InlineQuery | ChosenInlineResult | CallbackQuery,
-        { match: RegExpMatchArray }
-    > =>
+    ): UpdateFilter<Message | InlineQuery | ChosenInlineResult | CallbackQuery, { match: RegExpMatchArray }> =>
         (obj) => {
             const txt = extractText(obj)
             if (!txt) return false
@@ -133,10 +123,7 @@ export const startsWith = (
         return (obj) => {
             const txt = extractText(obj)
 
-            return (
-                txt != null &&
-                txt.toLowerCase().substring(0, str.length) === str
-            )
+            return txt != null && txt.toLowerCase().substring(0, str.length) === str
         }
     }
 
@@ -167,10 +154,7 @@ export const endsWith = (
         return (obj) => {
             const txt = extractText(obj)
 
-            return (
-                txt != null &&
-                txt.toLowerCase().substring(0, str.length) === str
-            )
+            return txt != null && txt.toLowerCase().substring(0, str.length) === str
         }
     }
 

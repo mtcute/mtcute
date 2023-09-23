@@ -42,11 +42,7 @@ export class TlBinaryReader {
      * @param data  Buffer to read from
      * @param start  Position to start reading from
      */
-    constructor(
-        readonly objectsMap: TlReaderMap | undefined,
-        data: Buffer,
-        start = 0,
-    ) {
+    constructor(readonly objectsMap: TlReaderMap | undefined, data: Buffer, start = 0) {
         this.data = data
         this.pos = start
     }
@@ -68,11 +64,7 @@ export class TlBinaryReader {
      * @param data  Buffer to read from
      * @param start  Position to start reading from
      */
-    static deserializeObject<T>(
-        objectsMap: TlReaderMap,
-        data: Buffer,
-        start = 0,
-    ): T {
+    static deserializeObject<T>(objectsMap: TlReaderMap, data: Buffer, start = 0): T {
         return new TlBinaryReader(objectsMap, data, start).object() as T
     }
 
@@ -100,9 +92,7 @@ export class TlBinaryReader {
 
     int53(): number {
         // inlined toNumber from Long
-        const res =
-            (this.data.readInt32LE(this.pos) >>> 0) +
-            TWO_PWR_32_DBL * this.data.readInt32LE(this.pos + 4)
+        const res = (this.data.readInt32LE(this.pos) >>> 0) + TWO_PWR_32_DBL * this.data.readInt32LE(this.pos + 4)
         this.pos += 8
 
         return res
@@ -135,9 +125,7 @@ export class TlBinaryReader {
         const val = this.uint()
         if (val === 0xbc799737) return false
         if (val === 0x997275b5) return true
-        throw new Error(
-            `Expected either boolTrue or boolFalse, got 0x${val.toString(16)}`,
-        )
+        throw new Error(`Expected either boolTrue or boolFalse, got 0x${val.toString(16)}`)
     }
 
     /**
@@ -164,10 +152,7 @@ export class TlBinaryReader {
         let padding
 
         if (firstByte === 254) {
-            length =
-                this.data[this.pos++] |
-                (this.data[this.pos++] << 8) |
-                (this.data[this.pos++] << 16)
+            length = this.data[this.pos++] | (this.data[this.pos++] << 8) | (this.data[this.pos++] << 16)
             padding = length % 4
         } else {
             length = firstByte
@@ -208,9 +193,7 @@ export class TlBinaryReader {
             this.seek(-4)
             const pos = this.pos
             const error = new TypeError(
-                `Unknown object id: 0x${id.toString(
-                    16,
-                )}. Content: ${this.raw().toString('hex')}`,
+                `Unknown object id: 0x${id.toString(16)}. Content: ${this.raw().toString('hex')}`,
             )
             this.pos = pos
             throw error
@@ -220,18 +203,13 @@ export class TlBinaryReader {
     }
 
     gzip(): unknown {
-        return new TlBinaryReader(
-            this.objectsMap,
-            gzipInflate(this.bytes()),
-        ).object()
+        return new TlBinaryReader(this.objectsMap, gzipInflate(this.bytes())).object()
     }
 
     vector(reader = this.object, bare = false): unknown[] {
         if (!bare) {
             if (this.uint() !== 0x1cb5c415) {
-                throw new Error(
-                    'Invalid object code, expected 0x1cb5c415 (vector)',
-                )
+                throw new Error('Invalid object code, expected 0x1cb5c415 (vector)')
             }
         }
 

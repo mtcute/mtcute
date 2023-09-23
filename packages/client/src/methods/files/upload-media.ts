@@ -1,18 +1,8 @@
-import {
-    assertNever,
-    MtArgumentError,
-    MtTypeAssertionError,
-} from '@mtcute/core'
+import { assertNever, MtArgumentError, MtTypeAssertionError } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
-import {
-    InputMediaLike,
-    InputPeerLike,
-    MessageMedia,
-    Photo,
-    RawDocument,
-} from '../../types'
+import { InputMediaLike, InputPeerLike, MessageMedia, Photo, RawDocument } from '../../types'
 import { parseDocument } from '../../types/media/document-utils'
 
 /**
@@ -72,11 +62,7 @@ export async function uploadMedia(
     })
 
     if (res._ === 'messageMediaEmpty') {
-        throw new MtTypeAssertionError(
-            'uploadMedia',
-            'not messageMediaEmpty',
-            'messageMediaEmpty',
-        )
+        throw new MtTypeAssertionError('uploadMedia', 'not messageMediaEmpty', 'messageMediaEmpty')
     }
 
     switch (normMedia._) {

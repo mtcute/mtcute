@@ -64,10 +64,7 @@ class NodeReadable extends Readable {
         }
     }
 
-    _handleDestroy(
-        err: Error | null,
-        callback: (error?: Error | null) => void,
-    ) {
+    _handleDestroy(err: Error | null, callback: (error?: Error | null) => void) {
         this._webStream
             .cancel()
             .then(() => super._destroy(err, callback))
@@ -75,10 +72,7 @@ class NodeReadable extends Readable {
     }
 }
 
-export function convertWebStreamToNodeReadable(
-    webStream: ReadableStream,
-    opts?: ReadableOptions,
-): Readable {
+export function convertWebStreamToNodeReadable(webStream: ReadableStream, opts?: ReadableOptions): Readable {
     return new NodeReadable(webStream, opts)
 }
 
@@ -91,10 +85,7 @@ export function bufferToStream(buf: Buffer): Readable {
     })
 }
 
-export async function readBytesFromStream(
-    stream: Readable,
-    size: number,
-): Promise<Buffer | null> {
+export async function readBytesFromStream(stream: Readable, size: number): Promise<Buffer | null> {
     if (stream.readableEnded) return null
 
     let res = stream.read(size) as Buffer

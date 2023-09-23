@@ -22,9 +22,7 @@ export const chat =
 /**
  * Filter updates by chat ID(s) or username(s)
  */
-export const chatId = (
-    id: MaybeArray<number | string>,
-): UpdateFilter<Message | PollVoteUpdate> => {
+export const chatId = (id: MaybeArray<number | string>): UpdateFilter<Message | PollVoteUpdate> => {
     if (Array.isArray(id)) {
         const index: Record<number | string, true> = {}
         let matchSelf = false
@@ -45,11 +43,7 @@ export const chatId = (
 
             const chat = (upd as Exclude<typeof upd, PollVoteUpdate>).chat
 
-            return (
-                (matchSelf && chat.isSelf) ||
-                chat.id in index ||
-                chat.username! in index
-            )
+            return (matchSelf && chat.isSelf) || chat.id in index || chat.username! in index
         }
     }
 
@@ -69,10 +63,7 @@ export const chatId = (
                 return upd.peer.type === 'chat' && upd.peer.username === id
             }
 
-            return (
-                (upd as Exclude<typeof upd, PollVoteUpdate>).chat.username ===
-                id
-            )
+            return (upd as Exclude<typeof upd, PollVoteUpdate>).chat.username === id
         }
     }
 

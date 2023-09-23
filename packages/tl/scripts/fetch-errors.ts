@@ -28,14 +28,10 @@ interface TelegramErrorsSpec {
 
 async function fetchFromTelegram(errors: TlErrors) {
     const page = await fetch(ERRORS_PAGE_TG).then((it) => it.text())
-    const jsonUrl = page.match(
-        /can be found <a href="([^"]+)">here »<\/a>/i,
-    )?.[1]
+    const jsonUrl = page.match(/can be found <a href="([^"]+)">here »<\/a>/i)?.[1]
     if (!jsonUrl) throw new Error('Cannot find JSON URL')
 
-    const json = (await fetch(new URL(jsonUrl, ERRORS_PAGE_TG)).then((it) =>
-        it.json(),
-    )) as TelegramErrorsSpec
+    const json = (await fetch(new URL(jsonUrl, ERRORS_PAGE_TG)).then((it) => it.json())) as TelegramErrorsSpec
 
     // since nobody fucking guarantees that .descriptions
     // will have description for each described here (or vice versa),
@@ -103,8 +99,7 @@ async function fetchFromTelegram(errors: TlErrors) {
             matchingErrors.push(inner)
 
             if (!errors.errors[inner].description) {
-                errors.errors[inner].description =
-                    errors.errors[name].description
+                errors.errors[inner].description = errors.errors[name].description
             }
         }
 
@@ -176,17 +171,14 @@ async function fetchFromTelethon(errors: TlErrors) {
         // names for better code insights
         // we also prefer description from telegram, if it's available and doesn't use placeholders
         if (description) {
-            const desc = description.replace(
-                /{([a-z0-9_]+)}/gi,
-                (_, name: string) => {
-                    if (!obj._paramNames) {
-                        obj._paramNames = []
-                    }
-                    obj._paramNames.push(name)
+            const desc = description.replace(/{([a-z0-9_]+)}/gi, (_, name: string) => {
+                if (!obj._paramNames) {
+                    obj._paramNames = []
+                }
+                obj._paramNames.push(name)
 
-                    return '%d'
-                },
-            )
+                return '%d'
+            })
 
             if (!obj.description || obj._paramNames?.length) {
                 obj.description = desc

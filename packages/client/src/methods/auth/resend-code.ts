@@ -14,11 +14,7 @@ import { normalizePhoneNumber } from '../../utils/misc-utils'
  * @param phoneCodeHash  Confirmation code identifier from {@link SentCode}
  * @internal
  */
-export async function resendCode(
-    this: TelegramClient,
-    phone: string,
-    phoneCodeHash: string,
-): Promise<SentCode> {
+export async function resendCode(this: TelegramClient, phone: string, phoneCodeHash: string): Promise<SentCode> {
     phone = normalizePhoneNumber(phone)
 
     const res = await this.call({

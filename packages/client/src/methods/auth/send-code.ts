@@ -11,10 +11,7 @@ import { normalizePhoneNumber } from '../../utils/misc-utils'
  * @returns  An object containing information about the sent confirmation code
  * @internal
  */
-export async function sendCode(
-    this: TelegramClient,
-    phone: string,
-): Promise<SentCode> {
+export async function sendCode(this: TelegramClient, phone: string): Promise<SentCode> {
     phone = normalizePhoneNumber(phone)
 
     const res = await this.call({

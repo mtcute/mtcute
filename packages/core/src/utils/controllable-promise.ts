@@ -31,7 +31,6 @@ export function createControllablePromise<T = unknown>(): ControllablePromise<T>
     // ts doesn't like this, but it's fine
 
     ;(promise as ControllablePromise<T>).resolve = _resolve!
-
     ;(promise as ControllablePromise<T>).reject = _reject!
 
     return promise as ControllablePromise<T>

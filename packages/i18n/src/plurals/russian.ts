@@ -8,12 +8,7 @@ import { I18nValue, I18nValueDynamic } from '../types'
  * @param few  Value for "few" (2 стола, 42 стола)
  * @param many  Value for "many" (5 столов, 100 столов, 0 столов, нет столов)
  */
-export function pluralizeRussian<T>(
-    n: number,
-    one: T,
-    few: T,
-    many: T,
-): T {
+export function pluralizeRussian<T>(n: number, one: T, few: T, many: T): T {
     // reference: https://unicode-org.github.io/cldr-staging/charts/latest/supplemental/language_plural_rules.html#ru
 
     // one: 1 книга

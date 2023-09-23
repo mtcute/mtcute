@@ -19,14 +19,7 @@ import { ChatPhoto } from './chat-photo'
  *  - `long_time_ago`, blocked user or user with hidden last seen time who was online more than a month ago.
  *  - `bot`, for bots.
  */
-export type UserStatus =
-    | 'online'
-    | 'offline'
-    | 'recently'
-    | 'within_week'
-    | 'within_month'
-    | 'long_time_ago'
-    | 'bot'
+export type UserStatus = 'online' | 'offline' | 'recently' | 'within_week' | 'within_month' | 'long_time_ago' | 'bot'
 
 export interface UserParsedStatus {
     status: UserStatus
@@ -128,10 +121,7 @@ export class User {
         return this.raw.lastName ?? null
     }
 
-    static parseStatus(
-        status: tl.TypeUserStatus,
-        bot = false,
-    ): UserParsedStatus {
+    static parseStatus(status: tl.TypeUserStatus, bot = false): UserParsedStatus {
         let ret: UserStatus
         let date: Date
 
@@ -227,14 +217,7 @@ export class User {
      * More info at [Pyrogram FAQ](https://docs.pyrogram.org/faq#what-are-the-ip-addresses-of-telegram-data-centers).
      */
     get dcId(): number | null {
-        return (
-            (
-                this.raw.photo as Exclude<
-                    typeof this.raw.photo,
-                    tl.RawUserProfilePhotoEmpty
-                >
-            )?.dcId ?? null
-        )
+        return (this.raw.photo as Exclude<typeof this.raw.photo, tl.RawUserProfilePhotoEmpty>)?.dcId ?? null
     }
 
     /** User's phone number */
@@ -265,11 +248,7 @@ export class User {
     get photo(): ChatPhoto | null {
         if (this.raw.photo?._ !== 'userProfilePhoto') return null
 
-        return (this._photo ??= new ChatPhoto(
-            this.client,
-            this.inputPeer,
-            this.raw.photo,
-        ))
+        return (this._photo ??= new ChatPhoto(this.client, this.inputPeer, this.raw.photo))
     }
 
     /**
@@ -309,10 +288,7 @@ export class User {
      * msg.replyText(`Hello, ${msg.sender.mention()`)
      * ```
      */
-    mention<T extends string = string>(
-        text?: string | null,
-        parseMode?: T | null,
-    ): string | FormattedString<T> {
+    mention<T extends string = string>(text?: string | null, parseMode?: T | null): string | FormattedString<T> {
         if (text === undefined && this.username) {
             return `@${this.username}`
         }
@@ -366,10 +342,7 @@ export class User {
      * @param text  Mention text
      * @param parseMode  Parse mode to use when creating mention
      */
-    permanentMention<T extends string = string>(
-        text?: string | null,
-        parseMode?: T | null,
-    ): FormattedString<T> {
+    permanentMention<T extends string = string>(text?: string | null, parseMode?: T | null): FormattedString<T> {
         if (!this.raw.accessHash) {
             throw new MtArgumentError("user's access hash is not available!")
         }
@@ -388,9 +361,7 @@ export class User {
                     type: 'text_link',
                     offset: 0,
                     length: text.length,
-                    url: `tg://user?id=${
-                        this.id
-                    }&hash=${this.raw.accessHash.toString(16)}`,
+                    url: `tg://user?id=${this.id}&hash=${this.raw.accessHash.toString(16)}`,
                 },
             ]),
             parseMode,

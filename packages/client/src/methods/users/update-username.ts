@@ -10,10 +10,7 @@ import { User } from '../../types'
  * @param username  New username (5-32 chars, allowed chars: `a-zA-Z0-9_`), or `null` to remove
  * @internal
  */
-export async function updateUsername(
-    this: TelegramClient,
-    username: string | null,
-): Promise<User> {
+export async function updateUsername(this: TelegramClient, username: string | null): Promise<User> {
     if (username === null) username = ''
 
     const res = await this.call({

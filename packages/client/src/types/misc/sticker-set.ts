@@ -5,13 +5,7 @@ import { tl } from '@mtcute/tl'
 import { TelegramClient } from '../../client'
 import { MtEmptyError } from '../errors'
 import { InputFileLike } from '../files'
-import {
-    MaskPosition,
-    Sticker,
-    StickerSourceType,
-    StickerType,
-    Thumbnail,
-} from '../media'
+import { MaskPosition, Sticker, StickerSourceType, StickerType, Thumbnail } from '../media'
 import { parseDocument } from '../media/document-utils'
 import { makeInspectable } from '../utils'
 
@@ -47,21 +41,14 @@ export class StickerSet {
      */
     readonly isFull: boolean
 
-    constructor(
-        readonly client: TelegramClient,
-        raw: tl.TypeStickerSet | tl.messages.TypeStickerSet,
-    ) {
+    constructor(readonly client: TelegramClient, raw: tl.TypeStickerSet | tl.messages.TypeStickerSet) {
         if (raw._ === 'messages.stickerSet') {
             this.full = raw
             this.brief = raw.set
         } else if (raw._ === 'stickerSet') {
             this.brief = raw
         } else {
-            throw new MtTypeAssertionError(
-                'StickerSet',
-                'messages.stickerSet | stickerSet',
-                raw._,
-            )
+            throw new MtTypeAssertionError('StickerSet', 'messages.stickerSet | stickerSet', raw._)
         }
 
         this.isFull = raw._ === 'messages.stickerSet'
@@ -116,9 +103,7 @@ export class StickerSet {
      * Date when this sticker set was installed
      */
     get installedDate(): Date | null {
-        return this.brief.installedDate ?
-            new Date(this.brief.installedDate * 1000) :
-            null
+        return this.brief.installedDate ? new Date(this.brief.installedDate * 1000) : null
     }
 
     /**
@@ -169,17 +154,10 @@ export class StickerSet {
             const index = new LongMap<tl.Mutable<StickerInfo>>()
 
             this.full!.documents.forEach((doc) => {
-                const sticker = parseDocument(
-                    this.client,
-                    doc as tl.RawDocument,
-                )
+                const sticker = parseDocument(this.client, doc as tl.RawDocument)
 
                 if (!(sticker instanceof Sticker)) {
-                    throw new MtTypeAssertionError(
-                        'full.documents',
-                        'Sticker',
-                        sticker.mimeType,
-                    )
+                    throw new MtTypeAssertionError('full.documents', 'Sticker', sticker.mimeType)
                 }
 
                 const info: tl.Mutable<StickerInfo> = {
@@ -213,10 +191,7 @@ export class StickerSet {
      * (i.e. first sticker should be used as thumbnail)
      */
     get thumbnails(): ReadonlyArray<Thumbnail> {
-        return (this._thumbnails ??=
-            this.brief.thumbs?.map(
-                (sz) => new Thumbnail(this.client, this.brief, sz),
-            ) ?? [])
+        return (this._thumbnails ??= this.brief.thumbs?.map((sz) => new Thumbnail(this.client, this.brief, sz)) ?? [])
     }
 
     /**
@@ -240,9 +215,7 @@ export class StickerSet {
      *     In case this object does not contain info about stickers (i.e. {@link isFull} = false)
      */
     getStickersByEmoji(emoji: string): StickerInfo[] {
-        return this.stickers.filter(
-            (it) => it.alt === emoji || it.emoji.includes(emoji),
-        )
+        return this.stickers.filter((it) => it.alt === emoji || it.emoji.includes(emoji))
     }
 
     /**
@@ -301,9 +274,7 @@ export class StickerSet {
      *     Sticker File ID. In case this is a full sticker set object,
      *     you can also pass index (even negative), and that sticker will be removed
      */
-    async deleteSticker(
-        sticker: number | Parameters<TelegramClient['deleteStickerFromSet']>[0],
-    ): Promise<StickerSet> {
+    async deleteSticker(sticker: number | Parameters<TelegramClient['deleteStickerFromSet']>[0]): Promise<StickerSet> {
         if (typeof sticker === 'number') {
             sticker = this._getInputDocument(sticker)
         }
@@ -350,9 +321,7 @@ export class StickerSet {
      *     you can also pass index (even negative), and that sticker
      *     will be used as a thumb
      */
-    async setThumb(
-        thumb: number | Parameters<TelegramClient['setStickerSetThumb']>[1],
-    ): Promise<StickerSet> {
+    async setThumb(thumb: number | Parameters<TelegramClient['setStickerSetThumb']>[1]): Promise<StickerSet> {
         if (typeof thumb === 'number') {
             thumb = this._getInputDocument(thumb)
         }

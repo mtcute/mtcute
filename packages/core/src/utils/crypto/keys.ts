@@ -14,11 +14,7 @@ import { ICryptoProvider } from './abstract'
  * @param key  PEM-encoded RSA public key
  * @param old  Whether this is an "old" key
  */
-export async function parsePublicKey(
-    crypto: ICryptoProvider,
-    key: string,
-    old = false,
-): Promise<TlPublicKey> {
+export async function parsePublicKey(crypto: ICryptoProvider, key: string, old = false): Promise<TlPublicKey> {
     const asn1 = parseAsn1(parsePemContents(key))
     const modulus = asn1.children?.[0].value
     const exponent = asn1.children?.[1].value
@@ -48,11 +44,7 @@ export async function parsePublicKey(
  * @param key  PEM-encoded RSA public key
  * @param old  Whether this is an "old" key
  */
-export async function addPublicKey(
-    crypto: ICryptoProvider,
-    key: string,
-    old = false,
-): Promise<void> {
+export async function addPublicKey(crypto: ICryptoProvider, key: string, old = false): Promise<void> {
     const parsed = await parsePublicKey(crypto, key, old)
     keysIndex[parsed.fingerprint] = parsed
 }
@@ -63,10 +55,7 @@ export async function addPublicKey(
  * @param fingerprints  Fingerprints to match. The first one to match is returned.
  * @param allowOld  Whether to allow "old" keys
  */
-export function findKeyByFingerprints(
-    fingerprints: (string | Long)[],
-    allowOld = false,
-): TlPublicKey | null {
+export function findKeyByFingerprints(fingerprints: (string | Long)[], allowOld = false): TlPublicKey | null {
     for (let fp of fingerprints) {
         if (typeof fp !== 'string') {
             fp = fp.toUnsigned().toString(16)

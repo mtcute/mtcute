@@ -14,10 +14,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * @param userId  User ID, username or phone number
  * @internal
  */
-export async function deleteContacts(
-    this: TelegramClient,
-    userId: InputPeerLike
-): Promise<User | null>
+export async function deleteContacts(this: TelegramClient, userId: InputPeerLike): Promise<User | null>
 
 /**
  * Delete one or more contacts from your Telegram contacts list
@@ -28,10 +25,7 @@ export async function deleteContacts(
  * @param userIds  User IDs, usernames or phone numbers
  * @internal
  */
-export async function deleteContacts(
-    this: TelegramClient,
-    userIds: InputPeerLike[]
-): Promise<User[]>
+export async function deleteContacts(this: TelegramClient, userIds: InputPeerLike[]): Promise<User[]>
 
 /** @internal */
 export async function deleteContacts(
@@ -41,16 +35,10 @@ export async function deleteContacts(
     const single = !Array.isArray(userIds)
     if (single) userIds = [userIds as InputPeerLike]
 
-    const inputPeers = await this.resolvePeerMany(
-        userIds as InputPeerLike[],
-        normalizeToInputUser,
-    )
+    const inputPeers = await this.resolvePeerMany(userIds as InputPeerLike[], normalizeToInputUser)
 
     if (single && !inputPeers.length) {
-        throw new MtInvalidPeerTypeError(
-            (userIds as InputPeerLike[])[0],
-            'user',
-        )
+        throw new MtInvalidPeerTypeError((userIds as InputPeerLike[])[0], 'user')
     }
 
     const res = await this.call({

@@ -6,16 +6,11 @@ import { generateReaderCodeForTlEntry, parseTlToEntries } from '../../src'
 describe('generateReaderCodeForTlEntry', () => {
     const test = (tl: string, ...js: string[]) => {
         const entry = parseTlToEntries(tl).slice(-1)[0]
-        expect(generateReaderCodeForTlEntry(entry)).eq(
-            `${entry.id}:function(r){${js.join('')}},`,
-        )
+        expect(generateReaderCodeForTlEntry(entry)).eq(`${entry.id}:function(r){${js.join('')}},`)
     }
 
     it('generates code for constructors without arguments', () => {
-        test(
-            'topPeerCategoryBotsPM#ab661b5b = TopPeerCategory;',
-            "return{_:'topPeerCategoryBotsPM'}",
-        )
+        test('topPeerCategoryBotsPM#ab661b5b = TopPeerCategory;', "return{_:'topPeerCategoryBotsPM'}")
     })
 
     it('generates code for constructors with simple arguments', () => {
@@ -140,8 +135,7 @@ describe('generateReaderCodeForTlEntry', () => {
 
     it('generates code for bare types', () => {
         test(
-            'message#0949d9dc = Message;\n' +
-                'msg_container#73f1f8dc messages:vector<%Message> = MessageContainer;',
+            'message#0949d9dc = Message;\n' + 'msg_container#73f1f8dc messages:vector<%Message> = MessageContainer;',
             'return{',
             "_:'msg_container',",
             'messages:r.vector(m[155834844],1),',

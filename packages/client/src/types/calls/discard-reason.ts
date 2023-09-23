@@ -11,9 +11,7 @@ import { tl } from '@mtcute/tl'
 export type CallDiscardReason = 'missed' | 'disconnect' | 'hangup' | 'busy'
 
 /** @internal */
-export function _callDiscardReasonFromTl(
-    raw: tl.TypePhoneCallDiscardReason,
-): CallDiscardReason {
+export function _callDiscardReasonFromTl(raw: tl.TypePhoneCallDiscardReason): CallDiscardReason {
     switch (raw._) {
         case 'phoneCallDiscardReasonMissed':
             return 'missed'
@@ -29,9 +27,7 @@ export function _callDiscardReasonFromTl(
 }
 
 /** @internal */
-export function _callDiscardReasonToTl(
-    r: CallDiscardReason,
-): tl.TypePhoneCallDiscardReason {
+export function _callDiscardReasonToTl(r: CallDiscardReason): tl.TypePhoneCallDiscardReason {
     switch (r) {
         case 'missed':
             return { _: 'phoneCallDiscardReasonMissed' }

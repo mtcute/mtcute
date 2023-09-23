@@ -7,8 +7,7 @@ import { BotKeyboardBuilder } from './keyboard-builder'
 /**
  * Reply keyboard markup
  */
-export interface ReplyKeyboardMarkup
-    extends Omit<tl.RawReplyKeyboardMarkup, '_' | 'rows'> {
+export interface ReplyKeyboardMarkup extends Omit<tl.RawReplyKeyboardMarkup, '_' | 'rows'> {
     readonly type: 'reply'
 
     /**
@@ -27,8 +26,7 @@ export interface ReplyKeyboardHide extends Omit<tl.RawReplyKeyboardHide, '_'> {
 /**
  * Force the user to send a reply
  */
-export interface ReplyKeyboardForceReply
-    extends Omit<tl.RawReplyKeyboardForceReply, '_'> {
+export interface ReplyKeyboardForceReply extends Omit<tl.RawReplyKeyboardForceReply, '_'> {
     readonly type: 'force_reply'
 }
 
@@ -72,9 +70,7 @@ export namespace BotKeyboard {
      *
      * @param buttons  Two-dimensional array of buttons
      */
-    export function inline(
-        buttons: tl.TypeKeyboardButton[][],
-    ): InlineKeyboardMarkup {
+    export function inline(buttons: tl.TypeKeyboardButton[][]): InlineKeyboardMarkup {
         return {
             type: 'inline',
             buttons,
@@ -116,9 +112,7 @@ export namespace BotKeyboard {
     /**
      * Force the user to send a reply
      */
-    export function forceReply(
-        params: Omit<ReplyKeyboardForceReply, 'type'> = {},
-    ): ReplyKeyboardForceReply {
+    export function forceReply(params: Omit<ReplyKeyboardForceReply, 'type'> = {}): ReplyKeyboardForceReply {
         const ret = params as tl.Mutable<ReplyKeyboardForceReply>
         ret.type = 'force_reply'
 
@@ -147,9 +141,7 @@ export namespace BotKeyboard {
      *
      * @param text  Button text
      */
-    export function requestContact(
-        text: string,
-    ): tl.RawKeyboardButtonRequestPhone {
+    export function requestContact(text: string): tl.RawKeyboardButtonRequestPhone {
         return {
             _: 'keyboardButtonRequestPhone',
             text,
@@ -164,9 +156,7 @@ export namespace BotKeyboard {
      *
      * @param text  Button text
      */
-    export function requestGeo(
-        text: string,
-    ): tl.RawKeyboardButtonRequestGeoLocation {
+    export function requestGeo(text: string): tl.RawKeyboardButtonRequestGeoLocation {
         return {
             _: 'keyboardButtonRequestGeoLocation',
             text,
@@ -182,10 +172,7 @@ export namespace BotKeyboard {
      * @param text  Button text
      * @param quiz  If set, only quiz polls can be sent
      */
-    export function requestPoll(
-        text: string,
-        quiz?: boolean,
-    ): tl.RawKeyboardButtonRequestPoll {
+    export function requestPoll(text: string, quiz?: boolean): tl.RawKeyboardButtonRequestPoll {
         return {
             _: 'keyboardButtonRequestPoll',
             text,
@@ -248,11 +235,7 @@ export namespace BotKeyboard {
      *     If set, pressing the button will insert the bot's username
      *     and the specified inline query in the current chat's input field
      */
-    export function switchInline(
-        text: string,
-        query = '',
-        currentChat?: boolean,
-    ): tl.RawKeyboardButtonSwitchInline {
+    export function switchInline(text: string, query = '', currentChat?: boolean): tl.RawKeyboardButtonSwitchInline {
         return {
             _: 'keyboardButtonSwitchInline',
             samePeer: currentChat,
@@ -343,10 +326,7 @@ export namespace BotKeyboard {
      * @param text  Button label
      * @param url  WebView URL
      */
-    export function webView(
-        text: string,
-        url: string,
-    ): tl.RawKeyboardButtonWebView {
+    export function webView(text: string, url: string): tl.RawKeyboardButtonWebView {
         return {
             _: 'keyboardButtonWebView',
             text,
@@ -360,10 +340,7 @@ export namespace BotKeyboard {
      * @param text  Text of the button
      * @param user  User to be opened (use {@link TelegramClient.resolvePeer})
      */
-    export function userProfile(
-        text: string,
-        user: tl.TypeInputPeer,
-    ): tl.RawInputKeyboardButtonUserProfile {
+    export function userProfile(text: string, user: tl.TypeInputPeer): tl.RawInputKeyboardButtonUserProfile {
         return {
             _: 'inputKeyboardButtonUserProfile',
             text,
@@ -401,24 +378,23 @@ export namespace BotKeyboard {
     }
 
     /** @internal */
-    export function _rowsTo2d(
-        rows: tl.RawKeyboardButtonRow[],
-    ): tl.TypeKeyboardButton[][] {
+    export function _rowsTo2d(rows: tl.RawKeyboardButtonRow[]): tl.TypeKeyboardButton[][] {
         return rows.map((it) => it.buttons)
     }
 
     /** @internal */
-    export function _2dToRows(
-        arr: tl.TypeKeyboardButton[][],
-        inline: boolean,
-    ): tl.RawKeyboardButtonRow[] {
+    export function _2dToRows(arr: tl.TypeKeyboardButton[][], inline: boolean): tl.RawKeyboardButtonRow[] {
         return arr.map((row) => {
             if (!inline) {
                 // le cringe
-                row = row.map((btn) => btn._ === 'keyboardButtonWebView' ? ({
-                    ...btn,
-                    _: 'keyboardButtonSimpleWebView',
-                }) : btn)
+                row = row.map((btn) =>
+                    btn._ === 'keyboardButtonWebView' ?
+                        {
+                            ...btn,
+                            _: 'keyboardButtonSimpleWebView',
+                        } :
+                        btn,
+                )
             }
 
             return {
@@ -429,9 +405,7 @@ export namespace BotKeyboard {
     }
 
     /** @internal */
-    export function _convertToTl(
-        obj?: ReplyMarkup,
-    ): tl.TypeReplyMarkup | undefined {
+    export function _convertToTl(obj?: ReplyMarkup): tl.TypeReplyMarkup | undefined {
         if (!obj) return obj
         if (tl.isAnyReplyMarkup(obj)) return obj
 

@@ -19,11 +19,7 @@ function getAllGettersNames(obj: object): string[] {
 
     do {
         Object.getOwnPropertyNames(obj).forEach((prop) => {
-            if (
-                prop !== '__proto__' &&
-                Object.getOwnPropertyDescriptor(obj, prop)?.get &&
-                !getters.includes(prop)
-            ) {
+            if (prop !== '__proto__' && Object.getOwnPropertyDescriptor(obj, prop)?.get && !getters.includes(prop)) {
                 getters.push(prop)
             }
         })
@@ -46,11 +42,7 @@ const bufferToJsonInspect = function (this: Buffer) {
  * > (getter that caches after its first invocation is also
  * > considered pure in this case)
  */
-export function makeInspectable(
-    obj: new (...args: any[]) => any,
-    props?: string[],
-    hide?: string[],
-): void {
+export function makeInspectable(obj: new (...args: any[]) => any, props?: string[], hide?: string[]): void {
     const getters: string[] = props ? props : []
 
     for (const key of getAllGettersNames(obj.prototype)) {
@@ -71,11 +63,7 @@ export function makeInspectable(
             try {
                 let val = this[it]
 
-                if (
-                    val &&
-                    typeof val === 'object' &&
-                    typeof val.toJSON === 'function'
-                ) {
+                if (val && typeof val === 'object' && typeof val.toJSON === 'function') {
                     val = val.toJSON(true)
                 }
                 ret[it] = val

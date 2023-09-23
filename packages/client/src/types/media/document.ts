@@ -37,12 +37,8 @@ export abstract class RawDocument extends FileLocation {
      */
     get fileName(): string | null {
         if (this._fileName === undefined) {
-            const attr = this.raw.attributes.find(
-                (it) => it._ === 'documentAttributeFilename',
-            )
-            this._fileName = attr ?
-                (attr as tl.RawDocumentAttributeFilename).fileName :
-                null
+            const attr = this.raw.attributes.find((it) => it._ === 'documentAttributeFilename')
+            this._fileName = attr ? (attr as tl.RawDocumentAttributeFilename).fileName : null
         }
 
         return this._fileName
@@ -72,12 +68,8 @@ export abstract class RawDocument extends FileLocation {
         if (!this._thumbnails) {
             const arr: Thumbnail[] = []
 
-            this.raw.thumbs?.forEach((sz) =>
-                arr.push(new Thumbnail(this.client, this.raw, sz)),
-            )
-            this.raw.videoThumbs?.forEach((sz) =>
-                arr.push(new Thumbnail(this.client, this.raw, sz)),
-            )
+            this.raw.thumbs?.forEach((sz) => arr.push(new Thumbnail(this.client, this.raw, sz)))
+            this.raw.videoThumbs?.forEach((sz) => arr.push(new Thumbnail(this.client, this.raw, sz)))
 
             this._thumbnails = arr
         }
@@ -97,10 +89,9 @@ export abstract class RawDocument extends FileLocation {
     getThumbnail(type: string): Thumbnail | null {
         return (
             this.thumbnails.find((it) => {
-                if (
-                    it.raw._ === 'videoSizeEmojiMarkup' ||
-                    it.raw._ === 'videoSizeStickerMarkup'
-                ) { return false }
+                if (it.raw._ === 'videoSizeEmojiMarkup' || it.raw._ === 'videoSizeStickerMarkup') {
+                    return false
+                }
 
                 return it.raw.type === type
             }) ?? null

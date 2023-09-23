@@ -23,9 +23,7 @@ export class Video extends RawDocument {
     constructor(
         client: TelegramClient,
         doc: tl.RawDocument,
-        readonly attr:
-            | tl.RawDocumentAttributeVideo
-            | tl.RawDocumentAttributeImageSize,
+        readonly attr: tl.RawDocumentAttributeVideo | tl.RawDocumentAttributeImageSize,
     ) {
         super(client, doc)
     }
@@ -61,18 +59,14 @@ export class Video extends RawDocument {
     get isAnimation(): boolean {
         return (this._isAnimation ??=
             this.attr._ === 'documentAttributeImageSize' ||
-            this.raw.attributes.some(
-                (it) => it._ === 'documentAttributeAnimated',
-            ))
+            this.raw.attributes.some((it) => it._ === 'documentAttributeAnimated'))
     }
 
     /**
      * Whether this video is a round video message (aka video note)
      */
     get isRound(): boolean {
-        return (
-            this.attr._ === 'documentAttributeVideo' && Boolean(this.attr.roundMessage)
-        )
+        return this.attr._ === 'documentAttributeVideo' && Boolean(this.attr.roundMessage)
     }
 
     /**

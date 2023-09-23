@@ -2,12 +2,7 @@ import { assertNever } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../../client'
-import {
-    InputMediaContact,
-    InputMediaGeo,
-    InputMediaGeoLive,
-    InputMediaVenue,
-} from '../../media'
+import { InputMediaContact, InputMediaGeo, InputMediaGeoLive, InputMediaVenue } from '../../media'
 import { FormattedString } from '../../parser'
 import { BotKeyboard, ReplyMarkup } from '../keyboards'
 
@@ -147,9 +142,7 @@ export namespace BotInlineMessage {
      * Create an inline message containing
      * media from the result
      */
-    export function media(
-        params: Omit<InputInlineMessageMedia, 'type'> = {},
-    ): InputInlineMessageMedia {
+    export function media(params: Omit<InputInlineMessageMedia, 'type'> = {}): InputInlineMessageMedia {
         const ret = params as tl.Mutable<InputInlineMessageMedia>
         ret.type = 'media'
 
@@ -161,9 +154,7 @@ export namespace BotInlineMessage {
      *
      * @param params  Additional parameters
      */
-    export function geo(
-        params: Omit<InputInlineMessageGeo, 'type'>,
-    ): InputInlineMessageGeo {
+    export function geo(params: Omit<InputInlineMessageGeo, 'type'>): InputInlineMessageGeo {
         const ret = params as tl.Mutable<InputInlineMessageGeo>
         ret.type = 'geo'
 
@@ -175,9 +166,7 @@ export namespace BotInlineMessage {
      *
      * @param params  Additional parameters
      */
-    export function geoLive(
-        params: Omit<InputInlineMessageGeoLive, 'type'>,
-    ): InputInlineMessageGeoLive {
+    export function geoLive(params: Omit<InputInlineMessageGeoLive, 'type'>): InputInlineMessageGeoLive {
         const ret = params as tl.Mutable<InputInlineMessageGeoLive>
         ret.type = 'geo_live'
 
@@ -187,9 +176,7 @@ export namespace BotInlineMessage {
     /**
      * Create an inline message containing a venue
      */
-    export function venue(
-        params: Omit<InputInlineMessageVenue, 'type'>,
-    ): InputInlineMessageVenue {
+    export function venue(params: Omit<InputInlineMessageVenue, 'type'>): InputInlineMessageVenue {
         const ret = params as tl.Mutable<InputInlineMessageVenue>
         ret.type = 'venue'
 
@@ -200,9 +187,7 @@ export namespace BotInlineMessage {
      * Create an inline message containing a game
      * from the inline result
      */
-    export function game(
-        params: Omit<InputInlineMessageGame, 'type'>,
-    ): InputInlineMessageGame {
+    export function game(params: Omit<InputInlineMessageGame, 'type'>): InputInlineMessageGame {
         const ret = params as tl.Mutable<InputInlineMessageGame>
         ret.type = 'game'
 
@@ -212,9 +197,7 @@ export namespace BotInlineMessage {
     /**
      * Create an inline message containing a contact
      */
-    export function contact(
-        params: Omit<InputInlineMessageContact, 'type'>,
-    ): InputInlineMessageContact {
+    export function contact(params: Omit<InputInlineMessageContact, 'type'>): InputInlineMessageContact {
         const ret = params as tl.Mutable<InputInlineMessageContact>
         ret.type = 'contact'
 
@@ -229,11 +212,7 @@ export namespace BotInlineMessage {
     ): Promise<tl.TypeInputBotInlineMessage> {
         switch (obj.type) {
             case 'text': {
-                const [message, entities] = await client._parseEntities(
-                    obj.text,
-                    parseMode,
-                    obj.entities,
-                )
+                const [message, entities] = await client._parseEntities(obj.text, parseMode, obj.entities)
 
                 return {
                     _: 'inputBotInlineMessageText',
@@ -243,11 +222,7 @@ export namespace BotInlineMessage {
                 }
             }
             case 'media': {
-                const [message, entities] = await client._parseEntities(
-                    obj.text,
-                    parseMode,
-                    obj.entities,
-                )
+                const [message, entities] = await client._parseEntities(obj.text, parseMode, obj.entities)
 
                 return {
                     _: 'inputBotInlineMessageMediaAuto',
@@ -268,8 +243,7 @@ export namespace BotInlineMessage {
                     // fields will be `undefined` if this is a `geo`
                     heading: (obj as InputMediaGeoLive).heading,
                     period: (obj as InputMediaGeoLive).period,
-                    proximityNotificationRadius: (obj as InputMediaGeoLive)
-                        .proximityNotificationRadius,
+                    proximityNotificationRadius: (obj as InputMediaGeoLive).proximityNotificationRadius,
                     replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
                 }
             case 'venue':

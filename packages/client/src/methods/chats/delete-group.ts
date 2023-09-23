@@ -8,10 +8,7 @@ import { isInputPeerChat } from '../../utils/peer-utils'
  * @param chatId  Chat ID
  * @internal
  */
-export async function deleteGroup(
-    this: TelegramClient,
-    chatId: InputPeerLike,
-): Promise<void> {
+export async function deleteGroup(this: TelegramClient, chatId: InputPeerLike): Promise<void> {
     const chat = await this.resolvePeer(chatId)
     if (!isInputPeerChat(chat)) throw new MtInvalidPeerTypeError(chatId, 'chat')
 

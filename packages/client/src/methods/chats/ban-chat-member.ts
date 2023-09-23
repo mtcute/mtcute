@@ -51,10 +51,7 @@ export async function banChatMember(
     try {
         return this._findMessageInUpdate(res)
     } catch (e) {
-        if (
-            e instanceof MtTypeAssertionError &&
-            e.context === '_findInUpdate (@ .updates[*])'
-        ) {
+        if (e instanceof MtTypeAssertionError && e.context === '_findInUpdate (@ .updates[*])') {
             // no service message
             return null
         }

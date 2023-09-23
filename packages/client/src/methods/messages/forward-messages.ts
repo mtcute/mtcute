@@ -3,13 +3,7 @@ import { randomLong } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    FormattedString,
-    InputMediaLike,
-    InputPeerLike,
-    Message,
-    PeersIndex,
-} from '../../types'
+import { FormattedString, InputMediaLike, InputPeerLike, Message, PeersIndex } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
@@ -104,7 +98,7 @@ export async function forwardMessages(
          * have content protection.
          */
         forbidForwards?: boolean
-    }
+    },
 ): Promise<Message>
 
 /**
@@ -201,7 +195,7 @@ export async function forwardMessages(
          * have content protection.
          */
         forbidForwards?: boolean
-    }
+    },
 ): Promise<MaybeArray<Message>>
 
 /** @internal */
@@ -303,9 +297,7 @@ export async function forwardMessages(
     // error, instead only first 100 IDs will be forwarded,
     // which is definitely not the best outcome.
     if (messages.length > 100) {
-        throw new MtArgumentError(
-            'You can forward no more than 100 messages at once',
-        )
+        throw new MtArgumentError('You can forward no more than 100 messages at once')
     }
 
     const toPeer = await this.resolvePeer(toChatId)
@@ -314,9 +306,7 @@ export async function forwardMessages(
 
     if (params.caption) {
         if (params.captionMedia) {
-            throw new MtArgumentError(
-                'You can either pass `caption` or `captionMedia`',
-            )
+            throw new MtArgumentError('You can either pass `caption` or `captionMedia`')
         }
 
         captionMessage = await this.sendText(toPeer, params.caption, {
@@ -350,9 +340,7 @@ export async function forwardMessages(
         dropAuthor: params.noAuthor,
         dropMediaCaptions: params.noCaption,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs ?
-            await this.resolvePeer(params.sendAs) :
-            undefined,
+        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined,
     })
 
     assertIsUpdatesGroup('messages.forwardMessages', res)
@@ -367,14 +355,7 @@ export async function forwardMessages(
             case 'updateNewMessage':
             case 'updateNewChannelMessage':
             case 'updateNewScheduledMessage':
-                forwarded.push(
-                    new Message(
-                        this,
-                        upd.message,
-                        peers,
-                        upd._ === 'updateNewScheduledMessage',
-                    ),
-                )
+                forwarded.push(new Message(this, upd.message, peers, upd._ === 'updateNewScheduledMessage'))
                 break
         }
     })

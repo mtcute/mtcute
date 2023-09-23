@@ -76,7 +76,7 @@ import { UpdateState } from '../state'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/ban-types
 export type UpdateFilter<Base, Mod = {}, State = never> = (
     update: Base,
-    state?: UpdateState<State>
+    state?: UpdateState<State>,
 ) => MaybeAsync<boolean>
 
 export type Modify<Base, Mod> = Omit<Base, keyof Mod> & Mod
@@ -84,27 +84,13 @@ export type Invert<Base, Mod> = {
     [P in keyof Mod & keyof Base]: Exclude<Base[P], Mod[P]>
 }
 
-export type UnionToIntersection<U> = (
-    U extends any ? (k: U) => void : never
-) extends (k: infer I) => void
-    ? I
-    : never
+export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never
 
-export type ExtractBase<Filter> = Filter extends UpdateFilter<infer I, any>
-    ? I
-    : never
+export type ExtractBase<Filter> = Filter extends UpdateFilter<infer I, any> ? I : never
 
-export type ExtractMod<Filter> = Filter extends UpdateFilter<any, infer I>
-    ? I
-    : never
+export type ExtractMod<Filter> = Filter extends UpdateFilter<any, infer I> ? I : never
 
-export type ExtractState<Filter> = Filter extends UpdateFilter<
-    any,
-    any,
-    infer I
->
-    ? I
-    : never
+export type ExtractState<Filter> = Filter extends UpdateFilter<any, any, infer I> ? I : never
 
 export type TupleKeys<T extends any[]> = Exclude<keyof T, keyof []>
 export type WrapBase<T extends any[]> = {
@@ -112,6 +98,4 @@ export type WrapBase<T extends any[]> = {
 }
 export type Values<T> = T[keyof T]
 export type UnwrapBase<T> = T extends { base: any } ? T['base'] : never
-export type ExtractBaseMany<Filters extends any[]> = UnwrapBase<
-    UnionToIntersection<Values<WrapBase<Filters>>>
->
+export type ExtractBaseMany<Filters extends any[]> = UnwrapBase<UnionToIntersection<Values<WrapBase<Filters>>>>

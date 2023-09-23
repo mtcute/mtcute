@@ -4,14 +4,7 @@
 import { MaybeAsync } from '@mtcute/core'
 
 import { UpdateState } from '../state'
-import {
-    ExtractBaseMany,
-    ExtractMod,
-    ExtractState,
-    Invert,
-    UnionToIntersection,
-    UpdateFilter,
-} from './types'
+import { ExtractBaseMany, ExtractMod, ExtractState, Invert, UnionToIntersection, UpdateFilter } from './types'
 
 /**
  * Filter that matches any update
@@ -135,10 +128,7 @@ export function or<Base, Mod1, Mod2, State1, State2>(
  */
 export function every<Filters extends UpdateFilter<any, any>[]>(
     ...fns: Filters
-): UpdateFilter<
-    ExtractBaseMany<Filters>,
-    UnionToIntersection<ExtractMod<Filters[number]>>
-> {
+): UpdateFilter<ExtractBaseMany<Filters>, UnionToIntersection<ExtractMod<Filters[number]>>> {
     if (fns.length === 2) return and(fns[0], fns[1])
 
     return (upd, state) => {
@@ -185,11 +175,7 @@ export function every<Filters extends UpdateFilter<any, any>[]>(
  */
 export function some<Filters extends UpdateFilter<any, any, any>[]>(
     ...fns: Filters
-): UpdateFilter<
-    ExtractBaseMany<Filters>,
-    ExtractMod<Filters[number]>,
-    ExtractState<Filters[number]>
-> {
+): UpdateFilter<ExtractBaseMany<Filters>, ExtractMod<Filters[number]>, ExtractState<Filters[number]>> {
     if (fns.length === 2) return or(fns[0], fns[1])
 
     return (upd, state) => {

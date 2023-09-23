@@ -2,18 +2,8 @@ import { assertTypeIs } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    ChatMember,
-    InputPeerLike,
-    MtInvalidPeerTypeError,
-    PeersIndex,
-} from '../../types'
-import {
-    isInputPeerChannel,
-    isInputPeerChat,
-    isInputPeerUser,
-    normalizeToInputChannel,
-} from '../../utils/peer-utils'
+import { ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types'
+import { isInputPeerChannel, isInputPeerChat, isInputPeerUser, normalizeToInputChannel } from '../../utils/peer-utils'
 
 /**
  * Get information about a single chat member
@@ -41,23 +31,16 @@ export async function getChatMember(
             chatId: chat.chatId,
         })
 
-        assertTypeIs(
-            'getChatMember (@ messages.getFullChat)',
-            res.fullChat,
-            'chatFull',
-        )
+        assertTypeIs('getChatMember (@ messages.getFullChat)', res.fullChat, 'chatFull')
 
         const members =
-            res.fullChat.participants._ === 'chatParticipantsForbidden' ?
-                [] :
-                res.fullChat.participants.participants
+            res.fullChat.participants._ === 'chatParticipantsForbidden' ? [] : res.fullChat.participants.participants
 
         const peers = PeersIndex.from(res)
 
         for (const m of members) {
             if (
-                (user._ === 'inputPeerSelf' &&
-                    (peers.user(m.userId) as tl.RawUser).self) ||
+                (user._ === 'inputPeerSelf' && (peers.user(m.userId) as tl.RawUser).self) ||
                 (user._ === 'inputPeerUser' && m.userId === user.userId)
             ) {
                 return new ChatMember(this, m, peers)

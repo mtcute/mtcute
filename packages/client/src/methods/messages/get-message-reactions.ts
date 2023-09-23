@@ -20,7 +20,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 export async function getMessageReactions(
     this: TelegramClient,
     chatId: InputPeerLike,
-    messages: number
+    messages: number,
 ): Promise<MessageReactions | null>
 
 /**
@@ -38,7 +38,7 @@ export async function getMessageReactions(
 export async function getMessageReactions(
     this: TelegramClient,
     chatId: InputPeerLike,
-    messages: number[]
+    messages: number[],
 ): Promise<(MessageReactions | null)[]>
 
 /**
@@ -74,11 +74,7 @@ export async function getMessageReactions(
     const peers = PeersIndex.from(res)
 
     for (const update of res.updates) {
-        assertTypeIs(
-            'messages.getMessagesReactions',
-            update,
-            'updateMessageReactions',
-        )
+        assertTypeIs('messages.getMessagesReactions', update, 'updateMessageReactions')
 
         index[update.msgId] = new MessageReactions(
             this,

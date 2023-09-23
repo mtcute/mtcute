@@ -23,8 +23,7 @@ export const me: UpdateFilter<Message, { sender: User }> = (msg) =>
 /**
  * Filter messages sent by bots
  */
-export const bot: UpdateFilter<Message, { sender: User }> = (msg) =>
-    msg.sender.constructor === User && msg.sender.isBot
+export const bot: UpdateFilter<Message, { sender: User }> = (msg) => msg.sender.constructor === User && msg.sender.isBot
 
 /**
  * Filter updates by user ID(s) or username(s)
@@ -65,11 +64,7 @@ export const userId = (
             if (ctor === Message) {
                 const sender = (upd as Message).sender
 
-                return (
-                    (matchSelf && sender.isSelf) ||
-                    sender.id in index ||
-                    sender.username! in index
-                )
+                return (matchSelf && sender.isSelf) || sender.id in index || sender.username! in index
             } else if (ctor === UserStatusUpdate || ctor === UserTypingUpdate) {
                 const id = (upd as UserStatusUpdate | UserTypingUpdate).userId
 
@@ -81,28 +76,13 @@ export const userId = (
                 const peer = (upd as PollVoteUpdate).peer
                 if (peer.type !== 'user') return false
 
-                return (
-                    (matchSelf && peer.isSelf) ||
-                    peer.id in index ||
-                    peer.username! in index
-                )
+                return (matchSelf && peer.isSelf) || peer.id in index || peer.username! in index
             }
 
-            const user = (
-                upd as Exclude<
-                    typeof upd,
-                    | Message
-                    | UserStatusUpdate
-                    | UserTypingUpdate
-                    | PollVoteUpdate
-                >
-            ).user
+            const user = (upd as Exclude<typeof upd, Message | UserStatusUpdate | UserTypingUpdate | PollVoteUpdate>)
+                .user
 
-            return (
-                (matchSelf && user.isSelf) ||
-                user.id in index ||
-                user.username! in index
-            )
+            return (matchSelf && user.isSelf) || user.id in index || user.username! in index
         }
     }
 
@@ -125,15 +105,8 @@ export const userId = (
                 return peer.isSelf
             }
 
-            return (
-                upd as Exclude<
-                    typeof upd,
-                    | Message
-                    | UserStatusUpdate
-                    | UserTypingUpdate
-                    | PollVoteUpdate
-                >
-            ).user.isSelf
+            return (upd as Exclude<typeof upd, Message | UserStatusUpdate | UserTypingUpdate | PollVoteUpdate>).user
+                .isSelf
         }
     }
 
@@ -154,15 +127,8 @@ export const userId = (
             }
 
             return (
-                (
-                    upd as Exclude<
-                        typeof upd,
-                        | Message
-                        | UserStatusUpdate
-                        | UserTypingUpdate
-                        | PollVoteUpdate
-                    >
-                ).user.username === id
+                (upd as Exclude<typeof upd, Message | UserStatusUpdate | UserTypingUpdate | PollVoteUpdate>).user
+                    .username === id
             )
         }
     }
@@ -182,15 +148,7 @@ export const userId = (
         }
 
         return (
-            (
-                upd as Exclude<
-                    typeof upd,
-                    | Message
-                    | UserStatusUpdate
-                    | UserTypingUpdate
-                    | PollVoteUpdate
-                >
-            ).user.id === id
+            (upd as Exclude<typeof upd, Message | UserStatusUpdate | UserTypingUpdate | PollVoteUpdate>).user.id === id
         )
     }
 }

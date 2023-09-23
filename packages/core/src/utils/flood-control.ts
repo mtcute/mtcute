@@ -52,24 +52,15 @@ export class FloodControl {
                 limit.pos = this._events.length - limit.count
             }
 
-            while (
-                limit.pos < this._events.length &&
-                this._events[limit.pos] + limit.duration < now
-            ) {
+            while (limit.pos < this._events.length && this._events[limit.pos] + limit.duration < now) {
                 limit.pos += 1
             }
 
             if (limit.count + limit.pos < this._events.length) {
-                this._wakeupAt = Math.max(
-                    this._wakeupAt,
-                    this._events[limit.pos] + limit.duration,
-                )
+                this._wakeupAt = Math.max(this._wakeupAt, this._events[limit.pos] + limit.duration)
                 this._withoutUpdate = 0
             } else {
-                this._withoutUpdate = Math.min(
-                    this._withoutUpdate,
-                    limit.count + limit.pos - this._events.length - 1,
-                )
+                this._withoutUpdate = Math.min(this._withoutUpdate, limit.count + limit.pos - this._events.length - 1)
             }
 
             minPos = Math.min(minPos, limit.pos)

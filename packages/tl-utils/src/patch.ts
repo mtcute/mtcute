@@ -40,12 +40,8 @@ export function patchRuntimeTlSchema(
         includePrelude: true,
     })
 
-    const newReaders = evalForResult<TlReaderMap>(
-        readersCode.replace('var _=', 'return'),
-    )
-    const newWriters = evalForResult<TlWriterMap>(
-        writersCode.replace('var _=', 'return'),
-    )
+    const newReaders = evalForResult<TlReaderMap>(readersCode.replace('var _=', 'return'))
+    const newWriters = evalForResult<TlWriterMap>(writersCode.replace('var _=', 'return'))
 
     return {
         readerMap: {

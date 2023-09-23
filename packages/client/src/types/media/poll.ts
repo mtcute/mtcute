@@ -172,9 +172,7 @@ export class Poll {
     unparseSolution(parseMode?: string | null): string | null {
         if (!this.solution) return null
 
-        return this.client
-            .getParseMode(parseMode)
-            .unparse(this.solution, this.solutionEntities!)
+        return this.client.getParseMode(parseMode).unparse(this.solution, this.solutionEntities!)
     }
 
     /**

@@ -3,24 +3,13 @@ import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { ITelegramStorage } from '../storage'
 import { MtArgumentError, MtcuteError } from '../types'
-import {
-    createControllablePromise,
-    ICryptoProvider,
-    Logger,
-    sleep,
-} from '../utils'
+import { createControllablePromise, ICryptoProvider, Logger, sleep } from '../utils'
 import { assertTypeIs } from '../utils/type-assertions'
 import { ConfigManager } from './config-manager'
 import { MultiSessionConnection } from './multi-session-connection'
 import { PersistentConnectionParams } from './persistent-connection'
-import {
-    defaultReconnectionStrategy,
-    ReconnectionStrategy,
-} from './reconnection'
-import {
-    SessionConnection,
-    SessionConnectionParams,
-} from './session-connection'
+import { defaultReconnectionStrategy, ReconnectionStrategy } from './reconnection'
+import { SessionConnection, SessionConnectionParams } from './session-connection'
 import { defaultTransportFactory, TransportFactory } from './transports'
 
 export type ConnectionKind = 'main' | 'upload' | 'download' | 'downloadSmall'
@@ -45,9 +34,7 @@ export interface NetworkManagerParams {
     log: Logger
 
     apiId: number
-    initConnectionOptions?: Partial<
-        Omit<tl.RawInitConnectionRequest, 'apiId' | 'query'>
-    >
+    initConnectionOptions?: Partial<Omit<tl.RawInitConnectionRequest, 'apiId' | 'query'>>
     transport?: TransportFactory
     reconnectionStrategy?: ReconnectionStrategy<PersistentConnectionParams>
     floodSleepThreshold: number
@@ -63,17 +50,9 @@ export interface NetworkManagerParams {
     keepAliveAction: () => void
 }
 
-export type ConnectionCountDelegate = (
-    kind: ConnectionKind,
-    dcId: number,
-    isPremium: boolean
-) => number
+export type ConnectionCountDelegate = (kind: ConnectionKind, dcId: number, isPremium: boolean) => number
 
-const defaultConnectionCountDelegate: ConnectionCountDelegate = (
-    kind,
-    dcId,
-    isPremium,
-) => {
+const defaultConnectionCountDelegate: ConnectionCountDelegate = (kind, dcId, isPremium) => {
     switch (kind) {
         case 'main':
             return 1
@@ -185,33 +164,21 @@ export class DcConnectionManager {
 
     upload = new MultiSessionConnection(
         this.__baseConnectionParams(),
-        this.manager._connectionCount(
-            'upload',
-            this.dcId,
-            this.manager.params.isPremium,
-        ),
+        this.manager._connectionCount('upload', this.dcId, this.manager.params.isPremium),
         this._log,
         'UPLOAD',
     )
 
     download = new MultiSessionConnection(
         this.__baseConnectionParams(),
-        this.manager._connectionCount(
-            'download',
-            this.dcId,
-            this.manager.params.isPremium,
-        ),
+        this.manager._connectionCount('download', this.dcId, this.manager.params.isPremium),
         this._log,
         'DOWNLOAD',
     )
 
     downloadSmall = new MultiSessionConnection(
         this.__baseConnectionParams(),
-        this.manager._connectionCount(
-            'downloadSmall',
-            this.dcId,
-            this.manager.params.isPremium,
-        ),
+        this.manager._connectionCount('downloadSmall', this.dcId, this.manager.params.isPremium),
         this._log,
         'DOWNLOAD_SMALL',
     )
@@ -238,12 +205,7 @@ export class DcConnectionManager {
             mainParams.inactivityTimeout = undefined
         }
 
-        this.main = new MultiSessionConnection(
-            mainParams,
-            this._mainConnectionCount,
-            this._log,
-            'MAIN',
-        )
+        this.main = new MultiSessionConnection(mainParams, this._mainConnectionCount, this._log, 'MAIN')
 
         this._setupMulti('main')
         this._setupMulti('upload')
@@ -258,18 +220,12 @@ export class DcConnectionManager {
             if (kind !== 'main') {
                 // main connection is responsible for authorization,
                 // and keys are then sent to other connections
-                this.manager._log.warn(
-                    'got key-change from non-main connection, ignoring',
-                )
+                this.manager._log.warn('got key-change from non-main connection, ignoring')
 
                 return
             }
 
-            this.manager._log.debug(
-                'key change for dc %d from connection %d',
-                this.dcId,
-                idx,
-            )
+            this.manager._log.debug('key change for dc %d from connection %d', this.dcId, idx)
 
             // send key to other connections
             Promise.all([
@@ -285,51 +241,35 @@ export class DcConnectionManager {
                 })
                 .catch((e: Error) => this.manager.params._emitError(e))
         })
-        connection.on(
-            'tmp-key-change',
-            (idx: number, key: Buffer | null, expires: number) => {
-                if (kind !== 'main') {
-                    this.manager._log.warn(
-                        'got tmp-key-change from non-main connection, ignoring',
-                    )
+        connection.on('tmp-key-change', (idx: number, key: Buffer | null, expires: number) => {
+            if (kind !== 'main') {
+                this.manager._log.warn('got tmp-key-change from non-main connection, ignoring')
 
-                    return
-                }
+                return
+            }
 
-                this.manager._log.debug(
-                    'temp key change for dc %d from connection %d',
-                    this.dcId,
-                    idx,
-                )
+            this.manager._log.debug('temp key change for dc %d from connection %d', this.dcId, idx)
 
-                // send key to other connections
-                Promise.all([
-                    this.manager._storage.setTempAuthKeyFor(
-                        this.dcId,
-                        idx,
-                        key,
-                        expires * 1000,
-                    ),
-                    this.upload.setAuthKey(key, true),
-                    this.download.setAuthKey(key, true),
-                    this.downloadSmall.setAuthKey(key, true),
-                ])
-                    .then(() => {
-                        this.upload.notifyKeyChange()
-                        this.download.notifyKeyChange()
-                        this.downloadSmall.notifyKeyChange()
-                    })
-                    .catch((e: Error) => this.manager.params._emitError(e))
-            },
-        )
+            // send key to other connections
+            Promise.all([
+                this.manager._storage.setTempAuthKeyFor(this.dcId, idx, key, expires * 1000),
+                this.upload.setAuthKey(key, true),
+                this.download.setAuthKey(key, true),
+                this.downloadSmall.setAuthKey(key, true),
+            ])
+                .then(() => {
+                    this.upload.notifyKeyChange()
+                    this.download.notifyKeyChange()
+                    this.downloadSmall.notifyKeyChange()
+                })
+                .catch((e: Error) => this.manager.params._emitError(e))
+        })
 
         connection.on('auth-begin', () => {
             // we need to propagate auth-begin to all connections
             // to avoid them sending requests before auth is complete
             if (kind !== 'main') {
-                this.manager._log.warn(
-                    'got auth-begin from non-main connection, ignoring',
-                )
+                this.manager._log.warn('got auth-begin from non-main connection, ignoring')
 
                 return
             }
@@ -357,22 +297,14 @@ export class DcConnectionManager {
         if (isPrimary) {
             this.main.setInactivityTimeout(undefined)
         } else {
-            this.main.setInactivityTimeout(
-                this.manager.params.inactivityTimeout ?? 60_000,
-            )
+            this.main.setInactivityTimeout(this.manager.params.inactivityTimeout ?? 60_000)
         }
     }
 
     setIsPremium(isPremium: boolean): void {
-        this.upload.setCount(
-            this.manager._connectionCount('upload', this.dcId, isPremium),
-        )
-        this.download.setCount(
-            this.manager._connectionCount('download', this.dcId, isPremium),
-        )
-        this.downloadSmall.setCount(
-            this.manager._connectionCount('downloadSmall', this.dcId, isPremium),
-        )
+        this.upload.setCount(this.manager._connectionCount('upload', this.dcId, isPremium))
+        this.download.setCount(this.manager._connectionCount('download', this.dcId, isPremium))
+        this.downloadSmall.setCount(this.manager._connectionCount('downloadSmall', this.dcId, isPremium))
     }
 
     async loadKeys(): Promise<boolean> {
@@ -392,10 +324,7 @@ export class DcConnectionManager {
         if (this.manager.params.usePfs) {
             await Promise.all(
                 this.main._sessions.map(async (_, i) => {
-                    const temp = await this.manager._storage.getAuthKeyFor(
-                        this.dcId,
-                        i,
-                    )
+                    const temp = await this.manager._storage.getAuthKeyFor(this.dcId, i)
                     await this.main.setAuthKey(temp, true, i)
 
                     if (i === 0) {
@@ -429,10 +358,7 @@ export class NetworkManager {
     private _lastUpdateTime = 0
     private _updateHandler: (upd: tl.TypeUpdates) => void = () => {}
 
-    constructor(
-        readonly params: NetworkManagerParams & NetworkManagerExtraParams,
-        readonly config: ConfigManager,
-    ) {
+    constructor(readonly params: NetworkManagerParams & NetworkManagerExtraParams, readonly config: ConfigManager) {
         let deviceModel = 'mtcute on '
         let appVersion = 'unknown'
         if (typeof process !== 'undefined' && typeof require !== 'undefined') {
@@ -442,15 +368,12 @@ export class NetworkManager {
             try {
                 // for production builds
 
-                appVersion = (require('../package.json') as { version: string })
-                    .version
+                appVersion = (require('../package.json') as { version: string }).version
             } catch (e) {
                 try {
                     // for development builds (additional /src/ in path)
 
-                    appVersion = (
-                        require('../../package.json') as { version: string }
-                    ).version
+                    appVersion = (require('../../package.json') as { version: string }).version
                 } catch (e) {}
             }
         } else if (typeof navigator !== 'undefined') {
@@ -472,18 +395,14 @@ export class NetworkManager {
         }
 
         this._transportFactory = params.transport ?? defaultTransportFactory
-        this._reconnectionStrategy =
-            params.reconnectionStrategy ?? defaultReconnectionStrategy
-        this._connectionCount =
-            params.connectionCount ?? defaultConnectionCountDelegate
+        this._reconnectionStrategy = params.reconnectionStrategy ?? defaultReconnectionStrategy
+        this._connectionCount = params.connectionCount ?? defaultConnectionCountDelegate
 
         this._onConfigChanged = this._onConfigChanged.bind(this)
         config.onConfigUpdate(this._onConfigChanged)
     }
 
-    private async _findDcOptions(
-        dcId: number,
-    ): Promise<ITelegramStorage.DcOptions> {
+    private async _findDcOptions(dcId: number): Promise<ITelegramStorage.DcOptions> {
         const main = await this.config.findOption({
             dcId,
             allowIpv6: this.params.useIpv6,
@@ -633,11 +552,7 @@ export class NetworkManager {
             promise.resolve()
             delete this._pendingExports[manager.dcId]
         } catch (e) {
-            this._log.warn(
-                'failed to export auth to dc %d: %s',
-                manager.dcId,
-                e,
-            )
+            this._log.warn('failed to export auth to dc %d: %s', manager.dcId, e)
             promise.reject(e)
             throw e
         }
@@ -655,10 +570,7 @@ export class NetworkManager {
     // future-proofing. should probably remove once the implementation is stable
     // eslint-disable-next-line @typescript-eslint/require-await
     async notifyLoggedIn(auth: tl.auth.TypeAuthorization): Promise<void> {
-        if (
-            auth._ === 'auth.authorizationSignUpRequired' ||
-            auth.user._ === 'userEmpty'
-        ) {
+        if (auth._ === 'auth.authorizationSignUpRequired' || auth.user._ === 'userEmpty') {
             return
         }
 
@@ -693,10 +605,7 @@ export class NetworkManager {
         const options = await this._findDcOptions(newDc)
 
         if (!this._dcConnections.has(newDc)) {
-            this._dcConnections.set(
-                newDc,
-                new DcConnectionManager(this, newDc, options),
-            )
+            this._dcConnections.set(newDc, new DcConnectionManager(this, newDc, options))
         }
 
         await this._storage.setDefaultDcs(options)
@@ -714,8 +623,7 @@ export class NetworkManager {
             throw new MtcuteError('Not connected to any DC')
         }
 
-        const floodSleepThreshold =
-            params?.floodSleepThreshold ?? this.params.floodSleepThreshold
+        const floodSleepThreshold = params?.floodSleepThreshold ?? this.params.floodSleepThreshold
         const maxRetryCount = params?.maxRetryCount ?? this.params.maxRetryCount
 
         // do not send requests that are in flood wait
@@ -729,10 +637,7 @@ export class NetworkManager {
                 await sleep(delta)
                 this._floodWaitedRequests.delete(message._)
             } else {
-                const err = tl.RpcError.create(
-                    tl.RpcError.FLOOD,
-                    'FLOOD_WAIT_%d',
-                )
+                const err = tl.RpcError.create(tl.RpcError.FLOOD, 'FLOOD_WAIT_%d')
                 err.seconds = Math.ceil(delta / 1000)
                 throw err
             }
@@ -770,11 +675,7 @@ export class NetworkManager {
                 if (!tl.RpcError.is(e)) continue
 
                 if (!(e.code in CLIENT_ERRORS)) {
-                    this._log.warn(
-                        'Telegram is having internal issues: %d %s, retrying',
-                        e.code,
-                        e.message,
-                    )
+                    this._log.warn('Telegram is having internal issues: %d %s, retrying', e.code, e.message)
 
                     if (e.text === 'WORKER_BUSY_TOO_LONG_RETRY') {
                         // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
@@ -783,17 +684,10 @@ export class NetworkManager {
                     continue
                 }
 
-                if (
-                    e.is('FLOOD_WAIT_%d') ||
-                    e.is('SLOWMODE_WAIT_%d') ||
-                    e.is('FLOOD_TEST_PHONE_WAIT_%d')
-                ) {
+                if (e.is('FLOOD_WAIT_%d') || e.is('SLOWMODE_WAIT_%d') || e.is('FLOOD_TEST_PHONE_WAIT_%d')) {
                     if (e.text !== 'SLOWMODE_WAIT_%d') {
                         // SLOW_MODE_WAIT is chat-specific, not request-specific
-                        this._floodWaitedRequests.set(
-                            message._,
-                            Date.now() + e.seconds * 1000,
-                        )
+                        this._floodWaitedRequests.set(message._, Date.now() + e.seconds * 1000)
                     }
 
                     // In test servers, FLOOD_WAIT_0 has been observed, and sleeping for
@@ -810,11 +704,7 @@ export class NetworkManager {
                 }
 
                 if (manager === this._primaryDc) {
-                    if (
-                        e.is('PHONE_MIGRATE_%d') ||
-                        e.is('NETWORK_MIGRATE_%d') ||
-                        e.is('USER_MIGRATE_%d')
-                    ) {
+                    if (e.is('PHONE_MIGRATE_%d') || e.is('NETWORK_MIGRATE_%d') || e.is('USER_MIGRATE_%d')) {
                         this._log.info('Migrate error, new dc = %d', e.newDc)
 
                         await this.changePrimaryDc(e.newDc)
@@ -825,9 +715,7 @@ export class NetworkManager {
                     }
                 } else if (e.is('AUTH_KEY_UNREGISTERED')) {
                     // we can try re-exporting auth from the primary connection
-                    this._log.warn(
-                        'exported auth key error, trying re-exporting..',
-                    )
+                    this._log.warn('exported auth key error, trying re-exporting..')
 
                     await this._exportAuthTo(manager)
                     continue
@@ -863,11 +751,7 @@ export class NetworkManager {
 
             // guess based on the provided delegate. it is most likely correct,
             // but we should give actual values if possible
-            return this._connectionCount(
-                kind,
-                dcId ?? this._primaryDc.dcId,
-                this.params.isPremium,
-            )
+            return this._connectionCount(kind, dcId ?? this._primaryDc.dcId, this.params.isPremium)
         }
 
         return dc[kind].getPoolSize()

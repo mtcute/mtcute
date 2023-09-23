@@ -2,10 +2,7 @@ import { MaybeArray } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import {
-    isInputPeerChannel,
-    normalizeToInputChannel,
-} from '../../utils/peer-utils'
+import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**

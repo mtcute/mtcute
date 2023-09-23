@@ -23,15 +23,10 @@ export async function computePasswordHash(
     salt1: Buffer,
     salt2: Buffer,
 ): Promise<Buffer> {
-    const SH = (data: Buffer, salt: Buffer) =>
-        crypto.sha256(Buffer.concat([salt, data, salt]))
-    const PH1 = async (pwd: Buffer, salt1: Buffer, salt2: Buffer) =>
-        SH(await SH(pwd, salt1), salt2)
+    const SH = (data: Buffer, salt: Buffer) => crypto.sha256(Buffer.concat([salt, data, salt]))
+    const PH1 = async (pwd: Buffer, salt1: Buffer, salt2: Buffer) => SH(await SH(pwd, salt1), salt2)
     const PH2 = async (pwd: Buffer, salt1: Buffer, salt2: Buffer) =>
-        SH(
-            await crypto.pbkdf2(await PH1(pwd, salt1, salt2), salt1, 100000),
-            salt2,
-        )
+        SH(await crypto.pbkdf2(await PH1(pwd, salt1, salt2), salt1, 100000), salt2)
 
     return PH2(password, salt1, salt2)
 }
@@ -48,17 +43,9 @@ export async function computeNewPasswordHash(
     algo: tl.RawPasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow,
     password: string,
 ): Promise<Buffer> {
-    (algo as tl.Mutable<typeof algo>).salt1 = Buffer.concat([
-        algo.salt1,
-        randomBytes(32),
-    ])
+    (algo as tl.Mutable<typeof algo>).salt1 = Buffer.concat([algo.salt1, randomBytes(32)])
 
-    const _x = await computePasswordHash(
-        crypto,
-        Buffer.from(password),
-        algo.salt1,
-        algo.salt2,
-    )
+    const _x = await computePasswordHash(crypto, Buffer.from(password), algo.salt1, algo.salt2)
 
     const g = bigInt(algo.g)
     const p = bufferToBigInt(algo.p)
@@ -82,8 +69,7 @@ export async function computeSrpParams(
     // nice naming thx durov
     if (
         !request.currentAlgo ||
-        request.currentAlgo._ !==
-            'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow'
+        request.currentAlgo._ !== 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow'
     ) {
         throw new MtUnsupportedError(`Unknown algo ${request.currentAlgo?._}`)
     }
@@ -115,12 +101,7 @@ export async function computeSrpParams(
         // maybe, just maybe this will be a bit faster with some crypto providers
         /* k = */ crypto.sha256(Buffer.concat([algo.p, _g])),
         /* u = */ crypto.sha256(Buffer.concat([_gA, request.srpB])),
-        /* x = */ computePasswordHash(
-            crypto,
-            Buffer.from(password),
-            algo.salt1,
-            algo.salt2,
-        ),
+        /* x = */ computePasswordHash(crypto, Buffer.from(password), algo.salt1, algo.salt2),
     ])
     const k = bufferToBigInt(_k)
     const u = bufferToBigInt(_u)

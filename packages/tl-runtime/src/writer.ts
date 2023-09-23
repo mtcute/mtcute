@@ -33,10 +33,7 @@ export class TlSerializationCounter {
      * @param objectMap  Writers map
      * @param obj  Object to count bytes for
      */
-    static countNeededBytes(
-        objectMap: TlWriterMap,
-        obj: { _: string },
-    ): number {
+    static countNeededBytes(objectMap: TlWriterMap, obj: { _: string }): number {
         const cnt = new TlSerializationCounter(objectMap)
         cnt.object(obj)
 
@@ -112,8 +109,7 @@ export class TlSerializationCounter {
     }
 
     bytes(val: Buffer): void {
-        this.count +=
-            TlSerializationCounter.countBytesOverhead(val.length) + val.length
+        this.count += TlSerializationCounter.countBytesOverhead(val.length) + val.length
     }
 
     string(val: string): void {
@@ -151,11 +147,7 @@ export class TlBinaryWriter {
      * @param buffer  Buffer to write to
      * @param start  Position to start writing at
      */
-    constructor(
-        readonly objectMap: TlWriterMap | undefined,
-        buffer: Buffer,
-        start = 0,
-    ) {
+    constructor(readonly objectMap: TlWriterMap | undefined, buffer: Buffer, start = 0) {
         this.buffer = buffer
         this.pos = start
     }
@@ -166,10 +158,7 @@ export class TlBinaryWriter {
      * @param objectMap  Writers map
      * @param size  Size of the writer's buffer
      */
-    static alloc(
-        objectMap: TlWriterMap | undefined,
-        size: number,
-    ): TlBinaryWriter {
+    static alloc(objectMap: TlWriterMap | undefined, size: number): TlBinaryWriter {
         return new TlBinaryWriter(objectMap, Buffer.allocUnsafe(size))
     }
 
@@ -200,15 +189,9 @@ export class TlBinaryWriter {
      * @param obj  Object to serialize
      * @param knownSize  In case the size is known, pass it here
      */
-    static serializeObject(
-        objectMap: TlWriterMap,
-        obj: { _: string },
-        knownSize = -1,
-    ): Buffer {
+    static serializeObject(objectMap: TlWriterMap, obj: { _: string }, knownSize = -1): Buffer {
         if (knownSize === -1) {
-            knownSize =
-                objectMap._staticSize[obj._] ||
-                TlSerializationCounter.countNeededBytes(objectMap, obj)
+            knownSize = objectMap._staticSize[obj._] || TlSerializationCounter.countNeededBytes(objectMap, obj)
         }
 
         const writer = TlBinaryWriter.alloc(objectMap, knownSize)
@@ -233,10 +216,7 @@ export class TlBinaryWriter {
         this.buffer.writeInt32LE(val % TWO_PWR_32_DBL | 0, this.pos)
 
         if (val < 0) {
-            this.buffer.writeInt32LE(
-                (val / TWO_PWR_32_DBL - 1) | 0,
-                this.pos + 4,
-            )
+            this.buffer.writeInt32LE((val / TWO_PWR_32_DBL - 1) | 0, this.pos + 4)
         } else {
             this.buffer.writeInt32LE((val / TWO_PWR_32_DBL) | 0, this.pos + 4)
         }
@@ -326,11 +306,7 @@ export class TlBinaryWriter {
         fn(this, obj)
     }
 
-    vector(
-        fn: (item: unknown, bare?: boolean) => void,
-        val: unknown[],
-        bare?: boolean,
-    ): void {
+    vector(fn: (item: unknown, bare?: boolean) => void, val: unknown[], bare?: boolean): void {
         if (!bare) this.uint(0x1cb5c415)
         this.uint(val.length)
 

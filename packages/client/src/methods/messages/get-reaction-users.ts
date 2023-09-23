@@ -69,15 +69,14 @@ export async function* getReactionUsers(
     }
 
     for (;;) {
-        const res: tl.RpcCallReturn['messages.getMessageReactionsList'] =
-            await this.call({
-                _: 'messages.getMessageReactionsList',
-                peer,
-                id: messageId,
-                reaction,
-                limit: Math.min(chunkSize, total - current),
-                offset,
-            })
+        const res: tl.RpcCallReturn['messages.getMessageReactionsList'] = await this.call({
+            _: 'messages.getMessageReactionsList',
+            peer,
+            id: messageId,
+            reaction,
+            limit: Math.min(chunkSize, total - current),
+            offset,
+        })
 
         if (!res.reactions.length) break
 

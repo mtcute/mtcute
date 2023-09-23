@@ -3,13 +3,7 @@ import { randomLong } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    InputMediaLike,
-    InputPeerLike,
-    Message,
-    MtMessageNotFoundError,
-    PeersIndex,
-} from '../../types'
+import { InputMediaLike, InputPeerLike, Message, MtMessageNotFoundError, PeersIndex } from '../../types'
 import { normalizeDate, normalizeMessageId } from '../../utils/misc-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
@@ -86,11 +80,7 @@ export async function sendMediaGroup(
          * @param uploaded  Number of bytes already uploaded
          * @param total  Total file size
          */
-        progressCallback?: (
-            index: number,
-            uploaded: number,
-            total: number
-        ) => void
+        progressCallback?: (index: number, uploaded: number, total: number) => void
 
         /**
          * Whether to clear draft after sending this message.
@@ -120,27 +110,18 @@ export async function sendMediaGroup(
     let replyTo = normalizeMessageId(params.replyTo)
 
     if (params.commentTo) {
-        [peer, replyTo] = await this._getDiscussionMessage(
-            peer,
-            normalizeMessageId(params.commentTo)!,
-        )
+        [peer, replyTo] = await this._getDiscussionMessage(peer, normalizeMessageId(params.commentTo)!)
     }
 
     if (params.mustReply) {
         if (!replyTo) {
-            throw new MtArgumentError(
-                'mustReply used, but replyTo was not passed',
-            )
+            throw new MtArgumentError('mustReply used, but replyTo was not passed')
         }
 
         const msg = await this.getMessages(peer, replyTo)
 
         if (!msg) {
-            throw new MtMessageNotFoundError(
-                getMarkedPeerId(peer),
-                replyTo,
-                'to reply to',
-            )
+            throw new MtMessageNotFoundError(getMarkedPeerId(peer), replyTo, 'to reply to')
         }
     }
 
@@ -200,9 +181,7 @@ export async function sendMediaGroup(
         scheduleDate: normalizeDate(params.schedule),
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs ?
-            await this.resolvePeer(params.sendAs) :
-            undefined,
+        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined,
     })
 
     assertIsUpdatesGroup('_findMessageInUpdate', res)
@@ -212,25 +191,10 @@ export async function sendMediaGroup(
 
     const msgs = res.updates
         .filter(
-            (
-                u,
-            ): u is
-                | tl.RawUpdateNewMessage
-                | tl.RawUpdateNewChannelMessage
-                | tl.RawUpdateNewScheduledMessage =>
-                u._ === 'updateNewMessage' ||
-                u._ === 'updateNewChannelMessage' ||
-                u._ === 'updateNewScheduledMessage',
+            (u): u is tl.RawUpdateNewMessage | tl.RawUpdateNewChannelMessage | tl.RawUpdateNewScheduledMessage =>
+                u._ === 'updateNewMessage' || u._ === 'updateNewChannelMessage' || u._ === 'updateNewScheduledMessage',
         )
-        .map(
-            (u) =>
-                new Message(
-                    this,
-                    u.message,
-                    peers,
-                    u._ === 'updateNewScheduledMessage',
-                ),
-        )
+        .map((u) => new Message(this, u.message, peers, u._ === 'updateNewScheduledMessage'))
 
     this._pushConversationMessage(msgs[msgs.length - 1])
 

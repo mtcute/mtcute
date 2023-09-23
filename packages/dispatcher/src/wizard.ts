@@ -31,10 +31,10 @@ interface WizardInternalState {
  * that can be used to simplify implementing
  * step-by-step scenes.
  */
-export class WizardScene<
-    State,
-    SceneName extends string = string
-> extends Dispatcher<State & WizardInternalState, SceneName> {
+export class WizardScene<State, SceneName extends string = string> extends Dispatcher<
+    State & WizardInternalState,
+    SceneName
+> {
     private _steps = 0
 
     private _defaultState: State & WizardInternalState = {} as State & WizardInternalState
@@ -54,47 +54,36 @@ export class WizardScene<
      * Add a step to the wizard
      */
     addStep(
-        handler: (
-            msg: Message,
-            state: UpdateState<State, SceneName>
-        ) => MaybeAsync<WizardSceneAction | number>,
+        handler: (msg: Message, state: UpdateState<State, SceneName>) => MaybeAsync<WizardSceneAction | number>,
     ): void {
         const step = this._steps++
 
-        const filter = filters.state<WizardInternalState>(
-            (it) => it.$step === step,
-        )
+        const filter = filters.state<WizardInternalState>((it) => it.$step === step)
 
-        this.onNewMessage(
-            step === 0 ? filters.or(filters.stateEmpty, filter) : filter,
-            async (msg: Message, state) => {
-                const result = await handler(msg, state)
+        this.onNewMessage(step === 0 ? filters.or(filters.stateEmpty, filter) : filter, async (msg: Message, state) => {
+            const result = await handler(msg, state)
 
-                if (typeof result === 'number') {
-                    await state.merge({ $step: result }, this._defaultState)
+            if (typeof result === 'number') {
+                await state.merge({ $step: result }, this._defaultState)
 
-                    return
-                }
+                return
+            }
 
-                switch (result) {
-                    case 'next': {
-                        const next = step + 1
+            switch (result) {
+                case 'next': {
+                    const next = step + 1
 
-                        if (next === this._steps) {
-                            await state.exit()
-                        } else {
-                            await state.merge(
-                                { $step: next },
-                                this._defaultState,
-                            )
-                        }
-                        break
-                    }
-                    case 'exit':
+                    if (next === this._steps) {
                         await state.exit()
-                        break
+                    } else {
+                        await state.merge({ $step: next }, this._defaultState)
+                    }
+                    break
                 }
-            },
-        )
+                case 'exit':
+                    await state.exit()
+                    break
+            }
+        })
     }
 }

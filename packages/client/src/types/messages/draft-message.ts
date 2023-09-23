@@ -11,11 +11,7 @@ import { MessageEntity } from './message-entity'
  * A draft message
  */
 export class DraftMessage {
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.RawDraftMessage,
-        readonly _chatId: InputPeerLike,
-    ) {}
+    constructor(readonly client: TelegramClient, readonly raw: tl.RawDraftMessage, readonly _chatId: InputPeerLike) {}
 
     /**
      * Text of the draft message
@@ -93,10 +89,7 @@ export class DraftMessage {
      * @param params  Additional sending parameters
      * @link TelegramClient.sendMedia
      */
-    sendWithMedia(
-        media: InputMediaLike,
-        params?: Parameters<TelegramClient['sendMedia']>[2],
-    ): Promise<Message> {
+    sendWithMedia(media: InputMediaLike, params?: Parameters<TelegramClient['sendMedia']>[2]): Promise<Message> {
         return this.client.sendMedia(this._chatId, media, {
             clearDraft: true,
             replyTo: this.raw.replyToMsgId,

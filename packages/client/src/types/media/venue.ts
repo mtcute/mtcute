@@ -30,10 +30,7 @@ export interface VenueSource {
 export class Venue {
     readonly type = 'venue' as const
 
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.RawMessageMediaVenue,
-    ) {}
+    constructor(readonly client: TelegramClient, readonly raw: tl.RawMessageMediaVenue) {}
 
     private _location?: Location
     /**

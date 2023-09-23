@@ -10,9 +10,7 @@ export const INVITE_LINK_REGEX =
 
 // helpers to normalize result of `resolvePeer` function
 
-export function normalizeToInputPeer(
-    res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel,
-): tl.TypeInputPeer {
+export function normalizeToInputPeer(res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel): tl.TypeInputPeer {
     if (tl.isAnyInputPeer(res)) return res
 
     switch (res._) {
@@ -106,10 +104,7 @@ export function normalizeToInputChannel(
 
 export function isInputPeerUser(
     obj: tl.TypeInputPeer,
-): obj is
-    | tl.RawInputPeerUser
-    | tl.RawInputPeerUserFromMessage
-    | tl.RawInputPeerSelf {
+): obj is tl.RawInputPeerUser | tl.RawInputPeerUserFromMessage | tl.RawInputPeerSelf {
     switch (obj._) {
         case 'inputPeerUser':
         case 'inputPeerUserFromMessage':
@@ -132,9 +127,7 @@ export function isInputPeerChannel(
     return false
 }
 
-export function isInputPeerChat(
-    obj: tl.TypeInputPeer,
-): obj is tl.RawInputPeerChat {
+export function isInputPeerChat(obj: tl.TypeInputPeer): obj is tl.RawInputPeerChat {
     return obj._ === 'inputPeerChat'
 }
 
@@ -153,10 +146,7 @@ export function inputPeerToPeer(inp: tl.TypeInputPeer): tl.TypePeer {
     }
 }
 
-export function peerToInputPeer(
-    peer: tl.TypePeer,
-    accessHash = Long.ZERO,
-): tl.TypeInputPeer {
+export function peerToInputPeer(peer: tl.TypePeer, accessHash = Long.ZERO): tl.TypeInputPeer {
     switch (peer._) {
         case 'peerUser':
             return { _: 'inputPeerUser', userId: peer.userId, accessHash }

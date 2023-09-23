@@ -22,13 +22,8 @@ export type InputUniqueLocation =
  *
  * @param location  Information about file location
  */
-export function toUniqueFileId(
-    location: Omit<td.RawFullRemoteFileLocation, '_'>
-): string
-export function toUniqueFileId(
-    type: td.FileType,
-    location: InputUniqueLocation
-): string
+export function toUniqueFileId(location: Omit<td.RawFullRemoteFileLocation, '_'>): string
+export function toUniqueFileId(type: td.FileType, location: InputUniqueLocation): string
 
 export function toUniqueFileId(
     first: td.FileType | Omit<td.RawFullRemoteFileLocation, '_'>,
@@ -74,9 +69,7 @@ export function toUniqueFileId(
                 type = 5
                 break
             default:
-                throw new td.InvalidFileIdError(
-                    `Invalid file type: ${inputType}`,
-                )
+                throw new td.InvalidFileIdError(`Invalid file type: ${inputType}`)
         }
     }
 
@@ -149,10 +142,7 @@ export function toUniqueFileId(
             break
         }
         case 'web':
-            writer = TlBinaryWriter.alloc(
-                undefined,
-                Buffer.byteLength(inputLocation.url, 'utf-8') + 8,
-            )
+            writer = TlBinaryWriter.alloc(undefined, Buffer.byteLength(inputLocation.url, 'utf-8') + 8)
             writer.int(type)
             writer.string(inputLocation.url)
             break

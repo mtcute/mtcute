@@ -2,9 +2,7 @@ import { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../utils'
 
-const entityToType: Partial<
-    Record<tl.TypeMessageEntity['_'], MessageEntityType>
-> = {
+const entityToType: Partial<Record<tl.TypeMessageEntity['_'], MessageEntityType>> = {
     messageEntityBlockquote: 'blockquote',
     messageEntityBold: 'bold',
     messageEntityBotCommand: 'bot_command',
@@ -125,8 +123,7 @@ export class MessageEntity<Type extends MessageEntityType = MessageEntityType> {
             offset: obj.offset,
             length: obj.length,
             url: obj._ === 'messageEntityTextUrl' ? obj.url : undefined,
-            userId:
-                obj._ === 'messageEntityMentionName' ? obj.userId : undefined,
+            userId: obj._ === 'messageEntityMentionName' ? obj.userId : undefined,
             language: obj._ === 'messageEntityPre' ? obj.language : undefined,
             emojiId: obj._ === 'messageEntityCustomEmoji' ? obj.documentId : undefined,
         }

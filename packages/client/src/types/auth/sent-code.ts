@@ -2,18 +2,17 @@ import { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../utils'
 
-const sentCodeMap: Record<tl.auth.TypeSentCodeType['_'], SentCodeDeliveryType> =
-    {
-        'auth.sentCodeTypeApp': 'app',
-        'auth.sentCodeTypeCall': 'call',
-        'auth.sentCodeTypeFlashCall': 'flash_call',
-        'auth.sentCodeTypeSms': 'sms',
-        'auth.sentCodeTypeMissedCall': 'missed_call',
-        'auth.sentCodeTypeEmailCode': 'email',
-        'auth.sentCodeTypeSetUpEmailRequired': 'email_required',
-        'auth.sentCodeTypeFragmentSms': 'fragment',
-        'auth.sentCodeTypeFirebaseSms': 'firebase',
-    }
+const sentCodeMap: Record<tl.auth.TypeSentCodeType['_'], SentCodeDeliveryType> = {
+    'auth.sentCodeTypeApp': 'app',
+    'auth.sentCodeTypeCall': 'call',
+    'auth.sentCodeTypeFlashCall': 'flash_call',
+    'auth.sentCodeTypeSms': 'sms',
+    'auth.sentCodeTypeMissedCall': 'missed_call',
+    'auth.sentCodeTypeEmailCode': 'email',
+    'auth.sentCodeTypeSetUpEmailRequired': 'email_required',
+    'auth.sentCodeTypeFragmentSms': 'fragment',
+    'auth.sentCodeTypeFirebaseSms': 'firebase',
+}
 
 const nextCodeMap: Record<tl.auth.TypeCodeType['_'], NextCodeDeliveryType> = {
     'auth.codeTypeCall': 'call',

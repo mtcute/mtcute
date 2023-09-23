@@ -2,10 +2,7 @@ import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import {
-    normalizeToInputChannel,
-    normalizeToInputUser,
-} from '../../utils/peer-utils'
+import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
  * Edit supergroup/channel admin rights of a user.

@@ -6,10 +6,7 @@ import { TelegramClient } from '../../client'
  * @param code  Code which was sent via email
  * @internal
  */
-export async function verifyPasswordEmail(
-    this: TelegramClient,
-    code: string,
-): Promise<void> {
+export async function verifyPasswordEmail(this: TelegramClient, code: string): Promise<void> {
     await this.call({
         _: 'account.confirmPasswordEmail',
         code,

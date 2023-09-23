@@ -15,14 +15,7 @@ const COLORS = [
     '#00ffff',
     '#ff00ff',
 ]
-const TAG_COLORS = [
-    '#44ffff',
-    '#44ff44',
-    '#ffff44',
-    '#4444ff',
-    '#ff44ff',
-    '#ff4444',
-]
+const TAG_COLORS = ['#44ffff', '#44ff44', '#ffff44', '#4444ff', '#ff44ff', '#ff4444']
 
 /** @internal */
 export const _defaultLoggingHandler = (

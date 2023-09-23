@@ -3,10 +3,7 @@ import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Message, PeersIndex } from '../../types'
-import {
-    isInputPeerChannel,
-    normalizeToInputChannel,
-} from '../../utils/peer-utils'
+import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils'
 
 /**
  * Get a single message in chat by its ID
@@ -22,7 +19,7 @@ export async function getMessages(
     this: TelegramClient,
     chatId: InputPeerLike,
     messageId: number,
-    fromReply?: boolean
+    fromReply?: boolean,
 ): Promise<Message | null>
 /**
  * Get messages in chat by their IDs
@@ -41,7 +38,7 @@ export async function getMessages(
     this: TelegramClient,
     chatId: InputPeerLike,
     messageIds: number[],
-    fromReply?: boolean
+    fromReply?: boolean,
 ): Promise<(Message | null)[]>
 
 /** @internal */
@@ -78,11 +75,7 @@ export async function getMessages(
     )
 
     if (res._ === 'messages.messagesNotModified') {
-        throw new MtTypeAssertionError(
-            'getMessages',
-            '!messages.messagesNotModified',
-            res._,
-        )
+        throw new MtTypeAssertionError('getMessages', '!messages.messagesNotModified', res._)
     }
 
     const peers = PeersIndex.from(res)
@@ -95,33 +88,18 @@ export async function getMessages(
             // (channels have their own message numbering)
             switch (peer._) {
                 case 'inputPeerSelf':
-                    if (
-                        !(
-                            msg.peerId._ === 'peerUser' &&
-                            msg.peerId.userId === this._userId
-                        )
-                    ) {
+                    if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === this._userId)) {
                         return null
                     }
                     break
                 case 'inputPeerUser':
                 case 'inputPeerUserFromMessage':
-                    if (
-                        !(
-                            msg.peerId._ === 'peerUser' &&
-                            msg.peerId.userId === peer.userId
-                        )
-                    ) {
+                    if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === peer.userId)) {
                         return null
                     }
                     break
                 case 'inputPeerChat':
-                    if (
-                        !(
-                            msg.peerId._ === 'peerChat' &&
-                            msg.peerId.chatId === peer.chatId
-                        )
-                    ) {
+                    if (!(msg.peerId._ === 'peerChat' && msg.peerId.chatId === peer.chatId)) {
                         return null
                     }
                     break

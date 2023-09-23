@@ -3,17 +3,8 @@ import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    MaybeAsync,
-    MaybeDynamic,
-    SentCode,
-    TermsOfService,
-    User,
-} from '../../types'
-import {
-    normalizePhoneNumber,
-    resolveMaybeDynamic,
-} from '../../utils/misc-utils'
+import { MaybeAsync, MaybeDynamic, SentCode, TermsOfService, User } from '../../types'
+import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-utils'
 
 /**
  * Start the client in an interactive and declarative manner,
@@ -148,13 +139,7 @@ export async function start(
         // user is already authorized
 
         this.log.prefix = `[USER ${me.id}] `
-        this.log.info(
-            'Logged in as %s (ID: %s, username: %s, bot: %s)',
-            me.displayName,
-            me.id,
-            me.username,
-            me.isBot,
-        )
+        this.log.info('Logged in as %s (ID: %s, username: %s, bot: %s)', me.displayName, me.id, me.username, me.isBot)
 
         this.network.setIsPremium(me.isPremium)
 
@@ -191,14 +176,10 @@ export async function start(
             throw new MtArgumentError('You must pass `code` to use `phone`')
         }
     } else {
-        const botToken = params.botToken ?
-            await resolveMaybeDynamic(params.botToken) :
-            null
+        const botToken = params.botToken ? await resolveMaybeDynamic(params.botToken) : null
 
         if (!botToken) {
-            throw new MtArgumentError(
-                'Either bot token or phone number must be provided',
-            )
+            throw new MtArgumentError('Either bot token or phone number must be provided')
         }
 
         return await this.signInBot(botToken)
@@ -258,9 +239,7 @@ export async function start(
 
     if (has2fa) {
         if (!params.password) {
-            throw new MtArgumentError(
-                '2FA is enabled, but `password` was not provided.',
-            )
+            throw new MtArgumentError('2FA is enabled, but `password` was not provided.')
         }
 
         for (;;) {

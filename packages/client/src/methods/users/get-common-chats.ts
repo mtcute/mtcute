@@ -9,10 +9,7 @@ import { normalizeToInputUser } from '../../utils/peer-utils'
  * @throws MtInvalidPeerTypeError
  * @internal
  */
-export async function getCommonChats(
-    this: TelegramClient,
-    userId: InputPeerLike,
-): Promise<Chat[]> {
+export async function getCommonChats(this: TelegramClient, userId: InputPeerLike): Promise<Chat[]> {
     return this.call({
         _: 'messages.getCommonChats',
         userId: normalizeToInputUser(await this.resolvePeer(userId), userId),

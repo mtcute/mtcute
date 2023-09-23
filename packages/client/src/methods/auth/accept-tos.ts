@@ -8,10 +8,7 @@ import { TelegramClient } from '../../client'
  * @param tosId  TOS id
  * @internal
  */
-export async function acceptTos(
-    this: TelegramClient,
-    tosId: string,
-): Promise<boolean> {
+export async function acceptTos(this: TelegramClient, tosId: string): Promise<boolean> {
     const res = await this.call({
         _: 'help.acceptTermsOfService',
         id: {
@@ -21,11 +18,7 @@ export async function acceptTos(
     })
 
     if (!res) {
-        throw new MtTypeAssertionError(
-            'help.acceptTermsOfService',
-            'true',
-            'false',
-        )
+        throw new MtTypeAssertionError('help.acceptTermsOfService', 'true', 'false')
     }
 
     return true

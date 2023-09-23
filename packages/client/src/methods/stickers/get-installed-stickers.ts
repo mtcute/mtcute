@@ -15,9 +15,7 @@ import { StickerSet } from '../../types'
  *
  * @internal
  */
-export async function getInstalledStickers(
-    this: TelegramClient,
-): Promise<StickerSet[]> {
+export async function getInstalledStickers(this: TelegramClient): Promise<StickerSet[]> {
     const res = await this.call({
         _: 'messages.getAllStickers',
         hash: Long.ZERO,

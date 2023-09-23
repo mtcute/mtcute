@@ -32,10 +32,7 @@ export class FileLocation {
             | tl.TypeInputFileLocation
             | tl.TypeInputWebFileLocation
             | Buffer
-            | (() =>
-                  | tl.TypeInputFileLocation
-                  | tl.TypeInputWebFileLocation
-                  | Buffer),
+            | (() => tl.TypeInputFileLocation | tl.TypeInputWebFileLocation | Buffer),
         /**
          * File size in bytes, when available
          */
@@ -54,9 +51,7 @@ export class FileLocation {
      * @param params  Download parameters
      * @link TelegramClient.downloadAsIterable
      */
-    downloadIterable(
-        params?: Partial<FileDownloadParameters>,
-    ): AsyncIterableIterator<Buffer> {
+    downloadIterable(params?: Partial<FileDownloadParameters>): AsyncIterableIterator<Buffer> {
         return this.client.downloadAsIterable({
             ...params,
             location: this,
@@ -97,10 +92,7 @@ export class FileLocation {
      * @param params  File download parameters
      * @link TelegramClient.downloadToFile
      */
-    downloadToFile(
-        filename: string,
-        params?: Partial<FileDownloadParameters>,
-    ): Promise<void> {
+    downloadToFile(filename: string, params?: Partial<FileDownloadParameters>): Promise<void> {
         return this.client.downloadToFile(filename, {
             ...params,
             location: this,

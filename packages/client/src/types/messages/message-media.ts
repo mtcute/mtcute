@@ -83,11 +83,7 @@ export function _messageMediaFromTl(
             if (!peers) {
                 // should only be possible in extended media
                 // (and afaik polls can't be there)
-                throw new MtTypeAssertionError(
-                    "can't create poll without peers index",
-                    'PeersIndex',
-                    'null',
-                )
+                throw new MtTypeAssertionError("can't create poll without peers index", 'PeersIndex', 'null')
             }
 
             return new Poll(client, m.poll, peers, m.results)

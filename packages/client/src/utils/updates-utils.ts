@@ -11,11 +11,7 @@ import { tl } from '@mtcute/tl'
  * @param ptsCount  PTS count
  * @param channelId  Channel ID (bare), if applicable
  */
-export function createDummyUpdate(
-    pts: number,
-    ptsCount: number,
-    channelId = 0,
-): tl.TypeUpdates {
+export function createDummyUpdate(pts: number, ptsCount: number, channelId = 0): tl.TypeUpdates {
     return {
         _: 'updates',
         seq: 0,

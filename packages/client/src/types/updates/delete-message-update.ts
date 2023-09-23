@@ -10,9 +10,7 @@ import { makeInspectable } from '../utils'
 export class DeleteMessageUpdate {
     constructor(
         readonly client: TelegramClient,
-        readonly raw:
-            | tl.RawUpdateDeleteMessages
-            | tl.RawUpdateDeleteChannelMessages,
+        readonly raw: tl.RawUpdateDeleteMessages | tl.RawUpdateDeleteChannelMessages,
     ) {}
 
     /**
@@ -26,9 +24,7 @@ export class DeleteMessageUpdate {
      * Marked ID of the channel where the messages were deleted
      */
     get channelId(): number | null {
-        return this.raw._ === 'updateDeleteChannelMessages' ?
-            toggleChannelIdMark(this.raw.channelId) :
-            null
+        return this.raw._ === 'updateDeleteChannelMessages' ? toggleChannelIdMark(this.raw.channelId) : null
     }
 }
 

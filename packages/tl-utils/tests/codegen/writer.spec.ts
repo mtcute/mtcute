@@ -1,19 +1,13 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import {
-    generateWriterCodeForTlEntries,
-    generateWriterCodeForTlEntry,
-    parseTlToEntries,
-} from '../../src'
+import { generateWriterCodeForTlEntries, generateWriterCodeForTlEntry, parseTlToEntries } from '../../src'
 
 describe('generateWriterCodeForTlEntry', () => {
     const test = (tl: string, ...js: string[]) => {
         const entry = parseTlToEntries(tl).slice(-1)[0]
         expect(generateWriterCodeForTlEntry(entry)).eq(
-            `'${entry.name}':function(w${
-                entry.arguments.length ? ',v' : ''
-            }){w.uint(${entry.id});${js.join('')}},`,
+            `'${entry.name}':function(w${entry.arguments.length ? ',v' : ''}){w.uint(${entry.id});${js.join('')}},`,
         )
     }
 
@@ -111,8 +105,7 @@ describe('generateWriterCodeForTlEntry', () => {
 
     it('generates code for bare vectors', () => {
         test(
-            'message#0949d9dc = Message;\n' +
-                'msg_container#73f1f8dc messages:vector<%Message> = MessageContainer;',
+            'message#0949d9dc = Message;\n' + 'msg_container#73f1f8dc messages:vector<%Message> = MessageContainer;',
             "w.vector(m._bare[155834844],h(v,'messages'),1);",
         )
         test(
@@ -129,9 +122,7 @@ describe('generateWriterCodeForTlEntry', () => {
                 'future_salts#ae500895 salts:vector<future_salt> current:future_salt = FutureSalts;',
         )
 
-        expect(
-            generateWriterCodeForTlEntries(entries, { includePrelude: false }),
-        ).eq(
+        expect(generateWriterCodeForTlEntries(entries, { includePrelude: false })).eq(
             `
             var m={
                 'future_salt':function(w,v){w.uint(155834844);w.bytes(h(v,'salt'));},

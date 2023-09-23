@@ -21,9 +21,7 @@ export class SocksProxyConnectionError extends Error {
     readonly proxy: SocksProxySettings
 
     constructor(proxy: SocksProxySettings, message: string) {
-        super(
-            `Error while connecting to ${proxy.host}:${proxy.port}: ${message}`,
-        )
+        super(`Error while connecting to ${proxy.host}:${proxy.port}: ${message}`)
         this.proxy = proxy
     }
 }
@@ -77,11 +75,7 @@ function writeIpv4(ip: string, buf: Buffer, offset: number): void {
     }
 }
 
-function buildSocks4ConnectRequest(
-    ip: string,
-    port: number,
-    username = '',
-): Buffer {
+function buildSocks4ConnectRequest(ip: string, port: number, username = ''): Buffer {
     const userId = Buffer.from(username)
     const buf = Buffer.alloc(9 + userId.length)
 
@@ -117,14 +111,10 @@ function buildSocks5Auth(username: string, password: string) {
     const passwordBuf = Buffer.from(password)
 
     if (usernameBuf.length > 255) {
-        throw new MtArgumentError(
-            `Too long username (${usernameBuf.length} > 255)`,
-        )
+        throw new MtArgumentError(`Too long username (${usernameBuf.length} > 255)`)
     }
     if (passwordBuf.length > 255) {
-        throw new MtArgumentError(
-            `Too long password (${passwordBuf.length} > 255)`,
-        )
+        throw new MtArgumentError(`Too long password (${passwordBuf.length} > 255)`)
     }
 
     const buf = Buffer.alloc(3 + usernameBuf.length + passwordBuf.length)
@@ -203,11 +193,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
     constructor(proxy: SocksProxySettings) {
         super()
 
-        if (
-            proxy.version != null &&
-            proxy.version !== 4 &&
-            proxy.version !== 5
-        ) {
+        if (proxy.version != null && proxy.version !== 4 && proxy.version !== 5) {
             throw new SocksProxyConnectionError(
                 proxy,
 
@@ -232,11 +218,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
         this._state = TransportState.Connecting
         this._currentDc = dc
 
-        this._socket = connect(
-            this._proxy.port,
-            this._proxy.host,
-            this._onProxyConnected.bind(this),
-        )
+        this._socket = connect(this._proxy.port, this._proxy.host, this._onProxyConnected.bind(this))
 
         this._socket.on('error', this.handleError.bind(this))
         this._socket.on('close', this.close.bind(this))
@@ -251,54 +233,31 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                     // VER, must be 4
                     this._socket!.emit(
                         'error',
-                        new SocksProxyConnectionError(
-                            this._proxy,
-                            `Server returned version ${msg[0]}`,
-                        ),
+                        new SocksProxyConnectionError(this._proxy, `Server returned version ${msg[0]}`),
                     )
 
                     return
                 }
                 const code = msg[1]
 
-                this.log.debug(
-                    '[%s:%d] CONNECT returned code %d',
-                    this._proxy.host,
-                    this._proxy.port,
-                    code,
-                )
+                this.log.debug('[%s:%d] CONNECT returned code %d', this._proxy.host, this._proxy.port, code)
 
                 if (code === 0x5a) {
                     this._socket!.off('data', packetHandler)
-                    this._socket!.on('data', (data) =>
-                        this._packetCodec.feed(data),
-                    )
+                    this._socket!.on('data', (data) => this._packetCodec.feed(data))
                     this.handleConnect()
                 } else {
                     const msg =
-                        code in SOCKS4_ERRORS ?
-                            SOCKS4_ERRORS[code] :
-                            `Unknown error code: 0x${code.toString(16)}`
-                    this._socket!.emit(
-                        'error',
-                        new SocksProxyConnectionError(this._proxy, msg),
-                    )
+                        code in SOCKS4_ERRORS ? SOCKS4_ERRORS[code] : `Unknown error code: 0x${code.toString(16)}`
+                    this._socket!.emit('error', new SocksProxyConnectionError(this._proxy, msg))
                 }
             }
 
-            this.log.debug(
-                '[%s:%d] connected to proxy, sending CONNECT',
-                this._proxy.host,
-                this._proxy.port,
-            )
+            this.log.debug('[%s:%d] connected to proxy, sending CONNECT', this._proxy.host, this._proxy.port)
 
             try {
                 this._socket!.write(
-                    buildSocks4ConnectRequest(
-                        this._currentDc!.ipAddress,
-                        this._currentDc!.port,
-                        this._proxy.user,
-                    ),
+                    buildSocks4ConnectRequest(this._currentDc!.ipAddress, this._currentDc!.port, this._proxy.user),
                 )
             } catch (e) {
                 this._socket!.emit('error', e)
@@ -307,19 +266,11 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
             let state: 'greeting' | 'auth' | 'connect' = 'greeting'
 
             const sendConnect = () => {
-                this.log.debug(
-                    '[%s:%d] sending CONNECT',
-                    this._proxy.host,
-                    this._proxy.port,
-                )
+                this.log.debug('[%s:%d] sending CONNECT', this._proxy.host, this._proxy.port)
 
                 try {
                     this._socket!.write(
-                        buildSocks5Connect(
-                            this._currentDc!.ipAddress,
-                            this._currentDc!.port,
-                            this._currentDc!.ipv6,
-                        ),
+                        buildSocks5Connect(this._currentDc!.ipAddress, this._currentDc!.port, this._currentDc!.ipv6),
                     )
                     state = 'connect'
                 } catch (e) {
@@ -334,10 +285,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                             // VER, must be 5
                             this._socket!.emit(
                                 'error',
-                                new SocksProxyConnectionError(
-                                    this._proxy,
-                                    `Server returned version ${msg[0]}`,
-                                ),
+                                new SocksProxyConnectionError(this._proxy, `Server returned version ${msg[0]}`),
                             )
 
                             return
@@ -359,10 +307,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                                 break
                             case 0x02:
                                 // Username/password
-                                if (
-                                    !this._proxy.user ||
-                                    !this._proxy.password
-                                ) {
+                                if (!this._proxy.user || !this._proxy.password) {
                                     // should not happen
                                     this._socket!.emit(
                                         'error',
@@ -375,12 +320,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                                 }
 
                                 try {
-                                    this._socket!.write(
-                                        buildSocks5Auth(
-                                            this._proxy.user,
-                                            this._proxy.password,
-                                        ),
-                                    )
+                                    this._socket!.write(buildSocks5Auth(this._proxy.user, this._proxy.password))
                                     state = 'auth'
                                 } catch (e) {
                                     this._socket!.emit('error', e)
@@ -406,21 +346,13 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                             // VER of auth, must be 1
                             this._socket!.emit(
                                 'error',
-                                new SocksProxyConnectionError(
-                                    this._proxy,
-                                    `Server returned version ${msg[0]}`,
-                                ),
+                                new SocksProxyConnectionError(this._proxy, `Server returned version ${msg[0]}`),
                             )
 
                             return
                         }
 
-                        this.log.debug(
-                            '[%s:%d] AUTH returned code %d',
-                            this._proxy.host,
-                            this._proxy.port,
-                            msg[1],
-                        )
+                        this.log.debug('[%s:%d] AUTH returned code %d', this._proxy.host, this._proxy.port, msg[1])
 
                         if (msg[1] === 0x00) {
                             // success
@@ -428,10 +360,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                         } else {
                             this._socket!.emit(
                                 'error',
-                                new SocksProxyConnectionError(
-                                    this._proxy,
-                                    'Authentication failure',
-                                ),
+                                new SocksProxyConnectionError(this._proxy, 'Authentication failure'),
                             )
                         }
                         break
@@ -441,10 +370,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                             // VER, must be 5
                             this._socket!.emit(
                                 'error',
-                                new SocksProxyConnectionError(
-                                    this._proxy,
-                                    `Server returned version ${msg[0]}`,
-                                ),
+                                new SocksProxyConnectionError(this._proxy, `Server returned version ${msg[0]}`),
                             )
 
                             return
@@ -452,31 +378,19 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
 
                         const code = msg[1]
 
-                        this.log.debug(
-                            '[%s:%d] CONNECT returned code %d',
-                            this._proxy.host,
-                            this._proxy.port,
-                            code,
-                        )
+                        this.log.debug('[%s:%d] CONNECT returned code %d', this._proxy.host, this._proxy.port, code)
 
                         if (code === 0x00) {
                             // Request granted
                             this._socket!.off('data', packetHandler)
-                            this._socket!.on('data', (data) =>
-                                this._packetCodec.feed(data),
-                            )
+                            this._socket!.on('data', (data) => this._packetCodec.feed(data))
                             this.handleConnect()
                         } else {
                             const msg =
                                 code in SOCKS5_ERRORS ?
                                     SOCKS5_ERRORS[code] :
-                                    `Unknown error code: 0x${code.toString(
-                                        16,
-                                    )}`
-                            this._socket!.emit(
-                                'error',
-                                new SocksProxyConnectionError(this._proxy, msg),
-                            )
+                                    `Unknown error code: 0x${code.toString(16)}`
+                            this._socket!.emit('error', new SocksProxyConnectionError(this._proxy, msg))
                         }
                         break
                     }
@@ -485,18 +399,10 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
                 }
             }
 
-            this.log.debug(
-                '[%s:%d] connected to proxy, sending GREETING',
-                this._proxy.host,
-                this._proxy.port,
-            )
+            this.log.debug('[%s:%d] connected to proxy, sending GREETING', this._proxy.host, this._proxy.port)
 
             try {
-                this._socket!.write(
-                    buildSocks5Greeting(
-                        Boolean(this._proxy.user && this._proxy.password),
-                    ),
-                )
+                this._socket!.write(buildSocks5Greeting(Boolean(this._proxy.user && this._proxy.password)))
             } catch (e) {
                 this._socket!.emit('error', e)
             }

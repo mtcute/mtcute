@@ -45,10 +45,7 @@ const DEFAULT_OPTIONS: ReaderCodegenOptions = {
  * @param params  Options
  * @returns  Code as a writers map entry
  */
-export function generateReaderCodeForTlEntry(
-    entry: TlEntry,
-    params = DEFAULT_OPTIONS,
-): string {
+export function generateReaderCodeForTlEntry(entry: TlEntry, params = DEFAULT_OPTIONS): string {
     const { variableName, includeFlags } = { ...DEFAULT_OPTIONS, ...params }
 
     if (entry.id === 0) entry.id = computeConstructorIdFromEntry(entry)
@@ -94,9 +91,7 @@ export function generateReaderCodeForTlEntry(
             const bitIndex = parseInt(s[1])
 
             if (!(fieldName in flagsFields)) {
-                throw new Error(
-                    `Invalid predicate: ${predicate} - unknown field (in ${entry.name})`,
-                )
+                throw new Error(`Invalid predicate: ${predicate} - unknown field (in ${entry.name})`)
             }
             if (isNaN(bitIndex) || bitIndex < 0 || bitIndex > 32) {
                 throw new Error(`Invalid predicate: ${predicate} - invalid bit`)
@@ -132,14 +127,11 @@ export function generateReaderCodeForTlEntry(
         }
 
         let reader = `r.${type}`
-        const isBare =
-            arg.typeModifiers?.isBareType || arg.typeModifiers?.isBareUnion
+        const isBare = arg.typeModifiers?.isBareType || arg.typeModifiers?.isBareUnion
 
         if (isBare) {
             if (!arg.typeModifiers?.constructorId) {
-                throw new Error(
-                    `Cannot generate reader for ${entry.name}#${arg.name} - no constructor id referenced`,
-                )
+                throw new Error(`Cannot generate reader for ${entry.name}#${arg.name} - no constructor id referenced`)
             }
 
             reader = `${variableName}[${arg.typeModifiers.constructorId}]`
@@ -175,10 +167,7 @@ export function generateReaderCodeForTlEntry(
  * @param entries  Entries to generate reader for
  * @param params  Codegen options
  */
-export function generateReaderCodeForTlEntries(
-    entries: TlEntry[],
-    params = DEFAULT_OPTIONS,
-): string {
+export function generateReaderCodeForTlEntries(entries: TlEntry[], params = DEFAULT_OPTIONS): string {
     const { variableName, includeMethods } = { ...DEFAULT_OPTIONS, ...params }
     let ret = `var ${variableName}={\n`
 
@@ -189,20 +178,14 @@ export function generateReaderCodeForTlEntries(
     })
 
     const usedInBareVector: Record<string, 1> = {}
-    ret.replace(
-        new RegExp(`(?<=r\\.vector\\(${variableName}\\[)(\\d+)(?=])`, 'g'),
-        (_, id: string) => {
-            usedInBareVector[id] = 1
+    ret.replace(new RegExp(`(?<=r\\.vector\\(${variableName}\\[)(\\d+)(?=])`, 'g'), (_, id: string) => {
+        usedInBareVector[id] = 1
 
-            return _
-        },
-    )
+        return _
+    })
 
     for (const id of Object.keys(usedInBareVector)) {
-        ret = ret.replace(
-            new RegExp(`(?<=^${id}:function\\()r(?=\\))`, 'gm'),
-            'r=this',
-        )
+        ret = ret.replace(new RegExp(`(?<=^${id}:function\\()r(?=\\))`, 'gm'), 'r=this')
     }
 
     if (params.includeMethodResults) {
@@ -213,9 +196,7 @@ export function generateReaderCodeForTlEntries(
 
             const pre = `'${entry.name}':function(r){return `
 
-            const isVector =
-                entry.typeModifiers?.isVector ||
-                entry.typeModifiers?.isBareVector
+            const isVector = entry.typeModifiers?.isVector || entry.typeModifiers?.isBareVector
             const post = entry.typeModifiers?.isBareVector ? ',1' : ''
 
             if (entry.type in TL_PRIMITIVES) {

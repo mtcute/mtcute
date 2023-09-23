@@ -18,9 +18,7 @@ export async function resolveMaybeDynamic<T>(val: MaybeDynamic<T>): Promise<T> {
     return val instanceof Function ? await val() : await val
 }
 
-export function extractChannelIdFromUpdate(
-    upd: tl.TypeUpdate,
-): number | undefined {
+export function extractChannelIdFromUpdate(upd: tl.TypeUpdate): number | undefined {
     // holy shit
     let res = 0
 
@@ -41,17 +39,11 @@ export function extractChannelIdFromUpdate(
     return res
 }
 
-export function normalizeDate(
-    date: Date | number | undefined,
-): number | undefined {
-    return date ?
-        ~~((typeof date === 'number' ? date : date.getTime()) / 1000) :
-        undefined
+export function normalizeDate(date: Date | number | undefined): number | undefined {
+    return date ? ~~((typeof date === 'number' ? date : date.getTime()) / 1000) : undefined
 }
 
-export function normalizeMessageId(
-    msg: Message | number | undefined,
-): number | undefined {
+export function normalizeMessageId(msg: Message | number | undefined): number | undefined {
     if (!msg) return undefined
 
     return typeof msg === 'number' ? msg : msg.id

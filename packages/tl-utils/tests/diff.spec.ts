@@ -1,10 +1,7 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import {
-    generateTlEntriesDifference,
-    generateTlSchemasDifference,
-} from '../src/diff'
+import { generateTlEntriesDifference, generateTlSchemasDifference } from '../src/diff'
 import { parseTlToEntries } from '../src/parse'
 import { parseFullTlSchema } from '../src/schema'
 import { TlEntryDiff, TlSchemaDiff } from '../src/types'
@@ -69,54 +66,44 @@ describe('generateTlEntriesDifference', () => {
     })
 
     it('shows args diff', () => {
-        test(
-            [
-                'test#1 foo:int bar:int egg:flags.0?Egg = Test;',
-                'test#1 foo:Foo baz:int egg:flags.1?Egg = Test;',
-            ],
-            {
-                name: 'test',
-                arguments: {
-                    added: [
-                        {
-                            name: 'baz',
-                            type: 'int',
+        test(['test#1 foo:int bar:int egg:flags.0?Egg = Test;', 'test#1 foo:Foo baz:int egg:flags.1?Egg = Test;'], {
+            name: 'test',
+            arguments: {
+                added: [
+                    {
+                        name: 'baz',
+                        type: 'int',
+                    },
+                ],
+                removed: [
+                    {
+                        name: 'bar',
+                        type: 'int',
+                    },
+                ],
+                modified: [
+                    {
+                        name: 'foo',
+                        type: {
+                            old: 'int',
+                            new: 'Foo',
                         },
-                    ],
-                    removed: [
-                        {
-                            name: 'bar',
-                            type: 'int',
+                    },
+                    {
+                        name: 'egg',
+                        type: {
+                            old: 'flags.0?Egg',
+                            new: 'flags.1?Egg',
                         },
-                    ],
-                    modified: [
-                        {
-                            name: 'foo',
-                            type: {
-                                old: 'int',
-                                new: 'Foo',
-                            },
-                        },
-                        {
-                            name: 'egg',
-                            type: {
-                                old: 'flags.0?Egg',
-                                new: 'flags.1?Egg',
-                            },
-                        },
-                    ],
-                },
+                    },
+                ],
             },
-        )
+        })
     })
 })
 
 describe('generateTlSchemasDifference', () => {
-    const test = (
-        tl1: string[],
-        tl2: string[],
-        expected: Partial<TlSchemaDiff>,
-    ) => {
+    const test = (tl1: string[], tl2: string[], expected: Partial<TlSchemaDiff>) => {
         const a = parseFullTlSchema(parseTlToEntries(tl1.join('\n')))
         const b = parseFullTlSchema(parseTlToEntries(tl2.join('\n')))
         const res: Partial<TlSchemaDiff> = generateTlSchemasDifference(a, b)
@@ -196,204 +183,131 @@ describe('generateTlSchemasDifference', () => {
     })
 
     it('shows removed unions', () => {
-        test(
-            ['test foo:int = Test;', 'test1 = Test1;'],
-            ['test foo:Foo = Test;'],
-            {
-                unions: {
-                    removed: [
-                        {
-                            name: 'Test1',
-                            classes: [
-                                {
-                                    kind: 'class',
-                                    name: 'test1',
-                                    id: 3739166976,
-                                    type: 'Test1',
-                                    arguments: [],
-                                },
-                            ],
-                        },
-                    ],
-                    added: [],
-                    modified: [],
-                },
+        test(['test foo:int = Test;', 'test1 = Test1;'], ['test foo:Foo = Test;'], {
+            unions: {
+                removed: [
+                    {
+                        name: 'Test1',
+                        classes: [
+                            {
+                                kind: 'class',
+                                name: 'test1',
+                                id: 3739166976,
+                                type: 'Test1',
+                                arguments: [],
+                            },
+                        ],
+                    },
+                ],
+                added: [],
+                modified: [],
             },
-        )
+        })
     })
 
     it('shows added unions', () => {
-        test(
-            ['test foo:int = Test;'],
-            ['test foo:Foo = Test;', 'test1 = Test1;'],
-            {
-                unions: {
-                    added: [
-                        {
-                            name: 'Test1',
-                            classes: [
-                                {
-                                    kind: 'class',
-                                    name: 'test1',
-                                    id: 3739166976,
-                                    type: 'Test1',
-                                    arguments: [],
-                                },
-                            ],
-                        },
-                    ],
-                    removed: [],
-                    modified: [],
-                },
+        test(['test foo:int = Test;'], ['test foo:Foo = Test;', 'test1 = Test1;'], {
+            unions: {
+                added: [
+                    {
+                        name: 'Test1',
+                        classes: [
+                            {
+                                kind: 'class',
+                                name: 'test1',
+                                id: 3739166976,
+                                type: 'Test1',
+                                arguments: [],
+                            },
+                        ],
+                    },
+                ],
+                removed: [],
+                modified: [],
             },
-        )
+        })
     })
 
     it('shows modified unions', () => {
-        test(
-            ['test foo:int = Test;', 'test1 = Test;'],
-            ['test foo:Foo = Test;', 'test2 = Test;'],
-            {
-                unions: {
-                    added: [],
-                    removed: [],
-                    modified: [
-                        {
-                            name: 'Test',
-                            classes: {
-                                added: [
-                                    {
-                                        kind: 'class',
-                                        name: 'test2',
-                                        id: 3847402009,
-                                        type: 'Test',
-                                        arguments: [],
-                                    },
-                                ],
-                                removed: [
-                                    {
-                                        kind: 'class',
-                                        name: 'test1',
-                                        id: 1809692154,
-                                        type: 'Test',
-                                        arguments: [],
-                                    },
-                                ],
-                                modified: [],
-                            },
-                            methods: {
-                                added: [],
-                                removed: [],
-                                modified: [],
-                            },
-                        },
-                    ],
-                },
-            },
-        )
-
-        test(
-            ['test foo:int = Test;', 'test1 = Test;'],
-            ['test2 foo:Foo = Test;', 'test3 = Test;'],
-            {
-                unions: {
-                    added: [],
-                    removed: [],
-                    modified: [
-                        {
-                            name: 'Test',
-                            classes: {
-                                added: [
-                                    {
-                                        kind: 'class',
-                                        name: 'test2',
-                                        id: 711487159,
-                                        type: 'Test',
-                                        arguments: [
-                                            {
-                                                name: 'foo',
-                                                type: 'Foo',
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        kind: 'class',
-                                        name: 'test3',
-                                        id: 704164487,
-                                        type: 'Test',
-                                        arguments: [],
-                                    },
-                                ],
-                                removed: [
-                                    {
-                                        kind: 'class',
-                                        name: 'test',
-                                        id: 1331975629,
-                                        type: 'Test',
-                                        arguments: [
-                                            {
-                                                name: 'foo',
-                                                type: 'int',
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        kind: 'class',
-                                        name: 'test1',
-                                        id: 1809692154,
-                                        type: 'Test',
-                                        arguments: [],
-                                    },
-                                ],
-                                modified: [],
-                            },
-                            methods: {
-                                added: [],
-                                removed: [],
-                                modified: [],
-                            },
-                        },
-                    ],
-                },
-            },
-        )
-
-        test(
-            ['test = Test;', 'test1 = Test;'],
-            ['test = Test1;', 'test1 = Test1;'],
-            {
-                unions: {
-                    added: [
-                        {
-                            name: 'Test1',
-                            classes: [
+        test(['test foo:int = Test;', 'test1 = Test;'], ['test foo:Foo = Test;', 'test2 = Test;'], {
+            unions: {
+                added: [],
+                removed: [],
+                modified: [
+                    {
+                        name: 'Test',
+                        classes: {
+                            added: [
                                 {
                                     kind: 'class',
-                                    name: 'test',
-                                    id: 1997819349,
-                                    type: 'Test1',
-                                    arguments: [],
-                                },
-                                {
-                                    kind: 'class',
-                                    name: 'test1',
-                                    id: 3739166976,
-                                    type: 'Test1',
+                                    name: 'test2',
+                                    id: 3847402009,
+                                    type: 'Test',
                                     arguments: [],
                                 },
                             ],
+                            removed: [
+                                {
+                                    kind: 'class',
+                                    name: 'test1',
+                                    id: 1809692154,
+                                    type: 'Test',
+                                    arguments: [],
+                                },
+                            ],
+                            modified: [],
                         },
-                    ],
-                    removed: [
-                        {
-                            name: 'Test',
-                            classes: [
+                        methods: {
+                            added: [],
+                            removed: [],
+                            modified: [],
+                        },
+                    },
+                ],
+            },
+        })
+
+        test(['test foo:int = Test;', 'test1 = Test;'], ['test2 foo:Foo = Test;', 'test3 = Test;'], {
+            unions: {
+                added: [],
+                removed: [],
+                modified: [
+                    {
+                        name: 'Test',
+                        classes: {
+                            added: [
+                                {
+                                    kind: 'class',
+                                    name: 'test2',
+                                    id: 711487159,
+                                    type: 'Test',
+                                    arguments: [
+                                        {
+                                            name: 'foo',
+                                            type: 'Foo',
+                                        },
+                                    ],
+                                },
+                                {
+                                    kind: 'class',
+                                    name: 'test3',
+                                    id: 704164487,
+                                    type: 'Test',
+                                    arguments: [],
+                                },
+                            ],
+                            removed: [
                                 {
                                     kind: 'class',
                                     name: 'test',
-                                    id: 471282454,
+                                    id: 1331975629,
                                     type: 'Test',
-                                    arguments: [],
+                                    arguments: [
+                                        {
+                                            name: 'foo',
+                                            type: 'int',
+                                        },
+                                    ],
                                 },
                                 {
                                     kind: 'class',
@@ -403,11 +317,64 @@ describe('generateTlSchemasDifference', () => {
                                     arguments: [],
                                 },
                             ],
+                            modified: [],
                         },
-                    ],
-                    modified: [],
-                },
+                        methods: {
+                            added: [],
+                            removed: [],
+                            modified: [],
+                        },
+                    },
+                ],
             },
-        )
+        })
+
+        test(['test = Test;', 'test1 = Test;'], ['test = Test1;', 'test1 = Test1;'], {
+            unions: {
+                added: [
+                    {
+                        name: 'Test1',
+                        classes: [
+                            {
+                                kind: 'class',
+                                name: 'test',
+                                id: 1997819349,
+                                type: 'Test1',
+                                arguments: [],
+                            },
+                            {
+                                kind: 'class',
+                                name: 'test1',
+                                id: 3739166976,
+                                type: 'Test1',
+                                arguments: [],
+                            },
+                        ],
+                    },
+                ],
+                removed: [
+                    {
+                        name: 'Test',
+                        classes: [
+                            {
+                                kind: 'class',
+                                name: 'test',
+                                id: 471282454,
+                                type: 'Test',
+                                arguments: [],
+                            },
+                            {
+                                kind: 'class',
+                                name: 'test1',
+                                id: 1809692154,
+                                type: 'Test',
+                                arguments: [],
+                            },
+                        ],
+                    },
+                ],
+                modified: [],
+            },
+        })
     })
 })

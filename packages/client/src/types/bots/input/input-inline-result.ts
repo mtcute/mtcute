@@ -620,10 +620,7 @@ export namespace BotInline {
      * @param id  Inline result ID
      * @param media  Sticker
      */
-    export function sticker(
-        id: string,
-        media: string | tl.RawInputDocument,
-    ): InputInlineResultSticker {
+    export function sticker(id: string, media: string | tl.RawInputDocument): InputInlineResultSticker {
         return {
             id,
             type: 'sticker',
@@ -658,10 +655,7 @@ export namespace BotInline {
      * @param id  Inline result ID
      * @param params  Additional parameters
      */
-    export function geo(
-        id: string,
-        params: Omit<InputInlineResultGeo, 'type' | 'id'>,
-    ): InputInlineResultGeo {
+    export function geo(id: string, params: Omit<InputInlineResultGeo, 'type' | 'id'>): InputInlineResultGeo {
         const ret = params as tl.Mutable<InputInlineResultGeo>
         ret.id = id
         ret.type = 'geo'
@@ -675,10 +669,7 @@ export namespace BotInline {
      * @param id  Inline result ID
      * @param params  Venue parameters
      */
-    export function venue(
-        id: string,
-        params: Omit<InputInlineResultVenue, 'type' | 'id'>,
-    ): InputInlineResultVenue {
+    export function venue(id: string, params: Omit<InputInlineResultVenue, 'type' | 'id'>): InputInlineResultVenue {
         const ret = params as tl.Mutable<InputInlineResultVenue>
         ret.id = id
         ret.type = 'venue'
@@ -729,16 +720,8 @@ export namespace BotInline {
         results: InputInlineResult[],
         parseMode?: string | null,
     ): Promise<[boolean, tl.TypeInputBotInlineResult[]]> {
-        const normalizeThumb = (
-            obj: InputInlineResult,
-            fallback?: string,
-        ): tl.RawInputWebDocument | undefined => {
-            if (
-                obj.type !== 'voice' &&
-                obj.type !== 'audio' &&
-                obj.type !== 'sticker' &&
-                obj.type !== 'game'
-            ) {
+        const normalizeThumb = (obj: InputInlineResult, fallback?: string): tl.RawInputWebDocument | undefined => {
+            if (obj.type !== 'voice' && obj.type !== 'audio' && obj.type !== 'sticker' && obj.type !== 'game') {
                 if (!obj.thumb || typeof obj.thumb === 'string') {
                     if (!obj.thumb && !fallback) {
                         return undefined
@@ -748,10 +731,7 @@ export namespace BotInline {
                         _: 'inputWebDocument',
                         size: 0,
                         url: obj.thumb || fallback!,
-                        mimeType:
-                            obj.type === 'gif' ?
-                                obj.thumbMime ?? obj.mime ?? 'video/mp4' :
-                                'image/jpeg',
+                        mimeType: obj.type === 'gif' ? obj.thumbMime ?? obj.mime ?? 'video/mp4' : 'image/jpeg',
                         attributes: [],
                     }
                 }
@@ -773,11 +753,7 @@ export namespace BotInline {
                     let sendMessage: tl.TypeInputBotInlineMessage
 
                     if (obj.message) {
-                        sendMessage = await BotInlineMessage._convertToTl(
-                            client,
-                            obj.message,
-                            parseMode,
-                        )
+                        sendMessage = await BotInlineMessage._convertToTl(client, obj.message, parseMode)
                     } else {
                         let message = obj.title
                         const entities: tl.TypeMessageEntity[] = [
@@ -825,10 +801,7 @@ export namespace BotInline {
                                     attributes: [],
                                 } :
                                 undefined,
-                        thumb:
-                            typeof obj.thumb === 'string' ?
-                                normalizeThumb(obj) :
-                                obj.thumb,
+                        thumb: typeof obj.thumb === 'string' ? normalizeThumb(obj) : obj.thumb,
                         sendMessage,
                     })
                     continue
@@ -837,16 +810,10 @@ export namespace BotInline {
                     let sendMessage: tl.TypeInputBotInlineMessage
 
                     if (obj.message) {
-                        sendMessage = await BotInlineMessage._convertToTl(
-                            client,
-                            obj.message,
-                            parseMode,
-                        )
+                        sendMessage = await BotInlineMessage._convertToTl(client, obj.message, parseMode)
 
                         if (sendMessage._ !== 'inputBotInlineMessageGame') {
-                            throw new MtArgumentError(
-                                'game inline result must contain a game inline message',
-                            )
+                            throw new MtArgumentError('game inline result must contain a game inline message')
                         }
                     } else {
                         sendMessage = {
@@ -876,11 +843,7 @@ export namespace BotInline {
             let sendMessage: tl.TypeInputBotInlineMessage
 
             if (obj.message) {
-                sendMessage = await BotInlineMessage._convertToTl(
-                    client,
-                    obj.message,
-                    parseMode,
-                )
+                sendMessage = await BotInlineMessage._convertToTl(client, obj.message, parseMode)
             } else if (obj.type === 'venue') {
                 if (obj.latitude && obj.longitude) {
                     sendMessage = {
@@ -897,15 +860,9 @@ export namespace BotInline {
                         venueType: '',
                     }
                 } else {
-                    throw new MtArgumentError(
-                        'message or location (lat&lon) bust be supplied for venue inline result',
-                    )
+                    throw new MtArgumentError('message or location (lat&lon) bust be supplied for venue inline result')
                 }
-            } else if (
-                obj.type === 'video' &&
-                obj.isEmbed &&
-                typeof obj.media === 'string'
-            ) {
+            } else if (obj.type === 'video' && obj.isEmbed && typeof obj.media === 'string') {
                 sendMessage = {
                     _: 'inputBotInlineMessageText',
                     message: obj.media,
@@ -934,36 +891,26 @@ export namespace BotInline {
                 }
             }
 
-            let media:
-                | tl.TypeInputWebDocument
-                | tl.TypeInputDocument
-                | tl.TypeInputPhoto
-                | undefined = undefined
+            let media: tl.TypeInputWebDocument | tl.TypeInputDocument | tl.TypeInputPhoto | undefined = undefined
 
-            if (
-                obj.type !== 'geo' &&
-                obj.type !== 'venue' &&
-                obj.type !== 'contact'
-            ) {
+            if (obj.type !== 'geo' && obj.type !== 'venue' && obj.type !== 'contact') {
                 if (typeof obj.media === 'string') {
                     // file id or url
                     if (obj.media.match(/^https?:\/\//)) {
                         if (obj.type === 'sticker') {
-                            throw new MtArgumentError(
-                                'sticker inline result cannot contain a URL',
-                            )
+                            throw new MtArgumentError('sticker inline result cannot contain a URL')
                         }
 
                         let mime: string
                         if (obj.type === 'video') mime = 'video/mp4'
                         else if (obj.type === 'audio') {
                             mime = obj.mime ?? 'audio/mpeg'
-                        } else if (obj.type === 'gif') { mime = obj.mime ?? 'video/mp4' } else if (obj.type === 'voice') mime = 'audio/ogg'
+                        } else if (obj.type === 'gif') {
+                            mime = obj.mime ?? 'video/mp4'
+                        } else if (obj.type === 'voice') mime = 'audio/ogg'
                         else if (obj.type === 'file') {
                             if (!obj.mime) {
-                                throw new MtArgumentError(
-                                    'MIME type must be specified for file inline result',
-                                )
+                                throw new MtArgumentError('MIME type must be specified for file inline result')
                             }
 
                             mime = obj.mime
@@ -972,9 +919,7 @@ export namespace BotInline {
                         const attributes: tl.TypeDocumentAttribute[] = []
 
                         if (
-                            (obj.type === 'video' ||
-                                obj.type === 'gif' ||
-                                obj.type === 'photo') &&
+                            (obj.type === 'video' || obj.type === 'gif' || obj.type === 'photo') &&
                             obj.width &&
                             obj.height
                         ) {
@@ -992,17 +937,13 @@ export namespace BotInline {
                                     h: obj.height,
                                 })
                             }
-                        } else if (
-                            obj.type === 'audio' ||
-                            obj.type === 'voice'
-                        ) {
+                        } else if (obj.type === 'audio' || obj.type === 'voice') {
                             attributes.push({
                                 _: 'documentAttributeAudio',
                                 voice: obj.type === 'voice',
                                 duration: obj.duration ?? 0,
                                 title: obj.type === 'audio' ? obj.title : '',
-                                performer:
-                                    obj.type === 'audio' ? obj.performer : '',
+                                performer: obj.type === 'audio' ? obj.performer : '',
                             })
                         }
 
@@ -1037,9 +978,7 @@ export namespace BotInline {
             // but whatever.
             // ref: https://github.com/tdlib/td/blob/master/td/telegram/InlineQueriesManager.cpp
             if (obj.type === 'contact') {
-                title = obj.lastName?.length ?
-                    `${obj.firstName} ${obj.lastName}` :
-                    obj.firstName
+                title = obj.lastName?.length ? `${obj.firstName} ${obj.lastName}` : obj.firstName
             } else if (obj.type !== 'sticker') {
                 title = obj.title
             }

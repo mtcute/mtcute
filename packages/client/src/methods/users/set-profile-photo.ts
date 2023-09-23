@@ -24,10 +24,7 @@ export async function setProfilePhoto(
     previewSec?: number,
 ): Promise<Photo> {
     // try parsing media as file id or input photo
-    if (
-        tdFileId.isFileIdLike(media) ||
-        (typeof media === 'object' && tl.isAnyInputPhoto(media))
-    ) {
+    if (tdFileId.isFileIdLike(media) || (typeof media === 'object' && tl.isAnyInputPhoto(media))) {
         if (typeof media === 'string' && media.match(/^https?:\/\//)) {
             throw new MtArgumentError("Profile photo can't be set from URL.")
         }
@@ -48,10 +45,7 @@ export async function setProfilePhoto(
 
     const res = await this.call({
         _: 'photos.uploadProfilePhoto',
-        [type === 'photo' ? 'file' : 'video']: await this._normalizeInputFile(
-            media,
-            {},
-        ),
+        [type === 'photo' ? 'file' : 'video']: await this._normalizeInputFile(media, {}),
         videoStartTs: previewSec,
     })
 

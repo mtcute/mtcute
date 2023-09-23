@@ -3,17 +3,8 @@ import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    InputFileLike,
-    InputPeerLike,
-    isUploadedFile,
-    MtInvalidPeerTypeError,
-} from '../../types'
-import {
-    isInputPeerChannel,
-    isInputPeerChat,
-    normalizeToInputChannel,
-} from '../../utils/peer-utils'
+import { InputFileLike, InputPeerLike, isUploadedFile, MtInvalidPeerTypeError } from '../../types'
+import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
 
 /**
  * Set a new chat photo or video.

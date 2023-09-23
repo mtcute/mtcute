@@ -22,10 +22,7 @@ describe('mergeTlEntries', () => {
     }
 
     it('fails on conflicting kinds', () => {
-        test(
-            'test = Test;\n---functions---\ntest = Test;',
-            'basic info mismatch',
-        )
+        test('test = Test;\n---functions---\ntest = Test;', 'basic info mismatch')
     })
 
     it('fails on conflicting names', () => {
@@ -75,15 +72,9 @@ describe('mergeTlEntries', () => {
 })
 
 describe('mergeTlSchemas', () => {
-    const test = async (
-        schemas: string[][],
-        onConflict: number,
-        ...expected: string[]
-    ) => {
+    const test = async (schemas: string[][], onConflict: number, ...expected: string[]) => {
         const res = await mergeTlSchemas(
-            schemas.map((tl) =>
-                parseFullTlSchema(parseTlToEntries(tl.join('\n'))),
-            ),
+            schemas.map((tl) => parseFullTlSchema(parseTlToEntries(tl.join('\n')))),
             (opts) => opts[onConflict],
         )
 
@@ -97,11 +88,7 @@ describe('mergeTlSchemas', () => {
 
     it('merges different constructors', async () => {
         await test(
-            [
-                ['testClass = Test;'],
-                ['testClass2 = Test;'],
-                ['---functions---', 'testMethod = Test;'],
-            ],
+            [['testClass = Test;'], ['testClass2 = Test;'], ['---functions---', 'testMethod = Test;']],
             0,
             'testClass#5d60a438 = Test;',
             'testClass2#39c5c841 = Test;',
@@ -124,28 +111,16 @@ describe('mergeTlSchemas', () => {
 
     it('resolves conflict using user-provided option', async () => {
         await test(
-            [
-                ['test foo:int = Test;'],
-                ['test bar:int = Test;'],
-                ['test baz:int = Test;'],
-            ],
+            [['test foo:int = Test;'], ['test bar:int = Test;'], ['test baz:int = Test;']],
             0,
             'test#4f6455cd foo:int = Test;',
         )
         await test(
-            [
-                ['test foo:int = Test;'],
-                ['test bar:int = Test;'],
-                ['test baz:int = Test;'],
-            ],
+            [['test foo:int = Test;'], ['test bar:int = Test;'], ['test baz:int = Test;']],
             1,
             'test#3e993a74 bar:int = Test;',
         )
-        await test(
-            [['test foo:int = Test;'], [], ['test bar:int = Test;']],
-            1,
-            '',
-        )
+        await test([['test foo:int = Test;'], [], ['test bar:int = Test;']], 1, '')
     })
 
     it('merges comments', async () => {
@@ -153,10 +128,7 @@ describe('mergeTlSchemas', () => {
             [
                 ['test foo:flags.0?true = Test;'],
                 ['// test ctor', 'test bar:flags.0?true = Test;'],
-                [
-                    '// will be ignored',
-                    'test foo:flags.0?true bar:flags.0?true = Test;',
-                ],
+                ['// will be ignored', 'test foo:flags.0?true bar:flags.0?true = Test;'],
             ],
             0,
             '// @description test ctor',
@@ -168,14 +140,8 @@ describe('mergeTlSchemas', () => {
         await test(
             [
                 ['test foo:flags.0?true = Test;'],
-                [
-                    '// @description test @bar bar comment',
-                    'test bar:flags.0?true = Test;',
-                ],
-                [
-                    '// @description test @foo foo comment',
-                    'test foo:flags.0?true bar:flags.0?true = Test;',
-                ],
+                ['// @description test @bar bar comment', 'test bar:flags.0?true = Test;'],
+                ['// @description test @foo foo comment', 'test foo:flags.0?true bar:flags.0?true = Test;'],
             ],
             0,
             '// @description test',

@@ -7,11 +7,7 @@ import { describe, it } from 'mocha'
 import { TlBinaryWriter, TlSerializationCounter, TlWriterMap } from '../src'
 
 describe('TlBinaryWriter', () => {
-    const testSingleMethod = (
-        size: number,
-        fn: (w: TlBinaryWriter) => void,
-        map?: TlWriterMap,
-    ): string => {
+    const testSingleMethod = (size: number, fn: (w: TlBinaryWriter) => void, map?: TlWriterMap): string => {
         const w = TlBinaryWriter.alloc(map, size)
         fn(w)
         expect(w.pos).eq(size)
@@ -36,29 +32,15 @@ describe('TlBinaryWriter', () => {
     it('should write int53', () => {
         expect(testSingleMethod(8, (w) => w.int53(0))).eq('0000000000000000')
         expect(testSingleMethod(8, (w) => w.int53(1))).eq('0100000000000000')
-        expect(testSingleMethod(8, (w) => w.int53(67305985))).eq(
-            '0102030400000000',
-        )
-        expect(testSingleMethod(8, (w) => w.int53(281479271743489))).eq(
-            '0100010001000100',
-        )
+        expect(testSingleMethod(8, (w) => w.int53(67305985))).eq('0102030400000000')
+        expect(testSingleMethod(8, (w) => w.int53(281479271743489))).eq('0100010001000100')
         expect(testSingleMethod(8, (w) => w.int53(-1))).eq('ffffffffffffffff')
     })
 
     it('should write long', () => {
-        expect(testSingleMethod(8, (w) => w.long(Long.NEG_ONE))).eq(
-            'ffffffffffffffff',
-        )
-        expect(
-            testSingleMethod(8, (w) =>
-                w.long(Long.fromString('8671175386481439762')),
-            ),
-        ).eq('1234567812345678')
-        expect(
-            testSingleMethod(8, (w) =>
-                w.long(Long.fromString('-6700480189419895787')),
-            ),
-        ).eq('15c415b5c41c03a3')
+        expect(testSingleMethod(8, (w) => w.long(Long.NEG_ONE))).eq('ffffffffffffffff')
+        expect(testSingleMethod(8, (w) => w.long(Long.fromString('8671175386481439762')))).eq('1234567812345678')
+        expect(testSingleMethod(8, (w) => w.long(Long.fromString('-6700480189419895787')))).eq('15c415b5c41c03a3')
     })
 
     it('should write float', () => {
@@ -69,16 +51,12 @@ describe('TlBinaryWriter', () => {
 
     it('should write double', () => {
         expect(testSingleMethod(8, (w) => w.double(1))).eq('000000000000f03f')
-        expect(testSingleMethod(8, (w) => w.double(10.5))).eq(
-            '0000000000002540',
-        )
+        expect(testSingleMethod(8, (w) => w.double(10.5))).eq('0000000000002540')
         expect(testSingleMethod(8, (w) => w.double(8.8))).eq('9a99999999992140')
     })
 
     it('should write raw bytes', () => {
-        expect(
-            testSingleMethod(5, (w) => w.raw(Buffer.from([4, 3, 5, 1, 1]))),
-        ).eq('0403050101')
+        expect(testSingleMethod(5, (w) => w.raw(Buffer.from([4, 3, 5, 1, 1])))).eq('0403050101')
     })
 
     it('should write tg-encoded boolean', () => {
@@ -87,26 +65,18 @@ describe('TlBinaryWriter', () => {
     })
 
     it('should write tg-encoded bytes', () => {
-        expect(testSingleMethod(4, (w) => w.bytes(Buffer.from([1, 2, 3])))).eq(
-            '03010203',
-        )
-        expect(
-            testSingleMethod(8, (w) => w.bytes(Buffer.from([1, 2, 3, 4]))),
-        ).eq('0401020304000000')
+        expect(testSingleMethod(4, (w) => w.bytes(Buffer.from([1, 2, 3])))).eq('03010203')
+        expect(testSingleMethod(8, (w) => w.bytes(Buffer.from([1, 2, 3, 4])))).eq('0401020304000000')
 
         const random250bytes = randomBytes(250)
-        expect(testSingleMethod(252, (w) => w.bytes(random250bytes))).eq(
-            'fa' + random250bytes.toString('hex') + '00',
-        )
+        expect(testSingleMethod(252, (w) => w.bytes(random250bytes))).eq('fa' + random250bytes.toString('hex') + '00')
 
         const random1000bytes = randomBytes(1000)
         const buffer = Buffer.alloc(1004)
         buffer[0] = 254
         buffer.writeIntLE(1000, 1, 3)
         buffer.set(random1000bytes, 4)
-        expect(testSingleMethod(1004, (w) => w.bytes(random1000bytes))).eq(
-            buffer.toString('hex'),
-        )
+        expect(testSingleMethod(1004, (w) => w.bytes(random1000bytes))).eq(buffer.toString('hex'))
     })
 
     const stubObjectsMap: TlWriterMap = {
@@ -188,9 +158,7 @@ describe('TlBinaryWriter', () => {
                 },
                 stubObjectsMap,
             ),
-        ).eq(
-            '15c4b51c03000000efbeadde01000000addecefadec0adba020000003d0cbfbe15c4b51c020000000100000002000000',
-        )
+        ).eq('15c4b51c03000000efbeadde01000000addecefadec0adba020000003d0cbfbe15c4b51c020000000100000002000000')
     })
 
     describe('examples from documentation', () => {
@@ -202,14 +170,9 @@ describe('TlBinaryWriter', () => {
             const resPq = {
                 _: 'mt_resPQ',
                 nonce: Buffer.from('3E0549828CCA27E966B301A48FECE2FC', 'hex'),
-                serverNonce: Buffer.from(
-                    'A5CF4D33F4A11EA877BA4AA573907330',
-                    'hex',
-                ),
+                serverNonce: Buffer.from('A5CF4D33F4A11EA877BA4AA573907330', 'hex'),
                 pq: Buffer.from('17ED48941A08F981', 'hex'),
-                serverPublicKeyFingerprints: [
-                    Long.fromString('c3b42b026ce86b21', 16),
-                ],
+                serverPublicKeyFingerprints: [Long.fromString('c3b42b026ce86b21', 16)],
             }
 
             const map: TlWriterMap = {

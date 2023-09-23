@@ -12,9 +12,7 @@ const EMPTY_BUFFER = Buffer.alloc(0)
 type FileId = td.RawFullRemoteFileLocation
 
 function dialogPhotoToInputPeer(
-    dialog:
-        | td.RawPhotoSizeSourceDialogPhoto
-        | td.RawPhotoSizeSourceDialogPhotoLegacy,
+    dialog: td.RawPhotoSizeSourceDialogPhoto | td.RawPhotoSizeSourceDialogPhotoLegacy,
 ): tl.TypeInputPeer {
     const markedPeerId = dialog.id
     const peerType = getBasicPeerType(markedPeerId)
@@ -46,12 +44,12 @@ function dialogPhotoToInputPeer(
  *
  * @param fileId  File ID, either parsed or as a string
  */
-export function fileIdToInputWebFileLocation(
-    fileId: string | FileId,
-): tl.RawInputWebFileLocation {
+export function fileIdToInputWebFileLocation(fileId: string | FileId): tl.RawInputWebFileLocation {
     if (typeof fileId === 'string') fileId = parseFileId(fileId)
 
-    if (fileId.location._ !== 'web') { throw new td.ConversionError('inputWebFileLocation') }
+    if (fileId.location._ !== 'web') {
+        throw new td.ConversionError('inputWebFileLocation')
+    }
 
     return {
         _: 'inputWebFileLocation',
@@ -66,9 +64,7 @@ export function fileIdToInputWebFileLocation(
  *
  * @param fileId  File ID, either parsed or as a string
  */
-export function fileIdToInputFileLocation(
-    fileId: string | FileId,
-): tl.TypeInputFileLocation {
+export function fileIdToInputFileLocation(fileId: string | FileId): tl.TypeInputFileLocation {
     if (typeof fileId === 'string') fileId = parseFileId(fileId)
 
     const loc = fileId.location
@@ -81,9 +77,7 @@ export function fileIdToInputFileLocation(
             switch (loc.source._) {
                 case 'legacy':
                     if (!fileId.fileReference) {
-                        throw new td.InvalidFileIdError(
-                            'Expected legacy photo to have file reference',
-                        )
+                        throw new td.InvalidFileIdError('Expected legacy photo to have file reference')
                     }
 
                     // for some reason tdlib removed this thing altogether
@@ -100,18 +94,11 @@ export function fileIdToInputFileLocation(
                     }
                 case 'thumbnail':
                     if (!fileId.fileReference) {
-                        throw new td.InvalidFileIdError(
-                            'Expected thumbnail photo to have file reference',
-                        )
+                        throw new td.InvalidFileIdError('Expected thumbnail photo to have file reference')
                     }
 
-                    if (
-                        loc.source.fileType !== FileType.Photo &&
-                        loc.source.fileType !== FileType.Thumbnail
-                    ) {
-                        throw new td.InvalidFileIdError(
-                            'Expected a thumbnail to have a correct file type',
-                        )
+                    if (loc.source.fileType !== FileType.Photo && loc.source.fileType !== FileType.Thumbnail) {
+                        throw new td.InvalidFileIdError('Expected a thumbnail to have a correct file type')
                     }
 
                     return {
@@ -146,9 +133,7 @@ export function fileIdToInputFileLocation(
                     }
                 case 'fullLegacy':
                     if (!fileId.fileReference) {
-                        throw new td.InvalidFileIdError(
-                            'Expected legacy photo to have file reference',
-                        )
+                        throw new td.InvalidFileIdError('Expected legacy photo to have file reference')
                     }
 
                     return {
@@ -197,9 +182,7 @@ export function fileIdToInputFileLocation(
         }
         case 'common': {
             if (!fileId.fileReference) {
-                throw new td.InvalidFileIdError(
-                    'Expected common to have file reference',
-                )
+                throw new td.InvalidFileIdError('Expected common to have file reference')
             }
 
             if (fileId.type === FileType.Encrypted) {
@@ -208,10 +191,7 @@ export function fileIdToInputFileLocation(
                     id: loc.id,
                     accessHash: loc.accessHash,
                 }
-            } else if (
-                fileId.type === FileType.Secure ||
-                fileId.type === FileType.SecureRaw
-            ) {
+            } else if (fileId.type === FileType.Secure || fileId.type === FileType.SecureRaw) {
                 return {
                     _: 'inputSecureFileLocation',
                     id: loc.id,
@@ -238,9 +218,7 @@ export function fileIdToInputFileLocation(
  *
  * @param fileId  File ID, either parsed or as a string
  */
-export function fileIdToInputDocument(
-    fileId: string | FileId,
-): tl.RawInputDocument {
+export function fileIdToInputDocument(fileId: string | FileId): tl.RawInputDocument {
     if (typeof fileId === 'string') fileId = parseFileId(fileId)
 
     if (
@@ -248,7 +226,9 @@ export function fileIdToInputDocument(
         fileId.type === FileType.Secure ||
         fileId.type === FileType.SecureRaw ||
         fileId.type === FileType.Encrypted
-    ) { throw new td.ConversionError('inputDocument') }
+    ) {
+        throw new td.ConversionError('inputDocument')
+    }
 
     let fileRef = fileId.fileReference
 
@@ -257,9 +237,7 @@ export function fileIdToInputDocument(
             // older stickers' file IDs don't have file ref
             fileRef = EMPTY_BUFFER
         } else {
-            throw new td.InvalidFileIdError(
-                'Expected document to have file reference',
-            )
+            throw new td.InvalidFileIdError('Expected document to have file reference')
         }
     }
 
@@ -280,9 +258,13 @@ export function fileIdToInputDocument(
 export function fileIdToInputPhoto(fileId: string | FileId): tl.RawInputPhoto {
     if (typeof fileId === 'string') fileId = parseFileId(fileId)
 
-    if (fileId.location._ !== 'photo') { throw new td.ConversionError('inputPhoto') }
+    if (fileId.location._ !== 'photo') {
+        throw new td.ConversionError('inputPhoto')
+    }
 
-    if (!fileId.fileReference) { throw new td.InvalidFileIdError('Expected photo to have file reference') }
+    if (!fileId.fileReference) {
+        throw new td.InvalidFileIdError('Expected photo to have file reference')
+    }
 
     return {
         _: 'inputPhoto',
@@ -298,12 +280,12 @@ export function fileIdToInputPhoto(fileId: string | FileId): tl.RawInputPhoto {
  *
  * @param fileId  File ID, either parsed or as a string
  */
-export function fileIdToEncryptedFile(
-    fileId: string | FileId,
-): tl.RawInputEncryptedFile {
+export function fileIdToEncryptedFile(fileId: string | FileId): tl.RawInputEncryptedFile {
     if (typeof fileId === 'string') fileId = parseFileId(fileId)
 
-    if (fileId.location._ !== 'common' || fileId.type !== FileType.Encrypted) { throw new td.ConversionError('inputEncryptedFile') }
+    if (fileId.location._ !== 'common' || fileId.type !== FileType.Encrypted) {
+        throw new td.ConversionError('inputEncryptedFile')
+    }
 
     return {
         _: 'inputEncryptedFile',
@@ -318,15 +300,12 @@ export function fileIdToEncryptedFile(
  *
  * @param fileId  File ID, either parsed or as a string
  */
-export function fileIdToSecureFile(
-    fileId: string | FileId,
-): tl.RawInputSecureFile {
+export function fileIdToSecureFile(fileId: string | FileId): tl.RawInputSecureFile {
     if (typeof fileId === 'string') fileId = parseFileId(fileId)
 
-    if (
-        fileId.location._ !== 'common' ||
-        (fileId.type !== FileType.Secure && fileId.type !== FileType.SecureRaw)
-    ) { throw new td.ConversionError('inputSecureFile') }
+    if (fileId.location._ !== 'common' || (fileId.type !== FileType.Secure && fileId.type !== FileType.SecureRaw)) {
+        throw new td.ConversionError('inputSecureFile')
+    }
 
     return {
         _: 'inputSecureFile',

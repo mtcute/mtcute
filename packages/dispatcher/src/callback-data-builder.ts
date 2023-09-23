@@ -86,9 +86,7 @@ export class CallbackDataBuilder<T extends string> {
      *
      * @param params
      */
-    filter(
-        params: Partial<Record<T, MaybeArray<string | RegExp>>>,
-    ): UpdateFilter<
+    filter(params: Partial<Record<T, MaybeArray<string | RegExp>>>): UpdateFilter<
         CallbackQuery,
         {
             match: Record<T, string>
@@ -106,22 +104,14 @@ export class CallbackDataBuilder<T extends string> {
             const value = params[field]
 
             if (Array.isArray(value)) {
-                parts.push(
-                    `(${value
-                        .map((i) => (typeof i === 'string' ? i : i.source))
-                        .join('|')})`,
-                )
+                parts.push(`(${value.map((i) => (typeof i === 'string' ? i : i.source)).join('|')})`)
             } else {
                 // noinspection SuspiciousTypeOfGuard
-                parts.push(
-                    typeof value === 'string' ? value : (value as RegExp).source,
-                )
+                parts.push(typeof value === 'string' ? value : (value as RegExp).source)
             }
         })
 
-        const regex = new RegExp(
-            `^${this.prefix}${this.sep}${parts.join(this.sep)}$`,
-        )
+        const regex = new RegExp(`^${this.prefix}${this.sep}${parts.join(this.sep)}$`)
 
         return (query) => {
             const m = query.dataStr?.match(regex)

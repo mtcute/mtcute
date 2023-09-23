@@ -31,11 +31,7 @@ import {
     TDESKTOP_SCHEMA,
     TDLIB_SCHEMA,
 } from './constants'
-import {
-    applyDocumentation,
-    fetchDocumentation,
-    getCachedDocumentation,
-} from './documentation'
+import { applyDocumentation, fetchDocumentation, getCachedDocumentation } from './documentation'
 import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema'
 import { fetchRetry } from './utils'
 
@@ -60,9 +56,9 @@ interface Schema {
 
 async function fetchTdlibSchema(): Promise<Schema> {
     const schema = await fetchRetry(TDLIB_SCHEMA)
-    const versionHtml = await fetch(
-        'https://raw.githubusercontent.com/tdlib/td/master/td/telegram/Version.h',
-    ).then((i) => i.text())
+    const versionHtml = await fetch('https://raw.githubusercontent.com/tdlib/td/master/td/telegram/Version.h').then(
+        (i) => i.text(),
+    )
 
     const layer = versionHtml.match(/^constexpr int32 MTPROTO_LAYER = (\d+)/m)
     if (!layer) throw new Error('Layer number not available')
@@ -87,17 +83,11 @@ async function fetchTdesktopSchema(): Promise<Schema> {
     }
 }
 
-async function fetchCoreSchema(
-    domain = CORE_DOMAIN,
-    name = 'Core',
-): Promise<Schema> {
+async function fetchCoreSchema(domain = CORE_DOMAIN, name = 'Core'): Promise<Schema> {
     const html = await fetchRetry(`${domain}/schema`)
     const $ = cheerio.load(html)
     // cheerio doesn't always unescape them
-    const schema = $('.page_scheme code')
-        .text()
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
+    const schema = $('.page_scheme code').text().replace(/&lt;/g, '<').replace(/&gt;/g, '>')
 
     const layer = $('.dev_layer_select .dropdown-toggle')
         .text()
@@ -133,13 +123,8 @@ async function updateReadme(currentLayer: number) {
     )
 }
 
-async function updatePackageVersion(
-    rl: readline.Interface,
-    currentLayer: number,
-) {
-    const packageJson = JSON.parse(
-        await readFile(PACKAGE_JSON_FILE, 'utf8'),
-    ) as { version: string }
+async function updatePackageVersion(rl: readline.Interface, currentLayer: number) {
+    const packageJson = JSON.parse(await readFile(PACKAGE_JSON_FILE, 'utf8')) as { version: string }
     const version = packageJson.version
     let [major, minor] = version.split('.').map((i) => parseInt(i))
 
@@ -168,9 +153,10 @@ async function updatePackageVersion(
 async function overrideInt53(schema: TlFullSchema): Promise<void> {
     console.log('Applying int53 overrides...')
 
-    const config = JSON.parse(
-        await readFile(join(__dirname, '../data/int53-overrides.json'), 'utf8'),
-    ) as Record<string, Record<string, string[]>>
+    const config = JSON.parse(await readFile(join(__dirname, '../data/int53-overrides.json'), 'utf8')) as Record<
+        string,
+        Record<string, string[]>
+    >
 
     schema.entries.forEach((entry) => {
         const overrides: string[] | undefined = config[entry.kind][entry.name]
@@ -180,9 +166,7 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
             const arg = entry.arguments.find((it) => it.name === argName)
 
             if (!arg) {
-                console.log(
-                    `[warn] Cannot override ${entry.name}#${argName}: argument does not exist`,
-                )
+                console.log(`[warn] Cannot override ${entry.name}#${argName}: argument does not exist`)
 
                 return
             }
@@ -192,9 +176,7 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
             } else if (arg.type.toLowerCase() === 'vector<long>') {
                 arg.type = 'vector<int53>'
             } else {
-                console.log(
-                    `[warn] Cannot override ${entry.name}#${argName}: argument is not long (${arg.type})`,
-                )
+                console.log(`[warn] Cannot override ${entry.name}#${argName}: argument is not long (${arg.type})`)
             }
         })
     })
@@ -212,20 +194,13 @@ async function main() {
         {
             name: 'Custom',
             layer: 0, // handled manually
-            content: tlToFullSchema(
-                await readFile(join(__dirname, '../data/custom.tl'), 'utf8'),
-            ),
+            content: tlToFullSchema(await readFile(join(__dirname, '../data/custom.tl'), 'utf8')),
         },
     ]
 
     console.log('Available schemas:')
     schemas.forEach((schema) =>
-        console.log(
-            ' - %s (layer %d): %d entries',
-            schema.name,
-            schema.layer,
-            schema.content.entries.length,
-        ),
+        console.log(' - %s (layer %d): %d entries', schema.name, schema.layer, schema.content.entries.length),
     )
 
     const resultLayer = Math.max(...schemas.map((it) => it.layer))
@@ -253,9 +228,7 @@ async function main() {
                 chooseOptions = options
             } else {
                 // first of all, prefer entries from the latest layer
-                const fromLastSchema = options.filter(
-                    (opt) => opt.schema.layer === resultLayer,
-                )
+                const fromLastSchema = options.filter((opt) => opt.schema.layer === resultLayer)
 
                 // if there is only one schema on the latest layer, we can simply return it
                 if (fromLastSchema.length === 1) return fromLastSchema[0].entry
@@ -263,9 +236,7 @@ async function main() {
                 // there are multiple choices on the latest layer
                 // if they are all the same, it's just conflict between layers,
                 // and we can merge the ones from the latest layer
-                const mergedEntry = mergeTlEntries(
-                    fromLastSchema.map((opt) => opt.entry).filter(isPresent),
-                )
+                const mergedEntry = mergeTlEntries(fromLastSchema.map((opt) => opt.entry).filter(isPresent))
                 if (typeof mergedEntry === 'string') {
                     // merge failed, so there is in fact some conflict
                     chooseOptions = fromLastSchema
@@ -274,24 +245,14 @@ async function main() {
 
             const nonEmptyOptions = chooseOptions.filter(hasPresentKey('entry'))
 
-            console.log(
-                'Conflict detected at %s %s:',
-                nonEmptyOptions[0].entry.kind,
-                nonEmptyOptions[0].entry.name,
-            )
+            console.log('Conflict detected at %s %s:', nonEmptyOptions[0].entry.kind, nonEmptyOptions[0].entry.name)
             console.log('0. Remove')
             nonEmptyOptions.forEach((opt, idx) => {
-                console.log(
-                    `${idx + 1}. ${opt.schema.name}: ${writeTlEntryToString(
-                        opt.entry,
-                    )}`,
-                )
+                console.log(`${idx + 1}. ${opt.schema.name}: ${writeTlEntryToString(opt.entry)}`)
             })
 
             while (true) {
-                const res = parseInt(
-                    await input(rl, `[0-${nonEmptyOptions.length}] > `),
-                )
+                const res = parseInt(await input(rl, `[0-${nonEmptyOptions.length}] > `))
 
                 if (isNaN(res) || res < 0 || res > nonEmptyOptions.length) {
                     continue
@@ -304,10 +265,7 @@ async function main() {
         },
     )
 
-    console.log(
-        'Done! Final schema contains %d entries',
-        resultSchema.entries.length,
-    )
+    console.log('Done! Final schema contains %d entries', resultSchema.entries.length)
 
     let docs = await getCachedDocumentation()
 
@@ -330,11 +288,7 @@ async function main() {
     await overrideInt53(resultSchema)
 
     console.log('Writing diff to file...')
-    const oldSchema = unpackTlSchema(
-        JSON.parse(
-            await readFile(API_SCHEMA_JSON_FILE, 'utf8'),
-        ) as TlPackedSchema,
-    )
+    const oldSchema = unpackTlSchema(JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')) as TlPackedSchema)
     await writeFile(
         API_SCHEMA_DIFF_JSON_FILE,
         JSON.stringify(
@@ -348,10 +302,7 @@ async function main() {
     )
 
     console.log('Writing result to file...')
-    await writeFile(
-        API_SCHEMA_JSON_FILE,
-        JSON.stringify(packTlSchema(resultSchema, resultLayer)),
-    )
+    await writeFile(API_SCHEMA_JSON_FILE, JSON.stringify(packTlSchema(resultSchema, resultLayer)))
 
     console.log('Updating README.md...')
     await updateReadme(resultLayer)

@@ -1,8 +1,7 @@
 import { MtArgumentError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
-const ERROR_MSG =
-    'Given peer is not available in this index. This is most likely an internal library error.'
+const ERROR_MSG = 'Given peer is not available in this index. This is most likely an internal library error.'
 
 export class PeersIndex {
     readonly users: Map<number, tl.TypeUser> = new Map()
@@ -10,10 +9,7 @@ export class PeersIndex {
 
     hasMin = false
 
-    static from(obj: {
-        users?: tl.TypeUser[]
-        chats?: tl.TypeChat[]
-    }): PeersIndex {
+    static from(obj: { users?: tl.TypeUser[]; chats?: tl.TypeChat[] }): PeersIndex {
         const index = new PeersIndex()
 
         obj.users?.forEach((user) => {
@@ -30,10 +26,7 @@ export class PeersIndex {
                 (
                     chat as Exclude<
                         typeof chat,
-                        | tl.RawChatEmpty
-                        | tl.RawChat
-                        | tl.RawChatForbidden
-                        | tl.RawChannelForbidden
+                        tl.RawChatEmpty | tl.RawChat | tl.RawChatForbidden | tl.RawChannelForbidden
                     >
                 ).min
             ) {

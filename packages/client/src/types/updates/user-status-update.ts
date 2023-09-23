@@ -8,10 +8,7 @@ import { makeInspectable } from '../utils'
  * User status has changed
  */
 export class UserStatusUpdate {
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.RawUpdateUserStatus,
-    ) {}
+    constructor(readonly client: TelegramClient, readonly raw: tl.RawUpdateUserStatus) {}
 
     /**
      * ID of the user whose status has updated

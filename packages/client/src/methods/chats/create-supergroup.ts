@@ -9,11 +9,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * @param description  Description of the supergroup
  * @internal
  */
-export async function createSupergroup(
-    this: TelegramClient,
-    title: string,
-    description = '',
-): Promise<Chat> {
+export async function createSupergroup(this: TelegramClient, title: string, description = ''): Promise<Chat> {
     const res = await this.call({
         _: 'channels.createChannel',
         title,

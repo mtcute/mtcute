@@ -25,20 +25,14 @@ import {
 type ParserFunction = (
     client: TelegramClient,
     upd: tl.TypeUpdate | tl.TypeMessage,
-    peers: PeersIndex
+    peers: PeersIndex,
 ) => ParsedUpdate['data']
 type UpdateParser = [ParsedUpdate['name'], ParserFunction]
 
-const baseMessageParser: ParserFunction = (
-    client: TelegramClient,
-    upd,
-    peers,
-) =>
+const baseMessageParser: ParserFunction = (client: TelegramClient, upd, peers) =>
     new Message(
         client,
-        tl.isAnyMessage(upd) ?
-            upd :
-            (upd as { message: tl.TypeMessage }).message,
+        tl.isAnyMessage(upd) ? upd : (upd as { message: tl.TypeMessage }).message,
         peers,
         upd._ === 'updateNewScheduledMessage',
     )
@@ -53,22 +47,14 @@ const callbackQueryParser: UpdateParser = [
     'callback_query',
     (client, upd, peers) => new CallbackQuery(client, upd as any, peers),
 ]
-const userTypingParser: UpdateParser = [
-    'user_typing',
-    (client, upd) => new UserTypingUpdate(client, upd as any),
-]
+const userTypingParser: UpdateParser = ['user_typing', (client, upd) => new UserTypingUpdate(client, upd as any)]
 const deleteMessageParser: UpdateParser = [
     'delete_message',
     (client, upd) => new DeleteMessageUpdate(client, upd as any),
 ]
-const historyReadParser: UpdateParser = [
-    'history_read',
-    (client, upd) => new HistoryReadUpdate(client, upd as any),
-]
+const historyReadParser: UpdateParser = ['history_read', (client, upd) => new HistoryReadUpdate(client, upd as any)]
 
-const PARSERS: Partial<
-    Record<(tl.TypeUpdate | tl.TypeMessage)['_'], UpdateParser>
-> = {
+const PARSERS: Partial<Record<(tl.TypeUpdate | tl.TypeMessage)['_'], UpdateParser>> = {
     message: newMessageParser,
     messageEmpty: newMessageParser,
     messageService: newMessageParser,
@@ -79,29 +65,16 @@ const PARSERS: Partial<
     updateEditChannelMessage: editMessageParser,
     updateChatParticipant: chatMemberParser,
     updateChannelParticipant: chatMemberParser,
-    updateBotInlineQuery: [
-        'inline_query',
-        (client, upd, peers) => new InlineQuery(client, upd as any, peers),
-    ],
+    updateBotInlineQuery: ['inline_query', (client, upd, peers) => new InlineQuery(client, upd as any, peers)],
     updateBotInlineSend: [
         'chosen_inline_result',
-        (client, upd, peers) =>
-            new ChosenInlineResult(client, upd as any, peers),
+        (client, upd, peers) => new ChosenInlineResult(client, upd as any, peers),
     ],
     updateBotCallbackQuery: callbackQueryParser,
     updateInlineBotCallbackQuery: callbackQueryParser,
-    updateMessagePoll: [
-        'poll',
-        (client, upd, peers) => new PollUpdate(client, upd as any, peers),
-    ],
-    updateMessagePollVote: [
-        'poll_vote',
-        (client, upd, peers) => new PollVoteUpdate(client, upd as any, peers),
-    ],
-    updateUserStatus: [
-        'user_status',
-        (client, upd) => new UserStatusUpdate(client, upd as any),
-    ],
+    updateMessagePoll: ['poll', (client, upd, peers) => new PollUpdate(client, upd as any, peers)],
+    updateMessagePollVote: ['poll_vote', (client, upd, peers) => new PollVoteUpdate(client, upd as any, peers)],
+    updateUserStatus: ['user_status', (client, upd) => new UserStatusUpdate(client, upd as any)],
     updateChannelUserTyping: userTypingParser,
     updateChatUserTyping: userTypingParser,
     updateUserTyping: userTypingParser,
@@ -113,19 +86,14 @@ const PARSERS: Partial<
     updateReadChannelOutbox: historyReadParser,
     updateReadChannelDiscussionInbox: historyReadParser,
     updateReadChannelDiscussionOutbox: historyReadParser,
-    updateBotStopped: [
-        'bot_stopped',
-        (client, upd, peers) => new BotStoppedUpdate(client, upd as any, peers),
-    ],
+    updateBotStopped: ['bot_stopped', (client, upd, peers) => new BotStoppedUpdate(client, upd as any, peers)],
     updateBotChatInviteRequester: [
         'bot_chat_join_request',
-        (client, upd, peers) =>
-            new BotChatJoinRequestUpdate(client, upd as any, peers),
+        (client, upd, peers) => new BotChatJoinRequestUpdate(client, upd as any, peers),
     ],
     updatePendingJoinRequests: [
         'chat_join_request',
-        (client, upd, peers) =>
-            new ChatJoinRequestUpdate(client, upd as any, peers),
+        (client, upd, peers) => new ChatJoinRequestUpdate(client, upd as any, peers),
     ],
     updateBotPrecheckoutQuery: [
         'pre_checkout_query',

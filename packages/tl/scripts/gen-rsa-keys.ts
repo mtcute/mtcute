@@ -53,13 +53,7 @@ async function main() {
         obj[parsed.fingerprint] = parsed
     }
 
-    await writeFile(
-        OUT_JS_FILE,
-        ESM_PRELUDE +
-            "exports.default=JSON.parse('" +
-            JSON.stringify(obj) +
-            "');",
-    )
+    await writeFile(OUT_JS_FILE, ESM_PRELUDE + "exports.default=JSON.parse('" + JSON.stringify(obj) + "');")
 }
 
 main().catch(console.error)

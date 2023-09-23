@@ -11,11 +11,7 @@ import { InputPeerLike } from '../../types'
  * @param messageId  Message ID
  * @internal
  */
-export async function unpinMessage(
-    this: TelegramClient,
-    chatId: InputPeerLike,
-    messageId: number,
-): Promise<void> {
+export async function unpinMessage(this: TelegramClient, chatId: InputPeerLike, messageId: number): Promise<void> {
     const res = await this.call({
         _: 'messages.updatePinnedMessage',
         peer: await this.resolvePeer(chatId),

@@ -20,7 +20,7 @@ export interface ICryptoProvider {
         salt: Buffer,
         iterations: number,
         keylen?: number, // = 64
-        algo?: string // sha1 or sha512 (default sha512)
+        algo?: string, // sha1 or sha512 (default sha512)
     ): MaybeAsync<Buffer>
 
     hmacSha256(data: Buffer, key: Buffer): MaybeAsync<Buffer>

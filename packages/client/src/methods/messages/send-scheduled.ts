@@ -15,11 +15,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * @param id  ID of the message
  * @internal
  */
-export async function sendScheduled(
-    this: TelegramClient,
-    peer: InputPeerLike,
-    id: number
-): Promise<Message>
+export async function sendScheduled(this: TelegramClient, peer: InputPeerLike, id: number): Promise<Message>
 
 /**
  * Send previously scheduled message(s)
@@ -32,11 +28,7 @@ export async function sendScheduled(
  * @param ids  ID(s) of the messages
  * @internal
  */
-export async function sendScheduled(
-    this: TelegramClient,
-    peer: InputPeerLike,
-    ids: number[]
-): Promise<Message[]>
+export async function sendScheduled(this: TelegramClient, peer: InputPeerLike, ids: number[]): Promise<Message[]>
 
 /** @internal */
 export async function sendScheduled(

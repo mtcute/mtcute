@@ -18,18 +18,12 @@ export async function _normalizeCommandScope(
             const peer = await this.resolvePeer(scope.peer)
 
             return {
-                _:
-                    scope.type === 'peer' ?
-                        'botCommandScopePeer' :
-                        'botCommandScopePeerAdmins',
+                _: scope.type === 'peer' ? 'botCommandScopePeer' : 'botCommandScopePeerAdmins',
                 peer,
             }
         }
         case 'member': {
-            const user = normalizeToInputUser(
-                await this.resolvePeer(scope.user),
-                scope.user,
-            )
+            const user = normalizeToInputUser(await this.resolvePeer(scope.user), scope.user)
             const chat = await this.resolvePeer(scope.chat)
 
             return {

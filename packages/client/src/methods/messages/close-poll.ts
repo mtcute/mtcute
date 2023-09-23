@@ -17,11 +17,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * @param message  Message ID where this poll was found
  * @internal
  */
-export async function closePoll(
-    this: TelegramClient,
-    chatId: InputPeerLike,
-    message: number,
-): Promise<Poll> {
+export async function closePoll(this: TelegramClient, chatId: InputPeerLike, message: number): Promise<Poll> {
     const res = await this.call({
         _: 'messages.editMessage',
         peer: await this.resolvePeer(chatId),
@@ -43,18 +39,10 @@ export async function closePoll(
     this._handleUpdate(res, true)
 
     const upd = res.updates[0]
-    assertTypeIs(
-        'messages.editMessage (@ .updates[0])',
-        upd,
-        'updateMessagePoll',
-    )
+    assertTypeIs('messages.editMessage (@ .updates[0])', upd, 'updateMessagePoll')
 
     if (!upd.poll) {
-        throw new MtTypeAssertionError(
-            'messages.editMessage (@ .updates[0].poll)',
-            'poll',
-            'undefined',
-        )
+        throw new MtTypeAssertionError('messages.editMessage (@ .updates[0].poll)', 'poll', 'undefined')
     }
 
     const peers = PeersIndex.from(res)

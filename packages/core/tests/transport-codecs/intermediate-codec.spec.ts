@@ -5,9 +5,7 @@ import { IntermediatePacketCodec, TransportError } from '../../src'
 
 describe('IntermediatePacketCodec', () => {
     it('should return correct tag', () => {
-        expect(new IntermediatePacketCodec().tag().toString('hex')).eq(
-            'eeeeeeee',
-        )
+        expect(new IntermediatePacketCodec().tag().toString('hex')).eq('eeeeeeee')
     })
 
     it('should correctly parse immediate framing', (done) => {

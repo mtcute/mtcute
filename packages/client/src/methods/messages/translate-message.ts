@@ -28,10 +28,5 @@ export async function translateMessage(
         toLang: toLanguage,
     })
 
-    return [
-        res.result[0].text,
-        res.result[0].entities
-            .map((it) => MessageEntity._parse(it))
-            .filter(isPresent),
-    ]
+    return [res.result[0].text, res.result[0].entities.map((it) => MessageEntity._parse(it)).filter(isPresent)]
 }

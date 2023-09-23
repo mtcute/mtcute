@@ -1,10 +1,5 @@
 import { tl } from '@mtcute/tl'
-import {
-    TlBinaryReader,
-    TlBinaryWriter,
-    TlReaderMap,
-    TlWriterMap,
-} from '@mtcute/tl-runtime'
+import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { ITelegramStorage } from '../storage'
 import { MtArgumentError } from '../types'
@@ -18,18 +13,13 @@ export interface StringSessionData {
     authKey: Buffer
 }
 
-export function writeStringSession(
-    writerMap: TlWriterMap,
-    data: StringSessionData,
-): string {
+export function writeStringSession(writerMap: TlWriterMap, data: StringSessionData): string {
     const writer = TlBinaryWriter.alloc(writerMap, 512)
 
     const version = data.version
 
     if (version !== 1 && version !== 2) {
-        throw new MtArgumentError(
-            `Unsupported string session version: ${version}`,
-        )
+        throw new MtArgumentError(`Unsupported string session version: ${version}`)
     }
 
     let flags = 0
@@ -63,10 +53,7 @@ export function writeStringSession(
     return encodeUrlSafeBase64(writer.result())
 }
 
-export function readStringSession(
-    readerMap: TlReaderMap,
-    data: string,
-): StringSessionData {
+export function readStringSession(readerMap: TlReaderMap, data: string): StringSessionData {
     const buf = parseUrlSafeBase64(data)
 
     const version = buf[0]
@@ -83,14 +70,10 @@ export function readStringSession(
     const hasMedia = version >= 2 && Boolean(flags & 4)
 
     const primaryDc = reader.object() as tl.TypeDcOption
-    const primaryMediaDc = hasMedia ?
-        (reader.object() as tl.TypeDcOption) :
-        primaryDc
+    const primaryMediaDc = hasMedia ? (reader.object() as tl.TypeDcOption) : primaryDc
 
     if (primaryDc._ !== 'dcOption') {
-        throw new MtArgumentError(
-            `Invalid session string (dc._ = ${primaryDc._})`,
-        )
+        throw new MtArgumentError(`Invalid session string (dc._ = ${primaryDc._})`)
     }
 
     let self: ITelegramStorage.SelfInfo | null = null

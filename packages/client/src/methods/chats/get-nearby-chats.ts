@@ -13,11 +13,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * @param longitude  Longitude of the location
  * @internal
  */
-export async function getNearbyChats(
-    this: TelegramClient,
-    latitude: number,
-    longitude: number,
-): Promise<Chat[]> {
+export async function getNearbyChats(this: TelegramClient, latitude: number, longitude: number): Promise<Chat[]> {
     const res = await this.call({
         _: 'contacts.getLocated',
         geoPoint: {
@@ -32,11 +28,7 @@ export async function getNearbyChats(
 
     if (!res.updates.length) return []
 
-    assertTypeIs(
-        'contacts.getLocated (@ .updates[0])',
-        res.updates[0],
-        'updatePeerLocated',
-    )
+    assertTypeIs('contacts.getLocated (@ .updates[0])', res.updates[0], 'updatePeerLocated')
 
     const chats = res.chats.map((it) => new Chat(this, it))
 

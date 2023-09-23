@@ -1,12 +1,5 @@
 import { computeConstructorIdFromEntry } from './ctor-id'
-import {
-    TlArgument,
-    TlArgumentDiff,
-    TlEntry,
-    TlEntryDiff,
-    TlFullSchema,
-    TlSchemaDiff,
-} from './types'
+import { TlArgument, TlArgumentDiff, TlEntry, TlEntryDiff, TlFullSchema, TlSchemaDiff } from './types'
 import { stringifyArgumentType } from './utils'
 
 /**
@@ -15,10 +8,7 @@ import { stringifyArgumentType } from './utils'
  * @param a  Entry A (field `old` in diff)
  * @param b  Entry B (field `new` in diff)
  */
-export function generateTlEntriesDifference(
-    a: TlEntry,
-    b: TlEntry,
-): TlEntryDiff {
+export function generateTlEntriesDifference(a: TlEntry, b: TlEntry): TlEntryDiff {
     if (a.kind !== b.kind || a.name !== b.name) {
         throw new Error('Incompatible entries')
     }
@@ -51,9 +41,7 @@ export function generateTlEntriesDifference(
 
     if (
         !a.generics !== !b.generics ||
-        (a.generics &&
-            b.generics &&
-            JSON.stringify(a.generics) !== JSON.stringify(b.generics))
+        (a.generics && b.generics && JSON.stringify(a.generics) !== JSON.stringify(b.generics))
     ) {
         diff.generics = {
             old: a.generics,
@@ -91,10 +79,7 @@ export function generateTlEntriesDifference(
         }
 
         const argStr = stringifyArgumentType(arg.type, arg.typeModifiers)
-        const oldArgStr = stringifyArgumentType(
-            oldArg.type,
-            oldArg.typeModifiers,
-        )
+        const oldArgStr = stringifyArgumentType(oldArg.type, oldArg.typeModifiers)
 
         if (argStr !== oldArgStr) {
             diff.type = {
@@ -121,11 +106,7 @@ export function generateTlEntriesDifference(
         }
     })
 
-    if (
-        argsDiff.added.length ||
-        argsDiff.removed.length ||
-        argsDiff.modified.length
-    ) {
+    if (argsDiff.added.length || argsDiff.removed.length || argsDiff.modified.length) {
         diff.arguments = argsDiff
     }
 
@@ -138,10 +119,7 @@ export function generateTlEntriesDifference(
  * @param a  Entry A (field `old` in diff)
  * @param b  Entry B (field `new` in diff)
  */
-export function generateTlSchemasDifference(
-    a: TlFullSchema,
-    b: TlFullSchema,
-): TlSchemaDiff {
+export function generateTlSchemasDifference(a: TlFullSchema, b: TlFullSchema): TlSchemaDiff {
     // schemas already contain indexes, so we don't need to make our own
 
     const diff: TlSchemaDiff = {
@@ -162,10 +140,7 @@ export function generateTlSchemasDifference(
         },
     }
 
-    const unionDiffIndex: Record<
-        string,
-        TlSchemaDiff['unions']['modified'][number]
-    > = {}
+    const unionDiffIndex: Record<string, TlSchemaDiff['unions']['modified'][number]> = {}
     const unionDiffIndex2: Record<string, 1> = {}
 
     a.entries.forEach((entry) => {

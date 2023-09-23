@@ -12,10 +12,7 @@ import { parseDocument } from '../../types/media/document-utils'
  * @param ids  IDs of the stickers (as defined in {@link MessageEntity.emojiId})
  * @internal
  */
-export async function getCustomEmojis(
-    this: TelegramClient,
-    ids: tl.Long[],
-): Promise<Sticker[]> {
+export async function getCustomEmojis(this: TelegramClient, ids: tl.Long[]): Promise<Sticker[]> {
     const res = await this.call({
         _: 'messages.getCustomEmojiDocuments',
         documentId: ids,
@@ -27,11 +24,7 @@ export async function getCustomEmojis(
         const doc = parseDocument(this, it)
 
         if (doc.type !== 'sticker') {
-            throw new MtTypeAssertionError(
-                'getCustomEmojis',
-                'sticker',
-                doc.type,
-            )
+            throw new MtTypeAssertionError('getCustomEmojis', 'sticker', doc.type)
         }
 
         return doc

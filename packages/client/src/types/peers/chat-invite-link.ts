@@ -38,17 +38,9 @@ export interface ChatInviteLinkJoinedMember {
 export class ChatInviteLink {
     raw: tl.RawChatInviteExported
 
-    constructor(
-        readonly client: TelegramClient,
-        raw: tl.TypeExportedChatInvite,
-        readonly _peers?: PeersIndex,
-    ) {
+    constructor(readonly client: TelegramClient, raw: tl.TypeExportedChatInvite, readonly _peers?: PeersIndex) {
         if (raw._ === 'chatInvitePublicJoinRequests') {
-            throw new MtTypeAssertionError(
-                'ChatInviteLink',
-                'chatInviteExported',
-                raw._,
-            )
+            throw new MtTypeAssertionError('ChatInviteLink', 'chatInviteExported', raw._)
         }
         this.raw = raw
     }
@@ -81,10 +73,7 @@ export class ChatInviteLink {
     get creator(): User | null {
         if (!this._peers) return null
 
-        return (this._creator ??= new User(
-            this.client,
-            this._peers.user(this.raw.adminId),
-        ))
+        return (this._creator ??= new User(this.client, this._peers.user(this.raw.adminId)))
     }
 
     /**

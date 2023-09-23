@@ -18,10 +18,7 @@ export async function setChatUsername(
 ): Promise<void> {
     await this.call({
         _: 'channels.updateUsername',
-        channel: normalizeToInputChannel(
-            await this.resolvePeer(chatId),
-            chatId,
-        ),
+        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
         username: username || '',
     })
 }

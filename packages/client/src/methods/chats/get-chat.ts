@@ -21,10 +21,7 @@ import {
  *   Use {@link getChatPreview} instead.
  * @internal
  */
-export async function getChat(
-    this: TelegramClient,
-    chatId: InputPeerLike,
-): Promise<Chat> {
+export async function getChat(this: TelegramClient, chatId: InputPeerLike): Promise<Chat> {
     if (typeof chatId === 'string') {
         const m = chatId.match(INVITE_LINK_REGEX)
 
@@ -35,9 +32,7 @@ export async function getChat(
             })
 
             if (res._ === 'chatInvite') {
-                throw new MtArgumentError(
-                    `You haven't joined ${JSON.stringify(res.title)}`,
-                )
+                throw new MtArgumentError(`You haven't joined ${JSON.stringify(res.title)}`)
             }
 
             return new Chat(this, res.chat)

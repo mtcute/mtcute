@@ -61,15 +61,11 @@ export class JsonFileStorage extends JsonMemoryStorage {
         this._cleanup = params?.cleanup ?? Boolean(exitHook)
 
         if (this._cleanup && !exitHook) {
-            throw new MtUnsupportedError(
-                'Cleanup on exit is supported through `exit-hook` library, install it first!',
-            )
+            throw new MtUnsupportedError('Cleanup on exit is supported through `exit-hook` library, install it first!')
         }
 
         if (this._cleanup) {
-            this._unsubscribe = exitHook!.default(
-                this._onProcessExit.bind(this),
-            )
+            this._unsubscribe = exitHook!.default(this._onProcessExit.bind(this))
         }
     }
 
@@ -77,9 +73,7 @@ export class JsonFileStorage extends JsonMemoryStorage {
         try {
             this._loadJson(
                 await new Promise((res, rej) =>
-                    fs!.readFile(this._filename, 'utf-8', (err, data) =>
-                        err ? rej(err) : res(data),
-                    ),
+                    fs!.readFile(this._filename, 'utf-8', (err, data) => (err ? rej(err) : res(data))),
                 ),
             )
         } catch (e) {}
@@ -87,23 +81,15 @@ export class JsonFileStorage extends JsonMemoryStorage {
 
     save(): Promise<void> {
         return new Promise((resolve, reject) => {
-            fs!.writeFile(
-                this._safe ? this._filename + '.tmp' : this._filename,
-                this._saveJson(),
-                (err) => {
-                    if (err) reject(err)
-                    else if (this._safe) {
-                        fs!.rename(
-                            this._filename + '.tmp',
-                            this._filename,
-                            (err) => {
-                                if (err && err.code !== 'ENOENT') reject(err)
-                                else resolve()
-                            },
-                        )
-                    } else resolve()
-                },
-            )
+            fs!.writeFile(this._safe ? this._filename + '.tmp' : this._filename, this._saveJson(), (err) => {
+                if (err) reject(err)
+                else if (this._safe) {
+                    fs!.rename(this._filename + '.tmp', this._filename, (err) => {
+                        if (err && err.code !== 'ENOENT') reject(err)
+                        else resolve()
+                    })
+                } else resolve()
+            })
         })
     }
 

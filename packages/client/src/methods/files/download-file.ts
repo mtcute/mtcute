@@ -16,21 +16,12 @@ try {
  * @param params  File download parameters
  * @internal
  */
-export function downloadToFile(
-    this: TelegramClient,
-    filename: string,
-    params: FileDownloadParameters,
-): Promise<void> {
+export function downloadToFile(this: TelegramClient, filename: string, params: FileDownloadParameters): Promise<void> {
     if (!fs) {
-        throw new MtUnsupportedError(
-            'Downloading to file is only supported in NodeJS',
-        )
+        throw new MtUnsupportedError('Downloading to file is only supported in NodeJS')
     }
 
-    if (
-        params.location instanceof FileLocation &&
-        Buffer.isBuffer(params.location.location)
-    ) {
+    if (params.location instanceof FileLocation && Buffer.isBuffer(params.location.location)) {
         // early return for inline files
         const buf = params.location.location
 
@@ -46,10 +37,6 @@ export function downloadToFile(
     const stream = this.downloadAsStream(params)
 
     return new Promise((resolve, reject) => {
-        stream
-            .on('error', reject)
-            .pipe(output)
-            .on('finish', resolve)
-            .on('error', reject)
+        stream.on('error', reject).pipe(output).on('finish', resolve).on('error', reject)
     })
 }

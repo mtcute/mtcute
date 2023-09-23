@@ -9,9 +9,7 @@ import { assertNever, MaybeAsync } from '@mtcute/core'
  * @param msg  Message or callback from which to derive the key
  * @param scene  Current scene UID, or `null` if none
  */
-export type StateKeyDelegate = (
-    upd: Message | CallbackQuery
-) => MaybeAsync<string | null>
+export type StateKeyDelegate = (upd: Message | CallbackQuery) => MaybeAsync<string | null>
 
 /**
  * Default state key delegate.
@@ -24,9 +22,7 @@ export type StateKeyDelegate = (
  *    - If in private chat (i.e. `upd.chatType === 'user'`), `upd.user.id`
  *    - If in group/channel/supergroup (i.e. `upd.chatType !== 'user'`), `upd.chatId + '_' + upd.user.id`
  */
-export const defaultStateKeyDelegate: StateKeyDelegate = (
-    upd,
-): string | null => {
+export const defaultStateKeyDelegate: StateKeyDelegate = (upd): string | null => {
     if (upd.constructor === Message) {
         switch (upd.chat.chatType) {
             case 'private':

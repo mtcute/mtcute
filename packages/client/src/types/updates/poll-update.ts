@@ -12,11 +12,7 @@ import { makeInspectable } from '../utils'
  * polls which were sent by this bot
  */
 export class PollUpdate {
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.RawUpdateMessagePoll,
-        readonly _peers: PeersIndex,
-    ) {}
+    constructor(readonly client: TelegramClient, readonly raw: tl.RawUpdateMessagePoll, readonly _peers: PeersIndex) {}
 
     /**
      * Unique poll ID
@@ -62,12 +58,7 @@ export class PollUpdate {
                 }
             }
 
-            this._poll = new Poll(
-                this.client,
-                poll,
-                this._peers,
-                this.raw.results,
-            )
+            this._poll = new Poll(this.client, poll, this._peers, this.raw.results)
         }
 
         return this._poll

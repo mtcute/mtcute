@@ -30,10 +30,7 @@ describe('Dispatcher', () => {
             dp.removeUpdateHandler('raw')
             await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
 
-            expect(log).eql([
-                '(first) received updateConfig',
-                '(second) received updateConfig',
-            ])
+            expect(log).eql(['(first) received updateConfig', '(second) received updateConfig'])
         })
 
         it('supports filters for raw updates', async () => {
@@ -67,10 +64,7 @@ describe('Dispatcher', () => {
 
             await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
 
-            expect(log).eql([
-                '(no) received updateConfig',
-                '(true) received updateConfig',
-            ])
+            expect(log).eql(['(no) received updateConfig', '(true) received updateConfig'])
         })
     })
 
@@ -190,10 +184,7 @@ describe('Dispatcher', () => {
 
             await dp.dispatchRawUpdateNow({ _: 'updateConfig' }, emptyPeers)
 
-            expect(log).eql([
-                '(parent) received updateConfig',
-                '(child) received updateConfig',
-            ])
+            expect(log).eql(['(parent) received updateConfig', '(child) received updateConfig'])
         })
 
         it('should have separate handler groups for children', async () => {

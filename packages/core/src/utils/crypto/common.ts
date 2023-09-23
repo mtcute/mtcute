@@ -17,9 +17,7 @@ export class AesModeOfOperationIge implements IEncryptionScheme {
 
     async encrypt(data: Buffer): Promise<Buffer> {
         if (data.length % 16 !== 0) {
-            throw new Error(
-                'invalid plaintext size (must be multiple of 16 bytes)',
-            )
+            throw new Error('invalid plaintext size (must be multiple of 16 bytes)')
         }
 
         const ciphertext = Buffer.alloc(data.length)
@@ -44,9 +42,7 @@ export class AesModeOfOperationIge implements IEncryptionScheme {
 
     async decrypt(data: Buffer): Promise<Buffer> {
         if (data.length % 16 !== 0) {
-            throw new Error(
-                'invalid ciphertext size (must be multiple of 16 bytes)',
-            )
+            throw new Error('invalid ciphertext size (must be multiple of 16 bytes)')
         }
 
         const plaintext = Buffer.alloc(data.length)

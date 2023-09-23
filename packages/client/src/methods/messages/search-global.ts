@@ -71,24 +71,17 @@ export async function* searchGlobal(
         })
 
         if (res._ === 'messages.messagesNotModified') {
-            throw new MtTypeAssertionError(
-                'messages.searchGlobal',
-                '!messages.messagesNotModified',
-                res._,
-            )
+            throw new MtTypeAssertionError('messages.searchGlobal', '!messages.messagesNotModified', res._)
         }
 
         const peers = PeersIndex.from(res)
 
-        const msgs = res.messages
-            .filter((msg) => msg._ !== 'messageEmpty')
-            .map((msg) => new Message(this, msg, peers))
+        const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(this, msg, peers))
 
         if (!msgs.length) break
 
         const last = msgs[msgs.length - 1]
-        offsetRate =
-            (res as tl.messages.RawMessagesSlice).nextRate ?? last.raw.date
+        offsetRate = (res as tl.messages.RawMessagesSlice).nextRate ?? last.raw.date
         offsetPeer = last.chat.inputPeer
         offsetId = last.id
 

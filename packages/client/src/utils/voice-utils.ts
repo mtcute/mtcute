@@ -31,10 +31,7 @@ export function decodeWaveform(wf: Buffer): number[] {
 
     const lastByteIdx = ~~((lastIdx * 5) / 8)
     const lastBitShift = (lastIdx * 5) % 8
-    const lastValue =
-        lastByteIdx === wf.length - 1 ?
-            wf[lastByteIdx] :
-            wf.readUInt16LE(lastByteIdx)
+    const lastValue = lastByteIdx === wf.length - 1 ? wf[lastByteIdx] : wf.readUInt16LE(lastByteIdx)
     result[lastIdx] = (lastValue >> lastBitShift) & 0b11111
 
     return result

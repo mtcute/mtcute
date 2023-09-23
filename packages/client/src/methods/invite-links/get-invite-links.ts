@@ -54,15 +54,14 @@ export async function* getInviteLinks(
     let offsetLink: string | undefined = undefined
 
     for (;;) {
-        const res: tl.RpcCallReturn['messages.getExportedChatInvites'] =
-            await this.call({
-                _: 'messages.getExportedChatInvites',
-                peer,
-                adminId: admin,
-                limit: Math.min(chunkSize, total - current),
-                offsetDate,
-                offsetLink,
-            })
+        const res: tl.RpcCallReturn['messages.getExportedChatInvites'] = await this.call({
+            _: 'messages.getExportedChatInvites',
+            peer,
+            adminId: admin,
+            limit: Math.min(chunkSize, total - current),
+            offsetDate,
+            offsetLink,
+        })
 
         if (!res.invites.length) break
 
@@ -71,11 +70,7 @@ export async function* getInviteLinks(
         const last = res.invites[res.invites.length - 1]
 
         if (last._ === 'chatInvitePublicJoinRequests') {
-            throw new MtTypeAssertionError(
-                'getInviteLinks',
-                'chatInviteExported',
-                last._,
-            )
+            throw new MtTypeAssertionError('getInviteLinks', 'chatInviteExported', last._)
         }
         offsetDate = last.date
         offsetLink = last.link

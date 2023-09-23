@@ -26,10 +26,7 @@ export async function revokeInviteLink(
 
     const peers = PeersIndex.from(res)
 
-    const invite =
-        res._ === 'messages.exportedChatInviteReplaced' ?
-            res.newInvite :
-            res.invite
+    const invite = res._ === 'messages.exportedChatInviteReplaced' ? res.newInvite : res.invite
 
     return new ChatInviteLink(this, invite, peers)
 }

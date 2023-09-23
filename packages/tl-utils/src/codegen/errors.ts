@@ -54,10 +54,7 @@ export class RpcError extends Error {
 }
 `.trimStart()
 
-const template = (
-    str: string,
-    params: Record<string, string | number>,
-): string => {
+const template = (str: string, params: Record<string, string | number>): string => {
     return str.replace(/{([a-z]+)}/gi, (_, name) => String(params[name] ?? ''))
 }
 
@@ -103,10 +100,7 @@ function placeholderType(_name: string): string {
  * @param exports  Prefix for exports object
  * @returns  Tuple containing `[ts, js]` code
  */
-export function generateCodeForErrors(
-    errors: TlErrors,
-    exports = 'exports.',
-): [string, string] {
+export function generateCodeForErrors(errors: TlErrors, exports = 'exports.'): [string, string] {
     const descriptionsMap: Record<string, string> = {}
     let texts = ''
     let argMap = ''
@@ -131,16 +125,10 @@ export function generateCodeForErrors(
         if (placeholders.length) {
             const placeholderTypes = placeholders.map(placeholderType)
             argMap +=
-                `    '${name}': { ` +
-                placeholders
-                    .map((it, i) => `${it}: ${placeholderTypes[i]}`)
-                    .join(', ') +
-                ' },\n'
+                `    '${name}': { ` + placeholders.map((it, i) => `${it}: ${placeholderTypes[i]}`).join(', ') + ' },\n'
 
             const regex = name.replace('%d', '(\\d+)')
-            const setters = placeholders
-                .map((it, i) => `err.${it} = parseInt(match[${i + 1}])`)
-                .join('; ')
+            const setters = placeholders.map((it, i) => `err.${it} = parseInt(match[${i + 1}])`).join('; ')
             matchers += `    if ((match=obj.errorMessage.match(/^${regex}$/))!=null){ err.text = '${name}'; ${setters} }\n`
         }
     }
@@ -150,10 +138,7 @@ export function generateCodeForErrors(
         template(TEMPLATE_JS, {
             exports,
             statics: staticsJs,
-            descriptionsMap: JSON.stringify(descriptionsMap).replace(
-                /'/g,
-                "\\'",
-            ),
+            descriptionsMap: JSON.stringify(descriptionsMap).replace(/'/g, "\\'"),
             matchers,
         }),
     ]

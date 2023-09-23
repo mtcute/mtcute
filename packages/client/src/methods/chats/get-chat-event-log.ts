@@ -4,16 +4,8 @@ import { assertNever, MaybeArray } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    ChatAction,
-    ChatEvent,
-    InputPeerLike,
-    PeersIndex,
-} from '../../types'
-import {
-    normalizeToInputChannel,
-    normalizeToInputUser,
-} from '../../utils/peer-utils'
+import { ChatAction, ChatEvent, InputPeerLike, PeersIndex } from '../../types'
+import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
  * Get chat event log ("Recent actions" in official
@@ -66,9 +58,7 @@ export async function* getChatEventLog(
          * and when passing one or more action types,
          * they will be filtered locally.
          */
-        filters?:
-            | tl.TypeChannelAdminLogEventsFilter
-            | MaybeArray<Exclude<ChatAction, null>['type']>
+        filters?: tl.TypeChannelAdminLogEventsFilter | MaybeArray<Exclude<ChatAction, null>['type']>
 
         /**
          * Limit the number of events returned.
@@ -101,16 +91,11 @@ export async function* getChatEventLog(
         await this.resolvePeerMany(params.users, normalizeToInputUser) :
         undefined
 
-    let serverFilter:
-        | tl.Mutable<tl.TypeChannelAdminLogEventsFilter>
-        | undefined = undefined
+    let serverFilter: tl.Mutable<tl.TypeChannelAdminLogEventsFilter> | undefined = undefined
     let localFilter: Record<string, true> | undefined = undefined
 
     if (params.filters) {
-        if (
-            typeof params.filters === 'string' ||
-            Array.isArray(params.filters)
-        ) {
+        if (typeof params.filters === 'string' || Array.isArray(params.filters)) {
             let input = params.filters
             if (!Array.isArray(input)) input = [input]
 
@@ -224,10 +209,9 @@ export async function* getChatEventLog(
         for (const evt of res.events) {
             const parsed = new ChatEvent(this, evt, peers)
 
-            if (
-                localFilter &&
-                (!parsed.action || !localFilter[parsed.action.type])
-            ) { continue }
+            if (localFilter && (!parsed.action || !localFilter[parsed.action.type])) {
+                continue
+            }
 
             current += 1
             yield parsed

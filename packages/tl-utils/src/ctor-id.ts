@@ -10,9 +10,7 @@ import { TlEntry } from './types'
  * @param line  Line containing TL entry definition
  */
 export function computeConstructorIdFromString(line: string): number {
-    return computeConstructorIdFromEntry(
-        parseTlToEntries(line, { forIdComputation: true })[0],
-    )
+    return computeConstructorIdFromEntry(parseTlToEntries(line, { forIdComputation: true })[0])
 }
 
 /**

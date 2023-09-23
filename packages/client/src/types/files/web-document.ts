@@ -6,9 +6,7 @@ import { makeInspectable } from '../utils'
 import { FileLocation } from './file-location'
 
 const STUB_LOCATION = () => {
-    throw new MtArgumentError(
-        'This web document is not downloadable through Telegram',
-    )
+    throw new MtArgumentError('This web document is not downloadable through Telegram')
 }
 
 /**

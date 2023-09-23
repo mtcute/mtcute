@@ -57,9 +57,7 @@ export class UpdateState<State, SceneName extends string = string> {
     private _updateLocalKey(): void {
         if (!this._scoped) this._localKey = this._localKeyBase
         else {
-            this._localKey = this._scene ?
-                this._scene + '_' + this._localKeyBase :
-                this._localKeyBase
+            this._localKey = this._scene ? this._scene + '_' + this._localKeyBase : this._localKeyBase
         }
     }
 
@@ -86,10 +84,7 @@ export class UpdateState<State, SceneName extends string = string> {
      * @param force  Whether to ignore cached state (def. `false`)
      */
     async get(force?: boolean): Promise<State | null>
-    async get(
-        fallback?: State | boolean,
-        force?: boolean,
-    ): Promise<State | null> {
+    async get(fallback?: State | boolean, force?: boolean): Promise<State | null> {
         if (typeof fallback === 'boolean') {
             force = fallback
             fallback = undefined
@@ -101,9 +96,7 @@ export class UpdateState<State, SceneName extends string = string> {
             return this._cached
         }
 
-        let res = (await this._localStorage.getState(
-            this._localKey,
-        )) as State | null
+        let res = (await this._localStorage.getState(this._localKey)) as State | null
         if (!res && fallback) res = fallback
         this._cached = res
 
@@ -135,19 +128,12 @@ export class UpdateState<State, SceneName extends string = string> {
      * @param ttl  TTL for the new state (in seconds)
      * @param forceLoad  Whether to force load the old state from storage
      */
-    async merge(
-        state: Partial<State>,
-        fallback?: State,
-        ttl?: number,
-        forceLoad = false,
-    ): Promise<State> {
+    async merge(state: Partial<State>, fallback?: State, ttl?: number, forceLoad = false): Promise<State> {
         const old = await this.get(forceLoad)
 
         if (!old) {
             if (!fallback) {
-                throw new MtArgumentError(
-                    'Cannot use merge on empty state without fallback.',
-                )
+                throw new MtArgumentError('Cannot use merge on empty state without fallback.')
             }
 
             await this.set({ ...fallback, ...state }, ttl)
@@ -212,16 +198,8 @@ export class UpdateState<State, SceneName extends string = string> {
      * @returns  Tuple containing the number of remaining and
      *   unix time in ms when the user can try again
      */
-    async rateLimit(
-        key: string,
-        limit: number,
-        window: number,
-    ): Promise<[number, number]> {
-        const [remaining, reset] = await this._localStorage.getRateLimit(
-            `${key}:${this._localKey}`,
-            limit,
-            window,
-        )
+    async rateLimit(key: string, limit: number, window: number): Promise<[number, number]> {
+        const [remaining, reset] = await this._localStorage.getRateLimit(`${key}:${this._localKey}`, limit, window)
 
         if (!remaining) {
             throw new RateLimitError(reset)
@@ -246,11 +224,7 @@ export class UpdateState<State, SceneName extends string = string> {
      * @returns  Tuple containing the number of remaining and
      *   unix time in ms when the user can try again
      */
-    async throttle(
-        key: string,
-        limit: number,
-        window: number,
-    ): Promise<[number, number]> {
+    async throttle(key: string, limit: number, window: number): Promise<[number, number]> {
         try {
             return await this.rateLimit(key, limit, window)
         } catch (e: unknown) {

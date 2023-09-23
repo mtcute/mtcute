@@ -2,8 +2,7 @@ import { computeConstructorIdFromEntry } from './ctor-id'
 import { writeTlEntryToString } from './stringify'
 import { TlEntry, TlFullSchema } from './types'
 
-const replaceNewlineInComment = (s: string): string =>
-    s.replace(/\n/g, '\n//- ')
+const replaceNewlineInComment = (s: string): string => s.replace(/\n/g, '\n//- ')
 
 /**
  * Parse TL entries into a full schema object
@@ -99,9 +98,7 @@ boolTrue#997275b5 = Bool;
 
         if (entry.comment) {
             if (params?.tdlibComments) {
-                lines.push(
-                    `// @description ${replaceNewlineInComment(entry.comment)}`,
-                )
+                lines.push(`// @description ${replaceNewlineInComment(entry.comment)}`)
             } else {
                 lines.push(`// ${replaceNewlineInComment(entry.comment)}`)
             }
@@ -110,11 +107,7 @@ boolTrue#997275b5 = Bool;
         if (params?.tdlibComments) {
             entry.arguments.forEach((arg) => {
                 if (arg.comment) {
-                    lines.push(
-                        `// @${arg.name} ${replaceNewlineInComment(
-                            arg.comment,
-                        )}`,
-                    )
+                    lines.push(`// @${arg.name} ${replaceNewlineInComment(arg.comment)}`)
                 }
             })
         }

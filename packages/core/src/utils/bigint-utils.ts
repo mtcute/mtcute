@@ -9,11 +9,7 @@ import { randomBytes } from './buffer-utils'
  * @param length  Length of the resulting buffer (by default it's computed automatically)
  * @param le  Whether to use little-endian encoding
  */
-export function bigIntToBuffer(
-    value: BigInteger,
-    length = 0,
-    le = false,
-): Buffer {
+export function bigIntToBuffer(value: BigInteger, length = 0, le = false): Buffer {
     const array = value.toArray(256).value
 
     if (length !== 0 && array.length > length) {
@@ -41,12 +37,7 @@ export function bigIntToBuffer(
  * @param length  Length to read
  * @param le  Whether to use little-endian encoding
  */
-export function bufferToBigInt(
-    buffer: Buffer,
-    offset = 0,
-    length = buffer.length,
-    le = false,
-): BigInteger {
+export function bufferToBigInt(buffer: Buffer, offset = 0, length = buffer.length, le = false): BigInteger {
     const arr = [...buffer.slice(offset, offset + length)]
 
     if (le) arr.reverse()
@@ -85,10 +76,7 @@ export function randomBigIntBits(bits: number): BigInteger {
  * @param max  Maximum value (exclusive)
  * @param min  Minimum value (inclusive)
  */
-export function randomBigIntInRange(
-    max: BigInteger,
-    min = bigInt.one,
-): BigInteger {
+export function randomBigIntInRange(max: BigInteger, min = bigInt.one): BigInteger {
     const interval = max.minus(min)
     if (interval.isNegative()) throw new Error('expected min < max')
 

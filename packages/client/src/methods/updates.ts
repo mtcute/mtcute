@@ -90,21 +90,11 @@ function _initializeUpdates(this: TelegramClient) {
     this._updatesLoopActive = false
     this._updatesLoopCv = new ConditionVariable()
 
-    this._pendingUpdateContainers = new SortedLinkedList(
-        (a, b) => a.seqStart - b.seqStart,
-    )
-    this._pendingPtsUpdates = new SortedLinkedList(
-        (a, b) => a.ptsBefore! - b.ptsBefore!,
-    )
-    this._pendingPtsUpdatesPostponed = new SortedLinkedList(
-        (a, b) => a.ptsBefore! - b.ptsBefore!,
-    )
-    this._pendingQtsUpdates = new SortedLinkedList(
-        (a, b) => a.qtsBefore! - b.qtsBefore!,
-    )
-    this._pendingQtsUpdatesPostponed = new SortedLinkedList(
-        (a, b) => a.qtsBefore! - b.qtsBefore!,
-    )
+    this._pendingUpdateContainers = new SortedLinkedList((a, b) => a.seqStart - b.seqStart)
+    this._pendingPtsUpdates = new SortedLinkedList((a, b) => a.ptsBefore! - b.ptsBefore!)
+    this._pendingPtsUpdatesPostponed = new SortedLinkedList((a, b) => a.ptsBefore! - b.ptsBefore!)
+    this._pendingQtsUpdates = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
+    this._pendingQtsUpdatesPostponed = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
     this._pendingUnorderedUpdates = new Deque()
 
     this._updLock = new AsyncLock()
@@ -133,11 +123,7 @@ function _initializeUpdates(this: TelegramClient) {
  * @param time  Window time
  * @internal
  */
-export function enableRps(
-    this: TelegramClient,
-    size?: number,
-    time?: number,
-): void {
+export function enableRps(this: TelegramClient, size?: number, time?: number): void {
     this._rpsIncoming = new RpsMeter(size, time)
     this._rpsProcessing = new RpsMeter(size, time)
 }
@@ -155,9 +141,7 @@ export function enableRps(
  */
 export function getCurrentRpsIncoming(this: TelegramClient): number {
     if (!this._rpsIncoming) {
-        throw new MtArgumentError(
-            'RPS meter is not enabled, use .enableRps() first',
-        )
+        throw new MtArgumentError('RPS meter is not enabled, use .enableRps() first')
     }
 
     return this._rpsIncoming.getRps()
@@ -176,9 +160,7 @@ export function getCurrentRpsIncoming(this: TelegramClient): number {
  */
 export function getCurrentRpsProcessing(this: TelegramClient): number {
     if (!this._rpsProcessing) {
-        throw new MtArgumentError(
-            'RPS meter is not enabled, use .enableRps() first',
-        )
+        throw new MtArgumentError('RPS meter is not enabled, use .enableRps() first')
     }
 
     return this._rpsProcessing.getRps()
@@ -319,10 +301,7 @@ export function _onStop(this: TelegramClient): void {
 /**
  * @internal
  */
-export async function _saveStorage(
-    this: TelegramClient,
-    afterImport = false,
-): Promise<void> {
+export async function _saveStorage(this: TelegramClient, afterImport = false): Promise<void> {
     // save updates state to the session
 
     if (afterImport) {
@@ -378,11 +357,7 @@ export async function _saveStorage(
 /**
  * @internal
  */
-export function _dispatchUpdate(
-    this: TelegramClient,
-    update: tl.TypeUpdate | tl.TypeMessage,
-    peers: PeersIndex,
-): void {
+export function _dispatchUpdate(this: TelegramClient, update: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex): void {
     this.emit('raw_update', update, peers)
 
     const parsed = _parseUpdate(this, update, peers)
@@ -469,10 +444,7 @@ export function _dispatchUpdate(
 //     return ret
 // }
 
-async function _replaceMinPeers(
-    this: TelegramClient,
-    peers: PeersIndex,
-): Promise<boolean> {
+async function _replaceMinPeers(this: TelegramClient, peers: PeersIndex): Promise<boolean> {
     for (const [key, user_] of peers.users) {
         const user = user_ as Exclude<tl.TypeUser, tl.RawUserEmpty>
 
@@ -517,10 +489,7 @@ async function _fetchPeersForShort(
     const fetchPeer = async (peer?: tl.TypePeer | number) => {
         if (!peer) return true
 
-        const bare =
-            typeof peer === 'number' ?
-                markedPeerIdToBare(peer) :
-                getBarePeerId(peer)
+        const bare = typeof peer === 'number' ? markedPeerIdToBare(peer) : getBarePeerId(peer)
 
         const marked = typeof peer === 'number' ? peer : getMarkedPeerId(peer)
 
@@ -544,10 +513,7 @@ async function _fetchPeersForShort(
         case 'updateNewChannelMessage':
         case 'updateEditMessage':
         case 'updateEditChannelMessage': {
-            const msg =
-                upd._ === 'message' || upd._ === 'messageService' ?
-                    upd :
-                    upd.message
+            const msg = upd._ === 'message' || upd._ === 'messageService' ? upd : upd.message
             if (msg._ === 'messageEmpty') return null
 
             // ref: https://github.com/tdlib/td/blob/master/td/telegram/UpdatesManager.cpp
@@ -556,16 +522,10 @@ async function _fetchPeersForShort(
             if (!(await fetchPeer(msg.fromId))) return null
 
             if (msg.replyTo) {
-                if (
-                    msg.replyTo._ === 'messageReplyHeader' &&
-                    !(await fetchPeer(msg.replyTo.replyToPeerId))
-                ) {
+                if (msg.replyTo._ === 'messageReplyHeader' && !(await fetchPeer(msg.replyTo.replyToPeerId))) {
                     return null
                 }
-                if (
-                    msg.replyTo._ === 'messageReplyStoryHeader' &&
-                    !(await fetchPeer(msg.replyTo.userId))
-                ) {
+                if (msg.replyTo._ === 'messageReplyStoryHeader' && !(await fetchPeer(msg.replyTo.userId))) {
                     return null
                 }
             }
@@ -573,8 +533,7 @@ async function _fetchPeersForShort(
             if (msg._ !== 'messageService') {
                 if (
                     msg.fwdFrom &&
-                    (!(await fetchPeer(msg.fwdFrom.fromId)) ||
-                        !(await fetchPeer(msg.fwdFrom.savedFromPeer)))
+                    (!(await fetchPeer(msg.fwdFrom.fromId)) || !(await fetchPeer(msg.fwdFrom.savedFromPeer)))
                 ) {
                     return null
                 }
@@ -591,10 +550,7 @@ async function _fetchPeersForShort(
                 if (msg.media) {
                     switch (msg.media._) {
                         case 'messageMediaContact':
-                            if (
-                                msg.media.userId &&
-                                !(await fetchPeer(msg.media.userId))
-                            ) {
+                            if (msg.media.userId && !(await fetchPeer(msg.media.userId))) {
                                 return null
                             }
                     }
@@ -617,11 +573,7 @@ async function _fetchPeersForShort(
                         if (!(await fetchPeer(msg.action.userId))) return null
                         break
                     case 'messageActionChatMigrateTo':
-                        if (
-                            !(await fetchPeer(
-                                toggleChannelIdMark(msg.action.channelId),
-                            ))
-                        ) {
+                        if (!(await fetchPeer(toggleChannelIdMark(msg.action.channelId)))) {
                             return null
                         }
                         break
@@ -650,10 +602,7 @@ async function _fetchPeersForShort(
 }
 
 function _isMessageEmpty(upd: tl.TypeUpdate): boolean {
-    return (
-        (upd as Extract<typeof upd, { message: object }>).message?._ ===
-        'messageEmpty'
-    )
+    return (upd as Extract<typeof upd, { message: object }>).message?._ === 'messageEmpty'
 }
 
 /**
@@ -688,10 +637,7 @@ export function _handleUpdate(
         case 'updatesCombined':
             this._pendingUpdateContainers.add({
                 upd: update,
-                seqStart:
-                    update._ === 'updatesCombined' ?
-                        update.seqStart :
-                        update.seq,
+                seqStart: update._ === 'updatesCombined' ? update.seqStart : update.seq,
                 seqEnd: update.seq,
             })
             break
@@ -724,10 +670,7 @@ export function catchUp(this: TelegramClient): void {
     //         .then(() => this._saveStorage())
 }
 
-function _toPendingUpdate(
-    upd: tl.TypeUpdate,
-    peers?: PeersIndex,
-): PendingUpdate {
+function _toPendingUpdate(upd: tl.TypeUpdate, peers?: PeersIndex): PendingUpdate {
     const channelId = extractChannelIdFromUpdate(upd) || 0
     const pts = 'pts' in upd ? upd.pts : undefined
     // eslint-disable-next-line no-nested-ternary
@@ -797,10 +740,7 @@ async function _fetchChannelDifference(
     if (!_pts) _pts = fallbackPts
 
     if (!_pts) {
-        this._updsLog.debug(
-            'fetchChannelDifference failed for channel %d: base pts not available',
-            channelId,
-        )
+        this._updsLog.debug('fetchChannelDifference failed for channel %d: base pts not available', channelId)
 
         return
     }
@@ -808,14 +748,9 @@ async function _fetchChannelDifference(
     let channel
 
     try {
-        channel = normalizeToInputChannel(
-            await this.resolvePeer(toggleChannelIdMark(channelId)),
-        )
+        channel = normalizeToInputChannel(await this.resolvePeer(toggleChannelIdMark(channelId)))
     } catch (e) {
-        this._updsLog.warn(
-            'fetchChannelDifference failed for channel %d: input peer not found',
-            channelId,
-        )
+        this._updsLog.warn('fetchChannelDifference failed for channel %d: input peer not found', channelId)
 
         return
     }
@@ -843,10 +778,7 @@ async function _fetchChannelDifference(
         )
 
         if (diff._ === 'updates.channelDifferenceEmpty') {
-            this._updsLog.debug(
-                'getChannelDifference (cid = %d) returned channelDifferenceEmpty',
-                channelId,
-            )
+            this._updsLog.debug('getChannelDifference (cid = %d) returned channelDifferenceEmpty', channelId)
             break
         }
 
@@ -876,9 +808,7 @@ async function _fetchChannelDifference(
 
                 if (message._ === 'messageEmpty') return
 
-                this._pendingUnorderedUpdates.pushBack(
-                    _toPendingUpdate(_messageToUpdate(message), peers),
-                )
+                this._pendingUnorderedUpdates.pushBack(_toPendingUpdate(_messageToUpdate(message), peers))
             })
             break
         }
@@ -893,18 +823,11 @@ async function _fetchChannelDifference(
         )
 
         diff.newMessages.forEach((message) => {
-            this._updsLog.debug(
-                'processing message %d (%s) from diff for channel %d',
-                message.id,
-                message._,
-                channelId,
-            )
+            this._updsLog.debug('processing message %d (%s) from diff for channel %d', message.id, message._, channelId)
 
             if (message._ === 'messageEmpty') return
 
-            this._pendingUnorderedUpdates.pushBack(
-                _toPendingUpdate(_messageToUpdate(message), peers),
-            )
+            this._pendingUnorderedUpdates.pushBack(_toPendingUpdate(_messageToUpdate(message), peers))
         })
 
         diff.otherUpdates.forEach((upd) => {
@@ -945,11 +868,7 @@ function _fetchChannelDifferenceLater(
             _fetchChannelDifference
                 .call(this, channelId, fallbackPts, force)
                 .catch((err) => {
-                    this._updsLog.warn(
-                        'error fetching difference for %d: %s',
-                        channelId,
-                        err,
-                    )
+                    this._updsLog.warn('error fetching difference for %d: %s', channelId, err)
                 })
                 .then(() => {
                     requestedDiff.delete(channelId)
@@ -958,10 +877,7 @@ function _fetchChannelDifferenceLater(
     }
 }
 
-async function _fetchDifference(
-    this: TelegramClient,
-    requestedDiff: Map<number, Promise<void>>,
-): Promise<void> {
+async function _fetchDifference(this: TelegramClient, requestedDiff: Map<number, Promise<void>>): Promise<void> {
     for (;;) {
         const diff = await this.call({
             _: 'updates.getDifference',
@@ -972,24 +888,17 @@ async function _fetchDifference(
 
         switch (diff._) {
             case 'updates.differenceEmpty':
-                this._updsLog.debug(
-                    'updates.getDifference returned updates.differenceEmpty',
-                )
+                this._updsLog.debug('updates.getDifference returned updates.differenceEmpty')
 
                 return
             case 'updates.differenceTooLong':
                 this._pts = diff.pts
-                this._updsLog.debug(
-                    'updates.getDifference returned updates.differenceTooLong',
-                )
+                this._updsLog.debug('updates.getDifference returned updates.differenceTooLong')
 
                 return
         }
 
-        const state =
-            diff._ === 'updates.difference' ?
-                diff.state :
-                diff.intermediateState
+        const state = diff._ === 'updates.difference' ? diff.state : diff.intermediateState
 
         this._updsLog.debug(
             'updates.getDifference returned %d messages, %d updates. new pts: %d, qts: %d, seq: %d, final: %b',
@@ -1016,9 +925,7 @@ async function _fetchDifference(
             if (message._ === 'messageEmpty') return
 
             // pts does not need to be checked for them
-            this._pendingUnorderedUpdates.pushBack(
-                _toPendingUpdate(_messageToUpdate(message), peers),
-            )
+            this._pendingUnorderedUpdates.pushBack(_toPendingUpdate(_messageToUpdate(message), peers))
         })
 
         diff.otherUpdates.forEach((upd) => {
@@ -1029,12 +936,7 @@ async function _fetchDifference(
                     upd.pts,
                 )
 
-                _fetchChannelDifferenceLater.call(
-                    this,
-                    requestedDiff,
-                    upd.channelId,
-                    upd.pts,
-                )
+                _fetchChannelDifferenceLater.call(this, requestedDiff, upd.channelId, upd.pts)
 
                 return
             }
@@ -1072,20 +974,14 @@ async function _fetchDifference(
     }
 }
 
-function _fetchDifferenceLater(
-    this: TelegramClient,
-    requestedDiff: Map<number, Promise<void>>,
-): void {
+function _fetchDifferenceLater(this: TelegramClient, requestedDiff: Map<number, Promise<void>>): void {
     if (!requestedDiff.has(0)) {
         requestedDiff.set(
             0,
             _fetchDifference
                 .call(this, requestedDiff)
                 .catch((err) => {
-                    this._updsLog.warn(
-                        'error fetching common difference: %s',
-                        err,
-                    )
+                    this._updsLog.warn('error fetching common difference: %s', err)
                 })
                 .then(() => {
                     requestedDiff.delete(0)
@@ -1115,11 +1011,7 @@ async function _onUpdate(
             )
 
             if (pending.channelId) {
-                _fetchChannelDifferenceLater.call(
-                    this,
-                    requestedDiff,
-                    pending.channelId,
-                )
+                _fetchChannelDifferenceLater.call(this, requestedDiff, pending.channelId)
             } else {
                 _fetchDifferenceLater.call(this, requestedDiff)
             }
@@ -1141,11 +1033,7 @@ async function _onUpdate(
             )
 
             if (pending.channelId) {
-                _fetchChannelDifferenceLater.call(
-                    this,
-                    requestedDiff,
-                    pending.channelId,
-                )
+                _fetchChannelDifferenceLater.call(this, requestedDiff, pending.channelId)
             } else {
                 _fetchDifferenceLater.call(this, requestedDiff)
             }
@@ -1160,9 +1048,7 @@ async function _onUpdate(
         // because unordered may contain pts/qts values when received from diff
 
         if (pending.pts) {
-            const localPts = pending.channelId ?
-                this._cpts.get(pending.channelId) :
-                this._pts
+            const localPts = pending.channelId ? this._cpts.get(pending.channelId) : this._pts
 
             if (localPts && pending.ptsBefore !== localPts) {
                 this._updsLog.warn(
@@ -1234,8 +1120,7 @@ async function _onUpdate(
             break
         case 'updateUserName':
             if (upd.userId === this._userId) {
-                this._selfUsername =
-                    upd.usernames.find((it) => it.active)?.username ?? null
+                this._selfUsername = upd.usernames.find((it) => it.active)?.username ?? null
             }
             break
     }
@@ -1286,14 +1171,11 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
 
             // first process pending containers
             while (this._pendingUpdateContainers.length) {
-                const { upd, seqStart, seqEnd } =
-                    this._pendingUpdateContainers.popFront()!
+                const { upd, seqStart, seqEnd } = this._pendingUpdateContainers.popFront()!
 
                 switch (upd._) {
                     case 'updatesTooLong':
-                        log.debug(
-                            'received updatesTooLong, fetching difference',
-                        )
+                        log.debug('received updatesTooLong, fetching difference')
                         _fetchDifferenceLater.call(this, requestedDiff)
                         break
                     case 'updatesCombined':
@@ -1329,11 +1211,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                                 _fetchDifferenceLater.call(this, requestedDiff)
                             }
                         } else {
-                            log.debug(
-                                'received %s (size = %d)',
-                                upd._,
-                                upd.updates.length,
-                            )
+                            log.debug('received %s (size = %d)', upd._, upd.updates.length)
                         }
 
                         await this._cachePeersFrom(upd)
@@ -1359,12 +1237,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                                     update.channelId,
                                     update.pts,
                                 )
-                                _fetchChannelDifferenceLater.call(
-                                    this,
-                                    requestedDiff,
-                                    update.channelId,
-                                    update.pts,
-                                )
+                                _fetchChannelDifferenceLater.call(this, requestedDiff, update.channelId, update.pts)
                                 continue
                             }
 
@@ -1515,9 +1388,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                     // update gaps (i.e. first update received is considered
                     // to be the base state)
 
-                    const saved = await this.storage.getChannelPts(
-                        pending.channelId,
-                    )
+                    const saved = await this.storage.getChannelPts(pending.channelId)
 
                     if (saved) {
                         this._cpts.set(pending.channelId, saved)
@@ -1561,11 +1432,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                             )
 
                             if (pending.channelId) {
-                                _fetchChannelDifferenceLater.call(
-                                    this,
-                                    requestedDiff,
-                                    pending.channelId,
-                                )
+                                _fetchChannelDifferenceLater.call(this, requestedDiff, pending.channelId)
                             } else {
                                 _fetchDifferenceLater.call(this, requestedDiff)
                             }
@@ -1578,11 +1445,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
             }
 
             // process postponed pts-ordered updates
-            for (
-                let item = this._pendingPtsUpdatesPostponed._first;
-                item;
-                item = item.n
-            ) {
+            for (let item = this._pendingPtsUpdatesPostponed._first; item; item = item.n) {
                 // awesome fucking iteration because i'm so fucking tired and wanna kms
                 const pending = item.v
                 const upd = pending.update
@@ -1596,11 +1459,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
 
                 // channel pts from storage will be available because we loaded it earlier
                 if (!localPts) {
-                    log.warn(
-                        'local pts not available for postponed %s (cid = %d), skipping',
-                        upd._,
-                        pending.channelId,
-                    )
+                    log.warn('local pts not available for postponed %s (cid = %d), skipping', upd._, pending.channelId)
                     continue
                 }
 
@@ -1643,11 +1502,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                         this._pendingPtsUpdatesPostponed._remove(item)
 
                         if (pending.channelId) {
-                            _fetchChannelDifferenceLater.call(
-                                this,
-                                requestedDiff,
-                                pending.channelId,
-                            )
+                            _fetchChannelDifferenceLater.call(this, requestedDiff, pending.channelId)
                         } else {
                             _fetchDifferenceLater.call(this, requestedDiff)
                         }
@@ -1706,11 +1561,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
             }
 
             // process postponed qts-ordered updates
-            for (
-                let item = this._pendingQtsUpdatesPostponed._first;
-                item;
-                item = item.n
-            ) {
+            for (let item = this._pendingQtsUpdatesPostponed._first; item; item = item.n) {
                 // awesome fucking iteration because i'm so fucking tired and wanna kms
                 const pending = item.v
                 const upd = pending.update

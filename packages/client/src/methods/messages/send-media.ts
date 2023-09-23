@@ -146,11 +146,9 @@ export async function sendMedia(
         // some types dont have `caption` field, and ts warns us,
         // but since it's JS, they'll just be `undefined` and properly
         // handled by _parseEntities method
-        params.caption ||
-            (media as Extract<typeof media, { caption?: unknown }>).caption,
+        params.caption || (media as Extract<typeof media, { caption?: unknown }>).caption,
         params.parseMode,
-        params.entities ||
-            (media as Extract<typeof media, { entities?: unknown }>).entities,
+        params.entities || (media as Extract<typeof media, { entities?: unknown }>).entities,
     )
 
     let peer = await this.resolvePeer(chatId)
@@ -159,27 +157,18 @@ export async function sendMedia(
     let replyTo = normalizeMessageId(params.replyTo)
 
     if (params.commentTo) {
-        [peer, replyTo] = await this._getDiscussionMessage(
-            peer,
-            normalizeMessageId(params.commentTo)!,
-        )
+        [peer, replyTo] = await this._getDiscussionMessage(peer, normalizeMessageId(params.commentTo)!)
     }
 
     if (params.mustReply) {
         if (!replyTo) {
-            throw new MtArgumentError(
-                'mustReply used, but replyTo was not passed',
-            )
+            throw new MtArgumentError('mustReply used, but replyTo was not passed')
         }
 
         const msg = await this.getMessages(peer, replyTo)
 
         if (!msg) {
-            throw new MtMessageNotFoundError(
-                getMarkedPeerId(peer),
-                replyTo,
-                'to reply to',
-            )
+            throw new MtMessageNotFoundError(getMarkedPeerId(peer), replyTo, 'to reply to')
         }
     }
 
@@ -201,9 +190,7 @@ export async function sendMedia(
         entities,
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs ?
-            await this.resolvePeer(params.sendAs) :
-            undefined,
+        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined,
     })
 
     const msg = this._findMessageInUpdate(res)

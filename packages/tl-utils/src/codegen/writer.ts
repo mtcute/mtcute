@@ -55,10 +55,7 @@ const TL_WRITER_PRELUDE =
  * @param params  Options
  * @returns  Code as a readers map entry
  */
-export function generateWriterCodeForTlEntry(
-    entry: TlEntry,
-    params = DEFAULT_OPTIONS,
-): string {
+export function generateWriterCodeForTlEntry(entry: TlEntry, params = DEFAULT_OPTIONS): string {
     const { bare, includeFlags, variableName } = {
         ...DEFAULT_OPTIONS,
         ...params,
@@ -68,9 +65,7 @@ export function generateWriterCodeForTlEntry(
 
     const name = bare ? entry.id : `'${entry.name}'`
     const defaultWriter = bare ? '=this' : ''
-    let ret = `${name}:function(w${defaultWriter}${
-        entry.arguments.length ? ',v' : ''
-    }){`
+    let ret = `${name}:function(w${defaultWriter}${entry.arguments.length ? ',v' : ''}){`
 
     if (!bare) ret += `w.uint(${entry.id});`
 
@@ -94,19 +89,14 @@ export function generateWriterCodeForTlEntry(
                 const bitIndex = parseInt(s[1])
 
                 if (isNaN(bitIndex) || bitIndex < 0 || bitIndex > 32) {
-                    throw new Error(
-                        `Invalid predicate: ${predicate} - invalid bit`,
-                    )
+                    throw new Error(`Invalid predicate: ${predicate} - invalid bit`)
                 }
 
                 const action = `${arg.name}|=${1 << bitIndex};`
 
                 if (arg1.type === 'true') {
                     ret += `if(v.${arg1Name}===true)${action}`
-                } else if (
-                    arg1.typeModifiers?.isVector ||
-                    arg1.typeModifiers?.isBareVector
-                ) {
+                } else if (arg1.typeModifiers?.isVector || arg1.typeModifiers?.isBareVector) {
                     ret += `var _${arg1Name}=v.${arg1Name}&&v.${arg1Name}.length;if(_${arg1Name})${action}`
                 } else {
                     ret += `var _${arg1Name}=v.${arg1Name}!==undefined;if(_${arg1Name})${action}`
@@ -140,14 +130,11 @@ export function generateWriterCodeForTlEntry(
         }
 
         let writer = `w.${type}`
-        const isBare =
-            arg.typeModifiers?.isBareType || arg.typeModifiers?.isBareUnion
+        const isBare = arg.typeModifiers?.isBareType || arg.typeModifiers?.isBareUnion
 
         if (isBare) {
             if (!arg.typeModifiers?.constructorId) {
-                throw new Error(
-                    `Cannot generate writer for ${entry.name}#${arg.name} - no constructor id referenced`,
-                )
+                throw new Error(`Cannot generate writer for ${entry.name}#${arg.name} - no constructor id referenced`)
             }
 
             writer = `${variableName}._bare[${arg.typeModifiers.constructorId}]`
@@ -171,10 +158,7 @@ export function generateWriterCodeForTlEntry(
  * @param entries  Entries to generate writers for
  * @param params  Codegen options
  */
-export function generateWriterCodeForTlEntries(
-    entries: TlEntry[],
-    params = DEFAULT_OPTIONS,
-): string {
+export function generateWriterCodeForTlEntries(entries: TlEntry[], params = DEFAULT_OPTIONS): string {
     const { includePrelude, variableName, includeStaticSizes } = {
         ...DEFAULT_OPTIONS,
         ...params,

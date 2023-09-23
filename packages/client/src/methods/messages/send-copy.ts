@@ -2,13 +2,7 @@ import { getMarkedPeerId } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    FormattedString,
-    InputPeerLike,
-    Message,
-    MtMessageNotFoundError,
-    ReplyMarkup,
-} from '../../types'
+import { FormattedString, InputPeerLike, Message, MtMessageNotFoundError, ReplyMarkup } from '../../types'
 
 /**
  * Copy a message (i.e. send the same message,
@@ -107,11 +101,7 @@ export async function sendCopy(
     const msg = await this.getMessages(fromPeer, message)
 
     if (!msg) {
-        throw new MtMessageNotFoundError(
-            getMarkedPeerId(fromPeer),
-            message,
-            'to copy',
-        )
+        throw new MtMessageNotFoundError(getMarkedPeerId(fromPeer), message, 'to copy')
     }
 
     return msg.sendCopy(toChatId, params)

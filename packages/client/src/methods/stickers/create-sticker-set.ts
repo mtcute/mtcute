@@ -93,23 +93,14 @@ export async function createStickerSet(
          * @param uploaded  Number of bytes uploaded
          * @param total  Total file size
          */
-        progressCallback?: (
-            idx: number,
-            uploaded: number,
-            total: number
-        ) => void
+        progressCallback?: (idx: number, uploaded: number, total: number) => void
     },
 ): Promise<StickerSet> {
     if (params.type === 'emoji') {
-        throw new MtArgumentError(
-            'Creating emoji stickers is not supported yet by the API',
-        )
+        throw new MtArgumentError('Creating emoji stickers is not supported yet by the API')
     }
 
-    const owner = normalizeToInputUser(
-        await this.resolvePeer(params.owner),
-        params.owner,
-    )
+    const owner = normalizeToInputUser(await this.resolvePeer(params.owner), params.owner)
 
     const inputStickers: tl.TypeInputStickerSetItem[] = []
 
@@ -149,9 +140,7 @@ export async function createStickerSet(
         title: params.title,
         shortName: params.shortName,
         stickers: inputStickers,
-        thumb: params.thumb ?
-            await this._normalizeFileToDocument(params.thumb, {}) :
-            undefined,
+        thumb: params.thumb ? await this._normalizeFileToDocument(params.thumb, {}) : undefined,
     })
 
     return new StickerSet(this, res)

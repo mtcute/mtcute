@@ -7,37 +7,23 @@ import { Sticker } from './sticker'
 import { Video } from './video'
 import { Voice } from './voice'
 
-export type ParsedDocument =
-    | Sticker
-    | Voice
-    | Audio
-    | Video
-    | Document
+export type ParsedDocument = Sticker | Voice | Audio | Video | Document
 
 /** @internal */
-export function parseDocument(
-    client: TelegramClient,
-    doc: tl.RawDocument,
-): ParsedDocument {
+export function parseDocument(client: TelegramClient, doc: tl.RawDocument): ParsedDocument {
     const stickerAttr = doc.attributes.find(
-        (a) =>
-            a._ === 'documentAttributeSticker' ||
-            a._ === 'documentAttributeCustomEmoji',
+        (a) => a._ === 'documentAttributeSticker' || a._ === 'documentAttributeCustomEmoji',
     )
 
     if (stickerAttr) {
         const sz = doc.attributes.find(
-            (it) =>
-                it._ === 'documentAttributeImageSize' ||
-                it._ === 'documentAttributeVideo',
+            (it) => it._ === 'documentAttributeImageSize' || it._ === 'documentAttributeVideo',
         )! as tl.RawDocumentAttributeImageSize | tl.RawDocumentAttributeVideo
 
         return new Sticker(
             client,
             doc,
-            stickerAttr as
-                | tl.RawDocumentAttributeSticker
-                | tl.RawDocumentAttributeCustomEmoji,
+            stickerAttr as tl.RawDocumentAttributeSticker | tl.RawDocumentAttributeCustomEmoji,
             sz,
         )
     }

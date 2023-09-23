@@ -14,9 +14,7 @@ const PRIMITIVES_SIZES: Record<string, number> = {
     '#': 4,
 }
 
-export function calculateStaticSizes(
-    entries: TlEntry[],
-): Record<string, number> {
+export function calculateStaticSizes(entries: TlEntry[]): Record<string, number> {
     const staticSizes: Record<string, number> = {}
     const unionSizes: Record<string, Record<string, number | null>> = {}
     let changedInLastIteration = true
@@ -50,10 +48,7 @@ export function calculateStaticSizes(
                 return null
             }
 
-            if (
-                arg.typeModifiers?.isVector ||
-                arg.typeModifiers?.isBareVector
-            ) {
+            if (arg.typeModifiers?.isVector || arg.typeModifiers?.isBareVector) {
                 // cant be static sized
                 return null
             }

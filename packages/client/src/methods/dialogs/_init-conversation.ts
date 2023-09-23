@@ -17,11 +17,7 @@ function _initializeConversation(this: TelegramClient) {
 }
 
 /** @internal */
-export function _pushConversationMessage(
-    this: TelegramClient,
-    msg: Message,
-    incoming = false,
-): void {
+export function _pushConversationMessage(this: TelegramClient, msg: Message, incoming = false): void {
     // shortcut
     if (!this._hasConversations) return
 

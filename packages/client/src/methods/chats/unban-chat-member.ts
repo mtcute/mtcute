@@ -1,10 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
-import {
-    isInputPeerChannel,
-    isInputPeerChat,
-    normalizeToInputChannel,
-} from '../../utils/peer-utils'
+import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
 
 // @alias=unrestrictChatMember
 /**

@@ -65,12 +65,8 @@ export class Sticker extends RawDocument {
     constructor(
         client: TelegramClient,
         doc: tl.RawDocument,
-        readonly attr:
-            | tl.RawDocumentAttributeSticker
-            | tl.RawDocumentAttributeCustomEmoji,
-        readonly attr2?:
-            | tl.RawDocumentAttributeImageSize
-            | tl.RawDocumentAttributeVideo,
+        readonly attr: tl.RawDocumentAttributeSticker | tl.RawDocumentAttributeCustomEmoji,
+        readonly attr2?: tl.RawDocumentAttributeImageSize | tl.RawDocumentAttributeVideo,
     ) {
         super(client, doc)
     }
@@ -94,11 +90,7 @@ export class Sticker extends RawDocument {
      * (has premium fullscreen animation)
      */
     get isPremiumSticker(): boolean {
-        return Boolean(
-            this.raw.videoThumbs?.some(
-                (s) => s._ === 'videoSize' && s.type === 'f',
-            ),
-        )
+        return Boolean(this.raw.videoThumbs?.some((s) => s._ === 'videoSize' && s.type === 'f'))
     }
 
     /**
@@ -108,10 +100,7 @@ export class Sticker extends RawDocument {
      * that Telegram treats as a sticker.
      */
     get isValidSticker(): boolean {
-        return (
-            this.attr2 !== undefined &&
-            (this.attr2.w === 512 || this.attr2.h === 512)
-        )
+        return this.attr2 !== undefined && (this.attr2.w === 512 || this.attr2.h === 512)
     }
 
     /**
@@ -139,9 +128,7 @@ export class Sticker extends RawDocument {
      * > Not sure if there are any such stickers currently.
      */
     get customEmojiFree(): boolean {
-        return this.attr._ === 'documentAttributeCustomEmoji' ?
-            this.attr.free ?? false :
-            false
+        return this.attr._ === 'documentAttributeCustomEmoji' ? this.attr.free ?? false : false
     }
 
     /**
@@ -177,9 +164,7 @@ export class Sticker extends RawDocument {
             return 'video'
         }
 
-        return this.mimeType === 'application/x-tgsticker' ?
-            'animated' :
-            'static'
+        return this.mimeType === 'application/x-tgsticker' ? 'animated' : 'static'
     }
 
     /**
@@ -193,9 +178,7 @@ export class Sticker extends RawDocument {
      * Input sticker set that it associated with this sticker, if available.
      */
     get inputStickerSet(): tl.TypeInputStickerSet | null {
-        return this.attr.stickerset._ === 'inputStickerSetEmpty' ?
-            null :
-            this.attr.stickerset
+        return this.attr.stickerset._ === 'inputStickerSetEmpty' ? null : this.attr.stickerset
     }
 
     private _maskPosition?: MaskPosition
@@ -203,10 +186,7 @@ export class Sticker extends RawDocument {
      * Position where this mask should be placed
      */
     get maskPosition(): MaskPosition | null {
-        if (
-            this.attr._ !== 'documentAttributeSticker' ||
-            !this.attr.maskCoords
-        ) {
+        if (this.attr._ !== 'documentAttributeSticker' || !this.attr.maskCoords) {
             return null
         }
 
@@ -244,8 +224,7 @@ export class Sticker extends RawDocument {
         const set = await this.getStickerSet()
         if (!set) return ''
 
-        return set.stickers.find((it) => it.sticker.raw.id.eq(this.raw.id))!
-            .emoji
+        return set.stickers.find((it) => it.sticker.raw.id.eq(this.raw.id))!.emoji
     }
 }
 

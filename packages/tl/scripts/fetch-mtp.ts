@@ -13,10 +13,7 @@ async function fetchMtprotoSchema(): Promise<string> {
     const $ = cheerio.load(html)
 
     // cheerio doesn't always unescape them
-    return $('#dev_page_content pre code')
-        .text()
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
+    return $('#dev_page_content pre code').text().replace(/&lt;/g, '<').replace(/&gt;/g, '>')
 }
 
 async function main() {
@@ -28,14 +25,7 @@ async function main() {
 
     // remove manually parsed types
     entries = entries.filter(
-        (it) =>
-            ![
-                'mt_msg_container',
-                'mt_message',
-                'mt_msg_copy',
-                'mt_gzip_packed',
-                'mt_rpc_result',
-            ].includes(it.name),
+        (it) => !['mt_msg_container', 'mt_message', 'mt_msg_copy', 'mt_gzip_packed', 'mt_rpc_result'].includes(it.name),
     )
 
     // mtproto is handled internally, for simplicity we make them all classes

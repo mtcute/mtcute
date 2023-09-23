@@ -17,10 +17,7 @@ export async function deleteUserHistory(
     chatId: InputPeerLike,
     participantId: InputPeerLike,
 ): Promise<void> {
-    const channel = normalizeToInputChannel(
-        await this.resolvePeer(chatId),
-        chatId,
-    )
+    const channel = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
 
     const peer = await this.resolvePeer(participantId)
 
@@ -30,11 +27,5 @@ export async function deleteUserHistory(
         participant: peer,
     })
 
-    this._handleUpdate(
-        createDummyUpdate(
-            res.pts,
-            res.ptsCount,
-            (channel as tl.RawInputChannel).channelId,
-        ),
-    )
+    this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount, (channel as tl.RawInputChannel).channelId))
 }

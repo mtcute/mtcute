@@ -1,12 +1,7 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    BotKeyboard,
-    FormattedString,
-    InputMediaLike,
-    ReplyMarkup,
-} from '../../types'
+import { BotKeyboard, FormattedString, InputMediaLike, ReplyMarkup } from '../../types'
 import { normalizeInlineId } from '../../utils/inline-utils'
 
 /**
@@ -91,11 +86,7 @@ export async function editInlineMessage(
             )
         }
     } else if (params.text) {
-        [content, entities] = await this._parseEntities(
-            params.text,
-            params.parseMode,
-            params.entities,
-        )
+        [content, entities] = await this._parseEntities(params.text, params.parseMode, params.entities)
     }
 
     let retries = 3

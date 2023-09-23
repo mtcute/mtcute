@@ -35,9 +35,7 @@ const subdomainsMap: Record<string, string> = {
  * Base for WebSocket transports.
  * Subclasses must provide packet codec in `_packetCodec` property
  */
-export abstract class BaseWebSocketTransport
-    extends EventEmitter
-    implements ITelegramTransport {
+export abstract class BaseWebSocketTransport extends EventEmitter implements ITelegramTransport {
     private _currentDc: tl.RawDcOption | null = null
     private _state: TransportState = TransportState.Idle
     private _socket: WebSocket | null = null
@@ -58,9 +56,7 @@ export abstract class BaseWebSocketTransport
         super()
 
         if (!ws) {
-            throw new MtUnsupportedError(
-                'To use WebSocket transport with NodeJS, install `ws` package.',
-            )
+            throw new MtUnsupportedError('To use WebSocket transport with NodeJS, install `ws` package.')
         }
 
         this._baseDomain = baseDomain
@@ -71,9 +67,7 @@ export abstract class BaseWebSocketTransport
 
     private _updateLogPrefix() {
         if (this._currentDc) {
-            this.log.prefix = `[WS:${this._subdomains[this._currentDc.id]}.${
-                this._baseDomain
-            }] `
+            this.log.prefix = `[WS:${this._subdomains[this._currentDc.id]}.${this._baseDomain}] `
         } else {
             this.log.prefix = '[WS:disconnected] '
         }
@@ -107,9 +101,7 @@ export abstract class BaseWebSocketTransport
         this._state = TransportState.Connecting
         this._currentDc = dc
         this._socket = new ws!(
-            `wss://${this._subdomains[dc.id]}.${this._baseDomain}/apiws${
-                testMode ? '_test' : ''
-            }`,
+            `wss://${this._subdomains[dc.id]}.${this._baseDomain}/apiws${testMode ? '_test' : ''}`,
             'binary',
         )
 
@@ -119,9 +111,7 @@ export abstract class BaseWebSocketTransport
         this._socket.binaryType = 'arraybuffer'
 
         this._socket.addEventListener('message', (evt) =>
-            this._packetCodec.feed(
-                typedArrayToBuffer(evt.data as NodeJS.TypedArray),
-            ),
+            this._packetCodec.feed(typedArrayToBuffer(evt.data as NodeJS.TypedArray)),
         )
         this._socket.addEventListener('open', this.handleConnect.bind(this))
         this._socket.addEventListener('error', this.handleError.bind(this))
@@ -142,10 +132,7 @@ export abstract class BaseWebSocketTransport
     }
 
     handleError(event: Event | { error: Error }): void {
-        const error =
-            'error' in event ?
-                event.error :
-                new Error('unknown WebSocket error')
+        const error = 'error' in event ? event.error : new Error('unknown WebSocket error')
 
         this.log.error('error: %s', error.stack)
         this.emit('error', error)

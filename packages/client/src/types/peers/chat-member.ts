@@ -16,13 +16,7 @@ import { User } from './user'
  *  - `banned`: user was banned from the chat
  *  - `left`: user left the chat on their own
  */
-export type ChatMemberStatus =
-    | 'creator'
-    | 'admin'
-    | 'member'
-    | 'restricted'
-    | 'banned'
-    | 'left'
+export type ChatMemberStatus = 'creator' | 'admin' | 'member' | 'restricted' | 'banned' | 'left'
 
 /**
  * Information about one chat member
@@ -43,22 +37,12 @@ export class ChatMember {
             switch (this.raw._) {
                 case 'channelParticipantBanned':
                 case 'channelParticipantLeft':
-                    assertTypeIs(
-                        'ChatMember#user (raw.peer)',
-                        this.raw.peer,
-                        'peerUser',
-                    )
+                    assertTypeIs('ChatMember#user (raw.peer)', this.raw.peer, 'peerUser')
 
-                    this._user = new User(
-                        this.client,
-                        this._peers.user(this.raw.peer.userId),
-                    )
+                    this._user = new User(this.client, this._peers.user(this.raw.peer.userId))
                     break
                 default:
-                    this._user = new User(
-                        this.client,
-                        this._peers.user(this.raw.userId),
-                    )
+                    this._user = new User(this.client, this._peers.user(this.raw.userId))
                     break
             }
         }
@@ -84,9 +68,7 @@ export class ChatMember {
             case 'channelParticipantLeft':
                 return 'left'
             case 'channelParticipantBanned':
-                return this.raw.bannedRights.viewMessages ?
-                    'banned' :
-                    'restricted'
+                return this.raw.bannedRights.viewMessages ? 'banned' : 'restricted'
         }
 
         // fallback
@@ -136,10 +118,7 @@ export class ChatMember {
     get invitedBy(): User | null {
         if (this._invitedBy === undefined) {
             if ('inviterId' in this.raw && this.raw.inviterId) {
-                this._invitedBy = new User(
-                    this.client,
-                    this._peers.user(this.raw.inviterId),
-                )
+                this._invitedBy = new User(this.client, this._peers.user(this.raw.inviterId))
             } else {
                 this._invitedBy = null
             }
@@ -157,10 +136,7 @@ export class ChatMember {
     get promotedBy(): User | null {
         if (this._promotedBy === undefined) {
             if (this.raw._ === 'channelParticipantAdmin') {
-                this._promotedBy = new User(
-                    this.client,
-                    this._peers.user(this.raw.promotedBy),
-                )
+                this._promotedBy = new User(this.client, this._peers.user(this.raw.promotedBy))
             } else {
                 this._promotedBy = null
             }
@@ -178,10 +154,7 @@ export class ChatMember {
     get restrictedBy(): User | null {
         if (this._restrictedBy === undefined) {
             if (this.raw._ === 'channelParticipantBanned') {
-                this._restrictedBy = new User(
-                    this.client,
-                    this._peers.user(this.raw.kickedBy),
-                )
+                this._restrictedBy = new User(this.client, this._peers.user(this.raw.kickedBy))
             } else {
                 this._restrictedBy = null
             }
@@ -198,9 +171,7 @@ export class ChatMember {
     get restrictions(): ChatPermissions | null {
         if (this.raw._ !== 'channelParticipantBanned') return null
 
-        return (this._restrictions ??= new ChatPermissions(
-            this.raw.bannedRights,
-        ))
+        return (this._restrictions ??= new ChatPermissions(this.raw.bannedRights))
     }
 
     /**
@@ -209,9 +180,7 @@ export class ChatMember {
      * Makes sense only when `status = restricted or staus = banned`
      */
     get isMember(): boolean {
-        return this.raw._ === 'channelParticipantBanned' ?
-            !this.raw.left :
-            this.raw._ !== 'channelParticipantLeft'
+        return this.raw._ === 'channelParticipantBanned' ? !this.raw.left : this.raw._ !== 'channelParticipantLeft'
     }
 
     /**

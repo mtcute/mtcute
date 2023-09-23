@@ -11,11 +11,7 @@ import { makeInspectable } from '../utils'
  * interacts with the bot.
  */
 export class BotStoppedUpdate {
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.RawUpdateBotStopped,
-        readonly _peers: PeersIndex,
-    ) {}
+    constructor(readonly client: TelegramClient, readonly raw: tl.RawUpdateBotStopped, readonly _peers: PeersIndex) {}
 
     /**
      * ID of the user who stopped or restarted the bot
@@ -30,10 +26,7 @@ export class BotStoppedUpdate {
      * User who stopped or restarted the bot
      */
     get user(): User {
-        return (this._user ??= new User(
-            this.client,
-            this._peers.user(this.raw.userId),
-        ))
+        return (this._user ??= new User(this.client, this._peers.user(this.raw.userId)))
     }
 
     /**

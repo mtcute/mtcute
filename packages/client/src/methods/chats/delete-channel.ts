@@ -9,16 +9,10 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  * @param chatId  Chat ID or username
  * @internal
  */
-export async function deleteChannel(
-    this: TelegramClient,
-    chatId: InputPeerLike,
-): Promise<void> {
+export async function deleteChannel(this: TelegramClient, chatId: InputPeerLike): Promise<void> {
     const res = await this.call({
         _: 'channels.deleteChannel',
-        channel: normalizeToInputChannel(
-            await this.resolvePeer(chatId),
-            chatId,
-        ),
+        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
     })
     this._handleUpdate(res)
 }

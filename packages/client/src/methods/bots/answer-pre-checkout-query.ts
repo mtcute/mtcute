@@ -9,11 +9,7 @@ import { TelegramClient } from '../../client'
  * @param error  If pre-checkout is rejected, error message to show to the user
  * @internal
  */
-export async function answerPreCheckoutQuery(
-    this: TelegramClient,
-    queryId: tl.Long,
-    error?: string,
-): Promise<void> {
+export async function answerPreCheckoutQuery(this: TelegramClient, queryId: tl.Long, error?: string): Promise<void> {
     await this.call({
         _: 'messages.setBotPrecheckoutResults',
         queryId,

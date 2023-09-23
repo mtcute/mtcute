@@ -1,12 +1,7 @@
 import Long from 'long'
 
 import { assertTypeIs } from '@mtcute/core/utils'
-import {
-    fileIdToInputDocument,
-    fileIdToInputPhoto,
-    parseFileId,
-    tdFileId,
-} from '@mtcute/file-id'
+import { fileIdToInputDocument, fileIdToInputPhoto, parseFileId, tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -205,9 +200,7 @@ export async function _normalizeInputMedia(
         let sendMime
 
         if (media.type === 'sticker') {
-            sendMime = media.isAnimated ?
-                'application/x-tgsticker' :
-                'image/webp'
+            sendMime = media.isAnimated ? 'application/x-tgsticker' : 'image/webp'
         } else {
             sendMime = media.fileMime
         }
@@ -225,10 +218,7 @@ export async function _normalizeInputMedia(
 
     const uploadPeer = params.uploadPeer ?? { _: 'inputPeerSelf' }
 
-    const uploadMediaIfNeeded = async (
-        inputMedia: tl.TypeInputMedia,
-        photo: boolean,
-    ): Promise<tl.TypeInputMedia> => {
+    const uploadMediaIfNeeded = async (inputMedia: tl.TypeInputMedia, photo: boolean): Promise<tl.TypeInputMedia> => {
         if (!uploadMedia) return inputMedia
 
         const res = await this.call({
@@ -238,16 +228,8 @@ export async function _normalizeInputMedia(
         })
 
         if (photo) {
-            assertTypeIs(
-                'normalizeInputMedia (@ messages.uploadMedia)',
-                res,
-                'messageMediaPhoto',
-            )
-            assertTypeIs(
-                'normalizeInputMedia (@ messages.uploadMedia)',
-                res.photo!,
-                'photo',
-            )
+            assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaPhoto')
+            assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.photo!, 'photo')
 
             return {
                 _: 'inputMediaPhoto',
@@ -260,16 +242,8 @@ export async function _normalizeInputMedia(
                 ttlSeconds: media.ttlSeconds,
             }
         }
-        assertTypeIs(
-            'normalizeInputMedia (@ messages.uploadMedia)',
-            res,
-            'messageMediaDocument',
-        )
-        assertTypeIs(
-            'normalizeInputMedia (@ messages.uploadMedia)',
-            res.document!,
-            'document',
-        )
+        assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaDocument')
+        assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.document!, 'document')
 
         return {
             _: 'inputMediaDocument',
@@ -289,10 +263,7 @@ export async function _normalizeInputMedia(
         if (typeof input === 'string' && input.match(/^https?:\/\//)) {
             return uploadMediaIfNeeded(
                 {
-                    _:
-                        media.type === 'photo' ?
-                            'inputMediaPhotoExternal' :
-                            'inputMediaDocumentExternal',
+                    _: media.type === 'photo' ? 'inputMediaPhotoExternal' : 'inputMediaDocumentExternal',
                     url: input,
                 },
                 media.type === 'photo',
@@ -300,8 +271,7 @@ export async function _normalizeInputMedia(
         } else if (typeof input === 'string' && input.match(/^file:/)) {
             await upload(input.substring(5))
         } else {
-            const parsed =
-                typeof input === 'string' ? parseFileId(input) : input
+            const parsed = typeof input === 'string' ? parseFileId(input) : input
 
             if (parsed.location._ === 'photo') {
                 return {
@@ -359,11 +329,7 @@ export async function _normalizeInputMedia(
     if (media.type !== 'voice') {
         attributes.push({
             _: 'documentAttributeFilename',
-            fileName:
-                media.fileName ||
-                (typeof media.file === 'string' ?
-                    extractFileName(media.file) :
-                    'unnamed'),
+            fileName: media.fileName || (typeof media.file === 'string' ? extractFileName(media.file) : 'unnamed'),
         })
     }
 
@@ -389,10 +355,7 @@ export async function _normalizeInputMedia(
             duration: media.duration || 0,
             title: media.type === 'audio' ? media.title : undefined,
             performer: media.type === 'audio' ? media.performer : undefined,
-            waveform:
-                media.type === 'voice' && media.waveform ?
-                    encodeWaveform(media.waveform) :
-                    undefined,
+            waveform: media.type === 'voice' && media.waveform ? encodeWaveform(media.waveform) : undefined,
         })
     }
 

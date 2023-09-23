@@ -1,8 +1,4 @@
-import {
-    getMarkedPeerId,
-    MtArgumentError,
-    MtTypeAssertionError,
-} from '@mtcute/core'
+import { getMarkedPeerId, MtArgumentError, MtTypeAssertionError } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
@@ -122,11 +118,7 @@ export async function sendText(
 ): Promise<Message> {
     if (!params) params = {}
 
-    const [message, entities] = await this._parseEntities(
-        text,
-        params.parseMode,
-        params.entities,
-    )
+    const [message, entities] = await this._parseEntities(text, params.parseMode, params.entities)
 
     let peer = await this.resolvePeer(chatId)
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
@@ -134,27 +126,18 @@ export async function sendText(
     let replyTo = normalizeMessageId(params.replyTo)
 
     if (params.commentTo) {
-        [peer, replyTo] = await this._getDiscussionMessage(
-            peer,
-            normalizeMessageId(params.commentTo)!,
-        )
+        [peer, replyTo] = await this._getDiscussionMessage(peer, normalizeMessageId(params.commentTo)!)
     }
 
     if (params.mustReply) {
         if (!replyTo) {
-            throw new MtArgumentError(
-                'mustReply used, but replyTo was not passed',
-            )
+            throw new MtArgumentError('mustReply used, but replyTo was not passed')
         }
 
         const msg = await this.getMessages(peer, replyTo)
 
         if (!msg) {
-            throw new MtMessageNotFoundError(
-                getMarkedPeerId(peer),
-                replyTo,
-                'to reply to',
-            )
+            throw new MtMessageNotFoundError(getMarkedPeerId(peer), replyTo, 'to reply to')
         }
     }
 
@@ -176,9 +159,7 @@ export async function sendText(
         entities,
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs ?
-            await this.resolvePeer(params.sendAs) :
-            undefined,
+        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined,
     })
 
     if (res._ === 'updateShortSentMessage') {
@@ -199,9 +180,7 @@ export async function sendText(
 
         const peers = new PeersIndex()
 
-        const fetchPeer = async (
-            peer: tl.TypePeer | tl.TypeInputPeer,
-        ): Promise<void> => {
+        const fetchPeer = async (peer: tl.TypePeer | tl.TypeInputPeer): Promise<void> => {
             const id = getMarkedPeerId(peer)
 
             let cached = await this.storage.getFullPeerById(id)
@@ -224,11 +203,7 @@ export async function sendText(
             }
 
             if (!cached) {
-                throw new MtTypeAssertionError(
-                    'sendText (@ getFullPeerById)',
-                    'user | chat',
-                    'null',
-                )
+                throw new MtTypeAssertionError('sendText (@ getFullPeerById)', 'user | chat', 'null')
             }
 
             switch (cached._) {

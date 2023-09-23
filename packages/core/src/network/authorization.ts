@@ -3,29 +3,11 @@ import Long from 'long'
 
 import { mtp } from '@mtcute/tl'
 import { TlPublicKey } from '@mtcute/tl/binary/rsa-keys'
-import {
-    TlBinaryReader,
-    TlBinaryWriter,
-    TlSerializationCounter,
-} from '@mtcute/tl-runtime'
+import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 
-import {
-    MtArgumentError,
-    MtSecurityError,
-    MtTypeAssertionError,
-} from '../types'
-import {
-    bigIntToBuffer,
-    bufferToBigInt,
-    ICryptoProvider,
-    Logger,
-} from '../utils'
-import {
-    buffersEqual,
-    randomBytes,
-    xorBuffer,
-    xorBufferInPlace,
-} from '../utils/buffer-utils'
+import { MtArgumentError, MtSecurityError, MtTypeAssertionError } from '../types'
+import { bigIntToBuffer, bufferToBigInt, ICryptoProvider, Logger } from '../utils'
+import { buffersEqual, randomBytes, xorBuffer, xorBufferInPlace } from '../utils/buffer-utils'
 import { findKeyByFingerprints } from '../utils/crypto/keys'
 import { millerRabin } from '../utils/crypto/miller-rabin'
 import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto'
@@ -59,22 +41,15 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
     let checkedPrime = checkedPrimesCache.find((x) => x.prime.eq(dhPrime))
 
     if (!checkedPrime) {
-        if (
-            dhPrime.lesserOrEquals(TWO_POW_2047) ||
-            dhPrime.greaterOrEquals(TWO_POW_2048)
-        ) {
-            throw new MtSecurityError(
-                'Step 3: dh_prime is not in the 2048-bit range',
-            )
+        if (dhPrime.lesserOrEquals(TWO_POW_2047) || dhPrime.greaterOrEquals(TWO_POW_2048)) {
+            throw new MtSecurityError('Step 3: dh_prime is not in the 2048-bit range')
         }
 
         if (!millerRabin(dhPrime)) {
             throw new MtSecurityError('Step 3: dh_prime is not prime')
         }
         if (!millerRabin(dhPrime.minus(1).divide(2))) {
-            throw new MtSecurityError(
-                'Step 3: dh_prime is not a safe prime - (dh_prime-1)/2 is not prime',
-            )
+            throw new MtSecurityError('Step 3: dh_prime is not a safe prime - (dh_prime-1)/2 is not prime')
         }
 
         log.debug('dh_prime is probably prime')
@@ -99,16 +74,12 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
     switch (g) {
         case 2:
             if (dhPrime.mod(8).notEquals(7)) {
-                throw new MtSecurityError(
-                    'Step 3: ivalid g - dh_prime mod 8 != 7',
-                )
+                throw new MtSecurityError('Step 3: ivalid g - dh_prime mod 8 != 7')
             }
             break
         case 3:
             if (dhPrime.mod(3).notEquals(2)) {
-                throw new MtSecurityError(
-                    'Step 3: ivalid g - dh_prime mod 3 != 2',
-                )
+                throw new MtSecurityError('Step 3: ivalid g - dh_prime mod 3 != 2')
             }
             break
         case 4:
@@ -117,9 +88,7 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
             const mod = dhPrime.mod(5)
 
             if (mod.notEquals(1) && mod.notEquals(4)) {
-                throw new MtSecurityError(
-                    'Step 3: ivalid g - dh_prime mod 5 != 1 && dh_prime mod 5 != 4',
-                )
+                throw new MtSecurityError('Step 3: ivalid g - dh_prime mod 5 != 1 && dh_prime mod 5 != 4')
             }
             break
         }
@@ -127,9 +96,7 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
             const mod = dhPrime.mod(24)
 
             if (mod.notEquals(19) && mod.notEquals(23)) {
-                throw new MtSecurityError(
-                    'Step 3: ivalid g - dh_prime mod 24 != 19 && dh_prime mod 24 != 23',
-                )
+                throw new MtSecurityError('Step 3: ivalid g - dh_prime mod 24 != 19 && dh_prime mod 24 != 23')
             }
             break
         }
@@ -152,11 +119,7 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
     log.debug('g = %d is safe to use with dh_prime', g)
 }
 
-async function rsaPad(
-    data: Buffer,
-    crypto: ICryptoProvider,
-    key: TlPublicKey,
-): Promise<Buffer> {
+async function rsaPad(data: Buffer, crypto: ICryptoProvider, key: TlPublicKey): Promise<Buffer> {
     // since Summer 2021, they use "version of RSA with a variant of OAEP+ padding explained below"
 
     const keyModulus = bigInt(key.modulus, 16)
@@ -173,10 +136,7 @@ async function rsaPad(
 
         const aesKey = randomBytes(32)
 
-        const dataWithHash = Buffer.concat([
-            data,
-            await crypto.sha256(Buffer.concat([aesKey, data])),
-        ])
+        const dataWithHash = Buffer.concat([data, await crypto.sha256(Buffer.concat([aesKey, data]))])
         // we only need to reverse the data
         dataWithHash.slice(0, 192).reverse()
 
@@ -193,20 +153,13 @@ async function rsaPad(
             continue
         }
 
-        const encryptedBigint = decryptedDataBigint.modPow(
-            keyExponent,
-            keyModulus,
-        )
+        const encryptedBigint = decryptedDataBigint.modPow(keyExponent, keyModulus)
 
         return bigIntToBuffer(encryptedBigint, 256)
     }
 }
 
-async function rsaEncrypt(
-    data: Buffer,
-    crypto: ICryptoProvider,
-    key: TlPublicKey,
-): Promise<Buffer> {
+async function rsaEncrypt(data: Buffer, crypto: ICryptoProvider, key: TlPublicKey): Promise<Buffer> {
     const toEncrypt = Buffer.concat([
         await crypto.sha1(data),
         data,
@@ -214,10 +167,7 @@ async function rsaEncrypt(
         randomBytes(235 - data.length),
     ])
 
-    const encryptedBigInt = bufferToBigInt(toEncrypt).modPow(
-        bigInt(key.exponent, 16),
-        bigInt(key.modulus, 16),
-    )
+    const encryptedBigInt = bufferToBigInt(toEncrypt).modPow(bigInt(key.exponent, 16), bigInt(key.modulus, 16))
 
     return bigIntToBuffer(encryptedBigInt)
 }
@@ -239,10 +189,7 @@ export async function doAuthorization(
     const log = connection.log.create('auth')
 
     function sendPlainMessage(message: mtp.TlObject): Promise<void> {
-        const length = TlSerializationCounter.countNeededBytes(
-            writerMap,
-            message,
-        )
+        const length = TlSerializationCounter.countNeededBytes(writerMap, message)
         const writer = TlBinaryWriter.alloc(writerMap, length + 20) // 20 bytes for mtproto header
 
         const messageId = session.getMessageId()
@@ -283,9 +230,7 @@ export async function doAuthorization(
         throw new MtSecurityError('Step 1: invalid nonce from server')
     }
 
-    const serverKeys = resPq.serverPublicKeyFingerprints.map((it) =>
-        it.toUnsigned().toString(16),
-    )
+    const serverKeys = resPq.serverPublicKeyFingerprints.map((it) => it.toUnsigned().toString(16))
     log.debug('received PQ, keys: %j', serverKeys)
 
     // Step 2: DH exchange
@@ -293,15 +238,10 @@ export async function doAuthorization(
 
     if (!publicKey) {
         throw new MtSecurityError(
-            'Step 2: Could not find server public key with any of these fingerprints: ' +
-                serverKeys.join(', '),
+            'Step 2: Could not find server public key with any of these fingerprints: ' + serverKeys.join(', '),
         )
     }
-    log.debug(
-        'found server key, fp = %s, old = %s',
-        publicKey.fingerprint,
-        publicKey.old,
-    )
+    log.debug('found server key, fp = %s, old = %s', publicKey.fingerprint, publicKey.old)
 
     const [p, q] = await crypto.factorizePQ(resPq.pq)
     log.debug('factorized PQ: PQ = %h, P = %h, Q = %h', resPq.pq, p, q)
@@ -367,30 +307,15 @@ export async function doAuthorization(
     }
 
     // Step 3: complete DH exchange
-    const [key, iv] = await generateKeyAndIvFromNonce(
-        crypto,
-        resPq.serverNonce,
-        newNonce,
-    )
+    const [key, iv] = await generateKeyAndIvFromNonce(crypto, resPq.serverNonce, newNonce)
     const ige = crypto.createAesIge(key, iv)
 
     const plainTextAnswer = await ige.decrypt(serverDhParams.encryptedAnswer)
     const innerDataHash = plainTextAnswer.slice(0, 20)
-    const serverDhInnerReader = new TlBinaryReader(
-        readerMap,
-        plainTextAnswer,
-        20,
-    )
+    const serverDhInnerReader = new TlBinaryReader(readerMap, plainTextAnswer, 20)
     const serverDhInner = serverDhInnerReader.object() as mtp.TlObject
 
-    if (
-        !buffersEqual(
-            innerDataHash,
-            await crypto.sha1(
-                plainTextAnswer.slice(20, serverDhInnerReader.pos),
-            ),
-        )
-    ) {
+    if (!buffersEqual(innerDataHash, await crypto.sha1(plainTextAnswer.slice(20, serverDhInnerReader.pos)))) {
         throw new MtSecurityError('Step 3: invalid inner data hash')
     }
 
@@ -412,10 +337,7 @@ export async function doAuthorization(
     checkDhPrime(log, dhPrime, serverDhInner.g)
 
     let retryId = Long.ZERO
-    const serverSalt = xorBuffer(
-        newNonce.slice(0, 8),
-        resPq.serverNonce.slice(0, 8),
-    )
+    const serverSalt = xorBuffer(newNonce.slice(0, 8), resPq.serverNonce.slice(0, 8))
 
     for (;;) {
         const b = bufferToBigInt(randomBytes(256))
@@ -425,34 +347,21 @@ export async function doAuthorization(
         const authKeyAuxHash = (await crypto.sha1(authKey)).slice(0, 8)
 
         // validate DH params
-        if (
-            g.lesserOrEquals(1) ||
-            g.greaterOrEquals(dhPrime.minus(bigInt.one))
-        ) {
+        if (g.lesserOrEquals(1) || g.greaterOrEquals(dhPrime.minus(bigInt.one))) {
             throw new MtSecurityError('g is not within (1, dh_prime - 1)')
         }
-        if (
-            gA.lesserOrEquals(1) ||
-            gA.greaterOrEquals(dhPrime.minus(bigInt.one))
-        ) {
+        if (gA.lesserOrEquals(1) || gA.greaterOrEquals(dhPrime.minus(bigInt.one))) {
             throw new MtSecurityError('g_a is not within (1, dh_prime - 1)')
         }
-        if (
-            gB.lesserOrEquals(1) ||
-            gB.greaterOrEquals(dhPrime.minus(bigInt.one))
-        ) {
+        if (gB.lesserOrEquals(1) || gB.greaterOrEquals(dhPrime.minus(bigInt.one))) {
             throw new MtSecurityError('g_b is not within (1, dh_prime - 1)')
         }
 
         if (gA.lt(DH_SAFETY_RANGE) || gA.gt(dhPrime.minus(DH_SAFETY_RANGE))) {
-            throw new MtSecurityError(
-                'g_a is not within (2^{2048-64}, dh_prime - 2^{2048-64})',
-            )
+            throw new MtSecurityError('g_a is not within (2^{2048-64}, dh_prime - 2^{2048-64})')
         }
         if (gB.lt(DH_SAFETY_RANGE) || gB.gt(dhPrime.minus(DH_SAFETY_RANGE))) {
-            throw new MtSecurityError(
-                'g_b is not within (2^{2048-64}, dh_prime - 2^{2048-64})',
-            )
+            throw new MtSecurityError('g_b is not within (2^{2048-64}, dh_prime - 2^{2048-64})')
         }
 
         const gB_ = bigIntToBuffer(gB, 0, false)
@@ -465,18 +374,14 @@ export async function doAuthorization(
             retryId,
             gB: gB_,
         }
-        let innerLength =
-            TlSerializationCounter.countNeededBytes(writerMap, clientDhInner) +
-            20 // for hash
+        let innerLength = TlSerializationCounter.countNeededBytes(writerMap, clientDhInner) + 20 // for hash
         const innerPaddingLength = innerLength % 16
         if (innerPaddingLength > 0) innerLength += 16 - innerPaddingLength
 
         const clientDhInnerWriter = TlBinaryWriter.alloc(writerMap, innerLength)
         clientDhInnerWriter.pos = 20
         clientDhInnerWriter.object(clientDhInner)
-        const clientDhInnerHash = await crypto.sha1(
-            clientDhInnerWriter.buffer.slice(20, clientDhInnerWriter.pos),
-        )
+        const clientDhInnerHash = await crypto.sha1(clientDhInnerWriter.buffer.slice(20, clientDhInnerWriter.pos))
         clientDhInnerWriter.pos = 0
         clientDhInnerWriter.raw(clientDhInnerHash)
 
@@ -493,11 +398,7 @@ export async function doAuthorization(
         const dhGen = await readNext()
 
         if (!mtp.isAnySet_client_DH_params_answer(dhGen)) {
-            throw new MtTypeAssertionError(
-                'auth step 4',
-                'set_client_DH_params_answer',
-                dhGen._,
-            )
+            throw new MtTypeAssertionError('auth step 4', 'set_client_DH_params_answer', dhGen._)
         }
 
         if (!buffersEqual(dhGen.nonce, nonce)) {
@@ -511,17 +412,11 @@ export async function doAuthorization(
 
         if (dhGen._ === 'mt_dh_gen_fail') {
             // in theory i would be supposed to calculate newNonceHash, but why, we are failing anyway
-            throw new MtTypeAssertionError(
-                'auth step 4',
-                '!mt_dh_gen_fail',
-                dhGen._,
-            )
+            throw new MtTypeAssertionError('auth step 4', '!mt_dh_gen_fail', dhGen._)
         }
 
         if (dhGen._ === 'mt_dh_gen_retry') {
-            const expectedHash = await crypto.sha1(
-                Buffer.concat([newNonce, Buffer.from([2]), authKeyAuxHash]),
-            )
+            const expectedHash = await crypto.sha1(Buffer.concat([newNonce, Buffer.from([2]), authKeyAuxHash]))
 
             if (!buffersEqual(expectedHash.slice(4, 20), dhGen.newNonceHash2)) {
                 throw Error('Step 4: invalid retry nonce hash from server')
@@ -532,9 +427,7 @@ export async function doAuthorization(
 
         if (dhGen._ !== 'mt_dh_gen_ok') throw new Error() // unreachable
 
-        const expectedHash = await crypto.sha1(
-            Buffer.concat([newNonce, Buffer.from([1]), authKeyAuxHash]),
-        )
+        const expectedHash = await crypto.sha1(Buffer.concat([newNonce, Buffer.from([1]), authKeyAuxHash]))
 
         if (!buffersEqual(expectedHash.slice(4, 20), dhGen.newNonceHash1)) {
             throw Error('Step 4: invalid nonce hash from server')
@@ -542,10 +435,6 @@ export async function doAuthorization(
 
         log.info('authorization successful')
 
-        return [
-            authKey,
-            new Long(serverSalt.readInt32LE(), serverSalt.readInt32LE(4)),
-            timeOffset,
-        ]
+        return [authKey, new Long(serverSalt.readInt32LE(), serverSalt.readInt32LE(4)), timeOffset]
     }
 }

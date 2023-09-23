@@ -1,9 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
-import {
-    isInputPeerChannel,
-    normalizeToInputChannel,
-} from '../../utils/peer-utils'
+import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
 
 /**
@@ -29,9 +26,7 @@ export async function readHistory(
         })
 
         if (isInputPeerChannel(peer)) {
-            this._handleUpdate(
-                createDummyUpdate(res.pts, res.ptsCount, peer.channelId),
-            )
+            this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount, peer.channelId))
         } else {
             this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
         }

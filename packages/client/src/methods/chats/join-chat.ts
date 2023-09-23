@@ -1,9 +1,6 @@
 import { TelegramClient } from '../../client'
 import { Chat, InputPeerLike } from '../../types'
-import {
-    INVITE_LINK_REGEX,
-    normalizeToInputChannel,
-} from '../../utils/peer-utils'
+import { INVITE_LINK_REGEX, normalizeToInputChannel } from '../../utils/peer-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
@@ -18,10 +15,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  *   or ID of the linked supergroup or channel.
  * @internal
  */
-export async function joinChat(
-    this: TelegramClient,
-    chatId: InputPeerLike,
-): Promise<Chat> {
+export async function joinChat(this: TelegramClient, chatId: InputPeerLike): Promise<Chat> {
     if (typeof chatId === 'string') {
         const m = chatId.match(INVITE_LINK_REGEX)
 
@@ -40,10 +34,7 @@ export async function joinChat(
 
     const res = await this.call({
         _: 'channels.joinChannel',
-        channel: normalizeToInputChannel(
-            await this.resolvePeer(chatId),
-            chatId,
-        ),
+        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
     })
 
     assertIsUpdatesGroup('channels.joinChannel', res)

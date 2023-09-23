@@ -50,21 +50,10 @@ export function getBarePeerId(peer: tl.TypePeer): number {
  * - ID is negated and `-1e12` is subtracted for channels
  */
 export function getMarkedPeerId(peerId: number, peerType: BasicPeerType): number
-export function getMarkedPeerId(
-    peer:
-        | tl.TypePeer
-        | tl.TypeInputPeer
-        | tl.TypeInputUser
-        | tl.TypeInputChannel
-): number
+export function getMarkedPeerId(peer: tl.TypePeer | tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel): number
 
 export function getMarkedPeerId(
-    peer:
-        | tl.TypePeer
-        | tl.TypeInputPeer
-        | tl.TypeInputUser
-        | tl.TypeInputChannel
-        | number,
+    peer: tl.TypePeer | tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | number,
     peerType?: BasicPeerType,
 ): number {
     if (typeof peer === 'number') {
@@ -153,9 +142,7 @@ export function markedPeerIdToBare(peerId: number): number {
  * Extracts all (cacheable) entities from a TlObject or a list of them.
  * Only checks `.user`, `.chat`, `.channel`, `.users` and `.chats` properties
  */
-export function* getAllPeersFrom(
-    obj: tl.TlObject | tl.TlObject[],
-): Iterable<tl.TypeUser | tl.TypeChat> {
+export function* getAllPeersFrom(obj: tl.TlObject | tl.TlObject[]): Iterable<tl.TypeUser | tl.TypeChat> {
     if (typeof obj !== 'object') return
 
     if (Array.isArray(obj)) {
@@ -177,11 +164,7 @@ export function* getAllPeersFrom(
             return
     }
 
-    if (
-        'user' in obj &&
-        typeof obj.user === 'object' &&
-        obj.user._ === 'user'
-    ) {
+    if ('user' in obj && typeof obj.user === 'object' && obj.user._ === 'user') {
         yield obj.user
     }
 

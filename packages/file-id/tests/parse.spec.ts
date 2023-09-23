@@ -13,65 +13,47 @@ describe('parsing file ids', () => {
     }
 
     it('parses common file ids', () => {
-        test(
-            'CAACAgIAAxkBAAEJny9gituz1_V_uSKBUuG_nhtzEtFOeQACXFoAAuCjggfYjw_KAAGSnkgfBA',
-            {
-                _: 'remoteFileLocation',
-                dcId: 2,
-                fileReference: Buffer.from(
-                    '0100099f2f608adbb3d7f57fb9228152e1bf9e1b7312d14e79',
-                    'hex',
-                ),
-                location: {
-                    _: 'common',
-                    accessHash: Long.fromString('5232780349138767832'),
-                    id: Long.fromString('541175087705905756'),
-                },
-                type: td.FileType.Sticker,
+        test('CAACAgIAAxkBAAEJny9gituz1_V_uSKBUuG_nhtzEtFOeQACXFoAAuCjggfYjw_KAAGSnkgfBA', {
+            _: 'remoteFileLocation',
+            dcId: 2,
+            fileReference: Buffer.from('0100099f2f608adbb3d7f57fb9228152e1bf9e1b7312d14e79', 'hex'),
+            location: {
+                _: 'common',
+                accessHash: Long.fromString('5232780349138767832'),
+                id: Long.fromString('541175087705905756'),
             },
-        )
-        test(
-            'BQACAgIAAxkBAAEJnzNgit00IDsKd07OdSeanwz8osecYAACdAwAAueoWEicaPvNdOYEwB8E',
-            {
-                _: 'remoteFileLocation',
-                dcId: 2,
-                fileReference: Buffer.from(
-                    '0100099f33608add34203b0a774ece75279a9f0cfca2c79c60',
-                    'hex',
-                ),
-                location: {
-                    _: 'common',
-                    accessHash: Long.fromString('-4610306729174144868'),
-                    id: Long.fromString('5213102278772264052'),
-                },
-                type: td.FileType.Document,
+            type: td.FileType.Sticker,
+        })
+        test('BQACAgIAAxkBAAEJnzNgit00IDsKd07OdSeanwz8osecYAACdAwAAueoWEicaPvNdOYEwB8E', {
+            _: 'remoteFileLocation',
+            dcId: 2,
+            fileReference: Buffer.from('0100099f33608add34203b0a774ece75279a9f0cfca2c79c60', 'hex'),
+            location: {
+                _: 'common',
+                accessHash: Long.fromString('-4610306729174144868'),
+                id: Long.fromString('5213102278772264052'),
             },
-        )
+            type: td.FileType.Document,
+        })
     })
 
     it('parses thumbnails file ids', () => {
-        test(
-            'AAMCAgADGQEAAQmfL2CK27PX9X-5IoFS4b-eG3MS0U55AAJcWgAC4KOCB9iPD8oAAZKeSK1c8w4ABAEAB20AA1kCAAIfBA',
-            {
-                _: 'remoteFileLocation',
-                dcId: 2,
-                fileReference: Buffer.from(
-                    '0100099f2f608adbb3d7f57fb9228152e1bf9e1b7312d14e79',
-                    'hex',
-                ),
-                location: {
-                    _: 'photo',
-                    accessHash: Long.fromString('5232780349138767832'),
-                    id: Long.fromString('541175087705905756'),
-                    source: {
-                        _: 'thumbnail',
-                        fileType: td.FileType.Thumbnail,
-                        thumbnailType: 'm',
-                    },
+        test('AAMCAgADGQEAAQmfL2CK27PX9X-5IoFS4b-eG3MS0U55AAJcWgAC4KOCB9iPD8oAAZKeSK1c8w4ABAEAB20AA1kCAAIfBA', {
+            _: 'remoteFileLocation',
+            dcId: 2,
+            fileReference: Buffer.from('0100099f2f608adbb3d7f57fb9228152e1bf9e1b7312d14e79', 'hex'),
+            location: {
+                _: 'photo',
+                accessHash: Long.fromString('5232780349138767832'),
+                id: Long.fromString('541175087705905756'),
+                source: {
+                    _: 'thumbnail',
+                    fileType: td.FileType.Thumbnail,
+                    thumbnailType: 'm',
                 },
-                type: td.FileType.Thumbnail,
             },
-        )
+            type: td.FileType.Thumbnail,
+        })
     })
 
     it('parses profile pictures', () => {

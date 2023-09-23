@@ -28,10 +28,7 @@ export class Dialog {
      * @param dialogs  Dialogs list
      * @param folder  If passed, status of pin will be checked against this folder, and not globally
      */
-    static findPinned(
-        dialogs: Dialog[],
-        folder?: tl.RawDialogFilter,
-    ): Dialog[] {
+    static findPinned(dialogs: Dialog[], folder?: tl.RawDialogFilter): Dialog[] {
         if (folder) {
             const index: Record<number, true> = {}
             folder.pinnedPeers.forEach((peer) => {
@@ -51,10 +48,7 @@ export class Dialog {
      * @param folder  Folder to filter for
      * @param excludePinned  Whether to exclude pinned folders
      */
-    static filterFolder(
-        folder: tl.TypeDialogFilter,
-        excludePinned = true,
-    ): (val: Dialog) => boolean {
+    static filterFolder(folder: tl.TypeDialogFilter, excludePinned = true): (val: Dialog) => boolean {
         if (folder._ === 'dialogFilterDefault') {
             return () => true
         }
@@ -110,17 +104,10 @@ export class Dialog {
             if (folder.contacts && chatType === 'private' && chat.isContact) {
                 return true
             }
-            if (
-                folder.nonContacts &&
-                chatType === 'private' &&
-                !chat.isContact
-            ) {
+            if (folder.nonContacts && chatType === 'private' && !chat.isContact) {
                 return true
             }
-            if (
-                folder.groups &&
-                (chatType === 'group' || chatType === 'supergroup')
-            ) {
+            if (folder.groups && (chatType === 'group' || chatType === 'supergroup')) {
                 return true
             }
             if (folder.broadcasts && chatType === 'channel') return true
@@ -180,9 +167,7 @@ export class Dialog {
             switch (peer._) {
                 case 'peerChannel':
                 case 'peerChat':
-                    chat = this._peers.chat(
-                        peer._ === 'peerChannel' ? peer.channelId : peer.chatId,
-                    )
+                    chat = this._peers.chat(peer._ === 'peerChannel' ? peer.channelId : peer.chatId)
                     break
                 default:
                     chat = this._peers.user(peer.userId)
@@ -204,11 +189,7 @@ export class Dialog {
             const cid = this.chat.id
 
             if (cid in this._messages) {
-                this._lastMessage = new Message(
-                    this.client,
-                    this._messages[cid],
-                    this._peers,
-                )
+                this._lastMessage = new Message(this.client, this._messages[cid], this._peers)
             } else {
                 throw new MtMessageNotFoundError(cid, 0)
             }
@@ -259,11 +240,7 @@ export class Dialog {
     get draftMessage(): DraftMessage | null {
         if (this._draftMessage === undefined) {
             if (this.raw.draft?._ === 'draftMessage') {
-                this._draftMessage = new DraftMessage(
-                    this.client,
-                    this.raw.draft,
-                    this.chat.inputPeer,
-                )
+                this._draftMessage = new DraftMessage(this.client, this.raw.draft, this.chat.inputPeer)
             } else {
                 this._draftMessage = null
             }

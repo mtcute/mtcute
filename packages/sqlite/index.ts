@@ -11,20 +11,12 @@ import {
     TlWriterMap,
     toggleChannelIdMark,
 } from '@mtcute/core'
-import {
-    Logger,
-    longFromFastString,
-    longToFastString,
-    LruMap,
-    throttle,
-} from '@mtcute/core/utils'
+import { Logger, longFromFastString, longToFastString, LruMap, throttle } from '@mtcute/core/utils'
 import { IStateStorage } from '@mtcute/dispatcher'
 
 // todo: add testMode to "self"
 
-function getInputPeer(
-    row: SqliteEntity | ITelegramStorage.PeerInfo,
-): tl.TypeInputPeer {
+function getInputPeer(row: SqliteEntity | ITelegramStorage.PeerInfo): tl.TypeInputPeer {
     const id = row.id
 
     switch (row.type) {
@@ -32,10 +24,7 @@ function getInputPeer(
             return {
                 _: 'inputPeerUser',
                 userId: id,
-                accessHash:
-                    'accessHash' in row ?
-                        row.accessHash :
-                        longFromFastString(row.hash),
+                accessHash: 'accessHash' in row ? row.accessHash : longFromFastString(row.hash),
             }
         case 'chat':
             return {
@@ -46,10 +35,7 @@ function getInputPeer(
             return {
                 _: 'inputPeerChannel',
                 channelId: toggleChannelIdMark(id),
-                accessHash:
-                    'accessHash' in row ?
-                        row.accessHash :
-                        longFromFastString(row.hash),
+                accessHash: 'accessHash' in row ? row.accessHash : longFromFastString(row.hash),
             }
     }
 
@@ -144,16 +130,13 @@ const STATEMENTS = {
     delKv: 'delete from kv where key = ?',
 
     getState: 'select value, expires from state where key = ?',
-    setState:
-        'insert or replace into state (key, value, expires) values (?, ?, ?)',
+    setState: 'insert or replace into state (key, value, expires) values (?, ?, ?)',
     delState: 'delete from state where key = ?',
 
     getAuth: 'select key from auth_keys where dc = ?',
-    getAuthTemp:
-        'select key from temp_auth_keys where dc = ? and idx = ? and expires > ?',
+    getAuthTemp: 'select key from temp_auth_keys where dc = ? and idx = ? and expires > ?',
     setAuth: 'insert or replace into auth_keys (dc, key) values (?, ?)',
-    setAuthTemp:
-        'insert or replace into temp_auth_keys (dc, idx, key, expires) values (?, ?, ?, ?)',
+    setAuthTemp: 'insert or replace into temp_auth_keys (dc, idx, key, expires) values (?, ?, ?, ?)',
     delAuth: 'delete from auth_keys where dc = ?',
     delAuthTemp: 'delete from temp_auth_keys where dc = ? and idx = ?',
     delAllAuthTemp: 'delete from temp_auth_keys where dc = ?',
@@ -162,8 +145,7 @@ const STATEMENTS = {
     setPts: 'insert or replace into pts (channel_id, pts) values (?, ?)',
 
     updateUpdated: 'update entities set updated = ? where id = ?',
-    updateCachedEnt:
-        'update entities set username = ?, phone = ?, updated = ?, "full" = ? where id = ?',
+    updateCachedEnt: 'update entities set username = ?, phone = ?, updated = ?, "full" = ? where id = ?',
     upsertEnt:
         'insert or replace into entities (id, hash, type, username, phone, updated, "full") values (?, ?, ?, ?, ?, ?, ?)',
     getEntById: 'select * from entities where id = ?',
@@ -365,8 +347,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     }
 
     private _setToKv(key: string, value: unknown, now = false): void {
-        const query =
-            value === null ? this._statements.delKv : this._statements.setKv
+        const query = value === null ? this._statements.delKv : this._statements.setKv
         const params = value === null ? [key] : [key, JSON.stringify(value)]
 
         if (now) {
@@ -383,9 +364,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         if (from < 2 || from > CURRENT_VERSION) {
             // 1 version was skipped during development
             // yes i am too lazy to make auto-migrations for them
-            throw new Error(
-                'Unsupported session version, please migrate manually',
-            )
+            throw new Error('Unsupported session version, please migrate manually')
         }
 
         if (from === 2) {
@@ -396,22 +375,16 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
 
         if (from === 3) {
             // media dc support added
-            const oldDc = this._db
-                .prepare("select value from kv where key = 'def_dc'")
-                .get()
+            const oldDc = this._db.prepare("select value from kv where key = 'def_dc'").get()
 
             if (oldDc) {
-                const oldDcValue = JSON.parse(
-                    (oldDc as { value: string }).value,
-                ) as tl.RawDcOption
-                this._db
-                    .prepare("update kv set value = ? where key = 'def_dc'")
-                    .run([
-                        JSON.stringify({
-                            main: oldDcValue,
-                            media: oldDcValue,
-                        }),
-                    ])
+                const oldDcValue = JSON.parse((oldDc as { value: string }).value) as tl.RawDcOption
+                this._db.prepare("update kv set value = ? where key = 'def_dc'").run([
+                    JSON.stringify({
+                        main: oldDcValue,
+                        media: oldDcValue,
+                    }),
+                ])
             }
             from = 4
         }
@@ -425,32 +398,23 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     private _initializeStatements(): void {
         this._statements = {} as unknown as typeof this._statements
         Object.entries(STATEMENTS).forEach(([name, sql]) => {
-            this._statements[name as keyof typeof this._statements] =
-                this._db.prepare(sql)
+            this._statements[name as keyof typeof this._statements] = this._db.prepare(sql)
         })
     }
 
     private _initialize(): void {
-        const hasTables = this._db
-            .prepare(
-                "select name from sqlite_master where type = 'table' and name = 'kv'",
-            )
-            .get()
+        const hasTables = this._db.prepare("select name from sqlite_master where type = 'table' and name = 'kv'").get()
 
         if (hasTables) {
             // tables already exist, check version
-            const versionResult = this._db
-                .prepare("select value from kv where key = 'ver'")
-                .get()
+            const versionResult = this._db.prepare("select value from kv where key = 'ver'").get()
             const version = Number((versionResult as { value: number }).value)
 
             this.log.debug('current db version = %d', version)
 
             if (version < CURRENT_VERSION) {
                 this._upgradeDatabase(version)
-                this._db
-                    .prepare("update kv set value = ? where key = 'ver'")
-                    .run(CURRENT_VERSION)
+                this._db.prepare("update kv set value = ? where key = 'ver'").run(CURRENT_VERSION)
             }
 
             // prepared statements expect latest schema, so we need to upgrade first
@@ -471,10 +435,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
 
     load(): void {
         this._db = sqlite3(this._filename, {
-            verbose:
-                this.log.mgr.level === 5 ?
-                    (this.log.verbose as Options['verbose']) :
-                    undefined,
+            verbose: this.log.mgr.level === 5 ? (this.log.verbose as Options['verbose']) : undefined,
         })
 
         this._initialize()
@@ -485,13 +446,11 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         }
 
         // helper methods
-        this._runMany = this._db.transaction(
-            (stmts: [sqlite3.Statement, unknown[]][]) => {
-                stmts.forEach((stmt) => {
-                    stmt[0].run(stmt[1])
-                })
-            },
-        )
+        this._runMany = this._db.transaction((stmts: [sqlite3.Statement, unknown[]][]) => {
+            stmts.forEach((stmt) => {
+                stmt[0].run(stmt[1])
+            })
+        })
 
         this._updateManyPeers = this._db.transaction((data: unknown[][]) => {
             data.forEach((it: unknown) => {
@@ -499,10 +458,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
             })
         })
 
-        this._vacuumTimeout = setInterval(
-            this._vacuum.bind(this),
-            this._vacuumInterval,
-        )
+        this._vacuumTimeout = setInterval(this._vacuum.bind(this), this._vacuumInterval)
     }
 
     save(): void {
@@ -550,25 +506,15 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         ])
     }
 
-    setTempAuthKeyFor(
-        dcId: number,
-        index: number,
-        key: Buffer | null,
-        expires: number,
-    ): void {
+    setTempAuthKeyFor(dcId: number, index: number, key: Buffer | null, expires: number): void {
         this._pending.push([
-            key === null ?
-                this._statements.delAuthTemp :
-                this._statements.setAuthTemp,
+            key === null ? this._statements.delAuthTemp : this._statements.setAuthTemp,
             key === null ? [dcId, index] : [dcId, index, key, expires],
         ])
     }
 
     dropAuthKeysFor(dcId: number): void {
-        this._pending.push(
-            [this._statements.delAuth, [dcId]],
-            [this._statements.delAllAuthTemp, [dcId]],
-        )
+        this._pending.push([this._statements.delAuth, [dcId]], [this._statements.delAllAuthTemp, [dcId]])
     }
 
     getSelf(): ITelegramStorage.SelfInfo | null {
@@ -623,11 +569,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         peers.forEach((peer) => {
             const cached = this._cache?.get(peer.id)
 
-            if (
-                cached &&
-                'accessHash' in cached.peer &&
-                cached.peer.accessHash.eq(peer.accessHash)
-            ) {
+            if (cached && 'accessHash' in cached.peer && cached.peer.accessHash.eq(peer.accessHash)) {
                 // when entity is cached and hash is the same, an update query is needed,
                 // since some field in the full entity might have changed, or the username/phone
                 //
@@ -660,10 +602,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
                         peer.username,
                         peer.phone,
                         Date.now(),
-                        TlBinaryWriter.serializeObject(
-                            this.writerMap,
-                            peer.full,
-                        ),
+                        TlBinaryWriter.serializeObject(this.writerMap, peer.full),
                     ],
                 ])
                 this._addToCache(peer.id, {
@@ -678,9 +617,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         const cached = this._cache?.get(peerId)
         if (cached) return cached.peer
 
-        const row = this._statements.getEntById.get(
-            peerId,
-        ) as SqliteEntity | null
+        const row = this._statements.getEntById.get(peerId) as SqliteEntity | null
 
         if (row) {
             const peer = getInputPeer(row)
@@ -696,9 +633,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     }
 
     getPeerByPhone(phone: string): tl.TypeInputPeer | null {
-        const row = this._statements.getEntByPhone.get(
-            phone,
-        ) as SqliteEntity | null
+        const row = this._statements.getEntByPhone.get(phone) as SqliteEntity | null
 
         if (row) {
             const peer = getInputPeer(row)
@@ -714,9 +649,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
     }
 
     getPeerByUsername(username: string): tl.TypeInputPeer | null {
-        const row = this._statements.getEntByUser.get(
-            username.toLowerCase(),
-        ) as SqliteEntity | null
+        const row = this._statements.getEntByUser.get(username.toLowerCase()) as SqliteEntity | null
         if (!row || Date.now() - row.updated > USERNAME_TTL) return null
 
         if (row) {
@@ -789,11 +722,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         }
 
         this._fsmCache?.set(key, item)
-        this._statements.setState.run(
-            key,
-            parse ? JSON.stringify(item.value) : item.value,
-            item.expires,
-        )
+        this._statements.setState.run(key, parse ? JSON.stringify(item.value) : item.value, item.expires)
     }
 
     deleteState(key: string): void {
@@ -837,11 +766,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
                 value: limit,
             }
 
-            this._statements.setState.run(
-                `$rate_limit_${key}`,
-                item.value,
-                item.expires,
-            )
+            this._statements.setState.run(`$rate_limit_${key}`, item.value, item.expires)
             this._rlCache?.set(key, item)
 
             return [item.value, item.expires!]
@@ -850,11 +775,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         if (val.value > 0) {
             val.value -= 1
 
-            this._statements.setState.run(
-                `$rate_limit_${key}`,
-                val.value,
-                val.expires,
-            )
+            this._statements.setState.run(`$rate_limit_${key}`, val.value, val.expires)
 
             if (!cached) {
                 // add to cache

@@ -22,9 +22,7 @@ export async function _normalizeInputFile(
     },
 ): Promise<tl.TypeInputFile> {
     if (typeof input === 'object' && tl.isAnyInputMedia(input)) {
-        throw new MtArgumentError(
-            "InputFile can't be created from an InputMedia",
-        )
+        throw new MtArgumentError("InputFile can't be created from an InputMedia")
     } else if (tdFileId.isFileIdLike(input)) {
         if (typeof input === 'string' && input.match(/^file:/)) {
             const uploaded = await this.uploadFile({
@@ -34,9 +32,7 @@ export async function _normalizeInputFile(
 
             return uploaded.inputFile
         }
-        throw new MtArgumentError(
-            "InputFile can't be created from an URL or a File ID",
-        )
+        throw new MtArgumentError("InputFile can't be created from an URL or a File ID")
     } else if (isUploadedFile(input)) {
         return input.inputFile
     } else if (typeof input === 'object' && tl.isAnyInputFile(input)) {

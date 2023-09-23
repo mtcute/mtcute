@@ -1,10 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
-import {
-    isInputPeerChannel,
-    isInputPeerChat,
-    normalizeToInputChannel,
-} from '../../utils/peer-utils'
+import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
 
 /**
  * Change chat title
@@ -15,11 +11,7 @@ import {
  * @param title  New chat title, 1-255 characters
  * @internal
  */
-export async function setChatTitle(
-    this: TelegramClient,
-    chatId: InputPeerLike,
-    title: string,
-): Promise<void> {
+export async function setChatTitle(this: TelegramClient, chatId: InputPeerLike, title: string): Promise<void> {
     const chat = await this.resolvePeer(chatId)
 
     let res

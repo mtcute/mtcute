@@ -15,11 +15,7 @@ export class AuthKey {
     clientSalt!: Buffer
     serverSalt!: Buffer
 
-    constructor(
-        readonly _crypto: ICryptoProvider,
-        readonly log: Logger,
-        readonly _readerMap: TlReaderMap,
-    ) {}
+    constructor(readonly _crypto: ICryptoProvider, readonly log: Logger, readonly _readerMap: TlReaderMap) {}
 
     match(keyId: Buffer): boolean {
         return this.ready && buffersEqual(keyId, this.id)
@@ -37,15 +33,10 @@ export class AuthKey {
         this.log.verbose('auth key set up, id = %h', this.id)
     }
 
-    async encryptMessage(
-        message: Buffer,
-        serverSalt: Long,
-        sessionId: Long,
-    ): Promise<Buffer> {
+    async encryptMessage(message: Buffer, serverSalt: Long, sessionId: Long): Promise<Buffer> {
         if (!this.ready) throw new MtcuteError('Keys are not set up!')
 
-        let padding =
-            (16 /* header size */ + message.length + 12) /* min padding */ % 16
+        let padding = (16 /* header size */ + message.length + 12) /* min padding */ % 16
         padding = 12 + (padding ? 16 - padding : 0)
 
         const buf = Buffer.alloc(16 + message.length + padding)
@@ -57,15 +48,8 @@ export class AuthKey {
         message.copy(buf, 16)
         randomBytes(padding).copy(buf, 16 + message.length)
 
-        const messageKey = (
-            await this._crypto.sha256(Buffer.concat([this.clientSalt, buf]))
-        ).slice(8, 24)
-        const ige = await createAesIgeForMessage(
-            this._crypto,
-            this.key,
-            messageKey,
-            true,
-        )
+        const messageKey = (await this._crypto.sha256(Buffer.concat([this.clientSalt, buf]))).slice(8, 24)
+        const ige = await createAesIgeForMessage(this._crypto, this.key, messageKey, true)
         const encryptedData = await ige.encrypt(buf)
 
         return Buffer.concat([this.id, messageKey, encryptedData])
@@ -79,19 +63,10 @@ export class AuthKey {
         const messageKey = data.slice(8, 24)
         const encryptedData = data.slice(24)
 
-        const ige = await createAesIgeForMessage(
-            this._crypto,
-            this.key,
-            messageKey,
-            false,
-        )
+        const ige = await createAesIgeForMessage(this._crypto, this.key, messageKey, false)
         const innerData = await ige.decrypt(encryptedData)
 
-        const expectedMessageKey = (
-            await this._crypto.sha256(
-                Buffer.concat([this.serverSalt, innerData]),
-            )
-        ).slice(8, 24)
+        const expectedMessageKey = (await this._crypto.sha256(Buffer.concat([this.serverSalt, innerData]))).slice(8, 24)
 
         if (!buffersEqual(messageKey, expectedMessageKey)) {
             this.log.warn(
@@ -109,10 +84,7 @@ export class AuthKey {
         const messageId = innerReader.long(true)
 
         if (sessionId_.neq(sessionId)) {
-            this.log.warn(
-                'ignoring message with invalid sessionId = %h',
-                sessionId_,
-            )
+            this.log.warn('ignoring message with invalid sessionId = %h', sessionId_)
 
             return
         }
@@ -121,20 +93,13 @@ export class AuthKey {
         const length = innerReader.uint()
 
         if (length > innerData.length - 32 /* header size */) {
-            this.log.warn(
-                'ignoring message with invalid length: %d > %d',
-                length,
-                innerData.length - 32,
-            )
+            this.log.warn('ignoring message with invalid length: %d > %d', length, innerData.length - 32)
 
             return
         }
 
         if (length % 4 !== 0) {
-            this.log.warn(
-                'ignoring message with invalid length: %d is not a multiple of 4',
-                length,
-            )
+            this.log.warn('ignoring message with invalid length: %d is not a multiple of 4', length)
 
             return
         }
@@ -142,10 +107,7 @@ export class AuthKey {
         const paddingSize = innerData.length - length - 32 // header size
 
         if (paddingSize < 12 || paddingSize > 1024) {
-            this.log.warn(
-                'ignoring message with invalid padding size: %d',
-                paddingSize,
-            )
+            this.log.warn('ignoring message with invalid padding size: %d', paddingSize)
 
             return
         }

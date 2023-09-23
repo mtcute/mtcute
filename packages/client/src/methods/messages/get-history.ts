@@ -84,13 +84,10 @@ export async function* getHistory(
     const minId = params.minId || 0
     const maxId = params.maxId || 0
 
-    let offsetId =
-        params.offsetId ?? (params.reverse && !params.offsetDate ? 1 : 0)
+    let offsetId = params.offsetId ?? (params.reverse && !params.offsetDate ? 1 : 0)
     const offsetDate = normalizeDate(params.offsetDate) || 0
     const baseOffset = -(params.reverse ? limit : 0)
-    let addOffset =
-        (params.offset ? params.offset * (params.reverse ? -1 : 1) : 0) +
-        baseOffset
+    let addOffset = (params.offset ? params.offset * (params.reverse ? -1 : 1) : 0) + baseOffset
 
     // resolve peer once and pass an InputPeer afterwards
     const peer = await this.resolvePeer(chatId)
@@ -109,18 +106,12 @@ export async function* getHistory(
         })
 
         if (res._ === 'messages.messagesNotModified') {
-            throw new MtTypeAssertionError(
-                'messages.getHistory',
-                '!messages.messagesNotModified',
-                res._,
-            )
+            throw new MtTypeAssertionError('messages.getHistory', '!messages.messagesNotModified', res._)
         }
 
         const peers = PeersIndex.from(res)
 
-        const msgs = res.messages
-            .filter((msg) => msg._ !== 'messageEmpty')
-            .map((msg) => new Message(this, msg, peers))
+        const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(this, msg, peers))
 
         if (!msgs.length) break
 

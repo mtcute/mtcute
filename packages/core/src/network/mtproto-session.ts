@@ -1,12 +1,7 @@
 import Long from 'long'
 
 import { mtp, tl } from '@mtcute/tl'
-import {
-    TlBinaryWriter,
-    TlReaderMap,
-    TlSerializationCounter,
-    TlWriterMap,
-} from '@mtcute/tl-runtime'
+import { TlBinaryWriter, TlReaderMap, TlSerializationCounter, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { MtcuteError } from '../types'
 import {
@@ -111,10 +106,7 @@ export class MtprotoSession {
     queuedStateReq: Long[] = []
     queuedResendReq: Long[] = []
     queuedCancelReq: Long[] = []
-    getStateSchedule = new SortedArray<PendingRpc>(
-        [],
-        (a, b) => a.getState! - b.getState!,
-    )
+    getStateSchedule = new SortedArray<PendingRpc>([], (a, b) => a.getState! - b.getState!)
 
     // requests info
     pendingMessages = new LongMap<PendingMessage>()
@@ -215,11 +207,7 @@ export class MtprotoSession {
 
         rpc.sent = false
         rpc.containerId = undefined
-        this.log.debug(
-            'enqueued %s for sending (msg_id = %s)',
-            rpc.method,
-            rpc.msgId || 'n/a',
-        )
+        this.log.debug('enqueued %s for sending (msg_id = %s)', rpc.method, rpc.msgId || 'n/a')
         this.queuedRpc.pushBack(rpc)
 
         return true
@@ -261,10 +249,7 @@ export class MtprotoSession {
     }
 
     /** Decrypt a single MTProto message using session's keys */
-    async decryptMessage(
-        data: Buffer,
-        callback: Parameters<AuthKey['decryptMessage']>[2],
-    ): Promise<void> {
+    async decryptMessage(data: Buffer, callback: Parameters<AuthKey['decryptMessage']>[2]): Promise<void> {
         if (!this._authKey.ready) throw new MtcuteError('Keys are not set up!')
 
         const authKeyId = data.slice(0, 8)
@@ -292,20 +277,13 @@ export class MtprotoSession {
         return key.decryptMessage(data, this._sessionId, callback)
     }
 
-    writeMessage(
-        writer: TlBinaryWriter,
-        content: tl.TlObject | mtp.TlObject | Buffer,
-        isContentRelated = true,
-    ): Long {
+    writeMessage(writer: TlBinaryWriter, content: tl.TlObject | mtp.TlObject | Buffer, isContentRelated = true): Long {
         const messageId = this.getMessageId()
         const seqNo = this.getSeqNo(isContentRelated)
 
         const length = Buffer.isBuffer(content) ?
             content.length :
-            TlSerializationCounter.countNeededBytes(
-                  writer.objectMap!,
-                  content,
-            )
+            TlSerializationCounter.countNeededBytes(writer.objectMap!, content)
 
         writer.long(messageId)
         writer.int(seqNo)
@@ -337,10 +315,7 @@ export class MtprotoSession {
             this.next429Timeout = 1000
         }, 60000)
 
-        this.log.debug(
-            'transport flood, waiting for %d ms before proceeding',
-            timeout,
-        )
+        this.log.debug('transport flood, waiting for %d ms before proceeding', timeout)
 
         return Date.now() + timeout
     }

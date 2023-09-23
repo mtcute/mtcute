@@ -9,10 +9,7 @@ import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
  * @param chatId  Chat ID
  * @internal
  */
-export async function getPrimaryInviteLink(
-    this: TelegramClient,
-    chatId: InputPeerLike,
-): Promise<ChatInviteLink> {
+export async function getPrimaryInviteLink(this: TelegramClient, chatId: InputPeerLike): Promise<ChatInviteLink> {
     const res = await this.call({
         _: 'messages.getExportedChatInvites',
         peer: await this.resolvePeer(chatId),
@@ -30,11 +27,7 @@ export async function getPrimaryInviteLink(
     }
 
     if (!res.invites[0].permanent) {
-        throw new MtTypeAssertionError(
-            'messages.getExportedChatInvites (@ .invites[0].permanent)',
-            'true',
-            'false',
-        )
+        throw new MtTypeAssertionError('messages.getExportedChatInvites (@ .invites[0].permanent)', 'true', 'false')
     }
 
     const peers = PeersIndex.from(res)

@@ -1,14 +1,6 @@
-import {
-    ConnectionKind,
-    MtArgumentError,
-    MtUnsupportedError,
-} from '@mtcute/core'
+import { ConnectionKind, MtArgumentError, MtUnsupportedError } from '@mtcute/core'
 import { ConditionVariable } from '@mtcute/core/utils'
-import {
-    fileIdToInputFileLocation,
-    fileIdToInputWebFileLocation,
-    parseFileId,
-} from '@mtcute/file-id'
+import { fileIdToInputFileLocation, fileIdToInputWebFileLocation, parseFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -36,9 +28,7 @@ export async function* downloadAsIterable(
     const offset = params.offset ?? 0
 
     if (offset % 4096 !== 0) {
-        throw new MtArgumentError(
-            `Invalid offset: ${offset}. Must be divisible by 4096`,
-        )
+        throw new MtArgumentError(`Invalid offset: ${offset}. Must be divisible by 4096`)
     }
 
     let dcId = params.dcId
@@ -76,13 +66,10 @@ export async function* downloadAsIterable(
     // we will receive a FileMigrateError in case this is invalid
     if (!dcId) dcId = this._defaultDcs.main.id
 
-    const partSizeKb =
-        params.partSize ?? (fileSize ? determinePartSize(fileSize) : 64)
+    const partSizeKb = params.partSize ?? (fileSize ? determinePartSize(fileSize) : 64)
 
     if (partSizeKb % 4 !== 0) {
-        throw new MtArgumentError(
-            `Invalid part size: ${partSizeKb}. Must be divisible by 4.`,
-        )
+        throw new MtArgumentError(`Invalid part size: ${partSizeKb}. Must be divisible by 4.`)
     }
 
     const chunkSize = partSizeKb * 1024
@@ -90,10 +77,7 @@ export async function* downloadAsIterable(
     let limitBytes = params.limit ?? fileSize ?? Infinity
     if (limitBytes === 0) return
 
-    let numChunks =
-        limitBytes === Infinity ?
-            Infinity :
-            ~~((limitBytes + chunkSize - offset - 1) / chunkSize)
+    let numChunks = limitBytes === Infinity ? Infinity : ~~((limitBytes + chunkSize - offset - 1) / chunkSize)
 
     let nextChunkIdx = 0
     let nextWorkerChunkIdx = 0
@@ -104,8 +88,7 @@ export async function* downloadAsIterable(
     let connectionKind: ConnectionKind
 
     if (isSmall) {
-        connectionKind =
-            dcId === this.network.getPrimaryDcId() ? 'main' : 'downloadSmall'
+        connectionKind = dcId === this.network.getPrimaryDcId() ? 'main' : 'downloadSmall'
     } else {
         connectionKind = 'download'
     }
@@ -119,12 +102,8 @@ export async function* downloadAsIterable(
         poolSize,
     )
 
-    const downloadChunk = async (
-        chunk = nextWorkerChunkIdx++,
-    ): Promise<void> => {
-        let result:
-            | tl.RpcCallReturn['upload.getFile']
-            | tl.RpcCallReturn['upload.getWebFile']
+    const downloadChunk = async (chunk = nextWorkerChunkIdx++): Promise<void> => {
+        let result: tl.RpcCallReturn['upload.getFile'] | tl.RpcCallReturn['upload.getWebFile']
 
         try {
             result = await this.call(
@@ -155,16 +134,10 @@ export async function* downloadAsIterable(
             // we shouldnt receive them since cdnSupported is not set in the getFile request.
             // also, i couldnt find any media that would be downloaded from cdn, so even if
             // i implemented that, i wouldnt be able to test that, so :shrug:
-            throw new MtUnsupportedError(
-                'Received CDN redirect, which is not supported (yet)',
-            )
+            throw new MtUnsupportedError('Received CDN redirect, which is not supported (yet)')
         }
 
-        if (
-            result._ === 'upload.webFile' &&
-            result.size &&
-            limitBytes === Infinity
-        ) {
+        if (result._ === 'upload.webFile' && result.size && limitBytes === Infinity) {
             limitBytes = result.size
             numChunks = ~~((limitBytes + chunkSize - offset - 1) / chunkSize)
         }
@@ -175,21 +148,13 @@ export async function* downloadAsIterable(
             nextChunkCv.notify()
         }
 
-        if (
-            nextWorkerChunkIdx < numChunks &&
-            result.bytes.length === chunkSize
-        ) {
+        if (nextWorkerChunkIdx < numChunks && result.bytes.length === chunkSize) {
             return downloadChunk()
         }
     }
 
     let error: unknown = undefined
-    void Promise.all(
-        Array.from(
-            { length: Math.min(poolSize * REQUESTS_PER_CONNECTION, numChunks) },
-            downloadChunk,
-        ),
-    )
+    void Promise.all(Array.from({ length: Math.min(poolSize * REQUESTS_PER_CONNECTION, numChunks) }, downloadChunk))
         .catch((e) => {
             this.log.debug('download workers errored: %s', e.message)
             error = e

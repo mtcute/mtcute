@@ -31,12 +31,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
     })
 
     it('ignores namespace for name', () => {
-        test(
-            'test.test = Test;',
-            'interface RawTest {',
-            "    _: 'test.test';",
-            '}',
-        )
+        test('test.test = Test;', 'interface RawTest {', "    _: 'test.test';", '}')
     })
 
     it('renames non-primitive types', () => {
@@ -77,9 +72,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
                 '}',
             )
             test(
-                '---functions---\n' +
-                    '// This is a test method\n' +
-                    'test = Test;',
+                '---functions---\n' + '// This is a test method\n' + 'test = Test;',
                 '/**',
                 ' * This is a test method',
                 ' * ',
@@ -93,9 +86,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
 
         it('adds tdlib style comments', () => {
             test(
-                '// @description This is a test constructor\n' +
-                    '// @field Some field\n' +
-                    'test field:int = Test;',
+                '// @description This is a test constructor\n' + '// @field Some field\n' + 'test field:int = Test;',
                 '/**',
                 ' * This is a test constructor',
                 ' */',
@@ -140,8 +131,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
 
         it('should not break @link tags', () => {
             test(
-                '// This is a test constructor with a very long comment {@link whatever} more text\n' +
-                    'test = Test;',
+                '// This is a test constructor with a very long comment {@link whatever} more text\n' + 'test = Test;',
                 '/**',
                 ' * This is a test constructor with a very long comment',
                 ' * {@link whatever} more text',
@@ -165,21 +155,8 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
 
     it('generates code with raw flags for constructors with flags', () => {
         const entry = parseTlToEntries('test flags:# flags2:# = Test;')[0]
-        expect(
-            generateTypescriptDefinitionsForTlEntry(
-                entry,
-                undefined,
-                undefined,
-                true,
-            ),
-        ).eq(
-            [
-                'interface RawTest {',
-                "    _: 'test';",
-                '    flags: number;',
-                '    flags2: number;',
-                '}',
-            ].join('\n'),
+        expect(generateTypescriptDefinitionsForTlEntry(entry, undefined, undefined, true)).eq(
+            ['interface RawTest {', "    _: 'test';", '    flags: number;', '    flags2: number;', '}'].join('\n'),
         )
     })
 })
@@ -189,24 +166,15 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
         const entries = parseTlToEntries(tl)
         const schema = parseFullTlSchema(entries)
 
-        let [codeTs, codeJs] = generateTypescriptDefinitionsForTlSchema(
-            schema,
-            0,
-        )
+        let [codeTs, codeJs] = generateTypescriptDefinitionsForTlSchema(schema, 0)
 
         // skip prelude
-        codeTs = codeTs.substring(
-            codeTs.indexOf('-readonly [P in keyof T]: T[P]') + 37,
-            codeTs.length - 1,
-        )
+        codeTs = codeTs.substring(codeTs.indexOf('-readonly [P in keyof T]: T[P]') + 37, codeTs.length - 1)
         // unindent first level
         codeTs = codeTs.replace(/^ {4}/gm, '')
 
         // skip prelude
-        codeJs = codeJs.substring(
-            codeJs.indexOf('ns.LAYER = 0;') + 14,
-            codeJs.length - 15,
-        )
+        codeJs = codeJs.substring(codeJs.indexOf('ns.LAYER = 0;') + 14, codeJs.length - 15)
 
         expect(codeTs.trim()).eq(ts.join('\n'))
         expect(codeJs.trim()).eq(js.join('\n'))
@@ -227,10 +195,7 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
                 'type TlObject =',
                 '    | tl.RawTest',
             ],
-            [
-                "ns.isAnyTest = _isAny('Test');",
-                '_types = JSON.parse(\'{"test":"Test"}\');',
-            ],
+            ["ns.isAnyTest = _isAny('Test');", '_types = JSON.parse(\'{"test":"Test"}\');'],
         )
     })
 
@@ -253,10 +218,7 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
                 '    | tl.RawTest',
                 '    | tl.RawTest2',
             ],
-            [
-                "ns.isAnyTest = _isAny('Test');",
-                '_types = JSON.parse(\'{"test":"Test","test2":"Test"}\');',
-            ],
+            ["ns.isAnyTest = _isAny('Test');", '_types = JSON.parse(\'{"test":"Test","test2":"Test"}\');'],
         )
     })
 
@@ -285,10 +247,7 @@ describe('generateTypescriptDefinitionsForTlSchema', () => {
                 '    | tl.RawTest',
                 '    | tl.RawGetTestRequest',
             ],
-            [
-                "ns.isAnyTest = _isAny('Test');",
-                '_types = JSON.parse(\'{"test":"Test"}\');',
-            ],
+            ["ns.isAnyTest = _isAny('Test');", '_types = JSON.parse(\'{"test":"Test"}\');'],
         )
     })
 

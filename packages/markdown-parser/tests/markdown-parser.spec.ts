@@ -11,10 +11,7 @@ const createEntity = <T extends tl.TypeMessageEntity['_']>(
     type: T,
     offset: number,
     length: number,
-    additional?: Omit<
-        tl.FindByName<tl.TypeMessageEntity, T>,
-        '_' | 'offset' | 'length'
-    >,
+    additional?: Omit<tl.FindByName<tl.TypeMessageEntity, T>, '_' | 'offset' | 'length'>,
 ): tl.TypeMessageEntity => {
     return {
         _: type,
@@ -25,9 +22,7 @@ const createEntity = <T extends tl.TypeMessageEntity['_']>(
 }
 
 const createEntities = (entities: tl.TypeMessageEntity[]): MessageEntity[] => {
-    return entities
-        .map((it) => MessageEntity._parse(it))
-        .filter((it) => it !== null) as MessageEntity[]
+    return entities.map((it) => MessageEntity._parse(it)).filter((it) => it !== null) as MessageEntity[]
 }
 
 describe('MarkdownMessageEntityParser', () => {
@@ -113,10 +108,7 @@ describe('MarkdownMessageEntityParser', () => {
         it('should support entities on the edges', () => {
             test(
                 'Hello, world',
-                [
-                    createEntity('messageEntityBold', 0, 5),
-                    createEntity('messageEntityBold', 7, 5),
-                ],
+                [createEntity('messageEntityBold', 0, 5), createEntity('messageEntityBold', 7, 5)],
                 '**Hello**, **world**',
             )
         })
@@ -124,29 +116,19 @@ describe('MarkdownMessageEntityParser', () => {
         it('should clamp out-of-range entities', () => {
             test(
                 'Hello, world',
-                [
-                    createEntity('messageEntityBold', -2, 7),
-                    createEntity('messageEntityBold', 7, 10),
-                ],
+                [createEntity('messageEntityBold', -2, 7), createEntity('messageEntityBold', 7, 10)],
                 '**Hello**, **world**',
             )
         })
 
         it('should ignore entities outside the length', () => {
-            test(
-                'Hello, world',
-                [createEntity('messageEntityBold', 50, 5)],
-                'Hello, world',
-            )
+            test('Hello, world', [createEntity('messageEntityBold', 50, 5)], 'Hello, world')
         })
 
         it('should support entities followed by each other', () => {
             test(
                 'plain Hello, world plain',
-                [
-                    createEntity('messageEntityBold', 6, 6),
-                    createEntity('messageEntityItalic', 12, 6),
-                ],
+                [createEntity('messageEntityBold', 6, 6), createEntity('messageEntityItalic', 12, 6)],
                 [
                     'plain **Hello,**__ world__ plain',
                     // not the most obvious order, but who cares :D
@@ -159,10 +141,7 @@ describe('MarkdownMessageEntityParser', () => {
         it('should support nested entities', () => {
             test(
                 'Welcome to the gym zone!',
-                [
-                    createEntity('messageEntityItalic', 0, 24),
-                    createEntity('messageEntityBold', 15, 8),
-                ],
+                [createEntity('messageEntityItalic', 0, 24), createEntity('messageEntityBold', 15, 8)],
                 '__Welcome to the **gym zone**!__',
             )
         })
@@ -170,43 +149,22 @@ describe('MarkdownMessageEntityParser', () => {
         it('should support nested entities with the same edges', () => {
             test(
                 'Welcome to the gym zone!',
-                [
-                    createEntity('messageEntityItalic', 0, 24),
-                    createEntity('messageEntityBold', 15, 9),
-                ],
-                [
-                    '__Welcome to the **gym zone!**__',
-                    '__Welcome to the **gym zone!__**',
-                ],
+                [createEntity('messageEntityItalic', 0, 24), createEntity('messageEntityBold', 15, 9)],
+                ['__Welcome to the **gym zone!**__', '__Welcome to the **gym zone!__**'],
             )
             test(
                 'Welcome to the gym zone!',
-                [
-                    createEntity('messageEntityBold', 0, 24),
-                    createEntity('messageEntityItalic', 15, 9),
-                ],
-                [
-                    '**Welcome to the __gym zone!__**',
-                    '**Welcome to the __gym zone!**__',
-                ],
+                [createEntity('messageEntityBold', 0, 24), createEntity('messageEntityItalic', 15, 9)],
+                ['**Welcome to the __gym zone!__**', '**Welcome to the __gym zone!**__'],
             )
             test(
                 'Welcome to the gym zone!',
-                [
-                    createEntity('messageEntityItalic', 0, 24),
-                    createEntity('messageEntityBold', 0, 7),
-                ],
-                [
-                    '__**Welcome** to the gym zone!__',
-                    '**__Welcome** to the gym zone!__',
-                ],
+                [createEntity('messageEntityItalic', 0, 24), createEntity('messageEntityBold', 0, 7)],
+                ['__**Welcome** to the gym zone!__', '**__Welcome** to the gym zone!__'],
             )
             test(
                 'Welcome to the gym zone!',
-                [
-                    createEntity('messageEntityItalic', 0, 24),
-                    createEntity('messageEntityBold', 0, 24),
-                ],
+                [createEntity('messageEntityItalic', 0, 24), createEntity('messageEntityBold', 0, 24)],
                 [
                     '__**Welcome to the gym zone!**__',
                     '__**Welcome to the gym zone!__**',
@@ -219,10 +177,7 @@ describe('MarkdownMessageEntityParser', () => {
         it('should support overlapping entities', () => {
             test(
                 'Welcome to the gym zone!',
-                [
-                    createEntity('messageEntityItalic', 0, 14),
-                    createEntity('messageEntityBold', 8, 10),
-                ],
+                [createEntity('messageEntityItalic', 0, 14), createEntity('messageEntityBold', 8, 10)],
                 '__Welcome **to the__ gym** zone!',
             )
             test(
@@ -276,10 +231,7 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityItalic', 18, 4),
                     createEntity('messageEntityItalic', 9, 8),
                 ],
-                '/* /*/* /*/*/* __/_ /_/_ /_/_/___ __/- /-/-__ /-/-/-'.replace(
-                    /\//g,
-                    '\\',
-                ),
+                '/* /*/* /*/*/* __/_ /_/_ /_/_/___ __/- /-/-__ /-/-/-'.replace(/\//g, '\\'),
             )
         })
     })
@@ -386,10 +338,7 @@ describe('MarkdownMessageEntityParser', () => {
         it('should support entities on the edges', () => {
             test(
                 '**Hello**, **world**',
-                [
-                    createEntity('messageEntityBold', 0, 5),
-                    createEntity('messageEntityBold', 7, 5),
-                ],
+                [createEntity('messageEntityBold', 0, 5), createEntity('messageEntityBold', 7, 5)],
                 'Hello, world',
             )
         })
@@ -401,10 +350,7 @@ describe('MarkdownMessageEntityParser', () => {
         it('should support overlapping entities', () => {
             test(
                 '__Welcome **to the__ gym** zone!',
-                [
-                    createEntity('messageEntityItalic', 0, 14),
-                    createEntity('messageEntityBold', 8, 10),
-                ],
+                [createEntity('messageEntityItalic', 0, 14), createEntity('messageEntityBold', 8, 10)],
                 'Welcome to the gym zone!',
             )
 
@@ -442,14 +388,8 @@ describe('MarkdownMessageEntityParser', () => {
 
         it('should support entities followed by each other', () => {
             test(
-                [
-                    'plain **Hello,**__ world__ plain',
-                    'plain **Hello,__** world__ plain',
-                ],
-                [
-                    createEntity('messageEntityBold', 6, 6),
-                    createEntity('messageEntityItalic', 12, 6),
-                ],
+                ['plain **Hello,**__ world__ plain', 'plain **Hello,__** world__ plain'],
+                [createEntity('messageEntityBold', 6, 6), createEntity('messageEntityItalic', 12, 6)],
                 'plain Hello, world plain',
             )
         })
@@ -457,10 +397,7 @@ describe('MarkdownMessageEntityParser', () => {
         it('should support nested entities', () => {
             test(
                 '__Welcome to the **gym zone**!__',
-                [
-                    createEntity('messageEntityBold', 15, 8),
-                    createEntity('messageEntityItalic', 0, 24),
-                ],
+                [createEntity('messageEntityBold', 15, 8), createEntity('messageEntityItalic', 0, 24)],
                 'Welcome to the gym zone!',
             )
 
@@ -490,70 +427,40 @@ describe('MarkdownMessageEntityParser', () => {
             // again, order of the entities depends on which closing tag goes first.
             test(
                 '__Welcome to the **gym zone!**__',
-                [
-                    createEntity('messageEntityBold', 15, 9),
-                    createEntity('messageEntityItalic', 0, 24),
-                ],
+                [createEntity('messageEntityBold', 15, 9), createEntity('messageEntityItalic', 0, 24)],
                 'Welcome to the gym zone!',
             )
             test(
                 '__Welcome to the **gym zone!__**',
-                [
-                    createEntity('messageEntityItalic', 0, 24),
-                    createEntity('messageEntityBold', 15, 9),
-                ],
+                [createEntity('messageEntityItalic', 0, 24), createEntity('messageEntityBold', 15, 9)],
                 'Welcome to the gym zone!',
             )
 
             test(
                 '**Welcome to the __gym zone!__**',
-                [
-                    createEntity('messageEntityItalic', 15, 9),
-                    createEntity('messageEntityBold', 0, 24),
-                ],
+                [createEntity('messageEntityItalic', 15, 9), createEntity('messageEntityBold', 0, 24)],
                 'Welcome to the gym zone!',
             )
             test(
                 '**Welcome to the __gym zone!**__',
-                [
-                    createEntity('messageEntityBold', 0, 24),
-                    createEntity('messageEntityItalic', 15, 9),
-                ],
+                [createEntity('messageEntityBold', 0, 24), createEntity('messageEntityItalic', 15, 9)],
                 'Welcome to the gym zone!',
             )
 
             test(
-                [
-                    '__**Welcome** to the gym zone!__',
-                    '**__Welcome** to the gym zone!__',
-                ],
-                [
-                    createEntity('messageEntityBold', 0, 7),
-                    createEntity('messageEntityItalic', 0, 24),
-                ],
+                ['__**Welcome** to the gym zone!__', '**__Welcome** to the gym zone!__'],
+                [createEntity('messageEntityBold', 0, 7), createEntity('messageEntityItalic', 0, 24)],
                 'Welcome to the gym zone!',
             )
 
             test(
-                [
-                    '__**Welcome to the gym zone!**__',
-                    '**__Welcome to the gym zone!**__',
-                ],
-                [
-                    createEntity('messageEntityBold', 0, 24),
-                    createEntity('messageEntityItalic', 0, 24),
-                ],
+                ['__**Welcome to the gym zone!**__', '**__Welcome to the gym zone!**__'],
+                [createEntity('messageEntityBold', 0, 24), createEntity('messageEntityItalic', 0, 24)],
                 'Welcome to the gym zone!',
             )
             test(
-                [
-                    '__**Welcome to the gym zone!__**',
-                    '**__Welcome to the gym zone!__**',
-                ],
-                [
-                    createEntity('messageEntityItalic', 0, 24),
-                    createEntity('messageEntityBold', 0, 24),
-                ],
+                ['__**Welcome to the gym zone!__**', '**__Welcome to the gym zone!__**'],
+                [createEntity('messageEntityItalic', 0, 24), createEntity('messageEntityBold', 0, 24)],
                 'Welcome to the gym zone!',
             )
         })
@@ -580,14 +487,8 @@ describe('MarkdownMessageEntityParser', () => {
                 '* ** *** _ __ ___ - -- --- ~ ~~ ~~~ [ [[ ` `` ``` ```` \\ \\\\',
             )
             test(
-                '/* /*/* /*/*/* __/_ /_/_ /_/_/___ __/- /-/-__ /-/-/-'.replace(
-                    /\//g,
-                    '\\',
-                ),
-                [
-                    createEntity('messageEntityItalic', 9, 8),
-                    createEntity('messageEntityItalic', 18, 4),
-                ],
+                '/* /*/* /*/*/* __/_ /_/_ /_/_/___ __/- /-/-__ /-/-/-'.replace(/\//g, '\\'),
+                [createEntity('messageEntityItalic', 9, 8), createEntity('messageEntityItalic', 18, 4)],
                 '* ** *** _ __ ___ - -- ---',
             )
         })
@@ -597,34 +498,14 @@ describe('MarkdownMessageEntityParser', () => {
         })
 
         it('should ignore unclosed tags', () => {
-            test(
-                'plain ```\npre closed with single backtick`',
-                [],
-                'plain pre closed with single backtick`',
-            )
-            test(
-                'plain ```\npre closed with single backtick\n`',
-                [],
-                'plain pre closed with single backtick\n`',
-            )
+            test('plain ```\npre closed with single backtick`', [], 'plain pre closed with single backtick`')
+            test('plain ```\npre closed with single backtick\n`', [], 'plain pre closed with single backtick\n`')
 
-            test(
-                'plain ```\npre closed with double backticks`',
-                [],
-                'plain pre closed with double backticks`',
-            )
-            test(
-                'plain ```\npre closed with double backticks\n`',
-                [],
-                'plain pre closed with double backticks\n`',
-            )
+            test('plain ```\npre closed with double backticks`', [], 'plain pre closed with double backticks`')
+            test('plain ```\npre closed with double backticks\n`', [], 'plain pre closed with double backticks\n`')
 
             test('plain __italic but unclosed', [], 'plain italic but unclosed')
-            test(
-                'plain __italic and **also bold but both unclosed',
-                [],
-                'plain italic and also bold but both unclosed',
-            )
+            test('plain __italic and **also bold but both unclosed', [], 'plain italic and also bold but both unclosed')
             test(
                 'plain __italic and **also bold but italic closed__',
                 [createEntity('messageEntityItalic', 6, 38)],
@@ -638,8 +519,7 @@ describe('MarkdownMessageEntityParser', () => {
         })
 
         describe('malformed input', () => {
-            const testThrows = (input: string) =>
-                expect(() => parser.parse(input)).throws(Error)
+            const testThrows = (input: string) => expect(() => parser.parse(input)).throws(Error)
 
             it('should throw an error on malformed links', () => {
                 testThrows('plain [link](https://google.com but unclosed')
@@ -647,9 +527,7 @@ describe('MarkdownMessageEntityParser', () => {
 
             it('should throw an error on malformed pres', () => {
                 testThrows('plain ```pre without linebreaks```')
-                testThrows(
-                    'plain ``` pre without linebreaks but with spaces instead ```',
-                )
+                testThrows('plain ``` pre without linebreaks but with spaces instead ```')
             })
         })
     })
@@ -659,12 +537,8 @@ describe('MarkdownMessageEntityParser', () => {
             const unsafeString = '__[]__'
 
             expect(md`${unsafeString}`.value).eq('\\_\\_\\[\\]\\_\\_')
-            expect(md`${unsafeString} **text**`.value).eq(
-                '\\_\\_\\[\\]\\_\\_ **text**',
-            )
-            expect(md`**text** ${unsafeString}`.value).eq(
-                '**text** \\_\\_\\[\\]\\_\\_',
-            )
+            expect(md`${unsafeString} **text**`.value).eq('\\_\\_\\[\\]\\_\\_ **text**')
+            expect(md`**text** ${unsafeString}`.value).eq('**text** \\_\\_\\[\\]\\_\\_')
             expect(md`**${unsafeString}**`.value).eq('**\\_\\_\\[\\]\\_\\_**')
         })
 
@@ -673,14 +547,10 @@ describe('MarkdownMessageEntityParser', () => {
             const unsafeString = new FormattedString('__[]__')
 
             expect(md`${unsafeString}`.value).eq('__[]__')
-            expect(md`${unsafeString} ${unsafeString2}`.value).eq(
-                '__[]__ \\_\\_\\[\\]\\_\\_',
-            )
+            expect(md`${unsafeString} ${unsafeString2}`.value).eq('__[]__ \\_\\_\\[\\]\\_\\_')
             expect(md`${unsafeString} **text**`.value).eq('__[]__ **text**')
             expect(md`**text** ${unsafeString}`.value).eq('**text** __[]__')
-            expect(md`**${unsafeString} ${unsafeString2}**`.value).eq(
-                '**__[]__ \\_\\_\\[\\]\\_\\_**',
-            )
+            expect(md`**${unsafeString} ${unsafeString2}**`.value).eq('**__[]__ \\_\\_\\[\\]\\_\\_**')
         })
 
         it('should error with incompatible FormattedString', () => {

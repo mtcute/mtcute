@@ -1,10 +1,6 @@
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
-import {
-    isInputPeerChannel,
-    isInputPeerChat,
-    normalizeToInputChannel,
-} from '../../utils/peer-utils'
+import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
 
 /**
  * Delete a chat photo
@@ -14,10 +10,7 @@ import {
  * @param chatId  Chat ID or username
  * @internal
  */
-export async function deleteChatPhoto(
-    this: TelegramClient,
-    chatId: InputPeerLike,
-): Promise<void> {
+export async function deleteChatPhoto(this: TelegramClient, chatId: InputPeerLike): Promise<void> {
     const chat = await this.resolvePeer(chatId)
 
     let res

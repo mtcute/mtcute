@@ -1,10 +1,6 @@
 import bigInt, { BigInteger } from 'big-integer'
 
-import {
-    bigIntToBuffer,
-    bufferToBigInt,
-    randomBigIntInRange,
-} from '../bigint-utils'
+import { bigIntToBuffer, bufferToBigInt, randomBigIntInRange } from '../bigint-utils'
 
 /**
  * Factorize `p*q` to `p` and `q` synchronously using Brent-Pollard rho algorithm
@@ -16,7 +12,8 @@ export function factorizePQSync(pq: Buffer): [Buffer, Buffer] {
     const n = PollardRhoBrent(pq_)
     const m = pq_.divide(n)
 
-    let p; let q
+    let p
+    let q
 
     if (n.lt(m)) {
         p = n
@@ -52,11 +49,7 @@ function PollardRhoBrent(n: BigInteger): BigInteger {
         while (k.lt(r) && g.eq(1)) {
             ys = y
 
-            for (
-                let i = bigInt.zero;
-                i.lt(bigInt.min(m, r.minus(k)));
-                i = i.plus(bigInt.one)
-            ) {
+            for (let i = bigInt.zero; i.lt(bigInt.min(m, r.minus(k))); i = i.plus(bigInt.one)) {
                 y = y.multiply(y).mod(n).plus(c).mod(n)
                 q = q.multiply(x.minus(y).abs()).mod(n)
                 // y = (y * y % n + c) % n

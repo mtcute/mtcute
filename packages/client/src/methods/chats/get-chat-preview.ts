@@ -14,10 +14,7 @@ import { INVITE_LINK_REGEX } from '../../utils/peer-utils'
  *   Use {@link getChat} or {@link getFullChat} instead.
  * @internal
  */
-export async function getChatPreview(
-    this: TelegramClient,
-    inviteLink: string,
-): Promise<ChatPreview> {
+export async function getChatPreview(this: TelegramClient, inviteLink: string): Promise<ChatPreview> {
     const m = inviteLink.match(INVITE_LINK_REGEX)
     if (!m) throw new MtArgumentError('Invalid invite link')
 

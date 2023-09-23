@@ -4,10 +4,7 @@ import { tl } from '@mtcute/tl'
 
 import { Logger } from '../utils'
 import { MtprotoSession } from './mtproto-session'
-import {
-    SessionConnection,
-    SessionConnectionParams,
-} from './session-connection'
+import { SessionConnection, SessionConnectionParams } from './session-connection'
 import { TransportFactory } from './transports'
 
 export class MultiSessionConnection extends EventEmitter {
@@ -15,12 +12,7 @@ export class MultiSessionConnection extends EventEmitter {
     readonly _sessions: MtprotoSession[]
     private _enforcePfs = false
 
-    constructor(
-        readonly params: SessionConnectionParams,
-        private _count: number,
-        log: Logger,
-        logPrefix = '',
-    ) {
+    constructor(readonly params: SessionConnectionParams, private _count: number, log: Logger, logPrefix = '') {
         super()
         this._log = log.create('multi')
         if (logPrefix) this._log.prefix = `[${logPrefix}] `
@@ -68,11 +60,7 @@ export class MultiSessionConnection extends EventEmitter {
         //     return
         // }
 
-        this._log.debug(
-            'updating sessions count: %d -> %d',
-            this._sessions.length,
-            this._count,
-        )
+        this._log.debug('updating sessions count: %d -> %d', this._sessions.length, this._count)
 
         // case 1
         if (this._sessions.length === this._count) return
@@ -108,21 +96,13 @@ export class MultiSessionConnection extends EventEmitter {
         this._updateSessions()
         if (this._connections.length === this._count) return
 
-        this._log.debug(
-            'updating connections count: %d -> %d',
-            this._connections.length,
-            this._count,
-        )
+        this._log.debug('updating connections count: %d -> %d', this._connections.length, this._count)
 
         const newEnforcePfs = this._count > 1 && this.params.isMainConnection
         const enforcePfsChanged = newEnforcePfs !== this._enforcePfs
 
         if (enforcePfsChanged) {
-            this._log.debug(
-                'enforcePfs changed: %s -> %s',
-                this._enforcePfs,
-                newEnforcePfs,
-            )
+            this._log.debug('enforcePfs changed: %s -> %s', this._enforcePfs, newEnforcePfs)
             this._enforcePfs = newEnforcePfs
         }
 
@@ -154,9 +134,7 @@ export class MultiSessionConnection extends EventEmitter {
                     usePfs: this.params.usePfs || this._enforcePfs,
                     isMainConnection: this.params.isMainConnection && i === 0,
                     withUpdates:
-                        this.params.isMainConnection &&
-                        this.params.isMainDcConnection &&
-                        !this.params.disableUpdates,
+                        this.params.isMainConnection && this.params.isMainDcConnection && !this.params.disableUpdates,
                 },
                 session,
             )
@@ -174,9 +152,7 @@ export class MultiSessionConnection extends EventEmitter {
                     conn_.onConnected()
                 }
             })
-            conn.on('tmp-key-change', (key, expires) =>
-                this.emit('tmp-key-change', i, key, expires),
-            )
+            conn.on('tmp-key-change', (key, expires) => this.emit('tmp-key-change', i, key, expires))
             conn.on('auth-begin', () => {
                 this._log.debug('received auth-begin from connection %d', i)
                 this.emit('auth-begin', i)
@@ -212,11 +188,7 @@ export class MultiSessionConnection extends EventEmitter {
 
     private _nextConnection = 0
 
-    sendRpc<T extends tl.RpcMethod>(
-        request: T,
-        stack?: string,
-        timeout?: number,
-    ): Promise<tl.RpcCallReturn[T['_']]> {
+    sendRpc<T extends tl.RpcMethod>(request: T, stack?: string, timeout?: number): Promise<tl.RpcCallReturn[T['_']]> {
         // if (this.params.isMainConnection) {
         // find the least loaded connection
         let min = Infinity
@@ -224,9 +196,7 @@ export class MultiSessionConnection extends EventEmitter {
 
         for (let i = 0; i < this._connections.length; i++) {
             const conn = this._connections[i]
-            const total =
-                conn._session.queuedRpc.length +
-                conn._session.pendingMessages.size()
+            const total = conn._session.queuedRpc.length + conn._session.pendingMessages.size()
 
             if (total < min) {
                 min = total
@@ -257,11 +227,7 @@ export class MultiSessionConnection extends EventEmitter {
         this.connect()
     }
 
-    async setAuthKey(
-        authKey: Buffer | null,
-        temp = false,
-        idx = 0,
-    ): Promise<void> {
+    async setAuthKey(authKey: Buffer | null, temp = false, idx = 0): Promise<void> {
         const session = this._sessions[idx]
         const key = temp ? session._authKeyTemp : session._authKey
         await key.setup(authKey)
@@ -291,18 +257,14 @@ export class MultiSessionConnection extends EventEmitter {
         const session = this._sessions[0]
 
         if (this.params.usePfs && !session._authKeyTemp.ready) {
-            this._log.debug(
-                'temp auth key needed but not ready, ignoring key change',
-            )
+            this._log.debug('temp auth key needed but not ready, ignoring key change')
 
             return
         }
 
         if (this._sessions[0].queuedRpc.length) {
             // there are pending requests, we need to reconnect.
-            this._log.debug(
-                'notifying key change on the connection due to queued rpc',
-            )
+            this._log.debug('notifying key change on the connection due to queued rpc')
             this._connections[0].onConnected()
         }
 

@@ -1,10 +1,7 @@
 import { join } from 'path'
 
 export const DOC_CACHE_FILE = join(__dirname, '.documentation.cache.json')
-export const DESCRIPTIONS_YAML_FILE = join(
-    __dirname,
-    '../data/descriptions.yaml',
-)
+export const DESCRIPTIONS_YAML_FILE = join(__dirname, '../data/descriptions.yaml')
 export const API_SCHEMA_JSON_FILE = join(__dirname, '../api-schema.json')
 export const API_SCHEMA_DIFF_JSON_FILE = join(__dirname, '../diff.json')
 export const MTP_SCHEMA_JSON_FILE = join(__dirname, '../mtp-schema.json')
@@ -18,8 +15,7 @@ export const TDESKTOP_SCHEMA =
     'https://raw.githubusercontent.com/telegramdesktop/tdesktop/dev/Telegram/SourceFiles/mtproto/scheme/api.tl'
 export const TDESKTOP_LAYER =
     'https://raw.githubusercontent.com/telegramdesktop/tdesktop/dev/Telegram/SourceFiles/mtproto/scheme/layer.tl'
-export const TDLIB_SCHEMA =
-    'https://raw.githubusercontent.com/tdlib/td/master/td/generate/scheme/telegram_api.tl'
+export const TDLIB_SCHEMA = 'https://raw.githubusercontent.com/tdlib/td/master/td/generate/scheme/telegram_api.tl'
 
 export const ESM_PRELUDE = `// This file is auto-generated. Do not edit.
 "use strict";

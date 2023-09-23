@@ -59,9 +59,7 @@ const USERNAME_TTL = 86400000 // 24 hours
 
 export class MemoryStorage implements ITelegramStorage, IStateStorage {
     protected _state!: MemorySessionState
-    private _cachedInputPeers: LruMap<number, tl.TypeInputPeer> = new LruMap(
-        100,
-    )
+    private _cachedInputPeers: LruMap<number, tl.TypeInputPeer> = new LruMap(100)
 
     private _cachedFull: LruMap<number, tl.TypeUser | tl.TypeChat>
 
@@ -97,10 +95,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
     }
 
     load(): void {
-        this._vacuumTimeout = setInterval(
-            this._vacuum.bind(this),
-            this._vacuumInterval,
-        )
+        this._vacuumTimeout = setInterval(this._vacuum.bind(this), this._vacuumInterval)
     }
 
     destroy(): void {
@@ -147,15 +142,13 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         }
 
         if (populate) {
-            Object.values(obj.entities).forEach(
-                (ent: ITelegramStorage.PeerInfo) => {
-                    if (ent.phone) obj.phoneIndex.set(ent.phone, ent.id)
+            Object.values(obj.entities).forEach((ent: ITelegramStorage.PeerInfo) => {
+                if (ent.phone) obj.phoneIndex.set(ent.phone, ent.id)
 
-                    if (ent.username) {
-                        obj.usernameIndex.set(ent.username, ent.id)
-                    }
-                },
-            )
+                if (ent.username) {
+                    obj.usernameIndex.set(ent.username, ent.id)
+                }
+            })
         }
 
         this._state = obj
@@ -192,12 +185,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         this._state.defaultDcs = dcs
     }
 
-    setTempAuthKeyFor(
-        dcId: number,
-        index: number,
-        key: Buffer | null,
-        expiresAt: number,
-    ): void {
+    setTempAuthKeyFor(dcId: number, index: number, key: Buffer | null, expiresAt: number): void {
         const k = `${dcId}:${index}`
 
         if (key) {
@@ -269,9 +257,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         }
     }
 
-    protected _getInputPeer(
-        peerInfo?: ITelegramStorage.PeerInfo,
-    ): tl.TypeInputPeer | null {
+    protected _getInputPeer(peerInfo?: ITelegramStorage.PeerInfo): tl.TypeInputPeer | null {
         if (!peerInfo) return null
 
         switch (peerInfo.type) {

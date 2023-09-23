@@ -5,11 +5,7 @@ import { tl } from '@mtcute/tl'
 import { MtcuteError } from '../types'
 import { ICryptoProvider, Logger } from '../utils'
 import { ReconnectionStrategy } from './reconnection'
-import {
-    ITelegramTransport,
-    TransportFactory,
-    TransportState,
-} from './transports'
+import { ITelegramTransport, TransportFactory, TransportState } from './transports'
 
 export interface PersistentConnectionParams {
     crypto: ICryptoProvider
@@ -54,10 +50,7 @@ export abstract class PersistentConnection extends EventEmitter {
 
     protected abstract onMessage(data: Buffer): void
 
-    protected constructor(
-        params: PersistentConnectionParams,
-        readonly log: Logger,
-    ) {
+    protected constructor(params: PersistentConnectionParams, readonly log: Logger) {
         super()
         this.params = params
         this.changeTransport(params.transportFactory)
@@ -169,7 +162,9 @@ export abstract class PersistentConnection extends EventEmitter {
         if (this.isConnected) {
             throw new MtcuteError('Connection is already opened!')
         }
-        if (this._destroyed) { throw new MtcuteError('Connection is already destroyed!') }
+        if (this._destroyed) {
+            throw new MtcuteError('Connection is already destroyed!')
+        }
 
         if (this._reconnectionTimeout != null) {
             clearTimeout(this._reconnectionTimeout)
@@ -199,17 +194,11 @@ export abstract class PersistentConnection extends EventEmitter {
     protected _rescheduleInactivity(): void {
         if (!this.params.inactivityTimeout) return
         if (this._inactivityTimeout) clearTimeout(this._inactivityTimeout)
-        this._inactivityTimeout = setTimeout(
-            this._onInactivityTimeout,
-            this.params.inactivityTimeout,
-        )
+        this._inactivityTimeout = setTimeout(this._onInactivityTimeout, this.params.inactivityTimeout)
     }
 
     protected _onInactivityTimeout(): void {
-        this.log.info(
-            'disconnected because of inactivity for %d',
-            this.params.inactivityTimeout,
-        )
+        this.log.info('disconnected because of inactivity for %d', this.params.inactivityTimeout)
         this._inactive = true
         this._inactivityTimeout = null
         this._transport.close()

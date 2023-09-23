@@ -14,14 +14,12 @@ import {
 describe('buffersEqual', () => {
     it('should return true for equal buffers', () => {
         expect(buffersEqual(Buffer.from([]), Buffer.from([]))).is.true
-        expect(buffersEqual(Buffer.from([1, 2, 3]), Buffer.from([1, 2, 3]))).is
-            .true
+        expect(buffersEqual(Buffer.from([1, 2, 3]), Buffer.from([1, 2, 3]))).is.true
     })
 
     it('should return false for non-equal buffers', () => {
         expect(buffersEqual(Buffer.from([1]), Buffer.from([]))).is.false
-        expect(buffersEqual(Buffer.from([1, 2, 3]), Buffer.from([1, 2, 4]))).is
-            .false
+        expect(buffersEqual(Buffer.from([1, 2, 3]), Buffer.from([1, 2, 4]))).is.false
     })
 })
 
@@ -116,21 +114,15 @@ describe('cloneBuffer', () => {
 
 describe('parseUrlSafeBase64', () => {
     it('should parse url-safe base64', () => {
-        expect(parseUrlSafeBase64('qu7d8aGTeuF6-g').toString('hex')).eq(
-            'aaeeddf1a1937ae17afa',
-        )
+        expect(parseUrlSafeBase64('qu7d8aGTeuF6-g').toString('hex')).eq('aaeeddf1a1937ae17afa')
     })
     it('should parse normal base64', () => {
-        expect(parseUrlSafeBase64('qu7d8aGTeuF6+g==').toString('hex')).eq(
-            'aaeeddf1a1937ae17afa',
-        )
+        expect(parseUrlSafeBase64('qu7d8aGTeuF6+g==').toString('hex')).eq('aaeeddf1a1937ae17afa')
     })
 })
 
 describe('encodeUrlSafeBase64', () => {
     it('should encode to url-safe base64', () => {
-        expect(
-            encodeUrlSafeBase64(Buffer.from('aaeeddf1a1937ae17afa', 'hex')),
-        ).eq('qu7d8aGTeuF6-g')
+        expect(encodeUrlSafeBase64(Buffer.from('aaeeddf1a1937ae17afa', 'hex'))).eq('qu7d8aGTeuF6-g')
     })
 })

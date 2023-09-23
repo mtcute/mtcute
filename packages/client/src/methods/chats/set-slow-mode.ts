@@ -12,17 +12,10 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  *   Valid values are: `0 (off), 10, 30, 60 (1m), 300 (5m), 900 (15m) or 3600 (1h)`
  * @internal
  */
-export async function setSlowMode(
-    this: TelegramClient,
-    chatId: InputPeerLike,
-    seconds = 0,
-): Promise<void> {
+export async function setSlowMode(this: TelegramClient, chatId: InputPeerLike, seconds = 0): Promise<void> {
     const res = await this.call({
         _: 'channels.toggleSlowMode',
-        channel: normalizeToInputChannel(
-            await this.resolvePeer(chatId),
-            chatId,
-        ),
+        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
         seconds,
     })
     this._handleUpdate(res)

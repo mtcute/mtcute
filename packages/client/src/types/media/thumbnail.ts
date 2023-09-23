@@ -6,11 +6,7 @@ import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    inflateSvgPath,
-    strippedPhotoToJpg,
-    svgPathToFile,
-} from '../../utils/file-utils'
+import { inflateSvgPath, strippedPhotoToJpg, svgPathToFile } from '../../utils/file-utils'
 import { FileLocation } from '../files'
 import { makeInspectable } from '../utils'
 
@@ -60,35 +56,20 @@ export class Thumbnail extends FileLocation {
     readonly height: number
 
     private _path?: string
-    private _media:
-        | tl.RawPhoto
-        | tl.RawDocument
-        | tl.RawStickerSet
-        | tl.RawMessageExtendedMediaPreview
+    private _media: tl.RawPhoto | tl.RawDocument | tl.RawStickerSet | tl.RawMessageExtendedMediaPreview
 
     constructor(
         client: TelegramClient,
-        media:
-            | tl.RawPhoto
-            | tl.RawDocument
-            | tl.RawStickerSet
-            | tl.RawMessageExtendedMediaPreview,
+        media: tl.RawPhoto | tl.RawDocument | tl.RawStickerSet | tl.RawMessageExtendedMediaPreview,
         sz: tl.TypePhotoSize | tl.TypeVideoSize,
     ) {
         switch (sz._) {
             case 'photoSizeEmpty':
             case 'photoCachedSize':
-                throw new MtTypeAssertionError(
-                    'sz',
-                    'not (photoSizeEmpty | photoCachedSize)',
-                    sz._,
-                )
+                throw new MtTypeAssertionError('sz', 'not (photoSizeEmpty | photoCachedSize)', sz._)
         }
 
-        let location:
-            | tl.TypeInputFileLocation
-            | Buffer
-            | (() => tl.TypeInputFileLocation | Buffer)
+        let location: tl.TypeInputFileLocation | Buffer | (() => tl.TypeInputFileLocation | Buffer)
         let size
         let width
         let height: number
@@ -107,9 +88,7 @@ export class Thumbnail extends FileLocation {
             case 'videoSizeEmojiMarkup':
             case 'videoSizeStickerMarkup':
                 location = () => {
-                    throw new MtArgumentError(
-                        'Cannot download thumbnail with emoji/sticker markup, try other size',
-                    )
+                    throw new MtArgumentError('Cannot download thumbnail with emoji/sticker markup, try other size')
                 }
                 width = height = NaN
                 size = Infinity
@@ -127,17 +106,10 @@ export class Thumbnail extends FileLocation {
                     }
                 } else if (media._ === 'messageExtendedMediaPreview') {
                     // according to tdlib and tdesktop sources, sz can only be photoStrippedSize
-                    throw new MtTypeAssertionError(
-                        'messageExtendedMediaPreview#thumb',
-                        'photoStrippedSize',
-                        sz._,
-                    )
+                    throw new MtTypeAssertionError('messageExtendedMediaPreview#thumb', 'photoStrippedSize', sz._)
                 } else {
                     location = {
-                        _:
-                            media._ === 'photo' ?
-                                'inputPhotoFileLocation' :
-                                'inputDocumentFileLocation',
+                        _: media._ === 'photo' ? 'inputPhotoFileLocation' : 'inputDocumentFileLocation',
                         id: media.id,
                         fileReference: media.fileReference,
                         accessHash: media.accessHash,
@@ -146,10 +118,7 @@ export class Thumbnail extends FileLocation {
                 }
                 width = sz.w
                 height = sz.h
-                size =
-                    sz._ === 'photoSizeProgressive' ?
-                        Math.max(...sz.sizes) :
-                        sz.size
+                size = sz._ === 'photoSizeProgressive' ? Math.max(...sz.sizes) : sz.size
                 break
         }
 
@@ -219,14 +188,10 @@ export class Thumbnail extends FileLocation {
     get fileId(): string {
         if (!this._fileId) {
             if (
-                (this.raw._ !== 'photoSize' &&
-                    this.raw._ !== 'photoSizeProgressive' &&
-                    this.raw._ !== 'videoSize') ||
+                (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive' && this.raw._ !== 'videoSize') ||
                 this._media._ === 'messageExtendedMediaPreview' // just for type safety
             ) {
-                throw new MtArgumentError(
-                    `Cannot generate a file ID for "${this.type}"`,
-                )
+                throw new MtArgumentError(`Cannot generate a file ID for "${this.type}"`)
             }
 
             if (this._media._ === 'stickerSet') {
@@ -248,10 +213,7 @@ export class Thumbnail extends FileLocation {
                 })
             } else {
                 this._fileId = toFileId({
-                    type:
-                        this._media._ === 'photo' ?
-                            td.FileType.Photo :
-                            td.FileType.Thumbnail,
+                    type: this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
                     dcId: this.dcId!,
                     fileReference: this._media.fileReference,
                     location: {
@@ -260,12 +222,8 @@ export class Thumbnail extends FileLocation {
                         accessHash: this._media.accessHash,
                         source: {
                             _: 'thumbnail',
-                            fileType:
-                                this._media._ === 'photo' ?
-                                    td.FileType.Photo :
-                                    td.FileType.Thumbnail,
-                            thumbnailType:
-                                this.raw.type === 'u' ? '\x00' : this.raw.type,
+                            fileType: this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
+                            thumbnailType: this.raw.type === 'u' ? '\x00' : this.raw.type,
                         },
                     },
                 })
@@ -282,14 +240,10 @@ export class Thumbnail extends FileLocation {
     get uniqueFileId(): string {
         if (!this._uniqueFileId) {
             if (
-                (this.raw._ !== 'photoSize' &&
-                    this.raw._ !== 'photoSizeProgressive' &&
-                    this.raw._ !== 'videoSize') ||
+                (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive' && this.raw._ !== 'videoSize') ||
                 this._media._ === 'messageExtendedMediaPreview' // just for type safety
             ) {
-                throw new MtArgumentError(
-                    `Cannot generate a unique file ID for "${this.type}"`,
-                )
+                throw new MtArgumentError(`Cannot generate a unique file ID for "${this.type}"`)
             }
 
             if (this._media._ === 'stickerSet') {
@@ -305,20 +259,14 @@ export class Thumbnail extends FileLocation {
                 })
             } else {
                 this._uniqueFileId = toUniqueFileId(
-                    this._media._ === 'photo' ?
-                        td.FileType.Photo :
-                        td.FileType.Thumbnail,
+                    this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
                     {
                         _: 'photo',
                         id: this._media.id,
                         source: {
                             _: 'thumbnail',
-                            fileType:
-                                this._media._ === 'photo' ?
-                                    td.FileType.Photo :
-                                    td.FileType.Thumbnail,
-                            thumbnailType:
-                                this.raw.type === 'u' ? '\x00' : this.raw.type,
+                            fileType: this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
+                            thumbnailType: this.raw.type === 'u' ? '\x00' : this.raw.type,
                         },
                     },
                 )

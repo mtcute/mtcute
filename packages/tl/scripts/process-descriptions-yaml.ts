@@ -48,23 +48,13 @@ function unwrapMaybe(what: MaybeOverwrite, has: boolean): string | undefined {
     return undefined
 }
 
-export function applyDescriptionsYamlFile(
-    input: CachedDocumentation,
-    yaml: unknown,
-) {
-    const {
-        objects: byObjects,
-        arguments: byArguments,
-        regex: byRegex,
-    } = yaml as DescriptionsYaml
+export function applyDescriptionsYamlFile(input: CachedDocumentation, yaml: unknown) {
+    const { objects: byObjects, arguments: byArguments, regex: byRegex } = yaml as DescriptionsYaml
 
     // first create an index of all classes and methods
     const objIndex: Record<string, CachedDocumentationEntry> = {}
 
-    function indexObject(
-        obj: Record<string, CachedDocumentationEntry>,
-        prefix: string,
-    ) {
+    function indexObject(obj: Record<string, CachedDocumentationEntry>, prefix: string) {
         for (const name in obj) {
             objIndex[prefix + name] = obj[name]!
         }
@@ -87,10 +77,7 @@ export function applyDescriptionsYamlFile(
 
         if (rules.arguments) {
             for (const arg in rules.arguments) {
-                const repl = unwrapMaybe(
-                    rules.arguments[arg]!,
-                    obj.arguments !== undefined && arg in obj.arguments,
-                )
+                const repl = unwrapMaybe(rules.arguments[arg]!, obj.arguments !== undefined && arg in obj.arguments)
 
                 if (repl) {
                     if (!obj.arguments) obj.arguments = {}
@@ -107,10 +94,7 @@ export function applyDescriptionsYamlFile(
         for (const arg in byArguments) {
             if (obj.arguments && !(arg in obj.arguments)) continue
 
-            const repl = unwrapMaybe(
-                byArguments[arg]!,
-                Boolean(obj.arguments && arg in obj.arguments),
-            )
+            const repl = unwrapMaybe(byArguments[arg]!, Boolean(obj.arguments && arg in obj.arguments))
 
             if (repl) {
                 if (!obj.arguments) obj.arguments = {}

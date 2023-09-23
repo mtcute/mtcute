@@ -48,10 +48,7 @@ export async function addStickerToSet(
         stickerset: id,
         sticker: {
             _: 'inputStickerSetItem',
-            document: await this._normalizeFileToDocument(
-                sticker.file,
-                params ?? {},
-            ),
+            document: await this._normalizeFileToDocument(sticker.file, params ?? {}),
             emoji: sticker.emojis,
             maskCoords: sticker.maskPosition ?
                 {

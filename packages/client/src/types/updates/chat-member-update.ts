@@ -37,9 +37,7 @@ export type ChatMemberUpdateType =
     | 'new_owner'
     | 'other'
 
-function extractPeerId(
-    raw?: tl.TypeChatParticipant | tl.TypeChannelParticipant,
-) {
+function extractPeerId(raw?: tl.TypeChatParticipant | tl.TypeChannelParticipant) {
     if (!raw) return 0
 
     if (tl.isAnyChatParticipant(raw)) {
@@ -64,9 +62,7 @@ function extractPeerId(
 export class ChatMemberUpdate {
     constructor(
         readonly client: TelegramClient,
-        readonly raw:
-            | tl.RawUpdateChatParticipant
-            | tl.RawUpdateChannelParticipant,
+        readonly raw: tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant,
         readonly _peers: PeersIndex,
     ) {}
 
@@ -151,17 +147,11 @@ export class ChatMemberUpdate {
                     return (this._type = 'new_owner')
             }
 
-            if (
-                old._ === 'channelParticipantBanned' &&
-                cur._ === 'channelParticipant'
-            ) {
+            if (old._ === 'channelParticipantBanned' && cur._ === 'channelParticipant') {
                 return (this._type = 'unrestricted')
             }
 
-            if (
-                old._ === 'channelParticipantAdmin' &&
-                cur._ === 'channelParticipant'
-            ) {
+            if (old._ === 'channelParticipantAdmin' && cur._ === 'channelParticipant') {
                 return (this._type = 'demoted')
             }
 
@@ -177,10 +167,7 @@ export class ChatMemberUpdate {
      */
     get chat(): Chat {
         if (!this._chat) {
-            const id =
-                this.raw._ === 'updateChannelParticipant' ?
-                    this.raw.channelId :
-                    this.raw.chatId
+            const id = this.raw._ === 'updateChannelParticipant' ? this.raw.channelId : this.raw.chatId
             this._chat = new Chat(this.client, this._peers.chat(id))
         }
 
@@ -194,10 +181,7 @@ export class ChatMemberUpdate {
      * Can be chat/channel administrator or the {@link user} themself.
      */
     get actor(): User {
-        return (this._actor ??= new User(
-            this.client,
-            this._peers.user(this.raw.actorId),
-        ))
+        return (this._actor ??= new User(this.client, this._peers.user(this.raw.actorId)))
     }
 
     private _user?: User
@@ -205,10 +189,7 @@ export class ChatMemberUpdate {
      * User representing the chat member whose status was changed.
      */
     get user(): User {
-        return (this._user ??= new User(
-            this.client,
-            this._peers.user(this.raw.userId),
-        ))
+        return (this._user ??= new User(this.client, this._peers.user(this.raw.userId)))
     }
 
     private _oldMember?: ChatMember
@@ -218,11 +199,7 @@ export class ChatMemberUpdate {
     get oldMember(): ChatMember | null {
         if (!this.raw.prevParticipant) return null
 
-        return (this._oldMember ??= new ChatMember(
-            this.client,
-            this.raw.prevParticipant,
-            this._peers,
-        ))
+        return (this._oldMember ??= new ChatMember(this.client, this.raw.prevParticipant, this._peers))
     }
 
     private _newMember?: ChatMember
@@ -232,11 +209,7 @@ export class ChatMemberUpdate {
     get newMember(): ChatMember | null {
         if (!this.raw.newParticipant) return null
 
-        return (this._newMember ??= new ChatMember(
-            this.client,
-            this.raw.newParticipant,
-            this._peers,
-        ))
+        return (this._newMember ??= new ChatMember(this.client, this.raw.newParticipant, this._peers))
     }
 
     private _inviteLink?: ChatInviteLink
@@ -246,10 +219,7 @@ export class ChatMemberUpdate {
     get inviteLink(): ChatInviteLink | null {
         if (!this.raw.invite) return null
 
-        return (this._inviteLink ??= new ChatInviteLink(
-            this.client,
-            this.raw.invite,
-        ))
+        return (this._inviteLink ??= new ChatInviteLink(this.client, this.raw.invite))
     }
 }
 

@@ -12,8 +12,7 @@ export const snakeToCamel = (s: string): string => {
  * Transform camelCase string to PascalCase string
  * @param s  camelCase string
  */
-export const camelToPascal = (s: string): string =>
-    s[0].toUpperCase() + s.substring(1)
+export const camelToPascal = (s: string): string => s[0].toUpperCase() + s.substring(1)
 
 /**
  * Format a string as a JS documentation comment

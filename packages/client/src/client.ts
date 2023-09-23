@@ -2,19 +2,8 @@
 /* THIS FILE WAS AUTO-GENERATED */
 import { Readable } from 'stream'
 
-import {
-    BaseTelegramClient,
-    BaseTelegramClientOptions,
-    MaybeArray,
-    MaybeAsync,
-} from '@mtcute/core'
-import {
-    AsyncLock,
-    ConditionVariable,
-    Deque,
-    Logger,
-    SortedLinkedList,
-} from '@mtcute/core/utils'
+import { BaseTelegramClient, BaseTelegramClientOptions, MaybeArray, MaybeAsync } from '@mtcute/core'
+import { AsyncLock, ConditionVariable, Deque, Logger, SortedLinkedList } from '@mtcute/core/utils'
 import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
@@ -38,10 +27,7 @@ import { answerPreCheckoutQuery } from './methods/bots/answer-pre-checkout-query
 import { deleteMyCommands } from './methods/bots/delete-my-commands'
 import { getBotMenuButton } from './methods/bots/get-bot-menu-button'
 import { getCallbackAnswer } from './methods/bots/get-callback-answer'
-import {
-    getGameHighScores,
-    getInlineGameHighScores,
-} from './methods/bots/get-game-high-scores'
+import { getGameHighScores, getInlineGameHighScores } from './methods/bots/get-game-high-scores'
 import { getMyCommands } from './methods/bots/get-my-commands'
 import { _normalizeCommandScope } from './methods/bots/normalize-command-scope'
 import { setBotMenuButton } from './methods/bots/set-bot-menu-button'
@@ -122,10 +108,7 @@ import { editInlineMessage } from './methods/messages/edit-inline-message'
 import { editMessage } from './methods/messages/edit-message'
 import { _findMessageInUpdate } from './methods/messages/find-in-update'
 import { forwardMessages } from './methods/messages/forward-messages'
-import {
-    _getDiscussionMessage,
-    getDiscussionMessage,
-} from './methods/messages/get-discussion-message'
+import { _getDiscussionMessage, getDiscussionMessage } from './methods/messages/get-discussion-message'
 import { getHistory } from './methods/messages/get-history'
 import { getMessageGroup } from './methods/messages/get-message-group'
 import { getMessageReactions } from './methods/messages/get-message-reactions'
@@ -160,11 +143,7 @@ import {
 } from './methods/parse-modes/parse-modes'
 import { changeCloudPassword } from './methods/pasword/change-cloud-password'
 import { enableCloudPassword } from './methods/pasword/enable-cloud-password'
-import {
-    cancelPasswordEmail,
-    resendPasswordEmail,
-    verifyPasswordEmail,
-} from './methods/pasword/password-email'
+import { cancelPasswordEmail, resendPasswordEmail, verifyPasswordEmail } from './methods/pasword/password-email'
 import { removeCloudPassword } from './methods/pasword/remove-cloud-password'
 import { addStickerToSet } from './methods/stickers/add-sticker-to-set'
 import { createStickerSet } from './methods/stickers/create-sticker-set'
@@ -292,13 +271,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param name  Event name
      * @param handler  Raw update handler
      */
-    on(
-        name: 'raw_update',
-        handler: (
-            upd: tl.TypeUpdate | tl.TypeMessage,
-            peers: PeersIndex
-        ) => void
-    ): this
+    on(name: 'raw_update', handler: (upd: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex) => void): this
     /**
      * Register a parsed update handler
      *
@@ -326,10 +299,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param name  Event name
      * @param handler  Delete message handler
      */
-    on(
-        name: 'delete_message',
-        handler: (upd: DeleteMessageUpdate) => void
-    ): this
+    on(name: 'delete_message', handler: (upd: DeleteMessageUpdate) => void): this
     /**
      * Register a chat member update handler
      *
@@ -350,10 +320,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param name  Event name
      * @param handler  Chosen inline result handler
      */
-    on(
-        name: 'chosen_inline_result',
-        handler: (upd: ChosenInlineResult) => void
-    ): this
+    on(name: 'chosen_inline_result', handler: (upd: ChosenInlineResult) => void): this
     /**
      * Register a callback query handler
      *
@@ -409,30 +376,21 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param name  Event name
      * @param handler  Bot chat join request handler
      */
-    on(
-        name: 'bot_chat_join_request',
-        handler: (upd: BotChatJoinRequestUpdate) => void
-    ): this
+    on(name: 'bot_chat_join_request', handler: (upd: BotChatJoinRequestUpdate) => void): this
     /**
      * Register a chat join request handler
      *
      * @param name  Event name
      * @param handler  Chat join request handler
      */
-    on(
-        name: 'chat_join_request',
-        handler: (upd: ChatJoinRequestUpdate) => void
-    ): this
+    on(name: 'chat_join_request', handler: (upd: ChatJoinRequestUpdate) => void): this
     /**
      * Register a pre checkout query handler
      *
      * @param name  Event name
      * @param handler  Pre checkout query handler
      */
-    on(
-        name: 'pre_checkout_query',
-        handler: (upd: PreCheckoutQuery) => void
-    ): this
+    on(name: 'pre_checkout_query', handler: (upd: PreCheckoutQuery) => void): this
     /**
      * Accept the given TOS
      *
@@ -491,10 +449,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param params  Parameters to be passed to {@link TelegramClient.start}
      * @param then  Function to be called after {@link TelegramClient.start} returns
      */
-    run(
-        params: Parameters<TelegramClient['start']>[0],
-        then?: (user: User) => void | Promise<void>
-    ): void
+    run(params: Parameters<TelegramClient['start']>[0], then?: (user: User) => void | Promise<void>): void
     /**
      * Send the confirmation code to the given phone number
      *
@@ -530,11 +485,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @throws BadRequestError  In case the arguments are invalid
      * @throws SessionPasswordNeededError  In case a password is needed to sign in
      */
-    signIn(
-        phone: string,
-        phoneCodeHash: string,
-        phoneCode: string
-    ): Promise<User | TermsOfService | false>
+    signIn(phone: string, phoneCodeHash: string, phoneCode: string): Promise<User | TermsOfService | false>
     /**
      * Register a new user in Telegram.
      *
@@ -543,12 +494,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param firstName  New user's first name
      * @param lastName  (default: `''`) New user's last name
      */
-    signUp(
-        phone: string,
-        phoneCodeHash: string,
-        firstName: string,
-        lastName?: string
-    ): Promise<User>
+    signUp(phone: string, phoneCodeHash: string, firstName: string, lastName?: string): Promise<User>
     /**
      * Utility function to quickly authorize on test DC
      * using a [Test phone number](https://core.telegram.org/api/auth#test-phone-numbers),
@@ -759,7 +705,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * with a deep-link parameter.
              */
             url?: string
-        }
+        },
     ): Promise<void>
     /**
      * Answer an inline query.
@@ -849,7 +795,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * entities, only the messages that are sent once a result is clicked.
              */
             parseMode?: string | null
-        }
+        },
     ): Promise<void>
     /**
      * Answer a pre-checkout query.
@@ -918,7 +864,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * bot, it is checked by Telegram.
              */
             password?: string
-        }
+        },
     ): Promise<tl.messages.TypeBotCallbackAnswer>
     /**
      * Get high scores of a game
@@ -927,11 +873,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param message  ID of the message containing the game
      * @param userId  ID of the user to find high scores for
      */
-    getGameHighScores(
-        chatId: InputPeerLike,
-        message: number,
-        userId?: InputPeerLike
-    ): Promise<GameHighScore[]>
+    getGameHighScores(chatId: InputPeerLike, message: number, userId?: InputPeerLike): Promise<GameHighScore[]>
     /**
      * Get high scores of a game from an inline message
      *
@@ -940,7 +882,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getInlineGameHighScores(
         messageId: string | tl.TypeInputBotInlineMessageID,
-        userId?: InputPeerLike
+        userId?: InputPeerLike,
     ): Promise<GameHighScore[]>
     /**
      * Get a list of current bot's commands for the given command scope
@@ -964,16 +906,13 @@ export interface TelegramClient extends BaseTelegramClient {
     }): Promise<tl.RawBotCommand[]>
 
     _normalizeCommandScope(
-        scope: tl.TypeBotCommandScope | BotCommands.IntermediateScope
+        scope: tl.TypeBotCommandScope | BotCommands.IntermediateScope,
     ): Promise<tl.TypeBotCommandScope>
     /**
      * Sets a menu button for the given user.
      *
      */
-    setBotMenuButton(
-        user: InputPeerLike,
-        button: tl.TypeBotMenuButton
-    ): Promise<void>
+    setBotMenuButton(user: InputPeerLike, button: tl.TypeBotMenuButton): Promise<void>
     /**
      * Set a score of a user in a game
      *
@@ -1058,10 +997,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param target  Whether to target groups or channels.
      * @param rights  The default chat permissions.
      */
-    setMyDefaultRights(
-        target: 'channel' | 'group',
-        rights: Omit<tl.RawChatAdminRights, '_'>
-    ): Promise<void>
+    setMyDefaultRights(target: 'channel' | 'group', rights: Omit<tl.RawChatAdminRights, '_'>): Promise<void>
     /**
      * Add new members to a group, supergroup or channel.
      *
@@ -1072,11 +1008,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *   Number of old messages to be forwarded (0-100).
      *   Only applicable to legacy groups, ignored for supergroups and channels
      */
-    addChatMembers(
-        chatId: InputPeerLike,
-        users: MaybeArray<InputPeerLike>,
-        forwardCount?: number
-    ): Promise<void>
+    addChatMembers(chatId: InputPeerLike, users: MaybeArray<InputPeerLike>, forwardCount?: number): Promise<void>
     /**
      * Archive one or more chats
      *
@@ -1092,10 +1024,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param userId  User ID
      * @returns  Service message about removed user, if one was generated.
      */
-    banChatMember(
-        chatId: InputPeerLike,
-        userId: InputPeerLike
-    ): Promise<Message | null>
+    banChatMember(chatId: InputPeerLike, userId: InputPeerLike): Promise<Message | null>
     /**
      * Create a new broadcast channel
      *
@@ -1166,21 +1095,14 @@ export interface TelegramClient extends BaseTelegramClient {
      *     but they are in fact different flags in TL object.
      * @param maxId  (default: `0`) Maximum ID of message to delete. Defaults to 0 (remove all messages)
      */
-    deleteHistory(
-        chat: InputPeerLike,
-        mode?: 'delete' | 'clear' | 'revoke',
-        maxId?: number
-    ): Promise<void>
+    deleteHistory(chat: InputPeerLike, mode?: 'delete' | 'clear' | 'revoke', maxId?: number): Promise<void>
     /**
      * Delete all messages of a user (or channel) in a supergroup
      *
      * @param chatId  Chat ID
      * @param participantId  User/channel ID
      */
-    deleteUserHistory(
-        chatId: InputPeerLike,
-        participantId: InputPeerLike
-    ): Promise<void>
+    deleteUserHistory(chatId: InputPeerLike, participantId: InputPeerLike): Promise<void>
     /**
      * Edit supergroup/channel admin rights of a user.
      *
@@ -1193,7 +1115,7 @@ export interface TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         userId: InputPeerLike,
         rights: Omit<tl.RawChatAdminRights, '_'>,
-        rank?: string
+        rank?: string,
     ): Promise<void>
     /**
      * Get chat event log ("Recent actions" in official
@@ -1244,9 +1166,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * and when passing one or more action types,
              * they will be filtered locally.
              */
-            filters?:
-                | tl.TypeChannelAdminLogEventsFilter
-                | MaybeArray<Exclude<ChatAction, null>['type']>
+            filters?: tl.TypeChannelAdminLogEventsFilter | MaybeArray<Exclude<ChatAction, null>['type']>
 
             /**
              * Limit the number of events returned.
@@ -1261,7 +1181,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Defaults to `100`
              */
             chunkSize?: number
-        }
+        },
     ): AsyncIterableIterator<ChatEvent>
     /**
      * Get information about a single chat member
@@ -1270,10 +1190,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param userId  User ID, username, phone number, `"me"` or `"self"`
      * @throws UserNotParticipantError  In case given user is not a participant of a given chat
      */
-    getChatMember(
-        chatId: InputPeerLike,
-        userId: InputPeerLike
-    ): Promise<ChatMember>
+    getChatMember(chatId: InputPeerLike, userId: InputPeerLike): Promise<ChatMember>
     /**
      * Get a chunk of members of some chat.
      *
@@ -1317,16 +1234,8 @@ export interface TelegramClient extends BaseTelegramClient {
              *
              *  Only used for channels and supergroups. Defaults to `recent`
              */
-            type?:
-                | 'all'
-                | 'banned'
-                | 'restricted'
-                | 'bots'
-                | 'recent'
-                | 'admins'
-                | 'contacts'
-                | 'mention'
-        }
+            type?: 'all' | 'banned' | 'restricted' | 'bots' | 'recent' | 'admins' | 'contacts' | 'mention'
+        },
     ): Promise<ArrayWithTotal<ChatMember>>
     /**
      * Get preview information about a private chat.
@@ -1383,7 +1292,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Defaults to `200`
              */
             chunkSize?: number
-        }
+        },
     ): AsyncIterableIterator<ChatMember>
     /**
      * Join a channel or supergroup
@@ -1439,7 +1348,7 @@ export interface TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         userId: InputPeerLike,
         restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>,
-        until?: number | Date
+        until?: number | Date,
     ): Promise<void>
     /**
      * Save or delete a draft message associated with some chat
@@ -1447,10 +1356,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param draft  Draft message, or `null` to delete.
      */
-    saveDraft(
-        chatId: InputPeerLike,
-        draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>
-    ): Promise<void>
+    saveDraft(chatId: InputPeerLike, draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>): Promise<void>
     /**
      * Change default chat permissions for all members.
      *
@@ -1465,7 +1371,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     setChatDefaultPermissions(
         chatId: InputPeerLike,
-        restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>
+        restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>,
     ): Promise<Chat>
     /**
      * Change chat description
@@ -1475,10 +1381,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  Chat ID or username
      * @param description  New chat description, 0-255 characters
      */
-    setChatDescription(
-        chatId: InputPeerLike,
-        description: string
-    ): Promise<void>
+    setChatDescription(chatId: InputPeerLike, description: string): Promise<void>
     /**
      * Set a new chat photo or video.
      *
@@ -1495,7 +1398,7 @@ export interface TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         type: 'photo' | 'video',
         media: InputFileLike,
-        previewSec?: number
+        previewSec?: number,
     ): Promise<void>
     /**
      * Change chat title
@@ -1514,10 +1417,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  Chat ID or current username
      * @param username  New username, or `null` to remove
      */
-    setChatUsername(
-        chatId: InputPeerLike,
-        username: string | null
-    ): Promise<void>
+    setChatUsername(chatId: InputPeerLike, username: string | null): Promise<void>
     /**
      * Set supergroup's slow mode interval.
      *
@@ -1560,10 +1460,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  Chat ID
      * @param userId  User ID
      */
-    unrestrictChatMember(
-        chatId: InputPeerLike,
-        userId: InputPeerLike
-    ): Promise<void>
+    unrestrictChatMember(chatId: InputPeerLike, userId: InputPeerLike): Promise<void>
     /**
      * Add an existing Telegram user as a contact
      *
@@ -1593,7 +1490,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * with the newly created contact (defaults to `false`)
              */
             sharePhone?: boolean
-        }
+        },
     ): Promise<User>
     /**
      * Delete a single contact from your Telegram contacts list
@@ -1623,7 +1520,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param contacts  List of contacts
      */
     importContacts(
-        contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[]
+        contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[],
     ): Promise<tl.contacts.RawImportedContacts>
 
     _pushConversationMessage(msg: Message, incoming?: boolean): void
@@ -1636,9 +1533,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param folder  Parameters for the folder
      * @returns  Newly created folder
      */
-    createFolder(
-        folder: PartialExcept<tl.RawDialogFilter, 'title'>
-    ): Promise<tl.RawDialogFilter>
+    createFolder(folder: PartialExcept<tl.RawDialogFilter, 'title'>): Promise<tl.RawDialogFilter>
     /**
      * Delete a folder by its ID
      *
@@ -1658,7 +1553,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     editFolder(
         folder: tl.RawDialogFilter | number | string,
-        modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>
+        modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>,
     ): Promise<tl.RawDialogFilter>
     /**
      * Find a folder by its parameter.
@@ -1669,11 +1564,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param params  Search parameters. At least one must be set.
      */
-    findFolder(params: {
-        title?: string
-        emoji?: string
-        id?: number
-    }): Promise<tl.RawDialogFilter | null>
+    findFolder(params: { title?: string; emoji?: string; id?: number }): Promise<tl.RawDialogFilter | null>
     /**
      * Iterate over dialogs.
      *
@@ -1797,9 +1688,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getPeerDialogs(peers: InputPeerLike[]): Promise<Dialog[]>
 
-    _parseDialogs(
-        res: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs
-    ): Dialog[]
+    _parseDialogs(res: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs): Dialog[]
     /**
      * Reorder folders
      *
@@ -1823,10 +1712,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param filename  Local file name to which the remote file will be downloaded
      * @param params  File download parameters
      */
-    downloadToFile(
-        filename: string,
-        params: FileDownloadParameters
-    ): Promise<void>
+    downloadToFile(filename: string, params: FileDownloadParameters): Promise<void>
     /**
      * Download a file and return it as an iterable, which yields file contents
      * in chunks of a given size. Order of the chunks is guaranteed to be
@@ -1834,9 +1720,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param params  Download parameters
      */
-    downloadAsIterable(
-        params: FileDownloadParameters
-    ): AsyncIterableIterator<Buffer>
+    downloadAsIterable(params: FileDownloadParameters): AsyncIterableIterator<Buffer>
     /**
      * Download a file and return it as a Node readable stream,
      * streaming file contents.
@@ -1848,7 +1732,7 @@ export interface TelegramClient extends BaseTelegramClient {
         file: InputFileLike | tl.TypeInputDocument,
         params: {
             progressCallback?: (uploaded: number, total: number) => void
-        }
+        },
     ): Promise<tl.TypeInputDocument>
     /**
      * Normalize a {@link InputFileLike} to `InputFile`,
@@ -1862,7 +1746,7 @@ export interface TelegramClient extends BaseTelegramClient {
             fileName?: string
             fileSize?: number
             fileMime?: string
-        }
+        },
     ): Promise<tl.TypeInputFile>
     /**
      * Normalize an {@link InputMediaLike} to `InputMedia`,
@@ -1876,7 +1760,7 @@ export interface TelegramClient extends BaseTelegramClient {
             progressCallback?: (uploaded: number, total: number) => void
             uploadPeer?: tl.TypeInputPeer
         },
-        uploadMedia?: boolean
+        uploadMedia?: boolean,
     ): Promise<tl.TypeInputMedia>
     /**
      * Upload a file to Telegram servers, without actually
@@ -1958,7 +1842,7 @@ export interface TelegramClient extends BaseTelegramClient {
         params?: {
             peer?: InputPeerLike
             progressCallback?: (uploaded: number, total: number) => void
-        }
+        },
     ): Promise<Extract<MessageMedia, Photo | RawDocument>>
     /**
      * Create an additional invite link for the chat.
@@ -1990,7 +1874,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * approved by an admin
              */
             withApproval?: boolean
-        }
+        },
     ): Promise<ChatInviteLink>
     /**
      * Edit an invite link. You can only edit non-primary
@@ -2026,7 +1910,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * approved by an admin
              */
             withApproval?: boolean
-        }
+        },
     ): Promise<ChatInviteLink>
     /**
      * Generate a new primary invite link for a chat,
@@ -2071,7 +1955,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Doesn't work when {@link link} is set (Telegram limitation)
              */
             requestedSearch?: string
-        }
+        },
     ): AsyncIterableIterator<ChatInviteLinkJoinedMember>
     /**
      * Get detailed information about an invite link
@@ -2112,7 +1996,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Defaults to `100`
              */
             chunkSize?: number
-        }
+        },
     ): AsyncIterableIterator<ChatInviteLink>
     /**
      * Get primary invite link of a chat
@@ -2127,11 +2011,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param action  Whether to approve or deny the join requests
      * @param link  Invite link to target
      */
-    hideAllJoinRequests(
-        peer: InputPeerLike,
-        action: 'approve' | 'deny',
-        link?: string
-    ): Promise<void>
+    hideAllJoinRequests(peer: InputPeerLike, action: 'approve' | 'deny', link?: string): Promise<void>
     /**
      * Approve or deny join request to a chat.
      *
@@ -2139,11 +2019,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param user  User ID
      * @param action  Whether to approve or deny the join request
      */
-    hideJoinRequest(
-        peer: InputPeerLike,
-        user: InputPeerLike,
-        action: 'approve' | 'deny'
-    ): Promise<void>
+    hideJoinRequest(peer: InputPeerLike, user: InputPeerLike, action: 'approve' | 'deny'): Promise<void>
     /**
      * Revoke an invite link.
      *
@@ -2154,10 +2030,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param link  Invite link to revoke
      * @returns  If `link` is a primary invite, newly generated invite link, otherwise the revoked link
      */
-    revokeInviteLink(
-        chatId: InputPeerLike,
-        link: string
-    ): Promise<ChatInviteLink>
+    revokeInviteLink(chatId: InputPeerLike, link: string): Promise<ChatInviteLink>
     /**
      * Close a poll sent by you.
      *
@@ -2176,21 +2049,14 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param revoke  (default: `true`) Whether to "revoke" (i.e. delete for both sides).
      *      Only used for chats and private chats.
      */
-    deleteMessages(
-        chatId: InputPeerLike,
-        ids: MaybeArray<number>,
-        revoke?: boolean
-    ): Promise<void>
+    deleteMessages(chatId: InputPeerLike, ids: MaybeArray<number>, revoke?: boolean): Promise<void>
     /**
      * Delete scheduled messages.
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param ids  Message(s) ID(s) to delete.
      */
-    deleteScheduledMessages(
-        chatId: InputPeerLike,
-        ids: MaybeArray<number>
-    ): Promise<void>
+    deleteScheduledMessages(chatId: InputPeerLike, ids: MaybeArray<number>): Promise<void>
     /**
      * Edit sent inline message text, media and reply markup.
      *
@@ -2250,7 +2116,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * @param total  Total file size in bytes
              */
             progressCallback?: (uploaded: number, total: number) => void
-        }
+        },
     ): Promise<void>
     /**
      * Edit message text, media, reply markup and schedule date.
@@ -2317,7 +2183,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * @param total  Total file size in bytes
              */
             progressCallback?: (uploaded: number, total: number) => void
-        }
+        },
     ): Promise<Message>
 
     _findMessageInUpdate(res: tl.TypeUpdates, isEdit?: boolean): Message
@@ -2410,7 +2276,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * have content protection.
              */
             forbidForwards?: boolean
-        }
+        },
     ): Promise<Message>
     /**
      * Forward one or more messages, optionally including a caption message.
@@ -2504,13 +2370,10 @@ export interface TelegramClient extends BaseTelegramClient {
              * have content protection.
              */
             forbidForwards?: boolean
-        }
+        },
     ): Promise<MaybeArray<Message>>
 
-    _getDiscussionMessage(
-        peer: InputPeerLike,
-        message: number
-    ): Promise<[tl.TypeInputPeer, number]>
+    _getDiscussionMessage(peer: InputPeerLike, message: number): Promise<[tl.TypeInputPeer, number]>
     // public version of the same method because why not
     /**
      * Get discussion message for some channel post.
@@ -2526,10 +2389,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param peer  Channel where the post was found
      * @param message  ID of the channel post
      */
-    getDiscussionMessage(
-        peer: InputPeerLike,
-        message: number
-    ): Promise<Message | null>
+    getDiscussionMessage(peer: InputPeerLike, message: number): Promise<Message | null>
     /**
      * Iterate through a chat history sequentially.
      *
@@ -2595,7 +2455,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Defaults to `100`
              */
             chunkSize?: number
-        }
+        },
     ): AsyncIterableIterator<Message>
     /**
      * Get all messages inside of a message group
@@ -2615,10 +2475,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param messages  Message ID
      * @returns  Reactions to the corresponding message, or `null` if there are none
      */
-    getMessageReactions(
-        chatId: InputPeerLike,
-        messages: number
-    ): Promise<MessageReactions | null>
+    getMessageReactions(chatId: InputPeerLike, messages: number): Promise<MessageReactions | null>
     /**
      * Get reactions to messages.
      *
@@ -2630,10 +2487,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param messages  Message IDs
      * @returns  Reactions to corresponding messages, or `null` if there are none
      */
-    getMessageReactions(
-        chatId: InputPeerLike,
-        messages: number[]
-    ): Promise<(MessageReactions | null)[]>
+    getMessageReactions(chatId: InputPeerLike, messages: number[]): Promise<(MessageReactions | null)[]>
     /**
      * Get a single message from PM or legacy group by its ID.
      * For channels, use {@link getMessages}.
@@ -2646,10 +2500,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *     Whether the reply to a given message should be fetched
      *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
      */
-    getMessagesUnsafe(
-        messageId: number,
-        fromReply?: boolean
-    ): Promise<Message | null>
+    getMessagesUnsafe(messageId: number, fromReply?: boolean): Promise<Message | null>
     /**
      * Get messages from PM or legacy group by their IDs.
      * For channels, use {@link getMessages}.
@@ -2665,10 +2516,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *     Whether the reply to a given message should be fetched
      *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
      */
-    getMessagesUnsafe(
-        messageIds: number[],
-        fromReply?: boolean
-    ): Promise<(Message | null)[]>
+    getMessagesUnsafe(messageIds: number[], fromReply?: boolean): Promise<(Message | null)[]>
     /**
      * Get a single message in chat by its ID
      *
@@ -2678,11 +2526,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *     Whether the reply to a given message should be fetched
      *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
      */
-    getMessages(
-        chatId: InputPeerLike,
-        messageId: number,
-        fromReply?: boolean
-    ): Promise<Message | null>
+    getMessages(chatId: InputPeerLike, messageId: number, fromReply?: boolean): Promise<Message | null>
     /**
      * Get messages in chat by their IDs
      *
@@ -2695,11 +2539,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *     Whether the reply to a given message should be fetched
      *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
      */
-    getMessages(
-        chatId: InputPeerLike,
-        messageIds: number[],
-        fromReply?: boolean
-    ): Promise<(Message | null)[]>
+    getMessages(chatId: InputPeerLike, messageIds: number[], fromReply?: boolean): Promise<(Message | null)[]>
     /**
      * Get users who have reacted to the message.
      *
@@ -2734,7 +2574,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Defaults to `100`
              */
             chunkSize?: number
-        }
+        },
     ): AsyncIterableIterator<PeerReaction>
     /**
      * Get a single scheduled message in chat by its ID
@@ -2742,10 +2582,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
      * @param messageId  Scheduled message ID
      */
-    getScheduledMessages(
-        chatId: InputPeerLike,
-        messageId: number
-    ): Promise<Message | null>
+    getScheduledMessages(chatId: InputPeerLike, messageId: number): Promise<Message | null>
     /**
      * Get scheduled messages in chat by their IDs
      *
@@ -2755,15 +2592,12 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
      * @param messageIds  Scheduled messages IDs
      */
-    getScheduledMessages(
-        chatId: InputPeerLike,
-        messageIds: number[]
-    ): Promise<(Message | null)[]>
+    getScheduledMessages(chatId: InputPeerLike, messageIds: number[]): Promise<(Message | null)[]>
 
     _parseEntities(
         text?: string | FormattedString<string>,
         mode?: string | null,
-        entities?: tl.TypeMessageEntity[]
+        entities?: tl.TypeMessageEntity[],
     ): Promise<[string, tl.TypeMessageEntity[] | undefined]>
     /**
      * Pin a message in a group, supergroup, channel or PM.
@@ -2776,12 +2610,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param notify  (default: `false`) Whether to send a notification (only for legacy groups and supergroups)
      * @param bothSides  (default: `false`) Whether to pin for both sides (only for private chats)
      */
-    pinMessage(
-        chatId: InputPeerLike,
-        messageId: number,
-        notify?: boolean,
-        bothSides?: boolean
-    ): Promise<void>
+    pinMessage(chatId: InputPeerLike, messageId: number, notify?: boolean, bothSides?: boolean): Promise<void>
     /**
      * Mark chat history as read.
      *
@@ -2789,11 +2618,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param message  (default: `0`) Message up until which to read history (by default everything is read)
      * @param clearMentions  (default: `false`) Whether to also clear all mentions in the chat
      */
-    readHistory(
-        chatId: InputPeerLike,
-        message?: number,
-        clearMentions?: boolean
-    ): Promise<void>
+    readHistory(chatId: InputPeerLike, message?: number, clearMentions?: boolean): Promise<void>
     /**
      * Mark all reactions in chat as read.
      *
@@ -2935,7 +2760,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Defaults to `100`
              */
             chunkSize?: number
-        }
+        },
     ): AsyncIterableIterator<Message>
     /**
      * Copy a message (i.e. send the same message,
@@ -3025,7 +2850,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Defaults to `false`
              */
             clearDraft?: boolean
-        }
+        },
     ): Promise<Message>
     /**
      * Send a group of media.
@@ -3098,11 +2923,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * @param uploaded  Number of bytes already uploaded
              * @param total  Total file size
              */
-            progressCallback?: (
-                index: number,
-                uploaded: number,
-                total: number
-            ) => void
+            progressCallback?: (index: number, uploaded: number, total: number) => void
 
             /**
              * Whether to clear draft after sending this message.
@@ -3123,7 +2944,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Peer to use when sending the message.
              */
             sendAs?: InputPeerLike
-        }
+        },
     ): Promise<Message[]>
     /**
      * Send a single media (a photo or a document-based media)
@@ -3238,7 +3059,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Peer to use when sending the message.
              */
             sendAs?: InputPeerLike
-        }
+        },
     ): Promise<Message>
     /**
      * Send or remove a reaction.
@@ -3253,7 +3074,7 @@ export interface TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike,
         message: number,
         emoji: string | tl.Long | null,
-        big?: boolean
+        big?: boolean,
     ): Promise<Message>
     /**
      * Send s previously scheduled message.
@@ -3373,7 +3194,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Peer to use when sending the message.
              */
             sendAs?: InputPeerLike
-        }
+        },
     ): Promise<Message>
     /**
      * Sends a current user/bot typing event
@@ -3400,7 +3221,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * For comment threads, ID of the thread (i.e. top message)
              */
             threadId?: number
-        }
+        },
     ): Promise<void>
     /**
      * Send or retract a vote in a poll.
@@ -3413,11 +3234,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *     representing them. In case of indexes, the poll will first
      *     be requested from the server.
      */
-    sendVote(
-        chatId: InputPeerLike,
-        message: number,
-        options: null | MaybeArray<number | Buffer>
-    ): Promise<Poll>
+    sendVote(chatId: InputPeerLike, message: number, options: null | MaybeArray<number | Buffer>): Promise<Poll>
     /**
      * Translate message text to a given language.
      *
@@ -3432,7 +3249,7 @@ export interface TelegramClient extends BaseTelegramClient {
     translateMessage(
         chatId: InputPeerLike,
         messageId: number,
-        toLanguage: string
+        toLanguage: string,
     ): Promise<[string, MessageEntity[]] | null>
     /**
      * Translate text to a given language.
@@ -3466,9 +3283,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param params  Takeout session parameters
      */
-    initTakeoutSession(
-        params: Omit<tl.account.RawInitTakeoutSessionRequest, '_'>
-    ): Promise<TakeoutSession>
+    initTakeoutSession(params: Omit<tl.account.RawInitTakeoutSessionRequest, '_'>): Promise<TakeoutSession>
     /**
      * Register a given {@link IMessageEntityParser} as a parse mode
      * for messages. When this method is first called, given parse
@@ -3509,11 +3324,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param newPassword  New password as plaintext
      * @param hint  Hint for the new password
      */
-    changeCloudPassword(
-        currentPassword: string,
-        newPassword: string,
-        hint?: string
-    ): Promise<void>
+    changeCloudPassword(currentPassword: string, newPassword: string, hint?: string): Promise<void>
     /**
      * Enable 2FA password on your account
      *
@@ -3526,11 +3337,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param hint  Hint for the new password
      * @param email  Recovery email
      */
-    enableCloudPassword(
-        password: string,
-        hint?: string,
-        email?: string
-    ): Promise<void>
+    enableCloudPassword(password: string, hint?: string, email?: string): Promise<void>
     /**
      * Verify an email to use as 2FA recovery method
      *
@@ -3575,7 +3382,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * @param total  Total file size
              */
             progressCallback?: (uploaded: number, total: number) => void
-        }
+        },
     ): Promise<StickerSet>
     /**
      * Create a new sticker set.
@@ -3648,11 +3455,7 @@ export interface TelegramClient extends BaseTelegramClient {
          * @param uploaded  Number of bytes uploaded
          * @param total  Total file size
          */
-        progressCallback?: (
-            idx: number,
-            uploaded: number,
-            total: number
-        ) => void
+        progressCallback?: (idx: number, uploaded: number, total: number) => void
     }): Promise<StickerSet>
     /**
      * Delete a sticker from a sticker set
@@ -3666,10 +3469,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @returns  Modfiied sticker set
      */
     deleteStickerFromSet(
-        sticker:
-            | string
-            | tdFileId.RawFullRemoteFileLocation
-            | tl.TypeInputDocument
+        sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument,
     ): Promise<StickerSet>
     /**
      * Get custom emoji stickers by their IDs
@@ -3692,9 +3492,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param id  Sticker pack short name, dice emoji, `"emoji"` for animated emojis or input ID
      */
-    getStickerSet(
-        id: string | { dice: string } | tl.TypeInputStickerSet
-    ): Promise<StickerSet>
+    getStickerSet(id: string | { dice: string } | tl.TypeInputStickerSet): Promise<StickerSet>
     /**
      * Move a sticker in a sticker set
      * to another position
@@ -3709,11 +3507,8 @@ export interface TelegramClient extends BaseTelegramClient {
      * @returns  Modfiied sticker set
      */
     moveStickerInSet(
-        sticker:
-            | string
-            | tdFileId.RawFullRemoteFileLocation
-            | tl.TypeInputDocument,
-        position: number
+        sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument,
+        position: number,
     ): Promise<StickerSet>
     /**
      * Set sticker set thumbnail
@@ -3734,7 +3529,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * @param total  Total file size
              */
             progressCallback?: (uploaded: number, total: number) => void
-        }
+        },
     ): Promise<StickerSet>
     /**
      * Enable RPS meter.
@@ -3792,10 +3587,7 @@ export interface TelegramClient extends BaseTelegramClient {
 
     _onStop(): void
     _saveStorage(afterImport?: boolean): Promise<void>
-    _dispatchUpdate(
-        update: tl.TypeUpdate | tl.TypeMessage,
-        peers: PeersIndex
-    ): void
+    _dispatchUpdate(update: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex): void
     _handleUpdate(update: tl.TypeUpdates, noDispatch?: boolean): void
     /**
      * Catch up with the server by loading missed updates.
@@ -3819,9 +3611,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param ids  ID(s) of the photos. Can be file IDs or raw TL objects
      */
-    deleteProfilePhotos(
-        ids: MaybeArray<string | tl.TypeInputPhoto>
-    ): Promise<void>
+    deleteProfilePhotos(ids: MaybeArray<string | tl.TypeInputPhoto>): Promise<void>
     /**
      * Get a list of common chats you have with a given user
      *
@@ -3864,7 +3654,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Defaults to `100`
              */
             limit?: number
-        }
+        },
     ): Promise<Photo[]>
     /**
      * Get information about a single user.
@@ -3916,7 +3706,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * with IDs less than the set one
              */
             maxId?: tl.Long
-        }
+        },
     ): AsyncIterableIterator<Photo>
     /**
      * Get multiple `InputPeer`s at once,
@@ -3928,11 +3718,9 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param peerIds  Peer Ids
      * @param normalizer  Normalization function
      */
-    resolvePeerMany<
-        T extends tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
-    >(
+    resolvePeerMany<T extends tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel>(
         peerIds: InputPeerLike[],
-        normalizer: (obj: tl.TypeInputPeer) => T | null
+        normalizer: (obj: tl.TypeInputPeer) => T | null,
     ): Promise<T[]>
     /**
      * Get multiple `InputPeer`s at once.
@@ -3949,10 +3737,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param peerId  The peer identifier that you want to extract the `InputPeer` from.
      * @param force  (default: `false`) Whether to force re-fetch the peer from the server
      */
-    resolvePeer(
-        peerId: InputPeerLike,
-        force?: boolean
-    ): Promise<tl.TypeInputPeer>
+    resolvePeer(peerId: InputPeerLike, force?: boolean): Promise<tl.TypeInputPeer>
     /**
      * Change user status to offline or online
      *
@@ -3973,7 +3758,7 @@ export interface TelegramClient extends BaseTelegramClient {
     setProfilePhoto(
         type: 'photo' | 'video',
         media: InputFileLike | tl.TypeInputPhoto,
-        previewSec?: number
+        previewSec?: number,
     ): Promise<Photo>
     /**
      * Unblock a user
@@ -4060,21 +3845,11 @@ export class TelegramClient extends BaseTelegramClient {
         this._updatesLoopActive = false
         this._updatesLoopCv = new ConditionVariable()
 
-        this._pendingUpdateContainers = new SortedLinkedList(
-            (a, b) => a.seqStart - b.seqStart,
-        )
-        this._pendingPtsUpdates = new SortedLinkedList(
-            (a, b) => a.ptsBefore! - b.ptsBefore!,
-        )
-        this._pendingPtsUpdatesPostponed = new SortedLinkedList(
-            (a, b) => a.ptsBefore! - b.ptsBefore!,
-        )
-        this._pendingQtsUpdates = new SortedLinkedList(
-            (a, b) => a.qtsBefore! - b.qtsBefore!,
-        )
-        this._pendingQtsUpdatesPostponed = new SortedLinkedList(
-            (a, b) => a.qtsBefore! - b.qtsBefore!,
-        )
+        this._pendingUpdateContainers = new SortedLinkedList((a, b) => a.seqStart - b.seqStart)
+        this._pendingPtsUpdates = new SortedLinkedList((a, b) => a.ptsBefore! - b.ptsBefore!)
+        this._pendingPtsUpdatesPostponed = new SortedLinkedList((a, b) => a.ptsBefore! - b.ptsBefore!)
+        this._pendingQtsUpdates = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
+        this._pendingQtsUpdatesPostponed = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
         this._pendingUnorderedUpdates = new Deque()
 
         this._updLock = new AsyncLock()

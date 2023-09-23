@@ -1,10 +1,4 @@
-import {
-    CallbackQuery,
-    ChatMemberUpdate,
-    ChatMemberUpdateType,
-    UserStatus,
-    UserStatusUpdate,
-} from '@mtcute/client'
+import { CallbackQuery, ChatMemberUpdate, ChatMemberUpdateType, UserStatus, UserStatusUpdate } from '@mtcute/client'
 import { MaybeArray } from '@mtcute/core'
 
 import { UpdateFilter } from './types'
@@ -16,17 +10,9 @@ import { UpdateFilter } from './types'
  * @link ChatMemberUpdate.Type
  */
 export const chatMember: {
-    <T extends ChatMemberUpdateType>(type: T): UpdateFilter<
-        ChatMemberUpdate,
-        { type: T }
-    >
-    <T extends ChatMemberUpdateType[]>(types: T): UpdateFilter<
-        ChatMemberUpdate,
-        { type: T[number] }
-    >
-} = (
-    types: MaybeArray<ChatMemberUpdateType>,
-): UpdateFilter<ChatMemberUpdate> => {
+    <T extends ChatMemberUpdateType>(type: T): UpdateFilter<ChatMemberUpdate, { type: T }>
+    <T extends ChatMemberUpdateType[]>(types: T): UpdateFilter<ChatMemberUpdate, { type: T[number] }>
+} = (types: MaybeArray<ChatMemberUpdateType>): UpdateFilter<ChatMemberUpdate> => {
     if (Array.isArray(types)) {
         const index: Partial<Record<ChatMemberUpdateType, true>> = {}
         types.forEach((typ) => (index[typ] = true))
@@ -52,10 +38,7 @@ export const userStatus: {
             nextOffline: T extends 'online' ? Date : null
         }
     >
-    <T extends UserStatus[]>(statuses: T): UpdateFilter<
-        UserStatusUpdate,
-        { type: T[number] }
-    >
+    <T extends UserStatus[]>(statuses: T): UpdateFilter<UserStatusUpdate, { type: T[number] }>
 } = (statuses: MaybeArray<UserStatus>): UpdateFilter<UserStatusUpdate> => {
     if (Array.isArray(statuses)) {
         const index: Partial<Record<UserStatus, true>> = {}
@@ -71,15 +54,10 @@ export const userStatus: {
  * Create a filter for {@link ChatMemberUpdate} for updates
  * regarding current user
  */
-export const chatMemberSelf: UpdateFilter<
-    ChatMemberUpdate,
-    { isSelf: true }
-> = (upd) => upd.isSelf
+export const chatMemberSelf: UpdateFilter<ChatMemberUpdate, { isSelf: true }> = (upd) => upd.isSelf
 
 /**
  * Create a filter for callback queries that
  * originated from an inline message
  */
-export const callbackInline: UpdateFilter<CallbackQuery, { isInline: true }> = (
-    q,
-) => q.isInline
+export const callbackInline: UpdateFilter<CallbackQuery, { isInline: true }> = (q) => q.isInline

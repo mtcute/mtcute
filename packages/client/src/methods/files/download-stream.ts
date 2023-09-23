@@ -11,14 +11,8 @@ import { bufferToStream } from '../../utils/stream-utils'
  * @param params  File download parameters
  * @internal
  */
-export function downloadAsStream(
-    this: TelegramClient,
-    params: FileDownloadParameters,
-): Readable {
-    if (
-        params.location instanceof FileLocation &&
-        Buffer.isBuffer(params.location.location)
-    ) {
+export function downloadAsStream(this: TelegramClient, params: FileDownloadParameters): Readable {
+    if (params.location instanceof FileLocation && Buffer.isBuffer(params.location.location)) {
         return bufferToStream(params.location.location)
     }
 

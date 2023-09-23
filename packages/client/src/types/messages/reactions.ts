@@ -66,10 +66,7 @@ export class PeerReaction {
         if (!this._user) {
             assertTypeIs('PeerReaction#user', this.raw.peerId, 'peerUser')
 
-            this._user = new User(
-                this.client,
-                this._peers.user(this.raw.peerId.userId),
-            )
+            this._user = new User(this.client, this._peers.user(this.raw.peerId.userId))
         }
 
         return this._user
@@ -122,9 +119,7 @@ export class MessageReactions {
     /**
      * Get the users who reacted to this message
      */
-    getUsers(
-        params?: Parameters<TelegramClient['getReactionUsers']>[2],
-    ): AsyncIterableIterator<PeerReaction> {
+    getUsers(params?: Parameters<TelegramClient['getReactionUsers']>[2]): AsyncIterableIterator<PeerReaction> {
         return this.client.getReactionUsers(this.messageId, this.chatId, params)
     }
 }

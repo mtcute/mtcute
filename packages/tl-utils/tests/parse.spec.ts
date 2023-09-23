@@ -4,11 +4,7 @@ import { describe, it } from 'mocha'
 import { parseTlToEntries, TlEntry } from '../src'
 
 describe('tl parser', () => {
-    const test = (
-        tl: string,
-        expected: TlEntry[],
-        params?: Parameters<typeof parseTlToEntries>[1],
-    ) => {
+    const test = (tl: string, expected: TlEntry[], params?: Parameters<typeof parseTlToEntries>[1]) => {
         expect(parseTlToEntries(tl, params)).eql(expected)
     }
 
@@ -94,34 +90,31 @@ boolTrue#997275b5 = Bool;
 
     it('parses bare vectors', () => {
         // note: not from schema, schema uses bare `future_salt` instead
-        test(
-            'future_salts#ae500895 req_msg_id:long now:int salts:vector<FutureSalt> = FutureSalts;',
-            [
-                {
-                    kind: 'class',
-                    name: 'future_salts',
-                    id: 0xae500895,
-                    type: 'FutureSalts',
-                    arguments: [
-                        {
-                            name: 'req_msg_id',
-                            type: 'long',
+        test('future_salts#ae500895 req_msg_id:long now:int salts:vector<FutureSalt> = FutureSalts;', [
+            {
+                kind: 'class',
+                name: 'future_salts',
+                id: 0xae500895,
+                type: 'FutureSalts',
+                arguments: [
+                    {
+                        name: 'req_msg_id',
+                        type: 'long',
+                    },
+                    {
+                        name: 'now',
+                        type: 'int',
+                    },
+                    {
+                        name: 'salts',
+                        type: 'FutureSalt',
+                        typeModifiers: {
+                            isBareVector: true,
                         },
-                        {
-                            name: 'now',
-                            type: 'int',
-                        },
-                        {
-                            name: 'salts',
-                            type: 'FutureSalt',
-                            typeModifiers: {
-                                isBareVector: true,
-                            },
-                        },
-                    ],
-                },
-            ],
-        )
+                    },
+                ],
+            },
+        ])
     })
 
     it('parses bare unions', () => {
@@ -199,80 +192,71 @@ boolTrue#997275b5 = Bool;
     })
 
     it('parses methods with arguments', () => {
-        test(
-            '---functions---\nauth.exportAuthorization#e5bfffcd dc_id:int = auth.ExportedAuthorization;',
-            [
-                {
-                    kind: 'method',
-                    name: 'auth.exportAuthorization',
-                    id: 0xe5bfffcd,
-                    type: 'auth.ExportedAuthorization',
-                    arguments: [
-                        {
-                            name: 'dc_id',
-                            type: 'int',
-                        },
-                    ],
-                },
-            ],
-        )
+        test('---functions---\nauth.exportAuthorization#e5bfffcd dc_id:int = auth.ExportedAuthorization;', [
+            {
+                kind: 'method',
+                name: 'auth.exportAuthorization',
+                id: 0xe5bfffcd,
+                type: 'auth.ExportedAuthorization',
+                arguments: [
+                    {
+                        name: 'dc_id',
+                        type: 'int',
+                    },
+                ],
+            },
+        ])
     })
 
     it('parses multiple classes', () => {
-        test(
-            'jsonNull#3f6d7b68 = JSONValue;\njsonBool#c7345e6a value:Bool = JSONValue;',
-            [
-                {
-                    kind: 'class',
-                    name: 'jsonNull',
-                    id: 0x3f6d7b68,
-                    type: 'JSONValue',
-                    arguments: [],
-                },
-                {
-                    kind: 'class',
-                    name: 'jsonBool',
-                    id: 0xc7345e6a,
-                    type: 'JSONValue',
-                    arguments: [
-                        {
-                            name: 'value',
-                            type: 'Bool',
-                        },
-                    ],
-                },
-            ],
-        )
+        test('jsonNull#3f6d7b68 = JSONValue;\njsonBool#c7345e6a value:Bool = JSONValue;', [
+            {
+                kind: 'class',
+                name: 'jsonNull',
+                id: 0x3f6d7b68,
+                type: 'JSONValue',
+                arguments: [],
+            },
+            {
+                kind: 'class',
+                name: 'jsonBool',
+                id: 0xc7345e6a,
+                type: 'JSONValue',
+                arguments: [
+                    {
+                        name: 'value',
+                        type: 'Bool',
+                    },
+                ],
+            },
+        ])
     })
 
     it('parses generics', () => {
-        test(
-            '---functions---\ninvokeWithLayer#da9b0d0d {X:Type} layer:int query:!X = X;',
-            [
-                {
-                    kind: 'method',
-                    name: 'invokeWithLayer',
-                    id: 0xda9b0d0d,
-                    type: 'X',
-                    generics: [
-                        {
-                            name: 'X',
-                            type: 'Type',
-                        },
-                    ],
-                    arguments: [
-                        {
-                            name: 'layer',
-                            type: 'int',
-                        },
-                        {
-                            name: 'query',
-                            type: '!X',
-                        },
-                    ],
-                },
-            ],
-        )
+        test('---functions---\ninvokeWithLayer#da9b0d0d {X:Type} layer:int query:!X = X;', [
+            {
+                kind: 'method',
+                name: 'invokeWithLayer',
+                id: 0xda9b0d0d,
+                type: 'X',
+                generics: [
+                    {
+                        name: 'X',
+                        type: 'Type',
+                    },
+                ],
+                arguments: [
+                    {
+                        name: 'layer',
+                        type: 'int',
+                    },
+                    {
+                        name: 'query',
+                        type: '!X',
+                    },
+                ],
+            },
+        ])
     })
 
     it('parses predicates', () => {
@@ -411,20 +395,13 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
     it('calls callback on orphan comment', () => {
         const orphaned: string[] = []
         parseTlToEntries(
-            '// some comment idk\n\n' +
-                '//another comment\n' +
-                '//but multiline\n\n' +
-                '//yet another at the end',
+            '// some comment idk\n\n' + '//another comment\n' + '//but multiline\n\n' + '//yet another at the end',
             {
                 onOrphanComment: (s) => orphaned.push(s),
             },
         )
 
-        expect(orphaned).eql([
-            'some comment idk',
-            'another comment but multiline',
-            'yet another at the end',
-        ])
+        expect(orphaned).eql(['some comment idk', 'another comment but multiline', 'yet another at the end'])
     })
 
     it('applies prefix to constructors', () => {

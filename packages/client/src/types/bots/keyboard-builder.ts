@@ -70,10 +70,7 @@ export class BotKeyboardBuilder {
 
         if (
             this._buttons.length &&
-            (this.maxRowWidth === null ||
-                force ||
-                this._buttons[this._buttons.length - 1].length <
-                    this.maxRowWidth)
+            (this.maxRowWidth === null || force || this._buttons[this._buttons.length - 1].length < this.maxRowWidth)
         ) {
             this._buttons[this._buttons.length - 1].push()
         } else {
@@ -96,9 +93,7 @@ export class BotKeyboardBuilder {
     /**
      * Return contents of this builder as a reply keyboard
      */
-    asReply(
-        params: Omit<ReplyKeyboardMarkup, 'type' | 'buttons'> = {},
-    ): ReplyKeyboardMarkup {
+    asReply(params: Omit<ReplyKeyboardMarkup, 'type' | 'buttons'> = {}): ReplyKeyboardMarkup {
         const ret = params as tl.Mutable<ReplyKeyboardMarkup>
         ret.type = 'reply'
         ret.buttons = this._buttons

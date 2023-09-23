@@ -13,7 +13,7 @@ import { InputPeerLike, Message, PeersIndex } from '../../types'
 export async function getScheduledMessages(
     this: TelegramClient,
     chatId: InputPeerLike,
-    messageId: number
+    messageId: number,
 ): Promise<Message | null>
 /**
  * Get scheduled messages in chat by their IDs
@@ -28,7 +28,7 @@ export async function getScheduledMessages(
 export async function getScheduledMessages(
     this: TelegramClient,
     chatId: InputPeerLike,
-    messageIds: number[]
+    messageIds: number[],
 ): Promise<(Message | null)[]>
 
 /** @internal */
@@ -49,11 +49,7 @@ export async function getScheduledMessages(
     })
 
     if (res._ === 'messages.messagesNotModified') {
-        throw new MtTypeAssertionError(
-            'getMessages',
-            '!messages.messagesNotModified',
-            res._,
-        )
+        throw new MtTypeAssertionError('getMessages', '!messages.messagesNotModified', res._)
     }
 
     const peers = PeersIndex.from(res)

@@ -9,9 +9,7 @@ const PADDED_TAG = Buffer.from([0xdd, 0xdd, 0xdd, 0xdd])
  * Intermediate packet codec.
  * See https://core.telegram.org/mtproto/mtproto-transports#intermediate
  */
-export class IntermediatePacketCodec
-    extends StreamedCodec
-    implements IPacketCodec {
+export class IntermediatePacketCodec extends StreamedCodec implements IPacketCodec {
     tag(): Buffer {
         return TAG
     }

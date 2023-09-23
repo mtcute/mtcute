@@ -16,12 +16,10 @@ import { InputPeerLike } from '../../types'
  * @param normalizer  Normalization function
  * @internal
  */
-export async function resolvePeerMany<
-    T extends tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
->(
+export async function resolvePeerMany<T extends tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel>(
     this: TelegramClient,
     peerIds: InputPeerLike[],
-    normalizer: (obj: tl.TypeInputPeer) => T | null
+    normalizer: (obj: tl.TypeInputPeer) => T | null,
 ): Promise<T[]>
 
 /**
@@ -32,10 +30,7 @@ export async function resolvePeerMany<
  * @param peerIds  Peer Ids
  * @internal
  */
-export async function resolvePeerMany(
-    this: TelegramClient,
-    peerIds: InputPeerLike[]
-): Promise<tl.TypeInputPeer[]>
+export async function resolvePeerMany(this: TelegramClient, peerIds: InputPeerLike[]): Promise<tl.TypeInputPeer[]>
 
 /**
  * @internal
@@ -43,12 +38,9 @@ export async function resolvePeerMany(
 export async function resolvePeerMany(
     this: TelegramClient,
     peerIds: InputPeerLike[],
-    normalizer?: (
-        obj: tl.TypeInputPeer
-    ) => tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | null,
+    normalizer?: (obj: tl.TypeInputPeer) => tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | null,
 ): Promise<(tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[]> {
-    const ret: (tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[] =
-        []
+    const ret: (tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[] = []
 
     if (peerIds.length < 10) {
         // no point in using async pool for <10 peers
@@ -64,13 +56,9 @@ export async function resolvePeerMany(
             }
         }
     } else {
-        for await (const { error, value } of asyncPool(
-            (it) => this.resolvePeer(it),
-            peerIds,
-            {
-                limit: 10,
-            },
-        )) {
+        for await (const { error, value } of asyncPool((it) => this.resolvePeer(it), peerIds, {
+            limit: 10,
+        })) {
             if (error) {
                 throw error
             }

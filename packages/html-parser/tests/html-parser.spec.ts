@@ -11,10 +11,7 @@ const createEntity = <T extends tl.TypeMessageEntity['_']>(
     type: T,
     offset: number,
     length: number,
-    additional?: Omit<
-        tl.FindByName<tl.TypeMessageEntity, T>,
-        '_' | 'offset' | 'length'
-    >,
+    additional?: Omit<tl.FindByName<tl.TypeMessageEntity, T>, '_' | 'offset' | 'length'>,
 ): tl.TypeMessageEntity => {
     return {
         _: type,
@@ -25,21 +22,14 @@ const createEntity = <T extends tl.TypeMessageEntity['_']>(
 }
 
 const createEntities = (entities: tl.TypeMessageEntity[]): MessageEntity[] => {
-    return entities
-        .map((it) => MessageEntity._parse(it))
-        .filter((it) => it !== null) as MessageEntity[]
+    return entities.map((it) => MessageEntity._parse(it)).filter((it) => it !== null) as MessageEntity[]
 }
 
 describe('HtmlMessageEntityParser', () => {
     const parser = new HtmlMessageEntityParser()
 
     describe('unparse', () => {
-        const test = (
-            text: string,
-            entities: tl.TypeMessageEntity[],
-            expected: string,
-            _parser = parser,
-        ): void => {
+        const test = (text: string, entities: tl.TypeMessageEntity[], expected: string, _parser = parser): void => {
             expect(_parser.unparse(text, createEntities(entities))).eq(expected)
         }
 
@@ -108,10 +98,7 @@ describe('HtmlMessageEntityParser', () => {
         it('should support entities on the edges', () => {
             test(
                 'Hello, world',
-                [
-                    createEntity('messageEntityBold', 0, 5),
-                    createEntity('messageEntityBold', 7, 5),
-                ],
+                [createEntity('messageEntityBold', 0, 5), createEntity('messageEntityBold', 7, 5)],
                 '<b>Hello</b>, <b>world</b>',
             )
         })
@@ -119,29 +106,19 @@ describe('HtmlMessageEntityParser', () => {
         it('should clamp out-of-range entities', () => {
             test(
                 'Hello, world',
-                [
-                    createEntity('messageEntityBold', -2, 7),
-                    createEntity('messageEntityBold', 7, 10),
-                ],
+                [createEntity('messageEntityBold', -2, 7), createEntity('messageEntityBold', 7, 10)],
                 '<b>Hello</b>, <b>world</b>',
             )
         })
 
         it('should ignore entities outside the length', () => {
-            test(
-                'Hello, world',
-                [createEntity('messageEntityBold', 50, 5)],
-                'Hello, world',
-            )
+            test('Hello, world', [createEntity('messageEntityBold', 50, 5)], 'Hello, world')
         })
 
         it('should support entities followed by each other', () => {
             test(
                 'plain Hello, world plain',
-                [
-                    createEntity('messageEntityBold', 6, 6),
-                    createEntity('messageEntityItalic', 12, 6),
-                ],
+                [createEntity('messageEntityBold', 6, 6), createEntity('messageEntityItalic', 12, 6)],
                 'plain <b>Hello,</b><i> world</i> plain',
             )
         })
@@ -149,10 +126,7 @@ describe('HtmlMessageEntityParser', () => {
         it('should support nested entities', () => {
             test(
                 'Welcome to the gym zone!',
-                [
-                    createEntity('messageEntityItalic', 0, 24),
-                    createEntity('messageEntityBold', 15, 8),
-                ],
+                [createEntity('messageEntityItalic', 0, 24), createEntity('messageEntityBold', 15, 8)],
                 '<i>Welcome to the <b>gym zone</b>!</i>',
             )
         })
@@ -160,34 +134,22 @@ describe('HtmlMessageEntityParser', () => {
         it('should support nested entities with the same edges', () => {
             test(
                 'Welcome to the gym zone!',
-                [
-                    createEntity('messageEntityItalic', 0, 24),
-                    createEntity('messageEntityBold', 15, 9),
-                ],
+                [createEntity('messageEntityItalic', 0, 24), createEntity('messageEntityBold', 15, 9)],
                 '<i>Welcome to the <b>gym zone!</b></i>',
             )
             test(
                 'Welcome to the gym zone!',
-                [
-                    createEntity('messageEntityBold', 0, 24),
-                    createEntity('messageEntityItalic', 15, 9),
-                ],
+                [createEntity('messageEntityBold', 0, 24), createEntity('messageEntityItalic', 15, 9)],
                 '<b>Welcome to the <i>gym zone!</i></b>',
             )
             test(
                 'Welcome to the gym zone!',
-                [
-                    createEntity('messageEntityItalic', 0, 24),
-                    createEntity('messageEntityBold', 0, 7),
-                ],
+                [createEntity('messageEntityItalic', 0, 24), createEntity('messageEntityBold', 0, 7)],
                 '<i><b>Welcome</b> to the gym zone!</i>',
             )
             test(
                 'Welcome to the gym zone!',
-                [
-                    createEntity('messageEntityItalic', 0, 24),
-                    createEntity('messageEntityBold', 0, 24),
-                ],
+                [createEntity('messageEntityItalic', 0, 24), createEntity('messageEntityBold', 0, 24)],
                 '<i><b>Welcome to the gym zone!</b></i>',
             )
         })
@@ -195,10 +157,7 @@ describe('HtmlMessageEntityParser', () => {
         it('should support overlapping entities', () => {
             test(
                 'Welcome to the gym zone!',
-                [
-                    createEntity('messageEntityItalic', 0, 14),
-                    createEntity('messageEntityBold', 8, 10),
-                ],
+                [createEntity('messageEntityItalic', 0, 14), createEntity('messageEntityBold', 8, 10)],
                 '<i>Welcome <b>to the</b></i><b> gym</b> zone!',
             )
             test(
@@ -244,8 +203,7 @@ describe('HtmlMessageEntityParser', () => {
 
         it('should work with custom syntax highlighter', () => {
             const parser = new HtmlMessageEntityParser({
-                syntaxHighlighter: (code, lang) =>
-                    `lang: <b>${lang}</b><br>${code}`,
+                syntaxHighlighter: (code, lang) => `lang: <b>${lang}</b><br>${code}`,
             })
 
             test(
@@ -263,16 +221,8 @@ describe('HtmlMessageEntityParser', () => {
 
         it('should replace newlines with <br> outside pre', () => {
             test('plain\n\nplain', [], 'plain<br><br>plain')
-            test(
-                'plain\n\nplain',
-                [createEntity('messageEntityBold', 0, 12)],
-                '<b>plain<br><br>plain</b>',
-            )
-            test(
-                'plain\n\nplain',
-                [createEntity('messageEntityPre', 0, 12)],
-                '<pre>plain\n\nplain</pre>',
-            )
+            test('plain\n\nplain', [createEntity('messageEntityBold', 0, 12)], '<b>plain<br><br>plain</b>')
+            test('plain\n\nplain', [createEntity('messageEntityPre', 0, 12)], '<pre>plain\n\nplain</pre>')
         })
 
         it('should replace multiple spaces with &nbsp;', () => {
@@ -281,11 +231,7 @@ describe('HtmlMessageEntityParser', () => {
     })
 
     describe('parse', () => {
-        const test = (
-            text: string,
-            expectedEntities: tl.TypeMessageEntity[],
-            expectedText: string,
-        ): void => {
+        const test = (text: string, expectedEntities: tl.TypeMessageEntity[], expectedText: string): void => {
             const [_text, entities] = parser.parse(text)
             expect(_text).eql(expectedText)
             expect(entities).eql(expectedEntities)
@@ -373,11 +319,7 @@ describe('HtmlMessageEntityParser', () => {
         })
 
         it('should ignore newlines and indentation', () => {
-            test(
-                'this is some text\n\nwith newlines',
-                [],
-                'this is some text with newlines',
-            )
+            test('this is some text\n\nwith newlines', [], 'this is some text with newlines')
             test(
                 '<b>this is some text\n\nwith</b> newlines',
                 [createEntity('messageEntityBold', 0, 22)],
@@ -397,10 +339,7 @@ describe('HtmlMessageEntityParser', () => {
                 </b> yeah <i>so cool
                 </i>
                 `,
-                [
-                    createEntity('messageEntityBold', 45, 13),
-                    createEntity('messageEntityItalic', 64, 7),
-                ],
+                [createEntity('messageEntityBold', 45, 13), createEntity('messageEntityItalic', 64, 7)],
                 'this is some indented text with newlines and indented tags yeah so cool',
             )
         })
@@ -442,11 +381,7 @@ describe('HtmlMessageEntityParser', () => {
         })
 
         it('should handle <br>', () => {
-            test(
-                'this is some text<br><br>with actual newlines',
-                [],
-                'this is some text\n\nwith actual newlines',
-            )
+            test('this is some text<br><br>with actual newlines', [], 'this is some text\n\nwith actual newlines')
             test(
                 '<b>this is some text<br><br></b>with actual newlines',
                 // note that the <br> (i.e. \n) is not included in the entity
@@ -467,10 +402,7 @@ describe('HtmlMessageEntityParser', () => {
         it('should support entities on the edges', () => {
             test(
                 '<b>Hello</b>, <b>world</b>',
-                [
-                    createEntity('messageEntityBold', 0, 5),
-                    createEntity('messageEntityBold', 7, 5),
-                ],
+                [createEntity('messageEntityBold', 0, 5), createEntity('messageEntityBold', 7, 5)],
                 'Hello, world',
             )
         })
@@ -482,10 +414,7 @@ describe('HtmlMessageEntityParser', () => {
         it('should support entities followed by each other', () => {
             test(
                 'plain <b>Hello,</b><i> world</i> plain',
-                [
-                    createEntity('messageEntityBold', 6, 6),
-                    createEntity('messageEntityItalic', 12, 6),
-                ],
+                [createEntity('messageEntityBold', 6, 6), createEntity('messageEntityItalic', 12, 6)],
                 'plain Hello, world plain',
             )
         })
@@ -493,10 +422,7 @@ describe('HtmlMessageEntityParser', () => {
         it('should support nested entities', () => {
             test(
                 '<i>Welcome to the <b>gym zone</b>!</i>',
-                [
-                    createEntity('messageEntityBold', 15, 8),
-                    createEntity('messageEntityItalic', 0, 24),
-                ],
+                [createEntity('messageEntityBold', 15, 8), createEntity('messageEntityItalic', 0, 24)],
                 'Welcome to the gym zone!',
             )
         })
@@ -504,34 +430,22 @@ describe('HtmlMessageEntityParser', () => {
         it('should support nested entities with the same edges', () => {
             test(
                 '<i>Welcome to the <b>gym zone!</b></i>',
-                [
-                    createEntity('messageEntityBold', 15, 9),
-                    createEntity('messageEntityItalic', 0, 24),
-                ],
+                [createEntity('messageEntityBold', 15, 9), createEntity('messageEntityItalic', 0, 24)],
                 'Welcome to the gym zone!',
             )
             test(
                 '<b>Welcome to the <i>gym zone!</i></b>',
-                [
-                    createEntity('messageEntityItalic', 15, 9),
-                    createEntity('messageEntityBold', 0, 24),
-                ],
+                [createEntity('messageEntityItalic', 15, 9), createEntity('messageEntityBold', 0, 24)],
                 'Welcome to the gym zone!',
             )
             test(
                 '<i><b>Welcome</b> to the gym zone!</i>',
-                [
-                    createEntity('messageEntityBold', 0, 7),
-                    createEntity('messageEntityItalic', 0, 24),
-                ],
+                [createEntity('messageEntityBold', 0, 7), createEntity('messageEntityItalic', 0, 24)],
                 'Welcome to the gym zone!',
             )
             test(
                 '<i><b>Welcome to the gym zone!</b></i>',
-                [
-                    createEntity('messageEntityBold', 0, 24),
-                    createEntity('messageEntityItalic', 0, 24),
-                ],
+                [createEntity('messageEntityBold', 0, 24), createEntity('messageEntityItalic', 0, 24)],
                 'Welcome to the gym zone!',
             )
         })
@@ -549,11 +463,7 @@ describe('HtmlMessageEntityParser', () => {
         })
 
         it('should handle non-escaped special symbols', () => {
-            test(
-                '<&> <b>< & ></b> <&>',
-                [createEntity('messageEntityBold', 4, 5)],
-                '<&> < & > <&>',
-            )
+            test('<&> <b>< & ></b> <&>', [createEntity('messageEntityBold', 4, 5)], '<&> < & > <&>')
         })
 
         it('should unescape special symbols', () => {
@@ -583,15 +493,9 @@ describe('HtmlMessageEntityParser', () => {
             const unsafeString = '<&>'
 
             expect(html`${unsafeString}`.value).eq('&lt;&amp;&gt;')
-            expect(html`${unsafeString} <b>text</b>`.value).eq(
-                '&lt;&amp;&gt; <b>text</b>',
-            )
-            expect(html`<b>text</b> ${unsafeString}`.value).eq(
-                '<b>text</b> &lt;&amp;&gt;',
-            )
-            expect(html`<b>${unsafeString}</b>`.value).eq(
-                '<b>&lt;&amp;&gt;</b>',
-            )
+            expect(html`${unsafeString} <b>text</b>`.value).eq('&lt;&amp;&gt; <b>text</b>')
+            expect(html`<b>text</b> ${unsafeString}`.value).eq('<b>text</b> &lt;&amp;&gt;')
+            expect(html`<b>${unsafeString}</b>`.value).eq('<b>&lt;&amp;&gt;</b>')
         })
 
         it('should skip with FormattedString', () => {
@@ -599,19 +503,11 @@ describe('HtmlMessageEntityParser', () => {
             const unsafeString = new FormattedString('<&>')
 
             expect(html`${unsafeString}`.value).eq('<&>')
-            expect(html`${unsafeString} ${unsafeString2}`.value).eq(
-                '<&> &lt;&amp;&gt;',
-            )
-            expect(html`${unsafeString} <b>text</b>`.value).eq(
-                '<&> <b>text</b>',
-            )
-            expect(html`<b>text</b> ${unsafeString}`.value).eq(
-                '<b>text</b> <&>',
-            )
+            expect(html`${unsafeString} ${unsafeString2}`.value).eq('<&> &lt;&amp;&gt;')
+            expect(html`${unsafeString} <b>text</b>`.value).eq('<&> <b>text</b>')
+            expect(html`<b>text</b> ${unsafeString}`.value).eq('<b>text</b> <&>')
             expect(html`<b>${unsafeString}</b>`.value).eq('<b><&></b>')
-            expect(html`<b>${unsafeString} ${unsafeString2}</b>`.value).eq(
-                '<b><&> &lt;&amp;&gt;</b>',
-            )
+            expect(html`<b>${unsafeString} ${unsafeString2}</b>`.value).eq('<b><&> &lt;&amp;&gt;</b>')
         })
 
         it('should error with incompatible FormattedString', () => {

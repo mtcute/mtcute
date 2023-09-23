@@ -20,8 +20,7 @@ try {
     nativeCrypto = require('@mtcute/crypto-node').NodeNativeCryptoProvider
 } catch (e) {}
 
-export interface NodeTelegramClientOptions
-    extends Omit<BaseTelegramClientOptions, 'storage'> {
+export interface NodeTelegramClientOptions extends Omit<BaseTelegramClientOptions, 'storage'> {
     /**
      * Default parse mode to use.
      *

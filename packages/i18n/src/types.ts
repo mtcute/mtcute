@@ -13,16 +13,12 @@ export type I18nValueLiteral = string | FormattedString<string>
  * Dynamic translated value, represented by a
  * function resolving to a literal one
  */
-export type I18nValueDynamic<Args extends any[] = any[]> = (
-    ...args: Args
-) => I18nValueLiteral
+export type I18nValueDynamic<Args extends any[] = any[]> = (...args: Args) => I18nValueLiteral
 
 /**
  * Translated value. Can either be actual value or a function resolving to one
  */
-export type I18nValue<Args extends any[] = any[]> =
-    | I18nValueLiteral
-    | I18nValueDynamic<Args>
+export type I18nValue<Args extends any[] = any[]> = I18nValueLiteral | I18nValueDynamic<Args>
 
 /**
  * Strings dictionary
@@ -43,10 +39,9 @@ type GetValueNested<T, K extends string> = K extends `${infer P}.${infer Q}`
     ? GetValueNested<SafeGet<T, P>, Q>
     : SafeGet<T, K>
 
-type ExtractParameter<Strings, K extends string> = GetValueNested<
-    Strings,
-    K
-> extends (...params: infer R) => I18nValueLiteral
+type ExtractParameter<Strings, K extends string> = GetValueNested<Strings, K> extends (
+    ...params: infer R
+) => I18nValueLiteral
     ? R
     : []
 
@@ -60,9 +55,7 @@ export type MtcuteI18nAdapter<Input> = (obj: Input) => string | null | undefined
 /**
  * Translation function.
  */
-export type MtcuteI18nFunction<Strings, Input> = <
-    K extends NestedKeysDelimited<Strings>
->(
+export type MtcuteI18nFunction<Strings, Input> = <K extends NestedKeysDelimited<Strings>>(
     lang: Input | string | null,
     key: K,
     ...params: ExtractParameter<Strings, K>

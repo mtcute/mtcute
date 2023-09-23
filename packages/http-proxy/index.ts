@@ -3,13 +3,7 @@
 import { connect as connectTcp } from 'net'
 import { connect as connectTls, SecureContextOptions } from 'tls'
 
-import {
-    BaseTcpTransport,
-    IntermediatePacketCodec,
-    MtcuteError,
-    tl,
-    TransportState,
-} from '@mtcute/core'
+import { BaseTcpTransport, IntermediatePacketCodec, MtcuteError, tl, TransportState } from '@mtcute/core'
 
 /**
  * An error has occurred while connecting to an HTTP(s) proxy
@@ -18,9 +12,7 @@ export class HttpProxyConnectionError extends Error {
     readonly proxy: HttpProxySettings
 
     constructor(proxy: HttpProxySettings, message: string) {
-        super(
-            `Error while connecting to ${proxy.host}:${proxy.port}: ${message}`,
-        )
+        super(`Error while connecting to ${proxy.host}:${proxy.port}: ${message}`)
         this.proxy = proxy
     }
 }
@@ -94,28 +86,15 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
         this._currentDc = dc
 
         this._socket = this._proxy.tls ?
-            connectTls(
-                this._proxy.port,
-                this._proxy.host,
-                this._proxy.tlsOptions,
-                this._onProxyConnected.bind(this),
-            ) :
-            connectTcp(
-                this._proxy.port,
-                this._proxy.host,
-                this._onProxyConnected.bind(this),
-            )
+            connectTls(this._proxy.port, this._proxy.host, this._proxy.tlsOptions, this._onProxyConnected.bind(this)) :
+            connectTcp(this._proxy.port, this._proxy.host, this._onProxyConnected.bind(this))
 
         this._socket.on('error', this.handleError.bind(this))
         this._socket.on('close', this.close.bind(this))
     }
 
     private _onProxyConnected() {
-        this.log.debug(
-            '[%s:%d] connected to proxy, sending CONNECT',
-            this._proxy.host,
-            this._proxy.port,
-        )
+        this.log.debug('[%s:%d] connected to proxy, sending CONNECT', this._proxy.host, this._proxy.port)
 
         let ip = `${this._currentDc!.ipAddress}:${this._currentDc!.port}`
         if (this._currentDc!.ipv6) ip = `[${ip}]`
@@ -131,8 +110,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
             if (this._proxy.password) {
                 auth += ':' + this._proxy.password
             }
-            headers['Proxy-Authorization'] =
-                'Basic ' + Buffer.from(auth).toString('base64')
+            headers['Proxy-Authorization'] = 'Basic ' + Buffer.from(auth).toString('base64')
         }
         headers['Proxy-Connection'] = 'Keep-Alive'
 
@@ -143,12 +121,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
 
         this._socket!.write(packet)
         this._socket!.once('data', (msg) => {
-            this.log.debug(
-                '[%s:%d] CONNECT resulted in: %s',
-                this._proxy.host,
-                this._proxy.port,
-                msg,
-            )
+            this.log.debug('[%s:%d] CONNECT resulted in: %s', this._proxy.host, this._proxy.port, msg)
 
             const [proto, code, name] = msg.toString().split(' ')
 
@@ -156,10 +129,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
                 // wtf?
                 this._socket!.emit(
                     'error',
-                    new HttpProxyConnectionError(
-                        this._proxy,
-                        `Server returned invalid protocol: ${proto}`,
-                    ),
+                    new HttpProxyConnectionError(this._proxy, `Server returned invalid protocol: ${proto}`),
                 )
 
                 return
@@ -168,10 +138,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
             if (code[0] !== '2') {
                 this._socket!.emit(
                     'error',
-                    new HttpProxyConnectionError(
-                        this._proxy,
-                        `Server returned error: ${code} ${name}`,
-                    ),
+                    new HttpProxyConnectionError(this._proxy, `Server returned error: ${code} ${name}`),
                 )
 
                 return

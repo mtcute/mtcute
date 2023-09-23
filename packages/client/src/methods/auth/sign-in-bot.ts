@@ -11,10 +11,7 @@ import { User } from '../../types'
  * @throws BadRequestError  In case the bot token is invalid
  * @internal
  */
-export async function signInBot(
-    this: TelegramClient,
-    token: string,
-): Promise<User> {
+export async function signInBot(this: TelegramClient, token: string): Promise<User> {
     const res = await this.call({
         _: 'auth.importBotAuthorization',
         flags: 0,
@@ -23,16 +20,8 @@ export async function signInBot(
         botAuthToken: token,
     })
 
-    assertTypeIs(
-        'signInBot (@ auth.importBotAuthorization)',
-        res,
-        'auth.authorization',
-    )
-    assertTypeIs(
-        'signInBot (@ auth.importBotAuthorization -> user)',
-        res.user,
-        'user',
-    )
+    assertTypeIs('signInBot (@ auth.importBotAuthorization)', res, 'auth.authorization')
+    assertTypeIs('signInBot (@ auth.importBotAuthorization -> user)', res.user, 'user')
 
     this._userId = res.user.id
     this.log.prefix = `[USER ${this._userId}] `

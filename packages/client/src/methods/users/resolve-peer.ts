@@ -1,11 +1,6 @@
 import Long from 'long'
 
-import {
-    getBasicPeerType,
-    getMarkedPeerId,
-    MtTypeAssertionError,
-    toggleChannelIdMark,
-} from '@mtcute/core'
+import { getBasicPeerType, getMarkedPeerId, MtTypeAssertionError, toggleChannelIdMark } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
@@ -57,9 +52,7 @@ export async function resolvePeer(
 
             assertTypeIs('contacts.getContacts', res, 'contacts.contacts')
 
-            const found = res.users.find(
-                (it) => (it as tl.RawUser).phone === peerId,
-            )
+            const found = res.users.find((it) => (it as tl.RawUser).phone === peerId)
 
             if (found && found._ === 'user') {
                 return {
@@ -69,15 +62,11 @@ export async function resolvePeer(
                 }
             }
 
-            throw new MtPeerNotFoundError(
-                `Could not find a peer by phone ${peerId}`,
-            )
+            throw new MtPeerNotFoundError(`Could not find a peer by phone ${peerId}`)
         } else {
             // username
             if (!force) {
-                const fromStorage = await this.storage.getPeerByUsername(
-                    peerId.toLowerCase(),
-                )
+                const fromStorage = await this.storage.getPeerByUsername(peerId.toLowerCase())
                 if (fromStorage) return fromStorage
             }
 
@@ -112,20 +101,11 @@ export async function resolvePeer(
                 const found = res.chats.find((it) => it.id === id)
 
                 if (found) {
-                    if (
-                        !(
-                            found._ === 'channel' ||
-                            found._ === 'channelForbidden'
-                        )
-                    ) {
+                    if (!(found._ === 'channel' || found._ === 'channelForbidden')) {
                         // chats can't have usernames
                         // furthermore, our id is a channel id, so it must be a channel
                         // this should never happen, unless Telegram goes crazy
-                        throw new MtTypeAssertionError(
-                            'contacts.resolveUsername#chats',
-                            'channel',
-                            found._,
-                        )
+                        throw new MtTypeAssertionError('contacts.resolveUsername#chats', 'channel', found._)
                     }
 
                     if (!found.accessHash) {
@@ -143,16 +123,10 @@ export async function resolvePeer(
                 }
             } else {
                 // chats can't have usernames
-                throw new MtTypeAssertionError(
-                    'contacts.resolveUsername',
-                    'user or channel',
-                    res.peer._,
-                )
+                throw new MtTypeAssertionError('contacts.resolveUsername', 'user or channel', res.peer._)
             }
 
-            throw new MtPeerNotFoundError(
-                `Could not find a peer by username ${peerId}`,
-            )
+            throw new MtPeerNotFoundError(`Could not find a peer by username ${peerId}`)
         }
     }
 
@@ -228,10 +202,7 @@ export async function resolvePeer(
 
             const found = res.chats.find((it) => it.id === id)
 
-            if (
-                found &&
-                (found._ === 'channel' || found._ === 'channelForbidden')
-            ) {
+            if (found && (found._ === 'channel' || found._ === 'channelForbidden')) {
                 if (!found.accessHash) {
                     // shouldn't happen? but just in case
                     throw new MtPeerNotFoundError(

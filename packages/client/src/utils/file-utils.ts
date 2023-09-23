@@ -69,8 +69,7 @@ export function strippedPhotoToJpg(stripped: Buffer): Buffer {
     return result
 }
 
-const SVG_LOOKUP =
-    'AACAAAAHAAALMAAAQASTAVAAAZaacaaaahaaalmaaaqastava.az0123456789-,'
+const SVG_LOOKUP = 'AACAAAAHAAALMAAAQASTAVAAAZaacaaaahaaalmaaaqastava.az0123456789-,'
 
 /**
  * Inflate compressed preview SVG path to full SVG path

@@ -72,9 +72,7 @@ export async function startTest(
 
     if (phone) {
         if (!phone.match(/^99966\d{5}/)) {
-            throw new MtArgumentError(
-                `${phone} is an invalid test phone number`,
-            )
+            throw new MtArgumentError(`${phone} is an invalid test phone number`)
         }
         const id = parseInt(phone[5])
 

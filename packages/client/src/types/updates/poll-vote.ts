@@ -34,18 +34,12 @@ export class PollVoteUpdate {
         if (this._peer) return this._peer
 
         if (this.raw.peer._ === 'peerUser') {
-            return (this._peer = new User(
-                this.client,
-                this._peers.user(this.raw.peer.userId),
-            ))
+            return (this._peer = new User(this.client, this._peers.user(this.raw.peer.userId)))
         }
 
         assertTypeIs('PollVoteUpdate.peer', this.raw.peer, 'peerChannel')
 
-        return (this._peer = new User(
-            this.client,
-            this._peers.user(this.raw.peer.channelId),
-        ))
+        return (this._peer = new User(this.client, this._peers.user(this.raw.peer.channelId)))
     }
 
     /**
@@ -87,9 +81,7 @@ export class PollVoteUpdate {
                 throw new MtUnsupportedError('option had >1 byte')
             }
             if (buf[0] < 48 || buf[0] > 57) {
-                throw new MtUnsupportedError(
-                    'option had first byte out of 0-9 range',
-                )
+                throw new MtUnsupportedError('option had first byte out of 0-9 range')
             }
 
             return buf[0] - 48

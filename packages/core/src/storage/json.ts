@@ -17,12 +17,10 @@ export class JsonMemoryStorage extends MemoryStorage {
                     case 'authKeysTemp': {
                         const ret: Record<string, Buffer> = {}
 
-                        ;(value as string)
-                            .split('|')
-                            .forEach((pair: string) => {
-                                const [dcId, b64] = pair.split(',')
-                                ret[dcId] = Buffer.from(b64, 'base64')
-                            })
+                        ;(value as string).split('|').forEach((pair: string) => {
+                            const [dcId, b64] = pair.split(',')
+                            ret[dcId] = Buffer.from(b64, 'base64')
+                        })
 
                         return ret
                     }
@@ -33,9 +31,7 @@ export class JsonMemoryStorage extends MemoryStorage {
                     case 'pts':
                     case 'fsm':
                     case 'rl':
-                        return new Map(
-                            Object.entries(value as Record<string, string>),
-                        )
+                        return new Map(Object.entries(value as Record<string, string>))
                     case 'accessHash':
                         return longFromFastString(value as string)
                 }
@@ -54,9 +50,7 @@ export class JsonMemoryStorage extends MemoryStorage {
 
                     return [...value_.entries()]
                         .filter((it): it is [string, Buffer] => it[1] !== null)
-                        .map(
-                            ([dcId, key]) => dcId + ',' + key.toString('base64'),
-                        )
+                        .map(([dcId, key]) => dcId + ',' + key.toString('base64'))
                         .join('|')
                 }
                 case 'authKeysTempExpiry':
@@ -66,9 +60,7 @@ export class JsonMemoryStorage extends MemoryStorage {
                 case 'pts':
                 case 'fsm':
                 case 'rl':
-                    return Object.fromEntries([
-                        ...(value as Map<string, string>).entries(),
-                    ])
+                    return Object.fromEntries([...(value as Map<string, string>).entries()])
                 case 'accessHash':
                     return longToFastString(value as tl.Long)
             }

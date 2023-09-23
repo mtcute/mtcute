@@ -22,9 +22,7 @@ export function isPresent<T>(t: T | undefined | null | void): t is T {
  * ```
  */
 export function hasPresentKey<K extends string | number | symbol>(k: K) {
-    return function <T, V> (
-        a: T & { [k in K]?: V | null },
-    ): a is T & { [k in K]: V } {
+    return function <T, V> (a: T & { [k in K]?: V | null }): a is T & { [k in K]: V } {
         return a[k] !== undefined && a[k] !== null
     }
 }
@@ -46,13 +44,8 @@ export function hasPresentKey<K extends string | number | symbol>(k: K) {
  * files[0].imageUrl // TS will know this is present, because already it excluded the other union members.
  * ```
  */
-export function hasValueAtKey<K extends string | number | symbol, V>(
-    k: K,
-    v: V,
-) {
-    return function <T> (
-        a: T & { [k in K]: unknown },
-    ): a is T & { [k in K]: V } {
+export function hasValueAtKey<K extends string | number | symbol, V>(k: K, v: V) {
+    return function <T> (a: T & { [k in K]: unknown }): a is T & { [k in K]: V } {
         return a[k] === v
     }
 }

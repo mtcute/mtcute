@@ -1,11 +1,7 @@
 import type * as forgeNs from 'node-forge'
 
 import { MaybeAsync } from '../../types'
-import {
-    BaseCryptoProvider,
-    ICryptoProvider,
-    IEncryptionScheme,
-} from './abstract'
+import { BaseCryptoProvider, ICryptoProvider, IEncryptionScheme } from './abstract'
 
 type forge = typeof forgeNs
 let forge: forge | null = null
@@ -14,23 +10,17 @@ try {
     forge = require('node-forge') as forge
 } catch (e) {}
 
-export class ForgeCryptoProvider
-    extends BaseCryptoProvider
-    implements ICryptoProvider {
+export class ForgeCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
     constructor() {
         super()
 
         if (!forge) {
-            throw new Error(
-                'For ForgeCryptoProvider you must have node-forge installed!',
-            )
+            throw new Error('For ForgeCryptoProvider you must have node-forge installed!')
         }
     }
 
     createAesCtr(key: Buffer, iv: Buffer, encrypt: boolean): IEncryptionScheme {
-        const cipher = forge!.cipher[
-            encrypt ? 'createCipher' : 'createDecipher'
-        ]('AES-CTR', key.toString('binary'))
+        const cipher = forge!.cipher[encrypt ? 'createCipher' : 'createDecipher']('AES-CTR', key.toString('binary'))
         cipher.start({ iv: iv.toString('binary') })
 
         const update = (data: Buffer): Buffer => {
@@ -61,10 +51,7 @@ export class ForgeCryptoProvider
                 return Buffer.from(cipher.output.data, 'binary')
             },
             decrypt(data: Buffer) {
-                const cipher = forge!.cipher.createDecipher(
-                    'AES-ECB',
-                    keyBuffer,
-                )
+                const cipher = forge!.cipher.createDecipher('AES-ECB', keyBuffer)
                 cipher.start({})
                 // @ts-expect-error  wrong types
                 cipher.mode.pad = cipher.mode.unpad = false
@@ -76,13 +63,7 @@ export class ForgeCryptoProvider
         }
     }
 
-    pbkdf2(
-        password: Buffer,
-        salt: Buffer,
-        iterations: number,
-        keylen = 64,
-        algo = 'sha512',
-    ): MaybeAsync<Buffer> {
+    pbkdf2(password: Buffer, salt: Buffer, iterations: number, keylen = 64, algo = 'sha512'): MaybeAsync<Buffer> {
         return new Promise((resolve, reject) =>
             forge!.pkcs5.pbkdf2(
                 password.toString('binary'),
@@ -91,28 +72,17 @@ export class ForgeCryptoProvider
                 keylen,
                 // eslint-disable-next-line
                 (forge!.md as any)[algo].create(),
-                (err: Error | null, buf: string) =>
-                    err !== null ?
-                        reject(err) :
-                        resolve(Buffer.from(buf, 'binary')),
+                (err: Error | null, buf: string) => (err !== null ? reject(err) : resolve(Buffer.from(buf, 'binary'))),
             ),
         )
     }
 
     sha1(data: Buffer): MaybeAsync<Buffer> {
-        return Buffer.from(
-            forge!.md.sha1.create().update(data.toString('binary')).digest()
-                .data,
-            'binary',
-        )
+        return Buffer.from(forge!.md.sha1.create().update(data.toString('binary')).digest().data, 'binary')
     }
 
     sha256(data: Buffer): MaybeAsync<Buffer> {
-        return Buffer.from(
-            forge!.md.sha256.create().update(data.toString('binary')).digest()
-                .data,
-            'binary',
-        )
+        return Buffer.from(forge!.md.sha256.create().update(data.toString('binary')).digest().data, 'binary')
     }
 
     hmacSha256(data: Buffer, key: Buffer): MaybeAsync<Buffer> {

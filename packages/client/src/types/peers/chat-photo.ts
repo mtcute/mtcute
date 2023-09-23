@@ -92,20 +92,17 @@ export class ChatPhotoSize extends FileLocation {
      * TDLib and Bot API compatible unique File ID representing this size
      */
     get uniqueFileId(): string {
-        return (this._uniqueFileId ??= toUniqueFileId(
-            tdFileId.FileType.ProfilePhoto,
-            {
-                _: 'photo',
-                id: this.obj.photoId,
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                source: {
-                    _: 'dialogPhoto',
-                    big: this.big,
-                    // will be looked into in MTQ-37
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                } as any,
-            },
-        ))
+        return (this._uniqueFileId ??= toUniqueFileId(tdFileId.FileType.ProfilePhoto, {
+            _: 'photo',
+            id: this.obj.photoId,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            source: {
+                _: 'dialogPhoto',
+                big: this.big,
+                // will be looked into in MTQ-37
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+        }))
     }
 }
 
@@ -132,24 +129,14 @@ export class ChatPhoto {
 
     /** Chat photo file location in small resolution (160x160) */
     get small(): ChatPhotoSize {
-        return (this._smallFile ??= new ChatPhotoSize(
-            this.client,
-            this.peer,
-            this.raw,
-            false,
-        ))
+        return (this._smallFile ??= new ChatPhotoSize(this.client, this.peer, this.raw, false))
     }
 
     private _bigFile?: ChatPhotoSize
 
     /** Chat photo file location in big resolution (640x640) */
     get big(): ChatPhotoSize {
-        return (this._bigFile ??= new ChatPhotoSize(
-            this.client,
-            this.peer,
-            this.raw,
-            true,
-        ))
+        return (this._bigFile ??= new ChatPhotoSize(this.client, this.peer, this.raw, true))
     }
 
     private _thumb?: Buffer

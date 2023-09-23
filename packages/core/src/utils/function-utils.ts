@@ -10,10 +10,7 @@
  * @param func  Function to throttle
  * @param delay  Throttle delay
  */
-export function throttle(
-    func: () => void,
-    delay: number,
-): () => void {
+export function throttle(func: () => void, delay: number): () => void {
     let timeout: NodeJS.Timeout | null
 
     return function () {

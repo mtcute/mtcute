@@ -13,10 +13,7 @@ export class TakeoutSession {
      */
     readonly id: tl.Long
 
-    constructor(
-        readonly client: TelegramClient,
-        session: tl.account.RawTakeout,
-    ) {
+    constructor(readonly client: TelegramClient, session: tl.account.RawTakeout) {
         this.id = session.id
     }
 

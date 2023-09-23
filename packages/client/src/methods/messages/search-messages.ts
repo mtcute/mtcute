@@ -123,9 +123,7 @@ export async function* searchMessages(
     const limit = Math.min(params.chunkSize || 100, total)
 
     const peer = await this.resolvePeer(chatId)
-    const fromUser =
-        (params.fromUser ? await this.resolvePeer(params.fromUser) : null) ||
-        undefined
+    const fromUser = (params.fromUser ? await this.resolvePeer(params.fromUser) : null) || undefined
 
     for (;;) {
         const res = await this.call({
@@ -145,11 +143,7 @@ export async function* searchMessages(
         })
 
         if (res._ === 'messages.messagesNotModified') {
-            throw new MtTypeAssertionError(
-                'messages.search',
-                '!messages.messagesNotModified',
-                res._,
-            )
+            throw new MtTypeAssertionError('messages.search', '!messages.messagesNotModified', res._)
         }
 
         // for successive chunks, we need to reset the offset
@@ -157,9 +151,7 @@ export async function* searchMessages(
 
         const peers = PeersIndex.from(res)
 
-        const msgs = res.messages
-            .filter((msg) => msg._ !== 'messageEmpty')
-            .map((msg) => new Message(this, msg, peers))
+        const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(this, msg, peers))
 
         if (!msgs.length) break
 

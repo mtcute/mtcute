@@ -31,10 +31,7 @@ export class BotChatJoinRequestUpdate {
      * Object containing the chat information.
      */
     get chat(): Chat {
-        return (this._chat ??= new Chat(
-            this.client,
-            this._peers.chat(getBarePeerId(this.raw.peer)),
-        ))
+        return (this._chat ??= new Chat(this.client, this._peers.chat(getBarePeerId(this.raw.peer))))
     }
 
     /**
@@ -49,10 +46,7 @@ export class BotChatJoinRequestUpdate {
      * Object containing the user information.
      */
     get user(): User {
-        return (this._user ??= new User(
-            this.client,
-            this._peers.user(this.raw.userId),
-        ))
+        return (this._user ??= new User(this.client, this._peers.user(this.raw.userId)))
     }
 
     /**
@@ -75,23 +69,14 @@ export class BotChatJoinRequestUpdate {
      * Invite link used to request joining.
      */
     get invite(): ChatInviteLink {
-        return (this._invite ??= new ChatInviteLink(
-            this.client,
-            this.raw.invite,
-        ))
+        return (this._invite ??= new ChatInviteLink(this.client, this.raw.invite))
     }
 
     /**
      * Approve or deny the request.
      */
-    hide(
-        action: Parameters<TelegramClient['hideJoinRequest']>[2],
-    ): Promise<void> {
-        return this.client.hideJoinRequest(
-            this.chat.inputPeer,
-            this.user.inputPeer,
-            action,
-        )
+    hide(action: Parameters<TelegramClient['hideJoinRequest']>[2]): Promise<void> {
+        return this.client.hideJoinRequest(this.chat.inputPeer, this.user.inputPeer, action)
     }
 }
 

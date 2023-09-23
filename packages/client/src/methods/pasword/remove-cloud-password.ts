@@ -9,10 +9,7 @@ import { TelegramClient } from '../../client'
  * @param password  2FA password as plaintext
  * @internal
  */
-export async function removeCloudPassword(
-    this: TelegramClient,
-    password: string,
-): Promise<void> {
+export async function removeCloudPassword(this: TelegramClient, password: string): Promise<void> {
     const pwd = await this.call({ _: 'account.getPassword' })
 
     if (!pwd.hasPassword) {

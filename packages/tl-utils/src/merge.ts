@@ -83,8 +83,7 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
 
                 // we also need to make sure we put it *after* the respective flags field
 
-                const flagsField =
-                    entryArgument.typeModifiers.predicate.split('.')[0]
+                const flagsField = entryArgument.typeModifiers.predicate.split('.')[0]
                 const targetIdx = flagsLastIndex[flagsField]
 
                 // targetIdx *must* exist, otherwise ids wouldn't match
@@ -126,7 +125,7 @@ export async function mergeTlSchemas(
     schemas: TlFullSchema[],
     onConflict: (
         options: (TlEntry | undefined)[],
-        reason: string
+        reason: string,
     ) => TlEntry | undefined | Promise<TlEntry | undefined>,
 ): Promise<TlFullSchema> {
     const result: TlFullSchema = {
@@ -147,10 +146,7 @@ export async function mergeTlSchemas(
 
             const kind = entry.kind === 'class' ? 'classes' : 'methods'
             const index = result[kind]
-            const conflictIndex =
-                entry.kind === 'class' ?
-                    resolvedConflictsClasses :
-                    resolvedConflictsMethods
+            const conflictIndex = entry.kind === 'class' ? resolvedConflictsClasses : resolvedConflictsMethods
 
             if (entry.name in conflictIndex) {
                 // this entry was manually processed by user after a conflict
@@ -170,9 +166,7 @@ export async function mergeTlSchemas(
             if (typeof merged === 'string') {
                 // merge conflict
                 // find all candidates from all schemas and let the user decide
-                const candidates = schemas.map(
-                    (schema) => schema[kind][entry.name],
-                )
+                const candidates = schemas.map((schema) => schema[kind][entry.name])
 
                 const chosen = await onConflict(candidates, merged)
 

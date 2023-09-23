@@ -5,11 +5,7 @@ import { writeTlEntriesToString } from '../src/schema'
 import { TlEntry } from '../src/types'
 
 describe('writeTlEntriesToString', () => {
-    const test = (
-        entries: TlEntry[],
-        params: Parameters<typeof writeTlEntriesToString>[1],
-        ...expected: string[]
-    ) => {
+    const test = (entries: TlEntry[], params: Parameters<typeof writeTlEntriesToString>[1], ...expected: string[]) => {
         expect(
             writeTlEntriesToString(entries, {
                 omitPrimitives: true,
@@ -36,11 +32,7 @@ describe('writeTlEntriesToString', () => {
             ],
         }
 
-        test(
-            [obj],
-            { computeIds: false },
-            'error code:int text:string = Error;',
-        )
+        test([obj], { computeIds: false }, 'error code:int text:string = Error;')
         test([obj], {}, 'error#c4b9f9bb code:int text:string = Error;')
     })
 
@@ -65,21 +57,10 @@ describe('writeTlEntriesToString', () => {
             comment: 'An error',
         }
 
-        test(
-            [obj],
-            {},
-            '// An error',
-            'error#c4b9f9bb code:int text:string = Error;',
-        )
+        test([obj], {}, '// An error', 'error#c4b9f9bb code:int text:string = Error;')
 
         obj.comment += '\nVery error'
-        test(
-            [obj],
-            {},
-            '// An error',
-            '//- Very error',
-            'error#c4b9f9bb code:int text:string = Error;',
-        )
+        test([obj], {}, '// An error', '//- Very error', 'error#c4b9f9bb code:int text:string = Error;')
     })
 
     it('writes tdlib-style comments', () => {

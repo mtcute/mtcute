@@ -14,17 +14,15 @@ describe('calculateStaticSizes', () => {
     })
 
     it('computes for constructors with static parameters', () => {
-        test(
-            'auth.exportAuthorization#e5bfffcd dc_id:int = auth.ExportedAuthorization;',
-            { 'auth.exportAuthorization': 8 },
-        )
+        test('auth.exportAuthorization#e5bfffcd dc_id:int = auth.ExportedAuthorization;', {
+            'auth.exportAuthorization': 8,
+        })
     })
 
     it('correctly skips true fields', () => {
-        test(
-            'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int = help.PromoData;',
-            { 'help.promoData': 12 },
-        )
+        test('help.promoData#8c39793f flags:# proxy:flags.0?true expires:int = help.PromoData;', {
+            'help.promoData': 12,
+        })
     })
 
     it('correctly skips constructors with predicated fields', () => {
@@ -35,17 +33,11 @@ describe('calculateStaticSizes', () => {
     })
 
     it('correctly skips constructors with non-static fields', () => {
-        test(
-            'help.promoData#8c39793f psa_type:string psa_message:string = help.PromoData;',
-            {},
-        )
+        test('help.promoData#8c39793f psa_type:string psa_message:string = help.PromoData;', {})
     })
 
     it('correctly skips constructors with vector fields', () => {
-        test(
-            'help.promoData#8c39793f psa_type:Vector<int> = help.PromoData;',
-            {},
-        )
+        test('help.promoData#8c39793f psa_type:Vector<int> = help.PromoData;', {})
     })
 
     it('correctly handles static-sized children', () => {

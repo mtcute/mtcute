@@ -10,10 +10,7 @@ import { InputPeerLike } from '../../types'
  * @param chats  Chat ID(s), username(s), phone number(s), `"me"` or `"self"`
  * @internal
  */
-export async function archiveChats(
-    this: TelegramClient,
-    chats: MaybeArray<InputPeerLike>,
-): Promise<void> {
+export async function archiveChats(this: TelegramClient, chats: MaybeArray<InputPeerLike>): Promise<void> {
     if (!Array.isArray(chats)) chats = [chats]
 
     const folderPeers: tl.TypeInputFolderPeer[] = []

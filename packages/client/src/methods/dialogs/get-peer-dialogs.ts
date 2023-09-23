@@ -9,20 +9,14 @@ import { Dialog, InputPeerLike } from '../../types'
  * @param peers  Peers for which to fetch dialogs.
  * @internal
  */
-export async function getPeerDialogs(
-    this: TelegramClient,
-    peers: InputPeerLike
-): Promise<Dialog>
+export async function getPeerDialogs(this: TelegramClient, peers: InputPeerLike): Promise<Dialog>
 /**
  * Get dialogs with certain peers.
  *
  * @param peers  Peers for which to fetch dialogs.
  * @internal
  */
-export async function getPeerDialogs(
-    this: TelegramClient,
-    peers: InputPeerLike[]
-): Promise<Dialog[]>
+export async function getPeerDialogs(this: TelegramClient, peers: InputPeerLike[]): Promise<Dialog[]>
 
 /**
  * @internal
@@ -36,12 +30,11 @@ export async function getPeerDialogs(
 
     const res = await this.call({
         _: 'messages.getPeerDialogs',
-        peers: await this.resolvePeerMany(peers as InputPeerLike[]).then(
-            (peers) =>
-                peers.map((it) => ({
-                    _: 'inputDialogPeer',
-                    peer: it,
-                })),
+        peers: await this.resolvePeerMany(peers as InputPeerLike[]).then((peers) =>
+            peers.map((it) => ({
+                _: 'inputDialogPeer',
+                peer: it,
+            })),
         ),
     })
 

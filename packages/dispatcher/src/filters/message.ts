@@ -22,42 +22,30 @@ import { Modify, UpdateFilter } from './types'
  *
  * Messages sent to yourself (i.e. Saved Messages) are also "incoming"
  */
-export const incoming: UpdateFilter<Message, { isOutgoing: false }> = (msg) =>
-    !msg.isOutgoing
+export const incoming: UpdateFilter<Message, { isOutgoing: false }> = (msg) => !msg.isOutgoing
 
 /**
  * Filter outgoing messages.
  *
  * Messages sent to yourself (i.e. Saved Messages) are **not** "outgoing"
  */
-export const outgoing: UpdateFilter<Message, { isOutgoing: true }> = (msg) =>
-    msg.isOutgoing
+export const outgoing: UpdateFilter<Message, { isOutgoing: true }> = (msg) => msg.isOutgoing
 
 /**
  * Filter messages that are replies to some other message
  */
-export const reply: UpdateFilter<Message, { replyToMessageId: number }> = (
-    msg,
-) => msg.replyToMessageId !== null
+export const reply: UpdateFilter<Message, { replyToMessageId: number }> = (msg) => msg.replyToMessageId !== null
 
 /**
  * Filter messages containing some media
  */
-export const media: UpdateFilter<
-    Message,
-    { media: Exclude<Message['media'], null> }
-> = (msg) => msg.media !== null
+export const media: UpdateFilter<Message, { media: Exclude<Message['media'], null> }> = (msg) => msg.media !== null
 
 /**
  * Filter messages containing media of given type
  */
 export const mediaOf =
-    <T extends MessageMediaType>(
-        type: T,
-    ): UpdateFilter<
-        Message,
-        { media: Extract<Message['media'], { type: T }> }
-    > =>
+    <T extends MessageMediaType>(type: T): UpdateFilter<Message, { media: Extract<Message['media'], { type: T }> }> =>
         (msg) =>
             msg.media?.type === type
 
@@ -95,8 +83,7 @@ export const invoice = mediaOf('invoice')
 /**
  * Filter messages containing any location (live or static).
  */
-export const anyLocation: UpdateFilter<Message, { media: Location }> = (msg) =>
-    msg.media instanceof RawLocation
+export const anyLocation: UpdateFilter<Message, { media: Location }> = (msg) => msg.media instanceof RawLocation
 
 /**
  * Filter messages containing a document
@@ -104,9 +91,7 @@ export const anyLocation: UpdateFilter<Message, { media: Location }> = (msg) =>
  * This will also match media like audio, video, voice
  * that also use Documents
  */
-export const anyDocument: UpdateFilter<Message, { media: RawDocument }> = (
-    msg,
-) => msg.media instanceof RawDocument
+export const anyDocument: UpdateFilter<Message, { media: RawDocument }> = (msg) => msg.media instanceof RawDocument
 
 /**
  * Filter messages containing a simple video.
@@ -124,8 +109,7 @@ export const video: UpdateFilter<
             }
         >
     }
-> = (msg) =>
-    msg.media?.type === 'video' && !msg.media.isAnimation && !msg.media.isRound
+> = (msg) => msg.media?.type === 'video' && !msg.media.isAnimation && !msg.media.isRound
 
 /**
  * Filter messages containing an animation.
@@ -144,8 +128,7 @@ export const animation: UpdateFilter<
             }
         >
     }
-> = (msg) =>
-    msg.media?.type === 'video' && msg.media.isAnimation && !msg.media.isRound
+> = (msg) => msg.media?.type === 'video' && msg.media.isAnimation && !msg.media.isRound
 
 /**
  * Filter messages containing a round message (aka video note).
@@ -161,8 +144,7 @@ export const roundMessage: UpdateFilter<
             }
         >
     }
-> = (msg) =>
-    msg.media?.type === 'video' && !msg.media.isAnimation && msg.media.isRound
+> = (msg) => msg.media?.type === 'video' && !msg.media.isAnimation && msg.media.isRound
 
 /**
  * Filter messages containing a sticker by its type
@@ -194,8 +176,7 @@ export const text: UpdateFilter<
 /**
  * Filter service messages
  */
-export const service: UpdateFilter<Message, { isService: true }> = (msg) =>
-    msg.isService
+export const service: UpdateFilter<Message, { isService: true }> = (msg) => msg.isService
 
 /**
  * Filter service messages by action type
@@ -206,12 +187,7 @@ export const action = <T extends Exclude<MessageAction, null>['type']>(
     Message,
     {
         action: Extract<MessageAction, { type: T }>
-        sender: T extends
-            | 'user_joined_link'
-            | 'user_removed'
-            | 'history_cleared'
-            | 'contact_joined'
-            | 'bot_allowed'
+        sender: T extends 'user_joined_link' | 'user_removed' | 'history_cleared' | 'contact_joined' | 'bot_allowed'
             ? User
             : User | Chat
     }

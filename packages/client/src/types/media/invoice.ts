@@ -16,10 +16,7 @@ import { Thumbnail } from './thumbnail'
 export type InvoiceExtendedMediaState = 'none' | 'preview' | 'full'
 
 export class InvoiceExtendedMediaPreview {
-    constructor(
-        public readonly client: TelegramClient,
-        public readonly raw: tl.RawMessageExtendedMediaPreview,
-    ) {}
+    constructor(public readonly client: TelegramClient, public readonly raw: tl.RawMessageExtendedMediaPreview) {}
 
     /**
      * Width of the preview, in pixels (if available, else 0)
@@ -41,11 +38,7 @@ export class InvoiceExtendedMediaPreview {
             return null
         }
 
-        return (this._thumbnail ??= new Thumbnail(
-            this.client,
-            this.raw,
-            this.raw.thumb,
-        ))
+        return (this._thumbnail ??= new Thumbnail(this.client, this.raw, this.raw.thumb))
     }
 
     /**
@@ -63,10 +56,7 @@ export class InvoiceExtendedMediaPreview {
 export class Invoice {
     readonly type = 'invoice' as const
 
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.RawMessageMediaInvoice,
-    ) {}
+    constructor(readonly client: TelegramClient, readonly raw: tl.RawMessageMediaInvoice) {}
 
     /**
      * Whether the shipping address was requested
@@ -164,10 +154,7 @@ export class Invoice {
             throw new MtArgumentError('No extended media preview available')
         }
 
-        return (this._extendedMediaPreview ??= new InvoiceExtendedMediaPreview(
-            this.client,
-            this.raw.extendedMedia,
-        ))
+        return (this._extendedMediaPreview ??= new InvoiceExtendedMediaPreview(this.client, this.raw.extendedMedia))
     }
 
     private _extendedMedia?: MessageMedia
@@ -181,11 +168,7 @@ export class Invoice {
             throw new MtArgumentError('No extended media available')
         }
 
-        return (this._extendedMedia ??= _messageMediaFromTl(
-            this.client,
-            null,
-            this.raw.extendedMedia.media,
-        ))
+        return (this._extendedMedia ??= _messageMediaFromTl(this.client, null, this.raw.extendedMedia.media))
     }
 
     /**

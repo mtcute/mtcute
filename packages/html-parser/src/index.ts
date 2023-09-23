@@ -1,15 +1,9 @@
 import { Parser } from 'htmlparser2'
 import Long from 'long'
 
-import type {
-    FormattedString,
-    IMessageEntityParser,
-    MessageEntity,
-    tl,
-} from '@mtcute/client'
+import type { FormattedString, IMessageEntityParser, MessageEntity, tl } from '@mtcute/client'
 
-const MENTION_REGEX =
-    /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
+const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 
 /**
  * Tagged template based helper for escaping entities in HTML
@@ -28,10 +22,7 @@ export function html(
         if (typeof it === 'boolean' || !it) return
 
         if (typeof it === 'string') {
-            it = HtmlMessageEntityParser.escape(
-                it,
-                Boolean(str.match(/=['"]$/)),
-            )
+            it = HtmlMessageEntityParser.escape(it, Boolean(str.match(/=['"]$/)))
         } else {
             if (it.mode && it.mode !== 'html') {
                 throw new Error(`Incompatible parse mode: ${it.mode}`)
@@ -79,10 +70,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
      * @param quote  Whether `"` (double quote) should be escaped as `&quot;`
      */
     static escape(str: string, quote = false): string {
-        str = str
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
+        str = str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         if (quote) str = str.replace(/"/g, '&quot;')
 
         return str
@@ -227,11 +215,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                                     userId: {
                                         _: 'inputUser',
                                         userId: id,
-                                        accessHash: Long.fromString(
-                                            accessHash,
-                                            false,
-                                            16,
-                                        ),
+                                        accessHash: Long.fromString(accessHash, false, 16),
                                     },
                                 }
                             } else {
@@ -335,11 +319,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
 
             if (relativeOffset > lastOffset) {
                 // add missing plain text
-                html.push(
-                    HtmlMessageEntityParser.escape(
-                        text.substring(lastOffset, relativeOffset),
-                    ),
-                )
+                html.push(HtmlMessageEntityParser.escape(text.substring(lastOffset, relativeOffset)))
             } else if (relativeOffset < lastOffset) {
                 length -= lastOffset - relativeOffset
                 relativeOffset = lastOffset
@@ -361,13 +341,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
             if (type === 'pre') {
                 entityText = substr
             } else {
-                entityText = this._unparse(
-                    substr,
-                    entities,
-                    i + 1,
-                    offset + relativeOffset,
-                    length,
-                )
+                entityText = this._unparse(substr, entities, i + 1, offset + relativeOffset, length)
             }
 
             switch (type) {
@@ -380,16 +354,9 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                 case 'code':
                 case 'pre':
                     html.push(
-                        `<${type}${
-                            entity.language ?
-                                ` language="${entity.language}"` :
-                                ''
-                        }>${
+                        `<${type}${entity.language ? ` language="${entity.language}"` : ''}>${
                             this._syntaxHighlighter && entity.language ?
-                                this._syntaxHighlighter(
-                                    entityText,
-                                    entity.language,
-                                ) :
+                                this._syntaxHighlighter(entityText, entity.language) :
                                 entityText
                         }</${type}>`,
                     )
@@ -399,9 +366,7 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
                     html.push(`<${type}>${entityText}</${type}>`)
                     break
                 case 'email':
-                    html.push(
-                        `<a href="mailto:${entityText}">${entityText}</a>`,
-                    )
+                    html.push(`<a href="mailto:${entityText}">${entityText}</a>`)
                     break
                 case 'url':
                     html.push(`<a href="${entityText}">${entityText}</a>`)

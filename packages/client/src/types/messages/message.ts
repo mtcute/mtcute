@@ -1,10 +1,4 @@
-import {
-    assertNever,
-    getMarkedPeerId,
-    MtArgumentError,
-    MtTypeAssertionError,
-    toggleChannelIdMark,
-} from '@mtcute/core'
+import { assertNever, getMarkedPeerId, MtArgumentError, MtTypeAssertionError, toggleChannelIdMark } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -73,8 +67,7 @@ export interface MessageRepliesInfo {
 }
 
 /** Information about comments to a channel post */
-export interface MessageCommentsInfo
-    extends Omit<MessageRepliesInfo, 'isComments'> {
+export interface MessageCommentsInfo extends Omit<MessageRepliesInfo, 'isComments'> {
     /**
      * Whether this is a comments thread under a channel post
      */
@@ -111,11 +104,7 @@ export class Message {
         readonly isScheduled = false,
     ) {
         if (raw._ === 'messageEmpty') {
-            throw new MtTypeAssertionError(
-                'Message#ctor',
-                'not messageEmpty',
-                'messageEmpty',
-            )
+            throw new MtTypeAssertionError('Message#ctor', 'not messageEmpty', 'messageEmpty')
         }
 
         this.raw = raw
@@ -183,10 +172,7 @@ export class Message {
 
             if (!from) {
                 if (this.raw.peerId._ === 'peerUser') {
-                    this._sender = new User(
-                        this.client,
-                        this._peers.user(this.raw.peerId.userId),
-                    )
+                    this._sender = new User(this.client, this._peers.user(this.raw.peerId.userId))
                 } else {
                     // anon admin, return the chat
                     this._sender = this.chat
@@ -194,23 +180,13 @@ export class Message {
             } else {
                 switch (from._) {
                     case 'peerChannel': // forwarded channel post
-                        this._sender = new Chat(
-                            this.client,
-                            this._peers.chat(from.channelId),
-                        )
+                        this._sender = new Chat(this.client, this._peers.chat(from.channelId))
                         break
                     case 'peerUser':
-                        this._sender = new User(
-                            this.client,
-                            this._peers.user(from.userId),
-                        )
+                        this._sender = new User(this.client, this._peers.user(from.userId))
                         break
                     default:
-                        throw new MtTypeAssertionError(
-                            'raw.fromId',
-                            'peerUser | peerChannel',
-                            from._,
-                        )
+                        throw new MtTypeAssertionError('raw.fromId', 'peerUser | peerChannel', from._)
                 }
             }
         }
@@ -225,11 +201,7 @@ export class Message {
      */
     get chat(): Chat {
         if (this._chat === undefined) {
-            this._chat = Chat._parseFromMessage(
-                this.client,
-                this.raw,
-                this._peers,
-            )
+            this._chat = Chat._parseFromMessage(this.client, this.raw, this._peers)
         }
 
         return this._chat
@@ -261,23 +233,13 @@ export class Message {
                 } else if (fwd.fromId) {
                     switch (fwd.fromId._) {
                         case 'peerChannel':
-                            sender = new Chat(
-                                this.client,
-                                this._peers.chat(fwd.fromId.channelId),
-                            )
+                            sender = new Chat(this.client, this._peers.chat(fwd.fromId.channelId))
                             break
                         case 'peerUser':
-                            sender = new User(
-                                this.client,
-                                this._peers.user(fwd.fromId.userId),
-                            )
+                            sender = new User(this.client, this._peers.user(fwd.fromId.userId))
                             break
                         default:
-                            throw new MtTypeAssertionError(
-                                'raw.fwdFrom.fromId',
-                                'peerUser | peerChannel',
-                                fwd.fromId._,
-                            )
+                            throw new MtTypeAssertionError('raw.fwdFrom.fromId', 'peerUser | peerChannel', fwd.fromId._)
                     }
                 } else {
                     this._forward = null
@@ -317,8 +279,7 @@ export class Message {
             if (r.comments) {
                 const o = obj as unknown as MessageCommentsInfo
                 o.discussion = getMarkedPeerId(r.channelId!, 'channel')
-                o.repliers =
-                    r.recentRepliers?.map((it) => getMarkedPeerId(it)) ?? []
+                o.repliers = r.recentRepliers?.map((it) => getMarkedPeerId(it)) ?? []
             }
 
             this._replies = obj
@@ -364,10 +325,7 @@ export class Message {
             if (this.raw._ === 'messageService' || !this.raw.viaBotId) {
                 this._viaBot = null
             } else {
-                this._viaBot = new User(
-                    this.client,
-                    this._peers.user(this.raw.viaBotId),
-                )
+                this._viaBot = new User(this.client, this._peers.user(this.raw.viaBotId))
             }
         }
 
@@ -431,18 +389,10 @@ export class Message {
      */
     get media(): MessageMedia {
         if (this._media === undefined) {
-            if (
-                this.raw._ === 'messageService' ||
-                !this.raw.media ||
-                this.raw.media._ === 'messageMediaEmpty'
-            ) {
+            if (this.raw._ === 'messageService' || !this.raw.media || this.raw.media._ === 'messageMediaEmpty') {
                 this._media = null
             } else {
-                this._media = _messageMediaFromTl(
-                    this.client,
-                    this._peers,
-                    this.raw.media,
-                )
+                this._media = _messageMediaFromTl(this.client, this._peers, this.raw.media)
             }
         }
 
@@ -455,11 +405,7 @@ export class Message {
      * that was forwarded without author by a non-premium user
      */
     get isForwardedPremiumMedia(): boolean {
-        return (
-            this.raw._ === 'message' &&
-            this.raw.media?._ === 'messageMediaDocument' &&
-            this.raw.media.nopremium!
-        )
+        return this.raw._ === 'message' && this.raw.media?._ === 'messageMediaDocument' && this.raw.media.nopremium!
     }
 
     private _markup?: ReplyMarkup | null
@@ -548,22 +494,15 @@ export class Message {
      * @throws MtArgumentError  In case the chat does not support message links
      */
     get link(): string {
-        if (
-            this.chat.chatType === 'supergroup' ||
-            this.chat.chatType === 'channel'
-        ) {
+        if (this.chat.chatType === 'supergroup' || this.chat.chatType === 'channel') {
             if (this.chat.username) {
                 return `https://t.me/${this.chat.username}/${this.id}`
             }
 
-            return `https://t.me/c/${toggleChannelIdMark(this.chat.id)}/${
-                this.id
-            }`
+            return `https://t.me/c/${toggleChannelIdMark(this.chat.id)}/${this.id}`
         }
 
-        throw new MtArgumentError(
-            `Cannot generate message link for ${this.chat.chatType}`,
-        )
+        throw new MtArgumentError(`Cannot generate message link for ${this.chat.chatType}`)
     }
 
     /**
@@ -574,9 +513,7 @@ export class Message {
      * @param parseMode  Parse mode to use (`null` for default)
      */
     unparse(parseMode?: string | null): string {
-        return this.client
-            .getParseMode(parseMode)
-            .unparse(this.text, this.entities)
+        return this.client.getParseMode(parseMode).unparse(this.text, this.entities)
     }
 
     /**
@@ -714,9 +651,7 @@ export class Message {
         }
 
         if (!this.replies || !this.replies.isComments) {
-            throw new MtArgumentError(
-                'This message does not have comments section',
-            )
+            throw new MtArgumentError('This message does not have comments section')
         }
 
         if (!params) params = {}
@@ -747,9 +682,7 @@ export class Message {
         }
 
         if (!this.replies || !this.replies.isComments) {
-            throw new MtArgumentError(
-                'This message does not have comments section',
-            )
+            throw new MtArgumentError('This message does not have comments section')
         }
         if (!params) params = {}
         params.commentTo = this.id
@@ -779,9 +712,7 @@ export class Message {
         }
 
         if (!this.replies || !this.replies.isComments) {
-            throw new MtArgumentError(
-                'This message does not have comments section',
-            )
+            throw new MtArgumentError('This message does not have comments section')
         }
         if (!params) params = {}
         params.commentTo = this.id
@@ -805,12 +736,7 @@ export class Message {
      * @param bothSides  Whether to pin for both sides (only for private chats)
      */
     pin(notify = false, bothSides = false): Promise<void> {
-        return this.client.pinMessage(
-            this.chat.inputPeer,
-            this.id,
-            notify,
-            bothSides,
-        )
+        return this.client.pinMessage(this.chat.inputPeer, this.id, notify, bothSides)
     }
 
     /**
@@ -825,9 +751,7 @@ export class Message {
      *
      * @link TelegramClient.editMessage
      */
-    edit(
-        params: Parameters<TelegramClient['editMessage']>[2],
-    ): Promise<Message> {
+    edit(params: Parameters<TelegramClient['editMessage']>[2]): Promise<Message> {
         return this.client.editMessage(this.chat.inputPeer, this.id, params)
     }
 
@@ -858,16 +782,8 @@ export class Message {
      * @param params
      * @returns  Forwarded message
      */
-    forwardTo(
-        peer: InputPeerLike,
-        params?: Parameters<TelegramClient['forwardMessages']>[3],
-    ): Promise<Message> {
-        return this.client.forwardMessages(
-            peer,
-            this.chat.inputPeer,
-            this.id,
-            params,
-        )
+    forwardTo(peer: InputPeerLike, params?: Parameters<TelegramClient['forwardMessages']>[3]): Promise<Message> {
+        return this.client.forwardMessages(peer, this.chat.inputPeer, this.id, params)
     }
 
     /**
@@ -882,10 +798,7 @@ export class Message {
      * @param toChatId  Target chat ID
      * @param params  Copy parameters
      */
-    sendCopy(
-        toChatId: InputPeerLike,
-        params?: Parameters<TelegramClient['sendCopy']>[3],
-    ): Promise<Message> {
+    sendCopy(toChatId: InputPeerLike, params?: Parameters<TelegramClient['sendCopy']>[3]): Promise<Message> {
         if (!params) params = {}
 
         if (this.raw._ === 'messageService') {
@@ -900,10 +813,7 @@ export class Message {
                     file: this.media.inputMedia,
                     caption: params.caption ?? this.raw.message,
                     // we shouldn't use original entities if the user wants custom text
-                    entities:
-                        params.entities ?? params.caption ?
-                            undefined :
-                            this.raw.entities,
+                    entities: params.entities ?? params.caption ? undefined : this.raw.entities,
                 },
                 params,
             )
@@ -933,10 +843,7 @@ export class Message {
      * message.
      */
     async getDiscussionMessage(): Promise<Message | null> {
-        return this.client.getDiscussionMessage(
-            this.chat.inputPeer,
-            this.raw.id,
-        )
+        return this.client.getDiscussionMessage(this.chat.inputPeer, this.raw.id)
     }
 
     /**
@@ -945,11 +852,7 @@ export class Message {
      * @param clearMentions  Whether to also clear mentions
      */
     async read(clearMentions = false): Promise<void> {
-        return this.client.readHistory(
-            this.chat.inputPeer,
-            this.raw.id,
-            clearMentions,
-        )
+        return this.client.readHistory(this.chat.inputPeer, this.raw.id, clearMentions)
     }
 
     /**
@@ -959,12 +862,7 @@ export class Message {
      * @param big  Whether to use a big reaction
      */
     async react(emoji: string | null, big?: boolean): Promise<Message> {
-        return this.client.sendReaction(
-            this.chat.inputPeer,
-            this.raw.id,
-            emoji,
-            big,
-        )
+        return this.client.sendReaction(this.chat.inputPeer, this.raw.id, emoji, big)
     }
 
     async getCustomEmojis(): Promise<Sticker[]> {

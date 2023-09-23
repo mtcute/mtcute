@@ -278,10 +278,7 @@ export type MessageAction =
     | null
 
 /** @internal */
-export function _messageActionFromTl(
-    this: Message,
-    act: tl.TypeMessageAction,
-): MessageAction {
+export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): MessageAction {
     switch (act._) {
         case 'messageActionChatCreate':
             return {
@@ -343,10 +340,7 @@ export function _messageActionFromTl(
                 users: act.users,
             }
         case 'messageActionChatDeleteUser':
-            if (
-                this.raw.fromId?._ === 'peerUser' &&
-                act.userId === this.raw.fromId.userId
-            ) {
+            if (this.raw.fromId?._ === 'peerUser' && act.userId === this.raw.fromId.userId) {
                 return {
                     type: 'user_left',
                 }
@@ -383,9 +377,7 @@ export function _messageActionFromTl(
                 type: 'call',
                 id: act.callId,
                 isVideo: Boolean(act.video),
-                reason: act.reason ?
-                    _callDiscardReasonFromTl(act.reason) :
-                    undefined,
+                reason: act.reason ? _callDiscardReasonFromTl(act.reason) : undefined,
                 duration: act.duration ?? 0,
             }
         case 'messageActionScreenshotTaken':

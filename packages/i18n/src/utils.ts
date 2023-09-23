@@ -13,9 +13,7 @@ try {
  *
  * @param strings  Strings object
  */
-export function createI18nStringsIndex(
-    strings: I18nStrings,
-): Record<string, I18nValue> {
+export function createI18nStringsIndex(strings: I18nStrings): Record<string, I18nValue> {
     const ret: Record<string, I18nValue> = {}
 
     function add(obj: I18nStrings, prefix: string) {
@@ -41,24 +39,18 @@ export function createI18nStringsIndex(
  *
  * @param update  Update to extract language from
  */
-export function extractLanguageFromUpdate(
-    update: clientNs.ParsedUpdate['data'],
-): string | null | undefined {
+export function extractLanguageFromUpdate(update: clientNs.ParsedUpdate['data']): string | null | undefined {
     if (!client) {
-        throw new Error(
-            '@mtcute/client is not installed, you must provide your own adapter',
-        )
+        throw new Error('@mtcute/client is not installed, you must provide your own adapter')
     }
 
     switch (update.constructor) {
         case client.Message:
             // if sender is Chat it will just be undefined
-            return ((update as clientNs.Message).sender as clientNs.User)
-                .language
+            return ((update as clientNs.Message).sender as clientNs.User).language
         case client.PollVoteUpdate:
             // if peer is Chat it will just be undefined
-            return ((update as clientNs.PollVoteUpdate).peer as clientNs.User)
-                .language
+            return ((update as clientNs.PollVoteUpdate).peer as clientNs.User).language
         case client.ChatMemberUpdate:
         case client.InlineQuery:
         case client.ChosenInlineResult:

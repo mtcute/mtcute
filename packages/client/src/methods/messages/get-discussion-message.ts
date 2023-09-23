@@ -23,9 +23,7 @@ export async function _getDiscussionMessage(
     }
 
     const msg = res.messages[0]
-    const chat = res.chats.find(
-        (it) => it.id === (msg.peerId as tl.RawPeerChannel).channelId,
-    )! as tl.RawChannel
+    const chat = res.chats.find((it) => it.id === (msg.peerId as tl.RawPeerChannel).channelId)! as tl.RawChannel
 
     return [
         {

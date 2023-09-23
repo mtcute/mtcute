@@ -20,7 +20,7 @@ import { Message, PeersIndex } from '../../types'
 export async function getMessagesUnsafe(
     this: TelegramClient,
     messageId: number,
-    fromReply?: boolean
+    fromReply?: boolean,
 ): Promise<Message | null>
 /**
  * Get messages from PM or legacy group by their IDs.
@@ -41,7 +41,7 @@ export async function getMessagesUnsafe(
 export async function getMessagesUnsafe(
     this: TelegramClient,
     messageIds: number[],
-    fromReply?: boolean
+    fromReply?: boolean,
 ): Promise<(Message | null)[]>
 
 /** @internal */
@@ -65,11 +65,7 @@ export async function getMessagesUnsafe(
     })
 
     if (res._ === 'messages.messagesNotModified') {
-        throw new MtTypeAssertionError(
-            'getMessages',
-            '!messages.messagesNotModified',
-            res._,
-        )
+        throw new MtTypeAssertionError('getMessages', '!messages.messagesNotModified', res._)
     }
 
     const peers = PeersIndex.from(res)

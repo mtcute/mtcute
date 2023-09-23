@@ -1,14 +1,7 @@
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import {
-    BotKeyboard,
-    FormattedString,
-    InputMediaLike,
-    InputPeerLike,
-    Message,
-    ReplyMarkup,
-} from '../../types'
+import { BotKeyboard, FormattedString, InputMediaLike, InputPeerLike, Message, ReplyMarkup } from '../../types'
 
 /**
  * Edit message text, media, reply markup and schedule date.
@@ -96,11 +89,7 @@ export async function editMessage(
             )
         }
     } else if (params.text) {
-        [content, entities] = await this._parseEntities(
-            params.text,
-            params.parseMode,
-            params.entities,
-        )
+        [content, entities] = await this._parseEntities(params.text, params.parseMode, params.entities)
     }
 
     const res = await this.call({

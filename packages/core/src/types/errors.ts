@@ -49,9 +49,7 @@ export class MtTypeAssertionError extends MtcuteError {
     actual: string
 
     constructor(context: string, expected: string, actual: string) {
-        super(
-            `Type assertion error at ${context}: expected ${expected}, but got ${actual}`,
-        )
+        super(`Type assertion error at ${context}: expected ${expected}, but got ${actual}`)
         this.context = context
         this.expected = expected
         this.actual = actual

@@ -322,10 +322,7 @@ export type ChatAction =
     | ChatActionTtlChanged
     | null
 
-function _actionFromTl(
-    this: ChatEvent,
-    e: tl.TypeChannelAdminLogEventAction,
-): ChatAction {
+function _actionFromTl(this: ChatEvent, e: tl.TypeChannelAdminLogEventAction): ChatAction {
     switch (e._) {
         case 'channelAdminLogEventActionParticipantJoin':
             return { type: 'user_joined' }
@@ -391,21 +388,13 @@ function _actionFromTl(
         case 'channelAdminLogEventActionParticipantToggleBan':
             return {
                 type: 'user_perms_changed',
-                old: new ChatMember(
-                    this.client,
-                    e.prevParticipant,
-                    this._peers,
-                ),
+                old: new ChatMember(this.client, e.prevParticipant, this._peers),
                 new: new ChatMember(this.client, e.newParticipant, this._peers),
             }
         case 'channelAdminLogEventActionParticipantToggleAdmin':
             return {
                 type: 'user_admin_perms_changed',
-                old: new ChatMember(
-                    this.client,
-                    e.prevParticipant,
-                    this._peers,
-                ),
+                old: new ChatMember(this.client, e.prevParticipant, this._peers),
                 new: new ChatMember(this.client, e.newParticipant, this._peers),
             }
         case 'channelAdminLogEventActionChangeStickerSet':
@@ -440,14 +429,8 @@ function _actionFromTl(
         case 'channelAdminLogEventActionChangeLocation':
             return {
                 type: 'location_changed',
-                old:
-                    e.prevValue._ === 'channelLocationEmpty' ?
-                        null :
-                        new ChatLocation(this.client, e.prevValue),
-                new:
-                    e.newValue._ === 'channelLocationEmpty' ?
-                        null :
-                        new ChatLocation(this.client, e.newValue),
+                old: e.prevValue._ === 'channelLocationEmpty' ? null : new ChatLocation(this.client, e.prevValue),
+                new: e.newValue._ === 'channelLocationEmpty' ? null : new ChatLocation(this.client, e.newValue),
             }
         case 'channelAdminLogEventActionToggleSlowMode':
             return {
@@ -536,10 +519,7 @@ export class ChatEvent {
      * Actor of the event
      */
     get actor(): User {
-        return (this._actor ??= new User(
-            this.client,
-            this._peers.user(this.raw.userId),
-        ))
+        return (this._actor ??= new User(this.client, this._peers.user(this.raw.userId)))
     }
 
     private _action?: ChatAction

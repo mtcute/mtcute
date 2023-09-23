@@ -45,9 +45,7 @@ export function parseTdlibStyleComment(str: string): Record<string, string> {
  * @param entries  Entries to group
  * @returns  Mapping of namespace to entries. Base namespace is `''` (empty string).
  */
-export function groupTlEntriesByNamespace(
-    entries: TlEntry[],
-): Record<string, TlEntry[]> {
+export function groupTlEntriesByNamespace(entries: TlEntry[]): Record<string, TlEntry[]> {
     const ret: Record<string, TlEntry[]> = {}
 
     entries.forEach((entry) => {
@@ -61,10 +59,7 @@ export function groupTlEntriesByNamespace(
     return ret
 }
 
-export function stringifyArgumentType(
-    type: string,
-    modifiers?: TlTypeModifiers,
-) {
+export function stringifyArgumentType(type: string, modifiers?: TlTypeModifiers) {
     if (!modifiers) return type
     let ret = type
 

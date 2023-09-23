@@ -1,18 +1,8 @@
-import {
-    getMarkedPeerId,
-    MaybeArray,
-    MtArgumentError,
-    MtTypeAssertionError,
-} from '@mtcute/core'
+import { getMarkedPeerId, MaybeArray, MtArgumentError, MtTypeAssertionError } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
-import {
-    InputPeerLike,
-    MtMessageNotFoundError,
-    PeersIndex,
-    Poll,
-} from '../../types'
+import { InputPeerLike, MtMessageNotFoundError, PeersIndex, Poll } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /**
@@ -44,11 +34,7 @@ export async function sendVote(
         const msg = await this.getMessages(peer, message)
 
         if (!msg) {
-            throw new MtMessageNotFoundError(
-                getMarkedPeerId(peer),
-                message,
-                'to vote in',
-            )
+            throw new MtMessageNotFoundError(getMarkedPeerId(peer), message, 'to vote in')
         }
 
         if (!(msg.media instanceof Poll)) {
@@ -80,11 +66,7 @@ export async function sendVote(
     assertTypeIs('messages.sendVote (@ .updates[0])', upd, 'updateMessagePoll')
 
     if (!upd.poll) {
-        throw new MtTypeAssertionError(
-            'messages.sendVote (@ .updates[0].poll)',
-            'poll',
-            'undefined',
-        )
+        throw new MtTypeAssertionError('messages.sendVote (@ .updates[0].poll)', 'poll', 'undefined')
     }
 
     const peers = PeersIndex.from(res)

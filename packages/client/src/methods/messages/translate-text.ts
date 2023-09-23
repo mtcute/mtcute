@@ -11,11 +11,7 @@ import { TelegramClient } from '../../client'
  * @param toLanguage  Target language (two-letter ISO 639-1 language code)
  * @internal
  */
-export async function translateText(
-    this: TelegramClient,
-    text: string,
-    toLanguage: string,
-): Promise<string | null> {
+export async function translateText(this: TelegramClient, text: string, toLanguage: string): Promise<string | null> {
     const res = await this.call({
         _: 'messages.translateText',
         text: [

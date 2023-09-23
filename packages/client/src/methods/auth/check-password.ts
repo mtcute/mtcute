@@ -11,10 +11,7 @@ import { User } from '../../types'
  * @throws BadRequestError  In case the password is invalid
  * @internal
  */
-export async function checkPassword(
-    this: TelegramClient,
-    password: string,
-): Promise<User> {
+export async function checkPassword(this: TelegramClient, password: string): Promise<User> {
     const res = await this.call({
         _: 'auth.checkPassword',
         password: await computeSrpParams(
@@ -26,16 +23,8 @@ export async function checkPassword(
         ),
     })
 
-    assertTypeIs(
-        'checkPassword (@ auth.checkPassword)',
-        res,
-        'auth.authorization',
-    )
-    assertTypeIs(
-        'checkPassword (@ auth.checkPassword -> user)',
-        res.user,
-        'user',
-    )
+    assertTypeIs('checkPassword (@ auth.checkPassword)', res, 'auth.authorization')
+    assertTypeIs('checkPassword (@ auth.checkPassword -> user)', res.user, 'user')
 
     this._userId = res.user.id
     this.log.prefix = `[USER ${this._userId}] `

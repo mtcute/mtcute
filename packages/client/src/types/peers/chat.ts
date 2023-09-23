@@ -1,9 +1,4 @@
-import {
-    getMarkedPeerId,
-    MaybeArray,
-    MtArgumentError,
-    MtTypeAssertionError,
-} from '@mtcute/core'
+import { getMarkedPeerId, MaybeArray, MtArgumentError, MtTypeAssertionError } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -24,13 +19,7 @@ import { InputPeerLike, PeersIndex, User } from './index'
  *  - `channel`: Broadcast channel
  *  - `gigagroup`: Gigagroup aka Broadcast group
  */
-export type ChatType =
-    | 'private'
-    | 'bot'
-    | 'group'
-    | 'supergroup'
-    | 'channel'
-    | 'gigagroup'
+export type ChatType = 'private' | 'bot' | 'group' | 'supergroup' | 'channel' | 'gigagroup'
 
 /**
  * A chat.
@@ -41,12 +30,7 @@ export class Chat {
     /**
      * Raw peer object that this {@link Chat} represents.
      */
-    readonly peer:
-        | tl.RawUser
-        | tl.RawChat
-        | tl.RawChannel
-        | tl.RawChatForbidden
-        | tl.RawChannelForbidden
+    readonly peer: tl.RawUser | tl.RawChat | tl.RawChannel | tl.RawChatForbidden | tl.RawChannelForbidden
 
     constructor(
         readonly client: TelegramClient,
@@ -63,11 +47,7 @@ export class Chat {
             case 'channelForbidden':
                 break
             default:
-                throw new MtTypeAssertionError(
-                    'peer',
-                    'user | chat | channel',
-                    peer._,
-                )
+                throw new MtTypeAssertionError('peer', 'user | chat | channel', peer._)
         }
 
         this.client = client
@@ -89,9 +69,7 @@ export class Chat {
             switch (this.peer._) {
                 case 'user':
                     if (!this.peer.accessHash) {
-                        throw new MtArgumentError(
-                            "Peer's access hash is not available!",
-                        )
+                        throw new MtArgumentError("Peer's access hash is not available!")
                     }
 
                     this._inputPeer = {
@@ -110,9 +88,7 @@ export class Chat {
                 case 'channel':
                 case 'channelForbidden':
                     if (!this.peer.accessHash) {
-                        throw new MtArgumentError(
-                            "Peer's access hash is not available!",
-                        )
+                        throw new MtArgumentError("Peer's access hash is not available!")
                     }
 
                     this._inputPeer = {
@@ -283,17 +259,12 @@ export class Chat {
         if (
             !('photo' in this.peer) ||
             !this.peer.photo ||
-            (this.peer.photo._ !== 'userProfilePhoto' &&
-                this.peer.photo._ !== 'chatPhoto')
+            (this.peer.photo._ !== 'userProfilePhoto' && this.peer.photo._ !== 'chatPhoto')
         ) {
             return null
         }
 
-        return (this._photo ??= new ChatPhoto(
-            this.client,
-            this.inputPeer,
-            this.peer.photo,
-        ))
+        return (this._photo ??= new ChatPhoto(this.client, this.inputPeer, this.peer.photo))
     }
 
     /**
@@ -319,12 +290,8 @@ export class Chat {
         if (!('photo' in this.peer)) return null
 
         return (
-            (
-                this.peer.photo as Exclude<
-                    typeof this.peer.photo,
-                    tl.RawChatPhotoEmpty | tl.RawUserProfilePhotoEmpty
-                >
-            )?.dcId ?? null
+            (this.peer.photo as Exclude<typeof this.peer.photo, tl.RawChatPhotoEmpty | tl.RawUserProfilePhotoEmpty>)
+                ?.dcId ?? null
         )
     }
 
@@ -350,9 +317,7 @@ export class Chat {
      * Returned only in {@link TelegramClient.getFullChat}
      */
     get stickerSetName(): string | null {
-        return this.fullPeer && this.fullPeer._ === 'channelFull' ?
-            this.fullPeer.stickerset?.shortName ?? null :
-            null
+        return this.fullPeer && this.fullPeer._ === 'channelFull' ? this.fullPeer.stickerset?.shortName ?? null : null
     }
 
     /**
@@ -360,9 +325,7 @@ export class Chat {
      * Returned only in {@link TelegramClient.getFullChat}
      */
     get canSetStickerSet(): boolean | null {
-        return this.fullPeer && this.fullPeer._ === 'channelFull' ?
-            this.fullPeer.canSetStickers ?? null :
-            null
+        return this.fullPeer && this.fullPeer._ === 'channelFull' ? this.fullPeer.canSetStickers ?? null : null
     }
 
     /**
@@ -381,10 +344,7 @@ export class Chat {
         //     null
 
         if (this.fullPeer && this.fullPeer._ !== 'userFull') {
-            if (
-                this.fullPeer._ === 'chatFull' &&
-                this.fullPeer.participants._ === 'chatParticipants'
-            ) {
+            if (this.fullPeer._ === 'chatFull' && this.fullPeer.participants._ === 'chatParticipants') {
                 return this.fullPeer.participants.participants.length
             } else if (this.fullPeer._ === 'channelFull') {
                 return this.fullPeer.participantsCount ?? null
@@ -399,9 +359,7 @@ export class Chat {
      * This field is available only in case {@link isRestricted} is `true`
      */
     get restrictions(): ReadonlyArray<tl.RawRestrictionReason> | null {
-        return 'restrictionReason' in this.peer ?
-            this.peer.restrictionReason ?? null :
-            null
+        return 'restrictionReason' in this.peer ? this.peer.restrictionReason ?? null : null
     }
 
     private _permissions?: ChatPermissions
@@ -414,25 +372,18 @@ export class Chat {
             return null
         }
 
-        return (this._permissions ??= new ChatPermissions(
-            this.peer.bannedRights,
-        ))
+        return (this._permissions ??= new ChatPermissions(this.peer.bannedRights))
     }
 
     /**
      * Default chat member permissions, for groups and supergroups.
      */
     get defaultPermissions(): ChatPermissions | null {
-        if (
-            !('defaultBannedRights' in this.peer) ||
-            !this.peer.defaultBannedRights
-        ) {
+        if (!('defaultBannedRights' in this.peer) || !this.peer.defaultBannedRights) {
             return null
         }
 
-        return (this._permissions ??= new ChatPermissions(
-            this.peer.defaultBannedRights,
-        ))
+        return (this._permissions ??= new ChatPermissions(this.peer.defaultBannedRights))
     }
 
     /**
@@ -455,18 +406,11 @@ export class Chat {
      * Returned only in {@link TelegramClient.getFullChat}
      */
     get location(): ChatLocation | null {
-        if (
-            !this.fullPeer ||
-            this.fullPeer._ !== 'channelFull' ||
-            this.fullPeer.location?._ !== 'channelLocation'
-        ) {
+        if (!this.fullPeer || this.fullPeer._ !== 'channelFull' || this.fullPeer.location?._ !== 'channelLocation') {
             return null
         }
 
-        return (this._location ??= new ChatLocation(
-            this.client,
-            this.fullPeer.location,
-        ))
+        return (this._location ??= new ChatLocation(this.client, this.fullPeer.location))
     }
 
     private _linkedChat?: Chat
@@ -502,11 +446,7 @@ export class Chat {
     }
 
     /** @internal */
-    static _parseFromPeer(
-        client: TelegramClient,
-        peer: tl.TypePeer,
-        peers: PeersIndex,
-    ): Chat {
+    static _parseFromPeer(client: TelegramClient, peer: tl.TypePeer, peers: PeersIndex): Chat {
         switch (peer._) {
             case 'peerUser':
                 return new Chat(client, peers.user(peer.userId))
@@ -518,19 +458,12 @@ export class Chat {
     }
 
     /** @internal */
-    static _parseFull(
-        client: TelegramClient,
-        full: tl.messages.RawChatFull | tl.users.TypeUserFull,
-    ): Chat {
+    static _parseFull(client: TelegramClient, full: tl.messages.RawChatFull | tl.users.TypeUserFull): Chat {
         if (full._ === 'users.userFull') {
             const user = full.users.find((it) => it.id === full.fullUser.id)
 
             if (!user || user._ === 'userEmpty') {
-                throw new MtTypeAssertionError(
-                    'Chat._parseFull',
-                    'user',
-                    user?._ ?? 'undefined',
-                )
+                throw new MtTypeAssertionError('Chat._parseFull', 'user', user?._ ?? 'undefined')
             }
 
             return new Chat(client, user, full.fullUser)
@@ -544,10 +477,7 @@ export class Chat {
             if (fullChat.id === c.id) {
                 chat = c
             }
-            if (
-                fullChat._ === 'channelFull' &&
-                fullChat.linkedChatId === c.id
-            ) {
+            if (fullChat._ === 'channelFull' && fullChat.linkedChatId === c.id) {
                 linked = c
             }
         }
@@ -579,10 +509,7 @@ export class Chat {
      * msg.replyText(`Hello, ${msg.chat.mention()`)
      * ```
      */
-    mention<T extends string = string>(
-        text?: string | null,
-        parseMode?: T | null,
-    ): string | FormattedString<T> {
+    mention<T extends string = string>(text?: string | null, parseMode?: T | null): string | FormattedString<T> {
         if (this.user) return this.user.mention(text, parseMode)
 
         if (text === undefined && this.username) {
@@ -625,10 +552,7 @@ export class Chat {
      *   Number of old messages to be forwarded (0-100).
      *   Only applicable to legacy groups, ignored for supergroups and channels
      */
-    async addMembers(
-        users: MaybeArray<InputPeerLike>,
-        forwardCount?: number,
-    ): Promise<void> {
+    async addMembers(users: MaybeArray<InputPeerLike>, forwardCount?: number): Promise<void> {
         return this.client.addChatMembers(this.inputPeer, users, forwardCount)
     }
 

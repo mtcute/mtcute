@@ -28,9 +28,7 @@ export const command = (
 ): UpdateFilter<Message, { command: string[] }> => {
     if (!Array.isArray(commands)) commands = [commands]
 
-    commands = commands.map((i) =>
-        typeof i === 'string' ? i.toLowerCase() : i,
-    )
+    commands = commands.map((i) => (typeof i === 'string' ? i.toLowerCase() : i))
 
     const argumentsRe = /(["'])(.*?)(?<!\\)\1|(\S+)/g
     const unescapeRe = /\\(['"])/
@@ -38,12 +36,7 @@ export const command = (
     commands.forEach((cmd) => {
         if (typeof cmd !== 'string') cmd = cmd.source
 
-        commandsRe.push(
-            new RegExp(
-                `^(${cmd})(?:\\s|$|@([a-zA-Z0-9_]+?bot)(?:\\s|$))`,
-                caseSensitive ? '' : 'i',
-            ),
-        )
+        commandsRe.push(new RegExp(`^(${cmd})(?:\\s|$|@([a-zA-Z0-9_]+?bot)(?:\\s|$))`, caseSensitive ? '' : 'i'))
     })
 
     if (prefixes === null) prefixes = []
@@ -75,13 +68,11 @@ export const command = (
                 const match = m.slice(1, -1)
 
                 // we use .replace to iterate over global regex, not to replace the text
-                withoutPrefix
-                    .slice(m[0].length)
-                    .replace(argumentsRe, ($0, $1, $2: string, $3: string) => {
-                        match.push(($2 || $3 || '').replace(unescapeRe, '$1'))
+                withoutPrefix.slice(m[0].length).replace(argumentsRe, ($0, $1, $2: string, $3: string) => {
+                    match.push(($2 || $3 || '').replace(unescapeRe, '$1'))
 
-                        return ''
-                    })
+                    return ''
+                })
                 ;(msg as Message & { command: string[] }).command = match
 
                 return true
@@ -106,9 +97,7 @@ export const start = and(chat('private'), command('start'))
  * If the parameter is a regex, groups are added to `msg.command`,
  * meaning that the first group is available in `msg.command[2]`.
  */
-export const deeplink = (
-    params: MaybeArray<string | RegExp>,
-): UpdateFilter<Message, { command: string[] }> => {
+export const deeplink = (params: MaybeArray<string | RegExp>): UpdateFilter<Message, { command: string[] }> => {
     if (!Array.isArray(params)) {
         return and(start, (_msg: Message) => {
             const msg = _msg as Message & { command: string[] }

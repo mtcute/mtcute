@@ -11,16 +11,8 @@ export class MtPeerNotFoundError extends MtcuteError {}
  * Could not find a message by the provided information
  */
 export class MtMessageNotFoundError extends MtcuteError {
-    constructor(
-        readonly peerId: number,
-        readonly messageId: number,
-        readonly context?: string,
-    ) {
-        super(
-            `Message${
-                context ? ' ' + context : ''
-            } ${messageId} not found in ${peerId}`,
-        )
+    constructor(readonly peerId: number, readonly messageId: number, readonly context?: string) {
+        super(`Message${context ? ' ' + context : ''} ${messageId} not found in ${peerId}`)
     }
 }
 
@@ -33,9 +25,7 @@ export class MtMessageNotFoundError extends MtcuteError {
  */
 export class MtInvalidPeerTypeError extends MtcuteError {
     constructor(peer: InputPeerLike, expected: string) {
-        super(
-            `Provided identifier ${JSON.stringify(peer)} is not a ${expected}`,
-        )
+        super(`Provided identifier ${JSON.stringify(peer)} is not a ${expected}`)
     }
 }
 

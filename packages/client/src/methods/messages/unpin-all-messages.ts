@@ -9,10 +9,7 @@ import { createDummyUpdate } from '../../utils/updates-utils'
  * @param chatId  Chat or user ID
  * @internal
  */
-export async function unpinAllMessages(
-    this: TelegramClient,
-    chatId: InputPeerLike,
-): Promise<void> {
+export async function unpinAllMessages(this: TelegramClient, chatId: InputPeerLike): Promise<void> {
     const peer = await this.resolvePeer(chatId)
 
     const res = await this.call({
@@ -21,9 +18,7 @@ export async function unpinAllMessages(
     })
 
     if (isInputPeerChannel(peer)) {
-        this._handleUpdate(
-            createDummyUpdate(res.pts, res.ptsCount, peer.channelId),
-        )
+        this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount, peer.channelId))
     } else {
         this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
     }

@@ -39,10 +39,7 @@ export interface MtProxySettings {
 }
 
 const MAX_DOMAIN_LENGTH = 182 // must be small enough not to overflow TLS-hello length
-const TLS_START = [
-    Buffer.from('160303', 'hex'),
-    Buffer.from('140303000101170303', 'hex'),
-]
+const TLS_START = [Buffer.from('160303', 'hex'), Buffer.from('140303000101170303', 'hex')]
 
 /**
  * TCP transport that connects via an MTProxy
@@ -138,10 +135,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
                 this._packetCodec = new ObfuscatedPacketCodec(inner, proxy)
             } else {
                 this._packetCodec = new FakeTlsPacketCodec(
-                    new ObfuscatedPacketCodec(
-                        new PaddedIntermediatePacketCodec(),
-                        proxy,
-                    ),
+                    new ObfuscatedPacketCodec(new PaddedIntermediatePacketCodec(), proxy),
                 )
             }
 
@@ -177,11 +171,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
 
     private async _handleConnectFakeTls(): Promise<void> {
         try {
-            const hello = await generateFakeTlsHeader(
-                this._fakeTlsDomain!,
-                this._rawSecret,
-                this._crypto,
-            )
+            const hello = await generateFakeTlsHeader(this._fakeTlsDomain!, this._rawSecret, this._crypto)
             const helloRand = hello.slice(11, 11 + 32)
 
             const checkHelloResponse = async (buf: Buffer): Promise<void> => {
@@ -193,9 +183,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
                     }
 
                     if (first.compare(first, 0, first.length) !== 0) {
-                        throw new MtSecurityError(
-                            'First part of hello response is invalid',
-                        )
+                        throw new MtSecurityError('First part of hello response is invalid')
                     }
                     buf = buf.slice(first.length)
 
@@ -211,12 +199,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
 
                 const respRand = resp.slice(11, 11 + 32)
                 const hash = await this._crypto.hmacSha256(
-                    Buffer.concat([
-                        helloRand,
-                        resp.slice(0, 11),
-                        Buffer.alloc(32, 0),
-                        resp.slice(11 + 32),
-                    ]),
+                    Buffer.concat([helloRand, resp.slice(0, 11), Buffer.alloc(32, 0), resp.slice(11 + 32)]),
                     this._rawSecret,
                 )
 
@@ -229,9 +212,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
                 checkHelloResponse(buf)
                     .then(() => {
                         this._socket!.off('data', packetHandler)
-                        this._socket!.on('data', (data) =>
-                            this._packetCodec.feed(data),
-                        )
+                        this._socket!.on('data', (data) => this._packetCodec.feed(data))
 
                         return this.handleConnect()
                     })

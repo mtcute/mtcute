@@ -20,12 +20,8 @@ describe('i18n', () => {
             },
         },
         plural: createPluralEnglish('a message', (n) => `${n} messages`),
-        plural2: createPluralEnglish(
-            'a message',
-            (n: number, s: string) => `${n} messages from ${s}`,
-        ),
-        plural3: (n: number) =>
-            `${n} ${pluralizeEnglish(n, 'message', 'messages')}`,
+        plural2: createPluralEnglish('a message', (n: number, s: string) => `${n} messages from ${s}`),
+        plural3: (n: number) => `${n} ${pluralizeEnglish(n, 'message', 'messages')}`,
     }
     const ru: OtherLanguageWrap<typeof en> = {
         direct: 'Привет',
@@ -61,9 +57,7 @@ describe('i18n', () => {
     it('should work with function with args', () => {
         expect(tr('en', 'withArgs', '')).to.equal('Welcome ')
         expect(tr('en', 'withArgs', 'John')).to.equal('Welcome John')
-        expect(tr('en', 'withArgsObj', { name: 'John' })).to.equal(
-            'Welcome John',
-        )
+        expect(tr('en', 'withArgsObj', { name: 'John' })).to.equal('Welcome John')
     })
 
     it('should work with nested values', () => {
@@ -79,9 +73,7 @@ describe('i18n', () => {
 
     it('should fallback to primary language when string is not translated', () => {
         expect(tr('ru', 'fn')).to.equal('World')
-        expect(tr('ru', 'withArgsObj', { name: 'Ваня' })).to.equal(
-            'Welcome Ваня',
-        )
+        expect(tr('ru', 'withArgsObj', { name: 'Ваня' })).to.equal('Welcome Ваня')
         expect(tr('ru', 'nested.string')).to.equal('Hello')
     })
 
@@ -95,9 +87,7 @@ describe('i18n', () => {
             null as never,
             { _: 'message', peerId: { _: 'peerUser', userId: 1 } } as never,
             PeersIndex.from({
-                users: [
-                    { _: 'user', id: 1, firstName: 'Пыня', langCode: 'ru' },
-                ],
+                users: [{ _: 'user', id: 1, firstName: 'Пыня', langCode: 'ru' }],
             }),
         )
 
@@ -124,9 +114,7 @@ describe('i18n', () => {
             expect(tr('en', 'plural', 2)).to.equal('2 messages')
 
             expect(tr('en', 'plural2', 1, 'baka')).to.equal('a message')
-            expect(tr('en', 'plural2', 2, 'baka')).to.equal(
-                '2 messages from baka',
-            )
+            expect(tr('en', 'plural2', 2, 'baka')).to.equal('2 messages from baka')
 
             expect(tr('en', 'plural3', 1)).to.equal('1 message')
             expect(tr('en', 'plural3', 2)).to.equal('2 messages')

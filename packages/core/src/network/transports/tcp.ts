@@ -12,9 +12,7 @@ import { IntermediatePacketCodec } from './intermediate'
  * Base for TCP transports.
  * Subclasses must provide packet codec in `_packetCodec` property
  */
-export abstract class BaseTcpTransport
-    extends EventEmitter
-    implements ITelegramTransport {
+export abstract class BaseTcpTransport extends EventEmitter implements ITelegramTransport {
     protected _currentDc: tl.RawDcOption | null = null
     protected _state: TransportState = TransportState.Idle
     protected _socket: Socket | null = null
@@ -66,11 +64,7 @@ export abstract class BaseTcpTransport
 
         this.log.debug('connecting to %j', dc)
 
-        this._socket = connect(
-            dc.port,
-            dc.ipAddress,
-            this.handleConnect.bind(this),
-        )
+        this._socket = connect(dc.port, dc.ipAddress, this.handleConnect.bind(this))
 
         this._socket.on('data', (data) => {
             this._packetCodec.feed(data)
@@ -105,10 +99,7 @@ export abstract class BaseTcpTransport
                 if (initialMessage.length) {
                     this._socket!.write(initialMessage, (err) => {
                         if (err) {
-                            this.log.error(
-                                'failed to write initial message: %s',
-                                err.stack,
-                            )
+                            this.log.error('failed to write initial message: %s', err.stack)
                             this.emit('error')
                             this.close()
                         } else {

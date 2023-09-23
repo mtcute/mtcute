@@ -8,10 +8,7 @@ import { createDummyUpdate } from '../../utils/updates-utils'
  * @param chatId  Chat ID
  * @internal
  */
-export async function readReactions(
-    this: TelegramClient,
-    chatId: InputPeerLike,
-): Promise<void> {
+export async function readReactions(this: TelegramClient, chatId: InputPeerLike): Promise<void> {
     const res = await this.call({
         _: 'messages.readReactions',
         peer: await this.resolvePeer(chatId),

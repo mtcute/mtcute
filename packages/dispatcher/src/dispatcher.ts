@@ -49,22 +49,14 @@ import {
 } from './handler'
 // end-codegen-imports
 import { PropagationAction } from './propagation'
-import {
-    defaultStateKeyDelegate,
-    IStateStorage,
-    StateKeyDelegate,
-    UpdateState,
-} from './state'
+import { defaultStateKeyDelegate, IStateStorage, StateKeyDelegate, UpdateState } from './state'
 import { MtArgumentError } from '@mtcute/core'
 
 /**
  * Updates dispatcher
  */
 export class Dispatcher<State = never, SceneName extends string = string> {
-    private _groups: Record<
-        number,
-        Record<UpdateHandler['name'], UpdateHandler[]>
-    > = {}
+    private _groups: Record<number, Record<UpdateHandler['name'], UpdateHandler[]>> = {}
     private _groupsOrder: number[] = []
 
     private _client?: TelegramClient
@@ -77,9 +69,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     private _sceneScoped?: boolean
 
     private _storage?: State extends never ? undefined : IStateStorage
-    private _stateKeyDelegate?: State extends never
-        ? undefined
-        : StateKeyDelegate
+    private _stateKeyDelegate?: State extends never ? undefined : StateKeyDelegate
 
     private _customStateKeyDelegate?: StateKeyDelegate
     private _customStorage?: IStateStorage
@@ -87,18 +77,18 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     private _errorHandler?: <T = {}>(
         err: Error,
         update: ParsedUpdate & T,
-        state?: UpdateState<State, SceneName>
+        state?: UpdateState<State, SceneName>,
     ) => MaybeAsync<boolean>
 
     private _preUpdateHandler?: <T = {}>(
         update: ParsedUpdate & T,
-        state?: UpdateState<State, SceneName>
+        state?: UpdateState<State, SceneName>,
     ) => MaybeAsync<PropagationAction | void>
 
     private _postUpdateHandler?: <T = {}>(
         handled: boolean,
         update: ParsedUpdate & T,
-        state?: UpdateState<State, SceneName>
+        state?: UpdateState<State, SceneName>,
     ) => MaybeAsync<void>
 
     /**
@@ -115,14 +105,11 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * Create a new dispatcher and bind it to client and optionally
      * FSM storage
      */
-    constructor(
-        client: TelegramClient,
-        ...args: State extends never ? [] : [IStateStorage, StateKeyDelegate?]
-    )
+    constructor(client: TelegramClient, ...args: State extends never ? [] : [IStateStorage, StateKeyDelegate?])
     constructor(
         client?: TelegramClient | IStateStorage | StateKeyDelegate,
         storage?: IStateStorage | StateKeyDelegate,
-        key?: StateKeyDelegate
+        key?: StateKeyDelegate,
     ) {
         this.dispatchRawUpdate = this.dispatchRawUpdate.bind(this)
         this.dispatchUpdate = this.dispatchUpdate.bind(this)
@@ -133,8 +120,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
                 if (storage) {
                     this._storage = storage as any
-                    this._stateKeyDelegate = (key ??
-                        defaultStateKeyDelegate) as any
+                    this._stateKeyDelegate = (key ?? defaultStateKeyDelegate) as any
                 }
             } else if (typeof client === 'function') {
                 // is StateKeyDelegate
@@ -194,17 +180,12 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param update  Update to process
      * @param peers Peers index
      */
-    dispatchRawUpdate(
-        update: tl.TypeUpdate | tl.TypeMessage,
-        peers: PeersIndex
-    ): void {
+    dispatchRawUpdate(update: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex): void {
         if (!this._client) return
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
-        this.dispatchRawUpdateNow(update, peers).catch((err) =>
-            this._client!['_emitError'](err)
-        )
+        this.dispatchRawUpdateNow(update, peers).catch((err) => this._client!['_emitError'](err))
     }
 
     /**
@@ -219,10 +200,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param peers  Peers map
      * @returns  Whether the update was handled
      */
-    async dispatchRawUpdateNow(
-        update: tl.TypeUpdate | tl.TypeMessage,
-        peers: PeersIndex
-    ): Promise<boolean> {
+    async dispatchRawUpdateNow(update: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex): Promise<boolean> {
         if (!this._client) return false
 
         let handled = false
@@ -236,10 +214,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                 for (const h of handlers) {
                     let result: void | PropagationAction
 
-                    if (
-                        !h.check ||
-                        (await h.check(this._client, update, peers))
-                    ) {
+                    if (!h.check || (await h.check(this._client, update, peers))) {
                         result = await h.callback(this._client, update, peers)
                         handled = true
                     } else continue
@@ -280,9 +255,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
-        this.dispatchUpdateNow(update).catch((err) =>
-            this._client!['_emitError'](err)
-        )
+        this.dispatchUpdateNow(update).catch((err) => this._client!['_emitError'](err))
     }
 
     /**
@@ -305,7 +278,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         // this is getting a bit crazy lol
         parsedState?: UpdateState<State, SceneName> | null,
         parsedScene?: string | null,
-        forceScene?: true
+        forceScene?: true,
     ): Promise<boolean> {
         if (!this._client) return false
 
@@ -313,9 +286,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             if (
                 this._storage &&
                 this._scenes &&
-                (update.name === 'new_message' ||
-                    update.name === 'edit_message' ||
-                    update.name === 'callback_query')
+                (update.name === 'new_message' || update.name === 'edit_message' || update.name === 'callback_query')
             ) {
                 // no need to fetch scene if there are no registered scenes
 
@@ -343,21 +314,14 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                     return false
                 }
 
-                return this._scenes[parsedScene]._dispatchUpdateNowImpl(
-                    update,
-                    parsedState,
-                    parsedScene,
-                    true
-                )
+                return this._scenes[parsedScene]._dispatchUpdateNowImpl(update, parsedState, parsedScene, true)
             }
         }
 
         if (parsedState === undefined) {
             if (
                 this._storage &&
-                (update.name === 'new_message' ||
-                    update.name === 'edit_message' ||
-                    update.name === 'callback_query')
+                (update.name === 'new_message' || update.name === 'edit_message' || update.name === 'callback_query')
             ) {
                 const key = await this._stateKeyDelegate!(update.data)
 
@@ -366,9 +330,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
                     if (
                         !this._customStateKeyDelegate ||
-                        (customKey = await this._customStateKeyDelegate(
-                            update.data
-                        ))
+                        (customKey = await this._customStateKeyDelegate(update.data))
                     ) {
                         parsedState = new UpdateState(
                             this._storage,
@@ -376,7 +338,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                             this._scene ?? null,
                             this._sceneScoped,
                             this._customStorage,
-                            customKey
+                            customKey,
                         )
                     }
                 } else {
@@ -405,26 +367,14 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
                 if (update.name in group) {
                     // raw is not handled here, so we can safely assume this
-                    const handlers = group[update.name] as Exclude<
-                        UpdateHandler,
-                        RawUpdateHandler
-                    >[]
+                    const handlers = group[update.name] as Exclude<UpdateHandler, RawUpdateHandler>[]
 
                     try {
                         for (const h of handlers) {
                             let result: void | PropagationAction
 
-                            if (
-                                !h.check ||
-                                (await h.check(
-                                    update.data as any,
-                                    parsedState as never
-                                ))
-                            ) {
-                                result = await h.callback(
-                                    update.data as any,
-                                    parsedState as never
-                                )
+                            if (!h.check || (await h.check(update.data as any, parsedState as never))) {
+                                result = await h.callback(update.data as any, parsedState as never)
                                 handled = true
                             } else continue
 
@@ -439,27 +389,16 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
                                 case 'scene': {
                                     if (!parsedState) {
-                                        throw new MtArgumentError(
-                                            'Cannot use ToScene without state'
-                                        )
+                                        throw new MtArgumentError('Cannot use ToScene without state')
                                     }
 
                                     const scene = parsedState['_scene']
 
                                     if (!scene) {
-                                        throw new MtArgumentError(
-                                            'Cannot use ToScene without entering a scene'
-                                        )
+                                        throw new MtArgumentError('Cannot use ToScene without entering a scene')
                                     }
 
-                                    return this._scenes![
-                                        scene
-                                    ]._dispatchUpdateNowImpl(
-                                        update,
-                                        undefined,
-                                        scene,
-                                        true
-                                    )
+                                    return this._scenes![scene]._dispatchUpdateNowImpl(update, undefined, scene, true)
                                 }
                             }
 
@@ -467,11 +406,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                         }
                     } catch (e: any) {
                         if (this._errorHandler) {
-                            const handled = await this._errorHandler(
-                                e,
-                                update,
-                                parsedState as never
-                            )
+                            const handled = await this._errorHandler(e, update, parsedState as never)
                             if (!handled) throw e
                         } else {
                             throw e
@@ -521,10 +456,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index (-1 to affect all groups)
      * @internal
      */
-    removeUpdateHandler(
-        handler: UpdateHandler | UpdateHandler['name'] | 'all',
-        group = 0
-    ): void {
+    removeUpdateHandler(handler: UpdateHandler | UpdateHandler['name'] | 'all', group = 0): void {
         if (group !== -1 && !(group in this._groups)) {
             return
         }
@@ -572,12 +504,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onError<T = {}>(
         handler:
-            | ((
-                  err: Error,
-                  update: ParsedUpdate & T,
-                  state?: UpdateState<State, SceneName>
-              ) => MaybeAsync<boolean>)
-            | null
+            | ((err: Error, update: ParsedUpdate & T, state?: UpdateState<State, SceneName>) => MaybeAsync<boolean>)
+            | null,
     ): void {
         if (handler) this._errorHandler = handler
         else this._errorHandler = undefined
@@ -599,9 +527,9 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         handler:
             | ((
                   update: ParsedUpdate & T,
-                  state?: UpdateState<State, SceneName>
+                  state?: UpdateState<State, SceneName>,
               ) => MaybeAsync<PropagationAction | void>)
-            | null
+            | null,
     ): void {
         if (handler) this._preUpdateHandler = handler
         else this._preUpdateHandler = undefined
@@ -621,12 +549,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onPostUpdate<T = {}>(
         handler:
-            | ((
-                  handled: boolean,
-                  update: ParsedUpdate & T,
-                  state?: UpdateState<State, SceneName>
-              ) => MaybeAsync<void>)
-            | null
+            | ((handled: boolean, update: ParsedUpdate & T, state?: UpdateState<State, SceneName>) => MaybeAsync<void>)
+            | null,
     ): void {
         if (handler) this._postUpdateHandler = handler
         else this._postUpdateHandler = undefined
@@ -639,7 +563,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     propagateErrorToParent(
         err: Error,
         update: ParsedUpdate,
-        state?: UpdateState<State, SceneName>
+        state?: UpdateState<State, SceneName>,
     ): MaybeAsync<boolean> {
         if (!this.parent) {
             throw new MtArgumentError('This dispatcher is not a child')
@@ -667,7 +591,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                 'Provided dispatcher is ' +
                     (child._parent
                         ? 'already a child. Use parent.removeChild() before calling addChild()'
-                        : 'already bound to a client. Use unbind() before calling addChild()')
+                        : 'already bound to a client. Use unbind() before calling addChild()'),
             )
         }
 
@@ -712,11 +636,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param scene  Dispatcher representing the scene
      * @param scoped  Whether to use scoped FSM storage for the scene
      */
-    addScene(
-        uid: SceneName,
-        scene: Dispatcher<State, SceneName>,
-        scoped: false
-    ): void
+    addScene(uid: SceneName, scene: Dispatcher<State, SceneName>, scoped: false): void
     /**
      * Add a dispatcher as a scene with a scoped state
      *
@@ -730,22 +650,12 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param scene  Dispatcher representing the scene
      * @param scoped  Whether to use scoped FSM storage for the scene (defaults to `true`)
      */
-    addScene(
-        uid: SceneName,
-        scene: Dispatcher<any, SceneName>,
-        scoped?: true
-    ): void
-    addScene(
-        uid: SceneName,
-        scene: Dispatcher<any, SceneName>,
-        scoped = true
-    ): void {
+    addScene(uid: SceneName, scene: Dispatcher<any, SceneName>, scoped?: true): void
+    addScene(uid: SceneName, scene: Dispatcher<any, SceneName>, scoped = true): void {
         if (!this._scenes) this._scenes = {}
 
         if (uid in this._scenes) {
-            throw new MtArgumentError(
-                `Scene with UID ${uid} is already registered!`
-            )
+            throw new MtArgumentError(`Scene with UID ${uid} is already registered!`)
         }
 
         if (uid[0] === '$') {
@@ -753,9 +663,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         }
 
         if (scene._scene) {
-            throw new MtArgumentError(
-                `This dispatcher is already registered as scene ${scene._scene}`
-            )
+            throw new MtArgumentError(`This dispatcher is already registered as scene ${scene._scene}`)
         }
 
         this._prepareChild(scene)
@@ -804,9 +712,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     extend(other: Dispatcher<State, SceneName>): void {
         if (other._customStorage || other._customStateKeyDelegate) {
-            throw new MtArgumentError(
-                'Provided dispatcher has custom storage and cannot be extended from.'
-            )
+            throw new MtArgumentError('Provided dispatcher has custom storage and cannot be extended from.')
         }
 
         other._groupsOrder.forEach((group) => {
@@ -844,11 +750,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                     delete myScenes[key]
                 }
 
-                this.addScene(
-                    key as any,
-                    myScenes[key] as any,
-                    myScenes[key]._sceneScoped as any
-                )
+                this.addScene(key as any, myScenes[key] as any, myScenes[key]._sceneScoped as any)
             })
         }
 
@@ -877,9 +779,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             dp._groups[idx] = {} as any
 
             Object.keys(this._groups[idx]).forEach((type) => {
-                dp._groups[idx][type as UpdateHandler['name']] = [
-                    ...this._groups[idx][type as UpdateHandler['name']],
-                ]
+                dp._groups[idx][type as UpdateHandler['name']] = [...this._groups[idx][type as UpdateHandler['name']]]
             })
         })
 
@@ -901,7 +801,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                         key as any,
                         scene as any,
 
-                        this._scenes![key]._sceneScoped as any
+                        this._scenes![key]._sceneScoped as any,
                     )
                 })
             }
@@ -931,26 +831,14 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param object  Object for which the state should be fetched
      * @template S  State type, defaults to dispatcher's state type. Only checked at compile-time
      */
-    getState<S = State>(
-        object: Parameters<StateKeyDelegate>[0]
-    ): Promise<UpdateState<S, SceneName>>
-    getState<S = State>(
-        object: string | Parameters<StateKeyDelegate>[0]
-    ): MaybeAsync<UpdateState<S, SceneName>> {
+    getState<S = State>(object: Parameters<StateKeyDelegate>[0]): Promise<UpdateState<S, SceneName>>
+    getState<S = State>(object: string | Parameters<StateKeyDelegate>[0]): MaybeAsync<UpdateState<S, SceneName>> {
         if (!this._storage) {
-            throw new MtArgumentError(
-                'Cannot use getUpdateState() filter without state storage'
-            )
+            throw new MtArgumentError('Cannot use getUpdateState() filter without state storage')
         }
 
         if (typeof object === 'string') {
-            return new UpdateState(
-                this._storage,
-                object,
-                this._scene ?? null,
-                this._sceneScoped,
-                this._customStorage
-            )
+            return new UpdateState(this._storage, object, this._scene ?? null, this._sceneScoped, this._customStorage)
         }
 
         return Promise.resolve(this._stateKeyDelegate!(object)).then((key) => {
@@ -959,33 +847,23 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             }
 
             if (!this._customStateKeyDelegate) {
+                return new UpdateState(this._storage!, key, this._scene ?? null, this._sceneScoped, this._customStorage)
+            }
+
+            return Promise.resolve(this._customStateKeyDelegate(object)).then((customKey) => {
+                if (!customKey) {
+                    throw new MtArgumentError('Cannot derive custom key from given object')
+                }
+
                 return new UpdateState(
                     this._storage!,
                     key,
                     this._scene ?? null,
                     this._sceneScoped,
-                    this._customStorage
+                    this._customStorage,
+                    customKey,
                 )
-            }
-
-            return Promise.resolve(this._customStateKeyDelegate(object)).then(
-                (customKey) => {
-                    if (!customKey) {
-                        throw new MtArgumentError(
-                            'Cannot derive custom key from given object'
-                        )
-                    }
-
-                    return new UpdateState(
-                        this._storage!,
-                        key,
-                        this._scene ?? null,
-                        this._sceneScoped,
-                        this._customStorage,
-                        customKey
-                    )
-                }
-            )
+            })
         })
     }
 
@@ -995,9 +873,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * This will load the state for the given object
      * ignoring local custom storage, key delegate and scene scope.
      */
-    getGlobalState<T>(
-        object: Parameters<StateKeyDelegate>[0]
-    ): Promise<UpdateState<T, SceneName>> {
+    getGlobalState<T>(object: Parameters<StateKeyDelegate>[0]): Promise<UpdateState<T, SceneName>> {
         if (!this._parent) {
             throw new MtArgumentError('This dispatcher does not have a parent')
         }
@@ -1007,30 +883,20 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                 throw new MtArgumentError('Cannot derive key from given object')
             }
 
-            return new UpdateState(
-                this._storage!,
-                key,
-                this._scene ?? null,
-                false
-            )
+            return new UpdateState(this._storage!, key, this._scene ?? null, false)
         })
     }
 
     // addUpdateHandler convenience wrappers //
 
-    private _addKnownHandler(
-        name: UpdateHandler['name'],
-        filter: any,
-        handler?: any,
-        group?: number
-    ): void {
+    private _addKnownHandler(name: UpdateHandler['name'], filter: any, handler?: any, group?: number): void {
         if (typeof handler === 'number' || typeof handler === 'undefined') {
             this.addUpdateHandler(
                 {
                     name,
                     callback: filter,
                 },
-                handler
+                handler,
             )
         } else {
             this.addUpdateHandler(
@@ -1039,7 +905,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                     callback: handler,
                     check: filter,
                 },
-                group
+                group,
             )
         }
     }
@@ -1059,11 +925,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param handler  Raw update handler
      * @param group  Handler group index
      */
-    onRawUpdate(
-        filter: RawUpdateHandler['check'],
-        handler: RawUpdateHandler['callback'],
-        group?: number
-    ): void
+    onRawUpdate(filter: RawUpdateHandler['check'], handler: RawUpdateHandler['callback'], group?: number): void
 
     /** @internal */
     onRawUpdate(filter: any, handler?: any, group?: number): void {
@@ -1079,11 +941,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onNewMessage(
-        handler: NewMessageHandler<
-            Message,
-            State extends never ? never : UpdateState<State, SceneName>
-        >['callback'],
-        group?: number
+        handler: NewMessageHandler<Message, State extends never ? never : UpdateState<State, SceneName>>['callback'],
+        group?: number,
     ): void
 
     /**
@@ -1099,7 +958,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             filters.Modify<Message, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
-        group?: number
+        group?: number,
     ): void
 
     /**
@@ -1115,7 +974,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             filters.Modify<Message, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
-        group?: number
+        group?: number,
     ): void
 
     /** @internal */
@@ -1130,11 +989,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onEditMessage(
-        handler: EditMessageHandler<
-            Message,
-            State extends never ? never : UpdateState<State, SceneName>
-        >['callback'],
-        group?: number
+        handler: EditMessageHandler<Message, State extends never ? never : UpdateState<State, SceneName>>['callback'],
+        group?: number,
     ): void
 
     /**
@@ -1150,7 +1006,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             filters.Modify<Message, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
-        group?: number
+        group?: number,
     ): void
 
     /**
@@ -1166,7 +1022,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             filters.Modify<Message, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
-        group?: number
+        group?: number,
     ): void
 
     /** @internal */
@@ -1180,10 +1036,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param handler  Delete message handler
      * @param group  Handler group index
      */
-    onDeleteMessage(
-        handler: DeleteMessageHandler['callback'],
-        group?: number
-    ): void
+    onDeleteMessage(handler: DeleteMessageHandler['callback'], group?: number): void
 
     /**
      * Register a delete message handler with a filter
@@ -1194,10 +1047,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onDeleteMessage<Mod>(
         filter: UpdateFilter<DeleteMessageUpdate, Mod>,
-        handler: DeleteMessageHandler<
-            filters.Modify<DeleteMessageUpdate, Mod>
-        >['callback'],
-        group?: number
+        handler: DeleteMessageHandler<filters.Modify<DeleteMessageUpdate, Mod>>['callback'],
+        group?: number,
     ): void
 
     /** @internal */
@@ -1211,10 +1062,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param handler  Chat member update handler
      * @param group  Handler group index
      */
-    onChatMemberUpdate(
-        handler: ChatMemberUpdateHandler['callback'],
-        group?: number
-    ): void
+    onChatMemberUpdate(handler: ChatMemberUpdateHandler['callback'], group?: number): void
 
     /**
      * Register a chat member update handler with a filter
@@ -1225,10 +1073,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onChatMemberUpdate<Mod>(
         filter: UpdateFilter<ChatMemberUpdate, Mod>,
-        handler: ChatMemberUpdateHandler<
-            filters.Modify<ChatMemberUpdate, Mod>
-        >['callback'],
-        group?: number
+        handler: ChatMemberUpdateHandler<filters.Modify<ChatMemberUpdate, Mod>>['callback'],
+        group?: number,
     ): void
 
     /** @internal */
@@ -1253,10 +1099,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onInlineQuery<Mod>(
         filter: UpdateFilter<InlineQuery, Mod>,
-        handler: InlineQueryHandler<
-            filters.Modify<InlineQuery, Mod>
-        >['callback'],
-        group?: number
+        handler: InlineQueryHandler<filters.Modify<InlineQuery, Mod>>['callback'],
+        group?: number,
     ): void
 
     /** @internal */
@@ -1270,10 +1114,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param handler  Chosen inline result handler
      * @param group  Handler group index
      */
-    onChosenInlineResult(
-        handler: ChosenInlineResultHandler['callback'],
-        group?: number
-    ): void
+    onChosenInlineResult(handler: ChosenInlineResultHandler['callback'], group?: number): void
 
     /**
      * Register a chosen inline result handler with a filter
@@ -1284,10 +1125,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onChosenInlineResult<Mod>(
         filter: UpdateFilter<ChosenInlineResult, Mod>,
-        handler: ChosenInlineResultHandler<
-            filters.Modify<ChosenInlineResult, Mod>
-        >['callback'],
-        group?: number
+        handler: ChosenInlineResultHandler<filters.Modify<ChosenInlineResult, Mod>>['callback'],
+        group?: number,
     ): void
 
     /** @internal */
@@ -1306,7 +1145,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             CallbackQuery,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
-        group?: number
+        group?: number,
     ): void
 
     /**
@@ -1322,7 +1161,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             filters.Modify<CallbackQuery, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
-        group?: number
+        group?: number,
     ): void
 
     /**
@@ -1338,7 +1177,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             filters.Modify<CallbackQuery, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
-        group?: number
+        group?: number,
     ): void
 
     /** @internal */
@@ -1364,7 +1203,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     onPollUpdate<Mod>(
         filter: UpdateFilter<PollUpdate, Mod>,
         handler: PollUpdateHandler<filters.Modify<PollUpdate, Mod>>['callback'],
-        group?: number
+        group?: number,
     ): void
 
     /** @internal */
@@ -1389,10 +1228,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onPollVote<Mod>(
         filter: UpdateFilter<PollVoteUpdate, Mod>,
-        handler: PollVoteHandler<
-            filters.Modify<PollVoteUpdate, Mod>
-        >['callback'],
-        group?: number
+        handler: PollVoteHandler<filters.Modify<PollVoteUpdate, Mod>>['callback'],
+        group?: number,
     ): void
 
     /** @internal */
@@ -1406,10 +1243,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param handler  User status update handler
      * @param group  Handler group index
      */
-    onUserStatusUpdate(
-        handler: UserStatusUpdateHandler['callback'],
-        group?: number
-    ): void
+    onUserStatusUpdate(handler: UserStatusUpdateHandler['callback'], group?: number): void
 
     /**
      * Register an user status update handler with a filter
@@ -1420,10 +1254,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onUserStatusUpdate<Mod>(
         filter: UpdateFilter<UserStatusUpdate, Mod>,
-        handler: UserStatusUpdateHandler<
-            filters.Modify<UserStatusUpdate, Mod>
-        >['callback'],
-        group?: number
+        handler: UserStatusUpdateHandler<filters.Modify<UserStatusUpdate, Mod>>['callback'],
+        group?: number,
     ): void
 
     /** @internal */
@@ -1448,10 +1280,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onUserTyping<Mod>(
         filter: UpdateFilter<UserTypingUpdate, Mod>,
-        handler: UserTypingHandler<
-            filters.Modify<UserTypingUpdate, Mod>
-        >['callback'],
-        group?: number
+        handler: UserTypingHandler<filters.Modify<UserTypingUpdate, Mod>>['callback'],
+        group?: number,
     ): void
 
     /** @internal */
@@ -1476,10 +1306,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onHistoryRead<Mod>(
         filter: UpdateFilter<HistoryReadUpdate, Mod>,
-        handler: HistoryReadHandler<
-            filters.Modify<HistoryReadUpdate, Mod>
-        >['callback'],
-        group?: number
+        handler: HistoryReadHandler<filters.Modify<HistoryReadUpdate, Mod>>['callback'],
+        group?: number,
     ): void
 
     /** @internal */
@@ -1504,10 +1332,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onBotStopped<Mod>(
         filter: UpdateFilter<BotStoppedUpdate, Mod>,
-        handler: BotStoppedHandler<
-            filters.Modify<BotStoppedUpdate, Mod>
-        >['callback'],
-        group?: number
+        handler: BotStoppedHandler<filters.Modify<BotStoppedUpdate, Mod>>['callback'],
+        group?: number,
     ): void
 
     /** @internal */
@@ -1521,10 +1347,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param handler  Bot chat join request handler
      * @param group  Handler group index
      */
-    onBotChatJoinRequest(
-        handler: BotChatJoinRequestHandler['callback'],
-        group?: number
-    ): void
+    onBotChatJoinRequest(handler: BotChatJoinRequestHandler['callback'], group?: number): void
 
     /**
      * Register a bot chat join request handler with a filter
@@ -1535,10 +1358,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onBotChatJoinRequest<Mod>(
         filter: UpdateFilter<BotChatJoinRequestUpdate, Mod>,
-        handler: BotChatJoinRequestHandler<
-            filters.Modify<BotChatJoinRequestUpdate, Mod>
-        >['callback'],
-        group?: number
+        handler: BotChatJoinRequestHandler<filters.Modify<BotChatJoinRequestUpdate, Mod>>['callback'],
+        group?: number,
     ): void
 
     /** @internal */
@@ -1552,10 +1373,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param handler  Chat join request handler
      * @param group  Handler group index
      */
-    onChatJoinRequest(
-        handler: ChatJoinRequestHandler['callback'],
-        group?: number
-    ): void
+    onChatJoinRequest(handler: ChatJoinRequestHandler['callback'], group?: number): void
 
     /**
      * Register a chat join request handler with a filter
@@ -1566,10 +1384,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onChatJoinRequest<Mod>(
         filter: UpdateFilter<ChatJoinRequestUpdate, Mod>,
-        handler: ChatJoinRequestHandler<
-            filters.Modify<ChatJoinRequestUpdate, Mod>
-        >['callback'],
-        group?: number
+        handler: ChatJoinRequestHandler<filters.Modify<ChatJoinRequestUpdate, Mod>>['callback'],
+        group?: number,
     ): void
 
     /** @internal */
@@ -1583,10 +1399,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param handler  Pre checkout query handler
      * @param group  Handler group index
      */
-    onPreCheckoutQuery(
-        handler: PreCheckoutQueryHandler['callback'],
-        group?: number
-    ): void
+    onPreCheckoutQuery(handler: PreCheckoutQueryHandler['callback'], group?: number): void
 
     /**
      * Register a pre checkout query handler with a filter
@@ -1597,10 +1410,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onPreCheckoutQuery<Mod>(
         filter: UpdateFilter<PreCheckoutQuery, Mod>,
-        handler: PreCheckoutQueryHandler<
-            filters.Modify<PreCheckoutQuery, Mod>
-        >['callback'],
-        group?: number
+        handler: PreCheckoutQueryHandler<filters.Modify<PreCheckoutQuery, Mod>>['callback'],
+        group?: number,
     ): void
 
     /** @internal */

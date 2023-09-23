@@ -121,9 +121,7 @@ export class ChatPermissions {
      * will be lifted from a {@link ChatMember}
      */
     get untilDate(): Date | null {
-        return this.raw.untilDate === 0 ?
-            null :
-            new Date(this.raw.untilDate * 1000)
+        return this.raw.untilDate === 0 ? null : new Date(this.raw.untilDate * 1000)
     }
 }
 

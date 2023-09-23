@@ -37,9 +37,9 @@ export class Photo extends FileLocation {
 
         let bestSize: tl.RawPhotoSize | tl.RawPhotoSizeProgressive
 
-        const progressive = raw.sizes.find(
-            (it) => it._ === 'photoSizeProgressive',
-        ) as tl.RawPhotoSizeProgressive | undefined
+        const progressive = raw.sizes.find((it) => it._ === 'photoSizeProgressive') as
+            | tl.RawPhotoSizeProgressive
+            | undefined
 
         if (progressive) {
             location.thumbSize = progressive.type
@@ -87,11 +87,7 @@ export class Photo extends FileLocation {
      * Whether this photo is an animated profile picture
      */
     get isAnimatedAvatar(): boolean {
-        return Boolean(
-            this.raw.videoSizes?.some(
-                (s) => s._ === 'videoSize' && s.type === 'u',
-            ),
-        )
+        return Boolean(this.raw.videoSizes?.some((s) => s._ === 'videoSize' && s.type === 'u'))
     }
 
     /**
@@ -99,11 +95,7 @@ export class Photo extends FileLocation {
      */
     get isMarkupAvatar(): boolean {
         return Boolean(
-            this.raw.videoSizes?.some(
-                (s) =>
-                    s._ === 'videoSizeEmojiMarkup' ||
-                    s._ === 'videoSizeStickerMarkup',
-            ),
+            this.raw.videoSizes?.some((s) => s._ === 'videoSizeEmojiMarkup' || s._ === 'videoSizeStickerMarkup'),
         )
     }
 
@@ -116,12 +108,8 @@ export class Photo extends FileLocation {
      */
     get thumbnails(): ReadonlyArray<Thumbnail> {
         if (!this._thumbnails) {
-            this._thumbnails = this.raw.sizes.map(
-                (sz) => new Thumbnail(this.client, this.raw, sz),
-            )
-            this.raw.videoSizes?.forEach((sz) =>
-                this._thumbnails!.push(new Thumbnail(this.client, this.raw, sz)),
-            )
+            this._thumbnails = this.raw.sizes.map((sz) => new Thumbnail(this.client, this.raw, sz))
+            this.raw.videoSizes?.forEach((sz) => this._thumbnails!.push(new Thumbnail(this.client, this.raw, sz)))
         }
 
         return this._thumbnails
@@ -168,9 +156,7 @@ export class Photo extends FileLocation {
                 throw new MtArgumentError('Cannot get File ID for this photo')
             }
 
-            this._uniqueFileId = this.getThumbnail(
-                this._bestSize.type,
-            )!.uniqueFileId
+            this._uniqueFileId = this.getThumbnail(this._bestSize.type)!.uniqueFileId
         }
 
         return this._uniqueFileId
@@ -201,8 +187,4 @@ export class Photo extends FileLocation {
     }
 }
 
-makeInspectable(
-    Photo,
-    ['fileSize', 'dcId', 'width', 'height'],
-    ['inputMedia', 'inputPhoto'],
-)
+makeInspectable(Photo, ['fileSize', 'dcId', 'width', 'height'], ['inputMedia', 'inputPhoto'])

@@ -1,10 +1,4 @@
-import {
-    I18nStrings,
-    I18nValue,
-    MtcuteI18nAdapter,
-    MtcuteI18nFunction,
-    OtherLanguageWrap,
-} from './types'
+import { I18nStrings, I18nValue, MtcuteI18nAdapter, MtcuteI18nFunction, OtherLanguageWrap } from './types'
 import { createI18nStringsIndex, extractLanguageFromUpdate } from './utils'
 
 export * from './types'
@@ -52,8 +46,7 @@ export function createMtcuteI18n<Strings extends I18nStrings, Input>(
     } = params
 
     const indexes: Record<string, Record<string, I18nValue>> = {}
-    const fallbackIndex = (indexes[primaryLanguage.name] =
-        createI18nStringsIndex(primaryLanguage.strings))
+    const fallbackIndex = (indexes[primaryLanguage.name] = createI18nStringsIndex(primaryLanguage.strings))
 
     if (otherLanguages) {
         Object.keys(otherLanguages).forEach((lang) => {
@@ -62,16 +55,10 @@ export function createMtcuteI18n<Strings extends I18nStrings, Input>(
     }
 
     if (!(defaultLanguage in indexes)) {
-        throw new TypeError(
-            'defaultLanguage is not a registered language',
-        )
+        throw new TypeError('defaultLanguage is not a registered language')
     }
 
-    const tr = (
-        lang: Input | string | null,
-        key: string,
-        ...params: unknown[]
-    ) => {
+    const tr = (lang: Input | string | null, key: string, ...params: unknown[]) => {
         if (lang === null) lang = defaultLanguage
 
         if (typeof lang !== 'string') {

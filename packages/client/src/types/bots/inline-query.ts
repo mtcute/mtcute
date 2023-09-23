@@ -34,10 +34,7 @@ export class InlineQuery {
      * User who sent this query
      */
     get user(): User {
-        return (this._user ??= new User(
-            this.client,
-            this._peers.user(this.raw.userId),
-        ))
+        return (this._user ??= new User(this.client, this._peers.user(this.raw.userId)))
     }
 
     /**

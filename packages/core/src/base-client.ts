@@ -7,17 +7,9 @@ import defaultReaderMap from '@mtcute/tl/binary/reader'
 import defaultWriterMap from '@mtcute/tl/binary/writer'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import {
-    ReconnectionStrategy,
-    SessionConnection,
-    TransportFactory,
-} from './network'
+import { ReconnectionStrategy, SessionConnection, TransportFactory } from './network'
 import { ConfigManager } from './network/config-manager'
-import {
-    NetworkManager,
-    NetworkManagerExtraParams,
-    RpcCallOptions,
-} from './network/network-manager'
+import { NetworkManager, NetworkManagerExtraParams, RpcCallOptions } from './network/network-manager'
 import { PersistentConnectionParams } from './network/persistent-connection'
 import { ITelegramStorage, MemoryStorage } from './storage'
 import { MustEqual } from './types'
@@ -94,9 +86,7 @@ export interface BaseTelegramClientOptions {
      * `apiId` and `query` are not available and will be ignored.
      * Omitted values will be filled with defaults
      */
-    initConnectionOptions?: Partial<
-        Omit<tl.RawInitConnectionRequest, 'apiId' | 'query'>
-    >
+    initConnectionOptions?: Partial<Omit<tl.RawInitConnectionRequest, 'apiId' | 'query'>>
 
     /**
      * Transport factory to use in the client.
@@ -223,9 +213,7 @@ export class BaseTelegramClient extends EventEmitter {
 
     protected _lastUpdateTime = 0
 
-    protected _config = new ConfigManager(() =>
-        this.call({ _: 'help.getConfig' }),
-    )
+    protected _config = new ConfigManager(() => this.call({ _: 'help.getConfig' }))
 
     // not really connected, but rather "connect() was called"
     private _connected: ControllablePromise<void> | boolean = false
@@ -251,8 +239,7 @@ export class BaseTelegramClient extends EventEmitter {
     constructor(opts: BaseTelegramClientOptions) {
         super()
 
-        const apiId =
-            typeof opts.apiId === 'string' ? parseInt(opts.apiId) : opts.apiId
+        const apiId = typeof opts.apiId === 'string' ? parseInt(opts.apiId) : opts.apiId
 
         if (isNaN(apiId)) {
             throw new Error('apiId must be a number or a numeric string!')
@@ -270,9 +257,7 @@ export class BaseTelegramClient extends EventEmitter {
             if (this._testMode) {
                 dc = this._useIpv6 ? defaultTestIpv6Dc : defaultTestDc
             } else {
-                dc = this._useIpv6 ?
-                    defaultProductionIpv6Dc :
-                    defaultProductionDc
+                dc = this._useIpv6 ? defaultProductionIpv6Dc : defaultProductionDc
             }
         }
 
@@ -351,9 +336,7 @@ export class BaseTelegramClient extends EventEmitter {
         const primaryDc = await this.storage.getDefaultDcs()
         if (primaryDc !== null) this._defaultDcs = primaryDc
 
-        const defaultDcAuthKey = await this.storage.getAuthKeyFor(
-            this._defaultDcs.main.id,
-        )
+        const defaultDcAuthKey = await this.storage.getAuthKeyFor(this._defaultDcs.main.id)
 
         if ((this._importForce || !defaultDcAuthKey) && this._importFrom) {
             const data = readStringSession(this._readerMap, this._importFrom)
@@ -361,9 +344,7 @@ export class BaseTelegramClient extends EventEmitter {
             if (data.testMode !== this._testMode) {
                 throw new Error(
                     'This session string is not for the current backend. ' +
-                        `Session is ${
-                            data.testMode ? 'test' : 'prod'
-                        }, but the client is ${
+                        `Session is ${data.testMode ? 'test' : 'prod'}, but the client is ${
                             this._testMode ? 'test' : 'prod'
                         }`,
                 )
@@ -377,10 +358,7 @@ export class BaseTelegramClient extends EventEmitter {
             }
 
             // await this.primaryConnection.setupKeys(data.authKey)
-            await this.storage.setAuthKeyFor(
-                data.primaryDcs.main.id,
-                data.authKey,
-            )
+            await this.storage.setAuthKeyFor(data.primaryDcs.main.id, data.authKey)
 
             await this._saveStorage(true)
         }
@@ -466,9 +444,7 @@ export class BaseTelegramClient extends EventEmitter {
      *     the connection in which the error has occurred, in case
      *     this was connection-related error.
      */
-    onError(
-        handler: (err: unknown, connection?: SessionConnection) => void,
-    ): void {
+    onError(handler: (err: unknown, connection?: SessionConnection) => void): void {
         this._onError = handler
     }
 
@@ -505,10 +481,7 @@ export class BaseTelegramClient extends EventEmitter {
             switch (peer._) {
                 case 'user':
                     if (!peer.accessHash) {
-                        this.log.warn(
-                            'received user without access hash: %j',
-                            peer,
-                        )
+                        this.log.warn('received user without access hash: %j', peer)
                         continue
                     }
 
@@ -533,19 +506,13 @@ export class BaseTelegramClient extends EventEmitter {
                 case 'channel':
                 case 'channelForbidden':
                     if (!peer.accessHash) {
-                        this.log.warn(
-                            'received user without access hash: %j',
-                            peer,
-                        )
+                        this.log.warn('received user without access hash: %j', peer)
                         continue
                     }
                     parsedPeers.push({
                         id: toggleChannelIdMark(peer.id),
                         accessHash: peer.accessHash,
-                        username:
-                            peer._ === 'channel' ?
-                                peer.username?.toLowerCase() :
-                                undefined,
+                        username: peer._ === 'channel' ? peer.username?.toLowerCase() : undefined,
                         type: 'channel',
                         full: peer,
                     })

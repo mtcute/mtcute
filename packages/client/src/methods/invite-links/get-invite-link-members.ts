@@ -50,17 +50,16 @@ export async function* getInviteLinkMembers(
 
     for (;;) {
         // for some reason ts needs annotation, idk
-        const res: tl.RpcCallReturn['messages.getChatInviteImporters'] =
-            await this.call({
-                _: 'messages.getChatInviteImporters',
-                limit: Math.min(100, limit - current),
-                peer,
-                link: params.link,
-                requested: params.requested,
-                q: params.requestedSearch,
-                offsetDate,
-                offsetUser,
-            })
+        const res: tl.RpcCallReturn['messages.getChatInviteImporters'] = await this.call({
+            _: 'messages.getChatInviteImporters',
+            limit: Math.min(100, limit - current),
+            peer,
+            link: params.link,
+            requested: params.requested,
+            q: params.requestedSearch,
+            offsetDate,
+            offsetUser,
+        })
 
         if (!res.importers.length) break
 

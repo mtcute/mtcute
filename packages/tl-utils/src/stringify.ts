@@ -17,10 +17,7 @@ function normalizeType(s: string): string {
  *   Whether to generate definition for constructor ID computation
  *   (it has slightly different syntax, will not contain `true` flags, etc.)
  */
-export function writeTlEntryToString(
-    entry: TlEntry,
-    forIdComputation = false,
-): string {
+export function writeTlEntryToString(entry: TlEntry, forIdComputation = false): string {
     let str = entry.name
 
     if (!forIdComputation && entry.id) {
@@ -40,11 +37,7 @@ export function writeTlEntryToString(
     }
 
     for (const arg of entry.arguments) {
-        if (
-            forIdComputation &&
-            arg.typeModifiers?.predicate &&
-            arg.type === 'true'
-        ) {
+        if (forIdComputation && arg.typeModifiers?.predicate && arg.type === 'true') {
             continue
         }
 
@@ -62,9 +55,7 @@ export function writeTlEntryToString(
     if (forIdComputation) {
         str += '= ' + normalizeType(entry.type)
     } else {
-        const type = entry.typeModifiers ?
-            stringifyArgumentType(entry.type, entry.typeModifiers) :
-            entry.type
+        const type = entry.typeModifiers ? stringifyArgumentType(entry.type, entry.typeModifiers) : entry.type
         str += '= ' + type + ';'
     }
 

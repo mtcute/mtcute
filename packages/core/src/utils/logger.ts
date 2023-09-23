@@ -26,11 +26,7 @@ export class Logger {
 
     prefix = ''
 
-    constructor(
-        readonly mgr: LogManager,
-        readonly tag: string,
-        readonly parent: Logger = mgr,
-    ) {
+    constructor(readonly mgr: LogManager, readonly tag: string, readonly parent: Logger = mgr) {
         let hash = 0
 
         for (let i = 0; i < tag.length; i++) {
@@ -70,13 +66,7 @@ export class Logger {
         ) {
             let idx = 0
             fmt = fmt.replace(FORMATTER_RE, (m) => {
-                if (
-                    m === '%h' ||
-                    m === '%b' ||
-                    m === '%j' ||
-                    m === '%J' ||
-                    m === '%l'
-                ) {
+                if (m === '%h' || m === '%b' || m === '%j' || m === '%J' || m === '%l') {
                     let val = args[idx]
 
                     args.splice(idx, 1)
@@ -90,17 +80,13 @@ export class Logger {
                     if (m === '%b') return String(Boolean(val))
 
                     if (m === '%j' || m === '%J') {
-                        if (m === '%J') { val = [...(val as IterableIterator<unknown>)] }
+                        if (m === '%J') {
+                            val = [...(val as IterableIterator<unknown>)]
+                        }
 
                         return JSON.stringify(val, (k, v) => {
-                            if (
-                                typeof v === 'object' &&
-                                v.type === 'Buffer' &&
-                                Array.isArray(v.data)
-                            ) {
-                                let str = Buffer.from(
-                                    v.data as number[],
-                                ).toString('base64')
+                            if (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data)) {
+                                let str = Buffer.from(v.data as number[]).toString('base64')
 
                                 if (str.length > 300) {
                                     str = str.slice(0, 300) + '...'
@@ -122,13 +108,7 @@ export class Logger {
             })
         }
 
-        this.mgr.handler(
-            this.color,
-            level,
-            this.tag,
-            this.getPrefix() + fmt,
-            args,
-        )
+        this.mgr.handler(this.color, level, this.tag, this.getPrefix() + fmt, args)
     }
 
     readonly error = this.log.bind(this, LogManager.ERROR)
