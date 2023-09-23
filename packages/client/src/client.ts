@@ -2124,13 +2124,11 @@ export interface TelegramClient extends BaseTelegramClient {
      * Approve or deny multiple join requests to a chat.
      *
      * @param peer  Chat/channel ID
-     * @param user  User ID
      * @param action  Whether to approve or deny the join requests
      * @param link  Invite link to target
      */
     hideAllJoinRequests(
         peer: InputPeerLike,
-        user: InputPeerLike,
         action: 'approve' | 'deny',
         link?: string
     ): Promise<void>

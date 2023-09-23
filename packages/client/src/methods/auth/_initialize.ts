@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { TelegramClient } from '../../client'
 
 // @extension

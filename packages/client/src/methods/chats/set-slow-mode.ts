@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
+import { InputPeerLike } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
 
 /**
@@ -19,7 +19,10 @@ export async function setSlowMode(
 ): Promise<void> {
     const res = await this.call({
         _: 'channels.toggleSlowMode',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
+        channel: normalizeToInputChannel(
+            await this.resolvePeer(chatId),
+            chatId,
+        ),
         seconds,
     })
     this._handleUpdate(res)

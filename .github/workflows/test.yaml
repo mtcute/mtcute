@@ -11,7 +11,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    # This job uses a matrix strategy to run the job four times, once for each specified Node version. For more information, see "[AUTOTITLE](/actions/using-jobs/using-a-matrix-for-your-jobs)."
     strategy:
       matrix:
         node-version: [16.x, 18.x, 20.x]
@@ -33,5 +32,5 @@ jobs:
       - name: 'ESLint'
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
-        run: pnpm run lint
+        run: pnpm run lint:ci
       - run: pnpm run test:all

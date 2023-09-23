@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { TelegramClient } from '../../client'
 import { IMessageEntityParser } from '../../types'
 
@@ -12,6 +13,3 @@ function _initializeParseModes(this: TelegramClient) {
     this._parseModes = new Map()
     this._defaultParseMode = null
 }
-
-// since IMessageEntityParser is copied here, we don't need to
-// worry about marking it with @copy anywhere else.

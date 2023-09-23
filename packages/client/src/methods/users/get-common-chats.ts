@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { Chat, InputPeerLike, MtInvalidPeerTypeError } from '../../types'
+import { Chat, InputPeerLike } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**

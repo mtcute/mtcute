@@ -1,6 +1,7 @@
 const path = require('path')
 
 const packagesDir = path.join(__dirname, 'packages')
+const eslintCiConfig = path.join(__dirname, '.eslintrc.ci.js')
 
 module.exports = {
     '*.{js,jsx,ts,tsx}': (filenames) => {
@@ -13,7 +14,7 @@ module.exports = {
 
         return [
             `prettier --write ${filenames.join(' ')}`,
-            `eslint --fix ${filenames.join(' ')}`,
+            `eslint -c ${eslintCiConfig} --fix ${filenames.join(' ')}`,
             ...[...modifiedPackages].map((pkg) => `pnpm -C packages/${pkg} run --if-present build --noEmit`)
         ]
     }

@@ -10,6 +10,7 @@
         "postinstall": "node scripts/validate-deps-versions.mjs",
         "test:all": "pnpm run -r test",
         "lint": "eslint .",
+        "lint:ci": "eslint --config .eslintrc.ci.js .",
         "lint:tsc": "pnpm run -r build --noEmit",
         "lint:fix": "eslint --fix .",
         "format": "prettier --write \"packages/**/*.ts\"",

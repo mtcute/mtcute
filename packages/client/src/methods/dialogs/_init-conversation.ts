@@ -1,4 +1,4 @@
-/* eslint-disable dot-notation */
+/* eslint-disable @typescript-eslint/no-unused-vars, dot-notation */
 import { getMarkedPeerId } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'

@@ -4,13 +4,11 @@ import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {
-    BotKeyboard,
     InputMediaLike,
     InputPeerLike,
     Message,
     MtMessageNotFoundError,
     PeersIndex,
-    ReplyMarkup,
 } from '../../types'
 import { normalizeDate, normalizeMessageId } from '../../utils/misc-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'

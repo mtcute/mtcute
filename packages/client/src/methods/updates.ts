@@ -41,6 +41,7 @@ interface PendingUpdate {
     peers?: PeersIndex
 }
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // @extension
 interface UpdatesState {
     _updatesLoopActive: boolean
@@ -82,6 +83,7 @@ interface UpdatesState {
 
     _updsLog: Logger
 }
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 // @initialize
 function _initializeUpdates(this: TelegramClient) {
@@ -660,6 +662,7 @@ function _isMessageEmpty(upd: tl.TypeUpdate): boolean {
 export function _handleUpdate(
     this: TelegramClient,
     update: tl.TypeUpdates,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     noDispatch = false, // fixme
 ): void {
     this._updsLog.debug(
@@ -826,8 +829,6 @@ async function _fetchChannelDifference(
         limit = 1
     }
 
-    let isFirst = true
-
     for (;;) {
         const diff = await this.call(
             {
@@ -840,7 +841,6 @@ async function _fetchChannelDifference(
             },
             // { flush: !isFirst }
         )
-        isFirst = false
 
         if (diff._ === 'updates.channelDifferenceEmpty') {
             this._updsLog.debug(

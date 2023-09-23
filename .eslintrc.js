@@ -177,15 +177,11 @@ module.exports = {
             files: ['**/*.ts', '**/*.tsx'],
             env: { browser: true, es6: true, node: true },
             extends: [
-                'plugin:@typescript-eslint/strict-type-checked',
+                'plugin:@typescript-eslint/strict',
                 'plugin:import/typescript',
             ],
             globals: { Atomics: 'readonly', SharedArrayBuffer: 'readonly' },
             parser: '@typescript-eslint/parser',
-            parserOptions: {
-                project: true,
-                tsconfigRootDir: __dirname,
-            },
             plugins: ['@typescript-eslint'],
             rules: {
                 // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#supported-rules
@@ -217,16 +213,14 @@ module.exports = {
                 '@typescript-eslint/no-confusing-void-expression': 'off',
                 '@typescript-eslint/no-unnecessary-condition': 'off',
                 '@typescript-eslint/no-var-requires': 'off',
-                '@typescript-eslint/restrict-template-expressions': [
-                    'error',
-                    { allowNever: true },
-                ],
+
                 '@typescript-eslint/no-unsafe-enum-comparison': 'off',
                 '@typescript-eslint/no-invalid-void-type': 'off',
                 '@typescript-eslint/unbound-method': 'off',
                 '@typescript-eslint/no-dynamic-delete': 'off',
                 '@typescript-eslint/no-unsafe-member-access': 'off',
             },
+            reportUnusedDisableDirectives: false,
             settings: {
                 'import/resolver': {
                     node: true,

@@ -1,5 +1,5 @@
 import { TelegramClient } from '../../client'
-import { Chat, InputPeerLike, MtPeerNotFoundError } from '../../types'
+import { Chat, InputPeerLike } from '../../types'
 import {
     INVITE_LINK_REGEX,
     normalizeToInputChannel,

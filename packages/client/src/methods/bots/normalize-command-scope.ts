@@ -2,7 +2,7 @@ import { assertNever } from '@mtcute/core'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
-import { BotCommands, MtInvalidPeerTypeError } from '../../types'
+import { BotCommands } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /** @internal */
