@@ -1,6 +1,6 @@
 import Long from 'long'
 
-import { MtTypeAssertionError } from '@mtcute/core'
+import { assertTypeIsNot } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Message, PeersIndex } from '../../types'
@@ -105,9 +105,7 @@ export async function* getHistory(
             hash: Long.ZERO,
         })
 
-        if (res._ === 'messages.messagesNotModified') {
-            throw new MtTypeAssertionError('messages.getHistory', '!messages.messagesNotModified', res._)
-        }
+        assertTypeIsNot('getHistory', res, 'messages.messagesNotModified')
 
         const peers = PeersIndex.from(res)
 

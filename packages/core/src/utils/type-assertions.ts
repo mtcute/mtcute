@@ -60,6 +60,16 @@ export function assertTypeIs<T extends tl.TlObject, K extends T['_']>(
     }
 }
 
+export function assertTypeIsNot<T extends tl.TlObject, K extends T['_']>(
+    context: string,
+    obj: T,
+    expectedNot: K,
+): asserts obj is Exclude<T, tl.FindByName<T, K>> {
+    if (obj._ === expectedNot) {
+        throw new MtTypeAssertionError(context, 'not ' + expectedNot, obj._)
+    }
+}
+
 export function mtpAssertTypeIs<T extends mtp.TlObject, K extends T['_']>(
     context: string,
     obj: T,

@@ -1,4 +1,5 @@
-import { MaybeArray, MtTypeAssertionError } from '@mtcute/core'
+import { MaybeArray } from '@mtcute/core'
+import { assertTypeIsNot } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -64,9 +65,7 @@ export async function getMessagesUnsafe(
         id: ids,
     })
 
-    if (res._ === 'messages.messagesNotModified') {
-        throw new MtTypeAssertionError('getMessages', '!messages.messagesNotModified', res._)
-    }
+    assertTypeIsNot('getMessagesUnsafe', res, 'messages.messagesNotModified')
 
     const peers = PeersIndex.from(res)
 

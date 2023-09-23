@@ -1,6 +1,6 @@
 import Long from 'long'
 
-import { MtTypeAssertionError } from '@mtcute/core'
+import { assertTypeIsNot } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -126,7 +126,7 @@ export async function* searchMessages(
     const fromUser = (params.fromUser ? await this.resolvePeer(params.fromUser) : null) || undefined
 
     for (;;) {
-        const res = await this.call({
+        const res: tl.RpcCallReturn['messages.search'] = await this.call({
             _: 'messages.search',
             peer,
             q: params.query || '',
@@ -142,9 +142,7 @@ export async function* searchMessages(
             hash: Long.ZERO,
         })
 
-        if (res._ === 'messages.messagesNotModified') {
-            throw new MtTypeAssertionError('messages.search', '!messages.messagesNotModified', res._)
-        }
+        assertTypeIsNot('searchMessages', res, 'messages.messagesNotModified')
 
         // for successive chunks, we need to reset the offset
         offset = 0

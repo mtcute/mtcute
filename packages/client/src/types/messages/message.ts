@@ -1,4 +1,5 @@
 import { assertNever, getMarkedPeerId, MtArgumentError, MtTypeAssertionError, toggleChannelIdMark } from '@mtcute/core'
+import { assertTypeIsNot } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -103,9 +104,7 @@ export class Message {
          */
         readonly isScheduled = false,
     ) {
-        if (raw._ === 'messageEmpty') {
-            throw new MtTypeAssertionError('Message#ctor', 'not messageEmpty', 'messageEmpty')
-        }
+        assertTypeIsNot('Message#ctor', raw, 'messageEmpty')
 
         this.raw = raw
     }

@@ -1,4 +1,4 @@
-import { MtTypeAssertionError } from '@mtcute/core'
+import { assertTypeIsNot } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -39,9 +39,7 @@ export class ChatInviteLink {
     raw: tl.RawChatInviteExported
 
     constructor(readonly client: TelegramClient, raw: tl.TypeExportedChatInvite, readonly _peers?: PeersIndex) {
-        if (raw._ === 'chatInvitePublicJoinRequests') {
-            throw new MtTypeAssertionError('ChatInviteLink', 'chatInviteExported', raw._)
-        }
+        assertTypeIsNot('ChatInviteLink', raw, 'chatInvitePublicJoinRequests')
         this.raw = raw
     }
 

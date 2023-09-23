@@ -1,4 +1,4 @@
-import { MtTypeAssertionError } from '@mtcute/core'
+import { assertTypeIsNot } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -58,7 +58,7 @@ export async function* searchGlobal(
     let offsetId = 0
 
     for (;;) {
-        const res = await this.call({
+        const res: tl.RpcCallReturn['messages.searchGlobal'] = await this.call({
             _: 'messages.searchGlobal',
             q: params.query || '',
             filter: params.filter || SearchFilters.Empty,
@@ -70,9 +70,7 @@ export async function* searchGlobal(
             limit: Math.min(limit, total - current),
         })
 
-        if (res._ === 'messages.messagesNotModified') {
-            throw new MtTypeAssertionError('messages.searchGlobal', '!messages.messagesNotModified', res._)
-        }
+        assertTypeIsNot('searchGlobal', res, 'messages.messagesNotModified')
 
         const peers = PeersIndex.from(res)
 

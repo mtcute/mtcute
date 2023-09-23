@@ -1,4 +1,4 @@
-import { MtTypeAssertionError } from '@mtcute/core'
+import { assertTypeIsNot } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -69,9 +69,7 @@ export async function* getInviteLinks(
 
         const last = res.invites[res.invites.length - 1]
 
-        if (last._ === 'chatInvitePublicJoinRequests') {
-            throw new MtTypeAssertionError('getInviteLinks', 'chatInviteExported', last._)
-        }
+        assertTypeIsNot('getInviteLinks', last, 'chatInvitePublicJoinRequests')
         offsetDate = last.date
         offsetLink = last.link
 

@@ -1,5 +1,5 @@
-import { assertNever, MtArgumentError, MtTypeAssertionError } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertNever, MtArgumentError } from '@mtcute/core'
+import { assertTypeIs, assertTypeIsNot } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
 import { InputMediaLike, InputPeerLike, MessageMedia, Photo, RawDocument } from '../../types'
@@ -61,9 +61,7 @@ export async function uploadMedia(
         media: normMedia,
     })
 
-    if (res._ === 'messageMediaEmpty') {
-        throw new MtTypeAssertionError('uploadMedia', 'not messageMediaEmpty', 'messageMediaEmpty')
-    }
+    assertTypeIsNot('uploadMedia', res, 'messageMediaEmpty')
 
     switch (normMedia._) {
         case 'inputMediaUploadedPhoto':

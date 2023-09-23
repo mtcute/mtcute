@@ -1,4 +1,5 @@
-import { getMarkedPeerId, MtTypeAssertionError } from '@mtcute/core'
+import { getMarkedPeerId } from '@mtcute/core'
+import { assertTypeIsNot } from '@mtcute/core/utils'
 import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
@@ -9,13 +10,7 @@ export function _parseDialogs(
     this: TelegramClient,
     res: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs,
 ): Dialog[] {
-    if (res._ === 'messages.dialogsNotModified') {
-        throw new MtTypeAssertionError(
-            'messages.getPeerDialogs',
-            '!messages.dialogsNotModified',
-            'messages.dialogsNotModified',
-        )
-    }
+    assertTypeIsNot('parseDialogs', res, 'messages.dialogsNotModified')
 
     const peers = PeersIndex.from(res)
 
