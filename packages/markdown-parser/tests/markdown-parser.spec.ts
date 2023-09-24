@@ -3,6 +3,7 @@ import Long from 'long'
 import { describe, it } from 'mocha'
 
 import { FormattedString, MessageEntity, tl } from '@mtcute/client'
+import { isPresent } from '@mtcute/client/utils'
 
 import { MarkdownMessageEntityParser, md } from '../src'
 
@@ -21,7 +22,7 @@ const createEntity = <T extends tl.TypeMessageEntity['_']>(
 }
 
 const createEntities = (entities: tl.TypeMessageEntity[]): MessageEntity[] => {
-    return entities.map((it) => MessageEntity._parse(it)).filter((it) => it !== null) as MessageEntity[]
+    return entities.map((it) => MessageEntity._parse(it)).filter(isPresent)
 }
 
 describe('MarkdownMessageEntityParser', () => {

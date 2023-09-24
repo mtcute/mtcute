@@ -5,6 +5,7 @@
     },
     "include": [
         "./src",
-        "./tests"
+        "./tests",
+        "./utils.ts"
     ]
 }

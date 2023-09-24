@@ -1,4 +1,5 @@
 import { MtArgumentError } from '@mtcute/core'
+import { isPresent } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Message } from '../../types'
@@ -37,5 +38,5 @@ export async function getMessageGroup(
 
     if (!groupedId) throw new MtArgumentError('This message is not grouped')
 
-    return messages.filter((it) => it && it.groupedId?.eq(groupedId)) as Message[]
+    return messages.filter(isPresent).filter((it) => it.groupedId?.eq(groupedId))
 }
