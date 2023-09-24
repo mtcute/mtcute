@@ -1,6 +1,6 @@
 import Long from 'long'
 
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { MessageEntity } from '../messages'

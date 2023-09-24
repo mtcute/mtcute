@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/core'
 
 import { _callDiscardReasonFromTl, CallDiscardReason } from '../calls'
 import { Photo } from '../media'

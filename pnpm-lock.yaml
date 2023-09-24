@@ -111,9 +111,6 @@ importers:
       '@mtcute/file-id':
         specifier: workspace:^1.0.0
         version: link:../file-id
-      '@mtcute/tl':
-        specifier: workspace:^160.0.0
-        version: link:../tl
       '@types/node':
         specifier: 18.16.0
         version: 18.16.0
@@ -180,9 +177,6 @@ importers:
       '@mtcute/core':
         specifier: workspace:^1.0.0
         version: link:../core
-      '@mtcute/tl':
-        specifier: workspace:^160.0.0
-        version: link:../tl
       events:
         specifier: 3.2.0
         version: 3.2.0
@@ -192,9 +186,6 @@ importers:
       '@mtcute/core':
         specifier: workspace:^1.0.0
         version: link:../core
-      '@mtcute/tl':
-        specifier: workspace:^160.0.0
-        version: link:../tl
       '@mtcute/tl-runtime':
         specifier: workspace:^1.0.0
         version: link:../tl-runtime

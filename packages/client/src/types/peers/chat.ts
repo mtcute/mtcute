@@ -1,5 +1,4 @@
-import { getMarkedPeerId, MaybeArray, MtArgumentError, MtTypeAssertionError } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { getMarkedPeerId, MaybeArray, MtArgumentError, MtTypeAssertionError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { InputMediaLike } from '../media'

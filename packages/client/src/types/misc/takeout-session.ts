@@ -1,5 +1,4 @@
-import { MustEqual, RpcCallOptions } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { MustEqual, RpcCallOptions, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'

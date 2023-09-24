@@ -1,5 +1,4 @@
-import { PartialExcept } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { PartialExcept, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 

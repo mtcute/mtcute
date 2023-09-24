@@ -1,6 +1,5 @@
-import { MaybeArray, MtArgumentError } from '@mtcute/core'
+import { MaybeArray, MtArgumentError, tl } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { FormattedString, InputMediaLike, InputPeerLike, Message, PeersIndex } from '../../types'

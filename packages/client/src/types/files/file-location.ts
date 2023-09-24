@@ -1,6 +1,6 @@
 import { Readable } from 'stream'
 
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'

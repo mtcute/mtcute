@@ -22,8 +22,8 @@ import {
     TelegramClient,
     UserStatusUpdate,
     UserTypingUpdate,
+    tl,
 } from '@mtcute/client'
-import { tl } from '@mtcute/tl'
 
 import { filters, UpdateFilter } from './filters'
 // begin-codegen-imports

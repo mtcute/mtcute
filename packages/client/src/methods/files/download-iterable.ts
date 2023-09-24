@@ -1,7 +1,6 @@
-import { ConnectionKind, MtArgumentError, MtUnsupportedError } from '@mtcute/core'
+import { ConnectionKind, MtArgumentError, MtUnsupportedError, tl } from '@mtcute/core'
 import { ConditionVariable } from '@mtcute/core/utils'
 import { fileIdToInputFileLocation, fileIdToInputWebFileLocation, parseFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { FileDownloadParameters, FileLocation } from '../../types'

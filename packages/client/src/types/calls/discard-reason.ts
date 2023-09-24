@@ -1,3 +1,5 @@
+import { assertNever, tl } from '@mtcute/core'
+
 /**
  * Phone call discard reason. Can be:
  *  - `missed`: The call was missed
@@ -5,9 +7,6 @@
  *  - `hangup`: The call was ended normally
  *  - `busy`: The call was discarded because the user is in another call
  */
-import { assertNever } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
-
 export type CallDiscardReason = 'missed' | 'disconnect' | 'hangup' | 'busy'
 
 /** @internal */

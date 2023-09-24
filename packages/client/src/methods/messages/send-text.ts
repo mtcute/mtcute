@@ -1,6 +1,5 @@
-import { getMarkedPeerId, MtArgumentError, MtTypeAssertionError } from '@mtcute/core'
+import { getMarkedPeerId, MtArgumentError, MtTypeAssertionError, tl } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import {

@@ -1,5 +1,4 @@
-import { MaybeArray } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { MaybeArray, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'

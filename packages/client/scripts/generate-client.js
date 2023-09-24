@@ -31,12 +31,7 @@ ${text}`,
 
 async function addSingleMethod(state, fileName) {
     const fileFullText = await fs.promises.readFile(fileName, 'utf-8')
-    const program = ts.createSourceFile(
-        path.basename(fileName),
-        fileFullText,
-        ts.ScriptTarget.ES2018,
-        true,
-    )
+    const program = ts.createSourceFile(path.basename(fileName), fileFullText, ts.ScriptTarget.ES2018, true)
     const relPath = path.relative(targetDir, fileName).replace(/\\/g, '/') // replace path delim to unix
 
     state.files[relPath] = fileFullText
@@ -64,8 +59,7 @@ async function addSingleMethod(state, fileName) {
 
             if (
                 !stmt.importClause.namedBindings ||
-                stmt.importClause.namedBindings.kind !==
-                    ts.SyntaxKind.NamedImports
+                stmt.importClause.namedBindings.kind !== ts.SyntaxKind.NamedImports
             ) {
                 throwError(stmt, fileName, 'Only named imports are supported!')
             }
@@ -74,25 +68,16 @@ async function addSingleMethod(state, fileName) {
 
             if (module[0] === '.') {
                 // relative, need to resolve
-                const modFullPath = path.join(
-                    path.dirname(fileName),
-                    stmt.moduleSpecifier.text,
-                )
+                const modFullPath = path.join(path.dirname(fileName), stmt.moduleSpecifier.text)
                 const modPath = path.dirname(modFullPath)
                 const modName = path.basename(modFullPath)
 
-                module = path
-                    .join(path.relative(targetDir, modPath), modName)
-                    .replace(/\\/g, '/') // replace path delim to unix
+                module = path.join(path.relative(targetDir, modPath), modName).replace(/\\/g, '/') // replace path delim to unix
                 if (module[0] !== '.') module = './' + module
             }
 
             if (module === './client') {
-                throwError(
-                    stmt,
-                    fileName,
-                    "You can't copy an import from ./client",
-                )
+                throwError(stmt, fileName, "You can't copy an import from ./client")
             }
 
             if (!(module in state.imports)) {
@@ -119,9 +104,7 @@ async function addSingleMethod(state, fileName) {
                 name !== '_normalizeInputFile' &&
                 name !== '_normalizeInputMedia'
 
-            const isExported = (stmt.modifiers || []).find(
-                (mod) => mod.kind === ts.SyntaxKind.ExportKeyword,
-            )
+            const isExported = (stmt.modifiers || []).find((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
             const isInitialize = checkForFlag(stmt, '@initialize')
             const aliases = (function () {
                 const flag = checkForFlag(stmt, '@alias')
@@ -146,11 +129,7 @@ async function addSingleMethod(state, fileName) {
             }
 
             if (isInitialize && isExported) {
-                throwError(
-                    isExported,
-                    fileName,
-                    'Initialization methods must not be exported',
-                )
+                throwError(isExported, fileName, 'Initialization methods must not be exported')
             }
 
             if (isInitialize) {
@@ -171,8 +150,7 @@ async function addSingleMethod(state, fileName) {
             if (
                 isExported &&
                 (!firstArg ||
-                    (firstArg.type.getText() !== 'TelegramClient' &&
-                        firstArg.type.getText() !== 'BaseTelegramClient'))
+                    (firstArg.type.getText() !== 'TelegramClient' && firstArg.type.getText() !== 'BaseTelegramClient'))
             ) {
                 throwError(
                     firstArg || stmt.name,
@@ -183,16 +161,10 @@ async function addSingleMethod(state, fileName) {
 
             const returnsExported = (
                 stmt.body ?
-                    ts.getLeadingCommentRanges(
-                        fileFullText,
-                        stmt.body.pos + 2,
-                    ) ||
+                    ts.getLeadingCommentRanges(fileFullText, stmt.body.pos + 2) ||
                       (stmt.statements &&
                           stmt.statements.length &&
-                          ts.getLeadingCommentRanges(
-                              fileFullText,
-                              stmt.statements[0].pos,
-                          )) ||
+                          ts.getLeadingCommentRanges(fileFullText, stmt.statements[0].pos)) ||
                       [] :
                     []
             )
@@ -246,23 +218,13 @@ async function addSingleMethod(state, fileName) {
             }
 
             if (!checkForFlag(stmt, '@extension')) continue
-            const isExported = (stmt.modifiers || []).find(
-                (mod) => mod.kind === 92, /* ExportKeyword */
-            )
+            const isExported = (stmt.modifiers || []).find((mod) => mod.kind === 92 /* ExportKeyword */)
 
             if (isExported) {
-                throwError(
-                    isExported,
-                    fileName,
-                    'Extension interfaces must not be imported',
-                )
+                throwError(isExported, fileName, 'Extension interfaces must not be imported')
             }
             if (stmt.heritageClauses && stmt.heritageClauses.length) {
-                throwError(
-                    stmt.heritageClauses[0],
-                    fileName,
-                    'Extension interfaces must not be extended',
-                )
+                throwError(stmt.heritageClauses[0], fileName, 'Extension interfaces must not be extended')
             }
 
             for (const member of stmt.members || []) {
@@ -278,9 +240,7 @@ async function addSingleMethod(state, fileName) {
 }
 
 async function main() {
-    const output = fs.createWriteStream(
-        path.join(__dirname, '../src/client.ts'),
-    )
+    const output = fs.createWriteStream(path.join(__dirname, '../src/client.ts'))
     const state = {
         imports: {},
         fields: [],
@@ -302,8 +262,7 @@ async function main() {
     output.write(
         '/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging, @typescript-eslint/unified-signatures */\n' +
             '/* THIS FILE WAS AUTO-GENERATED */\n' +
-            "import { BaseTelegramClient, BaseTelegramClientOptions } from '@mtcute/core'\n" +
-            "import { tl } from '@mtcute/tl'\n",
+            "import { BaseTelegramClient, BaseTelegramClientOptions, tl } from '@mtcute/core'\n",
     )
     Object.entries(state.imports).forEach(([module, items]) => {
         items = [...items]
@@ -316,9 +275,7 @@ async function main() {
         output.write(`// from ${from}\n${code}\n`)
     })
 
-    output.write(
-        '\nexport interface TelegramClient extends BaseTelegramClient {\n',
-    )
+    output.write('\nexport interface TelegramClient extends BaseTelegramClient {\n')
 
     output.write(`/**
  * Register a raw update handler
@@ -342,9 +299,7 @@ async function main() {
  * @param name  Event name
  * @param handler  ${updates.toSentence(type, 'full')}
  */
-on(name: '${type.typeName}', handler: ((upd: ${
-    type.updateType
-}) => void)): this\n`)
+on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this\n`)
     })
 
     const printer = ts.createPrinter()
@@ -365,13 +320,9 @@ on(name: '${type.typeName}', handler: ((upd: ${
             // first let's determine the signature
             const returnType = func.type ? ': ' + func.type.getText() : ''
             const generics = func.typeParameters ?
-                `<${func.typeParameters
-                    .map((it) => it.getFullText())
-                    .join(', ')}>` :
+                `<${func.typeParameters.map((it) => it.getFullText()).join(', ')}>` :
                 ''
-            const rawParams = (func.parameters || []).filter(
-                (it) => !it.type || it.type.getText() !== 'TelegramClient',
-            )
+            const rawParams = (func.parameters || []).filter((it) => !it.type || it.type.getText() !== 'TelegramClient')
             const parameters = rawParams
                 .map((it) => {
                     if (it.initializer) {
@@ -382,33 +333,20 @@ on(name: '${type.typeName}', handler: ((upd: ${
                             // no explicit type.
                             // infer from initializer
                             if (
-                                it.initializer.kind ===
-                                    ts.SyntaxKind.TrueKeyword ||
-                                it.initializer.kind ===
-                                    ts.SyntaxKind.FalseKeyword
+                                it.initializer.kind === ts.SyntaxKind.TrueKeyword ||
+                                it.initializer.kind === ts.SyntaxKind.FalseKeyword
                             ) {
                                 it.type = { kind: ts.SyntaxKind.BooleanKeyword }
-                            } else if (
-                                it.initializer.kind ===
-                                ts.SyntaxKind.StringLiteral
-                            ) {
+                            } else if (it.initializer.kind === ts.SyntaxKind.StringLiteral) {
                                 it.type = { kind: ts.SyntaxKind.StringKeyword }
                             } else if (
-                                it.initializer.kind ===
-                                    ts.SyntaxKind.NumericLiteral ||
-                                (it.initializer.kind ===
-                                    ts.SyntaxKind.Identifier &&
-                                    (it.initializer.escapedText === 'NaN' ||
-                                        it.initializer.escapedText ===
-                                            'Infinity'))
+                                it.initializer.kind === ts.SyntaxKind.NumericLiteral ||
+                                (it.initializer.kind === ts.SyntaxKind.Identifier &&
+                                    (it.initializer.escapedText === 'NaN' || it.initializer.escapedText === 'Infinity'))
                             ) {
                                 it.type = { kind: ts.SyntaxKind.NumberKeyword }
                             } else {
-                                throwError(
-                                    it,
-                                    state.methods.used[origName],
-                                    'Cannot infer parameter type',
-                                )
+                                throwError(it, state.methods.used[origName], 'Cannot infer parameter type')
                             }
                         }
                         it.initializer = undefined
@@ -445,22 +383,17 @@ on(name: '${type.typeName}', handler: ((upd: ${
             comment = comment
                 .replace(/^\s*\/\/+\s*@alias.*$/m, '')
                 .replace(/(\n^|\/\*)\s*\*\s*@internal.*/m, '')
-                .replace(
-                    /((?:\n^|\/\*)\s*\*\s*@param )([^\s]+?)($|\s+)/gm,
-                    (_, pref, arg, post) => {
-                        const param = rawParams.find(
-                            (it) => it.name.escapedText === arg,
-                        )
-                        if (!param) return _
-                        if (!param._savedDefault) return _
+                .replace(/((?:\n^|\/\*)\s*\*\s*@param )([^\s]+?)($|\s+)/gm, (_, pref, arg, post) => {
+                    const param = rawParams.find((it) => it.name.escapedText === arg)
+                    if (!param) return _
+                    if (!param._savedDefault) return _
 
-                        if (post) {
-                            return `${pref}${arg}${post}(default: \`${param._savedDefault.trim()}\`) `
-                        }
+                    if (post) {
+                        return `${pref}${arg}${post}(default: \`${param._savedDefault.trim()}\`) `
+                    }
 
-                        return `${pref}${arg}\n*  (default: \`${param._savedDefault.trim()}\`)`
-                    },
-                )
+                    return `${pref}${arg}\n*  (default: \`${param._savedDefault.trim()}\`)`
+                })
 
             for (const name of [origName, ...aliases]) {
                 if (!hasOverloads) {
@@ -469,9 +402,7 @@ on(name: '${type.typeName}', handler: ((upd: ${
                         output.write(comment + '\n')
                     }
 
-                    output.write(
-                        `${name}${generics}(${parameters})${returnType}\n`,
-                    )
+                    output.write(`${name}${generics}(${parameters})${returnType}\n`)
                 }
 
                 if (!overload) {

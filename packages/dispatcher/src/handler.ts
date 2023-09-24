@@ -15,10 +15,10 @@ import {
     PollVoteUpdate,
     PreCheckoutQuery,
     TelegramClient,
+    tl,
     UserStatusUpdate,
     UserTypingUpdate,
 } from '@mtcute/client'
-import { tl } from '@mtcute/tl'
 
 import { PropagationAction } from './propagation'
 

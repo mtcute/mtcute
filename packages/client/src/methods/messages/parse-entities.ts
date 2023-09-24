@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MtArgumentError } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { MtArgumentError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { FormattedString } from '../../types'

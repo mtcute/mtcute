@@ -1,8 +1,7 @@
 import Long from 'long'
 
-import { assertNever } from '@mtcute/core'
+import { assertNever, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { ArrayWithTotal, ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types'

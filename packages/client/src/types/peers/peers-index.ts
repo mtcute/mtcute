@@ -1,5 +1,4 @@
-import { MtArgumentError } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { MtArgumentError, tl } from '@mtcute/core'
 
 const ERROR_MSG = 'Given peer is not available in this index. This is most likely an internal library error.'
 

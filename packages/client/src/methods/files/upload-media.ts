@@ -83,5 +83,6 @@ export async function uploadMedia(
             throw new MtArgumentError("This media (story) can't be uploaded")
         default:
             assertNever(normMedia)
+        //          ^?
     }
 }

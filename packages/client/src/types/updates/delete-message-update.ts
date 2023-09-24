@@ -1,5 +1,4 @@
-import { toggleChannelIdMark } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { tl, toggleChannelIdMark } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../utils'

@@ -1,5 +1,4 @@
-import { getBarePeerId } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { getBarePeerId, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { ChatInviteLinkJoinedMember, PeersIndex, User } from '../peers'

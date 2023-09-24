@@ -1,5 +1,5 @@
+import { tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { Message, PeersIndex, SearchFilters } from '../../types'

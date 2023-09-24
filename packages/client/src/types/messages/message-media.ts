@@ -1,5 +1,4 @@
-import { MtTypeAssertionError } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { MtTypeAssertionError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import {

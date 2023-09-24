@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/core'
 
 export * from './chat'
 export * from './chat-event'

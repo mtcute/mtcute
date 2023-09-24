@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-argument */
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import {

@@ -2,8 +2,7 @@ import { expect } from 'chai'
 import Long from 'long'
 import { describe, it } from 'mocha'
 
-import { FormattedString, MessageEntity } from '@mtcute/client'
-import { tl } from '@mtcute/tl'
+import { FormattedString, MessageEntity, tl } from '@mtcute/client'
 
 import { html, HtmlMessageEntityParser } from '../src'
 

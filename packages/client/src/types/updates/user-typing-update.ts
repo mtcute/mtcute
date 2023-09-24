@@ -1,5 +1,4 @@
-import { getBarePeerId, MtUnsupportedError, toggleChannelIdMark } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { getBarePeerId, MtUnsupportedError, tl, toggleChannelIdMark } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { BasicPeerType, Chat, TypingStatus, User } from '../'

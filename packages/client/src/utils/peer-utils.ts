@@ -1,7 +1,6 @@
 import Long from 'long'
 
-import { assertNever } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { assertNever, tl } from '@mtcute/core'
 
 import { InputPeerLike, MtInvalidPeerTypeError } from '../types'
 

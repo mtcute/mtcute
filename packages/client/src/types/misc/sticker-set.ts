@@ -1,6 +1,5 @@
-import { MtTypeAssertionError } from '@mtcute/core'
+import { MtTypeAssertionError, tl } from '@mtcute/core'
 import { LongMap } from '@mtcute/core/utils'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { MtEmptyError } from '../errors'

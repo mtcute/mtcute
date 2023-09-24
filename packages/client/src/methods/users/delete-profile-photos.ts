@@ -1,6 +1,5 @@
-import { MaybeArray } from '@mtcute/core'
+import { MaybeArray, tl } from '@mtcute/core'
 import { fileIdToInputPhoto } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 

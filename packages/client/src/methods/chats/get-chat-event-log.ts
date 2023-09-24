@@ -1,7 +1,6 @@
 import Long from 'long'
 
-import { assertNever, MaybeArray } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { assertNever, MaybeArray, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { ChatAction, ChatEvent, InputPeerLike, PeersIndex } from '../../types'

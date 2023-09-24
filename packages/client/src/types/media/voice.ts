@@ -1,5 +1,5 @@
+import { tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { decodeWaveform } from '../../utils/voice-utils'

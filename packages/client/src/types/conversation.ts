@@ -1,7 +1,6 @@
 /* eslint-disable dot-notation */
-import { getMarkedPeerId, MaybeAsync, MtArgumentError, MtTimeoutError } from '@mtcute/core'
+import { getMarkedPeerId, MaybeAsync, MtArgumentError, MtTimeoutError, tl } from '@mtcute/core'
 import { AsyncLock, ControllablePromise, createControllablePromise, Deque } from '@mtcute/core/utils'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../client'
 import { InputMediaLike } from './media'

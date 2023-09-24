@@ -2,10 +2,9 @@
 /* THIS FILE WAS AUTO-GENERATED */
 import { Readable } from 'stream'
 
-import { BaseTelegramClient, BaseTelegramClientOptions, MaybeArray, MaybeAsync } from '@mtcute/core'
+import { BaseTelegramClient, BaseTelegramClientOptions, MaybeArray, MaybeAsync, tl } from '@mtcute/core'
 import { AsyncLock, ConditionVariable, Deque, Logger, SortedLinkedList } from '@mtcute/core/utils'
 import { tdFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
 
 import { acceptTos } from './methods/auth/accept-tos'
 import { checkPassword } from './methods/auth/check-password'

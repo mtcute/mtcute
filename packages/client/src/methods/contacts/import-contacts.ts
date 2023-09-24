@@ -1,7 +1,6 @@
 import Long from 'long'
 
-import { PartialOnly } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { PartialOnly, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 

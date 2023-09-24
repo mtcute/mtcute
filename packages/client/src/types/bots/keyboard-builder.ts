@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/core'
 
 import type { InlineKeyboardMarkup, ReplyKeyboardMarkup } from './keyboards'
 

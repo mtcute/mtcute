@@ -1,5 +1,4 @@
-import { MtTypeAssertionError } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { MtTypeAssertionError, tl } from '@mtcute/core'
 
 // dummy updates which are used for methods that return messages.affectedHistory.
 // that is not an update, but it carries info about pts, and we need to handle it

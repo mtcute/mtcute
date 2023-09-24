@@ -1,6 +1,5 @@
-import { MtUnsupportedError } from '@mtcute/core'
+import { MtUnsupportedError, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { Chat, PeersIndex, User } from '../'

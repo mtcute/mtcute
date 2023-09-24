@@ -1,5 +1,4 @@
-import { BasicPeerType, getBasicPeerType, getMarkedPeerId, MtArgumentError } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { BasicPeerType, getBasicPeerType, getMarkedPeerId, MtArgumentError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { encodeInlineMessageId } from '../../utils/inline-utils'

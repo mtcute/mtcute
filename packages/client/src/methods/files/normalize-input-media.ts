@@ -1,8 +1,8 @@
 import Long from 'long'
 
+import { tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 import { fileIdToInputDocument, fileIdToInputPhoto, parseFileId, tdFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputMediaLike, isUploadedFile, UploadFileLike } from '../../types'

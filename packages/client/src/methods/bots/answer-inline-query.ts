@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { BotInline, InputInlineResult } from '../../types'

@@ -1,6 +1,5 @@
-import { assertNever, TlBinaryReader, TlBinaryWriter } from '@mtcute/core'
+import { assertNever, tl, TlBinaryReader, TlBinaryWriter } from '@mtcute/core'
 import { encodeUrlSafeBase64, parseUrlSafeBase64 } from '@mtcute/core/utils'
-import { tl } from '@mtcute/tl'
 
 /**
  * Parse TDLib style inline message ID

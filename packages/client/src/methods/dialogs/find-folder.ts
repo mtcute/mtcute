@@ -1,5 +1,4 @@
-import { MtArgumentError } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { MtArgumentError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 

@@ -12,7 +12,6 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@mtcute/tl": "workspace:^160.0.0",
         "@mtcute/tl-runtime": "workspace:^1.0.0",
         "@mtcute/core": "workspace:^1.0.0",
         "long": "5.2.3"

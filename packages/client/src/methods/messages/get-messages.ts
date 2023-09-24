@@ -1,6 +1,5 @@
-import { MaybeArray } from '@mtcute/core'
+import { MaybeArray, tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Message, PeersIndex } from '../../types'

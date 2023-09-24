@@ -1,8 +1,8 @@
 import type { ReadStream } from 'fs'
 import type { Readable } from 'stream'
 
+import { tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
 
 import { FileLocation } from './file-location'
 import { UploadedFile } from './uploaded-file'

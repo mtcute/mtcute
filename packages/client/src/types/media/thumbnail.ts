@@ -1,9 +1,8 @@
 import Long from 'long'
 
-import { MtArgumentError, MtTypeAssertionError } from '@mtcute/core'
+import { MtArgumentError, MtTypeAssertionError, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { inflateSvgPath, strippedPhotoToJpg, svgPathToFile } from '../../utils/file-utils'

@@ -1,5 +1,4 @@
-import { assertNever } from '@mtcute/core'
-import { tl } from '@mtcute/tl'
+import { assertNever, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { BotCommands } from '../../types'

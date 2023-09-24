@@ -1,6 +1,5 @@
-import { MtArgumentError } from '@mtcute/core'
+import { MtArgumentError, tl } from '@mtcute/core'
 import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
-import { tl } from '@mtcute/tl'
 
 import { TelegramClient } from '../../client'
 import { InputFileLike, InputPeerLike, isUploadedFile, MtInvalidPeerTypeError } from '../../types'
