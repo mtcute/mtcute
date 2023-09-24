@@ -3,7 +3,7 @@
 import { Readable } from 'stream'
 
 // @copy
-import { MaybeArray, MaybeAsync } from '@mtcute/core'
+import { MaybeArray, MaybeAsync, PartialExcept, PartialOnly } from '@mtcute/core'
 // @copy
 import { AsyncLock, ConditionVariable, Deque, Logger, SortedLinkedList } from '@mtcute/core/utils'
 // @copy
@@ -46,8 +46,6 @@ import {
     MessageMedia,
     MessageReactions,
     ParsedUpdate,
-    PartialExcept,
-    PartialOnly,
     PeerReaction,
     PeersIndex,
     Photo,

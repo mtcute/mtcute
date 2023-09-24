@@ -2,7 +2,15 @@
 /* THIS FILE WAS AUTO-GENERATED */
 import { Readable } from 'stream'
 
-import { BaseTelegramClient, BaseTelegramClientOptions, MaybeArray, MaybeAsync, tl } from '@mtcute/core'
+import {
+    BaseTelegramClient,
+    BaseTelegramClientOptions,
+    MaybeArray,
+    MaybeAsync,
+    PartialExcept,
+    PartialOnly,
+    tl,
+} from '@mtcute/core'
 import { AsyncLock, ConditionVariable, Deque, Logger, SortedLinkedList } from '@mtcute/core/utils'
 import { tdFileId } from '@mtcute/file-id'
 
@@ -219,8 +227,6 @@ import {
     MessageMedia,
     MessageReactions,
     ParsedUpdate,
-    PartialExcept,
-    PartialOnly,
     PeerReaction,
     PeersIndex,
     Photo,

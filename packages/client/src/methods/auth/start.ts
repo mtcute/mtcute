@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-import { MtArgumentError, tl } from '@mtcute/core'
+import { MaybeAsync, MtArgumentError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { MaybeAsync, MaybeDynamic, SentCode, TermsOfService, User } from '../../types'
+import { MaybeDynamic, SentCode, TermsOfService, User } from '../../types'
 import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-utils'
 
 /**
