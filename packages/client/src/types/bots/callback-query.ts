@@ -166,7 +166,7 @@ export class CallbackQuery {
             throw new MtArgumentError('Cannot get a message for inline callback')
         }
 
-        const msg = await this.client.getMessages(this.raw.peer, this.raw.msgId)
+        const msg = await this.client.getMessages(this.user.inputPeer, this.raw.msgId)
 
         if (!msg) {
             throw new MtMessageNotFoundError(getMarkedPeerId(this.raw.peer), this.raw.msgId, 'with button')
