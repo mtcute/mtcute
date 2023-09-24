@@ -3,7 +3,7 @@ import { stringifyArgumentType } from './utils'
 
 function normalizeType(s: string): string {
     return s
-        .replace(/^bytes/, 'string')
+        .replace(/(?<=^|\?)bytes/, 'string')
         .replace(/</g, ' ')
         .replace(/>/g, '')
         .replace('int53', 'long')
@@ -52,10 +52,11 @@ export function writeTlEntryToString(entry: TlEntry, forIdComputation = false): 
         }
     }
 
+    const type = entry.typeModifiers ? stringifyArgumentType(entry.type, entry.typeModifiers) : entry.type
+
     if (forIdComputation) {
-        str += '= ' + normalizeType(entry.type)
+        str += '= ' + normalizeType(type)
     } else {
-        const type = entry.typeModifiers ? stringifyArgumentType(entry.type, entry.typeModifiers) : entry.type
         str += '= ' + type + ';'
     }
 

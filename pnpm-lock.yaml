@@ -127,7 +127,7 @@ importers:
   packages/core:
     dependencies:
       '@mtcute/tl':
-        specifier: workspace:^160.0.0
+        specifier: workspace:^164.0.0
         version: link:../tl
       '@mtcute/tl-runtime':
         specifier: workspace:^1.0.0
@@ -196,7 +196,7 @@ importers:
   packages/html-parser:
     dependencies:
       '@mtcute/tl':
-        specifier: workspace:^160.0.0
+        specifier: workspace:^164.0.0
         version: link:../tl
       htmlparser2:
         specifier: ^6.0.1
@@ -224,7 +224,7 @@ importers:
   packages/markdown-parser:
     dependencies:
       '@mtcute/tl':
-        specifier: workspace:^160.0.0
+        specifier: workspace:^164.0.0
         version: link:../tl
       long:
         specifier: 5.2.3

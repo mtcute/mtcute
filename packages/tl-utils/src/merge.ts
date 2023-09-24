@@ -53,14 +53,10 @@ export function mergeTlEntries(entries: TlEntry[]): TlEntry | string {
         const ctorId = computeConstructorIdFromEntry(entry)
 
         // check if basic fields match
-        if (
-            result.kind !== entry.kind ||
-            result.name !== entry.name ||
-            result.type !== entry.type ||
-            result.id !== ctorId
-        ) {
-            return 'basic info mismatch'
-        }
+        if (result.kind !== entry.kind) return 'basic info mismatch - kind'
+        if (result.name !== entry.name) return 'basic info mismatch - name'
+        if (result.type !== entry.type) return 'basic info mismatch - type'
+        if (result.id !== ctorId) return 'basic info mismatch - id'
 
         // since we re-calculated id manually, we can skip checking
         // generics and arguments, and get straight to merging

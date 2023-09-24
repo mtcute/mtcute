@@ -1,4 +1,9 @@
 {
+    "compilerOptions": {
+        "paths": {
+            "~scripts/*": ["../../scripts/*"],
+        },
+    },
     "extends": "../../tsconfig.json",
     "include": [
         "./index.d.ts",

@@ -22,19 +22,19 @@ describe('mergeTlEntries', () => {
     }
 
     it('fails on conflicting kinds', () => {
-        test('test = Test;\n---functions---\ntest = Test;', 'basic info mismatch')
+        test('test = Test;\n---functions---\ntest = Test;', 'basic info mismatch - kind')
     })
 
     it('fails on conflicting names', () => {
-        test('test1 = Test;\ntest2 = Test;', 'basic info mismatch')
+        test('test1 = Test;\ntest2 = Test;', 'basic info mismatch - name')
     })
 
     it('fails on conflicting types', () => {
-        test('test = Test1;\ntest = Test2;', 'basic info mismatch')
+        test('test = Test1;\ntest = Test2;', 'basic info mismatch - type')
     })
 
     it('fails on conflicting ids', () => {
-        test('test = Test;\ntest foo:int = Test;', 'basic info mismatch')
+        test('test = Test;\ntest foo:int = Test;', 'basic info mismatch - id')
     })
 
     it('merges true flags', () => {

@@ -220,6 +220,7 @@ async function main() {
             }))
 
             let chooseOptions: ConflictOption[] = []
+            let mergeError = ''
 
             const customEntry = options[options.length - 1]
 
@@ -240,15 +241,21 @@ async function main() {
                 if (typeof mergedEntry === 'string') {
                     // merge failed, so there is in fact some conflict
                     chooseOptions = fromLastSchema
+                    mergeError = mergedEntry
                 } else return mergedEntry
             }
 
             const nonEmptyOptions = chooseOptions.filter(hasPresentKey('entry'))
 
-            console.log('Conflict detected at %s %s:', nonEmptyOptions[0].entry.kind, nonEmptyOptions[0].entry.name)
+            console.log(
+                'Conflict detected (%s) at %s %s:',
+                mergeError,
+                nonEmptyOptions[0].entry.kind,
+                nonEmptyOptions[0].entry.name,
+            )
             console.log('0. Remove')
             nonEmptyOptions.forEach((opt, idx) => {
-                console.log(`${idx + 1}. ${opt.schema.name}: ${writeTlEntryToString(opt.entry)}`)
+                console.log(`${idx + 1}. ${opt.schema.name}: (${opt.entry.kind}) ${writeTlEntryToString(opt.entry)}`)
             })
 
             while (true) {
