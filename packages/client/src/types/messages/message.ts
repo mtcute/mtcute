@@ -9,11 +9,11 @@ import {
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { BotKeyboard, ReplyMarkup } from '../bots'
 import { InputMediaLike, Sticker, WebPage } from '../media'
 import { FormattedString } from '../parser'
 import { Chat, InputPeerLike, PeersIndex, User } from '../peers'
-import { makeInspectable } from '../utils'
 import { _messageActionFromTl, MessageAction } from './message-action'
 import { MessageEntity } from './message-entity'
 import { _messageMediaFromTl, MessageMedia } from './message-media'

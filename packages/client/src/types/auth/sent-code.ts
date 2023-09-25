@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../utils'
+import { makeInspectable } from '../../utils'
 
 const sentCodeMap: Record<tl.auth.TypeSentCodeType['_'], SentCodeDeliveryType> = {
     'auth.sentCodeTypeApp': 'app',

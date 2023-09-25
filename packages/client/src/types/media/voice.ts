@@ -2,8 +2,8 @@ import { tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { decodeWaveform } from '../../utils/voice-utils'
-import { makeInspectable } from '../utils'
 import { RawDocument } from './document'
 
 /**

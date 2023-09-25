@@ -5,6 +5,7 @@ import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
 import { ArrayWithTotal, ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types'
+import { makeArrayWithTotal } from '../../utils'
 import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
 
 /**
@@ -131,9 +132,8 @@ export async function getChatMembers(
         const peers = PeersIndex.from(res)
 
         const ret = res.participants.map((i) => new ChatMember(this, i, peers)) as ArrayWithTotal<ChatMember>
-        ret.total = res.count
 
-        return ret
+        return makeArrayWithTotal(ret, res.count)
     }
 
     throw new MtInvalidPeerTypeError(chatId, 'chat or channel')

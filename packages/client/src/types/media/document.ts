@@ -2,8 +2,8 @@ import { tl } from '@mtcute/core'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { FileLocation } from '../files'
-import { makeInspectable } from '../utils'
 import { Thumbnail } from './thumbnail'
 
 /**

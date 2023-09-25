@@ -2,8 +2,8 @@ import { getMarkedPeerId, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { PeersIndex, User } from '../peers'
-import { makeInspectable } from '../utils'
 
 export class PeerReaction {
     constructor(

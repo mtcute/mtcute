@@ -1,8 +1,8 @@
 import { getBarePeerId, getMarkedPeerId, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { Chat, ChatInviteLink, PeersIndex, User } from '../peers'
-import { makeInspectable } from '../utils'
 
 /**
  * This update is sent when a user requests to join a chat

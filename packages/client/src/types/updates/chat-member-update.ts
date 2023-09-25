@@ -3,8 +3,8 @@
 import { getMarkedPeerId, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { Chat, ChatInviteLink, ChatMember, PeersIndex, User } from '../'
-import { makeInspectable } from '../utils'
 // todo: check case when restricted user joins chat - MTQ-35
 
 /**

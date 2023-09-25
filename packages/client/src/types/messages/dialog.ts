@@ -1,9 +1,9 @@
 import { getMarkedPeerId, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { MtMessageNotFoundError } from '../errors'
 import { Chat, PeersIndex } from '../peers'
-import { makeInspectable } from '../utils'
 import { DraftMessage } from './draft-message'
 import { Message } from './message'
 

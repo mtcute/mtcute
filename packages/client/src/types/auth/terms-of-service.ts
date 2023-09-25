@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/core'
 import { isPresent } from '@mtcute/core/utils'
 
+import { makeInspectable } from '../../utils'
 import { MessageEntity } from '../messages'
-import { makeInspectable } from '../utils'
 
 /**
  * Telegram's Terms of Service returned by {@link TelegramClient.signIn}

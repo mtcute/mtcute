@@ -1,9 +1,9 @@
 import { tl, toggleChannelIdMark } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { Photo } from '../media'
 import { Message } from '../messages'
-import { makeInspectable } from '../utils'
 import { ChatInviteLink } from './chat-invite-link'
 import { ChatLocation } from './chat-location'
 import { ChatMember } from './chat-member'

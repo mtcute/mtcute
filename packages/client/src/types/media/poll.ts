@@ -3,9 +3,9 @@ import Long from 'long'
 import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { MessageEntity } from '../messages'
 import { PeersIndex } from '../peers'
-import { makeInspectable } from '../utils'
 
 export interface PollAnswer {
     /**

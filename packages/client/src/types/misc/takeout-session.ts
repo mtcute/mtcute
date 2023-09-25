@@ -1,7 +1,7 @@
 import { MustEqual, RpcCallOptions, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../utils'
+import { makeInspectable } from '../../utils'
 
 /**
  * Account takeout session

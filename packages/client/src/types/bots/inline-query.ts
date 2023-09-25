@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { Location } from '../media'
 import { PeersIndex, PeerType, User } from '../peers'
-import { makeInspectable } from '../utils'
 import { InputInlineResult } from './input'
 
 const PEER_TYPE_MAP: Record<tl.TypeInlineQueryPeerType['_'], PeerType> = {

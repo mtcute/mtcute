@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { User, UserParsedStatus, UserStatus } from '../'
-import { makeInspectable } from '../utils'
 
 /**
  * User status has changed

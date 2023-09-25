@@ -1,8 +1,8 @@
 import { BasicPeerType, getBarePeerId, MtUnsupportedError, tl, toggleChannelIdMark } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { Chat, TypingStatus, User } from '../'
-import { makeInspectable } from '../utils'
 
 /**
  * User's typing status has changed.

@@ -2,8 +2,8 @@ import { MtArgumentError, tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { StickerSet } from '../misc'
-import { makeInspectable } from '../utils'
 import { RawDocument } from './document'
 
 export interface MaskPosition {

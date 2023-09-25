@@ -2,9 +2,9 @@ import { MtArgumentError, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { InputMediaLike } from '../media'
 import { FormattedString } from '../parser'
-import { makeInspectable } from '../utils'
 import { ChatPhoto } from './chat-photo'
 
 /**

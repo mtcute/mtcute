@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../utils'
+import { makeInspectable } from '../../utils'
 
 /**
  * Represents the permissions of a user in a {@link Chat}.

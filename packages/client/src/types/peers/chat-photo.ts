@@ -4,9 +4,9 @@ import { MtArgumentError, tl, toggleChannelIdMark } from '@mtcute/core'
 import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { strippedPhotoToJpg } from '../../utils/file-utils'
 import { FileLocation } from '../files'
-import { makeInspectable } from '../utils'
 
 /**
  * A size of a chat photo

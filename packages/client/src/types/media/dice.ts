@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../utils'
+import { makeInspectable } from '../../utils'
 
 /**
  * A dice or another interactive random emoji.

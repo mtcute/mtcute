@@ -1,9 +1,9 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { WebDocument } from '../files/web-document'
 import { _messageMediaFromTl, MessageMedia } from '../messages'
-import { makeInspectable } from '../utils'
 import { Thumbnail } from './thumbnail'
 
 /**

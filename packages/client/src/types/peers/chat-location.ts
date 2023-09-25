@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { Location } from '../media'
-import { makeInspectable } from '../utils'
 
 /**
  * Geolocation of a supergroup

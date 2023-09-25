@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { Photo } from '../media'
-import { makeInspectable } from '../utils'
 import { Chat } from './chat'
 import { User } from './user'
 

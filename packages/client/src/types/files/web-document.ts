@@ -1,7 +1,7 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../utils'
+import { makeInspectable } from '../../utils'
 import { FileLocation } from './file-location'
 
 const STUB_LOCATION = () => {

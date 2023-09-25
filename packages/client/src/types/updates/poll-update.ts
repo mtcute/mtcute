@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { PeersIndex, Poll } from '../'
-import { makeInspectable } from '../utils'
 
 /**
  * Poll state has changed (stopped, somebody

@@ -5,9 +5,9 @@ import { assertTypeIs } from '@mtcute/core/utils'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { inflateSvgPath, strippedPhotoToJpg, svgPathToFile } from '../../utils/file-utils'
 import { FileLocation } from '../files'
-import { makeInspectable } from '../utils'
 
 /**
  * One size of some thumbnail

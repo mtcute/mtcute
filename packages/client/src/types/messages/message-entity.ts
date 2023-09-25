@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../utils'
+import { makeInspectable } from '../../utils'
 
 const entityToType: Partial<Record<tl.TypeMessageEntity['_'], MessageEntityType>> = {
     messageEntityBlockquote: 'blockquote',

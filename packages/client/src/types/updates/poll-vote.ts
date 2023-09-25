@@ -2,8 +2,8 @@ import { MtUnsupportedError, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { Chat, PeersIndex, User } from '../'
-import { makeInspectable } from '../utils'
 
 /**
  * Some user has voted in a public poll.

@@ -1,11 +1,11 @@
 import { BasicPeerType, getBasicPeerType, getMarkedPeerId, MtArgumentError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
 import { MtMessageNotFoundError } from '../errors'
 import { Message } from '../messages'
 import { PeersIndex, User } from '../peers'
-import { makeInspectable } from '../utils'
 
 /**
  * An incoming callback query, originated from a callback button

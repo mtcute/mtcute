@@ -1,9 +1,9 @@
 import { getMarkedPeerId, MaybeArray, MtArgumentError, MtTypeAssertionError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { InputMediaLike } from '../media'
 import { FormattedString } from '../parser'
-import { makeInspectable } from '../utils'
 import { ChatLocation } from './chat-location'
 import { ChatPermissions } from './chat-permissions'
 import { ChatPhoto } from './chat-photo'

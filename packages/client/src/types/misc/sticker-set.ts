@@ -2,11 +2,11 @@ import { MtTypeAssertionError, tl } from '@mtcute/core'
 import { LongMap } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { MtEmptyError } from '../errors'
 import { InputFileLike } from '../files'
 import { MaskPosition, Sticker, StickerSourceType, StickerType, Thumbnail } from '../media'
 import { parseDocument } from '../media/document-utils'
-import { makeInspectable } from '../utils'
 
 /**
  * Information about one sticker inside the set

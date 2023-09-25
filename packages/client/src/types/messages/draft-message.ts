@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { InputMediaLike } from '../media'
 import { InputPeerLike } from '../peers'
-import { makeInspectable } from '../utils'
 import { Message } from './message'
 import { MessageEntity } from './message-entity'
 

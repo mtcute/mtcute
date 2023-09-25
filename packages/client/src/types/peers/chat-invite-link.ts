@@ -2,7 +2,7 @@ import { tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../utils'
+import { makeInspectable } from '../../utils'
 import { PeersIndex } from './index'
 import { User } from './user'
 

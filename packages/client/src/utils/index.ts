@@ -1,5 +1,6 @@
 export * from './file-utils'
 export * from './inline-utils'
+export * from './inspectable'
 export * from './misc-utils'
 export * from './peer-utils'
 export * from './rps-meter'

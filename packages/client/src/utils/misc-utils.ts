@@ -1,6 +1,6 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
-import { MaybeDynamic, Message } from '../types'
+import { ArrayWithTotal, MaybeDynamic, Message } from '../types'
 
 /**
  * Normalize phone number by stripping formatting
@@ -15,6 +15,17 @@ export function normalizePhoneNumber(phone: string): string {
 
 export async function resolveMaybeDynamic<T>(val: MaybeDynamic<T>): Promise<T> {
     return val instanceof Function ? await val() : await val
+}
+
+export function makeArrayWithTotal<T>(arr: T[], total: number): ArrayWithTotal<T> {
+    Object.defineProperty(arr, 'total', {
+        value: total,
+        enumerable: false,
+        configurable: false,
+        writable: false,
+    })
+
+    return arr as ArrayWithTotal<T>
 }
 
 export function extractChannelIdFromUpdate(upd: tl.TypeUpdate): number | undefined {

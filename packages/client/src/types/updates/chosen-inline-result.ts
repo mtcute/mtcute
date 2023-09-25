@@ -1,9 +1,9 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
 import { Location, PeersIndex, User } from '../'
-import { makeInspectable } from '../utils'
 
 /**
  * An inline result was chosen by the user and sent to some chat

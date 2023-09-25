@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
+import { makeInspectable } from '../../utils'
 import { PeersIndex, User } from '../peers'
-import { makeInspectable } from '../utils'
 
 /**
  * A user has stopped or restarted the bot.
