@@ -1,6 +1,6 @@
 import { TelegramClient } from '../../client'
-import { ArrayWithTotal, ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
-import { makeArrayWithTotal, normalizeDate } from '../../utils'
+import { ArrayPaginated, ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
+import { makeArrayPaginated, normalizeDate } from '../../utils'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
@@ -48,7 +48,7 @@ export async function getInviteLinks(
          */
         offsetLink?: string
     },
-): Promise<ArrayWithTotal<ChatInviteLink>> {
+): Promise<ArrayPaginated<ChatInviteLink, { date: number; link: string }>> {
     if (!params) params = {}
 
     const { revoked = false, limit = Infinity, admin } = params
@@ -68,8 +68,15 @@ export async function getInviteLinks(
 
     const peers = PeersIndex.from(res)
 
-    return makeArrayWithTotal(
-        res.invites.map((it) => new ChatInviteLink(this, it, peers)),
-        res.count,
-    )
+    const links = res.invites.map((it) => new ChatInviteLink(this, it, peers))
+
+    const last = links[links.length - 1]
+    const nextOffset = last ?
+        {
+            date: last.raw.date,
+            link: last.raw.link,
+        } :
+        undefined
+
+    return makeArrayPaginated(links, res.count, nextOffset)
 }

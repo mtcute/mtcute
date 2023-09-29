@@ -1,6 +1,5 @@
 import { TelegramClient } from '../../client'
 import { ChatInviteLinkMember, InputPeerLike } from '../../types'
-import { normalizeToInputUser } from '../../utils'
 
 /**
  * Iterate over users who have joined
@@ -50,14 +49,15 @@ export async function* iterInviteLinkMembers(
 
         if (!items.length) break
 
-        const last = items[items.length - 1]
-        offsetDate = last.date
-        offsetUser = normalizeToInputUser(last.user.inputPeer)
-
         for (const it of items) {
             yield it
 
             if (++current >= limit) return
         }
+
+        if (!items.next) return
+
+        offsetDate = items.next.date
+        offsetUser = items.next.user
     }
 }

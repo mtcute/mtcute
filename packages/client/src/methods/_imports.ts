@@ -11,6 +11,7 @@ import { tdFileId } from '@mtcute/file-id'
 
 // @copy
 import {
+    ArrayPaginated,
     ArrayWithTotal,
     BotChatJoinRequestUpdate,
     BotCommands,

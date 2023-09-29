@@ -194,6 +194,7 @@ import { unblockUser } from './methods/users/unblock-user'
 import { updateProfile } from './methods/users/update-profile'
 import { updateUsername } from './methods/users/update-username'
 import {
+    ArrayPaginated,
     ArrayWithTotal,
     BotChatJoinRequestUpdate,
     BotCommands,
@@ -1225,7 +1226,13 @@ export interface TelegramClient extends BaseTelegramClient {
             offset?: number
 
             /**
-             * Maximum number of members to be retrieved. Defaults to `200`
+             * Maximum number of members to be retrieved.
+             *
+             * > **Note**: Telegram currently only allows you to ever retrieve at most
+             * > 200 members, regardless of offset/limit. I.e. when passing
+             * > `offset=201` nothing will ever be returned.
+             *
+             * @default  200
              */
             limit?: number
 
@@ -2005,7 +2012,7 @@ export interface TelegramClient extends BaseTelegramClient {
              */
             requestedSearch?: string
         },
-    ): Promise<ArrayWithTotal<ChatInviteLinkMember>>
+    ): Promise<ArrayPaginated<ChatInviteLinkMember, { date: number; user: tl.TypeInputUser }>>
     /**
      * Get detailed information about an invite link
      *
@@ -2056,7 +2063,7 @@ export interface TelegramClient extends BaseTelegramClient {
              */
             offsetLink?: string
         },
-    ): Promise<ArrayWithTotal<ChatInviteLink>>
+    ): Promise<ArrayPaginated<ChatInviteLink, { date: number; link: string }>>
     /**
      * Get primary invite link of a chat
      *

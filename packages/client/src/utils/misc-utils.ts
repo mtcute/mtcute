@@ -1,6 +1,6 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
-import { ArrayWithTotal, MaybeDynamic, Message } from '../types'
+import { ArrayPaginated, ArrayWithTotal, MaybeDynamic, Message } from '../types'
 
 /**
  * Normalize phone number by stripping formatting
@@ -20,6 +20,14 @@ export async function resolveMaybeDynamic<T>(val: MaybeDynamic<T>): Promise<T> {
 export function makeArrayWithTotal<T>(arr: T[], total: number): ArrayWithTotal<T> {
     const a = arr as ArrayWithTotal<T>
     a.total = total
+
+    return a
+}
+
+export function makeArrayPaginated<T, Offset>(arr: T[], total: number, next?: Offset): ArrayPaginated<T, Offset> {
+    const a = arr as ArrayPaginated<T, Offset>
+    a.total = total
+    a.next = next
 
     return a
 }
