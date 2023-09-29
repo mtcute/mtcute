@@ -2,7 +2,7 @@ import { getBarePeerId, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
-import { ChatInviteLinkJoinedMember, PeersIndex, User } from '../peers'
+import { PeersIndex, User } from '../peers'
 
 /**
  * This update is sent when a user requests to join a chat
@@ -67,17 +67,6 @@ export class ChatJoinRequestUpdate {
         for (const id of this.raw.recentRequesters) {
             await this.client.hideJoinRequest(this.chatId, id, action)
         }
-    }
-
-    /**
-     * Fetch all pending join requests for this chat
-     */
-    fetchAll(params?: { limit?: number; search?: string }): AsyncIterableIterator<ChatInviteLinkJoinedMember> {
-        return this.client.getInviteLinkMembers(this.chatId, {
-            limit: params?.limit,
-            requested: true,
-            requestedSearch: params?.search,
-        })
     }
 }
 

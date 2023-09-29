@@ -1,15 +1,12 @@
-import { tl, toggleChannelIdMark } from '@mtcute/core'
+import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
-import { makeInspectable } from '../../utils'
-import { Photo } from '../media'
-import { Message } from '../messages'
-import { ChatInviteLink } from './chat-invite-link'
-import { ChatLocation } from './chat-location'
-import { ChatMember } from './chat-member'
-import { ChatPermissions } from './chat-permissions'
-import { PeersIndex } from './index'
-import { User } from './user'
+import { PeersIndex, TelegramClient, toggleChannelIdMark } from '../../..'
+import { Photo } from '../../media'
+import { Message } from '../../messages'
+import { ChatInviteLink } from '../chat-invite-link'
+import { ChatLocation } from '../chat-location'
+import { ChatMember } from '../chat-member'
+import { ChatPermissions } from '../chat-permissions'
 
 /** A user has joined the group (in the case of big groups, info of the user that has joined isn't shown) */
 export interface ChatActionUserJoined {
@@ -321,7 +318,28 @@ export type ChatAction =
     | ChatActionTtlChanged
     | null
 
-function _actionFromTl(this: ChatEvent, e: tl.TypeChannelAdminLogEventAction): ChatAction {
+/** @internal */
+export function _actionFromTl(
+    e: tl.TypeChannelAdminLogEventAction,
+    client: TelegramClient,
+    peers: PeersIndex,
+): ChatAction {
+    // todo - MTQ-78
+    // channelAdminLogEventActionParticipantJoinByRequest#afb6144a invite:ExportedChatInvite approved_by:long
+    // channelAdminLogEventActionToggleNoForwards#cb2ac766 new_value:Bool = ChannelAdminLogEventAction;
+    // todo - MTQ-57
+    // channelAdminLogEventActionChangeUsernames#f04fb3a9 prev_value:Vector<string> new_value:Vector<string>
+    // todo - MTQ-77
+    // channelAdminLogEventActionToggleForum#2cc6383 new_value:Bool = ChannelAdminLogEventAction;
+    // channelAdminLogEventActionCreateTopic#58707d28 topic:ForumTopic = ChannelAdminLogEventAction;
+    // channelAdminLogEventActionEditTopic#f06fe208 prev_topic:ForumTopic new_topic:ForumTopic
+    // channelAdminLogEventActionDeleteTopic#ae168909 topic:ForumTopic = ChannelAdminLogEventAction;
+    // channelAdminLogEventActionPinTopic#5d8d353b flags:# prev_topic:flags.0?ForumTopic new_topic:flags.1?ForumTopic
+    // todo - MTQ-72
+    // channelAdminLogEventActionSendMessage#278f2868 message:Message = ChannelAdminLogEventAction;
+    // channelAdminLogEventActionChangeAvailableReactions#be4e0ef8 prev_value:ChatReactions new_value:ChatReactions
+    // channelAdminLogEventActionToggleAntiSpam#64f36dfc new_value:Bool = ChannelAdminLogEventAction;
+
     switch (e._) {
         case 'channelAdminLogEventActionParticipantJoin':
             return { type: 'user_joined' }
@@ -346,8 +364,8 @@ function _actionFromTl(this: ChatEvent, e: tl.TypeChannelAdminLogEventAction): C
         case 'channelAdminLogEventActionChangePhoto':
             return {
                 type: 'photo_changed',
-                old: new Photo(this.client, e.prevPhoto as tl.RawPhoto),
-                new: new Photo(this.client, e.newPhoto as tl.RawPhoto),
+                old: new Photo(client, e.prevPhoto as tl.RawPhoto),
+                new: new Photo(client, e.newPhoto as tl.RawPhoto),
             }
         case 'channelAdminLogEventActionToggleInvites':
             return {
@@ -364,37 +382,37 @@ function _actionFromTl(this: ChatEvent, e: tl.TypeChannelAdminLogEventAction): C
         case 'channelAdminLogEventActionUpdatePinned':
             return {
                 type: 'msg_pinned',
-                message: new Message(this.client, e.message, this._peers),
+                message: new Message(client, e.message, peers),
             }
         case 'channelAdminLogEventActionEditMessage':
             return {
                 type: 'msg_edited',
-                old: new Message(this.client, e.prevMessage, this._peers),
-                new: new Message(this.client, e.newMessage, this._peers),
+                old: new Message(client, e.prevMessage, peers),
+                new: new Message(client, e.newMessage, peers),
             }
         case 'channelAdminLogEventActionDeleteMessage':
             return {
                 type: 'msg_deleted',
-                message: new Message(this.client, e.message, this._peers),
+                message: new Message(client, e.message, peers),
             }
         case 'channelAdminLogEventActionParticipantLeave':
             return { type: 'user_left' }
         case 'channelAdminLogEventActionParticipantInvite':
             return {
                 type: 'user_invited',
-                member: new ChatMember(this.client, e.participant, this._peers),
+                member: new ChatMember(client, e.participant, peers),
             }
         case 'channelAdminLogEventActionParticipantToggleBan':
             return {
                 type: 'user_perms_changed',
-                old: new ChatMember(this.client, e.prevParticipant, this._peers),
-                new: new ChatMember(this.client, e.newParticipant, this._peers),
+                old: new ChatMember(client, e.prevParticipant, peers),
+                new: new ChatMember(client, e.newParticipant, peers),
             }
         case 'channelAdminLogEventActionParticipantToggleAdmin':
             return {
                 type: 'user_admin_perms_changed',
-                old: new ChatMember(this.client, e.prevParticipant, this._peers),
-                new: new ChatMember(this.client, e.newParticipant, this._peers),
+                old: new ChatMember(client, e.prevParticipant, peers),
+                new: new ChatMember(client, e.newParticipant, peers),
             }
         case 'channelAdminLogEventActionChangeStickerSet':
             return {
@@ -417,7 +435,7 @@ function _actionFromTl(this: ChatEvent, e: tl.TypeChannelAdminLogEventAction): C
         case 'channelAdminLogEventActionStopPoll':
             return {
                 type: 'poll_stopped',
-                message: new Message(this.client, e.message, this._peers),
+                message: new Message(client, e.message, peers),
             }
         case 'channelAdminLogEventActionChangeLinkedChat':
             return {
@@ -428,8 +446,8 @@ function _actionFromTl(this: ChatEvent, e: tl.TypeChannelAdminLogEventAction): C
         case 'channelAdminLogEventActionChangeLocation':
             return {
                 type: 'location_changed',
-                old: e.prevValue._ === 'channelLocationEmpty' ? null : new ChatLocation(this.client, e.prevValue),
-                new: e.newValue._ === 'channelLocationEmpty' ? null : new ChatLocation(this.client, e.newValue),
+                old: e.prevValue._ === 'channelLocationEmpty' ? null : new ChatLocation(client, e.prevValue),
+                new: e.newValue._ === 'channelLocationEmpty' ? null : new ChatLocation(client, e.newValue),
             }
         case 'channelAdminLogEventActionToggleSlowMode':
             return {
@@ -460,23 +478,23 @@ function _actionFromTl(this: ChatEvent, e: tl.TypeChannelAdminLogEventAction): C
         case 'channelAdminLogEventActionParticipantJoinByInvite':
             return {
                 type: 'user_joined_invite',
-                link: new ChatInviteLink(this.client, e.invite, this._peers),
+                link: new ChatInviteLink(client, e.invite, peers),
             }
         case 'channelAdminLogEventActionExportedInviteDelete':
             return {
                 type: 'invite_deleted',
-                link: new ChatInviteLink(this.client, e.invite, this._peers),
+                link: new ChatInviteLink(client, e.invite, peers),
             }
         case 'channelAdminLogEventActionExportedInviteRevoke':
             return {
                 type: 'invite_revoked',
-                link: new ChatInviteLink(this.client, e.invite, this._peers),
+                link: new ChatInviteLink(client, e.invite, peers),
             }
         case 'channelAdminLogEventActionExportedInviteEdit':
             return {
                 type: 'invite_edited',
-                old: new ChatInviteLink(this.client, e.prevInvite, this._peers),
-                new: new ChatInviteLink(this.client, e.newInvite, this._peers),
+                old: new ChatInviteLink(client, e.prevInvite, peers),
+                new: new ChatInviteLink(client, e.newInvite, peers),
             }
         case 'channelAdminLogEventActionChangeHistoryTTL':
             return {
@@ -488,43 +506,3 @@ function _actionFromTl(this: ChatEvent, e: tl.TypeChannelAdminLogEventAction): C
             return null
     }
 }
-
-export class ChatEvent {
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.TypeChannelAdminLogEvent,
-        readonly _peers: PeersIndex,
-    ) {}
-
-    /**
-     * Event ID.
-     *
-     * Event IDs are generated in direct chronological order
-     * (i.e. newer events have bigger event ID)
-     */
-    get id(): tl.Long {
-        return this.raw.id
-    }
-
-    /**
-     * Date of the event
-     */
-    get date(): Date {
-        return new Date(this.raw.date * 1000)
-    }
-
-    private _actor?: User
-    /**
-     * Actor of the event
-     */
-    get actor(): User {
-        return (this._actor ??= new User(this.client, this._peers.user(this.raw.userId)))
-    }
-
-    private _action?: ChatAction
-    get action(): ChatAction {
-        return (this._action ??= _actionFromTl.call(this, this.raw.action))
-    }
-}
-
-makeInspectable(ChatEvent)

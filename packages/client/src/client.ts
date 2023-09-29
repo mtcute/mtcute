@@ -60,6 +60,7 @@ import { getChatMembers } from './methods/chats/get-chat-members'
 import { getChatPreview } from './methods/chats/get-chat-preview'
 import { getFullChat } from './methods/chats/get-full-chat'
 import { getNearbyChats } from './methods/chats/get-nearby-chats'
+import { iterChatEventLog } from './methods/chats/iter-chat-event-log'
 import { iterChatMembers } from './methods/chats/iter-chat-members'
 import { joinChat } from './methods/chats/join-chat'
 import { kickChatMember } from './methods/chats/kick-chat-member'
@@ -84,10 +85,9 @@ import { createFolder } from './methods/dialogs/create-folder'
 import { deleteFolder } from './methods/dialogs/delete-folder'
 import { editFolder } from './methods/dialogs/edit-folder'
 import { findFolder } from './methods/dialogs/find-folder'
-import { getDialogs } from './methods/dialogs/get-dialogs'
-import { getFolders } from './methods/dialogs/get-folders'
+import { _normalizeInputFolder, getFolders } from './methods/dialogs/get-folders'
 import { getPeerDialogs } from './methods/dialogs/get-peer-dialogs'
-import { _parseDialogs } from './methods/dialogs/parse-dialogs'
+import { iterDialogs } from './methods/dialogs/iter-dialogs'
 import { setFoldersOrder } from './methods/dialogs/set-folders'
 import { downloadAsBuffer } from './methods/files/download-buffer'
 import { downloadToFile } from './methods/files/download-file'
@@ -107,6 +107,8 @@ import { getInviteLinks } from './methods/invite-links/get-invite-links'
 import { getPrimaryInviteLink } from './methods/invite-links/get-primary-invite-link'
 import { hideAllJoinRequests } from './methods/invite-links/hide-all-join-requests'
 import { hideJoinRequest } from './methods/invite-links/hide-join-request'
+import { iterInviteLinkMembers } from './methods/invite-links/iter-invite-link-members'
+import { iterInviteLinks } from './methods/invite-links/iter-invite-links'
 import { revokeInviteLink } from './methods/invite-links/revoke-invite-link'
 import { closePoll } from './methods/messages/close-poll'
 import { deleteMessages } from './methods/messages/delete-messages'
@@ -198,10 +200,9 @@ import {
     BotStoppedUpdate,
     CallbackQuery,
     Chat,
-    ChatAction,
     ChatEvent,
     ChatInviteLink,
-    ChatInviteLinkJoinedMember,
+    ChatInviteLinkMember,
     ChatJoinRequestUpdate,
     ChatMember,
     ChatMemberUpdate,
@@ -216,6 +217,8 @@ import {
     HistoryReadUpdate,
     IMessageEntityParser,
     InlineQuery,
+    InputChatEventFilters,
+    InputDialogFolder,
     InputFileLike,
     InputInlineResult,
     InputMediaLike,
@@ -1123,8 +1126,7 @@ export interface TelegramClient extends BaseTelegramClient {
         rank?: string,
     ): Promise<void>
     /**
-     * Get chat event log ("Recent actions" in official
-     * clients).
+     * Get chat event log ("Recent actions" in official clients).
      *
      * Only available for supergroups and channels, and
      * requires (any) administrator rights.
@@ -1171,23 +1173,24 @@ export interface TelegramClient extends BaseTelegramClient {
              * and when passing one or more action types,
              * they will be filtered locally.
              */
-            filters?: tl.TypeChannelAdminLogEventsFilter | MaybeArray<Exclude<ChatAction, null>['type']>
+            filters?: InputChatEventFilters
 
             /**
              * Limit the number of events returned.
              *
-             * Defaults to `Infinity`, i.e. all events are returned
+             * > Note: when using filters, there will likely be
+             * > less events returned than specified here.
+             * > This limit is only used to limit the number of
+             * > events to fetch from the server.
+             * >
+             * > If you need to limit the number of events
+             * > returned, use {@link iterChatEventLog} instead.
+             *
+             * @default  100
              */
             limit?: number
-
-            /**
-             * Chunk size, usually not needed.
-             *
-             * Defaults to `100`
-             */
-            chunkSize?: number
         },
-    ): AsyncIterableIterator<ChatEvent>
+    ): Promise<ChatEvent[]>
     /**
      * Get information about a single chat member
      *
@@ -1277,6 +1280,33 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param longitude  Longitude of the location
      */
     getNearbyChats(latitude: number, longitude: number): Promise<Chat[]>
+    /**
+     * Iterate over chat event log.
+     *
+     * Small wrapper over {@link getChatEventLog}
+     *
+     * @param chatId  Chat ID
+     * @param params
+     */
+    iterChatEventLog(
+        chatId: InputPeerLike,
+        params?: Parameters<TelegramClient['getChatEventLog']>[1] & {
+            /**
+             * Total number of events to return.
+             *
+             * @default  Infinity
+             */
+            limit?: number
+
+            /**
+             * Chunk size, passed as `limit` to {@link getChatEventLog}.
+             * Usually you don't need to touch this.
+             *
+             * @default  100
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<ChatEvent>
     /**
      * Iterate through chat members
      *
@@ -1571,16 +1601,34 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     findFolder(params: { title?: string; emoji?: string; id?: number }): Promise<tl.RawDialogFilter | null>
     /**
+     * Get list of folders.
+     */
+    getFolders(): Promise<tl.TypeDialogFilter[]>
+
+    _normalizeInputFolder(folder: InputDialogFolder): Promise<tl.TypeDialogFilter>
+    /**
+     * Get dialogs with certain peers.
+     *
+     * @param peers  Peers for which to fetch dialogs.
+     */
+    getPeerDialogs(peers: InputPeerLike): Promise<Dialog>
+    /**
+     * Get dialogs with certain peers.
+     *
+     * @param peers  Peers for which to fetch dialogs.
+     */
+    getPeerDialogs(peers: InputPeerLike[]): Promise<Dialog[]>
+    /**
      * Iterate over dialogs.
      *
-     * Note that due to Telegram limitations,
+     * Note that due to Telegram API limitations,
      * ordering here can only be anti-chronological
      * (i.e. newest - first), and draft update date
      * is not considered when sorting.
      *
      * @param params  Fetch parameters
      */
-    getDialogs(params?: {
+    iterDialogs(params?: {
         /**
          * Offset message date used as an anchor for pagination.
          */
@@ -1599,7 +1647,7 @@ export interface TelegramClient extends BaseTelegramClient {
         /**
          * Limits the number of dialogs to be received.
          *
-         * Defaults to `Infinity`, i.e. all dialogs are fetched, ignored when `pinned=only`
+         * @default  `Infinity`, i.e. all dialogs are fetched
          */
         limit?: number
 
@@ -1607,7 +1655,7 @@ export interface TelegramClient extends BaseTelegramClient {
          * Chunk size which will be passed to `messages.getDialogs`.
          * You shouldn't usually care about this.
          *
-         * Defaults to 100.
+         * @default  100.
          */
         chunkSize?: number
 
@@ -1621,11 +1669,11 @@ export interface TelegramClient extends BaseTelegramClient {
          * `keep`, which will return pinned dialogs
          * ordered by date among other non-pinned dialogs.
          *
-         * Defaults to `include`.
-         *
          * > **Note**: When using `include` mode with folders,
          * > pinned dialogs will only be fetched if all offset
          * > parameters are unset.
+         *
+         * @default  `include`.
          */
         pinned?: 'include' | 'exclude' | 'only' | 'keep'
 
@@ -1636,11 +1684,13 @@ export interface TelegramClient extends BaseTelegramClient {
          * `exclude` them from the list, or `only`
          * return archived dialogs
          *
-         * Defaults to `exclude`, ignored for folders since folders
+         * Ignored for folders, since folders
          * themselves contain information about archived chats.
          *
-         * > **Note**: when fetching `only` pinned dialogs
-         * > passing `keep` will act as passing `only`
+         * > **Note**: when `pinned=only`, `archived=keep` will act as `only`
+         * > because of Telegram API limitations.
+         *
+         * @default  `exclude`
          */
         archived?: 'keep' | 'exclude' | 'only'
 
@@ -1663,9 +1713,9 @@ export interface TelegramClient extends BaseTelegramClient {
          * When a folder with given ID or title is not found,
          * {@link MtArgumentError} is thrown
          *
-         * By default fetches from "All" folder
+         * @default  <empty> (fetches from "All" folder)
          */
-        folder?: string | number | tl.RawDialogFilter
+        folder?: InputDialogFolder
 
         /**
          * Additional filtering for the dialogs.
@@ -1676,24 +1726,6 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         filter?: Partial<Omit<tl.RawDialogFilter, '_' | 'id' | 'title'>>
     }): AsyncIterableIterator<Dialog>
-    /**
-     * Get list of folders.
-     */
-    getFolders(): Promise<tl.TypeDialogFilter[]>
-    /**
-     * Get dialogs with certain peers.
-     *
-     * @param peers  Peers for which to fetch dialogs.
-     */
-    getPeerDialogs(peers: InputPeerLike): Promise<Dialog>
-    /**
-     * Get dialogs with certain peers.
-     *
-     * @param peers  Peers for which to fetch dialogs.
-     */
-    getPeerDialogs(peers: InputPeerLike[]): Promise<Dialog[]>
-
-    _parseDialogs(res: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs): Dialog[]
     /**
      * Reorder folders
      *
@@ -1943,9 +1975,21 @@ export interface TelegramClient extends BaseTelegramClient {
             link?: string
 
             /**
-             * Maximum number of users to return (by default returns all)
+             * Maximum number of users to return
+             *
+             * @default  100
              */
             limit?: number
+
+            /**
+             * Offset request/join date used as an anchor for pagination.
+             */
+            offsetDate?: Date | number
+
+            /**
+             * Offset user used as an anchor for pagination
+             */
+            offsetUser?: tl.TypeInputUser
 
             /**
              * Whether to get users who have requested to join
@@ -1955,13 +1999,13 @@ export interface TelegramClient extends BaseTelegramClient {
 
             /**
              * Search for a user in the pending join requests list
-             * (only works if {@link requested} is true)
+             * (if passed, {@link requested} is assumed to be true)
              *
              * Doesn't work when {@link link} is set (Telegram limitation)
              */
             requestedSearch?: string
         },
-    ): AsyncIterableIterator<ChatInviteLinkJoinedMember>
+    ): Promise<ArrayWithTotal<ChatInviteLinkMember>>
     /**
      * Get detailed information about an invite link
      *
@@ -1982,8 +2026,14 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getInviteLinks(
         chatId: InputPeerLike,
-        adminId: InputPeerLike,
         params?: {
+            /**
+             * Only return this admin's links.
+             *
+             * @default `"self"`
+             */
+            admin?: InputPeerLike
+
             /**
              * Whether to fetch revoked invite links
              */
@@ -1991,18 +2041,22 @@ export interface TelegramClient extends BaseTelegramClient {
 
             /**
              * Limit the number of invite links to be fetched.
-             * By default, all links are fetched.
+             *
+             * @default  100
              */
             limit?: number
 
             /**
-             * Size of chunks which are fetched. Usually not needed.
-             *
-             * Defaults to `100`
+             * Offset date used as an anchor for pagination.
              */
-            chunkSize?: number
+            offsetDate?: Date | number
+
+            /**
+             * Offset link used as an anchor for pagination
+             */
+            offsetLink?: string
         },
-    ): AsyncIterableIterator<ChatInviteLink>
+    ): Promise<ArrayWithTotal<ChatInviteLink>>
     /**
      * Get primary invite link of a chat
      *
@@ -2025,6 +2079,60 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param action  Whether to approve or deny the join request
      */
     hideJoinRequest(peer: InputPeerLike, user: InputPeerLike, action: 'approve' | 'deny'): Promise<void>
+    /**
+     * Iterate over users who have joined
+     * the chat with the given invite link.
+     *
+     * @param chatId  Chat ID
+     * @param params  Additional params
+     */
+    iterInviteLinkMembers(
+        chatId: InputPeerLike,
+        params: Parameters<TelegramClient['getInviteLinkMembers']>[1] & {
+            /**
+             * Maximum number of users to return
+             *
+             * @default  `Infinity`, i.e. all users are fetched
+             */
+            limit?: number
+
+            /**
+             * Chunk size which will be passed to `messages.getChatInviteImporters`.
+             * You shouldn't usually care about this.
+             *
+             * @default  100.
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<ChatInviteLinkMember>
+    /**
+     * Iterate over invite links created by some administrator in the chat.
+     *
+     * As an administrator you can only get your own links
+     * (i.e. `adminId = "self"`), as a creator you can get
+     * any other admin's links.
+     *
+     * @param chatId  Chat ID
+     * @param adminId  Admin who created the links
+     * @param params
+     */
+    iterInviteLinks(
+        chatId: InputPeerLike,
+        params?: Parameters<TelegramClient['getInviteLinks']>[1] & {
+            /**
+             * Limit the number of invite links to be fetched.
+             * By default, all links are fetched.
+             */
+            limit?: number
+
+            /**
+             * Size of chunks which are fetched. Usually not needed.
+             *
+             * Defaults to `100`
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<ChatInviteLink>
     /**
      * Revoke an invite link.
      *
@@ -3921,6 +4029,7 @@ export class TelegramClient extends BaseTelegramClient {
     getChat = getChat
     getFullChat = getFullChat
     getNearbyChats = getNearbyChats
+    iterChatEventLog = iterChatEventLog
     iterChatMembers = iterChatMembers
     joinChat = joinChat
     kickChatMember = kickChatMember
@@ -3946,10 +4055,10 @@ export class TelegramClient extends BaseTelegramClient {
     deleteFolder = deleteFolder
     editFolder = editFolder
     findFolder = findFolder
-    getDialogs = getDialogs
     getFolders = getFolders
+    _normalizeInputFolder = _normalizeInputFolder
     getPeerDialogs = getPeerDialogs
-    _parseDialogs = _parseDialogs
+    iterDialogs = iterDialogs
     setFoldersOrder = setFoldersOrder
     downloadAsBuffer = downloadAsBuffer
     downloadToFile = downloadToFile
@@ -3969,6 +4078,8 @@ export class TelegramClient extends BaseTelegramClient {
     getPrimaryInviteLink = getPrimaryInviteLink
     hideAllJoinRequests = hideAllJoinRequests
     hideJoinRequest = hideJoinRequest
+    iterInviteLinkMembers = iterInviteLinkMembers
+    iterInviteLinks = iterInviteLinks
     revokeInviteLink = revokeInviteLink
     closePoll = closePoll
     deleteMessages = deleteMessages

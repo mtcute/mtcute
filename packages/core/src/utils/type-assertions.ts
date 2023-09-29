@@ -44,7 +44,7 @@ export function hasPresentKey<K extends string | number | symbol>(k: K) {
  * files[0].imageUrl // TS will know this is present, because already it excluded the other union members.
  * ```
  */
-export function hasValueAtKey<K extends string | number | symbol, V>(k: K, v: V) {
+export function hasValueAtKey<const K extends string | number | symbol, const V>(k: K, v: V) {
     return function <T> (a: T & { [k in K]: unknown }): a is T & { [k in K]: V } {
         return a[k] === v
     }

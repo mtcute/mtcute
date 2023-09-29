@@ -18,14 +18,10 @@ export async function resolveMaybeDynamic<T>(val: MaybeDynamic<T>): Promise<T> {
 }
 
 export function makeArrayWithTotal<T>(arr: T[], total: number): ArrayWithTotal<T> {
-    Object.defineProperty(arr, 'total', {
-        value: total,
-        enumerable: false,
-        configurable: false,
-        writable: false,
-    })
+    const a = arr as ArrayWithTotal<T>
+    a.total = total
 
-    return arr as ArrayWithTotal<T>
+    return a
 }
 
 export function extractChannelIdFromUpdate(upd: tl.TypeUpdate): number | undefined {

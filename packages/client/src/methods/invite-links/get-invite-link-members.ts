@@ -1,7 +1,8 @@
 import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { ChatInviteLinkJoinedMember, InputPeerLike, PeersIndex, User } from '../../types'
+import { ArrayWithTotal, ChatInviteLinkMember, InputPeerLike, PeersIndex } from '../../types'
+import { makeArrayWithTotal, normalizeDate } from '../../utils'
 
 /**
  * Iterate over users who have joined
@@ -11,7 +12,7 @@ import { ChatInviteLinkJoinedMember, InputPeerLike, PeersIndex, User } from '../
  * @param params  Additional params
  * @internal
  */
-export async function* getInviteLinkMembers(
+export async function getInviteLinkMembers(
     this: TelegramClient,
     chatId: InputPeerLike,
     params: {
@@ -21,9 +22,21 @@ export async function* getInviteLinkMembers(
         link?: string
 
         /**
-         * Maximum number of users to return (by default returns all)
+         * Maximum number of users to return
+         *
+         * @default  100
          */
         limit?: number
+
+        /**
+         * Offset request/join date used as an anchor for pagination.
+         */
+        offsetDate?: Date | number
+
+        /**
+         * Offset user used as an anchor for pagination
+         */
+        offsetUser?: tl.TypeInputUser
 
         /**
          * Whether to get users who have requested to join
@@ -33,59 +46,36 @@ export async function* getInviteLinkMembers(
 
         /**
          * Search for a user in the pending join requests list
-         * (only works if {@link requested} is true)
+         * (if passed, {@link requested} is assumed to be true)
          *
          * Doesn't work when {@link link} is set (Telegram limitation)
          */
         requestedSearch?: string
     },
-): AsyncIterableIterator<ChatInviteLinkJoinedMember> {
+): Promise<ArrayWithTotal<ChatInviteLinkMember>> {
     const peer = await this.resolvePeer(chatId)
 
-    const limit = params.limit ?? Infinity
-    let current = 0
+    const { limit = 100, link, requestedSearch, requested = Boolean(requestedSearch) } = params
 
-    let offsetDate = 0
-    let offsetUser: tl.TypeInputUser = { _: 'inputUserEmpty' }
+    const { offsetUser = { _: 'inputUserEmpty' } } = params
 
-    for (;;) {
-        // for some reason ts needs annotation, idk
-        const res: tl.RpcCallReturn['messages.getChatInviteImporters'] = await this.call({
-            _: 'messages.getChatInviteImporters',
-            limit: Math.min(100, limit - current),
-            peer,
-            link: params.link,
-            requested: params.requested,
-            q: params.requestedSearch,
-            offsetDate,
-            offsetUser,
-        })
+    const offsetDate = normalizeDate(params.offsetDate) ?? 0
 
-        if (!res.importers.length) break
+    const res = await this.call({
+        _: 'messages.getChatInviteImporters',
+        limit,
+        peer,
+        link,
+        requested,
+        q: requestedSearch,
+        offsetDate,
+        offsetUser,
+    })
 
-        const peers = PeersIndex.from(res)
+    const peers = PeersIndex.from(res)
 
-        const last = res.importers[res.importers.length - 1]
-        offsetDate = last.date
-        offsetUser = {
-            _: 'inputUser',
-            userId: last.userId,
-            accessHash: (peers.user(last.userId) as tl.RawUser).accessHash!,
-        }
-
-        for (const it of res.importers) {
-            const user = new User(this, peers.user(it.userId))
-
-            yield {
-                user,
-                date: new Date(it.date * 1000),
-                isPendingRequest: it.requested!,
-                bio: it.about,
-                approvedBy: it.approvedBy,
-            }
-        }
-
-        current += res.importers.length
-        if (current >= limit) break
-    }
+    return makeArrayWithTotal(
+        res.importers.map((it) => new ChatInviteLinkMember(this, it, peers)),
+        res.count,
+    )
 }

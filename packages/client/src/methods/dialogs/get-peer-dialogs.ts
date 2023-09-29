@@ -38,7 +38,7 @@ export async function getPeerDialogs(
         ),
     })
 
-    const dialogs = this._parseDialogs(res)
+    const dialogs = Dialog.parseTlDialogs(this, res)
 
     return isSingle ? dialogs[0] : dialogs
 }

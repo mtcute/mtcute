@@ -1,15 +1,15 @@
 import Long from 'long'
 
-import { MtArgumentError, tl } from '@mtcute/core'
+import { MtUnsupportedError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { Dialog } from '../../types'
+import { Dialog, InputDialogFolder } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
 
 /**
  * Iterate over dialogs.
  *
- * Note that due to Telegram limitations,
+ * Note that due to Telegram API limitations,
  * ordering here can only be anti-chronological
  * (i.e. newest - first), and draft update date
  * is not considered when sorting.
@@ -17,7 +17,7 @@ import { normalizeDate } from '../../utils/misc-utils'
  * @param params  Fetch parameters
  * @internal
  */
-export async function* getDialogs(
+export async function* iterDialogs(
     this: TelegramClient,
     params?: {
         /**
@@ -38,7 +38,7 @@ export async function* getDialogs(
         /**
          * Limits the number of dialogs to be received.
          *
-         * Defaults to `Infinity`, i.e. all dialogs are fetched, ignored when `pinned=only`
+         * @default  `Infinity`, i.e. all dialogs are fetched
          */
         limit?: number
 
@@ -46,7 +46,7 @@ export async function* getDialogs(
          * Chunk size which will be passed to `messages.getDialogs`.
          * You shouldn't usually care about this.
          *
-         * Defaults to 100.
+         * @default  100.
          */
         chunkSize?: number
 
@@ -60,11 +60,11 @@ export async function* getDialogs(
          * `keep`, which will return pinned dialogs
          * ordered by date among other non-pinned dialogs.
          *
-         * Defaults to `include`.
-         *
          * > **Note**: When using `include` mode with folders,
          * > pinned dialogs will only be fetched if all offset
          * > parameters are unset.
+         *
+         * @default  `include`.
          */
         pinned?: 'include' | 'exclude' | 'only' | 'keep'
 
@@ -75,11 +75,13 @@ export async function* getDialogs(
          * `exclude` them from the list, or `only`
          * return archived dialogs
          *
-         * Defaults to `exclude`, ignored for folders since folders
+         * Ignored for folders, since folders
          * themselves contain information about archived chats.
          *
-         * > **Note**: when fetching `only` pinned dialogs
-         * > passing `keep` will act as passing `only`
+         * > **Note**: when `pinned=only`, `archived=keep` will act as `only`
+         * > because of Telegram API limitations.
+         *
+         * @default  `exclude`
          */
         archived?: 'keep' | 'exclude' | 'only'
 
@@ -102,9 +104,9 @@ export async function* getDialogs(
          * When a folder with given ID or title is not found,
          * {@link MtArgumentError} is thrown
          *
-         * By default fetches from "All" folder
+         * @default  <empty> (fetches from "All" folder)
          */
-        folder?: string | number | tl.RawDialogFilter
+        folder?: InputDialogFolder
 
         /**
          * Additional filtering for the dialogs.
@@ -118,49 +120,59 @@ export async function* getDialogs(
 ): AsyncIterableIterator<Dialog> {
     if (!params) params = {}
 
-    // fetch folder if needed
-    let filters: tl.TypeDialogFilter | undefined
+    const { limit = Infinity, chunkSize = 100, folder, filter, pinned = 'include' } = params
 
-    if (typeof params.folder === 'string' || typeof params.folder === 'number') {
-        const folders = await this.getFolders()
-        const found = folders.find((it) => {
-            if (it._ === 'dialogFilterDefault') {
-                return params!.folder === 0
-            }
+    let { offsetId = 0, offsetPeer = { _: 'inputPeerEmpty' }, archived = 'exclude' } = params
 
-            return it.id === params!.folder || it.title === params!.folder
-        })
+    let offsetDate = normalizeDate(params.offsetDate) ?? 0
 
-        if (!found) {
-            throw new MtArgumentError(`Could not find folder ${params.folder}`)
-        }
+    let localFilters_: tl.TypeDialogFilter | undefined
 
-        filters = found as tl.RawDialogFilter
-    } else {
-        filters = params.folder
+    if (folder) {
+        localFilters_ = await this._normalizeInputFolder(folder)
     }
 
-    if (params.filter) {
-        if (filters) {
-            filters = {
-                ...filters,
-                ...params.filter,
+    if (filter) {
+        if (localFilters_ && localFilters_._ !== 'dialogFilterDefault') {
+            localFilters_ = {
+                ...localFilters_,
+                ...filter,
             }
         } else {
-            filters = {
-                _: 'dialogFilterDefault',
+            localFilters_ = {
+                _: 'dialogFilter',
+                id: 0,
+                title: '',
+                pinnedPeers: [],
+                includePeers: [],
+                excludePeers: [],
+                ...params.filter,
             }
         }
+    }
+
+    if (localFilters_?._ === 'dialogFilterDefault') {
+        localFilters_ = undefined
+    }
+
+    if (localFilters_?._ === 'dialogFilterChatlist') {
+        throw new MtUnsupportedError('Shared chat folders are not supported yet')
+    }
+
+    const localFilters = localFilters_
+
+    if (localFilters) {
+        archived = localFilters.excludeArchived ? 'exclude' : 'keep'
     }
 
     const fetchPinnedDialogsFromFolder = async (): Promise<tl.messages.RawPeerDialogs | null> => {
-        if (!filters || filters._ === 'dialogFilterDefault' || !filters.pinnedPeers.length) {
+        if (!localFilters || !localFilters.pinnedPeers.length) {
             return null
         }
         const res = await this.call({
             _: 'messages.getPeerDialogs',
-            peers: filters.pinnedPeers.map((peer) => ({
-                _: 'inputDialogPeer',
+            peers: localFilters.pinnedPeers.map((peer) => ({
+                _: 'inputDialogPeer' as const,
                 peer,
             })),
         })
@@ -170,17 +182,10 @@ export async function* getDialogs(
         return res
     }
 
-    const pinned = params.pinned ?? 'include'
-    let archived = params.archived ?? 'exclude'
-
-    if (filters) {
-        archived = filters._ !== 'dialogFilterDefault' && filters.excludeArchived ? 'exclude' : 'keep'
-    }
-
     if (pinned === 'only') {
         let res
 
-        if (filters) {
+        if (localFilters) {
             res = await fetchPinnedDialogsFromFolder()
         } else {
             res = await this.call({
@@ -188,38 +193,36 @@ export async function* getDialogs(
                 folderId: archived === 'exclude' ? 0 : 1,
             })
         }
-        if (res) yield* this._parseDialogs(res)
+        if (res) yield* Dialog.parseTlDialogs(this, res, limit)
 
         return
     }
 
     let current = 0
-    const total = params.limit ?? Infinity
-    const chunkSize = Math.min(params.chunkSize ?? 100, total)
 
-    let offsetId = params.offsetId ?? 0
-    let offsetDate = normalizeDate(params.offsetDate) ?? 0
-    let offsetPeer = params.offsetPeer ?? { _: 'inputPeerEmpty' }
-
-    if (filters && filters._ !== 'dialogFilterDefault' && filters.pinnedPeers.length && pinned === 'include') {
+    if (
+        localFilters?.pinnedPeers.length &&
+        pinned === 'include' &&
+        offsetId === 0 &&
+        offsetDate === 0 &&
+        offsetPeer._ === 'inputPeerEmpty'
+    ) {
         const res = await fetchPinnedDialogsFromFolder()
 
         if (res) {
-            const dialogs = this._parseDialogs(res)
+            const dialogs = Dialog.parseTlDialogs(this, res, limit)
 
             for (const d of dialogs) {
                 yield d
-
-                if (++current >= total) return
+                if (++current >= limit) return
             }
         }
     }
-
     // if pinned is `only`, this wouldn't be reached
     // if pinned is `exclude`, we want to exclude them
     // if pinned is `include`, we already yielded them, so we also want to exclude them
     // if pinned is `keep`, we want to keep them
-    const filterFolder = filters ? Dialog.filterFolder(filters, pinned !== 'keep') : undefined
+    const filterFolder = localFilters ? Dialog.filterFolder(localFilters, pinned !== 'keep') : undefined
 
     let folderId
 
@@ -232,7 +235,8 @@ export async function* getDialogs(
     }
 
     for (;;) {
-        const dialogs = this._parseDialogs(
+        const dialogs = Dialog.parseTlDialogs(
+            this,
             await this.call({
                 _: 'messages.getDialogs',
                 excludePinned: params.pinned === 'exclude',
@@ -240,8 +244,7 @@ export async function* getDialogs(
                 offsetDate,
                 offsetId,
                 offsetPeer,
-
-                limit: chunkSize,
+                limit: filterFolder ? chunkSize : Math.min(limit - current, chunkSize),
                 hash: Long.ZERO,
             }),
         )
@@ -250,13 +253,13 @@ export async function* getDialogs(
         const last = dialogs[dialogs.length - 1]
         offsetPeer = last.chat.inputPeer
         offsetId = last.raw.topMessage
-        offsetDate = normalizeDate(last.lastMessage?.date) ?? 0
+        offsetDate = normalizeDate(last.lastMessage.date)!
 
         for (const d of dialogs) {
             if (filterFolder && !filterFolder(d)) continue
 
             yield d
-            if (++current >= total) return
+            if (++current >= limit) return
         }
     }
 }

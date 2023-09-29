@@ -1,11 +1,18 @@
 import { getMarkedPeerId, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { makeInspectable } from '../../utils'
+import { assertTypeIsNot, hasValueAtKey, makeInspectable } from '../../utils'
 import { MtMessageNotFoundError } from '../errors'
 import { Chat, PeersIndex } from '../peers'
 import { DraftMessage } from './draft-message'
 import { Message } from './message'
+
+/**
+ * Type used as an input for a folder in client methods
+ *
+ * You can pass folder object, id or title
+ */
+export type InputDialogFolder = string | number | tl.RawDialogFilter
 
 /**
  * A dialog.
@@ -20,6 +27,40 @@ export class Dialog {
         readonly _peers: PeersIndex,
         readonly _messages: Record<number, tl.TypeMessage>,
     ) {}
+
+    /**
+     * Parse a list of dialogs from a TL object
+     *
+     * @param client  Client instance
+     * @param dialogs  TL object
+     * @param limit  Maximum number of dialogs to parse
+     */
+    static parseTlDialogs(
+        client: TelegramClient,
+        dialogs: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs,
+        limit?: number,
+    ): Dialog[] {
+        assertTypeIsNot('parseDialogs', dialogs, 'messages.dialogsNotModified')
+
+        const peers = PeersIndex.from(dialogs)
+
+        const messages: Record<number, tl.TypeMessage> = {}
+        dialogs.messages.forEach((msg) => {
+            if (!msg.peerId) return
+
+            messages[getMarkedPeerId(msg.peerId)] = msg
+        })
+
+        const arr = dialogs.dialogs
+            .filter(hasValueAtKey('_', 'dialog'))
+            .map((it) => new Dialog(client, it, peers, messages))
+
+        if (limit) {
+            return arr.slice(0, limit)
+        }
+
+        return arr
+    }
 
     /**
      * Find pinned dialogs from a list of dialogs
@@ -183,7 +224,7 @@ export class Dialog {
     /**
      * The latest message sent in this chat
      */
-    get lastMessage(): Message | null {
+    get lastMessage(): Message {
         if (!this._lastMessage) {
             const cid = this.chat.id
 

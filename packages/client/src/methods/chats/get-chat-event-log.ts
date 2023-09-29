@@ -1,14 +1,14 @@
 import Long from 'long'
 
-import { assertNever, MaybeArray, tl } from '@mtcute/core'
+import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { ChatAction, ChatEvent, InputPeerLike, PeersIndex } from '../../types'
+import { ChatEvent, InputPeerLike, PeersIndex } from '../../types'
+import { InputChatEventFilters, normalizeChatEventFilters } from '../../types/peers/chat-event/filters'
 import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
- * Get chat event log ("Recent actions" in official
- * clients).
+ * Get chat event log ("Recent actions" in official clients).
  *
  * Only available for supergroups and channels, and
  * requires (any) administrator rights.
@@ -22,7 +22,7 @@ import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-
  * @param params
  * @internal
  */
-export async function* getChatEventLog(
+export async function getChatEventLog(
     this: TelegramClient,
     chatId: InputPeerLike,
     params?: {
@@ -57,165 +57,62 @@ export async function* getChatEventLog(
          * and when passing one or more action types,
          * they will be filtered locally.
          */
-        filters?: tl.TypeChannelAdminLogEventsFilter | MaybeArray<Exclude<ChatAction, null>['type']>
+        filters?: InputChatEventFilters
 
         /**
          * Limit the number of events returned.
          *
-         * Defaults to `Infinity`, i.e. all events are returned
+         * > Note: when using filters, there will likely be
+         * > less events returned than specified here.
+         * > This limit is only used to limit the number of
+         * > events to fetch from the server.
+         * >
+         * > If you need to limit the number of events
+         * > returned, use {@link iterChatEventLog} instead.
+         *
+         * @default  100
          */
         limit?: number
-
-        /**
-         * Chunk size, usually not needed.
-         *
-         * Defaults to `100`
-         */
-        chunkSize?: number
     },
-): AsyncIterableIterator<ChatEvent> {
+): Promise<ChatEvent[]> {
     if (!params) params = {}
 
     const channel = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
 
-    let current = 0
-    let maxId = params.maxId ?? Long.ZERO
-    const minId = params.minId ?? Long.ZERO
-    const query = params.query ?? ''
+    const { maxId = Long.ZERO, minId = Long.ZERO, query = '', limit = 100, users, filters } = params
 
-    const total = params.limit || Infinity
-    const chunkSize = Math.min(params.chunkSize ?? 100, total)
-
-    const admins: tl.TypeInputUser[] | undefined = params.users ?
-        await this.resolvePeerMany(params.users, normalizeToInputUser) :
+    const admins: tl.TypeInputUser[] | undefined = users ?
+        await this.resolvePeerMany(users, normalizeToInputUser) :
         undefined
 
-    let serverFilter: tl.Mutable<tl.TypeChannelAdminLogEventsFilter> | undefined = undefined
-    let localFilter: Record<string, true> | undefined = undefined
+    const { serverFilter, localFilter } = normalizeChatEventFilters(filters)
 
-    if (params.filters) {
-        if (typeof params.filters === 'string' || Array.isArray(params.filters)) {
-            let input = params.filters
-            if (!Array.isArray(input)) input = [input]
+    const res = await this.call({
+        _: 'channels.getAdminLog',
+        channel,
+        q: query,
+        eventsFilter: serverFilter,
+        admins,
+        maxId,
+        minId,
+        limit,
+    })
 
-            serverFilter = {
-                _: 'channelAdminLogEventsFilter',
-            }
-            localFilter = {}
+    if (!res.events.length) return []
 
-            input.forEach((type) => {
-                localFilter![type] = true
+    const peers = PeersIndex.from(res)
 
-                switch (type) {
-                    case 'user_joined':
-                        serverFilter!.join = true
-                        break
-                    case 'user_left':
-                        serverFilter!.leave = true
-                        break
-                    case 'user_invited':
-                        serverFilter!.invite = true
-                        break
-                    case 'title_changed':
-                    case 'description_changed':
-                    case 'linked_chat_changed':
-                    case 'location_changed':
-                    case 'photo_changed':
-                    case 'username_changed':
-                    case 'stickerset_changed':
-                        serverFilter!.info = true
-                        break
-                    case 'invites_toggled':
-                    case 'history_toggled':
-                    case 'signatures_toggled':
-                    case 'def_perms_changed':
-                        serverFilter!.settings = true
-                        break
-                    case 'msg_pinned':
-                        serverFilter!.pinned = true
-                        break
-                    case 'msg_edited':
-                    case 'poll_stopped':
-                        serverFilter!.edit = true
-                        break
-                    case 'msg_deleted':
-                        serverFilter!.delete = true
-                        break
-                    case 'user_perms_changed':
-                        serverFilter!.ban = true
-                        serverFilter!.unban = true
-                        serverFilter!.kick = true
-                        serverFilter!.unkick = true
-                        break
-                    case 'user_admin_perms_changed':
-                        serverFilter!.promote = true
-                        serverFilter!.demote = true
-                        break
-                    case 'slow_mode_changed':
-                    case 'ttl_changed':
-                        // not documented so idk, enable both
-                        serverFilter!.settings = true
-                        serverFilter!.info = true
-                        break
-                    case 'call_started':
-                    case 'call_ended':
-                        serverFilter!.groupCall = true
-                        break
-                    case 'call_setting_changed':
-                        // not documented so idk, enable all
-                        serverFilter!.groupCall = true
-                        serverFilter!.settings = true
-                        serverFilter!.info = true
-                        break
-                    case 'user_joined_invite':
-                        // not documented so idk, enable all
-                        serverFilter!.join = true
-                        serverFilter!.invite = true
-                        serverFilter!.invites = true
-                        break
-                    case 'invite_deleted':
-                    case 'invite_edited':
-                    case 'invite_revoked':
-                        serverFilter!.invites = true
-                        break
-                    default:
-                        assertNever(type)
-                }
-            })
-        } else {
-            serverFilter = params.filters
+    const results: ChatEvent[] = []
+
+    for (const evt of res.events) {
+        const parsed = new ChatEvent(this, evt, peers)
+
+        if (localFilter && (!parsed.action || !localFilter[parsed.action.type])) {
+            continue
         }
+
+        results.push(parsed)
     }
 
-    for (;;) {
-        const res = await this.call({
-            _: 'channels.getAdminLog',
-            channel,
-            q: query,
-            eventsFilter: serverFilter,
-            admins,
-            maxId,
-            minId,
-            limit: Math.min(chunkSize, total - current),
-        })
-
-        if (!res.events.length) break
-
-        const peers = PeersIndex.from(res)
-        const last = res.events[res.events.length - 1]
-        maxId = last.id
-
-        for (const evt of res.events) {
-            const parsed = new ChatEvent(this, evt, peers)
-
-            if (localFilter && (!parsed.action || !localFilter[parsed.action.type])) {
-                continue
-            }
-
-            current += 1
-            yield parsed
-
-            if (current >= total) break
-        }
-    }
+    return results
 }

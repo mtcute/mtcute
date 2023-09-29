@@ -1,8 +1,6 @@
-import { tl } from '@mtcute/core'
-import { assertTypeIsNot } from '@mtcute/core/utils'
-
 import { TelegramClient } from '../../client'
-import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
+import { ArrayWithTotal, ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
+import { makeArrayWithTotal, normalizeDate } from '../../utils'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
@@ -17,11 +15,17 @@ import { normalizeToInputUser } from '../../utils/peer-utils'
  * @param params
  * @internal
  */
-export async function* getInviteLinks(
+export async function getInviteLinks(
     this: TelegramClient,
     chatId: InputPeerLike,
-    adminId: InputPeerLike,
     params?: {
+        /**
+         * Only return this admin's links.
+         *
+         * @default `"self"`
+         */
+        admin?: InputPeerLike
+
         /**
          * Whether to fetch revoked invite links
          */
@@ -29,55 +33,43 @@ export async function* getInviteLinks(
 
         /**
          * Limit the number of invite links to be fetched.
-         * By default, all links are fetched.
+         *
+         * @default  100
          */
         limit?: number
 
         /**
-         * Size of chunks which are fetched. Usually not needed.
-         *
-         * Defaults to `100`
+         * Offset date used as an anchor for pagination.
          */
-        chunkSize?: number
+        offsetDate?: Date | number
+
+        /**
+         * Offset link used as an anchor for pagination
+         */
+        offsetLink?: string
     },
-): AsyncIterableIterator<ChatInviteLink> {
+): Promise<ArrayWithTotal<ChatInviteLink>> {
     if (!params) params = {}
 
-    let current = 0
-    const total = params.limit || Infinity
-    const chunkSize = Math.min(params.chunkSize ?? 100, total)
+    const { revoked = false, limit = Infinity, admin } = params
 
-    const peer = await this.resolvePeer(chatId)
-    const admin = normalizeToInputUser(await this.resolvePeer(adminId), adminId)
+    const offsetDate = normalizeDate(params.offsetDate)
+    const offsetLink = params.offsetLink
 
-    let offsetDate: number | undefined = undefined
-    let offsetLink: string | undefined = undefined
+    const res = await this.call({
+        _: 'messages.getExportedChatInvites',
+        peer: await this.resolvePeer(chatId),
+        revoked,
+        adminId: admin ? normalizeToInputUser(await this.resolvePeer(admin), admin) : { _: 'inputUserSelf' },
+        limit,
+        offsetDate,
+        offsetLink,
+    })
 
-    for (;;) {
-        const res: tl.RpcCallReturn['messages.getExportedChatInvites'] = await this.call({
-            _: 'messages.getExportedChatInvites',
-            peer,
-            adminId: admin,
-            limit: Math.min(chunkSize, total - current),
-            offsetDate,
-            offsetLink,
-        })
+    const peers = PeersIndex.from(res)
 
-        if (!res.invites.length) break
-
-        const peers = PeersIndex.from(res)
-
-        const last = res.invites[res.invites.length - 1]
-
-        assertTypeIsNot('getInviteLinks', last, 'chatInvitePublicJoinRequests')
-        offsetDate = last.date
-        offsetLink = last.link
-
-        for (const it of res.invites) {
-            yield new ChatInviteLink(this, it, peers)
-        }
-
-        current += res.invites.length
-        if (current >= total) break
-    }
+    return makeArrayWithTotal(
+        res.invites.map((it) => new ChatInviteLink(this, it, peers)),
+        res.count,
+    )
 }

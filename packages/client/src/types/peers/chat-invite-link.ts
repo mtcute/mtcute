@@ -6,32 +6,6 @@ import { makeInspectable } from '../../utils'
 import { PeersIndex } from './index'
 import { User } from './user'
 
-export interface ChatInviteLinkJoinedMember {
-    /**
-     * User who joined the chat
-     */
-    user: User
-
-    /**
-     * Date when the user joined the chat
-     */
-    date: Date
-
-    /**
-     * Whether the user currently has a pending join request
-     */
-    isPendingRequest: boolean
-    /**
-     * For users with pending requests,
-     * contains bio of the user that requested to join
-     */
-    bio?: string
-    /**
-     * The administrator that approved the join request of the user
-     */
-    approvedBy?: number
-}
-
 /**
  * An invite link
  */
