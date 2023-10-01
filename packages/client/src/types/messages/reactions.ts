@@ -5,6 +5,31 @@ import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { PeersIndex, User } from '../peers'
 
+/**
+ * Emoji describing a reaction.
+ *
+ * Either a `string` with a unicode emoji, or a `tl.Long` for a custom emoji
+ */
+export type InputReaction = string | tl.Long
+
+export function normalizeInputReaction(reaction?: InputReaction | null): tl.TypeReaction {
+    if (typeof reaction === 'string') {
+        return {
+            _: 'reactionEmoji',
+            emoticon: reaction,
+        }
+    } else if (reaction) {
+        return {
+            _: 'reactionCustomEmoji',
+            documentId: reaction,
+        }
+    }
+
+    return {
+        _: 'reactionEmpty',
+    }
+}
+
 export class PeerReaction {
     constructor(
         readonly client: TelegramClient,

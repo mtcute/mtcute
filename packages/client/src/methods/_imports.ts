@@ -41,6 +41,7 @@ import {
     InputInlineResult,
     InputMediaLike,
     InputPeerLike,
+    InputReaction,
     InputStickerSetItem,
     MaybeDynamic,
     Message,

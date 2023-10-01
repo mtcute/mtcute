@@ -224,6 +224,7 @@ import {
     InputInlineResult,
     InputMediaLike,
     InputPeerLike,
+    InputReaction,
     InputStickerSetItem,
     MaybeDynamic,
     Message,
@@ -1216,7 +1217,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Defaults to `''` (empty string)
              *
              * > **Note**: Only used for these values of `filter`:
-             * > `all`, `banned`, `restricted`, `contacts`
+             * > `all, banned, restricted, mention, contacts`
              */
             query?: string
 
@@ -2674,12 +2675,7 @@ export interface TelegramClient extends BaseTelegramClient {
             /**
              * Get only reactions with the specified emoji
              */
-            emoji?: string
-
-            /**
-             * Get only reactions with the specified custom emoji
-             */
-            customEmoji?: tl.Long
+            emoji?: InputReaction
 
             /**
              * Limit the number of events returned.
@@ -3186,16 +3182,11 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat ID with the message to react to
      * @param message  Message ID to react to
-     * @param emoji  Reaction emoji (if `tl.Long` then this is a custom emoji) or `null` to remove
+     * @param emoji  Reaction emoji (or `null` to remove reaction)
      * @param big  (default: `false`) Whether to use a big reaction
      * @returns  Message to which the reaction was sent
      */
-    sendReaction(
-        chatId: InputPeerLike,
-        message: number,
-        emoji: string | tl.Long | null,
-        big?: boolean,
-    ): Promise<Message>
+    sendReaction(chatId: InputPeerLike, message: number, emoji?: InputReaction | null, big?: boolean): Promise<Message>
     /**
      * Send s previously scheduled message.
      *

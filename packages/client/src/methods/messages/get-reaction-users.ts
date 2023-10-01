@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { InputPeerLike, PeerReaction, PeersIndex } from '../../types'
+import { InputPeerLike, InputReaction, normalizeInputReaction, PeerReaction, PeersIndex } from '../../types'
 
 /**
  * Get users who have reacted to the message.
@@ -19,12 +19,7 @@ export async function* getReactionUsers(
         /**
          * Get only reactions with the specified emoji
          */
-        emoji?: string
-
-        /**
-         * Get only reactions with the specified custom emoji
-         */
-        customEmoji?: tl.Long
+        emoji?: InputReaction
 
         /**
          * Limit the number of events returned.
@@ -50,23 +45,7 @@ export async function* getReactionUsers(
     const total = params.limit || Infinity
     const chunkSize = Math.min(params.chunkSize ?? 100, total)
 
-    let reaction: tl.TypeReaction
-
-    if (params.customEmoji) {
-        reaction = {
-            _: 'reactionCustomEmoji',
-            documentId: params.customEmoji,
-        }
-    } else if (params.emoji) {
-        reaction = {
-            _: 'reactionEmoji',
-            emoticon: params.emoji,
-        }
-    } else {
-        reaction = {
-            _: 'reactionEmpty',
-        }
-    }
+    const reaction = normalizeInputReaction(params.emoji)
 
     for (;;) {
         const res: tl.RpcCallReturn['messages.getMessageReactionsList'] = await this.call({
