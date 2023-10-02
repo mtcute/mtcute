@@ -18,6 +18,7 @@ import {
     removeFromLongArray,
 } from '../utils'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto'
+import { reportUnknownError } from '../utils/platform/error-reporting'
 import { doAuthorization } from './authorization'
 import { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session'
 import { PersistentConnection, PersistentConnectionParams } from './persistent-connection'
@@ -29,6 +30,7 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
     initConnection: tl.RawInitConnectionRequest
     inactivityTimeout?: number
     niceStacks?: boolean
+    enableErrorReporting: boolean
     layer: number
     disableUpdates?: boolean
     withUpdates?: boolean
@@ -758,6 +760,10 @@ export class SessionConnection extends PersistentConnection {
 
             if (this.params.niceStacks !== false) {
                 makeNiceStack(error, rpc.stack!, rpc.method)
+            }
+
+            if (error.unknown && this.params.enableErrorReporting) {
+                reportUnknownError(this.log, error, rpc.method)
             }
 
             rpc.promise.reject(error)

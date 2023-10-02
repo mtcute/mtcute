@@ -33,6 +33,7 @@ export interface NetworkManagerParams {
     crypto: ICryptoProvider
     log: Logger
 
+    enableErrorReporting: boolean
     apiId: number
     initConnectionOptions?: Partial<Omit<tl.RawInitConnectionRequest, 'apiId' | 'query'>>
     transport?: TransportFactory
@@ -156,6 +157,7 @@ export class DcConnectionManager {
         isMainConnection: false,
         isMainDcConnection: this.isPrimary,
         inactivityTimeout: this.manager.params.inactivityTimeout ?? 60_000,
+        enableErrorReporting: this.manager.params.enableErrorReporting,
     })
 
     private _log = this.manager._log.create('dc-manager')

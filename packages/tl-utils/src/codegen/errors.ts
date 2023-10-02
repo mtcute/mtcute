@@ -8,6 +8,7 @@ class RpcError extends Error {
         super(_descriptionsMap[text] || 'Unknown RPC error: [' + code + ':' + text + ']');
         this.code = code;
         this.text = text;
+        this.unknown = !_descriptionsMap[text];
     }
 
     static is(err, text) { return err.constructor === RpcError && (!text || err.text === text); }
@@ -44,6 +45,7 @@ export class RpcError extends Error {
 
     readonly code: number;
     readonly text: MtErrorText;
+    readonly unknown: boolean;
     constructor(code: number, text: MtErrorText);
 
     is<const T extends MtErrorText>(text: T): this is RpcErrorWithArgs<T>;

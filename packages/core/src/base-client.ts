@@ -132,6 +132,18 @@ export interface BaseTelegramClientOptions {
     disableUpdates?: boolean
 
     /**
+     * mtcute can send all unknown RPC errors to [danog](https://github.com/danog)'s
+     * [error reporting service](https://rpc.pwrtelegram.xyz/).
+     *
+     * This is fully anonymous (except maybe IP) and is only used to improve the library
+     * and developer experience for everyone working with MTProto. This is fully opt-in,
+     * and if you're too paranoid, you can disable it by manually passing `enableErrorReporting: false` to the client.
+     *
+     * @default false
+     */
+    enableErrorReporting?: boolean
+
+    /**
      * If true, RPC errors will have a stack trace of the initial `.call()`
      * or `.sendForResult()` call position, which drastically improves
      * debugging experience.<br>
@@ -288,6 +300,7 @@ export class BaseTelegramClient extends EventEmitter {
                 isPremium: false,
                 useIpv6: Boolean(opts.useIpv6),
                 keepAliveAction: this._keepAliveAction.bind(this),
+                enableErrorReporting: opts.enableErrorReporting ?? false,
                 ...(opts.network ?? {}),
             },
             this._config,
