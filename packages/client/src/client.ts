@@ -74,6 +74,8 @@ import { setChatPhoto } from './methods/chats/set-chat-photo'
 import { setChatTitle } from './methods/chats/set-chat-title'
 import { setChatUsername } from './methods/chats/set-chat-username'
 import { setSlowMode } from './methods/chats/set-slow-mode'
+import { toggleJoinRequests } from './methods/chats/toggle-join-requests'
+import { toggleJoinToSend } from './methods/chats/toggle-join-to-send'
 import { unarchiveChats } from './methods/chats/unarchive-chats'
 import { unbanChatMember } from './methods/chats/unban-chat-member'
 import { addContact } from './methods/contacts/add-contact'
@@ -1477,6 +1479,26 @@ export interface TelegramClient extends BaseTelegramClient {
      *   Valid values are: `0 (off), 10, 30, 60 (1m), 300 (5m), 900 (15m) or 3600 (1h)`
      */
     setSlowMode(chatId: InputPeerLike, seconds?: number): Promise<void>
+    /**
+     * Set whether a channel/supergroup has join requests enabled.
+     *
+     * > **Note**: this method only affects primary invite links.
+     * > Additional invite links may exist with the opposite setting.
+     *
+     * @param chatId  Chat ID or username
+     * @param enabled  (default: `false`) Whether join requests should be enabled
+     */
+    toggleJoinRequests(chatId: InputPeerLike, enabled?: boolean): Promise<void>
+    /**
+     * Set whether a channel/supergroup has join-to-send setting enabled.
+     *
+     * This only affects discussion groups where users can send messages
+     * without joining the group.
+     *
+     * @param chatId  Chat ID or username
+     * @param enabled  (default: `false`) Whether join-to-send setting should be enabled
+     */
+    toggleJoinToSend(chatId: InputPeerLike, enabled?: boolean): Promise<void>
     /**
      * Unarchive one or more chats
      *
@@ -4145,6 +4167,8 @@ export class TelegramClient extends BaseTelegramClient {
     setChatTitle = setChatTitle
     setChatUsername = setChatUsername
     setSlowMode = setSlowMode
+    toggleJoinRequests = toggleJoinRequests
+    toggleJoinToSend = toggleJoinToSend
     unarchiveChats = unarchiveChats
     unbanChatMember = unbanChatMember
     unrestrictChatMember = unbanChatMember

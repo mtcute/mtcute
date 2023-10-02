@@ -7,6 +7,7 @@ import { ChatInviteLink } from '../chat-invite-link'
 import { ChatLocation } from '../chat-location'
 import { ChatMember } from '../chat-member'
 import { ChatPermissions } from '../chat-permissions'
+import { User } from '../user'
 
 /** A user has joined the group (in the case of big groups, info of the user that has joined isn't shown) */
 export interface ChatActionUserJoined {
@@ -19,6 +20,17 @@ export interface ChatActionUserJoinedInvite {
 
     /** Invite link user to join */
     link: ChatInviteLink
+}
+
+/** A user has joined the group using an invite link and was approved by an admin */
+export interface ChatActionUserJoinedApproved {
+    type: 'user_joined_approved'
+
+    /** Invite link user to join */
+    link: ChatInviteLink
+
+    /** User who approved the join */
+    approvedBy: User
 }
 
 /** A user has left the group (in the case of big groups, info of the user that has joined isn't shown) */
@@ -315,6 +327,7 @@ export type ChatAction =
     | ChatActionInviteLinkDeleted
     | ChatActionInviteLinkEdited
     | ChatActionInviteLinkRevoked
+    | ChatActionUserJoinedApproved
     | ChatActionTtlChanged
     | null
 
@@ -324,8 +337,7 @@ export function _actionFromTl(
     client: TelegramClient,
     peers: PeersIndex,
 ): ChatAction {
-    // todo - MTQ-78
-    // channelAdminLogEventActionParticipantJoinByRequest#afb6144a invite:ExportedChatInvite approved_by:long
+    // todo - MTQ-84
     // channelAdminLogEventActionToggleNoForwards#cb2ac766 new_value:Bool = ChannelAdminLogEventAction;
     // todo - MTQ-57
     // channelAdminLogEventActionChangeUsernames#f04fb3a9 prev_value:Vector<string> new_value:Vector<string>
@@ -501,6 +513,12 @@ export function _actionFromTl(
                 type: 'ttl_changed',
                 old: e.prevValue,
                 new: e.newValue,
+            }
+        case 'channelAdminLogEventActionParticipantJoinByRequest':
+            return {
+                type: 'user_joined_approved',
+                link: new ChatInviteLink(client, e.invite, peers),
+                approvedBy: new User(client, peers.user(e.approvedBy)),
             }
         default:
             return null

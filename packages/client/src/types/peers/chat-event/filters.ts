@@ -32,6 +32,8 @@ export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEve
 
             switch (type) {
                 case 'user_joined':
+                case 'user_joined_invite':
+                case 'user_joined_approved':
                     serverFilter.join = true
                     break
                 case 'user_left':
@@ -47,6 +49,8 @@ export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEve
                 case 'photo_changed':
                 case 'username_changed':
                 case 'stickerset_changed':
+                case 'slow_mode_changed':
+                case 'ttl_changed':
                     serverFilter.info = true
                     break
                 case 'invites_toggled':
@@ -75,12 +79,6 @@ export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEve
                     serverFilter.promote = true
                     serverFilter.demote = true
                     break
-                case 'slow_mode_changed':
-                case 'ttl_changed':
-                    // not documented so idk, enable both
-                    serverFilter.settings = true
-                    serverFilter.info = true
-                    break
                 case 'call_started':
                 case 'call_ended':
                     serverFilter.groupCall = true
@@ -90,12 +88,6 @@ export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEve
                     serverFilter.groupCall = true
                     serverFilter.settings = true
                     serverFilter.info = true
-                    break
-                case 'user_joined_invite':
-                    // not documented so idk, enable all
-                    serverFilter.join = true
-                    serverFilter.invite = true
-                    serverFilter.invites = true
                     break
                 case 'invite_deleted':
                 case 'invite_edited':

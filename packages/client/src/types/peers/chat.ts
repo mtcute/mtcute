@@ -202,6 +202,16 @@ export class Chat {
         return this.peer._ === 'user' && this.peer.contact!
     }
 
+    /** Whether this group is a channel/supergroup with join requests enabled */
+    get hasJoinRequests(): boolean {
+        return this.peer._ === 'channel' && this.peer.joinRequest!
+    }
+
+    /** Whether this group is a supergroup with join-to-send rule enabled */
+    get hasJoinToSend(): boolean {
+        return this.peer._ === 'channel' && this.peer.joinToSend!
+    }
+
     /**
      * Title, for supergroups, channels and groups
      */
