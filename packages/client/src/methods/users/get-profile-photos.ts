@@ -1,9 +1,11 @@
 import Long from 'long'
 
 import { tl } from '@mtcute/core'
+import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
-import { InputPeerLike, Photo } from '../../types'
+import { ArrayPaginated, InputPeerLike, Photo } from '../../types'
+import { makeArrayPaginated } from '../../utils'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 
 /**
@@ -20,27 +22,37 @@ export async function getProfilePhotos(
         /**
          * Offset from which to fetch.
          *
-         * Defaults to `0`
+         * @default  `0`
          */
         offset?: number
 
         /**
          * Maximum number of items to fetch (up to 100)
          *
-         * Defaults to `100`
+         * @default  `100`
          */
         limit?: number
     },
-): Promise<Photo[]> {
+): Promise<ArrayPaginated<Photo, number>> {
     if (!params) params = {}
+
+    const { offset = 0, limit = 100 } = params
 
     const res = await this.call({
         _: 'photos.getUserPhotos',
         userId: normalizeToInputUser(await this.resolvePeer(userId), userId),
-        offset: params.offset ?? 0,
-        limit: params.limit ?? 100,
+        offset,
+        limit,
         maxId: Long.ZERO,
     })
 
-    return res.photos.map((it) => new Photo(this, it as tl.RawPhoto))
+    return makeArrayPaginated(
+        res.photos.map((it) => {
+            assertTypeIs('getProfilePhotos', it, 'photo')
+
+            return new Photo(this, it)
+        }),
+        (res as tl.photos.RawPhotosSlice).count ?? res.photos.length,
+        offset + res.photos.length,
+    )
 }

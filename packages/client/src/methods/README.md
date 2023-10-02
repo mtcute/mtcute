@@ -63,18 +63,18 @@ function _initializeAwesomeExtension(this: TelegramClient) {
 }
 ```
 
-## `@returns-exported`
+## `@exported`
 
-Used as a first statement inside an exported function's body to indicate that this method returns an object of type
-which is exported from the same file.
+Used as a first statement inside an exported function's body to indicate that 
+this exported type should be imported from the client
 
 Example:
 
 ```typescript
+// @exported
 export type FooOrBar = Foo | Bar
 
 export function getFooOrBar(this: TelegramClient): FooOrBar {
-    // @returns-exported
     return new Foo()
 }
 ```

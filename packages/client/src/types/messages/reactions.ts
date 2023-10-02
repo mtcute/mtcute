@@ -1,3 +1,5 @@
+import Long from 'long'
+
 import { getMarkedPeerId, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
@@ -10,7 +12,7 @@ import { PeersIndex, User } from '../peers'
  *
  * Either a `string` with a unicode emoji, or a `tl.Long` for a custom emoji
  */
-export type InputReaction = string | tl.Long
+export type InputReaction = string | tl.Long | tl.TypeReaction
 
 export function normalizeInputReaction(reaction?: InputReaction | null): tl.TypeReaction {
     if (typeof reaction === 'string') {
@@ -18,11 +20,13 @@ export function normalizeInputReaction(reaction?: InputReaction | null): tl.Type
             _: 'reactionEmoji',
             emoticon: reaction,
         }
-    } else if (reaction) {
+    } else if (Long.isLong(reaction)) {
         return {
             _: 'reactionCustomEmoji',
             documentId: reaction,
         }
+    } else if (reaction) {
+        return reaction
     }
 
     return {
@@ -138,13 +142,6 @@ export class MessageReactions {
         return (this._recentReactions ??= this.raw.recentReactions.map(
             (reaction) => new PeerReaction(this.client, reaction, this._peers),
         ))
-    }
-
-    /**
-     * Get the users who reacted to this message
-     */
-    getUsers(params?: Parameters<TelegramClient['getReactionUsers']>[2]): AsyncIterableIterator<PeerReaction> {
-        return this.client.getReactionUsers(this.messageId, this.chatId, params)
     }
 }
 

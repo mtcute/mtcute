@@ -1,7 +1,16 @@
-import { tl } from '@mtcute/core'
-
 import { TelegramClient } from '../../client'
-import { InputPeerLike, InputReaction, normalizeInputReaction, PeerReaction, PeersIndex } from '../../types'
+import {
+    ArrayPaginated,
+    InputPeerLike,
+    InputReaction,
+    normalizeInputReaction,
+    PeerReaction,
+    PeersIndex,
+} from '../../types'
+import { makeArrayPaginated } from '../../utils'
+
+// @exported
+export type GetReactionUsersOffset = string
 
 /**
  * Get users who have reacted to the message.
@@ -11,7 +20,7 @@ import { InputPeerLike, InputReaction, normalizeInputReaction, PeerReaction, Pee
  * @param params
  * @internal
  */
-export async function* getReactionUsers(
+export async function getReactionUsers(
     this: TelegramClient,
     chatId: InputPeerLike,
     messageId: number,
@@ -22,54 +31,40 @@ export async function* getReactionUsers(
         emoji?: InputReaction
 
         /**
-         * Limit the number of events returned.
+         * Limit the number of users returned.
          *
-         * Defaults to `Infinity`, i.e. all events are returned
+         * @default  100
          */
         limit?: number
 
         /**
-         * Chunk size, usually not needed.
-         *
-         * Defaults to `100`
+         * Offset for pagination
          */
-        chunkSize?: number
+        offset?: GetReactionUsersOffset
     },
-): AsyncIterableIterator<PeerReaction> {
+): Promise<ArrayPaginated<PeerReaction, GetReactionUsersOffset>> {
     if (!params) params = {}
+
+    const { limit = 100, offset, emoji } = params
 
     const peer = await this.resolvePeer(chatId)
 
-    let current = 0
-    let offset: string | undefined = undefined
-    const total = params.limit || Infinity
-    const chunkSize = Math.min(params.chunkSize ?? 100, total)
+    const reaction = normalizeInputReaction(emoji)
 
-    const reaction = normalizeInputReaction(params.emoji)
+    const res = await this.call({
+        _: 'messages.getMessageReactionsList',
+        peer,
+        id: messageId,
+        reaction,
+        limit,
+        offset,
+    })
 
-    for (;;) {
-        const res: tl.RpcCallReturn['messages.getMessageReactionsList'] = await this.call({
-            _: 'messages.getMessageReactionsList',
-            peer,
-            id: messageId,
-            reaction,
-            limit: Math.min(chunkSize, total - current),
-            offset,
-        })
+    const peers = PeersIndex.from(res)
 
-        if (!res.reactions.length) break
-
-        offset = res.nextOffset
-
-        const peers = PeersIndex.from(res)
-
-        for (const reaction of res.reactions) {
-            const parsed = new PeerReaction(this, reaction, peers)
-
-            current += 1
-            yield parsed
-
-            if (current >= total) break
-        }
-    }
+    return makeArrayPaginated(
+        res.reactions.map((it) => new PeerReaction(this, it, peers)),
+        res.count,
+        res.nextOffset,
+    )
 }

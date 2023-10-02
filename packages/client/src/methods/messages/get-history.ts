@@ -1,126 +1,130 @@
 import Long from 'long'
 
+import { tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, PeersIndex } from '../../types'
-import { normalizeDate } from '../../utils/misc-utils'
+import { ArrayPaginated, InputPeerLike, Message, PeersIndex } from '../../types'
+import { makeArrayPaginated } from '../../utils'
+
+// @exported
+export interface GetHistoryOffset {
+    id: number
+    date: number
+}
+
+const defaultOffset: GetHistoryOffset = {
+    id: 0,
+    date: 0,
+}
 
 /**
- * Iterate through a chat history sequentially.
+ * Get chat history.
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
  * @param params  Additional fetch parameters
  * @internal
  */
-export async function* getHistory(
+export async function getHistory(
     this: TelegramClient,
     chatId: InputPeerLike,
     params?: {
         /**
          * Limits the number of messages to be retrieved.
          *
-         * By default, no limit is applied and all messages
-         * are returned.
+         * @default  100
          */
         limit?: number
 
         /**
-         * Sequential number of the first message to be returned.
-         * Defaults to 0 (most recent message).
-         *
-         * Negative values are also accepted and are useful
-         * in case you set `offsetId` or `offsetDate`.
+         * Offset for pagination
          */
-        offset?: number
+        offset?: GetHistoryOffset
 
         /**
-         * Pass a message identifier as an offset to retrieve
-         * only older messages starting from that message
+         * Additional offset from {@link offset}, in resulting messages.
+         *
+         * This can be used for advanced use cases, like:
+         * - Loading 20 messages newer than message with ID `MSGID`:
+         *   `offset = MSGID, addOffset = -20, limit = 20`
+         * - Loading 20 messages around message with ID `MSGID`:
+         *   `offset = MSGID, addOffset = -10, limit = 20`
+         *
+         * @default  `0` (disabled)
          */
-        offsetId?: number
+
+        addOffset?: number
 
         /**
          * Minimum message ID to return
          *
-         * Defaults to `0` (disabled).
+         * @default  `0` (disabled).
          */
         minId?: number
 
         /**
          * Maximum message ID to return.
          *
-         * > *Seems* to work the same as {@link offsetId}
+         * Unless {@link addOffset} is used, this will work the same as {@link offset}.
          *
-         * Defaults to `0` (disabled).
+         * @default  `0` (disabled).
          */
         maxId?: number
 
         /**
-         * Pass a date (`Date` or Unix time in ms) as an offset to retrieve
-         * only older messages starting from that date.
-         */
-        offsetDate?: number | Date
-
-        /**
-         * Pass `true` to retrieve messages in reversed order (from older to recent)
+         * Whether to retrieve messages in reversed order (from older to recent),
+         * starting from {@link offset} (inclusive).
+         *
+         * > **Note**: Using `reverse=true` requires you to pass offset from which to start
+         * > fetching the messages "downwards". If you call `getHistory` with `reverse=true`
+         * > and without any offset, it will return an empty array.
+         *
+         * @default false
          */
         reverse?: boolean
-
-        /**
-         * Chunk size. Usually you shouldn't care about this.
-         *
-         * Defaults to `100`
-         */
-        chunkSize?: number
     },
-): AsyncIterableIterator<Message> {
+): Promise<ArrayPaginated<Message, GetHistoryOffset>> {
     if (!params) params = {}
 
-    let current = 0
-    const total = params.limit || Infinity
-    const limit = Math.min(params.chunkSize || 100, total)
+    const {
+        limit = 100,
+        offset: { id: offsetId = 0, date: offsetDate = 0 } = defaultOffset,
+        addOffset = 0,
+        minId = 0,
+        maxId = 0,
+        reverse = false,
+    } = params
 
-    const minId = params.minId || 0
-    const maxId = params.maxId || 0
+    const addOffsetAdjusted = addOffset + (reverse ? -limit : 0)
 
-    let offsetId = params.offsetId ?? (params.reverse && !params.offsetDate ? 1 : 0)
-    const offsetDate = normalizeDate(params.offsetDate) || 0
-    const baseOffset = -(params.reverse ? limit : 0)
-    let addOffset = (params.offset ? params.offset * (params.reverse ? -1 : 1) : 0) + baseOffset
-
-    // resolve peer once and pass an InputPeer afterwards
     const peer = await this.resolvePeer(chatId)
 
-    for (;;) {
-        const res = await this.call({
-            _: 'messages.getHistory',
-            peer,
-            offsetId,
-            offsetDate,
-            addOffset,
-            limit: Math.min(limit, total - current),
-            maxId,
-            minId,
-            hash: Long.ZERO,
-        })
+    const res = await this.call({
+        _: 'messages.getHistory',
+        peer,
+        offsetId,
+        offsetDate,
+        addOffset: addOffsetAdjusted,
+        limit,
+        maxId,
+        minId,
+        hash: Long.ZERO,
+    })
 
-        assertTypeIsNot('getHistory', res, 'messages.messagesNotModified')
+    assertTypeIsNot('getHistory', res, 'messages.messagesNotModified')
 
-        const peers = PeersIndex.from(res)
+    const peers = PeersIndex.from(res)
+    const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(this, msg, peers))
 
-        const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(this, msg, peers))
+    if (reverse) msgs.reverse()
 
-        if (!msgs.length) break
+    const last = msgs[msgs.length - 1]
+    const next = last ?
+        {
+            id: last.id + (reverse ? 1 : 0),
+            date: last.raw.date,
+        } :
+        undefined
 
-        if (params.reverse) msgs.reverse()
-
-        offsetId = msgs[msgs.length - 1].id + (params.reverse ? 1 : 0)
-        addOffset = baseOffset
-
-        yield* msgs
-        current += msgs.length
-
-        if (current >= total) break
-    }
+    return makeArrayPaginated(msgs, (res as tl.messages.RawMessagesSlice).count ?? msgs.length, next)
 }

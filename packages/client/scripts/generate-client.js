@@ -33,6 +33,7 @@ async function addSingleMethod(state, fileName) {
     const fileFullText = await fs.promises.readFile(fileName, 'utf-8')
     const program = ts.createSourceFile(path.basename(fileName), fileFullText, ts.ScriptTarget.ES2018, true)
     const relPath = path.relative(targetDir, fileName).replace(/\\/g, '/') // replace path delim to unix
+    const module = `./${relPath.replace(/\.ts$/, '')}`
 
     state.files[relPath] = fileFullText
 
@@ -53,6 +54,7 @@ async function addSingleMethod(state, fileName) {
 
     for (const stmt of program.statements) {
         const isCopy = checkForFlag(stmt, '@copy')
+        const isTypeExported = checkForFlag(stmt, '@exported')
 
         if (stmt.kind === ts.SyntaxKind.ImportDeclaration) {
             if (!isCopy) continue
@@ -159,19 +161,6 @@ async function addSingleMethod(state, fileName) {
                 )
             }
 
-            const returnsExported = (
-                stmt.body ?
-                    ts.getLeadingCommentRanges(fileFullText, stmt.body.pos + 2) ||
-                      (stmt.statements &&
-                          stmt.statements.length &&
-                          ts.getLeadingCommentRanges(fileFullText, stmt.statements[0].pos)) ||
-                      [] :
-                    []
-            )
-                .map((range) => fileFullText.substring(range.pos, range.end))
-                .join('\n')
-                .includes('@returns-exported')
-
             // overloads
             const isOverload = !stmt.body
 
@@ -193,20 +182,11 @@ async function addSingleMethod(state, fileName) {
                     hasOverloads: hasOverloads[name] && !isOverload,
                 })
 
-                const module = `./${relPath.replace(/\.ts$/, '')}`
-
                 if (!(module in state.imports)) {
                     state.imports[module] = new Set()
                 }
 
                 state.imports[module].add(name)
-
-                if (returnsExported) {
-                    let returnType = stmt.type.getText()
-                    let m = returnType.match(/^Promise<(.+)>$/)
-                    if (m) returnType = m[1]
-                    state.imports[module].add(returnType)
-                }
             }
         } else if (stmt.kind === ts.SyntaxKind.InterfaceDeclaration) {
             if (isCopy) {
@@ -217,8 +197,22 @@ async function addSingleMethod(state, fileName) {
                 continue
             }
 
+            const isExported = (stmt.modifiers || []).find((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
+
+            if (isTypeExported) {
+                if (!isExported) {
+                    throwError(stmt, fileName, 'Exported interfaces must be exported')
+                }
+
+                if (!(module in state.imports)) {
+                    state.imports[module] = new Set()
+                }
+
+                state.imports[module].add(stmt.name.escapedText)
+                continue
+            }
+
             if (!checkForFlag(stmt, '@extension')) continue
-            const isExported = (stmt.modifiers || []).find((mod) => mod.kind === 92 /* ExportKeyword */)
 
             if (isExported) {
                 throwError(isExported, fileName, 'Extension interfaces must not be imported')
@@ -233,8 +227,22 @@ async function addSingleMethod(state, fileName) {
                     code: member.getText(),
                 })
             }
+        } else if (stmt.kind === ts.SyntaxKind.TypeAliasDeclaration && isTypeExported) {
+            const isExported = (stmt.modifiers || []).find((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
+
+            if (!isExported) {
+                throwError(stmt, fileName, 'Exported type aliases must be exported')
+            }
+
+            if (!(module in state.imports)) {
+                state.imports[module] = new Set()
+            }
+
+            state.imports[module].add(stmt.name.escapedText)
         } else if (isCopy) {
             state.copy.push({ from: relPath, code: stmt.getFullText().trim() })
+        } else if (isTypeExported) {
+            throwError(stmt, fileName, 'Only functions and interfaces can be exported')
         }
     }
 }

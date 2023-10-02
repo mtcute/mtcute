@@ -4,8 +4,11 @@ import { tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, PeersIndex, SearchFilters } from '../../types'
-import { normalizeDate } from '../../utils/misc-utils'
+import { ArrayPaginated, InputPeerLike, Message, PeersIndex, SearchFilters } from '../../types'
+import { makeArrayPaginated, normalizeDate } from '../../utils/misc-utils'
+
+// @exported
+export type SearchMessagesOffset = number
 
 /**
  * Search for messages inside a specific chat
@@ -14,47 +17,59 @@ import { normalizeDate } from '../../utils/misc-utils'
  * @param params  Additional search parameters
  * @internal
  */
-export async function* searchMessages(
+export async function searchMessages(
     this: TelegramClient,
-    chatId: InputPeerLike,
     params?: {
         /**
          * Text query string. Required for text-only messages,
          * optional for media.
          *
-         * Defaults to `""` (empty string)
+         * @default  `""` (empty string)
          */
         query?: string
 
         /**
-         * Offset ID for the search. Only messages earlier than this
-         * ID will be returned.
+         * Chat where to search for messages.
          *
-         * Defaults to `0` (for the latest message).
+         * When empty, will search across common message box (i.e. private messages and legacy chats)
          */
-        offsetId?: number
+        chatId?: InputPeerLike
 
         /**
-         * Offset from the {@link offsetId}. Only used for the
-         * first chunk
+         * Offset ID for the search. Only messages earlier than this ID will be returned.
          *
-         * Defaults to `0` (for the same message as {@link offsetId}).
+         * @default  `0` (starting from the latest message).
          */
-        offset?: number
+        offset?: SearchMessagesOffset
+
+        /**
+         * Additional offset from {@link offset}, in resulting messages.
+         *
+         * This can be used for advanced use cases, like:
+         * - Loading 20 results newer than message with ID `MSGID`:
+         *   `offset = MSGID, addOffset = -20, limit = 20`
+         * - Loading 20 results around message with ID `MSGID`:
+         *   `offset = MSGID, addOffset = -10, limit = 20`
+         *
+         * When {@link offset} is not set, this will be relative to the last message
+         *
+         * @default  `0` (disabled)
+         */
+        addOffset?: number
 
         /**
          * Minimum message ID to return
          *
-         * Defaults to `0` (disabled).
+         * @default  `0` (disabled).
          */
         minId?: number
 
         /**
          * Maximum message ID to return.
          *
-         * > *Seems* to work the same as {@link offsetId}
+         * Unless {@link addOffset} is used, this will work the same as {@link offset}.
          *
-         * Defaults to `0` (disabled).
+         * @default  `0` (disabled).
          */
         maxId?: number
 
@@ -80,7 +95,7 @@ export async function* searchMessages(
         /**
          * Limits the number of messages to be retrieved.
          *
-         * By default, no limit is applied and all messages are returned
+         * @default  100
          */
         limit?: number
 
@@ -93,70 +108,57 @@ export async function* searchMessages(
         filter?: tl.TypeMessagesFilter
 
         /**
-         * Search for messages sent by a specific user.
+         * Search only for messages sent by a specific user.
          *
-         * Pass their marked ID, username, phone or `"me"` or `"self"`
+         * You can pass their marked ID, username, phone or `"me"` or `"self"`
          */
         fromUser?: InputPeerLike
-
-        /**
-         * Chunk size, which will be passed as `limit` parameter
-         * for `messages.search`. Usually you shouldn't care about this.
-         *
-         * Defaults to `100`
-         */
-        chunkSize?: number
     },
-): AsyncIterableIterator<Message> {
+): Promise<ArrayPaginated<Message, SearchMessagesOffset>> {
     if (!params) params = {}
 
-    let current = 0
-    let offsetId = params.offsetId || 0
-    let offset = params.offset || 0
+    const {
+        query = '',
+        chatId = { _: 'inputPeerEmpty' },
+        offset = 0,
+        addOffset = 0,
+        minId = 0,
+        maxId = 0,
+        threadId,
+        limit = 100,
+        filter = SearchFilters.Empty,
+    } = params
 
     const minDate = normalizeDate(params.minDate) ?? 0
     const maxDate = normalizeDate(params.maxDate) ?? 0
-    const minId = params.minId ?? 0
-    const maxId = params.maxId ?? 0
-
-    const total = params.limit || Infinity
-    const limit = Math.min(params.chunkSize || 100, total)
-
     const peer = await this.resolvePeer(chatId)
-    const fromUser = (params.fromUser ? await this.resolvePeer(params.fromUser) : null) || undefined
+    const fromUser = params.fromUser ? await this.resolvePeer(params.fromUser) : undefined
 
-    for (;;) {
-        const res: tl.RpcCallReturn['messages.search'] = await this.call({
-            _: 'messages.search',
-            peer,
-            q: params.query || '',
-            filter: params.filter || SearchFilters.Empty,
-            minDate,
-            maxDate,
-            offsetId,
-            addOffset: offset,
-            limit: Math.min(limit, total - current),
-            minId,
-            maxId,
-            fromId: fromUser,
-            hash: Long.ZERO,
-        })
+    const res = await this.call({
+        _: 'messages.search',
+        peer,
+        q: query,
+        filter,
+        minDate,
+        maxDate,
+        offsetId: offset,
+        addOffset,
+        limit,
+        minId,
+        maxId,
+        fromId: fromUser,
+        topMsgId: threadId,
+        hash: Long.ZERO,
+    })
 
-        assertTypeIsNot('searchMessages', res, 'messages.messagesNotModified')
+    assertTypeIsNot('searchMessages', res, 'messages.messagesNotModified')
 
-        // for successive chunks, we need to reset the offset
-        offset = 0
+    const peers = PeersIndex.from(res)
 
-        const peers = PeersIndex.from(res)
+    const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(this, msg, peers))
 
-        const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(this, msg, peers))
+    const last = msgs[msgs.length - 1]
+    const next = last ? last.id : undefined
 
-        if (!msgs.length) break
-
-        offsetId = res.messages[res.messages.length - 1].id
-        yield* msgs
-
-        current += msgs.length
-        if (current >= total) break
-    }
+    return makeArrayPaginated(msgs, (res as tl.messages.RawMessagesSlice).count ?? msgs.length, next)
 }

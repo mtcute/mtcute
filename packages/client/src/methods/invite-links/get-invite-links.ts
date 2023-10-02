@@ -1,7 +1,13 @@
 import { TelegramClient } from '../../client'
 import { ArrayPaginated, ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
-import { makeArrayPaginated, normalizeDate } from '../../utils'
+import { makeArrayPaginated } from '../../utils'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+
+// @exported
+export interface GetInviteLinksOffset {
+    date: number
+    link: string
+}
 
 /**
  * Get invite links created by some administrator in the chat.
@@ -39,22 +45,14 @@ export async function getInviteLinks(
         limit?: number
 
         /**
-         * Offset date used as an anchor for pagination.
+         * Offset for pagination.
          */
-        offsetDate?: Date | number
-
-        /**
-         * Offset link used as an anchor for pagination
-         */
-        offsetLink?: string
+        offset?: GetInviteLinksOffset
     },
-): Promise<ArrayPaginated<ChatInviteLink, { date: number; link: string }>> {
+): Promise<ArrayPaginated<ChatInviteLink, GetInviteLinksOffset>> {
     if (!params) params = {}
 
-    const { revoked = false, limit = Infinity, admin } = params
-
-    const offsetDate = normalizeDate(params.offsetDate)
-    const offsetLink = params.offsetLink
+    const { revoked = false, limit = Infinity, admin, offset } = params
 
     const res = await this.call({
         _: 'messages.getExportedChatInvites',
@@ -62,8 +60,8 @@ export async function getInviteLinks(
         revoked,
         adminId: admin ? normalizeToInputUser(await this.resolvePeer(admin), admin) : { _: 'inputUserSelf' },
         limit,
-        offsetDate,
-        offsetLink,
+        offsetDate: offset?.date,
+        offsetLink: offset?.link,
     })
 
     const peers = PeersIndex.from(res)

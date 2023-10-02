@@ -77,6 +77,13 @@ export class Photo extends FileLocation {
         this.type = 'photo'
     }
 
+    /**
+     * Photo ID
+     */
+    get id(): tl.Long {
+        return this.raw.id
+    }
+
     /** Date this photo was sent */
     get date(): Date {
         return new Date(this.raw.date * 1000)

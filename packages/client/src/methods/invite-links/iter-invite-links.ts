@@ -35,7 +35,7 @@ export async function* iterInviteLinks(
 
     const { revoked = false, limit = Infinity, chunkSize = 100, admin } = params
 
-    let { offsetDate, offsetLink } = params
+    let { offset } = params
 
     let current = 0
 
@@ -47,21 +47,18 @@ export async function* iterInviteLinks(
             admin: adminResolved,
             revoked,
             limit: Math.min(chunkSize, limit - current),
-            offsetDate,
-            offsetLink,
+            offset,
         })
 
         if (!links.length) return
-
-        const last = links[links.length - 1]
-
-        offsetDate = last.date
-        offsetLink = last.link
 
         for (const link of links) {
             yield link
 
             if (++current >= limit) break
         }
+
+        if (!links.next) return
+        offset = links.next
     }
 }

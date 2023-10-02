@@ -1,7 +1,3 @@
-import Long from 'long'
-
-import { tl } from '@mtcute/core'
-
 import { TelegramClient } from '../../client'
 import { InputPeerLike, Photo } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
@@ -16,66 +12,44 @@ import { normalizeToInputUser } from '../../utils/peer-utils'
 export async function* iterProfilePhotos(
     this: TelegramClient,
     userId: InputPeerLike,
-    params?: {
-        /**
-         * Offset from which to fetch.
-         *
-         * Defaults to `0`
-         */
-        offset?: number
-
+    params?: Parameters<TelegramClient['getProfilePhotos']>[1] & {
         /**
          * Maximum number of items to fetch
          *
-         * Defaults to `Infinity`, i.e. all items are fetched
+         * @default  `Infinity`, i.e. all items are fetched
          */
         limit?: number
 
         /**
          * Size of chunks which are fetched. Usually not needed.
          *
-         * Defaults to `100`
+         * @default  100
          */
         chunkSize?: number
-
-        /**
-         * If set, the method will return only photos
-         * with IDs less than the set one
-         */
-        maxId?: tl.Long
     },
 ): AsyncIterableIterator<Photo> {
     if (!params) params = {}
 
     const peer = normalizeToInputUser(await this.resolvePeer(userId), userId)
 
-    let offset = params.offset || 0
+    const { limit = Infinity, chunkSize = 100 } = params
+
+    let { offset } = params
     let current = 0
-    const total = params.limit || Infinity
-
-    const limit = Math.min(params.chunkSize || 100, total)
-
-    const maxId = params.maxId || Long.ZERO
 
     for (;;) {
-        const res = await this.call({
-            _: 'photos.getUserPhotos',
-            userId: peer,
-            limit: Math.min(limit, total - current),
+        const res = await this.getProfilePhotos(peer, {
             offset,
-            maxId,
+            limit: Math.min(chunkSize, limit - current),
         })
 
-        if (!res.photos.length) break
+        for (const it of res) {
+            yield it
 
-        offset += res.photos.length
-
-        for (const it of res.photos) {
-            yield new Photo(this, it as tl.RawPhoto)
+            if (++current >= limit) return
         }
 
-        current += res.photos.length
-
-        if (current >= total) break
+        if (!res.next) return
+        offset = res.next
     }
 }

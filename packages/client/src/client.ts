@@ -103,7 +103,7 @@ import { editInviteLink } from './methods/invite-links/edit-invite-link'
 import { exportInviteLink } from './methods/invite-links/export-invite-link'
 import { getInviteLink } from './methods/invite-links/get-invite-link'
 import { getInviteLinkMembers } from './methods/invite-links/get-invite-link-members'
-import { getInviteLinks } from './methods/invite-links/get-invite-links'
+import { getInviteLinks, GetInviteLinksOffset } from './methods/invite-links/get-invite-links'
 import { getPrimaryInviteLink } from './methods/invite-links/get-primary-invite-link'
 import { hideAllJoinRequests } from './methods/invite-links/hide-all-join-requests'
 import { hideJoinRequest } from './methods/invite-links/hide-join-request'
@@ -118,19 +118,23 @@ import { editMessage } from './methods/messages/edit-message'
 import { _findMessageInUpdate } from './methods/messages/find-in-update'
 import { forwardMessages } from './methods/messages/forward-messages'
 import { _getDiscussionMessage, getDiscussionMessage } from './methods/messages/get-discussion-message'
-import { getHistory } from './methods/messages/get-history'
+import { getHistory, GetHistoryOffset } from './methods/messages/get-history'
 import { getMessageGroup } from './methods/messages/get-message-group'
 import { getMessageReactions } from './methods/messages/get-message-reactions'
 import { getMessages } from './methods/messages/get-messages'
 import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe'
-import { getReactionUsers } from './methods/messages/get-reaction-users'
+import { getReactionUsers, GetReactionUsersOffset } from './methods/messages/get-reaction-users'
 import { getScheduledMessages } from './methods/messages/get-scheduled-messages'
+import { iterHistory } from './methods/messages/iter-history'
+import { iterReactionUsers } from './methods/messages/iter-reaction-users'
+import { iterSearchGlobal } from './methods/messages/iter-search-global'
+import { iterSearchMessages } from './methods/messages/iter-search-messages'
 import { _parseEntities } from './methods/messages/parse-entities'
 import { pinMessage } from './methods/messages/pin-message'
 import { readHistory } from './methods/messages/read-history'
 import { readReactions } from './methods/messages/read-reactions'
-import { searchGlobal } from './methods/messages/search-global'
-import { searchMessages } from './methods/messages/search-messages'
+import { searchGlobal, SearchGlobalOffset } from './methods/messages/search-global'
+import { searchMessages, SearchMessagesOffset } from './methods/messages/search-messages'
 import { sendCopy } from './methods/messages/send-copy'
 import { sendMedia } from './methods/messages/send-media'
 import { sendMediaGroup } from './methods/messages/send-media-group'
@@ -183,6 +187,7 @@ import { deleteProfilePhotos } from './methods/users/delete-profile-photos'
 import { getCommonChats } from './methods/users/get-common-chats'
 import { getMe } from './methods/users/get-me'
 import { getMyUsername } from './methods/users/get-my-username'
+import { getProfilePhoto } from './methods/users/get-profile-photo'
 import { getProfilePhotos } from './methods/users/get-profile-photos'
 import { getUsers } from './methods/users/get-users'
 import { iterProfilePhotos } from './methods/users/iter-profile-photos'
@@ -2055,16 +2060,11 @@ export interface TelegramClient extends BaseTelegramClient {
             limit?: number
 
             /**
-             * Offset date used as an anchor for pagination.
+             * Offset for pagination.
              */
-            offsetDate?: Date | number
-
-            /**
-             * Offset link used as an anchor for pagination
-             */
-            offsetLink?: string
+            offset?: GetInviteLinksOffset
         },
-    ): Promise<ArrayPaginated<ChatInviteLink, { date: number; link: string }>>
+    ): Promise<ArrayPaginated<ChatInviteLink, GetInviteLinksOffset>>
     /**
      * Get primary invite link of a chat
      *
@@ -2512,7 +2512,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getDiscussionMessage(peer: InputPeerLike, message: number): Promise<Message | null>
     /**
-     * Iterate through a chat history sequentially.
+     * Get chat history.
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param params  Additional fetch parameters
@@ -2523,61 +2523,58 @@ export interface TelegramClient extends BaseTelegramClient {
             /**
              * Limits the number of messages to be retrieved.
              *
-             * By default, no limit is applied and all messages
-             * are returned.
+             * @default  100
              */
             limit?: number
 
             /**
-             * Sequential number of the first message to be returned.
-             * Defaults to 0 (most recent message).
-             *
-             * Negative values are also accepted and are useful
-             * in case you set `offsetId` or `offsetDate`.
+             * Offset for pagination
              */
-            offset?: number
+            offset?: GetHistoryOffset
 
             /**
-             * Pass a message identifier as an offset to retrieve
-             * only older messages starting from that message
+             * Additional offset from {@link offset}, in resulting messages.
+             *
+             * This can be used for advanced use cases, like:
+             * - Loading 20 messages newer than message with ID `MSGID`:
+             *   `offset = MSGID, addOffset = -20, limit = 20`
+             * - Loading 20 messages around message with ID `MSGID`:
+             *   `offset = MSGID, addOffset = -10, limit = 20`
+             *
+             * @default  `0` (disabled)
              */
-            offsetId?: number
+
+            addOffset?: number
 
             /**
              * Minimum message ID to return
              *
-             * Defaults to `0` (disabled).
+             * @default  `0` (disabled).
              */
             minId?: number
 
             /**
              * Maximum message ID to return.
              *
-             * > *Seems* to work the same as {@link offsetId}
+             * Unless {@link addOffset} is used, this will work the same as {@link offset}.
              *
-             * Defaults to `0` (disabled).
+             * @default  `0` (disabled).
              */
             maxId?: number
 
             /**
-             * Pass a date (`Date` or Unix time in ms) as an offset to retrieve
-             * only older messages starting from that date.
-             */
-            offsetDate?: number | Date
-
-            /**
-             * Pass `true` to retrieve messages in reversed order (from older to recent)
+             * Whether to retrieve messages in reversed order (from older to recent),
+             * starting from {@link offset} (inclusive).
+             *
+             * > **Note**: Using `reverse=true` requires you to pass offset from which to start
+             * > fetching the messages "downwards". If you call `getHistory` with `reverse=true`
+             * > and without any offset, it will return an empty array.
+             *
+             * @default false
              */
             reverse?: boolean
-
-            /**
-             * Chunk size. Usually you shouldn't care about this.
-             *
-             * Defaults to `100`
-             */
-            chunkSize?: number
         },
-    ): AsyncIterableIterator<Message>
+    ): Promise<ArrayPaginated<Message, GetHistoryOffset>>
     /**
      * Get all messages inside of a message group
      *
@@ -2678,20 +2675,18 @@ export interface TelegramClient extends BaseTelegramClient {
             emoji?: InputReaction
 
             /**
-             * Limit the number of events returned.
+             * Limit the number of users returned.
              *
-             * Defaults to `Infinity`, i.e. all events are returned
+             * @default  100
              */
             limit?: number
 
             /**
-             * Chunk size, usually not needed.
-             *
-             * Defaults to `100`
+             * Offset for pagination
              */
-            chunkSize?: number
+            offset?: GetReactionUsersOffset
         },
-    ): AsyncIterableIterator<PeerReaction>
+    ): Promise<ArrayPaginated<PeerReaction, GetReactionUsersOffset>>
     /**
      * Get a single scheduled message in chat by its ID
      *
@@ -2709,6 +2704,111 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param messageIds  Scheduled messages IDs
      */
     getScheduledMessages(chatId: InputPeerLike, messageIds: number[]): Promise<(Message | null)[]>
+    /**
+     * Iterate over chat history. Wrapper over {@link getHistory}
+     *
+     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
+     * @param params  Additional fetch parameters
+     */
+    iterHistory(
+        chatId: InputPeerLike,
+        params?: Parameters<TelegramClient['getHistory']>[1] & {
+            /**
+             * Limits the number of messages to be retrieved.
+             *
+             * @default  Infinity, i.e. all messages
+             */
+            limit?: number
+
+            /**
+             * Chunk size. Usually you shouldn't care about this.
+             *
+             * @default  100
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<Message>
+    /**
+     * Iterate over users who have reacted to the message.
+     *
+     * Wrapper over {@link getReactionUsers}.
+     *
+     * @param chatId  Chat ID
+     * @param messageId  Message ID
+     * @param params
+     */
+    iterReactionUsers(
+        chatId: InputPeerLike,
+        messageId: number,
+        params?: Parameters<TelegramClient['getReactionUsers']>[2] & {
+            /**
+             * Limit the number of events returned.
+             *
+             * @default  `Infinity`, i.e. all events are returned
+             */
+            limit?: number
+
+            /**
+             * Chunk size, usually not needed.
+             *
+             * @default  100
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<PeerReaction>
+    /**
+     * Search for messages globally from all of your chats.
+     *
+     * Iterable version of {@link searchGlobal}
+     *
+     * **Note**: Due to Telegram limitations, you can only get up to ~10000 messages
+     *
+     * @param params  Search parameters
+     */
+    iterSearchGlobal(
+        params?: Parameters<TelegramClient['searchGlobal']>[0] & {
+            /**
+             * Limits the number of messages to be retrieved.
+             *
+             * @default  `Infinity`, i.e. all messages are returned
+             */
+            limit?: number
+
+            /**
+             * Chunk size, which will be passed as `limit` parameter
+             * for `messages.search`. Usually you shouldn't care about this.
+             *
+             * @default  100
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<Message>
+    /**
+     * Search for messages inside a specific chat
+     *
+     * Iterable version of {@link searchMessages}
+     *
+     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
+     * @param params  Additional search parameters
+     */
+    iterSearchMessages(
+        params?: Parameters<TelegramClient['searchMessages']>[0] & {
+            /**
+             * Limits the number of messages to be retrieved.
+             *
+             * @default  `Infinity`, i.e. all messages are returned
+             */
+            limit?: number
+
+            /**
+             * Chunk size, which will be passed as `limit` parameter
+             * for `messages.search`. Usually you shouldn't care about this.
+             *
+             * @default  `100`
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<Message>
 
     _parseEntities(
         text?: string | FormattedString<string>,
@@ -2752,14 +2852,14 @@ export interface TelegramClient extends BaseTelegramClient {
         /**
          * Text query string. Use `"@"` to search for mentions.
          *
-         * Defaults to `""` (empty string)
+         * @default `""` (empty string)
          */
         query?: string
 
         /**
          * Limits the number of messages to be retrieved.
          *
-         * By default, no limit is applied and all messages are returned
+         * @default  100
          */
         limit?: number
 
@@ -2772,112 +2872,121 @@ export interface TelegramClient extends BaseTelegramClient {
         filter?: tl.TypeMessagesFilter
 
         /**
-         * Chunk size, which will be passed as `limit` parameter
-         * for `messages.search`. Usually you shouldn't care about this.
-         *
-         * Defaults to `100`
+         * Offset data used for pagination
          */
-        chunkSize?: number
-    }): AsyncIterableIterator<Message>
+        offset?: SearchGlobalOffset
+
+        /**
+         * Only return messages newer than this date
+         */
+        minDate?: Date | number
+
+        /**
+         * Only return messages older than this date
+         */
+        maxDate?: Date | number
+    }): Promise<ArrayPaginated<Message, SearchGlobalOffset>>
     /**
      * Search for messages inside a specific chat
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param params  Additional search parameters
      */
-    searchMessages(
-        chatId: InputPeerLike,
-        params?: {
-            /**
-             * Text query string. Required for text-only messages,
-             * optional for media.
-             *
-             * Defaults to `""` (empty string)
-             */
-            query?: string
+    searchMessages(params?: {
+        /**
+         * Text query string. Required for text-only messages,
+         * optional for media.
+         *
+         * @default  `""` (empty string)
+         */
+        query?: string
 
-            /**
-             * Offset ID for the search. Only messages earlier than this
-             * ID will be returned.
-             *
-             * Defaults to `0` (for the latest message).
-             */
-            offsetId?: number
+        /**
+         * Chat where to search for messages.
+         *
+         * When empty, will search across common message box (i.e. private messages and legacy chats)
+         */
+        chatId?: InputPeerLike
 
-            /**
-             * Offset from the {@link offsetId}. Only used for the
-             * first chunk
-             *
-             * Defaults to `0` (for the same message as {@link offsetId}).
-             */
-            offset?: number
+        /**
+         * Offset ID for the search. Only messages earlier than this ID will be returned.
+         *
+         * @default  `0` (starting from the latest message).
+         */
+        offset?: SearchMessagesOffset
 
-            /**
-             * Minimum message ID to return
-             *
-             * Defaults to `0` (disabled).
-             */
-            minId?: number
+        /**
+         * Additional offset from {@link offset}, in resulting messages.
+         *
+         * This can be used for advanced use cases, like:
+         * - Loading 20 results newer than message with ID `MSGID`:
+         *   `offset = MSGID, addOffset = -20, limit = 20`
+         * - Loading 20 results around message with ID `MSGID`:
+         *   `offset = MSGID, addOffset = -10, limit = 20`
+         *
+         * When {@link offset} is not set, this will be relative to the last message
+         *
+         * @default  `0` (disabled)
+         */
+        addOffset?: number
 
-            /**
-             * Maximum message ID to return.
-             *
-             * > *Seems* to work the same as {@link offsetId}
-             *
-             * Defaults to `0` (disabled).
-             */
-            maxId?: number
+        /**
+         * Minimum message ID to return
+         *
+         * @default  `0` (disabled).
+         */
+        minId?: number
 
-            /**
-             * Minimum message date to return
-             *
-             * Defaults to `0` (disabled).
-             */
-            minDate?: number | Date
+        /**
+         * Maximum message ID to return.
+         *
+         * Unless {@link addOffset} is used, this will work the same as {@link offset}.
+         *
+         * @default  `0` (disabled).
+         */
+        maxId?: number
 
-            /**
-             * Maximum message date to return
-             *
-             * Defaults to `0` (disabled).
-             */
-            maxDate?: number | Date
+        /**
+         * Minimum message date to return
+         *
+         * Defaults to `0` (disabled).
+         */
+        minDate?: number | Date
 
-            /**
-             * Thread ID to return only messages from this thread.
-             */
-            threadId?: number
+        /**
+         * Maximum message date to return
+         *
+         * Defaults to `0` (disabled).
+         */
+        maxDate?: number | Date
 
-            /**
-             * Limits the number of messages to be retrieved.
-             *
-             * By default, no limit is applied and all messages are returned
-             */
-            limit?: number
+        /**
+         * Thread ID to return only messages from this thread.
+         */
+        threadId?: number
 
-            /**
-             * Filter the results using some filter.
-             * Defaults to {@link SearchFilters.Empty} (i.e. will return all messages)
-             *
-             * @link SearchFilters
-             */
-            filter?: tl.TypeMessagesFilter
+        /**
+         * Limits the number of messages to be retrieved.
+         *
+         * @default  100
+         */
+        limit?: number
 
-            /**
-             * Search for messages sent by a specific user.
-             *
-             * Pass their marked ID, username, phone or `"me"` or `"self"`
-             */
-            fromUser?: InputPeerLike
+        /**
+         * Filter the results using some filter.
+         * Defaults to {@link SearchFilters.Empty} (i.e. will return all messages)
+         *
+         * @link SearchFilters
+         */
+        filter?: tl.TypeMessagesFilter
 
-            /**
-             * Chunk size, which will be passed as `limit` parameter
-             * for `messages.search`. Usually you shouldn't care about this.
-             *
-             * Defaults to `100`
-             */
-            chunkSize?: number
-        },
-    ): AsyncIterableIterator<Message>
+        /**
+         * Search only for messages sent by a specific user.
+         *
+         * You can pass their marked ID, username, phone or `"me"` or `"self"`
+         */
+        fromUser?: InputPeerLike
+    }): Promise<ArrayPaginated<Message, SearchMessagesOffset>>
     /**
      * Copy a message (i.e. send the same message,
      * but do not forward it).
@@ -3744,6 +3853,14 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getMyUsername(): string | null
     /**
+     * Get a single profile picture of a user by its ID
+     *
+     * @param userId  User ID, username, phone number, `"me"` or `"self"`
+     * @param photoId  ID of the photo to fetch
+     * @param params
+     */
+    getProfilePhoto(userId: InputPeerLike, photoId: tl.Long): Promise<Photo>
+    /**
      * Get a list of profile pictures of a user
      *
      * @param userId  User ID, username, phone number, `"me"` or `"self"`
@@ -3755,18 +3872,18 @@ export interface TelegramClient extends BaseTelegramClient {
             /**
              * Offset from which to fetch.
              *
-             * Defaults to `0`
+             * @default  `0`
              */
             offset?: number
 
             /**
              * Maximum number of items to fetch (up to 100)
              *
-             * Defaults to `100`
+             * @default  `100`
              */
             limit?: number
         },
-    ): Promise<Photo[]>
+    ): Promise<ArrayPaginated<Photo, number>>
     /**
      * Get information about a single user.
      *
@@ -3790,33 +3907,20 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     iterProfilePhotos(
         userId: InputPeerLike,
-        params?: {
-            /**
-             * Offset from which to fetch.
-             *
-             * Defaults to `0`
-             */
-            offset?: number
-
+        params?: Parameters<TelegramClient['getProfilePhotos']>[1] & {
             /**
              * Maximum number of items to fetch
              *
-             * Defaults to `Infinity`, i.e. all items are fetched
+             * @default  `Infinity`, i.e. all items are fetched
              */
             limit?: number
 
             /**
              * Size of chunks which are fetched. Usually not needed.
              *
-             * Defaults to `100`
+             * @default  100
              */
             chunkSize?: number
-
-            /**
-             * If set, the method will return only photos
-             * with IDs less than the set one
-             */
-            maxId?: tl.Long
         },
     ): AsyncIterableIterator<Photo>
     /**
@@ -4095,6 +4199,10 @@ export class TelegramClient extends BaseTelegramClient {
     getMessages = getMessages
     getReactionUsers = getReactionUsers
     getScheduledMessages = getScheduledMessages
+    iterHistory = iterHistory
+    iterReactionUsers = iterReactionUsers
+    iterSearchGlobal = iterSearchGlobal
+    iterSearchMessages = iterSearchMessages
     _parseEntities = _parseEntities
     pinMessage = pinMessage
     readHistory = readHistory
@@ -4151,6 +4259,7 @@ export class TelegramClient extends BaseTelegramClient {
     getCommonChats = getCommonChats
     getMe = getMe
     getMyUsername = getMyUsername
+    getProfilePhoto = getProfilePhoto
     getProfilePhotos = getProfilePhotos
     getUsers = getUsers
     iterProfilePhotos = iterProfilePhotos
