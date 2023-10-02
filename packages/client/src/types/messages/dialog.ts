@@ -25,7 +25,7 @@ export class Dialog {
         readonly client: TelegramClient,
         readonly raw: tl.RawDialog,
         readonly _peers: PeersIndex,
-        readonly _messages: Record<number, tl.TypeMessage>,
+        readonly _messages: Map<number, tl.TypeMessage>,
     ) {}
 
     /**
@@ -44,11 +44,11 @@ export class Dialog {
 
         const peers = PeersIndex.from(dialogs)
 
-        const messages: Record<number, tl.TypeMessage> = {}
+        const messages = new Map<number, tl.TypeMessage>()
         dialogs.messages.forEach((msg) => {
             if (!msg.peerId) return
 
-            messages[getMarkedPeerId(msg.peerId)] = msg
+            messages.set(getMarkedPeerId(msg.peerId), msg)
         })
 
         const arr = dialogs.dialogs
@@ -228,8 +228,8 @@ export class Dialog {
         if (!this._lastMessage) {
             const cid = this.chat.id
 
-            if (cid in this._messages) {
-                this._lastMessage = new Message(this.client, this._messages[cid], this._peers)
+            if (this._messages.has(cid)) {
+                this._lastMessage = new Message(this.client, this._messages.get(cid)!, this._peers)
             } else {
                 throw new MtMessageNotFoundError(cid, 0)
             }
@@ -267,10 +267,17 @@ export class Dialog {
     }
 
     /**
-     * Number of unread messages
+     * Number of unread mentions
      */
     get unreadMentionsCount(): number {
         return this.raw.unreadMentionsCount
+    }
+
+    /**
+     * Number of unread reactions
+     */
+    get unreadReactionsCount(): number {
+        return this.raw.unreadReactionsCount
     }
 
     private _draftMessage?: DraftMessage | null
@@ -280,7 +287,7 @@ export class Dialog {
     get draftMessage(): DraftMessage | null {
         if (this._draftMessage === undefined) {
             if (this.raw.draft?._ === 'draftMessage') {
-                this._draftMessage = new DraftMessage(this.client, this.raw.draft, this.chat.inputPeer)
+                this._draftMessage = new DraftMessage(this.client, this.raw.draft)
             } else {
                 this._draftMessage = null
             }

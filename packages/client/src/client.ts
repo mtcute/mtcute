@@ -100,6 +100,17 @@ import { _normalizeInputFile } from './methods/files/normalize-input-file'
 import { _normalizeInputMedia } from './methods/files/normalize-input-media'
 import { uploadFile } from './methods/files/upload-file'
 import { uploadMedia } from './methods/files/upload-media'
+import { createForumTopic } from './methods/forums/create-forum-topic'
+import { deleteForumTopicHistory } from './methods/forums/delete-forum-topic-history'
+import { editForumTopic } from './methods/forums/edit-forum-topic'
+import { getForumTopics, GetForumTopicsOffset } from './methods/forums/get-forum-topics'
+import { getForumTopicsById } from './methods/forums/get-forum-topics-by-id'
+import { iterForumTopics } from './methods/forums/iter-forum-topics'
+import { reorderPinnedForumTopics } from './methods/forums/reorder-pinned-forum-topics'
+import { toggleForum } from './methods/forums/toggle-forum'
+import { toggleForumTopicClosed } from './methods/forums/toggle-forum-topic-closed'
+import { toggleForumTopicPinned } from './methods/forums/toggle-forum-topic-pinned'
+import { toggleGeneralTopicHidden } from './methods/forums/toggle-general-topic-hidden'
 import { createInviteLink } from './methods/invite-links/create-invite-link'
 import { editInviteLink } from './methods/invite-links/edit-invite-link'
 import { exportInviteLink } from './methods/invite-links/export-invite-link'
@@ -221,6 +232,7 @@ import {
     Dialog,
     FileDownloadParameters,
     FormattedString,
+    ForumTopic,
     GameHighScore,
     HistoryReadUpdate,
     IMessageEntityParser,
@@ -1045,11 +1057,19 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Create a new broadcast channel
      *
-     * @param title  Channel title
-     * @param description  (default: `''`) Channel description
      * @returns  Newly created channel
      */
-    createChannel(title: string, description?: string): Promise<Chat>
+    createChannel(params: {
+        /**
+         * Channel title
+         */
+        title: string
+
+        /**
+         * Channel description
+         */
+        description?: string
+    }): Promise<Chat>
     /**
      * Create a legacy group chat
      *
@@ -1065,10 +1085,31 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Create a new supergroup
      *
-     * @param title  Title of the supergroup
-     * @param description  (default: `''`) Description of the supergroup
+     * @returns  Newly created supergroup
      */
-    createSupergroup(title: string, description?: string): Promise<Chat>
+    createSupergroup(params: {
+        /**
+         * Supergroup title
+         */
+        title: string
+
+        /**
+         * Supergroup description
+         */
+        description?: string
+
+        /**
+         * Whether to create a forum
+         */
+        forum?: boolean
+
+        /**
+         * TTL period (in seconds) for the newly created channel
+         *
+         * @default 0 (i.e. messages don't expire)
+         */
+        ttlPeriod?: number
+    }): Promise<Chat>
 
     /**
      * Delete a channel or a supergroup
@@ -1916,6 +1957,193 @@ export interface TelegramClient extends BaseTelegramClient {
             progressCallback?: (uploaded: number, total: number) => void
         },
     ): Promise<Extract<MessageMedia, Photo | RawDocument>>
+    /**
+     * Create a topic in a forum
+     *
+     * Only admins with `manageTopics` permission can do this.
+     *
+     * @param chatId  Chat ID or username
+     * @returns  Service message for the created topic
+     */
+    createForumTopic(
+        chatId: InputPeerLike,
+        params: {
+            /**
+             * Topic title
+             */
+            title: string
+
+            /**
+             * Icon of the topic.
+             *
+             * Can be a number (color in RGB, see {@link ForumTopic} static members for allowed values)
+             * or a custom emoji ID.
+             *
+             * Icon color can't be changed after the topic is created.
+             */
+            icon?: number | tl.Long
+
+            /**
+             * Send as a specific channel
+             */
+            sendAs?: InputPeerLike
+        },
+    ): Promise<Message>
+    /**
+     * Delete a forum topic and all its history
+     *
+     * @param chat  Chat or user ID, username, phone number, `"me"` or `"self"`
+     * @param topicId  ID of the topic (i.e. its top message ID)
+     */
+    deleteForumTopicHistory(chat: InputPeerLike, topicId: number): Promise<void>
+    /**
+     * Modify a topic in a forum
+     *
+     * Only admins with `manageTopics` permission can do this.
+     *
+     * @param chatId  Chat ID or username
+     * @param topicId  ID of the topic (i.e. its top message ID)
+     * @returns  Service message about the modification
+     */
+    editForumTopic(
+        chatId: InputPeerLike,
+        topicId: number,
+        params: {
+            /**
+             * New topic title
+             */
+            title?: string
+
+            /**
+             * New icon of the topic.
+             *
+             * Can be a custom emoji ID, or `null` to remove the icon
+             * and use static color instead
+             */
+            icon?: tl.Long | null
+        },
+    ): Promise<Message>
+    /**
+     * Get a single forum topic by its ID
+     *
+     * @param chatId  Chat ID or username
+     */
+    getForumTopicsById(chatId: InputPeerLike, ids: number): Promise<ForumTopic>
+    /**
+     * Get forum topics by their IDs
+     *
+     * @param chatId  Chat ID or username
+     */
+    getForumTopicsById(chatId: InputPeerLike, ids: number[]): Promise<ForumTopic[]>
+    /**
+     * Get forum topics
+     *
+     * @param chatId  Chat ID or username
+     */
+    getForumTopics(
+        chatId: InputPeerLike,
+        params?: {
+            /**
+             * Search query
+             */
+            query?: string
+
+            /**
+             * Offset for pagination
+             */
+            offset?: GetForumTopicsOffset
+
+            /**
+             * Maximum number of topics to return.
+             *
+             * @default  100
+             */
+            limit?: number
+        },
+    ): Promise<ArrayPaginated<ForumTopic, GetForumTopicsOffset>>
+    /**
+     * Iterate over forum topics. Wrapper over {@link getForumTopics}.
+     *
+     * @param chatId  Chat ID or username
+     */
+    iterForumTopics(
+        chatId: InputPeerLike,
+        params?: Parameters<TelegramClient['getForumTopics']>[1] & {
+            /**
+             * Maximum number of topics to return.
+             *
+             * @default  `Infinity`, i.e. return all topics
+             */
+            limit?: number
+
+            /**
+             * Chunk size. Usually you shouldn't care about this.
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<ForumTopic>
+    /**
+     * Reorder pinned forum topics
+     *
+     * Only admins with `manageTopics` permission can do this.
+     *
+     * @param chatId  Chat ID or username
+     * @param topicId  ID of the topic (i.e. its top message ID)
+     */
+    reorderPinnedForumTopics(
+        chatId: InputPeerLike,
+        params: {
+            /**
+             * Order of the pinned topics
+             */
+            order: number[]
+
+            /**
+             * Whether to un-pin topics not present in the order
+             */
+            force?: boolean
+        },
+    ): Promise<void>
+    /**
+     * Toggle open/close status of a topic in a forum
+     *
+     * Only admins with `manageTopics` permission can do this.
+     *
+     * @param chatId  Chat ID or username
+     * @param topicId  ID of the topic (i.e. its top message ID)
+     * @param closed  Whether the topic should be closed
+     * @returns  Service message about the modification
+     */
+    toggleForumTopicClosed(chatId: InputPeerLike, topicId: number, closed: boolean): Promise<Message>
+    /**
+     * Toggle whether a topic in a forum is pinned
+     *
+     * Only admins with `manageTopics` permission can do this.
+     *
+     * @param chatId  Chat ID or username
+     * @param topicId  ID of the topic (i.e. its top message ID)
+     * @param pinned  Whether the topic should be pinned
+     */
+    toggleForumTopicPinned(chatId: InputPeerLike, topicId: number, pinned: boolean): Promise<void>
+    /**
+     * Set whether a supergroup is a forum.
+     *
+     * Only owner of the supergroup can change this setting.
+     *
+     * @param chatId  Chat ID or username
+     * @param enabled  (default: `false`) Whether the supergroup should be a forum
+     */
+    toggleForum(chatId: InputPeerLike, enabled?: boolean): Promise<void>
+    /**
+     * Toggle whether "General" topic in a forum is hidden or not
+     *
+     * Only admins with `manageTopics` permission can do this.
+     *
+     * @param chatId  Chat ID or username
+     * @param hidden  Whether the topic should be hidden
+     * @returns  Service message about the modification
+     */
+    toggleGeneralTopicHidden(chatId: InputPeerLike, hidden: boolean): Promise<Message>
     /**
      * Create an additional invite link for the chat.
      *
@@ -3061,6 +3289,8 @@ export interface TelegramClient extends BaseTelegramClient {
 
             /**
              * Message to reply to. Either a message object or message ID.
+             *
+             * For forums - can also be an ID of the topic (i.e. its top message ID)
              */
             replyTo?: number | Message
 
@@ -3116,6 +3346,8 @@ export interface TelegramClient extends BaseTelegramClient {
         params?: {
             /**
              * Message to reply to. Either a message object or message ID.
+             *
+             * For forums - can also be an ID of the topic (i.e. its top message ID)
              */
             replyTo?: number | Message
 
@@ -3226,6 +3458,8 @@ export interface TelegramClient extends BaseTelegramClient {
 
             /**
              * Message to reply to. Either a message object or message ID.
+             *
+             * For forums - can also be an ID of the topic (i.e. its top message ID)
              */
             replyTo?: number | Message
 
@@ -3353,6 +3587,8 @@ export interface TelegramClient extends BaseTelegramClient {
         params?: {
             /**
              * Message to reply to. Either a message object or message ID.
+             *
+             * For forums - can also be an ID of the topic (i.e. its top message ID)
              */
             replyTo?: number | Message
 
@@ -3509,7 +3745,15 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat or user ID
      */
-    unpinAllMessages(chatId: InputPeerLike): Promise<void>
+    unpinAllMessages(
+        chatId: InputPeerLike,
+        params?: {
+            /**
+             * For forums - unpin only messages from the given topic
+             */
+            topicId?: number
+        },
+    ): Promise<void>
     /**
      * Unpin a message in a group, supergroup, channel or PM.
      *
@@ -4195,6 +4439,17 @@ export class TelegramClient extends BaseTelegramClient {
     _normalizeInputMedia = _normalizeInputMedia
     uploadFile = uploadFile
     uploadMedia = uploadMedia
+    createForumTopic = createForumTopic
+    deleteForumTopicHistory = deleteForumTopicHistory
+    editForumTopic = editForumTopic
+    getForumTopicsById = getForumTopicsById
+    getForumTopics = getForumTopics
+    iterForumTopics = iterForumTopics
+    reorderPinnedForumTopics = reorderPinnedForumTopics
+    toggleForumTopicClosed = toggleForumTopicClosed
+    toggleForumTopicPinned = toggleForumTopicPinned
+    toggleForum = toggleForum
+    toggleGeneralTopicHidden = toggleGeneralTopicHidden
     createInviteLink = createInviteLink
     editInviteLink = editInviteLink
     exportInviteLink = exportInviteLink

@@ -249,6 +249,37 @@ export interface ActionSetTtl {
     readonly period: number
 }
 
+/** Forum topic was created */
+export interface ActionTopicCreated {
+    readonly type: 'topic_created'
+
+    /** Title of the topic */
+    title: string
+
+    /** Icon color of the topic */
+    iconColor: number
+
+    /** Icon emoji of the topic */
+    iconCustomEmoji?: tl.Long
+}
+
+/** Forum topic was modified */
+export interface ActionTopicEdited {
+    readonly type: 'topic_edited'
+
+    /** New title of the topic */
+    title?: string
+
+    /** New icon emoji of the topic (may be empty) */
+    iconCustomEmoji?: tl.Long
+
+    /** Whether the topic was opened/closed */
+    closed?: boolean
+
+    /** Whether the topic was (un-)hidden - only for "General" topic (`id=1`) */
+    hidden?: boolean
+}
+
 export type MessageAction =
     | ActionChatCreated
     | ActionChannelCreated
@@ -275,6 +306,8 @@ export type MessageAction =
     | ActionGroupCallEnded
     | ActionGroupInvite
     | ActionSetTtl
+    | ActionTopicCreated
+    | ActionTopicEdited
     | null
 
 /** @internal */
@@ -425,6 +458,21 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
             return {
                 type: 'set_ttl',
                 period: act.period,
+            }
+        case 'messageActionTopicCreate':
+            return {
+                type: 'topic_created',
+                title: act.title,
+                iconColor: act.iconColor,
+                iconCustomEmoji: act.iconEmojiId,
+            }
+        case 'messageActionTopicEdit':
+            return {
+                type: 'topic_edited',
+                title: act.title,
+                iconCustomEmoji: act.iconEmojiId,
+                closed: act.closed,
+                hidden: act.hidden,
             }
         default:
             return null

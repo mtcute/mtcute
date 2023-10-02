@@ -5,12 +5,25 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 /**
  * Create a new broadcast channel
  *
- * @param title  Channel title
- * @param description  Channel description
  * @returns  Newly created channel
  * @internal
  */
-export async function createChannel(this: TelegramClient, title: string, description = ''): Promise<Chat> {
+export async function createChannel(
+    this: TelegramClient,
+    params: {
+        /**
+         * Channel title
+         */
+        title: string
+
+        /**
+         * Channel description
+         */
+        description?: string
+    },
+): Promise<Chat> {
+    const { title, description = '' } = params
+
     const res = await this.call({
         _: 'channels.createChannel',
         title,

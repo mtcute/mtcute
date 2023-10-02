@@ -9,12 +9,24 @@ import { createDummyUpdate } from '../../utils/updates-utils'
  * @param chatId  Chat or user ID
  * @internal
  */
-export async function unpinAllMessages(this: TelegramClient, chatId: InputPeerLike): Promise<void> {
+export async function unpinAllMessages(
+    this: TelegramClient,
+    chatId: InputPeerLike,
+    params?: {
+        /**
+         * For forums - unpin only messages from the given topic
+         */
+        topicId?: number
+    },
+): Promise<void> {
+    const { topicId } = params ?? {}
+
     const peer = await this.resolvePeer(chatId)
 
     const res = await this.call({
         _: 'messages.unpinAllMessages',
         peer,
+        topMsgId: topicId,
     })
 
     if (isInputPeerChannel(peer)) {

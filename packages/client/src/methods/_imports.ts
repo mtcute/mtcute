@@ -31,6 +31,7 @@ import {
     Dialog,
     FileDownloadParameters,
     FormattedString,
+    ForumTopic,
     GameHighScore,
     HistoryReadUpdate,
     IMessageEntityParser,

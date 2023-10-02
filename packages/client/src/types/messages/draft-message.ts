@@ -2,16 +2,13 @@ import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
-import { InputMediaLike } from '../media'
-import { InputPeerLike } from '../peers'
-import { Message } from './message'
 import { MessageEntity } from './message-entity'
 
 /**
  * A draft message
  */
 export class DraftMessage {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawDraftMessage, readonly _chatId: InputPeerLike) {}
+    constructor(readonly client: TelegramClient, readonly raw: tl.RawDraftMessage) {}
 
     /**
      * Text of the draft message
@@ -58,45 +55,6 @@ export class DraftMessage {
         }
 
         return this._entities
-    }
-
-    /**
-     * Send this draft as a message.
-     * Calling this method will clear current draft.
-     *
-     * @param params  Additional sending parameters
-     * @link TelegramClient.sendText
-     */
-    send(params?: Parameters<TelegramClient['sendText']>[2]): Promise<Message> {
-        return this.client.sendText(this._chatId, this.raw.message, {
-            clearDraft: true,
-            disableWebPreview: this.raw.noWebpage,
-            entities: this.raw.entities,
-            replyTo: this.raw.replyToMsgId,
-            ...(params || {}),
-        })
-    }
-
-    /**
-     * Send this draft as a message with media.
-     * Calling this method will clear current draft.
-     *
-     * If passed media does not have an
-     * explicit caption, it will be set to {@link text},
-     * and its entities to {@link entities}
-     *
-     * @param media  Media to be sent
-     * @param params  Additional sending parameters
-     * @link TelegramClient.sendMedia
-     */
-    sendWithMedia(media: InputMediaLike, params?: Parameters<TelegramClient['sendMedia']>[2]): Promise<Message> {
-        return this.client.sendMedia(this._chatId, media, {
-            clearDraft: true,
-            replyTo: this.raw.replyToMsgId,
-            caption: this.raw.message,
-            entities: this.raw.entities,
-            ...(params || {}),
-        })
     }
 }
 

@@ -30,6 +30,8 @@ export async function sendText(
     params?: {
         /**
          * Message to reply to. Either a message object or message ID.
+         *
+         * For forums - can also be an ID of the topic (i.e. its top message ID)
          */
         replyTo?: number | Message
 

@@ -57,6 +57,7 @@ export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEve
                 case 'history_toggled':
                 case 'signatures_toggled':
                 case 'def_perms_changed':
+                case 'forum_toggled':
                     serverFilter.settings = true
                     break
                 case 'msg_pinned':
@@ -93,6 +94,11 @@ export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEve
                 case 'invite_edited':
                 case 'invite_revoked':
                     serverFilter.invites = true
+                    break
+                case 'topic_created':
+                case 'topic_edited':
+                case 'topic_deleted':
+                    serverFilter.forums = true
                     break
                 default:
                     assertNever(type)

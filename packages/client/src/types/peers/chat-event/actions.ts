@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
+import { assertTypeIs } from '@mtcute/core/utils'
 
-import { PeersIndex, TelegramClient, toggleChannelIdMark } from '../../..'
+import { ForumTopic, PeersIndex, TelegramClient, toggleChannelIdMark } from '../../..'
 import { Photo } from '../../media'
 import { Message } from '../../messages'
 import { ChatInviteLink } from '../chat-invite-link'
@@ -297,6 +298,41 @@ export interface ChatActionTtlChanged {
     new: number
 }
 
+/** Forum has been toggled */
+export interface ChatActionForumToggled {
+    type: 'forum_toggled'
+
+    /** New status */
+    enabled: boolean
+}
+
+/** Forum topic has been created */
+export interface ChatActionTopicCreated {
+    type: 'topic_created'
+
+    /** Topic that has been created */
+    topic: ForumTopic
+}
+
+/** Forum topic has been edited */
+export interface ChatActionTopicEdited {
+    type: 'topic_edited'
+
+    /** Old topic info */
+    old: ForumTopic
+
+    /** New topic info */
+    new: ForumTopic
+}
+
+/** Forum topic has been edited */
+export interface ChatActionTopicDeleted {
+    type: 'topic_deleted'
+
+    /** Old topic info */
+    topic: ForumTopic
+}
+
 /** Chat event action (`null` if unsupported) */
 export type ChatAction =
     | ChatActionUserJoined
@@ -329,6 +365,10 @@ export type ChatAction =
     | ChatActionInviteLinkRevoked
     | ChatActionUserJoinedApproved
     | ChatActionTtlChanged
+    | ChatActionForumToggled
+    | ChatActionTopicCreated
+    | ChatActionTopicEdited
+    | ChatActionTopicDeleted
     | null
 
 /** @internal */
@@ -341,12 +381,6 @@ export function _actionFromTl(
     // channelAdminLogEventActionToggleNoForwards#cb2ac766 new_value:Bool = ChannelAdminLogEventAction;
     // todo - MTQ-57
     // channelAdminLogEventActionChangeUsernames#f04fb3a9 prev_value:Vector<string> new_value:Vector<string>
-    // todo - MTQ-77
-    // channelAdminLogEventActionToggleForum#2cc6383 new_value:Bool = ChannelAdminLogEventAction;
-    // channelAdminLogEventActionCreateTopic#58707d28 topic:ForumTopic = ChannelAdminLogEventAction;
-    // channelAdminLogEventActionEditTopic#f06fe208 prev_topic:ForumTopic new_topic:ForumTopic
-    // channelAdminLogEventActionDeleteTopic#ae168909 topic:ForumTopic = ChannelAdminLogEventAction;
-    // channelAdminLogEventActionPinTopic#5d8d353b flags:# prev_topic:flags.0?ForumTopic new_topic:flags.1?ForumTopic
     // todo - MTQ-72
     // channelAdminLogEventActionSendMessage#278f2868 message:Message = ChannelAdminLogEventAction;
     // channelAdminLogEventActionChangeAvailableReactions#be4e0ef8 prev_value:ChatReactions new_value:ChatReactions
@@ -520,6 +554,39 @@ export function _actionFromTl(
                 link: new ChatInviteLink(client, e.invite, peers),
                 approvedBy: new User(client, peers.user(e.approvedBy)),
             }
+        // channelAdminLogEventActionCreateTopic#58707d28 topic:ForumTopic = ChannelAdminLogEventAction;
+        // channelAdminLogEventActionEditTopic#f06fe208 prev_topic:ForumTopic new_topic:ForumTopic
+        // channelAdminLogEventActionDeleteTopic#ae168909 topic:ForumTopic = ChannelAdminLogEventAction;
+        case 'channelAdminLogEventActionToggleForum':
+            return {
+                type: 'forum_toggled',
+                enabled: e.newValue,
+            }
+        case 'channelAdminLogEventActionCreateTopic':
+            assertTypeIs('ChannelAdminLogEventActionCreateTopic#topic', e.topic, 'forumTopic')
+
+            return {
+                type: 'topic_created',
+                topic: new ForumTopic(client, e.topic, peers),
+            }
+        case 'channelAdminLogEventActionEditTopic':
+            assertTypeIs('ChannelAdminLogEventActionCreateTopic#topic', e.prevTopic, 'forumTopic')
+            assertTypeIs('ChannelAdminLogEventActionCreateTopic#topic', e.newTopic, 'forumTopic')
+
+            return {
+                type: 'topic_edited',
+                old: new ForumTopic(client, e.prevTopic, peers),
+                new: new ForumTopic(client, e.newTopic, peers),
+            }
+        case 'channelAdminLogEventActionDeleteTopic':
+            assertTypeIs('ChannelAdminLogEventActionCreateTopic#topic', e.topic, 'forumTopic')
+
+            return {
+                type: 'topic_deleted',
+                topic: new ForumTopic(client, e.topic, peers),
+            }
+        // case 'channelAdminLogEventActionPinTopic'
+        // ^ looks like it is not used, and pinned topics are not at all presented in the event log
         default:
             return null
     }
