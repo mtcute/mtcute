@@ -8,7 +8,7 @@ export namespace tdFileId {
     export const WEB_LOCATION_FLAG = 1 << 24
     export const FILE_REFERENCE_FLAG = 1 << 25
 
-    export const CURRENT_VERSION = 41
+    export const CURRENT_VERSION = 48
 
     /**
      * An error occurred while parsing or serializing a File ID
