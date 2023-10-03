@@ -66,6 +66,7 @@ import { joinChat } from './methods/chats/join-chat'
 import { kickChatMember } from './methods/chats/kick-chat-member'
 import { leaveChat } from './methods/chats/leave-chat'
 import { markChatUnread } from './methods/chats/mark-chat-unread'
+import { reorderUsernames } from './methods/chats/reorder-usernames'
 import { restrictChatMember } from './methods/chats/restrict-chat-member'
 import { saveDraft } from './methods/chats/save-draft'
 import { setChatDefaultPermissions } from './methods/chats/set-chat-default-permissions'
@@ -74,6 +75,7 @@ import { setChatPhoto } from './methods/chats/set-chat-photo'
 import { setChatTitle } from './methods/chats/set-chat-title'
 import { setChatUsername } from './methods/chats/set-chat-username'
 import { setSlowMode } from './methods/chats/set-slow-mode'
+import { toggleFragmentUsername } from './methods/chats/toggle-fragment-username'
 import { toggleJoinRequests } from './methods/chats/toggle-join-requests'
 import { toggleJoinToSend } from './methods/chats/toggle-join-to-send'
 import { unarchiveChats } from './methods/chats/unarchive-chats'
@@ -208,9 +210,9 @@ import { resolvePeer } from './methods/users/resolve-peer'
 import { resolvePeerMany } from './methods/users/resolve-peer-many'
 import { setOffline } from './methods/users/set-offline'
 import { setProfilePhoto } from './methods/users/set-profile-photo'
+import { setUsername } from './methods/users/set-username'
 import { unblockUser } from './methods/users/unblock-user'
 import { updateProfile } from './methods/users/update-profile'
-import { updateUsername } from './methods/users/update-username'
 import {
     ArrayPaginated,
     ArrayWithTotal,
@@ -1420,6 +1422,12 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     markChatUnread(chatId: InputPeerLike): Promise<void>
     /**
+     * Reorder usernames
+     *
+     * @param peerId  Bot, channel or "me"/"self"
+     */
+    reorderUsernames(peerId: InputPeerLike, order: string[]): Promise<void>
+    /**
      * Restrict a user in a supergroup.
      *
      * @param chatId  Chat ID
@@ -1520,6 +1528,28 @@ export interface TelegramClient extends BaseTelegramClient {
      *   Valid values are: `0 (off), 10, 30, 60 (1m), 300 (5m), 900 (15m) or 3600 (1h)`
      */
     setSlowMode(chatId: InputPeerLike, seconds?: number): Promise<void>
+    /**
+     * Toggle a collectible (Fragment) username
+     *
+     * > **Note**: non-collectible usernames must still be changed
+     * > using {@link setUsername}/{@link setChatUsername}
+     *
+     * @param peerId  Bot, channel or "me"/"self"
+     */
+    toggleFragmentUsername(
+        peerId: InputPeerLike,
+        params: {
+            /**
+             * Username to toggle
+             */
+            username: string
+
+            /**
+             * Whether to enable or disable the username
+             */
+            active: boolean
+        },
+    ): Promise<void>
     /**
      * Set whether a channel/supergroup has join requests enabled.
      *
@@ -4242,6 +4272,15 @@ export interface TelegramClient extends BaseTelegramClient {
         previewSec?: number,
     ): Promise<Photo>
     /**
+     * Change username of the current user.
+     *
+     * Note that bots usernames must be changed through
+     * bot support or re-created from scratch.
+     *
+     * @param username  New username (5-32 chars, allowed chars: `a-zA-Z0-9_`), or `null` to remove
+     */
+    setUsername(username: string | null): Promise<User>
+    /**
      * Unblock a user
      *
      * @param id  User ID, username or phone number
@@ -4270,15 +4309,6 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         bio?: string
     }): Promise<User>
-    /**
-     * Change username of the current user.
-     *
-     * Note that bots usernames must be changed through
-     * bot support or re-created from scratch.
-     *
-     * @param username  New username (5-32 chars, allowed chars: `a-zA-Z0-9_`), or `null` to remove
-     */
-    updateUsername(username: string | null): Promise<User>
 }
 
 export class TelegramClient extends BaseTelegramClient {
@@ -4403,6 +4433,7 @@ export class TelegramClient extends BaseTelegramClient {
     kickChatMember = kickChatMember
     leaveChat = leaveChat
     markChatUnread = markChatUnread
+    reorderUsernames = reorderUsernames
     restrictChatMember = restrictChatMember
     saveDraft = saveDraft
     setChatDefaultPermissions = setChatDefaultPermissions
@@ -4411,6 +4442,7 @@ export class TelegramClient extends BaseTelegramClient {
     setChatTitle = setChatTitle
     setChatUsername = setChatUsername
     setSlowMode = setSlowMode
+    toggleFragmentUsername = toggleFragmentUsername
     toggleJoinRequests = toggleJoinRequests
     toggleJoinToSend = toggleJoinToSend
     unarchiveChats = unarchiveChats
@@ -4546,7 +4578,7 @@ export class TelegramClient extends BaseTelegramClient {
     resolvePeer = resolvePeer
     setOffline = setOffline
     setProfilePhoto = setProfilePhoto
+    setUsername = setUsername
     unblockUser = unblockUser
     updateProfile = updateProfile
-    updateUsername = updateUsername
 }

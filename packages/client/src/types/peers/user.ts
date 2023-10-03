@@ -197,7 +197,15 @@ export class User {
 
     /** User's or bot's username */
     get username(): string | null {
-        return this.raw.username ?? null
+        return this.raw.username ?? this.raw.usernames?.[0].username ?? null
+    }
+
+    /** User's or bot's usernames (including collectibles) */
+    get usernames(): ReadonlyArray<tl.RawUsername> | null {
+        return (
+            this.raw.usernames ??
+            (this.raw.username ? [{ _: 'username', username: this.raw.username, active: true }] : null)
+        )
     }
 
     /** IETF language tag of the user's language */

@@ -223,7 +223,21 @@ export class Chat {
      * Username, for private chats, bots, supergroups and channels if available
      */
     get username(): string | null {
-        return 'username' in this.peer ? this.peer.username ?? null : null
+        if (!('username' in this.peer)) return null
+
+        return this.peer.username ?? this.peer.usernames?.[0].username ?? null
+    }
+
+    /**
+     * Usernames (inclufing collectibles), for private chats, bots, supergroups and channels if available
+     */
+    get usernames(): ReadonlyArray<tl.RawUsername> | null {
+        if (!('usernames' in this.peer)) return null
+
+        return (
+            this.peer.usernames ??
+            (this.peer.username ? [{ _: 'username', username: this.peer.username, active: true }] : null)
+        )
     }
 
     /**
