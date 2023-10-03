@@ -73,6 +73,7 @@ import { setChatDefaultPermissions } from './methods/chats/set-chat-default-perm
 import { setChatDescription } from './methods/chats/set-chat-description'
 import { setChatPhoto } from './methods/chats/set-chat-photo'
 import { setChatTitle } from './methods/chats/set-chat-title'
+import { setChatTtl } from './methods/chats/set-chat-ttl'
 import { setChatUsername } from './methods/chats/set-chat-username'
 import { setSlowMode } from './methods/chats/set-slow-mode'
 import { toggleContentProtection } from './methods/chats/toggle-content-protection'
@@ -201,6 +202,7 @@ import {
 import { blockUser } from './methods/users/block-user'
 import { deleteProfilePhotos } from './methods/users/delete-profile-photos'
 import { getCommonChats } from './methods/users/get-common-chats'
+import { getGlobalTtl } from './methods/users/get-global-ttl'
 import { getMe } from './methods/users/get-me'
 import { getMyUsername } from './methods/users/get-my-username'
 import { getProfilePhoto } from './methods/users/get-profile-photo'
@@ -209,6 +211,7 @@ import { getUsers } from './methods/users/get-users'
 import { iterProfilePhotos } from './methods/users/iter-profile-photos'
 import { resolvePeer } from './methods/users/resolve-peer'
 import { resolvePeerMany } from './methods/users/resolve-peer-many'
+import { setGlobalTtl } from './methods/users/set-global-ttl'
 import { setOffline } from './methods/users/set-offline'
 import { setProfilePhoto } from './methods/users/set-profile-photo'
 import { setUsername } from './methods/users/set-username'
@@ -1079,12 +1082,26 @@ export interface TelegramClient extends BaseTelegramClient {
      * If you want to create a supergroup, use {@link createSupergroup}
      * instead.
      *
-     * @param title  Group title
-     * @param users
-     *   User(s) to be invited in the group (ID(s), username(s) or phone number(s)).
-     *   Due to Telegram limitations, you can't create a legacy group with yourself.
      */
-    createGroup(title: string, users: MaybeArray<InputPeerLike>): Promise<Chat>
+    createGroup(params: {
+        /**
+         * Group title
+         */
+        title: string
+
+        /**
+         * User(s) to be invited in the group (ID(s), username(s) or phone number(s)).
+         * Due to Telegram limitations, you can't create a legacy group with just yourself.
+         */
+        users: MaybeArray<InputPeerLike>
+
+        /**
+         * TTL period (in seconds) for the newly created chat
+         *
+         * @default 0 (i.e. messages don't expire)
+         */
+        ttlPeriod?: number
+    }): Promise<Chat>
     /**
      * Create a new supergroup
      *
@@ -1107,7 +1124,7 @@ export interface TelegramClient extends BaseTelegramClient {
         forum?: boolean
 
         /**
-         * TTL period (in seconds) for the newly created channel
+         * TTL period (in seconds) for the newly created supergroup
          *
          * @default 0 (i.e. messages don't expire)
          */
@@ -1509,6 +1526,13 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param title  New chat title, 1-255 characters
      */
     setChatTitle(chatId: InputPeerLike, title: string): Promise<void>
+    /**
+     * Set maximum Time-To-Live of all newly sent messages in the specified chat
+     *
+     * @param chatId  Chat ID
+     * @param period  New TTL period, in seconds (or 0 to disable)
+     */
+    setChatTtl(chatId: InputPeerLike, period: number): Promise<void>
     /**
      * Change supergroup/channel username
      *
@@ -4144,6 +4168,11 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getCommonChats(userId: InputPeerLike): Promise<Chat[]>
     /**
+     * Gets the current default value of the Time-To-Live setting, applied to all new chats.
+     *
+     */
+    getGlobalTtl(): Promise<number>
+    /**
      * Get currently authorized user's full information
      *
      */
@@ -4257,6 +4286,13 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param force  (default: `false`) Whether to force re-fetch the peer from the server
      */
     resolvePeer(peerId: InputPeerLike, force?: boolean): Promise<tl.TypeInputPeer>
+    /**
+     * Changes the current default value of the Time-To-Live setting,
+     * applied to all new chats.
+     *
+     * @param period  New TTL period, in seconds (or 0 to disable)
+     */
+    setGlobalTtl(period: number): Promise<void>
     /**
      * Change user status to offline or online
      *
@@ -4448,6 +4484,7 @@ export class TelegramClient extends BaseTelegramClient {
     setChatDescription = setChatDescription
     setChatPhoto = setChatPhoto
     setChatTitle = setChatTitle
+    setChatTtl = setChatTtl
     setChatUsername = setChatUsername
     setSlowMode = setSlowMode
     toggleContentProtection = toggleContentProtection
@@ -4577,6 +4614,7 @@ export class TelegramClient extends BaseTelegramClient {
     blockUser = blockUser
     deleteProfilePhotos = deleteProfilePhotos
     getCommonChats = getCommonChats
+    getGlobalTtl = getGlobalTtl
     getMe = getMe
     getMyUsername = getMyUsername
     getProfilePhoto = getProfilePhoto
@@ -4585,6 +4623,7 @@ export class TelegramClient extends BaseTelegramClient {
     iterProfilePhotos = iterProfilePhotos
     resolvePeerMany = resolvePeerMany
     resolvePeer = resolvePeer
+    setGlobalTtl = setGlobalTtl
     setOffline = setOffline
     setProfilePhoto = setProfilePhoto
     setUsername = setUsername

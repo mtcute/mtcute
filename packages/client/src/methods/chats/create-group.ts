@@ -11,17 +11,33 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * If you want to create a supergroup, use {@link createSupergroup}
  * instead.
  *
- * @param title  Group title
- * @param users
- *   User(s) to be invited in the group (ID(s), username(s) or phone number(s)).
- *   Due to Telegram limitations, you can't create a legacy group with yourself.
  * @internal
  */
 export async function createGroup(
     this: TelegramClient,
-    title: string,
-    users: MaybeArray<InputPeerLike>,
+    params: {
+        /**
+         * Group title
+         */
+        title: string
+
+        /**
+         * User(s) to be invited in the group (ID(s), username(s) or phone number(s)).
+         * Due to Telegram limitations, you can't create a legacy group with just yourself.
+         */
+        users: MaybeArray<InputPeerLike>
+
+        /**
+         * TTL period (in seconds) for the newly created chat
+         *
+         * @default 0 (i.e. messages don't expire)
+         */
+        ttlPeriod?: number
+    },
 ): Promise<Chat> {
+    const { title } = params
+    let { users } = params
+
     if (!Array.isArray(users)) users = [users]
 
     const peers = await this.resolvePeerMany(users, normalizeToInputUser)

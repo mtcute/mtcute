@@ -295,6 +295,13 @@ export class Dialog {
 
         return this._draftMessage
     }
+
+    /**
+     * TTL period of all messages in this dialog
+     */
+    get ttlPeriod(): number | null {
+        return this.raw.ttlPeriod ?? null
+    }
 }
 
 makeInspectable(Dialog)

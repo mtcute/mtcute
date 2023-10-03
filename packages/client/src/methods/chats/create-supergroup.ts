@@ -27,7 +27,7 @@ export async function createSupergroup(
         forum?: boolean
 
         /**
-         * TTL period (in seconds) for the newly created channel
+         * TTL period (in seconds) for the newly created supergroup
          *
          * @default 0 (i.e. messages don't expire)
          */

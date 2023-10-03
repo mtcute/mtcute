@@ -361,16 +361,6 @@ export class Chat {
      * Returned only in {@link TelegramClient.getFullChat}
      */
     get membersCount(): number | null {
-        // return this.fullPeer && this.fullPeer._ !== 'userFull' ?
-        //     this.fullPeer._ === 'chatFull' ?
-        //         this.fullPeer.participants._ === 'chatParticipants' ?
-        //             this.fullPeer.participants.participants.length :
-        //             null :
-        //         this.fullPeer._ === 'channelFull' ?
-        //             this.fullPeer.participantsCount ?? null :
-        //             null :
-        //     null
-
         if (this.fullPeer && this.fullPeer._ !== 'userFull') {
             if (this.fullPeer._ === 'chatFull' && this.fullPeer.participants._ === 'chatParticipants') {
                 return this.fullPeer.participants.participants.length
@@ -450,6 +440,15 @@ export class Chat {
      */
     get linkedChat(): Chat | null {
         return this._linkedChat ?? null
+    }
+
+    /**
+     * TTL of all messages in this chat, in seconds
+     *
+     * Returned only in {@link TelegramClient.getFullChat}
+     */
+    get ttlPeriod(): number | null {
+        return this.fullPeer?.ttlPeriod ?? null
     }
 
     private _user?: User

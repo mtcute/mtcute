@@ -418,6 +418,13 @@ export class Message {
         return this.raw._ === 'message' && this.raw.media?._ === 'messageMediaDocument' && this.raw.media.nopremium!
     }
 
+    /**
+     * TTL period of the message, in seconds.
+     */
+    get ttlPeriod(): number | null {
+        return this.raw.ttlPeriod ?? null
+    }
+
     private _markup?: ReplyMarkup | null
     /**
      * Reply markup provided with this message, if any.
