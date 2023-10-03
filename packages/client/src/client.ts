@@ -75,6 +75,7 @@ import { setChatPhoto } from './methods/chats/set-chat-photo'
 import { setChatTitle } from './methods/chats/set-chat-title'
 import { setChatUsername } from './methods/chats/set-chat-username'
 import { setSlowMode } from './methods/chats/set-slow-mode'
+import { toggleContentProtection } from './methods/chats/toggle-content-protection'
 import { toggleFragmentUsername } from './methods/chats/toggle-fragment-username'
 import { toggleJoinRequests } from './methods/chats/toggle-join-requests'
 import { toggleJoinToSend } from './methods/chats/toggle-join-to-send'
@@ -1528,6 +1529,13 @@ export interface TelegramClient extends BaseTelegramClient {
      *   Valid values are: `0 (off), 10, 30, 60 (1m), 300 (5m), 900 (15m) or 3600 (1h)`
      */
     setSlowMode(chatId: InputPeerLike, seconds?: number): Promise<void>
+    /**
+     * Set whether a chat has content protection (i.e. forwarding messages is disabled)
+     *
+     * @param chatId  Chat ID or username
+     * @param enabled  (default: `false`) Whether content protection should be enabled
+     */
+    toggleContentProtection(chatId: InputPeerLike, enabled?: boolean): Promise<void>
     /**
      * Toggle a collectible (Fragment) username
      *
@@ -4442,6 +4450,7 @@ export class TelegramClient extends BaseTelegramClient {
     setChatTitle = setChatTitle
     setChatUsername = setChatUsername
     setSlowMode = setSlowMode
+    toggleContentProtection = toggleContentProtection
     toggleFragmentUsername = toggleFragmentUsername
     toggleJoinRequests = toggleJoinRequests
     toggleJoinToSend = toggleJoinToSend

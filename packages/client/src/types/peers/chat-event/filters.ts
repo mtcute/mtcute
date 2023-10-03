@@ -48,6 +48,7 @@ export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEve
                 case 'location_changed':
                 case 'photo_changed':
                 case 'username_changed':
+                case 'usernames_changed':
                 case 'stickerset_changed':
                 case 'slow_mode_changed':
                 case 'ttl_changed':
@@ -58,6 +59,7 @@ export function normalizeChatEventFilters(input: InputChatEventFilters): ChatEve
                 case 'signatures_toggled':
                 case 'def_perms_changed':
                 case 'forum_toggled':
+                case 'no_forwards_toggled':
                     serverFilter.settings = true
                     break
                 case 'msg_pinned':

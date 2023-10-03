@@ -10,12 +10,12 @@ import { ChatMember } from '../chat-member'
 import { ChatPermissions } from '../chat-permissions'
 import { User } from '../user'
 
-/** A user has joined the group (in the case of big groups, info of the user that has joined isn't shown) */
+/** A user has joined the channel (in the case of big groups, info of the user that has joined isn't shown) */
 export interface ChatActionUserJoined {
     type: 'user_joined'
 }
 
-/** A user has joined the group using an invite link */
+/** A user has joined the channel using an invite link */
 export interface ChatActionUserJoinedInvite {
     type: 'user_joined_invite'
 
@@ -23,7 +23,7 @@ export interface ChatActionUserJoinedInvite {
     link: ChatInviteLink
 }
 
-/** A user has joined the group using an invite link and was approved by an admin */
+/** A user has joined the channel using an invite link and was approved by an admin */
 export interface ChatActionUserJoinedApproved {
     type: 'user_joined_approved'
 
@@ -34,12 +34,12 @@ export interface ChatActionUserJoinedApproved {
     approvedBy: User
 }
 
-/** A user has left the group (in the case of big groups, info of the user that has joined isn't shown) */
+/** A user has left the channel (in the case of big groups, info of the user that has joined isn't shown) */
 export interface ChatActionUserLeft {
     type: 'user_left'
 }
 
-/** A user was invited to the group */
+/** A user was invited to the channel */
 export interface ChatActionUserInvited {
     type: 'user_invited'
 
@@ -47,7 +47,7 @@ export interface ChatActionUserInvited {
     member: ChatMember
 }
 
-/** Group title has been changed */
+/** Channel title has been changed */
 export interface ChatActionTitleChanged {
     type: 'title_changed'
 
@@ -58,7 +58,7 @@ export interface ChatActionTitleChanged {
     new: string
 }
 
-/** Group description has been changed */
+/** Channel description has been changed */
 export interface ChatActionDescriptionChanged {
     type: 'description_changed'
 
@@ -69,7 +69,7 @@ export interface ChatActionDescriptionChanged {
     new: string
 }
 
-/** Group username has been changed */
+/** Channel username has been changed */
 export interface ChatActionUsernameChanged {
     type: 'username_changed'
 
@@ -80,7 +80,18 @@ export interface ChatActionUsernameChanged {
     new: string
 }
 
-/** Group photo has been changed */
+/** Channel username list has been changed */
+export interface ChatActionUsernamesChanged {
+    type: 'usernames_changed'
+
+    /** Old username */
+    old: string[]
+
+    /** New username */
+    new: string[]
+}
+
+/** Channel photo has been changed */
 export interface ChatActionPhotoChanged {
     type: 'photo_changed'
 
@@ -298,6 +309,14 @@ export interface ChatActionTtlChanged {
     new: number
 }
 
+/** Content protection has been toggled */
+export interface ChatActionNoForwardsToggled {
+    type: 'no_forwards_toggled'
+
+    /** New status */
+    enabled: boolean
+}
+
 /** Forum has been toggled */
 export interface ChatActionForumToggled {
     type: 'forum_toggled'
@@ -341,6 +360,7 @@ export type ChatAction =
     | ChatActionTitleChanged
     | ChatActionDescriptionChanged
     | ChatActionUsernameChanged
+    | ChatActionUsernamesChanged
     | ChatActionPhotoChanged
     | ChatActionInvitesToggled
     | ChatActionSignaturesToggled
@@ -365,6 +385,7 @@ export type ChatAction =
     | ChatActionInviteLinkRevoked
     | ChatActionUserJoinedApproved
     | ChatActionTtlChanged
+    | ChatActionNoForwardsToggled
     | ChatActionForumToggled
     | ChatActionTopicCreated
     | ChatActionTopicEdited
@@ -377,10 +398,6 @@ export function _actionFromTl(
     client: TelegramClient,
     peers: PeersIndex,
 ): ChatAction {
-    // todo - MTQ-84
-    // channelAdminLogEventActionToggleNoForwards#cb2ac766 new_value:Bool = ChannelAdminLogEventAction;
-    // todo - MTQ-57
-    // channelAdminLogEventActionChangeUsernames#f04fb3a9 prev_value:Vector<string> new_value:Vector<string>
     // todo - MTQ-72
     // channelAdminLogEventActionSendMessage#278f2868 message:Message = ChannelAdminLogEventAction;
     // channelAdminLogEventActionChangeAvailableReactions#be4e0ef8 prev_value:ChatReactions new_value:ChatReactions
@@ -404,6 +421,12 @@ export function _actionFromTl(
         case 'channelAdminLogEventActionChangeUsername':
             return {
                 type: 'username_changed',
+                old: e.prevValue,
+                new: e.newValue,
+            }
+        case 'channelAdminLogEventActionChangeUsernames':
+            return {
+                type: 'usernames_changed',
                 old: e.prevValue,
                 new: e.newValue,
             }
@@ -584,6 +607,11 @@ export function _actionFromTl(
             return {
                 type: 'topic_deleted',
                 topic: new ForumTopic(client, e.topic, peers),
+            }
+        case 'channelAdminLogEventActionToggleNoForwards':
+            return {
+                type: 'no_forwards_toggled',
+                enabled: e.newValue,
             }
         // case 'channelAdminLogEventActionPinTopic'
         // ^ looks like it is not used, and pinned topics are not at all presented in the event log

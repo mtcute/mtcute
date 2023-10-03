@@ -146,6 +146,11 @@ export class Message {
         return this.raw._ === 'messageService'
     }
 
+    /** Whether this message has content protection (i.e. disabled forwards) */
+    get isContentProtected(): boolean {
+        return this.raw._ === 'message' && this.raw.noforwards!
+    }
+
     /**
      * Multiple media messages with the same grouped ID
      * indicate an album or media group

@@ -212,6 +212,11 @@ export class Chat {
         return this.peer._ === 'channel' && this.peer.joinToSend!
     }
 
+    /** Whether this group has content protection (i.e. disabled forwards) */
+    get hasContentProtection(): boolean {
+        return (this.peer._ === 'channel' || this.peer._ === 'chat') && this.peer.noforwards!
+    }
+
     /**
      * Title, for supergroups, channels and groups
      */
