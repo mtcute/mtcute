@@ -76,6 +76,15 @@ function normalizeLinks(url: string, el: cheerio.Cheerio<cheerio.Element>): void
     })
 }
 
+function unescapeHtml(text: string) {
+    return text
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&nbsp;/g, ' ')
+        .trim()
+}
+
 function extractDescription($: cheerio.CheerioAPI) {
     return $('.page_scheme')
         .prevAll('p')
@@ -169,7 +178,7 @@ export async function fetchDocumentation(
 
         const retClass: CachedDocumentationEntry = {}
 
-        const description = extractDescription($)
+        const description = unescapeHtml(extractDescription($))
 
         if (description) {
             retClass.comment = description
@@ -182,7 +191,7 @@ export async function fetchDocumentation(
             if (!cols.length) return // <thead>
 
             const name = cols.first().text().trim()
-            const description = cols.last().html()?.trim()
+            const description = unescapeHtml(cols.last().html() ?? '')
 
             if (description) {
                 if (!retClass.arguments) retClass.arguments = {}
@@ -272,7 +281,7 @@ export function applyDocumentation(schema: TlFullSchema, docs: CachedDocumentati
             const obj = objIndex[name]
             const doc = docIndex[name]
 
-            if (doc.comment) obj.comment = doc.comment
+            obj.comment = doc.comment
             if (doc.throws) obj.throws = doc.throws
             if (doc.available) obj.available = doc.available
 
@@ -311,7 +320,7 @@ async function main() {
     let cached = await getCachedDocumentation()
 
     if (cached) {
-        console.log('Cached documentation: %d', cached.updated)
+        console.log('Cached documentation: %s', cached.updated)
     }
 
     const rl = createInterface({
@@ -334,7 +343,11 @@ async function main() {
             continue
         }
 
-        if (act === 0) return
+        if (act === 0) {
+            rl.close()
+
+            return
+        }
 
         if (act === 1) {
             const [schema, layer] = unpackTlSchema(
