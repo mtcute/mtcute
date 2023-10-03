@@ -1,6 +1,6 @@
 import { calculateStaticSizes } from '../calculator'
 import { computeConstructorIdFromEntry } from '../ctor-id'
-import { TL_PRIMITIVES, TlEntry } from '../types'
+import { TL_PRIMITIVES, TlArgument, TlEntry } from '../types'
 import { snakeToCamel } from './utils'
 
 export interface WriterCodegenOptions {
@@ -70,37 +70,58 @@ export function generateWriterCodeForTlEntry(entry: TlEntry, params = DEFAULT_OP
     if (!bare) ret += `w.uint(${entry.id});`
 
     const flagsFields: Record<string, 1> = {}
+    const fieldConditions: Record<string, string> = {}
 
     entry.arguments.forEach((arg) => {
         if (arg.type === '#') {
             ret += `var ${arg.name}=${includeFlags ? `v.${arg.name}` : '0'};`
 
-            entry.arguments.forEach((arg1) => {
-                const predicate = arg1.typeModifiers?.predicate
+            const usedByArgs = entry.arguments.filter((a) => a.typeModifiers?.predicate?.startsWith(arg.name + '.'))
+            const indexUsage: Record<string, TlArgument[]> = {}
 
-                let s
+            usedByArgs.forEach((arg1) => {
+                const index = arg1.typeModifiers!.predicate!.split('.')[1]
+                if (!indexUsage[index]) indexUsage[index] = []
+                indexUsage[index].push(arg1)
+            })
 
-                if (!predicate || (s = predicate.split('.'))[0] !== arg.name) {
-                    return
-                }
-
-                const arg1Name = snakeToCamel(arg1.name)
-
-                const bitIndex = parseInt(s[1])
+            Object.entries(indexUsage).forEach(([index, args]) => {
+                const bitIndex = parseInt(index)
 
                 if (isNaN(bitIndex) || bitIndex < 0 || bitIndex > 32) {
-                    throw new Error(`Invalid predicate: ${predicate} - invalid bit`)
+                    throw new Error(`Invalid predicate: ${arg.name}.${bitIndex} - invalid bit`)
                 }
+
+                const conditions: string[] = []
+                args.forEach((arg1) => {
+                    const arg1Name = snakeToCamel(arg1.name)
+
+                    if (arg1.type === 'true') {
+                        conditions.push(`v.${arg1Name}===true`)
+                    } else if (arg1.typeModifiers?.isVector || arg1.typeModifiers?.isBareVector) {
+                        ret += `var _${arg1Name}=v.${arg1Name}&&v.${arg1Name}.length;`
+                        conditions.push(`_${arg1Name}`)
+                    } else {
+                        ret += `var _${arg1Name}=v.${arg1Name}!==undefined;`
+                        conditions.push(`_${arg1Name}`)
+                    }
+                })
 
                 const action = `${arg.name}|=${1 << bitIndex};`
+                let condition: string
 
-                if (arg1.type === 'true') {
-                    ret += `if(v.${arg1Name}===true)${action}`
-                } else if (arg1.typeModifiers?.isVector || arg1.typeModifiers?.isBareVector) {
-                    ret += `var _${arg1Name}=v.${arg1Name}&&v.${arg1Name}.length;if(_${arg1Name})${action}`
+                if (conditions.length > 1) {
+                    condition = `_${arg.name}_${bitIndex}`
+                    ret += `var ${condition}=${conditions.join('||')};`
                 } else {
-                    ret += `var _${arg1Name}=v.${arg1Name}!==undefined;if(_${arg1Name})${action}`
+                    condition = conditions[0]
                 }
+
+                ret += `if(${condition})${action}`
+
+                args.forEach((arg) => {
+                    fieldConditions[arg.name] = condition
+                })
             })
 
             ret += `w.uint(${arg.name});`
@@ -118,7 +139,7 @@ export function generateWriterCodeForTlEntry(entry: TlEntry, params = DEFAULT_OP
         if (arg.typeModifiers?.predicate) {
             if (type === 'true') return // included in flags
 
-            ret += `if(_${argName})`
+            ret += `if(${fieldConditions[arg.name]})`
         } else {
             accessor = `h(v,'${argName}')`
         }

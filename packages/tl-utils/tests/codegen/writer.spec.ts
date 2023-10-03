@@ -74,6 +74,20 @@ describe('generateWriterCodeForTlEntry', () => {
         )
     })
 
+    it('generates code for constructors with multiple fields using the same flag', () => {
+        test(
+            'inputMediaPoll#f94e5f1 flags:# solution:flags.1?string solution_entities:flags.1?Vector<MessageEntity> = InputMedia;',
+            'var flags=0;',
+            'var _solution=v.solution!==undefined;',
+            'var _solutionEntities=v.solutionEntities&&v.solutionEntities.length;',
+            'var _flags_1=_solution||_solutionEntities;',
+            'if(_flags_1)flags|=2;',
+            'w.uint(flags);',
+            'if(_flags_1)w.string(v.solution);',
+            'if(_flags_1)w.vector(w.object,v.solutionEntities);',
+        )
+    })
+
     it('generates code for constructors with vector arguments', () => {
         test(
             'contacts.resolvedPeer#7f077ad9 peer:Peer chats:Vector<Chat> users:Vector<User> = contacts.ResolvedPeer;',
