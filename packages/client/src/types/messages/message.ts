@@ -17,7 +17,7 @@ import { Chat, InputPeerLike, PeersIndex, User } from '../peers'
 import { _messageActionFromTl, MessageAction } from './message-action'
 import { MessageEntity } from './message-entity'
 import { _messageMediaFromTl, MessageMedia } from './message-media'
-import { MessageReactions } from './reactions'
+import { MessageReactions } from './message-reactions'
 
 /** Information about a forward */
 export interface MessageForwardInfo {

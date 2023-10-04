@@ -6,6 +6,7 @@ import {
     ChatMemberUpdate,
     ChosenInlineResult,
     DeleteMessageUpdate,
+    DeleteStoryUpdate,
     HistoryReadUpdate,
     InlineQuery,
     MaybeAsync,
@@ -14,6 +15,7 @@ import {
     PollUpdate,
     PollVoteUpdate,
     PreCheckoutQuery,
+    StoryUpdate,
     TelegramClient,
     tl,
     UserStatusUpdate,
@@ -62,6 +64,8 @@ export type BotStoppedHandler<T = BotStoppedUpdate> = ParsedUpdateHandler<'bot_s
 export type BotChatJoinRequestHandler<T = BotChatJoinRequestUpdate> = ParsedUpdateHandler<'bot_chat_join_request', T>
 export type ChatJoinRequestHandler<T = ChatJoinRequestUpdate> = ParsedUpdateHandler<'chat_join_request', T>
 export type PreCheckoutQueryHandler<T = PreCheckoutQuery> = ParsedUpdateHandler<'pre_checkout_query', T>
+export type StoryUpdateHandler<T = StoryUpdate> = ParsedUpdateHandler<'story', T>
+export type DeleteStoryHandler<T = DeleteStoryUpdate> = ParsedUpdateHandler<'delete_story', T>
 
 export type UpdateHandler =
     | RawUpdateHandler
@@ -81,5 +85,7 @@ export type UpdateHandler =
     | BotChatJoinRequestHandler
     | ChatJoinRequestHandler
     | PreCheckoutQueryHandler
+    | StoryUpdateHandler
+    | DeleteStoryHandler
 
 // end-codegen

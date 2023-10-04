@@ -165,6 +165,7 @@ import { translateText } from './methods/messages/translate-text'
 import { unpinAllMessages } from './methods/messages/unpin-all-messages'
 import { unpinMessage } from './methods/messages/unpin-message'
 import { initTakeoutSession } from './methods/misc/init-takeout-session'
+import { _normalizePrivacyRules } from './methods/misc/normalize-privacy-rules'
 import {
     getParseMode,
     registerParseMode,
@@ -183,6 +184,33 @@ import { getInstalledStickers } from './methods/stickers/get-installed-stickers'
 import { getStickerSet } from './methods/stickers/get-sticker-set'
 import { moveStickerInSet } from './methods/stickers/move-sticker-in-set'
 import { setStickerSetThumb } from './methods/stickers/set-sticker-set-thumb'
+import { applyBoost } from './methods/stories/apply-boost'
+import { canApplyBoost, CanApplyBoostResult } from './methods/stories/can-apply-boost'
+import { canSendStory, CanSendStoryResult } from './methods/stories/can-send-story'
+import { deleteStories } from './methods/stories/delete-stories'
+import { editStory } from './methods/stories/edit-story'
+import { _findStoryInUpdate } from './methods/stories/find-in-update'
+import { getAllStories } from './methods/stories/get-all-stories'
+import { getBoostStats } from './methods/stories/get-boost-stats'
+import { getBoosters } from './methods/stories/get-boosters'
+import { getPeerStories } from './methods/stories/get-peer-stories'
+import { getProfileStories } from './methods/stories/get-profile-stories'
+import { getStoriesById } from './methods/stories/get-stories-by-id'
+import { getStoriesInteractions } from './methods/stories/get-stories-interactions'
+import { getStoryLink } from './methods/stories/get-story-link'
+import { getStoryViewers } from './methods/stories/get-story-viewers'
+import { hideMyStoriesViews } from './methods/stories/hide-my-stories-views'
+import { incrementStoriesViews } from './methods/stories/increment-stories-views'
+import { iterAllStories } from './methods/stories/iter-all-stories'
+import { iterBoosters } from './methods/stories/iter-boosters'
+import { iterProfileStories } from './methods/stories/iter-profile-stories'
+import { iterStoryViewers } from './methods/stories/iter-story-viewers'
+import { readStories } from './methods/stories/read-stories'
+import { reportStory } from './methods/stories/report-story'
+import { sendStory } from './methods/stories/send-story'
+import { sendStoryReaction } from './methods/stories/send-story-reaction'
+import { togglePeerStoriesArchived } from './methods/stories/toggle-peer-stories-archived'
+import { toggleStoriesPinned } from './methods/stories/toggle-stories-pinned'
 import {
     _dispatchUpdate,
     _fetchUpdatesState,
@@ -218,8 +246,11 @@ import { setUsername } from './methods/users/set-username'
 import { unblockUser } from './methods/users/unblock-user'
 import { updateProfile } from './methods/users/update-profile'
 import {
+    AllStories,
     ArrayPaginated,
     ArrayWithTotal,
+    Booster,
+    BoostStats,
     BotChatJoinRequestUpdate,
     BotCommands,
     BotStoppedUpdate,
@@ -249,6 +280,7 @@ import {
     InputInlineResult,
     InputMediaLike,
     InputPeerLike,
+    InputPrivacyRule,
     InputReaction,
     InputStickerSetItem,
     MaybeDynamic,
@@ -259,6 +291,7 @@ import {
     ParsedUpdate,
     PeerReaction,
     PeersIndex,
+    PeerStories,
     Photo,
     Poll,
     PollUpdate,
@@ -271,6 +304,11 @@ import {
     StickerSet,
     StickerSourceType,
     StickerType,
+    StoriesStealthMode,
+    Story,
+    StoryInteractions,
+    StoryViewer,
+    StoryViewersList,
     TakeoutSession,
     TermsOfService,
     TypingStatus,
@@ -3833,6 +3871,12 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     initTakeoutSession(params: Omit<tl.account.RawInitTakeoutSessionRequest, '_'>): Promise<TakeoutSession>
     /**
+     * Normalize {@link InputPrivacyRule}[] to `tl.TypeInputPrivacyRule`,
+     * resolving the peers if needed.
+     *
+     */
+    _normalizePrivacyRules(rules: InputPrivacyRule[]): Promise<tl.TypeInputPrivacyRule[]>
+    /**
      * Register a given {@link IMessageEntityParser} as a parse mode
      * for messages. When this method is first called, given parse
      * mode is also set as default.
@@ -4079,6 +4123,532 @@ export interface TelegramClient extends BaseTelegramClient {
             progressCallback?: (uploaded: number, total: number) => void
         },
     ): Promise<StickerSet>
+    /**
+     * Boost a given channel
+     *
+     * @param peerId  Peer ID to boost
+     */
+    applyBoost(peerId: InputPeerLike): Promise<void>
+    /**
+     * Check if the current user can apply boost to a given channel
+     *
+     * @param peerId  Peer ID whose stories to fetch
+     * @returns
+     *   - `{ can: true }` if the user can apply boost
+     *      - `.current` - {@link Chat} that the current user is currently boosting, if any
+     *   - `{ can: false }` if the user can't apply boost
+     *      - `.reason == "already_boosting"` if the user is already boosting this channel
+     *      - `.reason == "need_premium"` if the user needs Premium to boost this channel
+     */
+    canApplyBoost(peerId: InputPeerLike): Promise<CanApplyBoostResult>
+    /**
+     * Check if the current user can post stories as a given peer
+     *
+     * @param peerId  Peer ID whose stories to fetch
+     * @returns
+     *   - `true` if the user can post stories
+     *   - `"need_admin"` if the user is not an admin in the chat
+     *   - `"need_boosts"` if the channel doesn't have enough boosts
+     */
+    canSendStory(peerId: InputPeerLike): Promise<CanSendStoryResult>
+    /**
+     * Delete a story
+     *
+     * @returns  IDs of stories that were removed
+     */
+    deleteStories(params: {
+        /**
+         * Story IDs to delete
+         */
+        ids: MaybeArray<number>
+
+        /**
+         * Peer ID whose stories to delete
+         *
+         * @default  `self`
+         */
+        peer?: InputPeerLike
+    }): Promise<number[]>
+    /**
+     * Edit a sent story
+     *
+     * @returns  Edited story
+     */
+    editStory(params: {
+        /**
+         * Story ID to edit
+         */
+        id: number
+
+        /**
+         * Peer ID to whose story to edit
+         *
+         * @default  `self`
+         */
+        peer?: InputPeerLike
+
+        /**
+         * Media contained in a story. Currently can only be a photo or a video.
+         */
+        media?: InputMediaLike
+
+        /**
+         * Override caption for {@link media}
+         */
+        caption?: string | FormattedString<string>
+
+        /**
+         * Override entities for {@link media}
+         */
+        entities?: tl.TypeMessageEntity[]
+
+        /**
+         * Parse mode to use to parse entities before sending
+         * the message. Defaults to current default parse mode (if any).
+         *
+         * Passing `null` will explicitly disable formatting.
+         */
+        parseMode?: string | null
+
+        /**
+         * Interactive elements to add to the story
+         */
+        interactiveElements?: tl.TypeMediaArea[]
+
+        /**
+         * Privacy rules to apply to the story
+         *
+         * @default  "Everyone"
+         */
+        privacyRules?: InputPrivacyRule[]
+    }): Promise<Story>
+
+    _findStoryInUpdate(res: tl.TypeUpdates): Story
+    /**
+     * Get all stories (e.g. to load the top bar)
+     *
+     */
+    getAllStories(params?: {
+        /**
+         * Offset from which to fetch stories
+         */
+        offset?: string
+
+        /**
+         * Whether to fetch stories from "archived" (or "hidden") peers
+         */
+        archived?: boolean
+    }): Promise<AllStories>
+    /**
+     * Get information about boosts in a channel
+     *
+     * @returns  IDs of stories that were removed
+     */
+    getBoostStats(peerId: InputPeerLike): Promise<BoostStats>
+    /**
+     * Get boosters of a channel
+     *
+     * @returns  IDs of stories that were removed
+     */
+    getBoosters(
+        peerId: InputPeerLike,
+        params?: {
+            /**
+             * Offset for pagination
+             */
+            offset?: string
+
+            /**
+             * Maximum number of boosters to fetch
+             *
+             * @default  100
+             */
+            limit?: number
+        },
+    ): Promise<ArrayPaginated<Booster, string>>
+    /**
+     * Get stories of a given peer
+     *
+     * @param peerId  Peer ID whose stories to fetch
+     */
+    getPeerStories(peerId: InputPeerLike): Promise<PeerStories>
+    /**
+     * Get profile stories
+     *
+     */
+    getProfileStories(
+        peerId: InputPeerLike,
+        params?: {
+            /**
+             * Kind of stories to fetch
+             * - `pinned` - stories pinned to the profile and visible to everyone
+             * - `archived` - "archived" stories that can later be pinned, only visible to the owner
+             *
+             * @default  `pinned`
+             */
+            kind?: 'pinned' | 'archived'
+
+            /**
+             * Offset ID for pagination
+             */
+            offsetId?: number
+
+            /**
+             * Maximum number of stories to fetch
+             *
+             * @default  100
+             */
+            limit?: number
+        },
+    ): Promise<ArrayPaginated<Story, number>>
+    /**
+     * Get a single story by its ID
+     *
+     * @param peerId  Peer ID whose stories to fetch
+     * @param storyId  Story ID
+     */
+    getStoriesById(peerId: InputPeerLike, storyId: number): Promise<Story>
+    /**
+     * Get multiple stories by their IDs
+     *
+     * @param peerId  Peer ID whose stories to fetch
+     * @param storyIds  Story IDs
+     */
+    getStoriesById(peerId: InputPeerLike, storyIds: number[]): Promise<Story[]>
+    /**
+     * Get brief information about story interactions.
+     *
+     */
+    getStoriesInteractions(peerId: InputPeerLike, storyId: number): Promise<StoryInteractions>
+    /**
+     * Get brief information about stories interactions.
+     *
+     * The result will be in the same order as the input IDs
+     *
+     */
+    getStoriesInteractions(peerId: InputPeerLike, storyIds: number[]): Promise<StoryInteractions[]>
+    /**
+     * Generate a link to a story.
+     *
+     * Basically the link format is `t.me/<username>/s/<story_id>`,
+     * and if the user doesn't have a username, `USER_PUBLIC_MISSING` is thrown.
+     *
+     * I have no idea why is this an RPC call, but whatever
+     *
+     */
+    getStoryLink(peerId: InputPeerLike, storyId: number): Promise<string>
+    /**
+     * Get viewers list of a story
+     *
+     */
+    getStoryViewers(
+        peerId: InputPeerLike,
+        storyId: number,
+        params?: {
+            /**
+             * Whether to only fetch viewers from contacts
+             */
+            onlyContacts?: boolean
+
+            /**
+             * How to sort the results?
+             * - `reaction` - by reaction (viewers who has reacted are first), then by date (newest first)
+             * - `date` - by date, newest first
+             *
+             * @default  `reaction`
+             */
+            sortBy?: 'reaction' | 'date'
+
+            /**
+             * Search query
+             */
+            query?: string
+
+            /**
+             * Offset ID for pagination
+             */
+            offset?: string
+
+            /**
+             * Maximum number of viewers to fetch
+             *
+             * @default  100
+             */
+            limit?: number
+        },
+    ): Promise<StoryViewersList>
+    /**
+     * Hide own stories views (activate so called "stealth mode")
+     *
+     * Currently has a cooldown of 1 hour, and throws FLOOD_WAIT error if it is on cooldown.
+     *
+     */
+    hideMyStoriesViews(params?: {
+        /**
+         * Whether to hide views from the last 5 minutes
+         *
+         * @default  true
+         */
+        past?: boolean
+
+        /**
+         * Whether to hide views for the next 25 minutes
+         *
+         * @default  true
+         */
+        future?: boolean
+    }): Promise<StoriesStealthMode>
+    /**
+     * Increment views of one or more stories.
+     *
+     * This should be used for pinned stories, as they can't
+     * be marked as read when the user sees them ({@link Story#isActive} == false)
+     *
+     * @param peerId  Peer ID whose stories to mark as read
+     * @param ids  ID(s) of the stories to increment views of (max 200)
+     */
+    incrementStoriesViews(peerId: InputPeerLike, ids: MaybeArray<number>): Promise<boolean>
+    /**
+     * Iterate over all stories (e.g. to load the top bar)
+     *
+     * Wrapper over {@link getAllStories}
+     *
+     */
+    iterAllStories(params?: {
+        /**
+         * Offset from which to start fetching stories
+         */
+        offset?: string
+
+        /**
+         * Maximum number of stories to fetch
+         *
+         * @default  Infinity
+         */
+        limit?: number
+
+        /**
+         * Whether to fetch stories from "archived" (or "hidden") peers
+         */
+        archived?: boolean
+    }): AsyncIterableIterator<PeerStories>
+    /**
+     * Iterate over boosters of a channel.
+     *
+     * Wrapper over {@link getBoosters}
+     *
+     * @returns  IDs of stories that were removed
+     */
+    iterBoosters(
+        peerId: InputPeerLike,
+        params?: Parameters<TelegramClient['getBoosters']>[1] & {
+            /**
+             * Total number of boosters to fetch
+             *
+             * @default  Infinity, i.e. fetch all boosters
+             */
+            limit?: number
+
+            /**
+             * Number of boosters to fetch per request
+             * Usually you don't need to change this
+             *
+             * @default  100
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<Booster>
+    /**
+     * Iterate over profile stories. Wrapper over {@link getProfileStories}
+     *
+     */
+    iterProfileStories(
+        peerId: InputPeerLike,
+        params?: Parameters<TelegramClient['getProfileStories']>[1] & {
+            /**
+             * Total number of stories to fetch
+             *
+             * @default  `Infinity`, i.e. fetch all stories
+             */
+            limit?: number
+
+            /**
+             * Number of stories to fetch per request.
+             * Usually you shouldn't care about this.
+             *
+             * @default  100
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<Story>
+    /**
+     * Iterate over viewers list of a story.
+     * Wrapper over {@link getStoryViewers}
+     *
+     */
+    iterStoryViewers(
+        peerId: InputPeerLike,
+        storyId: number,
+        params?: Parameters<TelegramClient['getStoryViewers']>[2] & {
+            /**
+             * Total number of viewers to fetch
+             *
+             * @default  Infinity, i.e. fetch all viewers
+             */
+            limit?: number
+
+            /**
+             * Number of viewers to fetch per request.
+             * Usually you don't need to change this.
+             *
+             * @default  100
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<StoryViewer>
+    /**
+     * Mark all stories up to a given ID as read
+     *
+     * This should only be used for "active" stories ({@link Story#isActive} == false)
+     *
+     * @param peerId  Peer ID whose stories to mark as read
+     * @returns  IDs of the stores that were marked as read
+     */
+    readStories(peerId: InputPeerLike, maxId: number): Promise<number[]>
+    /**
+     * Report a story (or multiple stories) to the moderation team
+     *
+     */
+    reportStory(
+        peerId: InputPeerLike,
+        storyIds: MaybeArray<number>,
+        params?: {
+            /**
+             * Reason for reporting
+             *
+             * @default  inputReportReasonSpam
+             */
+            reason?: tl.TypeReportReason
+
+            /**
+             * Additional comment to the report
+             */
+            message?: string
+        },
+    ): Promise<void>
+    /**
+     * Send (or remove) a reaction to a story
+     *
+     */
+    sendStoryReaction(
+        peerId: InputPeerLike,
+        storyId: number,
+        reaction: InputReaction,
+        params?: {
+            /**
+             * Whether to add this reaction to recently used
+             */
+            addToRecent?: boolean
+        },
+    ): Promise<void>
+    /**
+     * Send a story
+     *
+     * @returns  Created story
+     */
+    sendStory(params: {
+        /**
+         * Peer ID to send story as
+         *
+         * @default  `self`
+         */
+        peer?: InputPeerLike
+
+        /**
+         * Media contained in a story. Currently can only be a photo or a video.
+         *
+         * You can also pass TDLib and Bot API compatible File ID,
+         * which will be wrapped in {@link InputMedia.auto}
+         */
+        media: InputMediaLike | string
+
+        /**
+         * Override caption for {@link media}
+         */
+        caption?: string | FormattedString<string>
+
+        /**
+         * Override entities for {@link media}
+         */
+        entities?: tl.TypeMessageEntity[]
+
+        /**
+         * Parse mode to use to parse entities before sending
+         * the message. Defaults to current default parse mode (if any).
+         *
+         * Passing `null` will explicitly disable formatting.
+         */
+        parseMode?: string | null
+
+        /**
+         * Whether to automatically pin this story to the profile
+         */
+        pinned?: boolean
+
+        /**
+         * Whether to disallow sharing this story
+         */
+        forbidForwards?: boolean
+
+        /**
+         * Interactive elements to add to the story
+         */
+        interactiveElements?: tl.TypeMediaArea[]
+
+        /**
+         * Privacy rules to apply to the story
+         *
+         * @default  "Everyone"
+         */
+        privacyRules?: InputPrivacyRule[]
+
+        /**
+         * TTL period of the story, in seconds
+         *
+         * @default  86400
+         */
+        period?: number
+    }): Promise<Story>
+    /**
+     * Toggle whether peer's stories are archived (hidden) or not.
+     *
+     * This **does not** archive the chat with that peer, only stories.
+     *
+     */
+    togglePeerStoriesArchived(peerId: InputPeerLike, archived: boolean): Promise<void>
+    /**
+     * Toggle one or more stories pinned status
+     *
+     * @returns  IDs of stories that were toggled
+     */
+    toggleStoriesPinned(params: {
+        /**
+         * Story ID(s) to toggle
+         */
+        ids: MaybeArray<number>
+
+        /**
+         * Whether to pin or unpin the story
+         */
+        pinned: boolean
+
+        /**
+         * Peer ID whose stories to toggle
+         *
+         * @default  `self`
+         */
+        peer?: InputPeerLike
+    }): Promise<number[]>
     /**
      * Enable RPS meter.
      * Only available in NodeJS v10.7.0 and newer
@@ -4579,6 +5149,7 @@ export class TelegramClient extends BaseTelegramClient {
     unpinAllMessages = unpinAllMessages
     unpinMessage = unpinMessage
     initTakeoutSession = initTakeoutSession
+    _normalizePrivacyRules = _normalizePrivacyRules
     registerParseMode = registerParseMode
     unregisterParseMode = unregisterParseMode
     getParseMode = getParseMode
@@ -4597,6 +5168,33 @@ export class TelegramClient extends BaseTelegramClient {
     getStickerSet = getStickerSet
     moveStickerInSet = moveStickerInSet
     setStickerSetThumb = setStickerSetThumb
+    applyBoost = applyBoost
+    canApplyBoost = canApplyBoost
+    canSendStory = canSendStory
+    deleteStories = deleteStories
+    editStory = editStory
+    _findStoryInUpdate = _findStoryInUpdate
+    getAllStories = getAllStories
+    getBoostStats = getBoostStats
+    getBoosters = getBoosters
+    getPeerStories = getPeerStories
+    getProfileStories = getProfileStories
+    getStoriesById = getStoriesById
+    getStoriesInteractions = getStoriesInteractions
+    getStoryLink = getStoryLink
+    getStoryViewers = getStoryViewers
+    hideMyStoriesViews = hideMyStoriesViews
+    incrementStoriesViews = incrementStoriesViews
+    iterAllStories = iterAllStories
+    iterBoosters = iterBoosters
+    iterProfileStories = iterProfileStories
+    iterStoryViewers = iterStoryViewers
+    readStories = readStories
+    reportStory = reportStory
+    sendStoryReaction = sendStoryReaction
+    sendStory = sendStory
+    togglePeerStoriesArchived = togglePeerStoriesArchived
+    toggleStoriesPinned = toggleStoriesPinned
     enableRps = enableRps
     getCurrentRpsIncoming = getCurrentRpsIncoming
     getCurrentRpsProcessing = getCurrentRpsProcessing

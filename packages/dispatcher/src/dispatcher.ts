@@ -19,6 +19,8 @@ import {
     PollUpdate,
     PollVoteUpdate,
     PreCheckoutQuery,
+    StoryUpdate,
+    DeleteStoryUpdate,
     TelegramClient,
     UserStatusUpdate,
     UserTypingUpdate,
@@ -35,6 +37,7 @@ import {
     ChatMemberUpdateHandler,
     ChosenInlineResultHandler,
     DeleteMessageHandler,
+    DeleteStoryHandler,
     EditMessageHandler,
     HistoryReadHandler,
     InlineQueryHandler,
@@ -43,6 +46,7 @@ import {
     PollVoteHandler,
     PreCheckoutQueryHandler,
     RawUpdateHandler,
+    StoryUpdateHandler,
     UpdateHandler,
     UserStatusUpdateHandler,
     UserTypingHandler,
@@ -1417,6 +1421,58 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     /** @internal */
     onPreCheckoutQuery(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('pre_checkout_query', filter, handler, group)
+    }
+
+    /**
+     * Register a story update handler without any filters
+     *
+     * @param handler  Story update handler
+     * @param group  Handler group index
+     */
+    onStoryUpdate(handler: StoryUpdateHandler['callback'], group?: number): void
+
+    /**
+     * Register a story update handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Story update handler
+     * @param group  Handler group index
+     */
+    onStoryUpdate<Mod>(
+        filter: UpdateFilter<StoryUpdate, Mod>,
+        handler: StoryUpdateHandler<filters.Modify<StoryUpdate, Mod>>['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onStoryUpdate(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('story', filter, handler, group)
+    }
+
+    /**
+     * Register a delete story handler without any filters
+     *
+     * @param handler  Delete story handler
+     * @param group  Handler group index
+     */
+    onDeleteStory(handler: DeleteStoryHandler['callback'], group?: number): void
+
+    /**
+     * Register a delete story handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Delete story handler
+     * @param group  Handler group index
+     */
+    onDeleteStory<Mod>(
+        filter: UpdateFilter<DeleteStoryUpdate, Mod>,
+        handler: DeleteStoryHandler<filters.Modify<DeleteStoryUpdate, Mod>>['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onDeleteStory(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('delete_story', filter, handler, group)
     }
 
     // end-codegen

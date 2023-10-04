@@ -88,7 +88,9 @@ export async function editMessage(
                 params.media.entities,
             )
         }
-    } else if (params.text) {
+    }
+
+    if (params.text) {
         [content, entities] = await this._parseEntities(params.text, params.parseMode, params.entities)
     }
 

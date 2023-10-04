@@ -10,7 +10,8 @@
         "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
         "docs": "typedoc",
         "build": "tsc",
-        "gen-client": "node ./scripts/generate-client.js"
+        "gen-client": "node ./scripts/generate-client.js",
+        "gen-updates": "node ./scripts/generate-updates.js"
     },
     "dependencies": {
         "@types/node": "18.16.0",

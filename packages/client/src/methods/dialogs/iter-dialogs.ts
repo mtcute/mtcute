@@ -253,7 +253,7 @@ export async function* iterDialogs(
         const last = dialogs[dialogs.length - 1]
         offsetPeer = last.chat.inputPeer
         offsetId = last.raw.topMessage
-        offsetDate = normalizeDate(last.lastMessage.date)!
+        offsetDate = last.lastMessage.raw.date
 
         for (const d of dialogs) {
             if (filterFolder && !filterFolder(d)) continue

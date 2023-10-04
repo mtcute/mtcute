@@ -5,10 +5,12 @@ import { ChatJoinRequestUpdate } from './chat-join-request'
 import { ChatMemberUpdate, ChatMemberUpdateType } from './chat-member-update'
 import { ChosenInlineResult } from './chosen-inline-result'
 import { DeleteMessageUpdate } from './delete-message-update'
+import { DeleteStoryUpdate } from './delete-story-update'
 import { HistoryReadUpdate } from './history-read-update'
 import { PollUpdate } from './poll-update'
 import { PollVoteUpdate } from './poll-vote'
 import { PreCheckoutQuery } from './pre-checkout-query'
+import { StoryUpdate } from './story-update'
 import { UserStatusUpdate } from './user-status-update'
 import { UserTypingUpdate } from './user-typing-update'
 
@@ -20,10 +22,12 @@ export {
     ChatMemberUpdateType,
     ChosenInlineResult,
     DeleteMessageUpdate,
+    DeleteStoryUpdate,
     HistoryReadUpdate,
     PollUpdate,
     PollVoteUpdate,
     PreCheckoutQuery,
+    StoryUpdate,
     UserStatusUpdate,
     UserTypingUpdate,
 }
@@ -46,5 +50,7 @@ export type ParsedUpdate =
     | { name: 'bot_chat_join_request'; data: BotChatJoinRequestUpdate }
     | { name: 'chat_join_request'; data: ChatJoinRequestUpdate }
     | { name: 'pre_checkout_query'; data: PreCheckoutQuery }
+    | { name: 'story'; data: StoryUpdate }
+    | { name: 'delete_story'; data: DeleteStoryUpdate }
 
 // end-codegen

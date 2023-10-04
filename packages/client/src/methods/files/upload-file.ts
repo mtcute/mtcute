@@ -246,14 +246,15 @@ export async function uploadFile(
             lock.release()
         }
 
-        if (fileSize === -1 && stream.readableEnded) {
-            fileSize = pos + (part?.length ?? 0)
-            partCount = ~~((fileSize + partSize - 1) / partSize)
-            this.log.debug('readable ended, file size = %d, part count = %d', fileSize, partCount)
+        if (!part && fileSize !== -1) {
+            throw new MtArgumentError(`Unexpected EOS (there were only ${idx} parts, but expected ${partCount})`)
         }
 
-        if (!part) {
-            throw new MtArgumentError(`Unexpected EOS (there were only ${idx} parts, but expected ${partCount})`)
+        if (fileSize === -1 && (stream.readableEnded || !part)) {
+            fileSize = pos + (part?.length ?? 0)
+            partCount = ~~((fileSize + partSize - 1) / partSize)
+            if (!part) part = Buffer.alloc(0)
+            this.log.debug('readable ended, file size = %d, part count = %d', fileSize, partCount)
         }
 
         if (!Buffer.isBuffer(part)) {
@@ -305,14 +306,10 @@ export async function uploadFile(
         return uploadNextPart()
     }
 
-    await Promise.all(
-        Array.from(
-            {
-                length: connectionPoolSize * requestsPerConnection,
-            },
-            uploadNextPart,
-        ),
-    )
+    let poolSize = connectionPoolSize * requestsPerConnection
+    if (partCount !== -1 && poolSize > partCount) poolSize = partCount
+
+    await Promise.all(Array.from({ length: poolSize }, uploadNextPart))
 
     let inputFile: tl.TypeInputFile
 
