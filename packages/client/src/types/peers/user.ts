@@ -5,6 +5,7 @@ import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { InputMediaLike } from '../media'
 import { FormattedString } from '../parser'
+import { EmojiStatus } from '../reactions/emoji-status'
 import { ChatPhoto } from './chat-photo'
 
 /**
@@ -60,6 +61,11 @@ export class User {
         return this.raw.mutualContact!
     }
 
+    /** Whether this user is in yout "close friends" list */
+    get isCloseFriend(): boolean {
+        return this.raw.closeFriend!
+    }
+
     /** Whether this user is deleted */
     get isDeleted(): boolean {
         return this.raw.deleted!
@@ -68,6 +74,26 @@ export class User {
     /** Whether this user is a bot */
     get isBot(): boolean {
         return this.raw.bot!
+    }
+
+    /** Whether this user is a bot that has access to all messages */
+    get isBotWithHistory(): boolean {
+        return this.raw.botChatHistory!
+    }
+
+    /** Whether this user is a bot that can't be added to chats */
+    get isBotWithoutChats(): boolean {
+        return this.raw.botNochats!
+    }
+
+    /** Whether this bot offers an attachment menu web app */
+    get isBotWithAttachmentMenu(): boolean {
+        return this.raw.botAttachMenu!
+    }
+
+    /** Whether this bot can be edited by the current user */
+    get isBotEditable(): boolean {
+        return this.raw.botCanEdit!
     }
 
     /** Whether this user has been verified by Telegram */
@@ -277,6 +303,32 @@ export class User {
         if (this.lastName) return `${this.firstName} ${this.lastName}`
 
         return this.firstName
+    }
+
+    private _emojiStatus?: EmojiStatus
+    /**
+     * User's emoji status, if any.
+     */
+    get emojiStatus(): EmojiStatus | null {
+        if (!this.raw.emojiStatus || this.raw.emojiStatus._ === 'emojiStatusEmpty') return null
+
+        return (this._emojiStatus ??= new EmojiStatus(this.raw.emojiStatus))
+    }
+
+    /** Whether you have hidden (arhived) this user's stories */
+    get storiesHidden(): boolean {
+        return this.raw.storiesHidden!
+    }
+
+    get storiesUnavailable(): boolean {
+        return this.raw.storiesUnavailable!
+    }
+
+    /**
+     * Maximum ID of stories this user has (or 0 if none)
+     */
+    get storiesMaxId(): number {
+        return this.raw.storiesMaxId ?? 0
     }
 
     /**

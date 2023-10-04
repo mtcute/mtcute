@@ -192,6 +192,14 @@ export async function _normalizeInputMedia(
         }
     }
 
+    if (media.type === 'story') {
+        return {
+            _: 'inputMediaStory',
+            peer: await this.resolvePeer(media.peer),
+            id: media.id,
+        }
+    }
+
     let inputFile: tl.TypeInputFile | undefined = undefined
     let thumb: tl.TypeInputFile | undefined = undefined
     let mime = 'application/octet-stream'

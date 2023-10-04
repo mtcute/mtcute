@@ -319,6 +319,15 @@ export class Message {
     }
 
     /**
+     * For replies, information about the story that is being replied to
+     */
+    get replyToStoryId(): tl.RawMessageReplyStoryHeader | null {
+        if (this.raw.replyTo?._ !== 'messageReplyStoryHeader') return null
+
+        return this.raw.replyTo
+    }
+
+    /**
      * Whether this message contains mention of the current user
      */
     get isMention(): boolean {

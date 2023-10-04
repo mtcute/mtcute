@@ -229,6 +229,7 @@ import {
 } from './methods/updates'
 import { blockUser } from './methods/users/block-user'
 import { deleteProfilePhotos } from './methods/users/delete-profile-photos'
+import { editCloseFriends, editCloseFriendsRaw } from './methods/users/edit-close-friends'
 import { getCommonChats } from './methods/users/get-common-chats'
 import { getGlobalTtl } from './methods/users/get-global-ttl'
 import { getMe } from './methods/users/get-me'
@@ -266,6 +267,7 @@ import {
     ChosenInlineResult,
     Conversation,
     DeleteMessageUpdate,
+    DeleteStoryUpdate,
     Dialog,
     FileDownloadParameters,
     FormattedString,
@@ -307,6 +309,7 @@ import {
     StoriesStealthMode,
     Story,
     StoryInteractions,
+    StoryUpdate,
     StoryViewer,
     StoryViewersList,
     TakeoutSession,
@@ -464,6 +467,20 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param handler  Pre checkout query handler
      */
     on(name: 'pre_checkout_query', handler: (upd: PreCheckoutQuery) => void): this
+    /**
+     * Register a story update handler
+     *
+     * @param name  Event name
+     * @param handler  Story update handler
+     */
+    on(name: 'story', handler: (upd: StoryUpdate) => void): this
+    /**
+     * Register a delete story handler
+     *
+     * @param name  Event name
+     * @param handler  Delete story handler
+     */
+    on(name: 'delete_story', handler: (upd: DeleteStoryUpdate) => void): this
     /**
      * Accept the given TOS
      *
@@ -4139,6 +4156,8 @@ export interface TelegramClient extends BaseTelegramClient {
      *   - `{ can: false }` if the user can't apply boost
      *      - `.reason == "already_boosting"` if the user is already boosting this channel
      *      - `.reason == "need_premium"` if the user needs Premium to boost this channel
+     *      - `.reason == "timeout"` if the user has recently boosted a channel and needs to wait
+     *        (`.until` contains the date until which the user needs to wait)
      */
     canApplyBoost(peerId: InputPeerLike): Promise<CanApplyBoostResult>
     /**
@@ -4731,6 +4750,18 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     deleteProfilePhotos(ids: MaybeArray<string | tl.TypeInputPhoto>): Promise<void>
     /**
+     * Edit "close friends" list directly using user IDs
+     *
+     * @param ids  User IDs
+     */
+    editCloseFriendsRaw(ids: number[]): Promise<void>
+    /**
+     * Edit "close friends" list using `InputPeerLike`s
+     *
+     * @param ids  User IDs
+     */
+    editCloseFriends(ids: InputPeerLike[]): Promise<void>
+    /**
      * Get a list of common chats you have with a given user
      *
      * @param userId  User's ID, username or phone number
@@ -5211,6 +5242,8 @@ export class TelegramClient extends BaseTelegramClient {
     _keepAliveAction = _keepAliveAction
     blockUser = blockUser
     deleteProfilePhotos = deleteProfilePhotos
+    editCloseFriendsRaw = editCloseFriendsRaw
+    editCloseFriends = editCloseFriends
     getCommonChats = getCommonChats
     getGlobalTtl = getGlobalTtl
     getMe = getMe

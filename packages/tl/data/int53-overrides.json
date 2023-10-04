@@ -153,6 +153,7 @@
         "account.initTakeoutSession": ["file_max_size"],
         "account.registerDevice": ["other_uids"],
         "account.unregisterDevice": ["other_uids"],
+        "contacts.editCloseFriends": ["id"],
         "messages.addChatUser": ["chat_id"],
         "messages.deleteChat": ["chat_id"],
         "messages.deleteChatUser": ["chat_id"],

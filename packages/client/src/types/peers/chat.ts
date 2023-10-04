@@ -202,6 +202,20 @@ export class Chat {
         return this.peer._ === 'user' && this.peer.contact!
     }
 
+    /** Whether this peer is a forum supergroup */
+    get isForum(): boolean {
+        return this.peer._ === 'channel' && this.peer.forum!
+    }
+
+    /** Whether you have hidden (arhived) this chat's stories */
+    get storiesHidden(): boolean {
+        return 'storiesHidden' in this.peer ? this.peer.storiesHidden! : false
+    }
+
+    get storiesUnavailable(): boolean {
+        return 'storiesUnavailable' in this.peer ? this.peer.storiesUnavailable! : false
+    }
+
     /** Whether this group is a channel/supergroup with join requests enabled */
     get hasJoinRequests(): boolean {
         return this.peer._ === 'channel' && this.peer.joinRequest!
@@ -449,6 +463,19 @@ export class Chat {
      */
     get ttlPeriod(): number | null {
         return this.fullPeer?.ttlPeriod ?? null
+    }
+
+    /**
+     * Maximum ID of stories this chat has (or 0 if none)
+     */
+    get storiesMaxId(): number {
+        switch (this.peer._) {
+            case 'channel':
+            case 'user':
+                return this.peer.storiesMaxId ?? 0
+        }
+
+        return 0
     }
 
     private _user?: User

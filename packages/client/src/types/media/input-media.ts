@@ -2,6 +2,7 @@ import { MaybeArray, tl } from '@mtcute/core'
 
 import { InputFileLike } from '../files'
 import { FormattedString } from '../parser'
+import { InputPeerLike } from '../peers'
 import { VenueSource } from './venue'
 
 export interface CaptionMixin {
@@ -540,6 +541,23 @@ export interface InputMediaQuiz extends Omit<InputMediaPoll, 'type'> {
 }
 
 /**
+ * A story to be sent
+ */
+export interface InputMediaStory extends CaptionMixin {
+    type: 'story'
+
+    /**
+     * Owner of the story
+     */
+    peer: InputPeerLike
+
+    /**
+     * ID of the story
+     */
+    id: number
+}
+
+/**
  * Input media that can be sent somewhere.
  *
  * Note that meta-fields (like `duration`) are only
@@ -565,6 +583,7 @@ export type InputMediaLike =
     | InputMediaInvoice
     | InputMediaPoll
     | InputMediaQuiz
+    | InputMediaStory
     | tl.TypeInputMedia
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -797,6 +816,18 @@ export namespace InputMedia {
     export function quiz(params: OmitTypeAndFile<InputMediaQuiz>): InputMediaQuiz {
         const ret = params as tl.Mutable<InputMediaQuiz>
         ret.type = 'quiz'
+
+        return ret
+    }
+
+    /**
+     * Create a story to be sent
+     *
+     * @param params  Story parameters
+     */
+    export function story(params: OmitTypeAndFile<InputMediaStory>): InputMediaStory {
+        const ret = params as tl.Mutable<InputMediaStory>
+        ret.type = 'story'
 
         return ret
     }
