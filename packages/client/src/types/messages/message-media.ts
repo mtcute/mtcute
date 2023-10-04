@@ -53,7 +53,7 @@ export function _messageMediaFromTl(
         case 'messageMediaPhoto':
             if (!(m.photo?._ === 'photo')) return null
 
-            return new Photo(client, m.photo)
+            return new Photo(client, m.photo, m)
         case 'messageMediaDice':
             return new Dice(m)
         case 'messageMediaContact':
@@ -61,7 +61,7 @@ export function _messageMediaFromTl(
         case 'messageMediaDocument':
             if (!(m.document?._ === 'document')) return null
 
-            return parseDocument(client, m.document) as MessageMedia
+            return parseDocument(client, m.document, m) as MessageMedia
         case 'messageMediaGeo':
             if (!(m.geo._ === 'geoPoint')) return null
 

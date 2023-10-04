@@ -32,11 +32,13 @@ import { answerCallbackQuery } from './methods/bots/answer-callback-query'
 import { answerInlineQuery } from './methods/bots/answer-inline-query'
 import { answerPreCheckoutQuery } from './methods/bots/answer-pre-checkout-query'
 import { deleteMyCommands } from './methods/bots/delete-my-commands'
+import { getBotInfo } from './methods/bots/get-bot-info'
 import { getBotMenuButton } from './methods/bots/get-bot-menu-button'
 import { getCallbackAnswer } from './methods/bots/get-callback-answer'
 import { getGameHighScores, getInlineGameHighScores } from './methods/bots/get-game-high-scores'
 import { getMyCommands } from './methods/bots/get-my-commands'
 import { _normalizeCommandScope } from './methods/bots/normalize-command-scope'
+import { setBotInfo } from './methods/bots/set-bot-info'
 import { setBotMenuButton } from './methods/bots/set-bot-menu-button'
 import { setGameScore, setInlineGameScore } from './methods/bots/set-game-score'
 import { setMyCommands } from './methods/bots/set-my-commands'
@@ -183,6 +185,7 @@ import { getCustomEmojis } from './methods/stickers/get-custom-emojis'
 import { getInstalledStickers } from './methods/stickers/get-installed-stickers'
 import { getStickerSet } from './methods/stickers/get-sticker-set'
 import { moveStickerInSet } from './methods/stickers/move-sticker-in-set'
+import { setChatStickerSet } from './methods/stickers/set-chat-sticker-set'
 import { setStickerSetThumb } from './methods/stickers/set-sticker-set-thumb'
 import { applyBoost } from './methods/stories/apply-boost'
 import { canApplyBoost, CanApplyBoostResult } from './methods/stories/can-apply-boost'
@@ -285,6 +288,7 @@ import {
     InputPeerLike,
     InputPrivacyRule,
     InputReaction,
+    InputStickerSet,
     InputStickerSetItem,
     MaybeDynamic,
     Message,
@@ -917,6 +921,23 @@ export interface TelegramClient extends BaseTelegramClient {
         langCode?: string
     }): Promise<void>
     /**
+     * Gets information about a bot the current uzer owns (or the current bot)
+     *
+     */
+    getBotInfo(params: {
+        /**
+         * When called by a user, a bot the user owns must be specified.
+         * When called by a bot, must be empty
+         */
+        bot?: InputPeerLike
+
+        /**
+         * If passed, will retrieve the bot's description in the given language.
+         * If left empty, will retrieve the fallback description.
+         */
+        langCode?: string
+    }): Promise<tl.bots.RawBotInfo>
+    /**
      * Fetches the menu button set for the given user.
      *
      */
@@ -999,6 +1020,32 @@ export interface TelegramClient extends BaseTelegramClient {
     _normalizeCommandScope(
         scope: tl.TypeBotCommandScope | BotCommands.IntermediateScope,
     ): Promise<tl.TypeBotCommandScope>
+    /**
+     * Sets information about a bot the current uzer owns (or the current bot)
+     *
+     */
+    setBotInfo(params: {
+        /**
+         * When called by a user, a bot the user owns must be specified.
+         * When called by a bot, must be empty
+         */
+        bot?: InputPeerLike
+
+        /**
+         * If passed, will update the bot's description in the given language.
+         * If left empty, will change the fallback description.
+         */
+        langCode?: string
+
+        /** New bot name */
+        name?: string
+
+        /** New bio text (displayed in the profile) */
+        bio?: string
+
+        /** New description text (displayed when the chat is empty) */
+        description?: string
+    }): Promise<void>
     /**
      * Sets a menu button for the given user.
      *
@@ -1107,15 +1154,18 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     archiveChats(chats: MaybeArray<InputPeerLike>): Promise<void>
     /**
-     * Ban a user from a legacy group, a supergroup or a channel.
+     * Ban a user/channel from a legacy group, a supergroup or a channel.
      * They will not be able to re-join the group on their own,
-     * manual administrator's action is required.
+     * manual administrator's action will be required.
+     *
+     * When banning a channel, the user won't be able to use
+     * any of their channels to post until the ban is lifted.
      *
      * @param chatId  Chat ID
-     * @param userId  User ID
+     * @param peerId  User/Channel ID
      * @returns  Service message about removed user, if one was generated.
      */
-    banChatMember(chatId: InputPeerLike, userId: InputPeerLike): Promise<Message | null>
+    banChatMember(chatId: InputPeerLike, peerId: InputPeerLike): Promise<Message | null>
     /**
      * Create a new broadcast channel
      *
@@ -1666,7 +1716,7 @@ export interface TelegramClient extends BaseTelegramClient {
     unarchiveChats(chats: MaybeArray<InputPeerLike>): Promise<void>
 
     /**
-     * Unban a user from a supergroup or a channel,
+     * Unban a user/channel from a supergroup or a channel,
      * or remove any restrictions that they have.
      * Unbanning does not add the user back to the chat, this
      * just allows the user to join the chat again, if they want.
@@ -1674,12 +1724,12 @@ export interface TelegramClient extends BaseTelegramClient {
      * This method acts as a no-op in case a legacy group is passed.
      *
      * @param chatId  Chat ID
-     * @param userId  User ID
+     * @param peerId  User/channel ID
      */
-    unbanChatMember(chatId: InputPeerLike, userId: InputPeerLike): Promise<void>
+    unbanChatMember(chatId: InputPeerLike, peerId: InputPeerLike): Promise<void>
 
     /**
-     * Unban a user from a supergroup or a channel,
+     * Unban a user/channel from a supergroup or a channel,
      * or remove any restrictions that they have.
      * Unbanning does not add the user back to the chat, this
      * just allows the user to join the chat again, if they want.
@@ -1687,9 +1737,9 @@ export interface TelegramClient extends BaseTelegramClient {
      * This method acts as a no-op in case a legacy group is passed.
      *
      * @param chatId  Chat ID
-     * @param userId  User ID
+     * @param peerId  User/channel ID
      */
-    unrestrictChatMember(chatId: InputPeerLike, userId: InputPeerLike): Promise<void>
+    unrestrictChatMember(chatId: InputPeerLike, peerId: InputPeerLike): Promise<void>
     /**
      * Add an existing Telegram user as a contact
      *
@@ -3982,7 +4032,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @returns  Modfiied sticker set
      */
     addStickerToSet(
-        id: string | tl.TypeInputStickerSet,
+        id: InputStickerSet,
         sticker: InputStickerSetItem,
         params?: {
             /**
@@ -4102,7 +4152,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param id  Sticker pack short name, dice emoji, `"emoji"` for animated emojis or input ID
      */
-    getStickerSet(id: string | { dice: string } | tl.TypeInputStickerSet): Promise<StickerSet>
+    getStickerSet(id: InputStickerSet): Promise<StickerSet>
     /**
      * Move a sticker in a sticker set
      * to another position
@@ -4121,6 +4171,15 @@ export interface TelegramClient extends BaseTelegramClient {
         position: number,
     ): Promise<StickerSet>
     /**
+     * Set group sticker set for a supergroup
+     *
+     * @param id  Sticker set short name or a TL object with input sticker set
+     * @param thumb  Sticker set thumbnail
+     * @param params
+     * @returns  Modified sticker set
+     */
+    setChatStickerSet(chatId: InputPeerLike, id: InputStickerSet): Promise<void>
+    /**
      * Set sticker set thumbnail
      *
      * @param id  Sticker set short name or a TL object with input sticker set
@@ -4129,7 +4188,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @returns  Modified sticker set
      */
     setStickerSetThumb(
-        id: string | tl.TypeInputStickerSet,
+        id: InputStickerSet,
         thumb: InputFileLike | tl.TypeInputDocument,
         params?: {
             /**
@@ -5056,12 +5115,14 @@ export class TelegramClient extends BaseTelegramClient {
     answerInlineQuery = answerInlineQuery
     answerPreCheckoutQuery = answerPreCheckoutQuery
     deleteMyCommands = deleteMyCommands
+    getBotInfo = getBotInfo
     getBotMenuButton = getBotMenuButton
     getCallbackAnswer = getCallbackAnswer
     getGameHighScores = getGameHighScores
     getInlineGameHighScores = getInlineGameHighScores
     getMyCommands = getMyCommands
     _normalizeCommandScope = _normalizeCommandScope
+    setBotInfo = setBotInfo
     setBotMenuButton = setBotMenuButton
     setGameScore = setGameScore
     setInlineGameScore = setInlineGameScore
@@ -5213,6 +5274,7 @@ export class TelegramClient extends BaseTelegramClient {
     getInstalledStickers = getInstalledStickers
     getStickerSet = getStickerSet
     moveStickerInSet = moveStickerInSet
+    setChatStickerSet = setChatStickerSet
     setStickerSetThumb = setStickerSetThumb
     applyBoost = applyBoost
     canApplyBoost = canApplyBoost

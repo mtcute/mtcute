@@ -348,6 +348,26 @@ export namespace BotKeyboard {
     }
 
     /**
+     * Button to request a peer from the user
+     *
+     * @param text  Text of the button
+     * @param buttonId  ID of the button that will later be passed to the service message
+     * @param peerType  Peer type, along with filters
+     */
+    export function requestPeer(
+        text: string,
+        buttonId: number,
+        peerType: tl.TypeRequestPeerType,
+    ): tl.RawKeyboardButtonRequestPeer {
+        return {
+            _: 'keyboardButtonRequestPeer',
+            text,
+            buttonId,
+            peerType,
+        }
+    }
+
+    /**
      * Find a button in the keyboard by its text or by predicate
      *
      * @param buttons  Two-dimensional array of buttons

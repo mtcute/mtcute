@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/core'
+import { getMarkedPeerId, tl } from '@mtcute/core'
 
 import { _callDiscardReasonFromTl, CallDiscardReason } from '../calls'
 import { Photo } from '../media'
@@ -122,6 +122,14 @@ export interface ActionUserJoinedLink {
     readonly inviter: number
 }
 
+/**
+ * User has joined the group via an invite link
+ * and was approved by an administrator
+ */
+export interface ActionUserJoinedApproved {
+    readonly type: 'user_joined_approved'
+}
+
 /** A payment was received from a user (bot) */
 export interface ActionPaymentReceived {
     readonly type: 'payment_received'
@@ -230,6 +238,17 @@ export interface ActionGroupCallEnded {
     readonly duration: number
 }
 
+/** Group call has been scheduled */
+export interface ActionGroupCallScheduled {
+    readonly type: 'group_call_scheduled'
+
+    /** TL object representing the call */
+    readonly call: tl.TypeInputGroupCall
+
+    /** Date when the call will start */
+    readonly date: Date
+}
+
 /** Group call has ended */
 export interface ActionGroupInvite {
     readonly type: 'group_call_invite'
@@ -242,8 +261,8 @@ export interface ActionGroupInvite {
 }
 
 /** Messages TTL changed */
-export interface ActionSetTtl {
-    readonly type: 'set_ttl'
+export interface ActionTtlChanged {
+    readonly type: 'ttl_changed'
 
     /** New TTL period */
     readonly period: number
@@ -280,6 +299,106 @@ export interface ActionTopicEdited {
     hidden?: boolean
 }
 
+/** A non-standard action has happened in the chat */
+export interface ActionCustom {
+    readonly type: 'custom'
+
+    /** Text to be shown in the interface */
+    action: string
+}
+
+/** Chat theme was changed */
+export interface ActionThemeChanged {
+    readonly type: 'theme_changed'
+
+    /** Emoji representing the new theme */
+    emoji: string
+}
+
+/** Data was sent from a WebView (user-side action) */
+export interface ActionWebviewDataSent {
+    readonly type: 'webview_sent'
+
+    /** Text of the button that was pressed to open the WebView */
+    text: string
+}
+
+/** Data was received from a WebView (bot-side action) */
+export interface ActionWebviewDataReceived {
+    readonly type: 'webview_received'
+
+    /** Text of the button that was pressed to open the WebView */
+    text: string
+
+    /** Data received from the WebView */
+    data: string
+}
+
+/** Premium subscription was gifted */
+export interface ActionPremiumGifted {
+    readonly type: 'premium_gifted'
+
+    /**
+     * Currency in which it was paid for.
+     * Three-letter ISO 4217 currency code)
+     */
+    currency: string
+
+    /**
+     * Price of the product in the smallest units of the currency
+     * (integer, not float/double). For example, for a price of
+     * `US$ 1.45`, `amount = 145`
+     */
+    amount: number
+
+    /** Duration of the gifted subscription in months */
+    months: number
+
+    /** If the subscription was bought with crypto, information about it */
+    crypto?: {
+        /** Crypto currency name */
+        currency: string
+        /** Price in the smallest units */
+        amount: number
+    }
+}
+
+/** A photo has been suggested as a profile photo */
+export interface ActionPhotoSuggested {
+    readonly type: 'photo_suggested'
+
+    /** Photo that was suggested */
+    photo: Photo
+}
+
+/** A peer was chosen by the user after clicking on a RequestPeer button */
+export interface ActionPeerChosen {
+    readonly type: 'peer_chosen'
+
+    /** ID of the button passed earlier by the bot */
+    buttonId: number
+
+    /** Marked ID of the chosen peer */
+    peerId: number
+
+    /** Input peer of the chosen peer */
+    inputPeer?: tl.TypeInputPeer
+}
+
+/** A wallpaper of the chathas been changed */
+export interface ActionWallpaperChanged {
+    readonly type: 'wallpaper_changed'
+
+    /**
+     * Whether the user has applied the same wallpaper
+     * as the other party previously set in the chat
+     */
+    same: boolean
+
+    /** TL object representing the new wallpaper */
+    wallpaper: tl.TypeWallPaper
+}
+
 export type MessageAction =
     | ActionChatCreated
     | ActionChannelCreated
@@ -304,14 +423,28 @@ export type MessageAction =
     | ActionGeoProximity
     | ActionGroupCallStarted
     | ActionGroupCallEnded
+    | ActionGroupCallScheduled
     | ActionGroupInvite
-    | ActionSetTtl
+    | ActionTtlChanged
     | ActionTopicCreated
     | ActionTopicEdited
+    | ActionCustom
+    | ActionThemeChanged
+    | ActionUserJoinedApproved
+    | ActionWebviewDataSent
+    | ActionWebviewDataReceived
+    | ActionPremiumGifted
+    | ActionPhotoSuggested
+    | ActionPeerChosen
+    | ActionWallpaperChanged
     | null
 
 /** @internal */
 export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): MessageAction {
+    // todo - passport
+    // messageActionSecureValuesSentMe#1b287353 values:Vector<SecureValue> credentials:SecureCredentialsEncrypted
+    // messageActionSecureValuesSent#d95c6154 types:Vector<SecureValueType>
+
     switch (act._) {
         case 'messageActionChatCreate':
             return {
@@ -447,7 +580,12 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 type: 'group_call_started',
                 call: act.call,
             }
-
+        case 'messageActionGroupCallScheduled':
+            return {
+                type: 'group_call_scheduled',
+                call: act.call,
+                date: new Date(act.scheduleDate * 1000),
+            }
         case 'messageActionInviteToGroupCall':
             return {
                 type: 'group_call_invite',
@@ -456,7 +594,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
             }
         case 'messageActionSetMessagesTTL':
             return {
-                type: 'set_ttl',
+                type: 'ttl_changed',
                 period: act.period,
             }
         case 'messageActionTopicCreate':
@@ -473,6 +611,63 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 iconCustomEmoji: act.iconEmojiId,
                 closed: act.closed,
                 hidden: act.hidden,
+            }
+        case 'messageActionCustomAction':
+            return {
+                type: 'custom',
+                action: act.message,
+            }
+        case 'messageActionSetChatTheme':
+            return {
+                type: 'theme_changed',
+                emoji: act.emoticon,
+            }
+        case 'messageActionChatJoinedByRequest':
+            return {
+                type: 'user_joined_approved',
+            }
+        case 'messageActionWebViewDataSent':
+            return {
+                type: 'webview_sent',
+                text: act.text,
+            }
+        case 'messageActionWebViewDataSentMe':
+            return {
+                type: 'webview_received',
+                text: act.text,
+                data: act.data,
+            }
+        case 'messageActionGiftPremium':
+            return {
+                type: 'premium_gifted',
+                currency: act.currency,
+                amount: act.amount.toNumber(),
+                months: act.months,
+                crypto: act.cryptoAmount ?
+                    {
+                        currency: act.cryptoCurrency!,
+                        amount: act.cryptoAmount.toNumber(),
+                    } :
+                    undefined,
+            }
+        case 'messageActionSuggestProfilePhoto':
+            return {
+                type: 'photo_suggested',
+                photo: new Photo(this.client, act.photo as tl.RawPhoto),
+            }
+        case 'messageActionRequestedPeer':
+            return {
+                type: 'peer_chosen',
+                buttonId: act.buttonId,
+                peerId: getMarkedPeerId(act.peer),
+                // todo - pass the peer itself?
+            }
+        case 'messageActionSetChatWallPaper':
+        case 'messageActionSetSameChatWallPaper':
+            return {
+                type: 'wallpaper_changed',
+                same: act._ === 'messageActionSetSameChatWallPaper',
+                wallpaper: act.wallpaper,
             }
         default:
             return null

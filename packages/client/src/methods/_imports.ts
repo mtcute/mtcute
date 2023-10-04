@@ -48,6 +48,7 @@ import {
     InputPeerLike,
     InputPrivacyRule,
     InputReaction,
+    InputStickerSet,
     InputStickerSetItem,
     MaybeDynamic,
     Message,

@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { InputFileLike, StickerSet } from '../../types'
+import { InputFileLike, InputStickerSet, normalizeInputStickerSet, StickerSet } from '../../types'
 
 /**
  * Set sticker set thumbnail
@@ -14,7 +14,7 @@ import { InputFileLike, StickerSet } from '../../types'
  */
 export async function setStickerSetThumb(
     this: TelegramClient,
-    id: string | tl.TypeInputStickerSet,
+    id: InputStickerSet,
     thumb: InputFileLike | tl.TypeInputDocument,
     params?: {
         /**
@@ -26,16 +26,9 @@ export async function setStickerSetThumb(
         progressCallback?: (uploaded: number, total: number) => void
     },
 ): Promise<StickerSet> {
-    if (typeof id === 'string') {
-        id = {
-            _: 'inputStickerSetShortName',
-            shortName: id,
-        }
-    }
-
     const res = await this.call({
         _: 'stickers.setStickerSetThumb',
-        stickerset: id,
+        stickerset: normalizeInputStickerSet(id),
         thumb: await this._normalizeFileToDocument(thumb, params ?? {}),
     })
 

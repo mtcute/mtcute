@@ -10,29 +10,32 @@ import {
 } from '../../utils/peer-utils'
 
 /**
- * Ban a user from a legacy group, a supergroup or a channel.
+ * Ban a user/channel from a legacy group, a supergroup or a channel.
  * They will not be able to re-join the group on their own,
- * manual administrator's action is required.
+ * manual administrator's action will be required.
+ *
+ * When banning a channel, the user won't be able to use
+ * any of their channels to post until the ban is lifted.
  *
  * @param chatId  Chat ID
- * @param userId  User ID
+ * @param peerId  User/Channel ID
  * @returns  Service message about removed user, if one was generated.
  * @internal
  */
 export async function banChatMember(
     this: TelegramClient,
     chatId: InputPeerLike,
-    userId: InputPeerLike,
+    peerId: InputPeerLike,
 ): Promise<Message | null> {
     const chat = await this.resolvePeer(chatId)
-    const user = await this.resolvePeer(userId)
+    const peer = await this.resolvePeer(peerId)
 
     let res
     if (isInputPeerChannel(chat)) {
         res = await this.call({
             _: 'channels.editBanned',
             channel: normalizeToInputChannel(chat),
-            participant: user,
+            participant: peer,
             bannedRights: {
                 _: 'chatBannedRights',
                 // bans can't be temporary.
@@ -44,7 +47,7 @@ export async function banChatMember(
         res = await this.call({
             _: 'messages.deleteChatUser',
             chatId: chat.chatId,
-            userId: normalizeToInputUser(user),
+            userId: normalizeToInputUser(peer),
         })
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 

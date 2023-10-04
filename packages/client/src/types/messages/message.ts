@@ -269,6 +269,23 @@ export class Message {
         return this._forward
     }
 
+    /**
+     * Whether the message is a channel post that was
+     * automatically forwarded to the connected discussion group
+     */
+    get isAutomaticForward(): boolean {
+        if (this.raw._ === 'messageService' || !this.raw.fwdFrom) return false
+
+        const fwd = this.raw.fwdFrom
+
+        return Boolean(
+            this.chat.chatType === 'supergroup' &&
+                fwd.channelPost &&
+                fwd.savedFromMsgId &&
+                fwd.savedFromPeer?._ === 'peerChannel',
+        )
+    }
+
     private _replies?: MessageRepliesInfo | MessageCommentsInfo
     /**
      * Information about comments (for channels) or replies (for groups)
@@ -309,8 +326,8 @@ export class Message {
     }
 
     /**
-     * For replies, ID of the thread (i.e. ID of the top message
-     * in the thread)
+     * For replies, ID of the thread/topic
+     * (i.e. ID of the top message in the thread/topic)
      */
     get replyToThreadId(): number | null {
         if (this.raw.replyTo?._ !== 'messageReplyHeader') return null
@@ -325,6 +342,13 @@ export class Message {
         if (this.raw.replyTo?._ !== 'messageReplyStoryHeader') return null
 
         return this.raw.replyTo
+    }
+
+    /** Whether this message is in a forum topic */
+    get isTopicMessage(): boolean {
+        if (this.raw.replyTo?._ !== 'messageReplyHeader') return false
+
+        return this.raw.replyTo.forumTopic!
     }
 
     /**

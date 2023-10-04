@@ -1,7 +1,5 @@
-import { tl } from '@mtcute/core'
-
 import { TelegramClient } from '../../client'
-import { StickerSet } from '../../types'
+import { InputStickerSet, normalizeInputStickerSet, StickerSet } from '../../types'
 
 /**
  * Get a sticker pack and stickers inside of it.
@@ -9,34 +7,10 @@ import { StickerSet } from '../../types'
  * @param id  Sticker pack short name, dice emoji, `"emoji"` for animated emojis or input ID
  * @internal
  */
-export async function getStickerSet(
-    this: TelegramClient,
-    id: string | { dice: string } | tl.TypeInputStickerSet,
-): Promise<StickerSet> {
-    let input: tl.TypeInputStickerSet
-
-    if (typeof id === 'string') {
-        input =
-            id === 'emoji' ?
-                {
-                    _: 'inputStickerSetAnimatedEmoji',
-                } :
-                {
-                    _: 'inputStickerSetShortName',
-                    shortName: id,
-                }
-    } else if ('dice' in id) {
-        input = {
-            _: 'inputStickerSetDice',
-            emoticon: id.dice,
-        }
-    } else {
-        input = id
-    }
-
+export async function getStickerSet(this: TelegramClient, id: InputStickerSet): Promise<StickerSet> {
     const res = await this.call({
         _: 'messages.getStickerSet',
-        stickerset: input,
+        stickerset: normalizeInputStickerSet(id),
         hash: 0,
     })
 

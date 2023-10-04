@@ -70,7 +70,7 @@ export async function uploadMedia(
             assertTypeIs('uploadMedia', res, 'messageMediaPhoto')
             assertTypeIs('uploadMedia', res.photo!, 'photo')
 
-            return new Photo(this, res.photo)
+            return new Photo(this, res.photo, res)
         case 'inputMediaUploadedDocument':
         case 'inputMediaDocument':
         case 'inputMediaDocumentExternal':
@@ -78,7 +78,7 @@ export async function uploadMedia(
             assertTypeIs('uploadMedia', res.document!, 'document')
 
             // eslint-disable-next-line
-            return parseDocument(this, res.document) as any
+            return parseDocument(this, res.document, res) as any
         case 'inputMediaStory':
             throw new MtArgumentError("This media (story) can't be uploaded")
         default:

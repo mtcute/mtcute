@@ -9,6 +9,68 @@ import { MaskPosition, Sticker, StickerSourceType, StickerType, Thumbnail } from
 import { parseDocument } from '../media/document-utils'
 
 /**
+ * Input sticker set.
+ * Can be one of:
+ *   - Raw TL object
+ *   - Sticker set short name
+ *   - `{ dice: "<emoji>" }` (e.g. `{ dice: "🎲" }`) - Used for fetching animated dice stickers
+ *   - `{ system: string }` - for system stickersets:
+ *      - `"animated"` - Animated emojis stickerset
+ *      - `"animated_animations"` - Animated emoji reaction stickerset
+ *         (contains animations to play when a user clicks on a given animated emoji)
+ *      - `"premium_gifts"` - Stickers to show when receiving a gifted Telegram Premium subscription,
+ *      - `"generic_animations"` - Generic animation stickerset containing animations to play
+ *         when reacting to messages using a normal emoji without a custom animation
+ *      - `"default_statuses"` - Default custom emoji status stickerset
+ *      - `"default_topic_icons"` - Default custom emoji stickerset for forum topic icons
+ */
+export type InputStickerSet =
+    | tl.TypeInputStickerSet
+    | { dice: string }
+    | {
+          system:
+              | 'animated'
+              | 'animated_animations'
+              | 'premium_gifts'
+              | 'generic_animations'
+              | 'default_statuses'
+              | 'default_topic_icons'
+      }
+    | string
+
+export function normalizeInputStickerSet(input: InputStickerSet): tl.TypeInputStickerSet {
+    if (typeof input === 'string') {
+        return {
+            _: 'inputStickerSetShortName',
+            shortName: input,
+        }
+    }
+    if ('_' in input) return input
+
+    if ('dice' in input) {
+        return {
+            _: 'inputStickerSetDice',
+            emoticon: input.dice,
+        }
+    }
+
+    switch (input.system) {
+        case 'animated':
+            return { _: 'inputStickerSetAnimatedEmoji' }
+        case 'animated_animations':
+            return { _: 'inputStickerSetAnimatedEmojiAnimations' }
+        case 'premium_gifts':
+            return { _: 'inputStickerSetPremiumGifts' }
+        case 'generic_animations':
+            return { _: 'inputStickerSetEmojiGenericAnimations' }
+        case 'default_statuses':
+            return { _: 'inputStickerSetEmojiDefaultStatuses' }
+        case 'default_topic_icons':
+            return { _: 'inputStickerSetEmojiDefaultTopicIcons' }
+    }
+}
+
+/**
  * Information about one sticker inside the set
  */
 export interface StickerInfo {

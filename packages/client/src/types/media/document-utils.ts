@@ -10,7 +10,11 @@ import { Voice } from './voice'
 export type ParsedDocument = Sticker | Voice | Audio | Video | Document
 
 /** @internal */
-export function parseDocument(client: TelegramClient, doc: tl.RawDocument): ParsedDocument {
+export function parseDocument(
+    client: TelegramClient,
+    doc: tl.RawDocument,
+    media?: tl.RawMessageMediaDocument,
+): ParsedDocument {
     const stickerAttr = doc.attributes.find(
         (a) => a._ === 'documentAttributeSticker' || a._ === 'documentAttributeCustomEmoji',
     )
@@ -38,12 +42,12 @@ export function parseDocument(client: TelegramClient, doc: tl.RawDocument): Pars
                 return new Audio(client, doc, attr)
 
             case 'documentAttributeVideo':
-                return new Video(client, doc, attr)
+                return new Video(client, doc, attr, media)
 
             case 'documentAttributeImageSize':
                 // legacy gif
                 if (doc.mimeType === 'image/gif') {
-                    return new Video(client, doc, attr)
+                    return new Video(client, doc, attr, media)
                 }
         }
     }

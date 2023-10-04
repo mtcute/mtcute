@@ -248,6 +248,7 @@ export async function _normalizeInputMedia(
                     fileReference: res.photo.fileReference,
                 },
                 ttlSeconds: media.ttlSeconds,
+                spoiler: media.type === 'video' && media.spoiler,
             }
         }
         assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaDocument')
@@ -262,6 +263,7 @@ export async function _normalizeInputMedia(
                 fileReference: res.document.fileReference,
             },
             ttlSeconds: media.ttlSeconds,
+            spoiler: media.type === 'video' && media.spoiler,
         }
     }
 
@@ -323,6 +325,7 @@ export async function _normalizeInputMedia(
                 _: 'inputMediaUploadedPhoto',
                 file: inputFile,
                 ttlSeconds: media.ttlSeconds,
+                spoiler: media.spoiler,
             },
             true,
         )
@@ -387,6 +390,7 @@ export async function _normalizeInputMedia(
             mimeType: mime,
             attributes,
             ttlSeconds: media.ttlSeconds,
+            spoiler: media.type === 'video' && media.spoiler,
         },
         false,
     )

@@ -24,6 +24,7 @@ export class Video extends RawDocument {
         client: TelegramClient,
         doc: tl.RawDocument,
         readonly attr: tl.RawDocumentAttributeVideo | tl.RawDocumentAttributeImageSize,
+        readonly media?: tl.RawMessageMediaDocument,
     ) {
         super(client, doc)
     }
@@ -74,6 +75,16 @@ export class Video extends RawDocument {
      */
     get isLegacyGif(): boolean {
         return this.attr._ === 'documentAttributeImageSize'
+    }
+
+    /** Whether this video is hidden with a spoiler */
+    get hasSpoiler(): boolean {
+        return this.media?.spoiler ?? false
+    }
+
+    /** For self-destructing videos, TTL in seconds */
+    get ttlSeconds(): number | null {
+        return this.media?.ttlSeconds ?? null
     }
 }
 

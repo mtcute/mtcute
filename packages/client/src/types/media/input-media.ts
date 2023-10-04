@@ -151,6 +151,11 @@ export interface InputMediaDocument extends FileMixin, CaptionMixin {
  */
 export interface InputMediaPhoto extends FileMixin, CaptionMixin {
     type: 'photo'
+
+    /**
+     * Whether this photo should be hidden with a spoiler
+     */
+    spoiler?: boolean
 }
 
 /**
@@ -238,6 +243,11 @@ export interface InputMediaVideo extends FileMixin, CaptionMixin {
      * Only applicable to newly uploaded files.
      */
     isRound?: boolean
+
+    /**
+     * Whether this video should be hidden with a spoiler
+     */
+    spoiler?: boolean
 }
 
 /**

@@ -11,9 +11,6 @@ import { Thumbnail } from './thumbnail'
 export class Photo extends FileLocation {
     readonly type: 'photo'
 
-    /** Raw TL object */
-    readonly raw: tl.RawPhoto
-
     /** Biggest available photo width */
     readonly width: number
 
@@ -22,7 +19,7 @@ export class Photo extends FileLocation {
 
     private _bestSize?: tl.RawPhotoSize | tl.RawPhotoSizeProgressive
 
-    constructor(client: TelegramClient, raw: tl.RawPhoto) {
+    constructor(client: TelegramClient, readonly raw: tl.RawPhoto, readonly media?: tl.RawMessageMediaPhoto) {
         const location = {
             _: 'inputPhotoFileLocation',
             id: raw.id,
@@ -71,7 +68,6 @@ export class Photo extends FileLocation {
 
         super(client, location, size, raw.dcId)
         this._bestSize = bestSize
-        this.raw = raw
         this.width = width
         this.height = height
         this.type = 'photo'
@@ -103,6 +99,16 @@ export class Photo extends FileLocation {
         return Boolean(
             this.raw.videoSizes?.some((s) => s._ === 'videoSizeEmojiMarkup' || s._ === 'videoSizeStickerMarkup'),
         )
+    }
+
+    /** Whether this photo is hidden with a spoiler */
+    get hasSpoiler(): boolean {
+        return this.media?.spoiler ?? false
+    }
+
+    /** For self-destructing photos, TTL in seconds */
+    get ttlSeconds(): number | null {
+        return this.media?.ttlSeconds ?? null
     }
 
     private _thumbnails?: Thumbnail[]

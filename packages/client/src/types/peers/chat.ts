@@ -232,6 +232,15 @@ export class Chat {
     }
 
     /**
+     * Whether this chat (user) has restricted sending them voice/video messages.
+     *
+     * Returned only in {@link TelegramClient.getFullChat}
+     */
+    get hasBlockedVoices(): boolean {
+        return this.fullPeer?._ === 'userFull' && this.fullPeer.voiceMessagesForbidden!
+    }
+
+    /**
      * Title, for supergroups, channels and groups
      */
     get title(): string | null {
