@@ -1,6 +1,4 @@
-import Long from 'long'
-
-import { MtArgumentError, tl, toggleChannelIdMark } from '@mtcute/core'
+import { Long, MtArgumentError, tl, toggleChannelIdMark } from '@mtcute/core'
 import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
 import { TelegramClient } from '../../client'

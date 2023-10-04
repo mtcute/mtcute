@@ -1,6 +1,4 @@
-import Long from 'long'
-
-import { MtArgumentError, MtTypeAssertionError, tl } from '@mtcute/core'
+import { Long, MtArgumentError, MtTypeAssertionError, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 

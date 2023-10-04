@@ -1,5 +1,4 @@
-import Long from 'long'
-
+import { Long } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'

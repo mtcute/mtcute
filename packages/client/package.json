@@ -18,7 +18,6 @@
         "@mtcute/core": "workspace:^1.0.0",
         "@mtcute/file-id": "workspace:^1.0.0",
         "eager-async-pool": "1.0.0",
-        "file-type": "16.5.4",
-        "long": "5.2.3"
+        "file-type": "16.5.4"
     }
 }

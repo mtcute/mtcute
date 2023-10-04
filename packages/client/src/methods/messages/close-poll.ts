@@ -1,6 +1,4 @@
-import Long from 'long'
-
-import { MtTypeAssertionError } from '@mtcute/core'
+import { Long, MtTypeAssertionError } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'

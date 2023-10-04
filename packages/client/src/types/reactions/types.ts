@@ -1,6 +1,4 @@
-import Long from 'long'
-
-import { MtTypeAssertionError, tl } from '@mtcute/core'
+import { Long, MtTypeAssertionError, tl } from '@mtcute/core'
 
 /**
  * Input version of {@link ReactionEmoji}, which also accepts bare TL object

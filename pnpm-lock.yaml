@@ -120,9 +120,6 @@ importers:
       file-type:
         specifier: 16.5.4
         version: 16.5.4
-      long:
-        specifier: 5.2.3
-        version: 5.2.3
 
   packages/core:
     dependencies:
@@ -189,9 +186,6 @@ importers:
       '@mtcute/tl-runtime':
         specifier: workspace:^1.0.0
         version: link:../tl-runtime
-      long:
-        specifier: 5.2.3
-        version: 5.2.3
 
   packages/html-parser:
     dependencies:
@@ -284,9 +278,6 @@ importers:
       better-sqlite3:
         specifier: 8.4.0
         version: 8.4.0
-      long:
-        specifier: 5.2.3
-        version: 5.2.3
     devDependencies:
       '@mtcute/dispatcher':
         specifier: workspace:^1.0.0

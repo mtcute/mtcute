@@ -1,6 +1,4 @@
-import Long from 'long'
-
-import { assertNever, tl } from '@mtcute/core'
+import { assertNever, Long, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'

@@ -1,6 +1,4 @@
-import Long from 'long'
-
-import { getBasicPeerType, getMarkedPeerId, MtTypeAssertionError, tl, toggleChannelIdMark } from '@mtcute/core'
+import { getBasicPeerType, getMarkedPeerId, Long, MtTypeAssertionError, tl, toggleChannelIdMark } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { TelegramClient } from '../../client'

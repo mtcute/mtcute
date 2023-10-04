@@ -1,6 +1,4 @@
-import Long from 'long'
-
-import { tl } from '@mtcute/core'
+import { Long, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'

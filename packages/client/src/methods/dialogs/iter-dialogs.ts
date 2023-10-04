@@ -1,6 +1,4 @@
-import Long from 'long'
-
-import { MtUnsupportedError, tl } from '@mtcute/core'
+import { Long, MtUnsupportedError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { Dialog, InputDialogFolder } from '../../types'

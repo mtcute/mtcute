@@ -1,6 +1,4 @@
-import Long from 'long'
-
-import { tl } from '@mtcute/core'
+import { Long, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 import { fileIdToInputDocument, fileIdToInputPhoto, parseFileId, tdFileId } from '@mtcute/file-id'
 

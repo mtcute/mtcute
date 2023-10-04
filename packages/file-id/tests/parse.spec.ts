@@ -1,6 +1,7 @@
 import { expect } from 'chai'
-import Long from 'long'
 import { describe, it } from 'mocha'
+
+import { Long } from '@mtcute/core'
 
 import { parseFileId } from '../src'
 import { tdFileId as td } from '../src/types'

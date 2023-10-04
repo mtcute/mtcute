@@ -1,6 +1,4 @@
-import Long from 'long'
-
-import { assertNever, getBasicPeerType, markedPeerIdToBare, tl } from '@mtcute/core'
+import { assertNever, getBasicPeerType, Long, markedPeerIdToBare, tl } from '@mtcute/core'
 
 import { parseFileId } from './parse'
 import { tdFileId as td } from './types'

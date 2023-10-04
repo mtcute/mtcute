@@ -13,8 +13,7 @@
     "dependencies": {
         "@mtcute/core": "workspace:^1.0.0",
         "@mtcute/tl-runtime": "workspace:^1.0.0",
-        "better-sqlite3": "8.4.0",
-        "long": "5.2.3"
+        "better-sqlite3": "8.4.0"
     },
     "devDependencies": {
         "@mtcute/dispatcher": "workspace:^1.0.0",
