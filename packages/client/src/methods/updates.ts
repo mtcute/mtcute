@@ -12,7 +12,7 @@ import {
     toggleChannelIdMark,
 } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../client'
+import { TelegramClient, TelegramClientOptions } from '../client'
 import { PeersIndex } from '../types'
 import { _parseUpdate } from '../types/updates/parse-update'
 import { extractChannelIdFromUpdate } from '../utils/misc-utils'
@@ -35,6 +35,7 @@ interface PendingUpdate {
     channelId?: number
     pts?: number
     ptsBefore?: number
+    qts?: number
     qtsBefore?: number
     timeout?: number
     peers?: PeersIndex
@@ -52,6 +53,13 @@ interface UpdatesState {
     _pendingQtsUpdates: SortedLinkedList<PendingUpdate>
     _pendingQtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
     _pendingUnorderedUpdates: Deque<PendingUpdate>
+
+    _noDispatchEnabled: boolean
+    // channel id or 0 => msg id
+    _noDispatchMsg: Map<number, Set<number>>
+    // channel id or 0 => pts
+    _noDispatchPts: Map<number, Set<number>>
+    _noDispatchQts: Set<number>
 
     _updLock: AsyncLock
     _rpsIncoming?: RpsMeter
@@ -85,7 +93,7 @@ interface UpdatesState {
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
 // @initialize
-function _initializeUpdates(this: TelegramClient) {
+function _initializeUpdates(this: TelegramClient, opts: TelegramClientOptions) {
     this._updatesLoopActive = false
     this._updatesLoopCv = new ConditionVariable()
 
@@ -95,6 +103,11 @@ function _initializeUpdates(this: TelegramClient) {
     this._pendingQtsUpdates = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
     this._pendingQtsUpdatesPostponed = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
     this._pendingUnorderedUpdates = new Deque()
+
+    this._noDispatchEnabled = !opts.disableNoDispatch
+    this._noDispatchMsg = new Map()
+    this._noDispatchPts = new Map()
+    this._noDispatchQts = new Set()
 
     this._updLock = new AsyncLock()
     // we dont need to initialize state fields since
@@ -356,7 +369,7 @@ export async function _saveStorage(this: TelegramClient, afterImport = false): P
 /**
  * @internal
  */
-export function _dispatchUpdate(this: TelegramClient, update: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex): void {
+export function _dispatchUpdate(this: TelegramClient, update: tl.TypeUpdate, peers: PeersIndex): void {
     this.emit('raw_update', update, peers)
 
     const parsed = _parseUpdate(this, update, peers)
@@ -367,81 +380,66 @@ export function _dispatchUpdate(this: TelegramClient, update: tl.TypeUpdate | tl
     }
 }
 
-// interface NoDispatchIndex {
-//     // channel id or 0 => msg id
-//     msg: Record<number, Record<number, true>>
-//     // channel id or 0 => pts
-//     pts: Record<number, Record<number, true>>
-//     qts: Record<number, true>
-// }
+function _addToNoDispatchIndex(this: TelegramClient, updates?: tl.TypeUpdates): void {
+    if (!updates) return
 
-// creating and using a no-dispatch index is pretty expensive,
-// but its not a big deal since it's actually rarely needed
-// function _createNoDispatchIndex(
-//     updates?: tl.TypeUpdates | tl.TypeUpdate
-// ): NoDispatchIndex | undefined {
-//     if (!updates) return undefined
-//     const ret: NoDispatchIndex = {
-//         msg: {},
-//         pts: {},
-//         qts: {},
-//     }
-//
-//     function addUpdate(upd: tl.TypeUpdate) {
-//         const cid = extractChannelIdFromUpdate(upd) ?? 0
-//         const pts = 'pts' in upd ? upd.pts : undefined
-//
-//         if (pts) {
-//             if (!ret.pts[cid]) ret.pts[cid] = {}
-//             ret.pts[cid][pts] = true
-//         }
-//
-//         const qts = 'qts' in upd ? upd.qts : undefined
-//         if (qts) {
-//             ret.qts[qts] = true
-//         }
-//
-//         switch (upd._) {
-//             case 'updateNewMessage':
-//             case 'updateNewChannelMessage': {
-//                 const cid =
-//                     upd.message.peerId?._ === 'peerChannel'
-//                         ? upd.message.peerId.channelId
-//                         : 0
-//                 if (!ret.msg[cid]) ret.msg[cid] = {}
-//                 ret.msg[cid][upd.message.id] = true
-//                 break
-//             }
-//         }
-//     }
-//
-//     switch (updates._) {
-//         case 'updates':
-//         case 'updatesCombined':
-//             updates.updates.forEach(addUpdate)
-//             break
-//         case 'updateShortMessage':
-//         case 'updateShortChatMessage':
-//         case 'updateShortSentMessage':
-//             // these updates are only used for non-channel messages, so we use 0
-//             if (!ret.msg[0]) ret.msg[0] = {}
-//             if (!ret.pts[0]) ret.pts[0] = {}
-//
-//             ret.msg[0][updates.id] = true
-//             ret.pts[0][updates.pts] = true
-//             break
-//         case 'updateShort':
-//             addUpdate(updates.update)
-//             break
-//         case 'updatesTooLong':
-//             break
-//         default:
-//             addUpdate(updates)
-//             break
-//     }
-//
-//     return ret
-// }
+    const addUpdate = (upd: tl.TypeUpdate) => {
+        const channelId = extractChannelIdFromUpdate(upd) ?? 0
+        const pts = 'pts' in upd ? upd.pts : undefined
+
+        if (pts) {
+            const set = this._noDispatchPts.get(channelId)
+            if (!set) this._noDispatchPts.set(channelId, new Set([pts]))
+            else set.add(pts)
+        }
+
+        const qts = 'qts' in upd ? upd.qts : undefined
+
+        if (qts) {
+            this._noDispatchQts.add(qts)
+        }
+
+        switch (upd._) {
+            case 'updateNewMessage':
+            case 'updateNewChannelMessage': {
+                const channelId = upd.message.peerId?._ === 'peerChannel' ? upd.message.peerId.channelId : 0
+
+                const set = this._noDispatchMsg.get(channelId)
+                if (!set) this._noDispatchMsg.set(channelId, new Set([upd.message.id]))
+                else set.add(upd.message.id)
+
+                break
+            }
+        }
+    }
+
+    switch (updates._) {
+        case 'updates':
+        case 'updatesCombined':
+            updates.updates.forEach(addUpdate)
+            break
+        case 'updateShortMessage':
+        case 'updateShortChatMessage':
+        case 'updateShortSentMessage': {
+            // these updates are only used for non-channel messages, so we use 0
+            let set = this._noDispatchMsg.get(0)
+            if (!set) this._noDispatchMsg.set(0, new Set([updates.id]))
+            else set.add(updates.id)
+
+            set = this._noDispatchPts.get(0)
+            if (!set) this._noDispatchPts.set(0, new Set([updates.pts]))
+            else set.add(updates.pts)
+            break
+        }
+        case 'updateShort':
+            addUpdate(updates.update)
+            break
+        case 'updatesTooLong':
+            break
+        default:
+            assertNever(updates)
+    }
+}
 
 async function _replaceMinPeers(this: TelegramClient, peers: PeersIndex): Promise<boolean> {
     for (const [key, user_] of peers.users) {
@@ -613,6 +611,10 @@ export function _handleUpdate(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     noDispatch = false, // fixme
 ): void {
+    if (noDispatch && this._noDispatchEnabled) {
+        _addToNoDispatchIndex.call(this, update)
+    }
+
     this._updsLog.debug(
         'received %s, queueing for processing. containers queue size: %d',
         update._,
@@ -681,6 +683,7 @@ function _toPendingUpdate(upd: tl.TypeUpdate, peers?: PeersIndex): PendingUpdate
         channelId,
         pts,
         ptsBefore: pts ? pts - ptsCount! : undefined,
+        qts,
         qtsBefore: qts ? qts - 1 : undefined,
         peers,
     }
@@ -1125,6 +1128,22 @@ async function _onUpdate(
     }
 
     // dispatch the update
+    if (this._noDispatchEnabled) {
+        const channelId = pending.channelId ?? 0
+        const msgId = upd._ === 'updateNewMessage' || upd._ === 'updateNewChannelMessage' ? upd.message.id : undefined
+
+        // we first need to remove it from each index, and then check if it was there
+        const foundByMsgId = msgId && this._noDispatchMsg.get(channelId)?.delete(msgId)
+        const foundByPts = this._noDispatchPts.get(channelId)?.delete(pending.pts!)
+        const foundByQts = this._noDispatchQts.delete(pending.qts!)
+
+        if (foundByMsgId || foundByPts || foundByQts) {
+            this._updsLog.debug('not dispatching %s because it is in no_dispatch index', upd._)
+
+            return
+        }
+    }
+
     this._updsLog.debug('dispatching %s (postponed = %s)', upd._, postponed)
     this._dispatchUpdate(upd, pending.peers)
 }

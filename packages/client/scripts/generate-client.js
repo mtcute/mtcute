@@ -421,11 +421,42 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
     )
     output.write('}\n')
 
+    output.write(
+        `
+export interface TelegramClientOptions extends BaseTelegramClientOptions {
+    /**
+     * **ADVANCED**
+     * 
+     * Whether to disable no-dispatch mechanism. 
+     * 
+     * No-dispatch is a mechanism that allows you to call methods
+     * that return updates and correctly handle them, without
+     * actually dispatching them to the event handlers.
+     * 
+     * In other words, the following code will work differently:
+     * \`\`\`ts
+     * dp.onNewMessage(console.log)
+     * console.log(tg.sendText('me', 'hello'))
+     * \`\`\`
+     * - if \`disableNoDispatch\` is \`true\`, the sent message will be
+     *   dispatched to the event handler, thus it will be printed twice
+     * - if \`disableNoDispatch\` is \`false\`, the sent message will not be 
+     *   dispatched to the event handler, thus it will onlt be printed once
+     * 
+     * Disabling it also may improve performance, but it's not guaranteed.
+     * 
+     * @default false
+     */
+    disableNoDispatch?: boolean
+}
+`.trim(),
+    )
+
     output.write('\nexport class TelegramClient extends BaseTelegramClient {\n')
 
     state.fields.forEach(({ code }) => output.write(`protected ${code}\n`))
 
-    output.write('constructor(opts: BaseTelegramClientOptions) {\n')
+    output.write('constructor(opts: TelegramClientOptions) {\n')
     output.write('super(opts)\n')
     state.init.forEach((code) => {
         output.write(code + '\n')

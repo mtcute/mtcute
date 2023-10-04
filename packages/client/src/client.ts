@@ -340,6 +340,7 @@ interface PendingUpdate {
     channelId?: number
     pts?: number
     ptsBefore?: number
+    qts?: number
     qtsBefore?: number
     timeout?: number
     peers?: PeersIndex
@@ -4784,7 +4785,7 @@ export interface TelegramClient extends BaseTelegramClient {
 
     _onStop(): void
     _saveStorage(afterImport?: boolean): Promise<void>
-    _dispatchUpdate(update: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex): void
+    _dispatchUpdate(update: tl.TypeUpdate, peers: PeersIndex): void
     _handleUpdate(update: tl.TypeUpdates, noDispatch?: boolean): void
     /**
      * Catch up with the server by loading missed updates.
@@ -5029,7 +5030,32 @@ export interface TelegramClient extends BaseTelegramClient {
         bio?: string
     }): Promise<User>
 }
-
+export interface TelegramClientOptions extends BaseTelegramClientOptions {
+    /**
+     * **ADVANCED**
+     *
+     * Whether to disable no-dispatch mechanism.
+     *
+     * No-dispatch is a mechanism that allows you to call methods
+     * that return updates and correctly handle them, without
+     * actually dispatching them to the event handlers.
+     *
+     * In other words, the following code will work differently:
+     * ```ts
+     * dp.onNewMessage(console.log)
+     * console.log(tg.sendText('me', 'hello'))
+     * ```
+     * - if `disableNoDispatch` is `true`, the sent message will be
+     *   dispatched to the event handler, thus it will be printed twice
+     * - if `disableNoDispatch` is `false`, the sent message will not be
+     *   dispatched to the event handler, thus it will onlt be printed once
+     *
+     * Disabling it also may improve performance, but it's not guaranteed.
+     *
+     * @default false
+     */
+    disableNoDispatch?: boolean
+}
 export class TelegramClient extends BaseTelegramClient {
     protected _userId: number | null
     protected _isBot: boolean
@@ -5046,6 +5072,10 @@ export class TelegramClient extends BaseTelegramClient {
     protected _pendingQtsUpdates: SortedLinkedList<PendingUpdate>
     protected _pendingQtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
     protected _pendingUnorderedUpdates: Deque<PendingUpdate>
+    protected _noDispatchEnabled: boolean
+    protected _noDispatchMsg: Map<number, Set<number>>
+    protected _noDispatchPts: Map<number, Set<number>>
+    protected _noDispatchQts: Set<number>
     protected _updLock: AsyncLock
     protected _rpsIncoming?: RpsMeter
     protected _rpsProcessing?: RpsMeter
@@ -5062,7 +5092,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _cpts: Map<number, number>
     protected _cptsMod: Map<number, number>
     protected _updsLog: Logger
-    constructor(opts: BaseTelegramClientOptions) {
+    constructor(opts: TelegramClientOptions) {
         super(opts)
         this._userId = null
         this._isBot = false
@@ -5081,6 +5111,11 @@ export class TelegramClient extends BaseTelegramClient {
         this._pendingQtsUpdates = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
         this._pendingQtsUpdatesPostponed = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
         this._pendingUnorderedUpdates = new Deque()
+
+        this._noDispatchEnabled = !opts.disableNoDispatch
+        this._noDispatchMsg = new Map()
+        this._noDispatchPts = new Map()
+        this._noDispatchQts = new Set()
 
         this._updLock = new AsyncLock()
         // we dont need to initialize state fields since
