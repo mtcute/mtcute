@@ -31,8 +31,8 @@ export class HistoryReadUpdate {
     }
 
     /**
-     * Whether this update is about messages in a discussion group
-     * (e.g. from a comments thread)
+     * Whether this update is about messages in a thread
+     * (e.g. a comments thread or a topic in a forum)
      */
     get isDiscussion(): boolean {
         switch (this.raw._) {
@@ -46,8 +46,6 @@ export class HistoryReadUpdate {
 
     /**
      * Marked peer ID of the chat where the messages were read.
-     *
-     * If `isDiscussion == true`, contains the discussion group.
      */
     get chatId(): number {
         switch (this.raw._) {
@@ -102,9 +100,9 @@ export class HistoryReadUpdate {
     }
 
     /**
-     * ID of the thread (i.e. ID of the top message).
+     * ID of the thread/topic (i.e. ID of the top message).
      *
-     * For non-discussion updates, 0.
+     * For non-thread updates, 0.
      */
     get threadId(): number {
         switch (this.raw._) {
