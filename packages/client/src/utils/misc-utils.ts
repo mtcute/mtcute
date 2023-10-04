@@ -53,6 +53,9 @@ export function extractChannelIdFromUpdate(upd: tl.TypeUpdate): number | undefin
     return res
 }
 
+export function normalizeDate(date: Date | number): number
+export function normalizeDate(date: Date | number | undefined): number | undefined
+
 export function normalizeDate(date: Date | number | undefined): number | undefined {
     return date ? ~~((typeof date === 'number' ? date : date.getTime()) / 1000) : undefined
 }

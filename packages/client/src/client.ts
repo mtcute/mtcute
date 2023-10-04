@@ -240,6 +240,7 @@ import { getUsers } from './methods/users/get-users'
 import { iterProfilePhotos } from './methods/users/iter-profile-photos'
 import { resolvePeer } from './methods/users/resolve-peer'
 import { resolvePeerMany } from './methods/users/resolve-peer-many'
+import { setEmojiStatus } from './methods/users/set-emoji-status'
 import { setGlobalTtl } from './methods/users/set-global-ttl'
 import { setOffline } from './methods/users/set-offline'
 import { setProfilePhoto } from './methods/users/set-profile-photo'
@@ -4888,6 +4889,20 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     resolvePeer(peerId: InputPeerLike, force?: boolean): Promise<tl.TypeInputPeer>
     /**
+     * Set an emoji status for the current user
+     *
+     * @param emoji  Custom emoji ID or `null` to remove the emoji
+     */
+    setEmojiStatus(
+        emoji: tl.Long | null,
+        params?: {
+            /**
+             * Date when the emoji status should expire (only if `emoji` is not `null`)
+             */
+            until?: number | Date
+        },
+    ): Promise<void>
+    /**
      * Changes the current default value of the Time-To-Live setting,
      * applied to all new chats.
      *
@@ -5254,6 +5269,7 @@ export class TelegramClient extends BaseTelegramClient {
     iterProfilePhotos = iterProfilePhotos
     resolvePeerMany = resolvePeerMany
     resolvePeer = resolvePeer
+    setEmojiStatus = setEmojiStatus
     setGlobalTtl = setGlobalTtl
     setOffline = setOffline
     setProfilePhoto = setProfilePhoto
