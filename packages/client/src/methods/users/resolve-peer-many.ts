@@ -1,16 +1,28 @@
-import { asyncPool } from 'eager-async-pool'
-
 import { tl } from '@mtcute/core'
+import { ConditionVariable } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
+import { TelegramClient, TelegramClientOptions } from '../../client'
 import { InputPeerLike } from '../../types'
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// @extension
+interface ResolvePeerManyExtension {
+    _resolvePeerManyPoolLimit: number
+}
+
+// @initialize
+function _resolvePeerManyInitializer(this: TelegramClient, opts: TelegramClientOptions) {
+    this._resolvePeerManyPoolLimit = opts.resolvePeerManyPoolLimit ?? 8
+}
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 /**
  * Get multiple `InputPeer`s at once,
  * while also normalizing and removing
  * peers that can't be normalized to that type.
- * Uses `async-eager-pool` internally, with a
- * limit of 10.
+ *
+ * Uses async pool internally, with a
+ * configurable concurrent limit (see {@link TelegramClientOptions#resolvePeerManyPoolLimit}).
  *
  * @param peerIds  Peer Ids
  * @param normalizer  Normalization function
@@ -24,8 +36,10 @@ export async function resolvePeerMany<T extends tl.TypeInputPeer | tl.TypeInputU
 
 /**
  * Get multiple `InputPeer`s at once.
- * Uses `async-eager-pool` internally, with a
- * limit of 10.
+ *
+ * Uses async pool internally, with a
+ * configurable concurrent limit (see {@link TelegramClientOptions#resolvePeerManyPoolLimit}).
+ *
  *
  * @param peerIds  Peer Ids
  * @internal
@@ -42,8 +56,10 @@ export async function resolvePeerMany(
 ): Promise<(tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[]> {
     const ret: (tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[] = []
 
-    if (peerIds.length < 10) {
-        // no point in using async pool for <10 peers
+    const limit = this._resolvePeerManyPoolLimit
+
+    if (peerIds.length < limit) {
+        // no point in using async pool for <limit peers
         const res = await Promise.all(peerIds.map((it) => this.resolvePeer(it)))
 
         if (!normalizer) return res
@@ -55,19 +71,59 @@ export async function resolvePeerMany(
                 ret.push(norm)
             }
         }
-    } else {
-        for await (const { error, value } of asyncPool((it) => this.resolvePeer(it), peerIds, {
-            limit: 10,
-        })) {
-            if (error) {
-                throw error
-            }
-            if (!value) continue
+
+        return ret
+    }
+
+    const cv = new ConditionVariable()
+    const buffer: Record<number, tl.TypeInputPeer | null> = {}
+
+    let nextIdx = 0
+    let nextWorkerIdx = 0
+
+    const fetchNext = async (idx = nextWorkerIdx++): Promise<void> => {
+        const result = await this.resolvePeer(peerIds[idx])
+
+        buffer[idx] = result
+
+        if (nextIdx === idx) {
+            cv.notify()
+        }
+
+        if (nextWorkerIdx < peerIds.length) {
+            await fetchNext(nextWorkerIdx++)
+        }
+    }
+
+    let error: unknown = undefined
+    void Promise.all(Array.from({ length: limit }, (_, i) => fetchNext(i)))
+        .catch((e) => {
+            this.log.debug('resolvePeerMany errored: %s', e.message)
+            error = e
+            cv.notify()
+        })
+        .then(() => {
+            this.log.debug('resolvePeerMany finished')
+        })
+
+    while (nextIdx < peerIds.length) {
+        await cv.wait()
+
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
+        if (error) throw error
+
+        while (nextIdx in buffer) {
+            const buf = buffer[nextIdx]
+            delete buffer[nextIdx]
+
+            nextIdx++
+
+            if (!buf) continue
 
             if (!normalizer) {
-                ret.push(value)
+                ret.push(buf)
             } else {
-                const norm = normalizer(value)
+                const norm = normalizer(buf)
 
                 if (norm) {
                     ret.push(norm)

@@ -17,7 +17,6 @@
         "@types/node": "18.16.0",
         "@mtcute/core": "workspace:^1.0.0",
         "@mtcute/file-id": "workspace:^1.0.0",
-        "eager-async-pool": "1.0.0",
         "file-type": "16.5.4"
     }
 }

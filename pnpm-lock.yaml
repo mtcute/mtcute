@@ -114,9 +114,6 @@ importers:
       '@types/node':
         specifier: 18.16.0
         version: 18.16.0
-      eager-async-pool:
-        specifier: 1.0.0
-        version: 1.0.0
       file-type:
         specifier: 16.5.4
         version: 16.5.4
@@ -2016,10 +2013,6 @@ packages:
     resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
     engines: {node: '>=10'}
     dev: true
-
-  /eager-async-pool@1.0.0:
-    resolution: {integrity: sha512-A2N+pbceYEz7O2KQ3TNQSSrZsivQ9i28cuNKRxfdT9QvRCoJ51pCP90hSNybOOBfoBHk15ZThJYrQWHo4h2UjA==}
-    dev: false
 
   /eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}

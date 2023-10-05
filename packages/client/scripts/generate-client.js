@@ -658,6 +658,19 @@ export interface TelegramClientOptions extends BaseTelegramClientOptions {
      * @default false
      */
     disableNoDispatch?: boolean
+
+    /**
+     * Limit of {@link resolvePeerMany} internal async pool.
+     * 
+     * Higher value means more parallel requests, but also
+     * higher risk of getting flood-wait errors.
+     * Most resolves will however likely be a DB cache hit.
+     * 
+     * Only change this if you know what you're doing.
+     * 
+     * @default 8
+     */
+    resolvePeerManyPoolLimit?: number
 }
 `.trim(),
     )

@@ -491,7 +491,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Accept the given TOS
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param tosId  TOS id
      */
@@ -499,7 +499,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Check your Two-Step verification password and log in
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param password  Your Two-Step verification password
      * @returns  The authorized user
@@ -509,7 +509,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get your Two-Step Verification password hint.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @returns  The password hint as a string, if any
      */
@@ -528,7 +528,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Recover your password with a recovery code and log in.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param recoveryCode  The recovery code sent via email
      * @returns  The authorized user
@@ -541,7 +541,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * The type of the code to be re-sent is specified in the `nextType` attribute of
      * {@link SentCode} object returned by {@link sendCode}
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param phone  Phone number in international format
      * @param phoneCodeHash  Confirmation code identifier from {@link SentCode}
@@ -564,7 +564,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Send the confirmation code to the given phone number
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param phone  Phone number in international format.
      * @returns  An object containing information about the sent confirmation code
@@ -573,7 +573,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Send a code to email needed to recover your password
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @returns  String containing email pattern to which the recovery code was sent
      */
@@ -591,7 +591,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Authorize a user in Telegram with a valid confirmation code.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param phone  Phone number in international format
      * @param phoneCodeHash  Code identifier from {@link TelegramClient.sendCode}
@@ -608,7 +608,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Register a new user in Telegram.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param phone  Phone number in international format
      * @param phoneCodeHash  Code identifier from {@link TelegramClient.sendCode}
@@ -793,7 +793,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Send an answer to a callback query.
      *
-     * **Available**: 🤖 bot only
+     * **Available**: 🤖 bots only
      *
      * @param queryId  ID of the callback query
      * @param params  Parameters of the answer
@@ -839,7 +839,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Answer an inline query.
      *
-     * **Available**: 🤖 bot only
+     * **Available**: 🤖 bots only
      *
      * @param queryId  Inline query ID
      * @param results  Results of the query
@@ -982,7 +982,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Fetches the menu button set for the given user.
      *
-     * **Available**: 🤖 bot only
+     * **Available**: 🤖 bots only
      *
      */
     getBotMenuButton(user: InputPeerLike): Promise<tl.TypeBotMenuButton>
@@ -990,7 +990,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Request a callback answer from a bot,
      * i.e. click an inline button that contains data.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID where the message was found
      * @param message  ID of the message containing the button
@@ -1027,7 +1027,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get high scores of a game
      *
-     * **Available**: 🤖 bot only
+     * **Available**: 🤖 bots only
      *
      * @param chatId  ID of the chat where the game was found
      * @param message  ID of the message containing the game
@@ -1037,7 +1037,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get high scores of a game from an inline message
      *
-     * **Available**: 🤖 bot only
+     * **Available**: 🤖 bots only
      *
      * @param messageId  ID of the inline message containing the game
      * @param userId  ID of the user to find high scores for
@@ -1110,7 +1110,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Set a score of a user in a game
      *
-     * **Available**: 🤖 bot only
+     * **Available**: 🤖 bots only
      *
      * @param params
      * @returns  The modified message
@@ -1140,7 +1140,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Set a score of a user in a game contained in
      * an inline message
      *
-     * **Available**: 🤖 bot only
+     * **Available**: 🤖 bots only
      *
      * @param params
      */
@@ -1168,7 +1168,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
      *
-     * **Available**: 🤖 bot only
+     * **Available**: 🤖 bots only
      *
      */
     setMyCommands(params: {
@@ -1194,7 +1194,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Sets the default chat permissions for the bot in the supergroup or channel.
      *
-     * **Available**: 🤖 bot only
+     * **Available**: 🤖 bots only
      *
      * @param target  Whether to target groups or channels.
      * @param rights  The default chat permissions.
@@ -1203,7 +1203,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Add new members to a group, supergroup or channel.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  ID of the chat or its username
      * @param users ID(s) of the users, their username(s) or phone(s).
@@ -1215,7 +1215,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Archive one or more chats
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chats  Chat ID(s), username(s), phone number(s), `"me"` or `"self"`
      */
@@ -1238,7 +1238,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Create a new broadcast channel
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @returns  Newly created channel
      */
@@ -1259,7 +1259,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * If you want to create a supergroup, use {@link createSupergroup}
      * instead.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      */
     createGroup(params: {
@@ -1284,7 +1284,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Create a new supergroup
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @returns  Newly created supergroup
      */
@@ -1315,7 +1315,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Delete a channel or a supergroup
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID or username
      */
@@ -1324,7 +1324,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Delete a channel or a supergroup
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID or username
      */
@@ -1342,7 +1342,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Delete a legacy group chat for all members
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      */
@@ -1351,7 +1351,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Delete communication history (for private chats
      * and legacy groups)
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chat  Chat or user ID, username, phone number, `"me"` or `"self"`
      * @param [mode='delete']
@@ -1367,7 +1367,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Delete all messages of a user (or channel) in a supergroup
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      * @param participantId  User/channel ID
@@ -1400,7 +1400,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * in direct chronological order (i.e. newer
      * events have bigger event ID)
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      * @param params
@@ -1524,7 +1524,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get preview information about a private chat.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param inviteLink  Invite link
      * @throws MtArgumentError  In case invite link has invalid format
@@ -1536,7 +1536,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get basic information about a chat.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  ID of the chat, its username or invite link
      * @throws MtArgumentError
@@ -1547,7 +1547,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get full information about a chat.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  ID of the chat, its username or invite link
      * @throws MtArgumentError
@@ -1558,7 +1558,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get nearby chats
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param latitude  Latitude of the location
      * @param longitude  Longitude of the location
@@ -1569,7 +1569,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * Small wrapper over {@link getChatEventLog}
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      * @param params
@@ -1624,7 +1624,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * `INVITE_REQUEST_SENT`, which means that you need to wait for admin approval.
      * You will get into the chat once they do so.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId
      *   Chat identifier. Either an invite link (`t.me/joinchat/*`), a username (`@username`)
@@ -1645,7 +1645,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Leave a group chat, supergroup or channel
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID or username
      * @param [clear=false]  Whether to clear history after leaving (only for legacy group chats)
@@ -1654,7 +1654,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Mark a chat as unread
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      */
@@ -1662,7 +1662,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Reorder usernames
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param peerId  Bot, channel or "me"/"self"
      */
@@ -1694,7 +1694,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Save or delete a draft message associated with some chat
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param draft  Draft message, or `null` to delete.
@@ -1763,7 +1763,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Set maximum Time-To-Live of all newly sent messages in the specified chat
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      * @param period  New TTL period, in seconds (or 0 to disable)
@@ -1774,7 +1774,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * You must be an administrator and have the appropriate permissions.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID or current username
      * @param username  New username, or `null` to remove
@@ -1783,7 +1783,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Set supergroup's slow mode interval.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID or username
      * @param [seconds=0]
@@ -1795,7 +1795,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Set whether a chat has content protection (i.e. forwarding messages is disabled)
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID or username
      * @param [enabled=false]  Whether content protection should be enabled
@@ -1807,7 +1807,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * > **Note**: non-collectible usernames must still be changed
      * > using {@link setUsername}/{@link setChatUsername}
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param peerId  Bot, channel or "me"/"self"
      */
@@ -1831,7 +1831,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * > **Note**: this method only affects primary invite links.
      * > Additional invite links may exist with the opposite setting.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID or username
      * @param [enabled=false]  Whether join requests should be enabled
@@ -1843,7 +1843,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * This only affects discussion groups where users can send messages
      * without joining the group.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID or username
      * @param [enabled=false]  Whether join-to-send setting should be enabled
@@ -1852,7 +1852,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Unarchive one or more chats
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chats  Chat ID(s), username(s), phone number(s), `"me"` or `"self"`
      */
@@ -1890,7 +1890,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Add an existing Telegram user as a contact
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param userId  User ID, username or phone number
      * @param params  Contact details
@@ -1940,14 +1940,14 @@ export interface TelegramClient extends BaseTelegramClient {
     deleteContacts(userIds: InputPeerLike[]): Promise<User[]>
     /**
      * Get list of contacts from your Telegram contacts list.
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      */
     getContacts(): Promise<User[]>
     /**
      * Import contacts to your Telegram contacts list.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param contacts  List of contacts
      */
@@ -1962,7 +1962,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * ID for the folder is optional, if not
      * provided it will be derived automatically.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param folder  Parameters for the folder
      * @returns  Newly created folder
@@ -1971,7 +1971,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Delete a folder by its ID
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param id  Folder ID or folder itself
      */
@@ -1979,7 +1979,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Edit a folder with given modification
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param folder
      *     Folder, folder ID or name.
@@ -2000,14 +2000,14 @@ export interface TelegramClient extends BaseTelegramClient {
      * > accurate since you can set the same title and/or emoji
      * > to multiple folders.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param params  Search parameters. At least one must be set.
      */
     findFolder(params: { title?: string; emoji?: string; id?: number }): Promise<tl.RawDialogFilter | null>
     /**
      * Get list of folders.
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      */
     getFolders(): Promise<tl.TypeDialogFilter[]>
@@ -2033,7 +2033,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * (i.e. newest - first), and draft update date
      * is not considered when sorting.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param params  Fetch parameters
      */
@@ -2140,7 +2140,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * Order is folder's ID (0 = default folder)
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      */
     setFoldersOrder(order: number[]): Promise<void>
@@ -2150,7 +2150,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * > **Note**: This method _will_ download the entire file
      * > into memory at once. This might cause an issue, so use wisely!
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param params  File download parameters
      */
@@ -2159,7 +2159,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Download a remote file to a local file (only for NodeJS).
      * Promise will resolve once the download is complete.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param filename  Local file name to which the remote file will be downloaded
      * @param params  File download parameters
@@ -2170,7 +2170,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * in chunks of a given size. Order of the chunks is guaranteed to be
      * consecutive.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param params  Download parameters
      */
@@ -2179,7 +2179,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Download a file and return it as a Node readable stream,
      * streaming file contents.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param params  File download parameters
      */
@@ -2400,7 +2400,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get forum topics
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID or username
      */
@@ -2428,7 +2428,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Iterate over forum topics. Wrapper over {@link getForumTopics}.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID or username
      */
@@ -2608,7 +2608,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Iterate over users who have joined
      * the chat with the given invite link.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      * @param params  Additional params
@@ -2656,7 +2656,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get detailed information about an invite link
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      * @param link  The invite link
@@ -2669,7 +2669,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * (i.e. `adminId = "self"`), as a creator you can get
      * any other admin's links.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      * @param adminId  Admin who created the links
@@ -2706,7 +2706,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get primary invite link of a chat
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      */
@@ -2714,7 +2714,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Approve or deny multiple join requests to a chat.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param peer  Chat/channel ID
      * @param action  Whether to approve or deny the join requests
@@ -2735,7 +2735,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Iterate over users who have joined
      * the chat with the given invite link.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      * @param params  Additional params
@@ -2766,7 +2766,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * (i.e. `adminId = "self"`), as a creator you can get
      * any other admin's links.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      * @param adminId  Admin who created the links
@@ -2828,7 +2828,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Delete scheduled messages.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param ids  Message(s) ID(s) to delete.
@@ -3167,7 +3167,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * is usually handled by the client, but if you disabled that,
      * you'll need to handle it manually.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param peer  Channel where the post was found
      * @param message  ID of the channel post
@@ -3176,7 +3176,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get chat history.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param params  Additional fetch parameters
@@ -3327,7 +3327,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get users who have reacted to the message.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      * @param messageId  Message ID
@@ -3375,7 +3375,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Iterate over chat history. Wrapper over {@link getHistory}
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param params  Additional fetch parameters
@@ -3403,7 +3403,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * Wrapper over {@link getReactionUsers}.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      * @param messageId  Message ID
@@ -3435,7 +3435,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * **Note**: Due to Telegram limitations, you can only get up to ~10000 messages
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param params  Search parameters
      */
@@ -3462,7 +3462,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * Iterable version of {@link searchMessages}
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param params  Additional search parameters
@@ -3508,7 +3508,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Mark chat history as read.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      * @param [message=0]  Message up until which to read history (by default everything is read)
@@ -3518,7 +3518,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Mark all reactions in chat as read.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID
      */
@@ -3528,7 +3528,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * **Note**: Due to Telegram limitations, you can only get up to ~10000 messages
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param params  Search parameters
      */
@@ -3573,7 +3573,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Search for messages inside a specific chat
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param params  Additional search parameters
@@ -3773,7 +3773,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * To add a caption to the group, add caption to the first
      * media in the group and don't add caption for any other.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param medias  Medias contained in the message.
@@ -3868,7 +3868,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Send a single media (a photo or a document-based media)
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param media
@@ -3987,7 +3987,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Send or remove a reaction.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID with the message to react to
      * @param message  Message ID to react to
@@ -4021,7 +4021,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Send a text message
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param text  Text of the message
@@ -4152,7 +4152,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Send or retract a vote in a poll.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat ID where this poll was found
      * @param message  Message ID where this poll was found
@@ -4170,7 +4170,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * > **Note**: For now doesn't seem to work, returns null for all messages.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param chatId  Chat or user ID
      * @param messageId  Identifier of the message to translate
@@ -4188,7 +4188,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * > **Note**: For now doesn't seem to work, returns null for all messages.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param text  Text to translate
      * @param toLanguage  Target language (two-letter ISO 639-1 language code)
@@ -4225,7 +4225,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Create a new takeout session
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param params  Takeout session parameters
      */
@@ -4282,7 +4282,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Change your 2FA password
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param currentPassword  Current password as plaintext
      * @param newPassword  New password as plaintext
@@ -4297,7 +4297,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * {@link resendPasswordEmail} or {@link cancelPasswordEmail},
      * and the call this method again
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param password  2FA password as plaintext
      * @param hint  Hint for the new password
@@ -4307,7 +4307,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Verify an email to use as 2FA recovery method
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param code  Code which was sent via email
      */
@@ -4315,21 +4315,21 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Resend the code to verify an email to use as 2FA recovery method.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      */
     resendPasswordEmail(): Promise<void>
     /**
      * Cancel the code that was sent to verify an email to use as 2FA recovery method
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      */
     cancelPasswordEmail(): Promise<void>
     /**
      * Remove 2FA password from your account
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param password  2FA password as plaintext
      */
@@ -4467,7 +4467,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * > Use {@link StickerSet.getFull} or {@link getStickerSet}
      * > to get a stickerset that will include the stickers
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      */
     getInstalledStickers(): Promise<StickerSet[]>
@@ -4665,7 +4665,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get information about boosts in a channel
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @returns  IDs of stories that were removed
      */
@@ -4673,7 +4673,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get boosters of a channel
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @returns  IDs of stories that were removed
      */
@@ -4878,7 +4878,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * Wrapper over {@link getBoosters}
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @returns  IDs of stories that were removed
      */
@@ -5210,7 +5210,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Block a user
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param id  User ID, username or phone number
      */
@@ -5218,7 +5218,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Delete your own profile photos
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param ids  ID(s) of the photos. Can be file IDs or raw TL objects
      */
@@ -5242,7 +5242,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get a list of common chats you have with a given user
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param userId  User's ID, username or phone number
      * @throws MtInvalidPeerTypeError
@@ -5349,12 +5349,14 @@ export interface TelegramClient extends BaseTelegramClient {
             chunkSize?: number
         },
     ): AsyncIterableIterator<Photo>
+    /* eslint-enable @typescript-eslint/no-unused-vars */
     /**
      * Get multiple `InputPeer`s at once,
      * while also normalizing and removing
      * peers that can't be normalized to that type.
-     * Uses `async-eager-pool` internally, with a
-     * limit of 10.
+     *
+     * Uses async pool internally, with a
+     * configurable concurrent limit (see {@link TelegramClientOptions#resolvePeerManyPoolLimit}).
      *
      * @param peerIds  Peer Ids
      * @param normalizer  Normalization function
@@ -5365,8 +5367,10 @@ export interface TelegramClient extends BaseTelegramClient {
     ): Promise<T[]>
     /**
      * Get multiple `InputPeer`s at once.
-     * Uses `async-eager-pool` internally, with a
-     * limit of 10.
+     *
+     * Uses async pool internally, with a
+     * configurable concurrent limit (see {@link TelegramClientOptions#resolvePeerManyPoolLimit}).
+     *
      *
      * @param peerIds  Peer Ids
      */
@@ -5385,7 +5389,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Set an emoji status for the current user
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param emoji  Custom emoji ID or `null` to remove the emoji
      */
@@ -5410,7 +5414,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Change user status to offline or online
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param [offline=true]  Whether the user is currently offline
      */
@@ -5439,7 +5443,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Note that bots usernames must be changed through
      * bot support or re-created from scratch.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param username  New username (5-32 chars, allowed chars: `a-zA-Z0-9_`), or `null` to remove
      */
@@ -5447,7 +5451,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Unblock a user
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param id  User ID, username or phone number
      */
@@ -5457,7 +5461,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * Only pass fields that you want to change.
      *
-     * **Available**: 👤 user only
+     * **Available**: 👤 users only
      *
      * @param params
      */
@@ -5503,6 +5507,19 @@ export interface TelegramClientOptions extends BaseTelegramClientOptions {
      * @default false
      */
     disableNoDispatch?: boolean
+
+    /**
+     * Limit of {@link resolvePeerMany} internal async pool.
+     *
+     * Higher value means more parallel requests, but also
+     * higher risk of getting flood-wait errors.
+     * Most resolves will however likely be a DB cache hit.
+     *
+     * Only change this if you know what you're doing.
+     *
+     * @default 8
+     */
+    resolvePeerManyPoolLimit?: number
 }
 export class TelegramClient extends BaseTelegramClient {
     protected _userId: number | null
@@ -5540,6 +5557,7 @@ export class TelegramClient extends BaseTelegramClient {
     protected _cpts: Map<number, number>
     protected _cptsMod: Map<number, number>
     protected _updsLog: Logger
+    protected _resolvePeerManyPoolLimit: number
     constructor(opts: TelegramClientOptions) {
         super(opts)
         this._userId = null
@@ -5579,6 +5597,7 @@ export class TelegramClient extends BaseTelegramClient {
         this._selfChanged = false
 
         this._updsLog = this.log.create('updates')
+        this._resolvePeerManyPoolLimit = opts.resolvePeerManyPoolLimit ?? 8
     }
     acceptTos = acceptTos
     checkPassword = checkPassword
