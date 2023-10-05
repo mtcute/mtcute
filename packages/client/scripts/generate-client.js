@@ -4,6 +4,15 @@ const fs = require('fs')
 const prettier = require('prettier')
 const updates = require('./generate-updates')
 
+const schema = require('../../tl/api-schema.json')
+
+function findMethodAvailability(method) {
+    const entry = schema.e.find((it) => it.kind === 'method' && it.name === method)
+    if (!entry) return null
+
+    return entry.available ?? null
+}
+
 const targetDir = path.join(__dirname, '../src')
 
 async function* getFiles(dir) {
@@ -27,6 +36,145 @@ function throwError(ast, file, text) {
 ${text}`,
     )
     process.exit(0)
+}
+
+function visitRecursively(ast, check, callback) {
+    const visit = (node) => {
+        if (!ts.isNode(node)) return
+
+        // recursively continue visiting
+        for (const [key, value] of Object.entries(node)) {
+            if (!value || typeof value !== 'object' || key === 'parent') {
+                continue
+            }
+
+            if (Array.isArray(value)) {
+                value.forEach(visit)
+            } else {
+                visit(value)
+            }
+        }
+
+        if (check(node)) {
+            callback(node)
+        }
+    }
+
+    visit(ast)
+}
+
+function findRawApiUsages(ast, fileName) {
+    // find `this.call({ _: '...', ...})
+
+    const usages = []
+
+    visitRecursively(
+        ast,
+        (node) => node.kind === ts.SyntaxKind.CallExpression,
+        (call) => {
+            if (call.expression.kind !== ts.SyntaxKind.PropertyAccessExpression) return
+            const prop = call.expression
+
+            if (prop.name.escapedText === 'call' && prop.expression.kind === ts.SyntaxKind.ThisKeyword) {
+                usages.push(call)
+            }
+        },
+    )
+
+    const methodUsages = []
+
+    for (const call of usages) {
+        const arg = call.arguments[0]
+
+        if (!arg || arg.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+            throwError(
+                call,
+                fileName,
+                'First argument to this.call() must be an object literal. Please use @available directive manually',
+            )
+        }
+
+        const method = arg.properties.find((it) => it.name.escapedText === '_')
+
+        if (!method || method.kind !== ts.SyntaxKind.PropertyAssignment) {
+            throwError(call, fileName, 'First argument to this.call() must have a _ property')
+        }
+
+        const init = method.initializer
+
+        if (init.kind === ts.SyntaxKind.StringLiteral) {
+            methodUsages.push(init.text)
+        } else if (init.kind === ts.SyntaxKind.ConditionalExpression) {
+            const whenTrue = init.whenTrue
+            const whenFalse = init.whenFalse
+
+            if (whenTrue.kind !== ts.SyntaxKind.StringLiteral || whenFalse.kind !== ts.SyntaxKind.StringLiteral) {
+                throwError(
+                    call,
+                    fileName,
+                    'Too complex, failed to extract method name, please use @available directive manually',
+                )
+            }
+
+            methodUsages.push(whenTrue.text, whenFalse.text)
+        } else {
+            throwError(
+                call,
+                fileName,
+                'Too complex, failed to extract method name, please use @available directive manually',
+            )
+        }
+    }
+
+    return methodUsages
+}
+
+function findDependencies(ast) {
+    const deps = new Set()
+
+    visitRecursively(
+        ast,
+        (node) => node.kind === ts.SyntaxKind.CallExpression,
+        (call) => {
+            if (call.expression.kind !== ts.SyntaxKind.PropertyAccessExpression) return
+            const prop = call.expression
+
+            if (
+                prop.name.escapedText !== 'call' &&
+                prop.name.escapedText !== '_emitError' &&
+                prop.name.escapedText !== '_cachePeersFrom' &&
+                prop.name.escapedText !== 'importSession' &&
+                prop.name.escapedText !== 'emit' &&
+                prop.expression.kind === ts.SyntaxKind.ThisKeyword
+            ) {
+                deps.add(prop.name.escapedText)
+            }
+        },
+    )
+
+    return [...deps]
+}
+
+function determineCommonAvailability(methods, resolver = (v) => v) {
+    let common = 'both'
+
+    for (const method of methods) {
+        const available = resolver(method)
+
+        if (available === null) {
+            console.log('availability null for ' + method)
+
+            return null
+        }
+
+        if (common === 'both') {
+            common = available
+        } else if (available !== 'both' && common !== available) {
+            return null
+        }
+    }
+
+    return common
 }
 
 async function addSingleMethod(state, fileName) {
@@ -117,6 +265,21 @@ async function addSingleMethod(state, fileName) {
 
                 return aliases.split(',')
             })()
+            const available = (function () {
+                const flag = checkForFlag(stmt, '@available')
+                if (!flag) return null
+
+                const [, available] = flag.split('=')
+                if (!available || !available.length) return null
+
+                if (available !== 'user' && available !== 'bot' && available !== 'both') {
+                    throwError(stmt, fileName, `Invalid value for @available flag: ${available}`)
+                }
+
+                return available
+            })()
+            const rawApiMethods = available === null && findRawApiUsages(stmt, fileName)
+            const dependencies = findDependencies(stmt).filter((it) => it !== name)
 
             if (!isExported && !isPrivate) {
                 throwError(stmt, fileName, 'Public methods MUST be exported.')
@@ -178,6 +341,9 @@ async function addSingleMethod(state, fileName) {
                     func: stmt,
                     comment: getLeadingComments(stmt),
                     aliases,
+                    available,
+                    rawApiMethods,
+                    dependencies,
                     overload: isOverload,
                     hasOverloads: hasOverloads[name] && !isOverload,
                 })
@@ -270,7 +436,7 @@ async function main() {
     output.write(
         '/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging, @typescript-eslint/unified-signatures */\n' +
             '/* THIS FILE WAS AUTO-GENERATED */\n' +
-            "import { BaseTelegramClient, BaseTelegramClientOptions, tl } from '@mtcute/core'\n",
+            "import { BaseTelegramClient, BaseTelegramClientOptions, tl, Long } from '@mtcute/core'\n",
     )
     Object.entries(state.imports).forEach(([module, items]) => {
         items = [...items]
@@ -323,7 +489,42 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
             aliases,
             overload,
             hasOverloads,
+            available,
+            rawApiMethods,
+            dependencies,
         }) => {
+            if (!available && !overload) {
+                // no @available directive
+                // try to determine it automatically
+                const checkDepsAvailability = (deps) => {
+                    return determineCommonAvailability(deps, (name) => {
+                        const method = state.methods.list.find((it) => it.name === name && !it.overload)
+
+                        if (!method) {
+                            throwError(
+                                func,
+                                origName,
+                                `Cannot determine availability of ${name}, is it a client method? Please use @available directive manually`,
+                            )
+                        }
+
+                        if (method.available === null) {
+                            return determineCommonAvailability([
+                                determineCommonAvailability(method.rawApiMethods, findMethodAvailability),
+                                checkDepsAvailability(method.dependencies),
+                            ])
+                        }
+
+                        return method.available
+                    })
+                }
+
+                available = determineCommonAvailability([
+                    determineCommonAvailability(rawApiMethods, findMethodAvailability),
+                    checkDepsAvailability(dependencies),
+                ])
+            }
+
             // create method that calls that function and passes `this`
             // first let's determine the signature
             const returnType = func.type ? ': ' + func.type.getText() : ''
@@ -389,18 +590,27 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
 
             // remove @internal mark and set default values for parameters
             comment = comment
-                .replace(/^\s*\/\/+\s*@alias.*$/m, '')
+                .replace(/^\s*\/\/+\s*@(alias|available).*$/m, '')
                 .replace(/(\n^|\/\*)\s*\*\s*@internal.*/m, '')
                 .replace(/((?:\n^|\/\*)\s*\*\s*@param )([^\s]+?)($|\s+)/gm, (_, pref, arg, post) => {
                     const param = rawParams.find((it) => it.name.escapedText === arg)
                     if (!param) return _
                     if (!param._savedDefault) return _
 
-                    if (post) {
-                        return `${pref}${arg}${post}(default: \`${param._savedDefault.trim()}\`) `
+                    return `${pref}[${arg}=${param._savedDefault.trim()}]${post}`
+                })
+                // insert "some text" at the end of comment before jsdoc
+                .replace(/(?<=\/\*.*)(?=\n\s*\*\s*(?:@[a-z]+|\/))/s, () => {
+                    switch (available) {
+                        case 'user':
+                            return '\n * **Available**: 👤 users only\n *'
+                        case 'bot':
+                            return '\n * **Available**: 🤖 bots only\n *'
+                        case 'both':
+                            return '\n * **Available**: ✅ both users and bots\n *'
                     }
 
-                    return `${pref}${arg}\n*  (default: \`${param._savedDefault.trim()}\`)`
+                    return ''
                 })
 
             for (const name of [origName, ...aliases]) {

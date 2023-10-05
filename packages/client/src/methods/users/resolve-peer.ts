@@ -5,6 +5,7 @@ import { TelegramClient } from '../../client'
 import { InputPeerLike, MtPeerNotFoundError } from '../../types'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
 
+// @available=both
 /**
  * Get the `InputPeer` of a known peer id.
  * Useful when an `InputPeer` is needed.

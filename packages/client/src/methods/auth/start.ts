@@ -5,6 +5,7 @@ import { TelegramClient } from '../../client'
 import { MaybeDynamic, SentCode, TermsOfService, User } from '../../types'
 import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-utils'
 
+// @available=both
 /**
  * Start the client in an interactive and declarative manner,
  * by providing callbacks for authorization details.

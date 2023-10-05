@@ -1,7 +1,8 @@
-import { tl } from '@mtcute/core'
+import { Long } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 
+// @available=bot
 /**
  * Send an answer to a callback query.
  *
@@ -11,7 +12,7 @@ import { TelegramClient } from '../../client'
  */
 export async function answerCallbackQuery(
     this: TelegramClient,
-    queryId: tl.Long,
+    queryId: Long,
     params?: {
         /**
          * Maximum amount of time in seconds for which

@@ -41,6 +41,7 @@ export async function getMessages(
     fromReply?: boolean,
 ): Promise<(Message | null)[]>
 
+// @available=both
 /** @internal */
 export async function getMessages(
     this: TelegramClient,

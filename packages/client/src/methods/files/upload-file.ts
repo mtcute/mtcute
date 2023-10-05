@@ -31,6 +31,7 @@ const REQUESTS_PER_CONNECTION = 3
 const MAX_PART_COUNT = 4000 // 512 kb * 4000 = 2000 MiB
 const MAX_PART_COUNT_PREMIUM = 8000 // 512 kb * 8000 = 4000 MiB
 
+// @available=both
 /**
  * Upload a file to Telegram servers, without actually
  * sending a message anywhere. Useful when an `InputFile` is required.
