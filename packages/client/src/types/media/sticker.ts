@@ -6,6 +6,13 @@ import { makeInspectable } from '../../utils'
 import { StickerSet } from '../misc'
 import { RawDocument } from './document'
 
+export const MASK_POSITION_POINT_TO_TL = {
+    forehead: 0,
+    eyes: 1,
+    mouth: 2,
+    chin: 3,
+} as const
+
 export interface MaskPosition {
     /**
      * The part of the face relative where the mask should be placed

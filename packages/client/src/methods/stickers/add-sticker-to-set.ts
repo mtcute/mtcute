@@ -1,12 +1,11 @@
 import { TelegramClient } from '../../client'
-import { InputStickerSet, InputStickerSetItem, normalizeInputStickerSet, StickerSet } from '../../types'
-
-const MASK_POS = {
-    forehead: 0,
-    eyes: 1,
-    mouth: 2,
-    chin: 3,
-} as const
+import {
+    InputStickerSet,
+    InputStickerSetItem,
+    MASK_POSITION_POINT_TO_TL,
+    normalizeInputStickerSet,
+    StickerSet,
+} from '../../types'
 
 /**
  * Add a sticker to a sticker set.
@@ -44,7 +43,7 @@ export async function addStickerToSet(
             maskCoords: sticker.maskPosition ?
                 {
                     _: 'maskCoords',
-                    n: MASK_POS[sticker.maskPosition.point],
+                    n: MASK_POSITION_POINT_TO_TL[sticker.maskPosition.point],
                     x: sticker.maskPosition.x,
                     y: sticker.maskPosition.y,
                     zoom: sticker.maskPosition.scale,

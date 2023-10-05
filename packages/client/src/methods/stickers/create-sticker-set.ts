@@ -5,18 +5,12 @@ import {
     InputFileLike,
     InputPeerLike,
     InputStickerSetItem,
+    MASK_POSITION_POINT_TO_TL,
     StickerSet,
     StickerSourceType,
     StickerType,
 } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
-
-const MASK_POS = {
-    forehead: 0,
-    eyes: 1,
-    mouth: 2,
-    chin: 3,
-} as const
 
 /**
  * Create a new sticker set.
@@ -117,7 +111,7 @@ export async function createStickerSet(
             maskCoords: sticker.maskPosition ?
                 {
                     _: 'maskCoords',
-                    n: MASK_POS[sticker.maskPosition.point],
+                    n: MASK_POSITION_POINT_TO_TL[sticker.maskPosition.point],
                     x: sticker.maskPosition.x,
                     y: sticker.maskPosition.y,
                     zoom: sticker.maskPosition.scale,
