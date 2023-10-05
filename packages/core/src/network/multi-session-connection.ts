@@ -188,7 +188,12 @@ export class MultiSessionConnection extends EventEmitter {
 
     private _nextConnection = 0
 
-    sendRpc<T extends tl.RpcMethod>(request: T, stack?: string, timeout?: number): Promise<tl.RpcCallReturn[T['_']]> {
+    sendRpc<T extends tl.RpcMethod>(
+        request: T,
+        stack?: string,
+        timeout?: number,
+        abortSignal?: AbortSignal,
+    ): Promise<tl.RpcCallReturn[T['_']]> {
         // if (this.params.isMainConnection) {
         // find the least loaded connection
         let min = Infinity
@@ -204,7 +209,7 @@ export class MultiSessionConnection extends EventEmitter {
             }
         }
 
-        return this._connections[minIdx].sendRpc(request, stack, timeout)
+        return this._connections[minIdx].sendRpc(request, stack, timeout, abortSignal)
         // }
 
         // round-robin connections

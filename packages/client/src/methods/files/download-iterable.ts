@@ -113,7 +113,7 @@ export async function* downloadAsIterable(
                     offset: chunkSize * chunk,
                     limit: chunkSize,
                 },
-                { dcId, kind: connectionKind },
+                { dcId, kind: connectionKind, abortSignal: params.abortSignal },
             )
         } catch (e: unknown) {
             if (!tl.RpcError.is(e)) throw e

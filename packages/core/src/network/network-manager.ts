@@ -139,6 +139,11 @@ export interface RpcCallOptions {
      * Overrides `dcId` if set.
      */
     manager?: DcConnectionManager
+
+    /**
+     * Abort signal for the call.
+     */
+    abortSignal?: AbortSignal
 }
 
 export class DcConnectionManager {
@@ -662,7 +667,7 @@ export class NetworkManager {
 
         for (let i = 0; i < maxRetryCount; i++) {
             try {
-                const res = await multi.sendRpc(message, stack, params?.timeout)
+                const res = await multi.sendRpc(message, stack, params?.timeout, params?.abortSignal)
 
                 if (kind === 'main') {
                     this._lastUpdateTime = Date.now()

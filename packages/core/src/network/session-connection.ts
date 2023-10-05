@@ -9,7 +9,6 @@ import { gzipDeflate, gzipInflate } from '@mtcute/tl-runtime/src/platform/gzip'
 import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types'
 import {
     ControllablePromise,
-    createCancellablePromise,
     createControllablePromise,
     EarlyTimer,
     longFromBuffer,
@@ -691,6 +690,23 @@ export class SessionConnection extends PersistentConnection {
                 return
             }
 
+            if (msg._ === 'cancel') {
+                let result
+
+                try {
+                    result = message.object() as mtp.TlObject
+                } catch (err) {
+                    this.log.debug('failed to parse rpc_result for cancel request %l, ignoring', reqMsgId)
+
+                    return
+                }
+
+                this.log.debug('received %s for cancelled request %l: %j', result._, reqMsgId)
+                this._onMessageAcked(reqMsgId)
+
+                return
+            }
+
             this.log.error('received rpc_result for %s request %l', msg._, reqMsgId)
 
             return
@@ -706,6 +722,8 @@ export class SessionConnection extends PersistentConnection {
         if (rpc.initConn) {
             this._session.initConnectionCalled = true
         }
+
+        rpc.done = true
 
         this.log.verbose('<<< (%s) %j', rpc.method, result)
 
@@ -1165,7 +1183,12 @@ export class SessionConnection extends PersistentConnection {
         }
     }
 
-    sendRpc<T extends tl.RpcMethod>(request: T, stack?: string, timeout?: number): Promise<tl.RpcCallReturn[T['_']]> {
+    sendRpc<T extends tl.RpcMethod>(
+        request: T,
+        stack?: string,
+        timeout?: number,
+        abortSignal?: AbortSignal,
+    ): Promise<tl.RpcCallReturn[T['_']]> {
         if (this._usable && this.params.inactivityTimeout) {
             this._rescheduleInactivity()
         }
@@ -1244,8 +1267,7 @@ export class SessionConnection extends PersistentConnection {
 
         const pending: PendingRpc = {
             method,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            promise: undefined as any, // because we need the object to make a promise
+            promise: createControllablePromise(),
             data: content,
             stack,
             // we will need to know size of gzip_packed overhead in _flush()
@@ -1254,6 +1276,7 @@ export class SessionConnection extends PersistentConnection {
 
             // setting them as well so jit can optimize stuff
             sent: undefined,
+            done: undefined,
             getState: undefined,
             msgId: undefined,
             seqNo: undefined,
@@ -1263,19 +1286,28 @@ export class SessionConnection extends PersistentConnection {
             timeout: undefined,
         }
 
-        const promise = createCancellablePromise<any>(this._cancelRpc.bind(this, pending))
-        pending.promise = promise
+        if (abortSignal?.aborted) {
+            pending.promise.reject(abortSignal.reason)
+
+            return pending.promise
+        }
 
         if (timeout) {
             pending.timeout = setTimeout(this._cancelRpc, timeout, pending, true)
         }
 
+        if (abortSignal) {
+            abortSignal.addEventListener('abort', () => this._cancelRpc(pending, false, abortSignal))
+        }
+
         this._enqueueRpc(pending, true)
 
-        return promise
+        return pending.promise
     }
 
-    private _cancelRpc(rpc: PendingRpc, onTimeout = false): void {
+    private _cancelRpc(rpc: PendingRpc, onTimeout = false, abortSignal?: AbortSignal): void {
+        if (rpc.done) return
+
         if (rpc.cancelled && !onTimeout) {
             throw new MtcuteError('RPC was already cancelled')
         }
@@ -1286,13 +1318,15 @@ export class SessionConnection extends PersistentConnection {
 
         if (onTimeout) {
             // todo: replace with MtTimeoutError
-            const error = new tl.RpcError(-503, 'Timeout')
+            const error = new tl.RpcError(400, 'Client timeout')
 
             if (this.params.niceStacks !== false) {
                 makeNiceStack(error, rpc.stack!, rpc.method)
             }
 
             rpc.promise.reject(error)
+        } else if (abortSignal) {
+            rpc.promise.reject(abortSignal.reason)
         }
 
         rpc.cancelled = true
@@ -1721,7 +1755,7 @@ export class SessionConnection extends PersistentConnection {
         const rootMsgId = new Long(result.readInt32LE(), result.readInt32LE(4))
 
         this.log.debug(
-            'sending %d messages: size = %db, acks = %d (msg_id = %s), ping = %s (msg_id = %s), state_req = %s (msg_id = %s), resend = %s (msg_id = %s), rpc = %s, container = %s, root msg_id = %l',
+            'sending %d messages: size = %db, acks = %d (msg_id = %s), ping = %s (msg_id = %s), state_req = %s (msg_id = %s), resend = %s (msg_id = %s), cancels = %s (msg_id = %s), rpc = %s, container = %s, root msg_id = %l',
             messageCount,
             packetSize,
             ackMsgIds?.length || 'false',
@@ -1731,6 +1765,8 @@ export class SessionConnection extends PersistentConnection {
             getStateMsgIds?.map((it) => it.toString()) || 'false',
             getStateMsgId,
             resendMsgIds?.map((it) => it.toString()) || 'false',
+            cancelRpcs,
+            cancelRpcs?.map((it) => it.toString()) || 'false',
             resendMsgId,
             rpcToSend.map((it) => it.method),
             useContainer,

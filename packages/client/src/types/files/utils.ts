@@ -105,4 +105,9 @@ export interface FileDownloadParameters {
      * @param total  Total file size (`Infinity` if not available)
      */
     progressCallback?: (downloaded: number, total: number) => void
+
+    /**
+     * Abort signal that can be used to cancel the download.
+     */
+    abortSignal?: AbortSignal
 }

@@ -25,6 +25,7 @@ export interface PendingRpc {
     gzipOverhead?: number
 
     sent?: boolean
+    done?: boolean
     msgId?: Long
     seqNo?: number
     containerId?: Long

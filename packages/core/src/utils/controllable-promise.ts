@@ -7,13 +7,6 @@ export type ControllablePromise<T = unknown> = Promise<T> & {
 }
 
 /**
- * A promise that can be cancelled.
- */
-export type CancellablePromise<T = unknown> = Promise<T> & {
-    cancel(): void
-}
-
-/**
  * The promise was cancelled
  */
 export class PromiseCancelledError extends Error {}
@@ -34,24 +27,4 @@ export function createControllablePromise<T = unknown>(): ControllablePromise<T>
     ;(promise as ControllablePromise<T>).reject = _reject!
 
     return promise as ControllablePromise<T>
-}
-
-/**
- * Creates a promise that can be cancelled.
- *
- * @param onCancel  Callback to call when cancellation is requested
- */
-export function createCancellablePromise<T = unknown>(
-    onCancel: () => void,
-): ControllablePromise<T> & CancellablePromise<T> {
-    // todo rethink this in MTQ-20
-
-    const promise = createControllablePromise()
-
-    ;(promise as unknown as CancellablePromise<T>).cancel = () => {
-        promise.reject(new PromiseCancelledError())
-        onCancel()
-    }
-
-    return promise as ControllablePromise<T> & CancellablePromise<T>
 }

@@ -36,6 +36,15 @@ export function downloadToFile(this: TelegramClient, filename: string, params: F
     const output = fs.createWriteStream(filename)
     const stream = this.downloadAsStream(params)
 
+    if (params.abortSignal) {
+        params.abortSignal.addEventListener('abort', () => {
+            this.log.debug('aborting file download %s - cleaning up', filename)
+            output.destroy()
+            stream.destroy()
+            fs!.rmSync(filename)
+        })
+    }
+
     return new Promise((resolve, reject) => {
         stream.on('error', reject).pipe(output).on('finish', resolve).on('error', reject)
     })
