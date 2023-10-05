@@ -3,8 +3,7 @@
 
 import { MaybeAsync } from '@mtcute/core'
 
-import { UpdateState } from '../state'
-import { ExtractBaseMany, ExtractMod, ExtractState, Invert, UnionToIntersection, UpdateFilter } from './types'
+import { ExtractBaseMany, ExtractMod, Invert, UnionToIntersection, UpdateFilter } from './types'
 
 /**
  * Filter that matches any update
@@ -35,9 +34,90 @@ export function not<Base, Mod, State>(
     }
 }
 
+// i couldn't come up with proper types for these 😭
+// if you know how to do this better - PRs are welcome!
+
+export function and<Base1, Mod1, State1, Base2, Mod2, State2>(
+    fn1: UpdateFilter<Base1, Mod1, State1>,
+    fn2: UpdateFilter<Base2, Mod2, State2>,
+): UpdateFilter<Base1 & Base2, Mod1 & Mod2, State1 | State2>
+export function and<Base1, Mod1, State1, Base2, Mod2, State2, Base3, Mod3, State3>(
+    fn1: UpdateFilter<Base1, Mod1, State1>,
+    fn2: UpdateFilter<Base2, Mod2, State2>,
+    fn3: UpdateFilter<Base3, Mod3, State3>,
+): UpdateFilter<Base1 & Base2 & Base3, Mod1 & Mod2 & Mod3, State1 | State2 | State3>
+export function and<Base1, Mod1, State1, Base2, Mod2, State2, Base3, Mod3, State3, Base4, Mod4, State4>(
+    fn1: UpdateFilter<Base1, Mod1, State1>,
+    fn2: UpdateFilter<Base2, Mod2, State2>,
+    fn3: UpdateFilter<Base3, Mod3, State3>,
+    fn4: UpdateFilter<Base4, Mod4, State4>,
+): UpdateFilter<Base1 & Base2 & Base3 & Base4, Mod1 & Mod2 & Mod3 & Mod4, State1 | State2 | State3 | State4>
+export function and<
+    Base1,
+    Mod1,
+    State1,
+    Base2,
+    Mod2,
+    State2,
+    Base3,
+    Mod3,
+    State3,
+    Base4,
+    Mod4,
+    State4,
+    Base5,
+    Mod5,
+    State5,
+>(
+    fn1: UpdateFilter<Base1, Mod1, State1>,
+    fn2: UpdateFilter<Base2, Mod2, State2>,
+    fn3: UpdateFilter<Base3, Mod3, State3>,
+    fn4: UpdateFilter<Base4, Mod4, State4>,
+    fn5: UpdateFilter<Base5, Mod5, State5>,
+): UpdateFilter<
+    Base1 & Base2 & Base3 & Base4 & Base5,
+    Mod1 & Mod2 & Mod3 & Mod4 & Mod5,
+    State1 | State2 | State3 | State4 | State5
+>
+export function and<
+    Base1,
+    Mod1,
+    State1,
+    Base2,
+    Mod2,
+    State2,
+    Base3,
+    Mod3,
+    State3,
+    Base4,
+    Mod4,
+    State4,
+    Base5,
+    Mod5,
+    State5,
+    Base6,
+    Mod6,
+    State6,
+>(
+    fn1: UpdateFilter<Base1, Mod1, State1>,
+    fn2: UpdateFilter<Base2, Mod2, State2>,
+    fn3: UpdateFilter<Base3, Mod3, State3>,
+    fn4: UpdateFilter<Base4, Mod4, State4>,
+    fn5: UpdateFilter<Base5, Mod5, State5>,
+    fn6: UpdateFilter<Base6, Mod6, State6>,
+): UpdateFilter<
+    Base1 & Base2 & Base3 & Base4 & Base5 & Base6,
+    Mod1 & Mod2 & Mod3 & Mod4 & Mod5 & Mod6,
+    State1 | State2 | State3 | State4 | State5 | State6
+>
+export function and<Filters extends UpdateFilter<any, any>[]>(
+    ...fns: Filters
+): UpdateFilter<ExtractBaseMany<Filters>, UnionToIntersection<ExtractMod<Filters[number]>>>
+
 /**
- * Combine two filters by applying an AND logical operation:
- * `and(fn1, fn2) = fn1 AND fn2`
+ * Combine multiple filters by applying an AND logical
+ * operation between every one of them:
+ * `and(fn1, fn2, ..., fnN) = fn1 AND fn2 AND ... AND fnN`
  *
  * > **Note**: This also combines type modifications, i.e.
  * > if the 1st has modification `{ field1: string }`
@@ -45,92 +125,14 @@ export function not<Base, Mod, State>(
  * > then the combined filter will have
  * > combined modification `{ field1: string, field2: number }`
  *
- * @param fn1  First filter
- * @param fn2  Second filter
- */
-export function and<Base, Mod1, Mod2, State1, State2>(
-    fn1: UpdateFilter<Base, Mod1, State1>,
-    fn2: UpdateFilter<Base, Mod2, State2>,
-): UpdateFilter<Base, Mod1 & Mod2, State1 | State2> {
-    return (upd, state) => {
-        const res1 = fn1(upd, state as UpdateState<State1>)
-
-        if (typeof res1 === 'boolean') {
-            if (!res1) return false
-
-            return fn2(upd, state as UpdateState<State2>)
-        }
-
-        return res1.then((r1) => {
-            if (!r1) return false
-
-            return fn2(upd, state as UpdateState<State2>)
-        })
-    }
-}
-
-/**
- * Combine two filters by applying an OR logical operation:
- * `or(fn1, fn2) = fn1 OR fn2`
- *
- * > **Note**: This also combines type modifications in a union, i.e.
- * > if the 1st has modification `{ field1: string }`
- * > and the 2nd has modification `{ field2: number }`,
- * > then the combined filter will have
- * > modification `{ field1: string } | { field2: number }`.
- * >
- * > It is up to the compiler to handle `if`s inside
- * > the handler function code, but this works with other
- * > logical functions as expected.
- *
- * @param fn1  First filter
- * @param fn2  Second filter
- */
-export function or<Base, Mod1, Mod2, State1, State2>(
-    fn1: UpdateFilter<Base, Mod1, State1>,
-    fn2: UpdateFilter<Base, Mod2, State2>,
-): UpdateFilter<Base, Mod1 | Mod2, State1 | State2> {
-    return (upd, state) => {
-        const res1 = fn1(upd, state as UpdateState<State1>)
-
-        if (typeof res1 === 'boolean') {
-            if (res1) return true
-
-            return fn2(upd, state as UpdateState<State2>)
-        }
-
-        return res1.then((r1) => {
-            if (r1) return true
-
-            return fn2(upd, state as UpdateState<State2>)
-        })
-    }
-}
-
-// im pretty sure it can be done simpler (return types of some and every),
-// so if you know how - PRs are welcome!
-
-/**
- * Combine multiple filters by applying an AND logical
- * operation between every one of them:
- * `every(fn1, fn2, ..., fnN) = fn1 AND fn2 AND ... AND fnN`
- *
- * > **Note**: This also combines type modification in a way
- * > similar to {@link and}.
- * >
- * > This method is less efficient than {@link and}
- *
- * > **Note**: This method *currently* does not propagate state
- * > type. This might be fixed in the future, but for now either
- * > use {@link and} or add type manually.
+ * > **Note**: Due to TypeScript limitations (or more likely my lack of brain cells),
+ * > state type is only correctly inferred for up to 6 filters.
+ * > If you need more, either provide type explicitly (e.g. `filters.state<SomeState>(...)`),
+ * > or combine multiple `and` calls.
  *
  * @param fns  Filters to combine
  */
-export function every<Filters extends UpdateFilter<any, any>[]>(
-    ...fns: Filters
-): UpdateFilter<ExtractBaseMany<Filters>, UnionToIntersection<ExtractMod<Filters[number]>>> {
-    if (fns.length === 2) return and(fns[0], fns[1])
-
+export function and(...fns: UpdateFilter<any, any, any>[]): UpdateFilter<any, any, any> {
     return (upd, state) => {
         let i = 0
         const max = fns.length
@@ -157,25 +159,103 @@ export function every<Filters extends UpdateFilter<any, any>[]>(
     }
 }
 
+export function or<Base1, Mod1, State1, Base2, Mod2, State2>(
+    fn1: UpdateFilter<Base1, Mod1, State1>,
+    fn2: UpdateFilter<Base2, Mod2, State2>,
+): UpdateFilter<Base1 & Base2, Mod1 | Mod2, State1 | State2>
+
+export function or<Base1, Mod1, State1, Base2, Mod2, State2, Base3, Mod3, State3>(
+    fn1: UpdateFilter<Base1, Mod1, State1>,
+    fn2: UpdateFilter<Base2, Mod2, State2>,
+    fn3: UpdateFilter<Base3, Mod3, State3>,
+): UpdateFilter<Base1 & Base2 & Base3, Mod1 | Mod2 | Mod3, State1 | State2 | State3>
+
+export function or<Base1, Mod1, State1, Base2, Mod2, State2, Base3, Mod3, State3, Base4, Mod4, State4>(
+    fn1: UpdateFilter<Base1, Mod1, State1>,
+    fn2: UpdateFilter<Base2, Mod2, State2>,
+    fn3: UpdateFilter<Base3, Mod3, State3>,
+    fn4: UpdateFilter<Base4, Mod4, State4>,
+): UpdateFilter<Base1 & Base2 & Base3 & Base4, Mod1 | Mod2 | Mod3 | Mod4, State1 | State2 | State3 | State4>
+
+export function or<
+    Base1,
+    Mod1,
+    State1,
+    Base2,
+    Mod2,
+    State2,
+    Base3,
+    Mod3,
+    State3,
+    Base4,
+    Mod4,
+    State4,
+    Base5,
+    Mod5,
+    State5,
+>(
+    fn1: UpdateFilter<Base1, Mod1, State1>,
+    fn2: UpdateFilter<Base2, Mod2, State2>,
+    fn3: UpdateFilter<Base3, Mod3, State3>,
+    fn4: UpdateFilter<Base4, Mod4, State4>,
+    fn5: UpdateFilter<Base5, Mod5, State5>,
+): UpdateFilter<
+    Base1 & Base2 & Base3 & Base4 & Base5,
+    Mod1 | Mod2 | Mod3 | Mod4 | Mod5,
+    State1 | State2 | State3 | State4 | State5
+>
+
+export function or<
+    Base1,
+    Mod1,
+    State1,
+    Base2,
+    Mod2,
+    State2,
+    Base3,
+    Mod3,
+    State3,
+    Base4,
+    Mod4,
+    State4,
+    Base5,
+    Mod5,
+    State5,
+    Base6,
+    Mod6,
+    State6,
+>(
+    fn1: UpdateFilter<Base1, Mod1, State1>,
+    fn2: UpdateFilter<Base2, Mod2, State2>,
+    fn3: UpdateFilter<Base3, Mod3, State3>,
+    fn4: UpdateFilter<Base4, Mod4, State4>,
+    fn5: UpdateFilter<Base5, Mod5, State5>,
+    fn6: UpdateFilter<Base6, Mod6, State6>,
+): UpdateFilter<
+    Base1 & Base2 & Base3 & Base4 & Base5 & Base6,
+    Mod1 | Mod2 | Mod3 | Mod4 | Mod5 | Mod6,
+    State1 | State2 | State3 | State4 | State5 | State6
+>
+
 /**
  * Combine multiple filters by applying an OR logical
  * operation between every one of them:
- * `every(fn1, fn2, ..., fnN) = fn1 OR fn2 OR ... OR fnN`
+ * `or(fn1, fn2, ..., fnN) = fn1 OR fn2 OR ... OR fnN`
  *
- * > **Note**: This also combines type modification in a way
- * > similar to {@link or}.
- * >
- * > This method is less efficient than {@link or}
+ * > **Note**: This also combines type modifications in a union, i.e.
+ * > if the 1st has modification `{ field1: string }`
+ * > and the 2nd has modification `{ field2: number }`,
+ * > then the combined filter will have
+ * > modification `{ field1: string } | { field2: number }`.
  *
- * > **Note**: This method *currently* does not propagate state
- * > type. This might be fixed in the future, but for now either
- * > use {@link or} or add type manually.
+ * > **Note**: Due to TypeScript limitations (or more likely my lack of brain cells),
+ * > state type is only correctly inferred for up to 6 filters.
+ * > If you need more, either provide type explicitly (e.g. `filters.state<SomeState>(...)`),
+ * > or combine multiple `and` calls.
  *
  * @param fns  Filters to combine
  */
-export function some<Filters extends UpdateFilter<any, any, any>[]>(
-    ...fns: Filters
-): UpdateFilter<ExtractBaseMany<Filters>, ExtractMod<Filters[number]>, ExtractState<Filters[number]>> {
+export function or(...fns: UpdateFilter<any, any, any>[]): UpdateFilter<any, any, any> {
     if (fns.length === 2) return or(fns[0], fns[1])
 
     return (upd, state) => {
@@ -186,6 +266,82 @@ export function some<Filters extends UpdateFilter<any, any, any>[]>(
             if (i === max) return false
 
             const res = fns[i++](upd, state)
+
+            if (typeof res === 'boolean') {
+                if (res) return true
+
+                return next()
+            }
+
+            return res.then((r: boolean) => {
+                if (r) return true
+
+                return next()
+            })
+        }
+
+        return next()
+    }
+}
+
+/**
+ * For updates that contain an array of updates (e.g. `message_group`),
+ * apply a filter to every element of the array.
+ *
+ * Filter will match if **all** elements match.
+ *
+ * > **Note**: This also applies type modification to every element of the array.
+ *
+ * @param filter
+ * @returns
+ */
+export function every<Base, Mod, State>(filter: UpdateFilter<Base, Mod, State>): UpdateFilter<Base[], Mod, State> {
+    return (upds, state) => {
+        let i = 0
+        const max = upds.length
+
+        const next = (): MaybeAsync<boolean> => {
+            if (i === max) return true
+
+            const res = filter(upds[i++], state)
+
+            if (typeof res === 'boolean') {
+                if (!res) return false
+
+                return next()
+            }
+
+            return res.then((r: boolean) => {
+                if (!r) return false
+
+                return next()
+            })
+        }
+
+        return next()
+    }
+}
+
+/**
+ * For updates that contain an array of updates (e.g. `message_group`),
+ * apply a filter to every element of the array.
+ *
+ * Filter will match if **all** elements match.
+ *
+ * > **Note**: This *does not* apply type modification to any element of the array
+ *
+ * @param filter
+ * @returns
+ */
+export function some<Base, Mod, State>(filter: UpdateFilter<Base, Mod, State>): UpdateFilter<Base[], Mod, State> {
+    return (upds, state) => {
+        let i = 0
+        const max = upds.length
+
+        const next = (): MaybeAsync<boolean> => {
+            if (i === max) return false
+
+            const res = filter(upds[i++], state)
 
             if (typeof res === 'boolean') {
                 if (res) return true

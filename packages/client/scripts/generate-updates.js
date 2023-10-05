@@ -8,16 +8,12 @@ const snakeToCamel = (s) => {
     })
 }
 
-const camelToPascal = (s) =>
-    s[0].toUpperCase() + s.substr(1)
+const camelToPascal = (s) => s[0].toUpperCase() + s.substr(1)
 
 const camelToSnake = (s) => {
-    return s.replace(
-        /(?<=[a-zA-Z0-9])([A-Z0-9]+(?=[A-Z]|$)|[A-Z0-9])/g,
-        ($1) => {
-            return '_' + $1.toLowerCase()
-        },
-    )
+    return s.replace(/(?<=[a-zA-Z0-9])([A-Z0-9]+(?=[A-Z]|$)|[A-Z0-9])/g, ($1) => {
+        return '_' + $1.toLowerCase()
+    })
 }
 
 function parseUpdateTypes() {
@@ -30,15 +26,13 @@ function parseUpdateTypes() {
     const ret = []
 
     for (const line of lines) {
-        const m = line.match(/^([a-z_]+)(?:: ([a-zA-Z]+))? = ([a-zA-Z]+)( \+ State)?$/)
+        const m = line.match(/^([a-z_]+)(?:: ([a-zA-Z]+))? = ([a-zA-Z]+(?:\[\])?)( \+ State)?$/)
         if (!m) throw new Error(`invalid syntax: ${line}`)
         ret.push({
             typeName: m[1],
             handlerTypeName: m[2] || camelToPascal(snakeToCamel(m[1])),
             updateType: m[3],
-            funcName: m[2] ?
-                m[2][0].toLowerCase() + m[2].substr(1) :
-                snakeToCamel(m[1]),
+            funcName: m[2] ? m[2][0].toLowerCase() + m[2].substr(1) : snakeToCamel(m[1]),
             state: Boolean(m[4]),
         })
     }
@@ -47,9 +41,7 @@ function parseUpdateTypes() {
 }
 
 function replaceSections(filename, sections, dir = __dirname) {
-    let lines = fs
-        .readFileSync(path.join(dir, '../src', filename), 'utf-8')
-        .split('\n')
+    let lines = fs.readFileSync(path.join(dir, '../src', filename), 'utf-8').split('\n')
 
     const findMarker = (marker) => {
         const idx = lines.findIndex((line) => line.trim() === `// ${marker}`)
@@ -84,9 +76,7 @@ async function formatFile(filename, dir = __dirname) {
 }
 
 function toSentence(type, stype = 'inline') {
-    const name = camelToSnake(type.handlerTypeName)
-        .toLowerCase()
-        .replace(/_/g, ' ')
+    const name = camelToSnake(type.handlerTypeName).toLowerCase().replace(/_/g, ' ')
 
     if (stype === 'inline') {
         return `${name[0].match(/[aeiouy]/i) ? 'an' : 'a'} ${name} handler`
@@ -99,7 +89,8 @@ function toSentence(type, stype = 'inline') {
 
 function generateParsedUpdate() {
     replaceSections('types/updates/index.ts', {
-        codegen: 'export type ParsedUpdate =\n' +
+        codegen:
+            'export type ParsedUpdate =\n' +
             types.map((typ) => `    | { name: '${typ.typeName}'; data: ${typ.updateType} }\n`).join(''),
     })
 }

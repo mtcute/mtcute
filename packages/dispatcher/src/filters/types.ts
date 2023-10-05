@@ -79,7 +79,7 @@ export type UpdateFilter<Base, Mod = {}, State = never> = (
     state?: UpdateState<State>,
 ) => MaybeAsync<boolean>
 
-export type Modify<Base, Mod> = Omit<Base, keyof Mod> & Mod
+export type Modify<Base, Mod> = Base extends (infer T)[] ? Modify<T, Mod>[] : Omit<Base, keyof Mod> & Mod
 export type Invert<Base, Mod> = {
     [P in keyof Mod & keyof Base]: Exclude<Base[P], Mod[P]>
 }

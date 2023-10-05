@@ -13,7 +13,7 @@ import {
 } from '@mtcute/core/utils'
 
 import { TelegramClient, TelegramClientOptions } from '../client'
-import { PeersIndex } from '../types'
+import { Message, PeersIndex } from '../types'
 import { _parseUpdate } from '../types/updates/parse-update'
 import { extractChannelIdFromUpdate } from '../utils/misc-utils'
 import { normalizeToInputChannel } from '../utils/peer-utils'
@@ -65,6 +65,9 @@ interface UpdatesState {
     _rpsIncoming?: RpsMeter
     _rpsProcessing?: RpsMeter
 
+    _messageGroupingInterval: number
+    _messageGroupingPending: Map<string, [Message[], NodeJS.Timeout]>
+
     // accessing storage every time might be expensive,
     // so store everything here, and load & save
     // every time session is loaded & saved.
@@ -108,6 +111,9 @@ function _initializeUpdates(this: TelegramClient, opts: TelegramClientOptions) {
     this._noDispatchMsg = new Map()
     this._noDispatchPts = new Map()
     this._noDispatchQts = new Set()
+
+    this._messageGroupingInterval = opts.messageGroupingInterval ?? 0
+    this._messageGroupingPending = new Map()
 
     this._updLock = new AsyncLock()
     // we dont need to initialize state fields since
@@ -375,6 +381,29 @@ export function _dispatchUpdate(this: TelegramClient, update: tl.TypeUpdate, pee
     const parsed = _parseUpdate(this, update, peers)
 
     if (parsed) {
+        if (this._messageGroupingInterval && parsed.name === 'new_message') {
+            const group = parsed.data.groupedIdUnique
+
+            if (group) {
+                const pendingGroup = this._messageGroupingPending.get(group)
+
+                if (pendingGroup) {
+                    pendingGroup[0].push(parsed.data)
+                } else {
+                    const messages = [parsed.data]
+                    const timeout = setTimeout(() => {
+                        this._messageGroupingPending.delete(group)
+                        this.emit('update', { name: 'message_group', data: messages })
+                        this.emit('message_group', messages)
+                    }, this._messageGroupingInterval)
+
+                    this._messageGroupingPending.set(group, [messages, timeout])
+                }
+
+                return
+            }
+        }
+
         this.emit('update', parsed)
         this.emit(parsed.name, parsed.data)
     }

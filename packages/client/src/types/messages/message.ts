@@ -161,6 +161,15 @@ export class Message {
         return this.raw._ === 'message' ? this.raw.groupedId ?? null : null
     }
 
+    /**
+     * Same as {@link groupedId}, but is globally unique across chats.
+     */
+    get groupedIdUnique(): string | null {
+        if (!(this.raw._ === 'message' && this.raw.groupedId !== undefined)) return null
+
+        return `${this.raw.groupedId.low}|${this.raw.groupedId.high}|${getMarkedPeerId(this.raw.peerId)}`
+    }
+
     private _sender?: User | Chat
 
     /**

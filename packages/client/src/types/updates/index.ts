@@ -36,6 +36,7 @@ export {
 export type ParsedUpdate =
     | { name: 'new_message'; data: Message }
     | { name: 'edit_message'; data: Message }
+    | { name: 'message_group'; data: Message[] }
     | { name: 'delete_message'; data: DeleteMessageUpdate }
     | { name: 'chat_member'; data: ChatMemberUpdate }
     | { name: 'inline_query'; data: InlineQuery }

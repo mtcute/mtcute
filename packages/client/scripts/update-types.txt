@@ -1,6 +1,7 @@
 # format: type_name[: handler_type_name] = update_type[ + State]
 new_message = Message + State
 edit_message = Message + State
+message_group = Message[] + State
 delete_message = DeleteMessageUpdate
 chat_member: ChatMemberUpdate = ChatMemberUpdate
 inline_query = InlineQuery

@@ -23,7 +23,7 @@ export const stateEmpty: UpdateFilter<Message> = async (upd, state) => {
 export const state = <T>(
     predicate: (state: T) => MaybeAsync<boolean>,
     // eslint-disable-next-line @typescript-eslint/ban-types
-): UpdateFilter<Message | CallbackQuery, {}, T> => {
+): UpdateFilter<Message | Message[] | CallbackQuery, {}, T> => {
     return async (upd, state) => {
         if (!state) return false
         const data = await state.get()

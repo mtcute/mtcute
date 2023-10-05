@@ -41,6 +41,7 @@ import {
     EditMessageHandler,
     HistoryReadHandler,
     InlineQueryHandler,
+    MessageGroupHandler,
     NewMessageHandler,
     PollUpdateHandler,
     PollVoteHandler,
@@ -109,7 +110,10 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * Create a new dispatcher and bind it to client and optionally
      * FSM storage
      */
-    constructor(client: TelegramClient, ...args: State extends never ? [] : [IStateStorage, StateKeyDelegate?])
+    constructor(
+        client: TelegramClient,
+        ...args: (() => State) extends () => never ? [] : [IStateStorage, StateKeyDelegate?]
+    )
     constructor(
         client?: TelegramClient | IStateStorage | StateKeyDelegate,
         storage?: IStateStorage | StateKeyDelegate,
@@ -290,11 +294,16 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             if (
                 this._storage &&
                 this._scenes &&
-                (update.name === 'new_message' || update.name === 'edit_message' || update.name === 'callback_query')
+                (update.name === 'new_message' ||
+                    update.name === 'edit_message' ||
+                    update.name === 'callback_query' ||
+                    update.name === 'message_group')
             ) {
                 // no need to fetch scene if there are no registered scenes
 
-                const key = await this._stateKeyDelegate!(update.data)
+                const key = await this._stateKeyDelegate!(
+                    update.name === 'message_group' ? update.data[0] : update.data,
+                )
 
                 if (key) {
                     parsedScene = await this._storage.getCurrentScene(key)
@@ -1032,6 +1041,57 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     /** @internal */
     onEditMessage(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('edit_message', filter, handler, group)
+    }
+
+    /**
+     * Register a message group handler without any filters
+     *
+     * @param handler  Message group handler
+     * @param group  Handler group index
+     */
+    onMessageGroup(
+        handler: MessageGroupHandler<
+            Message[],
+            State extends never ? never : UpdateState<State, SceneName>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register a message group handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Message group handler
+     * @param group  Handler group index
+     */
+    onMessageGroup<Mod>(
+        filter: UpdateFilter<Message[], Mod, State>,
+        handler: MessageGroupHandler<
+            filters.Modify<Message[], Mod>,
+            State extends never ? never : UpdateState<State, SceneName>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register a message group handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Message group handler
+     * @param group  Handler group index
+     */
+    onMessageGroup<Mod>(
+        filter: UpdateFilter<Message[], Mod>,
+        handler: MessageGroupHandler<
+            filters.Modify<Message[], Mod>,
+            State extends never ? never : UpdateState<State, SceneName>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onMessageGroup(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('message_group', filter, handler, group)
     }
 
     /**

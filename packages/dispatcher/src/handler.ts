@@ -50,6 +50,7 @@ export type RawUpdateHandler = BaseUpdateHandler<
 // begin-codegen
 export type NewMessageHandler<T = Message, S = never> = ParsedUpdateHandler<'new_message', T, S>
 export type EditMessageHandler<T = Message, S = never> = ParsedUpdateHandler<'edit_message', T, S>
+export type MessageGroupHandler<T = Message[], S = never> = ParsedUpdateHandler<'message_group', T, S>
 export type DeleteMessageHandler<T = DeleteMessageUpdate> = ParsedUpdateHandler<'delete_message', T>
 export type ChatMemberUpdateHandler<T = ChatMemberUpdate> = ParsedUpdateHandler<'chat_member', T>
 export type InlineQueryHandler<T = InlineQuery> = ParsedUpdateHandler<'inline_query', T>
@@ -71,6 +72,7 @@ export type UpdateHandler =
     | RawUpdateHandler
     | NewMessageHandler
     | EditMessageHandler
+    | MessageGroupHandler
     | DeleteMessageHandler
     | ChatMemberUpdateHandler
     | InlineQueryHandler
