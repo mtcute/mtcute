@@ -2,34 +2,13 @@ import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
 
-const entityToType: Partial<Record<tl.TypeMessageEntity['_'], MessageEntityType>> = {
-    messageEntityBlockquote: 'blockquote',
-    messageEntityBold: 'bold',
-    messageEntityBotCommand: 'bot_command',
-    messageEntityCashtag: 'cashtag',
-    messageEntityCode: 'code',
-    messageEntityEmail: 'email',
-    messageEntityHashtag: 'hashtag',
-    messageEntityItalic: 'italic',
-    messageEntityMention: 'mention',
-    messageEntityMentionName: 'text_mention',
-    messageEntityPhone: 'phone_number',
-    messageEntityPre: 'pre',
-    messageEntityStrike: 'strikethrough',
-    messageEntitySpoiler: 'spoiler',
-    messageEntityTextUrl: 'text_link',
-    messageEntityUnderline: 'underline',
-    messageEntityUrl: 'url',
-    messageEntityCustomEmoji: 'emoji',
-}
-
 /**
- * Type of the entity. Can be:
+ * Params of the entity. `.kind` can be:
  *   - 'mention': `@username`.
  *   - 'hashtag': `#hashtag`.
  *   - 'cashtag': `$USD`.
  *   - 'bot_command': `/start`.
- *   - 'url': `https://example.com` (see {@link MessageEntity.url}).
+ *   - 'url': `https://example.com`
  *   - 'email': `example@example.com`.
  *   - 'phone_number': `+42000`.
  *   - 'bold': **bold text**.
@@ -37,96 +16,145 @@ const entityToType: Partial<Record<tl.TypeMessageEntity['_'], MessageEntityType>
  *   - 'underline': <u>underlined</u> text.
  *   - 'strikethrough': <s>strikethrough</s> text.
  *   - 'code': `monospaced` string.
- *   - 'pre': `monospaced` block (see {@link MessageEntity.language}).
+ *   - 'pre': `monospaced` block. `.language` contains the language of the block (if available).
  *   - 'text_link': for clickable text URLs.
- *   - 'text_mention': for users without usernames (see {@link MessageEntity.user} below).
+ *   - 'text_mention': for user mention by name. `.userId` contains the ID of the mentioned user.
  *   - 'blockquote': A blockquote
- *   - 'emoji': A custom emoji
+ *   - 'emoji': A custom emoji. `.emojiId` contains the emoji ID.
  */
-export type MessageEntityType =
-    | 'mention'
-    | 'hashtag'
-    | 'cashtag'
-    | 'bot_command'
-    | 'url'
-    | 'email'
-    | 'phone_number'
-    | 'bold'
-    | 'italic'
-    | 'underline'
-    | 'strikethrough'
-    | 'spoiler'
-    | 'code'
-    | 'pre'
-    | 'text_link'
-    | 'text_mention'
-    | 'blockquote'
-    | 'emoji'
+export type MessageEntityParams =
+    | {
+          kind:
+              | 'mention'
+              | 'hashtag'
+              | 'cashtag'
+              | 'bot_command'
+              | 'url'
+              | 'email'
+              | 'phone_number'
+              | 'bold'
+              | 'italic'
+              | 'underline'
+              | 'strikethrough'
+              | 'spoiler'
+              | 'code'
+              | 'blockquote'
+              | 'bank_card'
+              | 'unknown'
+      }
+    | { kind: 'pre'; language?: string }
+    | { kind: 'text_link'; url: string }
+    | { kind: 'text_mention'; userId: number }
+    | { kind: 'emoji'; emojiId: tl.Long }
+
+/**
+ * Kind of the entity. For more information, see {@link MessageEntityParams}
+ */
+export type MessageEntityKind = MessageEntityParams['kind']
 
 /**
  * One special entity in a text message (like mention, hashtag, URL, etc.)
  */
-export class MessageEntity<Type extends MessageEntityType = MessageEntityType> {
-    /**
-     * Underlying raw TL object
-     */
-    readonly raw!: tl.TypeMessageEntity
-
-    /**
-     * Type of the entity. See {@link MessageEntity.Type} for a list of possible values
-     */
-    readonly type!: MessageEntityType
+export class MessageEntity {
+    constructor(readonly raw: tl.TypeMessageEntity, readonly _text?: string) {}
 
     /**
      * Offset in UTF-16 code units to the start of the entity.
      *
      * Since JS strings are UTF-16, you can use this as-is
      */
-    readonly offset!: number
+    get offset() {
+        return this.raw.offset
+    }
 
     /**
      * Length of the entity in UTF-16 code units.
      *
      * Since JS strings are UTF-16, you can use this as-is
      */
-    readonly length!: number
+    get length() {
+        return this.raw.length
+    }
 
     /**
-     * When `type=text_link`, contains the URL that would be opened if user taps on the text
+     * Kind of the entity (see {@link MessageEntityParams})
      */
-    readonly url?: Type extends 'text_link' ? string : never
+    get kind(): MessageEntityKind {
+        return this.params.kind
+    }
 
+    private _params?: MessageEntityParams
     /**
-     * When `type=text_mention`, contains the ID of the user mentioned.
+     * Params of the entity
      */
-    readonly userId?: number
+    get params(): MessageEntityParams {
+        if (this._params) return this._params
 
-    /**
-     * When `type=pre`, contains the programming language of the entity text
-     */
-    readonly language?: string
-
-    /**
-     * When `type=emoji`, ID of the custom emoji.
-     * The emoji itself must be loaded separately (and presumably cached)
-     * using {@link TelegramClient#getCustomEmojis}
-     */
-    readonly emojiId?: tl.Long
-
-    static _parse(obj: tl.TypeMessageEntity): MessageEntity | null {
-        const type = entityToType[obj._]
-        if (!type) return null
-
-        return {
-            raw: obj,
-            type,
-            offset: obj.offset,
-            length: obj.length,
-            url: obj._ === 'messageEntityTextUrl' ? obj.url : undefined,
-            userId: obj._ === 'messageEntityMentionName' ? obj.userId : undefined,
-            language: obj._ === 'messageEntityPre' ? obj.language : undefined,
-            emojiId: obj._ === 'messageEntityCustomEmoji' ? obj.documentId : undefined,
+        switch (this.raw._) {
+            case 'messageEntityMention':
+                return (this._params = { kind: 'mention' })
+            case 'messageEntityHashtag':
+                return (this._params = { kind: 'hashtag' })
+            case 'messageEntityCashtag':
+                return (this._params = { kind: 'cashtag' })
+            case 'messageEntityBotCommand':
+                return (this._params = { kind: 'bot_command' })
+            case 'messageEntityUrl':
+                return (this._params = { kind: 'url' })
+            case 'messageEntityEmail':
+                return (this._params = { kind: 'email' })
+            case 'messageEntityPhone':
+                return (this._params = { kind: 'phone_number' })
+            case 'messageEntityBold':
+                return (this._params = { kind: 'bold' })
+            case 'messageEntityItalic':
+                return (this._params = { kind: 'italic' })
+            case 'messageEntityUnderline':
+                return (this._params = { kind: 'underline' })
+            case 'messageEntityStrike':
+                return (this._params = { kind: 'strikethrough' })
+            case 'messageEntitySpoiler':
+                return (this._params = { kind: 'spoiler' })
+            case 'messageEntityCode':
+                return (this._params = { kind: 'code' })
+            case 'messageEntityPre':
+                return (this._params = { kind: 'pre', language: this.raw.language })
+            case 'messageEntityTextUrl':
+                return (this._params = { kind: 'text_link', url: this.raw.url })
+            case 'messageEntityMentionName':
+                return (this._params = { kind: 'text_mention', userId: this.raw.userId })
+            case 'messageEntityBlockquote':
+                return (this._params = { kind: 'blockquote' })
+            case 'messageEntityCustomEmoji':
+                return (this._params = { kind: 'emoji', emojiId: this.raw.documentId })
+            case 'messageEntityBankCard':
+                return (this._params = { kind: 'bank_card' })
         }
+
+        return (this._params = { kind: 'unknown' })
+    }
+
+    /**
+     * Text contained in this entity.
+     *
+     * > **Note**: This does not take into account that entities may overlap,
+     * > and is only useful for simple cases.
+     */
+    get text(): string {
+        if (!this._text) return ''
+
+        return this._text.slice(this.raw.offset, this.raw.offset + this.raw.length)
+    }
+
+    /**
+     * Checks if this entity is of the given type, and adjusts the type accordingly.
+     * @param kind
+     * @returns
+     */
+    is<const T extends MessageEntityKind>(
+        kind: T,
+    ): this is MessageEntity & { content: Extract<MessageEntityParams, { kind: T }>; kind: T } {
+        return this.params.kind === kind
     }
 }
 

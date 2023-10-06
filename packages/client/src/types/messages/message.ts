@@ -404,8 +404,7 @@ export class Message {
 
             if (this.raw._ === 'message' && this.raw.entities?.length) {
                 for (const ent of this.raw.entities) {
-                    const parsed = MessageEntity._parse(ent)
-                    if (parsed) this._entities.push(parsed)
+                    this._entities.push(new MessageEntity(ent, this.raw.message))
                 }
             }
         }
@@ -572,7 +571,9 @@ export class Message {
      * @param parseMode  Parse mode to use (`null` for default)
      */
     unparse(parseMode?: string | null): string {
-        return this.client.getParseMode(parseMode).unparse(this.text, this.entities)
+        if (this.raw._ === 'messageService') return ''
+
+        return this.client.getParseMode(parseMode).unparse(this.text, this.raw.entities ?? [])
     }
 
     /**

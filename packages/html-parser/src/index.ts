@@ -1,7 +1,7 @@
 import { Parser } from 'htmlparser2'
 import Long from 'long'
 
-import type { FormattedString, IMessageEntityParser, MessageEntity, tl } from '@mtcute/client'
+import type { FormattedString, IMessageEntityParser, tl } from '@mtcute/client'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 
@@ -276,14 +276,14 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
         return [plainText.replace(/\u00A0/g, ' '), entities]
     }
 
-    unparse(text: string, entities: ReadonlyArray<MessageEntity>): string {
+    unparse(text: string, entities: ReadonlyArray<tl.TypeMessageEntity>): string {
         return this._unparse(text, entities)
     }
 
     // internal function that uses recursion to correctly process nested & overlapping entities
     private _unparse(
         text: string,
-        entities: ReadonlyArray<MessageEntity>,
+        entities: ReadonlyArray<tl.TypeMessageEntity>,
         entitiesOffset = 0,
         offset = 0,
         length = text.length,
@@ -334,59 +334,59 @@ export class HtmlMessageEntityParser implements IMessageEntityParser {
             const substr = text.substr(relativeOffset, length)
             if (!substr) continue
 
-            const type = entity.type
+            const type = entity._
 
             let entityText
 
-            if (type === 'pre') {
+            if (type === 'messageEntityPre') {
                 entityText = substr
             } else {
                 entityText = this._unparse(substr, entities, i + 1, offset + relativeOffset, length)
             }
 
             switch (type) {
-                case 'bold':
-                case 'italic':
-                case 'underline':
-                case 'strikethrough':
-                    html.push(`<${type[0]}>${entityText}</${type[0]}>`)
+                case 'messageEntityBold':
+                case 'messageEntityItalic':
+                case 'messageEntityUnderline':
+                case 'messageEntityStrike':
+                case 'messageEntityCode':
+                case 'messageEntityBlockquote':
+                case 'messageEntitySpoiler':
+                    {
+                        const tag = (
+                            {
+                                messageEntityBold: 'b',
+                                messageEntityItalic: 'i',
+                                messageEntityUnderline: 'u',
+                                messageEntityStrike: 's',
+                                messageEntityCode: 'code',
+                                messageEntityBlockquote: 'blockquote',
+                                messageEntitySpoiler: 'spoiler',
+                            } as const
+                        )[type]
+                        html.push(`<${tag}>${entityText}</${tag}>`)
+                    }
                     break
-                case 'code':
-                case 'pre':
+                case 'messageEntityPre':
                     html.push(
-                        `<${type}${entity.language ? ` language="${entity.language}"` : ''}>${
+                        `<pre${entity.language ? ` language="${entity.language}"` : ''}>${
                             this._syntaxHighlighter && entity.language ?
                                 this._syntaxHighlighter(entityText, entity.language) :
                                 entityText
-                        }</${type}>`,
+                        }</pre>`,
                     )
                     break
-                case 'blockquote':
-                case 'spoiler':
-                    html.push(`<${type}>${entityText}</${type}>`)
-                    break
-                case 'email':
+                case 'messageEntityEmail':
                     html.push(`<a href="mailto:${entityText}">${entityText}</a>`)
                     break
-                case 'url':
+                case 'messageEntityUrl':
                     html.push(`<a href="${entityText}">${entityText}</a>`)
                     break
-                case 'text_link':
-                    html.push(
-                        `<a href="${HtmlMessageEntityParser.escape(
-                            // todo improve typings
-
-                            entity.url!,
-                            true,
-                        )}">${entityText}</a>`,
-                    )
+                case 'messageEntityTextUrl':
+                    html.push(`<a href="${HtmlMessageEntityParser.escape(entity.url, true)}">${entityText}</a>`)
                     break
-                case 'text_mention':
-                    html.push(
-                        // todo improve typings
-
-                        `<a href="tg://user?id=${entity.userId!}">${entityText}</a>`,
-                    )
+                case 'messageEntityMentionName':
+                    html.push(`<a href="tg://user?id=${entity.userId}">${entityText}</a>`)
                     break
                 default:
                     skip = true

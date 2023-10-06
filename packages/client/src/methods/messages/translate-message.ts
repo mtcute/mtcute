@@ -1,5 +1,3 @@
-import { isPresent } from '@mtcute/core/utils'
-
 import { TelegramClient } from '../../client'
 import { InputPeerLike, MessageEntity } from '../../types'
 
@@ -28,5 +26,5 @@ export async function translateMessage(
         toLang: toLanguage,
     })
 
-    return [res.result[0].text, res.result[0].entities.map((it) => MessageEntity._parse(it)).filter(isPresent)]
+    return [res.result[0].text, res.result[0].entities.map((it) => new MessageEntity(it, res.result[0].text))]
 }

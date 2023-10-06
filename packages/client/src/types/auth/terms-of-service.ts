@@ -1,5 +1,4 @@
 import { tl } from '@mtcute/core'
-import { isPresent } from '@mtcute/core/utils'
 
 import { makeInspectable } from '../../utils'
 import { MessageEntity } from '../messages'
@@ -37,7 +36,7 @@ export class TermsOfService {
      * Terms of Service entities text
      */
     get entities(): ReadonlyArray<MessageEntity> {
-        return (this._entities ??= this.tos.entities.map((it) => MessageEntity._parse(it)).filter(isPresent))
+        return (this._entities ??= this.tos.entities.map((it) => new MessageEntity(it, this.tos.text)))
     }
 }
 

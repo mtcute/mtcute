@@ -2,8 +2,7 @@ import { expect } from 'chai'
 import Long from 'long'
 import { describe, it } from 'mocha'
 
-import { FormattedString, MessageEntity, tl } from '@mtcute/client'
-import { isPresent } from '@mtcute/client/utils'
+import { FormattedString, tl } from '@mtcute/client'
 
 import { html, HtmlMessageEntityParser } from '../src'
 
@@ -21,16 +20,12 @@ const createEntity = <T extends tl.TypeMessageEntity['_']>(
     } as tl.TypeMessageEntity
 }
 
-const createEntities = (entities: tl.TypeMessageEntity[]): MessageEntity[] => {
-    return entities.map((it) => MessageEntity._parse(it)).filter(isPresent)
-}
-
 describe('HtmlMessageEntityParser', () => {
     const parser = new HtmlMessageEntityParser()
 
     describe('unparse', () => {
         const test = (text: string, entities: tl.TypeMessageEntity[], expected: string, _parser = parser): void => {
-            expect(_parser.unparse(text, createEntities(entities))).eq(expected)
+            expect(_parser.unparse(text, entities)).eq(expected)
         }
 
         it('should return the same text if there are no entities or text', () => {

@@ -1,6 +1,6 @@
 import Long from 'long'
 
-import type { FormattedString, IMessageEntityParser, MessageEntity, tl } from '@mtcute/client'
+import type { FormattedString, IMessageEntityParser, tl } from '@mtcute/client'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 const EMOJI_REGEX = /^tg:\/\/emoji\?id=(-?\d+)/
@@ -303,7 +303,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
         return [result, entities]
     }
 
-    unparse(text: string, entities: ReadonlyArray<MessageEntity>): string {
+    unparse(text: string, entities: ReadonlyArray<tl.TypeMessageEntity>): string {
         // keep track of positions of inserted escape symbols
         const escaped: number[] = []
         text = text.replace(TO_BE_ESCAPED, (s, pos: number) => {
@@ -317,7 +317,7 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
         const insert: InsertLater[] = []
 
         for (const entity of entities) {
-            const type = entity.type
+            const type = entity._
 
             let start = entity.offset
             let end = start + entity.length
@@ -345,25 +345,25 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
             let endTag: string
 
             switch (type) {
-                case 'bold':
+                case 'messageEntityBold':
                     startTag = endTag = TAG_BOLD
                     break
-                case 'italic':
+                case 'messageEntityItalic':
                     startTag = endTag = TAG_ITALIC
                     break
-                case 'underline':
+                case 'messageEntityUnderline':
                     startTag = endTag = TAG_UNDERLINE
                     break
-                case 'strikethrough':
+                case 'messageEntityStrike':
                     startTag = endTag = TAG_STRIKE
                     break
-                case 'spoiler':
+                case 'messageEntitySpoiler':
                     startTag = endTag = TAG_SPOILER
                     break
-                case 'code':
+                case 'messageEntityCode':
                     startTag = endTag = TAG_CODE
                     break
-                case 'pre':
+                case 'messageEntityPre':
                     startTag = TAG_PRE
 
                     if (entity.language) {
@@ -373,17 +373,17 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                     startTag += '\n'
                     endTag = '\n' + TAG_PRE
                     break
-                case 'text_link':
+                case 'messageEntityTextUrl':
                     startTag = '['
                     endTag = `](${entity.url})`
                     break
-                case 'text_mention':
+                case 'messageEntityMentionName':
                     startTag = '['
                     endTag = `](tg://user?id=${entity.userId})`
                     break
-                case 'emoji':
+                case 'messageEntityCustomEmoji':
                     startTag = '['
-                    endTag = `](tg://emoji?id=${entity.emojiId!.toString()})`
+                    endTag = `](tg://emoji?id=${entity.documentId.toString()})`
                     break
                 default:
                     continue

@@ -588,9 +588,7 @@ export class Chat {
         return new FormattedString(
             this.client.getParseMode(parseMode).unparse(text, [
                 {
-                    // eslint-disable-next-line
-                    raw: undefined as any,
-                    type: 'text_link',
+                    _: 'messageEntityTextUrl',
                     offset: 0,
                     length: text.length,
                     url: `https://t.me/${this.username}`,

@@ -48,8 +48,7 @@ export class DraftMessage {
 
             if (this.raw.entities?.length) {
                 for (const ent of this.raw.entities) {
-                    const parsed = MessageEntity._parse(ent)
-                    if (parsed) this._entities.push(parsed)
+                    this._entities.push(new MessageEntity(ent, this.raw.message))
                 }
             }
         }

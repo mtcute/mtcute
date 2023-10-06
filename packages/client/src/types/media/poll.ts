@@ -152,8 +152,7 @@ export class Poll {
 
             if (this.results.solutionEntities?.length) {
                 for (const ent of this.results.solutionEntities) {
-                    const parsed = MessageEntity._parse(ent)
-                    if (parsed) this._entities.push(parsed)
+                    this._entities.push(new MessageEntity(ent, this.results.solution))
                 }
             }
         }
@@ -168,9 +167,9 @@ export class Poll {
      * @param parseMode  Parse mode to use (`null` for default)
      */
     unparseSolution(parseMode?: string | null): string | null {
-        if (!this.solution) return null
+        if (!this.results?.solutionEntities) return null
 
-        return this.client.getParseMode(parseMode).unparse(this.solution, this.solutionEntities!)
+        return this.client.getParseMode(parseMode).unparse(this.results.solution!, this.results.solutionEntities)
     }
 
     /**

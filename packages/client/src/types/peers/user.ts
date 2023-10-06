@@ -359,9 +359,7 @@ export class User {
         return new FormattedString(
             this.client.getParseMode(parseMode).unparse(text, [
                 {
-                    // eslint-disable-next-line
-                    raw: undefined as any,
-                    type: 'text_mention',
+                    _: 'messageEntityMentionName',
                     offset: 0,
                     length: text.length,
                     userId: this.raw.id,
@@ -415,9 +413,7 @@ export class User {
         return new FormattedString(
             this.client.getParseMode(parseMode).unparse(text, [
                 {
-                    // eslint-disable-next-line
-                    raw: undefined as any,
-                    type: 'text_link',
+                    _: 'messageEntityTextUrl',
                     offset: 0,
                     length: text.length,
                     url: `tg://user?id=${this.id}&hash=${this.raw.accessHash.toString(16)}`,

@@ -1,13 +1,10 @@
 import { tl } from '@mtcute/core'
 
-import { MessageEntity } from '../types'
-
 /**
  * Interface describing a message entity parser.
+ *
  * mtcute comes with HTML parser inside `@mtcute/html-parser`
- * and MarkdownV2 parser inside `@mtcute/markdown-parser`,
- * implemented similar to how they are described
- * in the [Bot API documentation](https://core.telegram.org/bots/api#formatting-options).
+ * and Markdown parser inside `@mtcute/markdown-parser`.
  *
  * You are also free to implement your own parser and register it with
  * {@link TelegramClient.registerParseMode}.
@@ -35,7 +32,7 @@ export interface IMessageEntityParser {
      * @param text  Plain text
      * @param entities  Message entities that should be added to the text
      */
-    unparse(text: string, entities: ReadonlyArray<MessageEntity>): string
+    unparse(text: string, entities: ReadonlyArray<tl.TypeMessageEntity>): string
 }
 
 /**
