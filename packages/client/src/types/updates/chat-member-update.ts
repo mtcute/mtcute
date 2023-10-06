@@ -1,11 +1,8 @@
-// ^^ will be looked into in MTQ-35
-
 import { getMarkedPeerId, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { Chat, ChatInviteLink, ChatMember, PeersIndex, User } from '../'
-// todo: check case when restricted user joins chat - MTQ-35
 
 /**
  * Type of the event. Can be one of:
@@ -16,8 +13,11 @@ import { Chat, ChatInviteLink, ChatMember, PeersIndex, User } from '../'
  *  - `unkicked`: User `user` was removed from the list of kicked users by `actor` and can join the chat again
  *  - `restricted`: User `user` was restricted by `actor`
  *  - `unrestricted`: User `user` was unrestricted by `actor`
+ *  - `unrestricted_promoted`: User `user` was unrestricted AND promoted to an admin by `actor`
  *  - `promoted`: User `user` was promoted to admin by `actor`
  *  - `demoted`: User `user` was demoted from admin by `actor`
+ *  - `demoted_restricted`: User `user` was demoted from admin AND restricted by `actor`
+ *  - `demoted_kicked`: User `user` was demoted from admin AND kicked by `actor`
  *  - `old_owner`: User `user` transferred their own chat ownership
  *  - `new_owner`: User `actor` transferred their chat ownership to `user`
  *  - `other`: Some other event (e.g. change in restrictions, change in admin rights, etc.)
@@ -30,8 +30,11 @@ export type ChatMemberUpdateType =
     | 'unkicked'
     | 'restricted'
     | 'unrestricted'
+    | 'unrestricted_promoted'
     | 'promoted'
     | 'demoted'
+    | 'demoted_restricted'
+    | 'demoted_kicked'
     | 'old_owner'
     | 'new_owner'
     | 'other'
@@ -150,8 +153,24 @@ export class ChatMemberUpdate {
                 return (this._type = 'unrestricted')
             }
 
+            if (old._ === 'channelParticipantBanned' && cur._ === 'channelParticipantAdmin') {
+                return (this._type = 'unrestricted_promoted')
+            }
+
             if (old._ === 'channelParticipantAdmin' && cur._ === 'channelParticipant') {
                 return (this._type = 'demoted')
+            }
+
+            if (old._ === 'channelParticipantAdmin' && cur._ === 'channelParticipantBanned') {
+                return (this._type = cur.left ? 'demoted_kicked' : 'demoted_restricted')
+            }
+
+            if (old._ === 'channelParticipantBanned' && cur._ === 'channelParticipantBanned' && old.left !== cur.left) {
+                if (actorId === curId) {
+                    return (this._type = cur.left ? 'left' : 'joined')
+                }
+
+                return (this._type = cur.left ? 'kicked' : 'added')
             }
 
             return (this._type = 'other')
@@ -189,6 +208,11 @@ export class ChatMemberUpdate {
      */
     get user(): User {
         return (this._user ??= new User(this.client, this._peers.user(this.raw.userId)))
+    }
+
+    /** Whether this is a self-made action (i.e. actor == user) */
+    get isSelfMade(): boolean {
+        return this.raw.actorId === this.raw.userId
     }
 
     private _oldMember?: ChatMember
