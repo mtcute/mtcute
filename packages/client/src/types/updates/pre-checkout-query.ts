@@ -75,7 +75,7 @@ export class PreCheckoutQuery {
      * Reject the query
      */
     reject(error = ''): Promise<void> {
-        return this.client.answerPreCheckoutQuery(this.queryId, error)
+        return this.client.answerPreCheckoutQuery(this.queryId, { error })
     }
 }
 

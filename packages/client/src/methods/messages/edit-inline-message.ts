@@ -15,8 +15,13 @@ import { normalizeInlineId } from '../../utils/inline-utils'
  */
 export async function editInlineMessage(
     this: TelegramClient,
-    messageId: tl.TypeInputBotInlineMessageID | string,
     params: {
+        /**
+         * Inline message ID, either as a TL object, or as a
+         * TDLib and Bot API compatible string
+         */
+        messageId: tl.TypeInputBotInlineMessageID | string
+
         /**
          * New message text
          *
@@ -71,7 +76,7 @@ export async function editInlineMessage(
     let entities: tl.TypeMessageEntity[] | undefined
     let media: tl.TypeInputMedia | undefined = undefined
 
-    const id = normalizeInlineId(messageId)
+    const id = normalizeInlineId(params.messageId)
 
     if (params.media) {
         media = await this._normalizeInputMedia(params.media, params, true)

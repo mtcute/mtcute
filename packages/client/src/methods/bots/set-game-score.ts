@@ -17,12 +17,16 @@ export async function setGameScore(
     params: {
         /** Chat where the game was found */
         chatId: InputPeerLike
+
         /** ID of the message where the game was found */
         message: number
+
         /** ID of the user who has scored */
         userId: InputPeerLike
+
         /** The new score (must be >0) */
         score: number
+
         /**
          * When `true`, the game message will not be modified
          * to include the new score

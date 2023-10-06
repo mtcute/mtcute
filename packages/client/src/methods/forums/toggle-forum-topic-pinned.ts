@@ -7,17 +7,21 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  *
  * Only admins with `manageTopics` permission can do this.
  *
- * @param chatId  Chat ID or username
- * @param topicId  ID of the topic (i.e. its top message ID)
- * @param pinned  Whether the topic should be pinned
  * @internal
  */
 export async function toggleForumTopicPinned(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    topicId: number,
-    pinned: boolean,
+    params: {
+        /** Chat ID or username */
+        chatId: InputPeerLike
+        /** ID of the topic (i.e. its top message ID) */
+        topicId: number
+        /** Whether the topic should be pinned */
+        pinned: boolean
+    },
 ): Promise<void> {
+    const { chatId, topicId, pinned } = params
+
     await this.call({
         _: 'channels.updatePinnedForumTopic',
         channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),

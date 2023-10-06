@@ -16,9 +16,12 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  */
 export async function editForumTopic(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    topicId: number,
     params: {
+        /** Chat ID or username */
+        chatId: InputPeerLike
+        /** ID of the topic (i.e. its top message ID) */
+
+        topicId: number
         /**
          * New topic title
          */
@@ -33,7 +36,7 @@ export async function editForumTopic(
         icon?: tl.Long | null
     },
 ): Promise<Message> {
-    const { title, icon } = params
+    const { chatId, topicId, title, icon } = params
 
     const res = await this.call({
         _: 'channels.editForumTopic',

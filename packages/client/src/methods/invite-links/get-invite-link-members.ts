@@ -15,7 +15,7 @@ import { makeArrayPaginated, normalizeDate, normalizeToInputUser } from '../../u
 export async function getInviteLinkMembers(
     this: TelegramClient,
     chatId: InputPeerLike,
-    params: {
+    params?: {
         /**
          * Invite link for which to get members
          */
@@ -54,6 +54,7 @@ export async function getInviteLinkMembers(
     },
 ): Promise<ArrayPaginated<ChatInviteLinkMember, { date: number; user: tl.TypeInputUser }>> {
     const peer = await this.resolvePeer(chatId)
+    if (!params) params = {}
 
     const { limit = 100, link, requestedSearch, requested = Boolean(requestedSearch) } = params
 

@@ -1,7 +1,7 @@
 import { MtArgumentError } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { MaybeDynamic, User } from '../../types'
+import { User } from '../../types'
 
 /**
  * Utility function to quickly authorize on test DC
@@ -35,25 +35,6 @@ export async function startTest(
          * Override user's DC. Must be a valid test DC.
          */
         dcId?: number
-
-        /**
-         * First name of the user (used only for sign-up, defaults to 'User')
-         */
-        firstName?: MaybeDynamic<string>
-
-        /**
-         * Last name of the user (used only for sign-up, defaults to empty)
-         */
-        lastName?: MaybeDynamic<string>
-
-        /**
-         * By using this method to sign up an account, you are agreeing to Telegram
-         * ToS. This is required and your account will be banned otherwise.
-         * See https://telegram.org/tos and https://core.telegram.org/api/terms.
-         *
-         * If true, TOS will not be displayed and `tosCallback` will not be called.
-         */
-        acceptTos?: boolean
     },
 ): Promise<User> {
     if (!params) params = {}
@@ -100,9 +81,6 @@ export async function startTest(
     return this.start({
         phone,
         code: () => code,
-        firstName: params.firstName,
-        lastName: params.lastName,
-        acceptTos: params.acceptTos,
         codeSentCallback: (sent) => {
             for (let i = 0; i < sent.length; i++) {
                 code += phone![5]

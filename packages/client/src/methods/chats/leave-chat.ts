@@ -6,10 +6,18 @@ import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '..
  * Leave a group chat, supergroup or channel
  *
  * @param chatId  Chat ID or username
- * @param clear  Whether to clear history after leaving (only for legacy group chats)
  * @internal
  */
-export async function leaveChat(this: TelegramClient, chatId: InputPeerLike, clear = false): Promise<void> {
+export async function leaveChat(
+    this: TelegramClient,
+    chatId: InputPeerLike,
+    params?: {
+        /**
+         * Whether to clear history after leaving (only for legacy group chats)
+         */
+        clear?: boolean
+    },
+): Promise<void> {
     const chat = await this.resolvePeer(chatId)
 
     if (isInputPeerChannel(chat)) {
@@ -26,7 +34,7 @@ export async function leaveChat(this: TelegramClient, chatId: InputPeerLike, cle
         })
         this._handleUpdate(res)
 
-        if (clear) {
+        if (params?.clear) {
             await this.deleteHistory(chat)
         }
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')

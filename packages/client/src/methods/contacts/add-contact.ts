@@ -6,14 +6,14 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 /**
  * Add an existing Telegram user as a contact
  *
- * @param userId  User ID, username or phone number
- * @param params  Contact details
  * @internal
  */
 export async function addContact(
     this: TelegramClient,
-    userId: InputPeerLike,
     params: {
+        /** User ID, username or phone number */
+        userId: InputPeerLike
+
         /**
          * First name of the contact
          */
@@ -36,15 +36,16 @@ export async function addContact(
         sharePhone?: boolean
     },
 ): Promise<User> {
+    const { userId, firstName, lastName = '', phone = '', sharePhone = false } = params
     const peer = normalizeToInputUser(await this.resolvePeer(userId), userId)
 
     const res = await this.call({
         _: 'contacts.addContact',
         id: peer,
-        firstName: params.firstName,
-        lastName: params.lastName ?? '',
-        phone: params.phone ?? '',
-        addPhonePrivacyException: Boolean(params.sharePhone),
+        firstName,
+        lastName,
+        phone,
+        addPhonePrivacyException: sharePhone,
     })
 
     assertIsUpdatesGroup('contacts.addContact', res)

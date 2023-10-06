@@ -5,15 +5,19 @@ import { TelegramClient } from '../../client'
 /**
  * Sets the default chat permissions for the bot in the supergroup or channel.
  *
- * @param target  Whether to target groups or channels.
- * @param rights  The default chat permissions.
  * @internal
  */
 export async function setMyDefaultRights(
     this: TelegramClient,
-    target: 'channel' | 'group',
-    rights: Omit<tl.RawChatAdminRights, '_'>,
+    params: {
+        /** Whether to target groups or channels. */
+        target: 'channel' | 'group'
+        /** The default chat permissions. */
+        rights: Omit<tl.RawChatAdminRights, '_'>
+    },
 ): Promise<void> {
+    const { target, rights } = params
+
     await this.call({
         _: target === 'group' ? 'bots.setBotGroupDefaultAdminRights' : 'bots.setBotBroadcastDefaultAdminRights',
         adminRights: {

@@ -6,17 +6,21 @@ import { TelegramClient } from '../../client'
 /**
  * Change your 2FA password
  *
- * @param currentPassword  Current password as plaintext
- * @param newPassword  New password as plaintext
- * @param hint  Hint for the new password
  * @internal
  */
 export async function changeCloudPassword(
     this: TelegramClient,
-    currentPassword: string,
-    newPassword: string,
-    hint?: string,
+    params: {
+        /** Current password as plaintext */
+        currentPassword: string
+        /** New password as plaintext */
+        newPassword: string
+        /** Hint for the new password */
+        hint?: string
+    },
 ): Promise<void> {
+    const { currentPassword, newPassword, hint } = params
+
     const pwd = await this.call({ _: 'account.getPassword' })
 
     if (!pwd.hasPassword) {

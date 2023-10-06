@@ -8,15 +8,19 @@ import { createDummyUpdate } from '../../utils/updates-utils'
 /**
  * Delete all messages of a user (or channel) in a supergroup
  *
- * @param chatId  Chat ID
- * @param participantId  User/channel ID
  * @internal
  */
 export async function deleteUserHistory(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    participantId: InputPeerLike,
+    params: {
+        /** Chat ID */
+        chatId: InputPeerLike
+        /** User/channel ID whose messages to delete */
+        participantId: InputPeerLike
+    },
 ): Promise<void> {
+    const { chatId, participantId } = params
+
     const channel = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
 
     const peer = await this.resolvePeer(participantId)

@@ -182,17 +182,17 @@ export class CallbackQuery {
         return this.client.answerCallbackQuery(this.raw.queryId, params)
     }
 
-    /**
-     * Edit the message that originated this callback query
-     */
-    async editMessage(params: Parameters<TelegramClient['editInlineMessage']>[1]): Promise<void> {
-        // we can use editInlineMessage as a parameter since they share most of the parameters,
-        // except the ones that won't apply to already sent message anyways.
-        if (this.raw._ === 'updateInlineBotCallbackQuery') {
-            return this.client.editInlineMessage(this.raw.msgId, params)
-        }
-        await this.client.editMessage(getMarkedPeerId(this.raw.peer), this.raw.msgId, params)
-    }
+    // /**
+    //  * Edit the message that originated this callback query
+    //  */
+    // async editMessage(params: Parameters<TelegramClient['editInlineMessage']>[1]): Promise<void> {
+    //     // we can use editInlineMessage as a parameter since they share most of the parameters,
+    //     // except the ones that won't apply to already sent message anyways.
+    //     if (this.raw._ === 'updateInlineBotCallbackQuery') {
+    //         return this.client.editInlineMessage(this.raw.msgId, params)
+    //     }
+    //     await this.client.editMessage(getMarkedPeerId(this.raw.peer), this.raw.msgId, params)
+    // }
 }
 
 makeInspectable(CallbackQuery)

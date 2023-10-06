@@ -786,17 +786,14 @@ export class Message {
      * @param revoke  Whether to "revoke" (i.e. delete for both sides). Only used for chats and private chats.
      */
     delete(revoke = false): Promise<void> {
-        return this.client.deleteMessages(this.chat.inputPeer, this.id, revoke)
+        return this.client.deleteMessages(this.chat.inputPeer, this.id, { revoke })
     }
 
     /**
      * Pin this message.
-     *
-     * @param notify  Whether to send a notification (only for legacy groups and supergroups)
-     * @param bothSides  Whether to pin for both sides (only for private chats)
      */
-    pin(notify = false, bothSides = false): Promise<void> {
-        return this.client.pinMessage(this.chat.inputPeer, this.id, notify, bothSides)
+    pin(params?: Parameters<TelegramClient['pinMessage']>[2]): Promise<void> {
+        return this.client.pinMessage(this.chat.inputPeer, this.id, params)
     }
 
     /**
@@ -806,34 +803,34 @@ export class Message {
         return this.client.pinMessage(this.chat.inputPeer, this.id)
     }
 
-    /**
-     * Edit this message's text and/or reply markup
-     *
-     * @link TelegramClient.editMessage
-     */
-    edit(params: Parameters<TelegramClient['editMessage']>[2]): Promise<Message> {
-        return this.client.editMessage(this.chat.inputPeer, this.id, params)
-    }
+    // /**
+    //  * Edit this message's text and/or reply markup
+    //  *
+    //  * @link TelegramClient.editMessage
+    //  */
+    // edit(params: Parameters<TelegramClient['editMessage']>[2]): Promise<Message> {
+    //     return this.client.editMessage(this.chat.inputPeer, this.id, params)
+    // }
 
-    /**
-     * Edit message text and optionally reply markup.
-     *
-     * Convenience method that just wraps {@link edit},
-     * passing positional `text` as object field.
-     *
-     * @param text  New message text
-     * @param params?  Additional parameters
-     * @link TelegramClient.editMessage
-     */
-    editText(
-        text: string | FormattedString<string>,
-        params?: Omit<Parameters<TelegramClient['editMessage']>[2], 'text'>,
-    ): Promise<Message> {
-        return this.edit({
-            text,
-            ...(params || {}),
-        })
-    }
+    // /**
+    //  * Edit message text and optionally reply markup.
+    //  *
+    //  * Convenience method that just wraps {@link edit},
+    //  * passing positional `text` as object field.
+    //  *
+    //  * @param text  New message text
+    //  * @param params?  Additional parameters
+    //  * @link TelegramClient.editMessage
+    //  */
+    // editText(
+    //     text: string | FormattedString<string>,
+    //     params?: Omit<Parameters<TelegramClient['editMessage']>[2], 'text'>,
+    // ): Promise<Message> {
+    //     return this.edit({
+    //         text,
+    //         ...(params || {}),
+    //     })
+    // }
 
     /**
      * Forward this message to some chat
@@ -842,13 +839,20 @@ export class Message {
      * @param params
      * @returns  Forwarded message
      */
-    forwardTo(peer: InputPeerLike, params?: Parameters<TelegramClient['forwardMessages']>[3]): Promise<Message> {
-        return this.client.forwardMessages(peer, this.chat.inputPeer, this.id, params)
+    forwardTo(
+        peer: InputPeerLike,
+        params?: Omit<Parameters<TelegramClient['forwardMessages']>[0], 'messages' | 'toChatId' | 'fromChatId'>,
+    ): Promise<Message> {
+        return this.client.forwardMessages({
+            toChatId: peer,
+            fromChatId: this.chat.inputPeer,
+            messages: this.id,
+            ...params,
+        })
     }
 
     /**
-     * Send this message as a copy (i.e. send the same message,
-     * but do not forward it).
+     * Send this message as a copy (i.e. send the same message, but do not forward it).
      *
      * Note that if the message contains a webpage,
      * it will be copied simply as a text message,
@@ -858,7 +862,10 @@ export class Message {
      * @param toChatId  Target chat ID
      * @param params  Copy parameters
      */
-    sendCopy(toChatId: InputPeerLike, params?: Parameters<TelegramClient['sendCopy']>[3]): Promise<Message> {
+    sendCopy(
+        toChatId: InputPeerLike,
+        params?: Omit<Parameters<TelegramClient['sendCopy']>[0], 'fromChatId' | 'message' | 'toChatId'>,
+    ): Promise<Message> {
         if (!params) params = {}
 
         if (this.raw._ === 'messageService') {
@@ -912,7 +919,7 @@ export class Message {
      * @param clearMentions  Whether to also clear mentions
      */
     async read(clearMentions = false): Promise<void> {
-        return this.client.readHistory(this.chat.inputPeer, this.raw.id, clearMentions)
+        return this.client.readHistory(this.chat.inputPeer, { maxId: this.raw.id, clearMentions })
     }
 
     /**
@@ -922,7 +929,12 @@ export class Message {
      * @param big  Whether to use a big reaction
      */
     async react(emoji: string | null, big?: boolean): Promise<Message> {
-        return this.client.sendReaction(this.chat.inputPeer, this.raw.id, emoji, big)
+        return this.client.sendReaction({
+            chatId: this.chat.inputPeer,
+            message: this.raw.id,
+            emoji,
+            big,
+        })
     }
 
     async getCustomEmojis(): Promise<Sticker[]> {

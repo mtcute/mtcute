@@ -2,7 +2,6 @@ import { Long } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
 
-// @available=bot
 /**
  * Send an answer to a callback query.
  *
@@ -18,7 +17,7 @@ export async function answerCallbackQuery(
          * Maximum amount of time in seconds for which
          * this result can be cached by the client (not server!).
          *
-         * Defaults to `0`
+         * @default  0
          */
         cacheTime?: number
 
@@ -33,7 +32,7 @@ export async function answerCallbackQuery(
          * Whether to show an alert in the middle of the screen
          * instead of a notification at the top of the screen.
          *
-         * Defaults to `false`.
+         * @default  false
          */
         alert?: boolean
 
@@ -49,14 +48,14 @@ export async function answerCallbackQuery(
         url?: string
     },
 ): Promise<void> {
-    if (!params) params = {}
+    const { cacheTime = 0, text, alert, url } = params ?? {}
 
     await this.call({
         _: 'messages.setBotCallbackAnswer',
         queryId,
-        cacheTime: params.cacheTime ?? 0,
-        alert: params.alert,
-        message: params.text,
-        url: params.url,
+        cacheTime,
+        alert,
+        message: text,
+        url,
     })
 }

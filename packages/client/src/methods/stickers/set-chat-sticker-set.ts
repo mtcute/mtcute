@@ -5,7 +5,7 @@ import { normalizeToInputChannel } from '../../utils'
 /**
  * Set group sticker set for a supergroup
  *
- * @param id  Sticker set short name or a TL object with input sticker set
+ * @param setId  Sticker set short name or a TL object with input sticker set
  * @param thumb  Sticker set thumbnail
  * @param params
  * @returns  Modified sticker set
@@ -14,11 +14,11 @@ import { normalizeToInputChannel } from '../../utils'
 export async function setChatStickerSet(
     this: TelegramClient,
     chatId: InputPeerLike,
-    id: InputStickerSet,
+    setId: InputStickerSet,
 ): Promise<void> {
     await this.call({
         _: 'channels.setStickers',
         channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
-        stickerset: normalizeInputStickerSet(id),
+        stickerset: normalizeInputStickerSet(setId),
     })
 }

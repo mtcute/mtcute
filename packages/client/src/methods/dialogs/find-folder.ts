@@ -15,8 +15,11 @@ import { TelegramClient } from '../../client'
 export async function findFolder(
     this: TelegramClient,
     params: {
+        /** Folder title */
         title?: string
+        /** Folder emoji */
         emoji?: string
+        /** Folder ID */
         id?: number
     },
 ): Promise<tl.RawDialogFilter | null> {

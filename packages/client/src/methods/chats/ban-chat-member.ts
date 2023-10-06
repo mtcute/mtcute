@@ -17,18 +17,20 @@ import {
  * When banning a channel, the user won't be able to use
  * any of their channels to post until the ban is lifted.
  *
- * @param chatId  Chat ID
- * @param peerId  User/Channel ID
  * @returns  Service message about removed user, if one was generated.
  * @internal
  */
 export async function banChatMember(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    peerId: InputPeerLike,
+    params: {
+        /** Chat ID */
+        chatId: InputPeerLike
+        /** ID of the user/channel to ban */
+        participantId: InputPeerLike
+    },
 ): Promise<Message | null> {
-    const chat = await this.resolvePeer(chatId)
-    const peer = await this.resolvePeer(peerId)
+    const chat = await this.resolvePeer(params.chatId)
+    const peer = await this.resolvePeer(params.participantId)
 
     let res
     if (isInputPeerChannel(chat)) {
@@ -49,7 +51,7 @@ export async function banChatMember(
             chatId: chat.chatId,
             userId: normalizeToInputUser(peer),
         })
-    } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+    } else throw new MtInvalidPeerTypeError(params.chatId, 'chat or channel')
 
     try {
         return this._findMessageInUpdate(res)

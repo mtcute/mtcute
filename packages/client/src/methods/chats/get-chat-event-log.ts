@@ -16,7 +16,6 @@ import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-
  * in direct chronological order (i.e. newer
  * events have bigger event ID)
  *
- * @param chatId  Chat ID
  * @param params
  * @internal
  */
@@ -73,11 +72,9 @@ export async function getChatEventLog(
         limit?: number
     },
 ): Promise<ChatEvent[]> {
-    if (!params) params = {}
+    const { maxId = Long.ZERO, minId = Long.ZERO, query = '', limit = 100, users, filters } = params ?? {}
 
     const channel = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
-
-    const { maxId = Long.ZERO, minId = Long.ZERO, query = '', limit = 100, users, filters } = params
 
     const admins: tl.TypeInputUser[] | undefined = users ?
         await this.resolvePeerMany(users, normalizeToInputUser) :

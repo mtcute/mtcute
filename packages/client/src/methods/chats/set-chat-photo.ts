@@ -10,21 +10,29 @@ import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '..
  *
  * You must be an administrator and have the appropriate permissions.
  *
- * @param chatId  Chat ID or username
- * @param type  Media type (photo or video)
- * @param media  Input media file
- * @param previewSec
- *   When `type = video`, timestamp in seconds which will be shown
- *   as a static preview.
  * @internal
  */
 export async function setChatPhoto(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    type: 'photo' | 'video',
-    media: InputFileLike,
-    previewSec?: number,
+    params: {
+        /** Chat ID or username */
+        chatId: InputPeerLike
+
+        /** Media type (photo or video) */
+
+        type: 'photo' | 'video'
+
+        /** Input media file */
+        media: InputFileLike
+        /**
+         * When `type = video`, timestamp in seconds which will be shown
+         * as a static preview.
+         */
+        previewSec?: number
+    },
 ): Promise<void> {
+    const { chatId, type, media, previewSec } = params
+
     const chat = await this.resolvePeer(chatId)
 
     if (!(isInputPeerChannel(chat) || isInputPeerChat(chat))) {

@@ -2,7 +2,7 @@
 import { MaybeAsync, MtArgumentError, tl } from '@mtcute/core'
 
 import { TelegramClient } from '../../client'
-import { MaybeDynamic, SentCode, TermsOfService, User } from '../../types'
+import { MaybeDynamic, SentCode, User } from '../../types'
 import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-utils'
 
 // @available=both
@@ -74,31 +74,6 @@ export async function start(
          * Whether to force code delivery through SMS
          */
         forceSms?: boolean
-
-        /**
-         * First name of the user (used only for sign-up, defaults to 'User')
-         */
-        firstName?: MaybeDynamic<string>
-
-        /**
-         * Last name of the user (used only for sign-up, defaults to empty)
-         */
-        lastName?: MaybeDynamic<string>
-
-        /**
-         * By using this method to sign up an account, you are agreeing to Telegram
-         * ToS. This is required and your account will be banned otherwise.
-         * See https://telegram.org/tos and https://core.telegram.org/api/terms.
-         *
-         * If true, TOS will not be displayed and `tosCallback` will not be called.
-         */
-        acceptTos?: boolean
-
-        /**
-         * Custom method to display ToS. Can be used to show a GUI alert of some kind.
-         * Defaults to `console.log`
-         */
-        tosCallback?: (tos: TermsOfService) => MaybeAsync<void>
 
         /**
          * Custom method that is called when a code is sent. Can be used
@@ -185,10 +160,10 @@ export async function start(
         return await this.signInBot(botToken)
     }
 
-    let sentCode = await this.sendCode(phone)
+    let sentCode = await this.sendCode({ phone })
 
     if (params.forceSms && sentCode.type === 'app') {
-        sentCode = await this.resendCode(phone, sentCode.phoneCodeHash)
+        sentCode = await this.resendCode({ phone, phoneCodeHash: sentCode.phoneCodeHash })
     }
 
     if (params.codeSentCallback) {
@@ -199,14 +174,12 @@ export async function start(
 
     let has2fa = false
 
-    let result: User | TermsOfService | false
-
     for (;;) {
         const code = await resolveMaybeDynamic(params.code)
         if (!code) throw new tl.RpcError(400, 'PHONE_CODE_EMPTY')
 
         try {
-            result = await this.signIn(phone, sentCode.phoneCodeHash, code)
+            return await this.signIn({ phone, phoneCodeHash: sentCode.phoneCodeHash, phoneCode: code })
         } catch (e) {
             if (!tl.RpcError.is(e)) throw e
 
@@ -246,7 +219,7 @@ export async function start(
             const password = await resolveMaybeDynamic(params.password)
 
             try {
-                result = await this.checkPassword(password)
+                return await this.checkPassword(password)
             } catch (e) {
                 if (typeof params.password !== 'function') {
                     throw new MtArgumentError('Provided password was invalid')
@@ -261,41 +234,8 @@ export async function start(
                     continue
                 } else throw e
             }
-
-            break
         }
     }
 
-    // to make ts happy
-    result = result!
-
-    if (result instanceof User) {
-        return result
-    }
-
-    let tosId: string | null = null
-
-    if (result instanceof TermsOfService && !params.acceptTos) {
-        if (params.tosCallback) {
-            await params.tosCallback(result)
-        } else {
-            console.log(result.text)
-        }
-
-        tosId = result.id
-    }
-
-    // signup
-    result = await this.signUp(
-        phone,
-        sentCode.phoneCodeHash,
-        await resolveMaybeDynamic(params.firstName ?? 'User'),
-        await resolveMaybeDynamic(params.lastName),
-    )
-
-    if (tosId) {
-        await this.acceptTos(tosId)
-    }
-
-    return result
+    throw new MtArgumentError('Failed to log in with provided credentials')
 }

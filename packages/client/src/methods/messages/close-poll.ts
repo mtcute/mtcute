@@ -11,11 +11,19 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * Once closed, poll can't be re-opened, and nobody
  * will be able to vote in it
  *
- * @param chatId  Chat ID where this poll was found
- * @param message  Message ID where this poll was found
  * @internal
  */
-export async function closePoll(this: TelegramClient, chatId: InputPeerLike, message: number): Promise<Poll> {
+export async function closePoll(
+    this: TelegramClient,
+    params: {
+        /** Chat ID where this poll was found */
+        chatId: InputPeerLike
+        /** Message ID where this poll was found */
+        message: number
+    },
+): Promise<Poll> {
+    const { chatId, message } = params
+
     const res = await this.call({
         _: 'messages.editMessage',
         peer: await this.resolvePeer(chatId),

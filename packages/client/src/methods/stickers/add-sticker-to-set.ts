@@ -13,7 +13,7 @@ import {
  * Only for bots, and the sticker set must
  * have been created by this bot.
  *
- * @param id  Sticker set short name or TL object with input sticker set
+ * @param setId  Sticker set short name or TL object with input sticker set
  * @param sticker  Sticker to be added
  * @param params
  * @returns  Modfiied sticker set
@@ -21,7 +21,7 @@ import {
  */
 export async function addStickerToSet(
     this: TelegramClient,
-    id: InputStickerSet,
+    setId: InputStickerSet,
     sticker: InputStickerSetItem,
     params?: {
         /**
@@ -35,7 +35,7 @@ export async function addStickerToSet(
 ): Promise<StickerSet> {
     const res = await this.call({
         _: 'stickers.addStickerToSet',
-        stickerset: normalizeInputStickerSet(id),
+        stickerset: normalizeInputStickerSet(setId),
         sticker: {
             _: 'inputStickerSetItem',
             document: await this._normalizeFileToDocument(sticker.file, params ?? {}),

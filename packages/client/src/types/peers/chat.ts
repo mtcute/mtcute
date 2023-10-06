@@ -614,7 +614,7 @@ export class Chat {
      *   Only applicable to legacy groups, ignored for supergroups and channels
      */
     async addMembers(users: MaybeArray<InputPeerLike>, forwardCount?: number): Promise<void> {
-        return this.client.addChatMembers(this.inputPeer, users, forwardCount)
+        return this.client.addChatMembers(this.inputPeer, users, { forwardCount })
     }
 
     /**
@@ -638,7 +638,7 @@ export class Chat {
      * @param clearMentions  Whether to also clear all mentions in the chat
      */
     async readHistory(message = 0, clearMentions = false): Promise<void> {
-        return this.client.readHistory(this.inputPeer, message, clearMentions)
+        return this.client.readHistory(this.inputPeer, { maxId: message, clearMentions })
     }
 
     /**

@@ -6,19 +6,21 @@ import { InputPeerLike, MessageEntity } from '../../types'
  *
  * Returns `null` if it could not translate the message.
  *
- * > **Note**: For now doesn't seem to work, returns null for all messages.
- *
- * @param chatId  Chat or user ID
- * @param messageId  Identifier of the message to translate
- * @param toLanguage  Target language (two-letter ISO 639-1 language code)
  * @internal
  */
 export async function translateMessage(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    messageId: number,
-    toLanguage: string,
+    params: {
+        /** Chat or user ID */
+        chatId: InputPeerLike
+        /** Identifier of the message to translate */
+        messageId: number
+        /** Target language (two-letter ISO 639-1 language code) */
+        toLanguage: string
+    },
 ): Promise<[string, MessageEntity[]] | null> {
+    const { chatId, messageId, toLanguage } = params
+
     const res = await this.call({
         _: 'messages.translateText',
         peer: await this.resolvePeer(chatId),

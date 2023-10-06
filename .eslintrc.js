@@ -147,10 +147,7 @@ module.exports = {
             },
         ],
         'space-in-parens': 2,
-        'key-spacing': [
-            2,
-            { beforeColon: false, afterColon: true, mode: 'strict' },
-        ],
+        'key-spacing': [2, { beforeColon: false, afterColon: true, mode: 'strict' }],
         'space-infix-ops': 2,
         'padding-line-between-statements': [
             'error',
@@ -176,10 +173,7 @@ module.exports = {
         {
             files: ['**/*.ts', '**/*.tsx'],
             env: { browser: true, es6: true, node: true },
-            extends: [
-                'plugin:@typescript-eslint/strict',
-                'plugin:import/typescript',
-            ],
+            extends: ['plugin:@typescript-eslint/strict', 'plugin:import/typescript'],
             globals: { Atomics: 'readonly', SharedArrayBuffer: 'readonly' },
             parser: '@typescript-eslint/parser',
             plugins: ['@typescript-eslint'],
@@ -232,6 +226,13 @@ module.exports = {
             files: ['**/scripts/**'],
             rules: {
                 'no-console': 'off',
+            },
+        },
+        {
+            files: ['packages/client/src/methods/**/*.ts'],
+            rules: {
+                // this + max 3 more
+                'max-params': ['error', 4],
             },
         },
     ],

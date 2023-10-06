@@ -8,13 +8,14 @@ import { isInputPeerChannel, isInputPeerUser, normalizeToInputChannel, normalize
  * > **Note**: non-collectible usernames must still be changed
  * > using {@link setUsername}/{@link setChatUsername}
  *
- * @param peerId  Bot, channel or "me"/"self"
  * @internal
  */
 export async function toggleFragmentUsername(
     this: TelegramClient,
-    peerId: InputPeerLike,
     params: {
+        /** Peer ID whose username to toggle */
+        peerId: InputPeerLike
+
         /**
          * Username to toggle
          */
@@ -26,7 +27,7 @@ export async function toggleFragmentUsername(
         active: boolean
     },
 ): Promise<void> {
-    const { username, active } = params
+    const { peerId, username, active } = params
 
     const peer = await this.resolvePeer(peerId)
 

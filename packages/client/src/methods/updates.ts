@@ -1,4 +1,4 @@
-/* eslint-disable max-depth */
+/* eslint-disable max-depth,max-params */
 import { assertNever, MtArgumentError, tl } from '@mtcute/core'
 import {
     AsyncLock,

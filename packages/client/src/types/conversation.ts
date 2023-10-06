@@ -218,7 +218,7 @@ export class Conversation {
             message = this._lastMessage ?? 0
         }
 
-        return this.client.readHistory(this._inputPeer, message, clearMentions)
+        return this.client.readHistory(this._inputPeer, { maxId: message, clearMentions })
     }
 
     /**

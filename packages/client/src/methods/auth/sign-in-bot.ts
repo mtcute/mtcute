@@ -1,5 +1,3 @@
-import { assertTypeIs } from '@mtcute/core/utils'
-
 import { TelegramClient } from '../../client'
 import { User } from '../../types'
 
@@ -20,23 +18,5 @@ export async function signInBot(this: TelegramClient, token: string): Promise<Us
         botAuthToken: token,
     })
 
-    assertTypeIs('signInBot (@ auth.importBotAuthorization)', res, 'auth.authorization')
-    assertTypeIs('signInBot (@ auth.importBotAuthorization -> user)', res.user, 'user')
-
-    this._userId = res.user.id
-    this.log.prefix = `[USER ${this._userId}] `
-    this._isBot = true
-    this._selfUsername = res.user.username!
-    this._selfChanged = true
-
-    await this.network.notifyLoggedIn(res)
-
-    await this._fetchUpdatesState()
-    await this._saveStorage()
-
-    // telegram ignores invokeWithoutUpdates for auth methods
-    if (this.network.params.disableUpdates) this.network.resetSessions()
-    else this.startUpdatesLoop()
-
-    return new User(this, res.user)
+    return this._onAuthorization(res, true)
 }
