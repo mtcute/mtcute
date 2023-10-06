@@ -7,19 +7,23 @@ import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-
 /**
  * Edit supergroup/channel admin rights of a user.
  *
- * @param chatId  Chat ID
- * @param userId  User ID
- * @param rights  New admin rights
- * @param rank  Custom admin rank
  * @internal
  */
 export async function editAdminRights(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    userId: InputPeerLike,
-    rights: Omit<tl.RawChatAdminRights, '_'>,
-    rank = '',
+    params: {
+        /** Chat ID */
+        chatId: InputPeerLike
+        /** User ID */
+        userId: InputPeerLike
+        /** New admin rights */
+        rights: Omit<tl.RawChatAdminRights, '_'>
+        /** Custom admin rank */
+        rank?: string
+    },
 ): Promise<void> {
+    const { chatId, userId, rights, rank = '' } = params
+
     const chat = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
     const user = normalizeToInputUser(await this.resolvePeer(userId), userId)
 

@@ -10,14 +10,15 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  *
  * Only admins with `manageTopics` permission can do this.
  *
- * @param chatId  Chat ID or username
  * @returns  Service message for the created topic
  * @internal
  */
 export async function createForumTopic(
     this: TelegramClient,
-    chatId: InputPeerLike,
     params: {
+        /** Chat ID or username */
+        chatId: InputPeerLike
+
         /**
          * Topic title
          */
@@ -39,7 +40,7 @@ export async function createForumTopic(
         sendAs?: InputPeerLike
     },
 ): Promise<Message> {
-    const { title, icon, sendAs } = params
+    const { chatId, title, icon, sendAs } = params
 
     const res = await this.call({
         _: 'channels.createForumTopic',

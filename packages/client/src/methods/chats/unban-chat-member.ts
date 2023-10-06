@@ -11,17 +11,21 @@ import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '..
  *
  * This method acts as a no-op in case a legacy group is passed.
  *
- * @param chatId  Chat ID
- * @param peerId  User/channel ID
  * @internal
  */
 export async function unbanChatMember(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    peerId: InputPeerLike,
+    params: {
+        /** Chat ID */
+        chatId: InputPeerLike
+
+        /** User/channel ID who should be unbanned */
+        participantId: InputPeerLike
+    },
 ): Promise<void> {
+    const { chatId, participantId } = params
     const chat = await this.resolvePeer(chatId)
-    const peer = await this.resolvePeer(peerId)
+    const peer = await this.resolvePeer(participantId)
 
     if (isInputPeerChannel(chat)) {
         const res = await this.call({

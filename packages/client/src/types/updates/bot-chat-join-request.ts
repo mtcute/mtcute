@@ -74,9 +74,9 @@ export class BotChatJoinRequestUpdate {
     /**
      * Approve or deny the request.
      */
-    hide(action: Parameters<TelegramClient['hideJoinRequest']>[2]): Promise<void> {
-        return this.client.hideJoinRequest(this.chat.inputPeer, this.user.inputPeer, action)
-    }
+    // hide(action: Parameters<TelegramClient['hideJoinRequest']>[1]['action']): Promise<void> {
+    // return this.client.hideJoinRequest(this.chat.inputPeer, { action, user: this.user.inputPeer })
+    // }
 }
 
 makeInspectable(BotChatJoinRequestUpdate)

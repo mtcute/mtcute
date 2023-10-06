@@ -5,20 +5,27 @@ import { TelegramClient } from '../../client'
 /**
  * Edit a folder with given modification
  *
- * @param folder
- *     Folder, folder ID or name.
- *     Note that passing an ID or name will require re-fetching all folders,
- *     and passing name might affect not the right folder if you have multiple
- *     with the same name.
- * @param modification  Modification that will be applied to this folder
  * @returns  Modified folder
  * @internal
  */
 export async function editFolder(
     this: TelegramClient,
-    folder: tl.RawDialogFilter | number | string,
-    modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>,
+    params: {
+        /**
+         * Folder, folder ID or name.
+         * Note that passing an ID or name will require re-fetching all folders,
+         * and passing name might affect not the right folder if you have multiple
+         * with the same name.
+         */
+        folder: tl.RawDialogFilter | number | string
+
+        /** Modification to be applied to this folder */
+        modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>
+    },
 ): Promise<tl.RawDialogFilter> {
+    const { modification } = params
+    let { folder } = params
+
     if (folder === 0) {
         throw new MtArgumentError('Cannot modify default folder')
     }

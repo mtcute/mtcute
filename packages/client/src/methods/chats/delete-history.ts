@@ -7,23 +7,34 @@ import { createDummyUpdate } from '../../utils/updates-utils'
  * Delete communication history (for private chats
  * and legacy groups)
  *
- * @param chat  Chat or user ID, username, phone number, `"me"` or `"self"`
- * @param mode
- *   Deletion mode. Can be:
- *   - `delete`: delete messages (only for yourself)
- *   - `clear`: delete messages (only for yourself)
- *   - `revoke`: delete messages for all users
- *   - I'm not sure what's the difference between `delete` and `clear`,
- *     but they are in fact different flags in TL object.
- * @param maxId  Maximum ID of message to delete. Defaults to 0 (remove all messages)
  * @internal
  */
 export async function deleteHistory(
     this: TelegramClient,
     chat: InputPeerLike,
-    mode: 'delete' | 'clear' | 'revoke' = 'delete',
-    maxId = 0,
+    params?: {
+        /**
+         * Deletion mode. Can be:
+         * - `delete`: delete messages (only for yourself)
+         * - `clear`: delete messages (only for yourself)
+         * - `revoke`: delete messages for all users
+         * - I'm not sure what's the difference between `delete` and `clear`,
+         * but they are in fact different flags in TL object.
+         *
+         * @default  'delete'
+         */
+        mode: 'delete' | 'clear' | 'revoke'
+
+        /**
+         * Maximum ID of message to delete.
+         *
+         * @default  0, i.e. remove all messages
+         */
+        maxId?: number
+    },
 ): Promise<void> {
+    const { mode = 'delete', maxId = 0 } = params ?? {}
+
     const peer = await this.resolvePeer(chat)
 
     const res = await this.call({

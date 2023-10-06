@@ -16,9 +16,11 @@ import { normalizeDate } from '../../utils/misc-utils'
  */
 export async function editInviteLink(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    link: string,
     params: {
+        /** Chat ID */
+        chatId: InputPeerLike
+        /** Invite link to edit */
+        link: string
         /**
          * Date when this link will expire.
          * If `number` is passed, UNIX time in ms is expected.
@@ -40,13 +42,15 @@ export async function editInviteLink(
         withApproval?: boolean
     },
 ): Promise<ChatInviteLink> {
+    const { chatId, link, expires, usageLimit, withApproval } = params
+
     const res = await this.call({
         _: 'messages.editExportedChatInvite',
         peer: await this.resolvePeer(chatId),
         link,
-        expireDate: normalizeDate(params.expires),
-        usageLimit: params.usageLimit,
-        requestNeeded: params.withApproval,
+        expireDate: normalizeDate(expires),
+        usageLimit,
+        requestNeeded: withApproval,
     })
 
     const peers = PeersIndex.from(res)

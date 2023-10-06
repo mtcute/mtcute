@@ -9,19 +9,22 @@ import { InputFileLike, Photo } from '../../types'
  *
  * You can also pass a file ID or an InputPhoto to re-use existing photo.
  *
- * @param type  Media type (photo or video)
- * @param media  Input media file
- * @param previewSec
- *   When `type = video`, timestamp in seconds which will be shown
- *   as a static preview.
  * @internal
  */
 export async function setProfilePhoto(
     this: TelegramClient,
-    type: 'photo' | 'video',
-    media: InputFileLike | tl.TypeInputPhoto,
-    previewSec?: number,
+    params: {
+        /** Media type (photo or video) */
+        type: 'photo' | 'video'
+        /** Input media file */
+        media: InputFileLike | tl.TypeInputPhoto
+        /** When `type = video`, timestamp in seconds which will be shown as a static preview. */
+        previewSec?: number
+    },
 ): Promise<Photo> {
+    const { type, previewSec } = params
+    let { media } = params
+
     // try parsing media as file id or input photo
     if (tdFileId.isFileIdLike(media) || (typeof media === 'object' && tl.isAnyInputPhoto(media))) {
         if (typeof media === 'string' && media.match(/^https?:\/\//)) {

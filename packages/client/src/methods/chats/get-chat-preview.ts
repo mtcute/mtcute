@@ -9,7 +9,7 @@ import { INVITE_LINK_REGEX } from '../../utils/peer-utils'
  *
  * @param inviteLink  Invite link
  * @throws MtArgumentError  In case invite link has invalid format
- * @throws MtNotFoundError
+ * @throws MtPeerNotFoundError
  *   In case you are trying to get info about private chat that you have already joined.
  *   Use {@link getChat} or {@link getFullChat} instead.
  * @internal

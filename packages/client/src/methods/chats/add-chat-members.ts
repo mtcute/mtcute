@@ -10,21 +10,28 @@ import {
 } from '../../utils/peer-utils'
 
 /**
- * Add new members to a group, supergroup or channel.
+ * Add one or more new members to a group, supergroup or channel.
  *
  * @param chatId  ID of the chat or its username
- * @param users ID(s) of the users, their username(s) or phone(s).
- * @param forwardCount
- *   Number of old messages to be forwarded (0-100).
- *   Only applicable to legacy groups, ignored for supergroups and channels
+ * @param users ID(s) of the user(s) to add
  * @internal
  */
 export async function addChatMembers(
     this: TelegramClient,
     chatId: InputPeerLike,
     users: MaybeArray<InputPeerLike>,
-    forwardCount = 100,
+    params: {
+        /**
+         * Number of old messages to be forwarded (0-100).
+         * Only applicable to legacy groups, ignored for supergroups and channels
+         *
+         * @default 100
+         */
+        forwardCount?: number
+    },
 ): Promise<void> {
+    const { forwardCount = 100 } = params
+
     const chat = await this.resolvePeer(chatId)
 
     if (!Array.isArray(users)) users = [users]

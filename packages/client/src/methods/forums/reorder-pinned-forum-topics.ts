@@ -7,14 +7,14 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  *
  * Only admins with `manageTopics` permission can do this.
  *
- * @param chatId  Chat ID or username
- * @param topicId  ID of the topic (i.e. its top message ID)
  * @internal
  */
 export async function reorderPinnedForumTopics(
     this: TelegramClient,
-    chatId: InputPeerLike,
     params: {
+        /** Chat ID or username */
+        chatId: InputPeerLike
+
         /**
          * Order of the pinned topics
          */
@@ -26,7 +26,7 @@ export async function reorderPinnedForumTopics(
         force?: boolean
     },
 ): Promise<void> {
-    const { order, force } = params
+    const { chatId, order, force } = params
     await this.call({
         _: 'channels.reorderPinnedForumTopics',
         channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),

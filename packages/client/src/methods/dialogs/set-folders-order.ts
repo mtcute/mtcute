@@ -3,8 +3,7 @@ import { TelegramClient } from '../../client'
 /**
  * Reorder folders
  *
- * Order is folder's ID (0 = default folder)
- *
+ * @param order  New order of folders (folder IDs, where default = 0)
  * @internal
  */
 export async function setFoldersOrder(this: TelegramClient, order: number[]): Promise<void> {

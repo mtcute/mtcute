@@ -16,18 +16,18 @@ import { FormattedString, InputPeerLike, Message, MtMessageNotFoundError, ReplyM
  * > use {@link Message.sendCopy} instead, since that is
  * > much more efficient, and that is what this method wraps.
  *
- * @param toChatId  Source chat ID
- * @param fromChatId  Target chat ID
- * @param message  Message ID to forward
  * @param params
  * @internal
  */
 export async function sendCopy(
     this: TelegramClient,
-    toChatId: InputPeerLike,
-    fromChatId: InputPeerLike,
-    message: number,
-    params?: {
+    params: {
+        /** Source chat ID */
+        fromChatId: InputPeerLike
+        /** Target chat ID */
+        toChatId: InputPeerLike
+        /** Message ID to forward */
+        message: number
         /**
          * Whether to send this message silently.
          */
@@ -97,6 +97,8 @@ export async function sendCopy(
         clearDraft?: boolean
     },
 ): Promise<Message> {
+    const { fromChatId, toChatId, message, ...rest } = params
+
     const fromPeer = await this.resolvePeer(fromChatId)
 
     const msg = await this.getMessages(fromPeer, message)
@@ -105,5 +107,5 @@ export async function sendCopy(
         throw new MtMessageNotFoundError(getMarkedPeerId(fromPeer), message, 'to copy')
     }
 
-    return msg.sendCopy(toChatId, params)
+    return msg.sendCopy(toChatId, rest)
 }

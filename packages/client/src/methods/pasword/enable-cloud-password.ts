@@ -11,17 +11,21 @@ import { TelegramClient } from '../../client'
  * {@link resendPasswordEmail} or {@link cancelPasswordEmail},
  * and the call this method again
  *
- * @param password  2FA password as plaintext
- * @param hint  Hint for the new password
- * @param email  Recovery email
  * @internal
  */
 export async function enableCloudPassword(
     this: TelegramClient,
-    password: string,
-    hint?: string,
-    email?: string,
+    params: {
+        /** 2FA password as plaintext */
+        password: string
+        /** Hint for the new password */
+        hint?: string
+        /** Recovery email */
+        email?: string
+    },
 ): Promise<void> {
+    const { password, hint, email } = params
+
     const pwd = await this.call({ _: 'account.getPassword' })
 
     if (pwd.hasPassword) {

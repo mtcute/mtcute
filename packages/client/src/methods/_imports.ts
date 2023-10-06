@@ -78,7 +78,6 @@ import {
     StoryViewer,
     StoryViewersList,
     TakeoutSession,
-    TermsOfService,
     TypingStatus,
     UploadedFile,
     UploadFileLike,

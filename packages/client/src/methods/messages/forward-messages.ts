@@ -11,8 +11,6 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  *
  * To forward with a caption, use another overload that takes an array of IDs.
  *
- * @param toChatId  Destination chat ID, username, phone, `"me"` or `"self"`
- * @param fromChatId  Source chat ID, username, phone, `"me"` or `"self"`
  * @param message  Message ID
  * @param params  Additional sending parameters
  * @returns  Newly sent, forwarded messages in the destination chat
@@ -20,10 +18,14 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  */
 export async function forwardMessages(
     this: TelegramClient,
-    toChatId: InputPeerLike,
-    fromChatId: InputPeerLike,
-    message: number,
-    params?: {
+    params: {
+        /** Source chat ID, username, phone, `"me"` or `"self"` */
+        fromChatId: InputPeerLike
+        /** Destination chat ID, username, phone, `"me"` or `"self"` */
+        toChatId: InputPeerLike
+        /** Message ID */
+        messages: number
+
         /**
          * Optionally, a caption for your forwarded message(s).
          * It will be sent as a separate message before the forwarded messages.
@@ -117,10 +119,14 @@ export async function forwardMessages(
  */
 export async function forwardMessages(
     this: TelegramClient,
-    toChatId: InputPeerLike,
-    fromChatId: InputPeerLike,
-    messages: number[],
-    params?: {
+    params: {
+        /** Source chat ID, username, phone, `"me"` or `"self"` */
+        fromChatId: InputPeerLike
+        /** Destination chat ID, username, phone, `"me"` or `"self"` */
+        toChatId: InputPeerLike
+        /** Message IDs */
+        messages: number[]
+
         /**
          * Optionally, a caption for your forwarded message(s).
          * It will be sent as a separate message before the forwarded messages.
@@ -200,10 +206,11 @@ export async function forwardMessages(
 /** @internal */
 export async function forwardMessages(
     this: TelegramClient,
-    toChatId: InputPeerLike,
-    fromChatId: InputPeerLike,
-    messages: MaybeArray<number>,
-    params?: {
+    params: {
+        toChatId: InputPeerLike
+        fromChatId: InputPeerLike
+        messages: MaybeArray<number>
+
         /**
          * Optionally, a caption for your forwarded message(s).
          * It will be sent as a separate message before the forwarded messages.
@@ -283,7 +290,20 @@ export async function forwardMessages(
         sendAs?: InputPeerLike
     },
 ): Promise<MaybeArray<Message>> {
-    if (!params) params = {}
+    const {
+        toChatId,
+        fromChatId,
+        parseMode,
+        entities,
+        silent,
+        schedule,
+        clearDraft,
+        forbidForwards,
+        sendAs,
+        noAuthor,
+        noCaption,
+    } = params
+    let { messages } = params
 
     let isSingle = false
 
@@ -309,22 +329,22 @@ export async function forwardMessages(
         }
 
         captionMessage = await this.sendText(toPeer, params.caption, {
-            parseMode: params.parseMode,
-            entities: params.entities,
-            silent: params.silent,
-            schedule: params.schedule,
-            clearDraft: params.clearDraft,
-            forbidForwards: params.forbidForwards,
-            sendAs: params.sendAs,
+            parseMode,
+            entities,
+            silent,
+            schedule,
+            clearDraft,
+            forbidForwards,
+            sendAs,
         })
     } else if (params.captionMedia) {
         captionMessage = await this.sendMedia(toPeer, params.captionMedia, {
-            parseMode: params.parseMode,
-            silent: params.silent,
-            schedule: params.schedule,
-            clearDraft: params.clearDraft,
-            forbidForwards: params.forbidForwards,
-            sendAs: params.sendAs,
+            parseMode,
+            silent,
+            schedule,
+            clearDraft,
+            forbidForwards,
+            sendAs,
         })
     }
 
@@ -333,13 +353,13 @@ export async function forwardMessages(
         toPeer,
         fromPeer: await this.resolvePeer(fromChatId),
         id: messages,
-        silent: params.silent,
-        scheduleDate: normalizeDate(params.schedule),
+        silent,
+        scheduleDate: normalizeDate(schedule),
         randomId: Array.from({ length: messages.length }, () => randomLong()),
-        dropAuthor: params.noAuthor,
-        dropMediaCaptions: params.noCaption,
-        noforwards: params.forbidForwards,
-        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined,
+        dropAuthor: noAuthor,
+        dropMediaCaptions: noCaption,
+        noforwards: forbidForwards,
+        sendAs: sendAs ? await this.resolvePeer(sendAs) : undefined,
     })
 
     assertIsUpdatesGroup('messages.forwardMessages', res)

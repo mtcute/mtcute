@@ -12,7 +12,7 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * @param chatId  Chat ID or username
  * @param restrictions
  *     Restrictions for the chat. Note that unlike Bot API, this object contains
- *     the restrictions, and not the permissions, i.e. to
+ *     the restrictions, and not the permissions, i.e.
  *     passing `sendMessages=true` will disallow the users to send messages,
  *     and passing `{}` (empty object) will lift any restrictions
  * @internal

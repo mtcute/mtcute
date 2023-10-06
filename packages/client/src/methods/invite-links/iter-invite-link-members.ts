@@ -12,7 +12,7 @@ import { ChatInviteLinkMember, InputPeerLike } from '../../types'
 export async function* iterInviteLinkMembers(
     this: TelegramClient,
     chatId: InputPeerLike,
-    params: Parameters<TelegramClient['getInviteLinkMembers']>[1] & {
+    params?: Parameters<TelegramClient['getInviteLinkMembers']>[1] & {
         /**
          * Maximum number of users to return
          *
@@ -30,6 +30,7 @@ export async function* iterInviteLinkMembers(
     },
 ): AsyncIterableIterator<ChatInviteLinkMember> {
     const peer = await this.resolvePeer(chatId)
+    if (!params) params = {}
 
     const { limit = Infinity, chunkSize = 100, link, requestedSearch, requested = Boolean(requestedSearch) } = params
 

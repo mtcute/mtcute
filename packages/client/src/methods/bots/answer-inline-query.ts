@@ -20,7 +20,7 @@ export async function answerInlineQuery(
          * Maximum number of time in seconds that the results of the
          * query may be cached on the server for.
          *
-         * Defaults to `300`
+         * @default  300
          */
         cacheTime?: number
 
@@ -39,7 +39,7 @@ export async function answerInlineQuery(
          * Whether the results should only be cached on the server
          * for the user who sent the query.
          *
-         * Defaults to `false`
+         * @default  false
          */
         private?: boolean
 
@@ -47,7 +47,7 @@ export async function answerInlineQuery(
          * Next pagination offset (up to 64 bytes).
          *
          * When user has reached the end of the current results,
-         * it will re-send the inline query with the same text, but
+         * the client will re-send the inline query with the same text, but
          * with `offset` set to this value.
          *
          * If omitted or empty string is provided, it is assumed that
@@ -95,23 +95,23 @@ export async function answerInlineQuery(
         parseMode?: string | null
     },
 ): Promise<void> {
-    if (!params) params = {}
+    const { cacheTime = 300, gallery, private: priv, nextOffset, switchPm, parseMode } = params ?? {}
 
-    const [gallery, tlResults] = await BotInline._convertToTl(this, results, params.parseMode)
+    const [defaultGallery, tlResults] = await BotInline._convertToTl(this, results, parseMode)
 
     await this.call({
         _: 'messages.setInlineBotResults',
         queryId,
         results: tlResults,
-        cacheTime: params.cacheTime ?? 300,
-        gallery: params.gallery ?? gallery,
-        private: params.private,
-        nextOffset: params.nextOffset,
-        switchPm: params.switchPm ?
+        cacheTime,
+        gallery: gallery ?? defaultGallery,
+        private: priv,
+        nextOffset,
+        switchPm: switchPm ?
             {
                 _: 'inlineBotSwitchPM',
-                text: params.switchPm.text,
-                startParam: params.switchPm.parameter,
+                text: switchPm.text,
+                startParam: switchPm.parameter,
             } :
             undefined,
     })

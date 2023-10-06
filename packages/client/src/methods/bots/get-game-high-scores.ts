@@ -8,17 +8,23 @@ import { normalizeToInputUser } from '../../utils/peer-utils'
 /**
  * Get high scores of a game
  *
- * @param chatId  ID of the chat where the game was found
- * @param message  ID of the message containing the game
- * @param userId  ID of the user to find high scores for
  * @internal
  */
 export async function getGameHighScores(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    message: number,
-    userId?: InputPeerLike,
+    params: {
+        /** ID of the chat where the game was found */
+        chatId: InputPeerLike
+
+        /** ID of the message containing the game */
+        message: number
+
+        /** ID of the user to find high scores for */
+        userId?: InputPeerLike
+    },
 ): Promise<GameHighScore[]> {
+    const { chatId, message, userId } = params
+
     const chat = await this.resolvePeer(chatId)
 
     let user: tl.TypeInputUser

@@ -15,9 +15,15 @@ import { isInputPeerChannel, isInputPeerChat, isInputPeerUser, normalizeToInputC
  */
 export async function getChatMember(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    userId: InputPeerLike,
+    params: {
+        /** Chat ID or username */
+        chatId: InputPeerLike
+        /** User ID, username, phone number, `"me"` or `"self"` */
+        userId: InputPeerLike
+    },
 ): Promise<ChatMember> {
+    const { chatId, userId } = params
+
     const user = await this.resolvePeer(userId)
     const chat = await this.resolvePeer(chatId)
 

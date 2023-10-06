@@ -8,18 +8,21 @@ import { InputPeerLike } from '../../types'
  * Request a callback answer from a bot,
  * i.e. click an inline button that contains data.
  *
- * @param chatId  Chat ID where the message was found
- * @param message  ID of the message containing the button
- * @param data  Data contained in the button
  * @param params
  * @internal
  */
 export async function getCallbackAnswer(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    message: number,
-    data: string | Buffer,
-    params?: {
+    params: {
+        /** Chat ID where the message was found */
+        chatId: InputPeerLike
+
+        /** ID of the message containing the button */
+        message: number
+
+        /** Data contained in the button */
+        data: string | Buffer
+
         /**
          * Timeout for the query in ms.
          *
@@ -33,15 +36,16 @@ export async function getCallbackAnswer(
         game?: boolean
 
         /**
-         * If the button requires password entry,
-         * your 2FA password.
+         * If the button requires password entry, your 2FA password.
          *
-         * Your password is never exposed to the
-         * bot, it is checked by Telegram.
+         * Your password is never exposed to the bot,
+         * it is checked by Telegram.
          */
         password?: string
     },
 ): Promise<tl.messages.TypeBotCallbackAnswer> {
+    const { chatId, message, data, game, timeout = 10000 } = params
+
     let password: tl.TypeInputCheckPasswordSRP | undefined = undefined
 
     if (params?.password) {
@@ -56,8 +60,8 @@ export async function getCallbackAnswer(
             msgId: message,
             data: typeof data === 'string' ? Buffer.from(data) : data,
             password,
-            game: params?.game,
+            game: game,
         },
-        { timeout: params?.timeout ?? 10000 },
+        { timeout },
     )
 }

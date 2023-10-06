@@ -8,21 +8,27 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 /**
  * Send or retract a vote in a poll.
  *
- * @param chatId  Chat ID where this poll was found
- * @param message  Message ID where this poll was found
- * @param options
- *     Selected options, or `null` to retract.
- *     You can pass indexes of the answers or the `Buffer`s
- *     representing them. In case of indexes, the poll will first
- *     be requested from the server.
  * @internal
  */
 export async function sendVote(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    message: number,
-    options: null | MaybeArray<number | Buffer>,
+    params: {
+        /** Chat ID where this poll was found */
+        chatId: InputPeerLike
+        /** Message ID where this poll was found */
+        message: number
+        /**
+         * Selected options, or `null` to retract.
+         * You can pass indexes of the answers or the `Buffer`s
+         * representing them. In case of indexes, the poll will first
+         * be requested from the server.
+         */
+        options: null | MaybeArray<number | Buffer>
+    },
 ): Promise<Poll> {
+    const { chatId, message } = params
+    let { options } = params
+
     if (options === null) options = []
     if (!Array.isArray(options)) options = [options]
 

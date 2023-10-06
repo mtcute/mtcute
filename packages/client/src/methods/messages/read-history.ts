@@ -7,16 +7,27 @@ import { createDummyUpdate } from '../../utils/updates-utils'
  * Mark chat history as read.
  *
  * @param chatId  Chat ID
- * @param message  Message up until which to read history (by default everything is read)
- * @param clearMentions  Whether to also clear all mentions in the chat
  * @internal
  */
 export async function readHistory(
     this: TelegramClient,
     chatId: InputPeerLike,
-    message = 0,
-    clearMentions = false,
+    params?: {
+        /**
+         * Message up until which to read history
+         *
+         * @default  0, i.e. read everything
+         */
+        maxId?: number
+
+        /**
+         * Whether to also clear all mentions in the chat
+         */
+        clearMentions?: boolean
+    },
 ): Promise<void> {
+    const { maxId = 0, clearMentions } = params ?? {}
+
     const peer = await this.resolvePeer(chatId)
 
     if (clearMentions) {
@@ -36,13 +47,13 @@ export async function readHistory(
         await this.call({
             _: 'channels.readHistory',
             channel: normalizeToInputChannel(peer),
-            maxId: message,
+            maxId,
         })
     } else {
         const res = await this.call({
             _: 'messages.readHistory',
             peer,
-            maxId: message,
+            maxId,
         })
         this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
     }

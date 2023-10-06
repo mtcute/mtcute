@@ -4,21 +4,27 @@ import { InputPeerLike } from '../../types'
 /**
  * Approve or deny multiple join requests to a chat.
  *
- * @param peer  Chat/channel ID
- * @param action  Whether to approve or deny the join requests
- * @param link  Invite link to target
  * @internal
  */
 export async function hideAllJoinRequests(
     this: TelegramClient,
-    peer: InputPeerLike,
-    action: 'approve' | 'deny',
-    link?: string,
+    params: {
+        /** Chat/channel ID */
+        chatId: InputPeerLike
+
+        /** Whether to approve or deny the join requests */
+        action: 'approve' | 'deny'
+
+        /** Invite link to target */
+        link?: string
+    },
 ): Promise<void> {
+    const { chatId, action, link } = params
+
     await this.call({
         _: 'messages.hideAllChatJoinRequests',
         approved: action === 'approve',
-        peer: await this.resolvePeer(peer),
+        peer: await this.resolvePeer(chatId),
         link,
     })
 }

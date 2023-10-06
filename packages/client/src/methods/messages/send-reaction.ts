@@ -5,20 +5,24 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 /**
  * Send or remove a reaction.
  *
- * @param chatId  Chat ID with the message to react to
- * @param message  Message ID to react to
- * @param emoji  Reaction emoji (or `null` to remove reaction)
- * @param big  Whether to use a big reaction
  * @returns  Message to which the reaction was sent
  * @internal
  */
 export async function sendReaction(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    message: number,
-    emoji?: InputReaction | null,
-    big = false,
+    params: {
+        /** Chat ID with the message to react to */
+        chatId: InputPeerLike
+        /** Message ID to react to */
+        message: number
+        /** Reaction emoji (or `null` to remove reaction) */
+        emoji?: InputReaction | null
+        /** Whether to use a big reaction */
+        big?: boolean
+    },
 ): Promise<Message> {
+    const { chatId, message, emoji, big } = params
+
     const reaction = normalizeInputReaction(emoji)
 
     const res = await this.call({

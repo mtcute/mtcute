@@ -13,9 +13,12 @@ import { BotKeyboard, FormattedString, InputMediaLike, InputPeerLike, Message, R
  */
 export async function editMessage(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    message: number | Message,
     params: {
+        /** Chat ID */
+        chatId: InputPeerLike
+        /** Message to edit */
+        message: number | Message
+
         /**
          * New message text
          *
@@ -72,6 +75,7 @@ export async function editMessage(
         progressCallback?: (uploaded: number, total: number) => void
     },
 ): Promise<Message> {
+    const { chatId, message } = params
     let content: string | undefined = undefined
     let entities: tl.TypeMessageEntity[] | undefined
     let media: tl.TypeInputMedia | undefined = undefined

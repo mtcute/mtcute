@@ -60,7 +60,7 @@ export async function getChatMembers(
         type?: 'all' | 'banned' | 'restricted' | 'bots' | 'recent' | 'admins' | 'contacts' | 'mention'
     },
 ): Promise<ArrayWithTotal<ChatMember>> {
-    if (!params) params = {}
+    const { query = '', offset = 0, limit = 200, type = 'recent' } = params ?? {}
 
     const chat = await this.resolvePeer(chatId)
 
@@ -75,21 +75,18 @@ export async function getChatMembers(
         let members =
             res.fullChat.participants._ === 'chatParticipantsForbidden' ? [] : res.fullChat.participants.participants
 
-        if (params.offset) members = members.slice(params.offset)
-        if (params.limit) members = members.slice(0, params.limit)
+        if (offset) members = members.slice(offset)
+        if (limit) members = members.slice(0, limit)
 
         const peers = PeersIndex.from(res)
 
-        const ret = members.map((m) => new ChatMember(this, m, peers)) as ArrayWithTotal<ChatMember>
+        const ret = members.map((m) => new ChatMember(this, m, peers))
 
-        ret.total = ret.length
-
-        return ret
+        return makeArrayWithTotal(ret, ret.length)
     }
 
     if (isInputPeerChannel(chat)) {
-        const q = params.query?.toLowerCase() ?? ''
-        const type = params.type ?? 'recent'
+        const q = query
 
         let filter: tl.TypeChannelParticipantsFilter
 
@@ -126,8 +123,8 @@ export async function getChatMembers(
             _: 'channels.getParticipants',
             channel: normalizeToInputChannel(chat),
             filter,
-            offset: params.offset ?? 0,
-            limit: params.limit ?? 200,
+            offset,
+            limit,
             hash: Long.ZERO,
         })
 

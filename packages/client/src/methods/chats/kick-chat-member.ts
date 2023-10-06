@@ -9,24 +9,28 @@ import { isInputPeerChannel } from '../../utils/peer-utils'
  *
  * This effectively bans a user and immediately unbans them.
  *
- * @param chatId  Chat ID
- * @param userId  User ID
  * @internal
  */
 export async function kickChatMember(
     this: TelegramClient,
-    chatId: InputPeerLike,
-    userId: InputPeerLike,
+    params: {
+        /** Chat ID */
+        chatId: InputPeerLike
+        /** User ID */
+        userId: InputPeerLike
+    },
 ): Promise<void> {
+    const { chatId, userId } = params
+
     const chat = await this.resolvePeer(chatId)
     const user = await this.resolvePeer(userId)
 
-    await this.banChatMember(chat, user)
+    await this.banChatMember({ chatId: chat, participantId: user })
 
     // not needed in case this is a legacy group
     if (isInputPeerChannel(chat)) {
         // i fucking love telegram serverside race conditions
         await sleep(1000)
-        await this.unbanChatMember(chat, user)
+        await this.unbanChatMember({ chatId: chat, participantId: user })
     }
 }
