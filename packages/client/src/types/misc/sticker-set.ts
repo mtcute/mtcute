@@ -102,7 +102,10 @@ export class StickerSet {
      */
     readonly isFull: boolean
 
-    constructor(readonly client: TelegramClient, raw: tl.TypeStickerSet | tl.messages.TypeStickerSet) {
+    constructor(
+        readonly client: TelegramClient,
+        raw: tl.TypeStickerSet | tl.messages.TypeStickerSet,
+    ) {
         if (raw._ === 'messages.stickerSet') {
             this.full = raw
             this.brief = raw.set

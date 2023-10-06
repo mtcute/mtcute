@@ -26,7 +26,11 @@ export class Logger {
 
     prefix = ''
 
-    constructor(readonly mgr: LogManager, readonly tag: string, readonly parent: Logger = mgr) {
+    constructor(
+        readonly mgr: LogManager,
+        readonly tag: string,
+        readonly parent: Logger = mgr,
+    ) {
         let hash = 0
 
         for (let i = 0; i < tag.length; i++) {

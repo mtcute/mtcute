@@ -43,7 +43,10 @@ export class Conversation {
 
     private _pendingRead: Map<number, QueuedHandler<void>> = new Map()
 
-    constructor(readonly client: TelegramClient, readonly chat: InputPeerLike) {
+    constructor(
+        readonly client: TelegramClient,
+        readonly chat: InputPeerLike,
+    ) {
         this._onNewMessage = this._onNewMessage.bind(this)
         this._onEditMessage = this._onEditMessage.bind(this)
         this._onHistoryRead = this._onHistoryRead.bind(this)

@@ -9,7 +9,10 @@
 export class SortedArray<T> {
     readonly raw: T[]
 
-    constructor(array: T[] = [], readonly comparator: (a: T, b: T) => number) {
+    constructor(
+        array: T[] = [],
+        readonly comparator: (a: T, b: T) => number,
+    ) {
         this.raw = array.sort(comparator)
         this.comparator = comparator
     }

@@ -147,7 +147,11 @@ export class TlBinaryWriter {
      * @param buffer  Buffer to write to
      * @param start  Position to start writing at
      */
-    constructor(readonly objectMap: TlWriterMap | undefined, buffer: Buffer, start = 0) {
+    constructor(
+        readonly objectMap: TlWriterMap | undefined,
+        buffer: Buffer,
+        start = 0,
+    ) {
         this.buffer = buffer
         this.pos = start
     }

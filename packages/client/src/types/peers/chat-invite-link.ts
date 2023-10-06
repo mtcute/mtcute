@@ -12,7 +12,11 @@ import { User } from './user'
 export class ChatInviteLink {
     raw: tl.RawChatInviteExported
 
-    constructor(readonly client: TelegramClient, raw: tl.TypeExportedChatInvite, readonly _peers?: PeersIndex) {
+    constructor(
+        readonly client: TelegramClient,
+        raw: tl.TypeExportedChatInvite,
+        readonly _peers?: PeersIndex,
+    ) {
         assertTypeIsNot('ChatInviteLink', raw, 'chatInvitePublicJoinRequests')
         this.raw = raw
     }

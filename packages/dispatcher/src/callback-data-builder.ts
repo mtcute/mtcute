@@ -19,7 +19,10 @@ export class CallbackDataBuilder<T extends string> {
      * @param prefix  Prefix for the data. Use something unique across your bot.
      * @param fields  Field names in the order they will be serialized.
      */
-    constructor(public prefix: string, ...fields: T[]) {
+    constructor(
+        public prefix: string,
+        ...fields: T[]
+    ) {
         this._fields = fields
     }
 

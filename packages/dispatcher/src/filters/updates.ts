@@ -30,7 +30,9 @@ export const chatMember: {
  * @link User.Status
  */
 export const userStatus: {
-    <T extends UserStatus>(status: T): UpdateFilter<
+    <T extends UserStatus>(
+        status: T,
+    ): UpdateFilter<
         UserStatusUpdate,
         {
             type: T

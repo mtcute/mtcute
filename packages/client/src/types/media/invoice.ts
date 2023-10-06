@@ -15,7 +15,10 @@ import { Thumbnail } from './thumbnail'
 export type InvoiceExtendedMediaState = 'none' | 'preview' | 'full'
 
 export class InvoiceExtendedMediaPreview {
-    constructor(public readonly client: TelegramClient, public readonly raw: tl.RawMessageExtendedMediaPreview) {}
+    constructor(
+        public readonly client: TelegramClient,
+        public readonly raw: tl.RawMessageExtendedMediaPreview,
+    ) {}
 
     /**
      * Width of the preview, in pixels (if available, else 0)
@@ -55,7 +58,10 @@ export class InvoiceExtendedMediaPreview {
 export class Invoice {
     readonly type = 'invoice' as const
 
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawMessageMediaInvoice) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawMessageMediaInvoice,
+    ) {}
 
     /**
      * Whether the shipping address was requested

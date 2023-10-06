@@ -11,7 +11,11 @@ import { PeersIndex, User } from '../peers'
  * interacts with the bot.
  */
 export class BotStoppedUpdate {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawUpdateBotStopped, readonly _peers: PeersIndex) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawUpdateBotStopped,
+        readonly _peers: PeersIndex,
+    ) {}
 
     /**
      * ID of the user who stopped or restarted the bot

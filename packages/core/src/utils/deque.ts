@@ -23,7 +23,10 @@ export class Deque<T> {
     protected _tail = 0
     protected _capacity: number
 
-    constructor(minCapacity = MIN_INITIAL_CAPACITY, readonly maxLength = Infinity) {
+    constructor(
+        minCapacity = MIN_INITIAL_CAPACITY,
+        readonly maxLength = Infinity,
+    ) {
         let capacity = minCapacity
 
         if (capacity >= MIN_INITIAL_CAPACITY) {

@@ -8,7 +8,10 @@ import { Video } from './video'
 export class Game {
     readonly type = 'game' as const
 
-    constructor(readonly client: TelegramClient, readonly game: tl.RawGame) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly game: tl.RawGame,
+    ) {}
 
     /**
      * Unique identifier of the game.

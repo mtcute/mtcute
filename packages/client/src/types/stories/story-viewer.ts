@@ -9,7 +9,11 @@ import { ReactionEmoji, toReactionEmoji } from '../reactions'
  * Information about a single user who has viewed a story.
  */
 export class StoryViewer {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawStoryView, readonly _peers: PeersIndex) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawStoryView,
+        readonly _peers: PeersIndex,
+    ) {}
 
     /** Whether this user is in current user's global blacklist */
     get isBlocked(): boolean {
@@ -46,7 +50,10 @@ makeInspectable(StoryViewer)
  * List of story viewers.
  */
 export class StoryViewersList {
-    constructor(readonly client: TelegramClient, readonly raw: tl.stories.RawStoryViewsList) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.stories.RawStoryViewsList,
+    ) {}
 
     readonly _peers = PeersIndex.from(this.raw)
 

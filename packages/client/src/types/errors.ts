@@ -11,7 +11,11 @@ export class MtPeerNotFoundError extends MtcuteError {}
  * Could not find a message by the provided information
  */
 export class MtMessageNotFoundError extends MtcuteError {
-    constructor(readonly peerId: number, readonly messageId: number, readonly context?: string) {
+    constructor(
+        readonly peerId: number,
+        readonly messageId: number,
+        readonly context?: string,
+    ) {
         super(`Message${context ? ' ' + context : ''} ${messageId} not found in ${peerId}`)
     }
 }

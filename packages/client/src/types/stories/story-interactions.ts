@@ -9,7 +9,11 @@ import { ReactionCount } from '../reactions/reaction-count'
  * Brief information about story views/interactions
  */
 export class StoryInteractions {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawStoryViews, readonly _peers: PeersIndex) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawStoryViews,
+        readonly _peers: PeersIndex,
+    ) {}
 
     /**
      * Whether information about viewers is available.

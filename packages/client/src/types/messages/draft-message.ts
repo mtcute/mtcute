@@ -8,7 +8,10 @@ import { MessageEntity } from './message-entity'
  * A draft message
  */
 export class DraftMessage {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawDraftMessage) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawDraftMessage,
+    ) {}
 
     /**
      * Text of the draft message

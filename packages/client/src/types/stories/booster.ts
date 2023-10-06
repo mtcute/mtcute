@@ -8,7 +8,11 @@ import { PeersIndex, User } from '../peers'
  * Information about a user who is boosting a channel
  */
 export class Booster {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawBooster, readonly _peers: PeersIndex) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawBooster,
+        readonly _peers: PeersIndex,
+    ) {}
 
     /**
      * Date when this boost will automatically expire.

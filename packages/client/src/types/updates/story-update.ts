@@ -8,7 +8,11 @@ import { assertTypeIs, makeInspectable } from '../../utils'
  * > is to store known stories IDs and compare them to the one in the update.
  */
 export class StoryUpdate {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawUpdateStory, readonly _peers: PeersIndex) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawUpdateStory,
+        readonly _peers: PeersIndex,
+    ) {}
 
     private _peer?: User | Chat
     /**

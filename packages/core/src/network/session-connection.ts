@@ -73,7 +73,10 @@ export class SessionConnection extends PersistentConnection {
     private _readerMap: TlReaderMap
     private _writerMap: TlWriterMap
 
-    constructor(params: SessionConnectionParams, readonly _session: MtprotoSession) {
+    constructor(
+        params: SessionConnectionParams,
+        readonly _session: MtprotoSession,
+    ) {
         super(params, _session.log.create('conn'))
         this._flushTimer.onTimeout(this._flush.bind(this))
 
@@ -433,11 +436,14 @@ export class SessionConnection extends PersistentConnection {
                 this.onConnectionUsable()
 
                 // set a timeout to update temp auth key in advance to avoid interruption
-                this._pfsUpdateTimeout = setTimeout(() => {
-                    this._pfsUpdateTimeout = undefined
-                    this.log.debug('temp key is expiring soon')
-                    this._authorizePfs(true)
-                }, (TEMP_AUTH_KEY_EXPIRY - 60) * 1000)
+                this._pfsUpdateTimeout = setTimeout(
+                    () => {
+                        this._pfsUpdateTimeout = undefined
+                        this.log.debug('temp key is expiring soon')
+                        this._authorizePfs(true)
+                    },
+                    (TEMP_AUTH_KEY_EXPIRY - 60) * 1000,
+                )
             })
             .catch((err: Error) => {
                 this.log.error('PFS Authorization error: %s', err.message)

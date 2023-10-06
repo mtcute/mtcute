@@ -5,7 +5,10 @@ import { TelegramClient } from '../../../client'
 export abstract class StoryInteractiveArea {
     abstract type: string
 
-    constructor(readonly client: TelegramClient, readonly raw: Exclude<tl.TypeMediaArea, tl.RawInputMediaAreaVenue>) {
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: Exclude<tl.TypeMediaArea, tl.RawInputMediaAreaVenue>,
+    ) {
         this.raw = raw
     }
 

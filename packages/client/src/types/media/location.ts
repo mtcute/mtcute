@@ -8,7 +8,10 @@ import { FileLocation } from '../files'
  * A point on the map
  */
 export class RawLocation {
-    constructor(readonly client: TelegramClient, readonly geo: tl.RawGeoPoint) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly geo: tl.RawGeoPoint,
+    ) {}
 
     /**
      * Geo point latitude
@@ -107,7 +110,10 @@ export class Location extends RawLocation {
 export class LiveLocation extends RawLocation {
     readonly type = 'live_location' as const
 
-    constructor(client: TelegramClient, readonly live: tl.RawMessageMediaGeoLive) {
+    constructor(
+        client: TelegramClient,
+        readonly live: tl.RawMessageMediaGeoLive,
+    ) {
         super(client, live.geo as tl.RawGeoPoint)
     }
 

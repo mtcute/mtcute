@@ -12,7 +12,11 @@ import { PeersIndex, Poll } from '../'
  * polls which were sent by this bot
  */
 export class PollUpdate {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawUpdateMessagePoll, readonly _peers: PeersIndex) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawUpdateMessagePoll,
+        readonly _peers: PeersIndex,
+    ) {}
 
     /**
      * Unique poll ID

@@ -12,7 +12,10 @@ import { StoryInteractiveArea } from './base'
 export class StoryInteractiveVenue extends StoryInteractiveArea {
     readonly type = 'venue' as const
 
-    constructor(client: TelegramClient, readonly raw: tl.RawMediaAreaVenue) {
+    constructor(
+        client: TelegramClient,
+        readonly raw: tl.RawMediaAreaVenue,
+    ) {
         super(client, raw)
     }
 

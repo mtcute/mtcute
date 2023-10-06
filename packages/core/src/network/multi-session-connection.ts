@@ -12,7 +12,12 @@ export class MultiSessionConnection extends EventEmitter {
     readonly _sessions: MtprotoSession[]
     private _enforcePfs = false
 
-    constructor(readonly params: SessionConnectionParams, private _count: number, log: Logger, logPrefix = '') {
+    constructor(
+        readonly params: SessionConnectionParams,
+        private _count: number,
+        log: Logger,
+        logPrefix = '',
+    ) {
         super()
         this._log = log.create('multi')
         if (logPrefix) this._log.prefix = `[${logPrefix}] `
