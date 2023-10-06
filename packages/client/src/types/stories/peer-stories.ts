@@ -6,7 +6,11 @@ import { Chat, PeersIndex, User } from '../peers'
 import { Story } from './story'
 
 export class PeerStories {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawPeerStories, readonly _peers: PeersIndex) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawPeerStories,
+        readonly _peers: PeersIndex,
+    ) {}
 
     private _peer?: User | Chat
     /**

@@ -19,7 +19,10 @@ import { Photo } from './photo'
 export class WebPage {
     readonly type = 'web_page' as const
 
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawWebPage) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawWebPage,
+    ) {}
 
     /**
      * Unique ID of the preview

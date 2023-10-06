@@ -56,7 +56,10 @@ export type MessageEntityKind = MessageEntityParams['kind']
  * One special entity in a text message (like mention, hashtag, URL, etc.)
  */
 export class MessageEntity {
-    constructor(readonly raw: tl.TypeMessageEntity, readonly _text?: string) {}
+    constructor(
+        readonly raw: tl.TypeMessageEntity,
+        readonly _text?: string,
+    ) {}
 
     /**
      * Offset in UTF-16 code units to the start of the entity.

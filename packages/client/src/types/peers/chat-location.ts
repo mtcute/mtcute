@@ -8,7 +8,10 @@ import { Location } from '../media'
  * Geolocation of a supergroup
  */
 export class ChatLocation {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawChannelLocation) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawChannelLocation,
+    ) {}
 
     private _location?: Location
     /**

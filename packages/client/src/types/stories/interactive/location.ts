@@ -12,7 +12,10 @@ import { StoryInteractiveArea } from './base'
 export class StoryInteractiveLocation extends StoryInteractiveArea {
     readonly type = 'location' as const
 
-    constructor(client: TelegramClient, readonly raw: tl.RawMediaAreaGeoPoint) {
+    constructor(
+        client: TelegramClient,
+        readonly raw: tl.RawMediaAreaGeoPoint,
+    ) {
         super(client, raw)
     }
 

@@ -16,7 +16,11 @@ export class Voice extends RawDocument {
         return tdFileId.FileType.VoiceNote
     }
 
-    constructor(client: TelegramClient, doc: tl.RawDocument, readonly attr: tl.RawDocumentAttributeAudio) {
+    constructor(
+        client: TelegramClient,
+        doc: tl.RawDocument,
+        readonly attr: tl.RawDocumentAttributeAudio,
+    ) {
         super(client, doc)
     }
 

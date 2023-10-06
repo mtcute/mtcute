@@ -9,7 +9,10 @@ import { StoriesStealthMode } from './stealth-mode'
  * Returned by {@link TelegramClient.getAllStories}
  */
 export class AllStories {
-    constructor(readonly client: TelegramClient, readonly raw: tl.stories.RawAllStories) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.stories.RawAllStories,
+    ) {}
 
     readonly _peers = PeersIndex.from(this.raw)
 

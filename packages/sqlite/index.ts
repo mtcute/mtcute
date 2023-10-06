@@ -285,23 +285,26 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
 
         this._wal = !params?.disableWal
 
-        this._saveUnimportantLater = throttle(() => {
-            // unimportant changes are changes about cached in memory entities,
-            // that don't really need to be cached right away.
-            // to avoid redundant DB calls, these changes are persisted
-            // no more than once every 30 seconds.
-            //
-            // additionally, to avoid redundant changes that
-            // are immediately overwritten, we use object instead
-            // of an array, where the key is marked peer id,
-            // and value is the arguments array, since
-            // the query is always `updateCachedEnt`
-            const items = Object.values(this._pendingUnimportant)
-            if (!items.length) return
+        this._saveUnimportantLater = throttle(
+            () => {
+                // unimportant changes are changes about cached in memory entities,
+                // that don't really need to be cached right away.
+                // to avoid redundant DB calls, these changes are persisted
+                // no more than once every 30 seconds.
+                //
+                // additionally, to avoid redundant changes that
+                // are immediately overwritten, we use object instead
+                // of an array, where the key is marked peer id,
+                // and value is the arguments array, since
+                // the query is always `updateCachedEnt`
+                const items = Object.values(this._pendingUnimportant)
+                if (!items.length) return
 
-            this._updateManyPeers(items)
-            this._pendingUnimportant = {}
-        }, params?.unimportantSavesDelay ?? 30000)
+                this._updateManyPeers(items)
+                this._pendingUnimportant = {}
+            },
+            params?.unimportantSavesDelay ?? 30000,
+        )
 
         this._vacuumInterval = params?.vacuumInterval ?? 300_000
 

@@ -50,7 +50,10 @@ export abstract class PersistentConnection extends EventEmitter {
 
     protected abstract onMessage(data: Buffer): void
 
-    protected constructor(params: PersistentConnectionParams, readonly log: Logger) {
+    protected constructor(
+        params: PersistentConnectionParams,
+        readonly log: Logger,
+    ) {
         super()
         this.params = params
         this.changeTransport(params.transportFactory)

@@ -8,7 +8,11 @@ import { PeersIndex, User } from '../peers'
  * Game high score
  */
 export class GameHighScore {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawHighScore, readonly _peers: PeersIndex) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawHighScore,
+        readonly _peers: PeersIndex,
+    ) {}
 
     private _user?: User
     /**

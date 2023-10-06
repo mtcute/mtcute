@@ -5,7 +5,11 @@ import { makeInspectable } from '../../utils'
  * A story was deleted
  */
 export class DeleteStoryUpdate {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawUpdateStory, readonly _peers: PeersIndex) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawUpdateStory,
+        readonly _peers: PeersIndex,
+    ) {}
 
     private _peer?: User | Chat
     /**

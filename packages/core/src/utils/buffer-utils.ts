@@ -9,8 +9,9 @@ const b64urlAvailable = Buffer.isEncoding('base64url')
  * @param arr  Typed array to convert
  */
 export function typedArrayToBuffer(arr: NodeJS.TypedArray): Buffer {
-    return ArrayBuffer.isView(arr) ? // To avoid a copy, use the typed array's underlying ArrayBuffer to back
+    // To avoid a copy, use the typed array's underlying ArrayBuffer to back
     // new Buffer, respecting the "view", i.e. byteOffset and byteLength
+    return ArrayBuffer.isView(arr) ?
         Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength) : // Pass through all other types to `Buffer.from`
         Buffer.from(arr)
 }

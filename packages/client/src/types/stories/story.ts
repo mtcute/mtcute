@@ -22,7 +22,11 @@ export type StoryVisibility = 'public' | 'contacts' | 'selected_contacts' | 'clo
 export type StoryMedia = Photo | Video
 
 export class Story {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawStoryItem, readonly _peers: PeersIndex) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawStoryItem,
+        readonly _peers: PeersIndex,
+    ) {}
 
     /** Whether this story is pinned */
     get isPinned(): boolean {

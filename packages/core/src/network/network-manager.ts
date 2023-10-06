@@ -365,7 +365,10 @@ export class NetworkManager {
     private _lastUpdateTime = 0
     private _updateHandler: (upd: tl.TypeUpdates) => void = () => {}
 
-    constructor(readonly params: NetworkManagerParams & NetworkManagerExtraParams, readonly config: ConfigManager) {
+    constructor(
+        readonly params: NetworkManagerParams & NetworkManagerExtraParams,
+        readonly config: ConfigManager,
+    ) {
         let deviceModel = 'mtcute on '
         let appVersion = 'unknown'
         if (typeof process !== 'undefined' && typeof require !== 'undefined') {

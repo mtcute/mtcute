@@ -15,7 +15,11 @@ export class Audio extends RawDocument {
         return tdFileId.FileType.Audio
     }
 
-    constructor(client: TelegramClient, doc: tl.RawDocument, readonly attr: tl.RawDocumentAttributeAudio) {
+    constructor(
+        client: TelegramClient,
+        doc: tl.RawDocument,
+        readonly attr: tl.RawDocumentAttributeAudio,
+    ) {
         super(client, doc)
     }
 

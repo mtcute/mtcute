@@ -35,7 +35,10 @@ export class User {
      */
     readonly raw: tl.RawUser
 
-    constructor(readonly client: TelegramClient, user: tl.TypeUser) {
+    constructor(
+        readonly client: TelegramClient,
+        user: tl.TypeUser,
+    ) {
         assertTypeIs('User#init', user, 'user')
 
         this.raw = user

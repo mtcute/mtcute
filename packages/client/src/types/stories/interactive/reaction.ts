@@ -15,7 +15,10 @@ import { StoryInteractiveArea } from './base'
 export class StoryInteractiveReaction extends StoryInteractiveArea {
     readonly type = 'reaction' as const
 
-    constructor(client: TelegramClient, readonly raw: tl.RawMediaAreaSuggestedReaction) {
+    constructor(
+        client: TelegramClient,
+        readonly raw: tl.RawMediaAreaSuggestedReaction,
+    ) {
         super(client, raw)
     }
 

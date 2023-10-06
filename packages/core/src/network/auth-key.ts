@@ -15,7 +15,11 @@ export class AuthKey {
     clientSalt!: Buffer
     serverSalt!: Buffer
 
-    constructor(readonly _crypto: ICryptoProvider, readonly log: Logger, readonly _readerMap: TlReaderMap) {}
+    constructor(
+        readonly _crypto: ICryptoProvider,
+        readonly log: Logger,
+        readonly _readerMap: TlReaderMap,
+    ) {}
 
     match(keyId: Buffer): boolean {
         return this.ready && buffersEqual(keyId, this.id)

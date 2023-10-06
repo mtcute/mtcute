@@ -42,7 +42,11 @@ export class TlBinaryReader {
      * @param data  Buffer to read from
      * @param start  Position to start reading from
      */
-    constructor(readonly objectsMap: TlReaderMap | undefined, data: Buffer, start = 0) {
+    constructor(
+        readonly objectsMap: TlReaderMap | undefined,
+        data: Buffer,
+        start = 0,
+    ) {
         this.data = data
         this.pos = start
     }

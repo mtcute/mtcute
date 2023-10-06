@@ -14,7 +14,10 @@ import { Thumbnail } from './thumbnail'
 export abstract class RawDocument extends FileLocation {
     abstract type: string
 
-    constructor(client: TelegramClient, readonly raw: tl.RawDocument) {
+    constructor(
+        client: TelegramClient,
+        readonly raw: tl.RawDocument,
+    ) {
         super(
             client,
             {

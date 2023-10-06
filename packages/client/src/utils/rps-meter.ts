@@ -4,7 +4,10 @@ export class RpsMeter {
     _hits: Deque<bigint>
     time: bigint
 
-    constructor(readonly size = 500, time = 5000) {
+    constructor(
+        readonly size = 500,
+        time = 5000,
+    ) {
         if (typeof process === 'undefined' || !process.hrtime.bigint) {
             throw new Error('RPS meter is not supported on this platform')
         }

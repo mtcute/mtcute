@@ -42,7 +42,9 @@ export async function hideMyStoriesViews(
 
     const upd = res.updates.find(hasValueAtKey('_', 'updateStoriesStealthMode'))
 
-    if (!upd) { throw new MtTypeAssertionError('hideMyStoriesViews (@ res.updates[*])', 'updateStoriesStealthMode', 'none') }
+    if (!upd) {
+        throw new MtTypeAssertionError('hideMyStoriesViews (@ res.updates[*])', 'updateStoriesStealthMode', 'none')
+    }
 
     return new StoriesStealthMode(upd.stealthMode)
 }

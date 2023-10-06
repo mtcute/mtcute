@@ -19,7 +19,11 @@ export class Photo extends FileLocation {
 
     private _bestSize?: tl.RawPhotoSize | tl.RawPhotoSizeProgressive
 
-    constructor(client: TelegramClient, readonly raw: tl.RawPhoto, readonly media?: tl.RawMessageMediaPhoto) {
+    constructor(
+        client: TelegramClient,
+        readonly raw: tl.RawPhoto,
+        readonly media?: tl.RawMessageMediaPhoto,
+    ) {
         const location = {
             _: 'inputPhotoFileLocation',
             id: raw.id,

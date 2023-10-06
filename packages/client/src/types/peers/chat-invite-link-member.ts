@@ -6,7 +6,11 @@ import { PeersIndex } from './peers-index'
 import { User } from './user'
 
 export class ChatInviteLinkMember {
-    constructor(readonly client: TelegramClient, readonly raw: tl.RawChatInviteImporter, readonly _peers: PeersIndex) {}
+    constructor(
+        readonly client: TelegramClient,
+        readonly raw: tl.RawChatInviteImporter,
+        readonly _peers: PeersIndex,
+    ) {}
 
     private _user?: User
     /**

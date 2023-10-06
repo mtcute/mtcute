@@ -44,7 +44,10 @@ export class FormattedString<T extends string = never> {
      * @param value  Value that the string holds
      * @param mode  Name of the parse mode used
      */
-    constructor(readonly value: string, readonly mode?: T) {}
+    constructor(
+        readonly value: string,
+        readonly mode?: T,
+    ) {}
 
     toString(): string {
         return this.value
