@@ -1,9 +1,10 @@
-import { assertNever, MtArgumentError } from '@mtcute/core'
+import { assertNever, BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 import { assertTypeIs, assertTypeIsNot } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { InputMediaLike, InputPeerLike, MessageMedia, Photo, RawDocument } from '../../types'
 import { parseDocument } from '../../types/media/document-utils'
+import { resolvePeer } from '../users/resolve-peer'
+import { _normalizeInputMedia } from './normalize-input-media'
 
 /**
  * Upload a media to Telegram servers, without actually
@@ -15,10 +16,9 @@ import { parseDocument } from '../../types/media/document-utils'
  *
  * @param media  Media to upload
  * @param params  Upload parameters
- * @internal
  */
 export async function uploadMedia(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     media: InputMediaLike,
     params: {
         /**
@@ -36,7 +36,7 @@ export async function uploadMedia(
         progressCallback?: (uploaded: number, total: number) => void
     } = {},
 ): Promise<Extract<MessageMedia, Photo | RawDocument>> {
-    const normMedia = await this._normalizeInputMedia(media, params, false)
+    const normMedia = await _normalizeInputMedia(client, media, params, false)
 
     switch (normMedia._) {
         case 'inputMediaEmpty':
@@ -51,10 +51,10 @@ export async function uploadMedia(
             throw new MtArgumentError("This media can't be uploaded")
     }
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.uploadMedia',
         peer: params.peer ?
-            await this.resolvePeer(params.peer) :
+            await resolvePeer(client, params.peer) :
             {
                 _: 'inputPeerSelf',
             },
@@ -70,7 +70,7 @@ export async function uploadMedia(
             assertTypeIs('uploadMedia', res, 'messageMediaPhoto')
             assertTypeIs('uploadMedia', res.photo!, 'photo')
 
-            return new Photo(this, res.photo, res)
+            return new Photo(res.photo)
         case 'inputMediaUploadedDocument':
         case 'inputMediaDocument':
         case 'inputMediaDocumentExternal':
@@ -78,11 +78,10 @@ export async function uploadMedia(
             assertTypeIs('uploadMedia', res.document!, 'document')
 
             // eslint-disable-next-line
-            return parseDocument(this, res.document, res) as any
+            return parseDocument(res.document, res) as any
         case 'inputMediaStory':
             throw new MtArgumentError("This media (story) can't be uploaded")
         default:
             assertNever(normMedia)
-        //          ^?
     }
 }

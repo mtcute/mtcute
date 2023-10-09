@@ -1,18 +1,16 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { BotCommands } from '../../types'
+import { _normalizeCommandScope } from './normalize-command-scope'
 
 /**
  * Get a list of current bot's commands for the given command scope
  * and user language. If they are not set, empty set is returned.
  *
  * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
- *
- * @internal
  */
 export async function getMyCommands(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params?: {
         /**
          * Scope of the commands.
@@ -27,10 +25,10 @@ export async function getMyCommands(
         langCode?: string
     },
 ): Promise<tl.RawBotCommand[]> {
-    return this.call({
+    return client.call({
         _: 'bots.getBotCommands',
         scope: params?.scope ?
-            await this._normalizeCommandScope(params.scope) :
+            await _normalizeCommandScope(client, params.scope) :
             {
                 _: 'botCommandScopeDefault',
             },

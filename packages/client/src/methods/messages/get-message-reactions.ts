@@ -1,9 +1,9 @@
-import { getMarkedPeerId, MaybeArray } from '@mtcute/core'
+import { BaseTelegramClient, getMarkedPeerId, MaybeArray } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike, MessageReactions, PeersIndex } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Get reactions to a message.
@@ -15,10 +15,9 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * @param chatId  ID of the chat with the message
  * @param messages  Message ID
  * @returns  Reactions to the corresponding message, or `null` if there are none
- * @internal
  */
 export async function getMessageReactions(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     messages: number,
 ): Promise<MessageReactions | null>
@@ -33,10 +32,9 @@ export async function getMessageReactions(
  * @param chatId  ID of the chat with messages
  * @param messages  Message IDs
  * @returns  Reactions to corresponding messages, or `null` if there are none
- * @internal
  */
 export async function getMessageReactions(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     messages: number[],
 ): Promise<(MessageReactions | null)[]>
@@ -45,7 +43,7 @@ export async function getMessageReactions(
  * @internal
  */
 export async function getMessageReactions(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     messages: MaybeArray<number>,
 ): Promise<MaybeArray<MessageReactions | null>> {
@@ -55,9 +53,9 @@ export async function getMessageReactions(
         messages = [messages]
     }
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.getMessagesReactions',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         id: messages,
     })
 
@@ -76,13 +74,7 @@ export async function getMessageReactions(
     for (const update of res.updates) {
         assertTypeIs('messages.getMessagesReactions', update, 'updateMessageReactions')
 
-        index[update.msgId] = new MessageReactions(
-            this,
-            update.msgId,
-            getMarkedPeerId(update.peer),
-            update.reactions,
-            peers,
-        )
+        index[update.msgId] = new MessageReactions(update.msgId, getMarkedPeerId(update.peer), update.reactions, peers)
     }
 
     if (single) {

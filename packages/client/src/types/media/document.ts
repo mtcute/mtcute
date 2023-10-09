@@ -1,7 +1,6 @@
 import { tl } from '@mtcute/core'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { FileLocation } from '../files'
 import { Thumbnail } from './thumbnail'
@@ -14,12 +13,8 @@ import { Thumbnail } from './thumbnail'
 export abstract class RawDocument extends FileLocation {
     abstract type: string
 
-    constructor(
-        client: TelegramClient,
-        readonly raw: tl.RawDocument,
-    ) {
+    constructor(readonly raw: tl.RawDocument) {
         super(
-            client,
             {
                 _: 'inputDocumentFileLocation',
                 id: raw.id,
@@ -71,8 +66,8 @@ export abstract class RawDocument extends FileLocation {
         if (!this._thumbnails) {
             const arr: Thumbnail[] = []
 
-            this.raw.thumbs?.forEach((sz) => arr.push(new Thumbnail(this.client, this.raw, sz)))
-            this.raw.videoThumbs?.forEach((sz) => arr.push(new Thumbnail(this.client, this.raw, sz)))
+            this.raw.thumbs?.forEach((sz) => arr.push(new Thumbnail(this.raw, sz)))
+            this.raw.videoThumbs?.forEach((sz) => arr.push(new Thumbnail(this.raw, sz)))
 
             this._thumbnails = arr
         }

@@ -6,10 +6,11 @@
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "LGPL-3.0",
     "main": "src/index.ts",
+    "module": "_esm/index.js",
     "scripts": {
         "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
         "docs": "typedoc",
-        "build": "tsc",
+        "build": "tsc | tsc -p tsconfig.cjs.json",
         "gen-client": "node ./scripts/generate-client.js",
         "gen-updates": "node ./scripts/generate-updates.js"
     },

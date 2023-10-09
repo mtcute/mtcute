@@ -1,10 +1,8 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
-import { InputMediaLike } from '../media'
-import { FormattedString } from '../parser'
+import { MessageEntity } from '../messages/message-entity'
 import { EmojiStatus } from '../reactions/emoji-status'
 import { ChatPhoto } from './chat-photo'
 
@@ -35,10 +33,7 @@ export class User {
      */
     readonly raw: tl.RawUser
 
-    constructor(
-        readonly client: TelegramClient,
-        user: tl.TypeUser,
-    ) {
+    constructor(user: tl.TypeUser) {
         assertTypeIs('User#init', user, 'user')
 
         this.raw = user
@@ -284,7 +279,7 @@ export class User {
     get photo(): ChatPhoto | null {
         if (this.raw.photo?._ !== 'userProfilePhoto') return null
 
-        return (this._photo ??= new ChatPhoto(this.client, this.inputPeer, this.raw.photo))
+        return (this._photo ??= new ChatPhoto(this.inputPeer, this.raw.photo))
     }
 
     /**
@@ -338,37 +333,36 @@ export class User {
      * Create a mention for the user.
      *
      * When available and `text` is omitted, this method will return `@username`.
-     * Otherwise, text mention is created for the given (or default) parse mode.
+     * Otherwise, text mention is created.
      *
      * Use `null` as `text` (first parameter) to force create a text
      * mention with display name, even if there is a username.
      *
+     * > **Note**: This method doesn't format anything on its own.
+     * > Instead, it returns a {@link MessageEntity} that can later
+     * > be used with `html` or `md` template tags, or `unparse` method directly.
+     *
      * @param text  Text of the mention.
-     * @param parseMode  Parse mode to use when creating mention.
      * @example
      * ```typescript
-     * msg.replyText(`Hello, ${msg.sender.mention()`)
+     * msg.replyText(html`Hello, ${msg.sender.mention()`)
      * ```
      */
-    mention<T extends string = string>(text?: string | null, parseMode?: T | null): string | FormattedString<T> {
+    mention(text?: string | null): string | MessageEntity {
         if (text === undefined && this.username) {
             return `@${this.username}`
         }
 
         if (!text) text = this.displayName
-        // eslint-disable-next-line dot-notation
-        if (!parseMode) parseMode = this.client['_defaultParseMode'] as T
 
-        return new FormattedString(
-            this.client.getParseMode(parseMode).unparse(text, [
-                {
-                    _: 'messageEntityMentionName',
-                    offset: 0,
-                    length: text.length,
-                    userId: this.raw.id,
-                },
-            ]),
-            parseMode,
+        return new MessageEntity(
+            {
+                _: 'messageEntityMentionName',
+                offset: 0,
+                length: text.length,
+                userId: this.raw.id,
+            },
+            text,
         )
     }
 
@@ -386,83 +380,42 @@ export class User {
      * somewhere and load it from there if needed.
      *
      * This method is only needed when the result will be
-     * stored somewhere outside current mtcute instance,
+     * stored somewhere outside current mtcute instance (e.g. saved for later use),
      * otherwise {@link mention} will be enough.
+     *
+     * > **Note**: This method doesn't format anything on its own.
+     * > Instead, it returns a {@link MessageEntity} that can later
+     * > be used with `html` or `md` template tags, or `unparse` method directly.
      *
      * > **Note**: the resulting text can only be used by clients
      * > that support mtcute notation of permanent
      * > mention links (`tg://user?id=123&hash=abc`).
      * >
-     * > Both `@mtcute/html-parser` and `@mtcute/markdown-parser` support it.
-     * >
      * > Also note that these permanent mentions are only
      * > valid for current account, since peer access hashes are
      * > account-specific and can't be used on another account.
+     * >
+     * > Also note that for some users such mentions might not work at all
+     * > due to privacy settings.
      *
      * @param text  Mention text
-     * @param parseMode  Parse mode to use when creating mention
      */
-    permanentMention<T extends string = string>(text?: string | null, parseMode?: T | null): FormattedString<T> {
+    permanentMention(text?: string | null): MessageEntity {
         if (!this.raw.accessHash) {
-            throw new MtArgumentError("user's access hash is not available!")
+            throw new MtArgumentError("User's access hash is not available!")
         }
 
         if (!text) text = this.displayName
-        // eslint-disable-next-line dot-notation
-        if (!parseMode) parseMode = this.client['_defaultParseMode'] as T
 
-        // since we are just creating a link and not actual tg entity,
-        // we can use this hack to create a valid link through our parse mode
-        return new FormattedString(
-            this.client.getParseMode(parseMode).unparse(text, [
-                {
-                    _: 'messageEntityTextUrl',
-                    offset: 0,
-                    length: text.length,
-                    url: `tg://user?id=${this.id}&hash=${this.raw.accessHash.toString(16)}`,
-                },
-            ]),
-            parseMode,
+        return new MessageEntity(
+            {
+                _: 'messageEntityTextUrl',
+                offset: 0,
+                length: text.length,
+                url: `tg://user?id=${this.id}&hash=${this.raw.accessHash.toString(16)}`,
+            },
+            text,
         )
-    }
-
-    /**
-     * Send a text message to this user.
-     *
-     * @param text  Text of the message
-     * @param params
-     */
-    sendText(
-        text: string | FormattedString<string>,
-        params?: Parameters<TelegramClient['sendText']>[2],
-    ): ReturnType<TelegramClient['sendText']> {
-        return this.client.sendText(this.inputPeer, text, params)
-    }
-
-    /**
-     * Send a media to this user.
-     *
-     * @param media  Media to send
-     * @param params
-     */
-    sendMedia(
-        media: InputMediaLike | string,
-        params?: Parameters<TelegramClient['sendMedia']>[2],
-    ): ReturnType<TelegramClient['sendMedia']> {
-        return this.client.sendMedia(this.inputPeer, media, params)
-    }
-
-    /**
-     * Send a media group to this user.
-     *
-     * @param medias  Medias to send
-     * @param params
-     */
-    sendMediaGroup(
-        medias: (InputMediaLike | string)[],
-        params?: Parameters<TelegramClient['sendMediaGroup']>[2],
-    ): ReturnType<TelegramClient['sendMediaGroup']> {
-        return this.client.sendMediaGroup(this.inputPeer, medias, params)
     }
 }
 

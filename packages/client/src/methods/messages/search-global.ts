@@ -1,7 +1,6 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { ArrayPaginated, Message, PeersIndex, SearchFilters } from '../../types'
 import { makeArrayPaginated, normalizeDate } from '../../utils'
 
@@ -24,10 +23,9 @@ const defaultOffset: SearchGlobalOffset = {
  * **Note**: Due to Telegram limitations, you can only get up to ~10000 messages
  *
  * @param params  Search parameters
- * @internal
  */
 export async function searchGlobal(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params?: {
         /**
          * Text query string. Use `"@"` to search for mentions.
@@ -79,7 +77,7 @@ export async function searchGlobal(
     const minDate = normalizeDate(params.minDate) ?? 0
     const maxDate = normalizeDate(params.maxDate) ?? 0
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.searchGlobal',
         q: query,
         filter,
@@ -94,7 +92,7 @@ export async function searchGlobal(
     assertTypeIsNot('searchGlobal', res, 'messages.messagesNotModified')
     const peers = PeersIndex.from(res)
 
-    const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(this, msg, peers))
+    const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(msg, peers))
 
     const last = msgs[msgs.length - 1]
 

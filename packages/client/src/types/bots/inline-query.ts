@@ -1,10 +1,8 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { Location } from '../media'
 import { PeersIndex, PeerType, User } from '../peers'
-import { InputInlineResult } from './input'
 
 const PEER_TYPE_MAP: Record<tl.TypeInlineQueryPeerType['_'], PeerType> = {
     inlineQueryPeerTypeBroadcast: 'channel',
@@ -17,7 +15,6 @@ const PEER_TYPE_MAP: Record<tl.TypeInlineQueryPeerType['_'], PeerType> = {
 
 export class InlineQuery {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawUpdateBotInlineQuery,
         readonly _peers: PeersIndex,
     ) {}
@@ -34,7 +31,7 @@ export class InlineQuery {
      * User who sent this query
      */
     get user(): User {
-        return (this._user ??= new User(this.client, this._peers.user(this.raw.userId)))
+        return (this._user ??= new User(this._peers.user(this.raw.userId)))
     }
 
     /**
@@ -53,7 +50,7 @@ export class InlineQuery {
     get location(): Location | null {
         if (this.raw.geo?._ !== 'geoPoint') return null
 
-        return (this._location ??= new Location(this.client, this.raw.geo))
+        return (this._location ??= new Location(this.raw.geo))
     }
 
     /**
@@ -76,19 +73,6 @@ export class InlineQuery {
      */
     get peerType(): PeerType | null {
         return this.raw.peerType ? PEER_TYPE_MAP[this.raw.peerType._] : null
-    }
-
-    /**
-     * Answer to this inline query
-     *
-     * @param results  Inline results
-     * @param params  Additional parameters
-     */
-    async answer(
-        results: InputInlineResult[],
-        params?: Parameters<TelegramClient['answerInlineQuery']>[2],
-    ): Promise<void> {
-        return this.client.answerInlineQuery(this.raw.queryId, results, params)
     }
 }
 

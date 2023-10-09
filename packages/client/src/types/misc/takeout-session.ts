@@ -1,6 +1,5 @@
-import { MustEqual, RpcCallOptions, tl } from '@mtcute/core'
+import { BaseTelegramClient, MustEqual, RpcCallOptions, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 
 /**
@@ -13,7 +12,7 @@ export class TakeoutSession {
     readonly id: tl.Long
 
     constructor(
-        readonly client: TelegramClient,
+        readonly client: BaseTelegramClient,
         session: tl.account.RawTakeout,
     ) {
         this.id = session.id
@@ -61,7 +60,7 @@ export class TakeoutSession {
      *     that call should be called via takeout session or not.
      *     Returning `true` will use takeout session, `false` will not.
      */
-    createProxy(predicate?: (obj: tl.TlObject) => boolean): TelegramClient {
+    createProxy(predicate?: (obj: tl.TlObject) => boolean): BaseTelegramClient {
         const boundCall: TakeoutSession['call'] = predicate ?
             (obj, params) => {
                 if (predicate(obj)) {

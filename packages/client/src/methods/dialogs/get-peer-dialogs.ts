@@ -1,36 +1,33 @@
-import { MaybeArray } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
-import { Dialog, InputPeerLike } from '../../types'
+import { Dialog } from '../../types/messages/dialog'
+import { InputPeerLike } from '../../types/peers'
+import { resolvePeerMany } from '../users/resolve-peer-many'
 
 /**
  * Get dialogs with certain peers.
  *
  * @param peers  Peers for which to fetch dialogs.
- * @internal
  */
-export async function getPeerDialogs(this: TelegramClient, peers: InputPeerLike): Promise<Dialog>
+export async function getPeerDialogs(client: BaseTelegramClient, peers: InputPeerLike): Promise<Dialog>
 /**
  * Get dialogs with certain peers.
  *
  * @param peers  Peers for which to fetch dialogs.
- * @internal
  */
-export async function getPeerDialogs(this: TelegramClient, peers: InputPeerLike[]): Promise<Dialog[]>
+export async function getPeerDialogs(client: BaseTelegramClient, peers: InputPeerLike[]): Promise<Dialog[]>
 
-/**
- * @internal
- */
+/** @internal */
 export async function getPeerDialogs(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peers: MaybeArray<InputPeerLike>,
 ): Promise<MaybeArray<Dialog>> {
     const isSingle = !Array.isArray(peers)
     if (isSingle) peers = [peers as InputPeerLike]
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.getPeerDialogs',
-        peers: await this.resolvePeerMany(peers as InputPeerLike[]).then((peers) =>
+        peers: await resolvePeerMany(client, peers as InputPeerLike[]).then((peers) =>
             peers.map((it) => ({
                 _: 'inputDialogPeer',
                 peer: it,
@@ -38,7 +35,7 @@ export async function getPeerDialogs(
         ),
     })
 
-    const dialogs = Dialog.parseTlDialogs(this, res)
+    const dialogs = Dialog.parseTlDialogs(res)
 
     return isSingle ? dialogs[0] : dialogs
 }

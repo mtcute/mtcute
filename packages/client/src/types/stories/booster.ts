@@ -1,6 +1,5 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../..'
 import { makeInspectable } from '../../utils'
 import { PeersIndex, User } from '../peers'
 
@@ -9,7 +8,6 @@ import { PeersIndex, User } from '../peers'
  */
 export class Booster {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawBooster,
         readonly _peers: PeersIndex,
     ) {}
@@ -28,7 +26,7 @@ export class Booster {
      * User who is boosting the channel
      */
     get user(): User {
-        return (this._user ??= new User(this.client, this._peers.user(this.raw.userId)))
+        return (this._user ??= new User(this._peers.user(this.raw.userId)))
     }
 }
 

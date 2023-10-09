@@ -15,6 +15,7 @@
         "./utils/platform/crypto.js": "./utils/platform/crypto.web.js",
         "./utils/platform/transport.js": "./utils/platform/transport.web.js",
         "./utils/platform/logging.js": "./utils/platform/logging.web.js",
+        "./utils/platform/random.js": "./utils/platform/random.web.js",
         "./storage/json-file.js": false
     },
     "dependencies": {
@@ -29,7 +30,6 @@
     "devDependencies": {
         "@mtcute/dispatcher": "workspace:^1.0.0",
         "@types/ws": "8.5.4",
-        "exit-hook": "^4.0.0",
         "ws": "8.13.0"
     }
 }

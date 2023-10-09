@@ -1,6 +1,6 @@
+import { BaseTelegramClient } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { SentCode } from '../../types'
 import { normalizePhoneNumber } from '../../utils/misc-utils'
 
@@ -8,10 +8,9 @@ import { normalizePhoneNumber } from '../../utils/misc-utils'
  * Send the confirmation code to the given phone number
  *
  * @returns  An object containing information about the sent confirmation code
- * @internal
  */
 export async function sendCode(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Phone number in international format */
         phone: string
@@ -19,11 +18,12 @@ export async function sendCode(
 ): Promise<SentCode> {
     const phone = normalizePhoneNumber(params.phone)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'auth.sendCode',
         phoneNumber: phone,
-        apiId: this.network._initConnectionParams.apiId,
-        apiHash: this._apiHash,
+        apiId: client.network._initConnectionParams.apiId,
+        // eslint-disable-next-line dot-notation
+        apiHash: client['_apiHash'],
         settings: { _: 'codeSettings' },
     })
 

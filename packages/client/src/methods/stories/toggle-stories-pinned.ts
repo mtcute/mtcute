@@ -1,16 +1,15 @@
-import { MaybeArray } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Toggle one or more stories pinned status
  *
  * @returns  IDs of stories that were toggled
- * @internal
  */
 export async function toggleStoriesPinned(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * Story ID(s) to toggle
@@ -32,9 +31,9 @@ export async function toggleStoriesPinned(
 ): Promise<number[]> {
     const { ids, pinned, peer = 'me' } = params
 
-    return await this.call({
+    return await client.call({
         _: 'stories.togglePinned',
-        peer: await this.resolvePeer(peer),
+        peer: await resolvePeer(client, peer),
         id: Array.isArray(ids) ? ids : [ids],
         pinned,
     })

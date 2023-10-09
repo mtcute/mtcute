@@ -1,9 +1,9 @@
-import { Long, tl } from '@mtcute/core'
+import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { ArrayPaginated, InputPeerLike, Message, PeersIndex } from '../../types'
 import { makeArrayPaginated } from '../../utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 // @exported
 export interface GetHistoryOffset {
@@ -21,10 +21,9 @@ const defaultOffset: GetHistoryOffset = {
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
  * @param params  Additional fetch parameters
- * @internal
  */
 export async function getHistory(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     params?: {
         /**
@@ -95,9 +94,9 @@ export async function getHistory(
 
     const addOffsetAdjusted = addOffset + (reverse ? -limit : 0)
 
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.getHistory',
         peer,
         offsetId,
@@ -112,7 +111,7 @@ export async function getHistory(
     assertTypeIsNot('getHistory', res, 'messages.messagesNotModified')
 
     const peers = PeersIndex.from(res)
-    const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(this, msg, peers))
+    const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(msg, peers))
 
     if (reverse) msgs.reverse()
 

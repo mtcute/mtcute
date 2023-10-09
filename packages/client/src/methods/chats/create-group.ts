@@ -1,20 +1,18 @@
-import { MaybeArray } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { Chat, InputPeerLike } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { resolvePeerMany } from '../users/resolve-peer-many'
 
 /**
  * Create a legacy group chat
  *
  * If you want to create a supergroup, use {@link createSupergroup}
  * instead.
- *
- * @internal
  */
 export async function createGroup(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * Group title
@@ -40,9 +38,9 @@ export async function createGroup(
 
     if (!Array.isArray(users)) users = [users]
 
-    const peers = await this.resolvePeerMany(users, normalizeToInputUser)
+    const peers = await resolvePeerMany(client, users, normalizeToInputUser)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.createChat',
         title,
         users: peers,
@@ -50,7 +48,7 @@ export async function createGroup(
 
     assertIsUpdatesGroup('messages.createChat', res)
 
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 
-    return new Chat(this, res.chats[0])
+    return new Chat(res.chats[0])
 }

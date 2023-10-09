@@ -1,5 +1,5 @@
-import { xorBufferInPlace } from '../buffer-utils'
-import { IEncryptionScheme } from './abstract'
+import type { IEncryptionScheme } from './abstract'
+import { xorBufferInPlace } from './utils'
 
 /**
  * AES mode of operation IGE implementation in JS

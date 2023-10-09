@@ -1,17 +1,19 @@
-import { getMarkedPeerId, MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, getMarkedPeerId, MtArgumentError, tl } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
-import {
-    BotKeyboard,
-    FormattedString,
-    InputMediaLike,
-    InputPeerLike,
-    Message,
-    MtMessageNotFoundError,
-    ReplyMarkup,
-} from '../../types'
+import { BotKeyboard, ReplyMarkup } from '../../types/bots/keyboards'
+import { MtMessageNotFoundError } from '../../types/errors'
+import { InputMediaLike } from '../../types/media/input-media'
+import { Message } from '../../types/messages/message'
+import { FormattedString } from '../../types/parser'
+import { InputPeerLike } from '../../types/peers'
 import { normalizeDate, normalizeMessageId } from '../../utils/misc-utils'
+import { _normalizeInputMedia } from '../files/normalize-input-media'
+import { resolvePeer } from '../users/resolve-peer'
+import { _findMessageInUpdate } from './find-in-update'
+import { _getDiscussionMessage } from './get-discussion-message'
+import { getMessages } from './get-messages'
+import { _parseEntities } from './parse-entities'
 
 /**
  * Send a single media (a photo or a document-based media)
@@ -23,10 +25,9 @@ import { normalizeDate, normalizeMessageId } from '../../utils/misc-utils'
  *     in {@link InputMedia.auto}
  * @param params  Additional sending parameters
  * @link InputMedia
- * @internal
  */
 export async function sendMedia(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     media: InputMediaLike | string,
     params?: {
@@ -141,9 +142,10 @@ export async function sendMedia(
         }
     }
 
-    const inputMedia = await this._normalizeInputMedia(media, params)
+    const inputMedia = await _normalizeInputMedia(client, media, params)
 
-    const [message, entities] = await this._parseEntities(
+    const [message, entities] = await _parseEntities(
+        client,
         // some types dont have `caption` field, and ts warns us,
         // but since it's JS, they'll just be `undefined` and properly
         // handled by _parseEntities method
@@ -152,13 +154,13 @@ export async function sendMedia(
         params.entities || (media as Extract<typeof media, { entities?: unknown }>).entities,
     )
 
-    let peer = await this.resolvePeer(chatId)
+    let peer = await resolvePeer(client, chatId)
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
 
     let replyTo = normalizeMessageId(params.replyTo)
 
     if (params.commentTo) {
-        [peer, replyTo] = await this._getDiscussionMessage(peer, normalizeMessageId(params.commentTo)!)
+        [peer, replyTo] = await _getDiscussionMessage(client, peer, normalizeMessageId(params.commentTo)!)
     }
 
     if (params.mustReply) {
@@ -166,14 +168,14 @@ export async function sendMedia(
             throw new MtArgumentError('mustReply used, but replyTo was not passed')
         }
 
-        const msg = await this.getMessages(peer, replyTo)
+        const msg = await getMessages(client, peer, replyTo)
 
         if (!msg) {
             throw new MtMessageNotFoundError(getMarkedPeerId(peer), replyTo, 'to reply to')
         }
     }
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.sendMedia',
         peer,
         media: inputMedia,
@@ -191,12 +193,10 @@ export async function sendMedia(
         entities,
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined,
+        sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
     })
 
-    const msg = this._findMessageInUpdate(res)
-
-    this._pushConversationMessage(msg)
+    const msg = _findMessageInUpdate(client, res)
 
     return msg
 }

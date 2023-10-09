@@ -1,6 +1,9 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { Booster } from '../../types/stories/booster'
+import { resolvePeer } from '../users/resolve-peer'
+import { getBoosters } from './get-boosters'
 
 /**
  * Iterate over boosters of a channel.
@@ -8,12 +11,11 @@ import { Booster } from '../../types/stories/booster'
  * Wrapper over {@link getBoosters}
  *
  * @returns  IDs of stories that were removed
- * @internal
  */
 export async function* iterBoosters(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peerId: InputPeerLike,
-    params?: Parameters<TelegramClient['getBoosters']>[1] & {
+    params?: Parameters<typeof getBoosters>[2] & {
         /**
          * Total number of boosters to fetch
          *
@@ -36,10 +38,10 @@ export async function* iterBoosters(
     let { offset } = params
     let current = 0
 
-    const peer = await this.resolvePeer(peerId)
+    const peer = await resolvePeer(client, peerId)
 
     for (;;) {
-        const res = await this.getBoosters(peer, {
+        const res = await getBoosters(client, peer, {
             offset,
             limit: Math.min(limit - current, chunkSize),
         })

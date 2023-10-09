@@ -1,7 +1,6 @@
 import { tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { Location } from './location'
 
@@ -30,10 +29,7 @@ export interface VenueSource {
 export class Venue {
     readonly type = 'venue' as const
 
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.RawMessageMediaVenue,
-    ) {}
+    constructor(readonly raw: tl.RawMessageMediaVenue) {}
 
     private _location?: Location
     /**
@@ -42,7 +38,7 @@ export class Venue {
     get location(): Location {
         if (!this._location) {
             assertTypeIs('Venue#location', this.raw.geo, 'geoPoint')
-            this._location = new Location(this.client, this.raw.geo)
+            this._location = new Location(this.raw.geo)
         }
 
         return this._location

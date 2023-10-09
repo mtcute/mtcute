@@ -1,9 +1,10 @@
-import { Long, tl } from '@mtcute/core'
+import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { ChatEvent, InputPeerLike, PeersIndex } from '../../types'
 import { InputChatEventFilters, normalizeChatEventFilters } from '../../types/peers/chat-event/filters'
 import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
+import { resolvePeerMany } from '../users/resolve-peer-many'
 
 /**
  * Get chat event log ("Recent actions" in official clients).
@@ -17,10 +18,9 @@ import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-
  * events have bigger event ID)
  *
  * @param params
- * @internal
  */
 export async function getChatEventLog(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     params?: {
         /**
@@ -74,15 +74,15 @@ export async function getChatEventLog(
 ): Promise<ChatEvent[]> {
     const { maxId = Long.ZERO, minId = Long.ZERO, query = '', limit = 100, users, filters } = params ?? {}
 
-    const channel = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
+    const channel = normalizeToInputChannel(await resolvePeer(client, chatId), chatId)
 
     const admins: tl.TypeInputUser[] | undefined = users ?
-        await this.resolvePeerMany(users, normalizeToInputUser) :
+        await resolvePeerMany(client, users, normalizeToInputUser) :
         undefined
 
     const { serverFilter, localFilter } = normalizeChatEventFilters(filters)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'channels.getAdminLog',
         channel,
         q: query,
@@ -100,7 +100,7 @@ export async function getChatEventLog(
     const results: ChatEvent[] = []
 
     for (const evt of res.events) {
-        const parsed = new ChatEvent(this, evt, peers)
+        const parsed = new ChatEvent(evt, peers)
 
         if (localFilter && (!parsed.action || !localFilter[parsed.action.type])) {
             continue

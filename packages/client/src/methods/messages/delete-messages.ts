@@ -1,19 +1,18 @@
-import { MaybeArray } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
 import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Delete messages, including service messages.
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
  * @param ids  Message(s) ID(s) to delete.
- * @internal
  */
 export async function deleteMessages(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     ids: MaybeArray<number>,
     params?: {
@@ -30,20 +29,20 @@ export async function deleteMessages(
 
     if (!Array.isArray(ids)) ids = [ids]
 
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
 
     let upd
 
     if (isInputPeerChannel(peer)) {
         const channel = normalizeToInputChannel(peer)
-        const res = await this.call({
+        const res = await client.call({
             _: 'channels.deleteMessages',
             channel,
             id: ids,
         })
         upd = createDummyUpdate(res.pts, res.ptsCount, peer.channelId)
     } else {
-        const res = await this.call({
+        const res = await client.call({
             _: 'messages.deleteMessages',
             id: ids,
             revoke,
@@ -51,5 +50,5 @@ export async function deleteMessages(
         upd = createDummyUpdate(res.pts, res.ptsCount)
     }
 
-    this._handleUpdate(upd)
+    client.network.handleUpdate(upd)
 }

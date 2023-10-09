@@ -1,25 +1,27 @@
-import { MaybeArray } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { ForumTopic, InputPeerLike } from '../../types'
 import { normalizeToInputChannel } from '../../utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Get a single forum topic by its ID
  *
  * @param chatId  Chat ID or username
- * @internal
  */
-export async function getForumTopicsById(this: TelegramClient, chatId: InputPeerLike, ids: number): Promise<ForumTopic>
+export async function getForumTopicsById(
+    client: BaseTelegramClient,
+    chatId: InputPeerLike,
+    ids: number,
+): Promise<ForumTopic>
 
 /**
  * Get forum topics by their IDs
  *
  * @param chatId  Chat ID or username
- * @internal
  */
 export async function getForumTopicsById(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     ids: number[],
 ): Promise<ForumTopic[]>
@@ -28,23 +30,22 @@ export async function getForumTopicsById(
  * Get forum topics by their IDs
  *
  * @param chatId  Chat ID or username
- * @internal
  */
 export async function getForumTopicsById(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     ids: MaybeArray<number>,
 ): Promise<MaybeArray<ForumTopic>> {
     const single = !Array.isArray(ids)
     if (single) ids = [ids as number]
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'channels.getForumTopicsByID',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId)),
+        channel: normalizeToInputChannel(await resolvePeer(client, chatId)),
         topics: ids as number[],
     })
 
-    const topics = ForumTopic.parseTlForumTopics(this, res)
+    const topics = ForumTopic.parseTlForumTopics(res)
 
     return single ? topics[0] : topics
 }

@@ -1,14 +1,14 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { InputFileLike } from '../../types'
+import { _normalizeInputMedia } from './normalize-input-media'
 
 /**
  * @internal
  */
 export async function _normalizeFileToDocument(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     file: InputFileLike | tl.TypeInputDocument,
     params: {
         progressCallback?: (uploaded: number, total: number) => void
@@ -18,7 +18,8 @@ export async function _normalizeFileToDocument(
         return file
     }
 
-    const media = await this._normalizeInputMedia(
+    const media = await _normalizeInputMedia(
+        client,
         {
             type: 'document',
             file,
@@ -27,8 +28,8 @@ export async function _normalizeFileToDocument(
         true,
     )
 
-    assertTypeIs('createStickerSet', media, 'inputMediaDocument')
-    assertTypeIs('createStickerSet', media.id, 'inputDocument')
+    assertTypeIs('_normalizeFileToDocument', media, 'inputMediaDocument')
+    assertTypeIs('_normalizeFileToDocument', media.id, 'inputDocument')
 
     return media.id
 }

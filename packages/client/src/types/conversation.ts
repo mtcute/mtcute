@@ -1,18 +1,28 @@
-/* eslint-disable dot-notation */
-import { getMarkedPeerId, MaybeAsync, MtArgumentError, MtTimeoutError, tl } from '@mtcute/core'
+import { BaseTelegramClient, getMarkedPeerId, MaybeAsync, MtArgumentError, MtTimeoutError, tl } from '@mtcute/core'
 import { AsyncLock, ControllablePromise, createControllablePromise, Deque } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../client'
-import { InputMediaLike } from './media'
-import { Message } from './messages'
-import { FormattedString } from './parser'
-import { InputPeerLike } from './peers'
-import { HistoryReadUpdate } from './updates'
+import { getPeerDialogs } from '../methods/dialogs/get-peer-dialogs'
+import { readHistory } from '../methods/messages/read-history'
+import { sendMedia } from '../methods/messages/send-media'
+import { sendMediaGroup } from '../methods/messages/send-media-group'
+import { sendText } from '../methods/messages/send-text'
+import { resolvePeer } from '../methods/users/resolve-peer'
+import type { Message } from './messages'
+import type { InputPeerLike } from './peers'
+import type { HistoryReadUpdate, ParsedUpdate } from './updates'
+import { ParametersSkip2 } from './utils'
 
 interface QueuedHandler<T> {
     promise: ControllablePromise<T>
     check?: (update: T) => MaybeAsync<boolean>
     timeout?: NodeJS.Timeout
+}
+
+const CONVERSATION_SYMBOL = Symbol('conversation')
+
+interface ConversationsState {
+    pendingConversations: Map<number, Conversation[]>
+    hasConversations: boolean
 }
 
 /**
@@ -44,12 +54,57 @@ export class Conversation {
     private _pendingRead: Map<number, QueuedHandler<void>> = new Map()
 
     constructor(
-        readonly client: TelegramClient,
+        readonly client: BaseTelegramClient,
         readonly chat: InputPeerLike,
     ) {
-        this._onNewMessage = this._onNewMessage.bind(this)
-        this._onEditMessage = this._onEditMessage.bind(this)
-        this._onHistoryRead = this._onHistoryRead.bind(this)
+        if (!(CONVERSATION_SYMBOL in client)) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (client as any)[CONVERSATION_SYMBOL] = {
+                pendingConversations: new Map(),
+                hasConversations: false,
+            } satisfies ConversationsState
+        }
+    }
+
+    private static _getState(client: BaseTelegramClient): ConversationsState {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (client as any)[CONVERSATION_SYMBOL] as ConversationsState
+    }
+
+    static handleUpdate(client: BaseTelegramClient, update: ParsedUpdate): void {
+        const state = Conversation._getState(client)
+        if (!state?.hasConversations) return
+
+        let chatId
+
+        switch (update.name) {
+            case 'new_message':
+            case 'edit_message':
+                chatId = getMarkedPeerId(update.data.raw.peerId)
+                break
+            case 'history_read':
+                chatId = update.data.chatId
+                break
+            default:
+                return
+        }
+
+        const conv = state.pendingConversations.get(chatId)
+        if (!conv) return
+
+        for (const c of conv) {
+            switch (update.name) {
+                case 'new_message':
+                    c._onNewMessage(update.data)
+                    break
+                case 'edit_message':
+                    c._onEditMessage(update.data)
+                    break
+                case 'history_read':
+                    c._onHistoryRead(update.data)
+                    break
+            }
+        }
     }
 
     /**
@@ -95,10 +150,10 @@ export class Conversation {
         if (this._started) return
 
         this._started = true
-        this._inputPeer = await this.client.resolvePeer(this.chat)
+        this._inputPeer = await resolvePeer(this.client, this.chat)
         this._chatId = getMarkedPeerId(this._inputPeer)
 
-        const dialog = await this.client.getPeerDialogs(this._inputPeer)
+        const dialog = await getPeerDialogs(this.client, this._inputPeer)
         const lastMessage = dialog.lastMessage
 
         if (lastMessage) {
@@ -110,11 +165,13 @@ export class Conversation {
         this.client.on('edit_message', this._onEditMessage)
         this.client.on('history_read', this._onHistoryRead)
 
-        if (this.client['_pendingConversations'].has(this._chatId)) {
-            this.client['_pendingConversations'].set(this._chatId, [])
+        const state = Conversation._getState(this.client)
+
+        if (!state.pendingConversations.has(this._chatId)) {
+            state.pendingConversations.set(this._chatId, [])
         }
-        this.client['_pendingConversations'].get(this._chatId)!.push(this)
-        this.client['_hasConversations'] = true
+        state.pendingConversations.get(this._chatId)!.push(this)
+        state.hasConversations = true
     }
 
     /**
@@ -127,7 +184,9 @@ export class Conversation {
         this.client.off('edit_message', this._onEditMessage)
         this.client.off('history_read', this._onHistoryRead)
 
-        const pending = this.client['_pendingConversations'].get(this._chatId)
+        const state = Conversation._getState(this.client)
+
+        const pending = state.pendingConversations.get(this._chatId)
         const pendingIdx = pending?.indexOf(this) ?? -1
 
         if (pendingIdx > -1) {
@@ -135,9 +194,9 @@ export class Conversation {
             pending!.splice(pendingIdx, 1)
         }
         if (pending && !pending.length) {
-            this.client['_pendingConversations'].delete(this._chatId)
+            state.pendingConversations.delete(this._chatId)
         }
-        this.client['_hasConversations'] = Boolean(this.client['_pendingConversations'].size)
+        state.hasConversations = Boolean(state.pendingConversations.size)
 
         // reset pending status
         this._queuedNewMessage.clear()
@@ -149,65 +208,67 @@ export class Conversation {
         this._started = false
     }
 
+    private _recordMessage(msg: Message, incoming = false): Message {
+        this._lastMessage = msg.id
+        if (incoming) this._lastReceivedMessage = msg.id
+
+        return msg
+    }
+
     /**
      * Send a text message to this conversation.
      *
-     * @param text  Text of the message
-     * @param params
+     * Wrapper over {@link sendText}
      */
-    async sendText(
-        text: string | FormattedString<string>,
-        params?: Parameters<TelegramClient['sendText']>[2],
-    ): ReturnType<TelegramClient['sendText']> {
+    async sendText(...params: ParametersSkip2<typeof sendText>): ReturnType<typeof sendText> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
         }
 
-        return this.client.sendText(this._inputPeer, text, params)
+        return this._recordMessage(await sendText(this.client, this._inputPeer, ...params))
     }
 
     /**
      * Send a media to this conversation.
      *
-     * @param media  Media to send
-     * @param params
+     * Wrapper over {@link sendMedia}
      */
-    async sendMedia(
-        media: InputMediaLike | string,
-        params?: Parameters<TelegramClient['sendMedia']>[2],
-    ): ReturnType<TelegramClient['sendMedia']> {
+    async sendMedia(...params: ParametersSkip2<typeof sendMedia>): ReturnType<typeof sendMedia> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
         }
 
-        return this.client.sendMedia(this._inputPeer, media, params)
+        return this._recordMessage(await sendMedia(this.client, this._inputPeer, ...params))
     }
 
     /**
      * Send a media group to this conversation.
      *
-     * @param medias  Medias to send
-     * @param params
+     * Wrapper over {@link sendMediaGroup}
      */
-    async sendMediaGroup(
-        medias: (InputMediaLike | string)[],
-        params?: Parameters<TelegramClient['sendMediaGroup']>[2],
-    ): ReturnType<TelegramClient['sendMediaGroup']> {
+    async sendMediaGroup(...params: ParametersSkip2<typeof sendMediaGroup>): ReturnType<typeof sendMediaGroup> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
         }
 
-        return this.client.sendMediaGroup(this._inputPeer, medias, params)
+        const msgs = await sendMediaGroup(this.client, this._inputPeer, ...params)
+
+        this._recordMessage(msgs[msgs.length - 1])
+
+        return msgs
     }
 
     /**
      * Mark the conversation as read up to a certain point.
      *
      * By default, reads until the last message.
-     * You can pass `null` to read the entire conversation,
+     * You can pass `message=null` to read the entire conversation,
      * or pass message ID to read up until that ID.
      */
-    markRead(message?: number | null, clearMentions = true): Promise<void> {
+    markRead({
+        message,
+        clearMentions = true,
+    }: { message?: number | null; clearMentions?: boolean } = {}): Promise<void> {
         if (!this._started) {
             throw new MtArgumentError("Conversation hasn't started yet")
         }
@@ -218,17 +279,18 @@ export class Conversation {
             message = this._lastMessage ?? 0
         }
 
-        return this.client.readHistory(this._inputPeer, { maxId: message, clearMentions })
+        return readHistory(this.client, this._inputPeer, { maxId: message, clearMentions })
     }
 
     /**
      * Helper method that calls {@link start},
-     * the provided function and the {@link stop}.
+     * the provided function and then {@link stop}.
      *
      * It is preferred that you use this function rather than
      * manually starting and stopping the conversation.
      *
-     * If you don't stop the conversation, this *will* lead to memory leaks.
+     * If you don't stop the conversation when you're done,
+     * it *will* lead to memory leaks.
      *
      * @param handler
      */
@@ -256,8 +318,8 @@ export class Conversation {
      * Wait for a new message in the conversation
      *
      * @param filter  Filter for the handler. You can use any filter you can use for dispatcher
-     * @param timeout  Timeout for the handler in ms, def. 15 sec. Pass `null` to disable.
-     *   When the timeout is reached, `TimeoutError` is thrown.
+     * @param [timeout=15000]  Timeout for the handler in ms. Pass `null` to disable.
+     *   When the timeout is reached, `MtTimeoutError` is thrown.
      */
     waitForNewMessage(
         filter?: (msg: Message) => MaybeAsync<boolean>,
@@ -453,7 +515,7 @@ export class Conversation {
         }
 
         // check if the message is already read
-        const dialog = await this.client.getPeerDialogs(this._inputPeer)
+        const dialog = await getPeerDialogs(this.client, this._inputPeer)
         if (dialog.lastRead >= msgId) return
 
         const promise = createControllablePromise<void>()
@@ -495,7 +557,7 @@ export class Conversation {
                     this._queuedNewMessage.popFront()
                 }
             } catch (e: unknown) {
-                this.client['_emitError'](e)
+                this.client._emitError(e)
             }
 
             this._lastMessage = this._lastReceivedMessage = msg.id
@@ -525,7 +587,7 @@ export class Conversation {
                 this._pendingEditMessage.delete(msg.id)
             }
         })().catch((e) => {
-            this.client['_emitError'](e)
+            this.client._emitError(e)
         })
     }
 

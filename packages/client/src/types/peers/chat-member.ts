@@ -1,7 +1,6 @@
 import { tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { ChatPermissions } from './chat-permissions'
 import { PeersIndex } from './index'
@@ -23,7 +22,6 @@ export type ChatMemberStatus = 'creator' | 'admin' | 'member' | 'restricted' | '
  */
 export class ChatMember {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.TypeChatParticipant | tl.TypeChannelParticipant,
         readonly _peers: PeersIndex,
     ) {}
@@ -39,10 +37,10 @@ export class ChatMember {
                 case 'channelParticipantLeft':
                     assertTypeIs('ChatMember#user (raw.peer)', this.raw.peer, 'peerUser')
 
-                    this._user = new User(this.client, this._peers.user(this.raw.peer.userId))
+                    this._user = new User(this._peers.user(this.raw.peer.userId))
                     break
                 default:
-                    this._user = new User(this.client, this._peers.user(this.raw.userId))
+                    this._user = new User(this._peers.user(this.raw.userId))
                     break
             }
         }
@@ -118,7 +116,7 @@ export class ChatMember {
     get invitedBy(): User | null {
         if (this._invitedBy === undefined) {
             if ('inviterId' in this.raw && this.raw.inviterId) {
-                this._invitedBy = new User(this.client, this._peers.user(this.raw.inviterId))
+                this._invitedBy = new User(this._peers.user(this.raw.inviterId))
             } else {
                 this._invitedBy = null
             }
@@ -136,7 +134,7 @@ export class ChatMember {
     get promotedBy(): User | null {
         if (this._promotedBy === undefined) {
             if (this.raw._ === 'channelParticipantAdmin') {
-                this._promotedBy = new User(this.client, this._peers.user(this.raw.promotedBy))
+                this._promotedBy = new User(this._peers.user(this.raw.promotedBy))
             } else {
                 this._promotedBy = null
             }
@@ -154,7 +152,7 @@ export class ChatMember {
     get restrictedBy(): User | null {
         if (this._restrictedBy === undefined) {
             if (this.raw._ === 'channelParticipantBanned') {
-                this._restrictedBy = new User(this.client, this._peers.user(this.raw.kickedBy))
+                this._restrictedBy = new User(this._peers.user(this.raw.kickedBy))
             } else {
                 this._restrictedBy = null
             }

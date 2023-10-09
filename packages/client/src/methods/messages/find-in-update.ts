@@ -1,14 +1,14 @@
-import { MtTypeAssertionError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtTypeAssertionError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
-import { Message, PeersIndex } from '../../types'
+import { Message } from '../../types/messages'
+import { PeersIndex } from '../../types/peers'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /** @internal */
-export function _findMessageInUpdate(this: TelegramClient, res: tl.TypeUpdates, isEdit = false): Message {
+export function _findMessageInUpdate(client: BaseTelegramClient, res: tl.TypeUpdates, isEdit = false): Message {
     assertIsUpdatesGroup('_findMessageInUpdate', res)
 
-    this._handleUpdate(res, true)
+    client.network.handleUpdate(res, true)
 
     for (const u of res.updates) {
         if (
@@ -20,7 +20,7 @@ export function _findMessageInUpdate(this: TelegramClient, res: tl.TypeUpdates, 
         ) {
             const peers = PeersIndex.from(res)
 
-            return new Message(this, u.message, peers, u._ === 'updateNewScheduledMessage')
+            return new Message(u.message, peers, u._ === 'updateNewScheduledMessage')
         }
     }
 

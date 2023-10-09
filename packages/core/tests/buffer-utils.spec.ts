@@ -7,9 +7,8 @@ import {
     encodeUrlSafeBase64,
     parseUrlSafeBase64,
     randomBytes,
-    xorBuffer,
-    xorBufferInPlace,
 } from '../src/utils/buffer-utils'
+import { xorBuffer, xorBufferInPlace } from '../src/utils/crypto/utils'
 
 describe('buffersEqual', () => {
     it('should return true for equal buffers', () => {

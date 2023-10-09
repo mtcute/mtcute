@@ -12,10 +12,9 @@ import {
     PartialOnly,
     tl,
 } from '@mtcute/core'
-import { AsyncLock, ConditionVariable, Deque, Logger, SortedLinkedList } from '@mtcute/core/utils'
 import { tdFileId } from '@mtcute/file-id'
 
-import { _onAuthorization } from './methods/auth/_initialize'
+import { _onAuthorization, AuthState, getAuthState } from './methods/auth/_state'
 import { checkPassword } from './methods/auth/check-password'
 import { getPasswordHint } from './methods/auth/get-password-hint'
 import { logOut } from './methods/auth/log-out'
@@ -88,7 +87,6 @@ import { addContact } from './methods/contacts/add-contact'
 import { deleteContacts } from './methods/contacts/delete-contacts'
 import { getContacts } from './methods/contacts/get-contacts'
 import { importContacts } from './methods/contacts/import-contacts'
-import { _pushConversationMessage } from './methods/dialogs/_init-conversation'
 import { createFolder } from './methods/dialogs/create-folder'
 import { deleteFolder } from './methods/dialogs/delete-folder'
 import { editFolder } from './methods/dialogs/edit-folder'
@@ -168,16 +166,17 @@ import { unpinAllMessages } from './methods/messages/unpin-all-messages'
 import { unpinMessage } from './methods/messages/unpin-message'
 import { initTakeoutSession } from './methods/misc/init-takeout-session'
 import { _normalizePrivacyRules } from './methods/misc/normalize-privacy-rules'
+import { getParseModesState, ParseModesState } from './methods/parse-modes/_state'
 import {
     getParseMode,
     registerParseMode,
     setDefaultParseMode,
     unregisterParseMode,
 } from './methods/parse-modes/parse-modes'
-import { changeCloudPassword } from './methods/pasword/change-cloud-password'
-import { enableCloudPassword } from './methods/pasword/enable-cloud-password'
-import { cancelPasswordEmail, resendPasswordEmail, verifyPasswordEmail } from './methods/pasword/password-email'
-import { removeCloudPassword } from './methods/pasword/remove-cloud-password'
+import { changeCloudPassword } from './methods/password/change-cloud-password'
+import { enableCloudPassword } from './methods/password/enable-cloud-password'
+import { cancelPasswordEmail, resendPasswordEmail, verifyPasswordEmail } from './methods/password/password-email'
+import { removeCloudPassword } from './methods/password/remove-cloud-password'
 import { addStickerToSet } from './methods/stickers/add-sticker-to-set'
 import { createStickerSet } from './methods/stickers/create-sticker-set'
 import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set'
@@ -214,22 +213,15 @@ import { sendStory } from './methods/stories/send-story'
 import { sendStoryReaction } from './methods/stories/send-story-reaction'
 import { togglePeerStoriesArchived } from './methods/stories/toggle-peer-stories-archived'
 import { toggleStoriesPinned } from './methods/stories/toggle-stories-pinned'
+import { enableUpdatesProcessing, makeParsedUpdateHandler, ParsedUpdateHandlerParams } from './methods/updates'
 import {
-    _dispatchUpdate,
-    _fetchUpdatesState,
-    _handleUpdate,
-    _keepAliveAction,
-    _loadStorage,
-    _onStop,
-    _saveStorage,
-    _updatesLoop,
     catchUp,
     enableRps,
     getCurrentRpsIncoming,
     getCurrentRpsProcessing,
     startUpdatesLoop,
     stopUpdatesLoop,
-} from './methods/updates'
+} from './methods/updates/manager'
 import { blockUser } from './methods/users/block-user'
 import { deleteProfilePhotos } from './methods/users/delete-profile-photos'
 import { editCloseFriends, editCloseFriendsRaw } from './methods/users/edit-close-friends'
@@ -269,7 +261,6 @@ import {
     ChatMemberUpdate,
     ChatPreview,
     ChosenInlineResult,
-    Conversation,
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     Dialog,
@@ -325,84 +316,14 @@ import {
     UserStatusUpdate,
     UserTypingUpdate,
 } from './types'
-import { RpsMeter } from './utils/rps-meter'
+import { Conversation } from './types/conversation'
 
-// from methods/_options.ts
+// from methods/_init.ts
 interface TelegramClientOptions extends BaseTelegramClientOptions {
     /**
-     * **ADVANCED**
-     *
-     * Whether to disable no-dispatch mechanism.
-     *
-     * No-dispatch is a mechanism that allows you to call methods
-     * that return updates and correctly handle them, without
-     * actually dispatching them to the event handlers.
-     *
-     * In other words, the following code will work differently:
-     * ```ts
-     * dp.onNewMessage(console.log)
-     * console.log(await tg.sendText('me', 'hello'))
-     * ```
-     * - if `disableNoDispatch` is `true`, the sent message will be
-     *   dispatched to the event handler, thus it will be printed twice
-     * - if `disableNoDispatch` is `false`, the sent message will not be
-     *   dispatched to the event handler, thus it will onlt be printed once
-     *
-     * Disabling it also may improve performance, but it's not guaranteed.
-     *
-     * @default false
+     * Parameters for updates manager.
      */
-    disableNoDispatch?: boolean
-
-    /**
-     * Limit of {@link resolvePeerMany} internal async pool.
-     *
-     * Higher value means more parallel requests, but also
-     * higher risk of getting flood-wait errors.
-     * Most resolves will however likely be a DB cache hit.
-     *
-     * Only change this if you know what you're doing.
-     *
-     * @default 8
-     */
-    resolvePeerManyPoolLimit?: number
-
-    /**
-     * When non-zero, allows the library to automatically handle Telegram
-     * media groups (e.g. albums) in {@link MessageGroup} updates
-     * in a given time interval (in ms).
-     *
-     * **Note**: this does not catch messages that happen to be consecutive,
-     * only messages belonging to the same "media group".
-     *
-     * This will cause up to `messageGroupingInterval` delay
-     * in handling media group messages.
-     *
-     * This option only applies to `new_message` updates,
-     * and the updates being grouped **will not** be dispatched on their own.
-     *
-     * Recommended value is 250 ms.
-     *
-     * @default  0 (disabled)
-     */
-    messageGroupingInterval?: number
-}
-// from methods/updates.ts
-interface PendingUpdateContainer {
-    upd: tl.TypeUpdates
-    seqStart: number
-    seqEnd: number
-}
-// from methods/updates.ts
-interface PendingUpdate {
-    update: tl.TypeUpdate
-    channelId?: number
-    pts?: number
-    ptsBefore?: number
-    qts?: number
-    qtsBefore?: number
-    timeout?: number
-    peers?: PeersIndex
+    updates?: Omit<ParsedUpdateHandlerParams, 'onUpdate' | 'onRawUpdate'>
 }
 
 export interface TelegramClient extends BaseTelegramClient {
@@ -554,7 +475,9 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     on(name: 'delete_story', handler: (upd: DeleteStoryUpdate) => void): this
 
-    _onAuthorization(auth: tl.auth.TypeAuthorization, bot?: boolean): Promise<User>
+    getAuthState(): AuthState
+
+    _onAuthorization(auth: tl.auth.TypeAuthorization, bot?: boolean): User
     /**
      * Check your Two-Step verification password and log in
      *
@@ -601,7 +524,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * The type of the code to be re-sent is specified in the `nextType` attribute of
      * {@link SentCode} object returned by {@link sendCode}
-     *
      * **Available**: 👤 users only
      *
      */
@@ -622,10 +544,10 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * **Available**: ✅ both users and bots
      *
-     * @param params  Parameters to be passed to {@link TelegramClient.start}
-     * @param then  Function to be called after {@link TelegramClient.start} returns
+     * @param params  Parameters to be passed to {@link start}
+     * @param then  Function to be called after {@link start} returns
      */
-    run(params: Parameters<TelegramClient['start']>[0], then?: (user: User) => void | Promise<void>): void
+    run(params: Parameters<typeof start>[1], then?: (user: User) => void | Promise<void>): void
     /**
      * Send the confirmation code to the given phone number
      *
@@ -717,7 +639,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * This method is intended for simple and fast use in automated
      * scripts and bots. If you are developing a custom client,
      * you'll probably need to use other auth methods.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -778,28 +699,11 @@ export interface TelegramClient extends BaseTelegramClient {
          * to show a GUI alert of some kind.
          * Defaults to `console.log`.
          *
-         * This method is called *before* {@link TelegramClient.start.params.code}.
+         * This method is called *before* {@link start.params.code}.
          *
          * @param code
          */
         codeSentCallback?: (code: SentCode) => MaybeAsync<void>
-
-        /**
-         * Whether to "catch up" (load missed updates).
-         * Only applicable if the saved session already
-         * contained authorization and updates state.
-         *
-         * Note: you should register your handlers
-         * before calling `start()`, otherwise they will
-         * not be called.
-         *
-         * Note: In case the storage was not properly
-         * closed the last time, "catching up" might
-         * result in duplicate updates.
-         *
-         * Defaults to `false`.
-         */
-        catchUp?: boolean
     }): Promise<User>
     /**
      * Send an answer to a callback query.
@@ -959,7 +863,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * Does the same as passing `null` to  {@link setMyCommands}
      *
      * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -978,7 +881,6 @@ export interface TelegramClient extends BaseTelegramClient {
     }): Promise<void>
     /**
      * Gets information about a bot the current uzer owns (or the current bot)
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -997,7 +899,6 @@ export interface TelegramClient extends BaseTelegramClient {
     }): Promise<tl.bots.RawBotInfo>
     /**
      * Fetches the menu button set for the given user.
-     *
      * **Available**: 🤖 bots only
      *
      */
@@ -1042,7 +943,6 @@ export interface TelegramClient extends BaseTelegramClient {
     }): Promise<tl.messages.TypeBotCallbackAnswer>
     /**
      * Get high scores of a game
-     *
      * **Available**: 🤖 bots only
      *
      */
@@ -1073,7 +973,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * and user language. If they are not set, empty set is returned.
      *
      * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -1096,7 +995,6 @@ export interface TelegramClient extends BaseTelegramClient {
     ): Promise<tl.TypeBotCommandScope>
     /**
      * Sets information about a bot the current uzer owns (or the current bot)
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -1124,7 +1022,6 @@ export interface TelegramClient extends BaseTelegramClient {
     }): Promise<void>
     /**
      * Sets a menu button for the given user.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -1193,7 +1090,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * Set or delete commands for the current bot and the given scope
      *
      * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
-     *
      * **Available**: 🤖 bots only
      *
      */
@@ -1219,7 +1115,6 @@ export interface TelegramClient extends BaseTelegramClient {
     }): Promise<void>
     /**
      * Sets the default chat permissions for the bot in the supergroup or channel.
-     *
      * **Available**: 🤖 bots only
      *
      */
@@ -1299,7 +1194,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * If you want to create a supergroup, use {@link createSupergroup}
      * instead.
-     *
      * **Available**: 👤 users only
      *
      */
@@ -1389,9 +1283,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     deleteGroup(chatId: InputPeerLike): Promise<void>
     /**
-     * Delete communication history (for private chats
-     * and legacy groups)
-     *
+     * Delete communication history (for private chats and legacy groups)
      * **Available**: 👤 users only
      *
      */
@@ -1420,7 +1312,6 @@ export interface TelegramClient extends BaseTelegramClient {
     ): Promise<void>
     /**
      * Delete all messages of a user (or channel) in a supergroup
-     *
      * **Available**: 👤 users only
      *
      */
@@ -1432,7 +1323,6 @@ export interface TelegramClient extends BaseTelegramClient {
     }): Promise<void>
     /**
      * Edit supergroup/channel admin rights of a user.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -1630,14 +1520,14 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * Small wrapper over {@link getChatEventLog}
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  Chat ID
      * @param params
      */
     iterChatEventLog(
         chatId: InputPeerLike,
-        params?: Parameters<TelegramClient['getChatEventLog']>[1] & {
+        params?: Parameters<typeof getChatEventLog>[2] & {
             /**
              * Total number of events to return.
              *
@@ -1668,10 +1558,10 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     iterChatMembers(
         chatId: InputPeerLike,
-        params?: Parameters<TelegramClient['getChatMembers']>[1] & {
+        params?: Parameters<typeof getChatMembers>[2] & {
             /**
              * Chunk size, which will be passed as `limit` parameter
-             * to {@link TelegramClient.getChatMembers}. Usually you shouldn't care about this.
+             * to {@link getChatMembers}. Usually you shouldn't care about this.
              *
              * Defaults to `200`
              */
@@ -1696,7 +1586,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * Kick a user from a chat.
      *
      * This effectively bans a user and immediately unbans them.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -1709,7 +1598,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Leave a group chat, supergroup or channel
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  Chat ID or username
      */
@@ -1740,7 +1629,6 @@ export interface TelegramClient extends BaseTelegramClient {
     reorderUsernames(peerId: InputPeerLike, order: string[]): Promise<void>
     /**
      * Restrict a user in a supergroup.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -1811,7 +1699,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * Set a new chat photo or video.
      *
      * You must be an administrator and have the appropriate permissions.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -1888,7 +1775,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * > **Note**: non-collectible usernames must still be changed
      * > using {@link setUsername}/{@link setChatUsername}
-     *
      * **Available**: 👤 users only
      *
      */
@@ -1946,7 +1832,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * just allows the user to join the chat again, if they want.
      *
      * This method acts as a no-op in case a legacy group is passed.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -1965,7 +1850,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * just allows the user to join the chat again, if they want.
      *
      * This method acts as a no-op in case a legacy group is passed.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -1978,7 +1862,6 @@ export interface TelegramClient extends BaseTelegramClient {
     }): Promise<void>
     /**
      * Add an existing Telegram user as a contact
-     *
      * **Available**: 👤 users only
      *
      */
@@ -2041,8 +1924,6 @@ export interface TelegramClient extends BaseTelegramClient {
     importContacts(
         contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[],
     ): Promise<tl.contacts.RawImportedContacts>
-
-    _pushConversationMessage(msg: Message, incoming?: boolean): void
     /**
      * Create a folder from given parameters
      *
@@ -2089,7 +1970,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * > accurate since you can set the same title and/or emoji
      * > to multiple folders.
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param params  Search parameters. At least one must be set.
      */
@@ -2245,7 +2126,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * > **Note**: This method _will_ download the entire file
      * > into memory at once. This might cause an issue, so use wisely!
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param params  File download parameters
      */
@@ -2254,7 +2135,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Download a remote file to a local file (only for NodeJS).
      * Promise will resolve once the download is complete.
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param filename  Local file name to which the remote file will be downloaded
      * @param params  File download parameters
@@ -2274,7 +2155,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Download a file and return it as a Node readable stream,
      * streaming file contents.
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param params  File download parameters
      */
@@ -2292,7 +2173,6 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Normalize a {@link InputFileLike} to `InputFile`,
      * uploading it if needed.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -2308,7 +2188,6 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Normalize an {@link InputMediaLike} to `InputMedia`,
      * uploading the file if needed.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -2523,13 +2402,13 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Iterate over forum topics. Wrapper over {@link getForumTopics}.
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  Chat ID or username
      */
     iterForumTopics(
         chatId: InputPeerLike,
-        params?: Parameters<TelegramClient['getForumTopics']>[1] & {
+        params?: Parameters<typeof getForumTopics>[2] & {
             /**
              * Maximum number of topics to return.
              *
@@ -2547,7 +2426,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * Reorder pinned forum topics
      *
      * Only admins with `manageTopics` permission can do this.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -2588,7 +2466,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * Toggle whether a topic in a forum is pinned
      *
      * Only admins with `manageTopics` permission can do this.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -2816,7 +2693,6 @@ export interface TelegramClient extends BaseTelegramClient {
     getPrimaryInviteLink(chatId: InputPeerLike): Promise<ChatInviteLink>
     /**
      * Approve or deny multiple join requests to a chat.
-     *
      * **Available**: 👤 users only
      *
      */
@@ -2832,7 +2708,6 @@ export interface TelegramClient extends BaseTelegramClient {
     }): Promise<void>
     /**
      * Approve or deny join request to a chat.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -2848,14 +2723,14 @@ export interface TelegramClient extends BaseTelegramClient {
      * Iterate over users who have joined
      * the chat with the given invite link.
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  Chat ID
      * @param params  Additional params
      */
     iterInviteLinkMembers(
         chatId: InputPeerLike,
-        params?: Parameters<TelegramClient['getInviteLinkMembers']>[1] & {
+        params?: Parameters<typeof getInviteLinkMembers>[2] & {
             /**
              * Maximum number of users to return
              *
@@ -2879,7 +2754,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * (i.e. `adminId = "self"`), as a creator you can get
      * any other admin's links.
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  Chat ID
      * @param adminId  Admin who created the links
@@ -2887,7 +2762,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     iterInviteLinks(
         chatId: InputPeerLike,
-        params?: Parameters<TelegramClient['getInviteLinks']>[1] & {
+        params?: Parameters<typeof getInviteLinks>[2] & {
             /**
              * Limit the number of invite links to be fetched.
              * By default, all links are fetched.
@@ -2920,7 +2795,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * Once closed, poll can't be re-opened, and nobody
      * will be able to vote in it
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -3507,14 +3381,14 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Iterate over chat history. Wrapper over {@link getHistory}
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param params  Additional fetch parameters
      */
     iterHistory(
         chatId: InputPeerLike,
-        params?: Parameters<TelegramClient['getHistory']>[1] & {
+        params?: Parameters<typeof getHistory>[2] & {
             /**
              * Limits the number of messages to be retrieved.
              *
@@ -3535,7 +3409,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * Wrapper over {@link getReactionUsers}.
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  Chat ID
      * @param messageId  Message ID
@@ -3544,7 +3418,7 @@ export interface TelegramClient extends BaseTelegramClient {
     iterReactionUsers(
         chatId: InputPeerLike,
         messageId: number,
-        params?: Parameters<TelegramClient['getReactionUsers']>[2] & {
+        params?: Parameters<typeof getReactionUsers>[3] & {
             /**
              * Limit the number of events returned.
              *
@@ -3567,12 +3441,12 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * **Note**: Due to Telegram limitations, you can only get up to ~10000 messages
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param params  Search parameters
      */
     iterSearchGlobal(
-        params?: Parameters<TelegramClient['searchGlobal']>[0] & {
+        params?: Parameters<typeof searchGlobal>[1] & {
             /**
              * Limits the number of messages to be retrieved.
              *
@@ -3594,13 +3468,13 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * Iterable version of {@link searchMessages}
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param params  Additional search parameters
      */
     iterSearchMessages(
-        params?: Parameters<TelegramClient['searchMessages']>[0] & {
+        params?: Parameters<typeof searchMessages>[1] & {
             /**
              * Limits the number of messages to be retrieved.
              *
@@ -3834,10 +3708,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * and if the message contains an invoice,
      * it can't be copied.
      *
-     * > **Note**: if you already have {@link Message} object,
-     * > use {@link Message.sendCopy} instead, since that is
-     * > much more efficient, and that is what this method wraps.
-     *
      * **Available**: ✅ both users and bots
      *
      * @param params
@@ -3923,7 +3793,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * To add a caption to the group, add caption to the first
      * media in the group and don't add caption for any other.
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param medias  Medias contained in the message.
@@ -4018,7 +3888,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Send a single media (a photo or a document-based media)
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param media
@@ -4176,7 +4046,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Send a text message
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
      * @param text  Text of the message
@@ -4306,7 +4176,6 @@ export interface TelegramClient extends BaseTelegramClient {
     ): Promise<void>
     /**
      * Send or retract a vote in a poll.
-     *
      * **Available**: 👤 users only
      *
      */
@@ -4327,7 +4196,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * Translate message text to a given language.
      *
      * Returns `null` if it could not translate the message.
-     *
      * **Available**: 👤 users only
      *
      */
@@ -4391,11 +4259,12 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Normalize {@link InputPrivacyRule}[] to `tl.TypeInputPrivacyRule`,
      * resolving the peers if needed.
-     *
      * **Available**: ✅ both users and bots
      *
      */
     _normalizePrivacyRules(rules: InputPrivacyRule[]): Promise<tl.TypeInputPrivacyRule[]>
+
+    getParseModesState(): ParseModesState
     /**
      * Register a given {@link IMessageEntityParser} as a parse mode
      * for messages. When this method is first called, given parse
@@ -4439,7 +4308,6 @@ export interface TelegramClient extends BaseTelegramClient {
     setDefaultParseMode(name: string): void
     /**
      * Change your 2FA password
-     *
      * **Available**: 👤 users only
      *
      */
@@ -4458,7 +4326,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * thrown, and you should use {@link verifyPasswordEmail},
      * {@link resendPasswordEmail} or {@link cancelPasswordEmail},
      * and the call this method again
-     *
      * **Available**: 👤 users only
      *
      */
@@ -4480,14 +4347,12 @@ export interface TelegramClient extends BaseTelegramClient {
     verifyPasswordEmail(code: string): Promise<void>
     /**
      * Resend the code to verify an email to use as 2FA recovery method.
-     *
      * **Available**: 👤 users only
      *
      */
     resendPasswordEmail(): Promise<void>
     /**
      * Cancel the code that was sent to verify an email to use as 2FA recovery method
-     *
      * **Available**: 👤 users only
      *
      */
@@ -4632,7 +4497,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * > the packs, that does not include the stickers themselves.
      * > Use {@link StickerSet.getFull} or {@link getStickerSet}
      * > to get a stickerset that will include the stickers
-     *
      * **Available**: 👤 users only
      *
      */
@@ -4813,7 +4677,6 @@ export interface TelegramClient extends BaseTelegramClient {
     _findStoryInUpdate(res: tl.TypeUpdates): Story
     /**
      * Get all stories (e.g. to load the top bar)
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -4869,7 +4732,6 @@ export interface TelegramClient extends BaseTelegramClient {
     getPeerStories(peerId: InputPeerLike): Promise<PeerStories>
     /**
      * Get profile stories
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -4914,14 +4776,12 @@ export interface TelegramClient extends BaseTelegramClient {
     getStoriesById(peerId: InputPeerLike, storyIds: number[]): Promise<Story[]>
     /**
      * Get brief information about story interactions.
-     *
      */
     getStoriesInteractions(peerId: InputPeerLike, storyId: number): Promise<StoryInteractions>
     /**
      * Get brief information about stories interactions.
      *
      * The result will be in the same order as the input IDs
-     *
      */
     getStoriesInteractions(peerId: InputPeerLike, storyIds: number[]): Promise<StoryInteractions[]>
     /**
@@ -4931,14 +4791,12 @@ export interface TelegramClient extends BaseTelegramClient {
      * and if the user doesn't have a username, `USER_PUBLIC_MISSING` is thrown.
      *
      * I have no idea why is this an RPC call, but whatever
-     *
      * **Available**: ✅ both users and bots
      *
      */
     getStoryLink(peerId: InputPeerLike, storyId: number): Promise<string>
     /**
      * Get viewers list of a story
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -4982,7 +4840,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * Hide own stories views (activate so called "stealth mode")
      *
      * Currently has a cooldown of 1 hour, and throws FLOOD_WAIT error if it is on cooldown.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -5017,40 +4874,31 @@ export interface TelegramClient extends BaseTelegramClient {
      * Iterate over all stories (e.g. to load the top bar)
      *
      * Wrapper over {@link getAllStories}
-     *
      * **Available**: ✅ both users and bots
      *
      */
-    iterAllStories(params?: {
-        /**
-         * Offset from which to start fetching stories
-         */
-        offset?: string
-
-        /**
-         * Maximum number of stories to fetch
-         *
-         * @default  Infinity
-         */
-        limit?: number
-
-        /**
-         * Whether to fetch stories from "archived" (or "hidden") peers
-         */
-        archived?: boolean
-    }): AsyncIterableIterator<PeerStories>
+    iterAllStories(
+        params?: Parameters<typeof getAllStories>[1] & {
+            /**
+             * Maximum number of stories to fetch
+             *
+             * @default  Infinity
+             */
+            limit?: number
+        },
+    ): AsyncIterableIterator<PeerStories>
     /**
      * Iterate over boosters of a channel.
      *
      * Wrapper over {@link getBoosters}
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @returns  IDs of stories that were removed
      */
     iterBoosters(
         peerId: InputPeerLike,
-        params?: Parameters<TelegramClient['getBoosters']>[1] & {
+        params?: Parameters<typeof getBoosters>[2] & {
             /**
              * Total number of boosters to fetch
              *
@@ -5069,13 +4917,12 @@ export interface TelegramClient extends BaseTelegramClient {
     ): AsyncIterableIterator<Booster>
     /**
      * Iterate over profile stories. Wrapper over {@link getProfileStories}
-     *
      * **Available**: ✅ both users and bots
      *
      */
     iterProfileStories(
         peerId: InputPeerLike,
-        params?: Parameters<TelegramClient['getProfileStories']>[1] & {
+        params?: Parameters<typeof getProfileStories>[2] & {
             /**
              * Total number of stories to fetch
              *
@@ -5095,14 +4942,13 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Iterate over viewers list of a story.
      * Wrapper over {@link getStoryViewers}
-     *
      * **Available**: ✅ both users and bots
      *
      */
     iterStoryViewers(
         peerId: InputPeerLike,
         storyId: number,
-        params?: Parameters<TelegramClient['getStoryViewers']>[2] & {
+        params?: Parameters<typeof getStoryViewers>[3] & {
             /**
              * Total number of viewers to fetch
              *
@@ -5132,7 +4978,6 @@ export interface TelegramClient extends BaseTelegramClient {
     readStories(peerId: InputPeerLike, maxId: number): Promise<number[]>
     /**
      * Report a story (or multiple stories) to the moderation team
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -5155,21 +5000,18 @@ export interface TelegramClient extends BaseTelegramClient {
     ): Promise<void>
     /**
      * Send (or remove) a reaction to a story
-     *
      * **Available**: ✅ both users and bots
      *
      */
-    sendStoryReaction(
-        peerId: InputPeerLike,
-        storyId: number,
-        reaction: InputReaction,
-        params?: {
-            /**
-             * Whether to add this reaction to recently used
-             */
-            addToRecent?: boolean
-        },
-    ): Promise<void>
+    sendStoryReaction(params: {
+        peerId: InputPeerLike
+        storyId: number
+        reaction: InputReaction
+        /**
+         * Whether to add this reaction to recently used
+         */
+        addToRecent?: boolean
+    }): Promise<void>
     /**
      * Send a story
      *
@@ -5244,7 +5086,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * Toggle whether peer's stories are archived (hidden) or not.
      *
      * This **does not** archive the chat with that peer, only stories.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -5274,6 +5115,7 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         peer?: InputPeerLike
     }): Promise<number[]>
+    // code in this file is very bad, thanks to Telegram's awesome updates mechanism
     /**
      * Enable RPS meter.
      * Only available in NodeJS v10.7.0 and newer
@@ -5294,7 +5136,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * they should be around the same, except
      * rare situations when processing rps
      * may peak.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -5307,33 +5148,24 @@ export interface TelegramClient extends BaseTelegramClient {
      * they should be around the same, except
      * rare situations when processing rps
      * may peak.
-     *
      * **Available**: ✅ both users and bots
      *
      */
     getCurrentRpsProcessing(): number
     /**
-     * Fetch updates state from the server.
-     * Meant to be used right after authorization,
-     * but before force-saving the session.
+     * Start updates loop.
+     *
+     * You must first call {@link enableUpdatesProcessing} to use this method.
+     *
+     * It is recommended to use this method in callback to {@link start},
+     * or otherwise make sure the user is logged in.
+     *
+     * > **Note**: If you are using {@link UpdatesManagerParams.catchUp} option,
+     * > catching up will be done in background, you can't await it.
      * **Available**: ✅ both users and bots
      *
      */
-    _fetchUpdatesState(): Promise<void>
-    /**
-     * **Available**: ✅ both users and bots
-     *
-     */
-    _loadStorage(): Promise<void>
-    /**
-     * **ADVANCED**
-     *
-     * Manually start updates loop.
-     * Usually done automatically inside {@link start}
-     * **Available**: ✅ both users and bots
-     *
-     */
-    startUpdatesLoop(): void
+    startUpdatesLoop(): Promise<void>
     /**
      * **ADVANCED**
      *
@@ -5343,36 +5175,16 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      */
     stopUpdatesLoop(): void
-
-    _onStop(): void
-    /**
-     * **Available**: ✅ both users and bots
-     *
-     */
-    _saveStorage(afterImport?: boolean): Promise<void>
-    /**
-     * **Available**: ✅ both users and bots
-     *
-     */
-    _dispatchUpdate(update: tl.TypeUpdate, peers: PeersIndex): void
-    /**
-     * **Available**: ✅ both users and bots
-     *
-     */
-    _handleUpdate(update: tl.TypeUpdates, noDispatch?: boolean): void
     /**
      * Catch up with the server by loading missed updates.
      *
+     * > **Note**: In case the storage was not properly
+     * > closed the last time, "catching up" might
+     * > result in duplicate updates.
      * **Available**: ✅ both users and bots
      *
      */
     catchUp(): void
-    // todo: updateChannelTooLong with catchUpChannels disabled should not trigger getDifference (?)
-    // todo: when min peer or similar use pts_before as base pts for channels
-
-    _updatesLoop(): Promise<void>
-
-    _keepAliveAction(): void
     /**
      * Block a user
      *
@@ -5416,14 +5228,12 @@ export interface TelegramClient extends BaseTelegramClient {
     getCommonChats(userId: InputPeerLike): Promise<Chat[]>
     /**
      * Gets the current default value of the Time-To-Live setting, applied to all new chats.
-     *
      * **Available**: ✅ both users and bots
      *
      */
     getGlobalTtl(): Promise<number>
     /**
      * Get currently authorized user's full information
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -5433,7 +5243,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * This method uses locally available information and
      * does not call any API methods.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -5499,7 +5308,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     iterProfilePhotos(
         userId: InputPeerLike,
-        params?: Parameters<TelegramClient['getProfilePhotos']>[1] & {
+        params?: Parameters<typeof getProfilePhotos>[2] & {
             /**
              * Maximum number of items to fetch
              *
@@ -5515,14 +5324,12 @@ export interface TelegramClient extends BaseTelegramClient {
             chunkSize?: number
         },
     ): AsyncIterableIterator<Photo>
-    /* eslint-enable @typescript-eslint/no-unused-vars */
     /**
      * Get multiple `InputPeer`s at once,
      * while also normalizing and removing
      * peers that can't be normalized to that type.
      *
-     * Uses async pool internally, with a
-     * configurable concurrent limit (see {@link TelegramClientOptions#resolvePeerManyPoolLimit}).
+     * Uses async pool internally, with a concurrent limit of 8
      *
      * @param peerIds  Peer Ids
      * @param normalizer  Normalization function
@@ -5534,9 +5341,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get multiple `InputPeer`s at once.
      *
-     * Uses async pool internally, with a
-     * configurable concurrent limit (see {@link TelegramClientOptions#resolvePeerManyPoolLimit}).
-     *
+     * Uses async pool internally, with a concurrent limit of 8
      *
      * @param peerIds  Peer Ids
      */
@@ -5589,7 +5394,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * Set a new profile photo or video.
      *
      * You can also pass a file ID or an InputPhoto to re-use existing photo.
-     *
      * **Available**: ✅ both users and bots
      *
      */
@@ -5650,326 +5454,277 @@ export interface TelegramClient extends BaseTelegramClient {
 export { TelegramClientOptions }
 
 export class TelegramClient extends BaseTelegramClient {
-    protected _userId: number | null
-    protected _isBot: boolean
-    protected _selfUsername: string | null
-    protected _pendingConversations: Map<number, Conversation[]>
-    protected _hasConversations: boolean
-    protected _parseModes: Map<string, IMessageEntityParser>
-    protected _defaultParseMode: string | null
-    protected _updatesLoopActive: boolean
-    protected _updatesLoopCv: ConditionVariable
-    protected _pendingUpdateContainers: SortedLinkedList<PendingUpdateContainer>
-    protected _pendingPtsUpdates: SortedLinkedList<PendingUpdate>
-    protected _pendingPtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
-    protected _pendingQtsUpdates: SortedLinkedList<PendingUpdate>
-    protected _pendingQtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
-    protected _pendingUnorderedUpdates: Deque<PendingUpdate>
-    protected _noDispatchEnabled: boolean
-    protected _noDispatchMsg: Map<number, Set<number>>
-    protected _noDispatchPts: Map<number, Set<number>>
-    protected _noDispatchQts: Set<number>
-    protected _updLock: AsyncLock
-    protected _rpsIncoming?: RpsMeter
-    protected _rpsProcessing?: RpsMeter
-    protected _messageGroupingInterval: number
-    protected _messageGroupingPending: Map<string, [Message[], NodeJS.Timeout]>
-    protected _pts?: number
-    protected _qts?: number
-    protected _date?: number
-    protected _seq?: number
-    protected _oldPts?: number
-    protected _oldQts?: number
-    protected _oldDate?: number
-    protected _oldSeq?: number
-    protected _selfChanged: boolean
-    protected _catchUpChannels?: boolean
-    protected _cpts: Map<number, number>
-    protected _cptsMod: Map<number, number>
-    protected _updsLog: Logger
-    protected _resolvePeerManyPoolLimit: number
     constructor(opts: TelegramClientOptions) {
         super(opts)
-        this._userId = null
-        this._isBot = false
-        this._selfUsername = null
-        this.log.prefix = '[USER N/A] '
-        this._pendingConversations = new Map()
-        this._hasConversations = false
-        this._parseModes = new Map()
-        this._defaultParseMode = null
-        this._updatesLoopActive = false
-        this._updatesLoopCv = new ConditionVariable()
 
-        this._pendingUpdateContainers = new SortedLinkedList((a, b) => a.seqStart - b.seqStart)
-        this._pendingPtsUpdates = new SortedLinkedList((a, b) => a.ptsBefore! - b.ptsBefore!)
-        this._pendingPtsUpdatesPostponed = new SortedLinkedList((a, b) => a.ptsBefore! - b.ptsBefore!)
-        this._pendingQtsUpdates = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
-        this._pendingQtsUpdatesPostponed = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
-        this._pendingUnorderedUpdates = new Deque()
+        if (!opts.disableUpdates) {
+            enableUpdatesProcessing(this, {
+                onUpdate: makeParsedUpdateHandler({
+                    ...opts.updates,
+                    onUpdate: (update) => {
+                        Conversation.handleUpdate(this, update)
+                        this.emit('update', update)
+                        this.emit(update.name, update.data)
+                    },
+                    onRawUpdate: (update, peers) => {
+                        this.emit('raw_update', update, peers)
+                    },
+                }),
+            })
 
-        this._noDispatchEnabled = !opts.disableNoDispatch
-        this._noDispatchMsg = new Map()
-        this._noDispatchPts = new Map()
-        this._noDispatchQts = new Set()
+            this.start = async (params) => {
+                const user = await start(this, params)
+                await this.startUpdatesLoop()
 
-        this._messageGroupingInterval = opts.messageGroupingInterval ?? 0
-        this._messageGroupingPending = new Map()
-
-        this._updLock = new AsyncLock()
-        // we dont need to initialize state fields since
-        // they are always loaded either from the server, or from storage.
-
-        // channel PTS are not loaded immediately, and instead are cached here
-        // after the first time they were retrieved from the storage.
-        this._cpts = new Map()
-        // modified channel pts, to avoid unnecessary
-        // DB calls for not modified cpts
-        this._cptsMod = new Map()
-
-        this._selfChanged = false
-
-        this._updsLog = this.log.create('updates')
-        this._resolvePeerManyPoolLimit = opts.resolvePeerManyPoolLimit ?? 8
+                return user
+            }
+        } else {
+            this.start = start.bind(null, this)
+        }
     }
-    _onAuthorization = _onAuthorization
-    checkPassword = checkPassword
-    getPasswordHint = getPasswordHint
-    logOut = logOut
-    recoverPassword = recoverPassword
-    resendCode = resendCode
-    run = run
-    sendCode = sendCode
-    sendRecoveryCode = sendRecoveryCode
-    signInBot = signInBot
-    signIn = signIn
-    startTest = startTest
-    start = start
-    answerCallbackQuery = answerCallbackQuery
-    answerInlineQuery = answerInlineQuery
-    answerPreCheckoutQuery = answerPreCheckoutQuery
-    deleteMyCommands = deleteMyCommands
-    getBotInfo = getBotInfo
-    getBotMenuButton = getBotMenuButton
-    getCallbackAnswer = getCallbackAnswer
-    getGameHighScores = getGameHighScores
-    getInlineGameHighScores = getInlineGameHighScores
-    getMyCommands = getMyCommands
-    _normalizeCommandScope = _normalizeCommandScope
-    setBotInfo = setBotInfo
-    setBotMenuButton = setBotMenuButton
-    setGameScore = setGameScore
-    setInlineGameScore = setInlineGameScore
-    setMyCommands = setMyCommands
-    setMyDefaultRights = setMyDefaultRights
-    addChatMembers = addChatMembers
-    archiveChats = archiveChats
-    banChatMember = banChatMember
-    createChannel = createChannel
-    createGroup = createGroup
-    createSupergroup = createSupergroup
-    deleteChannel = deleteChannel
-    deleteSupergroup = deleteChannel
-    deleteChatPhoto = deleteChatPhoto
-    deleteGroup = deleteGroup
-    deleteHistory = deleteHistory
-    deleteUserHistory = deleteUserHistory
-    editAdminRights = editAdminRights
-    getChatEventLog = getChatEventLog
-    getChatMember = getChatMember
-    getChatMembers = getChatMembers
-    getChatPreview = getChatPreview
-    getChat = getChat
-    getFullChat = getFullChat
-    getNearbyChats = getNearbyChats
-    iterChatEventLog = iterChatEventLog
-    iterChatMembers = iterChatMembers
-    joinChat = joinChat
-    kickChatMember = kickChatMember
-    leaveChat = leaveChat
-    markChatUnread = markChatUnread
-    reorderUsernames = reorderUsernames
-    restrictChatMember = restrictChatMember
-    saveDraft = saveDraft
-    setChatDefaultPermissions = setChatDefaultPermissions
-    setChatDescription = setChatDescription
-    setChatPhoto = setChatPhoto
-    setChatTitle = setChatTitle
-    setChatTtl = setChatTtl
-    setChatUsername = setChatUsername
-    setSlowMode = setSlowMode
-    toggleContentProtection = toggleContentProtection
-    toggleFragmentUsername = toggleFragmentUsername
-    toggleJoinRequests = toggleJoinRequests
-    toggleJoinToSend = toggleJoinToSend
-    unarchiveChats = unarchiveChats
-    unbanChatMember = unbanChatMember
-    unrestrictChatMember = unbanChatMember
-    addContact = addContact
-    deleteContacts = deleteContacts
-    getContacts = getContacts
-    importContacts = importContacts
-    _pushConversationMessage = _pushConversationMessage
-    createFolder = createFolder
-    deleteFolder = deleteFolder
-    editFolder = editFolder
-    findFolder = findFolder
-    getFolders = getFolders
-    _normalizeInputFolder = _normalizeInputFolder
-    getPeerDialogs = getPeerDialogs
-    iterDialogs = iterDialogs
-    setFoldersOrder = setFoldersOrder
-    downloadAsBuffer = downloadAsBuffer
-    downloadToFile = downloadToFile
-    downloadAsIterable = downloadAsIterable
-    downloadAsStream = downloadAsStream
-    _normalizeFileToDocument = _normalizeFileToDocument
-    _normalizeInputFile = _normalizeInputFile
-    _normalizeInputMedia = _normalizeInputMedia
-    uploadFile = uploadFile
-    uploadMedia = uploadMedia
-    createForumTopic = createForumTopic
-    deleteForumTopicHistory = deleteForumTopicHistory
-    editForumTopic = editForumTopic
-    getForumTopicsById = getForumTopicsById
-    getForumTopics = getForumTopics
-    iterForumTopics = iterForumTopics
-    reorderPinnedForumTopics = reorderPinnedForumTopics
-    toggleForumTopicClosed = toggleForumTopicClosed
-    toggleForumTopicPinned = toggleForumTopicPinned
-    toggleForum = toggleForum
-    toggleGeneralTopicHidden = toggleGeneralTopicHidden
-    createInviteLink = createInviteLink
-    editInviteLink = editInviteLink
-    exportInviteLink = exportInviteLink
-    getInviteLinkMembers = getInviteLinkMembers
-    getInviteLink = getInviteLink
-    getInviteLinks = getInviteLinks
-    getPrimaryInviteLink = getPrimaryInviteLink
-    hideAllJoinRequests = hideAllJoinRequests
-    hideJoinRequest = hideJoinRequest
-    iterInviteLinkMembers = iterInviteLinkMembers
-    iterInviteLinks = iterInviteLinks
-    revokeInviteLink = revokeInviteLink
-    closePoll = closePoll
-    deleteMessages = deleteMessages
-    deleteScheduledMessages = deleteScheduledMessages
-    editInlineMessage = editInlineMessage
-    editMessage = editMessage
-    _findMessageInUpdate = _findMessageInUpdate
-    forwardMessages = forwardMessages
-    _getDiscussionMessage = _getDiscussionMessage
-    getDiscussionMessage = getDiscussionMessage
-    getHistory = getHistory
-    getMessageGroup = getMessageGroup
-    getMessageReactions = getMessageReactions
-    getMessagesUnsafe = getMessagesUnsafe
-    getMessages = getMessages
-    getReactionUsers = getReactionUsers
-    getScheduledMessages = getScheduledMessages
-    iterHistory = iterHistory
-    iterReactionUsers = iterReactionUsers
-    iterSearchGlobal = iterSearchGlobal
-    iterSearchMessages = iterSearchMessages
-    _parseEntities = _parseEntities
-    pinMessage = pinMessage
-    readHistory = readHistory
-    readReactions = readReactions
-    searchGlobal = searchGlobal
-    searchMessages = searchMessages
-    sendCopy = sendCopy
-    sendMediaGroup = sendMediaGroup
-    sendMedia = sendMedia
-    sendReaction = sendReaction
-    sendScheduled = sendScheduled
-    sendText = sendText
-    sendTyping = sendTyping
-    sendVote = sendVote
-    translateMessage = translateMessage
-    translateText = translateText
-    unpinAllMessages = unpinAllMessages
-    unpinMessage = unpinMessage
-    initTakeoutSession = initTakeoutSession
-    _normalizePrivacyRules = _normalizePrivacyRules
-    registerParseMode = registerParseMode
-    unregisterParseMode = unregisterParseMode
-    getParseMode = getParseMode
-    setDefaultParseMode = setDefaultParseMode
-    changeCloudPassword = changeCloudPassword
-    enableCloudPassword = enableCloudPassword
-    verifyPasswordEmail = verifyPasswordEmail
-    resendPasswordEmail = resendPasswordEmail
-    cancelPasswordEmail = cancelPasswordEmail
-    removeCloudPassword = removeCloudPassword
-    addStickerToSet = addStickerToSet
-    createStickerSet = createStickerSet
-    deleteStickerFromSet = deleteStickerFromSet
-    getCustomEmojis = getCustomEmojis
-    getInstalledStickers = getInstalledStickers
-    getStickerSet = getStickerSet
-    moveStickerInSet = moveStickerInSet
-    setChatStickerSet = setChatStickerSet
-    setStickerSetThumb = setStickerSetThumb
-    applyBoost = applyBoost
-    canApplyBoost = canApplyBoost
-    canSendStory = canSendStory
-    deleteStories = deleteStories
-    editStory = editStory
-    _findStoryInUpdate = _findStoryInUpdate
-    getAllStories = getAllStories
-    getBoostStats = getBoostStats
-    getBoosters = getBoosters
-    getPeerStories = getPeerStories
-    getProfileStories = getProfileStories
-    getStoriesById = getStoriesById
-    getStoriesInteractions = getStoriesInteractions
-    getStoryLink = getStoryLink
-    getStoryViewers = getStoryViewers
-    hideMyStoriesViews = hideMyStoriesViews
-    incrementStoriesViews = incrementStoriesViews
-    iterAllStories = iterAllStories
-    iterBoosters = iterBoosters
-    iterProfileStories = iterProfileStories
-    iterStoryViewers = iterStoryViewers
-    readStories = readStories
-    reportStory = reportStory
-    sendStoryReaction = sendStoryReaction
-    sendStory = sendStory
-    togglePeerStoriesArchived = togglePeerStoriesArchived
-    toggleStoriesPinned = toggleStoriesPinned
-    enableRps = enableRps
-    getCurrentRpsIncoming = getCurrentRpsIncoming
-    getCurrentRpsProcessing = getCurrentRpsProcessing
-    _fetchUpdatesState = _fetchUpdatesState
-    _loadStorage = _loadStorage
-    startUpdatesLoop = startUpdatesLoop
-    stopUpdatesLoop = stopUpdatesLoop
-    _onStop = _onStop
-    _saveStorage = _saveStorage
-    _dispatchUpdate = _dispatchUpdate
-    _handleUpdate = _handleUpdate
-    catchUp = catchUp
-    _updatesLoop = _updatesLoop
-    _keepAliveAction = _keepAliveAction
-    blockUser = blockUser
-    deleteProfilePhotos = deleteProfilePhotos
-    editCloseFriendsRaw = editCloseFriendsRaw
-    editCloseFriends = editCloseFriends
-    getCommonChats = getCommonChats
-    getGlobalTtl = getGlobalTtl
-    getMe = getMe
-    getMyUsername = getMyUsername
-    getProfilePhoto = getProfilePhoto
-    getProfilePhotos = getProfilePhotos
-    getUsers = getUsers
-    iterProfilePhotos = iterProfilePhotos
-    resolvePeerMany = resolvePeerMany
-    resolvePeer = resolvePeer
-    setEmojiStatus = setEmojiStatus
-    setGlobalTtl = setGlobalTtl
-    setOffline = setOffline
-    setProfilePhoto = setProfilePhoto
-    setUsername = setUsername
-    unblockUser = unblockUser
-    updateProfile = updateProfile
+    getAuthState = getAuthState.bind(null, this)
+    _onAuthorization = _onAuthorization.bind(null, this)
+    checkPassword = checkPassword.bind(null, this)
+    getPasswordHint = getPasswordHint.bind(null, this)
+    logOut = logOut.bind(null, this)
+    recoverPassword = recoverPassword.bind(null, this)
+    resendCode = resendCode.bind(null, this)
+    run = run.bind(null, this)
+    sendCode = sendCode.bind(null, this)
+    sendRecoveryCode = sendRecoveryCode.bind(null, this)
+    signInBot = signInBot.bind(null, this)
+    signIn = signIn.bind(null, this)
+    startTest = startTest.bind(null, this)
+    answerCallbackQuery = answerCallbackQuery.bind(null, this)
+    answerInlineQuery = answerInlineQuery.bind(null, this)
+    answerPreCheckoutQuery = answerPreCheckoutQuery.bind(null, this)
+    deleteMyCommands = deleteMyCommands.bind(null, this)
+    getBotInfo = getBotInfo.bind(null, this)
+    getBotMenuButton = getBotMenuButton.bind(null, this)
+    getCallbackAnswer = getCallbackAnswer.bind(null, this)
+    getGameHighScores = getGameHighScores.bind(null, this)
+    getInlineGameHighScores = getInlineGameHighScores.bind(null, this)
+    getMyCommands = getMyCommands.bind(null, this)
+    _normalizeCommandScope = _normalizeCommandScope.bind(null, this)
+    setBotInfo = setBotInfo.bind(null, this)
+    setBotMenuButton = setBotMenuButton.bind(null, this)
+    setGameScore = setGameScore.bind(null, this)
+    setInlineGameScore = setInlineGameScore.bind(null, this)
+    setMyCommands = setMyCommands.bind(null, this)
+    setMyDefaultRights = setMyDefaultRights.bind(null, this)
+    addChatMembers = addChatMembers.bind(null, this)
+    archiveChats = archiveChats.bind(null, this)
+    banChatMember = banChatMember.bind(null, this)
+    createChannel = createChannel.bind(null, this)
+    createGroup = createGroup.bind(null, this)
+    createSupergroup = createSupergroup.bind(null, this)
+    deleteChannel = deleteChannel.bind(null, this)
+    deleteSupergroup = deleteChannel.bind(null, this)
+    deleteChatPhoto = deleteChatPhoto.bind(null, this)
+    deleteGroup = deleteGroup.bind(null, this)
+    deleteHistory = deleteHistory.bind(null, this)
+    deleteUserHistory = deleteUserHistory.bind(null, this)
+    editAdminRights = editAdminRights.bind(null, this)
+    getChatEventLog = getChatEventLog.bind(null, this)
+    getChatMember = getChatMember.bind(null, this)
+    getChatMembers = getChatMembers.bind(null, this)
+    getChatPreview = getChatPreview.bind(null, this)
+    getChat = getChat.bind(null, this)
+    getFullChat = getFullChat.bind(null, this)
+    getNearbyChats = getNearbyChats.bind(null, this)
+    iterChatEventLog = iterChatEventLog.bind(null, this)
+    iterChatMembers = iterChatMembers.bind(null, this)
+    joinChat = joinChat.bind(null, this)
+    kickChatMember = kickChatMember.bind(null, this)
+    leaveChat = leaveChat.bind(null, this)
+    markChatUnread = markChatUnread.bind(null, this)
+    reorderUsernames = reorderUsernames.bind(null, this)
+    restrictChatMember = restrictChatMember.bind(null, this)
+    saveDraft = saveDraft.bind(null, this)
+    setChatDefaultPermissions = setChatDefaultPermissions.bind(null, this)
+    setChatDescription = setChatDescription.bind(null, this)
+    setChatPhoto = setChatPhoto.bind(null, this)
+    setChatTitle = setChatTitle.bind(null, this)
+    setChatTtl = setChatTtl.bind(null, this)
+    setChatUsername = setChatUsername.bind(null, this)
+    setSlowMode = setSlowMode.bind(null, this)
+    toggleContentProtection = toggleContentProtection.bind(null, this)
+    toggleFragmentUsername = toggleFragmentUsername.bind(null, this)
+    toggleJoinRequests = toggleJoinRequests.bind(null, this)
+    toggleJoinToSend = toggleJoinToSend.bind(null, this)
+    unarchiveChats = unarchiveChats.bind(null, this)
+    unbanChatMember = unbanChatMember.bind(null, this)
+    unrestrictChatMember = unbanChatMember.bind(null, this)
+    addContact = addContact.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    deleteContacts = deleteContacts.bind(null, this)
+    getContacts = getContacts.bind(null, this)
+    importContacts = importContacts.bind(null, this)
+    createFolder = createFolder.bind(null, this)
+    deleteFolder = deleteFolder.bind(null, this)
+    editFolder = editFolder.bind(null, this)
+    findFolder = findFolder.bind(null, this)
+    getFolders = getFolders.bind(null, this)
+    _normalizeInputFolder = _normalizeInputFolder.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    getPeerDialogs = getPeerDialogs.bind(null, this)
+    iterDialogs = iterDialogs.bind(null, this)
+    setFoldersOrder = setFoldersOrder.bind(null, this)
+    downloadAsBuffer = downloadAsBuffer.bind(null, this)
+    downloadToFile = downloadToFile.bind(null, this)
+    downloadAsIterable = downloadAsIterable.bind(null, this)
+    downloadAsStream = downloadAsStream.bind(null, this)
+    _normalizeFileToDocument = _normalizeFileToDocument.bind(null, this)
+    _normalizeInputFile = _normalizeInputFile.bind(null, this)
+    _normalizeInputMedia = _normalizeInputMedia.bind(null, this)
+    uploadFile = uploadFile.bind(null, this)
+    uploadMedia = uploadMedia.bind(null, this)
+    createForumTopic = createForumTopic.bind(null, this)
+    deleteForumTopicHistory = deleteForumTopicHistory.bind(null, this)
+    editForumTopic = editForumTopic.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    getForumTopicsById = getForumTopicsById.bind(null, this)
+    getForumTopics = getForumTopics.bind(null, this)
+    iterForumTopics = iterForumTopics.bind(null, this)
+    reorderPinnedForumTopics = reorderPinnedForumTopics.bind(null, this)
+    toggleForumTopicClosed = toggleForumTopicClosed.bind(null, this)
+    toggleForumTopicPinned = toggleForumTopicPinned.bind(null, this)
+    toggleForum = toggleForum.bind(null, this)
+    toggleGeneralTopicHidden = toggleGeneralTopicHidden.bind(null, this)
+    createInviteLink = createInviteLink.bind(null, this)
+    editInviteLink = editInviteLink.bind(null, this)
+    exportInviteLink = exportInviteLink.bind(null, this)
+    getInviteLinkMembers = getInviteLinkMembers.bind(null, this)
+    getInviteLink = getInviteLink.bind(null, this)
+    getInviteLinks = getInviteLinks.bind(null, this)
+    getPrimaryInviteLink = getPrimaryInviteLink.bind(null, this)
+    hideAllJoinRequests = hideAllJoinRequests.bind(null, this)
+    hideJoinRequest = hideJoinRequest.bind(null, this)
+    iterInviteLinkMembers = iterInviteLinkMembers.bind(null, this)
+    iterInviteLinks = iterInviteLinks.bind(null, this)
+    revokeInviteLink = revokeInviteLink.bind(null, this)
+    closePoll = closePoll.bind(null, this)
+    deleteMessages = deleteMessages.bind(null, this)
+    deleteScheduledMessages = deleteScheduledMessages.bind(null, this)
+    editInlineMessage = editInlineMessage.bind(null, this)
+    editMessage = editMessage.bind(null, this)
+    _findMessageInUpdate = _findMessageInUpdate.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    forwardMessages = forwardMessages.bind(null, this)
+    _getDiscussionMessage = _getDiscussionMessage.bind(null, this)
+    getDiscussionMessage = getDiscussionMessage.bind(null, this)
+    getHistory = getHistory.bind(null, this)
+    getMessageGroup = getMessageGroup.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    getMessageReactions = getMessageReactions.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    getMessagesUnsafe = getMessagesUnsafe.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    getMessages = getMessages.bind(null, this)
+    getReactionUsers = getReactionUsers.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    getScheduledMessages = getScheduledMessages.bind(null, this)
+    iterHistory = iterHistory.bind(null, this)
+    iterReactionUsers = iterReactionUsers.bind(null, this)
+    iterSearchGlobal = iterSearchGlobal.bind(null, this)
+    iterSearchMessages = iterSearchMessages.bind(null, this)
+    _parseEntities = _parseEntities.bind(null, this)
+    pinMessage = pinMessage.bind(null, this)
+    readHistory = readHistory.bind(null, this)
+    readReactions = readReactions.bind(null, this)
+    searchGlobal = searchGlobal.bind(null, this)
+    searchMessages = searchMessages.bind(null, this)
+    sendCopy = sendCopy.bind(null, this)
+    sendMediaGroup = sendMediaGroup.bind(null, this)
+    sendMedia = sendMedia.bind(null, this)
+    sendReaction = sendReaction.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    sendScheduled = sendScheduled.bind(null, this)
+    sendText = sendText.bind(null, this)
+    sendTyping = sendTyping.bind(null, this)
+    sendVote = sendVote.bind(null, this)
+    translateMessage = translateMessage.bind(null, this)
+    translateText = translateText.bind(null, this)
+    unpinAllMessages = unpinAllMessages.bind(null, this)
+    unpinMessage = unpinMessage.bind(null, this)
+    initTakeoutSession = initTakeoutSession.bind(null, this)
+    _normalizePrivacyRules = _normalizePrivacyRules.bind(null, this)
+    getParseModesState = getParseModesState.bind(null, this)
+    registerParseMode = registerParseMode.bind(null, this)
+    unregisterParseMode = unregisterParseMode.bind(null, this)
+    getParseMode = getParseMode.bind(null, this)
+    setDefaultParseMode = setDefaultParseMode.bind(null, this)
+    changeCloudPassword = changeCloudPassword.bind(null, this)
+    enableCloudPassword = enableCloudPassword.bind(null, this)
+    verifyPasswordEmail = verifyPasswordEmail.bind(null, this)
+    resendPasswordEmail = resendPasswordEmail.bind(null, this)
+    cancelPasswordEmail = cancelPasswordEmail.bind(null, this)
+    removeCloudPassword = removeCloudPassword.bind(null, this)
+    addStickerToSet = addStickerToSet.bind(null, this)
+    createStickerSet = createStickerSet.bind(null, this)
+    deleteStickerFromSet = deleteStickerFromSet.bind(null, this)
+    getCustomEmojis = getCustomEmojis.bind(null, this)
+    getInstalledStickers = getInstalledStickers.bind(null, this)
+    getStickerSet = getStickerSet.bind(null, this)
+    moveStickerInSet = moveStickerInSet.bind(null, this)
+    setChatStickerSet = setChatStickerSet.bind(null, this)
+    setStickerSetThumb = setStickerSetThumb.bind(null, this)
+    applyBoost = applyBoost.bind(null, this)
+    canApplyBoost = canApplyBoost.bind(null, this)
+    canSendStory = canSendStory.bind(null, this)
+    deleteStories = deleteStories.bind(null, this)
+    editStory = editStory.bind(null, this)
+    _findStoryInUpdate = _findStoryInUpdate.bind(null, this)
+    getAllStories = getAllStories.bind(null, this)
+    getBoostStats = getBoostStats.bind(null, this)
+    getBoosters = getBoosters.bind(null, this)
+    getPeerStories = getPeerStories.bind(null, this)
+    getProfileStories = getProfileStories.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    getStoriesById = getStoriesById.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    getStoriesInteractions = getStoriesInteractions.bind(null, this)
+    getStoryLink = getStoryLink.bind(null, this)
+    getStoryViewers = getStoryViewers.bind(null, this)
+    hideMyStoriesViews = hideMyStoriesViews.bind(null, this)
+    incrementStoriesViews = incrementStoriesViews.bind(null, this)
+    iterAllStories = iterAllStories.bind(null, this)
+    iterBoosters = iterBoosters.bind(null, this)
+    iterProfileStories = iterProfileStories.bind(null, this)
+    iterStoryViewers = iterStoryViewers.bind(null, this)
+    readStories = readStories.bind(null, this)
+    reportStory = reportStory.bind(null, this)
+    sendStoryReaction = sendStoryReaction.bind(null, this)
+    sendStory = sendStory.bind(null, this)
+    togglePeerStoriesArchived = togglePeerStoriesArchived.bind(null, this)
+    toggleStoriesPinned = toggleStoriesPinned.bind(null, this)
+    enableRps = enableRps.bind(null, this)
+    getCurrentRpsIncoming = getCurrentRpsIncoming.bind(null, this)
+    getCurrentRpsProcessing = getCurrentRpsProcessing.bind(null, this)
+    startUpdatesLoop = startUpdatesLoop.bind(null, this)
+    stopUpdatesLoop = stopUpdatesLoop.bind(null, this)
+    catchUp = catchUp.bind(null, this)
+    blockUser = blockUser.bind(null, this)
+    deleteProfilePhotos = deleteProfilePhotos.bind(null, this)
+    editCloseFriendsRaw = editCloseFriendsRaw.bind(null, this)
+    editCloseFriends = editCloseFriends.bind(null, this)
+    getCommonChats = getCommonChats.bind(null, this)
+    getGlobalTtl = getGlobalTtl.bind(null, this)
+    getMe = getMe.bind(null, this)
+    getMyUsername = getMyUsername.bind(null, this)
+    getProfilePhoto = getProfilePhoto.bind(null, this)
+    getProfilePhotos = getProfilePhotos.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    getUsers = getUsers.bind(null, this)
+    iterProfilePhotos = iterProfilePhotos.bind(null, this)
+    // @ts-expect-error .bind() kinda breaks typings for overloads
+    resolvePeerMany = resolvePeerMany.bind(null, this)
+    resolvePeer = resolvePeer.bind(null, this)
+    setEmojiStatus = setEmojiStatus.bind(null, this)
+    setGlobalTtl = setGlobalTtl.bind(null, this)
+    setOffline = setOffline.bind(null, this)
+    setProfilePhoto = setProfilePhoto.bind(null, this)
+    setUsername = setUsername.bind(null, this)
+    unblockUser = unblockUser.bind(null, this)
+    updateProfile = updateProfile.bind(null, this)
 }

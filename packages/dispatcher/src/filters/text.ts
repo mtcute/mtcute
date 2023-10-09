@@ -22,7 +22,7 @@ function extractText(obj: Message | InlineQuery | ChosenInlineResult | CallbackQ
  * Filter objects that match a given regular expression
  *  - for `Message`, `Message.text` is used
  *  - for `InlineQuery`, `InlineQuery.query` is used
- *  - for {@link ChosenInlineResult}, {@link ChosenInlineResult.id} is used
+ *  - for {@link ChosenInlineResult}, {@link ChosenInlineResult#id} is used
  *  - for `CallbackQuery`, `CallbackQuery.dataStr` is used
  *
  * When a regex matches, the match array is stored in a

@@ -1,10 +1,16 @@
 /* eslint-disable no-console */
-import { MaybeAsync, MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MaybeAsync, MtArgumentError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { MaybeDynamic, SentCode, User } from '../../types'
 import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-utils'
+import { getMe } from '../users/get-me'
+import { checkPassword } from './check-password'
+import { resendCode } from './resend-code'
+import { sendCode } from './send-code'
+import { signIn } from './sign-in'
+import { signInBot } from './sign-in-bot'
 
+// @manual
 // @available=both
 /**
  * Start the client in an interactive and declarative manner,
@@ -18,11 +24,9 @@ import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-util
  * This method is intended for simple and fast use in automated
  * scripts and bots. If you are developing a custom client,
  * you'll probably need to use other auth methods.
- *
- * @internal
  */
 export async function start(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * String session exported using {@link TelegramClient.exportSession}.
@@ -80,58 +84,25 @@ export async function start(
          * to show a GUI alert of some kind.
          * Defaults to `console.log`.
          *
-         * This method is called *before* {@link TelegramClient.start.params.code}.
+         * This method is called *before* {@link start.params.code}.
          *
          * @param code
          */
         codeSentCallback?: (code: SentCode) => MaybeAsync<void>
-
-        /**
-         * Whether to "catch up" (load missed updates).
-         * Only applicable if the saved session already
-         * contained authorization and updates state.
-         *
-         * Note: you should register your handlers
-         * before calling `start()`, otherwise they will
-         * not be called.
-         *
-         * Note: In case the storage was not properly
-         * closed the last time, "catching up" might
-         * result in duplicate updates.
-         *
-         * Defaults to `false`.
-         */
-        catchUp?: boolean
     },
 ): Promise<User> {
     if (params.session) {
-        this.importSession(params.session, params.sessionForce)
+        client.importSession(params.session, params.sessionForce)
     }
 
     try {
-        const me = await this.getMe()
+        const me = await getMe(client)
 
         // user is already authorized
 
-        this.log.prefix = `[USER ${me.id}] `
-        this.log.info('Logged in as %s (ID: %s, username: %s, bot: %s)', me.displayName, me.id, me.username, me.isBot)
+        client.log.info('Logged in as %s (ID: %s, username: %s, bot: %s)', me.displayName, me.id, me.username, me.isBot)
 
-        this.network.setIsPremium(me.isPremium)
-
-        if (!this.network.params.disableUpdates) {
-            this._catchUpChannels = Boolean(params.catchUp)
-
-            if (!params.catchUp) {
-                // otherwise we will catch up as soon as we receive a new update
-                await this._fetchUpdatesState()
-            }
-
-            this.startUpdatesLoop()
-
-            if (params.catchUp) {
-                this.catchUp()
-            }
-        }
+        client.network.setIsPremium(me.isPremium)
 
         return me
     } catch (e) {
@@ -157,13 +128,13 @@ export async function start(
             throw new MtArgumentError('Either bot token or phone number must be provided')
         }
 
-        return await this.signInBot(botToken)
+        return await signInBot(client, botToken)
     }
 
-    let sentCode = await this.sendCode({ phone })
+    let sentCode = await sendCode(client, { phone })
 
     if (params.forceSms && sentCode.type === 'app') {
-        sentCode = await this.resendCode({ phone, phoneCodeHash: sentCode.phoneCodeHash })
+        sentCode = await resendCode(client, { phone, phoneCodeHash: sentCode.phoneCodeHash })
     }
 
     if (params.codeSentCallback) {
@@ -179,7 +150,7 @@ export async function start(
         if (!code) throw new tl.RpcError(400, 'PHONE_CODE_EMPTY')
 
         try {
-            return await this.signIn({ phone, phoneCodeHash: sentCode.phoneCodeHash, phoneCode: code })
+            return await signIn(client, { phone, phoneCodeHash: sentCode.phoneCodeHash, phoneCode: code })
         } catch (e) {
             if (!tl.RpcError.is(e)) throw e
 
@@ -219,7 +190,7 @@ export async function start(
             const password = await resolveMaybeDynamic(params.password)
 
             try {
-                return await this.checkPassword(password)
+                return await checkPassword(client, password)
             } catch (e) {
                 if (typeof params.password !== 'function') {
                     throw new MtArgumentError('Provided password was invalid')

@@ -1,22 +1,28 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { isInputPeerChannel, isInputPeerUser, normalizeToInputChannel, normalizeToInputUser } from '../../utils'
+import { getAuthState } from '../auth/_state'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Reorder usernames
  *
  * @param peerId  Bot, channel or "me"/"self"
- * @internal
  */
-export async function reorderUsernames(this: TelegramClient, peerId: InputPeerLike, order: string[]): Promise<void> {
-    const peer = await this.resolvePeer(peerId)
+export async function reorderUsernames(
+    client: BaseTelegramClient,
+    peerId: InputPeerLike,
+    order: string[],
+): Promise<void> {
+    const peer = await resolvePeer(client, peerId)
 
     if (isInputPeerUser(peer)) {
         // either a bot or self
 
-        if (peer._ === 'inputPeerSelf' || peer.userId === this._userId) {
+        if (peer._ === 'inputPeerSelf' || peer.userId === getAuthState(client).userId) {
             // self
-            await this.call({
+            await client.call({
                 _: 'account.reorderUsernames',
                 order,
             })
@@ -25,13 +31,13 @@ export async function reorderUsernames(this: TelegramClient, peerId: InputPeerLi
         }
 
         // bot
-        await this.call({
+        await client.call({
             _: 'bots.reorderUsernames',
             bot: normalizeToInputUser(peer, peerId),
             order,
         })
     } else if (isInputPeerChannel(peer)) {
-        await this.call({
+        await client.call({
             _: 'channels.reorderUsernames',
             channel: normalizeToInputChannel(peer, peerId),
             order,

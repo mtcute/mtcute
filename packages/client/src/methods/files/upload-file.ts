@@ -2,10 +2,9 @@ import { fromBuffer as fileTypeFromBuffer } from 'file-type'
 import type { ReadStream } from 'fs'
 import { Readable } from 'stream'
 
-import { MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 import { AsyncLock, randomLong } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { UploadedFile, UploadFileLike } from '../../types'
 import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils'
 import { bufferToStream, convertWebStreamToNodeReadable, readBytesFromStream } from '../../utils/stream-utils'
@@ -40,10 +39,9 @@ const MAX_PART_COUNT_PREMIUM = 8000 // 512 kb * 8000 = 4000 MiB
  * methods like {@link sendMedia} that handle this under the hood.
  *
  * @param params  Upload parameters
- * @internal
  */
 export async function uploadFile(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * Upload file source.
@@ -205,7 +203,7 @@ export async function uploadFile(
     const partSize = partSizeKb * 1024
 
     let partCount = fileSize === -1 ? -1 : ~~((fileSize + partSize - 1) / partSize)
-    const maxPartCount = this.network.params.isPremium ? MAX_PART_COUNT_PREMIUM : MAX_PART_COUNT
+    const maxPartCount = client.network.params.isPremium ? MAX_PART_COUNT_PREMIUM : MAX_PART_COUNT
 
     if (partCount > maxPartCount) {
         throw new MtArgumentError(`File is too large (max ${maxPartCount} parts, got ${partCount})`)
@@ -214,10 +212,10 @@ export async function uploadFile(
     const isBig = fileSize === -1 || fileSize > BIG_FILE_MIN_SIZE
     const isSmall = fileSize !== -1 && fileSize < SMALL_FILE_MAX_SIZE
     const connectionKind = isSmall ? 'main' : 'upload'
-    const connectionPoolSize = Math.min(this.network.getPoolSize(connectionKind), partCount)
+    const connectionPoolSize = Math.min(client.network.getPoolSize(connectionKind), partCount)
     const requestsPerConnection = params.requestsPerConnection ?? REQUESTS_PER_CONNECTION
 
-    this.log.debug(
+    client.log.debug(
         'uploading %d bytes file in %d chunks, each %d bytes in %s connection pool of size %d',
         fileSize,
         partCount,
@@ -255,7 +253,7 @@ export async function uploadFile(
             fileSize = pos + (part?.length ?? 0)
             partCount = ~~((fileSize + partSize - 1) / partSize)
             if (!part) part = Buffer.alloc(0)
-            this.log.debug('readable ended, file size = %d, part count = %d', fileSize, partCount)
+            client.log.debug('readable ended, file size = %d, part count = %d', fileSize, partCount)
         }
 
         if (!Buffer.isBuffer(part)) {
@@ -295,7 +293,7 @@ export async function uploadFile(
                 bytes: part,
             } satisfies tl.upload.RawSaveFilePartRequest)
 
-        const result = await this.call(request, { kind: connectionKind })
+        const result = await client.call(request, { kind: connectionKind })
         if (!result) throw new Error(`Failed to upload part ${idx}`)
 
         pos += part.length

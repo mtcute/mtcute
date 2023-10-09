@@ -5,8 +5,6 @@ import { Readable } from 'stream'
 // @copy
 import { MaybeArray, MaybeAsync, PartialExcept, PartialOnly } from '@mtcute/core'
 // @copy
-import { AsyncLock, ConditionVariable, Deque, Logger, SortedLinkedList } from '@mtcute/core/utils'
-// @copy
 import { tdFileId } from '@mtcute/file-id'
 
 // @copy
@@ -29,7 +27,6 @@ import {
     ChatMemberUpdate,
     ChatPreview,
     ChosenInlineResult,
-    Conversation,
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     Dialog,

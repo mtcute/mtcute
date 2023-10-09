@@ -1,7 +1,6 @@
-import { MaybeArray, tl } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray, tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { Message, PeersIndex } from '../../types'
 
 /**
@@ -15,10 +14,9 @@ import { Message, PeersIndex } from '../../types'
  * @param [fromReply=false]
  *     Whether the reply to a given message should be fetched
  *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
- * @internal
  */
 export async function getMessagesUnsafe(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     messageId: number,
     fromReply?: boolean,
 ): Promise<Message | null>
@@ -36,17 +34,16 @@ export async function getMessagesUnsafe(
  * @param [fromReply=false]
  *     Whether the reply to a given message should be fetched
  *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
- * @internal
  */
 export async function getMessagesUnsafe(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     messageIds: number[],
     fromReply?: boolean,
 ): Promise<(Message | null)[]>
 
 /** @internal */
 export async function getMessagesUnsafe(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     messageIds: MaybeArray<number>,
     fromReply = false,
 ): Promise<MaybeArray<Message | null>> {
@@ -59,7 +56,7 @@ export async function getMessagesUnsafe(
         id: it,
     }))
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.getMessages',
         id: ids,
     })
@@ -71,7 +68,7 @@ export async function getMessagesUnsafe(
     const ret = res.messages.map((msg) => {
         if (msg._ === 'messageEmpty') return null
 
-        return new Message(this, msg, peers)
+        return new Message(msg, peers)
     })
 
     return isSingle ? ret[0] : ret

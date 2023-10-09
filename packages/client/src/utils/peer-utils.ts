@@ -1,6 +1,7 @@
 import { assertNever, Long, tl } from '@mtcute/core'
 
-import { InputPeerLike, MtInvalidPeerTypeError } from '../types'
+import { MtInvalidPeerTypeError } from '../types/errors'
+import { InputPeerLike } from '../types/peers'
 
 export const INVITE_LINK_REGEX =
     /^(?:https?:\/\/)?(?:www\.)?(?:t(?:elegram)?\.(?:org|me|dog)\/(?:joinchat\/|\+))([\w-]+)$/i

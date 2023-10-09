@@ -1,19 +1,17 @@
-import { Long } from '@mtcute/core'
+import { BaseTelegramClient, Long } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { User } from '../../types'
 
 /**
  * Get list of contacts from your Telegram contacts list.
- * @internal
  */
-export async function getContacts(this: TelegramClient): Promise<User[]> {
-    const res = await this.call({
+export async function getContacts(client: BaseTelegramClient): Promise<User[]> {
+    const res = await client.call({
         _: 'contacts.getContacts',
         hash: Long.ZERO,
     })
     assertTypeIs('getContacts', res, 'contacts.contacts')
 
-    return res.users.map((user) => new User(this, user))
+    return res.users.map((user) => new User(user))
 }

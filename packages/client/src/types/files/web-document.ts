@@ -1,6 +1,5 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { FileLocation } from './file-location'
 
@@ -19,12 +18,8 @@ const STUB_LOCATION = () => {
  * > To be sure, check `isDownloadable` property.
  */
 export class WebDocument extends FileLocation {
-    constructor(
-        client: TelegramClient,
-        readonly raw: tl.TypeWebDocument,
-    ) {
+    constructor(readonly raw: tl.TypeWebDocument) {
         super(
-            client,
             raw._ === 'webDocument' ?
                 {
                     _: 'inputWebFileLocation',

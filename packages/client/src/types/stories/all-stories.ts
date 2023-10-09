@@ -1,5 +1,7 @@
-import { PeersIndex, TelegramClient, tl } from '../..'
+import { tl } from '@mtcute/core'
+
 import { makeInspectable } from '../../utils'
+import { PeersIndex } from '../peers'
 import { PeerStories } from './peer-stories'
 import { StoriesStealthMode } from './stealth-mode'
 
@@ -9,10 +11,7 @@ import { StoriesStealthMode } from './stealth-mode'
  * Returned by {@link TelegramClient.getAllStories}
  */
 export class AllStories {
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.stories.RawAllStories,
-    ) {}
+    constructor(readonly raw: tl.stories.RawAllStories) {}
 
     readonly _peers = PeersIndex.from(this.raw)
 
@@ -35,7 +34,7 @@ export class AllStories {
     /** Peers with their stories */
     get peerStories(): PeerStories[] {
         if (!this._peerStories) {
-            this._peerStories = this.raw.peerStories.map((it) => new PeerStories(this.client, it, this._peers))
+            this._peerStories = this.raw.peerStories.map((it) => new PeerStories(it, this._peers))
         }
 
         return this._peerStories

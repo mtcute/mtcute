@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
-import { PeersIndex, Poll } from '../'
+import { Poll } from '../media/poll'
+import { PeersIndex } from '../peers/peers-index'
 
 /**
  * Poll state has changed (stopped, somebody
@@ -13,7 +13,6 @@ import { PeersIndex, Poll } from '../'
  */
 export class PollUpdate {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawUpdateMessagePoll,
         readonly _peers: PeersIndex,
     ) {}
@@ -62,7 +61,7 @@ export class PollUpdate {
                 }
             }
 
-            this._poll = new Poll(this.client, poll, this._peers, this.raw.results)
+            this._poll = new Poll(poll, this._peers, this.raw.results)
         }
 
         return this._poll

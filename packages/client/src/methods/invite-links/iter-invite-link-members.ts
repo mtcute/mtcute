@@ -1,5 +1,8 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { ChatInviteLinkMember, InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
+import { getInviteLinkMembers } from './get-invite-link-members'
 
 /**
  * Iterate over users who have joined
@@ -7,12 +10,11 @@ import { ChatInviteLinkMember, InputPeerLike } from '../../types'
  *
  * @param chatId  Chat ID
  * @param params  Additional params
- * @internal
  */
 export async function* iterInviteLinkMembers(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
-    params?: Parameters<TelegramClient['getInviteLinkMembers']>[1] & {
+    params?: Parameters<typeof getInviteLinkMembers>[2] & {
         /**
          * Maximum number of users to return
          *
@@ -29,7 +31,7 @@ export async function* iterInviteLinkMembers(
         chunkSize?: number
     },
 ): AsyncIterableIterator<ChatInviteLinkMember> {
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
     if (!params) params = {}
 
     const { limit = Infinity, chunkSize = 100, link, requestedSearch, requested = Boolean(requestedSearch) } = params
@@ -39,7 +41,7 @@ export async function* iterInviteLinkMembers(
     let current = 0
 
     for (;;) {
-        const items = await this.getInviteLinkMembers(peer, {
+        const items = await getInviteLinkMembers(client, peer, {
             limit: Math.min(chunkSize, limit - current),
             link,
             requested,

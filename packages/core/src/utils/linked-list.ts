@@ -76,4 +76,9 @@ export class SortedLinkedList<T> {
 
         this._size += 1
     }
+
+    clear(): void {
+        this._first = this._last = undefined
+        this._size = 0
+    }
 }

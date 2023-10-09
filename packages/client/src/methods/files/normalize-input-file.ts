@@ -1,17 +1,15 @@
-import { MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
-import { InputFileLike, isUploadedFile } from '../../types'
+import { InputFileLike, isUploadedFile } from '../../types/files'
+import { uploadFile } from './upload-file'
 
 /**
  * Normalize a {@link InputFileLike} to `InputFile`,
  * uploading it if needed.
- *
- * @internal
  */
 export async function _normalizeInputFile(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     input: InputFileLike,
     params: {
         progressCallback?: (uploaded: number, total: number) => void
@@ -24,7 +22,7 @@ export async function _normalizeInputFile(
         throw new MtArgumentError("InputFile can't be created from an InputMedia")
     } else if (tdFileId.isFileIdLike(input)) {
         if (typeof input === 'string' && input.match(/^file:/)) {
-            const uploaded = await this.uploadFile({
+            const uploaded = await uploadFile(client, {
                 file: input.substring(5),
                 ...params,
             })
@@ -37,7 +35,7 @@ export async function _normalizeInputFile(
     } else if (typeof input === 'object' && tl.isAnyInputFile(input)) {
         return input
     } else {
-        const uploaded = await this.uploadFile({
+        const uploaded = await uploadFile(client, {
             file: input,
             ...params,
         })

@@ -1,14 +1,14 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Approve or deny join request to a chat.
- *
- * @internal
  */
 export async function hideJoinRequest(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat/channel ID */
         chatId: InputPeerLike
@@ -20,12 +20,12 @@ export async function hideJoinRequest(
 ): Promise<void> {
     const { chatId, user, action } = params
 
-    const userId = normalizeToInputUser(await this.resolvePeer(user), user)
+    const userId = normalizeToInputUser(await resolvePeer(client, user), user)
 
-    await this.call({
+    await client.call({
         _: 'messages.hideChatJoinRequest',
         approved: action === 'approve',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         userId,
     })
 }

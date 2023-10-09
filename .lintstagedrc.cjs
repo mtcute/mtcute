@@ -15,6 +15,7 @@ module.exports = {
         return [
             `prettier --write ${filenames.join(' ')}`,
             `eslint -c ${eslintCiConfig} --fix ${filenames.join(' ')}`,
+            'pnpm run lint:dpdm',
             ...[...modifiedPackages].map((pkg) => `pnpm -C packages/${pkg} run --if-present build --noEmit`)
         ]
     }

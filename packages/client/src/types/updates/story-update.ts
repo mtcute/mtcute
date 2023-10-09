@@ -1,4 +1,7 @@
-import { Chat, PeersIndex, Story, TelegramClient, tl, User } from '../..'
+import { tl } from '@mtcute/core'
+
+import { Chat, PeersIndex, User } from '../../types/peers'
+import { Story } from '../../types/stories'
 import { assertTypeIs, makeInspectable } from '../../utils'
 
 /**
@@ -9,7 +12,6 @@ import { assertTypeIs, makeInspectable } from '../../utils'
  */
 export class StoryUpdate {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawUpdateStory,
         readonly _peers: PeersIndex,
     ) {}
@@ -23,11 +25,11 @@ export class StoryUpdate {
 
         switch (this.raw.peer._) {
             case 'peerUser':
-                return (this._peer = new User(this.client, this._peers.user(this.raw.peer.userId)))
+                return (this._peer = new User(this._peers.user(this.raw.peer.userId)))
             case 'peerChat':
-                return (this._peer = new Chat(this.client, this._peers.chat(this.raw.peer.chatId)))
+                return (this._peer = new Chat(this._peers.chat(this.raw.peer.chatId)))
             case 'peerChannel':
-                return (this._peer = new Chat(this.client, this._peers.chat(this.raw.peer.channelId)))
+                return (this._peer = new Chat(this._peers.chat(this.raw.peer.channelId)))
         }
     }
 
@@ -40,7 +42,7 @@ export class StoryUpdate {
 
         assertTypeIs('StoryUpdate.story', this.raw.story, 'storyItem')
 
-        return (this._story = new Story(this.client, this.raw.story, this._peers))
+        return (this._story = new Story(this.raw.story, this._peers))
     }
 }
 

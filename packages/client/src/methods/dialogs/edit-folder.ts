@@ -1,15 +1,14 @@
-import { MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
+import { getFolders } from './get-folders'
 
 /**
  * Edit a folder with given modification
  *
  * @returns  Modified folder
- * @internal
  */
 export async function editFolder(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * Folder, folder ID or name.
@@ -30,7 +29,7 @@ export async function editFolder(
         throw new MtArgumentError('Cannot modify default folder')
     }
     if (typeof folder === 'number' || typeof folder === 'string') {
-        const old = await this.getFolders()
+        const old = await getFolders(client)
         const found = old.find((it) => it._ === 'dialogFilter' && (it.id === folder || it.title === folder))
 
         if (!found) {
@@ -45,7 +44,7 @@ export async function editFolder(
         ...modification,
     }
 
-    await this.call({
+    await client.call({
         _: 'messages.updateDialogFilter',
         id: folder.id,
         filter,

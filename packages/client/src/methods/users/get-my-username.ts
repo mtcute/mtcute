@@ -1,13 +1,13 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
+import { getAuthState } from '../auth/_state'
 
 /**
  * Get currently authorized user's username.
  *
  * This method uses locally available information and
  * does not call any API methods.
- *
- * @internal
  */
-export function getMyUsername(this: TelegramClient): string | null {
-    return this._selfUsername
+export function getMyUsername(client: BaseTelegramClient): string | null {
+    return getAuthState(client).selfUsername
 }

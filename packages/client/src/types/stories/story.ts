@@ -1,6 +1,5 @@
 import { MtUnsupportedError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { Photo, Video } from '../media'
 import { _messageMediaFromTl, MessageEntity } from '../messages'
@@ -23,7 +22,6 @@ export type StoryMedia = Photo | Video
 
 export class Story {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawStoryItem,
         readonly _peers: PeersIndex,
     ) {}
@@ -120,7 +118,7 @@ export class Story {
      */
     get media(): StoryMedia {
         if (this._media === undefined) {
-            const media = _messageMediaFromTl(this.client, this._peers, this.raw.media)
+            const media = _messageMediaFromTl(this._peers, this.raw.media)
 
             switch (media?.type) {
                 case 'photo':
@@ -143,7 +141,7 @@ export class Story {
         if (!this.raw.mediaAreas) return []
 
         if (this._interactiveElements === undefined) {
-            this._interactiveElements = this.raw.mediaAreas.map((it) => _storyInteractiveElementFromTl(this.client, it))
+            this._interactiveElements = this.raw.mediaAreas.map((it) => _storyInteractiveElementFromTl(it))
         }
 
         return this._interactiveElements
@@ -167,7 +165,7 @@ export class Story {
     get interactions(): StoryInteractions | null {
         if (!this.raw.views) return null
 
-        return (this._interactions ??= new StoryInteractions(this.client, this.raw.views, this._peers))
+        return (this._interactions ??= new StoryInteractions(this.raw.views, this._peers))
     }
 
     /**

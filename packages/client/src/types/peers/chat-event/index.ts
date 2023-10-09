@@ -1,6 +1,5 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../../client'
 import { makeInspectable } from '../../../utils'
 import { PeersIndex } from '../peers-index'
 import { User } from '../user'
@@ -11,7 +10,6 @@ export { InputChatEventFilters } from './filters'
 
 export class ChatEvent {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.TypeChannelAdminLogEvent,
         readonly _peers: PeersIndex,
     ) {}
@@ -38,12 +36,12 @@ export class ChatEvent {
      * Actor of the event
      */
     get actor(): User {
-        return (this._actor ??= new User(this.client, this._peers.user(this.raw.userId)))
+        return (this._actor ??= new User(this._peers.user(this.raw.userId)))
     }
 
     private _action?: ChatAction
     get action(): ChatAction {
-        return (this._action ??= _actionFromTl(this.raw.action, this.client, this._peers))
+        return (this._action ??= _actionFromTl(this.raw.action, this._peers))
     }
 }
 

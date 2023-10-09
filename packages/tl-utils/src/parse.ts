@@ -1,8 +1,12 @@
-import { computeConstructorIdFromString } from './ctor-id'
+import { computeConstructorIdFromEntry } from './ctor-id'
 import { TL_PRIMITIVES, TlArgument, TlEntry } from './types'
 import { parseArgumentType, parseTdlibStyleComment } from './utils'
 
 const SINGLE_REGEX = /^(.+?)(?:#([0-9a-f]{1,8}))?(?: \?)?(?: {(.+?:.+?)})? ((?:.+? )*)= (.+);$/
+
+export function computeConstructorIdFromString(line: string): number {
+    return computeConstructorIdFromEntry(parseTlToEntries(line, { forIdComputation: true })[0])
+}
 
 /**
  * Parse TL schema into a list of entries.

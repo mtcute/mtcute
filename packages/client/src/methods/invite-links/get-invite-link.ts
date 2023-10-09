@@ -1,25 +1,26 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Get detailed information about an invite link
  *
  * @param chatId  Chat ID
  * @param link  The invite link
- * @internal
  */
 export async function getInviteLink(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     link: string,
 ): Promise<ChatInviteLink> {
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.getExportedChatInvite',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         link,
     })
 
     const peers = PeersIndex.from(res)
 
-    return new ChatInviteLink(this, res.invite, peers)
+    return new ChatInviteLink(res.invite, peers)
 }

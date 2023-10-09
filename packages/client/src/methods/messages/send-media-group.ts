@@ -1,10 +1,17 @@
-import { getMarkedPeerId, MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, getMarkedPeerId, MtArgumentError, tl } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
-import { InputMediaLike, InputPeerLike, Message, MtMessageNotFoundError, PeersIndex } from '../../types'
+import { MtMessageNotFoundError } from '../../types/errors'
+import { InputMediaLike } from '../../types/media/input-media'
+import { Message } from '../../types/messages/message'
+import { InputPeerLike, PeersIndex } from '../../types/peers'
 import { normalizeDate, normalizeMessageId } from '../../utils/misc-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { _normalizeInputMedia } from '../files/normalize-input-media'
+import { resolvePeer } from '../users/resolve-peer'
+import { _getDiscussionMessage } from './get-discussion-message'
+import { getMessages } from './get-messages'
+import { _parseEntities } from './parse-entities'
 
 /**
  * Send a group of media.
@@ -16,10 +23,9 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * @param medias  Medias contained in the message.
  * @param params  Additional sending parameters
  * @link InputMedia
- * @internal
  */
 export async function sendMediaGroup(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     medias: (InputMediaLike | string)[],
     params?: {
@@ -106,12 +112,12 @@ export async function sendMediaGroup(
 ): Promise<Message[]> {
     if (!params) params = {}
 
-    let peer = await this.resolvePeer(chatId)
+    let peer = await resolvePeer(client, chatId)
 
     let replyTo = normalizeMessageId(params.replyTo)
 
     if (params.commentTo) {
-        [peer, replyTo] = await this._getDiscussionMessage(peer, normalizeMessageId(params.commentTo)!)
+        [peer, replyTo] = await _getDiscussionMessage(client, peer, normalizeMessageId(params.commentTo)!)
     }
 
     if (params.mustReply) {
@@ -119,7 +125,7 @@ export async function sendMediaGroup(
             throw new MtArgumentError('mustReply used, but replyTo was not passed')
         }
 
-        const msg = await this.getMessages(peer, replyTo)
+        const msg = await getMessages(client, peer, replyTo)
 
         if (!msg) {
             throw new MtMessageNotFoundError(getMarkedPeerId(peer), replyTo, 'to reply to')
@@ -138,7 +144,8 @@ export async function sendMediaGroup(
             }
         }
 
-        const inputMedia = await this._normalizeInputMedia(
+        const inputMedia = await _normalizeInputMedia(
+            client,
             media,
             {
                 progressCallback: params.progressCallback?.bind(null, i),
@@ -150,7 +157,8 @@ export async function sendMediaGroup(
             true,
         )
 
-        const [message, entities] = await this._parseEntities(
+        const [message, entities] = await _parseEntities(
+            client,
             // some types dont have `caption` field, and ts warns us,
             // but since it's JS, they'll just be `undefined` and properly
             // handled by _parseEntities method
@@ -168,7 +176,7 @@ export async function sendMediaGroup(
         })
     }
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.sendMultiMedia',
         peer,
         multiMedia,
@@ -182,11 +190,11 @@ export async function sendMediaGroup(
         scheduleDate: normalizeDate(params.schedule),
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
-        sendAs: params.sendAs ? await this.resolvePeer(params.sendAs) : undefined,
+        sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
     })
 
     assertIsUpdatesGroup('_findMessageInUpdate', res)
-    this._handleUpdate(res, true)
+    client.network.handleUpdate(res, true)
 
     const peers = PeersIndex.from(res)
 
@@ -195,9 +203,7 @@ export async function sendMediaGroup(
             (u): u is tl.RawUpdateNewMessage | tl.RawUpdateNewChannelMessage | tl.RawUpdateNewScheduledMessage =>
                 u._ === 'updateNewMessage' || u._ === 'updateNewChannelMessage' || u._ === 'updateNewScheduledMessage',
         )
-        .map((u) => new Message(this, u.message, peers, u._ === 'updateNewScheduledMessage'))
-
-    this._pushConversationMessage(msgs[msgs.length - 1])
+        .map((u) => new Message(u.message, peers, u._ === 'updateNewScheduledMessage'))
 
     return msgs
 }

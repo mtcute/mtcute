@@ -1,5 +1,7 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Generate a link to a story.
@@ -8,13 +10,17 @@ import { InputPeerLike } from '../../types'
  * and if the user doesn't have a username, `USER_PUBLIC_MISSING` is thrown.
  *
  * I have no idea why is this an RPC call, but whatever
- *
- * @internal
  */
-export async function getStoryLink(this: TelegramClient, peerId: InputPeerLike, storyId: number): Promise<string> {
-    return this.call({
-        _: 'stories.exportStoryLink',
-        peer: await this.resolvePeer(peerId),
-        id: storyId,
-    }).then((r) => r.link)
+export async function getStoryLink(
+    client: BaseTelegramClient,
+    peerId: InputPeerLike,
+    storyId: number,
+): Promise<string> {
+    return client
+        .call({
+            _: 'stories.exportStoryLink',
+            peer: await resolvePeer(client, peerId),
+            id: storyId,
+        })
+        .then((r) => r.link)
 }

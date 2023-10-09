@@ -1,18 +1,16 @@
-import { MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
 import { InputFileLike, Photo } from '../../types'
+import { _normalizeInputFile } from '../files/normalize-input-file'
 
 /**
  * Set a new profile photo or video.
  *
  * You can also pass a file ID or an InputPhoto to re-use existing photo.
- *
- * @internal
  */
 export async function setProfilePhoto(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Media type (photo or video) */
         type: 'photo' | 'video'
@@ -36,20 +34,20 @@ export async function setProfilePhoto(
                 media = fileIdToInputPhoto(media)
             }
 
-            const res = await this.call({
+            const res = await client.call({
                 _: 'photos.updateProfilePhoto',
                 id: media,
             })
 
-            return new Photo(this, res.photo as tl.RawPhoto)
+            return new Photo(res.photo as tl.RawPhoto)
         }
     }
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'photos.uploadProfilePhoto',
-        [type === 'photo' ? 'file' : 'video']: await this._normalizeInputFile(media, {}),
+        [type === 'photo' ? 'file' : 'video']: await _normalizeInputFile(client, media, {}),
         videoStartTs: previewSec,
     })
 
-    return new Photo(this, res.photo as tl.RawPhoto)
+    return new Photo(res.photo as tl.RawPhoto)
 }

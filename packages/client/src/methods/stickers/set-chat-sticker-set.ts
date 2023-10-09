@@ -1,6 +1,8 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike, InputStickerSet, normalizeInputStickerSet } from '../../types'
 import { normalizeToInputChannel } from '../../utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Set group sticker set for a supergroup
@@ -9,16 +11,15 @@ import { normalizeToInputChannel } from '../../utils'
  * @param thumb  Sticker set thumbnail
  * @param params
  * @returns  Modified sticker set
- * @internal
  */
 export async function setChatStickerSet(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     setId: InputStickerSet,
 ): Promise<void> {
-    await this.call({
+    await client.call({
         _: 'channels.setStickers',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
+        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
         stickerset: normalizeInputStickerSet(setId),
     })
 }

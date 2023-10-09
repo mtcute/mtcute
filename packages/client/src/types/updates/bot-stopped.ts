@@ -1,6 +1,5 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { PeersIndex, User } from '../peers'
 
@@ -12,7 +11,6 @@ import { PeersIndex, User } from '../peers'
  */
 export class BotStoppedUpdate {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawUpdateBotStopped,
         readonly _peers: PeersIndex,
     ) {}
@@ -30,7 +28,7 @@ export class BotStoppedUpdate {
      * User who stopped or restarted the bot
      */
     get user(): User {
-        return (this._user ??= new User(this.client, this._peers.user(this.raw.userId)))
+        return (this._user ??= new User(this._peers.user(this.raw.userId)))
     }
 
     /**

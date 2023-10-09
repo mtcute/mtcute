@@ -1,5 +1,7 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { User } from '../../types'
+import { getAuthState } from '../auth/_state'
 
 /**
  * Change username of the current user.
@@ -8,17 +10,16 @@ import { User } from '../../types'
  * bot support or re-created from scratch.
  *
  * @param username  New username (5-32 chars, allowed chars: `a-zA-Z0-9_`), or `null` to remove
- * @internal
  */
-export async function setUsername(this: TelegramClient, username: string | null): Promise<User> {
+export async function setUsername(client: BaseTelegramClient, username: string | null): Promise<User> {
     if (username === null) username = ''
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'account.updateUsername',
         username,
     })
 
-    this._selfUsername = username || null
+    getAuthState(client).selfUsername = username || null
 
-    return new User(this, res)
+    return new User(res)
 }

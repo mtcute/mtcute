@@ -1,6 +1,8 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Set whether a channel/supergroup has join requests enabled.
@@ -10,13 +12,16 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  *
  * @param chatId  Chat ID or username
  * @param enabled  Whether join requests should be enabled
- * @internal
  */
-export async function toggleJoinRequests(this: TelegramClient, chatId: InputPeerLike, enabled = false): Promise<void> {
-    const res = await this.call({
+export async function toggleJoinRequests(
+    client: BaseTelegramClient,
+    chatId: InputPeerLike,
+    enabled = false,
+): Promise<void> {
+    const res = await client.call({
         _: 'channels.toggleJoinRequest',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
+        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
         enabled,
     })
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 }

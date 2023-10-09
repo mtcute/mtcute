@@ -1,18 +1,20 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike, Photo } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { getProfilePhotos } from './get-profile-photos'
+import { resolvePeer } from './resolve-peer'
 
 /**
  * Iterate over profile photos
  *
  * @param userId  User ID, username, phone number, `"me"` or `"self"`
  * @param params
- * @internal
  */
 export async function* iterProfilePhotos(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     userId: InputPeerLike,
-    params?: Parameters<TelegramClient['getProfilePhotos']>[1] & {
+    params?: Parameters<typeof getProfilePhotos>[2] & {
         /**
          * Maximum number of items to fetch
          *
@@ -30,7 +32,7 @@ export async function* iterProfilePhotos(
 ): AsyncIterableIterator<Photo> {
     if (!params) params = {}
 
-    const peer = normalizeToInputUser(await this.resolvePeer(userId), userId)
+    const peer = normalizeToInputUser(await resolvePeer(client, userId), userId)
 
     const { limit = Infinity, chunkSize = 100 } = params
 
@@ -38,7 +40,7 @@ export async function* iterProfilePhotos(
     let current = 0
 
     for (;;) {
-        const res = await this.getProfilePhotos(peer, {
+        const res = await getProfilePhotos(client, peer, {
             offset,
             limit: Math.min(chunkSize, limit - current),
         })

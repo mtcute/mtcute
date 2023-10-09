@@ -1,17 +1,15 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Delete all messages of a user (or channel) in a supergroup
- *
- * @internal
  */
 export async function deleteUserHistory(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID */
         chatId: InputPeerLike
@@ -21,15 +19,15 @@ export async function deleteUserHistory(
 ): Promise<void> {
     const { chatId, participantId } = params
 
-    const channel = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
+    const channel = normalizeToInputChannel(await resolvePeer(client, chatId), chatId)
 
-    const peer = await this.resolvePeer(participantId)
+    const peer = await resolvePeer(client, participantId)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'channels.deleteParticipantHistory',
         channel,
         participant: peer,
     })
 
-    this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount, (channel as tl.RawInputChannel).channelId))
+    client.network.handleUpdate(createDummyUpdate(res.pts, res.ptsCount, (channel as tl.RawInputChannel).channelId))
 }

@@ -1,7 +1,6 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 import { fileIdToInputDocument, tdFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
 import { StickerSet } from '../../types'
 
 /**
@@ -16,11 +15,10 @@ import { StickerSet } from '../../types'
  *     TL object representing a sticker to be removed
  * @param position  New sticker position (starting from 0)
  * @returns  Modfiied sticker set
- * @internal
  */
 
 export async function moveStickerInSet(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument,
     position: number,
 ): Promise<StickerSet> {
@@ -28,11 +26,11 @@ export async function moveStickerInSet(
         sticker = fileIdToInputDocument(sticker)
     }
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'stickers.changeStickerPosition',
         sticker,
         position,
     })
 
-    return new StickerSet(this, res)
+    return new StickerSet(res)
 }

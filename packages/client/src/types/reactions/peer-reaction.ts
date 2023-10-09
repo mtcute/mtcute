@@ -1,9 +1,9 @@
 import { getMarkedPeerId, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../..'
 import { makeInspectable } from '../../utils'
-import { PeersIndex, User } from '../peers'
+import { PeersIndex } from '../peers/peers-index'
+import { User } from '../peers/user'
 import { ReactionEmoji, toReactionEmoji } from './types'
 
 /**
@@ -11,7 +11,6 @@ import { ReactionEmoji, toReactionEmoji } from './types'
  */
 export class PeerReaction {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawMessagePeerReaction,
         readonly _peers: PeersIndex,
     ) {}
@@ -53,7 +52,7 @@ export class PeerReaction {
         if (!this._user) {
             assertTypeIs('PeerReaction#user', this.raw.peerId, 'peerUser')
 
-            this._user = new User(this.client, this._peers.user(this.raw.peerId.userId))
+            this._user = new User(this._peers.user(this.raw.peerId.userId))
         }
 
         return this._user

@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { BotCommands } from '../../types'
+import { _normalizeCommandScope } from './normalize-command-scope'
 
 /**
  * Delete commands for the current bot and the given scope.
@@ -9,11 +9,9 @@ import { BotCommands } from '../../types'
  * Does the same as passing `null` to  {@link setMyCommands}
  *
  * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
- *
- * @internal
  */
 export async function deleteMyCommands(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params?: {
         /**
          * Scope of the commands.
@@ -29,12 +27,12 @@ export async function deleteMyCommands(
     },
 ): Promise<void> {
     const scope: tl.TypeBotCommandScope = params?.scope ?
-        await this._normalizeCommandScope(params.scope) :
+        await _normalizeCommandScope(client, params.scope) :
         {
             _: 'botCommandScopeDefault',
         }
 
-    await this.call({
+    await client.call({
         _: 'bots.resetBotCommands',
         scope,
         langCode: params?.langCode ?? '',

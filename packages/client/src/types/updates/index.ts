@@ -1,4 +1,4 @@
-import { CallbackQuery, InlineQuery, Message } from '../..'
+import type { CallbackQuery, InlineQuery, Message } from '../../types'
 import { BotChatJoinRequestUpdate } from './bot-chat-join-request'
 import { BotStoppedUpdate } from './bot-stopped'
 import { ChatJoinRequestUpdate } from './chat-join-request'

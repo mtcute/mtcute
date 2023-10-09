@@ -1,17 +1,18 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Set maximum Time-To-Live of all newly sent messages in the specified chat
  *
  * @param chatId  Chat ID
  * @param period  New TTL period, in seconds (or 0 to disable)
- * @internal
  */
-export async function setChatTtl(this: TelegramClient, chatId: InputPeerLike, period: number): Promise<void> {
-    await this.call({
+export async function setChatTtl(client: BaseTelegramClient, chatId: InputPeerLike, period: number): Promise<void> {
+    await client.call({
         _: 'messages.setHistoryTTL',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         period,
     })
 }

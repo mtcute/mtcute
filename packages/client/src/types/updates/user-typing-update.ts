@@ -1,8 +1,7 @@
 import { BasicPeerType, getBarePeerId, MtUnsupportedError, tl, toggleChannelIdMark } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
-import { Chat, TypingStatus, User } from '../'
+import { TypingStatus } from '../peers'
 
 /**
  * User's typing status has changed.
@@ -10,10 +9,7 @@ import { Chat, TypingStatus, User } from '../'
  * This update is valid for 6 seconds.
  */
 export class UserTypingUpdate {
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChannelUserTyping,
-    ) {}
+    constructor(readonly raw: tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChannelUserTyping) {}
 
     /**
      * ID of the user whose typing status changed
@@ -91,20 +87,6 @@ export class UserTypingUpdate {
         }
 
         throw new MtUnsupportedError()
-    }
-
-    /**
-     * Fetch the user whose typing status has changed
-     */
-    getUser(): Promise<User> {
-        return this.client.getUsers(this.userId)
-    }
-
-    /**
-     * Fetch the chat where the update has happened
-     */
-    getChat(): Promise<Chat> {
-        return this.client.getChat(this.chatId)
     }
 }
 

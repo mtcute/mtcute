@@ -1,35 +1,21 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 import { ConditionVariable } from '@mtcute/core/utils'
 
-import { TelegramClient, TelegramClientOptions } from '../../client'
 import { InputPeerLike } from '../../types'
-
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// @extension
-interface ResolvePeerManyExtension {
-    _resolvePeerManyPoolLimit: number
-}
-
-// @initialize
-function _resolvePeerManyInitializer(this: TelegramClient, opts: TelegramClientOptions) {
-    this._resolvePeerManyPoolLimit = opts.resolvePeerManyPoolLimit ?? 8
-}
-/* eslint-enable @typescript-eslint/no-unused-vars */
+import { resolvePeer } from './resolve-peer'
 
 /**
  * Get multiple `InputPeer`s at once,
  * while also normalizing and removing
  * peers that can't be normalized to that type.
  *
- * Uses async pool internally, with a
- * configurable concurrent limit (see {@link TelegramClientOptions#resolvePeerManyPoolLimit}).
+ * Uses async pool internally, with a concurrent limit of 8
  *
  * @param peerIds  Peer Ids
  * @param normalizer  Normalization function
- * @internal
  */
 export async function resolvePeerMany<T extends tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel>(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peerIds: InputPeerLike[],
     normalizer: (obj: tl.TypeInputPeer) => T | null,
 ): Promise<T[]>
@@ -37,30 +23,27 @@ export async function resolvePeerMany<T extends tl.TypeInputPeer | tl.TypeInputU
 /**
  * Get multiple `InputPeer`s at once.
  *
- * Uses async pool internally, with a
- * configurable concurrent limit (see {@link TelegramClientOptions#resolvePeerManyPoolLimit}).
- *
+ * Uses async pool internally, with a concurrent limit of 8
  *
  * @param peerIds  Peer Ids
- * @internal
  */
-export async function resolvePeerMany(this: TelegramClient, peerIds: InputPeerLike[]): Promise<tl.TypeInputPeer[]>
+export async function resolvePeerMany(client: BaseTelegramClient, peerIds: InputPeerLike[]): Promise<tl.TypeInputPeer[]>
 
 /**
  * @internal
  */
 export async function resolvePeerMany(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peerIds: InputPeerLike[],
     normalizer?: (obj: tl.TypeInputPeer) => tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel | null,
 ): Promise<(tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[]> {
     const ret: (tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel)[] = []
 
-    const limit = this._resolvePeerManyPoolLimit
+    const limit = 8
 
     if (peerIds.length < limit) {
         // no point in using async pool for <limit peers
-        const res = await Promise.all(peerIds.map((it) => this.resolvePeer(it)))
+        const res = await Promise.all(peerIds.map((it) => resolvePeer(client, it)))
 
         if (!normalizer) return res
 
@@ -82,7 +65,7 @@ export async function resolvePeerMany(
     let nextWorkerIdx = 0
 
     const fetchNext = async (idx = nextWorkerIdx++): Promise<void> => {
-        const result = await this.resolvePeer(peerIds[idx])
+        const result = await resolvePeer(client, peerIds[idx])
 
         buffer[idx] = result
 
@@ -96,15 +79,11 @@ export async function resolvePeerMany(
     }
 
     let error: unknown = undefined
-    void Promise.all(Array.from({ length: limit }, (_, i) => fetchNext(i)))
-        .catch((e) => {
-            this.log.debug('resolvePeerMany errored: %s', e.message)
-            error = e
-            cv.notify()
-        })
-        .then(() => {
-            this.log.debug('resolvePeerMany finished')
-        })
+    void Promise.all(Array.from({ length: limit }, (_, i) => fetchNext(i))).catch((e) => {
+        client.log.debug('resolvePeerMany errored: %s', e.message)
+        error = e
+        cv.notify()
+    })
 
     while (nextIdx < peerIds.length) {
         await cv.wait()

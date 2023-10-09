@@ -1,19 +1,19 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike, Message } from '../../types'
 import { normalizeInlineId } from '../../utils/inline-utils'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { _findMessageInUpdate } from '../messages/find-in-update'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Set a score of a user in a game
  *
  * @param params
  * @returns  The modified message
- * @internal
  */
 export async function setGameScore(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat where the game was found */
         chatId: InputPeerLike
@@ -42,10 +42,10 @@ export async function setGameScore(
 ): Promise<Message> {
     const { chatId, message, userId, score, noEdit, force } = params
 
-    const user = normalizeToInputUser(await this.resolvePeer(userId), userId)
-    const chat = await this.resolvePeer(chatId)
+    const user = normalizeToInputUser(await resolvePeer(client, userId), userId)
+    const chat = await resolvePeer(client, chatId)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.setGameScore',
         peer: chat,
         id: message,
@@ -55,7 +55,7 @@ export async function setGameScore(
         force,
     })
 
-    return this._findMessageInUpdate(res, true)
+    return _findMessageInUpdate(client, res, true)
 }
 
 /**
@@ -63,10 +63,9 @@ export async function setGameScore(
  * an inline message
  *
  * @param params
- * @internal
  */
 export async function setInlineGameScore(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** ID of the inline message */
         messageId: string | tl.TypeInputBotInlineMessageID
@@ -89,11 +88,11 @@ export async function setInlineGameScore(
 ): Promise<void> {
     const { messageId, userId, score, noEdit, force } = params
 
-    const user = normalizeToInputUser(await this.resolvePeer(userId), userId)
+    const user = normalizeToInputUser(await resolvePeer(client, userId), userId)
 
     const id = normalizeInlineId(messageId)
 
-    await this.call(
+    await client.call(
         {
             _: 'messages.setInlineGameScore',
             id,

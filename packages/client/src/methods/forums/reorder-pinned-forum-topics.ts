@@ -1,16 +1,16 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Reorder pinned forum topics
  *
  * Only admins with `manageTopics` permission can do this.
- *
- * @internal
  */
 export async function reorderPinnedForumTopics(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID or username */
         chatId: InputPeerLike
@@ -27,9 +27,9 @@ export async function reorderPinnedForumTopics(
     },
 ): Promise<void> {
     const { chatId, order, force } = params
-    await this.call({
+    await client.call({
         _: 'channels.reorderPinnedForumTopics',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
+        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
         order,
         force,
     })

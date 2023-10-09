@@ -1,6 +1,5 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { PeersIndex, User } from '../peers'
 import { ReactionCount } from '../reactions/reaction-count'
@@ -10,7 +9,6 @@ import { ReactionCount } from '../reactions/reaction-count'
  */
 export class StoryInteractions {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawStoryViews,
         readonly _peers: PeersIndex,
     ) {}
@@ -57,7 +55,7 @@ export class StoryInteractions {
      */
     get recentViewers(): User[] {
         if (!this._recentViewers) {
-            this._recentViewers = this.raw.recentViewers?.map((it) => new User(this.client, this._peers.user(it))) ?? []
+            this._recentViewers = this.raw.recentViewers?.map((it) => new User(this._peers.user(it))) ?? []
         }
 
         return this._recentViewers

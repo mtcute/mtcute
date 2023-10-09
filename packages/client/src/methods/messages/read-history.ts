@@ -1,16 +1,17 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Mark chat history as read.
  *
  * @param chatId  Chat ID
- * @internal
  */
 export async function readHistory(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     params?: {
         /**
@@ -28,33 +29,33 @@ export async function readHistory(
 ): Promise<void> {
     const { maxId = 0, clearMentions } = params ?? {}
 
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
 
     if (clearMentions) {
-        const res = await this.call({
+        const res = await client.call({
             _: 'messages.readMentions',
             peer,
         })
 
         if (isInputPeerChannel(peer)) {
-            this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount, peer.channelId))
+            client.network.handleUpdate(createDummyUpdate(res.pts, res.ptsCount, peer.channelId))
         } else {
-            this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
+            client.network.handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
         }
     }
 
     if (isInputPeerChannel(peer)) {
-        await this.call({
+        await client.call({
             _: 'channels.readHistory',
             channel: normalizeToInputChannel(peer),
             maxId,
         })
     } else {
-        const res = await this.call({
+        const res = await client.call({
             _: 'messages.readHistory',
             peer,
             maxId,
         })
-        this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
+        client.network.handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
     }
 }

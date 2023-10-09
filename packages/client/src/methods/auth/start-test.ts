@@ -1,7 +1,8 @@
-import { MtArgumentError } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { User } from '../../types'
+import { logOut } from './log-out'
+import { start } from './start'
 
 /**
  * Utility function to quickly authorize on test DC
@@ -12,10 +13,9 @@ import { User } from '../../types'
  * > are using a test DC in `primaryDc` parameter.
  *
  * @param params  Additional parameters
- * @internal
  */
 export async function startTest(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params?: {
         /**
          * Whether to log out if current session is logged in.
@@ -41,13 +41,15 @@ export async function startTest(
 
     if (params.logout) {
         try {
-            await this.logOut()
+            await logOut(client)
         } catch (e) {}
     }
 
-    const availableDcs = await this.call({
-        _: 'help.getConfig',
-    }).then((res) => res.dcOptions)
+    const availableDcs = await client
+        .call({
+            _: 'help.getConfig',
+        })
+        .then((res) => res.dcOptions)
 
     let phone = params.phone
 
@@ -61,7 +63,7 @@ export async function startTest(
             throw new MtArgumentError(`${phone} has invalid DC ID (${id})`)
         }
     } else {
-        let dcId = this._defaultDcs.main.id
+        let dcId = client.network.getPrimaryDcId()
 
         if (params.dcId) {
             if (!availableDcs.find((dc) => dc.id === params!.dcId)) {
@@ -78,7 +80,7 @@ export async function startTest(
 
     let code = ''
 
-    return this.start({
+    return start(client, {
         phone,
         code: () => code,
         codeSentCallback: (sent) => {

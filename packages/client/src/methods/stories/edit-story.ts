@@ -1,16 +1,19 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { FormattedString, InputMediaLike, InputPeerLike, InputPrivacyRule, Story } from '../../types'
+import { _normalizeInputMedia } from '../files/normalize-input-media'
+import { _parseEntities } from '../messages/parse-entities'
+import { _normalizePrivacyRules } from '../misc/normalize-privacy-rules'
+import { resolvePeer } from '../users/resolve-peer'
+import { _findStoryInUpdate } from './find-in-update'
 
 /**
  * Edit a sent story
  *
  * @returns  Edited story
- * @internal
  */
 export async function editStory(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * Story ID to edit
@@ -67,12 +70,13 @@ export async function editStory(
     let media: tl.TypeInputMedia | undefined = undefined
 
     if (params.media) {
-        media = await this._normalizeInputMedia(params.media, params)
+        media = await _normalizeInputMedia(client, params.media, params)
 
         // if there's no caption in input media (i.e. not present or undefined),
         // user wants to keep current caption, thus `content` needs to stay `undefined`
         if ('caption' in params.media && params.media.caption !== undefined) {
-            [caption, entities] = await this._parseEntities(
+            [caption, entities] = await _parseEntities(
+                client,
                 params.media.caption,
                 params.parseMode,
                 params.media.entities,
@@ -81,14 +85,14 @@ export async function editStory(
     }
 
     if (params.caption) {
-        [caption, entities] = await this._parseEntities(params.caption, params.parseMode, params.entities)
+        [caption, entities] = await _parseEntities(client, params.caption, params.parseMode, params.entities)
     }
 
-    const privacyRules = params.privacyRules ? await this._normalizePrivacyRules(params.privacyRules) : undefined
+    const privacyRules = params.privacyRules ? await _normalizePrivacyRules(client, params.privacyRules) : undefined
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'stories.editStory',
-        peer: await this.resolvePeer(peer),
+        peer: await resolvePeer(client, peer),
         id,
         media,
         mediaAreas: interactiveElements,
@@ -97,5 +101,5 @@ export async function editStory(
         privacyRules,
     })
 
-    return this._findStoryInUpdate(res)
+    return _findStoryInUpdate(client, res)
 }

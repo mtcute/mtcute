@@ -1,17 +1,15 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Fetches the menu button set for the given user.
- *
- * @internal
  */
-export async function getBotMenuButton(this: TelegramClient, user: InputPeerLike): Promise<tl.TypeBotMenuButton> {
-    return await this.call({
+export async function getBotMenuButton(client: BaseTelegramClient, user: InputPeerLike): Promise<tl.TypeBotMenuButton> {
+    return await client.call({
         _: 'bots.getBotMenuButton',
-        userId: normalizeToInputUser(await this.resolvePeer(user), user),
+        userId: normalizeToInputUser(await resolvePeer(client, user), user),
     })
 }

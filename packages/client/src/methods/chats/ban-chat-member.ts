@@ -1,6 +1,5 @@
-import { MtTypeAssertionError } from '@mtcute/core'
+import { BaseTelegramClient, MtTypeAssertionError } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike, Message, MtInvalidPeerTypeError } from '../../types'
 import {
     isInputPeerChannel,
@@ -8,6 +7,8 @@ import {
     normalizeToInputChannel,
     normalizeToInputUser,
 } from '../../utils/peer-utils'
+import { _findMessageInUpdate } from '../messages/find-in-update'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Ban a user/channel from a legacy group, a supergroup or a channel.
@@ -18,10 +19,9 @@ import {
  * any of their channels to post until the ban is lifted.
  *
  * @returns  Service message about removed user, if one was generated.
- * @internal
  */
 export async function banChatMember(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID */
         chatId: InputPeerLike
@@ -29,12 +29,12 @@ export async function banChatMember(
         participantId: InputPeerLike
     },
 ): Promise<Message | null> {
-    const chat = await this.resolvePeer(params.chatId)
-    const peer = await this.resolvePeer(params.participantId)
+    const chat = await resolvePeer(client, params.chatId)
+    const peer = await resolvePeer(client, params.participantId)
 
     let res
     if (isInputPeerChannel(chat)) {
-        res = await this.call({
+        res = await client.call({
             _: 'channels.editBanned',
             channel: normalizeToInputChannel(chat),
             participant: peer,
@@ -46,7 +46,7 @@ export async function banChatMember(
             },
         })
     } else if (isInputPeerChat(chat)) {
-        res = await this.call({
+        res = await client.call({
             _: 'messages.deleteChatUser',
             chatId: chat.chatId,
             userId: normalizeToInputUser(peer),
@@ -54,7 +54,7 @@ export async function banChatMember(
     } else throw new MtInvalidPeerTypeError(params.chatId, 'chat or channel')
 
     try {
-        return this._findMessageInUpdate(res)
+        return _findMessageInUpdate(client, res)
     } catch (e) {
         if (e instanceof MtTypeAssertionError && e.context === '_findInUpdate (@ .updates[*])') {
             // no service message

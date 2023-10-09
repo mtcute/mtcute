@@ -7,10 +7,11 @@ import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/
 
 import { MtArgumentError, MtSecurityError, MtTypeAssertionError } from '../types'
 import { bigIntToBuffer, bufferToBigInt, ICryptoProvider, Logger } from '../utils'
-import { buffersEqual, randomBytes, xorBuffer, xorBufferInPlace } from '../utils/buffer-utils'
+import { buffersEqual, randomBytes } from '../utils/buffer-utils'
 import { findKeyByFingerprints } from '../utils/crypto/keys'
 import { millerRabin } from '../utils/crypto/miller-rabin'
 import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto'
+import { xorBuffer, xorBufferInPlace } from '../utils/crypto/utils'
 import { mtpAssertTypeIs } from '../utils/type-assertions'
 import { SessionConnection } from './session-connection'
 

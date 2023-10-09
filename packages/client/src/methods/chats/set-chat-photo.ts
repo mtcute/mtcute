@@ -1,19 +1,18 @@
-import { MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
 import { InputFileLike, InputPeerLike, isUploadedFile, MtInvalidPeerTypeError } from '../../types'
 import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
+import { uploadFile } from '../files/upload-file'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Set a new chat photo or video.
  *
  * You must be an administrator and have the appropriate permissions.
- *
- * @internal
  */
 export async function setChatPhoto(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID or username */
         chatId: InputPeerLike
@@ -33,7 +32,7 @@ export async function setChatPhoto(
 ): Promise<void> {
     const { chatId, type, media, previewSec } = params
 
-    const chat = await this.resolvePeer(chatId)
+    const chat = await resolvePeer(client, chatId)
 
     if (!(isInputPeerChannel(chat) || isInputPeerChat(chat))) {
         throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
@@ -48,7 +47,7 @@ export async function setChatPhoto(
             throw new MtArgumentError("Chat photo can't be external")
         }
         if (typeof media === 'string' && media.match(/^file:/)) {
-            const uploaded = await this.uploadFile({
+            const uploaded = await uploadFile(client, {
                 file: media.substring(5),
             })
             inputFile = uploaded.inputFile
@@ -71,7 +70,7 @@ export async function setChatPhoto(
     } else if (typeof media === 'object' && tl.isAnyInputFile(media)) {
         inputFile = media
     } else {
-        const uploaded = await this.uploadFile({
+        const uploaded = await uploadFile(client, {
             file: media,
         })
         inputFile = uploaded.inputFile
@@ -88,17 +87,17 @@ export async function setChatPhoto(
     let res
 
     if (isInputPeerChat(chat)) {
-        res = await this.call({
+        res = await client.call({
             _: 'messages.editChatPhoto',
             chatId: chat.chatId,
             photo,
         })
     } else {
-        res = await this.call({
+        res = await client.call({
             _: 'channels.editPhoto',
             channel: normalizeToInputChannel(chat),
             photo,
         })
     }
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 }

@@ -1,9 +1,8 @@
 import { Long, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
-import { MessageEntity } from '../messages'
-import { PeersIndex } from '../peers'
+import { MessageEntity } from '../messages/message-entity'
+import { PeersIndex } from '../peers/peers-index'
 
 export interface PollAnswer {
     /**
@@ -39,7 +38,6 @@ export class Poll {
     readonly type = 'poll' as const
 
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.TypePoll,
         readonly _peers: PeersIndex,
         readonly results?: tl.TypePollResults,
@@ -158,18 +156,6 @@ export class Poll {
         }
 
         return this._entities
-    }
-
-    /**
-     * Get the solution text formatted with a given parse mode.
-     * Returns `null` if solution is not available
-     *
-     * @param parseMode  Parse mode to use (`null` for default)
-     */
-    unparseSolution(parseMode?: string | null): string | null {
-        if (!this.results?.solutionEntities) return null
-
-        return this.client.getParseMode(parseMode).unparse(this.results.solution!, this.results.solutionEntities)
     }
 
     /**

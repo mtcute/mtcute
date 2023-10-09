@@ -1,18 +1,19 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 // @alias=deleteSupergroup
 /**
  * Delete a channel or a supergroup
  *
  * @param chatId  Chat ID or username
- * @internal
  */
-export async function deleteChannel(this: TelegramClient, chatId: InputPeerLike): Promise<void> {
-    const res = await this.call({
+export async function deleteChannel(client: BaseTelegramClient, chatId: InputPeerLike): Promise<void> {
+    const res = await client.call({
         _: 'channels.deleteChannel',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
+        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
     })
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 }

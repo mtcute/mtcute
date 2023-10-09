@@ -1,37 +1,41 @@
+import { BaseTelegramClient } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { User } from '../../types'
+import { getAuthState } from '../auth/_state'
 
 /**
  * Get currently authorized user's full information
- *
- * @internal
  */
-export function getMe(this: TelegramClient): Promise<User> {
-    return this.call({
-        _: 'users.getUsers',
-        id: [
-            {
-                _: 'inputUserSelf',
-            },
-        ],
-    }).then(async ([user]) => {
-        assertTypeIs('getMe (@ users.getUsers)', user, 'user')
+export function getMe(client: BaseTelegramClient): Promise<User> {
+    return client
+        .call({
+            _: 'users.getUsers',
+            id: [
+                {
+                    _: 'inputUserSelf',
+                },
+            ],
+        })
+        .then(async ([user]) => {
+            assertTypeIs('getMe (@ users.getUsers)', user, 'user')
 
-        if (this._userId !== user.id) {
-            // there is such possibility, e.g. when
-            // using a string session without `self`,
-            // or logging out and re-logging in
-            // we need to update the fields accordingly,
-            // and force-save the session
-            this._userId = user.id
-            this._isBot = Boolean(user.bot)
-            await this._saveStorage()
-        }
+            const authState = getAuthState(client)
 
-        this._selfUsername = user.username ?? null
+            if (authState.userId !== user.id) {
+                // there is such possibility, e.g. when
+                // using a string session without `self`,
+                // or logging out and re-logging in
+                // we need to update the fields accordingly,
+                // and force-save the session
+                authState.userId = user.id
+                authState.isBot = Boolean(user.bot)
+                authState.selfChanged = true
+                await client.saveStorage()
+            }
 
-        return new User(this, user)
-    })
+            authState.selfUsername = user.username ?? null
+
+            return new User(user)
+        })
 }

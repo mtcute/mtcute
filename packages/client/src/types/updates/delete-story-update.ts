@@ -1,4 +1,6 @@
-import { Chat, PeersIndex, TelegramClient, tl, User } from '../..'
+import { tl } from '@mtcute/core'
+
+import { Chat, PeersIndex, User } from '../../types/peers'
 import { makeInspectable } from '../../utils'
 
 /**
@@ -6,7 +8,6 @@ import { makeInspectable } from '../../utils'
  */
 export class DeleteStoryUpdate {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawUpdateStory,
         readonly _peers: PeersIndex,
     ) {}
@@ -20,11 +21,11 @@ export class DeleteStoryUpdate {
 
         switch (this.raw.peer._) {
             case 'peerUser':
-                return (this._peer = new User(this.client, this._peers.user(this.raw.peer.userId)))
+                return (this._peer = new User(this._peers.user(this.raw.peer.userId)))
             case 'peerChat':
-                return (this._peer = new Chat(this.client, this._peers.chat(this.raw.peer.chatId)))
+                return (this._peer = new Chat(this._peers.chat(this.raw.peer.chatId)))
             case 'peerChannel':
-                return (this._peer = new Chat(this.client, this._peers.chat(this.raw.peer.channelId)))
+                return (this._peer = new Chat(this._peers.chat(this.raw.peer.channelId)))
         }
     }
 

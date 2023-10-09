@@ -1,4 +1,4 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
 
 /**
  * Translate text to a given language.
@@ -9,10 +9,13 @@ import { TelegramClient } from '../../client'
  *
  * @param text  Text to translate
  * @param toLanguage  Target language (two-letter ISO 639-1 language code)
- * @internal
  */
-export async function translateText(this: TelegramClient, text: string, toLanguage: string): Promise<string | null> {
-    const res = await this.call({
+export async function translateText(
+    client: BaseTelegramClient,
+    text: string,
+    toLanguage: string,
+): Promise<string | null> {
+    const res = await client.call({
         _: 'messages.translateText',
         text: [
             {

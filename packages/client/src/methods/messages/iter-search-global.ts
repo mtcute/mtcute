@@ -1,6 +1,8 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { Message, SearchFilters } from '../../types'
 import { normalizeDate } from '../../utils'
+import { searchGlobal } from './search-global'
 
 /**
  * Search for messages globally from all of your chats.
@@ -10,11 +12,10 @@ import { normalizeDate } from '../../utils'
  * **Note**: Due to Telegram limitations, you can only get up to ~10000 messages
  *
  * @param params  Search parameters
- * @internal
  */
 export async function* iterSearchGlobal(
-    this: TelegramClient,
-    params?: Parameters<TelegramClient['searchGlobal']>[0] & {
+    client: BaseTelegramClient,
+    params?: Parameters<typeof searchGlobal>[1] & {
         /**
          * Limits the number of messages to be retrieved.
          *
@@ -42,7 +43,7 @@ export async function* iterSearchGlobal(
     let current = 0
 
     for (;;) {
-        const res = await this.searchGlobal({
+        const res = await searchGlobal(client, {
             query,
             filter,
             limit: Math.min(chunkSize, limit - current),

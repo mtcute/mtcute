@@ -1,5 +1,8 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { ChatInviteLink, InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
+import { getInviteLinks } from './get-invite-links'
 
 /**
  * Iterate over invite links created by some administrator in the chat.
@@ -11,12 +14,11 @@ import { ChatInviteLink, InputPeerLike } from '../../types'
  * @param chatId  Chat ID
  * @param adminId  Admin who created the links
  * @param params
- * @internal
  */
 export async function* iterInviteLinks(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
-    params?: Parameters<TelegramClient['getInviteLinks']>[1] & {
+    params?: Parameters<typeof getInviteLinks>[2] & {
         /**
          * Limit the number of invite links to be fetched.
          * By default, all links are fetched.
@@ -39,11 +41,11 @@ export async function* iterInviteLinks(
 
     let current = 0
 
-    const peer = await this.resolvePeer(chatId)
-    const adminResolved = admin ? await this.resolvePeer(admin) : ({ _: 'inputUserSelf' } as const)
+    const peer = await resolvePeer(client, chatId)
+    const adminResolved = admin ? await resolvePeer(client, admin) : ({ _: 'inputUserSelf' } as const)
 
     for (;;) {
-        const links = await this.getInviteLinks(peer, {
+        const links = await getInviteLinks(client, peer, {
             admin: adminResolved,
             revoked,
             limit: Math.min(chunkSize, limit - current),

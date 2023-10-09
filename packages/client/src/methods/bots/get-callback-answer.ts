@@ -1,18 +1,17 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 import { computeSrpParams } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Request a callback answer from a bot,
  * i.e. click an inline button that contains data.
  *
  * @param params
- * @internal
  */
 export async function getCallbackAnswer(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID where the message was found */
         chatId: InputPeerLike
@@ -49,14 +48,14 @@ export async function getCallbackAnswer(
     let password: tl.TypeInputCheckPasswordSRP | undefined = undefined
 
     if (params?.password) {
-        const pwd = await this.call({ _: 'account.getPassword' })
-        password = await computeSrpParams(this._crypto, pwd, params.password)
+        const pwd = await client.call({ _: 'account.getPassword' })
+        password = await computeSrpParams(client.crypto, pwd, params.password)
     }
 
-    return await this.call(
+    return await client.call(
         {
             _: 'messages.getBotCallbackAnswer',
-            peer: await this.resolvePeer(chatId),
+            peer: await resolvePeer(client, chatId),
             msgId: message,
             data: typeof data === 'string' ? Buffer.from(data) : data,
             password,

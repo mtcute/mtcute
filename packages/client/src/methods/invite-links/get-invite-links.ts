@@ -1,7 +1,9 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { ArrayPaginated, ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
 import { makeArrayPaginated } from '../../utils'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 // @exported
 export interface GetInviteLinksOffset {
@@ -19,10 +21,9 @@ export interface GetInviteLinksOffset {
  * @param chatId  Chat ID
  * @param adminId  Admin who created the links
  * @param params
- * @internal
  */
 export async function getInviteLinks(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     params?: {
         /**
@@ -54,11 +55,11 @@ export async function getInviteLinks(
 
     const { revoked = false, limit = Infinity, admin, offset } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.getExportedChatInvites',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         revoked,
-        adminId: admin ? normalizeToInputUser(await this.resolvePeer(admin), admin) : { _: 'inputUserSelf' },
+        adminId: admin ? normalizeToInputUser(await resolvePeer(client, admin), admin) : { _: 'inputUserSelf' },
         limit,
         offsetDate: offset?.date,
         offsetLink: offset?.link,
@@ -66,7 +67,7 @@ export async function getInviteLinks(
 
     const peers = PeersIndex.from(res)
 
-    const links = res.invites.map((it) => new ChatInviteLink(this, it, peers))
+    const links = res.invites.map((it) => new ChatInviteLink(it, peers))
 
     const last = links[links.length - 1]
     const nextOffset = last ?

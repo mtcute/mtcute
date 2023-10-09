@@ -1,17 +1,19 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike, Message } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
+import { getHistory } from './get-history'
 
 /**
  * Iterate over chat history. Wrapper over {@link getHistory}
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
  * @param params  Additional fetch parameters
- * @internal
  */
 export async function* iterHistory(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
-    params?: Parameters<TelegramClient['getHistory']>[1] & {
+    params?: Parameters<typeof getHistory>[2] & {
         /**
          * Limits the number of messages to be retrieved.
          *
@@ -35,10 +37,10 @@ export async function* iterHistory(
     let current = 0
 
     // resolve peer once and pass an InputPeer afterwards
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
 
     for (;;) {
-        const res = await this.getHistory(peer, {
+        const res = await getHistory(client, peer, {
             offset,
             addOffset,
             limit: Math.min(chunkSize, limit - current),

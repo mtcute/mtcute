@@ -1,4 +1,4 @@
-import { WebSocketTransport } from '../../network'
+import { WebSocketTransport } from '../../network/transports/websocket'
 import { MtUnsupportedError } from '../../types'
 
 /** @internal */

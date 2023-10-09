@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/tl'
 
-import { BasicPeerType, MtArgumentError, MtUnsupportedError } from '../types'
+import { MtArgumentError, MtUnsupportedError } from '../types/errors'
+import { BasicPeerType } from '../types/peers'
 
 // src: https://github.com/tdlib/td/blob/master/td/telegram/DialogId.h
 const ZERO_CHANNEL_ID = -1000000000000

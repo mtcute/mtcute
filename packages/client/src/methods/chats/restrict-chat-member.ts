@@ -1,17 +1,15 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
 import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Restrict a user in a supergroup.
- *
- * @internal
  */
 export async function restrictChatMember(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID */
         chatId: InputPeerLike
@@ -40,15 +38,15 @@ export async function restrictChatMember(
 ): Promise<void> {
     const { chatId, userId, restrictions, until = 0 } = params
 
-    const chat = await this.resolvePeer(chatId)
+    const chat = await resolvePeer(client, chatId)
 
     if (!isInputPeerChannel(chat)) {
         throw new MtInvalidPeerTypeError(chatId, 'channel')
     }
 
-    const user = await this.resolvePeer(userId)
+    const user = await resolvePeer(client, userId)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'channels.editBanned',
         channel: normalizeToInputChannel(chat),
         participant: user,
@@ -58,5 +56,5 @@ export async function restrictChatMember(
             ...restrictions,
         },
     })
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 }

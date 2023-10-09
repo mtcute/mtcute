@@ -1,5 +1,7 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Revoke an invite link.
@@ -10,16 +12,15 @@ import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
  * @param chatId  Chat ID
  * @param link  Invite link to revoke
  * @returns  If `link` is a primary invite, newly generated invite link, otherwise the revoked link
- * @internal
  */
 export async function revokeInviteLink(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     link: string,
 ): Promise<ChatInviteLink> {
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.editExportedChatInvite',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         link,
         revoked: true,
     })
@@ -28,5 +29,5 @@ export async function revokeInviteLink(
 
     const invite = res._ === 'messages.exportedChatInviteReplaced' ? res.newInvite : res.invite
 
-    return new ChatInviteLink(this, invite, peers)
+    return new ChatInviteLink(invite, peers)
 }

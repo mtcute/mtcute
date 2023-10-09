@@ -1,7 +1,6 @@
 import { tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { PeersIndex } from './index'
 import { User } from './user'
@@ -10,10 +9,9 @@ import { User } from './user'
  * An invite link
  */
 export class ChatInviteLink {
-    raw: tl.RawChatInviteExported
+    readonly raw: tl.RawChatInviteExported
 
     constructor(
-        readonly client: TelegramClient,
         raw: tl.TypeExportedChatInvite,
         readonly _peers?: PeersIndex,
     ) {
@@ -49,7 +47,7 @@ export class ChatInviteLink {
     get creator(): User | null {
         if (!this._peers) return null
 
-        return (this._creator ??= new User(this.client, this._peers.user(this.raw.adminId)))
+        return (this._creator ??= new User(this._peers.user(this.raw.adminId)))
     }
 
     /**

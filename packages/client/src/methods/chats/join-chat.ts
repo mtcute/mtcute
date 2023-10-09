@@ -1,7 +1,9 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { Chat, InputPeerLike } from '../../types'
 import { INVITE_LINK_REGEX, normalizeToInputChannel } from '../../utils/peer-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Join a channel or supergroup
@@ -13,33 +15,32 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * @param chatId
  *   Chat identifier. Either an invite link (`t.me/joinchat/*`), a username (`@username`)
  *   or ID of the linked supergroup or channel.
- * @internal
  */
-export async function joinChat(this: TelegramClient, chatId: InputPeerLike): Promise<Chat> {
+export async function joinChat(client: BaseTelegramClient, chatId: InputPeerLike): Promise<Chat> {
     if (typeof chatId === 'string') {
         const m = chatId.match(INVITE_LINK_REGEX)
 
         if (m) {
-            const res = await this.call({
+            const res = await client.call({
                 _: 'messages.importChatInvite',
                 hash: m[1],
             })
             assertIsUpdatesGroup('messages.importChatInvite', res)
 
-            this._handleUpdate(res)
+            client.network.handleUpdate(res)
 
-            return new Chat(this, res.chats[0])
+            return new Chat(res.chats[0])
         }
     }
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'channels.joinChannel',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
+        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
     })
 
     assertIsUpdatesGroup('channels.joinChannel', res)
 
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 
-    return new Chat(this, res.chats[0])
+    return new Chat(res.chats[0])
 }

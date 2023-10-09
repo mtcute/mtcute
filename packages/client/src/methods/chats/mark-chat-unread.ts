@@ -1,18 +1,19 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Mark a chat as unread
  *
  * @param chatId  Chat ID
- * @internal
  */
-export async function markChatUnread(this: TelegramClient, chatId: InputPeerLike): Promise<void> {
-    await this.call({
+export async function markChatUnread(client: BaseTelegramClient, chatId: InputPeerLike): Promise<void> {
+    await client.call({
         _: 'messages.markDialogUnread',
         peer: {
             _: 'inputDialogPeer',
-            peer: await this.resolvePeer(chatId),
+            peer: await resolvePeer(client, chatId),
         },
         unread: true,
     })

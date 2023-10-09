@@ -1,17 +1,15 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { BotCommands } from '../../types'
+import { _normalizeCommandScope } from './normalize-command-scope'
 
 /**
  * Set or delete commands for the current bot and the given scope
  *
  * Learn more about scopes in the [Bot API docs](https://core.telegram.org/bots/api#botcommandscope)
- *
- * @internal
  */
 export async function setMyCommands(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * New list of bot commands for the given scope.
@@ -34,20 +32,20 @@ export async function setMyCommands(
     },
 ): Promise<void> {
     const scope: tl.TypeBotCommandScope = params.scope ?
-        await this._normalizeCommandScope(params.scope) :
+        await _normalizeCommandScope(client, params.scope) :
         {
             _: 'botCommandScopeDefault',
         }
 
     if (params.commands?.length) {
-        await this.call({
+        await client.call({
             _: 'bots.setBotCommands',
             commands: params.commands,
             scope,
             langCode: params.langCode ?? '',
         })
     } else {
-        await this.call({
+        await client.call({
             _: 'bots.resetBotCommands',
             scope,
             langCode: params.langCode ?? '',

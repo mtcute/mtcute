@@ -1,6 +1,5 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { MessageEntity } from './message-entity'
 
@@ -8,10 +7,7 @@ import { MessageEntity } from './message-entity'
  * A draft message
  */
 export class DraftMessage {
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.RawDraftMessage,
-    ) {}
+    constructor(readonly raw: tl.RawDraftMessage) {}
 
     /**
      * Text of the draft message

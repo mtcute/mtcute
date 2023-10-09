@@ -1,8 +1,16 @@
-import { getBasicPeerType, getMarkedPeerId, Long, MtTypeAssertionError, tl, toggleChannelIdMark } from '@mtcute/core'
+import {
+    BaseTelegramClient,
+    getBasicPeerType,
+    getMarkedPeerId,
+    Long,
+    MtTypeAssertionError,
+    tl,
+    toggleChannelIdMark,
+} from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
-import { InputPeerLike, MtPeerNotFoundError } from '../../types'
+import { MtPeerNotFoundError } from '../../types/errors'
+import { InputPeerLike } from '../../types/peers'
 import { normalizeToInputPeer } from '../../utils/peer-utils'
 
 // @available=both
@@ -12,10 +20,9 @@ import { normalizeToInputPeer } from '../../utils/peer-utils'
  *
  * @param peerId  The peer identifier that you want to extract the `InputPeer` from.
  * @param force  Whether to force re-fetch the peer from the server
- * @internal
  */
 export async function resolvePeer(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peerId: InputPeerLike,
     force = false,
 ): Promise<tl.TypeInputPeer> {
@@ -29,7 +36,7 @@ export async function resolvePeer(
     }
 
     if (typeof peerId === 'number' && !force) {
-        const fromStorage = await this.storage.getPeerById(peerId)
+        const fromStorage = await client.storage.getPeerById(peerId)
         if (fromStorage) return fromStorage
     }
 
@@ -40,10 +47,10 @@ export async function resolvePeer(
 
         if (peerId.match(/^\d+$/)) {
             // phone number
-            const fromStorage = await this.storage.getPeerByPhone(peerId)
+            const fromStorage = await client.storage.getPeerByPhone(peerId)
             if (fromStorage) return fromStorage
 
-            const res = await this.call({
+            const res = await client.call({
                 _: 'contacts.getContacts',
                 hash: Long.ZERO,
             })
@@ -64,11 +71,11 @@ export async function resolvePeer(
         } else {
             // username
             if (!force) {
-                const fromStorage = await this.storage.getPeerByUsername(peerId.toLowerCase())
+                const fromStorage = await client.storage.getPeerByUsername(peerId.toLowerCase())
                 if (fromStorage) return fromStorage
             }
 
-            const res = await this.call({
+            const res = await client.call({
                 _: 'contacts.resolveUsername',
                 username: peerId,
             })
@@ -133,7 +140,7 @@ export async function resolvePeer(
     // try fetching by id, with access_hash set to 0
     switch (peerType) {
         case 'user': {
-            const res = await this.call({
+            const res = await client.call({
                 _: 'users.getUsers',
                 id: [
                     {
@@ -166,7 +173,7 @@ export async function resolvePeer(
         case 'chat': {
             // do we really need to make a call?
             // const id = -peerId
-            // const res = await this.call({
+            // const res = await client.call({
             //     _: 'messages.getChats',
             //     id: [id],
             // })
@@ -187,7 +194,7 @@ export async function resolvePeer(
         case 'channel': {
             const id = toggleChannelIdMark(peerId)
 
-            const res = await this.call({
+            const res = await client.call({
                 _: 'channels.getChannels',
                 id: [
                     {

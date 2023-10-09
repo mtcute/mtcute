@@ -1,15 +1,14 @@
-import { MaybeArray, tl } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Unarchive one or more chats
  *
  * @param chats  Chat ID(s), username(s), phone number(s), `"me"` or `"self"`
- * @internal
  */
-export async function unarchiveChats(this: TelegramClient, chats: MaybeArray<InputPeerLike>): Promise<void> {
+export async function unarchiveChats(client: BaseTelegramClient, chats: MaybeArray<InputPeerLike>): Promise<void> {
     if (!Array.isArray(chats)) chats = [chats]
 
     const folderPeers: tl.TypeInputFolderPeer[] = []
@@ -17,14 +16,14 @@ export async function unarchiveChats(this: TelegramClient, chats: MaybeArray<Inp
     for (const chat of chats) {
         folderPeers.push({
             _: 'inputFolderPeer',
-            peer: await this.resolvePeer(chat),
+            peer: await resolvePeer(client, chat),
             folderId: 0,
         })
     }
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'folders.editPeerFolders',
         folderPeers,
     })
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 }

@@ -1,5 +1,7 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { ChatInviteLink, InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Generate a new primary invite link for a chat,
@@ -9,14 +11,13 @@ import { ChatInviteLink, InputPeerLike } from '../../types'
  * > and bots by default don't have one.
  *
  * @param chatId  Chat IDs
- * @internal
  */
-export async function exportInviteLink(this: TelegramClient, chatId: InputPeerLike): Promise<ChatInviteLink> {
-    const res = await this.call({
+export async function exportInviteLink(client: BaseTelegramClient, chatId: InputPeerLike): Promise<ChatInviteLink> {
+    const res = await client.call({
         _: 'messages.exportChatInvite',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         legacyRevokePermanent: true,
     })
 
-    return new ChatInviteLink(this, res)
+    return new ChatInviteLink(res)
 }

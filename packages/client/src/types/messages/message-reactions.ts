@@ -1,6 +1,5 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../..'
 import { makeInspectable } from '../../utils'
 import { PeersIndex } from '../peers'
 import { PeerReaction } from '../reactions/peer-reaction'
@@ -11,7 +10,6 @@ import { ReactionCount } from '../reactions/reaction-count'
  */
 export class MessageReactions {
     constructor(
-        readonly client: TelegramClient,
         readonly messageId: number,
         readonly chatId: number,
         readonly raw: tl.RawMessageReactions,
@@ -47,7 +45,7 @@ export class MessageReactions {
         }
 
         return (this._recentReactions ??= this.raw.recentReactions.map(
-            (reaction) => new PeerReaction(this.client, reaction, this._peers),
+            (reaction) => new PeerReaction(reaction, this._peers),
         ))
     }
 }

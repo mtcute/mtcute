@@ -1,9 +1,9 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types'
 import { isInputPeerChannel, isInputPeerChat, isInputPeerUser, normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Get information about a single chat member
@@ -11,10 +11,9 @@ import { isInputPeerChannel, isInputPeerChat, isInputPeerUser, normalizeToInputC
  * @param chatId  Chat ID or username
  * @param userId  User ID, username, phone number, `"me"` or `"self"`
  * @throws UserNotParticipantError  In case given user is not a participant of a given chat
- * @internal
  */
 export async function getChatMember(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID or username */
         chatId: InputPeerLike
@@ -24,15 +23,15 @@ export async function getChatMember(
 ): Promise<ChatMember> {
     const { chatId, userId } = params
 
-    const user = await this.resolvePeer(userId)
-    const chat = await this.resolvePeer(chatId)
+    const user = await resolvePeer(client, userId)
+    const chat = await resolvePeer(client, chatId)
 
     if (isInputPeerChat(chat)) {
         if (!isInputPeerUser(user)) {
             throw new MtInvalidPeerTypeError(userId, 'user')
         }
 
-        const res = await this.call({
+        const res = await client.call({
             _: 'messages.getFullChat',
             chatId: chat.chatId,
         })
@@ -49,13 +48,13 @@ export async function getChatMember(
                 (user._ === 'inputPeerSelf' && (peers.user(m.userId) as tl.RawUser).self) ||
                 (user._ === 'inputPeerUser' && m.userId === user.userId)
             ) {
-                return new ChatMember(this, m, peers)
+                return new ChatMember(m, peers)
             }
         }
 
         throw new tl.RpcError(404, 'USER_NOT_PARTICIPANT')
     } else if (isInputPeerChannel(chat)) {
-        const res = await this.call({
+        const res = await client.call({
             _: 'channels.getParticipant',
             channel: normalizeToInputChannel(chat),
             participant: user,
@@ -63,6 +62,6 @@ export async function getChatMember(
 
         const peers = PeersIndex.from(res)
 
-        return new ChatMember(this, res.participant, peers)
+        return new ChatMember(res.participant, peers)
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 }

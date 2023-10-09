@@ -1,17 +1,18 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { isInputPeerChannel, isInputPeerUser, normalizeToInputChannel, normalizeToInputUser } from '../../utils'
+import { getAuthState } from '../auth/_state'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Toggle a collectible (Fragment) username
  *
  * > **Note**: non-collectible usernames must still be changed
  * > using {@link setUsername}/{@link setChatUsername}
- *
- * @internal
  */
 export async function toggleFragmentUsername(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Peer ID whose username to toggle */
         peerId: InputPeerLike
@@ -29,14 +30,14 @@ export async function toggleFragmentUsername(
 ): Promise<void> {
     const { peerId, username, active } = params
 
-    const peer = await this.resolvePeer(peerId)
+    const peer = await resolvePeer(client, peerId)
 
     if (isInputPeerUser(peer)) {
         // either a bot or self
 
-        if (peer._ === 'inputPeerSelf' || peer.userId === this._userId) {
+        if (peer._ === 'inputPeerSelf' || peer.userId === getAuthState(client).userId) {
             // self
-            await this.call({
+            await client.call({
                 _: 'account.toggleUsername',
                 username,
                 active,
@@ -46,14 +47,14 @@ export async function toggleFragmentUsername(
         }
 
         // bot
-        await this.call({
+        await client.call({
             _: 'bots.toggleUsername',
             bot: normalizeToInputUser(peer, peerId),
             username,
             active,
         })
     } else if (isInputPeerChannel(peer)) {
-        await this.call({
+        await client.call({
             _: 'channels.toggleUsername',
             channel: normalizeToInputChannel(peer, peerId),
             username,

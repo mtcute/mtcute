@@ -1,15 +1,13 @@
-import { MaybeArray, tl } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Report a story (or multiple stories) to the moderation team
- *
- * @internal
  */
 export async function reportStory(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peerId: InputPeerLike,
     storyIds: MaybeArray<number>,
     params?: {
@@ -28,9 +26,9 @@ export async function reportStory(
 ): Promise<void> {
     const { reason = { _: 'inputReportReasonSpam' }, message = '' } = params ?? {}
 
-    await this.call({
+    await client.call({
         _: 'stories.report',
-        peer: await this.resolvePeer(peerId),
+        peer: await resolvePeer(client, peerId),
         id: Array.isArray(storyIds) ? storyIds : [storyIds],
         message,
         reason,

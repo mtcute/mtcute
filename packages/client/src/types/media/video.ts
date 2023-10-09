@@ -1,7 +1,6 @@
 import { tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { RawDocument } from './document'
 
@@ -21,12 +20,11 @@ export class Video extends RawDocument {
     }
 
     constructor(
-        client: TelegramClient,
         doc: tl.RawDocument,
         readonly attr: tl.RawDocumentAttributeVideo | tl.RawDocumentAttributeImageSize,
         readonly media?: tl.RawMessageMediaDocument,
     ) {
-        super(client, doc)
+        super(doc)
     }
 
     /**
