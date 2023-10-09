@@ -17,6 +17,12 @@ export async function sendReaction(
         emoji?: InputReaction | null
         /** Whether to use a big reaction */
         big?: boolean
+
+        /**
+         * Whether to dispatch the returned edit message event
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     },
 ): Promise<Message> {
     const { emoji, big } = params
@@ -40,5 +46,5 @@ export async function sendReaction(
     // idk why, they contain literally the same data
     // so we can just return the message from the first one
 
-    return _findMessageInUpdate(client, res, true)
+    return _findMessageInUpdate(client, res, true, !params.shouldDispatch)
 }

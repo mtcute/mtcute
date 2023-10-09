@@ -23,9 +23,15 @@ export async function toggleForumTopicClosed(
 
         /** Whether the topic should be closed */
         closed: boolean
+
+        /**
+         * Whether to dispatch the returned service message (if any)
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     },
 ): Promise<Message> {
-    const { chatId, topicId, closed } = parmas
+    const { chatId, topicId, closed, shouldDispatch } = parmas
 
     const res = await client.call({
         _: 'channels.editForumTopic',
@@ -34,5 +40,5 @@ export async function toggleForumTopicClosed(
         closed,
     })
 
-    return _findMessageInUpdate(client, res)
+    return _findMessageInUpdate(client, res, false, shouldDispatch)
 }

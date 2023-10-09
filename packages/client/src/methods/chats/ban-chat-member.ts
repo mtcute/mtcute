@@ -25,12 +25,20 @@ export async function banChatMember(
     params: {
         /** Chat ID */
         chatId: InputPeerLike
+
         /** ID of the user/channel to ban */
         participantId: InputPeerLike
+
+        /**
+         * Whether to dispatch the returned service message (if any)
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     },
 ): Promise<Message | null> {
-    const chat = await resolvePeer(client, params.chatId)
-    const peer = await resolvePeer(client, params.participantId)
+    const { chatId, participantId, shouldDispatch } = params
+    const chat = await resolvePeer(client, chatId)
+    const peer = await resolvePeer(client, participantId)
 
     let res
     if (isInputPeerChannel(chat)) {
@@ -51,10 +59,10 @@ export async function banChatMember(
             chatId: chat.chatId,
             userId: normalizeToInputUser(peer),
         })
-    } else throw new MtInvalidPeerTypeError(params.chatId, 'chat or channel')
+    } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 
     try {
-        return _findMessageInUpdate(client, res)
+        return _findMessageInUpdate(client, res, false, !shouldDispatch)
     } catch (e) {
         if (e instanceof MtTypeAssertionError && e.context === '_findInUpdate (@ .updates[*])') {
             // no service message

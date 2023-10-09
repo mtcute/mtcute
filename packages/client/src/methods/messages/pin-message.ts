@@ -1,13 +1,16 @@
-import { BaseTelegramClient } from '@mtcute/core'
+import { BaseTelegramClient, MtTypeAssertionError } from '@mtcute/core'
 
-import { InputMessageId, normalizeInputMessageId } from '../../types'
+import { InputMessageId, Message, normalizeInputMessageId } from '../../types'
 import { resolvePeer } from '../users/resolve-peer'
+import { _findMessageInUpdate } from './find-in-update'
 
 /**
  * Pin a message in a group, supergroup, channel or PM.
  *
  * For supergroups/channels, you must have appropriate permissions,
  * either as an admin, or as default permissions
+ *
+ * @returns  Service message about pinned message, if one was generated.
  */
 export async function pinMessage(
     client: BaseTelegramClient,
@@ -16,9 +19,15 @@ export async function pinMessage(
         notify?: boolean
         /** Whether to pin for both sides (only for private chats) */
         bothSides?: boolean
+
+        /**
+         * Whether to dispatch the returned service message (if any)
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     },
-): Promise<void> {
-    const { notify, bothSides } = params ?? {}
+): Promise<Message | null> {
+    const { notify, bothSides, shouldDispatch } = params ?? {}
     const { chatId, message } = normalizeInputMessageId(params)
 
     const res = await client.call({
@@ -29,5 +38,14 @@ export async function pinMessage(
         pmOneside: !bothSides,
     })
 
-    client.network.handleUpdate(res)
+    try {
+        return _findMessageInUpdate(client, res, false, !shouldDispatch)
+    } catch (e) {
+        if (e instanceof MtTypeAssertionError && e.context === '_findInUpdate (@ .updates[*])') {
+            // no service message
+            return null
+        }
+
+        throw e
+    }
 }

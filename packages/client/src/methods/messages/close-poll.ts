@@ -11,7 +11,16 @@ import { resolvePeer } from '../users/resolve-peer'
  * Once closed, poll can't be re-opened, and nobody
  * will be able to vote in it
  */
-export async function closePoll(client: BaseTelegramClient, params: InputMessageId): Promise<Poll> {
+export async function closePoll(
+    client: BaseTelegramClient,
+    params: InputMessageId & {
+        /**
+         * Whether to dispatch the edit message event
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
+    },
+): Promise<Poll> {
     const { chatId, message } = normalizeInputMessageId(params)
 
     const res = await client.call({
@@ -32,7 +41,7 @@ export async function closePoll(client: BaseTelegramClient, params: InputMessage
 
     assertIsUpdatesGroup('messages.editMessage', res)
 
-    client.network.handleUpdate(res, true)
+    client.network.handleUpdate(res, !params.shouldDispatch)
 
     const upd = res.updates[0]
     assertTypeIs('messages.editMessage (@ .updates[0])', upd, 'updateMessagePoll')
