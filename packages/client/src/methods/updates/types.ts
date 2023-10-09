@@ -21,7 +21,7 @@ export interface UpdatesManagerParams {
     /**
      * **ADVANCED**
      *
-     * Whether to disable no-dispatch mechanism.
+     * Whether to globally disable no-dispatch mechanism.
      *
      * No-dispatch is a mechanism that allows you to call methods
      * that return updates and correctly handle them, without
@@ -38,6 +38,9 @@ export interface UpdatesManagerParams {
      *   dispatched to the event handler, thus it will onlt be printed once
      *
      * Disabling it may also improve performance, but it's not guaranteed.
+     *
+     * > **Note**: you can disable this on per-request basis by passing
+     * > `shouldDispatch: true` to the method call that accepts it.
      *
      * @default false
      */

@@ -89,6 +89,12 @@ export interface ForwardMessageOptions {
      * Peer to use when sending the message.
      */
     sendAs?: InputPeerLike
+
+    /**
+     * Whether to dispatch the forwarded messages
+     * to the client's update handler.
+     */
+    shouldDispatch?: true
 }
 
 /**
@@ -139,7 +145,7 @@ export async function forwardMessagesById(
 
     assertIsUpdatesGroup('messages.forwardMessages', res)
 
-    client.network.handleUpdate(res, true)
+    client.network.handleUpdate(res, !params.shouldDispatch)
 
     const peers = PeersIndex.from(res)
 

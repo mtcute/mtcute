@@ -32,9 +32,15 @@ export async function setGameScore(
          * This can be useful when fixing mistakes or banning cheaters
          */
         force?: boolean
+
+        /**
+         * Whether to dispatch the edit message event
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     },
 ): Promise<Message> {
-    const { userId, score, noEdit, force } = params
+    const { userId, score, noEdit, force, shouldDispatch } = params
     const { chatId, message } = normalizeInputMessageId(params)
 
     const user = normalizeToInputUser(await resolvePeer(client, userId), userId)
@@ -50,7 +56,7 @@ export async function setGameScore(
         force,
     })
 
-    return _findMessageInUpdate(client, res, true)
+    return _findMessageInUpdate(client, res, true, !shouldDispatch)
 }
 
 /**

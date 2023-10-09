@@ -131,6 +131,12 @@ export async function sendMedia(
          * Peer to use when sending the message.
          */
         sendAs?: InputPeerLike
+
+        /**
+         * Whether to dispatch the returned message
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     },
 ): Promise<Message> {
     if (!params) params = {}
@@ -196,7 +202,7 @@ export async function sendMedia(
         sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
     })
 
-    const msg = _findMessageInUpdate(client, res)
+    const msg = _findMessageInUpdate(client, res, false, !params.shouldDispatch)
 
     return msg
 }

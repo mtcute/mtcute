@@ -1050,6 +1050,12 @@ export interface TelegramClient extends BaseTelegramClient {
              * This can be useful when fixing mistakes or banning cheaters
              */
             force?: boolean
+
+            /**
+             * Whether to dispatch the edit message event
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
         },
     ): Promise<Message>
     /**
@@ -1161,8 +1167,15 @@ export interface TelegramClient extends BaseTelegramClient {
     banChatMember(params: {
         /** Chat ID */
         chatId: InputPeerLike
+
         /** ID of the user/channel to ban */
         participantId: InputPeerLike
+
+        /**
+         * Whether to dispatch the returned service message (if any)
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     }): Promise<Message | null>
     /**
      * Create a new broadcast channel
@@ -2314,6 +2327,12 @@ export interface TelegramClient extends BaseTelegramClient {
          * Send as a specific channel
          */
         sendAs?: InputPeerLike
+
+        /**
+         * Whether to dispatch the returned service message (if any)
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     }): Promise<Message>
     /**
      * Delete a forum topic and all its history
@@ -2354,6 +2373,12 @@ export interface TelegramClient extends BaseTelegramClient {
          * and use static color instead
          */
         icon?: tl.Long | null
+
+        /**
+         * Whether to dispatch the returned service message (if any)
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     }): Promise<Message>
     /**
      * Get a single forum topic by its ID
@@ -2457,6 +2482,12 @@ export interface TelegramClient extends BaseTelegramClient {
 
         /** Whether the topic should be closed */
         closed: boolean
+
+        /**
+         * Whether to dispatch the returned service message (if any)
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     }): Promise<Message>
     /**
      * Toggle whether a topic in a forum is pinned
@@ -2491,11 +2522,20 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * **Available**: ✅ both users and bots
      *
-     * @param chatId  Chat ID or username
-     * @param hidden  Whether the topic should be hidden
      * @returns  Service message about the modification
      */
-    toggleGeneralTopicHidden(chatId: InputPeerLike, hidden: boolean): Promise<Message>
+    toggleGeneralTopicHidden(params: {
+        /** Chat ID or username */
+        chatId: InputPeerLike
+        /** Whether the topic should be hidden */
+        hidden: boolean
+
+        /**
+         * Whether to dispatch the returned service message (if any)
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
+    }): Promise<Message>
     /**
      * Create an additional invite link for the chat.
      *
@@ -2794,7 +2834,15 @@ export interface TelegramClient extends BaseTelegramClient {
      * **Available**: ✅ both users and bots
      *
      */
-    closePoll(params: InputMessageId): Promise<Poll>
+    closePoll(
+        params: InputMessageId & {
+            /**
+             * Whether to dispatch the edit message event
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
+        },
+    ): Promise<Poll>
     /**
      * Delete messages by their IDs
      *
@@ -2952,10 +3000,16 @@ export interface TelegramClient extends BaseTelegramClient {
              * @param total  Total file size in bytes
              */
             progressCallback?: (uploaded: number, total: number) => void
+
+            /**
+             * Whether to dispatch the edit message event
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
         },
     ): Promise<Message>
 
-    _findMessageInUpdate(res: tl.TypeUpdates, isEdit?: boolean): Message
+    _findMessageInUpdate(res: tl.TypeUpdates, isEdit?: boolean, noDispatch?: boolean): Message
     /**
      * Forward one or more messages by their IDs.
      * You can forward no more than 100 messages at once.
@@ -3310,8 +3364,10 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * For supergroups/channels, you must have appropriate permissions,
      * either as an admin, or as default permissions
+     *
      * **Available**: ✅ both users and bots
      *
+     * @returns  Service message about pinned message, if one was generated.
      */
     pinMessage(
         params: InputMessageId & {
@@ -3319,8 +3375,14 @@ export interface TelegramClient extends BaseTelegramClient {
             notify?: boolean
             /** Whether to pin for both sides (only for private chats) */
             bothSides?: boolean
+
+            /**
+             * Whether to dispatch the returned service message (if any)
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
         },
-    ): Promise<void>
+    ): Promise<Message | null>
     /**
      * Mark chat history as read.
      *
@@ -3741,6 +3803,12 @@ export interface TelegramClient extends BaseTelegramClient {
              * Peer to use when sending the message.
              */
             sendAs?: InputPeerLike
+
+            /**
+             * Whether to dispatch the returned message
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
         },
     ): Promise<Message>
     /**
@@ -3756,6 +3824,12 @@ export interface TelegramClient extends BaseTelegramClient {
             emoji?: InputReaction | null
             /** Whether to use a big reaction */
             big?: boolean
+
+            /**
+             * Whether to dispatch the returned edit message event
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
         },
     ): Promise<Message>
     /**
@@ -3871,6 +3945,12 @@ export interface TelegramClient extends BaseTelegramClient {
              * Peer to use when sending the message.
              */
             sendAs?: InputPeerLike
+
+            /**
+             * Whether to dispatch the returned message
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
         },
     ): Promise<Message>
     /**

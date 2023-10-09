@@ -193,7 +193,7 @@ export async function sendMediaGroup(
         sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
     })
 
-    assertIsUpdatesGroup('_findMessageInUpdate', res)
+    assertIsUpdatesGroup('sendMediaGroup', res)
     client.network.handleUpdate(res, true)
 
     const peers = PeersIndex.from(res)

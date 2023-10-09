@@ -35,9 +35,15 @@ export async function editForumTopic(
          * and use static color instead
          */
         icon?: tl.Long | null
+
+        /**
+         * Whether to dispatch the returned service message (if any)
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     },
 ): Promise<Message> {
-    const { chatId, topicId, title, icon } = params
+    const { chatId, topicId, title, icon, shouldDispatch } = params
 
     const res = await client.call({
         _: 'channels.editForumTopic',
@@ -47,5 +53,5 @@ export async function editForumTopic(
         iconEmojiId: icon ? icon ?? Long.ZERO : undefined,
     })
 
-    return _findMessageInUpdate(client, res)
+    return _findMessageInUpdate(client, res, false, shouldDispatch)
 }

@@ -78,6 +78,12 @@ export async function editMessage(
          * @param total  Total file size in bytes
          */
         progressCallback?: (uploaded: number, total: number) => void
+
+        /**
+         * Whether to dispatch the edit message event
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     },
 ): Promise<Message> {
     const { chatId, message } = normalizeInputMessageId(params)
@@ -115,5 +121,5 @@ export async function editMessage(
         media,
     })
 
-    return _findMessageInUpdate(client, res, true)
+    return _findMessageInUpdate(client, res, true, !params.shouldDispatch)
 }

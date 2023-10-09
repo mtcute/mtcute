@@ -5,10 +5,15 @@ import { PeersIndex } from '../../types/peers'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
 /** @internal */
-export function _findMessageInUpdate(client: BaseTelegramClient, res: tl.TypeUpdates, isEdit = false): Message {
+export function _findMessageInUpdate(
+    client: BaseTelegramClient,
+    res: tl.TypeUpdates,
+    isEdit = false,
+    noDispatch = true,
+): Message {
     assertIsUpdatesGroup('_findMessageInUpdate', res)
 
-    client.network.handleUpdate(res, true)
+    client.network.handleUpdate(res, noDispatch)
 
     for (const u of res.updates) {
         if (

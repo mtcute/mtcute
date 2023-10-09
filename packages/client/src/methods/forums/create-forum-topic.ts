@@ -38,9 +38,15 @@ export async function createForumTopic(
          * Send as a specific channel
          */
         sendAs?: InputPeerLike
+
+        /**
+         * Whether to dispatch the returned service message (if any)
+         * to the client's update handler.
+         */
+        shouldDispatch?: true
     },
 ): Promise<Message> {
-    const { chatId, title, icon, sendAs } = params
+    const { chatId, title, icon, sendAs, shouldDispatch } = params
 
     const res = await client.call({
         _: 'channels.createForumTopic',
@@ -52,5 +58,5 @@ export async function createForumTopic(
         randomId: randomLong(),
     })
 
-    return _findMessageInUpdate(client, res)
+    return _findMessageInUpdate(client, res, false, !shouldDispatch)
 }
