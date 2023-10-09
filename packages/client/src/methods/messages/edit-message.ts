@@ -1,6 +1,14 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { BotKeyboard, FormattedString, InputMediaLike, InputPeerLike, Message, ReplyMarkup } from '../../types'
+import {
+    BotKeyboard,
+    FormattedString,
+    InputMediaLike,
+    InputMessageId,
+    Message,
+    normalizeInputMessageId,
+    ReplyMarkup,
+} from '../../types'
 import { _normalizeInputMedia } from '../files/normalize-input-media'
 import { resolvePeer } from '../users/resolve-peer'
 import { _findMessageInUpdate } from './find-in-update'
@@ -15,12 +23,7 @@ import { _parseEntities } from './parse-entities'
  */
 export async function editMessage(
     client: BaseTelegramClient,
-    params: {
-        /** Chat ID */
-        chatId: InputPeerLike
-        /** Message to edit */
-        message: number | Message
-
+    params: InputMessageId & {
         /**
          * New message text
          *
@@ -77,7 +80,7 @@ export async function editMessage(
         progressCallback?: (uploaded: number, total: number) => void
     },
 ): Promise<Message> {
-    const { chatId, message } = params
+    const { chatId, message } = normalizeInputMessageId(params)
     let content: string | undefined = undefined
     let entities: tl.TypeMessageEntity[] | undefined
     let media: tl.TypeInputMedia | undefined = undefined
@@ -103,7 +106,7 @@ export async function editMessage(
 
     const res = await client.call({
         _: 'messages.editMessage',
-        id: typeof message === 'number' ? message : message.id,
+        id: message,
         peer: await resolvePeer(client, chatId),
         noWebpage: params.disableWebPreview,
         replyMarkup: BotKeyboard._convertToTl(params.replyMarkup),

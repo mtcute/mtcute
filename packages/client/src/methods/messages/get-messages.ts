@@ -7,21 +7,7 @@ import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-ut
 import { getAuthState } from '../auth/_state'
 import { resolvePeer } from '../users/resolve-peer'
 
-/**
- * Get a single message in chat by its ID
- *
- * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
- * @param messageId  Messages ID
- * @param [fromReply=false]
- *     Whether the reply to a given message should be fetched
- *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
- */
-export async function getMessages(
-    client: BaseTelegramClient,
-    chatId: InputPeerLike,
-    messageId: number,
-    fromReply?: boolean,
-): Promise<Message | null>
+// @available=both
 /**
  * Get messages in chat by their IDs
  *
@@ -37,25 +23,14 @@ export async function getMessages(
 export async function getMessages(
     client: BaseTelegramClient,
     chatId: InputPeerLike,
-    messageIds: number[],
-    fromReply?: boolean,
-): Promise<(Message | null)[]>
-
-// @available=both
-/** @internal */
-export async function getMessages(
-    client: BaseTelegramClient,
-    chatId: InputPeerLike,
     messageIds: MaybeArray<number>,
     fromReply = false,
-): Promise<MaybeArray<Message | null>> {
+): Promise<(Message | null)[]> {
     const peer = await resolvePeer(client, chatId)
-
-    const isSingle = !Array.isArray(messageIds)
-    if (isSingle) messageIds = [messageIds as number]
+    if (!Array.isArray(messageIds)) messageIds = [messageIds]
 
     const type = fromReply ? 'inputMessageReplyTo' : 'inputMessageID'
-    const ids: tl.TypeInputMessage[] = (messageIds as number[]).map((it) => ({
+    const ids: tl.TypeInputMessage[] = messageIds.map((it) => ({
         _: type,
         id: it,
     }))
@@ -80,7 +55,8 @@ export async function getMessages(
     const peers = PeersIndex.from(res)
 
     let selfId: number | null | undefined = undefined
-    const ret = res.messages.map((msg) => {
+
+    return res.messages.map((msg) => {
         if (msg._ === 'messageEmpty') return null
 
         if (!isChannel) {
@@ -110,6 +86,4 @@ export async function getMessages(
 
         return new Message(msg, peers)
     })
-
-    return isSingle ? ret[0] : ret
 }

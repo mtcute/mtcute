@@ -1,14 +1,16 @@
 import { BaseTelegramClient, Long } from '@mtcute/core'
 
+import { CallbackQuery } from '../../types/bots/callback-query'
+
 /**
  * Send an answer to a callback query.
  *
- * @param queryId  ID of the callback query
+ * @param queryId  ID of the callback query, or the query itself
  * @param params  Parameters of the answer
  */
 export async function answerCallbackQuery(
     client: BaseTelegramClient,
-    queryId: Long,
+    queryId: Long | CallbackQuery,
     params?: {
         /**
          * Maximum amount of time in seconds for which
@@ -49,7 +51,7 @@ export async function answerCallbackQuery(
 
     await client.call({
         _: 'messages.setBotCallbackAnswer',
-        queryId,
+        queryId: Long.isLong(queryId) ? queryId : queryId.id,
         cacheTime,
         alert,
         message: text,

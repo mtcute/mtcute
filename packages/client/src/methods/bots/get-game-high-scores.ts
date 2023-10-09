@@ -1,6 +1,6 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { GameHighScore, InputPeerLike, PeersIndex } from '../../types'
+import { GameHighScore, InputMessageId, InputPeerLike, normalizeInputMessageId, PeersIndex } from '../../types'
 import { normalizeInlineId } from '../../utils/inline-utils'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { resolvePeer } from '../users/resolve-peer'
@@ -10,18 +10,13 @@ import { resolvePeer } from '../users/resolve-peer'
  */
 export async function getGameHighScores(
     client: BaseTelegramClient,
-    params: {
-        /** ID of the chat where the game was found */
-        chatId: InputPeerLike
-
-        /** ID of the message containing the game */
-        message: number
-
+    params: InputMessageId & {
         /** ID of the user to find high scores for */
         userId?: InputPeerLike
     },
 ): Promise<GameHighScore[]> {
-    const { chatId, message, userId } = params
+    const { userId } = params
+    const { chatId, message } = normalizeInputMessageId(params)
 
     const chat = await resolvePeer(client, chatId)
 

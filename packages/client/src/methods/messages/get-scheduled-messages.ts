@@ -5,17 +5,6 @@ import { InputPeerLike, Message, PeersIndex } from '../../types'
 import { resolvePeer } from '../users/resolve-peer'
 
 /**
- * Get a single scheduled message in chat by its ID
- *
- * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
- * @param messageId  Scheduled message ID
- */
-export async function getScheduledMessages(
-    client: BaseTelegramClient,
-    chatId: InputPeerLike,
-    messageId: number,
-): Promise<Message | null>
-/**
  * Get scheduled messages in chat by their IDs
  *
  * Fot messages that were not found, `null` will be
@@ -27,24 +16,15 @@ export async function getScheduledMessages(
 export async function getScheduledMessages(
     client: BaseTelegramClient,
     chatId: InputPeerLike,
-    messageIds: number[],
-): Promise<(Message | null)[]>
-
-/** @internal */
-export async function getScheduledMessages(
-    client: BaseTelegramClient,
-    chatId: InputPeerLike,
     messageIds: MaybeArray<number>,
-): Promise<MaybeArray<Message | null>> {
+): Promise<(Message | null)[]> {
     const peer = await resolvePeer(client, chatId)
-
-    const isSingle = !Array.isArray(messageIds)
-    if (isSingle) messageIds = [messageIds as number]
+    if (!Array.isArray(messageIds)) messageIds = [messageIds]
 
     const res = await client.call({
         _: 'messages.getScheduledMessages',
         peer,
-        id: messageIds as number[],
+        id: messageIds,
     })
 
     assertTypeIsNot('getScheduledMessages', res, 'messages.messagesNotModified')
@@ -57,5 +37,5 @@ export async function getScheduledMessages(
         return new Message(msg, peers, true)
     })
 
-    return isSingle ? ret[0] : ret
+    return ret
 }

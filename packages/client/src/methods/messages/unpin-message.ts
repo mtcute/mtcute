@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
+import { InputMessageId, normalizeInputMessageId } from '../../types'
 import { resolvePeer } from '../users/resolve-peer'
 
 /**
@@ -12,15 +12,13 @@ import { resolvePeer } from '../users/resolve-peer'
  * @param chatId  Chat ID, username, phone number, `"self"` or `"me"`
  * @param messageId  Message ID
  */
-export async function unpinMessage(
-    client: BaseTelegramClient,
-    chatId: InputPeerLike,
-    messageId: number,
-): Promise<void> {
+export async function unpinMessage(client: BaseTelegramClient, params: InputMessageId): Promise<void> {
+    const { chatId, message } = normalizeInputMessageId(params)
+
     const res = await client.call({
         _: 'messages.updatePinnedMessage',
         peer: await resolvePeer(client, chatId),
-        id: messageId,
+        id: message,
         unpin: true,
     })
 

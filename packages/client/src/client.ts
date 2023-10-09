@@ -128,16 +128,16 @@ import { iterInviteLinkMembers } from './methods/invite-links/iter-invite-link-m
 import { iterInviteLinks } from './methods/invite-links/iter-invite-links'
 import { revokeInviteLink } from './methods/invite-links/revoke-invite-link'
 import { closePoll } from './methods/messages/close-poll'
-import { deleteMessages } from './methods/messages/delete-messages'
+import { deleteMessages, deleteMessagesById, DeleteMessagesParams } from './methods/messages/delete-messages'
 import { deleteScheduledMessages } from './methods/messages/delete-scheduled-messages'
 import { editInlineMessage } from './methods/messages/edit-inline-message'
 import { editMessage } from './methods/messages/edit-message'
 import { _findMessageInUpdate } from './methods/messages/find-in-update'
-import { forwardMessages } from './methods/messages/forward-messages'
+import { ForwardMessageOptions, forwardMessages, forwardMessagesById } from './methods/messages/forward-messages'
 import { _getDiscussionMessage, getDiscussionMessage } from './methods/messages/get-discussion-message'
 import { getHistory, GetHistoryOffset } from './methods/messages/get-history'
 import { getMessageGroup } from './methods/messages/get-message-group'
-import { getMessageReactions } from './methods/messages/get-message-reactions'
+import { getMessageReactions, getMessageReactionsById } from './methods/messages/get-message-reactions'
 import { getMessages } from './methods/messages/get-messages'
 import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe'
 import { getReactionUsers, GetReactionUsersOffset } from './methods/messages/get-reaction-users'
@@ -152,7 +152,7 @@ import { readHistory } from './methods/messages/read-history'
 import { readReactions } from './methods/messages/read-reactions'
 import { searchGlobal, SearchGlobalOffset } from './methods/messages/search-global'
 import { searchMessages, SearchMessagesOffset } from './methods/messages/search-messages'
-import { sendCopy } from './methods/messages/send-copy'
+import { sendCopy, SendCopyParams } from './methods/messages/send-copy'
 import { sendMedia } from './methods/messages/send-media'
 import { sendMediaGroup } from './methods/messages/send-media-group'
 import { sendReaction } from './methods/messages/send-reaction'
@@ -276,6 +276,7 @@ import {
     InputFileLike,
     InputInlineResult,
     InputMediaLike,
+    InputMessageId,
     InputPeerLike,
     InputPrivacyRule,
     InputReaction,
@@ -710,11 +711,11 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * **Available**: 🤖 bots only
      *
-     * @param queryId  ID of the callback query
+     * @param queryId  ID of the callback query, or the query itself
      * @param params  Parameters of the answer
      */
     answerCallbackQuery(
-        queryId: Long,
+        queryId: Long | CallbackQuery,
         params?: {
             /**
              * Maximum amount of time in seconds for which
@@ -761,7 +762,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param params  Additional parameters
      */
     answerInlineQuery(
-        queryId: tl.Long,
+        queryId: tl.Long | InlineQuery,
         results: InputInlineResult[],
         params?: {
             /**
@@ -851,7 +852,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param queryId  Pre-checkout query ID
      */
     answerPreCheckoutQuery(
-        queryId: tl.Long,
+        queryId: tl.Long | PreCheckoutQuery,
         params?: {
             /** If pre-checkout is rejected, error message to show to the user */
             error?: string
@@ -946,16 +947,12 @@ export interface TelegramClient extends BaseTelegramClient {
      * **Available**: 🤖 bots only
      *
      */
-    getGameHighScores(params: {
-        /** ID of the chat where the game was found */
-        chatId: InputPeerLike
-
-        /** ID of the message containing the game */
-        message: number
-
-        /** ID of the user to find high scores for */
-        userId?: InputPeerLike
-    }): Promise<GameHighScore[]>
+    getGameHighScores(
+        params: InputMessageId & {
+            /** ID of the user to find high scores for */
+            userId?: InputPeerLike
+        },
+    ): Promise<GameHighScore[]>
     /**
      * Get high scores of a game from an inline message
      *
@@ -1034,31 +1031,27 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param params
      * @returns  The modified message
      */
-    setGameScore(params: {
-        /** Chat where the game was found */
-        chatId: InputPeerLike
+    setGameScore(
+        params: InputMessageId & {
+            /** ID of the user who has scored */
+            userId: InputPeerLike
 
-        /** ID of the message where the game was found */
-        message: number
+            /** The new score (must be >0) */
+            score: number
 
-        /** ID of the user who has scored */
-        userId: InputPeerLike
+            /**
+             * When `true`, the game message will not be modified
+             * to include the new score
+             */
+            noEdit?: boolean
 
-        /** The new score (must be >0) */
-        score: number
-
-        /**
-         * When `true`, the game message will not be modified
-         * to include the new score
-         */
-        noEdit?: boolean
-
-        /**
-         * Whether to allow user's score to decrease.
-         * This can be useful when fixing mistakes or banning cheaters
-         */
-        force?: boolean
-    }): Promise<Message>
+            /**
+             * Whether to allow user's score to decrease.
+             * This can be useful when fixing mistakes or banning cheaters
+             */
+            force?: boolean
+        },
+    ): Promise<Message>
     /**
      * Set a score of a user in a game contained in
      * an inline message
@@ -1484,10 +1477,11 @@ export interface TelegramClient extends BaseTelegramClient {
      *   Use {@link getChat} or {@link getFullChat} instead.
      */
     getChatPreview(inviteLink: string): Promise<ChatPreview>
+
     /**
      * Get basic information about a chat.
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  ID of the chat, its username or invite link
      * @throws MtArgumentError
@@ -1495,10 +1489,11 @@ export interface TelegramClient extends BaseTelegramClient {
      *   Use {@link getChatPreview} instead.
      */
     getChat(chatId: InputPeerLike): Promise<Chat>
+
     /**
      * Get full information about a chat.
      *
-     * **Available**: 👤 users only
+     * **Available**: ✅ both users and bots
      *
      * @param chatId  ID of the chat, its username or invite link
      * @throws MtArgumentError
@@ -2328,7 +2323,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chat  Chat or user ID, username, phone number, `"me"` or `"self"`
      * @param topicId  ID of the topic (i.e. its top message ID)
      */
-    deleteForumTopicHistory(chat: InputPeerLike, topicId: number): Promise<void>
+    deleteForumTopicHistory(chat: InputPeerLike, topicId: number | ForumTopic): Promise<void>
     /**
      * Modify a topic in a forum
      *
@@ -2343,9 +2338,10 @@ export interface TelegramClient extends BaseTelegramClient {
     editForumTopic(params: {
         /** Chat ID or username */
         chatId: InputPeerLike
-        /** ID of the topic (i.e. its top message ID) */
 
-        topicId: number
+        /** ID of the topic (i.e. its top message ID) */
+        topicId: number | ForumTopic
+
         /**
          * New topic title
          */
@@ -2436,7 +2432,7 @@ export interface TelegramClient extends BaseTelegramClient {
         /**
          * Order of the pinned topics
          */
-        order: number[]
+        order: (number | ForumTopic)[]
 
         /**
          * Whether to un-pin topics not present in the order
@@ -2457,7 +2453,7 @@ export interface TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike
 
         /** ID of the topic (i.e. its top message ID) */
-        topicId: number
+        topicId: number | ForumTopic
 
         /** Whether the topic should be closed */
         closed: boolean
@@ -2473,7 +2469,7 @@ export interface TelegramClient extends BaseTelegramClient {
         /** Chat ID or username */
         chatId: InputPeerLike
         /** ID of the topic (i.e. its top message ID) */
-        topicId: number
+        topicId: number | ForumTopic
         /** Whether the topic should be pinned */
         pinned: boolean
     }): Promise<void>
@@ -2551,7 +2547,7 @@ export interface TelegramClient extends BaseTelegramClient {
         /** Chat ID */
         chatId: InputPeerLike
         /** Invite link to edit */
-        link: string
+        link: string | ChatInviteLink
         /**
          * Date when this link will expire.
          * If `number` is passed, UNIX time in ms is expected.
@@ -2599,7 +2595,7 @@ export interface TelegramClient extends BaseTelegramClient {
             /**
              * Invite link for which to get members
              */
-            link?: string
+            link?: string | ChatInviteLink
 
             /**
              * Maximum number of users to return
@@ -2704,7 +2700,7 @@ export interface TelegramClient extends BaseTelegramClient {
         action: 'approve' | 'deny'
 
         /** Invite link to target */
-        link?: string
+        link?: string | ChatInviteLink
     }): Promise<void>
     /**
      * Approve or deny join request to a chat.
@@ -2789,7 +2785,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param link  Invite link to revoke
      * @returns  If `link` is a primary invite, newly generated invite link, otherwise the revoked link
      */
-    revokeInviteLink(chatId: InputPeerLike, link: string): Promise<ChatInviteLink>
+    revokeInviteLink(chatId: InputPeerLike, link: string | ChatInviteLink): Promise<ChatInviteLink>
     /**
      * Close a poll sent by you.
      *
@@ -2798,42 +2794,33 @@ export interface TelegramClient extends BaseTelegramClient {
      * **Available**: ✅ both users and bots
      *
      */
-    closePoll(params: {
-        /** Chat ID where this poll was found */
-        chatId: InputPeerLike
-        /** Message ID where this poll was found */
-        message: number
-    }): Promise<Poll>
+    closePoll(params: InputMessageId): Promise<Poll>
     /**
-     * Delete messages, including service messages.
+     * Delete messages by their IDs
      *
      * **Available**: ✅ both users and bots
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param ids  Message(s) ID(s) to delete.
      */
-    deleteMessages(
-        chatId: InputPeerLike,
-        ids: MaybeArray<number>,
-        params?: {
-            /**
-             * Whether to "revoke" (i.e. delete for both sides).
-             * Only used for chats and private chats.
-             *
-             * @default  true
-             */
-            revoke?: boolean
-        },
-    ): Promise<void>
+    deleteMessagesById(chatId: InputPeerLike, ids: number[], params?: DeleteMessagesParams): Promise<void>
     /**
-     * Delete scheduled messages.
+     * Delete one or more {@link Message}
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param messages  Message(s) to delete
+     */
+    deleteMessages(messages: Message[], params?: DeleteMessagesParams): Promise<void>
+    /**
+     * Delete scheduled messages by their IDs.
      *
      * **Available**: 👤 users only
      *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
      * @param ids  Message(s) ID(s) to delete.
      */
-    deleteScheduledMessages(chatId: InputPeerLike, ids: MaybeArray<number>): Promise<void>
+    deleteScheduledMessages(chatId: InputPeerLike, ids: number[]): Promise<void>
     /**
      * Edit sent inline message text, media and reply markup.
      *
@@ -2909,256 +2896,100 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param message  Message or its ID
      * @param params
      */
-    editMessage(params: {
-        /** Chat ID */
-        chatId: InputPeerLike
-        /** Message to edit */
-        message: number | Message
+    editMessage(
+        params: InputMessageId & {
+            /**
+             * New message text
+             *
+             * When `media` is passed, `media.caption` is used instead
+             */
+            text?: string | FormattedString<string>
 
-        /**
-         * New message text
-         *
-         * When `media` is passed, `media.caption` is used instead
-         */
-        text?: string | FormattedString<string>
+            /**
+             * Parse mode to use to parse entities before sending
+             * the message. Defaults to current default parse mode (if any).
+             *
+             * Passing `null` will explicitly disable formatting.
+             */
+            parseMode?: string | null
 
-        /**
-         * Parse mode to use to parse entities before sending
-         * the message. Defaults to current default parse mode (if any).
-         *
-         * Passing `null` will explicitly disable formatting.
-         */
-        parseMode?: string | null
+            /**
+             * List of formatting entities to use instead of parsing via a
+             * parse mode.
+             *
+             * **Note:** Passing this makes the method ignore {@link parseMode}
+             *
+             * When `media` is passed, `media.entities` is used instead
+             */
+            entities?: tl.TypeMessageEntity[]
 
-        /**
-         * List of formatting entities to use instead of parsing via a
-         * parse mode.
-         *
-         * **Note:** Passing this makes the method ignore {@link parseMode}
-         *
-         * When `media` is passed, `media.entities` is used instead
-         */
-        entities?: tl.TypeMessageEntity[]
+            /**
+             * New message media
+             */
+            media?: InputMediaLike
 
-        /**
-         * New message media
-         */
-        media?: InputMediaLike
+            /**
+             * Whether to disable links preview in this message
+             */
+            disableWebPreview?: boolean
 
-        /**
-         * Whether to disable links preview in this message
-         */
-        disableWebPreview?: boolean
+            /**
+             * For bots: new reply markup.
+             * If omitted, existing markup will be removed.
+             */
+            replyMarkup?: ReplyMarkup
 
-        /**
-         * For bots: new reply markup.
-         * If omitted, existing markup will be removed.
-         */
-        replyMarkup?: ReplyMarkup
+            /**
+             * To re-schedule a message: new schedule date.
+             * When passing a number, a UNIX time in ms is expected.
+             */
+            scheduleDate?: Date | number
 
-        /**
-         * To re-schedule a message: new schedule date.
-         * When passing a number, a UNIX time in ms is expected.
-         */
-        scheduleDate?: Date | number
-
-        /**
-         * For media, upload progress callback.
-         *
-         * @param uploaded  Number of bytes uploaded
-         * @param total  Total file size in bytes
-         */
-        progressCallback?: (uploaded: number, total: number) => void
-    }): Promise<Message>
+            /**
+             * For media, upload progress callback.
+             *
+             * @param uploaded  Number of bytes uploaded
+             * @param total  Total file size in bytes
+             */
+            progressCallback?: (uploaded: number, total: number) => void
+        },
+    ): Promise<Message>
 
     _findMessageInUpdate(res: tl.TypeUpdates, isEdit?: boolean): Message
     /**
-     * Forward a single message.
-     *
-     * To forward with a caption, use another overload that takes an array of IDs.
-     *
-     * @param message  Message ID
-     * @param params  Additional sending parameters
-     * @returns  Newly sent, forwarded messages in the destination chat
-     */
-    forwardMessages(params: {
-        /** Source chat ID, username, phone, `"me"` or `"self"` */
-        fromChatId: InputPeerLike
-        /** Destination chat ID, username, phone, `"me"` or `"self"` */
-        toChatId: InputPeerLike
-        /** Message ID */
-        messages: number
-
-        /**
-         * Optionally, a caption for your forwarded message(s).
-         * It will be sent as a separate message before the forwarded messages.
-         *
-         * You can either pass `caption` or `captionMedia`, passing both will
-         * result in an error
-         */
-        caption?: string | FormattedString<string>
-
-        /**
-         * Optionally, a media caption for your forwarded message(s).
-         * It will be sent as a separate message before the forwarded messages.
-         *
-         * You can either pass `caption` or `captionMedia`, passing both will
-         * result in an error
-         */
-        captionMedia?: InputMediaLike
-
-        /**
-         * Parse mode to use to parse entities in caption.
-         * Defaults to current default parse mode (if any).
-         *
-         * Passing `null` will explicitly disable formatting.
-         */
-        parseMode?: string | null
-
-        /**
-         * List of formatting entities in caption to use instead
-         * of parsing via a parse mode.
-         *
-         * **Note:** Passing this makes the method ignore {@link parseMode}
-         */
-        entities?: tl.TypeMessageEntity[]
-
-        /**
-         * Whether to forward silently (also applies to caption message).
-         */
-        silent?: boolean
-
-        /**
-         * If set, the forwarding will be scheduled to this date
-         * (also applies to caption message).
-         * When passing a number, a UNIX time in ms is expected.
-         *
-         * You can also pass `0x7FFFFFFE`, this will send the message
-         * once the peer is online
-         */
-        schedule?: Date | number
-
-        /**
-         * Whether to clear draft after sending this message (only used for caption)
-         *
-         * Defaults to `false`
-         */
-        clearDraft?: boolean
-
-        /**
-         * Whether to forward without author
-         */
-        noAuthor?: boolean
-
-        /**
-         * Whether to forward without caption (implies {@link noAuthor})
-         */
-        noCaption?: boolean
-
-        /**
-         * Whether to disallow further forwards of this message.
-         *
-         * Only for bots, works even if the target chat does not
-         * have content protection.
-         */
-        forbidForwards?: boolean
-    }): Promise<Message>
-    /**
-     * Forward one or more messages, optionally including a caption message.
+     * Forward one or more messages by their IDs.
      * You can forward no more than 100 messages at once.
      *
      * If a caption message was sent, it will be the first message in the resulting array.
+     *
+     * **Available**: ✅ both users and bots
      *
      * @param toChatId  Destination chat ID, username, phone, `"me"` or `"self"`
      * @param fromChatId  Source chat ID, username, phone, `"me"` or `"self"`
      * @param messages  Message IDs
      * @param params  Additional sending parameters
-     * @returns
-     *   Newly sent, forwarded messages in the destination chat.
-     *   If a caption message was provided, it will be the first message in the array.
+     * @returns  Newly sent, forwarded messages in the destination chat.
      */
-    forwardMessages(params: {
-        /** Source chat ID, username, phone, `"me"` or `"self"` */
-        fromChatId: InputPeerLike
-        /** Destination chat ID, username, phone, `"me"` or `"self"` */
-        toChatId: InputPeerLike
-        /** Message IDs */
-        messages: number[]
-
-        /**
-         * Optionally, a caption for your forwarded message(s).
-         * It will be sent as a separate message before the forwarded messages.
-         *
-         * You can either pass `caption` or `captionMedia`, passing both will
-         * result in an error
-         */
-        caption?: string | FormattedString<string>
-
-        /**
-         * Optionally, a media caption for your forwarded message(s).
-         * It will be sent as a separate message before the forwarded messages.
-         *
-         * You can either pass `caption` or `captionMedia`, passing both will
-         * result in an error
-         */
-        captionMedia?: InputMediaLike
-
-        /**
-         * Parse mode to use to parse entities in caption.
-         * Defaults to current default parse mode (if any).
-         *
-         * Passing `null` will explicitly disable formatting.
-         */
-        parseMode?: string | null
-
-        /**
-         * List of formatting entities in caption to use instead
-         * of parsing via a parse mode.
-         *
-         * **Note:** Passing this makes the method ignore {@link parseMode}
-         */
-        entities?: tl.TypeMessageEntity[]
-
-        /**
-         * Whether to forward silently (also applies to caption message).
-         */
-        silent?: boolean
-
-        /**
-         * If set, the forwarding will be scheduled to this date
-         * (also applies to caption message).
-         * When passing a number, a UNIX time in ms is expected.
-         *
-         * You can also pass `0x7FFFFFFE`, this will send the message
-         * once the peer is online
-         */
-        schedule?: Date | number
-
-        /**
-         * Whether to clear draft after sending this message (only used for caption)
-         *
-         * Defaults to `false`
-         */
-        clearDraft?: boolean
-
-        /**
-         * Whether to forward without author
-         */
-        noAuthor?: boolean
-
-        /**
-         * Whether to forward without caption (implies {@link noAuthor})
-         */
-        noCaption?: boolean
-
-        /**
-         * Whether to disallow further forwards of this message.
-         *
-         * Only for bots, works even if the target chat does not
-         * have content protection.
-         */
-        forbidForwards?: boolean
-    }): Promise<MaybeArray<Message>>
+    forwardMessagesById(
+        params: ForwardMessageOptions & {
+            /** Source chat ID, username, phone, `"me"` or `"self"` */
+            fromChatId: InputPeerLike
+            /** Message IDs to forward */
+            messages: number[]
+        },
+    ): Promise<Message[]>
+    /**
+     * Forward one or more {@link Message}s to another chat.
+     *
+     * > **Note**: all messages must be from the same chat.
+     * **Available**: ✅ both users and bots
+     *
+     */
+    forwardMessages(
+        params: ForwardMessageOptions & {
+            messages: Message[]
+        },
+    ): Promise<Message[]>
 
     _getDiscussionMessage(peer: InputPeerLike, message: number): Promise<[tl.TypeInputPeer, number]>
     // public version of the same method because why not
@@ -3178,7 +3009,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param peer  Channel where the post was found
      * @param message  ID of the channel post
      */
-    getDiscussionMessage(peer: InputPeerLike, message: number): Promise<Message | null>
+    getDiscussionMessage(params: InputMessageId): Promise<Message | null>
     /**
      * Get chat history.
      *
@@ -3253,44 +3084,37 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  Chat ID
      * @param message  ID of one of the messages in the group
      */
-    getMessageGroup(chatId: InputPeerLike, message: number): Promise<Message[]>
+    getMessageGroup(params: InputMessageId): Promise<Message[]>
     /**
-     * Get reactions to a message.
+     * Get reactions to messages by their IDs.
      *
      * > Apps should short-poll reactions for visible messages
      * > (that weren't sent by the user) once every 15-30 seconds,
      * > but only if `message.reactions` is set
      *
-     * @param chatId  ID of the chat with the message
-     * @param messages  Message ID
-     * @returns  Reactions to the corresponding message, or `null` if there are none
-     */
-    getMessageReactions(chatId: InputPeerLike, messages: number): Promise<MessageReactions | null>
-    /**
-     * Get reactions to messages.
-     *
-     * > Apps should short-poll reactions for visible messages
-     * > (that weren't sent by the user) once every 15-30 seconds,
-     * > but only if `message.reactions` is set
+     * **Available**: 👤 users only
      *
      * @param chatId  ID of the chat with messages
      * @param messages  Message IDs
      * @returns  Reactions to corresponding messages, or `null` if there are none
      */
-    getMessageReactions(chatId: InputPeerLike, messages: number[]): Promise<(MessageReactions | null)[]>
+    getMessageReactionsById(chatId: InputPeerLike, messages: number[]): Promise<(MessageReactions | null)[]>
     /**
-     * Get a single message from PM or legacy group by its ID.
-     * For channels, use {@link getMessages}.
+     * Get reactions to {@link Message}s.
      *
-     * Unlike {@link getMessages}, this method does not
-     * check if the message belongs to some chat.
+     * > **Note**: messages must all be from the same chat.
      *
-     * @param messageId  Messages ID
-     * @param [fromReply=false]
-     *     Whether the reply to a given message should be fetched
-     *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
+     * > Apps should short-poll reactions for visible messages
+     * > (that weren't sent by the user) once every 15-30 seconds,
+     * > but only if `message.reactions` is set
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param chatId  ID of the chat with messages
+     * @param messages  Message IDs
+     * @returns  Reactions to corresponding messages, or `null` if there are none
      */
-    getMessagesUnsafe(messageId: number, fromReply?: boolean): Promise<Message | null>
+    getMessageReactions(messages: Message[]): Promise<(MessageReactions | null)[]>
     /**
      * Get messages from PM or legacy group by their IDs.
      * For channels, use {@link getMessages}.
@@ -3301,48 +3125,39 @@ export interface TelegramClient extends BaseTelegramClient {
      * Fot messages that were not found, `null` will be
      * returned at that position.
      *
+     * **Available**: ✅ both users and bots
+     *
      * @param messageIds  Messages IDs
      * @param [fromReply=false]
      *     Whether the reply to a given message should be fetched
      *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
      */
-    getMessagesUnsafe(messageIds: number[], fromReply?: boolean): Promise<(Message | null)[]>
-    /**
-     * Get a single message in chat by its ID
-     *
-     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
-     * @param messageId  Messages ID
-     * @param [fromReply=false]
-     *     Whether the reply to a given message should be fetched
-     *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
-     */
-    getMessages(chatId: InputPeerLike, messageId: number, fromReply?: boolean): Promise<Message | null>
+    getMessagesUnsafe(messageIds: MaybeArray<number>, fromReply?: boolean): Promise<(Message | null)[]>
+
     /**
      * Get messages in chat by their IDs
      *
      * Fot messages that were not found, `null` will be
      * returned at that position.
      *
+     * **Available**: ✅ both users and bots
+     *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
      * @param messageIds  Messages IDs
      * @param [fromReply=false]
      *     Whether the reply to a given message should be fetched
      *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
      */
-    getMessages(chatId: InputPeerLike, messageIds: number[], fromReply?: boolean): Promise<(Message | null)[]>
+    getMessages(chatId: InputPeerLike, messageIds: MaybeArray<number>, fromReply?: boolean): Promise<(Message | null)[]>
     /**
      * Get users who have reacted to the message.
      *
      * **Available**: 👤 users only
      *
-     * @param chatId  Chat ID
-     * @param messageId  Message ID
      * @param params
      */
     getReactionUsers(
-        chatId: InputPeerLike,
-        messageId: number,
-        params?: {
+        params: InputMessageId & {
             /**
              * Get only reactions with the specified emoji
              */
@@ -3362,22 +3177,17 @@ export interface TelegramClient extends BaseTelegramClient {
         },
     ): Promise<ArrayPaginated<PeerReaction, GetReactionUsersOffset>>
     /**
-     * Get a single scheduled message in chat by its ID
-     *
-     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
-     * @param messageId  Scheduled message ID
-     */
-    getScheduledMessages(chatId: InputPeerLike, messageId: number): Promise<Message | null>
-    /**
      * Get scheduled messages in chat by their IDs
      *
      * Fot messages that were not found, `null` will be
      * returned at that position.
      *
+     * **Available**: 👤 users only
+     *
      * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
      * @param messageIds  Scheduled messages IDs
      */
-    getScheduledMessages(chatId: InputPeerLike, messageIds: number[]): Promise<(Message | null)[]>
+    getScheduledMessages(chatId: InputPeerLike, messageIds: MaybeArray<number>): Promise<(Message | null)[]>
     /**
      * Iterate over chat history. Wrapper over {@link getHistory}
      *
@@ -3416,9 +3226,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param params
      */
     iterReactionUsers(
-        chatId: InputPeerLike,
-        messageId: number,
-        params?: Parameters<typeof getReactionUsers>[3] & {
+        params: Parameters<typeof getReactionUsers>[1] & {
             /**
              * Limit the number of events returned.
              *
@@ -3502,16 +3310,11 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * For supergroups/channels, you must have appropriate permissions,
      * either as an admin, or as default permissions
-     *
      * **Available**: ✅ both users and bots
      *
-     * @param chatId  Chat ID, username, phone number, `"self"` or `"me"`
-     * @param messageId  Message ID
      */
     pinMessage(
-        chatId: InputPeerLike,
-        messageId: number,
-        params?: {
+        params: InputMessageId & {
             /** Whether to send a notification (only for legacy groups and supergroups) */
             notify?: boolean
             /** Whether to pin for both sides (only for private chats) */
@@ -3700,8 +3503,7 @@ export interface TelegramClient extends BaseTelegramClient {
         fromUser?: InputPeerLike
     }): Promise<ArrayPaginated<Message, SearchMessagesOffset>>
     /**
-     * Copy a message (i.e. send the same message,
-     * but do not forward it).
+     * Copy a message (i.e. send the same message, but do not forward it).
      *
      * Note that if the message contains a webpage,
      * it will be copied simply as a text message,
@@ -3712,81 +3514,18 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param params
      */
-    sendCopy(params: {
-        /** Source chat ID */
-        fromChatId: InputPeerLike
-        /** Target chat ID */
-        toChatId: InputPeerLike
-        /** Message ID to forward */
-        message: number
-        /**
-         * Whether to send this message silently.
-         */
-        silent?: boolean
-
-        /**
-         * If set, the message will be scheduled to this date.
-         * When passing a number, a UNIX time in ms is expected.
-         *
-         * You can also pass `0x7FFFFFFE`, this will send the message
-         * once the peer is online
-         */
-        schedule?: Date | number
-
-        /**
-         * New message caption (only used for media)
-         */
-        caption?: string | FormattedString<string>
-
-        /**
-         * Parse mode to use to parse `text` entities before sending
-         * the message. Defaults to current default parse mode (if any).
-         *
-         * Passing `null` will explicitly disable formatting.
-         */
-        parseMode?: string | null
-
-        /**
-         * Message to reply to. Either a message object or message ID.
-         *
-         * For forums - can also be an ID of the topic (i.e. its top message ID)
-         */
-        replyTo?: number | Message
-
-        /**
-         * Whether to throw an error if {@link replyTo}
-         * message does not exist.
-         *
-         * If that message was not found, `NotFoundError` is thrown,
-         * with `text` set to `MESSAGE_NOT_FOUND`.
-         *
-         * Incurs an additional request, so only use when really needed.
-         *
-         * Defaults to `false`
-         */
-        mustReply?: boolean
-
-        /**
-         * List of formatting entities to use instead of parsing via a
-         * parse mode.
-         *
-         * **Note:** Passing this makes the method ignore {@link parseMode}
-         */
-        entities?: tl.TypeMessageEntity[]
-
-        /**
-         * For bots: inline or reply markup or an instruction
-         * to hide a reply keyboard or to force a reply.
-         */
-        replyMarkup?: ReplyMarkup
-
-        /**
-         * Whether to clear draft after sending this message.
-         *
-         * Defaults to `false`
-         */
-        clearDraft?: boolean
-    }): Promise<Message>
+    sendCopy(
+        params: SendCopyParams &
+            (
+                | {
+                      /** Source chat ID */
+                      fromChatId: InputPeerLike
+                      /** Message ID to forward */
+                      message: number
+                  }
+                | { message: Message }
+            ),
+    ): Promise<Message>
     /**
      * Send a group of media.
      *
@@ -4011,27 +3750,14 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @returns  Message to which the reaction was sent
      */
-    sendReaction(params: {
-        /** Chat ID with the message to react to */
-        chatId: InputPeerLike
-        /** Message ID to react to */
-        message: number
-        /** Reaction emoji (or `null` to remove reaction) */
-        emoji?: InputReaction | null
-        /** Whether to use a big reaction */
-        big?: boolean
-    }): Promise<Message>
-    /**
-     * Send s previously scheduled message.
-     *
-     * Note that if the message belongs to a media group,
-     * the entire group will be sent, but only
-     * the first message will be returned (in this overload).
-     *
-     * @param peer  Chat where the messages were scheduled
-     * @param id  ID of the message
-     */
-    sendScheduled(peer: InputPeerLike, id: number): Promise<Message>
+    sendReaction(
+        params: InputMessageId & {
+            /** Reaction emoji (or `null` to remove reaction) */
+            emoji?: InputReaction | null
+            /** Whether to use a big reaction */
+            big?: boolean
+        },
+    ): Promise<Message>
     /**
      * Send previously scheduled message(s)
      *
@@ -4039,10 +3765,12 @@ export interface TelegramClient extends BaseTelegramClient {
      * the entire group will be sent, and all the messages
      * will be returned.
      *
+     * **Available**: 👤 users only
+     *
      * @param peer  Chat where the messages were scheduled
      * @param ids  ID(s) of the messages
      */
-    sendScheduled(peer: InputPeerLike, ids: number[]): Promise<Message[]>
+    sendScheduled(peer: InputPeerLike, ids: MaybeArray<number>): Promise<Message[]>
     /**
      * Send a text message
      *
@@ -4179,19 +3907,17 @@ export interface TelegramClient extends BaseTelegramClient {
      * **Available**: 👤 users only
      *
      */
-    sendVote(params: {
-        /** Chat ID where this poll was found */
-        chatId: InputPeerLike
-        /** Message ID where this poll was found */
-        message: number
-        /**
-         * Selected options, or `null` to retract.
-         * You can pass indexes of the answers or the `Buffer`s
-         * representing them. In case of indexes, the poll will first
-         * be requested from the server.
-         */
-        options: null | MaybeArray<number | Buffer>
-    }): Promise<Poll>
+    sendVote(
+        params: InputMessageId & {
+            /**
+             * Selected options, or `null` to retract.
+             * You can pass indexes of the answers or the `Buffer`s
+             * representing them. In case of indexes, the poll will first
+             * be requested from the server.
+             */
+            options: null | MaybeArray<number | Buffer>
+        },
+    ): Promise<Poll>
     /**
      * Translate message text to a given language.
      *
@@ -4199,14 +3925,12 @@ export interface TelegramClient extends BaseTelegramClient {
      * **Available**: 👤 users only
      *
      */
-    translateMessage(params: {
-        /** Chat or user ID */
-        chatId: InputPeerLike
-        /** Identifier of the message to translate */
-        messageId: number
-        /** Target language (two-letter ISO 639-1 language code) */
-        toLanguage: string
-    }): Promise<[string, MessageEntity[]] | null>
+    translateMessage(
+        params: InputMessageId & {
+            /** Target language (two-letter ISO 639-1 language code) */
+            toLanguage: string
+        },
+    ): Promise<[string, MessageEntity[]] | null>
     /**
      * Translate text to a given language.
      *
@@ -4247,7 +3971,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  Chat ID, username, phone number, `"self"` or `"me"`
      * @param messageId  Message ID
      */
-    unpinMessage(chatId: InputPeerLike, messageId: number): Promise<void>
+    unpinMessage(params: InputMessageId): Promise<void>
     /**
      * Create a new takeout session
      *
@@ -4761,29 +4485,22 @@ export interface TelegramClient extends BaseTelegramClient {
         },
     ): Promise<ArrayPaginated<Story, number>>
     /**
-     * Get a single story by its ID
+     * Get one or more stories by their IDs
      *
-     * @param peerId  Peer ID whose stories to fetch
-     * @param storyId  Story ID
-     */
-    getStoriesById(peerId: InputPeerLike, storyId: number): Promise<Story>
-    /**
-     * Get multiple stories by their IDs
+     * **Available**: 👤 users only
      *
      * @param peerId  Peer ID whose stories to fetch
      * @param storyIds  Story IDs
      */
-    getStoriesById(peerId: InputPeerLike, storyIds: number[]): Promise<Story[]>
-    /**
-     * Get brief information about story interactions.
-     */
-    getStoriesInteractions(peerId: InputPeerLike, storyId: number): Promise<StoryInteractions>
+    getStoriesById(peerId: InputPeerLike, storyIds: MaybeArray<number>): Promise<Story[]>
     /**
      * Get brief information about stories interactions.
      *
      * The result will be in the same order as the input IDs
+     * **Available**: ✅ both users and bots
+     *
      */
-    getStoriesInteractions(peerId: InputPeerLike, storyIds: number[]): Promise<StoryInteractions[]>
+    getStoriesInteractions(peerId: InputPeerLike, storyIds: MaybeArray<number>): Promise<StoryInteractions[]>
     /**
      * Generate a link to a story.
      *
@@ -5604,25 +5321,23 @@ export class TelegramClient extends BaseTelegramClient {
     iterInviteLinks = iterInviteLinks.bind(null, this)
     revokeInviteLink = revokeInviteLink.bind(null, this)
     closePoll = closePoll.bind(null, this)
+    deleteMessagesById = deleteMessagesById.bind(null, this)
     deleteMessages = deleteMessages.bind(null, this)
     deleteScheduledMessages = deleteScheduledMessages.bind(null, this)
     editInlineMessage = editInlineMessage.bind(null, this)
     editMessage = editMessage.bind(null, this)
     _findMessageInUpdate = _findMessageInUpdate.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
+    forwardMessagesById = forwardMessagesById.bind(null, this)
     forwardMessages = forwardMessages.bind(null, this)
     _getDiscussionMessage = _getDiscussionMessage.bind(null, this)
     getDiscussionMessage = getDiscussionMessage.bind(null, this)
     getHistory = getHistory.bind(null, this)
     getMessageGroup = getMessageGroup.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
+    getMessageReactionsById = getMessageReactionsById.bind(null, this)
     getMessageReactions = getMessageReactions.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
     getMessagesUnsafe = getMessagesUnsafe.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
     getMessages = getMessages.bind(null, this)
     getReactionUsers = getReactionUsers.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
     getScheduledMessages = getScheduledMessages.bind(null, this)
     iterHistory = iterHistory.bind(null, this)
     iterReactionUsers = iterReactionUsers.bind(null, this)
@@ -5638,7 +5353,6 @@ export class TelegramClient extends BaseTelegramClient {
     sendMediaGroup = sendMediaGroup.bind(null, this)
     sendMedia = sendMedia.bind(null, this)
     sendReaction = sendReaction.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
     sendScheduled = sendScheduled.bind(null, this)
     sendText = sendText.bind(null, this)
     sendTyping = sendTyping.bind(null, this)
@@ -5680,9 +5394,7 @@ export class TelegramClient extends BaseTelegramClient {
     getBoosters = getBoosters.bind(null, this)
     getPeerStories = getPeerStories.bind(null, this)
     getProfileStories = getProfileStories.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
     getStoriesById = getStoriesById.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
     getStoriesInteractions = getStoriesInteractions.bind(null, this)
     getStoryLink = getStoryLink.bind(null, this)
     getStoryViewers = getStoryViewers.bind(null, this)

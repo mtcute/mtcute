@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 import { isPresent } from '@mtcute/core/utils'
 
-import { InputPeerLike, Message } from '../../types'
+import { InputMessageId, Message, normalizeInputMessageId } from '../../types'
 import { isInputPeerChannel } from '../../utils/peer-utils'
 import { resolvePeer } from '../users/resolve-peer'
 import { getMessages } from './get-messages'
@@ -12,11 +12,9 @@ import { getMessages } from './get-messages'
  * @param chatId  Chat ID
  * @param message  ID of one of the messages in the group
  */
-export async function getMessageGroup(
-    client: BaseTelegramClient,
-    chatId: InputPeerLike,
-    message: number,
-): Promise<Message[]> {
+export async function getMessageGroup(client: BaseTelegramClient, params: InputMessageId): Promise<Message[]> {
+    const { chatId, message } = normalizeInputMessageId(params)
+
     // awesome hack stolen from pyrogram
     // groups have no more than 10 items
     // however, since for non-channels message ids are shared,

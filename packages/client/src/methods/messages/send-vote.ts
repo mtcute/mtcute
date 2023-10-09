@@ -1,7 +1,7 @@
 import { BaseTelegramClient, getMarkedPeerId, MaybeArray, MtArgumentError, MtTypeAssertionError } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { InputPeerLike, MtMessageNotFoundError, PeersIndex, Poll } from '../../types'
+import { InputMessageId, MtMessageNotFoundError, normalizeInputMessageId, PeersIndex, Poll } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 import { resolvePeer } from '../users/resolve-peer'
 import { getMessages } from './get-messages'
@@ -11,11 +11,7 @@ import { getMessages } from './get-messages'
  */
 export async function sendVote(
     client: BaseTelegramClient,
-    params: {
-        /** Chat ID where this poll was found */
-        chatId: InputPeerLike
-        /** Message ID where this poll was found */
-        message: number
+    params: InputMessageId & {
         /**
          * Selected options, or `null` to retract.
          * You can pass indexes of the answers or the `Buffer`s
@@ -25,7 +21,7 @@ export async function sendVote(
         options: null | MaybeArray<number | Buffer>
     },
 ): Promise<Poll> {
-    const { chatId, message } = params
+    const { chatId, message } = normalizeInputMessageId(params)
     let { options } = params
 
     if (options === null) options = []
@@ -36,7 +32,7 @@ export async function sendVote(
     let poll: Poll | undefined = undefined
 
     if (options.some((it) => typeof it === 'number')) {
-        const msg = await getMessages(client, peer, message)
+        const [msg] = await getMessages(client, peer, message)
 
         if (!msg) {
             throw new MtMessageNotFoundError(getMarkedPeerId(peer), message, 'to vote in')

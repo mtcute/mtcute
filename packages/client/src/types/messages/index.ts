@@ -1,5 +1,6 @@
 export * from './dialog'
 export * from './draft-message'
+export * from './input-message-id'
 export * from './message'
 export * from './message-action'
 export * from './message-entity'

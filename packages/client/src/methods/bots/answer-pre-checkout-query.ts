@@ -1,4 +1,6 @@
-import { BaseTelegramClient, tl } from '@mtcute/core'
+import { BaseTelegramClient, Long, tl } from '@mtcute/core'
+
+import { PreCheckoutQuery } from '../../types/updates'
 
 /**
  * Answer a pre-checkout query.
@@ -7,7 +9,7 @@ import { BaseTelegramClient, tl } from '@mtcute/core'
  */
 export async function answerPreCheckoutQuery(
     client: BaseTelegramClient,
-    queryId: tl.Long,
+    queryId: tl.Long | PreCheckoutQuery,
     params?: {
         /** If pre-checkout is rejected, error message to show to the user */
         error?: string
@@ -17,7 +19,7 @@ export async function answerPreCheckoutQuery(
 
     await client.call({
         _: 'messages.setBotPrecheckoutResults',
-        queryId,
+        queryId: Long.isLong(queryId) ? queryId : queryId.queryId,
         success: !error,
         error,
     })

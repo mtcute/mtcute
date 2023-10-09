@@ -1,5 +1,8 @@
 import { tl } from '@mtcute/core'
 
+import { Chat } from './chat'
+import { User } from './user'
+
 export * from './chat'
 export * from './chat-event'
 export * from './chat-invite-link'
@@ -21,15 +24,23 @@ export * from './user'
 export type PeerType = 'user' | 'bot' | 'group' | 'channel' | 'supergroup'
 
 /**
- * Type that can be used as an input peer
- * to most of the high-level methods. Can be:
+ * Type that can be used as an input peer to most of the high-level methods. Can be:
  *  - `number`, representing peer's marked ID*
- *  - `string`, representing peer's username (w/out preceding `@`)
- *  - `string`, representing user's phone number (only for contacts)
+ *  - `string`, representing peer's username (without preceding `@`)
+ *  - `string`, representing user's phone number
  *  - `"me"` and `"self"` which will be replaced with the current user/bot
+ *  - `Chat` or `User` object
  *  - Raw TL object
  *
- * > Telegram has moved to int64 IDs. Though, Levin [has confirmed](https://t.me/tdlibchat/25075)
+ * > * Telegram has moved to int64 IDs. Though, Levin [has confirmed](https://t.me/tdlibchat/25071)
  * > that new IDs *will* still fit into int53, meaning JS integers are fine.
  */
-export type InputPeerLike = string | number | tl.TypePeer | tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel
+export type InputPeerLike =
+    | string
+    | number
+    | tl.TypePeer
+    | tl.TypeInputPeer
+    | tl.TypeInputUser
+    | tl.TypeInputChannel
+    | Chat
+    | User
