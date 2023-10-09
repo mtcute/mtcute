@@ -1,16 +1,13 @@
-import { Long } from '@mtcute/core'
-
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient, Long } from '@mtcute/core'
 
 /**
  * Send an answer to a callback query.
  *
  * @param queryId  ID of the callback query
  * @param params  Parameters of the answer
- * @internal
  */
 export async function answerCallbackQuery(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     queryId: Long,
     params?: {
         /**
@@ -50,7 +47,7 @@ export async function answerCallbackQuery(
 ): Promise<void> {
     const { cacheTime = 0, text, alert, url } = params ?? {}
 
-    await this.call({
+    await client.call({
         _: 'messages.setBotCallbackAnswer',
         queryId,
         cacheTime,

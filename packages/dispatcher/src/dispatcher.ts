@@ -467,7 +467,6 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param handler  Update handler to remove, its name or `'all'` to remove all
      * @param group  Handler group index (-1 to affect all groups)
-     * @internal
      */
     removeUpdateHandler(handler: UpdateHandler | UpdateHandler['name'] | 'all', group = 0): void {
         if (group !== -1 && !(group in this._groups)) {

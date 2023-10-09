@@ -1,11 +1,9 @@
 import { getMarkedPeerId, tl, toggleChannelIdMark } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 
 export class HistoryReadUpdate {
     constructor(
-        readonly client: TelegramClient,
         readonly raw:
             | tl.RawUpdateReadHistoryInbox
             | tl.RawUpdateReadHistoryOutbox

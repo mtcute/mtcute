@@ -1,15 +1,17 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
+import { deleteHistory } from './delete-history'
 
 /**
  * Leave a group chat, supergroup or channel
  *
  * @param chatId  Chat ID or username
- * @internal
  */
 export async function leaveChat(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     params?: {
         /**
@@ -18,24 +20,24 @@ export async function leaveChat(
         clear?: boolean
     },
 ): Promise<void> {
-    const chat = await this.resolvePeer(chatId)
+    const chat = await resolvePeer(client, chatId)
 
     if (isInputPeerChannel(chat)) {
-        const res = await this.call({
+        const res = await client.call({
             _: 'channels.leaveChannel',
             channel: normalizeToInputChannel(chat),
         })
-        this._handleUpdate(res)
+        client.network.handleUpdate(res)
     } else if (isInputPeerChat(chat)) {
-        const res = await this.call({
+        const res = await client.call({
             _: 'messages.deleteChatUser',
             chatId: chat.chatId,
             userId: { _: 'inputUserSelf' },
         })
-        this._handleUpdate(res)
+        client.network.handleUpdate(res)
 
         if (params?.clear) {
-            await this.deleteHistory(chat)
+            await deleteHistory(client, chat)
         }
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 }

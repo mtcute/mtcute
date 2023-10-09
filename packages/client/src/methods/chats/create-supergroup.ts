@@ -1,4 +1,5 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { Chat } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
@@ -6,10 +7,9 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * Create a new supergroup
  *
  * @returns  Newly created supergroup
- * @internal
  */
 export async function createSupergroup(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * Supergroup title
@@ -36,7 +36,7 @@ export async function createSupergroup(
 ): Promise<Chat> {
     const { title, description = '', forum, ttlPeriod = 0 } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'channels.createChannel',
         title,
         about: description,
@@ -47,7 +47,7 @@ export async function createSupergroup(
 
     assertIsUpdatesGroup('channels.createChannel', res)
 
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 
-    return new Chat(this, res.chats[0])
+    return new Chat(res.chats[0])
 }

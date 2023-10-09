@@ -1,6 +1,5 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { BotInline, InputInlineResult } from '../../types'
 
 /**
@@ -9,10 +8,9 @@ import { BotInline, InputInlineResult } from '../../types'
  * @param queryId  Inline query ID
  * @param results  Results of the query
  * @param params  Additional parameters
- * @internal
  */
 export async function answerInlineQuery(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     queryId: tl.Long,
     results: InputInlineResult[],
     params?: {
@@ -97,9 +95,9 @@ export async function answerInlineQuery(
 ): Promise<void> {
     const { cacheTime = 300, gallery, private: priv, nextOffset, switchPm, parseMode } = params ?? {}
 
-    const [defaultGallery, tlResults] = await BotInline._convertToTl(this, results, parseMode)
+    const [defaultGallery, tlResults] = await BotInline._convertToTl(client, results, parseMode)
 
-    await this.call({
+    await client.call({
         _: 'messages.setInlineBotResults',
         queryId,
         results: tlResults,

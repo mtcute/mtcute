@@ -1,12 +1,10 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { PeersIndex, User } from '../peers'
 
 export class PreCheckoutQuery {
     constructor(
-        public readonly client: TelegramClient,
         public readonly raw: tl.RawUpdateBotPrecheckoutQuery,
         public readonly _peers: PeersIndex,
     ) {}
@@ -30,7 +28,7 @@ export class PreCheckoutQuery {
      * User who sent the query
      */
     get user(): User {
-        return (this._user ??= new User(this.client, this._peers.user(this.userId)))
+        return (this._user ??= new User(this._peers.user(this.userId)))
     }
 
     /**
@@ -62,20 +60,6 @@ export class PreCheckoutQuery {
      */
     get totalAmount(): tl.Long {
         return this.raw.totalAmount
-    }
-
-    /**
-     * Approve the query
-     */
-    approve(): Promise<void> {
-        return this.client.answerPreCheckoutQuery(this.queryId)
-    }
-
-    /**
-     * Reject the query
-     */
-    reject(error = ''): Promise<void> {
-        return this.client.answerPreCheckoutQuery(this.queryId, { error })
     }
 }
 

@@ -1,4 +1,4 @@
-import { TcpTransport } from '../../network'
+import { TcpTransport } from '../../network/transports/tcp'
 
 /** @internal */
 export const _defaultTransportFactory = () => new TcpTransport()

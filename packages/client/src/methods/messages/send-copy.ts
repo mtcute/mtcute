@@ -1,7 +1,10 @@
-import { getMarkedPeerId, tl } from '@mtcute/core'
+import { BaseTelegramClient, getMarkedPeerId, MtArgumentError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { FormattedString, InputPeerLike, Message, MtMessageNotFoundError, ReplyMarkup } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
+import { getMessages } from './get-messages'
+import { sendMedia } from './send-media'
+import { sendText } from './send-text'
 
 /**
  * Copy a message (i.e. send the same message,
@@ -12,15 +15,10 @@ import { FormattedString, InputPeerLike, Message, MtMessageNotFoundError, ReplyM
  * and if the message contains an invoice,
  * it can't be copied.
  *
- * > **Note**: if you already have {@link Message} object,
- * > use {@link Message.sendCopy} instead, since that is
- * > much more efficient, and that is what this method wraps.
- *
  * @param params
- * @internal
  */
 export async function sendCopy(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Source chat ID */
         fromChatId: InputPeerLike
@@ -99,13 +97,32 @@ export async function sendCopy(
 ): Promise<Message> {
     const { fromChatId, toChatId, message, ...rest } = params
 
-    const fromPeer = await this.resolvePeer(fromChatId)
+    const fromPeer = await resolvePeer(client, fromChatId)
 
-    const msg = await this.getMessages(fromPeer, message)
+    const msg = await getMessages(client, fromPeer, message)
 
     if (!msg) {
         throw new MtMessageNotFoundError(getMarkedPeerId(fromPeer), message, 'to copy')
     }
 
-    return msg.sendCopy(toChatId, rest)
+    if (msg.raw._ === 'messageService') {
+        throw new MtArgumentError("Service messages can't be copied")
+    }
+
+    if (msg.media && msg.media.type !== 'web_page' && msg.media.type !== 'invoice') {
+        return sendMedia(
+            client,
+            toChatId,
+            {
+                type: 'auto',
+                file: msg.media.inputMedia,
+                caption: params.caption ?? msg.raw.message,
+                // we shouldn't use original entities if the user wants custom text
+                entities: params.entities ?? params.caption ? undefined : msg.raw.entities,
+            },
+            rest,
+        )
+    }
+
+    return sendText(client, toChatId, msg.raw.message, rest)
 }

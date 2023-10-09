@@ -1,7 +1,7 @@
-import { assertNever, tl } from '@mtcute/core'
+import { assertNever, BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike, TypingStatus } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Sends a current user/bot typing event
@@ -14,10 +14,9 @@ import { InputPeerLike, TypingStatus } from '../../types'
  * @param chatId  Chat ID
  * @param status  Typing status
  * @param params
- * @internal
  */
 export async function sendTyping(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     status: TypingStatus | tl.TypeSendMessageAction = 'typing',
     params?: {
@@ -89,9 +88,9 @@ export async function sendTyping(
         }
     }
 
-    await this.call({
+    await client.call({
         _: 'messages.setTyping',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         action: status,
         topMsgId: params?.threadId,
     })

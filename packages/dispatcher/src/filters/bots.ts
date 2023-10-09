@@ -54,16 +54,17 @@ export const command = (
                 const m = withoutPrefix.match(regex)
                 if (!m) continue
 
-                const lastGroup = m[m.length - 1]
+                // const lastGroup = m[m.length - 1]
 
                 // eslint-disable-next-line dot-notation
-                if (lastGroup && msg.client['_isBot']) {
-                    // check bot username
-                    // eslint-disable-next-line dot-notation
-                    if (lastGroup !== msg.client['_selfUsername']) {
-                        return false
-                    }
-                }
+                // todo
+                // if (lastGroup && msg.client['_isBot']) {
+                //     // check bot username
+                //     // eslint-disable-next-line dot-notation
+                //     if (lastGroup !== msg.client['_selfUsername']) {
+                //         return false
+                //     }
+                // }
 
                 const match = m.slice(1, -1)
 

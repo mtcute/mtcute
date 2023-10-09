@@ -64,7 +64,11 @@ function visitRecursively(ast, check, callback) {
 }
 
 function findRawApiUsages(ast, fileName) {
-    // find `this.call({ _: '...', ...})
+    // find `cilent.call({ _: '...', ...})
+
+    if (ast.kind !== ts.SyntaxKind.FunctionDeclaration) return []
+    const firstParamName = ast.parameters[0]?.name?.escapedText
+    if (!firstParamName) return []
 
     const usages = []
 
@@ -75,7 +79,11 @@ function findRawApiUsages(ast, fileName) {
             if (call.expression.kind !== ts.SyntaxKind.PropertyAccessExpression) return
             const prop = call.expression
 
-            if (prop.name.escapedText === 'call' && prop.expression.kind === ts.SyntaxKind.ThisKeyword) {
+            if (
+                prop.name.escapedText === 'call' &&
+                prop.expression.kind === ts.SyntaxKind.Identifier &&
+                prop.expression.escapedText === firstParamName
+            ) {
                 usages.push(call)
             }
         },
@@ -248,12 +256,6 @@ async function addSingleMethod(state, fileName) {
                 )
             }
 
-            const isPrivate =
-                name[0] === '_' &&
-                name !== '_handleUpdate' &&
-                name !== '_normalizeInputFile' &&
-                name !== '_normalizeInputMedia'
-
             const isExported = (stmt.modifiers || []).find((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
             const isInitialize = checkForFlag(stmt, '@initialize')
             const aliases = (function () {
@@ -281,18 +283,6 @@ async function addSingleMethod(state, fileName) {
             const rawApiMethods = available === null && findRawApiUsages(stmt, fileName)
             const dependencies = findDependencies(stmt).filter((it) => it !== name)
 
-            if (!isExported && !isPrivate) {
-                throwError(stmt, fileName, 'Public methods MUST be exported.')
-            }
-
-            if (isExported && !checkForFlag(stmt, '@internal')) {
-                throwError(
-                    isExported,
-                    fileName,
-                    'Exported methods must be marked as @internal so TS compiler strips them away.',
-                )
-            }
-
             if (isInitialize && isExported) {
                 throwError(isExported, fileName, 'Initialization methods must not be exported')
             }
@@ -312,16 +302,8 @@ async function addSingleMethod(state, fileName) {
 
             const firstArg = stmt.parameters[0]
 
-            if (
-                isExported &&
-                (!firstArg ||
-                    (firstArg.type.getText() !== 'TelegramClient' && firstArg.type.getText() !== 'BaseTelegramClient'))
-            ) {
-                throwError(
-                    firstArg || stmt.name,
-                    fileName,
-                    'Exported methods must have `BaseTelegramClient` or `TelegramClient` as their first parameter',
-                )
+            if (isExported && (!firstArg || firstArg.type.getText() !== 'BaseTelegramClient')) {
+                continue
             }
 
             // overloads
@@ -334,25 +316,35 @@ async function addSingleMethod(state, fileName) {
             }
 
             if (isExported) {
-                state.methods.list.push({
-                    from: relPath,
-                    name,
-                    isPrivate,
-                    func: stmt,
-                    comment: getLeadingComments(stmt),
-                    aliases,
-                    available,
-                    rawApiMethods,
-                    dependencies,
-                    overload: isOverload,
-                    hasOverloads: hasOverloads[name] && !isOverload,
-                })
+                const isPrivate = checkForFlag(stmt, '@internal')
+                const isManual = checkForFlag(stmt, '@manual')
+                const isNoemit = checkForFlag(stmt, '@noemit')
+                const shouldEmit = !isNoemit && !(isPrivate && !isOverload && !hasOverloads)
 
-                if (!(module in state.imports)) {
-                    state.imports[module] = new Set()
+                if (shouldEmit) {
+                    state.methods.list.push({
+                        from: relPath,
+                        name,
+                        isPrivate,
+                        isManual,
+                        isNoemit,
+                        shouldEmit,
+                        func: stmt,
+                        comment: getLeadingComments(stmt),
+                        aliases,
+                        available,
+                        rawApiMethods,
+                        dependencies,
+                        overload: isOverload,
+                        hasOverloads: hasOverloads[name] && !isOverload,
+                    })
+
+                    if (!(module in state.imports)) {
+                        state.imports[module] = new Set()
+                    }
+
+                    state.imports[module].add(name)
                 }
-
-                state.imports[module].add(name)
             }
         } else if (stmt.kind === ts.SyntaxKind.InterfaceDeclaration) {
             if (isCopy) {
@@ -484,6 +476,7 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
         ({
             name: origName,
             // isPrivate,
+            isManual,
             func,
             comment,
             aliases,
@@ -531,7 +524,9 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
             const generics = func.typeParameters ?
                 `<${func.typeParameters.map((it) => it.getFullText()).join(', ')}>` :
                 ''
-            const rawParams = (func.parameters || []).filter((it) => !it.type || it.type.getText() !== 'TelegramClient')
+            const rawParams = (func.parameters || []).filter(
+                (it) => !it.type || it.type.getText() !== 'BaseTelegramClient',
+            )
             const parameters = rawParams
                 .map((it) => {
                     if (it.initializer) {
@@ -590,7 +585,7 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
 
             // remove @internal mark and set default values for parameters
             comment = comment
-                .replace(/^\s*\/\/+\s*@(alias|available).*$/m, '')
+                .replace(/^\s*\/\/+\s*@(alias|available|manual).*$/gm, '')
                 .replace(/(\n^|\/\*)\s*\*\s*@internal.*/m, '')
                 .replace(/((?:\n^|\/\*)\s*\*\s*@param )([^\s]+?)($|\s+)/gm, (_, pref, arg, post) => {
                     const param = rawParams.find((it) => it.name.escapedText === arg)
@@ -599,7 +594,6 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
 
                     return `${pref}[${arg}=${param._savedDefault.trim()}]${post}`
                 })
-                // insert "some text" at the end of comment before jsdoc
                 .replace(/(?<=\/\*.*)(?=\n\s*\*\s*(?:@[a-z]+|\/))/s, () => {
                     switch (available) {
                         case 'user':
@@ -623,8 +617,11 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
                     output.write(`${name}${generics}(${parameters})${returnType}\n`)
                 }
 
-                if (!overload) {
-                    classContents.push(`${name} = ${origName}`)
+                if (!overload && !isManual) {
+                    if (hasOverloads) {
+                        classContents.push('// @ts-expect-error .bind() kinda breaks typings for overloads')
+                    }
+                    classContents.push(`${name} = ${origName}.bind(null, this)`)
                 }
             }
         },

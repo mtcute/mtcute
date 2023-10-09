@@ -1,4 +1,6 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
+import { getAuthState } from './_state'
 
 /**
  * Log out from Telegram account and optionally reset the session storage.
@@ -7,20 +9,20 @@ import { TelegramClient } from '../../client'
  * the same {@link TelegramClient} instance.
  *
  * @returns  On success, `true` is returned
- * @internal
  */
-export async function logOut(this: TelegramClient): Promise<true> {
-    await this.call({ _: 'auth.logOut' })
+export async function logOut(client: BaseTelegramClient): Promise<true> {
+    await client.call({ _: 'auth.logOut' })
 
-    this._userId = null
-    this._isBot = false
-    // some implicit magic in favor of performance
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-    this._pts = this._seq = this._date = undefined as any
-    this._selfUsername = null
-    this._selfChanged = true
-    this.storage.reset()
-    await this._saveStorage()
+    const authState = getAuthState(client)
+    authState.userId = null
+    authState.isBot = false
+    authState.selfUsername = null
+    authState.selfChanged = true
+
+    client.emit('logged_out')
+
+    client.storage.reset()
+    await client.saveStorage()
 
     return true
 }

@@ -1,15 +1,12 @@
-import { Long, PartialOnly, tl } from '@mtcute/core'
-
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient, Long, PartialOnly, tl } from '@mtcute/core'
 
 /**
  * Import contacts to your Telegram contacts list.
  *
  * @param contacts  List of contacts
- * @internal
  */
 export async function importContacts(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     contacts: PartialOnly<Omit<tl.RawInputPhoneContact, '_'>, 'clientId'>[],
 ): Promise<tl.contacts.RawImportedContacts> {
     let seq = Long.ZERO
@@ -20,7 +17,7 @@ export async function importContacts(
         ...input,
     }))
 
-    return await this.call({
+    return await client.call({
         _: 'contacts.importContacts',
         contacts: contactsNorm,
     })

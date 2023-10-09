@@ -1,7 +1,6 @@
 import { tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../../client'
 import { makeInspectable } from '../../../utils'
 import { Location, VenueSource } from '../../media'
 import { StoryInteractiveArea } from './base'
@@ -12,11 +11,8 @@ import { StoryInteractiveArea } from './base'
 export class StoryInteractiveVenue extends StoryInteractiveArea {
     readonly type = 'venue' as const
 
-    constructor(
-        client: TelegramClient,
-        readonly raw: tl.RawMediaAreaVenue,
-    ) {
-        super(client, raw)
+    constructor(readonly raw: tl.RawMediaAreaVenue) {
+        super(raw)
     }
 
     private _location?: Location
@@ -26,7 +22,7 @@ export class StoryInteractiveVenue extends StoryInteractiveArea {
     get location(): Location {
         if (!this._location) {
             assertTypeIs('StoryInteractiveVenue#location', this.raw.geo, 'geoPoint')
-            this._location = new Location(this.client, this.raw.geo)
+            this._location = new Location(this.raw.geo)
         }
 
         return this._location

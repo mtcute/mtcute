@@ -1,20 +1,18 @@
-import { Long, MtTypeAssertionError } from '@mtcute/core'
+import { BaseTelegramClient, Long, MtTypeAssertionError } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike, PeersIndex, Poll } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Close a poll sent by you.
  *
  * Once closed, poll can't be re-opened, and nobody
  * will be able to vote in it
- *
- * @internal
  */
 export async function closePoll(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID where this poll was found */
         chatId: InputPeerLike
@@ -24,9 +22,9 @@ export async function closePoll(
 ): Promise<Poll> {
     const { chatId, message } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.editMessage',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         id: message,
         media: {
             _: 'inputMediaPoll',
@@ -42,7 +40,7 @@ export async function closePoll(
 
     assertIsUpdatesGroup('messages.editMessage', res)
 
-    this._handleUpdate(res, true)
+    client.network.handleUpdate(res, true)
 
     const upd = res.updates[0]
     assertTypeIs('messages.editMessage (@ .updates[0])', upd, 'updateMessagePoll')
@@ -53,5 +51,5 @@ export async function closePoll(
 
     const peers = PeersIndex.from(res)
 
-    return new Poll(this, upd.poll, peers, upd.results)
+    return new Poll(upd.poll, peers, upd.results)
 }

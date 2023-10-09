@@ -1,10 +1,10 @@
-import { assertNever, Long, tl } from '@mtcute/core'
+import { assertNever, BaseTelegramClient, Long, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { ArrayWithTotal, ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types'
 import { makeArrayWithTotal } from '../../utils'
 import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Get a chunk of members of some chat.
@@ -13,10 +13,9 @@ import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '..
  *
  * @param chatId  Chat ID or username
  * @param params  Additional parameters
- * @internal
  */
 export async function getChatMembers(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     params?: {
         /**
@@ -62,10 +61,10 @@ export async function getChatMembers(
 ): Promise<ArrayWithTotal<ChatMember>> {
     const { query = '', offset = 0, limit = 200, type = 'recent' } = params ?? {}
 
-    const chat = await this.resolvePeer(chatId)
+    const chat = await resolvePeer(client, chatId)
 
     if (isInputPeerChat(chat)) {
-        const res = await this.call({
+        const res = await client.call({
             _: 'messages.getFullChat',
             chatId: chat.chatId,
         })
@@ -80,7 +79,7 @@ export async function getChatMembers(
 
         const peers = PeersIndex.from(res)
 
-        const ret = members.map((m) => new ChatMember(this, m, peers))
+        const ret = members.map((m) => new ChatMember(m, peers))
 
         return makeArrayWithTotal(ret, ret.length)
     }
@@ -119,7 +118,7 @@ export async function getChatMembers(
                 assertNever(type)
         }
 
-        const res = await this.call({
+        const res = await client.call({
             _: 'channels.getParticipants',
             channel: normalizeToInputChannel(chat),
             filter,
@@ -132,7 +131,7 @@ export async function getChatMembers(
 
         const peers = PeersIndex.from(res)
 
-        const ret = res.participants.map((i) => new ChatMember(this, i, peers)) as ArrayWithTotal<ChatMember>
+        const ret = res.participants.map((i) => new ChatMember(i, peers))
 
         return makeArrayWithTotal(ret, res.count)
     }

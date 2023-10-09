@@ -1,9 +1,7 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { Photo } from '../media'
-import { Chat } from './chat'
 import { User } from './user'
 
 /**
@@ -16,7 +14,6 @@ export type ChatPreviewType = 'group' | 'supergroup' | 'channel'
 
 export class ChatPreview {
     constructor(
-        readonly client: TelegramClient,
         readonly invite: tl.RawChatInvite,
         /**
          * Original invite link used to fetch this preview
@@ -62,7 +59,7 @@ export class ChatPreview {
     get photo(): Photo | null {
         if (this.invite.photo._ === 'photoEmpty') return null
 
-        return (this._photo ??= new Photo(this.client, this.invite.photo))
+        return (this._photo ??= new Photo(this.invite.photo))
     }
 
     private _someMembers?: User[]
@@ -75,7 +72,7 @@ export class ChatPreview {
      */
     get someMembers(): ReadonlyArray<User> {
         return (this._someMembers ??= this.invite.participants ?
-            this.invite.participants.map((it) => new User(this.client, it)) :
+            this.invite.participants.map((it) => new User(it)) :
             [])
     }
 
@@ -85,13 +82,6 @@ export class ChatPreview {
      */
     get withApproval(): boolean {
         return this.invite.requestNeeded!
-    }
-
-    /**
-     * Join this chat
-     */
-    async join(): Promise<Chat> {
-        return this.client.joinChat(this.link)
     }
 }
 

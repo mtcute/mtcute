@@ -1,6 +1,5 @@
-import { MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import {
     InputFileLike,
     InputPeerLike,
@@ -11,6 +10,8 @@ import {
     StickerType,
 } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { _normalizeFileToDocument } from '../files/normalize-file-to-document'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Create a new sticker set.
@@ -20,10 +21,9 @@ import { normalizeToInputUser } from '../../utils/peer-utils'
  *
  * @param params
  * @returns  Newly created sticker set
- * @internal
  */
 export async function createStickerSet(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * Owner of the sticker set (must be user).
@@ -93,7 +93,7 @@ export async function createStickerSet(
         throw new MtArgumentError('Creating emoji stickers is not supported yet by the API')
     }
 
-    const owner = normalizeToInputUser(await this.resolvePeer(params.owner), params.owner)
+    const owner = normalizeToInputUser(await resolvePeer(client, params.owner), params.owner)
 
     const inputStickers: tl.TypeInputStickerSetItem[] = []
 
@@ -104,7 +104,7 @@ export async function createStickerSet(
 
         inputStickers.push({
             _: 'inputStickerSetItem',
-            document: await this._normalizeFileToDocument(sticker.file, {
+            document: await _normalizeFileToDocument(client, sticker.file, {
                 progressCallback,
             }),
             emoji: sticker.emojis,
@@ -122,7 +122,7 @@ export async function createStickerSet(
         i += 1
     }
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'stickers.createStickerSet',
         animated: params.sourceType === 'animated',
         videos: params.sourceType === 'video',
@@ -133,8 +133,8 @@ export async function createStickerSet(
         title: params.title,
         shortName: params.shortName,
         stickers: inputStickers,
-        thumb: params.thumb ? await this._normalizeFileToDocument(params.thumb, {}) : undefined,
+        thumb: params.thumb ? await _normalizeFileToDocument(client, params.thumb, {}) : undefined,
     })
 
-    return new StickerSet(this, res)
+    return new StickerSet(res)
 }

@@ -190,7 +190,7 @@ export class BaseTelegramClient extends EventEmitter {
     /**
      * Crypto provider taken from {@link BaseTelegramClientOptions.crypto}
      */
-    protected readonly _crypto: ICryptoProvider
+    readonly crypto: ICryptoProvider
 
     /**
      * Telegram storage taken from {@link BaseTelegramClientOptions.storage}
@@ -235,16 +235,6 @@ export class BaseTelegramClient extends EventEmitter {
     private _importFrom?: string
     private _importForce?: boolean
 
-    /**
-     * Method which is called every time the client receives a new update.
-     *
-     * User of the class is expected to override it and handle the given update
-     *
-     * @param update  Raw update object sent by Telegram
-     */
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected _handleUpdate(update: tl.TypeUpdates): void {}
-
     readonly log = new LogManager('client')
     readonly network: NetworkManager
 
@@ -257,7 +247,7 @@ export class BaseTelegramClient extends EventEmitter {
             throw new Error('apiId must be a number or a numeric string!')
         }
 
-        this._crypto = (opts.crypto ?? defaultCryptoProviderFactory)()
+        this.crypto = (opts.crypto ?? defaultCryptoProviderFactory)()
         this.storage = opts.storage ?? new MemoryStorage()
         this._apiHash = opts.apiHash
         this._useIpv6 = Boolean(opts.useIpv6)
@@ -283,7 +273,7 @@ export class BaseTelegramClient extends EventEmitter {
         this.network = new NetworkManager(
             {
                 apiId,
-                crypto: this._crypto,
+                crypto: this.crypto,
                 disableUpdates: opts.disableUpdates ?? false,
                 initConnectionOptions: opts.initConnectionOptions,
                 layer: this._layer,
@@ -310,19 +300,27 @@ export class BaseTelegramClient extends EventEmitter {
     }
 
     protected _keepAliveAction(): void {
-        // core does not have update handling, so we just use getState so the server knows
-        // we still do need updates
-        this.call({ _: 'updates.getState' }).catch((e) => {
-            this.log.error('failed to send keep-alive: %s', e)
-        })
+        this.emit('keep_alive')
     }
 
     protected async _loadStorage(): Promise<void> {
         await this.storage.load?.()
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected async _saveStorage(afterImport = false): Promise<void> {
+    _beforeStorageSave: (() => Promise<void>)[] = []
+
+    beforeStorageSave(cb: () => Promise<void>): void {
+        this._beforeStorageSave.push(cb)
+    }
+
+    offBeforeStorageSave(cb: () => Promise<void>): void {
+        this._beforeStorageSave = this._beforeStorageSave.filter((x) => x !== cb)
+    }
+
+    async saveStorage(): Promise<void> {
+        for (const cb of this._beforeStorageSave) {
+            await cb()
+        }
         await this.storage.save?.()
     }
 
@@ -339,9 +337,6 @@ export class BaseTelegramClient extends EventEmitter {
 
             return
         }
-
-        // we cant do this in constructor because we need to support subclassing
-        this.network.setUpdateHandler(this._handleUpdate.bind(this))
 
         const promise = (this._connected = createControllablePromise())
 
@@ -373,8 +368,10 @@ export class BaseTelegramClient extends EventEmitter {
             // await this.primaryConnection.setupKeys(data.authKey)
             await this.storage.setAuthKeyFor(data.primaryDcs.main.id, data.authKey)
 
-            await this._saveStorage(true)
+            await this.saveStorage()
         }
+
+        this.emit('before_connect')
 
         this.network
             .connect(this._defaultDcs)
@@ -386,22 +383,18 @@ export class BaseTelegramClient extends EventEmitter {
     }
 
     /**
-     * Additional cleanup for subclasses.
-     * @protected
-     */
-    protected _onClose(): void {}
-
-    /**
      * Close all connections and finalize the client.
      */
     async close(): Promise<void> {
-        this._onClose()
+        this.emit('before_close')
 
         this._config.destroy()
         this.network.destroy()
 
-        await this._saveStorage()
+        await this.saveStorage()
         await this.storage.destroy?.()
+
+        this.emit('closed')
     }
 
     /**
@@ -461,7 +454,12 @@ export class BaseTelegramClient extends EventEmitter {
         this._onError = handler
     }
 
-    protected _emitError(err: unknown, connection?: SessionConnection): void {
+    notifyLoggedIn(auth: tl.auth.RawAuthorization): void {
+        this.network.notifyLoggedIn(auth)
+        this.emit('logged_in', auth)
+    }
+
+    _emitError(err: unknown, connection?: SessionConnection): void {
         if (this._onError) {
             this._onError(err, connection)
         } else {
@@ -474,7 +472,7 @@ export class BaseTelegramClient extends EventEmitter {
      *
      * @returns  `true` if there were any `min` peers
      */
-    protected async _cachePeersFrom(obj: object): Promise<boolean> {
+    async _cachePeersFrom(obj: object): Promise<boolean> {
         const parsedPeers: ITelegramStorage.PeerInfo[] = []
 
         let hadMin = false

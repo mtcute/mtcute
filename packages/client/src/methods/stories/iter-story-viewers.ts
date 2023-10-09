@@ -1,17 +1,18 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike, StoryViewer } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
+import { getStoryViewers } from './get-story-viewers'
 
 /**
  * Iterate over viewers list of a story.
  * Wrapper over {@link getStoryViewers}
- *
- * @internal
  */
 export async function* iterStoryViewers(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peerId: InputPeerLike,
     storyId: number,
-    params?: Parameters<TelegramClient['getStoryViewers']>[2] & {
+    params?: Parameters<typeof getStoryViewers>[3] & {
         /**
          * Total number of viewers to fetch
          *
@@ -35,10 +36,10 @@ export async function* iterStoryViewers(
     let { offset = '' } = params
     let current = 0
 
-    const peer = await this.resolvePeer(peerId)
+    const peer = await resolvePeer(client, peerId)
 
     for (;;) {
-        const res = await this.getStoryViewers(peer, storyId, {
+        const res = await getStoryViewers(client, peer, storyId, {
             onlyContacts,
             sortBy,
             query,

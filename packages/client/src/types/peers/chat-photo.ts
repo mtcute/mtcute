@@ -1,7 +1,6 @@
 import { Long, MtArgumentError, tl, toggleChannelIdMark } from '@mtcute/core'
 import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { strippedPhotoToJpg } from '../../utils/file-utils'
 import { FileLocation } from '../files'
@@ -11,13 +10,11 @@ import { FileLocation } from '../files'
  */
 export class ChatPhotoSize extends FileLocation {
     constructor(
-        readonly client: TelegramClient,
         readonly peer: tl.TypeInputPeer,
         readonly obj: tl.RawUserProfilePhoto | tl.RawChatPhoto,
         readonly big: boolean,
     ) {
         super(
-            client,
             {
                 _: 'inputPeerPhotoFileLocation',
                 peer,
@@ -110,7 +107,6 @@ makeInspectable(ChatPhotoSize, ['dcId', 'big'])
  */
 export class ChatPhoto {
     constructor(
-        readonly client: TelegramClient,
         readonly peer: tl.TypeInputPeer,
         readonly raw: tl.RawUserProfilePhoto | tl.RawChatPhoto,
     ) {}
@@ -126,14 +122,14 @@ export class ChatPhoto {
 
     /** Chat photo file location in small resolution (160x160) */
     get small(): ChatPhotoSize {
-        return (this._smallFile ??= new ChatPhotoSize(this.client, this.peer, this.raw, false))
+        return (this._smallFile ??= new ChatPhotoSize(this.peer, this.raw, false))
     }
 
     private _bigFile?: ChatPhotoSize
 
     /** Chat photo file location in big resolution (640x640) */
     get big(): ChatPhotoSize {
-        return (this._bigFile ??= new ChatPhotoSize(this.client, this.peer, this.raw, true))
+        return (this._bigFile ??= new ChatPhotoSize(this.peer, this.raw, true))
     }
 
     private _thumb?: Buffer

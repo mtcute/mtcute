@@ -8,12 +8,11 @@ import {
 } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
-import { BotKeyboard, ReplyMarkup } from '../bots'
-import { InputMediaLike, Sticker, WebPage } from '../media'
-import { FormattedString } from '../parser'
-import { Chat, InputPeerLike, PeersIndex, User } from '../peers'
+import { BotKeyboard, ReplyMarkup } from '../bots/keyboards'
+import { Chat } from '../peers/chat'
+import { PeersIndex } from '../peers/peers-index'
+import { User } from '../peers/user'
 import { _messageActionFromTl, MessageAction } from './message-action'
 import { MessageEntity } from './message-entity'
 import { _messageMediaFromTl, MessageMedia } from './message-media'
@@ -101,12 +100,11 @@ export class Message {
     readonly raw: tl.RawMessage | tl.RawMessageService
 
     constructor(
-        readonly client: TelegramClient,
         raw: tl.TypeMessage,
         readonly _peers: PeersIndex,
         /**
          * Whether the message is scheduled.
-         * If it is, then its {@link Message.date} is set to future.
+         * If it is, then its {@link date} is set to future.
          */
         readonly isScheduled = false,
     ) {
@@ -191,7 +189,7 @@ export class Message {
 
             if (!from) {
                 if (this.raw.peerId._ === 'peerUser') {
-                    this._sender = new User(this.client, this._peers.user(this.raw.peerId.userId))
+                    this._sender = new User(this._peers.user(this.raw.peerId.userId))
                 } else {
                     // anon admin, return the chat
                     this._sender = this.chat
@@ -199,10 +197,10 @@ export class Message {
             } else {
                 switch (from._) {
                     case 'peerChannel': // forwarded channel post
-                        this._sender = new Chat(this.client, this._peers.chat(from.channelId))
+                        this._sender = new Chat(this._peers.chat(from.channelId))
                         break
                     case 'peerUser':
-                        this._sender = new User(this.client, this._peers.user(from.userId))
+                        this._sender = new User(this._peers.user(from.userId))
                         break
                     default:
                         throw new MtTypeAssertionError('raw.fromId', 'peerUser | peerChannel', from._)
@@ -220,7 +218,7 @@ export class Message {
      */
     get chat(): Chat {
         if (this._chat === undefined) {
-            this._chat = Chat._parseFromMessage(this.client, this.raw, this._peers)
+            this._chat = Chat._parseFromMessage(this.raw, this._peers)
         }
 
         return this._chat
@@ -252,10 +250,10 @@ export class Message {
                 } else if (fwd.fromId) {
                     switch (fwd.fromId._) {
                         case 'peerChannel':
-                            sender = new Chat(this.client, this._peers.chat(fwd.fromId.channelId))
+                            sender = new Chat(this._peers.chat(fwd.fromId.channelId))
                             break
                         case 'peerUser':
-                            sender = new User(this.client, this._peers.user(fwd.fromId.userId))
+                            sender = new User(this._peers.user(fwd.fromId.userId))
                             break
                         default:
                             throw new MtTypeAssertionError('raw.fwdFrom.fromId', 'peerUser | peerChannel', fwd.fromId._)
@@ -377,7 +375,7 @@ export class Message {
             if (this.raw._ === 'messageService' || !this.raw.viaBotId) {
                 this._viaBot = null
             } else {
-                this._viaBot = new User(this.client, this._peers.user(this.raw.viaBotId))
+                this._viaBot = new User(this._peers.user(this.raw.viaBotId))
             }
         }
 
@@ -443,7 +441,7 @@ export class Message {
             if (this.raw._ === 'messageService' || !this.raw.media || this.raw.media._ === 'messageMediaEmpty') {
                 this._media = null
             } else {
-                this._media = _messageMediaFromTl(this.client, this._peers, this.raw.media)
+                this._media = _messageMediaFromTl(this._peers, this.raw.media)
             }
         }
 
@@ -534,7 +532,6 @@ export class Message {
                 this._reactions = null
             } else {
                 this._reactions = new MessageReactions(
-                    this.client,
                     this.raw.id,
                     getMarkedPeerId(this.raw.peerId),
                     this.raw.reactions,
@@ -561,390 +558,6 @@ export class Message {
         }
 
         throw new MtArgumentError(`Cannot generate message link for ${this.chat.chatType}`)
-    }
-
-    /**
-     * Get the message text formatted with a given parse mode
-     *
-     * Shorthand for `client.getParseMode(...).unparse(msg.text, msg.entities)`
-     *
-     * @param parseMode  Parse mode to use (`null` for default)
-     */
-    unparse(parseMode?: string | null): string {
-        if (this.raw._ === 'messageService') return ''
-
-        return this.client.getParseMode(parseMode).unparse(this.text, this.raw.entities ?? [])
-    }
-
-    /**
-     * For replies, fetch the message that is being replied.
-     *
-     * Note that even if a message has {@link replyToMessageId},
-     * the message itself may have been deleted, in which case
-     * this method will also return `null`.
-     */
-    getReplyTo(): Promise<Message | null> {
-        if (!this.replyToMessageId) return Promise.resolve(null)
-
-        if (this.raw.peerId._ === 'peerChannel') {
-            return this.client.getMessages(this.chat.inputPeer, this.id, true)
-        }
-
-        return this.client.getMessagesUnsafe(this.id, true)
-    }
-
-    /**
-     * Send a message as an answer to this message.
-     *
-     * This just sends a message to the same chat
-     * as this message
-     *
-     * @param text  Text of the message
-     * @param params
-     */
-    answerText(
-        text: string | FormattedString<string>,
-        params?: Parameters<TelegramClient['sendText']>[2],
-    ): ReturnType<TelegramClient['sendText']> {
-        return this.client.sendText(this.chat.inputPeer, text, params)
-    }
-
-    /**
-     * Send a media as an answer to this message.
-     *
-     * This just sends a message to the same chat
-     * as this message
-     *
-     * @param media  Media to send
-     * @param params
-     */
-    answerMedia(
-        media: InputMediaLike | string,
-        params?: Parameters<TelegramClient['sendMedia']>[2],
-    ): ReturnType<TelegramClient['sendMedia']> {
-        return this.client.sendMedia(this.chat.inputPeer, media, params)
-    }
-
-    /**
-     * Send a media group as an answer to this message.
-     *
-     * This just sends a message to the same chat
-     * as this message
-     *
-     * @param medias  Medias to send
-     * @param params
-     */
-    answerMediaGroup(
-        medias: (InputMediaLike | string)[],
-        params?: Parameters<TelegramClient['sendMediaGroup']>[2],
-    ): ReturnType<TelegramClient['sendMediaGroup']> {
-        return this.client.sendMediaGroup(this.chat.inputPeer, medias, params)
-    }
-
-    /**
-     * Send a message in reply to this message.
-     *
-     * @param text  Text of the message
-     * @param params
-     */
-    replyText(
-        text: string | FormattedString<string>,
-        params?: Parameters<TelegramClient['sendText']>[2],
-    ): ReturnType<TelegramClient['sendText']> {
-        if (!params) params = {}
-        params.replyTo = this.id
-
-        return this.client.sendText(this.chat.inputPeer, text, params)
-    }
-
-    /**
-     * Send a media in reply to this message.
-     *
-     * @param media  Media to send
-     * @param params
-     */
-    replyMedia(
-        media: InputMediaLike | string,
-        params?: Parameters<TelegramClient['sendMedia']>[2],
-    ): ReturnType<TelegramClient['sendMedia']> {
-        if (!params) params = {}
-        params.replyTo = this.id
-
-        return this.client.sendMedia(this.chat.inputPeer, media, params)
-    }
-
-    /**
-     * Send a media group in reply to this message.
-     *
-     * @param medias  Medias to send
-     * @param params
-     */
-    replyMediaGroup(
-        medias: (InputMediaLike | string)[],
-        params?: Parameters<TelegramClient['sendMediaGroup']>[2],
-    ): ReturnType<TelegramClient['sendMediaGroup']> {
-        if (!params) params = {}
-        params.replyTo = this.id
-
-        return this.client.sendMediaGroup(this.chat.inputPeer, medias, params)
-    }
-
-    /**
-     * Send a text-only comment to this message.
-     *
-     * If this is a normal message (not a channel post),
-     * a simple reply will be sent.
-     *
-     * If this post does not have comments section,
-     * {@link MtArgumentError} is thrown. To check
-     * if a message has comments, use {@link replies}
-     *
-     * @param text  Text of the message
-     * @param params
-     */
-    commentText(
-        text: string | FormattedString<string>,
-        params?: Parameters<TelegramClient['sendText']>[2],
-    ): ReturnType<TelegramClient['sendText']> {
-        if (this.chat.chatType !== 'channel') {
-            return this.replyText(text, params)
-        }
-
-        if (!this.replies || !this.replies.isComments) {
-            throw new MtArgumentError('This message does not have comments section')
-        }
-
-        if (!params) params = {}
-        params.commentTo = this.id
-
-        return this.client.sendText(this.chat.inputPeer, text, params)
-    }
-
-    /**
-     * Send a media comment to this message
-     * .
-     * If this is a normal message (not a channel post),
-     * a simple reply will be sent.
-     *
-     * If this post does not have comments section,
-     * {@link MtArgumentError} is thrown. To check
-     * if a message has comments, use {@link replies}
-     *
-     * @param media  Media to send
-     * @param params
-     */
-    commentMedia(
-        media: InputMediaLike | string,
-        params?: Parameters<TelegramClient['sendMedia']>[2],
-    ): ReturnType<TelegramClient['sendMedia']> {
-        if (this.chat.chatType !== 'channel') {
-            return this.replyMedia(media, params)
-        }
-
-        if (!this.replies || !this.replies.isComments) {
-            throw new MtArgumentError('This message does not have comments section')
-        }
-        if (!params) params = {}
-        params.commentTo = this.id
-
-        return this.client.sendMedia(this.chat.inputPeer, media, params)
-    }
-
-    /**
-     * Send a media group comment to this message
-     * .
-     * If this is a normal message (not a channel post),
-     * a simple reply will be sent.
-     *
-     * If this post does not have comments section,
-     * {@link MtArgumentError} is thrown. To check
-     * if a message has comments, use {@link replies}
-     *
-     * @param medias  Medias to send
-     * @param params
-     */
-    commentMediaGroup(
-        medias: (InputMediaLike | string)[],
-        params?: Parameters<TelegramClient['sendMediaGroup']>[2],
-    ): ReturnType<TelegramClient['sendMediaGroup']> {
-        if (this.chat.chatType !== 'channel') {
-            return this.replyMediaGroup(medias, params)
-        }
-
-        if (!this.replies || !this.replies.isComments) {
-            throw new MtArgumentError('This message does not have comments section')
-        }
-        if (!params) params = {}
-        params.commentTo = this.id
-
-        return this.client.sendMediaGroup(this.chat.inputPeer, medias, params)
-    }
-
-    /**
-     * Delete this message.
-     *
-     * @param revoke  Whether to "revoke" (i.e. delete for both sides). Only used for chats and private chats.
-     */
-    delete(revoke = false): Promise<void> {
-        return this.client.deleteMessages(this.chat.inputPeer, this.id, { revoke })
-    }
-
-    /**
-     * Pin this message.
-     */
-    pin(params?: Parameters<TelegramClient['pinMessage']>[2]): Promise<void> {
-        return this.client.pinMessage(this.chat.inputPeer, this.id, params)
-    }
-
-    /**
-     * Unpin this message.
-     */
-    unpin(): Promise<void> {
-        return this.client.pinMessage(this.chat.inputPeer, this.id)
-    }
-
-    // /**
-    //  * Edit this message's text and/or reply markup
-    //  *
-    //  * @link TelegramClient.editMessage
-    //  */
-    // edit(params: Parameters<TelegramClient['editMessage']>[2]): Promise<Message> {
-    //     return this.client.editMessage(this.chat.inputPeer, this.id, params)
-    // }
-
-    // /**
-    //  * Edit message text and optionally reply markup.
-    //  *
-    //  * Convenience method that just wraps {@link edit},
-    //  * passing positional `text` as object field.
-    //  *
-    //  * @param text  New message text
-    //  * @param params?  Additional parameters
-    //  * @link TelegramClient.editMessage
-    //  */
-    // editText(
-    //     text: string | FormattedString<string>,
-    //     params?: Omit<Parameters<TelegramClient['editMessage']>[2], 'text'>,
-    // ): Promise<Message> {
-    //     return this.edit({
-    //         text,
-    //         ...(params || {}),
-    //     })
-    // }
-
-    /**
-     * Forward this message to some chat
-     *
-     * @param peer  Chat where to forward this message
-     * @param params
-     * @returns  Forwarded message
-     */
-    forwardTo(
-        peer: InputPeerLike,
-        params?: Omit<Parameters<TelegramClient['forwardMessages']>[0], 'messages' | 'toChatId' | 'fromChatId'>,
-    ): Promise<Message> {
-        return this.client.forwardMessages({
-            toChatId: peer,
-            fromChatId: this.chat.inputPeer,
-            messages: this.id,
-            ...params,
-        })
-    }
-
-    /**
-     * Send this message as a copy (i.e. send the same message, but do not forward it).
-     *
-     * Note that if the message contains a webpage,
-     * it will be copied simply as a text message,
-     * and if the message contains an invoice,
-     * it can't be copied.
-     *
-     * @param toChatId  Target chat ID
-     * @param params  Copy parameters
-     */
-    sendCopy(
-        toChatId: InputPeerLike,
-        params?: Omit<Parameters<TelegramClient['sendCopy']>[0], 'fromChatId' | 'message' | 'toChatId'>,
-    ): Promise<Message> {
-        if (!params) params = {}
-
-        if (this.raw._ === 'messageService') {
-            throw new MtArgumentError("Service messages can't be copied")
-        }
-
-        if (this.media && !(this.media instanceof WebPage)) {
-            return this.client.sendMedia(
-                toChatId,
-                {
-                    type: 'auto',
-                    file: this.media.inputMedia,
-                    caption: params.caption ?? this.raw.message,
-                    // we shouldn't use original entities if the user wants custom text
-                    entities: params.entities ?? params.caption ? undefined : this.raw.entities,
-                },
-                params,
-            )
-        }
-
-        return this.client.sendText(toChatId, this.raw.message, params)
-    }
-
-    /**
-     * Get all messages inside a group that this
-     * message belongs to (see {@link groupedId}),
-     * including this message.
-     *
-     * In case this message is not inside of a group,
-     * will just return itself.
-     */
-    async getGroup(): Promise<Message[]> {
-        if (!this.groupedId) return [this]
-
-        return this.client.getMessageGroup(this.chat.inputPeer, this.raw.id)
-    }
-
-    /**
-     * Get discussion message for some channel post.
-     *
-     * Returns `null` if the post does not have a discussion
-     * message.
-     */
-    async getDiscussionMessage(): Promise<Message | null> {
-        return this.client.getDiscussionMessage(this.chat.inputPeer, this.raw.id)
-    }
-
-    /**
-     * Read history in the chat up until this message
-     *
-     * @param clearMentions  Whether to also clear mentions
-     */
-    async read(clearMentions = false): Promise<void> {
-        return this.client.readHistory(this.chat.inputPeer, { maxId: this.raw.id, clearMentions })
-    }
-
-    /**
-     * React to this message
-     *
-     * @param emoji  Reaction emoji
-     * @param big  Whether to use a big reaction
-     */
-    async react(emoji: string | null, big?: boolean): Promise<Message> {
-        return this.client.sendReaction({
-            chatId: this.chat.inputPeer,
-            message: this.raw.id,
-            emoji,
-            big,
-        })
-    }
-
-    async getCustomEmojis(): Promise<Sticker[]> {
-        if (this.raw._ === 'messageService' || !this.raw.entities) return []
-
-        return this.client.getCustomEmojis(
-            this.raw.entities
-                .filter((it) => it._ === 'messageEntityCustomEmoji')
-                .map((it) => (it as tl.RawMessageEntityCustomEmoji).documentId),
-        )
     }
 }
 

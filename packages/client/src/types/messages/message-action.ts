@@ -2,7 +2,7 @@ import { getMarkedPeerId, tl } from '@mtcute/core'
 
 import { _callDiscardReasonFromTl, CallDiscardReason } from '../calls'
 import { Photo } from '../media'
-import { Message } from './message'
+import type { Message } from './message'
 
 /** Group was created */
 export interface ActionChatCreated {
@@ -494,7 +494,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         case 'messageActionChatEditPhoto':
             return {
                 type: 'photo_changed',
-                photo: new Photo(this.client, act.photo as tl.RawPhoto),
+                photo: new Photo(act.photo as tl.RawPhoto),
             }
         case 'messageActionChatDeletePhoto':
             return {
@@ -653,7 +653,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         case 'messageActionSuggestProfilePhoto':
             return {
                 type: 'photo_suggested',
-                photo: new Photo(this.client, act.photo as tl.RawPhoto),
+                photo: new Photo(act.photo as tl.RawPhoto),
             }
         case 'messageActionRequestedPeer':
             return {

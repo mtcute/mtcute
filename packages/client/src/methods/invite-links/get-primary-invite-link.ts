@@ -1,18 +1,17 @@
-import { MtTypeAssertionError } from '@mtcute/core'
+import { BaseTelegramClient, MtTypeAssertionError } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Get primary invite link of a chat
  *
  * @param chatId  Chat ID
- * @internal
  */
-export async function getPrimaryInviteLink(this: TelegramClient, chatId: InputPeerLike): Promise<ChatInviteLink> {
-    const res = await this.call({
+export async function getPrimaryInviteLink(client: BaseTelegramClient, chatId: InputPeerLike): Promise<ChatInviteLink> {
+    const res = await client.call({
         _: 'messages.getExportedChatInvites',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         adminId: { _: 'inputUserSelf' },
         limit: 1,
         revoked: false,
@@ -32,5 +31,5 @@ export async function getPrimaryInviteLink(this: TelegramClient, chatId: InputPe
 
     const peers = PeersIndex.from(res)
 
-    return new ChatInviteLink(this, res.invites[0], peers)
+    return new ChatInviteLink(res.invites[0], peers)
 }

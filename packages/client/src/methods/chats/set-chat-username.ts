@@ -1,6 +1,8 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Change supergroup/channel username
@@ -9,16 +11,15 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  *
  * @param chatId  Chat ID or current username
  * @param username  New username, or `null` to remove
- * @internal
  */
 export async function setChatUsername(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     username: string | null,
 ): Promise<void> {
-    await this.call({
+    await client.call({
         _: 'channels.updateUsername',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
+        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
         username: username || '',
     })
 }

@@ -1,6 +1,6 @@
 import Long from 'long'
 
-import type { FormattedString, IMessageEntityParser, tl } from '@mtcute/client'
+import type { FormattedString, IMessageEntityParser, MessageEntity, tl } from '@mtcute/client'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 const EMOJI_REGEX = /^tg:\/\/emoji\?id=(-?\d+)/
@@ -25,14 +25,16 @@ const TO_BE_ESCAPED = /[*_\-~`[\\\]|]/g
  */
 export function md(
     strings: TemplateStringsArray,
-    ...sub: (string | FormattedString<'markdown'> | boolean | undefined | null)[]
+    ...sub: (string | FormattedString<'markdown'> | MessageEntity | boolean | undefined | null)[]
 ): FormattedString<'markdown'> {
     let str = ''
     sub.forEach((it, idx) => {
         if (typeof it === 'boolean' || !it) return
 
         if (typeof it === 'string') it = MarkdownMessageEntityParser.escape(it)
-        else {
+        else if ('raw' in it) {
+            it = new MarkdownMessageEntityParser().unparse(it.text, [it.raw])
+        } else {
             if (it.mode && it.mode !== 'markdown') {
                 throw new Error(`Incompatible parse mode: ${it.mode}`)
             }

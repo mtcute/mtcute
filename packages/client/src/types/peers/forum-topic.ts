@@ -1,6 +1,5 @@
 import { MtTypeAssertionError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { hasValueAtKey, makeInspectable } from '../../utils'
 import { MtMessageNotFoundError } from '../errors'
 import { DraftMessage, Message } from '../messages'
@@ -17,13 +16,12 @@ export class ForumTopic {
     static COLOR_RED = 0xfb6f5f
 
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawForumTopic,
         readonly _peers: PeersIndex,
         readonly _messages?: Map<number, tl.TypeMessage>,
     ) {}
 
-    static parseTlForumTopics(client: TelegramClient, topics: tl.messages.TypeForumTopics): ForumTopic[] {
+    static parseTlForumTopics(topics: tl.messages.TypeForumTopics): ForumTopic[] {
         const peers = PeersIndex.from(topics)
         const messages = new Map<number, tl.TypeMessage>()
 
@@ -33,9 +31,7 @@ export class ForumTopic {
             messages.set(msg.id, msg)
         })
 
-        return topics.topics
-            .filter(hasValueAtKey('_', 'forumTopic'))
-            .map((it) => new ForumTopic(client, it, peers, messages))
+        return topics.topics.filter(hasValueAtKey('_', 'forumTopic')).map((it) => new ForumTopic(it, peers, messages))
     }
 
     /**
@@ -117,9 +113,9 @@ export class ForumTopic {
 
         switch (this.raw.fromId._) {
             case 'peerUser':
-                return (this._creator = new User(this.client, this._peers.user(this.raw.fromId.userId)))
+                return (this._creator = new User(this._peers.user(this.raw.fromId.userId)))
             case 'peerChat':
-                return (this._creator = new Chat(this.client, this._peers.chat(this.raw.fromId.chatId)))
+                return (this._creator = new Chat(this._peers.chat(this.raw.fromId.chatId)))
             default:
                 throw new MtTypeAssertionError('ForumTopic#creator', 'peerUser | peerChat', this.raw.fromId._)
         }
@@ -134,7 +130,7 @@ export class ForumTopic {
             const id = this.raw.topMessage
 
             if (this._messages?.has(id)) {
-                this._lastMessage = new Message(this.client, this._messages.get(id)!, this._peers)
+                this._lastMessage = new Message(this._messages.get(id)!, this._peers)
             } else {
                 throw new MtMessageNotFoundError(0, id)
             }
@@ -195,7 +191,7 @@ export class ForumTopic {
 
         if (!this.raw.draft || this.raw.draft._ === 'draftMessageEmpty') return null
 
-        return (this._draftMessage = new DraftMessage(this.client, this.raw.draft))
+        return (this._draftMessage = new DraftMessage(this.raw.draft))
     }
 }
 

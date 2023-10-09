@@ -1,15 +1,16 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Boost a given channel
  *
  * @param peerId  Peer ID to boost
- * @internal
  */
-export async function applyBoost(this: TelegramClient, peerId: InputPeerLike): Promise<void> {
-    await this.call({
+export async function applyBoost(client: BaseTelegramClient, peerId: InputPeerLike): Promise<void> {
+    await client.call({
         _: 'stories.applyBoost',
-        peer: await this.resolvePeer(peerId),
+        peer: await resolvePeer(client, peerId),
     })
 }

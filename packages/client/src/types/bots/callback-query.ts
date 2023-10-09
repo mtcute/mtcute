@@ -1,11 +1,9 @@
 import { BasicPeerType, getBasicPeerType, getMarkedPeerId, MtArgumentError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
-import { MtMessageNotFoundError } from '../errors'
-import { Message } from '../messages'
-import { PeersIndex, User } from '../peers'
+import { PeersIndex } from '../peers/peers-index'
+import { User } from '../peers/user'
 
 /**
  * An incoming callback query, originated from a callback button
@@ -13,7 +11,6 @@ import { PeersIndex, User } from '../peers'
  */
 export class CallbackQuery {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawUpdateBotCallbackQuery | tl.RawUpdateInlineBotCallbackQuery,
         readonly _peers: PeersIndex,
     ) {}
@@ -30,7 +27,7 @@ export class CallbackQuery {
      * User who has pressed the button
      */
     get user(): User {
-        return (this._user ??= new User(this.client, this._peers.user(this.raw.userId)))
+        return (this._user ??= new User(this._peers.user(this.raw.userId)))
     }
 
     /**
@@ -152,47 +149,6 @@ export class CallbackQuery {
     get game(): string | null {
         return this.raw.gameShortName ?? null
     }
-
-    /**
-     * Message that contained the callback button that was clicked.
-     *
-     * Note that the message may have been deleted, in which case
-     * `MessageNotFoundError` is thrown.
-     *
-     * Can only be used if `isInline = false`
-     */
-    async getMessage(): Promise<Message> {
-        if (this.raw._ !== 'updateBotCallbackQuery') {
-            throw new MtArgumentError('Cannot get a message for inline callback')
-        }
-
-        const msg = await this.client.getMessages(this.user.inputPeer, this.raw.msgId)
-
-        if (!msg) {
-            throw new MtMessageNotFoundError(getMarkedPeerId(this.raw.peer), this.raw.msgId, 'with button')
-        }
-
-        return msg
-    }
-
-    /**
-     * Answer this query
-     */
-    async answer(params?: Parameters<TelegramClient['answerCallbackQuery']>[1]): Promise<void> {
-        return this.client.answerCallbackQuery(this.raw.queryId, params)
-    }
-
-    // /**
-    //  * Edit the message that originated this callback query
-    //  */
-    // async editMessage(params: Parameters<TelegramClient['editInlineMessage']>[1]): Promise<void> {
-    //     // we can use editInlineMessage as a parameter since they share most of the parameters,
-    //     // except the ones that won't apply to already sent message anyways.
-    //     if (this.raw._ === 'updateInlineBotCallbackQuery') {
-    //         return this.client.editInlineMessage(this.raw.msgId, params)
-    //     }
-    //     await this.client.editMessage(getMarkedPeerId(this.raw.peer), this.raw.msgId, params)
-    // }
 }
 
 makeInspectable(CallbackQuery)

@@ -1,6 +1,6 @@
-import { MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
+import { getFolders } from './get-folders'
 
 /**
  * Find a folder by its parameter.
@@ -10,10 +10,9 @@ import { TelegramClient } from '../../client'
  * > to multiple folders.
  *
  * @param params  Search parameters. At least one must be set.
- * @internal
  */
 export async function findFolder(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Folder title */
         title?: string
@@ -27,7 +26,7 @@ export async function findFolder(
         throw new MtArgumentError('One of search parameters must be passed')
     }
 
-    const folders = await this.getFolders()
+    const folders = await getFolders(client)
 
     return (
         (folders.find((it) => {

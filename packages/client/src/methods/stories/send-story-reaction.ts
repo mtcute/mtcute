@@ -1,32 +1,32 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike, InputReaction, normalizeInputReaction } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Send (or remove) a reaction to a story
- *
- * @internal
  */
 export async function sendStoryReaction(
-    this: TelegramClient,
-    peerId: InputPeerLike,
-    storyId: number,
-    reaction: InputReaction,
-    params?: {
+    client: BaseTelegramClient,
+    params: {
+        peerId: InputPeerLike
+        storyId: number
+        reaction: InputReaction
         /**
          * Whether to add this reaction to recently used
          */
         addToRecent?: boolean
     },
 ): Promise<void> {
-    const { addToRecent } = params ?? {}
+    const { peerId, storyId, reaction, addToRecent } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'stories.sendReaction',
-        peer: await this.resolvePeer(peerId),
+        peer: await resolvePeer(client, peerId),
         storyId,
         reaction: normalizeInputReaction(reaction),
         addToRecent,
     })
 
-    this._handleUpdate(res, true)
+    client.network.handleUpdate(res, true)
 }

@@ -1,4 +1,3 @@
-import type * as exitHookNs from 'exit-hook'
 import type * as fsNs from 'fs'
 
 import { MtUnsupportedError } from '../types'
@@ -11,19 +10,12 @@ try {
     fs = require('fs') as fs
 } catch (e) {}
 
-type exitHook = typeof exitHookNs
-let exitHook: exitHook | null = null
-
-try {
-    exitHook = require('exit-hook') as exitHook
-} catch (e) {}
+const EVENTS = ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SIGTERM']
 
 export class JsonFileStorage extends JsonMemoryStorage {
     private readonly _filename: string
     private readonly _safe: boolean
     private readonly _cleanup: boolean
-
-    private readonly _unsubscribe?: () => void
 
     constructor(
         filename: string,
@@ -43,9 +35,8 @@ export class JsonFileStorage extends JsonMemoryStorage {
 
             /**
              * Whether to save file on process exit.
-             * Uses [`exit-hook`](https://www.npmjs.com/package/exit-hook)
              *
-             * Defaults to `true` if `exit-hook` is installed, otherwise `false`
+             * Defaults to `true`
              */
             cleanup?: boolean
         },
@@ -58,14 +49,11 @@ export class JsonFileStorage extends JsonMemoryStorage {
 
         this._filename = filename
         this._safe = params?.safe ?? true
-        this._cleanup = params?.cleanup ?? Boolean(exitHook)
-
-        if (this._cleanup && !exitHook) {
-            throw new MtUnsupportedError('Cleanup on exit is supported through `exit-hook` library, install it first!')
-        }
+        this._cleanup = params?.cleanup ?? true
 
         if (this._cleanup) {
-            this._unsubscribe = exitHook!.default(this._onProcessExit.bind(this))
+            this._onProcessExit = this._onProcessExit.bind(this)
+            EVENTS.forEach((event) => process.on(event, this._onProcessExit))
         }
     }
 
@@ -93,8 +81,11 @@ export class JsonFileStorage extends JsonMemoryStorage {
         })
     }
 
+    private _processExitHandled = false
     private _onProcessExit(): void {
         // on exit handler must be synchronous, thus we use sync methods here
+        if (this._processExitHandled) return
+        this._processExitHandled = true
 
         try {
             fs!.writeFileSync(this._filename, this._saveJson())
@@ -109,7 +100,7 @@ export class JsonFileStorage extends JsonMemoryStorage {
 
     destroy(): void {
         if (this._cleanup) {
-            this._unsubscribe?.()
+            EVENTS.forEach((event) => process.off(event, this._onProcessExit))
         }
     }
 }

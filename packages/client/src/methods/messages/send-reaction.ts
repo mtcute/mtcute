@@ -1,15 +1,17 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike, InputReaction, Message, normalizeInputReaction } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { resolvePeer } from '../users/resolve-peer'
+import { _findMessageInUpdate } from './find-in-update'
 
 /**
  * Send or remove a reaction.
  *
  * @returns  Message to which the reaction was sent
- * @internal
  */
 export async function sendReaction(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID with the message to react to */
         chatId: InputPeerLike
@@ -25,9 +27,9 @@ export async function sendReaction(
 
     const reaction = normalizeInputReaction(emoji)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.sendReaction',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         msgId: message,
         reaction: [reaction],
         big,
@@ -36,10 +38,10 @@ export async function sendReaction(
     assertIsUpdatesGroup('messages.sendReaction', res)
 
     // normally the group contains 2 updates:
-    // updateEditChannelMessage
+    // updateEdit(Channel)Message
     // updateMessageReactions
     // idk why, they contain literally the same data
     // so we can just return the message from the first one
 
-    return this._findMessageInUpdate(res, true)
+    return _findMessageInUpdate(client, res, true)
 }

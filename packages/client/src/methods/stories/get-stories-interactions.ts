@@ -1,15 +1,13 @@
-import { MaybeArray } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike, PeersIndex, StoryInteractions } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Get brief information about story interactions.
- *
- * @internal
  */
 export async function getStoriesInteractions(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peerId: InputPeerLike,
     storyId: number,
 ): Promise<StoryInteractions>
@@ -18,11 +16,9 @@ export async function getStoriesInteractions(
  * Get brief information about stories interactions.
  *
  * The result will be in the same order as the input IDs
- *
- * @internal
  */
 export async function getStoriesInteractions(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peerId: InputPeerLike,
     storyIds: number[],
 ): Promise<StoryInteractions[]>
@@ -31,22 +27,22 @@ export async function getStoriesInteractions(
  * @internal
  */
 export async function getStoriesInteractions(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peerId: InputPeerLike,
     storyIds: MaybeArray<number>,
 ): Promise<MaybeArray<StoryInteractions>> {
     const isSingle = !Array.isArray(storyIds)
     if (isSingle) storyIds = [storyIds as number]
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'stories.getStoriesViews',
-        peer: await this.resolvePeer(peerId),
+        peer: await resolvePeer(client, peerId),
         id: storyIds as number[],
     })
 
     const peers = PeersIndex.from(res)
 
-    const infos = res.views.map((it) => new StoryInteractions(this, it, peers))
+    const infos = res.views.map((it) => new StoryInteractions(it, peers))
 
     return isSingle ? infos[0] : infos
 }

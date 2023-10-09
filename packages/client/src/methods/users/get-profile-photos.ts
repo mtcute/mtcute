@@ -1,20 +1,19 @@
-import { Long, tl } from '@mtcute/core'
+import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { ArrayPaginated, InputPeerLike, Photo } from '../../types'
 import { makeArrayPaginated } from '../../utils'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { resolvePeer } from './resolve-peer'
 
 /**
  * Get a list of profile pictures of a user
  *
  * @param userId  User ID, username, phone number, `"me"` or `"self"`
  * @param params
- * @internal
  */
 export async function getProfilePhotos(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     userId: InputPeerLike,
     params?: {
         /**
@@ -36,9 +35,9 @@ export async function getProfilePhotos(
 
     const { offset = 0, limit = 100 } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'photos.getUserPhotos',
-        userId: normalizeToInputUser(await this.resolvePeer(userId), userId),
+        userId: normalizeToInputUser(await resolvePeer(client, userId), userId),
         offset,
         limit,
         maxId: Long.ZERO,
@@ -48,7 +47,7 @@ export async function getProfilePhotos(
         res.photos.map((it) => {
             assertTypeIs('getProfilePhotos', it, 'photo')
 
-            return new Photo(this, it)
+            return new Photo(it)
         }),
         (res as tl.photos.RawPhotosSlice).count ?? res.photos.length,
         offset + res.photos.length,

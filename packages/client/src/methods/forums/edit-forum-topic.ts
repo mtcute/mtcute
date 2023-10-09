@@ -1,8 +1,9 @@
-import { Long, tl } from '@mtcute/core'
+import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike, Message } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { _findMessageInUpdate } from '../messages/find-in-update'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Modify a topic in a forum
@@ -12,10 +13,9 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  * @param chatId  Chat ID or username
  * @param topicId  ID of the topic (i.e. its top message ID)
  * @returns  Service message about the modification
- * @internal
  */
 export async function editForumTopic(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID or username */
         chatId: InputPeerLike
@@ -38,13 +38,13 @@ export async function editForumTopic(
 ): Promise<Message> {
     const { chatId, topicId, title, icon } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'channels.editForumTopic',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
+        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
         topicId,
         title,
         iconEmojiId: icon ? icon ?? Long.ZERO : undefined,
     })
 
-    return this._findMessageInUpdate(res)
+    return _findMessageInUpdate(client, res)
 }

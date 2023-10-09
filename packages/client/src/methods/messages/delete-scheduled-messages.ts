@@ -1,29 +1,28 @@
-import { MaybeArray } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Delete scheduled messages.
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
  * @param ids  Message(s) ID(s) to delete.
- * @internal
  */
 export async function deleteScheduledMessages(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     ids: MaybeArray<number>,
 ): Promise<void> {
     if (!Array.isArray(ids)) ids = [ids]
 
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.deleteScheduledMessages',
         peer,
         id: ids,
     })
 
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 }

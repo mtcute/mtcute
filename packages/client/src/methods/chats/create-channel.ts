@@ -1,4 +1,5 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { Chat } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 
@@ -6,10 +7,9 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  * Create a new broadcast channel
  *
  * @returns  Newly created channel
- * @internal
  */
 export async function createChannel(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * Channel title
@@ -24,7 +24,7 @@ export async function createChannel(
 ): Promise<Chat> {
     const { title, description = '' } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'channels.createChannel',
         title,
         about: description,
@@ -33,7 +33,7 @@ export async function createChannel(
 
     assertIsUpdatesGroup('channels.createChannel', res)
 
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 
-    return new Chat(this, res.chats[0])
+    return new Chat(res.chats[0])
 }

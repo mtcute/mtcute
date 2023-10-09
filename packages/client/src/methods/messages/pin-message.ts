@@ -1,5 +1,7 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Pin a message in a group, supergroup, channel or PM.
@@ -9,10 +11,9 @@ import { InputPeerLike } from '../../types'
  *
  * @param chatId  Chat ID, username, phone number, `"self"` or `"me"`
  * @param messageId  Message ID
- * @internal
  */
 export async function pinMessage(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     messageId: number,
     params?: {
@@ -24,13 +25,13 @@ export async function pinMessage(
 ): Promise<void> {
     const { notify, bothSides } = params ?? {}
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.updatePinnedMessage',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         id: messageId,
         silent: !notify,
         pmOneside: !bothSides,
     })
 
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 }

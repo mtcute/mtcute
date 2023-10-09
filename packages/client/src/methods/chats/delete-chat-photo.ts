@@ -1,6 +1,8 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Delete a chat photo
@@ -8,25 +10,24 @@ import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '..
  * You must be an administrator and have the appropriate permissions.
  *
  * @param chatId  Chat ID or username
- * @internal
  */
-export async function deleteChatPhoto(this: TelegramClient, chatId: InputPeerLike): Promise<void> {
-    const chat = await this.resolvePeer(chatId)
+export async function deleteChatPhoto(client: BaseTelegramClient, chatId: InputPeerLike): Promise<void> {
+    const chat = await resolvePeer(client, chatId)
 
     let res
     if (isInputPeerChat(chat)) {
-        res = await this.call({
+        res = await client.call({
             _: 'messages.editChatPhoto',
             chatId: chat.chatId,
             photo: { _: 'inputChatPhotoEmpty' },
         })
     } else if (isInputPeerChannel(chat)) {
-        res = await this.call({
+        res = await client.call({
             _: 'channels.editPhoto',
             channel: normalizeToInputChannel(chat),
             photo: { _: 'inputChatPhotoEmpty' },
         })
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 }

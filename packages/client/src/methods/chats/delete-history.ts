@@ -1,16 +1,15 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { isInputPeerChannel } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
- * Delete communication history (for private chats
- * and legacy groups)
- *
- * @internal
+ * Delete communication history (for private chats and legacy groups)
  */
 export async function deleteHistory(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chat: InputPeerLike,
     params?: {
         /**
@@ -35,9 +34,9 @@ export async function deleteHistory(
 ): Promise<void> {
     const { mode = 'delete', maxId = 0 } = params ?? {}
 
-    const peer = await this.resolvePeer(chat)
+    const peer = await resolvePeer(client, chat)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.deleteHistory',
         justClear: mode === 'clear',
         revoke: mode === 'revoke',
@@ -46,8 +45,8 @@ export async function deleteHistory(
     })
 
     if (isInputPeerChannel(peer)) {
-        this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount, peer.channelId))
+        client.network.handleUpdate(createDummyUpdate(res.pts, res.ptsCount, peer.channelId))
     } else {
-        this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
+        client.network.handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
     }
 }

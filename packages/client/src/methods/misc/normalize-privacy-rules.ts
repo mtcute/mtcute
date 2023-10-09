@@ -1,17 +1,15 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPrivacyRule } from '../../types'
 import { normalizeToInputUser } from '../../utils'
+import { resolvePeerMany } from '../users/resolve-peer-many'
 
 /**
  * Normalize {@link InputPrivacyRule}[] to `tl.TypeInputPrivacyRule`,
  * resolving the peers if needed.
- *
- * @internal
  */
 export async function _normalizePrivacyRules(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     rules: InputPrivacyRule[],
 ): Promise<tl.TypeInputPrivacyRule[]> {
     const res: tl.TypeInputPrivacyRule[] = []
@@ -23,7 +21,7 @@ export async function _normalizePrivacyRules(
         }
 
         if ('users' in rule) {
-            const users = await this.resolvePeerMany(rule.users, normalizeToInputUser)
+            const users = await resolvePeerMany(client, rule.users, normalizeToInputUser)
 
             res.push({
                 _: rule.allow ? 'inputPrivacyValueAllowUsers' : 'inputPrivacyValueDisallowUsers',
@@ -33,7 +31,7 @@ export async function _normalizePrivacyRules(
         }
 
         if ('chats' in rule) {
-            const chats = await this.resolvePeerMany(rule.chats)
+            const chats = await resolvePeerMany(client, rule.chats)
 
             res.push({
                 _: rule.allow ? 'inputPrivacyValueAllowChatParticipants' : 'inputPrivacyValueDisallowChatParticipants',

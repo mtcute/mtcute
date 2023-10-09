@@ -1,6 +1,5 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { RawDocument } from './document'
 import { parseDocument } from './document-utils'
@@ -19,10 +18,7 @@ import { Photo } from './photo'
 export class WebPage {
     readonly type = 'web_page' as const
 
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.RawWebPage,
-    ) {}
+    constructor(readonly raw: tl.RawWebPage) {}
 
     /**
      * Unique ID of the preview
@@ -179,7 +175,7 @@ export class WebPage {
             if (this.raw.photo?._ !== 'photo') {
                 this._photo = null
             } else {
-                this._photo = new Photo(this.client, this.raw.photo)
+                this._photo = new Photo(this.raw.photo)
             }
         }
 
@@ -200,7 +196,7 @@ export class WebPage {
             if (this.raw.document?._ !== 'document') {
                 this._document = null
             } else {
-                this._document = parseDocument(this.client, this.raw.document)
+                this._document = parseDocument(this.raw.document)
             }
         }
 

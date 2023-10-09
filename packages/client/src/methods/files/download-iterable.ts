@@ -1,8 +1,7 @@
-import { ConnectionKind, MtArgumentError, MtUnsupportedError, tl } from '@mtcute/core'
+import { BaseTelegramClient, ConnectionKind, MtArgumentError, MtUnsupportedError, tl } from '@mtcute/core'
 import { ConditionVariable } from '@mtcute/core/utils'
 import { fileIdToInputFileLocation, fileIdToInputWebFileLocation, parseFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
 import { FileDownloadParameters, FileLocation } from '../../types'
 import { determinePartSize } from '../../utils/file-utils'
 
@@ -18,10 +17,9 @@ const REQUESTS_PER_CONNECTION = 3 // some arbitrary magic value that seems to wo
  * consecutive.
  *
  * @param params  Download parameters
- * @internal
  */
 export async function* downloadAsIterable(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: FileDownloadParameters,
 ): AsyncIterableIterator<Buffer> {
     const offset = params.offset ?? 0
@@ -63,7 +61,7 @@ export async function* downloadAsIterable(
     const isWeb = tl.isAnyInputWebFileLocation(location)
 
     // we will receive a FileMigrateError in case this is invalid
-    if (!dcId) dcId = this._defaultDcs.main.id
+    if (!dcId) dcId = client.network.getPrimaryDcId()
 
     const partSizeKb = params.partSize ?? (fileSize ? determinePartSize(fileSize) : 64)
 
@@ -87,13 +85,13 @@ export async function* downloadAsIterable(
     let connectionKind: ConnectionKind
 
     if (isSmall) {
-        connectionKind = dcId === this.network.getPrimaryDcId() ? 'main' : 'downloadSmall'
+        connectionKind = dcId === client.network.getPrimaryDcId() ? 'main' : 'downloadSmall'
     } else {
         connectionKind = 'download'
     }
-    const poolSize = this.network.getPoolSize(connectionKind, dcId)
+    const poolSize = client.network.getPoolSize(connectionKind, dcId)
 
-    this.log.debug(
+    client.log.debug(
         'Downloading file of size %d from dc %d using %s connection pool (pool size: %d)',
         limitBytes,
         dcId,
@@ -105,7 +103,7 @@ export async function* downloadAsIterable(
         let result: tl.RpcCallReturn['upload.getFile'] | tl.RpcCallReturn['upload.getWebFile']
 
         try {
-            result = await this.call(
+            result = await client.call(
                 {
                     _: isWeb ? 'upload.getWebFile' : 'upload.getFile',
                     // eslint-disable-next-line
@@ -155,12 +153,12 @@ export async function* downloadAsIterable(
     let error: unknown = undefined
     void Promise.all(Array.from({ length: Math.min(poolSize * REQUESTS_PER_CONNECTION, numChunks) }, downloadChunk))
         .catch((e) => {
-            this.log.debug('download workers errored: %s', e.message)
+            client.log.debug('download workers errored: %s', e.message)
             error = e
             nextChunkCv.notify()
         })
         .then(() => {
-            this.log.debug('download workers finished')
+            client.log.debug('download workers finished')
         })
 
     let position = offset

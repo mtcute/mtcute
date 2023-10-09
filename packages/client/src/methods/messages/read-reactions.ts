@@ -1,17 +1,18 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { createDummyUpdate } from '../../utils/updates-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Mark all reactions in chat as read.
  *
  * @param chatId  Chat ID
- * @internal
  */
-export async function readReactions(this: TelegramClient, chatId: InputPeerLike): Promise<void> {
-    const res = await this.call({
+export async function readReactions(client: BaseTelegramClient, chatId: InputPeerLike): Promise<void> {
+    const res = await client.call({
         _: 'messages.readReactions',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
     })
-    this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
+    client.network.handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
 }

@@ -1,9 +1,10 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike, Message } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { _findMessageInUpdate } from '../messages/find-in-update'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Create a topic in a forum
@@ -11,10 +12,9 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  * Only admins with `manageTopics` permission can do this.
  *
  * @returns  Service message for the created topic
- * @internal
  */
 export async function createForumTopic(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID or username */
         chatId: InputPeerLike
@@ -42,15 +42,15 @@ export async function createForumTopic(
 ): Promise<Message> {
     const { chatId, title, icon, sendAs } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'channels.createForumTopic',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
+        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
         title,
         iconColor: typeof icon === 'number' ? icon : undefined,
         iconEmojiId: typeof icon !== 'number' ? icon : undefined,
-        sendAs: sendAs ? await this.resolvePeer(sendAs) : undefined,
+        sendAs: sendAs ? await resolvePeer(client, sendAs) : undefined,
         randomId: randomLong(),
     })
 
-    return this._findMessageInUpdate(res)
+    return _findMessageInUpdate(client, res)
 }

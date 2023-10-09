@@ -1,6 +1,8 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
 import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Change chat title
@@ -9,25 +11,24 @@ import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '..
  *
  * @param chatId  Chat ID or username
  * @param title  New chat title, 1-255 characters
- * @internal
  */
-export async function setChatTitle(this: TelegramClient, chatId: InputPeerLike, title: string): Promise<void> {
-    const chat = await this.resolvePeer(chatId)
+export async function setChatTitle(client: BaseTelegramClient, chatId: InputPeerLike, title: string): Promise<void> {
+    const chat = await resolvePeer(client, chatId)
 
     let res
     if (isInputPeerChat(chat)) {
-        res = await this.call({
+        res = await client.call({
             _: 'messages.editChatTitle',
             chatId: chat.chatId,
             title,
         })
     } else if (isInputPeerChannel(chat)) {
-        res = await this.call({
+        res = await client.call({
             _: 'channels.editTitle',
             channel: normalizeToInputChannel(chat),
             title,
         })
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 }

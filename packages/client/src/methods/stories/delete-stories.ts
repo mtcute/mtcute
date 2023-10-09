@@ -1,16 +1,15 @@
-import { MaybeArray } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Delete a story
  *
  * @returns  IDs of stories that were removed
- * @internal
  */
 export async function deleteStories(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * Story IDs to delete
@@ -27,9 +26,9 @@ export async function deleteStories(
 ): Promise<number[]> {
     const { ids, peer = 'me' } = params
 
-    return this.call({
+    return client.call({
         _: 'stories.deleteStories',
-        peer: await this.resolvePeer(peer),
+        peer: await resolvePeer(client, peer),
         id: Array.isArray(ids) ? ids : [ids],
     })
 }

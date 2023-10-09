@@ -1,19 +1,22 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { Chat, InputPeerLike } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { resolvePeer } from './resolve-peer'
 
 /**
  * Get a list of common chats you have with a given user
  *
  * @param userId  User's ID, username or phone number
  * @throws MtInvalidPeerTypeError
- * @internal
  */
-export async function getCommonChats(this: TelegramClient, userId: InputPeerLike): Promise<Chat[]> {
-    return this.call({
-        _: 'messages.getCommonChats',
-        userId: normalizeToInputUser(await this.resolvePeer(userId), userId),
-        maxId: 0,
-        limit: 100,
-    }).then((res) => res.chats.map((it) => new Chat(this, it)))
+export async function getCommonChats(client: BaseTelegramClient, userId: InputPeerLike): Promise<Chat[]> {
+    return client
+        .call({
+            _: 'messages.getCommonChats',
+            userId: normalizeToInputUser(await resolvePeer(client, userId), userId),
+            maxId: 0,
+            limit: 100,
+        })
+        .then((res) => res.chats.map((it) => new Chat(it)))
 }

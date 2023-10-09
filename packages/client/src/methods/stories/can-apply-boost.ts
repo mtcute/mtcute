@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { Chat, InputPeerLike, PeersIndex } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 // @exported
 export type CanApplyBoostResult =
@@ -21,14 +21,13 @@ export type CanApplyBoostResult =
  *      - `.reason == "need_premium"` if the user needs Premium to boost this channel
  *      - `.reason == "timeout"` if the user has recently boosted a channel and needs to wait
  *        (`.until` contains the date until which the user needs to wait)
- * @internal
  */
-export async function canApplyBoost(this: TelegramClient, peerId: InputPeerLike): Promise<CanApplyBoostResult> {
+export async function canApplyBoost(client: BaseTelegramClient, peerId: InputPeerLike): Promise<CanApplyBoostResult> {
     try {
-        const res = await this.call(
+        const res = await client.call(
             {
                 _: 'stories.canApplyBoost',
-                peer: await this.resolvePeer(peerId),
+                peer: await resolvePeer(client, peerId),
             },
             { floodSleepThreshold: 0 },
         )
@@ -36,7 +35,7 @@ export async function canApplyBoost(this: TelegramClient, peerId: InputPeerLike)
         if (res._ === 'stories.canApplyBoostOk') return { can: true }
 
         const peers = PeersIndex.from(res)
-        const chat = new Chat(this, peers.get(res.currentBoost))
+        const chat = new Chat(peers.get(res.currentBoost))
 
         return { can: true, current: chat }
     } catch (e) {

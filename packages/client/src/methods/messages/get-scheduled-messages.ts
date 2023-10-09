@@ -1,18 +1,17 @@
-import { MaybeArray } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike, Message, PeersIndex } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Get a single scheduled message in chat by its ID
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
  * @param messageId  Scheduled message ID
- * @internal
  */
 export async function getScheduledMessages(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     messageId: number,
 ): Promise<Message | null>
@@ -24,26 +23,25 @@ export async function getScheduledMessages(
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
  * @param messageIds  Scheduled messages IDs
- * @internal
  */
 export async function getScheduledMessages(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     messageIds: number[],
 ): Promise<(Message | null)[]>
 
 /** @internal */
 export async function getScheduledMessages(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     messageIds: MaybeArray<number>,
 ): Promise<MaybeArray<Message | null>> {
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
 
     const isSingle = !Array.isArray(messageIds)
     if (isSingle) messageIds = [messageIds as number]
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.getScheduledMessages',
         peer,
         id: messageIds as number[],
@@ -56,7 +54,7 @@ export async function getScheduledMessages(
     const ret = res.messages.map((msg) => {
         if (msg._ === 'messageEmpty') return null
 
-        return new Message(this, msg, peers, true)
+        return new Message(msg, peers, true)
     })
 
     return isSingle ? ret[0] : ret

@@ -1,6 +1,5 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { FileLocation } from '../files'
 
@@ -8,10 +7,7 @@ import { FileLocation } from '../files'
  * A point on the map
  */
 export class RawLocation {
-    constructor(
-        readonly client: TelegramClient,
-        readonly geo: tl.RawGeoPoint,
-    ) {}
+    constructor(readonly geo: tl.RawGeoPoint) {}
 
     /**
      * Geo point latitude
@@ -69,7 +65,7 @@ export class RawLocation {
             scale?: number
         } = {},
     ): FileLocation {
-        return new FileLocation(this.client, {
+        return new FileLocation({
             _: 'inputWebFileGeoPointLocation',
             geoPoint: {
                 _: 'inputGeoPoint',
@@ -110,11 +106,8 @@ export class Location extends RawLocation {
 export class LiveLocation extends RawLocation {
     readonly type = 'live_location' as const
 
-    constructor(
-        client: TelegramClient,
-        readonly live: tl.RawMessageMediaGeoLive,
-    ) {
-        super(client, live.geo as tl.RawGeoPoint)
+    constructor(readonly live: tl.RawMessageMediaGeoLive) {
+        super(live.geo as tl.RawGeoPoint)
     }
 
     /**

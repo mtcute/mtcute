@@ -1,13 +1,11 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { PeersIndex } from './peers-index'
 import { User } from './user'
 
 export class ChatInviteLinkMember {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawChatInviteImporter,
         readonly _peers: PeersIndex,
     ) {}
@@ -17,7 +15,7 @@ export class ChatInviteLinkMember {
      * User who joined the chat
      */
     get user(): User {
-        return (this._user ??= new User(this.client, this._peers.user(this.raw.userId)))
+        return (this._user ??= new User(this._peers.user(this.raw.userId)))
     }
 
     /**
@@ -56,7 +54,7 @@ export class ChatInviteLinkMember {
     get approvedBy(): User | null {
         if (!this.raw.approvedBy) return null
 
-        return (this._approvedBy ??= new User(this.client, this._peers.user(this.raw.approvedBy)))
+        return (this._approvedBy ??= new User(this._peers.user(this.raw.approvedBy)))
     }
 }
 

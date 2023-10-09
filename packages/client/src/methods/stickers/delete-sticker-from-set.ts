@@ -1,7 +1,6 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 import { fileIdToInputDocument, tdFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
 import { StickerSet } from '../../types'
 
 /**
@@ -14,20 +13,19 @@ import { StickerSet } from '../../types'
  *     TDLib and Bot API compatible File ID, or a
  *     TL object representing a sticker to be removed
  * @returns  Modfiied sticker set
- * @internal
  */
 export async function deleteStickerFromSet(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument,
 ): Promise<StickerSet> {
     if (tdFileId.isFileIdLike(sticker)) {
         sticker = fileIdToInputDocument(sticker)
     }
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'stickers.removeStickerFromSet',
         sticker,
     })
 
-    return new StickerSet(this, res)
+    return new StickerSet(res)
 }

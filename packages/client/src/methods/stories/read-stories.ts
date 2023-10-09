@@ -1,5 +1,7 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Mark all stories up to a given ID as read
@@ -8,12 +10,11 @@ import { InputPeerLike } from '../../types'
  *
  * @param peerId  Peer ID whose stories to mark as read
  * @returns  IDs of the stores that were marked as read
- * @internal
  */
-export async function readStories(this: TelegramClient, peerId: InputPeerLike, maxId: number): Promise<number[]> {
-    return this.call({
+export async function readStories(client: BaseTelegramClient, peerId: InputPeerLike, maxId: number): Promise<number[]> {
+    return client.call({
         _: 'stories.readStories',
-        peer: await this.resolvePeer(peerId),
+        peer: await resolvePeer(client, peerId),
         maxId,
     })
 }

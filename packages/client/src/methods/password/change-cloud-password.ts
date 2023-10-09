@@ -1,15 +1,11 @@
-import { MtArgumentError } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 import { assertTypeIs, computeNewPasswordHash, computeSrpParams } from '@mtcute/core/utils'
-
-import { TelegramClient } from '../../client'
 
 /**
  * Change your 2FA password
- *
- * @internal
  */
 export async function changeCloudPassword(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Current password as plaintext */
         currentPassword: string
@@ -21,7 +17,7 @@ export async function changeCloudPassword(
 ): Promise<void> {
     const { currentPassword, newPassword, hint } = params
 
-    const pwd = await this.call({ _: 'account.getPassword' })
+    const pwd = await client.call({ _: 'account.getPassword' })
 
     if (!pwd.hasPassword) {
         throw new MtArgumentError('Cloud password is not enabled')
@@ -30,10 +26,10 @@ export async function changeCloudPassword(
     const algo = pwd.newAlgo
     assertTypeIs('account.getPassword', algo, 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow')
 
-    const oldSrp = await computeSrpParams(this._crypto, pwd, currentPassword)
-    const newHash = await computeNewPasswordHash(this._crypto, algo, newPassword)
+    const oldSrp = await computeSrpParams(client.crypto, pwd, currentPassword)
+    const newHash = await computeNewPasswordHash(client.crypto, algo, newPassword)
 
-    await this.call({
+    await client.call({
         _: 'account.updatePasswordSettings',
         password: oldSrp,
         newSettings: {

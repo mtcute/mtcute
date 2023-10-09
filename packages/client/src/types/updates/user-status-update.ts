@@ -1,17 +1,13 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
-import { User, UserParsedStatus, UserStatus } from '../'
+import { User, UserParsedStatus, UserStatus } from '../peers'
 
 /**
  * User status has changed
  */
 export class UserStatusUpdate {
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.RawUpdateUserStatus,
-    ) {}
+    constructor(readonly raw: tl.RawUpdateUserStatus) {}
 
     /**
      * ID of the user whose status has updated
@@ -53,13 +49,6 @@ export class UserStatusUpdate {
         if (!this._parsedStatus) this._parseStatus()
 
         return this._parsedStatus!.nextOffline
-    }
-
-    /**
-     * Fetch information about the user
-     */
-    getUser(): Promise<User> {
-        return this.client.getUsers(this.raw.userId)
     }
 }
 

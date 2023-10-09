@@ -1,15 +1,15 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike, User } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Add an existing Telegram user as a contact
- *
- * @internal
  */
 export async function addContact(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** User ID, username or phone number */
         userId: InputPeerLike
@@ -37,9 +37,9 @@ export async function addContact(
     },
 ): Promise<User> {
     const { userId, firstName, lastName = '', phone = '', sharePhone = false } = params
-    const peer = normalizeToInputUser(await this.resolvePeer(userId), userId)
+    const peer = normalizeToInputUser(await resolvePeer(client, userId), userId)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'contacts.addContact',
         id: peer,
         firstName,
@@ -50,7 +50,7 @@ export async function addContact(
 
     assertIsUpdatesGroup('contacts.addContact', res)
 
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 
-    return new User(this, res.users[0])
+    return new User(res.users[0])
 }

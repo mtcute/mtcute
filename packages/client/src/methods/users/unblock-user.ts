@@ -1,15 +1,16 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from './resolve-peer'
 
 /**
  * Unblock a user
  *
  * @param id  User ID, username or phone number
- * @internal
  */
-export async function unblockUser(this: TelegramClient, id: InputPeerLike): Promise<void> {
-    await this.call({
+export async function unblockUser(client: BaseTelegramClient, id: InputPeerLike): Promise<void> {
+    await client.call({
         _: 'contacts.unblock',
-        id: await this.resolvePeer(id),
+        id: await resolvePeer(client, id),
     })
 }

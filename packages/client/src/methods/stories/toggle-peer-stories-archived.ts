@@ -1,21 +1,21 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Toggle whether peer's stories are archived (hidden) or not.
  *
  * This **does not** archive the chat with that peer, only stories.
- *
- * @internal
  */
 export async function togglePeerStoriesArchived(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peerId: InputPeerLike,
     archived: boolean,
 ): Promise<void> {
-    await this.call({
+    await client.call({
         _: 'stories.togglePeerStoriesHidden',
-        peer: await this.resolvePeer(peerId),
+        peer: await resolvePeer(client, peerId),
         hidden: archived,
     })
 }

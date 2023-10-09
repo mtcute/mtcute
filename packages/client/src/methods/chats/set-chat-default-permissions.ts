@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { Chat, InputPeerLike } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Change default chat permissions for all members.
@@ -15,16 +15,15 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
  *     the restrictions, and not the permissions, i.e.
  *     passing `sendMessages=true` will disallow the users to send messages,
  *     and passing `{}` (empty object) will lift any restrictions
- * @internal
  */
 export async function setChatDefaultPermissions(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     restrictions: Omit<tl.RawChatBannedRights, '_' | 'untilDate'>,
 ): Promise<Chat> {
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.editChatDefaultBannedRights',
         peer,
         bannedRights: {
@@ -36,7 +35,7 @@ export async function setChatDefaultPermissions(
 
     assertIsUpdatesGroup('messages.editChatDefaultBannedRights', res)
 
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 
-    return new Chat(this, res.chats[0])
+    return new Chat(res.chats[0])
 }

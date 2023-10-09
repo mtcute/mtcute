@@ -1,32 +1,22 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { PeerStories } from '../../types'
+import { getAllStories } from './get-all-stories'
 
 /**
  * Iterate over all stories (e.g. to load the top bar)
  *
  * Wrapper over {@link getAllStories}
- *
- * @internal
  */
 export async function* iterAllStories(
-    this: TelegramClient,
-    params?: {
-        /**
-         * Offset from which to start fetching stories
-         */
-        offset?: string
-
+    client: BaseTelegramClient,
+    params?: Parameters<typeof getAllStories>[1] & {
         /**
          * Maximum number of stories to fetch
          *
          * @default  Infinity
          */
         limit?: number
-
-        /**
-         * Whether to fetch stories from "archived" (or "hidden") peers
-         */
-        archived?: boolean
     },
 ): AsyncIterableIterator<PeerStories> {
     if (!params) params = {}
@@ -36,7 +26,7 @@ export async function* iterAllStories(
     let current = 0
 
     for (;;) {
-        const res = await this.getAllStories({
+        const res = await getAllStories(client, {
             offset,
             archived,
         })

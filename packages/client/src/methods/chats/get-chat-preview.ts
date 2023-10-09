@@ -1,6 +1,5 @@
-import { MtArgumentError } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { ChatPreview, MtPeerNotFoundError } from '../../types'
 import { INVITE_LINK_REGEX } from '../../utils/peer-utils'
 
@@ -12,13 +11,12 @@ import { INVITE_LINK_REGEX } from '../../utils/peer-utils'
  * @throws MtPeerNotFoundError
  *   In case you are trying to get info about private chat that you have already joined.
  *   Use {@link getChat} or {@link getFullChat} instead.
- * @internal
  */
-export async function getChatPreview(this: TelegramClient, inviteLink: string): Promise<ChatPreview> {
+export async function getChatPreview(client: BaseTelegramClient, inviteLink: string): Promise<ChatPreview> {
     const m = inviteLink.match(INVITE_LINK_REGEX)
     if (!m) throw new MtArgumentError('Invalid invite link')
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.checkChatInvite',
         hash: m[1],
     })
@@ -27,5 +25,5 @@ export async function getChatPreview(this: TelegramClient, inviteLink: string): 
         throw new MtPeerNotFoundError('You have already joined this chat!')
     }
 
-    return new ChatPreview(this, res, inviteLink)
+    return new ChatPreview(res, inviteLink)
 }

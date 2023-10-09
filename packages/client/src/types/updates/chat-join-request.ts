@@ -1,6 +1,5 @@
 import { getBarePeerId, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { PeersIndex, User } from '../peers'
 
@@ -13,7 +12,6 @@ import { PeersIndex, User } from '../peers'
  */
 export class ChatJoinRequestUpdate {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawUpdatePendingJoinRequests,
         readonly _peers: PeersIndex,
     ) {}
@@ -40,9 +38,7 @@ export class ChatJoinRequestUpdate {
      * Users who recently requested to join the chat
      */
     get recentRequesters(): User[] {
-        return (this._recentRequesters ??= this.raw.recentRequesters.map(
-            (id) => new User(this.client, this._peers.user(id)),
-        ))
+        return (this._recentRequesters ??= this.raw.recentRequesters.map((id) => new User(this._peers.user(id))))
     }
 
     /**

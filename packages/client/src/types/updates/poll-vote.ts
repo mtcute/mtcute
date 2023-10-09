@@ -1,9 +1,8 @@
 import { MtUnsupportedError, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
-import { Chat, PeersIndex, User } from '../'
+import { Chat, PeersIndex, User } from '../peers'
 
 /**
  * Some user has voted in a public poll.
@@ -13,7 +12,6 @@ import { Chat, PeersIndex, User } from '../'
  */
 export class PollVoteUpdate {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawUpdateMessagePollVote,
         readonly _peers: PeersIndex,
     ) {}
@@ -33,12 +31,12 @@ export class PollVoteUpdate {
         if (this._peer) return this._peer
 
         if (this.raw.peer._ === 'peerUser') {
-            return (this._peer = new User(this.client, this._peers.user(this.raw.peer.userId)))
+            return (this._peer = new User(this._peers.user(this.raw.peer.userId)))
         }
 
         assertTypeIs('PollVoteUpdate.peer', this.raw.peer, 'peerChannel')
 
-        return (this._peer = new User(this.client, this._peers.user(this.raw.peer.channelId)))
+        return (this._peer = new User(this._peers.user(this.raw.peer.channelId)))
     }
 
     /**

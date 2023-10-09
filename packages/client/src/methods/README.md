@@ -57,7 +57,7 @@ Example:
 
 ```typescript
 // @initialize
-function _initializeAwesomeExtension(this: TelegramClient) {
+function _initializeAwesomeExtension(client: BaseTelegramClient) {
     this._field1 = 42
     this._field2 = 'uwu'
 }
@@ -74,7 +74,7 @@ Example:
 // @exported
 export type FooOrBar = Foo | Bar
 
-export function getFooOrBar(this: TelegramClient): FooOrBar {
+export function getFooOrBar(client: BaseTelegramClient): FooOrBar {
     return new Foo()
 }
 ```

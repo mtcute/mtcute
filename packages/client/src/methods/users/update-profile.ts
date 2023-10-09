@@ -1,4 +1,5 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { User } from '../../types'
 
 /**
@@ -7,10 +8,9 @@ import { User } from '../../types'
  * Only pass fields that you want to change.
  *
  * @param params
- * @internal
  */
 export async function updateProfile(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * New first name
@@ -28,12 +28,12 @@ export async function updateProfile(
         bio?: string
     },
 ): Promise<User> {
-    const res = await this.call({
+    const res = await client.call({
         _: 'account.updateProfile',
         firstName: params.firstName,
         lastName: params.lastName,
         about: params.bio,
     })
 
-    return new User(this, res)
+    return new User(res)
 }

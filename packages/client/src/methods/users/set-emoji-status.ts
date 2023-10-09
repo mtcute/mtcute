@@ -1,16 +1,14 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { normalizeDate } from '../../utils'
 
 /**
  * Set an emoji status for the current user
  *
  * @param emoji  Custom emoji ID or `null` to remove the emoji
- * @internal
  */
 export async function setEmojiStatus(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     emoji: tl.Long | null,
     params?: {
         /**
@@ -38,7 +36,7 @@ export async function setEmojiStatus(
         }
     }
 
-    await this.call({
+    await client.call({
         _: 'account.updateEmojiStatus',
         emojiStatus,
     })

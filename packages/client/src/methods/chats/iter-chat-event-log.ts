@@ -1,9 +1,11 @@
-import { Long, tl } from '@mtcute/core'
+import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { ChatEvent, InputPeerLike } from '../../types'
 import { normalizeChatEventFilters } from '../../types/peers/chat-event/filters'
 import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
+import { resolvePeerMany } from '../users/resolve-peer-many'
+import { getChatEventLog } from './get-chat-event-log'
 
 /**
  * Iterate over chat event log.
@@ -12,12 +14,11 @@ import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-
  *
  * @param chatId  Chat ID
  * @param params
- * @internal
  */
 export async function* iterChatEventLog(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
-    params?: Parameters<TelegramClient['getChatEventLog']>[1] & {
+    params?: Parameters<typeof getChatEventLog>[2] & {
         /**
          * Total number of events to return.
          *
@@ -36,12 +37,12 @@ export async function* iterChatEventLog(
 ): AsyncIterableIterator<ChatEvent> {
     if (!params) params = {}
 
-    const channel = normalizeToInputChannel(await this.resolvePeer(chatId), chatId)
+    const channel = normalizeToInputChannel(await resolvePeer(client, chatId), chatId)
 
     const { minId = Long.ZERO, query = '', limit = Infinity, chunkSize = 100, users, filters } = params
 
     const admins: tl.TypeInputUser[] | undefined = users ?
-        await this.resolvePeerMany(users, normalizeToInputUser) :
+        await resolvePeerMany(client, users, normalizeToInputUser) :
         undefined
 
     const { serverFilter, localFilter } = normalizeChatEventFilters(filters)
@@ -50,7 +51,7 @@ export async function* iterChatEventLog(
     let maxId = params.maxId ?? Long.ZERO
 
     for (;;) {
-        const chunk = await this.getChatEventLog(channel, {
+        const chunk = await getChatEventLog(client, channel, {
             minId,
             maxId,
             query,

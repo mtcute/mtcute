@@ -1,17 +1,15 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { GameHighScore, InputPeerLike, PeersIndex } from '../../types'
 import { normalizeInlineId } from '../../utils/inline-utils'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Get high scores of a game
- *
- * @internal
  */
 export async function getGameHighScores(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** ID of the chat where the game was found */
         chatId: InputPeerLike
@@ -25,17 +23,17 @@ export async function getGameHighScores(
 ): Promise<GameHighScore[]> {
     const { chatId, message, userId } = params
 
-    const chat = await this.resolvePeer(chatId)
+    const chat = await resolvePeer(client, chatId)
 
     let user: tl.TypeInputUser
 
     if (userId) {
-        user = normalizeToInputUser(await this.resolvePeer(userId), userId)
+        user = normalizeToInputUser(await resolvePeer(client, userId), userId)
     } else {
         user = { _: 'inputUserEmpty' }
     }
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.getGameHighScores',
         peer: chat,
         id: message,
@@ -44,7 +42,7 @@ export async function getGameHighScores(
 
     const peers = PeersIndex.from(res)
 
-    return res.scores.map((score) => new GameHighScore(this, score, peers))
+    return res.scores.map((score) => new GameHighScore(score, peers))
 }
 
 /**
@@ -52,10 +50,9 @@ export async function getGameHighScores(
  *
  * @param messageId  ID of the inline message containing the game
  * @param userId  ID of the user to find high scores for
- * @internal
  */
 export async function getInlineGameHighScores(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     messageId: string | tl.TypeInputBotInlineMessageID,
     userId?: InputPeerLike,
 ): Promise<GameHighScore[]> {
@@ -64,12 +61,12 @@ export async function getInlineGameHighScores(
     let user: tl.TypeInputUser
 
     if (userId) {
-        user = normalizeToInputUser(await this.resolvePeer(userId), userId)
+        user = normalizeToInputUser(await resolvePeer(client, userId), userId)
     } else {
         user = { _: 'inputUserEmpty' }
     }
 
-    const res = await this.call(
+    const res = await client.call(
         {
             _: 'messages.getInlineGameHighScores',
             id,
@@ -80,5 +77,5 @@ export async function getInlineGameHighScores(
 
     const peers = PeersIndex.from(res)
 
-    return res.scores.map((score) => new GameHighScore(this, score, peers))
+    return res.scores.map((score) => new GameHighScore(score, peers))
 }

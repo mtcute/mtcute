@@ -1,6 +1,5 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { PeersIndex, User } from '../peers'
 import { ReactionEmoji, toReactionEmoji } from '../reactions'
@@ -10,7 +9,6 @@ import { ReactionEmoji, toReactionEmoji } from '../reactions'
  */
 export class StoryViewer {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawStoryView,
         readonly _peers: PeersIndex,
     ) {}
@@ -40,7 +38,7 @@ export class StoryViewer {
     private _user?: User
     /** Information about the user */
     get user(): User {
-        return (this._user ??= new User(this.client, this._peers.user(this.raw.userId)))
+        return (this._user ??= new User(this._peers.user(this.raw.userId)))
     }
 }
 
@@ -50,10 +48,7 @@ makeInspectable(StoryViewer)
  * List of story viewers.
  */
 export class StoryViewersList {
-    constructor(
-        readonly client: TelegramClient,
-        readonly raw: tl.stories.RawStoryViewsList,
-    ) {}
+    constructor(readonly raw: tl.stories.RawStoryViewsList) {}
 
     readonly _peers = PeersIndex.from(this.raw)
 
@@ -76,7 +71,7 @@ export class StoryViewersList {
     /** List of viewers */
     get viewers(): StoryViewer[] {
         if (!this._viewers) {
-            this._viewers = this.raw.views.map((it) => new StoryViewer(this.client, it, this._peers))
+            this._viewers = this.raw.views.map((it) => new StoryViewer(it, this._peers))
         }
 
         return this._viewers

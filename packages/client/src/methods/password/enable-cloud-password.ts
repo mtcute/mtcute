@@ -1,7 +1,5 @@
-import { MtArgumentError } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 import { assertTypeIs, computeNewPasswordHash } from '@mtcute/core/utils'
-
-import { TelegramClient } from '../../client'
 
 /**
  * Enable 2FA password on your account
@@ -10,11 +8,9 @@ import { TelegramClient } from '../../client'
  * thrown, and you should use {@link verifyPasswordEmail},
  * {@link resendPasswordEmail} or {@link cancelPasswordEmail},
  * and the call this method again
- *
- * @internal
  */
 export async function enableCloudPassword(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** 2FA password as plaintext */
         password: string
@@ -26,7 +22,7 @@ export async function enableCloudPassword(
 ): Promise<void> {
     const { password, hint, email } = params
 
-    const pwd = await this.call({ _: 'account.getPassword' })
+    const pwd = await client.call({ _: 'account.getPassword' })
 
     if (pwd.hasPassword) {
         throw new MtArgumentError('Cloud password is already enabled')
@@ -35,9 +31,9 @@ export async function enableCloudPassword(
     const algo = pwd.newAlgo
     assertTypeIs('account.getPassword', algo, 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow')
 
-    const newHash = await computeNewPasswordHash(this._crypto, algo, password)
+    const newHash = await computeNewPasswordHash(client.crypto, algo, password)
 
-    await this.call({
+    await client.call({
         _: 'account.updatePasswordSettings',
         password: { _: 'inputCheckPasswordEmpty' },
         newSettings: {

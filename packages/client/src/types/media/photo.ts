@@ -1,6 +1,5 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { FileLocation } from '../files'
 import { Thumbnail } from './thumbnail'
@@ -20,7 +19,6 @@ export class Photo extends FileLocation {
     private _bestSize?: tl.RawPhotoSize | tl.RawPhotoSizeProgressive
 
     constructor(
-        client: TelegramClient,
         readonly raw: tl.RawPhoto,
         readonly media?: tl.RawMessageMediaPhoto,
     ) {
@@ -70,7 +68,7 @@ export class Photo extends FileLocation {
             }
         }
 
-        super(client, location, size, raw.dcId)
+        super(location, size, raw.dcId)
         this._bestSize = bestSize
         this.width = width
         this.height = height
@@ -124,8 +122,8 @@ export class Photo extends FileLocation {
      */
     get thumbnails(): ReadonlyArray<Thumbnail> {
         if (!this._thumbnails) {
-            this._thumbnails = this.raw.sizes.map((sz) => new Thumbnail(this.client, this.raw, sz))
-            this.raw.videoSizes?.forEach((sz) => this._thumbnails!.push(new Thumbnail(this.client, this.raw, sz)))
+            this._thumbnails = this.raw.sizes.map((sz) => new Thumbnail(this.raw, sz))
+            this.raw.videoSizes?.forEach((sz) => this._thumbnails!.push(new Thumbnail(this.raw, sz)))
         }
 
         return this._thumbnails

@@ -1,20 +1,6 @@
-export { _randomBytes as randomBytes } from './platform/crypto'
+export { _randomBytes as randomBytes } from './platform/random'
 
 const b64urlAvailable = Buffer.isEncoding('base64url')
-
-// from https://github.com/feross/typedarray-to-buffer
-// licensed under MIT
-/**
- * Convert a typed array to a Buffer.
- * @param arr  Typed array to convert
- */
-export function typedArrayToBuffer(arr: NodeJS.TypedArray): Buffer {
-    // To avoid a copy, use the typed array's underlying ArrayBuffer to back
-    // new Buffer, respecting the "view", i.e. byteOffset and byteLength
-    return ArrayBuffer.isView(arr) ?
-        Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength) : // Pass through all other types to `Buffer.from`
-        Buffer.from(arr)
-}
 
 /**
  * Check if two buffers are equal
@@ -30,34 +16,6 @@ export function buffersEqual(a: Buffer, b: Buffer): boolean {
     }
 
     return true
-}
-
-/**
- * Perform XOR operation on two buffers and return the new buffer
- *
- * @param data  Buffer to XOR
- * @param key  Key to XOR with
- */
-export function xorBuffer(data: Buffer, key: Buffer): Buffer {
-    const ret = Buffer.alloc(data.length)
-
-    for (let i = 0; i < data.length; i++) {
-        ret[i] = data[i] ^ key[i]
-    }
-
-    return ret
-}
-
-/**
- * Perform XOR operation on two buffers in-place
- *
- * @param data  Buffer to XOR
- * @param key  Key to XOR with
- */
-export function xorBufferInPlace(data: Buffer, key: Buffer): void {
-    for (let i = 0; i < data.length; i++) {
-        data[i] ^= key[i]
-    }
 }
 
 /**

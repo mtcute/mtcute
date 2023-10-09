@@ -1,6 +1,5 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { Photo } from './photo'
 import { Video } from './video'
@@ -8,10 +7,7 @@ import { Video } from './video'
 export class Game {
     readonly type = 'game' as const
 
-    constructor(
-        readonly client: TelegramClient,
-        readonly game: tl.RawGame,
-    ) {}
+    constructor(readonly game: tl.RawGame) {}
 
     /**
      * Unique identifier of the game.
@@ -48,7 +44,7 @@ export class Game {
     get photo(): Photo | null {
         if (this.game.photo._ === 'photoEmpty') return null
 
-        return (this._photo ??= new Photo(this.client, this.game.photo))
+        return (this._photo ??= new Photo(this.game.photo))
     }
 
     private _animation?: Video | null
@@ -66,7 +62,7 @@ export class Game {
             if (!attr) {
                 this._animation = null
             } else {
-                this._animation = new Video(this.client, this.game.document, attr)
+                this._animation = new Video(this.game.document, attr)
             }
         }
 

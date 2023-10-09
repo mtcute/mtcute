@@ -1,13 +1,12 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
 
 /**
  * Change user status to offline or online
  *
  * @param offline  Whether the user is currently offline
- * @internal
  */
-export async function setOffline(this: TelegramClient, offline = true): Promise<void> {
-    await this.call({
+export async function setOffline(client: BaseTelegramClient, offline = true): Promise<void> {
+    await client.call({
         _: 'account.updateStatus',
         offline,
     })

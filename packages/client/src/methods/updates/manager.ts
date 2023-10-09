@@ -1,135 +1,16 @@
 /* eslint-disable max-depth,max-params */
-import { assertNever, MtArgumentError, tl } from '@mtcute/core'
-import {
-    AsyncLock,
-    ConditionVariable,
-    Deque,
-    getBarePeerId,
-    getMarkedPeerId,
-    Logger,
-    markedPeerIdToBare,
-    SortedLinkedList,
-    toggleChannelIdMark,
-} from '@mtcute/core/utils'
+import { assertNever, BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
+import { getBarePeerId, getMarkedPeerId, markedPeerIdToBare, toggleChannelIdMark } from '@mtcute/core/utils'
 
-import { TelegramClient, TelegramClientOptions } from '../client'
-import { Message, PeersIndex } from '../types'
-import { _parseUpdate } from '../types/updates/parse-update'
-import { extractChannelIdFromUpdate } from '../utils/misc-utils'
-import { normalizeToInputChannel } from '../utils/peer-utils'
-// @copy
-import { RpsMeter } from '../utils/rps-meter'
+import { PeersIndex } from '../../types'
+import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { RpsMeter } from '../../utils/rps-meter'
+import { getAuthState } from '../auth/_state'
+import { resolvePeer } from '../users/resolve-peer'
+import { createUpdatesState, PendingUpdate, toPendingUpdate, UpdatesManagerParams, UpdatesState } from './types'
+import { extractChannelIdFromUpdate, messageToUpdate } from './utils'
 
 // code in this file is very bad, thanks to Telegram's awesome updates mechanism
-
-// @copy
-interface PendingUpdateContainer {
-    upd: tl.TypeUpdates
-    seqStart: number
-    seqEnd: number
-}
-
-// @copy
-interface PendingUpdate {
-    update: tl.TypeUpdate
-    channelId?: number
-    pts?: number
-    ptsBefore?: number
-    qts?: number
-    qtsBefore?: number
-    timeout?: number
-    peers?: PeersIndex
-}
-
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// @extension
-interface UpdatesState {
-    _updatesLoopActive: boolean
-    _updatesLoopCv: ConditionVariable
-
-    _pendingUpdateContainers: SortedLinkedList<PendingUpdateContainer>
-    _pendingPtsUpdates: SortedLinkedList<PendingUpdate>
-    _pendingPtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
-    _pendingQtsUpdates: SortedLinkedList<PendingUpdate>
-    _pendingQtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
-    _pendingUnorderedUpdates: Deque<PendingUpdate>
-
-    _noDispatchEnabled: boolean
-    // channel id or 0 => msg id
-    _noDispatchMsg: Map<number, Set<number>>
-    // channel id or 0 => pts
-    _noDispatchPts: Map<number, Set<number>>
-    _noDispatchQts: Set<number>
-
-    _updLock: AsyncLock
-    _rpsIncoming?: RpsMeter
-    _rpsProcessing?: RpsMeter
-
-    _messageGroupingInterval: number
-    _messageGroupingPending: Map<string, [Message[], NodeJS.Timeout]>
-
-    // accessing storage every time might be expensive,
-    // so store everything here, and load & save
-    // every time session is loaded & saved.
-    _pts?: number
-    _qts?: number
-    _date?: number
-    _seq?: number
-
-    // old values of the updates state (i.e. as in DB)
-    // used to avoid redundant storage calls
-    _oldPts?: number
-    _oldQts?: number
-    _oldDate?: number
-    _oldSeq?: number
-    _selfChanged: boolean
-
-    // whether to catch up channels from the locally stored pts
-    // usually set in start() method based on `catchUp` param
-    _catchUpChannels?: boolean
-
-    _cpts: Map<number, number>
-    _cptsMod: Map<number, number>
-
-    _updsLog: Logger
-}
-/* eslint-enable @typescript-eslint/no-unused-vars */
-
-// @initialize
-function _initializeUpdates(this: TelegramClient, opts: TelegramClientOptions) {
-    this._updatesLoopActive = false
-    this._updatesLoopCv = new ConditionVariable()
-
-    this._pendingUpdateContainers = new SortedLinkedList((a, b) => a.seqStart - b.seqStart)
-    this._pendingPtsUpdates = new SortedLinkedList((a, b) => a.ptsBefore! - b.ptsBefore!)
-    this._pendingPtsUpdatesPostponed = new SortedLinkedList((a, b) => a.ptsBefore! - b.ptsBefore!)
-    this._pendingQtsUpdates = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
-    this._pendingQtsUpdatesPostponed = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
-    this._pendingUnorderedUpdates = new Deque()
-
-    this._noDispatchEnabled = !opts.disableNoDispatch
-    this._noDispatchMsg = new Map()
-    this._noDispatchPts = new Map()
-    this._noDispatchQts = new Set()
-
-    this._messageGroupingInterval = opts.messageGroupingInterval ?? 0
-    this._messageGroupingPending = new Map()
-
-    this._updLock = new AsyncLock()
-    // we dont need to initialize state fields since
-    // they are always loaded either from the server, or from storage.
-
-    // channel PTS are not loaded immediately, and instead are cached here
-    // after the first time they were retrieved from the storage.
-    this._cpts = new Map()
-    // modified channel pts, to avoid unnecessary
-    // DB calls for not modified cpts
-    this._cptsMod = new Map()
-
-    this._selfChanged = false
-
-    this._updsLog = this.log.create('updates')
-}
 
 /**
  * Enable RPS meter.
@@ -139,11 +20,11 @@ function _initializeUpdates(this: TelegramClient, opts: TelegramClientOptions) {
  *
  * @param size  Sampling size
  * @param time  Window time
- * @internal
  */
-export function enableRps(this: TelegramClient, size?: number, time?: number): void {
-    this._rpsIncoming = new RpsMeter(size, time)
-    this._rpsProcessing = new RpsMeter(size, time)
+export function enableRps(client: BaseTelegramClient, size?: number, time?: number): void {
+    const state = getState(client)
+    state.rpsIncoming = new RpsMeter(size, time)
+    state.rpsProcessing = new RpsMeter(size, time)
 }
 
 /**
@@ -154,15 +35,15 @@ export function enableRps(this: TelegramClient, size?: number, time?: number): v
  * they should be around the same, except
  * rare situations when processing rps
  * may peak.
- *
- * @internal
  */
-export function getCurrentRpsIncoming(this: TelegramClient): number {
-    if (!this._rpsIncoming) {
+export function getCurrentRpsIncoming(client: BaseTelegramClient): number {
+    const state = getState(client)
+
+    if (!state.rpsIncoming) {
         throw new MtArgumentError('RPS meter is not enabled, use .enableRps() first')
     }
 
-    return this._rpsIncoming.getRps()
+    return state.rpsIncoming.getRps()
 }
 
 /**
@@ -173,128 +54,139 @@ export function getCurrentRpsIncoming(this: TelegramClient): number {
  * they should be around the same, except
  * rare situations when processing rps
  * may peak.
- *
- * @internal
  */
-export function getCurrentRpsProcessing(this: TelegramClient): number {
-    if (!this._rpsProcessing) {
+export function getCurrentRpsProcessing(client: BaseTelegramClient): number {
+    const state = getState(client)
+
+    if (!state.rpsProcessing) {
         throw new MtArgumentError('RPS meter is not enabled, use .enableRps() first')
     }
 
-    return this._rpsProcessing.getRps()
+    return state.rpsProcessing.getRps()
 }
 
 /**
- * Fetch updates state from the server.
- * Meant to be used right after authorization,
- * but before force-saving the session.
- * @internal
- */
-export async function _fetchUpdatesState(this: TelegramClient): Promise<void> {
-    await this._updLock.acquire()
-
-    this._updsLog.debug('fetching initial state')
-
-    try {
-        let state = await this.call({ _: 'updates.getState' })
-
-        this._updsLog.debug(
-            'updates.getState returned state: pts=%d, qts=%d, date=%d, seq=%d',
-            state.pts,
-            state.qts,
-            state.date,
-            state.seq,
-        )
-
-        // for some unknown fucking reason getState may return old qts
-        // call getDifference to get actual values :shrug:
-        const diff = await this.call({
-            _: 'updates.getDifference',
-            pts: state.pts,
-            qts: state.qts,
-            date: state.date,
-        })
-
-        switch (diff._) {
-            case 'updates.differenceEmpty':
-                break
-            case 'updates.differenceTooLong': // shouldn't happen, but who knows?
-                (state as tl.Mutable<tl.updates.TypeState>).pts = diff.pts
-                break
-            case 'updates.differenceSlice':
-                state = diff.intermediateState
-                break
-            case 'updates.difference':
-                state = diff.state
-                break
-            default:
-                assertNever(diff)
-        }
-
-        this._qts = state.qts
-        this._pts = state.pts
-        this._date = state.date
-        this._seq = state.seq
-
-        this._updsLog.debug(
-            'loaded initial state: pts=%d, qts=%d, date=%d, seq=%d',
-            state.pts,
-            state.qts,
-            state.date,
-            state.seq,
-        )
-    } catch (e) {
-        this._updsLog.error('failed to fetch updates state: %s', e)
-    }
-
-    this._updLock.release()
-}
-
-/**
- * @internal
- */
-export async function _loadStorage(this: TelegramClient): Promise<void> {
-    // load updates state from the session
-    await this.storage.load?.()
-    const state = await this.storage.getUpdatesState()
-
-    if (state) {
-        this._pts = this._oldPts = state[0]
-        this._qts = this._oldQts = state[1]
-        this._date = this._oldDate = state[2]
-        this._seq = this._oldSeq = state[3]
-        this._updsLog.debug(
-            'loaded stored state: pts=%d, qts=%d, date=%d, seq=%d',
-            state[0],
-            state[1],
-            state[2],
-            state[3],
-        )
-    }
-    // if no state, don't bother initializing properties
-    // since that means that there is no authorization,
-    // and thus _fetchUpdatesState will be called
-
-    const self = await this.storage.getSelf()
-
-    if (self) {
-        this._userId = self.userId
-        this._isBot = self.isBot
-    }
-}
-
-/**
- * **ADVANCED**
+ * Add updates handling capabilities to {@link BaseTelegramClient}
  *
- * Manually start updates loop.
- * Usually done automatically inside {@link start}
- * @internal
+ * {@link BaseTelegramClient} doesn't do any updates processing on its own, and instead
+ * dispatches raw TL updates to user of the class.
+ *
+ * This method enables updates processing according to Telegram's updates mechanism.
+ *
+ * > **Note**: you don't need to use this if you are using {@link TelegramClient}
+ *
+ * @param client  Client instance
+ * @param params  Updates manager parameters
+ * @noemit
  */
-export function startUpdatesLoop(this: TelegramClient): void {
-    if (this._updatesLoopActive) return
+export function enableUpdatesProcessing(client: BaseTelegramClient, params: UpdatesManagerParams): void {
+    if (getState(client)) return
 
-    this._updatesLoopActive = true
-    this._updatesLoop().catch((err) => this._emitError(err))
+    if (client.network.params.disableUpdates) {
+        throw new MtArgumentError('Updates must be enabled to use updates manager')
+    }
+
+    const authState = getAuthState(client)
+
+    const state = createUpdatesState(client, authState, params)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(client as any)[STATE_SYMBOL] = state
+
+    function onLoggedIn(): void {
+        fetchUpdatesState(client, state).catch((err) => client._emitError(err))
+    }
+
+    function onLoggedOut(): void {
+        stopUpdatesLoop(client)
+        state.cpts.clear()
+        state.cptsMod.clear()
+        state.pts = state.qts = state.date = state.seq = undefined
+    }
+
+    function onBeforeConnect(): void {
+        loadUpdatesStorage(client, state).catch((err) => client._emitError(err))
+    }
+
+    function onBeforeStorageSave(): Promise<void> {
+        return saveUpdatesStorage(client, state).catch((err) => client._emitError(err))
+    }
+
+    function onKeepAlive() {
+        state.log.debug('no updates for >15 minutes, catching up')
+        handleUpdate(state, { _: 'updatesTooLong' })
+    }
+
+    state.postponedTimer.onTimeout(() => {
+        state.hasTimedoutPostponed = true
+        state.updatesLoopCv.notify()
+    })
+
+    client.on('logged_in', onLoggedIn)
+    client.on('logged_out', onLoggedOut)
+    client.on('before_connect', onBeforeConnect)
+    client.beforeStorageSave(onBeforeStorageSave)
+    client.on('keep_alive', onKeepAlive)
+    client.network.setUpdateHandler((upd, fromClient) => handleUpdate(state, upd, fromClient))
+
+    function cleanup() {
+        client.off('logged_in', onLoggedIn)
+        client.off('logged_out', onLoggedOut)
+        client.off('before_connect', onBeforeConnect)
+        client.offBeforeStorageSave(onBeforeStorageSave)
+        client.off('keep_alive', onKeepAlive)
+        client.off('before_stop', cleanup)
+        client.network.setUpdateHandler(() => {})
+        stopUpdatesLoop(client)
+    }
+
+    state.stop = cleanup
+    client.on('before_stop', cleanup)
+}
+
+/**
+ * Disable updates processing.
+ *
+ * Basically reverts {@link enableUpdatesProcessing}
+ *
+ * @param client  Client instance
+ * @noemit
+ */
+export function disableUpdatesProcessing(client: BaseTelegramClient): void {
+    const state = getState(client)
+    if (!state) return
+
+    state.stop()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (client as any)[STATE_SYMBOL]
+}
+
+/**
+ * Start updates loop.
+ *
+ * You must first call {@link enableUpdatesProcessing} to use this method.
+ *
+ * It is recommended to use this method in callback to {@link start},
+ * or otherwise make sure the user is logged in.
+ *
+ * > **Note**: If you are using {@link UpdatesManagerParams.catchUp} option,
+ * > catching up will be done in background, you can't await it.
+ */
+export async function startUpdatesLoop(client: BaseTelegramClient): Promise<void> {
+    const state = getState(client)
+    if (state.updatesLoopActive) return
+
+    // otherwise we will catch up on the first update
+    if (!state.catchUpOnStart) {
+        await fetchUpdatesState(client, state)
+    }
+
+    // start updates loop in background
+    state.updatesLoopActive = true
+    updatesLoop(client, state).catch((err) => client._emitError(err))
+
+    if (state.catchUpOnStart) {
+        catchUp(client)
+    }
 }
 
 /**
@@ -302,114 +194,162 @@ export function startUpdatesLoop(this: TelegramClient): void {
  *
  * Manually stop updates loop.
  * Usually done automatically when stopping the client with {@link close}
- * @internal
  */
-export function stopUpdatesLoop(this: TelegramClient): void {
-    if (!this._updatesLoopActive) return
+export function stopUpdatesLoop(client: BaseTelegramClient): void {
+    const state = getState(client)
+    if (!state.updatesLoopActive) return
 
-    this._updatesLoopActive = false
-    this._updatesLoopCv.notify()
-}
-
-/** @internal */
-export function _onStop(this: TelegramClient): void {
-    this.stopUpdatesLoop()
+    state.updatesLoopActive = false
+    state.pendingUpdateContainers.clear()
+    state.pendingUnorderedUpdates.clear()
+    state.pendingPtsUpdates.clear()
+    state.pendingQtsUpdates.clear()
+    state.pendingPtsUpdatesPostponed.clear()
+    state.pendingQtsUpdatesPostponed.clear()
+    state.postponedTimer.reset()
+    state.updatesLoopCv.notify()
 }
 
 /**
- * @internal
+ * Catch up with the server by loading missed updates.
+ *
+ * > **Note**: In case the storage was not properly
+ * > closed the last time, "catching up" might
+ * > result in duplicate updates.
  */
-export async function _saveStorage(this: TelegramClient, afterImport = false): Promise<void> {
-    // save updates state to the session
+export function catchUp(client: BaseTelegramClient): void {
+    const state = getState(client)
 
-    if (afterImport) {
-        // we need to get `self` from db and store it
-        const self = await this.storage.getSelf()
+    state.log.debug('catch up requested')
 
-        if (self) {
-            this._userId = self.userId
-            this._isBot = self.isBot
-        }
-    }
+    state.catchUpChannels = true
+    handleUpdate(state, { _: 'updatesTooLong' })
+}
+
+////////////////////////////////////////////// IMPLEMENTATION //////////////////////////////////////////////
+
+const STATE_SYMBOL = Symbol('updatesState')
+
+function getState(client: BaseTelegramClient): UpdatesState {
+    // eslint-disable-next-line
+    return (client as any)[STATE_SYMBOL]
+}
+
+async function fetchUpdatesState(client: BaseTelegramClient, state: UpdatesState): Promise<void> {
+    await state.lock.acquire()
+
+    state.log.debug('fetching initial state')
 
     try {
-        // before any authorization pts will be undefined
-        if (this._pts !== undefined) {
-            // if old* value is not available, assume it has changed.
-            if (this._oldPts === undefined || this._oldPts !== this._pts) {
-                await this.storage.setUpdatesPts(this._pts)
-            }
-            if (this._oldQts === undefined || this._oldQts !== this._qts) {
-                await this.storage.setUpdatesQts(this._qts!)
-            }
-            if (this._oldDate === undefined || this._oldDate !== this._date) {
-                await this.storage.setUpdatesDate(this._date!)
-            }
-            if (this._oldSeq === undefined || this._oldSeq !== this._seq) {
-                await this.storage.setUpdatesSeq(this._seq!)
-            }
+        let fetchedState = await client.call({ _: 'updates.getState' })
 
-            // update old* values
-            this._oldPts = this._pts
-            this._oldQts = this._qts
-            this._oldDate = this._date
-            this._oldSeq = this._seq
+        state.log.debug(
+            'updates.getState returned state: pts=%d, qts=%d, date=%d, seq=%d',
+            fetchedState.pts,
+            fetchedState.qts,
+            fetchedState.date,
+            fetchedState.seq,
+        )
 
-            await this.storage.setManyChannelPts(this._cptsMod)
-            this._cptsMod.clear()
+        // for some unknown fucking reason getState may return old qts
+        // call getDifference to get actual values :shrug:
+        const diff = await client.call({
+            _: 'updates.getDifference',
+            pts: fetchedState.pts,
+            qts: fetchedState.qts,
+            date: fetchedState.date,
+        })
+
+        switch (diff._) {
+            case 'updates.differenceEmpty':
+                break
+            case 'updates.differenceTooLong': // shouldn't happen, but who knows?
+                (fetchedState as tl.Mutable<tl.updates.TypeState>).pts = diff.pts
+                break
+            case 'updates.differenceSlice':
+                fetchedState = diff.intermediateState
+                break
+            case 'updates.difference':
+                fetchedState = diff.state
+                break
+            default:
+                assertNever(diff)
         }
-        if (this._userId !== null && this._selfChanged) {
-            await this.storage.setSelf({
-                userId: this._userId,
-                isBot: this._isBot,
-            })
-            this._selfChanged = false
+
+        state.qts = fetchedState.qts
+        state.pts = fetchedState.pts
+        state.date = fetchedState.date
+        state.seq = fetchedState.seq
+
+        state.log.debug(
+            'loaded initial state: pts=%d, qts=%d, date=%d, seq=%d',
+            state.pts,
+            state.qts,
+            state.date,
+            state.seq,
+        )
+    } catch (e) {
+        state.log.error('failed to fetch updates state: %s', e)
+    }
+
+    state.lock.release()
+}
+
+async function loadUpdatesStorage(client: BaseTelegramClient, state: UpdatesState): Promise<void> {
+    const storedState = await client.storage.getUpdatesState()
+
+    if (storedState) {
+        state.pts = state.oldPts = storedState[0]
+        state.qts = state.oldQts = storedState[1]
+        state.date = state.oldDate = storedState[2]
+        state.seq = state.oldSeq = storedState[3]
+
+        state.log.debug(
+            'loaded stored state: pts=%d, qts=%d, date=%d, seq=%d',
+            storedState[0],
+            storedState[1],
+            storedState[2],
+            storedState[3],
+        )
+    }
+    // if no state, don't bother initializing properties
+    // since that means that there is no authorization,
+    // and thus fetchUpdatesState will be called
+}
+
+async function saveUpdatesStorage(client: BaseTelegramClient, state: UpdatesState, save = false): Promise<void> {
+    // before any authorization pts will be undefined
+    if (state.pts !== undefined) {
+        // if old* value is not available, assume it has changed.
+        if (state.oldPts === undefined || state.oldPts !== state.pts) {
+            await client.storage.setUpdatesPts(state.pts)
+        }
+        if (state.oldQts === undefined || state.oldQts !== state.qts) {
+            await client.storage.setUpdatesQts(state.qts!)
+        }
+        if (state.oldDate === undefined || state.oldDate !== state.date) {
+            await client.storage.setUpdatesDate(state.date!)
+        }
+        if (state.oldSeq === undefined || state.oldSeq !== state.seq) {
+            await client.storage.setUpdatesSeq(state.seq!)
         }
 
-        await this.storage.save?.()
-    } catch (err: unknown) {
-        this._emitError(err)
+        // update old* values
+        state.oldPts = state.pts
+        state.oldQts = state.qts
+        state.oldDate = state.date
+        state.oldSeq = state.seq
+
+        await client.storage.setManyChannelPts(state.cptsMod)
+        state.cptsMod.clear()
+
+        if (save) {
+            await client.storage.save?.()
+        }
     }
 }
 
-/**
- * @internal
- */
-export function _dispatchUpdate(this: TelegramClient, update: tl.TypeUpdate, peers: PeersIndex): void {
-    this.emit('raw_update', update, peers)
-
-    const parsed = _parseUpdate(this, update, peers)
-
-    if (parsed) {
-        if (this._messageGroupingInterval && parsed.name === 'new_message') {
-            const group = parsed.data.groupedIdUnique
-
-            if (group) {
-                const pendingGroup = this._messageGroupingPending.get(group)
-
-                if (pendingGroup) {
-                    pendingGroup[0].push(parsed.data)
-                } else {
-                    const messages = [parsed.data]
-                    const timeout = setTimeout(() => {
-                        this._messageGroupingPending.delete(group)
-                        this.emit('update', { name: 'message_group', data: messages })
-                        this.emit('message_group', messages)
-                    }, this._messageGroupingInterval)
-
-                    this._messageGroupingPending.set(group, [messages, timeout])
-                }
-
-                return
-            }
-        }
-
-        this.emit('update', parsed)
-        this.emit(parsed.name, parsed.data)
-    }
-}
-
-function _addToNoDispatchIndex(this: TelegramClient, updates?: tl.TypeUpdates): void {
+function addToNoDispatchIndex(state: UpdatesState, updates?: tl.TypeUpdates): void {
     if (!updates) return
 
     const addUpdate = (upd: tl.TypeUpdate) => {
@@ -417,15 +357,15 @@ function _addToNoDispatchIndex(this: TelegramClient, updates?: tl.TypeUpdates): 
         const pts = 'pts' in upd ? upd.pts : undefined
 
         if (pts) {
-            const set = this._noDispatchPts.get(channelId)
-            if (!set) this._noDispatchPts.set(channelId, new Set([pts]))
+            const set = state.noDispatchPts.get(channelId)
+            if (!set) state.noDispatchPts.set(channelId, new Set([pts]))
             else set.add(pts)
         }
 
         const qts = 'qts' in upd ? upd.qts : undefined
 
         if (qts) {
-            this._noDispatchQts.add(qts)
+            state.noDispatchQts.add(qts)
         }
 
         switch (upd._) {
@@ -433,8 +373,8 @@ function _addToNoDispatchIndex(this: TelegramClient, updates?: tl.TypeUpdates): 
             case 'updateNewChannelMessage': {
                 const channelId = upd.message.peerId?._ === 'peerChannel' ? upd.message.peerId.channelId : 0
 
-                const set = this._noDispatchMsg.get(channelId)
-                if (!set) this._noDispatchMsg.set(channelId, new Set([upd.message.id]))
+                const set = state.noDispatchMsg.get(channelId)
+                if (!set) state.noDispatchMsg.set(channelId, new Set([upd.message.id]))
                 else set.add(upd.message.id)
 
                 break
@@ -451,12 +391,12 @@ function _addToNoDispatchIndex(this: TelegramClient, updates?: tl.TypeUpdates): 
         case 'updateShortChatMessage':
         case 'updateShortSentMessage': {
             // these updates are only used for non-channel messages, so we use 0
-            let set = this._noDispatchMsg.get(0)
-            if (!set) this._noDispatchMsg.set(0, new Set([updates.id]))
+            let set = state.noDispatchMsg.get(0)
+            if (!set) state.noDispatchMsg.set(0, new Set([updates.id]))
             else set.add(updates.id)
 
-            set = this._noDispatchPts.get(0)
-            if (!set) this._noDispatchPts.set(0, new Set([updates.pts]))
+            set = state.noDispatchPts.get(0)
+            if (!set) state.noDispatchPts.set(0, new Set([updates.pts]))
             else set.add(updates.pts)
             break
         }
@@ -470,12 +410,12 @@ function _addToNoDispatchIndex(this: TelegramClient, updates?: tl.TypeUpdates): 
     }
 }
 
-async function _replaceMinPeers(this: TelegramClient, peers: PeersIndex): Promise<boolean> {
+async function replaceMinPeers(client: BaseTelegramClient, peers: PeersIndex): Promise<boolean> {
     for (const [key, user_] of peers.users) {
         const user = user_ as Exclude<tl.TypeUser, tl.RawUserEmpty>
 
         if (user.min) {
-            const cached = await this.storage.getFullPeerById(user.id)
+            const cached = await client.storage.getFullPeerById(user.id)
             if (!cached) return false
             peers.users.set(key, cached as tl.TypeUser)
         }
@@ -495,7 +435,7 @@ async function _replaceMinPeers(this: TelegramClient, peers: PeersIndex): Promis
                     id = -chat.id
             }
 
-            const cached = await this.storage.getFullPeerById(id)
+            const cached = await client.storage.getFullPeerById(id)
             if (!cached) return false
             peers.chats.set(key, cached as tl.TypeChat)
         }
@@ -506,8 +446,8 @@ async function _replaceMinPeers(this: TelegramClient, peers: PeersIndex): Promis
     return true
 }
 
-async function _fetchPeersForShort(
-    this: TelegramClient,
+async function fetchPeersForShort(
+    client: BaseTelegramClient,
     upd: tl.TypeUpdate | tl.RawMessage | tl.RawMessageService,
 ): Promise<PeersIndex | null> {
     const peers = new PeersIndex()
@@ -519,7 +459,7 @@ async function _fetchPeersForShort(
 
         const marked = typeof peer === 'number' ? peer : getMarkedPeerId(peer)
 
-        const cached = await this.storage.getFullPeerById(marked)
+        const cached = await client.storage.getFullPeerById(marked)
         if (!cached) return false
 
         if (marked > 0) {
@@ -627,29 +567,21 @@ async function _fetchPeersForShort(
     return peers
 }
 
-function _isMessageEmpty(upd: tl.TypeUpdate): boolean {
+function isMessageEmpty(upd: tl.TypeUpdate): boolean {
     return (upd as Extract<typeof upd, { message: object }>).message?._ === 'messageEmpty'
 }
 
-/**
- * @internal
- */
-export function _handleUpdate(
-    this: TelegramClient,
-    update: tl.TypeUpdates,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    noDispatch = false, // fixme
-): void {
-    if (noDispatch && this._noDispatchEnabled) {
-        _addToNoDispatchIndex.call(this, update)
+function handleUpdate(state: UpdatesState, update: tl.TypeUpdates, noDispatch = false): void {
+    if (noDispatch && state.noDispatchEnabled) {
+        addToNoDispatchIndex(state, update)
     }
 
-    this._updsLog.debug(
+    state.log.debug(
         'received %s, queueing for processing. containers queue size: %d',
         update._,
-        this._pendingUpdateContainers.length,
+        state.pendingUpdateContainers.length,
     )
-    this._rpsIncoming?.hit()
+    state.rpsIncoming?.hit()
 
     switch (update._) {
         case 'updatesTooLong':
@@ -657,7 +589,7 @@ export function _handleUpdate(
         case 'updateShortChatMessage':
         case 'updateShort':
         case 'updateShortSentMessage':
-            this._pendingUpdateContainers.add({
+            state.pendingUpdateContainers.add({
                 upd: update,
                 seqStart: 0,
                 seqEnd: 0,
@@ -665,7 +597,7 @@ export function _handleUpdate(
             break
         case 'updates':
         case 'updatesCombined':
-            this._pendingUpdateContainers.add({
+            state.pendingUpdateContainers.add({
                 upd: update,
                 seqStart: update._ === 'updatesCombined' ? update.seqStart : update.seq,
                 seqEnd: update.seq,
@@ -675,103 +607,25 @@ export function _handleUpdate(
             assertNever(update)
     }
 
-    this._updatesLoopCv.notify()
+    state.updatesLoopCv.notify()
 }
 
-/**
- * Catch up with the server by loading missed updates.
- *
- * @internal
- */
-export function catchUp(this: TelegramClient): void {
-    // we also use a lock here so new updates are not processed
-    // while we are catching up with older ones
-
-    this._updsLog.debug('catch up requested')
-
-    this._catchUpChannels = true
-    this._handleUpdate({ _: 'updatesTooLong' })
-
-    //     return this._updLock
-    //         .acquire()
-    //         .then(() => _loadDifference.call(this))
-    //         .catch((err) => this._emitError(err))
-    //         .then(() => this._updLock.release())
-    //         .then(() => this._saveStorage())
-}
-
-function _toPendingUpdate(upd: tl.TypeUpdate, peers?: PeersIndex): PendingUpdate {
-    const channelId = extractChannelIdFromUpdate(upd) || 0
-    const pts = 'pts' in upd ? upd.pts : undefined
-    // eslint-disable-next-line no-nested-ternary
-    const ptsCount = 'ptsCount' in upd ? upd.ptsCount : pts ? 0 : undefined
-    const qts = 'qts' in upd ? upd.qts : undefined
-
-    return {
-        update: upd,
-        channelId,
-        pts,
-        ptsBefore: pts ? pts - ptsCount! : undefined,
-        qts,
-        qtsBefore: qts ? qts - 1 : undefined,
-        peers,
-    }
-}
-
-function _messageToUpdate(message: tl.TypeMessage): tl.TypeUpdate {
-    switch (message.peerId!._) {
-        case 'peerUser':
-        case 'peerChat':
-            return {
-                _: 'updateNewMessage',
-                message,
-                pts: 0,
-                ptsCount: 0,
-            }
-        case 'peerChannel':
-            return {
-                _: 'updateNewChannelMessage',
-                message,
-                pts: 0,
-                ptsCount: 0,
-            }
-    }
-}
-
-// function _checkPts(local: number, remote: number): number {
-//     if (remote === 0x7ffffffff /* INT32_MAX */) {
-//         return 0
-//     }
-//
-//     const diff = remote - local
-//     // diff > 0 - there is a gap
-//     // diff < 0 - already applied
-//     // diff = 0 - ok
-//
-//     if (diff < -399999) {
-//         // pts can only go up or drop cardinally
-//         return 0
-//     }
-//
-//     return diff
-// }
-// todo: pts/qts drop
-
-async function _fetchChannelDifference(
-    this: TelegramClient,
+async function fetchChannelDifference(
+    client: BaseTelegramClient,
+    state: UpdatesState,
     channelId: number,
     fallbackPts?: number,
     force = false,
 ): Promise<void> {
-    let _pts: number | null | undefined = this._cpts.get(channelId)
+    let _pts: number | null | undefined = state.cpts.get(channelId)
 
-    if (!_pts && this._catchUpChannels) {
-        _pts = await this.storage.getChannelPts(channelId)
+    if (!_pts && state.catchUpChannels) {
+        _pts = await client.storage.getChannelPts(channelId)
     }
     if (!_pts) _pts = fallbackPts
 
     if (!_pts) {
-        this._updsLog.debug('fetchChannelDifference failed for channel %d: base pts not available', channelId)
+        state.log.debug('fetchChannelDifference failed for channel %d: base pts not available', channelId)
 
         return
     }
@@ -779,16 +633,16 @@ async function _fetchChannelDifference(
     let channel
 
     try {
-        channel = normalizeToInputChannel(await this.resolvePeer(toggleChannelIdMark(channelId)))
+        channel = normalizeToInputChannel(await resolvePeer(client, toggleChannelIdMark(channelId)))
     } catch (e) {
-        this._updsLog.warn('fetchChannelDifference failed for channel %d: input peer not found', channelId)
+        state.log.warn('fetchChannelDifference failed for channel %d: input peer not found', channelId)
 
         return
     }
 
     // to make TS happy
     let pts = _pts
-    let limit = this._isBot ? 100000 : 100
+    let limit = state.auth.isBot ? 100000 : 100
 
     if (pts <= 0) {
         pts = 1
@@ -796,24 +650,19 @@ async function _fetchChannelDifference(
     }
 
     for (;;) {
-        const diff = await this.call(
-            {
-                _: 'updates.getChannelDifference',
-                force,
-                channel,
-                pts,
-                limit,
-                filter: { _: 'channelMessagesFilterEmpty' },
-            },
-            // { flush: !isFirst }
-        )
+        const diff = await client.call({
+            _: 'updates.getChannelDifference',
+            force,
+            channel,
+            pts,
+            limit,
+            filter: { _: 'channelMessagesFilterEmpty' },
+        })
 
         if (diff._ === 'updates.channelDifferenceEmpty') {
-            this._updsLog.debug('getChannelDifference (cid = %d) returned channelDifferenceEmpty', channelId)
+            state.log.debug('getChannelDifference (cid = %d) returned channelDifferenceEmpty', channelId)
             break
         }
-
-        await this._cachePeersFrom(diff)
 
         const peers = PeersIndex.from(diff)
 
@@ -822,7 +671,7 @@ async function _fetchChannelDifference(
                 pts = diff.dialog.pts!
             }
 
-            this._updsLog.warn(
+            state.log.warn(
                 'getChannelDifference (cid = %d) returned channelDifferenceTooLong. new pts: %d, recent msgs: %d',
                 channelId,
                 pts,
@@ -830,7 +679,7 @@ async function _fetchChannelDifference(
             )
 
             diff.messages.forEach((message) => {
-                this._updsLog.debug(
+                state.log.debug(
                     'processing message %d (%s) from TooLong diff for channel %d',
                     message.id,
                     message._,
@@ -839,12 +688,12 @@ async function _fetchChannelDifference(
 
                 if (message._ === 'messageEmpty') return
 
-                this._pendingUnorderedUpdates.pushBack(_toPendingUpdate(_messageToUpdate(message), peers))
+                state.pendingUnorderedUpdates.pushBack(toPendingUpdate(messageToUpdate(message), peers))
             })
             break
         }
 
-        this._updsLog.debug(
+        state.log.debug(
             'getChannelDifference (cid = %d) returned %d messages, %d updates. new pts: %d, final: %b',
             channelId,
             diff.newMessages.length,
@@ -854,17 +703,17 @@ async function _fetchChannelDifference(
         )
 
         diff.newMessages.forEach((message) => {
-            this._updsLog.debug('processing message %d (%s) from diff for channel %d', message.id, message._, channelId)
+            state.log.debug('processing message %d (%s) from diff for channel %d', message.id, message._, channelId)
 
             if (message._ === 'messageEmpty') return
 
-            this._pendingUnorderedUpdates.pushBack(_toPendingUpdate(_messageToUpdate(message), peers))
+            state.pendingUnorderedUpdates.pushBack(toPendingUpdate(messageToUpdate(message), peers))
         })
 
         diff.otherUpdates.forEach((upd) => {
-            const parsed = _toPendingUpdate(upd, peers)
+            const parsed = toPendingUpdate(upd, peers)
 
-            this._updsLog.debug(
+            state.log.debug(
                 'processing %s from diff for channel %d, pts_before: %d, pts: %d',
                 upd._,
                 channelId,
@@ -872,9 +721,9 @@ async function _fetchChannelDifference(
                 parsed.pts,
             )
 
-            if (_isMessageEmpty(upd)) return
+            if (isMessageEmpty(upd)) return
 
-            this._pendingUnorderedUpdates.pushBack(parsed)
+            state.pendingUnorderedUpdates.pushBack(parsed)
         })
 
         pts = diff.pts
@@ -882,12 +731,13 @@ async function _fetchChannelDifference(
         if (diff.final) break
     }
 
-    this._cpts.set(channelId, pts)
-    this._cptsMod.set(channelId, pts)
+    state.cpts.set(channelId, pts)
+    state.cptsMod.set(channelId, pts)
 }
 
-function _fetchChannelDifferenceLater(
-    this: TelegramClient,
+function fetchChannelDifferenceLater(
+    client: BaseTelegramClient,
+    state: UpdatesState,
     requestedDiff: Map<number, Promise<void>>,
     channelId: number,
     fallbackPts?: number,
@@ -896,10 +746,9 @@ function _fetchChannelDifferenceLater(
     if (!requestedDiff.has(channelId)) {
         requestedDiff.set(
             channelId,
-            _fetchChannelDifference
-                .call(this, channelId, fallbackPts, force)
+            fetchChannelDifference(client, state, channelId, fallbackPts, force)
                 .catch((err) => {
-                    this._updsLog.warn('error fetching difference for %d: %s', channelId, err)
+                    state.log.warn('error fetching difference for %d: %s', channelId, err)
                 })
                 .then(() => {
                     requestedDiff.delete(channelId)
@@ -908,83 +757,80 @@ function _fetchChannelDifferenceLater(
     }
 }
 
-async function _fetchDifference(this: TelegramClient, requestedDiff: Map<number, Promise<void>>): Promise<void> {
+async function fetchDifference(
+    client: BaseTelegramClient,
+    state: UpdatesState,
+    requestedDiff: Map<number, Promise<void>>,
+): Promise<void> {
     for (;;) {
-        const diff = await this.call({
+        const diff = await client.call({
             _: 'updates.getDifference',
-            pts: this._pts!,
-            date: this._date!,
-            qts: this._qts!,
+            pts: state.pts!,
+            date: state.date!,
+            qts: state.qts!,
         })
 
         switch (diff._) {
             case 'updates.differenceEmpty':
-                this._updsLog.debug('updates.getDifference returned updates.differenceEmpty')
+                state.log.debug('updates.getDifference returned updates.differenceEmpty')
 
                 return
             case 'updates.differenceTooLong':
-                this._pts = diff.pts
-                this._updsLog.debug('updates.getDifference returned updates.differenceTooLong')
+                state.pts = diff.pts
+                state.log.debug('updates.getDifference returned updates.differenceTooLong')
 
                 return
         }
 
-        const state = diff._ === 'updates.difference' ? diff.state : diff.intermediateState
+        const fetchedState = diff._ === 'updates.difference' ? diff.state : diff.intermediateState
 
-        this._updsLog.debug(
+        state.log.debug(
             'updates.getDifference returned %d messages, %d updates. new pts: %d, qts: %d, seq: %d, final: %b',
             diff.newMessages.length,
             diff.otherUpdates.length,
-            state.pts,
-            state.qts,
-            state.seq,
+            fetchedState.pts,
+            fetchedState.qts,
+            fetchedState.seq,
             diff._ === 'updates.difference',
         )
-
-        await this._cachePeersFrom(diff)
 
         const peers = PeersIndex.from(diff)
 
         diff.newMessages.forEach((message) => {
-            this._updsLog.debug(
-                'processing message %d in %j (%s) from common diff',
-                message.id,
-                message.peerId,
-                message._,
-            )
+            state.log.debug('processing message %d in %j (%s) from common diff', message.id, message.peerId, message._)
 
             if (message._ === 'messageEmpty') return
 
             // pts does not need to be checked for them
-            this._pendingUnorderedUpdates.pushBack(_toPendingUpdate(_messageToUpdate(message), peers))
+            state.pendingUnorderedUpdates.pushBack(toPendingUpdate(messageToUpdate(message), peers))
         })
 
         diff.otherUpdates.forEach((upd) => {
             if (upd._ === 'updateChannelTooLong') {
-                this._updsLog.debug(
+                state.log.debug(
                     'received updateChannelTooLong for channel %d in common diff (pts = %d), fetching diff',
                     upd.channelId,
                     upd.pts,
                 )
 
-                _fetchChannelDifferenceLater.call(this, requestedDiff, upd.channelId, upd.pts)
+                fetchChannelDifferenceLater(client, state, requestedDiff, upd.channelId, upd.pts)
 
                 return
             }
 
-            if (_isMessageEmpty(upd)) return
+            if (isMessageEmpty(upd)) return
 
-            const parsed = _toPendingUpdate(upd, peers)
+            const parsed = toPendingUpdate(upd, peers)
 
             if (parsed.channelId && parsed.ptsBefore) {
                 // we need to check pts for these updates, put into pts queue
-                this._pendingPtsUpdates.add(parsed)
+                state.pendingPtsUpdates.add(parsed)
             } else {
                 // the updates are in order already, we can treat them as unordered
-                this._pendingUnorderedUpdates.pushBack(parsed)
+                state.pendingUnorderedUpdates.pushBack(parsed)
             }
 
-            this._updsLog.debug(
+            state.log.debug(
                 'received %s from common diff, cid: %d, pts_before: %d, pts: %d, qts_before: %d',
                 upd._,
                 parsed.channelId,
@@ -994,10 +840,10 @@ async function _fetchDifference(this: TelegramClient, requestedDiff: Map<number,
             )
         })
 
-        this._pts = state.pts
-        this._qts = state.qts
-        this._seq = state.seq
-        this._date = state.date
+        state.pts = fetchedState.pts
+        state.qts = fetchedState.qts
+        state.seq = fetchedState.seq
+        state.date = fetchedState.date
 
         if (diff._ === 'updates.difference') {
             return
@@ -1005,14 +851,17 @@ async function _fetchDifference(this: TelegramClient, requestedDiff: Map<number,
     }
 }
 
-function _fetchDifferenceLater(this: TelegramClient, requestedDiff: Map<number, Promise<void>>): void {
+function fetchDifferenceLater(
+    client: BaseTelegramClient,
+    state: UpdatesState,
+    requestedDiff: Map<number, Promise<void>>,
+): void {
     if (!requestedDiff.has(0)) {
         requestedDiff.set(
             0,
-            _fetchDifference
-                .call(this, requestedDiff)
+            fetchDifference(client, state, requestedDiff)
                 .catch((err) => {
-                    this._updsLog.warn('error fetching common difference: %s', err)
+                    state.log.warn('error fetching common difference: %s', err)
                 })
                 .then(() => {
                     requestedDiff.delete(0)
@@ -1021,8 +870,9 @@ function _fetchDifferenceLater(this: TelegramClient, requestedDiff: Map<number, 
     }
 }
 
-async function _onUpdate(
-    this: TelegramClient,
+async function onUpdate(
+    client: BaseTelegramClient,
+    state: UpdatesState,
     pending: PendingUpdate,
     requestedDiff: Map<number, Promise<void>>,
     postponed = false,
@@ -1033,8 +883,8 @@ async function _onUpdate(
     // check for min peers, try to replace them
     // it is important to do this before updating pts
     if (pending.peers && pending.peers.hasMin) {
-        if (!(await _replaceMinPeers.call(this, pending.peers))) {
-            this._updsLog.debug(
+        if (!(await replaceMinPeers(client, pending.peers))) {
+            state.log.debug(
                 'fetching difference because some peers were min and not cached for %s (pts = %d, cid = %d)',
                 upd._,
                 pending.pts,
@@ -1042,9 +892,9 @@ async function _onUpdate(
             )
 
             if (pending.channelId) {
-                _fetchChannelDifferenceLater.call(this, requestedDiff, pending.channelId)
+                fetchChannelDifferenceLater(client, state, requestedDiff, pending.channelId)
             } else {
-                _fetchDifferenceLater.call(this, requestedDiff)
+                fetchDifferenceLater(client, state, requestedDiff)
             }
 
             return
@@ -1053,10 +903,10 @@ async function _onUpdate(
 
     if (!pending.peers) {
         // this is a short update, we need to fetch the peers
-        const peers = await _fetchPeersForShort.call(this, upd)
+        const peers = await fetchPeersForShort(client, upd)
 
         if (!peers) {
-            this._updsLog.debug(
+            state.log.debug(
                 'fetching difference because some peers were not available for short %s (pts = %d, cid = %d)',
                 upd._,
                 pending.pts,
@@ -1064,9 +914,9 @@ async function _onUpdate(
             )
 
             if (pending.channelId) {
-                _fetchChannelDifferenceLater.call(this, requestedDiff, pending.channelId)
+                fetchChannelDifferenceLater(client, state, requestedDiff, pending.channelId)
             } else {
-                _fetchDifferenceLater.call(this, requestedDiff)
+                fetchDifferenceLater(client, state, requestedDiff)
             }
 
             return
@@ -1079,10 +929,10 @@ async function _onUpdate(
         // because unordered may contain pts/qts values when received from diff
 
         if (pending.pts) {
-            const localPts = pending.channelId ? this._cpts.get(pending.channelId) : this._pts
+            const localPts = pending.channelId ? state.cpts.get(pending.channelId) : state.pts
 
             if (localPts && pending.ptsBefore !== localPts) {
-                this._updsLog.warn(
+                state.log.warn(
                     'pts_before does not match local_pts for %s (cid = %d, pts_before = %d, pts = %d, local_pts = %d)',
                     upd._,
                     pending.channelId,
@@ -1092,7 +942,7 @@ async function _onUpdate(
                 )
             }
 
-            this._updsLog.debug(
+            state.log.debug(
                 'applying new pts (cid = %d) because received %s: %d -> %d (before: %d, count: %d) (postponed = %s)',
                 pending.channelId,
                 upd._,
@@ -1104,29 +954,29 @@ async function _onUpdate(
             )
 
             if (pending.channelId) {
-                this._cpts.set(pending.channelId, pending.pts)
-                this._cptsMod.set(pending.channelId, pending.pts)
+                state.cpts.set(pending.channelId, pending.pts)
+                state.cptsMod.set(pending.channelId, pending.pts)
             } else {
-                this._pts = pending.pts
+                state.pts = pending.pts
             }
         }
 
         if (pending.qtsBefore) {
-            this._updsLog.debug(
+            state.log.debug(
                 'applying new qts because received %s: %d -> %d (postponed = %s)',
                 upd._,
-                this._qts,
+                state.qts,
                 pending.qtsBefore + 1,
                 postponed,
             )
 
-            this._qts = pending.qtsBefore + 1
+            state.qts = pending.qts
         }
     }
 
-    if (_isMessageEmpty(upd)) return
+    if (isMessageEmpty(upd)) return
 
-    this._rpsProcessing?.hit()
+    state.rpsProcessing?.hit()
 
     // updates that are also used internally
     switch (upd._) {
@@ -1134,102 +984,103 @@ async function _onUpdate(
             // we just needed to apply new pts values
             return
         case 'updateDcOptions': {
-            const config = this.network.config.getNow()
+            const config = client.network.config.getNow()
 
             if (config) {
-                this.network.config.setConfig({
+                client.network.config.setConfig({
                     ...config,
                     dcOptions: upd.dcOptions,
                 })
             } else {
-                await this.network.config.update(true)
+                await client.network.config.update(true)
             }
             break
         }
         case 'updateConfig':
-            await this.network.config.update(true)
+            await client.network.config.update(true)
             break
         case 'updateUserName':
-            if (upd.userId === this._userId) {
-                this._selfUsername = upd.usernames.find((it) => it.active)?.username ?? null
+            if (upd.userId === state.auth.userId) {
+                state.auth.selfUsername = upd.usernames.find((it) => it.active)?.username ?? null
             }
             break
     }
 
     // dispatch the update
-    if (this._noDispatchEnabled) {
+    if (state.noDispatchEnabled) {
         const channelId = pending.channelId ?? 0
         const msgId = upd._ === 'updateNewMessage' || upd._ === 'updateNewChannelMessage' ? upd.message.id : undefined
 
         // we first need to remove it from each index, and then check if it was there
-        const foundByMsgId = msgId && this._noDispatchMsg.get(channelId)?.delete(msgId)
-        const foundByPts = this._noDispatchPts.get(channelId)?.delete(pending.pts!)
-        const foundByQts = this._noDispatchQts.delete(pending.qts!)
+        const foundByMsgId = msgId && state.noDispatchMsg.get(channelId)?.delete(msgId)
+        const foundByPts = state.noDispatchPts.get(channelId)?.delete(pending.pts!)
+        const foundByQts = state.noDispatchQts.delete(pending.qts!)
 
         if (foundByMsgId || foundByPts || foundByQts) {
-            this._updsLog.debug('not dispatching %s because it is in no_dispatch index', upd._)
+            state.log.debug('not dispatching %s because it is in no_dispatch index', upd._)
 
             return
         }
     }
 
-    this._updsLog.debug('dispatching %s (postponed = %s)', upd._, postponed)
-    this._dispatchUpdate(upd, pending.peers)
+    state.log.debug('dispatching %s (postponed = %s)', upd._, postponed)
+    state.handler(upd, pending.peers)
 }
 
 // todo: updateChannelTooLong with catchUpChannels disabled should not trigger getDifference (?)
 // todo: when min peer or similar use pts_before as base pts for channels
+// todo: fetchDiff when Session loss on the server: the client receives a new session created notification
 
-/** @internal */
-export async function _updatesLoop(this: TelegramClient): Promise<void> {
-    const log = this._updsLog
+async function updatesLoop(client: BaseTelegramClient, state: UpdatesState): Promise<void> {
+    const { log } = state
 
-    log.debug('updates loop started, state available? %b', this._pts)
+    log.debug('updates loop started, state available? %b', state.pts)
 
     try {
-        if (!this._pts) {
-            await this._fetchUpdatesState()
+        if (!state.pts) {
+            await fetchUpdatesState(client, state)
         }
 
-        while (this._updatesLoopActive) {
+        while (state.updatesLoopActive) {
             if (
                 !(
-                    this._pendingUpdateContainers.length ||
-                    this._pendingPtsUpdates.length ||
-                    this._pendingQtsUpdates.length ||
-                    this._pendingUnorderedUpdates.length
+                    state.pendingUpdateContainers.length ||
+                    state.pendingPtsUpdates.length ||
+                    state.pendingQtsUpdates.length ||
+                    state.pendingUnorderedUpdates.length ||
+                    state.hasTimedoutPostponed
                 )
             ) {
-                await this._updatesLoopCv.wait()
+                await state.updatesLoopCv.wait()
             }
-            if (!this._updatesLoopActive) break
+            if (!state.updatesLoopActive) break
 
             log.debug(
                 'updates loop tick. pending containers: %d, pts: %d, pts_postponed: %d, qts: %d, qts_postponed: %d, unordered: %d',
-                this._pendingUpdateContainers.length,
-                this._pendingPtsUpdates.length,
-                this._pendingPtsUpdatesPostponed.length,
-                this._pendingQtsUpdates.length,
-                this._pendingQtsUpdatesPostponed.length,
-                this._pendingUnorderedUpdates.length,
+                state.pendingUpdateContainers.length,
+                state.pendingPtsUpdates.length,
+                state.pendingPtsUpdatesPostponed.length,
+                state.pendingQtsUpdates.length,
+                state.pendingQtsUpdatesPostponed.length,
+                state.pendingUnorderedUpdates.length,
             )
 
             const requestedDiff = new Map<number, Promise<void>>()
 
             // first process pending containers
-            while (this._pendingUpdateContainers.length) {
-                const { upd, seqStart, seqEnd } = this._pendingUpdateContainers.popFront()!
+            while (state.pendingUpdateContainers.length) {
+                const { upd, seqStart, seqEnd } = state.pendingUpdateContainers.popFront()!
 
                 switch (upd._) {
                     case 'updatesTooLong':
                         log.debug('received updatesTooLong, fetching difference')
-                        _fetchDifferenceLater.call(this, requestedDiff)
+                        fetchDifferenceLater(client, state, requestedDiff)
                         break
                     case 'updatesCombined':
                     case 'updates': {
                         if (seqStart !== 0) {
                             // https://t.me/tdlibchat/5843
-                            const nextLocalSeq = this._seq! + 1
+                            const nextLocalSeq = state.seq! + 1
                             log.debug(
                                 'received seq-ordered %s (seq_start = %d, seq_end = %d, size = %d)',
                                 upd._,
@@ -1255,25 +1106,13 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                                     seqStart,
                                 )
                                 // "there's an updates gap that must be filled"
-                                _fetchDifferenceLater.call(this, requestedDiff)
+                                fetchDifferenceLater(client, state, requestedDiff)
                             }
                         } else {
                             log.debug('received %s (size = %d)', upd._, upd.updates.length)
                         }
 
-                        await this._cachePeersFrom(upd)
-                        // if (hasMin) {
-                        //     if (!(
-                        //         await _replaceMinPeers.call(this, upd)
-                        //     )) {
-                        //         log.debug(
-                        //             'fetching difference because some peers were min and not cached'
-                        //         )
-                        //         // some min peer is not cached.
-                        //         // need to re-fetch the thing, and cache them on the way
-                        //         await _fetchDifference.call(this)
-                        //     }
-                        // }
+                        await client._cachePeersFrom(upd)
 
                         const peers = PeersIndex.from(upd)
 
@@ -1284,24 +1123,24 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                                     update.channelId,
                                     update.pts,
                                 )
-                                _fetchChannelDifferenceLater.call(this, requestedDiff, update.channelId, update.pts)
+                                fetchChannelDifferenceLater(client, state, requestedDiff, update.channelId, update.pts)
                                 continue
                             }
 
-                            const parsed = _toPendingUpdate(update, peers)
+                            const parsed = toPendingUpdate(update, peers)
 
                             if (parsed.ptsBefore !== undefined) {
-                                this._pendingPtsUpdates.add(parsed)
+                                state.pendingPtsUpdates.add(parsed)
                             } else if (parsed.qtsBefore !== undefined) {
-                                this._pendingQtsUpdates.add(parsed)
+                                state.pendingQtsUpdates.add(parsed)
                             } else {
-                                this._pendingUnorderedUpdates.pushBack(parsed)
+                                state.pendingUnorderedUpdates.pushBack(parsed)
                             }
                         }
 
-                        if (seqEnd !== 0 && seqEnd > this._seq!) {
-                            this._seq = seqEnd
-                            this._date = upd.date
+                        if (seqEnd !== 0 && seqEnd > state.seq!) {
+                            state.seq = seqEnd
+                            state.date = upd.date
                         }
 
                         break
@@ -1309,14 +1148,14 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                     case 'updateShort': {
                         log.debug('received short %s', upd._)
 
-                        const parsed = _toPendingUpdate(upd.update)
+                        const parsed = toPendingUpdate(upd.update)
 
                         if (parsed.ptsBefore !== undefined) {
-                            this._pendingPtsUpdates.add(parsed)
+                            state.pendingPtsUpdates.add(parsed)
                         } else if (parsed.qtsBefore !== undefined) {
-                            this._pendingQtsUpdates.add(parsed)
+                            state.pendingQtsUpdates.add(parsed)
                         } else {
-                            this._pendingUnorderedUpdates.pushBack(parsed)
+                            state.pendingUnorderedUpdates.pushBack(parsed)
                         }
 
                         break
@@ -1333,7 +1172,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                             id: upd.id,
                             fromId: {
                                 _: 'peerUser',
-                                userId: upd.out ? this._userId! : upd.userId,
+                                userId: upd.out ? state.auth.userId! : upd.userId,
                             },
                             peerId: {
                                 _: 'peerUser',
@@ -1355,7 +1194,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                             ptsCount: upd.ptsCount,
                         }
 
-                        this._pendingPtsUpdates.add({
+                        state.pendingPtsUpdates.add({
                             update,
                             ptsBefore: upd.pts - upd.ptsCount,
                             pts: upd.pts,
@@ -1397,7 +1236,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                             ptsCount: upd.ptsCount,
                         }
 
-                        this._pendingPtsUpdates.add({
+                        state.pendingPtsUpdates.add({
                             update,
                             ptsBefore: upd.pts - upd.ptsCount,
                             pts: upd.pts,
@@ -1416,18 +1255,18 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
             }
 
             // process pts-ordered updates
-            while (this._pendingPtsUpdates.length) {
-                const pending = this._pendingPtsUpdates.popFront()!
+            while (state.pendingPtsUpdates.length) {
+                const pending = state.pendingPtsUpdates.popFront()!
                 const upd = pending.update
 
                 // check pts
 
                 let localPts: number | null = null
 
-                if (!pending.channelId) localPts = this._pts!
-                else if (this._cpts.has(pending.channelId)) {
-                    localPts = this._cpts.get(pending.channelId)!
-                } else if (this._catchUpChannels) {
+                if (!pending.channelId) localPts = state.pts!
+                else if (state.cpts.has(pending.channelId)) {
+                    localPts = state.cpts.get(pending.channelId)!
+                } else if (state.catchUpChannels) {
                     // only load stored channel pts in case
                     // the user has enabled catching up.
                     // not loading stored pts effectively disables
@@ -1435,16 +1274,20 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                     // update gaps (i.e. first update received is considered
                     // to be the base state)
 
-                    const saved = await this.storage.getChannelPts(pending.channelId)
+                    const saved = await client.storage.getChannelPts(pending.channelId)
 
                     if (saved) {
-                        this._cpts.set(pending.channelId, saved)
+                        state.cpts.set(pending.channelId, saved)
                         localPts = saved
                     }
                 }
 
                 if (localPts) {
-                    if (localPts > pending.ptsBefore!) {
+                    const diff = localPts - pending.ptsBefore!
+                    // PTS can only go up or drop cardinally
+                    const isPtsDrop = diff > 1000009
+
+                    if (diff > 0 && !isPtsDrop) {
                         // "the update was already applied, and must be ignored"
                         log.debug(
                             'ignoring %s (cid = %d) because already applied (by pts: exp %d, got %d)',
@@ -1455,53 +1298,75 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                         )
                         continue
                     }
-                    if (localPts < pending.ptsBefore!) {
+                    if (diff < 0) {
                         // "there's an update gap that must be filled"
                         // if the gap is less than 3, put the update into postponed queue
                         // otherwise, call getDifference
-                        if (pending.ptsBefore! - localPts < 3) {
+                        if (diff > -3) {
                             log.debug(
-                                'postponing %s for 0.5s (cid = %d) because small gap detected (by pts: exp %d, got %d)',
+                                'postponing %s for 0.5s (cid = %d) because small gap detected (by pts: exp %d, got %d, diff=%d)',
                                 upd._,
                                 pending.channelId,
                                 localPts,
                                 pending.ptsBefore,
+                                diff,
                             )
-                            pending.timeout = Date.now() + 700
-                            this._pendingPtsUpdatesPostponed.add(pending)
-                        } else {
+                            pending.timeout = Date.now() + 500
+                            state.pendingPtsUpdatesPostponed.add(pending)
+                            state.postponedTimer.emitBefore(pending.timeout)
+                        } else if (diff > -1000000) {
                             log.debug(
-                                'fetching difference after %s (cid = %d) because pts gap detected (by pts: exp %d, got %d)',
+                                'fetching difference after %s (cid = %d) because pts gap detected (by pts: exp %d, got %d, diff=%d)',
                                 upd._,
                                 pending.channelId,
                                 localPts,
                                 pending.ptsBefore,
+                                diff,
                             )
 
                             if (pending.channelId) {
-                                _fetchChannelDifferenceLater.call(this, requestedDiff, pending.channelId)
+                                fetchChannelDifferenceLater(client, state, requestedDiff, pending.channelId)
                             } else {
-                                _fetchDifferenceLater.call(this, requestedDiff)
+                                fetchDifferenceLater(client, state, requestedDiff)
+                            }
+                        } else {
+                            log.debug(
+                                'skipping all updates because pts gap is too big (by pts: exp %d, got %d, diff=%d)',
+                                localPts,
+                                pending.ptsBefore,
+                                diff,
+                            )
+
+                            if (pending.channelId) {
+                                state.cpts.set(pending.channelId, 0)
+                                state.cptsMod.set(pending.channelId, 0)
+                            } else {
+                                await fetchUpdatesState(client, state)
                             }
                         }
                         continue
                     }
+
+                    if (isPtsDrop) {
+                        log.debug('pts drop detected (%d -> %d)', localPts, pending.ptsBefore)
+                    }
                 }
 
-                await _onUpdate.call(this, pending, requestedDiff)
+                await onUpdate(client, state, pending, requestedDiff)
             }
 
             // process postponed pts-ordered updates
-            for (let item = this._pendingPtsUpdatesPostponed._first; item; item = item.n) {
+            for (let item = state.pendingPtsUpdatesPostponed._first; item; item = item.n) {
                 // awesome fucking iteration because i'm so fucking tired and wanna kms
                 const pending = item.v
+
                 const upd = pending.update
 
                 let localPts
 
-                if (!pending.channelId) localPts = this._pts!
-                else if (this._cpts.has(pending.channelId)) {
-                    localPts = this._cpts.get(pending.channelId)
+                if (!pending.channelId) localPts = state.pts!
+                else if (state.cpts.has(pending.channelId)) {
+                    localPts = state.cpts.get(pending.channelId)
                 }
 
                 // channel pts from storage will be available because we loaded it earlier
@@ -1520,7 +1385,7 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                         localPts,
                         pending.ptsBefore,
                     )
-                    this._pendingPtsUpdatesPostponed._remove(item)
+                    state.pendingPtsUpdatesPostponed._remove(item)
                     continue
                 }
                 if (localPts < pending.ptsBefore!) {
@@ -1546,85 +1411,93 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                             localPts,
                             pending.ptsBefore,
                         )
-                        this._pendingPtsUpdatesPostponed._remove(item)
+                        state.pendingPtsUpdatesPostponed._remove(item)
 
                         if (pending.channelId) {
-                            _fetchChannelDifferenceLater.call(this, requestedDiff, pending.channelId)
+                            fetchChannelDifferenceLater(client, state, requestedDiff, pending.channelId)
                         } else {
-                            _fetchDifferenceLater.call(this, requestedDiff)
+                            fetchDifferenceLater(client, state, requestedDiff)
                         }
                     }
                     continue
                 }
 
-                await _onUpdate.call(this, pending, requestedDiff, true)
-                this._pendingPtsUpdatesPostponed._remove(item)
+                await onUpdate(client, state, pending, requestedDiff, true)
+                state.pendingPtsUpdatesPostponed._remove(item)
             }
 
             // process qts-ordered updates
-            while (this._pendingQtsUpdates.length) {
-                const pending = this._pendingQtsUpdates.popFront()!
+            while (state.pendingQtsUpdates.length) {
+                const pending = state.pendingQtsUpdates.popFront()!
                 const upd = pending.update
 
                 // check qts
+                const diff = state.qts! - pending.qtsBefore!
+                const isQtsDrop = diff > 1000009
 
-                if (this._qts! > pending.qtsBefore!) {
+                if (diff > 0 && !isQtsDrop) {
                     // "the update was already applied, and must be ignored"
                     log.debug(
                         'ignoring %s because already applied (by qts: exp %d, got %d)',
                         upd._,
-                        this._qts!,
+                        state.qts!,
                         pending.qtsBefore,
                     )
                     continue
                 }
-                if (this._qts! < pending.qtsBefore!) {
+                if (state.qts! < pending.qtsBefore!) {
                     // "there's an update gap that must be filled"
                     // if the gap is less than 3, put the update into postponed queue
                     // otherwise, call getDifference
-                    //
-                    if (pending.qtsBefore! - this._qts! < 3) {
+                    if (diff > -3) {
                         log.debug(
-                            'postponing %s for 0.5s because small gap detected (by qts: exp %d, got %d)',
+                            'postponing %s for 0.5s because small gap detected (by qts: exp %d, got %d, diff=%d)',
                             upd._,
-                            this._qts!,
+                            state.qts!,
                             pending.qtsBefore,
+                            diff,
                         )
-                        pending.timeout = Date.now() + 700
-                        this._pendingQtsUpdatesPostponed.add(pending)
+                        pending.timeout = Date.now() + 500
+                        state.pendingQtsUpdatesPostponed.add(pending)
+                        state.postponedTimer.emitBefore(pending.timeout)
                     } else {
                         log.debug(
-                            'fetching difference after %s because qts gap detected (by qts: exp %d, got %d)',
+                            'fetching difference after %s because qts gap detected (by qts: exp %d, got %d, diff=%d)',
                             upd._,
-                            this._qts!,
+                            state.qts!,
                             pending.qtsBefore,
+                            diff,
                         )
-                        _fetchDifferenceLater.call(this, requestedDiff)
+                        fetchDifferenceLater(client, state, requestedDiff)
                     }
                     continue
                 }
 
-                await _onUpdate.call(this, pending, requestedDiff)
+                if (isQtsDrop) {
+                    log.debug('qts drop detected (%d -> %d)', state.qts, pending.qtsBefore)
+                }
+
+                await onUpdate(client, state, pending, requestedDiff)
             }
 
             // process postponed qts-ordered updates
-            for (let item = this._pendingQtsUpdatesPostponed._first; item; item = item.n) {
+            for (let item = state.pendingQtsUpdatesPostponed._first; item; item = item.n) {
                 // awesome fucking iteration because i'm so fucking tired and wanna kms
                 const pending = item.v
                 const upd = pending.update
 
                 // check the pts to see if the gap was filled
-                if (this._qts! > pending.qtsBefore!) {
+                if (state.qts! > pending.qtsBefore!) {
                     // "the update was already applied, and must be ignored"
                     log.debug(
                         'ignoring postponed %s because already applied (by qts: exp %d, got %d)',
                         upd._,
-                        this._qts!,
+                        state.qts!,
                         pending.qtsBefore,
                     )
                     continue
                 }
-                if (this._qts! < pending.qtsBefore!) {
+                if (state.qts! < pending.qtsBefore!) {
                     // "there's an update gap that must be filled"
                     // if the timeout has not expired yet, keep the update in the queue
                     // otherwise, fetch diff
@@ -1635,26 +1508,28 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                             'postponed %s is still waiting (%dms left) (current qts %d, need %d)',
                             upd._,
                             pending.timeout! - now,
-                            this._qts!,
+                            state.qts!,
                             pending.qtsBefore,
                         )
                     } else {
                         log.debug(
                             "gap for postponed %s wasn't filled, fetching diff (current qts %d, need %d)",
                             upd._,
-                            this._qts!,
+                            state.qts!,
                             pending.qtsBefore,
                         )
-                        this._pendingQtsUpdatesPostponed._remove(item)
-                        _fetchDifferenceLater.call(this, requestedDiff)
+                        state.pendingQtsUpdatesPostponed._remove(item)
+                        fetchDifferenceLater(client, state, requestedDiff)
                     }
                     continue
                 }
 
                 // gap was filled, and the update can be applied
-                await _onUpdate.call(this, pending, requestedDiff, true)
-                this._pendingQtsUpdatesPostponed._remove(item)
+                await onUpdate(client, state, pending, requestedDiff, true)
+                state.pendingQtsUpdatesPostponed._remove(item)
             }
+
+            state.hasTimedoutPostponed = false
 
             // wait for all pending diffs to load
             while (requestedDiff.size) {
@@ -1663,9 +1538,6 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                     requestedDiff.size,
                     requestedDiff.keys(),
                 )
-
-                // is this necessary?
-                // this.primaryConnection._flushSendQueue()
 
                 await Promise.all([...requestedDiff.values()])
 
@@ -1678,10 +1550,10 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
             }
 
             // process unordered updates (or updates received from diff)
-            while (this._pendingUnorderedUpdates.length) {
-                const pending = this._pendingUnorderedUpdates.popFront()!
+            while (state.pendingUnorderedUpdates.length) {
+                const pending = state.pendingUnorderedUpdates.popFront()!
 
-                await _onUpdate.call(this, pending, requestedDiff, false, true)
+                await onUpdate(client, state, pending, requestedDiff, false, true)
             }
 
             // onUpdate may also call getDiff in some cases, so we also need to check
@@ -1694,9 +1566,6 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
                     requestedDiff.keys(),
                 )
 
-                // is this necessary?
-                // this.primaryConnection._flushSendQueue()
-
                 await Promise.all([...requestedDiff.values()])
 
                 // diff results may as well contain new diffs to be requested
@@ -1708,18 +1577,12 @@ export async function _updatesLoop(this: TelegramClient): Promise<void> {
             }
 
             // save new update state
-            await this._saveStorage()
+            await saveUpdatesStorage(client, state, true)
         }
 
         log.debug('updates loop stopped')
     } catch (e) {
         log.error('updates loop encountered error, restarting: %s', e)
-        this._updatesLoop().catch((err) => this._emitError(err))
+        updatesLoop(client, state).catch((err) => client._emitError(err))
     }
-}
-
-/** @internal */
-export function _keepAliveAction(this: TelegramClient): void {
-    this._updsLog.debug('no updates for >15 minutes, catching up')
-    this._handleUpdate({ _: 'updatesTooLong' })
 }

@@ -1,9 +1,8 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { WebDocument } from '../files/web-document'
-import { _messageMediaFromTl, MessageMedia } from '../messages'
+import type { MessageMedia } from '../messages/message-media'
 import { Thumbnail } from './thumbnail'
 
 /**
@@ -15,10 +14,7 @@ import { Thumbnail } from './thumbnail'
 export type InvoiceExtendedMediaState = 'none' | 'preview' | 'full'
 
 export class InvoiceExtendedMediaPreview {
-    constructor(
-        public readonly client: TelegramClient,
-        public readonly raw: tl.RawMessageExtendedMediaPreview,
-    ) {}
+    constructor(public readonly raw: tl.RawMessageExtendedMediaPreview) {}
 
     /**
      * Width of the preview, in pixels (if available, else 0)
@@ -40,7 +36,7 @@ export class InvoiceExtendedMediaPreview {
             return null
         }
 
-        return (this._thumbnail ??= new Thumbnail(this.client, this.raw, this.raw.thumb))
+        return (this._thumbnail ??= new Thumbnail(this.raw, this.raw.thumb))
     }
 
     /**
@@ -59,8 +55,8 @@ export class Invoice {
     readonly type = 'invoice' as const
 
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawMessageMediaInvoice,
+        private readonly _extendedMedia?: MessageMedia,
     ) {}
 
     /**
@@ -98,7 +94,7 @@ export class Invoice {
     get photo(): WebDocument | null {
         if (!this.raw.photo) return null
 
-        return (this._photo ??= new WebDocument(this.client, this.raw.photo))
+        return (this._photo ??= new WebDocument(this.raw.photo))
     }
 
     /**
@@ -159,21 +155,20 @@ export class Invoice {
             throw new MtArgumentError('No extended media preview available')
         }
 
-        return (this._extendedMediaPreview ??= new InvoiceExtendedMediaPreview(this.client, this.raw.extendedMedia))
+        return (this._extendedMediaPreview ??= new InvoiceExtendedMediaPreview(this.raw.extendedMedia))
     }
 
-    private _extendedMedia?: MessageMedia
     /**
      * Get the invoice's extended media.
      * Only available if {@link extendedMediaState} is `full`.
      * Otherwise, throws an error.
      */
     get extendedMedia(): MessageMedia {
-        if (this.raw.extendedMedia?._ !== 'messageExtendedMedia') {
+        if (!this._extendedMedia) {
             throw new MtArgumentError('No extended media available')
         }
 
-        return (this._extendedMedia ??= _messageMediaFromTl(this.client, null, this.raw.extendedMedia.media))
+        return this._extendedMedia
     }
 
     /**

@@ -1,17 +1,19 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { ForumTopic, InputPeerLike } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
+import { getForumTopics } from './get-forum-topics'
 
 /**
  * Iterate over forum topics. Wrapper over {@link getForumTopics}.
  *
  * @param chatId  Chat ID or username
- * @internal
  */
 export async function* iterForumTopics(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
-    params?: Parameters<TelegramClient['getForumTopics']>[1] & {
+    params?: Parameters<typeof getForumTopics>[2] & {
         /**
          * Maximum number of topics to return.
          *
@@ -29,13 +31,13 @@ export async function* iterForumTopics(
 
     const { query, limit = Infinity, chunkSize = 100 } = params
 
-    const peer = normalizeToInputChannel(await this.resolvePeer(chatId))
+    const peer = normalizeToInputChannel(await resolvePeer(client, chatId))
 
     let { offset } = params
     let current = 0
 
     for (;;) {
-        const res = await this.getForumTopics(peer, {
+        const res = await getForumTopics(client, peer, {
             query,
             offset,
             limit: Math.min(chunkSize, limit - current),

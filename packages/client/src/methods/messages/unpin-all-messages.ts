@@ -1,16 +1,17 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { isInputPeerChannel } from '../../utils/peer-utils'
 import { createDummyUpdate } from '../../utils/updates-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Unpin all pinned messages in a chat.
  *
  * @param chatId  Chat or user ID
- * @internal
  */
 export async function unpinAllMessages(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     params?: {
         /**
@@ -21,17 +22,17 @@ export async function unpinAllMessages(
 ): Promise<void> {
     const { topicId } = params ?? {}
 
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.unpinAllMessages',
         peer,
         topMsgId: topicId,
     })
 
     if (isInputPeerChannel(peer)) {
-        this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount, peer.channelId))
+        client.network.handleUpdate(createDummyUpdate(res.pts, res.ptsCount, peer.channelId))
     } else {
-        this._handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
+        client.network.handleUpdate(createDummyUpdate(res.pts, res.ptsCount))
     }
 }

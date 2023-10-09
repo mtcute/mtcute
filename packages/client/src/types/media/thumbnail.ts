@@ -2,7 +2,6 @@ import { Long, MtArgumentError, MtTypeAssertionError, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { inflateSvgPath, strippedPhotoToJpg, svgPathToFile } from '../../utils/file-utils'
 import { FileLocation } from '../files'
@@ -56,7 +55,6 @@ export class Thumbnail extends FileLocation {
     private _media: tl.RawPhoto | tl.RawDocument | tl.RawStickerSet | tl.RawMessageExtendedMediaPreview
 
     constructor(
-        client: TelegramClient,
         media: tl.RawPhoto | tl.RawDocument | tl.RawStickerSet | tl.RawMessageExtendedMediaPreview,
         sz: tl.TypePhotoSize | tl.TypeVideoSize,
     ) {
@@ -129,7 +127,7 @@ export class Thumbnail extends FileLocation {
             dcId = media.dcId
         }
 
-        super(client, location, size, dcId)
+        super(location, size, dcId)
         this.raw = sz
         this.width = width
         this.height = height

@@ -1,6 +1,3 @@
-//
-//
-
 /**
  * Array that adds elements in sorted order.
  *

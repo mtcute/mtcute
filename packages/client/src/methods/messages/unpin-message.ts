@@ -1,5 +1,7 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Unpin a message in a group, supergroup, channel or PM.
@@ -9,15 +11,18 @@ import { InputPeerLike } from '../../types'
  *
  * @param chatId  Chat ID, username, phone number, `"self"` or `"me"`
  * @param messageId  Message ID
- * @internal
  */
-export async function unpinMessage(this: TelegramClient, chatId: InputPeerLike, messageId: number): Promise<void> {
-    const res = await this.call({
+export async function unpinMessage(
+    client: BaseTelegramClient,
+    chatId: InputPeerLike,
+    messageId: number,
+): Promise<void> {
+    const res = await client.call({
         _: 'messages.updatePinnedMessage',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         id: messageId,
         unpin: true,
     })
 
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 }

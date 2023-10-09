@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
-import { Location, PeersIndex, User } from '../'
+import { Location } from '../media/location'
+import { PeersIndex, User } from '../peers'
 
 /**
  * An inline result was chosen by the user and sent to some chat
@@ -13,7 +13,6 @@ import { Location, PeersIndex, User } from '../'
  */
 export class ChosenInlineResult {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawUpdateBotInlineSend,
         readonly _peers: PeersIndex,
     ) {}
@@ -31,7 +30,7 @@ export class ChosenInlineResult {
      * User who has chosen the query
      */
     get user(): User {
-        return (this._user ??= new User(this.client, this._peers.user(this.raw.userId)))
+        return (this._user ??= new User(this._peers.user(this.raw.userId)))
     }
 
     /**
@@ -49,7 +48,7 @@ export class ChosenInlineResult {
     get location(): Location | null {
         if (this.raw.geo?._ !== 'geoPoint') return null
 
-        return (this._location ??= new Location(this.client, this.raw.geo))
+        return (this._location ??= new Location(this.raw.geo))
     }
 
     /**

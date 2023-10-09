@@ -1,6 +1,5 @@
-import { MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { Chat, InputPeerLike } from '../../types'
 import {
     INVITE_LINK_REGEX,
@@ -10,6 +9,7 @@ import {
     normalizeToInputChannel,
     normalizeToInputUser,
 } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Get full information about a chat.
@@ -18,14 +18,13 @@ import {
  * @throws MtArgumentError
  *   In case you are trying to get info about private chat that you haven't joined.
  *   Use {@link getChatPreview} instead.
- * @internal
  */
-export async function getFullChat(this: TelegramClient, chatId: InputPeerLike): Promise<Chat> {
+export async function getFullChat(client: BaseTelegramClient, chatId: InputPeerLike): Promise<Chat> {
     if (typeof chatId === 'string') {
         const m = chatId.match(INVITE_LINK_REGEX)
 
         if (m) {
-            const res = await this.call({
+            const res = await client.call({
                 _: 'messages.checkChatInvite',
                 hash: m[1],
             })
@@ -39,25 +38,25 @@ export async function getFullChat(this: TelegramClient, chatId: InputPeerLike): 
         }
     }
 
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
 
     let res: tl.messages.TypeChatFull | tl.users.TypeUserFull
     if (isInputPeerChannel(peer)) {
-        res = await this.call({
+        res = await client.call({
             _: 'channels.getFullChannel',
             channel: normalizeToInputChannel(peer),
         })
     } else if (isInputPeerUser(peer)) {
-        res = await this.call({
+        res = await client.call({
             _: 'users.getFullUser',
             id: normalizeToInputUser(peer)!,
         })
     } else if (isInputPeerChat(peer)) {
-        res = await this.call({
+        res = await client.call({
             _: 'messages.getFullChat',
             chatId: peer.chatId,
         })
     } else throw new Error('should not happen')
 
-    return Chat._parseFull(this, res)
+    return Chat._parseFull(res)
 }

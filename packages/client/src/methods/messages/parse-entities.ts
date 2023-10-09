@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { FormattedString } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { getParseModesState } from '../parse-modes/_state'
+import { resolvePeer } from '../users/resolve-peer'
 
 const empty: [string, undefined] = ['', undefined]
 
 /** @internal */
 export async function _parseEntities(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     text?: string | FormattedString<string>,
     mode?: string | null,
     entities?: tl.TypeMessageEntity[],
@@ -24,13 +25,15 @@ export async function _parseEntities(
     }
 
     if (!entities) {
+        const parseModesState = getParseModesState(client)
+
         if (mode === undefined) {
-            mode = this._defaultParseMode
+            mode = parseModesState.defaultParseMode
         }
         // either explicitly disabled or no available parser
         if (!mode) return [text, []]
 
-        const modeImpl = this._parseModes.get(mode)
+        const modeImpl = parseModesState.parseModes.get(mode)
 
         if (!modeImpl) {
             throw new MtArgumentError(`Parse mode ${mode} is not registered.`)
@@ -43,7 +46,7 @@ export async function _parseEntities(
     for (const ent of entities) {
         if (ent._ === 'messageEntityMentionName') {
             try {
-                const inputPeer = normalizeToInputUser(await this.resolvePeer(ent.userId), ent.userId)
+                const inputPeer = normalizeToInputUser(await resolvePeer(client, ent.userId), ent.userId)
 
                 // not a user
                 if (!inputPeer) continue

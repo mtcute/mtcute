@@ -1,8 +1,8 @@
-import { Long, MtUnsupportedError, tl } from '@mtcute/core'
+import { BaseTelegramClient, Long, MtUnsupportedError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { Dialog, InputDialogFolder } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
+import { _normalizeInputFolder } from './get-folders'
 
 /**
  * Iterate over dialogs.
@@ -13,10 +13,9 @@ import { normalizeDate } from '../../utils/misc-utils'
  * is not considered when sorting.
  *
  * @param params  Fetch parameters
- * @internal
  */
 export async function* iterDialogs(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params?: {
         /**
          * Offset message date used as an anchor for pagination.
@@ -127,7 +126,7 @@ export async function* iterDialogs(
     let localFilters_: tl.TypeDialogFilter | undefined
 
     if (folder) {
-        localFilters_ = await this._normalizeInputFolder(folder)
+        localFilters_ = await _normalizeInputFolder(client, folder)
     }
 
     if (filter) {
@@ -167,7 +166,7 @@ export async function* iterDialogs(
         if (!localFilters || !localFilters.pinnedPeers.length) {
             return null
         }
-        const res = await this.call({
+        const res = await client.call({
             _: 'messages.getPeerDialogs',
             peers: localFilters.pinnedPeers.map((peer) => ({
                 _: 'inputDialogPeer' as const,
@@ -186,12 +185,12 @@ export async function* iterDialogs(
         if (localFilters) {
             res = await fetchPinnedDialogsFromFolder()
         } else {
-            res = await this.call({
+            res = await client.call({
                 _: 'messages.getPinnedDialogs',
                 folderId: archived === 'exclude' ? 0 : 1,
             })
         }
-        if (res) yield* Dialog.parseTlDialogs(this, res, limit)
+        if (res) yield* Dialog.parseTlDialogs(res, limit)
 
         return
     }
@@ -208,7 +207,7 @@ export async function* iterDialogs(
         const res = await fetchPinnedDialogsFromFolder()
 
         if (res) {
-            const dialogs = Dialog.parseTlDialogs(this, res, limit)
+            const dialogs = Dialog.parseTlDialogs(res, limit)
 
             for (const d of dialogs) {
                 yield d
@@ -234,8 +233,7 @@ export async function* iterDialogs(
 
     for (;;) {
         const dialogs = Dialog.parseTlDialogs(
-            this,
-            await this.call({
+            await client.call({
                 _: 'messages.getDialogs',
                 excludePinned: params.pinned === 'exclude',
                 folderId,

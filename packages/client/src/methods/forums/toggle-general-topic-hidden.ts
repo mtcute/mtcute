@@ -1,6 +1,9 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike, Message } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { _findMessageInUpdate } from '../messages/find-in-update'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Toggle whether "General" topic in a forum is hidden or not
@@ -10,19 +13,18 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  * @param chatId  Chat ID or username
  * @param hidden  Whether the topic should be hidden
  * @returns  Service message about the modification
- * @internal
  */
 export async function toggleGeneralTopicHidden(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     hidden: boolean,
 ): Promise<Message> {
-    const res = await this.call({
+    const res = await client.call({
         _: 'channels.editForumTopic',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
+        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
         topicId: 1,
         hidden,
     })
 
-    return this._findMessageInUpdate(res)
+    return _findMessageInUpdate(client, res)
 }

@@ -1,5 +1,7 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { User } from '../../types'
+import { start } from './start'
 
 /**
  * Simple wrapper that calls {@link start} and then
@@ -9,16 +11,15 @@ import { User } from '../../types'
  * Errors that were encountered while calling {@link start}
  * and `then` will be emitted as usual, and can be caught with {@link onError}
  *
- * @param params  Parameters to be passed to {@link TelegramClient.start}
- * @param then  Function to be called after {@link TelegramClient.start} returns
- * @internal
+ * @param params  Parameters to be passed to {@link start}
+ * @param then  Function to be called after {@link start} returns
  */
 export function run(
-    this: TelegramClient,
-    params: Parameters<TelegramClient['start']>[0],
+    client: BaseTelegramClient,
+    params: Parameters<typeof start>[1],
     then?: (user: User) => void | Promise<void>,
 ): void {
-    this.start(params)
+    start(client, params)
         .then(then)
-        .catch((err) => this._emitError(err))
+        .catch((err) => client._emitError(err))
 }

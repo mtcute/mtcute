@@ -1,17 +1,20 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { FormattedString, InputMediaLike, InputPeerLike, InputPrivacyRule, Story } from '../../types'
+import { _normalizeInputMedia } from '../files/normalize-input-media'
+import { _parseEntities } from '../messages/parse-entities'
+import { _normalizePrivacyRules } from '../misc/normalize-privacy-rules'
+import { resolvePeer } from '../users/resolve-peer'
+import { _findStoryInUpdate } from './find-in-update'
 
 /**
  * Send a story
  *
  * @returns  Created story
- * @internal
  */
 export async function sendStory(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * Peer ID to send story as
@@ -86,12 +89,13 @@ export async function sendStory(
         }
     }
 
-    const inputMedia = await this._normalizeInputMedia(media, params)
+    const inputMedia = await _normalizeInputMedia(client, media, params)
     const privacyRules = params.privacyRules ?
-        await this._normalizePrivacyRules(params.privacyRules) :
+        await _normalizePrivacyRules(client, params.privacyRules) :
         [{ _: 'inputPrivacyValueAllowAll' } as const]
 
-    const [caption, entities] = await this._parseEntities(
+    const [caption, entities] = await _parseEntities(
+        client,
         // some types dont have `caption` field, and ts warns us,
         // but since it's JS, they'll just be `undefined` and properly
         // handled by _parseEntities method
@@ -100,11 +104,11 @@ export async function sendStory(
         params.entities || (media as Extract<typeof media, { entities?: unknown }>).entities,
     )
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'stories.sendStory',
         pinned,
         noforwards: forbidForwards,
-        peer: await this.resolvePeer(peer),
+        peer: await resolvePeer(client, peer),
         media: inputMedia,
         mediaAreas: interactiveElements,
         caption,
@@ -114,5 +118,5 @@ export async function sendStory(
         period,
     })
 
-    return this._findStoryInUpdate(res)
+    return _findStoryInUpdate(client, res)
 }

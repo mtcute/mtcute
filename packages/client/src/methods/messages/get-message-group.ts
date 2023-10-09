@@ -1,19 +1,19 @@
-import { MtArgumentError } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 import { isPresent } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike, Message } from '../../types'
 import { isInputPeerChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
+import { getMessages } from './get-messages'
 
 /**
  * Get all messages inside of a message group
  *
  * @param chatId  Chat ID
  * @param message  ID of one of the messages in the group
- * @internal
  */
 export async function getMessageGroup(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     message: number,
 ): Promise<Message[]> {
@@ -23,7 +23,7 @@ export async function getMessageGroup(
     // we use larger number.
     // still, this might not be enough :shrug:
 
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
 
     const delta = isInputPeerChannel(peer) ? 9 : 19
 
@@ -33,7 +33,7 @@ export async function getMessageGroup(
         ids.push(i)
     }
 
-    const messages = await this.getMessages(chatId, ids)
+    const messages = await getMessages(client, chatId, ids)
     const groupedId = messages.find((it) => it?.id === message)!.groupedId
 
     if (!groupedId) throw new MtArgumentError('This message is not grouped')

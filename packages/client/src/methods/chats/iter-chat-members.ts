@@ -1,6 +1,9 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { ChatMember, InputPeerLike } from '../../types'
 import { isInputPeerChat } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
+import { getChatMembers } from './get-chat-members'
 
 /**
  * Iterate through chat members
@@ -11,15 +14,14 @@ import { isInputPeerChat } from '../../utils/peer-utils'
  *
  * @param chatId  Chat ID or username
  * @param params  Additional parameters
- * @internal
  */
 export async function* iterChatMembers(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
-    params?: Parameters<TelegramClient['getChatMembers']>[1] & {
+    params?: Parameters<typeof getChatMembers>[2] & {
         /**
          * Chunk size, which will be passed as `limit` parameter
-         * to {@link TelegramClient.getChatMembers}. Usually you shouldn't care about this.
+         * to {@link getChatMembers}. Usually you shouldn't care about this.
          *
          * Defaults to `200`
          */
@@ -34,10 +36,10 @@ export async function* iterChatMembers(
     let offset = params.offset ?? 0
 
     const yielded = new Set()
-    const chat = await this.resolvePeer(chatId)
+    const chat = await resolvePeer(client, chatId)
 
     for (;;) {
-        const members = await this.getChatMembers(chat, {
+        const members = await getChatMembers(client, chat, {
             offset,
             limit,
             query: params.query,

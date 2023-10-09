@@ -1,15 +1,12 @@
-import { tl } from '@mtcute/core'
-
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
 /**
  * Answer a pre-checkout query.
  *
  * @param queryId  Pre-checkout query ID
- * @internal
  */
 export async function answerPreCheckoutQuery(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     queryId: tl.Long,
     params?: {
         /** If pre-checkout is rejected, error message to show to the user */
@@ -18,7 +15,7 @@ export async function answerPreCheckoutQuery(
 ): Promise<void> {
     const { error } = params ?? {}
 
-    await this.call({
+    await client.call({
         _: 'messages.setBotPrecheckoutResults',
         queryId,
         success: !error,

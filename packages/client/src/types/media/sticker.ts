@@ -1,9 +1,7 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
-import { StickerSet } from '../misc'
 import { RawDocument } from './document'
 
 export const MASK_POSITION_POINT_TO_TL = {
@@ -69,12 +67,11 @@ export class Sticker extends RawDocument {
     }
 
     constructor(
-        client: TelegramClient,
         doc: tl.RawDocument,
         readonly attr: tl.RawDocumentAttributeSticker | tl.RawDocumentAttributeCustomEmoji,
         readonly attr2?: tl.RawDocumentAttributeImageSize | tl.RawDocumentAttributeVideo,
     ) {
-        super(client, doc)
+        super(doc)
     }
 
     /**
@@ -207,30 +204,6 @@ export class Sticker extends RawDocument {
         }
 
         return this._maskPosition
-    }
-
-    /**
-     * Get the sticker set that this sticker belongs to.
-     *
-     * Returns `null` if there's no sticker set.
-     */
-    async getStickerSet(): Promise<StickerSet | null> {
-        if (!this.hasStickerSet) return null
-
-        return this.client.getStickerSet(this.attr.stickerset)
-    }
-
-    /**
-     * Fetch all the emojis that are associated with the current sticker
-     *
-     * Returns empty string if the sticker is not associated
-     * with a sticker pack.
-     */
-    async getAllEmojis(): Promise<string> {
-        const set = await this.getStickerSet()
-        if (!set) return ''
-
-        return set.stickers.find((it) => it.sticker.raw.id.eq(this.raw.id))!.emoji
     }
 }
 

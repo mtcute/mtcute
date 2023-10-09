@@ -1,6 +1,9 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { Message, SearchFilters } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
+import { resolvePeer } from '../users/resolve-peer'
+import { searchMessages } from './search-messages'
 
 /**
  * Search for messages inside a specific chat
@@ -9,11 +12,10 @@ import { normalizeDate } from '../../utils/misc-utils'
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
  * @param params  Additional search parameters
- * @internal
  */
 export async function* iterSearchMessages(
-    this: TelegramClient,
-    params?: Parameters<TelegramClient['searchMessages']>[0] & {
+    client: BaseTelegramClient,
+    params?: Parameters<typeof searchMessages>[1] & {
         /**
          * Limits the number of messages to be retrieved.
          *
@@ -45,14 +47,14 @@ export async function* iterSearchMessages(
 
     const minDate = normalizeDate(params.minDate) ?? 0
     const maxDate = normalizeDate(params.maxDate) ?? 0
-    const peer = await this.resolvePeer(chatId)
-    const fromUser = params.fromUser ? await this.resolvePeer(params.fromUser) : undefined
+    const peer = await resolvePeer(client, chatId)
+    const fromUser = params.fromUser ? await resolvePeer(client, params.fromUser) : undefined
 
     let { offset, addOffset } = params
     let current = 0
 
     for (;;) {
-        const res = await this.searchMessages({
+        const res = await searchMessages(client, {
             query,
             chatId: peer,
             offset,

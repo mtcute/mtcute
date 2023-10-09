@@ -1,7 +1,6 @@
-import { MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 import { fileIdToInputDocument, fileIdToInputPhoto } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../../client'
 import { extractFileName } from '../../../utils/file-utils'
 import { BotInlineMessage, InputInlineMessage } from './input-inline-message'
 
@@ -715,7 +714,7 @@ export namespace BotInline {
 
     /** @internal */
     export async function _convertToTl(
-        client: TelegramClient,
+        client: BaseTelegramClient,
         results: InputInlineResult[],
         parseMode?: string | null,
     ): Promise<[boolean, tl.TypeInputBotInlineResult[]]> {

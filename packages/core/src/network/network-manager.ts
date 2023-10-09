@@ -363,7 +363,7 @@ export class NetworkManager {
 
     private _keepAliveInterval?: NodeJS.Timeout
     private _lastUpdateTime = 0
-    private _updateHandler: (upd: tl.TypeUpdates) => void = () => {}
+    private _updateHandler: (upd: tl.TypeUpdates, fromClient: boolean) => void = () => {}
 
     constructor(
         readonly params: NetworkManagerParams & NetworkManagerExtraParams,
@@ -470,7 +470,7 @@ export class NetworkManager {
         })
         dc.main.on('update', (update: tl.TypeUpdates) => {
             this._lastUpdateTime = Date.now()
-            this._updateHandler(update)
+            this._updateHandler(update, false)
         })
 
         return dc.loadKeys().then(() => dc.main.ensureConnected())
@@ -577,9 +577,7 @@ export class NetworkManager {
         }
     }
 
-    // future-proofing. should probably remove once the implementation is stable
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async notifyLoggedIn(auth: tl.auth.TypeAuthorization): Promise<void> {
+    notifyLoggedIn(auth: tl.auth.TypeAuthorization): void {
         if (auth._ === 'auth.authorizationSignUpRequired' || auth.user._ === 'userEmpty') {
             return
         }
@@ -589,8 +587,6 @@ export class NetworkManager {
         }
 
         this.setIsPremium(auth.user.premium!)
-
-        // await this.exportAuth()
     }
 
     resetSessions(): void {
@@ -740,6 +736,10 @@ export class NetworkManager {
 
     setUpdateHandler(handler: NetworkManager['_updateHandler']): void {
         this._updateHandler = handler
+    }
+
+    handleUpdate(update: tl.TypeUpdates, fromClient = true): void {
+        this._updateHandler(update, fromClient)
     }
 
     changeTransport(factory: TransportFactory): void {

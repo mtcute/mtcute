@@ -1,15 +1,12 @@
-import { tl } from '@mtcute/core'
-
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
 /**
  * Delete a folder by its ID
  *
  * @param id  Folder ID or folder itself
- * @internal
  */
-export async function deleteFolder(this: TelegramClient, id: number | tl.RawDialogFilter): Promise<void> {
-    await this.call({
+export async function deleteFolder(client: BaseTelegramClient, id: number | tl.RawDialogFilter): Promise<void> {
+    await client.call({
         _: 'messages.updateDialogFilter',
         id: typeof id === 'number' ? id : id.id,
     })

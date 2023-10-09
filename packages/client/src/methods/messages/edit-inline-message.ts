@@ -1,8 +1,9 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { BotKeyboard, FormattedString, InputMediaLike, ReplyMarkup } from '../../types'
 import { normalizeInlineId } from '../../utils/inline-utils'
+import { _normalizeInputMedia } from '../files/normalize-input-media'
+import { _parseEntities } from './parse-entities'
 
 /**
  * Edit sent inline message text, media and reply markup.
@@ -11,10 +12,9 @@ import { normalizeInlineId } from '../../utils/inline-utils'
  *     Inline message ID, either as a TL object, or as a
  *     TDLib and Bot API compatible string
  * @param params
- * @internal
  */
 export async function editInlineMessage(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * Inline message ID, either as a TL object, or as a
@@ -79,26 +79,27 @@ export async function editInlineMessage(
     const id = normalizeInlineId(params.messageId)
 
     if (params.media) {
-        media = await this._normalizeInputMedia(params.media, params, true)
+        media = await _normalizeInputMedia(client, params.media, params, true)
 
         // if there's no caption in input media (i.e. not present or undefined),
         // user wants to keep current caption, thus `content` needs to stay `undefined`
         if ('caption' in params.media && params.media.caption !== undefined) {
-            [content, entities] = await this._parseEntities(
+            [content, entities] = await _parseEntities(
+                client,
                 params.media.caption,
                 params.parseMode,
                 params.media.entities,
             )
         }
     } else if (params.text) {
-        [content, entities] = await this._parseEntities(params.text, params.parseMode, params.entities)
+        [content, entities] = await _parseEntities(client, params.text, params.parseMode, params.entities)
     }
 
     let retries = 3
 
     while (retries--) {
         try {
-            await this.call(
+            await client.call(
                 {
                     _: 'messages.editInlineBotMessage',
                     id,

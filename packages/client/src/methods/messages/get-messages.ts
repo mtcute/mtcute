@@ -1,9 +1,11 @@
-import { MaybeArray, tl } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray, tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, PeersIndex } from '../../types'
+import { Message } from '../../types/messages'
+import { InputPeerLike, PeersIndex } from '../../types/peers'
 import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils'
+import { getAuthState } from '../auth/_state'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Get a single message in chat by its ID
@@ -13,10 +15,9 @@ import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-ut
  * @param [fromReply=false]
  *     Whether the reply to a given message should be fetched
  *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
- * @internal
  */
 export async function getMessages(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     messageId: number,
     fromReply?: boolean,
@@ -32,10 +33,9 @@ export async function getMessages(
  * @param [fromReply=false]
  *     Whether the reply to a given message should be fetched
  *     (i.e. `getMessages(msg.chat.id, msg.id, true).id === msg.replyToMessageId`)
- * @internal
  */
 export async function getMessages(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     messageIds: number[],
     fromReply?: boolean,
@@ -44,12 +44,12 @@ export async function getMessages(
 // @available=both
 /** @internal */
 export async function getMessages(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     messageIds: MaybeArray<number>,
     fromReply = false,
 ): Promise<MaybeArray<Message | null>> {
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
 
     const isSingle = !Array.isArray(messageIds)
     if (isSingle) messageIds = [messageIds as number]
@@ -62,7 +62,7 @@ export async function getMessages(
 
     const isChannel = isInputPeerChannel(peer)
 
-    const res = await this.call(
+    const res = await client.call(
         isChannel ?
             {
                 _: 'channels.getMessages',
@@ -79,6 +79,7 @@ export async function getMessages(
 
     const peers = PeersIndex.from(res)
 
+    let selfId: number | null | undefined = undefined
     const ret = res.messages.map((msg) => {
         if (msg._ === 'messageEmpty') return null
 
@@ -87,7 +88,9 @@ export async function getMessages(
             // (channels have their own message numbering)
             switch (peer._) {
                 case 'inputPeerSelf':
-                    if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === this._userId)) {
+                    if (selfId === undefined) selfId = getAuthState(client).userId
+
+                    if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === selfId)) {
                         return null
                     }
                     break
@@ -105,7 +108,7 @@ export async function getMessages(
             }
         }
 
-        return new Message(this, msg, peers)
+        return new Message(msg, peers)
     })
 
     return isSingle ? ret[0] : ret

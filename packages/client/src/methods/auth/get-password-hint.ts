@@ -1,13 +1,14 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
 
 /**
  * Get your Two-Step Verification password hint.
  *
  * @returns  The password hint as a string, if any
- * @internal
  */
-export function getPasswordHint(this: TelegramClient): Promise<string | null> {
-    return this.call({
-        _: 'account.getPassword',
-    }).then((res) => res.hint ?? null)
+export function getPasswordHint(client: BaseTelegramClient): Promise<string | null> {
+    return client
+        .call({
+            _: 'account.getPassword',
+        })
+        .then((res) => res.hint ?? null)
 }

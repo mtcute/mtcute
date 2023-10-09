@@ -1,6 +1,8 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Set whether a supergroup is a forum.
@@ -9,13 +11,12 @@ import { normalizeToInputChannel } from '../../utils/peer-utils'
  *
  * @param chatId  Chat ID or username
  * @param enabled  Whether the supergroup should be a forum
- * @internal
  */
-export async function toggleForum(this: TelegramClient, chatId: InputPeerLike, enabled = false): Promise<void> {
-    const res = await this.call({
+export async function toggleForum(client: BaseTelegramClient, chatId: InputPeerLike, enabled = false): Promise<void> {
+    const res = await client.call({
         _: 'channels.toggleForum',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
+        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
         enabled,
     })
-    this._handleUpdate(res)
+    client.network.handleUpdate(res)
 }

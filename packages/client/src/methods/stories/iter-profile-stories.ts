@@ -1,15 +1,16 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike, Story } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
+import { getProfileStories } from './get-profile-stories'
 
 /**
  * Iterate over profile stories. Wrapper over {@link getProfileStories}
- *
- * @internal
  */
 export async function* iterProfileStories(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peerId: InputPeerLike,
-    params?: Parameters<TelegramClient['getProfileStories']>[1] & {
+    params?: Parameters<typeof getProfileStories>[2] & {
         /**
          * Total number of stories to fetch
          *
@@ -33,10 +34,10 @@ export async function* iterProfileStories(
     let { offsetId } = params
     let current = 0
 
-    const peer = await this.resolvePeer(peerId)
+    const peer = await resolvePeer(client, peerId)
 
     for (;;) {
-        const res = await this.getProfileStories(peer, {
+        const res = await getProfileStories(client, peer, {
             kind,
             offsetId,
             limit: Math.min(limit - current, chunkSize),

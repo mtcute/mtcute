@@ -1,7 +1,7 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 // @exported
 export type CanSendStoryResult = true | 'need_admin' | 'need_boosts'
@@ -14,13 +14,12 @@ export type CanSendStoryResult = true | 'need_admin' | 'need_boosts'
  *   - `true` if the user can post stories
  *   - `"need_admin"` if the user is not an admin in the chat
  *   - `"need_boosts"` if the channel doesn't have enough boosts
- * @internal
  */
-export async function canSendStory(this: TelegramClient, peerId: InputPeerLike): Promise<CanSendStoryResult> {
+export async function canSendStory(client: BaseTelegramClient, peerId: InputPeerLike): Promise<CanSendStoryResult> {
     try {
-        const res = await this.call({
+        const res = await client.call({
             _: 'stories.canSendStory',
-            peer: await this.resolvePeer(peerId),
+            peer: await resolvePeer(client, peerId),
         })
         if (!res) return 'need_admin'
 

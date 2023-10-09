@@ -1,7 +1,7 @@
-import { MtUnsupportedError } from '@mtcute/core'
+import { BaseTelegramClient, MtUnsupportedError } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { FileDownloadParameters, FileLocation } from '../../types'
+import { downloadAsStream } from './download-stream'
 let fs: typeof import('fs') | null = null
 
 try {
@@ -14,9 +14,12 @@ try {
  *
  * @param filename  Local file name to which the remote file will be downloaded
  * @param params  File download parameters
- * @internal
  */
-export function downloadToFile(this: TelegramClient, filename: string, params: FileDownloadParameters): Promise<void> {
+export function downloadToFile(
+    client: BaseTelegramClient,
+    filename: string,
+    params: FileDownloadParameters,
+): Promise<void> {
     if (!fs) {
         throw new MtUnsupportedError('Downloading to file is only supported in NodeJS')
     }
@@ -34,11 +37,11 @@ export function downloadToFile(this: TelegramClient, filename: string, params: F
     }
 
     const output = fs.createWriteStream(filename)
-    const stream = this.downloadAsStream(params)
+    const stream = downloadAsStream(client, params)
 
     if (params.abortSignal) {
         params.abortSignal.addEventListener('abort', () => {
-            this.log.debug('aborting file download %s - cleaning up', filename)
+            client.log.debug('aborting file download %s - cleaning up', filename)
             output.destroy()
             stream.destroy()
             fs!.rmSync(filename)

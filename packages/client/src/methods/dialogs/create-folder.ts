@@ -1,6 +1,6 @@
-import { PartialExcept, tl } from '@mtcute/core'
+import { BaseTelegramClient, PartialExcept, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
+import { getFolders } from './get-folders'
 
 /**
  * Create a folder from given parameters
@@ -10,16 +10,15 @@ import { TelegramClient } from '../../client'
  *
  * @param folder  Parameters for the folder
  * @returns  Newly created folder
- * @internal
  */
 export async function createFolder(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     folder: PartialExcept<tl.RawDialogFilter, 'title'>,
 ): Promise<tl.RawDialogFilter> {
     let id = folder.id
 
     if (!id) {
-        const old = await this.getFolders()
+        const old = await getFolders(client)
 
         // determine next id by finding max id
         // thanks durov for awesome api
@@ -39,7 +38,7 @@ export async function createFolder(
         id,
     }
 
-    await this.call({
+    await client.call({
         _: 'messages.updateDialogFilter',
         id,
         filter,

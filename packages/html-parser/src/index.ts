@@ -1,7 +1,7 @@
 import { Parser } from 'htmlparser2'
 import Long from 'long'
 
-import type { FormattedString, IMessageEntityParser, tl } from '@mtcute/client'
+import type { FormattedString, IMessageEntityParser, MessageEntity, tl } from '@mtcute/client'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 
@@ -15,7 +15,7 @@ const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|
  */
 export function html(
     strings: TemplateStringsArray,
-    ...sub: (string | FormattedString<'html'> | boolean | undefined | null)[]
+    ...sub: (string | FormattedString<'html'> | MessageEntity | boolean | undefined | null)[]
 ): FormattedString<'html'> {
     let str = ''
     sub.forEach((it, idx) => {
@@ -23,6 +23,8 @@ export function html(
 
         if (typeof it === 'string') {
             it = HtmlMessageEntityParser.escape(it, Boolean(str.match(/=['"]$/)))
+        } else if ('raw' in it) {
+            it = new HtmlMessageEntityParser().unparse(it.text, [it.raw])
         } else {
             if (it.mode && it.mode !== 'html') {
                 throw new Error(`Incompatible parse mode: ${it.mode}`)

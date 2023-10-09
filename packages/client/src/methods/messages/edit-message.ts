@@ -1,7 +1,10 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { BotKeyboard, FormattedString, InputMediaLike, InputPeerLike, Message, ReplyMarkup } from '../../types'
+import { _normalizeInputMedia } from '../files/normalize-input-media'
+import { resolvePeer } from '../users/resolve-peer'
+import { _findMessageInUpdate } from './find-in-update'
+import { _parseEntities } from './parse-entities'
 
 /**
  * Edit message text, media, reply markup and schedule date.
@@ -9,10 +12,9 @@ import { BotKeyboard, FormattedString, InputMediaLike, InputPeerLike, Message, R
  * @param chatId  ID of the chat, its username, phone or `"me"` or `"self"`
  * @param message  Message or its ID
  * @param params
- * @internal
  */
 export async function editMessage(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID */
         chatId: InputPeerLike
@@ -81,12 +83,13 @@ export async function editMessage(
     let media: tl.TypeInputMedia | undefined = undefined
 
     if (params.media) {
-        media = await this._normalizeInputMedia(params.media, params)
+        media = await _normalizeInputMedia(client, params.media, params)
 
         // if there's no caption in input media (i.e. not present or undefined),
         // user wants to keep current caption, thus `content` needs to stay `undefined`
         if ('caption' in params.media && params.media.caption !== undefined) {
-            [content, entities] = await this._parseEntities(
+            [content, entities] = await _parseEntities(
+                client,
                 params.media.caption,
                 params.parseMode,
                 params.media.entities,
@@ -95,13 +98,13 @@ export async function editMessage(
     }
 
     if (params.text) {
-        [content, entities] = await this._parseEntities(params.text, params.parseMode, params.entities)
+        [content, entities] = await _parseEntities(client, params.text, params.parseMode, params.entities)
     }
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.editMessage',
         id: typeof message === 'number' ? message : message.id,
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         noWebpage: params.disableWebPreview,
         replyMarkup: BotKeyboard._convertToTl(params.replyMarkup),
         message: content,
@@ -109,6 +112,5 @@ export async function editMessage(
         media,
     })
 
-    // eslint-disable-next-line
-    return this._findMessageInUpdate(res, true) as any
+    return _findMessageInUpdate(client, res, true)
 }

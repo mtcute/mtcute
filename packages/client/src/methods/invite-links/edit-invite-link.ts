@@ -1,6 +1,8 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Edit an invite link. You can only edit non-primary
@@ -12,10 +14,9 @@ import { normalizeDate } from '../../utils/misc-utils'
  * @param link  Invite link to edit
  * @param params
  * @returns  Modified invite link
- * @internal
  */
 export async function editInviteLink(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Chat ID */
         chatId: InputPeerLike
@@ -44,9 +45,9 @@ export async function editInviteLink(
 ): Promise<ChatInviteLink> {
     const { chatId, link, expires, usageLimit, withApproval } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.editExportedChatInvite',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         link,
         expireDate: normalizeDate(expires),
         usageLimit,
@@ -55,5 +56,5 @@ export async function editInviteLink(
 
     const peers = PeersIndex.from(res)
 
-    return new ChatInviteLink(this, res.invite, peers)
+    return new ChatInviteLink(res.invite, peers)
 }

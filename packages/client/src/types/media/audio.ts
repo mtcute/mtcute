@@ -1,7 +1,6 @@
 import { tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
 import { RawDocument } from './document'
 
@@ -16,11 +15,10 @@ export class Audio extends RawDocument {
     }
 
     constructor(
-        client: TelegramClient,
         doc: tl.RawDocument,
         readonly attr: tl.RawDocumentAttributeAudio,
     ) {
-        super(client, doc)
+        super(doc)
     }
 
     /**

@@ -1,16 +1,14 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Gets information about a bot the current uzer owns (or the current bot)
- *
- * @internal
  */
 export async function getBotInfo(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /**
          * When called by a user, a bot the user owns must be specified.
@@ -27,9 +25,9 @@ export async function getBotInfo(
 ): Promise<tl.bots.RawBotInfo> {
     const { bot, langCode = '' } = params
 
-    return this.call({
+    return client.call({
         _: 'bots.getBotInfo',
-        bot: bot ? normalizeToInputUser(await this.resolvePeer(bot), bot) : undefined,
+        bot: bot ? normalizeToInputUser(await resolvePeer(client, bot), bot) : undefined,
         langCode: langCode,
     })
 }

@@ -1,12 +1,12 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
 
 /**
  * Gets the current default value of the Time-To-Live setting, applied to all new chats.
- *
- * @internal
  */
-export async function getGlobalTtl(this: TelegramClient): Promise<number> {
-    return this.call({
-        _: 'messages.getDefaultHistoryTTL',
-    }).then((r) => r.period)
+export async function getGlobalTtl(client: BaseTelegramClient): Promise<number> {
+    return client
+        .call({
+            _: 'messages.getDefaultHistoryTTL',
+        })
+        .then((r) => r.period)
 }

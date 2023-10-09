@@ -1,4 +1,5 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import {
     InputStickerSet,
     InputStickerSetItem,
@@ -6,6 +7,7 @@ import {
     normalizeInputStickerSet,
     StickerSet,
 } from '../../types'
+import { _normalizeFileToDocument } from '../files/normalize-file-to-document'
 
 /**
  * Add a sticker to a sticker set.
@@ -17,10 +19,9 @@ import {
  * @param sticker  Sticker to be added
  * @param params
  * @returns  Modfiied sticker set
- * @internal
  */
 export async function addStickerToSet(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     setId: InputStickerSet,
     sticker: InputStickerSetItem,
     params?: {
@@ -33,12 +34,12 @@ export async function addStickerToSet(
         progressCallback?: (uploaded: number, total: number) => void
     },
 ): Promise<StickerSet> {
-    const res = await this.call({
+    const res = await client.call({
         _: 'stickers.addStickerToSet',
         stickerset: normalizeInputStickerSet(setId),
         sticker: {
             _: 'inputStickerSetItem',
-            document: await this._normalizeFileToDocument(sticker.file, params ?? {}),
+            document: await _normalizeFileToDocument(client, sticker.file, params ?? {}),
             emoji: sticker.emojis,
             maskCoords: sticker.maskPosition ?
                 {
@@ -52,5 +53,5 @@ export async function addStickerToSet(
         },
     })
 
-    return new StickerSet(this, res)
+    return new StickerSet(res)
 }

@@ -1,16 +1,15 @@
+import { BaseTelegramClient } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { ArrayPaginated, InputPeerLike, PeersIndex, Story } from '../../types'
 import { makeArrayPaginated } from '../../utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Get profile stories
- *
- * @internal
  */
 export async function getProfileStories(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peerId: InputPeerLike,
     params?: {
         /**
@@ -39,9 +38,9 @@ export async function getProfileStories(
 
     const { kind = 'pinned', offsetId = 0, limit = 100 } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: kind === 'pinned' ? 'stories.getPinnedStories' : 'stories.getStoriesArchive',
-        peer: await this.resolvePeer(peerId),
+        peer: await resolvePeer(client, peerId),
         offsetId,
         limit,
     })
@@ -51,7 +50,7 @@ export async function getProfileStories(
     const stories = res.stories.map((it) => {
         assertTypeIs('getProfileStories', it, 'storyItem')
 
-        return new Story(this, it, peers)
+        return new Story(it, peers)
     })
     const last = stories[stories.length - 1]
     const next = last?.id

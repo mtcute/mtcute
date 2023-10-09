@@ -1,6 +1,6 @@
-import { assertNever, tl } from '@mtcute/core'
+import { assertNever, BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../../client'
+import { _parseEntities } from '../../../methods/messages/parse-entities'
 import { InputMediaContact, InputMediaGeo, InputMediaGeoLive, InputMediaVenue } from '../../media'
 import { FormattedString } from '../../parser'
 import { BotKeyboard, ReplyMarkup } from '../keyboards'
@@ -205,13 +205,13 @@ export namespace BotInlineMessage {
 
     /** @internal */
     export async function _convertToTl(
-        client: TelegramClient,
+        client: BaseTelegramClient,
         obj: InputInlineMessage,
         parseMode?: string | null,
     ): Promise<tl.TypeInputBotInlineMessage> {
         switch (obj.type) {
             case 'text': {
-                const [message, entities] = await client._parseEntities(obj.text, parseMode, obj.entities)
+                const [message, entities] = await _parseEntities(client, obj.text, parseMode, obj.entities)
 
                 return {
                     _: 'inputBotInlineMessageText',
@@ -221,7 +221,7 @@ export namespace BotInlineMessage {
                 }
             }
             case 'media': {
-                const [message, entities] = await client._parseEntities(obj.text, parseMode, obj.entities)
+                const [message, entities] = await _parseEntities(client, obj.text, parseMode, obj.entities)
 
                 return {
                     _: 'inputBotInlineMessageMediaAuto',

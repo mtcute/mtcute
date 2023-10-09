@@ -1,21 +1,24 @@
-import { Long, tl } from '@mtcute/core'
+import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 import { fileIdToInputDocument, fileIdToInputPhoto, parseFileId, tdFileId } from '@mtcute/file-id'
 
-import { TelegramClient } from '../../client'
-import { InputMediaLike, isUploadedFile, UploadFileLike } from '../../types'
+import { isUploadedFile } from '../../types/files/uploaded-file'
+import { UploadFileLike } from '../../types/files/utils'
+import { InputMediaLike } from '../../types/media/input-media'
 import { extractFileName } from '../../utils/file-utils'
 import { normalizeDate } from '../../utils/misc-utils'
 import { encodeWaveform } from '../../utils/voice-utils'
+import { _parseEntities } from '../messages/parse-entities'
+import { resolvePeer } from '../users/resolve-peer'
+import { _normalizeInputFile } from './normalize-input-file'
+import { uploadFile } from './upload-file'
 
 /**
  * Normalize an {@link InputMediaLike} to `InputMedia`,
  * uploading the file if needed.
- *
- * @internal
  */
 export async function _normalizeInputMedia(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     media: InputMediaLike,
     params: {
         parseMode?: string | null
@@ -127,7 +130,7 @@ export async function _normalizeInputMedia(
             },
             startParam: media.startParam,
             extendedMedia: media.extendedMedia ?
-                await this._normalizeInputMedia(media.extendedMedia, params) :
+                await _normalizeInputMedia(client, media.extendedMedia, params) :
                 undefined,
         }
     }
@@ -162,7 +165,8 @@ export async function _normalizeInputMedia(
             })
 
             if (media.solution) {
-                [solution, solutionEntities] = await this._parseEntities(
+                [solution, solutionEntities] = await _parseEntities(
+                    client,
                     media.solution,
                     params.parseMode,
                     media.solutionEntities,
@@ -193,7 +197,7 @@ export async function _normalizeInputMedia(
     if (media.type === 'story') {
         return {
             _: 'inputMediaStory',
-            peer: await this.resolvePeer(media.peer),
+            peer: await resolvePeer(client, media.peer),
             id: media.id,
         }
     }
@@ -211,7 +215,7 @@ export async function _normalizeInputMedia(
             sendMime = media.fileMime
         }
 
-        const uploaded = await this.uploadFile({
+        const uploaded = await uploadFile(client, {
             file,
             progressCallback: params.progressCallback,
             fileName: media.fileName,
@@ -227,7 +231,7 @@ export async function _normalizeInputMedia(
     const uploadMediaIfNeeded = async (inputMedia: tl.TypeInputMedia, photo: boolean): Promise<tl.TypeInputMedia> => {
         if (!uploadMedia) return inputMedia
 
-        const res = await this.call({
+        const res = await client.call({
             _: 'messages.uploadMedia',
             peer: uploadPeer,
             media: inputMedia,
@@ -330,7 +334,7 @@ export async function _normalizeInputMedia(
     }
 
     if ('thumb' in media && media.thumb) {
-        thumb = await this._normalizeInputFile(media.thumb, {})
+        thumb = await _normalizeInputFile(client, media.thumb, {})
     }
 
     const attributes: tl.TypeDocumentAttribute[] = []

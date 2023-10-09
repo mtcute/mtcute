@@ -1,4 +1,5 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import {
     ArrayPaginated,
     InputPeerLike,
@@ -8,6 +9,7 @@ import {
     PeersIndex,
 } from '../../types'
 import { makeArrayPaginated } from '../../utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 // @exported
 export type GetReactionUsersOffset = string
@@ -18,10 +20,9 @@ export type GetReactionUsersOffset = string
  * @param chatId  Chat ID
  * @param messageId  Message ID
  * @param params
- * @internal
  */
 export async function getReactionUsers(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     messageId: number,
     params?: {
@@ -47,11 +48,11 @@ export async function getReactionUsers(
 
     const { limit = 100, offset, emoji } = params
 
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
 
     const reaction = normalizeInputReaction(emoji)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.getMessageReactionsList',
         peer,
         id: messageId,
@@ -63,7 +64,7 @@ export async function getReactionUsers(
     const peers = PeersIndex.from(res)
 
     return makeArrayPaginated(
-        res.reactions.map((it) => new PeerReaction(this, it, peers)),
+        res.reactions.map((it) => new PeerReaction(it, peers)),
         res.count,
         res.nextOffset,
     )

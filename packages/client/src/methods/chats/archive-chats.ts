@@ -1,20 +1,19 @@
-import { MaybeArray } from '@mtcute/core'
+import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike } from '../../types'
+import { resolvePeerMany } from '../users/resolve-peer-many'
 
 /**
  * Archive one or more chats
  *
  * @param chats  Chat ID(s), username(s), phone number(s), `"me"` or `"self"`
- * @internal
  */
-export async function archiveChats(this: TelegramClient, chats: MaybeArray<InputPeerLike>): Promise<void> {
+export async function archiveChats(client: BaseTelegramClient, chats: MaybeArray<InputPeerLike>): Promise<void> {
     if (!Array.isArray(chats)) chats = [chats]
 
-    const resolvedPeers = await this.resolvePeerMany(chats)
+    const resolvedPeers = await resolvePeerMany(client, chats)
 
-    const updates = await this.call({
+    const updates = await client.call({
         _: 'folders.editPeerFolders',
         folderPeers: resolvedPeers.map((peer) => ({
             _: 'inputFolderPeer',
@@ -22,5 +21,5 @@ export async function archiveChats(this: TelegramClient, chats: MaybeArray<Input
             folderId: 1,
         })),
     })
-    this._handleUpdate(updates)
+    client.network.handleUpdate(updates)
 }

@@ -1,17 +1,18 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
-import { InputPeerLike, Message, PeersIndex } from '../../types'
+import { Message } from '../../types/messages'
+import { InputPeerLike, PeersIndex } from '../../types/peers'
+import { resolvePeer } from '../users/resolve-peer'
 
 /** @internal */
 export async function _getDiscussionMessage(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peer: InputPeerLike,
     message: number,
 ): Promise<[tl.TypeInputPeer, number]> {
-    const inputPeer = await this.resolvePeer(peer)
+    const inputPeer = await resolvePeer(client, peer)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.getDiscussionMessage',
         peer: inputPeer,
         msgId: message,
@@ -50,16 +51,15 @@ export async function _getDiscussionMessage(
  *
  * @param peer  Channel where the post was found
  * @param message  ID of the channel post
- * @internal
  */
 export async function getDiscussionMessage(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     peer: InputPeerLike,
     message: number,
 ): Promise<Message | null> {
-    const inputPeer = await this.resolvePeer(peer)
+    const inputPeer = await resolvePeer(client, peer)
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.getDiscussionMessage',
         peer: inputPeer,
         msgId: message,
@@ -73,5 +73,5 @@ export async function getDiscussionMessage(
     const msg = res.messages[0]
     const peers = PeersIndex.from(res)
 
-    return new Message(this, msg, peers)
+    return new Message(msg, peers)
 }

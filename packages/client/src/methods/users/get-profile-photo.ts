@@ -1,9 +1,9 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { InputPeerLike, Photo } from '../../types'
 import { normalizeToInputUser } from '../../utils/peer-utils'
+import { resolvePeer } from './resolve-peer'
 
 /**
  * Get a single profile picture of a user by its ID
@@ -11,12 +11,15 @@ import { normalizeToInputUser } from '../../utils/peer-utils'
  * @param userId  User ID, username, phone number, `"me"` or `"self"`
  * @param photoId  ID of the photo to fetch
  * @param params
- * @internal
  */
-export async function getProfilePhoto(this: TelegramClient, userId: InputPeerLike, photoId: tl.Long): Promise<Photo> {
-    const res = await this.call({
+export async function getProfilePhoto(
+    client: BaseTelegramClient,
+    userId: InputPeerLike,
+    photoId: tl.Long,
+): Promise<Photo> {
+    const res = await client.call({
         _: 'photos.getUserPhotos',
-        userId: normalizeToInputUser(await this.resolvePeer(userId), userId),
+        userId: normalizeToInputUser(await resolvePeer(client, userId), userId),
         offset: -1,
         limit: 1,
         maxId: photoId,
@@ -25,5 +28,5 @@ export async function getProfilePhoto(this: TelegramClient, userId: InputPeerLik
     const photo = res.photos[0]
     assertTypeIs('getProfilePhotos', photo, 'photo')
 
-    return new Photo(this, photo)
+    return new Photo(photo)
 }

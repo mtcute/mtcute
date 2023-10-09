@@ -1,13 +1,12 @@
-import { getMarkedPeerId, MaybeArray, MtArgumentError, MtTypeAssertionError, tl } from '@mtcute/core'
+import { getMarkedPeerId, MtArgumentError, MtTypeAssertionError, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { makeInspectable } from '../../utils'
-import { InputMediaLike } from '../media'
-import { FormattedString } from '../parser'
+import { MessageEntity } from '../messages/message-entity'
 import { ChatLocation } from './chat-location'
 import { ChatPermissions } from './chat-permissions'
 import { ChatPhoto } from './chat-photo'
-import { InputPeerLike, PeersIndex, User } from './index'
+import { PeersIndex } from './peers-index'
+import { User } from './user'
 
 /**
  * Chat type. Can be:
@@ -32,7 +31,6 @@ export class Chat {
     readonly peer: tl.RawUser | tl.RawChat | tl.RawChannel | tl.RawChatForbidden | tl.RawChannelForbidden
 
     constructor(
-        readonly client: TelegramClient,
         peer: tl.TypeUser | tl.TypeChat,
         readonly fullPeer?: tl.TypeUserFull | tl.TypeChatFull,
     ) {
@@ -49,9 +47,7 @@ export class Chat {
                 throw new MtTypeAssertionError('peer', 'user | chat | channel', peer._)
         }
 
-        this.client = client
         this.peer = peer
-        this.fullPeer = fullPeer
     }
 
     /** Marked ID of this chat */
@@ -315,7 +311,7 @@ export class Chat {
             return null
         }
 
-        return (this._photo ??= new ChatPhoto(this.client, this.inputPeer, this.peer.photo))
+        return (this._photo ??= new ChatPhoto(this.inputPeer, this.peer.photo))
     }
 
     /**
@@ -451,7 +447,7 @@ export class Chat {
             return null
         }
 
-        return (this._location ??= new ChatLocation(this.client, this.fullPeer.location))
+        return (this._location ??= new ChatLocation(this.fullPeer.location))
     }
 
     private _linkedChat?: Chat
@@ -496,32 +492,28 @@ export class Chat {
     get user(): User | null {
         if (this.peer._ !== 'user') return null
 
-        return (this._user ??= new User(this.client, this.peer))
+        return (this._user ??= new User(this.peer))
     }
 
     /** @internal */
-    static _parseFromMessage(
-        client: TelegramClient,
-        message: tl.RawMessage | tl.RawMessageService,
-        peers: PeersIndex,
-    ): Chat {
-        return Chat._parseFromPeer(client, message.peerId, peers)
+    static _parseFromMessage(message: tl.RawMessage | tl.RawMessageService, peers: PeersIndex): Chat {
+        return Chat._parseFromPeer(message.peerId, peers)
     }
 
     /** @internal */
-    static _parseFromPeer(client: TelegramClient, peer: tl.TypePeer, peers: PeersIndex): Chat {
+    static _parseFromPeer(peer: tl.TypePeer, peers: PeersIndex): Chat {
         switch (peer._) {
             case 'peerUser':
-                return new Chat(client, peers.user(peer.userId))
+                return new Chat(peers.user(peer.userId))
             case 'peerChat':
-                return new Chat(client, peers.chat(peer.chatId))
+                return new Chat(peers.chat(peer.chatId))
         }
 
-        return new Chat(client, peers.chat(peer.channelId))
+        return new Chat(peers.chat(peer.channelId))
     }
 
     /** @internal */
-    static _parseFull(client: TelegramClient, full: tl.messages.RawChatFull | tl.users.TypeUserFull): Chat {
+    static _parseFull(full: tl.messages.RawChatFull | tl.users.TypeUserFull): Chat {
         if (full._ === 'users.userFull') {
             const user = full.users.find((it) => it.id === full.fullUser.id)
 
@@ -529,7 +521,7 @@ export class Chat {
                 throw new MtTypeAssertionError('Chat._parseFull', 'user', user?._ ?? 'undefined')
             }
 
-            return new Chat(client, user, full.fullUser)
+            return new Chat(user, full.fullUser)
         }
 
         const fullChat = full.fullChat
@@ -545,8 +537,8 @@ export class Chat {
             }
         }
 
-        const ret = new Chat(client, chat!, fullChat)
-        ret._linkedChat = linked ? new Chat(client, linked) : undefined
+        const ret = new Chat(chat!, fullChat)
+        ret._linkedChat = linked ? new Chat(linked) : undefined
 
         return ret
     }
@@ -555,7 +547,7 @@ export class Chat {
      * Create a mention for the chat.
      *
      * If this is a user, works just like {@link User.mention}.
-     * Otherwise, if the chat has a username, a @username is created
+     * Otherwise, if the chat has a username, a `@username` is created
      * (or text link, if `text` is passed). If it does not, chat title is
      * simply returned without additional formatting.
      *
@@ -565,15 +557,18 @@ export class Chat {
      * Use `null` as `text` (first parameter) to force create a text
      * mention with display name, even if there is a username.
      *
+     * > **Note**: This method doesn't format anything on its own.
+     * > Instead, it returns a {@link MessageEntity} that can later
+     * > be used with `html` or `md` template tags, or `unparse` method directly.
+     *
      * @param text  Text of the mention.
-     * @param parseMode  Parse mode to use when creating mention.
      * @example
      * ```typescript
-     * msg.replyText(`Hello, ${msg.chat.mention()`)
+     * msg.replyText(html`Hello, ${msg.chat.mention()`)
      * ```
      */
-    mention<T extends string = string>(text?: string | null, parseMode?: T | null): string | FormattedString<T> {
-        if (this.user) return this.user.mention(text, parseMode)
+    mention(text?: string | null): string | MessageEntity {
+        if (this.user) return this.user.mention(text)
 
         if (text === undefined && this.username) {
             return `@${this.username}`
@@ -582,102 +577,15 @@ export class Chat {
         if (!text) text = this.displayName
         if (!this.username) return text
 
-        // eslint-disable-next-line dot-notation
-        if (!parseMode) parseMode = this.client['_defaultParseMode'] as T
-
-        return new FormattedString(
-            this.client.getParseMode(parseMode).unparse(text, [
-                {
-                    _: 'messageEntityTextUrl',
-                    offset: 0,
-                    length: text.length,
-                    url: `https://t.me/${this.username}`,
-                },
-            ]),
-            parseMode,
+        return new MessageEntity(
+            {
+                _: 'messageEntityTextUrl',
+                offset: 0,
+                length: text.length,
+                url: `https://t.me/${this.username}`,
+            },
+            text,
         )
-    }
-
-    /**
-     * Join this chat.
-     */
-    async join(): Promise<void> {
-        await this.client.joinChat(this.inputPeer)
-    }
-
-    /**
-     * Add user(s) to this chat
-     *
-     * @param users  ID(s) of the users, their username(s) or phone(s).
-     * @param forwardCount
-     *   Number of old messages to be forwarded (0-100).
-     *   Only applicable to legacy groups, ignored for supergroups and channels
-     */
-    async addMembers(users: MaybeArray<InputPeerLike>, forwardCount?: number): Promise<void> {
-        return this.client.addChatMembers(this.inputPeer, users, { forwardCount })
-    }
-
-    /**
-     * Archive this chat
-     */
-    async archive(): Promise<void> {
-        return this.client.archiveChats(this.inputPeer)
-    }
-
-    /**
-     * Unarchive this chat
-     */
-    async unarchive(): Promise<void> {
-        return this.client.unarchiveChats(this.inputPeer)
-    }
-
-    /**
-     * Read history in this chat
-     *
-     * @param message  Message up until which to read history (by default everything is read)
-     * @param clearMentions  Whether to also clear all mentions in the chat
-     */
-    async readHistory(message = 0, clearMentions = false): Promise<void> {
-        return this.client.readHistory(this.inputPeer, { maxId: message, clearMentions })
-    }
-
-    /**
-     * Send a text message in this chat.
-     *
-     * @param text  Text of the message
-     * @param params
-     */
-    sendText(
-        text: string | FormattedString<string>,
-        params?: Parameters<TelegramClient['sendText']>[2],
-    ): ReturnType<TelegramClient['sendText']> {
-        return this.client.sendText(this.inputPeer, text, params)
-    }
-
-    /**
-     * Send a media in this chat.
-     *
-     * @param media  Media to send
-     * @param params
-     */
-    sendMedia(
-        media: InputMediaLike | string,
-        params?: Parameters<TelegramClient['sendMedia']>[2],
-    ): ReturnType<TelegramClient['sendMedia']> {
-        return this.client.sendMedia(this.inputPeer, media, params)
-    }
-
-    /**
-     * Send a media group in this chat.
-     *
-     * @param medias  Medias to send
-     * @param params
-     */
-    sendMediaGroup(
-        medias: (InputMediaLike | string)[],
-        params?: Parameters<TelegramClient['sendMediaGroup']>[2],
-    ): ReturnType<TelegramClient['sendMediaGroup']> {
-        return this.client.sendMediaGroup(this.inputPeer, medias, params)
     }
 }
 

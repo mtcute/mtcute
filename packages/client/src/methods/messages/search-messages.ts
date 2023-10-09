@@ -1,9 +1,9 @@
-import { Long, tl } from '@mtcute/core'
+import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { ArrayPaginated, InputPeerLike, Message, PeersIndex, SearchFilters } from '../../types'
 import { makeArrayPaginated, normalizeDate } from '../../utils/misc-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 // @exported
 export type SearchMessagesOffset = number
@@ -13,10 +13,9 @@ export type SearchMessagesOffset = number
  *
  * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`.
  * @param params  Additional search parameters
- * @internal
  */
 export async function searchMessages(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params?: {
         /**
          * Text query string. Required for text-only messages,
@@ -129,10 +128,10 @@ export async function searchMessages(
 
     const minDate = normalizeDate(params.minDate) ?? 0
     const maxDate = normalizeDate(params.maxDate) ?? 0
-    const peer = await this.resolvePeer(chatId)
-    const fromUser = params.fromUser ? await this.resolvePeer(params.fromUser) : undefined
+    const peer = await resolvePeer(client, chatId)
+    const fromUser = params.fromUser ? await resolvePeer(client, params.fromUser) : undefined
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.search',
         peer,
         q: query,
@@ -153,7 +152,7 @@ export async function searchMessages(
 
     const peers = PeersIndex.from(res)
 
-    const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(this, msg, peers))
+    const msgs = res.messages.filter((msg) => msg._ !== 'messageEmpty').map((msg) => new Message(msg, peers))
 
     const last = msgs[msgs.length - 1]
     const next = last ? last.id : undefined

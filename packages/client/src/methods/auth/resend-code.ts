@@ -1,6 +1,6 @@
+import { BaseTelegramClient } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { SentCode } from '../../types'
 import { normalizePhoneNumber } from '../../utils/misc-utils'
 
@@ -9,11 +9,9 @@ import { normalizePhoneNumber } from '../../utils/misc-utils'
  *
  * The type of the code to be re-sent is specified in the `nextType` attribute of
  * {@link SentCode} object returned by {@link sendCode}
- *
- * @internal
  */
 export async function resendCode(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params: {
         /** Phone number in international format */
         phone: string
@@ -24,7 +22,7 @@ export async function resendCode(
 ): Promise<SentCode> {
     const { phone, phoneCodeHash } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'auth.resendCode',
         phoneNumber: normalizePhoneNumber(phone),
         phoneCodeHash,

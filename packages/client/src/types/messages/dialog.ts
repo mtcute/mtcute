@@ -1,9 +1,9 @@
 import { getMarkedPeerId, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { assertTypeIsNot, hasValueAtKey, makeInspectable } from '../../utils'
 import { MtMessageNotFoundError } from '../errors'
-import { Chat, PeersIndex } from '../peers'
+import { Chat } from '../peers/chat'
+import { PeersIndex } from '../peers/peers-index'
 import { DraftMessage } from './draft-message'
 import { Message } from './message'
 
@@ -22,7 +22,6 @@ export type InputDialogFolder = string | number | tl.RawDialogFilter
  */
 export class Dialog {
     constructor(
-        readonly client: TelegramClient,
         readonly raw: tl.RawDialog,
         readonly _peers: PeersIndex,
         readonly _messages: Map<number, tl.TypeMessage>,
@@ -35,11 +34,7 @@ export class Dialog {
      * @param dialogs  TL object
      * @param limit  Maximum number of dialogs to parse
      */
-    static parseTlDialogs(
-        client: TelegramClient,
-        dialogs: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs,
-        limit?: number,
-    ): Dialog[] {
+    static parseTlDialogs(dialogs: tl.messages.TypeDialogs | tl.messages.TypePeerDialogs, limit?: number): Dialog[] {
         assertTypeIsNot('parseDialogs', dialogs, 'messages.dialogsNotModified')
 
         const peers = PeersIndex.from(dialogs)
@@ -51,9 +46,7 @@ export class Dialog {
             messages.set(getMarkedPeerId(msg.peerId), msg)
         })
 
-        const arr = dialogs.dialogs
-            .filter(hasValueAtKey('_', 'dialog'))
-            .map((it) => new Dialog(client, it, peers, messages))
+        const arr = dialogs.dialogs.filter(hasValueAtKey('_', 'dialog')).map((it) => new Dialog(it, peers, messages))
 
         if (limit) {
             return arr.slice(0, limit)
@@ -214,7 +207,7 @@ export class Dialog {
                     break
             }
 
-            this._chat = new Chat(this.client, chat)
+            this._chat = new Chat(chat)
         }
 
         return this._chat
@@ -229,7 +222,7 @@ export class Dialog {
             const cid = this.chat.id
 
             if (this._messages.has(cid)) {
-                this._lastMessage = new Message(this.client, this._messages.get(cid)!, this._peers)
+                this._lastMessage = new Message(this._messages.get(cid)!, this._peers)
             } else {
                 throw new MtMessageNotFoundError(cid, 0)
             }
@@ -287,7 +280,7 @@ export class Dialog {
     get draftMessage(): DraftMessage | null {
         if (this._draftMessage === undefined) {
             if (this.raw.draft?._ === 'draftMessage') {
-                this._draftMessage = new DraftMessage(this.client, this.raw.draft)
+                this._draftMessage = new DraftMessage(this.raw.draft)
             } else {
                 this._draftMessage = null
             }

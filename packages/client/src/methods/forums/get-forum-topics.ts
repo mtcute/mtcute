@@ -1,7 +1,9 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { ArrayPaginated, ForumTopic, InputPeerLike } from '../../types'
 import { makeArrayPaginated } from '../../utils'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 // @exported
 export interface GetForumTopicsOffset {
@@ -20,10 +22,9 @@ const defaultOffset: GetForumTopicsOffset = {
  * Get forum topics
  *
  * @param chatId  Chat ID or username
- * @internal
  */
 export async function getForumTopics(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     params?: {
         /**
@@ -52,9 +53,9 @@ export async function getForumTopics(
         limit = 100,
     } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'channels.getForumTopics',
-        channel: normalizeToInputChannel(await this.resolvePeer(chatId), chatId),
+        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
         q: query,
         offsetDate,
         offsetId,
@@ -62,7 +63,7 @@ export async function getForumTopics(
         limit,
     })
 
-    const topics = ForumTopic.parseTlForumTopics(this, res)
+    const topics = ForumTopic.parseTlForumTopics(res)
 
     const last = topics[topics.length - 1]
     const next = last ?

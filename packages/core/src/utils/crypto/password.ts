@@ -4,8 +4,9 @@ import { tl } from '@mtcute/tl'
 
 import { MtSecurityError, MtUnsupportedError } from '../../types'
 import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils'
-import { randomBytes, xorBuffer } from '../buffer-utils'
+import { randomBytes } from '../buffer-utils'
 import { ICryptoProvider } from './abstract'
+import { xorBuffer } from './utils'
 
 /**
  * Compute password hash as defined by MTProto.

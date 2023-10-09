@@ -1,6 +1,8 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { ChatInviteLink, InputPeerLike } from '../../types'
 import { normalizeDate } from '../../utils/misc-utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Create an additional invite link for the chat.
@@ -9,10 +11,9 @@ import { normalizeDate } from '../../utils/misc-utils'
  *
  * @param chatId  Chat ID
  * @param params
- * @internal
  */
 export async function createInviteLink(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     params?: {
         /**
@@ -38,13 +39,13 @@ export async function createInviteLink(
 ): Promise<ChatInviteLink> {
     if (!params) params = {}
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.exportChatInvite',
-        peer: await this.resolvePeer(chatId),
+        peer: await resolvePeer(client, chatId),
         expireDate: normalizeDate(params.expires),
         usageLimit: params.usageLimit,
         requestNeeded: params.withApproval,
     })
 
-    return new ChatInviteLink(this, res)
+    return new ChatInviteLink(res)
 }

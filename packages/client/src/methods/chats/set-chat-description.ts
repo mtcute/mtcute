@@ -1,5 +1,7 @@
-import { TelegramClient } from '../../client'
+import { BaseTelegramClient } from '@mtcute/core'
+
 import { InputPeerLike } from '../../types'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Change chat description
@@ -8,16 +10,15 @@ import { InputPeerLike } from '../../types'
  *
  * @param chatId  Chat ID or username
  * @param description  New chat description, 0-255 characters
- * @internal
  */
 export async function setChatDescription(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     description: string,
 ): Promise<void> {
-    const chat = await this.resolvePeer(chatId)
+    const chat = await resolvePeer(client, chatId)
 
-    await this.call({
+    await client.call({
         _: 'messages.editChatAbout',
         peer: chat,
         about: description,

@@ -1,6 +1,5 @@
 import { tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../../client'
 import { makeInspectable } from '../../../utils'
 import { ReactionEmoji, toReactionEmoji } from '../../reactions'
 import { StoryInteractiveArea } from './base'
@@ -15,11 +14,8 @@ import { StoryInteractiveArea } from './base'
 export class StoryInteractiveReaction extends StoryInteractiveArea {
     readonly type = 'reaction' as const
 
-    constructor(
-        client: TelegramClient,
-        readonly raw: tl.RawMediaAreaSuggestedReaction,
-    ) {
-        super(client, raw)
+    constructor(readonly raw: tl.RawMediaAreaSuggestedReaction) {
+        super(raw)
     }
 
     /** Whether this reaction is on a dark background */

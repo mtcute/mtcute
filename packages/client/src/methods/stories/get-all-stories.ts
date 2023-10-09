@@ -1,15 +1,13 @@
+import { BaseTelegramClient } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
-import { TelegramClient } from '../../client'
 import { AllStories } from '../../types'
 
 /**
  * Get all stories (e.g. to load the top bar)
- *
- * @internal
  */
 export async function getAllStories(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     params?: {
         /**
          * Offset from which to fetch stories
@@ -26,7 +24,7 @@ export async function getAllStories(
 
     const { offset, archived } = params
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'stories.getAllStories',
         state: offset,
         next: Boolean(offset),
@@ -35,5 +33,5 @@ export async function getAllStories(
 
     assertTypeIsNot('getAllStories', res, 'stories.allStoriesNotModified')
 
-    return new AllStories(this, res)
+    return new AllStories(res)
 }

@@ -1,8 +1,8 @@
-import { tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TelegramClient } from '../../client'
 import { ArrayPaginated, ChatInviteLinkMember, InputPeerLike, PeersIndex } from '../../types'
 import { makeArrayPaginated, normalizeDate, normalizeToInputUser } from '../../utils'
+import { resolvePeer } from '../users/resolve-peer'
 
 /**
  * Iterate over users who have joined
@@ -10,10 +10,9 @@ import { makeArrayPaginated, normalizeDate, normalizeToInputUser } from '../../u
  *
  * @param chatId  Chat ID
  * @param params  Additional params
- * @internal
  */
 export async function getInviteLinkMembers(
-    this: TelegramClient,
+    client: BaseTelegramClient,
     chatId: InputPeerLike,
     params?: {
         /**
@@ -53,7 +52,7 @@ export async function getInviteLinkMembers(
         requestedSearch?: string
     },
 ): Promise<ArrayPaginated<ChatInviteLinkMember, { date: number; user: tl.TypeInputUser }>> {
-    const peer = await this.resolvePeer(chatId)
+    const peer = await resolvePeer(client, chatId)
     if (!params) params = {}
 
     const { limit = 100, link, requestedSearch, requested = Boolean(requestedSearch) } = params
@@ -62,7 +61,7 @@ export async function getInviteLinkMembers(
 
     const offsetDate = normalizeDate(params.offsetDate) ?? 0
 
-    const res = await this.call({
+    const res = await client.call({
         _: 'messages.getChatInviteImporters',
         limit,
         peer,
@@ -75,7 +74,7 @@ export async function getInviteLinkMembers(
 
     const peers = PeersIndex.from(res)
 
-    const members = res.importers.map((it) => new ChatInviteLinkMember(this, it, peers))
+    const members = res.importers.map((it) => new ChatInviteLinkMember(it, peers))
 
     const last = members[members.length - 1]
     const nextOffset = last ?
