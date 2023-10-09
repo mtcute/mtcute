@@ -6,16 +6,6 @@ import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 import { resolvePeerMany } from '../users/resolve-peer-many'
 
 /**
- * Delete a single contact from your Telegram contacts list
- *
- * Returns deleted contact's profile or `null` in case
- * that user was not in your contacts list
- *
- * @param userId  User ID, username or phone number
- */
-export async function deleteContacts(client: BaseTelegramClient, userId: InputPeerLike): Promise<User | null>
-
-/**
  * Delete one or more contacts from your Telegram contacts list
  *
  * Returns deleted contact's profiles. Does not return
@@ -23,20 +13,13 @@ export async function deleteContacts(client: BaseTelegramClient, userId: InputPe
  *
  * @param userIds  User IDs, usernames or phone numbers
  */
-export async function deleteContacts(client: BaseTelegramClient, userIds: InputPeerLike[]): Promise<User[]>
+export async function deleteContacts(client: BaseTelegramClient, userIds: MaybeArray<InputPeerLike>): Promise<User[]> {
+    if (!Array.isArray(userIds)) userIds = [userIds]
 
-/** @internal */
-export async function deleteContacts(
-    client: BaseTelegramClient,
-    userIds: MaybeArray<InputPeerLike>,
-): Promise<MaybeArray<User> | null> {
-    const single = !Array.isArray(userIds)
-    if (single) userIds = [userIds as InputPeerLike]
+    const inputPeers = await resolvePeerMany(client, userIds, normalizeToInputUser)
 
-    const inputPeers = await resolvePeerMany(client, userIds as InputPeerLike[], normalizeToInputUser)
-
-    if (single && !inputPeers.length) {
-        throw new MtInvalidPeerTypeError((userIds as InputPeerLike[])[0], 'user')
+    if (!inputPeers.length) {
+        throw new MtInvalidPeerTypeError('all provided ids', 'user')
     }
 
     const res = await client.call({
@@ -46,11 +29,7 @@ export async function deleteContacts(
 
     assertIsUpdatesGroup('contacts.deleteContacts', res)
 
-    if (single && !res.updates.length) return null
-
     client.network.handleUpdate(res)
 
-    const users = res.users.map((user) => new User(user))
-
-    return single ? users[0] : users
+    return res.users.map((user) => new User(user))
 }
