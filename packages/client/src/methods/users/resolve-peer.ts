@@ -7,7 +7,6 @@ import {
     tl,
     toggleChannelIdMark,
 } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
 
 import { MtPeerNotFoundError } from '../../types/errors'
 import { InputPeerLike } from '../../types/peers'
@@ -26,10 +25,13 @@ export async function resolvePeer(
     peerId: InputPeerLike,
     force = false,
 ): Promise<tl.TypeInputPeer> {
-    // for convenience we also accept tl objects directly
+    // for convenience we also accept tl and User/Chat objects directly
     if (typeof peerId === 'object') {
         if (tl.isAnyPeer(peerId)) {
             peerId = getMarkedPeerId(peerId)
+        } else if ('type' in peerId) {
+            // User | Chat
+            return peerId.inputPeer
         } else {
             return normalizeToInputPeer(peerId)
         }
@@ -45,29 +47,17 @@ export async function resolvePeer(
 
         peerId = peerId.replace(/[@+\s()]/g, '')
 
+        let res
+
         if (peerId.match(/^\d+$/)) {
             // phone number
             const fromStorage = await client.storage.getPeerByPhone(peerId)
             if (fromStorage) return fromStorage
 
-            const res = await client.call({
-                _: 'contacts.getContacts',
-                hash: Long.ZERO,
+            res = await client.call({
+                _: 'contacts.resolvePhone',
+                phone: peerId,
             })
-
-            assertTypeIs('contacts.getContacts', res, 'contacts.contacts')
-
-            const found = res.users.find((it) => (it as tl.RawUser).phone === peerId)
-
-            if (found && found._ === 'user') {
-                return {
-                    _: 'inputPeerUser',
-                    userId: found.id,
-                    accessHash: found.accessHash!,
-                }
-            }
-
-            throw new MtPeerNotFoundError(`Could not find a peer by phone ${peerId}`)
         } else {
             // username
             if (!force) {
@@ -75,64 +65,62 @@ export async function resolvePeer(
                 if (fromStorage) return fromStorage
             }
 
-            const res = await client.call({
+            res = await client.call({
                 _: 'contacts.resolveUsername',
                 username: peerId,
             })
-
-            if (res.peer._ === 'peerUser') {
-                const id = res.peer.userId
-
-                const found = res.users.find((it) => it.id === id)
-
-                if (found && found._ === 'user') {
-                    if (!found.accessHash) {
-                        // no access hash, we can't use it
-                        // this may happen when bot resolves a username
-                        // of a user who hasn't started a conversation with it
-                        throw new MtPeerNotFoundError(
-                            `Peer (user) with username ${peerId} was found, but it has no access hash`,
-                        )
-                    }
-
-                    return {
-                        _: 'inputPeerUser',
-                        userId: found.id,
-                        accessHash: found.accessHash,
-                    }
-                }
-            } else if (res.peer._ === 'peerChannel') {
-                const id = res.peer.channelId
-                const found = res.chats.find((it) => it.id === id)
-
-                if (found) {
-                    if (!(found._ === 'channel' || found._ === 'channelForbidden')) {
-                        // chats can't have usernames
-                        // furthermore, our id is a channel id, so it must be a channel
-                        // this should never happen, unless Telegram goes crazy
-                        throw new MtTypeAssertionError('contacts.resolveUsername#chats', 'channel', found._)
-                    }
-
-                    if (!found.accessHash) {
-                        // shouldn't happen? but just in case
-                        throw new MtPeerNotFoundError(
-                            `Peer (channel) with username ${peerId} was found, but it has no access hash`,
-                        )
-                    }
-
-                    return {
-                        _: 'inputPeerChannel',
-                        channelId: found.id,
-                        accessHash: found.accessHash,
-                    }
-                }
-            } else {
-                // chats can't have usernames
-                throw new MtTypeAssertionError('contacts.resolveUsername', 'user or channel', res.peer._)
-            }
-
-            throw new MtPeerNotFoundError(`Could not find a peer by username ${peerId}`)
         }
+
+        if (res.peer._ === 'peerUser') {
+            const id = res.peer.userId
+
+            const found = res.users.find((it) => it.id === id)
+
+            if (found && found._ === 'user') {
+                if (!found.accessHash) {
+                    // no access hash, we can't use it
+                    // this may happen when bot resolves a username
+                    // of a user who hasn't started a conversation with it
+                    throw new MtPeerNotFoundError(
+                        `Peer (user) with username ${peerId} was found, but it has no access hash`,
+                    )
+                }
+
+                return {
+                    _: 'inputPeerUser',
+                    userId: found.id,
+                    accessHash: found.accessHash,
+                }
+            }
+        } else if (res.peer._ === 'peerChannel') {
+            const id = res.peer.channelId
+            const found = res.chats.find((it) => it.id === id)
+
+            if (found) {
+                if (!(found._ === 'channel' || found._ === 'channelForbidden')) {
+                    // chats can't have usernames
+                    // furthermore, our id is a channel id, so it must be a channel
+                    // this should never happen, unless Telegram goes crazy
+                    throw new MtTypeAssertionError('contacts.resolveUsername#chats', 'channel', found._)
+                }
+
+                if (!found.accessHash) {
+                    // shouldn't happen? but just in case
+                    throw new MtPeerNotFoundError(`Peer (channel) with ${peerId} was found, but it has no access hash`)
+                }
+
+                return {
+                    _: 'inputPeerChannel',
+                    channelId: found.id,
+                    accessHash: found.accessHash,
+                }
+            }
+        } else {
+            // chats can't have usernames
+            throw new MtTypeAssertionError('contacts.resolveUsername', 'user or channel', res.peer._)
+        }
+
+        throw new MtPeerNotFoundError(`Could not find a peer by ${peerId}`)
     }
 
     const peerType = getBasicPeerType(peerId)
@@ -171,25 +159,10 @@ export async function resolvePeer(
             break
         }
         case 'chat': {
-            // do we really need to make a call?
-            // const id = -peerId
-            // const res = await client.call({
-            //     _: 'messages.getChats',
-            //     id: [id],
-            // })
-            //
-            // const found = res.chats.find((it) => it.id === id)
-            // if (found && (found._ === 'chat' || found._ === 'chatForbidden'))
-            //     return {
-            //         _: 'inputPeerChat',
-            //         chatId: found.id
-            //     }
-
             return {
                 _: 'inputPeerChat',
                 chatId: -peerId,
             }
-            // break
         }
         case 'channel': {
             const id = toggleChannelIdMark(peerId)

@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, MessageEntity } from '../../types'
+import { InputMessageId, MessageEntity, normalizeInputMessageId } from '../../types'
 import { resolvePeer } from '../users/resolve-peer'
 
 /**
@@ -10,21 +10,18 @@ import { resolvePeer } from '../users/resolve-peer'
  */
 export async function translateMessage(
     client: BaseTelegramClient,
-    params: {
-        /** Chat or user ID */
-        chatId: InputPeerLike
-        /** Identifier of the message to translate */
-        messageId: number
+    params: InputMessageId & {
         /** Target language (two-letter ISO 639-1 language code) */
         toLanguage: string
     },
 ): Promise<[string, MessageEntity[]] | null> {
-    const { chatId, messageId, toLanguage } = params
+    const { toLanguage } = params
+    const { chatId, message } = normalizeInputMessageId(params)
 
     const res = await client.call({
         _: 'messages.translateText',
         peer: await resolvePeer(client, chatId),
-        id: [messageId],
+        id: [message],
         toLang: toLanguage,
     })
 

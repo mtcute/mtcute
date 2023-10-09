@@ -11,6 +11,7 @@ import {
 } from '../../utils/peer-utils'
 import { resolvePeer } from '../users/resolve-peer'
 
+// @available=both
 /**
  * Get basic information about a chat.
  *

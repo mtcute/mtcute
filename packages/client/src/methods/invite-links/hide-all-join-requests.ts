@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
+import type { ChatInviteLink, InputPeerLike } from '../../types'
 import { resolvePeer } from '../users/resolve-peer'
 
 /**
@@ -16,7 +16,7 @@ export async function hideAllJoinRequests(
         action: 'approve' | 'deny'
 
         /** Invite link to target */
-        link?: string
+        link?: string | ChatInviteLink
     },
 ): Promise<void> {
     const { chatId, action, link } = params
@@ -25,6 +25,6 @@ export async function hideAllJoinRequests(
         _: 'messages.hideAllChatJoinRequests',
         approved: action === 'approve',
         peer: await resolvePeer(client, chatId),
-        link,
+        link: typeof link === 'string' ? link : link?.link,
     })
 }

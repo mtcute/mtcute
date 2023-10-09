@@ -1,6 +1,6 @@
 import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 
-import { InputPeerLike, Message } from '../../types'
+import type { ForumTopic, InputPeerLike, Message } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
 import { _findMessageInUpdate } from '../messages/find-in-update'
 import { resolvePeer } from '../users/resolve-peer'
@@ -19,9 +19,10 @@ export async function editForumTopic(
     params: {
         /** Chat ID or username */
         chatId: InputPeerLike
-        /** ID of the topic (i.e. its top message ID) */
 
-        topicId: number
+        /** ID of the topic (i.e. its top message ID) */
+        topicId: number | ForumTopic
+
         /**
          * New topic title
          */
@@ -41,7 +42,7 @@ export async function editForumTopic(
     const res = await client.call({
         _: 'channels.editForumTopic',
         channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
-        topicId,
+        topicId: typeof topicId === 'number' ? topicId : topicId.id,
         title,
         iconEmojiId: icon ? icon ?? Long.ZERO : undefined,
     })

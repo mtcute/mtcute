@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, Message } from '../../types'
+import type { ForumTopic, InputPeerLike, Message } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
 import { _findMessageInUpdate } from '../messages/find-in-update'
 import { resolvePeer } from '../users/resolve-peer'
@@ -19,7 +19,7 @@ export async function toggleForumTopicClosed(
         chatId: InputPeerLike
 
         /** ID of the topic (i.e. its top message ID) */
-        topicId: number
+        topicId: number | ForumTopic
 
         /** Whether the topic should be closed */
         closed: boolean
@@ -30,7 +30,7 @@ export async function toggleForumTopicClosed(
     const res = await client.call({
         _: 'channels.editForumTopic',
         channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
-        topicId,
+        topicId: typeof topicId === 'number' ? topicId : topicId.id,
         closed,
     })
 

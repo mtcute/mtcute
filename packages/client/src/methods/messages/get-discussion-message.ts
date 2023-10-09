@@ -1,6 +1,6 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { Message } from '../../types/messages'
+import { InputMessageId, Message, normalizeInputMessageId } from '../../types/messages'
 import { InputPeerLike, PeersIndex } from '../../types/peers'
 import { resolvePeer } from '../users/resolve-peer'
 
@@ -54,10 +54,11 @@ export async function _getDiscussionMessage(
  */
 export async function getDiscussionMessage(
     client: BaseTelegramClient,
-    peer: InputPeerLike,
-    message: number,
+    params: InputMessageId,
 ): Promise<Message | null> {
-    const inputPeer = await resolvePeer(client, peer)
+    const { chatId, message } = normalizeInputMessageId(params)
+
+    const inputPeer = await resolvePeer(client, chatId)
 
     const res = await client.call({
         _: 'messages.getDiscussionMessage',

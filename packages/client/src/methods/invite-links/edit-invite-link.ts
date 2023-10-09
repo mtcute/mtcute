@@ -21,7 +21,7 @@ export async function editInviteLink(
         /** Chat ID */
         chatId: InputPeerLike
         /** Invite link to edit */
-        link: string
+        link: string | ChatInviteLink
         /**
          * Date when this link will expire.
          * If `number` is passed, UNIX time in ms is expected.
@@ -48,7 +48,7 @@ export async function editInviteLink(
     const res = await client.call({
         _: 'messages.editExportedChatInvite',
         peer: await resolvePeer(client, chatId),
-        link,
+        link: typeof link === 'string' ? link : link.link,
         expireDate: normalizeDate(expires),
         usageLimit,
         requestNeeded: withApproval,

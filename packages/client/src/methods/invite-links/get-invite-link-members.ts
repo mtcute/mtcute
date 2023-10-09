@@ -1,6 +1,6 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { ArrayPaginated, ChatInviteLinkMember, InputPeerLike, PeersIndex } from '../../types'
+import { ArrayPaginated, ChatInviteLink, ChatInviteLinkMember, InputPeerLike, PeersIndex } from '../../types'
 import { makeArrayPaginated, normalizeDate, normalizeToInputUser } from '../../utils'
 import { resolvePeer } from '../users/resolve-peer'
 
@@ -18,7 +18,7 @@ export async function getInviteLinkMembers(
         /**
          * Invite link for which to get members
          */
-        link?: string
+        link?: string | ChatInviteLink
 
         /**
          * Maximum number of users to return
@@ -65,7 +65,7 @@ export async function getInviteLinkMembers(
         _: 'messages.getChatInviteImporters',
         limit,
         peer,
-        link,
+        link: typeof link === 'string' ? link : link?.link,
         requested,
         q: requestedSearch,
         offsetDate,

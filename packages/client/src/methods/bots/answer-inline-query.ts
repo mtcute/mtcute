@@ -1,6 +1,6 @@
-import { BaseTelegramClient, tl } from '@mtcute/core'
+import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 
-import { BotInline, InputInlineResult } from '../../types'
+import { BotInline, InlineQuery, InputInlineResult } from '../../types/bots'
 
 /**
  * Answer an inline query.
@@ -11,7 +11,7 @@ import { BotInline, InputInlineResult } from '../../types'
  */
 export async function answerInlineQuery(
     client: BaseTelegramClient,
-    queryId: tl.Long,
+    queryId: tl.Long | InlineQuery,
     results: InputInlineResult[],
     params?: {
         /**
@@ -99,7 +99,7 @@ export async function answerInlineQuery(
 
     await client.call({
         _: 'messages.setInlineBotResults',
-        queryId,
+        queryId: Long.isLong(queryId) ? queryId : queryId.id,
         results: tlResults,
         cacheTime,
         gallery: gallery ?? defaultGallery,

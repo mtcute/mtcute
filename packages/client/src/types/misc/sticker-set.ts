@@ -12,6 +12,7 @@ import { parseDocument } from '../media/document-utils'
  * Can be one of:
  *   - Raw TL object
  *   - Sticker set short name
+ *   - {@link StickerSet} object
  *   - `{ dice: "<emoji>" }` (e.g. `{ dice: "🎲" }`) - Used for fetching animated dice stickers
  *   - `{ system: string }` - for system stickersets:
  *      - `"animated"` - Animated emojis stickerset
@@ -35,6 +36,7 @@ export type InputStickerSet =
               | 'default_statuses'
               | 'default_topic_icons'
       }
+    | StickerSet
     | string
 
 export function normalizeInputStickerSet(input: InputStickerSet): tl.TypeInputStickerSet {
@@ -45,6 +47,7 @@ export function normalizeInputStickerSet(input: InputStickerSet): tl.TypeInputSt
         }
     }
     if ('_' in input) return input
+    if (input instanceof StickerSet) return input.inputStickerSet
 
     if ('dice' in input) {
         return {

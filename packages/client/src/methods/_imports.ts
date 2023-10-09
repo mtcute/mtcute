@@ -42,6 +42,7 @@ import {
     InputFileLike,
     InputInlineResult,
     InputMediaLike,
+    InputMessageId,
     InputPeerLike,
     InputPrivacyRule,
     InputReaction,

@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
+import type { ForumTopic, InputPeerLike } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
 import { resolvePeer } from '../users/resolve-peer'
 
@@ -18,7 +18,7 @@ export async function reorderPinnedForumTopics(
         /**
          * Order of the pinned topics
          */
-        order: number[]
+        order: (number | ForumTopic)[]
 
         /**
          * Whether to un-pin topics not present in the order
@@ -30,7 +30,7 @@ export async function reorderPinnedForumTopics(
     await client.call({
         _: 'channels.reorderPinnedForumTopics',
         channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
-        order,
+        order: order.map((it) => (typeof it === 'number' ? it : it.id)),
         force,
     })
 }

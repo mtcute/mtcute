@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, normalizeInputReaction, PeerReaction } from '../../types'
+import { normalizeInputMessageId, normalizeInputReaction, PeerReaction } from '../../types'
 import { resolvePeer } from '../users/resolve-peer'
 import { getReactionUsers } from './get-reaction-users'
 
@@ -15,9 +15,7 @@ import { getReactionUsers } from './get-reaction-users'
  */
 export async function* iterReactionUsers(
     client: BaseTelegramClient,
-    chatId: InputPeerLike,
-    messageId: number,
-    params?: Parameters<typeof getReactionUsers>[3] & {
+    params: Parameters<typeof getReactionUsers>[1] & {
         /**
          * Limit the number of events returned.
          *
@@ -33,8 +31,7 @@ export async function* iterReactionUsers(
         chunkSize?: number
     },
 ): AsyncIterableIterator<PeerReaction> {
-    if (!params) params = {}
-
+    const { chatId, message } = normalizeInputMessageId(params)
     const peer = await resolvePeer(client, chatId)
 
     const { limit = Infinity, chunkSize = 100 } = params
@@ -45,7 +42,9 @@ export async function* iterReactionUsers(
     const reaction = normalizeInputReaction(params.emoji)
 
     for (;;) {
-        const res = await getReactionUsers(client, peer, messageId, {
+        const res = await getReactionUsers(client, {
+            chatId: peer,
+            message,
             emoji: reaction,
             limit: Math.min(chunkSize, limit - current),
             offset,

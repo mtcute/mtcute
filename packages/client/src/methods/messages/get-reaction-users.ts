@@ -2,8 +2,9 @@ import { BaseTelegramClient } from '@mtcute/core'
 
 import {
     ArrayPaginated,
-    InputPeerLike,
+    InputMessageId,
     InputReaction,
+    normalizeInputMessageId,
     normalizeInputReaction,
     PeerReaction,
     PeersIndex,
@@ -17,15 +18,11 @@ export type GetReactionUsersOffset = string
 /**
  * Get users who have reacted to the message.
  *
- * @param chatId  Chat ID
- * @param messageId  Message ID
  * @param params
  */
 export async function getReactionUsers(
     client: BaseTelegramClient,
-    chatId: InputPeerLike,
-    messageId: number,
-    params?: {
+    params: InputMessageId & {
         /**
          * Get only reactions with the specified emoji
          */
@@ -44,9 +41,8 @@ export async function getReactionUsers(
         offset?: GetReactionUsersOffset
     },
 ): Promise<ArrayPaginated<PeerReaction, GetReactionUsersOffset>> {
-    if (!params) params = {}
-
     const { limit = 100, offset, emoji } = params
+    const { chatId, message } = normalizeInputMessageId(params)
 
     const peer = await resolvePeer(client, chatId)
 
@@ -55,7 +51,7 @@ export async function getReactionUsers(
     const res = await client.call({
         _: 'messages.getMessageReactionsList',
         peer,
-        id: messageId,
+        id: message,
         reaction,
         limit,
         offset,

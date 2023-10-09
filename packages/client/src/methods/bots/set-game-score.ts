@@ -1,6 +1,6 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { InputPeerLike, Message } from '../../types'
+import { InputMessageId, InputPeerLike, Message, normalizeInputMessageId } from '../../types'
 import { normalizeInlineId } from '../../utils/inline-utils'
 import { normalizeToInputUser } from '../../utils/peer-utils'
 import { _findMessageInUpdate } from '../messages/find-in-update'
@@ -14,13 +14,7 @@ import { resolvePeer } from '../users/resolve-peer'
  */
 export async function setGameScore(
     client: BaseTelegramClient,
-    params: {
-        /** Chat where the game was found */
-        chatId: InputPeerLike
-
-        /** ID of the message where the game was found */
-        message: number
-
+    params: InputMessageId & {
         /** ID of the user who has scored */
         userId: InputPeerLike
 
@@ -40,7 +34,8 @@ export async function setGameScore(
         force?: boolean
     },
 ): Promise<Message> {
-    const { chatId, message, userId, score, noEdit, force } = params
+    const { userId, score, noEdit, force } = params
+    const { chatId, message } = normalizeInputMessageId(params)
 
     const user = normalizeToInputUser(await resolvePeer(client, userId), userId)
     const chat = await resolvePeer(client, chatId)

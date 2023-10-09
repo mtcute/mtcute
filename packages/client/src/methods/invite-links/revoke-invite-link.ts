@@ -16,12 +16,12 @@ import { resolvePeer } from '../users/resolve-peer'
 export async function revokeInviteLink(
     client: BaseTelegramClient,
     chatId: InputPeerLike,
-    link: string,
+    link: string | ChatInviteLink,
 ): Promise<ChatInviteLink> {
     const res = await client.call({
         _: 'messages.editExportedChatInvite',
         peer: await resolvePeer(client, chatId),
-        link,
+        link: typeof link === 'string' ? link : link.link,
         revoked: true,
     })
 

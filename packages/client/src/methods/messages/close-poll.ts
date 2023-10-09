@@ -1,7 +1,7 @@
 import { BaseTelegramClient, Long, MtTypeAssertionError } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
-import { InputPeerLike, PeersIndex, Poll } from '../../types'
+import { InputMessageId, normalizeInputMessageId, PeersIndex, Poll } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 import { resolvePeer } from '../users/resolve-peer'
 
@@ -11,16 +11,8 @@ import { resolvePeer } from '../users/resolve-peer'
  * Once closed, poll can't be re-opened, and nobody
  * will be able to vote in it
  */
-export async function closePoll(
-    client: BaseTelegramClient,
-    params: {
-        /** Chat ID where this poll was found */
-        chatId: InputPeerLike
-        /** Message ID where this poll was found */
-        message: number
-    },
-): Promise<Poll> {
-    const { chatId, message } = params
+export async function closePoll(client: BaseTelegramClient, params: InputMessageId): Promise<Poll> {
+    const { chatId, message } = normalizeInputMessageId(params)
 
     const res = await client.call({
         _: 'messages.editMessage',

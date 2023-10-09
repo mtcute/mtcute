@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
+import { ForumTopic, InputPeerLike } from '../../types'
 import { normalizeToInputChannel } from '../../utils/peer-utils'
 import { resolvePeer } from '../users/resolve-peer'
 
@@ -15,7 +15,7 @@ export async function toggleForumTopicPinned(
         /** Chat ID or username */
         chatId: InputPeerLike
         /** ID of the topic (i.e. its top message ID) */
-        topicId: number
+        topicId: number | ForumTopic
         /** Whether the topic should be pinned */
         pinned: boolean
     },
@@ -25,7 +25,7 @@ export async function toggleForumTopicPinned(
     await client.call({
         _: 'channels.updatePinnedForumTopic',
         channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
-        topicId,
+        topicId: typeof topicId === 'number' ? topicId : topicId.id,
         pinned,
     })
 }

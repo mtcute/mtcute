@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, InputReaction, Message, normalizeInputReaction } from '../../types'
+import { InputMessageId, InputReaction, Message, normalizeInputMessageId, normalizeInputReaction } from '../../types'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils'
 import { resolvePeer } from '../users/resolve-peer'
 import { _findMessageInUpdate } from './find-in-update'
@@ -12,18 +12,15 @@ import { _findMessageInUpdate } from './find-in-update'
  */
 export async function sendReaction(
     client: BaseTelegramClient,
-    params: {
-        /** Chat ID with the message to react to */
-        chatId: InputPeerLike
-        /** Message ID to react to */
-        message: number
+    params: InputMessageId & {
         /** Reaction emoji (or `null` to remove reaction) */
         emoji?: InputReaction | null
         /** Whether to use a big reaction */
         big?: boolean
     },
 ): Promise<Message> {
-    const { chatId, message, emoji, big } = params
+    const { emoji, big } = params
+    const { chatId, message } = normalizeInputMessageId(params)
 
     const reaction = normalizeInputReaction(emoji)
 
