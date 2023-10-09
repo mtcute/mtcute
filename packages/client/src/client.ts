@@ -1899,23 +1899,16 @@ export interface TelegramClient extends BaseTelegramClient {
         sharePhone?: boolean
     }): Promise<User>
     /**
-     * Delete a single contact from your Telegram contacts list
-     *
-     * Returns deleted contact's profile or `null` in case
-     * that user was not in your contacts list
-     *
-     * @param userId  User ID, username or phone number
-     */
-    deleteContacts(userId: InputPeerLike): Promise<User | null>
-    /**
      * Delete one or more contacts from your Telegram contacts list
      *
      * Returns deleted contact's profiles. Does not return
      * profiles of users that were not in your contacts list
      *
+     * **Available**: 👤 users only
+     *
      * @param userIds  User IDs, usernames or phone numbers
      */
-    deleteContacts(userIds: InputPeerLike[]): Promise<User[]>
+    deleteContacts(userIds: MaybeArray<InputPeerLike>): Promise<User[]>
     /**
      * Get list of contacts from your Telegram contacts list.
      * **Available**: 👤 users only
@@ -2001,15 +1994,11 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get dialogs with certain peers.
      *
-     * @param peers  Peers for which to fetch dialogs.
-     */
-    getPeerDialogs(peers: InputPeerLike): Promise<Dialog>
-    /**
-     * Get dialogs with certain peers.
+     * **Available**: 👤 users only
      *
      * @param peers  Peers for which to fetch dialogs.
      */
-    getPeerDialogs(peers: InputPeerLike[]): Promise<Dialog[]>
+    getPeerDialogs(peers: MaybeArray<InputPeerLike>): Promise<Dialog[]>
     /**
      * Iterate over dialogs.
      *
@@ -2381,17 +2370,13 @@ export interface TelegramClient extends BaseTelegramClient {
         shouldDispatch?: true
     }): Promise<Message>
     /**
-     * Get a single forum topic by its ID
-     *
-     * @param chatId  Chat ID or username
-     */
-    getForumTopicsById(chatId: InputPeerLike, ids: number): Promise<ForumTopic>
-    /**
      * Get forum topics by their IDs
      *
+     * **Available**: ✅ both users and bots
+     *
      * @param chatId  Chat ID or username
      */
-    getForumTopicsById(chatId: InputPeerLike, ids: number[]): Promise<ForumTopic[]>
+    getForumTopicsById(chatId: InputPeerLike, ids: MaybeArray<number>): Promise<ForumTopic[]>
     /**
      * Get forum topics
      *
@@ -5081,20 +5066,16 @@ export interface TelegramClient extends BaseTelegramClient {
         },
     ): Promise<ArrayPaginated<Photo, number>>
     /**
-     * Get information about a single user.
-     *
-     * @param id  User's identifier. Can be ID, username, phone number, `"me"` or `"self"` or TL object
-     */
-    getUsers(id: InputPeerLike): Promise<User>
-    /**
      * Get information about multiple users.
      * You can retrieve up to 200 users at once.
      *
      * Note that order is not guaranteed.
      *
+     * **Available**: ✅ both users and bots
+     *
      * @param ids  Users' identifiers. Can be ID, username, phone number, `"me"`, `"self"` or TL object
      */
-    getUsers(ids: InputPeerLike[]): Promise<User[]>
+    getUsers(ids: MaybeArray<InputPeerLike>): Promise<User[]>
     /**
      * Iterate over profile photos
      *
@@ -5353,7 +5334,6 @@ export class TelegramClient extends BaseTelegramClient {
     unbanChatMember = unbanChatMember.bind(null, this)
     unrestrictChatMember = unbanChatMember.bind(null, this)
     addContact = addContact.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
     deleteContacts = deleteContacts.bind(null, this)
     getContacts = getContacts.bind(null, this)
     importContacts = importContacts.bind(null, this)
@@ -5363,7 +5343,6 @@ export class TelegramClient extends BaseTelegramClient {
     findFolder = findFolder.bind(null, this)
     getFolders = getFolders.bind(null, this)
     _normalizeInputFolder = _normalizeInputFolder.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
     getPeerDialogs = getPeerDialogs.bind(null, this)
     iterDialogs = iterDialogs.bind(null, this)
     setFoldersOrder = setFoldersOrder.bind(null, this)
@@ -5379,7 +5358,6 @@ export class TelegramClient extends BaseTelegramClient {
     createForumTopic = createForumTopic.bind(null, this)
     deleteForumTopicHistory = deleteForumTopicHistory.bind(null, this)
     editForumTopic = editForumTopic.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
     getForumTopicsById = getForumTopicsById.bind(null, this)
     getForumTopics = getForumTopics.bind(null, this)
     iterForumTopics = iterForumTopics.bind(null, this)
@@ -5506,7 +5484,6 @@ export class TelegramClient extends BaseTelegramClient {
     getMyUsername = getMyUsername.bind(null, this)
     getProfilePhoto = getProfilePhoto.bind(null, this)
     getProfilePhotos = getProfilePhotos.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
     getUsers = getUsers.bind(null, this)
     iterProfilePhotos = iterProfilePhotos.bind(null, this)
     // @ts-expect-error .bind() kinda breaks typings for overloads
