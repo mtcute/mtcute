@@ -53,6 +53,7 @@ import {
     MessageEntity,
     MessageMedia,
     MessageReactions,
+    ParametersSkip2,
     ParsedUpdate,
     PeerReaction,
     PeersIndex,

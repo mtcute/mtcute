@@ -76,14 +76,6 @@ export class ChosenInlineResult {
 
         return encodeInlineMessageId(this.raw.msgId)
     }
-
-    // async editMessage(params: Parameters<TelegramClient['editInlineMessage']>[1]): Promise<void> {
-    //     if (!this.raw.msgId) {
-    //         throw new MtArgumentError('No message ID, make sure you have included reply markup!')
-    //     }
-
-    //     return this.client.editInlineMessage(this.raw.msgId, params)
-    // }
 }
 
 makeInspectable(ChosenInlineResult)

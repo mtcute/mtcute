@@ -1,5 +1,6 @@
 export * from './bots'
 export * from './chat'
+export * from './group'
 export * from './logic'
 export * from './message'
 export * from './state'

@@ -1,32 +1,38 @@
-/* eslint-disable */
+/* eslint-disable @typescript-eslint/unified-signatures,@typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,max-depth,dot-notation */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types */
 // ^^ will be looked into in MTQ-29
 
 import {
-    BotChatJoinRequestUpdate,
     BotStoppedUpdate,
-    CallbackQuery,
     ChatJoinRequestUpdate,
     ChatMemberUpdate,
-    ChosenInlineResult,
     DeleteMessageUpdate,
+    DeleteStoryUpdate,
     HistoryReadUpdate,
-    InlineQuery,
     MaybeAsync,
-    Message,
     ParsedUpdate,
     PeersIndex,
     PollUpdate,
     PollVoteUpdate,
-    PreCheckoutQuery,
     StoryUpdate,
-    DeleteStoryUpdate,
     TelegramClient,
+    tl,
     UserStatusUpdate,
     UserTypingUpdate,
-    tl,
 } from '@mtcute/client'
+import { MtArgumentError } from '@mtcute/core'
 
+import {
+    CallbackQueryContext,
+    ChatJoinRequestUpdateContext,
+    ChosenInlineResultContext,
+    InlineQueryContext,
+    MessageContext,
+    PreCheckoutQueryContext,
+} from './context'
+import { UpdateContext } from './context/base'
+import { _parsedUpdateToContext, UpdateContextType } from './context/parse'
 import { filters, UpdateFilter } from './filters'
 // begin-codegen-imports
 import {
@@ -55,7 +61,6 @@ import {
 // end-codegen-imports
 import { PropagationAction } from './propagation'
 import { defaultStateKeyDelegate, IStateStorage, StateKeyDelegate, UpdateState } from './state'
-import { MtArgumentError } from '@mtcute/core'
 
 /**
  * Updates dispatcher
@@ -193,7 +198,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
-        this.dispatchRawUpdateNow(update, peers).catch((err) => this._client!['_emitError'](err))
+        this.dispatchRawUpdateNow(update, peers).catch((err) => this._client!._emitError(err))
     }
 
     /**
@@ -263,7 +268,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
-        this.dispatchUpdateNow(update).catch((err) => this._client!['_emitError'](err))
+        this.dispatchUpdateNow(update).catch((err) => this._client!._emitError(err))
     }
 
     /**
@@ -287,6 +292,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         parsedState?: UpdateState<State, SceneName> | null,
         parsedScene?: string | null,
         forceScene?: true,
+        parsedContext?: UpdateContextType,
     ): Promise<boolean> {
         if (!this._client) return false
 
@@ -301,9 +307,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             ) {
                 // no need to fetch scene if there are no registered scenes
 
-                const key = await this._stateKeyDelegate!(
-                    update.name === 'message_group' ? update.data[0] : update.data,
-                )
+                if (!parsedContext) parsedContext = _parsedUpdateToContext(this._client, update)
+                const key = await this._stateKeyDelegate!(parsedContext as any)
 
                 if (key) {
                     parsedScene = await this._storage.getCurrentScene(key)
@@ -334,16 +339,20 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         if (parsedState === undefined) {
             if (
                 this._storage &&
-                (update.name === 'new_message' || update.name === 'edit_message' || update.name === 'callback_query')
+                (update.name === 'new_message' ||
+                    update.name === 'edit_message' ||
+                    update.name === 'callback_query' ||
+                    update.name === 'message_group')
             ) {
-                const key = await this._stateKeyDelegate!(update.data)
+                if (!parsedContext) parsedContext = _parsedUpdateToContext(this._client, update)
+                const key = await this._stateKeyDelegate!(parsedContext as any)
 
                 if (key) {
                     let customKey
 
                     if (
                         !this._customStateKeyDelegate ||
-                        (customKey = await this._customStateKeyDelegate(update.data))
+                        (customKey = await this._customStateKeyDelegate(parsedContext as any))
                     ) {
                         parsedState = new UpdateState(
                             this._storage,
@@ -386,8 +395,9 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                         for (const h of handlers) {
                             let result: void | PropagationAction
 
-                            if (!h.check || (await h.check(update.data as any, parsedState as never))) {
-                                result = await h.callback(update.data as any, parsedState as never)
+                            if (!parsedContext) parsedContext = _parsedUpdateToContext(this._client, update)
+                            if (!h.check || (await h.check(parsedContext as any, parsedState as never))) {
+                                result = await h.callback(parsedContext as any, parsedState as never)
                                 handled = true
                             } else continue
 
@@ -436,7 +446,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             }
         }
 
-        this._postUpdateHandler?.(handled, update, parsedState as any)
+        await this._postUpdateHandler?.(handled, update, parsedState as any)
 
         return handled
     }
@@ -601,9 +611,9 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         if (child._client) {
             throw new MtArgumentError(
                 'Provided dispatcher is ' +
-                    (child._parent
-                        ? 'already a child. Use parent.removeChild() before calling addChild()'
-                        : 'already bound to a client. Use unbind() before calling addChild()'),
+                    (child._parent ?
+                        'already a child. Use parent.removeChild() before calling addChild()' :
+                        'already bound to a client. Use unbind() before calling addChild()'),
             )
         }
 
@@ -953,21 +963,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onNewMessage(
-        handler: NewMessageHandler<Message, State extends never ? never : UpdateState<State, SceneName>>['callback'],
-        group?: number,
-    ): void
-
-    /**
-     * Register a new message handler with a filter
-     *
-     * @param filter  Update filter
-     * @param handler  New message handler
-     * @param group  Handler group index
-     */
-    onNewMessage<Mod>(
-        filter: UpdateFilter<Message, Mod, State>,
         handler: NewMessageHandler<
-            filters.Modify<Message, Mod>,
+            MessageContext,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number,
@@ -981,9 +978,25 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onNewMessage<Mod>(
-        filter: UpdateFilter<Message, Mod>,
+        filter: UpdateFilter<MessageContext, Mod, State>,
         handler: NewMessageHandler<
-            filters.Modify<Message, Mod>,
+            filters.Modify<MessageContext, Mod>,
+            State extends never ? never : UpdateState<State, SceneName>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register a new message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  New message handler
+     * @param group  Handler group index
+     */
+    onNewMessage<Mod>(
+        filter: UpdateFilter<MessageContext, Mod>,
+        handler: NewMessageHandler<
+            filters.Modify<MessageContext, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number,
@@ -1001,21 +1014,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onEditMessage(
-        handler: EditMessageHandler<Message, State extends never ? never : UpdateState<State, SceneName>>['callback'],
-        group?: number,
-    ): void
-
-    /**
-     * Register an edit message handler with a filter
-     *
-     * @param filter  Update filter
-     * @param handler  Edit message handler
-     * @param group  Handler group index
-     */
-    onEditMessage<Mod>(
-        filter: UpdateFilter<Message, Mod, State>,
         handler: EditMessageHandler<
-            filters.Modify<Message, Mod>,
+            MessageContext,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number,
@@ -1029,9 +1029,25 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onEditMessage<Mod>(
-        filter: UpdateFilter<Message, Mod>,
+        filter: UpdateFilter<MessageContext, Mod, State>,
         handler: EditMessageHandler<
-            filters.Modify<Message, Mod>,
+            filters.Modify<MessageContext, Mod>,
+            State extends never ? never : UpdateState<State, SceneName>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register an edit message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Edit message handler
+     * @param group  Handler group index
+     */
+    onEditMessage<Mod>(
+        filter: UpdateFilter<MessageContext, Mod>,
+        handler: EditMessageHandler<
+            filters.Modify<MessageContext, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number,
@@ -1050,7 +1066,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onMessageGroup(
         handler: MessageGroupHandler<
-            Message[],
+            MessageContext,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number,
@@ -1064,9 +1080,9 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onMessageGroup<Mod>(
-        filter: UpdateFilter<Message[], Mod, State>,
+        filter: UpdateFilter<MessageContext, Mod, State>,
         handler: MessageGroupHandler<
-            filters.Modify<Message[], Mod>,
+            filters.Modify<MessageContext, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number,
@@ -1080,9 +1096,9 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onMessageGroup<Mod>(
-        filter: UpdateFilter<Message[], Mod>,
+        filter: UpdateFilter<MessageContext, Mod>,
         handler: MessageGroupHandler<
-            filters.Modify<Message[], Mod>,
+            filters.Modify<MessageContext, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number,
@@ -1109,8 +1125,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onDeleteMessage<Mod>(
-        filter: UpdateFilter<DeleteMessageUpdate, Mod>,
-        handler: DeleteMessageHandler<filters.Modify<DeleteMessageUpdate, Mod>>['callback'],
+        filter: UpdateFilter<UpdateContext<DeleteMessageUpdate>, Mod>,
+        handler: DeleteMessageHandler<filters.Modify<UpdateContext<DeleteMessageUpdate>, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1135,8 +1151,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onChatMemberUpdate<Mod>(
-        filter: UpdateFilter<ChatMemberUpdate, Mod>,
-        handler: ChatMemberUpdateHandler<filters.Modify<ChatMemberUpdate, Mod>>['callback'],
+        filter: UpdateFilter<UpdateContext<ChatMemberUpdate>, Mod>,
+        handler: ChatMemberUpdateHandler<filters.Modify<UpdateContext<ChatMemberUpdate>, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1161,8 +1177,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onInlineQuery<Mod>(
-        filter: UpdateFilter<InlineQuery, Mod>,
-        handler: InlineQueryHandler<filters.Modify<InlineQuery, Mod>>['callback'],
+        filter: UpdateFilter<InlineQueryContext, Mod>,
+        handler: InlineQueryHandler<filters.Modify<InlineQueryContext, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1187,8 +1203,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onChosenInlineResult<Mod>(
-        filter: UpdateFilter<ChosenInlineResult, Mod>,
-        handler: ChosenInlineResultHandler<filters.Modify<ChosenInlineResult, Mod>>['callback'],
+        filter: UpdateFilter<ChosenInlineResultContext, Mod>,
+        handler: ChosenInlineResultHandler<filters.Modify<ChosenInlineResultContext, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1205,7 +1221,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onCallbackQuery(
         handler: CallbackQueryHandler<
-            CallbackQuery,
+            CallbackQueryContext,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number,
@@ -1219,9 +1235,9 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onCallbackQuery<Mod>(
-        filter: UpdateFilter<CallbackQuery, Mod, State>,
+        filter: UpdateFilter<CallbackQueryContext, Mod, State>,
         handler: CallbackQueryHandler<
-            filters.Modify<CallbackQuery, Mod>,
+            filters.Modify<CallbackQueryContext, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number,
@@ -1235,9 +1251,9 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onCallbackQuery<Mod>(
-        filter: UpdateFilter<CallbackQuery, Mod>,
+        filter: UpdateFilter<CallbackQueryContext, Mod>,
         handler: CallbackQueryHandler<
-            filters.Modify<CallbackQuery, Mod>,
+            filters.Modify<CallbackQueryContext, Mod>,
             State extends never ? never : UpdateState<State, SceneName>
         >['callback'],
         group?: number,
@@ -1264,8 +1280,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onPollUpdate<Mod>(
-        filter: UpdateFilter<PollUpdate, Mod>,
-        handler: PollUpdateHandler<filters.Modify<PollUpdate, Mod>>['callback'],
+        filter: UpdateFilter<UpdateContext<PollUpdate>, Mod>,
+        handler: PollUpdateHandler<filters.Modify<UpdateContext<PollUpdate>, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1290,8 +1306,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onPollVote<Mod>(
-        filter: UpdateFilter<PollVoteUpdate, Mod>,
-        handler: PollVoteHandler<filters.Modify<PollVoteUpdate, Mod>>['callback'],
+        filter: UpdateFilter<UpdateContext<PollVoteUpdate>, Mod>,
+        handler: PollVoteHandler<filters.Modify<UpdateContext<PollVoteUpdate>, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1316,8 +1332,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onUserStatusUpdate<Mod>(
-        filter: UpdateFilter<UserStatusUpdate, Mod>,
-        handler: UserStatusUpdateHandler<filters.Modify<UserStatusUpdate, Mod>>['callback'],
+        filter: UpdateFilter<UpdateContext<UserStatusUpdate>, Mod>,
+        handler: UserStatusUpdateHandler<filters.Modify<UpdateContext<UserStatusUpdate>, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1342,8 +1358,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onUserTyping<Mod>(
-        filter: UpdateFilter<UserTypingUpdate, Mod>,
-        handler: UserTypingHandler<filters.Modify<UserTypingUpdate, Mod>>['callback'],
+        filter: UpdateFilter<UpdateContext<UserTypingUpdate>, Mod>,
+        handler: UserTypingHandler<filters.Modify<UpdateContext<UserTypingUpdate>, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1368,8 +1384,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onHistoryRead<Mod>(
-        filter: UpdateFilter<HistoryReadUpdate, Mod>,
-        handler: HistoryReadHandler<filters.Modify<HistoryReadUpdate, Mod>>['callback'],
+        filter: UpdateFilter<UpdateContext<HistoryReadUpdate>, Mod>,
+        handler: HistoryReadHandler<filters.Modify<UpdateContext<HistoryReadUpdate>, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1394,8 +1410,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onBotStopped<Mod>(
-        filter: UpdateFilter<BotStoppedUpdate, Mod>,
-        handler: BotStoppedHandler<filters.Modify<BotStoppedUpdate, Mod>>['callback'],
+        filter: UpdateFilter<UpdateContext<BotStoppedUpdate>, Mod>,
+        handler: BotStoppedHandler<filters.Modify<UpdateContext<BotStoppedUpdate>, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1420,8 +1436,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onBotChatJoinRequest<Mod>(
-        filter: UpdateFilter<BotChatJoinRequestUpdate, Mod>,
-        handler: BotChatJoinRequestHandler<filters.Modify<BotChatJoinRequestUpdate, Mod>>['callback'],
+        filter: UpdateFilter<ChatJoinRequestUpdateContext, Mod>,
+        handler: BotChatJoinRequestHandler<filters.Modify<ChatJoinRequestUpdateContext, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1446,8 +1462,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onChatJoinRequest<Mod>(
-        filter: UpdateFilter<ChatJoinRequestUpdate, Mod>,
-        handler: ChatJoinRequestHandler<filters.Modify<ChatJoinRequestUpdate, Mod>>['callback'],
+        filter: UpdateFilter<UpdateContext<ChatJoinRequestUpdate>, Mod>,
+        handler: ChatJoinRequestHandler<filters.Modify<UpdateContext<ChatJoinRequestUpdate>, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1472,8 +1488,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onPreCheckoutQuery<Mod>(
-        filter: UpdateFilter<PreCheckoutQuery, Mod>,
-        handler: PreCheckoutQueryHandler<filters.Modify<PreCheckoutQuery, Mod>>['callback'],
+        filter: UpdateFilter<PreCheckoutQueryContext, Mod>,
+        handler: PreCheckoutQueryHandler<filters.Modify<PreCheckoutQueryContext, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1498,8 +1514,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onStoryUpdate<Mod>(
-        filter: UpdateFilter<StoryUpdate, Mod>,
-        handler: StoryUpdateHandler<filters.Modify<StoryUpdate, Mod>>['callback'],
+        filter: UpdateFilter<UpdateContext<StoryUpdate>, Mod>,
+        handler: StoryUpdateHandler<filters.Modify<UpdateContext<StoryUpdate>, Mod>>['callback'],
         group?: number,
     ): void
 
@@ -1524,8 +1540,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onDeleteStory<Mod>(
-        filter: UpdateFilter<DeleteStoryUpdate, Mod>,
-        handler: DeleteStoryHandler<filters.Modify<DeleteStoryUpdate, Mod>>['callback'],
+        filter: UpdateFilter<UpdateContext<DeleteStoryUpdate>, Mod>,
+        handler: DeleteStoryHandler<filters.Modify<UpdateContext<DeleteStoryUpdate>, Mod>>['callback'],
         group?: number,
     ): void
 

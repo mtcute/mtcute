@@ -1,7 +1,7 @@
-import { BaseTelegramClient, MtTypeAssertionError, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { BaseTelegramClient, MaybeArray, MtTypeAssertionError, tl } from '@mtcute/core'
+import { assertTypeIs, LongSet } from '@mtcute/core/utils'
 
-import { Sticker } from '../../types'
+import { Message, Sticker } from '../../types'
 import { parseDocument } from '../../types/media/document-utils'
 
 /**
@@ -26,4 +26,31 @@ export async function getCustomEmojis(client: BaseTelegramClient, ids: tl.Long[]
 
         return doc
     })
+}
+
+/**
+ * Given one or more messages, extract all unique custom emojis from it and fetch them
+ */
+export async function getCustomEmojisFromMessages(
+    client: BaseTelegramClient,
+    messages: MaybeArray<Message>,
+): Promise<Sticker[]> {
+    const set = new LongSet()
+
+    if (!Array.isArray(messages)) messages = [messages]
+
+    for (const { raw } of messages) {
+        if (raw._ === 'messageService' || !raw.entities) continue
+
+        for (const entity of raw.entities) {
+            if (entity._ === 'messageEntityCustomEmoji') {
+                set.add(entity.documentId)
+            }
+        }
+    }
+
+    const arr = set.toArray()
+    if (!arr.length) return []
+
+    return getCustomEmojis(client, arr)
 }

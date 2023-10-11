@@ -20,7 +20,7 @@ import { getPasswordHint } from './methods/auth/get-password-hint'
 import { logOut } from './methods/auth/log-out'
 import { recoverPassword } from './methods/auth/recover-password'
 import { resendCode } from './methods/auth/resend-code'
-import { run } from './methods/auth/run'
+import {} from './methods/auth/run'
 import { sendCode } from './methods/auth/send-code'
 import { sendRecoveryCode } from './methods/auth/send-recovery-code'
 import { signIn } from './methods/auth/sign-in'
@@ -141,6 +141,7 @@ import { getMessageReactions, getMessageReactionsById } from './methods/messages
 import { getMessages } from './methods/messages/get-messages'
 import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe'
 import { getReactionUsers, GetReactionUsersOffset } from './methods/messages/get-reaction-users'
+import { getReplyTo } from './methods/messages/get-reply-to'
 import { getScheduledMessages } from './methods/messages/get-scheduled-messages'
 import { iterHistory } from './methods/messages/iter-history'
 import { iterReactionUsers } from './methods/messages/iter-reaction-users'
@@ -152,10 +153,15 @@ import { readHistory } from './methods/messages/read-history'
 import { readReactions } from './methods/messages/read-reactions'
 import { searchGlobal, SearchGlobalOffset } from './methods/messages/search-global'
 import { searchMessages, SearchMessagesOffset } from './methods/messages/search-messages'
+import { answerMedia, answerMediaGroup, answerText } from './methods/messages/send-answer'
+import { commentMedia, commentMediaGroup, commentText } from './methods/messages/send-comment'
+import { CommonSendParams } from './methods/messages/send-common'
 import { sendCopy, SendCopyParams } from './methods/messages/send-copy'
+import { sendCopyGroup, SendCopyGroupParams } from './methods/messages/send-copy-group'
 import { sendMedia } from './methods/messages/send-media'
 import { sendMediaGroup } from './methods/messages/send-media-group'
 import { sendReaction } from './methods/messages/send-reaction'
+import { replyMedia, replyMediaGroup, replyText } from './methods/messages/send-reply'
 import { sendScheduled } from './methods/messages/send-scheduled'
 import { sendText } from './methods/messages/send-text'
 import { sendTyping } from './methods/messages/send-typing'
@@ -180,7 +186,7 @@ import { removeCloudPassword } from './methods/password/remove-cloud-password'
 import { addStickerToSet } from './methods/stickers/add-sticker-to-set'
 import { createStickerSet } from './methods/stickers/create-sticker-set'
 import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set'
-import { getCustomEmojis } from './methods/stickers/get-custom-emojis'
+import { getCustomEmojis, getCustomEmojisFromMessages } from './methods/stickers/get-custom-emojis'
 import { getInstalledStickers } from './methods/stickers/get-installed-stickers'
 import { getStickerSet } from './methods/stickers/get-sticker-set'
 import { moveStickerInSet } from './methods/stickers/move-sticker-in-set'
@@ -287,6 +293,7 @@ import {
     MessageEntity,
     MessageMedia,
     MessageReactions,
+    ParametersSkip2,
     ParsedUpdate,
     PeerReaction,
     PeersIndex,
@@ -547,6 +554,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param params  Parameters to be passed to {@link start}
      * @param then  Function to be called after {@link start} returns
+     * @manual
      */
     run(params: Parameters<typeof start>[1], then?: (user: User) => void | Promise<void>): void
     /**
@@ -2713,7 +2721,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     getPrimaryInviteLink(chatId: InputPeerLike): Promise<ChatInviteLink>
     /**
-     * Approve or deny multiple join requests to a chat.
+     * Approve or decline multiple join requests to a chat.
      * **Available**: 👤 users only
      *
      */
@@ -2721,14 +2729,14 @@ export interface TelegramClient extends BaseTelegramClient {
         /** Chat/channel ID */
         chatId: InputPeerLike
 
-        /** Whether to approve or deny the join requests */
-        action: 'approve' | 'deny'
+        /** Whether to approve or decline the join requests */
+        action: 'approve' | 'decline'
 
         /** Invite link to target */
         link?: string | ChatInviteLink
     }): Promise<void>
     /**
-     * Approve or deny join request to a chat.
+     * Approve or decline join request to a chat.
      * **Available**: ✅ both users and bots
      *
      */
@@ -2737,8 +2745,8 @@ export interface TelegramClient extends BaseTelegramClient {
         chatId: InputPeerLike
         /** User ID */
         user: InputPeerLike
-        /** Whether to approve or deny the join request */
-        action: 'approve' | 'deny'
+        /** Whether to approve or decline the join request */
+        action: 'approve' | 'decline'
     }): Promise<void>
     /**
      * Iterate over users who have joined
@@ -3216,6 +3224,16 @@ export interface TelegramClient extends BaseTelegramClient {
         },
     ): Promise<ArrayPaginated<PeerReaction, GetReactionUsersOffset>>
     /**
+     * For messages containing a reply, fetch the message that is being replied.
+     *
+     * Note that even if a message has {@link replyToMessageId},
+     * the message itself may have been deleted, in which case
+     * this method will also return `null`.
+     * **Available**: ✅ both users and bots
+     *
+     */
+    getReplyTo(message: Message): Promise<Message | null>
+    /**
      * Get scheduled messages in chat by their IDs
      *
      * Fot messages that were not found, `null` will be
@@ -3549,6 +3567,76 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         fromUser?: InputPeerLike
     }): Promise<ArrayPaginated<Message, SearchMessagesOffset>>
+    /** Send a text to the same chat (and topic, if applicable) as a given message */
+    answerText(message: Message, ...params: ParametersSkip2<typeof sendText>): ReturnType<typeof sendText>
+    /** Send a media to the same chat (and topic, if applicable) as a given message */
+    answerMedia(message: Message, ...params: ParametersSkip2<typeof sendMedia>): ReturnType<typeof sendMedia>
+    /** Send a media group to the same chat (and topic, if applicable) as a given message */
+    answerMediaGroup(
+        message: Message,
+        ...params: ParametersSkip2<typeof sendMediaGroup>
+    ): ReturnType<typeof sendMediaGroup>
+    /**
+     * Send a text comment to a given message.
+     *
+     * If this is a normal message (not a channel post),
+     * a simple reply will be sent.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @throws MtArgumentError
+     *     If this is a channel post which does not have comments section.
+     *     To check if a post has comments, use {@link Message#replies}.hasComments
+     */
+    commentText(message: Message, ...params: ParametersSkip2<typeof sendText>): ReturnType<typeof sendText>
+    /**
+     * Send a text comment to a given message.
+     *
+     * If this is a normal message (not a channel post),
+     * a simple reply will be sent.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @throws MtArgumentError
+     *     If this is a channel post which does not have comments section.
+     *     To check if a post has comments, use {@link Message#replies}.hasComments
+     */
+    commentMedia(message: Message, ...params: ParametersSkip2<typeof sendMedia>): ReturnType<typeof sendMedia>
+    /**
+     * Send a text comment to a given message.
+     *
+     * If this is a normal message (not a channel post),
+     * a simple reply will be sent.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @throws MtArgumentError
+     *     If this is a channel post which does not have comments section.
+     *     To check if a post has comments, use {@link Message#replies}.hasComments
+     */
+    commentMediaGroup(
+        message: Message,
+        ...params: ParametersSkip2<typeof sendMediaGroup>
+    ): ReturnType<typeof sendMediaGroup>
+    /**
+     * Copy a message group (i.e. send the same message group, but do not forward it).
+     *
+     * Note that all the provided messages must be in the same message group
+     * **Available**: ✅ both users and bots
+     *
+     */
+    sendCopyGroup(
+        params: SendCopyGroupParams &
+            (
+                | {
+                      /** Source chat ID */
+                      fromChatId: InputPeerLike
+                      /** Message IDs to forward */
+                      messages: number[]
+                  }
+                | { messages: Message[] }
+            ),
+    ): Promise<Message[]>
     /**
      * Copy a message (i.e. send the same message, but do not forward it).
      *
@@ -3556,10 +3644,8 @@ export interface TelegramClient extends BaseTelegramClient {
      * it will be copied simply as a text message,
      * and if the message contains an invoice,
      * it can't be copied.
-     *
      * **Available**: ✅ both users and bots
      *
-     * @param params
      */
     sendCopy(
         params: SendCopyParams &
@@ -3589,56 +3675,7 @@ export interface TelegramClient extends BaseTelegramClient {
     sendMediaGroup(
         chatId: InputPeerLike,
         medias: (InputMediaLike | string)[],
-        params?: {
-            /**
-             * Message to reply to. Either a message object or message ID.
-             *
-             * For forums - can also be an ID of the topic (i.e. its top message ID)
-             */
-            replyTo?: number | Message
-
-            /**
-             * Whether to throw an error if {@link replyTo}
-             * message does not exist.
-             *
-             * If that message was not found, `NotFoundError` is thrown,
-             * with `text` set to `MESSAGE_NOT_FOUND`.
-             *
-             * Incurs an additional request, so only use when really needed.
-             *
-             * Defaults to `false`
-             */
-            mustReply?: boolean
-
-            /**
-             * Message to comment to. Either a message object or message ID.
-             *
-             * This overwrites `replyTo` if it was passed
-             */
-            commentTo?: number | Message
-
-            /**
-             * Parse mode to use to parse entities before sending
-             * the message. Defaults to current default parse mode (if any).
-             *
-             * Passing `null` will explicitly disable formatting.
-             */
-            parseMode?: string | null
-
-            /**
-             * Whether to send this message silently.
-             */
-            silent?: boolean
-
-            /**
-             * If set, the message will be scheduled to this date.
-             * When passing a number, a UNIX time in ms is expected.
-             *
-             * You can also pass `0x7FFFFFFE`, this will send the message
-             * once the peer is online
-             */
-            schedule?: Date | number
-
+        params?: CommonSendParams & {
             /**
              * Function that will be called after some part has been uploaded.
              * Only used when a file that requires uploading is passed,
@@ -3649,26 +3686,6 @@ export interface TelegramClient extends BaseTelegramClient {
              * @param total  Total file size
              */
             progressCallback?: (index: number, uploaded: number, total: number) => void
-
-            /**
-             * Whether to clear draft after sending this message.
-             *
-             * Defaults to `false`
-             */
-            clearDraft?: boolean
-
-            /**
-             * Whether to disallow further forwards of this message.
-             *
-             * Only for bots, works even if the target chat does not
-             * have content protection.
-             */
-            forbidForwards?: boolean
-
-            /**
-             * Peer to use when sending the message.
-             */
-            sendAs?: InputPeerLike
         },
     ): Promise<Message[]>
     /**
@@ -3687,7 +3704,13 @@ export interface TelegramClient extends BaseTelegramClient {
     sendMedia(
         chatId: InputPeerLike,
         media: InputMediaLike | string,
-        params?: {
+        params?: CommonSendParams & {
+            /**
+             * For bots: inline or reply markup or an instruction
+             * to hide a reply keyboard or to force a reply.
+             */
+            replyMarkup?: ReplyMarkup
+
             /**
              * Override caption for `media`.
              *
@@ -3705,61 +3728,6 @@ export interface TelegramClient extends BaseTelegramClient {
             entities?: tl.TypeMessageEntity[]
 
             /**
-             * Message to reply to. Either a message object or message ID.
-             *
-             * For forums - can also be an ID of the topic (i.e. its top message ID)
-             */
-            replyTo?: number | Message
-
-            /**
-             * Whether to throw an error if {@link replyTo}
-             * message does not exist.
-             *
-             * If that message was not found, `NotFoundError` is thrown,
-             * with `text` set to `MESSAGE_NOT_FOUND`.
-             *
-             * Incurs an additional request, so only use when really needed.
-             *
-             * Defaults to `false`
-             */
-            mustReply?: boolean
-
-            /**
-             * Message to comment to. Either a message object or message ID.
-             *
-             * This overwrites `replyTo` if it was passed
-             */
-            commentTo?: number | Message
-
-            /**
-             * Parse mode to use to parse entities before sending
-             * the message. Defaults to current default parse mode (if any).
-             *
-             * Passing `null` will explicitly disable formatting.
-             */
-            parseMode?: string | null
-
-            /**
-             * Whether to send this message silently.
-             */
-            silent?: boolean
-
-            /**
-             * If set, the message will be scheduled to this date.
-             * When passing a number, a UNIX time in ms is expected.
-             *
-             * You can also pass `0x7FFFFFFE`, this will send the message
-             * once the peer is online
-             */
-            schedule?: Date | number
-
-            /**
-             * For bots: inline or reply markup or an instruction
-             * to hide a reply keyboard or to force a reply.
-             */
-            replyMarkup?: ReplyMarkup
-
-            /**
              * Function that will be called after some part has been uploaded.
              * Only used when a file that requires uploading is passed,
              * and not used when uploading a thumbnail.
@@ -3768,32 +3736,6 @@ export interface TelegramClient extends BaseTelegramClient {
              * @param total  Total file size
              */
             progressCallback?: (uploaded: number, total: number) => void
-
-            /**
-             * Whether to clear draft after sending this message.
-             *
-             * Defaults to `false`
-             */
-            clearDraft?: boolean
-
-            /**
-             * Whether to disallow further forwards of this message.
-             *
-             * Only for bots, works even if the target chat does not
-             * have content protection.
-             */
-            forbidForwards?: boolean
-
-            /**
-             * Peer to use when sending the message.
-             */
-            sendAs?: InputPeerLike
-
-            /**
-             * Whether to dispatch the returned message
-             * to the client's update handler.
-             */
-            shouldDispatch?: true
         },
     ): Promise<Message>
     /**
@@ -3817,6 +3759,15 @@ export interface TelegramClient extends BaseTelegramClient {
             shouldDispatch?: true
         },
     ): Promise<Message>
+    /** Send a text in reply to a given message */
+    replyText(message: Message, ...params: ParametersSkip2<typeof sendText>): ReturnType<typeof sendText>
+    /** Send a media in reply to a given message */
+    replyMedia(message: Message, ...params: ParametersSkip2<typeof sendMedia>): ReturnType<typeof sendMedia>
+    /** Send a media group in reply to a given message */
+    replyMediaGroup(
+        message: Message,
+        ...params: ParametersSkip2<typeof sendMediaGroup>
+    ): ReturnType<typeof sendMediaGroup>
     /**
      * Send previously scheduled message(s)
      *
@@ -3842,41 +3793,12 @@ export interface TelegramClient extends BaseTelegramClient {
     sendText(
         chatId: InputPeerLike,
         text: string | FormattedString<string>,
-        params?: {
+        params?: CommonSendParams & {
             /**
-             * Message to reply to. Either a message object or message ID.
-             *
-             * For forums - can also be an ID of the topic (i.e. its top message ID)
+             * For bots: inline or reply markup or an instruction
+             * to hide a reply keyboard or to force a reply.
              */
-            replyTo?: number | Message
-
-            /**
-             * Whether to throw an error if {@link replyTo}
-             * message does not exist.
-             *
-             * If that message was not found, `NotFoundError` is thrown,
-             * with `text` set to `MESSAGE_NOT_FOUND`.
-             *
-             * Incurs an additional request, so only use when really needed.
-             *
-             * Defaults to `false`
-             */
-            mustReply?: boolean
-
-            /**
-             * Message to comment to. Either a message object or message ID.
-             *
-             * This overwrites `replyTo` if it was passed
-             */
-            commentTo?: number | Message
-
-            /**
-             * Parse mode to use to parse entities before sending
-             * the message. Defaults to current default parse mode (if any).
-             *
-             * Passing `null` will explicitly disable formatting.
-             */
-            parseMode?: string | null
+            replyMarkup?: ReplyMarkup
 
             /**
              * List of formatting entities to use instead of parsing via a
@@ -3890,52 +3812,6 @@ export interface TelegramClient extends BaseTelegramClient {
              * Whether to disable links preview in this message
              */
             disableWebPreview?: boolean
-
-            /**
-             * Whether to send this message silently.
-             */
-            silent?: boolean
-
-            /**
-             * If set, the message will be scheduled to this date.
-             * When passing a number, a UNIX time in ms is expected.
-             *
-             * You can also pass `0x7FFFFFFE`, this will send the message
-             * once the peer is online
-             */
-            schedule?: Date | number
-
-            /**
-             * For bots: inline or reply markup or an instruction
-             * to hide a reply keyboard or to force a reply.
-             */
-            replyMarkup?: ReplyMarkup
-
-            /**
-             * Whether to clear draft after sending this message.
-             *
-             * Defaults to `false`
-             */
-            clearDraft?: boolean
-
-            /**
-             * Whether to disallow further forwards of this message.
-             *
-             * Only for bots, works even if the target chat does not
-             * have content protection.
-             */
-            forbidForwards?: boolean
-
-            /**
-             * Peer to use when sending the message.
-             */
-            sendAs?: InputPeerLike
-
-            /**
-             * Whether to dispatch the returned message
-             * to the client's update handler.
-             */
-            shouldDispatch?: true
         },
     ): Promise<Message>
     /**
@@ -4279,6 +4155,12 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param ids  IDs of the stickers (as defined in {@link MessageEntity.emojiId})
      */
     getCustomEmojis(ids: tl.Long[]): Promise<Sticker[]>
+    /**
+     * Given one or more messages, extract all unique custom emojis from it and fetch them
+     * **Available**: ✅ both users and bots
+     *
+     */
+    getCustomEmojisFromMessages(messages: MaybeArray<Message>): Promise<Sticker[]>
     /**
      * Get a list of all installed sticker packs
      *
@@ -5259,6 +5141,11 @@ export class TelegramClient extends BaseTelegramClient {
         } else {
             this.start = start.bind(null, this)
         }
+        this.run = (params, then) => {
+            this.start(params)
+                .then(then)
+                .catch((err) => this._emitError(err))
+        }
     }
     getAuthState = getAuthState.bind(null, this)
     _onAuthorization = _onAuthorization.bind(null, this)
@@ -5267,7 +5154,6 @@ export class TelegramClient extends BaseTelegramClient {
     logOut = logOut.bind(null, this)
     recoverPassword = recoverPassword.bind(null, this)
     resendCode = resendCode.bind(null, this)
-    run = run.bind(null, this)
     sendCode = sendCode.bind(null, this)
     sendRecoveryCode = sendRecoveryCode.bind(null, this)
     signInBot = signInBot.bind(null, this)
@@ -5396,6 +5282,7 @@ export class TelegramClient extends BaseTelegramClient {
     getMessagesUnsafe = getMessagesUnsafe.bind(null, this)
     getMessages = getMessages.bind(null, this)
     getReactionUsers = getReactionUsers.bind(null, this)
+    getReplyTo = getReplyTo.bind(null, this)
     getScheduledMessages = getScheduledMessages.bind(null, this)
     iterHistory = iterHistory.bind(null, this)
     iterReactionUsers = iterReactionUsers.bind(null, this)
@@ -5407,10 +5294,20 @@ export class TelegramClient extends BaseTelegramClient {
     readReactions = readReactions.bind(null, this)
     searchGlobal = searchGlobal.bind(null, this)
     searchMessages = searchMessages.bind(null, this)
+    answerText = answerText.bind(null, this)
+    answerMedia = answerMedia.bind(null, this)
+    answerMediaGroup = answerMediaGroup.bind(null, this)
+    commentText = commentText.bind(null, this)
+    commentMedia = commentMedia.bind(null, this)
+    commentMediaGroup = commentMediaGroup.bind(null, this)
+    sendCopyGroup = sendCopyGroup.bind(null, this)
     sendCopy = sendCopy.bind(null, this)
     sendMediaGroup = sendMediaGroup.bind(null, this)
     sendMedia = sendMedia.bind(null, this)
     sendReaction = sendReaction.bind(null, this)
+    replyText = replyText.bind(null, this)
+    replyMedia = replyMedia.bind(null, this)
+    replyMediaGroup = replyMediaGroup.bind(null, this)
     sendScheduled = sendScheduled.bind(null, this)
     sendText = sendText.bind(null, this)
     sendTyping = sendTyping.bind(null, this)
@@ -5436,6 +5333,7 @@ export class TelegramClient extends BaseTelegramClient {
     createStickerSet = createStickerSet.bind(null, this)
     deleteStickerFromSet = deleteStickerFromSet.bind(null, this)
     getCustomEmojis = getCustomEmojis.bind(null, this)
+    getCustomEmojisFromMessages = getCustomEmojisFromMessages.bind(null, this)
     getInstalledStickers = getInstalledStickers.bind(null, this)
     getStickerSet = getStickerSet.bind(null, this)
     moveStickerInSet = moveStickerInSet.bind(null, this)

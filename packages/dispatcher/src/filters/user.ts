@@ -3,15 +3,19 @@ import {
     CallbackQuery,
     ChatMemberUpdate,
     ChosenInlineResult,
+    DeleteStoryUpdate,
+    HistoryReadUpdate,
     InlineQuery,
     Message,
     PollVoteUpdate,
+    StoryUpdate,
     User,
     UserStatusUpdate,
     UserTypingUpdate,
 } from '@mtcute/client'
 import { MaybeArray } from '@mtcute/core'
 
+import { UpdateContextDistributed } from '../context'
 import { UpdateFilter } from './types'
 
 /**
@@ -25,130 +29,95 @@ export const me: UpdateFilter<Message, { sender: User }> = (msg) =>
  */
 export const bot: UpdateFilter<Message, { sender: User }> = (msg) => msg.sender.constructor === User && msg.sender.isBot
 
+// prettier-ignore
 /**
  * Filter updates by user ID(s) or username(s)
  *
- * Usernames are not supported for UserStatusUpdate
- * and UserTypingUpdate.
- *
- *
- * For chat member updates, uses `user.id`
+ * Note that only some updates support filtering by username.
  */
-export const userId = (
-    id: MaybeArray<number | string>,
-): UpdateFilter<
-    | Message
-    | UserStatusUpdate
-    | UserTypingUpdate
-    | InlineQuery
-    | ChatMemberUpdate
-    | ChosenInlineResult
-    | CallbackQuery
-    | PollVoteUpdate
-    | BotChatJoinRequestUpdate
-> => {
-    if (Array.isArray(id)) {
-        const index: Record<number | string, true> = {}
-        let matchSelf = false
-        id.forEach((id) => {
-            if (id === 'me' || id === 'self') {
-                matchSelf = true
-            } else {
-                index[id] = true
-            }
-        })
+export const userId: {
+    (id: MaybeArray<number>): UpdateFilter<UpdateContextDistributed<
+        | Message
+        | StoryUpdate
+        | DeleteStoryUpdate
+        | InlineQuery
+        | ChatMemberUpdate
+        | ChosenInlineResult
+        | CallbackQuery
+        | PollVoteUpdate
+        | BotChatJoinRequestUpdate
+    >>
+    (id: MaybeArray<number | string>): UpdateFilter<UpdateContextDistributed<
+        | Message
+        | UserStatusUpdate
+        | UserTypingUpdate
+        | StoryUpdate
+        | HistoryReadUpdate
+        | DeleteStoryUpdate
+        | InlineQuery
+        | ChatMemberUpdate
+        | ChosenInlineResult
+        | CallbackQuery
+        | PollVoteUpdate
+        | BotChatJoinRequestUpdate
+    >>
+} = (id) => {
+    const indexId = new Set<number>()
+    const indexUsername = new Set<string>()
+    let matchSelf = false
 
-        return (upd) => {
-            const ctor = upd.constructor
-
-            if (ctor === Message) {
-                const sender = (upd as Message).sender
-
-                return (matchSelf && sender.isSelf) || sender.id in index || sender.username! in index
-            } else if (ctor === UserStatusUpdate || ctor === UserTypingUpdate) {
-                // const id = (upd as UserStatusUpdate | UserTypingUpdate).userId
-
-                return false
-                // todo
-                // eslint-disable-next-line dot-notation
-                // (matchSelf && id === upd.client['_userId']) || id in index
-            } else if (ctor === PollVoteUpdate) {
-                const peer = (upd as PollVoteUpdate).peer
-                if (peer.type !== 'user') return false
-
-                return (matchSelf && peer.isSelf) || peer.id in index || peer.username! in index
-            }
-
-            const user = (upd as Exclude<typeof upd, Message | UserStatusUpdate | UserTypingUpdate | PollVoteUpdate>)
-                .user
-
-            return (matchSelf && user.isSelf) || user.id in index || user.username! in index
+    if (!Array.isArray(id)) id = [id]
+    id.forEach((id) => {
+        if (id === 'me' || id === 'self') {
+            matchSelf = true
+        } else if (typeof id === 'string') {
+            indexUsername.add(id)
+        } else {
+            indexId.add(id)
         }
-    }
-
-    if (id === 'me' || id === 'self') {
-        return (upd) => {
-            const ctor = upd.constructor
-
-            if (ctor === Message) {
-                return (upd as Message).sender.isSelf
-            } else if (ctor === UserStatusUpdate || ctor === UserTypingUpdate) {
-                return false
-                // todo
-                // (upd as UserStatusUpdate | UserTypingUpdate).userId ===
-                // eslint-disable-next-line dot-notation
-                // upd.client['_userId']
-            } else if (ctor === PollVoteUpdate) {
-                const peer = (upd as PollVoteUpdate).peer
-                if (peer.type !== 'user') return false
-
-                return peer.isSelf
-            }
-
-            return (upd as Exclude<typeof upd, Message | UserStatusUpdate | UserTypingUpdate | PollVoteUpdate>).user
-                .isSelf
-        }
-    }
-
-    if (typeof id === 'string') {
-        return (upd) => {
-            const ctor = upd.constructor
-
-            if (ctor === Message) {
-                return (upd as Message).sender.username === id
-            } else if (ctor === UserStatusUpdate || ctor === UserTypingUpdate) {
-                // username is not available
-                return false
-            } else if (ctor === PollVoteUpdate) {
-                const peer = (upd as PollVoteUpdate).peer
-                if (peer.type !== 'user') return false
-
-                return peer.username === id
-            }
-
-            return (
-                (upd as Exclude<typeof upd, Message | UserStatusUpdate | UserTypingUpdate | PollVoteUpdate>).user
-                    .username === id
-            )
-        }
-    }
+    })
 
     return (upd) => {
-        const ctor = upd.constructor
+        switch (upd._name) {
+            case 'new_message':
+            case 'edit_message': {
+                const sender = upd.sender
 
-        if (ctor === Message) {
-            return (upd as Message).sender.id === id
-        } else if (ctor === UserStatusUpdate || ctor === UserTypingUpdate) {
-            return (upd as UserStatusUpdate | UserTypingUpdate).userId === id
-        } else if (ctor === PollVoteUpdate) {
-            const peer = (upd as PollVoteUpdate).peer
-            if (peer.type !== 'user') return false
+                return (matchSelf && sender.isSelf) ||
+                    indexId.has(sender.id) ||
+                    indexUsername.has(sender.username!)
+            }
+            case 'user_status':
+            case 'user_typing': {
+                const id = upd.userId
 
-            return peer.id === id
+                return (matchSelf && id === upd.client.getAuthState().userId) ||
+                    indexId.has(id)
+            }
+            case 'poll_vote':
+            case 'story':
+            case 'delete_story': {
+                const peer = upd.peer
+                if (peer.type !== 'user') return false
+
+                return (matchSelf && peer.isSelf) ||
+                    indexId.has(peer.id) ||
+                    Boolean(peer.usernames?.some((u) => indexUsername.has(u.username)))
+            }
+            case 'history_read': {
+                const id = upd.chatId
+
+                return (matchSelf && id === upd.client.getAuthState().userId) ||
+                    indexId.has(id)
+            }
         }
 
+        const user = upd.user
+
         return (
-            (upd as Exclude<typeof upd, Message | UserStatusUpdate | UserTypingUpdate | PollVoteUpdate>).user.id === id
+            (matchSelf && user.isSelf) ||
+            indexId.has(user.id) ||
+            Boolean(user.usernames?.some((u) => indexUsername.has(u.username)))
         )
     }
 }

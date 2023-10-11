@@ -256,8 +256,6 @@ export function or<
  * @param fns  Filters to combine
  */
 export function or(...fns: UpdateFilter<any, any, any>[]): UpdateFilter<any, any, any> {
-    if (fns.length === 2) return or(fns[0], fns[1])
-
     return (upd, state) => {
         let i = 0
         const max = fns.length
@@ -266,82 +264,6 @@ export function or(...fns: UpdateFilter<any, any, any>[]): UpdateFilter<any, any
             if (i === max) return false
 
             const res = fns[i++](upd, state)
-
-            if (typeof res === 'boolean') {
-                if (res) return true
-
-                return next()
-            }
-
-            return res.then((r: boolean) => {
-                if (r) return true
-
-                return next()
-            })
-        }
-
-        return next()
-    }
-}
-
-/**
- * For updates that contain an array of updates (e.g. `message_group`),
- * apply a filter to every element of the array.
- *
- * Filter will match if **all** elements match.
- *
- * > **Note**: This also applies type modification to every element of the array.
- *
- * @param filter
- * @returns
- */
-export function every<Base, Mod, State>(filter: UpdateFilter<Base, Mod, State>): UpdateFilter<Base[], Mod, State> {
-    return (upds, state) => {
-        let i = 0
-        const max = upds.length
-
-        const next = (): MaybeAsync<boolean> => {
-            if (i === max) return true
-
-            const res = filter(upds[i++], state)
-
-            if (typeof res === 'boolean') {
-                if (!res) return false
-
-                return next()
-            }
-
-            return res.then((r: boolean) => {
-                if (!r) return false
-
-                return next()
-            })
-        }
-
-        return next()
-    }
-}
-
-/**
- * For updates that contain an array of updates (e.g. `message_group`),
- * apply a filter to every element of the array.
- *
- * Filter will match if **all** elements match.
- *
- * > **Note**: This *does not* apply type modification to any element of the array
- *
- * @param filter
- * @returns
- */
-export function some<Base, Mod, State>(filter: UpdateFilter<Base, Mod, State>): UpdateFilter<Base[], Mod, State> {
-    return (upds, state) => {
-        let i = 0
-        const max = upds.length
-
-        const next = (): MaybeAsync<boolean> => {
-            if (i === max) return false
-
-            const res = filter(upds[i++], state)
 
             if (typeof res === 'boolean') {
                 if (res) return true

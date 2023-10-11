@@ -343,7 +343,7 @@ async function addSingleMethod(state, fileName) {
                         state.imports[module] = new Set()
                     }
 
-                    state.imports[module].add(name)
+                    if (!isManual) state.imports[module].add(name)
                 }
             }
         } else if (stmt.kind === ts.SyntaxKind.InterfaceDeclaration) {

@@ -1,4 +1,4 @@
-import { CallbackQuery, Message } from '@mtcute/client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MaybeAsync } from '@mtcute/core'
 
 import { UpdateFilter } from './types'
@@ -6,7 +6,7 @@ import { UpdateFilter } from './types'
 /**
  * Create a filter for the cases when the state is empty
  */
-export const stateEmpty: UpdateFilter<Message> = async (upd, state) => {
+export const stateEmpty: UpdateFilter<any> = async (upd, state) => {
     if (!state) return false
 
     return !(await state.get())
@@ -23,7 +23,7 @@ export const stateEmpty: UpdateFilter<Message> = async (upd, state) => {
 export const state = <T>(
     predicate: (state: T) => MaybeAsync<boolean>,
     // eslint-disable-next-line @typescript-eslint/ban-types
-): UpdateFilter<Message | Message[] | CallbackQuery, {}, T> => {
+): UpdateFilter<any, {}, T> => {
     return async (upd, state) => {
         if (!state) return false
         const data = await state.get()

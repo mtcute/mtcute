@@ -159,4 +159,14 @@ export class LongSet {
     clear() {
         this._set.clear()
     }
+
+    toArray() {
+        const arr: Long[] = []
+
+        for (const v of this._set) {
+            arr.push(longFromFastString(v))
+        }
+
+        return arr
+    }
 }

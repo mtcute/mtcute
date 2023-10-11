@@ -201,3 +201,10 @@ export const action = <T extends Exclude<MessageAction, null>['type']>(
 
     return (msg) => msg.action?.type === type
 }
+
+export const sender =
+    <T extends Message['sender']['type']>(
+        type: T,
+    ): UpdateFilter<Message, { sender: Extract<Message['sender'], { type: T }> }> =>
+        (msg) =>
+            msg.sender.type === type

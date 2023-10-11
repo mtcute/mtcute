@@ -8,6 +8,9 @@ import type { Message } from './message'
  */
 export type InputMessageId = { chatId: InputPeerLike; message: number } | { message: Message }
 
+/** Remove {@link InputMessageId} type from the given type */
+export type OmitInputMessageId<T> = Omit<T, 'chatId' | 'message'>
+
 /** @internal */
 export function normalizeInputMessageId(id: InputMessageId) {
     if ('chatId' in id) return id

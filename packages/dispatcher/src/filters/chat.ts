@@ -1,6 +1,17 @@
-import { Chat, ChatType, Message, PollVoteUpdate, User } from '@mtcute/client'
+import {
+    BotChatJoinRequestUpdate,
+    Chat,
+    ChatMemberUpdate,
+    ChatType,
+    HistoryReadUpdate,
+    Message,
+    PollVoteUpdate,
+    User,
+    UserTypingUpdate,
+} from '@mtcute/client'
 import { MaybeArray } from '@mtcute/core'
 
+import { UpdateContextDistributed } from '../context'
 import { Modify, UpdateFilter } from './types'
 
 /**
@@ -19,59 +30,68 @@ export const chat =
         (msg) =>
             msg.chat.chatType === type
 
+// prettier-ignore
 /**
- * Filter updates by chat ID(s) or username(s)
+ * Filter updates by marked chat ID(s) or username(s)
+ *
+ * Note that only some updates support filtering by username.
+ *
+ * For messages, this filter checks for chat where the message
+ * was sent to, NOT the chat sender.
  */
-export const chatId = (id: MaybeArray<number | string>): UpdateFilter<Message | PollVoteUpdate> => {
-    if (Array.isArray(id)) {
-        const index: Record<number | string, true> = {}
-        let matchSelf = false
-        id.forEach((id) => {
-            if (id === 'me' || id === 'self') {
-                matchSelf = true
-            } else {
-                index[id] = true
-            }
-        })
+export const chatId: {
+    (id: MaybeArray<number>): UpdateFilter<UpdateContextDistributed<
+        | Message
+        | ChatMemberUpdate
+        | PollVoteUpdate
+        | BotChatJoinRequestUpdate
+    >>
+    (id: MaybeArray<number | string>): UpdateFilter<UpdateContextDistributed<
+        | Message
+        | ChatMemberUpdate
+        | UserTypingUpdate
+        | HistoryReadUpdate
+        | PollVoteUpdate
+        | BotChatJoinRequestUpdate
+    >>
+} = (id) => {
+    const indexId = new Set<number>()
+    const indexUsername = new Set<string>()
+    let matchSelf = false
 
-        return (upd) => {
-            if (upd.constructor === PollVoteUpdate) {
-                const peer = upd.peer
-
-                return peer.type === 'chat' && peer.id in index
-            }
-
-            const chat = (upd as Exclude<typeof upd, PollVoteUpdate>).chat
-
-            return (matchSelf && chat.isSelf) || chat.id in index || chat.username! in index
+    if (!Array.isArray(id)) id = [id]
+    id.forEach((id) => {
+        if (id === 'me' || id === 'self') {
+            matchSelf = true
+        } else if (typeof id === 'number') {
+            indexId.add(id)
+        } else {
+            indexUsername.add(id)
         }
-    }
-
-    if (id === 'me' || id === 'self') {
-        return (upd) => {
-            if (upd.constructor === PollVoteUpdate) {
-                return upd.peer.type === 'chat' && upd.peer.isSelf
-            }
-
-            return (upd as Exclude<typeof upd, PollVoteUpdate>).chat.isSelf
-        }
-    }
-
-    if (typeof id === 'string') {
-        return (upd) => {
-            if (upd.constructor === PollVoteUpdate) {
-                return upd.peer.type === 'chat' && upd.peer.username === id
-            }
-
-            return (upd as Exclude<typeof upd, PollVoteUpdate>).chat.username === id
-        }
-    }
+    })
 
     return (upd) => {
-        if (upd.constructor === PollVoteUpdate) {
-            return upd.peer.type === 'chat' && upd.peer.id === id
+        switch (upd._name) {
+            case 'poll_vote': {
+                const peer = upd.peer
+
+                return peer.type === 'chat' && (
+                    indexId.has(peer.id) ||
+                    Boolean(peer.usernames?.some((u) => indexUsername.has(u.username)))
+                )
+            }
+            case 'history_read':
+            case 'user_typing': {
+                const id = upd.chatId
+
+                return (matchSelf && id === upd.client.getAuthState().userId) || indexId.has(id)
+            }
         }
 
-        return (upd as Exclude<typeof upd, PollVoteUpdate>).chat.id === id
+        const chat = upd.chat
+
+        return (matchSelf && chat.isSelf) ||
+            indexId.has(chat.id) ||
+            Boolean(chat.usernames?.some((u) => indexUsername.has(u.username)))
     }
 }

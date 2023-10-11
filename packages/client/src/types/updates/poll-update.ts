@@ -24,12 +24,18 @@ export class PollUpdate {
         return this.raw.pollId
     }
 
+    /**
+     * Whether this is a shortened version of update, not containing the poll itself.
+     */
+    get isShort(): boolean {
+        return this.raw.poll === undefined
+    }
+
     private _poll?: Poll
     /**
      * The poll.
      *
-     * Note that sometimes the update does not have the poll
-     * (Telegram limitation), and mtcute creates a stub poll
+     * When {@link isShort} is set, mtcute creates a stub poll
      * with empty question, answers and flags
      * (like `quiz`, `public`, etc.)
      *
@@ -39,8 +45,7 @@ export class PollUpdate {
      *
      * Bot API and TDLib do basically the same internally,
      * and thus are able to always provide them,
-     * but mtcute tries to keep it simple in terms of local
-     * storage and only stores the necessary information.
+     * but mtcute currently does not have a way to do that.
      */
     get poll(): Poll {
         if (!this._poll) {
