@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ^^ will be looked into in MTQ-29
 
@@ -73,13 +74,13 @@ import { UpdateState } from '../state'
  * > like `and`, `or`, etc. Those are meant to be inferred by the compiler!
  */
 // we need the second parameter because it carries meta information
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type UpdateFilter<Base, Mod = {}, State = never> = (
     update: Base,
     state?: UpdateState<State>,
 ) => MaybeAsync<boolean>
 
-export type Modify<Base, Mod> = Base extends (infer T)[] ? Modify<T, Mod>[] : Omit<Base, keyof Mod> & Mod
+export type Modify<Base, Mod> = Omit<Base, keyof Mod> & Mod
 export type Invert<Base, Mod> = {
     [P in keyof Mod & keyof Base]: Exclude<Base[P], Mod[P]>
 }

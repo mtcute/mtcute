@@ -1,5 +1,6 @@
-import { MaybeAsync, Message } from '@mtcute/client'
+import { MaybeAsync } from '@mtcute/client'
 
+import { MessageContext } from './context'
 import { Dispatcher } from './dispatcher'
 import { filters } from './filters'
 import { UpdateState } from './state'
@@ -54,13 +55,13 @@ export class WizardScene<State, SceneName extends string = string> extends Dispa
      * Add a step to the wizard
      */
     addStep(
-        handler: (msg: Message, state: UpdateState<State, SceneName>) => MaybeAsync<WizardSceneAction | number>,
+        handler: (msg: MessageContext, state: UpdateState<State, SceneName>) => MaybeAsync<WizardSceneAction | number>,
     ): void {
         const step = this._steps++
 
         const filter = filters.state<WizardInternalState>((it) => it.$step === step)
 
-        this.onNewMessage(step === 0 ? filters.or(filters.stateEmpty, filter) : filter, async (msg: Message, state) => {
+        this.onNewMessage(step === 0 ? filters.or(filters.stateEmpty, filter) : filter, async (msg, state) => {
             const result = await handler(msg, state)
 
             if (typeof result === 'number') {

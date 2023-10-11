@@ -3,27 +3,14 @@ import { BaseTelegramClient, getMarkedPeerId, MtArgumentError, tl } from '@mtcut
 import { FormattedString, InputPeerLike, Message, MtMessageNotFoundError, ReplyMarkup } from '../../types'
 import { resolvePeer } from '../users/resolve-peer'
 import { getMessages } from './get-messages'
+import { CommonSendParams } from './send-common'
 import { sendMedia } from './send-media'
 import { sendText } from './send-text'
 
 // @exported
-export interface SendCopyParams {
+export interface SendCopyParams extends CommonSendParams {
     /** Target chat ID */
     toChatId: InputPeerLike
-
-    /**
-     * Whether to send this message silently.
-     */
-    silent?: boolean
-
-    /**
-     * If set, the message will be scheduled to this date.
-     * When passing a number, a UNIX time in ms is expected.
-     *
-     * You can also pass `0x7FFFFFFE`, this will send the message
-     * once the peer is online
-     */
-    schedule?: Date | number
 
     /**
      * New message caption (only used for media)
@@ -39,26 +26,6 @@ export interface SendCopyParams {
     parseMode?: string | null
 
     /**
-     * Message to reply to. Either a message object or message ID.
-     *
-     * For forums - can also be an ID of the topic (i.e. its top message ID)
-     */
-    replyTo?: number | Message
-
-    /**
-     * Whether to throw an error if {@link replyTo}
-     * message does not exist.
-     *
-     * If that message was not found, `NotFoundError` is thrown,
-     * with `text` set to `MESSAGE_NOT_FOUND`.
-     *
-     * Incurs an additional request, so only use when really needed.
-     *
-     * Defaults to `false`
-     */
-    mustReply?: boolean
-
-    /**
      * List of formatting entities to use instead of parsing via a
      * parse mode.
      *
@@ -71,13 +38,6 @@ export interface SendCopyParams {
      * to hide a reply keyboard or to force a reply.
      */
     replyMarkup?: ReplyMarkup
-
-    /**
-     * Whether to clear draft after sending this message.
-     *
-     * Defaults to `false`
-     */
-    clearDraft?: boolean
 }
 
 /**
@@ -87,8 +47,6 @@ export interface SendCopyParams {
  * it will be copied simply as a text message,
  * and if the message contains an invoice,
  * it can't be copied.
- *
- * @param params
  */
 export async function sendCopy(
     client: BaseTelegramClient,

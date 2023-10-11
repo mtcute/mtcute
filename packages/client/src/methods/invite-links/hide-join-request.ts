@@ -5,7 +5,7 @@ import { normalizeToInputUser } from '../../utils/peer-utils'
 import { resolvePeer } from '../users/resolve-peer'
 
 /**
- * Approve or deny join request to a chat.
+ * Approve or decline join request to a chat.
  */
 export async function hideJoinRequest(
     client: BaseTelegramClient,
@@ -14,8 +14,8 @@ export async function hideJoinRequest(
         chatId: InputPeerLike
         /** User ID */
         user: InputPeerLike
-        /** Whether to approve or deny the join request */
-        action: 'approve' | 'deny'
+        /** Whether to approve or decline the join request */
+        action: 'approve' | 'decline'
     },
 ): Promise<void> {
     const { chatId, user, action } = params

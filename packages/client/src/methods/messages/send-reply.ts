@@ -1,0 +1,43 @@
+import { BaseTelegramClient } from '@mtcute/core'
+
+import { Message } from '../../types/messages/message'
+import { ParametersSkip2 } from '../../types/utils'
+import { sendMedia } from './send-media'
+import { sendMediaGroup } from './send-media-group'
+import { sendText } from './send-text'
+
+/** Send a text in reply to a given message */
+export function replyText(
+    client: BaseTelegramClient,
+    message: Message,
+    ...params: ParametersSkip2<typeof sendText>
+): ReturnType<typeof sendText> {
+    const [text, params_ = {}] = params
+    params_.replyTo = message.id
+
+    return sendText(client, message.chat.inputPeer, text, params_)
+}
+
+/** Send a media in reply to a given message */
+export function replyMedia(
+    client: BaseTelegramClient,
+    message: Message,
+    ...params: ParametersSkip2<typeof sendMedia>
+): ReturnType<typeof sendMedia> {
+    const [media, params_ = {}] = params
+    params_.replyTo = message.id
+
+    return sendMedia(client, message.chat.inputPeer, media, params_)
+}
+
+/** Send a media group in reply to a given message */
+export function replyMediaGroup(
+    client: BaseTelegramClient,
+    message: Message,
+    ...params: ParametersSkip2<typeof sendMediaGroup>
+): ReturnType<typeof sendMediaGroup> {
+    const [media, params_ = {}] = params
+    params_.replyTo = message.id
+
+    return sendMediaGroup(client, message.chat.inputPeer, media, params_)
+}

@@ -45,4 +45,9 @@ function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
     } else {
         this.start = start.bind(null, this)
     }
+    this.run = (params, then) => {
+        this.start(params)
+            .then(then)
+            .catch((err) => this._emitError(err))
+    }
 }

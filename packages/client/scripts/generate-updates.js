@@ -26,7 +26,7 @@ function parseUpdateTypes() {
     const ret = []
 
     for (const line of lines) {
-        const m = line.match(/^([a-z_]+)(?:: ([a-zA-Z]+))? = ([a-zA-Z]+(?:\[\])?)( \+ State)?$/)
+        const m = line.match(/^([a-z_]+)(?:: ([a-zA-Z]+))? = ([a-zA-Z]+(?:\[\])?)( \+ State)?(?: in ([a-zA-Z]+))?$/)
         if (!m) throw new Error(`invalid syntax: ${line}`)
         ret.push({
             typeName: m[1],
@@ -34,6 +34,7 @@ function parseUpdateTypes() {
             updateType: m[3],
             funcName: m[2] ? m[2][0].toLowerCase() + m[2].substr(1) : snakeToCamel(m[1]),
             state: Boolean(m[4]),
+            context: m[5] ?? `UpdateContext<${m[3]}>`,
         })
     }
 

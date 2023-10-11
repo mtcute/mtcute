@@ -47,9 +47,10 @@ export interface MessageForwardInfo {
 /** Information about replies to a message */
 export interface MessageRepliesInfo {
     /**
-     * Whether this is a comments thread under a channel post
+     * Whether this message is a channel post that has a comments thread
+     * in the linked discussion group
      */
-    isComments: false
+    hasComments: false
 
     /**
      * Total number of replies
@@ -75,7 +76,8 @@ export interface MessageRepliesInfo {
 /** Information about comments to a channel post */
 export interface MessageCommentsInfo extends Omit<MessageRepliesInfo, 'isComments'> {
     /**
-     * Whether this is a comments thread under a channel post
+     * Whether this message is a channel post that has a comments thread
+     * in the linked discussion group
      */
     isComments: true
 
@@ -303,7 +305,7 @@ export class Message {
         if (!this._replies) {
             const r = this.raw.replies
             const obj: MessageRepliesInfo = {
-                isComments: r.comments as false,
+                hasComments: r.comments as false,
                 count: r.replies,
                 hasUnread: r.readMaxId !== undefined && r.readMaxId !== r.maxId,
                 lastMessageId: r.maxId,

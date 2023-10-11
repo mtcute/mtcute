@@ -1,6 +1,7 @@
 import { Message } from '@mtcute/client'
 import { MaybeArray, MaybeAsync } from '@mtcute/core'
 
+import { MessageContext } from '../context'
 import { chat } from './chat'
 import { and } from './logic'
 import { UpdateFilter } from './types'
@@ -25,7 +26,7 @@ export const command = (
     commands: MaybeArray<string | RegExp>,
     prefixes: MaybeArray<string> | null = '/',
     caseSensitive = false,
-): UpdateFilter<Message, { command: string[] }> => {
+): UpdateFilter<MessageContext, { command: string[] }> => {
     if (!Array.isArray(commands)) commands = [commands]
 
     commands = commands.map((i) => (typeof i === 'string' ? i.toLowerCase() : i))
@@ -44,7 +45,9 @@ export const command = (
 
     const _prefixes = prefixes
 
-    const check = (msg: Message): MaybeAsync<boolean> => {
+    const check = (msg: MessageContext): MaybeAsync<boolean> => {
+        if (msg.isMessageGroup) return check(msg.messages[0])
+
         for (const pref of _prefixes) {
             if (!msg.text.startsWith(pref)) continue
 
@@ -54,17 +57,15 @@ export const command = (
                 const m = withoutPrefix.match(regex)
                 if (!m) continue
 
-                // const lastGroup = m[m.length - 1]
+                const lastGroup = m[m.length - 1]
 
-                // eslint-disable-next-line dot-notation
-                // todo
-                // if (lastGroup && msg.client['_isBot']) {
-                //     // check bot username
-                //     // eslint-disable-next-line dot-notation
-                //     if (lastGroup !== msg.client['_selfUsername']) {
-                //         return false
-                //     }
-                // }
+                if (lastGroup) {
+                    const state = msg.client.getAuthState()
+
+                    if (state.isBot && lastGroup !== state.selfUsername) {
+                        return false
+                    }
+                }
 
                 const match = m.slice(1, -1)
 
@@ -74,7 +75,7 @@ export const command = (
 
                     return ''
                 })
-                ;(msg as Message & { command: string[] }).command = match
+                ;(msg as MessageContext & { command: string[] }).command = match
 
                 return true
             }
@@ -98,7 +99,7 @@ export const start = and(chat('private'), command('start'))
  * If the parameter is a regex, groups are added to `msg.command`,
  * meaning that the first group is available in `msg.command[2]`.
  */
-export const deeplink = (params: MaybeArray<string | RegExp>): UpdateFilter<Message, { command: string[] }> => {
+export const deeplink = (params: MaybeArray<string | RegExp>): UpdateFilter<MessageContext, { command: string[] }> => {
     if (!Array.isArray(params)) {
         return and(start, (_msg: Message) => {
             const msg = _msg as Message & { command: string[] }

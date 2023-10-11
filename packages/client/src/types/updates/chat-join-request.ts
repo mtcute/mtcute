@@ -47,23 +47,6 @@ export class ChatJoinRequestUpdate {
     get totalPending(): number {
         return this.raw.requestsPending
     }
-
-    /**
-     * Approve or deny the last requested user
-     */
-    // hideLast(action: Parameters<TelegramClient['hideJoinRequest']>[1]['action']): Promise<void> {
-    // return this.client.hideJoinRequest(this.chatId, { user: this.raw.recentRequesters[0], action })
-    // }
-
-    /**
-     * Approve or deny all recent requests
-     * (the ones available in {@link recentRequesters})
-     */
-    // async hideAllRecent(action: Parameters<TelegramClient['hideJoinRequest']>[1]['action']): Promise<void> {
-    //     for (const id of this.raw.recentRequesters) {
-    //         await this.client.hideJoinRequest(this.chatId, { user: id, action })
-    //     }
-    // }
 }
 
 makeInspectable(ChatJoinRequestUpdate)

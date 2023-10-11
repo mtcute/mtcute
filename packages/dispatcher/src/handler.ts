@@ -1,20 +1,14 @@
 import {
-    BotChatJoinRequestUpdate,
     BotStoppedUpdate,
-    CallbackQuery,
     ChatJoinRequestUpdate,
     ChatMemberUpdate,
-    ChosenInlineResult,
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     HistoryReadUpdate,
-    InlineQuery,
     MaybeAsync,
-    Message,
     PeersIndex,
     PollUpdate,
     PollVoteUpdate,
-    PreCheckoutQuery,
     StoryUpdate,
     TelegramClient,
     tl,
@@ -22,6 +16,15 @@ import {
     UserTypingUpdate,
 } from '@mtcute/client'
 
+import {
+    CallbackQueryContext,
+    ChatJoinRequestUpdateContext,
+    ChosenInlineResultContext,
+    InlineQueryContext,
+    MessageContext,
+    PreCheckoutQueryContext,
+} from './context'
+import { UpdateContext } from './context/base'
 import { PropagationAction } from './propagation'
 
 export interface BaseUpdateHandler<Name, Handler, Checker> {
@@ -48,25 +51,31 @@ export type RawUpdateHandler = BaseUpdateHandler<
 >
 
 // begin-codegen
-export type NewMessageHandler<T = Message, S = never> = ParsedUpdateHandler<'new_message', T, S>
-export type EditMessageHandler<T = Message, S = never> = ParsedUpdateHandler<'edit_message', T, S>
-export type MessageGroupHandler<T = Message[], S = never> = ParsedUpdateHandler<'message_group', T, S>
-export type DeleteMessageHandler<T = DeleteMessageUpdate> = ParsedUpdateHandler<'delete_message', T>
-export type ChatMemberUpdateHandler<T = ChatMemberUpdate> = ParsedUpdateHandler<'chat_member', T>
-export type InlineQueryHandler<T = InlineQuery> = ParsedUpdateHandler<'inline_query', T>
-export type ChosenInlineResultHandler<T = ChosenInlineResult> = ParsedUpdateHandler<'chosen_inline_result', T>
-export type CallbackQueryHandler<T = CallbackQuery, S = never> = ParsedUpdateHandler<'callback_query', T, S>
-export type PollUpdateHandler<T = PollUpdate> = ParsedUpdateHandler<'poll', T>
-export type PollVoteHandler<T = PollVoteUpdate> = ParsedUpdateHandler<'poll_vote', T>
-export type UserStatusUpdateHandler<T = UserStatusUpdate> = ParsedUpdateHandler<'user_status', T>
-export type UserTypingHandler<T = UserTypingUpdate> = ParsedUpdateHandler<'user_typing', T>
-export type HistoryReadHandler<T = HistoryReadUpdate> = ParsedUpdateHandler<'history_read', T>
-export type BotStoppedHandler<T = BotStoppedUpdate> = ParsedUpdateHandler<'bot_stopped', T>
-export type BotChatJoinRequestHandler<T = BotChatJoinRequestUpdate> = ParsedUpdateHandler<'bot_chat_join_request', T>
-export type ChatJoinRequestHandler<T = ChatJoinRequestUpdate> = ParsedUpdateHandler<'chat_join_request', T>
-export type PreCheckoutQueryHandler<T = PreCheckoutQuery> = ParsedUpdateHandler<'pre_checkout_query', T>
-export type StoryUpdateHandler<T = StoryUpdate> = ParsedUpdateHandler<'story', T>
-export type DeleteStoryHandler<T = DeleteStoryUpdate> = ParsedUpdateHandler<'delete_story', T>
+export type NewMessageHandler<T = MessageContext, S = never> = ParsedUpdateHandler<'new_message', T, S>
+export type EditMessageHandler<T = MessageContext, S = never> = ParsedUpdateHandler<'edit_message', T, S>
+export type MessageGroupHandler<T = MessageContext, S = never> = ParsedUpdateHandler<'message_group', T, S>
+export type DeleteMessageHandler<T = UpdateContext<DeleteMessageUpdate>> = ParsedUpdateHandler<'delete_message', T>
+export type ChatMemberUpdateHandler<T = UpdateContext<ChatMemberUpdate>> = ParsedUpdateHandler<'chat_member', T>
+export type InlineQueryHandler<T = InlineQueryContext> = ParsedUpdateHandler<'inline_query', T>
+export type ChosenInlineResultHandler<T = ChosenInlineResultContext> = ParsedUpdateHandler<'chosen_inline_result', T>
+export type CallbackQueryHandler<T = CallbackQueryContext, S = never> = ParsedUpdateHandler<'callback_query', T, S>
+export type PollUpdateHandler<T = UpdateContext<PollUpdate>> = ParsedUpdateHandler<'poll', T>
+export type PollVoteHandler<T = UpdateContext<PollVoteUpdate>> = ParsedUpdateHandler<'poll_vote', T>
+export type UserStatusUpdateHandler<T = UpdateContext<UserStatusUpdate>> = ParsedUpdateHandler<'user_status', T>
+export type UserTypingHandler<T = UpdateContext<UserTypingUpdate>> = ParsedUpdateHandler<'user_typing', T>
+export type HistoryReadHandler<T = UpdateContext<HistoryReadUpdate>> = ParsedUpdateHandler<'history_read', T>
+export type BotStoppedHandler<T = UpdateContext<BotStoppedUpdate>> = ParsedUpdateHandler<'bot_stopped', T>
+export type BotChatJoinRequestHandler<T = ChatJoinRequestUpdateContext> = ParsedUpdateHandler<
+    'bot_chat_join_request',
+    T
+>
+export type ChatJoinRequestHandler<T = UpdateContext<ChatJoinRequestUpdate>> = ParsedUpdateHandler<
+    'chat_join_request',
+    T
+>
+export type PreCheckoutQueryHandler<T = PreCheckoutQueryContext> = ParsedUpdateHandler<'pre_checkout_query', T>
+export type StoryUpdateHandler<T = UpdateContext<StoryUpdate>> = ParsedUpdateHandler<'story', T>
+export type DeleteStoryHandler<T = UpdateContext<DeleteStoryUpdate>> = ParsedUpdateHandler<'delete_story', T>
 
 export type UpdateHandler =
     | RawUpdateHandler

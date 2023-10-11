@@ -4,7 +4,7 @@ import type { ChatInviteLink, InputPeerLike } from '../../types'
 import { resolvePeer } from '../users/resolve-peer'
 
 /**
- * Approve or deny multiple join requests to a chat.
+ * Approve or decline multiple join requests to a chat.
  */
 export async function hideAllJoinRequests(
     client: BaseTelegramClient,
@@ -12,8 +12,8 @@ export async function hideAllJoinRequests(
         /** Chat/channel ID */
         chatId: InputPeerLike
 
-        /** Whether to approve or deny the join requests */
-        action: 'approve' | 'deny'
+        /** Whether to approve or decline the join requests */
+        action: 'approve' | 'decline'
 
         /** Invite link to target */
         link?: string | ChatInviteLink

@@ -1,18 +1,20 @@
-// ^^ will be looked into in MTQ-29
-
 import { CallbackQuery, ChosenInlineResult, InlineQuery, Message } from '@mtcute/client'
 
+import { UpdateContextDistributed } from '../context'
 import { UpdateFilter } from './types'
 
-function extractText(obj: Message | InlineQuery | ChosenInlineResult | CallbackQuery): string | null {
-    if (obj.constructor === Message) {
-        return obj.text
-    } else if (obj.constructor === InlineQuery) {
-        return obj.query
-    } else if (obj.constructor === ChosenInlineResult) {
-        return obj.id
-    } else if (obj.constructor === CallbackQuery) {
-        if (obj.raw.data) return obj.dataStr
+type UpdatesWithText = UpdateContextDistributed<Message | InlineQuery | ChosenInlineResult | CallbackQuery>
+
+function extractText(obj: UpdatesWithText): string | null {
+    switch (obj._name) {
+        case 'new_message':
+            return obj.text
+        case 'inline_query':
+            return obj.query
+        case 'chosen_inline_result':
+            return obj.id
+        case 'callback_query':
+            if (obj.raw.data) return obj.dataStr
     }
 
     return null
@@ -31,9 +33,7 @@ function extractText(obj: Message | InlineQuery | ChosenInlineResult | CallbackQ
  * @param regex  Regex to be matched
  */
 export const regex =
-    (
-        regex: RegExp,
-    ): UpdateFilter<Message | InlineQuery | ChosenInlineResult | CallbackQuery, { match: RegExpMatchArray }> =>
+    (regex: RegExp): UpdateFilter<UpdatesWithText, { match: RegExpMatchArray }> =>
         (obj) => {
             const txt = extractText(obj)
             if (!txt) return false
@@ -59,10 +59,7 @@ export const regex =
  * @param str  String to be matched
  * @param ignoreCase  Whether string case should be ignored
  */
-export const equals = (
-    str: string,
-    ignoreCase = false,
-): UpdateFilter<Message | InlineQuery | ChosenInlineResult | CallbackQuery> => {
+export const equals = (str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> => {
     if (ignoreCase) {
         str = str.toLowerCase()
 
@@ -82,10 +79,7 @@ export const equals = (
  * @param str  Substring to be matched
  * @param ignoreCase  Whether string case should be ignored
  */
-export const contains = (
-    str: string,
-    ignoreCase = false,
-): UpdateFilter<Message | InlineQuery | ChosenInlineResult | CallbackQuery> => {
+export const contains = (str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> => {
     if (ignoreCase) {
         str = str.toLowerCase()
 
@@ -113,10 +107,7 @@ export const contains = (
  * @param str  Substring to be matched
  * @param ignoreCase  Whether string case should be ignored
  */
-export const startsWith = (
-    str: string,
-    ignoreCase = false,
-): UpdateFilter<Message | InlineQuery | ChosenInlineResult | CallbackQuery> => {
+export const startsWith = (str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> => {
     if (ignoreCase) {
         str = str.toLowerCase()
 
@@ -144,10 +135,7 @@ export const startsWith = (
  * @param str  Substring to be matched
  * @param ignoreCase  Whether string case should be ignored
  */
-export const endsWith = (
-    str: string,
-    ignoreCase = false,
-): UpdateFilter<Message | InlineQuery | ChosenInlineResult | CallbackQuery> => {
+export const endsWith = (str: string, ignoreCase = false): UpdateFilter<UpdatesWithText> => {
     if (ignoreCase) {
         str = str.toLowerCase()
 

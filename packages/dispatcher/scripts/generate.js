@@ -8,19 +8,21 @@ function generateHandler() {
 
     types.forEach((type) => {
         lines.push(
-            `export type ${type.handlerTypeName}Handler<T = ${type.updateType}` +
-            `${type.state ? ', S = never' : ''}> = ParsedUpdateHandler<` +
-            `'${type.typeName}', T${type.state ? ', S' : ''}>`,
+            `export type ${type.handlerTypeName}Handler<T = ${type.context}` +
+                `${type.state ? ', S = never' : ''}> = ParsedUpdateHandler<` +
+                `'${type.typeName}', T${type.state ? ', S' : ''}>`,
         )
         names.push(`${type.handlerTypeName}Handler`)
     })
 
-    replaceSections('handler.ts', {
-        codegen:
-            lines.join('\n') +
-            '\n\nexport type UpdateHandler = \n' +
-            names.map((i) => `    | ${i}\n`).join(''),
-    }, __dirname)
+    replaceSections(
+        'handler.ts',
+        {
+            codegen:
+                lines.join('\n') + '\n\nexport type UpdateHandler = \n' + names.map((i) => `    | ${i}\n`).join(''),
+        },
+        __dirname,
+    )
 }
 
 function generateDispatcher() {
@@ -37,9 +39,13 @@ function generateDispatcher() {
      * @param handler  ${toSentence(type, 'full')}
      * @param group  Handler group index
      */
-    on${type.handlerTypeName}(handler: ${type.handlerTypeName}Handler${type.state ? `<${type.updateType}, State extends never ? never : UpdateState<State, SceneName>>` : ''}['callback'], group?: number): void
+    on${type.handlerTypeName}(handler: ${type.handlerTypeName}Handler${
+    type.state ? `<${type.context}, State extends never ? never : UpdateState<State, SceneName>>` : ''
+}['callback'], group?: number): void
 
-${type.state ? `
+${
+    type.state ?
+        `
     /**
      * Register ${toSentence(type)} with a filter
      *
@@ -48,11 +54,15 @@ ${type.state ? `
      * @param group  Handler group index
      */
     on${type.handlerTypeName}<Mod>(
-        filter: UpdateFilter<${type.updateType}, Mod, State>,
-        handler: ${type.handlerTypeName}Handler<filters.Modify<${type.updateType}, Mod>, State extends never ? never : UpdateState<State, SceneName>>['callback'],
+        filter: UpdateFilter<${type.context}, Mod, State>,
+        handler: ${type.handlerTypeName}Handler<filters.Modify<${
+    type.context
+}, Mod>, State extends never ? never : UpdateState<State, SceneName>>['callback'],
         group?: number
     ): void
-    ` : ''}
+    ` :
+        ''
+}
 
     /**
      * Register ${toSentence(type)} with a filter
@@ -62,8 +72,10 @@ ${type.state ? `
      * @param group  Handler group index
      */
     on${type.handlerTypeName}<Mod>(
-        filter: UpdateFilter<${type.updateType}, Mod>,
-        handler: ${type.handlerTypeName}Handler<filters.Modify<${type.updateType}, Mod>${type.state ? ', State extends never ? never : UpdateState<State, SceneName>' : ''}>['callback'],
+        filter: UpdateFilter<${type.context}, Mod>,
+        handler: ${type.handlerTypeName}Handler<filters.Modify<${type.context}, Mod>${
+    type.state ? ', State extends never ? never : UpdateState<State, SceneName>' : ''
+}>['callback'],
         group?: number
     ): void
 
@@ -74,13 +86,20 @@ ${type.state ? `
 `)
     })
 
-    replaceSections('dispatcher.ts', {
-        codegen: lines.join('\n'),
-        'codegen-imports':
-            'import {\n' +
-            imports.sort().map((i) => `    ${i},\n`).join('') +
-            "} from './handler'",
-    }, __dirname)
+    replaceSections(
+        'dispatcher.ts',
+        {
+            codegen: lines.join('\n'),
+            'codegen-imports':
+                'import {\n' +
+                imports
+                    .sort()
+                    .map((i) => `    ${i},\n`)
+                    .join('') +
+                "} from './handler'",
+        },
+        __dirname,
+    )
 }
 
 async function main() {
