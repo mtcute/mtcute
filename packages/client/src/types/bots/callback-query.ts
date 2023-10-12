@@ -2,6 +2,7 @@ import { BasicPeerType, getBasicPeerType, getMarkedPeerId, MtArgumentError, tl }
 
 import { makeInspectable } from '../../utils'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { PeersIndex } from '../peers/peers-index'
 import { User } from '../peers/user'
 
@@ -22,19 +23,16 @@ export class CallbackQuery {
         return this.raw.queryId
     }
 
-    private _user?: User
     /**
      * User who has pressed the button
      */
     get user(): User {
-        return (this._user ??= new User(this._peers.user(this.raw.userId)))
+        return new User(this._peers.user(this.raw.userId))
     }
 
     /**
      * Unique ID, that represents the chat to which the inline
      * message was sent. Does *not* contain actual chat ID.
-     *
-     * Useful for high scores in games
      */
     get uniqueChatId(): tl.Long {
         return this.raw.chatInstance
@@ -127,7 +125,6 @@ export class CallbackQuery {
         return this.raw.data ?? null
     }
 
-    private _dataStr?: string
     /**
      * Data that was contained in the callback button, if any,
      * parsed as a UTF8 string
@@ -138,7 +135,7 @@ export class CallbackQuery {
     get dataStr(): string | null {
         if (!this.raw.data) return null
 
-        return (this._dataStr ??= this.raw.data.toString('utf8'))
+        return this.raw.data.toString('utf8')
     }
 
     /**
@@ -151,4 +148,5 @@ export class CallbackQuery {
     }
 }
 
+memoizeGetters(CallbackQuery, ['user', 'dataStr'])
 makeInspectable(CallbackQuery)

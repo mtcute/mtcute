@@ -2,6 +2,7 @@ import { getMarkedPeerId, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { PeersIndex } from '../peers/peers-index'
 import { User } from '../peers/user'
 import { ReactionEmoji, toReactionEmoji } from './types'
@@ -43,20 +44,15 @@ export class PeerReaction {
         return getMarkedPeerId(this.raw.peerId)
     }
 
-    private _user?: User
-
     /**
      * User who has reacted
      */
     get user(): User {
-        if (!this._user) {
-            assertTypeIs('PeerReaction#user', this.raw.peerId, 'peerUser')
+        assertTypeIs('PeerReaction#user', this.raw.peerId, 'peerUser')
 
-            this._user = new User(this._peers.user(this.raw.peerId.userId))
-        }
-
-        return this._user
+        return new User(this._peers.user(this.raw.peerId.userId))
     }
 }
 
+memoizeGetters(PeerReaction, ['user'])
 makeInspectable(PeerReaction)

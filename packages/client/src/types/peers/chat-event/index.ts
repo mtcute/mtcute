@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../../utils'
+import { memoizeGetters } from '../../../utils/memoize'
 import { PeersIndex } from '../peers-index'
 import { User } from '../user'
 import { _actionFromTl, ChatAction } from './actions'
@@ -31,18 +32,17 @@ export class ChatEvent {
         return new Date(this.raw.date * 1000)
     }
 
-    private _actor?: User
     /**
      * Actor of the event
      */
     get actor(): User {
-        return (this._actor ??= new User(this._peers.user(this.raw.userId)))
+        return new User(this._peers.user(this.raw.userId))
     }
 
-    private _action?: ChatAction
     get action(): ChatAction {
-        return (this._action ??= _actionFromTl(this.raw.action, this._peers))
+        return _actionFromTl(this.raw.action, this._peers)
     }
 }
 
+memoizeGetters(ChatEvent, ['actor', 'action'])
 makeInspectable(ChatEvent)

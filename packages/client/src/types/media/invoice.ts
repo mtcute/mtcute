@@ -1,6 +1,7 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { WebDocument } from '../files/web-document'
 import type { MessageMedia } from '../messages/message-media'
 import { Thumbnail } from './thumbnail'
@@ -30,13 +31,12 @@ export class InvoiceExtendedMediaPreview {
         return this.raw.h ?? 0
     }
 
-    private _thumbnail?: Thumbnail
     get thumbnail(): Thumbnail | null {
         if (!this.raw.thumb) {
             return null
         }
 
-        return (this._thumbnail ??= new Thumbnail(this.raw, this.raw.thumb))
+        return new Thumbnail(this.raw, this.raw.thumb)
     }
 
     /**
@@ -47,6 +47,9 @@ export class InvoiceExtendedMediaPreview {
         return this.raw.videoDuration ?? 0
     }
 }
+
+memoizeGetters(InvoiceExtendedMediaPreview, ['thumbnail'])
+makeInspectable(InvoiceExtendedMediaPreview)
 
 /**
  * An invoice
@@ -87,14 +90,13 @@ export class Invoice {
         return this.raw.description
     }
 
-    private _photo?: WebDocument
     /**
      * URL of the product photo for the invoice
      */
     get photo(): WebDocument | null {
         if (!this.raw.photo) return null
 
-        return (this._photo ??= new WebDocument(this.raw.photo))
+        return new WebDocument(this.raw.photo)
     }
 
     /**
@@ -144,7 +146,6 @@ export class Invoice {
         return 'full'
     }
 
-    private _extendedMediaPreview?: InvoiceExtendedMediaPreview
     /**
      * Get the invoice's extended media preview.
      * Only available if {@link extendedMediaState} is `preview`.
@@ -155,7 +156,7 @@ export class Invoice {
             throw new MtArgumentError('No extended media preview available')
         }
 
-        return (this._extendedMediaPreview ??= new InvoiceExtendedMediaPreview(this.raw.extendedMedia))
+        return new InvoiceExtendedMediaPreview(this.raw.extendedMedia)
     }
 
     /**
@@ -186,5 +187,5 @@ export class Invoice {
     }
 }
 
+memoizeGetters(Invoice, ['extendedMediaPreview', 'photo'])
 makeInspectable(Invoice, undefined, ['inputMedia'])
-makeInspectable(InvoiceExtendedMediaPreview)

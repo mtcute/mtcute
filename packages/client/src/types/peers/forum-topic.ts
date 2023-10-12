@@ -1,6 +1,7 @@
 import { MtTypeAssertionError, tl } from '@mtcute/core'
 
 import { hasValueAtKey, makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { MtMessageNotFoundError } from '../errors'
 import { DraftMessage, Message } from '../messages'
 import { Chat } from './chat'
@@ -104,39 +105,31 @@ export class ForumTopic {
         return this.raw.iconEmojiId ?? null
     }
 
-    private _creator?: User | Chat
     /**
      * Creator of the topic
      */
     get creator(): User | Chat {
-        if (this._creator) return this._creator
-
         switch (this.raw.fromId._) {
             case 'peerUser':
-                return (this._creator = new User(this._peers.user(this.raw.fromId.userId)))
+                return new User(this._peers.user(this.raw.fromId.userId))
             case 'peerChat':
-                return (this._creator = new Chat(this._peers.chat(this.raw.fromId.chatId)))
+                return new Chat(this._peers.chat(this.raw.fromId.chatId))
             default:
                 throw new MtTypeAssertionError('ForumTopic#creator', 'peerUser | peerChat', this.raw.fromId._)
         }
     }
 
-    private _lastMessage?: Message
     /**
      * The latest message sent in this topic
      */
     get lastMessage(): Message {
-        if (!this._lastMessage) {
-            const id = this.raw.topMessage
+        const id = this.raw.topMessage
 
-            if (this._messages?.has(id)) {
-                this._lastMessage = new Message(this._messages.get(id)!, this._peers)
-            } else {
-                throw new MtMessageNotFoundError(0, id)
-            }
+        if (this._messages?.has(id)) {
+            return new Message(this._messages.get(id)!, this._peers)
         }
 
-        return this._lastMessage
+        throw new MtMessageNotFoundError(0, id)
     }
 
     /**
@@ -181,18 +174,15 @@ export class ForumTopic {
         return this.raw.unreadReactionsCount
     }
 
-    private _draftMessage?: DraftMessage
-
     /**
      * Draft message in the topic
      */
     get draftMessage(): DraftMessage | null {
-        if (this._draftMessage) return this._draftMessage
-
         if (!this.raw.draft || this.raw.draft._ === 'draftMessageEmpty') return null
 
-        return (this._draftMessage = new DraftMessage(this.raw.draft))
+        return new DraftMessage(this.raw.draft)
     }
 }
 
+memoizeGetters(ForumTopic, ['creator', 'lastMessage', 'draftMessage'])
 makeInspectable(ForumTopic)

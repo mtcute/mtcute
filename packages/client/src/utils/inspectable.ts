@@ -9,13 +9,17 @@ try {
 
 // get all property names. unlike Object.getOwnPropertyNames,
 // also gets inherited property names
-function getAllGettersNames(obj: object): string[] {
-    const getters: string[] = []
+function getAllGettersNames<T>(obj: T): (keyof T)[] {
+    const getters: (keyof T)[] = []
 
     do {
         Object.getOwnPropertyNames(obj).forEach((prop) => {
-            if (prop !== '__proto__' && Object.getOwnPropertyDescriptor(obj, prop)?.get && !getters.includes(prop)) {
-                getters.push(prop)
+            if (
+                prop !== '__proto__' &&
+                Object.getOwnPropertyDescriptor(obj, prop)?.get &&
+                !getters.includes(prop as any)
+            ) {
+                getters.push(prop as any)
             }
         })
     } while ((obj = Object.getPrototypeOf(obj)))
@@ -37,10 +41,10 @@ const bufferToJsonInspect = function (this: Buffer) {
  * > (getter that caches after its first invocation is also
  * > considered pure in this case)
  */
-export function makeInspectable(obj: new (...args: any[]) => any, props?: string[], hide?: string[]): void {
-    const getters: string[] = props ? props : []
+export function makeInspectable<T>(obj: new (...args: any[]) => T, props?: (keyof T)[], hide?: (keyof T)[]): void {
+    const getters: (keyof T)[] = props ? props : []
 
-    for (const key of getAllGettersNames(obj.prototype)) {
+    for (const key of getAllGettersNames<T>(obj.prototype)) {
         if (!hide || !hide.includes(key)) getters.push(key)
     }
 

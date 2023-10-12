@@ -9,6 +9,7 @@ import {
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { BotKeyboard, ReplyMarkup } from '../bots/keyboards'
 import { Chat } from '../peers/chat'
 import { PeersIndex } from '../peers/peers-index'
@@ -170,13 +171,11 @@ export class Message {
         return `${this.raw.groupedId.low}|${this.raw.groupedId.high}|${getMarkedPeerId(this.raw.peerId)}`
     }
 
-    private _sender?: User | Chat
-
     /**
      * Message sender.
      *
      * Usually is a {@link User}, but can be a {@link Chat}
-     * in case the message was sent by an anonymous admin,
+     * in case the message was sent by an anonymous admin, anonymous premium user,
      * or if the message is a forwarded channel post.
      *
      * If the message was sent by an anonymous admin,
@@ -186,44 +185,31 @@ export class Message {
      * sender is the channel itself.
      */
     get sender(): User | Chat {
-        if (this._sender === undefined) {
-            const from = this.raw.fromId
+        const from = this.raw.fromId
 
-            if (!from) {
-                if (this.raw.peerId._ === 'peerUser') {
-                    this._sender = new User(this._peers.user(this.raw.peerId.userId))
-                } else {
-                    // anon admin, return the chat
-                    this._sender = this.chat
-                }
-            } else {
-                switch (from._) {
-                    case 'peerChannel': // forwarded channel post
-                        this._sender = new Chat(this._peers.chat(from.channelId))
-                        break
-                    case 'peerUser':
-                        this._sender = new User(this._peers.user(from.userId))
-                        break
-                    default:
-                        throw new MtTypeAssertionError('raw.fromId', 'peerUser | peerChannel', from._)
-                }
+        if (!from) {
+            if (this.raw.peerId._ === 'peerUser') {
+                return new User(this._peers.user(this.raw.peerId.userId))
             }
+
+            // anon admin, return the chat
+            return this.chat
         }
-
-        return this._sender
+        switch (from._) {
+            case 'peerChannel': // forwarded channel post or anon
+                return new Chat(this._peers.chat(from.channelId))
+            case 'peerUser':
+                return new User(this._peers.user(from.userId))
+            default:
+                throw new MtTypeAssertionError('raw.fromId', 'peerUser | peerChannel', from._)
+        }
     }
-
-    private _chat?: Chat
 
     /**
      * Conversation the message belongs to
      */
     get chat(): Chat {
-        if (this._chat === undefined) {
-            this._chat = Chat._parseFromMessage(this.raw, this._peers)
-        }
-
-        return this._chat
+        return Chat._parseFromMessage(this.raw, this._peers)
     }
 
     /**
@@ -233,49 +219,40 @@ export class Message {
         return new Date(this.raw.date * 1000)
     }
 
-    private _forward?: MessageForwardInfo | null
-
     /**
      * If this message is a forward, contains info about it.
      */
     get forward(): MessageForwardInfo | null {
-        if (!this._forward) {
-            if (this.raw._ !== 'message' || !this.raw.fwdFrom) {
-                this._forward = null
-            } else {
-                const fwd = this.raw.fwdFrom
+        if (this.raw._ !== 'message' || !this.raw.fwdFrom) {
+            return null
+        }
+        const fwd = this.raw.fwdFrom
 
-                let sender: User | Chat | string
+        let sender: User | Chat | string
 
-                if (fwd.fromName) {
-                    sender = fwd.fromName
-                } else if (fwd.fromId) {
-                    switch (fwd.fromId._) {
-                        case 'peerChannel':
-                            sender = new Chat(this._peers.chat(fwd.fromId.channelId))
-                            break
-                        case 'peerUser':
-                            sender = new User(this._peers.user(fwd.fromId.userId))
-                            break
-                        default:
-                            throw new MtTypeAssertionError('raw.fwdFrom.fromId', 'peerUser | peerChannel', fwd.fromId._)
-                    }
-                } else {
-                    this._forward = null
-
-                    return this._forward
-                }
-
-                this._forward = {
-                    date: new Date(fwd.date * 1000),
-                    sender,
-                    fromMessageId: fwd.savedFromMsgId,
-                    signature: fwd.postAuthor,
-                }
+        if (fwd.fromName) {
+            sender = fwd.fromName
+        } else if (fwd.fromId) {
+            switch (fwd.fromId._) {
+                case 'peerChannel':
+                    sender = new Chat(this._peers.chat(fwd.fromId.channelId))
+                    break
+                case 'peerUser':
+                    sender = new User(this._peers.user(fwd.fromId.userId))
+                    break
+                default:
+                    throw new MtTypeAssertionError('raw.fwdFrom.fromId', 'peerUser | peerChannel', fwd.fromId._)
             }
+        } else {
+            return null
         }
 
-        return this._forward
+        return {
+            date: new Date(fwd.date * 1000),
+            sender,
+            fromMessageId: fwd.savedFromMsgId,
+            signature: fwd.postAuthor,
+        }
     }
 
     /**
@@ -295,33 +272,28 @@ export class Message {
         )
     }
 
-    private _replies?: MessageRepliesInfo | MessageCommentsInfo
     /**
      * Information about comments (for channels) or replies (for groups)
      */
     get replies(): MessageRepliesInfo | MessageCommentsInfo | null {
         if (this.raw._ !== 'message' || !this.raw.replies) return null
 
-        if (!this._replies) {
-            const r = this.raw.replies
-            const obj: MessageRepliesInfo = {
-                hasComments: r.comments as false,
-                count: r.replies,
-                hasUnread: r.readMaxId !== undefined && r.readMaxId !== r.maxId,
-                lastMessageId: r.maxId,
-                lastReadMessageId: r.readMaxId,
-            }
-
-            if (r.comments) {
-                const o = obj as unknown as MessageCommentsInfo
-                o.discussion = getMarkedPeerId(r.channelId!, 'channel')
-                o.repliers = r.recentRepliers?.map((it) => getMarkedPeerId(it)) ?? []
-            }
-
-            this._replies = obj
+        const r = this.raw.replies
+        const obj: MessageRepliesInfo = {
+            hasComments: r.comments as false,
+            count: r.replies,
+            hasUnread: r.readMaxId !== undefined && r.readMaxId !== r.maxId,
+            lastMessageId: r.maxId,
+            lastReadMessageId: r.readMaxId,
         }
 
-        return this._replies
+        if (r.comments) {
+            const o = obj as unknown as MessageCommentsInfo
+            o.discussion = getMarkedPeerId(r.channelId!, 'channel')
+            o.repliers = r.recentRepliers?.map((it) => getMarkedPeerId(it)) ?? []
+        }
+
+        return obj
     }
 
     /**
@@ -367,21 +339,16 @@ export class Message {
         return this.raw.mentioned!
     }
 
-    private _viaBot?: User | null
     /**
      * If this message is generated from an inline query,
      * information about the bot which generated it
      */
     get viaBot(): User | null {
-        if (this._viaBot === undefined) {
-            if (this.raw._ === 'messageService' || !this.raw.viaBotId) {
-                this._viaBot = null
-            } else {
-                this._viaBot = new User(this._peers.user(this.raw.viaBotId))
-            }
+        if (this.raw._ === 'messageService' || !this.raw.viaBotId) {
+            return null
         }
 
-        return this._viaBot
+        return new User(this._peers.user(this.raw.viaBotId))
     }
 
     /**
@@ -394,25 +361,21 @@ export class Message {
         return this.raw._ === 'messageService' ? '' : this.raw.message
     }
 
-    private _entities?: MessageEntity[]
     /**
      * Message text/caption entities (may be empty)
      */
     get entities(): ReadonlyArray<MessageEntity> {
-        if (!this._entities) {
-            this._entities = []
+        const entities: MessageEntity[] = []
 
-            if (this.raw._ === 'message' && this.raw.entities?.length) {
-                for (const ent of this.raw.entities) {
-                    this._entities.push(new MessageEntity(ent, this.raw.message))
-                }
+        if (this.raw._ === 'message' && this.raw.entities?.length) {
+            for (const ent of this.raw.entities) {
+                entities.push(new MessageEntity(ent, this.raw.message))
             }
         }
 
-        return this._entities
+        return entities
     }
 
-    private _action?: MessageAction
     /**
      * Message action. `null` for non-service messages
      * or for unsupported events.
@@ -420,18 +383,13 @@ export class Message {
      * For unsupported events, use `.raw.action` directly.
      */
     get action(): MessageAction | null {
-        if (!this._action) {
-            if (this.raw._ === 'message') {
-                this._action = null
-            } else {
-                this._action = _messageActionFromTl.call(this, this.raw.action)
-            }
+        if (this.raw._ === 'message') {
+            return null
         }
 
-        return this._action
+        return _messageActionFromTl.call(this, this.raw.action)
     }
 
-    private _media?: MessageMedia
     /**
      * Message media. `null` for text-only and service messages
      * and for unsupported media types.
@@ -439,15 +397,11 @@ export class Message {
      * For unsupported media types, use `.raw.media` directly.
      */
     get media(): MessageMedia {
-        if (this._media === undefined) {
-            if (this.raw._ === 'messageService' || !this.raw.media || this.raw.media._ === 'messageMediaEmpty') {
-                this._media = null
-            } else {
-                this._media = _messageMediaFromTl(this._peers, this.raw.media)
-            }
+        if (this.raw._ === 'messageService' || !this.raw.media || this.raw.media._ === 'messageMediaEmpty') {
+            return null
         }
 
-        return this._media!
+        return _messageMediaFromTl(this._peers, this.raw.media)
     }
 
     /**
@@ -466,56 +420,44 @@ export class Message {
         return this.raw.ttlPeriod ?? null
     }
 
-    private _markup?: ReplyMarkup | null
     /**
      * Reply markup provided with this message, if any.
      */
     get markup(): ReplyMarkup | null {
-        if (this._markup === undefined) {
-            if (this.raw._ === 'messageService' || !this.raw.replyMarkup) {
-                this._markup = null
-            } else {
-                const rm = this.raw.replyMarkup
-                let markup: ReplyMarkup | null
-
-                switch (rm._) {
-                    case 'replyKeyboardHide':
-                        markup = {
-                            type: 'reply_hide',
-                            selective: rm.selective,
-                        }
-                        break
-                    case 'replyKeyboardForceReply':
-                        markup = {
-                            type: 'force_reply',
-                            singleUse: rm.singleUse,
-                            selective: rm.selective,
-                        }
-                        break
-                    case 'replyKeyboardMarkup':
-                        markup = {
-                            type: 'reply',
-                            resize: rm.resize,
-                            singleUse: rm.singleUse,
-                            selective: rm.selective,
-                            buttons: BotKeyboard._rowsTo2d(rm.rows),
-                        }
-                        break
-                    case 'replyInlineMarkup':
-                        markup = {
-                            type: 'inline',
-                            buttons: BotKeyboard._rowsTo2d(rm.rows),
-                        }
-                        break
-                    default:
-                        assertNever(rm)
-                }
-
-                this._markup = markup
-            }
+        if (this.raw._ === 'messageService' || !this.raw.replyMarkup) {
+            return null
         }
 
-        return this._markup
+        const rm = this.raw.replyMarkup
+
+        switch (rm._) {
+            case 'replyKeyboardHide':
+                return {
+                    type: 'reply_hide',
+                    selective: rm.selective,
+                }
+            case 'replyKeyboardForceReply':
+                return {
+                    type: 'force_reply',
+                    singleUse: rm.singleUse,
+                    selective: rm.selective,
+                }
+            case 'replyKeyboardMarkup':
+                return {
+                    type: 'reply',
+                    resize: rm.resize,
+                    singleUse: rm.singleUse,
+                    selective: rm.selective,
+                    buttons: BotKeyboard._rowsTo2d(rm.rows),
+                }
+            case 'replyInlineMarkup':
+                return {
+                    type: 'inline',
+                    buttons: BotKeyboard._rowsTo2d(rm.rows),
+                }
+            default:
+                assertNever(rm)
+        }
     }
 
     /**
@@ -527,22 +469,12 @@ export class Message {
         return this.raw._ === 'message' && !this.raw.noforwards
     }
 
-    private _reactions?: MessageReactions | null
     get reactions(): MessageReactions | null {
-        if (this._reactions === undefined) {
-            if (this.raw._ === 'messageService' || !this.raw.reactions) {
-                this._reactions = null
-            } else {
-                this._reactions = new MessageReactions(
-                    this.raw.id,
-                    getMarkedPeerId(this.raw.peerId),
-                    this.raw.reactions,
-                    this._peers,
-                )
-            }
+        if (this.raw._ === 'messageService' || !this.raw.reactions) {
+            return null
         }
 
-        return this._reactions
+        return new MessageReactions(this.raw.id, getMarkedPeerId(this.raw.peerId), this.raw.reactions, this._peers)
     }
 
     /**
@@ -563,4 +495,16 @@ export class Message {
     }
 }
 
+memoizeGetters(Message, [
+    'sender',
+    'chat',
+    'forward',
+    'replies',
+    'viaBot',
+    'entities',
+    'action',
+    'media',
+    'markup',
+    'reactions',
+])
 makeInspectable(Message, ['isScheduled'], ['link'])

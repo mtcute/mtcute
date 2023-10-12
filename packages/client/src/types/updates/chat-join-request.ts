@@ -1,6 +1,7 @@
 import { getBarePeerId, tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { PeersIndex, User } from '../peers'
 
 /**
@@ -33,12 +34,11 @@ export class ChatJoinRequestUpdate {
         return this.raw.recentRequesters
     }
 
-    private _recentRequesters?: User[]
     /**
      * Users who recently requested to join the chat
      */
     get recentRequesters(): User[] {
-        return (this._recentRequesters ??= this.raw.recentRequesters.map((id) => new User(this._peers.user(id))))
+        return this.raw.recentRequesters.map((id) => new User(this._peers.user(id)))
     }
 
     /**
@@ -49,4 +49,5 @@ export class ChatJoinRequestUpdate {
     }
 }
 
+memoizeGetters(ChatJoinRequestUpdate, ['recentRequesters'])
 makeInspectable(ChatJoinRequestUpdate)

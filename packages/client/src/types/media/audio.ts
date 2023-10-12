@@ -2,6 +2,7 @@ import { tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { RawDocument } from './document'
 
 /**
@@ -45,4 +46,5 @@ export class Audio extends RawDocument {
     }
 }
 
+memoizeGetters(Audio, ['fileName', 'thumbnails', 'fileId', 'uniqueFileId'])
 makeInspectable(Audio, ['fileSize', 'dcId'], ['inputMedia', 'inputDocument'])

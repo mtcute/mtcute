@@ -1,7 +1,8 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
-import { User, UserParsedStatus, UserStatus } from '../peers'
+import { memoizeGetters } from '../../utils/memoize'
+import { User, UserStatus } from '../peers'
 
 /**
  * User status has changed
@@ -16,19 +17,15 @@ export class UserStatusUpdate {
         return this.raw.userId
     }
 
-    private _parsedStatus?: UserParsedStatus
-
-    private _parseStatus() {
-        this._parsedStatus = User.parseStatus(this.raw.status)
+    private get _parsedStatus() {
+        return User.parseStatus(this.raw.status)
     }
 
     /**
      * User's new Last Seen & Online status
      */
     get status(): UserStatus {
-        if (!this._parsedStatus) this._parseStatus()
-
-        return this._parsedStatus!.status
+        return this._parsedStatus.status
     }
 
     /**
@@ -36,9 +33,7 @@ export class UserStatusUpdate {
      * Only available if {@link status} is `offline`
      */
     get lastOnline(): Date | null {
-        if (!this._parsedStatus) this._parseStatus()
-
-        return this._parsedStatus!.lastOnline
+        return this._parsedStatus.lastOnline
     }
 
     /**
@@ -46,10 +41,9 @@ export class UserStatusUpdate {
      * Only available if {@link status} is `online`
      */
     get nextOffline(): Date | null {
-        if (!this._parsedStatus) this._parseStatus()
-
-        return this._parsedStatus!.nextOffline
+        return this._parsedStatus.nextOffline
     }
 }
 
+memoizeGetters(UserStatusUpdate, ['_parsedStatus' as keyof UserStatusUpdate])
 makeInspectable(UserStatusUpdate)

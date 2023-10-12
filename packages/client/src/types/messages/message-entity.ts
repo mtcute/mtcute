@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 
 /**
  * Params of the entity. `.kind` can be:
@@ -86,55 +87,52 @@ export class MessageEntity {
         return this.params.kind
     }
 
-    private _params?: MessageEntityParams
     /**
      * Params of the entity
      */
     get params(): MessageEntityParams {
-        if (this._params) return this._params
-
         switch (this.raw._) {
             case 'messageEntityMention':
-                return (this._params = { kind: 'mention' })
+                return { kind: 'mention' }
             case 'messageEntityHashtag':
-                return (this._params = { kind: 'hashtag' })
+                return { kind: 'hashtag' }
             case 'messageEntityCashtag':
-                return (this._params = { kind: 'cashtag' })
+                return { kind: 'cashtag' }
             case 'messageEntityBotCommand':
-                return (this._params = { kind: 'bot_command' })
+                return { kind: 'bot_command' }
             case 'messageEntityUrl':
-                return (this._params = { kind: 'url' })
+                return { kind: 'url' }
             case 'messageEntityEmail':
-                return (this._params = { kind: 'email' })
+                return { kind: 'email' }
             case 'messageEntityPhone':
-                return (this._params = { kind: 'phone_number' })
+                return { kind: 'phone_number' }
             case 'messageEntityBold':
-                return (this._params = { kind: 'bold' })
+                return { kind: 'bold' }
             case 'messageEntityItalic':
-                return (this._params = { kind: 'italic' })
+                return { kind: 'italic' }
             case 'messageEntityUnderline':
-                return (this._params = { kind: 'underline' })
+                return { kind: 'underline' }
             case 'messageEntityStrike':
-                return (this._params = { kind: 'strikethrough' })
+                return { kind: 'strikethrough' }
             case 'messageEntitySpoiler':
-                return (this._params = { kind: 'spoiler' })
+                return { kind: 'spoiler' }
             case 'messageEntityCode':
-                return (this._params = { kind: 'code' })
+                return { kind: 'code' }
             case 'messageEntityPre':
-                return (this._params = { kind: 'pre', language: this.raw.language })
+                return { kind: 'pre', language: this.raw.language }
             case 'messageEntityTextUrl':
-                return (this._params = { kind: 'text_link', url: this.raw.url })
+                return { kind: 'text_link', url: this.raw.url }
             case 'messageEntityMentionName':
-                return (this._params = { kind: 'text_mention', userId: this.raw.userId })
+                return { kind: 'text_mention', userId: this.raw.userId }
             case 'messageEntityBlockquote':
-                return (this._params = { kind: 'blockquote' })
+                return { kind: 'blockquote' }
             case 'messageEntityCustomEmoji':
-                return (this._params = { kind: 'emoji', emojiId: this.raw.documentId })
+                return { kind: 'emoji', emojiId: this.raw.documentId }
             case 'messageEntityBankCard':
-                return (this._params = { kind: 'bank_card' })
+                return { kind: 'bank_card' }
         }
 
-        return (this._params = { kind: 'unknown' })
+        return { kind: 'unknown' }
     }
 
     /**
@@ -161,4 +159,5 @@ export class MessageEntity {
     }
 }
 
+memoizeGetters(MessageEntity, ['params'])
 makeInspectable(MessageEntity)

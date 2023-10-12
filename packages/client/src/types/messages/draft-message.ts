@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { MessageEntity } from './message-entity'
 
 /**
@@ -37,23 +38,21 @@ export class DraftMessage {
         return this.raw.noWebpage!
     }
 
-    private _entities?: MessageEntity[]
     /**
      * Message text entities (may be empty)
      */
     get entities(): ReadonlyArray<MessageEntity> {
-        if (!this._entities) {
-            this._entities = []
+        const entities = []
 
-            if (this.raw.entities?.length) {
-                for (const ent of this.raw.entities) {
-                    this._entities.push(new MessageEntity(ent, this.raw.message))
-                }
+        if (this.raw.entities?.length) {
+            for (const ent of this.raw.entities) {
+                entities.push(new MessageEntity(ent, this.raw.message))
             }
         }
 
-        return this._entities
+        return entities
     }
 }
 
+memoizeGetters(DraftMessage, ['entities'])
 makeInspectable(DraftMessage)

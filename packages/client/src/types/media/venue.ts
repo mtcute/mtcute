@@ -2,6 +2,7 @@ import { tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { Location } from './location'
 
 export interface VenueSource {
@@ -31,17 +32,13 @@ export class Venue {
 
     constructor(readonly raw: tl.RawMessageMediaVenue) {}
 
-    private _location?: Location
     /**
      * Geolocation of the venue
      */
     get location(): Location {
-        if (!this._location) {
-            assertTypeIs('Venue#location', this.raw.geo, 'geoPoint')
-            this._location = new Location(this.raw.geo)
-        }
+        assertTypeIs('Venue#location', this.raw.geo, 'geoPoint')
 
-        return this._location
+        return new Location(this.raw.geo)
     }
 
     /**
@@ -104,4 +101,5 @@ export class Venue {
     }
 }
 
+memoizeGetters(Venue, ['location', 'source'])
 makeInspectable(Venue, undefined, ['inputMedia'])

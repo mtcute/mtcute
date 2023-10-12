@@ -1,6 +1,7 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { RawDocument } from './document'
 import { parseDocument } from './document-utils'
 import { Photo } from './photo'
@@ -164,25 +165,19 @@ export class WebPage {
         return this.raw.embedHeight || 0
     }
 
-    private _photo?: Photo | null
     /**
      * A photo inside this webpage preview.
      *
      * Used for most of the preview types.
      */
     get photo(): Photo | null {
-        if (this._photo === undefined) {
-            if (this.raw.photo?._ !== 'photo') {
-                this._photo = null
-            } else {
-                this._photo = new Photo(this.raw.photo)
-            }
+        if (this.raw.photo?._ !== 'photo') {
+            return null
         }
 
-        return this._photo
+        return new Photo(this.raw.photo)
     }
 
-    private _document?: RawDocument | null
     /**
      * Document inside this webpage preview.
      *
@@ -192,15 +187,11 @@ export class WebPage {
      * {@link Audio}, {@link Document}.
      */
     get document(): RawDocument | null {
-        if (this._document === undefined) {
-            if (this.raw.document?._ !== 'document') {
-                this._document = null
-            } else {
-                this._document = parseDocument(this.raw.document)
-            }
+        if (this.raw.document?._ !== 'document') {
+            return null
         }
 
-        return this._document
+        return parseDocument(this.raw.document)
     }
 
     /**
@@ -217,4 +208,5 @@ export class WebPage {
     }
 }
 
+memoizeGetters(WebPage, ['photo', 'document'])
 makeInspectable(WebPage, undefined, ['inputMedia'])

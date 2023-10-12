@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { PeersIndex, User } from '../peers'
 import { ReactionCount } from '../reactions/reaction-count'
 
@@ -39,27 +40,22 @@ export class StoryInteractions {
         return this.raw.reactionsCount ?? 0
     }
 
-    private _reactions?: ReactionCount[]
     /**
      * Reactions on the message, along with their counts
      */
     get reactions(): ReactionCount[] {
         if (!this.raw.reactions) return []
 
-        return (this._reactions ??= this.raw.reactions.map((it) => new ReactionCount(it)))
+        return this.raw.reactions.map((it) => new ReactionCount(it))
     }
 
-    private _recentViewers?: User[]
     /**
      * List of users who have recently viewed this story.
      */
     get recentViewers(): User[] {
-        if (!this._recentViewers) {
-            this._recentViewers = this.raw.recentViewers?.map((it) => new User(this._peers.user(it))) ?? []
-        }
-
-        return this._recentViewers
+        return this.raw.recentViewers?.map((it) => new User(this._peers.user(it))) ?? []
     }
 }
 
+memoizeGetters(StoryInteractions, ['reactions', 'recentViewers'])
 makeInspectable(StoryInteractions)

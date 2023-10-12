@@ -2,6 +2,7 @@ import { MtArgumentError, tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { RawDocument } from './document'
 
 export const MASK_POSITION_POINT_TO_TL = {
@@ -184,7 +185,6 @@ export class Sticker extends RawDocument {
         return this.attr.stickerset._ === 'inputStickerSetEmpty' ? null : this.attr.stickerset
     }
 
-    private _maskPosition?: MaskPosition
     /**
      * Position where this mask should be placed
      */
@@ -193,18 +193,16 @@ export class Sticker extends RawDocument {
             return null
         }
 
-        if (!this._maskPosition) {
-            const raw = this.attr.maskCoords
-            this._maskPosition = {
-                point: MASK_POS[raw.n],
-                x: raw.x,
-                y: raw.y,
-                scale: raw.zoom,
-            }
-        }
+        const raw = this.attr.maskCoords
 
-        return this._maskPosition
+        return {
+            point: MASK_POS[raw.n],
+            x: raw.x,
+            y: raw.y,
+            scale: raw.zoom,
+        }
     }
 }
 
+memoizeGetters(Sticker, ['fileName', 'thumbnails', 'fileId', 'uniqueFileId', 'maskPosition'])
 makeInspectable(Sticker, ['fileSize', 'dcId'], ['inputMedia', 'inputDocument'])

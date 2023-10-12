@@ -2,6 +2,7 @@ import { tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { decodeWaveform } from '../../utils/voice-utils'
 import { RawDocument } from './document'
 
@@ -39,5 +40,5 @@ export class Voice extends RawDocument {
         return decodeWaveform(this.attr.waveform!)
     }
 }
-
+memoizeGetters(Voice, ['fileName', 'thumbnails', 'fileId', 'uniqueFileId', 'waveform'])
 makeInspectable(Voice, ['fileSize', 'dcId'], ['inputMedia', 'inputDocument', 'waveform'])

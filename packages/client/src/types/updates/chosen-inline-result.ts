@@ -2,6 +2,7 @@ import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
 import { encodeInlineMessageId } from '../../utils/inline-utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { Location } from '../media/location'
 import { PeersIndex, User } from '../peers'
 
@@ -25,12 +26,11 @@ export class ChosenInlineResult {
         return this.raw.id
     }
 
-    private _user?: User
     /**
      * User who has chosen the query
      */
     get user(): User {
-        return (this._user ??= new User(this._peers.user(this.raw.userId)))
+        return new User(this._peers.user(this.raw.userId))
     }
 
     /**
@@ -41,14 +41,13 @@ export class ChosenInlineResult {
         return this.raw.query
     }
 
-    private _location?: Location
     /**
      * Sender location, only applicable to bots that requested user location
      */
     get location(): Location | null {
         if (this.raw.geo?._ !== 'geoPoint') return null
 
-        return (this._location ??= new Location(this.raw.geo))
+        return new Location(this.raw.geo)
     }
 
     /**
@@ -78,4 +77,5 @@ export class ChosenInlineResult {
     }
 }
 
+memoizeGetters(ChosenInlineResult, ['user', 'location'])
 makeInspectable(ChosenInlineResult)

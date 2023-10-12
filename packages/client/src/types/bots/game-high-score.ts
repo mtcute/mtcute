@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { PeersIndex } from '../peers/peers-index'
 import { User } from '../peers/user'
 
@@ -13,12 +14,11 @@ export class GameHighScore {
         readonly _peers: PeersIndex,
     ) {}
 
-    private _user?: User
     /**
      * User who has scored this score
      */
     get user(): User {
-        return (this._user ??= new User(this._peers.user(this.raw.userId)))
+        return new User(this._peers.user(this.raw.userId))
     }
 
     /**
@@ -36,4 +36,5 @@ export class GameHighScore {
     }
 }
 
+memoizeGetters(GameHighScore, ['user'])
 makeInspectable(GameHighScore)

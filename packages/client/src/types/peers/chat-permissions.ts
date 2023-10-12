@@ -131,5 +131,5 @@ makeInspectable(ChatPermissions)
  * Chat permissions that are used as an input for API methods.
  */
 export type InputChatPermissions = {
-    [k in Exclude<keyof ChatPermissions, '_bannedRights'>]?: boolean
+    [k in Exclude<keyof ChatPermissions, 'raw'>]?: boolean
 }

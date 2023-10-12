@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { Photo } from '../media'
 import { User } from './user'
 
@@ -52,17 +53,15 @@ export class ChatPreview {
         return this.invite.participantsCount
     }
 
-    _photo?: Photo
     /**
      * Chat photo
      */
     get photo(): Photo | null {
         if (this.invite.photo._ === 'photoEmpty') return null
 
-        return (this._photo ??= new Photo(this.invite.photo))
+        return new Photo(this.invite.photo)
     }
 
-    private _someMembers?: User[]
     /**
      * Preview of some of the chat members.
      *
@@ -71,9 +70,7 @@ export class ChatPreview {
      * ordered before others.
      */
     get someMembers(): ReadonlyArray<User> {
-        return (this._someMembers ??= this.invite.participants ?
-            this.invite.participants.map((it) => new User(it)) :
-            [])
+        return this.invite.participants?.map((it) => new User(it)) ?? []
     }
 
     /**
@@ -85,4 +82,5 @@ export class ChatPreview {
     }
 }
 
+memoizeGetters(ChatPreview, ['photo', 'someMembers'])
 makeInspectable(ChatPreview, ['link'])

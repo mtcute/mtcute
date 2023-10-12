@@ -1,6 +1,7 @@
 import { getMarkedPeerId, tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { Chat } from '../peers/chat'
 import { ChatInviteLink } from '../peers/chat-invite-link'
 import { ChatMember } from '../peers/chat-member'
@@ -84,132 +85,121 @@ export class ChatMemberUpdate {
         return this.user.isSelf
     }
 
-    private _type?: ChatMemberUpdateType
     /**
      * Type of the update
      *
      * @link ChatMemberUpdate.Type
      */
     get type(): ChatMemberUpdateType {
-        if (!this._type) {
-            // we do not use `.actor`, `.newMember` and `.oldMember`,
-            // since using them would mean creating objects,
-            // which will probably be useless in case this property
-            // is used inside of a filter
-            // fortunately, all the info is available as-is and does not require
-            // additional parsing
+        // we do not use `.actor`, `.newMember` and `.oldMember`,
+        // since using them would mean creating objects,
+        // which will probably be useless in case this property
+        // is used inside of a filter
+        // fortunately, all the info is available as-is and does not require
+        // additional parsing
 
-            const old = this.raw.prevParticipant
-            const cur = this.raw.newParticipant
+        const old = this.raw.prevParticipant
+        const cur = this.raw.newParticipant
 
-            const oldId = extractPeerId(old)
-            const curId = extractPeerId(cur)
+        const oldId = extractPeerId(old)
+        const curId = extractPeerId(cur)
 
-            const actorId = this.raw.actorId
+        const actorId = this.raw.actorId
 
-            if (!old && cur) {
-                // join or added
-                return (this._type = actorId === curId ? 'joined' : 'added')
-            }
-
-            if (old && !cur) {
-                // left, kicked (for chats) or unkicked
-                if (actorId === oldId) return (this._type = 'left')
-
-                if (old._ === 'channelParticipantBanned') {
-                    return (this._type = 'unkicked')
-                }
-
-                return (this._type = 'kicked')
-            }
-
-            // in this case OR is the same as AND, but AND doesn't work well with typescript :shrug:
-            if (!old || !cur) return (this._type = 'other')
-
-            switch (old._) {
-                case 'chatParticipant':
-                case 'channelParticipant':
-                    switch (cur._) {
-                        case 'chatParticipantAdmin':
-                        case 'channelParticipantAdmin':
-                            return (this._type = 'promoted')
-                        case 'channelParticipantBanned':
-                            // kicked or restricted
-                            if (cur.left) return (this._type = 'kicked')
-
-                            return (this._type = 'restricted')
-                    }
-                    break
-                case 'chatParticipantCreator':
-                case 'channelParticipantCreator':
-                    return (this._type = 'old_owner')
-            }
-
-            switch (cur._) {
-                case 'chatParticipantCreator':
-                case 'channelParticipantCreator':
-                    return (this._type = 'new_owner')
-            }
-
-            if (old._ === 'channelParticipantBanned' && cur._ === 'channelParticipant') {
-                return (this._type = 'unrestricted')
-            }
-
-            if (old._ === 'channelParticipantBanned' && cur._ === 'channelParticipantAdmin') {
-                return (this._type = 'unrestricted_promoted')
-            }
-
-            if (old._ === 'channelParticipantAdmin' && cur._ === 'channelParticipant') {
-                return (this._type = 'demoted')
-            }
-
-            if (old._ === 'channelParticipantAdmin' && cur._ === 'channelParticipantBanned') {
-                return (this._type = cur.left ? 'demoted_kicked' : 'demoted_restricted')
-            }
-
-            if (old._ === 'channelParticipantBanned' && cur._ === 'channelParticipantBanned' && old.left !== cur.left) {
-                if (actorId === curId) {
-                    return (this._type = cur.left ? 'left' : 'joined')
-                }
-
-                return (this._type = cur.left ? 'kicked' : 'added')
-            }
-
-            return (this._type = 'other')
+        if (!old && cur) {
+            // join or added
+            return actorId === curId ? 'joined' : 'added'
         }
 
-        return this._type
+        if (old && !cur) {
+            // left, kicked (for chats) or unkicked
+            if (actorId === oldId) return 'left'
+
+            if (old._ === 'channelParticipantBanned') {
+                return 'unkicked'
+            }
+
+            return 'kicked'
+        }
+
+        // in this case OR is the same as AND, but AND doesn't work well with typescript :shrug:
+        if (!old || !cur) return 'other'
+
+        switch (old._) {
+            case 'chatParticipant':
+            case 'channelParticipant':
+                switch (cur._) {
+                    case 'chatParticipantAdmin':
+                    case 'channelParticipantAdmin':
+                        return 'promoted'
+                    case 'channelParticipantBanned':
+                        // kicked or restricted
+                        if (cur.left) return 'kicked'
+
+                        return 'restricted'
+                }
+                break
+            case 'chatParticipantCreator':
+            case 'channelParticipantCreator':
+                return 'old_owner'
+        }
+
+        switch (cur._) {
+            case 'chatParticipantCreator':
+            case 'channelParticipantCreator':
+                return 'new_owner'
+        }
+
+        if (old._ === 'channelParticipantBanned' && cur._ === 'channelParticipant') {
+            return 'unrestricted'
+        }
+
+        if (old._ === 'channelParticipantBanned' && cur._ === 'channelParticipantAdmin') {
+            return 'unrestricted_promoted'
+        }
+
+        if (old._ === 'channelParticipantAdmin' && cur._ === 'channelParticipant') {
+            return 'demoted'
+        }
+
+        if (old._ === 'channelParticipantAdmin' && cur._ === 'channelParticipantBanned') {
+            return cur.left ? 'demoted_kicked' : 'demoted_restricted'
+        }
+
+        if (old._ === 'channelParticipantBanned' && cur._ === 'channelParticipantBanned' && old.left !== cur.left) {
+            if (actorId === curId) {
+                return cur.left ? 'left' : 'joined'
+            }
+
+            return cur.left ? 'kicked' : 'added'
+        }
+
+        return 'other'
     }
 
-    private _chat?: Chat
     /**
      * Chat in which this event has occurred
      */
     get chat(): Chat {
-        if (!this._chat) {
-            const id = this.raw._ === 'updateChannelParticipant' ? this.raw.channelId : this.raw.chatId
-            this._chat = new Chat(this._peers.chat(id))
-        }
+        const id = this.raw._ === 'updateChannelParticipant' ? this.raw.channelId : this.raw.chatId
 
-        return this._chat
+        return new Chat(this._peers.chat(id))
     }
 
-    private _actor?: User
     /**
      * Performer of the action which resulted in this update.
      *
      * Can be chat/channel administrator or the {@link user} themself.
      */
     get actor(): User {
-        return (this._actor ??= new User(this._peers.user(this.raw.actorId)))
+        return new User(this._peers.user(this.raw.actorId))
     }
 
-    private _user?: User
     /**
      * User representing the chat member whose status was changed.
      */
     get user(): User {
-        return (this._user ??= new User(this._peers.user(this.raw.userId)))
+        return new User(this._peers.user(this.raw.userId))
     }
 
     /** Whether this is a self-made action (i.e. actor == user) */
@@ -217,35 +207,33 @@ export class ChatMemberUpdate {
         return this.raw.actorId === this.raw.userId
     }
 
-    private _oldMember?: ChatMember
     /**
      * Previous (old) information about chat member.
      */
     get oldMember(): ChatMember | null {
         if (!this.raw.prevParticipant) return null
 
-        return (this._oldMember ??= new ChatMember(this.raw.prevParticipant, this._peers))
+        return new ChatMember(this.raw.prevParticipant, this._peers)
     }
 
-    private _newMember?: ChatMember
     /**
      * Current (new) information about chat member.
      */
     get newMember(): ChatMember | null {
         if (!this.raw.newParticipant) return null
 
-        return (this._newMember ??= new ChatMember(this.raw.newParticipant, this._peers))
+        return new ChatMember(this.raw.newParticipant, this._peers)
     }
 
-    private _inviteLink?: ChatInviteLink
     /**
      * In case this is a "join" event, invite link that was used to join (if any)
      */
     get inviteLink(): ChatInviteLink | null {
         if (!this.raw.invite) return null
 
-        return (this._inviteLink ??= new ChatInviteLink(this.raw.invite))
+        return new ChatInviteLink(this.raw.invite)
     }
 }
 
+memoizeGetters(ChatMemberUpdate, ['type', 'chat', 'actor', 'user', 'oldMember', 'newMember', 'inviteLink'])
 makeInspectable(ChatMemberUpdate)

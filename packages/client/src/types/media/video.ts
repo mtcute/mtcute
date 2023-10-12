@@ -2,6 +2,7 @@ import { tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { RawDocument } from './document'
 
 /**
@@ -50,15 +51,15 @@ export class Video extends RawDocument {
         return this.attr._ === 'documentAttributeVideo' ? this.attr.duration : 0
     }
 
-    private _isAnimation?: boolean
     /**
      * Whether this video is an animated GIF
      * (represented either by actual GIF or a silent MP4 video)
      */
     get isAnimation(): boolean {
-        return (this._isAnimation ??=
+        return (
             this.attr._ === 'documentAttributeImageSize' ||
-            this.raw.attributes.some((it) => it._ === 'documentAttributeAnimated'))
+            this.raw.attributes.some((it) => it._ === 'documentAttributeAnimated')
+        )
     }
 
     /**
@@ -86,4 +87,5 @@ export class Video extends RawDocument {
     }
 }
 
+memoizeGetters(Video, ['fileName', 'thumbnails', 'fileId', 'uniqueFileId', 'isAnimation'])
 makeInspectable(Video, ['fileSize', 'dcId'], ['inputMedia', 'inputDocument'])

@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { PeersIndex, User } from '../peers'
 import { ReactionEmoji, toReactionEmoji } from '../reactions'
 
@@ -35,13 +36,13 @@ export class StoryViewer {
         return toReactionEmoji(this.raw.reaction, true)
     }
 
-    private _user?: User
     /** Information about the user */
     get user(): User {
-        return (this._user ??= new User(this._peers.user(this.raw.userId)))
+        return new User(this._peers.user(this.raw.userId))
     }
 }
 
+memoizeGetters(StoryViewer, ['user'])
 makeInspectable(StoryViewer)
 
 /**
@@ -67,15 +68,11 @@ export class StoryViewersList {
         return this.raw.reactionsCount
     }
 
-    private _viewers?: StoryViewer[]
     /** List of viewers */
     get viewers(): StoryViewer[] {
-        if (!this._viewers) {
-            this._viewers = this.raw.views.map((it) => new StoryViewer(it, this._peers))
-        }
-
-        return this._viewers
+        return this.raw.views.map((it) => new StoryViewer(it, this._peers))
     }
 }
 
+memoizeGetters(StoryViewersList, ['viewers'])
 makeInspectable(StoryViewersList)

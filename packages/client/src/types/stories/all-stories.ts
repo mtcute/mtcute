@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { PeersIndex } from '../peers'
 import { PeerStories } from './peer-stories'
 import { StoriesStealthMode } from './stealth-mode'
@@ -30,21 +31,16 @@ export class AllStories {
         return this.raw.count
     }
 
-    private _peerStories?: PeerStories[]
     /** Peers with their stories */
     get peerStories(): PeerStories[] {
-        if (!this._peerStories) {
-            this._peerStories = this.raw.peerStories.map((it) => new PeerStories(it, this._peers))
-        }
-
-        return this._peerStories
+        return this.raw.peerStories.map((it) => new PeerStories(it, this._peers))
     }
 
-    private _stealthMode?: StoriesStealthMode
     /** Stealth mode info */
     get stealthMode(): StoriesStealthMode | null {
-        return (this._stealthMode ??= new StoriesStealthMode(this.raw.stealthMode))
+        return new StoriesStealthMode(this.raw.stealthMode)
     }
 }
 
+memoizeGetters(AllStories, ['peerStories', 'stealthMode'])
 makeInspectable(AllStories)

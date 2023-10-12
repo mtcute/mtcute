@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { Location } from '../media/location'
 
 /**
@@ -9,12 +10,11 @@ import { Location } from '../media/location'
 export class ChatLocation {
     constructor(readonly raw: tl.RawChannelLocation) {}
 
-    private _location?: Location
     /**
      * Location of the chat
      */
     get location(): Location {
-        return (this._location ??= new Location(this.raw.geoPoint as tl.RawGeoPoint))
+        return new Location(this.raw.geoPoint as tl.RawGeoPoint)
     }
 
     /**
@@ -25,4 +25,5 @@ export class ChatLocation {
     }
 }
 
+memoizeGetters(ChatLocation, ['location'])
 makeInspectable(ChatLocation)

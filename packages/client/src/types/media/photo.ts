@@ -1,6 +1,7 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { FileLocation } from '../files'
 import { Thumbnail } from './thumbnail'
 
@@ -113,7 +114,6 @@ export class Photo extends FileLocation {
         return this.media?.ttlSeconds ?? null
     }
 
-    private _thumbnails?: Thumbnail[]
     /**
      * Available thumbnails.
      *
@@ -121,12 +121,10 @@ export class Photo extends FileLocation {
      * represented by the current object.
      */
     get thumbnails(): ReadonlyArray<Thumbnail> {
-        if (!this._thumbnails) {
-            this._thumbnails = this.raw.sizes.map((sz) => new Thumbnail(this.raw, sz))
-            this.raw.videoSizes?.forEach((sz) => this._thumbnails!.push(new Thumbnail(this.raw, sz)))
-        }
+        const res = this.raw.sizes.map((sz) => new Thumbnail(this.raw, sz))
+        this.raw.videoSizes?.forEach((sz) => res.push(new Thumbnail(this.raw, sz)))
 
-        return this._thumbnails
+        return res
     }
 
     /**
@@ -142,38 +140,28 @@ export class Photo extends FileLocation {
         return this.thumbnails.find((it) => it.type === type) ?? null
     }
 
-    private _fileId?: string
     /**
      * Get TDLib and Bot API compatible File ID
      * representing this photo's best thumbnail.
      */
     get fileId(): string {
-        if (!this._fileId) {
-            if (!this._bestSize) {
-                throw new MtArgumentError('Cannot get File ID for this photo')
-            }
-
-            this._fileId = this.getThumbnail(this._bestSize.type)!.fileId
+        if (!this._bestSize) {
+            throw new MtArgumentError('Cannot get File ID for this photo')
         }
 
-        return this._fileId
+        return this.getThumbnail(this._bestSize.type)!.fileId
     }
 
-    private _uniqueFileId?: string
     /**
      * Get TDLib and Bot API compatible Unique File ID
      * representing this photo's best thumbnail.
      */
     get uniqueFileId(): string {
-        if (!this._uniqueFileId) {
-            if (!this._bestSize) {
-                throw new MtArgumentError('Cannot get File ID for this photo')
-            }
-
-            this._uniqueFileId = this.getThumbnail(this._bestSize.type)!.uniqueFileId
+        if (!this._bestSize) {
+            throw new MtArgumentError('Cannot get File ID for this photo')
         }
 
-        return this._uniqueFileId
+        return this.getThumbnail(this._bestSize.type)!.uniqueFileId
     }
 
     /**
@@ -201,4 +189,5 @@ export class Photo extends FileLocation {
     }
 }
 
+memoizeGetters(Photo, ['thumbnails', 'fileId', 'uniqueFileId'])
 makeInspectable(Photo, ['fileSize', 'dcId', 'width', 'height'], ['inputMedia', 'inputPhoto'])

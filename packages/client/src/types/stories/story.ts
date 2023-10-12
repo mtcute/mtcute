@@ -1,6 +1,7 @@
 import { MtUnsupportedError, tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { Photo, Video } from '../media'
 import { _messageMediaFromTl, MessageEntity } from '../messages'
 import { PeersIndex } from '../peers'
@@ -92,59 +93,45 @@ export class Story {
         return this.raw.caption ?? null
     }
 
-    private _entities?: MessageEntity[]
     /**
      * Caption entities (may be empty)
      */
     get entities(): ReadonlyArray<MessageEntity> {
-        if (!this._entities) {
-            this._entities = []
+        const entities = []
 
-            if (this.raw.entities?.length) {
-                for (const ent of this.raw.entities) {
-                    this._entities.push(new MessageEntity(ent, this.raw.caption))
-                }
+        if (this.raw.entities?.length) {
+            for (const ent of this.raw.entities) {
+                entities.push(new MessageEntity(ent, this.raw.caption))
             }
         }
 
-        return this._entities
+        return entities
     }
 
-    private _media?: StoryMedia
     /**
      * Story media.
      *
      * Currently, can only be {@link Photo} or {@link Video}.
      */
     get media(): StoryMedia {
-        if (this._media === undefined) {
-            const media = _messageMediaFromTl(this._peers, this.raw.media)
+        const media = _messageMediaFromTl(this._peers, this.raw.media)
 
-            switch (media?.type) {
-                case 'photo':
-                case 'video':
-                    this._media = media
-                    break
-                default:
-                    throw new MtUnsupportedError('Unsupported story media type')
-            }
+        switch (media?.type) {
+            case 'photo':
+            case 'video':
+                return media
+            default:
+                throw new MtUnsupportedError('Unsupported story media type')
         }
-
-        return this._media
     }
 
-    private _interactiveElements?: StoryInteractiveElement[]
     /**
      * Interactive elements of the story
      */
-    get interactiveElements() {
+    get interactiveElements(): StoryInteractiveElement[] {
         if (!this.raw.mediaAreas) return []
 
-        if (this._interactiveElements === undefined) {
-            this._interactiveElements = this.raw.mediaAreas.map((it) => _storyInteractiveElementFromTl(it))
-        }
-
-        return this._interactiveElements
+        return this.raw.mediaAreas.map((it) => _storyInteractiveElementFromTl(it))
     }
 
     /**
@@ -158,14 +145,13 @@ export class Story {
         return this.raw.privacy
     }
 
-    private _interactions?: StoryInteractions
     /**
      * Information about story interactions
      */
     get interactions(): StoryInteractions | null {
         if (!this.raw.views) return null
 
-        return (this._interactions ??= new StoryInteractions(this.raw.views, this._peers))
+        return new StoryInteractions(this.raw.views, this._peers)
     }
 
     /**
@@ -178,4 +164,5 @@ export class Story {
     }
 }
 
+memoizeGetters(Story, ['entities', 'media', 'interactiveElements', 'interactions'])
 makeInspectable(Story)

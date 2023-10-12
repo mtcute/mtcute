@@ -1,6 +1,7 @@
 import { Long, tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { MessageEntity } from '../messages/message-entity'
 import { PeersIndex } from '../peers/peers-index'
 
@@ -57,38 +58,33 @@ export class Poll {
         return this.raw.question
     }
 
-    private _answers?: PollAnswer[]
     /**
      * List of answers in this poll
      */
     get answers(): ReadonlyArray<PollAnswer> {
-        if (!this._answers) {
-            const results = this.results?.results
+        const results = this.results?.results
 
-            this._answers = this.raw.answers.map((ans, idx) => {
-                if (results) {
-                    const res = results[idx]
-
-                    return {
-                        text: ans.text,
-                        data: ans.option,
-                        voters: res.voters,
-                        chosen: Boolean(res.chosen),
-                        correct: Boolean(res.correct),
-                    }
-                }
+        return this.raw.answers.map((ans, idx) => {
+            if (results) {
+                const res = results[idx]
 
                 return {
                     text: ans.text,
                     data: ans.option,
-                    voters: 0,
-                    chosen: false,
-                    correct: false,
+                    voters: res.voters,
+                    chosen: Boolean(res.chosen),
+                    correct: Boolean(res.correct),
                 }
-            })
-        }
+            }
 
-        return this._answers
+            return {
+                text: ans.text,
+                data: ans.option,
+                voters: 0,
+                chosen: false,
+                correct: false,
+            }
+        })
     }
 
     /**
@@ -136,8 +132,6 @@ export class Poll {
         return this.results?.solution ?? null
     }
 
-    private _entities?: MessageEntity[]
-
     /**
      * Format entities for {@link solution}, only available
      * in case you have already answered
@@ -145,17 +139,15 @@ export class Poll {
     get solutionEntities(): ReadonlyArray<MessageEntity> | null {
         if (!this.results) return null
 
-        if (!this._entities) {
-            this._entities = []
+        const res: MessageEntity[] = []
 
-            if (this.results.solutionEntities?.length) {
-                for (const ent of this.results.solutionEntities) {
-                    this._entities.push(new MessageEntity(ent, this.results.solution))
-                }
+        if (this.results.solutionEntities?.length) {
+            for (const ent of this.results.solutionEntities) {
+                res.push(new MessageEntity(ent, this.results.solution))
             }
         }
 
-        return this._entities
+        return res
     }
 
     /**
@@ -191,4 +183,5 @@ export class Poll {
     }
 }
 
+memoizeGetters(Poll, ['answers', 'solutionEntities'])
 makeInspectable(Poll, undefined, ['inputMedia'])

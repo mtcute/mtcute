@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { PeersIndex } from './peers-index'
 import { User } from './user'
 
@@ -10,12 +11,11 @@ export class ChatInviteLinkMember {
         readonly _peers: PeersIndex,
     ) {}
 
-    private _user?: User
     /**
      * User who joined the chat
      */
     get user(): User {
-        return (this._user ??= new User(this._peers.user(this.raw.userId)))
+        return new User(this._peers.user(this.raw.userId))
     }
 
     /**
@@ -47,15 +47,15 @@ export class ChatInviteLinkMember {
         return this.raw.about ?? null
     }
 
-    private _approvedBy?: User
     /**
      * The administrator that approved the join request of the user
      */
     get approvedBy(): User | null {
         if (!this.raw.approvedBy) return null
 
-        return (this._approvedBy ??= new User(this._peers.user(this.raw.approvedBy)))
+        return new User(this._peers.user(this.raw.approvedBy))
     }
 }
 
+memoizeGetters(ChatInviteLinkMember, ['user', 'approvedBy'])
 makeInspectable(ChatInviteLinkMember)

@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { Location } from '../media'
 import { PeersIndex, PeerType, User } from '../peers'
 
@@ -26,12 +27,11 @@ export class InlineQuery {
         return this.raw.queryId
     }
 
-    private _user?: User
     /**
      * User who sent this query
      */
     get user(): User {
-        return (this._user ??= new User(this._peers.user(this.raw.userId)))
+        return new User(this._peers.user(this.raw.userId))
     }
 
     /**
@@ -41,7 +41,6 @@ export class InlineQuery {
         return this.raw.query
     }
 
-    private _location?: Location
     /**
      * Attached geolocation.
      *
@@ -50,7 +49,7 @@ export class InlineQuery {
     get location(): Location | null {
         if (this.raw.geo?._ !== 'geoPoint') return null
 
-        return (this._location ??= new Location(this.raw.geo))
+        return new Location(this.raw.geo)
     }
 
     /**
@@ -76,4 +75,5 @@ export class InlineQuery {
     }
 }
 
+memoizeGetters(InlineQuery, ['user', 'location'])
 makeInspectable(InlineQuery)

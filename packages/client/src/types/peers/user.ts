@@ -2,6 +2,7 @@ import { MtArgumentError, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { MessageEntity } from '../messages/message-entity'
 import { EmojiStatus } from '../reactions/emoji-status'
 import { ChatPhoto } from './chat-photo'
@@ -11,9 +12,9 @@ import { ChatPhoto } from './chat-photo'
  * Can be one of the following:
  *  - `online`, user is online right now.
  *  - `offline`, user is currently offline.
- *  - `recently`, user with hidden last seen time who was online between 1 second and 2-3 days ago.
- *  - `within_week`, user with hidden last seen time who was online between 2-3 and seven days ago.
- *  - `within_month`, user with hidden last seen time who was online between 6-7 days and a month ago.
+ *  - `recently`, user with hidden last seen time who was online between 1 second and 72 hours ago.
+ *  - `within_week`, user with hidden last seen time who was online between 72 hours and 7 days ago.
+ *  - `within_month`, user with hidden last seen time who was online between 7 days and a month ago.
  *  - `long_time_ago`, blocked user or user with hidden last seen time who was online more than a month ago.
  *  - `bot`, for bots.
  */
@@ -186,17 +187,13 @@ export class User {
         }
     }
 
-    private _parsedStatus?: UserParsedStatus
-
-    private _parseStatus() {
-        this._parsedStatus = User.parseStatus(this.raw.status!, this.raw.bot)
+    private get _parsedStatus() {
+        return User.parseStatus(this.raw.status!, this.raw.bot)
     }
 
     /** User's Last Seen & Online status */
     get status(): UserStatus {
-        if (!this._parsedStatus) this._parseStatus()
-
-        return this._parsedStatus!.status
+        return this._parsedStatus.status
     }
 
     /**
@@ -204,9 +201,7 @@ export class User {
      * Only available if {@link status} is `offline`
      */
     get lastOnline(): Date | null {
-        if (!this._parsedStatus) this._parseStatus()
-
-        return this._parsedStatus!.lastOnline
+        return this._parsedStatus.lastOnline
     }
 
     /**
@@ -214,9 +209,7 @@ export class User {
      * Only available if {@link status} is `online`
      */
     get nextOffline(): Date | null {
-        if (!this._parsedStatus) this._parseStatus()
-
-        return this._parsedStatus!.nextOffline
+        return this._parsedStatus.nextOffline
     }
 
     /** User's or bot's username */
@@ -271,7 +264,6 @@ export class User {
         }
     }
 
-    private _photo?: ChatPhoto
     /**
      * User's or bot's current profile photo, if any.
      * Suitable for downloads only
@@ -279,7 +271,7 @@ export class User {
     get photo(): ChatPhoto | null {
         if (this.raw.photo?._ !== 'userProfilePhoto') return null
 
-        return (this._photo ??= new ChatPhoto(this.inputPeer, this.raw.photo))
+        return new ChatPhoto(this.inputPeer, this.raw.photo)
     }
 
     /**
@@ -303,14 +295,13 @@ export class User {
         return this.firstName
     }
 
-    private _emojiStatus?: EmojiStatus
     /**
      * User's emoji status, if any.
      */
     get emojiStatus(): EmojiStatus | null {
         if (!this.raw.emojiStatus || this.raw.emojiStatus._ === 'emojiStatusEmpty') return null
 
-        return (this._emojiStatus ??= new EmojiStatus(this.raw.emojiStatus))
+        return new EmojiStatus(this.raw.emojiStatus)
     }
 
     /** Whether you have hidden (arhived) this user's stories */
@@ -419,4 +410,5 @@ export class User {
     }
 }
 
+memoizeGetters(User, ['_parsedStatus' as keyof User, 'usernames', 'inputPeer', 'photo', 'emojiStatus'])
 makeInspectable(User)

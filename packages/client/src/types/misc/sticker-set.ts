@@ -2,6 +2,7 @@ import { MtTypeAssertionError, tl } from '@mtcute/core'
 import { LongMap } from '@mtcute/core/utils'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { MtEmptyError } from '../errors'
 import { InputFileLike } from '../files'
 import { MaskPosition, Sticker, StickerSourceType, StickerType, Thumbnail } from '../media'
@@ -202,7 +203,6 @@ export class StickerSet {
         return this.brief.shortName
     }
 
-    private _stickers?: StickerInfo[]
     /**
      * List of stickers inside this sticker set
      *
@@ -212,41 +212,38 @@ export class StickerSet {
     get stickers(): ReadonlyArray<StickerInfo> {
         if (!this.isFull) throw new MtEmptyError()
 
-        if (!this._stickers) {
-            this._stickers = []
-            const index = new LongMap<tl.Mutable<StickerInfo>>()
+        const stickers: StickerInfo[] = []
+        const index = new LongMap<tl.Mutable<StickerInfo>>()
 
-            this.full!.documents.forEach((doc) => {
-                const sticker = parseDocument(doc as tl.RawDocument)
+        this.full!.documents.forEach((doc) => {
+            const sticker = parseDocument(doc as tl.RawDocument)
 
-                if (!(sticker instanceof Sticker)) {
-                    throw new MtTypeAssertionError('full.documents', 'Sticker', sticker.mimeType)
+            if (!(sticker instanceof Sticker)) {
+                throw new MtTypeAssertionError('full.documents', 'Sticker', sticker.mimeType)
+            }
+
+            const info: tl.Mutable<StickerInfo> = {
+                alt: sticker.emoji,
+                emoji: '', // populated later
+                sticker,
+            }
+            stickers.push(info)
+            index.set(doc.id, info)
+        })
+
+        this.full!.packs.forEach((pack) => {
+            pack.documents.forEach((id) => {
+                const item = index.get(id)
+
+                if (item) {
+                    item.emoji += pack.emoticon
                 }
-
-                const info: tl.Mutable<StickerInfo> = {
-                    alt: sticker.emoji,
-                    emoji: '', // populated later
-                    sticker,
-                }
-                this._stickers!.push(info)
-                index.set(doc.id, info)
             })
+        })
 
-            this.full!.packs.forEach((pack) => {
-                pack.documents.forEach((id) => {
-                    const item = index.get(id)
-
-                    if (item) {
-                        item.emoji += pack.emoticon
-                    }
-                })
-            })
-        }
-
-        return this._stickers
+        return stickers
     }
 
-    private _thumbnails?: Thumbnail[]
     /**
      * Available sticker set thumbnails.
      *
@@ -254,7 +251,7 @@ export class StickerSet {
      * (i.e. first sticker should be used as thumbnail)
      */
     get thumbnails(): ReadonlyArray<Thumbnail> {
-        return (this._thumbnails ??= this.brief.thumbs?.map((sz) => new Thumbnail(this.brief, sz)) ?? [])
+        return this.brief.thumbs?.map((sz) => new Thumbnail(this.brief, sz)) ?? []
     }
 
     /**
@@ -300,6 +297,7 @@ export class StickerSet {
     }
 }
 
+memoizeGetters(StickerSet, ['thumbnails', 'stickers'])
 makeInspectable(StickerSet, ['isFull'])
 
 export interface InputStickerSetItem {

@@ -3,6 +3,7 @@ import { tl } from '@mtcute/core'
 import { Chat, PeersIndex, User } from '../../types/peers'
 import { Story } from '../../types/stories'
 import { assertTypeIs, makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 
 /**
  * A story was posted or edited
@@ -16,34 +17,29 @@ export class StoryUpdate {
         readonly _peers: PeersIndex,
     ) {}
 
-    private _peer?: User | Chat
     /**
      * Peer that owns these stories.
      */
     get peer(): User | Chat {
-        if (this._peer) return this._peer
-
         switch (this.raw.peer._) {
             case 'peerUser':
-                return (this._peer = new User(this._peers.user(this.raw.peer.userId)))
+                return new User(this._peers.user(this.raw.peer.userId))
             case 'peerChat':
-                return (this._peer = new Chat(this._peers.chat(this.raw.peer.chatId)))
+                return new Chat(this._peers.chat(this.raw.peer.chatId))
             case 'peerChannel':
-                return (this._peer = new Chat(this._peers.chat(this.raw.peer.channelId)))
+                return new Chat(this._peers.chat(this.raw.peer.channelId))
         }
     }
 
-    private _story?: Story
     /**
      * Story that was posted or edited.
      */
     get story(): Story {
-        if (this._story) return this._story
-
         assertTypeIs('StoryUpdate.story', this.raw.story, 'storyItem')
 
-        return (this._story = new Story(this.raw.story, this._peers))
+        return new Story(this.raw.story, this._peers)
     }
 }
 
+memoizeGetters(StoryUpdate, ['peer', 'story'])
 makeInspectable(StoryUpdate)

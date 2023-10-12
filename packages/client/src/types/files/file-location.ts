@@ -34,63 +34,6 @@ export class FileLocation {
          */
         readonly dcId?: number,
     ) {}
-
-    // /**
-    //  * Download a file and return it as an iterable, which yields file contents
-    //  * in chunks of a given size. Order of the chunks is guaranteed to be
-    //  * consecutive.
-    //  *
-    //  * @param params  Download parameters
-    //  * @link TelegramClient.downloadAsIterable
-    //  */
-    // downloadIterable(params?: Partial<FileDownloadParameters>): AsyncIterableIterator<Buffer> {
-    //     return this.client.downloadAsIterable({
-    //         ...params,
-    //         location: this,
-    //     })
-    // }
-
-    // /**
-    //  * Download a file and return it as a Node readable stream,
-    //  * streaming file contents.
-    //  *
-    //  * @link TelegramClient.downloadAsStream
-    //  */
-    // downloadStream(params?: Partial<FileDownloadParameters>): Readable {
-    //     return this.client.downloadAsStream({
-    //         ...params,
-    //         location: this,
-    //     })
-    // }
-
-    // /**
-    //  * Download a file and return its contents as a Buffer.
-    //  *
-    //  * @param params  File download parameters
-    //  * @link TelegramClient.downloadAsBuffer
-    //  */
-    // downloadBuffer(params?: Partial<FileDownloadParameters>): Promise<Buffer> {
-    //     return this.client.downloadAsBuffer({
-    //         ...params,
-    //         location: this,
-    //     })
-    // }
-
-    // /**
-    //  * Download a remote file to a local file (only for NodeJS).
-    //  * Promise will resolve once the download is complete.
-    //  *
-    //  * @param filename  Local file name
-    //  * @param params  File download parameters
-    //  * @link TelegramClient.downloadToFile
-    //  */
-    // downloadToFile(filename: string, params?: Partial<FileDownloadParameters>): Promise<void> {
-    //     return this.client.downloadToFile(filename, {
-    //         ...params,
-    //         location: this,
-    //         fileSize: this.fileSize,
-    //     })
-    // }
 }
 
 makeInspectable(FileLocation, ['fileSize', 'dcId'])

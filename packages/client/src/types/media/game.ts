@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { Photo } from './photo'
 import { Video } from './video'
 
@@ -37,36 +38,30 @@ export class Game {
         return this.game.shortName
     }
 
-    private _photo?: Photo
     /**
      * Photo that will be displayed in the game message in chats
      */
     get photo(): Photo | null {
         if (this.game.photo._ === 'photoEmpty') return null
 
-        return (this._photo ??= new Photo(this.game.photo))
+        return new Photo(this.game.photo)
     }
 
-    private _animation?: Video | null
     /**
      * Animation that will be displayed in the game message in chats
      */
     get animation(): Video | null {
         if (this.game.document?._ !== 'document') return null
 
-        if (this._animation === undefined) {
-            const attr = this.game.document.attributes.find((it) => it._ === 'documentAttributeVideo') as
-                | tl.RawDocumentAttributeVideo
-                | undefined
+        const attr = this.game.document.attributes.find((it) => it._ === 'documentAttributeVideo') as
+            | tl.RawDocumentAttributeVideo
+            | undefined
 
-            if (!attr) {
-                this._animation = null
-            } else {
-                this._animation = new Video(this.game.document, attr)
-            }
+        if (!attr) {
+            return null
         }
 
-        return this._animation
+        return new Video(this.game.document, attr)
     }
 
     /**
@@ -86,4 +81,5 @@ export class Game {
     }
 }
 
+memoizeGetters(Game, ['photo', 'animation'])
 makeInspectable(Game, undefined, ['inputMedia'])

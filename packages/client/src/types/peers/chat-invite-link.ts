@@ -2,6 +2,7 @@ import { tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { PeersIndex } from './index'
 import { User } from './user'
 
@@ -40,14 +41,13 @@ export class ChatInviteLink {
         return this.creator?.isSelf ?? !this.raw.link.endsWith('...')
     }
 
-    private _creator?: User
     /**
      * Creator of the invite link, if available
      */
     get creator(): User | null {
         if (!this._peers) return null
 
-        return (this._creator ??= new User(this._peers.user(this.raw.adminId)))
+        return new User(this._peers.user(this.raw.adminId))
     }
 
     /**
@@ -120,4 +120,5 @@ export class ChatInviteLink {
     }
 }
 
+memoizeGetters(ChatInviteLink, ['creator'])
 makeInspectable(ChatInviteLink)

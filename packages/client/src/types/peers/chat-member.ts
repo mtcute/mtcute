@@ -2,6 +2,7 @@ import { tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { ChatPermissions } from './chat-permissions'
 import { PeersIndex } from './index'
 import { User } from './user'
@@ -26,26 +27,21 @@ export class ChatMember {
         readonly _peers: PeersIndex,
     ) {}
 
-    private _user?: User
     /**
      * Information about the user
      */
     get user(): User {
-        if (this._user === undefined) {
-            switch (this.raw._) {
-                case 'channelParticipantBanned':
-                case 'channelParticipantLeft':
-                    assertTypeIs('ChatMember#user (raw.peer)', this.raw.peer, 'peerUser')
+        switch (this.raw._) {
+            case 'channelParticipantBanned':
+            case 'channelParticipantLeft':
+                assertTypeIs('ChatMember#user (raw.peer)', this.raw.peer, 'peerUser')
 
-                    this._user = new User(this._peers.user(this.raw.peer.userId))
-                    break
-                default:
-                    this._user = new User(this._peers.user(this.raw.userId))
-                    break
-            }
+                return new User(this._peers.user(this.raw.peer.userId))
+                break
+            default:
+                return new User(this._peers.user(this.raw.userId))
+                break
         }
-
-        return this._user
     }
 
     /**
@@ -68,9 +64,6 @@ export class ChatMember {
             case 'channelParticipantBanned':
                 return this.raw.bannedRights.viewMessages ? 'banned' : 'restricted'
         }
-
-        // fallback
-        return 'member'
     }
 
     /**
@@ -104,7 +97,6 @@ export class ChatMember {
         }
     }
 
-    private _invitedBy?: User | null
     /**
      * Information about whoever invited this member to the chat.
      *
@@ -114,54 +106,39 @@ export class ChatMember {
      *  - `chat` is a supergroup/channel, and `user` is an admin
      */
     get invitedBy(): User | null {
-        if (this._invitedBy === undefined) {
-            if ('inviterId' in this.raw && this.raw.inviterId) {
-                this._invitedBy = new User(this._peers.user(this.raw.inviterId))
-            } else {
-                this._invitedBy = null
-            }
+        if ('inviterId' in this.raw && this.raw.inviterId) {
+            return new User(this._peers.user(this.raw.inviterId))
         }
 
-        return this._invitedBy
+        return null
     }
 
-    private _promotedBy?: User | null
     /**
      * Information about whoever promoted this admin.
      *
      * Only available if `status = admin`.
      */
     get promotedBy(): User | null {
-        if (this._promotedBy === undefined) {
-            if (this.raw._ === 'channelParticipantAdmin') {
-                this._promotedBy = new User(this._peers.user(this.raw.promotedBy))
-            } else {
-                this._promotedBy = null
-            }
+        if (this.raw._ === 'channelParticipantAdmin') {
+            return new User(this._peers.user(this.raw.promotedBy))
         }
 
-        return this._promotedBy
+        return null
     }
 
-    private _restrictedBy?: User | null
     /**
      * Information about whoever restricted this user.
      *
      * Only available if `status = restricted or status = banned`
      */
     get restrictedBy(): User | null {
-        if (this._restrictedBy === undefined) {
-            if (this.raw._ === 'channelParticipantBanned') {
-                this._restrictedBy = new User(this._peers.user(this.raw.kickedBy))
-            } else {
-                this._restrictedBy = null
-            }
+        if (this.raw._ === 'channelParticipantBanned') {
+            return new User(this._peers.user(this.raw.kickedBy))
         }
 
-        return this._restrictedBy
+        return null
     }
 
-    private _restrictions?: ChatPermissions
     /**
      * For restricted and banned users,
      * information about the restrictions
@@ -169,7 +146,7 @@ export class ChatMember {
     get restrictions(): ChatPermissions | null {
         if (this.raw._ !== 'channelParticipantBanned') return null
 
-        return (this._restrictions ??= new ChatPermissions(this.raw.bannedRights))
+        return new ChatPermissions(this.raw.bannedRights)
     }
 
     /**
@@ -198,4 +175,5 @@ export class ChatMember {
     }
 }
 
+memoizeGetters(ChatMember, ['user', 'invitedBy', 'promotedBy', 'restrictedBy', 'restrictions'])
 makeInspectable(ChatMember)

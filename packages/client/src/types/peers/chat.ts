@@ -1,6 +1,7 @@
 import { getMarkedPeerId, MtArgumentError, MtTypeAssertionError, tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { MessageEntity } from '../messages/message-entity'
 import { ChatLocation } from './chat-location'
 import { ChatPermissions } from './chat-permissions'
@@ -55,75 +56,59 @@ export class Chat {
         return getMarkedPeerId(this.inputPeer)
     }
 
-    private _inputPeer?: tl.TypeInputPeer
     /**
      * Chat's input peer
      */
     get inputPeer(): tl.TypeInputPeer {
-        if (!this._inputPeer) {
-            switch (this.peer._) {
-                case 'user':
-                    if (!this.peer.accessHash) {
-                        throw new MtArgumentError("Peer's access hash is not available!")
-                    }
+        switch (this.peer._) {
+            case 'user':
+                if (!this.peer.accessHash) {
+                    throw new MtArgumentError("Peer's access hash is not available!")
+                }
 
-                    this._inputPeer = {
-                        _: 'inputPeerUser',
-                        userId: this.peer.id,
-                        accessHash: this.peer.accessHash,
-                    }
-                    break
-                case 'chat':
-                case 'chatForbidden':
-                    this._inputPeer = {
-                        _: 'inputPeerChat',
-                        chatId: this.peer.id,
-                    }
-                    break
-                case 'channel':
-                case 'channelForbidden':
-                    if (!this.peer.accessHash) {
-                        throw new MtArgumentError("Peer's access hash is not available!")
-                    }
+                return {
+                    _: 'inputPeerUser',
+                    userId: this.peer.id,
+                    accessHash: this.peer.accessHash,
+                }
+            case 'chat':
+            case 'chatForbidden':
+                return {
+                    _: 'inputPeerChat',
+                    chatId: this.peer.id,
+                }
+            case 'channel':
+            case 'channelForbidden':
+                if (!this.peer.accessHash) {
+                    throw new MtArgumentError("Peer's access hash is not available!")
+                }
 
-                    this._inputPeer = {
-                        _: 'inputPeerChannel',
-                        channelId: this.peer.id,
-                        accessHash: this.peer.accessHash,
-                    }
-                    break
-            }
+                return {
+                    _: 'inputPeerChannel',
+                    channelId: this.peer.id,
+                    accessHash: this.peer.accessHash,
+                }
         }
-
-        return this._inputPeer
     }
 
-    private _chatType?: ChatType
     /** Type of chat */
     get chatType(): ChatType {
-        if (!this._chatType) {
-            switch (this.peer._) {
-                case 'user':
-                    this._chatType = this.peer.bot ? 'bot' : 'private'
-                    break
-                case 'chat':
-                case 'chatForbidden':
-                    this._chatType = 'group'
-                    break
-                case 'channel':
-                case 'channelForbidden':
-                    if (this.peer._ === 'channel' && this.peer.gigagroup) {
-                        this._chatType = 'gigagroup'
-                    } else if (this.peer.broadcast) {
-                        this._chatType = 'channel'
-                    } else {
-                        this._chatType = 'supergroup'
-                    }
-                    break
-            }
-        }
+        switch (this.peer._) {
+            case 'user':
+                return this.peer.bot ? 'bot' : 'private'
+            case 'chat':
+            case 'chatForbidden':
+                return 'group'
+            case 'channel':
+            case 'channelForbidden':
+                if (this.peer._ === 'channel' && this.peer.gigagroup) {
+                    return 'gigagroup'
+                } else if (this.peer.broadcast) {
+                    return 'channel'
+                }
 
-        return this._chatType
+                return 'supergroup'
+        }
     }
 
     /**
@@ -297,7 +282,6 @@ export class Chat {
         return this.peer.title
     }
 
-    private _photo?: ChatPhoto
     /**
      * Chat photo, if any.
      * Suitable for downloads only.
@@ -311,7 +295,7 @@ export class Chat {
             return null
         }
 
-        return (this._photo ??= new ChatPhoto(this.inputPeer, this.peer.photo))
+        return new ChatPhoto(this.inputPeer, this.peer.photo)
     }
 
     /**
@@ -399,8 +383,6 @@ export class Chat {
         return 'restrictionReason' in this.peer ? this.peer.restrictionReason ?? null : null
     }
 
-    private _permissions?: ChatPermissions
-
     /**
      * Current user's permissions, for supergroups.
      */
@@ -409,7 +391,7 @@ export class Chat {
             return null
         }
 
-        return (this._permissions ??= new ChatPermissions(this.peer.bannedRights))
+        return new ChatPermissions(this.peer.bannedRights)
     }
 
     /**
@@ -420,7 +402,7 @@ export class Chat {
             return null
         }
 
-        return (this._permissions ??= new ChatPermissions(this.peer.defaultBannedRights))
+        return new ChatPermissions(this.peer.defaultBannedRights)
     }
 
     /**
@@ -437,7 +419,6 @@ export class Chat {
      */
     readonly distance?: number
 
-    private _location?: ChatLocation
     /**
      * Location of the chat.
      * Returned only in {@link TelegramClient.getFullChat}
@@ -447,7 +428,7 @@ export class Chat {
             return null
         }
 
-        return (this._location ??= new ChatLocation(this.fullPeer.location))
+        return new ChatLocation(this.fullPeer.location)
     }
 
     private _linkedChat?: Chat
@@ -483,7 +464,6 @@ export class Chat {
         return 0
     }
 
-    private _user?: User
     /**
      * Get a {@link User} from this chat.
      *
@@ -492,7 +472,7 @@ export class Chat {
     get user(): User | null {
         if (this.peer._ !== 'user') return null
 
-        return (this._user ??= new User(this.peer))
+        return new User(this.peer)
     }
 
     /** @internal */
@@ -589,4 +569,14 @@ export class Chat {
     }
 }
 
+memoizeGetters(Chat, [
+    'inputPeer',
+    'chatType',
+    'usernames',
+    'photo',
+    'permissions',
+    'defaultPermissions',
+    'location',
+    'user',
+])
 makeInspectable(Chat, [], ['user'])

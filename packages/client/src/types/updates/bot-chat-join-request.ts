@@ -1,6 +1,7 @@
 import { getBarePeerId, getMarkedPeerId, tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { Chat, ChatInviteLink, PeersIndex, User } from '../peers'
 
 /**
@@ -23,12 +24,11 @@ export class BotChatJoinRequestUpdate {
         return getMarkedPeerId(this.raw.peer)
     }
 
-    private _chat?: Chat
     /**
      * Object containing the chat information.
      */
     get chat(): Chat {
-        return (this._chat ??= new Chat(this._peers.chat(getBarePeerId(this.raw.peer))))
+        return new Chat(this._peers.chat(getBarePeerId(this.raw.peer)))
     }
 
     /**
@@ -38,12 +38,11 @@ export class BotChatJoinRequestUpdate {
         return this.raw.userId
     }
 
-    private _user?: User
     /**
      * Object containing the user information.
      */
     get user(): User {
-        return (this._user ??= new User(this._peers.user(this.raw.userId)))
+        return new User(this._peers.user(this.raw.userId))
     }
 
     /**
@@ -60,14 +59,13 @@ export class BotChatJoinRequestUpdate {
         return new Date(this.raw.date * 1000)
     }
 
-    private _invite?: ChatInviteLink
-
     /**
      * Invite link used to request joining.
      */
     get invite(): ChatInviteLink {
-        return (this._invite ??= new ChatInviteLink(this.raw.invite))
+        return new ChatInviteLink(this.raw.invite)
     }
 }
 
+memoizeGetters(BotChatJoinRequestUpdate, ['chat', 'user', 'invite'])
 makeInspectable(BotChatJoinRequestUpdate)

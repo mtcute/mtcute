@@ -2,6 +2,7 @@ import { tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils'
 
 import { makeInspectable } from '../../../utils'
+import { memoizeGetters } from '../../../utils/memoize'
 import { Location } from '../../media'
 import { StoryInteractiveArea } from './base'
 
@@ -15,18 +16,15 @@ export class StoryInteractiveLocation extends StoryInteractiveArea {
         super(raw)
     }
 
-    private _location?: Location
     /**
      * Geolocation
      */
     get location(): Location {
-        if (!this._location) {
-            assertTypeIs('StoryInteractiveLocation#location', this.raw.geo, 'geoPoint')
-            this._location = new Location(this.raw.geo)
-        }
+        assertTypeIs('StoryInteractiveLocation#location', this.raw.geo, 'geoPoint')
 
-        return this._location
+        return new Location(this.raw.geo)
     }
 }
 
+memoizeGetters(StoryInteractiveLocation, ['location'])
 makeInspectable(StoryInteractiveLocation)

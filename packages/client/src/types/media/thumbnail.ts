@@ -4,6 +4,7 @@ import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
 import { makeInspectable } from '../../utils'
 import { inflateSvgPath, strippedPhotoToJpg, svgPathToFile } from '../../utils/file-utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { FileLocation } from '../files'
 
 /**
@@ -172,7 +173,6 @@ export class Thumbnail extends FileLocation {
         return this._path!
     }
 
-    private _fileId?: string
     /**
      * Get TDLib and Bot API compatible File ID
      * representing this thumbnail.
@@ -181,95 +181,84 @@ export class Thumbnail extends FileLocation {
      * > only to download it.
      */
     get fileId(): string {
-        if (!this._fileId) {
-            if (
-                (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive' && this.raw._ !== 'videoSize') ||
-                this._media._ === 'messageExtendedMediaPreview' // just for type safety
-            ) {
-                throw new MtArgumentError(`Cannot generate a file ID for "${this.type}"`)
-            }
-
-            if (this._media._ === 'stickerSet') {
-                this._fileId = toFileId({
-                    type: td.FileType.Thumbnail,
-                    dcId: this.dcId!,
-                    fileReference: null,
-                    location: {
-                        _: 'photo',
-                        id: Long.ZERO,
-                        accessHash: Long.ZERO,
-                        source: {
-                            _: 'stickerSetThumbnailVersion',
-                            id: this._media.id,
-                            accessHash: this._media.accessHash,
-                            version: this._media.thumbVersion!,
-                        },
-                    },
-                })
-            } else {
-                this._fileId = toFileId({
-                    type: this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
-                    dcId: this.dcId!,
-                    fileReference: this._media.fileReference,
-                    location: {
-                        _: 'photo',
-                        id: this._media.id,
-                        accessHash: this._media.accessHash,
-                        source: {
-                            _: 'thumbnail',
-                            fileType: this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
-                            thumbnailType: this.raw.type === 'u' ? '\x00' : this.raw.type,
-                        },
-                    },
-                })
-            }
+        if (
+            (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive' && this.raw._ !== 'videoSize') ||
+            this._media._ === 'messageExtendedMediaPreview' // just for type safety
+        ) {
+            throw new MtArgumentError(`Cannot generate a file ID for "${this.type}"`)
         }
 
-        return this._fileId
-    }
-
-    private _uniqueFileId?: string
-    /**
-     * Get a unique File ID representing this thumbnail.
-     */
-    get uniqueFileId(): string {
-        if (!this._uniqueFileId) {
-            if (
-                (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive' && this.raw._ !== 'videoSize') ||
-                this._media._ === 'messageExtendedMediaPreview' // just for type safety
-            ) {
-                throw new MtArgumentError(`Cannot generate a unique file ID for "${this.type}"`)
-            }
-
-            if (this._media._ === 'stickerSet') {
-                this._uniqueFileId = toUniqueFileId(td.FileType.Thumbnail, {
+        if (this._media._ === 'stickerSet') {
+            return toFileId({
+                type: td.FileType.Thumbnail,
+                dcId: this.dcId!,
+                fileReference: null,
+                location: {
                     _: 'photo',
                     id: Long.ZERO,
+                    accessHash: Long.ZERO,
                     source: {
                         _: 'stickerSetThumbnailVersion',
                         id: this._media.id,
                         accessHash: this._media.accessHash,
                         version: this._media.thumbVersion!,
                     },
-                })
-            } else {
-                this._uniqueFileId = toUniqueFileId(
-                    this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
-                    {
-                        _: 'photo',
-                        id: this._media.id,
-                        source: {
-                            _: 'thumbnail',
-                            fileType: this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
-                            thumbnailType: this.raw.type === 'u' ? '\x00' : this.raw.type,
-                        },
-                    },
-                )
-            }
+                },
+            })
         }
 
-        return this._uniqueFileId
+        return toFileId({
+            type: this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
+            dcId: this.dcId!,
+            fileReference: this._media.fileReference,
+            location: {
+                _: 'photo',
+                id: this._media.id,
+                accessHash: this._media.accessHash,
+                source: {
+                    _: 'thumbnail',
+                    fileType: this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
+                    thumbnailType: this.raw.type === 'u' ? '\x00' : this.raw.type,
+                },
+            },
+        })
+    }
+
+    /**
+     * Get a unique File ID representing this thumbnail.
+     */
+    get uniqueFileId(): string {
+        if (
+            (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive' && this.raw._ !== 'videoSize') ||
+            this._media._ === 'messageExtendedMediaPreview' // just for type safety
+        ) {
+            throw new MtArgumentError(`Cannot generate a unique file ID for "${this.type}"`)
+        }
+
+        if (this._media._ === 'stickerSet') {
+            return toUniqueFileId(td.FileType.Thumbnail, {
+                _: 'photo',
+                id: Long.ZERO,
+                source: {
+                    _: 'stickerSetThumbnailVersion',
+                    id: this._media.id,
+                    accessHash: this._media.accessHash,
+                    version: this._media.thumbVersion!,
+                },
+            })
+        }
+
+        return toUniqueFileId(this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail, {
+            _: 'photo',
+            id: this._media.id,
+            source: {
+                _: 'thumbnail',
+                fileType: this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
+                thumbnailType: this.raw.type === 'u' ? '\x00' : this.raw.type,
+            },
+        })
     }
 }
 
+memoizeGetters(Thumbnail, ['fileId', 'uniqueFileId'])
 makeInspectable(Thumbnail, ['fileSize', 'dcId', 'width', 'height'], ['path'])

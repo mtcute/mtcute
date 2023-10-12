@@ -1,6 +1,7 @@
 import { getMarkedPeerId, tl } from '@mtcute/core'
 
 import { assertTypeIsNot, hasValueAtKey, makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { MtMessageNotFoundError } from '../errors'
 import { Chat } from '../peers/chat'
 import { PeersIndex } from '../peers/peers-index'
@@ -187,48 +188,38 @@ export class Dialog {
         return this.raw.folderId === 1
     }
 
-    private _chat?: Chat
     /**
      * Chat that this dialog represents
      */
     get chat(): Chat {
-        if (!this._chat) {
-            const peer = this.raw.peer
+        const peer = this.raw.peer
 
-            let chat
+        let chat
 
-            switch (peer._) {
-                case 'peerChannel':
-                case 'peerChat':
-                    chat = this._peers.chat(peer._ === 'peerChannel' ? peer.channelId : peer.chatId)
-                    break
-                default:
-                    chat = this._peers.user(peer.userId)
-                    break
-            }
-
-            this._chat = new Chat(chat)
+        switch (peer._) {
+            case 'peerChannel':
+            case 'peerChat':
+                chat = this._peers.chat(peer._ === 'peerChannel' ? peer.channelId : peer.chatId)
+                break
+            default:
+                chat = this._peers.user(peer.userId)
+                break
         }
 
-        return this._chat
+        return new Chat(chat)
     }
 
-    private _lastMessage?: Message
     /**
      * The latest message sent in this chat
      */
     get lastMessage(): Message {
-        if (!this._lastMessage) {
-            const cid = this.chat.id
+        const cid = this.chat.id
 
-            if (this._messages.has(cid)) {
-                this._lastMessage = new Message(this._messages.get(cid)!, this._peers)
-            } else {
-                throw new MtMessageNotFoundError(cid, 0)
-            }
+        if (this._messages.has(cid)) {
+            return new Message(this._messages.get(cid)!, this._peers)
         }
 
-        return this._lastMessage
+        throw new MtMessageNotFoundError(cid, 0)
     }
 
     /**
@@ -273,20 +264,15 @@ export class Dialog {
         return this.raw.unreadReactionsCount
     }
 
-    private _draftMessage?: DraftMessage | null
     /**
      * Draft message in this dialog
      */
     get draftMessage(): DraftMessage | null {
-        if (this._draftMessage === undefined) {
-            if (this.raw.draft?._ === 'draftMessage') {
-                this._draftMessage = new DraftMessage(this.raw.draft)
-            } else {
-                this._draftMessage = null
-            }
+        if (this.raw.draft?._ === 'draftMessage') {
+            return new DraftMessage(this.raw.draft)
         }
 
-        return this._draftMessage
+        return null
     }
 
     /**
@@ -297,4 +283,5 @@ export class Dialog {
     }
 }
 
+memoizeGetters(Dialog, ['chat', 'lastMessage', 'draftMessage'])
 makeInspectable(Dialog)

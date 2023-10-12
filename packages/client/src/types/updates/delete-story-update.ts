@@ -2,6 +2,7 @@ import { tl } from '@mtcute/core'
 
 import { Chat, PeersIndex, User } from '../../types/peers'
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 
 /**
  * A story was deleted
@@ -12,20 +13,17 @@ export class DeleteStoryUpdate {
         readonly _peers: PeersIndex,
     ) {}
 
-    private _peer?: User | Chat
     /**
      * Peer that owns these stories.
      */
     get peer(): User | Chat {
-        if (this._peer) return this._peer
-
         switch (this.raw.peer._) {
             case 'peerUser':
-                return (this._peer = new User(this._peers.user(this.raw.peer.userId)))
+                return new User(this._peers.user(this.raw.peer.userId))
             case 'peerChat':
-                return (this._peer = new Chat(this._peers.chat(this.raw.peer.chatId)))
+                return new Chat(this._peers.chat(this.raw.peer.chatId))
             case 'peerChannel':
-                return (this._peer = new Chat(this._peers.chat(this.raw.peer.channelId)))
+                return new Chat(this._peers.chat(this.raw.peer.channelId))
         }
     }
 
@@ -37,4 +35,5 @@ export class DeleteStoryUpdate {
     }
 }
 
+memoizeGetters(DeleteStoryUpdate, ['peer'])
 makeInspectable(DeleteStoryUpdate)

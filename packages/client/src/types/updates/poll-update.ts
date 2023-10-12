@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { Poll } from '../media/poll'
 import { PeersIndex } from '../peers/peers-index'
 
@@ -31,7 +32,6 @@ export class PollUpdate {
         return this.raw.poll === undefined
     }
 
-    private _poll?: Poll
     /**
      * The poll.
      *
@@ -48,29 +48,26 @@ export class PollUpdate {
      * but mtcute currently does not have a way to do that.
      */
     get poll(): Poll {
-        if (!this._poll) {
-            let poll = this.raw.poll
+        let poll = this.raw.poll
 
-            if (!poll) {
-                // create stub poll
-                poll = {
-                    _: 'poll',
-                    id: this.raw.pollId,
-                    question: '',
-                    answers:
-                        this.raw.results.results?.map((res) => ({
-                            _: 'pollAnswer',
-                            text: '',
-                            option: res.option,
-                        })) ?? [],
-                }
+        if (!poll) {
+            // create stub poll
+            poll = {
+                _: 'poll',
+                id: this.raw.pollId,
+                question: '',
+                answers:
+                    this.raw.results.results?.map((res) => ({
+                        _: 'pollAnswer',
+                        text: '',
+                        option: res.option,
+                    })) ?? [],
             }
-
-            this._poll = new Poll(poll, this._peers, this.raw.results)
         }
 
-        return this._poll
+        return new Poll(poll, this._peers, this.raw.results)
     }
 }
 
+memoizeGetters(PollUpdate, ['poll'])
 makeInspectable(PollUpdate)

@@ -2,6 +2,7 @@ import { tl } from '@mtcute/core'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { FileLocation } from '../files'
 import { Thumbnail } from './thumbnail'
 
@@ -28,18 +29,14 @@ export abstract class RawDocument extends FileLocation {
         this.raw = raw
     }
 
-    private _fileName?: string | null
     /**
      * Original file name, extracted from the document
      * attributes.
      */
     get fileName(): string | null {
-        if (this._fileName === undefined) {
-            const attr = this.raw.attributes.find((it) => it._ === 'documentAttributeFilename')
-            this._fileName = attr ? (attr as tl.RawDocumentAttributeFilename).fileName : null
-        }
+        const attr = this.raw.attributes.find((it) => it._ === 'documentAttributeFilename')
 
-        return this._fileName
+        return attr ? (attr as tl.RawDocumentAttributeFilename).fileName : null
     }
 
     /**
@@ -56,23 +53,18 @@ export abstract class RawDocument extends FileLocation {
         return new Date(this.raw.date * 1000)
     }
 
-    private _thumbnails?: Thumbnail[]
     /**
      * Available thumbnails, if any.
      *
      * If there are no thumbnails, the array will be empty.
      */
     get thumbnails(): ReadonlyArray<Thumbnail> {
-        if (!this._thumbnails) {
-            const arr: Thumbnail[] = []
+        const arr: Thumbnail[] = []
 
-            this.raw.thumbs?.forEach((sz) => arr.push(new Thumbnail(this.raw, sz)))
-            this.raw.videoThumbs?.forEach((sz) => arr.push(new Thumbnail(this.raw, sz)))
+        this.raw.thumbs?.forEach((sz) => arr.push(new Thumbnail(this.raw, sz)))
+        this.raw.videoThumbs?.forEach((sz) => arr.push(new Thumbnail(this.raw, sz)))
 
-            this._thumbnails = arr
-        }
-
-        return this._thumbnails
+        return arr
     }
 
     /**
@@ -125,13 +117,12 @@ export abstract class RawDocument extends FileLocation {
         return td.FileType.Document
     }
 
-    protected _fileId?: string
     /**
      * Get TDLib and Bot API compatible File ID
      * representing this document.
      */
     get fileId(): string {
-        return (this._fileId ??= toFileId({
+        return toFileId({
             type: this._fileIdType(),
             dcId: this.raw.dcId,
             fileReference: this.raw.fileReference,
@@ -140,18 +131,17 @@ export abstract class RawDocument extends FileLocation {
                 id: this.raw.id,
                 accessHash: this.raw.accessHash,
             },
-        }))
+        })
     }
 
-    protected _uniqueFileId?: string
     /**
      * Get a unique File ID representing this document.
      */
     get uniqueFileId(): string {
-        return (this._uniqueFileId ??= toUniqueFileId(td.FileType.Document, {
+        return toUniqueFileId(td.FileType.Document, {
             _: 'common',
             id: this.raw.id,
-        }))
+        })
     }
 }
 
@@ -166,4 +156,5 @@ export class Document extends RawDocument {
     readonly type = 'document' as const
 }
 
+memoizeGetters(Document, ['fileName', 'thumbnails', 'fileId', 'uniqueFileId'])
 makeInspectable(Document, ['fileSize', 'dcId'], ['inputMedia', 'inputDocument'])

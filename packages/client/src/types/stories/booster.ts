@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils'
+import { memoizeGetters } from '../../utils/memoize'
 import { PeersIndex, User } from '../peers'
 
 /**
@@ -21,13 +22,13 @@ export class Booster {
         return new Date(this.raw.expires * 1000)
     }
 
-    private _user?: User
     /**
      * User who is boosting the channel
      */
     get user(): User {
-        return (this._user ??= new User(this._peers.user(this.raw.userId)))
+        return new User(this._peers.user(this.raw.userId))
     }
 }
 
+memoizeGetters(Booster, ['user'])
 makeInspectable(Booster)
