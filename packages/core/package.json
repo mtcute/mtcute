@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Core functions and base MTProto client",
     "author": "Alina Sireneva <alina@tei.su>",
-    "license": "LGPL-3.0",
+    "license": "MIT",
     "main": "src/index.ts",
     "scripts": {
         "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",

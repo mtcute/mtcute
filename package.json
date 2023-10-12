@@ -3,7 +3,7 @@
     "private": true,
     "version": "1.0.0",
     "description": "Type-safe library for MTProto (Telegram API) for browser and NodeJS",
-    "license": "LGPL-3.0",
+    "license": "MIT",
     "author": "Alina Sireneva <alina@tei.su>",
     "scripts": {
         "prepare": "husky install",

@@ -5,7 +5,7 @@
     "author": "Alina Sireneva <alina@tei.su>",
     "main": "src/index.ts",
     "private": true,
-    "license": "LGPL-3.0",
+    "license": "MIT",
     "scripts": {
         "build:bin": "node-gyp configure && node-gyp -j 16 build ",
         "build:dev": "node-gyp -j 16 build --debug",

@@ -4,7 +4,7 @@
     "description": "TL schema used for mtcute",
     "main": "index.js",
     "author": "Alina Sireneva <alina@tei.su>",
-    "license": "LGPL-3.0",
+    "license": "MIT",
     "scripts": {
         "test": "tsc --noEmit --esModuleInterop tests/types.ts",
         "fetch-mtp": "ts-node scripts/fetch-mtp.ts",
