@@ -59,8 +59,29 @@ async function generateWriters(apiSchema: TlFullSchema, mtpSchema: TlFullSchema)
     await writeFile(OUT_WRITERS_FILE, ESM_PRELUDE + code)
 }
 
+// put common errors to the top so they are parsed first
+const ERRORS_ORDER = ['FLOOD_WAIT_%d', 'FILE_MIGRATE_%d', 'NETWORK_MIGRATE_%d', 'PHONE_MIGRATE_%d', 'STATS_MIGRATE_%d']
+
+function putCommonErrorsFirst(errors: TlErrors) {
+    const newErrors: TlErrors['errors'] = {}
+
+    for (const name of ERRORS_ORDER) {
+        if (name in errors.errors) {
+            newErrors[name] = errors.errors[name]
+        }
+    }
+
+    for (const name in errors.errors) {
+        if (name in newErrors) continue
+        newErrors[name] = errors.errors[name]
+    }
+
+    errors.errors = newErrors
+}
+
 async function main() {
     const errors = JSON.parse(await readFile(ERRORS_JSON_FILE, 'utf8')) as TlErrors
+    putCommonErrorsFirst(errors)
 
     const [apiSchema, apiLayer] = unpackTlSchema(
         JSON.parse(await readFile(API_SCHEMA_JSON_FILE, 'utf8')) as TlPackedSchema,

@@ -4,25 +4,35 @@ import { snakeToCamel } from './utils'
 const TEMPLATE_JS = `
 const _descriptionsMap = JSON.parse('{descriptionsMap}')
 class RpcError extends Error {
-    constructor(code, text) {
-        super(_descriptionsMap[text] || 'Unknown RPC error: [' + code + ':' + text + ']');
+    constructor(code, text, description) {
+        super(description || 'Unknown RPC error: [' + code + ':' + text + ']');
         this.code = code;
         this.text = text;
-        this.unknown = !_descriptionsMap[text];
     }
 
     static is(err, text) { return err.constructor === RpcError && (!text || err.text === text); }
     is(text) { return this.text === text; }
 }
 RpcError.fromTl = function (obj) {
-    const err = new RpcError(obj.errorCode, obj.errorMessage);
+    if (obj.errorMessage in _descriptionsMap) {
+        return new RpcError(obj.errorCode, obj.errorMessage, _descriptionsMap[obj.errorMessage]);
+    }
 
-    if (err in _descriptionsMap) return err;
-
-    let match;
+    var err = new RpcError(obj.errorCode, obj.errorMessage);
+    var match;
 {matchers}
+    else return err
 
+    err.message = _descriptionsMap[err.text];
     return err
+}
+RpcError.create = function(code, text) {
+    var desc = _descriptionsMap[text];
+    var err = new RpcError(code, text, desc);
+    if (!desc) {
+        err.unknown = true;
+    } 
+    return err;
 }
 {statics}
 {exports}RpcError = RpcError;
@@ -115,6 +125,8 @@ export function generateCodeForErrors(errors: TlErrors, exports = 'exports.'): [
         staticsTs += `    static ${name}: ${code};\n`
     }
 
+    let first = true
+
     for (const error of Object.values(errors.errors)) {
         const [name, placeholders] = parseCode(error.name, error._paramNames)
 
@@ -131,7 +143,10 @@ export function generateCodeForErrors(errors: TlErrors, exports = 'exports.'): [
 
             const regex = name.replace('%d', '(\\d+)')
             const setters = placeholders.map((it, i) => `err.${it} = parseInt(match[${i + 1}])`).join('; ')
-            matchers += `    if ((match=obj.errorMessage.match(/^${regex}$/))!=null){ err.text = '${name}'; ${setters} }\n`
+            matchers += `    ${
+                first ? '' : 'else '
+            }if ((match=err.text.match(/^${regex}$/))!=null){ err.text = '${name}'; ${setters} }\n`
+            first = false
         }
     }
 

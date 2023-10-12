@@ -234,16 +234,9 @@ export function generateTypescriptDefinitionsForTlSchema(
     let js = PRELUDE_JS.replace('$NS$', namespace).replace('$LAYER$', String(layer))
 
     if (errors) {
-        // ts += '\n    namespace errors {\n'
-        // js += 'ns.errors = {};\n(function(ns){\n'
-
         const [_ts, _js] = generateCodeForErrors(errors, 'ns.')
-        // ts += indent(8, _ts)
         ts += _ts
         js += _js
-
-        // ts += '}\n'
-        // js += '})(ns.errors);\n'
     }
 
     const namespaces = groupTlEntriesByNamespace(schema.entries)
