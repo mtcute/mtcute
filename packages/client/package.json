@@ -10,7 +10,7 @@
     "scripts": {
         "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
         "docs": "typedoc",
-        "build": "tsc | tsc -p tsconfig.cjs.json",
+        "build": "tsc",
         "gen-client": "node ./scripts/generate-client.js",
         "gen-updates": "node ./scripts/generate-updates.js"
     },
