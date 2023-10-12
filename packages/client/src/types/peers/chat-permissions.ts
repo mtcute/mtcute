@@ -56,6 +56,60 @@ export class ChatPermissions {
     }
 
     /**
+     * Whether users can send photos.
+     *
+     * Implies {@link canSendMedia}
+     */
+    get canSendPhotos(): boolean {
+        return !this.raw.sendPhotos
+    }
+
+    /**
+     * Whether users can send videos.
+     *
+     * Implies {@link canSendMedia}
+     */
+    get canSendVideos(): boolean {
+        return !this.raw.sendVideos
+    }
+
+    /**
+     * Whether users can send round videos (i.e. video notes).
+     *
+     * Implies {@link canSendMedia}
+     */
+    get canSendRoundVideos(): boolean {
+        return !this.raw.sendRoundvideos
+    }
+
+    /**
+     * Whether users can send audio files.
+     *
+     * Implies {@link canSendMedia}
+     */
+    get canSendAudios(): boolean {
+        return !this.raw.sendAudios
+    }
+
+    /**
+     * Whether users can send voice notes.
+     *
+     * Implies {@link canSendMedia}
+     */
+    get canSendVoices(): boolean {
+        return !this.raw.sendVoices
+    }
+
+    /**
+     * Whether users can send files.
+     *
+     * Implies {@link canSendMedia}
+     */
+    get canSendFiles(): boolean {
+        return !this.raw.sendDocs
+    }
+
+    /**
      * Whether users can send games.
      *
      * Implies {@link canSendMedia}
@@ -80,6 +134,15 @@ export class ChatPermissions {
      */
     get canAddWebPreviews(): boolean {
         return !this.raw.embedLinks
+    }
+
+    /**
+     * Whether users can send text messages.
+     *
+     * Implies {@link canSendMessages}
+     */
+    get canSendText(): boolean {
+        return !this.raw.sendPlain
     }
 
     /**
@@ -114,6 +177,13 @@ export class ChatPermissions {
     }
 
     /**
+     * Whether users can pin messages
+     */
+    get canManageTopics(): boolean {
+        return !this.raw.manageTopics
+    }
+
+    /**
      * UNIX date until which these permissions are valid,
      * or `null` if forever.
      *
@@ -126,10 +196,3 @@ export class ChatPermissions {
 }
 
 makeInspectable(ChatPermissions)
-
-/**
- * Chat permissions that are used as an input for API methods.
- */
-export type InputChatPermissions = {
-    [k in Exclude<keyof ChatPermissions, 'raw'>]?: boolean
-}
