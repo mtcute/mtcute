@@ -16,7 +16,8 @@
         "lint:fix": "eslint --fix .",
         "format": "prettier --write \"packages/**/*.ts\"",
         "publish-all": "node scripts/publish.js all",
-        "docs": "pnpm run -r docs"
+        "docs": "pnpm run -r docs",
+        "build-package": "node scripts/build-package.js"
     },
     "dependencies": {
         "node-gyp": "9.3.1"

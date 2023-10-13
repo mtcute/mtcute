@@ -1,11 +1,7 @@
 import { Data, Deflate, inflate } from 'pako'
 
-export function typedArrayToBuffer(arr: NodeJS.TypedArray): Buffer {
-    return ArrayBuffer.isView(arr) ? Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength) : Buffer.from(arr)
-}
-
-export function gzipInflate(buf: Buffer): Buffer {
-    return typedArrayToBuffer(inflate(buf))
+export function gzipInflate(buf: Uint8Array): Uint8Array {
+    return inflate(buf)
 }
 
 const ERROR_SIZE_LIMIT_REACHED = 'ERR_SIZE_LIMIT_REACHED'
@@ -30,7 +26,7 @@ class DeflateLimited extends Deflate {
     }
 }
 
-export function gzipDeflate(buf: Buffer, maxRatio?: number): Buffer | null {
+export function gzipDeflate(buf: Uint8Array, maxRatio?: number): Uint8Array | null {
     const deflator = maxRatio ? new DeflateLimited(Math.floor(buf.length * maxRatio)) : new Deflate()
 
     try {
@@ -40,5 +36,5 @@ export function gzipDeflate(buf: Buffer, maxRatio?: number): Buffer | null {
         throw e
     }
 
-    return typedArrayToBuffer(deflator.result)
+    return deflator.result
 }

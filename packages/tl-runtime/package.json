@@ -5,14 +5,21 @@
     "description": "Runtime for TL",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
-    "main": "src/index.ts",
+    "type": "module",
     "scripts": {
-        "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
+        "test": "mocha \"tests/**/*.spec.ts\"",
         "docs": "typedoc",
-        "build": "tsc"
+        "build": "pnpm run -w build-package tl-runtime"
     },
     "browser": {
-        "./platform/gzip.js": "./platform/gzip.web.js"
+        "./encodings/base64.js": "./encodings/base64.web.js",
+        "./encodings/hex.js": "./encodings/hex.web.js",
+        "./encodings/utf8.js": "./encodings/utf8.web.js",
+        "./encodings/gzip.js": "./encodings/gzip.web.js"
+    },
+    "exports": {
+        "import": "./esm/index.js",
+        "require": "./cjs/index.js"
     },
     "dependencies": {
         "long": "5.2.3",

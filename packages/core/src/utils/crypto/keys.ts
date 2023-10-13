@@ -20,7 +20,7 @@ export async function parsePublicKey(crypto: ICryptoProvider, key: string, old =
     const exponent = asn1.children?.[1].value
     if (!modulus || !exponent) throw new Error('Invalid public key')
 
-    const writer = TlBinaryWriter.manualAlloc(512)
+    const writer = TlBinaryWriter.manual(512)
     // they are actually smaller, about 270 bytes, but idc :D
     writer.bytes(modulus)
     writer.bytes(exponent)

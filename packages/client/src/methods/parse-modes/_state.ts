@@ -5,10 +5,7 @@ import { IMessageEntityParser } from '../../types'
 
 const STATE_SYMBOL = Symbol('parseModesState')
 
-/**
- * @internal
- * @exported
- */
+/** @internal */
 export interface ParseModesState {
     parseModes: Map<string, IMessageEntityParser>
     defaultParseMode: string | null

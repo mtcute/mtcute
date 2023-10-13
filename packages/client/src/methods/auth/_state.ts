@@ -5,10 +5,7 @@ import { assertTypeIs } from '@mtcute/core/utils'
 import { User } from '../../types/peers/user'
 
 const STATE_SYMBOL = Symbol('authState')
-/**
- * @internal
- * @exported
- */
+/** @exported */
 export interface AuthState {
     // local copy of "self" in storage,
     // so we can use it w/out relying on storage.

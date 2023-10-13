@@ -1,6 +1,8 @@
 import Long from 'long'
 
-import { gzipInflate } from './platform/gzip'
+import { gzipInflate } from './encodings/gzip.js'
+import { hexEncode } from './encodings/hex.js'
+import { utf8Decode } from './encodings/utf8.js'
 
 const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 
@@ -27,14 +29,9 @@ export type TlReaderMap = Record<number, (r: any) => unknown> & {
  * Reader for TL objects.
  */
 export class TlBinaryReader {
-    /**
-     * Underlying buffer.
-     */
-    data: Buffer
+    readonly dataView: DataView
+    readonly uint8View: Uint8Array
 
-    /**
-     * Position in the buffer.
-     */
     pos = 0
 
     /**
@@ -44,11 +41,18 @@ export class TlBinaryReader {
      */
     constructor(
         readonly objectsMap: TlReaderMap | undefined,
-        data: Buffer,
+        data: ArrayBuffer,
         start = 0,
     ) {
-        this.data = data
-        this.pos = start
+        if (ArrayBuffer.isView(data)) {
+            this.pos = start
+            this.dataView = new DataView(data.buffer, data.byteOffset + start, data.byteLength)
+            this.uint8View = new Uint8Array(data.buffer, data.byteOffset + start, data.byteLength)
+        } else {
+            this.pos = start
+            this.dataView = new DataView(data, this.pos)
+            this.uint8View = new Uint8Array(data, this.pos)
+        }
     }
 
     /**
@@ -57,7 +61,7 @@ export class TlBinaryReader {
      * @param data  Buffer to read from
      * @param start  Position to start reading from
      */
-    static manual(data: Buffer, start = 0): TlBinaryReader {
+    static manual(data: ArrayBuffer, start = 0): TlBinaryReader {
         return new TlBinaryReader(undefined, data, start)
     }
 
@@ -68,19 +72,19 @@ export class TlBinaryReader {
      * @param data  Buffer to read from
      * @param start  Position to start reading from
      */
-    static deserializeObject<T>(objectsMap: TlReaderMap, data: Buffer, start = 0): T {
+    static deserializeObject<T>(objectsMap: TlReaderMap, data: Uint8Array, start = 0): T {
         return new TlBinaryReader(objectsMap, data, start).object() as T
     }
 
     int(): number {
-        const res = this.data.readInt32LE(this.pos)
+        const res = this.dataView.getInt32(this.pos, true)
         this.pos += 4
 
         return res
     }
 
     uint(): number {
-        const res = this.data.readUInt32LE(this.pos)
+        const res = this.dataView.getUint32(this.pos, true)
         this.pos += 4
 
         return res
@@ -91,20 +95,21 @@ export class TlBinaryReader {
      */
     peekUint(): number {
         // e.g. for checking ctor number
-        return this.data.readUInt32LE(this.pos)
+        return this.dataView.getInt32(this.pos, true)
     }
 
     int53(): number {
         // inlined toNumber from Long
-        const res = (this.data.readInt32LE(this.pos) >>> 0) + TWO_PWR_32_DBL * this.data.readInt32LE(this.pos + 4)
+        const res =
+            (this.dataView.getInt32(this.pos, true) >>> 0) + TWO_PWR_32_DBL * this.dataView.getInt32(this.pos + 4, true)
         this.pos += 8
 
         return res
     }
 
     long(unsigned = false): Long {
-        const lo = this.data.readInt32LE(this.pos)
-        const hi = this.data.readInt32LE(this.pos + 4)
+        const lo = this.dataView.getInt32(this.pos, true)
+        const hi = this.dataView.getInt32(this.pos + 4, true)
 
         this.pos += 8
 
@@ -112,14 +117,14 @@ export class TlBinaryReader {
     }
 
     float(): number {
-        const res = this.data.readFloatLE(this.pos)
+        const res = this.dataView.getFloat32(this.pos, true)
         this.pos += 4
 
         return res
     }
 
     double(): number {
-        const res = this.data.readDoubleLE(this.pos)
+        const res = this.dataView.getFloat64(this.pos, true)
         this.pos += 8
 
         return res
@@ -136,27 +141,27 @@ export class TlBinaryReader {
      * Read raw bytes of the given length
      * @param bytes  Length of the buffer to read
      */
-    raw(bytes = -1): Buffer {
-        if (bytes === -1) bytes = this.data.length - this.pos
+    raw(bytes = -1): Uint8Array {
+        if (bytes === -1) bytes = this.uint8View.length - this.pos
 
-        return this.data.slice(this.pos, (this.pos += bytes))
+        return this.uint8View.subarray(this.pos, (this.pos += bytes))
     }
 
-    int128(): Buffer {
-        return this.data.slice(this.pos, (this.pos += 16))
+    int128(): Uint8Array {
+        return this.uint8View.subarray(this.pos, (this.pos += 16))
     }
 
-    int256(): Buffer {
-        return this.data.slice(this.pos, (this.pos += 32))
+    int256(): Uint8Array {
+        return this.uint8View.subarray(this.pos, (this.pos += 32))
     }
 
-    bytes(): Buffer {
-        const firstByte = this.data[this.pos++]
+    bytes(): Uint8Array {
+        const firstByte = this.uint8View[this.pos++]
         let length
         let padding
 
         if (firstByte === 254) {
-            length = this.data[this.pos++] | (this.data[this.pos++] << 8) | (this.data[this.pos++] << 16)
+            length = this.uint8View[this.pos++] | (this.uint8View[this.pos++] << 8) | (this.uint8View[this.pos++] << 16)
             padding = length % 4
         } else {
             length = firstByte
@@ -170,7 +175,7 @@ export class TlBinaryReader {
     }
 
     string(): string {
-        return this.bytes().toString('utf-8')
+        return utf8Decode(this.bytes())
     }
 
     object(): unknown {
@@ -197,7 +202,7 @@ export class TlBinaryReader {
             this.seek(-4)
             const pos = this.pos
             const error = new TypeError(
-                `Unknown object id: 0x${id.toString(16)}. Content: ${this.raw().toString('hex')}`,
+                `Unknown object id: 0x${id.toString(16)}. Content: ${hexEncode(this.raw())}`,
             )
             this.pos = pos
             throw error
@@ -239,7 +244,7 @@ export class TlBinaryReader {
      * @param pos  Position to seek to
      */
     seekTo(pos: number): void {
-        if (pos >= this.data.length || pos < 0) {
+        if (pos >= this.uint8View.length || pos < 0) {
             throw new RangeError('New position is out of range')
         }
         this.pos = pos

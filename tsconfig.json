@@ -1,13 +1,14 @@
 {
     "compilerOptions": {
         "outDir": "./dist",
-        "module": "commonjs",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "target": "es2020",
         "allowJs": true,
         "sourceMap": true,
         "inlineSources": true,
         "declaration": true,
-        "esModuleInterop": true,
+        "esModuleInterop": false,
         "allowSyntheticDefaultImports": true,
         "strict": true,
         "noImplicitAny": true,
@@ -18,10 +19,7 @@
         "paths": {
             "~scripts/*": ["./scripts/*"],
         },
-        "typeRoots": [
-            "./node_modules/@types",
-            "./tsfixes.d.ts"
-        ]
+        "composite": true
     },
     "ts-node": {
         "require": [

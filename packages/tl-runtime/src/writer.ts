@@ -1,5 +1,7 @@
 import Long from 'long'
 
+import { byteLengthUtf8, utf8EncodeToBuffer } from './encodings/utf8.js'
+
 const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 
 /**
@@ -104,16 +106,16 @@ export class TlSerializationCounter {
         this.count += 4
     }
 
-    raw(val: Buffer): void {
-        this.count += val.length
+    raw(val: Uint8Array): void {
+        this.count += val.byteLength
     }
 
-    bytes(val: Buffer): void {
+    bytes(val: Uint8Array): void {
         this.count += TlSerializationCounter.countBytesOverhead(val.length) + val.length
     }
 
     string(val: string): void {
-        const length = Buffer.byteLength(val, 'utf8')
+        const length = byteLengthUtf8(val)
         this.count += TlSerializationCounter.countBytesOverhead(length) + length
     }
 
@@ -132,10 +134,8 @@ export class TlSerializationCounter {
  * Writer for TL objects.
  */
 export class TlBinaryWriter {
-    /**
-     * Underlying buffer.
-     */
-    buffer: Buffer
+    readonly dataView: DataView
+    readonly uint8View: Uint8Array
 
     /**
      * Current position in the buffer.
@@ -149,11 +149,18 @@ export class TlBinaryWriter {
      */
     constructor(
         readonly objectMap: TlWriterMap | undefined,
-        buffer: Buffer,
+        readonly data: ArrayBuffer,
         start = 0,
     ) {
-        this.buffer = buffer
-        this.pos = start
+        if (ArrayBuffer.isView(data)) {
+            this.pos = start
+            this.dataView = new DataView(data.buffer, data.byteOffset + start, data.byteLength)
+            this.uint8View = new Uint8Array(data.buffer, data.byteOffset + start, data.byteLength)
+        } else {
+            this.pos = start
+            this.dataView = new DataView(data, this.pos)
+            this.uint8View = new Uint8Array(data, this.pos)
+        }
     }
 
     /**
@@ -163,27 +170,19 @@ export class TlBinaryWriter {
      * @param size  Size of the writer's buffer
      */
     static alloc(objectMap: TlWriterMap | undefined, size: number): TlBinaryWriter {
-        return new TlBinaryWriter(objectMap, Buffer.allocUnsafe(size))
+        return new TlBinaryWriter(objectMap, new ArrayBuffer(size))
     }
 
     /**
      * Create a new writer without objects map for manual usage
      *
-     * @param buffer  Buffer to write to
+     * @param buffer  Buffer to write to, or its size
      * @param start  Position to start writing at
      */
-    static manual(buffer: Buffer, start = 0): TlBinaryWriter {
-        return new TlBinaryWriter(undefined, buffer, start)
-    }
+    static manual(buffer: ArrayBuffer | number, start = 0): TlBinaryWriter {
+        if (typeof buffer === 'number') buffer = new ArrayBuffer(buffer)
 
-    /**
-     * Create a new writer without objects map for manual usage
-     * with a given size
-     *
-     * @param size  Size of the writer's buffer
-     */
-    static manualAlloc(size: number): TlBinaryWriter {
-        return new TlBinaryWriter(undefined, Buffer.allocUnsafe(size))
+        return new TlBinaryWriter(undefined, buffer, start)
     }
 
     /**
@@ -193,7 +192,7 @@ export class TlBinaryWriter {
      * @param obj  Object to serialize
      * @param knownSize  In case the size is known, pass it here
      */
-    static serializeObject(objectMap: TlWriterMap, obj: { _: string }, knownSize = -1): Buffer {
+    static serializeObject(objectMap: TlWriterMap, obj: { _: string }, knownSize = -1): Uint8Array {
         if (knownSize === -1) {
             knownSize = objectMap._staticSize[obj._] || TlSerializationCounter.countNeededBytes(objectMap, obj)
         }
@@ -202,27 +201,27 @@ export class TlBinaryWriter {
 
         writer.object(obj)
 
-        return writer.buffer
+        return writer.uint8View
     }
 
     int(val: number): void {
-        this.buffer.writeInt32LE(val, this.pos)
+        this.dataView.setInt32(this.pos, val, true)
         this.pos += 4
     }
 
     uint(val: number): void {
-        this.buffer.writeUInt32LE(val, this.pos)
+        this.dataView.setUint32(this.pos, val, true)
         this.pos += 4
     }
 
     int53(val: number): void {
         // inlined fromNumber from Long
-        this.buffer.writeInt32LE(val % TWO_PWR_32_DBL | 0, this.pos)
+        this.dataView.setInt32(this.pos, val % TWO_PWR_32_DBL | 0, true)
 
         if (val < 0) {
-            this.buffer.writeInt32LE((val / TWO_PWR_32_DBL - 1) | 0, this.pos + 4)
+            this.dataView.setInt32(this.pos + 4, (val / TWO_PWR_32_DBL - 1) | 0, true)
         } else {
-            this.buffer.writeInt32LE((val / TWO_PWR_32_DBL) | 0, this.pos + 4)
+            this.dataView.setInt32(this.pos + 4, (val / TWO_PWR_32_DBL) | 0, true)
         }
 
         this.pos += 8
@@ -233,24 +232,24 @@ export class TlBinaryWriter {
     }
 
     long(val: Long): void {
-        this.buffer.writeInt32LE(val.low, this.pos)
-        this.buffer.writeInt32LE(val.high, this.pos + 4)
+        this.dataView.setInt32(this.pos, val.low, true)
+        this.dataView.setInt32(this.pos + 4, val.high, true)
 
         this.pos += 8
     }
 
     float(val: number): void {
-        this.buffer.writeFloatLE(val, this.pos)
+        this.dataView.setFloat32(this.pos, val, true)
         this.pos += 4
     }
 
     double(val: number): void {
-        this.buffer.writeDoubleLE(val, this.pos)
+        this.dataView.setFloat64(this.pos, val, true)
         this.pos += 8
     }
 
     boolean(val: boolean): void {
-        this.buffer.writeUInt32LE(val ? 0x997275b5 : 0xbc799737, this.pos)
+        this.dataView.setInt32(this.pos, val ? 0x997275b5 : 0xbc799737, true)
         this.pos += 4
     }
 
@@ -258,48 +257,48 @@ export class TlBinaryWriter {
      * Write raw bytes to the buffer
      * @param val  Buffer to write
      */
-    raw(val: Buffer): void {
-        val.copy(this.buffer, this.pos)
-        this.pos += val.length
+    raw(val: Uint8Array): void {
+        this.uint8View.set(val, this.pos)
+        this.pos += val.byteLength
     }
 
-    int128(val: Buffer): void {
-        val.copy(this.buffer, this.pos)
-        this.pos += 16
+    int128(val: Uint8Array): void {
+        if (val.byteLength !== 16) throw new Error('Invalid int128 length')
+        this.raw(val)
     }
 
-    int256(val: Buffer): void {
-        val.copy(this.buffer, this.pos)
-        this.pos += 32
+    int256(val: Uint8Array): void {
+        if (val.byteLength !== 32) throw new Error('Invalid int256 length')
+        this.raw(val)
     }
 
-    bytes(val: Buffer): void {
-        const length = val.length
+    bytes(val: Uint8Array): void {
+        const length = val.byteLength
         let padding
 
         if (length <= 253) {
-            this.buffer[this.pos++] = val.length
+            this.uint8View[this.pos++] = length
             padding = (length + 1) % 4
         } else {
-            this.buffer[this.pos++] = 254
-            this.buffer[this.pos++] = val.length & 0xff
-            this.buffer[this.pos++] = (val.length >> 8) & 0xff
-            this.buffer[this.pos++] = (val.length >> 16) & 0xff
+            this.uint8View[this.pos++] = 254
+            this.uint8View[this.pos++] = length & 0xff
+            this.uint8View[this.pos++] = (length >> 8) & 0xff
+            this.uint8View[this.pos++] = (length >> 16) & 0xff
             padding = length % 4
         }
 
-        val.copy(this.buffer, this.pos)
-        this.pos += val.length
+        this.uint8View.set(val, this.pos)
+        this.pos += length
 
         if (padding > 0) {
             padding = 4 - padding
 
-            while (padding--) this.buffer[this.pos++] = 0
+            while (padding--) this.uint8View[this.pos++] = 0
         }
     }
 
     string(val: string): void {
-        this.bytes(Buffer.from(val, 'utf-8'))
+        this.bytes(utf8EncodeToBuffer(val))
     }
 
     // hot path, avoid additional runtime checks
@@ -320,7 +319,7 @@ export class TlBinaryWriter {
     /**
      * Get the resulting buffer
      */
-    result(): Buffer {
-        return this.buffer.slice(0, this.pos)
+    result(): Uint8Array {
+        return this.uint8View.subarray(0, this.pos)
     }
 }

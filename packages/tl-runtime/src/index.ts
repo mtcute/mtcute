@@ -1,3 +1,3 @@
-export * from './platform/gzip'
-export * from './reader'
-export * from './writer'
+export * from './encodings/gzip.js'
+export * from './reader.js'
+export * from './writer.js'
