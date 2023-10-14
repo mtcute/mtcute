@@ -114,7 +114,7 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
         this._socket.binaryType = 'arraybuffer'
 
         this._socket.addEventListener('message', (evt) =>
-            this._packetCodec.feed(evt.data),
+            this._packetCodec.feed(new Uint8Array(evt.data)),
         )
         this._socket.addEventListener('open', this.handleConnect.bind(this))
         this._socket.addEventListener('error', this.handleError.bind(this))

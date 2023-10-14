@@ -151,6 +151,9 @@ importers:
         specifier: 5.2.3
         version: 5.2.3
     devDependencies:
+      '@cryptography/aes':
+        specifier: ^0.1.1
+        version: 0.1.1
       '@types/ws':
         specifier: 8.5.4
         version: 8.5.4
@@ -698,6 +701,10 @@ packages:
     engines: {node: '>=v14'}
     dependencies:
       chalk: 4.1.2
+    dev: true
+
+  /@cryptography/aes@0.1.1:
+    resolution: {integrity: sha512-PcYz4FDGblO6tM2kSC+VzhhK62vml6k6/YAkiWtyPvrgJVfnDRoHGDtKn5UiaRRUrvUTTocBpvc2rRgTCqxjsg==}
     dev: true
 
   /@cspotcode/source-map-support@0.8.1:

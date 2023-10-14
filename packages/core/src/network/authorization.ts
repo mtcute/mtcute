@@ -141,7 +141,7 @@ async function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKe
         // we only need to reverse the data
         dataWithHash.subarray(0, 192).reverse()
 
-        const aes = crypto.createAesIge(aesKey, aesIv)
+        const aes = await crypto.createAesIge(aesKey, aesIv)
         const encrypted = await aes.encrypt(dataWithHash)
         const encryptedHash = await crypto.sha256(encrypted)
 
@@ -300,7 +300,7 @@ export async function doAuthorization(
 
     // Step 3: complete DH exchange
     const [key, iv] = await generateKeyAndIvFromNonce(crypto, resPq.serverNonce, newNonce)
-    const ige = crypto.createAesIge(key, iv)
+    const ige = await crypto.createAesIge(key, iv)
 
     const plainTextAnswer = await ige.decrypt(serverDhParams.encryptedAnswer)
     const innerDataHash = plainTextAnswer.subarray(0, 20)

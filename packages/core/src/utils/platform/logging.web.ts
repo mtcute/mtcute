@@ -1,4 +1,4 @@
-const BASE_FORMAT = '%s [%с%s%с] [%c%s%c] '
+const BASE_FORMAT = '%s [%c%s%c] [%c%s%c] '
 const LEVEL_NAMES = [
     '', // OFF
     'ERR',
@@ -9,13 +9,20 @@ const LEVEL_NAMES = [
 ]
 const COLORS = [
     '', // OFF
-    '#ff0000',
-    '#ffff00',
-    '#0000ff',
-    '#00ffff',
-    '#ff00ff',
+    'color: #7a5f9d',
+    'color: #8d7041',
+    'color: #396c9e',
+    'color: #437761',
+    'color: #7a5f9d',
 ]
-const TAG_COLORS = ['#44ffff', '#44ff44', '#ffff44', '#4444ff', '#ff44ff', '#ff4444']
+const TAG_COLORS = [
+    'color: #437761',
+    'color: #537a36',
+    'color: #8d7041',
+    'color: #396c9e',
+    'color: #7a5f9d',
+    'color: #7a5f9d',
+]
 
 /** @internal */
 export const _defaultLoggingHandler = (

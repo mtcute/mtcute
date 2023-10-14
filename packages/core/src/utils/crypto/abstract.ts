@@ -26,27 +26,25 @@ export interface ICryptoProvider {
     hmacSha256(data: Uint8Array, key: Uint8Array): MaybeAsync<Uint8Array>
 
     // in telegram, iv is always either used only once, or is the same for all calls for the key
-    createAesCtr(key: Uint8Array, iv: Uint8Array, encrypt: boolean): IEncryptionScheme
+    createAesCtr(key: Uint8Array, iv: Uint8Array, encrypt: boolean): MaybeAsync<IEncryptionScheme>
 
-    createAesIge(key: Uint8Array, iv: Uint8Array): IEncryptionScheme
+    createAesIge(key: Uint8Array, iv: Uint8Array): MaybeAsync<IEncryptionScheme>
 
-    createAesEcb(key: Uint8Array): IEncryptionScheme
+    createAesEcb(key: Uint8Array): MaybeAsync<IEncryptionScheme>
 
     factorizePQ(pq: Uint8Array): MaybeAsync<[Uint8Array, Uint8Array]>
 }
 
 export abstract class BaseCryptoProvider {
-    createAesIge(key: Uint8Array, iv: Uint8Array): IEncryptionScheme {
-        return new AesModeOfOperationIge(key, iv, this.createAesEcb(key))
+    async createAesIge(key: Uint8Array, iv: Uint8Array) {
+        return new AesModeOfOperationIge(key, iv, await this.createAesEcb(key))
     }
 
-    factorizePQ(pq: Uint8Array): MaybeAsync<[Uint8Array, Uint8Array]> {
+    factorizePQ(pq: Uint8Array) {
         return factorizePQSync(pq)
     }
 
-    initialize(): void {}
-
-    abstract createAesEcb(key: Uint8Array): IEncryptionScheme
+    abstract createAesEcb(key: Uint8Array): MaybeAsync<IEncryptionScheme>
 }
 
 export type CryptoProviderFactory = () => ICryptoProvider

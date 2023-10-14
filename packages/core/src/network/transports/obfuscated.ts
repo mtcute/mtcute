@@ -78,8 +78,8 @@ export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec 
             decryptKey = await this._crypto.sha256(concatBuffers([decryptKey, this._proxy.secret]))
         }
 
-        this._encryptor = this._crypto.createAesCtr(encryptKey, encryptIv, true)
-        this._decryptor = this._crypto.createAesCtr(decryptKey, decryptIv, false)
+        this._encryptor = await this._crypto.createAesCtr(encryptKey, encryptIv, true)
+        this._decryptor = await this._crypto.createAesCtr(decryptKey, decryptIv, false)
 
         const encrypted = await this._encryptor.encrypt(random)
         random.set(encrypted.subarray(56, 64), 56)
