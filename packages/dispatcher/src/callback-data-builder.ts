@@ -1,7 +1,6 @@
-import { CallbackQuery } from '@mtcute/client'
-import { MaybeArray, MtArgumentError } from '@mtcute/core'
+import { CallbackQuery, MaybeArray, MtArgumentError } from '@mtcute/client'
 
-import { UpdateFilter } from './filters'
+import { UpdateFilter } from './filters/types.js'
 
 /**
  * Callback data builder, inspired by [aiogram](https://github.com/aiogram/aiogram).

@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MaybeArray, MtTypeAssertionError, tl } from '@mtcute/core'
-import { assertTypeIs, LongSet } from '@mtcute/core/utils'
+import { assertTypeIs, LongSet } from '@mtcute/core/utils.js'
 
-import { Message, Sticker } from '../../types'
-import { parseDocument } from '../../types/media/document-utils'
+import { Message, Sticker } from '../../types/index.js'
+import { parseDocument } from '../../types/media/document-utils.js'
 
 /**
  * Get custom emoji stickers by their IDs

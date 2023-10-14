@@ -1,13 +1,13 @@
-import { ForgeCryptoProvider } from './forge-crypto'
-import { NodeCryptoProvider } from './node-crypto'
+import { ForgeCryptoProvider } from './forge-crypto.js'
+import { NodeCryptoProvider } from './node-crypto.js'
 
-export * from './abstract'
-export * from './keys'
-export * from './password'
+export * from './abstract.js'
+export * from './keys.js'
+export * from './password.js'
 
 export { ForgeCryptoProvider, NodeCryptoProvider }
 
-import { _defaultCryptoProviderFactory } from '../platform/crypto'
-import { CryptoProviderFactory } from './abstract'
+import { _defaultCryptoProviderFactory } from '../platform/crypto.js'
+import { CryptoProviderFactory } from './abstract.js'
 
 export const defaultCryptoProviderFactory: CryptoProviderFactory = _defaultCryptoProviderFactory

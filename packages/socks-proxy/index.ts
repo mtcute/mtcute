@@ -13,6 +13,7 @@ import {
     tl,
     TransportState,
 } from '@mtcute/core'
+import { dataViewFromBuffer, utf8EncodeToBuffer } from '@mtcute/core/utils.js'
 
 /**
  * An error has occurred while connecting to an SOCKS proxy
@@ -58,7 +59,7 @@ export interface SocksProxySettings {
     version?: 4 | 5
 }
 
-function writeIpv4(ip: string, buf: Buffer, offset: number): void {
+function writeIpv4(ip: string, buf: Uint8Array, offset: number): void {
     const parts = ip.split('.')
 
     if (parts.length !== 4) {
@@ -75,22 +76,22 @@ function writeIpv4(ip: string, buf: Buffer, offset: number): void {
     }
 }
 
-function buildSocks4ConnectRequest(ip: string, port: number, username = ''): Buffer {
-    const userId = Buffer.from(username)
-    const buf = Buffer.alloc(9 + userId.length)
+function buildSocks4ConnectRequest(ip: string, port: number, username = ''): Uint8Array {
+    const userId = utf8EncodeToBuffer(username)
+    const buf = new Uint8Array(9 + userId.length)
 
     buf[0] = 0x04 // VER
     buf[1] = 0x01 // CMD = establish a TCP/IP stream connection
-    buf.writeUInt16BE(port, 2) // DSTPORT
+    dataViewFromBuffer(buf).setUint16(2, port, false)
     writeIpv4(ip, buf, 4) // DSTIP
-    userId.copy(buf, 8) // ID
+    buf.set(userId, 8)
     buf[8 + userId.length] = 0x00 // ID (null-termination)
 
     return buf
 }
 
-function buildSocks5Greeting(authAvailable: boolean): Buffer {
-    const buf = Buffer.alloc(authAvailable ? 4 : 3)
+function buildSocks5Greeting(authAvailable: boolean): Uint8Array {
+    const buf = new Uint8Array(authAvailable ? 4 : 3)
 
     buf[0] = 0x05 // VER
 
@@ -107,8 +108,8 @@ function buildSocks5Greeting(authAvailable: boolean): Buffer {
 }
 
 function buildSocks5Auth(username: string, password: string) {
-    const usernameBuf = Buffer.from(username)
-    const passwordBuf = Buffer.from(password)
+    const usernameBuf = utf8EncodeToBuffer(username)
+    const passwordBuf = utf8EncodeToBuffer(password)
 
     if (usernameBuf.length > 255) {
         throw new MtArgumentError(`Too long username (${usernameBuf.length} > 255)`)
@@ -117,17 +118,17 @@ function buildSocks5Auth(username: string, password: string) {
         throw new MtArgumentError(`Too long password (${passwordBuf.length} > 255)`)
     }
 
-    const buf = Buffer.alloc(3 + usernameBuf.length + passwordBuf.length)
+    const buf = new Uint8Array(3 + usernameBuf.length + passwordBuf.length)
     buf[0] = 0x01 // VER of auth
     buf[1] = usernameBuf.length
-    usernameBuf.copy(buf, 2)
+    buf.set(usernameBuf, 2)
     buf[2 + usernameBuf.length] = passwordBuf.length
-    passwordBuf.copy(buf, 3 + usernameBuf.length)
+    buf.set(passwordBuf, 3 + usernameBuf.length)
 
     return buf
 }
 
-function writeIpv6(ip: string, buf: Buffer, offset: number): void {
+function writeIpv6(ip: string, buf: Uint8Array, offset: number): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     ip = normalize(ip) as string
     const parts = ip.split(':')
@@ -136,6 +137,8 @@ function writeIpv6(ip: string, buf: Buffer, offset: number): void {
         throw new MtArgumentError('Invalid IPv6 address')
     }
 
+    const dv = dataViewFromBuffer(buf)
+
     for (let i = 0, j = offset; i < 8; i++, j += 2) {
         const n = parseInt(parts[i])
 
@@ -143,12 +146,13 @@ function writeIpv6(ip: string, buf: Buffer, offset: number): void {
             throw new MtArgumentError('Invalid IPv6 address')
         }
 
-        buf.writeUInt16BE(n, j)
+        dv.setUint16(j, n, false)
     }
 }
 
-function buildSocks5Connect(ip: string, port: number, ipv6 = false): Buffer {
-    const buf = Buffer.alloc(ipv6 ? 22 : 10)
+function buildSocks5Connect(ip: string, port: number, ipv6 = false): Uint8Array {
+    const buf = new Uint8Array(ipv6 ? 22 : 10)
+    const dv = dataViewFromBuffer(buf)
 
     buf[0] = 0x05 // VER
     buf[1] = 0x01 // CMD = establish a TCP/IP stream connection
@@ -157,11 +161,11 @@ function buildSocks5Connect(ip: string, port: number, ipv6 = false): Buffer {
     if (ipv6) {
         buf[3] = 0x04 // TYPE = IPv6
         writeIpv6(ip, buf, 4) // ADDR
-        buf.writeUInt16BE(port, 20) // DSTPORT
+        dv.setUint16(20, port, false)
     } else {
         buf[3] = 0x01 // TYPE = IPv4
         writeIpv4(ip, buf, 4) // ADDR
-        buf.writeUInt16BE(port, 8) // DSTPORT
+        dv.setUint16(8, port, false)
     }
 
     return buf
@@ -225,7 +229,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
     }
 
     private _onProxyConnected() {
-        let packetHandler: (msg: Buffer) => void
+        let packetHandler: (msg: Uint8Array) => void
 
         if (this._proxy.version === 4) {
             packetHandler = (msg) => {

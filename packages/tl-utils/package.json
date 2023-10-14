@@ -6,13 +6,11 @@
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
     "main": "src/index.ts",
+    "type": "module",
     "scripts": {
-        "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
+        "test": "mocha \"tests/**/*.spec.ts\"",
         "docs": "typedoc",
-        "build": "tsc"
-    },
-    "browser": {
-        "./platform/gzip.js": "./platform/gzip.web.js"
+        "build": "pnpm run -w build-package tl-utils"
     },
     "dependencies": {
         "crc-32": "1.2.0"

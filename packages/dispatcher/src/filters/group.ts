@@ -1,8 +1,7 @@
-import { Message } from '@mtcute/client'
-import { MaybeAsync } from '@mtcute/core'
+import { MaybeAsync, Message } from '@mtcute/client'
 
-import { MessageContext } from '../context'
-import { Modify, UpdateFilter } from './types'
+import { MessageContext } from '../context/message.js'
+import { Modify, UpdateFilter } from './types.js'
 
 /**
  * For message groups, apply a filter to every message in the group.

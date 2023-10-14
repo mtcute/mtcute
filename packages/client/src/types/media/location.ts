@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { FileLocation } from '../files'
+import { makeInspectable } from '../../utils/index.js'
+import { FileLocation } from '../files/index.js'
 
 /**
  * A point on the map

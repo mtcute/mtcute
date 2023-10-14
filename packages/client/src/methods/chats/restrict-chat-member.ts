@@ -1,9 +1,9 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
-import { normalizeDate } from '../../utils/misc-utils'
-import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
+import { normalizeDate } from '../../utils/misc-utils.js'
+import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Restrict a user in a supergroup.

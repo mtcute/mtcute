@@ -1,9 +1,13 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "outDir": "./dist"
+        "outDir": "./dist/esm"
     },
     "include": [
         "./index.ts",
+        "./fake-tls.ts",
+    ],
+    "references": [
+        { "path": "../core" }
     ]
 }

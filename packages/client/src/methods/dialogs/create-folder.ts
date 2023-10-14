@@ -1,6 +1,6 @@
 import { BaseTelegramClient, PartialExcept, tl } from '@mtcute/core'
 
-import { getFolders } from './get-folders'
+import { getFolders } from './get-folders.js'
 
 /**
  * Create a folder from given parameters

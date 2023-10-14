@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
-import { computeSrpParams } from '@mtcute/core/utils'
+import { computeSrpParams } from '@mtcute/core/utils.js'
 
-import { User } from '../../types'
-import { _onAuthorization } from './_state'
+import { User } from '../../types/index.js'
+import { _onAuthorization } from './_state.js'
 
 /**
  * Check your Two-Step verification password and log in

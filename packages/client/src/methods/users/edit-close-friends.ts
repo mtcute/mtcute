@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { normalizeToInputUser } from '../../utils'
-import { resolvePeerMany } from './resolve-peer-many'
+import { InputPeerLike } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/index.js'
+import { resolvePeerMany } from './resolve-peer-many.js'
 
 /**
  * Edit "close friends" list directly using user IDs

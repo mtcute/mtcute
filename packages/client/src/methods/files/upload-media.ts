@@ -1,10 +1,10 @@
 import { assertNever, BaseTelegramClient, MtArgumentError } from '@mtcute/core'
-import { assertTypeIs, assertTypeIsNot } from '@mtcute/core/utils'
+import { assertTypeIs, assertTypeIsNot } from '@mtcute/core/utils.js'
 
-import { InputMediaLike, InputPeerLike, MessageMedia, Photo, RawDocument } from '../../types'
-import { parseDocument } from '../../types/media/document-utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { _normalizeInputMedia } from './normalize-input-media'
+import { InputMediaLike, InputPeerLike, MessageMedia, Photo, RawDocument } from '../../types/index.js'
+import { parseDocument } from '../../types/media/document-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { _normalizeInputMedia } from './normalize-input-media.js'
 
 /**
  * Upload a media to Telegram servers, without actually

@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { SentCode } from '../../types'
-import { normalizePhoneNumber } from '../../utils/misc-utils'
+import { SentCode } from '../../types/index.js'
+import { normalizePhoneNumber } from '../../utils/misc-utils.js'
 
 /**
  * Send the confirmation code to the given phone number

@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { ForumTopic, InputPeerLike } from '../../types'
-import { normalizeToInputChannel } from '../../utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { ForumTopic, InputPeerLike } from '../../types/index.js'
+import { normalizeToInputChannel } from '../../utils/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get forum topics by their IDs

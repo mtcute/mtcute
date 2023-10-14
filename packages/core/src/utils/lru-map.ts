@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 // ^^ because of performance reasons
-import { LongMap } from './long-utils'
+import { LongMap } from './long-utils.js'
 
 interface TwoWayLinkedList<K, T> {
     // k = key

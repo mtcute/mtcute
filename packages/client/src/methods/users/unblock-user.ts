@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { resolvePeer } from './resolve-peer'
+import { InputPeerLike } from '../../types/index.js'
+import { resolvePeer } from './resolve-peer.js'
 
 /**
  * Unblock a user

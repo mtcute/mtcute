@@ -8,11 +8,11 @@ import {
     Message,
     normalizeInputMessageId,
     ReplyMarkup,
-} from '../../types'
-import { _normalizeInputMedia } from '../files/normalize-input-media'
-import { resolvePeer } from '../users/resolve-peer'
-import { _findMessageInUpdate } from './find-in-update'
-import { _parseEntities } from './parse-entities'
+} from '../../types/index.js'
+import { _normalizeInputMedia } from '../files/normalize-input-media.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { _findMessageInUpdate } from './find-in-update.js'
+import { _parseEntities } from './parse-entities.js'
 
 /**
  * Edit message text, media, reply markup and schedule date.

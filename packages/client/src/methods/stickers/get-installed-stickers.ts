@@ -1,7 +1,7 @@
 import { BaseTelegramClient, Long } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { StickerSet } from '../../types'
+import { StickerSet } from '../../types/index.js'
 
 /**
  * Get a list of all installed sticker packs

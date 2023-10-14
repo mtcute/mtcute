@@ -1,10 +1,10 @@
 import { assertNever, getBasicPeerType, Long, markedPeerIdToBare, tl } from '@mtcute/core'
 
-import { parseFileId } from './parse'
-import { tdFileId as td } from './types'
+import { parseFileId } from './parse.js'
+import { tdFileId as td } from './types.js'
 import FileType = td.FileType
 
-const EMPTY_BUFFER = Buffer.alloc(0)
+const EMPTY_BUFFER = new Uint8Array(0)
 
 type FileId = td.RawFullRemoteFileLocation
 

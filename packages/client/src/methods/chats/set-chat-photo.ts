@@ -1,10 +1,10 @@
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
 
-import { InputFileLike, InputPeerLike, isUploadedFile, MtInvalidPeerTypeError } from '../../types'
-import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
-import { uploadFile } from '../files/upload-file'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputFileLike, InputPeerLike, isUploadedFile, MtInvalidPeerTypeError } from '../../types/index.js'
+import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { uploadFile } from '../files/upload-file.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Set a new chat photo or video.

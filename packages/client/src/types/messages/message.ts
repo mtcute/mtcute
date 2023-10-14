@@ -6,18 +6,18 @@ import {
     tl,
     toggleChannelIdMark,
 } from '@mtcute/core'
-import { assertTypeIsNot } from '@mtcute/core/utils'
+import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { BotKeyboard, ReplyMarkup } from '../bots/keyboards'
-import { Chat } from '../peers/chat'
-import { PeersIndex } from '../peers/peers-index'
-import { User } from '../peers/user'
-import { _messageActionFromTl, MessageAction } from './message-action'
-import { MessageEntity } from './message-entity'
-import { _messageMediaFromTl, MessageMedia } from './message-media'
-import { MessageReactions } from './message-reactions'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { BotKeyboard, ReplyMarkup } from '../bots/keyboards.js'
+import { Chat } from '../peers/chat.js'
+import { PeersIndex } from '../peers/peers-index.js'
+import { User } from '../peers/user.js'
+import { _messageActionFromTl, MessageAction } from './message-action.js'
+import { MessageEntity } from './message-entity.js'
+import { _messageMediaFromTl, MessageMedia } from './message-media.js'
+import { MessageReactions } from './message-reactions.js'
 
 /** Information about a forward */
 export interface MessageForwardInfo {

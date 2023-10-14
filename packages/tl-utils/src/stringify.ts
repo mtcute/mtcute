@@ -1,5 +1,5 @@
-import { TlEntry } from './types'
-import { stringifyArgumentType } from './utils'
+import { TlEntry } from './types.js'
+import { stringifyArgumentType } from './utils.js'
 
 function normalizeType(s: string): string {
     return s

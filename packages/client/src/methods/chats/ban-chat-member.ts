@@ -1,14 +1,14 @@
 import { BaseTelegramClient, MtTypeAssertionError } from '@mtcute/core'
 
-import { InputPeerLike, Message, MtInvalidPeerTypeError } from '../../types'
+import { InputPeerLike, Message, MtInvalidPeerTypeError } from '../../types/index.js'
 import {
     isInputPeerChannel,
     isInputPeerChat,
     normalizeToInputChannel,
     normalizeToInputUser,
-} from '../../utils/peer-utils'
-import { _findMessageInUpdate } from '../messages/find-in-update'
-import { resolvePeer } from '../users/resolve-peer'
+} from '../../utils/peer-utils.js'
+import { _findMessageInUpdate } from '../messages/find-in-update.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Ban a user/channel from a legacy group, a supergroup or a channel.

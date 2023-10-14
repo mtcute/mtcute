@@ -1,11 +1,11 @@
 import { tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { ChatPermissions } from './chat-permissions'
-import { PeersIndex } from './index'
-import { User } from './user'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { ChatPermissions } from './chat-permissions.js'
+import { PeersIndex } from './index.js'
+import { User } from './user.js'
 
 /**
  * Status of the member:

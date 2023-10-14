@@ -1,7 +1,7 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { FileLocation } from './file-location'
+import { makeInspectable } from '../../utils/index.js'
+import { FileLocation } from './file-location.js'
 
 const STUB_LOCATION = () => {
     throw new MtArgumentError('This web document is not downloadable through Telegram')

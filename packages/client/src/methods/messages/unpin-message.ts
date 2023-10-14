@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputMessageId, normalizeInputMessageId } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputMessageId, normalizeInputMessageId } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Unpin a message in a group, supergroup, channel or PM.

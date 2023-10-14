@@ -8,10 +8,10 @@ import {
     StickerSet,
     StickerSourceType,
     StickerType,
-} from '../../types'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { _normalizeFileToDocument } from '../files/normalize-file-to-document'
-import { resolvePeer } from '../users/resolve-peer'
+} from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Create a new sticker set.

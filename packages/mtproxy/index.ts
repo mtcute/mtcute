@@ -1,4 +1,5 @@
-// ^^ because of this._socket. we know it's not null, almost everywhere, but TS doesn't
+/* eslint-disable no-restricted-globals */
+// todo fixme
 
 import { connect } from 'net'
 
@@ -14,9 +15,9 @@ import {
     tl,
     TransportState,
 } from '@mtcute/core'
-import { parseUrlSafeBase64 } from '@mtcute/core/utils'
+import { buffersEqual } from '@mtcute/core/dist/esm/utils/index.js'
 
-import { FakeTlsPacketCodec, generateFakeTlsHeader } from './fake-tls'
+import { FakeTlsPacketCodec, generateFakeTlsHeader } from './fake-tls.js'
 
 /**
  * MTProto proxy settings
@@ -67,7 +68,7 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
         } else if (proxy.secret.match(/^[0-9a-f]+$/i)) {
             secret = Buffer.from(proxy.secret, 'hex')
         } else {
-            secret = parseUrlSafeBase64(proxy.secret)
+            secret = Buffer.from(proxy.secret, 'base64url')
         }
 
         if (secret.length > 17 + MAX_DOMAIN_LENGTH) {
@@ -174,16 +175,22 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
             const hello = await generateFakeTlsHeader(this._fakeTlsDomain!, this._rawSecret, this._crypto)
             const helloRand = hello.slice(11, 11 + 32)
 
-            const checkHelloResponse = async (buf: Buffer): Promise<void> => {
+            let serverHelloBuffer: Buffer | null = null
+
+            const checkHelloResponse = async (buf: Buffer): Promise<boolean> => {
+                if (serverHelloBuffer) {
+                    buf = Buffer.concat([serverHelloBuffer, buf])
+                }
+
                 const resp = buf
 
                 for (const first of TLS_START) {
                     if (buf.length < first.length + 2) {
-                        return
+                        throw new MtSecurityError('Server hello is too short')
                     }
 
-                    if (first.compare(first, 0, first.length) !== 0) {
-                        throw new MtSecurityError('First part of hello response is invalid')
+                    if (!buffersEqual(buf.slice(0, first.length), first)) {
+                        throw new MtSecurityError('Server hello is invalid')
                     }
                     buf = buf.slice(first.length)
 
@@ -191,7 +198,14 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
                     buf = buf.slice(2)
 
                     if (buf.length < skipSize) {
-                        return
+                        // likely got split into multiple packets
+                        if (serverHelloBuffer) {
+                            throw new MtSecurityError('Server hello is too short')
+                        }
+
+                        serverHelloBuffer = resp
+
+                        return false
                     }
 
                     buf = buf.slice(skipSize)
@@ -203,16 +217,22 @@ export class MtProxyTcpTransport extends BaseTcpTransport {
                     this._rawSecret,
                 )
 
-                if (hash.compare(respRand) !== 0) {
+                if (!buffersEqual(hash, respRand)) {
                     throw new MtSecurityError('Response hash is invalid')
                 }
+
+                return true
             }
 
             const packetHandler = (buf: Buffer): void => {
                 checkHelloResponse(buf)
-                    .then(() => {
+                    .then((done) => {
+                        if (!done) return
+
                         this._socket!.off('data', packetHandler)
-                        this._socket!.on('data', (data) => this._packetCodec.feed(data))
+                        this._socket!.on('data', (data) => {
+                            this._packetCodec.feed(data)
+                        })
 
                         return this.handleConnect()
                     })

@@ -1,10 +1,10 @@
 import { BaseTelegramClient } from '@mtcute/core'
-import { assertTypeIsNot } from '@mtcute/core/utils'
+import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
-import type { ForumTopic, InputPeerLike } from '../../types'
-import { normalizeToInputChannel } from '../../utils/peer-utils'
-import { createDummyUpdate } from '../../utils/updates-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import type { ForumTopic, InputPeerLike } from '../../types/index.js'
+import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { createDummyUpdate } from '../../utils/updates-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Delete a forum topic and all its history

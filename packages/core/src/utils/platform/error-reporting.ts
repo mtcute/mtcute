@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
 
-import { Logger } from '../logger'
+import { Logger } from '../logger.js'
 
 export function reportUnknownError(log: Logger, error: tl.RpcError, method: string): void {
     if (typeof fetch !== 'function') return

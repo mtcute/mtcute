@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { PeersIndex } from './peers-index'
-import { User } from './user'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { PeersIndex } from './peers-index.js'
+import { User } from './user.js'
 
 export class ChatInviteLinkMember {
     constructor(

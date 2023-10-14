@@ -149,17 +149,17 @@ export class TlBinaryWriter {
      */
     constructor(
         readonly objectMap: TlWriterMap | undefined,
-        readonly data: ArrayBuffer,
+        data: ArrayBuffer,
         start = 0,
     ) {
         if (ArrayBuffer.isView(data)) {
             this.pos = start
-            this.dataView = new DataView(data.buffer, data.byteOffset + start, data.byteLength)
-            this.uint8View = new Uint8Array(data.buffer, data.byteOffset + start, data.byteLength)
+            this.dataView = new DataView(data.buffer, data.byteOffset, data.byteLength)
+            this.uint8View = new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
         } else {
             this.pos = start
-            this.dataView = new DataView(data, this.pos)
-            this.uint8View = new Uint8Array(data, this.pos)
+            this.dataView = new DataView(data)
+            this.uint8View = new Uint8Array(data)
         }
     }
 

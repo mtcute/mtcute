@@ -1,9 +1,9 @@
 import { MaybeAsync } from '@mtcute/client'
 
-import { MessageContext } from './context'
-import { Dispatcher } from './dispatcher'
-import { filters } from './filters'
-import { UpdateState } from './state'
+import { MessageContext } from './context/message.js'
+import { Dispatcher } from './dispatcher.js'
+import { filters } from './filters/index.js'
+import { UpdateState } from './state/update-state.js'
 
 /**
  * Action for the wizard scene.

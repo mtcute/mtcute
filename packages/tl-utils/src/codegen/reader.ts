@@ -1,6 +1,6 @@
-import { computeConstructorIdFromEntry } from '../ctor-id'
-import { TL_PRIMITIVES, TlEntry } from '../types'
-import { snakeToCamel } from './utils'
+import { computeConstructorIdFromEntry } from '../ctor-id.js'
+import { TL_PRIMITIVES, TlEntry } from '../types.js'
+import { snakeToCamel } from './utils.js'
 
 export interface ReaderCodegenOptions {
     /**

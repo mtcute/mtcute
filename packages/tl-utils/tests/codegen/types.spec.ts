@@ -6,7 +6,7 @@ import {
     generateTypescriptDefinitionsForTlSchema,
     parseFullTlSchema,
     parseTlToEntries,
-} from '../../src'
+} from '../../src/index.js'
 
 describe('generateTypescriptDefinitionsForTlEntry', () => {
     const test = (tl: string, ...ts: string[]) => {

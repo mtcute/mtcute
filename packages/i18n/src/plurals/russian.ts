@@ -1,4 +1,4 @@
-import { I18nValue, I18nValueDynamic } from '../types'
+import { I18nValue, I18nValueDynamic } from '../types.js'
 
 /**
  * Pluralize a value by Russian rules

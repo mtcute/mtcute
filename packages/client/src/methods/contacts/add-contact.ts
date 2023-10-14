@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, User } from '../../types'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, User } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Add an existing Telegram user as a contact

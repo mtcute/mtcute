@@ -1,9 +1,9 @@
 import { MaybeArray, tl } from '@mtcute/core'
 
-import { InputFileLike } from '../files'
-import { FormattedString } from '../parser'
-import { InputPeerLike } from '../peers'
-import { VenueSource } from './venue'
+import { InputFileLike } from '../files/index.js'
+import { FormattedString } from '../parser.js'
+import { InputPeerLike } from '../peers/index.js'
+import { VenueSource } from './venue.js'
 
 export interface CaptionMixin {
     /**
@@ -418,7 +418,7 @@ export interface InputMediaInvoice extends CaptionMixin {
      * Will not be displayed to the user and can be used
      * for internal processes
      */
-    payload: Buffer
+    payload: Uint8Array
 
     /**
      * Payments provider token, obtained from
@@ -536,7 +536,7 @@ export interface InputMediaQuiz extends Omit<InputMediaPoll, 'type'> {
      * > But since the API has that option, we also provide it,
      * > maybe to future-proof this :shrug:
      */
-    correct: MaybeArray<number | Buffer>
+    correct: MaybeArray<number | Uint8Array>
 
     /**
      * Explanation of the quiz solution

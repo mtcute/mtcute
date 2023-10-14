@@ -1,6 +1,6 @@
 import { tl, toggleChannelIdMark } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
+import { makeInspectable } from '../../utils/index.js'
 
 /**
  * One or more messages were deleted

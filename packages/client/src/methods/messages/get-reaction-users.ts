@@ -8,9 +8,9 @@ import {
     normalizeInputReaction,
     PeerReaction,
     PeersIndex,
-} from '../../types'
-import { makeArrayPaginated } from '../../utils'
-import { resolvePeer } from '../users/resolve-peer'
+} from '../../types/index.js'
+import { makeArrayPaginated } from '../../utils/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 // @exported
 export type GetReactionUsersOffset = string

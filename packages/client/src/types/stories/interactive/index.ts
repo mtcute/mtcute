@@ -1,10 +1,10 @@
 import { MtTypeAssertionError, tl } from '@mtcute/core'
 
-import { StoryInteractiveLocation } from './location'
-import { StoryInteractiveReaction } from './reaction'
-import { StoryInteractiveVenue } from './venue'
+import { StoryInteractiveLocation } from './location.js'
+import { StoryInteractiveReaction } from './reaction.js'
+import { StoryInteractiveVenue } from './venue.js'
 
-export * from './input'
+export * from './input.js'
 
 export type StoryInteractiveElement = StoryInteractiveReaction | StoryInteractiveLocation | StoryInteractiveVenue
 

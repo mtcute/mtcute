@@ -1,4 +1,4 @@
-import { Deque } from '@mtcute/core/utils'
+import { Deque } from '@mtcute/core/utils.js'
 
 export class RpsMeter {
     _hits: Deque<bigint>

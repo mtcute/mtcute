@@ -1,8 +1,8 @@
 import { BaseTelegramClient, Long, MtUnsupportedError, tl } from '@mtcute/core'
 
-import { Dialog, InputDialogFolder } from '../../types'
-import { normalizeDate } from '../../utils/misc-utils'
-import { _normalizeInputFolder } from './get-folders'
+import { Dialog, InputDialogFolder } from '../../types/index.js'
+import { normalizeDate } from '../../utils/misc-utils.js'
+import { _normalizeInputFolder } from './get-folders.js'
 
 /**
  * Iterate over dialogs.

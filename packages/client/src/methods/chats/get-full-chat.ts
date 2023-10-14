@@ -1,6 +1,6 @@
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 
-import { Chat, InputPeerLike } from '../../types'
+import { Chat, InputPeerLike } from '../../types/index.js'
 import {
     INVITE_LINK_REGEX,
     isInputPeerChannel,
@@ -8,8 +8,8 @@ import {
     isInputPeerUser,
     normalizeToInputChannel,
     normalizeToInputUser,
-} from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
+} from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 // @available=both
 /**

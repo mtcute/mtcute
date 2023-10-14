@@ -1,7 +1,7 @@
 import { BasicPeerType, getBarePeerId, MtUnsupportedError, tl, toggleChannelIdMark } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { TypingStatus } from '../peers'
+import { makeInspectable } from '../../utils/index.js'
+import { TypingStatus } from '../peers/index.js'
 
 /**
  * User's typing status has changed.

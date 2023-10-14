@@ -1,6 +1,6 @@
 import { MtcuteError } from '@mtcute/core'
 
-import { InputPeerLike } from './peers'
+import { InputPeerLike } from './peers/index.js'
 
 /**
  * Could not find a peer by the provided information

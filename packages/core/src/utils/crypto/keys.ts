@@ -1,10 +1,10 @@
 import Long from 'long'
 
-import keysIndex, { TlPublicKey } from '@mtcute/tl/binary/rsa-keys'
-import { TlBinaryWriter } from '@mtcute/tl-runtime'
+import { __publicKeyIndex as keysIndex, TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
+import { hexEncode, TlBinaryWriter } from '@mtcute/tl-runtime'
 
-import { parseAsn1, parsePemContents } from '../binary/asn1-parser'
-import { ICryptoProvider } from './abstract'
+import { parseAsn1, parsePemContents } from '../binary/asn1-parser.js'
+import { ICryptoProvider } from './abstract.js'
 
 /**
  * Parse PEM-encoded RSA public key information into modulus and exponent
@@ -27,11 +27,11 @@ export async function parsePublicKey(crypto: ICryptoProvider, key: string, old =
 
     const data = writer.result()
     const sha = await crypto.sha1(data)
-    const fp = sha.slice(-8).reverse().toString('hex')
+    const fp = hexEncode(sha.slice(-8).reverse())
 
     return {
-        modulus: modulus.toString('hex'),
-        exponent: exponent.toString('hex'),
+        modulus: hexEncode(modulus),
+        exponent: hexEncode(exponent),
         fingerprint: fp,
         old,
     }

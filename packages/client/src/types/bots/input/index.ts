@@ -1,2 +1,2 @@
-export * from './input-inline-message'
-export * from './input-inline-result'
+export * from './input-inline-message.js'
+export * from './input-inline-result.js'

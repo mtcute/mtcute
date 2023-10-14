@@ -3,10 +3,10 @@ import { connect, Socket } from 'net'
 
 import { tl } from '@mtcute/tl'
 
-import { MtcuteError } from '../../types'
-import { ICryptoProvider, Logger } from '../../utils'
-import { IPacketCodec, ITelegramTransport, TransportState } from './abstract'
-import { IntermediatePacketCodec } from './intermediate'
+import { MtcuteError } from '../../types/errors.js'
+import { ICryptoProvider, Logger } from '../../utils/index.js'
+import { IPacketCodec, ITelegramTransport, TransportState } from './abstract.js'
+import { IntermediatePacketCodec } from './intermediate.js'
 
 /**
  * Base for TCP transports.
@@ -115,7 +115,7 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
             .catch((err) => this.emit('error', err))
     }
 
-    async send(bytes: Buffer): Promise<void> {
+    async send(bytes: Uint8Array): Promise<void> {
         if (this._state !== TransportState.Ready) {
             throw new MtcuteError('Transport is not READY')
         }

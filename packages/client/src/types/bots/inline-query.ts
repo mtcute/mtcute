@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { Location } from '../media'
-import { PeersIndex, PeerType, User } from '../peers'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { Location } from '../media/location.js'
+import { PeersIndex, PeerType, User } from '../peers/index.js'
 
 const PEER_TYPE_MAP: Record<tl.TypeInlineQueryPeerType['_'], PeerType> = {
     inlineQueryPeerTypeBroadcast: 'channel',

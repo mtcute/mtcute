@@ -1,9 +1,9 @@
 import { BaseTelegramClient, getMarkedPeerId } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { InputPeerLike, Message, MessageReactions, PeersIndex } from '../../types'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, Message, MessageReactions, PeersIndex } from '../../types/index.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get reactions to messages by their IDs.

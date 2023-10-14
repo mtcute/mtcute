@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
-import { isInputPeerChat } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
+import { isInputPeerChat } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Delete a legacy group chat for all members

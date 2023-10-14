@@ -224,7 +224,7 @@ export namespace tdFileId {
         /**
          * File reference (if any)
          */
-        readonly fileReference: Buffer | null
+        readonly fileReference: Uint8Array | null
         /**
          * Context of the file location
          */

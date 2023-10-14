@@ -1,8 +1,8 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Fetches the menu button set for the given user.

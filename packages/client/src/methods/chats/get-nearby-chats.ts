@@ -1,8 +1,8 @@
 import { BaseTelegramClient, getMarkedPeerId, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { Chat } from '../../types'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { Chat } from '../../types/index.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
 
 /**
  * Get nearby chats

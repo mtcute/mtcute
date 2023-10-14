@@ -1,10 +1,10 @@
 import { assertNever, BaseTelegramClient, Long, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { ArrayWithTotal, ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types'
-import { makeArrayWithTotal } from '../../utils'
-import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { ArrayWithTotal, ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types/index.js'
+import { makeArrayWithTotal } from '../../utils/index.js'
+import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get a chunk of members of some chat.

@@ -2,12 +2,12 @@
 // This is a test for TypeScript typings
 // This file is never executed, only compiled
 
-import readerMap from '../binary/reader'
-import writerMap from '../binary/writer'
-import { tl } from '../'
+import { __tlReaderMap } from '../binary/reader.js'
+import { __tlWriterMap } from '../binary/writer.js'
+import { tl } from '../index.js'
 
-readerMap[0].call(null, null)
-writerMap['mt_message'].call(null, null, {})
+__tlReaderMap[0].call(null, null)
+__tlWriterMap['mt_message'].call(null, null, {})
 
 const error: tl.RpcError = tl.RpcError.create(400, 'BAD_REQUEST')
 

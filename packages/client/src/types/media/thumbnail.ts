@@ -1,11 +1,11 @@
 import { Long, MtArgumentError, MtTypeAssertionError, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
-import { makeInspectable } from '../../utils'
-import { inflateSvgPath, strippedPhotoToJpg, svgPathToFile } from '../../utils/file-utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { FileLocation } from '../files'
+import { inflateSvgPath, strippedPhotoToJpg, svgPathToFile } from '../../utils/file-utils.js'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { FileLocation } from '../files/index.js'
 
 /**
  * One size of some thumbnail
@@ -65,7 +65,7 @@ export class Thumbnail extends FileLocation {
                 throw new MtTypeAssertionError('sz', 'not (photoSizeEmpty | photoCachedSize)', sz._)
         }
 
-        let location: tl.TypeInputFileLocation | Buffer | (() => tl.TypeInputFileLocation | Buffer)
+        let location: tl.TypeInputFileLocation | Uint8Array | (() => tl.TypeInputFileLocation | Uint8Array)
         let size
         let width
         let height: number

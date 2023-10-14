@@ -1,12 +1,12 @@
 import { getMarkedPeerId, tl } from '@mtcute/core'
 
-import { assertTypeIsNot, hasValueAtKey, makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { MtMessageNotFoundError } from '../errors'
-import { Chat } from '../peers/chat'
-import { PeersIndex } from '../peers/peers-index'
-import { DraftMessage } from './draft-message'
-import { Message } from './message'
+import { assertTypeIsNot, hasValueAtKey, makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { MtMessageNotFoundError } from '../errors.js'
+import { Chat } from '../peers/chat.js'
+import { PeersIndex } from '../peers/peers-index.js'
+import { DraftMessage } from './draft-message.js'
+import { Message } from './message.js'
 
 /**
  * Type used as an input for a folder in client methods

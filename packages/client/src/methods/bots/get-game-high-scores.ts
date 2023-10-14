@@ -1,9 +1,9 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { GameHighScore, InputMessageId, InputPeerLike, normalizeInputMessageId, PeersIndex } from '../../types'
-import { normalizeInlineId } from '../../utils/inline-utils'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { GameHighScore, InputMessageId, InputPeerLike, normalizeInputMessageId, PeersIndex } from '../../types/index.js'
+import { normalizeInlineId } from '../../utils/inline-utils.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get high scores of a game

@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, InputStickerSet, normalizeInputStickerSet } from '../../types'
-import { normalizeToInputChannel } from '../../utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, InputStickerSet, normalizeInputStickerSet } from '../../types/index.js'
+import { normalizeToInputChannel } from '../../utils/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Set group sticker set for a supergroup

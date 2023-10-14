@@ -1,7 +1,8 @@
 import { assertNever, tl } from '@mtcute/core'
+import { utf8EncodeToBuffer } from '@mtcute/core/utils.js'
 
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { BotKeyboardBuilder } from './keyboard-builder'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { BotKeyboardBuilder } from './keyboard-builder.js'
 
 /**
  * Reply keyboard markup
@@ -208,14 +209,14 @@ export namespace BotKeyboard {
      */
     export function callback(
         text: string,
-        data: string | Buffer,
+        data: string | Uint8Array,
         requiresPassword?: boolean,
     ): tl.RawKeyboardButtonCallback {
         return {
             _: 'keyboardButtonCallback',
             text,
             requiresPassword,
-            data: typeof data === 'string' ? Buffer.from(data) : data,
+            data: typeof data === 'string' ? utf8EncodeToBuffer(data) : data,
         }
     }
 

@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { User } from '../../types'
-import { _onAuthorization } from './_state'
+import { User } from '../../types/index.js'
+import { _onAuthorization } from './_state.js'
 
 /**
  * Authorize a bot using its token issued by [@BotFather](//t.me/BotFather)

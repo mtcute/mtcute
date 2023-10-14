@@ -3,7 +3,7 @@
 // ^^ because of performance reasons
 import Long from 'long'
 
-import { LongSet } from './long-utils'
+import { LongSet } from './long-utils.js'
 
 interface OneWayLinkedList<T> {
     v: T

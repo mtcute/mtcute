@@ -1,30 +1,32 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { IntermediatePacketCodec, TransportError } from '../../src'
+import { hexDecodeToBuffer, hexEncode } from '@mtcute/tl-runtime'
+
+import { IntermediatePacketCodec, TransportError } from '../../src/index.js'
 
 describe('IntermediatePacketCodec', () => {
     it('should return correct tag', () => {
-        expect(new IntermediatePacketCodec().tag().toString('hex')).eq('eeeeeeee')
+        expect(hexEncode(new IntermediatePacketCodec().tag())).eq('eeeeeeee')
     })
 
     it('should correctly parse immediate framing', (done) => {
         const codec = new IntermediatePacketCodec()
-        codec.on('packet', (data: Buffer) => {
+        codec.on('packet', (data: Uint8Array) => {
             expect([...data]).eql([5, 1, 2, 3, 4])
             done()
         })
-        codec.feed(Buffer.from('050000000501020304', 'hex'))
+        codec.feed(hexDecodeToBuffer('050000000501020304'))
     })
 
     it('should correctly parse incomplete framing', (done) => {
         const codec = new IntermediatePacketCodec()
-        codec.on('packet', (data: Buffer) => {
+        codec.on('packet', (data: Uint8Array) => {
             expect([...data]).eql([5, 1, 2, 3, 4])
             done()
         })
-        codec.feed(Buffer.from('050000000501', 'hex'))
-        codec.feed(Buffer.from('020304', 'hex'))
+        codec.feed(hexDecodeToBuffer('050000000501'))
+        codec.feed(hexDecodeToBuffer('020304'))
     })
 
     it('should correctly parse multiple streamed packets', (done) => {
@@ -32,7 +34,7 @@ describe('IntermediatePacketCodec', () => {
 
         let number = 0
 
-        codec.on('packet', (data: Buffer) => {
+        codec.on('packet', (data: Uint8Array) => {
             if (number === 0) {
                 expect([...data]).eql([5, 1, 2, 3, 4])
                 number = 1
@@ -41,9 +43,9 @@ describe('IntermediatePacketCodec', () => {
                 done()
             }
         })
-        codec.feed(Buffer.from('050000000501', 'hex'))
-        codec.feed(Buffer.from('020304050000', 'hex'))
-        codec.feed(Buffer.from('000301020301', 'hex'))
+        codec.feed(hexDecodeToBuffer('050000000501'))
+        codec.feed(hexDecodeToBuffer('020304050000'))
+        codec.feed(hexDecodeToBuffer('000301020301'))
     })
 
     it('should correctly parse transport errors', (done) => {

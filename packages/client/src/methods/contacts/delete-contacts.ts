@@ -1,9 +1,9 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { InputPeerLike, MtInvalidPeerTypeError, User } from '../../types'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { resolvePeerMany } from '../users/resolve-peer-many'
+import { InputPeerLike, MtInvalidPeerTypeError, User } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
+import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**
  * Delete one or more contacts from your Telegram contacts list

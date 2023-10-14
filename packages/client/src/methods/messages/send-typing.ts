@@ -1,7 +1,7 @@
 import { assertNever, BaseTelegramClient, tl } from '@mtcute/core'
 
-import { InputPeerLike, TypingStatus } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, TypingStatus } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Sends a current user/bot typing event

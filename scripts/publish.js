@@ -88,10 +88,6 @@ function publishSinglePackage(name) {
             for (const f of fs.readdirSync(path.join(packageDir, '../crypto'))) {
                 fs.copyFileSync(path.join(packageDir, '../crypto', f), path.join(outDir, 'crypto', f))
             }
-
-            const nativeJs = fs.readFileSync(path.join(outDir, 'native.js'), 'utf8')
-
-            fs.writeFileSync(path.join(outDir, 'native.js'), nativeJs.replace(/'\.\.\/build/g, "'./build"))
         }
     }
 

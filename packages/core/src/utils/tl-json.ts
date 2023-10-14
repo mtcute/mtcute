@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
 
-import { MtArgumentError } from '../types'
+import { MtArgumentError } from '../types/errors.js'
 
 /**
  * Convert a JS object to TL JSON

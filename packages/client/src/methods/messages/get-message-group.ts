@@ -1,10 +1,10 @@
 import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
-import { isPresent } from '@mtcute/core/utils'
+import { isPresent } from '@mtcute/core/utils.js'
 
-import { InputMessageId, Message, normalizeInputMessageId } from '../../types'
-import { isInputPeerChannel } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { getMessages } from './get-messages'
+import { InputMessageId, Message, normalizeInputMessageId } from '../../types/index.js'
+import { isInputPeerChannel } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getMessages } from './get-messages.js'
 
 /**
  * Get all messages inside of a message group

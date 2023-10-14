@@ -1,8 +1,8 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { InputFileLike } from '../../types'
-import { _normalizeInputMedia } from './normalize-input-media'
+import { InputFileLike } from '../../types/index.js'
+import { _normalizeInputMedia } from './normalize-input-media.js'
 
 /**
  * @internal

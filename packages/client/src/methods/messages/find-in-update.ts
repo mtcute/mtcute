@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MtTypeAssertionError, tl } from '@mtcute/core'
 
-import { Message } from '../../types/messages'
-import { PeersIndex } from '../../types/peers'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { Message } from '../../types/messages/index.js'
+import { PeersIndex } from '../../types/peers/index.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
 
 /** @internal */
 export function _findMessageInUpdate(

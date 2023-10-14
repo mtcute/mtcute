@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, InputReaction, normalizeInputReaction } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, InputReaction, normalizeInputReaction } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Send (or remove) a reaction to a story

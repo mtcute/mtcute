@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 
-import { FormattedString } from '../../types'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { getParseModesState } from '../parse-modes/_state'
-import { resolvePeer } from '../users/resolve-peer'
+import { FormattedString } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { getParseModesState } from '../parse-modes/_state.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 const empty: [string, undefined] = ['', undefined]
 

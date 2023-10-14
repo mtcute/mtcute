@@ -1,7 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
+import { concatBuffers } from '@mtcute/core/utils.js'
 
-import { FileDownloadParameters, FileLocation } from '../../types'
-import { downloadAsIterable } from './download-iterable'
+import { FileDownloadParameters, FileLocation } from '../../types/index.js'
+import { downloadAsIterable } from './download-iterable.js'
 
 /**
  * Download a file and return its contents as a Buffer.
@@ -11,8 +12,11 @@ import { downloadAsIterable } from './download-iterable'
  *
  * @param params  File download parameters
  */
-export async function downloadAsBuffer(client: BaseTelegramClient, params: FileDownloadParameters): Promise<Buffer> {
-    if (params.location instanceof FileLocation && Buffer.isBuffer(params.location.location)) {
+export async function downloadAsBuffer(
+    client: BaseTelegramClient,
+    params: FileDownloadParameters,
+): Promise<Uint8Array> {
+    if (params.location instanceof FileLocation && ArrayBuffer.isView(params.location.location)) {
         return params.location.location
     }
 
@@ -22,5 +26,5 @@ export async function downloadAsBuffer(client: BaseTelegramClient, params: FileD
         chunks.push(chunk)
     }
 
-    return Buffer.concat(chunks)
+    return concatBuffers(chunks)
 }

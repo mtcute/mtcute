@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { ArrayPaginated, InputPeerLike, PeersIndex, Story } from '../../types'
-import { makeArrayPaginated } from '../../utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { ArrayPaginated, InputPeerLike, PeersIndex, Story } from '../../types/index.js'
+import { makeArrayPaginated } from '../../utils/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get profile stories

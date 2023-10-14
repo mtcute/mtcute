@@ -1,12 +1,12 @@
 import { getMarkedPeerId, tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { Chat } from '../peers/chat'
-import { ChatInviteLink } from '../peers/chat-invite-link'
-import { ChatMember } from '../peers/chat-member'
-import { PeersIndex } from '../peers/peers-index'
-import { User } from '../peers/user'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { Chat } from '../peers/chat.js'
+import { ChatInviteLink } from '../peers/chat-invite-link.js'
+import { ChatMember } from '../peers/chat-member.js'
+import { PeersIndex } from '../peers/peers-index.js'
+import { User } from '../peers/user.js'
 
 /**
  * Type of the event. Can be one of:

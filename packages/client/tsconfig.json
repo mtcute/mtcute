@@ -1,13 +1,13 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
-        "outDir": "./dist",
+        "outDir": "./dist/esm",
+        "rootDir": "./src"
     },
     "include": [
         "./src",
-        "./tests",
-        "./utils.ts"
+    ],
+    "references": [
+        { "path": "../core" }
     ]
 }

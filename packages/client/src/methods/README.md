@@ -24,7 +24,7 @@ Example:
 
 ```typescript
 // @copy
-import { Something } from '../../somewhere'
+import { Something } from '../../somewhere.js'
 
 // @copy
 interface SomeGreatInterface { ... }

@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MtTypeAssertionError } from '@mtcute/core'
 
-import { InputMessageId, Message, normalizeInputMessageId } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
-import { _findMessageInUpdate } from './find-in-update'
+import { InputMessageId, Message, normalizeInputMessageId } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { _findMessageInUpdate } from './find-in-update.js'
 
 /**
  * Pin a message in a group, supergroup, channel or PM.

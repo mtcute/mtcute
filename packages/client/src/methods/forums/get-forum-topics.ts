@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { ArrayPaginated, ForumTopic, InputPeerLike } from '../../types'
-import { makeArrayPaginated } from '../../utils'
-import { normalizeToInputChannel } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { ArrayPaginated, ForumTopic, InputPeerLike } from '../../types/index.js'
+import { makeArrayPaginated } from '../../utils/index.js'
+import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 // @exported
 export interface GetForumTopicsOffset {

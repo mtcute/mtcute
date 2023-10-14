@@ -1,11 +1,11 @@
 import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 
-import { ChatEvent, InputPeerLike } from '../../types'
-import { normalizeChatEventFilters } from '../../types/peers/chat-event/filters'
-import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { resolvePeerMany } from '../users/resolve-peer-many'
-import { getChatEventLog } from './get-chat-event-log'
+import { ChatEvent, InputPeerLike } from '../../types/index.js'
+import { normalizeChatEventFilters } from '../../types/peers/chat-event/filters.js'
+import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { resolvePeerMany } from '../users/resolve-peer-many.js'
+import { getChatEventLog } from './get-chat-event-log.js'
 
 /**
  * Iterate over chat event log.

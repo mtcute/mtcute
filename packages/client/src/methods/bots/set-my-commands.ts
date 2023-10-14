@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { BotCommands } from '../../types'
-import { _normalizeCommandScope } from './normalize-command-scope'
+import { BotCommands } from '../../types/index.js'
+import { _normalizeCommandScope } from './normalize-command-scope.js'
 
 /**
  * Set or delete commands for the current bot and the given scope

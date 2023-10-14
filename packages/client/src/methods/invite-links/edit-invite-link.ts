@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
-import { normalizeDate } from '../../utils/misc-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types/index.js'
+import { normalizeDate } from '../../utils/misc-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Edit an invite link. You can only edit non-primary

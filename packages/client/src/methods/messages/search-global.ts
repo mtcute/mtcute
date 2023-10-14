@@ -1,8 +1,8 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
-import { assertTypeIsNot } from '@mtcute/core/utils'
+import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
-import { ArrayPaginated, Message, PeersIndex, SearchFilters } from '../../types'
-import { makeArrayPaginated, normalizeDate } from '../../utils'
+import { ArrayPaginated, Message, PeersIndex, SearchFilters } from '../../types/index.js'
+import { makeArrayPaginated, normalizeDate } from '../../utils/index.js'
 
 // @exported
 export interface SearchGlobalOffset {

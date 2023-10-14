@@ -1,7 +1,9 @@
+/* eslint-disable no-restricted-globals */
+// todo fixme
 import bigInt, { BigInteger } from 'big-integer'
 
 import { IPacketCodec, WrappedCodec } from '@mtcute/core'
-import { bigIntToBuffer, bufferToBigInt, ICryptoProvider, randomBytes } from '@mtcute/core/utils'
+import { bigIntToBuffer, bufferToBigInt, ICryptoProvider, randomBytes } from '@mtcute/core/utils.js'
 
 const MAX_TLS_PACKET_LENGTH = 2878
 const TLS_FIRST_PREFIX = Buffer.from('140303000101', 'hex')
@@ -158,7 +160,7 @@ function initGrease(size: number): Buffer {
         }
     }
 
-    return buf
+    return Buffer.from(buf)
 }
 
 class TlsHelloWriter implements TlsOperationHandler {
@@ -180,7 +182,7 @@ class TlsHelloWriter implements TlsOperationHandler {
     }
 
     random(size: number) {
-        this.string(randomBytes(size))
+        this.string(Buffer.from(randomBytes(size)))
     }
 
     zero(size: number) {
@@ -210,7 +212,7 @@ class TlsHelloWriter implements TlsOperationHandler {
                 }
 
                 const key = bigIntToBuffer(x, 32, true)
-                this.string(key)
+                this.string(Buffer.from(key))
 
                 return
             }
@@ -243,7 +245,7 @@ class TlsHelloWriter implements TlsOperationHandler {
         this.zero(padSize)
         this.endScope()
 
-        const hash = await crypto.hmacSha256(this.buf, secret)
+        const hash = Buffer.from(await crypto.hmacSha256(this.buf, secret))
 
         const old = hash.readInt32LE(28)
         hash.writeInt32LE(old ^ unixTime, 28)
@@ -277,7 +279,7 @@ export class FakeTlsPacketCodec extends WrappedCodec implements IPacketCodec {
     private _isFirstTls = true
 
     async tag(): Promise<Buffer> {
-        this._header = await this._inner.tag()
+        this._header = Buffer.from(await this._inner.tag())
 
         return Buffer.alloc(0)
     }
@@ -301,7 +303,7 @@ export class FakeTlsPacketCodec extends WrappedCodec implements IPacketCodec {
     }
 
     async encode(packet: Buffer): Promise<Buffer> {
-        packet = await this._inner.encode(packet)
+        packet = Buffer.from(await this._inner.encode(packet))
 
         if (packet.length + this._header.length > MAX_TLS_PACKET_LENGTH) {
             const ret: Buffer[] = []

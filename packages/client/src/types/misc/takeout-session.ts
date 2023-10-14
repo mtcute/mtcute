@@ -1,6 +1,6 @@
 import { BaseTelegramClient, MustEqual, RpcCallOptions, tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
+import { makeInspectable } from '../../utils/index.js'
 
 /**
  * Account takeout session

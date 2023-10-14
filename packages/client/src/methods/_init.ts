@@ -2,13 +2,13 @@
 
 import { BaseTelegramClientOptions } from '@mtcute/core'
 
-import { TelegramClient } from '../client'
+import { TelegramClient } from '../client.js'
 // @copy
-import { Conversation } from '../types/conversation'
+import { Conversation } from '../types/conversation.js'
 // @copy
-import { start } from './auth/start'
+import { start } from './auth/start.js'
 // @copy
-import { enableUpdatesProcessing, makeParsedUpdateHandler, ParsedUpdateHandlerParams } from './updates'
+import { enableUpdatesProcessing, makeParsedUpdateHandler, ParsedUpdateHandlerParams } from './updates/index.js'
 
 // @copy
 interface TelegramClientOptions extends BaseTelegramClientOptions {

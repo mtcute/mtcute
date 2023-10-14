@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { Dialog } from '../../types/messages/dialog'
-import { InputPeerLike } from '../../types/peers'
-import { resolvePeerMany } from '../users/resolve-peer-many'
+import { Dialog } from '../../types/messages/dialog.js'
+import { InputPeerLike } from '../../types/peers/index.js'
+import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**
  * Get dialogs with certain peers.

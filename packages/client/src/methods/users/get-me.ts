@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { User } from '../../types'
-import { getAuthState } from '../auth/_state'
+import { User } from '../../types/index.js'
+import { getAuthState } from '../auth/_state.js'
 
 /**
  * Get currently authorized user's full information

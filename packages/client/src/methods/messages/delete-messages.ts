@@ -1,10 +1,10 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { InputPeerLike, Message } from '../../types'
-import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils'
-import { createDummyUpdate } from '../../utils/updates-utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { deleteScheduledMessages } from './delete-scheduled-messages'
+import { InputPeerLike, Message } from '../../types/index.js'
+import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { createDummyUpdate } from '../../utils/updates-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { deleteScheduledMessages } from './delete-scheduled-messages.js'
 
 // @exported
 export interface DeleteMessagesParams {

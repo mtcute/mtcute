@@ -1,4 +1,4 @@
-import { Deque } from './deque'
+import { Deque } from './deque.js'
 
 type LockInfo = [Promise<void>, () => void]
 

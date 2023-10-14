@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { InputPeerLike, PeersIndex, StoryInteractions } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, PeersIndex, StoryInteractions } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get brief information about stories interactions.

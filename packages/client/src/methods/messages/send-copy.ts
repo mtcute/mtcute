@@ -1,11 +1,11 @@
 import { BaseTelegramClient, getMarkedPeerId, MtArgumentError, tl } from '@mtcute/core'
 
-import { FormattedString, InputPeerLike, Message, MtMessageNotFoundError, ReplyMarkup } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
-import { getMessages } from './get-messages'
-import { CommonSendParams } from './send-common'
-import { sendMedia } from './send-media'
-import { sendText } from './send-text'
+import { FormattedString, InputPeerLike, Message, MtMessageNotFoundError, ReplyMarkup } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getMessages } from './get-messages.js'
+import { CommonSendParams } from './send-common.js'
+import { sendMedia } from './send-media.js'
+import { sendText } from './send-text.js'
 
 // @exported
 export interface SendCopyParams extends CommonSendParams {

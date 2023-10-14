@@ -1,6 +1,6 @@
 import { getMarkedPeerId, tl, toggleChannelIdMark } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
+import { makeInspectable } from '../../utils/index.js'
 
 export class HistoryReadUpdate {
     constructor(

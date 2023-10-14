@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
-import { Chat, PeersIndex, User } from '../../types/peers'
-import { Story } from '../../types/stories'
-import { assertTypeIs, makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
+import { Chat, PeersIndex, User } from '../../types/peers/index.js'
+import { Story } from '../../types/stories/index.js'
+import { assertTypeIs, makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
 
 /**
  * A story was posted or edited

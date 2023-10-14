@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Save or delete a draft message associated with some chat

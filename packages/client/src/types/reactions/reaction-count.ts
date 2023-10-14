@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { ReactionEmoji, toReactionEmoji } from './types'
+import { makeInspectable } from '../../utils/index.js'
+import { ReactionEmoji, toReactionEmoji } from './types.js'
 
 /**
  * Reaction count

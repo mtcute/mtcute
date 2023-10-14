@@ -1,12 +1,6 @@
-import type * as clientNs from '@mtcute/client'
+import type * as dispatcherNs from '@mtcute/dispatcher'
 
-import { I18nStrings, I18nValue } from './types'
-
-let client: typeof clientNs
-
-try {
-    client = require('@mtcute/client') as typeof clientNs
-} catch (e) {}
+import { I18nStrings, I18nValue } from './types.js'
 
 /**
  * Create an index of i18n strings delimited by "."
@@ -34,38 +28,32 @@ export function createI18nStringsIndex(strings: I18nStrings): Record<string, I18
 }
 
 /**
- * Extract language from `@mtcute/client` update. Can be used for customized
- * adapters or external i18n libraries.
+ * Extract language from `@mtcute/dispatcher` context.
+ * Can be used for customized adapters or external i18n libraries.
  *
  * @param update  Update to extract language from
  */
-export function extractLanguageFromUpdate(update: clientNs.ParsedUpdate['data']): string | null | undefined {
-    if (!client) {
-        throw new Error('@mtcute/client is not installed, you must provide your own adapter')
-    }
+export function extractLanguageFromUpdate(update: dispatcherNs.UpdateContextType): string | null | undefined {
+    if (!('_name' in update)) return null
 
-    switch (update.constructor) {
-        case client.Message:
-            // if sender is Chat it will just be undefined
-            return ((update as clientNs.Message).sender as clientNs.User).language
-        case client.PollVoteUpdate:
-            // if peer is Chat it will just be undefined
-            return ((update as clientNs.PollVoteUpdate).peer as clientNs.User).language
-        case client.ChatMemberUpdate:
-        case client.InlineQuery:
-        case client.ChosenInlineResult:
-        case client.CallbackQuery:
-        case client.BotStoppedUpdate:
-        case client.BotChatJoinRequestUpdate:
-            return (
-                update as
-                    | clientNs.ChatMemberUpdate
-                    | clientNs.InlineQuery
-                    | clientNs.ChosenInlineResult
-                    | clientNs.CallbackQuery
-                    | clientNs.BotStoppedUpdate
-                    | clientNs.BotChatJoinRequestUpdate
-            ).user.language
+    switch (update._name) {
+        case 'new_message': {
+            const { sender } = update
+
+            return sender.type === 'user' ? sender.language : null
+        }
+        case 'poll_vote': {
+            const { peer } = update
+
+            return peer?.type === 'user' ? peer.language : null
+        }
+        case 'chat_member':
+        case 'inline_query':
+        case 'chosen_inline_result':
+        case 'callback_query':
+        case 'bot_stopped':
+        case 'bot_chat_join_request':
+            return update.user.language
     }
 
     return null

@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { describe } from 'mocha'
 
-import { parseFileId, toUniqueFileId } from '../src'
+import { parseFileId, toUniqueFileId } from '../src/index.js'
 
 // test file IDs are partially taken from https://github.com/luckydonald/telegram_file_id
 

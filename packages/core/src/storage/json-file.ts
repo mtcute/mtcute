@@ -1,12 +1,16 @@
 import type * as fsNs from 'fs'
+import { createRequire } from 'module'
 
-import { MtUnsupportedError } from '../types'
-import { JsonMemoryStorage } from './json'
+import { MtUnsupportedError } from '../types/index.js'
+import { JsonMemoryStorage } from './json.js'
 
 type fs = typeof fsNs
 let fs: fs | null = null
 
 try {
+    // @only-if-esm
+    const require = createRequire(import.meta.url)
+    // @/only-if-esm
     fs = require('fs') as fs
 } catch (e) {}
 

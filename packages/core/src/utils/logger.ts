@@ -1,4 +1,6 @@
-import { _defaultLoggingHandler } from './platform/logging'
+import { hexEncode } from '@mtcute/tl-runtime'
+
+import { _defaultLoggingHandler } from './platform/logging.js'
 
 let defaultLogLevel = 2
 
@@ -76,7 +78,7 @@ export class Logger {
                     args.splice(idx, 1)
 
                     if (m === '%h') {
-                        if (Buffer.isBuffer(val)) return val.toString('hex')
+                        if (ArrayBuffer.isView(val)) return hexEncode(val as Uint8Array)
                         if (typeof val === 'number') return val.toString(16)
 
                         return String(val)
@@ -89,8 +91,12 @@ export class Logger {
                         }
 
                         return JSON.stringify(val, (k, v) => {
-                            if (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data)) {
-                                let str = Buffer.from(v.data as number[]).toString('base64')
+                            if (
+                                ArrayBuffer.isView(v) ||
+                                (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data))
+                            ) {
+                                // eslint-disable-next-line no-restricted-globals
+                                let str = v.data ? Buffer.from(v.data as number[]).toString('hex') : hexEncode(v)
 
                                 if (str.length > 300) {
                                     str = str.slice(0, 300) + '...'

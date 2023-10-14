@@ -35,6 +35,4 @@ export interface TlPublicKey {
  */
 type TlPublicKeyIndex = Record<string, TlPublicKey>
 
-declare const __publicKeyIndex: TlPublicKeyIndex
-// eslint-disable-next-line import/no-default-export
-export default __publicKeyIndex
+export const __publicKeyIndex: TlPublicKeyIndex

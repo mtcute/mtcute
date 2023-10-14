@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { resolvePeerMany } from '../users/resolve-peer-many'
+import { InputPeerLike } from '../../types/index.js'
+import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**
  * Archive one or more chats

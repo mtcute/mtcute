@@ -1,5 +1,7 @@
 import { MtArgumentError } from '@mtcute/core'
 
+import { concatBuffers, hexDecodeToBuffer, utf8EncodeToBuffer } from './index.js'
+
 /**
  * Given file size, determine the appropriate chunk size (in KB)
  * for upload/download operations.
@@ -15,7 +17,7 @@ export function determinePartSize(fileSize: number): number {
 /**
  * Returns `true` if all bytes in `buf` are printable ASCII characters
  */
-export function isProbablyPlainText(buf: Buffer): boolean {
+export function isProbablyPlainText(buf: Uint8Array): boolean {
     return !buf.some(
         (it) =>
             !(
@@ -30,7 +32,7 @@ export function isProbablyPlainText(buf: Buffer): boolean {
 }
 
 // from https://github.com/telegramdesktop/tdesktop/blob/bec39d89e19670eb436dc794a8f20b657cb87c71/Telegram/SourceFiles/ui/image/image.cpp#L225
-const JPEG_HEADER = Buffer.from(
+const JPEG_HEADER = hexDecodeToBuffer(
     'ffd8ffe000104a46494600010100000100010000ffdb004300281c1e231e1928' +
         '2321232d2b28303c64413c37373c7b585d4964918099968f808c8aa0b4e6c3a0aad' +
         'aad8a8cc8ffcbdaeef5ffffff9bc1fffffffaffe6fdfff8ffdb0043012b2d2d3c35' +
@@ -50,19 +52,18 @@ const JPEG_HEADER = Buffer.from(
         '8797a82838485868788898a92939495969798999aa2a3a4a5a6a7a8a9aab2b3b4b5' +
         'b6b7b8b9bac2c3c4c5c6c7c8c9cad2d3d4d5d6d7d8d9dae2e3e4e5e6e7e8e9eaf2f' +
         '3f4f5f6f7f8f9faffda000c03010002110311003f00',
-    'hex',
 )
-const JPEG_FOOTER = Buffer.from('ffd9', 'hex')
+const JPEG_FOOTER = new Uint8Array([0xff, 0xd9])
 
 /**
  * Convert stripped JPEG (from `photoStrippedSize`) to full JPEG
  */
-export function strippedPhotoToJpg(stripped: Buffer): Buffer {
+export function strippedPhotoToJpg(stripped: Uint8Array): Uint8Array {
     if (stripped.length < 3 || stripped[0] !== 1) {
         return stripped
     }
 
-    const result = Buffer.concat([JPEG_HEADER, stripped.slice(3), JPEG_FOOTER])
+    const result = concatBuffers([JPEG_HEADER, stripped.slice(3), JPEG_FOOTER])
     result[164] = stripped[1]
     result[166] = stripped[2]
 
@@ -75,7 +76,7 @@ const SVG_LOOKUP = 'AACAAAAHAAALMAAAQASTAVAAAZaacaaaahaaalmaaaqastava.az01234567
  * Inflate compressed preview SVG path to full SVG path
  * @param encoded
  */
-export function inflateSvgPath(encoded: Buffer): string {
+export function inflateSvgPath(encoded: Uint8Array): string {
     let path = 'M'
     const len = encoded.length
 
@@ -103,8 +104,8 @@ export function inflateSvgPath(encoded: Buffer): string {
  * Convert SVG path to SVG file
  * @param path
  */
-export function svgPathToFile(path: string): Buffer {
-    return Buffer.from(
+export function svgPathToFile(path: string): Uint8Array {
+    return utf8EncodeToBuffer(
         '<?xml version="1.0" encoding="utf-8"?>' +
             '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"' +
             'viewBox="0 0 512 512" xml:space="preserve">' +

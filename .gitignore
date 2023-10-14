@@ -11,3 +11,5 @@ private/
 
 docs/*
 !docs/.nojekyll
+
+*.tsbuildinfo

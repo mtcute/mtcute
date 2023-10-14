@@ -1,6 +1,6 @@
 import { assertNever, MaybeArray, tl } from '@mtcute/core'
 
-import { ChatAction } from './actions'
+import { ChatAction } from './actions.js'
 
 export interface ChatEventFilters {
     serverFilter?: tl.TypeChannelAdminLogEventsFilter

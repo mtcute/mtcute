@@ -1,23 +1,24 @@
-import { randomBytes } from '../../utils'
-import { IPacketCodec, TransportError } from './abstract'
-import { StreamedCodec } from './streamed'
+import { dataViewFromBuffer, randomBytes } from '../../utils/index.js'
+import { IPacketCodec, TransportError } from './abstract.js'
+import { StreamedCodec } from './streamed.js'
 
-const TAG = Buffer.from([0xee, 0xee, 0xee, 0xee])
-const PADDED_TAG = Buffer.from([0xdd, 0xdd, 0xdd, 0xdd])
+const TAG = new Uint8Array([0xee, 0xee, 0xee, 0xee])
+const PADDED_TAG = new Uint8Array([0xdd, 0xdd, 0xdd, 0xdd])
 
 /**
  * Intermediate packet codec.
  * See https://core.telegram.org/mtproto/mtproto-transports#intermediate
  */
 export class IntermediatePacketCodec extends StreamedCodec implements IPacketCodec {
-    tag(): Buffer {
+    tag(): Uint8Array {
         return TAG
     }
 
-    encode(packet: Buffer): Buffer {
-        const ret = Buffer.alloc(packet.length + 4)
-        ret.writeUInt32LE(packet.length)
-        packet.copy(ret, 4)
+    encode(packet: Uint8Array): Uint8Array {
+        const ret = new Uint8Array(packet.length + 4)
+        const dv = dataViewFromBuffer(ret)
+        dv.setUint32(0, packet.length, true)
+        ret.set(packet, 4)
 
         return ret
     }
@@ -27,18 +28,19 @@ export class IntermediatePacketCodec extends StreamedCodec implements IPacketCod
     }
 
     protected _handlePacket(): boolean {
-        const payloadLength = this._stream.readUInt32LE(0)
+        const dv = dataViewFromBuffer(this._stream)
+        const payloadLength = dv.getUint32(0, true)
 
         if (payloadLength <= this._stream.length - 4) {
             if (payloadLength === 4) {
-                const code = this._stream.readInt32LE(4) * -1
+                const code = dv.getInt32(4, true) * -1
                 this.emit('error', new TransportError(code))
             } else {
-                const payload = this._stream.slice(4, payloadLength + 4)
+                const payload = this._stream.subarray(4, payloadLength + 4)
                 this.emit('packet', payload)
             }
 
-            this._stream = this._stream.slice(payloadLength + 4)
+            this._stream = this._stream.subarray(payloadLength + 4)
 
             return true
         }
@@ -52,19 +54,20 @@ export class IntermediatePacketCodec extends StreamedCodec implements IPacketCod
  * See https://core.telegram.org/mtproto/mtproto-transports#padded-intermediate
  */
 export class PaddedIntermediatePacketCodec extends IntermediatePacketCodec {
-    tag(): Buffer {
+    tag(): Uint8Array {
         return PADDED_TAG
     }
 
-    encode(packet: Buffer): Buffer {
+    encode(packet: Uint8Array): Uint8Array {
         // padding size, 0-15
         const padSize = Math.floor(Math.random() * 16)
         const padding = randomBytes(padSize)
 
-        const ret = Buffer.alloc(packet.length + 4 + padSize)
-        ret.writeUInt32LE(packet.length + padSize)
-        packet.copy(ret, 4)
-        padding.copy(ret, 4 + ret.length)
+        const ret = new Uint8Array(packet.length + 4 + padSize)
+        const dv = dataViewFromBuffer(ret)
+        dv.setUint32(0, packet.length + padSize, true)
+        ret.set(packet, 4)
+        ret.set(padding, 4 + packet.length)
 
         return ret
     }

@@ -1,10 +1,10 @@
 import { BaseTelegramClient, Long, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { ArrayPaginated, InputPeerLike, Photo } from '../../types'
-import { makeArrayPaginated } from '../../utils'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { resolvePeer } from './resolve-peer'
+import { ArrayPaginated, InputPeerLike, Photo } from '../../types/index.js'
+import { makeArrayPaginated } from '../../utils/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { resolvePeer } from './resolve-peer.js'
 
 /**
  * Get a list of profile pictures of a user

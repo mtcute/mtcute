@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
+import { makeInspectable } from '../../utils/index.js'
 
 export class StoriesStealthMode {
     constructor(readonly raw: tl.RawStoriesStealthMode) {}

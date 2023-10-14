@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { ArrayPaginated, ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
-import { makeArrayPaginated } from '../../utils'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { ArrayPaginated, ChatInviteLink, InputPeerLike, PeersIndex } from '../../types/index.js'
+import { makeArrayPaginated } from '../../utils/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 // @exported
 export interface GetInviteLinksOffset {

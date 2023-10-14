@@ -1,9 +1,9 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { Chat, InputPeerLike } from '../../types'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { resolvePeerMany } from '../users/resolve-peer-many'
+import { Chat, InputPeerLike } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
+import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**
  * Create a legacy group chat

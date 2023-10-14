@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 const { types, toSentence, replaceSections, formatFile } = require('../../client/scripts/generate-updates')
 
 function generateHandler() {
@@ -96,7 +97,7 @@ ${
                     .sort()
                     .map((i) => `    ${i},\n`)
                     .join('') +
-                "} from './handler'",
+                "} from './handler.js'",
         },
         __dirname,
     )

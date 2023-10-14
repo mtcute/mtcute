@@ -1,8 +1,8 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
-import { computeSrpParams } from '@mtcute/core/utils'
+import { computeSrpParams, utf8EncodeToBuffer } from '@mtcute/core/utils.js'
 
-import { InputPeerLike } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Request a callback answer from a bot,
@@ -20,7 +20,7 @@ export async function getCallbackAnswer(
         message: number
 
         /** Data contained in the button */
-        data: string | Buffer
+        data: string | Uint8Array
 
         /**
          * Timeout for the query in ms.
@@ -57,7 +57,7 @@ export async function getCallbackAnswer(
             _: 'messages.getBotCallbackAnswer',
             peer: await resolvePeer(client, chatId),
             msgId: message,
-            data: typeof data === 'string' ? Buffer.from(data) : data,
+            data: typeof data === 'string' ? utf8EncodeToBuffer(data) : data,
             password,
             game: game,
         },

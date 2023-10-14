@@ -1,16 +1,16 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
-import { randomLong } from '@mtcute/core/utils'
+import { randomLong } from '@mtcute/core/utils.js'
 
-import { InputMediaLike } from '../../types/media/input-media'
-import { Message } from '../../types/messages/message'
-import { InputPeerLike, PeersIndex } from '../../types/peers'
-import { normalizeDate } from '../../utils/misc-utils'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { _normalizeInputMedia } from '../files/normalize-input-media'
-import { resolvePeer } from '../users/resolve-peer'
-import { _getDiscussionMessage } from './get-discussion-message'
-import { _parseEntities } from './parse-entities'
-import { _processCommonSendParameters, CommonSendParams } from './send-common'
+import { InputMediaLike } from '../../types/media/input-media.js'
+import { Message } from '../../types/messages/message.js'
+import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
+import { normalizeDate } from '../../utils/misc-utils.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
+import { _normalizeInputMedia } from '../files/normalize-input-media.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { _getDiscussionMessage } from './get-discussion-message.js'
+import { _parseEntities } from './parse-entities.js'
+import { _processCommonSendParameters, CommonSendParams } from './send-common.js'
 
 /**
  * Send a group of media.

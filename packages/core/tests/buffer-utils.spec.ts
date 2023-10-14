@@ -1,77 +1,77 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
+import { hexEncode, utf8Decode, utf8EncodeToBuffer } from '@mtcute/tl-runtime'
+
 import {
     buffersEqual,
-    cloneBuffer,
-    encodeUrlSafeBase64,
-    parseUrlSafeBase64,
+    cloneBuffer, concatBuffers,
     randomBytes,
-} from '../src/utils/buffer-utils'
-import { xorBuffer, xorBufferInPlace } from '../src/utils/crypto/utils'
+} from '../src/utils/buffer-utils.js'
+import { xorBuffer, xorBufferInPlace } from '../src/utils/crypto/utils.js'
 
 describe('buffersEqual', () => {
     it('should return true for equal buffers', () => {
-        expect(buffersEqual(Buffer.from([]), Buffer.from([]))).is.true
-        expect(buffersEqual(Buffer.from([1, 2, 3]), Buffer.from([1, 2, 3]))).is.true
+        expect(buffersEqual(new Uint8Array([]), new Uint8Array([]))).is.true
+        expect(buffersEqual(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3]))).is.true
     })
 
     it('should return false for non-equal buffers', () => {
-        expect(buffersEqual(Buffer.from([1]), Buffer.from([]))).is.false
-        expect(buffersEqual(Buffer.from([1, 2, 3]), Buffer.from([1, 2, 4]))).is.false
+        expect(buffersEqual(new Uint8Array([1]), new Uint8Array([]))).is.false
+        expect(buffersEqual(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 4]))).is.false
     })
 })
 
 describe('xorBuffer', () => {
     it('should xor buffers without modifying original', () => {
-        const data = Buffer.from('hello')
-        const key = Buffer.from('xor')
+        const data = utf8EncodeToBuffer('hello')
+        const key = utf8EncodeToBuffer('xor')
 
         const xored = xorBuffer(data, key)
         expect(data.toString()).eq('hello')
         expect(key.toString()).eq('xor')
-        expect(xored.toString('hex')).eq('100a1e6c6f')
+        expect(hexEncode(xored)).eq('100a1e6c6f')
     })
 
     it('should be deterministic', () => {
-        const data = Buffer.from('hello')
-        const key = Buffer.from('xor')
+        const data = utf8EncodeToBuffer('hello')
+        const key = utf8EncodeToBuffer('xor')
 
         const xored1 = xorBuffer(data, key)
-        expect(xored1.toString('hex')).eq('100a1e6c6f')
+        expect(hexEncode(xored1)).eq('100a1e6c6f')
 
         const xored2 = xorBuffer(data, key)
-        expect(xored2.toString('hex')).eq('100a1e6c6f')
+        expect(hexEncode(xored2)).eq('100a1e6c6f')
     })
 
     it('second call should decode content', () => {
-        const data = Buffer.from('hello')
-        const key = Buffer.from('xor')
+        const data = utf8EncodeToBuffer('hello')
+        const key = utf8EncodeToBuffer('xor')
 
         const xored1 = xorBuffer(data, key)
-        expect(xored1.toString('hex')).eq('100a1e6c6f')
+        expect(hexEncode(xored1)).eq('100a1e6c6f')
 
         const xored2 = xorBuffer(xored1, key)
-        expect(xored2.toString()).eq('hello')
+        expect(utf8Decode(xored2)).eq('hello')
     })
 })
 
 describe('xorBufferInPlace', () => {
     it('should xor buffers by modifying original', () => {
-        const data = Buffer.from('hello')
-        const key = Buffer.from('xor')
+        const data = utf8EncodeToBuffer('hello')
+        const key = utf8EncodeToBuffer('xor')
 
         xorBufferInPlace(data, key)
-        expect(data.toString('hex')).eq('100a1e6c6f')
+        expect(hexEncode(data)).eq('100a1e6c6f')
         expect(key.toString()).eq('xor')
     })
 
     it('second call should decode content', () => {
-        const data = Buffer.from('hello')
-        const key = Buffer.from('xor')
+        const data = utf8EncodeToBuffer('hello')
+        const key = utf8EncodeToBuffer('xor')
 
         xorBufferInPlace(data, key)
-        expect(data.toString('hex')).eq('100a1e6c6f')
+        expect(hexEncode(data)).eq('100a1e6c6f')
 
         xorBufferInPlace(data, key)
         expect(data.toString()).eq('hello')
@@ -93,7 +93,7 @@ describe('randomBytes', () => {
 
 describe('cloneBuffer', () => {
     it('should clone buffer', () => {
-        const orig = Buffer.from([1, 2, 3])
+        const orig = new Uint8Array([1, 2, 3])
         const copy = cloneBuffer(orig)
 
         expect([...copy]).eql([1, 2, 3])
@@ -102,7 +102,7 @@ describe('cloneBuffer', () => {
     })
 
     it('should clone buffer partially', () => {
-        const orig = Buffer.from([1, 2, 3, 4, 5])
+        const orig = new Uint8Array([1, 2, 3, 4, 5])
         const copy = cloneBuffer(orig, 1, 4)
 
         expect([...copy]).eql([2, 3, 4])
@@ -111,17 +111,22 @@ describe('cloneBuffer', () => {
     })
 })
 
-describe('parseUrlSafeBase64', () => {
-    it('should parse url-safe base64', () => {
-        expect(parseUrlSafeBase64('qu7d8aGTeuF6-g').toString('hex')).eq('aaeeddf1a1937ae17afa')
-    })
-    it('should parse normal base64', () => {
-        expect(parseUrlSafeBase64('qu7d8aGTeuF6+g==').toString('hex')).eq('aaeeddf1a1937ae17afa')
-    })
-})
+describe('concatBuffers', () => {
+    it('should concat buffers', () => {
+        const buf = concatBuffers([
+            new Uint8Array([1, 2, 3]),
+            new Uint8Array([4, 5, 6]),
+        ])
 
-describe('encodeUrlSafeBase64', () => {
-    it('should encode to url-safe base64', () => {
-        expect(encodeUrlSafeBase64(Buffer.from('aaeeddf1a1937ae17afa', 'hex'))).eq('qu7d8aGTeuF6-g')
+        expect([...buf]).eql([1, 2, 3, 4, 5, 6])
+    })
+
+    it('should create a new buffer', () => {
+        const buf1 = new Uint8Array([1, 2, 3])
+        const buf2 = new Uint8Array([4, 5, 6])
+        const buf = concatBuffers([buf1, buf2])
+
+        buf[0] = 0xff
+        expect(buf1[0]).not.eql(0xff)
     })
 })

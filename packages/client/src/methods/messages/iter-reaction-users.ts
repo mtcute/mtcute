@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { normalizeInputMessageId, normalizeInputReaction, PeerReaction } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
-import { getReactionUsers } from './get-reaction-users'
+import { normalizeInputMessageId, normalizeInputReaction, PeerReaction } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getReactionUsers } from './get-reaction-users.js'
 
 /**
  * Iterate over users who have reacted to the message.

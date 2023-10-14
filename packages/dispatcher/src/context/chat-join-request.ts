@@ -1,6 +1,6 @@
 import { BotChatJoinRequestUpdate, TelegramClient } from '@mtcute/client'
 
-import { UpdateContext } from './base'
+import { UpdateContext } from './base.js'
 
 /**
  * Context of a chat join request update (for bots).

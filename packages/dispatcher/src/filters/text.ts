@@ -1,7 +1,7 @@
 import { CallbackQuery, ChosenInlineResult, InlineQuery, Message } from '@mtcute/client'
 
-import { UpdateContextDistributed } from '../context'
-import { UpdateFilter } from './types'
+import { UpdateContextDistributed } from '../context/base.js'
+import { UpdateFilter } from './types.js'
 
 type UpdatesWithText = UpdateContextDistributed<Message | InlineQuery | ChosenInlineResult | CallbackQuery>
 

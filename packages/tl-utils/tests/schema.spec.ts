@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { writeTlEntriesToString } from '../src/schema'
-import { TlEntry } from '../src/types'
+import { writeTlEntriesToString } from '../src/schema.js'
+import { TlEntry } from '../src/types.js'
 
 describe('writeTlEntriesToString', () => {
     const test = (entries: TlEntry[], params: Parameters<typeof writeTlEntriesToString>[1], ...expected: string[]) => {

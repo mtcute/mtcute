@@ -1,10 +1,10 @@
 import { BaseTelegramClient, getMarkedPeerId, MaybeArray, MtArgumentError, MtTypeAssertionError } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { InputMessageId, MtMessageNotFoundError, normalizeInputMessageId, PeersIndex, Poll } from '../../types'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { getMessages } from './get-messages'
+import { InputMessageId, MtMessageNotFoundError, normalizeInputMessageId, PeersIndex, Poll } from '../../types/index.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getMessages } from './get-messages.js'
 
 /**
  * Send or retract a vote in a poll.
@@ -18,7 +18,7 @@ export async function sendVote(
          * representing them. In case of indexes, the poll will first
          * be requested from the server.
          */
-        options: null | MaybeArray<number | Buffer>
+        options: null | MaybeArray<number | Uint8Array>
     },
 ): Promise<Poll> {
     const { chatId, message } = normalizeInputMessageId(params)
@@ -56,7 +56,7 @@ export async function sendVote(
         _: 'messages.sendVote',
         peer,
         msgId: message,
-        options: options as Buffer[],
+        options: options as Uint8Array[],
     })
 
     assertIsUpdatesGroup('messages.sendVote', res)

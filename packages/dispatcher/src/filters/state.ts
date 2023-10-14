@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MaybeAsync } from '@mtcute/core'
+import { MaybeAsync } from '@mtcute/client'
 
-import { UpdateFilter } from './types'
+import { UpdateFilter } from './types.js'
 
 /**
  * Create a filter for the cases when the state is empty

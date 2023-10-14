@@ -1,11 +1,11 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { FormattedString, InputMediaLike, InputPeerLike, InputPrivacyRule, Story } from '../../types'
-import { _normalizeInputMedia } from '../files/normalize-input-media'
-import { _parseEntities } from '../messages/parse-entities'
-import { _normalizePrivacyRules } from '../misc/normalize-privacy-rules'
-import { resolvePeer } from '../users/resolve-peer'
-import { _findStoryInUpdate } from './find-in-update'
+import { FormattedString, InputMediaLike, InputPeerLike, InputPrivacyRule, Story } from '../../types/index.js'
+import { _normalizeInputMedia } from '../files/normalize-input-media.js'
+import { _parseEntities } from '../messages/parse-entities.js'
+import { _normalizePrivacyRules } from '../misc/normalize-privacy-rules.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { _findStoryInUpdate } from './find-in-update.js'
 
 /**
  * Edit a sent story

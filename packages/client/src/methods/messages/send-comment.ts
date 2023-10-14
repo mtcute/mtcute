@@ -1,11 +1,11 @@
 import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 
-import { Message } from '../../types/messages/message'
-import { ParametersSkip2 } from '../../types/utils'
-import { sendMedia } from './send-media'
-import { sendMediaGroup } from './send-media-group'
-import { replyMedia, replyMediaGroup, replyText } from './send-reply'
-import { sendText } from './send-text'
+import { Message } from '../../types/messages/message.js'
+import { ParametersSkip2 } from '../../types/utils.js'
+import { sendMedia } from './send-media.js'
+import { sendMediaGroup } from './send-media-group.js'
+import { replyMedia, replyMediaGroup, replyText } from './send-reply.js'
+import { sendText } from './send-text.js'
 
 /**
  * Send a text comment to a given message.

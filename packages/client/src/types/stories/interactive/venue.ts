@@ -1,10 +1,10 @@
 import { tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { makeInspectable } from '../../../utils'
-import { memoizeGetters } from '../../../utils/memoize'
-import { Location, VenueSource } from '../../media'
-import { StoryInteractiveArea } from './base'
+import { makeInspectable } from '../../../utils/index.js'
+import { memoizeGetters } from '../../../utils/memoize.js'
+import { Location, VenueSource } from '../../media/index.js'
+import { StoryInteractiveArea } from './base.js'
 
 /**
  * Interactive element containing a venue

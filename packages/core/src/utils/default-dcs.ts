@@ -1,4 +1,4 @@
-import { ITelegramStorage } from '../storage'
+import { ITelegramStorage } from '../storage/abstract.js'
 
 /** @internal */
 export const defaultProductionDc: ITelegramStorage.DcOptions = {

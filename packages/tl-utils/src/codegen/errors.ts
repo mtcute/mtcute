@@ -1,5 +1,5 @@
-import { TlErrors } from '../types'
-import { snakeToCamel } from './utils'
+import { TlErrors } from '../types.js'
+import { snakeToCamel } from './utils.js'
 
 const TEMPLATE_JS = `
 const _descriptionsMap = JSON.parse('{descriptionsMap}')
@@ -31,7 +31,7 @@ RpcError.create = function(code, text) {
     var err = new RpcError(code, text, desc);
     if (!desc) {
         err.unknown = true;
-    } 
+    }
     return err;
 }
 {statics}

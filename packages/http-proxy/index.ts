@@ -4,6 +4,7 @@ import { connect as connectTcp } from 'net'
 import { connect as connectTls, SecureContextOptions } from 'tls'
 
 import { BaseTcpTransport, IntermediatePacketCodec, MtcuteError, tl, TransportState } from '@mtcute/core'
+import { base64Encode, utf8EncodeToBuffer } from '@mtcute/core/utils.js'
 
 /**
  * An error has occurred while connecting to an HTTP(s) proxy
@@ -110,7 +111,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
             if (this._proxy.password) {
                 auth += ':' + this._proxy.password
             }
-            headers['Proxy-Authorization'] = 'Basic ' + Buffer.from(auth).toString('base64')
+            headers['Proxy-Authorization'] = 'Basic ' + base64Encode(utf8EncodeToBuffer(auth))
         }
         headers['Proxy-Connection'] = 'Keep-Alive'
 

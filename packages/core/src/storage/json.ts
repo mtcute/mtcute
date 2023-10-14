@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { tl } from '@mtcute/tl'
+import { base64DecodeToBuffer, base64Encode } from '@mtcute/tl-runtime'
 
-import { longFromFastString, longToFastString } from '../utils'
-import { MemorySessionState, MemoryStorage } from './memory'
+import { longFromFastString, longToFastString } from '../utils/long-utils.js'
+import { MemorySessionState, MemoryStorage } from './memory.js'
 
 /**
  * Helper class that provides json serialization functions
@@ -15,11 +16,11 @@ export class JsonMemoryStorage extends MemoryStorage {
                 switch (key) {
                     case 'authKeys':
                     case 'authKeysTemp': {
-                        const ret: Record<string, Buffer> = {}
+                        const ret: Record<string, Uint8Array> = {}
 
                         ;(value as string).split('|').forEach((pair: string) => {
                             const [dcId, b64] = pair.split(',')
-                            ret[dcId] = Buffer.from(b64, 'base64')
+                            ret[dcId] = base64DecodeToBuffer(b64)
                         })
 
                         return ret
@@ -46,11 +47,11 @@ export class JsonMemoryStorage extends MemoryStorage {
             switch (key) {
                 case 'authKeys':
                 case 'authKeysTemp': {
-                    const value_ = value as Map<string, Buffer | null>
+                    const value_ = value as Map<string, Uint8Array | null>
 
                     return [...value_.entries()]
-                        .filter((it): it is [string, Buffer] => it[1] !== null)
-                        .map(([dcId, key]) => dcId + ',' + key.toString('base64'))
+                        .filter((it): it is [string, Uint8Array] => it[1] !== null)
+                        .map(([dcId, key]) => dcId + ',' + base64Encode(key))
                         .join('|')
                 }
                 case 'authKeysTempExpiry':

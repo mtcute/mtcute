@@ -11,6 +11,7 @@ import {
     DeleteStoryUpdate,
     HistoryReadUpdate,
     MaybeAsync,
+    MtArgumentError,
     ParsedUpdate,
     PeersIndex,
     PollUpdate,
@@ -21,8 +22,8 @@ import {
     UserStatusUpdate,
     UserTypingUpdate,
 } from '@mtcute/client'
-import { MtArgumentError } from '@mtcute/core'
 
+import { UpdateContext } from './context/base.js'
 import {
     CallbackQueryContext,
     ChatJoinRequestUpdateContext,
@@ -30,10 +31,9 @@ import {
     InlineQueryContext,
     MessageContext,
     PreCheckoutQueryContext,
-} from './context'
-import { UpdateContext } from './context/base'
-import { _parsedUpdateToContext, UpdateContextType } from './context/parse'
-import { filters, UpdateFilter } from './filters'
+} from './context/index.js'
+import { _parsedUpdateToContext, UpdateContextType } from './context/parse.js'
+import { filters, UpdateFilter } from './filters/index.js'
 // begin-codegen-imports
 import {
     BotChatJoinRequestHandler,
@@ -57,10 +57,10 @@ import {
     UpdateHandler,
     UserStatusUpdateHandler,
     UserTypingHandler,
-} from './handler'
+} from './handler.js'
 // end-codegen-imports
-import { PropagationAction } from './propagation'
-import { defaultStateKeyDelegate, IStateStorage, StateKeyDelegate, UpdateState } from './state'
+import { PropagationAction } from './propagation.js'
+import { defaultStateKeyDelegate, IStateStorage, StateKeyDelegate, UpdateState } from './state/index.js'
 
 /**
  * Updates dispatcher

@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, Message } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
-import { getHistory } from './get-history'
+import { InputPeerLike, Message } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getHistory } from './get-history.js'
 
 /**
  * Iterate over chat history. Wrapper over {@link getHistory}

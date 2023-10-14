@@ -1,5 +1,5 @@
-import { BaseTelegramClient, TcpTransport } from '../../src'
-import { NodeCryptoProvider } from '../../utils'
+import { BaseTelegramClient, TcpTransport } from '../../src.js'
+import { NodeCryptoProvider } from '../../utils.js'
 
 export function createTestTelegramClient() {
     const tg = new BaseTelegramClient({

@@ -1,10 +1,10 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { PeersIndex } from '../peers'
-import { PeerStories } from './peer-stories'
-import { StoriesStealthMode } from './stealth-mode'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { PeersIndex } from '../peers/index.js'
+import { PeerStories } from './peer-stories.js'
+import { StoriesStealthMode } from './stealth-mode.js'
 
 /**
  * All stories of the current user

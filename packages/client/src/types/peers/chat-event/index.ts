@@ -1,13 +1,13 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../../utils'
-import { memoizeGetters } from '../../../utils/memoize'
-import { PeersIndex } from '../peers-index'
-import { User } from '../user'
-import { _actionFromTl, ChatAction } from './actions'
+import { makeInspectable } from '../../../utils/index.js'
+import { memoizeGetters } from '../../../utils/memoize.js'
+import { PeersIndex } from '../peers-index.js'
+import { User } from '../user.js'
+import { _actionFromTl, ChatAction } from './actions.js'
 
-export * from './actions'
-export { InputChatEventFilters } from './filters'
+export * from './actions.js'
+export { InputChatEventFilters } from './filters.js'
 
 export class ChatEvent {
     constructor(

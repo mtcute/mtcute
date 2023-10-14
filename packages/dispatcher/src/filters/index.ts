@@ -1,3 +1,3 @@
-import * as filters from './bundle'
+import * as filters from './bundle.js'
 import UpdateFilter = filters.UpdateFilter
 export { filters, UpdateFilter }

@@ -1,9 +1,9 @@
 import { BaseTelegramClient, Long, tl } from '@mtcute/core'
-import { assertTypeIsNot } from '@mtcute/core/utils'
+import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
-import { ArrayPaginated, InputPeerLike, Message, PeersIndex } from '../../types'
-import { makeArrayPaginated } from '../../utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { ArrayPaginated, InputPeerLike, Message, PeersIndex } from '../../types/index.js'
+import { makeArrayPaginated } from '../../utils/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 // @exported
 export interface GetHistoryOffset {

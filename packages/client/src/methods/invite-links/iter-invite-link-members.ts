@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { ChatInviteLinkMember, InputPeerLike } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
-import { getInviteLinkMembers } from './get-invite-link-members'
+import { ChatInviteLinkMember, InputPeerLike } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getInviteLinkMembers } from './get-invite-link-members.js'
 
 /**
  * Iterate over users who have joined

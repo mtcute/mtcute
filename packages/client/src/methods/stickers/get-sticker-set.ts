@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputStickerSet, normalizeInputStickerSet, StickerSet } from '../../types'
+import { InputStickerSet, normalizeInputStickerSet, StickerSet } from '../../types/index.js'
 
 /**
  * Get a sticker pack and stickers inside of it.

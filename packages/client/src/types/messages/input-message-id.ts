@@ -1,5 +1,5 @@
-import type { InputPeerLike } from '../peers'
-import type { Message } from './message'
+import type { InputPeerLike } from '../peers/index.js'
+import type { Message } from './message.js'
 
 /**
  * Parameters for methods that accept a message

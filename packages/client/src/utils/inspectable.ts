@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-argument */
 
+import { createRequire } from 'module'
+
+import { base64Encode } from './index.js'
+
 let util: typeof import('util') | null = null
 
 try {
+    // @only-if-esm
+    const require = createRequire(import.meta.url)
+    // @/only-if-esm
     util = require('util') as typeof import('util')
 } catch (e) {}
 
@@ -27,10 +34,8 @@ function getAllGettersNames<T>(obj: T): (keyof T)[] {
     return getters
 }
 
-const bufferToJsonOriginal = Buffer.prototype.toJSON
-
-const bufferToJsonInspect = function (this: Buffer) {
-    return this.toString('base64')
+const bufferToJsonInspect = function (this: Uint8Array) {
+    return base64Encode(this)
 }
 
 /**
@@ -54,7 +59,7 @@ export function makeInspectable<T>(obj: new (...args: any[]) => T, props?: (keyo
 
     obj.prototype.toJSON = function (nested = false) {
         if (!nested) {
-            (Buffer as any).toJSON = bufferToJsonInspect
+            (Uint8Array as any).toJSON = bufferToJsonInspect
         }
 
         const ret: any = Object.create(proto)
@@ -72,7 +77,7 @@ export function makeInspectable<T>(obj: new (...args: any[]) => T, props?: (keyo
         })
 
         if (!nested) {
-            Buffer.prototype.toJSON = bufferToJsonOriginal
+            delete (Uint8Array as any).prototype.toJSON
         }
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return

@@ -46,12 +46,12 @@ export class TlBinaryReader {
     ) {
         if (ArrayBuffer.isView(data)) {
             this.pos = start
-            this.dataView = new DataView(data.buffer, data.byteOffset + start, data.byteLength)
-            this.uint8View = new Uint8Array(data.buffer, data.byteOffset + start, data.byteLength)
+            this.dataView = new DataView(data.buffer, data.byteOffset, data.byteLength)
+            this.uint8View = new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
         } else {
             this.pos = start
-            this.dataView = new DataView(data, this.pos)
-            this.uint8View = new Uint8Array(data, this.pos)
+            this.dataView = new DataView(data)
+            this.uint8View = new Uint8Array(data)
         }
     }
 
@@ -95,7 +95,7 @@ export class TlBinaryReader {
      */
     peekUint(): number {
         // e.g. for checking ctor number
-        return this.dataView.getInt32(this.pos, true)
+        return this.dataView.getUint32(this.pos, true)
     }
 
     int53(): number {
@@ -201,9 +201,7 @@ export class TlBinaryReader {
             // mtproto sucks and there's no way we can just skip it
             this.seek(-4)
             const pos = this.pos
-            const error = new TypeError(
-                `Unknown object id: 0x${id.toString(16)}. Content: ${hexEncode(this.raw())}`,
-            )
+            const error = new TypeError(`Unknown object id: 0x${id.toString(16)}. Content: ${hexEncode(this.raw())}`)
             this.pos = pos
             throw error
         }

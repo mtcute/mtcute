@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Generate a link to a story.

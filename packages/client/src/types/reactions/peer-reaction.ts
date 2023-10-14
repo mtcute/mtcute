@@ -1,11 +1,11 @@
 import { getMarkedPeerId, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { PeersIndex } from '../peers/peers-index'
-import { User } from '../peers/user'
-import { ReactionEmoji, toReactionEmoji } from './types'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { PeersIndex } from '../peers/peers-index.js'
+import { User } from '../peers/user.js'
+import { ReactionEmoji, toReactionEmoji } from './types.js'
 
 /**
  * Reactions of a user to a message

@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { Poll } from '../media/poll'
-import { PeersIndex } from '../peers/peers-index'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { Poll } from '../media/poll.js'
+import { PeersIndex } from '../peers/peers-index.js'
 
 /**
  * Poll state has changed (stopped, somebody

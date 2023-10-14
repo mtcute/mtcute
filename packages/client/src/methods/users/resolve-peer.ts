@@ -8,9 +8,9 @@ import {
     toggleChannelIdMark,
 } from '@mtcute/core'
 
-import { MtPeerNotFoundError } from '../../types/errors'
-import { InputPeerLike } from '../../types/peers'
-import { normalizeToInputPeer } from '../../utils/peer-utils'
+import { MtPeerNotFoundError } from '../../types/errors.js'
+import { InputPeerLike } from '../../types/peers/index.js'
+import { normalizeToInputPeer } from '../../utils/peer-utils.js'
 
 // @available=both
 /**

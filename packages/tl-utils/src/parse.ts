@@ -1,6 +1,6 @@
-import { computeConstructorIdFromEntry } from './ctor-id'
-import { TL_PRIMITIVES, TlArgument, TlEntry } from './types'
-import { parseArgumentType, parseTdlibStyleComment } from './utils'
+import { computeConstructorIdFromEntry } from './ctor-id.js'
+import { TL_PRIMITIVES, TlArgument, TlEntry } from './types.js'
+import { parseArgumentType, parseTdlibStyleComment } from './utils.js'
 
 const SINGLE_REGEX = /^(.+?)(?:#([0-9a-f]{1,8}))?(?: \?)?(?: {(.+?:.+?)})? ((?:.+? )*)= (.+);$/
 

@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 
-import { IMessageEntityParser } from '../../types'
-import { getParseModesState } from './_state'
+import { IMessageEntityParser } from '../../types/index.js'
+import { getParseModesState } from './_state.js'
 
 /**
  * Register a given {@link IMessageEntityParser} as a parse mode

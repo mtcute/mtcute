@@ -8,7 +8,7 @@
         "sourceMap": true,
         "inlineSources": true,
         "declaration": true,
-        "esModuleInterop": false,
+        "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "strict": true,
         "noImplicitAny": true,

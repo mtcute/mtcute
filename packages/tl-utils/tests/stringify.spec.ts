@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { writeTlEntryToString } from '../src/stringify'
-import { TlArgument, TlEntry } from '../src/types'
+import { writeTlEntryToString } from '../src/stringify.js'
+import { TlArgument, TlEntry } from '../src/types.js'
 
 describe('writeTlEntryToString', () => {
     const make = (name: string, type: string, ...args: string[]): TlEntry => ({

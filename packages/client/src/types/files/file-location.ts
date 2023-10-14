@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
+import { makeInspectable } from '../../utils/index.js'
 
 /**
  * Information about file location.
@@ -23,8 +23,8 @@ export class FileLocation {
         readonly location:
             | tl.TypeInputFileLocation
             | tl.TypeInputWebFileLocation
-            | Buffer
-            | (() => tl.TypeInputFileLocation | tl.TypeInputWebFileLocation | Buffer),
+            | Uint8Array
+            | (() => tl.TypeInputFileLocation | tl.TypeInputWebFileLocation | Uint8Array),
         /**
          * File size in bytes, when available
          */

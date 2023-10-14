@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
 import { BaseTelegramClient, MaybeAsync, MtArgumentError, tl } from '@mtcute/core'
 
-import { MaybeDynamic, SentCode, User } from '../../types'
-import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-utils'
-import { getMe } from '../users/get-me'
-import { checkPassword } from './check-password'
-import { resendCode } from './resend-code'
-import { sendCode } from './send-code'
-import { signIn } from './sign-in'
-import { signInBot } from './sign-in-bot'
+import { MaybeDynamic, SentCode, User } from '../../types/index.js'
+import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-utils.js'
+import { getMe } from '../users/get-me.js'
+import { checkPassword } from './check-password.js'
+import { resendCode } from './resend-code.js'
+import { sendCode } from './send-code.js'
+import { signIn } from './sign-in.js'
+import { signInBot } from './sign-in-bot.js'
 
 // @manual
 // @available=both

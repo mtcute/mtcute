@@ -1,8 +1,8 @@
-import { I18nStrings, I18nValue, MtcuteI18nAdapter, MtcuteI18nFunction, OtherLanguageWrap } from './types'
-import { createI18nStringsIndex, extractLanguageFromUpdate } from './utils'
+import { I18nStrings, I18nValue, MtcuteI18nAdapter, MtcuteI18nFunction, OtherLanguageWrap } from './types.js'
+import { createI18nStringsIndex, extractLanguageFromUpdate } from './utils.js'
 
-export * from './types'
-export { extractLanguageFromUpdate } from './utils'
+export * from './types.js'
+export { extractLanguageFromUpdate } from './utils.js'
 
 export interface MtcuteI18nParameters<Strings extends I18nStrings, Input> {
     /**

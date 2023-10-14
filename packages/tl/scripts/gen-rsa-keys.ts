@@ -3,10 +3,10 @@ import { writeFile } from 'fs/promises'
 import { join } from 'path'
 import readline from 'readline'
 
-import { NodeCryptoProvider, parsePublicKey } from '@mtcute/core/utils'
+import { NodeCryptoProvider, parsePublicKey } from '@mtcute/core/utils.js'
 
-import { TlPublicKey } from '../binary/rsa-keys'
-import { ESM_PRELUDE } from './constants'
+import { TlPublicKey } from '../binary/rsa-keys.js'
+import { __dirname, ESM_PRELUDE } from './constants.js'
 
 const IN_TXT_FILE = join(__dirname, '.rsa-keys.txt')
 const OUT_JS_FILE = join(__dirname, '../binary/rsa-keys.js')

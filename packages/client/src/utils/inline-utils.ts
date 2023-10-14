@@ -1,5 +1,5 @@
-import { assertNever, tl, TlBinaryReader, TlBinaryWriter } from '@mtcute/core'
-import { encodeUrlSafeBase64, parseUrlSafeBase64 } from '@mtcute/core/utils'
+import { assertNever, tl } from '@mtcute/core'
+import { base64DecodeToBuffer, base64Encode, TlBinaryReader, TlBinaryWriter } from '@mtcute/core/utils.js'
 
 /**
  * Parse TDLib style inline message ID
@@ -7,7 +7,7 @@ import { encodeUrlSafeBase64, parseUrlSafeBase64 } from '@mtcute/core/utils'
  * @param id  Inline message ID
  */
 export function parseInlineMessageId(id: string): tl.TypeInputBotInlineMessageID {
-    const buf = parseUrlSafeBase64(id)
+    const buf = base64DecodeToBuffer(id, true)
     const reader = TlBinaryReader.manual(buf)
 
     if (buf.length === 20) {
@@ -38,13 +38,13 @@ export function encodeInlineMessageId(id: tl.TypeInputBotInlineMessageID): strin
 
     switch (id._) {
         case 'inputBotInlineMessageID':
-            writer = TlBinaryWriter.manualAlloc(20)
+            writer = TlBinaryWriter.manual(20)
             writer.int(id.dcId)
             writer.long(id.id)
             writer.long(id.accessHash)
             break
         case 'inputBotInlineMessageID64':
-            writer = TlBinaryWriter.manualAlloc(24)
+            writer = TlBinaryWriter.manual(24)
             writer.int(id.dcId)
             writer.long(id.ownerId)
             writer.int(id.id)
@@ -54,7 +54,7 @@ export function encodeInlineMessageId(id: tl.TypeInputBotInlineMessageID): strin
             assertNever(id)
     }
 
-    return encodeUrlSafeBase64(writer.result())
+    return base64Encode(writer.result(), true)
 }
 
 export function normalizeInlineId(id: string | tl.TypeInputBotInlineMessageID) {

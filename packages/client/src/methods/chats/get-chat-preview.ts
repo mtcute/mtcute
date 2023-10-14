@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 
-import { ChatPreview, MtPeerNotFoundError } from '../../types'
-import { INVITE_LINK_REGEX } from '../../utils/peer-utils'
+import { ChatPreview, MtPeerNotFoundError } from '../../types/index.js'
+import { INVITE_LINK_REGEX } from '../../utils/peer-utils.js'
 
 /**
  * Get preview information about a private chat.

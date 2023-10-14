@@ -1,10 +1,10 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { encodeInlineMessageId } from '../../utils/inline-utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { Location } from '../media/location'
-import { PeersIndex, User } from '../peers'
+import { makeInspectable } from '../../utils/index.js'
+import { encodeInlineMessageId } from '../../utils/inline-utils.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { Location } from '../media/location.js'
+import { PeersIndex, User } from '../peers/index.js'
 
 /**
  * An inline result was chosen by the user and sent to some chat

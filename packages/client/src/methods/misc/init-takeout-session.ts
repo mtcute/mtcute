@@ -1,6 +1,6 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { TakeoutSession } from '../../types'
+import { TakeoutSession } from '../../types/index.js'
 
 /**
  * Create a new takeout session

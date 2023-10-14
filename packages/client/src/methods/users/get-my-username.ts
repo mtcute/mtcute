@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { getAuthState } from '../auth/_state'
+import { getAuthState } from '../auth/_state.js'
 
 /**
  * Get currently authorized user's username.

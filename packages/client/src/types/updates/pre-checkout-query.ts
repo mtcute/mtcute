@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { PeersIndex, User } from '../peers'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { PeersIndex, User } from '../peers/index.js'
 
 export class PreCheckoutQuery {
     constructor(
@@ -35,7 +35,7 @@ export class PreCheckoutQuery {
      * Bot-defined payload of the original invoice
      * (see {@link InputMediaInvoice.payload})
      */
-    get payload(): Buffer {
+    get payload(): Uint8Array {
         return this.raw.payload
     }
 

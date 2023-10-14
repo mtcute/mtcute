@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { ChatInviteLink, InputPeerLike, PeersIndex } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get detailed information about an invite link

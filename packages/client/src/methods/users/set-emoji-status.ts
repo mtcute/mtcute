@@ -1,6 +1,6 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { normalizeDate } from '../../utils'
+import { normalizeDate } from '../../utils/index.js'
 
 /**
  * Set an emoji status for the current user

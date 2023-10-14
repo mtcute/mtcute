@@ -1,11 +1,10 @@
 import { assertNever } from '@mtcute/core'
-import { encodeUrlSafeBase64 } from '@mtcute/core/utils'
-import { TlBinaryWriter } from '@mtcute/tl-runtime'
+import { base64Encode, byteLengthUtf8, concatBuffers, TlBinaryWriter } from '@mtcute/core/utils.js'
 
-import { tdFileId as td } from './types'
-import { telegramRleEncode } from './utils'
+import { tdFileId as td } from './types.js'
+import { telegramRleEncode } from './utils.js'
 
-const SUFFIX = Buffer.from([td.CURRENT_VERSION, td.PERSISTENT_ID_VERSION])
+const SUFFIX = new Uint8Array([td.CURRENT_VERSION, td.PERSISTENT_ID_VERSION])
 
 /**
  * Serialize an object with information about file
@@ -27,7 +26,7 @@ export function toFileId(location: Omit<td.RawFullRemoteFileLocation, '_'>): str
     //
     // longest file ids are around 80 bytes, so i guess
     // we are safe with allocating 100 bytes
-    const writer = TlBinaryWriter.alloc(undefined, loc._ === 'web' ? Buffer.byteLength(loc.url, 'utf8') + 32 : 100)
+    const writer = TlBinaryWriter.alloc(undefined, loc._ === 'web' ? byteLengthUtf8(loc.url) + 32 : 100)
 
     writer.int(type)
     writer.int(location.dcId)
@@ -105,5 +104,5 @@ export function toFileId(location: Omit<td.RawFullRemoteFileLocation, '_'>): str
             assertNever(loc)
     }
 
-    return encodeUrlSafeBase64(Buffer.concat([telegramRleEncode(writer.result()), SUFFIX]))
+    return base64Encode(concatBuffers([telegramRleEncode(writer.result()), SUFFIX]), true)
 }

@@ -1,6 +1,6 @@
 import { mtp, tl } from '@mtcute/tl'
 
-import { MtTypeAssertionError } from '../types'
+import { MtTypeAssertionError } from '../types/errors.js'
 
 // mostly taken from https://github.com/robertmassaioli/ts-is-present
 

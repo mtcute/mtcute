@@ -1,6 +1,6 @@
 import { MtArgumentError } from '@mtcute/core'
 
-import { ArrayPaginated, ArrayWithTotal, MaybeDynamic, Message } from '../types'
+import { ArrayPaginated, ArrayWithTotal, MaybeDynamic, Message } from '../types/index.js'
 
 /**
  * Normalize phone number by stripping formatting

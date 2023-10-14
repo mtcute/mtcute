@@ -7,12 +7,12 @@
     "license": "MIT",
     "scripts": {
         "test": "tsc --noEmit --esModuleInterop tests/types.ts",
-        "fetch-mtp": "ts-node scripts/fetch-mtp.ts",
-        "fetch-api": "ts-node scripts/fetch-api.ts",
-        "fetch-errors": "ts-node scripts/fetch-errors.ts",
-        "docs-cli": "ts-node scripts/documentation.ts",
-        "gen-code": "ts-node scripts/gen-code.ts",
-        "gen-rsa": "ts-node scripts/gen-rsa-keys.ts",
+        "fetch-mtp": "ts-node-esm scripts/fetch-mtp.ts",
+        "fetch-api": "ts-node-esm scripts/fetch-api.ts",
+        "fetch-errors": "ts-node-esm scripts/fetch-errors.ts",
+        "docs-cli": "ts-node-esm scripts/documentation.ts",
+        "gen-code": "ts-node-esm scripts/gen-code.ts",
+        "gen-rsa": "ts-node-esm scripts/gen-rsa-keys.ts",
         "fetch-and-gen": "pnpm run fetch-api && pnpm run gen-code"
     },
     "dependencies": {

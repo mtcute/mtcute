@@ -97,7 +97,7 @@ module.exports = {
         yoda: 2,
 
         // Variables
-        'no-restricted-globals': ['error', 'Buffer'],
+        'no-restricted-globals': ['error', 'Buffer', '__dirname', 'require'],
         'no-var': 1,
 
         // Codestyle

@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { getAuthState } from './_state'
+import { getAuthState } from './_state.js'
 
 /**
  * Log out from Telegram account and optionally reset the session storage.

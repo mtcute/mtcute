@@ -1,12 +1,12 @@
 import { BaseTelegramClient, getMarkedPeerId, MtArgumentError } from '@mtcute/core'
 
-import { MtMessageNotFoundError } from '../../types/errors'
-import { Message } from '../../types/messages/message'
-import { InputPeerLike } from '../../types/peers'
-import { normalizeMessageId } from '../../utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { _getDiscussionMessage } from './get-discussion-message'
-import { getMessages } from './get-messages'
+import { MtMessageNotFoundError } from '../../types/errors.js'
+import { Message } from '../../types/messages/message.js'
+import { InputPeerLike } from '../../types/peers/index.js'
+import { normalizeMessageId } from '../../utils/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { _getDiscussionMessage } from './get-discussion-message.js'
+import { getMessages } from './get-messages.js'
 
 // @exported
 export interface CommonSendParams {

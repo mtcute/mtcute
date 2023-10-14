@@ -1,13 +1,13 @@
 import { getMarkedPeerId, MtArgumentError, MtTypeAssertionError, tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { MessageEntity } from '../messages/message-entity'
-import { ChatLocation } from './chat-location'
-import { ChatPermissions } from './chat-permissions'
-import { ChatPhoto } from './chat-photo'
-import { PeersIndex } from './peers-index'
-import { User } from './user'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { MessageEntity } from '../messages/message-entity.js'
+import { ChatLocation } from './chat-location.js'
+import { ChatPermissions } from './chat-permissions.js'
+import { ChatPhoto } from './chat-photo.js'
+import { PeersIndex } from './peers-index.js'
+import { User } from './user.js'
 
 /**
  * Chat type. Can be:

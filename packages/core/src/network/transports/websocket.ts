@@ -1,12 +1,13 @@
 import EventEmitter from 'events'
+import { createRequire } from 'module'
 
 import { tl } from '@mtcute/tl'
 
-import { MtcuteError, MtUnsupportedError } from '../../types'
-import { ICryptoProvider, Logger, typedArrayToBuffer } from '../../utils'
-import { IPacketCodec, ITelegramTransport, TransportState } from './abstract'
-import { IntermediatePacketCodec } from './intermediate'
-import { ObfuscatedPacketCodec } from './obfuscated'
+import { MtcuteError, MtUnsupportedError } from '../../types/errors.js'
+import { ICryptoProvider, Logger } from '../../utils/index.js'
+import { IPacketCodec, ITelegramTransport, TransportState } from './abstract.js'
+import { IntermediatePacketCodec } from './intermediate.js'
+import { ObfuscatedPacketCodec } from './obfuscated.js'
 
 let ws: {
     new (address: string, options?: string): WebSocket
@@ -14,7 +15,9 @@ let ws: {
 
 if (typeof window === 'undefined' || typeof window.WebSocket === 'undefined') {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        // @only-if-esm
+        const require = createRequire(import.meta.url)
+        // @/only-if-esm
         ws = require('ws')
     } catch (e) {
         ws = null
@@ -111,7 +114,7 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
         this._socket.binaryType = 'arraybuffer'
 
         this._socket.addEventListener('message', (evt) =>
-            this._packetCodec.feed(typedArrayToBuffer(evt.data as NodeJS.TypedArray)),
+            this._packetCodec.feed(evt.data),
         )
         this._socket.addEventListener('open', this.handleConnect.bind(this))
         this._socket.addEventListener('error', this.handleError.bind(this))
@@ -150,7 +153,7 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
             .catch((err) => this.emit('error', err))
     }
 
-    async send(bytes: Buffer): Promise<void> {
+    async send(bytes: Uint8Array): Promise<void> {
         if (this._state !== TransportState.Ready) {
             throw new MtcuteError('Transport is not READY')
         }

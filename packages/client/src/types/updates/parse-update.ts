@@ -21,7 +21,7 @@ import {
     StoryUpdate,
     UserStatusUpdate,
     UserTypingUpdate,
-} from '../index'
+} from '../index.js'
 
 /** @internal */
 export function _parseUpdate(update: tl.TypeUpdate, peers: PeersIndex): ParsedUpdate | null {

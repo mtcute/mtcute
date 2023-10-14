@@ -1,6 +1,6 @@
 import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 
-import { PreCheckoutQuery } from '../../types/updates'
+import type { PreCheckoutQuery } from '../../types/updates/pre-checkout-query.js'
 
 /**
  * Answer a pre-checkout query.

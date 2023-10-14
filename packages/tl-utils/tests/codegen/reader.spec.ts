@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { generateReaderCodeForTlEntry, parseTlToEntries } from '../../src'
+import { generateReaderCodeForTlEntry, parseTlToEntries } from '../../src/index.js'
 
 describe('generateReaderCodeForTlEntry', () => {
     const test = (tl: string, ...js: string[]) => {

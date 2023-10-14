@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { Message, SearchFilters } from '../../types'
-import { normalizeDate } from '../../utils/misc-utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { searchMessages } from './search-messages'
+import { Message, SearchFilters } from '../../types/index.js'
+import { normalizeDate } from '../../utils/misc-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { searchMessages } from './search-messages.js'
 
 /**
  * Search for messages inside a specific chat

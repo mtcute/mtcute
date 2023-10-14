@@ -1,7 +1,7 @@
-import { TlEntry, TlErrors, TlFullSchema, TlTypeModifiers } from '../types'
-import { groupTlEntriesByNamespace, splitNameToNamespace } from '../utils'
-import { generateCodeForErrors } from './errors'
-import { camelToPascal, indent, jsComment, snakeToCamel } from './utils'
+import { TlEntry, TlErrors, TlFullSchema, TlTypeModifiers } from '../types.js'
+import { groupTlEntriesByNamespace, splitNameToNamespace } from '../utils.js'
+import { generateCodeForErrors } from './errors.js'
+import { camelToPascal, indent, jsComment, snakeToCamel } from './utils.js'
 
 /**
  * Mapping of TL primitive types to TS types

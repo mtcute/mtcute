@@ -1,11 +1,11 @@
 import { MtArgumentError, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { MessageEntity } from '../messages/message-entity'
-import { EmojiStatus } from '../reactions/emoji-status'
-import { ChatPhoto } from './chat-photo'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { MessageEntity } from '../messages/message-entity.js'
+import { EmojiStatus } from '../reactions/emoji-status.js'
+import { ChatPhoto } from './chat-photo.js'
 
 /**
  * User's Last Seen & Online status.

@@ -19,10 +19,10 @@ import {
     COREFORK_DOMAIN,
     DESCRIPTIONS_YAML_FILE,
     DOC_CACHE_FILE,
-} from './constants'
-import { applyDescriptionsYamlFile } from './process-descriptions-yaml'
-import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema'
-import { fetchRetry } from './utils'
+} from './constants.js'
+import { applyDescriptionsYamlFile } from './process-descriptions-yaml.js'
+import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema.js'
+import { fetchRetry } from './utils.js'
 
 export interface CachedDocumentationEntry {
     comment?: string

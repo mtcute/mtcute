@@ -1,8 +1,8 @@
 import { assertNever, BaseTelegramClient, tl } from '@mtcute/core'
 
-import { BotCommands } from '../../types'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { BotCommands } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /** @internal */
 export async function _normalizeCommandScope(

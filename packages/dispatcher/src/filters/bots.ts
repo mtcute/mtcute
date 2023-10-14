@@ -1,10 +1,9 @@
-import { Message } from '@mtcute/client'
-import { MaybeArray, MaybeAsync } from '@mtcute/core'
+import { MaybeArray, MaybeAsync, Message } from '@mtcute/client'
 
-import { MessageContext } from '../context'
-import { chat } from './chat'
-import { and } from './logic'
-import { UpdateFilter } from './types'
+import { MessageContext } from '../context/message.js'
+import { chat } from './chat.js'
+import { and } from './logic.js'
+import { UpdateFilter } from './types.js'
 
 /**
  * Filter messages that call the given command(s)..

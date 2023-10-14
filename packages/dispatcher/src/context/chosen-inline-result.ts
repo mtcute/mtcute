@@ -1,6 +1,6 @@
 import { ChosenInlineResult, MtArgumentError, TelegramClient } from '@mtcute/client'
 
-import { UpdateContext } from './base'
+import { UpdateContext } from './base.js'
 
 /**
  * Context of a chosen inline result update.

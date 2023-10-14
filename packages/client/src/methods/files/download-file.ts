@@ -1,10 +1,15 @@
+import { createRequire } from 'module'
+
 import { BaseTelegramClient, MtUnsupportedError } from '@mtcute/core'
 
-import { FileDownloadParameters, FileLocation } from '../../types'
-import { downloadAsStream } from './download-stream'
+import { FileDownloadParameters, FileLocation } from '../../types/index.js'
+import { downloadAsStream } from './download-stream.js'
 let fs: typeof import('fs') | null = null
 
 try {
+    // @only-if-esm
+    const require = createRequire(import.meta.url)
+    // @/only-if-esm
     fs = require('fs') as typeof import('fs')
 } catch (e) {}
 
@@ -24,7 +29,7 @@ export function downloadToFile(
         throw new MtUnsupportedError('Downloading to file is only supported in NodeJS')
     }
 
-    if (params.location instanceof FileLocation && Buffer.isBuffer(params.location.location)) {
+    if (params.location instanceof FileLocation && ArrayBuffer.isView(params.location.location)) {
         // early return for inline files
         const buf = params.location.location
 

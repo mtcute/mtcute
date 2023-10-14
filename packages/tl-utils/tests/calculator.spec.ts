@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { parseTlToEntries } from '../src'
-import { calculateStaticSizes } from '../src/calculator'
+import { calculateStaticSizes } from '../src/calculator.js'
+import { parseTlToEntries } from '../src/parse.js'
 
 describe('calculateStaticSizes', () => {
     const test = (tl: string, expected: object) => {

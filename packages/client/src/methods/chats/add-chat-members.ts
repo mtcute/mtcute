@@ -1,14 +1,14 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
 import {
     isInputPeerChannel,
     isInputPeerChat,
     normalizeToInputChannel,
     normalizeToInputUser,
-} from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { resolvePeerMany } from '../users/resolve-peer-many'
+} from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**
  * Add one or more new members to a group, supergroup or channel.

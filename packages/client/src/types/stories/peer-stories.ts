@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
-import { assertTypeIs, makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { Chat, PeersIndex, User } from '../peers'
-import { Story } from './story'
+import { assertTypeIs, makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { Chat, PeersIndex, User } from '../peers/index.js'
+import { Story } from './story.js'
 
 export class PeerStories {
     constructor(

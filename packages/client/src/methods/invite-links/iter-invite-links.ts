@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { ChatInviteLink, InputPeerLike } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
-import { getInviteLinks } from './get-invite-links'
+import { ChatInviteLink, InputPeerLike } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getInviteLinks } from './get-invite-links.js'
 
 /**
  * Iterate over invite links created by some administrator in the chat.

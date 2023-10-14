@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ^^ will be looked into in MTQ-29
 
-import { MaybeAsync } from '@mtcute/core'
+import { MaybeAsync } from '@mtcute/client'
 
-import { UpdateState } from '../state'
+import { UpdateState } from '../state/update-state.js'
 /**
  * Type describing a primitive filter, which is a function taking some `Base`
  * and a {@link TelegramClient}, checking it against some condition

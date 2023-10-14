@@ -1,8 +1,8 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike } from '../../types/index.js'
+import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Edit supergroup/channel admin rights of a user.

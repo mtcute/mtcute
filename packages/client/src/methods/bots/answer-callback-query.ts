@@ -1,6 +1,6 @@
 import { BaseTelegramClient, Long } from '@mtcute/core'
 
-import { CallbackQuery } from '../../types/bots/callback-query'
+import { CallbackQuery } from '../../types/bots/callback-query.js'
 
 /**
  * Send an answer to a callback query.

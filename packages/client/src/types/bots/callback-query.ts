@@ -1,10 +1,10 @@
 import { BasicPeerType, getBasicPeerType, getMarkedPeerId, MtArgumentError, tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { encodeInlineMessageId } from '../../utils/inline-utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { PeersIndex } from '../peers/peers-index'
-import { User } from '../peers/user'
+import { makeInspectable, utf8Decode } from '../../utils/index.js'
+import { encodeInlineMessageId } from '../../utils/inline-utils.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { PeersIndex } from '../peers/peers-index.js'
+import { User } from '../peers/user.js'
 
 /**
  * An incoming callback query, originated from a callback button
@@ -121,7 +121,7 @@ export class CallbackQuery {
      * Note that this field is defined by the client, and a bad
      * client can send arbitrary data in this field.
      */
-    get data(): Buffer | null {
+    get data(): Uint8Array | null {
         return this.raw.data ?? null
     }
 
@@ -135,7 +135,7 @@ export class CallbackQuery {
     get dataStr(): string | null {
         if (!this.raw.data) return null
 
-        return this.raw.data.toString('utf8')
+        return utf8Decode(this.raw.data)
     }
 
     /**
