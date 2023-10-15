@@ -34,3 +34,10 @@ jobs:
       - name: 'Circular dependencies'
         run: pnpm run lint:dpdm
       - run: pnpm run test:all
+  e2e:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run end-to-end tests
+        run: cd e2e && ./cli.sh run-docker

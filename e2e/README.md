@@ -39,14 +39,10 @@ the environment for development:
 
 ```bash
 npm config set -L project @mtcute:registry http://verdaccio.e2e.orb.local/
-pnpm i
+./cli.sh install
 ```
 
 > Replace the URL above with the one generated with your Docker GUI of choice
 > (e2e > verdaccio > RMB > Open in browser). Example above assumes OrbStack
 
-Then use `runner.js` file to run the tests:
-
-```bash
-node runner.js
-```
+Then use `./cli.sh run` to run the tests
