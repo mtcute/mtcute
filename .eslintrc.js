@@ -243,6 +243,12 @@ module.exports = {
                 'no-restricted-globals': 'off',
             },
         },
+        {
+            files: ['e2e/ts/**'],
+            rules: {
+                'import/no-unresolved': 'off',
+            },
+        },
     ],
     settings: {
         'import/resolver': {

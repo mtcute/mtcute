@@ -3,8 +3,10 @@ const baseConfig = require('./.eslintrc.js')
 module.exports = {
     ...baseConfig,
     overrides: [
+        baseConfig.overrides[0],
         {
             ...baseConfig.overrides[0],
+            files: ['packages/**/*.ts'],
             extends: ['plugin:@typescript-eslint/strict-type-checked', 'plugin:import/typescript'],
             parser: '@typescript-eslint/parser',
             parserOptions: {
