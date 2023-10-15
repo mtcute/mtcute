@@ -33,6 +33,10 @@
             "./utils.js": {
                 "import": "./esm/utils/index.js",
                 "require": "./cjs/utils/index.js"
+            },
+            "./utils/crypto/*.js": {
+                "import": "./esm/utils/crypto/*.js",
+                "require": "./cjs/utils/crypto/*.js"
             }
         }
     },

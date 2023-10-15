@@ -36,8 +36,14 @@ export interface ICryptoProvider {
 }
 
 export abstract class BaseCryptoProvider {
-    async createAesIge(key: Uint8Array, iv: Uint8Array) {
-        return new AesModeOfOperationIge(key, iv, await this.createAesEcb(key))
+    createAesIge(key: Uint8Array, iv: Uint8Array): MaybeAsync<IEncryptionScheme> {
+        const ecb = this.createAesEcb(key)
+
+        if ('then' in ecb) {
+            return ecb.then((ecb) => new AesModeOfOperationIge(key, iv, ecb))
+        }
+
+        return new AesModeOfOperationIge(key, iv, ecb)
     }
 
     factorizePQ(pq: Uint8Array) {

@@ -24,5 +24,5 @@ export async function getPackageJsons(includeRoot = false) {
 
     if (includeRoot) packages.push('$root')
 
-    return Promise.all(packages.map(tryParsePackageJson))
+    return Promise.all(packages.map(tryParsePackageJson)).then((f) => f.filter(Boolean))
 }

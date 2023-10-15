@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 const baseConfig = require('./.eslintrc.js')
 
 module.exports = {

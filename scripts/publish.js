@@ -1,101 +1,47 @@
+/* eslint-disable no-restricted-globals */
+
 const fs = require('fs')
 const path = require('path')
 const cp = require('child_process')
-const rimraf = require('rimraf')
 
 // const REGISTRY = 'https://registry.npmjs.org'
-const REGISTRY = 'https://npm.tei.su'
+const REGISTRY = process.env.REGISTRY || 'https://npm.tei.su/'
 exports.REGISTRY = REGISTRY
 
 async function checkVersion(name, version) {
-    return fetch(`${REGISTRY}/@mtcute/${name}/${version}`).then((r) => r.status === 200)
+    return fetch(`${REGISTRY}@mtcute/${name}/${version}`).then((r) => r.status === 200)
 }
 
-function publishSinglePackage(name) {
+async function publishSinglePackage(name) {
     let packageDir = path.join(__dirname, '../packages', name)
 
     console.log('[i] Building %s', name)
-    // cleanup dist folder
-    rimraf.sync(path.join(packageDir, 'dist'))
 
-    let outDir = path.join(packageDir, 'dist')
-
-    if (name === 'tl') {
-        // create package by copying all the needed files
-        const files = [
-            'binary/reader.d.ts',
-            'binary/reader.js',
-            'binary/rsa-keys.d.ts',
-            'binary/rsa-keys.js',
-            'binary/writer.d.ts',
-            'binary/writer.js',
-            'index.d.ts',
-            'index.js',
-            'raw-errors.json',
-            'mtp-schema.json',
-            'api-schema.json',
-            'package.json',
-            'README.md',
-        ]
-
-        fs.mkdirSync(path.join(packageDir, 'dist/binary'), { recursive: true })
-
-        for (const f of files) {
-            fs.copyFileSync(path.join(packageDir, f), path.join(packageDir, 'dist', f))
-        }
-    } else {
-        // build ts
-        cp.execSync('pnpm run build', {
-            cwd: packageDir,
-            stdio: 'inherit',
-        })
-
-        if (name === 'client') {
-            // make TelegramClient a class, not an interface
-            const dTsContent = fs.readFileSync(path.join(outDir, 'client.d.ts'), 'utf8')
-
-            fs.writeFileSync(
-                path.join(outDir, 'client.d.ts'),
-                dTsContent.replace('export interface TelegramClient', 'export class TelegramClient'),
-            )
-        }
-
-        if (name === 'crypto-node') {
-            // copy native sources and binding.gyp file
-
-            fs.mkdirSync(path.join(outDir, 'lib'), { recursive: true })
-            fs.mkdirSync(path.join(outDir, 'crypto'), { recursive: true })
-
-            const bindingGyp = fs.readFileSync(path.join(packageDir, 'binding.gyp'), 'utf8')
-            fs.writeFileSync(
-                path.join(outDir, 'binding.gyp'),
-                bindingGyp
-                    // replace paths to crypto
-                    .replace(/"\.\.\/crypto/g, '"crypto'),
-            )
-
-            for (const f of fs.readdirSync(path.join(packageDir, 'lib'))) {
-                const content = fs.readFileSync(path.join(packageDir, 'lib', f), 'utf8')
-
-                fs.writeFileSync(
-                    path.join(outDir, 'lib', f),
-                    content
-                        // replace paths to crypto
-                        .replace(/#include "\.\.\/\.\.\/crypto/g, '#include "../crypto'),
-                )
-            }
-
-            for (const f of fs.readdirSync(path.join(packageDir, '../crypto'))) {
-                fs.copyFileSync(path.join(packageDir, '../crypto', f), path.join(outDir, 'crypto', f))
-            }
-        }
-    }
+    // run build script
+    cp.execSync('pnpm run build', {
+        cwd: packageDir,
+        stdio: 'inherit',
+    })
 
     console.log('[i] Publishing %s', name)
 
+    if (process.env.E2E) {
+        const version = require(path.join(packageDir, 'dist/package.json')).version
+
+        const exists = await checkVersion(name, version)
+
+        if (exists) {
+            console.log('[i] %s already exists, unpublishing..', name)
+            cp.execSync(`npm unpublish --registry ${REGISTRY} --force @mtcute/${name}`, {
+                cwd: path.join(packageDir, 'dist'),
+                stdio: 'inherit',
+            })
+        }
+    }
+
     // publish to npm
-    cp.execSync('npm publish --registry https://npm.tei.su --force', {
-        cwd: outDir,
+    cp.execSync(`npm publish --registry ${REGISTRY} --force`, {
+        cwd: path.join(packageDir, 'dist'),
         stdio: 'inherit',
     })
 }
@@ -117,13 +63,13 @@ function listPackages() {
 
 exports.listPackages = listPackages
 
-async function main() {
-    const arg = process.argv[2]
-
+async function main(arg = process.argv[2]) {
     if (!arg) {
         console.log('Usage: publish.js <package name | all | updated>')
         process.exit(0)
     }
+
+    console.log('[i] Using registry %s', REGISTRY)
 
     if (arg === 'all' || arg === 'updated') {
         for (const pkg of listPackages()) {
@@ -137,12 +83,14 @@ async function main() {
                 }
             }
 
-            publishSinglePackage(pkg)
+            await publishSinglePackage(pkg)
         }
     } else {
-        publishSinglePackage(arg)
+        await publishSinglePackage(arg)
     }
 }
+
+exports.main = main
 
 if (require.main === module) {
     main().catch((e) => {

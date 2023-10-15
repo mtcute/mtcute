@@ -11,7 +11,32 @@ if (process.argv.length < 3) {
 
 const packageDir = path.join(__dirname, '../packages', process.argv[2])
 const BUILD_CONFIGS = {
-    tl: { buildTs: false, buildCjs: false },
+    tl: {
+        buildTs: false,
+        buildCjs: false,
+        customScript(packageDir, outDir) {
+            // create package by copying all the needed files
+            const files = [
+                'binary/reader.d.ts',
+                'binary/reader.js',
+                'binary/rsa-keys.d.ts',
+                'binary/rsa-keys.js',
+                'binary/writer.d.ts',
+                'binary/writer.js',
+                'index.d.ts',
+                'index.js',
+                'raw-errors.json',
+                'mtp-schema.json',
+                'api-schema.json',
+            ]
+
+            fs.mkdirSync(path.join(outDir, 'binary'), { recursive: true })
+
+            for (const f of files) {
+                fs.copyFileSync(path.join(packageDir, f), path.join(outDir, f))
+            }
+        },
+    },
     core: {
         esmOnlyDirectives: true,
         customScript(packageDir, outDir) {
@@ -28,7 +53,23 @@ const BUILD_CONFIGS = {
             )
         },
     },
-    client: { esmOnlyDirectives: true },
+    client: {
+        esmOnlyDirectives: true,
+        customScript(packageDir, outDir) {
+            function fixClient(file) {
+                // make TelegramClient a class, not an interface
+                const dTsContent = fs.readFileSync(path.join(outDir, file), 'utf8')
+
+                fs.writeFileSync(
+                    path.join(outDir, file),
+                    dTsContent.replace('export interface TelegramClient', 'export class TelegramClient'),
+                )
+            }
+
+            fixClient('esm/client.d.ts')
+            fixClient('cjs/client.d.ts')
+        },
+    },
     'crypto-node': {
         customScript(packageDir, outDir) {
             // copy native sources and binding.gyp file
@@ -78,8 +119,12 @@ const buildConfig = {
 
 function buildPackageJson() {
     const pkgJson = JSON.parse(fs.readFileSync(path.join(packageDir, 'package.json'), 'utf-8'))
-    pkgJson.main = 'cjs/index.js'
-    pkgJson.module = 'esm/index.js'
+
+    if (buildConfig.buildCjs) {
+        pkgJson.main = 'cjs/index.js'
+        pkgJson.module = 'esm/index.js'
+    }
+
     const newScripts = {}
 
     if (pkgJson.keepScripts) {
@@ -116,6 +161,8 @@ function buildPackageJson() {
     replaceWorkspaceDependencies('peerDependencies')
     replaceWorkspaceDependencies('optionalDependencies')
 
+    delete pkgJson.typedoc
+
     fs.writeFileSync(path.join(packageDir, 'dist/package.json'), JSON.stringify(pkgJson, null, 2))
 }
 
@@ -132,6 +179,7 @@ const outDir = path.join(packageDir, 'dist')
 
 // clean
 fs.rmSync(path.join(outDir), { recursive: true, force: true })
+fs.mkdirSync(path.join(outDir), { recursive: true })
 
 if (buildConfig.buildTs) {
     console.log('[i] Building typescript...')
@@ -204,15 +252,20 @@ if (buildConfig.buildTs) {
 }
 
 console.log('[i] Copying files...')
-fs.writeFileSync(path.join(packageDir, 'dist/cjs/package.json'), JSON.stringify({ type: 'commonjs' }, null, 2))
+
+if (buildConfig.buildCjs) {
+    fs.writeFileSync(path.join(outDir, 'cjs/package.json'), JSON.stringify({ type: 'commonjs' }, null, 2))
+}
 
 buildPackageJson()
 
 try {
-    fs.cpSync(path.join(packageDir, 'README.md'), path.join(packageDir, 'dist/README.md'))
+    fs.cpSync(path.join(packageDir, 'README.md'), path.join(outDir, 'README.md'))
 } catch (e) {
     console.log('[!] Failed to copy README.md: ' + e.message)
 }
+
+fs.writeFileSync(path.join(outDir, '.npmignore'), '*.tsbuildinfo\n')
 
 buildConfig.customScript(packageDir, outDir)
 

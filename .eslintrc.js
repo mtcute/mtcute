@@ -235,6 +235,18 @@ module.exports = {
                 'max-params': ['error', 4],
             },
         },
+        {
+            files: ['e2e/cjs/**'],
+            rules: {
+                'no-restricted-globals': 'off',
+            },
+        },
+        {
+            files: ['e2e/**/*.ts'],
+            parserOptions: {
+                project: false,
+            },
+        },
     ],
     settings: {
         'import/resolver': {

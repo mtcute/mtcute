@@ -13,7 +13,8 @@
         "docs-cli": "ts-node-esm scripts/documentation.ts",
         "gen-code": "ts-node-esm scripts/gen-code.ts",
         "gen-rsa": "ts-node-esm scripts/gen-rsa-keys.ts",
-        "fetch-and-gen": "pnpm run fetch-api && pnpm run gen-code"
+        "fetch-and-gen": "pnpm run fetch-api && pnpm run gen-code",
+        "build": "pnpm run -w build-package tl"
     },
     "dependencies": {
         "long": "5.2.3"

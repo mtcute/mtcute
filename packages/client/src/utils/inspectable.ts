@@ -3,7 +3,7 @@
 
 import { createRequire } from 'module'
 
-import { base64Encode } from './index.js'
+import { base64Encode } from '@mtcute/core/utils.js'
 
 let util: typeof import('util') | null = null
 

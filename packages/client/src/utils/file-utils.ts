@@ -1,6 +1,5 @@
 import { MtArgumentError } from '@mtcute/core'
-
-import { concatBuffers, hexDecodeToBuffer, utf8EncodeToBuffer } from './index.js'
+import { concatBuffers, hexDecodeToBuffer, utf8EncodeToBuffer } from '@mtcute/core/utils.js'
 
 /**
  * Given file size, determine the appropriate chunk size (in KB)

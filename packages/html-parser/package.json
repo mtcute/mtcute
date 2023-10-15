@@ -10,7 +10,7 @@
     "scripts": {
         "test": "mocha \"tests/**/*.spec.ts\"",
         "coverage": "nyc npm run test",
-        "build": "tsc",
+        "build": "pnpm run -w build-package html-parser",
         "docs": "typedoc"
     },
     "distOnlyFields": {

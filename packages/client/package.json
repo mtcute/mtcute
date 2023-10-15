@@ -23,6 +23,10 @@
             "./methods/*.js": {
                 "import": "./esm/methods/*.js",
                 "require": "./cjs/methods/*.js"
+            },
+            "./utils.js": {
+                "import": "./esm/utils/index.js",
+                "require": "./cjs/utils/index.js"
             }
         }
     },

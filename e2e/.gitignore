@@ -1,0 +1,4 @@
+.verdaccio/storage
+.npmrc
+pnpm-lock.yaml
+.env

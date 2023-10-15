@@ -18,7 +18,7 @@
     "scripts": {
         "test": "mocha \"tests/**/*.spec.ts\"",
         "docs": "typedoc",
-        "build": "tsc",
+        "build": "pnpm run -w build-package dispatcher",
         "gen-updates": "node ./scripts/generate.cjs"
     },
     "dependencies": {
