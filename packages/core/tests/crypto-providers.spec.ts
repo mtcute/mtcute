@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { subtle } from 'crypto'
+import * as crypto from 'crypto'
 import { describe, it } from 'mocha'
 
 import { hexDecodeToBuffer, hexEncode, utf8EncodeToBuffer } from '@mtcute/tl-runtime'
@@ -138,5 +138,11 @@ describe('NodeCryptoProvider', () => {
 })
 
 describe('SubtleCryptoProvider', () => {
-    testCryptoProvider(new SubtleCryptoProvider(subtle))
+    if (typeof crypto.subtle === 'undefined') {
+        console.warn('Skipping SubtleCryptoProvider tests')
+
+        return
+    }
+
+    testCryptoProvider(new SubtleCryptoProvider(crypto.subtle))
 })
