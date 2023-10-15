@@ -28,12 +28,12 @@ jobs:
       - name: 'TL codegen'
         run: pnpm -C packages/tl run gen-code
       - name: 'TypeScript'
-        run: pnpm run lint:tsc
+        run: pnpm run lint:tsc:ci
       - name: 'ESLint'
         run: pnpm run lint:ci
       - name: 'Circular dependencies'
         run: pnpm run lint:dpdm
-      - run: pnpm run test:all
+      - run: pnpm run test:all:ci
   e2e:
     runs-on: ubuntu-latest
     needs: test
