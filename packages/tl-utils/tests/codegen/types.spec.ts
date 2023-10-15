@@ -23,7 +23,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
             '    b: Long;',
             '    c: Double;',
             '    d: string;',
-            '    e: Buffer;',
+            '    e: Uint8Array;',
             '    f: boolean;',
             '    g: number[];',
             '}',
