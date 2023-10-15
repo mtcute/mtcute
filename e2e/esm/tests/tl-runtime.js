@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-globals */
 import { expect } from 'chai'
 import Long from 'long'
 import { describe, it } from 'mocha'

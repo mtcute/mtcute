@@ -4,7 +4,9 @@ import { describe, it } from 'mocha'
 
 import { hexDecodeToBuffer, hexEncode, utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 
-import { ICryptoProvider, NodeCryptoProvider, SubtleCryptoProvider } from '../utils.js'
+import { NodeCryptoProvider } from '../src/utils/crypto/node-crypto.js'
+import { SubtleCryptoProvider } from '../src/utils/crypto/subtle.js'
+import { ICryptoProvider } from '../src/utils/index.js'
 
 export function testCryptoProvider(c: ICryptoProvider): void {
     it('should calculate sha1', async () => {

@@ -1,4 +1,4 @@
-/* eslint-disable no-console,no-restricted-globals */
+/* eslint-disable no-console */
 const glob = require('glob')
 const cp = require('child_process')
 const path = require('path')

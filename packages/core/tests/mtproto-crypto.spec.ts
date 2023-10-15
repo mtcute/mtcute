@@ -1,14 +1,15 @@
-/* eslint-disable no-restricted-globals */
+/* eslint-disable no-restricted-globals,@typescript-eslint/no-unsafe-assignment */
+// for whatever reason eslint doesn't properly handle chai-spies typings
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 import { describe, it } from 'mocha'
 
-import { NodeCryptoProvider } from '../src/utils/crypto/index.js'
 import {
     createAesIgeForMessage,
     createAesIgeForMessageOld,
     generateKeyAndIvFromNonce,
 } from '../src/utils/crypto/mtproto.js'
+import { NodeCryptoProvider } from '../src/utils/crypto/node-crypto.js'
 
 chai.use(spies)
 

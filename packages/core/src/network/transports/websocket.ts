@@ -18,6 +18,7 @@ if (typeof window === 'undefined' || typeof window.WebSocket === 'undefined') {
         // @only-if-esm
         const require = createRequire(import.meta.url)
         // @/only-if-esm
+        // eslint-disable-next-line
         ws = require('ws')
     } catch (e) {
         ws = null
@@ -114,7 +115,7 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
         this._socket.binaryType = 'arraybuffer'
 
         this._socket.addEventListener('message', (evt) =>
-            this._packetCodec.feed(new Uint8Array(evt.data)),
+            this._packetCodec.feed(new Uint8Array(evt.data as ArrayBuffer)),
         )
         this._socket.addEventListener('open', this.handleConnect.bind(this))
         this._socket.addEventListener('error', this.handleError.bind(this))

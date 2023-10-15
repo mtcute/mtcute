@@ -36,6 +36,8 @@ export function createI18nStringsIndex(strings: I18nStrings): Record<string, I18
 export function extractLanguageFromUpdate(update: dispatcherNs.UpdateContextType): string | null | undefined {
     if (!('_name' in update)) return null
 
+    // for whatever reason eslint doesn't like this
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
     switch (update._name) {
         case 'new_message': {
             const { sender } = update
@@ -55,6 +57,7 @@ export function extractLanguageFromUpdate(update: dispatcherNs.UpdateContextType
         case 'bot_chat_join_request':
             return update.user.language
     }
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 
     return null
 }

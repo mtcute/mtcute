@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio'
 import { readFile, writeFile } from 'fs/promises'
 import jsYaml from 'js-yaml'
+import { fileURLToPath } from 'node:url'
 import { createInterface } from 'readline'
 
 import {
@@ -384,6 +385,15 @@ async function main() {
     }
 }
 
-if (require.main === module) {
-    main().catch(console.error)
+if (import.meta.url.startsWith('file:')) {
+    // (A)
+    const modulePath = fileURLToPath(import.meta.url)
+
+    if (process.argv[1] === modulePath) {
+        // (B)
+        main().catch((err) => {
+            console.error(err)
+            process.exit(1)
+        })
+    }
 }

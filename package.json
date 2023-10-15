@@ -8,10 +8,10 @@
     "scripts": {
         "prepare": "husky install",
         "postinstall": "node scripts/validate-deps-versions.mjs",
-        "test:all": "pnpm run -r test",
+        "test:all": "pnpm run -r --parallel test",
         "lint": "eslint .",
-        "lint:ci": "eslint --config .eslintrc.ci.js .",
-        "lint:tsc": "pnpm run -r build --noEmit",
+        "lint:ci": "NODE_OPTIONS=\"--max_old_space_size=8192\" eslint --config .eslintrc.ci.js .",
+        "lint:tsc": "pnpm -r --filter=!crypto --parallel exec tsc --build",
         "lint:dpdm": "dpdm -T --no-warning --no-tree --exit-code circular:1 packages/*",
         "lint:fix": "eslint --fix .",
         "format": "prettier --write \"packages/**/*.ts\"",

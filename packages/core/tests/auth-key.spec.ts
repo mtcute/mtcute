@@ -1,13 +1,13 @@
 /* eslint-disable no-restricted-globals */
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
-import Long from 'long'
 import { describe, it } from 'mocha'
 
 import { TlReaderMap } from '@mtcute/tl-runtime'
 
 import { AuthKey } from '../src/network/auth-key.js'
-import { LogManager, NodeCryptoProvider } from '../utils.js'
+import { NodeCryptoProvider } from '../src/utils/crypto/node-crypto.js'
+import { LogManager } from '../src/utils/index.js'
 
 chai.use(spies)
 
@@ -15,10 +15,6 @@ const authKey = Buffer.alloc(
     2048 / 8,
     Buffer.from('98cb29c6ffa89e79da695a54f572e6cb101e81c688b63a4bf73c3622dec230e0', 'hex'),
 )
-
-const message = Buffer.from('some test message yay')
-const serverSalt = Long.fromBits(0x98cb29c6, 0xffa89e79)
-const sessionId = Long.fromBits(0xf572e6cb, 0x101e81c6)
 
 describe('AuthKey', () => {
     const crypto = new NodeCryptoProvider()

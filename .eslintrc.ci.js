@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-globals */
 const baseConfig = require('./.eslintrc.js')
 
 module.exports = {
@@ -6,10 +5,7 @@ module.exports = {
     overrides: [
         {
             ...baseConfig.overrides[0],
-            extends: [
-                'plugin:@typescript-eslint/strict-type-checked',
-                'plugin:import/typescript',
-            ],
+            extends: ['plugin:@typescript-eslint/strict-type-checked', 'plugin:import/typescript'],
             parser: '@typescript-eslint/parser',
             parserOptions: {
                 project: true,
@@ -17,10 +13,7 @@ module.exports = {
             },
             rules: {
                 ...baseConfig.overrides[0].rules,
-                '@typescript-eslint/restrict-template-expressions': [
-                    'error',
-                    { allowNever: true },
-                ],
+                '@typescript-eslint/restrict-template-expressions': ['error', { allowNever: true }],
             },
             reportUnusedDisableDirectives: false,
         },

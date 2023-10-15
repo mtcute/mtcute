@@ -95,7 +95,7 @@ export class Logger {
                                 ArrayBuffer.isView(v) ||
                                 (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data))
                             ) {
-                                // eslint-disable-next-line no-restricted-globals
+                                // eslint-disable-next-line
                                 let str = v.data ? Buffer.from(v.data as number[]).toString('hex') : hexEncode(v)
 
                                 if (str.length > 300) {

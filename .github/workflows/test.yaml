@@ -30,8 +30,6 @@ jobs:
       - name: 'TypeScript'
         run: pnpm run lint:tsc
       - name: 'ESLint'
-        env:
-          NODE_OPTIONS: "--max_old_space_size=4096"
         run: pnpm run lint:ci
       - name: 'Circular dependencies'
         run: pnpm run lint:dpdm

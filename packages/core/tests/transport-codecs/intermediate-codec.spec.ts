@@ -57,19 +57,19 @@ describe('IntermediatePacketCodec', () => {
             done()
         })
 
-        codec.feed(Buffer.from('040000006cfeffff', 'hex'))
+        codec.feed(hexDecodeToBuffer('040000006cfeffff'))
     })
 
     it('should reset when called reset()', (done) => {
         const codec = new IntermediatePacketCodec()
 
-        codec.on('packet', (data: Buffer) => {
+        codec.on('packet', (data: Uint8Array) => {
             expect([...data]).eql([1, 2, 3, 4, 5])
             done()
         })
 
-        codec.feed(Buffer.from('ff0000001234567812345678', 'hex'))
+        codec.feed(hexDecodeToBuffer('ff0000001234567812345678'))
         codec.reset()
-        codec.feed(Buffer.from('050000000102030405', 'hex'))
+        codec.feed(hexDecodeToBuffer('050000000102030405'))
     })
 })

@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-globals */
 const cp = require('child_process')
 const path = require('path')
 const fs = require('fs')
@@ -43,14 +42,8 @@ const BUILD_CONFIGS = {
             const version = require(path.join(packageDir, 'package.json')).version
             const replaceVersion = (content) => content.replace('%VERSION%', version)
 
-            transformFile(
-                path.join(outDir, 'cjs/network/network-manager.js'),
-                replaceVersion,
-            )
-            transformFile(
-                path.join(outDir, 'esm/network/network-manager.js'),
-                replaceVersion,
-            )
+            transformFile(path.join(outDir, 'cjs/network/network-manager.js'), replaceVersion)
+            transformFile(path.join(outDir, 'esm/network/network-manager.js'), replaceVersion)
         },
     },
     client: {
@@ -195,10 +188,7 @@ if (buildConfig.buildTs) {
                 if (!content.includes('@only-if-esm')) continue
                 originalFiles[f] = content
 
-                fs.writeFileSync(f, content.replace(
-                    /@only-if-esm.*?@\/only-if-esm/gs,
-                    '',
-                ))
+                fs.writeFileSync(f, content.replace(/@only-if-esm.*?@\/only-if-esm/gs, ''))
             }
         }
 
@@ -206,7 +196,9 @@ if (buildConfig.buildTs) {
 
         try {
             exec('pnpm exec tsc --module commonjs --outDir dist/cjs', { cwd: packageDir, stdio: 'inherit' })
-        } catch (e) { error = e }
+        } catch (e) {
+            error = e
+        }
 
         for (const f of Object.keys(originalFiles)) {
             fs.writeFileSync(f, originalFiles[f])

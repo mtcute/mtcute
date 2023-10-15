@@ -17,16 +17,19 @@ describe('@mtcute/tl', () => {
             accessHash: Long.fromNumber(456),
         }
 
-        expect(hexEncode(TlBinaryWriter.serializeObject(__tlWriterMap, obj))).to.equal('4ca5e8dd7b00000000000000c801000000000000')
+        expect(hexEncode(TlBinaryWriter.serializeObject(__tlWriterMap, obj))).to.equal(
+            '4ca5e8dd7b00000000000000c801000000000000',
+        )
     })
 
     it('readers map works with TlBinaryReader', () => {
         const buf = hexDecodeToBuffer('4ca5e8dd7b00000000000000c801000000000000')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line
         const obj = TlBinaryReader.deserializeObject<any>(__tlReaderMap, buf)
 
         expect(obj._).equal('inputPeerUser')
         expect(obj.userId).equal(123)
+        // eslint-disable-next-line
         expect(obj.accessHash.toString()).equal('456')
     })
 

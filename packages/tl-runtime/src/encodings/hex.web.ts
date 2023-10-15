@@ -2,7 +2,8 @@
 
 const hexSliceLookupTable = (function () {
     const alphabet = '0123456789abcdef'
-    const table = new Array(256)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const table: string[] = new Array(256)
 
     for (let i = 0; i < 16; ++i) {
         const i16 = i * 16
