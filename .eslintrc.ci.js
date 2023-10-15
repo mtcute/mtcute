@@ -20,5 +20,11 @@ module.exports = {
             reportUnusedDisableDirectives: false,
         },
         ...baseConfig.overrides.slice(1),
+        {
+            files: ['e2e/**'],
+            rules: {
+                'import/no-unresolved': 'off',
+            },
+        },
     ],
 }
