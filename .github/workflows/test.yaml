@@ -40,4 +40,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run end-to-end tests
-        run: cd e2e && ./cli.sh run-docker
+        env:
+          API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+        run: |
+          cd e2e
+          # is there a way not to do this manually?
+          echo API_ID=$API_ID > .env
+          echo API_HASH=$API_HASH >> .env
+          ./cli.sh run-docker
