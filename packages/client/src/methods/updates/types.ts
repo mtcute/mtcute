@@ -1,10 +1,10 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
-import { AsyncLock, ConditionVariable, Deque, EarlyTimer, Logger, SortedLinkedList } from '@mtcute/core/utils'
+import { AsyncLock, ConditionVariable, Deque, EarlyTimer, Logger, SortedLinkedList } from '@mtcute/core/utils.js'
 
-import { PeersIndex } from '../../types'
-import { RpsMeter } from '../../utils'
-import { AuthState } from '../auth/_state'
-import { extractChannelIdFromUpdate } from './utils'
+import { PeersIndex } from '../../types/index.js'
+import { RpsMeter } from '../../utils/index.js'
+import { AuthState } from '../auth/_state.js'
+import { extractChannelIdFromUpdate } from './utils.js'
 
 /**
  * Function to be called for each update.

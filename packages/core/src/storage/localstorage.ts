@@ -1,5 +1,5 @@
-import { MtUnsupportedError } from '../types'
-import { JsonMemoryStorage } from './json'
+import { MtUnsupportedError } from '../types/index.js'
+import { JsonMemoryStorage } from './json.js'
 
 export class LocalstorageStorage extends JsonMemoryStorage {
     private readonly _key: string

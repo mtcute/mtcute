@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { Location } from '../media/location'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { Location } from '../media/location.js'
 
 /**
  * Geolocation of a supergroup

@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MtTypeAssertionError, tl } from '@mtcute/core'
-import { assertTypeIs, hasValueAtKey } from '@mtcute/core/utils'
+import { assertTypeIs, hasValueAtKey } from '@mtcute/core/utils.js'
 
-import { PeersIndex, Story } from '../../types'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { PeersIndex, Story } from '../../types/index.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
 
 /** @internal */
 export function _findStoryInUpdate(client: BaseTelegramClient, res: tl.TypeUpdates): Story {

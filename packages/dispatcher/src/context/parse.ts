@@ -1,12 +1,12 @@
 import { ParsedUpdate, TelegramClient } from '@mtcute/client'
 
-import { UpdateContext } from './base'
-import { CallbackQueryContext } from './callback-query'
-import { ChatJoinRequestUpdateContext } from './chat-join-request'
-import { ChosenInlineResultContext } from './chosen-inline-result'
-import { InlineQueryContext } from './inline-query'
-import { MessageContext } from './message'
-import { PreCheckoutQueryContext } from './pre-checkout-query'
+import { UpdateContextDistributed } from './base.js'
+import { CallbackQueryContext } from './callback-query.js'
+import { ChatJoinRequestUpdateContext } from './chat-join-request.js'
+import { ChosenInlineResultContext } from './chosen-inline-result.js'
+import { InlineQueryContext } from './inline-query.js'
+import { MessageContext } from './message.js'
+import { PreCheckoutQueryContext } from './pre-checkout-query.js'
 
 /** @internal */
 export function _parsedUpdateToContext(client: TelegramClient, update: ParsedUpdate) {
@@ -27,7 +27,7 @@ export function _parsedUpdateToContext(client: TelegramClient, update: ParsedUpd
             return new PreCheckoutQueryContext(client, update.data)
     }
 
-    const _update = update.data as UpdateContext<typeof update.data>
+    const _update = update.data as UpdateContextDistributed<typeof update.data>
     _update.client = client
     _update._name = update.name
 

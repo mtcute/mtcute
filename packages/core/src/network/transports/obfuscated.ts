@@ -1,19 +1,11 @@
-import { buffersEqual, IEncryptionScheme, randomBytes } from '../../utils'
-import { IPacketCodec } from './abstract'
-import { WrappedCodec } from './wrapped'
-
-// initial payload can't start with these
-const BAD_HEADERS = [
-    Buffer.from('GET', 'utf8'),
-    Buffer.from('POST', 'utf8'),
-    Buffer.from('HEAD', 'utf8'),
-    Buffer.from('PVrG', 'utf8'),
-    Buffer.from('eeeeeeee', 'hex'),
-]
+import { concatBuffers, dataViewFromBuffer } from '../../utils/buffer-utils.js'
+import { IEncryptionScheme, randomBytes } from '../../utils/index.js'
+import { IPacketCodec } from './abstract.js'
+import { WrappedCodec } from './wrapped.js'
 
 export interface MtProxyInfo {
     dcId: number
-    secret: Buffer
+    secret: Uint8Array
     test: boolean
     media: boolean
 }
@@ -29,17 +21,29 @@ export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec 
         this._proxy = proxy
     }
 
-    async tag(): Promise<Buffer> {
-        let random: Buffer
+    async tag(): Promise<Uint8Array> {
+        let random: Uint8Array
+        let dv: DataView
 
-        r: for (;;) {
+        for (;;) {
             random = randomBytes(64)
             if (random[0] === 0xef) continue
 
-            for (const h of BAD_HEADERS) {
-                if (buffersEqual(random.slice(0, h.length), h)) continue r
+            dv = dataViewFromBuffer(random)
+            const firstInt = dv.getInt32(0, true)
+
+            if (
+                firstInt === 0x44414548 || // HEAD
+                firstInt === 0x54534f50 || // POST
+                firstInt === 0x20544547 || // GET(space)
+                firstInt === 0x4954504f || // OPTI
+                firstInt === 0xdddddddd || // padded intermediate
+                firstInt === 0xeeeeeeee || // intermediate
+                firstInt === 0x02010316 // no idea, taken from tdlib
+            ) {
+                continue
             }
-            if (random.readUInt32LE(4) === 0) continue
+            if (dv.getInt32(4, true) === 0) continue
 
             break
         }
@@ -48,48 +52,49 @@ export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec 
 
         if (innerTag.length !== 4) {
             const b = innerTag[0]
-            innerTag = Buffer.from([b, b, b, b])
+            innerTag = new Uint8Array([b, b, b, b])
         }
-        innerTag.copy(random, 56)
+        random.set(innerTag, 56)
 
         if (this._proxy) {
             let dcId = this._proxy.dcId
             if (this._proxy.test) dcId += 10000
             if (this._proxy.media) dcId = -dcId
 
-            random.writeInt16LE(dcId, 60)
+            dv.setInt16(60, dcId, true)
         }
 
-        const randomRev = Buffer.from(random.slice(8, 56)).reverse()
+        // randomBytes may return a Buffer in Node.js, whose .slice() doesn't copy
+        const randomRev = Uint8Array.prototype.slice.call(random, 8, 56).reverse()
 
-        let encryptKey = random.slice(8, 40)
-        const encryptIv = random.slice(40, 56)
+        let encryptKey = random.subarray(8, 40)
+        const encryptIv = random.subarray(40, 56)
 
-        let decryptKey = randomRev.slice(0, 32)
-        const decryptIv = randomRev.slice(32, 48)
+        let decryptKey = randomRev.subarray(0, 32)
+        const decryptIv = randomRev.subarray(32, 48)
 
         if (this._proxy) {
-            encryptKey = await this._crypto.sha256(Buffer.concat([encryptKey, this._proxy.secret]))
-            decryptKey = await this._crypto.sha256(Buffer.concat([decryptKey, this._proxy.secret]))
+            encryptKey = await this._crypto.sha256(concatBuffers([encryptKey, this._proxy.secret]))
+            decryptKey = await this._crypto.sha256(concatBuffers([decryptKey, this._proxy.secret]))
         }
 
-        this._encryptor = this._crypto.createAesCtr(encryptKey, encryptIv, true)
-        this._decryptor = this._crypto.createAesCtr(decryptKey, decryptIv, false)
+        this._encryptor = await this._crypto.createAesCtr(encryptKey, encryptIv, true)
+        this._decryptor = await this._crypto.createAesCtr(decryptKey, decryptIv, false)
 
         const encrypted = await this._encryptor.encrypt(random)
-        encrypted.copy(random, 56, 56, 64)
+        random.set(encrypted.subarray(56, 64), 56)
 
         return random
     }
 
-    async encode(packet: Buffer): Promise<Buffer> {
+    async encode(packet: Uint8Array): Promise<Uint8Array> {
         return this._encryptor!.encrypt(await this._inner.encode(packet))
     }
 
-    feed(data: Buffer): void {
+    feed(data: Uint8Array): void {
         const dec = this._decryptor!.decrypt(data)
 
-        if (Buffer.isBuffer(dec)) this._inner.feed(dec)
+        if (ArrayBuffer.isView(dec)) this._inner.feed(dec)
         else {
             dec.then((dec) => this._inner.feed(dec)).catch((err) => this.emit('error', err))
         }

@@ -1,6 +1,6 @@
-// telegram has some cursed RLE which only encodes consecutive \x00
+// tdlib's RLE only encodes consecutive \x00
 
-export function telegramRleEncode(buf: Buffer): Buffer {
+export function telegramRleEncode(buf: Uint8Array): Uint8Array {
     const len = buf.length
     const ret: number[] = []
     let count = 0
@@ -24,10 +24,10 @@ export function telegramRleEncode(buf: Buffer): Buffer {
         ret.push(0, count)
     }
 
-    return Buffer.from(ret)
+    return new Uint8Array(ret)
 }
 
-export function telegramRleDecode(buf: Buffer): Buffer {
+export function telegramRleDecode(buf: Uint8Array): Uint8Array {
     const len = buf.length
     const ret: number[] = []
     let prev = -1
@@ -48,5 +48,5 @@ export function telegramRleDecode(buf: Buffer): Buffer {
 
     if (prev !== -1) ret.push(prev)
 
-    return Buffer.from(ret)
+    return new Uint8Array(ret)
 }

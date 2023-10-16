@@ -1,12 +1,13 @@
 import bigInt from 'big-integer'
 
 import { tl } from '@mtcute/tl'
+import { utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 
-import { MtSecurityError, MtUnsupportedError } from '../../types'
-import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils'
-import { randomBytes } from '../buffer-utils'
-import { ICryptoProvider } from './abstract'
-import { xorBuffer } from './utils'
+import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
+import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils.js'
+import { concatBuffers, randomBytes } from '../buffer-utils.js'
+import { ICryptoProvider } from './abstract.js'
+import { xorBuffer } from './utils.js'
 
 /**
  * Compute password hash as defined by MTProto.
@@ -20,16 +21,14 @@ import { xorBuffer } from './utils'
  */
 export async function computePasswordHash(
     crypto: ICryptoProvider,
-    password: Buffer,
-    salt1: Buffer,
-    salt2: Buffer,
-): Promise<Buffer> {
-    const SH = (data: Buffer, salt: Buffer) => crypto.sha256(Buffer.concat([salt, data, salt]))
-    const PH1 = async (pwd: Buffer, salt1: Buffer, salt2: Buffer) => SH(await SH(pwd, salt1), salt2)
-    const PH2 = async (pwd: Buffer, salt1: Buffer, salt2: Buffer) =>
-        SH(await crypto.pbkdf2(await PH1(pwd, salt1, salt2), salt1, 100000), salt2)
+    password: Uint8Array,
+    salt1: Uint8Array,
+    salt2: Uint8Array,
+): Promise<Uint8Array> {
+    const SH = (data: Uint8Array, salt: Uint8Array) => crypto.sha256(concatBuffers([salt, data, salt]))
+    const PH1 = async (pwd: Uint8Array, salt1: Uint8Array, salt2: Uint8Array) => SH(await SH(pwd, salt1), salt2)
 
-    return PH2(password, salt1, salt2)
+    return SH(await crypto.pbkdf2(await PH1(password, salt1, salt2), salt1, 100000), salt2)
 }
 
 /**
@@ -43,10 +42,10 @@ export async function computeNewPasswordHash(
     crypto: ICryptoProvider,
     algo: tl.RawPasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow,
     password: string,
-): Promise<Buffer> {
-    (algo as tl.Mutable<typeof algo>).salt1 = Buffer.concat([algo.salt1, randomBytes(32)])
+): Promise<Uint8Array> {
+    (algo as tl.Mutable<typeof algo>).salt1 = concatBuffers([algo.salt1, randomBytes(32)])
 
-    const _x = await computePasswordHash(crypto, Buffer.from(password), algo.salt1, algo.salt2)
+    const _x = await computePasswordHash(crypto, utf8EncodeToBuffer(password), algo.salt1, algo.salt2)
 
     const g = bigInt(algo.g)
     const p = bufferToBigInt(algo.p)
@@ -96,13 +95,13 @@ export async function computeSrpParams(
     const gA = g.modPow(a, p)
     const _gA = bigIntToBuffer(gA, 256)
 
-    const H = (data: Buffer) => crypto.sha256(data)
+    const H = (data: Uint8Array) => crypto.sha256(data)
 
     const [_k, _u, _x] = await Promise.all([
         // maybe, just maybe this will be a bit faster with some crypto providers
-        /* k = */ crypto.sha256(Buffer.concat([algo.p, _g])),
-        /* u = */ crypto.sha256(Buffer.concat([_gA, request.srpB])),
-        /* x = */ computePasswordHash(crypto, Buffer.from(password), algo.salt1, algo.salt2),
+        /* k = */ crypto.sha256(concatBuffers([algo.p, _g])),
+        /* u = */ crypto.sha256(concatBuffers([_gA, request.srpB])),
+        /* x = */ computePasswordHash(crypto, utf8EncodeToBuffer(password), algo.salt1, algo.salt2),
     ])
     const k = bufferToBigInt(_k)
     const u = bufferToBigInt(_u)
@@ -117,7 +116,7 @@ export async function computeSrpParams(
     const _kA = await H(bigIntToBuffer(sA, 256))
 
     const _M1 = await H(
-        Buffer.concat([
+        concatBuffers([
             xorBuffer(await H(algo.p), await H(_g)),
             await H(algo.salt1),
             await H(algo.salt2),

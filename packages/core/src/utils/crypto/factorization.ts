@@ -1,12 +1,12 @@
 import bigInt, { BigInteger } from 'big-integer'
 
-import { bigIntToBuffer, bufferToBigInt, randomBigIntInRange } from '../bigint-utils'
+import { bigIntToBuffer, bufferToBigInt, randomBigIntInRange } from '../bigint-utils.js'
 
 /**
  * Factorize `p*q` to `p` and `q` synchronously using Brent-Pollard rho algorithm
  * @param pq
  */
-export function factorizePQSync(pq: Buffer): [Buffer, Buffer] {
+export function factorizePQSync(pq: Uint8Array): [Uint8Array, Uint8Array] {
     const pq_ = bufferToBigInt(pq)
 
     const n = PollardRhoBrent(pq_)

@@ -1,7 +1,6 @@
-import { CallbackQuery, ChatMemberUpdate, ChatMemberUpdateType, UserStatus, UserStatusUpdate } from '@mtcute/client'
-import { MaybeArray } from '@mtcute/core'
+import { CallbackQuery, ChatMemberUpdate, ChatMemberUpdateType, MaybeArray, UserStatus, UserStatusUpdate } from '@mtcute/client'
 
-import { UpdateFilter } from './types'
+import { UpdateFilter } from './types.js'
 
 /**
  * Create a filter for {@link ChatMemberUpdate} by update type

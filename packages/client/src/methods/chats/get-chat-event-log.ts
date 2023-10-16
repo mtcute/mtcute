@@ -1,10 +1,10 @@
 import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 
-import { ChatEvent, InputPeerLike, PeersIndex } from '../../types'
-import { InputChatEventFilters, normalizeChatEventFilters } from '../../types/peers/chat-event/filters'
-import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { resolvePeerMany } from '../users/resolve-peer-many'
+import { ChatEvent, InputPeerLike, PeersIndex } from '../../types/index.js'
+import { InputChatEventFilters, normalizeChatEventFilters } from '../../types/peers/chat-event/filters.js'
+import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**
  * Get chat event log ("Recent actions" in official clients).

@@ -1,0 +1,7 @@
+.verdaccio
+node_modules
+private
+dist
+pnpm-lock.yaml
+.npmrc
+.env*

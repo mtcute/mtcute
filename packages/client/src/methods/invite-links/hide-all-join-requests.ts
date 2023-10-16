@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import type { ChatInviteLink, InputPeerLike } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import type { ChatInviteLink, InputPeerLike } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Approve or decline multiple join requests to a chat.

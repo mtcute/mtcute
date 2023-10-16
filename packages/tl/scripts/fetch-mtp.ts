@@ -5,8 +5,8 @@ import { writeFile } from 'fs/promises'
 
 import { parseTlToEntries } from '@mtcute/tl-utils'
 
-import { CORE_DOMAIN, MTP_SCHEMA_JSON_FILE } from './constants'
-import { fetchRetry } from './utils'
+import { CORE_DOMAIN, MTP_SCHEMA_JSON_FILE } from './constants.js'
+import { fetchRetry } from './utils.js'
 
 async function fetchMtprotoSchema(): Promise<string> {
     const html = await fetchRetry(`${CORE_DOMAIN}/schema/mtproto`)

@@ -5,15 +5,31 @@
     "description": "Runtime for TL",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
-    "main": "src/index.ts",
+    "type": "module",
     "scripts": {
-        "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
+        "test": "mocha \"tests/**/*.spec.ts\"",
         "docs": "typedoc",
-        "build": "tsc"
+        "build": "pnpm run -w build-package tl-runtime"
     },
     "browser": {
-        "./platform/gzip.js": "./platform/gzip.web.js"
+        "./cjs/encodings/base64.js": "./cjs/encodings/base64.web.js",
+        "./esm/encodings/base64.js": "./esm/encodings/base64.web.js",
+        "./cjs/encodings/hex.js": "./cjs/encodings/hex.web.js",
+        "./esm/encodings/hex.js": "./esm/encodings/hex.web.js",
+        "./cjs/encodings/utf8.js": "./cjs/encodings/utf8.web.js",
+        "./esm/encodings/utf8.js": "./esm/encodings/utf8.web.js",
+        "./cjs/encodings/gzip.js": "./cjs/encodings/gzip.web.js",
+        "./esm/encodings/gzip.js": "./esm/encodings/gzip.web.js"
     },
+    "distOnlyFields": {
+        "exports": {
+            ".": {
+                "import": "./esm/index.js",
+                "require": "./cjs/index.js"
+            }
+        }
+    },
+    "main": "src/index.ts",
     "dependencies": {
         "long": "5.2.3",
         "pako": "2.1.0"

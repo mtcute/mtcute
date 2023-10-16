@@ -1,5 +1,7 @@
 import EventEmitter from 'events'
 
+import { concatBuffers } from '../../utils/index.js'
+
 /**
  * Base for streamed codecs.
  *
@@ -7,7 +9,7 @@ import EventEmitter from 'events'
  * multiple transport packets.
  */
 export abstract class StreamedCodec extends EventEmitter {
-    protected _stream = Buffer.alloc(0)
+    protected _stream = new Uint8Array(0)
 
     /**
      * Should return whether a full packet is available
@@ -22,8 +24,8 @@ export abstract class StreamedCodec extends EventEmitter {
      */
     protected abstract _handlePacket(): boolean
 
-    feed(data: Buffer): void {
-        this._stream = Buffer.concat([this._stream, data])
+    feed(data: Uint8Array): void {
+        this._stream = concatBuffers([this._stream, data])
 
         while (this._packetAvailable()) {
             if (!this._handlePacket()) break
@@ -31,6 +33,6 @@ export abstract class StreamedCodec extends EventEmitter {
     }
 
     reset(): void {
-        this._stream = Buffer.alloc(0)
+        this._stream = new Uint8Array(0)
     }
 }

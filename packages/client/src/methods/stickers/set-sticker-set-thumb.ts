@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { InputFileLike, InputStickerSet, normalizeInputStickerSet, StickerSet } from '../../types'
-import { _normalizeFileToDocument } from '../files/normalize-file-to-document'
+import { InputFileLike, InputStickerSet, normalizeInputStickerSet, StickerSet } from '../../types/index.js'
+import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
 
 /**
  * Set sticker set thumbnail

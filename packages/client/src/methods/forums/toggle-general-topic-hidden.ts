@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, Message } from '../../types'
-import { normalizeToInputChannel } from '../../utils/peer-utils'
-import { _findMessageInUpdate } from '../messages/find-in-update'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, Message } from '../../types/index.js'
+import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { _findMessageInUpdate } from '../messages/find-in-update.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Toggle whether "General" topic in a forum is hidden or not

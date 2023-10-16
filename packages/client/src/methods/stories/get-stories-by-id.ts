@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { InputPeerLike, PeersIndex, Story } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, PeersIndex, Story } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get one or more stories by their IDs

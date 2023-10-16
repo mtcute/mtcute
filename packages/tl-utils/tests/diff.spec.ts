@@ -1,10 +1,10 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { generateTlEntriesDifference, generateTlSchemasDifference } from '../src/diff'
-import { parseTlToEntries } from '../src/parse'
-import { parseFullTlSchema } from '../src/schema'
-import { TlEntryDiff, TlSchemaDiff } from '../src/types'
+import { generateTlEntriesDifference, generateTlSchemasDifference } from '../src/diff.js'
+import { parseTlToEntries } from '../src/parse.js'
+import { parseFullTlSchema } from '../src/schema.js'
+import { TlEntryDiff, TlSchemaDiff } from '../src/types.js'
 
 describe('generateTlEntriesDifference', () => {
     const test = (tl: string[], expected: TlEntryDiff) => {

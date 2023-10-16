@@ -1,9 +1,9 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { InputPeerLike, Photo } from '../../types'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { resolvePeer } from './resolve-peer'
+import { InputPeerLike, Photo } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { resolvePeer } from './resolve-peer.js'
 
 /**
  * Get a single profile picture of a user by its ID

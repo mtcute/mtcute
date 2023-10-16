@@ -1,5 +1,4 @@
-import { CallbackQuery, Message } from '@mtcute/client'
-import { assertNever, MaybeAsync } from '@mtcute/core'
+import { assertNever, CallbackQuery, MaybeAsync, Message } from '@mtcute/client'
 
 /**
  * Function that determines how the state key is derived.

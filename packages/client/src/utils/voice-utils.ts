@@ -1,10 +1,12 @@
+import { dataViewFromBuffer } from '@mtcute/core/utils.js'
+
 /**
  * Decode 5-bit encoded voice message waveform into
  * an array of waveform values (0-32).
  *
  * @param wf  Encoded waveform
  */
-export function decodeWaveform(wf: Buffer): number[] {
+export function decodeWaveform(wf: Uint8Array): number[] {
     const bitsCount = wf.length * 8
     const valuesCount = ~~(bitsCount / 5)
 
@@ -22,16 +24,17 @@ export function decodeWaveform(wf: Buffer): number[] {
     // So we read in a general way all the entries except the last one.
 
     const result: number[] = []
+    const dv = dataViewFromBuffer(wf)
 
     for (let i = 0, j = 0; i < lastIdx; i++, j += 5) {
         const byteIdx = ~~(j / 8)
         const bitShift = j % 8
-        result[i] = (wf.readUInt16LE(byteIdx) >> bitShift) & 0b11111
+        result[i] = (dv.getUint16(byteIdx, true) >> bitShift) & 0b11111
     }
 
     const lastByteIdx = ~~((lastIdx * 5) / 8)
     const lastBitShift = (lastIdx * 5) % 8
-    const lastValue = lastByteIdx === wf.length - 1 ? wf[lastByteIdx] : wf.readUInt16LE(lastByteIdx)
+    const lastValue = lastByteIdx === wf.length - 1 ? wf[lastByteIdx] : dv.getUint16(lastByteIdx, true)
     result[lastIdx] = (lastValue >> lastBitShift) & 0b11111
 
     return result
@@ -43,10 +46,11 @@ export function decodeWaveform(wf: Buffer): number[] {
  *
  * @param wf  Waveform values
  */
-export function encodeWaveform(wf: number[]): Buffer {
+export function encodeWaveform(wf: number[]): Uint8Array {
     const bitsCount = wf.length * 5
     const bytesCount = ~~(bitsCount + 7) / 8
-    const result = Buffer.alloc(bytesCount + 1)
+    const result = new Uint8Array(bytesCount + 1)
+    const dv = dataViewFromBuffer(result)
 
     // Write each 0-31 unsigned char as 5 bit to result.
     // We reserve one extra byte to be able to dereference any of required bytes
@@ -57,8 +61,9 @@ export function encodeWaveform(wf: number[]): Buffer {
         const bitShift = j % 8
         const value = (wf[i] & 0b11111) << bitShift
 
-        const old = result.readUInt16LE(byteIdx)
-        result.writeUInt16LE(old | value, byteIdx)
+        // const old = result.readUInt16LE(byteIdx)
+        // result.writeUInt16LE(old | value, byteIdx)
+        dv.setUint16(byteIdx, dv.getUint16(byteIdx, true) | value, true)
     }
 
     return result.slice(0, bytesCount)

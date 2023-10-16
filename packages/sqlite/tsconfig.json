@@ -1,9 +1,12 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "outDir": "./dist"
+        "outDir": "./dist/esm"
     },
     "include": [
         "./index.ts"
+    ],
+    "references": [
+        { "path": "../core" }
     ]
 }

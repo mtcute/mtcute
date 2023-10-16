@@ -1,11 +1,11 @@
 import { BaseTelegramClient, MaybeArray, tl } from '@mtcute/core'
-import { assertTypeIsNot } from '@mtcute/core/utils'
+import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
-import { Message } from '../../types/messages'
-import { InputPeerLike, PeersIndex } from '../../types/peers'
-import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils'
-import { getAuthState } from '../auth/_state'
-import { resolvePeer } from '../users/resolve-peer'
+import { Message } from '../../types/messages/index.js'
+import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
+import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { getAuthState } from '../auth/_state.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 // @available=both
 /**

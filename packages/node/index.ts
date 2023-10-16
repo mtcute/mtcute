@@ -1,7 +1,7 @@
+import { createRequire } from 'module'
 import { createInterface, Interface as RlInterface } from 'readline'
 
-import { TelegramClient, User } from '@mtcute/client'
-import { BaseTelegramClientOptions } from '@mtcute/core'
+import { TelegramClient, TelegramClientOptions, User } from '@mtcute/client'
 import { HtmlMessageEntityParser } from '@mtcute/html-parser'
 import { MarkdownMessageEntityParser } from '@mtcute/markdown-parser'
 import { SqliteStorage } from '@mtcute/sqlite'
@@ -16,11 +16,14 @@ export { SqliteStorage }
 let nativeCrypto: any
 
 try {
+    // @only-if-esm
+    const require = createRequire(import.meta.url)
+    // @/only-if-esm
     // eslint-disable-next-line
     nativeCrypto = require('@mtcute/crypto-node').NodeNativeCryptoProvider
 } catch (e) {}
 
-export interface NodeTelegramClientOptions extends Omit<BaseTelegramClientOptions, 'storage'> {
+export interface NodeTelegramClientOptions extends Omit<TelegramClientOptions, 'storage'> {
     /**
      * Default parse mode to use.
      *
@@ -40,7 +43,7 @@ export interface NodeTelegramClientOptions extends Omit<BaseTelegramClientOption
      * Defaults to SQLite storage in `client.session` file in
      * current working directory
      */
-    storage?: BaseTelegramClientOptions['storage'] | string
+    storage?: TelegramClientOptions['storage'] | string
 }
 
 /**

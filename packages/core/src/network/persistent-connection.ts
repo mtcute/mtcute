@@ -2,10 +2,10 @@ import EventEmitter from 'events'
 
 import { tl } from '@mtcute/tl'
 
-import { MtcuteError } from '../types'
-import { ICryptoProvider, Logger } from '../utils'
-import { ReconnectionStrategy } from './reconnection'
-import { ITelegramTransport, TransportFactory, TransportState } from './transports'
+import { MtcuteError } from '../types/index.js'
+import { ICryptoProvider, Logger } from '../utils/index.js'
+import { ReconnectionStrategy } from './reconnection.js'
+import { ITelegramTransport, TransportFactory, TransportState } from './transports/index.js'
 
 export interface PersistentConnectionParams {
     crypto: ICryptoProvider
@@ -29,7 +29,7 @@ export abstract class PersistentConnection extends EventEmitter {
     readonly params: PersistentConnectionParams
     protected _transport!: ITelegramTransport
 
-    private _sendOnceConnected: Buffer[] = []
+    private _sendOnceConnected: Uint8Array[] = []
 
     // reconnection
     private _lastError: Error | null = null
@@ -48,7 +48,7 @@ export abstract class PersistentConnection extends EventEmitter {
 
     protected abstract onError(err: Error): void
 
-    protected abstract onMessage(data: Buffer): void
+    protected abstract onMessage(data: Uint8Array): void
 
     protected constructor(
         params: PersistentConnectionParams,
@@ -219,7 +219,7 @@ export abstract class PersistentConnection extends EventEmitter {
         }
     }
 
-    async send(data: Buffer): Promise<void> {
+    async send(data: Uint8Array): Promise<void> {
         if (this._inactive) {
             this.connect()
         }

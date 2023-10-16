@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
         "outDir": "./dist",
-        "module": "commonjs",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "target": "es2020",
         "allowJs": true,
         "sourceMap": true,
@@ -18,15 +19,14 @@
         "paths": {
             "~scripts/*": ["./scripts/*"],
         },
-        "typeRoots": [
-            "./node_modules/@types",
-            "./tsfixes.d.ts"
-        ]
+        "composite": true
     },
     "ts-node": {
         "require": [
             "tsconfig-paths/register"
-        ]
+        ],
+        "esm": true,
+        "experimentalSpecifierResolution": "node"
     },
     "exclude": [
         "**/node_modules",

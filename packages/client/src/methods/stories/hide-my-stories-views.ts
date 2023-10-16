@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MtTypeAssertionError } from '@mtcute/core'
 
-import { StoriesStealthMode } from '../../types/stories/stealth-mode'
-import { assertIsUpdatesGroup, hasValueAtKey } from '../../utils'
+import { StoriesStealthMode } from '../../types/stories/stealth-mode.js'
+import { assertIsUpdatesGroup, hasValueAtKey } from '../../utils/index.js'
 
 /**
  * Hide own stories views (activate so called "stealth mode")

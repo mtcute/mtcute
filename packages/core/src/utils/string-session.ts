@@ -1,16 +1,22 @@
 import { tl } from '@mtcute/tl'
-import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import {
+    base64DecodeToBuffer,
+    base64Encode,
+    TlBinaryReader,
+    TlBinaryWriter,
+    TlReaderMap,
+    TlWriterMap,
+} from '@mtcute/tl-runtime'
 
-import { ITelegramStorage } from '../storage'
-import { MtArgumentError } from '../types'
-import { encodeUrlSafeBase64, parseUrlSafeBase64 } from './buffer-utils'
+import { ITelegramStorage } from '../storage/index.js'
+import { MtArgumentError } from '../types/index.js'
 
 export interface StringSessionData {
     version: number
     testMode: boolean
     primaryDcs: ITelegramStorage.DcOptions
     self?: ITelegramStorage.SelfInfo | null
-    authKey: Buffer
+    authKey: Uint8Array
 }
 
 export function writeStringSession(writerMap: TlWriterMap, data: StringSessionData): string {
@@ -32,7 +38,7 @@ export function writeStringSession(writerMap: TlWriterMap, data: StringSessionDa
         flags |= 2
     }
 
-    writer.buffer[0] = version
+    writer.uint8View[0] = version
     writer.pos += 1
 
     writer.int(flags)
@@ -50,11 +56,11 @@ export function writeStringSession(writerMap: TlWriterMap, data: StringSessionDa
 
     writer.bytes(data.authKey)
 
-    return encodeUrlSafeBase64(writer.result())
+    return base64Encode(writer.result(), true)
 }
 
 export function readStringSession(readerMap: TlReaderMap, data: string): StringSessionData {
-    const buf = parseUrlSafeBase64(data)
+    const buf = base64DecodeToBuffer(data, true)
 
     const version = buf[0]
 

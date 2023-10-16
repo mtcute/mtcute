@@ -1,10 +1,10 @@
 import { tl } from '@mtcute/core'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { FileLocation } from '../files'
-import { Thumbnail } from './thumbnail'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { FileLocation } from '../files/index.js'
+import { Thumbnail } from './thumbnail.js'
 
 /**
  * A file that is represented as a document in MTProto.

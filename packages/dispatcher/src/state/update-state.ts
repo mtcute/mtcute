@@ -1,7 +1,7 @@
-import { MtArgumentError, MtcuteError } from '@mtcute/core'
-import { sleep } from '@mtcute/core/utils'
+import { MtArgumentError, MtcuteError } from '@mtcute/client'
+import { sleep } from '@mtcute/client/utils.js'
 
-import { IStateStorage } from './storage'
+import { IStateStorage } from './storage.js'
 
 /**
  * Error thrown by `.rateLimit()`

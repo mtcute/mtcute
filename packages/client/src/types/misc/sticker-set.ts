@@ -1,12 +1,12 @@
 import { MtTypeAssertionError, tl } from '@mtcute/core'
-import { LongMap } from '@mtcute/core/utils'
+import { LongMap } from '@mtcute/core/utils.js'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { MtEmptyError } from '../errors'
-import { InputFileLike } from '../files'
-import { MaskPosition, Sticker, StickerSourceType, StickerType, Thumbnail } from '../media'
-import { parseDocument } from '../media/document-utils'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { MtEmptyError } from '../errors.js'
+import { InputFileLike } from '../files/index.js'
+import { parseDocument } from '../media/document-utils.js'
+import { MaskPosition, Sticker, StickerSourceType, StickerType, Thumbnail } from '../media/index.js'
 
 /**
  * Input sticker set.

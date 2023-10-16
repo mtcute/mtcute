@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { BotCommands } from '../../types'
-import { _normalizeCommandScope } from './normalize-command-scope'
+import { BotCommands } from '../../types/index.js'
+import { _normalizeCommandScope } from './normalize-command-scope.js'
 
 /**
  * Get a list of current bot's commands for the given command scope

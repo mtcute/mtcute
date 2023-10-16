@@ -2,8 +2,8 @@ import EventEmitter from 'events'
 
 import { tl } from '@mtcute/tl'
 
-import { MaybeAsync } from '../../types'
-import { ICryptoProvider, Logger } from '../../utils'
+import { MaybeAsync } from '../../types/index.js'
+import { ICryptoProvider, Logger } from '../../utils/index.js'
 
 export enum TransportState {
     /**
@@ -49,7 +49,7 @@ export interface ITelegramTransport extends EventEmitter {
     /** call to close existing connection to some DC */
     close(): void
     /** send a message */
-    send(data: Buffer): Promise<void>
+    send(data: Uint8Array): Promise<void>
 
     /**
      * Provides crypto and logging for the transport.
@@ -72,13 +72,13 @@ export type TransportFactory = () => ITelegramTransport
  */
 export interface IPacketCodec {
     /** Initial tag of the codec. Will be sent immediately once connected. */
-    tag(): MaybeAsync<Buffer>
+    tag(): MaybeAsync<Uint8Array>
 
     /** Encodes and frames a single packet */
-    encode(packet: Buffer): MaybeAsync<Buffer>
+    encode(packet: Uint8Array): MaybeAsync<Uint8Array>
 
     /** Feed packet to the codec. Once packet is processed, codec is supposed to emit `packet` or `error` */
-    feed(data: Buffer): void
+    feed(data: Uint8Array): void
     /** Reset codec state (for example, reset buffer) */
     reset(): void
 
@@ -91,7 +91,7 @@ export interface IPacketCodec {
      */
     on(event: 'error', handler: (error: Error) => void): void
     /** Emitted when a full packet has been processed. */
-    on(event: 'packet', handler: (packet: Buffer) => void): void
+    on(event: 'packet', handler: (packet: Uint8Array) => void): void
 
     /**
      * For codecs that use crypto functions and/or logging.

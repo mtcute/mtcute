@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { Photo } from '../media'
-import { User } from './user'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { Photo } from '../media/index.js'
+import { User } from './user.js'
 
 /**
  * Chat type. Can be:

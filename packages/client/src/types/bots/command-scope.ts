@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/core'
 
-import { InputPeerLike } from '../peers'
+import { InputPeerLike } from '../peers/index.js'
 
 /**
  * Helper constants and builder functions for methods

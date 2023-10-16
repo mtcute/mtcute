@@ -1,8 +1,8 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { ArrayPaginated, ChatInviteLink, ChatInviteLinkMember, InputPeerLike, PeersIndex } from '../../types'
-import { makeArrayPaginated, normalizeDate, normalizeToInputUser } from '../../utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { ArrayPaginated, ChatInviteLink, ChatInviteLinkMember, InputPeerLike, PeersIndex } from '../../types/index.js'
+import { makeArrayPaginated, normalizeDate, normalizeToInputUser } from '../../utils/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Iterate over users who have joined

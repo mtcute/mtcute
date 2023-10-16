@@ -1,9 +1,9 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types'
-import { isInputPeerChannel, isInputPeerChat, isInputPeerUser, normalizeToInputChannel } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types/index.js'
+import { isInputPeerChannel, isInputPeerChat, isInputPeerUser, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get information about a single chat member

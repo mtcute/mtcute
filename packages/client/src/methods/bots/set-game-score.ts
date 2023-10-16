@@ -1,10 +1,10 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { InputMessageId, InputPeerLike, Message, normalizeInputMessageId } from '../../types'
-import { normalizeInlineId } from '../../utils/inline-utils'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { _findMessageInUpdate } from '../messages/find-in-update'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputMessageId, InputPeerLike, Message, normalizeInputMessageId } from '../../types/index.js'
+import { normalizeInlineId } from '../../utils/inline-utils.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { _findMessageInUpdate } from '../messages/find-in-update.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Set a score of a user in a game

@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MaybeArray, tl } from '@mtcute/core'
 
-import { InputPeerLike, Message, PeersIndex } from '../../types'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, Message, PeersIndex } from '../../types/index.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Send previously scheduled message(s)

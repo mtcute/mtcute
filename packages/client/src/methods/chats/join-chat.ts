@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { Chat, InputPeerLike } from '../../types'
-import { INVITE_LINK_REGEX, normalizeToInputChannel } from '../../utils/peer-utils'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { Chat, InputPeerLike } from '../../types/index.js'
+import { INVITE_LINK_REGEX, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Join a channel or supergroup

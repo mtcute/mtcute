@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { isInputPeerChannel } from '../../utils/peer-utils'
-import { createDummyUpdate } from '../../utils/updates-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike } from '../../types/index.js'
+import { isInputPeerChannel } from '../../utils/peer-utils.js'
+import { createDummyUpdate } from '../../utils/updates-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Unpin all pinned messages in a chat.

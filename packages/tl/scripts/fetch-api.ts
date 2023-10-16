@@ -9,7 +9,7 @@ import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import * as readline from 'readline'
 
-import { hasPresentKey, isPresent } from '@mtcute/core/utils'
+import { hasPresentKey, isPresent } from '@mtcute/core/utils.js'
 import {
     generateTlSchemasDifference,
     mergeTlEntries,
@@ -22,6 +22,7 @@ import {
 } from '@mtcute/tl-utils'
 
 import {
+    __dirname,
     API_SCHEMA_DIFF_JSON_FILE,
     API_SCHEMA_JSON_FILE,
     BLOGFORK_DOMAIN,
@@ -30,12 +31,12 @@ import {
     TDESKTOP_LAYER,
     TDESKTOP_SCHEMA,
     TDLIB_SCHEMA,
-} from './constants'
-import { applyDocumentation, fetchDocumentation, getCachedDocumentation } from './documentation'
-import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema'
-import { fetchRetry } from './utils'
+} from './constants.js'
+import { applyDocumentation, fetchDocumentation, getCachedDocumentation } from './documentation.js'
+import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema.js'
+import { fetchRetry } from './utils.js'
 
-import { bumpVersion } from '~scripts/version'
+import { bumpVersion } from '~scripts/version.js'
 
 const README_MD_FILE = join(__dirname, '../README.md')
 const PACKAGE_JSON_FILE = join(__dirname, '../package.json')

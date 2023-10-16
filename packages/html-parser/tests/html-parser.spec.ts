@@ -4,7 +4,7 @@ import { describe, it } from 'mocha'
 
 import { FormattedString, tl } from '@mtcute/client'
 
-import { html, HtmlMessageEntityParser } from '../src'
+import { html, HtmlMessageEntityParser } from '../src/index.js'
 
 const createEntity = <T extends tl.TypeMessageEntity['_']>(
     type: T,

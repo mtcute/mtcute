@@ -1,12 +1,18 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "outDir": "./dist"
+        "outDir": "./dist/esm",
+        "rootDir": "./src",
+        "paths": {
+            "@mtcute/dispatcher": ["../dispatcher/src/state/storage.ts"],
+        }
     },
     "include": [
         "./src",
-        "./tests",
-        "./utils.ts",
+    ],
+    "references": [
+        { "path": "../tl" },
+        { "path": "../tl-runtime" },
     ],
     "typedocOptions": {
         "name": "@mtcute/core",

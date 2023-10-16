@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 
-import { User } from '../../types'
-import { logOut } from './log-out'
-import { start } from './start'
+import { User } from '../../types/index.js'
+import { logOut } from './log-out.js'
+import { start } from './start.js'
 
 /**
  * Utility function to quickly authorize on test DC

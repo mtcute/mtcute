@@ -1,8 +1,8 @@
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import { generateReaderCodeForTlEntries } from './codegen/reader'
-import { generateWriterCodeForTlEntries } from './codegen/writer'
-import { parseTlToEntries } from './parse'
+import { generateReaderCodeForTlEntries } from './codegen/reader.js'
+import { generateWriterCodeForTlEntries } from './codegen/writer.js'
+import { parseTlToEntries } from './parse.js'
 
 function evalForResult<T>(js: string): T {
     // eslint-disable-next-line @typescript-eslint/no-implied-eval

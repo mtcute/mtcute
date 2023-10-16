@@ -1,8 +1,8 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { InputPrivacyRule } from '../../types'
-import { normalizeToInputUser } from '../../utils'
-import { resolvePeerMany } from '../users/resolve-peer-many'
+import { InputPrivacyRule } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/index.js'
+import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**
  * Normalize {@link InputPrivacyRule}[] to `tl.TypeInputPrivacyRule`,

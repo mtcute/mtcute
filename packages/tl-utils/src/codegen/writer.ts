@@ -1,7 +1,7 @@
-import { calculateStaticSizes } from '../calculator'
-import { computeConstructorIdFromEntry } from '../ctor-id'
-import { TL_PRIMITIVES, TlArgument, TlEntry } from '../types'
-import { snakeToCamel } from './utils'
+import { calculateStaticSizes } from '../calculator.js'
+import { computeConstructorIdFromEntry } from '../ctor-id.js'
+import { TL_PRIMITIVES, TlArgument, TlEntry } from '../types.js'
+import { snakeToCamel } from './utils.js'
 
 export interface WriterCodegenOptions {
     /**

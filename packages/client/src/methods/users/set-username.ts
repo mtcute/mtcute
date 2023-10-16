@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { User } from '../../types'
-import { getAuthState } from '../auth/_state'
+import { User } from '../../types/index.js'
+import { getAuthState } from '../auth/_state.js'
 
 /**
  * Change username of the current user.

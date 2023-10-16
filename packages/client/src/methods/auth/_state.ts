@@ -1,14 +1,11 @@
 /* eslint-disable no-inner-declarations */
 import { BaseTelegramClient, MtUnsupportedError, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { User } from '../../types/peers/user'
+import { User } from '../../types/peers/user.js'
 
 const STATE_SYMBOL = Symbol('authState')
-/**
- * @internal
- * @exported
- */
+/** @exported */
 export interface AuthState {
     // local copy of "self" in storage,
     // so we can use it w/out relying on storage.
@@ -20,7 +17,6 @@ export interface AuthState {
     selfChanged?: boolean
 }
 
-/** @internal */
 export function getAuthState(client: BaseTelegramClient): AuthState {
     // eslint-disable-next-line
     let state: AuthState = (client as any)[STATE_SYMBOL]

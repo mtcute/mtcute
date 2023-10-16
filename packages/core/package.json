@@ -6,17 +6,39 @@
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
     "main": "src/index.ts",
+    "type": "module",
     "scripts": {
-        "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
-        "build": "tsc",
+        "test": "mocha \"tests/**/*.spec.ts\"",
+        "build": "pnpm run -w build-package core",
         "docs": "typedoc"
     },
     "browser": {
-        "./utils/platform/crypto.js": "./utils/platform/crypto.web.js",
-        "./utils/platform/transport.js": "./utils/platform/transport.web.js",
-        "./utils/platform/logging.js": "./utils/platform/logging.web.js",
-        "./utils/platform/random.js": "./utils/platform/random.web.js",
-        "./storage/json-file.js": false
+        "./cjs/utils/platform/crypto.js": "./cjs/utils/platform/crypto.web.js",
+        "./esm/utils/platform/crypto.js": "./esm/utils/platform/crypto.web.js",
+        "./cjs/utils/platform/transport.js": "./cjs/utils/platform/transport.web.js",
+        "./esm/utils/platform/transport.js": "./esm/utils/platform/transport.web.js",
+        "./cjs/utils/platform/logging.js": "./cjs/utils/platform/logging.web.js",
+        "./esm/utils/platform/logging.js": "./esm/utils/platform/logging.web.js",
+        "./cjs/utils/platform/random.js": "./cjs/utils/platform/random.web.js",
+        "./esm/utils/platform/random.js": "./esm/utils/platform/random.web.js",
+        "./cjs/storage/json-file.js": false,
+        "./esm/storage/json-file.js": false
+    },
+    "distOnlyFields": {
+        "exports": {
+            ".": {
+                "import": "./esm/index.js",
+                "require": "./cjs/index.js"
+            },
+            "./utils.js": {
+                "import": "./esm/utils/index.js",
+                "require": "./cjs/utils/index.js"
+            },
+            "./utils/crypto/*.js": {
+                "import": "./esm/utils/crypto/*.js",
+                "require": "./cjs/utils/crypto/*.js"
+            }
+        }
     },
     "dependencies": {
         "@mtcute/tl": "workspace:^165.0.0",
@@ -28,8 +50,9 @@
         "long": "5.2.3"
     },
     "devDependencies": {
-        "@mtcute/dispatcher": "workspace:^1.0.0",
+        "@cryptography/aes": "^0.1.1",
         "@types/ws": "8.5.4",
+        "node-forge": "1.3.1",
         "ws": "8.13.0"
     }
 }

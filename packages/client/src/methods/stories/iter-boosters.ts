@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { Booster } from '../../types/stories/booster'
-import { resolvePeer } from '../users/resolve-peer'
-import { getBoosters } from './get-boosters'
+import { InputPeerLike } from '../../types/index.js'
+import { Booster } from '../../types/stories/booster.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getBoosters } from './get-boosters.js'
 
 /**
  * Iterate over boosters of a channel.

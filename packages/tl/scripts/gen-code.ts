@@ -11,8 +11,8 @@ import {
     TlFullSchema,
 } from '@mtcute/tl-utils'
 
-import { API_SCHEMA_JSON_FILE, ERRORS_JSON_FILE, ESM_PRELUDE, MTP_SCHEMA_JSON_FILE } from './constants'
-import { TlPackedSchema, unpackTlSchema } from './schema'
+import { __dirname, API_SCHEMA_JSON_FILE, ERRORS_JSON_FILE, ESM_PRELUDE, MTP_SCHEMA_JSON_FILE } from './constants.js'
+import { TlPackedSchema, unpackTlSchema } from './schema.js'
 
 const OUT_TYPINGS_FILE = join(__dirname, '../index.d.ts')
 const OUT_TYPINGS_JS_FILE = join(__dirname, '../index.js')
@@ -41,7 +41,7 @@ async function generateReaders(apiSchema: TlFullSchema, mtpSchema: TlFullSchema)
         variableName: 'm',
     })
     code = code.substring(0, code.length - 1) + mtpCode.substring(8)
-    code += '\nexports.default = m;'
+    code += '\nexports.__tlReaderMap = m;'
 
     await writeFile(OUT_READERS_FILE, ESM_PRELUDE + code)
 }
@@ -54,7 +54,7 @@ async function generateWriters(apiSchema: TlFullSchema, mtpSchema: TlFullSchema)
         includeStaticSizes: true,
     })
 
-    code += '\nexports.default = m;'
+    code += '\nexports.__tlWriterMap = m;'
 
     await writeFile(OUT_WRITERS_FILE, ESM_PRELUDE + code)
 }

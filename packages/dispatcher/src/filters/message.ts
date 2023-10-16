@@ -2,6 +2,7 @@
 // ^^ will be looked into in MTQ-29
 import {
     Chat,
+    MaybeArray,
     Message,
     MessageAction,
     MessageMediaType,
@@ -13,9 +14,8 @@ import {
     User,
     Video,
 } from '@mtcute/client'
-import { MaybeArray } from '@mtcute/core'
 
-import { Modify, UpdateFilter } from './types'
+import { Modify, UpdateFilter } from './types.js'
 
 /**
  * Filter incoming messages.

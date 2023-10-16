@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { ChatMember, InputPeerLike } from '../../types'
-import { isInputPeerChat } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { getChatMembers } from './get-chat-members'
+import { ChatMember, InputPeerLike } from '../../types/index.js'
+import { isInputPeerChat } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getChatMembers } from './get-chat-members.js'
 
 /**
  * Iterate through chat members

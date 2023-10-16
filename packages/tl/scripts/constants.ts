@@ -1,4 +1,7 @@
 import { join } from 'path'
+import * as url from 'url'
+
+export const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
 export const DOC_CACHE_FILE = join(__dirname, '.documentation.cache.json')
 export const DESCRIPTIONS_YAML_FILE = join(__dirname, '../data/descriptions.yaml')

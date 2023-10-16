@@ -1,9 +1,9 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { BotKeyboard, FormattedString, InputMediaLike, ReplyMarkup } from '../../types'
-import { normalizeInlineId } from '../../utils/inline-utils'
-import { _normalizeInputMedia } from '../files/normalize-input-media'
-import { _parseEntities } from './parse-entities'
+import { BotKeyboard, FormattedString, InputMediaLike, ReplyMarkup } from '../../types/index.js'
+import { normalizeInlineId } from '../../utils/inline-utils.js'
+import { _normalizeInputMedia } from '../files/normalize-input-media.js'
+import { _parseEntities } from './parse-entities.js'
 
 /**
  * Edit sent inline message text, media and reply markup.

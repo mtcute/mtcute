@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/tl'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import { BasicPeerType, MaybeAsync } from '../types'
-import { Logger } from '../utils'
+import { BasicPeerType, MaybeAsync } from '../types/index.js'
+import { Logger } from '../utils/index.js'
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ITelegramStorage {
@@ -88,16 +88,16 @@ export interface ITelegramStorage {
      * @param dcId DC ID
      * @param tempIndex  Index of the temporary key (usually 0, used for multi-connections)
      */
-    getAuthKeyFor(dcId: number, tempIndex?: number): MaybeAsync<Buffer | null>
+    getAuthKeyFor(dcId: number, tempIndex?: number): MaybeAsync<Uint8Array | null>
     /**
      * Set auth_key for a given DC
      */
-    setAuthKeyFor(dcId: number, key: Buffer | null): MaybeAsync<void>
+    setAuthKeyFor(dcId: number, key: Uint8Array | null): MaybeAsync<void>
     /**
      * Set temp_auth_key for a given DC
      * expiresAt is unix time in ms
      */
-    setTempAuthKeyFor(dcId: number, index: number, key: Buffer | null, expiresAt: number): MaybeAsync<void>
+    setTempAuthKeyFor(dcId: number, index: number, key: Uint8Array | null, expiresAt: number): MaybeAsync<void>
     /**
      * Remove all saved auth keys (both temp and perm)
      * for the given DC. Used when perm_key becomes invalid,

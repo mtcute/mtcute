@@ -1,10 +1,10 @@
 import { tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { decodeWaveform } from '../../utils/voice-utils'
-import { RawDocument } from './document'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { decodeWaveform } from '../../utils/voice-utils.js'
+import { RawDocument } from './document.js'
 
 /**
  * An voice note.

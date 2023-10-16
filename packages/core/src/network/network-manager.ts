@@ -1,16 +1,16 @@
 import { tl } from '@mtcute/tl'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import { ITelegramStorage } from '../storage'
-import { MtArgumentError, MtcuteError } from '../types'
-import { createControllablePromise, ICryptoProvider, Logger, sleep } from '../utils'
-import { assertTypeIs } from '../utils/type-assertions'
-import { ConfigManager } from './config-manager'
-import { MultiSessionConnection } from './multi-session-connection'
-import { PersistentConnectionParams } from './persistent-connection'
-import { defaultReconnectionStrategy, ReconnectionStrategy } from './reconnection'
-import { SessionConnection, SessionConnectionParams } from './session-connection'
-import { defaultTransportFactory, TransportFactory } from './transports'
+import { ITelegramStorage } from '../storage/index.js'
+import { MtArgumentError, MtcuteError } from '../types/index.js'
+import { createControllablePromise, ICryptoProvider, Logger, sleep } from '../utils/index.js'
+import { assertTypeIs } from '../utils/type-assertions.js'
+import { ConfigManager } from './config-manager.js'
+import { MultiSessionConnection } from './multi-session-connection.js'
+import { PersistentConnectionParams } from './persistent-connection.js'
+import { defaultReconnectionStrategy, ReconnectionStrategy } from './reconnection.js'
+import { SessionConnection, SessionConnectionParams } from './session-connection.js'
+import { defaultTransportFactory, TransportFactory } from './transports/index.js'
 
 export type ConnectionKind = 'main' | 'upload' | 'download' | 'downloadSmall'
 
@@ -223,7 +223,7 @@ export class DcConnectionManager {
     private _setupMulti(kind: ConnectionKind): void {
         const connection = this[kind]
 
-        connection.on('key-change', (idx, key: Buffer | null) => {
+        connection.on('key-change', (idx, key: Uint8Array | null) => {
             if (kind !== 'main') {
                 // main connection is responsible for authorization,
                 // and keys are then sent to other connections
@@ -248,7 +248,7 @@ export class DcConnectionManager {
                 })
                 .catch((e: Error) => this.manager.params._emitError(e))
         })
-        connection.on('tmp-key-change', (idx: number, key: Buffer | null, expires: number) => {
+        connection.on('tmp-key-change', (idx: number, key: Uint8Array | null, expires: number) => {
             if (kind !== 'main') {
                 this.manager._log.warn('got tmp-key-change from non-main connection, ignoring')
 
@@ -370,22 +370,11 @@ export class NetworkManager {
         readonly config: ConfigManager,
     ) {
         let deviceModel = 'mtcute on '
-        let appVersion = 'unknown'
+        /* eslint-disable no-restricted-globals */
         if (typeof process !== 'undefined' && typeof require !== 'undefined') {
             const os = require('os') as typeof import('os')
             deviceModel += `${os.type()} ${os.arch()} ${os.release()}`
-
-            try {
-                // for production builds
-
-                appVersion = (require('../package.json') as { version: string }).version
-            } catch (e) {
-                try {
-                    // for development builds (additional /src/ in path)
-
-                    appVersion = (require('../../package.json') as { version: string }).version
-                } catch (e) {}
-            }
+            /* eslint-enable no-restricted-globals */
         } else if (typeof navigator !== 'undefined') {
             deviceModel += navigator.userAgent
         } else deviceModel += 'unknown'
@@ -394,7 +383,7 @@ export class NetworkManager {
             _: 'initConnection',
             deviceModel,
             systemVersion: '1.0',
-            appVersion,
+            appVersion: '%VERSION%',
             systemLangCode: 'en',
             langPack: '', // "langPacks are for official apps only"
             langCode: 'en',
@@ -734,7 +723,7 @@ export class NetworkManager {
         throw lastError!
     }
 
-    setUpdateHandler(handler: NetworkManager['_updateHandler']): void {
+    setUpdateHandler(handler: (upd: tl.TypeUpdates, fromClient: boolean) => void): void {
         this._updateHandler = handler
     }
 

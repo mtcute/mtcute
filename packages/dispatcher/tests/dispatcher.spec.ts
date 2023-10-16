@@ -3,7 +3,7 @@ import { describe, it } from 'mocha'
 
 import { PeersIndex, TelegramClient } from '@mtcute/client'
 
-import { Dispatcher, PropagationAction } from '../src'
+import { Dispatcher, PropagationAction } from '../src/index.js'
 
 describe('Dispatcher', () => {
     // todo: replace with proper mocked TelegramClient

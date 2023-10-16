@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { PeersIndex } from '../peers/peers-index'
-import { User } from '../peers/user'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { PeersIndex } from '../peers/peers-index.js'
+import { User } from '../peers/user.js'
 
 /**
  * Game high score

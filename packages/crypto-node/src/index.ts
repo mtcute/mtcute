@@ -1,7 +1,10 @@
-import { IEncryptionScheme, NodeCryptoProvider } from '@mtcute/core/utils'
+import { NodeCryptoProvider } from '@mtcute/core/src/utils/crypto/node-crypto.js'
+import { IEncryptionScheme } from '@mtcute/core/utils.js'
+
+import { native } from './native.cjs'
 
 // eslint-disable-next-line camelcase
-import { ige256_decrypt, ige256_encrypt } from './native'
+const { ige256_decrypt, ige256_encrypt } = native
 
 /**
  * Crypto provider for NodeJS that uses a native extension to improve
@@ -11,12 +14,12 @@ import { ige256_decrypt, ige256_encrypt } from './native'
  * they *are* faster than the custom ones.
  */
 export class NodeNativeCryptoProvider extends NodeCryptoProvider {
-    createAesIge(key: Buffer, iv: Buffer): IEncryptionScheme {
+    createAesIge(key: Uint8Array, iv: Uint8Array): IEncryptionScheme {
         return {
-            encrypt(data: Buffer): Buffer {
+            encrypt(data: Uint8Array): Uint8Array {
                 return ige256_encrypt(data, key, iv)
             },
-            decrypt(data: Buffer): Buffer {
+            decrypt(data: Uint8Array): Uint8Array {
                 return ige256_decrypt(data, key, iv)
             },
         }

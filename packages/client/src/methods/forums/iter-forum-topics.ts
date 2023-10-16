@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { ForumTopic, InputPeerLike } from '../../types'
-import { normalizeToInputChannel } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { getForumTopics } from './get-forum-topics'
+import { ForumTopic, InputPeerLike } from '../../types/index.js'
+import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getForumTopics } from './get-forum-topics.js'
 
 /**
  * Iterate over forum topics. Wrapper over {@link getForumTopics}.

@@ -1,9 +1,9 @@
 import { Long, tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { MessageEntity } from '../messages/message-entity'
-import { PeersIndex } from '../peers/peers-index'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { MessageEntity } from '../messages/message-entity.js'
+import { PeersIndex } from '../peers/peers-index.js'
 
 export interface PollAnswer {
     /**
@@ -15,7 +15,7 @@ export interface PollAnswer {
      * Answer data, to be passed to
      * {@link TelegramClient.sendVote}
      */
-    data: Buffer
+    data: Uint8Array
 
     /**
      * Number of people who has chosen this result.

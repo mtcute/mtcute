@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { ChatInviteLink, InputPeerLike } from '../../types'
-import { normalizeDate } from '../../utils/misc-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { ChatInviteLink, InputPeerLike } from '../../types/index.js'
+import { normalizeDate } from '../../utils/misc-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Create an additional invite link for the chat.

@@ -1,8 +1,8 @@
 import { getMarkedPeerId, tl } from '@mtcute/core'
 
-import { _callDiscardReasonFromTl, CallDiscardReason } from '../calls'
-import { Photo } from '../media'
-import type { Message } from './message'
+import { _callDiscardReasonFromTl, CallDiscardReason } from '../calls/index.js'
+import { Photo } from '../media/index.js'
+import type { Message } from './message.js'
 
 /** Group was created */
 export interface ActionChatCreated {
@@ -145,7 +145,7 @@ export interface ActionPaymentReceived {
     readonly amount: tl.Long
 
     /** Bot specified invoice payload */
-    readonly payload: Buffer
+    readonly payload: Uint8Array
 
     /** Order information provided by the user */
     readonly info?: tl.TypePaymentRequestedInfo

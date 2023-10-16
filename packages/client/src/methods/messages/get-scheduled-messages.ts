@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
-import { assertTypeIsNot } from '@mtcute/core/utils'
+import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
-import { InputPeerLike, Message, PeersIndex } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, Message, PeersIndex } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get scheduled messages in chat by their IDs

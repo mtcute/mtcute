@@ -1,8 +1,8 @@
 import { getBarePeerId, tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { PeersIndex, User } from '../peers'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { PeersIndex, User } from '../peers/index.js'
 
 /**
  * This update is sent when a user requests to join a chat

@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 import { fileIdToInputDocument, tdFileId } from '@mtcute/file-id'
 
-import { StickerSet } from '../../types'
+import { StickerSet } from '../../types/index.js'
 
 /**
  * Delete a sticker from a sticker set

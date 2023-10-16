@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MaybeArray, tl } from '@mtcute/core'
-import { assertTypeIsNot } from '@mtcute/core/utils'
+import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
-import { Message, PeersIndex } from '../../types'
+import { Message, PeersIndex } from '../../types/index.js'
 
 /**
  * Get messages from PM or legacy group by their IDs.

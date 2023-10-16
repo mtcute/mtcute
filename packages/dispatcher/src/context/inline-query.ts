@@ -1,6 +1,6 @@
 import { InlineQuery, ParametersSkip1, TelegramClient } from '@mtcute/client'
 
-import { UpdateContext } from './base'
+import { UpdateContext } from './base.js'
 
 /**
  * Context of an inline query update.

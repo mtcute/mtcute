@@ -5,7 +5,7 @@
 // import __tlReaderMap from '@mtcute/tl/binary/reader'
 // import { TlBinaryReader } from '@mtcute/tl-runtime'
 //
-// import { createTestTelegramClient } from './utils'
+// import { createTestTelegramClient } from './utils.js'
 //
 // // eslint-disable-next-line @typescript-eslint/no-var-requires
 // require('dotenv-flow').config()

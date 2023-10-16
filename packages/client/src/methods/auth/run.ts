@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { User } from '../../types'
-import { start } from './start'
+import { User } from '../../types/index.js'
+import { start } from './start.js'
 
 /**
  * Simple wrapper that calls {@link start} and then

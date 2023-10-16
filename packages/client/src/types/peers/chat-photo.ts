@@ -1,10 +1,10 @@
 import { Long, MtArgumentError, tl, toggleChannelIdMark } from '@mtcute/core'
 import { tdFileId, toFileId, toUniqueFileId } from '@mtcute/file-id'
 
-import { makeInspectable } from '../../utils'
-import { strippedPhotoToJpg } from '../../utils/file-utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { FileLocation } from '../files'
+import { strippedPhotoToJpg } from '../../utils/file-utils.js'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { FileLocation } from '../files/index.js'
 
 /**
  * A size of a chat photo
@@ -126,7 +126,7 @@ export class ChatPhoto {
     /**
      * Chat photo preview in *very* small resolution, if available
      */
-    get thumb(): Buffer | null {
+    get thumb(): Uint8Array | null {
         if (!this.raw.strippedThumb) return null
 
         return strippedPhotoToJpg(this.raw.strippedThumb)

@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../../utils'
-import { ReactionEmoji, toReactionEmoji } from '../../reactions'
-import { StoryInteractiveArea } from './base'
+import { makeInspectable } from '../../../utils/index.js'
+import { ReactionEmoji, toReactionEmoji } from '../../reactions/index.js'
+import { StoryInteractiveArea } from './base.js'
 
 /**
  * Interactive element containing a reaction.

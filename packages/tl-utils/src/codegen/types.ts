@@ -1,7 +1,7 @@
-import { TlEntry, TlErrors, TlFullSchema, TlTypeModifiers } from '../types'
-import { groupTlEntriesByNamespace, splitNameToNamespace } from '../utils'
-import { generateCodeForErrors } from './errors'
-import { camelToPascal, indent, jsComment, snakeToCamel } from './utils'
+import { TlEntry, TlErrors, TlFullSchema, TlTypeModifiers } from '../types.js'
+import { groupTlEntriesByNamespace, splitNameToNamespace } from '../utils.js'
+import { generateCodeForErrors } from './errors.js'
+import { camelToPascal, indent, jsComment, snakeToCamel } from './utils.js'
 
 /**
  * Mapping of TL primitive types to TS types
@@ -14,7 +14,7 @@ export const PRIMITIVE_TO_TS: Record<string, string> = {
     int256: 'Int256',
     double: 'Double',
     string: 'string',
-    bytes: 'Buffer',
+    bytes: 'Uint8Array',
     Bool: 'boolean',
     true: 'boolean',
     null: 'null',
@@ -186,9 +186,9 @@ export declare namespace $NS$ {
     function $extendTypes(types: Record<string, string>): void
 
     type Long = _Long;
-    type RawLong = Buffer;
-    type Int128 = Buffer;
-    type Int256 = Buffer;
+    type RawLong = Uint8Array;
+    type Int128 = Uint8Array;
+    type Int256 = Uint8Array;
     type Double = number;
 
     type FindByName<T extends { _: string }, Name extends T['_']> = Extract<T, { _: Name }>

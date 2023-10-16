@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { BoostStats } from '../../types/stories/boost-stats'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike } from '../../types/index.js'
+import { BoostStats } from '../../types/stories/boost-stats.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get information about boosts in a channel

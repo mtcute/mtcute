@@ -4,15 +4,15 @@ import {
     ChatMemberUpdate,
     ChatType,
     HistoryReadUpdate,
+    MaybeArray,
     Message,
     PollVoteUpdate,
     User,
     UserTypingUpdate,
 } from '@mtcute/client'
-import { MaybeArray } from '@mtcute/core'
 
-import { UpdateContextDistributed } from '../context'
-import { Modify, UpdateFilter } from './types'
+import { UpdateContextDistributed } from '../context/base.js'
+import { Modify, UpdateFilter } from './types.js'
 
 /**
  * Filter messages by chat type

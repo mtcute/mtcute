@@ -1,8 +1,8 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { User, UserStatus } from '../peers'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { User, UserStatus } from '../peers/index.js'
 
 /**
  * User status has changed

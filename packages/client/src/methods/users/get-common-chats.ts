@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { Chat, InputPeerLike } from '../../types'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { resolvePeer } from './resolve-peer'
+import { Chat, InputPeerLike } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { resolvePeer } from './resolve-peer.js'
 
 /**
  * Get a list of common chats you have with a given user

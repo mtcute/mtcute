@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, Photo } from '../../types'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { getProfilePhotos } from './get-profile-photos'
-import { resolvePeer } from './resolve-peer'
+import { InputPeerLike, Photo } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { getProfilePhotos } from './get-profile-photos.js'
+import { resolvePeer } from './resolve-peer.js'
 
 /**
  * Iterate over profile photos

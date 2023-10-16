@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, StoryViewersList } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike, StoryViewersList } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get viewers list of a story

@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
-import { InputPeerLike, User } from '../../types'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { resolvePeerMany } from './resolve-peer-many'
+import { InputPeerLike, User } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { resolvePeerMany } from './resolve-peer-many.js'
 
 /**
  * Get information about multiple users.

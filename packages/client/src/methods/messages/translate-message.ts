@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputMessageId, MessageEntity, normalizeInputMessageId } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputMessageId, MessageEntity, normalizeInputMessageId } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Translate message text to a given language.

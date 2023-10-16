@@ -1,1 +1,1 @@
-export * from './discard-reason'
+export * from './discard-reason.js'

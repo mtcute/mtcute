@@ -1,8 +1,7 @@
-import { parseUrlSafeBase64 } from '@mtcute/core/utils'
-import { TlBinaryReader } from '@mtcute/tl-runtime'
+import { base64DecodeToBuffer, base64Encode, TlBinaryReader } from '@mtcute/core/utils.js'
 
-import { tdFileId as td } from './types'
-import { telegramRleDecode } from './utils'
+import { tdFileId as td } from './types.js'
+import { telegramRleDecode } from './utils.js'
 
 function parseWebFileLocation(reader: TlBinaryReader): td.RawWebRemoteFileLocation {
     return {
@@ -25,14 +24,14 @@ function parsePhotoSizeSource(reader: TlBinaryReader): td.TypePhotoSizeSource {
             const fileType = reader.int()
 
             if (fileType < 0 || fileType >= td.FileType.Size) {
-                throw new td.UnsupportedError(`Unsupported file type: ${fileType} (${reader.data.toString('base64')})`)
+                throw new td.UnsupportedError(`Unsupported file type: ${fileType} (${base64Encode(reader.uint8View)})`)
             }
 
             const thumbnailType = reader.int()
 
             if (thumbnailType < 0 || thumbnailType > 255) {
                 throw new td.InvalidFileIdError(
-                    `Wrong thumbnail type: ${thumbnailType} (${reader.data.toString('base64')})`,
+                    `Wrong thumbnail type: ${thumbnailType} (${base64Encode(reader.uint8View)})`,
                 )
             }
 
@@ -111,7 +110,7 @@ function parsePhotoSizeSource(reader: TlBinaryReader): td.TypePhotoSizeSource {
             }
         default:
             throw new td.UnsupportedError(
-                `Unsupported photo size source ${variant} (${reader.data.toString('base64')})`,
+                `Unsupported photo size source ${variant} (${base64Encode(reader.uint8View)})`,
             )
     }
 }
@@ -191,9 +190,9 @@ function parseCommonFileLocation(reader: TlBinaryReader): td.RawCommonRemoteFile
     }
 }
 
-function fromPersistentIdV23(binary: Buffer, version: number): td.RawFullRemoteFileLocation {
+function fromPersistentIdV23(binary: Uint8Array, version: number): td.RawFullRemoteFileLocation {
     if (version < 0 || version > td.CURRENT_VERSION) {
-        throw new td.UnsupportedError(`Unsupported file ID v3 subversion: ${version} (${binary.toString('base64')})`)
+        throw new td.UnsupportedError(`Unsupported file ID v3 subversion: ${version} (${base64Encode(binary)})`)
     }
 
     binary = telegramRleDecode(binary)
@@ -209,12 +208,12 @@ function fromPersistentIdV23(binary: Buffer, version: number): td.RawFullRemoteF
     fileType &= ~td.FILE_REFERENCE_FLAG
 
     if (fileType < 0 || fileType >= td.FileType.Size) {
-        throw new td.UnsupportedError(`Unsupported file type: ${fileType} (${binary.toString('base64')})`)
+        throw new td.UnsupportedError(`Unsupported file type: ${fileType} (${base64Encode(binary)})`)
     }
 
     const dcId = reader.int()
 
-    let fileReference: Buffer | null = null
+    let fileReference: Uint8Array | null = null
 
     if (hasFileReference) {
         fileReference = reader.bytes()
@@ -288,7 +287,7 @@ function fromPersistentIdV23(binary: Buffer, version: number): td.RawFullRemoteF
                 break
             }
             default:
-                throw new td.UnsupportedError(`Invalid file type: ${fileType} (${binary.toString('base64')})`)
+                throw new td.UnsupportedError(`Invalid file type: ${fileType} (${base64Encode(binary)})`)
         }
     }
 
@@ -301,14 +300,14 @@ function fromPersistentIdV23(binary: Buffer, version: number): td.RawFullRemoteF
     }
 }
 
-function fromPersistentIdV2(binary: Buffer) {
-    return fromPersistentIdV23(binary.slice(0, -1), 0)
+function fromPersistentIdV2(binary: Uint8Array) {
+    return fromPersistentIdV23(binary.subarray(0, -1), 0)
 }
 
-function fromPersistentIdV3(binary: Buffer) {
+function fromPersistentIdV3(binary: Uint8Array) {
     const subversion = binary[binary.length - 2]
 
-    return fromPersistentIdV23(binary.slice(0, -2), subversion)
+    return fromPersistentIdV23(binary.subarray(0, -2), subversion)
 }
 
 /**
@@ -316,8 +315,8 @@ function fromPersistentIdV3(binary: Buffer) {
  *
  * @param fileId  File ID as a base-64 encoded string or Buffer
  */
-export function parseFileId(fileId: string | Buffer): td.RawFullRemoteFileLocation {
-    if (typeof fileId === 'string') fileId = parseUrlSafeBase64(fileId)
+export function parseFileId(fileId: string | Uint8Array): td.RawFullRemoteFileLocation {
+    if (typeof fileId === 'string') fileId = base64DecodeToBuffer(fileId, true)
 
     const version = fileId[fileId.length - 1]
 
@@ -329,5 +328,5 @@ export function parseFileId(fileId: string | Buffer): td.RawFullRemoteFileLocati
         return fromPersistentIdV3(fileId)
     }
 
-    throw new td.UnsupportedError(`Unsupported file ID version: ${version} (${fileId.toString('base64')})`)
+    throw new td.UnsupportedError(`Unsupported file ID version: ${version} (${base64Encode(fileId)})`)
 }

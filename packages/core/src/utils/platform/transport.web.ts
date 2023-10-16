@@ -1,5 +1,5 @@
-import { WebSocketTransport } from '../../network/transports/websocket'
-import { MtUnsupportedError } from '../../types'
+import { WebSocketTransport } from '../../network/transports/websocket.js'
+import { MtUnsupportedError } from '../../types/index.js'
 
 /** @internal */
 export const _defaultTransportFactory =

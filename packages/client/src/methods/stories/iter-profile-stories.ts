@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, Story } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
-import { getProfileStories } from './get-profile-stories'
+import { InputPeerLike, Story } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getProfileStories } from './get-profile-stories.js'
 
 /**
  * Iterate over profile stories. Wrapper over {@link getProfileStories}

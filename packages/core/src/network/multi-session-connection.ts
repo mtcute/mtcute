@@ -2,10 +2,10 @@ import EventEmitter from 'events'
 
 import { tl } from '@mtcute/tl'
 
-import { Logger } from '../utils'
-import { MtprotoSession } from './mtproto-session'
-import { SessionConnection, SessionConnectionParams } from './session-connection'
-import { TransportFactory } from './transports'
+import { Logger } from '../utils/index.js'
+import { MtprotoSession } from './mtproto-session.js'
+import { SessionConnection, SessionConnectionParams } from './session-connection.js'
+import { TransportFactory } from './transports/index.js'
 
 export class MultiSessionConnection extends EventEmitter {
     private _log: Logger
@@ -237,7 +237,7 @@ export class MultiSessionConnection extends EventEmitter {
         this.connect()
     }
 
-    async setAuthKey(authKey: Buffer | null, temp = false, idx = 0): Promise<void> {
+    async setAuthKey(authKey: Uint8Array | null, temp = false, idx = 0): Promise<void> {
         const session = this._sessions[idx]
         const key = temp ? session._authKeyTemp : session._authKey
         await key.setup(authKey)

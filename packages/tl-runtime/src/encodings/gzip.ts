@@ -1,10 +1,12 @@
-import { deflateSync, gunzipSync } from 'zlib'
+/* eslint-disable no-restricted-globals */
+
+import { deflateSync, gunzipSync } from 'node:zlib'
 
 /**
  * Decompress a buffer with gzip.
  * @param buf  Buffer to decompress
  */
-export function gzipInflate(buf: Buffer): Buffer {
+export function gzipInflate(buf: Uint8Array): Uint8Array {
     return gunzipSync(buf)
 }
 
@@ -16,11 +18,11 @@ export function gzipInflate(buf: Buffer): Buffer {
  *   Maximum compression ratio. If the resulting buffer is smaller than
  *   `buf.length * ratio`, `null` is returned.
  */
-export function gzipDeflate(buf: Buffer, maxRatio?: number): Buffer | null {
+export function gzipDeflate(buf: ArrayBuffer, maxRatio?: number): Buffer | null {
     if (maxRatio) {
         try {
             return deflateSync(buf, {
-                maxOutputLength: Math.floor(buf.length * maxRatio),
+                maxOutputLength: Math.floor(buf.byteLength * maxRatio),
             })
             // hot path, avoid additional runtime checks
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -3,17 +3,17 @@ import Long from 'long'
 import { tl } from '@mtcute/tl'
 import { TlBinaryReader, TlReaderMap } from '@mtcute/tl-runtime'
 
-import { MtcuteError } from '../types'
-import { buffersEqual, ICryptoProvider, Logger, randomBytes } from '../utils'
-import { createAesIgeForMessage } from '../utils/crypto/mtproto'
+import { MtcuteError } from '../types/errors.js'
+import { createAesIgeForMessage } from '../utils/crypto/mtproto.js'
+import { buffersEqual, concatBuffers, dataViewFromBuffer, ICryptoProvider, Logger, randomBytes } from '../utils/index.js'
 
 export class AuthKey {
     ready = false
 
-    key!: Buffer
-    id!: Buffer
-    clientSalt!: Buffer
-    serverSalt!: Buffer
+    key!: Uint8Array
+    id!: Uint8Array
+    clientSalt!: Uint8Array
+    serverSalt!: Uint8Array
 
     constructor(
         readonly _crypto: ICryptoProvider,
@@ -21,56 +21,67 @@ export class AuthKey {
         readonly _readerMap: TlReaderMap,
     ) {}
 
-    match(keyId: Buffer): boolean {
+    match(keyId: Uint8Array): boolean {
         return this.ready && buffersEqual(keyId, this.id)
     }
 
-    async setup(authKey?: Buffer | null): Promise<void> {
+    async setup(authKey?: Uint8Array | null): Promise<void> {
         if (!authKey) return this.reset()
 
         this.ready = true
         this.key = authKey
-        this.clientSalt = authKey.slice(88, 120)
-        this.serverSalt = authKey.slice(96, 128)
-        this.id = (await this._crypto.sha1(authKey)).slice(-8)
+        this.clientSalt = authKey.subarray(88, 120)
+        this.serverSalt = authKey.subarray(96, 128)
+        this.id = (await this._crypto.sha1(authKey)).subarray(-8)
 
         this.log.verbose('auth key set up, id = %h', this.id)
     }
 
-    async encryptMessage(message: Buffer, serverSalt: Long, sessionId: Long): Promise<Buffer> {
+    async encryptMessage(message: Uint8Array, serverSalt: Long, sessionId: Long): Promise<Uint8Array> {
         if (!this.ready) throw new MtcuteError('Keys are not set up!')
 
         let padding = (16 /* header size */ + message.length + 12) /* min padding */ % 16
         padding = 12 + (padding ? 16 - padding : 0)
 
-        const buf = Buffer.alloc(16 + message.length + padding)
+        const buf = new Uint8Array(16 + message.length + padding)
+        const dv = dataViewFromBuffer(buf)
 
-        buf.writeInt32LE(serverSalt.low)
-        buf.writeInt32LE(serverSalt.high, 4)
-        buf.writeInt32LE(sessionId.low, 8)
-        buf.writeInt32LE(sessionId.high, 12)
-        message.copy(buf, 16)
-        randomBytes(padding).copy(buf, 16 + message.length)
+        dv.setInt32(0, serverSalt.low, true)
+        dv.setInt32(4, serverSalt.high, true)
+        dv.setInt32(8, sessionId.low, true)
+        dv.setInt32(12, sessionId.high, true)
+        buf.set(message, 16)
+        buf.set(randomBytes(padding), 16 + message.length)
 
-        const messageKey = (await this._crypto.sha256(Buffer.concat([this.clientSalt, buf]))).slice(8, 24)
+        const messageKey = (await this._crypto.sha256(concatBuffers([this.clientSalt, buf]))).subarray(8, 24)
         const ige = await createAesIgeForMessage(this._crypto, this.key, messageKey, true)
         const encryptedData = await ige.encrypt(buf)
 
-        return Buffer.concat([this.id, messageKey, encryptedData])
+        return concatBuffers([this.id, messageKey, encryptedData])
     }
 
     async decryptMessage(
-        data: Buffer,
+        data: Uint8Array,
         sessionId: Long,
         callback: (msgId: tl.Long, seqNo: number, data: TlBinaryReader) => void,
     ): Promise<void> {
-        const messageKey = data.slice(8, 24)
-        const encryptedData = data.slice(24)
+        const messageKey = data.subarray(8, 24)
+        let encryptedData = data.subarray(24)
+
+        const mod16 = encryptedData.byteLength % 16
+
+        if (mod16 !== 0) {
+            // strip padding in case of padded transport.
+            // i wish this could be done at transport level, but we can't properly align anything there
+            // because padding size is not known, and transport level should not be aware of MTProto structure
+            encryptedData = encryptedData.subarray(0, encryptedData.byteLength - mod16)
+        }
 
         const ige = await createAesIgeForMessage(this._crypto, this.key, messageKey, false)
         const innerData = await ige.decrypt(encryptedData)
 
-        const expectedMessageKey = (await this._crypto.sha256(Buffer.concat([this.serverSalt, innerData]))).slice(8, 24)
+        const msgKeySource = await this._crypto.sha256(concatBuffers([this.serverSalt, innerData]))
+        const expectedMessageKey = msgKeySource.subarray(8, 24)
 
         if (!buffersEqual(messageKey, expectedMessageKey)) {
             this.log.warn(

@@ -1,12 +1,12 @@
 import { MtTypeAssertionError, tl } from '@mtcute/core'
 
-import { hasValueAtKey, makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { MtMessageNotFoundError } from '../errors'
-import { DraftMessage, Message } from '../messages'
-import { Chat } from './chat'
-import { PeersIndex } from './peers-index'
-import { User } from './user'
+import { hasValueAtKey, makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { MtMessageNotFoundError } from '../errors.js'
+import { DraftMessage, Message } from '../messages/index.js'
+import { Chat } from './chat.js'
+import { PeersIndex } from './peers-index.js'
+import { User } from './user.js'
 
 export class ForumTopic {
     static COLOR_BLUE = 0x6fb9f0

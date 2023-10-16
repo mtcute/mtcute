@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike, MtInvalidPeerTypeError } from '../../types'
-import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { deleteHistory } from './delete-history'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
+import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { deleteHistory } from './delete-history.js'
 
 /**
  * Leave a group chat, supergroup or channel

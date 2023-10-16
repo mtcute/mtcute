@@ -1,9 +1,9 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { RawDocument } from './document'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { RawDocument } from './document.js'
 
 export const MASK_POSITION_POINT_TO_TL = {
     forehead: 0,

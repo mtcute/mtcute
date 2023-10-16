@@ -1,10 +1,10 @@
 import { tl } from '@mtcute/core'
 
-import { Audio } from './audio'
-import { Document } from './document'
-import { Sticker } from './sticker'
-import { Video } from './video'
-import { Voice } from './voice'
+import { Audio } from './audio.js'
+import { Document } from './document.js'
+import { Sticker } from './sticker.js'
+import { Video } from './video.js'
+import { Voice } from './voice.js'
 
 export type ParsedDocument = Sticker | Voice | Audio | Video | Document
 

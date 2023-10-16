@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { Chat } from '../../types'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
+import { Chat } from '../../types/index.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
 
 /**
  * Create a new supergroup

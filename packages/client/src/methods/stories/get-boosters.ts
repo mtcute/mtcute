@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { ArrayPaginated, InputPeerLike, PeersIndex } from '../../types'
-import { Booster } from '../../types/stories/booster'
-import { makeArrayPaginated } from '../../utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { ArrayPaginated, InputPeerLike, PeersIndex } from '../../types/index.js'
+import { Booster } from '../../types/stories/booster.js'
+import { makeArrayPaginated } from '../../utils/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Get boosters of a channel

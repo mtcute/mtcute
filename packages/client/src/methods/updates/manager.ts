@@ -1,14 +1,14 @@
 /* eslint-disable max-depth,max-params */
 import { assertNever, BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
-import { getBarePeerId, getMarkedPeerId, markedPeerIdToBare, toggleChannelIdMark } from '@mtcute/core/utils'
+import { getBarePeerId, getMarkedPeerId, markedPeerIdToBare, toggleChannelIdMark } from '@mtcute/core/utils.js'
 
-import { PeersIndex } from '../../types'
-import { normalizeToInputChannel } from '../../utils/peer-utils'
-import { RpsMeter } from '../../utils/rps-meter'
-import { getAuthState } from '../auth/_state'
-import { resolvePeer } from '../users/resolve-peer'
-import { createUpdatesState, PendingUpdate, toPendingUpdate, UpdatesManagerParams, UpdatesState } from './types'
-import { extractChannelIdFromUpdate, messageToUpdate } from './utils'
+import { PeersIndex } from '../../types/index.js'
+import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { RpsMeter } from '../../utils/rps-meter.js'
+import { getAuthState } from '../auth/_state.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { createUpdatesState, PendingUpdate, toPendingUpdate, UpdatesManagerParams, UpdatesState } from './types.js'
+import { extractChannelIdFromUpdate, messageToUpdate } from './utils.js'
 
 // code in this file is very bad, thanks to Telegram's awesome updates mechanism
 

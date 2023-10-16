@@ -1,3 +1,3 @@
-export * from './input-privacy-rule'
-export * from './sticker-set'
-export * from './takeout-session'
+export * from './input-privacy-rule.js'
+export * from './sticker-set.js'
+export * from './takeout-session.js'

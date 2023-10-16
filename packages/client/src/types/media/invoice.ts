@@ -1,10 +1,10 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { WebDocument } from '../files/web-document'
-import type { MessageMedia } from '../messages/message-media'
-import { Thumbnail } from './thumbnail'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { WebDocument } from '../files/web-document.js'
+import type { MessageMedia } from '../messages/message-media.js'
+import { Thumbnail } from './thumbnail.js'
 
 /**
  * Information about invoice's extended media.

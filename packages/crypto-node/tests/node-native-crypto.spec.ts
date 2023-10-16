@@ -1,8 +1,8 @@
 import { describe } from 'mocha'
 
-import { testCryptoProvider } from '@mtcute/core/tests/crypto-providers.spec'
-
-import { NodeNativeCryptoProvider } from '../src'
+// eslint-disable-next-line import/no-relative-packages
+import { testCryptoProvider } from '../../core/tests/crypto-providers.spec.js'
+import { NodeNativeCryptoProvider } from '../src/index.js'
 
 describe('NodeNativeCryptoProvider', () => {
     testCryptoProvider(new NodeNativeCryptoProvider())

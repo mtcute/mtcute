@@ -1,9 +1,16 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "outDir": "./dist"
+        "outDir": "./dist/esm"
     },
     "include": [
         "./index.ts"
+    ],
+    "references": [
+        { "path": "../client" },
+        { "path": "../sqlite" },
+        { "path": "../dispatcher" },
+        { "path": "../html-parser" },
+        { "path": "../markdown-parser" }
     ]
 }

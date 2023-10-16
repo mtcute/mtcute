@@ -1,7 +1,7 @@
 import { BaseTelegramClient, Long } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { User } from '../../types'
+import { User } from '../../types/index.js'
 
 /**
  * Get list of contacts from your Telegram contacts list.

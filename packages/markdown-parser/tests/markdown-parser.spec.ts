@@ -4,7 +4,7 @@ import { describe, it } from 'mocha'
 
 import { FormattedString, tl } from '@mtcute/client'
 
-import { MarkdownMessageEntityParser, md } from '../src'
+import { MarkdownMessageEntityParser, md } from '../src/index.js'
 
 const createEntity = <T extends tl.TypeMessageEntity['_']>(
     type: T,
@@ -553,8 +553,7 @@ describe('MarkdownMessageEntityParser', () => {
             const unsafeString2 = new FormattedString('<&>', 'some-other-mode')
 
             expect(() => md`${unsafeString}`.value).not.throw(Error)
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+            // @ts-expect-error this is intentional
             expect(() => md`${unsafeString2}`.value).throw(Error)
         })
     })

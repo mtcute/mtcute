@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { User } from '../../types'
+import { User } from '../../types/index.js'
 
 /**
  * Update your profile details.

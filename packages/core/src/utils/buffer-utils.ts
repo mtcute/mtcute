@@ -1,6 +1,4 @@
-export { _randomBytes as randomBytes } from './platform/random'
-
-const b64urlAvailable = Buffer.isEncoding('base64url')
+export { _randomBytes as randomBytes } from './platform/random.js'
 
 /**
  * Check if two buffers are equal
@@ -8,7 +6,7 @@ const b64urlAvailable = Buffer.isEncoding('base64url')
  * @param a  First buffer
  * @param b  Second buffer
  */
-export function buffersEqual(a: Buffer, b: Buffer): boolean {
+export function buffersEqual(a: Uint8Array, b: Uint8Array): boolean {
     if (a.length !== b.length) return false
 
     for (let i = 0; i < a.length; i++) {
@@ -25,38 +23,40 @@ export function buffersEqual(a: Buffer, b: Buffer): boolean {
  * @param start  Start offset
  * @param end  End offset
  */
-export function cloneBuffer(buf: Buffer, start = 0, end = buf.length): Buffer {
-    const ret = Buffer.alloc(end - start)
-    buf.copy(ret, 0, start, end)
+export function cloneBuffer(buf: Uint8Array, start = 0, end = buf.length): Uint8Array {
+    const ret = new Uint8Array(end - start)
+    ret.set(buf.subarray(start, end))
 
     return ret
 }
 
 /**
- * Parse url-safe base64 string
- *
- * @param str  String to parse
+ * Concatenate multiple buffers into one
  */
-export function parseUrlSafeBase64(str: string): Buffer {
-    if (b64urlAvailable) {
-        return Buffer.from(str, 'base64url')
+export function concatBuffers(buffers: Uint8Array[]): Uint8Array {
+    /* eslint-disable no-restricted-globals */
+    if (typeof Buffer !== 'undefined') {
+        return Buffer.concat(buffers)
+    }
+    /* eslint-enable no-restricted-globals */
+
+    let length = 0
+
+    for (const buf of buffers) {
+        length += buf.length
     }
 
-    str = str.replace(/-/g, '+').replace(/_/g, '/')
-    while (str.length % 4) str += '='
+    const ret = new Uint8Array(length)
+    let offset = 0
 
-    return Buffer.from(str, 'base64')
+    for (const buf of buffers) {
+        ret.set(buf, offset)
+        offset += buf.length
+    }
+
+    return ret
 }
 
-/**
- * Convert a buffer to url-safe base64 string
- *
- * @param buf  Buffer to convert
- */
-export function encodeUrlSafeBase64(buf: Buffer): string {
-    if (b64urlAvailable) {
-        return buf.toString('base64url')
-    }
-
-    return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+export function dataViewFromBuffer(buf: Uint8Array): DataView {
+    return new DataView(buf.buffer, buf.byteOffset, buf.byteLength)
 }

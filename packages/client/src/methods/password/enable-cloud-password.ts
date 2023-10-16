@@ -1,5 +1,5 @@
 import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
-import { assertTypeIs, computeNewPasswordHash } from '@mtcute/core/utils'
+import { assertTypeIs, computeNewPasswordHash } from '@mtcute/core/utils.js'
 
 /**
  * Enable 2FA password on your account

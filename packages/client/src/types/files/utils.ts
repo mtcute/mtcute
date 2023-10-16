@@ -4,13 +4,13 @@ import type { Readable } from 'stream'
 import { tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
-import { FileLocation } from './file-location'
-import { UploadedFile } from './uploaded-file'
+import { FileLocation } from './file-location.js'
+import { UploadedFile } from './uploaded-file.js'
 
 /**
  * Describes types that can be used in {@link TelegramClient.uploadFile}
  * method. Can be one of:
- *  - `Buffer`, which will be interpreted as raw file contents
+ *  - `Uint8Array`/`Buffer`, which will be interpreted as raw file contents
  *  - `File` (from the Web API)
  *  - `string`, which will be interpreted as file path (**Node only!**)
  *  - `ReadStream` (for NodeJS, from the `fs` module)
@@ -19,7 +19,7 @@ import { UploadedFile } from './uploaded-file'
  *  - `Response` (from `window.fetch` or `node-fetch`)
  */
 export type UploadFileLike =
-    | Buffer
+    | Uint8Array
     | File
     | string
     | ReadStream

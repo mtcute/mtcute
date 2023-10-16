@@ -1,9 +1,9 @@
 import { BaseTelegramClient, Long, tl } from '@mtcute/core'
-import { assertTypeIsNot } from '@mtcute/core/utils'
+import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
-import { ArrayPaginated, InputPeerLike, Message, PeersIndex, SearchFilters } from '../../types'
-import { makeArrayPaginated, normalizeDate } from '../../utils/misc-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { ArrayPaginated, InputPeerLike, Message, PeersIndex, SearchFilters } from '../../types/index.js'
+import { makeArrayPaginated, normalizeDate } from '../../utils/misc-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 // @exported
 export type SearchMessagesOffset = number

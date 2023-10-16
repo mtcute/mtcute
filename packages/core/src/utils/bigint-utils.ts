@@ -1,6 +1,6 @@
 import bigInt, { BigInteger } from 'big-integer'
 
-import { randomBytes } from './buffer-utils'
+import { randomBytes } from './buffer-utils.js'
 
 /**
  * Convert a big integer to a buffer
@@ -9,7 +9,7 @@ import { randomBytes } from './buffer-utils'
  * @param length  Length of the resulting buffer (by default it's computed automatically)
  * @param le  Whether to use little-endian encoding
  */
-export function bigIntToBuffer(value: BigInteger, length = 0, le = false): Buffer {
+export function bigIntToBuffer(value: BigInteger, length = 0, le = false): Uint8Array {
     const array = value.toArray(256).value
 
     if (length !== 0 && array.length > length) {
@@ -23,7 +23,7 @@ export function bigIntToBuffer(value: BigInteger, length = 0, le = false): Buffe
 
     if (le) array.reverse()
 
-    const buffer = Buffer.alloc(length || array.length)
+    const buffer = new Uint8Array(length || array.length)
     buffer.set(array, 0)
 
     return buffer
@@ -37,12 +37,12 @@ export function bigIntToBuffer(value: BigInteger, length = 0, le = false): Buffe
  * @param length  Length to read
  * @param le  Whether to use little-endian encoding
  */
-export function bufferToBigInt(buffer: Buffer, offset = 0, length = buffer.length, le = false): BigInteger {
-    const arr = [...buffer.slice(offset, offset + length)]
+export function bufferToBigInt(buffer: Uint8Array, offset = 0, length = buffer.length, le = false): BigInteger {
+    const arr = [...buffer.subarray(offset, offset + length)]
 
     if (le) arr.reverse()
 
-    return bigInt.fromArray(arr, 256)
+    return bigInt.fromArray(arr as unknown as number[], 256)
 }
 
 /**

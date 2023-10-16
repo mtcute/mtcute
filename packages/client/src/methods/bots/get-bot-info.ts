@@ -1,8 +1,8 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { normalizeToInputUser } from '../../utils/peer-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike } from '../../types/index.js'
+import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Gets information about a bot the current uzer owns (or the current bot)

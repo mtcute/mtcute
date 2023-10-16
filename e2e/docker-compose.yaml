@@ -1,0 +1,31 @@
+version: "3"
+services:
+  verdaccio:
+    restart: unless-stopped
+    image: verdaccio/verdaccio:5.27
+    container_name: "verdaccio"
+    volumes:
+      - "./.verdaccio:/verdaccio/conf"
+    networks:
+      - mtcute-e2e
+  build:
+    build: 
+      context: ..
+      dockerfile: e2e/Dockerfile.build
+    networks:
+      - mtcute-e2e
+    depends_on:
+      - verdaccio
+  test:
+    build: 
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      - API_ID=${API_ID}
+      - API_HASH=${API_HASH}
+    networks:
+      - mtcute-e2e
+    depends_on:
+      - verdaccio
+networks:
+  mtcute-e2e: {}

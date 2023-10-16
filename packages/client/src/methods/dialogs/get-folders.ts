@@ -1,6 +1,6 @@
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 
-import { InputDialogFolder } from '../../types'
+import { InputDialogFolder } from '../../types/index.js'
 
 /**
  * Get list of folders.

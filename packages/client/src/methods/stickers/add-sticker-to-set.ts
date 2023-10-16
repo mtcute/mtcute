@@ -6,8 +6,8 @@ import {
     MASK_POSITION_POINT_TO_TL,
     normalizeInputStickerSet,
     StickerSet,
-} from '../../types'
-import { _normalizeFileToDocument } from '../files/normalize-file-to-document'
+} from '../../types/index.js'
+import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
 
 /**
  * Add a sticker to a sticker set.

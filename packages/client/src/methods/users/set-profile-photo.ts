@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 import { fileIdToInputPhoto, tdFileId } from '@mtcute/file-id'
 
-import { InputFileLike, Photo } from '../../types'
-import { _normalizeInputFile } from '../files/normalize-input-file'
+import { InputFileLike, Photo } from '../../types/index.js'
+import { _normalizeInputFile } from '../files/normalize-input-file.js'
 
 /**
  * Set a new profile photo or video.

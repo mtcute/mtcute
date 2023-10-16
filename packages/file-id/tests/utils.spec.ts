@@ -1,31 +1,33 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { telegramRleDecode, telegramRleEncode } from '../src/utils'
+import { hexDecodeToBuffer, hexEncode } from '@mtcute/core/utils.js'
+
+import { telegramRleDecode, telegramRleEncode } from '../src/utils.js'
 
 describe('telegramRleEncode', () => {
     it('should not modify input if there are no \\x00', () => {
-        expect(telegramRleEncode(Buffer.from('aaeeff', 'hex')).toString('hex')).eq('aaeeff')
+        expect(hexEncode(telegramRleEncode(hexDecodeToBuffer('aaeeff')))).eq('aaeeff')
     })
 
     it('should collapse consecutive \\x00', () => {
-        expect(telegramRleEncode(Buffer.from('00000000aa', 'hex')).toString('hex')).eq('0004aa')
-        expect(telegramRleEncode(Buffer.from('00000000aa000000aa', 'hex')).toString('hex')).eq('0004aa0003aa')
-        expect(telegramRleEncode(Buffer.from('00000000aa0000', 'hex')).toString('hex')).eq('0004aa0002')
-        expect(telegramRleEncode(Buffer.from('00aa00', 'hex')).toString('hex')).eq('0001aa0001')
+        expect(hexEncode(telegramRleEncode(hexDecodeToBuffer('00000000aa')))).eq('0004aa')
+        expect(hexEncode(telegramRleEncode(hexDecodeToBuffer('00000000aa000000aa')))).eq('0004aa0003aa')
+        expect(hexEncode(telegramRleEncode(hexDecodeToBuffer('00000000aa0000')))).eq('0004aa0002')
+        expect(hexEncode(telegramRleEncode(hexDecodeToBuffer('00aa00')))).eq('0001aa0001')
     })
 })
 
 describe('telegramRleDecode', () => {
     it('should not mofify input if there are no \\x00', () => {
-        expect(telegramRleDecode(Buffer.from('aaeeff', 'hex')).toString('hex')).eq('aaeeff')
+        expect(hexEncode(telegramRleDecode(hexDecodeToBuffer('aaeeff')))).eq('aaeeff')
     })
 
     it('should expand two-byte sequences starting with \\x00', () => {
-        expect(telegramRleDecode(Buffer.from('0004aa', 'hex')).toString('hex')).eq('00000000aa')
-        expect(telegramRleDecode(Buffer.from('0004aa0000', 'hex')).toString('hex')).eq('00000000aa')
-        expect(telegramRleDecode(Buffer.from('0004aa0003aa', 'hex')).toString('hex')).eq('00000000aa000000aa')
-        expect(telegramRleDecode(Buffer.from('0004aa0002', 'hex')).toString('hex')).eq('00000000aa0000')
-        expect(telegramRleDecode(Buffer.from('0001aa0001', 'hex')).toString('hex')).eq('00aa00')
+        expect(hexEncode(telegramRleDecode(hexDecodeToBuffer('0004aa')))).eq('00000000aa')
+        expect(hexEncode(telegramRleDecode(hexDecodeToBuffer('0004aa0000')))).eq('00000000aa')
+        expect(hexEncode(telegramRleDecode(hexDecodeToBuffer('0004aa0003aa')))).eq('00000000aa000000aa')
+        expect(hexEncode(telegramRleDecode(hexDecodeToBuffer('0004aa0002')))).eq('00000000aa0000')
+        expect(hexEncode(telegramRleDecode(hexDecodeToBuffer('0001aa0001')))).eq('00aa00')
     })
 })

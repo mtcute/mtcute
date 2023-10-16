@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputMessageId, InputReaction, Message, normalizeInputMessageId, normalizeInputReaction } from '../../types'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { resolvePeer } from '../users/resolve-peer'
-import { _findMessageInUpdate } from './find-in-update'
+import { InputMessageId, InputReaction, Message, normalizeInputMessageId, normalizeInputReaction } from '../../types/index.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { _findMessageInUpdate } from './find-in-update.js'
 
 /**
  * Send or remove a reaction.

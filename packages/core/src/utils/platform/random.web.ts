@@ -1,8 +1,6 @@
-import { typedArrayToBuffer } from '../web-utils'
-
-export function _randomBytes(size: number): Buffer {
+export function _randomBytes(size: number): Uint8Array {
     const ret = new Uint8Array(size)
     crypto.getRandomValues(ret)
 
-    return typedArrayToBuffer(ret)
+    return ret
 }

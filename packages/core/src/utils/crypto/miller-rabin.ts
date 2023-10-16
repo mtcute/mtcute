@@ -1,6 +1,6 @@
 import bigInt, { BigInteger } from 'big-integer'
 
-import { randomBigIntBits, twoMultiplicity } from '../bigint-utils'
+import { randomBigIntBits, twoMultiplicity } from '../bigint-utils.js'
 
 export function millerRabin(n: BigInteger, rounds = 20): boolean {
     // small numbers: 0, 1 are not prime, 2, 3 are prime

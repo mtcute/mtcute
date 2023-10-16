@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { Photo } from './photo'
-import { Video } from './video'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { Photo } from './photo.js'
+import { Video } from './video.js'
 
 export class Game {
     readonly type = 'game' as const

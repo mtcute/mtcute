@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 const fs = require('fs')
 const path = require('path')
 const prettier = require('prettier')

@@ -1,3 +1,3 @@
-export * from './manager'
-export * from './parsed'
-export * from './types'
+export * from './manager.js'
+export * from './parsed.js'
+export * from './types.js'

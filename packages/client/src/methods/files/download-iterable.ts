@@ -1,9 +1,9 @@
 import { BaseTelegramClient, ConnectionKind, MtArgumentError, MtUnsupportedError, tl } from '@mtcute/core'
-import { ConditionVariable } from '@mtcute/core/utils'
+import { ConditionVariable } from '@mtcute/core/utils.js'
 import { fileIdToInputFileLocation, fileIdToInputWebFileLocation, parseFileId } from '@mtcute/file-id'
 
-import { FileDownloadParameters, FileLocation } from '../../types'
-import { determinePartSize } from '../../utils/file-utils'
+import { FileDownloadParameters, FileLocation } from '../../types/index.js'
+import { determinePartSize } from '../../utils/file-utils.js'
 
 // small files (less than 128 kb) are downloaded using the "downloadSmall" pool
 // furthermore, if the file is small and is located on our main DC, it will be downloaded
@@ -21,7 +21,7 @@ const REQUESTS_PER_CONNECTION = 3 // some arbitrary magic value that seems to wo
 export async function* downloadAsIterable(
     client: BaseTelegramClient,
     params: FileDownloadParameters,
-): AsyncIterableIterator<Buffer> {
+): AsyncIterableIterator<Uint8Array> {
     const offset = params.offset ?? 0
 
     if (offset % 4096 !== 0) {
@@ -40,7 +40,7 @@ export async function* downloadAsIterable(
             locationInner = locationInner()
         }
 
-        if (Buffer.isBuffer(locationInner)) {
+        if (ArrayBuffer.isView(locationInner)) {
             yield locationInner
 
             return
@@ -79,7 +79,7 @@ export async function* downloadAsIterable(
     let nextChunkIdx = 0
     let nextWorkerChunkIdx = 0
     const nextChunkCv = new ConditionVariable()
-    const buffer: Record<number, Buffer> = {}
+    const buffer: Record<number, Uint8Array> = {}
 
     const isSmall = fileSize && fileSize <= SMALL_FILE_MAX_SIZE
     let connectionKind: ConnectionKind

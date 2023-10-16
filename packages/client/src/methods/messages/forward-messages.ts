@@ -1,10 +1,10 @@
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
-import { randomLong } from '@mtcute/core/utils'
+import { randomLong } from '@mtcute/core/utils.js'
 
-import { FormattedString, InputMediaLike, InputPeerLike, Message, PeersIndex } from '../../types'
-import { normalizeDate } from '../../utils/misc-utils'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { FormattedString, InputMediaLike, InputPeerLike, Message, PeersIndex } from '../../types/index.js'
+import { normalizeDate } from '../../utils/misc-utils.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 // @exported
 export interface ForwardMessageOptions {

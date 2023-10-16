@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { isInputPeerChannel, isInputPeerUser, normalizeToInputChannel, normalizeToInputUser } from '../../utils'
-import { getAuthState } from '../auth/_state'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike } from '../../types/index.js'
+import { isInputPeerChannel, isInputPeerUser, normalizeToInputChannel, normalizeToInputUser } from '../../utils/index.js'
+import { getAuthState } from '../auth/_state.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Toggle a collectible (Fragment) username

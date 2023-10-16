@@ -83,4 +83,4 @@ import {
     User,
     UserStatusUpdate,
     UserTypingUpdate,
-} from '../types'
+} from '../types/index.js'

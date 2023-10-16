@@ -1,5 +1,5 @@
 import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
-import { computeSrpParams } from '@mtcute/core/utils'
+import { computeSrpParams } from '@mtcute/core/utils.js'
 
 /**
  * Remove 2FA password from your account
@@ -21,7 +21,7 @@ export async function removeCloudPassword(client: BaseTelegramClient, password: 
         newSettings: {
             _: 'account.passwordInputSettings',
             newAlgo: { _: 'passwordKdfAlgoUnknown' },
-            newPasswordHash: Buffer.alloc(0),
+            newPasswordHash: new Uint8Array(0),
             hint: '',
         },
     })

@@ -1,13 +1,13 @@
 import { MtUnsupportedError, tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { Photo, Video } from '../media'
-import { _messageMediaFromTl, MessageEntity } from '../messages'
-import { PeersIndex } from '../peers'
-import { ReactionEmoji, toReactionEmoji } from '../reactions'
-import { _storyInteractiveElementFromTl, StoryInteractiveElement } from './interactive'
-import { StoryInteractions } from './story-interactions'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { Photo, Video } from '../media/index.js'
+import { _messageMediaFromTl, MessageEntity } from '../messages/index.js'
+import { PeersIndex } from '../peers/index.js'
+import { ReactionEmoji, toReactionEmoji } from '../reactions/index.js'
+import { _storyInteractiveElementFromTl, StoryInteractiveElement } from './interactive/index.js'
+import { StoryInteractions } from './story-interactions.js'
 
 /**
  * Information about story visibility.

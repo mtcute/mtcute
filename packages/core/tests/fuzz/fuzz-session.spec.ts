@@ -2,8 +2,8 @@
 // import { randomBytes } from 'crypto'
 // import { describe, it } from 'mocha'
 //
-// import { sleep } from '../../src'
-// import { createTestTelegramClient } from './utils'
+// import { sleep } from '../../src.js'
+// import { createTestTelegramClient } from './utils.js'
 //
 // // eslint-disable-next-line @typescript-eslint/no-var-requires
 // require('dotenv-flow').config()

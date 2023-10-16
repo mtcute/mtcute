@@ -3,16 +3,16 @@ import EventEmitter from 'events'
 import Long from 'long'
 
 import { tl } from '@mtcute/tl'
-import defaultReaderMap from '@mtcute/tl/binary/reader'
-import defaultWriterMap from '@mtcute/tl/binary/writer'
+import { __tlReaderMap as defaultReaderMap } from '@mtcute/tl/binary/reader.js'
+import { __tlWriterMap as defaultWriterMap } from '@mtcute/tl/binary/writer.js'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import { ReconnectionStrategy, SessionConnection, TransportFactory } from './network'
-import { ConfigManager } from './network/config-manager'
-import { NetworkManager, NetworkManagerExtraParams, RpcCallOptions } from './network/network-manager'
-import { PersistentConnectionParams } from './network/persistent-connection'
-import { ITelegramStorage, MemoryStorage } from './storage'
-import { MustEqual } from './types'
+import { ConfigManager } from './network/config-manager.js'
+import { ReconnectionStrategy, SessionConnection, TransportFactory } from './network/index.js'
+import { NetworkManager, NetworkManagerExtraParams, RpcCallOptions } from './network/network-manager.js'
+import { PersistentConnectionParams } from './network/persistent-connection.js'
+import { ITelegramStorage, MemoryStorage } from './storage/index.js'
+import { MustEqual } from './types/index.js'
 import {
     ControllablePromise,
     createControllablePromise,
@@ -28,7 +28,7 @@ import {
     readStringSession,
     toggleChannelIdMark,
     writeStringSession,
-} from './utils'
+} from './utils/index.js'
 
 export interface BaseTelegramClientOptions {
     /**

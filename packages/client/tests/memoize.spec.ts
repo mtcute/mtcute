@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { memoizeGetters } from '../src/utils/memoize'
+import { memoizeGetters } from '../src/utils/memoize.js'
 
 describe('memoizeGetters', () => {
     it('should memoize getters', () => {

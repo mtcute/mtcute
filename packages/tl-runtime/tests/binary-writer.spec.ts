@@ -4,7 +4,8 @@ import { randomBytes } from 'crypto'
 import Long from 'long'
 import { describe, it } from 'mocha'
 
-import { TlBinaryWriter, TlSerializationCounter, TlWriterMap } from '../src'
+import { hexDecodeToBuffer, hexEncode } from '../src/encodings/hex.js'
+import { TlBinaryWriter, TlSerializationCounter, TlWriterMap } from '../src/index.js'
 
 describe('TlBinaryWriter', () => {
     const testSingleMethod = (size: number, fn: (w: TlBinaryWriter) => void, map?: TlWriterMap): string => {
@@ -12,7 +13,7 @@ describe('TlBinaryWriter', () => {
         fn(w)
         expect(w.pos).eq(size)
 
-        return w.buffer.toString('hex')
+        return hexEncode(w.uint8View)
     }
 
     it('should write int32', () => {
@@ -56,7 +57,7 @@ describe('TlBinaryWriter', () => {
     })
 
     it('should write raw bytes', () => {
-        expect(testSingleMethod(5, (w) => w.raw(Buffer.from([4, 3, 5, 1, 1])))).eq('0403050101')
+        expect(testSingleMethod(5, (w) => w.raw(new Uint8Array([4, 3, 5, 1, 1])))).eq('0403050101')
     })
 
     it('should write tg-encoded boolean', () => {
@@ -65,13 +66,14 @@ describe('TlBinaryWriter', () => {
     })
 
     it('should write tg-encoded bytes', () => {
-        expect(testSingleMethod(4, (w) => w.bytes(Buffer.from([1, 2, 3])))).eq('03010203')
-        expect(testSingleMethod(8, (w) => w.bytes(Buffer.from([1, 2, 3, 4])))).eq('0401020304000000')
+        expect(testSingleMethod(4, (w) => w.bytes(new Uint8Array([1, 2, 3])))).eq('03010203')
+        expect(testSingleMethod(8, (w) => w.bytes(new Uint8Array([1, 2, 3, 4])))).eq('0401020304000000')
 
         const random250bytes = randomBytes(250)
         expect(testSingleMethod(252, (w) => w.bytes(random250bytes))).eq('fa' + random250bytes.toString('hex') + '00')
 
         const random1000bytes = randomBytes(1000)
+        // eslint-disable-next-line no-restricted-globals
         const buffer = Buffer.alloc(1004)
         buffer[0] = 254
         buffer.writeIntLE(1000, 1, 3)
@@ -169,9 +171,9 @@ describe('TlBinaryWriter', () => {
 
             const resPq = {
                 _: 'mt_resPQ',
-                nonce: Buffer.from('3E0549828CCA27E966B301A48FECE2FC', 'hex'),
-                serverNonce: Buffer.from('A5CF4D33F4A11EA877BA4AA573907330', 'hex'),
-                pq: Buffer.from('17ED48941A08F981', 'hex'),
+                nonce: hexDecodeToBuffer('3E0549828CCA27E966B301A48FECE2FC'),
+                serverNonce: hexDecodeToBuffer('A5CF4D33F4A11EA877BA4AA573907330'),
+                pq: hexDecodeToBuffer('17ED48941A08F981'),
                 serverPublicKeyFingerprints: [Long.fromString('c3b42b026ce86b21', 16)],
             }
 

@@ -1,9 +1,9 @@
 import { assertNever, BaseTelegramClient, tl } from '@mtcute/core'
 
-import { _parseEntities } from '../../../methods/messages/parse-entities'
-import { InputMediaContact, InputMediaGeo, InputMediaGeoLive, InputMediaVenue } from '../../media'
-import { FormattedString } from '../../parser'
-import { BotKeyboard, ReplyMarkup } from '../keyboards'
+import { _parseEntities } from '../../../methods/messages/parse-entities.js'
+import { InputMediaContact, InputMediaGeo, InputMediaGeoLive, InputMediaVenue } from '../../media/index.js'
+import { FormattedString } from '../../parser.js'
+import { BotKeyboard, ReplyMarkup } from '../keyboards.js'
 
 /**
  * Inline message containing only text

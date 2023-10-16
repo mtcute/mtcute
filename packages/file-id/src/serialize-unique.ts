@@ -1,9 +1,8 @@
 import { assertNever } from '@mtcute/core'
-import { encodeUrlSafeBase64 } from '@mtcute/core/utils'
-import { TlBinaryWriter } from '@mtcute/tl-runtime'
+import { base64Encode, byteLengthUtf8, TlBinaryWriter } from '@mtcute/core/utils.js'
 
-import { tdFileId as td } from './types'
-import { telegramRleEncode } from './utils'
+import { tdFileId as td } from './types.js'
+import { telegramRleEncode } from './utils.js'
 
 export type InputUniqueLocation =
     | Pick<td.RawWebRemoteFileLocation, '_' | 'url'>
@@ -82,7 +81,7 @@ export function toUniqueFileId(
             switch (source._) {
                 case 'legacy': {
                     // tdlib does not implement this
-                    writer = TlBinaryWriter.manualAlloc(16)
+                    writer = TlBinaryWriter.manual(16)
                     writer.int(type)
                     writer.int(100)
                     writer.long(source.secret)
@@ -90,7 +89,7 @@ export function toUniqueFileId(
                 }
                 case 'stickerSetThumbnail': {
                     // tdlib does not implement this
-                    writer = TlBinaryWriter.manualAlloc(24)
+                    writer = TlBinaryWriter.manual(24)
                     writer.int(type)
                     writer.int(150)
                     writer.long(source.id)
@@ -98,15 +97,15 @@ export function toUniqueFileId(
                     break
                 }
                 case 'dialogPhoto': {
-                    writer = TlBinaryWriter.manualAlloc(13)
+                    writer = TlBinaryWriter.manual(13)
                     writer.int(type)
                     writer.long(inputLocation.id)
-                    writer.raw(Buffer.from([Number(source.big)]))
+                    writer.raw(new Uint8Array([Number(source.big)]))
                     // it doesn't matter to which Dialog the photo belongs
                     break
                 }
                 case 'thumbnail': {
-                    writer = TlBinaryWriter.manualAlloc(13)
+                    writer = TlBinaryWriter.manual(13)
 
                     let thumbType = source.thumbnailType.charCodeAt(0)
 
@@ -120,21 +119,21 @@ export function toUniqueFileId(
 
                     writer.int(type)
                     writer.long(inputLocation.id)
-                    writer.raw(Buffer.from([thumbType]))
+                    writer.raw(new Uint8Array([thumbType]))
                     break
                 }
                 case 'fullLegacy':
                 case 'dialogPhotoLegacy':
                 case 'stickerSetThumbnailLegacy':
-                    writer = TlBinaryWriter.manualAlloc(16)
+                    writer = TlBinaryWriter.manual(16)
                     writer.int(type)
                     writer.long(source.volumeId)
                     writer.int(source.localId)
                     break
                 case 'stickerSetThumbnailVersion':
-                    writer = TlBinaryWriter.manualAlloc(17)
+                    writer = TlBinaryWriter.manual(17)
                     writer.int(type)
-                    writer.raw(Buffer.from([2]))
+                    writer.raw(new Uint8Array([2]))
                     writer.long(source.id)
                     writer.int(source.version)
                     break
@@ -142,12 +141,12 @@ export function toUniqueFileId(
             break
         }
         case 'web':
-            writer = TlBinaryWriter.alloc(undefined, Buffer.byteLength(inputLocation.url, 'utf-8') + 8)
+            writer = TlBinaryWriter.alloc(undefined, byteLengthUtf8(inputLocation.url) + 8)
             writer.int(type)
             writer.string(inputLocation.url)
             break
         case 'common':
-            writer = TlBinaryWriter.manualAlloc(12)
+            writer = TlBinaryWriter.manual(12)
             writer.int(type)
             writer.long(inputLocation.id)
             break
@@ -155,5 +154,5 @@ export function toUniqueFileId(
             assertNever(inputLocation)
     }
 
-    return encodeUrlSafeBase64(telegramRleEncode(writer.result()))
+    return base64Encode(telegramRleEncode(writer.result()), true)
 }

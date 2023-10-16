@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { PeerStories } from '../../types'
-import { getAllStories } from './get-all-stories'
+import { PeerStories } from '../../types/index.js'
+import { getAllStories } from './get-all-stories.js'
 
 /**
  * Iterate over all stories (e.g. to load the top bar)

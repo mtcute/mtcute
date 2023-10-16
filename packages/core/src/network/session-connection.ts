@@ -3,11 +3,20 @@
 import Long from 'long'
 
 import { mtp, tl } from '@mtcute/tl'
-import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlSerializationCounter, TlWriterMap } from '@mtcute/tl-runtime'
-import { gzipDeflate, gzipInflate } from '@mtcute/tl-runtime/src/platform/gzip'
-
-import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types'
 import {
+    gzipDeflate,
+    gzipInflate,
+    TlBinaryReader,
+    TlBinaryWriter,
+    TlReaderMap,
+    TlSerializationCounter,
+    TlWriterMap,
+} from '@mtcute/tl-runtime'
+
+import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
+import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
+import {
+    concatBuffers,
     ControllablePromise,
     createControllablePromise,
     EarlyTimer,
@@ -15,13 +24,12 @@ import {
     randomBytes,
     randomLong,
     removeFromLongArray,
-} from '../utils'
-import { createAesIgeForMessageOld } from '../utils/crypto/mtproto'
-import { reportUnknownError } from '../utils/platform/error-reporting'
-import { doAuthorization } from './authorization'
-import { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session'
-import { PersistentConnection, PersistentConnectionParams } from './persistent-connection'
-import { TransportError } from './transports'
+} from '../utils/index.js'
+import { reportUnknownError } from '../utils/platform/error-reporting.js'
+import { doAuthorization } from './authorization.js'
+import { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session.js'
+import { PersistentConnection, PersistentConnectionParams } from './persistent-connection.js'
+import { TransportError } from './transports/abstract.js'
 
 const TEMP_AUTH_KEY_EXPIRY = 86400
 
@@ -61,7 +69,7 @@ export class SessionConnection extends PersistentConnection {
     private _queuedDestroySession: Long[] = []
 
     // waitForMessage
-    private _pendingWaitForUnencrypted: [ControllablePromise<Buffer>, NodeJS.Timeout][] = []
+    private _pendingWaitForUnencrypted: [ControllablePromise<Uint8Array>, NodeJS.Timeout][] = []
 
     private _usePfs = this.params.usePfs ?? false
     private _isPfsBindingPending = false
@@ -85,7 +93,7 @@ export class SessionConnection extends PersistentConnection {
         this._handleRawMessage = this._handleRawMessage.bind(this)
     }
 
-    getAuthKey(temp = false): Buffer | null {
+    getAuthKey(temp = false): Uint8Array | null {
         const key = temp ? this._session._authKeyTemp : this._session._authKey
 
         if (!key.ready) return null
@@ -350,7 +358,7 @@ export class SessionConnection extends PersistentConnection {
                 const msgWithPadding = writer.result()
 
                 const hash = await this.params.crypto.sha1(msgWithoutPadding)
-                const msgKey = hash.slice(4, 20)
+                const msgKey = hash.subarray(4, 20)
 
                 const ige = await createAesIgeForMessageOld(
                     this.params.crypto,
@@ -359,7 +367,7 @@ export class SessionConnection extends PersistentConnection {
                     true,
                 )
                 const encryptedData = await ige.encrypt(msgWithPadding)
-                const encryptedMessage = Buffer.concat([this._session._authKey.id, msgKey, encryptedData])
+                const encryptedMessage = concatBuffers([this._session._authKey.id, msgKey, encryptedData])
 
                 const promise = createControllablePromise<mtp.RawMt_rpc_error | boolean>()
 
@@ -461,8 +469,8 @@ export class SessionConnection extends PersistentConnection {
             })
     }
 
-    waitForUnencryptedMessage(timeout = 5000): Promise<Buffer> {
-        const promise = createControllablePromise<Buffer>()
+    waitForUnencryptedMessage(timeout = 5000): Promise<Uint8Array> {
+        const promise = createControllablePromise<Uint8Array>()
         const timeoutId = setTimeout(() => {
             promise.reject(new MtTimeoutError(timeout))
             this._pendingWaitForUnencrypted = this._pendingWaitForUnencrypted.filter((it) => it[0] !== promise)
@@ -472,19 +480,19 @@ export class SessionConnection extends PersistentConnection {
         return promise
     }
 
-    protected async onMessage(data: Buffer): Promise<void> {
-        if (data.readInt32LE(0) === 0 && data.readInt32LE(4) === 0) {
-            // auth_key_id = 0, meaning it's an unencrypted message used for authorization
+    protected async onMessage(data: Uint8Array): Promise<void> {
+        if (this._pendingWaitForUnencrypted.length) {
+            const int32 = new Int32Array(data.buffer, data.byteOffset, 2)
 
-            if (this._pendingWaitForUnencrypted.length) {
+            if (int32[0] === 0 && int32[1] === 0) {
+                // auth_key_id = 0, meaning it's an unencrypted message used for authorization
+
                 const [promise, timeout] = this._pendingWaitForUnencrypted.shift()!
                 clearTimeout(timeout)
                 promise.resolve(data)
-            } else {
-                this.log.debug('unencrypted message received, but no one is waiting for it')
-            }
 
-            return
+                return
+            }
         }
 
         if (!this._session._authKey.ready) {
@@ -1119,7 +1127,7 @@ export class SessionConnection extends PersistentConnection {
         this.log.debug('received message info for %l, and answer (%l) was already received', msgId, answerMsgId)
     }
 
-    private _onMessagesInfo(msgIds: Long[], info: Buffer): void {
+    private _onMessagesInfo(msgIds: Long[], info: Uint8Array): void {
         if (msgIds.length !== info.length) {
             this.log.warn('messages state info was invalid: msg_ids.length !== info.length')
         }
@@ -1254,7 +1262,7 @@ export class SessionConnection extends PersistentConnection {
             // if it is less than 0.9, then try to compress the whole request
 
             const middle = ~~((content.length - 1024) / 2)
-            const gzipped = gzipDeflate(content.slice(middle, middle + 1024), 0.9)
+            const gzipped = gzipDeflate(content.subarray(middle, middle + 1024), 0.9)
 
             if (!gzipped) shouldGzip = false
         }
@@ -1417,23 +1425,24 @@ export class SessionConnection extends PersistentConnection {
         let containerMessageCount = 0
         let containerSize = 0
 
-        let ackRequest: Buffer | null = null
+        let ackRequest: Uint8Array | null = null
         let ackMsgIds: Long[] | null = null
 
-        let pingRequest: Buffer | null = null
+        let pingRequest: Uint8Array | null = null
         let pingId: Long | null = null
         let pingMsgId: Long | null = null
 
-        let getStateRequest: Buffer | null = null
+        let getStateRequest: Uint8Array | null = null
         let getStateMsgId: Long | null = null
         let getStateMsgIds: Long[] | null = null
 
-        let resendRequest: Buffer | null = null
+        let resendRequest: Uint8Array | null = null
         let resendMsgId: Long | null = null
         let resendMsgIds: Long[] | null = null
 
         let cancelRpcs: Long[] | null = null
         let destroySessions: Long[] | null = null
+        let rootMsgId: Long | null = null
 
         const now = Date.now()
 
@@ -1706,6 +1715,7 @@ export class SessionConnection extends PersistentConnection {
                 this._session.getStateSchedule.insert(msg)
             }
 
+            if (rootMsgId === null) rootMsgId = msg.msgId
             writer.long(this._registerOutgoingMsgId(msg.msgId))
             writer.uint(msg.seqNo!)
 
@@ -1730,6 +1740,7 @@ export class SessionConnection extends PersistentConnection {
 
             const containerId = this._session.getMessageId()
             writer.pos = 0
+            rootMsgId = containerId
             writer.long(this._registerOutgoingMsgId(containerId))
             writer.uint(this._session.getSeqNo(false))
             writer.uint(packetSize - 16)
@@ -1758,7 +1769,6 @@ export class SessionConnection extends PersistentConnection {
 
         const result = writer.result()
         // probably the easiest way lol
-        const rootMsgId = new Long(result.readInt32LE(), result.readInt32LE(4))
 
         this.log.debug(
             'sending %d messages: size = %db, acks = %d (msg_id = %s), ping = %s (msg_id = %s), state_req = %s (msg_id = %s), resend = %s (msg_id = %s), cancels = %s (msg_id = %s), rpc = %s, container = %s, root msg_id = %l',
@@ -1789,7 +1799,7 @@ export class SessionConnection extends PersistentConnection {
                 if (ackMsgIds) {
                     this._session.queuedAcks.splice(0, 0, ...ackMsgIds)
                 }
-                this._onMessageFailed(rootMsgId, 'unknown error')
+                this._onMessageFailed(rootMsgId!, 'unknown error')
             })
     }
 }

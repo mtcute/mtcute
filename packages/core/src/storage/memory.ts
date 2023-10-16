@@ -1,9 +1,8 @@
-import { IStateStorage } from '@mtcute/dispatcher'
 import { tl } from '@mtcute/tl'
 
-import { MaybeAsync } from '../types'
-import { LruMap, toggleChannelIdMark } from '../utils'
-import { ITelegramStorage } from './abstract'
+import { MaybeAsync } from '../types/index.js'
+import { LruMap, toggleChannelIdMark } from '../utils/index.js'
+import { ITelegramStorage } from './abstract.js'
 
 const CURRENT_VERSION = 1
 
@@ -14,8 +13,8 @@ export interface MemorySessionState {
     $version: typeof CURRENT_VERSION
 
     defaultDcs: ITelegramStorage.DcOptions | null
-    authKeys: Map<number, Buffer>
-    authKeysTemp: Map<string, Buffer>
+    authKeys: Map<number, Uint8Array>
+    authKeysTemp: Map<string, Uint8Array>
     authKeysTempExpiry: Map<string, number>
 
     // marked peer id -> entity info
@@ -57,7 +56,7 @@ export interface MemorySessionState {
 
 const USERNAME_TTL = 86400000 // 24 hours
 
-export class MemoryStorage implements ITelegramStorage, IStateStorage {
+export class MemoryStorage implements ITelegramStorage /*, IStateStorage*/ {
     protected _state!: MemorySessionState
     private _cachedInputPeers: LruMap<number, tl.TypeInputPeer> = new LruMap(100)
 
@@ -185,7 +184,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         this._state.defaultDcs = dcs
     }
 
-    setTempAuthKeyFor(dcId: number, index: number, key: Buffer | null, expiresAt: number): void {
+    setTempAuthKeyFor(dcId: number, index: number, key: Uint8Array | null, expiresAt: number): void {
         const k = `${dcId}:${index}`
 
         if (key) {
@@ -197,7 +196,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         }
     }
 
-    setAuthKeyFor(dcId: number, key: Buffer | null): void {
+    setAuthKeyFor(dcId: number, key: Uint8Array | null): void {
         if (key) {
             this._state.authKeys.set(dcId, key)
         } else {
@@ -205,7 +204,7 @@ export class MemoryStorage implements ITelegramStorage, IStateStorage {
         }
     }
 
-    getAuthKeyFor(dcId: number, tempIndex?: number): Buffer | null {
+    getAuthKeyFor(dcId: number, tempIndex?: number): Uint8Array | null {
         if (tempIndex !== undefined) {
             const k = `${dcId}:${tempIndex}`
 

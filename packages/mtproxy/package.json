@@ -6,9 +6,18 @@
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
     "main": "index.ts",
+    "type": "module",
     "scripts": {
         "docs": "typedoc",
-        "build": "tsc"
+        "build": "pnpm run -w build-package mtproxy"
+    },
+    "distOnlyFields": {
+        "exports": {
+            ".": {
+                "import": "./esm/index.js",
+                "require": "./cjs/index.js"
+            }
+        }
     },
     "dependencies": {
         "@mtcute/core": "workspace:^1.0.0",

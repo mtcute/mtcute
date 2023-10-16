@@ -3,7 +3,7 @@ import Long from 'long'
 import { mtp, tl } from '@mtcute/tl'
 import { TlBinaryWriter, TlReaderMap, TlSerializationCounter, TlWriterMap } from '@mtcute/tl-runtime'
 
-import { MtcuteError } from '../types'
+import { MtcuteError } from '../types/index.js'
 import {
     ControllablePromise,
     Deque,
@@ -14,12 +14,12 @@ import {
     LruSet,
     randomLong,
     SortedArray,
-} from '../utils'
-import { AuthKey } from './auth-key'
+} from '../utils/index.js'
+import { AuthKey } from './auth-key.js'
 
 export interface PendingRpc {
     method: string
-    data: Buffer
+    data: Uint8Array
     promise: ControllablePromise
     stack?: string
     gzipOverhead?: number
@@ -243,17 +243,17 @@ export class MtprotoSession {
     }
 
     /** Encrypt a single MTProto message using session's keys */
-    async encryptMessage(message: Buffer): Promise<Buffer> {
+    async encryptMessage(message: Uint8Array): Promise<Uint8Array> {
         const key = this._authKeyTemp.ready ? this._authKeyTemp : this._authKey
 
         return key.encryptMessage(message, this.serverSalt, this._sessionId)
     }
 
     /** Decrypt a single MTProto message using session's keys */
-    async decryptMessage(data: Buffer, callback: Parameters<AuthKey['decryptMessage']>[2]): Promise<void> {
+    async decryptMessage(data: Uint8Array, callback: Parameters<AuthKey['decryptMessage']>[2]): Promise<void> {
         if (!this._authKey.ready) throw new MtcuteError('Keys are not set up!')
 
-        const authKeyId = data.slice(0, 8)
+        const authKeyId = data.subarray(0, 8)
 
         let key: AuthKey
 
@@ -278,18 +278,22 @@ export class MtprotoSession {
         return key.decryptMessage(data, this._sessionId, callback)
     }
 
-    writeMessage(writer: TlBinaryWriter, content: tl.TlObject | mtp.TlObject | Buffer, isContentRelated = true): Long {
+    writeMessage(
+        writer: TlBinaryWriter,
+        content: tl.TlObject | mtp.TlObject | Uint8Array,
+        isContentRelated = true,
+    ): Long {
         const messageId = this.getMessageId()
         const seqNo = this.getSeqNo(isContentRelated)
 
-        const length = Buffer.isBuffer(content) ?
+        const length = ArrayBuffer.isView(content) ?
             content.length :
             TlSerializationCounter.countNeededBytes(writer.objectMap!, content)
 
         writer.long(messageId)
         writer.int(seqNo)
         writer.uint(length)
-        if (Buffer.isBuffer(content)) writer.raw(content)
+        if (ArrayBuffer.isView(content)) writer.raw(content)
         else writer.object(content as tl.TlObject)
 
         return messageId

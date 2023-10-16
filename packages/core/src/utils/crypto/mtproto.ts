@@ -1,4 +1,5 @@
-import { ICryptoProvider, IEncryptionScheme } from './abstract'
+import { concatBuffers } from '../buffer-utils.js'
+import { ICryptoProvider, IEncryptionScheme } from './abstract.js'
 
 /**
  * Generate AES key and IV from nonces as defined by MTProto.
@@ -11,15 +12,15 @@ import { ICryptoProvider, IEncryptionScheme } from './abstract'
  */
 export async function generateKeyAndIvFromNonce(
     crypto: ICryptoProvider,
-    serverNonce: Buffer,
-    newNonce: Buffer,
-): Promise<[Buffer, Buffer]> {
-    const hash1 = await crypto.sha1(Buffer.concat([newNonce, serverNonce]))
-    const hash2 = await crypto.sha1(Buffer.concat([serverNonce, newNonce]))
-    const hash3 = await crypto.sha1(Buffer.concat([newNonce, newNonce]))
+    serverNonce: Uint8Array,
+    newNonce: Uint8Array,
+): Promise<[Uint8Array, Uint8Array]> {
+    const hash1 = await crypto.sha1(concatBuffers([newNonce, serverNonce]))
+    const hash2 = await crypto.sha1(concatBuffers([serverNonce, newNonce]))
+    const hash3 = await crypto.sha1(concatBuffers([newNonce, newNonce]))
 
-    const key = Buffer.concat([hash1, hash2.slice(0, 12)])
-    const iv = Buffer.concat([hash2.slice(12, 20), hash3, newNonce.slice(0, 4)])
+    const key = concatBuffers([hash1, hash2.subarray(0, 12)])
+    const iv = concatBuffers([hash2.subarray(12, 20), hash3, newNonce.subarray(0, 4)])
 
     return [key, iv]
 }
@@ -35,16 +36,16 @@ export async function generateKeyAndIvFromNonce(
  */
 export async function createAesIgeForMessage(
     crypto: ICryptoProvider,
-    authKey: Buffer,
-    messageKey: Buffer,
+    authKey: Uint8Array,
+    messageKey: Uint8Array,
     client: boolean,
 ): Promise<IEncryptionScheme> {
     const x = client ? 0 : 8
-    const sha256a = await crypto.sha256(Buffer.concat([messageKey, authKey.slice(x, 36 + x)]))
-    const sha256b = await crypto.sha256(Buffer.concat([authKey.slice(40 + x, 76 + x), messageKey]))
+    const sha256a = await crypto.sha256(concatBuffers([messageKey, authKey.subarray(x, 36 + x)]))
+    const sha256b = await crypto.sha256(concatBuffers([authKey.subarray(40 + x, 76 + x), messageKey]))
 
-    const key = Buffer.concat([sha256a.slice(0, 8), sha256b.slice(8, 24), sha256a.slice(24, 32)])
-    const iv = Buffer.concat([sha256b.slice(0, 8), sha256a.slice(8, 24), sha256b.slice(24, 32)])
+    const key = concatBuffers([sha256a.subarray(0, 8), sha256b.subarray(8, 24), sha256a.subarray(24, 32)])
+    const iv = concatBuffers([sha256b.subarray(0, 8), sha256a.subarray(8, 24), sha256b.subarray(24, 32)])
 
     return crypto.createAesIge(key, iv)
 }
@@ -60,20 +61,25 @@ export async function createAesIgeForMessage(
  */
 export async function createAesIgeForMessageOld(
     crypto: ICryptoProvider,
-    authKey: Buffer,
-    messageKey: Buffer,
+    authKey: Uint8Array,
+    messageKey: Uint8Array,
     client: boolean,
 ): Promise<IEncryptionScheme> {
     const x = client ? 0 : 8
-    const sha1a = await crypto.sha1(Buffer.concat([messageKey, authKey.slice(x, 32 + x)]))
+    const sha1a = await crypto.sha1(concatBuffers([messageKey, authKey.subarray(x, 32 + x)]))
     const sha1b = await crypto.sha1(
-        Buffer.concat([authKey.slice(32 + x, 48 + x), messageKey, authKey.slice(48 + x, 64 + x)]),
+        concatBuffers([authKey.subarray(32 + x, 48 + x), messageKey, authKey.subarray(48 + x, 64 + x)]),
     )
-    const sha1c = await crypto.sha1(Buffer.concat([authKey.slice(64 + x, 96 + x), messageKey]))
-    const sha1d = await crypto.sha1(Buffer.concat([messageKey, authKey.slice(96 + x, 128 + x)]))
+    const sha1c = await crypto.sha1(concatBuffers([authKey.subarray(64 + x, 96 + x), messageKey]))
+    const sha1d = await crypto.sha1(concatBuffers([messageKey, authKey.subarray(96 + x, 128 + x)]))
 
-    const key = Buffer.concat([sha1a.slice(0, 8), sha1b.slice(8, 20), sha1c.slice(4, 16)])
-    const iv = Buffer.concat([sha1a.slice(8, 20), sha1b.slice(0, 8), sha1c.slice(16, 20), sha1d.slice(0, 8)])
+    const key = concatBuffers([sha1a.subarray(0, 8), sha1b.subarray(8, 20), sha1c.subarray(4, 16)])
+    const iv = concatBuffers([
+        sha1a.subarray(8, 20),
+        sha1b.subarray(0, 8),
+        sha1c.subarray(16, 20),
+        sha1d.subarray(0, 8),
+    ])
 
     return crypto.createAesIge(key, iv)
 }

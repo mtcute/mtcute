@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { LruMap } from '../utils'
+import { LruMap } from '../utils.js'
 
 describe('LruMap', () => {
     it('Map backend', () => {

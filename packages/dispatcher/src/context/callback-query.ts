@@ -1,6 +1,6 @@
 import { CallbackQuery, getMarkedPeerId, MtArgumentError, MtMessageNotFoundError, TelegramClient } from '@mtcute/client'
 
-import { UpdateContext } from './base'
+import { UpdateContext } from './base.js'
 
 /**
  * Context of a callback query update.

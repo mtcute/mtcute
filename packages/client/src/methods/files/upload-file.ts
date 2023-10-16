@@ -1,18 +1,24 @@
-import { fromBuffer as fileTypeFromBuffer } from 'file-type'
+import fileType from 'file-type'
 import type { ReadStream } from 'fs'
+import { createRequire } from 'module'
 import { Readable } from 'stream'
 
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
-import { AsyncLock, randomLong } from '@mtcute/core/utils'
+import { AsyncLock, randomLong } from '@mtcute/core/utils.js'
 
-import { UploadedFile, UploadFileLike } from '../../types'
-import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils'
-import { bufferToStream, convertWebStreamToNodeReadable, readBytesFromStream } from '../../utils/stream-utils'
+import { UploadedFile, UploadFileLike } from '../../types/index.js'
+import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils.js'
+import { bufferToStream, convertWebStreamToNodeReadable, readBytesFromStream } from '../../utils/stream-utils.js'
+
+const { fromBuffer: fileTypeFromBuffer } = fileType
 
 let fs: typeof import('fs') | null = null
 let path: typeof import('path') | null = null
 
 try {
+    // @only-if-esm
+    const require = createRequire(import.meta.url)
+    // @/only-if-esm
     fs = require('fs') as typeof import('fs')
     path = require('path') as typeof import('path')
 } catch (e) {}
@@ -104,7 +110,7 @@ export async function uploadFile(
     let fileName = DEFAULT_FILE_NAME
     let fileMime = params.fileMime
 
-    if (Buffer.isBuffer(file)) {
+    if (ArrayBuffer.isView(file)) {
         fileSize = file.length
         file = bufferToStream(file)
     }
@@ -252,12 +258,12 @@ export async function uploadFile(
         if (fileSize === -1 && (stream.readableEnded || !part)) {
             fileSize = pos + (part?.length ?? 0)
             partCount = ~~((fileSize + partSize - 1) / partSize)
-            if (!part) part = Buffer.alloc(0)
+            if (!part) part = new Uint8Array(0)
             client.log.debug('readable ended, file size = %d, part count = %d', fileSize, partCount)
         }
 
-        if (!Buffer.isBuffer(part)) {
-            throw new MtArgumentError(`Part ${thisIdx} was not a Buffer!`)
+        if (!ArrayBuffer.isView(part)) {
+            throw new MtArgumentError(`Part ${thisIdx} was not a Uint8Array!`)
         }
         if (part.length > partSize) {
             throw new MtArgumentError(`Part ${thisIdx} had invalid size (expected ${partSize}, got ${part.length})`)

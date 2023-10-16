@@ -1,15 +1,15 @@
 import { tl, toggleChannelIdMark } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { Photo } from '../../media/photo'
-import { Message } from '../../messages/message'
-import { ChatInviteLink } from '../chat-invite-link'
-import { ChatLocation } from '../chat-location'
-import { ChatMember } from '../chat-member'
-import { ChatPermissions } from '../chat-permissions'
-import { ForumTopic } from '../forum-topic'
-import { PeersIndex } from '../peers-index'
-import { User } from '../user'
+import { Photo } from '../../media/photo.js'
+import { Message } from '../../messages/message.js'
+import { ChatInviteLink } from '../chat-invite-link.js'
+import { ChatLocation } from '../chat-location.js'
+import { ChatMember } from '../chat-member.js'
+import { ChatPermissions } from '../chat-permissions.js'
+import { ForumTopic } from '../forum-topic.js'
+import { PeersIndex } from '../peers-index.js'
+import { User } from '../user.js'
 
 /** A user has joined the channel (in the case of big groups, info of the user that has joined isn't shown) */
 export interface ChatActionUserJoined {

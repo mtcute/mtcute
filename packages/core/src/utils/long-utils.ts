@@ -1,6 +1,7 @@
 import Long from 'long'
 
-import { getRandomInt } from './misc-utils'
+import { dataViewFromBuffer } from './buffer-utils.js'
+import { getRandomInt } from './misc-utils.js'
 
 /**
  * Get a random Long
@@ -21,12 +22,14 @@ export function randomLong(unsigned = false): Long {
  * @param unsigned  Whether the number should be unsigned
  * @param le  Whether the number is little-endian
  */
-export function longFromBuffer(buf: Buffer, unsigned = false, le = true): Long {
+export function longFromBuffer(buf: Uint8Array, unsigned = false, le = true): Long {
+    const dv = dataViewFromBuffer(buf)
+
     if (le) {
-        return new Long(buf.readInt32LE(0), buf.readInt32LE(4), unsigned)
+        return new Long(dv.getInt32(0, true), dv.getInt32(4, true), unsigned)
     }
 
-    return new Long(buf.readInt32BE(4), buf.readInt32BE(0), unsigned)
+    return new Long(dv.getInt32(4, false), dv.getInt32(0, false), unsigned)
 }
 
 /**

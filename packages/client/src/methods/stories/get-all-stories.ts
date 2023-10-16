@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
-import { assertTypeIsNot } from '@mtcute/core/utils'
+import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
-import { AllStories } from '../../types'
+import { AllStories } from '../../types/index.js'
 
 /**
  * Get all stories (e.g. to load the top bar)

@@ -2,9 +2,9 @@ import { Readable } from 'stream'
 
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { FileDownloadParameters, FileLocation } from '../../types'
-import { bufferToStream } from '../../utils/stream-utils'
-import { downloadAsIterable } from './download-iterable'
+import { FileDownloadParameters, FileLocation } from '../../types/index.js'
+import { bufferToStream } from '../../utils/stream-utils.js'
+import { downloadAsIterable } from './download-iterable.js'
 
 /**
  * Download a file and return it as a Node readable stream,
@@ -13,7 +13,7 @@ import { downloadAsIterable } from './download-iterable'
  * @param params  File download parameters
  */
 export function downloadAsStream(client: BaseTelegramClient, params: FileDownloadParameters): Readable {
-    if (params.location instanceof FileLocation && Buffer.isBuffer(params.location.location)) {
+    if (params.location instanceof FileLocation && ArrayBuffer.isView(params.location.location)) {
         return bufferToStream(params.location.location)
     }
 

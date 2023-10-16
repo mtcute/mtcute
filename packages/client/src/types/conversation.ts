@@ -1,16 +1,16 @@
 import { BaseTelegramClient, getMarkedPeerId, MaybeAsync, MtArgumentError, MtTimeoutError, tl } from '@mtcute/core'
-import { AsyncLock, ControllablePromise, createControllablePromise, Deque } from '@mtcute/core/utils'
+import { AsyncLock, ControllablePromise, createControllablePromise, Deque } from '@mtcute/core/utils.js'
 
-import { getPeerDialogs } from '../methods/dialogs/get-peer-dialogs'
-import { readHistory } from '../methods/messages/read-history'
-import { sendMedia } from '../methods/messages/send-media'
-import { sendMediaGroup } from '../methods/messages/send-media-group'
-import { sendText } from '../methods/messages/send-text'
-import { resolvePeer } from '../methods/users/resolve-peer'
-import type { Message } from './messages'
-import type { InputPeerLike } from './peers'
-import type { HistoryReadUpdate, ParsedUpdate } from './updates'
-import { ParametersSkip2 } from './utils'
+import { getPeerDialogs } from '../methods/dialogs/get-peer-dialogs.js'
+import { readHistory } from '../methods/messages/read-history.js'
+import { sendMedia } from '../methods/messages/send-media.js'
+import { sendMediaGroup } from '../methods/messages/send-media-group.js'
+import { sendText } from '../methods/messages/send-text.js'
+import { resolvePeer } from '../methods/users/resolve-peer.js'
+import type { Message } from './messages/message.js'
+import type { InputPeerLike } from './peers/index.js'
+import type { HistoryReadUpdate, ParsedUpdate } from './updates/index.js'
+import { ParametersSkip2 } from './utils.js'
 
 interface QueuedHandler<T> {
     promise: ControllablePromise<T>

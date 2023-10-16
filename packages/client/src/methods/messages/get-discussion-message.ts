@@ -1,8 +1,8 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { InputMessageId, Message, normalizeInputMessageId } from '../../types/messages'
-import { InputPeerLike, PeersIndex } from '../../types/peers'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputMessageId, Message, normalizeInputMessageId } from '../../types/messages/index.js'
+import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /** @internal */
 export async function _getDiscussionMessage(

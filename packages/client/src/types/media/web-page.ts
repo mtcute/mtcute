@@ -1,10 +1,10 @@
 import { MtArgumentError, tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { RawDocument } from './document'
-import { parseDocument } from './document-utils'
-import { Photo } from './photo'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { RawDocument } from './document.js'
+import { parseDocument } from './document-utils.js'
+import { Photo } from './photo.js'
 
 /**
  * Web page preview.

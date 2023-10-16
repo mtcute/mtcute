@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { computeConstructorIdFromEntry, TlArgument, TlEntry } from '../src'
+import { computeConstructorIdFromEntry, TlArgument, TlEntry } from '../src/index.js'
 
 describe('computeConstructorIdFromEntry', () => {
     const make = (name: string, type: string, ...args: string[]): TlEntry => ({

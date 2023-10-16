@@ -1,4 +1,4 @@
-import { I18nValue, I18nValueDynamic } from '../types'
+import { I18nValue, I18nValueDynamic } from '../types.js'
 
 /**
  * Get an English ordinal suffix (st/nd/rd/th) for a given number.

@@ -16,6 +16,7 @@ import {
     UserTypingUpdate,
 } from '@mtcute/client'
 
+import { UpdateContext } from './context/base.js'
 import {
     CallbackQueryContext,
     ChatJoinRequestUpdateContext,
@@ -23,9 +24,8 @@ import {
     InlineQueryContext,
     MessageContext,
     PreCheckoutQueryContext,
-} from './context'
-import { UpdateContext } from './context/base'
-import { PropagationAction } from './propagation'
+} from './context/index.js'
+import { PropagationAction } from './propagation.js'
 
 export interface BaseUpdateHandler<Name, Handler, Checker> {
     name: Name

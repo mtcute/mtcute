@@ -1,11 +1,13 @@
 // all available libraries either suck or are extremely large for the use case, so i made my own~
 
+import { base64DecodeToBuffer, hexEncode } from '@mtcute/tl-runtime'
+
 /**
  * Parses a single PEM block to buffer.
  * In fact just strips begin/end tags and parses the rest as Base64
  */
-export function parsePemContents(pem: string): Buffer {
-    return Buffer.from(pem.replace(/^-----(BEGIN|END)( RSA)? PUBLIC KEY-----$|\n/gm, ''), 'base64')
+export function parsePemContents(pem: string): Uint8Array {
+    return base64DecodeToBuffer(pem.replace(/^-----(BEGIN|END)( RSA)? PUBLIC KEY-----$|\n/gm, ''))
 }
 
 // based on https://git.coolaj86.com/coolaj86/asn1-parser.js/src/branch/master/asn1-parser.js
@@ -16,7 +18,7 @@ interface Asn1Object {
     lengthSize: number
     length: number
     children?: Asn1Object[]
-    value?: Buffer
+    value?: Uint8Array
 }
 
 const ELOOPN = 102
@@ -47,8 +49,8 @@ const VTYPES: Record<number, true> = {
 /**
  * Parses ASN.1 data to an object
  */
-export function parseAsn1(data: Buffer): Asn1Object {
-    function parseAsn1Inner(buf: Buffer, depth: number[], eager = false) {
+export function parseAsn1(data: Uint8Array): Asn1Object {
+    function parseAsn1Inner(buf: Uint8Array, depth: number[], eager = false) {
         if (depth.length >= EDEEPN) {
             throw new Error(EDEEP)
         }
@@ -64,7 +66,7 @@ export function parseAsn1(data: Buffer): Asn1Object {
         if (0x80 & asn1.length) {
             asn1.lengthSize = 0x7f & asn1.length
             // I think that buf->hex->int solves the problem of Endianness... not sure
-            asn1.length = buf.readIntBE(index, asn1.lengthSize)
+            asn1.length = parseInt(hexEncode(buf.subarray(index, index + asn1.lengthSize)), 16)
             index += asn1.lengthSize
         }
 
@@ -85,7 +87,7 @@ export function parseAsn1(data: Buffer): Asn1Object {
             while (iters < ELOOPN && index < 2 + asn1.length + asn1.lengthSize) {
                 iters += 1
                 depth.length += 1
-                child = parseAsn1Inner(buf.slice(index, index + adjustedLen), depth, eager)
+                child = parseAsn1Inner(buf.subarray(index, index + adjustedLen), depth, eager)
                 depth.length -= 1
                 // The numbers don't match up exactly and I don't remember why...
                 // probably something with adjustedLen or some such, but the tests pass
@@ -117,7 +119,7 @@ export function parseAsn1(data: Buffer): Asn1Object {
         }
 
         // Return types that are _always_ values
-        asn1.value = buf.slice(index, index + adjustedLen)
+        asn1.value = buf.subarray(index, index + adjustedLen)
 
         if (VTYPES[asn1.type]) {
             return asn1

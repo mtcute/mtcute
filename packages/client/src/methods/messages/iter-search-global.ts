@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { Message, SearchFilters } from '../../types'
-import { normalizeDate } from '../../utils'
-import { searchGlobal } from './search-global'
+import { Message, SearchFilters } from '../../types/index.js'
+import { normalizeDate } from '../../utils/index.js'
+import { searchGlobal } from './search-global.js'
 
 /**
  * Search for messages globally from all of your chats.

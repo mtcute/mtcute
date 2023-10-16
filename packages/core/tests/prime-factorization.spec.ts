@@ -1,16 +1,18 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { factorizePQSync } from '../src/utils/crypto/factorization'
+import { hexDecodeToBuffer, hexEncode } from '@mtcute/tl-runtime'
+
+import { factorizePQSync } from '../src/utils/crypto/factorization.js'
 
 describe('prime factorization', function () {
     this.timeout(10000) // since PQ factorization relies on RNG, it may take a while (or may not!)
 
     it('should decompose PQ to prime factors P and Q', () => {
         const testFactorization = (pq: string, p: string, q: string) => {
-            const [p1, q1] = factorizePQSync(Buffer.from(pq, 'hex'))
-            expect(p1.toString('hex')).eq(p.toLowerCase())
-            expect(q1.toString('hex')).eq(q.toLowerCase())
+            const [p1, q1] = factorizePQSync(hexDecodeToBuffer(pq))
+            expect(hexEncode(p1)).eq(p.toLowerCase())
+            expect(hexEncode(q1)).eq(q.toLowerCase())
         }
 
         // from samples at https://core.telegram.org/mtproto/samples-auth_key

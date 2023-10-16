@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { ChatInviteLink, InputPeerLike } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { ChatInviteLink, InputPeerLike } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Generate a new primary invite link for a chat,

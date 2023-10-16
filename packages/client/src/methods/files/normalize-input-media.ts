@@ -1,17 +1,17 @@
 import { BaseTelegramClient, Long, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 import { fileIdToInputDocument, fileIdToInputPhoto, parseFileId, tdFileId } from '@mtcute/file-id'
 
-import { isUploadedFile } from '../../types/files/uploaded-file'
-import { UploadFileLike } from '../../types/files/utils'
-import { InputMediaLike } from '../../types/media/input-media'
-import { extractFileName } from '../../utils/file-utils'
-import { normalizeDate } from '../../utils/misc-utils'
-import { encodeWaveform } from '../../utils/voice-utils'
-import { _parseEntities } from '../messages/parse-entities'
-import { resolvePeer } from '../users/resolve-peer'
-import { _normalizeInputFile } from './normalize-input-file'
-import { uploadFile } from './upload-file'
+import { isUploadedFile } from '../../types/files/uploaded-file.js'
+import { UploadFileLike } from '../../types/files/utils.js'
+import { InputMediaLike } from '../../types/media/input-media.js'
+import { extractFileName } from '../../utils/file-utils.js'
+import { normalizeDate } from '../../utils/misc-utils.js'
+import { encodeWaveform } from '../../utils/voice-utils.js'
+import { _parseEntities } from '../messages/parse-entities.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { _normalizeInputFile } from './normalize-input-file.js'
+import { uploadFile } from './upload-file.js'
 
 /**
  * Normalize an {@link InputMediaLike} to `InputMedia`,
@@ -142,14 +142,14 @@ export async function _normalizeInputMedia(
                     _: 'pollAnswer',
                     text: ans,
                     // emulate the behaviour of most implementations
-                    option: Buffer.from([48 /* '0' */ + idx]),
+                    option: new Uint8Array([48 /* '0' */ + idx]),
                 }
             }
 
             return ans
         })
 
-        let correct: Buffer[] | undefined = undefined
+        let correct: Uint8Array[] | undefined = undefined
         let solution: string | undefined = undefined
         let solutionEntities: tl.TypeMessageEntity[] | undefined = undefined
 

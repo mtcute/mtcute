@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ^^ will be looked into in MTQ-29
 
-import { MaybeAsync } from '@mtcute/core'
+import { MaybeAsync } from '@mtcute/client'
 
-import { ExtractBaseMany, ExtractMod, Invert, UnionToIntersection, UpdateFilter } from './types'
+import { ExtractBaseMany, ExtractMod, Invert, UnionToIntersection, UpdateFilter } from './types.js'
 
 /**
  * Filter that matches any update

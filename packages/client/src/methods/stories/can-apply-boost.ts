@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { Chat, InputPeerLike, PeersIndex } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { Chat, InputPeerLike, PeersIndex } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 // @exported
 export type CanApplyBoostResult =

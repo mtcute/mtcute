@@ -2,7 +2,7 @@ import bigInt from 'big-integer'
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { millerRabin } from '../src/utils/crypto/miller-rabin'
+import { millerRabin } from '../src/utils/crypto/miller-rabin.js'
 
 describe('miller-rabin test', function () {
     this.timeout(10000) // since miller-rabin factorization relies on RNG, it may take a while (or may not!)

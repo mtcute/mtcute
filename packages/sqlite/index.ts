@@ -2,17 +2,18 @@
 
 import sqlite3, { Options } from 'better-sqlite3'
 
+import { ITelegramStorage, tl, toggleChannelIdMark } from '@mtcute/core'
 import {
-    ITelegramStorage,
-    tl,
+    Logger,
+    longFromFastString,
+    longToFastString,
+    LruMap,
+    throttle,
     TlBinaryReader,
     TlBinaryWriter,
     TlReaderMap,
     TlWriterMap,
-    toggleChannelIdMark,
-} from '@mtcute/core'
-import { Logger, longFromFastString, longToFastString, LruMap, throttle } from '@mtcute/core/utils'
-import { IStateStorage } from '@mtcute/dispatcher'
+} from '@mtcute/core/utils.js'
 
 // todo: add testMode to "self"
 
@@ -111,7 +112,7 @@ interface SqliteEntity {
     username?: string
     phone?: string
     updated: number
-    full: Buffer
+    full: Uint8Array
 }
 
 interface CacheItem {
@@ -155,14 +156,14 @@ const STATEMENTS = {
     delStaleState: 'delete from state where expires < ?',
 } as const
 
-const EMPTY_BUFFER = Buffer.alloc(0)
+const EMPTY_BUFFER = new Uint8Array(0)
 
 /**
  * SQLite backed storage for mtcute.
  *
  * Uses `better-sqlite3` library
  */
-export class SqliteStorage implements ITelegramStorage, IStateStorage {
+export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
     private _db!: sqlite3.Database
     private _statements!: Record<keyof typeof STATEMENTS, sqlite3.Statement>
     private readonly _filename: string
@@ -318,10 +319,8 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         this._reader = new TlBinaryReader(readerMap, EMPTY_BUFFER)
     }
 
-    private _readFullPeer(data: Buffer): tl.TypeUser | tl.TypeChat | null {
-        // reuse reader because why not
-        this._reader.pos = 0
-        this._reader.data = data
+    private _readFullPeer(data: Uint8Array): tl.TypeUser | tl.TypeChat | null {
+        this._reader = new TlBinaryReader(this.readerMap, data)
         let obj
 
         try {
@@ -331,8 +330,6 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
             // it should be ignored (i guess?????)
             obj = null
         }
-        // remove reference to allow GC-ing
-        this._reader.data = EMPTY_BUFFER
 
         return obj as tl.TypeUser | tl.TypeChat | null
     }
@@ -490,7 +487,7 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
         return this._getFromKv('def_dc')
     }
 
-    getAuthKeyFor(dcId: number, tempIndex?: number): Buffer | null {
+    getAuthKeyFor(dcId: number, tempIndex?: number): Uint8Array | null {
         let row
 
         if (tempIndex !== undefined) {
@@ -499,17 +496,17 @@ export class SqliteStorage implements ITelegramStorage, IStateStorage {
             row = this._statements.getAuth.get(dcId)
         }
 
-        return row ? (row as { key: Buffer }).key : null
+        return row ? (row as { key: Uint8Array }).key : null
     }
 
-    setAuthKeyFor(dcId: number, key: Buffer | null): void {
+    setAuthKeyFor(dcId: number, key: Uint8Array | null): void {
         this._pending.push([
             key === null ? this._statements.delAuth : this._statements.setAuth,
             key === null ? [dcId] : [dcId, key],
         ])
     }
 
-    setTempAuthKeyFor(dcId: number, index: number, key: Buffer | null, expires: number): void {
+    setTempAuthKeyFor(dcId: number, index: number, key: Uint8Array | null, expires: number): void {
         this._pending.push([
             key === null ? this._statements.delAuthTemp : this._statements.setAuthTemp,
             key === null ? [dcId, index] : [dcId, index, key, expires],

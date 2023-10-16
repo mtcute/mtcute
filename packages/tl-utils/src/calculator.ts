@@ -1,4 +1,4 @@
-import { TlEntry } from './types'
+import { TlEntry } from './types.js'
 
 const PRIMITIVES_SIZES: Record<string, number> = {
     int: 4,

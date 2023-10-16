@@ -2,18 +2,18 @@ import bigInt from 'big-integer'
 import Long from 'long'
 
 import { mtp } from '@mtcute/tl'
-import { TlPublicKey } from '@mtcute/tl/binary/rsa-keys'
+import { TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 
-import { MtArgumentError, MtSecurityError, MtTypeAssertionError } from '../types'
-import { bigIntToBuffer, bufferToBigInt, ICryptoProvider, Logger } from '../utils'
-import { buffersEqual, randomBytes } from '../utils/buffer-utils'
-import { findKeyByFingerprints } from '../utils/crypto/keys'
-import { millerRabin } from '../utils/crypto/miller-rabin'
-import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto'
-import { xorBuffer, xorBufferInPlace } from '../utils/crypto/utils'
-import { mtpAssertTypeIs } from '../utils/type-assertions'
-import { SessionConnection } from './session-connection'
+import { MtArgumentError, MtSecurityError, MtTypeAssertionError } from '../types/index.js'
+import { buffersEqual, concatBuffers, dataViewFromBuffer, randomBytes } from '../utils/buffer-utils.js'
+import { findKeyByFingerprints } from '../utils/crypto/keys.js'
+import { millerRabin } from '../utils/crypto/miller-rabin.js'
+import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto.js'
+import { xorBuffer, xorBufferInPlace } from '../utils/crypto/utils.js'
+import { bigIntToBuffer, bufferToBigInt, ICryptoProvider, Logger } from '../utils/index.js'
+import { mtpAssertTypeIs } from '../utils/type-assertions.js'
+import { SessionConnection } from './session-connection.js'
 
 // Heavily based on code from https://github.com/LonamiWebs/Telethon/blob/master/telethon/network/authenticator.py
 
@@ -120,7 +120,7 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
     log.debug('g = %d is safe to use with dh_prime', g)
 }
 
-async function rsaPad(data: Buffer, crypto: ICryptoProvider, key: TlPublicKey): Promise<Buffer> {
+async function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Promise<Uint8Array> {
     // since Summer 2021, they use "version of RSA with a variant of OAEP+ padding explained below"
 
     const keyModulus = bigInt(key.modulus, 16)
@@ -130,23 +130,23 @@ async function rsaPad(data: Buffer, crypto: ICryptoProvider, key: TlPublicKey): 
         throw new MtArgumentError('Failed to pad: too big data')
     }
 
-    data = Buffer.concat([data, randomBytes(192 - data.length)])
+    data = concatBuffers([data, randomBytes(192 - data.length)])
 
     for (;;) {
-        const aesIv = Buffer.alloc(32)
+        const aesIv = new Uint8Array(32)
 
         const aesKey = randomBytes(32)
 
-        const dataWithHash = Buffer.concat([data, await crypto.sha256(Buffer.concat([aesKey, data]))])
+        const dataWithHash = concatBuffers([data, await crypto.sha256(concatBuffers([aesKey, data]))])
         // we only need to reverse the data
-        dataWithHash.slice(0, 192).reverse()
+        dataWithHash.subarray(0, 192).reverse()
 
-        const aes = crypto.createAesIge(aesKey, aesIv)
+        const aes = await crypto.createAesIge(aesKey, aesIv)
         const encrypted = await aes.encrypt(dataWithHash)
         const encryptedHash = await crypto.sha256(encrypted)
 
         xorBufferInPlace(aesKey, encryptedHash)
-        const decryptedData = Buffer.concat([aesKey, encrypted])
+        const decryptedData = concatBuffers([aesKey, encrypted])
 
         const decryptedDataBigint = bufferToBigInt(decryptedData)
 
@@ -160,8 +160,8 @@ async function rsaPad(data: Buffer, crypto: ICryptoProvider, key: TlPublicKey): 
     }
 }
 
-async function rsaEncrypt(data: Buffer, crypto: ICryptoProvider, key: TlPublicKey): Promise<Buffer> {
-    const toEncrypt = Buffer.concat([
+async function rsaEncrypt(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Promise<Uint8Array> {
+    const toEncrypt = concatBuffers([
         await crypto.sha1(data),
         data,
         // sha1 is always 20 bytes, so we're left with 255 - 20 - x padding
@@ -182,7 +182,7 @@ export async function doAuthorization(
     connection: SessionConnection,
     crypto: ICryptoProvider,
     expiresIn?: number,
-): Promise<[Buffer, Long, number]> {
+): Promise<[Uint8Array, Long, number]> {
     // eslint-disable-next-line dot-notation
     const session = connection['_session']
     const readerMap = session._readerMap
@@ -292,15 +292,6 @@ export async function doAuthorization(
         throw new MtSecurityError('Step 2: invalid server nonce from server')
     }
 
-    // type was removed from schema in July 2021
-    // if (serverDhParams._ === 'mt_server_DH_params_fail') {
-    //     // why would i want to do that? we are gonna fail anyways.
-    //     // let expectedNnh = (await crypto.sha1(newNonce)).slice(4, 20)
-    //     // if (!buffersEqual(serverDhParams.newNonceHash, expectedNnh))
-    //     //     throw new MtSecurityError('Step 2: invalid DH fail nonce from server')
-    //     throw new MtSecurityError('Step 2: server DH failed')
-    // }
-
     log.debug('server DH ok')
 
     if (serverDhParams.encryptedAnswer.length % 16 !== 0) {
@@ -309,14 +300,14 @@ export async function doAuthorization(
 
     // Step 3: complete DH exchange
     const [key, iv] = await generateKeyAndIvFromNonce(crypto, resPq.serverNonce, newNonce)
-    const ige = crypto.createAesIge(key, iv)
+    const ige = await crypto.createAesIge(key, iv)
 
     const plainTextAnswer = await ige.decrypt(serverDhParams.encryptedAnswer)
-    const innerDataHash = plainTextAnswer.slice(0, 20)
+    const innerDataHash = plainTextAnswer.subarray(0, 20)
     const serverDhInnerReader = new TlBinaryReader(readerMap, plainTextAnswer, 20)
     const serverDhInner = serverDhInnerReader.object() as mtp.TlObject
 
-    if (!buffersEqual(innerDataHash, await crypto.sha1(plainTextAnswer.slice(20, serverDhInnerReader.pos)))) {
+    if (!buffersEqual(innerDataHash, await crypto.sha1(plainTextAnswer.subarray(20, serverDhInnerReader.pos)))) {
         throw new MtSecurityError('Step 3: invalid inner data hash')
     }
 
@@ -338,14 +329,14 @@ export async function doAuthorization(
     checkDhPrime(log, dhPrime, serverDhInner.g)
 
     let retryId = Long.ZERO
-    const serverSalt = xorBuffer(newNonce.slice(0, 8), resPq.serverNonce.slice(0, 8))
+    const serverSalt = xorBuffer(newNonce.subarray(0, 8), resPq.serverNonce.subarray(0, 8))
 
     for (;;) {
         const b = bufferToBigInt(randomBytes(256))
         const gB = g.modPow(b, dhPrime)
 
         const authKey = bigIntToBuffer(gA.modPow(b, dhPrime))
-        const authKeyAuxHash = (await crypto.sha1(authKey)).slice(0, 8)
+        const authKeyAuxHash = (await crypto.sha1(authKey)).subarray(0, 8)
 
         // validate DH params
         if (g.lesserOrEquals(1) || g.greaterOrEquals(dhPrime.minus(bigInt.one))) {
@@ -382,13 +373,13 @@ export async function doAuthorization(
         const clientDhInnerWriter = TlBinaryWriter.alloc(writerMap, innerLength)
         clientDhInnerWriter.pos = 20
         clientDhInnerWriter.object(clientDhInner)
-        const clientDhInnerHash = await crypto.sha1(clientDhInnerWriter.buffer.slice(20, clientDhInnerWriter.pos))
+        const clientDhInnerHash = await crypto.sha1(clientDhInnerWriter.uint8View.subarray(20, clientDhInnerWriter.pos))
         clientDhInnerWriter.pos = 0
         clientDhInnerWriter.raw(clientDhInnerHash)
 
         log.debug('sending client DH (timeOffset = %d)', timeOffset)
 
-        const clientDhEncrypted = await ige.encrypt(clientDhInnerWriter.buffer)
+        const clientDhEncrypted = await ige.encrypt(clientDhInnerWriter.uint8View)
         await sendPlainMessage({
             _: 'mt_set_client_DH_params',
             nonce,
@@ -417,9 +408,9 @@ export async function doAuthorization(
         }
 
         if (dhGen._ === 'mt_dh_gen_retry') {
-            const expectedHash = await crypto.sha1(Buffer.concat([newNonce, Buffer.from([2]), authKeyAuxHash]))
+            const expectedHash = await crypto.sha1(concatBuffers([newNonce, new Uint8Array([2]), authKeyAuxHash]))
 
-            if (!buffersEqual(expectedHash.slice(4, 20), dhGen.newNonceHash2)) {
+            if (!buffersEqual(expectedHash.subarray(4, 20), dhGen.newNonceHash2)) {
                 throw Error('Step 4: invalid retry nonce hash from server')
             }
             retryId = Long.fromBytesLE(authKeyAuxHash as unknown as number[])
@@ -428,14 +419,16 @@ export async function doAuthorization(
 
         if (dhGen._ !== 'mt_dh_gen_ok') throw new Error() // unreachable
 
-        const expectedHash = await crypto.sha1(Buffer.concat([newNonce, Buffer.from([1]), authKeyAuxHash]))
+        const expectedHash = await crypto.sha1(concatBuffers([newNonce, new Uint8Array([1]), authKeyAuxHash]))
 
-        if (!buffersEqual(expectedHash.slice(4, 20), dhGen.newNonceHash1)) {
+        if (!buffersEqual(expectedHash.subarray(4, 20), dhGen.newNonceHash1)) {
             throw Error('Step 4: invalid nonce hash from server')
         }
 
         log.info('authorization successful')
 
-        return [authKey, new Long(serverSalt.readInt32LE(), serverSalt.readInt32LE(4)), timeOffset]
+        const dv = dataViewFromBuffer(serverSalt)
+
+        return [authKey, new Long(dv.getInt32(0, true), dv.getInt32(4, true)), timeOffset]
     }
 }

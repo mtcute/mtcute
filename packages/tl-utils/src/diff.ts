@@ -1,6 +1,6 @@
-import { computeConstructorIdFromEntry } from './ctor-id'
-import { TlArgument, TlArgumentDiff, TlEntry, TlEntryDiff, TlFullSchema, TlSchemaDiff } from './types'
-import { stringifyArgumentType } from './utils'
+import { computeConstructorIdFromEntry } from './ctor-id.js'
+import { TlArgument, TlArgumentDiff, TlEntry, TlEntryDiff, TlFullSchema, TlSchemaDiff } from './types.js'
+import { stringifyArgumentType } from './utils.js'
 
 /**
  * Compute difference between two TL entries.

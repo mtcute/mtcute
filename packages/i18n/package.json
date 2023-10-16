@@ -6,13 +6,23 @@
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
     "main": "src/index.ts",
+    "type": "module",
     "scripts": {
-        "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
+        "test": "mocha \"tests/**/*.spec.ts\"",
         "coverage": "nyc npm run test",
-        "build": "tsc",
+        "build": "pnpm run -w build-package i18n",
         "docs": "typedoc"
     },
+    "distOnlyFields": {
+        "exports": {
+            ".": {
+                "import": "./esm/index.js",
+                "require": "./cjs/index.js"
+            }
+        }
+    },
     "devDependencies": {
-        "@mtcute/client": "workspace:^1.0.0"
+        "@mtcute/client": "workspace:^1.0.0",
+        "@mtcute/dispatcher": "workspace:^1.0.0"
     }
 }

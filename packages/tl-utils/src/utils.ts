@@ -1,4 +1,4 @@
-import { TlEntry, TlTypeModifiers } from './types'
+import { TlEntry, TlTypeModifiers } from './types.js'
 
 /**
  * Split qualified TL entry name into namespace and name

@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { RawDocument } from './document'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { RawDocument } from './document.js'
 
 /**
  * A video, round video message or GIF animation.

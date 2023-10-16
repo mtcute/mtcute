@@ -1,7 +1,7 @@
 import EventEmitter from 'events'
 
-import { ICryptoProvider, Logger } from '../../utils'
-import { IPacketCodec } from './abstract'
+import { ICryptoProvider, Logger } from '../../utils/index.js'
+import { IPacketCodec } from './abstract.js'
 
 export abstract class WrappedCodec extends EventEmitter {
     protected _crypto!: ICryptoProvider

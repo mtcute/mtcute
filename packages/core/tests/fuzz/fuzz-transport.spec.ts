@@ -11,7 +11,7 @@
 //     sleep,
 //     tl,
 //     TransportState,
-// } from '../../src'
+// } from '../../src.js'
 //
 // // eslint-disable-next-line @typescript-eslint/no-var-requires
 // require('dotenv-flow').config()

@@ -1,8 +1,8 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
-import { ConditionVariable } from '@mtcute/core/utils'
+import { ConditionVariable } from '@mtcute/core/utils.js'
 
-import { InputPeerLike } from '../../types'
-import { resolvePeer } from './resolve-peer'
+import { InputPeerLike } from '../../types/index.js'
+import { resolvePeer } from './resolve-peer.js'
 
 /**
  * Get multiple `InputPeer`s at once,

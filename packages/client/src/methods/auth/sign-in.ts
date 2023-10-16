@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { User } from '../../types'
-import { normalizePhoneNumber } from '../../utils/misc-utils'
-import { _onAuthorization } from './_state'
+import { User } from '../../types/index.js'
+import { normalizePhoneNumber } from '../../utils/misc-utils.js'
+import { _onAuthorization } from './_state.js'
 
 /**
  * Authorize a user in Telegram with a valid confirmation code.

@@ -1,6 +1,6 @@
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 
-import { getFolders } from './get-folders'
+import { getFolders } from './get-folders.js'
 
 /**
  * Find a folder by its parameter.

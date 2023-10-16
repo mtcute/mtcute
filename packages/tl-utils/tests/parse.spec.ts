@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { parseTlToEntries, TlEntry } from '../src'
+import { parseTlToEntries, TlEntry } from '../src/index.js'
 
 describe('tl parser', () => {
     const test = (tl: string, expected: TlEntry[], params?: Parameters<typeof parseTlToEntries>[1]) => {

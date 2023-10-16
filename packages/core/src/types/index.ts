@@ -1,3 +1,3 @@
-export * from './errors'
-export * from './peers'
-export * from './utils'
+export * from './errors.js'
+export * from './peers.js'
+export * from './utils.js'

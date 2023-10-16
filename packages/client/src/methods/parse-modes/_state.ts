@@ -1,14 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { IMessageEntityParser } from '../../types'
+import { IMessageEntityParser } from '../../types/index.js'
 
 const STATE_SYMBOL = Symbol('parseModesState')
 
-/**
- * @internal
- * @exported
- */
+/** @internal */
 export interface ParseModesState {
     parseModes: Map<string, IMessageEntityParser>
     defaultParseMode: string | null

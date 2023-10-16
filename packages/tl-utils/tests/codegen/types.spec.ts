@@ -6,7 +6,7 @@ import {
     generateTypescriptDefinitionsForTlSchema,
     parseFullTlSchema,
     parseTlToEntries,
-} from '../../src'
+} from '../../src/index.js'
 
 describe('generateTypescriptDefinitionsForTlEntry', () => {
     const test = (tl: string, ...ts: string[]) => {
@@ -23,7 +23,7 @@ describe('generateTypescriptDefinitionsForTlEntry', () => {
             '    b: Long;',
             '    c: Double;',
             '    d: string;',
-            '    e: Buffer;',
+            '    e: Uint8Array;',
             '    f: boolean;',
             '    g: number[];',
             '}',

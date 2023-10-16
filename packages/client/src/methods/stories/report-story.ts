@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MaybeArray, tl } from '@mtcute/core'
 
-import { InputPeerLike } from '../../types'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputPeerLike } from '../../types/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Report a story (or multiple stories) to the moderation team

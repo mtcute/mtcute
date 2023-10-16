@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio'
 import { readFile, writeFile } from 'fs/promises'
 import jsYaml from 'js-yaml'
+import { fileURLToPath } from 'node:url'
 import { createInterface } from 'readline'
 
 import {
@@ -19,10 +20,10 @@ import {
     COREFORK_DOMAIN,
     DESCRIPTIONS_YAML_FILE,
     DOC_CACHE_FILE,
-} from './constants'
-import { applyDescriptionsYamlFile } from './process-descriptions-yaml'
-import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema'
-import { fetchRetry } from './utils'
+} from './constants.js'
+import { applyDescriptionsYamlFile } from './process-descriptions-yaml.js'
+import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema.js'
+import { fetchRetry } from './utils.js'
 
 export interface CachedDocumentationEntry {
     comment?: string
@@ -384,6 +385,15 @@ async function main() {
     }
 }
 
-if (require.main === module) {
-    main().catch(console.error)
+if (import.meta.url.startsWith('file:')) {
+    // (A)
+    const modulePath = fileURLToPath(import.meta.url)
+
+    if (process.argv[1] === modulePath) {
+        // (B)
+        main().catch((err) => {
+            console.error(err)
+            process.exit(1)
+        })
+    }
 }

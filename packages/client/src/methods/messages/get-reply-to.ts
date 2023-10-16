@@ -1,8 +1,8 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { Message } from '../../types/messages'
-import { getMessages } from './get-messages'
-import { getMessagesUnsafe } from './get-messages-unsafe'
+import { Message } from '../../types/messages/index.js'
+import { getMessages } from './get-messages.js'
+import { getMessagesUnsafe } from './get-messages-unsafe.js'
 
 /**
  * For messages containing a reply, fetch the message that is being replied.

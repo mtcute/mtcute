@@ -3,7 +3,7 @@ import { writeFile } from 'fs/promises'
 
 import { TlErrors } from '@mtcute/tl-utils'
 
-import { ERRORS_JSON_FILE } from './constants'
+import { ERRORS_JSON_FILE } from './constants.js'
 
 const ERRORS_PAGE_TG = 'https://corefork.telegram.org/api/errors'
 const ERRORS_PAGE_TELETHON =

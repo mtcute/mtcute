@@ -2,224 +2,208 @@
 /* THIS FILE WAS AUTO-GENERATED */
 import { Readable } from 'stream'
 
-import {
-    BaseTelegramClient,
-    BaseTelegramClientOptions,
-    Long,
-    MaybeArray,
-    MaybeAsync,
-    PartialExcept,
-    PartialOnly,
-    tl,
-} from '@mtcute/core'
+import { BaseTelegramClient, BaseTelegramClientOptions, Long, MaybeArray, MaybeAsync, PartialExcept, PartialOnly, tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
-import { _onAuthorization, AuthState, getAuthState } from './methods/auth/_state'
-import { checkPassword } from './methods/auth/check-password'
-import { getPasswordHint } from './methods/auth/get-password-hint'
-import { logOut } from './methods/auth/log-out'
-import { recoverPassword } from './methods/auth/recover-password'
-import { resendCode } from './methods/auth/resend-code'
-import {} from './methods/auth/run'
-import { sendCode } from './methods/auth/send-code'
-import { sendRecoveryCode } from './methods/auth/send-recovery-code'
-import { signIn } from './methods/auth/sign-in'
-import { signInBot } from './methods/auth/sign-in-bot'
-import { start } from './methods/auth/start'
-import { startTest } from './methods/auth/start-test'
-import { answerCallbackQuery } from './methods/bots/answer-callback-query'
-import { answerInlineQuery } from './methods/bots/answer-inline-query'
-import { answerPreCheckoutQuery } from './methods/bots/answer-pre-checkout-query'
-import { deleteMyCommands } from './methods/bots/delete-my-commands'
-import { getBotInfo } from './methods/bots/get-bot-info'
-import { getBotMenuButton } from './methods/bots/get-bot-menu-button'
-import { getCallbackAnswer } from './methods/bots/get-callback-answer'
-import { getGameHighScores, getInlineGameHighScores } from './methods/bots/get-game-high-scores'
-import { getMyCommands } from './methods/bots/get-my-commands'
-import { _normalizeCommandScope } from './methods/bots/normalize-command-scope'
-import { setBotInfo } from './methods/bots/set-bot-info'
-import { setBotMenuButton } from './methods/bots/set-bot-menu-button'
-import { setGameScore, setInlineGameScore } from './methods/bots/set-game-score'
-import { setMyCommands } from './methods/bots/set-my-commands'
-import { setMyDefaultRights } from './methods/bots/set-my-default-rights'
-import { addChatMembers } from './methods/chats/add-chat-members'
-import { archiveChats } from './methods/chats/archive-chats'
-import { banChatMember } from './methods/chats/ban-chat-member'
-import { createChannel } from './methods/chats/create-channel'
-import { createGroup } from './methods/chats/create-group'
-import { createSupergroup } from './methods/chats/create-supergroup'
-import { deleteChannel } from './methods/chats/delete-channel'
-import { deleteChatPhoto } from './methods/chats/delete-chat-photo'
-import { deleteGroup } from './methods/chats/delete-group'
-import { deleteHistory } from './methods/chats/delete-history'
-import { deleteUserHistory } from './methods/chats/delete-user-history'
-import { editAdminRights } from './methods/chats/edit-admin-rights'
-import { getChat } from './methods/chats/get-chat'
-import { getChatEventLog } from './methods/chats/get-chat-event-log'
-import { getChatMember } from './methods/chats/get-chat-member'
-import { getChatMembers } from './methods/chats/get-chat-members'
-import { getChatPreview } from './methods/chats/get-chat-preview'
-import { getFullChat } from './methods/chats/get-full-chat'
-import { getNearbyChats } from './methods/chats/get-nearby-chats'
-import { iterChatEventLog } from './methods/chats/iter-chat-event-log'
-import { iterChatMembers } from './methods/chats/iter-chat-members'
-import { joinChat } from './methods/chats/join-chat'
-import { kickChatMember } from './methods/chats/kick-chat-member'
-import { leaveChat } from './methods/chats/leave-chat'
-import { markChatUnread } from './methods/chats/mark-chat-unread'
-import { reorderUsernames } from './methods/chats/reorder-usernames'
-import { restrictChatMember } from './methods/chats/restrict-chat-member'
-import { saveDraft } from './methods/chats/save-draft'
-import { setChatDefaultPermissions } from './methods/chats/set-chat-default-permissions'
-import { setChatDescription } from './methods/chats/set-chat-description'
-import { setChatPhoto } from './methods/chats/set-chat-photo'
-import { setChatTitle } from './methods/chats/set-chat-title'
-import { setChatTtl } from './methods/chats/set-chat-ttl'
-import { setChatUsername } from './methods/chats/set-chat-username'
-import { setSlowMode } from './methods/chats/set-slow-mode'
-import { toggleContentProtection } from './methods/chats/toggle-content-protection'
-import { toggleFragmentUsername } from './methods/chats/toggle-fragment-username'
-import { toggleJoinRequests } from './methods/chats/toggle-join-requests'
-import { toggleJoinToSend } from './methods/chats/toggle-join-to-send'
-import { unarchiveChats } from './methods/chats/unarchive-chats'
-import { unbanChatMember } from './methods/chats/unban-chat-member'
-import { addContact } from './methods/contacts/add-contact'
-import { deleteContacts } from './methods/contacts/delete-contacts'
-import { getContacts } from './methods/contacts/get-contacts'
-import { importContacts } from './methods/contacts/import-contacts'
-import { createFolder } from './methods/dialogs/create-folder'
-import { deleteFolder } from './methods/dialogs/delete-folder'
-import { editFolder } from './methods/dialogs/edit-folder'
-import { findFolder } from './methods/dialogs/find-folder'
-import { _normalizeInputFolder, getFolders } from './methods/dialogs/get-folders'
-import { getPeerDialogs } from './methods/dialogs/get-peer-dialogs'
-import { iterDialogs } from './methods/dialogs/iter-dialogs'
-import { setFoldersOrder } from './methods/dialogs/set-folders-order'
-import { downloadAsBuffer } from './methods/files/download-buffer'
-import { downloadToFile } from './methods/files/download-file'
-import { downloadAsIterable } from './methods/files/download-iterable'
-import { downloadAsStream } from './methods/files/download-stream'
-import { _normalizeFileToDocument } from './methods/files/normalize-file-to-document'
-import { _normalizeInputFile } from './methods/files/normalize-input-file'
-import { _normalizeInputMedia } from './methods/files/normalize-input-media'
-import { uploadFile } from './methods/files/upload-file'
-import { uploadMedia } from './methods/files/upload-media'
-import { createForumTopic } from './methods/forums/create-forum-topic'
-import { deleteForumTopicHistory } from './methods/forums/delete-forum-topic-history'
-import { editForumTopic } from './methods/forums/edit-forum-topic'
-import { getForumTopics, GetForumTopicsOffset } from './methods/forums/get-forum-topics'
-import { getForumTopicsById } from './methods/forums/get-forum-topics-by-id'
-import { iterForumTopics } from './methods/forums/iter-forum-topics'
-import { reorderPinnedForumTopics } from './methods/forums/reorder-pinned-forum-topics'
-import { toggleForum } from './methods/forums/toggle-forum'
-import { toggleForumTopicClosed } from './methods/forums/toggle-forum-topic-closed'
-import { toggleForumTopicPinned } from './methods/forums/toggle-forum-topic-pinned'
-import { toggleGeneralTopicHidden } from './methods/forums/toggle-general-topic-hidden'
-import { createInviteLink } from './methods/invite-links/create-invite-link'
-import { editInviteLink } from './methods/invite-links/edit-invite-link'
-import { exportInviteLink } from './methods/invite-links/export-invite-link'
-import { getInviteLink } from './methods/invite-links/get-invite-link'
-import { getInviteLinkMembers } from './methods/invite-links/get-invite-link-members'
-import { getInviteLinks, GetInviteLinksOffset } from './methods/invite-links/get-invite-links'
-import { getPrimaryInviteLink } from './methods/invite-links/get-primary-invite-link'
-import { hideAllJoinRequests } from './methods/invite-links/hide-all-join-requests'
-import { hideJoinRequest } from './methods/invite-links/hide-join-request'
-import { iterInviteLinkMembers } from './methods/invite-links/iter-invite-link-members'
-import { iterInviteLinks } from './methods/invite-links/iter-invite-links'
-import { revokeInviteLink } from './methods/invite-links/revoke-invite-link'
-import { closePoll } from './methods/messages/close-poll'
-import { deleteMessages, deleteMessagesById, DeleteMessagesParams } from './methods/messages/delete-messages'
-import { deleteScheduledMessages } from './methods/messages/delete-scheduled-messages'
-import { editInlineMessage } from './methods/messages/edit-inline-message'
-import { editMessage } from './methods/messages/edit-message'
-import { _findMessageInUpdate } from './methods/messages/find-in-update'
-import { ForwardMessageOptions, forwardMessages, forwardMessagesById } from './methods/messages/forward-messages'
-import { _getDiscussionMessage, getDiscussionMessage } from './methods/messages/get-discussion-message'
-import { getHistory, GetHistoryOffset } from './methods/messages/get-history'
-import { getMessageGroup } from './methods/messages/get-message-group'
-import { getMessageReactions, getMessageReactionsById } from './methods/messages/get-message-reactions'
-import { getMessages } from './methods/messages/get-messages'
-import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe'
-import { getReactionUsers, GetReactionUsersOffset } from './methods/messages/get-reaction-users'
-import { getReplyTo } from './methods/messages/get-reply-to'
-import { getScheduledMessages } from './methods/messages/get-scheduled-messages'
-import { iterHistory } from './methods/messages/iter-history'
-import { iterReactionUsers } from './methods/messages/iter-reaction-users'
-import { iterSearchGlobal } from './methods/messages/iter-search-global'
-import { iterSearchMessages } from './methods/messages/iter-search-messages'
-import { _parseEntities } from './methods/messages/parse-entities'
-import { pinMessage } from './methods/messages/pin-message'
-import { readHistory } from './methods/messages/read-history'
-import { readReactions } from './methods/messages/read-reactions'
-import { searchGlobal, SearchGlobalOffset } from './methods/messages/search-global'
-import { searchMessages, SearchMessagesOffset } from './methods/messages/search-messages'
-import { answerMedia, answerMediaGroup, answerText } from './methods/messages/send-answer'
-import { commentMedia, commentMediaGroup, commentText } from './methods/messages/send-comment'
-import { CommonSendParams } from './methods/messages/send-common'
-import { sendCopy, SendCopyParams } from './methods/messages/send-copy'
-import { sendCopyGroup, SendCopyGroupParams } from './methods/messages/send-copy-group'
-import { sendMedia } from './methods/messages/send-media'
-import { sendMediaGroup } from './methods/messages/send-media-group'
-import { sendReaction } from './methods/messages/send-reaction'
-import { replyMedia, replyMediaGroup, replyText } from './methods/messages/send-reply'
-import { sendScheduled } from './methods/messages/send-scheduled'
-import { sendText } from './methods/messages/send-text'
-import { sendTyping } from './methods/messages/send-typing'
-import { sendVote } from './methods/messages/send-vote'
-import { translateMessage } from './methods/messages/translate-message'
-import { translateText } from './methods/messages/translate-text'
-import { unpinAllMessages } from './methods/messages/unpin-all-messages'
-import { unpinMessage } from './methods/messages/unpin-message'
-import { initTakeoutSession } from './methods/misc/init-takeout-session'
-import { _normalizePrivacyRules } from './methods/misc/normalize-privacy-rules'
-import { getParseModesState, ParseModesState } from './methods/parse-modes/_state'
+import { AuthState, getAuthState } from './methods/auth/_state.js'
+import { checkPassword } from './methods/auth/check-password.js'
+import { getPasswordHint } from './methods/auth/get-password-hint.js'
+import { logOut } from './methods/auth/log-out.js'
+import { recoverPassword } from './methods/auth/recover-password.js'
+import { resendCode } from './methods/auth/resend-code.js'
+import { sendCode } from './methods/auth/send-code.js'
+import { sendRecoveryCode } from './methods/auth/send-recovery-code.js'
+import { signIn } from './methods/auth/sign-in.js'
+import { signInBot } from './methods/auth/sign-in-bot.js'
+import { start } from './methods/auth/start.js'
+import { startTest } from './methods/auth/start-test.js'
+import { answerCallbackQuery } from './methods/bots/answer-callback-query.js'
+import { answerInlineQuery } from './methods/bots/answer-inline-query.js'
+import { answerPreCheckoutQuery } from './methods/bots/answer-pre-checkout-query.js'
+import { deleteMyCommands } from './methods/bots/delete-my-commands.js'
+import { getBotInfo } from './methods/bots/get-bot-info.js'
+import { getBotMenuButton } from './methods/bots/get-bot-menu-button.js'
+import { getCallbackAnswer } from './methods/bots/get-callback-answer.js'
+import { getGameHighScores, getInlineGameHighScores } from './methods/bots/get-game-high-scores.js'
+import { getMyCommands } from './methods/bots/get-my-commands.js'
+import { setBotInfo } from './methods/bots/set-bot-info.js'
+import { setBotMenuButton } from './methods/bots/set-bot-menu-button.js'
+import { setGameScore, setInlineGameScore } from './methods/bots/set-game-score.js'
+import { setMyCommands } from './methods/bots/set-my-commands.js'
+import { setMyDefaultRights } from './methods/bots/set-my-default-rights.js'
+import { addChatMembers } from './methods/chats/add-chat-members.js'
+import { archiveChats } from './methods/chats/archive-chats.js'
+import { banChatMember } from './methods/chats/ban-chat-member.js'
+import { createChannel } from './methods/chats/create-channel.js'
+import { createGroup } from './methods/chats/create-group.js'
+import { createSupergroup } from './methods/chats/create-supergroup.js'
+import { deleteChannel } from './methods/chats/delete-channel.js'
+import { deleteChatPhoto } from './methods/chats/delete-chat-photo.js'
+import { deleteGroup } from './methods/chats/delete-group.js'
+import { deleteHistory } from './methods/chats/delete-history.js'
+import { deleteUserHistory } from './methods/chats/delete-user-history.js'
+import { editAdminRights } from './methods/chats/edit-admin-rights.js'
+import { getChat } from './methods/chats/get-chat.js'
+import { getChatEventLog } from './methods/chats/get-chat-event-log.js'
+import { getChatMember } from './methods/chats/get-chat-member.js'
+import { getChatMembers } from './methods/chats/get-chat-members.js'
+import { getChatPreview } from './methods/chats/get-chat-preview.js'
+import { getFullChat } from './methods/chats/get-full-chat.js'
+import { getNearbyChats } from './methods/chats/get-nearby-chats.js'
+import { iterChatEventLog } from './methods/chats/iter-chat-event-log.js'
+import { iterChatMembers } from './methods/chats/iter-chat-members.js'
+import { joinChat } from './methods/chats/join-chat.js'
+import { kickChatMember } from './methods/chats/kick-chat-member.js'
+import { leaveChat } from './methods/chats/leave-chat.js'
+import { markChatUnread } from './methods/chats/mark-chat-unread.js'
+import { reorderUsernames } from './methods/chats/reorder-usernames.js'
+import { restrictChatMember } from './methods/chats/restrict-chat-member.js'
+import { saveDraft } from './methods/chats/save-draft.js'
+import { setChatDefaultPermissions } from './methods/chats/set-chat-default-permissions.js'
+import { setChatDescription } from './methods/chats/set-chat-description.js'
+import { setChatPhoto } from './methods/chats/set-chat-photo.js'
+import { setChatTitle } from './methods/chats/set-chat-title.js'
+import { setChatTtl } from './methods/chats/set-chat-ttl.js'
+import { setChatUsername } from './methods/chats/set-chat-username.js'
+import { setSlowMode } from './methods/chats/set-slow-mode.js'
+import { toggleContentProtection } from './methods/chats/toggle-content-protection.js'
+import { toggleFragmentUsername } from './methods/chats/toggle-fragment-username.js'
+import { toggleJoinRequests } from './methods/chats/toggle-join-requests.js'
+import { toggleJoinToSend } from './methods/chats/toggle-join-to-send.js'
+import { unarchiveChats } from './methods/chats/unarchive-chats.js'
+import { unbanChatMember } from './methods/chats/unban-chat-member.js'
+import { addContact } from './methods/contacts/add-contact.js'
+import { deleteContacts } from './methods/contacts/delete-contacts.js'
+import { getContacts } from './methods/contacts/get-contacts.js'
+import { importContacts } from './methods/contacts/import-contacts.js'
+import { createFolder } from './methods/dialogs/create-folder.js'
+import { deleteFolder } from './methods/dialogs/delete-folder.js'
+import { editFolder } from './methods/dialogs/edit-folder.js'
+import { findFolder } from './methods/dialogs/find-folder.js'
+import { getFolders } from './methods/dialogs/get-folders.js'
+import { getPeerDialogs } from './methods/dialogs/get-peer-dialogs.js'
+import { iterDialogs } from './methods/dialogs/iter-dialogs.js'
+import { setFoldersOrder } from './methods/dialogs/set-folders-order.js'
+import { downloadAsBuffer } from './methods/files/download-buffer.js'
+import { downloadToFile } from './methods/files/download-file.js'
+import { downloadAsIterable } from './methods/files/download-iterable.js'
+import { downloadAsStream } from './methods/files/download-stream.js'
+import { _normalizeInputFile } from './methods/files/normalize-input-file.js'
+import { _normalizeInputMedia } from './methods/files/normalize-input-media.js'
+import { uploadFile } from './methods/files/upload-file.js'
+import { uploadMedia } from './methods/files/upload-media.js'
+import { createForumTopic } from './methods/forums/create-forum-topic.js'
+import { deleteForumTopicHistory } from './methods/forums/delete-forum-topic-history.js'
+import { editForumTopic } from './methods/forums/edit-forum-topic.js'
+import { getForumTopics, GetForumTopicsOffset } from './methods/forums/get-forum-topics.js'
+import { getForumTopicsById } from './methods/forums/get-forum-topics-by-id.js'
+import { iterForumTopics } from './methods/forums/iter-forum-topics.js'
+import { reorderPinnedForumTopics } from './methods/forums/reorder-pinned-forum-topics.js'
+import { toggleForum } from './methods/forums/toggle-forum.js'
+import { toggleForumTopicClosed } from './methods/forums/toggle-forum-topic-closed.js'
+import { toggleForumTopicPinned } from './methods/forums/toggle-forum-topic-pinned.js'
+import { toggleGeneralTopicHidden } from './methods/forums/toggle-general-topic-hidden.js'
+import { createInviteLink } from './methods/invite-links/create-invite-link.js'
+import { editInviteLink } from './methods/invite-links/edit-invite-link.js'
+import { exportInviteLink } from './methods/invite-links/export-invite-link.js'
+import { getInviteLink } from './methods/invite-links/get-invite-link.js'
+import { getInviteLinkMembers } from './methods/invite-links/get-invite-link-members.js'
+import { getInviteLinks, GetInviteLinksOffset } from './methods/invite-links/get-invite-links.js'
+import { getPrimaryInviteLink } from './methods/invite-links/get-primary-invite-link.js'
+import { hideAllJoinRequests } from './methods/invite-links/hide-all-join-requests.js'
+import { hideJoinRequest } from './methods/invite-links/hide-join-request.js'
+import { iterInviteLinkMembers } from './methods/invite-links/iter-invite-link-members.js'
+import { iterInviteLinks } from './methods/invite-links/iter-invite-links.js'
+import { revokeInviteLink } from './methods/invite-links/revoke-invite-link.js'
+import { closePoll } from './methods/messages/close-poll.js'
+import { deleteMessages, deleteMessagesById, DeleteMessagesParams } from './methods/messages/delete-messages.js'
+import { deleteScheduledMessages } from './methods/messages/delete-scheduled-messages.js'
+import { editInlineMessage } from './methods/messages/edit-inline-message.js'
+import { editMessage } from './methods/messages/edit-message.js'
+import { ForwardMessageOptions, forwardMessages, forwardMessagesById } from './methods/messages/forward-messages.js'
+import { getDiscussionMessage } from './methods/messages/get-discussion-message.js'
+import { getHistory, GetHistoryOffset } from './methods/messages/get-history.js'
+import { getMessageGroup } from './methods/messages/get-message-group.js'
+import { getMessageReactions, getMessageReactionsById } from './methods/messages/get-message-reactions.js'
+import { getMessages } from './methods/messages/get-messages.js'
+import { getMessagesUnsafe } from './methods/messages/get-messages-unsafe.js'
+import { getReactionUsers, GetReactionUsersOffset } from './methods/messages/get-reaction-users.js'
+import { getReplyTo } from './methods/messages/get-reply-to.js'
+import { getScheduledMessages } from './methods/messages/get-scheduled-messages.js'
+import { iterHistory } from './methods/messages/iter-history.js'
+import { iterReactionUsers } from './methods/messages/iter-reaction-users.js'
+import { iterSearchGlobal } from './methods/messages/iter-search-global.js'
+import { iterSearchMessages } from './methods/messages/iter-search-messages.js'
+import { pinMessage } from './methods/messages/pin-message.js'
+import { readHistory } from './methods/messages/read-history.js'
+import { readReactions } from './methods/messages/read-reactions.js'
+import { searchGlobal, SearchGlobalOffset } from './methods/messages/search-global.js'
+import { searchMessages, SearchMessagesOffset } from './methods/messages/search-messages.js'
+import { answerMedia, answerMediaGroup, answerText } from './methods/messages/send-answer.js'
+import { commentMedia, commentMediaGroup, commentText } from './methods/messages/send-comment.js'
+import { CommonSendParams } from './methods/messages/send-common.js'
+import { sendCopy, SendCopyParams } from './methods/messages/send-copy.js'
+import { sendCopyGroup, SendCopyGroupParams } from './methods/messages/send-copy-group.js'
+import { sendMedia } from './methods/messages/send-media.js'
+import { sendMediaGroup } from './methods/messages/send-media-group.js'
+import { sendReaction } from './methods/messages/send-reaction.js'
+import { replyMedia, replyMediaGroup, replyText } from './methods/messages/send-reply.js'
+import { sendScheduled } from './methods/messages/send-scheduled.js'
+import { sendText } from './methods/messages/send-text.js'
+import { sendTyping } from './methods/messages/send-typing.js'
+import { sendVote } from './methods/messages/send-vote.js'
+import { translateMessage } from './methods/messages/translate-message.js'
+import { translateText } from './methods/messages/translate-text.js'
+import { unpinAllMessages } from './methods/messages/unpin-all-messages.js'
+import { unpinMessage } from './methods/messages/unpin-message.js'
+import { initTakeoutSession } from './methods/misc/init-takeout-session.js'
+import { _normalizePrivacyRules } from './methods/misc/normalize-privacy-rules.js'
 import {
     getParseMode,
     registerParseMode,
     setDefaultParseMode,
     unregisterParseMode,
-} from './methods/parse-modes/parse-modes'
-import { changeCloudPassword } from './methods/password/change-cloud-password'
-import { enableCloudPassword } from './methods/password/enable-cloud-password'
-import { cancelPasswordEmail, resendPasswordEmail, verifyPasswordEmail } from './methods/password/password-email'
-import { removeCloudPassword } from './methods/password/remove-cloud-password'
-import { addStickerToSet } from './methods/stickers/add-sticker-to-set'
-import { createStickerSet } from './methods/stickers/create-sticker-set'
-import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set'
-import { getCustomEmojis, getCustomEmojisFromMessages } from './methods/stickers/get-custom-emojis'
-import { getInstalledStickers } from './methods/stickers/get-installed-stickers'
-import { getStickerSet } from './methods/stickers/get-sticker-set'
-import { moveStickerInSet } from './methods/stickers/move-sticker-in-set'
-import { setChatStickerSet } from './methods/stickers/set-chat-sticker-set'
-import { setStickerSetThumb } from './methods/stickers/set-sticker-set-thumb'
-import { applyBoost } from './methods/stories/apply-boost'
-import { canApplyBoost, CanApplyBoostResult } from './methods/stories/can-apply-boost'
-import { canSendStory, CanSendStoryResult } from './methods/stories/can-send-story'
-import { deleteStories } from './methods/stories/delete-stories'
-import { editStory } from './methods/stories/edit-story'
-import { _findStoryInUpdate } from './methods/stories/find-in-update'
-import { getAllStories } from './methods/stories/get-all-stories'
-import { getBoostStats } from './methods/stories/get-boost-stats'
-import { getBoosters } from './methods/stories/get-boosters'
-import { getPeerStories } from './methods/stories/get-peer-stories'
-import { getProfileStories } from './methods/stories/get-profile-stories'
-import { getStoriesById } from './methods/stories/get-stories-by-id'
-import { getStoriesInteractions } from './methods/stories/get-stories-interactions'
-import { getStoryLink } from './methods/stories/get-story-link'
-import { getStoryViewers } from './methods/stories/get-story-viewers'
-import { hideMyStoriesViews } from './methods/stories/hide-my-stories-views'
-import { incrementStoriesViews } from './methods/stories/increment-stories-views'
-import { iterAllStories } from './methods/stories/iter-all-stories'
-import { iterBoosters } from './methods/stories/iter-boosters'
-import { iterProfileStories } from './methods/stories/iter-profile-stories'
-import { iterStoryViewers } from './methods/stories/iter-story-viewers'
-import { readStories } from './methods/stories/read-stories'
-import { reportStory } from './methods/stories/report-story'
-import { sendStory } from './methods/stories/send-story'
-import { sendStoryReaction } from './methods/stories/send-story-reaction'
-import { togglePeerStoriesArchived } from './methods/stories/toggle-peer-stories-archived'
-import { toggleStoriesPinned } from './methods/stories/toggle-stories-pinned'
-import { enableUpdatesProcessing, makeParsedUpdateHandler, ParsedUpdateHandlerParams } from './methods/updates'
+} from './methods/parse-modes/parse-modes.js'
+import { changeCloudPassword } from './methods/password/change-cloud-password.js'
+import { enableCloudPassword } from './methods/password/enable-cloud-password.js'
+import { cancelPasswordEmail, resendPasswordEmail, verifyPasswordEmail } from './methods/password/password-email.js'
+import { removeCloudPassword } from './methods/password/remove-cloud-password.js'
+import { addStickerToSet } from './methods/stickers/add-sticker-to-set.js'
+import { createStickerSet } from './methods/stickers/create-sticker-set.js'
+import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set.js'
+import { getCustomEmojis, getCustomEmojisFromMessages } from './methods/stickers/get-custom-emojis.js'
+import { getInstalledStickers } from './methods/stickers/get-installed-stickers.js'
+import { getStickerSet } from './methods/stickers/get-sticker-set.js'
+import { moveStickerInSet } from './methods/stickers/move-sticker-in-set.js'
+import { setChatStickerSet } from './methods/stickers/set-chat-sticker-set.js'
+import { setStickerSetThumb } from './methods/stickers/set-sticker-set-thumb.js'
+import { applyBoost } from './methods/stories/apply-boost.js'
+import { canApplyBoost, CanApplyBoostResult } from './methods/stories/can-apply-boost.js'
+import { canSendStory, CanSendStoryResult } from './methods/stories/can-send-story.js'
+import { deleteStories } from './methods/stories/delete-stories.js'
+import { editStory } from './methods/stories/edit-story.js'
+import { getAllStories } from './methods/stories/get-all-stories.js'
+import { getBoostStats } from './methods/stories/get-boost-stats.js'
+import { getBoosters } from './methods/stories/get-boosters.js'
+import { getPeerStories } from './methods/stories/get-peer-stories.js'
+import { getProfileStories } from './methods/stories/get-profile-stories.js'
+import { getStoriesById } from './methods/stories/get-stories-by-id.js'
+import { getStoriesInteractions } from './methods/stories/get-stories-interactions.js'
+import { getStoryLink } from './methods/stories/get-story-link.js'
+import { getStoryViewers } from './methods/stories/get-story-viewers.js'
+import { hideMyStoriesViews } from './methods/stories/hide-my-stories-views.js'
+import { incrementStoriesViews } from './methods/stories/increment-stories-views.js'
+import { iterAllStories } from './methods/stories/iter-all-stories.js'
+import { iterBoosters } from './methods/stories/iter-boosters.js'
+import { iterProfileStories } from './methods/stories/iter-profile-stories.js'
+import { iterStoryViewers } from './methods/stories/iter-story-viewers.js'
+import { readStories } from './methods/stories/read-stories.js'
+import { reportStory } from './methods/stories/report-story.js'
+import { sendStory } from './methods/stories/send-story.js'
+import { sendStoryReaction } from './methods/stories/send-story-reaction.js'
+import { togglePeerStoriesArchived } from './methods/stories/toggle-peer-stories-archived.js'
+import { toggleStoriesPinned } from './methods/stories/toggle-stories-pinned.js'
+import { enableUpdatesProcessing, makeParsedUpdateHandler, ParsedUpdateHandlerParams } from './methods/updates/index.js'
 import {
     catchUp,
     enableRps,
@@ -227,27 +211,28 @@ import {
     getCurrentRpsProcessing,
     startUpdatesLoop,
     stopUpdatesLoop,
-} from './methods/updates/manager'
-import { blockUser } from './methods/users/block-user'
-import { deleteProfilePhotos } from './methods/users/delete-profile-photos'
-import { editCloseFriends, editCloseFriendsRaw } from './methods/users/edit-close-friends'
-import { getCommonChats } from './methods/users/get-common-chats'
-import { getGlobalTtl } from './methods/users/get-global-ttl'
-import { getMe } from './methods/users/get-me'
-import { getMyUsername } from './methods/users/get-my-username'
-import { getProfilePhoto } from './methods/users/get-profile-photo'
-import { getProfilePhotos } from './methods/users/get-profile-photos'
-import { getUsers } from './methods/users/get-users'
-import { iterProfilePhotos } from './methods/users/iter-profile-photos'
-import { resolvePeer } from './methods/users/resolve-peer'
-import { resolvePeerMany } from './methods/users/resolve-peer-many'
-import { setEmojiStatus } from './methods/users/set-emoji-status'
-import { setGlobalTtl } from './methods/users/set-global-ttl'
-import { setOffline } from './methods/users/set-offline'
-import { setProfilePhoto } from './methods/users/set-profile-photo'
-import { setUsername } from './methods/users/set-username'
-import { unblockUser } from './methods/users/unblock-user'
-import { updateProfile } from './methods/users/update-profile'
+} from './methods/updates/manager.js'
+import { blockUser } from './methods/users/block-user.js'
+import { deleteProfilePhotos } from './methods/users/delete-profile-photos.js'
+import { editCloseFriends, editCloseFriendsRaw } from './methods/users/edit-close-friends.js'
+import { getCommonChats } from './methods/users/get-common-chats.js'
+import { getGlobalTtl } from './methods/users/get-global-ttl.js'
+import { getMe } from './methods/users/get-me.js'
+import { getMyUsername } from './methods/users/get-my-username.js'
+import { getProfilePhoto } from './methods/users/get-profile-photo.js'
+import { getProfilePhotos } from './methods/users/get-profile-photos.js'
+import { getUsers } from './methods/users/get-users.js'
+import { iterProfilePhotos } from './methods/users/iter-profile-photos.js'
+import { resolvePeer } from './methods/users/resolve-peer.js'
+import { resolvePeerMany } from './methods/users/resolve-peer-many.js'
+import { setEmojiStatus } from './methods/users/set-emoji-status.js'
+import { setGlobalTtl } from './methods/users/set-global-ttl.js'
+import { setOffline } from './methods/users/set-offline.js'
+import { setProfilePhoto } from './methods/users/set-profile-photo.js'
+import { setUsername } from './methods/users/set-username.js'
+import { unblockUser } from './methods/users/unblock-user.js'
+import { updateProfile } from './methods/users/update-profile.js'
+import { Conversation } from './types/conversation.js'
 import {
     AllStories,
     ArrayPaginated,
@@ -323,8 +308,7 @@ import {
     User,
     UserStatusUpdate,
     UserTypingUpdate,
-} from './types'
-import { Conversation } from './types/conversation'
+} from './types/index.js'
 
 // from methods/_init.ts
 interface TelegramClientOptions extends BaseTelegramClientOptions {
@@ -484,8 +468,6 @@ export interface TelegramClient extends BaseTelegramClient {
     on(name: 'delete_story', handler: (upd: DeleteStoryUpdate) => void): this
 
     getAuthState(): AuthState
-
-    _onAuthorization(auth: tl.auth.TypeAuthorization, bot?: boolean): User
     /**
      * Check your Two-Step verification password and log in
      *
@@ -928,7 +910,7 @@ export interface TelegramClient extends BaseTelegramClient {
         message: number
 
         /** Data contained in the button */
-        data: string | Buffer
+        data: string | Uint8Array
 
         /**
          * Timeout for the query in ms.
@@ -994,10 +976,6 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         langCode?: string
     }): Promise<tl.RawBotCommand[]>
-
-    _normalizeCommandScope(
-        scope: tl.TypeBotCommandScope | BotCommands.IntermediateScope,
-    ): Promise<tl.TypeBotCommandScope>
     /**
      * Sets information about a bot the current uzer owns (or the current bot)
      * **Available**: ✅ both users and bots
@@ -1997,8 +1975,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      */
     getFolders(): Promise<tl.TypeDialogFilter[]>
-
-    _normalizeInputFolder(folder: InputDialogFolder): Promise<tl.TypeDialogFilter>
     /**
      * Get dialogs with certain peers.
      *
@@ -2135,7 +2111,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param params  File download parameters
      */
-    downloadAsBuffer(params: FileDownloadParameters): Promise<Buffer>
+    downloadAsBuffer(params: FileDownloadParameters): Promise<Uint8Array>
     /**
      * Download a remote file to a local file (only for NodeJS).
      * Promise will resolve once the download is complete.
@@ -2155,7 +2131,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param params  Download parameters
      */
-    downloadAsIterable(params: FileDownloadParameters): AsyncIterableIterator<Buffer>
+    downloadAsIterable(params: FileDownloadParameters): AsyncIterableIterator<Uint8Array>
     /**
      * Download a file and return it as a Node readable stream,
      * streaming file contents.
@@ -2165,16 +2141,6 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param params  File download parameters
      */
     downloadAsStream(params: FileDownloadParameters): Readable
-    /**
-     * **Available**: ✅ both users and bots
-     *
-     */
-    _normalizeFileToDocument(
-        file: InputFileLike | tl.TypeInputDocument,
-        params: {
-            progressCallback?: (uploaded: number, total: number) => void
-        },
-    ): Promise<tl.TypeInputDocument>
     /**
      * Normalize a {@link InputFileLike} to `InputFile`,
      * uploading it if needed.
@@ -3001,8 +2967,6 @@ export interface TelegramClient extends BaseTelegramClient {
             shouldDispatch?: true
         },
     ): Promise<Message>
-
-    _findMessageInUpdate(res: tl.TypeUpdates, isEdit?: boolean, noDispatch?: boolean): Message
     /**
      * Forward one or more messages by their IDs.
      * You can forward no more than 100 messages at once.
@@ -3037,8 +3001,6 @@ export interface TelegramClient extends BaseTelegramClient {
             messages: Message[]
         },
     ): Promise<Message[]>
-
-    _getDiscussionMessage(peer: InputPeerLike, message: number): Promise<[tl.TypeInputPeer, number]>
     // public version of the same method because why not
     /**
      * Get discussion message for some channel post.
@@ -3356,12 +3318,6 @@ export interface TelegramClient extends BaseTelegramClient {
             chunkSize?: number
         },
     ): AsyncIterableIterator<Message>
-
-    _parseEntities(
-        text?: string | FormattedString<string>,
-        mode?: string | null,
-        entities?: tl.TypeMessageEntity[],
-    ): Promise<[string, tl.TypeMessageEntity[] | undefined]>
     /**
      * Pin a message in a group, supergroup, channel or PM.
      *
@@ -3856,7 +3812,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * representing them. In case of indexes, the poll will first
              * be requested from the server.
              */
-            options: null | MaybeArray<number | Buffer>
+            options: null | MaybeArray<number | Uint8Array>
         },
     ): Promise<Poll>
     /**
@@ -3928,8 +3884,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      */
     _normalizePrivacyRules(rules: InputPrivacyRule[]): Promise<tl.TypeInputPrivacyRule[]>
-
-    getParseModesState(): ParseModesState
     /**
      * Register a given {@link IMessageEntityParser} as a parse mode
      * for messages. When this method is first called, given parse
@@ -4344,8 +4298,6 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         privacyRules?: InputPrivacyRule[]
     }): Promise<Story>
-
-    _findStoryInUpdate(res: tl.TypeUpdates): Story
     /**
      * Get all stories (e.g. to load the top bar)
      * **Available**: ✅ both users and bots
@@ -5148,7 +5100,6 @@ export class TelegramClient extends BaseTelegramClient {
         }
     }
     getAuthState = getAuthState.bind(null, this)
-    _onAuthorization = _onAuthorization.bind(null, this)
     checkPassword = checkPassword.bind(null, this)
     getPasswordHint = getPasswordHint.bind(null, this)
     logOut = logOut.bind(null, this)
@@ -5169,7 +5120,6 @@ export class TelegramClient extends BaseTelegramClient {
     getGameHighScores = getGameHighScores.bind(null, this)
     getInlineGameHighScores = getInlineGameHighScores.bind(null, this)
     getMyCommands = getMyCommands.bind(null, this)
-    _normalizeCommandScope = _normalizeCommandScope.bind(null, this)
     setBotInfo = setBotInfo.bind(null, this)
     setBotMenuButton = setBotMenuButton.bind(null, this)
     setGameScore = setGameScore.bind(null, this)
@@ -5228,7 +5178,6 @@ export class TelegramClient extends BaseTelegramClient {
     editFolder = editFolder.bind(null, this)
     findFolder = findFolder.bind(null, this)
     getFolders = getFolders.bind(null, this)
-    _normalizeInputFolder = _normalizeInputFolder.bind(null, this)
     getPeerDialogs = getPeerDialogs.bind(null, this)
     iterDialogs = iterDialogs.bind(null, this)
     setFoldersOrder = setFoldersOrder.bind(null, this)
@@ -5236,7 +5185,6 @@ export class TelegramClient extends BaseTelegramClient {
     downloadToFile = downloadToFile.bind(null, this)
     downloadAsIterable = downloadAsIterable.bind(null, this)
     downloadAsStream = downloadAsStream.bind(null, this)
-    _normalizeFileToDocument = _normalizeFileToDocument.bind(null, this)
     _normalizeInputFile = _normalizeInputFile.bind(null, this)
     _normalizeInputMedia = _normalizeInputMedia.bind(null, this)
     uploadFile = uploadFile.bind(null, this)
@@ -5270,10 +5218,8 @@ export class TelegramClient extends BaseTelegramClient {
     deleteScheduledMessages = deleteScheduledMessages.bind(null, this)
     editInlineMessage = editInlineMessage.bind(null, this)
     editMessage = editMessage.bind(null, this)
-    _findMessageInUpdate = _findMessageInUpdate.bind(null, this)
     forwardMessagesById = forwardMessagesById.bind(null, this)
     forwardMessages = forwardMessages.bind(null, this)
-    _getDiscussionMessage = _getDiscussionMessage.bind(null, this)
     getDiscussionMessage = getDiscussionMessage.bind(null, this)
     getHistory = getHistory.bind(null, this)
     getMessageGroup = getMessageGroup.bind(null, this)
@@ -5288,7 +5234,6 @@ export class TelegramClient extends BaseTelegramClient {
     iterReactionUsers = iterReactionUsers.bind(null, this)
     iterSearchGlobal = iterSearchGlobal.bind(null, this)
     iterSearchMessages = iterSearchMessages.bind(null, this)
-    _parseEntities = _parseEntities.bind(null, this)
     pinMessage = pinMessage.bind(null, this)
     readHistory = readHistory.bind(null, this)
     readReactions = readReactions.bind(null, this)
@@ -5318,7 +5263,6 @@ export class TelegramClient extends BaseTelegramClient {
     unpinMessage = unpinMessage.bind(null, this)
     initTakeoutSession = initTakeoutSession.bind(null, this)
     _normalizePrivacyRules = _normalizePrivacyRules.bind(null, this)
-    getParseModesState = getParseModesState.bind(null, this)
     registerParseMode = registerParseMode.bind(null, this)
     unregisterParseMode = unregisterParseMode.bind(null, this)
     getParseMode = getParseMode.bind(null, this)
@@ -5344,7 +5288,6 @@ export class TelegramClient extends BaseTelegramClient {
     canSendStory = canSendStory.bind(null, this)
     deleteStories = deleteStories.bind(null, this)
     editStory = editStory.bind(null, this)
-    _findStoryInUpdate = _findStoryInUpdate.bind(null, this)
     getAllStories = getAllStories.bind(null, this)
     getBoostStats = getBoostStats.bind(null, this)
     getBoosters = getBoosters.bind(null, this)

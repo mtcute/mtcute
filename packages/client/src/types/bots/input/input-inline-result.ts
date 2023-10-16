@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 import { fileIdToInputDocument, fileIdToInputPhoto } from '@mtcute/file-id'
 
-import { extractFileName } from '../../../utils/file-utils'
-import { BotInlineMessage, InputInlineMessage } from './input-inline-message'
+import { extractFileName } from '../../../utils/file-utils.js'
+import { BotInlineMessage, InputInlineMessage } from './input-inline-message.js'
 
 export interface BaseInputInlineResult {
     /**

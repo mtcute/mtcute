@@ -1,5 +1,5 @@
-import { computeConstructorIdFromEntry } from './ctor-id'
-import { TlArgument, TlEntry, TlFullSchema } from './types'
+import { computeConstructorIdFromEntry } from './ctor-id.js'
+import { TlArgument, TlEntry, TlFullSchema } from './types.js'
 
 /**
  * Merge multiple TL entries into a single entry.

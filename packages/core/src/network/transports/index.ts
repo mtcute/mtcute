@@ -1,14 +1,14 @@
-import { TransportFactory } from './abstract'
+import { TransportFactory } from './abstract.js'
 
-export * from './abstract'
-export * from './intermediate'
-export * from './obfuscated'
-export * from './streamed'
-export * from './tcp'
-export * from './websocket'
-export * from './wrapped'
+export * from './abstract.js'
+export * from './intermediate.js'
+export * from './obfuscated.js'
+export * from './streamed.js'
+export * from './tcp.js'
+export * from './websocket.js'
+export * from './wrapped.js'
 
-import { _defaultTransportFactory } from '../../utils/platform/transport'
+import { _defaultTransportFactory } from '../../utils/platform/transport.js'
 
 /** Platform-defined default transport factory */
 export const defaultTransportFactory: TransportFactory = _defaultTransportFactory

@@ -6,14 +6,22 @@
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
     "main": "src/index.ts",
+    "type": "module",
+    "distOnlyFields": {
+        "exports": {
+            ".": {
+                "import": "./esm/index.js",
+                "require": "./cjs/index.js"
+            }
+        }
+    },
     "scripts": {
-        "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\"",
+        "test": "mocha \"tests/**/*.spec.ts\"",
         "docs": "typedoc",
-        "build": "tsc",
-        "gen-updates": "node ./scripts/generate.js"
+        "build": "pnpm run -w build-package dispatcher",
+        "gen-updates": "node ./scripts/generate.cjs"
     },
     "dependencies": {
-        "@mtcute/core": "workspace:^1.0.0",
         "@mtcute/client": "workspace:^1.0.0",
         "events": "3.2.0"
     }

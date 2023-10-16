@@ -8,7 +8,7 @@ import {
     parseTlToEntries,
     writeTlEntriesToString,
     writeTlEntryToString,
-} from '../src'
+} from '../src/index.js'
 
 describe('mergeTlEntries', () => {
     const test = (tl: string, expected: string) => {

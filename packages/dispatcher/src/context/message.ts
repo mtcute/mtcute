@@ -1,10 +1,10 @@
 import { Message, OmitInputMessageId, ParametersSkip1, TelegramClient } from '@mtcute/client'
-import { DeleteMessagesParams } from '@mtcute/client/src/methods/messages/delete-messages'
-import { ForwardMessageOptions } from '@mtcute/client/src/methods/messages/forward-messages'
-import { SendCopyParams } from '@mtcute/client/src/methods/messages/send-copy'
-import { SendCopyGroupParams } from '@mtcute/client/src/methods/messages/send-copy-group'
+import { DeleteMessagesParams } from '@mtcute/client/src/methods/messages/delete-messages.js'
+import { ForwardMessageOptions } from '@mtcute/client/src/methods/messages/forward-messages.js'
+import { SendCopyParams } from '@mtcute/client/src/methods/messages/send-copy.js'
+import { SendCopyGroupParams } from '@mtcute/client/src/methods/messages/send-copy-group.js'
 
-import { UpdateContext } from './base'
+import { UpdateContext } from './base.js'
 
 /**
  * Context of a message-related update.

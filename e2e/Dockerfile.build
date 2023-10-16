@@ -1,0 +1,19 @@
+FROM node:20-alpine
+WORKDIR /app
+
+RUN apk add python3 make g++ && \
+    corepack enable && \
+    corepack prepare pnpm@8.7.1 --activate
+
+COPY ../ /app/
+
+RUN pnpm install --frozen-lockfile && \
+    pnpm -C packages/tl run gen-code && \
+    # verdaccio is configured to allow anonymous publish, but npm requires a token 🥴
+    npm config set //verdaccio:4873/:_authToken fake-token
+
+ENV REGISTRY="http://verdaccio:4873/"
+ENV E2E="1"
+
+ENTRYPOINT [ "node", "/app/scripts/publish.js" ]
+CMD [ "all" ]

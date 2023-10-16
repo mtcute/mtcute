@@ -97,7 +97,7 @@ module.exports = {
         yoda: 2,
 
         // Variables
-        'no-restricted-globals': [2],
+        'no-restricted-globals': ['error'],
         'no-var': 1,
 
         // Codestyle
@@ -169,6 +169,7 @@ module.exports = {
         'import/no-default-export': 'error',
         'no-console': ['error', { allow: ['warn', 'error'] }],
     },
+    ignorePatterns: ['packages/client/utils.ts', 'packages/core/utils.ts'],
     overrides: [
         {
             files: ['**/*.ts', '**/*.tsx'],
@@ -213,6 +214,7 @@ module.exports = {
                 '@typescript-eslint/unbound-method': 'off',
                 '@typescript-eslint/no-dynamic-delete': 'off',
                 '@typescript-eslint/no-unsafe-member-access': 'off',
+                'no-restricted-globals': ['error', 'Buffer', '__dirname', 'require'],
             },
             reportUnusedDisableDirectives: false,
             settings: {
@@ -233,6 +235,12 @@ module.exports = {
             rules: {
                 // this + max 3 more
                 'max-params': ['error', 4],
+            },
+        },
+        {
+            files: ['e2e/cjs/**'],
+            rules: {
+                'no-restricted-globals': 'off',
             },
         },
     ],

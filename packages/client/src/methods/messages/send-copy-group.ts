@@ -1,12 +1,12 @@
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
-import { isPresent } from '@mtcute/core/utils'
+import { isPresent } from '@mtcute/core/utils.js'
 
-import { Message } from '../../types/messages/message'
-import { InputPeerLike } from '../../types/peers'
-import { resolvePeer } from '../users/resolve-peer'
-import { getMessages } from './get-messages'
-import { CommonSendParams } from './send-common'
-import { sendMediaGroup } from './send-media-group'
+import { Message } from '../../types/messages/message.js'
+import { InputPeerLike } from '../../types/peers/index.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+import { getMessages } from './get-messages.js'
+import { CommonSendParams } from './send-common.js'
+import { sendMediaGroup } from './send-media-group.js'
 
 // @exported
 export interface SendCopyGroupParams extends CommonSendParams {

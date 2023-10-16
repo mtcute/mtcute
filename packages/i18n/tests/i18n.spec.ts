@@ -2,10 +2,11 @@ import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
 import { Message, PeersIndex } from '@mtcute/client'
+import { MessageContext } from '@mtcute/dispatcher'
 
-import { createMtcuteI18n, OtherLanguageWrap } from '../src'
-import { createPluralEnglish, pluralizeEnglish } from '../src/plurals/english'
-import { createPluralRussian } from '../src/plurals/russian'
+import { createMtcuteI18n, OtherLanguageWrap } from '../src/index.js'
+import { createPluralEnglish, pluralizeEnglish } from '../src/plurals/english.js'
+import { createPluralRussian } from '../src/plurals/russian.js'
 
 describe('i18n', () => {
     const en = {
@@ -83,12 +84,12 @@ describe('i18n', () => {
     })
 
     it('should parse language from a message', () => {
-        const message = new Message(
+        const message = new MessageContext(null as never, new Message(
             { _: 'message', peerId: { _: 'peerUser', userId: 1 } } as never,
             PeersIndex.from({
                 users: [{ _: 'user', id: 1, firstName: 'Пыня', langCode: 'ru' }],
             }),
-        )
+        ))
 
         expect(tr(message, 'direct')).to.equal('Привет')
     })

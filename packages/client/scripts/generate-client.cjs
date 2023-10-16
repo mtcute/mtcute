@@ -1,8 +1,9 @@
+/* eslint-disable no-restricted-globals */
 const ts = require('typescript')
 const path = require('path')
 const fs = require('fs')
 const prettier = require('prettier')
-const updates = require('./generate-updates')
+const updates = require('./generate-updates.cjs')
 
 const schema = require('../../tl/api-schema.json')
 
@@ -189,7 +190,7 @@ async function addSingleMethod(state, fileName) {
     const fileFullText = await fs.promises.readFile(fileName, 'utf-8')
     const program = ts.createSourceFile(path.basename(fileName), fileFullText, ts.ScriptTarget.ES2018, true)
     const relPath = path.relative(targetDir, fileName).replace(/\\/g, '/') // replace path delim to unix
-    const module = `./${relPath.replace(/\.ts$/, '')}`
+    const module = `./${relPath.replace(/\.ts$/, '.js')}`
 
     state.files[relPath] = fileFullText
 
@@ -319,7 +320,7 @@ async function addSingleMethod(state, fileName) {
                 const isPrivate = checkForFlag(stmt, '@internal')
                 const isManual = checkForFlag(stmt, '@manual')
                 const isNoemit = checkForFlag(stmt, '@noemit')
-                const shouldEmit = !isNoemit && !(isPrivate && !isOverload && !hasOverloads)
+                const shouldEmit = !isNoemit && !(isPrivate && !isOverload && !Object.keys(hasOverloads).length)
 
                 if (shouldEmit) {
                     state.methods.list.push({
@@ -432,6 +433,7 @@ async function main() {
     )
     Object.entries(state.imports).forEach(([module, items]) => {
         items = [...items]
+        if (!items.length) return
         output.write(`import { ${items.sort().join(', ')} } from '${module}'\n`)
     })
 

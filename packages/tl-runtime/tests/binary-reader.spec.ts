@@ -1,70 +1,70 @@
 // eslint-disable-next-line max-len
-/* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-argument */
 import { expect } from 'chai'
 import { randomBytes } from 'crypto'
 import Long from 'long'
 import { describe, it } from 'mocha'
 
-import { TlBinaryReader, TlReaderMap } from '../src'
+import { hexDecodeToBuffer, hexEncode } from '../src/encodings/hex.js'
+import { TlBinaryReader, TlReaderMap } from '../src/index.js'
 
 describe('TlBinaryReader', () => {
     it('should read int32', () => {
-        expect(TlBinaryReader.manual(Buffer.from([0, 0, 0, 0])).int()).eq(0)
-        expect(TlBinaryReader.manual(Buffer.from([1, 0, 0, 0])).int()).eq(1)
-        expect(TlBinaryReader.manual(Buffer.from([1, 2, 3, 4])).int()).eq(67305985)
-        expect(new TlBinaryReader({}, Buffer.from([0xff, 0xff, 0xff, 0xff])).int()).eq(-1)
+        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0])).int()).eq(0)
+        expect(TlBinaryReader.manual(new Uint8Array([1, 0, 0, 0])).int()).eq(1)
+        expect(TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).int()).eq(67305985)
+        expect(TlBinaryReader.manual(new Uint8Array([0xff, 0xff, 0xff, 0xff])).int()).eq(-1)
     })
 
     it('should read uint32', () => {
-        expect(TlBinaryReader.manual(Buffer.from([0, 0, 0, 0])).uint()).eq(0)
-        expect(TlBinaryReader.manual(Buffer.from([1, 0, 0, 0])).uint()).eq(1)
-        expect(TlBinaryReader.manual(Buffer.from([1, 2, 3, 4])).uint()).eq(67305985)
-        expect(new TlBinaryReader({}, Buffer.from([0xff, 0xff, 0xff, 0xff])).uint()).eq(4294967295)
+        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0])).uint()).eq(0)
+        expect(TlBinaryReader.manual(new Uint8Array([1, 0, 0, 0])).uint()).eq(1)
+        expect(TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).uint()).eq(67305985)
+        expect(TlBinaryReader.manual(new Uint8Array([0xff, 0xff, 0xff, 0xff])).uint()).eq(4294967295)
     })
 
     it('should read int53', () => {
-        expect(TlBinaryReader.manual(Buffer.from([0, 0, 0, 0, 0, 0, 0, 0])).int53()).eq(0)
-        expect(TlBinaryReader.manual(Buffer.from([1, 0, 0, 0, 0, 0, 0, 0])).int53()).eq(1)
-        expect(TlBinaryReader.manual(Buffer.from([1, 2, 3, 4, 0, 0, 0, 0])).int53()).eq(67305985)
-        expect(TlBinaryReader.manual(Buffer.from([1, 0, 1, 0, 1, 0, 1, 0])).int53()).eq(281479271743489)
-        expect(new TlBinaryReader({}, Buffer.from([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff])).int53()).eq(-1)
+        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0])).int53()).eq(0)
+        expect(TlBinaryReader.manual(new Uint8Array([1, 0, 0, 0, 0, 0, 0, 0])).int53()).eq(1)
+        expect(TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4, 0, 0, 0, 0])).int53()).eq(67305985)
+        expect(TlBinaryReader.manual(new Uint8Array([1, 0, 1, 0, 1, 0, 1, 0])).int53()).eq(281479271743489)
+        expect(TlBinaryReader.manual(new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff])).int53()).eq(-1)
     })
 
     it('should read long', () => {
         expect(
-            new TlBinaryReader({}, Buffer.from([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff])).long().toString(),
+            TlBinaryReader.manual(new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff])).long().toString(),
         ).eq('-1')
         expect(
-            new TlBinaryReader({}, Buffer.from([0x12, 0x34, 0x56, 0x78, 0x12, 0x34, 0x56, 0x78])).long().toString(),
+            TlBinaryReader.manual(new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x12, 0x34, 0x56, 0x78])).long().toString(),
         ).eq('8671175386481439762')
         expect(
-            new TlBinaryReader({}, Buffer.from([0x15, 0xc4, 0x15, 0xb5, 0xc4, 0x1c, 0x03, 0xa3])).long().toString(),
+            TlBinaryReader.manual(new Uint8Array([0x15, 0xc4, 0x15, 0xb5, 0xc4, 0x1c, 0x03, 0xa3])).long().toString(),
         ).eq('-6700480189419895787')
     })
 
     it('should read float', () => {
-        expect(TlBinaryReader.manual(Buffer.from([0, 0, 0x80, 0x3f])).float()).closeTo(1, 0.001)
-        expect(new TlBinaryReader({}, Buffer.from([0xb6, 0xf3, 0x9d, 0x3f])).float()).closeTo(1.234, 0.001)
-        expect(new TlBinaryReader({}, Buffer.from([0xfa, 0x7e, 0x2a, 0x3f])).float()).closeTo(0.666, 0.001)
+        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0x80, 0x3f])).float()).closeTo(1, 0.001)
+        expect(TlBinaryReader.manual(new Uint8Array([0xb6, 0xf3, 0x9d, 0x3f])).float()).closeTo(1.234, 0.001)
+        expect(TlBinaryReader.manual(new Uint8Array([0xfa, 0x7e, 0x2a, 0x3f])).float()).closeTo(0.666, 0.001)
     })
 
     it('should read double', () => {
-        expect(new TlBinaryReader({}, Buffer.from([0, 0, 0, 0, 0, 0, 0xf0, 0x3f])).double()).closeTo(1, 0.001)
-        expect(new TlBinaryReader({}, Buffer.from([0, 0, 0, 0, 0, 0, 0x25, 0x40])).double()).closeTo(10.5, 0.001)
-        expect(new TlBinaryReader({}, Buffer.from([0x9a, 0x99, 0x99, 0x99, 0x99, 0x99, 0x21, 0x40])).double()).closeTo(
-            8.8,
-            0.001,
-        )
+        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0, 0, 0, 0xf0, 0x3f])).double()).closeTo(1, 0.001)
+        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0, 0, 0, 0x25, 0x40])).double()).closeTo(10.5, 0.001)
+        expect(
+            TlBinaryReader.manual(new Uint8Array([0x9a, 0x99, 0x99, 0x99, 0x99, 0x99, 0x21, 0x40])).double(),
+        ).closeTo(8.8, 0.001)
     })
 
     it('should read raw bytes', () => {
-        expect([...TlBinaryReader.manual(Buffer.from([1, 2, 3, 4])).raw(2)]).eql([1, 2])
-        expect([...TlBinaryReader.manual(Buffer.from([1, 2, 3, 4])).raw()]).eql([1, 2, 3, 4])
-        expect([...TlBinaryReader.manual(Buffer.from([1, 2, 3, 4])).raw(0)]).eql([])
+        expect([...TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).raw(2)]).eql([1, 2])
+        expect([...TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).raw()]).eql([1, 2, 3, 4])
+        expect([...TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).raw(0)]).eql([])
     })
 
     it('should move cursor', () => {
-        const reader = new TlBinaryReader({}, Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]))
+        const reader = TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]))
 
         reader.int()
         expect(reader.pos).eq(4)
@@ -95,14 +95,15 @@ describe('TlBinaryReader', () => {
     })
 
     it('should read tg-encoded bytes', () => {
-        expect([...TlBinaryReader.manual(Buffer.from([1, 2, 3, 4])).bytes()]).eql([2])
+        expect([...TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).bytes()]).eql([2])
 
         const random250bytes = randomBytes(250)
-        let reader = new TlBinaryReader({}, Buffer.from([250, ...random250bytes, 0, 0, 0, 0, 0]))
+        let reader = TlBinaryReader.manual(new Uint8Array([250, ...random250bytes, 0, 0, 0, 0, 0]))
         expect([...reader.bytes()]).eql([...random250bytes])
         expect(reader.pos).eq(252)
 
         const random1000bytes = randomBytes(1000)
+        // eslint-disable-next-line no-restricted-globals
         const buffer = Buffer.alloc(1010)
         buffer[0] = 254
         buffer.writeIntLE(1000, 1, 3)
@@ -126,7 +127,7 @@ describe('TlBinaryReader', () => {
     }
 
     it('should read tg-encoded objects', () => {
-        const buffer = Buffer.from([
+        const buffer = new Uint8Array([
             0xef,
             0xbe,
             0xad,
@@ -158,7 +159,7 @@ describe('TlBinaryReader', () => {
     })
 
     it('should read tg-encoded vectors', () => {
-        const buffer = Buffer.from([
+        const buffer = new Uint8Array([
             0x15,
             0xc4,
             0xb5,
@@ -241,13 +242,13 @@ describe('TlBinaryReader', () => {
             }
 
             const expected = {
-                nonce: Buffer.from('3E0549828CCA27E966B301A48FECE2FC', 'hex'),
-                serverNonce: Buffer.from('A5CF4D33F4A11EA877BA4AA573907330', 'hex'),
-                pq: Buffer.from('17ED48941A08F981', 'hex'),
+                nonce: hexDecodeToBuffer('3E0549828CCA27E966B301A48FECE2FC'),
+                serverNonce: hexDecodeToBuffer('A5CF4D33F4A11EA877BA4AA573907330'),
+                pq: hexDecodeToBuffer('17ED48941A08F981'),
                 serverPublicKeyFingerprints: [Long.fromString('c3b42b026ce86b21', false, 16)],
             }
 
-            const r = new TlBinaryReader(map, Buffer.from(input, 'hex'))
+            const r = new TlBinaryReader(map, hexDecodeToBuffer(input))
             expect(r.long().toString()).eq('0') // authKeyId
             expect(r.long().toString(16)).eq('51E57AC91E83C801'.toLowerCase()) // messageId
             expect(r.uint()).eq(64) // messageLength
@@ -255,9 +256,9 @@ describe('TlBinaryReader', () => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const obj = r.object() as any
             expect(obj._).eq('mt_resPQ')
-            expect(obj.nonce.toString('hex')).eq(expected.nonce.toString('hex'))
-            expect(obj.serverNonce.toString('hex')).eq(expected.serverNonce.toString('hex'))
-            expect(obj.pq.toString('hex')).eq(expected.pq.toString('hex'))
+            expect(hexEncode(obj.nonce)).eq(hexEncode(expected.nonce))
+            expect(hexEncode(obj.serverNonce)).eq(hexEncode(expected.serverNonce))
+            expect(hexEncode(obj.pq)).eq(hexEncode(expected.pq))
             expect(obj.serverPublicKeyFingerprints.length).eq(1)
             expect(obj.serverPublicKeyFingerprints[0].toString(16)).eq(
                 expected.serverPublicKeyFingerprints[0].toString(16),

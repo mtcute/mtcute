@@ -1,9 +1,9 @@
 import { BaseTelegramClient, Long, MtTypeAssertionError } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { InputMessageId, normalizeInputMessageId, PeersIndex, Poll } from '../../types'
-import { assertIsUpdatesGroup } from '../../utils/updates-utils'
-import { resolvePeer } from '../users/resolve-peer'
+import { InputMessageId, normalizeInputMessageId, PeersIndex, Poll } from '../../types/index.js'
+import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
+import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Close a poll sent by you.

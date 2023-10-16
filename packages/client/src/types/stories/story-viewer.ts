@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { PeersIndex, User } from '../peers'
-import { ReactionEmoji, toReactionEmoji } from '../reactions'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { PeersIndex, User } from '../peers/index.js'
+import { ReactionEmoji, toReactionEmoji } from '../reactions/index.js'
 
 /**
  * Information about a single user who has viewed a story.

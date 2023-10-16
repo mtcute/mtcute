@@ -2,7 +2,7 @@
 
 import { MaybeArray, tl } from '@mtcute/core'
 
-import { InputPeerLike } from '../peers'
+import { InputPeerLike } from '../peers/index.js'
 
 interface InputPrivacyRuleUsers {
     allow: boolean

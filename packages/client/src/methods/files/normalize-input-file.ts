@@ -1,8 +1,8 @@
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
-import { InputFileLike, isUploadedFile } from '../../types/files'
-import { uploadFile } from './upload-file'
+import { InputFileLike, isUploadedFile } from '../../types/files/index.js'
+import { uploadFile } from './upload-file.js'
 
 /**
  * Normalize a {@link InputFileLike} to `InputFile`,

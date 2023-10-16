@@ -1,7 +1,7 @@
 import { Long, tl } from '@mtcute/core'
 
-import { VenueSource } from '../../media'
-import { InputReaction, normalizeInputReaction } from '../../reactions'
+import { VenueSource } from '../../media/index.js'
+import { InputReaction, normalizeInputReaction } from '../../reactions/index.js'
 
 /**
  * Constructor for interactive story elements.

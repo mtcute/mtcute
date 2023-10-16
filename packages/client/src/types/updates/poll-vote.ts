@@ -1,9 +1,9 @@
 import { MtUnsupportedError, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils'
+import { assertTypeIs } from '@mtcute/core/utils.js'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { Chat, PeersIndex, User } from '../peers'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { Chat, PeersIndex, User } from '../peers/index.js'
 
 /**
  * Some user has voted in a public poll.
@@ -59,7 +59,7 @@ export class PollVoteUpdate {
      * This might break at any time, but seems to be consistent for now.
      * To get chosen answer indexes derived as before, use {@link chosenIndexesAuto}.
      */
-    get chosen(): ReadonlyArray<Buffer> {
+    get chosen(): ReadonlyArray<Uint8Array> {
         return this.raw.options
     }
 

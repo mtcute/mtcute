@@ -1,9 +1,9 @@
 import { tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils'
-import { memoizeGetters } from '../../utils/memoize'
-import { PeersIndex, User } from '../peers'
-import { ReactionCount } from '../reactions/reaction-count'
+import { makeInspectable } from '../../utils/index.js'
+import { memoizeGetters } from '../../utils/memoize.js'
+import { PeersIndex, User } from '../peers/index.js'
+import { ReactionCount } from '../reactions/reaction-count.js'
 
 /**
  * Brief information about story views/interactions

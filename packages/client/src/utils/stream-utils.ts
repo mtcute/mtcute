@@ -76,7 +76,7 @@ export function convertWebStreamToNodeReadable(webStream: ReadableStream, opts?:
     return new NodeReadable(webStream, opts)
 }
 
-export function bufferToStream(buf: Buffer): Readable {
+export function bufferToStream(buf: Uint8Array): Readable {
     return new Readable({
         read() {
             this.push(buf)
@@ -85,15 +85,15 @@ export function bufferToStream(buf: Buffer): Readable {
     })
 }
 
-export async function readBytesFromStream(stream: Readable, size: number): Promise<Buffer | null> {
+export async function readBytesFromStream(stream: Readable, size: number): Promise<Uint8Array | null> {
     if (stream.readableEnded) return null
 
-    let res = stream.read(size) as Buffer
+    let res = stream.read(size) as Uint8Array
 
     if (!res) {
         return new Promise((resolve, reject) => {
             stream.on('readable', function handler() {
-                res = stream.read(size) as Buffer
+                res = stream.read(size) as Uint8Array
 
                 if (res) {
                     stream.off('readable', handler)
