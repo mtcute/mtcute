@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eau
+
 method=$1
 shift
 
@@ -10,10 +12,11 @@ case "$method" in
         node runner.js $@
         ;;
     "run-docker")
+        source .env
         docker compose run --rm --build test $@
         ;;
     "update")
-        docker compose run --rm --build build $@
+        docker compose run --build build $@
         ./cli.sh install
         ;;
     "start")
@@ -23,8 +26,7 @@ case "$method" in
         docker compose down
         ;;
     "install")
-        rm pnpm-lock.yaml
-        rm -rf node_modules
+        rm -rf pnpm-lock.yaml node_modules
         pnpm install
         ;;
     "ci")

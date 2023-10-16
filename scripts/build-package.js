@@ -98,6 +98,7 @@ const BUILD_CONFIGS = {
             fs.copyFileSync(path.join(packageDir, 'src/native.cjs'), path.join(outDir, 'esm/native.cjs'))
         },
     },
+    node: { esmOnlyDirectives: true },
 }
 
 const buildConfig = {

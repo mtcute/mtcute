@@ -6,8 +6,21 @@ const cp = require('child_process')
 const REGISTRY = process.env.REGISTRY || 'https://npm.tei.su/'
 exports.REGISTRY = REGISTRY
 
-async function checkVersion(name, version) {
-    return fetch(`${REGISTRY}@mtcute/${name}/${version}`).then((r) => r.status === 200)
+async function checkVersion(name, version, retry = 0) {
+    return fetch(`${REGISTRY}@mtcute/${name}/${version}`)
+        .then((r) => r.status === 200)
+        .catch((err) => {
+            if (retry >= 5) throw err
+
+            // for whatever reason this request sometimes fails with ECONNRESET
+            // no idea why, probably some issue in orbstack networking
+            console.log('[i] Error checking version:')
+            console.log(err)
+
+            return new Promise((resolve) => setTimeout(resolve, 1000)).then(() =>
+                checkVersion(name, version, retry + 1),
+            )
+        })
 }
 
 async function publishSinglePackage(name) {
@@ -38,7 +51,7 @@ async function publishSinglePackage(name) {
     }
 
     // publish to npm
-    cp.execSync(`npm publish --registry ${REGISTRY} --force`, {
+    cp.execSync(`npm publish --registry ${REGISTRY} --force -q`, {
         cwd: path.join(packageDir, 'dist'),
         stdio: 'inherit',
     })

@@ -9,7 +9,7 @@
     "type": "module",
     "scripts": {
         "docs": "typedoc",
-        "build": "pnpm run -w build-package html-parser"
+        "build": "pnpm run -w build-package node"
     },
     "distOnlyFields": {
         "exports": {

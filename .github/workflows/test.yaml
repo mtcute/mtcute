@@ -43,9 +43,4 @@ jobs:
         env:
           API_ID: ${{ secrets.TELEGRAM_API_ID }}
           API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
-        run: |
-          cd e2e
-          # is there a way not to do this manually?
-          echo API_ID=$API_ID > .env
-          echo API_HASH=$API_HASH >> .env
-          ./cli.sh ci
+        run: cd e2e && ./cli.sh ci
