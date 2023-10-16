@@ -27,6 +27,11 @@ case "$method" in
         rm -rf node_modules
         pnpm install
         ;;
+    "ci")
+        docker compose up -d verdaccio
+        docker compose run --rm --build build
+        docker compose run --rm --build test
+        ;;
     *)
         echo "Unknown command"
         ;;

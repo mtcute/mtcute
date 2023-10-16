@@ -48,4 +48,4 @@ jobs:
           # is there a way not to do this manually?
           echo API_ID=$API_ID > .env
           echo API_HASH=$API_HASH >> .env
-          ./cli.sh run-docker
+          ./cli.sh ci
