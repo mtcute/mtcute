@@ -1,7 +1,6 @@
 #!/bin/bash
 
-set -eauE
-trap 'docker compose logs verdaccio' ERR
+set -eau
 
 method=$1
 shift
@@ -31,6 +30,7 @@ case "$method" in
         pnpm install
         ;;
     "ci")
+        chmod -R 777 .verdaccio
         docker compose up -d verdaccio
         docker compose run --rm --build build
         docker compose run --rm --build test
