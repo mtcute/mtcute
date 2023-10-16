@@ -39,6 +39,8 @@ jobs:
     needs: test
     steps:
       - uses: actions/checkout@v4
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
       - name: Run end-to-end tests
         env:
           API_ID: ${{ secrets.TELEGRAM_API_ID }}
