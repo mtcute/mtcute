@@ -1,6 +1,7 @@
 #!/bin/bash
 
-set -eau
+set -eauE
+trap 'docker compose logs verdaccio' ERR
 
 method=$1
 shift
