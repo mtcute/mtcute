@@ -428,8 +428,7 @@ async function main() {
 
     output.write(
         '/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging, @typescript-eslint/unified-signatures */\n' +
-            '/* THIS FILE WAS AUTO-GENERATED */\n' +
-            "import { BaseTelegramClient, BaseTelegramClientOptions, tl, Long } from '@mtcute/core'\n",
+            '/* THIS FILE WAS AUTO-GENERATED */\n'
     )
     Object.entries(state.imports).forEach(([module, items]) => {
         items = [...items]

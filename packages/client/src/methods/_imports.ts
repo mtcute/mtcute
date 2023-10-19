@@ -1,9 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // @copy
-import { Readable } from 'stream'
-
-// @copy
-import { MaybeArray, MaybeAsync, PartialExcept, PartialOnly } from '@mtcute/core'
+import {
+    BaseTelegramClient,
+    BaseTelegramClientOptions,
+    Long,
+    MaybeArray,
+    MaybeAsync,
+    PartialExcept,
+    PartialOnly,
+    tl,
+} from '@mtcute/core'
 // @copy
 import { tdFileId } from '@mtcute/file-id'
 

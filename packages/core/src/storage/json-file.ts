@@ -1,18 +1,7 @@
-import type * as fsNs from 'fs'
-import { createRequire } from 'module'
+// eslint-disable-next-line no-restricted-imports
+import * as fs from 'fs'
 
-import { MtUnsupportedError } from '../types/index.js'
 import { JsonMemoryStorage } from './json.js'
-
-type fs = typeof fsNs
-let fs: fs | null = null
-
-try {
-    // @only-if-esm
-    const require = createRequire(import.meta.url)
-    // @/only-if-esm
-    fs = require('fs') as fs
-} catch (e) {}
 
 const EVENTS = ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SIGTERM']
 
@@ -47,10 +36,6 @@ export class JsonFileStorage extends JsonMemoryStorage {
     ) {
         super()
 
-        if (!fs || !fs.readFile) {
-            throw new MtUnsupportedError('Node fs module is not available!')
-        }
-
         this._filename = filename
         this._safe = params?.safe ?? true
         this._cleanup = params?.cleanup ?? true
@@ -65,7 +50,7 @@ export class JsonFileStorage extends JsonMemoryStorage {
         try {
             this._loadJson(
                 await new Promise((res, rej) =>
-                    fs!.readFile(this._filename, 'utf-8', (err, data) => (err ? rej(err) : res(data))),
+                    fs.readFile(this._filename, 'utf-8', (err, data) => (err ? rej(err) : res(data))),
                 ),
             )
         } catch (e) {}
@@ -73,10 +58,10 @@ export class JsonFileStorage extends JsonMemoryStorage {
 
     save(): Promise<void> {
         return new Promise((resolve, reject) => {
-            fs!.writeFile(this._safe ? this._filename + '.tmp' : this._filename, this._saveJson(), (err) => {
+            fs.writeFile(this._safe ? this._filename + '.tmp' : this._filename, this._saveJson(), (err) => {
                 if (err) reject(err)
                 else if (this._safe) {
-                    fs!.rename(this._filename + '.tmp', this._filename, (err) => {
+                    fs.rename(this._filename + '.tmp', this._filename, (err) => {
                         if (err && err.code !== 'ENOENT') reject(err)
                         else resolve()
                     })
@@ -92,12 +77,12 @@ export class JsonFileStorage extends JsonMemoryStorage {
         this._processExitHandled = true
 
         try {
-            fs!.writeFileSync(this._filename, this._saveJson())
+            fs.writeFileSync(this._filename, this._saveJson())
         } catch (e) {}
 
         if (this._safe) {
             try {
-                fs!.unlinkSync(this._filename + '.tmp')
+                fs.unlinkSync(this._filename + '.tmp')
             } catch (e) {}
         }
     }

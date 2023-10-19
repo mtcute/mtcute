@@ -1,5 +1,5 @@
+/* eslint-disable no-restricted-imports */
 import type { ReadStream } from 'fs'
-import type { Readable } from 'stream'
 
 import { tl } from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
@@ -12,26 +12,20 @@ import { UploadedFile } from './uploaded-file.js'
  * method. Can be one of:
  *  - `Uint8Array`/`Buffer`, which will be interpreted as raw file contents
  *  - `File` (from the Web API)
- *  - `string`, which will be interpreted as file path (**Node only!**)
+ *  - `string`, which will be interpreted as file path (**non-browser only!**)
  *  - `ReadStream` (for NodeJS, from the `fs` module)
- *  - `ReadableStream` (from the Web API, base readable stream)
- *  - `Readable` (for NodeJS, base readable stream)
- *  - `Response` (from `window.fetch` or `node-fetch`)
+ *  - `ReadableStream` (Web API readable stream)
+ *  - `Readable` (NodeJS readable stream)
+ *  - `Response` (from `window.fetch`)
  */
 export type UploadFileLike =
     | Uint8Array
     | File
     | string
     | ReadStream
-    | ReadableStream
+    | ReadableStream<Uint8Array>
     | NodeJS.ReadableStream
-    | Readable
-    // fetch() response
-    | {
-          headers: Headers
-          url: string
-          body: ReadableStream<Uint8Array> | NodeJS.ReadableStream | null
-      }
+    | Response
 
 /**
  * Describes types that can be used as an input
@@ -45,7 +39,7 @@ export type UploadFileLike =
  *  - `Readable` (for NodeJS, base readable stream)
  *  - {@link UploadedFile} returned from {@link TelegramClient.uploadFile}
  *  - `tl.TypeInputFile` and `tl.TypeInputMedia` TL objects
- *  - `string` with a path to a local file prepended with `file:` (NodeJS only) (e.g. `file:image.jpg`)
+ *  - `string` with a path to a local file prepended with `file:` (non-browser only) (e.g. `file:image.jpg`)
  *  - `string` with a URL to remote files (e.g. `https://example.com/image.jpg`)
  *  - `string` with TDLib and Bot API compatible File ID.
  *  - `td.RawFullRemoteFileLocation` (parsed File ID)

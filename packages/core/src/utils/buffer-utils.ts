@@ -34,6 +34,8 @@ export function cloneBuffer(buf: Uint8Array, start = 0, end = buf.length): Uint8
  * Concatenate multiple buffers into one
  */
 export function concatBuffers(buffers: Uint8Array[]): Uint8Array {
+    if (buffers.length === 1) return buffers[0]
+
     /* eslint-disable no-restricted-globals */
     if (typeof Buffer !== 'undefined') {
         return Buffer.concat(buffers)

@@ -1,8 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging, @typescript-eslint/unified-signatures */
 /* THIS FILE WAS AUTO-GENERATED */
-import { Readable } from 'stream'
-
-import { BaseTelegramClient, BaseTelegramClientOptions, Long, MaybeArray, MaybeAsync, PartialExcept, PartialOnly, tl } from '@mtcute/core'
+import {
+    BaseTelegramClient,
+    BaseTelegramClientOptions,
+    Long,
+    MaybeArray,
+    MaybeAsync,
+    PartialExcept,
+    PartialOnly,
+    tl,
+} from '@mtcute/core'
 import { tdFileId } from '@mtcute/file-id'
 
 import { AuthState, getAuthState } from './methods/auth/_state.js'
@@ -2133,14 +2140,14 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     downloadAsIterable(params: FileDownloadParameters): AsyncIterableIterator<Uint8Array>
     /**
-     * Download a file and return it as a Node readable stream,
+     * Download a file and return it as a readable stream,
      * streaming file contents.
      *
      * **Available**: ✅ both users and bots
      *
      * @param params  File download parameters
      */
-    downloadAsStream(params: FileDownloadParameters): Readable
+    downloadAsStream(params: FileDownloadParameters): ReadableStream<Uint8Array>
     /**
      * Normalize a {@link InputFileLike} to `InputFile`,
      * uploading it if needed.
@@ -2237,6 +2244,15 @@ export interface TelegramClient extends BaseTelegramClient {
          * @param total  Total file size, if known
          */
         progressCallback?: (uploaded: number, total: number) => void
+
+        /**
+         * When using `inputMediaUploadedPhoto` (e.g. when sending an uploaded photo) require
+         * the file size to be known beforehand.
+         *
+         * In case this is set to `true`, a stream is passed as `file` and the file size is unknown,
+         * the stream will be buffered in memory and the file size will be inferred from the buffer.
+         */
+        requireFileSize?: boolean
     }): Promise<UploadedFile>
     /**
      * Upload a media to Telegram servers, without actually

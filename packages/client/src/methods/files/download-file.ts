@@ -3,7 +3,8 @@ import { createRequire } from 'module'
 import { BaseTelegramClient, MtUnsupportedError } from '@mtcute/core'
 
 import { FileDownloadParameters, FileLocation } from '../../types/index.js'
-import { downloadAsStream } from './download-stream.js'
+import { downloadAsIterable } from './download-iterable.js'
+
 let fs: typeof import('fs') | null = null
 
 try {
@@ -20,7 +21,7 @@ try {
  * @param filename  Local file name to which the remote file will be downloaded
  * @param params  File download parameters
  */
-export function downloadToFile(
+export async function downloadToFile(
     client: BaseTelegramClient,
     filename: string,
     params: FileDownloadParameters,
@@ -42,18 +43,18 @@ export function downloadToFile(
     }
 
     const output = fs.createWriteStream(filename)
-    const stream = downloadAsStream(client, params)
 
     if (params.abortSignal) {
         params.abortSignal.addEventListener('abort', () => {
             client.log.debug('aborting file download %s - cleaning up', filename)
             output.destroy()
-            stream.destroy()
             fs!.rmSync(filename)
         })
     }
 
-    return new Promise((resolve, reject) => {
-        stream.on('error', reject).pipe(output).on('finish', resolve).on('error', reject)
-    })
+    for await (const chunk of downloadAsIterable(client, params)) {
+        output.write(chunk)
+    }
+
+    output.end()
 }

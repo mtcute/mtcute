@@ -215,6 +215,7 @@ module.exports = {
                 '@typescript-eslint/no-dynamic-delete': 'off',
                 '@typescript-eslint/no-unsafe-member-access': 'off',
                 'no-restricted-globals': ['error', 'Buffer', '__dirname', 'require'],
+                'no-restricted-imports': ['error', 'buffer', 'crypto', 'fs', 'path', 'stream'],
             },
             reportUnusedDisableDirectives: false,
             settings: {
@@ -225,9 +226,10 @@ module.exports = {
             },
         },
         {
-            files: ['**/scripts/**'],
+            files: ['**/scripts/**', '*.spec.ts'],
             rules: {
                 'no-console': 'off',
+                'no-restricted-imports': 'off',
             },
         },
         {

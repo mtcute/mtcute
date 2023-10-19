@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { createCipheriv, createDecipheriv, createHash, createHmac, pbkdf2 } from 'crypto'
 
 import { MaybeAsync } from '../../types/index.js'

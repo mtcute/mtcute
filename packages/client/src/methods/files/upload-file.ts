@@ -1,19 +1,20 @@
 import fileType from 'file-type'
+// eslint-disable-next-line no-restricted-imports
 import type { ReadStream } from 'fs'
 import { createRequire } from 'module'
-import { Readable } from 'stream'
 
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
-import { AsyncLock, randomLong } from '@mtcute/core/utils.js'
+import { randomLong } from '@mtcute/core/utils.js'
 
 import { UploadedFile, UploadFileLike } from '../../types/index.js'
 import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils.js'
-import { bufferToStream, convertWebStreamToNodeReadable, readBytesFromStream } from '../../utils/stream-utils.js'
+import { bufferToStream, createChunkedReader, nodeReadableToWeb, streamToBuffer } from '../../utils/stream-utils.js'
 
 const { fromBuffer: fileTypeFromBuffer } = fileType
 
 let fs: typeof import('fs') | null = null
 let path: typeof import('path') | null = null
+let nodeStream: typeof import('stream') | null = null
 
 try {
     // @only-if-esm
@@ -21,6 +22,7 @@ try {
     // @/only-if-esm
     fs = require('fs') as typeof import('fs')
     path = require('path') as typeof import('path')
+    nodeStream = require('stream') as typeof import('stream')
 } catch (e) {}
 
 const OVERRIDE_MIME: Record<string, string> = {
@@ -102,6 +104,15 @@ export async function uploadFile(
          * @param total  Total file size, if known
          */
         progressCallback?: (uploaded: number, total: number) => void
+
+        /**
+         * When using `inputMediaUploadedPhoto` (e.g. when sending an uploaded photo) require
+         * the file size to be known beforehand.
+         *
+         * In case this is set to `true`, a stream is passed as `file` and the file size is unknown,
+         * the stream will be buffered in memory and the file size will be inferred from the buffer.
+         */
+        requireFileSize?: boolean
     },
 ): Promise<UploadedFile> {
     // normalize params
@@ -137,11 +148,7 @@ export async function uploadFile(
                 res(stat.size)
             })
         })
-        // fs.ReadStream is a subclass of Readable, no conversion needed
-    }
-
-    if (typeof ReadableStream !== 'undefined' && file instanceof ReadableStream) {
-        file = convertWebStreamToNodeReadable(file)
+        // fs.ReadStream is a subclass of Readable, will be handled below
     }
 
     if (typeof file === 'object' && 'headers' in file && 'body' in file && 'url' in file) {
@@ -176,11 +183,15 @@ export async function uploadFile(
             throw new MtArgumentError('Fetch response contains `null` body')
         }
 
-        if (typeof ReadableStream !== 'undefined' && file.body instanceof ReadableStream) {
-            file = convertWebStreamToNodeReadable(file.body)
-        } else {
-            file = file.body
-        }
+        file = file.body
+    }
+
+    if (nodeStream && file instanceof nodeStream.Readable) {
+        file = nodeReadableToWeb(file)
+    }
+
+    if (!(file instanceof ReadableStream)) {
+        throw new MtArgumentError('Could not convert input `file` to stream!')
     }
 
     // override file name and mime (if any)
@@ -188,6 +199,13 @@ export async function uploadFile(
 
     // set file size if not automatically inferred
     if (fileSize === -1 && params.fileSize) fileSize = params.fileSize
+
+    if (fileSize === -1 && params.requireFileSize) {
+        // buffer the entire stream in memory, then convert it back to stream (bruh)
+        const buffer = await streamToBuffer(file)
+        fileSize = buffer.length
+        file = bufferToStream(buffer)
+    }
 
     let partSizeKb = params.partSize
 
@@ -197,10 +215,6 @@ export async function uploadFile(
         } else {
             partSizeKb = determinePartSize(fileSize)
         }
-    }
-
-    if (!(file instanceof Readable)) {
-        throw new MtArgumentError('Could not convert input `file` to stream!')
     }
 
     if (partSizeKb > 512) {
@@ -218,6 +232,7 @@ export async function uploadFile(
     const isBig = fileSize === -1 || fileSize > BIG_FILE_MIN_SIZE
     const isSmall = fileSize !== -1 && fileSize < SMALL_FILE_MAX_SIZE
     const connectionKind = isSmall ? 'main' : 'upload'
+    // streamed uploads must be serialized, otherwise we'll get FILE_PART_SIZE_INVALID
     const connectionPoolSize = Math.min(client.network.getPoolSize(connectionKind), partCount)
     const requestsPerConnection = params.requestsPerConnection ?? REQUESTS_PER_CONNECTION
 
@@ -237,25 +252,18 @@ export async function uploadFile(
 
     let pos = 0
     let idx = 0
-    const lock = new AsyncLock()
+    const reader = createChunkedReader(stream, partSize)
 
     const uploadNextPart = async (): Promise<void> => {
         const thisIdx = idx++
 
-        let part
-
-        try {
-            await lock.acquire()
-            part = await readBytesFromStream(stream, partSize)
-        } finally {
-            lock.release()
-        }
+        let part = await reader.read()
 
         if (!part && fileSize !== -1) {
-            throw new MtArgumentError(`Unexpected EOS (there were only ${idx} parts, but expected ${partCount})`)
+            throw new MtArgumentError(`Unexpected EOS (there were only ${idx - 1} parts, but expected ${partCount})`)
         }
 
-        if (fileSize === -1 && (stream.readableEnded || !part)) {
+        if (fileSize === -1 && (reader.ended() || !part)) {
             fileSize = pos + (part?.length ?? 0)
             partCount = ~~((fileSize + partSize - 1) / partSize)
             if (!part) part = new Uint8Array(0)
@@ -311,7 +319,7 @@ export async function uploadFile(
         return uploadNextPart()
     }
 
-    let poolSize = connectionPoolSize * requestsPerConnection
+    let poolSize = partCount === -1 ? 1 : connectionPoolSize * requestsPerConnection
     if (partCount !== -1 && poolSize > partCount) poolSize = partCount
 
     await Promise.all(Array.from({ length: poolSize }, uploadNextPart))
