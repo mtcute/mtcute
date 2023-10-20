@@ -30,6 +30,10 @@
             }
         }
     },
+    "browser": {
+        "./cjs/methods/files/_platform.js": "./cjs/methods/files/_platform.web.js",
+        "./esm/methods/files/_platform.js": "./esm/methods/files/_platform.web.js"
+    },
     "dependencies": {
         "@types/node": "18.16.0",
         "@mtcute/core": "workspace:^1.0.0",

@@ -1,29 +1,14 @@
 import fileType from 'file-type'
-// eslint-disable-next-line no-restricted-imports
-import type { ReadStream } from 'fs'
-import { createRequire } from 'module'
 
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils.js'
 
 import { UploadedFile, UploadFileLike } from '../../types/index.js'
 import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils.js'
-import { bufferToStream, createChunkedReader, nodeReadableToWeb, streamToBuffer } from '../../utils/stream-utils.js'
+import { bufferToStream, createChunkedReader, streamToBuffer } from '../../utils/stream-utils.js'
+import { _createFileStream, _extractFileStreamMeta, _handleNodeStream, _isFileStream } from './_platform.js'
 
 const { fromBuffer: fileTypeFromBuffer } = fileType
-
-let fs: typeof import('fs') | null = null
-let path: typeof import('path') | null = null
-let nodeStream: typeof import('stream') | null = null
-
-try {
-    // @only-if-esm
-    const require = createRequire(import.meta.url)
-    // @/only-if-esm
-    fs = require('fs') as typeof import('fs')
-    path = require('path') as typeof import('path')
-    nodeStream = require('stream') as typeof import('stream')
-} catch (e) {}
 
 const OVERRIDE_MIME: Record<string, string> = {
     // tg doesn't interpret `audio/opus` files as voice messages for some reason
@@ -134,20 +119,11 @@ export async function uploadFile(
     }
 
     if (typeof file === 'string') {
-        if (!fs) {
-            throw new MtArgumentError('Local paths are only supported for NodeJS!')
-        }
-        file = fs.createReadStream(file)
+        file = _createFileStream(file)
     }
 
-    if (fs && file instanceof fs.ReadStream) {
-        fileName = path!.basename(file.path.toString())
-        fileSize = await new Promise((res, rej) => {
-            fs!.stat((file as ReadStream).path.toString(), (err, stat) => {
-                if (err) rej(err)
-                res(stat.size)
-            })
-        })
+    if (_isFileStream(file)) {
+        [fileName, fileSize] = await _extractFileStreamMeta(file)
         // fs.ReadStream is a subclass of Readable, will be handled below
     }
 
@@ -186,9 +162,7 @@ export async function uploadFile(
         file = file.body
     }
 
-    if (nodeStream && file instanceof nodeStream.Readable) {
-        file = nodeReadableToWeb(file)
-    }
+    file = _handleNodeStream(file)
 
     if (!(file instanceof ReadableStream)) {
         throw new MtArgumentError('Could not convert input `file` to stream!')

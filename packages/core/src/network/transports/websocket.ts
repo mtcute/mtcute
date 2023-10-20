@@ -1,5 +1,4 @@
 import EventEmitter from 'events'
-import { createRequire } from 'module'
 
 import { tl } from '@mtcute/tl'
 
@@ -9,22 +8,8 @@ import { IPacketCodec, ITelegramTransport, TransportState } from './abstract.js'
 import { IntermediatePacketCodec } from './intermediate.js'
 import { ObfuscatedPacketCodec } from './obfuscated.js'
 
-let ws: {
-    new (address: string, options?: string): WebSocket
-} | null
-
-if (typeof window === 'undefined' || typeof window.WebSocket === 'undefined') {
-    try {
-        // @only-if-esm
-        const require = createRequire(import.meta.url)
-        // @/only-if-esm
-        // eslint-disable-next-line
-        ws = require('ws')
-    } catch (e) {
-        ws = null
-    }
-} else {
-    ws = window.WebSocket
+export type WebSocketConstructor = {
+    new (address: string, protocol?: string): WebSocket
 }
 
 const subdomainsMap: Record<string, string> = {
@@ -51,20 +36,36 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
 
     private _baseDomain: string
     private _subdomains: Record<string, string>
+    private _WebSocket: WebSocketConstructor
 
-    /**
-     * @param baseDomain  Base WebSocket domain
-     * @param subdomains  Map of sub-domains (key is DC ID, value is string)
-     */
-    constructor(baseDomain = 'web.telegram.org', subdomains = subdomainsMap) {
+    constructor({
+        ws = WebSocket,
+        baseDomain = 'web.telegram.org',
+        subdomains = subdomainsMap,
+    }: {
+        /** Custom implementation of WebSocket (e.g. https://npm.im/ws) */
+        ws?: WebSocketConstructor
+        /** Base WebSocket domain */
+        baseDomain?: string
+        /** Map of sub-domains (key is DC ID, value is string) */
+        subdomains?: Record<string, string>
+    } = {}) {
         super()
 
         if (!ws) {
-            throw new MtUnsupportedError('To use WebSocket transport with NodeJS, install `ws` package.')
+            throw new MtUnsupportedError(
+                'To use WebSocket transport with NodeJS, install `ws` package and pass it to constructor',
+            )
+        }
+
+        // gotta love cjs/esm compat
+        if ('default' in ws) {
+            ws = ws.default as WebSocketConstructor
         }
 
         this._baseDomain = baseDomain
         this._subdomains = subdomains
+        this._WebSocket = ws
 
         this.close = this.close.bind(this)
     }
@@ -104,7 +105,7 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
 
         this._state = TransportState.Connecting
         this._currentDc = dc
-        this._socket = new ws!(
+        this._socket = new this._WebSocket(
             `wss://${this._subdomains[dc.id]}.${this._baseDomain}/apiws${testMode ? '_test' : ''}`,
             'binary',
         )
