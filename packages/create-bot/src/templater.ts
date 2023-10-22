@@ -43,7 +43,7 @@ export async function runTemplaterForFile(file: string, config: UserConfig): Pro
 
                 return acc
             },
-            {},
+            {} as Record<MtcuteFeature, boolean>,
         ),
     })
 
