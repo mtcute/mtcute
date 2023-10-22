@@ -1,3 +1,4 @@
+{{emit_if features.linters}}
 module.exports = {
     env: {
         browser: true,
@@ -69,7 +70,6 @@ module.exports = {
         'no-empty': [2, { allowEmptyCatch: true }],
         'no-empty-function': 'off',
         'no-extra-boolean-cast': 2,
-        // "no-extra-parens": [2, "all"],
         'no-extra-semi': 2,
         'no-func-assign': 2,
         'no-new': 2,
@@ -160,37 +160,24 @@ module.exports = {
         'simple-import-sort/imports': [
             'error',
             {
-                groups: [['^[a-z]'], ['^@mtcute'], ['^@/'], ['^~/'], ['^\\.']],
+                groups: [['^@mtcute'], ['^[a-z]'], ['^#']],
             },
         ],
         'simple-import-sort/exports': 'error',
         'import/no-relative-packages': 'error',
         'import/no-mutable-exports': 'error',
         'import/no-default-export': 'error',
-        'no-console': ['error', { allow: ['warn', 'error'] }],
     },
-    ignorePatterns: ['packages/client/utils.ts', 'packages/core/utils.ts'],
+    {{#if features.typescript}}
     overrides: [
         {
-            files: ['**/*.ts', '**/*.tsx'],
+            files: ['**/*.ts'],
             env: { browser: true, es6: true, node: true },
-            extends: ['plugin:@typescript-eslint/strict', 'plugin:import/typescript'],
+            extends: ['plugin:@typescript-eslint/recommended'],
             globals: { Atomics: 'readonly', SharedArrayBuffer: 'readonly' },
             parser: '@typescript-eslint/parser',
             plugins: ['@typescript-eslint'],
             rules: {
-                // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#supported-rules
-                '@typescript-eslint/member-delimiter-style': [
-                    'error',
-                    {
-                        multiline: {
-                            delimiter: 'none',
-                        },
-                        singleline: {
-                            delimiter: 'semi', // because prettier
-                        },
-                    },
-                ],
                 '@typescript-eslint/consistent-type-assertions': 2,
                 '@typescript-eslint/no-explicit-any': 2,
                 '@typescript-eslint/no-unused-vars': [
@@ -203,21 +190,7 @@ module.exports = {
                         varsIgnorePattern: '^_',
                     },
                 ],
-                '@typescript-eslint/no-non-null-assertion': 'off', // todo MTQ-36
-                '@typescript-eslint/no-empty-function': 'off',
-                '@typescript-eslint/no-confusing-void-expression': 'off',
-                '@typescript-eslint/no-unnecessary-condition': 'off',
-                '@typescript-eslint/no-var-requires': 'off',
-
-                '@typescript-eslint/no-unsafe-enum-comparison': 'off',
-                '@typescript-eslint/no-invalid-void-type': 'off',
-                '@typescript-eslint/unbound-method': 'off',
-                '@typescript-eslint/no-dynamic-delete': 'off',
-                '@typescript-eslint/no-unsafe-member-access': 'off',
-                'no-restricted-globals': ['error', 'Buffer', '__dirname', 'require'],
-                'no-restricted-imports': ['error', 'buffer', 'crypto', 'fs', 'path', 'stream'],
             },
-            reportUnusedDisableDirectives: false,
             settings: {
                 'import/resolver': {
                     node: true,
@@ -225,27 +198,8 @@ module.exports = {
                 },
             },
         },
-        {
-            files: ['**/scripts/**', '*.spec.ts', 'packages/create-*/**'],
-            rules: {
-                'no-console': 'off',
-                'no-restricted-imports': 'off',
-            },
-        },
-        {
-            files: ['packages/client/src/methods/**/*.ts'],
-            rules: {
-                // this + max 3 more
-                'max-params': ['error', 4],
-            },
-        },
-        {
-            files: ['e2e/cjs/**'],
-            rules: {
-                'no-restricted-globals': 'off',
-            },
-        },
     ],
+    {{/if}}
     settings: {
         'import/resolver': {
             node: true,

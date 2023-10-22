@@ -1,0 +1,39 @@
+{{emit_if (not features.typescript)}}
+{{#if features.dispatcher}}
+import { Dispatcher, filters } from '@mtcute/dispatcher'
+{{/if}}
+import { NodeTelegramClient } from '@mtcute/node'
+
+import * as env from './env.js'
+{{#if features.i18n}}
+import { tr } from './i18n/index.js'
+{{/if}}
+
+const tg = new NodeTelegramClient({
+    apiId: env.API_ID,
+    apiHash: env.API_HASH,
+    storage: 'bot-data/session',
+})
+
+{{#if features.dispatcher}}
+const dp = new Dispatcher(tg)
+
+dp.onNewMessage(filters.start, async (msg) => {
+    {{#if features.i18n}}
+    await msg.answerText(tr(msg, 'helloWorld'))
+    {{else}}
+    await msg.answerText('Hello, world!')
+    {{/if}}
+})
+{{/if}}
+
+tg.run(
+    {{#if botToken}}
+    { botToken: env.BOT_TOKEN },
+    {{else}}
+    {},
+    {{/if}}
+    (user) => {
+        console.log('Logged in as', user.username)
+    },
+)

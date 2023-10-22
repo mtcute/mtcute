@@ -1,0 +1,26 @@
+{
+    "name": "@mtcute/create-bot",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Bot starter kit for mtcute",
+    "author": "Alina Sireneva <alina@tei.su>",
+    "license": "MIT",
+    "type": "module",
+    "scripts": {
+        "build": "pnpm run -w build-package node",
+        "run": "ts-node-esm src/main.ts"
+    },
+    "bin": {
+        "create-bot": "./dist/main.js"
+    },
+    "dependencies": {
+        "chalk": "^5.3.0",
+        "glob": "10.2.6",
+        "handlebars": "^4.7.8",
+        "inquirer": "9.2.11",
+        "open": "9.1.0"
+    },
+    "devDependencies": {
+        "@types/inquirer": "^9.0.6"
+    }
+}

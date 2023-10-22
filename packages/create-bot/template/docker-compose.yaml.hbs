@@ -1,0 +1,11 @@
+{{emit_if features.docker}}
+version: "3.9"
+services:
+  bot:
+    build:
+      context: .
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./bot-data:/app/bot-data

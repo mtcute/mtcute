@@ -23,7 +23,6 @@
         "@mtcute/client": "workspace:^1.0.0",
         "@mtcute/sqlite": "workspace:^1.0.0",
         "@mtcute/markdown-parser": "workspace:^1.0.0",
-        "@mtcute/html-parser": "workspace:^1.0.0",
-        "@mtcute/dispatcher": "workspace:^1.0.0"
+        "@mtcute/html-parser": "workspace:^1.0.0"
     }
 }

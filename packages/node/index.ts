@@ -7,7 +7,6 @@ import { MarkdownMessageEntityParser } from '@mtcute/markdown-parser'
 import { SqliteStorage } from '@mtcute/sqlite'
 
 export * from '@mtcute/client'
-export * from '@mtcute/dispatcher'
 export * from '@mtcute/html-parser'
 export * from '@mtcute/markdown-parser'
 export { SqliteStorage }

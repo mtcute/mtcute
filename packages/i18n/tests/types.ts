@@ -3,7 +3,7 @@
 // This file is never executed, only compiled
 
 import { Message } from '@mtcute/client'
-import { createMtcuteI18n, OtherLanguageWrapExhaustive, OtherLanguageWrap } from '../src'
+import { createMtcuteI18n, OtherLanguageWrap } from '../src/index.js'
 
 const en = {
     basic: {

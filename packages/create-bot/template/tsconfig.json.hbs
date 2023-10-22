@@ -1,0 +1,29 @@
+{{emit_if features.typescript}}
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "target": "es2020",
+        "allowJs": true,
+        "sourceMap": true,
+        "inlineSources": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "incremental": true,
+        "skipLibCheck": true,
+    },
+    "include": [
+        "./src"
+    ],
+    "ts-node": {
+        "esm": true,
+        "experimentalSpecifierResolution": "node"
+    },
+    "exclude": [
+        "**/node_modules",
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "name": "{{ name }}",
+    "license": "MIT",
+    "version": "1.0.0",
+    {{#if features.typescript}}
+    "main": "dist/index.js",
+    {{else}}
+    "main": "src/index.js",
+    {{/if}}
+    "type": "module",
+    "scripts": {
+        {{#if features.linters}}
+        "prepare": "husky install",
+        "lint": "eslint .",
+        "lint:fix": "eslint --fix .",
+        "format": "prettier --write \"src/**/*.ts\"",
+        {{/if}}
+        {{#if features.typescript}}
+        "run": "tsc && dotenv node ./dist/index.js",
+        "build": "tsc"
+        {{else}}
+        "run": "dotenv node ./src/index.js"
+        {{/if}}
+    }
+}
