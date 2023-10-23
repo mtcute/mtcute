@@ -37,6 +37,10 @@
             "./utils/crypto/*.js": {
                 "import": "./esm/utils/crypto/*.js",
                 "require": "./cjs/utils/crypto/*.js"
+            },
+            "./network/transports/*.js": {
+                "import": "./esm/network/transports/*.js",
+                "require": "./cjs/network/transports/*.js"
             }
         }
     },

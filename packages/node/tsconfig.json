@@ -4,7 +4,8 @@
         "outDir": "./dist/esm"
     },
     "include": [
-        "./index.ts"
+        "./index.ts",
+        "./utils.ts",
     ],
     "references": [
         { "path": "../client" },
