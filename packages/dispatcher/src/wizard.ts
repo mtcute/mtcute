@@ -24,7 +24,7 @@ export enum WizardSceneAction {
 }
 
 interface WizardInternalState {
-    $step: number
+    $step?: number
 }
 
 /**
@@ -52,33 +52,67 @@ export class WizardScene<State, SceneName extends string = string> extends Dispa
     }
 
     /**
+     * Go to the Nth step
+     */
+    async goToStep(state: UpdateState<WizardInternalState, SceneName>, step: number) {
+        if (step >= this._steps) {
+            await state.exit()
+        } else {
+            await state.merge({ $step: step }, this._defaultState)
+        }
+    }
+
+    /**
+     * Skip N steps
+     */
+    async skip(state: UpdateState<WizardInternalState, SceneName>, count = 1) {
+        const { $step } = (await state.get()) || {}
+        if ($step === undefined) throw new Error('Wizard state is not initialized')
+
+        return this.goToStep(state, $step + count)
+    }
+
+    /**
+     * Filter that will only pass if the current step is `step`
+     */
+    static onNthStep(step: number) {
+        const filter = filters.state<WizardInternalState>((it) => it.$step === step)
+
+        if (step === 0) return filters.or(filters.stateEmpty, filter)
+
+        return filter
+    }
+
+    /**
+     * Filter that will only pass if the current step is the one after last one added
+     */
+    onCurrentStep() {
+        return WizardScene.onNthStep(this._steps)
+    }
+
+    /**
      * Add a step to the wizard
      */
     addStep(
-        handler: (msg: MessageContext, state: UpdateState<State, SceneName>) => MaybeAsync<WizardSceneAction | number>,
+        handler: (
+            msg: MessageContext,
+            state: UpdateState<State & WizardInternalState, SceneName>,
+        ) => MaybeAsync<WizardSceneAction | number>,
     ): void {
         const step = this._steps++
 
-        const filter = filters.state<WizardInternalState>((it) => it.$step === step)
-
-        this.onNewMessage(step === 0 ? filters.or(filters.stateEmpty, filter) : filter, async (msg, state) => {
+        this.onNewMessage(WizardScene.onNthStep(step), async (msg, state) => {
             const result = await handler(msg, state)
 
             if (typeof result === 'number') {
-                await state.merge({ $step: result }, this._defaultState)
+                await this.goToStep(state, result)
 
                 return
             }
 
             switch (result) {
                 case 'next': {
-                    const next = step + 1
-
-                    if (next === this._steps) {
-                        await state.exit()
-                    } else {
-                        await state.merge({ $step: next }, this._defaultState)
-                    }
+                    await this.goToStep(state, step + 1)
                     break
                 }
                 case 'exit':

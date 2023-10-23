@@ -1,4 +1,6 @@
-import { assertNever, CallbackQuery, MaybeAsync, Message } from '@mtcute/client'
+import { assertNever, MaybeAsync } from '@mtcute/client'
+
+import { CallbackQueryContext, MessageContext } from '../context/index.js'
 
 /**
  * Function that determines how the state key is derived.
@@ -8,7 +10,7 @@ import { assertNever, CallbackQuery, MaybeAsync, Message } from '@mtcute/client'
  * @param msg  Message or callback from which to derive the key
  * @param scene  Current scene UID, or `null` if none
  */
-export type StateKeyDelegate = (upd: Message | CallbackQuery) => MaybeAsync<string | null>
+export type StateKeyDelegate = (upd: MessageContext | CallbackQueryContext) => MaybeAsync<string | null>
 
 /**
  * Default state key delegate.
@@ -22,7 +24,7 @@ export type StateKeyDelegate = (upd: Message | CallbackQuery) => MaybeAsync<stri
  *    - If in group/channel/supergroup (i.e. `upd.chatType !== 'user'`), `upd.chatId + '_' + upd.user.id`
  */
 export const defaultStateKeyDelegate: StateKeyDelegate = (upd): string | null => {
-    if (upd.constructor === Message) {
+    if (upd._name === 'new_message') {
         switch (upd.chat.chatType) {
             case 'private':
             case 'bot':
@@ -37,7 +39,7 @@ export const defaultStateKeyDelegate: StateKeyDelegate = (upd): string | null =>
         }
     }
 
-    if (upd.constructor === CallbackQuery) {
+    if (upd._name === 'callback_query') {
         if (upd.isInline) return null
         if (upd.chatType === 'user') return `${upd.user.id}`
 
