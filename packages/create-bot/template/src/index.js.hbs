@@ -31,7 +31,11 @@ tg.run(
     {{#if botToken}}
     { botToken: env.BOT_TOKEN },
     {{else}}
-    {},
+    {
+        phone: () => tg.input('Phone > '),
+        code: () => tg.input('Code > '),
+        password: () => tg.input('2FA password > '),
+    },
     {{/if}}
     (user) => {
         console.log('Logged in as', user.username)

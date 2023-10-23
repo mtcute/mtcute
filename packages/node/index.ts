@@ -1,7 +1,7 @@
 import { createRequire } from 'module'
 import { createInterface, Interface as RlInterface } from 'readline'
 
-import { TelegramClient, TelegramClientOptions, User } from '@mtcute/client'
+import { TelegramClient, TelegramClientOptions } from '@mtcute/client'
 import { HtmlMessageEntityParser } from '@mtcute/html-parser'
 import { MarkdownMessageEntityParser } from '@mtcute/markdown-parser'
 import { SqliteStorage } from '@mtcute/sqlite'
@@ -95,26 +95,6 @@ export class NodeTelegramClient extends TelegramClient {
         }
 
         return new Promise((res) => this._rl?.question(text, res))
-    }
-
-    start(params: Parameters<TelegramClient['start']>[0] = {}): Promise<User> {
-        if (!params.botToken) {
-            if (!params.phone) params.phone = () => this.input('Phone > ')
-            if (!params.code) params.code = () => this.input('Code > ')
-
-            if (!params.password) {
-                params.password = () => this.input('2FA password > ')
-            }
-        }
-
-        return super.start(params).then((user) => {
-            if (this._rl) {
-                this._rl.close()
-                delete this._rl
-            }
-
-            return user
-        })
     }
 
     close(): Promise<void> {
