@@ -36,6 +36,9 @@ describe('Deep links', function () {
     describe('Bot add to group links', () => {
         it('should generate t.me links', () => {
             expect(links.botAddToGroup({ bot: 'bot_username' })).eq('https://t.me/bot_username?startgroup')
+            expect(links.botAddToGroup({ bot: 'bot_username', parameter: '' })).eq(
+                'https://t.me/bot_username?startgroup=',
+            )
             expect(links.botAddToGroup({ bot: 'bot_username', parameter: 'parameter' })).eq(
                 'https://t.me/bot_username?startgroup=parameter',
             )

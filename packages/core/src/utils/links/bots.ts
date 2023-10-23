@@ -142,7 +142,7 @@ export const botAddToGroup = deeplinkBuilder<{
 }>({
     internalBuild: ({ bot, parameter, admin }) => [
         'resolve',
-        { domain: bot, startgroup: parameter || true, admin: normalizeBotAdmin(admin) },
+        { domain: bot, startgroup: parameter ?? true, admin: normalizeBotAdmin(admin) },
     ],
     internalParse: (path, query) => {
         if (path !== 'resolve') return null
@@ -162,7 +162,7 @@ export const botAddToGroup = deeplinkBuilder<{
 
     externalBuild: ({ bot, parameter, admin }) => [
         bot,
-        { startgroup: parameter || true, admin: normalizeBotAdmin(admin) },
+        { startgroup: parameter ?? true, admin: normalizeBotAdmin(admin) },
     ],
     externalParse: (path, query) => {
         if (path.includes('/') || path[0] === '+' || path.length <= 2) return null
