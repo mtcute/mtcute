@@ -3,7 +3,8 @@
 import { connect as connectTcp } from 'net'
 import { connect as connectTls, SecureContextOptions } from 'tls'
 
-import { BaseTcpTransport, IntermediatePacketCodec, MtcuteError, tl, TransportState } from '@mtcute/core'
+import { IntermediatePacketCodec, MtcuteError, tl, TransportState } from '@mtcute/core'
+import { BaseTcpTransport } from '@mtcute/core/src/network/transports/tcp.js'
 import { base64Encode, utf8EncodeToBuffer } from '@mtcute/core/utils.js'
 
 /**
