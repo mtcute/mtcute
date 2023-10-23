@@ -99,6 +99,12 @@ const BUILD_CONFIGS = {
         },
     },
     node: { esmOnlyDirectives: true },
+    'create-bot': {
+        buildCjs: false,
+        customScript(packageDir, outDir) {
+            fs.cpSync(path.join(packageDir, 'template'), path.join(outDir, 'template'), { recursive: true })
+        },
+    },
 }
 
 const buildConfig = {
@@ -257,6 +263,8 @@ try {
 } catch (e) {
     console.log('[!] Failed to copy README.md: ' + e.message)
 }
+
+fs.cpSync(path.join(__dirname, '../LICENSE'), path.join(outDir, 'LICENSE'))
 
 fs.writeFileSync(path.join(outDir, '.npmignore'), '*.tsbuildinfo\n')
 

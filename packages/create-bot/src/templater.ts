@@ -43,6 +43,7 @@ export async function runTemplaterForFile(file: string, config: UserConfig): Pro
 
                 return acc
             },
+            // eslint-disable-next-line @typescript-eslint/prefer-reduce-type-parameter
             {} as Record<MtcuteFeature, boolean>,
         ),
     })

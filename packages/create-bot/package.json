@@ -7,11 +7,11 @@
     "license": "MIT",
     "type": "module",
     "scripts": {
-        "build": "pnpm run -w build-package node",
+        "build": "pnpm run -w build-package create-bot",
         "run": "ts-node-esm src/main.ts"
     },
     "bin": {
-        "create-bot": "./dist/main.js"
+        "create-bot": "./src/main.js"
     },
     "dependencies": {
         "chalk": "^5.3.0",
