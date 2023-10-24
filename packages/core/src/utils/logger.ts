@@ -2,7 +2,7 @@ import { hexEncode } from '@mtcute/tl-runtime'
 
 import { _defaultLoggingHandler } from './platform/logging.js'
 
-let defaultLogLevel = 2
+let defaultLogLevel = 3
 
 if (typeof process !== 'undefined') {
     const envLogLevel = parseInt(process.env.MTCUTE_LOG_LEVEL ?? '')

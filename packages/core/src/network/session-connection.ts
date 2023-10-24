@@ -564,7 +564,7 @@ export class SessionConnection extends PersistentConnection {
         }
 
         if (this._session.recentIncomingMsgIds.has(messageId)) {
-            this.log.warn('warn: ignoring duplicate message %s', messageId)
+            this.log.debug('ignoring duplicate message %s', messageId)
 
             return
         }

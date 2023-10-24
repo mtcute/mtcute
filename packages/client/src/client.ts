@@ -1587,15 +1587,17 @@ export interface TelegramClient extends BaseTelegramClient {
      * Kick a user from a chat.
      *
      * This effectively bans a user and immediately unbans them.
+     *
      * **Available**: ✅ both users and bots
      *
+     *  @returns  Service message about removed user, if one was generated.
      */
     kickChatMember(params: {
         /** Chat ID */
         chatId: InputPeerLike
         /** User ID */
         userId: InputPeerLike
-    }): Promise<void>
+    }): Promise<Message | null>
     /**
      * Leave a group chat, supergroup or channel
      *

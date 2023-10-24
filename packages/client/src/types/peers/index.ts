@@ -1,8 +1,5 @@
 import { tl } from '@mtcute/core'
 
-import { Chat } from './chat.js'
-import { User } from './user.js'
-
 export * from './chat.js'
 export * from './chat-event/index.js'
 export * from './chat-invite-link.js'
@@ -29,7 +26,7 @@ export type PeerType = 'user' | 'bot' | 'group' | 'channel' | 'supergroup'
  *  - `string`, representing peer's username (without preceding `@`)
  *  - `string`, representing user's phone number
  *  - `"me"` and `"self"` which will be replaced with the current user/bot
- *  - `Chat` or `User` object
+ *  - Any object with `inputPeer: tl.TypeInputPeer` property
  *  - Raw TL object
  *
  * > * Telegram has moved to int64 IDs. Though, Levin [has confirmed](https://t.me/tdlibchat/25071)
@@ -42,5 +39,4 @@ export type InputPeerLike =
     | tl.TypeInputPeer
     | tl.TypeInputUser
     | tl.TypeInputChannel
-    | Chat
-    | User
+    | { inputPeer: tl.TypeInputPeer }

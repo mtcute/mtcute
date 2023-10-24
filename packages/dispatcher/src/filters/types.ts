@@ -100,3 +100,5 @@ export type WrapBase<T extends any[]> = {
 export type Values<T> = T[keyof T]
 export type UnwrapBase<T> = T extends { base: any } ? T['base'] : never
 export type ExtractBaseMany<Filters extends any[]> = UnwrapBase<UnionToIntersection<Values<WrapBase<Filters>>>>
+
+export type EmptyObject = Record<never, never>

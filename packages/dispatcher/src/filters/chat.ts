@@ -12,20 +12,25 @@ import {
 } from '@mtcute/client'
 
 import { UpdateContextDistributed } from '../context/base.js'
-import { Modify, UpdateFilter } from './types.js'
+import { EmptyObject, Modify, UpdateFilter } from './types.js'
 
 /**
- * Filter messages by chat type
+ * Filter updates by type of the chat where they happened
  */
 export const chat =
-    <T extends ChatType>(
+    <T extends ChatType, Obj extends { chat: Chat }>(
         type: T,
     ): UpdateFilter<
-        Message,
+        Obj,
         {
-            chat: Modify<Chat, { type: T }>
-            sender: T extends 'private' | 'bot' | 'group' ? User : User | Chat
-        }
+            chat: Modify<Chat, { chatType: T }>
+        } & (Obj extends Message
+            ? T extends 'private' | 'bot' | 'group'
+                ? {
+                      sender: User
+                  }
+                : EmptyObject
+            : EmptyObject)
     > =>
         (msg) =>
             msg.chat.chatType === type

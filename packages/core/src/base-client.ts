@@ -163,6 +163,13 @@ export interface BaseTelegramClientOptions {
     network?: NetworkManagerExtraParams
 
     /**
+     * Set logging level for the client.
+     *
+     * See static members of {@link LogManager} for possible values.
+     */
+    logLevel?: number
+
+    /**
      * **EXPERT USE ONLY!**
      *
      * Override TL layer used for the connection.
@@ -246,6 +253,8 @@ export class BaseTelegramClient extends EventEmitter {
         if (isNaN(apiId)) {
             throw new Error('apiId must be a number or a numeric string!')
         }
+
+        if (opts.logLevel) this.log.level = opts.logLevel
 
         this.crypto = (opts.crypto ?? defaultCryptoProviderFactory)()
         this.storage = opts.storage ?? new MemoryStorage()

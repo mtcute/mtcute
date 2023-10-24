@@ -29,7 +29,7 @@ export async function resolvePeer(
     if (typeof peerId === 'object') {
         if (tl.isAnyPeer(peerId)) {
             peerId = getMarkedPeerId(peerId)
-        } else if ('type' in peerId) {
+        } else if ('inputPeer' in peerId) {
             // User | Chat
             return peerId.inputPeer
         } else {

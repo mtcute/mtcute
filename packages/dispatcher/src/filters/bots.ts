@@ -2,7 +2,7 @@ import { MaybeArray, MaybeAsync, Message } from '@mtcute/client'
 
 import { MessageContext } from '../context/message.js'
 import { chat } from './chat.js'
-import { and } from './logic.js'
+import { and, or } from './logic.js'
 import { UpdateFilter } from './types.js'
 
 /**
@@ -91,6 +91,12 @@ export const command = (
  * private messages.
  */
 export const start = and(chat('private'), command('start'))
+
+/**
+ * Shorthand filter that matches /start commands
+ * sent in groups (i.e. using `?startgroup` parameter).
+ */
+export const startGroup = and(or(chat('supergroup'), chat('group')), command('start'))
 
 /**
  * Filter for deep links (i.e. `/start <deeplink_parameter>`).
