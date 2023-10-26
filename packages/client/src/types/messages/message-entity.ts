@@ -154,7 +154,7 @@ export class MessageEntity {
      */
     is<const T extends MessageEntityKind>(
         kind: T,
-    ): this is MessageEntity & { content: Extract<MessageEntityParams, { kind: T }>; kind: T } {
+    ): this is MessageEntity & { params: Extract<MessageEntityParams, { kind: T }>; kind: T } {
         return this.params.kind === kind
     }
 }

@@ -2,7 +2,12 @@ import { BaseTelegramClient, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils.js'
 
 import { ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types/index.js'
-import { isInputPeerChannel, isInputPeerChat, isInputPeerUser, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import {
+    isInputPeerChannel,
+    isInputPeerChat,
+    isInputPeerUser,
+    normalizeToInputChannel,
+} from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -10,7 +15,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
  *
  * @param chatId  Chat ID or username
  * @param userId  User ID, username, phone number, `"me"` or `"self"`
- * @throws UserNotParticipantError  In case given user is not a participant of a given chat
+ * @returns  Chat member, or `null` if user is not a member of the chat
  */
 export async function getChatMember(
     client: BaseTelegramClient,
@@ -20,7 +25,7 @@ export async function getChatMember(
         /** User ID, username, phone number, `"me"` or `"self"` */
         userId: InputPeerLike
     },
-): Promise<ChatMember> {
+): Promise<ChatMember | null> {
     const { chatId, userId } = params
 
     const user = await resolvePeer(client, userId)
@@ -52,16 +57,24 @@ export async function getChatMember(
             }
         }
 
-        throw new tl.RpcError(404, 'USER_NOT_PARTICIPANT')
+        return null
     } else if (isInputPeerChannel(chat)) {
-        const res = await client.call({
-            _: 'channels.getParticipant',
-            channel: normalizeToInputChannel(chat),
-            participant: user,
-        })
+        try {
+            const res = await client.call({
+                _: 'channels.getParticipant',
+                channel: normalizeToInputChannel(chat),
+                participant: user,
+            })
 
-        const peers = PeersIndex.from(res)
+            const peers = PeersIndex.from(res)
 
-        return new ChatMember(res.participant, peers)
+            return new ChatMember(res.participant, peers)
+        } catch (e) {
+            if (tl.RpcError.is(e, 'USER_NOT_PARTICIPANT')) {
+                return null
+            }
+
+            throw e
+        }
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 }

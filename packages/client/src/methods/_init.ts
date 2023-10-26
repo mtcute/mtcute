@@ -8,23 +8,31 @@ import { Conversation } from '../types/conversation.js'
 // @copy
 import { start } from './auth/start.js'
 // @copy
-import { enableUpdatesProcessing, makeParsedUpdateHandler, ParsedUpdateHandlerParams } from './updates/index.js'
+import {
+    enableUpdatesProcessing,
+    makeParsedUpdateHandler,
+    ParsedUpdateHandlerParams,
+    UpdatesManagerParams,
+} from './updates/index.js'
 
 // @copy
 interface TelegramClientOptions extends BaseTelegramClientOptions {
     /**
      * Parameters for updates manager.
      */
-    updates?: Omit<ParsedUpdateHandlerParams, 'onUpdate' | 'onRawUpdate'>
+    updates?: Omit<ParsedUpdateHandlerParams & UpdatesManagerParams, 'onUpdate' | 'onRawUpdate'>
 }
 
 // @initialize
 /** @internal */
 function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
     if (!opts.disableUpdates) {
+        const { messageGroupingInterval, ...managerParams } = opts.updates ?? {}
+
         enableUpdatesProcessing(this, {
+            ...managerParams,
             onUpdate: makeParsedUpdateHandler({
-                ...opts.updates,
+                messageGroupingInterval,
                 onUpdate: (update) => {
                     Conversation.handleUpdate(this, update)
                     this.emit('update', update)

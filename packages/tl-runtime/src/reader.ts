@@ -215,8 +215,12 @@ export class TlBinaryReader {
 
     vector(reader = this.object, bare = false): unknown[] {
         if (!bare) {
-            if (this.uint() !== 0x1cb5c415) {
-                throw new Error('Invalid object code, expected 0x1cb5c415 (vector)')
+            const uint = this.uint()
+
+            if (uint !== 0x1cb5c415) {
+                throw new Error(
+                    `Invalid object code, expected 0x1cb5c415 (vector), got 0x${uint.toString(16)} at ${this.pos - 4}`,
+                )
             }
         }
 

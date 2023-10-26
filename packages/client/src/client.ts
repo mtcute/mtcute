@@ -210,7 +210,12 @@ import { sendStory } from './methods/stories/send-story.js'
 import { sendStoryReaction } from './methods/stories/send-story-reaction.js'
 import { togglePeerStoriesArchived } from './methods/stories/toggle-peer-stories-archived.js'
 import { toggleStoriesPinned } from './methods/stories/toggle-stories-pinned.js'
-import { enableUpdatesProcessing, makeParsedUpdateHandler, ParsedUpdateHandlerParams } from './methods/updates/index.js'
+import {
+    enableUpdatesProcessing,
+    makeParsedUpdateHandler,
+    ParsedUpdateHandlerParams,
+    UpdatesManagerParams,
+} from './methods/updates/index.js'
 import {
     catchUp,
     enableRps,
@@ -322,7 +327,7 @@ interface TelegramClientOptions extends BaseTelegramClientOptions {
     /**
      * Parameters for updates manager.
      */
-    updates?: Omit<ParsedUpdateHandlerParams, 'onUpdate' | 'onRawUpdate'>
+    updates?: Omit<ParsedUpdateHandlerParams & UpdatesManagerParams, 'onUpdate' | 'onRawUpdate'>
 }
 
 export interface TelegramClient extends BaseTelegramClient {
@@ -1409,14 +1414,14 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param chatId  Chat ID or username
      * @param userId  User ID, username, phone number, `"me"` or `"self"`
-     * @throws UserNotParticipantError  In case given user is not a participant of a given chat
+     * @returns  Chat member, or `null` if user is not a member of the chat
      */
     getChatMember(params: {
         /** Chat ID or username */
         chatId: InputPeerLike
         /** User ID, username, phone number, `"me"` or `"self"` */
         userId: InputPeerLike
-    }): Promise<ChatMember>
+    }): Promise<ChatMember | null>
     /**
      * Get a chunk of members of some chat.
      *
@@ -5088,9 +5093,12 @@ export class TelegramClient extends BaseTelegramClient {
         super(opts)
 
         if (!opts.disableUpdates) {
+            const { messageGroupingInterval, ...managerParams } = opts.updates ?? {}
+
             enableUpdatesProcessing(this, {
+                ...managerParams,
                 onUpdate: makeParsedUpdateHandler({
-                    ...opts.updates,
+                    messageGroupingInterval,
                     onUpdate: (update) => {
                         Conversation.handleUpdate(this, update)
                         this.emit('update', update)
