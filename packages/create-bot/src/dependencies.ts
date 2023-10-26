@@ -31,6 +31,7 @@ export function buildDependenciesList(config: UserConfig) {
             'eslint-plugin-ascii',
             'eslint-plugin-import',
             'eslint-plugin-simple-import-sort',
+            'prettier',
         )
 
         if (config.features.includes(MtcuteFeature.TypeScript)) {
