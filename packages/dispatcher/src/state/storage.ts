@@ -80,3 +80,18 @@ export interface IStateStorage {
      */
     resetRateLimit(key: string): MaybeAsync<void>
 }
+
+export function isCompatibleStorage(storage: unknown): storage is IStateStorage {
+    return (
+        typeof storage === 'object' &&
+        storage !== null &&
+        'getState' in storage &&
+        'setState' in storage &&
+        'deleteState' in storage &&
+        'getCurrentScene' in storage &&
+        'setCurrentScene' in storage &&
+        'deleteCurrentScene' in storage &&
+        'getRateLimit' in storage &&
+        'resetRateLimit' in storage
+    )
+}

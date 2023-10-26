@@ -12,7 +12,7 @@ import { Modify, UpdateFilter } from './types.js'
  * @param filter
  * @returns
  */
-export function every<Mod, State>(
+export function every<Mod, State extends object>(
     filter: UpdateFilter<Message, Mod, State>,
 ): UpdateFilter<
     MessageContext,
@@ -57,8 +57,11 @@ export function every<Mod, State>(
  * @param filter
  * @returns
  */
-// eslint-disable-next-line
-export function some<State>(filter: UpdateFilter<Message, any, State>): UpdateFilter<MessageContext, {}, State> {
+export function some<State extends object>(
+    // eslint-disable-next-line
+    filter: UpdateFilter<Message, any, State>,
+    // eslint-disable-next-line
+): UpdateFilter<MessageContext, {}, State> {
     return (ctx, state) => {
         let i = 0
         const upds = ctx.messages

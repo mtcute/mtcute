@@ -32,10 +32,7 @@ interface WizardInternalState {
  * that can be used to simplify implementing
  * step-by-step scenes.
  */
-export class WizardScene<State, SceneName extends string = string> extends Dispatcher<
-    State & WizardInternalState,
-    SceneName
-> {
+export class WizardScene<State extends object> extends Dispatcher<State & WizardInternalState> {
     private _steps = 0
 
     private _defaultState: State & WizardInternalState = {} as State & WizardInternalState
@@ -54,7 +51,7 @@ export class WizardScene<State, SceneName extends string = string> extends Dispa
     /**
      * Go to the Nth step
      */
-    async goToStep(state: UpdateState<WizardInternalState, SceneName>, step: number) {
+    async goToStep(state: UpdateState<WizardInternalState>, step: number) {
         if (step >= this._steps) {
             await state.exit()
         } else {
@@ -65,7 +62,7 @@ export class WizardScene<State, SceneName extends string = string> extends Dispa
     /**
      * Skip N steps
      */
-    async skip(state: UpdateState<WizardInternalState, SceneName>, count = 1) {
+    async skip(state: UpdateState<WizardInternalState>, count = 1) {
         const { $step } = (await state.get()) || {}
         if ($step === undefined) throw new Error('Wizard state is not initialized')
 
@@ -96,7 +93,7 @@ export class WizardScene<State, SceneName extends string = string> extends Dispa
     addStep(
         handler: (
             msg: MessageContext,
-            state: UpdateState<State & WizardInternalState, SceneName>,
+            state: UpdateState<State & WizardInternalState>,
         ) => MaybeAsync<WizardSceneAction | number>,
     ): void {
         const step = this._steps++

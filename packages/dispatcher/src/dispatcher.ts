@@ -60,22 +60,49 @@ import {
 } from './handler.js'
 // end-codegen-imports
 import { PropagationAction } from './propagation.js'
-import { defaultStateKeyDelegate, IStateStorage, StateKeyDelegate, UpdateState } from './state/index.js'
+import {
+    defaultStateKeyDelegate,
+    isCompatibleStorage,
+    IStateStorage,
+    StateKeyDelegate,
+    UpdateState,
+} from './state/index.js'
+
+export interface DispatcherParams {
+    /**
+     * If this dispatcher can be used as a scene, its unique name.
+     *
+     * Should not be set manually, use {@link Dispatcher#scene} instead
+     */
+    sceneName?: string
+
+    /**
+     * Custom storage for the dispatcher.
+     *
+     * @default  Client's storage
+     */
+    storage?: IStateStorage
+
+    /**
+     * Custom key delegate for the dispatcher.
+     */
+    key?: StateKeyDelegate
+}
 
 /**
  * Updates dispatcher
  */
-export class Dispatcher<State = never, SceneName extends string = string> {
+export class Dispatcher<State extends object = never> {
     private _groups: Record<number, Record<UpdateHandler['name'], UpdateHandler[]>> = {}
     private _groupsOrder: number[] = []
 
     private _client?: TelegramClient
 
     private _parent?: Dispatcher<any>
-    private _children: Dispatcher<any, any>[] = []
+    private _children: Dispatcher<any>[] = []
 
-    private _scenes?: Record<string, Dispatcher<any, SceneName>>
-    private _scene?: SceneName
+    private _scenes?: Record<string, Dispatcher<any>>
+    private _scene?: string
     private _sceneScoped?: boolean
 
     private _storage?: State extends never ? undefined : IStateStorage
@@ -87,65 +114,94 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     private _errorHandler?: <T = {}>(
         err: Error,
         update: ParsedUpdate & T,
-        state?: UpdateState<State, SceneName>,
+        state?: UpdateState<State>,
     ) => MaybeAsync<boolean>
 
     private _preUpdateHandler?: <T = {}>(
         update: ParsedUpdate & T,
-        state?: UpdateState<State, SceneName>,
+        state?: UpdateState<State>,
     ) => MaybeAsync<PropagationAction | void>
 
     private _postUpdateHandler?: <T = {}>(
         handled: boolean,
         update: ParsedUpdate & T,
-        state?: UpdateState<State, SceneName>,
+        state?: UpdateState<State>,
     ) => MaybeAsync<void>
 
-    /**
-     * Create a new dispatcher, that will be used as a child,
-     * optionally providing a custom key delegate
-     */
-    constructor(key?: StateKeyDelegate)
-    /**
-     * Create a new dispatcher, that will be used as a child, optionally
-     * providing custom storage and key delegate
-     */
-    constructor(storage: IStateStorage, key?: StateKeyDelegate)
-    /**
-     * Create a new dispatcher and bind it to client and optionally
-     * FSM storage
-     */
-    constructor(
-        client: TelegramClient,
-        ...args: (() => State) extends () => never ? [] : [IStateStorage, StateKeyDelegate?]
-    )
-    constructor(
-        client?: TelegramClient | IStateStorage | StateKeyDelegate,
-        storage?: IStateStorage | StateKeyDelegate,
-        key?: StateKeyDelegate,
-    ) {
+    protected constructor(client?: TelegramClient, params?: DispatcherParams) {
         this.dispatchRawUpdate = this.dispatchRawUpdate.bind(this)
         this.dispatchUpdate = this.dispatchUpdate.bind(this)
 
+        // eslint-disable-next-line prefer-const
+        let { storage, key, sceneName } = params ?? {}
+
         if (client) {
-            if (client instanceof TelegramClient) {
-                this.bindToClient(client)
+            this.bindToClient(client)
 
-                if (storage) {
-                    this._storage = storage as any
-                    this._stateKeyDelegate = (key ?? defaultStateKeyDelegate) as any
-                }
-            } else if (typeof client === 'function') {
-                // is StateKeyDelegate
-                this._customStateKeyDelegate = client as any
-            } else {
-                this._customStorage = client as any
+            if (!storage) {
+                const _storage = client.storage
 
-                if (storage) {
-                    this._customStateKeyDelegate = client as any
+                if (!isCompatibleStorage(_storage)) {
+                    throw new MtArgumentError(
+                        'Storage used by the client is not compatible with the dispatcher. Please provide a compatible storage manually',
+                    )
                 }
+
+                storage = _storage
+            }
+
+            if (storage) {
+                this._storage = storage as any
+                this._stateKeyDelegate = (key ?? defaultStateKeyDelegate) as any
+            }
+        } else {
+            // child dispatcher without client
+
+            if (storage) {
+                this._customStorage = storage as any
+            }
+
+            if (key) {
+                this._customStateKeyDelegate = key as any
+            }
+
+            if (sceneName) {
+                if (sceneName[0] === '$') {
+                    throw new MtArgumentError('Scene name cannot start with $')
+                }
+
+                this._scene = sceneName
             }
         }
+    }
+
+    /**
+     * Create a new dispatcher and bind it to the client.
+     */
+    static for<State extends object = never>(client: TelegramClient, params?: DispatcherParams): Dispatcher<State> {
+        return new Dispatcher<State>(client, params)
+    }
+
+    /**
+     * Create a new child dispatcher.
+     */
+    static child<State extends object = never>(params?: DispatcherParams): Dispatcher<State> {
+        return new Dispatcher<State>(undefined, params)
+    }
+
+    /**
+     * Create a new scene dispatcher
+     */
+    static scene<State extends object = Record<never, never>>(
+        name: string,
+        params?: Omit<DispatcherParams, 'sceneName'>,
+    ): Dispatcher<State> {
+        return new Dispatcher<State>(undefined, { sceneName: name, ...params })
+    }
+
+    /** For scene dispatchers, name of the scene */
+    get sceneName(): string | undefined {
+        return this._scene
     }
 
     /**
@@ -289,7 +345,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     private async _dispatchUpdateNowImpl(
         update: ParsedUpdate,
         // this is getting a bit crazy lol
-        parsedState?: UpdateState<State, SceneName> | null,
+        parsedState?: UpdateState<State> | null,
         parsedScene?: string | null,
         forceScene?: true,
         parsedContext?: UpdateContextType,
@@ -525,9 +581,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param handler  Error handler
      */
     onError<T = {}>(
-        handler:
-            | ((err: Error, update: ParsedUpdate & T, state?: UpdateState<State, SceneName>) => MaybeAsync<boolean>)
-            | null,
+        handler: ((err: Error, update: ParsedUpdate & T, state?: UpdateState<State>) => MaybeAsync<boolean>) | null,
     ): void {
         if (handler) this._errorHandler = handler
         else this._errorHandler = undefined
@@ -547,10 +601,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      */
     onPreUpdate<T = {}>(
         handler:
-            | ((
-                  update: ParsedUpdate & T,
-                  state?: UpdateState<State, SceneName>,
-              ) => MaybeAsync<PropagationAction | void>)
+            | ((update: ParsedUpdate & T, state?: UpdateState<State>) => MaybeAsync<PropagationAction | void>)
             | null,
     ): void {
         if (handler) this._preUpdateHandler = handler
@@ -570,9 +621,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param handler  Pre-update middleware
      */
     onPostUpdate<T = {}>(
-        handler:
-            | ((handled: boolean, update: ParsedUpdate & T, state?: UpdateState<State, SceneName>) => MaybeAsync<void>)
-            | null,
+        handler: ((handled: boolean, update: ParsedUpdate & T, state?: UpdateState<State>) => MaybeAsync<void>) | null,
     ): void {
         if (handler) this._postUpdateHandler = handler
         else this._postUpdateHandler = undefined
@@ -582,17 +631,13 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * Set error handler that will propagate
      * the error to the parent dispatcher
      */
-    propagateErrorToParent(
-        err: Error,
-        update: ParsedUpdate,
-        state?: UpdateState<State, SceneName>,
-    ): MaybeAsync<boolean> {
+    propagateErrorToParent(err: Error, update: ParsedUpdate, state?: UpdateState<State>): MaybeAsync<boolean> {
         if (!this.parent) {
             throw new MtArgumentError('This dispatcher is not a child')
         }
 
         if (this.parent._errorHandler) {
-            return this.parent._errorHandler(err, update, state)
+            return this.parent._errorHandler(err, update, state as any)
         }
         throw err
     }
@@ -607,7 +652,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         return this._parent ?? null
     }
 
-    private _prepareChild(child: Dispatcher<any, any>): void {
+    private _prepareChild(child: Dispatcher<any>): void {
         if (child._client) {
             throw new MtArgumentError(
                 'Provided dispatcher is ' +
@@ -638,7 +683,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param child  Other dispatcher
      */
-    addChild(child: Dispatcher<State, SceneName>): void {
+    addChild(child: Dispatcher<State>): void {
         if (this._children.includes(child)) return
 
         this._prepareChild(child)
@@ -658,7 +703,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param scene  Dispatcher representing the scene
      * @param scoped  Whether to use scoped FSM storage for the scene
      */
-    addScene(uid: SceneName, scene: Dispatcher<State, SceneName>, scoped: false): void
+    addScene(scene: Dispatcher<State>, scoped: false): void
     /**
      * Add a dispatcher as a scene with a scoped state
      *
@@ -672,26 +717,23 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param scene  Dispatcher representing the scene
      * @param scoped  Whether to use scoped FSM storage for the scene (defaults to `true`)
      */
-    addScene(uid: SceneName, scene: Dispatcher<any, SceneName>, scoped?: true): void
-    addScene(uid: SceneName, scene: Dispatcher<any, SceneName>, scoped = true): void {
+    addScene(scene: Dispatcher<any>, scoped?: true): void
+    addScene(scene: Dispatcher<any>, scoped = true): void {
         if (!this._scenes) this._scenes = {}
 
-        if (uid in this._scenes) {
-            throw new MtArgumentError(`Scene with UID ${uid} is already registered!`)
+        if (!scene._scene) {
+            throw new MtArgumentError(
+                'Non-scene dispatcher passed to addScene. Use `Dispatcher.scene()` to create one.',
+            )
         }
 
-        if (uid[0] === '$') {
-            throw new MtArgumentError('Scene UID cannot start with $')
-        }
-
-        if (scene._scene) {
-            throw new MtArgumentError(`This dispatcher is already registered as scene ${scene._scene}`)
+        if (scene._scene in this._scenes) {
+            throw new MtArgumentError(`Scene with name ${scene._scene} is already registered!`)
         }
 
         this._prepareChild(scene)
-        scene._scene = uid
         scene._sceneScoped = scoped
-        this._scenes[uid] = scene
+        this._scenes[scene._scene] = scene
     }
 
     /**
@@ -705,7 +747,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param child  Other dispatcher
      */
-    removeChild(child: Dispatcher<any, any>): void {
+    removeChild(child: Dispatcher<any>): void {
         const idx = this._children.indexOf(child)
 
         if (idx > -1) {
@@ -732,7 +774,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param other  Other dispatcher
      */
-    extend(other: Dispatcher<State, SceneName>): void {
+    extend(other: Dispatcher<State>): void {
         if (other._customStorage || other._customStateKeyDelegate) {
             throw new MtArgumentError('Provided dispatcher has custom storage and cannot be extended from.')
         }
@@ -772,7 +814,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
                     delete myScenes[key]
                 }
 
-                this.addScene(key as any, myScenes[key] as any, myScenes[key]._sceneScoped as any)
+                this.addScene(myScenes[key] as any, myScenes[key]._sceneScoped as any)
             })
         }
 
@@ -791,8 +833,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      *
      * @param children  Whether to also clone children and scenes
      */
-    clone(children = false): Dispatcher<State, SceneName> {
-        const dp = new Dispatcher<State, SceneName>()
+    clone(children = false): Dispatcher<State> {
+        const dp = new Dispatcher<State>()
 
         // copy handlers.
         Object.keys(this._groups).forEach((key) => {
@@ -819,12 +861,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
             if (this._scenes) {
                 Object.keys(this._scenes).forEach((key) => {
                     const scene = this._scenes![key].clone(true)
-                    dp.addScene(
-                        key as any,
-                        scene as any,
-
-                        this._scenes![key]._sceneScoped as any,
-                    )
+                    dp.addScene(scene as any, this._scenes![key]._sceneScoped as any)
                 })
             }
         }
@@ -841,7 +878,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param key  State storage key
      * @template S  State type, defaults to dispatcher's state type. Only checked at compile-time
      */
-    getState<S = State>(key: string): UpdateState<S, SceneName>
+    getState<S extends object = State>(key: string): UpdateState<S>
 
     /**
      * Get update state object for the given object.
@@ -853,8 +890,8 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param object  Object for which the state should be fetched
      * @template S  State type, defaults to dispatcher's state type. Only checked at compile-time
      */
-    getState<S = State>(object: Parameters<StateKeyDelegate>[0]): Promise<UpdateState<S, SceneName>>
-    getState<S = State>(object: string | Parameters<StateKeyDelegate>[0]): MaybeAsync<UpdateState<S, SceneName>> {
+    getState<S extends object = State>(object: Parameters<StateKeyDelegate>[0]): Promise<UpdateState<S>>
+    getState<S extends object = State>(object: string | Parameters<StateKeyDelegate>[0]): MaybeAsync<UpdateState<S>> {
         if (!this._storage) {
             throw new MtArgumentError('Cannot use getUpdateState() filter without state storage')
         }
@@ -895,7 +932,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * This will load the state for the given object
      * ignoring local custom storage, key delegate and scene scope.
      */
-    getGlobalState<T>(object: Parameters<StateKeyDelegate>[0]): Promise<UpdateState<T, SceneName>> {
+    getGlobalState<T extends object>(object: Parameters<StateKeyDelegate>[0]): Promise<UpdateState<T>> {
         if (!this._parent) {
             throw new MtArgumentError('This dispatcher does not have a parent')
         }
@@ -963,10 +1000,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onNewMessage(
-        handler: NewMessageHandler<
-            MessageContext,
-            State extends never ? never : UpdateState<State, SceneName>
-        >['callback'],
+        handler: NewMessageHandler<MessageContext, State extends never ? never : UpdateState<State>>['callback'],
         group?: number,
     ): void
 
@@ -981,7 +1015,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         filter: UpdateFilter<MessageContext, Mod, State>,
         handler: NewMessageHandler<
             filters.Modify<MessageContext, Mod>,
-            State extends never ? never : UpdateState<State, SceneName>
+            State extends never ? never : UpdateState<State>
         >['callback'],
         group?: number,
     ): void
@@ -997,7 +1031,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         filter: UpdateFilter<MessageContext, Mod>,
         handler: NewMessageHandler<
             filters.Modify<MessageContext, Mod>,
-            State extends never ? never : UpdateState<State, SceneName>
+            State extends never ? never : UpdateState<State>
         >['callback'],
         group?: number,
     ): void
@@ -1014,10 +1048,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onEditMessage(
-        handler: EditMessageHandler<
-            MessageContext,
-            State extends never ? never : UpdateState<State, SceneName>
-        >['callback'],
+        handler: EditMessageHandler<MessageContext, State extends never ? never : UpdateState<State>>['callback'],
         group?: number,
     ): void
 
@@ -1032,7 +1063,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         filter: UpdateFilter<MessageContext, Mod, State>,
         handler: EditMessageHandler<
             filters.Modify<MessageContext, Mod>,
-            State extends never ? never : UpdateState<State, SceneName>
+            State extends never ? never : UpdateState<State>
         >['callback'],
         group?: number,
     ): void
@@ -1048,7 +1079,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         filter: UpdateFilter<MessageContext, Mod>,
         handler: EditMessageHandler<
             filters.Modify<MessageContext, Mod>,
-            State extends never ? never : UpdateState<State, SceneName>
+            State extends never ? never : UpdateState<State>
         >['callback'],
         group?: number,
     ): void
@@ -1065,10 +1096,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
      * @param group  Handler group index
      */
     onMessageGroup(
-        handler: MessageGroupHandler<
-            MessageContext,
-            State extends never ? never : UpdateState<State, SceneName>
-        >['callback'],
+        handler: MessageGroupHandler<MessageContext, State extends never ? never : UpdateState<State>>['callback'],
         group?: number,
     ): void
 
@@ -1083,7 +1111,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         filter: UpdateFilter<MessageContext, Mod, State>,
         handler: MessageGroupHandler<
             filters.Modify<MessageContext, Mod>,
-            State extends never ? never : UpdateState<State, SceneName>
+            State extends never ? never : UpdateState<State>
         >['callback'],
         group?: number,
     ): void
@@ -1099,7 +1127,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         filter: UpdateFilter<MessageContext, Mod>,
         handler: MessageGroupHandler<
             filters.Modify<MessageContext, Mod>,
-            State extends never ? never : UpdateState<State, SceneName>
+            State extends never ? never : UpdateState<State>
         >['callback'],
         group?: number,
     ): void
@@ -1222,7 +1250,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
     onCallbackQuery(
         handler: CallbackQueryHandler<
             CallbackQueryContext,
-            State extends never ? never : UpdateState<State, SceneName>
+            State extends never ? never : UpdateState<State>
         >['callback'],
         group?: number,
     ): void
@@ -1238,7 +1266,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         filter: UpdateFilter<CallbackQueryContext, Mod, State>,
         handler: CallbackQueryHandler<
             filters.Modify<CallbackQueryContext, Mod>,
-            State extends never ? never : UpdateState<State, SceneName>
+            State extends never ? never : UpdateState<State>
         >['callback'],
         group?: number,
     ): void
@@ -1254,7 +1282,7 @@ export class Dispatcher<State = never, SceneName extends string = string> {
         filter: UpdateFilter<CallbackQueryContext, Mod>,
         handler: CallbackQueryHandler<
             filters.Modify<CallbackQueryContext, Mod>,
-            State extends never ? never : UpdateState<State, SceneName>
+            State extends never ? never : UpdateState<State>
         >['callback'],
         group?: number,
     ): void

@@ -20,7 +20,7 @@ export const stateEmpty: UpdateFilter<any> = async (upd, state) => {
  *
  * @param predicate  State predicate
  */
-export const state = <T>(
+export const state = <T extends object>(
     predicate: (state: T) => MaybeAsync<boolean>,
     // eslint-disable-next-line @typescript-eslint/ban-types
 ): UpdateFilter<any, {}, T> => {

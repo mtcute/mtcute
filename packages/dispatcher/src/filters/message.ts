@@ -15,6 +15,7 @@ import {
     Video,
 } from '@mtcute/client'
 
+import { MessageContext } from '../index.js'
 import { Modify, UpdateFilter } from './types.js'
 
 /**
@@ -208,3 +209,25 @@ export const sender =
     ): UpdateFilter<Message, { sender: Extract<Message['sender'], { type: T }> }> =>
         (msg) =>
             msg.sender.type === type
+
+/**
+ * Filter that matches messages that are replies to some other message.
+ *
+ * Optionally, you can pass a filter that will be applied to the replied message.
+ */
+export const replyTo =
+    <Mod, State extends object>(
+        filter?: UpdateFilter<Message, Mod, State>,
+    ): UpdateFilter<MessageContext, { getReplyTo: () => Promise<Message & Mod> }, State> =>
+        async (msg, state) => {
+            if (!msg.replyToMessageId) return false
+
+            const reply = await msg.getReplyTo()
+            if (!reply) return false
+
+            msg.getReplyTo = () => Promise.resolve(reply)
+
+            if (!filter) return true
+
+            return filter(reply, state)
+        }

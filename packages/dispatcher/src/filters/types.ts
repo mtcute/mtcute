@@ -75,7 +75,7 @@ import { UpdateState } from '../state/update-state.js'
  */
 // we need the second parameter because it carries meta information
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type UpdateFilter<Base, Mod = {}, State = never> = (
+export type UpdateFilter<Base, Mod = {}, State extends object = never> = (
     update: Base,
     state?: UpdateState<State>,
 ) => MaybeAsync<boolean>

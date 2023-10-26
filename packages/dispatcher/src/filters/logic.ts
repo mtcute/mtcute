@@ -22,7 +22,7 @@ export const any: UpdateFilter<any> = () => true
  *
  * @param fn  Filter to negate
  */
-export function not<Base, Mod, State>(
+export function not<Base, Mod, State extends object>(
     fn: UpdateFilter<Base, Mod, State>,
 ): UpdateFilter<Base, Invert<Base, Mod>, State> {
     return (upd, state) => {
@@ -37,16 +37,39 @@ export function not<Base, Mod, State>(
 // i couldn't come up with proper types for these 😭
 // if you know how to do this better - PRs are welcome!
 
-export function and<Base1, Mod1, State1, Base2, Mod2, State2>(
+export function and<Base1, Mod1, State1 extends object, Base2, Mod2, State2 extends object>(
     fn1: UpdateFilter<Base1, Mod1, State1>,
     fn2: UpdateFilter<Base2, Mod2, State2>,
 ): UpdateFilter<Base1 & Base2, Mod1 & Mod2, State1 | State2>
-export function and<Base1, Mod1, State1, Base2, Mod2, State2, Base3, Mod3, State3>(
+export function and<
+    Base1,
+    Mod1,
+    State1 extends object,
+    Base2,
+    Mod2,
+    State2 extends object,
+    Base3,
+    Mod3,
+    State3 extends object,
+>(
     fn1: UpdateFilter<Base1, Mod1, State1>,
     fn2: UpdateFilter<Base2, Mod2, State2>,
     fn3: UpdateFilter<Base3, Mod3, State3>,
 ): UpdateFilter<Base1 & Base2 & Base3, Mod1 & Mod2 & Mod3, State1 | State2 | State3>
-export function and<Base1, Mod1, State1, Base2, Mod2, State2, Base3, Mod3, State3, Base4, Mod4, State4>(
+export function and<
+    Base1,
+    Mod1,
+    State1 extends object,
+    Base2,
+    Mod2,
+    State2 extends object,
+    Base3,
+    Mod3,
+    State3 extends object,
+    Base4,
+    Mod4,
+    State4 extends object,
+>(
     fn1: UpdateFilter<Base1, Mod1, State1>,
     fn2: UpdateFilter<Base2, Mod2, State2>,
     fn3: UpdateFilter<Base3, Mod3, State3>,
@@ -55,19 +78,19 @@ export function and<Base1, Mod1, State1, Base2, Mod2, State2, Base3, Mod3, State
 export function and<
     Base1,
     Mod1,
-    State1,
+    State1 extends object,
     Base2,
     Mod2,
-    State2,
+    State2 extends object,
     Base3,
     Mod3,
-    State3,
+    State3 extends object,
     Base4,
     Mod4,
-    State4,
+    State4 extends object,
     Base5,
     Mod5,
-    State5,
+    State5 extends object,
 >(
     fn1: UpdateFilter<Base1, Mod1, State1>,
     fn2: UpdateFilter<Base2, Mod2, State2>,
@@ -82,22 +105,22 @@ export function and<
 export function and<
     Base1,
     Mod1,
-    State1,
+    State1 extends object,
     Base2,
     Mod2,
-    State2,
+    State2 extends object,
     Base3,
     Mod3,
-    State3,
+    State3 extends object,
     Base4,
     Mod4,
-    State4,
+    State4 extends object,
     Base5,
     Mod5,
-    State5,
+    State5 extends object,
     Base6,
     Mod6,
-    State6,
+    State6 extends object,
 >(
     fn1: UpdateFilter<Base1, Mod1, State1>,
     fn2: UpdateFilter<Base2, Mod2, State2>,
@@ -159,18 +182,41 @@ export function and(...fns: UpdateFilter<any, any, any>[]): UpdateFilter<any, an
     }
 }
 
-export function or<Base1, Mod1, State1, Base2, Mod2, State2>(
+export function or<Base1, Mod1, State1 extends object, Base2, Mod2, State2 extends object>(
     fn1: UpdateFilter<Base1, Mod1, State1>,
     fn2: UpdateFilter<Base2, Mod2, State2>,
 ): UpdateFilter<Base1 & Base2, Mod1 | Mod2, State1 | State2>
 
-export function or<Base1, Mod1, State1, Base2, Mod2, State2, Base3, Mod3, State3>(
+export function or<
+    Base1,
+    Mod1,
+    State1 extends object,
+    Base2,
+    Mod2,
+    State2 extends object,
+    Base3,
+    Mod3,
+    State3 extends object,
+>(
     fn1: UpdateFilter<Base1, Mod1, State1>,
     fn2: UpdateFilter<Base2, Mod2, State2>,
     fn3: UpdateFilter<Base3, Mod3, State3>,
 ): UpdateFilter<Base1 & Base2 & Base3, Mod1 | Mod2 | Mod3, State1 | State2 | State3>
 
-export function or<Base1, Mod1, State1, Base2, Mod2, State2, Base3, Mod3, State3, Base4, Mod4, State4>(
+export function or<
+    Base1,
+    Mod1,
+    State1 extends object,
+    Base2,
+    Mod2,
+    State2 extends object,
+    Base3,
+    Mod3,
+    State3 extends object,
+    Base4,
+    Mod4,
+    State4 extends object,
+>(
     fn1: UpdateFilter<Base1, Mod1, State1>,
     fn2: UpdateFilter<Base2, Mod2, State2>,
     fn3: UpdateFilter<Base3, Mod3, State3>,
@@ -180,19 +226,19 @@ export function or<Base1, Mod1, State1, Base2, Mod2, State2, Base3, Mod3, State3
 export function or<
     Base1,
     Mod1,
-    State1,
+    State1 extends object,
     Base2,
     Mod2,
-    State2,
+    State2 extends object,
     Base3,
     Mod3,
-    State3,
+    State3 extends object,
     Base4,
     Mod4,
-    State4,
+    State4 extends object,
     Base5,
     Mod5,
-    State5,
+    State5 extends object,
 >(
     fn1: UpdateFilter<Base1, Mod1, State1>,
     fn2: UpdateFilter<Base2, Mod2, State2>,
@@ -208,22 +254,22 @@ export function or<
 export function or<
     Base1,
     Mod1,
-    State1,
+    State1 extends object,
     Base2,
     Mod2,
-    State2,
+    State2 extends object,
     Base3,
     Mod3,
-    State3,
+    State3 extends object,
     Base4,
     Mod4,
-    State4,
+    State4 extends object,
     Base5,
     Mod5,
-    State5,
+    State5 extends object,
     Base6,
     Mod6,
-    State6,
+    State6 extends object,
 >(
     fn1: UpdateFilter<Base1, Mod1, State1>,
     fn2: UpdateFilter<Base2, Mod2, State2>,

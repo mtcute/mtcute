@@ -1,6 +1,9 @@
+/* eslint-disable dot-notation */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MtArgumentError, MtcuteError } from '@mtcute/client'
 import { sleep } from '@mtcute/client/utils.js'
 
+import type { Dispatcher } from '../dispatcher.js'
 import { IStateStorage } from './storage.js'
 
 /**
@@ -18,13 +21,13 @@ export class RateLimitError extends MtcuteError {
  * @template State  Type that represents the state
  * @template SceneName  Possible scene names
  */
-export class UpdateState<State, SceneName extends string = string> {
+export class UpdateState<State extends object> {
     private _key: string
     private _localKey!: string
 
     private _storage: IStateStorage
 
-    private _scene: SceneName | null
+    private _scene: string | null
     private _scoped?: boolean
     private _cached?: State | null
 
@@ -34,7 +37,7 @@ export class UpdateState<State, SceneName extends string = string> {
     constructor(
         storage: IStateStorage,
         key: string,
-        scene: SceneName | null,
+        scene: string | null,
         scoped?: boolean,
         customStorage?: IStateStorage,
         customKey?: string,
@@ -50,7 +53,8 @@ export class UpdateState<State, SceneName extends string = string> {
         this._updateLocalKey()
     }
 
-    get scene(): SceneName | null {
+    /** Name of the current scene */
+    get scene(): string | null {
         return this._scene
     }
 
@@ -68,7 +72,7 @@ export class UpdateState<State, SceneName extends string = string> {
      * @param fallback  Default state value
      * @param force  Whether to ignore cached state (def. `false`)
      */
-    async get(fallback: State, force?: boolean): Promise<State>
+    async get(fallback: State | (() => State), force?: boolean): Promise<State>
 
     /**
      * Retrieve the state from the storage, falling back to default
@@ -77,27 +81,32 @@ export class UpdateState<State, SceneName extends string = string> {
      * @param fallback  Default state value
      * @param force  Whether to ignore cached state (def. `false`)
      */
-    async get(fallback?: State, force?: boolean): Promise<State | null>
+    async get(fallback?: State | (() => State), force?: boolean): Promise<State | null>
     /**
      * Retrieve the state from the storage
      *
      * @param force  Whether to ignore cached state (def. `false`)
      */
     async get(force?: boolean): Promise<State | null>
-    async get(fallback?: State | boolean, force?: boolean): Promise<State | null> {
+    async get(fallback?: State | (() => State) | boolean, force?: boolean): Promise<State | null> {
         if (typeof fallback === 'boolean') {
             force = fallback
             fallback = undefined
         }
 
         if (!force && this._cached !== undefined) {
-            if (!this._cached && fallback) return fallback
+            if (!this._cached && fallback) {
+                return typeof fallback === 'function' ? fallback() : fallback
+            }
 
             return this._cached
         }
 
         let res = (await this._localStorage.getState(this._localKey)) as State | null
-        if (!res && fallback) res = fallback
+
+        if (!res && fallback) {
+            res = typeof fallback === 'function' ? fallback() : fallback
+        }
         this._cached = res
 
         return res
@@ -128,7 +137,16 @@ export class UpdateState<State, SceneName extends string = string> {
      * @param ttl  TTL for the new state (in seconds)
      * @param forceLoad  Whether to force load the old state from storage
      */
-    async merge(state: Partial<State>, fallback?: State, ttl?: number, forceLoad = false): Promise<State> {
+    async merge(
+        state: Partial<State>,
+        params: {
+            fallback?: State | (() => State)
+            ttl?: number
+            forceLoad?: boolean
+        } = {},
+    ): Promise<State> {
+        const { fallback, ttl, forceLoad } = params
+
         const old = await this.get(forceLoad)
 
         if (!old) {
@@ -136,7 +154,9 @@ export class UpdateState<State, SceneName extends string = string> {
                 throw new MtArgumentError('Cannot use merge on empty state without fallback.')
             }
 
-            await this.set({ ...fallback, ...state }, ttl)
+            const fallback_ = typeof fallback === 'function' ? fallback() : fallback
+
+            await this.set({ ...fallback_, ...state }, ttl)
         } else {
             await this.set({ ...old, ...state }, ttl)
         }
@@ -156,14 +176,43 @@ export class UpdateState<State, SceneName extends string = string> {
 
     /**
      * Enter some scene
-     *
-     * @param scene  Scene name
-     * @param ttl  TTL for the scene (in seconds)
      */
-    async enter(scene: SceneName, ttl?: number): Promise<void> {
-        this._scene = scene
+    async enter<SceneState extends object, Scene extends Dispatcher<SceneState>>(
+        scene: Scene,
+        params?: {
+            /**
+             * Initial state for the scene
+             *
+             * Note that this will only work if the scene uses the same key delegate as this state.
+             */
+            with?: SceneState
+
+            /** TTL for the scene (in seconds) */
+            ttl?: number
+        },
+    ): Promise<void> {
+        const { with: with_, ttl } = params ?? {}
+
+        if (!scene['_scene']) {
+            throw new MtArgumentError('Cannot enter a non-scene Dispatcher')
+        }
+
+        if (!scene['_parent']) {
+            throw new MtArgumentError('This scene has not been registered')
+        }
+
+        this._scene = scene['_scene']
         this._updateLocalKey()
-        await this._storage.setCurrentScene(this._key, scene, ttl)
+
+        await this._storage.setCurrentScene(this._key, this._scene, ttl)
+
+        if (with_) {
+            if (scene['_customStateKeyDelegate']) {
+                throw new MtArgumentError('Cannot use `with` parameter when the scene uses a custom state key delegate')
+            }
+
+            await scene.getState(this._key).set(with_, ttl)
+        }
     }
 
     /**

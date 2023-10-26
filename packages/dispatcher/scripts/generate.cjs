@@ -1,5 +1,4 @@
-/* eslint-disable no-restricted-globals */
-const { types, toSentence, replaceSections, formatFile } = require('../../client/scripts/generate-updates')
+const { types, toSentence, replaceSections, formatFile } = require('../../client/scripts/generate-updates.cjs')
 
 function generateHandler() {
     const lines = []
@@ -41,7 +40,7 @@ function generateDispatcher() {
      * @param group  Handler group index
      */
     on${type.handlerTypeName}(handler: ${type.handlerTypeName}Handler${
-    type.state ? `<${type.context}, State extends never ? never : UpdateState<State, SceneName>>` : ''
+    type.state ? `<${type.context}, State extends never ? never : UpdateState<State>>` : ''
 }['callback'], group?: number): void
 
 ${
@@ -58,7 +57,7 @@ ${
         filter: UpdateFilter<${type.context}, Mod, State>,
         handler: ${type.handlerTypeName}Handler<filters.Modify<${
     type.context
-}, Mod>, State extends never ? never : UpdateState<State, SceneName>>['callback'],
+}, Mod>, State extends never ? never : UpdateState<State>>['callback'],
         group?: number
     ): void
     ` :
@@ -75,7 +74,7 @@ ${
     on${type.handlerTypeName}<Mod>(
         filter: UpdateFilter<${type.context}, Mod>,
         handler: ${type.handlerTypeName}Handler<filters.Modify<${type.context}, Mod>${
-    type.state ? ', State extends never ? never : UpdateState<State, SceneName>' : ''
+    type.state ? ', State extends never ? never : UpdateState<State>' : ''
 }>['callback'],
         group?: number
     ): void
