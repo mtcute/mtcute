@@ -12,7 +12,7 @@ describe('Dispatcher', () => {
 
     describe('Raw updates', () => {
         it('registers and unregisters handlers for raw updates', async () => {
-            const dp = new Dispatcher(client)
+            const dp = Dispatcher.for(client)
             const log: string[] = []
 
             dp.onRawUpdate((cl, upd) => {
@@ -34,7 +34,7 @@ describe('Dispatcher', () => {
         })
 
         it('supports filters for raw updates', async () => {
-            const dp = new Dispatcher(client)
+            const dp = Dispatcher.for(client)
 
             const log: string[] = []
 
@@ -72,7 +72,7 @@ describe('Dispatcher', () => {
 
     describe('Filter groups', () => {
         it('does separate propagation for filter groups', async () => {
-            const dp = new Dispatcher(client)
+            const dp = Dispatcher.for(client)
 
             const log: string[] = []
 
@@ -99,7 +99,7 @@ describe('Dispatcher', () => {
         })
 
         it('allows continuing propagation in the same group with ContinuePropagation', async () => {
-            const dp = new Dispatcher(client)
+            const dp = Dispatcher.for(client)
 
             const log: string[] = []
 
@@ -132,7 +132,7 @@ describe('Dispatcher', () => {
         })
 
         it('allows stopping any further propagation with Stop', async () => {
-            const dp = new Dispatcher(client)
+            const dp = Dispatcher.for(client)
 
             const log: string[] = []
 
@@ -168,8 +168,8 @@ describe('Dispatcher', () => {
 
     describe('Children', () => {
         it('should call children handlers after own handlers', async () => {
-            const dp = new Dispatcher(client)
-            const child = new Dispatcher()
+            const dp = Dispatcher.for(client)
+            const child = Dispatcher.child()
             dp.addChild(child)
 
             const log: string[] = []
@@ -188,8 +188,8 @@ describe('Dispatcher', () => {
         })
 
         it('should have separate handler groups for children', async () => {
-            const dp = new Dispatcher(client)
-            const child = new Dispatcher()
+            const dp = Dispatcher.for(client)
+            const child = Dispatcher.child()
             dp.addChild(child)
 
             const log: string[] = []
