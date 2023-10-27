@@ -12,6 +12,7 @@ import { Thumbnail } from './thumbnail.js'
  * This also includes audios, videos, voices etc.
  */
 export abstract class RawDocument extends FileLocation {
+    /** Type of the media (for use in a tagged union) */
     abstract type: string
 
     constructor(readonly raw: tl.RawDocument) {

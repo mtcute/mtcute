@@ -6,24 +6,36 @@ import { Logger } from '../utils/index.js'
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ITelegramStorage {
+    /** Information about a cached peer */
     export interface PeerInfo {
-        // marked id
+        /** Peer marked ID */
         id: number
+        /** Peer access hash */
         accessHash: tl.Long
+        /** Peer type */
         type: BasicPeerType
+        /** Peer username, if any */
         username?: string
+        /** Peer phone number, if available */
         phone?: string
 
+        /** Full TL object with the cached entity */
         full: tl.TypeUser | tl.TypeChat
     }
 
+    /** Information about currently logged in user */
     export interface SelfInfo {
+        /** Whether this is a bot */
         isBot: boolean
+        /** Current user's ID */
         userId: number
     }
 
+    /** Information about preferred DC-s for the user */
     export interface DcOptions {
+        /** Main DC */
         main: tl.RawDcOption
+        /** Media DC. Can be the same as main */
         media: tl.RawDcOption
     }
 }

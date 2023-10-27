@@ -61,6 +61,7 @@ export type ReplyMarkup =
  */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace BotKeyboard {
+    /** Create a keyboard builder */
     export function builder(maxRowWidth?: number | null): BotKeyboardBuilder {
         return new BotKeyboardBuilder(maxRowWidth)
     }

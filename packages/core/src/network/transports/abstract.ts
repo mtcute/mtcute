@@ -5,6 +5,7 @@ import { tl } from '@mtcute/tl'
 import { MaybeAsync } from '../../types/index.js'
 import { ICryptoProvider, Logger } from '../../utils/index.js'
 
+/** Current state of the transport */
 export enum TransportState {
     /**
      * Transport has no active connections nor trying to connect to anything

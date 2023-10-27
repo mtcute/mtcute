@@ -413,7 +413,7 @@ export abstract class BaseSocksTcpTransport extends BaseTcpTransport {
 /**
  * Socks TCP transport using an intermediate packet codec.
  *
- * Should be the one passed as `transport` to {@link TelegramClient} constructor
+ * Should be the one passed as `transport` to `TelegramClient` constructor
  * (unless you want to use a custom codec).
  */
 export class SocksTcpTransport extends BaseSocksTcpTransport {

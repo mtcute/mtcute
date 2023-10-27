@@ -13,19 +13,5 @@
     "references": [
         { "path": "../tl" },
         { "path": "../tl-runtime" },
-    ],
-    "typedocOptions": {
-        "name": "@mtcute/core",
-        "includeVersion": true,
-        "out": "../../docs/packages/core",
-        "validation": {
-            "notExported": true,
-            "invalidLink": true,
-            "notDocumented": false
-        },
-        "excludePrivate": true,
-        "entryPoints": [
-            "./src/index.ts"
-        ]
-    }
+    ]
 }

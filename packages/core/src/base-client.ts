@@ -30,6 +30,7 @@ import {
     writeStringSession,
 } from './utils/index.js'
 
+/** Options for {@link BaseTelegramClient} */
 export interface BaseTelegramClientOptions {
     /**
      * API ID from my.telegram.org
@@ -193,6 +194,10 @@ export interface BaseTelegramClientOptions {
     writerMap?: TlWriterMap
 }
 
+/**
+ * Basic Telegram client that only implements the bare minimum
+ * to make RPC calls and receive low-level updates.
+ */
 export class BaseTelegramClient extends EventEmitter {
     /**
      * Crypto provider taken from {@link BaseTelegramClientOptions.crypto}
@@ -226,13 +231,17 @@ export class BaseTelegramClient extends EventEmitter {
     protected _defaultDcs: ITelegramStorage.DcOptions
 
     private _niceStacks: boolean
+    /** TL layer used by the client */
     readonly _layer: number
+    /** TL readers map used by the client */
     readonly _readerMap: TlReaderMap
+    /** TL writers map used by the client */
     readonly _writerMap: TlWriterMap
 
+    /** Unix timestamp when the last update was received */
     protected _lastUpdateTime = 0
 
-    protected _config = new ConfigManager(() => this.call({ _: 'help.getConfig' }))
+    readonly _config = new ConfigManager(() => this.call({ _: 'help.getConfig' }))
 
     // not really connected, but rather "connect() was called"
     private _connected: ControllablePromise<void> | boolean = false

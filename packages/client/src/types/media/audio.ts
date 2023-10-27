@@ -9,14 +9,17 @@ import { RawDocument } from './document.js'
  * An audio file
  */
 export class Audio extends RawDocument {
+    /** Type of the media (for use in a tagged union) */
     readonly type = 'audio' as const
 
+    /** Type of the file for File ID generation */
     protected _fileIdType(): tdFileId.FileType {
         return tdFileId.FileType.Audio
     }
 
     constructor(
         doc: tl.RawDocument,
+        /** TL object describing the audio */
         readonly attr: tl.RawDocumentAttributeAudio,
     ) {
         super(doc)

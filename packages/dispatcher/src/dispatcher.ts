@@ -72,7 +72,7 @@ export interface DispatcherParams {
     /**
      * If this dispatcher can be used as a scene, its unique name.
      *
-     * Should not be set manually, use {@link Dispatcher#scene} instead
+     * Should not be set manually, use {@link Dispatcher.scene} instead
      */
     sceneName?: string
 

@@ -598,6 +598,7 @@ export type InputMediaLike =
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace InputMedia {
+    /** Omit `type` and `file` from the given type */
     export type OmitTypeAndFile<T extends InputMediaLike, K extends keyof T = never> = Omit<T, 'type' | 'file' | K>
 
     /**

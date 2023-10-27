@@ -7,7 +7,7 @@ import { User } from '../user.js'
 import { _actionFromTl, ChatAction } from './actions.js'
 
 export * from './actions.js'
-export { InputChatEventFilters } from './filters.js'
+export { ChatEventFilters, InputChatEventFilters } from './filters.js'
 
 export class ChatEvent {
     constructor(

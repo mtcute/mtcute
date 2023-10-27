@@ -18,6 +18,10 @@
             ".": {
                 "import": "./esm/index.js",
                 "require": "./cjs/index.js"
+            },
+            "./plurals/*.js": {
+                "import": "./esm/plurals/*.js",
+                "require": "./cjs/plurals/*.js"
             }
         }
     },

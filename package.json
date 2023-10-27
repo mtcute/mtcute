@@ -18,7 +18,7 @@
         "lint:fix": "eslint --fix .",
         "format": "prettier --write \"packages/**/*.ts\"",
         "publish-all": "node scripts/publish.js all",
-        "docs": "pnpm run -r docs",
+        "docs": "typedoc",
         "build-package": "node scripts/build-package.js"
     },
     "dependencies": {

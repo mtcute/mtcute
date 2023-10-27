@@ -1,5 +1,11 @@
 import { tl } from '@mtcute/tl'
 
+/**
+ * Config manager is responsible for keeping
+ * the current server configuration up-to-date
+ * and providing methods to find the best DC
+ * option for the current session.
+ */
 export class ConfigManager {
     constructor(private _update: () => Promise<tl.RawConfig>) {}
 

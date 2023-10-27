@@ -5,6 +5,7 @@ import { StoryInteractiveReaction } from './reaction.js'
 import { StoryInteractiveVenue } from './venue.js'
 
 export * from './input.js'
+export { StoryInteractiveLocation, StoryInteractiveReaction, StoryInteractiveVenue }
 
 export type StoryInteractiveElement = StoryInteractiveReaction | StoryInteractiveLocation | StoryInteractiveVenue
 

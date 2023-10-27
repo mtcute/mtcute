@@ -96,6 +96,7 @@ export interface NetworkManagerExtraParams {
     inactivityTimeout?: number
 }
 
+/** Options that can be customized when making an RPC call */
 export interface RpcCallOptions {
     /**
      * If the call results in a `FLOOD_WAIT_X` error,
@@ -146,6 +147,9 @@ export interface RpcCallOptions {
     abortSignal?: AbortSignal
 }
 
+/**
+ * Wrapper over all connection pools for a single DC.
+ */
 export class DcConnectionManager {
     private __baseConnectionParams = (): SessionConnectionParams => ({
         crypto: this.manager.params.crypto,
@@ -167,8 +171,10 @@ export class DcConnectionManager {
 
     private _log = this.manager._log.create('dc-manager')
 
+    /** Main connection pool */
     main: MultiSessionConnection
 
+    /** Upload connection pool */
     upload = new MultiSessionConnection(
         this.__baseConnectionParams(),
         this.manager._connectionCount('upload', this.dcId, this.manager.params.isPremium),
@@ -176,6 +182,7 @@ export class DcConnectionManager {
         'UPLOAD',
     )
 
+    /** Download connection pool */
     download = new MultiSessionConnection(
         this.__baseConnectionParams(),
         this.manager._connectionCount('download', this.dcId, this.manager.params.isPremium),
@@ -183,6 +190,7 @@ export class DcConnectionManager {
         'DOWNLOAD',
     )
 
+    /** Download connection pool (for small files) */
     downloadSmall = new MultiSessionConnection(
         this.__baseConnectionParams(),
         this.manager._connectionCount('downloadSmall', this.dcId, this.manager.params.isPremium),
@@ -197,9 +205,13 @@ export class DcConnectionManager {
     }
 
     constructor(
+        /** Network manager instance */
         readonly manager: NetworkManager,
+        /** DC ID */
         readonly dcId: number,
+        /** DC options to use */
         readonly _dcs: ITelegramStorage.DcOptions,
+        /** Whether this DC is the primary one */
         public isPrimary = false,
     ) {
         this._log.prefix = `[DC ${dcId}] `
@@ -349,6 +361,9 @@ export class DcConnectionManager {
     }
 }
 
+/**
+ * Class that manages all connections to Telegram servers.
+ */
 export class NetworkManager {
     readonly _log = this.params.log.create('network')
     readonly _storage = this.params.storage

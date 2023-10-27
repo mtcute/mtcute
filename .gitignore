@@ -7,9 +7,7 @@ private/
 .vscode
 *.log
 
-# Docs are generated and deployed in gh-pages branch.
-
-docs/*
-!docs/.nojekyll
+# docs are generated in ci
+docs
 
 *.tsbuildinfo

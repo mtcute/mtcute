@@ -4,12 +4,12 @@ import { MaybeArray, tl } from '@mtcute/core'
 
 import { InputPeerLike } from '../peers/index.js'
 
-interface InputPrivacyRuleUsers {
+export interface InputPrivacyRuleUsers {
     allow: boolean
     users: InputPeerLike[]
 }
 
-interface InputPrivacyRuleChatParticipants {
+export interface InputPrivacyRuleChatParticipants {
     allow: boolean
     chats: InputPeerLike[]
 }

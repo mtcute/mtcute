@@ -12,8 +12,12 @@ import { StoriesStealthMode } from './stealth-mode.js'
  * Returned by {@link TelegramClient.getAllStories}
  */
 export class AllStories {
-    constructor(readonly raw: tl.stories.RawAllStories) {}
+    constructor(
+        /** Raw TL object */
+        readonly raw: tl.stories.RawAllStories,
+    ) {}
 
+    /** Peers index */
     readonly _peers = PeersIndex.from(this.raw)
 
     /** Whether there are more stories to fetch */

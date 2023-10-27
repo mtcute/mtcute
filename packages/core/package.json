@@ -9,8 +9,7 @@
     "type": "module",
     "scripts": {
         "test": "mocha \"tests/**/*.spec.ts\"",
-        "build": "pnpm run -w build-package core",
-        "docs": "typedoc"
+        "build": "pnpm run -w build-package core"
     },
     "browser": {
         "./cjs/utils/platform/crypto.js": "./cjs/utils/platform/crypto.web.js",
