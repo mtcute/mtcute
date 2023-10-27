@@ -2,7 +2,7 @@ import { BaseTelegramClient, ConnectionKind, MtArgumentError, MtUnsupportedError
 import { ConditionVariable } from '@mtcute/core/utils.js'
 import { fileIdToInputFileLocation, fileIdToInputWebFileLocation, parseFileId } from '@mtcute/file-id'
 
-import { FileDownloadParameters, FileLocation } from '../../types/index.js'
+import { FileDownloadLocation, FileDownloadParameters, FileLocation } from '../../types/index.js'
 import { determinePartSize } from '../../utils/file-utils.js'
 
 // small files (less than 128 kb) are downloaded using the "downloadSmall" pool
@@ -20,18 +20,18 @@ const REQUESTS_PER_CONNECTION = 3 // some arbitrary magic value that seems to wo
  */
 export async function* downloadAsIterable(
     client: BaseTelegramClient,
-    params: FileDownloadParameters,
+    input: FileDownloadLocation,
+    params?: FileDownloadParameters,
 ): AsyncIterableIterator<Uint8Array> {
-    const offset = params.offset ?? 0
+    const offset = params?.offset ?? 0
 
     if (offset % 4096 !== 0) {
         throw new MtArgumentError(`Invalid offset: ${offset}. Must be divisible by 4096`)
     }
 
-    let dcId = params.dcId
-    let fileSize = params.fileSize
+    let dcId = params?.dcId
+    let fileSize = params?.fileSize
 
-    const input = params.location
     let location: tl.TypeInputFileLocation | tl.TypeInputWebFileLocation
     if (input instanceof FileLocation) {
         let locationInner = input.location
@@ -63,7 +63,7 @@ export async function* downloadAsIterable(
     // we will receive a FileMigrateError in case this is invalid
     if (!dcId) dcId = client.network.getPrimaryDcId()
 
-    const partSizeKb = params.partSize ?? (fileSize ? determinePartSize(fileSize) : 64)
+    const partSizeKb = params?.partSize ?? (fileSize ? determinePartSize(fileSize) : 64)
 
     if (partSizeKb % 4 !== 0) {
         throw new MtArgumentError(`Invalid part size: ${partSizeKb}. Must be divisible by 4.`)
@@ -71,7 +71,7 @@ export async function* downloadAsIterable(
 
     const chunkSize = partSizeKb * 1024
 
-    let limitBytes = params.limit ?? fileSize ?? Infinity
+    let limitBytes = params?.limit ?? fileSize ?? Infinity
     if (limitBytes === 0) return
 
     let numChunks = limitBytes === Infinity ? Infinity : ~~((limitBytes + chunkSize - offset - 1) / chunkSize)
@@ -111,7 +111,7 @@ export async function* downloadAsIterable(
                     offset: chunkSize * chunk,
                     limit: chunkSize,
                 },
-                { dcId, kind: connectionKind, abortSignal: params.abortSignal },
+                { dcId, kind: connectionKind, abortSignal: params?.abortSignal },
             )
         } catch (e: unknown) {
             if (!tl.RpcError.is(e)) throw e
@@ -175,7 +175,7 @@ export async function* downloadAsIterable(
 
             position += buf.length
 
-            params.progressCallback?.(position, limitBytes)
+            params?.progressCallback?.(position, limitBytes)
 
             yield buf
 

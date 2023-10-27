@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { FileDownloadParameters, FileLocation } from '../../types/index.js'
+import { FileDownloadLocation, FileDownloadParameters, FileLocation } from '../../types/index.js'
 import { bufferToStream } from '../../utils/stream-utils.js'
 import { downloadAsIterable } from './download-iterable.js'
 
@@ -12,16 +12,17 @@ import { downloadAsIterable } from './download-iterable.js'
  */
 export function downloadAsStream(
     client: BaseTelegramClient,
-    params: FileDownloadParameters,
+    location: FileDownloadLocation,
+    params?: FileDownloadParameters,
 ): ReadableStream<Uint8Array> {
-    if (params.location instanceof FileLocation && ArrayBuffer.isView(params.location.location)) {
-        return bufferToStream(params.location.location)
+    if (location instanceof FileLocation && ArrayBuffer.isView(location.location)) {
+        return bufferToStream(location.location)
     }
 
     const cancel = new AbortController()
 
-    if (params.abortSignal) {
-        params.abortSignal.addEventListener('abort', () => {
+    if (params?.abortSignal) {
+        params?.abortSignal.addEventListener('abort', () => {
             cancel.abort()
         })
     }
@@ -29,7 +30,7 @@ export function downloadAsStream(
     return new ReadableStream<Uint8Array>({
         start(controller) {
             (async () => {
-                for await (const chunk of downloadAsIterable(client, params)) {
+                for await (const chunk of downloadAsIterable(client, location, params)) {
                     controller.enqueue(chunk)
                 }
 

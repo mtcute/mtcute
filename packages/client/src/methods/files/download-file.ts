@@ -2,7 +2,7 @@ import { createRequire } from 'module'
 
 import { BaseTelegramClient, MtUnsupportedError } from '@mtcute/core'
 
-import { FileDownloadParameters, FileLocation } from '../../types/index.js'
+import { FileDownloadLocation, FileDownloadParameters, FileLocation } from '../../types/index.js'
 import { downloadAsIterable } from './download-iterable.js'
 
 let fs: typeof import('fs') | null = null
@@ -24,15 +24,16 @@ try {
 export async function downloadToFile(
     client: BaseTelegramClient,
     filename: string,
-    params: FileDownloadParameters,
+    location: FileDownloadLocation,
+    params?: FileDownloadParameters,
 ): Promise<void> {
     if (!fs) {
         throw new MtUnsupportedError('Downloading to file is only supported in NodeJS')
     }
 
-    if (params.location instanceof FileLocation && ArrayBuffer.isView(params.location.location)) {
+    if (location instanceof FileLocation && ArrayBuffer.isView(location.location)) {
         // early return for inline files
-        const buf = params.location.location
+        const buf = location.location
 
         return new Promise((resolve, reject) => {
             fs!.writeFile(filename, buf, (err) => {
@@ -44,7 +45,7 @@ export async function downloadToFile(
 
     const output = fs.createWriteStream(filename)
 
-    if (params.abortSignal) {
+    if (params?.abortSignal) {
         params.abortSignal.addEventListener('abort', () => {
             client.log.debug('aborting file download %s - cleaning up', filename)
             output.destroy()
@@ -52,7 +53,7 @@ export async function downloadToFile(
         })
     }
 
-    for await (const chunk of downloadAsIterable(client, params)) {
+    for await (const chunk of downloadAsIterable(client, location, params)) {
         output.write(chunk)
     }
 

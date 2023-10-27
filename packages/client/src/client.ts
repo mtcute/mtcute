@@ -267,6 +267,7 @@ import {
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     Dialog,
+    FileDownloadLocation,
     FileDownloadParameters,
     FormattedString,
     ForumTopic,
@@ -2125,7 +2126,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param params  File download parameters
      */
-    downloadAsBuffer(params: FileDownloadParameters): Promise<Uint8Array>
+    downloadAsBuffer(location: FileDownloadLocation, params?: FileDownloadParameters): Promise<Uint8Array>
     /**
      * Download a remote file to a local file (only for NodeJS).
      * Promise will resolve once the download is complete.
@@ -2135,7 +2136,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param filename  Local file name to which the remote file will be downloaded
      * @param params  File download parameters
      */
-    downloadToFile(filename: string, params: FileDownloadParameters): Promise<void>
+    downloadToFile(filename: string, location: FileDownloadLocation, params?: FileDownloadParameters): Promise<void>
     /**
      * Download a file and return it as an iterable, which yields file contents
      * in chunks of a given size. Order of the chunks is guaranteed to be
@@ -2145,7 +2146,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param params  Download parameters
      */
-    downloadAsIterable(params: FileDownloadParameters): AsyncIterableIterator<Uint8Array>
+    downloadAsIterable(input: FileDownloadLocation, params?: FileDownloadParameters): AsyncIterableIterator<Uint8Array>
     /**
      * Download a file and return it as a readable stream,
      * streaming file contents.
@@ -2154,7 +2155,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param params  File download parameters
      */
-    downloadAsStream(params: FileDownloadParameters): ReadableStream<Uint8Array>
+    downloadAsStream(location: FileDownloadLocation, params?: FileDownloadParameters): ReadableStream<Uint8Array>
     /**
      * Normalize a {@link InputFileLike} to `InputFile`,
      * uploading it if needed.
