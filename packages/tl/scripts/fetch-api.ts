@@ -21,6 +21,8 @@ import {
     writeTlEntryToString,
 } from '@mtcute/tl-utils'
 
+// eslint-disable-next-line import/no-relative-packages
+import { bumpVersion } from '../../../scripts/version.js'
 import {
     __dirname,
     API_SCHEMA_DIFF_JSON_FILE,
@@ -35,8 +37,6 @@ import {
 import { applyDocumentation, fetchDocumentation, getCachedDocumentation } from './documentation.js'
 import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema.js'
 import { fetchRetry } from './utils.js'
-
-import { bumpVersion } from '~scripts/version.js'
 
 const README_MD_FILE = join(__dirname, '../README.md')
 const PACKAGE_JSON_FILE = join(__dirname, '../package.json')

@@ -16,15 +16,9 @@
         "incremental": true,
         "stripInternal": true,
         "skipLibCheck": true,
-        "paths": {
-            "~scripts/*": ["./scripts/*"],
-        },
         "composite": true
     },
     "ts-node": {
-        "require": [
-            "tsconfig-paths/register"
-        ],
         "esm": true,
         "experimentalSpecifierResolution": "node"
     },
