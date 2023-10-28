@@ -98,49 +98,61 @@ export const start = and(chat('private'), command('start'))
  */
 export const startGroup = and(or(chat('supergroup'), chat('group')), command('start'))
 
+const deeplinkBase =
+    (base: UpdateFilter<MessageContext, { command: string[] }>) =>
+        (params: MaybeArray<string | RegExp>): UpdateFilter<MessageContext, { command: string[] }> => {
+            if (!Array.isArray(params)) {
+                return and(start, (_msg: Message) => {
+                    const msg = _msg as Message & { command: string[] }
+
+                    if (msg.command.length !== 2) return false
+
+                    const p = msg.command[1]
+                    if (typeof params === 'string' && p === params) return true
+
+                    const m = p.match(params)
+                    if (!m) return false
+
+                    msg.command.push(...m.slice(1))
+
+                    return true
+                })
+            }
+
+            return and(base, (_msg: Message) => {
+                const msg = _msg as Message & { command: string[] }
+
+                if (msg.command.length !== 2) return false
+
+                const p = msg.command[1]
+
+                for (const param of params) {
+                    if (typeof param === 'string' && p === param) return true
+
+                    const m = p.match(param)
+                    if (!m) continue
+
+                    msg.command.push(...m.slice(1))
+
+                    return true
+                }
+
+                return false
+            })
+        }
+
 /**
  * Filter for deep links (i.e. `/start <deeplink_parameter>`).
  *
  * If the parameter is a regex, groups are added to `msg.command`,
  * meaning that the first group is available in `msg.command[2]`.
  */
-export const deeplink = (params: MaybeArray<string | RegExp>): UpdateFilter<MessageContext, { command: string[] }> => {
-    if (!Array.isArray(params)) {
-        return and(start, (_msg: Message) => {
-            const msg = _msg as Message & { command: string[] }
+export const deeplink = deeplinkBase(start)
 
-            if (msg.command.length !== 2) return false
-
-            const p = msg.command[1]
-            if (typeof params === 'string' && p === params) return true
-
-            const m = p.match(params)
-            if (!m) return false
-
-            msg.command.push(...m.slice(1))
-
-            return true
-        })
-    }
-
-    return and(start, (_msg: Message) => {
-        const msg = _msg as Message & { command: string[] }
-
-        if (msg.command.length !== 2) return false
-
-        const p = msg.command[1]
-
-        for (const param of params) {
-            if (typeof param === 'string' && p === param) return true
-
-            const m = p.match(param)
-            if (!m) continue
-
-            msg.command.push(...m.slice(1))
-
-            return true
-        }
-
-        return false
-    })
-}
+/**
+ * Filter for group deep links (i.e. `/start <deeplink_parameter>`).
+ *
+ * If the parameter is a regex, groups are added to `msg.command`,
+ * meaning that the first group is available in `msg.command[2]`.
+ */
+export const deeplinkGroup = deeplinkBase(startGroup)

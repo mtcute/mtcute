@@ -82,6 +82,22 @@ export async function answerInlineQuery(
         }
 
         /**
+         * If passed, clients will display a button on top of the remaining inline result
+         * list with the specified text, that switches the user to the specified bot web app.
+         */
+        switchWebview?: {
+            /**
+             * Text of the button
+             */
+            text: string
+
+            /**
+             * URL to open
+             */
+            url: string
+        }
+
+        /**
          * Parse mode to use when parsing inline message text.
          * Defaults to current default parse mode (if any).
          *
@@ -93,7 +109,7 @@ export async function answerInlineQuery(
         parseMode?: string | null
     },
 ): Promise<void> {
-    const { cacheTime = 300, gallery, private: priv, nextOffset, switchPm, parseMode } = params ?? {}
+    const { cacheTime = 300, gallery, private: priv, nextOffset, switchPm, switchWebview, parseMode } = params ?? {}
 
     const [defaultGallery, tlResults] = await BotInline._convertToTl(client, results, parseMode)
 
@@ -110,6 +126,13 @@ export async function answerInlineQuery(
                 _: 'inlineBotSwitchPM',
                 text: switchPm.text,
                 startParam: switchPm.parameter,
+            } :
+            undefined,
+        switchWebview: switchWebview ?
+            {
+                _: 'inlineBotWebView',
+                text: switchWebview.text,
+                url: switchWebview.url,
             } :
             undefined,
     })

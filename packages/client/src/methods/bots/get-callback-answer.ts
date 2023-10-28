@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 import { computeSrpParams, utf8EncodeToBuffer } from '@mtcute/core/utils.js'
 
-import { InputPeerLike } from '../../types/index.js'
+import { InputMessageId, normalizeInputMessageId } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -12,13 +12,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
  */
 export async function getCallbackAnswer(
     client: BaseTelegramClient,
-    params: {
-        /** Chat ID where the message was found */
-        chatId: InputPeerLike
-
-        /** ID of the message containing the button */
-        message: number
-
+    params: InputMessageId & {
         /** Data contained in the button */
         data: string | Uint8Array
 
@@ -43,7 +37,8 @@ export async function getCallbackAnswer(
         password?: string
     },
 ): Promise<tl.messages.TypeBotCallbackAnswer> {
-    const { chatId, message, data, game, timeout = 10000 } = params
+    const { chatId, message } = normalizeInputMessageId(params)
+    const { data, game, timeout = 10000 } = params
 
     let password: tl.TypeInputCheckPasswordSRP | undefined = undefined
 
