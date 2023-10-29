@@ -189,9 +189,18 @@ export class UpdateState<State extends object> {
 
             /** TTL for the scene (in seconds) */
             ttl?: number
+
+            /**
+             * If currently in a scoped scene, whether to reset the state
+             *
+             * @default  true
+             */
+            reset?: boolean
         },
     ): Promise<void> {
-        const { with: with_, ttl } = params ?? {}
+        const { with: with_, ttl, reset = true } = params ?? {}
+
+        if (reset && this._scoped) await this.delete()
 
         if (!scene['_scene']) {
             throw new MtArgumentError('Cannot enter a non-scene Dispatcher')
@@ -202,6 +211,7 @@ export class UpdateState<State extends object> {
         }
 
         this._scene = scene['_scene']
+        this._scoped = scene['_sceneScoped']
         this._updateLocalKey()
 
         await this._storage.setCurrentScene(this._key, this._scene, ttl)
