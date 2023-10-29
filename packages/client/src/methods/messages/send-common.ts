@@ -1,9 +1,9 @@
-import { BaseTelegramClient, getMarkedPeerId, MtArgumentError } from '@mtcute/core'
+import { BaseTelegramClient, getMarkedPeerId, MtArgumentError, tl } from '@mtcute/core'
 
 import { MtMessageNotFoundError } from '../../types/errors.js'
 import { Message } from '../../types/messages/message.js'
 import { InputPeerLike } from '../../types/peers/index.js'
-import { normalizeMessageId } from '../../utils/index.js'
+import { normalizeMessageId, normalizeToInputUser } from '../../utils/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _getDiscussionMessage } from './get-discussion-message.js'
 import { getMessages } from './get-messages.js'
@@ -14,6 +14,8 @@ export interface CommonSendParams {
      * Message to reply to. Either a message object or message ID.
      *
      * For forums - can also be an ID of the topic (i.e. its top message ID)
+     *
+     * Can also be a message from another chat, in which case a quote will be sent.
      */
     replyTo?: number | Message
 
@@ -36,6 +38,28 @@ export interface CommonSendParams {
      * This overwrites `replyTo` if it was passed
      */
     commentTo?: number | Message
+
+    /**
+     * Story to reply to.
+     *
+     * Must be the story sent by the peer you are sending the message to.
+     *
+     * Can't be used together with {@link replyTo} or {@link commentTo}.
+     */
+    replyToStory?: number
+
+    /**
+     * Quoted text. Must be exactly contained in the message
+     * being quoted to be accepted by the server
+     */
+    quoteText?: string
+
+    /**
+     * Entities contained in the quoted text.
+     * Must be exactly contained in the message
+     * being quoted to be accepted by the server
+     */
+    quoteEntities?: tl.TypeMessageEntity[]
 
     /**
      * Parse mode to use to parse entities before sending
@@ -98,6 +122,7 @@ export async function _processCommonSendParameters(
     let peer = await resolvePeer(client, chatId)
 
     let replyTo = normalizeMessageId(params.replyTo)
+    const replyToPeer = typeof params.replyTo === 'number' ? peer : params.replyTo?.chat.inputPeer
 
     if (params.commentTo) {
         [peer, replyTo] = await _getDiscussionMessage(client, peer, normalizeMessageId(params.commentTo)!)
@@ -115,5 +140,30 @@ export async function _processCommonSendParameters(
         }
     }
 
-    return { peer, replyTo }
+    if (params.replyToStory && replyTo) {
+        throw new MtArgumentError('replyTo/commentTo and replyToStory cannot be used together')
+    }
+
+    let tlReplyTo: tl.TypeInputReplyTo | undefined = undefined
+
+    if (replyTo) {
+        tlReplyTo = {
+            _: 'inputReplyToMessage',
+            replyToMsgId: replyTo,
+            replyToPeerId: replyToPeer,
+            quoteText: params.quoteText,
+            quoteEntities: params.quoteEntities,
+        }
+    } else if (params.replyToStory) {
+        tlReplyTo = {
+            _: 'inputReplyToStory',
+            storyId: params.replyToStory,
+            userId: normalizeToInputUser(peer),
+        }
+    }
+
+    return {
+        peer,
+        replyTo: tlReplyTo,
+    }
 }

@@ -29,6 +29,14 @@ export async function sendMediaGroup(
     medias: (InputMediaLike | string)[],
     params?: CommonSendParams & {
         /**
+         * Whether to invert media position.
+         *
+         * Currently only supported for web previews and makes the
+         * client render the preview above the caption and not below.
+         */
+        invertMedia?: boolean
+
+        /**
          * Function that will be called after some part has been uploaded.
          * Only used when a file that requires uploading is passed,
          * and not used when uploading a thumbnail.
@@ -93,16 +101,12 @@ export async function sendMediaGroup(
         peer,
         multiMedia,
         silent: params.silent,
-        replyTo: replyTo ?
-            {
-                _: 'inputReplyToMessage',
-                replyToMsgId: replyTo,
-            } :
-            undefined,
+        replyTo,
         scheduleDate: normalizeDate(params.schedule),
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
         sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
+        invertMedia: params.invertMedia,
     })
 
     assertIsUpdatesGroup('sendMediaGroup', res)

@@ -321,6 +321,29 @@ export class User {
     }
 
     /**
+     * Name color of this user, which should also be used when
+     * rendering replies to their messages and web previews sent by them.
+     *
+     * Note that this value is **not** an RGB color representation. Instead, it is
+     * a number which should be used to pick a color from a predefined
+     * list of colors:
+     *  - `0-6` are the default colors used by Telegram clients:
+     *    `red, orange, purple, green, sea, blue, pink`
+     *  - `>= 7` are returned by `help.getAppConfig`.
+     */
+    get color(): number {
+        return this.raw.color ?? this.raw.id % 7
+    }
+
+    /**
+     * ID of the emoji that should be used as a background pattern
+     * when rendering replies to this user's messages.
+     */
+    get replyBackgroundEmojiId(): tl.Long | null {
+        return this.raw.backgroundEmojiId ?? null
+    }
+
+    /**
      * Create a mention for the user.
      *
      * When available and `text` is omitted, this method will return `@username`.

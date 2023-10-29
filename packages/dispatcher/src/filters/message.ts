@@ -6,6 +6,7 @@ import {
     Message,
     MessageAction,
     MessageMediaType,
+    MessageReplyInfo,
     RawDocument,
     RawLocation,
     Sticker,
@@ -35,7 +36,7 @@ export const outgoing: UpdateFilter<Message, { isOutgoing: true }> = (msg) => ms
 /**
  * Filter messages that are replies to some other message
  */
-export const reply: UpdateFilter<Message, { replyToMessageId: number }> = (msg) => msg.replyToMessageId !== null
+export const reply: UpdateFilter<Message, { replyToMessage: MessageReplyInfo }> = (msg) => msg.replyToMessage !== null
 
 /**
  * Filter messages containing some media
@@ -220,7 +221,7 @@ export const replyTo =
         filter?: UpdateFilter<Message, Mod, State>,
     ): UpdateFilter<MessageContext, { getReplyTo: () => Promise<Message & Mod> }, State> =>
         async (msg, state) => {
-            if (!msg.replyToMessageId) return false
+            if (!msg.replyToMessage?.id) return false
 
             const reply = await msg.getReplyTo()
             if (!reply) return false

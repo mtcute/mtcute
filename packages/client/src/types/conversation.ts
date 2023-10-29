@@ -424,8 +424,8 @@ export class Conversation {
         }
 
         const pred = filter ?
-            (msg: Message) => (msg.replyToMessageId === msgId ? filter(msg) : false) :
-            (msg: Message) => msg.replyToMessageId === msgId
+            (msg: Message) => (msg.replyToMessage?.id === msgId ? filter(msg) : false) :
+            (msg: Message) => msg.replyToMessage?.id === msgId
 
         return this.waitForNewMessage(pred, params?.timeout)
     }

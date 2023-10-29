@@ -66,6 +66,7 @@ import { markChatUnread } from './methods/chats/mark-chat-unread.js'
 import { reorderUsernames } from './methods/chats/reorder-usernames.js'
 import { restrictChatMember } from './methods/chats/restrict-chat-member.js'
 import { saveDraft } from './methods/chats/save-draft.js'
+import { setChatColor } from './methods/chats/set-chat-color.js'
 import { setChatDefaultPermissions } from './methods/chats/set-chat-default-permissions.js'
 import { setChatDescription } from './methods/chats/set-chat-description.js'
 import { setChatPhoto } from './methods/chats/set-chat-photo.js'
@@ -153,6 +154,7 @@ import { sendCopy, SendCopyParams } from './methods/messages/send-copy.js'
 import { sendCopyGroup, SendCopyGroupParams } from './methods/messages/send-copy-group.js'
 import { sendMedia } from './methods/messages/send-media.js'
 import { sendMediaGroup } from './methods/messages/send-media-group.js'
+import { QuoteParamsFrom, quoteWithMedia, quoteWithMediaGroup, quoteWithText } from './methods/messages/send-quote.js'
 import { sendReaction } from './methods/messages/send-reaction.js'
 import { replyMedia, replyMediaGroup, replyText } from './methods/messages/send-reply.js'
 import { sendScheduled } from './methods/messages/send-scheduled.js'
@@ -1687,6 +1689,39 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param draft  Draft message, or `null` to delete.
      */
     saveDraft(chatId: InputPeerLike, draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>): Promise<void>
+
+    /**
+     * Set chat name/replies color and optionally background pattern
+     * **Available**: 👤 users only
+     *
+     */
+    setChatColor(params: {
+        /**
+         * Peer where to update the color.
+         *
+         * By default will change the color for the current user
+         */
+        peer?: InputPeerLike
+
+        /**
+         * Color identificator
+         *
+         * Note that this value is **not** an RGB color representation. Instead, it is
+         * a number which should be used to pick a color from a predefined
+         * list of colors:
+         *  - `0-6` are the default colors used by Telegram clients:
+         *    `red, orange, purple, green, sea, blue, pink`
+         *  - `>= 7` are returned by `help.getAppConfig`.
+         */
+        color: number
+
+        /**
+         * Background pattern emoji ID.
+         *
+         * Must be an adaptive emoji, otherwise the request will fail.
+         */
+        backgroundEmojiId?: tl.Long
+    }): Promise<void>
     /**
      * Change default chat permissions for all members.
      *
@@ -2917,6 +2952,14 @@ export interface TelegramClient extends BaseTelegramClient {
         disableWebPreview?: boolean
 
         /**
+         * Whether to invert media position.
+         *
+         * Currently only supported for web previews and makes the
+         * client render the preview above the caption and not below.
+         */
+        invertMedia?: boolean
+
+        /**
          * For bots: new reply markup.
          * If omitted, existing markup will be removed.
          */
@@ -3001,6 +3044,14 @@ export interface TelegramClient extends BaseTelegramClient {
              * to the client's update handler.
              */
             shouldDispatch?: true
+
+            /**
+             * Whether to invert media position.
+             *
+             * Currently only supported for web previews and makes the
+             * client render the preview above the caption and not below.
+             */
+            invertMedia?: boolean
         },
     ): Promise<Message>
     /**
@@ -3224,7 +3275,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * For messages containing a reply, fetch the message that is being replied.
      *
-     * Note that even if a message has {@link replyToMessageId},
+     * Note that even if a message has {@link replyToMessage},
      * the message itself may have been deleted, in which case
      * this method will also return `null`.
      * **Available**: ✅ both users and bots
@@ -3669,6 +3720,14 @@ export interface TelegramClient extends BaseTelegramClient {
         medias: (InputMediaLike | string)[],
         params?: CommonSendParams & {
             /**
+             * Whether to invert media position.
+             *
+             * Currently only supported for web previews and makes the
+             * client render the preview above the caption and not below.
+             */
+            invertMedia?: boolean
+
+            /**
              * Function that will be called after some part has been uploaded.
              * Only used when a file that requires uploading is passed,
              * and not used when uploading a thumbnail.
@@ -3704,6 +3763,14 @@ export interface TelegramClient extends BaseTelegramClient {
             replyMarkup?: ReplyMarkup
 
             /**
+             * Whether to invert media position.
+             *
+             * Currently only supported for web previews and makes the
+             * client render the preview above the caption and not below.
+             */
+            invert?: boolean
+
+            /**
              * Override caption for `media`.
              *
              * Can be used, for example. when using File IDs
@@ -3730,6 +3797,30 @@ export interface TelegramClient extends BaseTelegramClient {
             progressCallback?: (uploaded: number, total: number) => void
         },
     ): Promise<Message>
+    /** Send a text in reply to a given quote */
+    quoteWithText(
+        message: Message,
+        params: QuoteParamsFrom<Parameters<typeof sendText>[3]> & {
+            /** Text to send */
+            text: Parameters<typeof sendText>[2]
+        },
+    ): ReturnType<typeof sendText>
+    /** Send a media in reply to a given quote */
+    quoteWithMedia(
+        message: Message,
+        params: QuoteParamsFrom<Parameters<typeof sendMedia>[3]> & {
+            /** Media to send */
+            media: Parameters<typeof sendMedia>[2]
+        },
+    ): ReturnType<typeof sendMedia>
+    /** Send a media group in reply to a given quote */
+    quoteWithMediaGroup(
+        message: Message,
+        params: QuoteParamsFrom<Parameters<typeof sendMediaGroup>[3]> & {
+            /** Media group to send */
+            medias: Parameters<typeof sendMediaGroup>[2]
+        },
+    ): ReturnType<typeof sendMediaGroup>
     /**
      * Send or remove a reaction.
      *
@@ -3804,6 +3895,14 @@ export interface TelegramClient extends BaseTelegramClient {
              * Whether to disable links preview in this message
              */
             disableWebPreview?: boolean
+
+            /**
+             * Whether to invert media position.
+             *
+             * Currently only supported for web previews and makes the
+             * client render the preview above the caption and not below.
+             */
+            invertMedia?: boolean
         },
     ): Promise<Message>
     /**
@@ -5194,6 +5293,7 @@ export class TelegramClient extends BaseTelegramClient {
     reorderUsernames = reorderUsernames.bind(null, this)
     restrictChatMember = restrictChatMember.bind(null, this)
     saveDraft = saveDraft.bind(null, this)
+    setChatColor = setChatColor.bind(null, this)
     setChatDefaultPermissions = setChatDefaultPermissions.bind(null, this)
     setChatDescription = setChatDescription.bind(null, this)
     setChatPhoto = setChatPhoto.bind(null, this)
@@ -5288,6 +5388,9 @@ export class TelegramClient extends BaseTelegramClient {
     sendCopy = sendCopy.bind(null, this)
     sendMediaGroup = sendMediaGroup.bind(null, this)
     sendMedia = sendMedia.bind(null, this)
+    quoteWithText = quoteWithText.bind(null, this)
+    quoteWithMedia = quoteWithMedia.bind(null, this)
+    quoteWithMediaGroup = quoteWithMediaGroup.bind(null, this)
     sendReaction = sendReaction.bind(null, this)
     replyText = replyText.bind(null, this)
     replyMedia = replyMedia.bind(null, this)

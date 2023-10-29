@@ -58,6 +58,14 @@ export async function editInlineMessage(
         disableWebPreview?: boolean
 
         /**
+         * Whether to invert media position.
+         *
+         * Currently only supported for web previews and makes the
+         * client render the preview above the caption and not below.
+         */
+        invertMedia?: boolean
+
+        /**
          * For bots: new reply markup.
          * If omitted, existing markup will be removed.
          */
@@ -108,6 +116,7 @@ export async function editInlineMessage(
                     message: content,
                     entities,
                     media,
+                    invertMedia: params.invertMedia,
                 },
                 { dcId: id.dcId },
             )

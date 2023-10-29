@@ -45,6 +45,14 @@ export async function sendText(
          * Whether to disable links preview in this message
          */
         disableWebPreview?: boolean
+
+        /**
+         * Whether to invert media position.
+         *
+         * Currently only supported for web previews and makes the
+         * client render the preview above the caption and not below.
+         */
+        invertMedia?: boolean
     },
 ): Promise<Message> {
     if (!params) params = {}
@@ -59,12 +67,7 @@ export async function sendText(
         peer,
         noWebpage: params.disableWebPreview,
         silent: params.silent,
-        replyTo: replyTo ?
-            {
-                _: 'inputReplyToMessage',
-                replyToMsgId: replyTo,
-            } :
-            undefined,
+        replyTo,
         randomId: randomLong(),
         scheduleDate: normalizeDate(params.schedule),
         replyMarkup,
@@ -73,6 +76,7 @@ export async function sendText(
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
         sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
+        invertMedia: params.invertMedia,
     })
 
     if (res._ === 'updateShortSentMessage') {

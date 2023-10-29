@@ -567,6 +567,28 @@ export interface InputMediaStory extends CaptionMixin {
     id: number
 }
 
+/** A webpage to be sent */
+export interface InputMediaWebpage extends CaptionMixin {
+    type: 'webpage'
+
+    /**
+     * Whether the link must be present in the message
+     * for the preview to appear
+     */
+    required?: boolean
+
+    /**
+     * By default, size of the media in the preview
+     * is determined based on content type.
+     *
+     * You can override this behaviour by passing the wanted size here
+     */
+    size?: 'large' | 'small'
+
+    /** Webpage URL */
+    url: string
+}
+
 /**
  * Input media that can be sent somewhere.
  *
@@ -594,6 +616,7 @@ export type InputMediaLike =
     | InputMediaPoll
     | InputMediaQuiz
     | InputMediaStory
+    | InputMediaWebpage
     | tl.TypeInputMedia
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -839,6 +862,20 @@ export namespace InputMedia {
     export function story(params: OmitTypeAndFile<InputMediaStory>): InputMediaStory {
         const ret = params as tl.Mutable<InputMediaStory>
         ret.type = 'story'
+
+        return ret
+    }
+
+    /**
+     * Create a webpage to be sent
+     *
+     * @param url  Webpage URL
+     * @param params  Additional parameters
+     */
+    export function webpage(url: string, params: OmitTypeAndFile<InputMediaWebpage, 'url'> = {}): InputMediaWebpage {
+        const ret = params as tl.Mutable<InputMediaWebpage>
+        ret.type = 'webpage'
+        ret.url = url
 
         return ret
     }

@@ -85,6 +85,21 @@ export class MessageContext extends Message implements UpdateContext<Message> {
         return this.client.replyMediaGroup(this, ...params)
     }
 
+    /** Send a text message in reply to this message */
+    quoteWithText(params: Parameters<TelegramClient['quoteWithText']>[1]) {
+        return this.client.quoteWithText(this, params)
+    }
+
+    /** Send a media in reply to this message */
+    quoteWithMedia(params: Parameters<TelegramClient['quoteWithMedia']>[1]) {
+        return this.client.quoteWithMedia(this, params)
+    }
+
+    /** Send a media group in reply to this message */
+    quoteWithMediaGroup(params: Parameters<TelegramClient['quoteWithMediaGroup']>[1]) {
+        return this.client.quoteWithMediaGroup(this, params)
+    }
+
     /** Send a text as a comment to this message */
     commentText(...params: ParametersSkip1<TelegramClient['commentText']>) {
         return this.client.commentText(this, ...params)

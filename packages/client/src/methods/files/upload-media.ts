@@ -80,7 +80,8 @@ export async function uploadMedia(
             // eslint-disable-next-line
             return parseDocument(res.document, res) as any
         case 'inputMediaStory':
-            throw new MtArgumentError("This media (story) can't be uploaded")
+        case 'inputMediaWebPage':
+            throw new MtArgumentError(`This media (${normMedia._}) can't be uploaded`)
         default:
             assertNever(normMedia)
     }

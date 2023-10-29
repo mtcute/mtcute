@@ -6,7 +6,7 @@ import { makeInspectable } from '../../utils/index.js'
  * Information about boosts in a channel
  */
 export class BoostStats {
-    constructor(readonly raw: tl.stories.RawBoostsStatus) {}
+    constructor(readonly raw: tl.premium.RawBoostsStatus) {}
 
     /** Whether this channel is being boosted by the current user */
     get isBoosting(): boolean {

@@ -1,7 +1,13 @@
 import { assertNever, BaseTelegramClient, tl } from '@mtcute/core'
 
 import { _parseEntities } from '../../../methods/messages/parse-entities.js'
-import { InputMediaContact, InputMediaGeo, InputMediaGeoLive, InputMediaVenue } from '../../media/index.js'
+import {
+    InputMediaContact,
+    InputMediaGeo,
+    InputMediaGeoLive,
+    InputMediaVenue,
+    InputMediaWebpage,
+} from '../../media/index.js'
 import { FormattedString } from '../../parser.js'
 import { BotKeyboard, ReplyMarkup } from '../keyboards.js'
 
@@ -31,6 +37,14 @@ export interface InputInlineMessageText {
      * Whether to disable links preview in this message
      */
     disableWebPreview?: boolean
+
+    /**
+     * Whether to invert media position.
+     *
+     * Currently only supported for web previews and makes the
+     * client render the preview above the caption and not below.
+     */
+    invertMedia?: boolean
 }
 
 /**
@@ -55,6 +69,14 @@ export interface InputInlineMessageMedia {
      * Message reply markup
      */
     replyMarkup?: ReplyMarkup
+
+    /**
+     * Whether to invert media position.
+     *
+     * Currently only supported for web previews and makes the
+     * client render the preview above the caption and not below.
+     */
+    invertMedia?: boolean
 }
 
 /**
@@ -109,6 +131,32 @@ export interface InputInlineMessageContact extends InputMediaContact {
     replyMarkup?: ReplyMarkup
 }
 
+export interface InputInlineMessageWebpage extends InputMediaWebpage {
+    /**
+     * Text of the message
+     */
+    text: string | FormattedString<string>
+
+    /**
+     * Text markup entities.
+     * If passed, parse mode is ignored
+     */
+    entities?: tl.TypeMessageEntity[]
+
+    /**
+     * Message reply markup
+     */
+    replyMarkup?: ReplyMarkup
+
+    /**
+     * Whether to invert media position.
+     *
+     * Currently only supported for web previews and makes the
+     * client render the preview above the caption and not below.
+     */
+    invertMedia?: boolean
+}
+
 export type InputInlineMessage =
     | InputInlineMessageText
     | InputInlineMessageMedia
@@ -117,6 +165,7 @@ export type InputInlineMessage =
     | InputInlineMessageVenue
     | InputInlineMessageGame
     | InputInlineMessageContact
+    | InputInlineMessageWebpage
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace BotInlineMessage {
@@ -203,6 +252,16 @@ export namespace BotInlineMessage {
         return ret
     }
 
+    /**
+     * Create an inline message containing a webpage
+     */
+    export function webpage(params: Omit<InputInlineMessageWebpage, 'type'>): InputInlineMessageWebpage {
+        const ret = params as tl.Mutable<InputInlineMessageWebpage>
+        ret.type = 'webpage'
+
+        return ret
+    }
+
     /** @internal */
     export async function _convertToTl(
         client: BaseTelegramClient,
@@ -218,6 +277,7 @@ export namespace BotInlineMessage {
                     message,
                     entities,
                     replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+                    invertMedia: obj.invertMedia,
                 }
             }
             case 'media': {
@@ -228,6 +288,7 @@ export namespace BotInlineMessage {
                     message,
                     entities,
                     replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+                    invertMedia: obj.invertMedia,
                 }
             }
             case 'geo':
@@ -274,6 +335,21 @@ export namespace BotInlineMessage {
                     vcard: obj.vcard ?? '',
                     replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
                 }
+            case 'webpage': {
+                const [message, entities] = await _parseEntities(client, obj.text, parseMode, obj.entities)
+
+                return {
+                    _: 'inputBotInlineMessageMediaWebPage',
+                    message,
+                    entities,
+                    replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+                    invertMedia: obj.invertMedia,
+                    forceLargeMedia: obj.size === 'large',
+                    forceSmallMedia: obj.size === 'small',
+                    optional: !obj.required,
+                    url: obj.url,
+                }
+            }
             default:
                 assertNever(obj)
         }

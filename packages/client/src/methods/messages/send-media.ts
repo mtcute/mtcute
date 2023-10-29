@@ -37,6 +37,14 @@ export async function sendMedia(
         replyMarkup?: ReplyMarkup
 
         /**
+         * Whether to invert media position.
+         *
+         * Currently only supported for web previews and makes the
+         * client render the preview above the caption and not below.
+         */
+        invert?: boolean
+
+        /**
          * Override caption for `media`.
          *
          * Can be used, for example. when using File IDs
@@ -92,12 +100,7 @@ export async function sendMedia(
         peer,
         media: inputMedia,
         silent: params.silent,
-        replyTo: replyTo ?
-            {
-                _: 'inputReplyToMessage',
-                replyToMsgId: replyTo,
-            } :
-            undefined,
+        replyTo,
         randomId: randomLong(),
         scheduleDate: normalizeDate(params.schedule),
         replyMarkup,
@@ -106,6 +109,7 @@ export async function sendMedia(
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
         sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
+        invertMedia: params.invert,
     })
 
     const msg = _findMessageInUpdate(client, res, false, !params.shouldDispatch)

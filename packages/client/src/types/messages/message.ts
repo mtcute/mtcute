@@ -16,82 +16,10 @@ import { PeersIndex } from '../peers/peers-index.js'
 import { User } from '../peers/user.js'
 import { _messageActionFromTl, MessageAction } from './message-action.js'
 import { MessageEntity } from './message-entity.js'
+import { MessageForwardInfo, MessageReplyInfo } from './message-forward.js'
 import { _messageMediaFromTl, MessageMedia } from './message-media.js'
 import { MessageReactions } from './message-reactions.js'
-
-/** Information about a forward */
-export interface MessageForwardInfo {
-    /**
-     * Date the original message was sent
-     */
-    date: Date
-
-    /**
-     * Sender of the original message (either user or a channel)
-     * or their name (for users with private forwards)
-     */
-    sender: User | Chat | string
-
-    /**
-     * For messages forwarded from channels,
-     * identifier of the original message in the channel
-     */
-    fromMessageId?: number
-
-    /**
-     * For messages forwarded from channels,
-     * signature of the post author (if present)
-     */
-    signature?: string
-}
-
-/** Information about replies to a message */
-export interface MessageRepliesInfo {
-    /**
-     * Whether this message is a channel post that has a comments thread
-     * in the linked discussion group
-     */
-    hasComments: false
-
-    /**
-     * Total number of replies
-     */
-    count: number
-
-    /**
-     * Whether this reply thread has unread messages
-     */
-    hasUnread: boolean
-
-    /**
-     * ID of the last message in the thread (if any)
-     */
-    lastMessageId?: number
-
-    /**
-     * ID of the last read message in the thread (if any)
-     */
-    lastReadMessageId?: number
-}
-
-/** Information about comments to a channel post */
-export interface MessageCommentsInfo extends Omit<MessageRepliesInfo, 'isComments'> {
-    /**
-     * Whether this message is a channel post that has a comments thread
-     * in the linked discussion group
-     */
-    isComments: true
-
-    /**
-     * ID of the discussion group for the post
-     */
-    discussion: number
-
-    /**
-     * IDs of the last few commenters to the post
-     */
-    repliers: number[]
-}
+import { MessageRepliesInfo } from './message-replies.js'
 
 /**
  * A Telegram message.
@@ -226,33 +154,8 @@ export class Message {
         if (this.raw._ !== 'message' || !this.raw.fwdFrom) {
             return null
         }
-        const fwd = this.raw.fwdFrom
 
-        let sender: User | Chat | string
-
-        if (fwd.fromName) {
-            sender = fwd.fromName
-        } else if (fwd.fromId) {
-            switch (fwd.fromId._) {
-                case 'peerChannel':
-                    sender = new Chat(this._peers.chat(fwd.fromId.channelId))
-                    break
-                case 'peerUser':
-                    sender = new User(this._peers.user(fwd.fromId.userId))
-                    break
-                default:
-                    throw new MtTypeAssertionError('raw.fwdFrom.fromId', 'peerUser | peerChannel', fwd.fromId._)
-            }
-        } else {
-            return null
-        }
-
-        return {
-            date: new Date(fwd.date * 1000),
-            sender,
-            fromMessageId: fwd.savedFromMsgId,
-            signature: fwd.postAuthor,
-        }
+        return new MessageForwardInfo(this.raw.fwdFrom, this._peers)
     }
 
     /**
@@ -275,51 +178,29 @@ export class Message {
     /**
      * Information about comments (for channels) or replies (for groups)
      */
-    get replies(): MessageRepliesInfo | MessageCommentsInfo | null {
+    get replies(): MessageRepliesInfo | null {
         if (this.raw._ !== 'message' || !this.raw.replies) return null
 
-        const r = this.raw.replies
-        const obj: MessageRepliesInfo = {
-            hasComments: r.comments as false,
-            count: r.replies,
-            hasUnread: r.readMaxId !== undefined && r.readMaxId !== r.maxId,
-            lastMessageId: r.maxId,
-            lastReadMessageId: r.readMaxId,
-        }
-
-        if (r.comments) {
-            const o = obj as unknown as MessageCommentsInfo
-            o.discussion = getMarkedPeerId(r.channelId!, 'channel')
-            o.repliers = r.recentRepliers?.map((it) => getMarkedPeerId(it)) ?? []
-        }
-
-        return obj
+        return new MessageRepliesInfo(this.raw.replies, this._peers)
     }
 
     /**
-     * For replies, the ID of the message that current message
-     * replies to.
+     * For replies, information about the that is being replied to.
+     *
+     * Mutually exclusive with {@link replyToStory}
      */
-    get replyToMessageId(): number | null {
+    get replyToMessage(): MessageReplyInfo | null {
         if (this.raw.replyTo?._ !== 'messageReplyHeader') return null
 
-        return this.raw.replyTo.replyToMsgId ?? null
-    }
-
-    /**
-     * For replies, ID of the thread/topic
-     * (i.e. ID of the top message in the thread/topic)
-     */
-    get replyToThreadId(): number | null {
-        if (this.raw.replyTo?._ !== 'messageReplyHeader') return null
-
-        return this.raw.replyTo.replyToTopId ?? null
+        return new MessageReplyInfo(this.raw.replyTo, this._peers)
     }
 
     /**
      * For replies, information about the story that is being replied to
+     *
+     * Mutually exclusive with {@link replyToMessage}
      */
-    get replyToStoryId(): tl.RawMessageReplyStoryHeader | null {
+    get replyToStory(): tl.RawMessageReplyStoryHeader | null {
         if (this.raw.replyTo?._ !== 'messageReplyStoryHeader') return null
 
         return this.raw.replyTo

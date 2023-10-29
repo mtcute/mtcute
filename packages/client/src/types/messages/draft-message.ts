@@ -18,10 +18,12 @@ export class DraftMessage {
     }
 
     /**
-     * The message this message will reply to
+     * Information about replies/quotes in this message
      */
-    get replyToMessageId(): number | null {
-        return this.raw.replyToMsgId ?? null
+    get replyToMessage(): tl.RawInputReplyToMessage | null {
+        if (this.raw.replyTo?._ !== 'inputReplyToMessage') return null
+
+        return this.raw.replyTo
     }
 
     /**

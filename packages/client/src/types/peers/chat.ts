@@ -465,6 +465,33 @@ export class Chat {
     }
 
     /**
+     * Name color of this chat, which should also be used when
+     * rendering replies to their messages and web previews sent by them.
+     *
+     * Note that this value is **not** an RGB color representation. Instead, it is
+     * a number which should be used to pick a color from a predefined
+     * list of colors:
+     *  - `0-6` are the default colors used by Telegram clients:
+     *    `red, orange, purple, green, sea, blue, pink`
+     *  - `>= 7` are returned by `help.getAppConfig`.
+     */
+    get color(): number {
+        if (this.peer._ !== 'channel' && this.peer._ !== 'user') return this.peer.id % 7
+
+        return this.peer.color ?? this.peer.id % 7
+    }
+
+    /**
+     * ID of the emoji that should be used as a background pattern
+     * when rendering replies to this user's messages.
+     */
+    get replyBackgroundEmojiId(): tl.Long | null {
+        if (this.peer._ !== 'channel' && this.peer._ !== 'user') return null
+
+        return this.peer.backgroundEmojiId ?? null
+    }
+
+    /**
      * Get a {@link User} from this chat.
      *
      * Returns `null` if this is not a chat with user

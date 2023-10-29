@@ -84,6 +84,14 @@ export async function editMessage(
          * to the client's update handler.
          */
         shouldDispatch?: true
+
+        /**
+         * Whether to invert media position.
+         *
+         * Currently only supported for web previews and makes the
+         * client render the preview above the caption and not below.
+         */
+        invertMedia?: boolean
     },
 ): Promise<Message> {
     const { chatId, message } = normalizeInputMessageId(params)
@@ -119,6 +127,7 @@ export async function editMessage(
         message: content,
         entities,
         media,
+        invertMedia: params.invertMedia,
     })
 
     return _findMessageInUpdate(client, res, true, !params.shouldDispatch)

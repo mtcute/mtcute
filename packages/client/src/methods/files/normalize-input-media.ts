@@ -202,6 +202,16 @@ export async function _normalizeInputMedia(
         }
     }
 
+    if (media.type === 'webpage') {
+        return {
+            _: 'inputMediaWebPage',
+            forceLargeMedia: media.size === 'large',
+            forceSmallMedia: media.size === 'small',
+            optional: !media.required,
+            url: media.url,
+        }
+    }
+
     let inputFile: tl.TypeInputFile | undefined = undefined
     let thumb: tl.TypeInputFile | undefined = undefined
     let mime = 'application/octet-stream'

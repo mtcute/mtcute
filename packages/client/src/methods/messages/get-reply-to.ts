@@ -7,12 +7,12 @@ import { getMessagesUnsafe } from './get-messages-unsafe.js'
 /**
  * For messages containing a reply, fetch the message that is being replied.
  *
- * Note that even if a message has {@link replyToMessageId},
+ * Note that even if a message has {@link replyToMessage},
  * the message itself may have been deleted, in which case
  * this method will also return `null`.
  */
 export async function getReplyTo(client: BaseTelegramClient, message: Message): Promise<Message | null> {
-    if (!message.replyToMessageId) {
+    if (!message.replyToMessage?.id) {
         return null
     }
 
