@@ -11,7 +11,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
  */
 export async function getBoostStats(client: BaseTelegramClient, peerId: InputPeerLike): Promise<BoostStats> {
     const res = await client.call({
-        _: 'stories.getBoostsStatus',
+        _: 'premium.getBoostsStatus',
         peer: await resolvePeer(client, peerId),
     })
 

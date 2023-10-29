@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const semver = require('semver')
+const cp = require('child_process')
 
 function bumpVersion(packageName, version) {
     const packageJsons = fs
@@ -8,12 +9,7 @@ function bumpVersion(packageName, version) {
         .filter((s) => !s.startsWith('.'))
         .map((name) => {
             try {
-                return JSON.parse(
-                    fs.readFileSync(
-                        path.join(__dirname, '../packages', name, 'package.json'),
-                        'utf-8',
-                    ),
-                )
+                return JSON.parse(fs.readFileSync(path.join(__dirname, '../packages', name, 'package.json'), 'utf-8'))
             } catch (e) {
                 if (e.code !== 'ENOENT') throw e
 
@@ -80,10 +76,7 @@ function bumpVersion(packageName, version) {
                     const depVersionRange = obj[depName].replace(/^workspace:/, '')
                     depName = depName.slice(8)
 
-                    if (
-                        depName === pkgName &&
-                        !semver.satisfies(version, depVersionRange)
-                    ) {
+                    if (depName === pkgName && !semver.satisfies(version, depVersionRange)) {
                         obj[`@mtcute/${depName}`] = `workspace:^${version}`
                         console.log(` - updated dependency ${depName} at ${json.name}`)
                         packageJsonChanged.add(json.name.slice(8))
@@ -104,15 +97,14 @@ function bumpVersion(packageName, version) {
         const json = packageJsons.find((json) => json.name === `@mtcute/${name}`)
         if (!json) return
 
-        fs.writeFileSync(
-            path.join(__dirname, '../packages', name, 'package.json'),
-            JSON.stringify(json, null, 4),
-        )
+        fs.writeFileSync(path.join(__dirname, '../packages', name, 'package.json'), JSON.stringify(json, null, 4))
     })
 
     console.log('Done!')
     // because i am fucking dumb and have adhd and always forget it lol
-    console.log('Now run `pnpm i` and make sure everything compiles.')
+    // console.log('Now run `pnpm i` and make sure everything compiles.')
+    // i kept forgetting that so yea
+    cp.execSync('pnpm -w install', { stdio: 'inherit' })
 }
 
 if (require.main === module) {
