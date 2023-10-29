@@ -23,7 +23,7 @@ export async function* iterChatMembers(
          * Chunk size, which will be passed as `limit` parameter
          * to {@link getChatMembers}. Usually you shouldn't care about this.
          *
-         * Defaults to `200`
+         * @default  `200`
          */
         chunkSize?: number
     },

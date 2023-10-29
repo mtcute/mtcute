@@ -4,6 +4,7 @@ import { InputPeerLike } from '../../types/index.js'
 import { BoostStats } from '../../types/stories/boost-stats.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
+// @available=user
 /**
  * Get information about boosts in a channel
  *

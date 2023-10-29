@@ -99,12 +99,13 @@ export async function answerInlineQuery(
 
         /**
          * Parse mode to use when parsing inline message text.
-         * Defaults to current default parse mode (if any).
          *
          * Passing `null` will explicitly disable formatting.
          *
          * **Note**: inline results themselves *can not* have markup
          * entities, only the messages that are sent once a result is clicked.
+         *
+         * @default  current default parse mode (if any).
          */
         parseMode?: string | null
     },

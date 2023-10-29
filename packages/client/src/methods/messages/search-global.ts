@@ -42,10 +42,9 @@ export async function searchGlobal(
         limit?: number
 
         /**
-         * Filter the results using some filter.
-         * Defaults to {@link SearchFilters.Empty} (i.e. will return all messages)
+         * Filter the results using some filter. (see {@link SearchFilters})
          *
-         * @link SearchFilters
+         * @default  {@link SearchFilters.Empty} (i.e. will return all messages)
          */
         filter?: tl.TypeMessagesFilter
 

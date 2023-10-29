@@ -1,4 +1,4 @@
-import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, tl } from '@mtcute/core'
 
 import {
     InputFileLike,
@@ -49,17 +49,25 @@ export async function createStickerSet(
 
         /**
          * Type of the stickers in this set.
-         * Defaults to `sticker`, i.e. regular stickers.
          *
-         * Creating `emoji` stickers via API is not supported yet
+         * @default  `sticker`, i.e. regular stickers.
          */
         type?: StickerType
 
         /**
          * File source type for the stickers in this set.
-         * Defaults to `static`, i.e. regular WEBP stickers.
+         *
+         * @default  `static`, i.e. regular WEBP stickers.
          */
         sourceType?: StickerSourceType
+
+        /**
+         * Whether to create "adaptive" emoji set.
+         *
+         * Color of the emoji will be changed depending on the text color.
+         * Only works for TGS-based emoji stickers
+         */
+        adaptive?: boolean
 
         /**
          * List of stickers to be immediately added into the pack.
@@ -89,10 +97,6 @@ export async function createStickerSet(
         progressCallback?: (idx: number, uploaded: number, total: number) => void
     },
 ): Promise<StickerSet> {
-    if (params.type === 'emoji') {
-        throw new MtArgumentError('Creating emoji stickers is not supported yet by the API')
-    }
-
     const owner = normalizeToInputUser(await resolvePeer(client, params.owner), params.owner)
 
     const inputStickers: tl.TypeInputStickerSetItem[] = []
@@ -127,8 +131,8 @@ export async function createStickerSet(
         animated: params.sourceType === 'animated',
         videos: params.sourceType === 'video',
         masks: params.type === 'mask',
-        // currently not supported
-        // emojis: params.type === 'emoji',
+        emojis: params.type === 'emoji',
+        textColor: params.adaptive,
         userId: owner,
         title: params.title,
         shortName: params.shortName,

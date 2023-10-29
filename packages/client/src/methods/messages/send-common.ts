@@ -28,7 +28,7 @@ export interface CommonSendParams {
      *
      * Incurs an additional request, so only use when really needed.
      *
-     * Defaults to `false`
+     * @default  `false`
      */
     mustReply?: boolean
 
@@ -62,10 +62,10 @@ export interface CommonSendParams {
     quoteEntities?: tl.TypeMessageEntity[]
 
     /**
-     * Parse mode to use to parse entities before sending
-     * the message. Defaults to current default parse mode (if any).
-     *
+     * Parse mode to use to parse entities before sending the message.
      * Passing `null` will explicitly disable formatting.
+     *
+     * @default  current default parse mode (if any).
      */
     parseMode?: string | null
 
@@ -86,7 +86,7 @@ export interface CommonSendParams {
     /**
      * Whether to clear draft after sending this message.
      *
-     * Defaults to `false`
+     * @default  `false`
      */
     clearDraft?: boolean
 

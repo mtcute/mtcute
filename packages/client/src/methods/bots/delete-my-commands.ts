@@ -16,7 +16,7 @@ export async function deleteMyCommands(
         /**
          * Scope of the commands.
          *
-         * Defaults to `BotScope.default_` (i.e. `botCommandScopeDefault`)
+         * @default  `BotScope.default_` (i.e. `botCommandScopeDefault`)
          */
         scope?: tl.TypeBotCommandScope | BotCommands.IntermediateScope
 

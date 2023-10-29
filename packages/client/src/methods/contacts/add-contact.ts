@@ -31,7 +31,9 @@ export async function addContact(
 
         /**
          * Whether to share your own phone number
-         * with the newly created contact (defaults to `false`)
+         * with the newly created contact
+         *
+         * @default false
          */
         sharePhone?: boolean
     },

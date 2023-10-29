@@ -39,28 +39,28 @@ export class RawLocation {
             /**
              * Map width in pixels before applying scale (16-1024)
              *
-             * Defaults to `128`
+             * @default  `128`
              */
             width?: number
 
             /**
              * Map height in pixels before applying scale (16-1024)
              *
-             * Defaults to `128`
+             * @default  `128`
              */
             height?: number
 
             /**
              * Map zoom level (13-20)
              *
-             * Defaults to `15`
+             * @default  `15`
              */
             zoom?: number
 
             /**
              * Map scale (1-3)
              *
-             * Defaults to `1`
+             * @default  `1`
              */
             scale?: number
         } = {},

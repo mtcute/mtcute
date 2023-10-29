@@ -82,11 +82,11 @@ export async function start(
         /**
          * Custom method that is called when a code is sent. Can be used
          * to show a GUI alert of some kind.
-         * Defaults to `console.log`.
          *
          * This method is called *before* {@link start.params.code}.
          *
          * @param code
+         * @default  `console.log`.
          */
         codeSentCallback?: (code: SentCode) => MaybeAsync<void>
     },

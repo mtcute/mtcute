@@ -43,10 +43,10 @@ export async function editStory(
         entities?: tl.TypeMessageEntity[]
 
         /**
-         * Parse mode to use to parse entities before sending
-         * the message. Defaults to current default parse mode (if any).
-         *
+         * Parse mode to use to parse entities before sending the message.
          * Passing `null` will explicitly disable formatting.
+         *
+         * @default  current default parse mode (if any).
          */
         parseMode?: string | null
 

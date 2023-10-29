@@ -19,7 +19,7 @@ export async function getCallbackAnswer(
         /**
          * Timeout for the query in ms.
          *
-         * Defaults to `10000` (10 sec)
+         * @default  `10000` (10 sec)
          */
         timeout?: number
 

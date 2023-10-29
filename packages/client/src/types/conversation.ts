@@ -367,7 +367,7 @@ export class Conversation {
             /**
              * Message for which to wait for response for.
              *
-             * Defaults to last sent/received message
+             * @default  last sent/received message
              */
             message?: number
 
@@ -376,7 +376,7 @@ export class Conversation {
              *
              * When the timeout is reached, `TimeoutError` is thrown.
              *
-             * Defaults to `15000` (15 sec)
+             * @default  `15000` (15 sec)
              */
             timeout?: number | null
         },
@@ -403,7 +403,7 @@ export class Conversation {
             /**
              * Message for which to wait for reply for.
              *
-             * Defaults to last sent/received message
+             * @default  last sent/received message
              */
             message?: number
 
@@ -412,7 +412,7 @@ export class Conversation {
              *
              * When the timeout is reached, `TimeoutError` is thrown.
              *
-             * Defaults to `15000` (15 sec)
+             * @default  `15000` (15 sec)
              */
             timeout?: number | null
         },
@@ -446,7 +446,7 @@ export class Conversation {
             /**
              * Message for which to wait for reply for.
              *
-             * Defaults to last received message
+             * @default  last received message
              */
             message?: number
 
@@ -455,7 +455,7 @@ export class Conversation {
              *
              * When the timeout is reached, `TimeoutError` is thrown.
              *
-             * Defaults to `15000` (15 sec)
+             * @default  `15000` (15 sec)
              */
             timeout?: number | null
         },

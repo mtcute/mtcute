@@ -19,7 +19,9 @@ export interface PollAnswer {
 
     /**
      * Number of people who has chosen this result.
-     * If not available (i.e. not voted yet), defaults to `0`
+     * If not available (i.e. not voted yet)
+     *
+     * @default  `0`
      */
     voters: number
 
@@ -30,7 +32,9 @@ export interface PollAnswer {
 
     /**
      * Whether this answer is correct (for quizzes).
-     * Not available before choosing an answer, and defaults to `false`
+     * Not available before choosing an answer
+     *
+     * @default  `false`
      */
     correct: boolean
 }

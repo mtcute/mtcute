@@ -91,7 +91,8 @@ export interface NetworkManagerExtraParams {
 
     /**
      * Idle timeout for non-main connections, in ms
-     * Defaults to 60 seconds.
+     *
+     * @default  60000 (60 seconds).
      */
     inactivityTimeout?: number
 }

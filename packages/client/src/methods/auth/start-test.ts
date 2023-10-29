@@ -20,7 +20,7 @@ export async function startTest(
         /**
          * Whether to log out if current session is logged in.
          *
-         * Defaults to false.
+         * @default  false.
          */
         logout?: boolean
 

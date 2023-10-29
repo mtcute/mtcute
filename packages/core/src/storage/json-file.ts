@@ -22,14 +22,14 @@ export class JsonFileStorage extends JsonMemoryStorage {
              * a blank file because of the app being stopped while
              * the storage is being written.
              *
-             * Defaults to `true`
+             * @default  `true`
              */
             safe?: boolean
 
             /**
              * Whether to save file on process exit.
              *
-             * Defaults to `true`
+             * @default  `true`
              */
             cleanup?: boolean
         },

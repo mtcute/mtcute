@@ -74,7 +74,7 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage*/ {
          * by a local storage), and only available within
          * the current runtime.
          *
-         * Defaults to `100`, use `0` to disable
+         * @default  `100`, use `0` to disable
          */
         cacheSize?: number
 
@@ -84,7 +84,7 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage*/ {
          * When vacuuming, the storage will remove expired FSM
          * states to reduce memory usage.
          *
-         * Defaults to `300_000` (5 minutes)
+         * @default  `300_000` (5 minutes)
          */
         vacuumInterval?: number
     }) {

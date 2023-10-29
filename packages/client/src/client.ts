@@ -616,7 +616,7 @@ export interface TelegramClient extends BaseTelegramClient {
         /**
          * Whether to log out if current session is logged in.
          *
-         * Defaults to false.
+         * @default  false.
          */
         logout?: boolean
 
@@ -703,11 +703,11 @@ export interface TelegramClient extends BaseTelegramClient {
         /**
          * Custom method that is called when a code is sent. Can be used
          * to show a GUI alert of some kind.
-         * Defaults to `console.log`.
          *
          * This method is called *before* {@link start.params.code}.
          *
          * @param code
+         * @default  `console.log`.
          */
         codeSentCallback?: (code: SentCode) => MaybeAsync<void>
     }): Promise<User>
@@ -855,12 +855,13 @@ export interface TelegramClient extends BaseTelegramClient {
 
             /**
              * Parse mode to use when parsing inline message text.
-             * Defaults to current default parse mode (if any).
              *
              * Passing `null` will explicitly disable formatting.
              *
              * **Note**: inline results themselves *can not* have markup
              * entities, only the messages that are sent once a result is clicked.
+             *
+             * @default  current default parse mode (if any).
              */
             parseMode?: string | null
         },
@@ -892,7 +893,7 @@ export interface TelegramClient extends BaseTelegramClient {
         /**
          * Scope of the commands.
          *
-         * Defaults to `BotScope.default_` (i.e. `botCommandScopeDefault`)
+         * @default  `BotScope.default_` (i.e. `botCommandScopeDefault`)
          */
         scope?: tl.TypeBotCommandScope | BotCommands.IntermediateScope
 
@@ -941,7 +942,7 @@ export interface TelegramClient extends BaseTelegramClient {
             /**
              * Timeout for the query in ms.
              *
-             * Defaults to `10000` (10 sec)
+             * @default  `10000` (10 sec)
              */
             timeout?: number
 
@@ -994,7 +995,7 @@ export interface TelegramClient extends BaseTelegramClient {
         /**
          * Scope of the commands.
          *
-         * Defaults to `BotScope.default_` (i.e. `botCommandScopeDefault`)
+         * @default  `BotScope.default_` (i.e. `botCommandScopeDefault`)
          */
         scope?: tl.TypeBotCommandScope | BotCommands.IntermediateScope
 
@@ -1116,7 +1117,7 @@ export interface TelegramClient extends BaseTelegramClient {
         /**
          * Scope of the commands.
          *
-         * Defaults to `BotScope.default_` (i.e. `botCommandScopeDefault`)
+         * @default  `BotScope.default_` (i.e. `botCommandScopeDefault`)
          */
         scope?: tl.TypeBotCommandScope | BotCommands.IntermediateScope
 
@@ -1452,10 +1453,11 @@ export interface TelegramClient extends BaseTelegramClient {
         params?: {
             /**
              * Search query to filter members by their display names and usernames
-             * Defaults to `''` (empty string)
              *
              * > **Note**: Only used for these values of `filter`:
              * > `all, banned, restricted, mention, contacts`
+             *
+             * @default  `''` (empty string)
              */
             query?: string
 
@@ -1486,7 +1488,9 @@ export interface TelegramClient extends BaseTelegramClient {
              *  - `contacts`: get only contacts
              *  - `mention`: get users that can be mentioned (see {@link tl.RawChannelParticipantsMentions})
              *
-             *  Only used for channels and supergroups. Defaults to `recent`
+             *  Only used for channels and supergroups.
+             *
+             * @default  `recent`
              */
             type?: 'all' | 'banned' | 'restricted' | 'bots' | 'recent' | 'admins' | 'contacts' | 'mention'
         },
@@ -1584,7 +1588,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Chunk size, which will be passed as `limit` parameter
              * to {@link getChatMembers}. Usually you shouldn't care about this.
              *
-             * Defaults to `200`
+             * @default  `200`
              */
             chunkSize?: number
         },
@@ -1942,7 +1946,9 @@ export interface TelegramClient extends BaseTelegramClient {
 
         /**
          * Whether to share your own phone number
-         * with the newly created contact (defaults to `false`)
+         * with the newly created contact
+         *
+         * @default false
          */
         sharePhone?: boolean
     }): Promise<User>
@@ -2589,7 +2595,9 @@ export interface TelegramClient extends BaseTelegramClient {
              * Maximum number of users that can be members of this chat
              * at the same time after joining using this link.
              *
-             * Integer in range `[1, 99999]` or `Infinity`, defaults to `Infinity`
+             * Integer in range `[1, 99999]` or `Infinity`
+             *
+             * @default  `Infinity`
              */
             usageLimit?: number
 
@@ -2838,7 +2846,7 @@ export interface TelegramClient extends BaseTelegramClient {
             /**
              * Size of chunks which are fetched. Usually not needed.
              *
-             * Defaults to `100`
+             * @default  `100`
              */
             chunkSize?: number
         },
@@ -2924,10 +2932,11 @@ export interface TelegramClient extends BaseTelegramClient {
         text?: string | FormattedString<string>
 
         /**
-         * Parse mode to use to parse entities before sending
-         * the message. Defaults to current default parse mode (if any).
+         * Parse mode to use to parse entities before sending the message.
+         *
          *
          * Passing `null` will explicitly disable formatting.
+         * @default  current default parse mode (if any).
          */
         parseMode?: string | null
 
@@ -2992,10 +3001,11 @@ export interface TelegramClient extends BaseTelegramClient {
             text?: string | FormattedString<string>
 
             /**
-             * Parse mode to use to parse entities before sending
-             * the message. Defaults to current default parse mode (if any).
+             * Parse mode to use to parse entities before sending the message.
              *
              * Passing `null` will explicitly disable formatting.
+             *
+             * @default  current default parse mode (if any).
              */
             parseMode?: string | null
 
@@ -3485,10 +3495,9 @@ export interface TelegramClient extends BaseTelegramClient {
         limit?: number
 
         /**
-         * Filter the results using some filter.
-         * Defaults to {@link SearchFilters.Empty} (i.e. will return all messages)
+         * Filter the results using some filter. (see {@link SearchFilters})
          *
-         * @link SearchFilters
+         * @default  {@link SearchFilters.Empty} (i.e. will return all messages)
          */
         filter?: tl.TypeMessagesFilter
 
@@ -3572,14 +3581,14 @@ export interface TelegramClient extends BaseTelegramClient {
         /**
          * Minimum message date to return
          *
-         * Defaults to `0` (disabled).
+         * @default  `0` (disabled).
          */
         minDate?: number | Date
 
         /**
          * Maximum message date to return
          *
-         * Defaults to `0` (disabled).
+         * @default  `0` (disabled).
          */
         maxDate?: number | Date
 
@@ -3596,10 +3605,9 @@ export interface TelegramClient extends BaseTelegramClient {
         limit?: number
 
         /**
-         * Filter the results using some filter.
-         * Defaults to {@link SearchFilters.Empty} (i.e. will return all messages)
+         * Filter the results using some filter (see {@link SearchFilters})
          *
-         * @link SearchFilters
+         * @default  {@link SearchFilters.Empty} (i.e. will return all messages)
          */
         filter?: tl.TypeMessagesFilter
 
@@ -4181,17 +4189,25 @@ export interface TelegramClient extends BaseTelegramClient {
 
         /**
          * Type of the stickers in this set.
-         * Defaults to `sticker`, i.e. regular stickers.
          *
-         * Creating `emoji` stickers via API is not supported yet
+         * @default  `sticker`, i.e. regular stickers.
          */
         type?: StickerType
 
         /**
          * File source type for the stickers in this set.
-         * Defaults to `static`, i.e. regular WEBP stickers.
+         *
+         * @default  `static`, i.e. regular WEBP stickers.
          */
         sourceType?: StickerSourceType
+
+        /**
+         * Whether to create "adaptive" emoji set.
+         *
+         * Color of the emoji will be changed depending on the text color.
+         * Only works for TGS-based emoji stickers
+         */
+        adaptive?: boolean
 
         /**
          * List of stickers to be immediately added into the pack.
@@ -4414,10 +4430,10 @@ export interface TelegramClient extends BaseTelegramClient {
         entities?: tl.TypeMessageEntity[]
 
         /**
-         * Parse mode to use to parse entities before sending
-         * the message. Defaults to current default parse mode (if any).
-         *
+         * Parse mode to use to parse entities before sending the message.
          * Passing `null` will explicitly disable formatting.
+         *
+         * @default  current default parse mode (if any).
          */
         parseMode?: string | null
 
@@ -4449,6 +4465,7 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         archived?: boolean
     }): Promise<AllStories>
+
     /**
      * Get information about boosts in a channel
      *
@@ -4797,10 +4814,10 @@ export interface TelegramClient extends BaseTelegramClient {
         entities?: tl.TypeMessageEntity[]
 
         /**
-         * Parse mode to use to parse entities before sending
-         * the message. Defaults to current default parse mode (if any).
-         *
+         * Parse mode to use to parse entities before sending the message.
          * Passing `null` will explicitly disable formatting.
+         *
+         * @default  current default parse mode (if any).
          */
         parseMode?: string | null
 

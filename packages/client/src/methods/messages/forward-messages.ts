@@ -31,9 +31,10 @@ export interface ForwardMessageOptions {
 
     /**
      * Parse mode to use to parse entities in caption.
-     * Defaults to current default parse mode (if any).
      *
      * Passing `null` will explicitly disable formatting.
+     *
+     * @default  current default parse mode (if any).
      */
     parseMode?: string | null
 
@@ -63,7 +64,7 @@ export interface ForwardMessageOptions {
     /**
      * Whether to clear draft after sending this message (only used for caption)
      *
-     * Defaults to `false`
+     * @default  `false`
      */
     clearDraft?: boolean
 

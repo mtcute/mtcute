@@ -302,7 +302,7 @@ export namespace BotKeyboard {
              * `url` domain must be the same as the domain linked
              * with the bot.
              *
-             * Defaults to current bot
+             * @default  current bot
              */
             bot?: tl.TypeInputUser
         } = {},

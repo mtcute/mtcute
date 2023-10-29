@@ -20,10 +20,11 @@ export async function getChatMembers(
     params?: {
         /**
          * Search query to filter members by their display names and usernames
-         * Defaults to `''` (empty string)
          *
          * > **Note**: Only used for these values of `filter`:
          * > `all, banned, restricted, mention, contacts`
+         *
+         * @default  `''` (empty string)
          */
         query?: string
 
@@ -54,7 +55,9 @@ export async function getChatMembers(
          *  - `contacts`: get only contacts
          *  - `mention`: get users that can be mentioned (see {@link tl.RawChannelParticipantsMentions})
          *
-         *  Only used for channels and supergroups. Defaults to `recent`
+         *  Only used for channels and supergroups.
+         *
+         * @default  `recent`
          */
         type?: 'all' | 'banned' | 'restricted' | 'bots' | 'recent' | 'admins' | 'contacts' | 'mention'
     },

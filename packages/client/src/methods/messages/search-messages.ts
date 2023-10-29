@@ -73,14 +73,14 @@ export async function searchMessages(
         /**
          * Minimum message date to return
          *
-         * Defaults to `0` (disabled).
+         * @default  `0` (disabled).
          */
         minDate?: number | Date
 
         /**
          * Maximum message date to return
          *
-         * Defaults to `0` (disabled).
+         * @default  `0` (disabled).
          */
         maxDate?: number | Date
 
@@ -97,10 +97,9 @@ export async function searchMessages(
         limit?: number
 
         /**
-         * Filter the results using some filter.
-         * Defaults to {@link SearchFilters.Empty} (i.e. will return all messages)
+         * Filter the results using some filter (see {@link SearchFilters})
          *
-         * @link SearchFilters
+         * @default  {@link SearchFilters.Empty} (i.e. will return all messages)
          */
         filter?: tl.TypeMessagesFilter
 

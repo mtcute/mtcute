@@ -19,9 +19,10 @@ export interface SendCopyParams extends CommonSendParams {
 
     /**
      * Parse mode to use to parse `text` entities before sending
-     * the message. Defaults to current default parse mode (if any).
-     *
+     * the message.
      * Passing `null` will explicitly disable formatting.
+     *
+     * @default  current default parse mode (if any).
      */
     parseMode?: string | null
 

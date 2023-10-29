@@ -28,7 +28,7 @@ export async function* iterInviteLinks(
         /**
          * Size of chunks which are fetched. Usually not needed.
          *
-         * Defaults to `100`
+         * @default  `100`
          */
         chunkSize?: number
     },

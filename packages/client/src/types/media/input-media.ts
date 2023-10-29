@@ -170,9 +170,9 @@ export interface InputMediaSticker extends FileMixin, CaptionMixin {
      * Note that animated stickers must be in TGS
      * format, which is Lottie JSON compressed using GZip
      *
-     * Defaults to `false`
-     *
      * Only applicable to newly uploaded files.
+     *
+     * @default  false
      */
     isAnimated?: boolean
 

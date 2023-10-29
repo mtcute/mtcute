@@ -68,7 +68,8 @@ export interface BaseTelegramClientOptions {
      * Can be used to connect to other networks (like test DCs).
      *
      * When session already contains primary DC, this parameter is ignored.
-     * Defaults to Production DC 2.
+     *
+     * @default  Production DC 2.
      */
     defaultDcs?: ITelegramStorage.DcOptions
 
@@ -91,13 +92,15 @@ export interface BaseTelegramClientOptions {
 
     /**
      * Transport factory to use in the client.
-     * Defaults to platform-specific transport: WebSocket on the web, TCP in node
+     *
+     * @default  platform-specific transport: WebSocket on the web, TCP in node
      */
     transport?: TransportFactory
 
     /**
      * Reconnection strategy.
-     * Defaults to simple reconnection strategy: first 0ms, then up to 5s (increasing by 1s)
+     *
+     * @default  simple reconnection strategy: first 0ms, then up to 5s (increasing by 1s)
      */
     reconnectionStrategy?: ReconnectionStrategy<PersistentConnectionParams>
 

@@ -25,7 +25,7 @@ export interface MtcuteI18nParameters<Strings extends I18nStrings, Input> {
     /**
      * Language that will be used if no language is specified
      *
-     * Defaults to {@link primaryLanguage}
+     * @default  {@link primaryLanguage}
      */
     defaultLanguage?: string
 

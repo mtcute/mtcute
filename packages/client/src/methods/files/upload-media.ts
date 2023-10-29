@@ -23,7 +23,8 @@ export async function uploadMedia(
     params: {
         /**
          * Peer to associate this media with.
-         * Defaults to `self`
+         *
+         * @default  `self`
          */
         peer?: InputPeerLike
 

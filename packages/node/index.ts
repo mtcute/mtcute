@@ -29,7 +29,7 @@ export interface NodeTelegramClientOptions extends Omit<TelegramClientOptions, '
      * Both HTML and Markdown parse modes are
      * registered automatically.
      *
-     * Defaults to `html`
+     * @default  `html`
      */
     defaultParseMode?: 'html' | 'markdown'
 

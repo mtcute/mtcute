@@ -60,7 +60,7 @@ export interface InputInlineResultArticle extends BaseInputInlineResult {
      * Whether to prevent article URL from
      * displaying by the client
      *
-     * Defaults to `false`
+     * @default  `false`
      */
     hideUrl?: boolean
 
@@ -88,10 +88,11 @@ export interface InputInlineResultGif extends BaseInputInlineResult {
     media: string | tl.RawInputWebDocument | tl.RawInputDocument
 
     /**
-     * Media MIME type, defaults to `video/mp4`, only applicable
-     * to URLs.
+     * Media MIME type, only applicable to URLs.
      *
      * Usually unnecessary, since Telegram automatically infers it.
+     *
+     * @default `video/mp4`
      */
     mime?: string
 
@@ -106,13 +107,16 @@ export interface InputInlineResultGif extends BaseInputInlineResult {
     description?: string
 
     /**
-     * Animation thumbnail URL. Defaults to `media`,
-     * only applicable in case `media` is a URL
+     * Animation thumbnail URL, only applicable in case `media` is a URL
+     *
+     * @default  `media`
      */
     thumb?: string | tl.RawInputWebDocument
 
     /**
-     * Thumbnail MIME type (defaults to `image/jpeg`)
+     * Thumbnail MIME type
+     *
+     * @default  `image/jpeg`
      */
     thumbMime?: string
 
@@ -167,10 +171,11 @@ export interface InputInlineResultVideo extends BaseInputInlineResult {
     description?: string
 
     /**
-     * Video thumbnail URL (must be jpeg). Defaults to `media`,
-     * only applicable in case `media` is a URL.
+     * Video thumbnail URL (must be jpeg), only applicable in case `media` is a URL.
      *
      * Must be provided explicitly if this is a video loaded by URL.
+     *
+     * @default  `media`
      */
     thumb?: string | tl.RawInputWebDocument
 
@@ -208,9 +213,11 @@ export interface InputInlineResultAudio extends BaseInputInlineResult {
     media: string | tl.RawInputWebDocument | tl.RawInputDocument
 
     /**
-     * MIME type of the audio file, defaults to `audio/mpeg`
+     * MIME type of the audio file
      *
      * Usually unnecessary, since Telegram infers it automatically.
+     *
+     * @default  `audio/mpeg`
      */
     mime?: string
 
@@ -296,8 +303,9 @@ export interface InputInlineResultPhoto extends BaseInputInlineResult {
     height?: number
 
     /**
-     * Photo thumbnail URL (must be jpeg). Defaults to `media`,
-     * only applicable in case `media` is a URL
+     * Photo thumbnail URL (must be jpeg), only applicable in case `media` is a URL
+     *
+     * @default  `media`
      */
     thumb?: string | tl.RawInputWebDocument
 }
@@ -355,8 +363,9 @@ export interface InputInlineResultFile extends BaseInputInlineResult {
     description?: string
 
     /**
-     * Photo thumbnail URL (must be jpeg). Defaults to `media`,
-     * only applicable in case `media` is a URL
+     * Photo thumbnail URL (must be jpeg), only applicable in case `media` is a URL
+     *
+     * @default  `media`
      */
     thumb?: string | tl.RawInputWebDocument
 }

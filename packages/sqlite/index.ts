@@ -206,7 +206,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
              * used when finding peer by ID, since other
              * kinds of lookups (phone, username) may get stale quickly
              *
-             * Defaults to `100`
+             * @default  `100`
              */
             cacheSize?: number
 
@@ -219,7 +219,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
              * state in case of concurrent accesses), you
              * can disable this by passing `0`
              *
-             * Defaults to `100`
+             * @default  `100`
              */
             fsmCacheSize?: number
 
@@ -232,7 +232,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
              * state in case of concurrent accesses), you
              * can disable this by passing `0`
              *
-             * Defaults to `100`
+             * @default  `100`
              */
             rlCacheSize?: number
 
@@ -244,7 +244,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
              * However, you might encounter some issues,
              * and if you do, you can disable WAL by passing `true`
              *
-             * Defaults to false
+             * @default  false
              */
             disableWal?: boolean
 
@@ -255,7 +255,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
              *
              * If you are having issues with this, you can set this to `0`
              *
-             * Defaults to `30000` (30 sec)
+             * @default  `30000` (30 sec)
              */
             unimportantSavesDelay?: number
 
@@ -265,7 +265,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
              * When vacuuming, the storage will remove expired FSM
              * states to reduce disk and memory usage.
              *
-             * Defaults to `300_000` (5 minutes)
+             * @default  `300_000` (5 minutes)
              */
             vacuumInterval?: number
         },

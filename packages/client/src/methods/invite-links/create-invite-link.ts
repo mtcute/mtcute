@@ -26,7 +26,9 @@ export async function createInviteLink(
          * Maximum number of users that can be members of this chat
          * at the same time after joining using this link.
          *
-         * Integer in range `[1, 99999]` or `Infinity`, defaults to `Infinity`
+         * Integer in range `[1, 99999]` or `Infinity`
+         *
+         * @default  `Infinity`
          */
         usageLimit?: number
 
