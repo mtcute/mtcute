@@ -66,7 +66,6 @@
         "messageActionInviteToGroupCall": ["users"],
         "messageEntityMentionName": ["user_id"],
         "messageMediaContact": ["user_id"],
-        "messageMediaStory": ["user_id"],
         "messageReplies": ["channel_id"],
         "messageReplyStoryHeader": ["user_id"],
         "messageUserVote": ["user_id"],
@@ -129,10 +128,8 @@
         "updateReadChannelDiscussionOutbox": ["channel_id"],
         "updateReadChannelInbox": ["channel_id"],
         "updateReadChannelOutbox": ["channel_id"],
-        "updateReadStories": ["user_id"],
         "updateShortChatMessage": ["from_id", "chat_id", "via_bot_id"],
         "updateShortMessage": ["user_id", "via_bot_id"],
-        "updateStory": ["user_id"],
         "updateUserEmojiStatus": ["user_id"],
         "updateUserName": ["user_id"],
         "updateUserPhone": ["user_id"],
@@ -144,7 +141,6 @@
         "userFull": ["id"],
         "userStories": ["user_id"],
         "webAuthorization": ["bot_id"],
-        "webPageAttributeStory": ["user_id"],
         "_": "Dummy line teehee~"
     },
     "method": {

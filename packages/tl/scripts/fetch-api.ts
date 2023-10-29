@@ -230,10 +230,18 @@ async function main() {
                 chooseOptions = options
             } else {
                 // first of all, prefer entries from the latest layer
-                const fromLastSchema = options.filter((opt) => opt.schema.layer === resultLayer)
+                let fromLastSchema = options.filter((opt) => opt.entry && opt.schema.layer === resultLayer)
 
                 // if there is only one schema on the latest layer, we can simply return it
                 if (fromLastSchema.length === 1) return fromLastSchema[0].entry
+
+                // the conflict was earlier, and now this entry is removed altogether.
+                // keep it just in case for now, as it may still be referenced somewhere
+                if (fromLastSchema.length === 0) {
+                    fromLastSchema = options.sort((a, b) => b.schema.layer - a.schema.layer).filter((opt) => opt.entry)
+                    // only keep the latest item
+                    fromLastSchema = [fromLastSchema[0]]
+                }
 
                 // there are multiple choices on the latest layer
                 // if they are all the same, it's just conflict between layers,
