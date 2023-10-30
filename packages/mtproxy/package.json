@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/mtproxy",
     "private": true,
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "MTProto proxy (MTProxy) support for mtcute",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
@@ -20,7 +20,7 @@
         }
     },
     "dependencies": {
-        "@mtcute/core": "workspace:^1.0.0",
+        "@mtcute/core": "workspace:^0.1.0",
         "big-integer": "1.6.51"
     }
 }

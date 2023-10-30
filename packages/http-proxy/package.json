@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/http-proxy",
     "private": true,
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "HTTP(S) proxy support for mtcute",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
@@ -20,6 +20,6 @@
         }
     },
     "dependencies": {
-        "@mtcute/core": "workspace:^1.0.0"
+        "@mtcute/core": "workspace:^0.1.0"
     }
 }

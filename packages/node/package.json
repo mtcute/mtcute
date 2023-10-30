@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/node",
     "private": true,
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Meta-package for Node JS",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
@@ -24,9 +24,9 @@
         }
     },
     "dependencies": {
-        "@mtcute/client": "workspace:^1.0.0",
-        "@mtcute/sqlite": "workspace:^1.0.0",
-        "@mtcute/markdown-parser": "workspace:^1.0.0",
-        "@mtcute/html-parser": "workspace:^1.0.0"
+        "@mtcute/client": "workspace:^0.1.0",
+        "@mtcute/sqlite": "workspace:^0.1.0",
+        "@mtcute/markdown-parser": "workspace:^0.1.0",
+        "@mtcute/html-parser": "workspace:^0.1.0"
     }
 }

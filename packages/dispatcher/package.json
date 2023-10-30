@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/dispatcher",
     "private": true,
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Updates dispatcher and bot framework for @mtcute/client",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
@@ -22,7 +22,7 @@
         "gen-updates": "node ./scripts/generate.cjs"
     },
     "dependencies": {
-        "@mtcute/client": "workspace:^1.0.0",
+        "@mtcute/client": "workspace:^0.1.0",
         "events": "3.2.0"
     }
 }

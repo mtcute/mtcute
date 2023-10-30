@@ -1,6 +1,6 @@
 {
     "name": "@mtcute/crypto-node",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Native crypto implementation for NodeJS",
     "author": "Alina Sireneva <alina@tei.su>",
     "main": "src/index.ts",
@@ -28,6 +28,6 @@
         }
     },
     "dependencies": {
-        "@mtcute/core": "workspace:^1.0.0"
+        "@mtcute/core": "workspace:^0.1.0"
     }
 }

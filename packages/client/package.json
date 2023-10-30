@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/client",
     "private": true,
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "High-level API over @mtcute/core",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
@@ -36,8 +36,8 @@
     },
     "dependencies": {
         "@types/node": "18.16.0",
-        "@mtcute/core": "workspace:^1.0.0",
-        "@mtcute/file-id": "workspace:^1.0.0",
+        "@mtcute/core": "workspace:^0.1.0",
+        "@mtcute/file-id": "workspace:^0.1.0",
         "file-type": "16.5.4"
     }
 }

@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/core",
     "private": true,
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Core functions and base MTProto client",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
@@ -45,7 +45,7 @@
     },
     "dependencies": {
         "@mtcute/tl": "workspace:^166.0.0",
-        "@mtcute/tl-runtime": "workspace:^1.0.0",
+        "@mtcute/tl-runtime": "workspace:^0.1.0",
         "@types/events": "3.0.0",
         "@types/node": "18.16.0",
         "big-integer": "1.6.51",

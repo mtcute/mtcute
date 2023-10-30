@@ -115,10 +115,10 @@ importers:
   packages/client:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../core
       '@mtcute/file-id':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../file-id
       '@types/node':
         specifier: 18.16.0
@@ -133,7 +133,7 @@ importers:
         specifier: workspace:^166.0.0
         version: link:../tl
       '@mtcute/tl-runtime':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../tl-runtime
       '@types/events':
         specifier: 3.0.0
@@ -191,13 +191,13 @@ importers:
   packages/crypto-node:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../core
 
   packages/dispatcher:
     dependencies:
       '@mtcute/client':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../client
       events:
         specifier: 3.2.0
@@ -206,7 +206,7 @@ importers:
   packages/file-id:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../core
 
   packages/html-parser:
@@ -222,22 +222,22 @@ importers:
         version: 5.2.3
     devDependencies:
       '@mtcute/client':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../client
 
   packages/http-proxy:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../core
 
   packages/i18n:
     devDependencies:
       '@mtcute/client':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../client
       '@mtcute/dispatcher':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../dispatcher
 
   packages/markdown-parser:
@@ -250,13 +250,13 @@ importers:
         version: 5.2.3
     devDependencies:
       '@mtcute/client':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../client
 
   packages/mtproxy:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../core
       big-integer:
         specifier: 1.6.51
@@ -265,22 +265,22 @@ importers:
   packages/node:
     dependencies:
       '@mtcute/client':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../client
       '@mtcute/html-parser':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../html-parser
       '@mtcute/markdown-parser':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../markdown-parser
       '@mtcute/sqlite':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../sqlite
 
   packages/socks-proxy:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../core
       ip6:
         specifier: 0.2.7
@@ -289,10 +289,10 @@ importers:
   packages/sqlite:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../core
       '@mtcute/tl-runtime':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../tl-runtime
       better-sqlite3:
         specifier: 8.4.0
@@ -312,10 +312,10 @@ importers:
         version: 10.9.1(@types/node@18.16.0)(typescript@5.0.4)
     devDependencies:
       '@mtcute/core':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../core
       '@mtcute/tl-utils':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../tl-utils
       '@types/js-yaml':
         specifier: ^4.0.5
@@ -350,7 +350,7 @@ importers:
         version: 1.2.0
     devDependencies:
       '@mtcute/tl-runtime':
-        specifier: workspace:^1.0.0
+        specifier: workspace:^0.1.0
         version: link:../tl-runtime
 
 packages:

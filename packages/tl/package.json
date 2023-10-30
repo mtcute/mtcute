@@ -21,8 +21,8 @@
         "ts-node": "10.9.1"
     },
     "devDependencies": {
-        "@mtcute/core": "workspace:^1.0.0",
-        "@mtcute/tl-utils": "workspace:^1.0.0",
+        "@mtcute/core": "workspace:^0.1.0",
+        "@mtcute/tl-utils": "workspace:^0.1.0",
         "@types/js-yaml": "^4.0.5",
         "cheerio": "1.0.0-rc.12",
         "csv-parse": "^5.5.0",
