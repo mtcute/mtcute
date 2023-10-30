@@ -115,16 +115,13 @@ export function svgPathToFile(path: string): Uint8Array {
     )
 }
 
-const FILENAME_REGEX = /^(?:file:)?(\/?.+[/\\])*(.+\..+)$/
-
 /**
  * Get file name from file path
  *
  * @param path  File path
  */
 export function extractFileName(path: string): string {
-    const m = path.match(FILENAME_REGEX)
-    if (m) return m[2]
+    if (path.startsWith('file:')) path = path.slice(5)
 
-    return ''
+    return path.split(/[\\/]/).pop()!
 }
