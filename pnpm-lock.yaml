@@ -211,9 +211,6 @@ importers:
 
   packages/html-parser:
     dependencies:
-      '@mtcute/tl':
-        specifier: workspace:^166.0.0
-        version: link:../tl
       htmlparser2:
         specifier: ^6.0.1
         version: 6.1.0
@@ -242,9 +239,6 @@ importers:
 
   packages/markdown-parser:
     dependencies:
-      '@mtcute/tl':
-        specifier: workspace:^166.0.0
-        version: link:../tl
       long:
         specifier: 5.2.3
         version: 5.2.3
