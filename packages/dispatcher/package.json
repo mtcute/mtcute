@@ -22,7 +22,7 @@
         "gen-updates": "node ./scripts/generate.cjs"
     },
     "dependencies": {
-        "@mtcute/client": "workspace:^0.1.0",
+        "@mtcute/client": "workspace:^",
         "events": "3.2.0"
     }
 }

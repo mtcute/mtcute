@@ -44,8 +44,8 @@
         }
     },
     "dependencies": {
-        "@mtcute/tl": "workspace:^166.0.0",
-        "@mtcute/tl-runtime": "workspace:^0.1.0",
+        "@mtcute/tl": "workspace:^",
+        "@mtcute/tl-runtime": "workspace:^",
         "@types/events": "3.0.0",
         "@types/node": "18.16.0",
         "big-integer": "1.6.51",

@@ -20,7 +20,7 @@
         }
     },
     "dependencies": {
-        "@mtcute/core": "workspace:^0.1.0",
+        "@mtcute/core": "workspace:^",
         "big-integer": "1.6.51"
     }
 }

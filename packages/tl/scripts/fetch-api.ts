@@ -21,8 +21,6 @@ import {
     writeTlEntryToString,
 } from '@mtcute/tl-utils'
 
-// eslint-disable-next-line import/no-relative-packages
-import { bumpVersion } from '../../../scripts/version.js'
 import {
     __dirname,
     API_SCHEMA_DIFF_JSON_FILE,
@@ -147,8 +145,6 @@ async function updatePackageVersion(rl: readline.Interface, currentLayer: number
     const versionStr = `${major}.${minor}.0`
     packageJson.version = versionStr
     await writeFile(PACKAGE_JSON_FILE, JSON.stringify(packageJson, null, 4))
-
-    bumpVersion('tl', versionStr)
 }
 
 async function overrideInt53(schema: TlFullSchema): Promise<void> {

@@ -25,6 +25,6 @@
         "long": "5.2.3"
     },
     "devDependencies": {
-        "@mtcute/client": "workspace:^0.1.0"
+        "@mtcute/client": "workspace:^"
     }
 }

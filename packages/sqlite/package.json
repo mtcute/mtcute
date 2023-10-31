@@ -20,8 +20,8 @@
         "build": "pnpm run -w build-package sqlite"
     },
     "dependencies": {
-        "@mtcute/core": "workspace:^0.1.0",
-        "@mtcute/tl-runtime": "workspace:^0.1.0",
+        "@mtcute/core": "workspace:^",
+        "@mtcute/tl-runtime": "workspace:^",
         "better-sqlite3": "8.4.0"
     },
     "devDependencies": {

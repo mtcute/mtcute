@@ -115,10 +115,10 @@ importers:
   packages/client:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../core
       '@mtcute/file-id':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../file-id
       '@types/node':
         specifier: 18.16.0
@@ -130,10 +130,10 @@ importers:
   packages/core:
     dependencies:
       '@mtcute/tl':
-        specifier: workspace:^166.0.0
+        specifier: workspace:^
         version: link:../tl
       '@mtcute/tl-runtime':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../tl-runtime
       '@types/events':
         specifier: 3.0.0
@@ -191,13 +191,13 @@ importers:
   packages/crypto-node:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../core
 
   packages/dispatcher:
     dependencies:
       '@mtcute/client':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../client
       events:
         specifier: 3.2.0
@@ -206,7 +206,7 @@ importers:
   packages/file-id:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../core
 
   packages/html-parser:
@@ -219,22 +219,22 @@ importers:
         version: 5.2.3
     devDependencies:
       '@mtcute/client':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../client
 
   packages/http-proxy:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../core
 
   packages/i18n:
     devDependencies:
       '@mtcute/client':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../client
       '@mtcute/dispatcher':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../dispatcher
 
   packages/markdown-parser:
@@ -244,13 +244,13 @@ importers:
         version: 5.2.3
     devDependencies:
       '@mtcute/client':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../client
 
   packages/mtproxy:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../core
       big-integer:
         specifier: 1.6.51
@@ -259,22 +259,22 @@ importers:
   packages/node:
     dependencies:
       '@mtcute/client':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../client
       '@mtcute/html-parser':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../html-parser
       '@mtcute/markdown-parser':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../markdown-parser
       '@mtcute/sqlite':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../sqlite
 
   packages/socks-proxy:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../core
       ip6:
         specifier: 0.2.7
@@ -283,10 +283,10 @@ importers:
   packages/sqlite:
     dependencies:
       '@mtcute/core':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../core
       '@mtcute/tl-runtime':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../tl-runtime
       better-sqlite3:
         specifier: 8.4.0
@@ -301,15 +301,12 @@ importers:
       long:
         specifier: 5.2.3
         version: 5.2.3
-      ts-node:
-        specifier: 10.9.1
-        version: 10.9.1(@types/node@18.16.0)(typescript@5.0.4)
     devDependencies:
       '@mtcute/core':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../core
       '@mtcute/tl-utils':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../tl-utils
       '@types/js-yaml':
         specifier: ^4.0.5
@@ -344,7 +341,7 @@ importers:
         version: 1.2.0
     devDependencies:
       '@mtcute/tl-runtime':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^
         version: link:../tl-runtime
 
 packages:
@@ -728,6 +725,7 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
+    dev: true
 
   /@eslint-community/eslint-utils@4.4.0(eslint@8.47.0):
     resolution: {integrity: sha512-1/sA4dwrzBAyeUoQ6oxahHKmrZvsnLCg4RfxW3ZFGGmQkSNQPFNLV9CUEFQP1x9EYXHTo5p6xdhZM1Ne9p/AfA==}
@@ -833,6 +831,7 @@ packages:
   /@jridgewell/resolve-uri@3.0.6:
     resolution: {integrity: sha512-R7xHtBSNm+9SyvpJkdQl+qrM3Hm2fea3Ef197M3mUug+v+yR+Rhfbs7PBtcBUVnIWJ4JcAdjvij+c8hXS9p5aw==}
     engines: {node: '>=6.0.0'}
+    dev: true
 
   /@jridgewell/set-array@1.1.0:
     resolution: {integrity: sha512-SfJxIxNVYLTsKwzB3MoOQ1yxf4w/E6MdkvTgrgAt1bfxjSrLUoHMKrDOykwN14q65waezZIdqDneUIPh4/sKxg==}
@@ -841,12 +840,14 @@ packages:
 
   /@jridgewell/sourcemap-codec@1.4.11:
     resolution: {integrity: sha512-Fg32GrJo61m+VqYSdRSjRXMjQ06j8YIYfcTqndLYVAaHmroZHLJZCydsWBOTDqXS2v+mjxohBWEMfg97GXmYQg==}
+    dev: true
 
   /@jridgewell/trace-mapping@0.3.9:
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
     dependencies:
       '@jridgewell/resolve-uri': 3.0.6
       '@jridgewell/sourcemap-codec': 1.4.11
+    dev: true
 
   /@ljharb/through@2.3.11:
     resolution: {integrity: sha512-ccfcIDlogiXNq5KcbAwbaO7lMh3Tm1i3khMPYpxlK8hH/W53zN81KM9coerRLOnTGu3nfXIniAmQbRI9OxbC0w==}
@@ -910,15 +911,19 @@ packages:
 
   /@tsconfig/node10@1.0.8:
     resolution: {integrity: sha512-6XFfSQmMgq0CFLY1MslA/CPUfhIL919M1rMsa5lP2P097N2Wd1sSX0tx1u4olM16fLNhtHZpRhedZJphNJqmZg==}
+    dev: true
 
   /@tsconfig/node12@1.0.9:
     resolution: {integrity: sha512-/yBMcem+fbvhSREH+s14YJi18sp7J9jpuhYByADT2rypfajMZZN4WQ6zBGgBKp53NKmqI36wFYDb3yaMPurITw==}
+    dev: true
 
   /@tsconfig/node14@1.0.1:
     resolution: {integrity: sha512-509r2+yARFfHHE7T6Puu2jjkoycftovhXRqW328PDXTVGKihlb1P8Z9mMZH04ebyajfRY7dedfGynlrFHJUQCg==}
+    dev: true
 
   /@tsconfig/node16@1.0.2:
     resolution: {integrity: sha512-eZxlbI8GZscaGS7kkc/trHTT5xgrjH3/1n2JDwusC9iahPKWMRvRjJSAN5mCXviuTGQ/lHnhvv8Q1YTpnfz9gA==}
+    dev: true
 
   /@types/better-sqlite3@7.6.4:
     resolution: {integrity: sha512-dzrRZCYPXIXfSR1/surNbJ/grU3scTaygS0OMzjlGf71i9sc2fGyHPXXiXmEvNIoE0cGwsanEFMVJxPXmco9Eg==}
@@ -1154,11 +1159,13 @@ packages:
   /acorn-walk@8.2.0:
     resolution: {integrity: sha512-k+iyHEuPgSw6SbuDpGQM+06HQUa04DZ3o+F6CSzXMvvI5KMvnaEqXe+YVe555R9nn6GPt404fos4wcgpw12SDA==}
     engines: {node: '>=0.4.0'}
+    dev: true
 
   /acorn@8.10.0:
     resolution: {integrity: sha512-F0SAmZ8iUtS//m8DmCTA0jlh6TDKkHQyK6xc6V4KDTyZKA9dnvX9/3sRTVQrWm79glUAZbnmmNcdYwUIHWVybw==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+    dev: true
 
   /agent-base@6.0.2:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
@@ -1294,6 +1301,7 @@ packages:
 
   /arg@4.1.3:
     resolution: {integrity: sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==}
+    dev: true
 
   /argparse@1.0.10:
     resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
@@ -1847,6 +1855,7 @@ packages:
 
   /create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
+    dev: true
 
   /cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
@@ -2004,6 +2013,7 @@ packages:
   /diff@4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
+    dev: true
 
   /diff@5.0.0:
     resolution: {integrity: sha512-/VTCrvm5Z0JGty/BWHljh+BAiw3IK+2j87NGMu8Nwc/f48WoDAC395uomO9ZD117ZOBaHmkX1oyLvkVM/aIT3w==}
@@ -3741,6 +3751,7 @@ packages:
 
   /make-error@1.3.6:
     resolution: {integrity: sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==}
+    dev: true
 
   /make-fetch-happen@10.1.2:
     resolution: {integrity: sha512-GWMGiZsKVeJACQGJ1P3Z+iNec7pLsU6YW1q11eaPn3RR8nRXHppFWfP7Eu0//55JK3hSjrAQRl8sDa5uXpq1Ew==}
@@ -5238,6 +5249,7 @@ packages:
       typescript: 5.0.4
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
+    dev: true
 
   /tsconfig-paths@3.14.2:
     resolution: {integrity: sha512-o/9iXgCYc5L/JxCHPe3Hvh8Q/2xm5Z+p18PESBU6Ff33695QnCHBEjcytY2q19ua7Mbl/DavtBOLq+oG0RCL+g==}
@@ -5334,6 +5346,7 @@ packages:
     resolution: {integrity: sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==}
     engines: {node: '>=12.20'}
     hasBin: true
+    dev: true
 
   /typescript@5.2.2:
     resolution: {integrity: sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==}
@@ -5397,6 +5410,7 @@ packages:
 
   /v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
+    dev: true
 
   /validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
@@ -5610,6 +5624,7 @@ packages:
   /yn@3.1.1:
     resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}
     engines: {node: '>=6'}
+    dev: true
 
   /yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}

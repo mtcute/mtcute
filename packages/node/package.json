@@ -24,9 +24,9 @@
         }
     },
     "dependencies": {
-        "@mtcute/client": "workspace:^0.1.0",
-        "@mtcute/sqlite": "workspace:^0.1.0",
-        "@mtcute/markdown-parser": "workspace:^0.1.0",
-        "@mtcute/html-parser": "workspace:^0.1.0"
+        "@mtcute/client": "workspace:^",
+        "@mtcute/sqlite": "workspace:^",
+        "@mtcute/markdown-parser": "workspace:^",
+        "@mtcute/html-parser": "workspace:^"
     }
 }

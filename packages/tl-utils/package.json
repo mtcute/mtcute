@@ -16,6 +16,6 @@
         "crc-32": "1.2.0"
     },
     "devDependencies": {
-        "@mtcute/tl-runtime": "workspace:^0.1.0"
+        "@mtcute/tl-runtime": "workspace:^"
     }
 }

@@ -26,7 +26,7 @@
         }
     },
     "devDependencies": {
-        "@mtcute/client": "workspace:^0.1.0",
-        "@mtcute/dispatcher": "workspace:^0.1.0"
+        "@mtcute/client": "workspace:^",
+        "@mtcute/dispatcher": "workspace:^"
     }
 }

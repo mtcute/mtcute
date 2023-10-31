@@ -17,12 +17,11 @@
         "build": "pnpm run -w build-package tl"
     },
     "dependencies": {
-        "long": "5.2.3",
-        "ts-node": "10.9.1"
+        "long": "5.2.3"
     },
     "devDependencies": {
-        "@mtcute/core": "workspace:^0.1.0",
-        "@mtcute/tl-utils": "workspace:^0.1.0",
+        "@mtcute/core": "workspace:^",
+        "@mtcute/tl-utils": "workspace:^",
         "@types/js-yaml": "^4.0.5",
         "cheerio": "1.0.0-rc.12",
         "csv-parse": "^5.5.0",

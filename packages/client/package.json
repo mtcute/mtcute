@@ -36,8 +36,8 @@
     },
     "dependencies": {
         "@types/node": "18.16.0",
-        "@mtcute/core": "workspace:^0.1.0",
-        "@mtcute/file-id": "workspace:^0.1.0",
+        "@mtcute/core": "workspace:^",
+        "@mtcute/file-id": "workspace:^",
         "file-type": "16.5.4"
     }
 }
