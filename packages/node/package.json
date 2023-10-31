@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/node",
     "private": true,
-    "version": "0.0.0",
+    "version": "0.0.1",
     "description": "Meta-package for Node JS",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",

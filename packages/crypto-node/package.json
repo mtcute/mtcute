@@ -1,6 +1,6 @@
 {
     "name": "@mtcute/crypto-node",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "description": "Native crypto implementation for NodeJS",
     "author": "Alina Sireneva <alina@tei.su>",
     "main": "src/index.ts",
@@ -18,7 +18,9 @@
         "test": "mocha \"tests/**/*.spec.ts\"",
         "docs": "typedoc"
     },
-    "keepScripts": ["install"],
+    "keepScripts": [
+        "install"
+    ],
     "distOnlyFields": {
         "exports": {
             ".": {
