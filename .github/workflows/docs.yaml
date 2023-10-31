@@ -17,6 +17,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.repository == 'mtcute/mtcute' # do not run on forks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

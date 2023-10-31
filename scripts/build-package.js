@@ -151,7 +151,17 @@ function buildPackageJson() {
             const value = dependencies[name]
 
             if (value.startsWith('workspace:')) {
-                dependencies[name] = value.replace('workspace:', '')
+                if (value !== 'workspace:^') {
+                    throw new Error(
+                        `Cannot replace workspace dependency ${name} with ${value} - only workspace:^ is supported`,
+                    )
+                }
+                if (!name.startsWith('@mtcute/')) {
+                    throw new Error(`Cannot replace workspace dependency ${name} - only @mtcute/* is supported`)
+                }
+
+                const depVersion = require(path.join(packageDir, '..', name.slice(8), 'package.json')).version
+                dependencies[name] = `^${depVersion}`
             }
         }
     }

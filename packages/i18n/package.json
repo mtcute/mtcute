@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/i18n",
     "private": true,
-    "version": "0.1.0",
+    "version": "0.0.0",
     "description": "I18n for mtcute",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",

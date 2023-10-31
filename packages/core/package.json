@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/core",
     "private": true,
-    "version": "0.1.0",
+    "version": "0.0.0",
     "description": "Core functions and base MTProto client",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",

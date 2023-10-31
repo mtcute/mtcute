@@ -30,6 +30,7 @@ case "$method" in
         pnpm install
         ;;
     "ci")
+        set -eaux
         chmod -R 777 .verdaccio
         docker compose up -d verdaccio
         docker compose run --rm --build build

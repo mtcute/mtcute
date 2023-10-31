@@ -1,0 +1,71 @@
+name: Run release
+
+on:
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: 'Packages to release (comma separated names, `all` or `updated`)'
+        required: true
+        default: 'updated'
+      kind:
+        description: 'Release kind (major, minor, patch)'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BOT_PAT }}
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - run: pnpm install --frozen-lockfile
+      - name: 'TL codegen'
+        run: pnpm -C packages/tl run gen-code
+      - name: Initialize configs
+        run: |
+          git config user.name "mtcute-bot"
+          git config user.email mtcute-bot@tei.su
+          npm config set //npm.tei.su/:_authToken ${{ secrets.NPM_TOKEN }}
+      - name: Find packages to publish
+        id: find
+        run: node scripts/find-updated-packages.js ${{ inputs.kind }} ${{ inputs.packages }}
+      - name: Bump versions
+        id: bump
+        run: node scripts/bump-version.js ${{ inputs.kind }} ${{ steps.find.outputs.modified }}
+      - name: Commit version bumps
+        run: |
+          git commit -am "v${{ steps.bump.outputs.version }}"
+          git push
+      - name: Build pacakges and publish to NPM
+        id: build
+        env:
+          GH_RELEASE: 1
+        run: node scripts/publish.js ${{ steps.find.outputs.modified }}
+      - name: GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: v${{ steps.bump.outputs.version }}
+          name: v${{ steps.bump.outputs.version }}
+          artifacts: ${{ steps.build.outputs.tarballs }}}
+          draft: false
+          prerelease: false
