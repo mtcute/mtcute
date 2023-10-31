@@ -56,7 +56,7 @@
         "semver": "7.5.1",
         "ts-node": "10.9.1",
         "tsconfig-paths": "^4.2.0",
-        "typedoc": "0.24.7",
+        "typedoc": "0.25.3",
         "typescript": "5.0.4"
     }
 }

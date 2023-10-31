@@ -9,10 +9,10 @@ module.exports = {
     excludeExternals: true,
     excludeInternal: true,
     exclude: [
-        '**/*/dist',
         '**/*/node_modules',
         './packages/tl/**/*',
     ],
+    externalPattern: ['**/dist/**'],
     plugin: [
         './scripts/typedoc-external-links.cjs',
     ],
