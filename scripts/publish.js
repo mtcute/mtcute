@@ -2,8 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const cp = require('child_process')
 
-// const REGISTRY = 'https://registry.npmjs.org'
-const REGISTRY = process.env.REGISTRY || 'https://npm.tei.su/'
+const REGISTRY = process.env.REGISTRY || 'https://registry.npmjs.org'
 exports.REGISTRY = REGISTRY
 
 async function checkVersion(name, version, retry = 0) {
@@ -82,6 +81,8 @@ async function main(arg = process.argv[2]) {
 
     console.log('[i] Using registry %s', REGISTRY)
 
+    const published = []
+
     if (arg === 'all' || arg === 'updated') {
         for (const pkg of listPackages()) {
             if (arg === 'updated') {
@@ -95,9 +96,27 @@ async function main(arg = process.argv[2]) {
             }
 
             await publishSinglePackage(pkg)
+            published.push(pkg)
         }
     } else {
-        await publishSinglePackage(arg)
+        for (const pkg of arg.split(',')) {
+            await publishSinglePackage(pkg)
+            published.push(pkg)
+        }
+    }
+
+    if (process.env.GH_RELEASE) {
+        // we should also generate tgz files for all published packages
+        // for a github release, and also generate a title
+        const tarballs = []
+
+        for (const pkg of published) {
+            const dir = path.join(__dirname, '../packages', pkg, 'dist')
+            const tar = cp.execSync('npm pack -q', { cwd: dir })
+            tarballs.push(path.join(dir, tar.toString().trim()))
+        }
+
+        fs.writeFileSync(process.env.GITHUB_OUTPUT, `tarballs=${tarballs.join(',')}\n`, { flag: 'a' })
     }
 }
 

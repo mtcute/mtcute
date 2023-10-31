@@ -10,6 +10,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    if: github.actor != 'mtcute-bot' # do not after release
 
     strategy:
       matrix:
