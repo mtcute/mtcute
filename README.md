@@ -1,59 +1,94 @@
-# mtcute
+<p align="center">
+    <a href="https://github.com/mtcute/mtcute/">
+        <img src="./.github/logo.svg" alt="mtcute logo" title="mtcute" width="480" /><br/>
+    </a><br/>
+    <b>modern typescript library for mtproto</b>
+    <br>
+    <a href="https://mtcute.dev">documentation</a>
+    &nbsp;•&nbsp;
+    <a href="https://ref.mtcute.dev">api reference</a>
+    &nbsp;•&nbsp;
+    <a href="https://t.me/mt_cute">telegram chat</a>
+    &nbsp;•&nbsp;
+    <a href="https://lindie.app/share/6c5d9f04cae4f0640f58b9d5d7ddca467e87e980">kanban board</a>
+    <br/><br/>
+    <img src="https://github.com/mtcute/mtcute/actions/workflows/test.yaml/badge.svg" alt="NodeJS CI" />
+    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmtcute%2Fmtcute%2Fmaster%2Fpackages%2Ftl%2Fapi-schema.json&query=l&label=tl%20layer" alt="tl layer" />
+    <a href="https://www.npmjs.com/search?q=%40mtcute">
+        <img src="https://img.shields.io/npm/v/@mtcute/client" alt="npm" />
+    </a>
+    <img src="https://img.shields.io/badge/-alpha-orange" alt="alpha version" />
+</p>
 
-![CI badge](https://github.com/mtcute/mtcute/actions/workflows/test.yaml/badge.svg)
+> [!WARNING] 
+> mtcute is currently in alpha stage: the api is not very stable yet, and there may be a lot of bugs  
+> feel free to try it out, though, any feedback is appreciated!
 
-**PROJECT IS IN A HIATUS**
-> not really, but that's probably the best way to describe it
+```ts
+import { NodeTelegramClient } from '@mtcute/node'
+import { Dispatcher, filters } from '@mtcute/dispatcher'
 
-~~If anyone would like to take over it, feel free to DM me.~~  
-Meanwhile, check out other MTProto libraries in JS, or, better yet, use TDLib for god's sake.
+const tg = new NodeTelegramClient({
+    apiId: parseInt(process.env.API_ID),
+    apiHash: process.env.API_HASH,
+    storage: 'my-account'
+})
+const dp = Dispatcher.for(tg)
 
-I'm currently not sure what I want to do with mtcute.  
-I may or may not continue working on it in the future, no promises. 
-I still try to devote some time to it, but it's just not enough, considering the amount of work that needs to be done.  
+dp.onNewMessage(filters.chat('private'), async (msg) => {
+    await msg.replyText('hiiii from mtcute! 🌸')
+})
 
-I really would like to at least release this, since there are simply no good enough MTProto libraries in TS, but I'm not sure if I have enough time and motivation to do so.
-
-Like, I'm not saying other TS libraries are bad, but they just aren't good enough for me. 
-I want to have a library that provides the most friendly, convenient **and** type-safe API possible, 
-while also being fast and reliable, and also hackable to the core.  
-I'm a perfectionist, and that's exactly why I keep postponing the release of this library,
-and why I'm not sure if I'll ever release it at all. I could just release it as it is and work from feedback, 
-but I kinda feel like it's not the right way to do it.
-
-Alright, enough of my stupid rambling. If you're still interested, here's the readme:
-
----
-
-[🗒️ Kanban board](https://lindie.app/share/6c5d9f04cae4f0640f58b9d5d7ddca467e87e980) – Backlog, ideas, improvements, etc.
-
-[📚 Documentation](https://tmp.tei.su) – Early prototype and is probably outdated in many places, but it's still better than nothing.
-
-💬 Telegram chat – TBA, no point in creating it now.
-
-## Installation
-
-Currently, target TypeScript major is 5.1, target Node major is 18.
-
-mtcute is currently only published in my private NPM registry.
-> **Note**: versions may (and will) be overwritten, so at one point your build might just break because of integrity checks.  
-> *Please* don't use this in production, or at least download a tarball and install it from there.
->
-> It is currently used for my peronal testing purposes, and I do host a few small bots with it, but I can't guarantee that it will work for you.
->
-> ~~ik that my devops are not the best, but im trying, alright?!!~~
->
-> You have been warned.
-
-You can install it by running:
-
-```bash
-npm config set --location project @mtcute:registry https://npm.tei.su
-
-npm install @mtcute/node # or any other package
+tg.run({
+    phone: () => tg.input('phone > '),
+    code: () => tg.input('code > '),
+    password: () => tg.input('password > ')
+}, async (self) => {
+    console.log(`logged in as ${self.displayName}`)
+})
 ```
 
-## Setting up for development:
+mtcute is a modern, performant and *✨ cute ✨* [mtproto](https://mtcute.dev/guide/intro/mtproto-vs-bot-api.html) library and bot framework, 
+supporting both web and nodejs. 
+
+## quick start
+
+🤖 just starting a (user)bot? use the scaffolding tool:
+
+```bash
+pnpm create @mtcute/bot
+```
+
+🏭 want to integrate it into your existing nodejs app? use the nodejs wrapper:
+```bash
+pnpm add @mtcute/node
+# for native crypto
+pnpm add @mtcute/crypto-node
+```
+
+✨ building something for web? use the client directly:
+```bash
+pnpm add @mtcute/client
+```
+
+learn more: [guide](https://mtcute.dev/guide/)
+
+## features
+
+- 🍰 **simple**: mtcute hides all the complexity and provides a clean and modern API
+- ✨ **compatible**: mtcute supports almost everything Bot API does, and even more!
+- 🍡 **lightweight**: Running instance uses less than 50 MB of RAM.
+- 🛡️ **type-safe**: Most of the APIs (including MTProto) are strictly typed to help your workflow
+- ⚙️ **hackable**: Almost every aspect of the library is customizable, including networking and storage
+- 🕙 **up-to-date**: mtcute uses the latest TL schema to provide the newest features as soon as possible
+
+## cat in the readme 🐈
+
+<p align="center">
+    <img src="https://cataas.com/cat" align="center" width="480" />
+</p>
+
+## setting up for development
 
 ```bash
 git clone https://github.com/mtcute/mtcute
@@ -65,15 +100,10 @@ pnpm install --frozen-lockfile
 pnpm -C packages/tl run gen-code
 ```
 
-## cat in a readme 🐈
+## acknowledgements
 
-![cat](https://cataas.com/cat)
+some parts were based on or greatly inspired by these projects:
 
-## Acknowledgements
-
-Some parts were based on code from these projects:
-
-- [TDLib](https://github.com/tdlib/td)
-- [Pyrogram](https://github.com/pyrogram/pyrogram)
-- [Telethon](https://github.com/LonamiWebs/Telethon)
-- [TDesktop](https://github.com/telegramdesktop/tdesktop)
+- [TDLib](https://github.com/tdlib/td) - the official mtproto client library
+- [TDesktop](https://github.com/telegramdesktop/tdesktop) - the official desktop client
+- [Pyrogram](https://github.com/pyrogram/pyrogram), [Telethon](https://github.com/LonamiWebs/Telethon) - popular python libraries
