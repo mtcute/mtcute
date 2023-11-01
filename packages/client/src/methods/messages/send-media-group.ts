@@ -7,9 +7,9 @@ import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
+import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _getDiscussionMessage } from './get-discussion-message.js'
-import { _parseEntities } from './parse-entities.js'
 import { _processCommonSendParameters, CommonSendParams } from './send-common.js'
 
 /**
@@ -77,14 +77,11 @@ export async function sendMediaGroup(
             true,
         )
 
-        const [message, entities] = await _parseEntities(
+        const [message, entities] = await _normalizeInputText(
             client,
             // some types dont have `caption` field, and ts warns us,
-            // but since it's JS, they'll just be `undefined` and properly
-            // handled by _parseEntities method
+            // but since it's JS, they'll just be `undefined` and properly handled by the method
             (media as Extract<typeof media, { caption?: unknown }>).caption,
-            params.parseMode,
-            (media as Extract<typeof media, { entities?: unknown }>).entities,
         )
 
         multiMedia.push({

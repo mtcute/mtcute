@@ -2,7 +2,6 @@
 
 📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_html_parser.html)
 
-
 HTML entities parser for mtcute
 
 > **NOTE**: The syntax implemented here is **incompatible** with Bot API _HTML_.
@@ -12,21 +11,20 @@ HTML entities parser for mtcute
 ## Features
 - Supports all entities that Telegram supports
 - Supports nested entities
-- Proper newline handling (just like in real HTML)
-- Automatic escaping of user input
+- Proper newline/whitespace handling (just like in real HTML)
+- [Interpolation](#interpolation)!
 
 ## Usage
 
 ```ts
-import { TelegramClient } from '@mtcute/client'
-import { HtmlMessageEntityParser, html } from '@mtcute/html-parser'
-
-const tg = new TelegramClient({ ... })
-tg.registerParseMode(new HtmlMessageEntityParser())
+import { html } from '@mtcute/html-parser'
 
 tg.sendText(
     'me',
-    html`Hello, <b>me</b>! Updates from the feed:<br>${await getUpdatesFromFeed()}`
+    html`
+        Hello, <b>me</b>! Updates from the feed:<br>
+        ${await getUpdatesFromFeed()}
+    `
 )
 ```
 
@@ -97,18 +95,20 @@ Overlapping entities are supported in `unparse()`, though.
 | `<b>bold <i>and</b> italic</i>`                                                                                     | **bold _and_** italic<br>⚠️ <i>word "italic" is not actually italic!</i> |
 | `<b>bold <i>and</i></b><i> italic</i>`<br>⚠️ <i>this is how <code>unparse()</code> handles overlapping entities</i> | **bold _and_** _italic_                                                  |
 
-## Escaping
+## Interpolation
 
-Escaping in this parser works exactly the same as in `htmlparser2`.
+Being a tagged template literal, `html` supports interpolation.
 
-This means that you can keep `<>&` symbols as-is in some cases. However, when dealing with user input, it is always
-better to use [`HtmlMessageEntityParser.escape`](./classes/htmlmessageentityparser.html#escape) or, even better,
-`html` helper:
+You can interpolate one of the following:
+- `string` - **will not** be parsed, and appended to plain text as-is
+  - In case you want the string to be parsed, use `html` as a simple function: <code>html\`... ${html('**bold**')} ...\`</code>
+- `number` - will be converted to string and appended to plain text as-is
+- `TextWithEntities` or `MessageEntity` - will add the text and its entities to the output. This is the type returned by `html` itself:
+  ```ts
+    const bold = html`**bold**`
+    const text = html`Hello, ${bold}!`
+  ```
+- falsy value (i.e. `null`, `undefined`, `false`) - will be ignored
 
-```typescript
-import { html } from '@mtcute/html-parser'
-
-const username = 'Boris <&>'
-const text = html`Hi, ${username}!`
-console.log(text) // Hi, Boris &amp;lt;&amp;amp;&amp;gt;!
-```
+Note that because of interpolation, you almost never need to think about escaping anything,
+since the values are not even parsed as HTML, and are appended to the output as-is.

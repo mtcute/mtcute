@@ -725,7 +725,6 @@ export namespace BotInline {
     export async function _convertToTl(
         client: BaseTelegramClient,
         results: InputInlineResult[],
-        parseMode?: string | null,
     ): Promise<[boolean, tl.TypeInputBotInlineResult[]]> {
         const normalizeThumb = (obj: InputInlineResult, fallback?: string): tl.RawInputWebDocument | undefined => {
             if (obj.type !== 'voice' && obj.type !== 'audio' && obj.type !== 'sticker' && obj.type !== 'game') {
@@ -760,7 +759,7 @@ export namespace BotInline {
                     let sendMessage: tl.TypeInputBotInlineMessage
 
                     if (obj.message) {
-                        sendMessage = await BotInlineMessage._convertToTl(client, obj.message, parseMode)
+                        sendMessage = await BotInlineMessage._convertToTl(client, obj.message)
                     } else {
                         let message = obj.title
                         const entities: tl.TypeMessageEntity[] = [
@@ -817,7 +816,7 @@ export namespace BotInline {
                     let sendMessage: tl.TypeInputBotInlineMessage
 
                     if (obj.message) {
-                        sendMessage = await BotInlineMessage._convertToTl(client, obj.message, parseMode)
+                        sendMessage = await BotInlineMessage._convertToTl(client, obj.message)
 
                         if (sendMessage._ !== 'inputBotInlineMessageGame') {
                             throw new MtArgumentError('game inline result must contain a game inline message')
@@ -850,7 +849,7 @@ export namespace BotInline {
             let sendMessage: tl.TypeInputBotInlineMessage
 
             if (obj.message) {
-                sendMessage = await BotInlineMessage._convertToTl(client, obj.message, parseMode)
+                sendMessage = await BotInlineMessage._convertToTl(client, obj.message)
             } else if (obj.type === 'venue') {
                 if (obj.latitude && obj.longitude) {
                     sendMessage = {

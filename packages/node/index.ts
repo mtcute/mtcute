@@ -2,8 +2,6 @@ import { createRequire } from 'module'
 import { createInterface, Interface as RlInterface } from 'readline'
 
 import { TelegramClient, TelegramClientOptions } from '@mtcute/client'
-import { HtmlMessageEntityParser } from '@mtcute/html-parser'
-import { MarkdownMessageEntityParser } from '@mtcute/markdown-parser'
 import { SqliteStorage } from '@mtcute/sqlite'
 
 export * from '@mtcute/client'
@@ -23,16 +21,6 @@ try {
 } catch (e) {}
 
 export interface NodeTelegramClientOptions extends Omit<TelegramClientOptions, 'storage'> {
-    /**
-     * Default parse mode to use.
-     *
-     * Both HTML and Markdown parse modes are
-     * registered automatically.
-     *
-     * @default  `html`
-     */
-    defaultParseMode?: 'html' | 'markdown'
-
     /**
      * Storage to use.
      *
@@ -66,13 +54,6 @@ export class NodeTelegramClient extends TelegramClient {
                     new SqliteStorage(opts.storage) :
                     opts.storage ?? new SqliteStorage('client.session'),
         })
-
-        this.registerParseMode(new HtmlMessageEntityParser())
-        this.registerParseMode(new MarkdownMessageEntityParser())
-
-        if (opts.defaultParseMode) {
-            this.setDefaultParseMode(opts.defaultParseMode)
-        }
     }
 
     private _rl?: RlInterface

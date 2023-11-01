@@ -1,10 +1,10 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils.js'
 
-import { FormattedString, InputMediaLike, InputPeerLike, InputPrivacyRule, Story } from '../../types/index.js'
+import { InputMediaLike, InputPeerLike, InputPrivacyRule, InputText, Story } from '../../types/index.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
-import { _parseEntities } from '../messages/parse-entities.js'
 import { _normalizePrivacyRules } from '../misc/normalize-privacy-rules.js'
+import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _findStoryInUpdate } from './find-in-update.js'
 
@@ -34,20 +34,7 @@ export async function sendStory(
         /**
          * Override caption for {@link media}
          */
-        caption?: string | FormattedString<string>
-
-        /**
-         * Override entities for {@link media}
-         */
-        entities?: tl.TypeMessageEntity[]
-
-        /**
-         * Parse mode to use to parse entities before sending the message.
-         * Passing `null` will explicitly disable formatting.
-         *
-         * @default  current default parse mode (if any).
-         */
-        parseMode?: string | null
+        caption?: InputText
 
         /**
          * Whether to automatically pin this story to the profile
@@ -89,19 +76,16 @@ export async function sendStory(
         }
     }
 
-    const inputMedia = await _normalizeInputMedia(client, media, params)
+    const inputMedia = await _normalizeInputMedia(client, media)
     const privacyRules = params.privacyRules ?
         await _normalizePrivacyRules(client, params.privacyRules) :
         [{ _: 'inputPrivacyValueAllowAll' } as const]
 
-    const [caption, entities] = await _parseEntities(
+    const [caption, entities] = await _normalizeInputText(
         client,
         // some types dont have `caption` field, and ts warns us,
-        // but since it's JS, they'll just be `undefined` and properly
-        // handled by _parseEntities method
+        // but since it's JS, they'll just be `undefined` and properly handled by the method
         params.caption || (media as Extract<typeof media, { caption?: unknown }>).caption,
-        params.parseMode,
-        params.entities || (media as Extract<typeof media, { entities?: unknown }>).entities,
     )
 
     const res = await client.call({

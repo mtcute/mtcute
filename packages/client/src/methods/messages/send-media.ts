@@ -1,17 +1,17 @@
-import { BaseTelegramClient, tl } from '@mtcute/core'
+import { BaseTelegramClient } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils.js'
 
 import { BotKeyboard, ReplyMarkup } from '../../types/bots/keyboards.js'
 import { InputMediaLike } from '../../types/media/input-media.js'
 import { Message } from '../../types/messages/message.js'
-import { FormattedString } from '../../types/parser.js'
+import { InputText } from '../../types/misc/entities.js'
 import { InputPeerLike } from '../../types/peers/index.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
+import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 import { _getDiscussionMessage } from './get-discussion-message.js'
-import { _parseEntities } from './parse-entities.js'
 import { _processCommonSendParameters, CommonSendParams } from './send-common.js'
 
 /**
@@ -50,15 +50,7 @@ export async function sendMedia(
          * Can be used, for example. when using File IDs
          * or when using existing InputMedia objects.
          */
-        caption?: string | FormattedString<string>
-
-        /**
-         * Override entities for `media`.
-         *
-         * Can be used, for example. when using File IDs
-         * or when using existing InputMedia objects.
-         */
-        entities?: tl.TypeMessageEntity[]
+        caption?: InputText
 
         /**
          * Function that will be called after some part has been uploaded.
@@ -82,14 +74,11 @@ export async function sendMedia(
 
     const inputMedia = await _normalizeInputMedia(client, media, params)
 
-    const [message, entities] = await _parseEntities(
+    const [message, entities] = await _normalizeInputText(
         client,
         // some types dont have `caption` field, and ts warns us,
-        // but since it's JS, they'll just be `undefined` and properly
-        // handled by _parseEntities method
+        // but since it's JS, they'll just be `undefined` and properly handled by the method
         params.caption || (media as Extract<typeof media, { caption?: unknown }>).caption,
-        params.parseMode,
-        params.entities || (media as Extract<typeof media, { entities?: unknown }>).entities,
     )
 
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)

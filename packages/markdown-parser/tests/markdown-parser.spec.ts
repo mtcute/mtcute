@@ -2,9 +2,10 @@ import { expect } from 'chai'
 import Long from 'long'
 import { describe, it } from 'mocha'
 
-import { FormattedString, tl } from '@mtcute/client'
+import { MessageEntity, TextWithEntities, tl } from '@mtcute/client'
 
-import { MarkdownMessageEntityParser, md } from '../src/index.js'
+// md is special cased in prettier, we don't want that here
+import { md as md_ } from '../src/index.js'
 
 const createEntity = <T extends tl.TypeMessageEntity['_']>(
     type: T,
@@ -21,16 +22,9 @@ const createEntity = <T extends tl.TypeMessageEntity['_']>(
 }
 
 describe('MarkdownMessageEntityParser', () => {
-    const parser = new MarkdownMessageEntityParser()
-
     describe('unparse', () => {
-        const test = (
-            text: string,
-            entities: tl.TypeMessageEntity[],
-            expected: string | string[],
-            _parser = parser,
-        ): void => {
-            const result = _parser.unparse(text, entities)
+        const test = (text: string, entities: tl.TypeMessageEntity[], expected: string | string[]): void => {
+            const result = md_.unparse({ text, entities })
 
             if (Array.isArray(expected)) {
                 expect(expected).to.include(result)
@@ -240,9 +234,9 @@ describe('MarkdownMessageEntityParser', () => {
             if (!Array.isArray(texts)) texts = [texts]
 
             for (const text of texts) {
-                const [_text, entities] = parser.parse(text)
-                expect(_text).eql(expectedText)
-                expect(entities).eql(expectedEntities)
+                const res = md_(text)
+                expect(res.text).eql(expectedText)
+                expect(res.entities ?? []).eql(expectedEntities)
             }
         }
 
@@ -492,29 +486,8 @@ describe('MarkdownMessageEntityParser', () => {
             test('[link]() [link]', [], 'link [link]')
         })
 
-        it('should ignore unclosed tags', () => {
-            test('plain ```\npre closed with single backtick`', [], 'plain pre closed with single backtick`')
-            test('plain ```\npre closed with single backtick\n`', [], 'plain pre closed with single backtick\n`')
-
-            test('plain ```\npre closed with double backticks`', [], 'plain pre closed with double backticks`')
-            test('plain ```\npre closed with double backticks\n`', [], 'plain pre closed with double backticks\n`')
-
-            test('plain __italic but unclosed', [], 'plain italic but unclosed')
-            test('plain __italic and **also bold but both unclosed', [], 'plain italic and also bold but both unclosed')
-            test(
-                'plain __italic and **also bold but italic closed__',
-                [createEntity('messageEntityItalic', 6, 38)],
-                'plain italic and also bold but italic closed',
-            )
-            test(
-                'plain __italic and **also bold but bold closed**',
-                [createEntity('messageEntityBold', 17, 25)],
-                'plain italic and also bold but bold closed',
-            )
-        })
-
         describe('malformed input', () => {
-            const testThrows = (input: string) => expect(() => parser.parse(input)).throws(Error)
+            const testThrows = (input: string) => expect(() => md_(input)).throws(Error)
 
             it('should throw an error on malformed links', () => {
                 testThrows('plain [link](https://google.com but unclosed')
@@ -524,37 +497,95 @@ describe('MarkdownMessageEntityParser', () => {
                 testThrows('plain ```pre without linebreaks```')
                 testThrows('plain ``` pre without linebreaks but with spaces instead ```')
             })
+
+            it('should throw an error on unterminated entity', () => {
+                testThrows('plain **bold but unclosed')
+                testThrows('plain **bold and __also italic but unclosed')
+            })
         })
     })
 
     describe('template', () => {
-        it('should work as a tagged template literal', () => {
-            const unsafeString = '__[]__'
+        const test = (text: TextWithEntities, expectedEntities: tl.TypeMessageEntity[], expectedText: string): void => {
+            expect(text.text).eql(expectedText)
+            expect(text.entities ?? []).eql(expectedEntities)
+        }
 
-            expect(md`${unsafeString}`.value).eq('\\_\\_\\[\\]\\_\\_')
-            expect(md`${unsafeString} **text**`.value).eq('\\_\\_\\[\\]\\_\\_ **text**')
-            expect(md`**text** ${unsafeString}`.value).eq('**text** \\_\\_\\[\\]\\_\\_')
-            expect(md`**${unsafeString}**`.value).eq('**\\_\\_\\[\\]\\_\\_**')
+        it('should add plain strings as is', () => {
+            test(md_`${'**plain**'}`, [], '**plain**')
         })
 
-        it('should skip with FormattedString', () => {
-            const unsafeString2 = '__[]__'
-            const unsafeString = new FormattedString('__[]__')
-
-            expect(md`${unsafeString}`.value).eq('__[]__')
-            expect(md`${unsafeString} ${unsafeString2}`.value).eq('__[]__ \\_\\_\\[\\]\\_\\_')
-            expect(md`${unsafeString} **text**`.value).eq('__[]__ **text**')
-            expect(md`**text** ${unsafeString}`.value).eq('**text** __[]__')
-            expect(md`**${unsafeString} ${unsafeString2}**`.value).eq('**__[]__ \\_\\_\\[\\]\\_\\_**')
+        it('should skip falsy values', () => {
+            test(md_`some text ${null} more text ${false}`, [], 'some text  more text ')
         })
 
-        it('should error with incompatible FormattedString', () => {
-            const unsafeString = new FormattedString('<&>', 'markdown')
-            const unsafeString2 = new FormattedString('<&>', 'some-other-mode')
+        it('should properly dedent', () => {
+            test(
+                md_`
+                some text
+                **bold**
+                more text
+            `,
+                [createEntity('messageEntityBold', 10, 4)],
+                'some text\nbold\nmore text',
+            )
+        })
 
-            expect(() => md`${unsafeString}`.value).not.throw(Error)
-            // @ts-expect-error this is intentional
-            expect(() => md`${unsafeString2}`.value).throw(Error)
+        it('should process entities', () => {
+            const inner = md_`**bold**`
+
+            test(
+                md_`some text ${inner} some more text`,
+                [createEntity('messageEntityBold', 10, 4)],
+                'some text bold some more text',
+            )
+            test(
+                md_`some text ${inner} some more ${inner} text`,
+                [createEntity('messageEntityBold', 10, 4), createEntity('messageEntityBold', 25, 4)],
+                'some text bold some more bold text',
+            )
+        })
+
+        it('should process entities on edges', () => {
+            test(
+                md_`${md_`**bold**`} and ${md_`__italic__`}`,
+                [createEntity('messageEntityBold', 0, 4), createEntity('messageEntityItalic', 9, 6)],
+                'bold and italic',
+            )
+        })
+
+        it('should process nested entities', () => {
+            test(
+                md_`**bold ${md_`__bold italic__`} more bold**`,
+                [createEntity('messageEntityItalic', 5, 11), createEntity('messageEntityBold', 0, 26)],
+                'bold bold italic more bold',
+            )
+            test(
+                md_`**bold ${md_`__bold italic__ --and some underline--`} more bold**`,
+                [
+                    createEntity('messageEntityItalic', 5, 11),
+                    createEntity('messageEntityUnderline', 17, 18),
+                    createEntity('messageEntityBold', 0, 45),
+                ],
+                'bold bold italic and some underline more bold',
+            )
+            test(
+                md_`**${md_`__bold italic --underline--__`}**`,
+                [
+                    createEntity('messageEntityUnderline', 12, 9),
+                    createEntity('messageEntityItalic', 0, 21),
+                    createEntity('messageEntityBold', 0, 21),
+                ],
+                'bold italic underline',
+            )
+        })
+
+        it('should process MessageEntity', () => {
+            test(
+                md_`**bold ${new MessageEntity(createEntity('messageEntityItalic', 0, 11), 'bold italic')} more bold**`,
+                [createEntity('messageEntityItalic', 5, 11), createEntity('messageEntityBold', 0, 26)],
+                'bold bold italic more bold',
+            )
         })
     })
 })

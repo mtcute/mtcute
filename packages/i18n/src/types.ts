@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { FormattedString } from '@mtcute/client'
+import type { tl } from '@mtcute/client'
 
 type Values<T> = T[keyof T]
 type SafeGet<T, K extends string> = T extends Record<K, unknown> ? T[K] : never
@@ -8,7 +8,18 @@ type SafeGet<T, K extends string> = T extends Record<K, unknown> ? T[K] : never
 /**
  * Literal translated value, represented by (optionally formatted) string
  */
-export type I18nValueLiteral = string | FormattedString<string>
+export type I18nValueLiteral =
+    | string
+    | {
+          readonly text: string
+          readonly entities?: tl.TypeMessageEntity[]
+      }
+
+// ^ we're not using InputText from @mtcute/client because it's a type-only dependency
+// and may not be available at runtime, and we don't want it to be `any`
+//
+// we check if this is assignable to InputText in tests, so it's fine
+
 /**
  * Dynamic translated value, represented by a
  * function resolving to a literal one
@@ -59,7 +70,7 @@ export type MtcuteI18nFunction<Strings, Input> = <K extends NestedKeysDelimited<
     lang: Input | string | null,
     key: K,
     ...params: ExtractParameter<Strings, K>
-) => string | FormattedString<string>
+) => I18nValueLiteral
 
 /**
  * Wrapper type for i18n object containing strings for a language

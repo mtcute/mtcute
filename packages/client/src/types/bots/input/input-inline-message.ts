@@ -1,6 +1,7 @@
 import { assertNever, BaseTelegramClient, tl } from '@mtcute/core'
 
-import { _parseEntities } from '../../../methods/messages/parse-entities.js'
+import { _normalizeInputText } from '../../../methods/misc/normalize-text.js'
+import { InputText } from '../../../types/misc/entities.js'
 import {
     InputMediaContact,
     InputMediaGeo,
@@ -8,7 +9,6 @@ import {
     InputMediaVenue,
     InputMediaWebpage,
 } from '../../media/index.js'
-import { FormattedString } from '../../parser.js'
 import { BotKeyboard, ReplyMarkup } from '../keyboards.js'
 
 /**
@@ -20,13 +20,7 @@ export interface InputInlineMessageText {
     /**
      * Text of the message
      */
-    text: string | FormattedString<string>
-
-    /**
-     * Text markup entities.
-     * If passed, parse mode is ignored
-     */
-    entities?: tl.TypeMessageEntity[]
+    text: InputText
 
     /**
      * Message reply markup
@@ -57,13 +51,7 @@ export interface InputInlineMessageMedia {
     /**
      * Caption for the media
      */
-    text?: string | FormattedString<string>
-
-    /**
-     * Caption markup entities.
-     * If passed, parse mode is ignored
-     */
-    entities?: tl.TypeMessageEntity[]
+    text?: InputText
 
     /**
      * Message reply markup
@@ -135,13 +123,7 @@ export interface InputInlineMessageWebpage extends InputMediaWebpage {
     /**
      * Text of the message
      */
-    text: string | FormattedString<string>
-
-    /**
-     * Text markup entities.
-     * If passed, parse mode is ignored
-     */
-    entities?: tl.TypeMessageEntity[]
+    text: InputText
 
     /**
      * Message reply markup
@@ -176,7 +158,7 @@ export namespace BotInlineMessage {
      * @param params
      */
     export function text(
-        text: string | FormattedString<string>,
+        text: InputText,
         params: Omit<InputInlineMessageText, 'type' | 'text'> = {},
     ): InputInlineMessageText {
         const ret = params as tl.Mutable<InputInlineMessageText>
@@ -266,11 +248,10 @@ export namespace BotInlineMessage {
     export async function _convertToTl(
         client: BaseTelegramClient,
         obj: InputInlineMessage,
-        parseMode?: string | null,
     ): Promise<tl.TypeInputBotInlineMessage> {
         switch (obj.type) {
             case 'text': {
-                const [message, entities] = await _parseEntities(client, obj.text, parseMode, obj.entities)
+                const [message, entities] = await _normalizeInputText(client, obj.text)
 
                 return {
                     _: 'inputBotInlineMessageText',
@@ -281,7 +262,7 @@ export namespace BotInlineMessage {
                 }
             }
             case 'media': {
-                const [message, entities] = await _parseEntities(client, obj.text, parseMode, obj.entities)
+                const [message, entities] = await _normalizeInputText(client, obj.text)
 
                 return {
                     _: 'inputBotInlineMessageMediaAuto',
@@ -336,7 +317,7 @@ export namespace BotInlineMessage {
                     replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
                 }
             case 'webpage': {
-                const [message, entities] = await _parseEntities(client, obj.text, parseMode, obj.entities)
+                const [message, entities] = await _normalizeInputText(client, obj.text)
 
                 return {
                     _: 'inputBotInlineMessageMediaWebPage',

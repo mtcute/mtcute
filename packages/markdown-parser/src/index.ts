@@ -1,6 +1,6 @@
 import Long from 'long'
 
-import type { FormattedString, IMessageEntityParser, MessageEntity, tl } from '@mtcute/client'
+import type { InputText, MessageEntity, TextWithEntities, tl } from '@mtcute/client'
 
 const MENTION_REGEX = /^tg:\/\/user\?id=(\d+)(?:&hash=(-?[0-9a-fA-F]+)(?:&|$)|&|$)/
 const EMOJI_REGEX = /^tg:\/\/emoji\?id=(-?\d+)/
@@ -16,69 +16,138 @@ const TAG_PRE = '```'
 const TO_BE_ESCAPED = /[*_\-~`[\\\]|]/g
 
 /**
- * Tagged template based helper for escaping entities in Markdown
+ * Escape a string to be safely used in Markdown.
  *
- * @example
- * ```typescript
- * const escaped = md`**${user.displayName}**`
- * ```
+ * > **Note**: this function is in most cases not needed, as `md` function
+ * > handles all `string`s passed to it automatically as plain text.
  */
-export function md(
-    strings: TemplateStringsArray,
-    ...sub: (string | FormattedString<'markdown'> | MessageEntity | boolean | undefined | null)[]
-): FormattedString<'markdown'> {
-    let str = ''
-    sub.forEach((it, idx) => {
-        if (typeof it === 'boolean' || !it) return
-
-        if (typeof it === 'string') it = MarkdownMessageEntityParser.escape(it)
-        else if ('raw' in it) {
-            it = new MarkdownMessageEntityParser().unparse(it.text, [it.raw])
-        } else {
-            if (it.mode && it.mode !== 'markdown') {
-                throw new Error(`Incompatible parse mode: ${it.mode}`)
-            }
-            it = it.value
-        }
-
-        str += strings[idx] + it
-    })
-
-    return { value: str + strings[strings.length - 1], mode: 'markdown' }
+function escape(str: string): string {
+    return str.replace(TO_BE_ESCAPED, (s) => '\\' + s)
 }
 
 /**
- * Markdown MessageEntity parser.
- *
- * This class is **not** compatible with the Bot API Markdown nor MarkdownV2,
- * please read the [documentation](../) to learn about syntax.
+ * Add Markdown formatting to the text given the plain text and entities contained in it.
  */
-export class MarkdownMessageEntityParser implements IMessageEntityParser {
-    name = 'markdown'
+function unparse(input: InputText): string {
+    if (typeof input === 'string') return escape(input)
 
-    /**
-     *
-     * @param str  String to be escaped
-     */
+    let text = input.text
+    const entities = input.entities ?? []
 
-    /* istanbul ignore next */
-    static escape(str: string): string {
-        // this code doesn't really need to be tested since it's just
-        // a simplified version of what is used in .unparse()
-        return str.replace(TO_BE_ESCAPED, (s) => '\\' + s)
+    // keep track of positions of inserted escape symbols
+    const escaped: number[] = []
+    text = text.replace(TO_BE_ESCAPED, (s, pos: number) => {
+        escaped.push(pos)
+
+        return '\\' + s
+    })
+    const hasEscaped = escaped.length > 0
+
+    type InsertLater = [number, string]
+    const insert: InsertLater[] = []
+
+    for (const entity of entities) {
+        const type = entity._
+
+        let start = entity.offset
+        let end = start + entity.length
+
+        if (start > text.length) continue
+        if (start < 0) start = 0
+        if (end > text.length) end = text.length
+
+        if (hasEscaped) {
+            // determine number of escape chars since the beginning of the string
+            let escapedPos = 0
+
+            while (escapedPos < escaped.length && escaped[escapedPos] < start) {
+                escapedPos += 1
+            }
+            start += escapedPos
+
+            while (escapedPos < escaped.length && escaped[escapedPos] <= end) {
+                escapedPos += 1
+            }
+            end += escapedPos
+        }
+
+        let startTag
+        let endTag: string
+
+        switch (type) {
+            case 'messageEntityBold':
+                startTag = endTag = TAG_BOLD
+                break
+            case 'messageEntityItalic':
+                startTag = endTag = TAG_ITALIC
+                break
+            case 'messageEntityUnderline':
+                startTag = endTag = TAG_UNDERLINE
+                break
+            case 'messageEntityStrike':
+                startTag = endTag = TAG_STRIKE
+                break
+            case 'messageEntitySpoiler':
+                startTag = endTag = TAG_SPOILER
+                break
+            case 'messageEntityCode':
+                startTag = endTag = TAG_CODE
+                break
+            case 'messageEntityPre':
+                startTag = TAG_PRE
+
+                if (entity.language) {
+                    startTag += entity.language
+                }
+
+                startTag += '\n'
+                endTag = '\n' + TAG_PRE
+                break
+            case 'messageEntityTextUrl':
+                startTag = '['
+                endTag = `](${entity.url})`
+                break
+            case 'messageEntityMentionName':
+                startTag = '['
+                endTag = `](tg://user?id=${entity.userId})`
+                break
+            case 'messageEntityCustomEmoji':
+                startTag = '['
+                endTag = `](tg://emoji?id=${entity.documentId.toString()})`
+                break
+            default:
+                continue
+        }
+
+        insert.push([start, startTag])
+        insert.push([end, endTag])
     }
 
-    parse(text: string): [string, tl.TypeMessageEntity[]] {
-        const entities: tl.TypeMessageEntity[] = []
+    // sort by offset desc
+    insert.sort((a, b) => b[0] - a[0])
+
+    for (const [offset, tag] of insert) {
+        text = text.substr(0, offset) + tag + text.substr(offset)
+    }
+
+    return text
+}
+
+function parse(
+    strings: TemplateStringsArray | string,
+    ...sub: (InputText | MessageEntity | boolean | number | undefined | null)[]
+): TextWithEntities {
+    const entities: tl.TypeMessageEntity[] = []
+    let result = ''
+
+    const stacks: Record<string, tl.Mutable<tl.TypeMessageEntity>[]> = {}
+
+    let insideCode = false
+    let insidePre = false
+    let insideLink = false
+
+    function feed(text: string) {
         const len = text.length
-        let result = ''
-
-        const stacks: Record<string, tl.Mutable<tl.TypeMessageEntity>[]> = {}
-
-        let insideCode = false
-        let insidePre = false
-        let insideLink = false
-
         let pos = 0
 
         while (pos < len) {
@@ -297,111 +366,106 @@ export class MarkdownMessageEntityParser implements IMessageEntityParser {
                 }
             }
 
+            if (c === '\n') {
+                if (pos !== 0) {
+                    result += '\n'
+                }
+
+                const nonWhitespace = text.slice(pos + 1).search(/\S/)
+
+                if (nonWhitespace !== -1) {
+                    pos += nonWhitespace + 1
+                } else {
+                    pos = len
+                    result = result.trimEnd()
+                }
+                continue
+            }
+
             // nothing matched => normal character
             result += c
             pos += 1
         }
-
-        return [result, entities]
     }
 
-    unparse(text: string, entities: ReadonlyArray<tl.TypeMessageEntity>): string {
-        // keep track of positions of inserted escape symbols
-        const escaped: number[] = []
-        text = text.replace(TO_BE_ESCAPED, (s, pos: number) => {
-            escaped.push(pos)
+    if (typeof strings === 'string') strings = [strings] as unknown as TemplateStringsArray
 
-            return '\\' + s
-        })
-        const hasEscaped = escaped.length > 0
+    sub.forEach((it, idx) => {
+        feed(strings[idx])
 
-        type InsertLater = [number, string]
-        const insert: InsertLater[] = []
+        if (typeof it === 'boolean' || !it) return
 
-        for (const entity of entities) {
-            const type = entity._
+        if (typeof it === 'string' || typeof it === 'number') {
+            result += it
+        } else {
+            // TextWithEntities or MessageEntity
+            const text = it.text
+            const innerEntities = 'raw' in it ? [it.raw] : it.entities
 
-            let start = entity.offset
-            let end = start + entity.length
+            const baseOffset = result.length
+            result += text
 
-            if (start > text.length) continue
-            if (start < 0) start = 0
-            if (end > text.length) end = text.length
-
-            if (hasEscaped) {
-                // determine number of escape chars since the beginning of the string
-                let escapedPos = 0
-
-                while (escapedPos < escaped.length && escaped[escapedPos] < start) {
-                    escapedPos += 1
+            if (innerEntities) {
+                for (const ent of innerEntities) {
+                    entities.push({ ...ent, offset: ent.offset + baseOffset })
                 }
-                start += escapedPos
-
-                while (escapedPos < escaped.length && escaped[escapedPos] <= end) {
-                    escapedPos += 1
-                }
-                end += escapedPos
             }
-
-            let startTag
-            let endTag: string
-
-            switch (type) {
-                case 'messageEntityBold':
-                    startTag = endTag = TAG_BOLD
-                    break
-                case 'messageEntityItalic':
-                    startTag = endTag = TAG_ITALIC
-                    break
-                case 'messageEntityUnderline':
-                    startTag = endTag = TAG_UNDERLINE
-                    break
-                case 'messageEntityStrike':
-                    startTag = endTag = TAG_STRIKE
-                    break
-                case 'messageEntitySpoiler':
-                    startTag = endTag = TAG_SPOILER
-                    break
-                case 'messageEntityCode':
-                    startTag = endTag = TAG_CODE
-                    break
-                case 'messageEntityPre':
-                    startTag = TAG_PRE
-
-                    if (entity.language) {
-                        startTag += entity.language
-                    }
-
-                    startTag += '\n'
-                    endTag = '\n' + TAG_PRE
-                    break
-                case 'messageEntityTextUrl':
-                    startTag = '['
-                    endTag = `](${entity.url})`
-                    break
-                case 'messageEntityMentionName':
-                    startTag = '['
-                    endTag = `](tg://user?id=${entity.userId})`
-                    break
-                case 'messageEntityCustomEmoji':
-                    startTag = '['
-                    endTag = `](tg://emoji?id=${entity.documentId.toString()})`
-                    break
-                default:
-                    continue
-            }
-
-            insert.push([start, startTag])
-            insert.push([end, endTag])
         }
+    })
 
-        // sort by offset desc
-        insert.sort((a, b) => b[0] - a[0])
+    feed(strings[strings.length - 1])
 
-        for (const [offset, tag] of insert) {
-            text = text.substr(0, offset) + tag + text.substr(offset)
+    for (const [name, stack] of Object.entries(stacks)) {
+        if (stack.length) {
+            throw new Error(`Unterminated ${name} entity`)
         }
+    }
 
-        return text
+    return {
+        text: result,
+        entities,
     }
 }
+
+// typedoc doesn't support this yet, so we'll have to do it manually
+// https://github.com/TypeStrong/typedoc/issues/2436
+
+export const md: {
+    /**
+     * Tagged template based Markdown-to-entities parser function
+     *
+     * Additionally, `md` function has two static methods:
+     * - `md.escape` - escape a string to be safely used in Markdown
+     *   (should not be needed in most cases, as `md` function itself handles all `string`s
+     *   passed to it automatically as plain text)
+     * - `md.unparse` - add Markdown formatting to the text given the plain text and entities contained in it
+     *
+     * @example
+     * ```typescript
+     * const text = md`**${user.displayName}**`
+     * ```
+     */
+    (
+        strings: TemplateStringsArray,
+        ...sub: (InputText | MessageEntity | boolean | number | undefined | null)[]
+    ): TextWithEntities
+    /**
+     * A variant taking a plain JS string as input
+     * and parsing it.
+     *
+     * Useful for cases when you already have a string
+     * (e.g. from some server) and want to parse it.
+     *
+     * @example
+     * ```typescript
+     * const string = '**hello**'
+     * const text = md(string)
+     * ```
+     */
+    (string: string): TextWithEntities
+    escape: typeof escape
+    unparse: typeof unparse
+} = Object.assign(parse, {
+    escape,
+    unparse,
+})

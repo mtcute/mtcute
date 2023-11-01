@@ -3,16 +3,16 @@ import { randomLong } from '@mtcute/core/utils.js'
 
 import { BotKeyboard, ReplyMarkup } from '../../types/bots/keyboards.js'
 import { Message } from '../../types/messages/message.js'
-import { FormattedString } from '../../types/parser.js'
+import { InputText } from '../../types/misc/entities.js'
 import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
 import { inputPeerToPeer } from '../../utils/peer-utils.js'
 import { createDummyUpdate } from '../../utils/updates-utils.js'
 import { getAuthState } from '../auth/_state.js'
+import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 import { _getDiscussionMessage } from './get-discussion-message.js'
-import { _parseEntities } from './parse-entities.js'
 import { _processCommonSendParameters, CommonSendParams } from './send-common.js'
 
 /**
@@ -25,21 +25,13 @@ import { _processCommonSendParameters, CommonSendParams } from './send-common.js
 export async function sendText(
     client: BaseTelegramClient,
     chatId: InputPeerLike,
-    text: string | FormattedString<string>,
+    text: InputText,
     params?: CommonSendParams & {
         /**
          * For bots: inline or reply markup or an instruction
          * to hide a reply keyboard or to force a reply.
          */
         replyMarkup?: ReplyMarkup
-
-        /**
-         * List of formatting entities to use instead of parsing via a
-         * parse mode.
-         *
-         * **Note:** Passing this makes the method ignore {@link parseMode}
-         */
-        entities?: tl.TypeMessageEntity[]
 
         /**
          * Whether to disable links preview in this message
@@ -57,7 +49,7 @@ export async function sendText(
 ): Promise<Message> {
     if (!params) params = {}
 
-    const [message, entities] = await _parseEntities(client, text, params.parseMode, params.entities)
+    const [message, entities] = await _normalizeInputText(client, text)
 
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
     const { peer, replyTo } = await _processCommonSendParameters(client, chatId, params)

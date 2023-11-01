@@ -2,14 +2,17 @@
 // This is a test for TypeScript typings
 // This file is never executed, only compiled
 
-import { Message } from '@mtcute/client'
+import { InputText, Message } from '@mtcute/client'
 import { createMtcuteI18n, OtherLanguageWrap } from '../src/index.js'
+
+declare const someInputText: InputText
 
 const en = {
     basic: {
         hello: 'Hello',
         world: () => 'World',
         welcome: (name: string) => `Welcome ${name}`,
+        test: someInputText,
     },
 }
 

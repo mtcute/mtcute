@@ -1,9 +1,9 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { BotKeyboard, FormattedString, InputMediaLike, ReplyMarkup } from '../../types/index.js'
+import { BotKeyboard, InputMediaLike, InputText, ReplyMarkup } from '../../types/index.js'
 import { normalizeInlineId } from '../../utils/inline-utils.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
-import { _parseEntities } from './parse-entities.js'
+import { _normalizeInputText } from '../misc/normalize-text.js'
 
 /**
  * Edit sent inline message text, media and reply markup.
@@ -27,26 +27,7 @@ export async function editInlineMessage(
          *
          * When `media` is passed, `media.caption` is used instead
          */
-        text?: string | FormattedString<string>
-
-        /**
-         * Parse mode to use to parse entities before sending the message.
-         *
-         *
-         * Passing `null` will explicitly disable formatting.
-         * @default  current default parse mode (if any).
-         */
-        parseMode?: string | null
-
-        /**
-         * List of formatting entities to use instead of parsing via a
-         * parse mode.
-         *
-         * **Note:** Passing this makes the method ignore {@link parseMode}
-         *
-         * When `media` is passed, `media.entities` is used instead
-         */
-        entities?: tl.TypeMessageEntity[]
+        text?: InputText
 
         /**
          * New message media
@@ -93,15 +74,10 @@ export async function editInlineMessage(
         // if there's no caption in input media (i.e. not present or undefined),
         // user wants to keep current caption, thus `content` needs to stay `undefined`
         if ('caption' in params.media && params.media.caption !== undefined) {
-            [content, entities] = await _parseEntities(
-                client,
-                params.media.caption,
-                params.parseMode,
-                params.media.entities,
-            )
+            [content, entities] = await _normalizeInputText(client, params.media.caption)
         }
     } else if (params.text) {
-        [content, entities] = await _parseEntities(client, params.text, params.parseMode, params.entities)
+        [content, entities] = await _normalizeInputText(client, params.text)
     }
 
     let retries = 3

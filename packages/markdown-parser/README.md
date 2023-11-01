@@ -8,22 +8,23 @@ Markdown entities parser for mtcute
 >
 > Please read [Syntax](#syntax) below for a detailed explanation
 
-> **Note**:
-> It is generally recommended to use `@mtcute/html-parser` instead, 
-> as it is easier to use and is more readable in most cases
+## Features
+- Supports all entities that Telegram supports
+- Supports nested and overlapping entities
+- Supports dedentation
+- [Interpolation](#interpolation)!
 
 ## Usage
 
 ```typescript
-import { TelegramClient } from '@mtcute/client'
-import { MarkdownMessageEntityParser, md } from '@mtcute/markdown-parser'
-
-const tg = new TelegramClient({ ... })
-tg.registerParseMode(new MarkdownMessageEntityParser())
+import { md } from '@mtcute/markdown-parser'
 
 tg.sendText(
     'me',
-    md`Hello, **me**! Updates from the feed:\n${await getUpdatesFromFeed()}`
+    md`
+        Hello, **me**! Updates from the feed:
+        ${await getUpdatesFromFeed()}
+    `
 )
 ```
 
@@ -118,27 +119,20 @@ tags just as start/end markers, and not in terms of nesting.
 | `**Welcome back, __User__!**` | **Welcome back, _User_!** | `<b>Welcome back, <i>User</i>!</b>`    |
 | `**bold __and** italic__`     | **bold _and_** _italic_   | `<b>bold <i>and</i></b><i> italic</i>` |
 
-## Escaping
+## Interpolation
 
-Often, you may want to escape the text in a way it is not processed as an entity.
+Being a tagged template literal, `md` supports interpolation.
 
-To escape any character, prepend it with ` \ ` (backslash). Escaped characters are added to output as-is.
+You can interpolate one of the following:
+- `string` - **will not** be parsed, and appended to plain text as-is
+  - In case you want the string to be parsed, use `md` as a simple function: <code>md\`... ${md('**bold**')} ...\`</code>
+- `number` - will be converted to string and appended to plain text as-is
+- `TextWithEntities` or `MessageEntity` - will add the text and its entities to the output. This is the type returned by `md` itself:
+  ```ts
+    const bold = md`**bold**`
+    const text = md`Hello, ${bold}!`
+  ```
+- falsy value (i.e. `null`, `undefined`, `false`) - will be ignored
 
-Inline entities and links inside code entities (both inline and pre) are not processed, so you only need to escape
-closing tags.
-
-> **Note**: backslash itself must be escaped like this: ` \\ ` (double backslash).
->
-> This will look pretty bad in real code, so use escaping only when really needed, and use
-> [`MarkdownMessageEntityParser.escape`](./classes/markdownmessageentityparser.html#escape) or `md` or
-> other parse modes (like HTML one provided by [`@mtcute/html-parser`](../html-parser/index.html))) instead.
-
-> In theory, you could escape every single non-markup character, but why would you want to do that 😜
-
-| Code                                   | Result (visual)                | Result (as HTML)                                        |
-|----------------------------------------|--------------------------------|---------------------------------------------------------|
-| `\_\_not italic\_\_`                   | \_\_not italic\_\_             | `__not italic__`                                        |
-| `__italic \_ text__`                   | _italic \_ text_               | `<i>italic _ text </i>`                                 |
-| <code>\`__not italic__\`</code>        | `__not italic__`               | `<code>__not italic__</code>`                           |
-| <code>C:\\\\Users\\\\Guest</code>      | C:\Users\Guest                 | `C:\Users\Guest`                                        |
-| <code>\`var a = \\\`hello\\\`\`</code> | <code>var a = \`hello\`</code> | <code>&lt;code&gt;var a = \`hello\`&lt;/code&gt;</code> |
+Because of interpolation, you almost never need to think about escaping anything,
+since the values are not even parsed as Markdown, and are appended to the output as-is.

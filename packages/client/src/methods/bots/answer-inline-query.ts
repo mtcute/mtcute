@@ -96,23 +96,11 @@ export async function answerInlineQuery(
              */
             url: string
         }
-
-        /**
-         * Parse mode to use when parsing inline message text.
-         *
-         * Passing `null` will explicitly disable formatting.
-         *
-         * **Note**: inline results themselves *can not* have markup
-         * entities, only the messages that are sent once a result is clicked.
-         *
-         * @default  current default parse mode (if any).
-         */
-        parseMode?: string | null
     },
 ): Promise<void> {
-    const { cacheTime = 300, gallery, private: priv, nextOffset, switchPm, switchWebview, parseMode } = params ?? {}
+    const { cacheTime = 300, gallery, private: priv, nextOffset, switchPm, switchWebview } = params ?? {}
 
-    const [defaultGallery, tlResults] = await BotInline._convertToTl(client, results, parseMode)
+    const [defaultGallery, tlResults] = await BotInline._convertToTl(client, results)
 
     await client.call({
         _: 'messages.setInlineBotResults',

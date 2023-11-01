@@ -167,12 +167,6 @@ import { unpinAllMessages } from './methods/messages/unpin-all-messages.js'
 import { unpinMessage } from './methods/messages/unpin-message.js'
 import { initTakeoutSession } from './methods/misc/init-takeout-session.js'
 import { _normalizePrivacyRules } from './methods/misc/normalize-privacy-rules.js'
-import {
-    getParseMode,
-    registerParseMode,
-    setDefaultParseMode,
-    unregisterParseMode,
-} from './methods/parse-modes/parse-modes.js'
 import { changeCloudPassword } from './methods/password/change-cloud-password.js'
 import { enableCloudPassword } from './methods/password/enable-cloud-password.js'
 import { cancelPasswordEmail, resendPasswordEmail, verifyPasswordEmail } from './methods/password/password-email.js'
@@ -271,11 +265,9 @@ import {
     Dialog,
     FileDownloadLocation,
     FileDownloadParameters,
-    FormattedString,
     ForumTopic,
     GameHighScore,
     HistoryReadUpdate,
-    IMessageEntityParser,
     InlineQuery,
     InputChatEventFilters,
     InputDialogFolder,
@@ -288,6 +280,7 @@ import {
     InputReaction,
     InputStickerSet,
     InputStickerSetItem,
+    InputText,
     MaybeDynamic,
     Message,
     MessageEntity,
@@ -852,18 +845,6 @@ export interface TelegramClient extends BaseTelegramClient {
                  */
                 url: string
             }
-
-            /**
-             * Parse mode to use when parsing inline message text.
-             *
-             * Passing `null` will explicitly disable formatting.
-             *
-             * **Note**: inline results themselves *can not* have markup
-             * entities, only the messages that are sent once a result is clicked.
-             *
-             * @default  current default parse mode (if any).
-             */
-            parseMode?: string | null
         },
     ): Promise<void>
     /**
@@ -2232,8 +2213,7 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     _normalizeInputMedia(
         media: InputMediaLike,
-        params: {
-            parseMode?: string | null
+        params?: {
             progressCallback?: (uploaded: number, total: number) => void
             uploadPeer?: tl.TypeInputPeer
         },
@@ -2929,26 +2909,7 @@ export interface TelegramClient extends BaseTelegramClient {
          *
          * When `media` is passed, `media.caption` is used instead
          */
-        text?: string | FormattedString<string>
-
-        /**
-         * Parse mode to use to parse entities before sending the message.
-         *
-         *
-         * Passing `null` will explicitly disable formatting.
-         * @default  current default parse mode (if any).
-         */
-        parseMode?: string | null
-
-        /**
-         * List of formatting entities to use instead of parsing via a
-         * parse mode.
-         *
-         * **Note:** Passing this makes the method ignore {@link parseMode}
-         *
-         * When `media` is passed, `media.entities` is used instead
-         */
-        entities?: tl.TypeMessageEntity[]
+        text?: InputText
 
         /**
          * New message media
@@ -2998,26 +2959,7 @@ export interface TelegramClient extends BaseTelegramClient {
              *
              * When `media` is passed, `media.caption` is used instead
              */
-            text?: string | FormattedString<string>
-
-            /**
-             * Parse mode to use to parse entities before sending the message.
-             *
-             * Passing `null` will explicitly disable formatting.
-             *
-             * @default  current default parse mode (if any).
-             */
-            parseMode?: string | null
-
-            /**
-             * List of formatting entities to use instead of parsing via a
-             * parse mode.
-             *
-             * **Note:** Passing this makes the method ignore {@link parseMode}
-             *
-             * When `media` is passed, `media.entities` is used instead
-             */
-            entities?: tl.TypeMessageEntity[]
+            text?: InputText
 
             /**
              * New message media
@@ -3067,8 +3009,6 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Forward one or more messages by their IDs.
      * You can forward no more than 100 messages at once.
-     *
-     * If a caption message was sent, it will be the first message in the resulting array.
      *
      * **Available**: ✅ both users and bots
      *
@@ -3784,15 +3724,7 @@ export interface TelegramClient extends BaseTelegramClient {
              * Can be used, for example. when using File IDs
              * or when using existing InputMedia objects.
              */
-            caption?: string | FormattedString<string>
-
-            /**
-             * Override entities for `media`.
-             *
-             * Can be used, for example. when using File IDs
-             * or when using existing InputMedia objects.
-             */
-            entities?: tl.TypeMessageEntity[]
+            caption?: InputText
 
             /**
              * Function that will be called after some part has been uploaded.
@@ -3883,21 +3815,13 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     sendText(
         chatId: InputPeerLike,
-        text: string | FormattedString<string>,
+        text: InputText,
         params?: CommonSendParams & {
             /**
              * For bots: inline or reply markup or an instruction
              * to hide a reply keyboard or to force a reply.
              */
             replyMarkup?: ReplyMarkup
-
-            /**
-             * List of formatting entities to use instead of parsing via a
-             * parse mode.
-             *
-             * **Note:** Passing this makes the method ignore {@link parseMode}
-             */
-            entities?: tl.TypeMessageEntity[]
 
             /**
              * Whether to disable links preview in this message
@@ -4027,47 +3951,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      */
     _normalizePrivacyRules(rules: InputPrivacyRule[]): Promise<tl.TypeInputPrivacyRule[]>
-    /**
-     * Register a given {@link IMessageEntityParser} as a parse mode
-     * for messages. When this method is first called, given parse
-     * mode is also set as default.
-     *
-     * **Available**: ✅ both users and bots
-     *
-     * @param parseMode  Parse mode to register
-     * @throws MtClientError  When the parse mode with a given name is already registered.
-     */
-    registerParseMode(parseMode: IMessageEntityParser): void
-    /**
-     * Unregister a parse mode by its name.
-     * Will silently fail if given parse mode does not exist.
-     *
-     * Also updates the default parse mode to the next one available, if any
-     *
-     * **Available**: ✅ both users and bots
-     *
-     * @param name  Name of the parse mode to unregister
-     */
-    unregisterParseMode(name: string): void
-    /**
-     * Get a {@link IMessageEntityParser} registered under a given name (or a default one).
-     *
-     * **Available**: ✅ both users and bots
-     *
-     * @param name  Name of the parse mode which parser to get.
-     * @throws MtClientError  When the provided parse mode is not registered
-     * @throws MtClientError  When `name` is omitted and there is no default parse mode
-     */
-    getParseMode(name?: string | null): IMessageEntityParser
-    /**
-     * Set a given parse mode as a default one.
-     *
-     * **Available**: ✅ both users and bots
-     *
-     * @param name  Name of the parse mode
-     * @throws MtClientError  When given parse mode is not registered.
-     */
-    setDefaultParseMode(name: string): void
     /**
      * Change your 2FA password
      * **Available**: 👤 users only
@@ -4422,20 +4305,7 @@ export interface TelegramClient extends BaseTelegramClient {
         /**
          * Override caption for {@link media}
          */
-        caption?: string | FormattedString<string>
-
-        /**
-         * Override entities for {@link media}
-         */
-        entities?: tl.TypeMessageEntity[]
-
-        /**
-         * Parse mode to use to parse entities before sending the message.
-         * Passing `null` will explicitly disable formatting.
-         *
-         * @default  current default parse mode (if any).
-         */
-        parseMode?: string | null
+        caption?: InputText
 
         /**
          * Interactive elements to add to the story
@@ -4806,20 +4676,7 @@ export interface TelegramClient extends BaseTelegramClient {
         /**
          * Override caption for {@link media}
          */
-        caption?: string | FormattedString<string>
-
-        /**
-         * Override entities for {@link media}
-         */
-        entities?: tl.TypeMessageEntity[]
-
-        /**
-         * Parse mode to use to parse entities before sending the message.
-         * Passing `null` will explicitly disable formatting.
-         *
-         * @default  current default parse mode (if any).
-         */
-        parseMode?: string | null
+        caption?: InputText
 
         /**
          * Whether to automatically pin this story to the profile
@@ -5422,10 +5279,6 @@ export class TelegramClient extends BaseTelegramClient {
     unpinMessage = unpinMessage.bind(null, this)
     initTakeoutSession = initTakeoutSession.bind(null, this)
     _normalizePrivacyRules = _normalizePrivacyRules.bind(null, this)
-    registerParseMode = registerParseMode.bind(null, this)
-    unregisterParseMode = unregisterParseMode.bind(null, this)
-    getParseMode = getParseMode.bind(null, this)
-    setDefaultParseMode = setDefaultParseMode.bind(null, this)
     changeCloudPassword = changeCloudPassword.bind(null, this)
     enableCloudPassword = enableCloudPassword.bind(null, this)
     verifyPasswordEmail = verifyPasswordEmail.bind(null, this)

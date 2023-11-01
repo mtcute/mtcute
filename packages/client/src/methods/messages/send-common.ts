@@ -2,8 +2,10 @@ import { BaseTelegramClient, getMarkedPeerId, MtArgumentError, tl } from '@mtcut
 
 import { MtMessageNotFoundError } from '../../types/errors.js'
 import { Message } from '../../types/messages/message.js'
+import { TextWithEntities } from '../../types/misc/entities.js'
 import { InputPeerLike } from '../../types/peers/index.js'
 import { normalizeMessageId, normalizeToInputUser } from '../../utils/index.js'
+import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _getDiscussionMessage } from './get-discussion-message.js'
 import { getMessages } from './get-messages.js'
@@ -50,24 +52,9 @@ export interface CommonSendParams {
 
     /**
      * Quoted text. Must be exactly contained in the message
-     * being quoted to be accepted by the server
+     * being quoted to be accepted by the server (as well as entities)
      */
-    quoteText?: string
-
-    /**
-     * Entities contained in the quoted text.
-     * Must be exactly contained in the message
-     * being quoted to be accepted by the server
-     */
-    quoteEntities?: tl.TypeMessageEntity[]
-
-    /**
-     * Parse mode to use to parse entities before sending the message.
-     * Passing `null` will explicitly disable formatting.
-     *
-     * @default  current default parse mode (if any).
-     */
-    parseMode?: string | null
+    quote?: TextWithEntities
 
     /**
      * Whether to send this message silently.
@@ -151,8 +138,8 @@ export async function _processCommonSendParameters(
             _: 'inputReplyToMessage',
             replyToMsgId: replyTo,
             replyToPeerId: replyToPeer,
-            quoteText: params.quoteText,
-            quoteEntities: params.quoteEntities,
+            quoteText: params.quote?.text,
+            quoteEntities: params.quote?.entities as tl.TypeMessageEntity[],
         }
     } else if (params.replyToStory) {
         tlReplyTo = {

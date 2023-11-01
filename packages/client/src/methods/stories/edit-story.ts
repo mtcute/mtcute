@@ -1,9 +1,9 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { FormattedString, InputMediaLike, InputPeerLike, InputPrivacyRule, Story } from '../../types/index.js'
+import { InputMediaLike, InputPeerLike, InputPrivacyRule, InputText, Story } from '../../types/index.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
-import { _parseEntities } from '../messages/parse-entities.js'
 import { _normalizePrivacyRules } from '../misc/normalize-privacy-rules.js'
+import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _findStoryInUpdate } from './find-in-update.js'
 
@@ -35,20 +35,7 @@ export async function editStory(
         /**
          * Override caption for {@link media}
          */
-        caption?: string | FormattedString<string>
-
-        /**
-         * Override entities for {@link media}
-         */
-        entities?: tl.TypeMessageEntity[]
-
-        /**
-         * Parse mode to use to parse entities before sending the message.
-         * Passing `null` will explicitly disable formatting.
-         *
-         * @default  current default parse mode (if any).
-         */
-        parseMode?: string | null
+        caption?: InputText
 
         /**
          * Interactive elements to add to the story
@@ -70,22 +57,17 @@ export async function editStory(
     let media: tl.TypeInputMedia | undefined = undefined
 
     if (params.media) {
-        media = await _normalizeInputMedia(client, params.media, params)
+        media = await _normalizeInputMedia(client, params.media)
 
         // if there's no caption in input media (i.e. not present or undefined),
         // user wants to keep current caption, thus `content` needs to stay `undefined`
         if ('caption' in params.media && params.media.caption !== undefined) {
-            [caption, entities] = await _parseEntities(
-                client,
-                params.media.caption,
-                params.parseMode,
-                params.media.entities,
-            )
+            [caption, entities] = await _normalizeInputText(client, params.media.caption)
         }
     }
 
     if (params.caption) {
-        [caption, entities] = await _parseEntities(client, params.caption, params.parseMode, params.entities)
+        [caption, entities] = await _normalizeInputText(client, params.caption)
     }
 
     const privacyRules = params.privacyRules ? await _normalizePrivacyRules(client, params.privacyRules) : undefined

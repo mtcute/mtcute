@@ -1,6 +1,6 @@
-import { BaseTelegramClient, getMarkedPeerId, MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, getMarkedPeerId, MtArgumentError } from '@mtcute/core'
 
-import { FormattedString, InputPeerLike, Message, MtMessageNotFoundError, ReplyMarkup } from '../../types/index.js'
+import { InputPeerLike, InputText, Message, MtMessageNotFoundError, ReplyMarkup } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { getMessages } from './get-messages.js'
 import { CommonSendParams } from './send-common.js'
@@ -15,24 +15,7 @@ export interface SendCopyParams extends CommonSendParams {
     /**
      * New message caption (only used for media)
      */
-    caption?: string | FormattedString<string>
-
-    /**
-     * Parse mode to use to parse `text` entities before sending
-     * the message.
-     * Passing `null` will explicitly disable formatting.
-     *
-     * @default  current default parse mode (if any).
-     */
-    parseMode?: string | null
-
-    /**
-     * List of formatting entities to use instead of parsing via a
-     * parse mode.
-     *
-     * **Note:** Passing this makes the method ignore {@link parseMode}
-     */
-    entities?: tl.TypeMessageEntity[]
+    caption?: InputText
 
     /**
      * For bots: inline or reply markup or an instruction
@@ -83,15 +66,26 @@ export async function sendCopy(
     }
 
     if (msg.media && msg.media.type !== 'web_page' && msg.media.type !== 'invoice') {
+        let caption: InputText | undefined = params.caption
+
+        if (!caption) {
+            if (msg.raw.entities?.length) {
+                caption = {
+                    text: msg.raw.message,
+                    entities: msg.raw.entities,
+                }
+            } else {
+                caption = msg.raw.message
+            }
+        }
+
         return sendMedia(
             client,
             toChatId,
             {
                 type: 'auto',
                 file: msg.media.inputMedia,
-                caption: params.caption ?? msg.raw.message,
-                // we shouldn't use original entities if the user wants custom text
-                entities: params.entities ?? params.caption ? undefined : msg.raw.entities,
+                caption,
             },
             rest,
         )

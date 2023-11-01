@@ -1,7 +1,7 @@
-import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils.js'
 
-import { FormattedString, InputMediaLike, InputPeerLike, Message, PeersIndex } from '../../types/index.js'
+import { InputPeerLike, Message, PeersIndex } from '../../types/index.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -10,41 +10,6 @@ import { resolvePeer } from '../users/resolve-peer.js'
 export interface ForwardMessageOptions {
     /** Destination chat ID, username, phone, `"me"` or `"self"` */
     toChatId: InputPeerLike
-
-    /**
-     * Optionally, a caption for your forwarded message(s).
-     * It will be sent as a separate message before the forwarded messages.
-     *
-     * You can either pass `caption` or `captionMedia`, passing both will
-     * result in an error
-     */
-    caption?: string | FormattedString<string>
-
-    /**
-     * Optionally, a media caption for your forwarded message(s).
-     * It will be sent as a separate message before the forwarded messages.
-     *
-     * You can either pass `caption` or `captionMedia`, passing both will
-     * result in an error
-     */
-    captionMedia?: InputMediaLike
-
-    /**
-     * Parse mode to use to parse entities in caption.
-     *
-     * Passing `null` will explicitly disable formatting.
-     *
-     * @default  current default parse mode (if any).
-     */
-    parseMode?: string | null
-
-    /**
-     * List of formatting entities in caption to use instead
-     * of parsing via a parse mode.
-     *
-     * **Note:** Passing this makes the method ignore {@link parseMode}
-     */
-    entities?: tl.TypeMessageEntity[]
 
     /**
      * Whether to forward silently (also applies to caption message).
@@ -101,8 +66,6 @@ export interface ForwardMessageOptions {
 /**
  * Forward one or more messages by their IDs.
  * You can forward no more than 100 messages at once.
- *
- * If a caption message was sent, it will be the first message in the resulting array.
  *
  * @param toChatId  Destination chat ID, username, phone, `"me"` or `"self"`
  * @param fromChatId  Source chat ID, username, phone, `"me"` or `"self"`

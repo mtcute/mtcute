@@ -14,7 +14,7 @@ export function createI18nStringsIndex(strings: I18nStrings): Record<string, I18
         for (const key in obj) {
             const val = obj[key]
 
-            if (typeof val === 'object' && !('value' in val)) {
+            if (typeof val === 'object' && !('text' in val)) {
                 add(val, prefix + key + '.')
             } else {
                 ret[prefix + key] = val as string

@@ -8,7 +8,7 @@ import { InputMediaLike } from '../../types/media/input-media.js'
 import { extractFileName } from '../../utils/file-utils.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
 import { encodeWaveform } from '../../utils/voice-utils.js'
-import { _parseEntities } from '../messages/parse-entities.js'
+import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _normalizeInputFile } from './normalize-input-file.js'
 import { uploadFile } from './upload-file.js'
@@ -21,10 +21,9 @@ export async function _normalizeInputMedia(
     client: BaseTelegramClient,
     media: InputMediaLike,
     params: {
-        parseMode?: string | null
         progressCallback?: (uploaded: number, total: number) => void
         uploadPeer?: tl.TypeInputPeer
-    },
+    } = {},
     uploadMedia = false,
 ): Promise<tl.TypeInputMedia> {
     // my condolences to those poor souls who are going to maintain this (myself included)
@@ -165,12 +164,7 @@ export async function _normalizeInputMedia(
             })
 
             if (media.solution) {
-                [solution, solutionEntities] = await _parseEntities(
-                    client,
-                    media.solution,
-                    params.parseMode,
-                    media.solutionEntities,
-                )
+                [solution, solutionEntities] = await _normalizeInputText(client, media.solution)
             }
         }
 

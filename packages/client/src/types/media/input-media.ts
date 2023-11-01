@@ -1,7 +1,7 @@
 import { MaybeArray, tl } from '@mtcute/core'
 
+import { InputText } from '../../types/misc/entities.js'
 import { InputFileLike } from '../files/index.js'
-import { FormattedString } from '../parser.js'
 import { InputPeerLike } from '../peers/index.js'
 import { VenueSource } from './venue.js'
 
@@ -9,13 +9,7 @@ export interface CaptionMixin {
     /**
      * Caption of the media
      */
-    caption?: string | FormattedString<string>
-
-    /**
-     * Caption entities of the media.
-     * If passed, parse mode is ignored
-     */
-    entities?: tl.TypeMessageEntity[]
+    caption?: InputText
 }
 
 export interface FileMixin {
@@ -541,13 +535,7 @@ export interface InputMediaQuiz extends Omit<InputMediaPoll, 'type'> {
     /**
      * Explanation of the quiz solution
      */
-    solution?: string | FormattedString<string>
-
-    /**
-     * Format entities for `solution`.
-     * If used, parse mode is ignored.
-     */
-    solutionEntities?: tl.TypeMessageEntity[]
+    solution?: InputText
 }
 
 /**
