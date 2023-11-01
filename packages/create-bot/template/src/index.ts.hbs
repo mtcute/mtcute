@@ -16,7 +16,7 @@ const tg = new NodeTelegramClient({
 })
 
 {{#if features.dispatcher}}
-const dp = new Dispatcher(tg)
+const dp = Dispatcher.for(tg)
 
 dp.onNewMessage(filters.start, async (msg) => {
     {{#if features.i18n}}
