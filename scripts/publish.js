@@ -2,7 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const cp = require('child_process')
 
-const REGISTRY = process.env.REGISTRY || 'https://registry.npmjs.org'
+const NPMJS = 'https://registry.npmjs.org'
+const REGISTRY = process.env.REGISTRY || NPMJS
 exports.REGISTRY = REGISTRY
 
 async function checkVersion(name, version, retry = 0) {
@@ -50,7 +51,8 @@ async function publishSinglePackage(name) {
     }
 
     // publish to npm
-    cp.execSync(`npm publish --registry ${REGISTRY} --force -q`, {
+    const params = REGISTRY === NPMJS ? '--access public' : '--force'
+    cp.execSync(`npm publish --registry ${REGISTRY} ${params} -q`, {
         cwd: path.join(packageDir, 'dist'),
         stdio: 'inherit',
     })
