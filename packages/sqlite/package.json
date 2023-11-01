@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/sqlite",
     "private": true,
-    "version": "0.0.0",
+    "version": "0.1.0",
     "description": "SQLite-based storage for mtcute",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
