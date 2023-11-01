@@ -1,6 +1,6 @@
 # @mtcute/tl
 
-> TL schema and related utils used for mtcute.
+TL schema and related utils used for mtcute.
 
 Generated from TL layer **166** (last updated on 29.10.2023).
 
@@ -12,27 +12,25 @@ Package's major version is always TL schema layer number,
 so version `42.0.0` means that this version was generated from TL layer 42.
 
 - JSON schema, types, binary (de-)serialization and helper functions are generated directly from `.tl` files that are
-  automatically fetched from [TDesktop repository](https://github.com/telegramdesktop/tdesktop/).
-- Errors are generated
-  from [`errors.csv`](https://github.com/LonamiWebs/Telethon/blob/master/telethon_generator/data/errors.csv)
-  that is automatically fetched from [Telethon repository](https://github.com/LonamiWebs/Telethon).
+  automatically fetched from multiple sources and are merged together.
+- Errors are generated from 
+  [`errors.csv`](https://github.com/LonamiWebs/Telethon/blob/master/telethon_generator/data/errors.csv)
+  and official Telegram errors JSON file.
 - RSA keys info is generated based on manually extracted PEMs from Telegram for Android source code.
 
-## Contents
+## Exports
 
-### `@mtcute/tl`
-
-[Documentation](./modules/index.html)
+### Root
 
 TypeScript typings and type helpers generated from the schema.
 
 By default, all types are immutable (have their fields marked as `readonly`). That is because most of the time you don't
 really need to modify the objects, and modifying them will only lead to confusion. However, there are still valid
 use-cases for mutable TL objects, so you can use exported
-`tl.Mutable` type to make a given object type mutable.
+`tl.Mutable` helper type to make a given object type mutable.
 
-`tl` is exported as a namespace to allow better code insights, and to avoid cluttering global namespace and very long
-import statements.
+`tl` is exported as a namespace to allow better code insights, 
+as well as to avoid cluttering global namespace and very long import statements.
 
 MTProto schema is available in namespace `mtp`, also exported by this package.
 
@@ -56,7 +54,7 @@ try {
 }
 ```
 
-### `@mtcute/tl/api-schema`
+### `/api-schema.json`
 
 [Documentation](./modules/api_schema.html)
 
@@ -64,38 +62,42 @@ JSON file describing all available TL classes, methods and unions. Can be used t
 > This very file is used to generate binary serialization and TypeScript typings for `@mtcute/tl`.
 
 ```typescript
-import * as tlSchema from '@mtcute/tl/raw-schema'
+import * as tlSchema from '@mtcute/tl/raw-schema.json'
+
 console.log(`Current layer: ${tlSchema.apiLayer}`)
 // Current layer: 124
 ```
 
-### `@mtcute/tl/binary/reader`
-
-[Documentation](./modules/binary_reader.html)
+### `/binary/reader.js`
 
 Contains mapping used to read TL objects from binary streams.
 
 ```typescript
-import readerMap from '@mtcute/tl/binary/reader'
-import { BinaryReader } from './binary-reader'
+import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
+import { TlBinaryReader } from '@mtcute/tl-runtime'
 
-const reader = new BinaryReader(Buffer.from([...]))
-console.log(readerMap[0x5bb8e511 /* mt_message */].call(reader))
+const reader = TlBinaryReader.manual(new Uint8Array([...]))
+console.log(readerMap[0x5bb8e511 /* mt_message */](reader))
 // { _: 'mt_message', ... }
 ```
 
-### `@mtcute/tl/binary/writer`
-
-[Documentation](./modules/binary_writer.html)
+### `/binary/writer.js`
 
 Contains mapping used to write TL objects to binary streams.
 
 ```typescript
-import writerMap from '@mtcute/tl/binary/writer'
-import { BinaryWriter } from './binary-writer'
+import { __tlWriterMap } from '@mtcute/tl/binary/writer'
+import { TlBinaryWriter } from '@mtcute/tl-runtime'
 
-const writer = new BinaryWriter()
-writerMap[0x5bb8e511 /* mt_message */].call(writer, { ... })
+const writer = TlBinaryWriter.manual(100)
+writerMap[0x5bb8e511 /* mt_message */](writer, { ... })
 console.log(writer.result())
-// Buffer <11 e5 b8 5b ...>
+// Uint8Array <11 e5 b8 5b ...>
 ```
+
+### `/binary/rsa-keys.js`
+
+Contains RSA keys used when authorizing with Telegram.
+
+`old` flag also determines if the client should use the old
+RSA padding scheme.

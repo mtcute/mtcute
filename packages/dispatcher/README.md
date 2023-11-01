@@ -1,5 +1,26 @@
-# `@mtcute/dispatcher`
+# @mtcute/dispatcher
 
-Dispatcher and bot framework for mtcute.
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_dispatcher.html)  
+🧐 [Guide](https://mtcute.dev/guide/dispatcher/intro.html)
 
-You can learn more in [the guide](/guide/index.html).
+Dispatcher and bot framework based on @mtcute/client.
+
+## Features
+- **Straightforward**: Simple and expressive API
+- **State**: Supports storing state for each chat
+- **Filters**: Powerful and easy-to-use filtering system
+- **Middleware**: Basic middleware support for updates
+- **Scenes**: Built-in support for scenes
+
+## Usage
+
+```ts
+import { NodeTelegramClient, Dispatcher } from '@mtcute/node'
+
+const tg = new NodeTelegramClient({ ... })
+const dp = Dispatcher.for(tg)
+
+dp.onNewMessage(async (msg) => {
+    await msg.replyText('Hello world!')
+})
+```

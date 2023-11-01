@@ -1,19 +1,10 @@
-# `@mtcute/file-id`
+# @mtcute/file-id
 
-A package that is used internally by `@mtcute/client` to parse, serialize
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_file_id.html)
+
+This package is used internally by `@mtcute/client` to parse, serialize
 and manipulate TDLib and Bot API compatible File IDs, but can also be used
 for any other purposes.
-
-## Contents
-This package exports a number of functions, namely:
- - `parseFileId()` which parses provided File ID to an object representing its contents
- - `toFileId()` which serializes provided object containing file info to a File ID
- - `toUniqueFileId()` which serializes provided object containing file info to a Unique File ID
- - `fileIdTo*()` which converts a File ID to an input TL object, which can be used
-   in RPC calls etc.
-
-This package also exports namespace `tdFileId`, which contains all the types
-used by the library
 
 ## Acknowledgements
 This is basically a port of a portion of TDLib APIs, but greatly

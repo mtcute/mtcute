@@ -1,4 +1,6 @@
-# `@mtcute/crypto-node`
+# @mtcute/crypto-node
+
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_crypto_node.html)
 
 Native extension for NodeJS that improves performance of the most used
 cryptographic mode in Telegram (IGE), which is not implemented by OpenSSL.
@@ -23,6 +25,8 @@ const tg = new TelegramClient({
     crypto: () => new NodeNativeCryptoProvider()
 })
 ```
+
+> **Tip**: When using `@mtcute/node`, this will be done automatically for you.
 
 ## Acknowledgments
 Based on [pyrogram/tgcrypto](https://github.com/pyrogram/tgcrypto)

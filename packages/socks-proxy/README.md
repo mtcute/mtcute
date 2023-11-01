@@ -1,5 +1,7 @@
 # @mtcute/socks-proxy
 
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_socks_proxy.html)
+
 Socks4/5 proxy transport for mtcute.
 
 ## Usage

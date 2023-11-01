@@ -1,5 +1,7 @@
 # @mtcute/http-proxy
 
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_http_proxy.html)
+
 HTTP(s) proxy transport for mtcute.
 
 ## Usage

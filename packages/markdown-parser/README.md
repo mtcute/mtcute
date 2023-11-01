@@ -1,12 +1,16 @@
 # @mtcute/markdown-parser
 
-> Markdown entities parser for mtcute
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_markdown_parser.html)
 
-This package implements formatting syntax similar to Markdown (CommonMark) but slightly adjusted and simplified.
+Markdown entities parser for mtcute
 
 > **NOTE**: The syntax implemented here is **not** compatible with Bot API _Markdown_, nor _MarkdownV2_.
 >
 > Please read [Syntax](#syntax) below for a detailed explanation
+
+> **Note**:
+> It is generally recommended to use `@mtcute/html-parser` instead, 
+> as it is easier to use and is more readable in most cases
 
 ## Usage
 
@@ -122,9 +126,6 @@ To escape any character, prepend it with ` \ ` (backslash). Escaped characters a
 
 Inline entities and links inside code entities (both inline and pre) are not processed, so you only need to escape
 closing tags.
-
-Also, in JavaScript (and many other languages) ` \ ` itself must be escaped, so you'll end up with strings
-like `"\\_\\_not italic\\_\\_`.
 
 > **Note**: backslash itself must be escaped like this: ` \\ ` (double backslash).
 >

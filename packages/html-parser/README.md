@@ -1,17 +1,23 @@
 # @mtcute/html-parser
 
-> HTML entities parser for mtcute
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_html_parser.html)
 
-This package implements formatting syntax based on HTML, similar to the one available in the Bot
-API ([documented here](https://core.telegram.org/bots/api#html-style))
+
+HTML entities parser for mtcute
 
 > **NOTE**: The syntax implemented here is **incompatible** with Bot API _HTML_.
 >
 > Please read [Syntax](#syntax) below for a detailed explanation
 
+## Features
+- Supports all entities that Telegram supports
+- Supports nested entities
+- Proper newline handling (just like in real HTML)
+- Automatic escaping of user input
+
 ## Usage
 
-```typescript
+```ts
 import { TelegramClient } from '@mtcute/client'
 import { HtmlMessageEntityParser, html } from '@mtcute/html-parser'
 
@@ -72,9 +78,6 @@ Optionally, language for `<pre>` block can be specified like this:
 ```html
 <pre language="typescript">export type Foo = 42</pre>
 ```
-
-> However, since syntax highlighting hasn't been implemented in
-> official Telegram clients except WebA, this doesn't really matter 🤷‍♀️
 
 | Code                                                                                | Result (visual)              |
 | ----------------------------------------------------------------------------------- | ---------------------------- |

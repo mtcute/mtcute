@@ -1,6 +1,8 @@
 # @mtcute/sqlite
 
-SQLite backed storage for mtcute, based on `better-sqlite3`
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_sqlite.html)
+
+SQLite backed storage for mtcute, built with `better-sqlite3`
 
 ## Usage
 
