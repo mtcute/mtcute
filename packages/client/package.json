@@ -32,12 +32,12 @@
     },
     "browser": {
         "./cjs/methods/files/_platform.js": "./cjs/methods/files/_platform.web.js",
-        "./esm/methods/files/_platform.js": "./esm/methods/files/_platform.web.js"
+        "./esm/methods/files/_platform.js": "./esm/methods/files/_platform.web.js",
+        "./cjs/methods/files/download-file.js": "./cjs/methods/files/download-file.web.js",
+        "./esm/methods/files/download-file.js": "./esm/methods/files/download-file.web.js"
     },
     "dependencies": {
-        "@types/node": "18.16.0",
         "@mtcute/core": "workspace:^",
-        "@mtcute/file-id": "workspace:^",
-        "file-type": "16.5.4"
+        "@mtcute/file-id": "workspace:^"
     }
 }

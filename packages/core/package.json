@@ -47,7 +47,6 @@
         "@mtcute/tl": "workspace:^",
         "@mtcute/tl-runtime": "workspace:^",
         "@types/events": "3.0.0",
-        "@types/node": "18.16.0",
         "big-integer": "1.6.51",
         "events": "3.2.0",
         "long": "5.2.3"

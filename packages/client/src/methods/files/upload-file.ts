@@ -1,14 +1,11 @@
-import fileType from 'file-type'
-
 import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils.js'
 
 import { UploadedFile, UploadFileLike } from '../../types/index.js'
+import { guessFileMime } from '../../utils/file-type.js'
 import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils.js'
 import { bufferToStream, createChunkedReader, streamToBuffer } from '../../utils/stream-utils.js'
 import { _createFileStream, _extractFileStreamMeta, _handleNodeStream, _isFileStream } from './_platform.js'
-
-const { fromBuffer: fileTypeFromBuffer } = fileType
 
 const OVERRIDE_MIME: Record<string, string> = {
     // tg doesn't interpret `audio/opus` files as voice messages for some reason
@@ -252,10 +249,11 @@ export async function uploadFile(
         }
 
         if (thisIdx === 0 && fileMime === undefined) {
-            const fileType = await fileTypeFromBuffer(part)
-            fileMime = fileType?.mime
+            const mime = guessFileMime(part)
 
-            if (!fileMime) {
+            if (mime) {
+                fileMime = mime
+            } else {
                 // either plain text or random binary gibberish
                 // make an assumption based on the first 8 bytes
                 // if all 8 bytes are printable ASCII characters,
