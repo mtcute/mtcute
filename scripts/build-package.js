@@ -67,8 +67,7 @@ const BUILD_CONFIGS = {
         customScript(packageDir, outDir) {
             // copy native sources and binding.gyp file
 
-            fs.mkdirSync(path.join(outDir, 'lib'), { recursive: true })
-            fs.mkdirSync(path.join(outDir, 'crypto'), { recursive: true })
+            fs.cpSync(path.join(packageDir, 'lib'), path.join(outDir, 'lib'), { recursive: true })
 
             const bindingGyp = fs.readFileSync(path.join(packageDir, 'binding.gyp'), 'utf8')
             fs.writeFileSync(
@@ -77,21 +76,6 @@ const BUILD_CONFIGS = {
                     // replace paths to crypto
                     .replace(/"\.\.\/crypto/g, '"crypto'),
             )
-
-            for (const f of fs.readdirSync(path.join(packageDir, 'lib'))) {
-                const content = fs.readFileSync(path.join(packageDir, 'lib', f), 'utf8')
-
-                fs.writeFileSync(
-                    path.join(outDir, 'lib', f),
-                    content
-                        // replace paths to crypto
-                        .replace(/#include "\.\.\/\.\.\/crypto/g, '#include "../crypto'),
-                )
-            }
-
-            for (const f of fs.readdirSync(path.join(packageDir, '../crypto'))) {
-                fs.copyFileSync(path.join(packageDir, '../crypto', f), path.join(outDir, 'crypto', f))
-            }
 
             // for some unknown fucking reason ts doesn't do this
             fs.copyFileSync(path.join(packageDir, 'src/native.cjs'), path.join(outDir, 'cjs/native.cjs'))

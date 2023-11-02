@@ -3,10 +3,9 @@
 📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_crypto_node.html)
 
 Native extension for NodeJS that improves performance of the most used
-cryptographic mode in Telegram (IGE), which is not implemented by OpenSSL.
+cryptographic mode in Telegram (IGE), which is not implemented directly by OpenSSL.
 
-Other modes used (i.e. CBC, CTR) and hashes are supported natively by OpenSSL,
-and they *are* faster than the custom implementation, so OpenSSL will be used for them.
+Uses OpenSSL under the hood to provide maximum performance
 
 ## Installation
 You will need all the pre-requisites for [node-gyp](https://github.com/nodejs/node-gyp#installation).
@@ -28,5 +27,6 @@ const tg = new TelegramClient({
 
 > **Tip**: When using `@mtcute/node`, this will be done automatically for you.
 
-## Acknowledgments
-Based on [pyrogram/tgcrypto](https://github.com/pyrogram/tgcrypto)
+## Benchmarks
+
+See https://github.com/mtcute/benchmarks

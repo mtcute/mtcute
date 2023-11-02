@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <node_api.h>
-#include "../../crypto/ige256.h"
+#include "ige256.h"
 
 #ifndef NODE_GYP_MODULE_NAME
 #define NODE_GYP_MODULE_NAME crypto
@@ -74,7 +74,7 @@
         napi_value ret; \
         CALL_ASSERT_OK(napi_create_buffer(env, size, (void**) &output_buf, &ret)); \
 \
-        name(input_buf, size, key_buf, iv_buf, output_buf); \
+        name(env, input_buf, size, key_buf, iv_buf, output_buf); \
 \
         return ret; \
     }
