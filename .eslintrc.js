@@ -226,7 +226,7 @@ module.exports = {
             },
         },
         {
-            files: ['**/scripts/**', '*.spec.ts', 'packages/create-*/**'],
+            files: ['**/scripts/**', '*.spec.ts', 'packages/create-*/**', '**/build.config.cjs'],
             rules: {
                 'no-console': 'off',
                 'no-restricted-imports': 'off',

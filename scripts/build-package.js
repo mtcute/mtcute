@@ -9,86 +9,15 @@ if (process.argv.length < 3) {
 }
 
 const packageDir = path.join(__dirname, '../packages', process.argv[2])
-const BUILD_CONFIGS = {
-    tl: {
-        buildTs: false,
-        buildCjs: false,
-        customScript(packageDir, outDir) {
-            // create package by copying all the needed files
-            const files = [
-                'binary/reader.d.ts',
-                'binary/reader.js',
-                'binary/rsa-keys.d.ts',
-                'binary/rsa-keys.js',
-                'binary/writer.d.ts',
-                'binary/writer.js',
-                'index.d.ts',
-                'index.js',
-                'raw-errors.json',
-                'mtp-schema.json',
-                'api-schema.json',
-            ]
+const outDir = path.join(packageDir, 'dist')
 
-            fs.mkdirSync(path.join(outDir, 'binary'), { recursive: true })
+function exec(cmd, params) {
+    cp.execSync(cmd, { cwd: packageDir, stdio: 'inherit', ...params })
+}
 
-            for (const f of files) {
-                fs.copyFileSync(path.join(packageDir, f), path.join(outDir, f))
-            }
-        },
-    },
-    core: {
-        esmOnlyDirectives: true,
-        customScript(packageDir, outDir) {
-            const version = require(path.join(packageDir, 'package.json')).version
-            const replaceVersion = (content) => content.replace('%VERSION%', version)
-
-            transformFile(path.join(outDir, 'cjs/network/network-manager.js'), replaceVersion)
-            transformFile(path.join(outDir, 'esm/network/network-manager.js'), replaceVersion)
-        },
-    },
-    client: {
-        esmOnlyDirectives: true,
-        customScript(packageDir, outDir) {
-            function fixClient(file) {
-                // make TelegramClient a class, not an interface
-                const dTsContent = fs.readFileSync(path.join(outDir, file), 'utf8')
-
-                fs.writeFileSync(
-                    path.join(outDir, file),
-                    dTsContent.replace('export interface TelegramClient', 'export class TelegramClient'),
-                )
-            }
-
-            fixClient('esm/client.d.ts')
-            fixClient('cjs/client.d.ts')
-        },
-    },
-    'crypto-node': {
-        customScript(packageDir, outDir) {
-            // copy native sources and binding.gyp file
-
-            fs.cpSync(path.join(packageDir, 'lib'), path.join(outDir, 'lib'), { recursive: true })
-
-            const bindingGyp = fs.readFileSync(path.join(packageDir, 'binding.gyp'), 'utf8')
-            fs.writeFileSync(
-                path.join(outDir, 'binding.gyp'),
-                bindingGyp
-                    // replace paths to crypto
-                    .replace(/"\.\.\/crypto/g, '"crypto'),
-            )
-
-            // for some unknown fucking reason ts doesn't do this
-            fs.copyFileSync(path.join(packageDir, 'src/native.cjs'), path.join(outDir, 'cjs/native.cjs'))
-            fs.copyFileSync(path.join(packageDir, 'src/native.cjs'), path.join(outDir, 'esm/native.cjs'))
-        },
-    },
-    node: { esmOnlyDirectives: true },
-    'create-bot': {
-        buildCjs: false,
-        customScript(packageDir, outDir) {
-            fs.cpSync(path.join(packageDir, 'template'), path.join(outDir, 'template'), { recursive: true })
-        },
-    },
+function transformFile(file, transform) {
+    const content = fs.readFileSync(file, 'utf8')
+    fs.writeFileSync(file, transform(content))
 }
 
 const buildConfig = {
@@ -97,9 +26,37 @@ const buildConfig = {
     removeReferenceComments: true,
     replaceSrcImports: true,
     esmOnlyDirectives: false,
-    customScript: () => {},
-    ...BUILD_CONFIGS[process.argv[2]],
+    before: () => {},
+    final: () => {},
+    ...(() => {
+        let config
+
+        try {
+            config = require(path.join(packageDir, 'build.config.cjs'))
+        } catch (e) {
+            return {}
+        }
+
+        console.log('[i] Using custom build config')
+
+        if (typeof config === 'function') {
+            config = config({
+                fs,
+                path,
+                exec,
+                transformFile,
+                packageDir,
+                outDir,
+            })
+        }
+
+        console.log(config)
+
+        return config
+    })(),
 }
+
+console.log(buildConfig)
 
 function buildPackageJson() {
     const pkgJson = JSON.parse(fs.readFileSync(path.join(packageDir, 'package.json'), 'utf-8'))
@@ -160,20 +117,11 @@ function buildPackageJson() {
     fs.writeFileSync(path.join(packageDir, 'dist/package.json'), JSON.stringify(pkgJson, null, 2))
 }
 
-function exec(cmd) {
-    cp.execSync(cmd, { cwd: packageDir, stdio: 'inherit' })
-}
-
-function transformFile(file, transform) {
-    const content = fs.readFileSync(file, 'utf8')
-    fs.writeFileSync(file, transform(content))
-}
-
-const outDir = path.join(packageDir, 'dist')
-
 // clean
 fs.rmSync(path.join(outDir), { recursive: true, force: true })
 fs.mkdirSync(path.join(outDir), { recursive: true })
+
+buildConfig.before()
 
 if (buildConfig.buildTs) {
     console.log('[i] Building typescript...')
@@ -262,6 +210,6 @@ fs.cpSync(path.join(__dirname, '../LICENSE'), path.join(outDir, 'LICENSE'))
 
 fs.writeFileSync(path.join(outDir, '.npmignore'), '*.tsbuildinfo\n')
 
-buildConfig.customScript(packageDir, outDir)
+buildConfig.final()
 
 console.log('[v] Done!')
