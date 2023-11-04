@@ -18,6 +18,7 @@
         "@mtcute/tl": "*",
         "@mtcute/tl-runtime": "*",
         "@mtcute/tl-utils": "*",
+        "@mtcute/wasm": "*",
         "@types/chai": "^4.3.8",
         "@types/mocha": "^10.0.2",
         "chai": "^4.3.10",
@@ -27,5 +28,8 @@
         "mocha": "^10.2.0",
         "ts-node": "^10.9.1",
         "typescript": "^5.2.2"
+    },
+    "devDependencies": {
+        "@types/node": "^20.8.10"
     }
 }
