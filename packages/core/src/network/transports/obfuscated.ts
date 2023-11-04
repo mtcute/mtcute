@@ -1,5 +1,5 @@
 import { concatBuffers, dataViewFromBuffer } from '../../utils/buffer-utils.js'
-import { IEncryptionScheme, randomBytes } from '../../utils/index.js'
+import { IAesCtr, randomBytes } from '../../utils/index.js'
 import { IPacketCodec } from './abstract.js'
 import { WrappedCodec } from './wrapped.js'
 
@@ -11,8 +11,8 @@ export interface MtProxyInfo {
 }
 
 export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec {
-    private _encryptor?: IEncryptionScheme
-    private _decryptor?: IEncryptionScheme
+    private _encryptor?: IAesCtr
+    private _decryptor?: IAesCtr
 
     private _proxy?: MtProxyInfo
 
@@ -78,31 +78,31 @@ export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec 
             decryptKey = await this._crypto.sha256(concatBuffers([decryptKey, this._proxy.secret]))
         }
 
-        this._encryptor = await this._crypto.createAesCtr(encryptKey, encryptIv, true)
-        this._decryptor = await this._crypto.createAesCtr(decryptKey, decryptIv, false)
+        this._encryptor = this._crypto.createAesCtr(encryptKey, encryptIv, true)
+        this._decryptor = this._crypto.createAesCtr(decryptKey, decryptIv, false)
 
-        const encrypted = await this._encryptor.encrypt(random)
+        const encrypted = this._encryptor.process(random)
         random.set(encrypted.subarray(56, 64), 56)
 
         return random
     }
 
     async encode(packet: Uint8Array): Promise<Uint8Array> {
-        return this._encryptor!.encrypt(await this._inner.encode(packet))
+        return this._encryptor!.process(await this._inner.encode(packet))
     }
 
     feed(data: Uint8Array): void {
-        const dec = this._decryptor!.decrypt(data)
+        const dec = this._decryptor!.process(data)
 
-        if (ArrayBuffer.isView(dec)) this._inner.feed(dec)
-        else {
-            dec.then((dec) => this._inner.feed(dec)).catch((err) => this.emit('error', err))
-        }
+        this._inner.feed(dec)
     }
 
     reset(): void {
         this._inner.reset()
-        delete this._encryptor
-        delete this._decryptor
+        this._encryptor?.close?.()
+        this._decryptor?.close?.()
+
+        this._encryptor = undefined
+        this._decryptor = undefined
     }
 }

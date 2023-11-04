@@ -5,7 +5,14 @@ import { TlBinaryReader, TlReaderMap } from '@mtcute/tl-runtime'
 
 import { MtcuteError } from '../types/errors.js'
 import { createAesIgeForMessage } from '../utils/crypto/mtproto.js'
-import { buffersEqual, concatBuffers, dataViewFromBuffer, ICryptoProvider, Logger, randomBytes } from '../utils/index.js'
+import {
+    buffersEqual,
+    concatBuffers,
+    dataViewFromBuffer,
+    ICryptoProvider,
+    Logger,
+    randomBytes,
+} from '../utils/index.js'
 
 export class AuthKey {
     ready = false
@@ -55,7 +62,7 @@ export class AuthKey {
 
         const messageKey = (await this._crypto.sha256(concatBuffers([this.clientSalt, buf]))).subarray(8, 24)
         const ige = await createAesIgeForMessage(this._crypto, this.key, messageKey, true)
-        const encryptedData = await ige.encrypt(buf)
+        const encryptedData = ige.encrypt(buf)
 
         return concatBuffers([this.id, messageKey, encryptedData])
     }
@@ -78,7 +85,7 @@ export class AuthKey {
         }
 
         const ige = await createAesIgeForMessage(this._crypto, this.key, messageKey, false)
-        const innerData = await ige.decrypt(encryptedData)
+        const innerData = ige.decrypt(encryptedData)
 
         const msgKeySource = await this._crypto.sha256(concatBuffers([this.serverSalt, innerData]))
         const expectedMessageKey = msgKeySource.subarray(8, 24)

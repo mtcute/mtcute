@@ -1,4 +1,4 @@
-import { NodeCryptoProvider } from '../crypto/node-crypto.js'
+import { NodeCryptoProvider } from '../crypto/node.js'
 
 /** @internal */
 export const _defaultCryptoProviderFactory = () => new NodeCryptoProvider()

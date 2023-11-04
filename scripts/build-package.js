@@ -50,13 +50,9 @@ const buildConfig = {
             })
         }
 
-        console.log(config)
-
         return config
     })(),
 }
-
-console.log(buildConfig)
 
 function buildPackageJson() {
     const pkgJson = JSON.parse(fs.readFileSync(path.join(packageDir, 'package.json'), 'utf-8'))

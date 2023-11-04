@@ -126,6 +126,9 @@ importers:
       '@mtcute/tl-runtime':
         specifier: workspace:^
         version: link:../tl-runtime
+      '@mtcute/wasm':
+        specifier: workspace:^
+        version: link:../wasm
       '@types/events':
         specifier: 3.0.0
         version: 3.0.0
@@ -139,9 +142,6 @@ importers:
         specifier: 5.2.3
         version: 5.2.3
     devDependencies:
-      '@cryptography/aes':
-        specifier: ^0.1.1
-        version: 0.1.1
       '@types/ws':
         specifier: 8.5.4
         version: 8.5.4
@@ -312,13 +312,6 @@ importers:
       long:
         specifier: 5.2.3
         version: 5.2.3
-      pako:
-        specifier: 2.1.0
-        version: 2.1.0
-    devDependencies:
-      '@types/pako':
-        specifier: 2.0.0
-        version: 2.0.0
 
   packages/tl-utils:
     dependencies:
@@ -329,6 +322,8 @@ importers:
       '@mtcute/tl-runtime':
         specifier: workspace:^
         version: link:../tl-runtime
+
+  packages/wasm: {}
 
 packages:
 
@@ -702,10 +697,6 @@ packages:
       chalk: 4.1.2
     dev: true
 
-  /@cryptography/aes@0.1.1:
-    resolution: {integrity: sha512-PcYz4FDGblO6tM2kSC+VzhhK62vml6k6/YAkiWtyPvrgJVfnDRoHGDtKn5UiaRRUrvUTTocBpvc2rRgTCqxjsg==}
-    dev: true
-
   /@cspotcode/source-map-support@0.8.1:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
@@ -966,10 +957,6 @@ packages:
 
   /@types/normalize-package-data@2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
-    dev: true
-
-  /@types/pako@2.0.0:
-    resolution: {integrity: sha512-10+iaz93qR5WYxTo+PMifD5TSxiOtdRaxBf7INGGXMQgTCu8Z/7GYWYFUOS3q/G0nE5boj1r4FEB+WSy7s5gbA==}
     dev: true
 
   /@types/semver@7.5.0:
@@ -4310,10 +4297,6 @@ packages:
       lodash.flattendeep: 4.4.0
       release-zalgo: 1.0.0
     dev: true
-
-  /pako@2.1.0:
-    resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
-    dev: false
 
   /parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}

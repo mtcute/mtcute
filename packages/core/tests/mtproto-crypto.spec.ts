@@ -9,7 +9,7 @@ import {
     createAesIgeForMessageOld,
     generateKeyAndIvFromNonce,
 } from '../src/utils/crypto/mtproto.js'
-import { NodeCryptoProvider } from '../src/utils/crypto/node-crypto.js'
+import { NodeCryptoProvider } from '../src/utils/crypto/node.js'
 
 chai.use(spies)
 

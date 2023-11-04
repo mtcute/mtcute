@@ -6,7 +6,7 @@ import { describe, it } from 'mocha'
 import { TlReaderMap } from '@mtcute/tl-runtime'
 
 import { AuthKey } from '../src/network/auth-key.js'
-import { NodeCryptoProvider } from '../src/utils/crypto/node-crypto.js'
+import { NodeCryptoProvider } from '../src/utils/crypto/node.js'
 import { LogManager } from '../src/utils/index.js'
 
 chai.use(spies)

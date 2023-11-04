@@ -1,5 +1,4 @@
 export * from './encodings/base64.js'
-export * from './encodings/gzip.js'
 export * from './encodings/hex.js'
 export * from './encodings/utf8.js'
 export * from './reader.js'

@@ -1,5 +1,5 @@
 import { MtUnsupportedError } from '../../index.js'
-import { SubtleCryptoProvider } from '../crypto/subtle.js'
+import { WebCryptoProvider } from '../crypto/web.js'
 
 /** @internal */
 export const _defaultCryptoProviderFactory = () => {
@@ -7,5 +7,5 @@ export const _defaultCryptoProviderFactory = () => {
         throw new MtUnsupportedError('WebCrypto API is not available')
     }
 
-    return new SubtleCryptoProvider(crypto.subtle)
+    return new WebCryptoProvider({ subtle: crypto.subtle })
 }

@@ -1,11 +1,14 @@
 import { MaybeAsync } from '../../types/index.js'
-import { AesModeOfOperationIge } from './common.js'
 import { factorizePQSync } from './factorization.js'
 
 export interface IEncryptionScheme {
-    encrypt(data: Uint8Array): MaybeAsync<Uint8Array>
+    encrypt(data: Uint8Array): Uint8Array
+    decrypt(data: Uint8Array): Uint8Array
+}
 
-    decrypt(data: Uint8Array): MaybeAsync<Uint8Array>
+export interface IAesCtr {
+    process(data: Uint8Array): Uint8Array
+    close?(): void
 }
 
 export interface ICryptoProvider {
@@ -25,32 +28,20 @@ export interface ICryptoProvider {
 
     hmacSha256(data: Uint8Array, key: Uint8Array): MaybeAsync<Uint8Array>
 
-    // in telegram, iv is always either used only once, or is the same for all calls for the key
-    createAesCtr(key: Uint8Array, iv: Uint8Array, encrypt: boolean): MaybeAsync<IEncryptionScheme>
+    createAesCtr(key: Uint8Array, iv: Uint8Array, encrypt: boolean): IAesCtr
 
-    createAesIge(key: Uint8Array, iv: Uint8Array): MaybeAsync<IEncryptionScheme>
-
-    createAesEcb(key: Uint8Array): MaybeAsync<IEncryptionScheme>
+    createAesIge(key: Uint8Array, iv: Uint8Array): IEncryptionScheme
 
     factorizePQ(pq: Uint8Array): MaybeAsync<[Uint8Array, Uint8Array]>
+
+    gzip(data: Uint8Array, maxSize: number): Uint8Array | null
+    gunzip(data: Uint8Array): Uint8Array
 }
 
 export abstract class BaseCryptoProvider {
-    createAesIge(key: Uint8Array, iv: Uint8Array): MaybeAsync<IEncryptionScheme> {
-        const ecb = this.createAesEcb(key)
-
-        if ('then' in ecb) {
-            return ecb.then((ecb) => new AesModeOfOperationIge(key, iv, ecb))
-        }
-
-        return new AesModeOfOperationIge(key, iv, ecb)
-    }
-
     factorizePQ(pq: Uint8Array) {
         return factorizePQSync(pq)
     }
-
-    abstract createAesEcb(key: Uint8Array): MaybeAsync<IEncryptionScheme>
 }
 
 export type CryptoProviderFactory = () => ICryptoProvider

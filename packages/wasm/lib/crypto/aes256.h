@@ -1,12 +1,11 @@
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
+#include "lib_common.h"
 
 #ifndef AES256_H
 #define AES256_H
 
 #define AES_BLOCK_SIZE 16
 #define EXPANDED_KEY_SIZE 60
+#define AES_EXPORT __attribute__((visibility("default")))
 
 #ifdef __cplusplus
 extern "C" {

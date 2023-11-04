@@ -1,6 +1,5 @@
 import Long from 'long'
 
-import { gzipInflate } from './encodings/gzip.js'
 import { hexEncode } from './encodings/hex.js'
 import { utf8Decode } from './encodings/utf8.js'
 
@@ -178,13 +177,10 @@ export class TlBinaryReader {
         return utf8Decode(this.bytes())
     }
 
-    object(): unknown {
-        const id = this.uint()
-
+    object(id = this.uint()): unknown {
         if (id === 0x1cb5c415 /* vector */) {
             return this.vector(this.object, true)
         }
-        if (id === 0x3072cfa1 /* gzip_packed */) return this.gzip()
         if (id === 0xbc799737 /* boolFalse */) return false
         if (id === 0x997275b5 /* boolTrue */) return true
         // unsure if it is actually used in the wire, seems like it's only used for boolean flags
@@ -207,10 +203,6 @@ export class TlBinaryReader {
         }
 
         return reader(this)
-    }
-
-    gzip(): unknown {
-        return new TlBinaryReader(this.objectsMap, gzipInflate(this.bytes())).object()
     }
 
     vector(reader = this.object, bare = false): unknown[] {

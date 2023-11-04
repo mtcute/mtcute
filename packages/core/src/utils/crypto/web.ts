@@ -1,12 +1,17 @@
+import {
+    createCtr256,
+    ctr256,
+    deflateMaxSize,
+    freeCtr256,
+    gunzip,
+    ige256Decrypt,
+    ige256Encrypt,
+    initAsync,
+    InitInput,
+} from '@mtcute/wasm'
+
 import { MaybeAsync } from '../../index.js'
-import { BaseCryptoProvider, ICryptoProvider, IEncryptionScheme } from './abstract.js'
-
-import AES_, { CTR } from '@cryptography/aes'
-
-// fucking weird flex with es modules.
-// i hate default imports please for the love of god never use them
-type AES_ = typeof AES_.default
-const AES = 'default' in AES_ ? AES_.default : AES_ as AES_
+import { BaseCryptoProvider, IAesCtr, ICryptoProvider, IEncryptionScheme } from './abstract.js'
 
 const ALGO_TO_SUBTLE: Record<string, string> = {
     sha256: 'SHA-256',
@@ -14,23 +19,23 @@ const ALGO_TO_SUBTLE: Record<string, string> = {
     sha512: 'SHA-512',
 }
 
-function wordsToBytes(words: Uint32Array): Uint8Array {
-    const o = new Uint8Array(words.byteLength)
+export class WebCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
+    readonly subtle: SubtleCrypto
+    readonly wasmInput?: InitInput
 
-    const len = words.length * 4
+    constructor(params?: { wasmInput?: InitInput; subtle?: SubtleCrypto }) {
+        super()
+        this.wasmInput = params?.wasmInput
+        const subtle = params?.subtle ?? globalThis.crypto?.subtle
 
-    for (let i = 0; i < len; ++i) {
-        o[i] = ((words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff)
+        if (!subtle) {
+            throw new Error('SubtleCrypto is not available')
+        }
+        this.subtle = subtle
     }
 
-    return o
-}
-
-export class SubtleCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
-    constructor(
-        readonly subtle: SubtleCrypto,
-    ) {
-        super()
+    initialize(): Promise<void> {
+        return initAsync(this.wasmInput)
     }
 
     sha1(data: Uint8Array): MaybeAsync<Uint8Array> {
@@ -78,21 +83,27 @@ export class SubtleCryptoProvider extends BaseCryptoProvider implements ICryptoP
         return new Uint8Array(res)
     }
 
-    createAesCtr(key: Uint8Array, iv: Uint8Array): IEncryptionScheme {
-        const aes = new CTR(key, iv)
+    createAesCtr(key: Uint8Array, iv: Uint8Array): IAesCtr {
+        const ctx = createCtr256(key, iv)
 
         return {
-            encrypt: (data) => wordsToBytes(aes.encrypt(data)),
-            decrypt: (data) => wordsToBytes(aes.decrypt(data)),
+            process: (data) => ctr256(ctx, data),
+            close: () => freeCtr256(ctx),
         }
     }
 
-    createAesEcb(key: Uint8Array): IEncryptionScheme {
-        const aes = new AES(key)
-
+    createAesIge(key: Uint8Array, iv: Uint8Array): IEncryptionScheme {
         return {
-            encrypt: (data) => wordsToBytes(aes.encrypt(data)),
-            decrypt: (data) => wordsToBytes(aes.decrypt(data)),
+            encrypt: (data) => ige256Encrypt(data, key, iv),
+            decrypt: (data) => ige256Decrypt(data, key, iv),
         }
+    }
+
+    gzip(data: Uint8Array, maxSize: number): Uint8Array | null {
+        return deflateMaxSize(data, maxSize)
+    }
+
+    gunzip(data: Uint8Array): Uint8Array {
+        return gunzip(data)
     }
 }

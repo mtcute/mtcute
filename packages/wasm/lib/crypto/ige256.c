@@ -1,6 +1,6 @@
 #include "aes256.h"
 
-void ige256_encrypt(uint8_t* in, uint32_t length, uint8_t* key, uint8_t* iv, uint8_t* out) {
+AES_EXPORT void ige256_encrypt(uint8_t* in, uint32_t length, uint8_t* key, uint8_t* iv, uint8_t* out) {
     uint32_t expandedKey[EXPANDED_KEY_SIZE];
     uint32_t i, j;
 
@@ -29,7 +29,7 @@ void ige256_encrypt(uint8_t* in, uint32_t length, uint8_t* key, uint8_t* iv, uin
     }
 }
 
-void ige256_decrypt(uint8_t* in, uint32_t length, uint8_t* key, uint8_t* iv, uint8_t* out) {
+AES_EXPORT void ige256_decrypt(uint8_t* in, uint32_t length, uint8_t* key, uint8_t* iv, uint8_t* out) {
     uint32_t expandedKey[EXPANDED_KEY_SIZE];
     uint32_t i, j;
 

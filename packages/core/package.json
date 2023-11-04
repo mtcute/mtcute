@@ -46,13 +46,13 @@
     "dependencies": {
         "@mtcute/tl": "workspace:^",
         "@mtcute/tl-runtime": "workspace:^",
+        "@mtcute/wasm": "workspace:^",
         "@types/events": "3.0.0",
         "big-integer": "1.6.51",
         "events": "3.2.0",
         "long": "5.2.3"
     },
     "devDependencies": {
-        "@cryptography/aes": "^0.1.1",
         "@types/ws": "8.5.4",
         "node-forge": "1.3.1",
         "ws": "8.13.0"

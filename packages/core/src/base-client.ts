@@ -361,6 +361,7 @@ export class BaseTelegramClient extends EventEmitter {
 
         const promise = (this._connected = createControllablePromise())
 
+        await this.crypto.initialize?.()
         await this._loadStorage()
         const primaryDc = await this.storage.getDefaultDcs()
         if (primaryDc !== null) this._defaultDcs = primaryDc

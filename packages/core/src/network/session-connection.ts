@@ -3,15 +3,7 @@
 import Long from 'long'
 
 import { mtp, tl } from '@mtcute/tl'
-import {
-    gzipDeflate,
-    gzipInflate,
-    TlBinaryReader,
-    TlBinaryWriter,
-    TlReaderMap,
-    TlSerializationCounter,
-    TlWriterMap,
-} from '@mtcute/tl-runtime'
+import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlSerializationCounter, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
@@ -20,6 +12,7 @@ import {
     ControllablePromise,
     createControllablePromise,
     EarlyTimer,
+    ICryptoProvider,
     longFromBuffer,
     randomBytes,
     randomLong,
@@ -51,6 +44,12 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
 
 // destroy_auth_key#d1435160 = DestroyAuthKeyRes;
 // const DESTROY_AUTH_KEY = Buffer.from('605134d1', 'hex')
+// gzip_packed#3072cfa1 packed_data:string = Object;
+const GZIP_PACKED_ID = 0x3072cfa1
+// msg_container#73f1f8dc messages:vector<%Message> = MessageContainer;
+const MSG_CONTAINER_ID = 0x73f1f8dc
+// rpc_result#f35c6d01 req_msg_id:long result:Object = RpcResult;
+const RPC_RESULT_ID = 0xf35c6d01
 
 function makeNiceStack(error: tl.RpcError, stack: string, method?: string) {
     error.stack = `RpcError (${error.code} ${error.text}): ${error.message}\n    at ${method}\n${stack
@@ -80,6 +79,7 @@ export class SessionConnection extends PersistentConnection {
 
     private _readerMap: TlReaderMap
     private _writerMap: TlWriterMap
+    private _crypto: ICryptoProvider
 
     constructor(
         params: SessionConnectionParams,
@@ -90,6 +90,7 @@ export class SessionConnection extends PersistentConnection {
 
         this._readerMap = params.readerMap
         this._writerMap = params.writerMap
+        this._crypto = params.crypto
         this._handleRawMessage = this._handleRawMessage.bind(this)
     }
 
@@ -265,7 +266,7 @@ export class SessionConnection extends PersistentConnection {
         this._session.authorizationPending = true
         this.emit('auth-begin')
 
-        doAuthorization(this, this.params.crypto)
+        doAuthorization(this, this._crypto)
             .then(async ([authKey, serverSalt, timeOffset]) => {
                 await this._session._authKey.setup(authKey)
                 this._session.serverSalt = serverSalt
@@ -312,7 +313,7 @@ export class SessionConnection extends PersistentConnection {
             this._isPfsBindingPending = true
         }
 
-        doAuthorization(this, this.params.crypto, TEMP_AUTH_KEY_EXPIRY)
+        doAuthorization(this, this._crypto, TEMP_AUTH_KEY_EXPIRY)
             .then(async ([tempAuthKey, tempServerSalt]) => {
                 if (!this._usePfs) {
                     this.log.info('pfs has been disabled while generating temp key')
@@ -357,16 +358,11 @@ export class SessionConnection extends PersistentConnection {
                 writer.raw(randomBytes(8))
                 const msgWithPadding = writer.result()
 
-                const hash = await this.params.crypto.sha1(msgWithoutPadding)
+                const hash = await this._crypto.sha1(msgWithoutPadding)
                 const msgKey = hash.subarray(4, 20)
 
-                const ige = await createAesIgeForMessageOld(
-                    this.params.crypto,
-                    this._session._authKey.key,
-                    msgKey,
-                    true,
-                )
-                const encryptedData = await ige.encrypt(msgWithPadding)
+                const ige = await createAesIgeForMessageOld(this._crypto, this._session._authKey.key, msgKey, true)
+                const encryptedData = ige.encrypt(msgWithPadding)
                 const encryptedMessage = concatBuffers([this._session._authKey.id, msgKey, encryptedData])
 
                 const promise = createControllablePromise<mtp.RawMt_rpc_error | boolean>()
@@ -512,22 +508,17 @@ export class SessionConnection extends PersistentConnection {
     }
 
     private _handleRawMessage(messageId: Long, seqNo: number, message: TlBinaryReader): void {
-        if (message.peekUint() === 0x3072cfa1) {
-            // gzip_packed
-            // we can't use message.gzip() because it may contain msg_container,
-            // so we parse it manually.
-            message.uint()
+        const objectId = message.uint()
 
+        if (objectId === GZIP_PACKED_ID) {
             return this._handleRawMessage(
                 messageId,
                 seqNo,
-                new TlBinaryReader(this._readerMap, gzipInflate(message.bytes())),
+                new TlBinaryReader(this._readerMap, this._crypto.gunzip(message.bytes())),
             )
         }
 
-        if (message.peekUint() === 0x73f1f8dc) {
-            // msg_container
-            message.uint()
+        if (objectId === MSG_CONTAINER_ID) {
             const count = message.uint()
 
             for (let i = 0; i < count; i++) {
@@ -545,15 +536,12 @@ export class SessionConnection extends PersistentConnection {
             return
         }
 
-        if (message.peekUint() === 0xf35c6d01) {
-            // rpc_result
-            message.uint()
-
+        if (objectId === RPC_RESULT_ID) {
             return this._onRpcResult(messageId, message)
         }
 
         // we are safe.. i guess
-        this._handleMessage(messageId, message.object())
+        this._handleMessage(messageId, message.object(objectId))
     }
 
     private _handleMessage(messageId: Long, message_: unknown): void {
@@ -729,7 +717,22 @@ export class SessionConnection extends PersistentConnection {
         const rpc = msg.rpc
 
         const customReader = this._readerMap._results![rpc.method]
-        const result: any = customReader ? customReader(message) : message.object()
+
+        let result: any
+
+        if (customReader) {
+            result = customReader(message)
+        } else {
+            const objectId = message.uint()
+
+            if (objectId === GZIP_PACKED_ID) {
+                const inner = this._crypto.gunzip(message.bytes())
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                result = TlBinaryReader.deserializeObject(this._readerMap, inner)
+            } else {
+                result = message.object(objectId)
+            }
+        }
 
         // initConnection call was definitely received and
         // processed by the server, so we no longer need to use it
@@ -1262,13 +1265,14 @@ export class SessionConnection extends PersistentConnection {
             // if it is less than 0.9, then try to compress the whole request
 
             const middle = ~~((content.length - 1024) / 2)
-            const gzipped = gzipDeflate(content.subarray(middle, middle + 1024), 0.9)
+            const middlePart = content.subarray(middle, middle + 1024)
+            const gzipped = this._crypto.gzip(middlePart, Math.floor(middlePart.length * 0.9))
 
             if (!gzipped) shouldGzip = false
         }
 
         if (shouldGzip) {
-            const gzipped = gzipDeflate(content, 0.9)
+            const gzipped = this._crypto.gzip(content, Math.floor(content.length * 0.9))
 
             if (gzipped) {
                 this.log.debug('gzipped %s (%db -> %db)', method, content.length, gzipped.length)
@@ -1601,7 +1605,7 @@ export class SessionConnection extends PersistentConnection {
             // leave bytes for mtproto header (we'll write it later,
             // since we need seqno and msg_id to be larger than the content)
             writer.pos += 16
-            writer.uint(0x73f1f8dc) // msg_container
+            writer.uint(MSG_CONTAINER_ID)
             writer.uint(messageCount)
         }
 

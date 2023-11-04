@@ -1,4 +1,4 @@
-import { NodeCryptoProvider } from '@mtcute/core/src/utils/crypto/node-crypto.js'
+import { BaseNodeCryptoProvider } from '@mtcute/core/src/utils/crypto/node.js'
 import { IEncryptionScheme } from '@mtcute/core/utils.js'
 
 import { native } from './native.cjs'
@@ -13,7 +13,7 @@ const { ige256_decrypt, ige256_encrypt } = native
  * Other modes are supported natively by OpenSSL, and
  * they *are* faster than the custom ones.
  */
-export class NodeNativeCryptoProvider extends NodeCryptoProvider {
+export class NodeNativeCryptoProvider extends BaseNodeCryptoProvider {
     createAesIge(key: Uint8Array, iv: Uint8Array): IEncryptionScheme {
         return {
             encrypt(data: Uint8Array): Uint8Array {

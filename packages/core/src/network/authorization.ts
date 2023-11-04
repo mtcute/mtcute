@@ -141,8 +141,8 @@ async function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKe
         // we only need to reverse the data
         dataWithHash.subarray(0, 192).reverse()
 
-        const aes = await crypto.createAesIge(aesKey, aesIv)
-        const encrypted = await aes.encrypt(dataWithHash)
+        const aes = crypto.createAesIge(aesKey, aesIv)
+        const encrypted = aes.encrypt(dataWithHash)
         const encryptedHash = await crypto.sha256(encrypted)
 
         xorBufferInPlace(aesKey, encryptedHash)
@@ -300,9 +300,9 @@ export async function doAuthorization(
 
     // Step 3: complete DH exchange
     const [key, iv] = await generateKeyAndIvFromNonce(crypto, resPq.serverNonce, newNonce)
-    const ige = await crypto.createAesIge(key, iv)
+    const ige = crypto.createAesIge(key, iv)
 
-    const plainTextAnswer = await ige.decrypt(serverDhParams.encryptedAnswer)
+    const plainTextAnswer = ige.decrypt(serverDhParams.encryptedAnswer)
     const innerDataHash = plainTextAnswer.subarray(0, 20)
     const serverDhInnerReader = new TlBinaryReader(readerMap, plainTextAnswer, 20)
     const serverDhInner = serverDhInnerReader.object() as mtp.TlObject
@@ -379,7 +379,7 @@ export async function doAuthorization(
 
         log.debug('sending client DH (timeOffset = %d)', timeOffset)
 
-        const clientDhEncrypted = await ige.encrypt(clientDhInnerWriter.uint8View)
+        const clientDhEncrypted = ige.encrypt(clientDhInnerWriter.uint8View)
         await sendPlainMessage({
             _: 'mt_set_client_DH_params',
             nonce,

@@ -1,0 +1,29 @@
+{
+    "name": "@mtcute/wasm",
+    "private": true,
+    "version": "0.1.0",
+    "description": "WASM implementation of common algorithms used in Telegram",
+    "author": "Alina Sireneva <alina@tei.su>",
+    "license": "MIT",
+    "main": "src/index.ts",
+    "type": "module",
+    "scripts": {
+        "test": "mocha \"tests/**/*.spec.ts\"",
+        "docs": "typedoc",
+        "build": "pnpm run -w build-package wasm",
+        "build:wasm": "docker build --output=lib --target=binaries lib"
+    },
+    "browser": {
+        "./cjs/init.js": "./cjs/init.web.js",
+        "./esm/init.js": "./esm/init.web.js"
+    },
+    "distOnlyFields": {
+        "exports": {
+            ".": {
+                "import": "./esm/index.js",
+                "require": "./cjs/index.js"
+            },
+            "./mtcute.wasm": "./mtcute.wasm"
+        }
+    }
+}
