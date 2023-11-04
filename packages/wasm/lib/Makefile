@@ -35,7 +35,7 @@ SOURCES = utils.c \
 	$(if $(filter 1, $(IGE_API)), crypto/ige256.c) \
 	$(if $(filter 1, $(CTR_API)), crypto/ctr256.c)
 
-CC := clang
+CC ?= clang
 CFLAGS_WASM := \
 	-target wasm32-unknown-unknown \
 	-nostdlib -ffreestanding -DFREESTANDING \
