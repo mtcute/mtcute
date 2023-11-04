@@ -240,7 +240,7 @@ module.exports = {
             },
         },
         {
-            files: ['e2e/cjs/**'],
+            files: ['e2e/**'],
             rules: {
                 'no-restricted-globals': 'off',
             },
