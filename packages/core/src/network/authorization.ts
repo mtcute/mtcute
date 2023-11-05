@@ -1,4 +1,3 @@
-import bigInt from 'big-integer'
 import Long from 'long'
 
 import { mtp } from '@mtcute/tl'
@@ -11,45 +10,46 @@ import { findKeyByFingerprints } from '../utils/crypto/keys.js'
 import { millerRabin } from '../utils/crypto/miller-rabin.js'
 import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto.js'
 import { xorBuffer, xorBufferInPlace } from '../utils/crypto/utils.js'
-import { bigIntToBuffer, bufferToBigInt, ICryptoProvider, Logger } from '../utils/index.js'
+import { bigIntModPow, bigIntToBuffer, bufferToBigInt, ICryptoProvider, Logger } from '../utils/index.js'
 import { mtpAssertTypeIs } from '../utils/type-assertions.js'
 import { SessionConnection } from './session-connection.js'
 
 // Heavily based on code from https://github.com/LonamiWebs/Telethon/blob/master/telethon/network/authenticator.py
 
 // see https://core.telegram.org/mtproto/security_guidelines
-const DH_SAFETY_RANGE = bigInt[2].pow(2048 - 64)
-const KNOWN_DH_PRIME = bigInt(
-    'C71CAEB9C6B1C9048E6C522F70F13F73980D40238E3E21C14934D037563D930F48198A0AA7C14058229493D22530F4DBFA336F6E0AC925139543AED44CCE7C3720FD51F69458705AC68CD4FE6B6B13ABDC9746512969328454F18FAF8C595F642477FE96BB2A941D5BCD1D4AC8CC49880708FA9B378E3C4F3A9060BEE67CF9A4A4A695811051907E162753B56B0F6B410DBA74D8A84B2A14B3144E0EF1284754FD17ED950D5965B4B9DD46582DB1178D169C6BC465B0D6FF9CA3928FEF5B9AE4E418FC15E83EBEA0F87FA9FF5EED70050DED2849F47BF959D956850CE929851F0D8115F635B105EE2E4E15D04B2454BF6F4FADF034B10403119CD8E3B92FCC5B',
-    16,
-)
-const TWO_POW_2047 = bigInt[2].pow(2047)
-const TWO_POW_2048 = bigInt[2].pow(2048)
+// const DH_SAFETY_RANGE = bigInt[2].pow(2048 - 64)
+const DH_SAFETY_RANGE = 2n ** (2048n - 64n)
+const KNOWN_DH_PRIME =
+    // eslint-disable-next-line max-len
+    0xc71caeb9c6b1c9048e6c522f70f13f73980d40238e3e21c14934d037563d930f48198a0aa7c14058229493d22530f4dbfa336f6e0ac925139543aed44cce7c3720fd51f69458705ac68cd4fe6b6b13abdc9746512969328454f18faf8c595f642477fe96bb2a941d5bcd1d4ac8cc49880708fa9b378e3c4f3a9060bee67cf9a4a4a695811051907e162753b56b0f6b410dba74d8a84b2a14b3144e0ef1284754fd17ed950d5965b4b9dd46582db1178d169c6bc465b0d6ff9ca3928fef5b9ae4e418fc15e83ebea0f87fa9ff5eed70050ded2849f47bf959d956850ce929851f0d8115f635b105ee2e4e15d04b2454bf6f4fadf034b10403119cd8e3b92fcc5bn
+const TWO_POW_2047 = 2n ** 2047n
+const TWO_POW_2048 = 2n ** 2048n
 
 interface CheckedPrime {
-    prime: bigInt.BigInteger
+    prime: bigint
     generators: number[]
 }
+
 const checkedPrimesCache: CheckedPrime[] = []
 
-function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
-    if (KNOWN_DH_PRIME.eq(dhPrime)) {
+function checkDhPrime(log: Logger, dhPrime: bigint, g: number) {
+    if (KNOWN_DH_PRIME === dhPrime) {
         log.debug('server is using known dh prime, skipping validation')
 
         return
     }
 
-    let checkedPrime = checkedPrimesCache.find((x) => x.prime.eq(dhPrime))
+    let checkedPrime = checkedPrimesCache.find((x) => x.prime === dhPrime)
 
     if (!checkedPrime) {
-        if (dhPrime.lesserOrEquals(TWO_POW_2047) || dhPrime.greaterOrEquals(TWO_POW_2048)) {
+        if (dhPrime <= TWO_POW_2047 || dhPrime >= TWO_POW_2048) {
             throw new MtSecurityError('Step 3: dh_prime is not in the 2048-bit range')
         }
 
         if (!millerRabin(dhPrime)) {
             throw new MtSecurityError('Step 3: dh_prime is not prime')
         }
-        if (!millerRabin(dhPrime.minus(1).divide(2))) {
+        if (!millerRabin((dhPrime - 1n) / 2n)) {
             throw new MtSecurityError('Step 3: dh_prime is not a safe prime - (dh_prime-1)/2 is not prime')
         }
 
@@ -74,37 +74,37 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
 
     switch (g) {
         case 2:
-            if (dhPrime.mod(8).notEquals(7)) {
+            if (dhPrime % 8n !== 7n) {
                 throw new MtSecurityError('Step 3: ivalid g - dh_prime mod 8 != 7')
             }
             break
         case 3:
-            if (dhPrime.mod(3).notEquals(2)) {
+            if (dhPrime % 3n !== 2n) {
                 throw new MtSecurityError('Step 3: ivalid g - dh_prime mod 3 != 2')
             }
             break
         case 4:
             break
         case 5: {
-            const mod = dhPrime.mod(5)
+            const mod = dhPrime % 5n
 
-            if (mod.notEquals(1) && mod.notEquals(4)) {
+            if (mod !== 1n && mod !== 4n) {
                 throw new MtSecurityError('Step 3: ivalid g - dh_prime mod 5 != 1 && dh_prime mod 5 != 4')
             }
             break
         }
         case 6: {
-            const mod = dhPrime.mod(24)
+            const mod = dhPrime % 24n
 
-            if (mod.notEquals(19) && mod.notEquals(23)) {
+            if (mod !== 19n && mod !== 23n) {
                 throw new MtSecurityError('Step 3: ivalid g - dh_prime mod 24 != 19 && dh_prime mod 24 != 23')
             }
             break
         }
         case 7: {
-            const mod = dhPrime.mod(7)
+            const mod = dhPrime % 7n
 
-            if (mod.notEquals(3) && mod.notEquals(5) && mod.notEquals(6)) {
+            if (mod !== 3n && mod !== 5n && mod !== 6n) {
                 throw new MtSecurityError(
                     'Step 3: ivalid g - dh_prime mod 7 != 3 && dh_prime mod 7 != 5 && dh_prime mod 7 != 6',
                 )
@@ -123,8 +123,8 @@ function checkDhPrime(log: Logger, dhPrime: bigInt.BigInteger, g: number) {
 async function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Promise<Uint8Array> {
     // since Summer 2021, they use "version of RSA with a variant of OAEP+ padding explained below"
 
-    const keyModulus = bigInt(key.modulus, 16)
-    const keyExponent = bigInt(key.exponent, 16)
+    const keyModulus = BigInt(`0x${key.modulus}`)
+    const keyExponent = BigInt(`0x${key.exponent}`)
 
     if (data.length > 144) {
         throw new MtArgumentError('Failed to pad: too big data')
@@ -150,11 +150,11 @@ async function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKe
 
         const decryptedDataBigint = bufferToBigInt(decryptedData)
 
-        if (decryptedDataBigint.geq(keyModulus)) {
+        if (decryptedDataBigint >= keyModulus) {
             continue
         }
 
-        const encryptedBigint = decryptedDataBigint.modPow(keyExponent, keyModulus)
+        const encryptedBigint = bigIntModPow(decryptedDataBigint, keyExponent, keyModulus)
 
         return bigIntToBuffer(encryptedBigint, 256)
     }
@@ -168,7 +168,11 @@ async function rsaEncrypt(data: Uint8Array, crypto: ICryptoProvider, key: TlPubl
         randomBytes(235 - data.length),
     ])
 
-    const encryptedBigInt = bufferToBigInt(toEncrypt).modPow(bigInt(key.exponent, 16), bigInt(key.modulus, 16))
+    const encryptedBigInt = bigIntModPow(
+        bufferToBigInt(toEncrypt),
+        BigInt(`0x${key.exponent}`),
+        BigInt(`0x${key.modulus}`),
+    )
 
     return bigIntToBuffer(encryptedBigInt)
 }
@@ -323,7 +327,7 @@ export async function doAuthorization(
     const dhPrime = bufferToBigInt(serverDhInner.dhPrime)
     const timeOffset = Math.floor(Date.now() / 1000) - serverDhInner.serverTime
 
-    const g = bigInt(serverDhInner.g)
+    const g = BigInt(serverDhInner.g)
     const gA = bufferToBigInt(serverDhInner.gA)
 
     checkDhPrime(log, dhPrime, serverDhInner.g)
@@ -333,26 +337,26 @@ export async function doAuthorization(
 
     for (;;) {
         const b = bufferToBigInt(randomBytes(256))
-        const gB = g.modPow(b, dhPrime)
+        const gB = bigIntModPow(g, b, dhPrime)
 
-        const authKey = bigIntToBuffer(gA.modPow(b, dhPrime))
+        const authKey = bigIntToBuffer(bigIntModPow(gA, b, dhPrime))
         const authKeyAuxHash = (await crypto.sha1(authKey)).subarray(0, 8)
 
         // validate DH params
-        if (g.lesserOrEquals(1) || g.greaterOrEquals(dhPrime.minus(bigInt.one))) {
+        if (g <= 1 || g >= dhPrime - 1n) {
             throw new MtSecurityError('g is not within (1, dh_prime - 1)')
         }
-        if (gA.lesserOrEquals(1) || gA.greaterOrEquals(dhPrime.minus(bigInt.one))) {
+        if (gA <= 1 || gA >= dhPrime - 1n) {
             throw new MtSecurityError('g_a is not within (1, dh_prime - 1)')
         }
-        if (gB.lesserOrEquals(1) || gB.greaterOrEquals(dhPrime.minus(bigInt.one))) {
+        if (gB <= 1 || gB >= dhPrime - 1n) {
             throw new MtSecurityError('g_b is not within (1, dh_prime - 1)')
         }
 
-        if (gA.lt(DH_SAFETY_RANGE) || gA.gt(dhPrime.minus(DH_SAFETY_RANGE))) {
+        if (gA <= DH_SAFETY_RANGE || gA >= dhPrime - DH_SAFETY_RANGE) {
             throw new MtSecurityError('g_a is not within (2^{2048-64}, dh_prime - 2^{2048-64})')
         }
-        if (gB.lt(DH_SAFETY_RANGE) || gB.gt(dhPrime.minus(DH_SAFETY_RANGE))) {
+        if (gB <= DH_SAFETY_RANGE || gB >= dhPrime - DH_SAFETY_RANGE) {
             throw new MtSecurityError('g_b is not within (2^{2048-64}, dh_prime - 2^{2048-64})')
         }
 

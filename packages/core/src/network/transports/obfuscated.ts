@@ -1,4 +1,4 @@
-import { concatBuffers, dataViewFromBuffer } from '../../utils/buffer-utils.js'
+import { bufferToReversed, concatBuffers, dataViewFromBuffer } from '../../utils/buffer-utils.js'
 import { IAesCtr, randomBytes } from '../../utils/index.js'
 import { IPacketCodec } from './abstract.js'
 import { WrappedCodec } from './wrapped.js'
@@ -64,8 +64,7 @@ export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec 
             dv.setInt16(60, dcId, true)
         }
 
-        // randomBytes may return a Buffer in Node.js, whose .slice() doesn't copy
-        const randomRev = Uint8Array.prototype.slice.call(random, 8, 56).reverse()
+        const randomRev = bufferToReversed(random, 8, 56)
 
         let encryptKey = random.subarray(8, 40)
         const encryptIv = random.subarray(40, 56)

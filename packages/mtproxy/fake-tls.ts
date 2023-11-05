@@ -1,50 +1,54 @@
 /* eslint-disable no-restricted-globals */
-// todo fixme
-import bigInt, { BigInteger } from 'big-integer'
-
 import { IPacketCodec, WrappedCodec } from '@mtcute/core'
-import { bigIntToBuffer, bufferToBigInt, ICryptoProvider, randomBytes } from '@mtcute/core/utils.js'
+import {
+    bigIntModInv,
+    bigIntModPow,
+    bigIntToBuffer,
+    bufferToBigInt,
+    ICryptoProvider,
+    randomBytes,
+} from '@mtcute/core/utils.js'
 
 const MAX_TLS_PACKET_LENGTH = 2878
 const TLS_FIRST_PREFIX = Buffer.from('140303000101', 'hex')
 
 // ref: https://github.com/tdlib/td/blob/master/td/mtproto/TlsInit.cpp
-const KEY_MOD = bigInt('7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed', 16)
+const KEY_MOD = 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffedn
 // 2^255 - 19
-const QUAD_RES_MOD = bigInt('7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed', 16)
+const QUAD_RES_MOD = 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffedn
 // (mod - 1) / 2 = 2^254 - 10
-const QUAD_RES_POW = bigInt('3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6', 16)
+const QUAD_RES_POW = 0x3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6n
 
-function _getY2(x: BigInteger, mod: BigInteger): BigInteger {
+function _getY2(x: bigint, mod: bigint): bigint {
     // returns y = x^3 + x^2 * 486662 + x
     let y = x
-    y = y.add(486662).mod(mod)
-    y = y.multiply(x).mod(mod)
-    y = y.plus(1).mod(mod)
-    y = y.multiply(x).mod(mod)
+    y = (y + 486662n) % mod
+    y = (y * x) % mod
+    y = (y + 1n) % mod
+    y = (y * x) % mod
 
     return y
 }
 
-function _getDoubleX(x: BigInteger, mod: BigInteger): BigInteger {
+function _getDoubleX(x: bigint, mod: bigint): bigint {
     // returns x_2 = (x^2 - 1)^2/(4*y^2)
     let denominator = _getY2(x, mod)
-    denominator = denominator.multiply(4).mod(mod)
+    denominator = (denominator * 4n) % mod
 
-    let numerator = x.multiply(x).mod(mod)
-    numerator = numerator.minus(1).mod(mod)
-    numerator = numerator.multiply(numerator).mod(mod)
+    let numerator = (x * x) % mod
+    numerator = (numerator - 1n) % mod
+    numerator = (numerator * numerator) % mod
 
-    denominator = denominator.modInv(mod)
-    numerator = numerator.multiply(denominator).mod(mod)
+    denominator = bigIntModInv(denominator, mod)
+    numerator = (numerator * denominator) % mod
 
     return numerator
 }
 
-function _isQuadraticResidue(a: BigInteger): boolean {
-    const r = a.modPow(QUAD_RES_POW, QUAD_RES_MOD)
+function _isQuadraticResidue(a: bigint): boolean {
+    const r = bigIntModPow(a, QUAD_RES_POW, QUAD_RES_MOD)
 
-    return r.eq(1)
+    return r === 1n
 }
 
 interface TlsOperationHandler {

@@ -48,7 +48,6 @@
         "@mtcute/tl-runtime": "workspace:^",
         "@mtcute/wasm": "workspace:^",
         "@types/events": "3.0.0",
-        "big-integer": "1.6.51",
         "events": "3.2.0",
         "long": "5.2.3"
     },

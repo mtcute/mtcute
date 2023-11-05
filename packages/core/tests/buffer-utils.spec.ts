@@ -3,11 +3,7 @@ import { describe, it } from 'mocha'
 
 import { hexEncode, utf8Decode, utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 
-import {
-    buffersEqual,
-    cloneBuffer, concatBuffers,
-    randomBytes,
-} from '../src/utils/buffer-utils.js'
+import { buffersEqual, bufferToReversed, cloneBuffer, concatBuffers, randomBytes } from '../src/utils/buffer-utils.js'
 import { xorBuffer, xorBufferInPlace } from '../src/utils/crypto/utils.js'
 
 describe('buffersEqual', () => {
@@ -113,10 +109,7 @@ describe('cloneBuffer', () => {
 
 describe('concatBuffers', () => {
     it('should concat buffers', () => {
-        const buf = concatBuffers([
-            new Uint8Array([1, 2, 3]),
-            new Uint8Array([4, 5, 6]),
-        ])
+        const buf = concatBuffers([new Uint8Array([1, 2, 3]), new Uint8Array([4, 5, 6])])
 
         expect([...buf]).eql([1, 2, 3, 4, 5, 6])
     })
@@ -128,5 +121,27 @@ describe('concatBuffers', () => {
 
         buf[0] = 0xff
         expect(buf1[0]).not.eql(0xff)
+    })
+})
+
+describe('bufferToReversed', () => {
+    it('should reverse the buffer', () => {
+        const buf = bufferToReversed(new Uint8Array([1, 2, 3, 4, 5, 6]))
+
+        expect([...buf]).eql([6, 5, 4, 3, 2, 1])
+    })
+
+    it('should reverse a part of the buffer', () => {
+        const buf = bufferToReversed(new Uint8Array([1, 2, 3, 4, 5, 6]), 1, 5)
+
+        expect([...buf]).eql([5, 4, 3, 2])
+    })
+
+    it('should create a new buffer', () => {
+        const buf1 = new Uint8Array([1, 2, 3])
+        const buf2 = bufferToReversed(buf1)
+
+        buf2[0] = 0xff
+        expect([...buf1]).eql([1, 2, 3])
     })
 })

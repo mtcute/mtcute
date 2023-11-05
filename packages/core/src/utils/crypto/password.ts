@@ -1,10 +1,8 @@
-import bigInt from 'big-integer'
-
 import { tl } from '@mtcute/tl'
 import { utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 
 import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
-import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils.js'
+import { bigIntModPow, bigIntToBuffer, bufferToBigInt } from '../bigint-utils.js'
 import { concatBuffers, randomBytes } from '../buffer-utils.js'
 import { ICryptoProvider } from './abstract.js'
 import { xorBuffer } from './utils.js'
@@ -47,11 +45,11 @@ export async function computeNewPasswordHash(
 
     const _x = await computePasswordHash(crypto, utf8EncodeToBuffer(password), algo.salt1, algo.salt2)
 
-    const g = bigInt(algo.g)
+    const g = BigInt(algo.g)
     const p = bufferToBigInt(algo.p)
     const x = bufferToBigInt(_x)
 
-    return bigIntToBuffer(g.modPow(x, p), 256)
+    return bigIntToBuffer(bigIntModPow(g, x, p), 256)
 }
 
 /**
@@ -86,13 +84,13 @@ export async function computeSrpParams(
         throw new MtSecurityError('SRP_ID is not present in the request')
     }
 
-    const g = bigInt(algo.g)
+    const g = BigInt(algo.g)
     const _g = bigIntToBuffer(g, 256)
     const p = bufferToBigInt(algo.p)
     const gB = bufferToBigInt(request.srpB)
 
     const a = bufferToBigInt(randomBytes(256))
-    const gA = g.modPow(a, p)
+    const gA = bigIntModPow(g, a, p)
     const _gA = bigIntToBuffer(gA, 256)
 
     const H = (data: Uint8Array) => crypto.sha256(data)
@@ -107,12 +105,12 @@ export async function computeSrpParams(
     const u = bufferToBigInt(_u)
     const x = bufferToBigInt(_x)
 
-    const v = g.modPow(x, p)
-    const kV = k.multiply(v).mod(p)
+    const v = bigIntModPow(g, x, p)
+    const kV = (k * v) % p
 
-    let t = gB.minus(kV).mod(p)
-    if (t.isNegative()) t = t.plus(p)
-    const sA = t.modPow(a.plus(u.multiply(x)), p)
+    let t = gB - kV
+    if (t < 0n) t += p
+    const sA = bigIntModPow(t, a + u * x, p)
     const _kA = await H(bigIntToBuffer(sA, 256))
 
     const _M1 = await H(

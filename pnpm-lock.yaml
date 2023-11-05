@@ -132,9 +132,6 @@ importers:
       '@types/events':
         specifier: 3.0.0
         version: 3.0.0
-      big-integer:
-        specifier: 1.6.51
-        version: 1.6.51
       events:
         specifier: 3.2.0
         version: 3.2.0
@@ -238,9 +235,6 @@ importers:
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
-      big-integer:
-        specifier: 1.6.51
-        version: 1.6.51
 
   packages/node:
     dependencies:

@@ -59,6 +59,23 @@ export function concatBuffers(buffers: Uint8Array[]): Uint8Array {
     return ret
 }
 
+/**
+ * Shortcut for creating a DataView from a Uint8Array
+ */
 export function dataViewFromBuffer(buf: Uint8Array): DataView {
     return new DataView(buf.buffer, buf.byteOffset, buf.byteLength)
+}
+
+/**
+ * Reverse a buffer (or a part of it) into a new buffer
+ */
+export function bufferToReversed(buf: Uint8Array, start = 0, end = buf.length): Uint8Array {
+    const len = end - start
+    const ret = new Uint8Array(len)
+
+    for (let i = 0; i < len; i++) {
+        ret[i] = buf[end - i - 1]
+    }
+
+    return ret
 }

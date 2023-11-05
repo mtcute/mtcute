@@ -1,6 +1,11 @@
-import bigInt, { BigInteger } from 'big-integer'
-
-import { bigIntToBuffer, bufferToBigInt, randomBigIntInRange } from '../bigint-utils.js'
+import {
+    bigIntAbs,
+    bigIntGcd,
+    bigIntMin,
+    bigIntToBuffer,
+    bufferToBigInt,
+    randomBigIntInRange,
+} from '../bigint-utils.js'
 
 /**
  * Factorize `p*q` to `p` and `q` synchronously using Brent-Pollard rho algorithm
@@ -10,12 +15,12 @@ export function factorizePQSync(pq: Uint8Array): [Uint8Array, Uint8Array] {
     const pq_ = bufferToBigInt(pq)
 
     const n = PollardRhoBrent(pq_)
-    const m = pq_.divide(n)
+    const m = pq_ / n
 
     let p
     let q
 
-    if (n.lt(m)) {
+    if (n < m) {
         p = n
         q = m
     } else {
@@ -26,50 +31,46 @@ export function factorizePQSync(pq: Uint8Array): [Uint8Array, Uint8Array] {
     return [bigIntToBuffer(p), bigIntToBuffer(q)]
 }
 
-function PollardRhoBrent(n: BigInteger): BigInteger {
-    if (n.isEven()) return bigInt[2]
+function PollardRhoBrent(n: bigint): bigint {
+    if (n % 2n === 0n) return 2n
 
-    let y = randomBigIntInRange(n.minus(1))
-    const c = randomBigIntInRange(n.minus(1))
-    const m = randomBigIntInRange(n.minus(1))
-    let g = bigInt.one
-    let r = bigInt.one
-    let q = bigInt.one
+    let y = randomBigIntInRange(n - 1n)
+    const c = randomBigIntInRange(n - 1n)
+    const m = randomBigIntInRange(n - 1n)
+    let g = 1n
+    let r = 1n
+    let q = 1n
 
-    let ys: BigInteger
-    let x: BigInteger
+    let ys: bigint
+    let x: bigint
 
-    while (g.eq(bigInt.one)) {
+    while (g === 1n) {
         x = y
-        for (let i = 0; r.geq(i); i++) y = y.multiply(y).mod(n).plus(c).mod(n)
-        // y = ((y * y) % n + c) % n
+        for (let i = 0; r >= i; i++) y = (((y * y) % n) + c) % n
 
-        let k = bigInt.zero
+        let k = 0n
 
-        while (k.lt(r) && g.eq(1)) {
+        while (k < r && g === 1n) {
             ys = y
 
-            for (let i = bigInt.zero; i.lt(bigInt.min(m, r.minus(k))); i = i.plus(bigInt.one)) {
-                y = y.multiply(y).mod(n).plus(c).mod(n)
-                q = q.multiply(x.minus(y).abs()).mod(n)
-                // y = (y * y % n + c) % n
-                // q = q * abs(x - y) % n
+            for (let i = 0n; i < bigIntMin(m, r - k); i++) {
+                y = (((y * y) % n) + c) % n
+                q = (q * bigIntAbs(x - y)) % n
             }
 
-            g = bigInt.gcd(q, n)
-            k = k.plus(m)
+            g = bigIntGcd(q, n)
+            k = k + m
         }
 
-        r = r.multiply(bigInt[2])
+        r <<= 1n
     }
 
-    if (g.eq(n)) {
+    if (g === n) {
         do {
-            ys = ys!.multiply(ys!).mod(n).plus(c).mod(n)
-            // ys = ((ys * ys) % n + c) % n
+            ys = (((ys! * ys!) % n) + c) % n
 
-            g = bigInt.gcd(x!.minus(ys), n)
-        } while (g.leq(bigInt.one))
+            g = bigIntGcd(x! - ys!, n)
+        } while (g <= 1n)
     }
 
     return g
