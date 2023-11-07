@@ -32,19 +32,19 @@ export class AuthKey {
         return this.ready && buffersEqual(keyId, this.id)
     }
 
-    async setup(authKey?: Uint8Array | null): Promise<void> {
+    setup(authKey?: Uint8Array | null): void {
         if (!authKey) return this.reset()
 
         this.ready = true
         this.key = authKey
         this.clientSalt = authKey.subarray(88, 120)
         this.serverSalt = authKey.subarray(96, 128)
-        this.id = (await this._crypto.sha1(authKey)).subarray(-8)
+        this.id = this._crypto.sha1(authKey).subarray(-8)
 
         this.log.verbose('auth key set up, id = %h', this.id)
     }
 
-    async encryptMessage(message: Uint8Array, serverSalt: Long, sessionId: Long): Promise<Uint8Array> {
+    encryptMessage(message: Uint8Array, serverSalt: Long, sessionId: Long): Uint8Array {
         if (!this.ready) throw new MtcuteError('Keys are not set up!')
 
         let padding = (16 /* header size */ + message.length + 12) /* min padding */ % 16
@@ -60,18 +60,18 @@ export class AuthKey {
         buf.set(message, 16)
         buf.set(randomBytes(padding), 16 + message.length)
 
-        const messageKey = (await this._crypto.sha256(concatBuffers([this.clientSalt, buf]))).subarray(8, 24)
-        const ige = await createAesIgeForMessage(this._crypto, this.key, messageKey, true)
+        const messageKey = this._crypto.sha256(concatBuffers([this.clientSalt, buf])).subarray(8, 24)
+        const ige = createAesIgeForMessage(this._crypto, this.key, messageKey, true)
         const encryptedData = ige.encrypt(buf)
 
         return concatBuffers([this.id, messageKey, encryptedData])
     }
 
-    async decryptMessage(
+    decryptMessage(
         data: Uint8Array,
         sessionId: Long,
         callback: (msgId: tl.Long, seqNo: number, data: TlBinaryReader) => void,
-    ): Promise<void> {
+    ): void {
         const messageKey = data.subarray(8, 24)
         let encryptedData = data.subarray(24)
 
@@ -84,10 +84,10 @@ export class AuthKey {
             encryptedData = encryptedData.subarray(0, encryptedData.byteLength - mod16)
         }
 
-        const ige = await createAesIgeForMessage(this._crypto, this.key, messageKey, false)
+        const ige = createAesIgeForMessage(this._crypto, this.key, messageKey, false)
         const innerData = ige.decrypt(encryptedData)
 
-        const msgKeySource = await this._crypto.sha256(concatBuffers([this.serverSalt, innerData]))
+        const msgKeySource = this._crypto.sha256(concatBuffers([this.serverSalt, innerData]))
         const expectedMessageKey = msgKeySource.subarray(8, 24)
 
         if (!buffersEqual(messageKey, expectedMessageKey)) {

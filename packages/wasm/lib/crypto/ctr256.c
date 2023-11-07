@@ -2,27 +2,25 @@
 
 struct ctr256_ctx {
     uint32_t expandedKey[EXPANDED_KEY_SIZE];
-    uint8_t* iv;
+    uint8_t iv[AES_BLOCK_SIZE];
     uint8_t state;
 };
 
-AES_EXPORT struct ctr256_ctx* ctr256_alloc(uint8_t* key, uint8_t* iv) {
+WASM_EXPORT struct ctr256_ctx* ctr256_alloc() {
     struct ctr256_ctx *state = (struct ctr256_ctx *) __malloc(sizeof(struct ctr256_ctx));
-    aes256_set_encryption_key(key, state->expandedKey);
-    __free(key);
+    aes256_set_encryption_key(aes_shared_key_buffer, state->expandedKey);
 
-    state->iv = iv;
+    memcpy(state->iv, aes_shared_iv_buffer, AES_BLOCK_SIZE);
     state->state = 0;
 
     return state;
 }
 
-AES_EXPORT void ctr256_free(struct ctr256_ctx* ctx) {
-    __free(ctx->iv);
+WASM_EXPORT void ctr256_free(struct ctr256_ctx* ctx) {
     __free(ctx);
 }
 
-AES_EXPORT void ctr256(struct ctr256_ctx* ctx, uint8_t* in, uint32_t length, uint8_t *out) {
+WASM_EXPORT void ctr256(struct ctr256_ctx* ctx, uint8_t* in, uint32_t length, uint8_t *out) {
     uint8_t chunk[AES_BLOCK_SIZE];
     uint32_t* expandedKey = ctx->expandedKey;
     uint8_t* iv = ctx->iv;

@@ -24,9 +24,9 @@ export async function computePasswordHash(
     salt2: Uint8Array,
 ): Promise<Uint8Array> {
     const SH = (data: Uint8Array, salt: Uint8Array) => crypto.sha256(concatBuffers([salt, data, salt]))
-    const PH1 = async (pwd: Uint8Array, salt1: Uint8Array, salt2: Uint8Array) => SH(await SH(pwd, salt1), salt2)
+    const PH1 = (pwd: Uint8Array, salt1: Uint8Array, salt2: Uint8Array) => SH(SH(pwd, salt1), salt2)
 
-    return SH(await crypto.pbkdf2(await PH1(password, salt1, salt2), salt1, 100000), salt2)
+    return SH(await crypto.pbkdf2(PH1(password, salt1, salt2), salt1, 100000), salt2)
 }
 
 /**
@@ -95,12 +95,9 @@ export async function computeSrpParams(
 
     const H = (data: Uint8Array) => crypto.sha256(data)
 
-    const [_k, _u, _x] = await Promise.all([
-        // maybe, just maybe this will be a bit faster with some crypto providers
-        /* k = */ crypto.sha256(concatBuffers([algo.p, _g])),
-        /* u = */ crypto.sha256(concatBuffers([_gA, request.srpB])),
-        /* x = */ computePasswordHash(crypto, utf8EncodeToBuffer(password), algo.salt1, algo.salt2),
-    ])
+    const _k = crypto.sha256(concatBuffers([algo.p, _g]))
+    const _u = crypto.sha256(concatBuffers([_gA, request.srpB]))
+    const _x = await computePasswordHash(crypto, utf8EncodeToBuffer(password), algo.salt1, algo.salt2)
     const k = bufferToBigInt(_k)
     const u = bufferToBigInt(_u)
     const x = bufferToBigInt(_x)
@@ -111,18 +108,9 @@ export async function computeSrpParams(
     let t = gB - kV
     if (t < 0n) t += p
     const sA = bigIntModPow(t, a + u * x, p)
-    const _kA = await H(bigIntToBuffer(sA, 256))
+    const _kA = H(bigIntToBuffer(sA, 256))
 
-    const _M1 = await H(
-        concatBuffers([
-            xorBuffer(await H(algo.p), await H(_g)),
-            await H(algo.salt1),
-            await H(algo.salt2),
-            _gA,
-            request.srpB,
-            _kA,
-        ]),
-    )
+    const _M1 = H(concatBuffers([xorBuffer(H(algo.p), H(_g)), H(algo.salt1), H(algo.salt2), _gA, request.srpB, _kA]))
 
     return {
         _: 'inputCheckPasswordSRP',

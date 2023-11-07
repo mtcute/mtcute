@@ -50,7 +50,7 @@ async function main() {
     const obj: Record<string, TlPublicKey> = {}
 
     for await (const key of parseInputFile()) {
-        const parsed = await parsePublicKey(crypto, key.pem, key.kind === 'old')
+        const parsed = parsePublicKey(crypto, key.pem, key.kind === 'old')
         obj[parsed.fingerprint] = parsed
     }
 

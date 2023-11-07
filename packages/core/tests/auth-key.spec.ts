@@ -21,9 +21,9 @@ describe('AuthKey', () => {
     const logger = new LogManager()
     const readerMap: TlReaderMap = {}
 
-    it('should correctly calculate derivatives', async () => {
+    it('should correctly calculate derivatives', () => {
         const key = new AuthKey(crypto, logger, readerMap)
-        await key.setup(authKey)
+        key.setup(authKey)
 
         expect(key.key).to.eql(authKey)
         expect(key.clientSalt).to.eql(

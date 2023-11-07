@@ -5,14 +5,6 @@
 #ifndef LIB_LIB_COMMON_H
 #define LIB_LIB_COMMON_H
 
-#ifdef LIBDEFLATE_H
- /*
-  * When building the library, LIBDEFLATEAPI needs to be defined properly before
-  * including libdeflate.h.
-  */
-#  error "lib_common.h must always be included before libdeflate.h"
-#endif
-
 #if defined(LIBDEFLATE_DLL) && (defined(_WIN32) || defined(__CYGWIN__))
 #  define LIBDEFLATE_EXPORT_SYM  __declspec(dllexport)
 #elif defined(__GNUC__)
@@ -38,9 +30,8 @@
 #define LIBDEFLATEAPI	LIBDEFLATE_EXPORT_SYM LIBDEFLATE_ALIGN_STACK
 
 #include "common_defs.h"
-
-extern void* __malloc(size_t size);
-extern void __free(void* ptr);
+#include "libdeflate.h"
+#include "wasm.h"
 
 void *libdeflate_aligned_malloc(size_t alignment, size_t size);
 void libdeflate_aligned_free(void *ptr);
@@ -49,14 +40,4 @@ void libdeflate_aligned_free(void *ptr);
 #define CONCAT_IMPL(a, b)	a##b
 #define CONCAT(a, b)		CONCAT_IMPL(a, b)
 #define ADD_SUFFIX(name)	CONCAT(name, SUFFIX)
-
-#ifdef LOGGING
-void __debug(char* str);
-
-#define DEBUG(str) __debug(str);
-
-#else
-#define DEBUG(str)
-#endif
-
 #endif /* LIB_LIB_COMMON_H */

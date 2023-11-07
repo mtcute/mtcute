@@ -11,20 +11,20 @@ import { ICryptoProvider } from '../src/utils/index.js'
 export function testCryptoProvider(c: ICryptoProvider): void {
     before(() => c.initialize?.())
 
-    it('should calculate sha1', async () => {
-        expect(hexEncode(await c.sha1(utf8EncodeToBuffer('')))).to.eq('da39a3ee5e6b4b0d3255bfef95601890afd80709')
-        expect(hexEncode(await c.sha1(utf8EncodeToBuffer('hello')))).to.eq('aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d')
-        expect(hexEncode(await c.sha1(hexDecodeToBuffer('aebb1f')))).to.eq('62849d15c5dea495916c5eea8dba5f9551288850')
+    it('should calculate sha1', () => {
+        expect(hexEncode(c.sha1(utf8EncodeToBuffer('')))).to.eq('da39a3ee5e6b4b0d3255bfef95601890afd80709')
+        expect(hexEncode(c.sha1(utf8EncodeToBuffer('hello')))).to.eq('aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d')
+        expect(hexEncode(c.sha1(hexDecodeToBuffer('aebb1f')))).to.eq('62849d15c5dea495916c5eea8dba5f9551288850')
     })
 
-    it('should calculate sha256', async () => {
-        expect(hexEncode(await c.sha256(utf8EncodeToBuffer('')))).to.eq(
+    it('should calculate sha256', () => {
+        expect(hexEncode(c.sha256(utf8EncodeToBuffer('')))).to.eq(
             'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         )
-        expect(hexEncode(await c.sha256(utf8EncodeToBuffer('hello')))).to.eq(
+        expect(hexEncode(c.sha256(utf8EncodeToBuffer('hello')))).to.eq(
             '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824',
         )
-        expect(hexEncode(await c.sha256(hexDecodeToBuffer('aebb1f')))).to.eq(
+        expect(hexEncode(c.sha256(hexDecodeToBuffer('aebb1f')))).to.eq(
             '2d29658aba48f2b286fe8bbddb931b7ad297e5adb5b9a6fc3aab67ef7fbf4e80',
         )
     })

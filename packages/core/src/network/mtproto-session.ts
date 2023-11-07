@@ -243,14 +243,14 @@ export class MtprotoSession {
     }
 
     /** Encrypt a single MTProto message using session's keys */
-    async encryptMessage(message: Uint8Array): Promise<Uint8Array> {
+    encryptMessage(message: Uint8Array): Uint8Array {
         const key = this._authKeyTemp.ready ? this._authKeyTemp : this._authKey
 
         return key.encryptMessage(message, this.serverSalt, this._sessionId)
     }
 
     /** Decrypt a single MTProto message using session's keys */
-    async decryptMessage(data: Uint8Array, callback: Parameters<AuthKey['decryptMessage']>[2]): Promise<void> {
+    decryptMessage(data: Uint8Array, callback: Parameters<AuthKey['decryptMessage']>[2]): void {
         if (!this._authKey.ready) throw new MtcuteError('Keys are not set up!')
 
         const authKeyId = data.subarray(0, 8)

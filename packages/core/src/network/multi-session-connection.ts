@@ -237,10 +237,10 @@ export class MultiSessionConnection extends EventEmitter {
         this.connect()
     }
 
-    async setAuthKey(authKey: Uint8Array | null, temp = false, idx = 0): Promise<void> {
+    setAuthKey(authKey: Uint8Array | null, temp = false, idx = 0): void {
         const session = this._sessions[idx]
         const key = temp ? session._authKeyTemp : session._authKey
-        await key.setup(authKey)
+        key.setup(authKey)
     }
 
     resetAuthKeys(): void {

@@ -14,9 +14,9 @@ export interface IAesCtr {
 export interface ICryptoProvider {
     initialize?(): MaybeAsync<void>
 
-    sha1(data: Uint8Array): MaybeAsync<Uint8Array>
+    sha1(data: Uint8Array): Uint8Array
 
-    sha256(data: Uint8Array): MaybeAsync<Uint8Array>
+    sha256(data: Uint8Array): Uint8Array
 
     pbkdf2(
         password: Uint8Array,

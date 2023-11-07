@@ -16,20 +16,6 @@ extern "C" {
 #define LIBDEFLATE_VERSION_MINOR	19
 #define LIBDEFLATE_VERSION_STRING	"1.19"
 
-/*
- * Users of libdeflate.dll on Windows can define LIBDEFLATE_DLL to cause
- * __declspec(dllimport) to be used.  This should be done when it's easy to do.
- * Otherwise it's fine to skip it, since it is a very minor performance
- * optimization that is irrelevant for most use cases of libdeflate.
- */
-#ifndef LIBDEFLATEAPI
-#  if defined(LIBDEFLATE_DLL) && (defined(_WIN32) || defined(__CYGWIN__))
-#    define LIBDEFLATEAPI	__declspec(dllimport)
-#  else
-#    define LIBDEFLATEAPI
-#  endif
-#endif
-
 /* ========================================================================== */
 /*                             Compression                                    */
 /* ========================================================================== */

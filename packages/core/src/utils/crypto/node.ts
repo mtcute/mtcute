@@ -63,7 +63,6 @@ export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
     }
 
     gunzip(data: Uint8Array): Uint8Array {
-        // todo: test if wasm impl is better fit here
         return gunzipSync(data)
     }
 }

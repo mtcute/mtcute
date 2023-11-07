@@ -6,11 +6,17 @@ export * from './types.js'
 let wasm!: MtcuteWasmModule
 let compressor!: number
 let decompressor!: number
+let sharedOutPtr!: number
+let sharedKeyPtr!: number
+let sharedIvPtr!: number
 let cachedUint8Memory: Uint8Array | null = null
 
 function initCommon() {
     compressor = wasm.libdeflate_alloc_compressor(6)
     decompressor = wasm.libdeflate_alloc_decompressor()
+    sharedOutPtr = wasm.__get_shared_out()
+    sharedKeyPtr = wasm.__get_shared_key_buffer()
+    sharedIvPtr = wasm.__get_shared_iv_buffer()
 }
 
 function getUint8Memory() {
@@ -58,7 +64,9 @@ export async function initAsync(input?: InitInput): Promise<void> {
 export function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | null {
     const outputPtr = wasm.__malloc(size)
     const inputPtr = wasm.__malloc(bytes.length)
-    getUint8Memory().set(bytes, inputPtr)
+
+    const mem = getUint8Memory()
+    mem.set(bytes, inputPtr)
 
     const written = wasm.libdeflate_zlib_compress(compressor, inputPtr, bytes.length, outputPtr, size)
     wasm.__free(inputPtr)
@@ -69,7 +77,7 @@ export function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | nu
         return null
     }
 
-    const result = getUint8Memory().slice(outputPtr, outputPtr + written)
+    const result = mem.slice(outputPtr, outputPtr + written)
     wasm.__free(outputPtr)
 
     return result
@@ -109,20 +117,18 @@ export function gunzip(bytes: Uint8Array): Uint8Array {
  * @param iv  initialization vector (32 bytes)
  */
 export function ige256Encrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8Array {
-    const ptr = wasm.__malloc(key.length + iv.length + data.length + data.length)
+    const ptr = wasm.__malloc(data.length + data.length)
 
-    const keyPtr = ptr
-    const ivPtr = ptr + key.length
-    const inputPtr = ivPtr + iv.length
+    const inputPtr = ptr
     const outputPtr = inputPtr + data.length
 
     const mem = getUint8Memory()
     mem.set(data, inputPtr)
-    mem.set(key, keyPtr)
-    mem.set(iv, ivPtr)
+    mem.set(key, sharedKeyPtr)
+    mem.set(iv, sharedIvPtr)
 
-    wasm.ige256_encrypt(inputPtr, data.length, keyPtr, ivPtr, outputPtr)
-    const result = getUint8Memory().slice(outputPtr, outputPtr + data.length)
+    wasm.ige256_encrypt(inputPtr, data.length, outputPtr)
+    const result = mem.slice(outputPtr, outputPtr + data.length)
 
     wasm.__free(ptr)
 
@@ -137,21 +143,19 @@ export function ige256Encrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array)
  * @param iv  initialization vector (32 bytes)
  */
 export function ige256Decrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8Array {
-    const ptr = wasm.__malloc(key.length + iv.length + data.length + data.length)
+    const ptr = wasm.__malloc(data.length + data.length)
 
-    const keyPtr = ptr
-    const ivPtr = ptr + key.length
-    const inputPtr = ivPtr + iv.length
+    const inputPtr = ptr
     const outputPtr = inputPtr + data.length
 
     const mem = getUint8Memory()
     mem.set(data, inputPtr)
-    mem.set(key, keyPtr)
-    mem.set(iv, ivPtr)
+    mem.set(key, sharedKeyPtr)
+    mem.set(iv, sharedIvPtr)
 
-    wasm.ige256_decrypt(inputPtr, data.length, keyPtr, ivPtr, outputPtr)
+    wasm.ige256_decrypt(inputPtr, data.length, outputPtr)
+    const result = mem.slice(outputPtr, outputPtr + data.length)
 
-    const result = getUint8Memory().slice(outputPtr, outputPtr + data.length)
     wasm.__free(ptr)
 
     return result
@@ -163,15 +167,10 @@ export function ige256Decrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array)
  * > **Note**: `freeCtr256` must be called on the returned context when it's no longer needed
  */
 export function createCtr256(key: Uint8Array, iv: Uint8Array) {
-    const keyPtr = wasm.__malloc(key.length)
-    const ivPtr = wasm.__malloc(iv.length)
-    getUint8Memory().set(key, keyPtr)
-    getUint8Memory().set(iv, ivPtr)
+    getUint8Memory().set(key, sharedKeyPtr)
+    getUint8Memory().set(iv, sharedIvPtr)
 
-    const ctx = wasm.ctr256_alloc(keyPtr, ivPtr)
-    // pointers are "moved" and will be handled by c code
-
-    return ctx
+    return wasm.ctr256_alloc()
 }
 
 /**
@@ -201,6 +200,42 @@ export function ctr256(ctx: number, data: Uint8Array): Uint8Array {
     __free(outputPtr)
 
     return result
+}
+
+/**
+ * Calculate a SHA-256 hash
+ *
+ * @param data  data to hash
+ */
+export function sha256(data: Uint8Array): Uint8Array {
+    const { __malloc, __free } = wasm
+    const inputPtr = __malloc(data.length)
+
+    const mem = getUint8Memory()
+    mem.set(data, inputPtr)
+
+    wasm.sha256(inputPtr, data.length)
+    __free(inputPtr)
+
+    return mem.slice(sharedOutPtr, sharedOutPtr + 32)
+}
+
+/**
+ * Calculate a SHA-1 hash
+ *
+ * @param data  data to hash
+ */
+export function sha1(data: Uint8Array): Uint8Array {
+    const { __malloc, __free } = wasm
+    const inputPtr = __malloc(data.length)
+
+    const mem = getUint8Memory()
+    mem.set(data, inputPtr)
+
+    wasm.sha1(inputPtr, data.length)
+    __free(inputPtr)
+
+    return mem.slice(sharedOutPtr, sharedOutPtr + 20)
 }
 
 /**

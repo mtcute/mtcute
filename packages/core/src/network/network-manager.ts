@@ -330,12 +330,10 @@ export class DcConnectionManager {
     async loadKeys(): Promise<boolean> {
         const permanent = await this.manager._storage.getAuthKeyFor(this.dcId)
 
-        await Promise.all([
-            this.main.setAuthKey(permanent),
-            this.upload.setAuthKey(permanent),
-            this.download.setAuthKey(permanent),
-            this.downloadSmall.setAuthKey(permanent),
-        ])
+        this.main.setAuthKey(permanent)
+        this.upload.setAuthKey(permanent)
+        this.download.setAuthKey(permanent)
+        this.downloadSmall.setAuthKey(permanent)
 
         if (!permanent) {
             return false
@@ -345,14 +343,12 @@ export class DcConnectionManager {
             await Promise.all(
                 this.main._sessions.map(async (_, i) => {
                     const temp = await this.manager._storage.getAuthKeyFor(this.dcId, i)
-                    await this.main.setAuthKey(temp, true, i)
+                    this.main.setAuthKey(temp, true, i)
 
                     if (i === 0) {
-                        await Promise.all([
-                            this.upload.setAuthKey(temp, true),
-                            this.download.setAuthKey(temp, true),
-                            this.downloadSmall.setAuthKey(temp, true),
-                        ])
+                        this.upload.setAuthKey(temp, true)
+                        this.download.setAuthKey(temp, true)
+                        this.downloadSmall.setAuthKey(temp, true)
                     }
                 }),
             )

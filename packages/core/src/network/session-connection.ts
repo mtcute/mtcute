@@ -267,8 +267,8 @@ export class SessionConnection extends PersistentConnection {
         this.emit('auth-begin')
 
         doAuthorization(this, this._crypto)
-            .then(async ([authKey, serverSalt, timeOffset]) => {
-                await this._session._authKey.setup(authKey)
+            .then(([authKey, serverSalt, timeOffset]) => {
+                this._session._authKey.setup(authKey)
                 this._session.serverSalt = serverSalt
                 this._session._timeOffset = timeOffset
 
@@ -322,7 +322,7 @@ export class SessionConnection extends PersistentConnection {
                 }
 
                 const tempKey = this._session._authKeyTempSecondary
-                await tempKey.setup(tempAuthKey)
+                tempKey.setup(tempAuthKey)
 
                 const msgId = this._session.getMessageId()
 
@@ -358,10 +358,10 @@ export class SessionConnection extends PersistentConnection {
                 writer.raw(randomBytes(8))
                 const msgWithPadding = writer.result()
 
-                const hash = await this._crypto.sha1(msgWithoutPadding)
+                const hash = this._crypto.sha1(msgWithoutPadding)
                 const msgKey = hash.subarray(4, 20)
 
-                const ige = await createAesIgeForMessageOld(this._crypto, this._session._authKey.key, msgKey, true)
+                const ige = createAesIgeForMessageOld(this._crypto, this._session._authKey.key, msgKey, true)
                 const encryptedData = ige.encrypt(msgWithPadding)
                 const encryptedMessage = concatBuffers([this._session._authKey.id, msgKey, encryptedData])
 
@@ -399,7 +399,7 @@ export class SessionConnection extends PersistentConnection {
                 reqWriter.object(request)
 
                 // we can now send it as is
-                const requestEncrypted = await tempKey.encryptMessage(
+                const requestEncrypted = tempKey.encryptMessage(
                     reqWriter.result(),
                     tempServerSalt,
                     this._session._sessionId,
@@ -476,7 +476,7 @@ export class SessionConnection extends PersistentConnection {
         return promise
     }
 
-    protected async onMessage(data: Uint8Array): Promise<void> {
+    protected onMessage(data: Uint8Array): void {
         if (this._pendingWaitForUnencrypted.length) {
             const int32 = new Int32Array(data.buffer, data.byteOffset, 2)
 
@@ -501,7 +501,7 @@ export class SessionConnection extends PersistentConnection {
         }
 
         try {
-            await this._session.decryptMessage(data, this._handleRawMessage)
+            this._session.decryptMessage(data, this._handleRawMessage)
         } catch (err) {
             this.log.error('failed to decrypt message: %s\ndata: %h', err, data)
         }
@@ -1793,17 +1793,15 @@ export class SessionConnection extends PersistentConnection {
             rootMsgId,
         )
 
-        this._session
-            .encryptMessage(result)
-            .then((enc) => this.send(enc))
-            .catch((err: Error) => {
-                this.log.error('error while sending pending messages (root msg_id = %l): %s', rootMsgId, err.stack)
+        const enc = this._session.encryptMessage(result)
+        this.send(enc).catch((err: Error) => {
+            this.log.error('error while sending pending messages (root msg_id = %l): %s', rootMsgId, err.stack)
 
-                // put acks in the front so they are the first to be sent
-                if (ackMsgIds) {
-                    this._session.queuedAcks.splice(0, 0, ...ackMsgIds)
-                }
-                this._onMessageFailed(rootMsgId!, 'unknown error')
-            })
+            // put acks in the front so they are the first to be sent
+            if (ackMsgIds) {
+                this._session.queuedAcks.splice(0, 0, ...ackMsgIds)
+            }
+            this._onMessageFailed(rootMsgId!, 'unknown error')
+        })
     }
 }

@@ -6,6 +6,17 @@
 #define GET(p) SWAP(*((uint32_t *)(p)))
 #define PUT(ct, st) (*((uint32_t *)(ct)) = SWAP((st)))
 
+uint8_t aes_shared_key_buffer[32];
+uint8_t aes_shared_iv_buffer[32];
+
+WASM_EXPORT uint8_t* __get_shared_key_buffer() {
+  return aes_shared_key_buffer;
+}
+
+WASM_EXPORT uint8_t* __get_shared_iv_buffer() {
+  return aes_shared_iv_buffer;
+}
+
 static const uint32_t Te0[256] = {
     0xc66363a5, 0xf87c7c84, 0xee777799, 0xf67b7b8d, 0xfff2f20d, 0xd66b6bbd, 0xde6f6fb1, 0x91c5c554,
     0x60303050, 0x02010103, 0xce6767a9, 0x562b2b7d, 0xe7fefe19, 0xb5d7d762, 0x4dababe6, 0xec76769a,

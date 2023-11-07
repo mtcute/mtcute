@@ -120,7 +120,7 @@ function checkDhPrime(log: Logger, dhPrime: bigint, g: number) {
     log.debug('g = %d is safe to use with dh_prime', g)
 }
 
-async function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Promise<Uint8Array> {
+function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Uint8Array {
     // since Summer 2021, they use "version of RSA with a variant of OAEP+ padding explained below"
 
     const keyModulus = BigInt(`0x${key.modulus}`)
@@ -137,13 +137,13 @@ async function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKe
 
         const aesKey = randomBytes(32)
 
-        const dataWithHash = concatBuffers([data, await crypto.sha256(concatBuffers([aesKey, data]))])
+        const dataWithHash = concatBuffers([data, crypto.sha256(concatBuffers([aesKey, data]))])
         // we only need to reverse the data
         dataWithHash.subarray(0, 192).reverse()
 
         const aes = crypto.createAesIge(aesKey, aesIv)
         const encrypted = aes.encrypt(dataWithHash)
-        const encryptedHash = await crypto.sha256(encrypted)
+        const encryptedHash = crypto.sha256(encrypted)
 
         xorBufferInPlace(aesKey, encryptedHash)
         const decryptedData = concatBuffers([aesKey, encrypted])
@@ -160,9 +160,9 @@ async function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKe
     }
 }
 
-async function rsaEncrypt(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Promise<Uint8Array> {
+function rsaEncrypt(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Uint8Array {
     const toEncrypt = concatBuffers([
-        await crypto.sha1(data),
+        crypto.sha1(data),
         data,
         // sha1 is always 20 bytes, so we're left with 255 - 20 - x padding
         randomBytes(235 - data.length),
@@ -271,8 +271,8 @@ export async function doAuthorization(
     const pqInnerData = TlBinaryWriter.serializeObject(writerMap, _pqInnerData)
 
     const encryptedData = publicKey.old ?
-        await rsaEncrypt(pqInnerData, crypto, publicKey) :
-        await rsaPad(pqInnerData, crypto, publicKey)
+        rsaEncrypt(pqInnerData, crypto, publicKey) :
+        rsaPad(pqInnerData, crypto, publicKey)
 
     log.debug('requesting DH params')
 
@@ -303,7 +303,7 @@ export async function doAuthorization(
     }
 
     // Step 3: complete DH exchange
-    const [key, iv] = await generateKeyAndIvFromNonce(crypto, resPq.serverNonce, newNonce)
+    const [key, iv] = generateKeyAndIvFromNonce(crypto, resPq.serverNonce, newNonce)
     const ige = crypto.createAesIge(key, iv)
 
     const plainTextAnswer = ige.decrypt(serverDhParams.encryptedAnswer)
@@ -311,7 +311,7 @@ export async function doAuthorization(
     const serverDhInnerReader = new TlBinaryReader(readerMap, plainTextAnswer, 20)
     const serverDhInner = serverDhInnerReader.object() as mtp.TlObject
 
-    if (!buffersEqual(innerDataHash, await crypto.sha1(plainTextAnswer.subarray(20, serverDhInnerReader.pos)))) {
+    if (!buffersEqual(innerDataHash, crypto.sha1(plainTextAnswer.subarray(20, serverDhInnerReader.pos)))) {
         throw new MtSecurityError('Step 3: invalid inner data hash')
     }
 
@@ -340,7 +340,7 @@ export async function doAuthorization(
         const gB = bigIntModPow(g, b, dhPrime)
 
         const authKey = bigIntToBuffer(bigIntModPow(gA, b, dhPrime))
-        const authKeyAuxHash = (await crypto.sha1(authKey)).subarray(0, 8)
+        const authKeyAuxHash = crypto.sha1(authKey).subarray(0, 8)
 
         // validate DH params
         if (g <= 1 || g >= dhPrime - 1n) {
@@ -377,7 +377,7 @@ export async function doAuthorization(
         const clientDhInnerWriter = TlBinaryWriter.alloc(writerMap, innerLength)
         clientDhInnerWriter.pos = 20
         clientDhInnerWriter.object(clientDhInner)
-        const clientDhInnerHash = await crypto.sha1(clientDhInnerWriter.uint8View.subarray(20, clientDhInnerWriter.pos))
+        const clientDhInnerHash = crypto.sha1(clientDhInnerWriter.uint8View.subarray(20, clientDhInnerWriter.pos))
         clientDhInnerWriter.pos = 0
         clientDhInnerWriter.raw(clientDhInnerHash)
 
@@ -412,7 +412,7 @@ export async function doAuthorization(
         }
 
         if (dhGen._ === 'mt_dh_gen_retry') {
-            const expectedHash = await crypto.sha1(concatBuffers([newNonce, new Uint8Array([2]), authKeyAuxHash]))
+            const expectedHash = crypto.sha1(concatBuffers([newNonce, new Uint8Array([2]), authKeyAuxHash]))
 
             if (!buffersEqual(expectedHash.subarray(4, 20), dhGen.newNonceHash2)) {
                 throw Error('Step 4: invalid retry nonce hash from server')
@@ -423,7 +423,7 @@ export async function doAuthorization(
 
         if (dhGen._ !== 'mt_dh_gen_ok') throw new Error() // unreachable
 
-        const expectedHash = await crypto.sha1(concatBuffers([newNonce, new Uint8Array([1]), authKeyAuxHash]))
+        const expectedHash = crypto.sha1(concatBuffers([newNonce, new Uint8Array([1]), authKeyAuxHash]))
 
         if (!buffersEqual(expectedHash.subarray(4, 20), dhGen.newNonceHash1)) {
             throw Error('Step 4: invalid nonce hash from server')

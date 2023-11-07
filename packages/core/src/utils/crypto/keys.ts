@@ -14,7 +14,7 @@ import { ICryptoProvider } from './abstract.js'
  * @param key  PEM-encoded RSA public key
  * @param old  Whether this is an "old" key
  */
-export async function parsePublicKey(crypto: ICryptoProvider, key: string, old = false): Promise<TlPublicKey> {
+export function parsePublicKey(crypto: ICryptoProvider, key: string, old = false): TlPublicKey {
     const asn1 = parseAsn1(parsePemContents(key))
     const modulus = asn1.children?.[0].value
     const exponent = asn1.children?.[1].value
@@ -26,7 +26,7 @@ export async function parsePublicKey(crypto: ICryptoProvider, key: string, old =
     writer.bytes(exponent)
 
     const data = writer.result()
-    const sha = await crypto.sha1(data)
+    const sha = crypto.sha1(data)
     const fp = hexEncode(sha.slice(-8).reverse())
 
     return {
@@ -44,8 +44,8 @@ export async function parsePublicKey(crypto: ICryptoProvider, key: string, old =
  * @param key  PEM-encoded RSA public key
  * @param old  Whether this is an "old" key
  */
-export async function addPublicKey(crypto: ICryptoProvider, key: string, old = false): Promise<void> {
-    const parsed = await parsePublicKey(crypto, key, old)
+export function addPublicKey(crypto: ICryptoProvider, key: string, old = false): void {
+    const parsed = parsePublicKey(crypto, key, old)
     keysIndex[parsed.fingerprint] = parsed
 }
 

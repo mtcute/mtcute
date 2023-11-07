@@ -20,11 +20,11 @@ const authKey = Buffer.alloc(
 const messageKey = Buffer.from('25d701f2a29205526757825a99eb2d32')
 
 describe('mtproto 2.0', () => {
-    it('should correctly derive message key and iv for client', async () => {
+    it('should correctly derive message key and iv for client', () => {
         const crypto = new NodeCryptoProvider()
         const spy = chai.spy.on(crypto, 'createAesIge')
 
-        await createAesIgeForMessage(crypto, authKey, messageKey, true)
+        createAesIgeForMessage(crypto, authKey, messageKey, true)
 
         expect(spy).to.have.been.called.with.exactly(
             Buffer.from('7acac59ab48cd370e478daf6c64545ab9f32d5c9197f25febe052110f61875ca', 'hex'),
@@ -32,11 +32,11 @@ describe('mtproto 2.0', () => {
         )
     })
 
-    it('should correctly derive message key and iv for server', async () => {
+    it('should correctly derive message key and iv for server', () => {
         const crypto = new NodeCryptoProvider()
         const spy = chai.spy.on(crypto, 'createAesIge')
 
-        await createAesIgeForMessage(crypto, authKey, messageKey, false)
+        createAesIgeForMessage(crypto, authKey, messageKey, false)
 
         expect(spy).to.have.been.called.with.exactly(
             Buffer.from('c7cf179e7ebab144ba87de05415db4157d2fc66df4790b2fd405a6c8cbe4c0b3', 'hex'),
@@ -46,11 +46,11 @@ describe('mtproto 2.0', () => {
 })
 
 describe('mtproto 1.0', () => {
-    it('should correctly derive message key and iv for client', async () => {
+    it('should correctly derive message key and iv for client', () => {
         const crypto = new NodeCryptoProvider()
         const spy = chai.spy.on(crypto, 'createAesIge')
 
-        await createAesIgeForMessageOld(crypto, authKey, messageKey, true)
+        createAesIgeForMessageOld(crypto, authKey, messageKey, true)
 
         expect(spy).to.have.been.called.with.exactly(
             Buffer.from('aad61cb5b7be5e8435174d74665f8a978e85806d0970ad4958642ca49e3c8834', 'hex'),
@@ -58,11 +58,11 @@ describe('mtproto 1.0', () => {
         )
     })
 
-    it('should correctly derive message key and iv for server', async () => {
+    it('should correctly derive message key and iv for server', () => {
         const crypto = new NodeCryptoProvider()
         const spy = chai.spy.on(crypto, 'createAesIge')
 
-        await createAesIgeForMessageOld(crypto, authKey, messageKey, false)
+        createAesIgeForMessageOld(crypto, authKey, messageKey, false)
 
         expect(spy).to.have.been.called.with.exactly(
             Buffer.from('d57682a17105e43b92bc5025ea80e88ef708240fc19450dfe072a8760f9534da', 'hex'),
@@ -72,10 +72,10 @@ describe('mtproto 1.0', () => {
 })
 
 describe('mtproto key/iv from nonce', () => {
-    it('should correctly derive message key and iv for given nonces', async () => {
+    it('should correctly derive message key and iv for given nonces', () => {
         const crypto = new NodeCryptoProvider()
 
-        const res = await generateKeyAndIvFromNonce(
+        const res = generateKeyAndIvFromNonce(
             crypto,
             Buffer.from('8af24c551836e5ed7002f5857e6e71b2', 'hex'),
             Buffer.from('3bf48b2d3152f383d82d1f2b32ac7fb5', 'hex'),

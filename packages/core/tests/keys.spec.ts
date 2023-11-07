@@ -7,9 +7,9 @@ import { parsePublicKey } from '../src/utils/index.js'
 const crypto = new NodeCryptoProvider()
 
 describe('parsePublicKey', () => {
-    it('should parse telegram public keys', async () => {
+    it('should parse telegram public keys', () => {
         expect(
-            await parsePublicKey(
+            parsePublicKey(
                 crypto,
                 `-----BEGIN RSA PUBLIC KEY-----
 MIIBCgKCAQEAruw2yP/BCcsJliRoW5eBVBVle9dtjJw+OYED160Wybum9SXtBBLX
