@@ -266,7 +266,9 @@ export class BaseTelegramClient extends EventEmitter {
             throw new Error('apiId must be a number or a numeric string!')
         }
 
-        if (opts.logLevel) this.log.level = opts.logLevel
+        if (opts.logLevel !== undefined) {
+            this.log.level = opts.logLevel
+        }
 
         this.crypto = (opts.crypto ?? defaultCryptoProviderFactory)()
         this.storage = opts.storage ?? new MemoryStorage()
@@ -312,6 +314,7 @@ export class BaseTelegramClient extends EventEmitter {
                 useIpv6: Boolean(opts.useIpv6),
                 keepAliveAction: this._keepAliveAction.bind(this),
                 enableErrorReporting: opts.enableErrorReporting ?? false,
+                onUsable: () => this.emit('usable'),
                 ...(opts.network ?? {}),
             },
             this._config,

@@ -1,0 +1,33 @@
+{
+    "name": "@mtcute/test",
+    "private": true,
+    "version": "0.1.0",
+    "description": "Test utilities for mtcute",
+    "author": "Alina Sireneva <alina@tei.su>",
+    "license": "MIT",
+    "main": "src/index.ts",
+    "type": "module",
+    "scripts": {
+        "docs": "typedoc",
+        "test": "mocha \"tests/**/*.spec.ts\"",
+        "build": "pnpm run -w build-package test"
+    },
+    "dependencies": {
+        "long": "5.2.3"
+    },
+    "devDependencies": {
+        "@mtcute/tl-utils": "workspace:^"
+    },
+    "peerDependencies": {
+        "@mtcute/core": "workspace:^",
+        "@mtcute/tl": "workspace:*"
+    },
+    "distOnlyFields": {
+        "exports": {
+            ".": {
+                "import": "./esm/index.js",
+                "require": "./cjs/index.js"
+            }
+        }
+    }
+}

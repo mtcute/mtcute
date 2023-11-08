@@ -49,6 +49,7 @@ export interface NetworkManagerParams {
     isPremium: boolean
     _emitError: (err: Error, connection?: SessionConnection) => void
     keepAliveAction: () => void
+    onUsable: () => void
 }
 
 export type ConnectionCountDelegate = (kind: ConnectionKind, dcId: number, isPremium: boolean) => number
@@ -448,6 +449,7 @@ export class NetworkManager {
 
         dc.main.on('usable', () => {
             this._lastUpdateTime = Date.now()
+            this.params.onUsable()
 
             if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
             this._keepAliveInterval = setInterval(() => {
@@ -679,7 +681,9 @@ export class NetworkManager {
             } catch (e: any) {
                 lastError = e as Error
 
-                if (!tl.RpcError.is(e)) continue
+                if (!tl.RpcError.is(e)) {
+                    throw e
+                }
 
                 if (!(e.code in CLIENT_ERRORS)) {
                     this._log.warn('Telegram is having internal issues: %d %s, retrying', e.code, e.message)

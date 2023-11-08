@@ -276,6 +276,22 @@ importers:
         specifier: 7.6.4
         version: 7.6.4
 
+  packages/test:
+    dependencies:
+      '@mtcute/core':
+        specifier: workspace:^
+        version: link:../core
+      '@mtcute/tl':
+        specifier: workspace:*
+        version: link:../tl
+      long:
+        specifier: 5.2.3
+        version: 5.2.3
+    devDependencies:
+      '@mtcute/tl-utils':
+        specifier: workspace:^
+        version: link:../tl-utils
+
   packages/tl:
     dependencies:
       long:
