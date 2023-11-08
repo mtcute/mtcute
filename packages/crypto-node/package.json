@@ -14,9 +14,7 @@
         "install": "node-gyp configure && node-gyp -j 16 build",
         "rebuild:dev": "node-gyp configure --debug && node-gyp -j 16 rebuild --debug",
         "rebuild": "node-gyp configure && node-gyp -j 16 rebuild",
-        "clean": "node-gyp clean",
-        "test": "mocha \"tests/**/*.spec.ts\"",
-        "docs": "typedoc"
+        "clean": "node-gyp clean"
     },
     "keepScripts": [
         "install"

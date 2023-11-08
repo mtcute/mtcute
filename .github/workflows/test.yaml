@@ -34,7 +34,7 @@ jobs:
         run: pnpm run lint:ci
       - name: 'Circular dependencies'
         run: pnpm run lint:dpdm
-      - run: pnpm run test:all:ci
+      - run: pnpm run test
   e2e:
     runs-on: ubuntu-latest
     needs: test

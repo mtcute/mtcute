@@ -14,8 +14,8 @@ import {
     tl,
     TransportState,
 } from '@mtcute/core'
-import { buffersEqual } from '@mtcute/core/dist/esm/utils/index.js'
 import { BaseTcpTransport } from '@mtcute/core/src/network/transports/tcp.js'
+import { buffersEqual } from '@mtcute/core/utils.js'
 
 import { FakeTlsPacketCodec, generateFakeTlsHeader } from './fake-tls.js'
 

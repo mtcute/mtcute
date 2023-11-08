@@ -7,7 +7,6 @@
     "license": "MIT",
     "type": "module",
     "scripts": {
-        "test": "mocha \"tests/**/*.spec.ts\"",
         "docs": "typedoc",
         "build": "pnpm run -w build-package tl-runtime"
     },

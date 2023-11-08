@@ -8,10 +8,7 @@
     "main": "src/index.ts",
     "type": "module",
     "scripts": {
-        "test": "mocha \"tests/**/*.spec.ts\"",
-        "coverage": "nyc npm run test",
-        "build": "pnpm run -w build-package markdown-parser",
-        "docs": "typedoc"
+        "build": "pnpm run -w build-package markdown-parser"
     },
     "distOnlyFields": {
         "exports": {

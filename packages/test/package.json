@@ -8,8 +8,6 @@
     "main": "src/index.ts",
     "type": "module",
     "scripts": {
-        "docs": "typedoc",
-        "test": "mocha \"tests/**/*.spec.ts\"",
         "build": "pnpm run -w build-package test"
     },
     "dependencies": {

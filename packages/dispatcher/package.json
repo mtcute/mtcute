@@ -16,8 +16,6 @@
         }
     },
     "scripts": {
-        "test": "mocha \"tests/**/*.spec.ts\"",
-        "docs": "typedoc",
         "build": "pnpm run -w build-package dispatcher",
         "gen-updates": "node ./scripts/generate.cjs"
     },

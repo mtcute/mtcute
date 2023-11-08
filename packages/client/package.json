@@ -8,8 +8,6 @@
     "main": "src/index.ts",
     "type": "module",
     "scripts": {
-        "test": "mocha \"tests/**/*.spec.ts\"",
-        "docs": "typedoc",
         "build": "pnpm run -w build-package client",
         "gen-client": "node ./scripts/generate-client.cjs",
         "gen-updates": "node ./scripts/generate-updates.cjs"

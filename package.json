@@ -8,8 +8,9 @@
     "scripts": {
         "prepare": "husky install",
         "postinstall": "node scripts/validate-deps-versions.mjs",
-        "test:all": "pnpm run -r --parallel test",
-        "test:all:ci": "pnpm run -r test",
+        "test": "vitest run && pnpm run -r test",
+        "test:dev": "vitest watch",
+        "test:coverage": "vitest run --coverage",
         "lint": "eslint .",
         "lint:ci": "NODE_OPTIONS=\"--max_old_space_size=8192\" eslint --config .eslintrc.ci.js .",
         "lint:tsc": "pnpm -r --parallel exec tsc --build",
@@ -27,15 +28,11 @@
     "devDependencies": {
         "@commitlint/cli": "^17.6.5",
         "@commitlint/config-conventional": "^17.6.5",
-        "@types/chai": "4.3.5",
-        "@types/chai-spies": "^1.0.4",
-        "@types/mocha": "10.0.1",
         "@types/node-forge": "1.3.2",
         "@types/ws": "8.5.4",
         "@typescript-eslint/eslint-plugin": "6.4.0",
         "@typescript-eslint/parser": "6.4.0",
-        "chai": "4.3.7",
-        "chai-spies": "^1.0.0",
+        "@vitest/coverage-v8": "^0.34.6",
         "dotenv-flow": "3.2.0",
         "dpdm": "^3.14.0",
         "eslint": "8.47.0",
@@ -47,15 +44,15 @@
         "glob": "10.2.6",
         "husky": "^8.0.3",
         "lint-staged": "^13.2.2",
-        "mocha": "10.2.0",
         "node-forge": "1.3.1",
-        "nyc": "15.1.0",
         "prettier": "3.0.3",
         "rimraf": "5.0.1",
         "semver": "7.5.1",
         "ts-node": "10.9.1",
         "tsconfig-paths": "^4.2.0",
         "typedoc": "0.25.3",
-        "typescript": "5.0.4"
+        "typescript": "5.0.4",
+        "vite": "^4.5.0",
+        "vitest": "^0.34.6"
     }
 }

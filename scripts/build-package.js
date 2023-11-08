@@ -125,7 +125,23 @@ buildConfig.before()
 
 if (buildConfig.buildTs) {
     console.log('[i] Building typescript...')
-    exec('pnpm exec tsc --build', { cwd: packageDir, stdio: 'inherit' })
+
+    fs.cpSync(path.join(packageDir, 'tsconfig.json'), path.join(packageDir, 'tsconfig.backup.json'))
+
+    let tsconfig = fs.readFileSync(path.join(packageDir, 'tsconfig.backup.json'), 'utf-8')
+    // what the fuck
+    tsconfig = tsconfig.replace(
+        /("extends": "\.\.\/\.\.\/tsconfig\.json",)/,
+        '$1"exclude": ["**/*.{test,test-utils}.ts"],',
+    )
+    fs.writeFileSync(path.join(packageDir, 'tsconfig.json'), tsconfig)
+
+    try {
+        exec('pnpm exec tsc --build', { cwd: packageDir, stdio: 'inherit' })
+    } catch (e) {
+        fs.renameSync(path.join(packageDir, 'tsconfig.backup.json'), path.join(packageDir, 'tsconfig.json'))
+        throw e
+    }
 
     if (buildConfig.buildCjs) {
         console.log('[i] Building typescript (CJS)...')
@@ -155,6 +171,8 @@ if (buildConfig.buildTs) {
 
         if (error) throw error
     }
+
+    fs.renameSync(path.join(packageDir, 'tsconfig.backup.json'), path.join(packageDir, 'tsconfig.json'))
 
     console.log('[i] Post-processing...')
 
