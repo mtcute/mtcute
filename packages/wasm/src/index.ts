@@ -27,6 +27,8 @@ function getUint8Memory() {
     return cachedUint8Memory
 }
 
+/* c8 ignore start */
+
 /**
  * Init the WASM blob synchronously (e.g. by passing a `WebAssembly.Module` instance)
  */
@@ -42,6 +44,8 @@ export function initSync(module: SyncInitInput): void {
     wasm = instance.exports as unknown as MtcuteWasmModule
     initCommon()
 }
+
+/* c8 ignore end */
 
 /**
  * Init the WASM blob asynchronously (e.g. by passing a URL to the WASM file)
@@ -98,6 +102,7 @@ export function gunzip(bytes: Uint8Array): Uint8Array {
 
     const ret = wasm.libdeflate_gzip_decompress(decompressor, inputPtr, bytes.length, outputPtr, size)
 
+    /* c8 ignore next 3 */
     if (ret === -1) throw new Error('gunzip error -- bad data')
     if (ret === -2) throw new Error('gunzip error -- short output')
     if (ret === -3) throw new Error('gunzip error -- short input') // should never happen

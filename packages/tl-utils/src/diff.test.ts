@@ -6,7 +6,7 @@ import { parseFullTlSchema } from './schema.js'
 import { TlEntryDiff, TlSchemaDiff } from './types.js'
 
 describe('generateTlEntriesDifference', () => {
-    const test = (tl: string[], expected: TlEntryDiff) => {
+    const test = (tl: string[], expected?: TlEntryDiff) => {
         const e = parseTlToEntries(tl.join('\n'))
         const res = generateTlEntriesDifference(e[0], e[1])
         expect(res).toEqual(expected)
@@ -99,281 +99,70 @@ describe('generateTlEntriesDifference', () => {
             },
         })
     })
+
+    it('shows args comments diff', () => {
+        test(['// @description a @foo Foo\ntest foo:int = Test;', '// @description a @foo Bar\ntest foo:int = Test;'], {
+            name: 'test',
+            arguments: {
+                added: [],
+                removed: [],
+                modified: [
+                    {
+                        name: 'foo',
+                        comment: {
+                            old: 'Foo',
+                            new: 'Bar',
+                        },
+                    },
+                ],
+            },
+        })
+    })
+
+    it('throws on incompatible entries', () => {
+        expect(() => test(['test1 = Test;', 'test2 = Test;'])).toThrow()
+        expect(() => test(['test = Test1;', 'test = Test2;'])).toThrow()
+    })
 })
 
 describe('generateTlSchemasDifference', () => {
-    const test = (tl1: string[], tl2: string[], expected: Partial<TlSchemaDiff>) => {
+    const test = (tl1: string[], tl2: string[]) => {
         const a = parseFullTlSchema(parseTlToEntries(tl1.join('\n')))
         const b = parseFullTlSchema(parseTlToEntries(tl2.join('\n')))
         const res: Partial<TlSchemaDiff> = generateTlSchemasDifference(a, b)
 
-        if (!('methods' in expected)) delete res.methods
-        if (!('classes' in expected)) delete res.classes
-        if (!('unions' in expected)) delete res.unions
-
-        expect(res).toEqual(expected)
+        expect(res).toMatchSnapshot()
     }
 
     it('shows added constructors', () => {
-        test(['test1 = Test;'], ['test1 = Test;', 'test2 = Test;'], {
-            classes: {
-                added: [
-                    {
-                        kind: 'class',
-                        name: 'test2',
-                        id: 3847402009,
-                        type: 'Test',
-                        arguments: [],
-                    },
-                ],
-                removed: [],
-                modified: [],
-            },
-        })
+        test(['test1 = Test;'], ['test1 = Test;', 'test2 = Test;'])
     })
 
     it('shows removed constructors', () => {
-        test(['test1 = Test;', 'test2 = Test;'], ['test1 = Test;'], {
-            classes: {
-                removed: [
-                    {
-                        kind: 'class',
-                        name: 'test2',
-                        id: 3847402009,
-                        type: 'Test',
-                        arguments: [],
-                    },
-                ],
-                added: [],
-                modified: [],
-            },
-        })
+        test(['test1 = Test;', 'test2 = Test;'], ['test1 = Test;'])
     })
 
     it('shows modified constructors', () => {
-        test(['test foo:int = Test;'], ['test foo:Foo = Test;'], {
-            classes: {
-                removed: [],
-                added: [],
-                modified: [
-                    {
-                        name: 'test',
-                        arguments: {
-                            added: [],
-                            removed: [],
-                            modified: [
-                                {
-                                    name: 'foo',
-                                    type: {
-                                        old: 'int',
-                                        new: 'Foo',
-                                    },
-                                },
-                            ],
-                        },
-                        id: {
-                            new: 3348640942,
-                            old: 1331975629,
-                        },
-                    },
-                ],
-            },
-        })
+        test(['test foo:int = Test;'], ['test foo:Foo = Test;'])
     })
 
     it('shows removed unions', () => {
-        test(['test foo:int = Test;', 'test1 = Test1;'], ['test foo:Foo = Test;'], {
-            unions: {
-                removed: [
-                    {
-                        name: 'Test1',
-                        classes: [
-                            {
-                                kind: 'class',
-                                name: 'test1',
-                                id: 3739166976,
-                                type: 'Test1',
-                                arguments: [],
-                            },
-                        ],
-                    },
-                ],
-                added: [],
-                modified: [],
-            },
-        })
+        test(['test foo:int = Test;', 'test1 = Test1;'], ['test foo:Foo = Test;'])
     })
 
     it('shows added unions', () => {
-        test(['test foo:int = Test;'], ['test foo:Foo = Test;', 'test1 = Test1;'], {
-            unions: {
-                added: [
-                    {
-                        name: 'Test1',
-                        classes: [
-                            {
-                                kind: 'class',
-                                name: 'test1',
-                                id: 3739166976,
-                                type: 'Test1',
-                                arguments: [],
-                            },
-                        ],
-                    },
-                ],
-                removed: [],
-                modified: [],
-            },
-        })
+        test(['test foo:int = Test;'], ['test foo:Foo = Test;', 'test1 = Test1;'])
     })
 
     it('shows modified unions', () => {
-        test(['test foo:int = Test;', 'test1 = Test;'], ['test foo:Foo = Test;', 'test2 = Test;'], {
-            unions: {
-                added: [],
-                removed: [],
-                modified: [
-                    {
-                        name: 'Test',
-                        classes: {
-                            added: [
-                                {
-                                    kind: 'class',
-                                    name: 'test2',
-                                    id: 3847402009,
-                                    type: 'Test',
-                                    arguments: [],
-                                },
-                            ],
-                            removed: [
-                                {
-                                    kind: 'class',
-                                    name: 'test1',
-                                    id: 1809692154,
-                                    type: 'Test',
-                                    arguments: [],
-                                },
-                            ],
-                            modified: [],
-                        },
-                        methods: {
-                            added: [],
-                            removed: [],
-                            modified: [],
-                        },
-                    },
-                ],
-            },
-        })
+        test(['test foo:int = Test;', 'test1 = Test;'], ['test foo:Foo = Test;', 'test2 = Test;'])
 
-        test(['test foo:int = Test;', 'test1 = Test;'], ['test2 foo:Foo = Test;', 'test3 = Test;'], {
-            unions: {
-                added: [],
-                removed: [],
-                modified: [
-                    {
-                        name: 'Test',
-                        classes: {
-                            added: [
-                                {
-                                    kind: 'class',
-                                    name: 'test2',
-                                    id: 711487159,
-                                    type: 'Test',
-                                    arguments: [
-                                        {
-                                            name: 'foo',
-                                            type: 'Foo',
-                                        },
-                                    ],
-                                },
-                                {
-                                    kind: 'class',
-                                    name: 'test3',
-                                    id: 704164487,
-                                    type: 'Test',
-                                    arguments: [],
-                                },
-                            ],
-                            removed: [
-                                {
-                                    kind: 'class',
-                                    name: 'test',
-                                    id: 1331975629,
-                                    type: 'Test',
-                                    arguments: [
-                                        {
-                                            name: 'foo',
-                                            type: 'int',
-                                        },
-                                    ],
-                                },
-                                {
-                                    kind: 'class',
-                                    name: 'test1',
-                                    id: 1809692154,
-                                    type: 'Test',
-                                    arguments: [],
-                                },
-                            ],
-                            modified: [],
-                        },
-                        methods: {
-                            added: [],
-                            removed: [],
-                            modified: [],
-                        },
-                    },
-                ],
-            },
-        })
+        test(['test foo:int = Test;', 'test1 = Test;'], ['test2 foo:Foo = Test;', 'test3 = Test;'])
 
-        test(['test = Test;', 'test1 = Test;'], ['test = Test1;', 'test1 = Test1;'], {
-            unions: {
-                added: [
-                    {
-                        name: 'Test1',
-                        classes: [
-                            {
-                                kind: 'class',
-                                name: 'test',
-                                id: 1997819349,
-                                type: 'Test1',
-                                arguments: [],
-                            },
-                            {
-                                kind: 'class',
-                                name: 'test1',
-                                id: 3739166976,
-                                type: 'Test1',
-                                arguments: [],
-                            },
-                        ],
-                    },
-                ],
-                removed: [
-                    {
-                        name: 'Test',
-                        classes: [
-                            {
-                                kind: 'class',
-                                name: 'test',
-                                id: 471282454,
-                                type: 'Test',
-                                arguments: [],
-                            },
-                            {
-                                kind: 'class',
-                                name: 'test1',
-                                id: 1809692154,
-                                type: 'Test',
-                                arguments: [],
-                            },
-                        ],
-                    },
-                ],
-                modified: [],
-            },
-        })
+        test(['test = Test;', 'test1 = Test;'], ['test = Test1;', 'test1 = Test1;'])
+    })
+
+    it('shows modified methods', () => {
+        test(['---functions---', 'test = Test;'], ['---functions---', 'test = Test2;'])
     })
 })

@@ -66,6 +66,17 @@ export function parseTlToEntries(
     let currentComment = ''
     const prefix = params.prefix ?? ''
 
+    const handleError = (err: Error, entryIdx: number) => {
+        if (params.panicOnError) {
+            throw err
+        } else if (params.onError) {
+            params.onError(err, '', entryIdx)
+            /* c8 ignore next 3 */
+        } else {
+            console.warn(err)
+        }
+    }
+
     lines.forEach((line, idx) => {
         line = line.trim()
 
@@ -108,15 +119,7 @@ export function parseTlToEntries(
         const match = SINGLE_REGEX.exec(line)
 
         if (!match) {
-            const err = new Error(`Failed to parse line ${idx + 1}: ${line}`)
-
-            if (params.panicOnError) {
-                throw err
-            } else if (params.onError) {
-                params.onError(err, line, idx + 1)
-            } else {
-                console.warn(err)
-            }
+            handleError(new Error(`Failed to parse line ${idx + 1}: ${line}`), idx + 1)
 
             return
         }
@@ -214,6 +217,8 @@ export function parseTlToEntries(
         params.onOrphanComment(currentComment)
     }
 
+    if (params.forIdComputation) return ret
+
     // post-process:
     // - add return type ctor id for methods
     // - find arguments where type is not a union and put corresponding modifiers
@@ -240,21 +245,19 @@ export function parseTlToEntries(
                 return
             }
 
-            if (type in unions && arg.typeModifiers?.isBareUnion) {
-                if (unions[type].length !== 1) {
-                    const err = new Error(
-                        `Union ${type} has more than one entry, cannot use it like %${type} (found in ${entry.name}#${arg.name})`,
+            if (arg.typeModifiers?.isBareUnion) {
+                if (!(type in unions)) {
+                    handleError(new Error(`Union ${type} not found (found in ${entry.name}#${arg.name})`), entryIdx)
+                } else if (unions[type].length !== 1) {
+                    handleError(
+                        new Error(
+                            `Union ${type} has more than one entry, cannot use it like %${type} (found in ${entry.name}#${arg.name})`,
+                        ),
+                        entryIdx,
                     )
-
-                    if (params.panicOnError) {
-                        throw err
-                    } else if (params.onError) {
-                        params.onError(err, '', entryIdx)
-                    } else {
-                        console.warn(err)
-                    }
+                } else {
+                    arg.typeModifiers.constructorId = unions[type][0].id
                 }
-                arg.typeModifiers.constructorId = unions[type][0].id
             } else if (type in entries) {
                 if (!arg.typeModifiers) arg.typeModifiers = {}
                 arg.typeModifiers.isBareType = true

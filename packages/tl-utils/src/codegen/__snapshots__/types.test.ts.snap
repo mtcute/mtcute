@@ -1,0 +1,292 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generateTypescriptDefinitionsForTlEntry > comments > adds return type comments 1`] = `
+"/**
+ * This is a test method
+ * 
+ * RPC method returns {@link tl.TypeTest}
+ */
+interface RawTestRequest {
+    _: 'test';
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > comments > adds return type comments 2`] = `
+"/**
+ * This is a test method
+ * 
+ * RPC method returns {@link tl.TypeTest}
+ */
+interface RawTestRequest {
+    _: 'test';
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > comments > adds return type comments 3`] = `
+"/**
+ * RPC method returns {@link tl.TypeTest} array
+ */
+interface RawTestRequest {
+    _: 'test';
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > comments > adds tdlib style comments 1`] = `
+"/**
+ * This is a test constructor
+ */
+interface RawTest {
+    _: 'test';
+    /**
+     * Some field
+     */
+    field: number;
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > comments > adds tl style comments 1`] = `
+"/**
+ * This is a test constructor
+ */
+interface RawTest {
+    _: 'test';
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > comments > adds usage info comments 1`] = `
+"/**
+ * RPC method returns {@link tl.TypeTest}
+ * 
+ * This method is **not** available for bots
+ * 
+ * This method *may* throw one of these errors: FOO, BAR
+ */
+interface RawTestRequest {
+    _: 'test';
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > comments > adds usage info comments 2`] = `
+"/**
+ * RPC method returns {@link tl.TypeTest}
+ * 
+ * This method is **not** available for normal users
+ */
+interface RawTestBotRequest {
+    _: 'testBot';
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > comments > should not break @link tags 1`] = `
+"/**
+ * This is a test constructor with a very long comment
+ * {@link whatever} more text
+ */
+interface RawTest {
+    _: 'test';
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > comments > wraps long comments 1`] = `
+"/**
+ * This is a test constructor with a very very very very very
+ * very very very long comment
+ */
+interface RawTest {
+    _: 'test';
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > comments > wraps long comments 2`] = `
+"/**
+ * This is a test method with a very very very very very very
+ * very very long comment
+ * 
+ * RPC method returns {@link tl.TypeTest}
+ */
+interface RawTestRequest {
+    _: 'test';
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > generates code with raw flags for constructors with flags 1`] = `
+"interface RawTest {
+    _: 'test';
+    flags: number;
+    flags2: number;
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > ignores namespace for name 1`] = `
+"interface RawTest {
+    _: 'test.test';
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > marks optional fields as optional 1`] = `
+"interface RawTest {
+    _: 'test';
+    a?: boolean;
+    b?: string;
+    c?: tl.TypeFoo;
+    d?: tl.namespace.TypeFoo[];
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > renames non-primitive types 1`] = `
+"interface RawTest {
+    _: 'test';
+    foo: tl.TypeFoo;
+    bar: tl.TypeBar[];
+    baz: tl.namespace.TypeBaz;
+    egg: tl.namespace.TypeEgg[];
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > replaces primitive types 1`] = `
+"interface RawTest {
+    _: 'test';
+    a: number;
+    b: Long;
+    c: Double;
+    d: string;
+    e: Uint8Array;
+    f: boolean;
+    g: number[];
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlEntry > writes generic types 1`] = `
+"interface RawInvokeWithoutUpdatesRequest<X extends tl.TlObject = tl.TlObject> {
+    _: 'invokeWithoutUpdates';
+    query: X;
+}"
+`;
+
+exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with methods 1`] = `
+"interface RawTest {
+    _: 'test';
+}
+/**
+ * RPC method returns {@link tl.TypeTest}
+ */
+interface RawGetTestRequest {
+    _: 'getTest';
+}
+interface RpcCallReturn {
+    'getTest': tl.TypeTest
+}
+type TypeTest = tl.RawTest
+function isAnyTest(o: object): o is TypeTest
+type RpcMethod =
+    | tl.RawGetTestRequest
+
+type TlObject =
+    | tl.RawTest
+    | tl.RawGetTestRequest"
+`;
+
+exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with methods 2`] = `
+"ns.isAnyTest = _isAny('Test');
+_types = JSON.parse('{\\"test\\":\\"Test\\"}');"
+`;
+
+exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with multi-unions 1`] = `
+"interface RawTest {
+    _: 'test';
+}
+interface RawTest2 {
+    _: 'test2';
+}
+interface RpcCallReturn {
+}
+type TypeTest = tl.RawTest | tl.RawTest2
+function isAnyTest(o: object): o is TypeTest
+
+type TlObject =
+    | tl.RawTest
+    | tl.RawTest2"
+`;
+
+exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with multi-unions 2`] = `
+"ns.isAnyTest = _isAny('Test');
+_types = JSON.parse('{\\"test\\":\\"Test\\",\\"test2\\":\\"Test\\"}');"
+`;
+
+exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with namespaces 1`] = `
+"interface RawTest {
+    _: 'test';
+}
+interface RawTest2 {
+    _: 'test2';
+}
+/**
+ * RPC method returns {@link tl.TypeTest}
+ */
+interface RawGetTestRequest {
+    _: 'getTest';
+}
+interface RpcCallReturn extends test.RpcCallReturn {
+    'getTest': tl.TypeTest
+}
+type TypeTest = tl.RawTest | tl.RawTest2
+function isAnyTest(o: object): o is TypeTest
+
+namespace test {
+    interface RawTest {
+        _: 'test.test';
+    }
+    interface RawTest2 {
+        _: 'test.test2';
+    }
+    /**
+     * RPC method returns {@link tl.test.TypeTest}
+     */
+    interface RawGetTestRequest {
+        _: 'test.getTest';
+    }
+    interface RpcCallReturn {
+        'test.getTest': tl.test.TypeTest
+    }
+    type TypeTest = tl.test.RawTest | tl.test.RawTest2
+    function isAnyTest(o: object): o is TypeTest
+}
+type RpcMethod =
+    | tl.RawGetTestRequest
+    | tl.test.RawGetTestRequest
+
+type TlObject =
+    | tl.RawTest
+    | tl.RawTest2
+    | tl.test.RawTest
+    | tl.test.RawTest2
+    | tl.RawGetTestRequest
+    | tl.test.RawGetTestRequest"
+`;
+
+exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with namespaces 2`] = `
+"ns.isAnyTest = _isAny('Test');
+ns.test = {};
+(function(ns){
+ns.isAnyTest = _isAny('test.Test');
+})(ns.test);
+_types = JSON.parse('{\\"test\\":\\"Test\\",\\"test2\\":\\"Test\\",\\"test.test\\":\\"test.Test\\",\\"test.test2\\":\\"test.Test\\"}');"
+`;
+
+exports[`generateTypescriptDefinitionsForTlSchema > writes simple schemas 1`] = `
+"interface RawTest {
+    _: 'test';
+}
+interface RpcCallReturn {
+}
+type TypeTest = tl.RawTest
+function isAnyTest(o: object): o is TypeTest
+
+type TlObject =
+    | tl.RawTest"
+`;
+
+exports[`generateTypescriptDefinitionsForTlSchema > writes simple schemas 2`] = `
+"ns.isAnyTest = _isAny('Test');
+_types = JSON.parse('{\\"test\\":\\"Test\\"}');"
+`;

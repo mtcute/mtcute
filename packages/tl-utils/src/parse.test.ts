@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { parseTlToEntries } from './parse.js'
 import { TlEntry } from './types.js'
@@ -440,5 +440,57 @@ users.getUsers id:Vector<InputUser> = Vector<User>;
             ],
             { prefix: 'mt_' },
         )
+    })
+
+    it('correctly handles ---types---', () => {
+        test('---functions---\n' + 'testFn = Test;\n' + '---types---\n' + 'testType = Test;', [
+            {
+                arguments: [],
+                id: 3671236185,
+                kind: 'method',
+                name: 'testFn',
+                type: 'Test',
+            },
+            {
+                arguments: [],
+                id: 922588822,
+                kind: 'class',
+                name: 'testType',
+                type: 'Test',
+            },
+        ])
+    })
+
+    describe('errors', () => {
+        it('correctly throws errors if panicOnError is set', () => {
+            const invalidSchema = 'some invalid schema 🥴'
+
+            expect(() => parseTlToEntries(invalidSchema, { panicOnError: true })).toThrow(invalidSchema)
+        })
+
+        it('gracefully continues if onError set', () => {
+            const schema = 'some invalid line 🥴\ntest = Test;'
+            const onError = vi.fn()
+
+            const res = parseTlToEntries(schema, { onError })
+
+            expect(res).toEqual([
+                {
+                    arguments: [],
+                    id: 471282454,
+                    kind: 'class',
+                    name: 'test',
+                    type: 'Test',
+                },
+            ])
+            expect(onError).toHaveBeenCalledOnce()
+        })
+
+        it('correctly handles incorrect %Foo usage', () => {
+            expect(() => parseTlToEntries('test foo:%Foo = Test;', { panicOnError: true })).toThrow('not found')
+            expect(() =>
+                parseTlToEntries('foo = Foo;\nbar = Foo;\ntest foo:%Foo = Test;', { panicOnError: true }),
+            ).toThrow('more than one')
+        })
     })
 })

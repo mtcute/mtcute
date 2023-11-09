@@ -1,0 +1,60 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generateWriterCodeForTlEntries > generates code for bare types 1`] = `
+"var m={
+'future_salt':function(w,v){w.uint(155834844);w.bytes(h(v,'salt'));},
+'future_salts':function(w,v){w.uint(2924480661);w.vector(m._bare[155834844],h(v,'salts'),1);m._bare[155834844](w,h(v,'current'));},
+_bare:{
+155834844:function(w=this,v){w.bytes(h(v,'salt'));},
+},
+}"
+`;
+
+exports[`generateWriterCodeForTlEntries > should include prelude by default 1`] = `
+"function h(o,p){var q=o[p];if(q===void 0)throw Error('Object '+o._+' is missing required property '+p);return q}
+var m={
+}"
+`;
+
+exports[`generateWriterCodeForTlEntries > should include static sizes calculations 1`] = `
+"function h(o,p){var q=o[p];if(q===void 0)throw Error('Object '+o._+' is missing required property '+p);return q}
+var m={
+'test1':function(w,v){w.uint(102026291);w.int(h(v,'foo'));w.int(h(v,'bar'));},
+'test2':function(w,v){w.uint(2926357645);w.int(h(v,'foo'));w.double(h(v,'bar'));},
+'test3':function(w,v){w.uint(3373702963);w.int(h(v,'foo'));w.bytes(h(v,'bar'));},
+_staticSize:{
+'test1':12,
+'test2':16,
+},
+}"
+`;
+
+exports[`generateWriterCodeForTlEntry > automatically computes constructor ID if needed 1`] = `"'topPeerCategoryBotsPM':function(w){w.uint(2875595611);},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for bare vectors 1`] = `"'msg_container':function(w,v){w.uint(1945237724);w.vector(m._bare[155834844],h(v,'messages'),1);},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for bare vectors 2`] = `"'future_salts':function(w,v){w.uint(2924480661);w.vector(m._bare[155834844],h(v,'salts'));w.object(h(v,'current'));},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for constructors with generics 1`] = `"'invokeWithLayer':function(w,v){w.uint(3667594509);w.int(h(v,'layer'));w.object(h(v,'query'));},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for constructors with multiple fields using the same flag 1`] = `"'inputMediaPoll':function(w,v){w.uint(261416433);var flags=0;var _solution=v.solution!==undefined;var _solutionEntities=v.solutionEntities&&v.solutionEntities.length;var _flags_1=_solution||_solutionEntities;if(_flags_1)flags|=2;w.uint(flags);if(_flags_1)w.string(v.solution);if(_flags_1)w.vector(w.object,v.solutionEntities);},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for constructors with multiple flags fields 1`] = `"'updates.channelDifferenceEmpty':function(w,v){w.uint(1041346555);var flags=0;if(v.final===true)flags|=1;var _timeout=v.timeout!==undefined;if(_timeout)flags|=2;w.uint(flags);w.int(h(v,'pts'));if(_timeout)w.int(v.timeout);var flags2=0;if(v.canDeleteChannel===true)flags2|=1;w.uint(flags2);},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for constructors with optional arguments 1`] = `"'updates.channelDifferenceEmpty':function(w,v){w.uint(1041346555);var flags=0;if(v.final===true)flags|=1;var _timeout=v.timeout!==undefined;if(_timeout)flags|=2;w.uint(flags);w.int(h(v,'pts'));if(_timeout)w.int(v.timeout);},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for constructors with optional vector arguments 1`] = `"'messages.getWebPagePreview':function(w,v){w.uint(2338894028);var flags=0;var _entities=v.entities&&v.entities.length;if(_entities)flags|=8;w.uint(flags);w.string(h(v,'message'));if(_entities)w.vector(w.object,v.entities);},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for constructors with simple arguments 1`] = `"'inputBotInlineMessageID':function(w,v){w.uint(2299280777);w.int(h(v,'dcId'));w.long(h(v,'id'));w.long(h(v,'accessHash'));},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for constructors with simple arguments 2`] = `"'contact':function(w,v){w.uint(341499403);w.long(h(v,'userId'));w.boolean(h(v,'mutual'));},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for constructors with simple arguments 3`] = `"'maskCoords':function(w,v){w.uint(2933316530);w.int(h(v,'n'));w.double(h(v,'x'));w.double(h(v,'y'));w.double(h(v,'zoom'));},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for constructors with true flags 1`] = `"'messages.messageEditData':function(w,v){w.uint(649453030);var flags=0;if(v.caption===true)flags|=1;w.uint(flags);},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for constructors with vector arguments 1`] = `"'contacts.resolvedPeer':function(w,v){w.uint(2131196633);w.object(h(v,'peer'));w.vector(w.object,h(v,'chats'));w.vector(w.object,h(v,'users'));},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code for constructors without arguments 1`] = `"'topPeerCategoryBotsPM':function(w){w.uint(2875595611);},"`;
+
+exports[`generateWriterCodeForTlEntry > generates code with raw flags for constructors with flags 1`] = `"'test':function(w,v){w.uint(1554225816);var flags=v.flags;w.uint(flags);var flags2=v.flags2;w.uint(flags2);},"`;

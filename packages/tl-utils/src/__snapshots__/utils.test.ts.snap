@@ -1,0 +1,31 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`groupTlEntriesByNamespace > should group entries correctly 1`] = `
+{
+  "": [
+    {
+      "arguments": [],
+      "id": 0,
+      "kind": "class",
+      "name": "bar",
+      "type": "Bar",
+    },
+  ],
+  "foo": [
+    {
+      "arguments": [],
+      "id": 0,
+      "kind": "class",
+      "name": "foo.bar",
+      "type": "FooBar",
+    },
+    {
+      "arguments": [],
+      "id": 0,
+      "kind": "class",
+      "name": "foo.baz",
+      "type": "FooBaz",
+    },
+  ],
+}
+`;

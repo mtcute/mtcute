@@ -1,4 +1,3 @@
-import { computeConstructorIdFromEntry } from './ctor-id.js'
 import { TlArgument, TlArgumentDiff, TlEntry, TlEntryDiff, TlFullSchema, TlSchemaDiff } from './types.js'
 import { stringifyArgumentType } from './utils.js'
 
@@ -25,11 +24,13 @@ export function generateTlEntriesDifference(a: TlEntry, b: TlEntry): TlEntryDiff
     }
 
     if (a.id !== b.id) {
-        let oldId = a.id
-        let newId = b.id
+        const oldId = a.id
+        const newId = b.id
 
-        if (oldId === 0) oldId = computeConstructorIdFromEntry(a)
-        if (newId === 0) newId = computeConstructorIdFromEntry(b)
+        /* c8 ignore next 3 */
+        if (oldId === 0 || newId === 0) {
+            throw new Error('Entry ID cannot be 0')
+        }
 
         if (oldId !== newId) {
             diff.id = {

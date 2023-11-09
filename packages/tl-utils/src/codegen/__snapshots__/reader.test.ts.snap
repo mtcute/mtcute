@@ -1,0 +1,90 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generateReaderCodeForTlEntries > doesn't generate code for methods by default 1`] = `
+"var m={
+471282454:function(r){return{_:'test'}},
+}"
+`;
+
+exports[`generateReaderCodeForTlEntries > generates code for methods if asked to 1`] = `
+"var m={
+471282454:function(r){return{_:'test'}},
+2119910527:function(r){return{_:'test2'}},
+}"
+`;
+
+exports[`generateReaderCodeForTlEntries > generates code for multiple entries 1`] = `
+"var m={
+471282454:function(r){return{_:'test'}},
+2119910527:function(r){return{_:'test2'}},
+}"
+`;
+
+exports[`generateReaderCodeForTlEntries > method return readers > doesn't include Bool parsing 1`] = `
+"var m={
+_results:{
+},
+}"
+`;
+
+exports[`generateReaderCodeForTlEntries > method return readers > includes primitive return type parsing info 1`] = `
+"var m={
+1809692154:function(r){return{_:'test1'}},
+_results:{
+'test':function(r){return r.int()},
+},
+}"
+`;
+
+exports[`generateReaderCodeForTlEntries > method return readers > includes primitive vectors return type parsing info 1`] = `
+"var m={
+_results:{
+'test':function(r){return r.vector(r.int)},
+},
+}"
+`;
+
+exports[`generateReaderCodeForTlEntries > method return readers > includes primitive vectors return type parsing info 2`] = `
+"var m={
+_results:{
+'test':function(r){return r.vector(r.int)},
+},
+}"
+`;
+
+exports[`generateReaderCodeForTlEntries > updates readers used in bare vectors 1`] = `
+"var m={
+471282454:function(r=this){return{_:'test'}},
+3562390222:function(r){return{_:'test2',a:r.vector(m[471282454],1),}},
+}"
+`;
+
+exports[`generateReaderCodeForTlEntry > generates code for bare types 1`] = `"1945237724:function(r){return{_:'msg_container',messages:r.vector(m[155834844],1),}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for bare types 2`] = `"2924480661:function(r){return{_:'future_salts',salts:r.vector(m[155834844]),current:r.object(),}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for bare types 3`] = `"2924480661:function(r){return{_:'future_salts',salts:r.vector(m[155834844],1),current:m[155834844](r),}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for constructors with arguments before flags field 1`] = `"2262925665:function(r){var id=r.long(),flags=r.uint();return{_:'poll',id:id,quiz:!!(flags&8),question:r.string(),}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for constructors with generics 1`] = `"3667594509:function(r){return{_:'invokeWithLayer',layer:r.int(),query:r.object(),}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for constructors with multiple flags fields 1`] = `"1041346555:function(r){var flags=r.uint(),pts=r.int(),timeout=flags&2?r.int():void 0,flags2=r.uint();return{_:'updates.channelDifferenceEmpty',final:!!(flags&1),pts:pts,timeout:timeout,canDeleteChannel:!!(flags2&1),}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for constructors with optional arguments 1`] = `"1041346555:function(r){var flags=r.uint();return{_:'updates.channelDifferenceEmpty',final:!!(flags&1),pts:r.int(),timeout:flags&2?r.int():void 0,}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for constructors with optional vector arguments 1`] = `"2338894028:function(r){var flags=r.uint();return{_:'messages.getWebPagePreview',message:r.string(),entities:flags&8?r.vector(r.object):void 0,}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for constructors with simple arguments 1`] = `"2299280777:function(r){return{_:'inputBotInlineMessageID',dcId:r.int(),id:r.long(),accessHash:r.long(),}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for constructors with simple arguments 2`] = `"341499403:function(r){return{_:'contact',userId:r.long(),mutual:r.boolean(),}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for constructors with simple arguments 3`] = `"2933316530:function(r){return{_:'maskCoords',n:r.int(),x:r.double(),y:r.double(),zoom:r.double(),}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for constructors with true flags 1`] = `"649453030:function(r){var flags=r.uint();return{_:'messages.messageEditData',caption:!!(flags&1),}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for constructors with vector arguments 1`] = `"2131196633:function(r){return{_:'contacts.resolvedPeer',peer:r.object(),chats:r.vector(r.object),users:r.vector(r.object),}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code for constructors without arguments 1`] = `"2875595611:function(r){return{_:'topPeerCategoryBotsPM'}},"`;
+
+exports[`generateReaderCodeForTlEntry > generates code with raw flags for constructors with flags 1`] = `"1554225816:function(r){var flags=r.uint(),flags2=r.uint();return{_:'test',flags:flags,flags2:flags2,}},"`;

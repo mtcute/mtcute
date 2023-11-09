@@ -1,0 +1,574 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generateTlSchemasDifference > shows added constructors 1`] = `
+{
+  "classes": {
+    "added": [
+      {
+        "arguments": [],
+        "id": 3847402009,
+        "kind": "class",
+        "name": "test2",
+        "type": "Test",
+      },
+    ],
+    "modified": [],
+    "removed": [],
+  },
+  "methods": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "unions": {
+    "added": [],
+    "modified": [
+      {
+        "classes": {
+          "added": [
+            {
+              "arguments": [],
+              "id": 3847402009,
+              "kind": "class",
+              "name": "test2",
+              "type": "Test",
+            },
+          ],
+          "modified": [],
+          "removed": [],
+        },
+        "methods": {
+          "added": [],
+          "modified": [],
+          "removed": [],
+        },
+        "name": "Test",
+      },
+    ],
+    "removed": [],
+  },
+}
+`;
+
+exports[`generateTlSchemasDifference > shows added unions 1`] = `
+{
+  "classes": {
+    "added": [
+      {
+        "arguments": [],
+        "id": 3739166976,
+        "kind": "class",
+        "name": "test1",
+        "type": "Test1",
+      },
+    ],
+    "modified": [
+      {
+        "arguments": {
+          "added": [],
+          "modified": [
+            {
+              "name": "foo",
+              "type": {
+                "new": "Foo",
+                "old": "int",
+              },
+            },
+          ],
+          "removed": [],
+        },
+        "id": {
+          "new": 3348640942,
+          "old": 1331975629,
+        },
+        "name": "test",
+      },
+    ],
+    "removed": [],
+  },
+  "methods": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "unions": {
+    "added": [
+      {
+        "classes": [
+          {
+            "arguments": [],
+            "id": 3739166976,
+            "kind": "class",
+            "name": "test1",
+            "type": "Test1",
+          },
+        ],
+        "name": "Test1",
+      },
+    ],
+    "modified": [],
+    "removed": [],
+  },
+}
+`;
+
+exports[`generateTlSchemasDifference > shows modified constructors 1`] = `
+{
+  "classes": {
+    "added": [],
+    "modified": [
+      {
+        "arguments": {
+          "added": [],
+          "modified": [
+            {
+              "name": "foo",
+              "type": {
+                "new": "Foo",
+                "old": "int",
+              },
+            },
+          ],
+          "removed": [],
+        },
+        "id": {
+          "new": 3348640942,
+          "old": 1331975629,
+        },
+        "name": "test",
+      },
+    ],
+    "removed": [],
+  },
+  "methods": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "unions": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+}
+`;
+
+exports[`generateTlSchemasDifference > shows modified methods 1`] = `
+{
+  "classes": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "methods": {
+    "added": [],
+    "modified": [
+      {
+        "id": {
+          "new": 3994885231,
+          "old": 471282454,
+        },
+        "name": "test",
+      },
+    ],
+    "removed": [],
+  },
+  "unions": {
+    "added": [
+      undefined,
+    ],
+    "modified": [],
+    "removed": [
+      undefined,
+    ],
+  },
+}
+`;
+
+exports[`generateTlSchemasDifference > shows modified unions 1`] = `
+{
+  "classes": {
+    "added": [
+      {
+        "arguments": [],
+        "id": 3847402009,
+        "kind": "class",
+        "name": "test2",
+        "type": "Test",
+      },
+    ],
+    "modified": [
+      {
+        "arguments": {
+          "added": [],
+          "modified": [
+            {
+              "name": "foo",
+              "type": {
+                "new": "Foo",
+                "old": "int",
+              },
+            },
+          ],
+          "removed": [],
+        },
+        "id": {
+          "new": 3348640942,
+          "old": 1331975629,
+        },
+        "name": "test",
+      },
+    ],
+    "removed": [
+      {
+        "arguments": [],
+        "id": 1809692154,
+        "kind": "class",
+        "name": "test1",
+        "type": "Test",
+      },
+    ],
+  },
+  "methods": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "unions": {
+    "added": [],
+    "modified": [
+      {
+        "classes": {
+          "added": [
+            {
+              "arguments": [],
+              "id": 3847402009,
+              "kind": "class",
+              "name": "test2",
+              "type": "Test",
+            },
+          ],
+          "modified": [],
+          "removed": [
+            {
+              "arguments": [],
+              "id": 1809692154,
+              "kind": "class",
+              "name": "test1",
+              "type": "Test",
+            },
+          ],
+        },
+        "methods": {
+          "added": [],
+          "modified": [],
+          "removed": [],
+        },
+        "name": "Test",
+      },
+    ],
+    "removed": [],
+  },
+}
+`;
+
+exports[`generateTlSchemasDifference > shows modified unions 2`] = `
+{
+  "classes": {
+    "added": [
+      {
+        "arguments": [
+          {
+            "name": "foo",
+            "type": "Foo",
+          },
+        ],
+        "id": 711487159,
+        "kind": "class",
+        "name": "test2",
+        "type": "Test",
+      },
+      {
+        "arguments": [],
+        "id": 704164487,
+        "kind": "class",
+        "name": "test3",
+        "type": "Test",
+      },
+    ],
+    "modified": [],
+    "removed": [
+      {
+        "arguments": [
+          {
+            "name": "foo",
+            "type": "int",
+          },
+        ],
+        "id": 1331975629,
+        "kind": "class",
+        "name": "test",
+        "type": "Test",
+      },
+      {
+        "arguments": [],
+        "id": 1809692154,
+        "kind": "class",
+        "name": "test1",
+        "type": "Test",
+      },
+    ],
+  },
+  "methods": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "unions": {
+    "added": [],
+    "modified": [
+      {
+        "classes": {
+          "added": [
+            {
+              "arguments": [
+                {
+                  "name": "foo",
+                  "type": "Foo",
+                },
+              ],
+              "id": 711487159,
+              "kind": "class",
+              "name": "test2",
+              "type": "Test",
+            },
+            {
+              "arguments": [],
+              "id": 704164487,
+              "kind": "class",
+              "name": "test3",
+              "type": "Test",
+            },
+          ],
+          "modified": [],
+          "removed": [
+            {
+              "arguments": [
+                {
+                  "name": "foo",
+                  "type": "int",
+                },
+              ],
+              "id": 1331975629,
+              "kind": "class",
+              "name": "test",
+              "type": "Test",
+            },
+            {
+              "arguments": [],
+              "id": 1809692154,
+              "kind": "class",
+              "name": "test1",
+              "type": "Test",
+            },
+          ],
+        },
+        "methods": {
+          "added": [],
+          "modified": [],
+          "removed": [],
+        },
+        "name": "Test",
+      },
+    ],
+    "removed": [],
+  },
+}
+`;
+
+exports[`generateTlSchemasDifference > shows modified unions 3`] = `
+{
+  "classes": {
+    "added": [],
+    "modified": [
+      {
+        "id": {
+          "new": 1997819349,
+          "old": 471282454,
+        },
+        "name": "test",
+      },
+      {
+        "id": {
+          "new": 3739166976,
+          "old": 1809692154,
+        },
+        "name": "test1",
+      },
+    ],
+    "removed": [],
+  },
+  "methods": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "unions": {
+    "added": [
+      {
+        "classes": [
+          {
+            "arguments": [],
+            "id": 1997819349,
+            "kind": "class",
+            "name": "test",
+            "type": "Test1",
+          },
+          {
+            "arguments": [],
+            "id": 3739166976,
+            "kind": "class",
+            "name": "test1",
+            "type": "Test1",
+          },
+        ],
+        "name": "Test1",
+      },
+    ],
+    "modified": [],
+    "removed": [
+      {
+        "classes": [
+          {
+            "arguments": [],
+            "id": 471282454,
+            "kind": "class",
+            "name": "test",
+            "type": "Test",
+          },
+          {
+            "arguments": [],
+            "id": 1809692154,
+            "kind": "class",
+            "name": "test1",
+            "type": "Test",
+          },
+        ],
+        "name": "Test",
+      },
+    ],
+  },
+}
+`;
+
+exports[`generateTlSchemasDifference > shows removed constructors 1`] = `
+{
+  "classes": {
+    "added": [],
+    "modified": [],
+    "removed": [
+      {
+        "arguments": [],
+        "id": 3847402009,
+        "kind": "class",
+        "name": "test2",
+        "type": "Test",
+      },
+    ],
+  },
+  "methods": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "unions": {
+    "added": [],
+    "modified": [
+      {
+        "classes": {
+          "added": [],
+          "modified": [],
+          "removed": [
+            {
+              "arguments": [],
+              "id": 3847402009,
+              "kind": "class",
+              "name": "test2",
+              "type": "Test",
+            },
+          ],
+        },
+        "methods": {
+          "added": [],
+          "modified": [],
+          "removed": [],
+        },
+        "name": "Test",
+      },
+    ],
+    "removed": [],
+  },
+}
+`;
+
+exports[`generateTlSchemasDifference > shows removed unions 1`] = `
+{
+  "classes": {
+    "added": [],
+    "modified": [
+      {
+        "arguments": {
+          "added": [],
+          "modified": [
+            {
+              "name": "foo",
+              "type": {
+                "new": "Foo",
+                "old": "int",
+              },
+            },
+          ],
+          "removed": [],
+        },
+        "id": {
+          "new": 3348640942,
+          "old": 1331975629,
+        },
+        "name": "test",
+      },
+    ],
+    "removed": [
+      {
+        "arguments": [],
+        "id": 3739166976,
+        "kind": "class",
+        "name": "test1",
+        "type": "Test1",
+      },
+    ],
+  },
+  "methods": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "unions": {
+    "added": [],
+    "modified": [],
+    "removed": [
+      {
+        "classes": [
+          {
+            "arguments": [],
+            "id": 3739166976,
+            "kind": "class",
+            "name": "test1",
+            "type": "Test1",
+          },
+        ],
+        "name": "Test1",
+      },
+    ],
+  },
+}
+`;

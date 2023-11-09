@@ -10,4 +10,6 @@ private/
 # docs are generated in ci
 docs
 
+coverage
+.rollup.cache
 *.tsbuildinfo

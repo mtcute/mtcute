@@ -111,6 +111,8 @@ export function generateTypescriptDefinitionsForTlEntry(
         if (errors) {
             if (errors.userOnly[entry.name]) {
                 comment += '\n\nThis method is **not** available for bots'
+            } else if (errors.botOnly[entry.name]) {
+                comment += '\n\nThis method is **not** available for normal users'
             }
 
             if (errors.throws[entry.name]) {
@@ -126,10 +128,20 @@ export function generateTypescriptDefinitionsForTlEntry(
     if (entry.generics?.length) {
         genericsString = '<'
         entry.generics.forEach((it, idx) => {
-            const tsType = it.type === 'Type' ? 'tl.TlObject' : fullTypeName(it.type, baseNamespace)
+            /* c8 ignore next 3 */
+            if (it.type !== 'Type') {
+                throw new Error('Only Type generics are supported')
+            }
+
+            const tsType = `${baseNamespace}TlObject`
 
             genericsIndex[it.name] = 1
-            if (idx !== 0) genericsString += ', '
+
+            /* c8 ignore next 3 */
+            if (idx !== 0) {
+                throw new Error('Multiple generics are not supported')
+            }
+
             genericsString += `${it.name} extends ${tsType} = ${tsType}`
         })
         genericsString += '>'

@@ -13,6 +13,7 @@ export async function loadWasmBinary(input?: InitInput): Promise<WebAssembly.Ins
         input = join(__dirname, '../lib/mtcute.wasm')
     }
 
+    /* c8 ignore next 3 */
     if (typeof input !== 'string') {
         throw new Error('Invalid input, for Node.js pass path to wasm blob')
     }

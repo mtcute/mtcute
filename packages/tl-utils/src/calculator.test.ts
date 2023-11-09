@@ -26,9 +26,13 @@ describe('calculateStaticSizes', () => {
 
     it('correctly skips constructors with predicated fields', () => {
         test(
-            'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer psa_type:flags.1?string psa_message:flags.2?string = help.PromoData;',
+            'help.promoData#8c39793f flags:# expires:int psa_type:flags.1?int psa_message:flags.2?int = help.PromoData;',
             {},
         )
+    })
+
+    it('correctly skips constructors with generic fields', () => {
+        test('invokeWithLayer {T:X} = !X;', {})
     })
 
     it('correctly skips constructors with non-static fields', () => {
@@ -60,6 +64,35 @@ describe('calculateStaticSizes', () => {
                 peerChannel: 12,
                 'help.promoData': 24,
             },
+        )
+    })
+
+    it('correctly handles differently sized union children', () => {
+        test(
+            'peerUser user_id:int53 = Peer;\n' +
+                'peerChannel channel_id:int53 access_hash:long = Peer;\n' +
+                'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer = help.PromoData;',
+            {
+                peerUser: 12,
+                peerChannel: 20,
+            },
+        )
+    })
+
+    it('correctly handles non static-sized union children', () => {
+        test(
+            'peerUser user_id:int53 = Peer;\n' +
+                'peerChannel channel_id:int53 access_hash:bytes = Peer;\n' +
+                'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer = help.PromoData;',
+            {
+                peerUser: 12,
+            },
+        )
+        test(
+            'peerUser user_id:int53 access_hash:bytes = Peer;\n' +
+                'peerChannel channel_id:int53 access_hash:bytes = Peer;\n' +
+                'help.promoData#8c39793f flags:# proxy:flags.0?true expires:int peer:Peer = help.PromoData;',
+            {},
         )
     })
 })

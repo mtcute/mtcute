@@ -204,11 +204,7 @@ export function generateWriterCodeForTlEntries(entries: TlEntry[], params = DEFA
         ret += '_bare:{\n'
 
         Object.keys(usedAsBareIds).forEach((id) => {
-            const entry = entries.find((e) => e.id === parseInt(id))
-
-            if (!entry) {
-                return
-            }
+            const entry = entries.find((e) => e.id === parseInt(id))!
 
             ret +=
                 generateWriterCodeForTlEntry(entry, {
