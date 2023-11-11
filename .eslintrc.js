@@ -219,7 +219,7 @@ module.exports = {
                     'error',
                     {
                         paths: ['buffer', 'crypto', 'fs', 'path', 'stream'],
-                        patterns: ['@mtcute/*/dist/**'],
+                        patterns: ['@mtcute/*/dist**'],
                     },
                 ],
             },
@@ -238,7 +238,7 @@ module.exports = {
                 'no-restricted-imports': [
                     'error',
                     {
-                        patterns: ['@mtcute/*/dist/**'],
+                        patterns: ['@mtcute/*/dist**'],
                     },
                 ],
             },
