@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { hexDecodeToBuffer, hexEncode } from '@mtcute/tl-runtime'
 
 import { IntermediatePacketCodec, PaddedIntermediatePacketCodec, TransportError } from '../../index.js'
-import { concatBuffers, dataViewFromBuffer } from '../../utils/index.js'
+import { defaultTestCryptoProvider, useFakeMathRandom } from '../../utils/crypto/crypto.test-utils.js'
+import { concatBuffers } from '../../utils/index.js'
 
 describe('IntermediatePacketCodec', () => {
     it('should return correct tag', () => {
@@ -89,23 +90,22 @@ describe('IntermediatePacketCodec', () => {
 })
 
 describe('PaddedIntermediatePacketCodec', () => {
-    it('should return correct tag', () => {
-        expect(hexEncode(new PaddedIntermediatePacketCodec().tag())).eq('dddddddd')
+    useFakeMathRandom()
+
+    const create = async () => {
+        const codec = new PaddedIntermediatePacketCodec()
+        codec.setup!(await defaultTestCryptoProvider())
+
+        return codec
+    }
+
+    it('should return correct tag', async () => {
+        expect(hexEncode((await create()).tag())).eq('dddddddd')
     })
 
-    it('should correctly frame packets', () => {
-        // todo: once we have predictable random, test this properly
-
+    it('should correctly frame packets', async () => {
         const data = hexDecodeToBuffer('6cfeffff')
-        const encoded = new PaddedIntermediatePacketCodec().encode(data)
-        const dv = dataViewFromBuffer(encoded)
 
-        const packetSize = dv.getUint32(0, true)
-        const paddingSize = packetSize - data.length
-
-        // padding size, 0-15
-        expect(paddingSize).toBeGreaterThanOrEqual(0)
-        expect(paddingSize).toBeLessThanOrEqual(15)
-        expect([...encoded.slice(4, 4 + packetSize - paddingSize)]).toEqual([...data])
+        expect(hexEncode((await create()).encode(data))).toEqual('0a0000006cfeffff29afd26df40f')
     })
 })

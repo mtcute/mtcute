@@ -1,5 +1,5 @@
 import { bufferToReversed, concatBuffers, dataViewFromBuffer } from '../../utils/buffer-utils.js'
-import { IAesCtr, randomBytes } from '../../utils/index.js'
+import { IAesCtr } from '../../utils/index.js'
 import { IPacketCodec } from './abstract.js'
 import { WrappedCodec } from './wrapped.js'
 
@@ -26,7 +26,7 @@ export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec 
         let dv: DataView
 
         for (;;) {
-            random = randomBytes(64)
+            random = this._crypto.randomBytes(64)
             if (random[0] === 0xef) continue
 
             dv = dataViewFromBuffer(random)

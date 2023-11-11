@@ -1,4 +1,5 @@
-import { bufferToReversed, randomBytes } from './buffer-utils.js'
+import { bufferToReversed } from './buffer-utils.js'
+import { ICryptoProvider } from './crypto/abstract.js'
 
 /**
  * Get the minimum number of bits required to represent a number
@@ -82,19 +83,19 @@ export function bufferToBigInt(buffer: Uint8Array, le = false): bigint {
 }
 
 /**
- * Generate a random big integer of the given size (in bytes)
+ * Generate a cryptographically safe random big integer of the given size (in bytes)
  * @param size  Size in bytes
  */
-export function randomBigInt(size: number): bigint {
-    return bufferToBigInt(randomBytes(size))
+export function randomBigInt(crypto: ICryptoProvider, size: number): bigint {
+    return bufferToBigInt(crypto.randomBytes(size))
 }
 
 /**
  * Generate a random big integer of the given size (in bits)
  * @param bits
  */
-export function randomBigIntBits(bits: number): bigint {
-    let num = randomBigInt(Math.ceil(bits / 8))
+export function randomBigIntBits(crypto: ICryptoProvider, bits: number): bigint {
+    let num = randomBigInt(crypto, Math.ceil(bits / 8))
 
     const bitLength = bigIntBitLength(num)
 
@@ -112,13 +113,13 @@ export function randomBigIntBits(bits: number): bigint {
  * @param max  Maximum value (exclusive)
  * @param min  Minimum value (inclusive)
  */
-export function randomBigIntInRange(max: bigint, min = 1n): bigint {
+export function randomBigIntInRange(crypto: ICryptoProvider, max: bigint, min = 1n): bigint {
     const interval = max - min
     if (interval < 0n) throw new Error('expected min < max')
 
     const byteSize = bigIntBitLength(interval) / 8
 
-    let result = randomBigInt(byteSize)
+    let result = randomBigInt(crypto, byteSize)
     while (result > interval) result -= interval
 
     return min + result

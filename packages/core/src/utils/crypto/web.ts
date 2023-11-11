@@ -8,16 +8,16 @@ const ALGO_TO_SUBTLE: Record<string, string> = {
 }
 
 export class WebCryptoProvider extends WasmCryptoProvider implements ICryptoProvider {
-    readonly subtle: SubtleCrypto
+    readonly crypto: Crypto
 
-    constructor(params?: WasmCryptoProviderOptions & { subtle?: SubtleCrypto }) {
+    constructor(params?: WasmCryptoProviderOptions & { crypto?: Crypto }) {
         super(params)
-        const subtle = params?.subtle ?? globalThis.crypto?.subtle
+        const crypto = params?.crypto ?? globalThis.crypto
 
-        if (!subtle) {
-            throw new Error('SubtleCrypto is not available')
+        if (!crypto || !crypto.subtle) {
+            throw new Error('WebCrypto is not available')
         }
-        this.subtle = subtle
+        this.crypto = crypto
     }
 
     async pbkdf2(
@@ -27,9 +27,9 @@ export class WebCryptoProvider extends WasmCryptoProvider implements ICryptoProv
         keylen?: number | undefined,
         algo?: string | undefined,
     ): Promise<Uint8Array> {
-        const keyMaterial = await this.subtle.importKey('raw', password, 'PBKDF2', false, ['deriveBits'])
+        const keyMaterial = await this.crypto.subtle.importKey('raw', password, 'PBKDF2', false, ['deriveBits'])
 
-        return this.subtle
+        return this.crypto.subtle
             .deriveBits(
                 {
                     name: 'PBKDF2',
@@ -44,7 +44,7 @@ export class WebCryptoProvider extends WasmCryptoProvider implements ICryptoProv
     }
 
     async hmacSha256(data: Uint8Array, key: Uint8Array): Promise<Uint8Array> {
-        const keyMaterial = await this.subtle.importKey(
+        const keyMaterial = await this.crypto.subtle.importKey(
             'raw',
             key,
             { name: 'HMAC', hash: { name: 'SHA-256' } },
@@ -52,8 +52,12 @@ export class WebCryptoProvider extends WasmCryptoProvider implements ICryptoProv
             ['sign'],
         )
 
-        const res = await this.subtle.sign({ name: 'HMAC' }, keyMaterial, data)
+        const res = await this.crypto.subtle.sign({ name: 'HMAC' }, keyMaterial, data)
 
         return new Uint8Array(res)
+    }
+
+    randomFill(buf: Uint8Array): void {
+        this.crypto.getRandomValues(buf)
     }
 }

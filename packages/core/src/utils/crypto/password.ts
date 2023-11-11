@@ -3,7 +3,7 @@ import { utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 
 import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
 import { bigIntModPow, bigIntToBuffer, bufferToBigInt } from '../bigint-utils.js'
-import { concatBuffers, randomBytes } from '../buffer-utils.js'
+import { concatBuffers } from '../buffer-utils.js'
 import { ICryptoProvider } from './abstract.js'
 import { xorBuffer } from './utils.js'
 
@@ -41,7 +41,10 @@ export async function computeNewPasswordHash(
     algo: tl.RawPasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow,
     password: string,
 ): Promise<Uint8Array> {
-    (algo as tl.Mutable<typeof algo>).salt1 = concatBuffers([algo.salt1, randomBytes(32)])
+    const salt1 = new Uint8Array(algo.salt1.length + 32)
+    salt1.set(algo.salt1)
+    crypto.randomFill(salt1.subarray(algo.salt1.length))
+    ;(algo as tl.Mutable<typeof algo>).salt1 = salt1
 
     const _x = await computePasswordHash(crypto, utf8EncodeToBuffer(password), algo.salt1, algo.salt2)
 
@@ -89,7 +92,7 @@ export async function computeSrpParams(
     const p = bufferToBigInt(algo.p)
     const gB = bufferToBigInt(request.srpB)
 
-    const a = bufferToBigInt(randomBytes(256))
+    const a = bufferToBigInt(crypto.randomBytes(256))
     const gA = bigIntModPow(g, a, p)
     const _gA = bigIntToBuffer(gA, 256)
 

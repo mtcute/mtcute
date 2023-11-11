@@ -4,17 +4,17 @@ import { testCryptoProvider } from './crypto.test-utils.js'
 import { WebCryptoProvider } from './web.js'
 
 describe('WebCryptoProvider', async () => {
-    let subtle = globalThis.crypto?.subtle
+    let crypto = globalThis.crypto
 
-    if (!subtle && typeof process !== 'undefined') {
-        subtle = await import('crypto').then((m) => m.subtle)
+    if (!crypto && typeof process !== 'undefined') {
+        crypto = await import('crypto').then((m) => m.webcrypto as Crypto)
     }
 
-    if (!subtle) {
-        console.warn('Skipping WebCryptoProvider tests (no crypto.subtle)')
+    if (!crypto) {
+        console.warn('Skipping WebCryptoProvider tests (no webcrypto)')
 
         return
     }
 
-    testCryptoProvider(new WebCryptoProvider({ subtle }))
+    testCryptoProvider(new WebCryptoProvider({ crypto }))
 })

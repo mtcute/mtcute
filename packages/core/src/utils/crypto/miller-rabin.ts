@@ -1,6 +1,7 @@
 import { bigIntBitLength, bigIntModPow, randomBigIntBits, twoMultiplicity } from '../bigint-utils.js'
+import { ICryptoProvider } from './abstract.js'
 
-export function millerRabin(n: bigint, rounds = 20): boolean {
+export function millerRabin(crypto: ICryptoProvider, n: bigint, rounds = 20): boolean {
     // small numbers: 0, 1 are not prime, 2, 3 are prime
     if (n < 4n) return n > 1n
     if (n % 2n === 0n || n < 0n) return false
@@ -15,7 +16,7 @@ export function millerRabin(n: bigint, rounds = 20): boolean {
         let base
 
         do {
-            base = randomBigIntBits(nBits)
+            base = randomBigIntBits(crypto, nBits)
         } while (base <= 1n || base >= nSub)
 
         let x = bigIntModPow(base, d, n)

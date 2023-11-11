@@ -1,5 +1,3 @@
-export { _randomBytes as randomBytes } from './platform/random.js'
-
 /**
  * Check if two buffers are equal
  *

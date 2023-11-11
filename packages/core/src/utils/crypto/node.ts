@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-restricted-imports
-import { createCipheriv, createHash, createHmac, pbkdf2 } from 'crypto'
+import { createCipheriv, createHash, createHmac, pbkdf2, randomFillSync } from 'crypto'
 import { deflateSync, gunzipSync } from 'zlib'
 
 import { ige256Decrypt, ige256Encrypt, initAsync, InitInput } from '@mtcute/wasm'
@@ -64,6 +64,10 @@ export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
 
     gunzip(data: Uint8Array): Uint8Array {
         return gunzipSync(data)
+    }
+
+    randomFill(buf: Uint8Array) {
+        randomFillSync(buf)
     }
 }
 

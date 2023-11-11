@@ -7,5 +7,5 @@ export const _defaultCryptoProviderFactory = () => {
         throw new MtUnsupportedError('WebCrypto API is not available')
     }
 
-    return new WebCryptoProvider({ subtle: crypto.subtle })
+    return new WebCryptoProvider({ crypto })
 }

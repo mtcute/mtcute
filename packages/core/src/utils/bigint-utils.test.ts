@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { hexDecodeToBuffer } from '@mtcute/tl-runtime'
 
+import { defaultTestCryptoProvider } from './crypto/crypto.test-utils.js'
 import {
     bigIntBitLength,
     bigIntGcd,
@@ -85,50 +86,56 @@ describe('bufferToBigInt', () => {
     })
 })
 
-describe('randomBigInt', () => {
+describe('randomBigInt', async () => {
+    const c = await defaultTestCryptoProvider()
+
     it('should return a random bigint', () => {
-        const a = randomBigInt(32)
-        const b = randomBigInt(32)
+        const a = randomBigInt(c, 32)
+        const b = randomBigInt(c, 32)
 
         expect(a).not.toEqual(b)
     })
 
     it('should return a random bigint up to specified byte length', () => {
-        const a = randomBigInt(32)
-        const b = randomBigInt(64)
+        const a = randomBigInt(c, 32)
+        const b = randomBigInt(c, 64)
 
         expect(bigIntBitLength(a)).toBeLessThanOrEqual(32 * 8)
         expect(bigIntBitLength(b)).toBeLessThanOrEqual(64 * 8)
     })
 })
 
-describe('randomBigIntBits', () => {
+describe('randomBigIntBits', async () => {
+    const c = await defaultTestCryptoProvider()
+
     it('should return a random bigint', () => {
-        const a = randomBigIntBits(32)
-        const b = randomBigIntBits(32)
+        const a = randomBigIntBits(c, 32)
+        const b = randomBigIntBits(c, 32)
 
         expect(a).not.toEqual(b)
     })
 
     it('should return a random bigint up to specified bit length', () => {
-        const a = randomBigIntBits(32)
-        const b = randomBigIntBits(64)
+        const a = randomBigIntBits(c, 32)
+        const b = randomBigIntBits(c, 64)
 
         expect(bigIntBitLength(a)).toBeLessThanOrEqual(32)
         expect(bigIntBitLength(b)).toBeLessThanOrEqual(64)
     })
 })
 
-describe('randomBigIntInRange', () => {
+describe('randomBigIntInRange', async () => {
+    const c = await defaultTestCryptoProvider()
+
     it('should return a random bigint', () => {
-        const a = randomBigIntInRange(10000n)
-        const b = randomBigIntInRange(10000n)
+        const a = randomBigIntInRange(c, 10000n)
+        const b = randomBigIntInRange(c, 10000n)
 
         expect(a).not.toEqual(b)
     })
 
     it('should return a bigint within a given range', () => {
-        const a = randomBigIntInRange(200n, 100n)
+        const a = randomBigIntInRange(c, 200n, 100n)
 
         expect(a).toBeGreaterThanOrEqual(100n)
         expect(a).toBeLessThan(200n)

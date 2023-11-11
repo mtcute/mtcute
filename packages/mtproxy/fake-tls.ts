@@ -1,13 +1,6 @@
 /* eslint-disable no-restricted-globals */
 import { IPacketCodec, WrappedCodec } from '@mtcute/core'
-import {
-    bigIntModInv,
-    bigIntModPow,
-    bigIntToBuffer,
-    bufferToBigInt,
-    ICryptoProvider,
-    randomBytes,
-} from '@mtcute/core/utils.js'
+import { bigIntModInv, bigIntModPow, bigIntToBuffer, bufferToBigInt, ICryptoProvider } from '@mtcute/core/utils.js'
 
 const MAX_TLS_PACKET_LENGTH = 2878
 const TLS_FIRST_PREFIX = Buffer.from('140303000101', 'hex')
@@ -151,8 +144,8 @@ function executeTlsOperations(h: TlsOperationHandler): void {
 //     }
 // }
 
-function initGrease(size: number): Buffer {
-    const buf = randomBytes(size)
+function initGrease(crypto: ICryptoProvider, size: number): Buffer {
+    const buf = crypto.randomBytes(size)
 
     for (let i = 0; i < size; i++) {
         buf[i] = (buf[i] & 0xf0) + 0x0a
@@ -172,10 +165,14 @@ class TlsHelloWriter implements TlsOperationHandler {
     pos = 0
 
     private _domain: Buffer
-    private _grease = initGrease(7)
+    private _grease = initGrease(this.crypto, 7)
     private _scopes: number[] = []
 
-    constructor(size: number, domain: Buffer) {
+    constructor(
+        readonly crypto: ICryptoProvider,
+        size: number,
+        domain: Buffer,
+    ) {
         this._domain = domain
         this.buf = Buffer.allocUnsafe(size)
     }
@@ -186,7 +183,7 @@ class TlsHelloWriter implements TlsOperationHandler {
     }
 
     random(size: number) {
-        this.string(Buffer.from(randomBytes(size)))
+        this.string(Buffer.from(this.crypto.randomBytes(size)))
     }
 
     zero(size: number) {
@@ -204,7 +201,7 @@ class TlsHelloWriter implements TlsOperationHandler {
 
     key() {
         for (;;) {
-            const key = randomBytes(32)
+            const key = this.crypto.randomBytes(32)
             key[31] &= 127
 
             let x = bufferToBigInt(key)
@@ -241,7 +238,7 @@ class TlsHelloWriter implements TlsOperationHandler {
         this.buf.writeUInt16BE(size, begin)
     }
 
-    async finish(secret: Buffer, crypto: ICryptoProvider): Promise<Buffer> {
+    async finish(secret: Buffer): Promise<Buffer> {
         const padSize = 515 - this.pos
         const unixTime = ~~(Date.now() / 1000)
 
@@ -249,7 +246,7 @@ class TlsHelloWriter implements TlsOperationHandler {
         this.zero(padSize)
         this.endScope()
 
-        const hash = Buffer.from(await crypto.hmacSha256(this.buf, secret))
+        const hash = Buffer.from(await this.crypto.hmacSha256(this.buf, secret))
 
         const old = hash.readInt32LE(28)
         hash.writeInt32LE(old ^ unixTime, 28)
@@ -264,10 +261,10 @@ class TlsHelloWriter implements TlsOperationHandler {
 export async function generateFakeTlsHeader(domain: string, secret: Buffer, crypto: ICryptoProvider): Promise<Buffer> {
     const domainBuf = Buffer.from(domain)
 
-    const writer = new TlsHelloWriter(517, domainBuf)
+    const writer = new TlsHelloWriter(crypto, 517, domainBuf)
     executeTlsOperations(writer)
 
-    return writer.finish(secret, crypto)
+    return writer.finish(secret)
 }
 
 /**

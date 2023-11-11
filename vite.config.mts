@@ -10,6 +10,6 @@ export default defineConfig({
             include: [
                 'packages/**/*.test-d.ts',
             ],
-        }
+        },
     },
 })

@@ -23,8 +23,10 @@ export interface WasmCryptoProviderOptions {
     wasmInput?: InitInput
 }
 
-export class WasmCryptoProvider extends BaseCryptoProvider implements Partial<ICryptoProvider> {
+export abstract class WasmCryptoProvider extends BaseCryptoProvider implements Partial<ICryptoProvider> {
     readonly wasmInput?: InitInput
+
+    abstract randomFill(buf: Uint8Array): void
 
     constructor(params?: WasmCryptoProviderOptions) {
         super()

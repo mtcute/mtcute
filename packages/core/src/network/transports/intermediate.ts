@@ -1,4 +1,4 @@
-import { dataViewFromBuffer, randomBytes } from '../../utils/index.js'
+import { dataViewFromBuffer, getRandomInt, ICryptoProvider } from '../../utils/index.js'
 import { IPacketCodec, TransportError } from './abstract.js'
 import { StreamedCodec } from './streamed.js'
 
@@ -58,16 +58,20 @@ export class PaddedIntermediatePacketCodec extends IntermediatePacketCodec {
         return PADDED_TAG
     }
 
+    private _crypto!: ICryptoProvider
+    setup?(crypto: ICryptoProvider) {
+        this._crypto = crypto
+    }
+
     encode(packet: Uint8Array): Uint8Array {
         // padding size, 0-15
-        const padSize = Math.floor(Math.random() * 16)
-        const padding = randomBytes(padSize)
+        const padSize = getRandomInt(16)
 
         const ret = new Uint8Array(packet.length + 4 + padSize)
         const dv = dataViewFromBuffer(ret)
         dv.setUint32(0, packet.length + padSize, true)
         ret.set(packet, 4)
-        ret.set(padding, 4 + packet.length)
+        this._crypto.randomFill(ret.subarray(4 + packet.length))
 
         return ret
     }

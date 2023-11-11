@@ -36,11 +36,23 @@ export interface ICryptoProvider {
 
     gzip(data: Uint8Array, maxSize: number): Uint8Array | null
     gunzip(data: Uint8Array): Uint8Array
+
+    randomFill(buf: Uint8Array): void
+    randomBytes(size: number): Uint8Array
 }
 
 export abstract class BaseCryptoProvider {
+    abstract randomFill(buf: Uint8Array): void
+
     factorizePQ(pq: Uint8Array) {
-        return factorizePQSync(pq)
+        return factorizePQSync(this as unknown as ICryptoProvider, pq)
+    }
+
+    randomBytes(size: number) {
+        const buf = new Uint8Array(size)
+        this.randomFill(buf)
+
+        return buf
     }
 }
 

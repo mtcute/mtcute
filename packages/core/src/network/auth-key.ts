@@ -5,14 +5,7 @@ import { TlBinaryReader, TlReaderMap } from '@mtcute/tl-runtime'
 
 import { MtcuteError } from '../types/errors.js'
 import { createAesIgeForMessage } from '../utils/crypto/mtproto.js'
-import {
-    buffersEqual,
-    concatBuffers,
-    dataViewFromBuffer,
-    ICryptoProvider,
-    Logger,
-    randomBytes,
-} from '../utils/index.js'
+import { buffersEqual, concatBuffers, dataViewFromBuffer, ICryptoProvider, Logger } from '../utils/index.js'
 
 export class AuthKey {
     ready = false
@@ -58,7 +51,7 @@ export class AuthKey {
         dv.setInt32(8, sessionId.low, true)
         dv.setInt32(12, sessionId.high, true)
         buf.set(message, 16)
-        buf.set(randomBytes(padding), 16 + message.length)
+        this._crypto.randomFill(buf.subarray(16 + message.length, 16 + message.length + padding))
 
         const messageKey = this._crypto.sha256(concatBuffers([this.clientSalt, buf])).subarray(8, 24)
         const ige = createAesIgeForMessage(this._crypto, this.key, messageKey, true)
@@ -91,11 +84,7 @@ export class AuthKey {
         const expectedMessageKey = msgKeySource.subarray(8, 24)
 
         if (!buffersEqual(messageKey, expectedMessageKey)) {
-            this.log.warn(
-                '[%h] received message with invalid messageKey = %h (expected %h)',
-                messageKey,
-                expectedMessageKey,
-            )
+            this.log.warn('received message with invalid messageKey = %h (expected %h)', messageKey, expectedMessageKey)
 
             return
         }

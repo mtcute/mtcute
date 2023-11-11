@@ -5,7 +5,7 @@ import { TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 
 import { MtArgumentError, MtSecurityError, MtTypeAssertionError } from '../types/index.js'
-import { buffersEqual, concatBuffers, dataViewFromBuffer, randomBytes } from '../utils/buffer-utils.js'
+import { buffersEqual, concatBuffers, dataViewFromBuffer } from '../utils/buffer-utils.js'
 import { findKeyByFingerprints } from '../utils/crypto/keys.js'
 import { millerRabin } from '../utils/crypto/miller-rabin.js'
 import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto.js'
@@ -32,7 +32,7 @@ interface CheckedPrime {
 
 const checkedPrimesCache: CheckedPrime[] = []
 
-function checkDhPrime(log: Logger, dhPrime: bigint, g: number) {
+function checkDhPrime(crypto: ICryptoProvider, log: Logger, dhPrime: bigint, g: number) {
     if (KNOWN_DH_PRIME === dhPrime) {
         log.debug('server is using known dh prime, skipping validation')
 
@@ -46,10 +46,10 @@ function checkDhPrime(log: Logger, dhPrime: bigint, g: number) {
             throw new MtSecurityError('Step 3: dh_prime is not in the 2048-bit range')
         }
 
-        if (!millerRabin(dhPrime)) {
+        if (!millerRabin(crypto, dhPrime)) {
             throw new MtSecurityError('Step 3: dh_prime is not prime')
         }
-        if (!millerRabin((dhPrime - 1n) / 2n)) {
+        if (!millerRabin(crypto, (dhPrime - 1n) / 2n)) {
             throw new MtSecurityError('Step 3: dh_prime is not a safe prime - (dh_prime-1)/2 is not prime')
         }
 
@@ -130,12 +130,15 @@ function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Ui
         throw new MtArgumentError('Failed to pad: too big data')
     }
 
-    data = concatBuffers([data, randomBytes(192 - data.length)])
+    const dataPadded = new Uint8Array(192)
+    dataPadded.set(data, 0)
+    crypto.randomFill(dataPadded.subarray(data.length))
+    data = dataPadded
 
     for (;;) {
         const aesIv = new Uint8Array(32)
 
-        const aesKey = randomBytes(32)
+        const aesKey = crypto.randomBytes(32)
 
         const dataWithHash = concatBuffers([data, crypto.sha256(concatBuffers([aesKey, data]))])
         // we only need to reverse the data
@@ -165,7 +168,7 @@ function rsaEncrypt(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey)
         crypto.sha1(data),
         data,
         // sha1 is always 20 bytes, so we're left with 255 - 20 - x padding
-        randomBytes(235 - data.length),
+        crypto.randomBytes(235 - data.length),
     ])
 
     const encryptedBigInt = bigIntModPow(
@@ -222,7 +225,7 @@ export async function doAuthorization(
 
     if (expiresIn) log.prefix = '[PFS] '
 
-    const nonce = randomBytes(16)
+    const nonce = crypto.randomBytes(16)
     // Step 1: PQ request
     log.debug('starting PQ handshake (temp = %b), nonce = %h', expiresIn, nonce)
 
@@ -251,7 +254,7 @@ export async function doAuthorization(
     const [p, q] = await crypto.factorizePQ(resPq.pq)
     log.debug('factorized PQ: PQ = %h, P = %h, Q = %h', resPq.pq, p, q)
 
-    const newNonce = randomBytes(32)
+    const newNonce = crypto.randomBytes(32)
 
     let dcId = connection.params.dc.id
     if (connection.params.testMode) dcId += 10000
@@ -330,13 +333,13 @@ export async function doAuthorization(
     const g = BigInt(serverDhInner.g)
     const gA = bufferToBigInt(serverDhInner.gA)
 
-    checkDhPrime(log, dhPrime, serverDhInner.g)
+    checkDhPrime(crypto, log, dhPrime, serverDhInner.g)
 
     let retryId = Long.ZERO
     const serverSalt = xorBuffer(newNonce.subarray(0, 8), resPq.serverNonce.subarray(0, 8))
 
     for (;;) {
-        const b = bufferToBigInt(randomBytes(256))
+        const b = bufferToBigInt(crypto.randomBytes(256))
         const gB = bigIntModPow(g, b, dhPrime)
 
         const authKey = bigIntToBuffer(bigIntModPow(gA, b, dhPrime))

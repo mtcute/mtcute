@@ -14,7 +14,6 @@ import {
     EarlyTimer,
     ICryptoProvider,
     longFromBuffer,
-    randomBytes,
     randomLong,
     removeFromLongArray,
 } from '../utils/index.js'
@@ -348,14 +347,14 @@ export class SessionConnection extends PersistentConnection {
                 const writer = TlBinaryWriter.alloc(this.params.writerMap, 80)
                 // = 40 (inner length) + 32 (mtproto header) + 8 (pad 72 so mod 16 = 0)
 
-                writer.raw(randomBytes(16))
+                writer.raw(this._crypto.randomBytes(16))
                 writer.long(msgId)
                 writer.int(0) // seq_no
                 writer.int(40) // msg_len
                 writer.object(inner)
 
                 const msgWithoutPadding = writer.result()
-                writer.raw(randomBytes(8))
+                writer.raw(this._crypto.randomBytes(8))
                 const msgWithPadding = writer.result()
 
                 const hash = this._crypto.sha1(msgWithoutPadding)

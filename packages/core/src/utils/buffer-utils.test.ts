@@ -1,9 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { hexEncode, utf8Decode, utf8EncodeToBuffer } from '@mtcute/tl-runtime'
-
-import { buffersEqual, bufferToReversed, cloneBuffer, concatBuffers, randomBytes } from './buffer-utils.js'
-import { xorBuffer, xorBufferInPlace } from './crypto/utils.js'
+import { buffersEqual, bufferToReversed, cloneBuffer, concatBuffers } from './buffer-utils.js'
 
 describe('buffersEqual', () => {
     it('should return true for equal buffers', () => {
@@ -14,75 +11,6 @@ describe('buffersEqual', () => {
     it('should return false for non-equal buffers', () => {
         expect(buffersEqual(new Uint8Array([1]), new Uint8Array([]))).is.false
         expect(buffersEqual(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 4]))).is.false
-    })
-})
-
-describe('xorBuffer', () => {
-    it('should xor buffers without modifying original', () => {
-        const data = utf8EncodeToBuffer('hello')
-        const key = utf8EncodeToBuffer('xor')
-
-        const xored = xorBuffer(data, key)
-        expect(data.toString()).eq('hello')
-        expect(key.toString()).eq('xor')
-        expect(hexEncode(xored)).eq('100a1e6c6f')
-    })
-
-    it('should be deterministic', () => {
-        const data = utf8EncodeToBuffer('hello')
-        const key = utf8EncodeToBuffer('xor')
-
-        const xored1 = xorBuffer(data, key)
-        expect(hexEncode(xored1)).eq('100a1e6c6f')
-
-        const xored2 = xorBuffer(data, key)
-        expect(hexEncode(xored2)).eq('100a1e6c6f')
-    })
-
-    it('second call should decode content', () => {
-        const data = utf8EncodeToBuffer('hello')
-        const key = utf8EncodeToBuffer('xor')
-
-        const xored1 = xorBuffer(data, key)
-        expect(hexEncode(xored1)).eq('100a1e6c6f')
-
-        const xored2 = xorBuffer(xored1, key)
-        expect(utf8Decode(xored2)).eq('hello')
-    })
-})
-
-describe('xorBufferInPlace', () => {
-    it('should xor buffers by modifying original', () => {
-        const data = utf8EncodeToBuffer('hello')
-        const key = utf8EncodeToBuffer('xor')
-
-        xorBufferInPlace(data, key)
-        expect(hexEncode(data)).eq('100a1e6c6f')
-        expect(key.toString()).eq('xor')
-    })
-
-    it('second call should decode content', () => {
-        const data = utf8EncodeToBuffer('hello')
-        const key = utf8EncodeToBuffer('xor')
-
-        xorBufferInPlace(data, key)
-        expect(hexEncode(data)).eq('100a1e6c6f')
-
-        xorBufferInPlace(data, key)
-        expect(data.toString()).eq('hello')
-    })
-})
-
-describe('randomBytes', () => {
-    it('should return exactly N bytes', () => {
-        expect(randomBytes(0).length).eq(0)
-        expect(randomBytes(5).length).eq(5)
-        expect(randomBytes(10).length).eq(10)
-        expect(randomBytes(256).length).eq(256)
-    })
-
-    it('should not be deterministic', () => {
-        expect([...randomBytes(8)]).not.eql([...randomBytes(8)])
     })
 })
 
