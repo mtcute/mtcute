@@ -11,6 +11,8 @@ module.exports = {
     exclude: [
         '**/*/node_modules',
         './packages/tl/**/*',
+        '**/*.test.ts',
+        '**/*.test-utils.ts',
     ],
     externalPattern: ['**/dist/**'],
     plugin: [
