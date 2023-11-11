@@ -12,6 +12,7 @@
         "test:dev": "vitest watch",
         "test:ui": "vitest --ui",
         "test:coverage": "vitest run --coverage",
+        "test:ci": "vitest run --coverage.enabled --coverage.reporter=json",
         "lint": "eslint .",
         "lint:ci": "NODE_OPTIONS=\"--max_old_space_size=8192\" eslint --config .eslintrc.ci.js .",
         "lint:tsc": "pnpm -r --parallel exec tsc --build",
