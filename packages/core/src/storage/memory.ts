@@ -1,4 +1,3 @@
-import { IStateStorage } from '@mtcute/dispatcher'
 import { tl } from '@mtcute/tl'
 
 import { LruMap, toggleChannelIdMark } from '../utils/index.js'
@@ -56,7 +55,7 @@ export interface MemorySessionState {
 
 const USERNAME_TTL = 86400000 // 24 hours
 
-export class MemoryStorage implements ITelegramStorage, IStateStorage {
+export class MemoryStorage implements ITelegramStorage {
     protected _state!: MemorySessionState
     private _cachedInputPeers: LruMap<number, tl.TypeInputPeer> = new LruMap(100)
 

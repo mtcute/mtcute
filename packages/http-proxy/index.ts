@@ -1,5 +1,3 @@
-// ^^ because of this._socket. we know it's not null, almost everywhere, but TS doesn't
-
 import { connect as connectTcp } from 'net'
 import { connect as connectTls, SecureContextOptions } from 'tls'
 

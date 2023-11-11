@@ -1,5 +1,8 @@
 import { MaybeAsync } from '@mtcute/client'
 
+// ⚠️ Important: when modifying the below interface, also update it
+// in packages/core/src/storage/storage.test-utils.ts
+
 /**
  * Interface for FSM storage for the dispatcher.
  *

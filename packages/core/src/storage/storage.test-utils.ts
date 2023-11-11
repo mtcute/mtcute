@@ -1,12 +1,12 @@
 import Long from 'long'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { IStateStorage } from '@mtcute/dispatcher'
 import { createStub } from '@mtcute/test'
 import { tl } from '@mtcute/tl'
 import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 
+import { MaybeAsync } from '../types/index.js'
 import { defaultProductionDc } from '../utils/default-dcs.js'
 import { LogManager } from '../utils/index.js'
 import { ITelegramStorage } from './abstract.js'
@@ -230,6 +230,17 @@ export function testStorage(s: ITelegramStorage): void {
             expect(await s.getUpdatesState()).toBeNull()
         })
     })
+}
+
+interface IStateStorage {
+    getState(key: string): MaybeAsync<unknown>
+    setState(key: string, state: unknown, ttl?: number): MaybeAsync<void>
+    deleteState(key: string): MaybeAsync<void>
+    getCurrentScene(key: string): MaybeAsync<string | null>
+    setCurrentScene(key: string, scene: string, ttl?: number): MaybeAsync<void>
+    deleteCurrentScene(key: string): MaybeAsync<void>
+    getRateLimit(key: string, limit: number, window: number): MaybeAsync<[number, number]>
+    resetRateLimit(key: string): MaybeAsync<void>
 }
 
 export function testStateStorage(s: IStateStorage) {

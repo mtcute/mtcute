@@ -130,16 +130,17 @@ if (buildConfig.buildTs) {
 
     let tsconfig = fs.readFileSync(path.join(packageDir, 'tsconfig.backup.json'), 'utf-8')
     // what the fuck
-    tsconfig = tsconfig.replace(
-        /("extends": "\.\.\/\.\.\/tsconfig\.json",)/,
-        '$1"exclude": ["**/*.{test,test-utils}.ts"],',
-    )
+    tsconfig = tsconfig.replace(/(?<="extends": "\.\.\/\.\.\/)tsconfig\.json(?=",)/, 'tsconfig.build.json')
     fs.writeFileSync(path.join(packageDir, 'tsconfig.json'), tsconfig)
+
+    const restoreTsconfig = () => {
+        fs.renameSync(path.join(packageDir, 'tsconfig.backup.json'), path.join(packageDir, 'tsconfig.json'))
+    }
 
     try {
         exec('pnpm exec tsc --build', { cwd: packageDir, stdio: 'inherit' })
     } catch (e) {
-        fs.renameSync(path.join(packageDir, 'tsconfig.backup.json'), path.join(packageDir, 'tsconfig.json'))
+        restoreTsconfig()
         throw e
     }
 
@@ -169,10 +170,13 @@ if (buildConfig.buildTs) {
             fs.writeFileSync(f, originalFiles[f])
         }
 
-        if (error) throw error
+        if (error) {
+            restoreTsconfig()
+            throw error
+        }
     }
 
-    fs.renameSync(path.join(packageDir, 'tsconfig.backup.json'), path.join(packageDir, 'tsconfig.json'))
+    restoreTsconfig()
 
     console.log('[i] Post-processing...')
 

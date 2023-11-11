@@ -130,9 +130,6 @@ importers:
         specifier: 5.2.3
         version: 5.2.3
     devDependencies:
-      '@mtcute/dispatcher':
-        specifier: workspace:^
-        version: link:../dispatcher
       '@mtcute/test':
         specifier: workspace:^
         version: link:../test
