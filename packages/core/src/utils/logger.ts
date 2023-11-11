@@ -4,6 +4,7 @@ import { _defaultLoggingHandler } from './platform/logging.js'
 
 let defaultLogLevel = 3
 
+/* c8 ignore start */
 if (typeof process !== 'undefined') {
     const envLogLevel = parseInt(process.env.MTCUTE_LOG_LEVEL ?? '')
 
@@ -17,6 +18,7 @@ if (typeof process !== 'undefined') {
         defaultLogLevel = localLogLevel
     }
 }
+/* c8 ignore end */
 
 const FORMATTER_RE = /%[a-zA-Z]/g
 
@@ -79,7 +81,7 @@ export class Logger {
 
                     if (m === '%h') {
                         if (ArrayBuffer.isView(val)) return hexEncode(val as Uint8Array)
-                        if (typeof val === 'number') return val.toString(16)
+                        if (typeof val === 'number' || typeof val === 'bigint') return val.toString(16)
 
                         return String(val)
                     }
@@ -164,10 +166,6 @@ export class LogManager extends Logger {
 
     level = defaultLogLevel
     handler = _defaultLoggingHandler
-
-    disable(): void {
-        this.level = 0
-    }
 
     /**
      * Create a {@link Logger} with the given tag

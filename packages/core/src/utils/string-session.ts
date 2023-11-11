@@ -41,11 +41,14 @@ export function writeStringSession(writerMap: TlWriterMap, data: StringSessionDa
     writer.uint8View[0] = version
     writer.pos += 1
 
+    if (version >= 2 && data.primaryDcs.media !== data.primaryDcs.main) {
+        flags |= 4
+    }
+
     writer.int(flags)
     writer.object(data.primaryDcs.main)
 
     if (version >= 2 && data.primaryDcs.media !== data.primaryDcs.main) {
-        flags |= 4
         writer.object(data.primaryDcs.media)
     }
 
@@ -97,7 +100,7 @@ export function readStringSession(readerMap: TlReaderMap, data: string): StringS
     const key = reader.bytes()
 
     return {
-        version: 1,
+        version,
         testMode,
         primaryDcs: {
             main: primaryDc,

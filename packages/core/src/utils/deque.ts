@@ -24,14 +24,16 @@ export class Deque<T> {
     protected _capacity: number
 
     constructor(
-        minCapacity = MIN_INITIAL_CAPACITY,
         readonly maxLength = Infinity,
+        minCapacity = maxLength === Infinity ? MIN_INITIAL_CAPACITY : maxLength,
     ) {
         let capacity = minCapacity
 
-        if (capacity >= MIN_INITIAL_CAPACITY) {
+        if (capacity < MIN_INITIAL_CAPACITY) {
+            capacity = MIN_INITIAL_CAPACITY
+        }
+        if (capacity !== MIN_INITIAL_CAPACITY) {
             // Find the best power of two to hold elements.
-            // >= because array can't be full
             capacity |= capacity >>> 1
             capacity |= capacity >>> 2
             capacity |= capacity >>> 4
@@ -135,6 +137,8 @@ export class Deque<T> {
 
     toArray(): T[] {
         const sz = this.length
+        if (sz === 0) return []
+
         const arr = new Array(sz)
 
         if (this._head < this._tail) {
@@ -220,6 +224,7 @@ export class Deque<T> {
 
     *iter(): IterableIterator<T> {
         const sz = this.length
+        if (sz === 0) return
 
         if (this._head < this._tail) {
             // head to tail

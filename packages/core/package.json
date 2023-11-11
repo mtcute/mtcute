@@ -53,6 +53,8 @@
     "devDependencies": {
         "@types/ws": "8.5.4",
         "node-forge": "1.3.1",
+        "@mtcute/test": "workspace:^",
+        "@mtcute/dispatcher": "workspace:^",
         "ws": "8.13.0"
     }
 }

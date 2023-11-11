@@ -1,6 +1,6 @@
+import { IStateStorage } from '@mtcute/dispatcher'
 import { tl } from '@mtcute/tl'
 
-import { MaybeAsync } from '../types/index.js'
 import { LruMap, toggleChannelIdMark } from '../utils/index.js'
 import { ITelegramStorage } from './abstract.js'
 
@@ -56,7 +56,7 @@ export interface MemorySessionState {
 
 const USERNAME_TTL = 86400000 // 24 hours
 
-export class MemoryStorage implements ITelegramStorage /*, IStateStorage*/ {
+export class MemoryStorage implements ITelegramStorage, IStateStorage {
     protected _state!: MemorySessionState
     private _cachedInputPeers: LruMap<number, tl.TypeInputPeer> = new LruMap(100)
 
@@ -131,11 +131,11 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage*/ {
         // populate indexes if needed
         let populate = false
 
-        if (!obj.phoneIndex) {
+        if (!obj.phoneIndex?.size) {
             obj.phoneIndex = new Map()
             populate = true
         }
-        if (!obj.usernameIndex) {
+        if (!obj.usernameIndex?.size) {
             obj.usernameIndex = new Map()
             populate = true
         }
@@ -229,7 +229,7 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage*/ {
         }
     }
 
-    updatePeers(peers: PeerInfoWithUpdated[]): MaybeAsync<void> {
+    updatePeers(peers: PeerInfoWithUpdated[]): void {
         for (const peer of peers) {
             this._cachedFull.set(peer.id, peer.full)
 
@@ -326,26 +326,26 @@ export class MemoryStorage implements ITelegramStorage /*, IStateStorage*/ {
         return this._state.pts.get(entityId) ?? null
     }
 
-    getUpdatesState(): MaybeAsync<[number, number, number, number] | null> {
+    getUpdatesState(): [number, number, number, number] | null {
         return this._state.gpts ?? null
     }
 
-    setUpdatesPts(val: number): MaybeAsync<void> {
+    setUpdatesPts(val: number): void {
         if (!this._state.gpts) this._state.gpts = [0, 0, 0, 0]
         this._state.gpts[0] = val
     }
 
-    setUpdatesQts(val: number): MaybeAsync<void> {
+    setUpdatesQts(val: number): void {
         if (!this._state.gpts) this._state.gpts = [0, 0, 0, 0]
         this._state.gpts[1] = val
     }
 
-    setUpdatesDate(val: number): MaybeAsync<void> {
+    setUpdatesDate(val: number): void {
         if (!this._state.gpts) this._state.gpts = [0, 0, 0, 0]
         this._state.gpts[2] = val
     }
 
-    setUpdatesSeq(val: number): MaybeAsync<void> {
+    setUpdatesSeq(val: number): void {
         if (!this._state.gpts) this._state.gpts = [0, 0, 0, 0]
         this._state.gpts[3] = val
     }

@@ -2,7 +2,28 @@ import { describe, expect, it } from 'vitest'
 
 import { hexDecodeToBuffer } from '@mtcute/tl-runtime'
 
-import { bigIntToBuffer, bufferToBigInt } from './index.js'
+import {
+    bigIntBitLength,
+    bigIntGcd,
+    bigIntModInv,
+    bigIntModPow,
+    bigIntToBuffer,
+    bufferToBigInt,
+    randomBigInt,
+    randomBigIntBits,
+    randomBigIntInRange,
+    twoMultiplicity,
+} from './index.js'
+
+describe('bigIntBitLength', () => {
+    it('should correctly calculate bit length', () => {
+        expect(bigIntBitLength(0n)).eq(0)
+        expect(bigIntBitLength(1n)).eq(1)
+        expect(bigIntBitLength(2n)).eq(2)
+        expect(bigIntBitLength(255n)).eq(8)
+        expect(bigIntBitLength(256n)).eq(9)
+    })
+})
 
 describe('bigIntToBuffer', () => {
     it('should handle writing to BE', () => {
@@ -61,5 +82,113 @@ describe('bufferToBigInt', () => {
 
         expect(bufferToBigInt(buf, false).toString()).eq(num.toString())
         expect(bufferToBigInt(buf.reverse(), true).toString()).eq(num.toString())
+    })
+})
+
+describe('randomBigInt', () => {
+    it('should return a random bigint', () => {
+        const a = randomBigInt(32)
+        const b = randomBigInt(32)
+
+        expect(a).not.toEqual(b)
+    })
+
+    it('should return a random bigint up to specified byte length', () => {
+        const a = randomBigInt(32)
+        const b = randomBigInt(64)
+
+        expect(bigIntBitLength(a)).toBeLessThanOrEqual(32 * 8)
+        expect(bigIntBitLength(b)).toBeLessThanOrEqual(64 * 8)
+    })
+})
+
+describe('randomBigIntBits', () => {
+    it('should return a random bigint', () => {
+        const a = randomBigIntBits(32)
+        const b = randomBigIntBits(32)
+
+        expect(a).not.toEqual(b)
+    })
+
+    it('should return a random bigint up to specified bit length', () => {
+        const a = randomBigIntBits(32)
+        const b = randomBigIntBits(64)
+
+        expect(bigIntBitLength(a)).toBeLessThanOrEqual(32)
+        expect(bigIntBitLength(b)).toBeLessThanOrEqual(64)
+    })
+})
+
+describe('randomBigIntInRange', () => {
+    it('should return a random bigint', () => {
+        const a = randomBigIntInRange(10000n)
+        const b = randomBigIntInRange(10000n)
+
+        expect(a).not.toEqual(b)
+    })
+
+    it('should return a bigint within a given range', () => {
+        const a = randomBigIntInRange(200n, 100n)
+
+        expect(a).toBeGreaterThanOrEqual(100n)
+        expect(a).toBeLessThan(200n)
+    })
+})
+
+describe('twoMultiplicity', () => {
+    it('should return the multiplicity of 2 in the prime factorization of n', () => {
+        expect(twoMultiplicity(0n)).toEqual(0n)
+        expect(twoMultiplicity(1n)).toEqual(0n)
+        expect(twoMultiplicity(2n)).toEqual(1n)
+        expect(twoMultiplicity(4n)).toEqual(2n)
+        expect(twoMultiplicity(65536n)).toEqual(16n)
+        expect(twoMultiplicity(65537n)).toEqual(0n)
+    })
+})
+
+describe('bigIntGcd', () => {
+    it('should return the greatest common divisor of a and b', () => {
+        expect(bigIntGcd(123n, 456n)).toEqual(3n)
+    })
+
+    it('should correctly handle zeros', () => {
+        expect(bigIntGcd(0n, 0n)).toEqual(0n)
+        expect(bigIntGcd(0n, 1n)).toEqual(1n)
+        expect(bigIntGcd(1n, 0n)).toEqual(1n)
+    })
+
+    it('should correctly handle equal values', () => {
+        expect(bigIntGcd(1n, 1n)).toEqual(1n)
+    })
+})
+
+describe('bigIntModPow', () => {
+    it('should correctly calculate modular exponentiation', () => {
+        expect(bigIntModPow(2n, 3n, 5n)).toEqual(3n)
+        expect(bigIntModPow(2n, 3n, 6n)).toEqual(2n)
+        expect(bigIntModPow(2n, 3n, 7n)).toEqual(1n)
+        expect(bigIntModPow(2n, 3n, 8n)).toEqual(0n)
+    })
+
+    it('should correctly handle very large numbers', () => {
+        // calculating this with BigInt would either take forever or error with "Maximum BigInt size exceeded
+        expect(bigIntModPow(2n, 100000000000n, 100n)).toEqual(76n)
+    })
+})
+
+describe('bigIntModInv', () => {
+    it('should correctly calculate modular inverse', () => {
+        expect(bigIntModInv(2n, 5n)).toEqual(3n)
+        expect(bigIntModInv(2n, 7n)).toEqual(4n)
+    })
+
+    it("should error if there's no modular inverse", () => {
+        expect(() => bigIntModInv(2n, 6n)).toThrow(RangeError)
+        expect(() => bigIntModInv(2n, 8n)).toThrow(RangeError)
+    })
+
+    it('should correctly handle very large numbers', () => {
+        // calculating this with BigInt would either take forever or error with "Maximum BigInt size exceeded
+        expect(bigIntModInv(123123123123n, 1829n)).toEqual(318n)
     })
 })

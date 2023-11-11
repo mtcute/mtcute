@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import { hexDecodeToBuffer, hexEncode } from '@mtcute/tl-runtime'
 
-import { IntermediatePacketCodec, TransportError } from '../../index.js'
+import { IntermediatePacketCodec, PaddedIntermediatePacketCodec, TransportError } from '../../index.js'
+import { concatBuffers, dataViewFromBuffer } from '../../utils/index.js'
 
 describe('IntermediatePacketCodec', () => {
     it('should return correct tag', () => {
@@ -76,4 +77,35 @@ describe('IntermediatePacketCodec', () => {
             codec.reset()
             codec.feed(hexDecodeToBuffer('050000000102030405'))
         }))
+
+    it('should correctly frame packets', () => {
+        const data = hexDecodeToBuffer('6cfeffff')
+
+        // eslint-disable-next-line no-restricted-globals
+        expect(Buffer.from(new IntermediatePacketCodec().encode(data))).toEqual(
+            concatBuffers([new Uint8Array([0x04, 0x00, 0x00, 0x00]), data]),
+        )
+    })
+})
+
+describe('PaddedIntermediatePacketCodec', () => {
+    it('should return correct tag', () => {
+        expect(hexEncode(new PaddedIntermediatePacketCodec().tag())).eq('dddddddd')
+    })
+
+    it('should correctly frame packets', () => {
+        // todo: once we have predictable random, test this properly
+
+        const data = hexDecodeToBuffer('6cfeffff')
+        const encoded = new PaddedIntermediatePacketCodec().encode(data)
+        const dv = dataViewFromBuffer(encoded)
+
+        const packetSize = dv.getUint32(0, true)
+        const paddingSize = packetSize - data.length
+
+        // padding size, 0-15
+        expect(paddingSize).toBeGreaterThanOrEqual(0)
+        expect(paddingSize).toBeLessThanOrEqual(15)
+        expect([...encoded.slice(4, 4 + packetSize - paddingSize)]).toEqual([...data])
+    })
 })

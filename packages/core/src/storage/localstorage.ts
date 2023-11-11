@@ -16,11 +16,14 @@ export class LocalstorageStorage extends JsonMemoryStorage {
 
     load(): void {
         try {
-            this._loadJson(localStorage[this._key] as string)
+            const val = localStorage.getItem(this._key)
+            if (val === null) return
+
+            this._loadJson(val)
         } catch (e) {}
     }
 
     save(): void {
-        localStorage[this._key] = this._saveJson()
+        localStorage.setItem(this._key, this._saveJson())
     }
 }

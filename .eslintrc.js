@@ -215,7 +215,13 @@ module.exports = {
                 '@typescript-eslint/no-dynamic-delete': 'off',
                 '@typescript-eslint/no-unsafe-member-access': 'off',
                 'no-restricted-globals': ['error', 'Buffer', '__dirname', 'require'],
-                'no-restricted-imports': ['error', 'buffer', 'crypto', 'fs', 'path', 'stream'],
+                'no-restricted-imports': [
+                    'error',
+                    {
+                        paths: ['buffer', 'crypto', 'fs', 'path', 'stream'],
+                        patterns: ['@mtcute/*/dist/**'],
+                    },
+                ],
             },
             reportUnusedDisableDirectives: false,
             settings: {
@@ -229,7 +235,12 @@ module.exports = {
             files: ['**/scripts/**', '*.test.ts', 'packages/create-*/**', '**/build.config.cjs'],
             rules: {
                 'no-console': 'off',
-                'no-restricted-imports': 'off',
+                'no-restricted-imports': [
+                    'error',
+                    {
+                        patterns: ['@mtcute/*/dist/**'],
+                    },
+                ],
             },
         },
         {

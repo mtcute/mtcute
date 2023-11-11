@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { tl } from '@mtcute/tl'
 import { base64DecodeToBuffer, base64Encode } from '@mtcute/tl-runtime'
 
-import { longFromFastString, longToFastString } from '../utils/long-utils.js'
 import { MemorySessionState, MemoryStorage } from './memory.js'
 
 /**
@@ -16,25 +14,26 @@ export class JsonMemoryStorage extends MemoryStorage {
                 switch (key) {
                     case 'authKeys':
                     case 'authKeysTemp': {
-                        const ret: Record<string, Uint8Array> = {}
+                        const ret = new Map<string | number, Uint8Array>()
 
                         ;(value as string).split('|').forEach((pair: string) => {
                             const [dcId, b64] = pair.split(',')
-                            ret[dcId] = base64DecodeToBuffer(b64)
+                            const mapKey = key === 'authKeysTemp' ? dcId : parseInt(dcId)
+
+                            ret.set(mapKey, base64DecodeToBuffer(b64))
                         })
 
                         return ret
                     }
                     case 'authKeysTempExpiry':
-                    case 'entities':
                     case 'phoneIndex':
                     case 'usernameIndex':
                     case 'pts':
                     case 'fsm':
                     case 'rl':
                         return new Map(Object.entries(value as Record<string, string>))
-                    case 'accessHash':
-                        return longFromFastString(value as string)
+                    case 'entities':
+                        return new Map()
                 }
 
                 return value
@@ -55,15 +54,14 @@ export class JsonMemoryStorage extends MemoryStorage {
                         .join('|')
                 }
                 case 'authKeysTempExpiry':
-                case 'entities':
                 case 'phoneIndex':
                 case 'usernameIndex':
                 case 'pts':
                 case 'fsm':
                 case 'rl':
                     return Object.fromEntries([...(value as Map<string, string>).entries()])
-                case 'accessHash':
-                    return longToFastString(value as tl.Long)
+                case 'entities':
+                    return {}
             }
 
             return value

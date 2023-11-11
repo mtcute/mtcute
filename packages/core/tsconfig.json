@@ -3,9 +3,6 @@
     "compilerOptions": {
         "outDir": "./dist/esm",
         "rootDir": "./src",
-        "paths": {
-            "@mtcute/dispatcher": ["../dispatcher/src/state/storage.ts"],
-        }
     },
     "include": [
         "./src",

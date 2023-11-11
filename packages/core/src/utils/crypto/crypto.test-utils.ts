@@ -1,8 +1,10 @@
 import { beforeAll, expect, it } from 'vitest'
+import { gzipSync, inflateSync } from 'zlib'
 
 import { hexDecodeToBuffer, hexEncode, utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 
 import { ICryptoProvider } from './abstract.js'
+import { factorizePQSync } from './factorization.js'
 
 export function testCryptoProvider(c: ICryptoProvider): void {
     beforeAll(() => c.initialize?.())
@@ -92,5 +94,47 @@ export function testCryptoProvider(c: ICryptoProvider): void {
                 aes.decrypt(hexDecodeToBuffer('792ea8ae577b1a66cb3bd92679b8030ca54ee631976bd3a04547fdcb4639fa69')),
             ),
         ).to.eq('99706487a1cde613bc6de0b6f24b1c7aa448c8b9c3403e3467a8cad89340f53b')
+    })
+
+    it(
+        'should decompose PQ to prime factors P and Q',
+        () => {
+            const testFactorization = (pq: string, p: string, q: string) => {
+                const [p1, q1] = factorizePQSync(hexDecodeToBuffer(pq))
+                expect(hexEncode(p1)).eq(p.toLowerCase())
+                expect(hexEncode(q1)).eq(q.toLowerCase())
+            }
+
+            // from samples at https://core.telegram.org/mtproto/samples-auth_key
+            testFactorization('17ED48941A08F981', '494C553B', '53911073')
+            // random example
+            testFactorization('14fcab4dfc861f45', '494c5c99', '494c778d')
+        },
+        // since PQ factorization relies on RNG, it may take a while (or may not!)
+        { timeout: 10000 },
+    )
+
+    it('should correctly gzip', () => {
+        const data = new Uint8Array(1000).fill(0x42)
+
+        const compressed = c.gzip(data, 100)
+
+        expect(compressed).not.toBeNull()
+
+        const decompressed = inflateSync(compressed!)
+
+        expect(compressed!.length).toBeLessThan(data.length)
+        // eslint-disable-next-line no-restricted-globals
+        expect(decompressed).toEqual(Buffer.from(data))
+    })
+
+    it('should correctly gunzip', () => {
+        const data = new Uint8Array(1000).fill(0x42)
+
+        const compressed = gzipSync(data)
+        const decompressed = c.gunzip(compressed)
+
+        // eslint-disable-next-line no-restricted-globals
+        expect(Buffer.from(decompressed)).toEqual(Buffer.from(data))
     })
 }

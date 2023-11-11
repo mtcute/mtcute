@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { hexEncode, utf8Decode, utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 
@@ -121,6 +121,19 @@ describe('concatBuffers', () => {
         buf[0] = 0xff
         expect(buf1[0]).not.eql(0xff)
     })
+
+    it('should work without native Buffer', () => {
+        vi.stubGlobal('Buffer', undefined)
+        const buf1 = new Uint8Array([1, 2, 3])
+        const buf2 = new Uint8Array([4, 5, 6])
+        const buf = concatBuffers([buf1, buf2])
+
+        buf1[0] = 0xff
+
+        expect([...buf]).eql([1, 2, 3, 4, 5, 6])
+    })
+
+    afterEach(() => void vi.unstubAllGlobals())
 })
 
 describe('bufferToReversed', () => {

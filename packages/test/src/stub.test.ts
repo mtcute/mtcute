@@ -34,6 +34,14 @@ describe('stub', () => {
         })
     })
 
+    it('should correctly generate stubs for optional vectors', () => {
+        expect(createStub('updateChannelPinnedTopics')).toEqual({
+            _: 'updateChannelPinnedTopics',
+            channelId: 0,
+            order: [],
+        })
+    })
+
     it('should correctly generate stubs for nested types', () => {
         expect(createStub('messageActionGroupCallScheduled', { scheduleDate: 123 })).toEqual({
             _: 'messageActionGroupCallScheduled',

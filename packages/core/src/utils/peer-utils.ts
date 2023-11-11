@@ -72,14 +72,18 @@ export function getMarkedPeerId(
     switch (peer._) {
         case 'peerUser':
         case 'inputPeerUser':
+        case 'inputPeerUserFromMessage':
         case 'inputUser':
+        case 'inputUserFromMessage':
             return peer.userId
         case 'peerChat':
         case 'inputPeerChat':
             return -peer.chatId
         case 'peerChannel':
         case 'inputPeerChannel':
+        case 'inputPeerChannelFromMessage':
         case 'inputChannel':
+        case 'inputChannelFromMessage':
             return ZERO_CHANNEL_ID - peer.channelId
     }
 
@@ -110,7 +114,7 @@ export function getBasicPeerType(peer: tl.TypePeer | number): BasicPeerType {
             return 'channel'
         }
 
-        if (MAX_SECRET_CHAT_ID <= peer && peer !== ZERO_SECRET_CHAT_ID) {
+        if (MAX_SECRET_CHAT_ID >= peer && peer !== ZERO_SECRET_CHAT_ID) {
             // return 'secret'
             throw new MtUnsupportedError('Secret chats are not supported')
         }
