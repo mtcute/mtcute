@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/mtproxy",
     "private": true,
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "MTProto proxy (MTProxy) support for mtcute",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",

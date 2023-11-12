@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/wasm",
     "private": true,
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "WASM implementation of common algorithms used in Telegram",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
