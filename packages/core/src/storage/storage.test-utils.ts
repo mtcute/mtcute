@@ -8,7 +8,7 @@ import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 
 import { MaybeAsync } from '../types/index.js'
 import { defaultProductionDc } from '../utils/default-dcs.js'
-import { LogManager } from '../utils/index.js'
+import { hexEncode, Logger, LogManager, TlReaderMap, TlWriterMap } from '../utils/index.js'
 import { ITelegramStorage } from './abstract.js'
 
 export const stubPeerUser: ITelegramStorage.PeerInfo = {
@@ -39,22 +39,34 @@ const peerChannelInput: tl.TypeInputPeer = {
     accessHash: Long.fromBits(666, 555),
 }
 
-export function testStorage(s: ITelegramStorage): void {
-    beforeAll(async () => {
-        await s.load?.()
+function maybeHexEncode(x: Uint8Array | null): string | null {
+    if (x == null) return null
 
+    return hexEncode(x)
+}
+
+export function testStorage<T extends ITelegramStorage>(
+    s: T,
+    params?: {
+        skipEntityOverwrite?: boolean
+        customTests?: (s: T) => void
+    },
+): void {
+    beforeAll(async () => {
         const logger = new LogManager()
         logger.level = 0
         s.setup?.(logger, __tlReaderMap, __tlWriterMap)
+
+        await s.load?.()
     })
 
     afterAll(() => s.destroy?.())
-    beforeEach(() => s.reset?.())
+    beforeEach(() => s.reset(true))
 
     describe('default dc', () => {
         it('should store', async () => {
             await s.setDefaultDcs(defaultProductionDc)
-            expect(await s.getDefaultDcs()).toBe(defaultProductionDc)
+            expect(await s.getDefaultDcs()).toEqual(defaultProductionDc)
         })
 
         it('should remove', async () => {
@@ -79,8 +91,8 @@ export function testStorage(s: ITelegramStorage): void {
             await s.setAuthKeyFor(2, key2)
             await s.setAuthKeyFor(3, key3)
 
-            expect(await s.getAuthKeyFor(2)).toEqual(key2)
-            expect(await s.getAuthKeyFor(3)).toEqual(key3)
+            expect(maybeHexEncode(await s.getAuthKeyFor(2))).toEqual(hexEncode(key2))
+            expect(maybeHexEncode(await s.getAuthKeyFor(3))).toEqual(hexEncode(key3))
         })
 
         it('should store temp auth keys', async () => {
@@ -91,10 +103,10 @@ export function testStorage(s: ITelegramStorage): void {
             await s.setTempAuthKeyFor(3, 0, key3i0, expire)
             await s.setTempAuthKeyFor(3, 1, key3i1, expire)
 
-            expect(await s.getAuthKeyFor(2, 0)).toEqual(key2i0)
-            expect(await s.getAuthKeyFor(2, 1)).toEqual(key2i1)
-            expect(await s.getAuthKeyFor(3, 0)).toEqual(key3i0)
-            expect(await s.getAuthKeyFor(3, 1)).toEqual(key3i1)
+            expect(maybeHexEncode(await s.getAuthKeyFor(2, 0))).toEqual(hexEncode(key2i0))
+            expect(maybeHexEncode(await s.getAuthKeyFor(2, 1))).toEqual(hexEncode(key2i1))
+            expect(maybeHexEncode(await s.getAuthKeyFor(3, 0))).toEqual(hexEncode(key3i0))
+            expect(maybeHexEncode(await s.getAuthKeyFor(3, 1))).toEqual(hexEncode(key3i1))
         })
 
         it('should expire temp auth keys', async () => {
@@ -128,7 +140,7 @@ export function testStorage(s: ITelegramStorage): void {
             expect(await s.getAuthKeyFor(2)).toBeNull()
             expect(await s.getAuthKeyFor(2, 0)).toBeNull()
             expect(await s.getAuthKeyFor(2, 1)).toBeNull()
-            expect(await s.getAuthKeyFor(3)).toEqual(key3) // should not be removed
+            expect(maybeHexEncode(await s.getAuthKeyFor(3))).toEqual(hexEncode(key3)) // should not be removed
         })
 
         it('should remove all auth keys with dropAuthKeysFor', async () => {
@@ -144,13 +156,32 @@ export function testStorage(s: ITelegramStorage): void {
             expect(await s.getAuthKeyFor(2)).toBeNull()
             expect(await s.getAuthKeyFor(2, 0)).toBeNull()
             expect(await s.getAuthKeyFor(2, 1)).toBeNull()
-            expect(await s.getAuthKeyFor(3)).toEqual(key3) // should not be removed
+            expect(maybeHexEncode(await s.getAuthKeyFor(3))).toEqual(hexEncode(key3)) // should not be removed
+        })
+
+        it('should not reset auth keys on reset()', async () => {
+            await s.setAuthKeyFor(2, key2)
+            await s.setAuthKeyFor(3, key3)
+            s.reset()
+
+            expect(maybeHexEncode(await s.getAuthKeyFor(2))).toEqual(hexEncode(key2))
+            expect(maybeHexEncode(await s.getAuthKeyFor(3))).toEqual(hexEncode(key3))
+        })
+
+        it('should reset auth keys on reset(true)', async () => {
+            await s.setAuthKeyFor(2, key2)
+            await s.setAuthKeyFor(3, key3)
+            s.reset(true)
+
+            expect(await s.getAuthKeyFor(2)).toBeNull()
+            expect(await s.getAuthKeyFor(3)).toBeNull()
         })
     })
 
     describe('peers', () => {
         it('should cache and return peers', async () => {
             await s.updatePeers([stubPeerUser, peerChannel])
+            await s.save?.() // update-related methods are batched, so we need to save
 
             expect(await s.getPeerById(stubPeerUser.id)).toEqual(peerUserInput)
             expect(await s.getPeerById(peerChannel.id)).toEqual(peerChannelInput)
@@ -158,6 +189,7 @@ export function testStorage(s: ITelegramStorage): void {
 
         it('should cache and return peers by username', async () => {
             await s.updatePeers([stubPeerUser, peerChannel])
+            await s.save?.() // update-related methods are batched, so we need to save
 
             expect(await s.getPeerByUsername(stubPeerUser.username!)).toEqual(peerUserInput)
             expect(await s.getPeerByUsername(peerChannel.username!)).toEqual(peerChannelInput)
@@ -165,21 +197,26 @@ export function testStorage(s: ITelegramStorage): void {
 
         it('should cache and return peers by phone', async () => {
             await s.updatePeers([stubPeerUser])
+            await s.save?.() // update-related methods are batched, so we need to save
 
             expect(await s.getPeerByPhone(stubPeerUser.phone!)).toEqual(peerUserInput)
         })
 
-        it('should overwrite existing cached peers', async () => {
-            await s.updatePeers([stubPeerUser])
-            await s.updatePeers([{ ...stubPeerUser, username: 'whatever' }])
+        if (!params?.skipEntityOverwrite) {
+            it('should overwrite existing cached peers', async () => {
+                await s.updatePeers([stubPeerUser])
+                await s.updatePeers([{ ...stubPeerUser, username: 'whatever' }])
+                await s.save?.() // update-related methods are batched, so we need to save
 
-            expect(await s.getPeerById(stubPeerUser.id)).toEqual(peerUserInput)
-            expect(await s.getPeerByUsername(stubPeerUser.username!)).toBeNull()
-            expect(await s.getPeerByUsername('whatever')).toEqual(peerUserInput)
-        })
+                expect(await s.getPeerById(stubPeerUser.id)).toEqual(peerUserInput)
+                expect(await s.getPeerByUsername(stubPeerUser.username!)).toBeNull()
+                expect(await s.getPeerByUsername('whatever')).toEqual(peerUserInput)
+            })
+        }
 
         it('should cache full peer info', async () => {
             await s.updatePeers([stubPeerUser, peerChannel])
+            await s.save?.() // update-related methods are batched, so we need to save
 
             expect(await s.getFullPeerById(stubPeerUser.id)).toEqual(stubPeerUser.full)
             expect(await s.getFullPeerById(peerChannel.id)).toEqual(peerChannel.full)
@@ -210,6 +247,8 @@ export function testStorage(s: ITelegramStorage): void {
             await s.setUpdatesQts(2)
             await s.setUpdatesDate(3)
             await s.setUpdatesSeq(4)
+            await s.save?.() // update-related methods are batched, so we need to save
+
             expect(await s.getUpdatesState()).toEqual([1, 2, 3, 4])
         })
 
@@ -220,6 +259,7 @@ export function testStorage(s: ITelegramStorage): void {
                     [3, 4],
                 ]),
             )
+            await s.save?.() // update-related methods are batched, so we need to save
 
             expect(await s.getChannelPts(1)).toEqual(2)
             expect(await s.getChannelPts(3)).toEqual(4)
@@ -230,9 +270,16 @@ export function testStorage(s: ITelegramStorage): void {
             expect(await s.getUpdatesState()).toBeNull()
         })
     })
+
+    params?.customTests?.(s)
 }
 
 interface IStateStorage {
+    setup?(log: Logger, readerMap: TlReaderMap, writerMap: TlWriterMap): void
+    load?(): MaybeAsync<void>
+    save?(): MaybeAsync<void>
+    destroy?(): MaybeAsync<void>
+    reset(): MaybeAsync<void>
     getState(key: string): MaybeAsync<unknown>
     setState(key: string, state: unknown, ttl?: number): MaybeAsync<void>
     deleteState(key: string): MaybeAsync<void>
@@ -244,6 +291,17 @@ interface IStateStorage {
 }
 
 export function testStateStorage(s: IStateStorage) {
+    beforeAll(async () => {
+        const logger = new LogManager()
+        logger.level = 0
+        s.setup?.(logger, __tlReaderMap, __tlWriterMap)
+
+        await s.load?.()
+    })
+
+    afterAll(() => s.destroy?.())
+    beforeEach(() => s.reset())
+
     describe('key-value state', () => {
         beforeAll(() => void vi.useFakeTimers())
         afterAll(() => void vi.useRealTimers())

@@ -78,9 +78,11 @@ export interface ITelegramStorage {
     destroy?(): MaybeAsync<void>
 
     /**
-     * Reset session to its default state
+     * Reset session to its default state, optionally resetting auth keys
+     *
+     * @param [withAuthKeys=false]  Whether to also reset auth keys
      */
-    reset(): void
+    reset(withAuthKeys?: boolean): void
 
     /**
      * Set default datacenter to use with this session.
@@ -128,6 +130,9 @@ export interface ITelegramStorage {
 
     /**
      * Update local database of input peers from the peer info list
+     *
+     * Client will call `.save()` after all updates-related methods
+     * are called, so you can safely batch these updates
      */
     updatePeers(peers: ITelegramStorage.PeerInfo[]): MaybeAsync<void>
     /**
@@ -151,18 +156,30 @@ export interface ITelegramStorage {
 
     /**
      * Set common `pts` value
+     *
+     * Client will call `.save()` after all updates-related methods
+     * are called, so you can safely batch these updates
      */
     setUpdatesPts(val: number): MaybeAsync<void>
     /**
      * Set common `qts` value
+     *
+     * Client will call `.save()` after all updates-related methods
+     * are called, so you can safely batch these updates
      */
     setUpdatesQts(val: number): MaybeAsync<void>
     /**
      * Set updates `date` value
+     *
+     * Client will call `.save()` after all updates-related methods
+     * are called, so you can safely batch these updates
      */
     setUpdatesDate(val: number): MaybeAsync<void>
     /**
      * Set updates `seq` value
+     *
+     * Client will call `.save()` after all updates-related methods
+     * are called, so you can safely batch these updates
      */
     setUpdatesSeq(val: number): MaybeAsync<void>
 
@@ -172,8 +189,12 @@ export interface ITelegramStorage {
     getChannelPts(entityId: number): MaybeAsync<number | null>
     /**
      * Set channels `pts` values in batch.
+     *
      * Storage is supposed to replace stored channel `pts` values
      * with given in the object (key is unmarked peer id, value is the `pts`)
+     *
+     * Client will call `.save()` after all updates-related methods
+     * are called, so you can safely batch these updates
      */
     setManyChannelPts(values: Map<number, number>): MaybeAsync<void>
 

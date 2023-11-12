@@ -1,4 +1,4 @@
 module.exports = {
     extends: ['../../typedoc.base.cjs'],
-    entryPoints: ['./index.ts'],
+    entryPoints: ['./src/index.ts'],
 }

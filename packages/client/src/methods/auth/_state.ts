@@ -5,6 +5,7 @@ import { assertTypeIs } from '@mtcute/core/utils.js'
 import { User } from '../../types/peers/user.js'
 
 const STATE_SYMBOL = Symbol('authState')
+
 /** @exported */
 export interface AuthState {
     // local copy of "self" in storage,
@@ -70,7 +71,11 @@ export function getAuthState(client: BaseTelegramClient): AuthState {
 }
 
 /** @internal */
-export function _onAuthorization(client: BaseTelegramClient, auth: tl.auth.TypeAuthorization, bot = false): User {
+export async function _onAuthorization(
+    client: BaseTelegramClient,
+    auth: tl.auth.TypeAuthorization,
+    bot = false,
+): Promise<User> {
     if (auth._ === 'auth.authorizationSignUpRequired') {
         throw new MtUnsupportedError(
             'Signup is no longer supported by Telegram for non-official clients. Please use your mobile device to sign up.',
@@ -86,6 +91,7 @@ export function _onAuthorization(client: BaseTelegramClient, auth: tl.auth.TypeA
     state.selfChanged = true
 
     client.notifyLoggedIn(auth)
+    await client.saveStorage()
 
     // telegram ignores invokeWithoutUpdates for auth methods
     if (client.network.params.disableUpdates) client.network.resetSessions()

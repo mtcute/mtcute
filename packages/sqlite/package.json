@@ -5,7 +5,7 @@
     "description": "SQLite-based storage for mtcute",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
-    "main": "index.ts",
+    "main": "src/index.ts",
     "type": "module",
     "distOnlyFields": {
         "exports": {

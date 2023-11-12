@@ -1,3 +1,7 @@
+export type ThrottledFunction = (() => void) & {
+    reset: () => void
+}
+
 /**
  * Throttle a function with a given delay.
  * Similar to lodash.
@@ -10,10 +14,10 @@
  * @param func  Function to throttle
  * @param delay  Throttle delay
  */
-export function throttle(func: () => void, delay: number): () => void {
+export function throttle(func: () => void, delay: number): ThrottledFunction {
     let timeout: NodeJS.Timeout | null
 
-    return function () {
+    const res: ThrottledFunction = function () {
         if (timeout) {
             return
         }
@@ -24,4 +28,13 @@ export function throttle(func: () => void, delay: number): () => void {
         }
         timeout = setTimeout(later, delay)
     }
+
+    res.reset = () => {
+        if (timeout) {
+            clearTimeout(timeout)
+            timeout = null
+        }
+    }
+
+    return res
 }

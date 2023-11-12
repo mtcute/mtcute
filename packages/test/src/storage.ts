@@ -62,9 +62,9 @@ export class StubMemoryTelegramStorage extends MemoryStorage implements ITelegra
         super.destroy()
     }
 
-    reset(): void {
+    reset(withKeys = false): void {
         this.params?.onReset?.()
-        super.reset()
+        super.reset(withKeys)
     }
 
     decryptOutgoingMessage(crypto: ICryptoProvider, data: Uint8Array, dcId: number, tempIndex?: number | undefined) {

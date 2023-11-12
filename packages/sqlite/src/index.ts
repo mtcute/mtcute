@@ -9,6 +9,7 @@ import {
     longToFastString,
     LruMap,
     throttle,
+    ThrottledFunction,
     TlBinaryReader,
     TlBinaryWriter,
     TlReaderMap,
@@ -98,9 +99,12 @@ const SCHEMA = `
 const RESET = `
     delete from kv where key <> 'ver';
     delete from state;
-    delete from auth_keys;
     delete from pts;
     delete from entities
+`
+const RESET_AUTH_KEYS = `
+    delete from auth_keys;
+    delete from temp_auth_keys;
 `
 
 const USERNAME_TTL = 86400000 // 24 hours
@@ -179,7 +183,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
 
     private _reader!: TlBinaryReader
 
-    private _saveUnimportantLater: () => void
+    private _saveUnimportantLater: ThrottledFunction
 
     private _vacuumTimeout?: NodeJS.Timeout
     private _vacuumInterval: number
@@ -435,7 +439,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
 
     load(): void {
         this._db = sqlite3(this._filename, {
-            verbose: this.log.mgr.level === 5 ? (this.log.verbose as Options['verbose']) : undefined,
+            verbose: this.log.mgr.level >= 5 ? (this.log.verbose as Options['verbose']) : undefined,
         })
 
         this._initialize()
@@ -475,12 +479,20 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
         clearInterval(this._vacuumTimeout)
     }
 
-    reset(): void {
+    reset(withAuthKeys = false): void {
         this._db.exec(RESET)
+        if (withAuthKeys) this._db.exec(RESET_AUTH_KEYS)
+
+        this._pending = []
+        this._pendingUnimportant = {}
+        this._cache?.clear()
+        this._fsmCache?.clear()
+        this._rlCache?.clear()
+        this._saveUnimportantLater.reset()
     }
 
     setDefaultDcs(dc: ITelegramStorage.DcOptions | null): void {
-        return this._setToKv('def_dc', dc)
+        return this._setToKv('def_dc', dc, true)
     }
 
     getDefaultDcs(): ITelegramStorage.DcOptions | null {
@@ -500,21 +512,24 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
     }
 
     setAuthKeyFor(dcId: number, key: Uint8Array | null): void {
-        this._pending.push([
-            key === null ? this._statements.delAuth : this._statements.setAuth,
-            key === null ? [dcId] : [dcId, key],
-        ])
+        if (key !== null) {
+            this._statements.setAuth.run(dcId, key)
+        } else {
+            this._statements.delAuth.run(dcId)
+        }
     }
 
     setTempAuthKeyFor(dcId: number, index: number, key: Uint8Array | null, expires: number): void {
-        this._pending.push([
-            key === null ? this._statements.delAuthTemp : this._statements.setAuthTemp,
-            key === null ? [dcId, index] : [dcId, index, key, expires],
-        ])
+        if (key !== null) {
+            this._statements.setAuthTemp.run(dcId, index, key, expires)
+        } else {
+            this._statements.delAuthTemp.run(dcId, index)
+        }
     }
 
     dropAuthKeysFor(dcId: number): void {
-        this._pending.push([this._statements.delAuth, [dcId]], [this._statements.delAllAuthTemp, [dcId]])
+        this._statements.delAuth.run(dcId)
+        this._statements.delAllAuthTemp.run(dcId)
     }
 
     getSelf(): ITelegramStorage.SelfInfo | null {
@@ -522,7 +537,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
     }
 
     setSelf(self: ITelegramStorage.SelfInfo | null): void {
-        return this._setToKv('self', self)
+        return this._setToKv('self', self, true)
     }
 
     getUpdatesState(): [number, number, number, number] | null {

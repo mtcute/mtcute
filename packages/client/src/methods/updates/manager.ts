@@ -861,6 +861,14 @@ function fetchDifferenceLater(
             0,
             fetchDifference(client, state, requestedDiff)
                 .catch((err) => {
+                    if (tl.RpcError.is(err, 'AUTH_KEY_UNREGISTERED')) {
+                        // for some reason, when logging out telegram may send updatesTooLong
+                        // in any case, we need to stop updates loop
+                        stopUpdatesLoop(client)
+
+                        return
+                    }
+
                     state.log.warn('error fetching common difference: %s', err)
                 })
                 .then(() => {

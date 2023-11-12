@@ -6,6 +6,8 @@ import { TelegramClient } from '../client.js'
 // @copy
 import { Conversation } from '../types/conversation.js'
 // @copy
+import { logOut } from './auth/log-out.js'
+// @copy
 import { start } from './auth/start.js'
 // @copy
 import {

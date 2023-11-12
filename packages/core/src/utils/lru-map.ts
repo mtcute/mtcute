@@ -135,4 +135,11 @@ export class LruMap<K extends string | number, V> {
         const item = this._map.get(key)
         if (item) this._remove(item)
     }
+
+    clear(): void {
+        this._map.clear()
+        this._first = undefined
+        this._last = undefined
+        this._size = 0
+    }
 }

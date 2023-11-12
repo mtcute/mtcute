@@ -249,12 +249,10 @@ export class DcConnectionManager {
             this.manager._log.debug('key change for dc %d from connection %d', this.dcId, idx)
 
             // send key to other connections
-            Promise.all([
-                this.manager._storage.setAuthKeyFor(this.dcId, key),
-                this.upload.setAuthKey(key),
-                this.download.setAuthKey(key),
-                this.downloadSmall.setAuthKey(key),
-            ])
+            this.upload.setAuthKey(key)
+            this.download.setAuthKey(key)
+            this.downloadSmall.setAuthKey(key)
+            Promise.resolve(this.manager._storage.setAuthKeyFor(this.dcId, key))
                 .then(() => {
                     this.upload.notifyKeyChange()
                     this.download.notifyKeyChange()
@@ -272,12 +270,11 @@ export class DcConnectionManager {
             this.manager._log.debug('temp key change for dc %d from connection %d', this.dcId, idx)
 
             // send key to other connections
-            Promise.all([
-                this.manager._storage.setTempAuthKeyFor(this.dcId, idx, key, expires * 1000),
-                this.upload.setAuthKey(key, true),
-                this.download.setAuthKey(key, true),
-                this.downloadSmall.setAuthKey(key, true),
-            ])
+            this.upload.setAuthKey(key, true)
+            this.download.setAuthKey(key, true)
+            this.downloadSmall.setAuthKey(key, true)
+
+            Promise.resolve(this.manager._storage.setTempAuthKeyFor(this.dcId, idx, key, expires * 1000))
                 .then(() => {
                     this.upload.notifyKeyChange()
                     this.download.notifyKeyChange()

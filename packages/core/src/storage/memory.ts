@@ -87,7 +87,7 @@ export class MemoryStorage implements ITelegramStorage {
          */
         vacuumInterval?: number
     }) {
-        this.reset()
+        this.reset(true)
         this._cachedFull = new LruMap(params?.cacheSize ?? 100)
         this._vacuumInterval = params?.vacuumInterval ?? 300_000
     }
@@ -100,13 +100,13 @@ export class MemoryStorage implements ITelegramStorage {
         clearInterval(this._vacuumTimeout)
     }
 
-    reset(): void {
+    reset(withAuthKeys = false): void {
         this._state = {
             $version: CURRENT_VERSION,
             defaultDcs: null,
-            authKeys: new Map(),
-            authKeysTemp: new Map(),
-            authKeysTempExpiry: new Map(),
+            authKeys: withAuthKeys ? new Map<number, Uint8Array>() : this._state.authKeys,
+            authKeysTemp: withAuthKeys ? new Map<string, Uint8Array>() : this._state.authKeysTemp,
+            authKeysTempExpiry: withAuthKeys ? new Map<string, number>() : this._state.authKeysTempExpiry,
             entities: new Map(),
             phoneIndex: new Map(),
             usernameIndex: new Map(),
