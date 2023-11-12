@@ -16,7 +16,7 @@
         <img src="https://img.shields.io/npm/v/@mtcute/client" alt="npm" />
     </a>
     <a href="https://t.me/mt_cute">
-        <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Ftei.su%2Fmtcute_chat_badge.php&cacheSeconds=300000" alt="telegram chat" />
+        <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Ftei.su%2Fmtcute_chat_badge.php&cacheSeconds=300" alt="telegram chat" />
     </a>
     <img src="https://img.shields.io/badge/-alpha-orange" alt="alpha version" />
 </p>
@@ -24,6 +24,8 @@
 > [!WARNING] 
 > mtcute is currently in alpha stage: the api is not very stable yet, and there may be a lot of bugs  
 > feel free to try it out, though, any feedback is appreciated!
+>
+> releases may not follow semver just yet, so please pin the versions for now
 
 ```ts
 import { NodeTelegramClient } from '@mtcute/node'
