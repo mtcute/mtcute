@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { gzipSync, inflateSync } from 'zlib'
 
@@ -32,6 +33,10 @@ export function withFakeRandom(provider: ICryptoProvider, source = DEFAULT_ENTRO
     let offset = 0
 
     function getRandomValues(buf: Uint8Array) {
+        if (offset + buf.length > sourceBytes.length) {
+            throw new Error('not enough entropy')
+        }
+
         buf.set(sourceBytes.subarray(offset, offset + buf.length))
         offset += buf.length
     }
@@ -215,4 +220,14 @@ export function testCryptoProvider(c: ICryptoProvider): void {
             expect(spy).toHaveBeenCalled()
         })
     })
+}
+
+export function u8HexDecode(hex: string) {
+    const buf = hexDecodeToBuffer(hex)
+
+    if (Buffer.isBuffer(buf)) {
+        return new Uint8Array(buf)
+    }
+
+    return buf
 }

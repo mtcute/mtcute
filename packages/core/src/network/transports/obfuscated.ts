@@ -30,7 +30,7 @@ export class ObfuscatedPacketCodec extends WrappedCodec implements IPacketCodec 
             if (random[0] === 0xef) continue
 
             dv = dataViewFromBuffer(random)
-            const firstInt = dv.getInt32(0, true)
+            const firstInt = dv.getUint32(0, true)
 
             if (
                 firstInt === 0x44414548 || // HEAD

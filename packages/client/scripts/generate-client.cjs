@@ -421,7 +421,7 @@ async function main() {
     }
 
     for await (const file of getFiles(path.join(__dirname, '../src/methods'))) {
-        if (!file.startsWith('.') && file.endsWith('.ts') && !file.endsWith('.web.ts')) {
+        if (!file.startsWith('.') && file.endsWith('.ts') && !file.endsWith('.web.ts') && !file.endsWith('.test.ts')) {
             await addSingleMethod(state, file)
         }
     }
