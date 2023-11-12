@@ -48,6 +48,9 @@ jobs:
       - name: Find packages to publish
         id: find
         run: node scripts/find-updated-packages.js ${{ inputs.kind }} ${{ inputs.packages }}
+      - name: Generate changelog
+        id: changelog
+        run: node scripts/generate-changelog.js ${{ steps.find.outputs.modified }}
       - name: Bump versions
         id: bump
         run: node scripts/bump-version.js ${{ inputs.kind }} ${{ steps.find.outputs.modified }}
@@ -55,7 +58,7 @@ jobs:
         run: |
           git commit -am "v${{ steps.bump.outputs.version }}"
           git push
-      - name: Build pacakges and publish to NPM
+      - name: Build packages and publish to NPM
         id: build
         env:
           GH_RELEASE: 1
@@ -66,6 +69,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: v${{ steps.bump.outputs.version }}
           name: v${{ steps.bump.outputs.version }}
-          artifacts: ${{ steps.build.outputs.tarballs }}}
+          artifacts: ${{ steps.build.outputs.tarballs }}
+          body: ${{ steps.changelog.outputs.changelog }}
           draft: false
           prerelease: false

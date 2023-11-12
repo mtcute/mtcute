@@ -2,25 +2,7 @@ const cp = require('child_process')
 const fs = require('fs')
 const path = require('path')
 const { listPackages } = require('./publish')
-
-function getLatestTag() {
-    try {
-        const res = cp.execSync('git describe --abbrev=0 --tags', { encoding: 'utf8', stdio: 'pipe' }).trim()
-
-        return res
-    } catch (e) {
-        if (e.stderr.match(/^fatal: (No names found|No tags can describe)/i)) {
-            // no tags found, let's just return the first commit
-            return cp.execSync('git rev-list --max-parents=0 HEAD', { encoding: 'utf8' }).trim()
-        }
-
-        throw e
-    }
-}
-
-function findChangedFilesSince(tag, until = 'HEAD') {
-    return cp.execSync(`git diff --name-only ${tag} ${until}`, { encoding: 'utf8', stdio: 'pipe' }).trim().split('\n')
-}
+const { getLatestTag, findChangedFilesSince } = require('./git-utils')
 
 getTsconfigFiles.cache = {}
 
@@ -46,8 +28,10 @@ function isMeaningfulChange(pkg, path) {
     if (getTsconfigFiles(pkg).indexOf(path) > -1) return true
 
     // some magic heuristics stuff
-    if (path.match(/\.md$/i)) return false
+    if (path.match(/\.(md|\.test\.ts)$/i)) return false
     if (path.match(/^\/(scripts|dist|tests|private)/i)) return false
+
+    console.log('[i] %s: %s is a meaningful change', pkg, path)
 
     // to be safe
     return true

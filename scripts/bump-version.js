@@ -29,6 +29,7 @@ function bumpVersions(packages, kind) {
     console.log('[i] Bumping versions to %s', nextVersion)
 
     for (const pkg of packages) {
+        if (pkg === 'tl') continue // own versioning
         const pkgJson = pkgJsons.find((it) => it.name === `@mtcute/${pkg}`)
 
         if (!pkgJson) {
