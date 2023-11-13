@@ -169,7 +169,29 @@ module.exports = {
         'import/no-default-export': 'error',
         'no-console': ['error', { allow: ['warn', 'error'] }],
     },
-    ignorePatterns: ['packages/client/utils.ts', 'packages/core/utils.ts'],
+    ignorePatterns: [
+        'node_modules/',
+        '.config/',
+        '.idea/',
+        '.vscode/',
+
+        'private/',
+        'docs/',
+        'dist/',
+
+        '*.json',
+
+        // codegen
+        'packages/tl/binary/rsa-keys.js',
+        'packages/tl/binary/reader.js',
+        'packages/tl/binary/writer.js',
+        'packages/tl/index.js',
+        'packages/tl/index.d.ts',
+        'packages/tl/*.json',
+
+        'packages/client/utils.ts',
+        'packages/core/utils.ts'
+    ],
     overrides: [
         {
             files: ['**/*.ts', '**/*.tsx'],

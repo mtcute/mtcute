@@ -130,7 +130,7 @@ if (buildConfig.buildTs) {
 
     let tsconfig = fs.readFileSync(path.join(packageDir, 'tsconfig.backup.json'), 'utf-8')
     // what the fuck
-    tsconfig = tsconfig.replace(/(?<="extends": "\.\.\/\.\.\/)tsconfig\.json(?=",)/, 'tsconfig.build.json')
+    tsconfig = tsconfig.replace(/(?<="extends": "\.\.\/\.\.\/)tsconfig\.json(?=",)/, '.config/tsconfig.build.json')
     fs.writeFileSync(path.join(packageDir, 'tsconfig.json'), tsconfig)
 
     const restoreTsconfig = () => {

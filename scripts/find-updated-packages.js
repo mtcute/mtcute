@@ -25,11 +25,18 @@ function getTsconfigFiles(pkg) {
 }
 
 function isMeaningfulChange(pkg, path) {
-    if (getTsconfigFiles(pkg).indexOf(path) > -1) return true
-
     // some magic heuristics stuff
-    if (path.match(/\.(md|\.test\.ts)$/i)) return false
-    if (path.match(/^\/(scripts|dist|tests|private)/i)) return false
+
+    if (path.match(/\.(md|test(?:-utils)?\.ts)$/i)) return false
+
+    if (getTsconfigFiles(pkg).indexOf(path) > -1) {
+        console.log('[i] %s: %s is in tsconfig', pkg, path)
+
+        return true
+    }
+
+    if (path.match(/typedoc\.cjs$/i)) return false
+    if (path.match(/^(scripts|dist|tests|private)\//i)) return false
 
     console.log('[i] %s: %s is a meaningful change', pkg, path)
 

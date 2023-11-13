@@ -2,13 +2,13 @@ const fs = require('fs')
 const path = require('path')
 
 module.exports = {
-    ...require('./typedoc.base.cjs'),
+    ...require('./config.base.cjs'),
     name: 'mtcute',
-    out: './docs',
+    out: '../../docs',
     entryPoints: fs
-        .readdirSync(path.join(__dirname, 'packages'))
+        .readdirSync(path.join(__dirname, '../../packages'))
         .filter((it) => !['crypto', 'tl', 'create-bot'].includes(it))
-        .map((it) => `packages/${it}`),
+        .map((it) => `../../packages/${it}`),
     entryPointStrategy: 'packages',
     // logLevel: 'Verbose',
 }

@@ -6,22 +6,22 @@
     "license": "MIT",
     "author": "Alina Sireneva <alina@tei.su>",
     "scripts": {
-        "prepare": "husky install",
+        "prepare": "husky install .config/husky",
         "postinstall": "node scripts/validate-deps-versions.mjs",
-        "test": "vitest run && pnpm run -r test",
-        "test:dev": "vitest watch",
-        "test:ui": "vitest --ui",
-        "test:coverage": "vitest run --coverage",
-        "test:ci": "vitest run --coverage.enabled --coverage.reporter=json",
+        "test": "vitest --config .config/vite.ts run && pnpm run -r test",
+        "test:dev": "vitest --config .config/vite.mts watch",
+        "test:ui": "vitest --config .config/vite.mts --ui",
+        "test:coverage": "vitest --config .config/vite.mts run --coverage",
+        "test:ci": "vitest --config .config/vite.mts run --coverage.enabled --coverage.reporter=json",
         "lint": "eslint .",
-        "lint:ci": "NODE_OPTIONS=\"--max_old_space_size=8192\" eslint --config .eslintrc.ci.js .",
+        "lint:ci": "NODE_OPTIONS=\\\"--max_old_space_size=8192\\\" eslint --config .config/eslint.ci.js .",
         "lint:tsc": "pnpm -r --parallel exec tsc --build",
         "lint:tsc:ci": "pnpm -r exec tsc --build",
         "lint:dpdm": "dpdm -T --no-warning --no-tree --exit-code circular:1 packages/*",
         "lint:fix": "eslint --fix .",
         "format": "prettier --write \"packages/**/*.ts\"",
         "publish-all": "node scripts/publish.js all",
-        "docs": "typedoc",
+        "docs": "typedoc --options .config/typedoc/config.cjs",
         "build-package": "node scripts/build-package.js"
     },
     "dependencies": {
@@ -57,5 +57,9 @@
         "typescript": "5.0.4",
         "vite": "4.5.0",
         "vitest": "0.34.6"
+    },
+    "prettier": "./.config/prettier.cjs",
+    "eslintConfig": {
+        "extends": "./.config/eslint.cjs"
     }
 }

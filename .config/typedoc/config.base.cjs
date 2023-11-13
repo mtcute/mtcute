@@ -16,6 +16,6 @@ module.exports = {
     ],
     externalPattern: ['**/dist/**'],
     plugin: [
-        './scripts/typedoc-external-links.cjs',
+        './plugin-external-links.cjs',
     ],
 }

@@ -1,7 +1,7 @@
 const path = require('path')
 
-const packagesDir = path.join(__dirname, 'packages')
-const eslintCiConfig = path.join(__dirname, '.eslintrc.ci.js')
+const packagesDir = path.join(__dirname, '../packages')
+const eslintCiConfig = path.join(__dirname, 'eslintrc.ci.js')
 
 module.exports = {
     '*.{js,jsx,ts,tsx}': (filenames) => {
