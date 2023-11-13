@@ -8,6 +8,8 @@
     &nbsp;•&nbsp;
     <a href="https://ref.mtcute.dev">api reference</a>
     &nbsp;•&nbsp;
+    <a href="https://t.me/mt_cute">telegram chat</a>
+    &nbsp;•&nbsp;
     <a href="https://lindie.app/share/6c5d9f04cae4f0640f58b9d5d7ddca467e87e980">kanban board</a>
     <br/><br/>
     <img src="https://github.com/mtcute/mtcute/actions/workflows/test.yaml/badge.svg" alt="NodeJS CI" />
@@ -15,14 +17,11 @@
     <a href="https://www.npmjs.com/search?q=%40mtcute">
         <img src="https://img.shields.io/npm/v/@mtcute/client" alt="npm" />
     </a>
-    <a href="https://t.me/mt_cute">
-        <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Ftei.su%2Fmtcute_chat_badge.php&cacheSeconds=300" alt="telegram chat" />
-    </a>
     <img src="https://img.shields.io/badge/-alpha-orange" alt="alpha version" />
 </p>
 
-> [!WARNING] 
-> mtcute is currently in alpha stage: the api is not very stable yet, and there may be a lot of bugs  
+> [!WARNING]
+> mtcute is currently in alpha stage: the api is not very stable yet, and there may be a lot of bugs
 > feel free to try it out, though, any feedback is appreciated!
 >
 > releases may not follow semver just yet, so please pin the versions for now
@@ -51,8 +50,8 @@ tg.run({
 })
 ```
 
-mtcute is a modern, performant and *✨ cute ✨* [mtproto](https://mtcute.dev/guide/intro/mtproto-vs-bot-api.html) library and bot framework, 
-supporting both web and nodejs. 
+mtcute is a modern, performant and *✨ cute ✨* [mtproto](https://mtcute.dev/guide/intro/mtproto-vs-bot-api.html) library and bot framework,
+supporting both web and nodejs.
 
 ## quick start
 
