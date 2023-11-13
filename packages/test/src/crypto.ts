@@ -2,11 +2,14 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { gzipSync, inflateSync } from 'zlib'
 
-import { hexDecodeToBuffer, hexEncode, utf8EncodeToBuffer } from '@mtcute/tl-runtime'
-
-import { dataViewFromBuffer } from '../buffer-utils.js'
-import { ICryptoProvider } from './abstract.js'
-import { defaultCryptoProviderFactory } from './index.js'
+import {
+    dataViewFromBuffer,
+    defaultCryptoProviderFactory,
+    hexDecodeToBuffer,
+    hexEncode,
+    ICryptoProvider,
+    utf8EncodeToBuffer,
+} from '@mtcute/core/utils.js'
 
 // some random 1024 bytes of entropy
 const DEFAULT_ENTROPY = `
@@ -69,6 +72,7 @@ export async function defaultTestCryptoProvider(source = DEFAULT_ENTROPY): Promi
 
     return prov
 }
+
 export function testCryptoProvider(c: ICryptoProvider): void {
     beforeAll(() => c.initialize?.())
 

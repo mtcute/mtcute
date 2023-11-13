@@ -1,7 +1,8 @@
 import { Socket } from 'net'
 import { describe, expect, it, MockedObject, vi } from 'vitest'
 
-import { defaultTestCryptoProvider, u8HexDecode } from '../../utils/crypto/crypto.test-utils.js'
+import { defaultTestCryptoProvider, u8HexDecode } from '@mtcute/test'
+
 import { defaultProductionDc, hexDecodeToBuffer, LogManager } from '../../utils/index.js'
 import { TransportState } from './abstract.js'
 import { TcpTransport } from './tcp.js'

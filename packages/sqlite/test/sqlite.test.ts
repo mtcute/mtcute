@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { stubPeerUser, testStateStorage, testStorage } from '@mtcute/core/src/storage/storage.test-utils.js'
+import { stubPeerUser, testStateStorage, testStorage } from '@mtcute/test'
 
 import { SqliteStorage } from '../src/index.js'
 

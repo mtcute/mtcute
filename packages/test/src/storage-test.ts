@@ -1,15 +1,13 @@
 import Long from 'long'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createStub } from '@mtcute/test'
+import { ITelegramStorage, MaybeAsync } from '@mtcute/core'
+import { defaultProductionDc, hexEncode, Logger, LogManager, TlReaderMap, TlWriterMap } from '@mtcute/core/utils.js'
 import { tl } from '@mtcute/tl'
 import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 
-import { MaybeAsync } from '../types/index.js'
-import { defaultProductionDc } from '../utils/default-dcs.js'
-import { hexEncode, Logger, LogManager, TlReaderMap, TlWriterMap } from '../utils/index.js'
-import { ITelegramStorage } from './abstract.js'
+import { createStub } from './stub.js'
 
 export const stubPeerUser: ITelegramStorage.PeerInfo = {
     id: 123123,
@@ -276,17 +274,29 @@ export function testStorage<T extends ITelegramStorage>(
 
 interface IStateStorage {
     setup?(log: Logger, readerMap: TlReaderMap, writerMap: TlWriterMap): void
+
     load?(): MaybeAsync<void>
+
     save?(): MaybeAsync<void>
+
     destroy?(): MaybeAsync<void>
+
     reset(): MaybeAsync<void>
+
     getState(key: string): MaybeAsync<unknown>
+
     setState(key: string, state: unknown, ttl?: number): MaybeAsync<void>
+
     deleteState(key: string): MaybeAsync<void>
+
     getCurrentScene(key: string): MaybeAsync<string | null>
+
     setCurrentScene(key: string, scene: string, ttl?: number): MaybeAsync<void>
+
     deleteCurrentScene(key: string): MaybeAsync<void>
+
     getRateLimit(key: string, limit: number, window: number): MaybeAsync<[number, number]>
+
     resetRateLimit(key: string): MaybeAsync<void>
 }
 

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
+import { defaultTestCryptoProvider } from '@mtcute/test'
 import { hexDecodeToBuffer } from '@mtcute/tl-runtime'
 
-import { defaultTestCryptoProvider } from './crypto/crypto.test-utils.js'
 import {
     bigIntBitLength,
     bigIntGcd,

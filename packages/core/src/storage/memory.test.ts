@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
+import { testStateStorage, testStorage } from '@mtcute/test'
+
 import { MemoryStorage } from './memory.js'
-import { testStateStorage, testStorage } from './storage.test-utils.js'
 
 describe('MemoryStorage', () => {
     testStorage(new MemoryStorage())

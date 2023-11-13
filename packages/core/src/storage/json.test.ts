@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
+import { stubPeerUser } from '@mtcute/test'
+
 import { JsonMemoryStorage } from './json.js'
-import { stubPeerUser } from './storage.test-utils.js'
 
 describe('JsonMemoryStorage', () => {
     class ExtJsonMemoryStorage extends JsonMemoryStorage {

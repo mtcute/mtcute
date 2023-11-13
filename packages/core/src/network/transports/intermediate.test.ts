@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
+import { defaultTestCryptoProvider, useFakeMathRandom } from '@mtcute/test'
 import { hexDecodeToBuffer, hexEncode } from '@mtcute/tl-runtime'
 
 import { IntermediatePacketCodec, PaddedIntermediatePacketCodec, TransportError } from '../../index.js'
-import { defaultTestCryptoProvider, useFakeMathRandom } from '../../utils/crypto/crypto.test-utils.js'
 import { concatBuffers } from '../../utils/index.js'
 
 describe('IntermediatePacketCodec', () => {

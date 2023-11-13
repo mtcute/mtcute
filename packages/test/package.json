@@ -18,7 +18,8 @@
     },
     "peerDependencies": {
         "@mtcute/core": "workspace:^",
-        "@mtcute/tl": "workspace:*"
+        "@mtcute/tl": "workspace:*",
+        "vitest": "^0.34.6"
     },
     "distOnlyFields": {
         "exports": {

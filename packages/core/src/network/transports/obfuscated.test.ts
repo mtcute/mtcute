@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { defaultTestCryptoProvider, u8HexDecode } from '../../utils/crypto/crypto.test-utils.js'
+import { defaultTestCryptoProvider, u8HexDecode } from '@mtcute/test'
+
 import { hexDecodeToBuffer, hexEncode, LogManager } from '../../utils/index.js'
 import { IntermediatePacketCodec } from './intermediate.js'
 import { MtProxyInfo, ObfuscatedPacketCodec } from './obfuscated.js'

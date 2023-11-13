@@ -25,6 +25,7 @@
         "better-sqlite3": "8.4.0"
     },
     "devDependencies": {
+        "@mtcute/test": "workspace:^",
         "@types/better-sqlite3": "7.6.4"
     }
 }

@@ -1,6 +1,6 @@
 import { describe } from 'vitest'
 
-import { testCryptoProvider } from '@mtcute/core/src/utils/crypto/crypto.test-utils.js'
+import { testCryptoProvider } from '@mtcute/test'
 
 import { NodeNativeCryptoProvider } from '../src/index.js'
 

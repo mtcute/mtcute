@@ -1,10 +1,10 @@
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
 
+import { defaultTestCryptoProvider } from '@mtcute/test'
 import { tl } from '@mtcute/tl'
 import { hexDecodeToBuffer, hexEncode, utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 
-import { defaultTestCryptoProvider } from './crypto.test-utils.js'
 import { computeNewPasswordHash, computePasswordHash, computeSrpParams } from './index.js'
 
 // a real-world request from an account with "qwe123" password

@@ -1,6 +1,7 @@
 import Long from 'long'
 import { describe, expect, it, vi } from 'vitest'
 
+import { defaultTestCryptoProvider } from '@mtcute/test'
 import {
     hexDecode,
     hexDecodeToBuffer,
@@ -11,7 +12,6 @@ import {
     utf8EncodeToBuffer,
 } from '@mtcute/tl-runtime'
 
-import { defaultTestCryptoProvider } from '../utils/crypto/crypto.test-utils.js'
 import { LogManager } from '../utils/index.js'
 import { AuthKey } from './auth-key.js'
 

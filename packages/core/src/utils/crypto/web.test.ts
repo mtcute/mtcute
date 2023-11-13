@@ -1,6 +1,7 @@
 import { describe } from 'vitest'
 
-import { testCryptoProvider } from './crypto.test-utils.js'
+import { testCryptoProvider } from '@mtcute/test'
+
 import { WebCryptoProvider } from './web.js'
 
 describe('WebCryptoProvider', async () => {
