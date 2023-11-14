@@ -169,9 +169,9 @@ export class Message {
 
         return Boolean(
             this.chat.chatType === 'supergroup' &&
-                fwd.channelPost &&
                 fwd.savedFromMsgId &&
-                fwd.savedFromPeer?._ === 'peerChannel',
+                fwd.savedFromPeer?._ === 'peerChannel' &&
+                getMarkedPeerId(fwd.savedFromPeer) !== getMarkedPeerId(this.raw.peerId),
         )
     }
 
