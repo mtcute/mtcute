@@ -88,7 +88,7 @@ export class CallbackDataBuilder<T extends string> {
      *
      * @param params
      */
-    filter(params: Partial<Record<T, MaybeArray<string | RegExp>>>): UpdateFilter<
+    filter(params: Partial<Record<T, MaybeArray<string | RegExp>>> = {}): UpdateFilter<
         CallbackQuery,
         {
             match: Record<T, string>
