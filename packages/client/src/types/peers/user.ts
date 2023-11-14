@@ -434,4 +434,4 @@ export class User {
 }
 
 memoizeGetters(User, ['_parsedStatus' as keyof User, 'usernames', 'inputPeer', 'photo', 'emojiStatus'])
-makeInspectable(User)
+makeInspectable(User, undefined, ['_parsedStatus' as keyof User])
