@@ -19,7 +19,7 @@ export class ConfigManager {
     private _listeners: ((config: tl.RawConfig) => void)[] = []
 
     get isStale(): boolean {
-        return !this._config || this._config.expires < Date.now() / 1000
+        return !this._config || this._config.expires <= Date.now() / 1000
     }
 
     update(force = false): Promise<void> {
@@ -28,6 +28,7 @@ export class ConfigManager {
 
         return (this._updatingPromise = this._update().then((config) => {
             if (this._destroyed) return
+            this._updatingPromise = undefined
 
             this.setConfig(config)
         }))
