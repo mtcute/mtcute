@@ -17,5 +17,6 @@ module.exports = {
     externalPattern: ['**/dist/**'],
     plugin: [
         './plugin-external-links.cjs',
+        './plugin-umami.cjs',
     ],
 }
