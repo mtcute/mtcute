@@ -76,13 +76,13 @@ export function guessFileMime(chunk: Uint8Array): string | null {
     }
 
     if (b0 === 0x52 && b1 === 0x61 && b2 === 0x72 && b3 === 0x21 && b4 === 0x1a && b5 === 0x07) {
-        if (chunk[6] === 0x00 || chunk[6] === 0x01) return 'application/x-rar-compressed'
+        if (b6 === 0x00 || b6 === 0x01) return 'application/x-rar-compressed'
     }
 
     // ftyp - iso container
     if (b4 === 0x66 && b5 === 0x74 && b6 === 0x79 && b7 === 0x70 && chunk[8] & 0x60) {
         const brandMajor = String.fromCharCode(...chunk.subarray(8, 12))
-            .replace('\0', ' ')
+            .replace(/\0/g, ' ')
             .trim()
 
         switch (brandMajor) {
@@ -105,18 +105,10 @@ export function guessFileMime(chunk: Uint8Array): string | null {
             case 'M4VH':
             case 'M4VP':
                 return 'video/x-m4v'
-            case 'M4P':
-                return 'video/mp4'
-            case 'M4B':
-                return 'audio/mp4'
             case 'M4A':
                 return 'audio/x-m4a'
-            case 'F4V':
-                return 'video/mp4'
-            case 'F4P':
-                return 'video/mp4'
+            case 'M4B':
             case 'F4A':
-                return 'audio/mp4'
             case 'F4B':
                 return 'audio/mp4'
             case 'crx':

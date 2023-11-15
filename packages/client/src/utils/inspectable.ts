@@ -25,10 +25,6 @@ function getAllGettersNames<T>(obj: T): (keyof T)[] {
     return getters
 }
 
-const bufferToJsonInspect = function (this: Uint8Array) {
-    return base64Encode(this)
-}
-
 /**
  * Small helper function that adds `toJSON` and `util.custom.inspect`
  * methods to a given class based on its getters
@@ -48,28 +44,24 @@ export function makeInspectable<T>(obj: new (...args: any[]) => T, props?: (keyo
     // eslint-disable-next-line @typescript-eslint/no-implied-eval
     const proto = new Function(`return function ${obj.name}(){}`)().prototype
 
-    obj.prototype.toJSON = function (nested = false) {
-        if (!nested) {
-            (Uint8Array as any).toJSON = bufferToJsonInspect
-        }
-
+    obj.prototype.toJSON = function () {
         const ret: any = Object.create(proto)
         getters.forEach((it) => {
             try {
                 let val = this[it]
 
-                if (val && typeof val === 'object' && typeof val.toJSON === 'function') {
-                    val = val.toJSON(true)
+                if (val && typeof val === 'object') {
+                    if (val instanceof Uint8Array) {
+                        val = base64Encode(val)
+                    } else if (typeof val.toJSON === 'function') {
+                        val = val.toJSON(true)
+                    }
                 }
                 ret[it] = val
             } catch (e: any) {
                 ret[it] = 'Error: ' + e.message
             }
         })
-
-        if (!nested) {
-            delete (Uint8Array as any).prototype.toJSON
-        }
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return ret

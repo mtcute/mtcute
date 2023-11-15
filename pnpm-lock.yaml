@@ -108,6 +108,10 @@ importers:
       '@mtcute/file-id':
         specifier: workspace:^
         version: link:../file-id
+    devDependencies:
+      '@mtcute/test':
+        specifier: workspace:^
+        version: link:../test
 
   packages/core:
     dependencies:

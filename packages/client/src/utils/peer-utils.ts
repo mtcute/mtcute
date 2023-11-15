@@ -1,4 +1,4 @@
-import { assertNever, Long, tl } from '@mtcute/core'
+import { assertNever, tl } from '@mtcute/core'
 
 import { MtInvalidPeerTypeError } from '../types/errors.js'
 import { InputPeerLike } from '../types/peers/index.js'
@@ -140,21 +140,6 @@ export function inputPeerToPeer(inp: tl.TypeInputPeer): tl.TypePeer {
         case 'inputPeerChat':
             return { _: 'peerChat', chatId: inp.chatId }
         default:
-            throw new Error(`Cannot convert ${inp._} to peer`)
-    }
-}
-
-export function peerToInputPeer(peer: tl.TypePeer, accessHash = Long.ZERO): tl.TypeInputPeer {
-    switch (peer._) {
-        case 'peerUser':
-            return { _: 'inputPeerUser', userId: peer.userId, accessHash }
-        case 'peerChannel':
-            return {
-                _: 'inputPeerChannel',
-                channelId: peer.channelId,
-                accessHash,
-            }
-        case 'peerChat':
-            return { _: 'inputPeerChat', chatId: peer.chatId }
+            throw new MtInvalidPeerTypeError(inp, `Cannot convert ${inp._} to peer`)
     }
 }

@@ -8,6 +8,7 @@
         "./src",
     ],
     "references": [
-        { "path": "../core" }
+        { "path": "../core" },
+        { "path": "../test" }
     ]
 }

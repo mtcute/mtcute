@@ -10,5 +10,6 @@
     "references": [
         { "path": "../tl" },
         { "path": "../tl-runtime" },
+        { "path": "../test" },
     ]
 }

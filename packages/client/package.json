@@ -37,5 +37,8 @@
     "dependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/file-id": "workspace:^"
+    },
+    "devDependencies": {
+        "@mtcute/test": "workspace:^"
     }
 }

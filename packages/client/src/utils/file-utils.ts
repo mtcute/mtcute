@@ -59,7 +59,7 @@ const JPEG_FOOTER = new Uint8Array([0xff, 0xd9])
  */
 export function strippedPhotoToJpg(stripped: Uint8Array): Uint8Array {
     if (stripped.length < 3 || stripped[0] !== 1) {
-        return stripped
+        throw new MtArgumentError('Invalid stripped JPEG')
     }
 
     const result = concatBuffers([JPEG_HEADER, stripped.slice(3), JPEG_FOOTER])
@@ -95,6 +95,8 @@ export function inflateSvgPath(encoded: Uint8Array): string {
             path += num & 63
         }
     }
+
+    path += 'z'
 
     return path
 }
