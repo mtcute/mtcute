@@ -8,7 +8,7 @@
     "scripts": {
         "prepare": "husky install .config/husky",
         "postinstall": "node scripts/validate-deps-versions.mjs",
-        "test": "vitest --config .config/vite.ts run && pnpm run -r test",
+        "test": "vitest --config .config/vite.mts run && pnpm run -r test",
         "test:dev": "vitest --config .config/vite.mts watch",
         "test:ui": "vitest --config .config/vite.mts --ui",
         "test:coverage": "vitest --config .config/vite.mts run --coverage",

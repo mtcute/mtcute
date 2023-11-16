@@ -9,7 +9,7 @@ describe('client stub', () => {
         const client = new StubTelegramClient()
 
         const stubConfig = createStub('config')
-        client.respondWith('help.getConfig', stubConfig)
+        client.respondWith('help.getConfig', () => stubConfig)
 
         await client.with(async () => {
             const result = await client.call({ _: 'help.getConfig' })

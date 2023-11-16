@@ -437,6 +437,8 @@ export namespace BotKeyboard {
                     resize: obj.resize,
                     singleUse: obj.singleUse,
                     selective: obj.selective,
+                    persistent: obj.persistent,
+                    placeholder: obj.placeholder,
                     rows: _2dToRows(obj.buttons, false),
                 }
             case 'reply_hide':
@@ -449,6 +451,7 @@ export namespace BotKeyboard {
                     _: 'replyKeyboardForceReply',
                     singleUse: obj.singleUse,
                     selective: obj.selective,
+                    placeholder: obj.placeholder,
                 }
             case 'inline':
                 return {

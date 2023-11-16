@@ -11,6 +11,7 @@ import {
 import { MtPeerNotFoundError } from '../../types/errors.js'
 import { InputPeerLike } from '../../types/peers/index.js'
 import { normalizeToInputPeer } from '../../utils/peer-utils.js'
+import { getAuthState } from '../auth/_state.js'
 
 // @available=both
 /**
@@ -18,7 +19,7 @@ import { normalizeToInputPeer } from '../../utils/peer-utils.js'
  * Useful when an `InputPeer` is needed in Raw API.
  *
  * @param peerId  The peer identifier that you want to extract the `InputPeer` from.
- * @param force  Whether to force re-fetch the peer from the server
+ * @param force  Whether to force re-fetch the peer from the server (only applicable for usernames and phone numbers)
  */
 export async function resolvePeer(
     client: BaseTelegramClient,
@@ -37,7 +38,7 @@ export async function resolvePeer(
         }
     }
 
-    if (typeof peerId === 'number' && !force) {
+    if (typeof peerId === 'number' && !force && !getAuthState(client).isBot) {
         const fromStorage = await client.storage.getPeerById(peerId)
         if (fromStorage) return fromStorage
     }
@@ -123,81 +124,32 @@ export async function resolvePeer(
         throw new MtPeerNotFoundError(`Could not find a peer by ${peerId}`)
     }
 
+    // in some cases, the server allows us to use access_hash=0.
+    // particularly, when we're a bot or we're referencing a user
+    // who we have "seen" recently
+    // if it's not the case, we'll get an `PEER_ID_INVALID` error anyways
     const peerType = getBasicPeerType(peerId)
 
-    // try fetching by id, with access_hash set to 0
     switch (peerType) {
-        case 'user': {
-            const res = await client.call({
-                _: 'users.getUsers',
-                id: [
-                    {
-                        _: 'inputUser',
-                        userId: peerId,
-                        accessHash: Long.ZERO,
-                    },
-                ],
-            })
-
-            const found = res.find((it) => it.id === peerId)
-
-            if (found && found._ === 'user') {
-                if (!found.accessHash) {
-                    // shouldn't happen? but just in case
-                    throw new MtPeerNotFoundError(
-                        `Peer (user) with username ${peerId} was found, but it has no access hash`,
-                    )
-                }
-
-                return {
-                    _: 'inputPeerUser',
-                    userId: found.id,
-                    accessHash: found.accessHash,
-                }
+        case 'user':
+            return {
+                _: 'inputPeerUser',
+                userId: peerId,
+                accessHash: Long.ZERO,
             }
-
-            break
-        }
-        case 'chat': {
+        case 'chat':
             return {
                 _: 'inputPeerChat',
                 chatId: -peerId,
             }
-        }
         case 'channel': {
             const id = toggleChannelIdMark(peerId)
 
-            const res = await client.call({
-                _: 'channels.getChannels',
-                id: [
-                    {
-                        _: 'inputChannel',
-                        channelId: id,
-                        accessHash: Long.ZERO,
-                    },
-                ],
-            })
-
-            const found = res.chats.find((it) => it.id === id)
-
-            if (found && (found._ === 'channel' || found._ === 'channelForbidden')) {
-                if (!found.accessHash) {
-                    // shouldn't happen? but just in case
-                    throw new MtPeerNotFoundError(
-                        `Peer (channel) with username ${peerId} was found, but it has no access hash`,
-                    )
-                }
-
-                return {
-                    _: 'inputPeerChannel',
-                    channelId: found.id,
-                    accessHash: found.accessHash ?? Long.ZERO,
-                }
+            return {
+                _: 'inputPeerChannel',
+                channelId: id,
+                accessHash: Long.ZERO,
             }
-
-            break
         }
     }
-
-    throw new MtPeerNotFoundError(`Could not find a peer by ID ${peerId}`)
 }

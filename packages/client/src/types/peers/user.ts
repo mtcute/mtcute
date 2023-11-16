@@ -145,7 +145,7 @@ export class User {
         return this.raw.lastName ?? null
     }
 
-    static parseStatus(status: tl.TypeUserStatus, bot = false): UserParsedStatus {
+    static parseStatus(status?: tl.TypeUserStatus, bot = false): UserParsedStatus {
         let ret: UserStatus
         let date: Date
 
@@ -188,7 +188,7 @@ export class User {
     }
 
     private get _parsedStatus() {
-        return User.parseStatus(this.raw.status!, this.raw.bot)
+        return User.parseStatus(this.raw.status, this.raw.bot)
     }
 
     /** User's Last Seen & Online status */
@@ -214,18 +214,27 @@ export class User {
 
     /** User's or bot's username */
     get username(): string | null {
-        return this.raw.username ?? this.raw.usernames?.[0].username ?? null
+        return this.raw.username ?? this.raw.usernames?.[0]?.username ?? null
     }
 
     /** User's or bot's usernames (including collectibles) */
     get usernames(): ReadonlyArray<tl.RawUsername> | null {
-        return (
-            this.raw.usernames ??
-            (this.raw.username ? [{ _: 'username', username: this.raw.username, active: true }] : null)
-        )
+        if (this.raw.username) {
+            return [{ _: 'username', username: this.raw.username, active: true }]
+        }
+
+        if (!this.raw.usernames?.length) {
+            return null
+        }
+
+        return this.raw.usernames
     }
 
-    /** IETF language tag of the user's language */
+    /**
+     * IETF language tag of the user's language
+     *
+     * Only available in some contexts
+     */
     get language(): string | null {
         return this.raw.langCode ?? null
     }
@@ -354,7 +363,7 @@ export class User {
      *
      * > **Note**: This method doesn't format anything on its own.
      * > Instead, it returns a {@link MessageEntity} that can later
-     * > be used with `html` or `md` template tags, or `unparse` method directly.
+     * > be used with `html` or `md` template tags
      *
      * @param text  Text of the mention.
      * @example
@@ -393,13 +402,16 @@ export class User {
      * to actually make it permanent is to send it as a message
      * somewhere and load it from there if needed.
      *
+     * Note that some users (particularly, users with hidden forwards)
+     * may not be mentioned like this outside the chats you have in common.
+     *
      * This method is only needed when the result will be
      * stored somewhere outside current mtcute instance (e.g. saved for later use),
      * otherwise {@link mention} will be enough.
      *
      * > **Note**: This method doesn't format anything on its own.
      * > Instead, it returns a {@link MessageEntity} that can later
-     * > be used with `html` or `md` template tags, or `unparse` method directly.
+     * > be used with `html` or `md` template tags
      *
      * > **Note**: the resulting text can only be used by clients
      * > that support mtcute notation of permanent

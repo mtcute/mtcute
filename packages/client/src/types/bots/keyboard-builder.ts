@@ -72,7 +72,7 @@ export class BotKeyboardBuilder {
             this._buttons.length &&
             (this.maxRowWidth === null || force || this._buttons[this._buttons.length - 1].length < this.maxRowWidth)
         ) {
-            this._buttons[this._buttons.length - 1].push()
+            this._buttons[this._buttons.length - 1].push(btn)
         } else {
             this._buttons.push([btn])
         }

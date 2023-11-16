@@ -50,37 +50,36 @@ export class StubTelegramClient extends BaseTelegramClient {
         })
     }
 
+    /**
+     * Create a fake client that may not actually be used for API calls
+     *
+     * Useful for testing "offline" methods
+     */
+    static offline() {
+        const client = new StubTelegramClient()
+
+        client.call = (obj) => {
+            throw new Error(`Expected offline client to not make any API calls (method called: ${obj._})`)
+        }
+
+        return client
+    }
+
     // some fake peers handling //
 
     readonly _knownChats = new Map<number, tl.TypeChat>()
     readonly _knownUsers = new Map<number, tl.TypeUser>()
     _selfId = 0
 
-    registerChat(chat: tl.TypeChat | tl.TypeChat[]): void {
-        if (Array.isArray(chat)) {
-            for (const c of chat) {
-                this.registerChat(c)
+    async registerPeers(...peers: (tl.TypeUser | tl.TypeChat)[]): Promise<void> {
+        for (const peer of peers) {
+            if (tl.isAnyUser(peer)) {
+                this._knownUsers.set(peer.id, peer)
+            } else {
+                this._knownChats.set(peer.id, peer)
             }
 
-            return
-        }
-
-        this._knownChats.set(chat.id, chat)
-    }
-
-    registerUser(user: tl.TypeUser | tl.TypeUser[]): void {
-        if (Array.isArray(user)) {
-            for (const u of user) {
-                this.registerUser(u)
-            }
-
-            return
-        }
-
-        this._knownUsers.set(user.id, user)
-
-        if (user._ === 'user' && user.self) {
-            this._selfId = user.id
+            await this._cachePeersFrom(peer)
         }
     }
 
@@ -150,17 +149,14 @@ export class StubTelegramClient extends BaseTelegramClient {
         this.respondWith(method, responder)
     }
 
-    respondWith<T extends tl.RpcMethod['_']>(
-        method: T,
-        response: tl.RpcCallReturn[T] | ((data: tl.FindByName<tl.RpcMethod, T>) => tl.RpcCallReturn[T]),
-    ) {
-        if (typeof response !== 'function') {
-            const res = response
-            response = () => res
-        }
-
+    respondWith<
+        T extends tl.RpcMethod['_'],
+        Fn extends(data: tl.FindByName<tl.RpcMethod, T>) => MaybeAsync<tl.RpcCallReturn[T]>,
+    >(method: T, response: Fn): Fn {
         // eslint-disable-next-line
         this._responders.set(method, response as any)
+
+        return response
     }
 
     async call<T extends tl.RpcMethod>(
