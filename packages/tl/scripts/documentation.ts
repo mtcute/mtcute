@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio'
+import { asyncPoolCallback } from 'eager-async-pool'
 import { readFile, writeFile } from 'fs/promises'
 import jsYaml from 'js-yaml'
 import { fileURLToPath } from 'node:url'
@@ -154,17 +155,16 @@ export async function fetchDocumentation(
 
     function log(str: string) {
         if (silent) return
-        while (str.length < prevSize) str += ' '
+        const oldPrevSize = prevSize
+        prevSize = str.length
+        while (str.length < oldPrevSize) str += ' '
 
         process.stdout.write('\r' + PROGRESS_CHARS[logPos] + ' ' + str)
 
-        prevSize = str.length
         logPos = (logPos + 1) % PROGRESS_CHARS.length
     }
 
-    for (const entry of schema.entries) {
-        log(`📥 ${entry.kind} ${entry.name}`)
-
+    async function fetchDocsForEntry(entry: TlEntry) {
         const url = `${domain}/${entry.kind === 'class' ? 'constructor' : 'method'}/${entry.name}`
 
         const html = await fetchRetry(url, {
@@ -173,7 +173,7 @@ export async function fetchDocumentation(
         const $ = cheerio.load(html)
         const content = $('#dev_page_content')
 
-        if (content.text().trim() === 'The page has not been saved') continue
+        if (content.text().trim() === 'The page has not been saved') return
 
         normalizeLinks(url, content)
 
@@ -236,7 +236,7 @@ export async function fetchDocumentation(
         ret[entry.kind === 'class' ? 'classes' : 'methods'][entry.name] = retClass
     }
 
-    for (const name in schema.unions) {
+    async function fetchDocsForUnion(name: string) {
         log(`📥 union ${name}`)
 
         const url = `${domain}/type/${name}`
@@ -247,13 +247,43 @@ export async function fetchDocumentation(
         const $ = cheerio.load(html)
         const content = $('#dev_page_content')
 
-        if (content.text().trim() === 'The page has not been saved') continue
+        if (content.text().trim() === 'The page has not been saved') return
 
         normalizeLinks(url, content)
 
         const description = extractDescription($)
         if (description) ret.unions[name] = description
     }
+
+    await asyncPoolCallback(
+        fetchDocsForEntry,
+        schema.entries,
+        ({ item, error }) => {
+            if (error) {
+                console.log(`❌ ${item.kind} ${item.name} (${error.message})`)
+
+                return
+            }
+
+            log(`📥 ${item.kind} ${item.name}`)
+        },
+        { limit: 16 },
+    )
+
+    await asyncPoolCallback(
+        fetchDocsForUnion,
+        Object.keys(schema.unions),
+        ({ item, error }) => {
+            if (error) {
+                console.log(`❌ union ${item} (${error.message})`)
+
+                return
+            }
+
+            log(`📥 union ${item}`)
+        },
+        { limit: 16 },
+    )
 
     log('✨ Patching descriptions')
 

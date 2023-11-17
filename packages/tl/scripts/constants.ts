@@ -3,7 +3,7 @@ import * as url from 'url'
 
 export const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
-export const DOC_CACHE_FILE = join(__dirname, '.documentation.cache.json')
+export const DOC_CACHE_FILE = join(__dirname, '../data/documentation.cache.json')
 export const DESCRIPTIONS_YAML_FILE = join(__dirname, '../data/descriptions.yaml')
 export const API_SCHEMA_JSON_FILE = join(__dirname, '../api-schema.json')
 export const API_SCHEMA_DIFF_JSON_FILE = join(__dirname, '../diff.json')

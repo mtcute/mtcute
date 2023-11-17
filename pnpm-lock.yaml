@@ -321,6 +321,9 @@ importers:
       csv-parse:
         specifier: ^5.5.0
         version: 5.5.0
+      eager-async-pool:
+        specifier: ^1.0.0
+        version: 1.0.0
       js-yaml:
         specifier: 4.1.0
         version: 4.1.0
@@ -2072,6 +2075,10 @@ packages:
       tslib: 2.6.2
       typescript: 5.2.2
       yargs: 17.7.2
+    dev: true
+
+  /eager-async-pool@1.0.0:
+    resolution: {integrity: sha512-A2N+pbceYEz7O2KQ3TNQSSrZsivQ9i28cuNKRxfdT9QvRCoJ51pCP90hSNybOOBfoBHk15ZThJYrQWHo4h2UjA==}
     dev: true
 
   /eastasianwidth@0.2.0:
