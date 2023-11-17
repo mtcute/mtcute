@@ -11,7 +11,6 @@ import {
 import { MtPeerNotFoundError } from '../../types/errors.js'
 import { InputPeerLike } from '../../types/peers/index.js'
 import { normalizeToInputPeer } from '../../utils/peer-utils.js'
-import { getAuthState } from '../auth/_state.js'
 
 // @available=both
 /**
@@ -38,7 +37,7 @@ export async function resolvePeer(
         }
     }
 
-    if (typeof peerId === 'number' && !force && !getAuthState(client).isBot) {
+    if (typeof peerId === 'number' && !force) {
         const fromStorage = await client.storage.getPeerById(peerId)
         if (fromStorage) return fromStorage
     }

@@ -4,7 +4,6 @@ import { Long } from '@mtcute/core'
 import { createStub, StubTelegramClient } from '@mtcute/test'
 
 import { Chat, MtPeerNotFoundError, User } from '../../types/index.js'
-import { getAuthState } from '../auth/_state.js'
 import { resolvePeer } from './resolve-peer.js'
 
 describe('resolvePeer', () => {
@@ -75,27 +74,6 @@ describe('resolvePeer', () => {
 
             it('should return user with zero hash if not in storage', async () => {
                 const client = new StubTelegramClient()
-
-                const resolved = await resolvePeer(client, 123)
-
-                expect(resolved).toEqual({
-                    _: 'inputPeerUser',
-                    userId: 123,
-                    accessHash: Long.ZERO,
-                })
-            })
-
-            it('should return user with zero hash for bots', async () => {
-                const client = new StubTelegramClient()
-
-                getAuthState(client).isBot = true
-
-                await client.registerPeers(
-                    createStub('user', {
-                        id: 123,
-                        accessHash: Long.fromBits(456, 789),
-                    }),
-                )
 
                 const resolved = await resolvePeer(client, 123)
 
