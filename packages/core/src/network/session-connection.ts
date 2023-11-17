@@ -1771,7 +1771,6 @@ export class SessionConnection extends PersistentConnection {
         }
 
         const result = writer.result()
-        // probably the easiest way lol
 
         this.log.debug(
             'sending %d messages: size = %db, acks = %d (msg_id = %s), ping = %s (msg_id = %s), state_req = %s (msg_id = %s), resend = %s (msg_id = %s), cancels = %s (msg_id = %s), rpc = %s, container = %s, root msg_id = %l',
@@ -1800,7 +1799,9 @@ export class SessionConnection extends PersistentConnection {
             if (ackMsgIds) {
                 this._session.queuedAcks.splice(0, 0, ...ackMsgIds)
             }
-            this._onMessageFailed(rootMsgId!, 'unknown error')
+            if (rootMsgId) {
+                this._onMessageFailed(rootMsgId, 'unknown error')
+            }
         })
     }
 }

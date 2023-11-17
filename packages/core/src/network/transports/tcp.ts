@@ -116,11 +116,11 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
     }
 
     async send(bytes: Uint8Array): Promise<void> {
+        const framed = await this._packetCodec.encode(bytes)
+
         if (this._state !== TransportState.Ready) {
             throw new MtcuteError('Transport is not READY')
         }
-
-        const framed = await this._packetCodec.encode(bytes)
 
         return new Promise((resolve, reject) => {
             this._socket!.write(framed, (error) => {
