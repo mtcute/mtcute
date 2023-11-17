@@ -70,7 +70,7 @@ pnpm add @mtcute/crypto-node
 
 ✨ building something for web? use the client directly:
 ```bash
-pnpm add @mtcute/client @cryptography/aes
+pnpm add @mtcute/client
 ```
 
 learn more: [guide](https://mtcute.dev/guide/)
