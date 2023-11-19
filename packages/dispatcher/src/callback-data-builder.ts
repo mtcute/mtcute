@@ -73,6 +73,8 @@ export class CallbackDataBuilder<T extends string> {
 
         const ret = {} as Record<T, string>
         parts.forEach((it, idx) => {
+            if (idx === 0) return // skip prefix
+
             ret[this._fields[idx - 1]] = it
         })
 
