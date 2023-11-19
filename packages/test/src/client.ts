@@ -65,6 +65,28 @@ export class StubTelegramClient extends BaseTelegramClient {
         return client
     }
 
+    /**
+     * Create a fake "full" client (i.e. TelegramClient)
+     *
+     * Basically a proxy that returns an empty function for every unknown method
+     */
+    static full() {
+        const client = new StubTelegramClient()
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return new Proxy(client, {
+            get(target, prop) {
+                if (typeof prop === 'string' && !(prop in target)) {
+                    return () => {}
+                }
+
+                return target[prop as keyof typeof target]
+            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        }) as any
+        // i don't want to type this properly since it would require depending test utils on client
+    }
+
     // some fake peers handling //
 
     readonly _knownChats = new Map<number, tl.TypeChat>()

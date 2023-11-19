@@ -21,6 +21,7 @@
     },
     "dependencies": {
         "@mtcute/client": "workspace:^",
+        "@mtcute/test": "workspace:^",
         "events": "3.2.0"
     }
 }

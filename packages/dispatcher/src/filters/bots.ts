@@ -23,12 +23,19 @@ import { UpdateFilter } from './types.js'
  */
 export const command = (
     commands: MaybeArray<string | RegExp>,
-    prefixes: MaybeArray<string> | null = '/',
-    caseSensitive = false,
+    {
+        prefixes = '/',
+        caseSensitive = false,
+    }: {
+        prefixes?: MaybeArray<string> | null
+        caseSensitive?: boolean
+    } = {},
 ): UpdateFilter<MessageContext, { command: string[] }> => {
     if (!Array.isArray(commands)) commands = [commands]
 
-    commands = commands.map((i) => (typeof i === 'string' ? i.toLowerCase() : i))
+    if (!caseSensitive) {
+        commands = commands.map((i) => (typeof i === 'string' ? i.toLowerCase() : i))
+    }
 
     const argumentsRe = /(["'])(.*?)(?<!\\)\1|(\S+)/g
     const unescapeRe = /\\(['"])/
@@ -67,6 +74,7 @@ export const command = (
                 }
 
                 const match = m.slice(1, -1)
+                if (!caseSensitive) match[0] = match[0].toLowerCase()
 
                 // we use .replace to iterate over global regex, not to replace the text
                 withoutPrefix.slice(m[0].length).replace(argumentsRe, ($0, $1, $2: string, $3: string) => {

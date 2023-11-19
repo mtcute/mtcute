@@ -184,6 +184,9 @@ importers:
       '@mtcute/client':
         specifier: workspace:^
         version: link:../client
+      '@mtcute/test':
+        specifier: workspace:^
+        version: link:../test
       events:
         specifier: 3.2.0
         version: 3.2.0
