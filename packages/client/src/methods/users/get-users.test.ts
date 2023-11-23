@@ -31,7 +31,7 @@ describe('getUsers', () => {
         expect(await getUsers(client, 123)).toEqual([new User(createStub('user', { id: 123, accessHash: Long.ZERO }))])
     })
 
-    it('should ignore userEmpty', async () => {
-        expect(await getUsers(client, 1)).toEqual([])
+    it('should return null for userEmpty', async () => {
+        expect(await getUsers(client, 1)).toEqual([null])
     })
 })

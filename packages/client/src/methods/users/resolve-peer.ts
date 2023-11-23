@@ -18,7 +18,7 @@ import { normalizeToInputPeer } from '../../utils/peer-utils.js'
  * Useful when an `InputPeer` is needed in Raw API.
  *
  * @param peerId  The peer identifier that you want to extract the `InputPeer` from.
- * @param force  Whether to force re-fetch the peer from the server (only applicable for usernames and phone numbers)
+ * @param force  Whether to force re-fetch the peer from the server (only for usernames and phone numbers)
  */
 export async function resolvePeer(
     client: BaseTelegramClient,

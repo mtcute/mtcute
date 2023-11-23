@@ -4224,7 +4224,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Boost a given channel
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @param peerId  Peer ID to boost
      */
@@ -4232,7 +4232,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Check if the current user can apply boost to a given channel
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @param peerId  Peer ID whose stories to fetch
      * @returns
@@ -4248,7 +4248,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Check if the current user can post stories as a given peer
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @param peerId  Peer ID whose stories to fetch
      * @returns
@@ -4260,7 +4260,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Delete a story
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @returns  IDs of stories that were removed
      */
@@ -4280,7 +4280,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Edit a sent story
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @returns  Edited story
      */
@@ -4321,7 +4321,7 @@ export interface TelegramClient extends BaseTelegramClient {
     }): Promise<Story>
     /**
      * Get all stories (e.g. to load the top bar)
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      */
     getAllStories(params?: {
@@ -4370,14 +4370,14 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Get stories of a given peer
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @param peerId  Peer ID whose stories to fetch
      */
     getPeerStories(peerId: InputPeerLike): Promise<PeerStories>
     /**
      * Get profile stories
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      */
     getProfileStories(
@@ -4418,7 +4418,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Get brief information about stories interactions.
      *
      * The result will be in the same order as the input IDs
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      */
     getStoriesInteractions(peerId: InputPeerLike, storyIds: MaybeArray<number>): Promise<StoryInteractions[]>
@@ -4429,13 +4429,13 @@ export interface TelegramClient extends BaseTelegramClient {
      * and if the user doesn't have a username, `USER_PUBLIC_MISSING` is thrown.
      *
      * I have no idea why is this an RPC call, but whatever
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      */
     getStoryLink(peerId: InputPeerLike, storyId: number): Promise<string>
     /**
      * Get viewers list of a story
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      */
     getStoryViewers(
@@ -4478,7 +4478,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * Hide own stories views (activate so called "stealth mode")
      *
      * Currently has a cooldown of 1 hour, and throws FLOOD_WAIT error if it is on cooldown.
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      */
     hideMyStoriesViews(params?: {
@@ -4502,7 +4502,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * This should be used for pinned stories, as they can't
      * be marked as read when the user sees them ({@link Story#isActive} == false)
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @param peerId  Peer ID whose stories to mark as read
      * @param ids  ID(s) of the stories to increment views of (max 200)
@@ -4608,7 +4608,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * This should only be used for "active" stories ({@link Story#isActive} == false)
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @param peerId  Peer ID whose stories to mark as read
      * @returns  IDs of the stores that were marked as read
@@ -4616,7 +4616,7 @@ export interface TelegramClient extends BaseTelegramClient {
     readStories(peerId: InputPeerLike, maxId: number): Promise<number[]>
     /**
      * Report a story (or multiple stories) to the moderation team
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      */
     reportStory(
@@ -4638,7 +4638,7 @@ export interface TelegramClient extends BaseTelegramClient {
     ): Promise<void>
     /**
      * Send (or remove) a reaction to a story
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      */
     sendStoryReaction(params: {
@@ -4653,7 +4653,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Send a story
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @returns  Created story
      */
@@ -4711,14 +4711,14 @@ export interface TelegramClient extends BaseTelegramClient {
      * Toggle whether peer's stories are archived (hidden) or not.
      *
      * This **does not** archive the chat with that peer, only stories.
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      */
     togglePeerStoriesArchived(peerId: InputPeerLike, archived: boolean): Promise<void>
     /**
      * Toggle one or more stories pinned status
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @returns  IDs of stories that were toggled
      */
@@ -4829,7 +4829,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Edit "close friends" list directly using user IDs
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @param ids  User IDs
      */
@@ -4837,7 +4837,7 @@ export interface TelegramClient extends BaseTelegramClient {
     /**
      * Edit "close friends" list using `InputPeerLike`s
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @param ids  User IDs
      */
@@ -4918,7 +4918,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param ids  Users' identifiers. Can be ID, username, phone number, `"me"`, `"self"` or TL object
      */
-    getUsers(ids: MaybeArray<InputPeerLike>): Promise<User[]>
+    getUsers(ids: MaybeArray<InputPeerLike>): Promise<(User | null)[]>
     /**
      * Iterate over profile photos
      *
@@ -4975,7 +4975,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * **Available**: ✅ both users and bots
      *
      * @param peerId  The peer identifier that you want to extract the `InputPeer` from.
-     * @param [force=false]  Whether to force re-fetch the peer from the server
+     * @param [force=false]  Whether to force re-fetch the peer from the server (only for usernames and phone numbers)
      */
     resolvePeer(peerId: InputPeerLike, force?: boolean): Promise<tl.TypeInputPeer>
     /**
