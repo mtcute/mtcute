@@ -1,4 +1,11 @@
-import { CallbackQuery, getMarkedPeerId, MtArgumentError, MtMessageNotFoundError, TelegramClient } from '@mtcute/client'
+import {
+    CallbackQuery,
+    getMarkedPeerId,
+    Message,
+    MtArgumentError,
+    MtMessageNotFoundError,
+    TelegramClient,
+} from '@mtcute/client'
 
 import { UpdateContext } from './base.js'
 
@@ -60,5 +67,18 @@ export class CallbackQueryContext extends CallbackQuery implements UpdateContext
             message: this.raw.msgId,
             ...params,
         })
+    }
+
+    /**
+     * Shortcut for getting the message and editing it.
+     */
+    async editMessageWith(handler: (msg: Message) => Promise<Parameters<CallbackQueryContext['editMessage']>[0]>) {
+        const msg = await this.getMessage()
+        if (!msg) return
+
+        const res = await handler(msg)
+        if (!res) return
+
+        return this.editMessage(res)
     }
 }
