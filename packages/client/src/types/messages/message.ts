@@ -11,6 +11,7 @@ import { assertTypeIsNot } from '@mtcute/core/utils.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { BotKeyboard, ReplyMarkup } from '../bots/keyboards.js'
+import { TextWithEntities } from '../misc/index.js'
 import { Chat } from '../peers/chat.js'
 import { PeersIndex } from '../peers/peers-index.js'
 import { User } from '../peers/user.js'
@@ -255,6 +256,15 @@ export class Message {
         }
 
         return entities
+    }
+
+    get textWithEntities(): TextWithEntities {
+        if (this.raw._ === 'messageService') return { text: '', entities: [] }
+
+        return {
+            text: this.raw.message,
+            entities: this.raw.entities,
+        }
     }
 
     /**
