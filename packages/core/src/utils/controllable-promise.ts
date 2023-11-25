@@ -7,11 +7,6 @@ export type ControllablePromise<T = unknown> = Promise<T> & {
 }
 
 /**
- * The promise was cancelled
- */
-export class PromiseCancelledError extends Error {}
-
-/**
  * Creates a promise that can be resolved or rejected from outside.
  */
 export function createControllablePromise<T = unknown>(): ControllablePromise<T> {

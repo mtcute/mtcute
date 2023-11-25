@@ -2,7 +2,7 @@ import EventEmitter from 'events'
 
 import { tl } from '@mtcute/tl'
 
-import { Logger } from '../utils/index.js'
+import { createControllablePromise, Logger } from '../utils/index.js'
 import { MtprotoSession } from './mtproto-session.js'
 import { SessionConnection, SessionConnectionParams } from './session-connection.js'
 import { TransportFactory } from './transports/index.js'
@@ -124,9 +124,21 @@ export class MultiSessionConnection extends EventEmitter {
         }
 
         if (enforcePfsChanged) {
-            this._connections.forEach((conn) => {
-                conn.setUsePfs(this.params.usePfs || this._enforcePfs)
-            })
+            // we need to fetch new auth keys first
+            const promise = createControllablePromise<void>()
+            this.emit('request-keys', promise)
+
+            promise
+                .then(() => {
+                    this._connections.forEach((conn) => {
+                        conn.setUsePfs(this.params.usePfs || this._enforcePfs)
+
+                        if (connect) conn.connect()
+                    })
+                })
+                .catch((err) => {
+                    this.emit('error', err)
+                })
         }
 
         // create new connections
@@ -144,7 +156,7 @@ export class MultiSessionConnection extends EventEmitter {
                 session,
             )
 
-            if (this.params.isMainConnection) {
+            if (this.params.isMainConnection && this.params.isMainDcConnection) {
                 conn.on('update', (update) => this.emit('update', update))
             }
             conn.on('error', (err) => this.emit('error', err, conn))
@@ -178,7 +190,8 @@ export class MultiSessionConnection extends EventEmitter {
             })
 
             this._connections.push(conn)
-            if (connect) conn.connect()
+            // if enforcePfsChanged, we need to connect after setting the new auth key
+            if (connect && !enforcePfsChanged) conn.connect()
         }
     }
 

@@ -3,7 +3,7 @@ import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { ITelegramStorage } from '../storage/index.js'
 import { MtArgumentError, MtcuteError } from '../types/index.js'
-import { createControllablePromise, ICryptoProvider, Logger, sleep } from '../utils/index.js'
+import { ControllablePromise, createControllablePromise, ICryptoProvider, Logger, sleep } from '../utils/index.js'
 import { assertTypeIs } from '../utils/type-assertions.js'
 import { ConfigManager } from './config-manager.js'
 import { MultiSessionConnection } from './multi-session-connection.js'
@@ -303,6 +303,13 @@ export class DcConnectionManager {
             this.main.requestAuth()
         })
 
+        // fucking awesome architecture, but whatever
+        connection.on('request-keys', (promise: ControllablePromise<void>) => {
+            this.loadKeys(true)
+                .then(() => promise.resolve())
+                .catch((e: Error) => promise.reject(e))
+        })
+
         connection.on('error', (err: Error, conn: SessionConnection) => {
             this.manager.params._emitError(err, conn)
         })
@@ -311,6 +318,7 @@ export class DcConnectionManager {
     setIsPrimary(isPrimary: boolean): void {
         if (this.isPrimary === isPrimary) return
         this.isPrimary = isPrimary
+        this.main.params.isMainDcConnection = isPrimary
 
         if (isPrimary) {
             this.main.setInactivityTimeout(undefined)
@@ -325,7 +333,7 @@ export class DcConnectionManager {
         this.downloadSmall.setCount(this.manager._connectionCount('downloadSmall', this.dcId, isPremium))
     }
 
-    async loadKeys(): Promise<boolean> {
+    async loadKeys(forcePfs = false): Promise<boolean> {
         const permanent = await this.manager._storage.getAuthKeyFor(this.dcId)
 
         this.main.setAuthKey(permanent)
@@ -337,7 +345,7 @@ export class DcConnectionManager {
             return false
         }
 
-        if (this.manager.params.usePfs) {
+        if (this.manager.params.usePfs || forcePfs) {
             await Promise.all(
                 this.main._sessions.map(async (_, i) => {
                     const temp = await this.manager._storage.getAuthKeyFor(this.dcId, i)
