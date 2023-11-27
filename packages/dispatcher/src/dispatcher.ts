@@ -77,7 +77,7 @@ export interface DispatcherParams {
     sceneName?: string
 
     /**
-     * Custom storage for the dispatcher.
+     * Custom storage for this dispatcher and its children.
      *
      * @default  Client's storage
      */
@@ -93,7 +93,7 @@ export interface DispatcherParams {
  * Updates dispatcher
  */
 export class Dispatcher<State extends object = never> {
-    private _groups: Record<number, Record<UpdateHandler['name'], UpdateHandler[]>> = {}
+    private _groups: Map<number, Map<UpdateHandler['name'], UpdateHandler[]>> = new Map()
     private _groupsOrder: number[] = []
 
     private _client?: TelegramClient
@@ -101,7 +101,7 @@ export class Dispatcher<State extends object = never> {
     private _parent?: Dispatcher<any>
     private _children: Dispatcher<any>[] = []
 
-    private _scenes?: Record<string, Dispatcher<any>>
+    private _scenes?: Map<string, Dispatcher<any>>
     private _scene?: string
     private _sceneScoped?: boolean
 
@@ -131,6 +131,8 @@ export class Dispatcher<State extends object = never> {
     protected constructor(client?: TelegramClient, params?: DispatcherParams) {
         this.dispatchRawUpdate = this.dispatchRawUpdate.bind(this)
         this.dispatchUpdate = this.dispatchUpdate.bind(this)
+        this._onClientBeforeConnect = this._onClientBeforeConnect.bind(this)
+        this._onClientBeforeClose = this._onClientBeforeClose.bind(this)
 
         // eslint-disable-next-line prefer-const
         let { storage, key, sceneName } = params ?? {}
@@ -204,36 +206,89 @@ export class Dispatcher<State extends object = never> {
         return this._scene
     }
 
+    private _onClientBeforeConnect() {
+        (async () => {
+            if (
+                !this._parent &&
+                this._storage &&
+                this._storage !== (this._client!.storage as unknown as IStateStorage)
+            ) {
+                // this is a root dispatcher with custom storage
+                await this._storage.load?.()
+            }
+
+            if (this._parent && this._customStorage) {
+                // this is a child dispatcher with custom storage
+                await this._customStorage.load?.()
+            }
+
+            for (const child of this._children) {
+                child._onClientBeforeConnect()
+            }
+
+            if (this._scenes) {
+                for (const scene of this._scenes.values()) {
+                    scene._onClientBeforeConnect()
+                }
+            }
+        })().catch((err) => this._client!._emitError(err))
+    }
+
+    private _onClientBeforeClose() {
+        (async () => {
+            if (
+                !this._parent &&
+                this._storage &&
+                this._storage !== (this._client!.storage as unknown as IStateStorage)
+            ) {
+                // this is a root dispatcher with custom storage
+                await this._storage.save?.()
+                await this._storage.destroy?.()
+            }
+
+            if (this._parent && this._customStorage) {
+                // this is a child dispatcher with custom storage
+                await this._customStorage.save?.()
+                await this._customStorage.destroy?.()
+            }
+
+            for (const child of this._children) {
+                child._onClientBeforeClose()
+            }
+
+            if (this._scenes) {
+                for (const scene of this._scenes.values()) {
+                    scene._onClientBeforeClose()
+                }
+            }
+        })().catch((err) => this._client!._emitError(err))
+    }
+
     /**
      * Bind the dispatcher to the client.
      * Called by the constructor automatically if
      * `client` was passed.
-     *
-     * Under the hood, this replaces client's `dispatchUpdate`
-     * function, meaning you can't bind two different
-     * dispatchers to the same client at the same time.
-     * Instead, use {@link extend}, {@link addChild}
-     * or {@link addScene} on the existing, already bound dispatcher.
      *
      * Dispatcher also uses bound client to throw errors
      */
     bindToClient(client: TelegramClient): void {
         client.on('update', this.dispatchUpdate)
         client.on('raw_update', this.dispatchRawUpdate)
+        client.on('before_connect', this._onClientBeforeConnect)
+        client.on('before_close', this._onClientBeforeClose)
 
         this._client = client
     }
 
     /**
      * Unbind a dispatcher from the client.
-     *
-     * This will replace client's dispatchUpdate with a no-op.
-     * If this dispatcher is not bound, nothing will happen.
      */
     unbind(): void {
         if (this._client) {
             this._client.off('update', this.dispatchUpdate)
             this._client.off('raw_update', this.dispatchRawUpdate)
+            this._client.off('before_connect', this._onClientBeforeConnect)
+            this._client.off('before_close', this._onClientBeforeClose)
 
             this._client = undefined
         }
@@ -275,10 +330,10 @@ export class Dispatcher<State extends object = never> {
         let handled = false
 
         outer: for (const grp of this._groupsOrder) {
-            const group = this._groups[grp]
+            const group = this._groups.get(grp)!
 
-            if ('raw' in group) {
-                const handlers = group.raw as RawUpdateHandler[]
+            if (group.has('raw')) {
+                const handlers = group.get('raw')! as RawUpdateHandler[]
 
                 for (const h of handlers) {
                     let result: void | PropagationAction
@@ -383,12 +438,12 @@ export class Dispatcher<State extends object = never> {
                     return false
                 }
             } else {
-                if (!this._scenes || !(parsedScene in this._scenes)) {
+                if (!this._scenes || !this._scenes.has(parsedScene)) {
                     // not registered scene
                     return false
                 }
 
-                return this._scenes[parsedScene]._dispatchUpdateNowImpl(update, parsedState, parsedScene, true)
+                return this._scenes.get(parsedScene)!._dispatchUpdateNowImpl(update, parsedState, parsedScene, true)
             }
         }
 
@@ -441,11 +496,11 @@ export class Dispatcher<State extends object = never> {
 
         if (shouldDispatch) {
             outer: for (const grp of this._groupsOrder) {
-                const group = this._groups[grp]
+                const group = this._groups.get(grp)!
 
-                if (update.name in group) {
+                if (group.has(update.name)) {
                     // raw is not handled here, so we can safely assume this
-                    const handlers = group[update.name] as Exclude<UpdateHandler, RawUpdateHandler>[]
+                    const handlers = group.get(update.name)! as Exclude<UpdateHandler, RawUpdateHandler>[]
 
                     try {
                         for (const h of handlers) {
@@ -477,7 +532,12 @@ export class Dispatcher<State extends object = never> {
                                         throw new MtArgumentError('Cannot use ToScene without entering a scene')
                                     }
 
-                                    return this._scenes![scene]._dispatchUpdateNowImpl(update, undefined, scene, true)
+                                    return this._scenes!.get(scene)!._dispatchUpdateNowImpl(
+                                        update,
+                                        undefined,
+                                        scene,
+                                        true,
+                                    )
                                 }
                             }
 
@@ -514,17 +574,17 @@ export class Dispatcher<State extends object = never> {
      * @param group  Handler group index
      */
     addUpdateHandler(handler: UpdateHandler, group = 0): void {
-        if (!(group in this._groups)) {
-            this._groups[group] = {} as any
+        if (!this._groups.has(group)) {
+            this._groups.set(group, new Map())
             this._groupsOrder.push(group)
             this._groupsOrder.sort((a, b) => a - b)
         }
 
-        if (!(handler.name in this._groups[group])) {
-            this._groups[group][handler.name] = []
+        if (!this._groups.get(group)!.has(handler.name)) {
+            this._groups.get(group)!.set(handler.name, [])
         }
 
-        this._groups[group][handler.name].push(handler)
+        this._groups.get(group)!.get(handler.name)!.push(handler)
     }
 
     /**
@@ -532,35 +592,37 @@ export class Dispatcher<State extends object = never> {
      * handler group.
      *
      * @param handler  Update handler to remove, its name or `'all'` to remove all
-     * @param group  Handler group index (-1 to affect all groups)
+     * @param group  Handler group index (null to affect all groups)
      */
-    removeUpdateHandler(handler: UpdateHandler | UpdateHandler['name'] | 'all', group = 0): void {
-        if (group !== -1 && !(group in this._groups)) {
+    removeUpdateHandler(handler: UpdateHandler | UpdateHandler['name'] | 'all', group: number | null = 0): void {
+        if (group !== null && !this._groups.has(group)) {
             return
         }
 
         if (typeof handler === 'string') {
             if (handler === 'all') {
-                if (group === -1) {
-                    this._groups = {}
+                if (group === null) {
+                    this._groups = new Map()
                 } else {
-                    delete this._groups[group]
+                    this._groups.delete(group)
                 }
-            } else {
-                delete this._groups[group][handler]
+            } else if (group !== null) {
+                this._groups.get(group)!.delete(handler)
             }
 
             return
         }
 
-        if (!(handler.name in this._groups[group])) {
+        if (group === null) return
+
+        if (!this._groups.get(group)!.has(handler.name)) {
             return
         }
 
-        const idx = this._groups[group][handler.name].indexOf(handler)
+        const idx = this._groups.get(group)!.get(handler.name)!.indexOf(handler)
 
         if (idx > -1) {
-            this._groups[group][handler.name].splice(idx, 1)
+            this._groups.get(group)!.get(handler.name)!.splice(idx, 1)
         }
     }
 
@@ -666,6 +728,8 @@ export class Dispatcher<State extends object = never> {
         child._client = this._client
         child._storage = this._storage
         child._stateKeyDelegate = this._stateKeyDelegate
+        child._customStorage ??= this._customStorage
+        child._customStateKeyDelegate ??= this._customStateKeyDelegate
     }
 
     /**
@@ -719,7 +783,7 @@ export class Dispatcher<State extends object = never> {
      */
     addScene(scene: Dispatcher<any>, scoped?: true): void
     addScene(scene: Dispatcher<any>, scoped = true): void {
-        if (!this._scenes) this._scenes = {}
+        if (!this._scenes) this._scenes = new Map()
 
         if (!scene._scene) {
             throw new MtArgumentError(
@@ -727,13 +791,13 @@ export class Dispatcher<State extends object = never> {
             )
         }
 
-        if (scene._scene in this._scenes) {
+        if (this._scenes.has(scene._scene)) {
             throw new MtArgumentError(`Scene with name ${scene._scene} is already registered!`)
         }
 
         this._prepareChild(scene)
         scene._sceneScoped = scoped
-        this._scenes[scene._scene] = scene
+        this._scenes.set(scene._scene, scene)
     }
 
     /**
@@ -780,19 +844,21 @@ export class Dispatcher<State extends object = never> {
         }
 
         other._groupsOrder.forEach((group) => {
-            if (!(group in this._groups)) {
-                this._groups[group] = other._groups[group]
+            if (!this._groups.has(group)) {
+                this._groups.set(group, other._groups.get(group)!)
                 this._groupsOrder.push(group)
             } else {
-                const otherGrp = other._groups[group] as any
-                const selfGrp = this._groups[group] as any
-                Object.keys(otherGrp).forEach((typ) => {
-                    if (!(typ in selfGrp)) {
-                        selfGrp[typ] = otherGrp[typ]
+                const otherGrp = other._groups.get(group)!
+                const selfGrp = this._groups.get(group)!
+
+                for (const typ of otherGrp.keys()) {
+                    if (!selfGrp.has(typ)) {
+                        selfGrp.set(typ, otherGrp.get(typ)!)
                     } else {
-                        selfGrp[typ].push(...otherGrp[typ])
+                        // selfGrp[typ].push(...otherGrp[typ])
+                        selfGrp.get(typ)!.push(...otherGrp.get(typ)!)
                     }
-                })
+                }
             }
         })
 
@@ -803,19 +869,19 @@ export class Dispatcher<State extends object = never> {
 
         if (other._scenes) {
             const otherScenes = other._scenes
-            if (!this._scenes) this._scenes = {}
+            if (!this._scenes) this._scenes = new Map()
             const myScenes = this._scenes
 
-            Object.keys(otherScenes).forEach((key) => {
-                otherScenes[key]._unparent()
+            for (const key of otherScenes.keys()) {
+                otherScenes.get(key)!._unparent()
 
-                if (key in myScenes) {
+                if (myScenes.has(key)) {
                     // will be overwritten
-                    delete myScenes[key]
+                    myScenes.delete(key)
                 }
 
-                this.addScene(myScenes[key] as any, myScenes[key]._sceneScoped as any)
-            })
+                this.addScene(otherScenes.get(key) as any, otherScenes.get(key)!._sceneScoped as any)
+            }
         }
 
         this._groupsOrder.sort((a, b) => a - b)
@@ -837,15 +903,16 @@ export class Dispatcher<State extends object = never> {
         const dp = new Dispatcher<State>()
 
         // copy handlers.
-        Object.keys(this._groups).forEach((key) => {
+        for (const key of this._groups.keys()) {
             const idx = key as any as number
 
-            dp._groups[idx] = {} as any
+            dp._groups.set(idx, new Map())
 
-            Object.keys(this._groups[idx]).forEach((type) => {
-                dp._groups[idx][type as UpdateHandler['name']] = [...this._groups[idx][type as UpdateHandler['name']]]
-            })
-        })
+            for (const type of this._groups.get(idx)!.keys()) {
+                // dp._groups.get(idx)!.set(type, [...this._groups.get(idx)!].get(type)!])
+                dp._groups.get(idx)!.set(type, [...this._groups.get(idx)!.get(type)!])
+            }
+        }
 
         dp._groupsOrder = [...this._groupsOrder]
         dp._errorHandler = this._errorHandler
@@ -859,10 +926,10 @@ export class Dispatcher<State extends object = never> {
             })
 
             if (this._scenes) {
-                Object.keys(this._scenes).forEach((key) => {
-                    const scene = this._scenes![key].clone(true)
-                    dp.addScene(scene as any, this._scenes![key]._sceneScoped as any)
-                })
+                for (const key of this._scenes.keys()) {
+                    const scene = this._scenes.get(key)!.clone(true)
+                    dp.addScene(scene as any, this._scenes.get(key)!._sceneScoped as any)
+                }
             }
         }
 

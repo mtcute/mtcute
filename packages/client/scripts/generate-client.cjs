@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-globals */
 const ts = require('typescript')
 const path = require('path')
 const fs = require('fs')
@@ -428,7 +427,7 @@ async function main() {
 
     output.write(
         '/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging, @typescript-eslint/unified-signatures */\n' +
-            '/* THIS FILE WAS AUTO-GENERATED */\n'
+            '/* THIS FILE WAS AUTO-GENERATED */\n',
     )
     Object.entries(state.imports).forEach(([module, items]) => {
         items = [...items]
@@ -468,6 +467,10 @@ async function main() {
  */
 on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this\n`)
     })
+
+    output.write(`
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+on(name: string, handler: (...args: any[]) => void): this\n`)
 
     const printer = ts.createPrinter()
 

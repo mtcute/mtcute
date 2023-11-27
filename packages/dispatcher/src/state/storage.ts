@@ -17,6 +17,28 @@ import { MaybeAsync } from '@mtcute/client'
  */
 export interface IStateStorage {
     /**
+     * Load state from some external storage.
+     * Should be used either to load session content from file/network/etc
+     * to memory, or to open required connections to fetch session content later
+     *
+     * This method may be called multiple times and should handle that.
+     */
+    load?(): MaybeAsync<void>
+    /**
+     * Save state to some external storage.
+     * Should be used to commit pending changes in the session.
+     * For example, saving session content to file/network/etc,
+     * or committing a database transaction
+     */
+    save?(): MaybeAsync<void>
+    /**
+     * Cleanup storage and release all used resources.
+     *
+     * This method may be called multiple times and should handle that.
+     */
+    destroy?(): MaybeAsync<void>
+
+    /**
      * Retrieve state from the storage
      *
      * @param key  Key of the state, as defined by {@link StateKeyDelegate}

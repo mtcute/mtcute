@@ -475,6 +475,9 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     on(name: 'delete_story', handler: (upd: DeleteStoryUpdate) => void): this
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    on(name: string, handler: (...args: any[]) => void): this
+
     getAuthState(): AuthState
     /**
      * Check your Two-Step verification password and log in
