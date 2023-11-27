@@ -109,7 +109,7 @@ export async function _processCommonSendParameters(
     let peer = await resolvePeer(client, chatId)
 
     let replyTo = normalizeMessageId(params.replyTo)
-    const replyToPeer = typeof params.replyTo === 'number' ? peer : params.replyTo?.chat.inputPeer
+    const replyToPeer = typeof params.replyTo === 'number' ? undefined : params.replyTo?.chat.inputPeer
 
     if (params.commentTo) {
         [peer, replyTo] = await _getDiscussionMessage(client, peer, normalizeMessageId(params.commentTo)!)
