@@ -503,6 +503,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
     }
 
     destroy(): void {
+        this.reset()
         this._db.close()
         clearInterval(this._vacuumTimeout)
     }
