@@ -28,10 +28,12 @@ async function generateTypings(apiSchema: TlFullSchema, apiLayer: number, mtpSch
     await writeFile(OUT_TYPINGS_JS_FILE, ESM_PRELUDE + apiJs + '\n\n' + mtpJs)
 }
 
+const removeInternalEntries = (entries: TlEntry[]) => entries.filter((it) => !it.name.startsWith('mtcute.'))
+
 async function generateReaders(apiSchema: TlFullSchema, mtpSchema: TlFullSchema) {
     console.log('Generating readers...')
 
-    let code = generateReaderCodeForTlEntries(apiSchema.entries, {
+    let code = generateReaderCodeForTlEntries(removeInternalEntries(apiSchema.entries), {
         variableName: 'm',
         includeMethods: false,
         includeMethodResults: true,
@@ -49,7 +51,7 @@ async function generateReaders(apiSchema: TlFullSchema, mtpSchema: TlFullSchema)
 async function generateWriters(apiSchema: TlFullSchema, mtpSchema: TlFullSchema) {
     console.log('Generating writers...')
 
-    let code = generateWriterCodeForTlEntries([...apiSchema.entries, ...mtpSchema.entries], {
+    let code = generateWriterCodeForTlEntries([...removeInternalEntries(apiSchema.entries), ...mtpSchema.entries], {
         variableName: 'm',
         includeStaticSizes: true,
     })
