@@ -219,6 +219,51 @@ export function testStorage<T extends ITelegramStorage>(
             expect(await s.getFullPeerById(stubPeerUser.id)).toEqual(stubPeerUser.full)
             expect(await s.getFullPeerById(peerChannel.id)).toEqual(peerChannel.full)
         })
+
+        describe('min peers', () => {
+            it('should generate *FromMessage constructors from reference messages', async () => {
+                await s.updatePeers([peerChannel])
+                await s.saveReferenceMessage(stubPeerUser.id, peerChannel.id, 456)
+                await s.save?.() // update-related methods are batched, so we need to save
+
+                expect(await s.getPeerById(stubPeerUser.id)).toEqual({
+                    _: 'inputPeerUserFromMessage',
+                    peer: peerChannelInput,
+                    msgId: 456,
+                    userId: stubPeerUser.id,
+                })
+            })
+
+            it('should handle cases when referenced chat is not available', async () => {
+                // this shouldn't really happen, but the storage should be able to handle it
+                await s.saveReferenceMessage(stubPeerUser.id, peerChannel.id, 456)
+                await s.save?.() // update-related methods are batched, so we need to save
+
+                expect(await s.getPeerById(stubPeerUser.id)).toEqual(null)
+            })
+
+            it('should return full peer if it gets available', async () => {
+                await s.updatePeers([peerChannel])
+                await s.saveReferenceMessage(stubPeerUser.id, peerChannel.id, 456)
+                await s.save?.() // update-related methods are batched, so we need to save
+
+                await s.updatePeers([stubPeerUser])
+                await s.save?.()
+
+                expect(await s.getPeerById(stubPeerUser.id)).toEqual(peerUserInput)
+            })
+
+            it('should handle cases when referenced message is deleted', async () => {
+                await s.updatePeers([peerChannel])
+                await s.saveReferenceMessage(stubPeerUser.id, peerChannel.id, 456)
+                await s.save?.() // update-related methods are batched, so we need to save
+
+                await s.deleteReferenceMessages(peerChannel.id, [456])
+                await s.save?.()
+
+                expect(await s.getPeerById(stubPeerUser.id)).toEqual(null)
+            })
+        })
     })
 
     describe('current user', () => {

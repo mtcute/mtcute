@@ -135,18 +135,41 @@ export interface ITelegramStorage {
      * are called, so you can safely batch these updates
      */
     updatePeers(peers: ITelegramStorage.PeerInfo[]): MaybeAsync<void>
+
     /**
      * Find a peer in local database by its marked ID
+     *
+     * If no peer was found, the storage should try searching its
+     * reference messages database. If a reference message is found,
+     * a `inputPeer*FromMessage` constructor should be returned
      */
     getPeerById(peerId: number): MaybeAsync<tl.TypeInputPeer | null>
+
     /**
      * Find a peer in local database by its username
      */
     getPeerByUsername(username: string): MaybeAsync<tl.TypeInputPeer | null>
+
     /**
      * Find a peer in local database by its phone number
      */
     getPeerByPhone(phone: string): MaybeAsync<tl.TypeInputPeer | null>
+
+    /**
+     * For `*FromMessage` constructors: store a reference to a `peerId` -
+     * it was seen in message `messageId` in chat `chatId`.
+     *
+     * `peerId` and `chatId` are marked peer IDs.
+     *
+     * Learn more: https://core.telegram.org/api/min
+     */
+    saveReferenceMessage(peerId: number, chatId: number, messageId: number): MaybeAsync<void>
+
+    /**
+     * For `*FromMessage` constructors: messages `messageIds` in chat `chatId` were deleted,
+     * so remove any stored peer references to them.
+     */
+    deleteReferenceMessages(chatId: number, messageIds: number[]): MaybeAsync<void>
 
     /**
      * Get updates state (if available), represented as a tuple

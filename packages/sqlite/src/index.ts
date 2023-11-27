@@ -44,7 +44,7 @@ function getInputPeer(row: SqliteEntity | ITelegramStorage.PeerInfo): tl.TypeInp
     throw new Error(`Invalid peer type: ${row.type}`)
 }
 
-const CURRENT_VERSION = 4
+const CURRENT_VERSION = 5
 
 // language=SQLite format=false
 const TEMP_AUTH_TABLE = `
@@ -55,6 +55,16 @@ const TEMP_AUTH_TABLE = `
         expires integer not null,
         primary key (dc, idx)
     );
+`
+
+// language=SQLite format=false
+const MESSAGE_REFS_TABLE = `
+    create table message_refs (
+        peer_id integer primary key,
+        chat_id integer not null,
+        msg_id integer not null
+    );
+    create index idx_message_refs on message_refs (chat_id, msg_id);
 `
 
 // language=SQLite format=false
@@ -93,6 +103,8 @@ const SCHEMA = `
     );
     create index idx_entities_username on entities (username);
     create index idx_entities_phone on entities (phone);
+
+    ${MESSAGE_REFS_TABLE}
 `
 
 // language=SQLite format=false
@@ -100,7 +112,8 @@ const RESET = `
     delete from kv where key <> 'ver';
     delete from state;
     delete from pts;
-    delete from entities
+    delete from entities;
+    delete from message_refs;
 `
 const RESET_AUTH_KEYS = `
     delete from auth_keys;
@@ -127,6 +140,12 @@ interface CacheItem {
 interface FsmItem<T = unknown> {
     value: T
     expires?: number
+}
+
+interface MessageRef {
+    peer_id: number
+    chat_id: number
+    msg_id: number
 }
 
 const STATEMENTS = {
@@ -156,6 +175,11 @@ const STATEMENTS = {
     getEntById: 'select * from entities where id = ?',
     getEntByPhone: 'select * from entities where phone = ? limit 1',
     getEntByUser: 'select * from entities where username = ? limit 1',
+
+    storeMessageRef: 'insert or replace into message_refs (peer_id, chat_id, msg_id) values (?, ?, ?)',
+    getMessageRef: 'select chat_id, msg_id from message_refs where peer_id = ?',
+    delMessageRefs: 'delete from message_refs where chat_id = ? and msg_id = ?',
+    delAllMessageRefs: 'delete from message_refs where peer_id = ?',
 
     delStaleState: 'delete from state where expires < ?',
 } as const
@@ -312,8 +336,6 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
         )
 
         this._vacuumInterval = params?.vacuumInterval ?? 300_000
-
-        // todo: add support for workers (idk if really needed, but still)
     }
 
     setup(log: Logger, readerMap: TlReaderMap, writerMap: TlWriterMap): void {
@@ -391,6 +413,12 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
                 ])
             }
             from = 4
+        }
+
+        if (from === 4) {
+            // message references support added
+            this._db.exec(MESSAGE_REFS_TABLE)
+            from = 5
         }
 
         if (from !== CURRENT_VERSION) {
@@ -532,11 +560,19 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
         this._statements.delAllAuthTemp.run(dcId)
     }
 
+    private _cachedSelf?: ITelegramStorage.SelfInfo | null
     getSelf(): ITelegramStorage.SelfInfo | null {
-        return this._getFromKv('self')
+        if (this._cachedSelf !== undefined) return this._cachedSelf
+
+        const self = this._getFromKv<ITelegramStorage.SelfInfo | null>('self')
+        this._cachedSelf = self
+
+        return self
     }
 
     setSelf(self: ITelegramStorage.SelfInfo | null): void {
+        this._cachedSelf = self
+
         return this._setToKv('self', self, true)
     }
 
@@ -624,11 +660,43 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
                     peer: getInputPeer(peer),
                     full: peer.full,
                 })
+
+                // we have the full peer, we no longer need the references
+                // we can skip this in the other branch, since in that case it would've already been deleted
+                if (!this._cachedSelf?.isBot) {
+                    this._pending.push([this._statements.delAllMessageRefs, [peer.id]])
+                }
             }
         })
     }
 
-    getPeerById(peerId: number): tl.TypeInputPeer | null {
+    private _findPeerByReference(peerId: number): tl.TypeInputPeer | null {
+        const row = this._statements.getMessageRef.get(peerId) as MessageRef | null
+        if (!row) return null
+
+        const chat = this.getPeerById(row.chat_id, false)
+        if (!chat) return null
+
+        if (peerId > 0) {
+            // user
+            return {
+                _: 'inputPeerUserFromMessage',
+                peer: chat,
+                userId: peerId,
+                msgId: row.msg_id,
+            }
+        }
+
+        // channel
+        return {
+            _: 'inputPeerChannelFromMessage',
+            peer: chat,
+            channelId: toggleChannelIdMark(peerId),
+            msgId: row.msg_id,
+        }
+    }
+
+    getPeerById(peerId: number, allowRefs = true): tl.TypeInputPeer | null {
         const cached = this._cache?.get(peerId)
         if (cached) return cached.peer
 
@@ -642,6 +710,10 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
             })
 
             return peer
+        }
+
+        if (allowRefs) {
+            return this._findPeerByReference(peerId)
         }
 
         return null
@@ -697,6 +769,16 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
         }
 
         return null
+    }
+
+    saveReferenceMessage(peerId: number, chatId: number, messageId: number): void {
+        this._pending.push([this._statements.storeMessageRef, [peerId, chatId, messageId]])
+    }
+
+    deleteReferenceMessages(chatId: number, messageIds: number[]): void {
+        for (const id of messageIds) {
+            this._pending.push([this._statements.delMessageRefs, [chatId, id]])
+        }
     }
 
     // IStateStorage implementation

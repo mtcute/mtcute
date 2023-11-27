@@ -494,21 +494,15 @@ export class BaseTelegramClient extends EventEmitter {
 
     /**
      * Adds all peers from a given object to entity cache in storage.
-     *
-     * @returns  `true` if there were any `min` peers
      */
-    async _cachePeersFrom(obj: object): Promise<boolean> {
+    async _cachePeersFrom(obj: object): Promise<void> {
         const parsedPeers: ITelegramStorage.PeerInfo[] = []
 
-        let hadMin = false
         let count = 0
 
         for (const peer of getAllPeersFrom(obj as tl.TlObject)) {
             if ((peer as any).min) {
-                // absolutely incredible min peer handling, courtesy of levlam.
-                // see this thread: https://t.me/tdlibchat/15084
-                hadMin = true
-                this.log.debug('received min peer: %j', peer)
+                // no point in caching min peers as we can't use them
                 continue
             }
 
@@ -560,8 +554,6 @@ export class BaseTelegramClient extends EventEmitter {
             await this.storage.updatePeers(parsedPeers)
             this.log.debug('cached %d peers', count)
         }
-
-        return hadMin
     }
 
     /**

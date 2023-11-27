@@ -31,9 +31,22 @@ export async function resolvePeer(
             peerId = getMarkedPeerId(peerId)
         } else if ('inputPeer' in peerId) {
             // User | Chat
-            return peerId.inputPeer
+            peerId = peerId.inputPeer
         } else {
-            return normalizeToInputPeer(peerId)
+            peerId = normalizeToInputPeer(peerId)
+        }
+    }
+
+    if (typeof peerId === 'object') {
+        switch (peerId._) {
+            case 'mtcute.dummyInputPeerMinUser':
+                peerId = peerId.userId
+                break
+            case 'mtcute.dummyInputPeerMinChannel':
+                peerId = toggleChannelIdMark(peerId.channelId)
+                break
+            default:
+                return peerId
         }
     }
 

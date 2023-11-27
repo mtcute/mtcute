@@ -14,7 +14,7 @@ describe('MemoryStorage', () => {
                 constructor() {
                     super()
                     this._setStateFrom({
-                        $version: 1,
+                        $version: 2,
                         defaultDcs: null,
                         authKeys: new Map(),
                         authKeysTemp: new Map(),
@@ -26,6 +26,7 @@ describe('MemoryStorage', () => {
                         pts: new Map(),
                         fsm: new Map(),
                         rl: new Map(),
+                        refs: new Map(),
                         self: null,
                     })
                 }

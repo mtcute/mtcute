@@ -533,7 +533,7 @@ export class NetworkManager {
             throw new MtArgumentError('DC manager already exists')
         }
 
-        const dc = new DcConnectionManager(this, defaultDcs.main.id, defaultDcs)
+        const dc = new DcConnectionManager(this, defaultDcs.main.id, defaultDcs, true)
         this._dcConnections.set(defaultDcs.main.id, dc)
         await this._switchPrimaryDc(dc)
     }
@@ -619,7 +619,7 @@ export class NetworkManager {
         const options = await this._findDcOptions(newDc)
 
         if (!this._dcConnections.has(newDc)) {
-            this._dcConnections.set(newDc, new DcConnectionManager(this, newDc, options))
+            this._dcConnections.set(newDc, new DcConnectionManager(this, newDc, options, true))
         }
 
         await this._storage.setDefaultDcs(options)

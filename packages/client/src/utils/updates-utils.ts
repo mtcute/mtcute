@@ -19,7 +19,7 @@ export function createDummyUpdate(pts: number, ptsCount: number, channelId = 0):
         users: [],
         updates: [
             {
-                _: 'dummyUpdate',
+                _: 'mtcute.dummyUpdate',
                 channelId,
                 pts,
                 ptsCount,

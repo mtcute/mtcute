@@ -1,4 +1,12 @@
-import { Message, OmitInputMessageId, ParametersSkip1, TelegramClient } from '@mtcute/client'
+import {
+    Chat,
+    Message,
+    MtPeerNotFoundError,
+    OmitInputMessageId,
+    ParametersSkip1,
+    TelegramClient,
+    User,
+} from '@mtcute/client'
 import { DeleteMessagesParams } from '@mtcute/client/src/methods/messages/delete-messages.js'
 import { ForwardMessageOptions } from '@mtcute/client/src/methods/messages/forward-messages.js'
 import { SendCopyParams } from '@mtcute/client/src/methods/messages/send-copy.js'
@@ -38,6 +46,29 @@ export class MessageContext extends Message implements UpdateContext<Message> {
 
         this.messages = Array.isArray(message) ? message.map((it) => new MessageContext(client, it)) : [this]
         this.isMessageGroup = Array.isArray(message)
+    }
+
+    /**
+     * Get complete information about {@link sender}
+     *
+     * Learn more: [Incomplete peers](https://mtcute.dev/guide/topics/peers.html#incomplete-peers)
+     */
+    async getSender(): Promise<User | Chat> {
+        if (!this.sender.isMin) return this.sender
+
+        let res
+
+        if (this.sender.type === 'user') {
+            [res] = await this.client.getUsers(this.sender)
+        } else {
+            res = await this.client.getChat(this.sender)
+        }
+
+        if (!res) throw new MtPeerNotFoundError('Failed to fetch sender')
+
+        Object.defineProperty(this, 'sender', { value: res })
+
+        return res
     }
 
     /** Get a message that this message is a reply to */

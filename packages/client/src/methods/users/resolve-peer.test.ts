@@ -46,6 +46,49 @@ describe('resolvePeer', () => {
         })
     })
 
+    it('should extract input peer from dummy min peers', async () => {
+        const client = StubTelegramClient.offline()
+
+        await client.registerPeers(
+            createStub('channel', {
+                id: 456,
+                accessHash: Long.fromBits(111, 222),
+            }),
+        )
+        await client.storage.saveReferenceMessage(123, -1000000000456, 789)
+        await client.storage.saveReferenceMessage(-1000000000123, -1000000000456, 789)
+
+        const resolved = await resolvePeer(client, {
+            _: 'mtcute.dummyInputPeerMinUser',
+            userId: 123,
+        })
+        const resolved2 = await resolvePeer(client, {
+            _: 'mtcute.dummyInputPeerMinChannel',
+            channelId: 123,
+        })
+
+        expect(resolved).toEqual({
+            _: 'inputPeerUserFromMessage',
+            userId: 123,
+            peer: {
+                _: 'inputPeerChannel',
+                channelId: 456,
+                accessHash: Long.fromBits(111, 222),
+            },
+            msgId: 789,
+        })
+        expect(resolved2).toEqual({
+            _: 'inputPeerChannelFromMessage',
+            channelId: 123,
+            peer: {
+                _: 'inputPeerChannel',
+                channelId: 456,
+                accessHash: Long.fromBits(111, 222),
+            },
+            msgId: 789,
+        })
+    })
+
     it('should return inputPeerSelf for me/self', async () => {
         expect(await resolvePeer(StubTelegramClient.offline(), 'me')).toEqual({ _: 'inputPeerSelf' })
         expect(await resolvePeer(StubTelegramClient.offline(), 'self')).toEqual({ _: 'inputPeerSelf' })
@@ -69,6 +112,31 @@ describe('resolvePeer', () => {
                     _: 'inputPeerUser',
                     userId: 123,
                     accessHash: Long.fromBits(456, 789),
+                })
+            })
+
+            it('should try checking for message references in storage', async () => {
+                const client = StubTelegramClient.offline()
+
+                await client.registerPeers(
+                    createStub('channel', {
+                        id: 456,
+                        accessHash: Long.fromBits(111, 222),
+                    }),
+                )
+                await client.storage.saveReferenceMessage(123, -1000000000456, 789)
+
+                const resolved = await resolvePeer(client, 123)
+
+                expect(resolved).toEqual({
+                    _: 'inputPeerUserFromMessage',
+                    userId: 123,
+                    peer: {
+                        _: 'inputPeerChannel',
+                        channelId: 456,
+                        accessHash: Long.fromBits(111, 222),
+                    },
+                    msgId: 789,
                 })
             })
 
@@ -105,6 +173,31 @@ describe('resolvePeer', () => {
                 })
             })
 
+            it('should try checking for message references in storage', async () => {
+                const client = StubTelegramClient.offline()
+
+                await client.registerPeers(
+                    createStub('channel', {
+                        id: 456,
+                        accessHash: Long.fromBits(111, 222),
+                    }),
+                )
+                await client.storage.saveReferenceMessage(-1000000000123, -1000000000456, 789)
+
+                const resolved = await resolvePeer(client, -1000000000123)
+
+                expect(resolved).toEqual({
+                    _: 'inputPeerChannelFromMessage',
+                    channelId: 123,
+                    peer: {
+                        _: 'inputPeerChannel',
+                        channelId: 456,
+                        accessHash: Long.fromBits(111, 222),
+                    },
+                    msgId: 789,
+                })
+            })
+
             it('should return channel with zero hash if not in storage', async () => {
                 const client = new StubTelegramClient()
 
@@ -119,7 +212,7 @@ describe('resolvePeer', () => {
         })
 
         describe('chats', () => {
-            it('should always return zero hash', async () => {
+            it('should correctly resolve', async () => {
                 const client = StubTelegramClient.offline()
 
                 const resolved = await resolvePeer(client, -123)

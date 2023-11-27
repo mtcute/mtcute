@@ -76,7 +76,8 @@ export interface PendingUpdate {
     qts?: number
     qtsBefore?: number
     timeout?: number
-    peers?: PeersIndex
+    peers: PeersIndex
+    fromDifference: boolean
 }
 
 /** @internal */
@@ -181,7 +182,7 @@ export function createUpdatesState(
     }
 }
 
-export function toPendingUpdate(upd: tl.TypeUpdate, peers?: PeersIndex): PendingUpdate {
+export function toPendingUpdate(upd: tl.TypeUpdate, peers: PeersIndex, fromDifference = false): PendingUpdate {
     const channelId = extractChannelIdFromUpdate(upd) || 0
     const pts = 'pts' in upd ? upd.pts : undefined
     // eslint-disable-next-line no-nested-ternary
@@ -196,5 +197,6 @@ export function toPendingUpdate(upd: tl.TypeUpdate, peers?: PeersIndex): Pending
         qts,
         qtsBefore: qts ? qts - 1 : undefined,
         peers,
+        fromDifference,
     }
 }

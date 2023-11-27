@@ -3,7 +3,7 @@ import { tl } from '@mtcute/tl'
 import { LruMap, toggleChannelIdMark } from '../utils/index.js'
 import { ITelegramStorage } from './abstract.js'
 
-const CURRENT_VERSION = 1
+const CURRENT_VERSION = 2
 
 type PeerInfoWithUpdated = ITelegramStorage.PeerInfo & { updated: number }
 
@@ -22,6 +22,9 @@ export interface MemorySessionState {
     phoneIndex: Map<string, number>
     // username -> peer id
     usernameIndex: Map<string, number>
+
+    // reference messages. peer id -> `${chat id}:${msg id}][]
+    refs: Map<number, Set<string>>
 
     // common pts, date, seq, qts
     gpts: [number, number, number, number] | null
@@ -110,12 +113,15 @@ export class MemoryStorage implements ITelegramStorage {
             entities: new Map(),
             phoneIndex: new Map(),
             usernameIndex: new Map(),
+            refs: new Map(),
             gpts: null,
             pts: new Map(),
             fsm: new Map(),
             rl: new Map(),
             self: null,
         }
+        this._cachedInputPeers?.clear()
+        this._cachedFull?.clear()
     }
 
     /**
@@ -125,7 +131,14 @@ export class MemoryStorage implements ITelegramStorage {
      * you plan on using it somewhere else, be sure to copy it beforehand.
      */
     protected _setStateFrom(obj: MemorySessionState): void {
-        if (obj.$version !== CURRENT_VERSION) return
+        let ver = obj.$version as number
+
+        if (ver === 1) {
+            // v2: introduced message references
+            obj.refs = new Map()
+            obj.$version = ver = 2
+        }
+        if (ver !== CURRENT_VERSION) return
 
         // populate indexes if needed
         let populate = false
@@ -252,6 +265,11 @@ export class MemoryStorage implements ITelegramStorage {
             if (peer.phone) this._state.phoneIndex.set(peer.phone, peer.id)
 
             this._state.entities.set(peer.id, peer)
+
+            // no point in storing references anymore, since we have the full peer
+            if (this._state.refs.has(peer.id)) {
+                this._state.refs.delete(peer.id)
+            }
         }
     }
 
@@ -279,11 +297,42 @@ export class MemoryStorage implements ITelegramStorage {
         }
     }
 
+    private _findPeerByRef(peerId: number): tl.TypeInputPeer | null {
+        const refs = this._state.refs.get(peerId)
+        if (!refs || refs.size === 0) return null
+
+        const [ref] = refs.values()
+        const [chatId, msgId] = ref.split(':').map(Number)
+
+        const chatPeer = this._getInputPeer(this._state.entities.get(chatId))
+        if (!chatPeer) return null
+
+        if (peerId > 0) {
+            // user
+            return {
+                _: 'inputPeerUserFromMessage',
+                msgId,
+                userId: peerId,
+                peer: chatPeer,
+            }
+        }
+
+        // channel
+        return {
+            _: 'inputPeerChannelFromMessage',
+            msgId,
+            channelId: toggleChannelIdMark(peerId),
+            peer: chatPeer,
+        }
+    }
+
     getPeerById(peerId: number): tl.TypeInputPeer | null {
         if (this._cachedInputPeers.has(peerId)) {
             return this._cachedInputPeers.get(peerId)!
         }
-        const peer = this._getInputPeer(this._state.entities.get(peerId))
+
+        let peer = this._getInputPeer(this._state.entities.get(peerId))
+        if (!peer) peer = this._findPeerByRef(peerId)
         if (peer) this._cachedInputPeers.set(peerId, peer)
 
         return peer
@@ -305,6 +354,23 @@ export class MemoryStorage implements ITelegramStorage {
         if (Date.now() - peer.updated > USERNAME_TTL) return null
 
         return this._getInputPeer(peer)
+    }
+
+    saveReferenceMessage(peerId: number, chatId: number, messageId: number): void {
+        if (!this._state.refs.has(peerId)) {
+            this._state.refs.set(peerId, new Set())
+        }
+
+        this._state.refs.get(peerId)!.add(`${chatId}:${messageId}`)
+    }
+
+    deleteReferenceMessages(chatId: number, messageIds: number[]): void {
+        // not the most efficient way, but it's fine
+        for (const refs of this._state.refs.values()) {
+            for (const msg of messageIds) {
+                refs.delete(`${chatId}:${msg}`)
+            }
+        }
     }
 
     getSelf(): ITelegramStorage.SelfInfo | null {

@@ -1,11 +1,17 @@
 /* eslint-disable max-depth,max-params */
-import { assertNever, BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
+import { assertNever, BaseTelegramClient, MaybeAsync, MtArgumentError, tl } from '@mtcute/core'
 import { getBarePeerId, getMarkedPeerId, markedPeerIdToBare, toggleChannelIdMark } from '@mtcute/core/utils.js'
 
 import { PeersIndex } from '../../types/index.js'
-import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import {
+    isInputPeerChannel,
+    isInputPeerUser,
+    normalizeToInputChannel,
+    normalizeToInputUser,
+} from '../../utils/peer-utils.js'
 import { RpsMeter } from '../../utils/rps-meter.js'
 import { getAuthState } from '../auth/_state.js'
+import { _getChannelsBatched, _getUsersBatched } from '../chats/batched-queries.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { createUpdatesState, PendingUpdate, toPendingUpdate, UpdatesManagerParams, UpdatesState } from './types.js'
 import { extractChannelIdFromUpdate, messageToUpdate } from './utils.js'
@@ -410,89 +416,58 @@ function addToNoDispatchIndex(state: UpdatesState, updates?: tl.TypeUpdates): vo
     }
 }
 
-async function replaceMinPeers(client: BaseTelegramClient, peers: PeersIndex): Promise<boolean> {
-    for (const [key, user_] of peers.users) {
-        const user = user_ as Exclude<tl.TypeUser, tl.RawUserEmpty>
-
-        if (user.min) {
-            const cached = await client.storage.getFullPeerById(user.id)
-            if (!cached) return false
-            peers.users.set(key, cached as tl.TypeUser)
-        }
-    }
-
-    for (const [key, chat_] of peers.chats) {
-        const chat = chat_ as Extract<tl.TypeChat, { min?: boolean }>
-
-        if (chat.min) {
-            let id: number
-
-            switch (chat._) {
-                case 'channel':
-                    id = toggleChannelIdMark(chat.id)
-                    break
-                default:
-                    id = -chat.id
-            }
-
-            const cached = await client.storage.getFullPeerById(id)
-            if (!cached) return false
-            peers.chats.set(key, cached as tl.TypeChat)
-        }
-    }
-
-    peers.hasMin = false
-
-    return true
-}
-
-async function fetchPeersForShort(
+async function fetchMissingPeers(
     client: BaseTelegramClient,
-    upd: tl.TypeUpdate | tl.RawMessage | tl.RawMessageService,
-): Promise<PeersIndex | null> {
-    const peers = new PeersIndex()
+    upd: tl.TypeUpdate,
+    peers: PeersIndex,
+    allowMissing = false,
+): Promise<Set<number>> {
+    const missing = new Set<number>()
 
-    const fetchPeer = async (peer?: tl.TypePeer | number) => {
+    async function fetchPeer(peer?: tl.TypePeer | number) {
         if (!peer) return true
 
         const bare = typeof peer === 'number' ? markedPeerIdToBare(peer) : getBarePeerId(peer)
 
         const marked = typeof peer === 'number' ? peer : getMarkedPeerId(peer)
+        const index = marked > 0 ? peers.chats : peers.users
+
+        if (index.has(bare)) return true
+        if (missing.has(marked)) return false
 
         const cached = await client.storage.getFullPeerById(marked)
-        if (!cached) return false
 
-        if (marked > 0) {
-            peers.users.set(bare, cached as tl.TypeUser)
-        } else {
-            peers.chats.set(bare, cached as tl.TypeChat)
+        if (!cached) {
+            missing.add(marked)
+
+            return allowMissing
         }
+
+        // whatever, ts is not smart enough to understand
+        (index as Map<number, tl.TypeUser | tl.TypeChat>).set(bare, cached)
 
         return true
     }
 
     switch (upd._) {
-        // not really sure if these can be inside updateShort, but whatever
-        case 'message':
-        case 'messageService':
         case 'updateNewMessage':
         case 'updateNewChannelMessage':
         case 'updateEditMessage':
         case 'updateEditChannelMessage': {
-            const msg = upd._ === 'message' || upd._ === 'messageService' ? upd : upd.message
-            if (msg._ === 'messageEmpty') return null
+            const msg = upd.message
+            if (msg._ === 'messageEmpty') return missing
 
             // ref: https://github.com/tdlib/td/blob/master/td/telegram/UpdatesManager.cpp
             // (search by UpdatesManager::is_acceptable_update)
-            if (!(await fetchPeer(msg.peerId))) return null
-            if (!(await fetchPeer(msg.fromId))) return null
+            if (!(await fetchPeer(msg.peerId))) return missing
+            if (!(await fetchPeer(msg.fromId))) return missing
 
             if (msg.replyTo) {
                 if (msg.replyTo._ === 'messageReplyHeader' && !(await fetchPeer(msg.replyTo.replyToPeerId))) {
-                    return null
+                    return missing
                 }
                 if (msg.replyTo._ === 'messageReplyStoryHeader' && !(await fetchPeer(msg.replyTo.userId))) {
-                    return null
+                    return missing
                 }
             }
 
@@ -501,14 +476,14 @@ async function fetchPeersForShort(
                     msg.fwdFrom &&
                     (!(await fetchPeer(msg.fwdFrom.fromId)) || !(await fetchPeer(msg.fwdFrom.savedFromPeer)))
                 ) {
-                    return null
+                    return missing
                 }
-                if (!(await fetchPeer(msg.viaBotId))) return null
+                if (!(await fetchPeer(msg.viaBotId))) return missing
 
                 if (msg.entities) {
                     for (const ent of msg.entities) {
                         if (ent._ === 'messageEntityMentionName') {
-                            if (!(await fetchPeer(ent.userId))) return null
+                            if (!(await fetchPeer(ent.userId))) return missing
                         }
                     }
                 }
@@ -517,7 +492,7 @@ async function fetchPeersForShort(
                     switch (msg.media._) {
                         case 'messageMediaContact':
                             if (msg.media.userId && !(await fetchPeer(msg.media.userId))) {
-                                return null
+                                return missing
                             }
                     }
                 }
@@ -527,28 +502,28 @@ async function fetchPeersForShort(
                     case 'messageActionChatAddUser':
                     case 'messageActionInviteToGroupCall':
                         for (const user of msg.action.users) {
-                            if (!(await fetchPeer(user))) return null
+                            if (!(await fetchPeer(user))) return missing
                         }
                         break
                     case 'messageActionChatJoinedByLink':
                         if (!(await fetchPeer(msg.action.inviterId))) {
-                            return null
+                            return missing
                         }
                         break
                     case 'messageActionChatDeleteUser':
-                        if (!(await fetchPeer(msg.action.userId))) return null
+                        if (!(await fetchPeer(msg.action.userId))) return missing
                         break
                     case 'messageActionChatMigrateTo':
                         if (!(await fetchPeer(toggleChannelIdMark(msg.action.channelId)))) {
-                            return null
+                            return missing
                         }
                         break
                     case 'messageActionChannelMigrateFrom':
-                        if (!(await fetchPeer(-msg.action.chatId))) return null
+                        if (!(await fetchPeer(-msg.action.chatId))) return missing
                         break
                     case 'messageActionGeoProximityReached':
-                        if (!(await fetchPeer(msg.action.fromId))) return null
-                        if (!(await fetchPeer(msg.action.toId))) return null
+                        if (!(await fetchPeer(msg.action.fromId))) return missing
+                        if (!(await fetchPeer(msg.action.toId))) return missing
                         break
                 }
             }
@@ -558,13 +533,97 @@ async function fetchPeersForShort(
             if ('entities' in upd.draft && upd.draft.entities) {
                 for (const ent of upd.draft.entities) {
                     if (ent._ === 'messageEntityMentionName') {
-                        if (!(await fetchPeer(ent.userId))) return null
+                        if (!(await fetchPeer(ent.userId))) return missing
                     }
                 }
             }
     }
 
-    return peers
+    return missing
+}
+
+async function storeMessageReferences(client: BaseTelegramClient, msg: tl.TypeMessage): Promise<void> {
+    if (msg._ === 'messageEmpty') return
+
+    const peerId = msg.peerId
+    if (peerId._ !== 'peerChannel') return
+
+    const channelId = toggleChannelIdMark(peerId.channelId)
+
+    const promises: MaybeAsync<void>[] = []
+
+    function store(peer?: tl.TypePeer | number | number[]): void {
+        if (!peer) return
+
+        if (Array.isArray(peer)) {
+            peer.forEach(store)
+
+            return
+        }
+
+        const marked = typeof peer === 'number' ? peer : getMarkedPeerId(peer)
+
+        promises.push(client.storage.saveReferenceMessage(marked, channelId, msg.id))
+    }
+
+    // reference: https://github.com/tdlib/td/blob/master/td/telegram/MessagesManager.cpp
+    // (search by get_message_user_ids, get_message_channel_ids)
+    store(msg.fromId)
+
+    if (msg._ === 'message') {
+        store(msg.viaBotId)
+        store(msg.fwdFrom?.fromId)
+
+        if (msg.media) {
+            switch (msg.media._) {
+                case 'messageMediaWebPage':
+                    if (msg.media.webpage._ === 'webPage' && msg.media.webpage.attributes) {
+                        for (const attr of msg.media.webpage.attributes) {
+                            if (attr._ === 'webPageAttributeStory') {
+                                store(attr.peer)
+                            }
+                        }
+                    }
+                    break
+                case 'messageMediaContact':
+                    store(msg.media.userId)
+                    break
+                case 'messageMediaStory':
+                    store(msg.media.peer)
+                    break
+                case 'messageMediaGiveaway':
+                    store(msg.media.channels.map(toggleChannelIdMark))
+                    break
+            }
+        }
+    } else {
+        switch (msg.action._) {
+            case 'messageActionChatCreate':
+            case 'messageActionChatAddUser':
+            case 'messageActionInviteToGroupCall':
+                store(msg.action.users)
+                break
+            case 'messageActionChatDeleteUser':
+                store(msg.action.userId)
+                break
+        }
+    }
+
+    if (msg.replyTo) {
+        switch (msg.replyTo._) {
+            case 'messageReplyHeader':
+                store(msg.replyTo.replyToPeerId)
+                store(msg.replyTo.replyFrom?.fromId)
+                break
+            case 'messageReplyStoryHeader':
+                store(msg.replyTo.userId)
+                break
+        }
+        // in fact, we can also use peers contained in the replied-to message,
+        // but we don't fetch it automatically, so we can't know which peers are there
+    }
+
+    await Promise.all(promises)
 }
 
 function isMessageEmpty(upd: tl.TypeUpdate): boolean {
@@ -615,8 +674,7 @@ async function fetchChannelDifference(
     state: UpdatesState,
     channelId: number,
     fallbackPts?: number,
-    force = false,
-): Promise<void> {
+): Promise<boolean> {
     let _pts: number | null | undefined = state.cpts.get(channelId)
 
     if (!_pts && state.catchUpChannels) {
@@ -627,17 +685,15 @@ async function fetchChannelDifference(
     if (!_pts) {
         state.log.debug('fetchChannelDifference failed for channel %d: base pts not available', channelId)
 
-        return
+        return false
     }
 
-    let channel
+    const channel = normalizeToInputChannel(await resolvePeer(client, toggleChannelIdMark(channelId)))
 
-    try {
-        channel = normalizeToInputChannel(await resolvePeer(client, toggleChannelIdMark(channelId)))
-    } catch (e) {
-        state.log.warn('fetchChannelDifference failed for channel %d: input peer not found', channelId)
+    if (channel._ === 'inputChannel' && channel.accessHash.isZero()) {
+        state.log.debug('fetchChannelDifference failed for channel %d: input peer not found', channelId)
 
-        return
+        return false
     }
 
     // to make TS happy
@@ -652,7 +708,7 @@ async function fetchChannelDifference(
     for (;;) {
         const diff = await client.call({
             _: 'updates.getChannelDifference',
-            force,
+            force: true, // Set to true to skip some possibly unneeded updates and reduce server-side load
             channel,
             pts,
             limit,
@@ -688,7 +744,7 @@ async function fetchChannelDifference(
 
                 if (message._ === 'messageEmpty') return
 
-                state.pendingUnorderedUpdates.pushBack(toPendingUpdate(messageToUpdate(message), peers))
+                state.pendingUnorderedUpdates.pushBack(toPendingUpdate(messageToUpdate(message), peers, true))
             })
             break
         }
@@ -707,11 +763,11 @@ async function fetchChannelDifference(
 
             if (message._ === 'messageEmpty') return
 
-            state.pendingUnorderedUpdates.pushBack(toPendingUpdate(messageToUpdate(message), peers))
+            state.pendingUnorderedUpdates.pushBack(toPendingUpdate(messageToUpdate(message), peers, true))
         })
 
         diff.otherUpdates.forEach((upd) => {
-            const parsed = toPendingUpdate(upd, peers)
+            const parsed = toPendingUpdate(upd, peers, true)
 
             state.log.debug(
                 'processing %s from diff for channel %d, pts_before: %d, pts: %d',
@@ -733,6 +789,8 @@ async function fetchChannelDifference(
 
     state.cpts.set(channelId, pts)
     state.cptsMod.set(channelId, pts)
+
+    return true
 }
 
 function fetchChannelDifferenceLater(
@@ -741,17 +799,21 @@ function fetchChannelDifferenceLater(
     requestedDiff: Map<number, Promise<void>>,
     channelId: number,
     fallbackPts?: number,
-    force = false,
 ): void {
     if (!requestedDiff.has(channelId)) {
         requestedDiff.set(
             channelId,
-            fetchChannelDifference(client, state, channelId, fallbackPts, force)
+            fetchChannelDifference(client, state, channelId, fallbackPts)
                 .catch((err) => {
                     state.log.warn('error fetching difference for %d: %s', channelId, err)
                 })
-                .then(() => {
+                .then((ok) => {
                     requestedDiff.delete(channelId)
+
+                    if (!ok) {
+                        state.log.debug('channel difference for %d failed, falling back to common diff', channelId)
+                        fetchDifferenceLater(client, state, requestedDiff)
+                    }
                 }),
         )
     }
@@ -802,7 +864,7 @@ async function fetchDifference(
             if (message._ === 'messageEmpty') return
 
             // pts does not need to be checked for them
-            state.pendingUnorderedUpdates.pushBack(toPendingUpdate(messageToUpdate(message), peers))
+            state.pendingUnorderedUpdates.pushBack(toPendingUpdate(messageToUpdate(message), peers, true))
         })
 
         diff.otherUpdates.forEach((upd) => {
@@ -820,7 +882,7 @@ async function fetchDifference(
 
             if (isMessageEmpty(upd)) return
 
-            const parsed = toPendingUpdate(upd, peers)
+            const parsed = toPendingUpdate(upd, peers, true)
 
             if (parsed.channelId && parsed.ptsBefore) {
                 // we need to check pts for these updates, put into pts queue
@@ -870,6 +932,11 @@ function fetchDifferenceLater(
                     }
 
                     state.log.warn('error fetching common difference: %s', err)
+
+                    if (tl.RpcError.is(err, 'PERSISTENT_TIMESTAMP_INVALID')) {
+                        // this function never throws
+                        return fetchUpdatesState(client, state)
+                    }
                 })
                 .then(() => {
                     requestedDiff.delete(0)
@@ -888,48 +955,44 @@ async function onUpdate(
 ): Promise<void> {
     const upd = pending.update
 
-    // check for min peers, try to replace them
+    let missing: Set<number> | undefined = undefined
+
     // it is important to do this before updating pts
-    if (pending.peers && pending.peers.hasMin) {
-        if (!(await replaceMinPeers(client, pending.peers))) {
+    if (pending.peers.hasMin || pending.peers.empty) {
+        // even if we have min peers in difference, we can't do anything about them.
+        // we still want to collect them, so we can fetch them in the background.
+        // we won't wait for them, since that would block the updates loop
+
+        missing = await fetchMissingPeers(client, upd, pending.peers, pending.fromDifference)
+
+        if (!pending.fromDifference && missing.size) {
             state.log.debug(
-                'fetching difference because some peers were min and not cached for %s (pts = %d, cid = %d)',
+                'fetching difference because some peers were min (%J) and not cached for %s (pts = %d, cid = %d)',
+                missing,
                 upd._,
                 pending.pts,
                 pending.channelId,
             )
 
-            if (pending.channelId) {
-                fetchChannelDifferenceLater(client, state, requestedDiff, pending.channelId)
+            if (pending.channelId && !(upd._ === 'updateNewChannelMessage' && upd.message._ === 'messageService')) {
+                // don't replace service messages, because they can be about bot's kicking
+                fetchChannelDifferenceLater(client, state, requestedDiff, pending.channelId, pending.ptsBefore)
             } else {
                 fetchDifferenceLater(client, state, requestedDiff)
             }
 
             return
         }
-    }
 
-    if (!pending.peers) {
-        // this is a short update, we need to fetch the peers
-        const peers = await fetchPeersForShort(client, upd)
-
-        if (!peers) {
+        if (missing.size) {
             state.log.debug(
-                'fetching difference because some peers were not available for short %s (pts = %d, cid = %d)',
+                'peers still missing after fetching difference: %J for %s (pts = %d, cid = %d)',
+                missing,
                 upd._,
                 pending.pts,
                 pending.channelId,
             )
-
-            if (pending.channelId) {
-                fetchChannelDifferenceLater(client, state, requestedDiff, pending.channelId)
-            } else {
-                fetchDifferenceLater(client, state, requestedDiff)
-            }
-
-            return
         }
-        pending.peers = peers
     }
 
     // apply new pts/qts, if applicable
@@ -988,7 +1051,7 @@ async function onUpdate(
 
     // updates that are also used internally
     switch (upd._) {
-        case 'dummyUpdate':
+        case 'mtcute.dummyUpdate':
             // we just needed to apply new pts values
             return
         case 'updateDcOptions': {
@@ -1000,18 +1063,69 @@ async function onUpdate(
                     dcOptions: upd.dcOptions,
                 })
             } else {
-                await client.network.config.update(true)
+                client.network.config.update(true).catch((err) => client._emitError(err))
             }
             break
         }
         case 'updateConfig':
-            await client.network.config.update(true)
+            client.network.config.update(true).catch((err) => client._emitError(err))
             break
         case 'updateUserName':
             if (upd.userId === state.auth.userId) {
                 state.auth.selfUsername = upd.usernames.find((it) => it.active)?.username ?? null
             }
             break
+        case 'updateDeleteChannelMessages':
+            if (!state.auth.isBot) {
+                await client.storage.deleteReferenceMessages(toggleChannelIdMark(upd.channelId), upd.messages)
+            }
+            break
+        case 'updateNewMessage':
+        case 'updateEditMessage':
+        case 'updateNewChannelMessage':
+        case 'updateEditChannelMessage':
+            if (!state.auth.isBot) {
+                await storeMessageReferences(client, upd.message)
+            }
+            break
+    }
+
+    if (missing?.size) {
+        if (state.auth.isBot) {
+            state.log.warn(
+                'missing peers (%J) after getDifference for %s (pts = %d, cid = %d)',
+                missing,
+                upd._,
+                pending.pts,
+                pending.channelId,
+            )
+        } else {
+            // force save storage so the min peers are stored
+            await client.storage.save?.()
+
+            for (const id of missing) {
+                Promise.resolve(client.storage.getPeerById(id))
+                    .then((peer): unknown => {
+                        if (!peer) {
+                            state.log.warn('cannot fetch full peer %d - getPeerById returned null', id)
+
+                            return
+                        }
+
+                        // the peer will be automatically cached by the `.call()`, we don't have to do anything
+                        if (isInputPeerChannel(peer)) {
+                            return _getChannelsBatched(client, normalizeToInputChannel(peer))
+                        } else if (isInputPeerUser(peer)) {
+                            return _getUsersBatched(client, normalizeToInputUser(peer))
+                        }
+
+                        state.log.warn('cannot fetch full peer %d - unknown peer type %s', id, peer._)
+                    })
+                    .catch((err) => {
+                        state.log.warn('error fetching full peer %d: %s', id, err)
+                    })
+            }
+        }
     }
 
     // dispatch the update
@@ -1034,10 +1148,6 @@ async function onUpdate(
     state.log.debug('dispatching %s (postponed = %s)', upd._, postponed)
     state.handler(upd, pending.peers)
 }
-
-// todo: updateChannelTooLong with catchUpChannels disabled should not trigger getDifference (?)
-// todo: when min peer or similar use pts_before as base pts for channels
-// todo: fetchDiff when Session loss on the server: the client receives a new session created notification
 
 async function updatesLoop(client: BaseTelegramClient, state: UpdatesState): Promise<void> {
     const { log } = state
@@ -1125,14 +1235,35 @@ async function updatesLoop(client: BaseTelegramClient, state: UpdatesState): Pro
                         const peers = PeersIndex.from(upd)
 
                         for (const update of upd.updates) {
-                            if (update._ === 'updateChannelTooLong') {
-                                log.debug(
-                                    'received updateChannelTooLong for channel %d (pts = %d) in container, fetching diff',
-                                    update.channelId,
-                                    update.pts,
-                                )
-                                fetchChannelDifferenceLater(client, state, requestedDiff, update.channelId, update.pts)
-                                continue
+                            switch (update._) {
+                                case 'updateChannelTooLong':
+                                    log.debug(
+                                        'received updateChannelTooLong for channel %d (pts = %d) in container, fetching diff',
+                                        update.channelId,
+                                        update.pts,
+                                    )
+                                    fetchChannelDifferenceLater(
+                                        client,
+                                        state,
+                                        requestedDiff,
+                                        update.channelId,
+                                        update.pts,
+                                    )
+                                    continue
+                                case 'updatePtsChanged':
+                                    // see https://github.com/tdlib/td/blob/07c1d53a6d3cb1fad58d2822e55eef6d57363581/td/telegram/UpdatesManager.cpp#L4051
+                                    if (client.network.getPoolSize('main') > 1) {
+                                        // highload bot
+                                        state.log.debug(
+                                            'updatePtsChanged received, resetting pts to 1 and fetching difference',
+                                        )
+                                        state.pts = 1
+                                        fetchDifferenceLater(client, state, requestedDiff)
+                                    } else {
+                                        state.log.debug('updatePtsChanged received, fetching updates state')
+                                        await fetchUpdatesState(client, state)
+                                    }
+                                    continue
                             }
 
                             const parsed = toPendingUpdate(update, peers)
@@ -1156,7 +1287,7 @@ async function updatesLoop(client: BaseTelegramClient, state: UpdatesState): Pro
                     case 'updateShort': {
                         log.debug('received short %s', upd._)
 
-                        const parsed = toPendingUpdate(upd.update)
+                        const parsed = toPendingUpdate(upd.update, new PeersIndex())
 
                         if (parsed.ptsBefore !== undefined) {
                             state.pendingPtsUpdates.add(parsed)
@@ -1206,6 +1337,8 @@ async function updatesLoop(client: BaseTelegramClient, state: UpdatesState): Pro
                             update,
                             ptsBefore: upd.pts - upd.ptsCount,
                             pts: upd.pts,
+                            peers: new PeersIndex(),
+                            fromDifference: false,
                         })
 
                         break
@@ -1248,6 +1381,8 @@ async function updatesLoop(client: BaseTelegramClient, state: UpdatesState): Pro
                             update,
                             ptsBefore: upd.pts - upd.ptsCount,
                             pts: upd.pts,
+                            peers: new PeersIndex(),
+                            fromDifference: false,
                         })
 
                         break

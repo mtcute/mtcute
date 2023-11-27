@@ -312,7 +312,6 @@ export class SessionConnection extends PersistentConnection {
             this._isPfsBindingPending = true
         }
 
-        process.exit(0)
         doAuthorization(this, this._crypto, TEMP_AUTH_KEY_EXPIRY)
             .then(async ([tempAuthKey, tempServerSalt]) => {
                 if (!this._usePfs) {

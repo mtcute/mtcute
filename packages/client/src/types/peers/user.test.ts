@@ -33,6 +33,21 @@ describe('User', () => {
 
             expect(() => user.inputPeer).toThrow()
         })
+
+        it('should return correct input peer for min', () => {
+            const user = new User(
+                createStub('user', {
+                    id: 123,
+                    accessHash: Long.fromBits(456, 789),
+                    min: true,
+                }),
+            )
+
+            expect(user.inputPeer).toEqual({
+                _: 'mtcute.dummyInputPeerMinUser',
+                userId: 123,
+            })
+        })
     })
 
     describe('status', () => {

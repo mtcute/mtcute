@@ -31,6 +31,7 @@ export class JsonMemoryStorage extends MemoryStorage {
                     case 'pts':
                     case 'fsm':
                     case 'rl':
+                    case 'refs':
                         return new Map(Object.entries(value as Record<string, string>))
                     case 'entities':
                         return new Map()

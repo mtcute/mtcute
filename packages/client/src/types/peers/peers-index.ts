@@ -36,6 +36,10 @@ export class PeersIndex {
         return index
     }
 
+    get empty(): boolean {
+        return this.users.size === 0 && this.chats.size === 0
+    }
+
     user(id: number): tl.TypeUser {
         const r = this.users.get(id)
 

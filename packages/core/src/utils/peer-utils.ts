@@ -70,6 +70,7 @@ export function getMarkedPeerId(
     }
 
     switch (peer._) {
+        case 'mtcute.dummyInputPeerMinUser':
         case 'peerUser':
         case 'inputPeerUser':
         case 'inputPeerUserFromMessage':
@@ -79,6 +80,7 @@ export function getMarkedPeerId(
         case 'peerChat':
         case 'inputPeerChat':
             return -peer.chatId
+        case 'mtcute.dummyInputPeerMinChannel':
         case 'peerChannel':
         case 'inputPeerChannel':
         case 'inputPeerChannelFromMessage':
@@ -87,7 +89,7 @@ export function getMarkedPeerId(
             return ZERO_CHANNEL_ID - peer.channelId
     }
 
-    throw new MtArgumentError('Invalid peer')
+    throw new MtArgumentError(`Invalid peer: ${peer._}`)
 }
 
 /**

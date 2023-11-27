@@ -57,11 +57,53 @@ export class Chat {
     }
 
     /**
-     * Chat's input peer
+     * Whether this chat's information is incomplete.
+     *
+     * This usually only happens in large chats, where
+     * the server sometimes sends only a part of the chat's
+     * information. Basic info like name and profile photo
+     * are always available, but other fields may be omitted
+     * despite being available.
+     *
+     * It was observed that these fields may be missing:
+     *   - `isMember`
+     *   - and probably more
+     *
+     * This currently only ever happens for non-bot users, so if you are building
+     * a normal bot, you can safely ignore this field.
+     *
+     * To fetch the "complete" user information, use one of these methods:
+     *  - {@link TelegramClient.getChat}
+     *  - {@link TelegramClient.getFullChat}.
+     *
+     * Learn more: [Incomplete peers](https://mtcute.dev/guide/topics/peers.html#incomplete-peers)
+     */
+    get isMin(): boolean {
+        // avoid additional runtime checks
+        return Boolean((this.peer as { min?: boolean }).min)
+    }
+
+    /**
+     * Chat's input peer for advanced use-cases.
+     *
+     * > **Note**: for {@link min} chats, this method will return
+     * > `mtcute.dummyInputPeerMin*`, which are actually not a valid input peer,
+     * > These are used to indicate that the user is incomplete, and a message
+     * > reference is needed to resolve the peer.
+     * >
+     * > Such objects are handled by {@link TelegramClient.resolvePeer} method,
+     * so prefer using it whenever you need an input peer.
      */
     get inputPeer(): tl.TypeInputPeer {
         switch (this.peer._) {
             case 'user':
+                if (this.peer.min) {
+                    return {
+                        _: 'mtcute.dummyInputPeerMinUser',
+                        userId: this.peer.id,
+                    }
+                }
+
                 if (!this.peer.accessHash) {
                     throw new MtArgumentError("Peer's access hash is not available!")
                 }
@@ -79,6 +121,13 @@ export class Chat {
                 }
             case 'channel':
             case 'channelForbidden':
+                if ((this.peer as tl.RawChannel).min) {
+                    return {
+                        _: 'mtcute.dummyInputPeerMinChannel',
+                        channelId: this.peer.id,
+                    }
+                }
+
                 if (!this.peer.accessHash) {
                     throw new MtArgumentError("Peer's access hash is not available!")
                 }
@@ -186,6 +235,23 @@ export class Chat {
     /** Whether this peer is a forum supergroup */
     get isForum(): boolean {
         return this.peer._ === 'channel' && this.peer.forum!
+    }
+
+    /**
+     * Whether the current user is a member of the chat.
+     *
+     * For users, this is always `true`.
+     */
+    get isMember(): boolean {
+        switch (this.peer._) {
+            case 'user':
+                return true
+            case 'channel':
+            case 'chat':
+                return !this.peer.left
+            default:
+                return false
+        }
     }
 
     /** Whether you have hidden (arhived) this chat's stories */

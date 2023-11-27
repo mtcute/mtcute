@@ -232,3 +232,23 @@ export const replyTo =
 
             return filter(reply, state)
         }
+
+/**
+ * Middleware-like filter that will fetch the sender of the message
+ * and make it available to further filters, as well as the handler itself.
+ */
+export const withCompleteSender =
+    <Mod, State extends object>(
+        filter?: UpdateFilter<MessageContext, Mod, State>,
+    ): UpdateFilter<MessageContext, Mod, State> =>
+        async (msg, state) => {
+            try {
+                await msg.getSender()
+            } catch (e) {
+                return false
+            }
+
+            if (!filter) return true
+
+            return filter(msg, state)
+        }
