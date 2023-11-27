@@ -10,7 +10,7 @@ module.exports = {
     excludeInternal: true,
     exclude: [
         '**/*/node_modules',
-        './packages/tl/**/*',
+        '../../packages/tl/**/*',
         '**/*.test.ts',
         '**/*.test-utils.ts',
     ],
