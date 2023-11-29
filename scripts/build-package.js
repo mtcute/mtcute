@@ -114,6 +114,31 @@ function buildPackageJson() {
 
     delete pkgJson.typedoc
 
+    function maybeFixPath(p, repl) {
+        if (!p) return p
+
+        if (p.startsWith('./src/')) {
+            return repl + p.slice(6)
+        }
+
+        return p
+    }
+
+    if (pkgJson.browser) {
+        for (const key of Object.keys(pkgJson.browser)) {
+            if (!key.startsWith('./src/')) continue
+
+            const path = key.slice(6)
+            pkgJson.browser[`./esm/${path}`] = maybeFixPath(pkgJson.browser[key], './esm/')
+
+            if (buildConfig.buildCjs) {
+                pkgJson.browser[`./cjs/${path}`] = maybeFixPath(pkgJson.browser[key], './cjs/')
+            }
+
+            delete pkgJson.browser[key]
+        }
+    }
+
     fs.writeFileSync(path.join(packageDir, 'dist/package.json'), JSON.stringify(pkgJson, null, 2))
 }
 

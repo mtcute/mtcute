@@ -12,4 +12,7 @@ export default defineConfig({
             ],
         },
     },
+    define: {
+        'import.meta.env.TEST_ENV': '"node"'
+    }
 })

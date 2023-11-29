@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-globals */
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { gzipSync, inflateSync } from 'zlib'
 
@@ -75,6 +74,28 @@ export async function defaultTestCryptoProvider(source = DEFAULT_ENTROPY): Promi
 
 export function testCryptoProvider(c: ICryptoProvider): void {
     beforeAll(() => c.initialize?.())
+
+    function gzipSyncWrap(data: Uint8Array) {
+        if (import.meta.env.TEST_ENV === 'browser') {
+            // @ts-expect-error fucking crutch because @jspm/core uses Buffer.isBuffer for some reason
+            data._isBuffer = true
+
+            return new Uint8Array(gzipSync(data))
+        }
+
+        return gzipSync(data)
+    }
+
+    function inflateSyncWrap(data: Uint8Array) {
+        if (import.meta.env.TEST_ENV === 'browser') {
+            // @ts-expect-error fucking crutch because @jspm/core uses Buffer.isBuffer for some reason
+            data._isBuffer = true
+
+            return new Uint8Array(inflateSync(data))
+        }
+
+        return inflateSync(data)
+    }
 
     it('should calculate sha1', () => {
         expect(hexEncode(c.sha1(utf8EncodeToBuffer('')))).to.eq('da39a3ee5e6b4b0d3255bfef95601890afd80709')
@@ -188,21 +209,19 @@ export function testCryptoProvider(c: ICryptoProvider): void {
 
         expect(compressed).not.toBeNull()
 
-        const decompressed = inflateSync(compressed!)
+        const decompressed = inflateSyncWrap(compressed!)
 
         expect(compressed!.length).toBeLessThan(data.length)
-        // eslint-disable-next-line no-restricted-globals
-        expect(decompressed).toEqual(Buffer.from(data))
+        expect(hexEncode(decompressed)).toEqual(hexEncode(data))
     })
 
     it('should correctly gunzip', () => {
         const data = new Uint8Array(1000).fill(0x42)
 
-        const compressed = gzipSync(data)
+        const compressed = gzipSyncWrap(data)
         const decompressed = c.gunzip(compressed)
 
-        // eslint-disable-next-line no-restricted-globals
-        expect(Buffer.from(decompressed)).toEqual(Buffer.from(data))
+        expect(hexEncode(decompressed)).toEqual(hexEncode(data))
     })
 
     describe('randomBytes', () => {
@@ -229,7 +248,8 @@ export function testCryptoProvider(c: ICryptoProvider): void {
 export function u8HexDecode(hex: string) {
     const buf = hexDecodeToBuffer(hex)
 
-    if (Buffer.isBuffer(buf)) {
+    // eslint-disable-next-line no-restricted-globals
+    if (import.meta.env.TEST_ENV === 'node' && Buffer.isBuffer(buf)) {
         return new Uint8Array(buf)
     }
 

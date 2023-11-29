@@ -29,10 +29,8 @@
         }
     },
     "browser": {
-        "./cjs/methods/files/_platform.js": "./cjs/methods/files/_platform.web.js",
-        "./esm/methods/files/_platform.js": "./esm/methods/files/_platform.web.js",
-        "./cjs/methods/files/download-file.js": "./cjs/methods/files/download-file.web.js",
-        "./esm/methods/files/download-file.js": "./esm/methods/files/download-file.web.js"
+        "./src/methods/files/_platform.js": "./src/methods/files/_platform.web.js",
+        "./src/methods/files/download-file.js": "./src/methods/files/download-file.web.js"
     },
     "dependencies": {
         "@mtcute/core": "workspace:^",

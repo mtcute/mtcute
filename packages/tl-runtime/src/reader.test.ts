@@ -1,12 +1,25 @@
 // eslint-disable-next-line max-len
 /* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-argument */
 
-import { randomBytes } from 'crypto'
+// import { randomBytes } from 'crypto'
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
 
 import { hexDecodeToBuffer, hexEncode } from './encodings/hex.js'
 import { TlBinaryReader, TlReaderMap } from './reader.js'
+
+let randomBytes: (n: number) => Uint8Array
+
+if (import.meta.env.TEST_ENV === 'node') {
+    randomBytes = await import('crypto').then((m) => m.randomBytes)
+} else {
+    randomBytes = (n: number) => {
+        const buf = new Uint8Array(n)
+        crypto.getRandomValues(buf)
+
+        return buf
+    }
+}
 
 describe('TlBinaryReader', () => {
     it('should read int32', () => {
@@ -111,10 +124,9 @@ describe('TlBinaryReader', () => {
         expect(reader.pos).toEqual(252)
 
         const random1000bytes = randomBytes(1000)
-        // eslint-disable-next-line no-restricted-globals
-        const buffer = Buffer.alloc(1010)
+        const buffer = new Uint8Array(1010)
         buffer[0] = 254
-        buffer.writeIntLE(1000, 1, 3)
+        new DataView(buffer.buffer).setUint32(1, 1000, true)
         buffer.set(random1000bytes, 4)
         reader = TlBinaryReader.manual(buffer)
         expect([...reader.bytes()]).toEqual([...random1000bytes])

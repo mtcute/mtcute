@@ -13,7 +13,9 @@ module.exports = ({ path: { join }, fs, outDir, packageDir, transformFile }) => 
         }
 
         fixWasmPath('cjs/init.js')
+        fixWasmPath('cjs/init.web.js')
         fixWasmPath('esm/init.js')
+        fixWasmPath('esm/init.web.js')
 
         fs.cpSync(join(packageDir, 'lib/mtcute.wasm'), join(outDir, 'mtcute.wasm'))
     },

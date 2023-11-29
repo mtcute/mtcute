@@ -10,8 +10,8 @@ describe('xorBuffer', () => {
         const key = utf8EncodeToBuffer('xor')
 
         const xored = xorBuffer(data, key)
-        expect(data.toString()).eq('hello')
-        expect(key.toString()).eq('xor')
+        expect(utf8Decode(data)).eq('hello')
+        expect(utf8Decode(key)).eq('xor')
         expect(hexEncode(xored)).eq('100a1e6c6f')
     })
 
@@ -45,7 +45,7 @@ describe('xorBufferInPlace', () => {
 
         xorBufferInPlace(data, key)
         expect(hexEncode(data)).eq('100a1e6c6f')
-        expect(key.toString()).eq('xor')
+        expect(utf8Decode(key)).eq('xor')
     })
 
     it('second call should decode content', () => {
@@ -56,6 +56,6 @@ describe('xorBufferInPlace', () => {
         expect(hexEncode(data)).eq('100a1e6c6f')
 
         xorBufferInPlace(data, key)
-        expect(data.toString()).eq('hello')
+        expect(utf8Decode(data)).eq('hello')
     })
 })

@@ -5075,7 +5075,7 @@ export interface TelegramClient extends BaseTelegramClient {
     }): Promise<User>
 }
 
-export { TelegramClientOptions }
+export type { TelegramClientOptions }
 
 export class TelegramClient extends BaseTelegramClient {
     constructor(opts: TelegramClientOptions) {

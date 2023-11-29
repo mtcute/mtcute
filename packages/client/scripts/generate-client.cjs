@@ -632,7 +632,7 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
     )
     output.write('}\n')
 
-    output.write('\nexport { TelegramClientOptions }\n')
+    output.write('\nexport type { TelegramClientOptions }\n')
     output.write('\nexport class TelegramClient extends BaseTelegramClient {\n')
 
     state.fields.forEach(({ code }) => output.write(`protected ${code}\n`))

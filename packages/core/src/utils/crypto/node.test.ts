@@ -2,14 +2,12 @@ import { describe } from 'vitest'
 
 import { testCryptoProvider } from '@mtcute/test'
 
-import { NodeCryptoProvider } from './node.js'
+if (import.meta.env.TEST_ENV === 'node') {
+    describe('NodeCryptoProvider', async () => {
+        const { NodeCryptoProvider } = await import('./node.js')
 
-describe('NodeCryptoProvider', () => {
-    if (typeof process === 'undefined') {
-        console.warn('Skipping NodeCryptoProvider tests')
-
-        return
-    }
-
-    testCryptoProvider(new NodeCryptoProvider())
-})
+        testCryptoProvider(new NodeCryptoProvider())
+    })
+} else {
+    describe.skip('NodeCryptoProvider', () => {})
+}

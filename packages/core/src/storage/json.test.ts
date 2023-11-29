@@ -4,6 +4,9 @@ import { stubPeerUser } from '@mtcute/test'
 
 import { JsonMemoryStorage } from './json.js'
 
+// eslint-disable-next-line no-restricted-globals
+const createBuffer = import.meta.env.TEST_ENV === 'node' ? Buffer.from : (d: number[]) => new Uint8Array(d)
+
 describe('JsonMemoryStorage', () => {
     class ExtJsonMemoryStorage extends JsonMemoryStorage {
         loadJson(json: string): void {
@@ -25,9 +28,9 @@ describe('JsonMemoryStorage', () => {
         s.setUpdatesPts(123)
         s.setUpdatesQts(456)
         // eslint-disable-next-line no-restricted-globals
-        s.setAuthKeyFor(1, Buffer.from([1, 2, 3]))
+        s.setAuthKeyFor(1, createBuffer([1, 2, 3]))
         // eslint-disable-next-line no-restricted-globals
-        s.setTempAuthKeyFor(2, 0, Buffer.from([4, 5, 6]), 1234567890)
+        s.setTempAuthKeyFor(2, 0, createBuffer([4, 5, 6]), 1234567890)
         s.setState('someState', 'someValue')
         s.updatePeers([{ ...stubPeerUser, updated: 0 }])
 

@@ -11,12 +11,9 @@
         "build": "pnpm run -w build-package tl-runtime"
     },
     "browser": {
-        "./cjs/encodings/base64.js": "./cjs/encodings/base64.web.js",
-        "./esm/encodings/base64.js": "./esm/encodings/base64.web.js",
-        "./cjs/encodings/hex.js": "./cjs/encodings/hex.web.js",
-        "./esm/encodings/hex.js": "./esm/encodings/hex.web.js",
-        "./cjs/encodings/utf8.js": "./cjs/encodings/utf8.web.js",
-        "./esm/encodings/utf8.js": "./esm/encodings/utf8.web.js"
+        "./src/encodings/hex.js": "./src/encodings/hex.web.js",
+        "./src/encodings/utf8.js": "./src/encodings/utf8.web.js",
+        "./src/encodings/base64.js": "./src/encodings/base64.web.js"
     },
     "distOnlyFields": {
         "exports": {

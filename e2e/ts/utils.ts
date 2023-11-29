@@ -1,4 +1,4 @@
-import type { BaseTelegramClientOptions } from '@mtcute/core'
+import { BaseTelegramClientOptions } from '@mtcute/core'
 
 export const getApiParams = (): BaseTelegramClientOptions => {
     if (!process.env.API_ID || !process.env.API_HASH) {

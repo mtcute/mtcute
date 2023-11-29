@@ -1,5 +1,6 @@
-/* eslint-disable no-restricted-globals */
 import { describe, expect, it } from 'vitest'
+
+import { hexEncode } from '@mtcute/core/utils.js'
 
 import { StubTelegramClient } from './client.js'
 import { createStub } from './stub.js'
@@ -23,7 +24,7 @@ describe('client stub', () => {
         const client = new StubTelegramClient()
 
         client.onRawMessage((msg) => {
-            log.push(`message ctor=${Buffer.from(msg.slice(0, 4)).toString('hex')}`)
+            log.push(`message ctor=${hexEncode(msg.subarray(0, 4))}`)
             client.close().catch(() => {})
         })
 

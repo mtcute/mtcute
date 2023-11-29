@@ -1,4 +1,6 @@
-import { createRequire } from 'module'
+import * as schema_ from '@mtcute/tl/api-schema.json' assert { type: 'json' }
+
+const schema = ('default' in schema_ ? schema_.default : schema_) as { e: TlEntry[] }
 
 import type { TlEntry } from '@mtcute/tl-utils'
 
@@ -12,10 +14,6 @@ export function getEntriesMap() {
             entries: _cachedEntriesMap,
             unions: _cachedUnionsMap!,
         }
-    }
-
-    const schema = createRequire(import.meta.url)('@mtcute/tl/api-schema.json') as {
-        e: TlEntry[]
     }
 
     _cachedEntriesMap = new Map()

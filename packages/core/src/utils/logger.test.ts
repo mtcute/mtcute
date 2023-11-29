@@ -130,16 +130,18 @@ describe('logger', () => {
                 expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test {"a":1}', [])
             })
 
-            it('should format buffers inside as hex strings', () => {
-                const [mgr, spy] = createManager()
+            if (import.meta.env.TEST_ENV === 'node') {
+                it('should format Buffers inside as hex strings', () => {
+                    const [mgr, spy] = createManager()
 
-                // eslint-disable-next-line no-restricted-globals
-                mgr.info('test %j', { a: Buffer.from([1, 2, 3]) })
-                mgr.info('test Uint8Array %j', { a: new Uint8Array([1, 2, 3]) })
+                    // eslint-disable-next-line no-restricted-globals
+                    mgr.info('test %j', { a: Buffer.from([1, 2, 3]) })
+                    mgr.info('test Uint8Array %j', { a: new Uint8Array([1, 2, 3]) })
 
-                expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test {"a":"010203"}', [])
-                expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test Uint8Array {"a":"010203"}', [])
-            })
+                    expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test {"a":"010203"}', [])
+                    expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test Uint8Array {"a":"010203"}', [])
+                })
+            }
 
             it('should trim long buffers', () => {
                 const [mgr, spy] = createManager()

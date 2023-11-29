@@ -4,7 +4,6 @@ import { defaultTestCryptoProvider, useFakeMathRandom } from '@mtcute/test'
 import { hexDecodeToBuffer, hexEncode } from '@mtcute/tl-runtime'
 
 import { IntermediatePacketCodec, PaddedIntermediatePacketCodec, TransportError } from '../../index.js'
-import { concatBuffers } from '../../utils/index.js'
 
 describe('IntermediatePacketCodec', () => {
     it('should return correct tag', () => {
@@ -82,10 +81,7 @@ describe('IntermediatePacketCodec', () => {
     it('should correctly frame packets', () => {
         const data = hexDecodeToBuffer('6cfeffff')
 
-        // eslint-disable-next-line no-restricted-globals
-        expect(Buffer.from(new IntermediatePacketCodec().encode(data))).toEqual(
-            concatBuffers([new Uint8Array([0x04, 0x00, 0x00, 0x00]), data]),
-        )
+        expect(hexEncode(new IntermediatePacketCodec().encode(data))).toEqual('040000006cfeffff')
     })
 })
 

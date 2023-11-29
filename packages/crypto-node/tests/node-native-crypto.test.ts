@@ -2,9 +2,12 @@ import { describe } from 'vitest'
 
 import { testCryptoProvider } from '@mtcute/test'
 
-import { NodeNativeCryptoProvider } from '../src/index.js'
+if (import.meta.env.TEST_ENV === 'node') {
+    describe('NodeNativeCryptoProvider', async () => {
+        const { NodeNativeCryptoProvider } = await import('../src/index.js')
 
-describe('NodeNativeCryptoProvider', () => {
-    // eslint-disable-next-line
-    testCryptoProvider(new NodeNativeCryptoProvider())
-})
+        testCryptoProvider(new NodeNativeCryptoProvider())
+    })
+} else {
+    describe.skip('NodeNativeCryptoProvider', () => {})
+}

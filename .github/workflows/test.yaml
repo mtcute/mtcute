@@ -9,33 +9,33 @@ on:
     branches: [ master ]
 
 jobs:
-  test:
+  lint: 
     runs-on: ubuntu-latest
     if: github.actor != 'mtcute-bot' # do not run after release
-
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-      - run: pnpm install --frozen-lockfile
-      - name: 'TL codegen'
-        run: pnpm -C packages/tl run gen-code
+      - uses: ./.github/actions/init
       - name: 'TypeScript'
         run: pnpm run lint:tsc:ci
       - name: 'ESLint'
         run: pnpm run lint:ci
       - name: 'Circular dependencies'
         run: pnpm run lint:dpdm
-      - run: pnpm run test:ci
+
+  test-node:
+    runs-on: ubuntu-latest
+    needs: lint
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+        with: 
+          node-version: ${{ matrix.node-version }}
+      - name: 'Run tests'
+        run: pnpm run test:ci
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         if: ${{ matrix.node-version == '18.x' }} # to avoid uploading twice
@@ -43,9 +43,25 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           files: ./coverage/coverage-final.json
+  
+  test-web:
+    runs-on: ubuntu-latest
+    needs: lint
+
+    strategy:
+      matrix:
+        browser: [chromium, firefox]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+      - name: 'Initialize browser'
+        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+      - name: 'Run tests'
+        run: pnpm run test:browser --browser.name=${{ matrix.browser }}
+  
   e2e:
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test-node, test-web]
     steps:
       - uses: actions/checkout@v4
       - name: Run end-to-end tests

@@ -11,16 +11,11 @@
         "build": "pnpm run -w build-package core"
     },
     "browser": {
-        "./cjs/utils/platform/crypto.js": "./cjs/utils/platform/crypto.web.js",
-        "./esm/utils/platform/crypto.js": "./esm/utils/platform/crypto.web.js",
-        "./cjs/utils/platform/transport.js": "./cjs/utils/platform/transport.web.js",
-        "./esm/utils/platform/transport.js": "./esm/utils/platform/transport.web.js",
-        "./cjs/utils/platform/logging.js": "./cjs/utils/platform/logging.web.js",
-        "./esm/utils/platform/logging.js": "./esm/utils/platform/logging.web.js",
-        "./cjs/utils/platform/random.js": "./cjs/utils/platform/random.web.js",
-        "./esm/utils/platform/random.js": "./esm/utils/platform/random.web.js",
-        "./cjs/storage/json-file.js": false,
-        "./esm/storage/json-file.js": false
+        "./src/utils/platform/crypto.js": "./src/utils/platform/crypto.web.js",
+        "./src/utils/platform/transport.js": "./src/utils/platform/transport.web.js",
+        "./src/utils/platform/logging.js": "./src/utils/platform/logging.web.js",
+        "./src/utils/platform/random.js": "./src/utils/platform/random.web.js",
+        "./src/storage/json-file.js": false
     },
     "distOnlyFields": {
         "exports": {

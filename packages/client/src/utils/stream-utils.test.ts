@@ -83,23 +83,25 @@ describe('createChunkedReader', () => {
     })
 })
 
-describe('nodeReadableToWeb', () => {
-    it('should correctly convert a readable stream', async () => {
-        const stream = new Readable({
-            read() {
-                // eslint-disable-next-line no-restricted-globals
-                this.push(Buffer.from([1, 2, 3]))
-                // eslint-disable-next-line no-restricted-globals
-                this.push(Buffer.from([4, 5, 6]))
-                this.push(null)
-            },
+if (import.meta.env.TEST_ENV === 'node') {
+    describe('nodeReadableToWeb', () => {
+        it('should correctly convert a readable stream', async () => {
+            const stream = new Readable({
+                read() {
+                    // eslint-disable-next-line no-restricted-globals
+                    this.push(Buffer.from([1, 2, 3]))
+                    // eslint-disable-next-line no-restricted-globals
+                    this.push(Buffer.from([4, 5, 6]))
+                    this.push(null)
+                },
+            })
+
+            const webStream = nodeReadableToWeb(stream)
+            const reader = webStream.getReader()
+
+            expect(await reader.read()).to.deep.equal({ value: new Uint8Array([1, 2, 3]), done: false })
+            expect(await reader.read()).to.deep.equal({ value: new Uint8Array([4, 5, 6]), done: false })
+            expect(await reader.read()).to.deep.equal({ value: undefined, done: true })
         })
-
-        const webStream = nodeReadableToWeb(stream)
-        const reader = webStream.getReader()
-
-        expect(await reader.read()).to.deep.equal({ value: new Uint8Array([1, 2, 3]), done: false })
-        expect(await reader.read()).to.deep.equal({ value: new Uint8Array([4, 5, 6]), done: false })
-        expect(await reader.read()).to.deep.equal({ value: undefined, done: true })
     })
-})
+}

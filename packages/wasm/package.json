@@ -13,8 +13,7 @@
         "build:wasm": "docker build --output=lib --target=binaries lib"
     },
     "browser": {
-        "./cjs/init.js": "./cjs/init.web.js",
-        "./esm/init.js": "./esm/init.web.js"
+        "./src/init.js": "./src/init.web.js"
     },
     "distOnlyFields": {
         "exports": {
@@ -24,5 +23,8 @@
             },
             "./mtcute.wasm": "./mtcute.wasm"
         }
+    },
+    "devDependencies": {
+        "@mtcute/tl-runtime": "workspace:^"
     }
 }

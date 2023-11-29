@@ -16,7 +16,13 @@
         "incremental": true,
         "stripInternal": true,
         "skipLibCheck": true,
-        "composite": true
+        "composite": true,
+        "types": [
+            "node",
+            "vite/client"
+        ],
+        "resolveJsonModule": true,
+        "isolatedModules": true,
     },
     "ts-node": {
         "esm": true,

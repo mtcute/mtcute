@@ -2,7 +2,7 @@ import { InitInput } from './types.js'
 
 export async function loadWasmBinary(input?: InitInput): Promise<WebAssembly.Instance> {
     if (typeof input === 'undefined') {
-        input = new URL('../mtcute.wasm', import.meta.url)
+        input = new URL('../lib/mtcute.wasm', import.meta.url)
     }
 
     if (

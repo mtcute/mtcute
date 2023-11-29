@@ -1,10 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { randomBytes } from 'crypto'
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
 
 import { hexDecodeToBuffer, hexEncode } from '../src/encodings/hex.js'
 import { TlBinaryWriter, TlSerializationCounter, TlWriterMap } from './writer.js'
+
+let randomBytes: (n: number) => Uint8Array
+
+if (import.meta.env.TEST_ENV === 'node') {
+    randomBytes = await import('crypto').then((m) => m.randomBytes)
+} else {
+    randomBytes = (n: number) => {
+        const buf = new Uint8Array(n)
+        crypto.getRandomValues(buf)
+
+        return buf
+    }
+}
 
 describe('TlBinaryWriter', () => {
     const testSingleMethod = (size: number, fn: (w: TlBinaryWriter) => void, map?: TlWriterMap): string => {
@@ -69,17 +81,14 @@ describe('TlBinaryWriter', () => {
         expect(testSingleMethod(8, (w) => w.bytes(new Uint8Array([1, 2, 3, 4])))).toEqual('0401020304000000')
 
         const random250bytes = randomBytes(250)
-        expect(testSingleMethod(252, (w) => w.bytes(random250bytes))).toEqual(
-            'fa' + random250bytes.toString('hex') + '00',
-        )
+        expect(testSingleMethod(252, (w) => w.bytes(random250bytes))).toEqual(`fa${hexEncode(random250bytes)}00`)
 
         const random1000bytes = randomBytes(1000)
-        // eslint-disable-next-line no-restricted-globals
-        const buffer = Buffer.alloc(1004)
+        const buffer = new Uint8Array(1004)
         buffer[0] = 254
-        buffer.writeIntLE(1000, 1, 3)
+        new DataView(buffer.buffer).setUint32(1, 1000, true)
         buffer.set(random1000bytes, 4)
-        expect(testSingleMethod(1004, (w) => w.bytes(random1000bytes))).toEqual(buffer.toString('hex'))
+        expect(testSingleMethod(1004, (w) => w.bytes(random1000bytes))).toEqual(hexEncode(buffer))
     })
 
     const stubObjectsMap: TlWriterMap = {

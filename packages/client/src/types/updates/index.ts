@@ -2,7 +2,8 @@ import type { CallbackQuery, InlineQuery, Message } from '../../types/index.js'
 import { BotChatJoinRequestUpdate } from './bot-chat-join-request.js'
 import { BotStoppedUpdate } from './bot-stopped.js'
 import { ChatJoinRequestUpdate } from './chat-join-request.js'
-import { ChatMemberUpdate, ChatMemberUpdateType } from './chat-member-update.js'
+import { ChatMemberUpdate } from './chat-member-update.js'
+export type { ChatMemberUpdateType } from './chat-member-update.js'
 import { ChosenInlineResult } from './chosen-inline-result.js'
 import { DeleteMessageUpdate } from './delete-message-update.js'
 import { DeleteStoryUpdate } from './delete-story-update.js'
@@ -19,7 +20,6 @@ export {
     BotStoppedUpdate,
     ChatJoinRequestUpdate,
     ChatMemberUpdate,
-    ChatMemberUpdateType,
     ChosenInlineResult,
     DeleteMessageUpdate,
     DeleteStoryUpdate,
