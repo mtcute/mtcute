@@ -11,7 +11,7 @@ import { ConfigManager } from './network/config-manager.js'
 import { ReconnectionStrategy, SessionConnection, TransportFactory } from './network/index.js'
 import { NetworkManager, NetworkManagerExtraParams, RpcCallOptions } from './network/network-manager.js'
 import { PersistentConnectionParams } from './network/persistent-connection.js'
-import { ITelegramStorage, MemoryStorage } from './storage/index.js'
+import { ITelegramStorage } from './storage/index.js'
 import { MustEqual } from './types/index.js'
 import {
     ControllablePromise,
@@ -43,9 +43,8 @@ export interface BaseTelegramClientOptions {
 
     /**
      * Telegram storage to use.
-     * If omitted, {@link MemoryStorage} is used
      */
-    storage?: ITelegramStorage
+    storage: ITelegramStorage
 
     /**
      * Cryptography provider factory to allow delegating
@@ -271,7 +270,8 @@ export class BaseTelegramClient extends EventEmitter {
         }
 
         this.crypto = (opts.crypto ?? defaultCryptoProviderFactory)()
-        this.storage = opts.storage ?? new MemoryStorage()
+
+        this.storage = opts.storage
         this._apiHash = opts.apiHash
         this._useIpv6 = Boolean(opts.useIpv6)
         this._testMode = Boolean(opts.testMode)

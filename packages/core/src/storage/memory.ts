@@ -58,6 +58,13 @@ export interface MemorySessionState {
 
 const USERNAME_TTL = 86400000 // 24 hours
 
+/**
+ * In-memory storage implementation for mtcute.
+ *
+ * This storage is **not persistent**, meaning that all data
+ * **will** be lost on restart. Only use this storage for testing,
+ * or if you know what you're doing.
+ */
 export class MemoryStorage implements ITelegramStorage {
     protected _state!: MemorySessionState
     private _cachedInputPeers: LruMap<number, tl.TypeInputPeer> = new LruMap(100)
