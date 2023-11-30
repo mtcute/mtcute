@@ -5,6 +5,18 @@ import { JsonMemoryStorage } from './json.js'
 
 const EVENTS = ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SIGTERM']
 
+/**
+ * mtcute storage that stores data in a JSON file.
+ *
+ * > **Note**: This storage is **not fully persistent**, meaning that
+ * > some data *will* be lost on restart, including entities cache,
+ * > FSM and rate limiter states, because JSON file would be too large otherwise.
+ * >
+ * > This storage should only be used for testing purposes,
+ * > and should not be used in production. Use e.g. `@mtcute/sqlite` instead.
+ *
+ * @deprecated
+ */
 export class JsonFileStorage extends JsonMemoryStorage {
     private readonly _filename: string
     private readonly _safe: boolean

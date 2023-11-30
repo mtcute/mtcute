@@ -94,6 +94,12 @@ interface CachedEntity {
     full: tl.TypeUser | tl.TypeChat | null
 }
 
+/**
+ * mtcute storage that uses IndexedDB as a backend.
+ *
+ * This storage is the default one for browsers, and is generally
+ * recommended over local storage based one.
+ */
 export class IdbStorage implements ITelegramStorage {
     private _cache?: LruMap<number, CachedEntity>
 

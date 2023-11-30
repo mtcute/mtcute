@@ -26,13 +26,13 @@ export class JsonMemoryStorage extends MemoryStorage {
                         return ret
                     }
                     case 'authKeysTempExpiry':
+                    case 'pts':
+                        return new Map(Object.entries(value as Record<string, string>))
                     case 'phoneIndex':
                     case 'usernameIndex':
-                    case 'pts':
                     case 'fsm':
                     case 'rl':
                     case 'refs':
-                        return new Map(Object.entries(value as Record<string, string>))
                     case 'entities':
                         return new Map()
                 }

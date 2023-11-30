@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest'
 
-import { stubPeerUser } from '@mtcute/test'
-
 import { JsonMemoryStorage } from './json.js'
 
 // eslint-disable-next-line no-restricted-globals
@@ -31,8 +29,6 @@ describe('JsonMemoryStorage', () => {
         s.setAuthKeyFor(1, createBuffer([1, 2, 3]))
         // eslint-disable-next-line no-restricted-globals
         s.setTempAuthKeyFor(2, 0, createBuffer([4, 5, 6]), 1234567890)
-        s.setState('someState', 'someValue')
-        s.updatePeers([{ ...stubPeerUser, updated: 0 }])
 
         const json = s.saveJson()
         const s2 = new ExtJsonMemoryStorage()

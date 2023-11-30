@@ -1,6 +1,18 @@
 import { MtUnsupportedError } from '../types/index.js'
 import { JsonMemoryStorage } from './json.js'
 
+/**
+ * mtcute storage that stores data in a `localStorage` key.
+ *
+ * > **Note**: This storage is **not fully persistent**, meaning that
+ * > some data *will* be lost on restart, including entities cache,
+ * > FSM and rate limiter states, because the JSON would be too large otherwise.
+ * >
+ * > This storage should only be used for testing purposes,
+ * > and should not be used in production. Use e.g. {@link IdbStorage} instead.
+ *
+ * @deprecated
+ */
 export class LocalstorageStorage extends JsonMemoryStorage {
     private readonly _key: string
 
