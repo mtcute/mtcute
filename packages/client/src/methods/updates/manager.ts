@@ -430,7 +430,7 @@ async function fetchMissingPeers(
         const bare = typeof peer === 'number' ? markedPeerIdToBare(peer) : getBarePeerId(peer)
 
         const marked = typeof peer === 'number' ? peer : getMarkedPeerId(peer)
-        const index = marked > 0 ? peers.chats : peers.users
+        const index = marked > 0 ? peers.users : peers.chats
 
         if (index.has(bare)) return true
         if (missing.has(marked)) return false
@@ -963,6 +963,7 @@ async function onUpdate(
         // we still want to collect them, so we can fetch them in the background.
         // we won't wait for them, since that would block the updates loop
 
+        state.log.debug('loading missing peers for %s (pts = %d, cid = %d)', upd._, pending.pts, pending.channelId)
         missing = await fetchMissingPeers(client, upd, pending.peers, pending.fromDifference)
 
         if (!pending.fromDifference && missing.size) {
