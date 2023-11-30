@@ -34,6 +34,10 @@
             "./network/transports/*.js": {
                 "import": "./esm/network/transports/*.js",
                 "require": "./cjs/network/transports/*.js"
+            },
+            "./storage/*.js": {
+                "import": "./esm/storage/*.js",
+                "require": "./cjs/storage/*.js"
             }
         }
     },

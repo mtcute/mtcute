@@ -258,6 +258,7 @@ async function addSingleMethod(state, fileName) {
 
             const isExported = (stmt.modifiers || []).find((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
             const isInitialize = checkForFlag(stmt, '@initialize')
+            const isInitializeSuper = isInitialize === 'super'
             const aliases = (function () {
                 const flag = checkForFlag(stmt, '@alias')
                 if (!flag) return []
@@ -295,7 +296,11 @@ async function addSingleMethod(state, fileName) {
                 while (code[code.length - 1] !== '}') code = code.slice(0, -1)
                 code = code.slice(1, -1).trim()
 
-                state.init.push(code)
+                if (isInitializeSuper) {
+                    state.init.unshift(code)
+                } else {
+                    state.init.push(code)
+                }
             }
 
             if (!isExported) continue
@@ -638,7 +643,6 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
     state.fields.forEach(({ code }) => output.write(`protected ${code}\n`))
 
     output.write('constructor(opts: TelegramClientOptions) {\n')
-    output.write('super(opts)\n')
     state.init.forEach((code) => {
         output.write(code + '\n')
     })

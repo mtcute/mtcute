@@ -3,6 +3,7 @@
 import {
     BaseTelegramClient,
     BaseTelegramClientOptions,
+    ITelegramStorage,
     Long,
     MaybeArray,
     MaybeAsync,

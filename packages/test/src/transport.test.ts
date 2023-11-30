@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { BaseTelegramClient } from '@mtcute/core'
+import { MemoryStorage } from '@mtcute/core/src/storage/memory.js'
 
 import { createStub } from './stub.js'
 import { StubTelegramTransport } from './transport.js'
@@ -17,6 +18,7 @@ describe('transport stub', () => {
                 main: createStub('dcOption', { ipAddress: '1.2.3.4', port: 1234 }),
                 media: createStub('dcOption', { ipAddress: '1.2.3.4', port: 5678 }),
             },
+            storage: new MemoryStorage(),
             transport: () =>
                 new StubTelegramTransport({
                     onConnect: (dc, testMode) => {

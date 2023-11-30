@@ -3,6 +3,7 @@
 import {
     BaseTelegramClient,
     BaseTelegramClientOptions,
+    ITelegramStorage,
     Long,
     MaybeArray,
     MaybeAsync,
@@ -10,6 +11,7 @@ import {
     PartialOnly,
     tl,
 } from '@mtcute/core'
+import { MemoryStorage } from '@mtcute/core/src/storage/memory.js'
 import { tdFileId } from '@mtcute/file-id'
 
 import { AuthState, getAuthState } from './methods/auth/_state.js'
@@ -317,9 +319,21 @@ import {
     UserStatusUpdate,
     UserTypingUpdate,
 } from './types/index.js'
+import { _defaultStorageFactory } from './utils/platform/storage.js'
 
 // from methods/_init.ts
-interface TelegramClientOptions extends BaseTelegramClientOptions {
+interface TelegramClientOptions extends Omit<BaseTelegramClientOptions, 'storage'> {
+    /**
+     * Storage to use for this client.
+     *
+     * If a string is passed, it will be used as:
+     *   - a path to a JSON file for Node.js
+     *   - IndexedDB database name for browsers
+     *
+     * If omitted, {@link MemoryStorage} is used
+     */
+    storage?: string | ITelegramStorage
+
     /**
      * Parameters for updates manager.
      */
@@ -5079,8 +5093,17 @@ export type { TelegramClientOptions }
 
 export class TelegramClient extends BaseTelegramClient {
     constructor(opts: TelegramClientOptions) {
+        if (typeof opts.storage === 'string') {
+            opts.storage = _defaultStorageFactory(opts.storage)
+        } else if (!opts.storage) {
+            opts.storage = new MemoryStorage()
+        }
+
+        /* eslint-disable @typescript-eslint/no-unsafe-call */
+        // @ts-expect-error codegen
         super(opts)
 
+        /* eslint-enable @typescript-eslint/no-unsafe-call */
         if (!opts.disableUpdates) {
             const { messageGroupingInterval, ...managerParams } = opts.updates ?? {}
 

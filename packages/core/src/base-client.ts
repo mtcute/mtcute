@@ -42,7 +42,7 @@ export interface BaseTelegramClientOptions {
     apiHash: string
 
     /**
-     * Telegram storage to use.
+     * Storage to use for this client.
      */
     storage: ITelegramStorage
 

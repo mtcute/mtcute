@@ -1,4 +1,5 @@
-import { ITelegramStorage, MemoryStorage, MtArgumentError } from '@mtcute/core'
+import { ITelegramStorage, MtArgumentError } from '@mtcute/core'
+import { MemoryStorage } from '@mtcute/core/src/storage/memory.js'
 import { createAesIgeForMessage, ICryptoProvider } from '@mtcute/core/utils.js'
 
 export class StubMemoryTelegramStorage extends MemoryStorage implements ITelegramStorage {
