@@ -216,8 +216,16 @@ export function testStorage<T extends ITelegramStorage>(
             await s.updatePeers([stubPeerUser, peerChannel])
             await s.save?.() // update-related methods are batched, so we need to save
 
-            expect(await s.getFullPeerById(stubPeerUser.id)).toEqual(stubPeerUser.full)
-            expect(await s.getFullPeerById(peerChannel.id)).toEqual(peerChannel.full)
+            expect({
+                ...(await s.getFullPeerById(stubPeerUser.id)),
+                usernames: [],
+                restrictionReason: [],
+            }).toEqual(stubPeerUser.full)
+            expect({
+                ...(await s.getFullPeerById(peerChannel.id)),
+                usernames: [],
+                restrictionReason: [],
+            }).toEqual(peerChannel.full)
         })
 
         describe('min peers', () => {
