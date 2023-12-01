@@ -59,6 +59,7 @@ import { getChatMembers } from './methods/chats/get-chat-members.js'
 import { getChatPreview } from './methods/chats/get-chat-preview.js'
 import { getFullChat } from './methods/chats/get-full-chat.js'
 import { getNearbyChats } from './methods/chats/get-nearby-chats.js'
+import { getSimilarChannels } from './methods/chats/get-similar-channels.js'
 import { iterChatEventLog } from './methods/chats/iter-chat-event-log.js'
 import { iterChatMembers } from './methods/chats/iter-chat-members.js'
 import { joinChat } from './methods/chats/join-chat.js'
@@ -1538,6 +1539,19 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param longitude  Longitude of the location
      */
     getNearbyChats(latitude: number, longitude: number): Promise<Chat[]>
+
+    /**
+     * Get channels that are similar to a given channel
+     *
+     * > **Note**: This method only returns the channels that the current user
+     * > is not subscribed to. For non-premium users, this method will only return
+     * > a few channels (with the total number of similar channels being specified in `.total`)
+     * >
+     * > Returns empty array in case there are no similar channels available.
+     * **Available**: 👤 users only
+     *
+     */
+    getSimilarChannels(channel: InputPeerLike): Promise<ArrayWithTotal<Chat>>
     /**
      * Iterate over chat event log.
      *
@@ -5184,6 +5198,7 @@ export class TelegramClient extends BaseTelegramClient {
     getChat = getChat.bind(null, this)
     getFullChat = getFullChat.bind(null, this)
     getNearbyChats = getNearbyChats.bind(null, this)
+    getSimilarChannels = getSimilarChannels.bind(null, this)
     iterChatEventLog = iterChatEventLog.bind(null, this)
     iterChatMembers = iterChatMembers.bind(null, this)
     joinChat = joinChat.bind(null, this)
