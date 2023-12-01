@@ -3,6 +3,7 @@ import { getMarkedPeerId, MtArgumentError, MtTypeAssertionError, tl } from '@mtc
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MessageEntity } from '../messages/message-entity.js'
+import { ChatColors } from './chat-colors.js'
 import { ChatLocation } from './chat-location.js'
 import { ChatPermissions } from './chat-permissions.js'
 import { ChatPhoto } from './chat-photo.js'
@@ -531,30 +532,14 @@ export class Chat {
     }
 
     /**
-     * Name color of this chat, which should also be used when
-     * rendering replies to their messages and web previews sent by them.
-     *
-     * Note that this value is **not** an RGB color representation. Instead, it is
-     * a number which should be used to pick a color from a predefined
-     * list of colors:
-     *  - `0-6` are the default colors used by Telegram clients:
-     *    `red, orange, purple, green, sea, blue, pink`
-     *  - `>= 7` are returned by `help.getAppConfig`.
+     * Color that should be used when rendering replies to
+     * the messages and web previews sent by this chat,
+     * as well as to render the chat title
      */
-    get color(): number {
-        if (this.peer._ !== 'channel' && this.peer._ !== 'user') return this.peer.id % 7
+    get color(): ChatColors {
+        const color = this.peer._ === 'user' || this.peer._ === 'channel' ? this.peer.color : undefined
 
-        return this.peer.color ?? this.peer.id % 7
-    }
-
-    /**
-     * ID of the emoji that should be used as a background pattern
-     * when rendering replies to this user's messages.
-     */
-    get replyBackgroundEmojiId(): tl.Long | null {
-        if (this.peer._ !== 'channel' && this.peer._ !== 'user') return null
-
-        return this.peer.backgroundEmojiId ?? null
+        return new ChatColors(this.peer.id, color)
     }
 
     /**
@@ -671,5 +656,6 @@ memoizeGetters(Chat, [
     'defaultPermissions',
     'location',
     'user',
+    'color',
 ])
 makeInspectable(Chat, [], ['user'])

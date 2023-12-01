@@ -5,6 +5,7 @@ import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MessageEntity } from '../messages/message-entity.js'
 import { EmojiStatus } from '../reactions/emoji-status.js'
+import { ChatColors } from './chat-colors.js'
 import { ChatPhoto } from './chat-photo.js'
 
 /**
@@ -375,26 +376,22 @@ export class User {
     }
 
     /**
-     * Name color of this user, which should also be used when
-     * rendering replies to their messages and web previews sent by them.
-     *
-     * Note that this value is **not** an RGB color representation. Instead, it is
-     * a number which should be used to pick a color from a predefined
-     * list of colors:
-     *  - `0-6` are the default colors used by Telegram clients:
-     *    `red, orange, purple, green, sea, blue, pink`
-     *  - `>= 7` are returned by `help.getAppConfig`.
+     * Color that should be used when rendering replies to
+     * their messages and web previews sent by them,
+     * as well as to render the chat title
      */
-    get color(): number {
-        return this.raw.color ?? this.raw.id % 7
+    get color(): ChatColors {
+        return new ChatColors(this.raw.id, this.raw.color)
     }
 
     /**
-     * ID of the emoji that should be used as a background pattern
-     * when rendering replies to this user's messages.
+     * Color that should be used when rendering the header of
+     * the user's profile
+     *
+     * If `null`, a generic header should be used instead
      */
-    get replyBackgroundEmojiId(): tl.Long | null {
-        return this.raw.backgroundEmojiId ?? null
+    get profileColors(): ChatColors | null {
+        return this.raw.profileColor ? new ChatColors(this.raw.id, this.raw.profileColor) : null
     }
 
     /**
@@ -490,5 +487,13 @@ export class User {
     }
 }
 
-memoizeGetters(User, ['_parsedStatus' as keyof User, 'usernames', 'inputPeer', 'photo', 'emojiStatus'])
+memoizeGetters(User, [
+    '_parsedStatus' as keyof User,
+    'usernames',
+    'inputPeer',
+    'photo',
+    'emojiStatus',
+    'color',
+    'profileColors',
+])
 makeInspectable(User, undefined, ['_parsedStatus' as keyof User])

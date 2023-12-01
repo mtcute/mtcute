@@ -17,7 +17,7 @@
         "test:browser:dev": "vitest --config .config/vite.browser.mts watch",
         "lint": "eslint .",
         "lint:ci": "NODE_OPTIONS=\\\"--max_old_space_size=8192\\\" eslint --config .config/eslint.ci.js .",
-        "lint:tsc": "pnpm -r --workspace-concurrency=4 exec tsc --build",
+        "lint:tsc": "rimraf packages/**/dist && pnpm -r --workspace-concurrency=4 exec tsc --build",
         "lint:tsc:ci": "pnpm -r exec tsc --build",
         "lint:dpdm": "dpdm -T --no-warning --no-tree --exit-code circular:1 packages/*",
         "lint:fix": "eslint --fix .",
