@@ -1,4 +1,5 @@
 import { BaseTelegramClientOptions } from '@mtcute/core'
+import { MemoryStorage } from '@mtcute/core/storage/memory.js'
 
 export const getApiParams = (): BaseTelegramClientOptions => {
     if (!process.env.API_ID || !process.env.API_HASH) {
@@ -9,5 +10,6 @@ export const getApiParams = (): BaseTelegramClientOptions => {
         apiId: parseInt(process.env.API_ID),
         apiHash: process.env.API_HASH,
         testMode: true,
+        storage: new MemoryStorage(),
     }
 }
