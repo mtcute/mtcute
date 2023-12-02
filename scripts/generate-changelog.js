@@ -14,7 +14,7 @@ function generateChangelog(onlyPackages) {
 
         const { type, breaking } = parsed
 
-        if (!type || ['chore', 'ci', 'docs', 'test'].includes(type)) continue
+        if ((!type || ['chore', 'ci', 'docs', 'test'].includes(type)) && !breaking) continue
 
         const changed = findChangedFilesSince(`${commit.hash}~1`, commit.hash)
 
