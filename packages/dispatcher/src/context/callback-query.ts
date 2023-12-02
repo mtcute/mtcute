@@ -1,6 +1,7 @@
 import {
     CallbackQuery,
     getMarkedPeerId,
+    MaybeAsync,
     Message,
     MtArgumentError,
     MtMessageNotFoundError,
@@ -72,7 +73,7 @@ export class CallbackQueryContext extends CallbackQuery implements UpdateContext
     /**
      * Shortcut for getting the message and editing it.
      */
-    async editMessageWith(handler: (msg: Message) => Promise<Parameters<CallbackQueryContext['editMessage']>[0]>) {
+    async editMessageWith(handler: (msg: Message) => MaybeAsync<Parameters<CallbackQueryContext['editMessage']>[0]>) {
         const msg = await this.getMessage()
         if (!msg) return
 
