@@ -2,11 +2,11 @@
 // ^^ will be looked into in MTQ-29
 import {
     _RepliedMessageAssertionsByOrigin,
-    Chat,
     MaybeArray,
     Message,
     MessageAction,
     MessageMediaType,
+    Peer,
     RawDocument,
     RawLocation,
     RepliedMessageInfo,
@@ -208,7 +208,7 @@ export const action = <T extends Exclude<MessageAction, null>['type']>(
         action: Extract<MessageAction, { type: T }>
         sender: T extends 'user_joined_link' | 'user_removed' | 'history_cleared' | 'contact_joined' | 'bot_allowed'
             ? User
-            : User | Chat
+            : Peer
     }
 > => {
     if (Array.isArray(type)) {
@@ -261,7 +261,7 @@ export const withCompleteSender =
     ): UpdateFilter<MessageContext, Mod, State> =>
         async (msg, state) => {
             try {
-                await msg.getSender()
+                await msg.getCompleteSender()
             } catch (e) {
                 return false
             }

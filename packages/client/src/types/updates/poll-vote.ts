@@ -1,9 +1,8 @@
 import { MtUnsupportedError, tl } from '@mtcute/core'
-import { assertTypeIs } from '@mtcute/core/utils.js'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { Chat, PeersIndex, User } from '../peers/index.js'
+import { parsePeer, Peer, PeersIndex } from '../peers/index.js'
 
 /**
  * Some user has voted in a public poll.
@@ -27,14 +26,8 @@ export class PollVoteUpdate {
     /**
      * Peer who has voted
      */
-    get peer(): User | Chat {
-        if (this.raw.peer._ === 'peerUser') {
-            return new User(this._peers.user(this.raw.peer.userId))
-        }
-
-        assertTypeIs('PollVoteUpdate.peer', this.raw.peer, 'peerChannel')
-
-        return new Chat(this._peers.chat(this.raw.peer.channelId))
+    get peer(): Peer {
+        return parsePeer(this.raw.peer, this._peers)
     }
 
     /**

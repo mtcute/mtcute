@@ -3,8 +3,8 @@ import { MtTypeAssertionError, tl } from '@mtcute/core'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Chat } from '../peers/chat.js'
+import { parsePeer, PeerSender } from '../peers/peer.js'
 import { PeersIndex } from '../peers/peers-index.js'
-import { User } from '../peers/user.js'
 import { _messageMediaFromTl } from './message-media.js'
 
 /**
@@ -27,20 +27,16 @@ export class MessageForwardInfo {
      * Sender of the original message (either user or a channel)
      * or their name (for users with private forwards)
      */
-    get sender(): User | Chat | string {
+    get sender(): PeerSender {
         if (this.raw.fromName) {
-            return this.raw.fromName
+            return {
+                type: 'anonymous',
+                displayName: this.raw.fromName,
+            }
         }
 
         if (this.raw.fromId) {
-            switch (this.raw.fromId._) {
-                case 'peerChannel':
-                    return new Chat(this._peers.chat(this.raw.fromId.channelId))
-                case 'peerUser':
-                    return new User(this._peers.user(this.raw.fromId.userId))
-                default:
-                    throw new MtTypeAssertionError('raw.fwdFrom.fromId', 'peerUser | peerChannel', this.raw.fromId._)
-            }
+            return parsePeer(this.raw.fromId, this._peers)
         }
 
         throw new MtTypeAssertionError('MessageForwardInfo', 'to have fromId or fromName', 'neither')
@@ -50,7 +46,7 @@ export class MessageForwardInfo {
      * For "saved" messages (i.e. messages forwarded to yourself,
      * "Saved Messages"), the peer where the message was originally sent
      */
-    fromChat(): User | Chat | null {
+    fromChat(): Chat | null {
         if (!this.raw.savedFromPeer) return null
 
         return Chat._parseFromPeer(this.raw.savedFromPeer, this._peers)

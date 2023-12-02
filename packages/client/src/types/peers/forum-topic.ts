@@ -1,12 +1,11 @@
-import { MtTypeAssertionError, tl } from '@mtcute/core'
+import { tl } from '@mtcute/core'
 
 import { hasValueAtKey, makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { MtMessageNotFoundError } from '../errors.js'
 import { DraftMessage, Message } from '../messages/index.js'
-import { Chat } from './chat.js'
+import { parsePeer, Peer } from './peer.js'
 import { PeersIndex } from './peers-index.js'
-import { User } from './user.js'
 
 export class ForumTopic {
     static COLOR_BLUE = 0x6fb9f0
@@ -108,15 +107,8 @@ export class ForumTopic {
     /**
      * Creator of the topic
      */
-    get creator(): User | Chat {
-        switch (this.raw.fromId._) {
-            case 'peerUser':
-                return new User(this._peers.user(this.raw.fromId.userId))
-            case 'peerChat':
-                return new Chat(this._peers.chat(this.raw.fromId.chatId))
-            default:
-                throw new MtTypeAssertionError('ForumTopic#creator', 'peerUser | peerChat', this.raw.fromId._)
-        }
+    get creator(): Peer {
+        return parsePeer(this.raw.fromId, this._peers)
     }
 
     /**

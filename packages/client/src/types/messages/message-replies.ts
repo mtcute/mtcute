@@ -2,9 +2,8 @@ import { getMarkedPeerId, tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { Chat } from '../peers/chat.js'
+import { parsePeer, Peer } from '../peers/peer.js'
 import { PeersIndex } from '../peers/peers-index.js'
-import { User } from '../peers/user.js'
 
 /**
  * Information about replies to a message
@@ -65,19 +64,8 @@ export class MessageRepliesInfo {
     /**
      * Last few commenters to the post (usually 3)
      */
-    get repliers(): (User | Chat)[] {
-        return (
-            this.raw.recentRepliers?.map((it) => {
-                switch (it._) {
-                    case 'peerUser':
-                        return new User(this._peers.user(it.userId))
-                    case 'peerChannel':
-                        return new Chat(this._peers.chat(it.channelId))
-                    default:
-                        throw new Error('Unexpected peer type: ' + it._)
-                }
-            }) ?? []
-        )
+    get repliers(): Peer[] {
+        return this.raw.recentRepliers?.map((it) => parsePeer(it, this._peers)) ?? []
     }
 }
 

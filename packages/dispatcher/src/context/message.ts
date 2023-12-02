@@ -1,12 +1,4 @@
-import {
-    Chat,
-    Message,
-    MtPeerNotFoundError,
-    OmitInputMessageId,
-    ParametersSkip1,
-    TelegramClient,
-    User,
-} from '@mtcute/client'
+import { Message, MtPeerNotFoundError, OmitInputMessageId, ParametersSkip1, Peer, TelegramClient } from '@mtcute/client'
 import { DeleteMessagesParams } from '@mtcute/client/src/methods/messages/delete-messages.js'
 import { ForwardMessageOptions } from '@mtcute/client/src/methods/messages/forward-messages.js'
 import { SendCopyParams } from '@mtcute/client/src/methods/messages/send-copy.js'
@@ -53,7 +45,7 @@ export class MessageContext extends Message implements UpdateContext<Message> {
      *
      * Learn more: [Incomplete peers](https://mtcute.dev/guide/topics/peers.html#incomplete-peers)
      */
-    async getSender(): Promise<User | Chat> {
+    async getCompleteSender(): Promise<Peer> {
         if (!this.sender.isMin) return this.sender
 
         let res

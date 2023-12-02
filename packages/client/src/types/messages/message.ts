@@ -1,11 +1,4 @@
-import {
-    assertNever,
-    getMarkedPeerId,
-    MtArgumentError,
-    MtTypeAssertionError,
-    tl,
-    toggleChannelIdMark,
-} from '@mtcute/core'
+import { assertNever, getMarkedPeerId, MtArgumentError, tl, toggleChannelIdMark } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
 import { makeInspectable } from '../../utils/index.js'
@@ -13,6 +6,7 @@ import { memoizeGetters } from '../../utils/memoize.js'
 import { BotKeyboard, ReplyMarkup } from '../bots/keyboards.js'
 import { TextWithEntities } from '../misc/index.js'
 import { Chat } from '../peers/chat.js'
+import { parsePeer, Peer } from '../peers/peer.js'
 import { PeersIndex } from '../peers/peers-index.js'
 import { User } from '../peers/user.js'
 import { _messageActionFromTl, MessageAction } from './message-action.js'
@@ -114,7 +108,7 @@ export class Message {
      * If the message is a forwarded channel post,
      * sender is the channel itself.
      */
-    get sender(): User | Chat {
+    get sender(): Peer {
         const from = this.raw.fromId
 
         if (!from) {
@@ -125,14 +119,8 @@ export class Message {
             // anon admin, return the chat
             return this.chat
         }
-        switch (from._) {
-            case 'peerChannel': // forwarded channel post or anon
-                return new Chat(this._peers.chat(from.channelId))
-            case 'peerUser':
-                return new User(this._peers.user(from.userId))
-            default:
-                throw new MtTypeAssertionError('raw.fromId', 'peerUser | peerChannel', from._)
-        }
+
+        return parsePeer(from, this._peers)
     }
 
     /**

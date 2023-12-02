@@ -1,4 +1,4 @@
-import { assertNever, Chat, MaybeAsync, User } from '@mtcute/client'
+import { assertNever, MaybeAsync, Peer } from '@mtcute/client'
 
 import { CallbackQueryContext, MessageContext } from '../context/index.js'
 
@@ -10,7 +10,7 @@ import { CallbackQueryContext, MessageContext } from '../context/index.js'
  * @param msg  Message or callback from which to derive the key
  * @param scene  Current scene UID, or `null` if none
  */
-export type StateKeyDelegate = (upd: MessageContext | CallbackQueryContext | User | Chat) => MaybeAsync<string | null>
+export type StateKeyDelegate = (upd: MessageContext | CallbackQueryContext | Peer) => MaybeAsync<string | null>
 
 /**
  * Default state key delegate.

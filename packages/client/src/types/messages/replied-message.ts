@@ -3,6 +3,7 @@ import { MtTypeAssertionError, tl } from '@mtcute/core'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Chat } from '../peers/chat.js'
+import { PeerSender } from '../peers/peer.js'
 import { PeersIndex } from '../peers/peers-index.js'
 import { User } from '../peers/user.js'
 import { MessageEntity } from './message-entity.js'
@@ -27,12 +28,12 @@ export interface _RepliedMessageAssertionsByOrigin {
     other_chat: {
         id: number
         chat: Chat
-        sender: User | Chat | string
+        sender: PeerSender
     }
     private: {
         id: null
         chat: null
-        sender: User | Chat | string
+        sender: PeerSender
     }
 }
 
@@ -90,7 +91,7 @@ export class RepliedMessageInfo {
             }
         }
 
-        return true
+        return false
     }
 
     /**
@@ -128,12 +129,15 @@ export class RepliedMessageInfo {
      *
      * `null` if the sender is not available (for `same_chat` origin)
      */
-    get sender(): User | Chat | string | null {
+    get sender(): PeerSender | null {
         const { replyFrom, replyToPeerId } = this.raw
         if (!replyFrom && !replyToPeerId) return null
 
         if (replyFrom?.fromName) {
-            return replyFrom.fromName
+            return {
+                type: 'anonymous',
+                displayName: replyFrom.fromName,
+            }
         }
 
         const peer = replyFrom?.fromId ?? replyToPeerId
