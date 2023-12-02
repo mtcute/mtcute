@@ -53,25 +53,31 @@ export class MessageRepliesInfo {
 
     /**
      * ID of the discussion group for the post
+     *
+     * `null` if the post is not a channel post
      */
-    get discussion(): number {
-        return getMarkedPeerId(this.raw.channelId!, 'channel')
+    get discussion(): number | null {
+        if (!this.raw.channelId) return null
+
+        return getMarkedPeerId(this.raw.channelId, 'channel')
     }
 
     /**
      * Last few commenters to the post (usually 3)
      */
     get repliers(): (User | Chat)[] {
-        return this.raw.recentRepliers!.map((it) => {
-            switch (it._) {
-                case 'peerUser':
-                    return new User(this._peers.user(it.userId))
-                case 'peerChannel':
-                    return new Chat(this._peers.chat(it.channelId))
-                default:
-                    throw new Error('Unexpected peer type: ' + it._)
-            }
-        })
+        return (
+            this.raw.recentRepliers?.map((it) => {
+                switch (it._) {
+                    case 'peerUser':
+                        return new User(this._peers.user(it.userId))
+                    case 'peerChannel':
+                        return new Chat(this._peers.chat(it.channelId))
+                    default:
+                        throw new Error('Unexpected peer type: ' + it._)
+                }
+            }) ?? []
+        )
     }
 }
 

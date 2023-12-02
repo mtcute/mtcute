@@ -17,10 +17,11 @@ import { PeersIndex } from '../peers/peers-index.js'
 import { User } from '../peers/user.js'
 import { _messageActionFromTl, MessageAction } from './message-action.js'
 import { MessageEntity } from './message-entity.js'
-import { MessageForwardInfo, MessageReplyInfo } from './message-forward.js'
+import { MessageForwardInfo } from './message-forward.js'
 import { _messageMediaFromTl, MessageMedia } from './message-media.js'
 import { MessageReactions } from './message-reactions.js'
 import { MessageRepliesInfo } from './message-replies.js'
+import { RepliedMessageInfo } from './replied-message.js'
 
 /**
  * A Telegram message.
@@ -190,10 +191,10 @@ export class Message {
      *
      * Mutually exclusive with {@link replyToStory}
      */
-    get replyToMessage(): MessageReplyInfo | null {
+    get replyToMessage(): RepliedMessageInfo | null {
         if (this.raw.replyTo?._ !== 'messageReplyHeader') return null
 
-        return new MessageReplyInfo(this.raw.replyTo, this._peers)
+        return new RepliedMessageInfo(this.raw.replyTo, this._peers)
     }
 
     /**

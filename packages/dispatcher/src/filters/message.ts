@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ^^ will be looked into in MTQ-29
 import {
+    _RepliedMessageAssertionsByOrigin,
     Chat,
     MaybeArray,
     Message,
     MessageAction,
     MessageMediaType,
-    MessageReplyInfo,
     RawDocument,
     RawLocation,
+    RepliedMessageInfo,
+    RepliedMessageOrigin,
     Sticker,
     StickerSourceType,
     StickerType,
@@ -36,7 +38,22 @@ export const outgoing: UpdateFilter<Message, { isOutgoing: true }> = (msg) => ms
 /**
  * Filter messages that are replies to some other message
  */
-export const reply: UpdateFilter<Message, { replyToMessage: MessageReplyInfo }> = (msg) => msg.replyToMessage !== null
+export const reply: UpdateFilter<Message, { replyToMessage: RepliedMessageInfo }> = (msg) => msg.replyToMessage !== null
+
+/**
+ * Filter messages that are replies with the given origin type
+ */
+export const replyOrigin =
+    <T extends RepliedMessageOrigin>(
+        origin: T,
+    ): UpdateFilter<
+        Message,
+        {
+            replyToMessage: Modify<RepliedMessageInfo, _RepliedMessageAssertionsByOrigin[T] & { origin: T }>
+        }
+    > =>
+        (msg) =>
+            msg.replyToMessage?.originIs(origin) ?? false // originIs does additional checks
 
 /**
  * Filter messages containing some media
@@ -74,7 +91,7 @@ export const liveLocation = mediaOf('live_location')
 /** Filter messages containing a game */
 export const game = mediaOf('game')
 /** Filter messages containing a web page */
-export const webpage = mediaOf('web_page')
+export const webpage = mediaOf('webpage')
 /** Filter messages containing a venue */
 export const venue = mediaOf('venue')
 /** Filter messages containing a poll */
@@ -212,7 +229,8 @@ export const sender =
             msg.sender.type === type
 
 /**
- * Filter that matches messages that are replies to some other message.
+ * Filter that matches messages that are replies to some other message that can be fetched
+ * (i.e. not `private` origin, and has not been deleted)
  *
  * Optionally, you can pass a filter that will be applied to the replied message.
  */
