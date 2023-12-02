@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/file-id",
     "private": true,
-    "version": "0.1.1",
+    "version": "0.2.0",
     "description": "Support for TDLib and Bot API file ID for mtcute",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
