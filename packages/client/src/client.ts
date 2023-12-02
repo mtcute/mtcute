@@ -134,6 +134,7 @@ import { editMessage } from './methods/messages/edit-message.js'
 import { ForwardMessageOptions, forwardMessages, forwardMessagesById } from './methods/messages/forward-messages.js'
 import { getDiscussionMessage } from './methods/messages/get-discussion-message.js'
 import { getHistory, GetHistoryOffset } from './methods/messages/get-history.js'
+import { getMessageByLink } from './methods/messages/get-message-by-link.js'
 import { getMessageGroup } from './methods/messages/get-message-group.js'
 import { getMessageReactions, getMessageReactionsById } from './methods/messages/get-message-reactions.js'
 import { getMessages } from './methods/messages/get-messages.js'
@@ -3154,6 +3155,12 @@ export interface TelegramClient extends BaseTelegramClient {
         },
     ): Promise<ArrayPaginated<Message, GetHistoryOffset>>
     /**
+     * Given a message link (e.g. `t.me/durov/1`), fetch the relevant message.
+     * **Available**: ✅ both users and bots
+     *
+     */
+    getMessageByLink(link: string): Promise<Message | null>
+    /**
      * Get all messages inside of a message group
      *
      * **Available**: ✅ both users and bots
@@ -5276,6 +5283,7 @@ export class TelegramClient extends BaseTelegramClient {
     forwardMessages = forwardMessages.bind(null, this)
     getDiscussionMessage = getDiscussionMessage.bind(null, this)
     getHistory = getHistory.bind(null, this)
+    getMessageByLink = getMessageByLink.bind(null, this)
     getMessageGroup = getMessageGroup.bind(null, this)
     getMessageReactionsById = getMessageReactionsById.bind(null, this)
     getMessageReactions = getMessageReactions.bind(null, this)
