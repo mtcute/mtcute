@@ -9,7 +9,7 @@ import { Thumbnail } from './thumbnail.js'
  * A photo
  */
 export class Photo extends FileLocation {
-    readonly type: 'photo'
+    readonly type = 'photo' as const
 
     /** Biggest available photo width */
     readonly width: number

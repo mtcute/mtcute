@@ -17,7 +17,7 @@ import { Photo } from './photo.js'
  * of my own observations and experiments.
  */
 export class WebPage {
-    readonly type = 'web_page' as const
+    readonly type = 'webpage' as const
 
     constructor(readonly raw: tl.RawWebPage) {}
 

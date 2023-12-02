@@ -65,7 +65,7 @@ export async function sendCopy(
         throw new MtArgumentError("Service messages can't be copied")
     }
 
-    if (msg.media && msg.media.type !== 'web_page' && msg.media.type !== 'invoice') {
+    if (msg.media && msg.media.type !== 'webpage' && msg.media.type !== 'invoice') {
         let caption: InputText | undefined = params.caption
 
         if (!caption) {
