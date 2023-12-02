@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
 import { InputText } from '../../types/misc/entities.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 const empty: [string, undefined] = ['', undefined]
@@ -26,7 +26,7 @@ export async function _normalizeInputText(
     for (const ent of entities) {
         if (ent._ === 'messageEntityMentionName') {
             try {
-                const inputPeer = normalizeToInputUser(await resolvePeer(client, ent.userId), ent.userId)
+                const inputPeer = toInputUser(await resolvePeer(client, ent.userId), ent.userId)
 
                 const ent_ = ent as unknown as tl.RawInputMessageEntityMentionName
                 ent_._ = 'inputMessageEntityMentionName'

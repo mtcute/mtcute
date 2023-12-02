@@ -1,12 +1,7 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
-import {
-    isInputPeerChannel,
-    isInputPeerChat,
-    normalizeToInputChannel,
-    normalizeToInputUser,
-} from '../../utils/peer-utils.js'
+import { isInputPeerChannel, isInputPeerChat, toInputChannel, toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
@@ -38,7 +33,7 @@ export async function addChatMembers(
 
     if (isInputPeerChat(chat)) {
         for (const user of users) {
-            const p = normalizeToInputUser(await resolvePeer(client, user))
+            const p = toInputUser(await resolvePeer(client, user))
 
             const updates = await client.call({
                 _: 'messages.addChatUser',
@@ -51,8 +46,8 @@ export async function addChatMembers(
     } else if (isInputPeerChannel(chat)) {
         const updates = await client.call({
             _: 'channels.inviteToChannel',
-            channel: normalizeToInputChannel(chat),
-            users: await resolvePeerMany(client, users, normalizeToInputUser),
+            channel: toInputChannel(chat),
+            users: await resolvePeerMany(client, users, toInputUser),
         })
 
         client.network.handleUpdate(updates)

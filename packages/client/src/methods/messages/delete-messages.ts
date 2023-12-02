@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
 import { InputPeerLike, Message } from '../../types/index.js'
-import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
 import { createDummyUpdate } from '../../utils/updates-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { deleteScheduledMessages } from './delete-scheduled-messages.js'
@@ -36,7 +36,7 @@ export async function deleteMessagesById(
     let upd
 
     if (isInputPeerChannel(peer)) {
-        const channel = normalizeToInputChannel(peer)
+        const channel = toInputChannel(peer)
         const res = await client.call({
             _: 'channels.deleteMessages',
             channel,

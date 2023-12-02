@@ -6,8 +6,8 @@ import {
     isInputPeerChannel,
     isInputPeerChat,
     isInputPeerUser,
-    normalizeToInputChannel,
-    normalizeToInputUser,
+    toInputChannel,
+    toInputUser,
 } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -45,12 +45,12 @@ export async function getFullChat(client: BaseTelegramClient, chatId: InputPeerL
     if (isInputPeerChannel(peer)) {
         res = await client.call({
             _: 'channels.getFullChannel',
-            channel: normalizeToInputChannel(peer),
+            channel: toInputChannel(peer),
         })
     } else if (isInputPeerUser(peer)) {
         res = await client.call({
             _: 'users.getFullUser',
-            id: normalizeToInputUser(peer)!,
+            id: toInputUser(peer)!,
         })
     } else if (isInputPeerChat(peer)) {
         res = await client.call({

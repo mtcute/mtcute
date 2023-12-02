@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike, User } from '../../types/index.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -39,7 +39,7 @@ export async function addContact(
     },
 ): Promise<User> {
     const { userId, firstName, lastName = '', phone = '', sharePhone = false } = params
-    const peer = normalizeToInputUser(await resolvePeer(client, userId), userId)
+    const peer = toInputUser(await resolvePeer(client, userId), userId)
 
     const res = await client.call({
         _: 'contacts.addContact',

@@ -1,7 +1,7 @@
 import { assertNever, BaseTelegramClient, tl } from '@mtcute/core'
 
 import { BotCommands } from '../../types/index.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /** @internal */
@@ -22,7 +22,7 @@ export async function _normalizeCommandScope(
             }
         }
         case 'member': {
-            const user = normalizeToInputUser(await resolvePeer(client, scope.user), scope.user)
+            const user = toInputUser(await resolvePeer(client, scope.user), scope.user)
             const chat = await resolvePeer(client, scope.chat)
 
             return {

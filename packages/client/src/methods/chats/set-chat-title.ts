@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
-import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { isInputPeerChannel, isInputPeerChat, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -25,7 +25,7 @@ export async function setChatTitle(client: BaseTelegramClient, chatId: InputPeer
     } else if (isInputPeerChannel(chat)) {
         res = await client.call({
             _: 'channels.editTitle',
-            channel: normalizeToInputChannel(chat),
+            channel: toInputChannel(chat),
             title,
         })
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')

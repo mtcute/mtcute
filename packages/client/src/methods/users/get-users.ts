@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
 import { InputPeerLike, User } from '../../types/index.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { _getUsersBatched } from '../chats/batched-queries.js'
 import { resolvePeer } from './resolve-peer.js'
 import { resolvePeerMany } from './resolve-peer-many.js'
@@ -17,12 +17,12 @@ import { resolvePeerMany } from './resolve-peer-many.js'
 export async function getUsers(client: BaseTelegramClient, ids: MaybeArray<InputPeerLike>): Promise<(User | null)[]> {
     if (!Array.isArray(ids)) {
         // avoid unnecessary overhead of Promise.all and resolvePeerMany
-        const res = await _getUsersBatched(client, normalizeToInputUser(await resolvePeer(client, ids)))
+        const res = await _getUsersBatched(client, toInputUser(await resolvePeer(client, ids)))
 
         return [res ? new User(res) : null]
     }
 
-    const inputPeers = await resolvePeerMany(client, ids, normalizeToInputUser)
+    const inputPeers = await resolvePeerMany(client, ids, toInputUser)
 
     // pooling will be done by the helper
     const res = await Promise.all(inputPeers.map((peer) => _getUsersBatched(client, peer)))

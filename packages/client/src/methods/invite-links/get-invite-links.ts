@@ -2,7 +2,7 @@ import { BaseTelegramClient } from '@mtcute/core'
 
 import { ArrayPaginated, ChatInviteLink, InputPeerLike, PeersIndex } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 // @exported
@@ -59,7 +59,7 @@ export async function getInviteLinks(
         _: 'messages.getExportedChatInvites',
         peer: await resolvePeer(client, chatId),
         revoked,
-        adminId: admin ? normalizeToInputUser(await resolvePeer(client, admin), admin) : { _: 'inputUserSelf' },
+        adminId: admin ? toInputUser(await resolvePeer(client, admin), admin) : { _: 'inputUserSelf' },
         limit,
         offsetDate: offset?.date,
         offsetLink: offset?.link,

@@ -8,12 +8,12 @@ import {
     isInputPeerChannel,
     isInputPeerChat,
     isInputPeerUser,
-    normalizeToInputChannel,
-    normalizeToInputPeer,
-    normalizeToInputUser,
+    toInputChannel,
+    toInputPeer,
+    toInputUser,
 } from './peer-utils.js'
 
-describe('normalizeToInputPeer', () => {
+describe('toInputPeer', () => {
     it.each([
         ['inputChannelEmpty', 'inputPeerEmpty'],
         ['inputUserEmpty', 'inputPeerEmpty'],
@@ -27,7 +27,7 @@ describe('normalizeToInputPeer', () => {
         const from = createStub(fromType)
         const to = createStub(toType)
 
-        expect(normalizeToInputPeer(from)).toEqual(to)
+        expect(toInputPeer(from)).toEqual(to)
     })
 
     it.each([
@@ -40,11 +40,11 @@ describe('normalizeToInputPeer', () => {
     ] as const)('should keep %s as is', (type) => {
         const obj = createStub(type)
 
-        expect(normalizeToInputPeer(obj)).toBe(obj)
+        expect(toInputPeer(obj)).toBe(obj)
     })
 })
 
-describe('normalizeToInputUser', () => {
+describe('toInputUser', () => {
     it.each([
         ['inputPeerSelf', 'inputUserSelf'],
         ['inputPeerUser', 'inputUser'],
@@ -53,17 +53,15 @@ describe('normalizeToInputUser', () => {
         const from = createStub(fromType)
         const to = createStub(toType)
 
-        expect(normalizeToInputUser(from)).toEqual(to)
+        expect(toInputUser(from)).toEqual(to)
     })
 
     it('should throw for other types', () => {
-        expect(() => normalizeToInputUser(createStub('inputPeerChannel'), 'some_channel')).toThrow(
-            MtInvalidPeerTypeError,
-        )
+        expect(() => toInputUser(createStub('inputPeerChannel'), 'some_channel')).toThrow(MtInvalidPeerTypeError)
     })
 })
 
-describe('normalizeToInputChannel', () => {
+describe('toInputChannel', () => {
     it.each([
         ['inputPeerChannel', 'inputChannel'],
         ['inputPeerChannelFromMessage', 'inputChannelFromMessage'],
@@ -71,11 +69,11 @@ describe('normalizeToInputChannel', () => {
         const from = createStub(fromType)
         const to = createStub(toType)
 
-        expect(normalizeToInputChannel(from)).toEqual(to)
+        expect(toInputChannel(from)).toEqual(to)
     })
 
     it('should throw for other types', () => {
-        expect(() => normalizeToInputChannel(createStub('inputPeerUser'), 'some_user')).toThrow(MtInvalidPeerTypeError)
+        expect(() => toInputChannel(createStub('inputPeerUser'), 'some_user')).toThrow(MtInvalidPeerTypeError)
     })
 })
 

@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
 import { InputPrivacyRule } from '../../types/index.js'
-import { normalizeToInputUser } from '../../utils/index.js'
+import { toInputUser } from '../../utils/index.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**
@@ -21,7 +21,7 @@ export async function _normalizePrivacyRules(
         }
 
         if ('users' in rule) {
-            const users = await resolvePeerMany(client, rule.users, normalizeToInputUser)
+            const users = await resolvePeerMany(client, rule.users, toInputUser)
 
             res.push({
                 _: rule.allow ? 'inputPrivacyValueAllowUsers' : 'inputPrivacyValueDisallowUsers',

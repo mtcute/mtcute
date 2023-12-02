@@ -1,7 +1,7 @@
 import { assertNever, tl } from '@mtcute/core'
 import { utf8EncodeToBuffer } from '@mtcute/core/utils.js'
 
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { BotKeyboardBuilder } from './keyboard-builder.js'
 
 /**
@@ -345,7 +345,7 @@ export namespace BotKeyboard {
         return {
             _: 'inputKeyboardButtonUserProfile',
             text,
-            userId: normalizeToInputUser(user),
+            userId: toInputUser(user),
         }
     }
 

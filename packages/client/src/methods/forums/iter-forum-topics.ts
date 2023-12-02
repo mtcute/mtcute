@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { ForumTopic, InputPeerLike } from '../../types/index.js'
-import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { getForumTopics } from './get-forum-topics.js'
 
@@ -31,7 +31,7 @@ export async function* iterForumTopics(
 
     const { query, limit = Infinity, chunkSize = 100 } = params
 
-    const peer = normalizeToInputChannel(await resolvePeer(client, chatId))
+    const peer = toInputChannel(await resolvePeer(client, chatId))
 
     let { offset } = params
     let current = 0

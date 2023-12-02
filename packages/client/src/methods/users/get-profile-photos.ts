@@ -3,7 +3,7 @@ import { assertTypeIs } from '@mtcute/core/utils.js'
 
 import { ArrayPaginated, InputPeerLike, Photo } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeer } from './resolve-peer.js'
 
 /**
@@ -37,7 +37,7 @@ export async function getProfilePhotos(
 
     const res = await client.call({
         _: 'photos.getUserPhotos',
-        userId: normalizeToInputUser(await resolvePeer(client, userId), userId),
+        userId: toInputUser(await resolvePeer(client, userId), userId),
         offset,
         limit,
         maxId: Long.ZERO,

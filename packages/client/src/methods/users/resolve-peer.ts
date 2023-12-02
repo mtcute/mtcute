@@ -10,7 +10,7 @@ import {
 
 import { MtPeerNotFoundError } from '../../types/errors.js'
 import { InputPeerLike } from '../../types/peers/index.js'
-import { normalizeToInputPeer } from '../../utils/peer-utils.js'
+import { toInputPeer } from '../../utils/peer-utils.js'
 
 // @available=both
 /**
@@ -33,7 +33,7 @@ export async function resolvePeer(
             // User | Chat
             peerId = peerId.inputPeer
         } else {
-            peerId = normalizeToInputPeer(peerId)
+            peerId = toInputPeer(peerId)
         }
     }
 

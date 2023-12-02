@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike } from '../../types/index.js'
-import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -20,7 +20,7 @@ export async function toggleJoinToSend(
 ): Promise<void> {
     const res = await client.call({
         _: 'channels.toggleJoinToSend',
-        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
         enabled,
     })
     client.network.handleUpdate(res)

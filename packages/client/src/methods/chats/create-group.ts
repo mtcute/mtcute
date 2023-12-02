@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
 import { Chat, InputPeerLike } from '../../types/index.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
@@ -38,7 +38,7 @@ export async function createGroup(
 
     if (!Array.isArray(users)) users = [users]
 
-    const peers = await resolvePeerMany(client, users, normalizeToInputUser)
+    const peers = await resolvePeerMany(client, users, toInputUser)
 
     const res = await client.call({
         _: 'messages.createChat',

@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
-import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { isInputPeerChannel, isInputPeerChat, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 // @alias=unrestrictChatMember
@@ -30,7 +30,7 @@ export async function unbanChatMember(
     if (isInputPeerChannel(chat)) {
         const res = await client.call({
             _: 'channels.editBanned',
-            channel: normalizeToInputChannel(chat),
+            channel: toInputChannel(chat),
             participant: peer,
             bannedRights: {
                 _: 'chatBannedRights',

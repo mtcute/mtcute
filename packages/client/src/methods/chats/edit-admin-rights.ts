@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
 import { InputPeerLike } from '../../types/index.js'
-import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputChannel, toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -22,8 +22,8 @@ export async function editAdminRights(
 ): Promise<void> {
     const { chatId, userId, rights, rank = '' } = params
 
-    const chat = normalizeToInputChannel(await resolvePeer(client, chatId), chatId)
-    const user = normalizeToInputUser(await resolvePeer(client, userId), userId)
+    const chat = toInputChannel(await resolvePeer(client, chatId), chatId)
+    const user = toInputUser(await resolvePeer(client, userId), userId)
 
     const res = await client.call({
         _: 'channels.editAdmin',

@@ -2,7 +2,7 @@ import { BaseTelegramClient, tl } from '@mtcute/core'
 
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
-import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -48,7 +48,7 @@ export async function restrictChatMember(
 
     const res = await client.call({
         _: 'channels.editBanned',
-        channel: normalizeToInputChannel(chat),
+        channel: toInputChannel(chat),
         participant: user,
         bannedRights: {
             _: 'chatBannedRights',

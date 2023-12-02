@@ -2,7 +2,7 @@ import { BaseTelegramClient } from '@mtcute/core'
 
 import { ArrayWithTotal, Chat, InputPeerLike } from '../../types/index.js'
 import { makeArrayWithTotal } from '../../utils/misc-utils.js'
-import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 // @available=user
@@ -21,7 +21,7 @@ export async function getSimilarChannels(
 ): Promise<ArrayWithTotal<Chat>> {
     const res = await client.call({
         _: 'channels.getChannelRecommendations',
-        channel: normalizeToInputChannel(await resolvePeer(client, channel), channel),
+        channel: toInputChannel(await resolvePeer(client, channel), channel),
     })
 
     const parsed = res.chats.map((chat) => new Chat(chat))

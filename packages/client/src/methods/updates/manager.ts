@@ -3,12 +3,7 @@ import { assertNever, BaseTelegramClient, MaybeAsync, MtArgumentError, tl } from
 import { getBarePeerId, getMarkedPeerId, markedPeerIdToBare, toggleChannelIdMark } from '@mtcute/core/utils.js'
 
 import { PeersIndex } from '../../types/index.js'
-import {
-    isInputPeerChannel,
-    isInputPeerUser,
-    normalizeToInputChannel,
-    normalizeToInputUser,
-} from '../../utils/peer-utils.js'
+import { isInputPeerChannel, isInputPeerUser, toInputChannel, toInputUser } from '../../utils/peer-utils.js'
 import { RpsMeter } from '../../utils/rps-meter.js'
 import { getAuthState } from '../auth/_state.js'
 import { _getChannelsBatched, _getUsersBatched } from '../chats/batched-queries.js'
@@ -688,7 +683,7 @@ async function fetchChannelDifference(
         return false
     }
 
-    const channel = normalizeToInputChannel(await resolvePeer(client, toggleChannelIdMark(channelId)))
+    const channel = toInputChannel(await resolvePeer(client, toggleChannelIdMark(channelId)))
 
     if (channel._ === 'inputChannel' && channel.accessHash.isZero()) {
         state.log.debug('fetchChannelDifference failed for channel %d: input peer not found', channelId)
@@ -1115,9 +1110,9 @@ async function onUpdate(
 
                         // the peer will be automatically cached by the `.call()`, we don't have to do anything
                         if (isInputPeerChannel(peer)) {
-                            return _getChannelsBatched(client, normalizeToInputChannel(peer))
+                            return _getChannelsBatched(client, toInputChannel(peer))
                         } else if (isInputPeerUser(peer)) {
-                            return _getUsersBatched(client, normalizeToInputUser(peer))
+                            return _getUsersBatched(client, toInputUser(peer))
                         }
 
                         state.log.warn('cannot fetch full peer %d - unknown peer type %s', id, peer._)

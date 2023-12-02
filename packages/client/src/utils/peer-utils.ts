@@ -6,9 +6,9 @@ import { InputPeerLike } from '../types/peers/index.js'
 export const INVITE_LINK_REGEX =
     /^(?:https?:\/\/)?(?:www\.)?(?:t(?:elegram)?\.(?:org|me|dog)\/(?:joinchat\/|\+))([\w-]+)$/i
 
-// helpers to normalize result of `resolvePeer` function
+// helpers to convert result of `resolvePeer` function
 
-export function normalizeToInputPeer(res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel): tl.TypeInputPeer {
+export function toInputPeer(res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel): tl.TypeInputPeer {
     if (tl.isAnyInputPeer(res)) return res
 
     switch (res._) {
@@ -48,7 +48,7 @@ export function normalizeToInputPeer(res: tl.TypeInputPeer | tl.TypeInputUser | 
     }
 }
 
-export function normalizeToInputUser(
+export function toInputUser(
     res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel,
     input?: InputPeerLike,
 ): tl.TypeInputUser {
@@ -75,7 +75,7 @@ export function normalizeToInputUser(
     throw new MtInvalidPeerTypeError(input ?? res, 'user')
 }
 
-export function normalizeToInputChannel(
+export function toInputChannel(
     res: tl.TypeInputPeer | tl.TypeInputUser | tl.TypeInputChannel,
     input?: InputPeerLike,
 ): tl.TypeInputChannel {

@@ -2,7 +2,7 @@ import { BaseTelegramClient, tl } from '@mtcute/core'
 import { randomLong } from '@mtcute/core/utils.js'
 
 import { InputPeerLike, Message } from '../../types/index.js'
-import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { toInputChannel } from '../../utils/peer-utils.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -50,7 +50,7 @@ export async function createForumTopic(
 
     const res = await client.call({
         _: 'channels.createForumTopic',
-        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
         title,
         iconColor: typeof icon === 'number' ? icon : undefined,
         iconEmojiId: typeof icon !== 'number' ? icon : undefined,

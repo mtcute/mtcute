@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike } from '../../types/index.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -20,7 +20,7 @@ export async function hideJoinRequest(
 ): Promise<void> {
     const { chatId, user, action } = params
 
-    const userId = normalizeToInputUser(await resolvePeer(client, user), user)
+    const userId = toInputUser(await resolvePeer(client, user), user)
 
     await client.call({
         _: 'messages.hideChatJoinRequest',

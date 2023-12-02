@@ -3,7 +3,7 @@ import { assertTypeIs } from '@mtcute/core/utils.js'
 
 import { ArrayWithTotal, ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types/index.js'
 import { makeArrayWithTotal } from '../../utils/index.js'
-import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { isInputPeerChannel, isInputPeerChat, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -123,7 +123,7 @@ export async function getChatMembers(
 
         const res = await client.call({
             _: 'channels.getParticipants',
-            channel: normalizeToInputChannel(chat),
+            channel: toInputChannel(chat),
             filter,
             offset,
             limit,

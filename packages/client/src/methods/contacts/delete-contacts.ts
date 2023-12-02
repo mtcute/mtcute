@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
 import { InputPeerLike, MtInvalidPeerTypeError, User } from '../../types/index.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
@@ -16,7 +16,7 @@ import { resolvePeerMany } from '../users/resolve-peer-many.js'
 export async function deleteContacts(client: BaseTelegramClient, userIds: MaybeArray<InputPeerLike>): Promise<User[]> {
     if (!Array.isArray(userIds)) userIds = [userIds]
 
-    const inputPeers = await resolvePeerMany(client, userIds, normalizeToInputUser)
+    const inputPeers = await resolvePeerMany(client, userIds, toInputUser)
 
     if (!inputPeers.length) {
         throw new MtInvalidPeerTypeError('all provided ids', 'user')

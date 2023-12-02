@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike } from '../../types/index.js'
-import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -19,7 +19,7 @@ export async function setChatUsername(
 ): Promise<void> {
     await client.call({
         _: 'channels.updateUsername',
-        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
         username: username || '',
     })
 }

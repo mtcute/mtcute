@@ -9,7 +9,7 @@ import {
     StickerSourceType,
     StickerType,
 } from '../../types/index.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -97,7 +97,7 @@ export async function createStickerSet(
         progressCallback?: (idx: number, uploaded: number, total: number) => void
     },
 ): Promise<StickerSet> {
-    const owner = normalizeToInputUser(await resolvePeer(client, params.owner), params.owner)
+    const owner = toInputUser(await resolvePeer(client, params.owner), params.owner)
 
     const inputStickers: tl.TypeInputStickerSetItem[] = []
 

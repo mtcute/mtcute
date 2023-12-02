@@ -2,7 +2,7 @@ import { BaseTelegramClient } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
 import type { ForumTopic, InputPeerLike } from '../../types/index.js'
-import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { toInputChannel } from '../../utils/peer-utils.js'
 import { createDummyUpdate } from '../../utils/updates-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -17,7 +17,7 @@ export async function deleteForumTopicHistory(
     chat: InputPeerLike,
     topicId: number | ForumTopic,
 ): Promise<void> {
-    const channel = normalizeToInputChannel(await resolvePeer(client, chat), chat)
+    const channel = toInputChannel(await resolvePeer(client, chat), chat)
     assertTypeIsNot('deleteForumTopicHistory', channel, 'inputChannelEmpty')
 
     const res = await client.call({

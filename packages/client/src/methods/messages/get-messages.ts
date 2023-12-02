@@ -3,7 +3,7 @@ import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
 import { Message } from '../../types/messages/index.js'
 import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
-import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
 import { getAuthState } from '../auth/_state.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -42,7 +42,7 @@ export async function getMessages(
             {
                 _: 'channels.getMessages',
                 id: ids,
-                channel: normalizeToInputChannel(peer),
+                channel: toInputChannel(peer),
             } :
             {
                 _: 'messages.getMessages',

@@ -2,12 +2,7 @@ import { BaseTelegramClient, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils.js'
 
 import { ChatMember, InputPeerLike, MtInvalidPeerTypeError, PeersIndex } from '../../types/index.js'
-import {
-    isInputPeerChannel,
-    isInputPeerChat,
-    isInputPeerUser,
-    normalizeToInputChannel,
-} from '../../utils/peer-utils.js'
+import { isInputPeerChannel, isInputPeerChat, isInputPeerUser, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -62,7 +57,7 @@ export async function getChatMember(
         try {
             const res = await client.call({
                 _: 'channels.getParticipant',
-                channel: normalizeToInputChannel(chat),
+                channel: toInputChannel(chat),
                 participant: user,
             })
 

@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
-import { isInputPeerChannel, isInputPeerChat, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { isInputPeerChannel, isInputPeerChat, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { deleteHistory } from './delete-history.js'
 
@@ -25,7 +25,7 @@ export async function leaveChat(
     if (isInputPeerChannel(chat)) {
         const res = await client.call({
             _: 'channels.leaveChannel',
-            channel: normalizeToInputChannel(chat),
+            channel: toInputChannel(chat),
         })
         client.network.handleUpdate(res)
     } else if (isInputPeerChat(chat)) {

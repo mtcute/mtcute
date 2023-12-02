@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
 import { InputPeerLike } from '../../types/index.js'
-import { normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { toInputChannel } from '../../utils/peer-utils.js'
 import { createDummyUpdate } from '../../utils/updates-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -19,7 +19,7 @@ export async function deleteUserHistory(
 ): Promise<void> {
     const { chatId, participantId } = params
 
-    const channel = normalizeToInputChannel(await resolvePeer(client, chatId), chatId)
+    const channel = toInputChannel(await resolvePeer(client, chatId), chatId)
 
     const peer = await resolvePeer(client, participantId)
 

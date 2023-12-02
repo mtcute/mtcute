@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
 import { ArrayPaginated, ChatInviteLink, ChatInviteLinkMember, InputPeerLike, PeersIndex } from '../../types/index.js'
-import { makeArrayPaginated, normalizeDate, normalizeToInputUser } from '../../utils/index.js'
+import { makeArrayPaginated, normalizeDate, toInputUser } from '../../utils/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -80,7 +80,7 @@ export async function getInviteLinkMembers(
     const nextOffset = last ?
         {
             date: last.raw.date,
-            user: normalizeToInputUser(last.user.inputPeer),
+            user: toInputUser(last.user.inputPeer),
         } :
         undefined
 

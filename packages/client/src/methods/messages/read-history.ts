@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike } from '../../types/index.js'
-import { isInputPeerChannel, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
 import { createDummyUpdate } from '../../utils/updates-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -47,7 +47,7 @@ export async function readHistory(
     if (isInputPeerChannel(peer)) {
         await client.call({
             _: 'channels.readHistory',
-            channel: normalizeToInputChannel(peer),
+            channel: toInputChannel(peer),
             maxId,
         })
     } else {

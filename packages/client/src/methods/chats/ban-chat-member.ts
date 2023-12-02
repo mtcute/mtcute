@@ -1,12 +1,7 @@
 import { BaseTelegramClient, MtTypeAssertionError } from '@mtcute/core'
 
 import { InputPeerLike, Message, MtInvalidPeerTypeError } from '../../types/index.js'
-import {
-    isInputPeerChannel,
-    isInputPeerChat,
-    normalizeToInputChannel,
-    normalizeToInputUser,
-} from '../../utils/peer-utils.js'
+import { isInputPeerChannel, isInputPeerChat, toInputChannel, toInputUser } from '../../utils/peer-utils.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -44,7 +39,7 @@ export async function banChatMember(
     if (isInputPeerChannel(chat)) {
         res = await client.call({
             _: 'channels.editBanned',
-            channel: normalizeToInputChannel(chat),
+            channel: toInputChannel(chat),
             participant: peer,
             bannedRights: {
                 _: 'chatBannedRights',
@@ -57,7 +52,7 @@ export async function banChatMember(
         res = await client.call({
             _: 'messages.deleteChatUser',
             chatId: chat.chatId,
-            userId: normalizeToInputUser(peer),
+            userId: toInputUser(peer),
         })
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 

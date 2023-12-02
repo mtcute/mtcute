@@ -2,7 +2,7 @@ import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 
 import { ChatEvent, InputPeerLike } from '../../types/index.js'
 import { normalizeChatEventFilters } from '../../types/peers/chat-event/filters.js'
-import { normalizeToInputChannel, normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputChannel, toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 import { getChatEventLog } from './get-chat-event-log.js'
@@ -37,13 +37,11 @@ export async function* iterChatEventLog(
 ): AsyncIterableIterator<ChatEvent> {
     if (!params) params = {}
 
-    const channel = normalizeToInputChannel(await resolvePeer(client, chatId), chatId)
+    const channel = toInputChannel(await resolvePeer(client, chatId), chatId)
 
     const { minId = Long.ZERO, query = '', limit = Infinity, chunkSize = 100, users, filters } = params
 
-    const admins: tl.TypeInputUser[] | undefined = users ?
-        await resolvePeerMany(client, users, normalizeToInputUser) :
-        undefined
+    const admins: tl.TypeInputUser[] | undefined = users ? await resolvePeerMany(client, users, toInputUser) : undefined
 
     const { serverFilter, localFilter } = normalizeChatEventFilters(filters)
 

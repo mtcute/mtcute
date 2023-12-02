@@ -2,7 +2,7 @@ import { BaseTelegramClient, tl } from '@mtcute/core'
 
 import { GameHighScore, InputMessageId, InputPeerLike, normalizeInputMessageId, PeersIndex } from '../../types/index.js'
 import { normalizeInlineId } from '../../utils/inline-utils.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -23,7 +23,7 @@ export async function getGameHighScores(
     let user: tl.TypeInputUser
 
     if (userId) {
-        user = normalizeToInputUser(await resolvePeer(client, userId), userId)
+        user = toInputUser(await resolvePeer(client, userId), userId)
     } else {
         user = { _: 'inputUserEmpty' }
     }
@@ -56,7 +56,7 @@ export async function getInlineGameHighScores(
     let user: tl.TypeInputUser
 
     if (userId) {
-        user = normalizeToInputUser(await resolvePeer(client, userId), userId)
+        user = toInputUser(await resolvePeer(client, userId), userId)
     } else {
         user = { _: 'inputUserEmpty' }
     }

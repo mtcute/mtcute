@@ -6,8 +6,8 @@ import {
     isInputPeerChannel,
     isInputPeerChat,
     isInputPeerUser,
-    normalizeToInputChannel,
-    normalizeToInputUser,
+    toInputChannel,
+    toInputUser,
 } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _getChannelsBatched, _getChatsBatched, _getUsersBatched } from './batched-queries.js'
@@ -43,9 +43,9 @@ export async function getChat(client: BaseTelegramClient, chatId: InputPeerLike)
 
     let res: tl.TypeChat | tl.TypeUser | null
     if (isInputPeerChannel(peer)) {
-        res = await _getChannelsBatched(client, normalizeToInputChannel(peer))
+        res = await _getChannelsBatched(client, toInputChannel(peer))
     } else if (isInputPeerUser(peer)) {
-        res = await _getUsersBatched(client, normalizeToInputUser(peer))
+        res = await _getUsersBatched(client, toInputUser(peer))
     } else if (isInputPeerChat(peer)) {
         res = await _getChatsBatched(client, peer.chatId)
     } else throw new Error('should not happen')

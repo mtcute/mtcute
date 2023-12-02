@@ -2,7 +2,7 @@ import { BaseTelegramClient, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils.js'
 
 import { InputPeerLike, Photo } from '../../types/index.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeer } from './resolve-peer.js'
 
 /**
@@ -19,7 +19,7 @@ export async function getProfilePhoto(
 ): Promise<Photo> {
     const res = await client.call({
         _: 'photos.getUserPhotos',
-        userId: normalizeToInputUser(await resolvePeer(client, userId), userId),
+        userId: toInputUser(await resolvePeer(client, userId), userId),
         offset: -1,
         limit: 1,
         maxId: photoId,

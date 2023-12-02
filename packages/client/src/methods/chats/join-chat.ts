@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { Chat, InputPeerLike } from '../../types/index.js'
-import { INVITE_LINK_REGEX, normalizeToInputChannel } from '../../utils/peer-utils.js'
+import { INVITE_LINK_REGEX, toInputChannel } from '../../utils/peer-utils.js'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -35,7 +35,7 @@ export async function joinChat(client: BaseTelegramClient, chatId: InputPeerLike
 
     const res = await client.call({
         _: 'channels.joinChannel',
-        channel: normalizeToInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
     })
 
     assertIsUpdatesGroup('channels.joinChannel', res)

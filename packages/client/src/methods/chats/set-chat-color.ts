@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MtTypeAssertionError, tl } from '@mtcute/core'
 
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
-import { isInputPeerChannel, isInputPeerUser, normalizeToInputChannel } from '../../utils/index.js'
+import { isInputPeerChannel, isInputPeerUser, toInputChannel } from '../../utils/index.js'
 import { getAuthState } from '../auth/_state.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -45,7 +45,7 @@ export async function setChatColor(
     if (isInputPeerChannel(peer)) {
         const res = await client.call({
             _: 'channels.updateColor',
-            channel: normalizeToInputChannel(peer),
+            channel: toInputChannel(peer),
             color,
             backgroundEmojiId,
         })

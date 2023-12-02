@@ -1,7 +1,7 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
 import { InputPeerLike } from '../../types/index.js'
-import { normalizeToInputUser } from '../../utils/peer-utils.js'
+import { toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -27,7 +27,7 @@ export async function getBotInfo(
 
     return client.call({
         _: 'bots.getBotInfo',
-        bot: bot ? normalizeToInputUser(await resolvePeer(client, bot), bot) : undefined,
+        bot: bot ? toInputUser(await resolvePeer(client, bot), bot) : undefined,
         langCode: langCode,
     })
 }

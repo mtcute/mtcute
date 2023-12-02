@@ -1,7 +1,7 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
 
 import { ForumTopic, InputPeerLike } from '../../types/index.js'
-import { normalizeToInputChannel } from '../../utils/index.js'
+import { toInputChannel } from '../../utils/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -18,7 +18,7 @@ export async function getForumTopicsById(
 
     const res = await client.call({
         _: 'channels.getForumTopicsByID',
-        channel: normalizeToInputChannel(await resolvePeer(client, chatId)),
+        channel: toInputChannel(await resolvePeer(client, chatId)),
         topics: ids,
     })
 
