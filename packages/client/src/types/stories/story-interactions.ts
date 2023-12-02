@@ -2,7 +2,8 @@ import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { PeersIndex, User } from '../peers/index.js'
+import { PeersIndex } from '../peers/peers-index.js'
+import { User } from '../peers/user.js'
 import { ReactionCount } from '../reactions/reaction-count.js'
 
 /**

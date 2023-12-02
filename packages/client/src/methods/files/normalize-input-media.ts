@@ -30,7 +30,18 @@ export async function _normalizeInputMedia(
 
     // thanks to @pacificescape for pointing out messages.uploadMedia method
 
-    if (tl.isAnyInputMedia(media)) return media
+    if (tl.isAnyInputMedia(media)) {
+        // make sure the peers in the media are correctly resolved (i.e. mtcute.* ones are replaced with proper ones)
+        switch (media._) {
+            case 'inputMediaStory':
+                return {
+                    ...media,
+                    peer: await resolvePeer(client, media.peer),
+                }
+        }
+
+        return media
+    }
 
     if (media.type === 'venue') {
         return {

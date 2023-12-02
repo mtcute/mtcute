@@ -50,7 +50,7 @@ export class WebPage {
      * Officially documented are:
      * `article, photo, audio, video, document, profile, app`,
      * but also these are encountered:
-     * `telegram_user, telegram_bot, telegram_channel, telegram_megagroup`:
+     * `telegram_user, telegram_bot, telegram_channel, telegram_megagroup, telegram_story`:
      *
      * - `telegram_*` ones seem to be used for `t.me` links.
      * - `article` seems to be used for almost all custom pages with `og:*` tags

@@ -3,7 +3,8 @@ import { assertTypeIs } from '@mtcute/core/utils.js'
 
 import { makeInspectable } from '../../../utils/index.js'
 import { memoizeGetters } from '../../../utils/memoize.js'
-import { Location, VenueSource } from '../../media/index.js'
+import { Location } from '../../media/location.js'
+import { VenueSource } from '../../media/venue.js'
 import { StoryInteractiveArea } from './base.js'
 
 /**

@@ -2,8 +2,10 @@ import { MtUnsupportedError, tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { Photo, Video } from '../media/index.js'
-import { _messageMediaFromTl, MessageEntity } from '../messages/index.js'
+import { parseDocument } from '../media/document-utils.js'
+import { Photo } from '../media/photo.js'
+import { Video } from '../media/video.js'
+import { MessageEntity } from '../messages/message-entity.js'
 import { PeersIndex } from '../peers/index.js'
 import { ReactionEmoji, toReactionEmoji } from '../reactions/index.js'
 import { _storyInteractiveElementFromTl, StoryInteractiveElement } from './interactive/index.js'
@@ -114,15 +116,20 @@ export class Story {
      * Currently, can only be {@link Photo} or {@link Video}.
      */
     get media(): StoryMedia {
-        const media = _messageMediaFromTl(this._peers, this.raw.media)
+        switch (this.raw.media._) {
+            case 'messageMediaPhoto':
+                if (this.raw.media.photo?._ !== 'photo') throw new MtUnsupportedError('Unsupported story media type')
 
-        switch (media?.type) {
-            case 'photo':
-            case 'video':
-                return media
-            default:
-                throw new MtUnsupportedError('Unsupported story media type')
+                return new Photo(this.raw.media.photo, this.raw.media)
+            case 'messageMediaDocument': {
+                if (this.raw.media.document?._ !== 'document') { throw new MtUnsupportedError('Unsupported story media type') }
+
+                const doc = parseDocument(this.raw.media.document, this.raw.media)
+                if (doc.type === 'video') return doc
+            }
         }
+
+        throw new MtUnsupportedError('Unsupported story media type')
     }
 
     /**
