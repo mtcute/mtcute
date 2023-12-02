@@ -1,16 +1,9 @@
-import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError } from '@mtcute/core'
 
 import { Chat, InputPeerLike, MtPeerNotFoundError } from '../../types/index.js'
-import {
-    INVITE_LINK_REGEX,
-    isInputPeerChannel,
-    isInputPeerChat,
-    isInputPeerUser,
-    toInputChannel,
-    toInputUser,
-} from '../../utils/peer-utils.js'
+import { INVITE_LINK_REGEX } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
-import { _getChannelsBatched, _getChatsBatched, _getUsersBatched } from './batched-queries.js'
+import { _getRawPeerBatched } from './batched-queries.js'
 
 // @available=both
 /**
@@ -41,14 +34,7 @@ export async function getChat(client: BaseTelegramClient, chatId: InputPeerLike)
 
     const peer = await resolvePeer(client, chatId)
 
-    let res: tl.TypeChat | tl.TypeUser | null
-    if (isInputPeerChannel(peer)) {
-        res = await _getChannelsBatched(client, toInputChannel(peer))
-    } else if (isInputPeerUser(peer)) {
-        res = await _getUsersBatched(client, toInputUser(peer))
-    } else if (isInputPeerChat(peer)) {
-        res = await _getChatsBatched(client, peer.chatId)
-    } else throw new Error('should not happen')
+    const res = await _getRawPeerBatched(client, peer)
 
     if (!res) throw new MtPeerNotFoundError(`Chat ${JSON.stringify(chatId)} was not found`)
 

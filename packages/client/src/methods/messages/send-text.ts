@@ -9,6 +9,7 @@ import { normalizeDate } from '../../utils/misc-utils.js'
 import { inputPeerToPeer } from '../../utils/peer-utils.js'
 import { createDummyUpdate } from '../../utils/updates-utils.js'
 import { getAuthState } from '../auth/_state.js'
+import { _getRawPeerBatched } from '../chats/batched-queries.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _findMessageInUpdate } from './find-in-update.js'
@@ -97,22 +98,7 @@ export async function sendText(
             let cached = await client.storage.getFullPeerById(id)
 
             if (!cached) {
-                switch (peer._) {
-                    case 'inputPeerChat':
-                    case 'peerChat':
-                        // resolvePeer does not fetch the chat.
-                        // we need to do it manually
-                        cached = await client
-                            .call({
-                                _: 'messages.getChats',
-                                id: [peer.chatId],
-                            })
-                            .then((res) => res.chats[0])
-                        break
-                    default:
-                        await resolvePeer(client, peer)
-                        cached = await client.storage.getFullPeerById(id)
-                }
+                cached = await _getRawPeerBatched(client, await resolvePeer(client, peer))
             }
 
             if (!cached) {

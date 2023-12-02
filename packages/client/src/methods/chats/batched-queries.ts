@@ -1,5 +1,12 @@
-import { MtArgumentError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError, tl } from '@mtcute/core'
 
+import {
+    isInputPeerChannel,
+    isInputPeerChat,
+    isInputPeerUser,
+    toInputChannel,
+    toInputUser,
+} from '../../utils/peer-utils.js'
 import { batchedQuery } from '../../utils/query-batcher.js'
 import { getAuthState } from '../auth/_state.js'
 
@@ -120,3 +127,19 @@ export const _getChannelsBatched = batchedQuery<tl.TypeInputChannel, tl.RawChann
         }
     },
 })
+
+/** @internal */
+export function _getRawPeerBatched(
+    client: BaseTelegramClient,
+    peer: tl.TypeInputPeer,
+): Promise<tl.TypeUser | tl.TypeChat | null> {
+    if (isInputPeerUser(peer)) {
+        return _getUsersBatched(client, toInputUser(peer))
+    } else if (isInputPeerChannel(peer)) {
+        return _getChannelsBatched(client, toInputChannel(peer))
+    } else if (isInputPeerChat(peer)) {
+        return _getChatsBatched(client, peer.chatId)
+    }
+
+    throw new MtArgumentError('Invalid peer')
+}
