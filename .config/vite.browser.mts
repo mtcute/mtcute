@@ -18,6 +18,7 @@ export default mergeConfig(baseConfig, defineConfig({
         fakeTimers: {
             toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date']
         },
+        retry: process.env.CI ? 3 : 0,
         // for whatever reason using exclude-s makes the vite never start the browser, so we use skip-s instead.
         // exclude: [
         //     './packages/crypto-node/**',

@@ -57,7 +57,13 @@ jobs:
       - name: 'Initialize browser'
         run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
       - name: 'Run tests'
-        run: pnpm run test:browser --browser.name=${{ matrix.browser }}
+        # i wish we didn't have to do this, but vitest in browser is very flaky
+        # see: https://github.com/vitest-dev/vitest/issues/4173
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          timeout_minutes: 30
+          command: pnpm run test:browser --browser.name=${{ matrix.browser }}
   
   e2e:
     runs-on: ubuntu-latest
