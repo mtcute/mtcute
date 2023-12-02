@@ -18,7 +18,17 @@ function generateChangelog(onlyPackages) {
 
         const changed = findChangedFilesSince(`${commit.hash}~1`, commit.hash)
 
-        const line = `- ${commit.hash}: ${breaking ? '**❗ BREAKING** ' : ''}${commit.msg}`
+        let line = `- ${commit.hash}: ${breaking ? '**❗ BREAKING** ' : ''}${commit.msg}`
+
+        if (breaking && commit.description) {
+            line +=
+                '\n' +
+                commit.description
+                    .trim()
+                    .split('\n')
+                    .map((line) => `  ${line}`)
+                    .join('\n')
+        }
 
         for (const file of changed) {
             if (!file.startsWith('packages/')) continue

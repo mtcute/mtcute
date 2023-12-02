@@ -20,16 +20,33 @@ function findChangedFilesSince(tag, until = 'HEAD') {
 }
 
 function getCommitsSince(tag, until = 'HEAD') {
-    return cp
-        .execSync(`git log --pretty="format:%H %s" ${tag}..${until}`, { encoding: 'utf8', stdio: 'pipe' })
+    const delim = `---${Math.random().toString(36).slice(2)}---`
+
+    const lines = cp
+        .execSync(`git log --pretty="format:%H %s%n%b%n${delim}" ${tag}..${until}`, { encoding: 'utf8', stdio: 'pipe' })
         .trim()
         .split('\n')
-        .reverse()
-        .map((it) => {
-            const [hash, ...msg] = it.split(' ')
 
-            return { hash, msg: msg.join(' ') }
-        })
+    const items = []
+
+    let current = null
+
+    for (const line of lines) {
+        if (line === delim) {
+            if (current) items.push(current)
+            current = null
+        } else if (current) {
+            if (current.description) current.description += '\n'
+            current.description += line
+        } else {
+            const [hash, ...msg] = line.split(' ')
+            current = { hash, msg: msg.join(' '), description: '' }
+        }
+    }
+
+    if (current) items.push(current)
+
+    return items.reverse()
 }
 
 function parseConventionalCommit(msg) {
