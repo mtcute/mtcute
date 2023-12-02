@@ -124,8 +124,7 @@ export async function sendText(
             }
         }
 
-        await fetchPeer(peer)
-        await fetchPeer(msg.fromId!)
+        await Promise.all([fetchPeer(peer), fetchPeer(msg.fromId!)])
 
         const ret = new Message(msg, peers)
 
