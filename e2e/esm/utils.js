@@ -1,4 +1,5 @@
 import { MemoryStorage } from '@mtcute/core/storage/memory.js'
+import { LogManager } from '@mtcute/core/utils.js'
 
 export const getApiParams = () => {
     if (!process.env.API_ID || !process.env.API_HASH) {
@@ -10,5 +11,6 @@ export const getApiParams = () => {
         apiHash: process.env.API_HASH,
         testMode: true,
         storage: new MemoryStorage(),
+        logLevel: LogManager.DEBUG,
     }
 }

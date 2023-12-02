@@ -27,17 +27,17 @@
                 "import": "./esm/utils/index.js",
                 "require": "./cjs/utils/index.js"
             },
-            "./utils/crypto/*.js": {
-                "import": "./esm/utils/crypto/*.js",
-                "require": "./cjs/utils/crypto/*.js"
+            "./utils/crypto/*": {
+                "import": "./esm/utils/crypto/*",
+                "require": "./cjs/utils/crypto/*"
             },
-            "./network/transports/*.js": {
-                "import": "./esm/network/transports/*.js",
-                "require": "./cjs/network/transports/*.js"
+            "./network/transports/*": {
+                "import": "./esm/network/transports/*",
+                "require": "./cjs/network/transports/*"
             },
-            "./storage/*.js": {
-                "import": "./esm/storage/*.js",
-                "require": "./cjs/storage/*.js"
+            "./storage/*": {
+                "import": "./esm/storage/*",
+                "require": "./cjs/storage/*"
             }
         }
     },

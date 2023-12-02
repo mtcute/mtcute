@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-globals */
 const cp = require('child_process')
 
 const { fixForEsm } = require('./build-esm.cjs')

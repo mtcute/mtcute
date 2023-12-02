@@ -1,4 +1,5 @@
 const { MemoryStorage } = require('@mtcute/core/storage/memory.js')
+const { LogManager } = require('@mtcute/core/utils.js')
 
 exports.getApiParams = () => {
     if (!process.env.API_ID || !process.env.API_HASH) {
@@ -10,5 +11,6 @@ exports.getApiParams = () => {
         apiHash: process.env.API_HASH,
         testMode: true,
         storage: new MemoryStorage(),
+        logLevel: LogManager.DEBUG,
     }
 }
