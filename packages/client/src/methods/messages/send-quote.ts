@@ -67,6 +67,7 @@ export function quoteWithText(
     const params_ = params__ as NonNullable<Parameters<typeof sendText>[3]>
     params_.replyTo = message
     params_.quote = extractQuote(message, params.start, params.end)
+    params_.quoteOffset = params.start
 
     return sendText(client, toChatId, text, params_)
 }
@@ -84,6 +85,7 @@ export function quoteWithMedia(
     const params_ = params__ as NonNullable<Parameters<typeof sendMedia>[3]>
     params_.replyTo = message
     params_.quote = extractQuote(message, params.start, params.end)
+    params_.quoteOffset = params.start
 
     return sendMedia(client, toChatId, media, params_)
 }
@@ -101,6 +103,7 @@ export function quoteWithMediaGroup(
     const params_ = params__ as NonNullable<Parameters<typeof sendMediaGroup>[3]>
     params_.replyTo = message
     params_.quote = extractQuote(message, params.start, params.end)
+    params_.quoteOffset = params.start
 
     return sendMediaGroup(client, message.chat.inputPeer, medias, params_)
 }

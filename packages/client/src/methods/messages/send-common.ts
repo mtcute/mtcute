@@ -57,6 +57,11 @@ export interface CommonSendParams {
     quote?: TextWithEntities
 
     /**
+     * Offset of the start of the quote in the message.
+     */
+    quoteOffset?: number
+
+    /**
      * Whether to send this message silently.
      */
     silent?: boolean
@@ -140,6 +145,7 @@ export async function _processCommonSendParameters(
             replyToPeerId: replyToPeer,
             quoteText: params.quote?.text,
             quoteEntities: params.quote?.entities as tl.TypeMessageEntity[],
+            quoteOffset: params.quoteOffset,
         }
     } else if (params.replyToStory) {
         tlReplyTo = {
