@@ -579,8 +579,7 @@ export class BaseTelegramClient extends EventEmitter {
      * > with [@BotFather](//t.me/botfather)
      */
     async exportSession(): Promise<string> {
-        const primaryDcs = await this.storage.getDefaultDcs()
-        if (!primaryDcs) throw new Error('No default DC set')
+        const primaryDcs = (await this.storage.getDefaultDcs()) ?? this._defaultDcs
 
         const authKey = await this.storage.getAuthKeyFor(primaryDcs.main.id)
         if (!authKey) throw new Error('Auth key is not ready yet')
