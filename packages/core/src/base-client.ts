@@ -446,7 +446,10 @@ export class BaseTelegramClient extends EventEmitter {
         const stack = this._niceStacks ? new Error().stack : undefined
 
         const res = await this.network.call(message, params, stack)
-        await this._cachePeersFrom(res)
+
+        if (await this._cachePeersFrom(res)) {
+            await this.saveStorage()
+        }
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return res
@@ -495,7 +498,7 @@ export class BaseTelegramClient extends EventEmitter {
     /**
      * Adds all peers from a given object to entity cache in storage.
      */
-    async _cachePeersFrom(obj: object): Promise<void> {
+    async _cachePeersFrom(obj: object): Promise<boolean> {
         const parsedPeers: ITelegramStorage.PeerInfo[] = []
 
         let count = 0
@@ -553,7 +556,11 @@ export class BaseTelegramClient extends EventEmitter {
         if (count > 0) {
             await this.storage.updatePeers(parsedPeers)
             this.log.debug('cached %d peers', count)
+
+            return true
         }
+
+        return false
     }
 
     /**
