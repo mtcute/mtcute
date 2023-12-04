@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/client",
     "private": true,
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "High-level API over @mtcute/core",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
