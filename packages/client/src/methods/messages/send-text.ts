@@ -5,7 +5,6 @@ import { BotKeyboard, ReplyMarkup } from '../../types/bots/keyboards.js'
 import { Message } from '../../types/messages/message.js'
 import { InputText } from '../../types/misc/entities.js'
 import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
-import { normalizeDate } from '../../utils/misc-utils.js'
 import { inputPeerToPeer } from '../../utils/peer-utils.js'
 import { createDummyUpdate } from '../../utils/updates-utils.js'
 import { getAuthState } from '../auth/_state.js'
@@ -53,7 +52,7 @@ export async function sendText(
     const [message, entities] = await _normalizeInputText(client, text)
 
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
-    const { peer, replyTo } = await _processCommonSendParameters(client, chatId, params)
+    const { peer, replyTo, scheduleDate } = await _processCommonSendParameters(client, chatId, params)
 
     const res = await client.call({
         _: 'messages.sendMessage',
@@ -62,7 +61,7 @@ export async function sendText(
         silent: params.silent,
         replyTo,
         randomId: randomLong(),
-        scheduleDate: normalizeDate(params.schedule),
+        scheduleDate,
         replyMarkup,
         message,
         entities,

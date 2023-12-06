@@ -4,7 +4,6 @@ import { randomLong } from '@mtcute/core/utils.js'
 import { InputMediaLike } from '../../types/media/input-media.js'
 import { Message } from '../../types/messages/message.js'
 import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
-import { normalizeDate } from '../../utils/misc-utils.js'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
@@ -50,7 +49,7 @@ export async function sendMediaGroup(
 ): Promise<Message[]> {
     if (!params) params = {}
 
-    const { peer, replyTo } = await _processCommonSendParameters(client, chatId, params)
+    const { peer, replyTo, scheduleDate } = await _processCommonSendParameters(client, chatId, params)
 
     const multiMedia: tl.RawInputSingleMedia[] = []
 
@@ -99,7 +98,7 @@ export async function sendMediaGroup(
         multiMedia,
         silent: params.silent,
         replyTo,
-        scheduleDate: normalizeDate(params.schedule),
+        scheduleDate,
         clearDraft: params.clearDraft,
         noforwards: params.forbidForwards,
         sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,

@@ -6,7 +6,6 @@ import { InputMediaLike } from '../../types/media/input-media.js'
 import { Message } from '../../types/messages/message.js'
 import { InputText } from '../../types/misc/entities.js'
 import { InputPeerLike } from '../../types/peers/index.js'
-import { normalizeDate } from '../../utils/misc-utils.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -82,7 +81,7 @@ export async function sendMedia(
     )
 
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
-    const { peer, replyTo } = await _processCommonSendParameters(client, chatId, params)
+    const { peer, replyTo, scheduleDate } = await _processCommonSendParameters(client, chatId, params)
 
     const res = await client.call({
         _: 'messages.sendMedia',
@@ -91,7 +90,7 @@ export async function sendMedia(
         silent: params.silent,
         replyTo,
         randomId: randomLong(),
-        scheduleDate: normalizeDate(params.schedule),
+        scheduleDate,
         replyMarkup,
         message,
         entities,

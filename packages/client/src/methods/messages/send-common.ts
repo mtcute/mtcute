@@ -4,7 +4,7 @@ import { MtMessageNotFoundError } from '../../types/errors.js'
 import { Message } from '../../types/messages/message.js'
 import { TextWithEntities } from '../../types/misc/entities.js'
 import { InputPeerLike } from '../../types/peers/index.js'
-import { normalizeMessageId, toInputUser } from '../../utils/index.js'
+import { normalizeDate, normalizeMessageId, toInputUser } from '../../utils/index.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _getDiscussionMessage } from './get-discussion-message.js'
@@ -70,10 +70,11 @@ export interface CommonSendParams {
      * If set, the message will be scheduled to this date.
      * When passing a number, a UNIX time in ms is expected.
      *
-     * You can also pass `0x7FFFFFFE`, this will send the message
-     * once the peer is online
+     * You can also pass `online` - this will send the message
+     * once the peer is online. Note that this requires that
+     * peer's online status to be visible to you.
      */
-    schedule?: Date | number
+    schedule?: Date | number | 'online'
 
     /**
      * Whether to clear draft after sending this message.
@@ -155,8 +156,17 @@ export async function _processCommonSendParameters(
         }
     }
 
+    let scheduleDate: number | undefined = undefined
+
+    if (params.schedule === 'online') {
+        scheduleDate = 0x7ffffffe
+    } else if (params.schedule) {
+        scheduleDate = normalizeDate(params.schedule)
+    }
+
     return {
         peer,
         replyTo: tlReplyTo,
+        scheduleDate,
     }
 }
