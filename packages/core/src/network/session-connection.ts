@@ -1404,12 +1404,6 @@ export class SessionConnection extends PersistentConnection {
             // we schedule it on the next tick, so we can load-balance
             // between multiple connections using the same session
             this._flushTimer.emitWhenIdle()
-        } else if (this._inactivityPendingFlush) {
-            this.log.debug('pending messages sent, closing connection')
-            this._flushTimer.reset()
-            this._inactivityPendingFlush = false
-
-            super._onInactivityTimeout()
         } else {
             this._flushTimer.emitBefore(this._session.lastPingTime + 60000)
         }
@@ -1792,7 +1786,7 @@ export class SessionConnection extends PersistentConnection {
         )
 
         const enc = this._session.encryptMessage(result)
-        this.send(enc).catch((err: Error) => {
+        const promise = this.send(enc).catch((err: Error) => {
             this.log.error('error while sending pending messages (root msg_id = %l): %s', rootMsgId, err.stack)
 
             // put acks in the front so they are the first to be sent
@@ -1803,5 +1797,15 @@ export class SessionConnection extends PersistentConnection {
                 this._onMessageFailed(rootMsgId, 'unknown error')
             }
         })
+
+        if (this._inactivityPendingFlush && !this._session.hasPendingMessages) {
+            void promise.then(() => {
+                this.log.debug('pending messages sent, closing connection')
+                this._flushTimer.reset()
+                this._inactivityPendingFlush = false
+
+                super._onInactivityTimeout()
+            })
+        }
     }
 }
