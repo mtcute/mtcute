@@ -49,12 +49,12 @@ RpcError.fromTl = function (obj) {
     }
 
     var err = new RpcError(obj.errorCode, obj.errorMessage);
-    var match;
-    if ((match=err.text.match(/^FLOOD_WAIT_(\\\\d+)$/))!=null){ err.text = 'FLOOD_WAIT_%d'; err.duration = parseInt(match[1]) }
+    var match, param;
+    if ((match=err.text.match(/^FLOOD_WAIT_(\\\\d+)$/))!=null){ err.text = 'FLOOD_WAIT_%d'; param = err.duration = parseInt(match[1]) }
 
     else return err
 
-    err.message = _descriptionsMap[err.text];
+    err.message = _descriptionsMap[err.text].replace('%d', param);
     return err
 }
 RpcError.create = function(code, text) {
