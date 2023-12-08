@@ -56,6 +56,6 @@ export async function getCallbackAnswer(
             password,
             game: game,
         },
-        { timeout },
+        { timeout, throw503: true },
     )
 }

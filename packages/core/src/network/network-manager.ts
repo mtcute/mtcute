@@ -2,7 +2,7 @@ import { tl } from '@mtcute/tl'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { ITelegramStorage } from '../storage/index.js'
-import { MtArgumentError, MtcuteError } from '../types/index.js'
+import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
 import { ControllablePromise, createControllablePromise, ICryptoProvider, Logger, sleep } from '../utils/index.js'
 import { assertTypeIs } from '../utils/type-assertions.js'
 import { ConfigManager } from './config-manager.js'
@@ -147,6 +147,14 @@ export interface RpcCallOptions {
      * Abort signal for the call.
      */
     abortSignal?: AbortSignal
+
+    /**
+     * Whether we should not retry on -503 errors and throw {@link MtTimeoutError} immediately instead.
+     *
+     * Useful for methods like `messages.getBotCallbackAnswer` that reliably return
+     * -503 in case the upstream bot failed to respond.
+     */
+    throw503?: boolean
 }
 
 /**
@@ -639,6 +647,7 @@ export class NetworkManager {
 
         const floodSleepThreshold = params?.floodSleepThreshold ?? this.params.floodSleepThreshold
         const maxRetryCount = params?.maxRetryCount ?? this.params.maxRetryCount
+        const throw503 = params?.throw503 ?? false
 
         // do not send requests that are in flood wait
         if (this._floodWaitedRequests.has(message._)) {
@@ -691,6 +700,10 @@ export class NetworkManager {
                 }
 
                 if (!(e.code in CLIENT_ERRORS)) {
+                    if (throw503 && e.code === -503) {
+                        throw new MtTimeoutError()
+                    }
+
                     this._log.warn('Telegram is having internal issues: %d %s, retrying', e.code, e.message)
 
                     if (e.text === 'WORKER_BUSY_TOO_LONG_RETRY') {
