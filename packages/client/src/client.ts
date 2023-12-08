@@ -132,6 +132,7 @@ import { deleteScheduledMessages } from './methods/messages/delete-scheduled-mes
 import { editInlineMessage } from './methods/messages/edit-inline-message.js'
 import { editMessage } from './methods/messages/edit-message.js'
 import { ForwardMessageOptions, forwardMessages, forwardMessagesById } from './methods/messages/forward-messages.js'
+import { getCallbackQueryMessage } from './methods/messages/get-callback-query-message.js'
 import { getDiscussionMessage } from './methods/messages/get-discussion-message.js'
 import { getHistory, GetHistoryOffset } from './methods/messages/get-history.js'
 import { getMessageByLink } from './methods/messages/get-message-by-link.js'
@@ -3070,6 +3071,23 @@ export interface TelegramClient extends BaseTelegramClient {
             messages: Message[]
         },
     ): Promise<Message[]>
+
+    /**
+     * Get the message containing the button being clicked
+     * in the given callback query.
+     * **Available**: 🤖 bots only
+     *
+     */
+    getCallbackQueryMessage(
+        id:
+            | CallbackQuery
+            | tl.RawUpdateBotCallbackQuery
+            | {
+                  messageId: number
+                  queryId: tl.Long
+                  peer: InputPeerLike
+              },
+    ): Promise<Message | null>
     // public version of the same method because why not
     /**
      * Get discussion message for some channel post.
@@ -5281,6 +5299,7 @@ export class TelegramClient extends BaseTelegramClient {
     editMessage = editMessage.bind(null, this)
     forwardMessagesById = forwardMessagesById.bind(null, this)
     forwardMessages = forwardMessages.bind(null, this)
+    getCallbackQueryMessage = getCallbackQueryMessage.bind(null, this)
     getDiscussionMessage = getDiscussionMessage.bind(null, this)
     getHistory = getHistory.bind(null, this)
     getMessageByLink = getMessageByLink.bind(null, this)

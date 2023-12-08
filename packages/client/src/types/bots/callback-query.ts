@@ -3,6 +3,7 @@ import { BasicPeerType, getBasicPeerType, getMarkedPeerId, MtArgumentError, tl }
 import { makeInspectable, utf8Decode } from '../../utils/index.js'
 import { encodeInlineMessageId } from '../../utils/inline-utils.js'
 import { memoizeGetters } from '../../utils/memoize.js'
+import { Chat } from '../peers/chat.js'
 import { PeersIndex } from '../peers/peers-index.js'
 import { User } from '../peers/user.js'
 
@@ -94,6 +95,19 @@ export class CallbackQuery {
     }
 
     /**
+     * Chat where this message was sent
+     *
+     * Only available in case `isInline = false`
+     */
+    get chat(): Chat {
+        if (this.raw._ !== 'updateBotCallbackQuery') {
+            throw new MtArgumentError('Cannot get message id for inline callback')
+        }
+
+        return new Chat(this._peers.get(this.raw.peer))
+    }
+
+    /**
      * Basic peer type of the chat where this message was sent,
      * derived based on {@link chatId}
      */
@@ -148,5 +162,5 @@ export class CallbackQuery {
     }
 }
 
-memoizeGetters(CallbackQuery, ['user', 'dataStr'])
+memoizeGetters(CallbackQuery, ['user', 'chat', 'dataStr', 'inlineMessageIdStr'])
 makeInspectable(CallbackQuery)

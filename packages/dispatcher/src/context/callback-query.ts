@@ -31,19 +31,17 @@ export class CallbackQueryContext extends CallbackQuery implements UpdateContext
     }
 
     /**
-     *      * Message that contained the callback button that was clicked.
+     * Get the message containing the callback button being clicked.
      *
      * Note that the message may have been deleted, in which case
      * `MessageNotFoundError` is thrown.
-     *
-     * Can only be used if `isInline = false`
      */
     async getMessage() {
         if (this.raw._ !== 'updateBotCallbackQuery') {
             throw new MtArgumentError('Cannot get message for inline callback query')
         }
 
-        const [msg] = await this.client.getMessages(this.raw.peer, this.raw.msgId)
+        const msg = await this.client.getCallbackQueryMessage(this)
 
         if (!msg) {
             throw new MtMessageNotFoundError(getMarkedPeerId(this.raw.peer), this.raw.msgId, 'Message not found')
