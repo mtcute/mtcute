@@ -41,6 +41,7 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
 
 const TEMP_AUTH_KEY_EXPIRY = 86400 // 24 hours
 const PING_INTERVAL = 60000 // 1 minute
+const GET_STATE_INTERVAL = 1500 // 1.5 seconds
 
 // destroy_auth_key#d1435160 = DestroyAuthKeyRes;
 // const DESTROY_AUTH_KEY = Buffer.from('605134d1', 'hex')
@@ -1163,7 +1164,7 @@ export class SessionConnection extends PersistentConnection {
                 case 2:
                 case 3:
                     // message wasn't received by the server
-                    this._onMessageFailed(msgId, `message info state ${status}`)
+                    return this._onMessageFailed(msgId, `message info state ${status}`)
                     break
 
                 case 0:
@@ -1188,6 +1189,12 @@ export class SessionConnection extends PersistentConnection {
             this.log.debug('received message info for %l, but answer (%l) was not received yet', msgId, answerMsgId)
             this._session.queuedResendReq.push(answerMsgId)
             this._flushTimer.emitWhenIdle()
+
+            return
+        }
+
+        if (answerMsgId.isZero()) {
+            this.log.debug('received message info for %l: message is still pending (status = %d)', msgId, status)
 
             return
         }
@@ -1474,7 +1481,10 @@ export class SessionConnection extends PersistentConnection {
             // between multiple connections using the same session
             this._flushTimer.emitWhenIdle()
         } else {
-            this._flushTimer.emitBefore(this._session.lastPingTime + PING_INTERVAL)
+            const nextPingTime = this._session.lastPingTime + PING_INTERVAL
+            const nextGetScheduleTime = this._session.getStateSchedule.raw[0]?.getState || Infinity
+
+            this._flushTimer.emitBefore(Math.min(nextPingTime, nextGetScheduleTime))
         }
     }
 
@@ -1533,7 +1543,7 @@ export class SessionConnection extends PersistentConnection {
             messageCount += 1
         }
 
-        const getStateTime = now + 1500
+        const getStateTime = now + GET_STATE_INTERVAL
 
         if (now - this._session.lastPingTime > PING_INTERVAL) {
             if (!this._session.lastPingMsgId.isZero()) {
