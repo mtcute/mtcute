@@ -5,6 +5,7 @@ import { Message } from '../../types/messages/message.js'
 import { TextWithEntities } from '../../types/misc/entities.js'
 import { InputPeerLike } from '../../types/peers/index.js'
 import { normalizeDate, normalizeMessageId, toInputUser } from '../../utils/index.js'
+import { _getPeerChainId } from '../misc/chain-id.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { _getDiscussionMessage } from './get-discussion-message.js'
@@ -168,5 +169,6 @@ export async function _processCommonSendParameters(
         peer,
         replyTo: tlReplyTo,
         scheduleDate,
+        chainId: _getPeerChainId(client, peer, 'send'),
     }
 }

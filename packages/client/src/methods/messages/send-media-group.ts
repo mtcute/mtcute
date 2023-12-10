@@ -49,7 +49,7 @@ export async function sendMediaGroup(
 ): Promise<Message[]> {
     if (!params) params = {}
 
-    const { peer, replyTo, scheduleDate } = await _processCommonSendParameters(client, chatId, params)
+    const { peer, replyTo, scheduleDate, chainId } = await _processCommonSendParameters(client, chatId, params)
 
     const multiMedia: tl.RawInputSingleMedia[] = []
 
@@ -92,18 +92,21 @@ export async function sendMediaGroup(
         })
     }
 
-    const res = await client.call({
-        _: 'messages.sendMultiMedia',
-        peer,
-        multiMedia,
-        silent: params.silent,
-        replyTo,
-        scheduleDate,
-        clearDraft: params.clearDraft,
-        noforwards: params.forbidForwards,
-        sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
-        invertMedia: params.invertMedia,
-    })
+    const res = await client.call(
+        {
+            _: 'messages.sendMultiMedia',
+            peer,
+            multiMedia,
+            silent: params.silent,
+            replyTo,
+            scheduleDate,
+            clearDraft: params.clearDraft,
+            noforwards: params.forbidForwards,
+            sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
+            invertMedia: params.invertMedia,
+        },
+        { chainId },
+    )
 
     assertIsUpdatesGroup('sendMediaGroup', res)
     client.network.handleUpdate(res, true)

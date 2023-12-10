@@ -52,24 +52,27 @@ export async function sendText(
     const [message, entities] = await _normalizeInputText(client, text)
 
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
-    const { peer, replyTo, scheduleDate } = await _processCommonSendParameters(client, chatId, params)
+    const { peer, replyTo, scheduleDate, chainId } = await _processCommonSendParameters(client, chatId, params)
 
-    const res = await client.call({
-        _: 'messages.sendMessage',
-        peer,
-        noWebpage: params.disableWebPreview,
-        silent: params.silent,
-        replyTo,
-        randomId: randomLong(),
-        scheduleDate,
-        replyMarkup,
-        message,
-        entities,
-        clearDraft: params.clearDraft,
-        noforwards: params.forbidForwards,
-        sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
-        invertMedia: params.invertMedia,
-    })
+    const res = await client.call(
+        {
+            _: 'messages.sendMessage',
+            peer,
+            noWebpage: params.disableWebPreview,
+            silent: params.silent,
+            replyTo,
+            randomId: randomLong(),
+            scheduleDate,
+            replyMarkup,
+            message,
+            entities,
+            clearDraft: params.clearDraft,
+            noforwards: params.forbidForwards,
+            sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
+            invertMedia: params.invertMedia,
+        },
+        { chainId },
+    )
 
     if (res._ === 'updateShortSentMessage') {
         // todo extract this to updates manager?

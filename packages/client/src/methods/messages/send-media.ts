@@ -81,24 +81,27 @@ export async function sendMedia(
     )
 
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
-    const { peer, replyTo, scheduleDate } = await _processCommonSendParameters(client, chatId, params)
+    const { peer, replyTo, scheduleDate, chainId } = await _processCommonSendParameters(client, chatId, params)
 
-    const res = await client.call({
-        _: 'messages.sendMedia',
-        peer,
-        media: inputMedia,
-        silent: params.silent,
-        replyTo,
-        randomId: randomLong(),
-        scheduleDate,
-        replyMarkup,
-        message,
-        entities,
-        clearDraft: params.clearDraft,
-        noforwards: params.forbidForwards,
-        sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
-        invertMedia: params.invert,
-    })
+    const res = await client.call(
+        {
+            _: 'messages.sendMedia',
+            peer,
+            media: inputMedia,
+            silent: params.silent,
+            replyTo,
+            randomId: randomLong(),
+            scheduleDate,
+            replyMarkup,
+            message,
+            entities,
+            clearDraft: params.clearDraft,
+            noforwards: params.forbidForwards,
+            sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
+            invertMedia: params.invert,
+        },
+        { chainId },
+    )
 
     const msg = _findMessageInUpdate(client, res, false, !params.shouldDispatch)
 
