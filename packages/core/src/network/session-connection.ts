@@ -23,8 +23,6 @@ import { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session.js
 import { PersistentConnection, PersistentConnectionParams } from './persistent-connection.js'
 import { TransportError } from './transports/abstract.js'
 
-const TEMP_AUTH_KEY_EXPIRY = 86400
-
 export interface SessionConnectionParams extends PersistentConnectionParams {
     initConnection: tl.RawInitConnectionRequest
     inactivityTimeout?: number
@@ -41,6 +39,9 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
     writerMap: TlWriterMap
 }
 
+const TEMP_AUTH_KEY_EXPIRY = 86400 // 24 hours
+const PING_INTERVAL = 60000 // 1 minute
+
 // destroy_auth_key#d1435160 = DestroyAuthKeyRes;
 // const DESTROY_AUTH_KEY = Buffer.from('605134d1', 'hex')
 // gzip_packed#3072cfa1 packed_data:string = Object;
@@ -49,6 +50,9 @@ const GZIP_PACKED_ID = 0x3072cfa1
 const MSG_CONTAINER_ID = 0x73f1f8dc
 // rpc_result#f35c6d01 req_msg_id:long result:Object = RpcResult;
 const RPC_RESULT_ID = 0xf35c6d01
+// invokeAfterMsg#cb9f372d {X:Type} msg_id:long query:!X = X;
+const INVOKE_AFTER_MSG_ID = 0xcb9f372d
+const INVOKE_AFTER_MSG_SIZE = 12 // 8 (invokeAfterMsg) + 4 (msg_id)
 
 function makeNiceStack(error: tl.RpcError, stack: string, method?: string) {
     error.stack = `RpcError (${error.code} ${error.text}): ${error.message}\n    at ${method}\n${stack
@@ -735,6 +739,7 @@ export class SessionConnection extends PersistentConnection {
 
         // initConnection call was definitely received and
         // processed by the server, so we no longer need to use it
+        // todo: is this the case with failed invokeAfterMsg(s) as well?
         if (rpc.initConn) {
             this._session.initConnectionCalled = true
         }
@@ -753,42 +758,73 @@ export class SessionConnection extends PersistentConnection {
                 rpc.method,
             )
 
-            if (res.errorMessage === 'AUTH_KEY_PERM_EMPTY') {
-                // happens when temp auth key is not yet bound
-                // this shouldn't happen as we block any outbound communications
-                // until the temp key is derived and bound.
-                //
-                // i think it is also possible for the error to be returned
-                // when the temp key has expired, but this still shouldn't happen
-                // but this is tg, so something may go wrong, and we will receive this as an error
-                // (for god's sake why is this not in mtproto and instead hacked into the app layer)
-                this._authorizePfs()
-                this._onMessageFailed(reqMsgId, 'AUTH_KEY_PERM_EMPTY', true)
-
-                return
-            }
-
-            if (res.errorMessage === 'CONNECTION_NOT_INITED') {
-                // this seems to sometimes happen when using pfs
-                // no idea why, but tdlib also seems to handle these, so whatever
-
-                this._session.initConnectionCalled = false
-                this._onMessageFailed(reqMsgId, res.errorMessage, true)
-
-                // just setting this flag is not enough because the message
-                // is already serialized, so we do this awesome hack
-                this.sendRpc({ _: 'help.getNearestDc' })
-                    .then(() => {
-                        this.log.debug('additional help.getNearestDc for initConnection ok')
-                    })
-                    .catch((err) => {
-                        this.log.debug('additional help.getNearestDc for initConnection error: %s', err)
-                    })
-
-                return
-            }
-
             if (rpc.cancelled) return
+
+            switch (res.errorMessage) {
+                case 'AUTH_KEY_PERM_EMPTY':
+                    // happens when temp auth key is not yet bound
+                    // this shouldn't happen as we block any outbound communications
+                    // until the temp key is derived and bound.
+                    //
+                    // i think it is also possible for the error to be returned
+                    // when the temp key has expired, but this still shouldn't happen
+                    // but this is tg, so something may go wrong, and we will receive this as an error
+                    // (for god's sake why is this not in mtproto and instead hacked into the app layer)
+                    this._authorizePfs()
+                    this._onMessageFailed(reqMsgId, 'AUTH_KEY_PERM_EMPTY', true)
+
+                    return
+                case 'CONNECTION_NOT_INITED': {
+                    // this seems to sometimes happen when using pfs
+                    // no idea why, but tdlib also seems to handle these, so whatever
+
+                    this._session.initConnectionCalled = false
+                    this._onMessageFailed(reqMsgId, res.errorMessage, true)
+
+                    // just setting this flag is not enough because the message
+                    // is already serialized, so we do this awesome hack
+                    this.sendRpc({ _: 'help.getNearestDc' })
+                        .then(() => {
+                            this.log.debug('additional help.getNearestDc for initConnection ok')
+                        })
+                        .catch((err) => {
+                            this.log.debug('additional help.getNearestDc for initConnection error: %s', err)
+                        })
+
+                    return
+                }
+                case 'MSG_WAIT_TIMEOUT':
+                case 'MSG_WAIT_FAILED': {
+                    if (!rpc.invokeAfter) {
+                        this.log.warn('received %s for non-chained request %l', res.errorMessage, reqMsgId)
+
+                        break
+                    }
+
+                    // in some cases, MSG_WAIT_TIMEOUT is returned instead of MSG_WAIT_FAILED when one of the deps
+                    // failed with MSG_WAIT_TIMEOUT. i have no clue why, this makes zero sense, but what fucking ever
+                    //
+                    // this basically means we can't handle a timeout any different than a general failure,
+                    // because the timeout might not refer to the immediate `.invokeAfter` message, but to
+                    // its arbitrary-depth dependency, so we indeed have to wait for the message ourselves...
+
+                    if (this._session.pendingMessages.has(rpc.invokeAfter)) {
+                        // the dependency is still pending, postpone the processing
+                        this.log.debug(
+                            'chain %s: waiting for %l before processing %l',
+                            rpc.chainId,
+                            rpc.invokeAfter,
+                            reqMsgId,
+                        )
+                        this._session.getPendingChainedFails(rpc.chainId!).insert(rpc)
+                    } else {
+                        this._session.chains.delete(rpc.chainId!)
+                        this._onMessageFailed(reqMsgId, 'MSG_WAIT_FAILED', true)
+                    }
+
+                    return
+                }
+            }
 
             const error = tl.RpcError.fromTl(res)
 
@@ -809,8 +845,38 @@ export class SessionConnection extends PersistentConnection {
             rpc.promise.resolve(result)
         }
 
+        if (rpc.chainId) {
+            this._processPendingChainedFails(rpc.chainId, reqMsgId)
+        }
+
         this._onMessageAcked(reqMsgId)
         this._session.pendingMessages.delete(reqMsgId)
+    }
+
+    private _processPendingChainedFails(chainId: number | string, sinceMsgId: Long): void {
+        // sinceMsgId was already definitely received and contained an error.
+        // we should now re-send all the pending MSG_WAIT_FAILED after it
+        this._session.removeFromChain(chainId, sinceMsgId)
+
+        const oldPending = this._session.chainsPendingFails.get(chainId)
+
+        if (!oldPending?.length) {
+            return
+        }
+
+        const idx = oldPending.index({ invokeAfter: sinceMsgId } as PendingRpc, true)
+        if (idx === -1) return
+
+        const toFail = oldPending.raw.splice(idx)
+
+        this.log.debug('chain %s: failing %d dependant messages: %L', chainId, toFail.length, toFail)
+
+        // we're failing the rest of the chain, including the last message
+        this._session.chains.delete(chainId)
+
+        for (const rpc of toFail) {
+            this._onMessageFailed(rpc.msgId!, 'MSG_WAIT_FAILED', true)
+        }
     }
 
     private _onMessageAcked(msgId: Long, inContainer = false): void {
@@ -1204,6 +1270,7 @@ export class SessionConnection extends PersistentConnection {
         stack?: string,
         timeout?: number,
         abortSignal?: AbortSignal,
+        chainId?: string | number,
     ): Promise<tl.RpcCallReturn[T['_']]> {
         if (this._usable && this.params.inactivityTimeout) {
             this._rescheduleInactivity()
@@ -1290,8 +1357,10 @@ export class SessionConnection extends PersistentConnection {
             // we will need to know size of gzip_packed overhead in _flush()
             gzipOverhead: shouldGzip ? 4 + TlSerializationCounter.countBytesOverhead(content.length) : 0,
             initConn,
+            chainId,
 
             // setting them as well so jit can optimize stuff
+            invokeAfter: undefined,
             sent: undefined,
             done: undefined,
             getState: undefined,
@@ -1405,7 +1474,7 @@ export class SessionConnection extends PersistentConnection {
             // between multiple connections using the same session
             this._flushTimer.emitWhenIdle()
         } else {
-            this._flushTimer.emitBefore(this._session.lastPingTime + 60000)
+            this._flushTimer.emitBefore(this._session.lastPingTime + PING_INTERVAL)
         }
     }
 
@@ -1466,16 +1535,17 @@ export class SessionConnection extends PersistentConnection {
 
         const getStateTime = now + 1500
 
-        if (now - this._session.lastPingTime > 60000) {
+        if (now - this._session.lastPingTime > PING_INTERVAL) {
             if (!this._session.lastPingMsgId.isZero()) {
                 this.log.warn("didn't receive pong for previous ping (msg_id = %l)", this._session.lastPingMsgId)
                 this._session.pendingMessages.delete(this._session.lastPingMsgId)
             }
 
             pingId = randomLong()
-            const obj: mtp.RawMt_ping = {
-                _: 'mt_ping',
+            const obj: mtp.RawMt_ping_delay_disconnect = {
+                _: 'mt_ping_delay_disconnect',
                 pingId,
+                disconnectDelay: 75,
             }
 
             this._session.lastPingTime = Date.now()
@@ -1570,6 +1640,10 @@ export class SessionConnection extends PersistentConnection {
             rpcToSend.push(msg)
             containerSize += msg.data.length + 16
             if (msg.gzipOverhead) containerSize += msg.gzipOverhead
+
+            if (msg.chainId) {
+                containerSize += INVOKE_AFTER_MSG_SIZE
+            }
 
             // if message was already assigned a msg_id,
             // we must wrap it in a container with a newer msg_id
@@ -1699,6 +1773,11 @@ export class SessionConnection extends PersistentConnection {
                     _: 'rpc',
                     rpc: msg,
                 })
+
+                if (msg.chainId) {
+                    msg.invokeAfter = this._session.addToChain(msg.chainId, msgId)
+                    this.log.debug('chain %s: invoke %l after %l', msg.chainId, msg.msgId, msg.invokeAfter)
+                }
             } else {
                 this.log.debug('%s: msg_id already assigned, reusing %l, seqno: %d', msg.method, msg.msgId, msg.seqNo)
             }
@@ -1716,12 +1795,23 @@ export class SessionConnection extends PersistentConnection {
             writer.long(this._registerOutgoingMsgId(msg.msgId))
             writer.uint(msg.seqNo!)
 
+            const invokeAfterSize = msg.invokeAfter ? INVOKE_AFTER_MSG_SIZE : 0
+
+            const writeInvokeAfter = () => {
+                if (!msg.invokeAfter) return
+
+                writer.uint(INVOKE_AFTER_MSG_ID)
+                writer.long(msg.invokeAfter)
+            }
+
             if (msg.gzipOverhead) {
-                writer.uint(msg.data.length + msg.gzipOverhead)
-                writer.uint(0x3072cfa1) // gzip_packed#3072cfa1
+                writer.uint(msg.data.length + msg.gzipOverhead + invokeAfterSize)
+                writeInvokeAfter()
+                writer.uint(GZIP_PACKED_ID)
                 writer.bytes(msg.data)
             } else {
-                writer.uint(msg.data.length)
+                writer.uint(msg.data.length + invokeAfterSize)
+                writeInvokeAfter()
                 writer.raw(msg.data)
             }
 
@@ -1733,7 +1823,7 @@ export class SessionConnection extends PersistentConnection {
             // we couldn't have assigned them earlier because mtproto
             // requires them to be >= than the contained messages
 
-            // writer.pos is expected to be packetSize
+            packetSize = writer.pos
 
             const containerId = this._session.getMessageId()
             writer.pos = 0
@@ -1767,18 +1857,17 @@ export class SessionConnection extends PersistentConnection {
         const result = writer.result()
 
         this.log.debug(
-            'sending %d messages: size = %db, acks = %d (msg_id = %s), ping = %s (msg_id = %s), state_req = %s (msg_id = %s), resend = %s (msg_id = %s), cancels = %s (msg_id = %s), rpc = %s, container = %s, root msg_id = %l',
+            'sending %d messages: size = %db, acks = %L, ping = %b (msg_id = %l), state_req = %L (msg_id = %l), resend = %L (msg_id = %l), cancels = %L (msg_id = %l), rpc = %s, container = %b, root msg_id = %l',
             messageCount,
             packetSize,
-            ackMsgIds?.length || 'false',
-            ackMsgIds?.map((it) => it.toString()),
-            Boolean(pingRequest),
+            ackMsgIds,
+            pingRequest,
             pingMsgId,
-            getStateMsgIds?.map((it) => it.toString()) || 'false',
+            getStateMsgIds,
             getStateMsgId,
-            resendMsgIds?.map((it) => it.toString()) || 'false',
+            resendMsgIds,
             cancelRpcs,
-            cancelRpcs?.map((it) => it.toString()) || 'false',
+            cancelRpcs,
             resendMsgId,
             rpcToSend.map((it) => it.method),
             useContainer,

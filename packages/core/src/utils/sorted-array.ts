@@ -55,6 +55,7 @@ export class SortedArray<T> {
 
     // closest: return the closest value (right-hand side)
     // meaning that raw[idx - 1] <= item <= raw[idx]
+    // in other words, smallest idx such that raw[idx] >= item
     index(item: T, closest = false): number {
         let lo = 0
         let hi = this.raw.length

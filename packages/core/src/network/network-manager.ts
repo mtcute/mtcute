@@ -155,6 +155,15 @@ export interface RpcCallOptions {
      * -503 in case the upstream bot failed to respond.
      */
     throw503?: boolean
+
+    /**
+     * Some requests should be processed consecutively, and not in parallel.
+     * Using the same `chainId` for multiple requests will ensure that they are processed in the order
+     * of calling `.call()`.
+     *
+     * Particularly useful for `messages.sendMessage` and alike.
+     */
+    chainId?: string | number
 }
 
 /**
@@ -683,7 +692,7 @@ export class NetworkManager {
 
         for (let i = 0; i < maxRetryCount; i++) {
             try {
-                const res = await multi.sendRpc(message, stack, params?.timeout, params?.abortSignal)
+                const res = await multi.sendRpc(message, stack, params?.timeout, params?.abortSignal, params?.chainId)
 
                 if (kind === 'main') {
                     this._lastUpdateTime = Date.now()
@@ -704,7 +713,12 @@ export class NetworkManager {
                         throw new MtTimeoutError()
                     }
 
-                    this._log.warn('Telegram is having internal issues: %d %s, retrying', e.code, e.message)
+                    this._log.warn(
+                        'Telegram is having internal issues: %d:%s (%s), retrying',
+                        e.code,
+                        e.text,
+                        e.message,
+                    )
 
                     if (e.text === 'WORKER_BUSY_TOO_LONG_RETRY') {
                         // according to tdlib, "it is dangerous to resend query without timeout, so use 1"

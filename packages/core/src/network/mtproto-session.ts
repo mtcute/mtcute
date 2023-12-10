@@ -5,6 +5,7 @@ import { TlBinaryWriter, TlReaderMap, TlSerializationCounter, TlWriterMap } from
 
 import { MtcuteError } from '../types/index.js'
 import {
+    compareLongs,
     ControllablePromise,
     Deque,
     getRandomInt,
@@ -23,6 +24,9 @@ export interface PendingRpc {
     promise: ControllablePromise
     stack?: string
     gzipOverhead?: number
+
+    chainId?: string | number
+    invokeAfter?: Long
 
     sent?: boolean
     done?: boolean
@@ -108,6 +112,9 @@ export class MtprotoSession {
     queuedResendReq: Long[] = []
     queuedCancelReq: Long[] = []
     getStateSchedule = new SortedArray<PendingRpc>([], (a, b) => a.getState! - b.getState!)
+
+    chains = new Map<string | number, Long>()
+    chainsPendingFails = new Map<string | number, SortedArray<PendingRpc>>()
 
     // requests info
     pendingMessages = new LongMap<PendingMessage>()
@@ -200,6 +207,7 @@ export class MtprotoSession {
         this.queuedStateReq.length = 0
         this.queuedResendReq.length = 0
         this.getStateSchedule.clear()
+        this.chains.clear()
     }
 
     enqueueRpc(rpc: PendingRpc, force?: boolean): boolean {
@@ -333,5 +341,43 @@ export class MtprotoSession {
         }
 
         this.lastPingMsgId = Long.ZERO
+    }
+
+    addToChain(chainId: string | number, msgId: Long): Long | undefined {
+        const prevMsgId = this.chains.get(chainId)
+        this.chains.set(chainId, msgId)
+
+        this.log.debug('added message %l to chain %s (prev: %l)', msgId, chainId, prevMsgId)
+
+        return prevMsgId
+    }
+
+    removeFromChain(chainId: string | number, msgId: Long): void {
+        const lastMsgId = this.chains.get(chainId)
+
+        if (!lastMsgId) {
+            this.log.warn('tried to remove message %l from empty chain %s', msgId, chainId)
+
+            return
+        }
+
+        if (lastMsgId.eq(msgId)) {
+            // last message of the chain, remove it
+            this.log.debug('chain %s: exhausted, last message %l', msgId, chainId)
+            this.chains.delete(chainId)
+        }
+
+        // do nothing
+    }
+
+    getPendingChainedFails(chainId: string | number): SortedArray<PendingRpc> {
+        let arr = this.chainsPendingFails.get(chainId)
+
+        if (!arr) {
+            arr = new SortedArray<PendingRpc>([], (a, b) => compareLongs(a.invokeAfter!, b.invokeAfter!))
+            this.chainsPendingFails.set(chainId, arr)
+        }
+
+        return arr
     }
 }

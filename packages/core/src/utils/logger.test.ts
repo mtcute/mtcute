@@ -171,5 +171,23 @@ describe('logger', () => {
                 expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test 123', [])
             })
         })
+
+        describe('%L', () => {
+            it('should format Long arrays as strings', () => {
+                const [mgr, spy] = createManager()
+
+                mgr.info('test %L', [Long.fromInt(123), Long.fromInt(456)])
+
+                expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test [123, 456]', [])
+            })
+
+            it('should format everything else as n/a', () => {
+                const [mgr, spy] = createManager()
+
+                mgr.info('test %L', 123)
+
+                expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test n/a', [])
+            })
+        })
     })
 })

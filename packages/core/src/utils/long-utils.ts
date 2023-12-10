@@ -54,6 +54,18 @@ export function removeFromLongArray(arr: Long[], val: Long): boolean {
 }
 
 /**
+ * Compare two Longs and return -1, 0 or 1,
+ * to be used as a comparator function.
+ */
+export function compareLongs(a: Long, b: Long): number {
+    if (a.eq(b)) return 0
+
+    if (a.gt(b)) return 1
+
+    return -1
+}
+
+/**
  * Serialize a Long (int64) to its fast string representation:
  * `$high|$low`.
  *

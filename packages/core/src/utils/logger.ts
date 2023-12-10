@@ -70,11 +70,12 @@ export class Logger {
             fmt.includes('%b') ||
             fmt.includes('%j') ||
             fmt.includes('%J') ||
-            fmt.includes('%l')
+            fmt.includes('%l') ||
+            fmt.includes('%L')
         ) {
             let idx = 0
             fmt = fmt.replace(FORMATTER_RE, (m) => {
-                if (m === '%h' || m === '%b' || m === '%j' || m === '%J' || m === '%l') {
+                if (m === '%h' || m === '%b' || m === '%j' || m === '%J' || m === '%l' || m === '%L') {
                     let val = args[idx]
 
                     args.splice(idx, 1)
@@ -112,6 +113,12 @@ export class Logger {
                         })
                     }
                     if (m === '%l') return String(val)
+
+                    if (m === '%L') {
+                        if (!Array.isArray(val)) return 'n/a'
+
+                        return `[${(val as unknown[]).map(String).join(', ')}]`
+                    }
                 }
 
                 idx++
