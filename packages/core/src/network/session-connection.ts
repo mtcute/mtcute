@@ -1257,8 +1257,11 @@ export class SessionConnection extends PersistentConnection {
             return
         }
 
+        this.log.debug('received future_salts: %d salts', msg.salts.length)
+
         this._salts.isFetching = false
-        this._salts.setFutureSalts(msg.salts)
+        this._salts.setFutureSalts(msg.salts.slice())
+        this.emit('future-salts', msg.salts)
     }
 
     private _onDestroySessionResult(msg: mtp.TypeDestroySessionRes): void {

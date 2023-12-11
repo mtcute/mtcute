@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { mtp, tl } from '@mtcute/tl'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { BasicPeerType, MaybeAsync } from '../types/index.js'
@@ -93,6 +93,18 @@ export interface ITelegramStorage {
      * (by default should return null)
      */
     getDefaultDcs(): MaybeAsync<ITelegramStorage.DcOptions | null>
+
+    /**
+     * Store information about future salts for a given DC
+     */
+    setFutureSalts(dcId: number, salts: mtp.RawMt_future_salt[]): MaybeAsync<void>
+    /**
+     * Get information about future salts for a given DC (if available)
+     *
+     * You don't need to implement any checks, they will be done by the library.
+     * It is enough to just return the same array that was passed to `setFutureSalts`.
+     */
+    getFutureSalts(dcId: number): MaybeAsync<mtp.RawMt_future_salt[] | null>
 
     /**
      * Get auth_key for a given DC

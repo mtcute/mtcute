@@ -171,6 +171,7 @@ export class MultiSessionConnection extends EventEmitter {
                 }
             })
             conn.on('tmp-key-change', (key, expires) => this.emit('tmp-key-change', i, key, expires))
+            conn.on('future-salts', (salts) => this.emit('future-salts', salts))
             conn.on('auth-begin', () => {
                 this._log.debug('received auth-begin from connection %d', i)
                 this.emit('auth-begin', i)

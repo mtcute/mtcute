@@ -1,9 +1,8 @@
-import EventEmitter from 'events'
 import Long from 'long'
 
 import { mtp } from '@mtcute/tl'
 
-export class ServerSaltManager extends EventEmitter {
+export class ServerSaltManager {
     private _futureSalts: mtp.RawMt_future_salt[] = []
 
     currentSalt = Long.ZERO
@@ -17,12 +16,15 @@ export class ServerSaltManager extends EventEmitter {
     setFutureSalts(salts: mtp.RawMt_future_salt[]): void {
         this._futureSalts = salts
 
-        if (Date.now() > salts[0].validSince * 1000) {
+        const now = Date.now() / 1000
+
+        while (salts.length > 0 && now > salts[0].validSince) {
             this.currentSalt = salts[0].salt
             this._futureSalts.shift()
         }
 
-        this._scheduleNext()
+        if (!this._futureSalts.length) this.currentSalt = Long.ZERO
+        else this._scheduleNext()
     }
 
     private _timer?: NodeJS.Timeout

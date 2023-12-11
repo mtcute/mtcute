@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { tl } from '@mtcute/tl'
+import { mtp, tl } from '@mtcute/tl'
 import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { Logger } from '../utils/logger.js'
@@ -326,6 +326,30 @@ export class IdbStorage implements ITelegramStorage {
 
     getDefaultDcs(): Promise<ITelegramStorage.DcOptions | null> {
         return this._getFromKv('dcs')
+    }
+
+    async getFutureSalts(dcId: number): Promise<mtp.RawMt_future_salt[] | null> {
+        const res = await this._getFromKv<string[]>(`futureSalts:${dcId}`)
+        if (!res) return null
+
+        return res.map((it) => {
+            const [salt, validSince, validUntil] = it.split(',')
+
+            return {
+                _: 'mt_future_salt',
+                validSince: Number(validSince),
+                validUntil: Number(validUntil),
+                salt: longFromFastString(salt),
+            }
+        })
+    }
+
+    setFutureSalts(dcId: number, salts: mtp.RawMt_future_salt[]): Promise<void> {
+        return this._setToKv(
+            `futureSalts:${dcId}`,
+            salts.map((salt) => `${longToFastString(salt.salt)},${salt.validSince},${salt.validUntil}`),
+            true,
+        )
     }
 
     async getAuthKeyFor(dcId: number, tempIndex?: number | undefined): Promise<Uint8Array | null> {

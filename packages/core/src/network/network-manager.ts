@@ -1,4 +1,4 @@
-import { tl } from '@mtcute/tl'
+import { mtp, tl } from '@mtcute/tl'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { ITelegramStorage } from '../storage/index.js'
@@ -302,6 +302,11 @@ export class DcConnectionManager {
                 })
                 .catch((e: Error) => this.manager.params._emitError(e))
         })
+        connection.on('future-salts', (salts: mtp.RawMt_future_salt[]) => {
+            Promise.resolve(this.manager._storage.setFutureSalts(this.dcId, salts)).catch((e: Error) =>
+                this.manager.params._emitError(e),
+            )
+        })
 
         connection.on('auth-begin', () => {
             // we need to propagate auth-begin to all connections
@@ -354,12 +359,19 @@ export class DcConnectionManager {
     }
 
     async loadKeys(forcePfs = false): Promise<boolean> {
-        const permanent = await this.manager._storage.getAuthKeyFor(this.dcId)
+        const [permanent, salts] = await Promise.all([
+            this.manager._storage.getAuthKeyFor(this.dcId),
+            this.manager._storage.getFutureSalts(this.dcId),
+        ])
 
         this.main.setAuthKey(permanent)
         this.upload.setAuthKey(permanent)
         this.download.setAuthKey(permanent)
         this.downloadSmall.setAuthKey(permanent)
+
+        if (salts) {
+            this._salts.setFutureSalts(salts)
+        }
 
         if (!permanent) {
             return false

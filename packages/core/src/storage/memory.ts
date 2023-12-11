@@ -1,9 +1,9 @@
-import { tl } from '@mtcute/tl'
+import { mtp, tl } from '@mtcute/tl'
 
 import { LruMap, toggleChannelIdMark } from '../utils/index.js'
 import { ITelegramStorage } from './abstract.js'
 
-const CURRENT_VERSION = 2
+const CURRENT_VERSION = 3
 
 type PeerInfoWithUpdated = ITelegramStorage.PeerInfo & { updated: number }
 
@@ -54,6 +54,7 @@ export interface MemorySessionState {
     >
 
     self: ITelegramStorage.SelfInfo | null
+    futureSalts: Map<number, mtp.RawMt_future_salt[]>
 }
 
 const USERNAME_TTL = 86400000 // 24 hours
@@ -126,6 +127,7 @@ export class MemoryStorage implements ITelegramStorage {
             fsm: new Map(),
             rl: new Map(),
             self: null,
+            futureSalts: new Map(),
         }
         this._cachedInputPeers?.clear()
         this._cachedFull?.clear()
@@ -143,7 +145,12 @@ export class MemoryStorage implements ITelegramStorage {
         if (ver === 1) {
             // v2: introduced message references
             obj.refs = new Map()
-            obj.$version = ver = 2
+            obj.$version = ver = 2 as any // eslint-disable-line
+        }
+        if (ver === 2) {
+            // v3: introduced future salts
+            obj.futureSalts = new Map()
+            obj.$version = ver = 3
         }
         if (ver !== CURRENT_VERSION) return
 
@@ -203,6 +210,14 @@ export class MemoryStorage implements ITelegramStorage {
         this._state.defaultDcs = dcs
     }
 
+    setFutureSalts(dcId: number, salts: mtp.RawMt_future_salt[]): void {
+        this._state.futureSalts.set(dcId, salts)
+    }
+
+    getFutureSalts(dcId: number): mtp.RawMt_future_salt[] | null {
+        return this._state.futureSalts.get(dcId) ?? null
+    }
+
     setTempAuthKeyFor(dcId: number, index: number, key: Uint8Array | null, expiresAt: number): void {
         const k = `${dcId}:${index}`
 
@@ -246,6 +261,9 @@ export class MemoryStorage implements ITelegramStorage {
                 this._state.authKeysTempExpiry.delete(key)
             }
         }
+
+        // future salts are linked to auth keys
+        this._state.futureSalts.delete(dcId)
     }
 
     updatePeers(peers: PeerInfoWithUpdated[]): void {

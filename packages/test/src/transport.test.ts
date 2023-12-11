@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { BaseTelegramClient } from '@mtcute/core'
 import { MemoryStorage } from '@mtcute/core/src/storage/memory.js'
@@ -31,11 +31,13 @@ describe('transport stub', () => {
                 }),
         })
 
-        await client.connect().catch(() => {}) // ignore "client closed" error
+        client.connect().catch(() => {}) // ignore "client closed" error
 
-        expect(log).toEqual([
-            'message size=40', // req_pq_multi
-            'connect 1.2.3.4:1234 test=false',
-        ])
+        await vi.waitFor(() =>
+            expect(log).toEqual([
+                'message size=40', // req_pq_multi
+                'connect 1.2.3.4:1234 test=false',
+            ]),
+        )
     })
 })

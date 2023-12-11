@@ -2,7 +2,7 @@
 
 import sqlite3, { Options } from 'better-sqlite3'
 
-import { ITelegramStorage, tl, toggleChannelIdMark } from '@mtcute/core'
+import { ITelegramStorage, mtp, tl, toggleChannelIdMark } from '@mtcute/core'
 import {
     Logger,
     longFromFastString,
@@ -526,6 +526,29 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
 
     getDefaultDcs(): ITelegramStorage.DcOptions | null {
         return this._getFromKv('def_dc')
+    }
+
+    getFutureSalts(dcId: number): mtp.RawMt_future_salt[] | null {
+        return (
+            this._getFromKv<string[]>(`futureSalts:${dcId}`)?.map((it) => {
+                const [salt, validSince, validUntil] = it.split(',')
+
+                return {
+                    _: 'mt_future_salt',
+                    validSince: Number(validSince),
+                    validUntil: Number(validUntil),
+                    salt: longFromFastString(salt),
+                }
+            }) ?? null
+        )
+    }
+
+    setFutureSalts(dcId: number, salts: mtp.RawMt_future_salt[]): void {
+        return this._setToKv(
+            `futureSalts:${dcId}`,
+            salts.map((salt) => `${longToFastString(salt.salt)},${salt.validSince},${salt.validUntil}`),
+            true,
+        )
     }
 
     getAuthKeyFor(dcId: number, tempIndex?: number): Uint8Array | null {

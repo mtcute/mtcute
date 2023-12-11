@@ -3,7 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { ITelegramStorage, MaybeAsync } from '@mtcute/core'
 import { defaultProductionDc, hexEncode, Logger, LogManager, TlReaderMap, TlWriterMap } from '@mtcute/core/utils.js'
-import { tl } from '@mtcute/tl'
+import { mtp, tl } from '@mtcute/tl'
 import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 
@@ -173,6 +173,30 @@ export function testStorage<T extends ITelegramStorage>(
 
             expect(await s.getAuthKeyFor(2)).toBeNull()
             expect(await s.getAuthKeyFor(3)).toBeNull()
+        })
+    })
+
+    describe('future salts', () => {
+        const someFutureSalt1 = Long.fromBits(123, 456)
+        const someFutureSalt2 = Long.fromBits(789, 101112)
+        const someFutureSalt3 = Long.fromBits(131415, 161718)
+        const someFutureSalt4 = Long.fromBits(192021, 222324)
+
+        const salts1: mtp.RawMt_future_salt[] = [
+            { _: 'mt_future_salt', validSince: 123, validUntil: 456, salt: someFutureSalt1 },
+            { _: 'mt_future_salt', validSince: 789, validUntil: 101112, salt: someFutureSalt2 },
+        ]
+        const salts2: mtp.RawMt_future_salt[] = [
+            { _: 'mt_future_salt', validSince: 123, validUntil: 456, salt: someFutureSalt3 },
+            { _: 'mt_future_salt', validSince: 789, validUntil: 101112, salt: someFutureSalt4 },
+        ]
+
+        it('should store and retrieve future salts', async () => {
+            await s.setFutureSalts(1, salts1)
+            await s.setFutureSalts(2, salts2)
+
+            expect(await s.getFutureSalts(1)).toEqual(salts1)
+            expect(await s.getFutureSalts(2)).toEqual(salts2)
         })
     })
 
