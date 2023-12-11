@@ -5,7 +5,7 @@ const { expect } = require('chai')
 const { getApiParams } = require('../utils')
 
 describe('@mtcute/core', function () {
-    this.timeout(60_000)
+    this.timeout(300_000)
 
     it('connects to test DC and makes help.getNearestDc', async () => {
         const tg = new BaseTelegramClient({
