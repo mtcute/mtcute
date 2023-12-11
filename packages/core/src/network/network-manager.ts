@@ -9,6 +9,7 @@ import { ConfigManager } from './config-manager.js'
 import { MultiSessionConnection } from './multi-session-connection.js'
 import { PersistentConnectionParams } from './persistent-connection.js'
 import { defaultReconnectionStrategy, ReconnectionStrategy } from './reconnection.js'
+import { ServerSaltManager } from './server-salt.js'
 import { SessionConnection, SessionConnectionParams } from './session-connection.js'
 import { defaultTransportFactory, TransportFactory } from './transports/index.js'
 
@@ -170,6 +171,7 @@ export interface RpcCallOptions {
  * Wrapper over all connection pools for a single DC.
  */
 export class DcConnectionManager {
+    private _salts = new ServerSaltManager()
     private __baseConnectionParams = (): SessionConnectionParams => ({
         crypto: this.manager.params.crypto,
         initConnection: this.manager._initConnectionParams,
@@ -186,6 +188,7 @@ export class DcConnectionManager {
         isMainDcConnection: this.isPrimary,
         inactivityTimeout: this.manager.params.inactivityTimeout ?? 60_000,
         enableErrorReporting: this.manager.params.enableErrorReporting,
+        salts: this._salts,
     })
 
     private _log = this.manager._log.create('dc-manager')
@@ -378,6 +381,14 @@ export class DcConnectionManager {
         }
 
         return true
+    }
+
+    destroy() {
+        this.main.destroy()
+        this.upload.destroy()
+        this.download.destroy()
+        this.downloadSmall.destroy()
+        this._salts.destroy()
     }
 }
 
@@ -812,10 +823,7 @@ export class NetworkManager {
 
     destroy(): void {
         for (const dc of this._dcConnections.values()) {
-            dc.main.destroy()
-            dc.upload.destroy()
-            dc.download.destroy()
-            dc.downloadSmall.destroy()
+            dc.destroy()
         }
         if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
         this.config.offConfigUpdate(this._onConfigChanged)

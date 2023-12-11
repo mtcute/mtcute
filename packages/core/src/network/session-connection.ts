@@ -21,6 +21,7 @@ import { reportUnknownError } from '../utils/platform/error-reporting.js'
 import { doAuthorization } from './authorization.js'
 import { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session.js'
 import { PersistentConnection, PersistentConnectionParams } from './persistent-connection.js'
+import { ServerSaltManager } from './server-salt.js'
 import { TransportError } from './transports/abstract.js'
 
 export interface SessionConnectionParams extends PersistentConnectionParams {
@@ -34,6 +35,8 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
     isMainConnection: boolean
     isMainDcConnection: boolean
     usePfs?: boolean
+
+    salts: ServerSaltManager
 
     readerMap: TlReaderMap
     writerMap: TlWriterMap
@@ -84,6 +87,7 @@ export class SessionConnection extends PersistentConnection {
     private _readerMap: TlReaderMap
     private _writerMap: TlWriterMap
     private _crypto: ICryptoProvider
+    private _salts: ServerSaltManager
 
     constructor(
         params: SessionConnectionParams,
@@ -95,6 +99,7 @@ export class SessionConnection extends PersistentConnection {
         this._readerMap = params.readerMap
         this._writerMap = params.writerMap
         this._crypto = params.crypto
+        this._salts = params.salts
         this._handleRawMessage = this._handleRawMessage.bind(this)
     }
 
@@ -143,6 +148,7 @@ export class SessionConnection extends PersistentConnection {
     reset(forever = false): void {
         this._session.initConnectionCalled = false
         this._flushTimer.reset()
+        this._salts.isFetching = false
 
         if (forever) {
             this.removeAllListeners()
@@ -273,7 +279,7 @@ export class SessionConnection extends PersistentConnection {
         doAuthorization(this, this._crypto)
             .then(([authKey, serverSalt, timeOffset]) => {
                 this._session._authKey.setup(authKey)
-                this._session.serverSalt = serverSalt
+                this._salts.currentSalt = serverSalt
                 this._session._timeOffset = timeOffset
 
                 this._session.authorizationPending = false
@@ -430,7 +436,7 @@ export class SessionConnection extends PersistentConnection {
 
                 this._session._authKeyTempSecondary = this._session._authKeyTemp
                 this._session._authKeyTemp = tempKey
-                this._session.serverSalt = tempServerSalt
+                this._salts.currentSalt = tempServerSalt
 
                 this.log.debug('temp key has been bound, exp = %d', inner.expiresAt)
 
@@ -608,7 +614,7 @@ export class SessionConnection extends PersistentConnection {
                 this._onMsgsStateInfo(message)
                 break
             case 'mt_future_salts':
-                // todo
+                this._onFutureSalts(message)
                 break
             case 'mt_msgs_state_req':
             case 'mt_msg_resend_req':
@@ -1022,6 +1028,12 @@ export class SessionConnection extends PersistentConnection {
             case 'bind':
                 this.log.debug('temp key binding request %l failed because of %s, retrying', msgId, reason)
                 msgInfo.promise.reject(Error(reason))
+                break
+            case 'future_salts':
+                this.log.debug('future_salts request %l failed because of %s, will retry', msgId, reason)
+                this._salts.isFetching = false
+                // this is enough to make it retry on the next flush.
+                break
         }
 
         this._session.pendingMessages.delete(msgId)
@@ -1064,7 +1076,7 @@ export class SessionConnection extends PersistentConnection {
     }
 
     private _onBadServerSalt(msg: mtp.RawMt_bad_server_salt): void {
-        this._session.serverSalt = msg.newServerSalt
+        this._salts.currentSalt = msg.newServerSalt
 
         this._onMessageFailed(msg.badMsgId, 'bad_server_salt')
     }
@@ -1114,7 +1126,7 @@ export class SessionConnection extends PersistentConnection {
             this.emit('update', { _: 'updatesTooLong' })
         }
 
-        this._session.serverSalt = serverSalt
+        this._salts.currentSalt = serverSalt
 
         this.log.debug('received new_session_created, uid = %l, first msg_id = %l', uniqueId, firstMsgId)
 
@@ -1228,6 +1240,25 @@ export class SessionConnection extends PersistentConnection {
         }
 
         this._onMessagesInfo(info.msgIds, msg.info)
+    }
+
+    private _onFutureSalts(msg: mtp.RawMt_future_salts): void {
+        const info = this._session.pendingMessages.get(msg.reqMsgId)
+
+        if (!info) {
+            this.log.warn('received future_salts to unknown request %l', msg.reqMsgId)
+
+            return
+        }
+
+        if (info._ !== 'future_salts') {
+            this.log.warn('received future_salts to %s query %l', info._, msg.reqMsgId)
+
+            return
+        }
+
+        this._salts.isFetching = false
+        this._salts.setFutureSalts(msg.salts)
     }
 
     private _onDestroySessionResult(msg: mtp.TypeDestroySessionRes): void {
@@ -1504,6 +1535,9 @@ export class SessionConnection extends PersistentConnection {
         let ackRequest: Uint8Array | null = null
         let ackMsgIds: Long[] | null = null
 
+        let getFutureSaltsRequest: Uint8Array | null = null
+        let getFutureSaltsMsgId: Long | null = null
+
         let pingRequest: Uint8Array | null = null
         let pingId: Long | null = null
         let pingMsgId: Long | null = null
@@ -1542,8 +1576,6 @@ export class SessionConnection extends PersistentConnection {
             packetSize += ackRequest.length + 16
             messageCount += 1
         }
-
-        const getStateTime = now + GET_STATE_INTERVAL
 
         if (now - this._session.lastPingTime > PING_INTERVAL) {
             if (!this._session.lastPingMsgId.isZero()) {
@@ -1630,6 +1662,18 @@ export class SessionConnection extends PersistentConnection {
             containerSize += this._queuedDestroySession.length * 28
             destroySessions = this._queuedDestroySession
             this._queuedDestroySession = []
+        }
+
+        if (this._salts.shouldFetchSalts()) {
+            const obj: mtp.RawMt_get_future_salts = {
+                _: 'mt_get_future_salts',
+                num: 64,
+            }
+
+            getFutureSaltsRequest = TlBinaryWriter.serializeObject(this._writerMap, obj)
+            containerSize += getFutureSaltsRequest.length + 16
+            containerMessageCount += 1
+            this._salts.isFetching = true
         }
 
         let forceContainer = false
@@ -1765,6 +1809,18 @@ export class SessionConnection extends PersistentConnection {
             })
         }
 
+        if (getFutureSaltsRequest) {
+            getFutureSaltsMsgId = this._registerOutgoingMsgId(this._session.writeMessage(writer, getFutureSaltsRequest))
+            const pending: PendingMessage = {
+                _: 'future_salts',
+                containerId: getFutureSaltsMsgId,
+            }
+            this._session.pendingMessages.set(getFutureSaltsMsgId, pending)
+            otherPendings.push(pending)
+        }
+
+        const getStateTime = now + GET_STATE_INTERVAL
+
         for (let i = 0; i < rpcToSend.length; i++) {
             const msg = rpcToSend[i]
             // not using writeMessage here because we also need seqNo, and
@@ -1867,7 +1923,7 @@ export class SessionConnection extends PersistentConnection {
         const result = writer.result()
 
         this.log.debug(
-            'sending %d messages: size = %db, acks = %L, ping = %b (msg_id = %l), state_req = %L (msg_id = %l), resend = %L (msg_id = %l), cancels = %L (msg_id = %l), rpc = %s, container = %b, root msg_id = %l',
+            'sending %d messages: size = %db, acks = %L, ping = %b (msg_id = %l), state_req = %L (msg_id = %l), resend = %L (msg_id = %l), cancels = %L (msg_id = %l), salts_req = %b (msg_id = %l), rpc = %s, container = %b, root msg_id = %l',
             messageCount,
             packetSize,
             ackMsgIds,
@@ -1879,6 +1935,8 @@ export class SessionConnection extends PersistentConnection {
             cancelRpcs,
             cancelRpcs,
             resendMsgId,
+            getFutureSaltsRequest,
+            getFutureSaltsMsgId,
             rpcToSend.map((it) => it.method),
             useContainer,
             rootMsgId,

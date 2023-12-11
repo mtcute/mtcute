@@ -88,6 +88,7 @@ export class MultiSessionConnection extends EventEmitter {
                 this._log.create('session'),
                 this.params.readerMap,
                 this.params.writerMap,
+                this.params.salts,
             )
 
             // brvh

@@ -17,6 +17,7 @@ import {
     SortedArray,
 } from '../utils/index.js'
 import { AuthKey } from './auth-key.js'
+import { ServerSaltManager } from './server-salt.js'
 
 export interface PendingRpc {
     method: string
@@ -98,8 +99,6 @@ export class MtprotoSession {
     _lastMessageId = Long.ZERO
     _seqNo = 0
 
-    serverSalt = Long.ZERO
-
     /// state ///
     // recent msg ids
     recentOutgoingMsgIds = new LruSet<Long>(1000, true)
@@ -137,6 +136,7 @@ export class MtprotoSession {
         readonly log: Logger,
         readonly _readerMap: TlReaderMap,
         readonly _writerMap: TlWriterMap,
+        readonly _salts: ServerSaltManager,
     ) {
         this.log.prefix = `[SESSION ${this._sessionId.toString(16)}] `
     }
@@ -254,7 +254,7 @@ export class MtprotoSession {
     encryptMessage(message: Uint8Array): Uint8Array {
         const key = this._authKeyTemp.ready ? this._authKeyTemp : this._authKey
 
-        return key.encryptMessage(message, this.serverSalt, this._sessionId)
+        return key.encryptMessage(message, this._salts.currentSalt, this._sessionId)
     }
 
     /** Decrypt a single MTProto message using session's keys */
