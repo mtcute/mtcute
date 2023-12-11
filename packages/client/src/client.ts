@@ -288,7 +288,6 @@ import {
     InputText,
     MaybeDynamic,
     Message,
-    MessageEntity,
     MessageMedia,
     MessageReactions,
     ParametersSkip2,
@@ -315,6 +314,7 @@ import {
     StoryViewer,
     StoryViewersList,
     TakeoutSession,
+    TextWithEntities,
     TypingStatus,
     UploadedFile,
     UploadFileLike,
@@ -3950,20 +3950,16 @@ export interface TelegramClient extends BaseTelegramClient {
             /** Target language (two-letter ISO 639-1 language code) */
             toLanguage: string
         },
-    ): Promise<[string, MessageEntity[]] | null>
+    ): Promise<TextWithEntities>
     /**
      * Translate text to a given language.
-     *
-     * Returns `null` if it could not translate the message.
-     *
-     * > **Note**: For now doesn't seem to work, returns null for all messages.
      *
      * **Available**: 👤 users only
      *
      * @param text  Text to translate
      * @param toLanguage  Target language (two-letter ISO 639-1 language code)
      */
-    translateText(text: string, toLanguage: string): Promise<string | null>
+    translateText(text: InputText, toLanguage: string): Promise<TextWithEntities>
     /**
      * Unpin all pinned messages in a chat.
      *

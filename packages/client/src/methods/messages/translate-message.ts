@@ -1,6 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { InputMessageId, MessageEntity, normalizeInputMessageId } from '../../types/index.js'
+import { InputMessageId, normalizeInputMessageId, TextWithEntities } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -14,7 +14,7 @@ export async function translateMessage(
         /** Target language (two-letter ISO 639-1 language code) */
         toLanguage: string
     },
-): Promise<[string, MessageEntity[]] | null> {
+): Promise<TextWithEntities> {
     const { toLanguage } = params
     const { chatId, message } = normalizeInputMessageId(params)
 
@@ -25,5 +25,8 @@ export async function translateMessage(
         toLang: toLanguage,
     })
 
-    return [res.result[0].text, res.result[0].entities.map((it) => new MessageEntity(it, res.result[0].text))]
+    return {
+        text: res.result[0].text,
+        entities: res.result[0].entities,
+    }
 }
