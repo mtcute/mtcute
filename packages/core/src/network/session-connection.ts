@@ -713,7 +713,7 @@ export class SessionConnection extends PersistentConnection {
                     return
                 }
 
-                this.log.debug('received %s for cancelled request %l: %j', result._, reqMsgId)
+                this.log.debug('received %s for cancelled request %l: %j', result._, reqMsgId, result)
                 this._onMessageAcked(reqMsgId)
 
                 return
@@ -928,6 +928,7 @@ export class SessionConnection extends PersistentConnection {
                 break
             }
             case 'bind':
+            case 'cancel':
                 break // do nothing, wait for the result
 
             default:
@@ -1460,6 +1461,7 @@ export class SessionConnection extends PersistentConnection {
 
         if (rpc.msgId) {
             this._session.queuedCancelReq.push(rpc.msgId)
+            this._session.getStateSchedule.remove(rpc)
             this._flushTimer.emitWhenIdle()
         } else {
             // in case rpc wasn't sent yet (or had some error),

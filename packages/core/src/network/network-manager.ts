@@ -127,6 +127,8 @@ export interface RpcCallOptions {
     timeout?: number
 
     /**
+     * **ADVANCED**
+     *
      * Kind of connection to use for this call.
      *
      * @default 'main'
@@ -134,11 +136,15 @@ export interface RpcCallOptions {
     kind?: ConnectionKind
 
     /**
+     * **ADVANCED**
+     *
      * ID of the DC to use for this call
      */
     dcId?: number
 
     /**
+     * **ADVANCED**
+     *
      * DC connection manager to use for this call.
      * Overrides `dcId` if set.
      */

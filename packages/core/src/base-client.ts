@@ -456,6 +456,44 @@ export class BaseTelegramClient extends EventEmitter {
     }
 
     /**
+     * Create a Proxy that will call all methods with given call parameters
+     * (see {@link RpcCallOptions}})
+     *
+     * This is useful when you don't call `call()` directly, but rather
+     * use high-level API provided by `@mtcute/client`, for example:
+     *
+     * ```ts
+     * const client = new TelegramClient(...)
+     *
+     * const someone = await client
+     *   .withCallParams({ timeout: 500 })
+     *   .getUsers(...)
+     * ```
+     */
+    withCallParams(params: RpcCallOptions): this {
+        return new Proxy(this, {
+            get(target, prop, receiver) {
+                if (prop === 'call') {
+                    return (message: tl.RpcMethod, paramsCustom?: RpcCallOptions) =>
+                        target.call(message, {
+                            ...params,
+                            ...paramsCustom,
+                        })
+                }
+
+                return Reflect.get(target, prop, receiver)
+            },
+        })
+    }
+
+    /**
+     * Shorthand for `withCallParams({ abortSignal })`
+     */
+    withAbortSignal(signal: AbortSignal): this {
+        return this.withCallParams({ abortSignal: signal })
+    }
+
+    /**
      * Change transport for the client.
      *
      * Can be used, for example, to change proxy at runtime
