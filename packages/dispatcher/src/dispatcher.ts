@@ -28,6 +28,7 @@ import {
     CallbackQueryContext,
     ChatJoinRequestUpdateContext,
     ChosenInlineResultContext,
+    InlineCallbackQueryContext,
     InlineQueryContext,
     MessageContext,
     PreCheckoutQueryContext,
@@ -46,6 +47,7 @@ import {
     DeleteStoryHandler,
     EditMessageHandler,
     HistoryReadHandler,
+    InlineCallbackQueryHandler,
     InlineQueryHandler,
     MessageGroupHandler,
     NewMessageHandler,
@@ -1357,6 +1359,57 @@ export class Dispatcher<State extends object = never> {
     /** @internal */
     onCallbackQuery(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('callback_query', filter, handler, group)
+    }
+
+    /**
+     * Register an inline callback query handler without any filters
+     *
+     * @param handler  Inline callback query handler
+     * @param group  Handler group index
+     */
+    onInlineCallbackQuery(
+        handler: InlineCallbackQueryHandler<
+            InlineCallbackQueryContext,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register an inline callback query handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Inline callback query handler
+     * @param group  Handler group index
+     */
+    onInlineCallbackQuery<Mod>(
+        filter: UpdateFilter<InlineCallbackQueryContext, Mod, State>,
+        handler: InlineCallbackQueryHandler<
+            filters.Modify<InlineCallbackQueryContext, Mod>,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register an inline callback query handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Inline callback query handler
+     * @param group  Handler group index
+     */
+    onInlineCallbackQuery<Mod>(
+        filter: UpdateFilter<InlineCallbackQueryContext, Mod>,
+        handler: InlineCallbackQueryHandler<
+            filters.Modify<InlineCallbackQueryContext, Mod>,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onInlineCallbackQuery(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('inline_callback_query', filter, handler, group)
     }
 
     /**

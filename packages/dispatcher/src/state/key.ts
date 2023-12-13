@@ -45,10 +45,9 @@ export const defaultStateKeyDelegate: StateKeyDelegate = (upd): string | null =>
     }
 
     if (upd._name === 'callback_query') {
-        if (upd.isInline) return null
-        if (upd.chatType === 'user') return `${upd.user.id}`
+        if (upd.chat.chatType === 'private') return `${upd.user.id}`
 
-        return `${upd.chatId}_${upd.user.id}`
+        return `${upd.chat.id}_${upd.user.id}`
     }
 
     return null

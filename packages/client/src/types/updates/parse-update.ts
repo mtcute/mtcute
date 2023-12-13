@@ -11,6 +11,7 @@ import {
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     HistoryReadUpdate,
+    InlineCallbackQuery,
     InlineQuery,
     Message,
     ParsedUpdate,
@@ -44,8 +45,9 @@ export function _parseUpdate(update: tl.TypeUpdate, peers: PeersIndex): ParsedUp
         case 'updateBotInlineSend':
             return { name: 'chosen_inline_result', data: new ChosenInlineResult(update, peers) }
         case 'updateBotCallbackQuery':
-        case 'updateInlineBotCallbackQuery':
             return { name: 'callback_query', data: new CallbackQuery(update, peers) }
+        case 'updateInlineBotCallbackQuery':
+            return { name: 'inline_callback_query', data: new InlineCallbackQuery(update, peers) }
         case 'updateMessagePoll':
             return { name: 'poll', data: new PollUpdate(update, peers) }
         case 'updateMessagePollVote':

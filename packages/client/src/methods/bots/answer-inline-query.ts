@@ -1,6 +1,7 @@
 import { BaseTelegramClient, Long, tl } from '@mtcute/core'
 
-import { BotInline, InlineQuery, InputInlineResult } from '../../types/bots/index.js'
+import { BotInline, InputInlineResult } from '../../types/bots/index.js'
+import { InlineQuery } from '../../types/updates/inline-query.js'
 
 /**
  * Answer an inline query.

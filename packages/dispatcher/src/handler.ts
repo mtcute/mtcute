@@ -21,6 +21,7 @@ import {
     CallbackQueryContext,
     ChatJoinRequestUpdateContext,
     ChosenInlineResultContext,
+    InlineCallbackQueryContext,
     InlineQueryContext,
     MessageContext,
     PreCheckoutQueryContext,
@@ -59,6 +60,11 @@ export type ChatMemberUpdateHandler<T = UpdateContext<ChatMemberUpdate>> = Parse
 export type InlineQueryHandler<T = InlineQueryContext> = ParsedUpdateHandler<'inline_query', T>
 export type ChosenInlineResultHandler<T = ChosenInlineResultContext> = ParsedUpdateHandler<'chosen_inline_result', T>
 export type CallbackQueryHandler<T = CallbackQueryContext, S = never> = ParsedUpdateHandler<'callback_query', T, S>
+export type InlineCallbackQueryHandler<T = InlineCallbackQueryContext, S = never> = ParsedUpdateHandler<
+    'inline_callback_query',
+    T,
+    S
+>
 export type PollUpdateHandler<T = UpdateContext<PollUpdate>> = ParsedUpdateHandler<'poll', T>
 export type PollVoteHandler<T = UpdateContext<PollVoteUpdate>> = ParsedUpdateHandler<'poll_vote', T>
 export type UserStatusUpdateHandler<T = UpdateContext<UserStatusUpdate>> = ParsedUpdateHandler<'user_status', T>
@@ -87,6 +93,7 @@ export type UpdateHandler =
     | InlineQueryHandler
     | ChosenInlineResultHandler
     | CallbackQueryHandler
+    | InlineCallbackQueryHandler
     | PollUpdateHandler
     | PollVoteHandler
     | UserStatusUpdateHandler

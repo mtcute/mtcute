@@ -1,9 +1,9 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 import { assertTypeIsNot } from '@mtcute/core/utils.js'
 
-import type { CallbackQuery } from '../../types/bots/callback-query.js'
 import { Message } from '../../types/messages/message.js'
 import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
+import type { CallbackQuery } from '../../types/updates/callback-query.js'
 import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 

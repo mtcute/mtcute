@@ -1,12 +1,4 @@
-import {
-    CallbackQuery,
-    getMarkedPeerId,
-    MaybeAsync,
-    Message,
-    MtArgumentError,
-    MtMessageNotFoundError,
-    TelegramClient,
-} from '@mtcute/client'
+import { CallbackQuery, InlineCallbackQuery, MaybeAsync, Message, TelegramClient } from '@mtcute/client'
 
 import { UpdateContext } from './base.js'
 
@@ -34,33 +26,16 @@ export class CallbackQueryContext extends CallbackQuery implements UpdateContext
      * Get the message containing the callback button being clicked.
      *
      * Note that the message may have been deleted, in which case
-     * `MessageNotFoundError` is thrown.
+     * `null` will be returned.
      */
-    async getMessage() {
-        if (this.raw._ !== 'updateBotCallbackQuery') {
-            throw new MtArgumentError('Cannot get message for inline callback query')
-        }
-
-        const msg = await this.client.getCallbackQueryMessage(this)
-
-        if (!msg) {
-            throw new MtMessageNotFoundError(getMarkedPeerId(this.raw.peer), this.raw.msgId, 'Message not found')
-        }
-
-        return msg
+    async getMessage(): Promise<Message | null> {
+        return this.client.getCallbackQueryMessage(this)
     }
 
     /**
      * Edit the message that contained the callback button that was clicked.
      */
     async editMessage(params: Omit<Parameters<TelegramClient['editInlineMessage']>[0], 'messageId'>) {
-        if (this.raw._ === 'updateInlineBotCallbackQuery') {
-            return this.client.editInlineMessage({
-                messageId: this.raw.msgId,
-                ...params,
-            })
-        }
-
         return this.client.editMessage({
             chatId: this.raw.peer,
             message: this.raw.msgId,
@@ -79,5 +54,36 @@ export class CallbackQueryContext extends CallbackQuery implements UpdateContext
         if (!res) return
 
         return this.editMessage(res)
+    }
+}
+
+/**
+ * Context of an inline-originated callback query update.
+ *
+ * This is a subclass of {@link InlineCallbackQuery}, so all its fields are also available.
+ */
+export class InlineCallbackQueryContext extends InlineCallbackQuery implements UpdateContext<InlineCallbackQuery> {
+    readonly _name = 'inline_callback_query'
+
+    constructor(
+        readonly client: TelegramClient,
+        query: InlineCallbackQuery,
+    ) {
+        super(query.raw, query._peers)
+    }
+
+    /** Answer to this callback query */
+    answer(params: Parameters<TelegramClient['answerCallbackQuery']>[1]) {
+        return this.client.answerCallbackQuery(this.id, params)
+    }
+
+    /**
+     * Edit the message that contained the callback button that was clicked.
+     */
+    async editMessage(params: Omit<Parameters<TelegramClient['editInlineMessage']>[0], 'messageId'>) {
+        return this.client.editInlineMessage({
+            messageId: this.raw.msgId,
+            ...params,
+        })
     }
 }

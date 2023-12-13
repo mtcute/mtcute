@@ -5,6 +5,7 @@ import {
     ChosenInlineResult,
     DeleteStoryUpdate,
     HistoryReadUpdate,
+    InlineCallbackQuery,
     InlineQuery,
     MaybeArray,
     Message,
@@ -44,6 +45,7 @@ export const userId: {
         | ChatMemberUpdate
         | ChosenInlineResult
         | CallbackQuery
+        | InlineCallbackQuery
         | PollVoteUpdate
         | BotChatJoinRequestUpdate
     >>
@@ -58,6 +60,7 @@ export const userId: {
         | ChatMemberUpdate
         | ChosenInlineResult
         | CallbackQuery
+        | InlineCallbackQuery
         | PollVoteUpdate
         | BotChatJoinRequestUpdate
     >>

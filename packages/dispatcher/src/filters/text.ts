@@ -1,9 +1,11 @@
-import { CallbackQuery, ChosenInlineResult, InlineQuery, Message } from '@mtcute/client'
+import { CallbackQuery, ChosenInlineResult, InlineCallbackQuery, InlineQuery, Message } from '@mtcute/client'
 
 import { UpdateContextDistributed } from '../context/base.js'
 import { UpdateFilter } from './types.js'
 
-type UpdatesWithText = UpdateContextDistributed<Message | InlineQuery | ChosenInlineResult | CallbackQuery>
+type UpdatesWithText = UpdateContextDistributed<
+    Message | InlineQuery | ChosenInlineResult | CallbackQuery | InlineCallbackQuery
+>
 
 function extractText(obj: UpdatesWithText): string | null {
     switch (obj._name) {
@@ -14,6 +16,7 @@ function extractText(obj: UpdatesWithText): string | null {
         case 'chosen_inline_result':
             return obj.id
         case 'callback_query':
+        case 'inline_callback_query':
             if (obj.raw.data) return obj.dataStr
     }
 

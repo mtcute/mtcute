@@ -7,6 +7,7 @@ chat_member: ChatMemberUpdate = ChatMemberUpdate
 inline_query = InlineQuery in InlineQueryContext
 chosen_inline_result = ChosenInlineResult in ChosenInlineResultContext
 callback_query = CallbackQuery + State in CallbackQueryContext
+inline_callback_query = InlineCallbackQuery + State in InlineCallbackQueryContext
 poll: PollUpdate = PollUpdate
 poll_vote = PollVoteUpdate
 user_status: UserStatusUpdate = UserStatusUpdate

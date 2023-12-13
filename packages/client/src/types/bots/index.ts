@@ -1,7 +1,5 @@
-export * from './callback-query.js'
 export * from './command-scope.js'
 export * from './game-high-score.js'
-export * from './inline-query.js'
 export * from './input/index.js'
 export * from './keyboard-builder.js'
 export * from './keyboards.js'

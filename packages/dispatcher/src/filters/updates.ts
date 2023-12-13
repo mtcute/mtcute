@@ -1,4 +1,4 @@
-import { CallbackQuery, ChatMemberUpdate, ChatMemberUpdateType, MaybeArray, UserStatus, UserStatusUpdate } from '@mtcute/client'
+import { ChatMemberUpdate, ChatMemberUpdateType, MaybeArray, UserStatus, UserStatusUpdate } from '@mtcute/client'
 
 import { UpdateFilter } from './types.js'
 
@@ -56,9 +56,3 @@ export const userStatus: {
  * regarding current user
  */
 export const chatMemberSelf: UpdateFilter<ChatMemberUpdate, { isSelf: true }> = (upd) => upd.isSelf
-
-/**
- * Create a filter for callback queries that
- * originated from an inline message
- */
-export const callbackInline: UpdateFilter<CallbackQuery, { isInline: true }> = (q) => q.isInline
