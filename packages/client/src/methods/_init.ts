@@ -10,8 +10,6 @@ import { Conversation } from '../types/conversation.js'
 // @copy
 import { _defaultStorageFactory } from '../utils/platform/storage.js'
 // @copy
-import { start } from './auth/start.js'
-// @copy
 import {
     enableUpdatesProcessing,
     makeParsedUpdateHandler,
@@ -73,19 +71,5 @@ function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
                 },
             }),
         })
-
-        this.start = async (params) => {
-            const user = await start(this, params)
-            await this.startUpdatesLoop()
-
-            return user
-        }
-    } else {
-        this.start = start.bind(null, this)
-    }
-    this.run = (params, then) => {
-        this.start(params)
-            .then(then)
-            .catch((err) => this._emitError(err))
     }
 }

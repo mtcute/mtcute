@@ -13,7 +13,6 @@ import { start } from './start.js'
  *
  * @param params  Parameters to be passed to {@link start}
  * @param then  Function to be called after {@link start} returns
- * @manual
  */
 export function run(
     client: BaseTelegramClient,

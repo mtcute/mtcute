@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging, @typescript-eslint/unified-signatures */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* THIS FILE WAS AUTO-GENERATED */
 import {
     BaseTelegramClient,
@@ -20,6 +21,7 @@ import { getPasswordHint } from './methods/auth/get-password-hint.js'
 import { logOut } from './methods/auth/log-out.js'
 import { recoverPassword } from './methods/auth/recover-password.js'
 import { resendCode } from './methods/auth/resend-code.js'
+import { run } from './methods/auth/run.js'
 import { sendCode } from './methods/auth/send-code.js'
 import { sendRecoveryCode } from './methods/auth/send-recovery-code.js'
 import { signIn } from './methods/auth/sign-in.js'
@@ -564,7 +566,6 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param params  Parameters to be passed to {@link start}
      * @param then  Function to be called after {@link start} returns
-     * @manual
      */
     run(params: Parameters<typeof start>[1], then?: (user: User) => void | Promise<void>): void
     /**
@@ -5156,261 +5157,985 @@ export class TelegramClient extends BaseTelegramClient {
                     },
                 }),
             })
-
-            this.start = async (params) => {
-                const user = await start(this, params)
-                await this.startUpdatesLoop()
-
-                return user
-            }
-        } else {
-            this.start = start.bind(null, this)
-        }
-        this.run = (params, then) => {
-            this.start(params)
-                .then(then)
-                .catch((err) => this._emitError(err))
         }
     }
-    getAuthState = getAuthState.bind(null, this)
-    checkPassword = checkPassword.bind(null, this)
-    getPasswordHint = getPasswordHint.bind(null, this)
-    logOut = logOut.bind(null, this)
-    recoverPassword = recoverPassword.bind(null, this)
-    resendCode = resendCode.bind(null, this)
-    sendCode = sendCode.bind(null, this)
-    sendRecoveryCode = sendRecoveryCode.bind(null, this)
-    signInBot = signInBot.bind(null, this)
-    signIn = signIn.bind(null, this)
-    startTest = startTest.bind(null, this)
-    answerCallbackQuery = answerCallbackQuery.bind(null, this)
-    answerInlineQuery = answerInlineQuery.bind(null, this)
-    answerPreCheckoutQuery = answerPreCheckoutQuery.bind(null, this)
-    deleteMyCommands = deleteMyCommands.bind(null, this)
-    getBotInfo = getBotInfo.bind(null, this)
-    getBotMenuButton = getBotMenuButton.bind(null, this)
-    getCallbackAnswer = getCallbackAnswer.bind(null, this)
-    getGameHighScores = getGameHighScores.bind(null, this)
-    getInlineGameHighScores = getInlineGameHighScores.bind(null, this)
-    getMyCommands = getMyCommands.bind(null, this)
-    setBotInfo = setBotInfo.bind(null, this)
-    setBotMenuButton = setBotMenuButton.bind(null, this)
-    setGameScore = setGameScore.bind(null, this)
-    setInlineGameScore = setInlineGameScore.bind(null, this)
-    setMyCommands = setMyCommands.bind(null, this)
-    setMyDefaultRights = setMyDefaultRights.bind(null, this)
-    addChatMembers = addChatMembers.bind(null, this)
-    archiveChats = archiveChats.bind(null, this)
-    banChatMember = banChatMember.bind(null, this)
-    createChannel = createChannel.bind(null, this)
-    createGroup = createGroup.bind(null, this)
-    createSupergroup = createSupergroup.bind(null, this)
-    deleteChannel = deleteChannel.bind(null, this)
-    deleteSupergroup = deleteChannel.bind(null, this)
-    deleteChatPhoto = deleteChatPhoto.bind(null, this)
-    deleteGroup = deleteGroup.bind(null, this)
-    deleteHistory = deleteHistory.bind(null, this)
-    deleteUserHistory = deleteUserHistory.bind(null, this)
-    editAdminRights = editAdminRights.bind(null, this)
-    getChatEventLog = getChatEventLog.bind(null, this)
-    getChatMember = getChatMember.bind(null, this)
-    getChatMembers = getChatMembers.bind(null, this)
-    getChatPreview = getChatPreview.bind(null, this)
-    getChat = getChat.bind(null, this)
-    getFullChat = getFullChat.bind(null, this)
-    getNearbyChats = getNearbyChats.bind(null, this)
-    getSimilarChannels = getSimilarChannels.bind(null, this)
-    iterChatEventLog = iterChatEventLog.bind(null, this)
-    iterChatMembers = iterChatMembers.bind(null, this)
-    joinChat = joinChat.bind(null, this)
-    kickChatMember = kickChatMember.bind(null, this)
-    leaveChat = leaveChat.bind(null, this)
-    markChatUnread = markChatUnread.bind(null, this)
-    reorderUsernames = reorderUsernames.bind(null, this)
-    restrictChatMember = restrictChatMember.bind(null, this)
-    saveDraft = saveDraft.bind(null, this)
-    setChatColor = setChatColor.bind(null, this)
-    setChatDefaultPermissions = setChatDefaultPermissions.bind(null, this)
-    setChatDescription = setChatDescription.bind(null, this)
-    setChatPhoto = setChatPhoto.bind(null, this)
-    setChatTitle = setChatTitle.bind(null, this)
-    setChatTtl = setChatTtl.bind(null, this)
-    setChatUsername = setChatUsername.bind(null, this)
-    setSlowMode = setSlowMode.bind(null, this)
-    toggleContentProtection = toggleContentProtection.bind(null, this)
-    toggleFragmentUsername = toggleFragmentUsername.bind(null, this)
-    toggleJoinRequests = toggleJoinRequests.bind(null, this)
-    toggleJoinToSend = toggleJoinToSend.bind(null, this)
-    unarchiveChats = unarchiveChats.bind(null, this)
-    unbanChatMember = unbanChatMember.bind(null, this)
-    unrestrictChatMember = unbanChatMember.bind(null, this)
-    addContact = addContact.bind(null, this)
-    deleteContacts = deleteContacts.bind(null, this)
-    getContacts = getContacts.bind(null, this)
-    importContacts = importContacts.bind(null, this)
-    createFolder = createFolder.bind(null, this)
-    deleteFolder = deleteFolder.bind(null, this)
-    editFolder = editFolder.bind(null, this)
-    findFolder = findFolder.bind(null, this)
-    getFolders = getFolders.bind(null, this)
-    getPeerDialogs = getPeerDialogs.bind(null, this)
-    iterDialogs = iterDialogs.bind(null, this)
-    setFoldersOrder = setFoldersOrder.bind(null, this)
-    downloadAsBuffer = downloadAsBuffer.bind(null, this)
-    downloadToFile = downloadToFile.bind(null, this)
-    downloadAsIterable = downloadAsIterable.bind(null, this)
-    downloadAsStream = downloadAsStream.bind(null, this)
-    _normalizeInputFile = _normalizeInputFile.bind(null, this)
-    _normalizeInputMedia = _normalizeInputMedia.bind(null, this)
-    uploadFile = uploadFile.bind(null, this)
-    uploadMedia = uploadMedia.bind(null, this)
-    createForumTopic = createForumTopic.bind(null, this)
-    deleteForumTopicHistory = deleteForumTopicHistory.bind(null, this)
-    editForumTopic = editForumTopic.bind(null, this)
-    getForumTopicsById = getForumTopicsById.bind(null, this)
-    getForumTopics = getForumTopics.bind(null, this)
-    iterForumTopics = iterForumTopics.bind(null, this)
-    reorderPinnedForumTopics = reorderPinnedForumTopics.bind(null, this)
-    toggleForumTopicClosed = toggleForumTopicClosed.bind(null, this)
-    toggleForumTopicPinned = toggleForumTopicPinned.bind(null, this)
-    toggleForum = toggleForum.bind(null, this)
-    toggleGeneralTopicHidden = toggleGeneralTopicHidden.bind(null, this)
-    createInviteLink = createInviteLink.bind(null, this)
-    editInviteLink = editInviteLink.bind(null, this)
-    exportInviteLink = exportInviteLink.bind(null, this)
-    getInviteLinkMembers = getInviteLinkMembers.bind(null, this)
-    getInviteLink = getInviteLink.bind(null, this)
-    getInviteLinks = getInviteLinks.bind(null, this)
-    getPrimaryInviteLink = getPrimaryInviteLink.bind(null, this)
-    hideAllJoinRequests = hideAllJoinRequests.bind(null, this)
-    hideJoinRequest = hideJoinRequest.bind(null, this)
-    iterInviteLinkMembers = iterInviteLinkMembers.bind(null, this)
-    iterInviteLinks = iterInviteLinks.bind(null, this)
-    revokeInviteLink = revokeInviteLink.bind(null, this)
-    closePoll = closePoll.bind(null, this)
-    deleteMessagesById = deleteMessagesById.bind(null, this)
-    deleteMessages = deleteMessages.bind(null, this)
-    deleteScheduledMessages = deleteScheduledMessages.bind(null, this)
-    editInlineMessage = editInlineMessage.bind(null, this)
-    editMessage = editMessage.bind(null, this)
-    forwardMessagesById = forwardMessagesById.bind(null, this)
-    forwardMessages = forwardMessages.bind(null, this)
-    getCallbackQueryMessage = getCallbackQueryMessage.bind(null, this)
-    getDiscussionMessage = getDiscussionMessage.bind(null, this)
-    getHistory = getHistory.bind(null, this)
-    getMessageByLink = getMessageByLink.bind(null, this)
-    getMessageGroup = getMessageGroup.bind(null, this)
-    getMessageReactionsById = getMessageReactionsById.bind(null, this)
-    getMessageReactions = getMessageReactions.bind(null, this)
-    getMessagesUnsafe = getMessagesUnsafe.bind(null, this)
-    getMessages = getMessages.bind(null, this)
-    getReactionUsers = getReactionUsers.bind(null, this)
-    getReplyTo = getReplyTo.bind(null, this)
-    getScheduledMessages = getScheduledMessages.bind(null, this)
-    iterHistory = iterHistory.bind(null, this)
-    iterReactionUsers = iterReactionUsers.bind(null, this)
-    iterSearchGlobal = iterSearchGlobal.bind(null, this)
-    iterSearchMessages = iterSearchMessages.bind(null, this)
-    pinMessage = pinMessage.bind(null, this)
-    readHistory = readHistory.bind(null, this)
-    readReactions = readReactions.bind(null, this)
-    searchGlobal = searchGlobal.bind(null, this)
-    searchMessages = searchMessages.bind(null, this)
-    answerText = answerText.bind(null, this)
-    answerMedia = answerMedia.bind(null, this)
-    answerMediaGroup = answerMediaGroup.bind(null, this)
-    commentText = commentText.bind(null, this)
-    commentMedia = commentMedia.bind(null, this)
-    commentMediaGroup = commentMediaGroup.bind(null, this)
-    sendCopyGroup = sendCopyGroup.bind(null, this)
-    sendCopy = sendCopy.bind(null, this)
-    sendMediaGroup = sendMediaGroup.bind(null, this)
-    sendMedia = sendMedia.bind(null, this)
-    quoteWithText = quoteWithText.bind(null, this)
-    quoteWithMedia = quoteWithMedia.bind(null, this)
-    quoteWithMediaGroup = quoteWithMediaGroup.bind(null, this)
-    sendReaction = sendReaction.bind(null, this)
-    replyText = replyText.bind(null, this)
-    replyMedia = replyMedia.bind(null, this)
-    replyMediaGroup = replyMediaGroup.bind(null, this)
-    sendScheduled = sendScheduled.bind(null, this)
-    sendText = sendText.bind(null, this)
-    sendTyping = sendTyping.bind(null, this)
-    sendVote = sendVote.bind(null, this)
-    translateMessage = translateMessage.bind(null, this)
-    translateText = translateText.bind(null, this)
-    unpinAllMessages = unpinAllMessages.bind(null, this)
-    unpinMessage = unpinMessage.bind(null, this)
-    initTakeoutSession = initTakeoutSession.bind(null, this)
-    _normalizePrivacyRules = _normalizePrivacyRules.bind(null, this)
-    changeCloudPassword = changeCloudPassword.bind(null, this)
-    enableCloudPassword = enableCloudPassword.bind(null, this)
-    verifyPasswordEmail = verifyPasswordEmail.bind(null, this)
-    resendPasswordEmail = resendPasswordEmail.bind(null, this)
-    cancelPasswordEmail = cancelPasswordEmail.bind(null, this)
-    removeCloudPassword = removeCloudPassword.bind(null, this)
-    addStickerToSet = addStickerToSet.bind(null, this)
-    createStickerSet = createStickerSet.bind(null, this)
-    deleteStickerFromSet = deleteStickerFromSet.bind(null, this)
-    getCustomEmojis = getCustomEmojis.bind(null, this)
-    getCustomEmojisFromMessages = getCustomEmojisFromMessages.bind(null, this)
-    getInstalledStickers = getInstalledStickers.bind(null, this)
-    getStickerSet = getStickerSet.bind(null, this)
-    moveStickerInSet = moveStickerInSet.bind(null, this)
-    setChatStickerSet = setChatStickerSet.bind(null, this)
-    setStickerSetThumb = setStickerSetThumb.bind(null, this)
-    applyBoost = applyBoost.bind(null, this)
-    canApplyBoost = canApplyBoost.bind(null, this)
-    canSendStory = canSendStory.bind(null, this)
-    deleteStories = deleteStories.bind(null, this)
-    editStory = editStory.bind(null, this)
-    getAllStories = getAllStories.bind(null, this)
-    getBoostStats = getBoostStats.bind(null, this)
-    getBoosters = getBoosters.bind(null, this)
-    getPeerStories = getPeerStories.bind(null, this)
-    getProfileStories = getProfileStories.bind(null, this)
-    getStoriesById = getStoriesById.bind(null, this)
-    getStoriesInteractions = getStoriesInteractions.bind(null, this)
-    getStoryLink = getStoryLink.bind(null, this)
-    getStoryViewers = getStoryViewers.bind(null, this)
-    hideMyStoriesViews = hideMyStoriesViews.bind(null, this)
-    incrementStoriesViews = incrementStoriesViews.bind(null, this)
-    iterAllStories = iterAllStories.bind(null, this)
-    iterBoosters = iterBoosters.bind(null, this)
-    iterProfileStories = iterProfileStories.bind(null, this)
-    iterStoryViewers = iterStoryViewers.bind(null, this)
-    readStories = readStories.bind(null, this)
-    reportStory = reportStory.bind(null, this)
-    sendStoryReaction = sendStoryReaction.bind(null, this)
-    sendStory = sendStory.bind(null, this)
-    togglePeerStoriesArchived = togglePeerStoriesArchived.bind(null, this)
-    toggleStoriesPinned = toggleStoriesPinned.bind(null, this)
-    enableRps = enableRps.bind(null, this)
-    getCurrentRpsIncoming = getCurrentRpsIncoming.bind(null, this)
-    getCurrentRpsProcessing = getCurrentRpsProcessing.bind(null, this)
-    startUpdatesLoop = startUpdatesLoop.bind(null, this)
-    stopUpdatesLoop = stopUpdatesLoop.bind(null, this)
-    catchUp = catchUp.bind(null, this)
-    blockUser = blockUser.bind(null, this)
-    deleteProfilePhotos = deleteProfilePhotos.bind(null, this)
-    editCloseFriendsRaw = editCloseFriendsRaw.bind(null, this)
-    editCloseFriends = editCloseFriends.bind(null, this)
-    getCommonChats = getCommonChats.bind(null, this)
-    getGlobalTtl = getGlobalTtl.bind(null, this)
-    getMe = getMe.bind(null, this)
-    getMyUsername = getMyUsername.bind(null, this)
-    getProfilePhoto = getProfilePhoto.bind(null, this)
-    getProfilePhotos = getProfilePhotos.bind(null, this)
-    getUsers = getUsers.bind(null, this)
-    iterProfilePhotos = iterProfilePhotos.bind(null, this)
-    // @ts-expect-error .bind() kinda breaks typings for overloads
-    resolvePeerMany = resolvePeerMany.bind(null, this)
-    resolvePeer = resolvePeer.bind(null, this)
-    setEmojiStatus = setEmojiStatus.bind(null, this)
-    setGlobalTtl = setGlobalTtl.bind(null, this)
-    setOffline = setOffline.bind(null, this)
-    setProfilePhoto = setProfilePhoto.bind(null, this)
-    setUsername = setUsername.bind(null, this)
-    unblockUser = unblockUser.bind(null, this)
-    updateProfile = updateProfile.bind(null, this)
 }
+
+TelegramClient.prototype.getAuthState = function (...args) {
+    return getAuthState(this, ...args)
+}
+
+TelegramClient.prototype.checkPassword = function (...args) {
+    return checkPassword(this, ...args)
+}
+
+TelegramClient.prototype.getPasswordHint = function (...args) {
+    return getPasswordHint(this, ...args)
+}
+
+TelegramClient.prototype.logOut = function (...args) {
+    return logOut(this, ...args)
+}
+
+TelegramClient.prototype.recoverPassword = function (...args) {
+    return recoverPassword(this, ...args)
+}
+
+TelegramClient.prototype.resendCode = function (...args) {
+    return resendCode(this, ...args)
+}
+
+TelegramClient.prototype.run = function (...args) {
+    return run(this, ...args)
+}
+
+TelegramClient.prototype.sendCode = function (...args) {
+    return sendCode(this, ...args)
+}
+
+TelegramClient.prototype.sendRecoveryCode = function (...args) {
+    return sendRecoveryCode(this, ...args)
+}
+
+TelegramClient.prototype.signInBot = function (...args) {
+    return signInBot(this, ...args)
+}
+
+TelegramClient.prototype.signIn = function (...args) {
+    return signIn(this, ...args)
+}
+
+TelegramClient.prototype.startTest = function (...args) {
+    return startTest(this, ...args)
+}
+
+TelegramClient.prototype.answerCallbackQuery = function (...args) {
+    return answerCallbackQuery(this, ...args)
+}
+
+TelegramClient.prototype.answerInlineQuery = function (...args) {
+    return answerInlineQuery(this, ...args)
+}
+
+TelegramClient.prototype.answerPreCheckoutQuery = function (...args) {
+    return answerPreCheckoutQuery(this, ...args)
+}
+
+TelegramClient.prototype.deleteMyCommands = function (...args) {
+    return deleteMyCommands(this, ...args)
+}
+
+TelegramClient.prototype.getBotInfo = function (...args) {
+    return getBotInfo(this, ...args)
+}
+
+TelegramClient.prototype.getBotMenuButton = function (...args) {
+    return getBotMenuButton(this, ...args)
+}
+
+TelegramClient.prototype.getCallbackAnswer = function (...args) {
+    return getCallbackAnswer(this, ...args)
+}
+
+TelegramClient.prototype.getGameHighScores = function (...args) {
+    return getGameHighScores(this, ...args)
+}
+
+TelegramClient.prototype.getInlineGameHighScores = function (...args) {
+    return getInlineGameHighScores(this, ...args)
+}
+
+TelegramClient.prototype.getMyCommands = function (...args) {
+    return getMyCommands(this, ...args)
+}
+
+TelegramClient.prototype.setBotInfo = function (...args) {
+    return setBotInfo(this, ...args)
+}
+
+TelegramClient.prototype.setBotMenuButton = function (...args) {
+    return setBotMenuButton(this, ...args)
+}
+
+TelegramClient.prototype.setGameScore = function (...args) {
+    return setGameScore(this, ...args)
+}
+
+TelegramClient.prototype.setInlineGameScore = function (...args) {
+    return setInlineGameScore(this, ...args)
+}
+
+TelegramClient.prototype.setMyCommands = function (...args) {
+    return setMyCommands(this, ...args)
+}
+
+TelegramClient.prototype.setMyDefaultRights = function (...args) {
+    return setMyDefaultRights(this, ...args)
+}
+
+TelegramClient.prototype.addChatMembers = function (...args) {
+    return addChatMembers(this, ...args)
+}
+
+TelegramClient.prototype.archiveChats = function (...args) {
+    return archiveChats(this, ...args)
+}
+
+TelegramClient.prototype.banChatMember = function (...args) {
+    return banChatMember(this, ...args)
+}
+
+TelegramClient.prototype.createChannel = function (...args) {
+    return createChannel(this, ...args)
+}
+
+TelegramClient.prototype.createGroup = function (...args) {
+    return createGroup(this, ...args)
+}
+
+TelegramClient.prototype.createSupergroup = function (...args) {
+    return createSupergroup(this, ...args)
+}
+
+TelegramClient.prototype.deleteChannel = function (...args) {
+    return deleteChannel(this, ...args)
+}
+
+TelegramClient.prototype.deleteSupergroup = function (...args) {
+    return deleteChannel(this, ...args)
+}
+
+TelegramClient.prototype.deleteChatPhoto = function (...args) {
+    return deleteChatPhoto(this, ...args)
+}
+
+TelegramClient.prototype.deleteGroup = function (...args) {
+    return deleteGroup(this, ...args)
+}
+
+TelegramClient.prototype.deleteHistory = function (...args) {
+    return deleteHistory(this, ...args)
+}
+
+TelegramClient.prototype.deleteUserHistory = function (...args) {
+    return deleteUserHistory(this, ...args)
+}
+
+TelegramClient.prototype.editAdminRights = function (...args) {
+    return editAdminRights(this, ...args)
+}
+
+TelegramClient.prototype.getChatEventLog = function (...args) {
+    return getChatEventLog(this, ...args)
+}
+
+TelegramClient.prototype.getChatMember = function (...args) {
+    return getChatMember(this, ...args)
+}
+
+TelegramClient.prototype.getChatMembers = function (...args) {
+    return getChatMembers(this, ...args)
+}
+
+TelegramClient.prototype.getChatPreview = function (...args) {
+    return getChatPreview(this, ...args)
+}
+
+TelegramClient.prototype.getChat = function (...args) {
+    return getChat(this, ...args)
+}
+
+TelegramClient.prototype.getFullChat = function (...args) {
+    return getFullChat(this, ...args)
+}
+
+TelegramClient.prototype.getNearbyChats = function (...args) {
+    return getNearbyChats(this, ...args)
+}
+
+TelegramClient.prototype.getSimilarChannels = function (...args) {
+    return getSimilarChannels(this, ...args)
+}
+
+TelegramClient.prototype.iterChatEventLog = function (...args) {
+    return iterChatEventLog(this, ...args)
+}
+
+TelegramClient.prototype.iterChatMembers = function (...args) {
+    return iterChatMembers(this, ...args)
+}
+
+TelegramClient.prototype.joinChat = function (...args) {
+    return joinChat(this, ...args)
+}
+
+TelegramClient.prototype.kickChatMember = function (...args) {
+    return kickChatMember(this, ...args)
+}
+
+TelegramClient.prototype.leaveChat = function (...args) {
+    return leaveChat(this, ...args)
+}
+
+TelegramClient.prototype.markChatUnread = function (...args) {
+    return markChatUnread(this, ...args)
+}
+
+TelegramClient.prototype.reorderUsernames = function (...args) {
+    return reorderUsernames(this, ...args)
+}
+
+TelegramClient.prototype.restrictChatMember = function (...args) {
+    return restrictChatMember(this, ...args)
+}
+
+TelegramClient.prototype.saveDraft = function (...args) {
+    return saveDraft(this, ...args)
+}
+
+TelegramClient.prototype.setChatColor = function (...args) {
+    return setChatColor(this, ...args)
+}
+
+TelegramClient.prototype.setChatDefaultPermissions = function (...args) {
+    return setChatDefaultPermissions(this, ...args)
+}
+
+TelegramClient.prototype.setChatDescription = function (...args) {
+    return setChatDescription(this, ...args)
+}
+
+TelegramClient.prototype.setChatPhoto = function (...args) {
+    return setChatPhoto(this, ...args)
+}
+
+TelegramClient.prototype.setChatTitle = function (...args) {
+    return setChatTitle(this, ...args)
+}
+
+TelegramClient.prototype.setChatTtl = function (...args) {
+    return setChatTtl(this, ...args)
+}
+
+TelegramClient.prototype.setChatUsername = function (...args) {
+    return setChatUsername(this, ...args)
+}
+
+TelegramClient.prototype.setSlowMode = function (...args) {
+    return setSlowMode(this, ...args)
+}
+
+TelegramClient.prototype.toggleContentProtection = function (...args) {
+    return toggleContentProtection(this, ...args)
+}
+
+TelegramClient.prototype.toggleFragmentUsername = function (...args) {
+    return toggleFragmentUsername(this, ...args)
+}
+
+TelegramClient.prototype.toggleJoinRequests = function (...args) {
+    return toggleJoinRequests(this, ...args)
+}
+
+TelegramClient.prototype.toggleJoinToSend = function (...args) {
+    return toggleJoinToSend(this, ...args)
+}
+
+TelegramClient.prototype.unarchiveChats = function (...args) {
+    return unarchiveChats(this, ...args)
+}
+
+TelegramClient.prototype.unbanChatMember = function (...args) {
+    return unbanChatMember(this, ...args)
+}
+
+TelegramClient.prototype.unrestrictChatMember = function (...args) {
+    return unbanChatMember(this, ...args)
+}
+
+TelegramClient.prototype.addContact = function (...args) {
+    return addContact(this, ...args)
+}
+
+TelegramClient.prototype.deleteContacts = function (...args) {
+    return deleteContacts(this, ...args)
+}
+
+TelegramClient.prototype.getContacts = function (...args) {
+    return getContacts(this, ...args)
+}
+
+TelegramClient.prototype.importContacts = function (...args) {
+    return importContacts(this, ...args)
+}
+
+TelegramClient.prototype.createFolder = function (...args) {
+    return createFolder(this, ...args)
+}
+
+TelegramClient.prototype.deleteFolder = function (...args) {
+    return deleteFolder(this, ...args)
+}
+
+TelegramClient.prototype.editFolder = function (...args) {
+    return editFolder(this, ...args)
+}
+
+TelegramClient.prototype.findFolder = function (...args) {
+    return findFolder(this, ...args)
+}
+
+TelegramClient.prototype.getFolders = function (...args) {
+    return getFolders(this, ...args)
+}
+
+TelegramClient.prototype.getPeerDialogs = function (...args) {
+    return getPeerDialogs(this, ...args)
+}
+
+TelegramClient.prototype.iterDialogs = function (...args) {
+    return iterDialogs(this, ...args)
+}
+
+TelegramClient.prototype.setFoldersOrder = function (...args) {
+    return setFoldersOrder(this, ...args)
+}
+
+TelegramClient.prototype.downloadAsBuffer = function (...args) {
+    return downloadAsBuffer(this, ...args)
+}
+
+TelegramClient.prototype.downloadToFile = function (...args) {
+    return downloadToFile(this, ...args)
+}
+
+TelegramClient.prototype.downloadAsIterable = function (...args) {
+    return downloadAsIterable(this, ...args)
+}
+
+TelegramClient.prototype.downloadAsStream = function (...args) {
+    return downloadAsStream(this, ...args)
+}
+
+TelegramClient.prototype._normalizeInputFile = function (...args) {
+    return _normalizeInputFile(this, ...args)
+}
+
+TelegramClient.prototype._normalizeInputMedia = function (...args) {
+    return _normalizeInputMedia(this, ...args)
+}
+
+TelegramClient.prototype.uploadFile = function (...args) {
+    return uploadFile(this, ...args)
+}
+
+TelegramClient.prototype.uploadMedia = function (...args) {
+    return uploadMedia(this, ...args)
+}
+
+TelegramClient.prototype.createForumTopic = function (...args) {
+    return createForumTopic(this, ...args)
+}
+
+TelegramClient.prototype.deleteForumTopicHistory = function (...args) {
+    return deleteForumTopicHistory(this, ...args)
+}
+
+TelegramClient.prototype.editForumTopic = function (...args) {
+    return editForumTopic(this, ...args)
+}
+
+TelegramClient.prototype.getForumTopicsById = function (...args) {
+    return getForumTopicsById(this, ...args)
+}
+
+TelegramClient.prototype.getForumTopics = function (...args) {
+    return getForumTopics(this, ...args)
+}
+
+TelegramClient.prototype.iterForumTopics = function (...args) {
+    return iterForumTopics(this, ...args)
+}
+
+TelegramClient.prototype.reorderPinnedForumTopics = function (...args) {
+    return reorderPinnedForumTopics(this, ...args)
+}
+
+TelegramClient.prototype.toggleForumTopicClosed = function (...args) {
+    return toggleForumTopicClosed(this, ...args)
+}
+
+TelegramClient.prototype.toggleForumTopicPinned = function (...args) {
+    return toggleForumTopicPinned(this, ...args)
+}
+
+TelegramClient.prototype.toggleForum = function (...args) {
+    return toggleForum(this, ...args)
+}
+
+TelegramClient.prototype.toggleGeneralTopicHidden = function (...args) {
+    return toggleGeneralTopicHidden(this, ...args)
+}
+
+TelegramClient.prototype.createInviteLink = function (...args) {
+    return createInviteLink(this, ...args)
+}
+
+TelegramClient.prototype.editInviteLink = function (...args) {
+    return editInviteLink(this, ...args)
+}
+
+TelegramClient.prototype.exportInviteLink = function (...args) {
+    return exportInviteLink(this, ...args)
+}
+
+TelegramClient.prototype.getInviteLinkMembers = function (...args) {
+    return getInviteLinkMembers(this, ...args)
+}
+
+TelegramClient.prototype.getInviteLink = function (...args) {
+    return getInviteLink(this, ...args)
+}
+
+TelegramClient.prototype.getInviteLinks = function (...args) {
+    return getInviteLinks(this, ...args)
+}
+
+TelegramClient.prototype.getPrimaryInviteLink = function (...args) {
+    return getPrimaryInviteLink(this, ...args)
+}
+
+TelegramClient.prototype.hideAllJoinRequests = function (...args) {
+    return hideAllJoinRequests(this, ...args)
+}
+
+TelegramClient.prototype.hideJoinRequest = function (...args) {
+    return hideJoinRequest(this, ...args)
+}
+
+TelegramClient.prototype.iterInviteLinkMembers = function (...args) {
+    return iterInviteLinkMembers(this, ...args)
+}
+
+TelegramClient.prototype.iterInviteLinks = function (...args) {
+    return iterInviteLinks(this, ...args)
+}
+
+TelegramClient.prototype.revokeInviteLink = function (...args) {
+    return revokeInviteLink(this, ...args)
+}
+
+TelegramClient.prototype.closePoll = function (...args) {
+    return closePoll(this, ...args)
+}
+
+TelegramClient.prototype.deleteMessagesById = function (...args) {
+    return deleteMessagesById(this, ...args)
+}
+
+TelegramClient.prototype.deleteMessages = function (...args) {
+    return deleteMessages(this, ...args)
+}
+
+TelegramClient.prototype.deleteScheduledMessages = function (...args) {
+    return deleteScheduledMessages(this, ...args)
+}
+
+TelegramClient.prototype.editInlineMessage = function (...args) {
+    return editInlineMessage(this, ...args)
+}
+
+TelegramClient.prototype.editMessage = function (...args) {
+    return editMessage(this, ...args)
+}
+
+TelegramClient.prototype.forwardMessagesById = function (...args) {
+    return forwardMessagesById(this, ...args)
+}
+
+TelegramClient.prototype.forwardMessages = function (...args) {
+    return forwardMessages(this, ...args)
+}
+
+TelegramClient.prototype.getCallbackQueryMessage = function (...args) {
+    return getCallbackQueryMessage(this, ...args)
+}
+
+TelegramClient.prototype.getDiscussionMessage = function (...args) {
+    return getDiscussionMessage(this, ...args)
+}
+
+TelegramClient.prototype.getHistory = function (...args) {
+    return getHistory(this, ...args)
+}
+
+TelegramClient.prototype.getMessageByLink = function (...args) {
+    return getMessageByLink(this, ...args)
+}
+
+TelegramClient.prototype.getMessageGroup = function (...args) {
+    return getMessageGroup(this, ...args)
+}
+
+TelegramClient.prototype.getMessageReactionsById = function (...args) {
+    return getMessageReactionsById(this, ...args)
+}
+
+TelegramClient.prototype.getMessageReactions = function (...args) {
+    return getMessageReactions(this, ...args)
+}
+
+TelegramClient.prototype.getMessagesUnsafe = function (...args) {
+    return getMessagesUnsafe(this, ...args)
+}
+
+TelegramClient.prototype.getMessages = function (...args) {
+    return getMessages(this, ...args)
+}
+
+TelegramClient.prototype.getReactionUsers = function (...args) {
+    return getReactionUsers(this, ...args)
+}
+
+TelegramClient.prototype.getReplyTo = function (...args) {
+    return getReplyTo(this, ...args)
+}
+
+TelegramClient.prototype.getScheduledMessages = function (...args) {
+    return getScheduledMessages(this, ...args)
+}
+
+TelegramClient.prototype.iterHistory = function (...args) {
+    return iterHistory(this, ...args)
+}
+
+TelegramClient.prototype.iterReactionUsers = function (...args) {
+    return iterReactionUsers(this, ...args)
+}
+
+TelegramClient.prototype.iterSearchGlobal = function (...args) {
+    return iterSearchGlobal(this, ...args)
+}
+
+TelegramClient.prototype.iterSearchMessages = function (...args) {
+    return iterSearchMessages(this, ...args)
+}
+
+TelegramClient.prototype.pinMessage = function (...args) {
+    return pinMessage(this, ...args)
+}
+
+TelegramClient.prototype.readHistory = function (...args) {
+    return readHistory(this, ...args)
+}
+
+TelegramClient.prototype.readReactions = function (...args) {
+    return readReactions(this, ...args)
+}
+
+TelegramClient.prototype.searchGlobal = function (...args) {
+    return searchGlobal(this, ...args)
+}
+
+TelegramClient.prototype.searchMessages = function (...args) {
+    return searchMessages(this, ...args)
+}
+
+TelegramClient.prototype.answerText = function (...args) {
+    return answerText(this, ...args)
+}
+
+TelegramClient.prototype.answerMedia = function (...args) {
+    return answerMedia(this, ...args)
+}
+
+TelegramClient.prototype.answerMediaGroup = function (...args) {
+    return answerMediaGroup(this, ...args)
+}
+
+TelegramClient.prototype.commentText = function (...args) {
+    return commentText(this, ...args)
+}
+
+TelegramClient.prototype.commentMedia = function (...args) {
+    return commentMedia(this, ...args)
+}
+
+TelegramClient.prototype.commentMediaGroup = function (...args) {
+    return commentMediaGroup(this, ...args)
+}
+
+TelegramClient.prototype.sendCopyGroup = function (...args) {
+    return sendCopyGroup(this, ...args)
+}
+
+TelegramClient.prototype.sendCopy = function (...args) {
+    return sendCopy(this, ...args)
+}
+
+TelegramClient.prototype.sendMediaGroup = function (...args) {
+    return sendMediaGroup(this, ...args)
+}
+
+TelegramClient.prototype.sendMedia = function (...args) {
+    return sendMedia(this, ...args)
+}
+
+TelegramClient.prototype.quoteWithText = function (...args) {
+    return quoteWithText(this, ...args)
+}
+
+TelegramClient.prototype.quoteWithMedia = function (...args) {
+    return quoteWithMedia(this, ...args)
+}
+
+TelegramClient.prototype.quoteWithMediaGroup = function (...args) {
+    return quoteWithMediaGroup(this, ...args)
+}
+
+TelegramClient.prototype.sendReaction = function (...args) {
+    return sendReaction(this, ...args)
+}
+
+TelegramClient.prototype.replyText = function (...args) {
+    return replyText(this, ...args)
+}
+
+TelegramClient.prototype.replyMedia = function (...args) {
+    return replyMedia(this, ...args)
+}
+
+TelegramClient.prototype.replyMediaGroup = function (...args) {
+    return replyMediaGroup(this, ...args)
+}
+
+TelegramClient.prototype.sendScheduled = function (...args) {
+    return sendScheduled(this, ...args)
+}
+
+TelegramClient.prototype.sendText = function (...args) {
+    return sendText(this, ...args)
+}
+
+TelegramClient.prototype.sendTyping = function (...args) {
+    return sendTyping(this, ...args)
+}
+
+TelegramClient.prototype.sendVote = function (...args) {
+    return sendVote(this, ...args)
+}
+
+TelegramClient.prototype.translateMessage = function (...args) {
+    return translateMessage(this, ...args)
+}
+
+TelegramClient.prototype.translateText = function (...args) {
+    return translateText(this, ...args)
+}
+
+TelegramClient.prototype.unpinAllMessages = function (...args) {
+    return unpinAllMessages(this, ...args)
+}
+
+TelegramClient.prototype.unpinMessage = function (...args) {
+    return unpinMessage(this, ...args)
+}
+
+TelegramClient.prototype.initTakeoutSession = function (...args) {
+    return initTakeoutSession(this, ...args)
+}
+
+TelegramClient.prototype._normalizePrivacyRules = function (...args) {
+    return _normalizePrivacyRules(this, ...args)
+}
+
+TelegramClient.prototype.changeCloudPassword = function (...args) {
+    return changeCloudPassword(this, ...args)
+}
+
+TelegramClient.prototype.enableCloudPassword = function (...args) {
+    return enableCloudPassword(this, ...args)
+}
+
+TelegramClient.prototype.verifyPasswordEmail = function (...args) {
+    return verifyPasswordEmail(this, ...args)
+}
+
+TelegramClient.prototype.resendPasswordEmail = function (...args) {
+    return resendPasswordEmail(this, ...args)
+}
+
+TelegramClient.prototype.cancelPasswordEmail = function (...args) {
+    return cancelPasswordEmail(this, ...args)
+}
+
+TelegramClient.prototype.removeCloudPassword = function (...args) {
+    return removeCloudPassword(this, ...args)
+}
+
+TelegramClient.prototype.addStickerToSet = function (...args) {
+    return addStickerToSet(this, ...args)
+}
+
+TelegramClient.prototype.createStickerSet = function (...args) {
+    return createStickerSet(this, ...args)
+}
+
+TelegramClient.prototype.deleteStickerFromSet = function (...args) {
+    return deleteStickerFromSet(this, ...args)
+}
+
+TelegramClient.prototype.getCustomEmojis = function (...args) {
+    return getCustomEmojis(this, ...args)
+}
+
+TelegramClient.prototype.getCustomEmojisFromMessages = function (...args) {
+    return getCustomEmojisFromMessages(this, ...args)
+}
+
+TelegramClient.prototype.getInstalledStickers = function (...args) {
+    return getInstalledStickers(this, ...args)
+}
+
+TelegramClient.prototype.getStickerSet = function (...args) {
+    return getStickerSet(this, ...args)
+}
+
+TelegramClient.prototype.moveStickerInSet = function (...args) {
+    return moveStickerInSet(this, ...args)
+}
+
+TelegramClient.prototype.setChatStickerSet = function (...args) {
+    return setChatStickerSet(this, ...args)
+}
+
+TelegramClient.prototype.setStickerSetThumb = function (...args) {
+    return setStickerSetThumb(this, ...args)
+}
+
+TelegramClient.prototype.applyBoost = function (...args) {
+    return applyBoost(this, ...args)
+}
+
+TelegramClient.prototype.canApplyBoost = function (...args) {
+    return canApplyBoost(this, ...args)
+}
+
+TelegramClient.prototype.canSendStory = function (...args) {
+    return canSendStory(this, ...args)
+}
+
+TelegramClient.prototype.deleteStories = function (...args) {
+    return deleteStories(this, ...args)
+}
+
+TelegramClient.prototype.editStory = function (...args) {
+    return editStory(this, ...args)
+}
+
+TelegramClient.prototype.getAllStories = function (...args) {
+    return getAllStories(this, ...args)
+}
+
+TelegramClient.prototype.getBoostStats = function (...args) {
+    return getBoostStats(this, ...args)
+}
+
+TelegramClient.prototype.getBoosters = function (...args) {
+    return getBoosters(this, ...args)
+}
+
+TelegramClient.prototype.getPeerStories = function (...args) {
+    return getPeerStories(this, ...args)
+}
+
+TelegramClient.prototype.getProfileStories = function (...args) {
+    return getProfileStories(this, ...args)
+}
+
+TelegramClient.prototype.getStoriesById = function (...args) {
+    return getStoriesById(this, ...args)
+}
+
+TelegramClient.prototype.getStoriesInteractions = function (...args) {
+    return getStoriesInteractions(this, ...args)
+}
+
+TelegramClient.prototype.getStoryLink = function (...args) {
+    return getStoryLink(this, ...args)
+}
+
+TelegramClient.prototype.getStoryViewers = function (...args) {
+    return getStoryViewers(this, ...args)
+}
+
+TelegramClient.prototype.hideMyStoriesViews = function (...args) {
+    return hideMyStoriesViews(this, ...args)
+}
+
+TelegramClient.prototype.incrementStoriesViews = function (...args) {
+    return incrementStoriesViews(this, ...args)
+}
+
+TelegramClient.prototype.iterAllStories = function (...args) {
+    return iterAllStories(this, ...args)
+}
+
+TelegramClient.prototype.iterBoosters = function (...args) {
+    return iterBoosters(this, ...args)
+}
+
+TelegramClient.prototype.iterProfileStories = function (...args) {
+    return iterProfileStories(this, ...args)
+}
+
+TelegramClient.prototype.iterStoryViewers = function (...args) {
+    return iterStoryViewers(this, ...args)
+}
+
+TelegramClient.prototype.readStories = function (...args) {
+    return readStories(this, ...args)
+}
+
+TelegramClient.prototype.reportStory = function (...args) {
+    return reportStory(this, ...args)
+}
+
+TelegramClient.prototype.sendStoryReaction = function (...args) {
+    return sendStoryReaction(this, ...args)
+}
+
+TelegramClient.prototype.sendStory = function (...args) {
+    return sendStory(this, ...args)
+}
+
+TelegramClient.prototype.togglePeerStoriesArchived = function (...args) {
+    return togglePeerStoriesArchived(this, ...args)
+}
+
+TelegramClient.prototype.toggleStoriesPinned = function (...args) {
+    return toggleStoriesPinned(this, ...args)
+}
+
+TelegramClient.prototype.enableRps = function (...args) {
+    return enableRps(this, ...args)
+}
+
+TelegramClient.prototype.getCurrentRpsIncoming = function (...args) {
+    return getCurrentRpsIncoming(this, ...args)
+}
+
+TelegramClient.prototype.getCurrentRpsProcessing = function (...args) {
+    return getCurrentRpsProcessing(this, ...args)
+}
+
+TelegramClient.prototype.startUpdatesLoop = function (...args) {
+    return startUpdatesLoop(this, ...args)
+}
+
+TelegramClient.prototype.stopUpdatesLoop = function (...args) {
+    return stopUpdatesLoop(this, ...args)
+}
+
+TelegramClient.prototype.catchUp = function (...args) {
+    return catchUp(this, ...args)
+}
+
+TelegramClient.prototype.blockUser = function (...args) {
+    return blockUser(this, ...args)
+}
+
+TelegramClient.prototype.deleteProfilePhotos = function (...args) {
+    return deleteProfilePhotos(this, ...args)
+}
+
+TelegramClient.prototype.editCloseFriendsRaw = function (...args) {
+    return editCloseFriendsRaw(this, ...args)
+}
+
+TelegramClient.prototype.editCloseFriends = function (...args) {
+    return editCloseFriends(this, ...args)
+}
+
+TelegramClient.prototype.getCommonChats = function (...args) {
+    return getCommonChats(this, ...args)
+}
+
+TelegramClient.prototype.getGlobalTtl = function (...args) {
+    return getGlobalTtl(this, ...args)
+}
+
+TelegramClient.prototype.getMe = function (...args) {
+    return getMe(this, ...args)
+}
+
+TelegramClient.prototype.getMyUsername = function (...args) {
+    return getMyUsername(this, ...args)
+}
+
+TelegramClient.prototype.getProfilePhoto = function (...args) {
+    return getProfilePhoto(this, ...args)
+}
+
+TelegramClient.prototype.getProfilePhotos = function (...args) {
+    return getProfilePhotos(this, ...args)
+}
+
+TelegramClient.prototype.getUsers = function (...args) {
+    return getUsers(this, ...args)
+}
+
+TelegramClient.prototype.iterProfilePhotos = function (...args) {
+    return iterProfilePhotos(this, ...args)
+}
+
+// @ts-expect-error this kinda breaks typings for overloads, idc
+TelegramClient.prototype.resolvePeerMany = function (...args) {
+    // @ts-expect-error this kinda breaks typings for overloads, idc
+    return resolvePeerMany(this, ...args)
+}
+
+TelegramClient.prototype.resolvePeer = function (...args) {
+    return resolvePeer(this, ...args)
+}
+
+TelegramClient.prototype.setEmojiStatus = function (...args) {
+    return setEmojiStatus(this, ...args)
+}
+
+TelegramClient.prototype.setGlobalTtl = function (...args) {
+    return setGlobalTtl(this, ...args)
+}
+
+TelegramClient.prototype.setOffline = function (...args) {
+    return setOffline(this, ...args)
+}
+
+TelegramClient.prototype.setProfilePhoto = function (...args) {
+    return setProfilePhoto(this, ...args)
+}
+
+TelegramClient.prototype.setUsername = function (...args) {
+    return setUsername(this, ...args)
+}
+
+TelegramClient.prototype.unblockUser = function (...args) {
+    return unblockUser(this, ...args)
+}
+
+TelegramClient.prototype.updateProfile = function (...args) {
+    return updateProfile(this, ...args)
+}
+
+TelegramClient.prototype.start =
+    // @manual-impl=start
+    /** @internal */
+    async function _start(this: TelegramClient, params: Parameters<typeof start>[1]) {
+        const user = await start(this, params)
+
+        if (!this.network.params.disableUpdates) {
+            await this.startUpdatesLoop()
+        }
+
+        return user
+    }

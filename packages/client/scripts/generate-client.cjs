@@ -258,6 +258,7 @@ async function addSingleMethod(state, fileName) {
 
             const isExported = (stmt.modifiers || []).find((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
             const isInitialize = checkForFlag(stmt, '@initialize')
+            const isManualImpl = checkForFlag(stmt, '@manual-impl')
             const isInitializeSuper = isInitialize === 'super'
             const aliases = (function () {
                 const flag = checkForFlag(stmt, '@alias')
@@ -301,6 +302,13 @@ async function addSingleMethod(state, fileName) {
                 } else {
                     state.init.push(code)
                 }
+            }
+
+            if (isManualImpl) {
+                state.impls.push({
+                    name: isManualImpl.split('=')[1],
+                    code: stmt.getFullText(),
+                })
             }
 
             if (!isExported) continue
@@ -348,7 +356,7 @@ async function addSingleMethod(state, fileName) {
                         state.imports[module] = new Set()
                     }
 
-                    if (!isManual) state.imports[module].add(name)
+                    state.imports[module].add(name)
                 }
             }
         } else if (stmt.kind === ts.SyntaxKind.InterfaceDeclaration) {
@@ -420,6 +428,7 @@ async function main() {
             used: {},
             list: [],
         },
+        impls: [],
         copy: [],
         files: {},
     }
@@ -432,7 +441,8 @@ async function main() {
 
     output.write(
         '/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging, @typescript-eslint/unified-signatures */\n' +
-            '/* THIS FILE WAS AUTO-GENERATED */\n',
+        '/* eslint-disable @typescript-eslint/no-unsafe-argument */\n' +
+        '/* THIS FILE WAS AUTO-GENERATED */\n',
     )
     Object.entries(state.imports).forEach(([module, items]) => {
         items = [...items]
@@ -480,6 +490,7 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
     const printer = ts.createPrinter()
 
     const classContents = []
+    const classProtoDecls = []
 
     state.methods.list.forEach(
         ({
@@ -628,9 +639,15 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
 
                 if (!overload && !isManual) {
                     if (hasOverloads) {
-                        classContents.push('// @ts-expect-error .bind() kinda breaks typings for overloads')
+                        classProtoDecls.push('// @ts-expect-error this kinda breaks typings for overloads, idc')
                     }
-                    classContents.push(`${name} = ${origName}.bind(null, this)`)
+                    classProtoDecls.push(`TelegramClient.prototype.${name} = function(...args) {`)
+
+                    if (hasOverloads) {
+                        classProtoDecls.push('// @ts-expect-error this kinda breaks typings for overloads, idc')
+                    }
+                    classProtoDecls.push(`    return ${origName}(this, ...args);`)
+                    classProtoDecls.push('}\n')
                 }
             }
         },
@@ -649,7 +666,9 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
     output.write('}\n')
 
     classContents.forEach((line) => output.write(line + '\n'))
-    output.write('}')
+    output.write('}\n')
+    classProtoDecls.forEach((line) => output.write(line + '\n'))
+    state.impls.forEach(({ name, code }) => output.write(`TelegramClient.prototype.${name} = ${code}\n`))
 
     // format the resulting file with prettier
     const targetFile = path.join(__dirname, '../src/client.ts')

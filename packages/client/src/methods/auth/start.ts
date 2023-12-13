@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { BaseTelegramClient, MaybeAsync, MtArgumentError, tl } from '@mtcute/core'
 
+import type { TelegramClient } from '../../client.js'
 import { MaybeDynamic, SentCode, User } from '../../types/index.js'
 import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-utils.js'
 import { getMe } from '../users/get-me.js'
@@ -209,4 +210,16 @@ export async function start(
     }
 
     throw new MtArgumentError('Failed to log in with provided credentials')
+}
+
+// @manual-impl=start
+/** @internal */
+async function _start(this: TelegramClient, params: Parameters<typeof start>[1]) {
+    const user = await start(this, params)
+
+    if (!this.network.params.disableUpdates) {
+        await this.startUpdatesLoop()
+    }
+
+    return user
 }
