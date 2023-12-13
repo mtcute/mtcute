@@ -21,7 +21,6 @@ import { getPasswordHint } from './methods/auth/get-password-hint.js'
 import { logOut } from './methods/auth/log-out.js'
 import { recoverPassword } from './methods/auth/recover-password.js'
 import { resendCode } from './methods/auth/resend-code.js'
-import { run } from './methods/auth/run.js'
 import { sendCode } from './methods/auth/send-code.js'
 import { sendRecoveryCode } from './methods/auth/send-recovery-code.js'
 import { signIn } from './methods/auth/sign-in.js'
@@ -566,6 +565,7 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param params  Parameters to be passed to {@link start}
      * @param then  Function to be called after {@link start} returns
+     * @manual=noemit
      */
     run(params: Parameters<typeof start>[1], then?: (user: User) => void | Promise<void>): void
     /**
@@ -5185,10 +5185,6 @@ TelegramClient.prototype.resendCode = function (...args) {
     return resendCode(this, ...args)
 }
 
-TelegramClient.prototype.run = function (...args) {
-    return run(this, ...args)
-}
-
 TelegramClient.prototype.sendCode = function (...args) {
     return sendCode(this, ...args)
 }
@@ -6127,6 +6123,18 @@ TelegramClient.prototype.updateProfile = function (...args) {
     return updateProfile(this, ...args)
 }
 
+TelegramClient.prototype.run =
+    // @manual-impl=run
+    /** @internal */
+    function _run(
+        this: TelegramClient,
+        params: Parameters<typeof start>[1],
+        then?: (user: User) => void | Promise<void>,
+    ) {
+        this.start(params)
+            .then(then)
+            .catch((err) => this._emitError(err))
+    }
 TelegramClient.prototype.start =
     // @manual-impl=start
     /** @internal */

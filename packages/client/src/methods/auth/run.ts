@@ -1,5 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
+import { TelegramClient } from '../../index.js'
 import { User } from '../../types/index.js'
 import { start } from './start.js'
 
@@ -13,6 +14,7 @@ import { start } from './start.js'
  *
  * @param params  Parameters to be passed to {@link start}
  * @param then  Function to be called after {@link start} returns
+ * @manual=noemit
  */
 export function run(
     client: BaseTelegramClient,
@@ -22,4 +24,12 @@ export function run(
     start(client, params)
         .then(then)
         .catch((err) => client._emitError(err))
+}
+
+// @manual-impl=run
+/** @internal */
+function _run(this: TelegramClient, params: Parameters<typeof start>[1], then?: (user: User) => void | Promise<void>) {
+    this.start(params)
+        .then(then)
+        .catch((err) => this._emitError(err))
 }

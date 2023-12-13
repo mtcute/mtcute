@@ -356,7 +356,9 @@ async function addSingleMethod(state, fileName) {
                         state.imports[module] = new Set()
                     }
 
-                    state.imports[module].add(name)
+                    if (!isManual || isManual.split('=')[1] !== 'noemit') {
+                        state.imports[module].add(name)
+                    }
                 }
             }
         } else if (stmt.kind === ts.SyntaxKind.InterfaceDeclaration) {
