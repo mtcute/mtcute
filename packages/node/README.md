@@ -4,7 +4,7 @@
 
 All-in-one package for NodeJS. Includes support for native crypto addon
 (must be installed separately, `@mtcute/crypto-node`), terminal I/O via
-`readline` and comes with pre-installed HTML and Markdown parsers.
+`readline` and includes HTML and Markdown parsers.
 
 ## Usage
 
@@ -15,5 +15,9 @@ const tg = new NodeTelegramClient({
     apiId: 12345,
     apiHash: 'abcdef',
     storage: 'my-account'
+})
+
+tg.run(async (user) => {
+    console.log(`✨ logged in as ${user.displayName}`)
 })
 ```

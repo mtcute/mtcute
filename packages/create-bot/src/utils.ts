@@ -14,7 +14,7 @@ export function exec(cwd: string, ...cmd: string[]) {
             if (code === 0) {
                 resolve()
             } else {
-                reject(new Error(`Process exited with code ${code}`))
+                reject(new Error(`Process "${cmd.join(' ')}" exited with code ${code}`))
             }
         })
     })

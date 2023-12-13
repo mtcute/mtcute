@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/mtcute/mtcute/">
-        <img src="./.github/logo.svg" alt="mtcute logo" title="mtcute" width="480" /><br/>
+        <img src="https://raw.githubusercontent.com/mtcute/mtcute/master/.github/logo.svg" alt="mtcute logo" title="mtcute" width="480" /><br/>
     </a><br/>
     <b>modern typescript library for mtproto</b>
     <br>
@@ -41,12 +41,8 @@ dp.onNewMessage(filters.chat('private'), async (msg) => {
     await msg.replyText('hiiii from mtcute! 🌸')
 })
 
-tg.run({
-    phone: () => tg.input('phone > '),
-    code: () => tg.input('code > '),
-    password: () => tg.input('password > ')
-}, async (self) => {
-    console.log(`logged in as ${self.displayName}`)
+tg.run({ /* optional params */ }, async (self) => {
+    console.log(`✨ logged in as ${self.displayName}`)
 })
 ```
 

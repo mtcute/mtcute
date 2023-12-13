@@ -1,7 +1,7 @@
 import { createRequire } from 'module'
 import { createInterface, Interface as RlInterface } from 'readline'
 
-import { TelegramClient, TelegramClientOptions } from '@mtcute/client'
+import { TelegramClient, TelegramClientOptions, User } from '@mtcute/client'
 import { SqliteStorage } from '@mtcute/sqlite'
 
 export * from '@mtcute/client'
@@ -20,31 +20,15 @@ try {
     nativeCrypto = require('@mtcute/crypto-node').NodeNativeCryptoProvider
 } catch (e) {}
 
-export interface NodeTelegramClientOptions extends Omit<TelegramClientOptions, 'storage'> {
-    /**
-     * Storage to use.
-     *
-     * You can pass a file name as a simple string,
-     * which will be passed directly to `SqliteStorage`
-     *
-     * Defaults to SQLite storage in `client.session` file in
-     * current working directory
-     */
-    storage?: TelegramClientOptions['storage'] | string
-}
-
 /**
  * Tiny wrapper over {@link TelegramClient} for usage inside Node JS.
  *
- * This automatically sets the parse modes, native
- * crypto addon and defaults to SQLite session.
- *
- * Documentation for this class only contains the
- * difference between {@link TelegramClient} and {@link NodeTelegramClient}.
- * For the complete documentation, please refer to {@link TelegramClient}.
+ * This class automatically manages native
+ * crypto addon and defaults to SQLite session (unlike `TelegarmClient`,
+ * which defaults to a JSON file on Node).
  */
 export class NodeTelegramClient extends TelegramClient {
-    constructor(opts: NodeTelegramClientOptions) {
+    constructor(opts: TelegramClientOptions) {
         super({
             // eslint-disable-next-line
             crypto: nativeCrypto ? () => new nativeCrypto() : undefined,
@@ -82,5 +66,39 @@ export class NodeTelegramClient extends TelegramClient {
         this._rl?.close()
 
         return super.close()
+    }
+
+    start(params: Parameters<TelegramClient['start']>[0] = {}): Promise<User> {
+        if (!params.botToken) {
+            if (!params.phone) params.phone = () => this.input('phone > ')
+            if (!params.code) params.code = () => this.input('code > ')
+
+            if (!params.password) {
+                params.password = () => this.input('2fa password > ')
+            }
+        }
+
+        return super.start(params).then((user) => {
+            if (this._rl) {
+                this._rl.close()
+                delete this._rl
+            }
+
+            return user
+        })
+    }
+
+    run(
+        params: Parameters<TelegramClient['start']>[0] | ((user: User) => void | Promise<void>),
+        then?: (user: User) => void | Promise<void>,
+    ): void {
+        if (typeof params === 'function') {
+            then = params
+            params = {}
+        }
+
+        this.start(params)
+            .then(then)
+            .catch((err) => this._emitError(err))
     }
 }
