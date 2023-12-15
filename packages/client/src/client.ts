@@ -67,6 +67,7 @@ import { joinChat } from './methods/chats/join-chat.js'
 import { kickChatMember } from './methods/chats/kick-chat-member.js'
 import { leaveChat } from './methods/chats/leave-chat.js'
 import { markChatUnread } from './methods/chats/mark-chat-unread.js'
+import { openChat } from './methods/chats/open-chat.js'
 import { reorderUsernames } from './methods/chats/reorder-usernames.js'
 import { restrictChatMember } from './methods/chats/restrict-chat-member.js'
 import { saveDraft } from './methods/chats/save-draft.js'
@@ -223,6 +224,8 @@ import {
     enableRps,
     getCurrentRpsIncoming,
     getCurrentRpsProcessing,
+    notifyChannelClosed,
+    notifyChannelOpened,
     startUpdatesLoop,
     stopUpdatesLoop,
 } from './methods/updates/manager.js'
@@ -274,6 +277,7 @@ import {
     ForumTopic,
     GameHighScore,
     HistoryReadUpdate,
+    InlineCallbackQuery,
     InlineQuery,
     InputChatEventFilters,
     InputDialogFolder,
@@ -415,6 +419,13 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param handler  Callback query handler
      */
     on(name: 'callback_query', handler: (upd: CallbackQuery) => void): this
+    /**
+     * Register an inline callback query handler
+     *
+     * @param name  Event name
+     * @param handler  Inline callback query handler
+     */
+    on(name: 'inline_callback_query', handler: (upd: InlineCallbackQuery) => void): this
     /**
      * Register a poll update handler
      *
@@ -1661,6 +1672,17 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param chatId  Chat ID
      */
     markChatUnread(chatId: InputPeerLike): Promise<void>
+    /**
+     * Inform the library that the user has opened a chat.
+     *
+     * Some library logic depends on this, for example, the library will
+     * periodically ping the server to keep the updates flowing.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param chat  Chat to open
+     */
+    openChat(chat: InputPeerLike): Promise<void>
     /**
      * Reorder usernames
      *
@@ -4864,6 +4886,36 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     catchUp(): void
     /**
+     * **ADVANCED**
+     *
+     * Notify the updates manager that some channel was "opened".
+     * Channel difference for "opened" channels will be fetched on a regular basis.
+     * This is a low-level method, prefer using {@link openChat} instead.
+     *
+     * Channel must be resolve-able with `resolvePeer` method (i.e. be in cache);
+     * base chat PTS must either be passed (e.g. from {@link Dialog}), or cached in storage.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param channelId  Bare ID of the channel
+     * @param pts  PTS of the channel, if known (e.g. from {@link Dialog})
+     * @returns `true` if the channel was opened for the first time, `false` if it is already opened
+     */
+    notifyChannelOpened(channelId: number, pts?: number): boolean
+    /**
+     * **ADVANCED**
+     *
+     * Notify the updates manager that some channel was "closed".
+     * Basically the opposite of {@link notifyChannelOpened}.
+     * This is a low-level method, prefer using {@link closeChat} instead.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param channelId  Bare channel ID
+     * @returns `true` if the chat was closed for the last time, `false` otherwise
+     */
+    notifyChannelClosed(channelId: number): boolean
+    /**
      * Block a user
      *
      * **Available**: 👤 users only
@@ -5375,6 +5427,10 @@ TelegramClient.prototype.leaveChat = function (...args) {
 
 TelegramClient.prototype.markChatUnread = function (...args) {
     return markChatUnread(this, ...args)
+}
+
+TelegramClient.prototype.openChat = function (...args) {
+    return openChat(this, ...args)
 }
 
 TelegramClient.prototype.reorderUsernames = function (...args) {
@@ -6035,6 +6091,14 @@ TelegramClient.prototype.stopUpdatesLoop = function (...args) {
 
 TelegramClient.prototype.catchUp = function (...args) {
     return catchUp(this, ...args)
+}
+
+TelegramClient.prototype.notifyChannelOpened = function (...args) {
+    return notifyChannelOpened(this, ...args)
+}
+
+TelegramClient.prototype.notifyChannelClosed = function (...args) {
+    return notifyChannelClosed(this, ...args)
 }
 
 TelegramClient.prototype.blockUser = function (...args) {

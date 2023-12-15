@@ -5,6 +5,7 @@ import { getBarePeerId, getMarkedPeerId, markedPeerIdToBare, toggleChannelIdMark
 import { PeersIndex } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerUser, toInputChannel, toInputUser } from '../../utils/peer-utils.js'
 import { RpsMeter } from '../../utils/rps-meter.js'
+import { createDummyUpdatesContainer } from '../../utils/updates-utils.js'
 import { getAuthState } from '../auth/_state.js'
 import { _getChannelsBatched, _getUsersBatched } from '../chats/batched-queries.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -200,6 +201,11 @@ export function stopUpdatesLoop(client: BaseTelegramClient): void {
     const state = getState(client)
     if (!state.updatesLoopActive) return
 
+    for (const timer of state.channelDiffTimeouts.values()) {
+        clearTimeout(timer)
+    }
+    state.channelDiffTimeouts.clear()
+
     state.updatesLoopActive = false
     state.pendingUpdateContainers.clear()
     state.pendingUnorderedUpdates.clear()
@@ -225,6 +231,81 @@ export function catchUp(client: BaseTelegramClient): void {
 
     state.catchUpChannels = true
     handleUpdate(state, { _: 'updatesTooLong' })
+}
+
+/**
+ * **ADVANCED**
+ *
+ * Notify the updates manager that some channel was "opened".
+ * Channel difference for "opened" channels will be fetched on a regular basis.
+ * This is a low-level method, prefer using {@link openChat} instead.
+ *
+ * Channel must be resolve-able with `resolvePeer` method (i.e. be in cache);
+ * base chat PTS must either be passed (e.g. from {@link Dialog}), or cached in storage.
+ *
+ * @param channelId  Bare ID of the channel
+ * @param pts  PTS of the channel, if known (e.g. from {@link Dialog})
+ * @returns `true` if the channel was opened for the first time, `false` if it is already opened
+ */
+export function notifyChannelOpened(client: BaseTelegramClient, channelId: number, pts?: number): boolean {
+    // this method is intentionally very dumb to avoid making this file even more unreadable
+
+    const state = getState(client)
+
+    if (!state) {
+        throw new MtArgumentError('Updates processing is not enabled, use enableUpdatesProcessing() first')
+    }
+
+    if (state.channelsOpened.has(channelId)) {
+        state.log.debug('channel %d opened again', channelId)
+        state.channelsOpened.set(channelId, state.channelsOpened.get(channelId)! + 1)
+
+        return false
+    }
+
+    state.channelsOpened.set(channelId, 1)
+    state.log.debug('channel %d opened (pts=%d)', channelId, pts)
+
+    // force fetch channel difference
+    fetchChannelDifferenceViaUpdate(state, channelId, pts)
+
+    return true
+}
+
+/**
+ * **ADVANCED**
+ *
+ * Notify the updates manager that some channel was "closed".
+ * Basically the opposite of {@link notifyChannelOpened}.
+ * This is a low-level method, prefer using {@link closeChat} instead.
+ *
+ * @param channelId  Bare channel ID
+ * @returns `true` if the chat was closed for the last time, `false` otherwise
+ */
+export function notifyChannelClosed(client: BaseTelegramClient, channelId: number): boolean {
+    const state = getState(client)
+
+    if (!state) {
+        throw new MtArgumentError('Updates processing is not enabled, use enableUpdatesProcessing() first')
+    }
+
+    const opened = state.channelsOpened.get(channelId)!
+
+    if (opened === undefined) {
+        return false
+    }
+
+    if (opened > 1) {
+        state.log.debug('channel %d closed, but is opened %d more times', channelId, opened - 1)
+        state.channelsOpened.set(channelId, opened - 1)
+
+        return false
+    }
+
+    state.channelsOpened.delete(channelId)
+    state.log.debug('channel %d closed', channelId)
+
+    return true
 }
 
 ////////////////////////////////////////////// IMPLEMENTATION //////////////////////////////////////////////
@@ -670,6 +751,12 @@ async function fetchChannelDifference(
     channelId: number,
     fallbackPts?: number,
 ): Promise<boolean> {
+    // clear timeout if any
+    if (state.channelDiffTimeouts.has(channelId)) {
+        clearTimeout(state.channelDiffTimeouts.get(channelId))
+        state.channelDiffTimeouts.delete(channelId)
+    }
+
     let _pts: number | null | undefined = state.cpts.get(channelId)
 
     if (!_pts && state.catchUpChannels) {
@@ -700,6 +787,8 @@ async function fetchChannelDifference(
         limit = 1
     }
 
+    let lastTimeout = 0
+
     for (;;) {
         const diff = await client.call({
             _: 'updates.getChannelDifference',
@@ -709,6 +798,8 @@ async function fetchChannelDifference(
             limit,
             filter: { _: 'channelMessagesFilterEmpty' },
         })
+
+        if (diff.timeout) lastTimeout = diff.timeout
 
         if (diff._ === 'updates.channelDifferenceEmpty') {
             state.log.debug('getChannelDifference (cid = %d) returned channelDifferenceEmpty', channelId)
@@ -785,6 +876,15 @@ async function fetchChannelDifference(
     state.cpts.set(channelId, pts)
     state.cptsMod.set(channelId, pts)
 
+    // schedule next fetch
+    if (lastTimeout !== 0 && state.channelsOpened.has(channelId)) {
+        state.log.debug('scheduling next fetch for channel %d in %d seconds', channelId, lastTimeout)
+        state.channelDiffTimeouts.set(
+            channelId,
+            setTimeout(() => fetchChannelDifferenceViaUpdate(state, channelId), lastTimeout * 1000),
+        )
+    }
+
     return true
 }
 
@@ -812,6 +912,19 @@ function fetchChannelDifferenceLater(
                 }),
         )
     }
+}
+
+function fetchChannelDifferenceViaUpdate(state: UpdatesState, channelId: number, pts?: number): void {
+    handleUpdate(
+        state,
+        createDummyUpdatesContainer([
+            {
+                _: 'updateChannelTooLong',
+                channelId,
+                pts,
+            },
+        ]),
+    )
 }
 
 async function fetchDifference(

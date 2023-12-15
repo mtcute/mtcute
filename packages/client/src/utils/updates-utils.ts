@@ -4,6 +4,20 @@ import { MtTypeAssertionError, tl } from '@mtcute/core'
 // that is not an update, but it carries info about pts, and we need to handle it
 
 /**
+ * Create a dummy `updates` container with given updates.
+ */
+export function createDummyUpdatesContainer(updates: tl.TypeUpdate[], seq = 0): tl.TypeUpdates {
+    return {
+        _: 'updates',
+        seq,
+        date: 0,
+        chats: [],
+        users: [],
+        updates,
+    }
+}
+
+/**
  * Create a dummy update from PTS and PTS count.
  *
  * @param pts  PTS
@@ -11,21 +25,14 @@ import { MtTypeAssertionError, tl } from '@mtcute/core'
  * @param channelId  Channel ID (bare), if applicable
  */
 export function createDummyUpdate(pts: number, ptsCount: number, channelId = 0): tl.TypeUpdates {
-    return {
-        _: 'updates',
-        seq: 0,
-        date: 0,
-        chats: [],
-        users: [],
-        updates: [
-            {
-                _: 'mtcute.dummyUpdate',
-                channelId,
-                pts,
-                ptsCount,
-            },
-        ],
-    }
+    return createDummyUpdatesContainer([
+        {
+            _: 'mtcute.dummyUpdate',
+            channelId,
+            pts,
+            ptsCount,
+        },
+    ])
 }
 
 /** @internal */

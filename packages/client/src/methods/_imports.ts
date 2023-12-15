@@ -42,6 +42,7 @@ import {
     ForumTopic,
     GameHighScore,
     HistoryReadUpdate,
+    InlineCallbackQuery,
     InlineQuery,
     InputChatEventFilters,
     InputDialogFolder,

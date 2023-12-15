@@ -128,6 +128,8 @@ export interface UpdatesState {
 
     cpts: Map<number, number>
     cptsMod: Map<number, number>
+    channelDiffTimeouts: Map<number, NodeJS.Timeout>
+    channelsOpened: Map<number, number>
 
     log: Logger
     stop: () => void
@@ -175,6 +177,8 @@ export function createUpdatesState(
         catchUpOnStart: opts.catchUp ?? false,
         cpts: new Map(),
         cptsMod: new Map(),
+        channelDiffTimeouts: new Map(),
+        channelsOpened: new Map(),
         log: client.log.create('updates'),
         stop: () => {}, // will be set later
         handler: opts.onUpdate,
