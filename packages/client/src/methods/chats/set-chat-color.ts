@@ -2,7 +2,7 @@ import { BaseTelegramClient, MtTypeAssertionError, tl } from '@mtcute/core'
 
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
 import { assertTrue, isInputPeerChannel, isInputPeerUser, toInputChannel } from '../../utils/index.js'
-import { getAuthState } from '../auth/_state.js'
+import { isSelfPeer } from '../auth/_state.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 // @available=user
@@ -64,8 +64,8 @@ export async function setChatColor(
     }
 
     if (isInputPeerUser(peer)) {
-        if (peer._ !== 'inputPeerSelf' && peer.userId !== getAuthState(client).userId) {
-            throw new MtTypeAssertionError('setChatColor', 'inputPeerSelf | inputPeerUser', peer._)
+        if (!isSelfPeer(client, peer)) {
+            throw new MtTypeAssertionError('setChatColor', 'self', peer._)
         }
 
         const r = await client.call({

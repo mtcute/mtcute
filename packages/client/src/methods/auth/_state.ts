@@ -98,3 +98,27 @@ export async function _onAuthorization(
 
     return new User(auth.user)
 }
+
+/**
+ * Check if the given peer/input peer is referring to the current user
+ */
+export function isSelfPeer(
+    client: BaseTelegramClient,
+    peer: tl.TypeInputPeer | tl.TypePeer | tl.TypeInputUser,
+): boolean {
+    const state = getAuthState(client)
+
+    switch (peer._) {
+        case 'inputPeerSelf':
+        case 'inputUserSelf':
+            return true
+        case 'inputPeerUser':
+        case 'inputPeerUserFromMessage':
+        case 'inputUser':
+        case 'inputUserFromMessage':
+        case 'peerUser':
+            return peer.userId === state.userId
+        default:
+            return false
+    }
+}

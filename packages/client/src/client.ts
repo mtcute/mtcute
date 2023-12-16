@@ -15,7 +15,7 @@ import {
 import { MemoryStorage } from '@mtcute/core/src/storage/memory.js'
 import { tdFileId } from '@mtcute/file-id'
 
-import { AuthState, getAuthState } from './methods/auth/_state.js'
+import { AuthState, getAuthState, isSelfPeer } from './methods/auth/_state.js'
 import { checkPassword } from './methods/auth/check-password.js'
 import { getPasswordHint } from './methods/auth/get-password-hint.js'
 import { logOut } from './methods/auth/log-out.js'
@@ -508,6 +508,12 @@ export interface TelegramClient extends BaseTelegramClient {
     on(name: string, handler: (...args: any[]) => void): this
 
     getAuthState(): AuthState
+    /**
+     * Check if the given peer/input peer is referring to the current user
+     * **Available**: ✅ both users and bots
+     *
+     */
+    isSelfPeer(peer: tl.TypeInputPeer | tl.TypePeer | tl.TypeInputUser): boolean
     /**
      * Check your Two-Step verification password and log in
      *
@@ -5235,6 +5241,10 @@ export class TelegramClient extends BaseTelegramClient {
 
 TelegramClient.prototype.getAuthState = function (...args) {
     return getAuthState(this, ...args)
+}
+
+TelegramClient.prototype.isSelfPeer = function (...args) {
+    return isSelfPeer(this, ...args)
 }
 
 TelegramClient.prototype.checkPassword = function (...args) {
