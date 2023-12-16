@@ -21,9 +21,8 @@ export async function sendCode(
     const res = await client.call({
         _: 'auth.sendCode',
         phoneNumber: phone,
-        apiId: client.network._initConnectionParams.apiId,
-        // eslint-disable-next-line dot-notation
-        apiHash: client['_apiHash'],
+        apiId: client.params.apiId,
+        apiHash: client.params.apiHash,
         settings: { _: 'codeSettings' },
     })
 

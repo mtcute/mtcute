@@ -46,16 +46,6 @@ export class BaseTelegramClient extends EventEmitter {
     readonly storage: ITelegramStorage
 
     /**
-     * API hash taken from {@link BaseTelegramClientOptions.apiHash}
-     */
-    protected readonly _apiHash: string
-
-    /**
-     * "Use IPv6" taken from {@link BaseTelegramClientOptions.useIpv6}
-     */
-    protected readonly _useIpv6: boolean
-
-    /**
      * "Test mode" taken from {@link BaseTelegramClientOptions.testMode}
      */
     protected readonly _testMode: boolean
@@ -90,60 +80,57 @@ export class BaseTelegramClient extends EventEmitter {
     readonly log = new LogManager('client')
     readonly network: NetworkManager
 
-    constructor(opts: BaseTelegramClientOptions) {
+    constructor(readonly params: BaseTelegramClientOptions) {
         super()
 
-        if (opts.logLevel !== undefined) {
-            this.log.level = opts.logLevel
+        if (params.logLevel !== undefined) {
+            this.log.level = params.logLevel
         }
 
-        this.crypto = (opts.crypto ?? defaultCryptoProviderFactory)()
+        this.crypto = (params.crypto ?? defaultCryptoProviderFactory)()
+        this.storage = params.storage
+        this._testMode = Boolean(params.testMode)
 
-        this.storage = opts.storage
-        this._apiHash = opts.apiHash
-        this._useIpv6 = Boolean(opts.useIpv6)
-        this._testMode = Boolean(opts.testMode)
-
-        let dc = opts.defaultDcs
+        let dc = params.defaultDcs
 
         if (!dc) {
-            if (this._testMode) {
-                dc = this._useIpv6 ? defaultTestIpv6Dc : defaultTestDc
+            if (params.testMode) {
+                dc = params.useIpv6 ? defaultTestIpv6Dc : defaultTestDc
             } else {
-                dc = this._useIpv6 ? defaultProductionIpv6Dc : defaultProductionDc
+                dc = params.useIpv6 ? defaultProductionIpv6Dc : defaultProductionDc
             }
         }
 
         this._defaultDcs = dc
-        this._niceStacks = opts.niceStacks ?? true
+        this._niceStacks = params.niceStacks ?? true
 
-        this._layer = opts.overrideLayer ?? tl.LAYER
-        this._readerMap = opts.readerMap ?? defaultReaderMap
-        this._writerMap = opts.writerMap ?? defaultWriterMap
+        this._layer = params.overrideLayer ?? tl.LAYER
+        this._readerMap = params.readerMap ?? defaultReaderMap
+        this._writerMap = params.writerMap ?? defaultWriterMap
 
         this.network = new NetworkManager(
             {
-                apiId: opts.apiId,
+                apiId: params.apiId,
                 crypto: this.crypto,
-                disableUpdates: opts.disableUpdates ?? false,
-                initConnectionOptions: opts.initConnectionOptions,
+                disableUpdates: params.disableUpdates ?? false,
+                initConnectionOptions: params.initConnectionOptions,
                 layer: this._layer,
                 log: this.log,
                 readerMap: this._readerMap,
                 writerMap: this._writerMap,
-                reconnectionStrategy: opts.reconnectionStrategy,
+                reconnectionStrategy: params.reconnectionStrategy,
                 storage: this.storage,
-                testMode: this._testMode,
-                transport: opts.transport,
+                testMode: Boolean(params.testMode),
+                transport: params.transport,
                 _emitError: this._emitError.bind(this),
-                floodSleepThreshold: opts.floodSleepThreshold ?? 10000,
-                maxRetryCount: opts.maxRetryCount ?? 5,
+                floodSleepThreshold: params.floodSleepThreshold ?? 10000,
+                maxRetryCount: params.maxRetryCount ?? 5,
                 isPremium: false,
-                useIpv6: Boolean(opts.useIpv6),
+                useIpv6: Boolean(params.useIpv6),
                 keepAliveAction: this._keepAliveAction.bind(this),
-                enableErrorReporting: opts.enableErrorReporting ?? false,
+                enableErrorReporting: params.enableErrorReporting ?? false,
                 onUsable: () => this.emit('usable'),
-                ...(opts.network ?? {}),
+                ...(params.network ?? {}),
             },
             this._config,
         )

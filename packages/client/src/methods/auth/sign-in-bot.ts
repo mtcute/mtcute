@@ -14,9 +14,8 @@ export async function signInBot(client: BaseTelegramClient, token: string): Prom
     const res = await client.call({
         _: 'auth.importBotAuthorization',
         flags: 0,
-        apiId: client.network._initConnectionParams.apiId,
-        // eslint-disable-next-line dot-notation
-        apiHash: client['_apiHash'],
+        apiId: client.params.apiId,
+        apiHash: client.params.apiHash,
         botAuthToken: token,
     })
 
