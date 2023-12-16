@@ -1,4 +1,5 @@
 import { BaseTelegramClient, MaybeArray, tl } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { InputPeerLike } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -26,11 +27,13 @@ export async function reportStory(
 ): Promise<void> {
     const { reason = { _: 'inputReportReasonSpam' }, message = '' } = params ?? {}
 
-    await client.call({
+    const r = await client.call({
         _: 'stories.report',
         peer: await resolvePeer(client, peerId),
         id: Array.isArray(storyIds) ? storyIds : [storyIds],
         message,
         reason,
     })
+
+    assertTrue('stories.report', r)
 }

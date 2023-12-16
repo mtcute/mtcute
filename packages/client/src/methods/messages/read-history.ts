@@ -1,4 +1,5 @@
 import { BaseTelegramClient } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { InputPeerLike } from '../../types/index.js'
 import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
@@ -45,11 +46,13 @@ export async function readHistory(
     }
 
     if (isInputPeerChannel(peer)) {
-        await client.call({
+        const r = await client.call({
             _: 'channels.readHistory',
             channel: toInputChannel(peer),
             maxId,
         })
+
+        assertTrue('channels.readHistory', r)
     } else {
         const res = await client.call({
             _: 'messages.readHistory',

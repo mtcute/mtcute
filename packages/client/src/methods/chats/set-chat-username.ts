@@ -1,4 +1,5 @@
 import { BaseTelegramClient } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { InputPeerLike } from '../../types/index.js'
 import { toInputChannel } from '../../utils/peer-utils.js'
@@ -17,9 +18,11 @@ export async function setChatUsername(
     chatId: InputPeerLike,
     username: string | null,
 ): Promise<void> {
-    await client.call({
+    const r = await client.call({
         _: 'channels.updateUsername',
         channel: toInputChannel(await resolvePeer(client, chatId), chatId),
         username: username || '',
     })
+
+    assertTrue('channels.updateUsername', r)
 }

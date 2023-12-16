@@ -67,7 +67,7 @@ import { joinChat } from './methods/chats/join-chat.js'
 import { kickChatMember } from './methods/chats/kick-chat-member.js'
 import { leaveChat } from './methods/chats/leave-chat.js'
 import { markChatUnread } from './methods/chats/mark-chat-unread.js'
-import { openChat } from './methods/chats/open-chat.js'
+import { closeChat, openChat } from './methods/chats/open-chat.js'
 import { reorderUsernames } from './methods/chats/reorder-usernames.js'
 import { restrictChatMember } from './methods/chats/restrict-chat-member.js'
 import { saveDraft } from './methods/chats/save-draft.js'
@@ -1684,6 +1684,18 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     openChat(chat: InputPeerLike): Promise<void>
     /**
+     * Inform the library that the user has closed a chat.
+     * Un-does the effect of {@link openChat}.
+     *
+     * Some library logic depends on this, for example, the library will
+     * periodically ping the server to keep the updates flowing.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param chat  Chat to open
+     */
+    closeChat(chat: InputPeerLike): Promise<void>
+    /**
      * Reorder usernames
      *
      * **Available**: 👤 users only
@@ -1732,7 +1744,7 @@ export interface TelegramClient extends BaseTelegramClient {
     saveDraft(chatId: InputPeerLike, draft: null | Omit<tl.RawDraftMessage, '_' | 'date'>): Promise<void>
 
     /**
-     * Set chat name/replies color and optionally background pattern
+     * Set peer color and optionally background pattern
      * **Available**: 👤 users only
      *
      */
@@ -1762,6 +1774,14 @@ export interface TelegramClient extends BaseTelegramClient {
          * Must be an adaptive emoji, otherwise the request will fail.
          */
         backgroundEmojiId?: tl.Long
+
+        /**
+         * Whether to set this color for the profile
+         * header instead of chat name/replies.
+         *
+         * Currently only available for the current user.
+         */
+        forProfile?: boolean
     }): Promise<void>
     /**
      * Change default chat permissions for all members.
@@ -4582,7 +4602,7 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param peerId  Peer ID whose stories to mark as read
      * @param ids  ID(s) of the stories to increment views of (max 200)
      */
-    incrementStoriesViews(peerId: InputPeerLike, ids: MaybeArray<number>): Promise<boolean>
+    incrementStoriesViews(peerId: InputPeerLike, ids: MaybeArray<number>): Promise<void>
     /**
      * Iterate over all stories (e.g. to load the top bar)
      *
@@ -5431,6 +5451,10 @@ TelegramClient.prototype.markChatUnread = function (...args) {
 
 TelegramClient.prototype.openChat = function (...args) {
     return openChat(this, ...args)
+}
+
+TelegramClient.prototype.closeChat = function (...args) {
+    return closeChat(this, ...args)
 }
 
 TelegramClient.prototype.reorderUsernames = function (...args) {

@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike } from '../../types/index.js'
-import { toInputUser } from '../../utils/index.js'
+import { assertTrue, toInputUser } from '../../utils/index.js'
 import { resolvePeerMany } from './resolve-peer-many.js'
 
 /**
@@ -10,10 +10,12 @@ import { resolvePeerMany } from './resolve-peer-many.js'
  * @param ids  User IDs
  */
 export async function editCloseFriendsRaw(client: BaseTelegramClient, ids: number[]): Promise<void> {
-    await client.call({
+    const r = await client.call({
         _: 'contacts.editCloseFriends',
         id: ids,
     })
+
+    assertTrue('contacts.editCloseFriends', r)
 }
 
 /**
@@ -22,7 +24,7 @@ export async function editCloseFriendsRaw(client: BaseTelegramClient, ids: numbe
  * @param ids  User IDs
  */
 export async function editCloseFriends(client: BaseTelegramClient, ids: InputPeerLike[]): Promise<void> {
-    await client.call({
+    const r = await client.call({
         _: 'contacts.editCloseFriends',
         id: await resolvePeerMany(client, ids, toInputUser).then((r) =>
             r.map((u) => {
@@ -32,4 +34,6 @@ export async function editCloseFriends(client: BaseTelegramClient, ids: InputPee
             }),
         ),
     })
+
+    assertTrue('contacts.editCloseFriends', r)
 }

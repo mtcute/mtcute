@@ -1,6 +1,6 @@
 import { BaseTelegramClient, MustEqual, RpcCallOptions, tl } from '@mtcute/core'
 
-import { makeInspectable } from '../../utils/index.js'
+import { assertTrue, makeInspectable } from '../../utils/index.js'
 
 /**
  * Account takeout session
@@ -87,10 +87,12 @@ export class TakeoutSession {
      * @param success  Whether the data was successfully exported
      */
     async finish(success = true): Promise<void> {
-        await this.call({
+        const r = await this.call({
             _: 'account.finishTakeoutSession',
             success,
         })
+
+        assertTrue('account.finishTakeoutSession', r)
     }
 }
 

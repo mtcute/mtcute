@@ -1,4 +1,5 @@
 import { BaseTelegramClient } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { InputPeerLike } from '../../types/index.js'
 import { toInputUser } from '../../utils/peer-utils.js'
@@ -34,7 +35,7 @@ export async function setBotInfo(
 ): Promise<void> {
     const { bot, langCode = '', name, bio, description } = params
 
-    await client.call({
+    const r = await client.call({
         _: 'bots.setBotInfo',
         bot: bot ? toInputUser(await resolvePeer(client, bot), bot) : undefined,
         langCode: langCode,
@@ -42,4 +43,6 @@ export async function setBotInfo(
         about: bio,
         description,
     })
+
+    assertTrue('bots.setBotInfo', r)
 }

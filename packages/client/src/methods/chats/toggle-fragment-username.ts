@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike } from '../../types/index.js'
-import { isInputPeerChannel, isInputPeerUser, toInputChannel, toInputUser } from '../../utils/index.js'
+import { assertTrue, isInputPeerChannel, isInputPeerUser, toInputChannel, toInputUser } from '../../utils/index.js'
 import { getAuthState } from '../auth/_state.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -37,28 +37,34 @@ export async function toggleFragmentUsername(
 
         if (peer._ === 'inputPeerSelf' || peer.userId === getAuthState(client).userId) {
             // self
-            await client.call({
+            const r = await client.call({
                 _: 'account.toggleUsername',
                 username,
                 active,
             })
 
+            assertTrue('account.toggleUsername', r)
+
             return
         }
 
         // bot
-        await client.call({
+        const r = await client.call({
             _: 'bots.toggleUsername',
             bot: toInputUser(peer, peerId),
             username,
             active,
         })
+
+        assertTrue('bots.toggleUsername', r)
     } else if (isInputPeerChannel(peer)) {
-        await client.call({
+        const r = await client.call({
             _: 'channels.toggleUsername',
             channel: toInputChannel(peer, peerId),
             username,
             active,
         })
+
+        assertTrue('channels.toggleUsername', r)
     }
 }

@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike } from '../../types/index.js'
-import { isInputPeerChannel, isInputPeerUser, toInputChannel, toInputUser } from '../../utils/index.js'
+import { assertTrue, isInputPeerChannel, isInputPeerUser, toInputChannel, toInputUser } from '../../utils/index.js'
 import { getAuthState } from '../auth/_state.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -22,25 +22,31 @@ export async function reorderUsernames(
 
         if (peer._ === 'inputPeerSelf' || peer.userId === getAuthState(client).userId) {
             // self
-            await client.call({
+            const r = await client.call({
                 _: 'account.reorderUsernames',
                 order,
             })
+
+            assertTrue('account.reorderUsernames', r)
 
             return
         }
 
         // bot
-        await client.call({
+        const r = await client.call({
             _: 'bots.reorderUsernames',
             bot: toInputUser(peer, peerId),
             order,
         })
+
+        assertTrue('bots.reorderUsernames', r)
     } else if (isInputPeerChannel(peer)) {
-        await client.call({
+        const r = await client.call({
             _: 'channels.reorderUsernames',
             channel: toInputChannel(peer, peerId),
             order,
         })
+
+        assertTrue('channels.reorderUsernames', r)
     }
 }

@@ -1,13 +1,13 @@
 import { BaseTelegramClient, MtTypeAssertionError, tl } from '@mtcute/core'
 
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
-import { isInputPeerChannel, isInputPeerUser, toInputChannel } from '../../utils/index.js'
+import { assertTrue, isInputPeerChannel, isInputPeerUser, toInputChannel } from '../../utils/index.js'
 import { getAuthState } from '../auth/_state.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 // @available=user
 /**
- * Set chat name/replies color and optionally background pattern
+ * Set peer color and optionally background pattern
  */
 export async function setChatColor(
     client: BaseTelegramClient,
@@ -37,9 +37,17 @@ export async function setChatColor(
          * Must be an adaptive emoji, otherwise the request will fail.
          */
         backgroundEmojiId?: tl.Long
+
+        /**
+         * Whether to set this color for the profile
+         * header instead of chat name/replies.
+         *
+         * Currently only available for the current user.
+         */
+        forProfile?: boolean
     },
 ): Promise<void> {
-    const { color, backgroundEmojiId } = params
+    const { color, backgroundEmojiId, forProfile } = params
     const peer = await resolvePeer(client, params.peer ?? 'me')
 
     if (isInputPeerChannel(peer)) {
@@ -60,11 +68,14 @@ export async function setChatColor(
             throw new MtTypeAssertionError('setChatColor', 'inputPeerSelf | inputPeerUser', peer._)
         }
 
-        await client.call({
+        const r = await client.call({
             _: 'account.updateColor',
             color,
             backgroundEmojiId,
+            forProfile,
         })
+
+        assertTrue('account.updateColor', r)
     }
 
     throw new MtInvalidPeerTypeError(peer, 'channel | user')

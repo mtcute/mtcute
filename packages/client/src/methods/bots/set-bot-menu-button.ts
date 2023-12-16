@@ -1,4 +1,5 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { InputPeerLike } from '../../types/index.js'
 import { toInputUser } from '../../utils/peer-utils.js'
@@ -12,9 +13,11 @@ export async function setBotMenuButton(
     user: InputPeerLike,
     button: tl.TypeBotMenuButton,
 ): Promise<void> {
-    await client.call({
+    const r = await client.call({
         _: 'bots.setBotMenuButton',
         userId: toInputUser(await resolvePeer(client, user), user),
         button,
     })
+
+    assertTrue('bots.setBotMenuButton', r)
 }

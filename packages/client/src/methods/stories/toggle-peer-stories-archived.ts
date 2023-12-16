@@ -1,4 +1,5 @@
 import { BaseTelegramClient } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { InputPeerLike } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -13,9 +14,11 @@ export async function togglePeerStoriesArchived(
     peerId: InputPeerLike,
     archived: boolean,
 ): Promise<void> {
-    await client.call({
+    const r = await client.call({
         _: 'stories.togglePeerStoriesHidden',
         peer: await resolvePeer(client, peerId),
         hidden: archived,
     })
+
+    assertTrue('stories.togglePeerStoriesHidden', r)
 }

@@ -1,4 +1,5 @@
 import { BaseTelegramClient, Long } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { CallbackQuery } from '../../types/updates/callback-query.js'
 
@@ -49,7 +50,7 @@ export async function answerCallbackQuery(
 ): Promise<void> {
     const { cacheTime = 0, text, alert, url } = params ?? {}
 
-    await client.call({
+    const r = await client.call({
         _: 'messages.setBotCallbackAnswer',
         queryId: Long.isLong(queryId) ? queryId : queryId.id,
         cacheTime,
@@ -57,4 +58,6 @@ export async function answerCallbackQuery(
         message: text,
         url,
     })
+
+    assertTrue('messages.setBotCallbackAnswer', r)
 }

@@ -1,4 +1,5 @@
 import { BaseTelegramClient, PartialExcept, tl } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { getFolders } from './get-folders.js'
 
@@ -38,11 +39,13 @@ export async function createFolder(
         id,
     }
 
-    await client.call({
+    const r = await client.call({
         _: 'messages.updateDialogFilter',
         id,
         filter,
     })
+
+    assertTrue('messages.updateDialogFilter', r)
 
     return filter
 }

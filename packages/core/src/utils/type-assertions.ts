@@ -79,3 +79,9 @@ export function mtpAssertTypeIs<T extends mtp.TlObject, K extends T['_']>(
         throw new MtTypeAssertionError(context, expected, obj._)
     }
 }
+
+export function assertTrue(context: string, cond: boolean): asserts cond {
+    if (!cond) {
+        throw new MtTypeAssertionError(context, 'true', 'false')
+    }
+}

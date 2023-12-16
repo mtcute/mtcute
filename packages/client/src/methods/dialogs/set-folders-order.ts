@@ -1,4 +1,5 @@
 import { BaseTelegramClient } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 /**
  * Reorder folders
@@ -6,8 +7,10 @@ import { BaseTelegramClient } from '@mtcute/core'
  * @param order  New order of folders (folder IDs, where default = 0)
  */
 export async function setFoldersOrder(client: BaseTelegramClient, order: number[]): Promise<void> {
-    await client.call({
+    const r = await client.call({
         _: 'messages.updateDialogFiltersOrder',
         order,
     })
+
+    assertTrue('messages.updateDialogFiltersOrder', r)
 }

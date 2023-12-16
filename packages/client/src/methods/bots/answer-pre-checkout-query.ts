@@ -1,4 +1,5 @@
 import { BaseTelegramClient, Long, tl } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import type { PreCheckoutQuery } from '../../types/updates/pre-checkout-query.js'
 
@@ -17,10 +18,12 @@ export async function answerPreCheckoutQuery(
 ): Promise<void> {
     const { error } = params ?? {}
 
-    await client.call({
+    const r = await client.call({
         _: 'messages.setBotPrecheckoutResults',
         queryId: Long.isLong(queryId) ? queryId : queryId.queryId,
         success: !error,
         error,
     })
+
+    assertTrue('messages.setBotPrecheckoutResults', r)
 }

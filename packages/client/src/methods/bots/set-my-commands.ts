@@ -1,4 +1,5 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { BotCommands } from '../../types/index.js'
 import { _normalizeCommandScope } from './normalize-command-scope.js'
@@ -38,17 +39,21 @@ export async function setMyCommands(
         }
 
     if (params.commands?.length) {
-        await client.call({
+        const r = await client.call({
             _: 'bots.setBotCommands',
             commands: params.commands,
             scope,
             langCode: params.langCode ?? '',
         })
+
+        assertTrue('bots.setBotCommands', r)
     } else {
-        await client.call({
+        const r = await client.call({
             _: 'bots.resetBotCommands',
             scope,
             langCode: params.langCode ?? '',
         })
+
+        assertTrue('bots.resetBotCommands', r)
     }
 }

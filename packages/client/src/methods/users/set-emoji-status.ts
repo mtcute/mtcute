@@ -1,6 +1,6 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
 
-import { normalizeDate } from '../../utils/index.js'
+import { assertTrue, normalizeDate } from '../../utils/index.js'
 
 /**
  * Set an emoji status for the current user
@@ -36,8 +36,10 @@ export async function setEmojiStatus(
         }
     }
 
-    await client.call({
+    const r = await client.call({
         _: 'account.updateEmojiStatus',
         emojiStatus,
     })
+
+    assertTrue('account.updateEmojiStatus', r)
 }

@@ -1,4 +1,5 @@
 import { BaseTelegramClient } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { InputPeerLike } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -9,7 +10,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * @param chatId  Chat ID
  */
 export async function markChatUnread(client: BaseTelegramClient, chatId: InputPeerLike): Promise<void> {
-    await client.call({
+    const r = await client.call({
         _: 'messages.markDialogUnread',
         peer: {
             _: 'inputDialogPeer',
@@ -17,4 +18,6 @@ export async function markChatUnread(client: BaseTelegramClient, chatId: InputPe
         },
         unread: true,
     })
+
+    assertTrue('messages.markDialogUnread', r)
 }

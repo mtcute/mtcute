@@ -1,4 +1,5 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { InputMessageId, InputPeerLike, Message, normalizeInputMessageId } from '../../types/index.js'
 import { normalizeInlineId } from '../../utils/inline-utils.js'
@@ -93,7 +94,7 @@ export async function setInlineGameScore(
 
     const id = normalizeInlineId(messageId)
 
-    await client.call(
+    const r = await client.call(
         {
             _: 'messages.setInlineGameScore',
             id,
@@ -104,4 +105,6 @@ export async function setInlineGameScore(
         },
         { dcId: id.dcId },
     )
+
+    assertTrue('messages.setInlineGameScore', r)
 }

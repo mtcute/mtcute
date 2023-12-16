@@ -1,4 +1,5 @@
 import { BaseTelegramClient } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
 import { isInputPeerChat } from '../../utils/peer-utils.js'
@@ -21,8 +22,10 @@ export async function deleteGroup(client: BaseTelegramClient, chatId: InputPeerL
     })
     client.network.handleUpdate(res)
 
-    await client.call({
+    const r = await client.call({
         _: 'messages.deleteChat',
         chatId: chat.chatId,
     })
+
+    assertTrue('messages.deleteChat', r)
 }

@@ -1,4 +1,5 @@
 import { assertNever, BaseTelegramClient, tl } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { InputPeerLike, TypingStatus } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -88,10 +89,12 @@ export async function sendTyping(
         }
     }
 
-    await client.call({
+    const r = await client.call({
         _: 'messages.setTyping',
         peer: await resolvePeer(client, chatId),
         action: status,
         topMsgId: params?.threadId,
     })
+
+    assertTrue('messages.setTyping', r)
 }

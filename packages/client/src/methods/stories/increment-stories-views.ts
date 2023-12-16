@@ -1,4 +1,5 @@
 import { BaseTelegramClient, MaybeArray } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 import { InputPeerLike } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -16,10 +17,12 @@ export async function incrementStoriesViews(
     client: BaseTelegramClient,
     peerId: InputPeerLike,
     ids: MaybeArray<number>,
-): Promise<boolean> {
-    return client.call({
+): Promise<void> {
+    const r = await client.call({
         _: 'stories.incrementStoryViews',
         peer: await resolvePeer(client, peerId),
         id: Array.isArray(ids) ? ids : [ids],
     })
+
+    assertTrue('stories.incrementStoryViews', r)
 }

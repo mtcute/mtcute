@@ -1,4 +1,5 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
+import { assertTrue } from '@mtcute/core/utils.js'
 
 /**
  * Sets the default chat permissions for the bot in the supergroup or channel.
@@ -14,11 +15,13 @@ export async function setMyDefaultRights(
 ): Promise<void> {
     const { target, rights } = params
 
-    await client.call({
+    const r = await client.call({
         _: target === 'group' ? 'bots.setBotGroupDefaultAdminRights' : 'bots.setBotBroadcastDefaultAdminRights',
         adminRights: {
             _: 'chatAdminRights',
             ...rights,
         },
     })
+
+    assertTrue('bots.setBotGroupDefaultAdminRights', r)
 }
