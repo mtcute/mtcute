@@ -11,7 +11,7 @@ export interface BaseTelegramClientOptions {
     /**
      * API ID from my.telegram.org
      */
-    apiId: number | string
+    apiId: number
     /**
      * API hash from my.telegram.org
      */

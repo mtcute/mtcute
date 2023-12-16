@@ -93,12 +93,6 @@ export class BaseTelegramClient extends EventEmitter {
     constructor(opts: BaseTelegramClientOptions) {
         super()
 
-        const apiId = typeof opts.apiId === 'string' ? parseInt(opts.apiId) : opts.apiId
-
-        if (isNaN(apiId)) {
-            throw new Error('apiId must be a number or a numeric string!')
-        }
-
         if (opts.logLevel !== undefined) {
             this.log.level = opts.logLevel
         }
@@ -129,7 +123,7 @@ export class BaseTelegramClient extends EventEmitter {
 
         this.network = new NetworkManager(
             {
-                apiId,
+                apiId: opts.apiId,
                 crypto: this.crypto,
                 disableUpdates: opts.disableUpdates ?? false,
                 initConnectionOptions: opts.initConnectionOptions,
