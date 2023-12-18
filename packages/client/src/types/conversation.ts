@@ -71,9 +71,15 @@ export class Conversation {
         return (client as any)[CONVERSATION_SYMBOL] as ConversationsState
     }
 
-    static handleUpdate(client: BaseTelegramClient, update: ParsedUpdate): void {
+    /**
+     * Pass the update to the conversation manager and all registered
+     * conversations on this client.
+     *
+     * @returns `true` if the update was handled by some conversation
+     */
+    static handleUpdate(client: BaseTelegramClient, update: ParsedUpdate): boolean {
         const state = Conversation._getState(client)
-        if (!state?.hasConversations) return
+        if (!state?.hasConversations) return false
 
         let chatId
 
@@ -86,25 +92,30 @@ export class Conversation {
                 chatId = update.data.chatId
                 break
             default:
-                return
+                return false
         }
 
         const conv = state.pendingConversations.get(chatId)
-        if (!conv) return
+        if (!conv) return false
 
         for (const c of conv) {
             switch (update.name) {
                 case 'new_message':
                     c._onNewMessage(update.data)
-                    break
+
+                    return true
                 case 'edit_message':
                     c._onEditMessage(update.data)
-                    break
+
+                    return true
                 case 'history_read':
                     c._onHistoryRead(update.data)
-                    break
+
+                    return true
             }
         }
+
+        return false
     }
 
     /**

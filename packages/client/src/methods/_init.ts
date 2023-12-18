@@ -58,6 +58,14 @@ interface TelegramClientOptions extends Omit<BaseTelegramClientOptions, 'storage
      * you should manually add a handler using `client.network.setUpdateHandler`.
      */
     disableUpdatesManager?: boolean
+
+    /**
+     * If `true`, the updates that were handled by some {@link Conversation}
+     * will not be dispatched any further.
+     *
+     * @default  true
+     */
+    skipConversationUpdates?: boolean
 }
 
 // @initialize=super
@@ -79,6 +87,7 @@ function _initializeClientSuper(this: TelegramClient, opts: TelegramClientOption
 /** @internal */
 function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
     this._disableUpdatesManager = opts.disableUpdatesManager ?? false
+    const skipConversationUpdates = opts.skipConversationUpdates ?? true
 
     if (!opts.disableUpdates && !opts.disableUpdatesManager) {
         const { messageGroupingInterval, ...managerParams } = opts.updates ?? {}
@@ -88,7 +97,8 @@ function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
             onUpdate: makeParsedUpdateHandler({
                 messageGroupingInterval,
                 onUpdate: (update) => {
-                    Conversation.handleUpdate(this, update)
+                    if (Conversation.handleUpdate(this, update) && skipConversationUpdates) return
+
                     this.emit('update', update)
                     this.emit(update.name, update.data)
                 },
