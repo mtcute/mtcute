@@ -15,6 +15,7 @@
         "./src/utils/platform/transport.js": "./src/utils/platform/transport.web.js",
         "./src/utils/platform/logging.js": "./src/utils/platform/logging.web.js",
         "./src/utils/platform/random.js": "./src/utils/platform/random.web.js",
+        "./src/utils/platform/exit-hook.js": "./src/utils/platform/exit-hook.web.js",
         "./src/storage/json-file.js": false
     },
     "distOnlyFields": {

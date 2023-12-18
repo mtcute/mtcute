@@ -1,9 +1,8 @@
 // eslint-disable-next-line no-restricted-imports
 import * as fs from 'fs'
 
+import { beforeExit } from '../utils/index.js'
 import { JsonMemoryStorage } from './json.js'
-
-const EVENTS = ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SIGTERM']
 
 /**
  * mtcute storage that stores data in a JSON file.
@@ -20,7 +19,7 @@ const EVENTS = ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SI
 export class JsonFileStorage extends JsonMemoryStorage {
     private readonly _filename: string
     private readonly _safe: boolean
-    private readonly _cleanup: boolean
+    private readonly _cleanupUnregister?: () => void
 
     constructor(
         filename: string,
@@ -50,11 +49,9 @@ export class JsonFileStorage extends JsonMemoryStorage {
 
         this._filename = filename
         this._safe = params?.safe ?? true
-        this._cleanup = params?.cleanup ?? true
 
-        if (this._cleanup) {
-            this._onProcessExit = this._onProcessExit.bind(this)
-            EVENTS.forEach((event) => process.on(event, this._onProcessExit))
+        if (params?.cleanup !== false) {
+            this._cleanupUnregister = beforeExit(() => this._onProcessExit())
         }
     }
 
@@ -82,12 +79,8 @@ export class JsonFileStorage extends JsonMemoryStorage {
         })
     }
 
-    private _processExitHandled = false
     private _onProcessExit(): void {
         // on exit handler must be synchronous, thus we use sync methods here
-        if (this._processExitHandled) return
-        this._processExitHandled = true
-
         try {
             fs.writeFileSync(this._filename, this._saveJson())
         } catch (e) {}
@@ -100,8 +93,6 @@ export class JsonFileStorage extends JsonMemoryStorage {
     }
 
     destroy(): void {
-        if (this._cleanup) {
-            EVENTS.forEach((event) => process.off(event, this._onProcessExit))
-        }
+        this._cleanupUnregister?.()
     }
 }
