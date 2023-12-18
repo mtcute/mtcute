@@ -217,7 +217,7 @@ export async function start(
 async function _start(this: TelegramClient, params: Parameters<typeof start>[1]) {
     const user = await start(this, params)
 
-    if (!this.network.params.disableUpdates) {
+    if (!this.network.params.disableUpdates && !this._disableUpdatesManager) {
         await this.startUpdatesLoop()
     }
 

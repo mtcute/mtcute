@@ -346,6 +346,25 @@ interface TelegramClientOptions extends Omit<BaseTelegramClientOptions, 'storage
      * Parameters for updates manager.
      */
     updates?: Omit<ParsedUpdateHandlerParams & UpdatesManagerParams, 'onUpdate' | 'onRawUpdate'>
+
+    /**
+     * **ADVANCED**
+     *
+     * If set to `true`, updates manager will not be created,
+     * and only raw TL Updates will be emitted.
+     *
+     * Unlike {@link TelegramClientOptions.disableUpdates}, this
+     * does not prevent the updates from being sent by the server,
+     * but disables proper handling of them (see [Working with Updates](https://core.telegram.org/api/updates))
+     *
+     * This may be useful in some cases when you require more control over
+     * the updates or to minimize additional overhead from properly handling them
+     * for some very particular use cases.
+     *
+     * The updates **will not** be dispatched the normal way, instead
+     * you should manually add a handler using `client.network.setUpdateHandler`.
+     */
+    disableUpdatesManager?: boolean
 }
 
 export interface TelegramClient extends BaseTelegramClient {
@@ -5206,6 +5225,7 @@ export interface TelegramClient extends BaseTelegramClient {
 export type { TelegramClientOptions }
 
 export class TelegramClient extends BaseTelegramClient {
+    protected _disableUpdatesManager: boolean
     constructor(opts: TelegramClientOptions) {
         if (typeof opts.storage === 'string') {
             opts.storage = _defaultStorageFactory(opts.storage)
@@ -5216,9 +5236,10 @@ export class TelegramClient extends BaseTelegramClient {
         /* eslint-disable @typescript-eslint/no-unsafe-call */
         // @ts-expect-error codegen
         super(opts)
-
         /* eslint-enable @typescript-eslint/no-unsafe-call */
-        if (!opts.disableUpdates) {
+        this._disableUpdatesManager = opts.disableUpdatesManager ?? false
+
+        if (!opts.disableUpdates && !opts.disableUpdatesManager) {
             const { messageGroupingInterval, ...managerParams } = opts.updates ?? {}
 
             enableUpdatesProcessing(this, {
@@ -6239,7 +6260,7 @@ TelegramClient.prototype.start =
     async function _start(this: TelegramClient, params: Parameters<typeof start>[1]) {
         const user = await start(this, params)
 
-        if (!this.network.params.disableUpdates) {
+        if (!this.network.params.disableUpdates && !this._disableUpdatesManager) {
             await this.startUpdatesLoop()
         }
 
