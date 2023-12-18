@@ -4,6 +4,7 @@ import sqlite3, { Options } from 'better-sqlite3'
 
 import { ITelegramStorage, mtp, tl, toggleChannelIdMark } from '@mtcute/core'
 import {
+    beforeExit,
     Logger,
     longFromFastString,
     longToFastString,
@@ -211,6 +212,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
 
     private _vacuumTimeout?: NodeJS.Timeout
     private _vacuumInterval: number
+    private _cleanupUnregister?: () => void
 
     private log!: Logger
     private readerMap!: TlReaderMap
@@ -296,6 +298,13 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
              * @default  `300_000` (5 minutes)
              */
             vacuumInterval?: number
+
+            /**
+             * Whether to finalize database before exiting.
+             *
+             * @default  `true`
+             */
+            cleanup?: boolean
         },
     ) {
         this._filename = filename
@@ -314,28 +323,14 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
 
         this._wal = !params?.disableWal
 
-        this._saveUnimportantLater = throttle(
-            () => {
-                // unimportant changes are changes about cached in memory entities,
-                // that don't really need to be cached right away.
-                // to avoid redundant DB calls, these changes are persisted
-                // no more than once every 30 seconds.
-                //
-                // additionally, to avoid redundant changes that
-                // are immediately overwritten, we use object instead
-                // of an array, where the key is marked peer id,
-                // and value is the arguments array, since
-                // the query is always `updateCachedEnt`
-                const items = Object.values(this._pendingUnimportant)
-                if (!items.length) return
-
-                this._updateManyPeers(items)
-                this._pendingUnimportant = {}
-            },
-            params?.unimportantSavesDelay ?? 30000,
-        )
+        this._saveUnimportant = this._saveUnimportant.bind(this)
+        this._saveUnimportantLater = throttle(this._saveUnimportant, params?.unimportantSavesDelay ?? 30000)
 
         this._vacuumInterval = params?.vacuumInterval ?? 300_000
+
+        if (params?.cleanup !== false) {
+            this._cleanupUnregister = beforeExit(() => this._destroy())
+        }
     }
 
     setup(log: Logger, readerMap: TlReaderMap, writerMap: TlWriterMap): void {
@@ -493,6 +488,24 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
         this._vacuumTimeout = setInterval(this._vacuum.bind(this), this._vacuumInterval)
     }
 
+    private _saveUnimportant() {
+        // unimportant changes are changes about cached in memory entities,
+        // that don't really need to be cached right away.
+        // to avoid redundant DB calls, these changes are persisted
+        // no more than once every 30 seconds.
+        //
+        // additionally, to avoid redundant changes that
+        // are immediately overwritten, we use object instead
+        // of an array, where the key is marked peer id,
+        // and value is the arguments array, since
+        // the query is always `updateCachedEnt`
+        const items = Object.values(this._pendingUnimportant)
+        if (!items.length) return
+
+        this._updateManyPeers(items)
+        this._pendingUnimportant = {}
+    }
+
     save(): void {
         if (!this._pending.length) return
 
@@ -502,10 +515,16 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
         this._saveUnimportantLater()
     }
 
-    destroy(): void {
+    private _destroy() {
+        this._saveUnimportant()
         this._db.close()
         clearInterval(this._vacuumTimeout)
         this._saveUnimportantLater.reset()
+    }
+
+    destroy(): void {
+        this._destroy()
+        this._cleanupUnregister?.()
     }
 
     reset(withAuthKeys = false): void {
