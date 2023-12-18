@@ -1,5 +1,9 @@
 const cp = require('child_process')
 
+function getCurrentCommit() {
+    return cp.execSync('git rev-parse HEAD', { encoding: 'utf8', stdio: 'pipe' }).trim()
+}
+
 function getLatestTag() {
     try {
         const res = cp.execSync('git describe --abbrev=0 --tags', { encoding: 'utf8', stdio: 'pipe' }).trim()
@@ -64,4 +68,5 @@ module.exports = {
     findChangedFilesSince,
     getCommitsSince,
     parseConventionalCommit,
+    getCurrentCommit,
 }
