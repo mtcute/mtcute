@@ -6,11 +6,8 @@ const fs = require('fs')
 const path = require('path')
 const { execSync } = require('child_process')
 
-const { REGISTRY } = require('../scripts/publish.js')
-const { getCurrentCommit } = require('../scripts/git-utils.js')
-
 // setup token
-const { NPM_TOKEN } = process.env
+const { NPM_TOKEN, REGISTRY, CURRENT_COMMIT } = process.env
 
 if (!NPM_TOKEN) {
     console.error('NPM_TOKEN is not set!')
@@ -22,7 +19,7 @@ execSync(`npm config set //${REGISTRY.replace(/^https?:\/\//, '')}/:_authToken $
 const nodeModulesDir = path.join(__dirname, 'node_modules')
 const mtcuteDir = path.join(nodeModulesDir, '@mtcute')
 
-const commit = getCurrentCommit().slice(0, 7)
+const commit = CURRENT_COMMIT.slice(0, 7)
 
 for (const pkg of fs.readdirSync(mtcuteDir)) {
     const pkgJsonPath = path.join(mtcuteDir, pkg, 'package.json')

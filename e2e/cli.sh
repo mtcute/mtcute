@@ -34,7 +34,11 @@ case "$method" in
         chmod -R 777 .verdaccio
         docker compose up -d verdaccio
         docker compose run --rm --build build
-        docker compose run --rm --build test
+        docker compose run --build test
+        ;;
+    "ci-publish")
+        export CURRENT_COMMIT=$(git rev-parse HEAD)
+        docker compose run --rm -e REGISTRY -e NPM_TOKEN -e CURRENT_COMMIT test publish-canary
         ;;
     *)
         echo "Unknown command"

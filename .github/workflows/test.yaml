@@ -80,6 +80,5 @@ jobs:
         continue-on-error: true
         env:
           NPM_TOKEN: ${{ secrets.CANARY_NPM_TOKEN }}
-          E2E: 1
           REGISTRY: 'https://npm.tei.su'
-        run: cd e2e && node publish-canary.js
+        run: cd e2e && ./cli.sh ci-publish

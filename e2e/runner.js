@@ -80,6 +80,7 @@ async function main() {
     if (!process.argv[2]) {
         console.log('Usage: node runner.js <what>')
         console.log('  where <what> is one of:')
+        console.log('    publish-canary - publish everything to canary npm')
         console.log('    all - run all tests')
         console.log('    <dirname> - (one of %s) - run tests for that directory', DIRS.join(', '))
         console.log('    <dirname> <filename> - run tests for that file')
@@ -87,6 +88,12 @@ async function main() {
     }
 
     const [dir, file] = process.argv.slice(2)
+
+    if (dir === 'publish-canary') {
+        cp.execSync('node publish-canary.js', { stdio: 'inherit' })
+
+        return
+    }
 
     if (dir === 'all') {
         for (const d of DIRS) {
