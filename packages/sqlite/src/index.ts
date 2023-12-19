@@ -485,6 +485,7 @@ export class SqliteStorage implements ITelegramStorage /*, IStateStorage*/ {
             })
         })
 
+        clearInterval(this._vacuumTimeout)
         this._vacuumTimeout = setInterval(this._vacuum.bind(this), this._vacuumInterval)
     }
 
