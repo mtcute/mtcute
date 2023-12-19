@@ -21,7 +21,7 @@ export async function logOut(client: BaseTelegramClient): Promise<true> {
 
     client.emit('logged_out')
 
-    client.storage.reset()
+    await client.storage.reset()
     await client.saveStorage()
 
     return true

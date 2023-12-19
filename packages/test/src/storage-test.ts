@@ -160,7 +160,7 @@ export function testStorage<T extends ITelegramStorage>(
         it('should not reset auth keys on reset()', async () => {
             await s.setAuthKeyFor(2, key2)
             await s.setAuthKeyFor(3, key3)
-            s.reset()
+            await s.reset()
 
             expect(maybeHexEncode(await s.getAuthKeyFor(2))).toEqual(hexEncode(key2))
             expect(maybeHexEncode(await s.getAuthKeyFor(3))).toEqual(hexEncode(key3))
@@ -169,7 +169,7 @@ export function testStorage<T extends ITelegramStorage>(
         it('should reset auth keys on reset(true)', async () => {
             await s.setAuthKeyFor(2, key2)
             await s.setAuthKeyFor(3, key3)
-            s.reset(true)
+            await s.reset(true)
 
             expect(await s.getAuthKeyFor(2)).toBeNull()
             expect(await s.getAuthKeyFor(3)).toBeNull()

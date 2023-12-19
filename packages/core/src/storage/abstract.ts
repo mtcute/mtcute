@@ -82,7 +82,7 @@ export interface ITelegramStorage {
      *
      * @param [withAuthKeys=false]  Whether to also reset auth keys
      */
-    reset(withAuthKeys?: boolean): void
+    reset(withAuthKeys?: boolean): MaybeAsync<void>
 
     /**
      * Set default datacenter to use with this session.
