@@ -206,8 +206,10 @@ export class MtprotoSession {
         this.queuedAcks.length = 0
         this.queuedStateReq.length = 0
         this.queuedResendReq.length = 0
+        this.queuedCancelReq.length = 0
         this.getStateSchedule.clear()
         this.chains.clear()
+        this.chainsPendingFails.clear()
     }
 
     enqueueRpc(rpc: PendingRpc, force?: boolean): boolean {
