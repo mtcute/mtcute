@@ -11,7 +11,7 @@ import { getAuthState } from '../auth/_state.js'
  *
  * @param username  New username (5-32 chars, allowed chars: `a-zA-Z0-9_`), or `null` to remove
  */
-export async function setUsername(client: BaseTelegramClient, username: string | null): Promise<User> {
+export async function setMyUsername(client: BaseTelegramClient, username: string | null): Promise<User> {
     if (username === null) username = ''
 
     const res = await client.call({

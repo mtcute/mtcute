@@ -7,7 +7,7 @@ import { assertTrue, normalizeDate } from '../../utils/index.js'
  *
  * @param emoji  Custom emoji ID or `null` to remove the emoji
  */
-export async function setEmojiStatus(
+export async function setMyEmojiStatus(
     client: BaseTelegramClient,
     emoji: tl.Long | null,
     params?: {

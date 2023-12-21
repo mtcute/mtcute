@@ -242,11 +242,11 @@ import { getUsers } from './methods/users/get-users.js'
 import { iterProfilePhotos } from './methods/users/iter-profile-photos.js'
 import { resolvePeer } from './methods/users/resolve-peer.js'
 import { resolvePeerMany } from './methods/users/resolve-peer-many.js'
-import { setEmojiStatus } from './methods/users/set-emoji-status.js'
 import { setGlobalTtl } from './methods/users/set-global-ttl.js'
+import { setMyEmojiStatus } from './methods/users/set-my-emoji-status.js'
+import { setMyProfilePhoto } from './methods/users/set-my-profile-photo.js'
+import { setMyUsername } from './methods/users/set-my-username.js'
 import { setOffline } from './methods/users/set-offline.js'
-import { setProfilePhoto } from './methods/users/set-profile-photo.js'
-import { setUsername } from './methods/users/set-username.js'
 import { unblockUser } from './methods/users/unblock-user.js'
 import { updateProfile } from './methods/users/update-profile.js'
 import { Conversation } from './types/conversation.js'
@@ -365,6 +365,14 @@ interface TelegramClientOptions extends Omit<BaseTelegramClientOptions, 'storage
      * you should manually add a handler using `client.network.setUpdateHandler`.
      */
     disableUpdatesManager?: boolean
+
+    /**
+     * If `true`, the updates that were handled by some {@link Conversation}
+     * will not be dispatched any further.
+     *
+     * @default  true
+     */
+    skipConversationUpdates?: boolean
 }
 
 export interface TelegramClient extends BaseTelegramClient {
@@ -5129,22 +5137,6 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     resolvePeer(peerId: InputPeerLike, force?: boolean): Promise<tl.TypeInputPeer>
     /**
-     * Set an emoji status for the current user
-     *
-     * **Available**: 👤 users only
-     *
-     * @param emoji  Custom emoji ID or `null` to remove the emoji
-     */
-    setEmojiStatus(
-        emoji: tl.Long | null,
-        params?: {
-            /**
-             * Date when the emoji status should expire (only if `emoji` is not `null`)
-             */
-            until?: number | Date
-        },
-    ): Promise<void>
-    /**
      * Changes the current default value of the Time-To-Live setting,
      * applied to all new chats.
      *
@@ -5154,21 +5146,29 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     setGlobalTtl(period: number): Promise<void>
     /**
-     * Change user status to offline or online
+     * Set an emoji status for the current user
      *
      * **Available**: 👤 users only
      *
-     * @param [offline=true]  Whether the user is currently offline
+     * @param emoji  Custom emoji ID or `null` to remove the emoji
      */
-    setOffline(offline?: boolean): Promise<void>
+    setMyEmojiStatus(
+        emoji: tl.Long | null,
+        params?: {
+            /**
+             * Date when the emoji status should expire (only if `emoji` is not `null`)
+             */
+            until?: number | Date
+        },
+    ): Promise<void>
     /**
-     * Set a new profile photo or video.
+     * Set a new profile photo or video for the current user.
      *
      * You can also pass a file ID or an InputPhoto to re-use existing photo.
      * **Available**: ✅ both users and bots
      *
      */
-    setProfilePhoto(params: {
+    setMyProfilePhoto(params: {
         /** Media type (photo or video) */
         type: 'photo' | 'video'
         /** Input media file */
@@ -5186,7 +5186,15 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * @param username  New username (5-32 chars, allowed chars: `a-zA-Z0-9_`), or `null` to remove
      */
-    setUsername(username: string | null): Promise<User>
+    setMyUsername(username: string | null): Promise<User>
+    /**
+     * Change user status to offline or online
+     *
+     * **Available**: 👤 users only
+     *
+     * @param [offline=true]  Whether the user is currently offline
+     */
+    setOffline(offline?: boolean): Promise<void>
     /**
      * Unblock a user
      *
@@ -5238,6 +5246,7 @@ export class TelegramClient extends BaseTelegramClient {
         super(opts)
         /* eslint-enable @typescript-eslint/no-unsafe-call */
         this._disableUpdatesManager = opts.disableUpdatesManager ?? false
+        const skipConversationUpdates = opts.skipConversationUpdates ?? true
 
         if (!opts.disableUpdates && !opts.disableUpdatesManager) {
             const { messageGroupingInterval, ...managerParams } = opts.updates ?? {}
@@ -5247,7 +5256,8 @@ export class TelegramClient extends BaseTelegramClient {
                 onUpdate: makeParsedUpdateHandler({
                     messageGroupingInterval,
                     onUpdate: (update) => {
-                        Conversation.handleUpdate(this, update)
+                        if (Conversation.handleUpdate(this, update) && skipConversationUpdates) return
+
                         this.emit('update', update)
                         this.emit(update.name, update.data)
                     },
@@ -6214,24 +6224,24 @@ TelegramClient.prototype.resolvePeer = function (...args) {
     return resolvePeer(this, ...args)
 }
 
-TelegramClient.prototype.setEmojiStatus = function (...args) {
-    return setEmojiStatus(this, ...args)
-}
-
 TelegramClient.prototype.setGlobalTtl = function (...args) {
     return setGlobalTtl(this, ...args)
 }
 
+TelegramClient.prototype.setMyEmojiStatus = function (...args) {
+    return setMyEmojiStatus(this, ...args)
+}
+
+TelegramClient.prototype.setMyProfilePhoto = function (...args) {
+    return setMyProfilePhoto(this, ...args)
+}
+
+TelegramClient.prototype.setMyUsername = function (...args) {
+    return setMyUsername(this, ...args)
+}
+
 TelegramClient.prototype.setOffline = function (...args) {
     return setOffline(this, ...args)
-}
-
-TelegramClient.prototype.setProfilePhoto = function (...args) {
-    return setProfilePhoto(this, ...args)
-}
-
-TelegramClient.prototype.setUsername = function (...args) {
-    return setUsername(this, ...args)
 }
 
 TelegramClient.prototype.unblockUser = function (...args) {

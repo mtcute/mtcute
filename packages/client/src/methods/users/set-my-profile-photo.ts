@@ -5,11 +5,11 @@ import { InputFileLike, Photo } from '../../types/index.js'
 import { _normalizeInputFile } from '../files/normalize-input-file.js'
 
 /**
- * Set a new profile photo or video.
+ * Set a new profile photo or video for the current user.
  *
  * You can also pass a file ID or an InputPhoto to re-use existing photo.
  */
-export async function setProfilePhoto(
+export async function setMyProfilePhoto(
     client: BaseTelegramClient,
     params: {
         /** Media type (photo or video) */
