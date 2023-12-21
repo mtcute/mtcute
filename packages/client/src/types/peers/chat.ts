@@ -2,6 +2,7 @@ import { getMarkedPeerId, MtArgumentError, MtTypeAssertionError, tl } from '@mtc
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
+import { Photo } from '../media/photo.js'
 import { MessageEntity } from '../messages/message-entity.js'
 import { ChatColors } from './chat-colors.js'
 import { ChatLocation } from './chat-location.js'
@@ -352,6 +353,8 @@ export class Chat {
     /**
      * Chat photo, if any.
      * Suitable for downloads only.
+     *
+     * If full chat information is available, prefer {@link fullPhoto} instead.
      */
     get photo(): ChatPhoto | null {
         if (
@@ -363,6 +366,79 @@ export class Chat {
         }
 
         return new ChatPhoto(this.inputPeer, this.peer.photo)
+    }
+
+    /**
+     * Full information about this chat's photo, if any.
+     *
+     * Unlike {@link Chat.photo}, this field contains additional information
+     * about the photo, such as its date, more sizes, and is the only
+     * way to get the animated profile photo.
+     *
+     * This field takes into account any personal/fallback photo
+     * that the user may have set
+     *
+     * Only available in {@link TelegramClient.getFullChat}
+     */
+    get fullPhoto(): Photo | null {
+        if (!this.fullPeer) return null
+
+        let photo: tl.TypePhoto | undefined = undefined
+
+        switch (this.fullPeer._) {
+            case 'userFull':
+                photo = this.fullPeer.personalPhoto ?? this.fullPeer.profilePhoto ?? this.fullPeer.fallbackPhoto
+                break
+            case 'chatFull':
+            case 'channelFull':
+                photo = this.fullPeer.chatPhoto
+        }
+
+        if (photo?._ !== 'photo') return null
+
+        return new Photo(photo)
+    }
+
+    /**
+     * A custom photo (set by the current user) that should be displayed
+     * instead of the actual chat photo.
+     *
+     * Currently only available for users.
+     * Returned only in {@link TelegramClient.getFullChat}
+     */
+    get personalPhoto(): Photo | null {
+        if (!this.fullPeer || this.fullPeer._ !== 'userFull') return null
+        if (this.fullPeer.personalPhoto?._ !== 'photo') return null
+
+        return new Photo(this.fullPeer.personalPhoto)
+    }
+
+    /**
+     * Actual profile photo of the user, bypassing the custom one.
+     *
+     * Returned only in {@link TelegramClient.getFullChat}
+     */
+    get realPhoto(): Photo | null {
+        if (!this.fullPeer) return null
+        if (this.fullPeer._ !== 'userFull') return this.fullPhoto
+        if (this.fullPeer.personalPhoto?._ !== 'photo') return null
+
+        return new Photo(this.fullPeer.personalPhoto)
+    }
+
+    /**
+     * A photo that the user has set to be shown
+     * in case their actual profile photo is not available
+     * due to privacy settings.
+     *
+     * Currently only available for users.
+     * Returned only in {@link TelegramClient.getFullChat}
+     */
+    get publicPhoto(): Photo | null {
+        if (!this.fullPeer || this.fullPeer._ !== 'userFull') return null
+        if (this.fullPeer.fallbackPhoto?._ !== 'photo') return null
+
+        return new Photo(this.fullPeer.fallbackPhoto)
     }
 
     /**
@@ -652,6 +728,10 @@ memoizeGetters(Chat, [
     'chatType',
     'usernames',
     'photo',
+    'fullPhoto',
+    'personalPhoto',
+    'realPhoto',
+    'publicPhoto',
     'permissions',
     'defaultPermissions',
     'location',
