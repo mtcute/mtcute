@@ -32,6 +32,9 @@ export async function* downloadAsIterable(
     let dcId = params?.dcId
     let fileSize = params?.fileSize
 
+    const abortSignal = params?.abortSignal
+    let aborted = false
+
     let location: tl.TypeInputFileLocation | tl.TypeInputWebFileLocation
     if (input instanceof FileLocation) {
         let locationInner = input.location
@@ -102,6 +105,10 @@ export async function* downloadAsIterable(
     const downloadChunk = async (chunk = nextWorkerChunkIdx++): Promise<void> => {
         let result: tl.RpcCallReturn['upload.getFile'] | tl.RpcCallReturn['upload.getWebFile']
 
+        if (aborted) {
+            return
+        }
+
         try {
             result = await client.call(
                 {
@@ -111,9 +118,15 @@ export async function* downloadAsIterable(
                     offset: chunkSize * chunk,
                     limit: chunkSize,
                 },
-                { dcId, kind: connectionKind, abortSignal: params?.abortSignal },
+                {
+                    dcId,
+                    kind: connectionKind,
+                    maxRetryCount: Infinity, // retry until explicitly aborted (or finished)
+                    abortSignal,
+                },
             )
         } catch (e: unknown) {
+            if (e instanceof DOMException && e.name === 'AbortError') return
             if (!tl.RpcError.is(e)) throw e
 
             if (e.is('FILE_MIGRATE_%d')) {
@@ -132,6 +145,10 @@ export async function* downloadAsIterable(
             // also, i couldnt find any media that would be downloaded from cdn, so even if
             // i implemented that, i wouldnt be able to test that, so :shrug:
             throw new MtUnsupportedError('Received CDN redirect, which is not supported (yet)')
+        }
+
+        if (aborted) {
+            return
         }
 
         if (result._ === 'upload.webFile' && result.size && limitBytes === Infinity) {
@@ -155,11 +172,21 @@ export async function* downloadAsIterable(
         .catch((e) => {
             client.log.debug('download workers errored: %s', e.message)
             error = e
+            aborted = true // not really aborted, but we dont want to download more chunks
             nextChunkCv.notify()
         })
         .then(() => {
             client.log.debug('download workers finished')
         })
+
+    // to avoid MaxListenersExceededWarning we do this instead
+    // already sent requests can go to hell (they will get ignored)
+    abortSignal?.addEventListener('abort', () => {
+        client.log.debug('download aborted')
+        error = abortSignal.reason
+        aborted = true
+        nextChunkCv.notify()
+    })
 
     let position = offset
 
