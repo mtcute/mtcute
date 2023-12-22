@@ -1,5 +1,5 @@
 /* eslint-disable no-inner-declarations */
-import { BaseTelegramClient, MtUnsupportedError, tl } from '@mtcute/core'
+import { BaseTelegramClient, MtArgumentError, MtUnsupportedError, tl } from '@mtcute/core'
 import { assertTypeIs } from '@mtcute/core/utils.js'
 
 import { User } from '../../types/peers/user.js'
@@ -18,53 +18,73 @@ export interface AuthState {
     selfChanged?: boolean
 }
 
+/**
+ * Initialize auth state for the given client.
+ *
+ * Allows {@link getAuthState} to be used and is required for some methods.
+ * @noemit
+ */
+export function setupAuthState(client: BaseTelegramClient): void {
+    // eslint-disable-next-line
+    let state: AuthState = (client as any)[STATE_SYMBOL]
+    if (state) return
+
+    // init
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    state = (client as any)[STATE_SYMBOL] = {
+        userId: null,
+        isBot: false,
+        selfUsername: null,
+    }
+
+    client.log.prefix = '[USER N/A] '
+
+    function onBeforeConnect() {
+        Promise.resolve(client.storage.getSelf())
+            .then((self) => {
+                if (!self) return
+
+                state.userId = self.userId
+                state.isBot = self.isBot
+                client.log.prefix = `[USER ${self.userId}] `
+            })
+            .catch((err) => client._emitError(err))
+    }
+
+    async function onBeforeStorageSave() {
+        if (state.selfChanged) {
+            await client.storage.setSelf(
+                state.userId ?
+                    {
+                        userId: state.userId,
+                        isBot: state.isBot,
+                    } :
+                    null,
+            )
+            state.selfChanged = false
+        }
+    }
+
+    client.on('before_connect', onBeforeConnect)
+    client.beforeStorageSave(onBeforeStorageSave)
+    client.on('before_stop', () => {
+        client.off('before_connect', onBeforeConnect)
+        client.offBeforeStorageSave(onBeforeStorageSave)
+    })
+}
+
+/**
+ * Get auth state for the given client, containing
+ * information about the current user.
+ *
+ * Auth state must first be initialized with {@link setupAuthState}.
+ */
 export function getAuthState(client: BaseTelegramClient): AuthState {
     // eslint-disable-next-line
     let state: AuthState = (client as any)[STATE_SYMBOL]
 
     if (!state) {
-        // init
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        state = (client as any)[STATE_SYMBOL] = {
-            userId: null,
-            isBot: false,
-            selfUsername: null,
-        }
-
-        client.log.prefix = '[USER N/A] '
-
-        function onBeforeConnect() {
-            Promise.resolve(client.storage.getSelf())
-                .then((self) => {
-                    if (!self) return
-
-                    state.userId = self.userId
-                    state.isBot = self.isBot
-                    client.log.prefix = `[USER ${self.userId}] `
-                })
-                .catch((err) => client._emitError(err))
-        }
-
-        async function onBeforeStorageSave() {
-            if (state.selfChanged) {
-                await client.storage.setSelf(
-                    state.userId ?
-                        {
-                            userId: state.userId,
-                            isBot: state.isBot,
-                        } :
-                        null,
-                )
-                state.selfChanged = false
-            }
-        }
-
-        client.on('before_connect', onBeforeConnect)
-        client.beforeStorageSave(onBeforeStorageSave)
-        client.on('before_stop', () => {
-            client.off('before_connect', onBeforeConnect)
-            client.offBeforeStorageSave(onBeforeStorageSave)
-        })
+        throw new MtArgumentError('Auth state is not initialized, use setupAuthState()')
     }
 
     return state

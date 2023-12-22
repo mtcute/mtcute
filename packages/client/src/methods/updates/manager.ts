@@ -6,7 +6,7 @@ import { PeersIndex } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerUser, toInputChannel, toInputUser } from '../../utils/peer-utils.js'
 import { RpsMeter } from '../../utils/rps-meter.js'
 import { createDummyUpdatesContainer } from '../../utils/updates-utils.js'
-import { getAuthState } from '../auth/_state.js'
+import { getAuthState, setupAuthState } from '../auth/_state.js'
 import { _getChannelsBatched, _getUsersBatched } from '../chats/batched-queries.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { createUpdatesState, PendingUpdate, toPendingUpdate, UpdatesManagerParams, UpdatesState } from './types.js'
@@ -83,6 +83,8 @@ export function getCurrentRpsProcessing(client: BaseTelegramClient): number {
  */
 export function enableUpdatesProcessing(client: BaseTelegramClient, params: UpdatesManagerParams): void {
     if (getState(client)) return
+
+    setupAuthState(client)
 
     if (client.network.params.disableUpdates) {
         throw new MtArgumentError('Updates must be enabled to use updates manager')

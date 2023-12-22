@@ -10,6 +10,8 @@ import { Conversation } from '../types/conversation.js'
 // @copy
 import { _defaultStorageFactory } from '../utils/platform/storage.js'
 // @copy
+import { setupAuthState } from './auth/_state.js'
+// @copy
 import {
     enableUpdatesProcessing,
     makeParsedUpdateHandler,
@@ -107,5 +109,7 @@ function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
                 },
             }),
         })
+    } else {
+        setupAuthState(this)
     }
 }

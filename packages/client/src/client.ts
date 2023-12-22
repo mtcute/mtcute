@@ -15,7 +15,7 @@ import {
 import { MemoryStorage } from '@mtcute/core/src/storage/memory.js'
 import { tdFileId } from '@mtcute/file-id'
 
-import { AuthState, getAuthState, isSelfPeer } from './methods/auth/_state.js'
+import { AuthState, getAuthState, isSelfPeer, setupAuthState } from './methods/auth/_state.js'
 import { checkPassword } from './methods/auth/check-password.js'
 import { getPasswordHint } from './methods/auth/get-password-hint.js'
 import { logOut } from './methods/auth/log-out.js'
@@ -533,7 +533,14 @@ export interface TelegramClient extends BaseTelegramClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(name: string, handler: (...args: any[]) => void): this
-
+    /**
+     * Get auth state for the given client, containing
+     * information about the current user.
+     *
+     * Auth state must first be initialized with {@link setupAuthState}.
+     * **Available**: ✅ both users and bots
+     *
+     */
     getAuthState(): AuthState
     /**
      * Check if the given peer/input peer is referring to the current user
@@ -5266,6 +5273,8 @@ export class TelegramClient extends BaseTelegramClient {
                     },
                 }),
             })
+        } else {
+            setupAuthState(this)
         }
     }
 }
