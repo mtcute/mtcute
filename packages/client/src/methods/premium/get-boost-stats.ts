@@ -1,7 +1,7 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike } from '../../types/index.js'
-import { BoostStats } from '../../types/stories/boost-stats.js'
+import { BoostStats } from '../../types/premium/boost-stats.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 // @available=user

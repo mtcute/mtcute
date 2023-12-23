@@ -178,6 +178,12 @@ import { changeCloudPassword } from './methods/password/change-cloud-password.js
 import { enableCloudPassword } from './methods/password/enable-cloud-password.js'
 import { cancelPasswordEmail, resendPasswordEmail, verifyPasswordEmail } from './methods/password/password-email.js'
 import { removeCloudPassword } from './methods/password/remove-cloud-password.js'
+import { applyBoost } from './methods/premium/apply-boost.js'
+import { canApplyBoost, CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
+import { getBoostStats } from './methods/premium/get-boost-stats.js'
+import { getBoosts } from './methods/premium/get-boosts.js'
+import { getMyBoostSlots } from './methods/premium/get-my-boost-slots.js'
+import { iterBoosters } from './methods/premium/iter-boosters.js'
 import { addStickerToSet } from './methods/stickers/add-sticker-to-set.js'
 import { createStickerSet } from './methods/stickers/create-sticker-set.js'
 import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set.js'
@@ -187,14 +193,10 @@ import { getStickerSet } from './methods/stickers/get-sticker-set.js'
 import { moveStickerInSet } from './methods/stickers/move-sticker-in-set.js'
 import { setChatStickerSet } from './methods/stickers/set-chat-sticker-set.js'
 import { setStickerSetThumb } from './methods/stickers/set-sticker-set-thumb.js'
-import { applyBoost } from './methods/stories/apply-boost.js'
-import { canApplyBoost, CanApplyBoostResult } from './methods/stories/can-apply-boost.js'
 import { canSendStory, CanSendStoryResult } from './methods/stories/can-send-story.js'
 import { deleteStories } from './methods/stories/delete-stories.js'
 import { editStory } from './methods/stories/edit-story.js'
 import { getAllStories } from './methods/stories/get-all-stories.js'
-import { getBoostStats } from './methods/stories/get-boost-stats.js'
-import { getBoosters } from './methods/stories/get-boosters.js'
 import { getPeerStories } from './methods/stories/get-peer-stories.js'
 import { getProfileStories } from './methods/stories/get-profile-stories.js'
 import { getStoriesById } from './methods/stories/get-stories-by-id.js'
@@ -204,7 +206,6 @@ import { getStoryViewers } from './methods/stories/get-story-viewers.js'
 import { hideMyStoriesViews } from './methods/stories/hide-my-stories-views.js'
 import { incrementStoriesViews } from './methods/stories/increment-stories-views.js'
 import { iterAllStories } from './methods/stories/iter-all-stories.js'
-import { iterBoosters } from './methods/stories/iter-boosters.js'
 import { iterProfileStories } from './methods/stories/iter-profile-stories.js'
 import { iterStoryViewers } from './methods/stories/iter-story-viewers.js'
 import { readStories } from './methods/stories/read-stories.js'
@@ -254,7 +255,8 @@ import {
     AllStories,
     ArrayPaginated,
     ArrayWithTotal,
-    Booster,
+    Boost,
+    BoostSlot,
     BoostStats,
     BotChatJoinRequestUpdate,
     BotCommands,
@@ -4146,6 +4148,96 @@ export interface TelegramClient extends BaseTelegramClient {
      */
     removeCloudPassword(password: string): Promise<void>
     /**
+     * Boost a given channel
+     *
+     * **Available**: 👤 users only
+     *
+     * @param peerId  Peer ID to boost
+     */
+    applyBoost(peerId: InputPeerLike): Promise<void>
+    /**
+     * Check if the current user can apply boost to some channel
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @returns
+     *   - `{ can: true }` if the user can apply boost
+     *      - `.replace` - {@link Chat}s that can be replaced with the current one.
+     *        If the user can apply boost without replacing any chats, this field will be `undefined`.
+     *   - `{ can: false }` if the user can't apply boost
+     *      - `.reason == "no_slots"` if the user has no available slots
+     *      - `.reason == "need_premium"` if the user needs Premium to boost
+     *   - In all cases, `slots` will contain all the current user's boost slots
+     */
+    canApplyBoost(): Promise<CanApplyBoostResult>
+
+    /**
+     * Get information about boosts in a channel
+     *
+     * **Available**: 👤 users only
+     *
+     * @returns  IDs of stories that were removed
+     */
+    getBoostStats(peerId: InputPeerLike): Promise<BoostStats>
+    /**
+     * Get boosts of a channel
+     * **Available**: 👤 users only
+     *
+     */
+    getBoosts(
+        peerId: InputPeerLike,
+        params?: {
+            /**
+             * Offset for pagination
+             */
+            offset?: string
+
+            /**
+             * Maximum number of boosters to fetch
+             *
+             * @default  100
+             */
+            limit?: number
+        },
+    ): Promise<ArrayPaginated<Boost, string>>
+    /**
+     * Get boost slots information of the current user.
+     *
+     * Includes information about the currently boosted channels,
+     * as well as the slots that can be used to boost other channels.
+     * **Available**: 👤 users only
+     *
+     */
+    getMyBoostSlots(): Promise<BoostSlot[]>
+    /**
+     * Iterate over boosters of a channel.
+     *
+     * Wrapper over {@link getBoosters}
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @returns  IDs of stories that were removed
+     */
+    iterBoosters(
+        peerId: InputPeerLike,
+        params?: Parameters<typeof getBoosts>[2] & {
+            /**
+             * Total number of boosters to fetch
+             *
+             * @default  Infinity, i.e. fetch all boosters
+             */
+            limit?: number
+
+            /**
+             * Number of boosters to fetch per request
+             * Usually you don't need to change this
+             *
+             * @default  100
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<Boost>
+    /**
      * Add a sticker to a sticker set.
      *
      * Only for bots, and the sticker set must
@@ -4357,30 +4449,6 @@ export interface TelegramClient extends BaseTelegramClient {
         },
     ): Promise<StickerSet>
     /**
-     * Boost a given channel
-     *
-     * **Available**: 👤 users only
-     *
-     * @param peerId  Peer ID to boost
-     */
-    applyBoost(peerId: InputPeerLike): Promise<void>
-    /**
-     * Check if the current user can apply boost to a given channel
-     *
-     * **Available**: 👤 users only
-     *
-     * @param peerId  Peer ID whose stories to fetch
-     * @returns
-     *   - `{ can: true }` if the user can apply boost
-     *      - `.current` - {@link Chat} that the current user is currently boosting, if any
-     *   - `{ can: false }` if the user can't apply boost
-     *      - `.reason == "already_boosting"` if the user is already boosting this channel
-     *      - `.reason == "need_premium"` if the user needs Premium to boost this channel
-     *      - `.reason == "timeout"` if the user has recently boosted a channel and needs to wait
-     *        (`.until` contains the date until which the user needs to wait)
-     */
-    canApplyBoost(peerId: InputPeerLike): Promise<CanApplyBoostResult>
-    /**
      * Check if the current user can post stories as a given peer
      *
      * **Available**: 👤 users only
@@ -4470,38 +4538,6 @@ export interface TelegramClient extends BaseTelegramClient {
          */
         archived?: boolean
     }): Promise<AllStories>
-
-    /**
-     * Get information about boosts in a channel
-     *
-     * **Available**: 👤 users only
-     *
-     * @returns  IDs of stories that were removed
-     */
-    getBoostStats(peerId: InputPeerLike): Promise<BoostStats>
-    /**
-     * Get boosters of a channel
-     *
-     * **Available**: 👤 users only
-     *
-     * @returns  IDs of stories that were removed
-     */
-    getBoosters(
-        peerId: InputPeerLike,
-        params?: {
-            /**
-             * Offset for pagination
-             */
-            offset?: string
-
-            /**
-             * Maximum number of boosters to fetch
-             *
-             * @default  100
-             */
-            limit?: number
-        },
-    ): Promise<ArrayPaginated<Booster, string>>
     /**
      * Get stories of a given peer
      *
@@ -4660,34 +4696,6 @@ export interface TelegramClient extends BaseTelegramClient {
             limit?: number
         },
     ): AsyncIterableIterator<PeerStories>
-    /**
-     * Iterate over boosters of a channel.
-     *
-     * Wrapper over {@link getBoosters}
-     *
-     * **Available**: ✅ both users and bots
-     *
-     * @returns  IDs of stories that were removed
-     */
-    iterBoosters(
-        peerId: InputPeerLike,
-        params?: Parameters<typeof getBoosters>[2] & {
-            /**
-             * Total number of boosters to fetch
-             *
-             * @default  Infinity, i.e. fetch all boosters
-             */
-            limit?: number
-
-            /**
-             * Number of boosters to fetch per request
-             * Usually you don't need to change this
-             *
-             * @default  100
-             */
-            chunkSize?: number
-        },
-    ): AsyncIterableIterator<Booster>
     /**
      * Iterate over profile stories. Wrapper over {@link getProfileStories}
      * **Available**: ✅ both users and bots
@@ -5999,6 +6007,30 @@ TelegramClient.prototype.removeCloudPassword = function (...args) {
     return removeCloudPassword(this, ...args)
 }
 
+TelegramClient.prototype.applyBoost = function (...args) {
+    return applyBoost(this, ...args)
+}
+
+TelegramClient.prototype.canApplyBoost = function (...args) {
+    return canApplyBoost(this, ...args)
+}
+
+TelegramClient.prototype.getBoostStats = function (...args) {
+    return getBoostStats(this, ...args)
+}
+
+TelegramClient.prototype.getBoosts = function (...args) {
+    return getBoosts(this, ...args)
+}
+
+TelegramClient.prototype.getMyBoostSlots = function (...args) {
+    return getMyBoostSlots(this, ...args)
+}
+
+TelegramClient.prototype.iterBoosters = function (...args) {
+    return iterBoosters(this, ...args)
+}
+
 TelegramClient.prototype.addStickerToSet = function (...args) {
     return addStickerToSet(this, ...args)
 }
@@ -6039,14 +6071,6 @@ TelegramClient.prototype.setStickerSetThumb = function (...args) {
     return setStickerSetThumb(this, ...args)
 }
 
-TelegramClient.prototype.applyBoost = function (...args) {
-    return applyBoost(this, ...args)
-}
-
-TelegramClient.prototype.canApplyBoost = function (...args) {
-    return canApplyBoost(this, ...args)
-}
-
 TelegramClient.prototype.canSendStory = function (...args) {
     return canSendStory(this, ...args)
 }
@@ -6061,14 +6085,6 @@ TelegramClient.prototype.editStory = function (...args) {
 
 TelegramClient.prototype.getAllStories = function (...args) {
     return getAllStories(this, ...args)
-}
-
-TelegramClient.prototype.getBoostStats = function (...args) {
-    return getBoostStats(this, ...args)
-}
-
-TelegramClient.prototype.getBoosters = function (...args) {
-    return getBoosters(this, ...args)
 }
 
 TelegramClient.prototype.getPeerStories = function (...args) {
@@ -6105,10 +6121,6 @@ TelegramClient.prototype.incrementStoriesViews = function (...args) {
 
 TelegramClient.prototype.iterAllStories = function (...args) {
     return iterAllStories(this, ...args)
-}
-
-TelegramClient.prototype.iterBoosters = function (...args) {
-    return iterBoosters(this, ...args)
 }
 
 TelegramClient.prototype.iterProfileStories = function (...args) {

@@ -1,16 +1,14 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { ArrayPaginated, InputPeerLike, PeersIndex } from '../../types/index.js'
-import { Booster } from '../../types/stories/booster.js'
+import { Boost } from '../../types/premium/boost.js'
 import { makeArrayPaginated } from '../../utils/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
- * Get boosters of a channel
- *
- * @returns  IDs of stories that were removed
+ * Get boosts of a channel
  */
-export async function getBoosters(
+export async function getBoosts(
     client: BaseTelegramClient,
     peerId: InputPeerLike,
     params?: {
@@ -26,11 +24,11 @@ export async function getBoosters(
          */
         limit?: number
     },
-): Promise<ArrayPaginated<Booster, string>> {
+): Promise<ArrayPaginated<Boost, string>> {
     const { offset = '', limit = 100 } = params ?? {}
 
     const res = await client.call({
-        _: 'stories.getBoostersList',
+        _: 'premium.getBoostsList',
         peer: await resolvePeer(client, peerId),
         offset,
         limit,
@@ -39,7 +37,7 @@ export async function getBoosters(
     const peers = PeersIndex.from(res)
 
     return makeArrayPaginated(
-        res.boosters.map((it) => new Booster(it, peers)),
+        res.boosts.map((it) => new Boost(it, peers)),
         res.count,
         res.nextOffset,
     )

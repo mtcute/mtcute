@@ -29,6 +29,14 @@ export class BoostStats {
     }
 
     /**
+     * The number of boosts acquired from created Telegram Premium
+     * gift codes and giveaways, only available to channel admins
+     */
+    get gifts(): number {
+        return this.raw.giftBoosts ?? 0
+    }
+
+    /**
      * Number of boosts that were needed for the current level
      */
     get currentLevelBoosts(): number {
@@ -79,6 +87,14 @@ export class BoostStats {
     /** URL that would bring up the boost interface */
     get url(): string {
         return this.raw.boostUrl
+    }
+
+    /**
+     * If {@link isBoosting}, IDs of the boost slots that are
+     * currently occupied by this channel
+     */
+    get boostSlots(): number[] {
+        return this.raw.myBoostSlots ?? []
     }
 }
 

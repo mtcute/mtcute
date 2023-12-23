@@ -1,9 +1,9 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike } from '../../types/index.js'
-import { Booster } from '../../types/stories/booster.js'
+import { Boost } from '../../types/premium/boost.js'
 import { resolvePeer } from '../users/resolve-peer.js'
-import { getBoosters } from './get-boosters.js'
+import { getBoosts } from './get-boosts.js'
 
 /**
  * Iterate over boosters of a channel.
@@ -15,7 +15,7 @@ import { getBoosters } from './get-boosters.js'
 export async function* iterBoosters(
     client: BaseTelegramClient,
     peerId: InputPeerLike,
-    params?: Parameters<typeof getBoosters>[2] & {
+    params?: Parameters<typeof getBoosts>[2] & {
         /**
          * Total number of boosters to fetch
          *
@@ -31,7 +31,7 @@ export async function* iterBoosters(
          */
         chunkSize?: number
     },
-): AsyncIterableIterator<Booster> {
+): AsyncIterableIterator<Boost> {
     if (!params) params = {}
     const { limit = Infinity, chunkSize = 100 } = params
 
@@ -41,7 +41,7 @@ export async function* iterBoosters(
     const peer = await resolvePeer(client, peerId)
 
     for (;;) {
-        const res = await getBoosters(client, peer, {
+        const res = await getBoosts(client, peer, {
             offset,
             limit: Math.min(limit - current, chunkSize),
         })

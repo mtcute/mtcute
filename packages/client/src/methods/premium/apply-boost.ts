@@ -10,7 +10,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
  */
 export async function applyBoost(client: BaseTelegramClient, peerId: InputPeerLike): Promise<void> {
     await client.call({
-        _: 'stories.applyBoost',
+        _: 'premium.applyBoost',
         peer: await resolvePeer(client, peerId),
     })
 }

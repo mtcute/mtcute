@@ -122,7 +122,9 @@ export class Story {
 
                 return new Photo(this.raw.media.photo, this.raw.media)
             case 'messageMediaDocument': {
-                if (this.raw.media.document?._ !== 'document') { throw new MtUnsupportedError('Unsupported story media type') }
+                if (this.raw.media.document?._ !== 'document') {
+                    throw new MtUnsupportedError('Unsupported story media type')
+                }
 
                 const doc = parseDocument(this.raw.media.document, this.raw.media)
                 if (doc.type === 'video') return doc
@@ -138,7 +140,7 @@ export class Story {
     get interactiveElements(): StoryInteractiveElement[] {
         if (!this.raw.mediaAreas) return []
 
-        return this.raw.mediaAreas.map((it) => _storyInteractiveElementFromTl(it))
+        return this.raw.mediaAreas.map((it) => _storyInteractiveElementFromTl(it, this._peers))
     }
 
     /**

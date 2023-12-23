@@ -1,7 +1,8 @@
-import { getMarkedPeerId, tl } from '@mtcute/core'
+import { tl } from '@mtcute/core'
 
 import { _callDiscardReasonFromTl, CallDiscardReason } from '../calls/index.js'
-import { Photo } from '../media/index.js'
+import { Photo } from '../media/photo.js'
+import { parsePeer, Peer } from '../peers/peer.js'
 import type { Message } from './message.js'
 
 /** Group was created */
@@ -378,11 +379,8 @@ export interface ActionPeerChosen {
     /** ID of the button passed earlier by the bot */
     buttonId: number
 
-    /** Marked ID of the chosen peer */
-    peerId: number
-
-    /** Input peer of the chosen peer */
-    inputPeer?: tl.TypeInputPeer
+    /** Chosen peers */
+    peers: Peer[]
 }
 
 /** A wallpaper of the chathas been changed */
@@ -659,8 +657,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
             return {
                 type: 'peer_chosen',
                 buttonId: act.buttonId,
-                peerId: getMarkedPeerId(act.peer),
-                // todo - pass the peer itself?
+                peers: act.peers.map((it) => parsePeer(it, this._peers)),
             }
         case 'messageActionSetChatWallPaper':
         case 'messageActionSetSameChatWallPaper':

@@ -354,18 +354,30 @@ export namespace BotKeyboard {
      *
      * @param text  Text of the button
      * @param buttonId  ID of the button that will later be passed to the service message
-     * @param peerType  Peer type, along with filters
      */
     export function requestPeer(
         text: string,
         buttonId: number,
-        peerType: tl.TypeRequestPeerType,
+        params: {
+            /**
+             * Peer type, along with filters
+             */
+            peerType: tl.TypeRequestPeerType
+
+            /**
+             * Maximum number of peers to be selected
+             *
+             * @default  1
+             */
+            count?: number
+        },
     ): tl.RawKeyboardButtonRequestPeer {
         return {
             _: 'keyboardButtonRequestPeer',
             text,
             buttonId,
-            peerType,
+            peerType: params.peerType,
+            maxQuantity: params.count ?? 1,
         }
     }
 

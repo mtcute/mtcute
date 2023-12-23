@@ -2,7 +2,7 @@ import { tl } from '@mtcute/core'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { Photo } from '../media/index.js'
+import { Photo } from '../media/photo.js'
 import { User } from './user.js'
 
 /**

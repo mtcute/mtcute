@@ -24,6 +24,7 @@ import { MaskPosition, Sticker, StickerSourceType, StickerType, Thumbnail } from
  *         when reacting to messages using a normal emoji without a custom animation
  *      - `"default_statuses"` - Default custom emoji status stickerset
  *      - `"default_topic_icons"` - Default custom emoji stickerset for forum topic icons
+ *      - `"default_channel_statuses"` - Default custom emoji status stickerset for channels
  */
 export type InputStickerSet =
     | tl.TypeInputStickerSet
@@ -36,6 +37,7 @@ export type InputStickerSet =
               | 'generic_animations'
               | 'default_statuses'
               | 'default_topic_icons'
+              | 'default_channel_statuses'
       }
     | StickerSet
     | string
@@ -70,6 +72,8 @@ export function normalizeInputStickerSet(input: InputStickerSet): tl.TypeInputSt
             return { _: 'inputStickerSetEmojiDefaultStatuses' }
         case 'default_topic_icons':
             return { _: 'inputStickerSetEmojiDefaultTopicIcons' }
+        case 'default_channel_statuses':
+            return { _: 'inputStickerSetEmojiChannelDefaultStatuses' }
     }
 }
 
