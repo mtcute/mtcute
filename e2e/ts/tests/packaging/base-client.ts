@@ -4,7 +4,7 @@ import { describe, it } from 'mocha'
 import { BaseTelegramClient } from '@mtcute/core'
 
 // @fix-import
-import { getApiParams } from '../utils'
+import { getApiParams } from '../../utils'
 
 describe('@mtcute/core', function () {
     this.timeout(300_000)

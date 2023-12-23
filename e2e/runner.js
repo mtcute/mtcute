@@ -70,6 +70,7 @@ function runForDir(dir) {
     }
 
     const files = glob.sync(getFiles(), { cwd: path.join(__dirname, dir) })
+    files.sort()
 
     for (const file of files) {
         runForFile(dir, file, false)

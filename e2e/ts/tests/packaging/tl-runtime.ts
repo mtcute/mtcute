@@ -81,7 +81,7 @@ describe('TlBinaryWriter', () => {
             w.bytes(obj.pq)
             w.vector(w.long, obj.serverPublicKeyFingerprints)
         },
-        _staticSize: {} as any
+        _staticSize: {} as any,
     }
 
     it('should work with Buffers', () => {

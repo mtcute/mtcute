@@ -1,8 +1,12 @@
-import { BaseTelegramClientOptions } from '@mtcute/core'
-import { MemoryStorage } from '@mtcute/core/storage/memory.js'
-import { LogManager } from '@mtcute/core/utils.js'
+// eslint-disable-next-line no-restricted-imports
+import { join } from 'path'
 
-export const getApiParams = (): BaseTelegramClientOptions => {
+import { BaseTelegramClientOptions, MaybeAsync } from '@mtcute/core'
+import { MemoryStorage } from '@mtcute/core/storage/memory.js'
+import { LogManager, sleep } from '@mtcute/core/utils.js'
+import { SqliteStorage } from '@mtcute/sqlite'
+
+export const getApiParams = (storage?: string): BaseTelegramClientOptions => {
     if (!process.env.API_ID || !process.env.API_HASH) {
         throw new Error('API_ID and API_HASH env variables must be set')
     }
@@ -11,7 +15,25 @@ export const getApiParams = (): BaseTelegramClientOptions => {
         apiId: parseInt(process.env.API_ID),
         apiHash: process.env.API_HASH,
         testMode: true,
-        storage: new MemoryStorage(),
-        logLevel: LogManager.DEBUG,
+        storage: storage ? new SqliteStorage(join(__dirname, storage)) : new MemoryStorage(),
+        logLevel: LogManager.VERBOSE,
     }
+}
+
+export async function waitFor(condition: () => MaybeAsync<void>, timeout = 5000): Promise<void> {
+    const start = Date.now()
+    let lastError
+
+    while (Date.now() - start < timeout) {
+        try {
+            await condition()
+
+            return
+        } catch (e) {
+            lastError = e
+            await sleep(100)
+        }
+    }
+
+    throw lastError
 }

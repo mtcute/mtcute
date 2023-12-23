@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { Long, toggleChannelIdMark } from '@mtcute/core'
 import { createStub, StubTelegramClient } from '@mtcute/test'
 
-import { getAuthState } from '../auth/_state.js'
+import { getAuthState, setupAuthState } from '../auth/_state.js'
 import { sendText } from './send-text.js'
 
 const stubUser = createStub('user', {
@@ -104,6 +104,7 @@ describe('sendText', () => {
         const client = new StubTelegramClient()
 
         await client.registerPeers(stubUser)
+        setupAuthState(client)
         getAuthState(client).userId = stubUser.id
 
         client.respondWith('messages.sendMessage', () =>
@@ -127,6 +128,7 @@ describe('sendText', () => {
     it('should correctly handle updateShortSentMessage without cached peer', async () => {
         const client = new StubTelegramClient()
 
+        setupAuthState(client)
         getAuthState(client).userId = stubUser.id
 
         const getUsersFn = client.respondWith(
