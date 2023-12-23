@@ -1473,6 +1473,24 @@ export class SessionConnection extends PersistentConnection {
     protected _onInactivityTimeout() {
         // we should send all pending acks and other service messages
         // before dropping the connection
+        // additionally, if we are still waiting for some rpc results,
+        // we should wait for them first
+
+        let hasPendingRpc = false
+
+        for (const it of this._session.pendingMessages.values()) {
+            if (it._ === 'rpc') {
+                hasPendingRpc = true
+                break
+            }
+        }
+
+        if (hasPendingRpc) {
+            this.log.debug('waiting for pending rpc queries to finish before closing connection')
+            this._rescheduleInactivity()
+
+            return
+        }
 
         if (!this._session.hasPendingMessages) {
             this.log.debug('no pending service messages, closing connection')
