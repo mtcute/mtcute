@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/socks-proxy",
     "private": true,
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "SOCKS4/5 proxy support for mtcute",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
