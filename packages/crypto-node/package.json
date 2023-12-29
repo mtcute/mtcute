@@ -1,6 +1,6 @@
 {
     "name": "@mtcute/crypto-node",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "description": "Native crypto implementation for NodeJS",
     "author": "Alina Sireneva <alina@tei.su>",
     "main": "src/index.ts",
