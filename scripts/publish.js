@@ -87,14 +87,12 @@ async function main(arg = process.argv[2]) {
 
     if (arg === 'all' || arg === 'updated') {
         for (const pkg of listPackages()) {
-            if (arg === 'updated') {
-                const pkgVersion = require(`../packages/${pkg}/package.json`).version
-                const published = await checkVersion(pkg, pkgVersion)
+            const pkgVersion = require(`../packages/${pkg}/package.json`).version
+            const published = await checkVersion(pkg, pkgVersion)
 
-                if (published) {
-                    console.log('[i] %s is up to date', pkg)
-                    continue
-                }
+            if (published) {
+                console.log('[i] %s is up to date', pkg)
+                continue
             }
 
             await publishSinglePackage(pkg)
