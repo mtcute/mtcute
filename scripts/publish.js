@@ -90,7 +90,7 @@ async function main(arg = process.argv[2]) {
 
     console.log('[i] Using registry %s', REGISTRY)
 
-    const published = []
+    const publishedPkgs = []
 
     if (arg === 'all' || arg === 'updated') {
         for (const pkg of listPackages()) {
@@ -103,12 +103,12 @@ async function main(arg = process.argv[2]) {
             }
 
             await publishSinglePackage(pkg)
-            published.push(pkg)
+            publishedPkgs.push(pkg)
         }
     } else {
         for (const pkg of arg.split(',')) {
             await publishSinglePackage(pkg)
-            published.push(pkg)
+            publishedPkgs.push(pkg)
         }
     }
 
@@ -117,7 +117,7 @@ async function main(arg = process.argv[2]) {
         // for a github release, and also generate a title
         const tarballs = []
 
-        for (const pkg of published) {
+        for (const pkg of publishedPkgs) {
             const dir = path.join(__dirname, '../packages', pkg, 'dist')
             const tar = cp.execSync('npm pack -q', { cwd: dir })
             tarballs.push(path.join(dir, tar.toString().trim()))
