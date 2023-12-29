@@ -7,7 +7,10 @@ const REGISTRY = process.env.REGISTRY || NPMJS
 exports.REGISTRY = REGISTRY
 
 async function checkVersion(name, version, retry = 0) {
-    return fetch(`${REGISTRY}@mtcute/${name}/${version}`)
+    let registry = REGISTRY
+    if (!registry.endsWith('/')) registry += '/'
+
+    return fetch(`${registry}@mtcute/${name}/${version}`)
         .then((r) => r.status === 200)
         .catch((err) => {
             if (retry >= 5) throw err
@@ -36,17 +39,21 @@ async function publishSinglePackage(name) {
 
     console.log('[i] Publishing %s', name)
 
-    if (process.env.E2E) {
-        const version = require(path.join(packageDir, 'dist/package.json')).version
+    const version = require(path.join(packageDir, 'dist/package.json')).version
 
-        const exists = await checkVersion(name, version)
+    const exists = await checkVersion(name, version)
 
-        if (exists) {
+    if (exists) {
+        if (process.env.E2E) {
             console.log('[i] %s already exists, unpublishing..', name)
             cp.execSync(`npm unpublish --registry ${REGISTRY} --force @mtcute/${name}`, {
                 cwd: path.join(packageDir, 'dist'),
                 stdio: 'inherit',
             })
+        } else {
+            console.log('[i] %s already exists, skipping..', name)
+
+            return
         }
     }
 
