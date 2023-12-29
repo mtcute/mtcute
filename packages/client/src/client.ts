@@ -260,6 +260,8 @@ import {
     BoostStats,
     BotChatJoinRequestUpdate,
     BotCommands,
+    BotReactionCountUpdate,
+    BotReactionUpdate,
     BotStoppedUpdate,
     CallbackQuery,
     Chat,
@@ -532,6 +534,20 @@ export interface TelegramClient extends BaseTelegramClient {
      * @param handler  Delete story handler
      */
     on(name: 'delete_story', handler: (upd: DeleteStoryUpdate) => void): this
+    /**
+     * Register a bot reaction update handler
+     *
+     * @param name  Event name
+     * @param handler  Bot reaction update handler
+     */
+    on(name: 'bot_reaction', handler: (upd: BotReactionUpdate) => void): this
+    /**
+     * Register a bot reaction count update handler
+     *
+     * @param name  Event name
+     * @param handler  Bot reaction count update handler
+     */
+    on(name: 'bot_reaction_count', handler: (upd: BotReactionCountUpdate) => void): this
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(name: string, handler: (...args: any[]) => void): this
@@ -3907,12 +3923,14 @@ export interface TelegramClient extends BaseTelegramClient {
      *
      * **Available**: 👤 users only
      *
-     * @returns  Message to which the reaction was sent
+     * @returns
+     *   Message to which the reaction was sent, if available.
+     *   The message is normally available for users, but may not be available for bots in PMs.
      */
     sendReaction(
         params: InputMessageId & {
             /** Reaction emoji (or `null` to remove reaction) */
-            emoji?: InputReaction | null
+            emoji?: MaybeArray<InputReaction> | null
             /** Whether to use a big reaction */
             big?: boolean
 
@@ -3922,7 +3940,7 @@ export interface TelegramClient extends BaseTelegramClient {
              */
             shouldDispatch?: true
         },
-    ): Promise<Message>
+    ): Promise<Message | null>
     /** Send a text in reply to a given message */
     replyText(message: Message, ...params: ParametersSkip2<typeof sendText>): ReturnType<typeof sendText>
     /** Send a media in reply to a given message */

@@ -24,6 +24,8 @@ import {
     BoostStats,
     BotChatJoinRequestUpdate,
     BotCommands,
+    BotReactionCountUpdate,
+    BotReactionUpdate,
     BotStoppedUpdate,
     CallbackQuery,
     Chat,

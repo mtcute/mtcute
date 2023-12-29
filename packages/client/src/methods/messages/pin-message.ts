@@ -1,4 +1,4 @@
-import { BaseTelegramClient, MtTypeAssertionError } from '@mtcute/core'
+import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputMessageId, Message, normalizeInputMessageId } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -38,14 +38,5 @@ export async function pinMessage(
         pmOneside: !bothSides,
     })
 
-    try {
-        return _findMessageInUpdate(client, res, false, !shouldDispatch)
-    } catch (e) {
-        if (e instanceof MtTypeAssertionError && e.context === '_findInUpdate (@ .updates[*])') {
-            // no service message
-            return null
-        }
-
-        throw e
-    }
+    return _findMessageInUpdate(client, res, false, !shouldDispatch, true)
 }

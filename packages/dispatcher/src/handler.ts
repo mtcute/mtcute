@@ -1,4 +1,6 @@
 import {
+    BotReactionCountUpdate,
+    BotReactionUpdate,
     BotStoppedUpdate,
     ChatJoinRequestUpdate,
     ChatMemberUpdate,
@@ -82,6 +84,11 @@ export type ChatJoinRequestHandler<T = UpdateContext<ChatJoinRequestUpdate>> = P
 export type PreCheckoutQueryHandler<T = PreCheckoutQueryContext> = ParsedUpdateHandler<'pre_checkout_query', T>
 export type StoryUpdateHandler<T = UpdateContext<StoryUpdate>> = ParsedUpdateHandler<'story', T>
 export type DeleteStoryHandler<T = UpdateContext<DeleteStoryUpdate>> = ParsedUpdateHandler<'delete_story', T>
+export type BotReactionUpdateHandler<T = UpdateContext<BotReactionUpdate>> = ParsedUpdateHandler<'bot_reaction', T>
+export type BotReactionCountUpdateHandler<T = UpdateContext<BotReactionCountUpdate>> = ParsedUpdateHandler<
+    'bot_reaction_count',
+    T
+>
 
 export type UpdateHandler =
     | RawUpdateHandler
@@ -105,5 +112,7 @@ export type UpdateHandler =
     | PreCheckoutQueryHandler
     | StoryUpdateHandler
     | DeleteStoryHandler
+    | BotReactionUpdateHandler
+    | BotReactionCountUpdateHandler
 
 // end-codegen

@@ -4,6 +4,8 @@
 // ^^ will be looked into in MTQ-29
 
 import {
+    BotReactionCountUpdate,
+    BotReactionUpdate,
     BotStoppedUpdate,
     ChatJoinRequestUpdate,
     ChatMemberUpdate,
@@ -38,6 +40,8 @@ import { filters, UpdateFilter } from './filters/index.js'
 // begin-codegen-imports
 import {
     BotChatJoinRequestHandler,
+    BotReactionCountUpdateHandler,
+    BotReactionUpdateHandler,
     BotStoppedHandler,
     CallbackQueryHandler,
     ChatJoinRequestHandler,
@@ -1696,6 +1700,58 @@ export class Dispatcher<State extends object = never> {
     /** @internal */
     onDeleteStory(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('delete_story', filter, handler, group)
+    }
+
+    /**
+     * Register a bot reaction update handler without any filters
+     *
+     * @param handler  Bot reaction update handler
+     * @param group  Handler group index
+     */
+    onBotReactionUpdate(handler: BotReactionUpdateHandler['callback'], group?: number): void
+
+    /**
+     * Register a bot reaction update handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Bot reaction update handler
+     * @param group  Handler group index
+     */
+    onBotReactionUpdate<Mod>(
+        filter: UpdateFilter<UpdateContext<BotReactionUpdate>, Mod>,
+        handler: BotReactionUpdateHandler<filters.Modify<UpdateContext<BotReactionUpdate>, Mod>>['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onBotReactionUpdate(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('bot_reaction', filter, handler, group)
+    }
+
+    /**
+     * Register a bot reaction count update handler without any filters
+     *
+     * @param handler  Bot reaction count update handler
+     * @param group  Handler group index
+     */
+    onBotReactionCountUpdate(handler: BotReactionCountUpdateHandler['callback'], group?: number): void
+
+    /**
+     * Register a bot reaction count update handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Bot reaction count update handler
+     * @param group  Handler group index
+     */
+    onBotReactionCountUpdate<Mod>(
+        filter: UpdateFilter<UpdateContext<BotReactionCountUpdate>, Mod>,
+        handler: BotReactionCountUpdateHandler<filters.Modify<UpdateContext<BotReactionCountUpdate>, Mod>>['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onBotReactionCountUpdate(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('bot_reaction_count', filter, handler, group)
     }
 
     // end-codegen

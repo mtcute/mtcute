@@ -1,4 +1,4 @@
-import { BaseTelegramClient, MtTypeAssertionError } from '@mtcute/core'
+import { BaseTelegramClient } from '@mtcute/core'
 
 import { InputPeerLike, Message, MtInvalidPeerTypeError } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerChat, toInputChannel, toInputUser } from '../../utils/peer-utils.js'
@@ -56,14 +56,5 @@ export async function banChatMember(
         })
     } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 
-    try {
-        return _findMessageInUpdate(client, res, false, !shouldDispatch)
-    } catch (e) {
-        if (e instanceof MtTypeAssertionError && e.context === '_findInUpdate (@ .updates[*])') {
-            // no service message
-            return null
-        }
-
-        throw e
-    }
+    return _findMessageInUpdate(client, res, false, !shouldDispatch, true)
 }

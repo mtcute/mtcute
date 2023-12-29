@@ -1,16 +1,44 @@
+/* eslint-disable max-params */
 import { BaseTelegramClient, MtTypeAssertionError, tl } from '@mtcute/core'
 
 import { Message } from '../../types/messages/index.js'
 import { PeersIndex } from '../../types/peers/index.js'
 import { assertIsUpdatesGroup } from '../../utils/updates-utils.js'
 
-/** @internal */
+/**
+ * @internal
+ * @noemit
+ */
+export function _findMessageInUpdate(
+    client: BaseTelegramClient,
+    res: tl.TypeUpdates,
+    isEdit?: boolean,
+    noDispatch?: boolean,
+    allowNull?: false,
+): Message
+/**
+ * @internal
+ * @noemit
+ */
+export function _findMessageInUpdate(
+    client: BaseTelegramClient,
+    res: tl.TypeUpdates,
+    isEdit?: boolean,
+    noDispatch?: boolean,
+    allowNull?: true,
+): Message | null
+
+/**
+ * @internal
+ * @noemit
+ */
 export function _findMessageInUpdate(
     client: BaseTelegramClient,
     res: tl.TypeUpdates,
     isEdit = false,
     noDispatch = true,
-): Message {
+    allowNull = false,
+): Message | null {
     assertIsUpdatesGroup('_findMessageInUpdate', res)
 
     client.network.handleUpdate(res, noDispatch)
@@ -28,6 +56,8 @@ export function _findMessageInUpdate(
             return new Message(u.message, peers, u._ === 'updateNewScheduledMessage')
         }
     }
+
+    if (allowNull) return null
 
     throw new MtTypeAssertionError(
         '_findInUpdate (@ .updates[*])',

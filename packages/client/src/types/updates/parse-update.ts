@@ -3,6 +3,8 @@ import { tl } from '@mtcute/core'
 
 import {
     BotChatJoinRequestUpdate,
+    BotReactionCountUpdate,
+    BotReactionUpdate,
     BotStoppedUpdate,
     CallbackQuery,
     ChatJoinRequestUpdate,
@@ -88,6 +90,10 @@ export function _parseUpdate(update: tl.TypeUpdate, peers: PeersIndex): ParsedUp
                 data: new StoryUpdate(update, peers),
             }
         }
+        case 'updateBotMessageReaction':
+            return { name: 'bot_reaction', data: new BotReactionUpdate(update, peers) }
+        case 'updateBotMessageReactions':
+            return { name: 'bot_reaction_count', data: new BotReactionCountUpdate(update, peers) }
         default:
             return null
     }

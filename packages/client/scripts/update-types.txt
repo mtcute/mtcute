@@ -19,3 +19,5 @@ chat_join_request = ChatJoinRequestUpdate
 pre_checkout_query = PreCheckoutQuery in PreCheckoutQueryContext
 story: StoryUpdate = StoryUpdate
 delete_story = DeleteStoryUpdate
+bot_reaction: BotReactionUpdate = BotReactionUpdate
+bot_reaction_count: BotReactionCountUpdate = BotReactionCountUpdate
