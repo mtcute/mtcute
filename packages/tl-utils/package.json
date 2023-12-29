@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/tl-utils",
     "private": true,
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "Utils for working with TL schema",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",

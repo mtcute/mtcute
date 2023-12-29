@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/dispatcher",
     "private": true,
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "Updates dispatcher and bot framework for @mtcute/client",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",

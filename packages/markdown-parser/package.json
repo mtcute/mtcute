@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/markdown-parser",
     "private": true,
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "Markdown entities parser for mtcute",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
