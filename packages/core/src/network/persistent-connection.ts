@@ -1,16 +1,14 @@
 import EventEmitter from 'events'
 
-import { tl } from '@mtcute/tl'
-
 import { MtcuteError } from '../types/index.js'
-import { ICryptoProvider, Logger } from '../utils/index.js'
+import { BasicDcOption, ICryptoProvider, Logger } from '../utils/index.js'
 import { ReconnectionStrategy } from './reconnection.js'
 import { ITelegramTransport, TransportFactory, TransportState } from './transports/index.js'
 
 export interface PersistentConnectionParams {
     crypto: ICryptoProvider
     transportFactory: TransportFactory
-    dc: tl.RawDcOption
+    dc: BasicDcOption
     testMode: boolean
     reconnectionStrategy: ReconnectionStrategy<PersistentConnectionParams>
     inactivityTimeout?: number

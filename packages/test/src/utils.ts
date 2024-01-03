@@ -1,8 +1,7 @@
-import { getBasicPeerType, markedPeerIdToBare, tl } from '@mtcute/core'
+import { parseMarkedPeerId, tl } from '@mtcute/core'
 
 export function markedIdToPeer(id: number): tl.TypePeer {
-    const type = getBasicPeerType(id)
-    const bareId = markedPeerIdToBare(id)
+    const [type, bareId] = parseMarkedPeerId(id)
 
     switch (type) {
         case 'user':

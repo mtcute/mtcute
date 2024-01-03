@@ -4,7 +4,6 @@ import { assertTypeIsNot } from '@mtcute/core/utils.js'
 import { Message } from '../../types/messages/index.js'
 import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
 import { isInputPeerChannel, toInputChannel } from '../../utils/peer-utils.js'
-import { getAuthState } from '../auth/_state.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 // @available=both
@@ -64,7 +63,7 @@ export async function getMessages(
             // (channels have their own message numbering)
             switch (peer._) {
                 case 'inputPeerSelf':
-                    if (selfId === undefined) selfId = getAuthState(client).userId
+                    if (selfId === undefined) selfId = client.storage.self.getCached()?.userId ?? null
 
                     if (!(msg.peerId._ === 'peerUser' && msg.peerId.userId === selfId)) {
                         return null

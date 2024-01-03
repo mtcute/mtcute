@@ -94,8 +94,9 @@ export const userId: {
             case 'user_typing': {
                 const id = upd.userId
 
-                return (matchSelf && id === upd.client.getAuthState().userId) ||
-                    indexId.has(id)
+                throw new Error('TODO')
+                // return (matchSelf && id === upd.client.getAuthState().userId) ||
+                //     indexId.has(id)
             }
             case 'poll_vote':
             case 'story':
@@ -110,8 +111,9 @@ export const userId: {
             case 'history_read': {
                 const id = upd.chatId
 
-                return (matchSelf && id === upd.client.getAuthState().userId) ||
-                    indexId.has(id)
+                throw new Error('TODO')
+                // return (matchSelf && id === upd.client.getAuthState().userId) ||
+                //     indexId.has(id)
             }
         }
 

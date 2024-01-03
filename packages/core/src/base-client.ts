@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import EventEmitter from 'events'
-import Long from 'long'
 
 import { tl } from '@mtcute/tl'
 import { __tlReaderMap as defaultReaderMap } from '@mtcute/tl/binary/reader.js'
@@ -9,24 +8,23 @@ import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { BaseTelegramClientOptions } from './base-client.types.js'
 import { ConfigManager } from './network/config-manager.js'
-import { SessionConnection, TransportFactory } from './network/index.js'
+import { SessionConnection } from './network/index.js'
 import { NetworkManager, RpcCallOptions } from './network/network-manager.js'
-import { ITelegramStorage } from './storage/index.js'
+import { StorageManager } from './storage/storage.js'
 import { MustEqual } from './types/index.js'
 import {
     ControllablePromise,
     createControllablePromise,
+    DcOptions,
     defaultCryptoProviderFactory,
     defaultProductionDc,
     defaultProductionIpv6Dc,
     defaultTestDc,
     defaultTestIpv6Dc,
-    getAllPeersFrom,
     ICryptoProvider,
     LogManager,
     readStringSession,
     StringSessionData,
-    toggleChannelIdMark,
     writeStringSession,
 } from './utils/index.js'
 
@@ -40,10 +38,8 @@ export class BaseTelegramClient extends EventEmitter {
      */
     readonly crypto: ICryptoProvider
 
-    /**
-     * Telegram storage taken from {@link BaseTelegramClientOptions.storage}
-     */
-    readonly storage: ITelegramStorage
+    /** Storage manager */
+    readonly storage: StorageManager
 
     /**
      * "Test mode" taken from {@link BaseTelegramClientOptions.testMode}
@@ -54,7 +50,7 @@ export class BaseTelegramClient extends EventEmitter {
      * Primary DCs taken from {@link BaseTelegramClientOptions.defaultDcs},
      * loaded from session or changed by other means (like redirecting).
      */
-    protected _defaultDcs: ITelegramStorage.DcOptions
+    protected _defaultDcs: DcOptions
 
     private _niceStacks: boolean
     /** TL layer used by the client */
@@ -63,9 +59,6 @@ export class BaseTelegramClient extends EventEmitter {
     readonly _readerMap: TlReaderMap
     /** TL writers map used by the client */
     readonly _writerMap: TlWriterMap
-
-    /** Unix timestamp when the last update was received */
-    protected _lastUpdateTime = 0
 
     readonly _config = new ConfigManager(() => this.call({ _: 'help.getConfig' }))
 
@@ -88,7 +81,6 @@ export class BaseTelegramClient extends EventEmitter {
         }
 
         this.crypto = (params.crypto ?? defaultCryptoProviderFactory)()
-        this.storage = params.storage
         this._testMode = Boolean(params.testMode)
 
         let dc = params.defaultDcs
@@ -107,6 +99,14 @@ export class BaseTelegramClient extends EventEmitter {
         this._layer = params.overrideLayer ?? tl.LAYER
         this._readerMap = params.readerMap ?? defaultReaderMap
         this._writerMap = params.writerMap ?? defaultWriterMap
+
+        this.storage = new StorageManager({
+            provider: params.storage,
+            log: this.log,
+            readerMap: this._readerMap,
+            writerMap: this._writerMap,
+            ...params.storageOptions,
+        })
 
         this.network = new NetworkManager(
             {
@@ -127,40 +127,12 @@ export class BaseTelegramClient extends EventEmitter {
                 maxRetryCount: params.maxRetryCount ?? 5,
                 isPremium: false,
                 useIpv6: Boolean(params.useIpv6),
-                keepAliveAction: this._keepAliveAction.bind(this),
                 enableErrorReporting: params.enableErrorReporting ?? false,
                 onUsable: () => this.emit('usable'),
-                ...(params.network ?? {}),
+                ...params.network,
             },
             this._config,
         )
-
-        this.storage.setup?.(this.log, this._readerMap, this._writerMap)
-    }
-
-    protected _keepAliveAction(): void {
-        this.emit('keep_alive')
-    }
-
-    protected async _loadStorage(): Promise<void> {
-        await this.storage.load?.()
-    }
-
-    _beforeStorageSave: (() => Promise<void>)[] = []
-
-    beforeStorageSave(cb: () => Promise<void>): void {
-        this._beforeStorageSave.push(cb)
-    }
-
-    offBeforeStorageSave(cb: () => Promise<void>): void {
-        this._beforeStorageSave = this._beforeStorageSave.filter((x) => x !== cb)
-    }
-
-    async saveStorage(): Promise<void> {
-        for (const cb of this._beforeStorageSave) {
-            await cb()
-        }
-        await this.storage.save?.()
     }
 
     /**
@@ -180,11 +152,15 @@ export class BaseTelegramClient extends EventEmitter {
         const promise = (this._connected = createControllablePromise())
 
         await this.crypto.initialize?.()
-        await this._loadStorage()
-        const primaryDc = await this.storage.getDefaultDcs()
+        await this.storage.load()
+
+        const primaryDc = await this.storage.dcs.fetch()
         if (primaryDc !== null) this._defaultDcs = primaryDc
 
-        const defaultDcAuthKey = await this.storage.getAuthKeyFor(this._defaultDcs.main.id)
+        const self = await this.storage.self.fetch()
+        this.log.prefix = `[USER ${self?.userId ?? 'n/a'}] `
+
+        const defaultDcAuthKey = await this.storage.provider.authKeys.get(this._defaultDcs.main.id)
 
         if ((this._importForce || !defaultDcAuthKey) && this._importFrom) {
             const data = this._importFrom
@@ -199,16 +175,15 @@ export class BaseTelegramClient extends EventEmitter {
             }
 
             this._defaultDcs = data.primaryDcs
-            await this.storage.setDefaultDcs(data.primaryDcs)
+            await this.storage.dcs.store(data.primaryDcs)
 
             if (data.self) {
-                await this.storage.setSelf(data.self)
+                await this.storage.self.store(data.self)
             }
 
-            // await this.primaryConnection.setupKeys(data.authKey)
-            await this.storage.setAuthKeyFor(data.primaryDcs.main.id, data.authKey)
+            await this.storage.provider.authKeys.set(data.primaryDcs.main.id, data.authKey)
 
-            await this.saveStorage()
+            await this.storage.save()
         }
 
         this.emit('before_connect')
@@ -231,7 +206,7 @@ export class BaseTelegramClient extends EventEmitter {
         this._config.destroy()
         this.network.destroy()
 
-        await this.saveStorage()
+        await this.storage.save()
         await this.storage.destroy?.()
 
         this.emit('closed')
@@ -262,9 +237,7 @@ export class BaseTelegramClient extends EventEmitter {
 
         const res = await this.network.call(message, params, stack)
 
-        if (await this._cachePeersFrom(res)) {
-            await this.saveStorage()
-        }
+        await this.storage.peers.updatePeersFrom(res)
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return res
@@ -309,20 +282,6 @@ export class BaseTelegramClient extends EventEmitter {
     }
 
     /**
-     * Change transport for the client.
-     *
-     * Can be used, for example, to change proxy at runtime
-     *
-     * This effectively calls `changeTransport()` on
-     * `primaryConnection` and all additional connections.
-     *
-     * @param factory  New transport factory
-     */
-    changeTransport(factory: TransportFactory): void {
-        this.network.changeTransport(factory)
-    }
-
-    /**
      * Register an error handler for the client
      *
      * @param handler
@@ -335,79 +294,14 @@ export class BaseTelegramClient extends EventEmitter {
         this._emitError = handler
     }
 
-    notifyLoggedIn(auth: tl.auth.RawAuthorization): void {
+    async notifyLoggedIn(auth: tl.auth.RawAuthorization): Promise<void> {
         this.network.notifyLoggedIn(auth)
+        this.log.prefix = `[USER ${auth.user.id}] `
+        await this.storage.self.store({
+            userId: auth.user.id,
+            isBot: auth.user._ === 'user' && auth.user.bot!,
+        })
         this.emit('logged_in', auth)
-    }
-
-    /**
-     * **ADVANCED**
-     *
-     * Adds all peers from a given object to entity cache in storage.
-     */
-    async _cachePeersFrom(obj: object): Promise<boolean> {
-        const parsedPeers: ITelegramStorage.PeerInfo[] = []
-
-        let count = 0
-
-        for (const peer of getAllPeersFrom(obj as tl.TlObject)) {
-            if ((peer as any).min) {
-                // no point in caching min peers as we can't use them
-                continue
-            }
-
-            count += 1
-
-            switch (peer._) {
-                case 'user':
-                    if (!peer.accessHash) {
-                        this.log.warn('received user without access hash: %j', peer)
-                        continue
-                    }
-
-                    parsedPeers.push({
-                        id: peer.id,
-                        accessHash: peer.accessHash,
-                        username: peer.username?.toLowerCase(),
-                        phone: peer.phone,
-                        type: 'user',
-                        full: peer,
-                    })
-                    break
-                case 'chat':
-                case 'chatForbidden':
-                    parsedPeers.push({
-                        id: -peer.id,
-                        accessHash: Long.ZERO,
-                        type: 'chat',
-                        full: peer,
-                    })
-                    break
-                case 'channel':
-                case 'channelForbidden':
-                    if (!peer.accessHash) {
-                        this.log.warn('received user without access hash: %j', peer)
-                        continue
-                    }
-                    parsedPeers.push({
-                        id: toggleChannelIdMark(peer.id),
-                        accessHash: peer.accessHash,
-                        username: peer._ === 'channel' ? peer.username?.toLowerCase() : undefined,
-                        type: 'channel',
-                        full: peer,
-                    })
-                    break
-            }
-        }
-
-        if (count > 0) {
-            await this.storage.updatePeers(parsedPeers)
-            this.log.debug('cached %d peers', count)
-
-            return true
-        }
-
-        return false
     }
 
     /**
@@ -426,14 +320,14 @@ export class BaseTelegramClient extends EventEmitter {
      * > with [@BotFather](//t.me/botfather)
      */
     async exportSession(): Promise<string> {
-        const primaryDcs = (await this.storage.getDefaultDcs()) ?? this._defaultDcs
+        const primaryDcs = (await this.storage.dcs.fetch()) ?? this._defaultDcs
 
-        const authKey = await this.storage.getAuthKeyFor(primaryDcs.main.id)
+        const authKey = await this.storage.provider.authKeys.get(primaryDcs.main.id)
         if (!authKey) throw new Error('Auth key is not ready yet')
 
         return writeStringSession(this._writerMap, {
             version: 2,
-            self: await this.storage.getSelf(),
+            self: await this.storage.self.fetch(),
             testMode: this._testMode,
             primaryDcs,
             authKey,

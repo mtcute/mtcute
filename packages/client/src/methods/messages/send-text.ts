@@ -7,7 +7,6 @@ import { InputText } from '../../types/misc/entities.js'
 import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
 import { inputPeerToPeer } from '../../utils/peer-utils.js'
 import { createDummyUpdate } from '../../utils/updates-utils.js'
-import { getAuthState } from '../auth/_state.js'
 import { _getRawPeerBatched } from '../chats/batched-queries.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -80,7 +79,7 @@ export async function sendText(
             _: 'message',
             id: res.id,
             peerId: inputPeerToPeer(peer),
-            fromId: { _: 'peerUser', userId: getAuthState(client).userId! },
+            fromId: { _: 'peerUser', userId: client.storage.self.getCached()!.userId },
             message,
             date: res.date,
             out: res.out,
@@ -97,7 +96,7 @@ export async function sendText(
         const fetchPeer = async (peer: tl.TypePeer | tl.TypeInputPeer): Promise<void> => {
             const id = getMarkedPeerId(peer)
 
-            let cached = await client.storage.getFullPeerById(id)
+            let cached = await client.storage.peers.getCompleteById(id)
 
             if (!cached) {
                 cached = await _getRawPeerBatched(client, await resolvePeer(client, peer))

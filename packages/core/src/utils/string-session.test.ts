@@ -4,7 +4,7 @@ import { createStub } from '@mtcute/test'
 import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 
-import { defaultProductionDc } from './default-dcs.js'
+import { defaultProductionDc } from './dcs.js'
 import { readStringSession, writeStringSession } from './string-session.js'
 
 const stubAuthKey = new Uint8Array(32)

@@ -1,7 +1,5 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { getAuthState } from '../auth/_state.js'
-
 /**
  * Get currently authorized user's username.
  *
@@ -9,5 +7,6 @@ import { getAuthState } from '../auth/_state.js'
  * does not call any API methods.
  */
 export function getMyUsername(client: BaseTelegramClient): string | null {
-    return getAuthState(client).selfUsername
+    throw new Error('Not implemented')
+    // return getAuthState(client).selfUsername
 }

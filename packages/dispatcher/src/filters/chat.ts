@@ -89,7 +89,8 @@ export const chatId: {
             case 'user_typing': {
                 const id = upd.chatId
 
-                return (matchSelf && id === upd.client.getAuthState().userId) || indexId.has(id)
+                throw new Error('TODO')
+                // return (matchSelf && id === upd.client.getAuthState().userId) || indexId.has(id)
             }
         }
 

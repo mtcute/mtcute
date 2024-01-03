@@ -250,6 +250,7 @@ export class SessionConnection extends PersistentConnection {
             // we must send some user-related rpc to the server to make sure that
             // it will send us updates
             this.sendRpc({ _: 'updates.getState' }).catch((err: any) => {
+                if (this._destroyed) return // silently fail
                 this.log.warn('failed to send updates.getState: %s', err.text || err.message)
             })
         }

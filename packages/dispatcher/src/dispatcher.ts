@@ -149,13 +149,14 @@ export class Dispatcher<State extends object = never> {
             if (!storage) {
                 const _storage = client.storage
 
-                if (!isCompatibleStorage(_storage)) {
-                    throw new MtArgumentError(
-                        'Storage used by the client is not compatible with the dispatcher. Please provide a compatible storage manually',
-                    )
-                }
+                // if (!isCompatibleStorage(_storage)) {
+                //     // todo: dont throw if state is never used
+                //     throw new MtArgumentError(
+                //         'Storage used by the client is not compatible with the dispatcher. Please provide a compatible storage manually',
+                //     )
+                // }
 
-                storage = _storage
+                storage = _storage as any
             }
 
             if (storage) {

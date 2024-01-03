@@ -1,12 +1,11 @@
 /* eslint-disable max-depth,max-params */
-import { assertNever, BaseTelegramClient, MaybeAsync, MtArgumentError, tl } from '@mtcute/core'
-import { getBarePeerId, getMarkedPeerId, markedPeerIdToBare, toggleChannelIdMark } from '@mtcute/core/utils.js'
+import { assertNever, BaseTelegramClient, MaybeAsync, MtArgumentError, parseMarkedPeerId, tl } from '@mtcute/core'
+import { getBarePeerId, getMarkedPeerId, toggleChannelIdMark } from '@mtcute/core/utils.js'
 
 import { PeersIndex } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerUser, toInputChannel, toInputUser } from '../../utils/peer-utils.js'
 import { RpsMeter } from '../../utils/rps-meter.js'
 import { createDummyUpdatesContainer } from '../../utils/updates-utils.js'
-import { getAuthState, setupAuthState } from '../auth/_state.js'
 import { _getChannelsBatched, _getUsersBatched } from '../chats/batched-queries.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 import { createUpdatesState, PendingUpdate, toPendingUpdate, UpdatesManagerParams, UpdatesState } from './types.js'
@@ -84,19 +83,18 @@ export function getCurrentRpsProcessing(client: BaseTelegramClient): number {
 export function enableUpdatesProcessing(client: BaseTelegramClient, params: UpdatesManagerParams): void {
     if (getState(client)) return
 
-    setupAuthState(client)
-
     if (client.network.params.disableUpdates) {
         throw new MtArgumentError('Updates must be enabled to use updates manager')
     }
 
-    const authState = getAuthState(client)
+    const authState = client.storage.self.getCached(true)
 
     const state = createUpdatesState(client, authState, params)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(client as any)[STATE_SYMBOL] = state
 
     function onLoggedIn(): void {
+        state.auth = client.storage.self.getCached()
         fetchUpdatesState(client, state).catch((err) => client._emitError(err))
     }
 
@@ -109,10 +107,6 @@ export function enableUpdatesProcessing(client: BaseTelegramClient, params: Upda
 
     function onBeforeConnect(): void {
         loadUpdatesStorage(client, state).catch((err) => client._emitError(err))
-    }
-
-    function onBeforeStorageSave(): Promise<void> {
-        return saveUpdatesStorage(client, state).catch((err) => client._emitError(err))
     }
 
     function onKeepAlive() {
@@ -128,7 +122,6 @@ export function enableUpdatesProcessing(client: BaseTelegramClient, params: Upda
     client.on('logged_in', onLoggedIn)
     client.on('logged_out', onLoggedOut)
     client.on('before_connect', onBeforeConnect)
-    client.beforeStorageSave(onBeforeStorageSave)
     client.on('keep_alive', onKeepAlive)
     client.network.setUpdateHandler((upd, fromClient) => handleUpdate(state, upd, fromClient))
 
@@ -136,7 +129,6 @@ export function enableUpdatesProcessing(client: BaseTelegramClient, params: Upda
         client.off('logged_in', onLoggedIn)
         client.off('logged_out', onLoggedOut)
         client.off('before_connect', onBeforeConnect)
-        client.offBeforeStorageSave(onBeforeStorageSave)
         client.off('keep_alive', onKeepAlive)
         client.off('before_stop', cleanup)
         client.network.setUpdateHandler(() => {})
@@ -380,7 +372,7 @@ async function fetchUpdatesState(client: BaseTelegramClient, state: UpdatesState
 }
 
 async function loadUpdatesStorage(client: BaseTelegramClient, state: UpdatesState): Promise<void> {
-    const storedState = await client.storage.getUpdatesState()
+    const storedState = await client.storage.updates.getState()
 
     if (storedState) {
         state.pts = state.oldPts = storedState[0]
@@ -406,16 +398,16 @@ async function saveUpdatesStorage(client: BaseTelegramClient, state: UpdatesStat
     if (state.pts !== undefined) {
         // if old* value is not available, assume it has changed.
         if (state.oldPts === undefined || state.oldPts !== state.pts) {
-            await client.storage.setUpdatesPts(state.pts)
+            await client.storage.updates.setPts(state.pts)
         }
         if (state.oldQts === undefined || state.oldQts !== state.qts) {
-            await client.storage.setUpdatesQts(state.qts!)
+            await client.storage.updates.setQts(state.qts!)
         }
         if (state.oldDate === undefined || state.oldDate !== state.date) {
-            await client.storage.setUpdatesDate(state.date!)
+            await client.storage.updates.setDate(state.date!)
         }
         if (state.oldSeq === undefined || state.oldSeq !== state.seq) {
-            await client.storage.setUpdatesSeq(state.seq!)
+            await client.storage.updates.setSeq(state.seq!)
         }
 
         // update old* values
@@ -424,7 +416,7 @@ async function saveUpdatesStorage(client: BaseTelegramClient, state: UpdatesStat
         state.oldDate = state.date
         state.oldSeq = state.seq
 
-        await client.storage.setManyChannelPts(state.cptsMod)
+        await client.storage.updates.setManyChannelPts(state.cptsMod)
         state.cptsMod.clear()
 
         if (save) {
@@ -505,7 +497,7 @@ async function fetchMissingPeers(
     async function fetchPeer(peer?: tl.TypePeer | number) {
         if (!peer) return true
 
-        const bare = typeof peer === 'number' ? markedPeerIdToBare(peer) : getBarePeerId(peer)
+        const bare = typeof peer === 'number' ? parseMarkedPeerId(peer)[1] : getBarePeerId(peer)
 
         const marked = typeof peer === 'number' ? peer : getMarkedPeerId(peer)
         const index = marked > 0 ? peers.users : peers.chats
@@ -513,7 +505,7 @@ async function fetchMissingPeers(
         if (index.has(bare)) return true
         if (missing.has(marked)) return false
 
-        const cached = await client.storage.getFullPeerById(marked)
+        const cached = await client.storage.peers.getCompleteById(marked)
 
         if (!cached) {
             missing.add(marked)
@@ -641,7 +633,7 @@ async function storeMessageReferences(client: BaseTelegramClient, msg: tl.TypeMe
 
         const marked = typeof peer === 'number' ? peer : getMarkedPeerId(peer)
 
-        promises.push(client.storage.saveReferenceMessage(marked, channelId, msg.id))
+        promises.push(client.storage.refMsgs.store(marked, channelId, msg.id))
     }
 
     // reference: https://github.com/tdlib/td/blob/master/td/telegram/MessagesManager.cpp
@@ -762,7 +754,7 @@ async function fetchChannelDifference(
     let _pts: number | null | undefined = state.cpts.get(channelId)
 
     if (!_pts && state.catchUpChannels) {
-        _pts = await client.storage.getChannelPts(channelId)
+        _pts = await client.storage.updates.getChannelPts(channelId)
     }
     if (!_pts) _pts = fallbackPts
 
@@ -782,7 +774,7 @@ async function fetchChannelDifference(
 
     // to make TS happy
     let pts = _pts
-    let limit = state.auth.isBot ? 100000 : 100
+    let limit = state.auth?.isBot ? 100000 : 100
 
     if (pts <= 0) {
         pts = 1
@@ -1182,27 +1174,28 @@ async function onUpdate(
             client.network.config.update(true).catch((err) => client._emitError(err))
             break
         case 'updateUserName':
-            if (upd.userId === state.auth.userId) {
-                state.auth.selfUsername = upd.usernames.find((it) => it.active)?.username ?? null
-            }
+            // todo
+            // if (upd.userId === state.auth?.userId) {
+            //     state.auth.selfUsername = upd.usernames.find((it) => it.active)?.username ?? null
+            // }
             break
         case 'updateDeleteChannelMessages':
-            if (!state.auth.isBot) {
-                await client.storage.deleteReferenceMessages(toggleChannelIdMark(upd.channelId), upd.messages)
+            if (!state.auth?.isBot) {
+                await client.storage.refMsgs.delete(toggleChannelIdMark(upd.channelId), upd.messages)
             }
             break
         case 'updateNewMessage':
         case 'updateEditMessage':
         case 'updateNewChannelMessage':
         case 'updateEditChannelMessage':
-            if (!state.auth.isBot) {
+            if (!state.auth?.isBot) {
                 await storeMessageReferences(client, upd.message)
             }
             break
     }
 
     if (missing?.size) {
-        if (state.auth.isBot) {
+        if (state.auth?.isBot) {
             state.log.warn(
                 'missing peers (%J) after getDifference for %s (pts = %d, cid = %d)',
                 missing,
@@ -1215,7 +1208,7 @@ async function onUpdate(
             await client.storage.save?.()
 
             for (const id of missing) {
-                Promise.resolve(client.storage.getPeerById(id))
+                Promise.resolve(client.storage.peers.getById(id))
                     .then((peer): unknown => {
                         if (!peer) {
                             state.log.warn('cannot fetch full peer %d - getPeerById returned null', id)
@@ -1341,7 +1334,7 @@ async function updatesLoop(client: BaseTelegramClient, state: UpdatesState): Pro
                             log.debug('received %s (size = %d)', upd._, upd.updates.length)
                         }
 
-                        await client._cachePeersFrom(upd)
+                        await client.storage.peers.updatePeersFrom(upd)
 
                         const peers = PeersIndex.from(upd)
 
@@ -1422,7 +1415,7 @@ async function updatesLoop(client: BaseTelegramClient, state: UpdatesState): Pro
                             id: upd.id,
                             fromId: {
                                 _: 'peerUser',
-                                userId: upd.out ? state.auth.userId! : upd.userId,
+                                userId: upd.out ? state.auth!.userId : upd.userId,
                             },
                             peerId: {
                                 _: 'peerUser',
@@ -1528,7 +1521,7 @@ async function updatesLoop(client: BaseTelegramClient, state: UpdatesState): Pro
                     // update gaps (i.e. first update received is considered
                     // to be the base state)
 
-                    const saved = await client.storage.getChannelPts(pending.channelId)
+                    const saved = await client.storage.updates.getChannelPts(pending.channelId)
 
                     if (saved) {
                         state.cpts.set(pending.channelId, saved)

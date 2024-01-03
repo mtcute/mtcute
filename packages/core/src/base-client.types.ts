@@ -3,8 +3,9 @@ import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { NetworkManagerExtraParams, ReconnectionStrategy, TransportFactory } from './network/index.js'
 import { PersistentConnectionParams } from './network/persistent-connection.js'
-import { ITelegramStorage } from './storage/abstract.js'
-import { CryptoProviderFactory } from './utils/index.js'
+import { IMtStorageProvider } from './storage/provider.js'
+import { StorageManagerExtraOptions } from './storage/storage.js'
+import { CryptoProviderFactory, DcOptions } from './utils/index.js'
 
 /** Options for {@link BaseTelegramClient} */
 export interface BaseTelegramClientOptions {
@@ -20,7 +21,10 @@ export interface BaseTelegramClientOptions {
     /**
      * Storage to use for this client.
      */
-    storage: ITelegramStorage
+    storage: IMtStorageProvider
+
+    /** Additional options for the storage manager */
+    storageOptions?: StorageManagerExtraOptions
 
     /**
      * Cryptography provider factory to allow delegating
@@ -46,7 +50,7 @@ export interface BaseTelegramClientOptions {
      *
      * @default  Production DC 2.
      */
-    defaultDcs?: ITelegramStorage.DcOptions
+    defaultDcs?: DcOptions
 
     /**
      * Whether to connect to test servers.

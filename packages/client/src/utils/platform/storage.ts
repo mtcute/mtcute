@@ -1,6 +1,5 @@
-import { JsonFileStorage } from '@mtcute/core/src/storage/json-file.js'
-
 /** @internal */
 export const _defaultStorageFactory = (name: string) => {
-    return new JsonFileStorage(name)
+    // todo: move sqlite to core?
+    throw new Error('Not implemented')
 }

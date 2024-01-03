@@ -22,7 +22,7 @@
     "dependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/tl-runtime": "workspace:^",
-        "better-sqlite3": "8.4.0"
+        "better-sqlite3": "9.2.2"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^",

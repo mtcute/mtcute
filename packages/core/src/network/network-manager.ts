@@ -1,9 +1,9 @@
 import { mtp, tl } from '@mtcute/tl'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import { ITelegramStorage } from '../storage/index.js'
+import { StorageManager } from '../storage/storage.js'
 import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
-import { ControllablePromise, createControllablePromise, ICryptoProvider, Logger, sleep } from '../utils/index.js'
+import { ControllablePromise, createControllablePromise, DcOptions, ICryptoProvider, Logger, sleep } from '../utils/index.js'
 import { assertTypeIs } from '../utils/type-assertions.js'
 import { ConfigManager } from './config-manager.js'
 import { MultiSessionConnection } from './multi-session-connection.js'
@@ -30,7 +30,7 @@ const CLIENT_ERRORS = {
  * This type is intended for internal usage only.
  */
 export interface NetworkManagerParams {
-    storage: ITelegramStorage
+    storage: StorageManager
     crypto: ICryptoProvider
     log: Logger
 
@@ -49,7 +49,6 @@ export interface NetworkManagerParams {
     writerMap: TlWriterMap
     isPremium: boolean
     _emitError: (err: Error, connection?: SessionConnection) => void
-    keepAliveAction: () => void
     onUsable: () => void
 }
 
@@ -238,7 +237,7 @@ export class DcConnectionManager {
         /** DC ID */
         readonly dcId: number,
         /** DC options to use */
-        readonly _dcs: ITelegramStorage.DcOptions,
+        readonly _dcs: DcOptions,
         /** Whether this DC is the primary one */
         public isPrimary = false,
     ) {
@@ -278,7 +277,7 @@ export class DcConnectionManager {
             this.upload.setAuthKey(key)
             this.download.setAuthKey(key)
             this.downloadSmall.setAuthKey(key)
-            Promise.resolve(this.manager._storage.setAuthKeyFor(this.dcId, key))
+            Promise.resolve(this.manager._storage.provider.authKeys.set(this.dcId, key))
                 .then(() => {
                     this.upload.notifyKeyChange()
                     this.download.notifyKeyChange()
@@ -300,7 +299,7 @@ export class DcConnectionManager {
             this.download.setAuthKey(key, true)
             this.downloadSmall.setAuthKey(key, true)
 
-            Promise.resolve(this.manager._storage.setTempAuthKeyFor(this.dcId, idx, key, expires * 1000))
+            Promise.resolve(this.manager._storage.provider.authKeys.setTemp(this.dcId, idx, key, expires * 1000))
                 .then(() => {
                     this.upload.notifyKeyChange()
                     this.download.notifyKeyChange()
@@ -309,7 +308,7 @@ export class DcConnectionManager {
                 .catch((e: Error) => this.manager.params._emitError(e))
         })
         connection.on('future-salts', (salts: mtp.RawMt_future_salt[]) => {
-            Promise.resolve(this.manager._storage.setFutureSalts(this.dcId, salts)).catch((e: Error) =>
+            Promise.resolve(this.manager._storage.salts.store(this.dcId, salts)).catch((e: Error) =>
                 this.manager.params._emitError(e),
             )
         })
@@ -366,8 +365,8 @@ export class DcConnectionManager {
 
     async loadKeys(forcePfs = false): Promise<boolean> {
         const [permanent, salts] = await Promise.all([
-            this.manager._storage.getAuthKeyFor(this.dcId),
-            this.manager._storage.getFutureSalts(this.dcId),
+            this.manager._storage.provider.authKeys.get(this.dcId),
+            this.manager._storage.salts.fetch(this.dcId),
         ])
 
         this.main.setAuthKey(permanent)
@@ -384,9 +383,10 @@ export class DcConnectionManager {
         }
 
         if (this.manager.params.usePfs || forcePfs) {
+            const now = Date.now()
             await Promise.all(
                 this.main._sessions.map(async (_, i) => {
-                    const temp = await this.manager._storage.getAuthKeyFor(this.dcId, i)
+                    const temp = await this.manager._storage.provider.authKeys.getTemp(this.dcId, i, now)
                     this.main.setAuthKey(temp, true, i)
 
                     if (i === 0) {
@@ -425,8 +425,6 @@ export class NetworkManager {
     protected readonly _dcConnections = new Map<number, DcConnectionManager>()
     protected _primaryDc?: DcConnectionManager
 
-    private _keepAliveInterval?: NodeJS.Timeout
-    private _lastUpdateTime = 0
     private _updateHandler: (upd: tl.TypeUpdates, fromClient: boolean) => void = () => {}
 
     constructor(
@@ -465,7 +463,7 @@ export class NetworkManager {
         config.onConfigUpdate(this._onConfigChanged)
     }
 
-    private async _findDcOptions(dcId: number): Promise<ITelegramStorage.DcOptions> {
+    private async _findDcOptions(dcId: number): Promise<DcOptions> {
         const main = await this.config.findOption({
             dcId,
             allowIpv6: this.params.useIpv6,
@@ -499,21 +497,9 @@ export class NetworkManager {
         dc.setIsPrimary(true)
 
         dc.main.on('usable', () => {
-            this._lastUpdateTime = Date.now()
             this.params.onUsable()
 
-            if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
-            this._keepAliveInterval = setInterval(() => {
-                if (Date.now() - this._lastUpdateTime > 900_000) {
-                    // telegram asks to fetch pending updates if there are no updates for 15 minutes.
-                    // it is up to the user to decide whether to do it or not
-
-                    this.params.keepAliveAction()
-                    this._lastUpdateTime = Date.now()
-                }
-            }, 60_000)
-
-            Promise.resolve(this._storage.getSelf())
+            Promise.resolve(this._storage.self.fetch())
                 .then((self) => {
                     if (self?.isBot) {
                         // bots may receive tmpSessions, which we should respect
@@ -523,7 +509,6 @@ export class NetworkManager {
                 .catch((e: Error) => this.params._emitError(e))
         })
         dc.main.on('update', (update: tl.TypeUpdates) => {
-            this._lastUpdateTime = Date.now()
             this._updateHandler(update, false)
         })
 
@@ -569,7 +554,7 @@ export class NetworkManager {
      *
      * @param defaultDcs  Default DCs to connect to
      */
-    async connect(defaultDcs: ITelegramStorage.DcOptions): Promise<void> {
+    async connect(defaultDcs: DcOptions): Promise<void> {
         if (defaultDcs.main.id !== defaultDcs.media.id) {
             throw new MtArgumentError('Default DCs must be the same')
         }
@@ -668,7 +653,7 @@ export class NetworkManager {
             this._dcConnections.set(newDc, new DcConnectionManager(this, newDc, options, true))
         }
 
-        await this._storage.setDefaultDcs(options)
+        await this._storage.dcs.store(options)
 
         await this._switchPrimaryDc(this._dcConnections.get(newDc)!)
     }
@@ -722,10 +707,6 @@ export class NetworkManager {
         for (let i = 0; i < maxRetryCount; i++) {
             try {
                 const res = await multi.sendRpc(message, stack, params?.timeout, params?.abortSignal, params?.chainId)
-
-                if (kind === 'main') {
-                    this._lastUpdateTime = Date.now()
-                }
 
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return res
@@ -843,7 +824,6 @@ export class NetworkManager {
         for (const dc of this._dcConnections.values()) {
             dc.destroy()
         }
-        if (this._keepAliveInterval) clearInterval(this._keepAliveInterval)
         this.config.offConfigUpdate(this._onConfigChanged)
     }
 }

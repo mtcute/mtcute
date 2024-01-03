@@ -1,9 +1,9 @@
 import {
     BaseTelegramClient,
-    getBasicPeerType,
     getMarkedPeerId,
     Long,
     MtTypeAssertionError,
+    parseMarkedPeerId,
     tl,
     toggleChannelIdMark,
 } from '@mtcute/core'
@@ -51,7 +51,7 @@ export async function resolvePeer(
     }
 
     if (typeof peerId === 'number' && !force) {
-        const fromStorage = await client.storage.getPeerById(peerId)
+        const fromStorage = await client.storage.peers.getById(peerId)
         if (fromStorage) return fromStorage
     }
 
@@ -64,7 +64,7 @@ export async function resolvePeer(
 
         if (peerId.match(/^\d+$/)) {
             // phone number
-            const fromStorage = await client.storage.getPeerByPhone(peerId)
+            const fromStorage = await client.storage.peers.getByPhone(peerId)
             if (fromStorage) return fromStorage
 
             res = await client.call({
@@ -74,7 +74,7 @@ export async function resolvePeer(
         } else {
             // username
             if (!force) {
-                const fromStorage = await client.storage.getPeerByUsername(peerId.toLowerCase())
+                const fromStorage = await client.storage.peers.getByUsername(peerId)
                 if (fromStorage) return fromStorage
             }
 
@@ -140,28 +140,25 @@ export async function resolvePeer(
     // particularly, when we're a bot or we're referencing a user
     // who we have "seen" recently
     // if it's not the case, we'll get an `PEER_ID_INVALID` error anyways
-    const peerType = getBasicPeerType(peerId)
+    const [peerType, bareId] = parseMarkedPeerId(peerId)
 
     switch (peerType) {
         case 'user':
             return {
                 _: 'inputPeerUser',
-                userId: peerId,
+                userId: bareId,
                 accessHash: Long.ZERO,
             }
         case 'chat':
             return {
                 _: 'inputPeerChat',
-                chatId: -peerId,
+                chatId: bareId,
             }
-        case 'channel': {
-            const id = toggleChannelIdMark(peerId)
-
+        case 'channel':
             return {
                 _: 'inputPeerChannel',
-                channelId: id,
+                channelId: bareId,
                 accessHash: Long.ZERO,
             }
-        }
     }
 }

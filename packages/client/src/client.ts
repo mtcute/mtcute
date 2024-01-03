@@ -4,7 +4,7 @@
 import {
     BaseTelegramClient,
     BaseTelegramClientOptions,
-    ITelegramStorage,
+    IMtStorageProvider,
     Long,
     MaybeArray,
     MaybeAsync,
@@ -12,10 +12,10 @@ import {
     PartialOnly,
     tl,
 } from '@mtcute/core'
-import { MemoryStorage } from '@mtcute/core/src/storage/memory.js'
+import { MemoryStorage } from '@mtcute/core/src/storage/providers/memory/index.js'
 import { tdFileId } from '@mtcute/file-id'
 
-import { AuthState, getAuthState, isSelfPeer, setupAuthState } from './methods/auth/_state.js'
+import { isSelfPeer } from './methods/auth/_state.js'
 import { checkPassword } from './methods/auth/check-password.js'
 import { getPasswordHint } from './methods/auth/get-password-hint.js'
 import { logOut } from './methods/auth/log-out.js'
@@ -344,7 +344,7 @@ interface TelegramClientOptions extends Omit<BaseTelegramClientOptions, 'storage
      *
      * If omitted, {@link MemoryStorage} is used
      */
-    storage?: string | ITelegramStorage
+    storage?: string | IMtStorageProvider
 
     /**
      * Parameters for updates manager.
@@ -551,15 +551,6 @@ export interface TelegramClient extends BaseTelegramClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(name: string, handler: (...args: any[]) => void): this
-    /**
-     * Get auth state for the given client, containing
-     * information about the current user.
-     *
-     * Auth state must first be initialized with {@link setupAuthState}.
-     * **Available**: ✅ both users and bots
-     *
-     */
-    getAuthState(): AuthState
     /**
      * Check if the given peer/input peer is referring to the current user
      * **Available**: ✅ both users and bots
@@ -5299,14 +5290,8 @@ export class TelegramClient extends BaseTelegramClient {
                     },
                 }),
             })
-        } else {
-            setupAuthState(this)
         }
     }
-}
-
-TelegramClient.prototype.getAuthState = function (...args) {
-    return getAuthState(this, ...args)
 }
 
 TelegramClient.prototype.isSelfPeer = function (...args) {

@@ -55,8 +55,8 @@ describe('resolvePeer', () => {
                 accessHash: Long.fromBits(111, 222),
             }),
         )
-        await client.storage.saveReferenceMessage(123, -1000000000456, 789)
-        await client.storage.saveReferenceMessage(-1000000000123, -1000000000456, 789)
+        await client.storage.refMsgs.store(123, -1000000000456, 789)
+        await client.storage.refMsgs.store(-1000000000123, -1000000000456, 789)
 
         const resolved = await resolvePeer(client, {
             _: 'mtcute.dummyInputPeerMinUser',
@@ -124,7 +124,7 @@ describe('resolvePeer', () => {
                         accessHash: Long.fromBits(111, 222),
                     }),
                 )
-                await client.storage.saveReferenceMessage(123, -1000000000456, 789)
+                await client.storage.refMsgs.store(123, -1000000000456, 789)
 
                 const resolved = await resolvePeer(client, 123)
 
@@ -182,7 +182,7 @@ describe('resolvePeer', () => {
                         accessHash: Long.fromBits(111, 222),
                     }),
                 )
-                await client.storage.saveReferenceMessage(-1000000000123, -1000000000456, 789)
+                await client.storage.refMsgs.store(-1000000000123, -1000000000456, 789)
 
                 const resolved = await resolvePeer(client, -1000000000123)
 

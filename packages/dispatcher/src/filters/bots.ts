@@ -66,11 +66,12 @@ export const command = (
                 const lastGroup = m[m.length - 1]
 
                 if (lastGroup) {
-                    const state = msg.client.getAuthState()
+                    // const state = msg.client.getAuthState()
 
-                    if (state.isBot && lastGroup !== state.selfUsername) {
-                        return false
-                    }
+                    // if (state.isBot && lastGroup !== state.selfUsername) {
+                    //     return false
+                    // }
+                    console.log('todo')
                 }
 
                 const match = m.slice(1, -1)

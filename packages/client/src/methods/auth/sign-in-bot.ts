@@ -19,5 +19,5 @@ export async function signInBot(client: BaseTelegramClient, token: string): Prom
         botAuthToken: token,
     })
 
-    return _onAuthorization(client, res, true)
+    return _onAuthorization(client, res)
 }

@@ -1,7 +1,6 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
 import { User } from '../../types/index.js'
-import { getAuthState } from '../auth/_state.js'
 
 /**
  * Change username of the current user.
@@ -19,7 +18,8 @@ export async function setMyUsername(client: BaseTelegramClient, username: string
         username,
     })
 
-    getAuthState(client).selfUsername = username || null
+    // todo
+    // getAuthState(client).selfUsername = username || null
 
     return new User(res)
 }

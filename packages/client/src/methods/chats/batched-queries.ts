@@ -8,7 +8,6 @@ import {
     toInputUser,
 } from '../../utils/peer-utils.js'
 import { batchedQuery } from '../../utils/query-batcher.js'
-import { getAuthState } from '../auth/_state.js'
 
 /** @internal */
 export const _getUsersBatched = batchedQuery<tl.TypeInputUser, tl.TypeUser, number>({
@@ -27,7 +26,7 @@ export const _getUsersBatched = batchedQuery<tl.TypeInputUser, tl.TypeUser, numb
             case 'inputUserFromMessage':
                 return item.userId
             case 'inputUserSelf':
-                return getAuthState(client).userId!
+                return client.storage.self.getCached()!.userId
             default:
                 throw new MtArgumentError('Invalid input user')
         }

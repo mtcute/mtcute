@@ -1,9 +1,9 @@
 import { BaseTelegramClient, tl } from '@mtcute/core'
+import type { CurrentUserInfo } from '@mtcute/core/src/storage/service/current-user.js'
 import { AsyncLock, ConditionVariable, Deque, EarlyTimer, Logger, SortedLinkedList } from '@mtcute/core/utils.js'
 
 import { PeersIndex } from '../../types/index.js'
 import { RpsMeter } from '../../utils/index.js'
-import { AuthState } from '../auth/_state.js'
 import { extractChannelIdFromUpdate } from './utils.js'
 
 /**
@@ -134,7 +134,7 @@ export interface UpdatesState {
     log: Logger
     stop: () => void
     handler: RawUpdateHandler
-    auth: AuthState
+    auth: CurrentUserInfo | null
 }
 
 /**
@@ -143,7 +143,7 @@ export interface UpdatesState {
  */
 export function createUpdatesState(
     client: BaseTelegramClient,
-    authState: AuthState,
+    authState: CurrentUserInfo | null,
     opts: UpdatesManagerParams,
 ): UpdatesState {
     return {

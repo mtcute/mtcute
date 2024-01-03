@@ -3,7 +3,7 @@ import EventEmitter from 'events'
 import { tl } from '@mtcute/tl'
 
 import { MaybeAsync } from '../../types/index.js'
-import { ICryptoProvider, Logger } from '../../utils/index.js'
+import { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.js'
 
 /** Current state of the transport */
 export enum TransportState {
@@ -40,13 +40,13 @@ export interface ITelegramTransport extends EventEmitter {
     /** returns current state */
     state(): TransportState
     /** returns current DC. should return null if state == IDLE */
-    currentDc(): tl.RawDcOption | null
+    currentDc(): BasicDcOption | null
 
     /**
      * Start trying to connect to a specified DC.
      * Will throw an error if state != IDLE
      */
-    connect(dc: tl.RawDcOption, testMode: boolean): void
+    connect(dc: BasicDcOption, testMode: boolean): void
     /** call to close existing connection to some DC */
     close(): void
     /** send a message */

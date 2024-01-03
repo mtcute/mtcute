@@ -1,7 +1,5 @@
 import { BaseTelegramClient } from '@mtcute/core'
 
-import { getAuthState } from './_state.js'
-
 /**
  * Log out from Telegram account and optionally reset the session storage.
  *
@@ -13,16 +11,12 @@ import { getAuthState } from './_state.js'
 export async function logOut(client: BaseTelegramClient): Promise<true> {
     await client.call({ _: 'auth.logOut' })
 
-    const authState = getAuthState(client)
-    authState.userId = null
-    authState.isBot = false
-    authState.selfUsername = null
-    authState.selfChanged = true
+    await client.storage.self.store(null)
+    // authState.selfUsername = null todo
 
     client.emit('logged_out')
 
-    await client.storage.reset()
-    await client.saveStorage()
+    await client.storage.clear()
 
     return true
 }

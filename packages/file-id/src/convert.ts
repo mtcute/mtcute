@@ -1,4 +1,4 @@
-import { assertNever, getBasicPeerType, Long, markedPeerIdToBare, tl } from '@mtcute/core'
+import { assertNever, Long, parseMarkedPeerId, tl } from '@mtcute/core'
 
 import { parseFileId } from './parse.js'
 import { tdFileId as td } from './types.js'
@@ -12,8 +12,7 @@ function dialogPhotoToInputPeer(
     dialog: td.RawPhotoSizeSourceDialogPhoto | td.RawPhotoSizeSourceDialogPhotoLegacy,
 ): tl.TypeInputPeer {
     const markedPeerId = dialog.id
-    const peerType = getBasicPeerType(markedPeerId)
-    const peerId = markedPeerIdToBare(markedPeerId)
+    const [peerType, peerId] = parseMarkedPeerId(markedPeerId)
 
     if (peerType === 'user') {
         return {

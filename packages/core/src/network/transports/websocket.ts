@@ -1,9 +1,7 @@
 import EventEmitter from 'events'
 
-import { tl } from '@mtcute/tl'
-
 import { MtcuteError, MtUnsupportedError } from '../../types/errors.js'
-import { ICryptoProvider, Logger } from '../../utils/index.js'
+import { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.js'
 import { IPacketCodec, ITelegramTransport, TransportState } from './abstract.js'
 import { IntermediatePacketCodec } from './intermediate.js'
 import { ObfuscatedPacketCodec } from './obfuscated.js'
@@ -25,7 +23,7 @@ const subdomainsMap: Record<string, string> = {
  * Subclasses must provide packet codec in `_packetCodec` property
  */
 export abstract class BaseWebSocketTransport extends EventEmitter implements ITelegramTransport {
-    private _currentDc: tl.RawDcOption | null = null
+    private _currentDc: BasicDcOption | null = null
     private _state: TransportState = TransportState.Idle
     private _socket: WebSocket | null = null
     private _crypto!: ICryptoProvider
@@ -87,11 +85,11 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
         return this._state
     }
 
-    currentDc(): tl.RawDcOption | null {
+    currentDc(): BasicDcOption | null {
         return this._currentDc
     }
 
-    connect(dc: tl.RawDcOption, testMode: boolean): void {
+    connect(dc: BasicDcOption, testMode: boolean): void {
         if (this._state !== TransportState.Idle) {
             throw new MtcuteError('Transport is not IDLE')
         }

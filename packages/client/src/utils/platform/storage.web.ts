@@ -1,4 +1,4 @@
-import { IdbStorage } from '@mtcute/core/src/storage/idb.js'
+import { IdbStorage } from '@mtcute/core'
 
 import { MtUnsupportedError } from '../../index.js'
 

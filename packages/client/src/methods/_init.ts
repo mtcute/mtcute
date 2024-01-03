@@ -1,16 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { BaseTelegramClientOptions, ITelegramStorage } from '@mtcute/core'
+import { BaseTelegramClientOptions, IMtStorageProvider } from '@mtcute/core'
 // @copy
-import { MemoryStorage } from '@mtcute/core/src/storage/memory.js'
+import { MemoryStorage } from '@mtcute/core/src/storage/providers/memory/index.js'
 
 import { TelegramClient } from '../client.js'
 // @copy
 import { Conversation } from '../types/conversation.js'
 // @copy
 import { _defaultStorageFactory } from '../utils/platform/storage.js'
-// @copy
-import { setupAuthState } from './auth/_state.js'
 // @copy
 import {
     enableUpdatesProcessing,
@@ -35,7 +33,7 @@ interface TelegramClientOptions extends Omit<BaseTelegramClientOptions, 'storage
      *
      * If omitted, {@link MemoryStorage} is used
      */
-    storage?: string | ITelegramStorage
+    storage?: string | IMtStorageProvider
 
     /**
      * Parameters for updates manager.
@@ -109,7 +107,5 @@ function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
                 },
             }),
         })
-    } else {
-        setupAuthState(this)
     }
 }

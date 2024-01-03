@@ -8,14 +8,15 @@ import {
     TlWriterMap,
 } from '@mtcute/tl-runtime'
 
-import { ITelegramStorage } from '../storage/index.js'
+import { CurrentUserInfo } from '../storage/service/current-user.js'
 import { MtArgumentError } from '../types/index.js'
+import { DcOptions } from './dcs.js'
 
 export interface StringSessionData {
     version: number
     testMode: boolean
-    primaryDcs: ITelegramStorage.DcOptions
-    self?: ITelegramStorage.SelfInfo | null
+    primaryDcs: DcOptions
+    self?: CurrentUserInfo | null
     authKey: Uint8Array
 }
 
@@ -85,7 +86,7 @@ export function readStringSession(readerMap: TlReaderMap, data: string): StringS
         throw new MtArgumentError(`Invalid session string (dc._ = ${primaryDc._})`)
     }
 
-    let self: ITelegramStorage.SelfInfo | null = null
+    let self: CurrentUserInfo | null = null
 
     if (hasSelf) {
         const selfId = reader.int53()

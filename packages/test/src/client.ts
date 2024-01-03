@@ -36,7 +36,7 @@ export class StubTelegramClient extends BaseTelegramClient {
                         }
 
                         const dcId = transport._currentDc!.id
-                        const key = storage.getAuthKeyFor(dcId)
+                        const key = storage.authKeys.get(dcId)
 
                         if (key) {
                             this._onRawMessage(storage.decryptOutgoingMessage(transport._crypto, data, dcId))
@@ -101,7 +101,7 @@ export class StubTelegramClient extends BaseTelegramClient {
                 this._knownChats.set(peer.id, peer)
             }
 
-            await this._cachePeersFrom(peer)
+            await this.storage.peers.updatePeersFrom(peer)
         }
     }
 

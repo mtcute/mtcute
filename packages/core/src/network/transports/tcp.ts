@@ -1,10 +1,8 @@
 import EventEmitter from 'events'
 import { connect, Socket } from 'net'
 
-import { tl } from '@mtcute/tl'
-
 import { MtcuteError } from '../../types/errors.js'
-import { ICryptoProvider, Logger } from '../../utils/index.js'
+import { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.js'
 import { IPacketCodec, ITelegramTransport, TransportState } from './abstract.js'
 import { IntermediatePacketCodec } from './intermediate.js'
 
@@ -13,7 +11,7 @@ import { IntermediatePacketCodec } from './intermediate.js'
  * Subclasses must provide packet codec in `_packetCodec` property
  */
 export abstract class BaseTcpTransport extends EventEmitter implements ITelegramTransport {
-    protected _currentDc: tl.RawDcOption | null = null
+    protected _currentDc: BasicDcOption | null = null
     protected _state: TransportState = TransportState.Idle
     protected _socket: Socket | null = null
 
@@ -41,12 +39,12 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
         return this._state
     }
 
-    currentDc(): tl.RawDcOption | null {
+    currentDc(): BasicDcOption | null {
         return this._currentDc
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    connect(dc: tl.RawDcOption, testMode: boolean): void {
+    connect(dc: BasicDcOption, testMode: boolean): void {
         if (this._state !== TransportState.Idle) {
             throw new MtcuteError('Transport is not IDLE')
         }

@@ -93,56 +93,27 @@ export function getMarkedPeerId(
 }
 
 /**
- * Extract basic peer type from {@link tl.TypePeer} or its marked ID.
+ * Parse a marked ID into a {@link BasicPeerType} and a bare ID
  */
-export function getBasicPeerType(peer: tl.TypePeer | number): BasicPeerType {
-    if (typeof peer !== 'number') {
-        switch (peer._) {
-            case 'peerUser':
-                return 'user'
-            case 'peerChat':
-                return 'chat'
-            case 'peerChannel':
-                return 'channel'
-        }
-    }
-
-    if (peer < 0) {
-        if (MIN_MARKED_CHAT_ID <= peer) {
-            return 'chat'
+export function parseMarkedPeerId(id: number): [BasicPeerType, number] {
+    if (id < 0) {
+        if (MIN_MARKED_CHAT_ID <= id) {
+            return ['chat', -id]
         }
 
-        if (MIN_MARKED_CHANNEL_ID <= peer && peer !== ZERO_CHANNEL_ID) {
-            return 'channel'
+        if (MIN_MARKED_CHANNEL_ID <= id && id !== ZERO_CHANNEL_ID) {
+            return ['channel', ZERO_CHANNEL_ID - id]
         }
 
-        if (MAX_SECRET_CHAT_ID >= peer && peer !== ZERO_SECRET_CHAT_ID) {
+        if (MAX_SECRET_CHAT_ID >= id && id !== ZERO_SECRET_CHAT_ID) {
             // return 'secret'
             throw new MtUnsupportedError('Secret chats are not supported')
         }
-    } else if (peer > 0 && peer <= MAX_USER_ID) {
-        return 'user'
+    } else if (id > 0 && id <= MAX_USER_ID) {
+        return ['user', id]
     }
 
-    throw new MtArgumentError(`Invalid marked peer id: ${peer}`)
-}
-
-/**
- * Extract bare peer ID from marked ID.
- *
- * @param peerId  Marked peer ID
- */
-export function markedPeerIdToBare(peerId: number): number {
-    const type = getBasicPeerType(peerId)
-
-    switch (type) {
-        case 'user':
-            return peerId
-        case 'chat':
-            return -peerId
-        case 'channel':
-            return toggleChannelIdMark(peerId)
-    }
+    throw new MtArgumentError(`Invalid marked peer id: ${id}`)
 }
 
 /**

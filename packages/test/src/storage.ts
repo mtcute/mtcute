@@ -1,8 +1,7 @@
-import { ITelegramStorage, MtArgumentError } from '@mtcute/core'
-import { MemoryStorage } from '@mtcute/core/src/storage/memory.js'
+import { MemoryStorage, MtArgumentError } from '@mtcute/core'
 import { createAesIgeForMessage, ICryptoProvider } from '@mtcute/core/utils.js'
 
-export class StubMemoryTelegramStorage extends MemoryStorage implements ITelegramStorage {
+export class StubMemoryTelegramStorage extends MemoryStorage {
     constructor(
         readonly params: {
             /**
@@ -20,56 +19,40 @@ export class StubMemoryTelegramStorage extends MemoryStorage implements ITelegra
              * @default true
              */
             hasTempKeys?: boolean | number[]
-
-            onLoad?: () => void
-            onSave?: () => void
-            onDestroy?: () => void
-            onReset?: () => void
         } = {
             hasKeys: true,
             hasTempKeys: true,
         },
     ) {
         super()
-    }
 
-    getAuthKeyFor(dcId: number, tempIndex?: number | undefined): Uint8Array | null {
-        if (tempIndex === undefined && this.params.hasKeys) {
-            if (this.params.hasKeys === true || this.params.hasKeys.includes(dcId)) {
-                return new Uint8Array(256)
+        const _origGet = this.authKeys.get
+
+        this.authKeys.get = (dcId) => {
+            if (this.params.hasKeys) {
+                if (this.params.hasKeys === true || this.params.hasKeys.includes(dcId)) {
+                    return new Uint8Array(256)
+                }
             }
+
+            return _origGet.call(this.authKeys, dcId)
         }
 
-        if (tempIndex === undefined && this.params.hasTempKeys) {
-            if (this.params.hasTempKeys === true || this.params.hasTempKeys.includes(dcId)) {
-                return new Uint8Array(256)
+        const _origGetTemp = this.authKeys.getTemp
+
+        this.authKeys.getTemp = (dcId, idx, now) => {
+            if (this.params.hasTempKeys) {
+                if (this.params.hasTempKeys === true || this.params.hasTempKeys.includes(dcId)) {
+                    return new Uint8Array(256)
+                }
             }
+
+            return _origGetTemp.call(this.authKeys, dcId, idx, now)
         }
-
-        return super.getAuthKeyFor(dcId, tempIndex)
-    }
-
-    load(): void {
-        this.params.onLoad?.()
-        super.load()
-    }
-
-    save(): void {
-        this.params.onSave?.()
-    }
-
-    destroy(): void {
-        this.params.onDestroy?.()
-        super.destroy()
-    }
-
-    reset(withKeys = false): void {
-        this.params?.onReset?.()
-        super.reset(withKeys)
     }
 
     decryptOutgoingMessage(crypto: ICryptoProvider, data: Uint8Array, dcId: number, tempIndex?: number | undefined) {
-        const key = this.getAuthKeyFor(dcId, tempIndex)
+        const key = tempIndex ? this.authKeys.getTemp(dcId, tempIndex, Date.now()) : this.authKeys.get(dcId)
 
         if (!key) {
             throw new MtArgumentError(`No auth key for DC ${dcId}`)
