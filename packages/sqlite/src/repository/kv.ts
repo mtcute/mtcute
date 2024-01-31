@@ -1,6 +1,6 @@
 import { Statement } from 'better-sqlite3'
 
-import { IKeyValueRepository } from '@mtcute/core/src/storage/repository/key-value.js'
+import { IKeyValueRepository } from '@mtcute/core'
 
 import { SqliteStorageDriver } from '../driver.js'
 

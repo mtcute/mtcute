@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { Message, PeersIndex, tl } from '@mtcute/client'
+import { Message, PeersIndex, tl } from '@mtcute/core'
 import { createStub, StubTelegramClient } from '@mtcute/test'
 
 import { MessageContext } from '../index.js'

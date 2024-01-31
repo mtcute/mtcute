@@ -14,7 +14,7 @@ import {
     User,
     UserStatusUpdate,
     UserTypingUpdate,
-} from '@mtcute/client'
+} from '@mtcute/core'
 
 import { UpdateContextDistributed } from '../context/base.js'
 import { UpdateFilter } from './types.js'
@@ -94,9 +94,8 @@ export const userId: {
             case 'user_typing': {
                 const id = upd.userId
 
-                throw new Error('TODO')
-                // return (matchSelf && id === upd.client.getAuthState().userId) ||
-                //     indexId.has(id)
+                return (matchSelf && id === upd.client.storage.self.getCached()?.userId) ||
+                    indexId.has(id)
             }
             case 'poll_vote':
             case 'story':
@@ -111,9 +110,8 @@ export const userId: {
             case 'history_read': {
                 const id = upd.chatId
 
-                throw new Error('TODO')
-                // return (matchSelf && id === upd.client.getAuthState().userId) ||
-                //     indexId.has(id)
+                return (matchSelf && id === upd.client.storage.self.getCached()?.userId) ||
+                    indexId.has(id)
             }
         }
 

@@ -2,7 +2,7 @@ import { mtp, tl } from '@mtcute/tl'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { StorageManager } from '../storage/storage.js'
-import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
+import { MtArgumentError, MtcuteError, MtTimeoutError, MtUnsupportedError } from '../types/index.js'
 import { ControllablePromise, createControllablePromise, DcOptions, ICryptoProvider, Logger, sleep } from '../utils/index.js'
 import { assertTypeIs } from '../utils/type-assertions.js'
 import { ConfigManager } from './config-manager.js'
@@ -48,7 +48,8 @@ export interface NetworkManagerParams {
     readerMap: TlReaderMap
     writerMap: TlWriterMap
     isPremium: boolean
-    _emitError: (err: Error, connection?: SessionConnection) => void
+    emitError: (err: Error, connection?: SessionConnection) => void
+    onUpdate: (upd: tl.TypeUpdates) => void
     onUsable: () => void
 }
 
@@ -283,7 +284,7 @@ export class DcConnectionManager {
                     this.download.notifyKeyChange()
                     this.downloadSmall.notifyKeyChange()
                 })
-                .catch((e: Error) => this.manager.params._emitError(e))
+                .catch((e: Error) => this.manager.params.emitError(e))
         })
         connection.on('tmp-key-change', (idx: number, key: Uint8Array | null, expires: number) => {
             if (kind !== 'main') {
@@ -305,11 +306,11 @@ export class DcConnectionManager {
                     this.download.notifyKeyChange()
                     this.downloadSmall.notifyKeyChange()
                 })
-                .catch((e: Error) => this.manager.params._emitError(e))
+                .catch((e: Error) => this.manager.params.emitError(e))
         })
         connection.on('future-salts', (salts: mtp.RawMt_future_salt[]) => {
             Promise.resolve(this.manager._storage.salts.store(this.dcId, salts)).catch((e: Error) =>
-                this.manager.params._emitError(e),
+                this.manager.params.emitError(e),
             )
         })
 
@@ -341,7 +342,7 @@ export class DcConnectionManager {
         })
 
         connection.on('error', (err: Error, conn: SessionConnection) => {
-            this.manager.params._emitError(err, conn)
+            this.manager.params.emitError(err, conn)
         })
     }
 
@@ -425,7 +426,7 @@ export class NetworkManager {
     protected readonly _dcConnections = new Map<number, DcConnectionManager>()
     protected _primaryDc?: DcConnectionManager
 
-    private _updateHandler: (upd: tl.TypeUpdates, fromClient: boolean) => void = () => {}
+    private _updateHandler: (upd: tl.TypeUpdates, fromClient: boolean) => void
 
     constructor(
         readonly params: NetworkManagerParams & NetworkManagerExtraParams,
@@ -458,6 +459,7 @@ export class NetworkManager {
         this._transportFactory = params.transport ?? defaultTransportFactory
         this._reconnectionStrategy = params.reconnectionStrategy ?? defaultReconnectionStrategy
         this._connectionCount = params.connectionCount ?? defaultConnectionCountDelegate
+        this._updateHandler = params.onUpdate
 
         this._onConfigChanged = this._onConfigChanged.bind(this)
         config.onConfigUpdate(this._onConfigChanged)
@@ -498,15 +500,6 @@ export class NetworkManager {
 
         dc.main.on('usable', () => {
             this.params.onUsable()
-
-            Promise.resolve(this._storage.self.fetch())
-                .then((self) => {
-                    if (self?.isBot) {
-                        // bots may receive tmpSessions, which we should respect
-                        return this.config.update(true)
-                    }
-                })
-                .catch((e: Error) => this.params._emitError(e))
         })
         dc.main.on('update', (update: tl.TypeUpdates) => {
             this._updateHandler(update, false)
@@ -616,16 +609,44 @@ export class NetworkManager {
         }
     }
 
-    notifyLoggedIn(auth: tl.auth.TypeAuthorization): void {
-        if (auth._ === 'auth.authorizationSignUpRequired' || auth.user._ === 'userEmpty') {
-            return
+    notifyLoggedIn(auth: tl.auth.TypeAuthorization | tl.RawUser): tl.RawUser {
+        if (auth._ === 'auth.authorizationSignUpRequired') {
+            throw new MtUnsupportedError(
+                'Signup is no longer supported by Telegram for non-official clients. Please use your mobile device to sign up.',
+            )
         }
 
-        if (auth.tmpSessions) {
-            this._primaryDc?.main.setCount(auth.tmpSessions)
+        let user: tl.RawUser
+
+        if (auth._ === 'auth.authorization') {
+            if (auth.tmpSessions) {
+                this._primaryDc?.main.setCount(auth.tmpSessions)
+            }
+
+            user = auth.user as tl.RawUser
+        } else {
+            if (auth.bot) {
+                // bots may receive tmpSessions, which we should respect
+                this.config.update(true)
+                    .catch((e: Error) => this.params.emitError(e))
+            }
+
+            user = auth
         }
 
-        this.setIsPremium(auth.user.premium!)
+        this.setIsPremium(user.premium!)
+
+        // telegram ignores invokeWithoutUpdates for auth methods
+        if (auth._ === 'auth.authorization' && this.params.disableUpdates) {
+            this.resetSessions()
+        }
+
+        return user
+    }
+
+    notifyLoggedOut(): void {
+        this.setIsPremium(false)
+        this.resetSessions()
     }
 
     resetSessions(): void {
@@ -779,14 +800,6 @@ export class NetworkManager {
         }
 
         throw lastError!
-    }
-
-    setUpdateHandler(handler: (upd: tl.TypeUpdates, fromClient: boolean) => void): void {
-        this._updateHandler = handler
-    }
-
-    handleUpdate(update: tl.TypeUpdates, fromClient = true): void {
-        this._updateHandler(update, fromClient)
     }
 
     changeTransport(factory: TransportFactory): void {

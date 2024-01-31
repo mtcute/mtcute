@@ -1,6 +1,6 @@
 import { Statement } from 'better-sqlite3'
 
-import { IAuthKeysRepository } from '@mtcute/core/src/storage/repository/auth-keys.js'
+import { IAuthKeysRepository } from '@mtcute/core'
 
 import { SqliteStorageDriver } from '../driver.js'
 

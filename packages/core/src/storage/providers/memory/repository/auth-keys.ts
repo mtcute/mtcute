@@ -10,11 +10,11 @@ interface AuthKeysState {
 export class MemoryAuthKeysRepository implements IAuthKeysRepository {
     constructor(readonly _driver: MemoryStorageDriver) {}
 
-    readonly state = this._driver.getState<AuthKeysState>('authKeys', {
+    readonly state = this._driver.getState<AuthKeysState>('authKeys', () => ({
         authKeys: new Map(),
         authKeysTemp: new Map(),
         authKeysTempExpiry: new Map(),
-    })
+    }))
 
     set(dc: number, key: Uint8Array | null): void {
         if (key) {

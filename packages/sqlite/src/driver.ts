@@ -1,6 +1,7 @@
 import sqlite3, { Database, Options, Statement } from 'better-sqlite3'
 
 import { BaseStorageDriver, MtUnsupportedError } from '@mtcute/core'
+import { beforeExit } from '@mtcute/core/utils.js'
 
 export interface SqliteStorageDriverOptions {
     /**
@@ -43,6 +44,7 @@ export class SqliteStorageDriver extends BaseStorageDriver {
 
     private _pending: [Statement, unknown[]][] = []
     private _runMany!: (stmts: [Statement, unknown[]][]) => void
+    private _cleanup?: () => void
 
     private _migrations: Map<string, Map<number, MigrationFunction>> = new Map()
     private _maxVersion: Map<string, number> = new Map()
@@ -153,6 +155,10 @@ export class SqliteStorageDriver extends BaseStorageDriver {
         })
 
         this._initialize()
+        this._cleanup = beforeExit(() => {
+            this._save()
+            this._destroy()
+        })
         for (const cb of this._onLoad) cb(this.db)
     }
 
@@ -165,5 +171,7 @@ export class SqliteStorageDriver extends BaseStorageDriver {
 
     _destroy(): void {
         this.db.close()
+        this._cleanup?.()
+        this._cleanup = undefined
     }
 }

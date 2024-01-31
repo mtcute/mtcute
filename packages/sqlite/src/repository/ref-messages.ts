@@ -1,6 +1,6 @@
 import { Statement } from 'better-sqlite3'
 
-import { IReferenceMessagesRepository } from '@mtcute/core/src/storage/repository/ref-messages.js'
+import { IReferenceMessagesRepository } from '@mtcute/core'
 
 import { SqliteStorageDriver } from '../driver.js'
 

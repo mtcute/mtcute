@@ -29,7 +29,7 @@ export class StubTelegramClient extends BaseTelegramClient {
                     onMessage: (data) => {
                         if (!this._onRawMessage) {
                             if (this._responders.size) {
-                                this._emitError(new Error('Unexpected outgoing message'))
+                                this.emitError(new Error('Unexpected outgoing message'))
                             }
 
                             return
@@ -281,7 +281,9 @@ export class StubTelegramClient extends BaseTelegramClient {
 
     async connectAndWait() {
         await this.connect()
-        await new Promise((resolve) => this.once('usable', resolve))
+        await new Promise((resolve): void => {
+            this.mt.once('usable', resolve)
+        })
     }
 
     async with(fn: () => MaybeAsync<void>): Promise<void> {

@@ -20,8 +20,18 @@
         "gen-updates": "node ./scripts/generate.cjs"
     },
     "dependencies": {
-        "@mtcute/client": "workspace:^",
-        "@mtcute/test": "workspace:^",
+        "@mtcute/core": "workspace:^",
         "events": "3.2.0"
+    },
+    "devDependencies": {
+        "@mtcute/test": "workspace:^"
+    },
+    "peerDependencies": {
+        "@mtcute/sqlite": "workspace:^"
+    },
+    "peerDependenciesMeta": {
+        "@mtcute/sqlite": {
+            "optional": true
+        }
     }
 }

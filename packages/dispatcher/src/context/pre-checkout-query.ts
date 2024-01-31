@@ -1,4 +1,4 @@
-import { PreCheckoutQuery, TelegramClient } from '@mtcute/client'
+import { PreCheckoutQuery, TelegramClient } from '@mtcute/core'
 
 import { UpdateContext } from './base.js'
 

@@ -1,3 +1,4 @@
+export * from '../highlevel/utils/index.js'
 export * from './async-lock.js'
 export * from './bigint-utils.js'
 export * from './buffer-utils.js'

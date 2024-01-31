@@ -23,7 +23,7 @@ import {
     tl,
     UserStatusUpdate,
     UserTypingUpdate,
-} from '@mtcute/client'
+} from '@mtcute/core'
 
 import { UpdateContext } from './context/base.js'
 import {
@@ -68,11 +68,11 @@ import {
 import { PropagationAction } from './propagation.js'
 import {
     defaultStateKeyDelegate,
-    isCompatibleStorage,
-    IStateStorage,
+    IStateStorageProvider,
     StateKeyDelegate,
     UpdateState,
 } from './state/index.js'
+import { StateService } from './state/service.js'
 
 export interface DispatcherParams {
     /**
@@ -87,7 +87,7 @@ export interface DispatcherParams {
      *
      * @default  Client's storage
      */
-    storage?: IStateStorage
+    storage?: IStateStorageProvider
 
     /**
      * Custom key delegate for the dispatcher.
@@ -111,11 +111,11 @@ export class Dispatcher<State extends object = never> {
     private _scene?: string
     private _sceneScoped?: boolean
 
-    private _storage?: State extends never ? undefined : IStateStorage
-    private _stateKeyDelegate?: State extends never ? undefined : StateKeyDelegate
+    private _storage?: StateService
+    private _stateKeyDelegate?: StateKeyDelegate
 
     private _customStateKeyDelegate?: StateKeyDelegate
-    private _customStorage?: IStateStorage
+    private _customStorage?: StateService
 
     private _errorHandler?: <T = {}>(
         err: Error,
@@ -137,8 +137,6 @@ export class Dispatcher<State extends object = never> {
     protected constructor(client?: TelegramClient, params?: DispatcherParams) {
         this.dispatchRawUpdate = this.dispatchRawUpdate.bind(this)
         this.dispatchUpdate = this.dispatchUpdate.bind(this)
-        this._onClientBeforeConnect = this._onClientBeforeConnect.bind(this)
-        this._onClientBeforeClose = this._onClientBeforeClose.bind(this)
 
         // eslint-disable-next-line prefer-const
         let { storage, key, sceneName } = params ?? {}
@@ -146,32 +144,19 @@ export class Dispatcher<State extends object = never> {
         if (client) {
             this.bindToClient(client)
 
-            if (!storage) {
-                const _storage = client.storage
-
-                // if (!isCompatibleStorage(_storage)) {
-                //     // todo: dont throw if state is never used
-                //     throw new MtArgumentError(
-                //         'Storage used by the client is not compatible with the dispatcher. Please provide a compatible storage manually',
-                //     )
-                // }
-
-                storage = _storage as any
-            }
-
             if (storage) {
-                this._storage = storage as any
-                this._stateKeyDelegate = (key ?? defaultStateKeyDelegate) as any
+                this._storage = new StateService(storage)
+                this._stateKeyDelegate = (key ?? defaultStateKeyDelegate)
             }
         } else {
             // child dispatcher without client
 
             if (storage) {
-                this._customStorage = storage as any
+                this._customStorage = new StateService(storage)
             }
 
             if (key) {
-                this._customStateKeyDelegate = key as any
+                this._customStateKeyDelegate = key
             }
 
             if (sceneName) {
@@ -213,64 +198,6 @@ export class Dispatcher<State extends object = never> {
         return this._scene
     }
 
-    private _onClientBeforeConnect() {
-        (async () => {
-            if (
-                !this._parent &&
-                this._storage &&
-                this._storage !== (this._client!.storage as unknown as IStateStorage)
-            ) {
-                // this is a root dispatcher with custom storage
-                await this._storage.load?.()
-            }
-
-            if (this._parent && this._customStorage) {
-                // this is a child dispatcher with custom storage
-                await this._customStorage.load?.()
-            }
-
-            for (const child of this._children) {
-                child._onClientBeforeConnect()
-            }
-
-            if (this._scenes) {
-                for (const scene of this._scenes.values()) {
-                    scene._onClientBeforeConnect()
-                }
-            }
-        })().catch((err) => this._client!._emitError(err))
-    }
-
-    private _onClientBeforeClose() {
-        (async () => {
-            if (
-                !this._parent &&
-                this._storage &&
-                this._storage !== (this._client!.storage as unknown as IStateStorage)
-            ) {
-                // this is a root dispatcher with custom storage
-                await this._storage.save?.()
-                await this._storage.destroy?.()
-            }
-
-            if (this._parent && this._customStorage) {
-                // this is a child dispatcher with custom storage
-                await this._customStorage.save?.()
-                await this._customStorage.destroy?.()
-            }
-
-            for (const child of this._children) {
-                child._onClientBeforeClose()
-            }
-
-            if (this._scenes) {
-                for (const scene of this._scenes.values()) {
-                    scene._onClientBeforeClose()
-                }
-            }
-        })().catch((err) => this._client!._emitError(err))
-    }
-
     /**
      * Bind the dispatcher to the client.
      * Called by the constructor automatically if
@@ -281,8 +208,6 @@ export class Dispatcher<State extends object = never> {
     bindToClient(client: TelegramClient): void {
         client.on('update', this.dispatchUpdate)
         client.on('raw_update', this.dispatchRawUpdate)
-        client.on('before_connect', this._onClientBeforeConnect)
-        client.on('before_close', this._onClientBeforeClose)
 
         this._client = client
     }
@@ -294,10 +219,32 @@ export class Dispatcher<State extends object = never> {
         if (this._client) {
             this._client.off('update', this.dispatchUpdate)
             this._client.off('raw_update', this.dispatchRawUpdate)
-            this._client.off('before_connect', this._onClientBeforeConnect)
-            this._client.off('before_close', this._onClientBeforeClose)
 
             this._client = undefined
+        }
+    }
+
+    /**
+     * Destroy the dispatcher and all its children.
+     *
+     * When destroying, all the registered handlers are removed,
+     * and the underlying storage is freed.
+     */
+    async destroy(): Promise<void> {
+        if (this._parent && this._customStorage) {
+            await this._customStorage.destroy()
+        } else if (!this._parent && this._storage) {
+            await this._storage.destroy()
+        }
+
+        this.removeUpdateHandler('all')
+
+        for (const child of this._children) {
+            await child.destroy()
+        }
+
+        for (const scene of this._scenes?.values() ?? []) {
+            await scene.destroy()
         }
     }
 
@@ -316,7 +263,7 @@ export class Dispatcher<State extends object = never> {
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
-        this.dispatchRawUpdateNow(update, peers).catch((err) => this._client!._emitError(err))
+        this.dispatchRawUpdateNow(update, peers).catch((err) => this._client!.emitError(err))
     }
 
     /**
@@ -386,7 +333,7 @@ export class Dispatcher<State extends object = never> {
 
         // order does not matter in the dispatcher,
         // so we can handle each update in its own task
-        this.dispatchUpdateNow(update).catch((err) => this._client!._emitError(err))
+        this.dispatchUpdateNow(update).catch((err) => this._client!.emitError(err))
     }
 
     /**

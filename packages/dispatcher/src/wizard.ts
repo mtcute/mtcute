@@ -1,4 +1,4 @@
-import { MaybeAsync } from '@mtcute/client'
+import { MaybeAsync } from '@mtcute/core'
 
 import { MessageContext } from './context/message.js'
 import { Dispatcher } from './dispatcher.js'

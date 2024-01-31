@@ -1,4 +1,4 @@
-import { IPeersRepository } from '../../../repository/peers.js'
+import { IPeersRepository } from '../../../../highlevel/storage/repository/peers.js'
 import { IdbStorageDriver } from '../driver.js'
 import { reqToPromise } from '../utils.js'
 

@@ -1,8 +1,7 @@
-import { assertNever } from '@mtcute/core'
-import { base64Encode, byteLengthUtf8, concatBuffers, TlBinaryWriter } from '@mtcute/core/utils.js'
+import { base64Encode, byteLengthUtf8, TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { tdFileId as td } from './types.js'
-import { telegramRleEncode } from './utils.js'
+import { assertNever, telegramRleEncode } from './utils.js'
 
 const SUFFIX = new Uint8Array([td.CURRENT_VERSION, td.PERSISTENT_ID_VERSION])
 
@@ -104,5 +103,10 @@ export function toFileId(location: Omit<td.RawFullRemoteFileLocation, '_'>): str
             assertNever(loc)
     }
 
-    return base64Encode(concatBuffers([telegramRleEncode(writer.result()), SUFFIX]), true)
+    const result = telegramRleEncode(writer.result())
+    const withSuffix = new Uint8Array(result.length + SUFFIX.length)
+    withSuffix.set(result)
+    withSuffix.set(SUFFIX, result.length)
+
+    return base64Encode(withSuffix, true)
 }

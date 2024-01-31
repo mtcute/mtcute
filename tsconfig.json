@@ -21,6 +21,12 @@
             "node",
             "vite/client"
         ],
+        "lib": [
+            "es2020",
+            "dom",
+            "dom.iterable",
+            "WebWorker",
+        ],
         "resolveJsonModule": true,
         "isolatedModules": true,
     },

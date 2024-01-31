@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ^^ will be looked into in MTQ-29
 
-import { MaybeAsync } from '@mtcute/client'
+import { MaybeAsync } from '@mtcute/core'
 
 import { ExtractBaseMany, ExtractMod, Invert, UnionToIntersection, UpdateFilter } from './types.js'
 

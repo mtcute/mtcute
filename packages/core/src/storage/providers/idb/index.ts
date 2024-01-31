@@ -5,6 +5,8 @@ import { IdbKvRepository } from './repository/kv.js'
 import { IdbPeersRepository } from './repository/peers.js'
 import { IdbRefMsgRepository } from './repository/ref-messages.js'
 
+export { IdbStorageDriver } from './driver.js'
+
 /**
  * mtcute storage that uses IndexedDB as a backend.
  *

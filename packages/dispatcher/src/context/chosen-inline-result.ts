@@ -1,4 +1,4 @@
-import { ChosenInlineResult, MtArgumentError, TelegramClient } from '@mtcute/client'
+import { ChosenInlineResult, MtArgumentError, TelegramClient } from '@mtcute/core'
 
 import { UpdateContext } from './base.js'
 

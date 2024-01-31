@@ -115,21 +115,11 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(@vitest/browser@0.34.6)(@vitest/ui@0.34.6)(playwright@1.40.1)
 
-  packages/client:
+  packages/core:
     dependencies:
-      '@mtcute/core':
-        specifier: workspace:^
-        version: link:../core
       '@mtcute/file-id':
         specifier: workspace:^
         version: link:../file-id
-    devDependencies:
-      '@mtcute/test':
-        specifier: workspace:^
-        version: link:../test
-
-  packages/core:
-    dependencies:
       '@mtcute/tl':
         specifier: workspace:^
         version: link:../tl
@@ -155,9 +145,6 @@ importers:
       '@types/ws':
         specifier: 8.5.4
         version: 8.5.4
-      node-forge:
-        specifier: 1.3.1
-        version: 1.3.1
       ws:
         specifier: 8.13.0
         version: 8.13.0
@@ -196,21 +183,28 @@ importers:
 
   packages/dispatcher:
     dependencies:
-      '@mtcute/client':
-        specifier: workspace:^
-        version: link:../client
-      '@mtcute/test':
-        specifier: workspace:^
-        version: link:../test
-      events:
-        specifier: 3.2.0
-        version: 3.2.0
-
-  packages/file-id:
-    dependencies:
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
+      '@mtcute/sqlite':
+        specifier: workspace:^
+        version: link:../sqlite
+      events:
+        specifier: 3.2.0
+        version: 3.2.0
+    devDependencies:
+      '@mtcute/test':
+        specifier: workspace:^
+        version: link:../test
+
+  packages/file-id:
+    dependencies:
+      '@mtcute/tl-runtime':
+        specifier: workspace:^
+        version: link:../tl-runtime
+      long:
+        specifier: 5.2.3
+        version: 5.2.3
 
   packages/html-parser:
     dependencies:
@@ -221,9 +215,9 @@ importers:
         specifier: 5.2.3
         version: 5.2.3
     devDependencies:
-      '@mtcute/client':
+      '@mtcute/core':
         specifier: workspace:^
-        version: link:../client
+        version: link:../core
 
   packages/http-proxy:
     dependencies:
@@ -233,9 +227,9 @@ importers:
 
   packages/i18n:
     devDependencies:
-      '@mtcute/client':
+      '@mtcute/core':
         specifier: workspace:^
-        version: link:../client
+        version: link:../core
       '@mtcute/dispatcher':
         specifier: workspace:^
         version: link:../dispatcher
@@ -246,9 +240,9 @@ importers:
         specifier: 5.2.3
         version: 5.2.3
     devDependencies:
-      '@mtcute/client':
+      '@mtcute/core':
         specifier: workspace:^
-        version: link:../client
+        version: link:../core
 
   packages/mtproxy:
     dependencies:
@@ -258,9 +252,9 @@ importers:
 
   packages/node:
     dependencies:
-      '@mtcute/client':
+      '@mtcute/core':
         specifier: workspace:^
-        version: link:../client
+        version: link:../core
       '@mtcute/html-parser':
         specifier: workspace:^
         version: link:../html-parser

@@ -1,4 +1,4 @@
-import { base64DecodeToBuffer, base64Encode, TlBinaryReader } from '@mtcute/core/utils.js'
+import { base64DecodeToBuffer, base64Encode, TlBinaryReader } from '@mtcute/tl-runtime'
 
 import { tdFileId as td } from './types.js'
 import { telegramRleDecode } from './utils.js'

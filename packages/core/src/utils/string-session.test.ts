@@ -50,7 +50,12 @@ describe('writeStringSession', () => {
                 testMode: false,
                 primaryDcs: stubDcs,
                 authKey: stubAuthKey,
-                self: { userId: 12345, isBot: false },
+                self: {
+                    userId: 12345,
+                    isBot: false,
+                    isPremium: false,
+                    usernames: [],
+                },
             }),
         ).toMatchInlineSnapshot(
             '"AgUAAAANobcYAAAAAAIAAAAOMTQ5LjE1NC4xNjcuNTAAuwEAAA2htxgCAAAAAgAAAA8xNDkuMTU0LjE2Ny4yMjK7AQAAOTAAAAAAAAA3l3m8IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
@@ -64,7 +69,12 @@ describe('writeStringSession', () => {
                 testMode: true,
                 primaryDcs: stubDcs,
                 authKey: stubAuthKey,
-                self: { userId: 12345, isBot: false },
+                self: {
+                    userId: 12345,
+                    isBot: false,
+                    isPremium: false,
+                    usernames: [],
+                },
             }),
         ).toMatchInlineSnapshot(
             '"AgcAAAANobcYAAAAAAIAAAAOMTQ5LjE1NC4xNjcuNTAAuwEAAA2htxgCAAAAAgAAAA8xNDkuMTU0LjE2Ny4yMjK7AQAAOTAAAAAAAAA3l3m8IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',

@@ -1,4 +1,4 @@
-import { CallbackQuery, ChosenInlineResult, InlineCallbackQuery, InlineQuery, Message } from '@mtcute/client'
+import { CallbackQuery, ChosenInlineResult, InlineCallbackQuery, InlineQuery, Message } from '@mtcute/core'
 
 import { UpdateContextDistributed } from '../context/base.js'
 import { UpdateFilter } from './types.js'

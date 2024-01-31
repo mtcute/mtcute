@@ -12,10 +12,10 @@ export interface ServiceOptions {
 }
 
 export class BaseService {
-    readonly _driver: IStorageDriver
-    readonly _readerMap: TlReaderMap
-    readonly _writerMap: TlWriterMap
-    readonly _log: Logger
+    protected _driver: IStorageDriver
+    protected _readerMap: TlReaderMap
+    protected _writerMap: TlWriterMap
+    protected _log: Logger
 
     constructor(opts: ServiceOptions) {
         this._driver = opts.driver

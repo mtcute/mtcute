@@ -1,6 +1,6 @@
 import { Statement } from 'better-sqlite3'
 
-import { IPeersRepository } from '@mtcute/core/src/storage/repository/peers.js'
+import { IPeersRepository } from '@mtcute/core'
 
 import { SqliteStorageDriver } from '../driver.js'
 

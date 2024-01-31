@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MaybeAsync } from '@mtcute/client'
+import { MaybeAsync } from '@mtcute/core'
 
 import { UpdateFilter } from './types.js'
 

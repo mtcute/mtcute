@@ -1,4 +1,4 @@
-import { IReferenceMessagesRepository } from '../../../repository/ref-messages.js'
+import { IReferenceMessagesRepository } from '../../../../highlevel/storage/repository/ref-messages.js'
 import { MemoryStorageDriver } from '../driver.js'
 
 interface RefMessagesState {
@@ -8,9 +8,9 @@ interface RefMessagesState {
 export class MemoryRefMessagesRepository implements IReferenceMessagesRepository {
     constructor(readonly _driver: MemoryStorageDriver) {}
 
-    readonly state = this._driver.getState<RefMessagesState>('refMessages', {
+    readonly state = this._driver.getState<RefMessagesState>('refMessages', () => ({
         refs: new Map(),
-    })
+    }))
 
     store(peerId: number, chatId: number, msgId: number): void {
         if (!this.state.refs.has(peerId)) {

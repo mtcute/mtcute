@@ -1,5 +1,4 @@
-export * from './base-client.js'
-export * from './base-client.types.js'
+export * from './highlevel/index.js'
 export * from './network/index.js'
 export * from './storage/index.js'
 export * from './types/index.js'

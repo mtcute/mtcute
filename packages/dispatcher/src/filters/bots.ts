@@ -1,4 +1,4 @@
-import { MaybeArray, MaybeAsync, Message } from '@mtcute/client'
+import { MaybeArray, MaybeAsync, Message } from '@mtcute/core'
 
 import { MessageContext } from '../context/message.js'
 import { chat } from './chat.js'
@@ -66,12 +66,11 @@ export const command = (
                 const lastGroup = m[m.length - 1]
 
                 if (lastGroup) {
-                    // const state = msg.client.getAuthState()
+                    const self = msg.client.storage.self.getCached()
 
-                    // if (state.isBot && lastGroup !== state.selfUsername) {
-                    //     return false
-                    // }
-                    console.log('todo')
+                    if (self && self.isBot && !self.usernames.includes(lastGroup)) {
+                        return false
+                    }
                 }
 
                 const match = m.slice(1, -1)

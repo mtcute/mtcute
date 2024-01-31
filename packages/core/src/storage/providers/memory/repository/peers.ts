@@ -1,4 +1,4 @@
-import { IPeersRepository } from '../../../repository/peers.js'
+import { IPeersRepository } from '../../../../highlevel/storage/repository/peers.js'
 import { MemoryStorageDriver } from '../driver.js'
 
 interface PeersState {
@@ -10,11 +10,11 @@ interface PeersState {
 export class MemoryPeersRepository implements IPeersRepository {
     constructor(readonly _driver: MemoryStorageDriver) {}
 
-    readonly state = this._driver.getState<PeersState>('peers', {
+    readonly state = this._driver.getState<PeersState>('peers', () => ({
         entities: new Map(),
         usernameIndex: new Map(),
         phoneIndex: new Map(),
-    })
+    }))
 
     store(peer: IPeersRepository.PeerInfo): void {
         const old = this.state.entities.get(peer.id)

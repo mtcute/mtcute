@@ -1,4 +1,4 @@
-import { MaybeAsync, Message } from '@mtcute/client'
+import { MaybeAsync, Message } from '@mtcute/core'
 
 import { MessageContext } from '../context/message.js'
 import { Modify, UpdateFilter } from './types.js'

@@ -1,4 +1,4 @@
-import { IReferenceMessagesRepository } from '../../../repository/ref-messages.js'
+import { IReferenceMessagesRepository } from '../../../../highlevel/storage/repository/ref-messages.js'
 import { IdbStorageDriver } from '../driver.js'
 import { cursorToIterator, reqToPromise, txToPromise } from '../utils.js'
 

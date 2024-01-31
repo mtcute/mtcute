@@ -16,7 +16,7 @@ import {
     tl,
     UserStatusUpdate,
     UserTypingUpdate,
-} from '@mtcute/client'
+} from '@mtcute/core'
 
 import { UpdateContext } from './context/base.js'
 import {

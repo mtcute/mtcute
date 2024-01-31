@@ -50,3 +50,7 @@ export function telegramRleDecode(buf: Uint8Array): Uint8Array {
 
     return new Uint8Array(ret)
 }
+
+export function assertNever(_: never): never {
+    throw new Error('unreachable')
+}

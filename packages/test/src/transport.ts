@@ -1,8 +1,8 @@
 import EventEmitter from 'events'
 
+import { tl } from '@mtcute/tl'
 import { ITelegramTransport, TransportState } from '@mtcute/core'
 import { ICryptoProvider, Logger } from '@mtcute/core/utils.js'
-import { tl } from '@mtcute/tl'
 
 export class StubTelegramTransport extends EventEmitter implements ITelegramTransport {
     constructor(

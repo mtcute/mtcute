@@ -1,8 +1,9 @@
-import { Message, MtPeerNotFoundError, OmitInputMessageId, ParametersSkip1, Peer, TelegramClient } from '@mtcute/client'
-import { DeleteMessagesParams } from '@mtcute/client/src/methods/messages/delete-messages.js'
-import { ForwardMessageOptions } from '@mtcute/client/src/methods/messages/forward-messages.js'
-import { SendCopyParams } from '@mtcute/client/src/methods/messages/send-copy.js'
-import { SendCopyGroupParams } from '@mtcute/client/src/methods/messages/send-copy-group.js'
+import { Message, MtPeerNotFoundError, OmitInputMessageId, ParametersSkip1, Peer, TelegramClient } from '@mtcute/core'
+// todo: fix these imports when packaging
+import { DeleteMessagesParams } from '@mtcute/core/src/highlevel/methods/messages/delete-messages.js'
+import { ForwardMessageOptions } from '@mtcute/core/src/highlevel/methods/messages/forward-messages.js'
+import { SendCopyParams } from '@mtcute/core/src/highlevel/methods/messages/send-copy.js'
+import { SendCopyGroupParams } from '@mtcute/core/src/highlevel/methods/messages/send-copy-group.js'
 
 import { UpdateContext } from './base.js'
 

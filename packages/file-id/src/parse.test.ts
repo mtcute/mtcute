@@ -1,7 +1,7 @@
+import Long from 'long'
 import { describe, expect, it } from 'vitest'
 
-import { Long } from '@mtcute/core'
-import { hexDecodeToBuffer } from '@mtcute/core/utils.js'
+import { hexDecodeToBuffer } from '@mtcute/tl-runtime'
 
 import { parseFileId } from './parse.js'
 import { tdFileId as td } from './types.js'

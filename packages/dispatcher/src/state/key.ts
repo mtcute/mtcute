@@ -1,4 +1,4 @@
-import { assertNever, MaybeAsync, Peer } from '@mtcute/client'
+import { assertNever, MaybeAsync, Peer } from '@mtcute/core'
 
 import { CallbackQueryContext, MessageContext } from '../context/index.js'
 

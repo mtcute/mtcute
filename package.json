@@ -1,5 +1,5 @@
 {
-    "name": "mtcute",
+    "name": "mtcute-workspace",
     "private": true,
     "version": "0.6.0",
     "description": "Type-safe library for MTProto (Telegram API) for browser and NodeJS",

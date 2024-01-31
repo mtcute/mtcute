@@ -160,7 +160,7 @@ module.exports = {
         'simple-import-sort/imports': [
             'error',
             {
-                groups: [['^[a-z]'], ['^@mtcute'], ['^@/'], ['^~/'], ['^\\.']],
+                groups: [['^[a-z]'], ['^@?mtcute'], ['^@/'], ['^~/'], ['^\\.']],
             },
         ],
         'simple-import-sort/exports': 'error',
