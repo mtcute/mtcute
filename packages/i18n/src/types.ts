@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { tl } from '@mtcute/client'
+import type { tl } from '@mtcute/core'
 
 type Values<T> = T[keyof T]
 type SafeGet<T, K extends string> = T extends Record<K, unknown> ? T[K] : never

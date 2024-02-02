@@ -1,10 +1,10 @@
 import { createRequire } from 'module'
 import { createInterface, Interface as RlInterface } from 'readline'
 
-import { TelegramClient, TelegramClientOptions, User } from '@mtcute/client'
+import { TelegramClient, TelegramClientOptions, User } from '@mtcute/core'
 import { SqliteStorage } from '@mtcute/sqlite'
 
-export * from '@mtcute/client'
+export * from '@mtcute/core'
 export * from '@mtcute/html-parser'
 export * from '@mtcute/markdown-parser'
 export { SqliteStorage }
@@ -29,6 +29,12 @@ try {
  */
 export class NodeTelegramClient extends TelegramClient {
     constructor(opts: TelegramClientOptions) {
+        if ('client' in opts) {
+            super(opts)
+
+            return
+        }
+
         super({
             // eslint-disable-next-line
             crypto: nativeCrypto ? () => new nativeCrypto() : undefined,
@@ -99,6 +105,6 @@ export class NodeTelegramClient extends TelegramClient {
 
         this.start(params)
             .then(then)
-            .catch((err) => this._emitError(err))
+            .catch((err) => this.emitError(err))
     }
 }

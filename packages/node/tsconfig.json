@@ -8,7 +8,7 @@
         "./utils.ts",
     ],
     "references": [
-        { "path": "../client" },
+        { "path": "../core" },
         { "path": "../sqlite" },
         { "path": "../dispatcher" },
         { "path": "../html-parser" },
