@@ -1,8 +1,7 @@
-import { assertNever } from '@mtcute/core'
-import { base64Encode, byteLengthUtf8, TlBinaryWriter } from '@mtcute/core/utils.js'
+import { base64Encode, byteLengthUtf8, TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { tdFileId as td } from './types.js'
-import { telegramRleEncode } from './utils.js'
+import { assertNever, telegramRleEncode } from './utils.js'
 
 export type InputUniqueLocation =
     | Pick<td.RawWebRemoteFileLocation, '_' | 'url'>

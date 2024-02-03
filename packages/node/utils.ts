@@ -1,1 +1,1 @@
-export * from '@mtcute/client/utils.js'
+export * from '@mtcute/core/utils.js'

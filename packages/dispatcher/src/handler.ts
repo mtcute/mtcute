@@ -7,7 +7,7 @@ import {
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     HistoryReadUpdate,
-    MaybeAsync,
+    MaybePromise,
     PeersIndex,
     PollUpdate,
     PollVoteUpdate,
@@ -16,7 +16,7 @@ import {
     tl,
     UserStatusUpdate,
     UserTypingUpdate,
-} from '@mtcute/client'
+} from '@mtcute/core'
 
 import { UpdateContext } from './context/base.js'
 import {
@@ -39,8 +39,8 @@ export interface BaseUpdateHandler<Name, Handler, Checker> {
 
 export type ParsedUpdateHandler<Name, Update, State = never> = BaseUpdateHandler<
     Name,
-    (update: Update, state: State) => MaybeAsync<void | PropagationAction>,
-    (update: Update, state: State) => MaybeAsync<boolean>
+    (update: Update, state: State) => MaybePromise<void | PropagationAction>,
+    (update: Update, state: State) => MaybePromise<boolean>
 >
 
 export type RawUpdateHandler = BaseUpdateHandler<
@@ -49,8 +49,8 @@ export type RawUpdateHandler = BaseUpdateHandler<
         client: TelegramClient,
         update: tl.TypeUpdate | tl.TypeMessage,
         peers: PeersIndex,
-    ) => MaybeAsync<void | PropagationAction>,
-    (client: TelegramClient, update: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex) => MaybeAsync<boolean>
+    ) => MaybePromise<void | PropagationAction>,
+    (client: TelegramClient, update: tl.TypeUpdate | tl.TypeMessage, peers: PeersIndex) => MaybePromise<boolean>
 >
 
 // begin-codegen

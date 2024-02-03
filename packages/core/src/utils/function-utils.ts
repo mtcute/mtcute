@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type ThrottledFunction = (() => void) & {
     reset: () => void
 }
@@ -37,4 +38,35 @@ export function throttle(func: () => void, delay: number): ThrottledFunction {
     }
 
     return res
+}
+
+export function asyncResettable<T extends(...args: any[]) => Promise<any>>(func: T) {
+    let runningPromise: Promise<any> | null = null
+    let finished = false
+
+    const run = function (...args: any[]) {
+        if (finished) return Promise.resolve()
+
+        if (runningPromise) {
+            return runningPromise
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        runningPromise = func(...args)
+        void runningPromise.then(() => {
+            runningPromise = null
+            finished = true
+        })
+
+        return runningPromise
+    } as T
+
+    return {
+        run,
+        finished: () => finished,
+        wait: () => runningPromise,
+        reset: () => {
+            finished = false
+        },
+    }
 }

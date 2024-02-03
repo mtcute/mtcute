@@ -19,6 +19,7 @@
         }
     },
     "dependencies": {
-        "@mtcute/core": "workspace:^"
+        "@mtcute/tl-runtime": "workspace:^",
+        "long": "5.2.3"
     }
 }

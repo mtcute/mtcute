@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ^^ will be looked into in MTQ-29
 
-import { MaybeAsync } from '@mtcute/client'
+import { MaybePromise } from '@mtcute/core'
 
 import { ExtractBaseMany, ExtractMod, Invert, UnionToIntersection, UpdateFilter } from './types.js'
 
@@ -160,7 +160,7 @@ export function and(...fns: UpdateFilter<any, any, any>[]): UpdateFilter<any, an
         let i = 0
         const max = fns.length
 
-        const next = (): MaybeAsync<boolean> => {
+        const next = (): MaybePromise<boolean> => {
             if (i === max) return true
 
             const res = fns[i++](upd, state)
@@ -306,7 +306,7 @@ export function or(...fns: UpdateFilter<any, any, any>[]): UpdateFilter<any, any
         let i = 0
         const max = fns.length
 
-        const next = (): MaybeAsync<boolean> => {
+        const next = (): MaybePromise<boolean> => {
             if (i === max) return false
 
             const res = fns[i++](upd, state)

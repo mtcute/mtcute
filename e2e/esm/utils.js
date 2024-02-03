@@ -1,4 +1,4 @@
-import { MemoryStorage } from '@mtcute/core/storage/memory.js'
+import { MemoryStorage } from '@mtcute/core'
 import { LogManager } from '@mtcute/core/utils.js'
 
 export const getApiParams = () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { CallbackQuery, MtArgumentError, PeersIndex } from '@mtcute/client'
-import { utf8EncodeToBuffer } from '@mtcute/client/utils.js'
+import { CallbackQuery, MtArgumentError, PeersIndex } from '@mtcute/core'
+import { utf8EncodeToBuffer } from '@mtcute/core/utils.js'
 import { createStub } from '@mtcute/test'
 
 import { CallbackDataBuilder } from './callback-data-builder.js'

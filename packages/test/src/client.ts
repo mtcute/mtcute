@@ -1,4 +1,11 @@
-import { BaseTelegramClient, BaseTelegramClientOptions, MaybeAsync, MustEqual, RpcCallOptions, tl } from '@mtcute/core'
+import {
+    BaseTelegramClient,
+    BaseTelegramClientOptions,
+    MaybePromise,
+    MustEqual,
+    RpcCallOptions,
+    tl,
+} from '@mtcute/core'
 
 import { StubMemoryTelegramStorage } from './storage.js'
 import { StubTelegramTransport } from './transport.js'
@@ -24,19 +31,20 @@ export class StubTelegramClient extends BaseTelegramClient {
             apiHash: '',
             logLevel: 0,
             storage,
+            disableUpdates: true,
             transport: () => {
                 const transport = new StubTelegramTransport({
                     onMessage: (data) => {
                         if (!this._onRawMessage) {
                             if (this._responders.size) {
-                                this._emitError(new Error('Unexpected outgoing message'))
+                                this.emitError(new Error('Unexpected outgoing message'))
                             }
 
                             return
                         }
 
                         const dcId = transport._currentDc!.id
-                        const key = storage.getAuthKeyFor(dcId)
+                        const key = storage.authKeys.get(dcId)
 
                         if (key) {
                             this._onRawMessage(storage.decryptOutgoingMessage(transport._crypto, data, dcId))
@@ -101,7 +109,7 @@ export class StubTelegramClient extends BaseTelegramClient {
                 this._knownChats.set(peer.id, peer)
             }
 
-            await this._cachePeersFrom(peer)
+            await this.storage.peers.updatePeersFrom(peer)
         }
     }
 
@@ -173,7 +181,7 @@ export class StubTelegramClient extends BaseTelegramClient {
 
     respondWith<
         T extends tl.RpcMethod['_'],
-        Fn extends(data: tl.FindByName<tl.RpcMethod, T>) => MaybeAsync<tl.RpcCallReturn[T]>,
+        Fn extends(data: tl.FindByName<tl.RpcMethod, T>) => MaybePromise<tl.RpcCallReturn[T]>,
     >(method: T, response: Fn): Fn {
         // eslint-disable-next-line
         this._responders.set(method, response as any)
@@ -279,13 +287,8 @@ export class StubTelegramClient extends BaseTelegramClient {
 
     // helpers //
 
-    async connectAndWait() {
+    async with(fn: () => MaybePromise<void>): Promise<void> {
         await this.connect()
-        await new Promise((resolve) => this.once('usable', resolve))
-    }
-
-    async with(fn: () => MaybeAsync<void>): Promise<void> {
-        await this.connectAndWait()
 
         let error: unknown
 

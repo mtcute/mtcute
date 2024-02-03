@@ -1,5 +1,6 @@
 module.exports = ({ path, transformFile, packageDir, outDir }) => ({
     esmOnlyDirectives: true,
+    esmImportDirectives: true,
     final() {
         const version = require(path.join(packageDir, 'package.json')).version
         const replaceVersion = (content) => content.replace('%VERSION%', version)

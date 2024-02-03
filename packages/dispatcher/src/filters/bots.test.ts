@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { Message, PeersIndex, tl } from '@mtcute/client'
+import { Message, PeersIndex, tl } from '@mtcute/core'
 import { createStub, StubTelegramClient } from '@mtcute/test'
 
 import { MessageContext } from '../index.js'
@@ -20,10 +20,11 @@ describe('filters.command', () => {
         const ctx = createMessageContext({
             message: text,
         })
-        ctx.client.getAuthState = () => ({
+        void ctx.client.storage.self.store({
             isBot: true,
+            isPremium: false,
             userId: 0,
-            selfUsername: 'testbot',
+            usernames: ['testbot'],
         })
 
         // eslint-disable-next-line

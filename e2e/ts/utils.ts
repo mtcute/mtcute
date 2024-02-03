@@ -1,12 +1,11 @@
 // eslint-disable-next-line no-restricted-imports
 import { join } from 'path'
 
-import { BaseTelegramClientOptions, MaybeAsync } from '@mtcute/core'
-import { MemoryStorage } from '@mtcute/core/storage/memory.js'
+import { MaybePromise, MemoryStorage } from '@mtcute/core'
 import { LogManager, sleep } from '@mtcute/core/utils.js'
 import { SqliteStorage } from '@mtcute/sqlite'
 
-export const getApiParams = (storage?: string): BaseTelegramClientOptions => {
+export const getApiParams = (storage?: string) => {
     if (!process.env.API_ID || !process.env.API_HASH) {
         throw new Error('API_ID and API_HASH env variables must be set')
     }
@@ -20,7 +19,7 @@ export const getApiParams = (storage?: string): BaseTelegramClientOptions => {
     }
 }
 
-export async function waitFor(condition: () => MaybeAsync<void>, timeout = 5000): Promise<void> {
+export async function waitFor(condition: () => MaybePromise<void>, timeout = 5000): Promise<void> {
     const start = Date.now()
     let lastError
 

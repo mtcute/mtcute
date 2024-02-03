@@ -16,7 +16,7 @@ import {
     StickerType,
     User,
     Video,
-} from '@mtcute/client'
+} from '@mtcute/core'
 
 import { MessageContext } from '../index.js'
 import { Modify, UpdateFilter } from './types.js'

@@ -1,4 +1,4 @@
-import { MaybeAsync, Message } from '@mtcute/client'
+import { MaybePromise, Message } from '@mtcute/core'
 
 import { MessageContext } from '../context/message.js'
 import { Modify, UpdateFilter } from './types.js'
@@ -26,7 +26,7 @@ export function every<Mod, State extends object>(
         const upds = ctx.messages
         const max = upds.length
 
-        const next = (): MaybeAsync<boolean> => {
+        const next = (): MaybePromise<boolean> => {
             if (i === max) return true
 
             const res = filter(upds[i++], state)
@@ -67,7 +67,7 @@ export function some<State extends object>(
         const upds = ctx.messages
         const max = upds.length
 
-        const next = (): MaybeAsync<boolean> => {
+        const next = (): MaybePromise<boolean> => {
             if (i === max) return false
 
             const res = filter(upds[i++], state)

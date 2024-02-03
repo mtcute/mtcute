@@ -24,7 +24,7 @@
         }
     },
     "dependencies": {
-        "@mtcute/client": "workspace:^",
+        "@mtcute/core": "workspace:^",
         "@mtcute/sqlite": "workspace:^",
         "@mtcute/markdown-parser": "workspace:^",
         "@mtcute/html-parser": "workspace:^"

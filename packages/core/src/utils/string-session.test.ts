@@ -4,7 +4,7 @@ import { createStub } from '@mtcute/test'
 import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 
-import { defaultProductionDc } from './default-dcs.js'
+import { defaultProductionDc } from './dcs.js'
 import { readStringSession, writeStringSession } from './string-session.js'
 
 const stubAuthKey = new Uint8Array(32)
@@ -50,7 +50,12 @@ describe('writeStringSession', () => {
                 testMode: false,
                 primaryDcs: stubDcs,
                 authKey: stubAuthKey,
-                self: { userId: 12345, isBot: false },
+                self: {
+                    userId: 12345,
+                    isBot: false,
+                    isPremium: false,
+                    usernames: [],
+                },
             }),
         ).toMatchInlineSnapshot(
             '"AgUAAAANobcYAAAAAAIAAAAOMTQ5LjE1NC4xNjcuNTAAuwEAAA2htxgCAAAAAgAAAA8xNDkuMTU0LjE2Ny4yMjK7AQAAOTAAAAAAAAA3l3m8IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
@@ -64,7 +69,12 @@ describe('writeStringSession', () => {
                 testMode: true,
                 primaryDcs: stubDcs,
                 authKey: stubAuthKey,
-                self: { userId: 12345, isBot: false },
+                self: {
+                    userId: 12345,
+                    isBot: false,
+                    isPremium: false,
+                    usernames: [],
+                },
             }),
         ).toMatchInlineSnapshot(
             '"AgcAAAANobcYAAAAAAIAAAAOMTQ5LjE1NC4xNjcuNTAAuwEAAA2htxgCAAAAAgAAAA8xNDkuMTU0LjE2Ny4yMjK7AQAAOTAAAAAAAAA3l3m8IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
@@ -115,7 +125,12 @@ describe('readStringSession', () => {
                 testMode: false,
                 primaryDcs: stubDcs,
                 authKey: stubAuthKey,
-                self: { userId: 12345, isBot: false },
+                self: {
+                    userId: 12345,
+                    isBot: false,
+                    isPremium: false,
+                    usernames: [],
+                },
             })
         })
 
@@ -130,7 +145,12 @@ describe('readStringSession', () => {
                 testMode: true,
                 primaryDcs: stubDcs,
                 authKey: stubAuthKey,
-                self: { userId: 12345, isBot: false },
+                self: {
+                    userId: 12345,
+                    isBot: false,
+                    isPremium: false,
+                    usernames: [],
+                },
             })
         })
     })
@@ -148,7 +168,12 @@ describe('readStringSession', () => {
                 // v1 didn't have separate media dc
                 primaryDcs: stubDcsSameMedia,
                 authKey: stubAuthKey,
-                self: { userId: 12345, isBot: false },
+                self: {
+                    userId: 12345,
+                    isBot: false,
+                    isPremium: false,
+                    usernames: [],
+                },
             })
         })
     })

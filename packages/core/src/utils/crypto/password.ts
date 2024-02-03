@@ -4,6 +4,7 @@ import { utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
 import { bigIntModPow, bigIntToBuffer, bufferToBigInt } from '../bigint-utils.js'
 import { concatBuffers } from '../buffer-utils.js'
+import { assertTypeIs } from '../type-assertions.js'
 import { ICryptoProvider } from './abstract.js'
 import { xorBuffer } from './utils.js'
 
@@ -38,9 +39,11 @@ export async function computePasswordHash(
  */
 export async function computeNewPasswordHash(
     crypto: ICryptoProvider,
-    algo: tl.RawPasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow,
+    algo: tl.TypePasswordKdfAlgo,
     password: string,
 ): Promise<Uint8Array> {
+    assertTypeIs('account.getPassword', algo, 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow')
+
     const salt1 = new Uint8Array(algo.salt1.length + 32)
     salt1.set(algo.salt1)
     crypto.randomFill(salt1.subarray(algo.salt1.length))

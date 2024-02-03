@@ -1,4 +1,4 @@
-import { InlineQuery, ParametersSkip1, TelegramClient } from '@mtcute/client'
+import { InlineQuery, ParametersSkip1, TelegramClient } from '@mtcute/core'
 
 import { UpdateContext } from './base.js'
 

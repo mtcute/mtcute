@@ -4,7 +4,7 @@ import { deflateSync, gunzipSync } from 'zlib'
 
 import { ige256Decrypt, ige256Encrypt, initAsync, InitInput } from '@mtcute/wasm'
 
-import { MaybeAsync } from '../../types/index.js'
+import { MaybePromise } from '../../types/index.js'
 import { BaseCryptoProvider, IAesCtr, ICryptoProvider, IEncryptionScheme } from './abstract.js'
 
 export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
@@ -24,7 +24,7 @@ export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
         iterations: number,
         keylen = 64,
         algo = 'sha512',
-    ): MaybeAsync<Uint8Array> {
+    ): MaybePromise<Uint8Array> {
         return new Promise((resolve, reject) =>
             pbkdf2(password, salt, iterations, keylen, algo, (err: Error | null, buf: Uint8Array) =>
                 err !== null ? reject(err) : resolve(buf),

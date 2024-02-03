@@ -6,9 +6,8 @@ import { createStub } from '@mtcute/test'
 import {
     getAllPeersFrom,
     getBarePeerId,
-    getBasicPeerType,
     getMarkedPeerId,
-    markedPeerIdToBare,
+    parseMarkedPeerId,
     toggleChannelIdMark,
 } from './peer-utils.js'
 
@@ -68,32 +67,18 @@ describe('getMarkedPeerId', () => {
     })
 })
 
-describe('getBasicPeerType', () => {
-    it('should return basic peer type from Peer', () => {
-        expect(getBasicPeerType({ _: 'peerUser', userId: 123 })).toEqual('user')
-        expect(getBasicPeerType({ _: 'peerChat', chatId: 456 })).toEqual('chat')
-        expect(getBasicPeerType({ _: 'peerChannel', channelId: SOME_CHANNEL_ID })).toEqual('channel')
-    })
-
-    it('should return basic peer type from marked id', () => {
-        expect(getBasicPeerType(123)).toEqual('user')
-        expect(getBasicPeerType(-456)).toEqual('chat')
-        expect(getBasicPeerType(SOME_CHANNEL_ID_MARKED)).toEqual('channel')
+describe('parseMarkedPeerId', () => {
+    it('should correctly parse marked ids', () => {
+        expect(parseMarkedPeerId(123)).toEqual(['user', 123])
+        expect(parseMarkedPeerId(-456)).toEqual(['chat', 456])
+        expect(parseMarkedPeerId(SOME_CHANNEL_ID_MARKED)).toEqual(['channel', SOME_CHANNEL_ID])
     })
 
     it('should throw for invalid marked ids', () => {
-        expect(() => getBasicPeerType(0)).toThrow('Invalid marked peer id')
+        expect(() => parseMarkedPeerId(0)).toThrow('Invalid marked peer id')
 
         // secret chats are not supported yet
-        expect(() => getBasicPeerType(-1997852516400)).toThrow('Secret chats are not supported')
-    })
-})
-
-describe('markedPeerIdToBare', () => {
-    it('should return bare peer id from marked id', () => {
-        expect(markedPeerIdToBare(123)).toEqual(123)
-        expect(markedPeerIdToBare(-456)).toEqual(456)
-        expect(markedPeerIdToBare(SOME_CHANNEL_ID_MARKED)).toEqual(SOME_CHANNEL_ID)
+        expect(() => parseMarkedPeerId(-1997852516400)).toThrow('Secret chats are not supported')
     })
 })
 

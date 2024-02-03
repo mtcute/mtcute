@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { PeersIndex, TelegramClient } from '@mtcute/client'
+import { PeersIndex, TelegramClient } from '@mtcute/core'
 
 import { Dispatcher, PropagationAction } from '../src/index.js'
 

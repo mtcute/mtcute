@@ -1,4 +1,4 @@
-import { Long } from '@mtcute/core'
+import Long from 'long'
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace tdFileId {

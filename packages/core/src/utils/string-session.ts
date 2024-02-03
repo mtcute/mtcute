@@ -1,3 +1,4 @@
+// todo move to highlevel/
 import { tl } from '@mtcute/tl'
 import {
     base64DecodeToBuffer,
@@ -8,14 +9,15 @@ import {
     TlWriterMap,
 } from '@mtcute/tl-runtime'
 
-import { ITelegramStorage } from '../storage/index.js'
+import { CurrentUserInfo } from '../highlevel/storage/service/current-user.js'
 import { MtArgumentError } from '../types/index.js'
+import { DcOptions } from './dcs.js'
 
 export interface StringSessionData {
     version: number
     testMode: boolean
-    primaryDcs: ITelegramStorage.DcOptions
-    self?: ITelegramStorage.SelfInfo | null
+    primaryDcs: DcOptions
+    self?: CurrentUserInfo | null
     authKey: Uint8Array
 }
 
@@ -67,7 +69,7 @@ export function readStringSession(readerMap: TlReaderMap, data: string): StringS
 
     const version = buf[0]
 
-    if (version !== 1 && version !== 2) {
+    if (version !== 1 && version !== 2 && version !== 3) {
         throw new Error(`Invalid session string (version = ${version})`)
     }
 
@@ -85,7 +87,7 @@ export function readStringSession(readerMap: TlReaderMap, data: string): StringS
         throw new MtArgumentError(`Invalid session string (dc._ = ${primaryDc._})`)
     }
 
-    let self: ITelegramStorage.SelfInfo | null = null
+    let self: CurrentUserInfo | null = null
 
     if (hasSelf) {
         const selfId = reader.int53()
@@ -94,6 +96,9 @@ export function readStringSession(readerMap: TlReaderMap, data: string): StringS
         self = {
             userId: selfId,
             isBot: selfBot,
+            // todo: we should make sure we fetch this from the server at first start
+            isPremium: false,
+            usernames: [],
         }
     }
 

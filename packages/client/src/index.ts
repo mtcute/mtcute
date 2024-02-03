@@ -1,5 +1,0 @@
-export * from './client.js'
-export * from './types/index.js'
-export * from './utils/peer-utils.js'
-export { createDummyUpdate } from './utils/updates-utils.js'
-export * from '@mtcute/core'

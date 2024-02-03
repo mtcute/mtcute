@@ -1,10 +1,10 @@
 /* eslint-disable dot-notation */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MtArgumentError, MtcuteError } from '@mtcute/client'
-import { sleep } from '@mtcute/client/utils.js'
+import { MtArgumentError, MtcuteError } from '@mtcute/core'
+import { sleep } from '@mtcute/core/utils.js'
 
 import type { Dispatcher } from '../dispatcher.js'
-import { IStateStorage } from './storage.js'
+import { StateService } from './service.js'
 
 /**
  * Error thrown by `.rateLimit()`
@@ -25,21 +25,21 @@ export class UpdateState<State extends object> {
     private _key: string
     private _localKey!: string
 
-    private _storage: IStateStorage
+    private _storage: StateService
 
     private _scene: string | null
     private _scoped?: boolean
     private _cached?: State | null
 
-    private _localStorage: IStateStorage
+    private _localStorage: StateService
     private _localKeyBase: string
 
     constructor(
-        storage: IStateStorage,
+        storage: StateService,
         key: string,
         scene: string | null,
         scoped?: boolean,
-        customStorage?: IStateStorage,
+        customStorage?: StateService,
         customKey?: string,
     ) {
         this._storage = storage

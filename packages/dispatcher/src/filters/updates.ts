@@ -1,4 +1,4 @@
-import { ChatMemberUpdate, ChatMemberUpdateType, MaybeArray, UserStatus, UserStatusUpdate } from '@mtcute/client'
+import { ChatMemberUpdate, ChatMemberUpdateType, MaybeArray, UserStatus, UserStatusUpdate } from '@mtcute/core'
 
 import { UpdateFilter } from './types.js'
 

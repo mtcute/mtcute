@@ -26,6 +26,7 @@ const buildConfig = {
     removeReferenceComments: true,
     replaceSrcImports: true,
     esmOnlyDirectives: false,
+    esmImportDirectives: false,
     before: () => {},
     final: () => {},
     ...(() => {
@@ -173,6 +174,7 @@ if (buildConfig.buildTs) {
         console.log('[i] Building typescript (CJS)...')
         const originalFiles = {}
 
+        // todo - get rid of these, use @esm-replace-import instead
         if (buildConfig.esmOnlyDirectives) {
             for (const f of glob.sync(path.join(packageDir, '**/*.ts'))) {
                 const content = fs.readFileSync(f, 'utf8')
@@ -180,6 +182,15 @@ if (buildConfig.buildTs) {
                 originalFiles[f] = content
 
                 fs.writeFileSync(f, content.replace(/@only-if-esm.*?@\/only-if-esm/gs, ''))
+            }
+        }
+        if (buildConfig.esmImportDirectives) {
+            for (const f of glob.sync(path.join(packageDir, '**/*.ts'))) {
+                const content = fs.readFileSync(f, 'utf8')
+                if (!content.includes('@esm-replace-import')) continue
+                originalFiles[f] = content
+
+                fs.writeFileSync(f, content.replace(/@esm-replace-import.*?await import/gs, 'require'))
             }
         }
 

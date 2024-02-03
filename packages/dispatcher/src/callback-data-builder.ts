@@ -1,4 +1,4 @@
-import { CallbackQuery, MaybeArray, MtArgumentError } from '@mtcute/client'
+import { CallbackQuery, MaybeArray, MtArgumentError } from '@mtcute/core'
 
 import { UpdateFilter } from './filters/types.js'
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { hexDecodeToBuffer, hexEncode } from '@mtcute/core/utils.js'
+import { hexDecodeToBuffer, hexEncode } from '@mtcute/tl-runtime'
 
 import { telegramRleDecode, telegramRleEncode } from './utils.js'
 
