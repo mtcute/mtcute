@@ -155,14 +155,18 @@ export class MtprotoSession {
      */
     reset(withAuthKey = false): void {
         if (withAuthKey) {
-            this._authKey.reset()
-            this._authKeyTemp.reset()
-            this._authKeyTempSecondary.reset()
+            this.resetAuthKey()
         }
 
         clearTimeout(this.current429Timeout)
-        this.resetState()
+        this.resetState(withAuthKey)
         this.resetLastPing(true)
+    }
+
+    resetAuthKey(): void {
+        this._authKey.reset()
+        this._authKeyTemp.reset()
+        this._authKeyTempSecondary.reset()
     }
 
     /**

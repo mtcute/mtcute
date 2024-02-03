@@ -218,13 +218,13 @@ export class SessionConnection extends PersistentConnection {
                     }
 
                     // otherwise, 404 must be referencing the perm_key
-                    this.log.info('transport error 404, reauthorizing')
                 }
 
                 // there happened a little trolling
-                this._session.reset(true)
+                this.log.info('transport error 404, reauthorizing')
+                this._session.resetAuthKey()
+                this._resetSession()
                 this.emit('key-change', null)
-                this._authorize()
 
                 return
             }
@@ -1290,6 +1290,7 @@ export class SessionConnection extends PersistentConnection {
         this._queuedDestroySession.push(this._session._sessionId)
 
         this._session.resetState(true)
+        this._onAllFailed('session reset')
         this.reconnect()
 
         // once we receive new_session_created, all pending messages will be resent.
