@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MaybeAsync } from '../../types/utils.js'
+import { MaybePromise } from '../../types/utils.js'
 
-export type MaybeDynamic<T> = MaybeAsync<T> | (() => MaybeAsync<T>)
+export type MaybeDynamic<T> = MaybePromise<T> | (() => MaybePromise<T>)
 
 export type ArrayWithTotal<T> = T[] & { total: number }
 export type ArrayPaginated<T, Offset> = T[] & { total: number; next?: Offset }

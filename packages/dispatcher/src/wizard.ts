@@ -1,4 +1,4 @@
-import { MaybeAsync } from '@mtcute/core'
+import { MaybePromise } from '@mtcute/core'
 
 import { MessageContext } from './context/message.js'
 import { Dispatcher } from './dispatcher.js'
@@ -94,7 +94,7 @@ export class WizardScene<State extends object> extends Dispatcher<State & Wizard
         handler: (
             msg: MessageContext,
             state: UpdateState<State & WizardInternalState>,
-        ) => MaybeAsync<WizardSceneAction | number>,
+        ) => MaybePromise<WizardSceneAction | number>,
     ): void {
         const step = this._steps++
 

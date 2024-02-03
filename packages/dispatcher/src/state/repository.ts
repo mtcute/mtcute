@@ -1,4 +1,4 @@
-import { MaybeAsync } from '@mtcute/core'
+import { MaybePromise } from '@mtcute/core'
 
 /**
  * Interface for FSM storage for the dispatcher.
@@ -19,7 +19,7 @@ export interface IStateRepository {
      *
      * @param key  Key of the state, as defined by {@link StateKeyDelegate}
      */
-    getState(key: string, now: number): MaybeAsync<string | null>
+    getState(key: string, now: number): MaybePromise<string | null>
 
     /**
      * Save state to the storage
@@ -28,21 +28,21 @@ export interface IStateRepository {
      * @param state  String representing the state
      * @param ttl  TTL for the state, in seconds
      */
-    setState(key: string, state: string, ttl?: number): MaybeAsync<void>
+    setState(key: string, state: string, ttl?: number): MaybePromise<void>
 
     /**
      * Delete state from the storage
      *
      * @param key  Key of the state, as defined by {@link StateKeyDelegate}
      */
-    deleteState(key: string): MaybeAsync<void>
+    deleteState(key: string): MaybePromise<void>
 
     /**
      * Clean up expired states and rate limits.
      *
      * @param now  Current unix time in ms
      */
-    vacuum(now: number): MaybeAsync<void>
+    vacuum(now: number): MaybePromise<void>
 
     /**
      * Get information about a rate limit.
@@ -57,12 +57,12 @@ export interface IStateRepository {
      * @returns  Tuple containing the number of remaining and
      *   unix time in ms when the user can try again
      */
-    getRateLimit(key: string, now: number, limit: number, window: number): MaybeAsync<[number, number]>
+    getRateLimit(key: string, now: number, limit: number, window: number): MaybePromise<[number, number]>
 
     /**
      * Reset a rate limit.
      *
      * @param key  Key of the rate limit
      */
-    resetRateLimit(key: string): MaybeAsync<void>
+    resetRateLimit(key: string): MaybePromise<void>
 }

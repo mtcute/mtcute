@@ -1,4 +1,4 @@
-import { CallbackQuery, InlineCallbackQuery, MaybeAsync, Message, TelegramClient } from '@mtcute/core'
+import { CallbackQuery, InlineCallbackQuery, MaybePromise, Message, TelegramClient } from '@mtcute/core'
 
 import { UpdateContext } from './base.js'
 
@@ -46,7 +46,7 @@ export class CallbackQueryContext extends CallbackQuery implements UpdateContext
     /**
      * Shortcut for getting the message and editing it.
      */
-    async editMessageWith(handler: (msg: Message) => MaybeAsync<Parameters<CallbackQueryContext['editMessage']>[0]>) {
+    async editMessageWith(handler: (msg: Message) => MaybePromise<Parameters<CallbackQueryContext['editMessage']>[0]>) {
         const msg = await this.getMessage()
         if (!msg) return
 

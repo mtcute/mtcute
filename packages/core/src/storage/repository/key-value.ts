@@ -1,12 +1,12 @@
-import { MaybeAsync } from '../../types/utils.js'
+import { MaybePromise } from '../../types/utils.js'
 
 export interface IKeyValueRepository {
     /** Set a key-value pair */
-    set(key: string, value: Uint8Array): MaybeAsync<void>
+    set(key: string, value: Uint8Array): MaybePromise<void>
     /** Get a key-value pair */
-    get(key: string): MaybeAsync<Uint8Array | null>
+    get(key: string): MaybePromise<Uint8Array | null>
     /** Delete a key-value pair */
-    delete(key: string): MaybeAsync<void>
+    delete(key: string): MaybePromise<void>
 
-    deleteAll(): MaybeAsync<void>
+    deleteAll(): MaybePromise<void>
 }

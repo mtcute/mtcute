@@ -1,4 +1,4 @@
-import { MaybeAsync } from '../../types/index.js'
+import { MaybePromise } from '../../types/index.js'
 import { factorizePQSync } from './factorization.js'
 
 export interface IEncryptionScheme {
@@ -12,7 +12,7 @@ export interface IAesCtr {
 }
 
 export interface ICryptoProvider {
-    initialize?(): MaybeAsync<void>
+    initialize?(): MaybePromise<void>
 
     sha1(data: Uint8Array): Uint8Array
 
@@ -24,15 +24,15 @@ export interface ICryptoProvider {
         iterations: number,
         keylen?: number, // = 64
         algo?: string, // sha1 or sha512 (default sha512)
-    ): MaybeAsync<Uint8Array>
+    ): MaybePromise<Uint8Array>
 
-    hmacSha256(data: Uint8Array, key: Uint8Array): MaybeAsync<Uint8Array>
+    hmacSha256(data: Uint8Array, key: Uint8Array): MaybePromise<Uint8Array>
 
     createAesCtr(key: Uint8Array, iv: Uint8Array, encrypt: boolean): IAesCtr
 
     createAesIge(key: Uint8Array, iv: Uint8Array): IEncryptionScheme
 
-    factorizePQ(pq: Uint8Array): MaybeAsync<[Uint8Array, Uint8Array]>
+    factorizePQ(pq: Uint8Array): MaybePromise<[Uint8Array, Uint8Array]>
 
     gzip(data: Uint8Array, maxSize: number): Uint8Array | null
     gunzip(data: Uint8Array): Uint8Array

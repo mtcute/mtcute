@@ -1,4 +1,4 @@
-import { MaybeAsync } from '@mtcute/core'
+import { MaybePromise } from '@mtcute/core'
 import type { SqliteStorage, SqliteStorageDriver, Statement } from '@mtcute/sqlite'
 
 import { IStateStorageProvider } from '../provider.js'
@@ -46,12 +46,12 @@ class SqliteStateRepository implements IStateRepository {
     }
 
     private _setState!: Statement
-    setState(key: string, state: string, ttl?: number | undefined): MaybeAsync<void> {
+    setState(key: string, state: string, ttl?: number | undefined): MaybePromise<void> {
         this._setState.run(key, state, ttl ? Date.now() + ttl * 1000 : undefined)
     }
 
     private _getState!: Statement
-    getState(key: string, now: number): MaybeAsync<string | null> {
+    getState(key: string, now: number): MaybePromise<string | null> {
         const res_ = this._getState.get(key)
         if (!res_) return null
         const res = res_ as StateDto
@@ -66,13 +66,13 @@ class SqliteStateRepository implements IStateRepository {
     }
 
     private _deleteState!: Statement
-    deleteState(key: string): MaybeAsync<void> {
+    deleteState(key: string): MaybePromise<void> {
         this._deleteState.run(key)
     }
 
     private _deleteOldState!: Statement
     private _deleteOldRl!: Statement
-    vacuum(now: number): MaybeAsync<void> {
+    vacuum(now: number): MaybePromise<void> {
         this._deleteOldState.run(now)
         this._deleteOldRl.run(now)
     }
@@ -107,7 +107,7 @@ class SqliteStateRepository implements IStateRepository {
         return [val.remaining, val.reset]
     }
 
-    resetRateLimit(key: string): MaybeAsync<void> {
+    resetRateLimit(key: string): MaybePromise<void> {
         this._deleteRl.run(key)
     }
 }

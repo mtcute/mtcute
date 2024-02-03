@@ -6,7 +6,7 @@ import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 // @copy
-import { MaybeArray, MaybeAsync, PartialExcept, PartialOnly } from '../../types/index.js'
+import { MaybeArray, MaybePromise, PartialExcept, PartialOnly } from '../../types/index.js'
 // @copy
 import { StringSessionData } from '../../utils/string-session.js'
 // @copy

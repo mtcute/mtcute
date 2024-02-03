@@ -1,4 +1,4 @@
-import { MaybeAsync } from '../types/utils.js'
+import { MaybePromise } from '../types/utils.js'
 import { Logger } from '../utils/logger.js'
 
 /**
@@ -14,7 +14,7 @@ export interface IStorageDriver {
      * May be called more than once, handle this with care
      * (or use {@link BaseStorageDriver} that handles this for you)
      */
-    load?(): MaybeAsync<void>
+    load?(): MaybePromise<void>
     /**
      * Save session to some external storage.
      * Should be used to commit pending changes in the session.
@@ -24,14 +24,14 @@ export interface IStorageDriver {
      * It is safe to batch all changes and only commit them here,
      * unless stated otherwise in the method description
      */
-    save?(): MaybeAsync<void>
+    save?(): MaybePromise<void>
     /**
      * Cleanup session and release all used resources.
      *
      * May be called more than once, handle this with care
      * (or use {@link BaseStorageDriver} that handles this for you)
      */
-    destroy?(): MaybeAsync<void>
+    destroy?(): MaybePromise<void>
 
     /**
      * Setup the driver, passing the logger instance,
@@ -45,9 +45,9 @@ export interface IStorageDriver {
  * and handling the lifecycle for you
  */
 export abstract class BaseStorageDriver implements IStorageDriver {
-    abstract _load(): MaybeAsync<void>
-    abstract _destroy(): MaybeAsync<void>
-    abstract _save?(): MaybeAsync<void>
+    abstract _load(): MaybePromise<void>
+    abstract _destroy(): MaybePromise<void>
+    abstract _save?(): MaybePromise<void>
 
     private _loadedTimes = 0
     private _destroyed = false
@@ -84,7 +84,7 @@ export abstract class BaseStorageDriver implements IStorageDriver {
         }
     }
 
-    save(): MaybeAsync<void> {
+    save(): MaybePromise<void> {
         return this._save?.()
     }
 }

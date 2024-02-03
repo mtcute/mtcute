@@ -2,7 +2,7 @@ import EventEmitter from 'events'
 
 import { tl } from '@mtcute/tl'
 
-import { MaybeAsync } from '../../types/index.js'
+import { MaybePromise } from '../../types/index.js'
 import { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.js'
 
 /** Current state of the transport */
@@ -73,10 +73,10 @@ export type TransportFactory = () => ITelegramTransport
  */
 export interface IPacketCodec {
     /** Initial tag of the codec. Will be sent immediately once connected. */
-    tag(): MaybeAsync<Uint8Array>
+    tag(): MaybePromise<Uint8Array>
 
     /** Encodes and frames a single packet */
-    encode(packet: Uint8Array): MaybeAsync<Uint8Array>
+    encode(packet: Uint8Array): MaybePromise<Uint8Array>
 
     /** Feed packet to the codec. Once packet is processed, codec is supposed to emit `packet` or `error` */
     feed(data: Uint8Array): void

@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-restricted-imports
 import { join } from 'path'
 
-import { MaybeAsync, MemoryStorage } from '@mtcute/core'
+import { MaybePromise, MemoryStorage } from '@mtcute/core'
 import { LogManager, sleep } from '@mtcute/core/utils.js'
 import { SqliteStorage } from '@mtcute/sqlite'
 
@@ -19,7 +19,7 @@ export const getApiParams = (storage?: string) => {
     }
 }
 
-export async function waitFor(condition: () => MaybeAsync<void>, timeout = 5000): Promise<void> {
+export async function waitFor(condition: () => MaybePromise<void>, timeout = 5000): Promise<void> {
     const start = Date.now()
     let lastError
 

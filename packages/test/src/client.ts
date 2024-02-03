@@ -1,4 +1,11 @@
-import { BaseTelegramClient, BaseTelegramClientOptions, MaybeAsync, MustEqual, RpcCallOptions, tl } from '@mtcute/core'
+import {
+    BaseTelegramClient,
+    BaseTelegramClientOptions,
+    MaybePromise,
+    MustEqual,
+    RpcCallOptions,
+    tl,
+} from '@mtcute/core'
 
 import { StubMemoryTelegramStorage } from './storage.js'
 import { StubTelegramTransport } from './transport.js'
@@ -174,7 +181,7 @@ export class StubTelegramClient extends BaseTelegramClient {
 
     respondWith<
         T extends tl.RpcMethod['_'],
-        Fn extends(data: tl.FindByName<tl.RpcMethod, T>) => MaybeAsync<tl.RpcCallReturn[T]>,
+        Fn extends(data: tl.FindByName<tl.RpcMethod, T>) => MaybePromise<tl.RpcCallReturn[T]>,
     >(method: T, response: Fn): Fn {
         // eslint-disable-next-line
         this._responders.set(method, response as any)
@@ -280,7 +287,7 @@ export class StubTelegramClient extends BaseTelegramClient {
 
     // helpers //
 
-    async with(fn: () => MaybeAsync<void>): Promise<void> {
+    async with(fn: () => MaybePromise<void>): Promise<void> {
         await this.connect()
 
         let error: unknown

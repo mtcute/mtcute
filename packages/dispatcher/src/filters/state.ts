@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MaybeAsync } from '@mtcute/core'
+import { MaybePromise } from '@mtcute/core'
 
 import { UpdateFilter } from './types.js'
 
@@ -21,7 +21,7 @@ export const stateEmpty: UpdateFilter<any> = async (upd, state) => {
  * @param predicate  State predicate
  */
 export const state = <T extends object>(
-    predicate: (state: T) => MaybeAsync<boolean>,
+    predicate: (state: T) => MaybePromise<boolean>,
     // eslint-disable-next-line @typescript-eslint/ban-types
 ): UpdateFilter<any, {}, T> => {
     return async (upd, state) => {

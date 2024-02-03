@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/tl'
 
 import { MtArgumentError, MtTimeoutError } from '../../types/errors.js'
-import { MaybeAsync } from '../../types/utils.js'
+import { MaybePromise } from '../../types/utils.js'
 import { AsyncLock } from '../../utils/async-lock.js'
 import { ControllablePromise, createControllablePromise } from '../../utils/controllable-promise.js'
 import { Deque } from '../../utils/deque.js'
@@ -20,7 +20,7 @@ import { ParametersSkip2 } from './utils.js'
 
 interface QueuedHandler<T> {
     promise: ControllablePromise<T>
-    check?: (update: T) => MaybeAsync<boolean>
+    check?: (update: T) => MaybePromise<boolean>
     timeout?: NodeJS.Timeout
 }
 
@@ -304,7 +304,7 @@ export class Conversation {
      *
      * @param handler
      */
-    async with<T>(handler: () => MaybeAsync<T>): Promise<T> {
+    async with<T>(handler: () => MaybePromise<T>): Promise<T> {
         await this.start()
 
         let err: unknown
@@ -332,7 +332,7 @@ export class Conversation {
      *   When the timeout is reached, `MtTimeoutError` is thrown.
      */
     waitForNewMessage(
-        filter?: (msg: Message) => MaybeAsync<boolean>,
+        filter?: (msg: Message) => MaybePromise<boolean>,
         timeout: number | null = 15000,
     ): Promise<Message> {
         if (!this._started) {
@@ -372,7 +372,7 @@ export class Conversation {
      * @param params
      */
     waitForResponse(
-        filter?: (msg: Message) => MaybeAsync<boolean>,
+        filter?: (msg: Message) => MaybePromise<boolean>,
         params?: {
             /**
              * Message for which to wait for response for.
@@ -408,7 +408,7 @@ export class Conversation {
      * @param params
      */
     waitForReply(
-        filter?: (msg: Message) => MaybeAsync<boolean>,
+        filter?: (msg: Message) => MaybePromise<boolean>,
         params?: {
             /**
              * Message for which to wait for reply for.
@@ -451,7 +451,7 @@ export class Conversation {
      * @param params
      */
     async waitForEdit(
-        filter?: (msg: Message) => MaybeAsync<boolean>,
+        filter?: (msg: Message) => MaybePromise<boolean>,
         params?: {
             /**
              * Message for which to wait for reply for.

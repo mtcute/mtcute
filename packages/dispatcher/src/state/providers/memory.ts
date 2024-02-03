@@ -1,4 +1,4 @@
-import { MaybeAsync, MemoryStorageDriver } from '@mtcute/core'
+import { MaybePromise, MemoryStorageDriver } from '@mtcute/core'
 
 import { IStateStorageProvider } from '../provider.js'
 import { IStateRepository } from '../repository.js'
@@ -91,15 +91,13 @@ class MemoryStateRepository implements IStateRepository {
         return [item.remaining, item.reset]
     }
 
-    resetRateLimit(key: string): MaybeAsync<void> {
+    resetRateLimit(key: string): MaybePromise<void> {
         this.rl.delete(key)
     }
 }
 
 export class MemoryStateStorage implements IStateStorageProvider {
-    constructor(
-        readonly driver: MemoryStorageDriver = new MemoryStorageDriver(),
-    ) {}
+    constructor(readonly driver: MemoryStorageDriver = new MemoryStorageDriver()) {}
 
     readonly state = new MemoryStateRepository(this.driver)
 }

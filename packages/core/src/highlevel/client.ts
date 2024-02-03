@@ -8,7 +8,7 @@ import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { MemoryStorage } from '../storage/providers/memory/index.js'
-import { MaybeArray, MaybeAsync, PartialExcept, PartialOnly } from '../types/index.js'
+import { MaybeArray, MaybePromise, PartialExcept, PartialOnly } from '../types/index.js'
 import { StringSessionData } from '../utils/string-session.js'
 import { BaseTelegramClient, BaseTelegramClientOptions } from './base.js'
 import { ITelegramClient } from './client.types.js'
@@ -672,7 +672,7 @@ export interface TelegramClient extends ITelegramClient {
      * This method handles both login and sign up, and also handles 2FV
      *
      * All parameters are `MaybeDynamic<T>`, meaning you
-     * can either supply `T`, or a function that returns `MaybeAsync<T>`
+     * can either supply `T`, or a function that returns `MaybePromise<T>`
      *
      * This method is intended for simple and fast use in automated
      * scripts and bots. If you are developing a custom client,
@@ -725,7 +725,7 @@ export interface TelegramClient extends ITelegramClient {
          * If provided `code`/`password` is a constant string, providing an
          * invalid one will interrupt authorization flow.
          */
-        invalidCodeCallback?: (type: 'code' | 'password') => MaybeAsync<void>
+        invalidCodeCallback?: (type: 'code' | 'password') => MaybePromise<void>
 
         /**
          * Whether to force code delivery through SMS
@@ -741,7 +741,7 @@ export interface TelegramClient extends ITelegramClient {
          * @param code
          * @default  `console.log`.
          */
-        codeSentCallback?: (code: SentCode) => MaybeAsync<void>
+        codeSentCallback?: (code: SentCode) => MaybePromise<void>
     }): Promise<User>
     /**
      * Check if the given peer/input peer is referring to the current user

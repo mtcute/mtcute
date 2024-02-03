@@ -1,4 +1,4 @@
-import { MaybeArray, MaybeAsync, Message } from '@mtcute/core'
+import { MaybeArray, MaybePromise, Message } from '@mtcute/core'
 
 import { MessageContext } from '../context/message.js'
 import { chat } from './chat.js'
@@ -51,7 +51,7 @@ export const command = (
 
     const _prefixes = prefixes
 
-    const check = (msg: MessageContext): MaybeAsync<boolean> => {
+    const check = (msg: MessageContext): MaybePromise<boolean> => {
         if (msg.isMessageGroup) return check(msg.messages[0])
 
         for (const pref of _prefixes) {

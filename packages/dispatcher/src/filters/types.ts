@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ^^ will be looked into in MTQ-29
 
-import { MaybeAsync } from '@mtcute/core'
+import { MaybePromise } from '@mtcute/core'
 
 import { UpdateState } from '../state/update-state.js'
 /**
@@ -78,7 +78,7 @@ import { UpdateState } from '../state/update-state.js'
 export type UpdateFilter<Base, Mod = {}, State extends object = never> = (
     update: Base,
     state?: UpdateState<State>,
-) => MaybeAsync<boolean>
+) => MaybePromise<boolean>
 
 export type Modify<Base, Mod> = Omit<Base, keyof Mod> & Mod
 export type Invert<Base, Mod> = {

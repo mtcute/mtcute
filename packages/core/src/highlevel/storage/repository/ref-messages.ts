@@ -1,8 +1,8 @@
-import { MaybeAsync } from '../../../types/utils.js'
+import { MaybePromise } from '../../../types/utils.js'
 
 export interface IReferenceMessagesRepository {
     /** Store a reference message */
-    store(peerId: number, chatId: number, msgId: number): MaybeAsync<void>
+    store(peerId: number, chatId: number, msgId: number): MaybePromise<void>
     /**
      * Get the reference message for the given `peerId`.
      *
@@ -10,13 +10,13 @@ export interface IReferenceMessagesRepository {
      * the one with the highest `msgId` should be returned, but this is not
      * really important.
      */
-    getByPeer(peerId: number): MaybeAsync<[number, number] | null>
+    getByPeer(peerId: number): MaybePromise<[number, number] | null>
 
     /**
      * Delete reference messages given the `chatId`
      * where `msgId` is one of `msgIds`
      */
-    delete(chatId: number, msgIds: number[]): MaybeAsync<void>
-    deleteByPeer(peerId: number): MaybeAsync<void>
-    deleteAll(): MaybeAsync<void>
+    delete(chatId: number, msgIds: number[]): MaybePromise<void>
+    deleteByPeer(peerId: number): MaybePromise<void>
+    deleteAll(): MaybePromise<void>
 }

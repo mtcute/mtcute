@@ -2,7 +2,7 @@
 import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../types/errors.js'
-import { assertNever, MaybeAsync } from '../../types/utils.js'
+import { assertNever, MaybePromise } from '../../types/utils.js'
 import {
     AsyncLock,
     ConditionVariable,
@@ -680,7 +680,7 @@ export class UpdatesManager {
 
         const channelId = toggleChannelIdMark(peerId.channelId)
 
-        const promises: MaybeAsync<void>[] = []
+        const promises: MaybePromise<void>[] = []
 
         function store(peer?: tl.TypePeer | number | number[]): void {
             if (!peer) return

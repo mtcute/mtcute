@@ -2,7 +2,7 @@
 import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
-import { MaybeAsync } from '../../../types/utils.js'
+import { MaybePromise } from '../../../types/utils.js'
 import { StringSessionData } from '../../../utils/string-session.js'
 import { ITelegramClient } from '../../client.types.js'
 import { SentCode } from '../../types/auth/sent-code.js'
@@ -24,7 +24,7 @@ import { signInBot } from './sign-in-bot.js'
  * This method handles both login and sign up, and also handles 2FV
  *
  * All parameters are `MaybeDynamic<T>`, meaning you
- * can either supply `T`, or a function that returns `MaybeAsync<T>`
+ * can either supply `T`, or a function that returns `MaybePromise<T>`
  *
  * This method is intended for simple and fast use in automated
  * scripts and bots. If you are developing a custom client,
@@ -77,7 +77,7 @@ export async function start(
          * If provided `code`/`password` is a constant string, providing an
          * invalid one will interrupt authorization flow.
          */
-        invalidCodeCallback?: (type: 'code' | 'password') => MaybeAsync<void>
+        invalidCodeCallback?: (type: 'code' | 'password') => MaybePromise<void>
 
         /**
          * Whether to force code delivery through SMS
@@ -93,7 +93,7 @@ export async function start(
          * @param code
          * @default  `console.log`.
          */
-        codeSentCallback?: (code: SentCode) => MaybeAsync<void>
+        codeSentCallback?: (code: SentCode) => MaybePromise<void>
     },
 ): Promise<User> {
     if (params.session) {

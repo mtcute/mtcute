@@ -12,7 +12,7 @@ import {
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     HistoryReadUpdate,
-    MaybeAsync,
+    MaybePromise,
     MtArgumentError,
     ParsedUpdate,
     PeersIndex,
@@ -66,12 +66,7 @@ import {
 } from './handler.js'
 // end-codegen-imports
 import { PropagationAction } from './propagation.js'
-import {
-    defaultStateKeyDelegate,
-    IStateStorageProvider,
-    StateKeyDelegate,
-    UpdateState,
-} from './state/index.js'
+import { defaultStateKeyDelegate, IStateStorageProvider, StateKeyDelegate, UpdateState } from './state/index.js'
 import { StateService } from './state/service.js'
 
 export interface DispatcherParams {
@@ -121,18 +116,18 @@ export class Dispatcher<State extends object = never> {
         err: Error,
         update: ParsedUpdate & T,
         state?: UpdateState<State>,
-    ) => MaybeAsync<boolean>
+    ) => MaybePromise<boolean>
 
     private _preUpdateHandler?: <T = {}>(
         update: ParsedUpdate & T,
         state?: UpdateState<State>,
-    ) => MaybeAsync<PropagationAction | void>
+    ) => MaybePromise<PropagationAction | void>
 
     private _postUpdateHandler?: <T = {}>(
         handled: boolean,
         update: ParsedUpdate & T,
         state?: UpdateState<State>,
-    ) => MaybeAsync<void>
+    ) => MaybePromise<void>
 
     protected constructor(client?: TelegramClient, params?: DispatcherParams) {
         this.dispatchRawUpdate = this.dispatchRawUpdate.bind(this)
@@ -146,7 +141,7 @@ export class Dispatcher<State extends object = never> {
 
             if (storage) {
                 this._storage = new StateService(storage)
-                this._stateKeyDelegate = (key ?? defaultStateKeyDelegate)
+                this._stateKeyDelegate = key ?? defaultStateKeyDelegate
             }
         } else {
             // child dispatcher without client
@@ -597,7 +592,7 @@ export class Dispatcher<State extends object = never> {
      * @param handler  Error handler
      */
     onError<T = {}>(
-        handler: ((err: Error, update: ParsedUpdate & T, state?: UpdateState<State>) => MaybeAsync<boolean>) | null,
+        handler: ((err: Error, update: ParsedUpdate & T, state?: UpdateState<State>) => MaybePromise<boolean>) | null,
     ): void {
         if (handler) this._errorHandler = handler
         else this._errorHandler = undefined
@@ -617,7 +612,7 @@ export class Dispatcher<State extends object = never> {
      */
     onPreUpdate<T = {}>(
         handler:
-            | ((update: ParsedUpdate & T, state?: UpdateState<State>) => MaybeAsync<PropagationAction | void>)
+            | ((update: ParsedUpdate & T, state?: UpdateState<State>) => MaybePromise<PropagationAction | void>)
             | null,
     ): void {
         if (handler) this._preUpdateHandler = handler
@@ -637,7 +632,9 @@ export class Dispatcher<State extends object = never> {
      * @param handler  Pre-update middleware
      */
     onPostUpdate<T = {}>(
-        handler: ((handled: boolean, update: ParsedUpdate & T, state?: UpdateState<State>) => MaybeAsync<void>) | null,
+        handler:
+            | ((handled: boolean, update: ParsedUpdate & T, state?: UpdateState<State>) => MaybePromise<void>)
+            | null,
     ): void {
         if (handler) this._postUpdateHandler = handler
         else this._postUpdateHandler = undefined
@@ -647,7 +644,7 @@ export class Dispatcher<State extends object = never> {
      * Set error handler that will propagate
      * the error to the parent dispatcher
      */
-    propagateErrorToParent(err: Error, update: ParsedUpdate, state?: UpdateState<State>): MaybeAsync<boolean> {
+    propagateErrorToParent(err: Error, update: ParsedUpdate, state?: UpdateState<State>): MaybePromise<boolean> {
         if (!this.parent) {
             throw new MtArgumentError('This dispatcher is not a child')
         }
@@ -912,7 +909,7 @@ export class Dispatcher<State extends object = never> {
      * @template S  State type, defaults to dispatcher's state type. Only checked at compile-time
      */
     getState<S extends object = State>(object: Parameters<StateKeyDelegate>[0]): Promise<UpdateState<S>>
-    getState<S extends object = State>(object: string | Parameters<StateKeyDelegate>[0]): MaybeAsync<UpdateState<S>> {
+    getState<S extends object = State>(object: string | Parameters<StateKeyDelegate>[0]): MaybePromise<UpdateState<S>> {
         if (!this._storage) {
             throw new MtArgumentError('Cannot use getUpdateState() filter without state storage')
         }
