@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { fakeKeyValueRepository } from '../repository/key-value.test-utils.js'
+import { fakeKeyValueRepository } from '@mtcute/test'
+
 import { UpdatesStateService } from '../../highlevel/storage/service/updates.js'
 import { testServiceOptions } from './utils.test-utils.js'
 
@@ -73,10 +74,7 @@ describe('updates state service', () => {
         it('should write to updates_channel:xxx key', async () => {
             await service.setChannelPts(123, 0x04030201)
 
-            expect(kv.set).toHaveBeenCalledWith(
-                'updates_channel:123',
-                new Uint8Array([1, 2, 3, 4]),
-            )
+            expect(kv.set).toHaveBeenCalledWith('updates_channel:123', new Uint8Array([1, 2, 3, 4]))
         })
     })
 })

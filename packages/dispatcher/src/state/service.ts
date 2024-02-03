@@ -18,15 +18,14 @@ export class StateService {
     async load() {
         await this._load.run()
         this._vacuumTimer = setInterval(() => {
-            Promise.resolve(this.provider.state.vacuum(Date.now()))
-                .catch(() => {})
+            Promise.resolve(this.provider.state.vacuum(Date.now())).catch(() => {})
         }, 300_000)
     }
 
     async destroy() {
         await this.provider.driver.save?.()
         await this.provider.driver.destroy?.()
-        clearInterval(this._vacuumTimer!)
+        clearInterval(this._vacuumTimer)
         this._loaded = false
     }
 

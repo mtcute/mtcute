@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { Message, PeersIndex } from '@mtcute/client'
+import { Message, PeersIndex } from '@mtcute/core'
 import { MessageContext } from '@mtcute/dispatcher'
 
 import { createMtcuteI18n, OtherLanguageWrap } from '../src/index.js'

@@ -62,7 +62,9 @@ export class StorageManager {
         this.driver.setup?.(this.log)
 
         if (this.options.cleanup ?? true) {
-            this._cleanupRestore = beforeExit(() => this._destroy().catch((err) => this.log.error(err)))
+            this._cleanupRestore = beforeExit(() => {
+                this._destroy().catch((err) => this.log.error('cleanup error: %s', err))
+            })
         }
 
         await this.driver.load?.()

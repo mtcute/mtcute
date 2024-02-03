@@ -1,11 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { createStub } from '@mtcute/test'
+import { IPeersRepository, IStorageDriver } from '@mtcute/core'
+import { TlBinaryWriter } from '@mtcute/core/utils.js'
 import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
-import { TlBinaryWriter } from '@mtcute/tl-runtime'
 
-import { IStorageDriver } from '../../../storage/driver.js'
-import { IPeersRepository } from './peers.js'
+import { createStub } from '../stub.js'
 
 export function fakePeersRepository(): IPeersRepository {
     return {
@@ -56,8 +55,8 @@ export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriv
         })
 
         it('should store and retrieve peers', async () => {
-            repo.store(stubPeerUser)
-            repo.store(stubPeerChannel)
+            await repo.store(stubPeerUser)
+            await repo.store(stubPeerChannel)
             await driver.save?.()
 
             expect(fixPeerInfo(await repo.getById(123123))).toEqual(stubPeerUser)
@@ -69,11 +68,11 @@ export function testPeersRepository(repo: IPeersRepository, driver: IStorageDriv
         })
 
         it('should update peers usernames', async () => {
-            repo.store(stubPeerUser)
+            await repo.store(stubPeerUser)
             await driver.save?.()
 
             const modUser = { ...stubPeerUser, usernames: ['some_user2'] }
-            repo.store(modUser)
+            await repo.store(modUser)
             await driver.save?.()
 
             expect(fixPeerInfo(await repo.getById(123123))).toEqual(modUser)

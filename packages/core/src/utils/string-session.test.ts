@@ -125,7 +125,12 @@ describe('readStringSession', () => {
                 testMode: false,
                 primaryDcs: stubDcs,
                 authKey: stubAuthKey,
-                self: { userId: 12345, isBot: false },
+                self: {
+                    userId: 12345,
+                    isBot: false,
+                    isPremium: false,
+                    usernames: [],
+                },
             })
         })
 
@@ -140,7 +145,12 @@ describe('readStringSession', () => {
                 testMode: true,
                 primaryDcs: stubDcs,
                 authKey: stubAuthKey,
-                self: { userId: 12345, isBot: false },
+                self: {
+                    userId: 12345,
+                    isBot: false,
+                    isPremium: false,
+                    usernames: [],
+                },
             })
         })
     })
@@ -158,7 +168,12 @@ describe('readStringSession', () => {
                 // v1 didn't have separate media dc
                 primaryDcs: stubDcsSameMedia,
                 authKey: stubAuthKey,
-                self: { userId: 12345, isBot: false },
+                self: {
+                    userId: 12345,
+                    isBot: false,
+                    isPremium: false,
+                    usernames: [],
+                },
             })
         })
     })

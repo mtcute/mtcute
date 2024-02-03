@@ -4917,7 +4917,7 @@ export interface TelegramClient extends ITelegramClient {
      * **Available**: ✅ both users and bots
      *
      */
-    getMyUsername(): string | null
+    getMyUsername(): Promise<string | null>
     /**
      * Get a single profile picture of a user by its ID
      *

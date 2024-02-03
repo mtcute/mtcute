@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { IAuthKeysRepository } from './auth-keys.js'
+import { IAuthKeysRepository } from '@mtcute/core'
 
 export function fakeAuthKeysRepository(): IAuthKeysRepository {
     return {

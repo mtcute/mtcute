@@ -1,7 +1,7 @@
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
 
-import { MessageEntity, TextWithEntities, tl } from '@mtcute/client'
+import { MessageEntity, TextWithEntities, tl } from '@mtcute/core'
 
 // prettier has "html" special-cased which breaks the formatting
 // this is not an issue when using normally, since we properly handle newlines/spaces,

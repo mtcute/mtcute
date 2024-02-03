@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { fakeAuthKeysRepository } from '../repository/auth-keys.test-utils.js'
-import { fakeKeyValueRepository } from '../repository/key-value.test-utils.js'
+import { fakeAuthKeysRepository, fakeKeyValueRepository } from '@mtcute/test'
+
 import { AuthKeysService } from './auth-keys.js'
 import { FutureSaltsService } from './future-salts.js'
 import { testServiceOptions } from './utils.test-utils.js'

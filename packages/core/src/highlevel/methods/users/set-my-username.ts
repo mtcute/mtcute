@@ -17,7 +17,7 @@ export async function setMyUsername(client: ITelegramClient, username: string | 
         username,
     })
 
-    client.storage.self.update({ username })
+    await client.storage.self.update({ username })
 
     return new User(res)
 }

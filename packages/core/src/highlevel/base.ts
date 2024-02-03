@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await */
 import { tl } from '@mtcute/tl'
 
 import { MtClient, MtClientOptions } from '../network/client.js'
@@ -5,7 +6,14 @@ import { ConnectionKind, RpcCallOptions } from '../network/network-manager.js'
 import { StorageManagerExtraOptions } from '../storage/storage.js'
 import { MtArgumentError } from '../types/errors.js'
 import { MustEqual } from '../types/utils.js'
-import { asyncResettable, computeNewPasswordHash, computeSrpParams, readStringSession, StringSessionData, writeStringSession } from '../utils/index.js'
+import {
+    asyncResettable,
+    computeNewPasswordHash,
+    computeSrpParams,
+    readStringSession,
+    StringSessionData,
+    writeStringSession,
+} from '../utils/index.js'
 import { LogManager } from '../utils/logger.js'
 import { ITelegramClient } from './client.types.js'
 import { ITelegramStorageProvider } from './storage/provider.js'
@@ -29,7 +37,7 @@ export class BaseTelegramClient implements ITelegramClient {
             this._serverUpdatesHandler = this.updates.handleUpdate.bind(this.updates)
         }
 
-        this.mt.on('update', (update) => {
+        this.mt.on('update', (update: tl.TypeUpdates) => {
             this._serverUpdatesHandler(update)
         })
     }
@@ -272,16 +280,10 @@ export class BaseTelegramClient implements ITelegramClient {
         return this.mt.network.getPrimaryDcId()
     }
 
-    computeSrpParams(
-        request: tl.account.RawPassword,
-        password: string,
-    ): Promise<tl.RawInputCheckPasswordSRP> {
+    computeSrpParams(request: tl.account.RawPassword, password: string): Promise<tl.RawInputCheckPasswordSRP> {
         return computeSrpParams(this.crypto, request, password)
     }
-    computeNewPasswordHash(
-        algo: tl.TypePasswordKdfAlgo,
-        password: string,
-    ): Promise<Uint8Array> {
+    computeNewPasswordHash(algo: tl.TypePasswordKdfAlgo, password: string): Promise<Uint8Array> {
         return computeNewPasswordHash(this.crypto, algo, password)
     }
 }

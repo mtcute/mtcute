@@ -25,7 +25,7 @@ export class IdbKvRepository implements IKeyValueRepository {
 
     async get(key: string): Promise<Uint8Array | null> {
         const os = this.os()
-        const res = await reqToPromise<KeyValueDto>(os.get(key))
+        const res = await reqToPromise<KeyValueDto>(os.get(key) as IDBRequest<KeyValueDto>)
         if (res === undefined) return null
 
         return res.value

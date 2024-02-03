@@ -22,19 +22,21 @@ export class IdbPeersRepository implements IPeersRepository {
     }
 
     async getById(id: number): Promise<IPeersRepository.PeerInfo | null> {
-        const it = await reqToPromise(this.os().get(id))
+        const it = await reqToPromise(this.os().get(id) as IDBRequest<IPeersRepository.PeerInfo>)
 
         return it ?? null
     }
 
     async getByUsername(username: string): Promise<IPeersRepository.PeerInfo | null> {
-        const it = await reqToPromise(this.os().index('by_username').get(username))
+        const it = await reqToPromise(
+            this.os().index('by_username').get(username) as IDBRequest<IPeersRepository.PeerInfo>,
+        )
 
         return it ?? null
     }
 
     async getByPhone(phone: string): Promise<IPeersRepository.PeerInfo | null> {
-        const it = await reqToPromise(this.os().index('by_phone').get(phone))
+        const it = await reqToPromise(this.os().index('by_phone').get(phone) as IDBRequest<IPeersRepository.PeerInfo>)
 
         return it ?? null
     }

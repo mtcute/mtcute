@@ -6,6 +6,7 @@ export function connectToWorker(worker: SomeWorker, handler: ClientMessageHandle
         const send: SendFn = worker.postMessage.bind(worker)
 
         const messageHandler = (ev: MessageEvent) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             handler(ev.data)
         }
 
@@ -37,6 +38,7 @@ export function connectToWorker(worker: SomeWorker, handler: ClientMessageHandle
                 return
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             handler(ev.data)
         }
 

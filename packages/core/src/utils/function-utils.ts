@@ -51,8 +51,9 @@ export function asyncResettable<T extends(...args: any[]) => Promise<any>>(func:
             return runningPromise
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         runningPromise = func(...args)
-        runningPromise.then(() => {
+        void runningPromise.then(() => {
             runningPromise = null
             finished = true
         })

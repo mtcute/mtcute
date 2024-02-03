@@ -8,14 +8,9 @@ export class WorkerInvoker {
     constructor(private send: SendFn) {}
 
     private _nextId = 0
-    private _pending = new Map<number, ControllablePromise<unknown>>()
+    private _pending = new Map<number, ControllablePromise>()
 
-    private _invoke(
-        target: InvokeTarget,
-        method: string,
-        args: unknown[],
-        isVoid: boolean,
-    ) {
+    private _invoke(target: InvokeTarget, method: string, args: unknown[], isVoid: boolean) {
         const id = this._nextId++
 
         this.send({
@@ -36,15 +31,12 @@ export class WorkerInvoker {
         }
     }
 
-    invoke(
-        target: InvokeTarget,
-        method: string,
-        args: unknown[],
-    ): Promise<unknown> {
+    invoke(target: InvokeTarget, method: string, args: unknown[]): Promise<unknown> {
         return this._invoke(target, method, args, false) as Promise<unknown>
     }
 
     invokeVoid(target: InvokeTarget, method: string, args: unknown[]): void {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this._invoke(target, method, args, true)
     }
 

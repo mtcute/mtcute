@@ -18,7 +18,7 @@ function mapPeerDto(dto: PeerDto): IPeersRepository.PeerInfo {
     return {
         id: dto.id,
         accessHash: dto.hash,
-        usernames: JSON.parse(dto.usernames),
+        usernames: JSON.parse(dto.usernames) as string[],
         updated: dto.updated,
         phone: dto.phone || undefined,
         complete: dto.complete,
@@ -47,7 +47,9 @@ export class SqlitePeersRepository implements IPeersRepository {
             )
 
             this._getById = db.prepare('select * from peers where id = ?')
-            this._getByUsername = db.prepare('select * from peers where exists (select 1 from json_each(usernames) where value = ?)')
+            this._getByUsername = db.prepare(
+                'select * from peers where exists (select 1 from json_each(usernames) where value = ?)',
+            )
             this._getByPhone = db.prepare('select * from peers where phone = ?')
 
             this._delAll = db.prepare('delete from peers')

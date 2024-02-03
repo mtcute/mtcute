@@ -16,6 +16,7 @@ export function registerWorker(handler: WorkerMessageHandler): RespondFn {
 
     const respond: RespondFn = port.postMessage.bind(port)
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     parentPort.on('message', (message) => handler(message, respond))
 
     return respond

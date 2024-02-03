@@ -10,6 +10,7 @@ export function registerWorker(handler: WorkerMessageHandler): RespondFn {
     if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
         const respond: RespondFn = self.postMessage.bind(self)
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         self.addEventListener('message', (message) => handler(message.data, respond))
 
         return respond
@@ -53,7 +54,7 @@ export function registerWorker(handler: WorkerMessageHandler): RespondFn {
             // so even if the browser has suspended the timers, we should still get a ping within a minute
             let timeout = setTimeout(onTimeout, 60000)
 
-            port.addEventListener('message', async (message) => {
+            port.addEventListener('message', (message) => {
                 if (message.data.__type__ === 'close') {
                     onClose()
 
@@ -67,6 +68,7 @@ export function registerWorker(handler: WorkerMessageHandler): RespondFn {
                     return
                 }
 
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 handler(message.data, respond)
             })
         }

@@ -8,7 +8,7 @@
     "main": "src/index.ts",
     "type": "module",
     "scripts": {
-        "build": "pnpm run -w build-package mtcute",
+        "build": "pnpm run -w build-package core",
         "gen-client": "node ./scripts/generate-client.cjs",
         "gen-updates": "node ./scripts/generate-updates.cjs"
     },

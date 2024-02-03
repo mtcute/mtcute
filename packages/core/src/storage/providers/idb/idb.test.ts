@@ -1,9 +1,12 @@
 import { afterAll, beforeAll, describe } from 'vitest'
 
-import { testPeersRepository } from '../../../highlevel/storage/repository/peers.test-utils.js'
-import { testRefMessagesRepository } from '../../../highlevel/storage/repository/ref-messages.test-utils.js'
-import { testAuthKeysRepository } from '../../repository/auth-keys.test-utils.js'
-import { testKeyValueRepository } from '../../repository/key-value.test-utils.js'
+import {
+    testAuthKeysRepository,
+    testKeyValueRepository,
+    testPeersRepository,
+    testRefMessagesRepository,
+} from '@mtcute/test'
+
 import { IdbStorage } from './index.js'
 
 if (import.meta.env.TEST_ENV === 'browser') {
@@ -20,7 +23,7 @@ if (import.meta.env.TEST_ENV === 'browser') {
         testRefMessagesRepository(storage.refMessages, storage.driver)
 
         afterAll(async () => {
-            storage.driver.destroy()
+            await storage.driver.destroy()
 
             const req = indexedDB.deleteDatabase(idbName)
             await new Promise<void>((resolve, reject) => {

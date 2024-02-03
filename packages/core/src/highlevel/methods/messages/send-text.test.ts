@@ -103,7 +103,7 @@ describe('sendText', () => {
     it('should correctly handle updateShortSentMessage with cached peer', async () => {
         const client = new StubTelegramClient()
 
-        client.storage.self.store({
+        await client.storage.self.store({
             userId: stubUser.id,
             isBot: false,
             isPremium: false,
@@ -132,7 +132,7 @@ describe('sendText', () => {
     it('should correctly handle updateShortSentMessage without cached peer', async () => {
         const client = new StubTelegramClient()
 
-        client.storage.self.store({
+        await client.storage.self.store({
             userId: stubUser.id,
             isBot: false,
             isPremium: false,

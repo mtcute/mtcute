@@ -20,12 +20,12 @@ describe('filters.command', () => {
         const ctx = createMessageContext({
             message: text,
         })
-        // todo
-        // ctx.client.getAuthState = () => ({
-        //     isBot: true,
-        //     userId: 0,
-        //     selfUsername: 'testbot',
-        // })
+        void ctx.client.storage.self.store({
+            isBot: true,
+            isPremium: false,
+            userId: 0,
+            usernames: ['testbot'],
+        })
 
         // eslint-disable-next-line
         if (command(...params)(ctx)) return (ctx as any).command
@@ -39,11 +39,10 @@ describe('filters.command', () => {
         expect(getParsedCommand('/start', ['start', 'stop'])).toEqual(['start'])
     })
 
-    // todo
-    // it('should only parse commands to the current bot', () => {
-    //     expect(getParsedCommand('/start@testbot', 'start')).toEqual(['start'])
-    //     expect(getParsedCommand('/start@otherbot', 'start')).toEqual(null)
-    // })
+    it('should only parse commands to the current bot', () => {
+        expect(getParsedCommand('/start@testbot', 'start')).toEqual(['start'])
+        expect(getParsedCommand('/start@otherbot', 'start')).toEqual(null)
+    })
 
     it('should parse command arguments', () => {
         expect(getParsedCommand('/start foo bar baz', 'start')).toEqual(['start', 'foo', 'bar', 'baz'])

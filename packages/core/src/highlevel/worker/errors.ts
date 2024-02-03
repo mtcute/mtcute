@@ -94,7 +94,7 @@ export function deserializeError(error: SerializedError): Error {
             for (const key in custom) {
                 if (key === 'code' || key === 'text') continue
                 // @ts-expect-error lol
-                err2[key] = custom[key]
+                err2[key] = custom[key] // eslint-disable-line
             }
             break
         }

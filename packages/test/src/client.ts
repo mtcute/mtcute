@@ -24,6 +24,7 @@ export class StubTelegramClient extends BaseTelegramClient {
             apiHash: '',
             logLevel: 0,
             storage,
+            disableUpdates: true,
             transport: () => {
                 const transport = new StubTelegramTransport({
                     onMessage: (data) => {
@@ -279,15 +280,8 @@ export class StubTelegramClient extends BaseTelegramClient {
 
     // helpers //
 
-    async connectAndWait() {
-        await this.connect()
-        await new Promise((resolve): void => {
-            this.mt.once('usable', resolve)
-        })
-    }
-
     async with(fn: () => MaybeAsync<void>): Promise<void> {
-        await this.connectAndWait()
+        await this.connect()
 
         let error: unknown
 

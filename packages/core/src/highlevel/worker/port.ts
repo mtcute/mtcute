@@ -72,14 +72,11 @@ export class TelegramWorkerPort<Custom extends WorkerCustomMethods> implements I
         this._destroyed = true
 
         if (terminate && 'terminate' in this.options.worker) {
-            this.options.worker.terminate()
+            Promise.resolve(this.options.worker.terminate()).catch(() => {})
         }
     }
 
-    invokeCustom<T extends keyof Custom>(
-        method: T,
-        ...args: Parameters<Custom[T]>
-    ): Promise<ReturnType<Custom[T]>> {
+    invokeCustom<T extends keyof Custom>(method: T, ...args: Parameters<Custom[T]>): Promise<ReturnType<Custom[T]>> {
         return this._invoker.invoke('custom', method as string, args) as Promise<ReturnType<Custom[T]>>
     }
 

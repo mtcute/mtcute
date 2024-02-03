@@ -1,7 +1,7 @@
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
 
-import { MessageEntity, TextWithEntities, tl } from '@mtcute/client'
+import { MessageEntity, TextWithEntities, tl } from '@mtcute/core'
 
 // md is special cased in prettier, we don't want that here
 import { md as md_ } from './index.js'

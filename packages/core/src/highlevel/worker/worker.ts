@@ -45,6 +45,7 @@ export function makeTelegramWorker<T extends WorkerCustomMethods>(params: Telegr
             }
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const method = target[msg.method]
 
         if (!method) {
@@ -57,6 +58,7 @@ export function makeTelegramWorker<T extends WorkerCustomMethods>(params: Telegr
             return
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         Promise.resolve(method.apply(target, msg.args))
             .then((res) => {
                 if (msg.void) return

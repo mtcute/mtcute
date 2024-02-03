@@ -63,7 +63,7 @@ function parse(data: Uint8Array): CurrentUserInfo | null {
 
     if (flags & 2) {
         const len = reader.int()
-        usernames = new Array(len)
+        usernames = new Array<string>(len)
 
         for (let i = 0; i < len; i++) {
             usernames[i] = reader.string()
@@ -143,11 +143,7 @@ export class CurrentUserService extends BaseService {
         return this._cached
     }
 
-    async update(params: {
-        username?: string
-        usernames?: string[]
-        isPremium?: boolean
-    }): Promise<void> {
+    async update(params: { username?: string; usernames?: string[]; isPremium?: boolean }): Promise<void> {
         const info = await this.fetch()
         if (!info) return
 

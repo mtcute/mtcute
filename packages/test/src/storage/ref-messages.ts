@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { IStorageDriver } from '../../../storage/driver.js'
-import { IReferenceMessagesRepository } from './ref-messages.js'
+import { IReferenceMessagesRepository, IStorageDriver } from '@mtcute/core'
 
 export function fakeRefMessagesRepository(): IReferenceMessagesRepository {
     return {
@@ -27,7 +26,10 @@ export function testRefMessagesRepository(repo: IReferenceMessagesRepository, dr
             await repo.store(2, 6, 7)
             await driver.save?.()
 
-            expect(await repo.getByPeer(1)).deep.oneOf([[2, 3], [4, 5]])
+            expect(await repo.getByPeer(1)).deep.oneOf([
+                [2, 3],
+                [4, 5],
+            ])
             expect(await repo.getByPeer(2)).toEqual([6, 7])
             expect(await repo.getByPeer(3)).toEqual(null)
             expect(await repo.getByPeer(4)).toEqual(null)
@@ -64,7 +66,11 @@ export function testRefMessagesRepository(repo: IReferenceMessagesRepository, dr
             await repo.deleteByPeer(1)
             await driver.save?.()
             expect(await repo.getByPeer(1)).toEqual(null)
-            expect(await repo.getByPeer(2)).deep.oneOf([[20, 30], [40, 50], [60, 70]])
+            expect(await repo.getByPeer(2)).deep.oneOf([
+                [20, 30],
+                [40, 50],
+                [60, 70],
+            ])
         })
     })
 }
