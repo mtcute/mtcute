@@ -100,4 +100,6 @@ export class TelegramWorkerPort<Custom extends WorkerCustomMethods> implements I
     readonly getPrimaryDcId = this._bind('getPrimaryDcId')
     readonly computeSrpParams = this._bind('computeSrpParams')
     readonly computeNewPasswordHash = this._bind('computeNewPasswordHash')
+    readonly startUpdatesLoop = this._bind('startUpdatesLoop')
+    readonly stopUpdatesLoop = this._bind('stopUpdatesLoop')
 }

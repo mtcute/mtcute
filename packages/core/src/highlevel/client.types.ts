@@ -22,6 +22,8 @@ export interface ITelegramClient {
     notifyLoggedOut(): Promise<void>
     notifyChannelOpened(channelId: number, pts?: number): Promise<boolean>
     notifyChannelClosed(channelId: number): Promise<boolean>
+    startUpdatesLoop(): Promise<void>
+    stopUpdatesLoop(): Promise<void>
     call<T extends tl.RpcMethod>(
         message: MustEqual<T, tl.RpcMethod>,
         params?: RpcCallOptions,
@@ -42,12 +44,6 @@ export interface ITelegramClient {
     getPoolSize(kind: ConnectionKind, dcId?: number): Promise<number>
     getPrimaryDcId(): Promise<number>
 
-    computeSrpParams(
-        request: tl.account.RawPassword,
-        password: string,
-    ): Promise<tl.RawInputCheckPasswordSRP>
-    computeNewPasswordHash(
-        algo: tl.TypePasswordKdfAlgo,
-        password: string,
-    ): Promise<Uint8Array>
+    computeSrpParams(request: tl.account.RawPassword, password: string): Promise<tl.RawInputCheckPasswordSRP>
+    computeNewPasswordHash(algo: tl.TypePasswordKdfAlgo, password: string): Promise<Uint8Array>
 }

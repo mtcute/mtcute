@@ -38,9 +38,9 @@ export class TelegramStorageManager {
         this.mt._serviceOptions,
     )
 
-    async clear() {
+    async clear(withAuthKeys = false) {
         await this.provider.peers.deleteAll()
         await this.provider.refMessages.deleteAll()
-        await this.mt.clear()
+        await this.mt.clear(withAuthKeys)
     }
 }

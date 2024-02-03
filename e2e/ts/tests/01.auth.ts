@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { MtUnsupportedError, TelegramClient } from '@mtcute/client'
+import { BaseTelegramClient, MtUnsupportedError, TelegramClient } from '@mtcute/core'
 
 import { getApiParams } from '../utils.js'
 
@@ -14,11 +14,12 @@ describe('1. authorization', function () {
     this.timeout(300_000)
 
     it('should authorize in default dc', async () => {
-        const tg = new TelegramClient(getApiParams('dc2.session'))
+        const base = new BaseTelegramClient(getApiParams('dc2.session'))
+        const tg = new TelegramClient({ client: base })
 
         // reset storage just in case
-        await tg.storage.load?.()
-        await tg.storage.reset(true)
+        await base.mt.storage.load()
+        await base.storage.clear(true)
 
         while (true) {
             const phone = `999662${getAccountId()}`
@@ -45,11 +46,12 @@ describe('1. authorization', function () {
     })
 
     it('should authorize in dc 1', async () => {
-        const tg = new TelegramClient(getApiParams('dc1.session'))
+        const base = new BaseTelegramClient(getApiParams('dc1.session'))
+        const tg = new TelegramClient({ client: base })
 
         // reset storage just in case
-        await tg.storage.load?.()
-        await tg.storage.reset(true)
+        await base.mt.storage.load()
+        await base.mt.storage.clear(true)
 
         while (true) {
             const phone = `999661${getAccountId()}`

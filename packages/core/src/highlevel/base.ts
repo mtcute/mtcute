@@ -132,6 +132,14 @@ export class BaseTelegramClient implements ITelegramClient {
         return this.updates?.notifyChannelClosed(channelId) ?? false
     }
 
+    async startUpdatesLoop(): Promise<void> {
+        await this.updates?.startLoop()
+    }
+
+    async stopUpdatesLoop(): Promise<void> {
+        this.updates?.stopLoop()
+    }
+
     /**
      * Make an RPC call
      *

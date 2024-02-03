@@ -5909,6 +5909,12 @@ TelegramClient.prototype.notifyChannelOpened = function (...args) {
 TelegramClient.prototype.notifyChannelClosed = function (...args) {
     return this._client.notifyChannelClosed(...args)
 }
+TelegramClient.prototype.startUpdatesLoop = function (...args) {
+    return this._client.startUpdatesLoop(...args)
+}
+TelegramClient.prototype.stopUpdatesLoop = function (...args) {
+    return this._client.stopUpdatesLoop(...args)
+}
 TelegramClient.prototype.call = function (...args) {
     return this._client.call(...args)
 }

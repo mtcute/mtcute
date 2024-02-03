@@ -2,7 +2,6 @@
     "name": "mtcute-e2e",
     "private": true,
     "dependencies": {
-        "@mtcute/client": "*",
         "@mtcute/core": "*",
         "@mtcute/crypto-node": "*",
         "@mtcute/dispatcher": "*",

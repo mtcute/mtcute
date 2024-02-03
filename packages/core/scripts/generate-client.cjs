@@ -684,6 +684,8 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
         'notifyLoggedOut',
         'notifyChannelOpened',
         'notifyChannelClosed',
+        'startUpdatesLoop',
+        'stopUpdatesLoop',
         'call',
         'importSession',
         'exportSession',

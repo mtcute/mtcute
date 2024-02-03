@@ -1,4 +1,4 @@
-const { MemoryStorage } = require('@mtcute/core/storage/memory.js')
+const { MemoryStorage } = require('@mtcute/core')
 const { LogManager } = require('@mtcute/core/utils.js')
 
 exports.getApiParams = () => {
