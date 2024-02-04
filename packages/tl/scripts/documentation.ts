@@ -7,6 +7,7 @@ import { createInterface } from 'readline'
 
 import {
     camelToPascal,
+    jsComment,
     PRIMITIVE_TO_TS,
     snakeToCamel,
     splitNameToNamespace,
@@ -16,6 +17,7 @@ import {
 
 import {
     API_SCHEMA_JSON_FILE,
+    APP_CONFIG_JSON_FILE,
     BLOGFORK_DOMAIN,
     CORE_DOMAIN,
     COREFORK_DOMAIN,
@@ -98,6 +100,13 @@ function extractDescription($: cheerio.CheerioAPI) {
         .trim()
 }
 
+function htmlAll($: cheerio.CheerioAPI, search: cheerio.Cheerio<cheerio.Element>) {
+    return search
+        .get()
+        .map((el) => $(el).html() ?? '')
+        .join('')
+}
+
 // from https://github.com/sindresorhus/cli-spinners/blob/main/spinners.json
 const PROGRESS_CHARS = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 
@@ -125,6 +134,168 @@ async function chooseDomainForDocs(headers: Record<string, string>): Promise<[nu
     }
 
     return [maxLayer, maxDomain]
+}
+
+function lastParensGroup(text: string): string | undefined {
+    const groups = []
+    let depth = 0
+    let current = ''
+
+    for (let i = 0; i < text.length; i++) {
+        if (text[i] === ')') depth--
+
+        if (depth > 0) {
+            current += text[i]
+        }
+
+        if (text[i] === '(') depth++
+
+        if (current && depth === 0) {
+            groups.push(current)
+            current = ''
+        }
+    }
+
+    return groups[groups.length - 1]
+}
+
+async function fetchAppConfigDocumentation() {
+    const headers = {
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' +
+            'Chrome/87.0.4280.88 Safari/537.36',
+    }
+
+    const [, domain] = await chooseDomainForDocs(headers)
+
+    const page = await fetchRetry(`${domain}/api/config`, { headers })
+    const $ = cheerio.load(page)
+
+    const fields = $('p:icontains(typical fields included)').nextUntil('h3')
+    normalizeLinks(`${domain}/api/config`, fields)
+    const fieldNames = fields.filter('h4')
+
+    const _example = $('p:icontains(example value)').next('pre').find('code')
+    const example = JSON.parse(_example.text().trim()) as Record<string, unknown>
+
+    const result: Record<string, unknown> = {}
+
+    function valueToTypescript(value: unknown, record = false): string {
+        if (value === undefined) return 'unknown'
+        if (value === null) return 'null'
+
+        if (Array.isArray(value)) {
+            const types = new Set(value.map((v) => typeof v))
+
+            if (types.size === 1) {
+                return valueToTypescript(value[0]) + '[]'
+            }
+
+            return `(${value.map((v) => valueToTypescript(v)).join(' | ')})[]`
+        }
+
+        if (typeof value === 'object') {
+            if (record) {
+                const inner = Object.values(value)[0] as unknown
+
+                return `Record<string, ${valueToTypescript(inner)}>`
+            }
+
+            return (
+                '{\n' +
+                Object.entries(value)
+                    .map(([k, v]) => `    ${k}: ${valueToTypescript(v)}`)
+                    .join('\n') +
+                '\n}'
+            )
+        }
+
+        return typeof value
+    }
+
+    function docsTypeToTypescript(field: string, type: string): string {
+        let m
+
+        if ((m = type.match(/(.*), defaults to .+$/i))) {
+            return docsTypeToTypescript(field, m[1])
+        }
+
+        if ((m = type.match(/^(?:array of )(.+?)s?$/i))) {
+            return docsTypeToTypescript(field, m[1]) + '[]'
+        }
+
+        switch (type) {
+            case 'integer':
+                return 'number'
+            case 'itneger':
+                return 'number'
+            case 'float':
+                return 'number'
+            case 'string':
+                return 'string'
+            case 'string emoji':
+                return 'string'
+            case 'boolean':
+                return 'boolean'
+            case 'bool':
+                return 'boolean'
+        }
+
+        if (type.match(/^object with .+? keys|^map of/i)) {
+            return valueToTypescript(example[field], true)
+        }
+
+        if (type.match(/^strings?, /)) {
+            if (type.includes('or')) {
+                const options = type.slice(8).split(/, | or /)
+
+                return options.map((o) => (o[0] === '"' ? o : JSON.stringify(o))).join(' | ')
+            }
+
+            return 'string'
+        }
+
+        if (type.includes(',')) {
+            return docsTypeToTypescript(field, type.split(',')[0])
+        }
+
+        if (type.match(/^numeric string/)) {
+            return 'string'
+        }
+
+        if (type.includes('as described')) {
+            return valueToTypescript(example[field])
+        }
+
+        console.log(`Failed to parse type at ${field}: ${type}`)
+
+        return valueToTypescript(example[field])
+    }
+
+    for (const fieldName of fieldNames.toArray()) {
+        const name = $(fieldName).text().trim()
+        const description = htmlAll($, $(fieldName).nextUntil('h3, h4'))
+        let type = 'unknown'
+
+        let typeStr = lastParensGroup(description)
+
+        if (!typeStr) {
+            typeStr = description.match(/\s+\((.+?)(?:\)|\.|\)\.)$/)?.[1]
+        }
+
+        if (typeStr) {
+            type = docsTypeToTypescript(name, typeStr)
+        } else if (name in example) {
+            type = valueToTypescript(example[name])
+        }
+
+        result[name] = {
+            type,
+            description: jsComment(description),
+        }
+    }
+
+    return result
 }
 
 export async function fetchDocumentation(
@@ -366,10 +537,11 @@ async function main() {
         console.log('1. Update documentation')
         console.log('2. Apply descriptions.yaml')
         console.log('3. Apply documentation to schema')
+        console.log('4. Fetch app config documentation')
 
-        const act = parseInt(await input('[0-3] > '))
+        const act = parseInt(await input('[0-4] > '))
 
-        if (isNaN(act) || act < 0 || act > 3) {
+        if (isNaN(act) || act < 0 || act > 4) {
             console.log('Invalid action')
             continue
         }
@@ -412,15 +584,20 @@ async function main() {
             applyDocumentation(schema, cached)
             await writeFile(API_SCHEMA_JSON_FILE, JSON.stringify(packTlSchema(schema, layer)))
         }
+
+        if (act === 4) {
+            const appConfig = await fetchAppConfigDocumentation()
+
+            console.log('Fetched app config documentation')
+            await writeFile(APP_CONFIG_JSON_FILE, JSON.stringify(appConfig))
+        }
     }
 }
 
 if (import.meta.url.startsWith('file:')) {
-    // (A)
     const modulePath = fileURLToPath(import.meta.url)
 
     if (process.argv[1] === modulePath) {
-        // (B)
         main().catch((err) => {
             console.error(err)
             process.exit(1)

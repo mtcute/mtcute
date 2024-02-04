@@ -4,6 +4,7 @@ import { LogManager } from '../../utils/logger.js'
 import { ITelegramClient } from '../client.types.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
 import { RawUpdateHandler } from '../updates/types.js'
+import { AppConfigManagerProxy } from './app-config.js'
 import { WorkerInvoker } from './invoker.js'
 import { connectToWorker } from './platform/connect.js'
 import { ClientMessageHandler, SomeWorker, WorkerCustomMethods } from './protocol.js'
@@ -64,6 +65,7 @@ export class TelegramWorkerPort<Custom extends WorkerCustomMethods> implements I
     private _bind = this._invoker.makeBinder<ITelegramClient>('client')
 
     readonly storage = new TelegramStorageProxy(this._invoker)
+    readonly appConfig = new AppConfigManagerProxy(this._invoker)
 
     private _destroyed = false
     destroy(terminate = false): void {

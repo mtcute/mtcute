@@ -4,45 +4,39 @@ import { tl } from '@mtcute/tl'
 
 import { SerializedError } from './errors.js'
 
-export type WorkerInboundMessage =
-    | {
-        type: 'invoke'
-        id: number
-        target:
-            | 'custom'
-            | 'client'
-            | 'storage'
-            | 'storage-self'
-            | 'storage-peers'
-        method: string
-        args: unknown[]
-        void: boolean
-    }
+export type WorkerInboundMessage = {
+    type: 'invoke'
+    id: number
+    target: 'custom' | 'client' | 'storage' | 'storage-self' | 'storage-peers' | 'app-config'
+    method: string
+    args: unknown[]
+    void: boolean
+}
 
 export type WorkerOutboundMessage =
     | { type: 'server_update'; update: tl.TypeUpdates }
     | {
-        type: 'update'
-        update: tl.TypeUpdate
-        users: Map<number, tl.TypeUser>
-        chats: Map<number, tl.TypeChat>
-        hasMin: boolean
-    }
+          type: 'update'
+          update: tl.TypeUpdate
+          users: Map<number, tl.TypeUser>
+          chats: Map<number, tl.TypeChat>
+          hasMin: boolean
+      }
     | { type: 'error'; error: unknown }
     | {
-        type: 'log'
-        color: number
-        level: number
-        tag: string
-        fmt: string
-        args: unknown[]
-    }
+          type: 'log'
+          color: number
+          level: number
+          tag: string
+          fmt: string
+          args: unknown[]
+      }
     | {
-        type: 'result'
-        id: number
-        result?: unknown
-        error?: SerializedError
-    }
+          type: 'result'
+          id: number
+          result?: unknown
+          error?: SerializedError
+      }
 
 export type SomeWorker = NodeWorker | Worker | SharedWorker
 

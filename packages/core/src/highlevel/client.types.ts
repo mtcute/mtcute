@@ -4,6 +4,7 @@ import type { ConnectionKind, RpcCallOptions } from '../network/index.js'
 import type { MustEqual, PublicPart } from '../types/utils.js'
 import type { Logger } from '../utils/logger.js'
 import type { StringSessionData } from '../utils/string-session.js'
+import type { AppConfigManager } from './managers/app-config-manager.js'
 import type { TelegramStorageManager } from './storage/storage.js'
 import type { RawUpdateHandler } from './updates/types.js'
 
@@ -14,6 +15,7 @@ import type { RawUpdateHandler } from './updates/types.js'
 export interface ITelegramClient {
     readonly log: Logger
     readonly storage: PublicPart<TelegramStorageManager>
+    readonly appConfig: PublicPart<AppConfigManager>
 
     prepare(): Promise<void>
     connect(): Promise<void>

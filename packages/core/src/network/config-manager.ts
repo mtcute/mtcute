@@ -1,74 +1,19 @@
 import { tl } from '@mtcute/tl'
 
+import { Reloadable } from '../utils/reloadable.js'
+
 /**
  * Config manager is responsible for keeping
  * the current server configuration up-to-date
  * and providing methods to find the best DC
  * option for the current session.
  */
-export class ConfigManager {
-    constructor(private _update: () => Promise<tl.RawConfig>) {}
-
-    private _destroyed = false
-    private _config?: tl.RawConfig
-    private _cdnConfig?: tl.RawCdnConfig
-
-    private _updateTimeout?: NodeJS.Timeout
-    private _updatingPromise?: Promise<void>
-
-    private _listeners: ((config: tl.RawConfig) => void)[] = []
-
-    get isStale(): boolean {
-        return !this._config || this._config.expires <= Date.now() / 1000
-    }
-
-    update(force = false): Promise<void> {
-        if (!force && !this.isStale) return Promise.resolve()
-        if (this._updatingPromise) return this._updatingPromise
-
-        return (this._updatingPromise = this._update().then((config) => {
-            if (this._destroyed) return
-            this._updatingPromise = undefined
-
-            this.setConfig(config)
-        }))
-    }
-
-    setConfig(config: tl.RawConfig): void {
-        this._config = config
-
-        if (this._updateTimeout) clearTimeout(this._updateTimeout)
-        this._updateTimeout = setTimeout(
-            () => void this.update().catch(() => {}),
-            (config.expires - Date.now() / 1000) * 1000,
-        )
-
-        for (const cb of this._listeners) cb(config)
-    }
-
-    onConfigUpdate(cb: (config: tl.RawConfig) => void): void {
-        this._listeners.push(cb)
-    }
-
-    offConfigUpdate(cb: (config: tl.RawConfig) => void): void {
-        const idx = this._listeners.indexOf(cb)
-        if (idx >= 0) this._listeners.splice(idx, 1)
-    }
-
-    getNow(): tl.RawConfig | undefined {
-        return this._config
-    }
-
-    async get(): Promise<tl.RawConfig> {
-        if (this.isStale) await this.update()
-
-        return this._config!
-    }
-
-    destroy(): void {
-        if (this._updateTimeout) clearTimeout(this._updateTimeout)
-        this._listeners.length = 0
-        this._destroyed = true
+export class ConfigManager extends Reloadable<tl.RawConfig> {
+    constructor(update: () => Promise<tl.RawConfig>) {
+        super({
+            reload: update,
+            getExpiresAt: (data) => data.expires * 1000,
+        })
     }
 
     async findOption(params: {
@@ -81,7 +26,7 @@ export class ConfigManager {
     }): Promise<tl.RawDcOption | undefined> {
         if (this.isStale) await this.update()
 
-        const options = this._config!.dcOptions.filter((opt) => {
+        const options = this._data!.dcOptions.filter((opt) => {
             if (opt.tcpoOnly) return false // unsupported
             if (opt.ipv6 && !params.allowIpv6) return false
             if (opt.mediaOnly && !params.allowMedia) return false

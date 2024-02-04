@@ -3,7 +3,14 @@ import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { StorageManager } from '../storage/storage.js'
 import { MtArgumentError, MtcuteError, MtTimeoutError, MtUnsupportedError } from '../types/index.js'
-import { ControllablePromise, createControllablePromise, DcOptions, ICryptoProvider, Logger, sleep } from '../utils/index.js'
+import {
+    ControllablePromise,
+    createControllablePromise,
+    DcOptions,
+    ICryptoProvider,
+    Logger,
+    sleep,
+} from '../utils/index.js'
 import { assertTypeIs } from '../utils/type-assertions.js'
 import { ConfigManager } from './config-manager.js'
 import { MultiSessionConnection } from './multi-session-connection.js'
@@ -462,7 +469,7 @@ export class NetworkManager {
         this._updateHandler = params.onUpdate
 
         this._onConfigChanged = this._onConfigChanged.bind(this)
-        config.onConfigUpdate(this._onConfigChanged)
+        config.onReload(this._onConfigChanged)
     }
 
     private async _findDcOptions(dcId: number): Promise<DcOptions> {
@@ -627,8 +634,7 @@ export class NetworkManager {
         } else {
             if (auth.bot) {
                 // bots may receive tmpSessions, which we should respect
-                this.config.update(true)
-                    .catch((e: Error) => this.params.emitError(e))
+                this.config.update(true).catch((e: Error) => this.params.emitError(e))
             }
 
             user = auth
@@ -837,6 +843,6 @@ export class NetworkManager {
         for (const dc of this._dcConnections.values()) {
             dc.destroy()
         }
-        this.config.offConfigUpdate(this._onConfigChanged)
+        this.config.offReload(this._onConfigChanged)
     }
 }

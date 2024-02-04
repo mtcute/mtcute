@@ -48,7 +48,7 @@ describe('ConfigManager', () => {
         const cm = new ConfigManager(getConfig)
         expect(cm.isStale).toBe(true)
 
-        cm.setConfig(config)
+        cm.setData(config)
         expect(cm.isStale).toBe(false)
 
         vi.setSystemTime(300_000)
@@ -69,8 +69,14 @@ describe('ConfigManager', () => {
         const cm = new ConfigManager(getConfig)
         await cm.update()
 
-        vi.setSystemTime(300_000)
+        getConfig.mockImplementation(() =>
+            Promise.resolve({
+                ...config,
+                expires: 600,
+            }),
+        )
         getConfig.mockClear()
+        await vi.advanceTimersByTimeAsync(301_000)
         await Promise.all([cm.update(), cm.update()])
 
         expect(getConfig).toHaveBeenCalledOnce()
@@ -79,11 +85,11 @@ describe('ConfigManager', () => {
     it('should call listeners on config update', async () => {
         const cm = new ConfigManager(getConfig)
         const listener = vi.fn()
-        cm.onConfigUpdate(listener)
+        cm.onReload(listener)
         await cm.update()
 
         vi.setSystemTime(300_000)
-        cm.offConfigUpdate(listener)
+        cm.onReload(listener)
         await cm.update()
 
         expect(listener).toHaveBeenCalledOnce()

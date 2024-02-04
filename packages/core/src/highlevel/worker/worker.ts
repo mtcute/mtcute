@@ -33,6 +33,9 @@ export function makeTelegramWorker<T extends WorkerCustomMethods>(params: Telegr
             case 'storage-peers':
                 target = client.storage.peers
                 break
+            case 'app-config':
+                target = client.appConfig
+                break
 
             default: {
                 respond({

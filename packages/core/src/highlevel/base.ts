@@ -16,6 +16,7 @@ import {
 } from '../utils/index.js'
 import { LogManager } from '../utils/logger.js'
 import { ITelegramClient } from './client.types.js'
+import { AppConfigManager } from './managers/app-config-manager.js'
 import { ITelegramStorageProvider } from './storage/provider.js'
 import { TelegramStorageManager, TelegramStorageManagerExtraOptions } from './storage/storage.js'
 import { UpdatesManager } from './updates/manager.js'
@@ -52,6 +53,7 @@ export class BaseTelegramClient implements ITelegramClient {
         provider: this.params.storage,
         ...this.params.storageOptions,
     })
+    readonly appConfig = new AppConfigManager(this)
 
     private _prepare = asyncResettable(async () => {
         await this.mt.prepare()

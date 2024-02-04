@@ -1167,7 +1167,7 @@ export class UpdatesManager {
                 const config = client.mt.network.config.getNow()
 
                 if (config) {
-                    client.mt.network.config.setConfig({
+                    client.mt.network.config.setData({
                         ...config,
                         dcOptions: upd.dcOptions,
                     })
