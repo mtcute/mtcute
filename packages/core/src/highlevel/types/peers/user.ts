@@ -26,6 +26,7 @@ export interface UserParsedStatus {
     status: UserStatus
     lastOnline: Date | null
     nextOffline: Date | null
+    byMe: boolean
 }
 
 export class User {
@@ -167,6 +168,11 @@ export class User {
         return this.raw.premium!
     }
 
+    /** Whether Premium is required to contact this user */
+    get isPremiumRequired(): boolean {
+        return this.raw.contactRequirePremium!
+    }
+
     /** User's or bot's first name */
     get firstName(): string {
         return this.raw.firstName ?? 'Deleted Account'
@@ -180,6 +186,7 @@ export class User {
     static parseStatus(status?: tl.TypeUserStatus, bot = false): UserParsedStatus {
         let ret: UserStatus
         let date: Date
+        let byMe = false
 
         const us = status
 
@@ -199,12 +206,15 @@ export class User {
                     break
                 case 'userStatusRecently':
                     ret = 'recently'
+                    byMe = us.byMe!
                     break
                 case 'userStatusLastWeek':
                     ret = 'within_week'
+                    byMe = us.byMe!
                     break
                 case 'userStatusLastMonth':
                     ret = 'within_month'
+                    byMe = us.byMe!
                     break
                 default:
                     ret = 'long_time_ago'
@@ -216,6 +226,7 @@ export class User {
             status: ret,
             lastOnline: ret === 'offline' ? date! : null,
             nextOffline: ret === 'online' ? date! : null,
+            byMe,
         }
     }
 
@@ -226,6 +237,15 @@ export class User {
     /** User's Last Seen & Online status */
     get status(): UserStatus {
         return this._parsedStatus.status
+    }
+
+    /**
+     * Whether user's online status is hidden because
+     * we have hidden our own online status from them,
+     * and we don't have Premium subscription.
+     */
+    get statusHiddenByMe(): boolean {
+        return this._parsedStatus.byMe
     }
 
     /**

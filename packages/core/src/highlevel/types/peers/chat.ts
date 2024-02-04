@@ -6,6 +6,7 @@ import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Photo } from '../media/photo.js'
 import { MessageEntity } from '../messages/message-entity.js'
+import { EmojiStatus } from '../reactions/emoji-status.js'
 import { ChatColors } from './chat-colors.js'
 import { ChatLocation } from './chat-location.js'
 import { ChatPermissions } from './chat-permissions.js'
@@ -618,6 +619,33 @@ export class Chat {
         const color = this.peer._ === 'user' || this.peer._ === 'channel' ? this.peer.color : undefined
 
         return new ChatColors(this.peer.id, color)
+    }
+
+    /**
+     * Chat's emoji status, if any.
+     */
+    get emojiStatus(): EmojiStatus | null {
+        if (this.peer._ !== 'user' && this.peer._ !== 'channel') return null
+        if (!this.peer.emojiStatus || this.peer.emojiStatus._ === 'emojiStatusEmpty') return null
+
+        return new EmojiStatus(this.peer.emojiStatus)
+    }
+
+    /**
+     * Color that should be used when rendering the header of
+     * the user's profile
+     *
+     * If `null`, a generic header should be used instead
+     */
+    get profileColors(): ChatColors {
+        const color = this.peer._ === 'user' || this.peer._ === 'channel' ? this.peer.profileColor : undefined
+
+        return new ChatColors(this.peer.id, color)
+    }
+
+    /** Boosts level this chat has (0 if none or is not a channel) */
+    get boostsLevel(): number {
+        return this.peer._ === 'channel' ? this.peer.level ?? 0 : 0
     }
 
     /**
