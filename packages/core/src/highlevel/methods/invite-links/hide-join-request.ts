@@ -1,7 +1,6 @@
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike } from '../../types/index.js'
-import { toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 
 /**
  * Approve or decline join request to a chat.
@@ -19,7 +18,7 @@ export async function hideJoinRequest(
 ): Promise<void> {
     const { chatId, user, action } = params
 
-    const userId = toInputUser(await resolvePeer(client, user), user)
+    const userId = await resolveUser(client, user)
 
     await client.call({
         _: 'messages.hideChatJoinRequest',

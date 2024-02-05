@@ -1,8 +1,8 @@
 import { ITelegramClient } from '../../client.types.js'
 import { Chat, InputPeerLike } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
-import { INVITE_LINK_REGEX, toInputChannel } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { INVITE_LINK_REGEX } from '../../utils/peer-utils.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 /**
  * Join a channel or supergroup
@@ -34,7 +34,7 @@ export async function joinChat(client: ITelegramClient, chatId: InputPeerLike): 
 
     const res = await client.call({
         _: 'channels.joinChannel',
-        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: await resolveChannel(client, chatId),
     })
 
     assertIsUpdatesGroup('channels.joinChannel', res)

@@ -1,8 +1,7 @@
 import { ITelegramClient } from '../../client.types.js'
 import { ArrayPaginated, ChatInviteLink, InputPeerLike, PeersIndex } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
-import { toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 
 // @exported
 export interface GetInviteLinksOffset {
@@ -58,7 +57,7 @@ export async function getInviteLinks(
         _: 'messages.getExportedChatInvites',
         peer: await resolvePeer(client, chatId),
         revoked,
-        adminId: admin ? toInputUser(await resolvePeer(client, admin), admin) : { _: 'inputUserSelf' },
+        adminId: admin ? await resolveUser(client, admin) : { _: 'inputUserSelf' },
         limit,
         offsetDate: offset?.date,
         offsetLink: offset?.link,

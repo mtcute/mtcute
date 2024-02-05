@@ -1,8 +1,7 @@
 import { assertTrue } from '../../../utils/type-assertions.js'
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike } from '../../types/index.js'
-import { toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveUser } from '../users/resolve-peer.js'
 
 /**
  * Sets information about a bot the current uzer owns (or the current bot)
@@ -36,7 +35,7 @@ export async function setBotInfo(
 
     const r = await client.call({
         _: 'bots.setBotInfo',
-        bot: bot ? toInputUser(await resolvePeer(client, bot), bot) : undefined,
+        bot: bot ? await resolveUser(client, bot) : undefined,
         langCode: langCode,
         name,
         about: bio,

@@ -1,7 +1,6 @@
 import { ITelegramClient } from '../../client.types.js'
 import { ForumTopic, InputPeerLike } from '../../types/index.js'
-import { toInputChannel } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 /**
  * Toggle whether a topic in a forum is pinned
@@ -23,7 +22,7 @@ export async function toggleForumTopicPinned(
 
     await client.call({
         _: 'channels.updatePinnedForumTopic',
-        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: await resolveChannel(client, chatId),
         topicId: typeof topicId === 'number' ? topicId : topicId.id,
         pinned,
     })

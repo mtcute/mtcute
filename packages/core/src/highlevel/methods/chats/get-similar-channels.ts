@@ -1,8 +1,7 @@
 import { ITelegramClient } from '../../client.types.js'
 import { ArrayWithTotal, Chat, InputPeerLike } from '../../types/index.js'
 import { makeArrayWithTotal } from '../../utils/misc-utils.js'
-import { toInputChannel } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 // @available=user
 /**
@@ -20,7 +19,7 @@ export async function getSimilarChannels(
 ): Promise<ArrayWithTotal<Chat>> {
     const res = await client.call({
         _: 'channels.getChannelRecommendations',
-        channel: toInputChannel(await resolvePeer(client, channel), channel),
+        channel: await resolveChannel(client, channel),
     })
 
     const parsed = res.chats.map((chat) => new Chat(chat))

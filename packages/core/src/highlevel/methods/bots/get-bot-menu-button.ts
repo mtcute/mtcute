@@ -2,8 +2,7 @@ import { tl } from '@mtcute/tl'
 
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike } from '../../types/index.js'
-import { toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveUser } from '../users/resolve-peer.js'
 
 /**
  * Fetches the menu button set for the given user.
@@ -11,6 +10,6 @@ import { resolvePeer } from '../users/resolve-peer.js'
 export async function getBotMenuButton(client: ITelegramClient, user: InputPeerLike): Promise<tl.TypeBotMenuButton> {
     return await client.call({
         _: 'bots.getBotMenuButton',
-        userId: toInputUser(await resolvePeer(client, user), user),
+        userId: await resolveUser(client, user),
     })
 }

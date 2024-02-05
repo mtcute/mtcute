@@ -2,8 +2,7 @@ import { tl } from '@mtcute/tl'
 
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike } from '../../types/index.js'
-import { toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveUser } from '../users/resolve-peer.js'
 
 /**
  * Gets information about a bot the current uzer owns (or the current bot)
@@ -28,7 +27,7 @@ export async function getBotInfo(
 
     return client.call({
         _: 'bots.getBotInfo',
-        bot: bot ? toInputUser(await resolvePeer(client, bot), bot) : undefined,
+        bot: bot ? await resolveUser(client, bot) : undefined,
         langCode: langCode,
     })
 }

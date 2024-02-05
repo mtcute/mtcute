@@ -3,8 +3,7 @@ import { tl } from '@mtcute/tl'
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike } from '../../types/index.js'
 import { createDummyUpdate } from '../../updates/utils.js'
-import { toInputChannel } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel, resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Delete all messages of a user (or channel) in a supergroup
@@ -20,7 +19,7 @@ export async function deleteUserHistory(
 ): Promise<void> {
     const { chatId, participantId } = params
 
-    const channel = toInputChannel(await resolvePeer(client, chatId), chatId)
+    const channel = await resolveChannel(client, chatId)
 
     const peer = await resolvePeer(client, participantId)
 

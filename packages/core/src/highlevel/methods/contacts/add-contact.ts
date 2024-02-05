@@ -1,8 +1,7 @@
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike, User } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
-import { toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveUser } from '../users/resolve-peer.js'
 
 /**
  * Add an existing Telegram user as a contact
@@ -38,7 +37,7 @@ export async function addContact(
     },
 ): Promise<User> {
     const { userId, firstName, lastName = '', phone = '', sharePhone = false } = params
-    const peer = toInputUser(await resolvePeer(client, userId), userId)
+    const peer = await resolveUser(client, userId)
 
     const res = await client.call({
         _: 'contacts.addContact',

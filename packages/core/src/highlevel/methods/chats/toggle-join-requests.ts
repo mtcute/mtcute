@@ -1,7 +1,6 @@
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike } from '../../types/index.js'
-import { toInputChannel } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 /**
  * Set whether a channel/supergroup has join requests enabled.
@@ -19,7 +18,7 @@ export async function toggleJoinRequests(
 ): Promise<void> {
     const res = await client.call({
         _: 'channels.toggleJoinRequest',
-        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: await resolveChannel(client, chatId),
         enabled,
     })
     client.handleClientUpdate(res)

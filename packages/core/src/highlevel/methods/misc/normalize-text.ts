@@ -2,8 +2,7 @@ import { tl } from '@mtcute/tl'
 
 import { ITelegramClient } from '../../client.types.js'
 import { InputText } from '../../types/misc/entities.js'
-import { toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveUser } from '../users/resolve-peer.js'
 
 const empty: [string, undefined] = ['', undefined]
 
@@ -27,7 +26,7 @@ export async function _normalizeInputText(
     for (const ent of entities) {
         if (ent._ === 'messageEntityMentionName') {
             try {
-                const inputPeer = toInputUser(await resolvePeer(client, ent.userId), ent.userId)
+                const inputPeer = await resolveUser(client, ent.userId)
 
                 const ent_ = ent as unknown as tl.RawInputMessageEntityMentionName
                 ent_._ = 'inputMessageEntityMentionName'

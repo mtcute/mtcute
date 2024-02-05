@@ -2,8 +2,7 @@ import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { ITelegramClient } from '../../client.types.js'
 import type { ForumTopic, InputPeerLike } from '../../types/index.js'
 import { createDummyUpdate } from '../../updates/utils.js'
-import { toInputChannel } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 /**
  * Delete a forum topic and all its history
@@ -16,7 +15,7 @@ export async function deleteForumTopicHistory(
     chat: InputPeerLike,
     topicId: number | ForumTopic,
 ): Promise<void> {
-    const channel = toInputChannel(await resolvePeer(client, chat), chat)
+    const channel = await resolveChannel(client, chat)
     assertTypeIsNot('deleteForumTopicHistory', channel, 'inputChannelEmpty')
 
     const res = await client.call({

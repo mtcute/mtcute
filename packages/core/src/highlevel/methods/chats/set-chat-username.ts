@@ -1,8 +1,7 @@
 import { assertTrue } from '../../../utils/type-assertions.js'
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike } from '../../types/index.js'
-import { toInputChannel } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 /**
  * Change supergroup/channel username
@@ -19,7 +18,7 @@ export async function setChatUsername(
 ): Promise<void> {
     const r = await client.call({
         _: 'channels.updateUsername',
-        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: await resolveChannel(client, chatId),
         username: username || '',
     })
 

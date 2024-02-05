@@ -3,8 +3,7 @@ import { tl } from '@mtcute/tl'
 import { assertNever } from '../../../types/utils.js'
 import { ITelegramClient } from '../../client.types.js'
 import { BotCommands } from '../../types/index.js'
-import { toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 
 /** @internal */
 export async function _normalizeCommandScope(
@@ -24,7 +23,7 @@ export async function _normalizeCommandScope(
             }
         }
         case 'member': {
-            const user = toInputUser(await resolvePeer(client, scope.user), scope.user)
+            const user = await resolveUser(client, scope.user)
             const chat = await resolvePeer(client, scope.chat)
 
             return {

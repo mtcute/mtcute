@@ -1,8 +1,7 @@
 import { assertTrue } from '../../../utils/type-assertions.js'
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike, InputStickerSet, normalizeInputStickerSet } from '../../types/index.js'
-import { toInputChannel } from '../../utils/index.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 /**
  * Set group sticker set for a supergroup
@@ -19,7 +18,7 @@ export async function setChatStickerSet(
 ): Promise<void> {
     const r = await client.call({
         _: 'channels.setStickers',
-        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: await resolveChannel(client, chatId),
         stickerset: normalizeInputStickerSet(setId),
     })
 

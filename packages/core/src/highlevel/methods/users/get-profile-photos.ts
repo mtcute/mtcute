@@ -6,8 +6,7 @@ import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { ITelegramClient } from '../../client.types.js'
 import { ArrayPaginated, InputPeerLike, Photo } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
-import { toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from './resolve-peer.js'
+import { resolveUser } from './resolve-peer.js'
 
 /**
  * Get a list of profile pictures of a user
@@ -40,7 +39,7 @@ export async function getProfilePhotos(
 
     const res = await client.call({
         _: 'photos.getUserPhotos',
-        userId: toInputUser(await resolvePeer(client, userId), userId),
+        userId: await resolveUser(client, userId),
         offset,
         limit,
         maxId: Long.ZERO,

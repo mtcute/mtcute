@@ -1,8 +1,7 @@
 import { MaybeArray } from '../../../types/utils.js'
 import { ITelegramClient } from '../../client.types.js'
 import { ForumTopic, InputPeerLike } from '../../types/index.js'
-import { toInputChannel } from '../../utils/index.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 /**
  * Get forum topics by their IDs
@@ -18,7 +17,7 @@ export async function getForumTopicsById(
 
     const res = await client.call({
         _: 'channels.getForumTopicsByID',
-        channel: toInputChannel(await resolvePeer(client, chatId)),
+        channel: await resolveChannel(client, chatId),
         topics: ids,
     })
 

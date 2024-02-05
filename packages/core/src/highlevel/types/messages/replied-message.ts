@@ -184,6 +184,9 @@ export class RepliedMessageInfo {
     /**
      * Offset of the start of the {@link quoteText} in the replied-to message.
      *
+     * Note that this offset should only be used as a hint, as the actual
+     * quote offset may be different due to message being edited after the quote
+     *
      * `null` if not available, in which case it should be assumed that the quote
      * starts at `.indexOf(quoteText)` of the replied-to message text.
      */

@@ -5,8 +5,8 @@ import { tl } from '@mtcute/tl'
 import { ITelegramClient } from '../../client.types.js'
 import { ChatEvent, InputPeerLike, PeersIndex } from '../../types/index.js'
 import { InputChatEventFilters, normalizeChatEventFilters } from '../../types/peers/chat-event/filters.js'
-import { toInputChannel, toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { toInputUser } from '../../utils/peer-utils.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**
@@ -77,7 +77,7 @@ export async function getChatEventLog(
 ): Promise<ChatEvent[]> {
     const { maxId = Long.ZERO, minId = Long.ZERO, query = '', limit = 100, users, filters } = params ?? {}
 
-    const channel = toInputChannel(await resolvePeer(client, chatId), chatId)
+    const channel = await resolveChannel(client, chatId)
 
     const admins: tl.TypeInputUser[] | undefined = users ? await resolvePeerMany(client, users, toInputUser) : undefined
 

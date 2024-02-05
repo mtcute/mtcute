@@ -5,8 +5,8 @@ import { tl } from '@mtcute/tl'
 import { ITelegramClient } from '../../client.types.js'
 import { ChatEvent, InputPeerLike } from '../../types/index.js'
 import { normalizeChatEventFilters } from '../../types/peers/chat-event/filters.js'
-import { toInputChannel, toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { toInputUser } from '../../utils/peer-utils.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 import { getChatEventLog } from './get-chat-event-log.js'
 
@@ -40,7 +40,7 @@ export async function* iterChatEventLog(
 ): AsyncIterableIterator<ChatEvent> {
     if (!params) params = {}
 
-    const channel = toInputChannel(await resolvePeer(client, chatId), chatId)
+    const channel = await resolveChannel(client, chatId)
 
     const { minId = Long.ZERO, query = '', limit = Infinity, chunkSize = 100, users, filters } = params
 

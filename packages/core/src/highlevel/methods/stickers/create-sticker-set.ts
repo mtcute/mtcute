@@ -10,9 +10,8 @@ import {
     StickerSourceType,
     StickerType,
 } from '../../types/index.js'
-import { toInputUser } from '../../utils/peer-utils.js'
 import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveUser } from '../users/resolve-peer.js'
 
 /**
  * Create a new sticker set.
@@ -98,7 +97,7 @@ export async function createStickerSet(
         progressCallback?: (idx: number, uploaded: number, total: number) => void
     },
 ): Promise<StickerSet> {
-    const owner = toInputUser(await resolvePeer(client, params.owner), params.owner)
+    const owner = await resolveUser(client, params.owner)
 
     const inputStickers: tl.TypeInputStickerSetItem[] = []
 

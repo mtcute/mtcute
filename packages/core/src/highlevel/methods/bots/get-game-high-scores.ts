@@ -3,8 +3,7 @@ import { tl } from '@mtcute/tl'
 import { ITelegramClient } from '../../client.types.js'
 import { GameHighScore, InputMessageId, InputPeerLike, normalizeInputMessageId, PeersIndex } from '../../types/index.js'
 import { normalizeInlineId } from '../../utils/inline-utils.js'
-import { toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 
 /**
  * Get high scores of a game
@@ -24,7 +23,7 @@ export async function getGameHighScores(
     let user: tl.TypeInputUser
 
     if (userId) {
-        user = toInputUser(await resolvePeer(client, userId), userId)
+        user = await resolveUser(client, userId)
     } else {
         user = { _: 'inputUserEmpty' }
     }
@@ -57,7 +56,7 @@ export async function getInlineGameHighScores(
     let user: tl.TypeInputUser
 
     if (userId) {
-        user = toInputUser(await resolvePeer(client, userId), userId)
+        user = await resolveUser(client, userId)
     } else {
         user = { _: 'inputUserEmpty' }
     }

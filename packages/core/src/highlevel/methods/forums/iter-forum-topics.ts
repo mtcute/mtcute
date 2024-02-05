@@ -1,7 +1,6 @@
 import { ITelegramClient } from '../../client.types.js'
 import { ForumTopic, InputPeerLike } from '../../types/index.js'
-import { toInputChannel } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 import { getForumTopics } from './get-forum-topics.js'
 
 /**
@@ -30,7 +29,7 @@ export async function* iterForumTopics(
 
     const { query, limit = Infinity, chunkSize = 100 } = params
 
-    const peer = toInputChannel(await resolvePeer(client, chatId))
+    const peer = await resolveChannel(client, chatId)
 
     let { offset } = params
     let current = 0

@@ -1,7 +1,6 @@
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike } from '../../types/index.js'
-import { toInputChannel } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 /**
  * Set whether a supergroup is a forum.
@@ -14,7 +13,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
 export async function toggleForum(client: ITelegramClient, chatId: InputPeerLike, enabled = false): Promise<void> {
     const res = await client.call({
         _: 'channels.toggleForum',
-        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: await resolveChannel(client, chatId),
         enabled,
     })
     client.handleClientUpdate(res)

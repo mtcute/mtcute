@@ -7,7 +7,7 @@ import { getMarkedPeerId, parseMarkedPeerId, toggleChannelIdMark } from '../../.
 import { ITelegramClient } from '../../client.types.js'
 import { MtPeerNotFoundError } from '../../types/errors.js'
 import { InputPeerLike } from '../../types/peers/index.js'
-import { toInputPeer } from '../../utils/peer-utils.js'
+import { toInputChannel, toInputPeer, toInputUser } from '../../utils/peer-utils.js'
 
 // @available=both
 /**
@@ -158,4 +158,26 @@ export async function resolvePeer(
                 accessHash: Long.ZERO,
             }
     }
+}
+
+/**
+ * Shorthand for `resolvePeer` that converts the input peer to `InputUser`.
+ */
+export async function resolveUser(
+    client: ITelegramClient,
+    peerId: InputPeerLike,
+    force = false,
+): Promise<tl.TypeInputUser> {
+    return toInputUser(await resolvePeer(client, peerId, force), peerId)
+}
+
+/**
+ * Shorthand for `resolvePeer` that converts the input peer to `InputChannel`.
+ */
+export async function resolveChannel(
+    client: ITelegramClient,
+    peerId: InputPeerLike,
+    force = false,
+): Promise<tl.TypeInputChannel> {
+    return toInputChannel(await resolvePeer(client, peerId, force), peerId)
 }

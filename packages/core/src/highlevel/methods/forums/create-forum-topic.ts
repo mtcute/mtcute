@@ -3,9 +3,8 @@ import { tl } from '@mtcute/tl'
 import { randomLong } from '../../../utils/long-utils.js'
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike, Message } from '../../types/index.js'
-import { toInputChannel } from '../../utils/peer-utils.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel, resolvePeer } from '../users/resolve-peer.js'
 
 /**
  * Create a topic in a forum
@@ -51,7 +50,7 @@ export async function createForumTopic(
 
     const res = await client.call({
         _: 'channels.createForumTopic',
-        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: await resolveChannel(client, chatId),
         title,
         iconColor: typeof icon === 'number' ? icon : undefined,
         iconEmojiId: typeof icon !== 'number' ? icon : undefined,

@@ -2,7 +2,7 @@ import { MaybeArray } from '../../../types/utils.js'
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerChat, toInputChannel, toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
 
 /**
@@ -33,7 +33,7 @@ export async function addChatMembers(
 
     if (isInputPeerChat(chat)) {
         for (const user of users) {
-            const p = toInputUser(await resolvePeer(client, user))
+            const p = await resolveUser(client, user)
 
             const updates = await client.call({
                 _: 'messages.addChatUser',

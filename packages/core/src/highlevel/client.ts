@@ -223,7 +223,7 @@ import { getProfilePhoto } from './methods/users/get-profile-photo.js'
 import { getProfilePhotos } from './methods/users/get-profile-photos.js'
 import { getUsers } from './methods/users/get-users.js'
 import { iterProfilePhotos } from './methods/users/iter-profile-photos.js'
-import { resolvePeer } from './methods/users/resolve-peer.js'
+import { resolveChannel, resolvePeer, resolveUser } from './methods/users/resolve-peer.js'
 import { resolvePeerMany } from './methods/users/resolve-peer-many.js'
 import { setGlobalTtl } from './methods/users/set-global-ttl.js'
 import { setMyEmojiStatus } from './methods/users/set-my-emoji-status.js'
@@ -5025,6 +5025,18 @@ export interface TelegramClient extends ITelegramClient {
      */
     resolvePeer(peerId: InputPeerLike, force?: boolean): Promise<tl.TypeInputPeer>
     /**
+     * Shorthand for `resolvePeer` that converts the input peer to `InputUser`.
+     * **Available**: ✅ both users and bots
+     *
+     */
+    resolveUser(peerId: InputPeerLike, force?: boolean): Promise<tl.TypeInputUser>
+    /**
+     * Shorthand for `resolvePeer` that converts the input peer to `InputChannel`.
+     * **Available**: ✅ both users and bots
+     *
+     */
+    resolveChannel(peerId: InputPeerLike, force?: boolean): Promise<tl.TypeInputChannel>
+    /**
      * Changes the current default value of the Time-To-Live setting,
      * applied to all new chats.
      *
@@ -5866,6 +5878,12 @@ TelegramClient.prototype.resolvePeerMany = function (...args) {
 }
 TelegramClient.prototype.resolvePeer = function (...args) {
     return resolvePeer(this._client, ...args)
+}
+TelegramClient.prototype.resolveUser = function (...args) {
+    return resolveUser(this._client, ...args)
+}
+TelegramClient.prototype.resolveChannel = function (...args) {
+    return resolveChannel(this._client, ...args)
 }
 TelegramClient.prototype.setGlobalTtl = function (...args) {
     return setGlobalTtl(this._client, ...args)

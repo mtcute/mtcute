@@ -4,9 +4,8 @@ import { assertTrue } from '../../../utils/type-assertions.js'
 import { ITelegramClient } from '../../client.types.js'
 import { InputMessageId, InputPeerLike, Message, normalizeInputMessageId } from '../../types/index.js'
 import { normalizeInlineId } from '../../utils/inline-utils.js'
-import { toInputUser } from '../../utils/peer-utils.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 
 /**
  * Set a score of a user in a game
@@ -45,7 +44,7 @@ export async function setGameScore(
     const { userId, score, noEdit, force, shouldDispatch } = params
     const { chatId, message } = normalizeInputMessageId(params)
 
-    const user = toInputUser(await resolvePeer(client, userId), userId)
+    const user = await resolveUser(client, userId)
     const chat = await resolvePeer(client, chatId)
 
     const res = await client.call({
@@ -91,7 +90,7 @@ export async function setInlineGameScore(
 ): Promise<void> {
     const { messageId, userId, score, noEdit, force } = params
 
-    const user = toInputUser(await resolvePeer(client, userId), userId)
+    const user = await resolveUser(client, userId)
 
     const id = normalizeInlineId(messageId)
 

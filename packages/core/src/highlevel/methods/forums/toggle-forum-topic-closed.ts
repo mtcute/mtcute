@@ -1,8 +1,7 @@
 import { ITelegramClient } from '../../client.types.js'
 import type { ForumTopic, InputPeerLike, Message } from '../../types/index.js'
-import { toInputChannel } from '../../utils/peer-utils.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 /**
  * Toggle open/close status of a topic in a forum
@@ -34,7 +33,7 @@ export async function toggleForumTopicClosed(
 
     const res = await client.call({
         _: 'channels.editForumTopic',
-        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: await resolveChannel(client, chatId),
         topicId: typeof topicId === 'number' ? topicId : topicId.id,
         closed,
     })

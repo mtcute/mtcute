@@ -1,8 +1,7 @@
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike, Photo } from '../../types/index.js'
-import { toInputUser } from '../../utils/peer-utils.js'
 import { getProfilePhotos } from './get-profile-photos.js'
-import { resolvePeer } from './resolve-peer.js'
+import { resolveUser } from './resolve-peer.js'
 
 /**
  * Iterate over profile photos
@@ -31,7 +30,7 @@ export async function* iterProfilePhotos(
 ): AsyncIterableIterator<Photo> {
     if (!params) params = {}
 
-    const peer = toInputUser(await resolvePeer(client, userId), userId)
+    const peer = await resolveUser(client, userId)
 
     const { limit = Infinity, chunkSize = 100 } = params
 

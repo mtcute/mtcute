@@ -1,7 +1,6 @@
 import { ITelegramClient } from '../../client.types.js'
 import { Chat, InputPeerLike } from '../../types/index.js'
-import { toInputUser } from '../../utils/peer-utils.js'
-import { resolvePeer } from './resolve-peer.js'
+import { resolveUser } from './resolve-peer.js'
 
 /**
  * Get a list of common chats you have with a given user
@@ -13,7 +12,7 @@ export async function getCommonChats(client: ITelegramClient, userId: InputPeerL
     return client
         .call({
             _: 'messages.getCommonChats',
-            userId: toInputUser(await resolvePeer(client, userId), userId),
+            userId: await resolveUser(client, userId),
             maxId: 0,
             limit: 100,
         })

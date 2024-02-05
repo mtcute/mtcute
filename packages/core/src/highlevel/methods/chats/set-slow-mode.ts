@@ -1,7 +1,6 @@
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike } from '../../types/index.js'
-import { toInputChannel } from '../../utils/peer-utils.js'
-import { resolvePeer } from '../users/resolve-peer.js'
+import { resolveChannel } from '../users/resolve-peer.js'
 
 /**
  * Set supergroup's slow mode interval.
@@ -15,7 +14,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
 export async function setSlowMode(client: ITelegramClient, chatId: InputPeerLike, seconds = 0): Promise<void> {
     const res = await client.call({
         _: 'channels.toggleSlowMode',
-        channel: toInputChannel(await resolvePeer(client, chatId), chatId),
+        channel: await resolveChannel(client, chatId),
         seconds,
     })
     client.handleClientUpdate(res)
