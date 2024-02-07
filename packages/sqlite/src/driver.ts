@@ -1,6 +1,6 @@
 import sqlite3, { Database, Options, Statement } from 'better-sqlite3'
 
-import { BaseStorageDriver, MtUnsupportedError } from '@mtcute/core'
+import { BaseStorageDriver } from '@mtcute/core'
 import { beforeExit } from '@mtcute/core/utils.js'
 
 export interface SqliteStorageDriverOptions {
@@ -49,6 +49,17 @@ export class SqliteStorageDriver extends BaseStorageDriver {
     private _migrations: Map<string, Map<number, MigrationFunction>> = new Map()
     private _maxVersion: Map<string, number> = new Map()
 
+    // todo: remove in 1.0.0 + remove direct dep on @mtcute/tl
+    private _legacyMigrations: Map<string, MigrationFunction> = new Map()
+
+    registerLegacyMigration(repo: string, migration: MigrationFunction): void {
+        if (this.loaded) {
+            throw new Error('Cannot register migrations after loading')
+        }
+
+        this._legacyMigrations.set(repo, migration)
+    }
+
     registerMigration(repo: string, version: number, migration: MigrationFunction): void {
         if (this.loaded) {
             throw new Error('Cannot register migrations after loading')
@@ -88,16 +99,16 @@ export class SqliteStorageDriver extends BaseStorageDriver {
         this._pending.push([stmt, params])
     }
 
+    private _runLegacyMigrations = false
+
     _initialize(): void {
         const hasLegacyTables = this.db
             .prepare("select name from sqlite_master where type = 'table' and name = 'kv'")
             .get()
 
         if (hasLegacyTables) {
-            throw new MtUnsupportedError(
-                'This database was created with an older version of mtcute, and cannot be used anymore. ' +
-                    'Please delete the database and try again.',
-            )
+            this._log.info('legacy tables detected, will run migrations')
+            this._runLegacyMigrations = true
         }
 
         this.db.exec(MIGRATIONS_TABLE_SQL)
@@ -154,12 +165,24 @@ export class SqliteStorageDriver extends BaseStorageDriver {
             })
         })
 
-        this._initialize()
+        this.db.transaction(() => this._initialize())()
+
         this._cleanup = beforeExit(() => {
             this._save()
             this._destroy()
         })
         for (const cb of this._onLoad) cb(this.db)
+
+        if (this._runLegacyMigrations) {
+            this.db.transaction(() => {
+                for (const migration of this._legacyMigrations.values()) {
+                    migration(this.db)
+                }
+
+                // in case _writeLater was used
+                this._runMany(this._pending)
+            })()
+        }
     }
 
     _save(): void {

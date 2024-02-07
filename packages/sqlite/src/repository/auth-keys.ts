@@ -18,11 +18,11 @@ export class SqliteAuthKeysRepository implements IAuthKeysRepository {
     constructor(readonly _driver: SqliteStorageDriver) {
         _driver.registerMigration('auth_keys', 1, (db) => {
             db.exec(`
-                create table auth_keys (
+                create table if not exists auth_keys (
                     dc integer primary key,
                     key blob not null
                 );
-                create table temp_auth_keys (
+                create table if not exists temp_auth_keys (
                     dc integer not null,
                     idx integer not null,
                     key blob not null,
@@ -36,7 +36,9 @@ export class SqliteAuthKeysRepository implements IAuthKeysRepository {
             this._getTemp = db.prepare('select key from temp_auth_keys where dc = ? and idx = ? and expires > ?')
 
             this._set = db.prepare('insert or replace into auth_keys (dc, key) values (?, ?)')
-            this._setTemp = this._driver.db.prepare('insert or replace into temp_auth_keys (dc, idx, key, expires) values (?, ?, ?, ?)')
+            this._setTemp = this._driver.db.prepare(
+                'insert or replace into temp_auth_keys (dc, idx, key, expires) values (?, ?, ?, ?)',
+            )
 
             this._del = db.prepare('delete from auth_keys where dc = ?')
             this._delTemp = db.prepare('delete from temp_auth_keys where dc = ? and idx = ?')

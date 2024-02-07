@@ -21,6 +21,7 @@
     },
     "dependencies": {
         "@mtcute/core": "workspace:^",
+        "@mtcute/tl": "*",
         "@mtcute/tl-runtime": "workspace:^",
         "better-sqlite3": "9.2.2"
     },

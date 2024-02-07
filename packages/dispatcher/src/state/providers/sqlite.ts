@@ -43,6 +43,10 @@ class SqliteStateRepository implements IStateRepository {
             this._deleteRl = _driver.db.prepare('delete from rl_state where key = ?')
             this._deleteOldRl = _driver.db.prepare('delete from rl_state where reset < ?')
         })
+        _driver.registerLegacyMigration('state', (db) => {
+            // not too important information, just drop the table
+            db.exec('drop table state')
+        })
     }
 
     private _setState!: Statement

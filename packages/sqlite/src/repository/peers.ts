@@ -54,6 +54,10 @@ export class SqlitePeersRepository implements IPeersRepository {
 
             this._delAll = db.prepare('delete from peers')
         })
+        _driver.registerLegacyMigration('peers', (db) => {
+            // not too important information, just drop the table
+            db.exec('drop table entities')
+        })
     }
 
     private _store!: Statement

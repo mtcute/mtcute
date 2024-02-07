@@ -279,6 +279,9 @@ importers:
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
+      '@mtcute/tl':
+        specifier: '*'
+        version: link:../tl
       '@mtcute/tl-runtime':
         specifier: workspace:^
         version: link:../tl-runtime

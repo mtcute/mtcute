@@ -14,17 +14,19 @@ export class SqliteRefMessagesRepository implements IReferenceMessagesRepository
     constructor(readonly _driver: SqliteStorageDriver) {
         _driver.registerMigration('ref_messages', 1, (db) => {
             db.exec(`
-                create table message_refs (
+                create table if not exists message_refs (
                     peer_id integer not null,
                     chat_id integer not null,
                     msg_id integer not null
                 );
-                create index idx_message_refs_peer on message_refs (peer_id);
-                create index idx_message_refs on message_refs (chat_id, msg_id);
+                create index if not exists idx_message_refs_peer on message_refs (peer_id);
+                create index if not exists idx_message_refs on message_refs (chat_id, msg_id);
             `)
         })
         _driver.onLoad(() => {
-            this._store = this._driver.db.prepare('insert or replace into message_refs (peer_id, chat_id, msg_id) values (?, ?, ?)')
+            this._store = this._driver.db.prepare(
+                'insert or replace into message_refs (peer_id, chat_id, msg_id) values (?, ?, ?)',
+            )
 
             this._getByPeer = this._driver.db.prepare('select chat_id, msg_id from message_refs where peer_id = ?')
 
