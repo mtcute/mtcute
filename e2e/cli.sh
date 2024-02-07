@@ -38,7 +38,8 @@ case "$method" in
         ;;
     "ci-publish")
         export CURRENT_COMMIT=$(git rev-parse HEAD)
-        docker compose run --rm -e REGISTRY -e NPM_TOKEN -e CURRENT_COMMIT test publish-canary
+        docker compose up -d verdaccio
+        node publish-canary.js
         ;;
     *)
         echo "Unknown command"

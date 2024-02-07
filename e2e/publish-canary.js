@@ -6,7 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const { execSync } = require('child_process')
 
-// setup token
+// setup tokenw
 const { NPM_TOKEN, REGISTRY, CURRENT_COMMIT } = process.env
 
 if (!NPM_TOKEN || !REGISTRY || !CURRENT_COMMIT) {
@@ -15,30 +15,18 @@ if (!NPM_TOKEN || !REGISTRY || !CURRENT_COMMIT) {
 }
 
 execSync(`npm config set //${REGISTRY.replace(/^https?:\/\//, '')}/:_authToken ${NPM_TOKEN}`, { stdio: 'inherit' })
-
-const nodeModulesDir = path.join(__dirname, 'node_modules')
-const mtcuteDir = path.join(nodeModulesDir, '@mtcute')
-
 const commit = CURRENT_COMMIT.slice(0, 7)
-const versions = {}
 
-for (const pkg of fs.readdirSync(mtcuteDir)) {
-    const pkgJsonPath = path.join(mtcuteDir, pkg, 'package.json')
-    const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'))
-    const version = `${pkgJson.version}-git.${commit}`
-    versions[pkg] = version
-}
+const myPkgJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'))
+const packages = Object.keys(myPkgJson.dependencies).filter((x) => x.startsWith('@mtcute/')).map((x) => x.slice('@mtcute/'.length))
 
-for (const pkg of fs.readdirSync(mtcuteDir)) {
-    const pkgJsonPath = path.join(mtcuteDir, pkg, 'package.json')
-    const pkgJsonOrig = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'))
-    const pkgJson = JSON.parse(JSON.stringify(pkgJsonOrig))
+const workDir = path.join(__dirname, 'temp')
+fs.mkdirSync(workDir, { recursive: true })
 
-    const version = versions[pkg]
-    pkgJson.version = version
+async function main() {
+    const versions = {}
 
-    // eslint-disable-next-line no-inner-declarations
-    function fixDependencies(key) {
+    function fixDependencies(pkgJson, key) {
         if (!pkgJson[key]) return
 
         const deps = pkgJson[key]
@@ -49,18 +37,42 @@ for (const pkg of fs.readdirSync(mtcuteDir)) {
         }
     }
 
-    fixDependencies('dependencies')
-    fixDependencies('peerDependencies')
-    fixDependencies('devDependencies')
-    fixDependencies('optionalDependencies')
+    // prepare working directory
+    for (const pkg of packages) {
+        const data = await fetch(`http://localhost:4873/@mtcute/${pkg}`).then((x) => x.json())
+        const version = data['dist-tags'].latest
+        const tarball = data.versions[version].dist.tarball
 
-    fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 4))
+        execSync(`wget -O ${pkg}.tgz ${tarball}`, { cwd: workDir, stdio: 'inherit' })
+        execSync(`tar -xzf ${pkg}.tgz`, { cwd: workDir, stdio: 'inherit' })
+        execSync(`rm ${pkg}.tgz`, { cwd: workDir, stdio: 'inherit' })
+        execSync(`mv package ${pkg}`, { cwd: workDir, stdio: 'inherit' })
 
-    execSync(`npm publish --registry ${REGISTRY} -q --tag canary`, {
-        cwd: path.join(mtcuteDir, pkg),
-        stdio: 'inherit',
-    })
+        versions[pkg] = `${version}-git.${commit}`
+    }
 
-    // restore package.json just in case
-    fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJsonOrig, null, 4))
+    for (const pkg of packages) {
+        const pkgDir = path.join(workDir, pkg)
+
+        const pkgJsonPath = path.join(pkgDir, 'package.json')
+        const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'))
+
+        fixDependencies(pkgJson, 'dependencies')
+        fixDependencies(pkgJson, 'peerDependencies')
+        fixDependencies(pkgJson, 'devDependencies')
+        fixDependencies(pkgJson, 'optionalDependencies')
+        pkgJson.version = versions[pkg]
+
+        fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 4))
+
+        execSync(`npm publish --registry ${REGISTRY} -q --tag canary`, {
+            cwd: pkgDir,
+            stdio: 'inherit',
+        })
+    }
 }
+
+main().catch((err) => {
+    console.error(err)
+    process.exit(1)
+})
