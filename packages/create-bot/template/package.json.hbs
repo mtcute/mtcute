@@ -16,10 +16,10 @@
         "format": "prettier --write \"src/**/*.ts\"",
         {{/if}}
         {{#if features.typescript}}
-        "run": "tsc && dotenv node ./dist/index.js",
+        "start": "tsc && dotenv node ./dist/index.js",
         "build": "tsc"
         {{else}}
-        "run": "dotenv node ./src/index.js"
+        "start": "dotenv node ./src/index.js"
         {{/if}}
     }
 }

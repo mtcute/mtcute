@@ -40,4 +40,4 @@ if (config.features.includes(MtcuteFeature.Linters)) {
 console.log(`✅ Scaffolded new project at ${chalk.blue(outDir)}`)
 console.log('🚀 Run it with:')
 console.log(`  ${chalk.blue('$')} cd ${projectName}`)
-console.log(`  ${chalk.blue('$')} pnpm run run`)
+console.log(`  ${chalk.blue('$')} pnpm start`)
