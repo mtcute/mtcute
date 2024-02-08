@@ -251,6 +251,10 @@ export async function doAuthorization(
     }
     log.debug('found server key, fp = %s, old = %s', publicKey.fingerprint, publicKey.old)
 
+    if (millerRabin(crypto, bufferToBigInt(resPq.pq))) {
+        throw new MtSecurityError('Step 2: pq is prime')
+    }
+
     const [p, q] = await crypto.factorizePQ(resPq.pq)
     log.debug('factorized PQ: PQ = %h, P = %h, Q = %h', resPq.pq, p, q)
 
@@ -401,10 +405,10 @@ export async function doAuthorization(
         }
 
         if (!buffersEqual(dhGen.nonce, nonce)) {
-            throw Error('Step 4: invalid nonce from server')
+            throw new MtSecurityError('Step 4: invalid nonce from server')
         }
         if (!buffersEqual(dhGen.serverNonce, resPq.serverNonce)) {
-            throw Error('Step 4: invalid server nonce from server')
+            throw new MtSecurityError('Step 4: invalid server nonce from server')
         }
 
         log.debug('DH result: %s', dhGen._)
@@ -418,7 +422,7 @@ export async function doAuthorization(
             const expectedHash = crypto.sha1(concatBuffers([newNonce, new Uint8Array([2]), authKeyAuxHash]))
 
             if (!buffersEqual(expectedHash.subarray(4, 20), dhGen.newNonceHash2)) {
-                throw Error('Step 4: invalid retry nonce hash from server')
+                throw new MtSecurityError('Step 4: invalid retry nonce hash from server')
             }
             retryId = Long.fromBytesLE(authKeyAuxHash as unknown as number[])
             continue
@@ -429,7 +433,7 @@ export async function doAuthorization(
         const expectedHash = crypto.sha1(concatBuffers([newNonce, new Uint8Array([1]), authKeyAuxHash]))
 
         if (!buffersEqual(expectedHash.subarray(4, 20), dhGen.newNonceHash1)) {
-            throw Error('Step 4: invalid nonce hash from server')
+            throw new MtSecurityError('Step 4: invalid nonce hash from server')
         }
 
         log.info('authorization successful')
