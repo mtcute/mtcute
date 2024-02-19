@@ -594,7 +594,7 @@ export class UpdatesManager {
                     if (msg.replyTo._ === 'messageReplyHeader' && !(await fetchPeer(msg.replyTo.replyToPeerId))) {
                         return missing
                     }
-                    if (msg.replyTo._ === 'messageReplyStoryHeader' && !(await fetchPeer(msg.replyTo.userId))) {
+                    if (msg.replyTo._ === 'messageReplyStoryHeader' && !(await fetchPeer(msg.replyTo.peer))) {
                         return missing
                     }
                 }
@@ -746,7 +746,7 @@ export class UpdatesManager {
                     store(msg.replyTo.replyFrom?.fromId)
                     break
                 case 'messageReplyStoryHeader':
-                    store(msg.replyTo.userId)
+                    store(msg.replyTo.peer)
                     break
             }
             // in fact, we can also use peers contained in the replied-to message,

@@ -393,6 +393,13 @@ export interface ActionWallpaperChanged {
      */
     same: boolean
 
+    /**
+     * Whether the wallpaper was forcefully applied for
+     * both sides, without explicit confirmation from the other
+     * side.
+     */
+    forBoth: boolean
+
     /** TL object representing the new wallpaper */
     wallpaper: tl.TypeWallPaper
 }
@@ -660,10 +667,10 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 peers: act.peers.map((it) => parsePeer(it, this._peers)),
             }
         case 'messageActionSetChatWallPaper':
-        case 'messageActionSetSameChatWallPaper':
             return {
                 type: 'wallpaper_changed',
-                same: act._ === 'messageActionSetSameChatWallPaper',
+                same: act.same!,
+                forBoth: act.forBoth!,
                 wallpaper: act.wallpaper,
             }
         default:
