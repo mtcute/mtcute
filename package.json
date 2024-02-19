@@ -5,6 +5,7 @@
     "description": "Type-safe library for MTProto (Telegram API) for browser and NodeJS",
     "license": "MIT",
     "author": "Alina Sireneva <alina@tei.su>",
+    "workspaces": ["packages/*"],
     "scripts": {
         "prepare": "husky install .config/husky",
         "postinstall": "node scripts/validate-deps-versions.mjs",

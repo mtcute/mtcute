@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const _imported = await import(import.meta.env.TEST_ENV === 'node' ? './hex.js' : './hex.web.js')
+const _imported = await import(
+    import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun' ? './hex.js' : './hex.web.js'
+)
 const { hexDecode, hexDecodeToBuffer, hexEncode } = _imported as typeof import('./hex.js')
 
 describe('hex', () => {

@@ -249,7 +249,7 @@ export function u8HexDecode(hex: string) {
     const buf = hexDecodeToBuffer(hex)
 
     // eslint-disable-next-line no-restricted-globals
-    if (import.meta.env.TEST_ENV === 'node' && Buffer.isBuffer(buf)) {
+    if ((import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') && Buffer.isBuffer(buf)) {
         return new Uint8Array(buf)
     }
 

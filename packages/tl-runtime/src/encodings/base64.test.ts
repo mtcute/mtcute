@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const _imported = await import(import.meta.env.TEST_ENV === 'node' ? './base64.js' : './base64.web.js')
+const _imported = await import(
+    import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun' ? './base64.js' : './base64.web.js'
+)
 const { base64Decode, base64DecodeToBuffer, base64Encode } = _imported as typeof import('./base64.js')
 
 describe('base64', () => {

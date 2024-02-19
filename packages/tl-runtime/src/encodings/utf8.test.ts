@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const _imported = await import(import.meta.env.TEST_ENV === 'node' ? './utf8.js' : './utf8.web.js')
+const _imported = await import(
+    import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun' ? './utf8.js' : './utf8.web.js'
+)
 const { byteLengthUtf8, utf8Decode, utf8Encode, utf8EncodeToBuffer } = _imported as typeof import('./utf8.js')
 
 describe('utf8', () => {

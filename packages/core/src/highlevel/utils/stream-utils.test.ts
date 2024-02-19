@@ -83,7 +83,7 @@ describe('createChunkedReader', () => {
     })
 })
 
-if (import.meta.env.TEST_ENV === 'node') {
+if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
     describe('nodeReadableToWeb', () => {
         it('should correctly convert a readable stream', async () => {
             const stream = new Readable({

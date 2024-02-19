@@ -130,7 +130,7 @@ describe('logger', () => {
                 expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test {"a":1}', [])
             })
 
-            if (import.meta.env.TEST_ENV === 'node') {
+            if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
                 it('should format Buffers inside as hex strings', () => {
                     const [mgr, spy] = createManager()
 

@@ -1,7 +1,7 @@
 import { Socket } from 'net'
 import { describe, expect, it, MockedObject, vi } from 'vitest'
 
-if (import.meta.env.TEST_ENV === 'node') {
+if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
     vi.doMock('net', () => ({
         connect: vi.fn().mockImplementation((port: number, ip: string, cb: () => void) => {
             cb()
