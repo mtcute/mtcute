@@ -1,6 +1,4 @@
-import { isatty } from 'tty'
-
-const isTty = isatty(process.stdout.fd)
+const isTty = typeof process === 'object' && Boolean(process.stdout?.isTTY)
 
 const BASE_FORMAT = isTty ? '%s [%s] [%s%s\x1b[0m] ' : '%s [%s] [%s] '
 const LEVEL_NAMES = isTty ?
