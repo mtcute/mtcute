@@ -404,6 +404,38 @@ export interface ActionWallpaperChanged {
     wallpaper: tl.TypeWallPaper
 }
 
+/** A Telergam Premium gift code was received */
+export interface ActionGiftCode {
+    readonly type: 'gift_code'
+
+    /** Information about the gift code */
+    raw: tl.RawMessageActionGiftCode
+}
+
+/** A Telergam Premium giveaway was started */
+export interface ActionGiveawayStarted {
+    readonly type: 'giveaway_started'
+}
+
+/** A Telergam Premium giveaway was ended and results are available */
+export interface ActionGiveawayEnded {
+    readonly type: 'giveaway_ended'
+
+    /** Number of winners in the giveaway */
+    winners: number
+
+    /** Number of undistributed prizes */
+    undistributed: number
+}
+
+/** Boosts were applied to the group */
+export interface ActionBoostApply {
+    readonly type: 'boost_apply'
+
+    /** Number of boosts applied */
+    count: number
+}
+
 export type MessageAction =
     | ActionChatCreated
     | ActionChannelCreated
@@ -442,6 +474,10 @@ export type MessageAction =
     | ActionPhotoSuggested
     | ActionPeerChosen
     | ActionWallpaperChanged
+    | ActionGiftCode
+    | ActionGiveawayStarted
+    | ActionGiveawayEnded
+    | ActionBoostApply
     | null
 
 /** @internal */
@@ -672,6 +708,26 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 same: act.same!,
                 forBoth: act.forBoth!,
                 wallpaper: act.wallpaper,
+            }
+        case 'messageActionGiftCode':
+            return {
+                type: 'gift_code',
+                raw: act,
+            }
+        case 'messageActionGiveawayLaunch':
+            return {
+                type: 'giveaway_started',
+            }
+        case 'messageActionGiveawayResults':
+            return {
+                type: 'giveaway_ended',
+                winners: act.winnersCount,
+                undistributed: act.unclaimedCount,
+            }
+        case 'messageActionBoostApply':
+            return {
+                type: 'boost_apply',
+                count: act.boosts,
             }
         default:
             return null
