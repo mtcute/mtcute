@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/test",
     "private": true,
-    "version": "0.6.0",
+    "version": "0.7.0",
     "description": "Test utilities for mtcute",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
