@@ -185,6 +185,22 @@ function determineCommonAvailability(methods, resolver = (v) => v) {
     return common
 }
 
+async function runPrettier(targetFile) {
+    const prettierConfig = await prettier.resolveConfig(targetFile)
+    let fullSource = await fs.promises.readFile(targetFile, 'utf-8')
+    fullSource = await prettier.format(fullSource, {
+        ...(prettierConfig || {}),
+        filepath: targetFile,
+    })
+    await fs.promises.writeFile(targetFile, fullSource)
+}
+
+function runEslint(targetFile) {
+    require('child_process').execSync(`pnpm exec eslint --fix ${targetFile}`, {
+        stdio: 'inherit',
+    })
+}
+
 async function addSingleMethod(state, fileName) {
     const fileFullText = await fs.promises.readFile(fileName, 'utf-8')
     const program = ts.createSourceFile(path.basename(fileName), fileFullText, ts.ScriptTarget.ES2018, true)
@@ -337,6 +353,7 @@ async function addSingleMethod(state, fileName) {
                 if (shouldEmit) {
                     state.methods.list.push({
                         from: relPath,
+                        module,
                         name,
                         isPrivate,
                         isManual,
@@ -715,19 +732,25 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
     })
     state.impls.forEach(({ name, code }) => output.write(`TelegramClient.prototype.${name} = ${code}\n`))
 
-    // format the resulting file with prettier
-    const prettierConfig = await prettier.resolveConfig(targetFile)
-    let fullSource = await fs.promises.readFile(targetFile, 'utf-8')
-    fullSource = await prettier.format(fullSource, {
-        ...(prettierConfig || {}),
-        filepath: targetFile,
-    })
-    await fs.promises.writeFile(targetFile, fullSource)
+    // write methods re-exports to separate file
+    const targetFileMethods = path.join(__dirname, '../src/highlevel/methods.ts')
+    const outputMethods = fs.createWriteStream(targetFileMethods)
 
-    // fix using eslint
-    require('child_process').execSync(`pnpm exec eslint --fix ${targetFile}`, {
-        stdio: 'inherit',
+    outputMethods.write('/* THIS FILE WAS AUTO-GENERATED */\n')
+    state.methods.list.forEach(({ module, name, overload }) => {
+        if (overload) return
+        outputMethods.write(`export { ${name} } from '${module}'\n`)
     })
+
+    await new Promise((resolve) => { outputMethods.end(resolve) })
+    await new Promise((resolve) => { output.end(resolve) })
+
+    // format the resulting files with prettier and eslint
+    runPrettier(targetFile)
+    runPrettier(targetFileMethods)
+
+    runEslint(targetFile)
+    runEslint(targetFileMethods)
 }
 
 main().catch(console.error)

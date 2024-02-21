@@ -51,9 +51,9 @@
                 "import": "./esm/highlevel/*",
                 "require": "./cjs/highlevel/*"
             },
-            "./methods/*": {
-                "import": "./esm/highlevel/methods/*",
-                "require": "./cjs/highlevel/methods/*"
+            "./methods.js": {
+                "import": "./esm/highlevel/methods.js",
+                "require": "./cjs/highlevel/methods.js"
             }
         }
     },
