@@ -1,9 +1,9 @@
-import chalk from 'chalk'
+import * as colors from 'colorette'
 import { spawn } from 'cross-spawn'
 
 export function exec(cwd: string, ...cmd: string[]) {
     return new Promise<void>((resolve, reject) => {
-        console.log(`${chalk.blue('$')} ${cmd.join(' ')}`)
+        console.log(`${colors.blue('$')} ${cmd.join(' ')}`)
 
         const proc = spawn(cmd[0], cmd.slice(1), {
             stdio: 'inherit',

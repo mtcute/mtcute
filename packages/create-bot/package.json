@@ -14,7 +14,7 @@
         "create-bot": "./src/main.js"
     },
     "dependencies": {
-        "chalk": "5.3.0",
+        "colorette": "^2.0.20",
         "cross-spawn": "7.0.3",
         "glob": "10.2.6",
         "handlebars": "4.7.8",
@@ -22,7 +22,7 @@
         "open": "9.1.0"
     },
     "devDependencies": {
-        "@types/inquirer": "^9.0.6",
-        "@types/cross-spawn": "^6.0.6"
+        "@types/cross-spawn": "^6.0.6",
+        "@types/inquirer": "^9.0.6"
     }
 }

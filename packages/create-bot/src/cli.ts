@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import * as colors from 'colorette'
 import inquirer from 'inquirer'
 import open from 'open'
 
@@ -47,14 +47,16 @@ export async function askForConfigPersisted(): Promise<UserConfigPersisted> {
                     setTimeout(() => void open(TELEGRAM_APPS_PAGE), 1000)
 
                     return [
-                        chalk.italic(`Opening ${chalk.blue(TELEGRAM_APPS_PAGE)}...`),
-                        `🔒 Log in with your ${chalk.blueBright('Telegram')} account`,
+                        colors.italic(`Opening ${colors.blue(TELEGRAM_APPS_PAGE)}...`),
+                        `🔒 Log in with your ${colors.blueBright('Telegram')} account`,
                         '📝 Fill out the form:',
-                        `   - ${chalk.bold('App title, short name')}: anything you want, can be changed later`,
-                        `   - ${chalk.bold('Platform')}: doesn't matter`,
-                        `   - ${chalk.bold('URL')}: can be left blank`,
-                        `🚀 Click ${chalk.bold('Create application')}`,
-                        `${chalk.bold.red('❗ DO NOT')} share your API hash with anyone, as it can't be revoked`,
+                        `   - ${colors.bold('App title, short name')}: anything you want, can be changed later`,
+                        `   - ${colors.bold('Platform')}: doesn't matter`,
+                        `   - ${colors.bold('URL')}: can be left blank`,
+                        `🚀 Click ${colors.bold('Create application')}`,
+                        `${colors.bold(
+                            colors.red('❗ DO NOT'),
+                        )} share your API hash with anyone, as it can't be revoked`,
                     ].join('\n')
                 }
                 if (!/^\d+$/.test(v)) return 'API ID must be a number'
@@ -109,8 +111,8 @@ export async function askForConfig(): Promise<UserConfig> {
                     allowEmptyBotToken = true
 
                     return [
-                        `You most likely need a bot token. You can obtain one from ${chalk.blue('@BotFather')}`,
-                        `   Press ${chalk.bold('Enter')} again if you want to create a ${chalk.magenta('userbot')}`,
+                        `You most likely need a bot token. You can obtain one from ${colors.blue('@BotFather')}`,
+                        `   Press ${colors.bold('Enter')} again if you want to create a ${colors.magenta('userbot')}`,
                     ].join('\n')
                 }
                 if (!v.match(/^(\d+):[a-z0-9-_]{16,50}$/i)) return 'Invalid bot token'

@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import * as colors from 'colorette'
 import { join } from 'node:path'
 
 import { askForConfig } from './cli.js'
@@ -37,7 +37,7 @@ if (config.features.includes(MtcuteFeature.Linters)) {
     await exec(outDir, 'pnpm', 'exec', 'husky', 'install')
 }
 
-console.log(`✅ Scaffolded new project at ${chalk.blue(outDir)}`)
+console.log(`✅ Scaffolded new project at ${colors.blue(outDir)}`)
 console.log('🚀 Run it with:')
-console.log(`  ${chalk.blue('$')} cd ${projectName}`)
-console.log(`  ${chalk.blue('$')} pnpm start`)
+console.log(`  ${colors.blue('$')} cd ${projectName}`)
+console.log(`  ${colors.blue('$')} pnpm start`)

@@ -151,9 +151,9 @@ importers:
 
   packages/create-bot:
     dependencies:
-      chalk:
-        specifier: 5.3.0
-        version: 5.3.0
+      colorette:
+        specifier: ^2.0.20
+        version: 2.0.20
       cross-spawn:
         specifier: 7.0.3
         version: 7.0.3
@@ -2039,7 +2039,6 @@ packages:
 
   /colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
-    dev: true
 
   /commander@10.0.1:
     resolution: {integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==}
