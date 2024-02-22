@@ -230,7 +230,7 @@ export class BaseTelegramClient implements ITelegramClient {
         if (!authKey) throw new Error('Auth key is not ready yet')
 
         return writeStringSession({
-            version: 2,
+            version: 3,
             self: await this.storage.self.fetch(),
             testMode: Boolean(this.params.testMode),
             primaryDcs,
