@@ -4,7 +4,7 @@ import { createStub } from '@mtcute/test'
 import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 
-import { defaultProductionDc } from './dcs.js'
+import { defaultProductionDc } from '../../utils/dcs.js'
 import { readStringSession, writeStringSession } from './string-session.js'
 
 const stubAuthKey = new Uint8Array(32)
@@ -12,43 +12,63 @@ const stubDcs = {
     main: createStub('dcOption', defaultProductionDc.main),
     media: createStub('dcOption', defaultProductionDc.media),
 }
+const stubDcsBasic = {
+    main: {
+        id: 2,
+        ipAddress: defaultProductionDc.main.ipAddress,
+        ipv6: false,
+        mediaOnly: false,
+        port: 443,
+    },
+    media: {
+        id: 2,
+        ipAddress: defaultProductionDc.media.ipAddress,
+        ipv6: false,
+        mediaOnly: true,
+        port: 443,
+    },
+}
 const stubDcsSameMedia = {
     main: stubDcs.main,
     media: stubDcs.main,
+}
+const stubDcsBasicSameMedia = {
+    main: stubDcsBasic.main,
+    media: stubDcsBasic.main,
 }
 
 describe('writeStringSession', () => {
     it('should write production string session without user', () => {
         expect(
-            writeStringSession(__tlWriterMap, {
-                version: 2,
+            writeStringSession({
+                version: 3,
                 testMode: false,
-                primaryDcs: stubDcs,
+                primaryDcs: stubDcsBasic,
                 authKey: stubAuthKey,
             }),
         ).toMatchInlineSnapshot(
-            '"AgQAAAANobcYAAAAAAIAAAAOMTQ5LjE1NC4xNjcuNTAAuwEAAA2htxgCAAAAAgAAAA8xNDkuMTU0LjE2Ny4yMjK7AQAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
+            '"AwQAAAAXAQIADjE0OS4xNTQuMTY3LjUwALsBAAAXAQICDzE0OS4xNTQuMTY3LjIyMrsBAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
         )
     })
     it('should write production string session without user with same dc for media', () => {
         expect(
-            writeStringSession(__tlWriterMap, {
-                version: 2,
+            writeStringSession({
+                version: 3,
                 testMode: false,
-                primaryDcs: stubDcsSameMedia,
+                primaryDcs: stubDcsBasicSameMedia,
                 authKey: stubAuthKey,
             }),
         ).toMatchInlineSnapshot(
-            '"AgAAAAANobcYAAAAAAIAAAAOMTQ5LjE1NC4xNjcuNTAAuwEAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
+            '"AwAAAAAXAQIADjE0OS4xNTQuMTY3LjUwALsBAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
         )
     })
 
     it('should write production string session with user', () => {
         expect(
-            writeStringSession(__tlWriterMap, {
-                version: 2,
+            writeStringSession({
+                version: 3,
                 testMode: false,
-                primaryDcs: stubDcs,
+                primaryDcs: stubDcsBasic,
                 authKey: stubAuthKey,
                 self: {
                     userId: 12345,
@@ -58,16 +78,16 @@ describe('writeStringSession', () => {
                 },
             }),
         ).toMatchInlineSnapshot(
-            '"AgUAAAANobcYAAAAAAIAAAAOMTQ5LjE1NC4xNjcuNTAAuwEAAA2htxgCAAAAAgAAAA8xNDkuMTU0LjE2Ny4yMjK7AQAAOTAAAAAAAAA3l3m8IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
+            '"AwUAAAAXAQIADjE0OS4xNTQuMTY3LjUwALsBAAAXAQICDzE0OS4xNTQuMTY3LjIyMrsBAAA5MAAAAAAAADeXebwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
         )
     })
 
     it('should write test dc string session with user', () => {
         expect(
-            writeStringSession(__tlWriterMap, {
-                version: 2,
+            writeStringSession({
+                version: 3,
                 testMode: true,
-                primaryDcs: stubDcs,
+                primaryDcs: stubDcsBasic,
                 authKey: stubAuthKey,
                 self: {
                     userId: 12345,
@@ -77,12 +97,84 @@ describe('writeStringSession', () => {
                 },
             }),
         ).toMatchInlineSnapshot(
-            '"AgcAAAANobcYAAAAAAIAAAAOMTQ5LjE1NC4xNjcuNTAAuwEAAA2htxgCAAAAAgAAAA8xNDkuMTU0LjE2Ny4yMjK7AQAAOTAAAAAAAAA3l3m8IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
+            '"AwcAAAAXAQIADjE0OS4xNTQuMTY3LjUwALsBAAAXAQICDzE0OS4xNTQuMTY3LjIyMrsBAAA5MAAAAAAAADeXebwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"',
         )
     })
 })
 
 describe('readStringSession', () => {
+    describe('v3', () => {
+        it('should read production string session without user', () => {
+            expect(
+                readStringSession(
+                    __tlReaderMap,
+                    'AwQAAAAXAQIADjE0OS4xNTQuMTY3LjUwALsBAAAXAQICDzE0OS4xNTQuMTY3LjIyMrsBAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                ),
+            ).toEqual({
+                version: 3,
+                testMode: false,
+                primaryDcs: stubDcsBasic,
+                authKey: stubAuthKey,
+                self: null,
+            })
+        })
+
+        it('should read production string session without user with same dc for media', () => {
+            expect(
+                readStringSession(
+                    __tlReaderMap,
+                    'AwAAAAAXAQIADjE0OS4xNTQuMTY3LjUwALsBAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                ),
+            ).toEqual({
+                version: 3,
+                testMode: false,
+                primaryDcs: stubDcsBasicSameMedia,
+                authKey: stubAuthKey,
+                self: null,
+            })
+        })
+
+        it('should read production string session with user', () => {
+            expect(
+                readStringSession(
+                    __tlReaderMap,
+                    'AwUAAAAXAQIADjE0OS4xNTQuMTY3LjUwALsBAAAXAQICDzE0OS4xNTQuMTY3LjIyMrsBAAA5MAAAAAAAADeXebwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                ),
+            ).toEqual({
+                version: 3,
+                testMode: false,
+                primaryDcs: stubDcsBasic,
+                authKey: stubAuthKey,
+                self: {
+                    userId: 12345,
+                    isBot: false,
+                    isPremium: false,
+                    usernames: [],
+                },
+            })
+        })
+
+        it('should read test dc string session with user', () => {
+            expect(
+                readStringSession(
+                    __tlReaderMap,
+                    'AwcAAAAXAQIADjE0OS4xNTQuMTY3LjUwALsBAAAXAQICDzE0OS4xNTQuMTY3LjIyMrsBAAA5MAAAAAAAADeXebwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                ),
+            ).toEqual({
+                version: 3,
+                testMode: true,
+                primaryDcs: stubDcsBasic,
+                authKey: stubAuthKey,
+                self: {
+                    userId: 12345,
+                    isBot: false,
+                    isPremium: false,
+                    usernames: [],
+                },
+            })
+        })
+    })
+
     describe('v2', () => {
         it('should read production string session without user', () => {
             expect(

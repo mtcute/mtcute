@@ -3,10 +3,10 @@ import { tl } from '@mtcute/tl'
 import type { ConnectionKind, RpcCallOptions } from '../network/index.js'
 import type { MustEqual, PublicPart } from '../types/utils.js'
 import type { Logger } from '../utils/logger.js'
-import type { StringSessionData } from '../utils/string-session.js'
 import type { AppConfigManager } from './managers/app-config-manager.js'
 import type { TelegramStorageManager } from './storage/storage.js'
 import type { RawUpdateHandler } from './updates/types.js'
+import type { StringSessionData } from './utils/string-session.js'
 
 // NB: when adding new methods, don't forget to add them to:
 //  - worker/port.ts

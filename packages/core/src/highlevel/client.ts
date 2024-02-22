@@ -9,7 +9,6 @@ import { tl } from '@mtcute/tl'
 
 import { MemoryStorage } from '../storage/providers/memory/index.js'
 import { MaybeArray, MaybePromise, PartialExcept, PartialOnly } from '../types/index.js'
-import { StringSessionData } from '../utils/string-session.js'
 import { BaseTelegramClient, BaseTelegramClientOptions } from './base.js'
 import { ITelegramClient } from './client.types.js'
 import { checkPassword } from './methods/auth/check-password.js'
@@ -316,6 +315,7 @@ import {
 } from './types/index.js'
 import { makeParsedUpdateHandler, ParsedUpdateHandlerParams } from './updates/parsed.js'
 import { _defaultStorageFactory } from './utils/platform/storage.js'
+import { StringSessionData } from './utils/string-session.js'
 
 // from methods/_init.ts
 // @copy

@@ -229,7 +229,7 @@ export class BaseTelegramClient implements ITelegramClient {
         const authKey = await this.mt.storage.provider.authKeys.get(primaryDcs.main.id)
         if (!authKey) throw new Error('Auth key is not ready yet')
 
-        return writeStringSession(this.mt._writerMap, {
+        return writeStringSession({
             version: 2,
             self: await this.storage.self.fetch(),
             testMode: Boolean(this.params.testMode),

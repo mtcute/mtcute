@@ -1,17 +1,9 @@
-// todo move to highlevel/
 import { tl } from '@mtcute/tl'
-import {
-    base64DecodeToBuffer,
-    base64Encode,
-    TlBinaryReader,
-    TlBinaryWriter,
-    TlReaderMap,
-    TlWriterMap,
-} from '@mtcute/tl-runtime'
+import { base64DecodeToBuffer, base64Encode, TlBinaryReader, TlBinaryWriter, TlReaderMap } from '@mtcute/tl-runtime'
 
-import { CurrentUserInfo } from '../highlevel/storage/service/current-user.js'
-import { MtArgumentError } from '../types/index.js'
-import { DcOptions } from './dcs.js'
+import { MtArgumentError } from '../../types/index.js'
+import { BasicDcOption, DcOptions, parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
+import { CurrentUserInfo } from '../storage/service/current-user.js'
 
 export interface StringSessionData {
     version: number
@@ -21,12 +13,12 @@ export interface StringSessionData {
     authKey: Uint8Array
 }
 
-export function writeStringSession(writerMap: TlWriterMap, data: StringSessionData): string {
-    const writer = TlBinaryWriter.alloc(writerMap, 512)
+export function writeStringSession(data: StringSessionData): string {
+    const writer = TlBinaryWriter.manual(512)
 
     const version = data.version
 
-    if (version !== 1 && version !== 2) {
+    if (version !== 3) {
         throw new MtArgumentError(`Unsupported string session version: ${version}`)
     }
 
@@ -48,10 +40,10 @@ export function writeStringSession(writerMap: TlWriterMap, data: StringSessionDa
     }
 
     writer.int(flags)
-    writer.object(data.primaryDcs.main)
+    writer.bytes(serializeBasicDcOption(data.primaryDcs.main))
 
     if (version >= 2 && data.primaryDcs.media !== data.primaryDcs.main) {
-        writer.object(data.primaryDcs.media)
+        writer.bytes(serializeBasicDcOption(data.primaryDcs.media))
     }
 
     if (data.self) {
@@ -80,11 +72,36 @@ export function readStringSession(readerMap: TlReaderMap, data: string): StringS
     const testMode = Boolean(flags & 2)
     const hasMedia = version >= 2 && Boolean(flags & 4)
 
-    const primaryDc = reader.object() as tl.TypeDcOption
-    const primaryMediaDc = hasMedia ? (reader.object() as tl.TypeDcOption) : primaryDc
+    let primaryDc: BasicDcOption
+    let primaryMediaDc: BasicDcOption
 
-    if (primaryDc._ !== 'dcOption') {
-        throw new MtArgumentError(`Invalid session string (dc._ = ${primaryDc._})`)
+    if (version <= 2) {
+        const primaryDc_ = reader.object() as tl.TypeDcOption
+        const primaryMediaDc_ = hasMedia ? (reader.object() as tl.TypeDcOption) : primaryDc_
+
+        if (primaryDc_._ !== 'dcOption') {
+            throw new MtArgumentError(`Invalid session string (dc._ = ${primaryDc_._})`)
+        }
+
+        primaryDc = primaryDc_
+        primaryMediaDc = primaryMediaDc_
+    } else if (version === 3) {
+        const primaryDc_ = parseBasicDcOption(reader.bytes())
+
+        if (primaryDc_ === null) {
+            throw new MtArgumentError('Invalid session string (failed to parse primaryDc)')
+        }
+
+        const primaryMediaDc_ = hasMedia ? parseBasicDcOption(reader.bytes()) : primaryDc_
+
+        if (primaryMediaDc_ === null) {
+            throw new MtArgumentError('Invalid session string (failed to parse primaryMediaDc)')
+        }
+
+        primaryDc = primaryDc_
+        primaryMediaDc = primaryMediaDc_
+    } else {
+        throw new Error() // unreachable
     }
 
     let self: CurrentUserInfo | null = null

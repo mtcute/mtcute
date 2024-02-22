@@ -8,8 +8,6 @@ import { tl } from '@mtcute/tl'
 // @copy
 import { MaybeArray, MaybePromise, PartialExcept, PartialOnly } from '../../types/index.js'
 // @copy
-import { StringSessionData } from '../../utils/string-session.js'
-// @copy
 import { BaseTelegramClient, BaseTelegramClientOptions } from '../base.js'
 // @copy
 import { ITelegramClient } from '../client.types.js'
@@ -94,3 +92,5 @@ import {
     UserStatusUpdate,
     UserTypingUpdate,
 } from '../types/index.js'
+// @copy
+import { StringSessionData } from '../utils/string-session.js'
