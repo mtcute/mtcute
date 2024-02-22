@@ -1,5 +1,6 @@
 import * as colors from 'colorette'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import { askForConfig } from './cli.js'
 import { installDependencies } from './dependencies.js'
@@ -18,7 +19,7 @@ const config = await askForConfig()
 config.name = projectName
 const outDir = process.env.TARGET_DIR || join(process.cwd(), projectName)
 
-const __dirname = new URL('.', import.meta.url).pathname
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 await runTemplater(join(__dirname, '../template'), outDir, config)
 

@@ -5,7 +5,8 @@ import { join } from 'path'
 import { InitInput } from './types.js'
 
 // @only-if-esm
-const __dirname = new URL('.', import.meta.url).pathname
+const url = await import('url')
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 // @/only-if-esm
 
 export async function loadWasmBinary(input?: InitInput): Promise<WebAssembly.Instance> {
