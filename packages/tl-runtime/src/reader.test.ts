@@ -1,12 +1,16 @@
 // eslint-disable-next-line max-len
 /* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-argument */
 
-// import { randomBytes } from 'crypto'
+// import Long from 'long'
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
 
-import { hexDecodeToBuffer, hexEncode } from './encodings/hex.js'
+import { defaultTlPlatform } from './platform.test-utils.js'
 import { TlBinaryReader, TlReaderMap } from './reader.js'
+
+// todo: replace with platform-specific packages
+const hexEncode = (buf: Uint8Array) => buf.reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '')
+const hexDecodeToBuffer = (hex: string) => new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)))
 
 let randomBytes: (n: number) => Uint8Array
 
@@ -23,69 +27,94 @@ if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
 
 describe('TlBinaryReader', () => {
     it('should read int32', () => {
-        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0])).int()).toEqual(0)
-        expect(TlBinaryReader.manual(new Uint8Array([1, 0, 0, 0])).int()).toEqual(1)
-        expect(TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).int()).toEqual(67305985)
-        expect(TlBinaryReader.manual(new Uint8Array([0xff, 0xff, 0xff, 0xff])).int()).toEqual(-1)
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0, 0, 0, 0])).int()).toEqual(0)
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([1, 0, 0, 0])).int()).toEqual(1)
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([1, 2, 3, 4])).int()).toEqual(67305985)
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0xff, 0xff, 0xff, 0xff])).int()).toEqual(-1)
     })
 
     it('should read uint32', () => {
-        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0])).uint()).toEqual(0)
-        expect(TlBinaryReader.manual(new Uint8Array([1, 0, 0, 0])).uint()).toEqual(1)
-        expect(TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).uint()).toEqual(67305985)
-        expect(TlBinaryReader.manual(new Uint8Array([0xff, 0xff, 0xff, 0xff])).uint()).toEqual(4294967295)
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0, 0, 0, 0])).uint()).toEqual(0)
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([1, 0, 0, 0])).uint()).toEqual(1)
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([1, 2, 3, 4])).uint()).toEqual(67305985)
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0xff, 0xff, 0xff, 0xff])).uint()).toEqual(
+            4294967295,
+        )
     })
 
     it('should read int53', () => {
-        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0])).int53()).toEqual(0)
-        expect(TlBinaryReader.manual(new Uint8Array([1, 0, 0, 0, 0, 0, 0, 0])).int53()).toEqual(1)
-        expect(TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4, 0, 0, 0, 0])).int53()).toEqual(67305985)
-        expect(TlBinaryReader.manual(new Uint8Array([1, 0, 1, 0, 1, 0, 1, 0])).int53()).toEqual(281479271743489)
-        expect(TlBinaryReader.manual(new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff])).int53()).toEqual(
-            -1,
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0])).int53()).toEqual(0)
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([1, 0, 0, 0, 0, 0, 0, 0])).int53()).toEqual(1)
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([1, 2, 3, 4, 0, 0, 0, 0])).int53()).toEqual(
+            67305985,
         )
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([1, 0, 1, 0, 1, 0, 1, 0])).int53()).toEqual(
+            281479271743489,
+        )
+        expect(
+            TlBinaryReader.manual(
+                defaultTlPlatform,
+                new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+            ).int53(),
+        ).toEqual(-1)
     })
 
     it('should read long', () => {
         expect(
-            TlBinaryReader.manual(new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]))
+            TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]))
                 .long()
                 .toString(),
         ).toEqual('-1')
         expect(
-            TlBinaryReader.manual(new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x12, 0x34, 0x56, 0x78]))
+            TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x12, 0x34, 0x56, 0x78]))
                 .long()
                 .toString(),
         ).toEqual('8671175386481439762')
         expect(
-            TlBinaryReader.manual(new Uint8Array([0x15, 0xc4, 0x15, 0xb5, 0xc4, 0x1c, 0x03, 0xa3]))
+            TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0x15, 0xc4, 0x15, 0xb5, 0xc4, 0x1c, 0x03, 0xa3]))
                 .long()
                 .toString(),
         ).toEqual('-6700480189419895787')
     })
 
     it('should read float', () => {
-        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0x80, 0x3f])).float()).toBeCloseTo(1, 0.001)
-        expect(TlBinaryReader.manual(new Uint8Array([0xb6, 0xf3, 0x9d, 0x3f])).float()).toBeCloseTo(1.234, 0.001)
-        expect(TlBinaryReader.manual(new Uint8Array([0xfa, 0x7e, 0x2a, 0x3f])).float()).toBeCloseTo(0.666, 0.001)
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0, 0, 0x80, 0x3f])).float()).toBeCloseTo(
+            1,
+            0.001,
+        )
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0xb6, 0xf3, 0x9d, 0x3f])).float()).toBeCloseTo(
+            1.234,
+            0.001,
+        )
+        expect(TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0xfa, 0x7e, 0x2a, 0x3f])).float()).toBeCloseTo(
+            0.666,
+            0.001,
+        )
     })
 
     it('should read double', () => {
-        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0, 0, 0, 0xf0, 0x3f])).double()).toBeCloseTo(1, 0.001)
-        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0, 0, 0, 0x25, 0x40])).double()).toBeCloseTo(10.5, 0.001)
         expect(
-            TlBinaryReader.manual(new Uint8Array([0x9a, 0x99, 0x99, 0x99, 0x99, 0x99, 0x21, 0x40])).double(),
+            TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0, 0, 0, 0, 0, 0, 0xf0, 0x3f])).double(),
+        ).toBeCloseTo(1, 0.001)
+        expect(
+            TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([0, 0, 0, 0, 0, 0, 0x25, 0x40])).double(),
+        ).toBeCloseTo(10.5, 0.001)
+        expect(
+            TlBinaryReader.manual(
+                defaultTlPlatform,
+                new Uint8Array([0x9a, 0x99, 0x99, 0x99, 0x99, 0x99, 0x21, 0x40]),
+            ).double(),
         ).toBeCloseTo(8.8, 0.001)
     })
 
     it('should read raw bytes', () => {
-        expect([...TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).raw(2)]).toEqual([1, 2])
-        expect([...TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).raw()]).toEqual([1, 2, 3, 4])
-        expect([...TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).raw(0)]).toEqual([])
+        expect([...TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([1, 2, 3, 4])).raw(2)]).toEqual([1, 2])
+        expect([...TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([1, 2, 3, 4])).raw()]).toEqual([1, 2, 3, 4])
+        expect([...TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([1, 2, 3, 4])).raw(0)]).toEqual([])
     })
 
     it('should move cursor', () => {
-        const reader = TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]))
+        const reader = TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]))
 
         reader.int()
         expect(reader.pos).toEqual(4)
@@ -116,10 +145,10 @@ describe('TlBinaryReader', () => {
     })
 
     it('should read tg-encoded bytes', () => {
-        expect([...TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).bytes()]).toEqual([2])
+        expect([...TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([1, 2, 3, 4])).bytes()]).toEqual([2])
 
         const random250bytes = randomBytes(250)
-        let reader = TlBinaryReader.manual(new Uint8Array([250, ...random250bytes, 0, 0, 0, 0, 0]))
+        let reader = TlBinaryReader.manual(defaultTlPlatform, new Uint8Array([250, ...random250bytes, 0, 0, 0, 0, 0]))
         expect([...reader.bytes()]).toEqual([...random250bytes])
         expect(reader.pos).toEqual(252)
 
@@ -128,7 +157,7 @@ describe('TlBinaryReader', () => {
         buffer[0] = 254
         new DataView(buffer.buffer).setUint32(1, 1000, true)
         buffer.set(random1000bytes, 4)
-        reader = TlBinaryReader.manual(buffer)
+        reader = TlBinaryReader.manual(defaultTlPlatform, buffer)
         expect([...reader.bytes()]).toEqual([...random1000bytes])
         expect(reader.pos).toEqual(1004)
     })
@@ -170,7 +199,7 @@ describe('TlBinaryReader', () => {
             0x00,
             0x00, // int32 2
         ])
-        const reader = new TlBinaryReader(stubObjectsMap, buffer)
+        const reader = new TlBinaryReader(defaultTlPlatform, stubObjectsMap, buffer)
 
         const deadBeef = reader.object()
         expect(deadBeef).toEqual({ a: 1, b: 42 })
@@ -232,7 +261,7 @@ describe('TlBinaryReader', () => {
             0x00,
             0x00, // int32 2
         ])
-        const reader = new TlBinaryReader(stubObjectsMap, buffer)
+        const reader = new TlBinaryReader(defaultTlPlatform, stubObjectsMap, buffer)
 
         const vector = reader.vector()
         expect(vector).toEqual([{ a: 1, b: 42 }, 2, { vec: [1, 2] }])
@@ -268,7 +297,7 @@ describe('TlBinaryReader', () => {
                 serverPublicKeyFingerprints: [Long.fromString('c3b42b026ce86b21', false, 16)],
             }
 
-            const r = new TlBinaryReader(map, hexDecodeToBuffer(input))
+            const r = new TlBinaryReader(defaultTlPlatform, map, hexDecodeToBuffer(input))
             expect(r.long().toString()).toEqual('0') // authKeyId
             expect(r.long().toString(16)).toEqual('51E57AC91E83C801'.toLowerCase()) // messageId
             expect(r.uint()).toEqual(64) // messageLength

@@ -1,6 +1,6 @@
 import Long from 'long'
 
-import { byteLengthUtf8, utf8EncodeToBuffer } from './encodings/utf8.js'
+import { ITlPlatform } from './platform.js'
 
 const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 
@@ -27,7 +27,10 @@ export class TlSerializationCounter {
     /**
      * @param objectMap  Writers map
      */
-    constructor(readonly objectMap: TlWriterMap) {}
+    constructor(
+        readonly platform: ITlPlatform,
+        readonly objectMap: TlWriterMap,
+    ) {}
 
     /**
      * Count bytes required to serialize the given object.
@@ -35,8 +38,8 @@ export class TlSerializationCounter {
      * @param objectMap  Writers map
      * @param obj  Object to count bytes for
      */
-    static countNeededBytes(objectMap: TlWriterMap, obj: { _: string }): number {
-        const cnt = new TlSerializationCounter(objectMap)
+    static countNeededBytes(platform: ITlPlatform, objectMap: TlWriterMap, obj: { _: string }): number {
+        const cnt = new TlSerializationCounter(platform, objectMap)
         cnt.object(obj)
 
         return cnt.count
@@ -115,7 +118,7 @@ export class TlSerializationCounter {
     }
 
     string(val: string): void {
-        const length = byteLengthUtf8(val)
+        const length = this.platform.utf8ByteLength(val)
         this.count += TlSerializationCounter.countBytesOverhead(length) + length
     }
 
@@ -148,6 +151,7 @@ export class TlBinaryWriter {
      * @param start  Position to start writing at
      */
     constructor(
+        readonly platform: ITlPlatform,
         readonly objectMap: TlWriterMap | undefined,
         data: ArrayBuffer,
         start = 0,
@@ -169,8 +173,8 @@ export class TlBinaryWriter {
      * @param objectMap  Writers map
      * @param size  Size of the writer's buffer
      */
-    static alloc(objectMap: TlWriterMap | undefined, size: number): TlBinaryWriter {
-        return new TlBinaryWriter(objectMap, new ArrayBuffer(size))
+    static alloc(platform: ITlPlatform, objectMap: TlWriterMap | undefined, size: number): TlBinaryWriter {
+        return new TlBinaryWriter(platform, objectMap, new ArrayBuffer(size))
     }
 
     /**
@@ -179,10 +183,10 @@ export class TlBinaryWriter {
      * @param buffer  Buffer to write to, or its size
      * @param start  Position to start writing at
      */
-    static manual(buffer: ArrayBuffer | number, start = 0): TlBinaryWriter {
+    static manual(platform: ITlPlatform, buffer: ArrayBuffer | number, start = 0): TlBinaryWriter {
         if (typeof buffer === 'number') buffer = new ArrayBuffer(buffer)
 
-        return new TlBinaryWriter(undefined, buffer, start)
+        return new TlBinaryWriter(platform, undefined, buffer, start)
     }
 
     /**
@@ -192,12 +196,18 @@ export class TlBinaryWriter {
      * @param obj  Object to serialize
      * @param knownSize  In case the size is known, pass it here
      */
-    static serializeObject(objectMap: TlWriterMap, obj: { _: string }, knownSize = -1): Uint8Array {
+    static serializeObject(
+        platform: ITlPlatform,
+        objectMap: TlWriterMap,
+        obj: { _: string },
+        knownSize = -1,
+    ): Uint8Array {
         if (knownSize === -1) {
-            knownSize = objectMap._staticSize[obj._] || TlSerializationCounter.countNeededBytes(objectMap, obj)
+            knownSize =
+                objectMap._staticSize[obj._] || TlSerializationCounter.countNeededBytes(platform, objectMap, obj)
         }
 
-        const writer = TlBinaryWriter.alloc(objectMap, knownSize)
+        const writer = TlBinaryWriter.alloc(platform, objectMap, knownSize)
 
         writer.object(obj)
 
@@ -298,7 +308,7 @@ export class TlBinaryWriter {
     }
 
     string(val: string): void {
-        this.bytes(utf8EncodeToBuffer(val))
+        this.bytes(this.platform.utf8Encode(val))
     }
 
     // hot path, avoid additional runtime checks

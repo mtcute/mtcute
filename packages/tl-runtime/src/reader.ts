@@ -1,7 +1,6 @@
 import Long from 'long'
 
-import { hexEncode } from './encodings/hex.js'
-import { utf8Decode } from './encodings/utf8.js'
+import { ITlPlatform } from './platform.js'
 
 const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 
@@ -39,6 +38,7 @@ export class TlBinaryReader {
      * @param start  Position to start reading from
      */
     constructor(
+        readonly platform: ITlPlatform,
         readonly objectsMap: TlReaderMap | undefined,
         data: ArrayBuffer,
         start = 0,
@@ -60,8 +60,8 @@ export class TlBinaryReader {
      * @param data  Buffer to read from
      * @param start  Position to start reading from
      */
-    static manual(data: ArrayBuffer, start = 0): TlBinaryReader {
-        return new TlBinaryReader(undefined, data, start)
+    static manual(platform: ITlPlatform, data: ArrayBuffer, start = 0): TlBinaryReader {
+        return new TlBinaryReader(platform, undefined, data, start)
     }
 
     /**
@@ -71,8 +71,8 @@ export class TlBinaryReader {
      * @param data  Buffer to read from
      * @param start  Position to start reading from
      */
-    static deserializeObject<T>(objectsMap: TlReaderMap, data: Uint8Array, start = 0): T {
-        return new TlBinaryReader(objectsMap, data, start).object() as T
+    static deserializeObject<T>(platform: ITlPlatform, objectsMap: TlReaderMap, data: Uint8Array, start = 0): T {
+        return new TlBinaryReader(platform, objectsMap, data, start).object() as T
     }
 
     int(): number {
@@ -174,7 +174,7 @@ export class TlBinaryReader {
     }
 
     string(): string {
-        return utf8Decode(this.bytes())
+        return this.platform.utf8Decode(this.bytes())
     }
 
     object(id = this.uint()): unknown {
@@ -197,7 +197,7 @@ export class TlBinaryReader {
             // mtproto sucks and there's no way we can just skip it
             this.seek(-4)
             const pos = this.pos
-            const error = new TypeError(`Unknown object id: 0x${id.toString(16)}. Content: ${hexEncode(this.raw())}`)
+            const error = new TypeError(`Unknown object id: 0x${id.toString(16)}`)
             this.pos = pos
             throw error
         }
