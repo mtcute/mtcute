@@ -152,13 +152,16 @@ importers:
   packages/create-bot:
     dependencies:
       chalk:
-        specifier: ^5.3.0
+        specifier: 5.3.0
         version: 5.3.0
+      cross-spawn:
+        specifier: 7.0.3
+        version: 7.0.3
       glob:
         specifier: 10.2.6
         version: 10.2.6
       handlebars:
-        specifier: ^4.7.8
+        specifier: 4.7.8
         version: 4.7.8
       inquirer:
         specifier: 9.2.11
@@ -167,6 +170,9 @@ importers:
         specifier: 9.1.0
         version: 9.1.0
     devDependencies:
+      '@types/cross-spawn':
+        specifier: ^6.0.6
+        version: 6.0.6
       '@types/inquirer':
         specifier: ^9.0.6
         version: 9.0.6
@@ -1253,6 +1259,12 @@ packages:
 
   /@types/chai@4.3.5:
     resolution: {integrity: sha512-mEo1sAde+UCE6b2hxn332f1g1E8WfYRu6p5SvTKr2ZKC1f7gFJXk4h5PyGP9Dt6gCaG8y8XhwnXWC6Iy2cmBng==}
+
+  /@types/cross-spawn@6.0.6:
+    resolution: {integrity: sha512-fXRhhUkG4H3TQk5dBhQ7m/JDdSNHKwR2BBia62lhwEIq9xGiQKLxd6LymNhn47SjXhsUEPmxi+PKw2OkW4LLjA==}
+    dependencies:
+      '@types/node': 20.10.0
+    dev: true
 
   /@types/estree@1.0.5:
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
