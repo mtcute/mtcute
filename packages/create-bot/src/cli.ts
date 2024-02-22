@@ -1,6 +1,6 @@
 import * as colors from 'colorette'
 import inquirer from 'inquirer'
-import open from 'open'
+import { open } from 'openurl'
 
 import { readConfig, UserConfigPersisted, writeConfig } from './config.js'
 import { TELEGRAM_APPS_PAGE } from './constants.js'
@@ -44,7 +44,11 @@ export async function askForConfigPersisted(): Promise<UserConfigPersisted> {
             message: 'API ID (press Enter to obtain one):',
             validate: (v: string) => {
                 if (!v) {
-                    setTimeout(() => void open(TELEGRAM_APPS_PAGE), 1000)
+                    setTimeout(() => {
+                        try {
+                            open(TELEGRAM_APPS_PAGE)
+                        } catch (e) {}
+                    }, 1000)
 
                     return [
                         colors.italic(`Opening ${colors.blue(TELEGRAM_APPS_PAGE)}...`),
