@@ -29,4 +29,3 @@ export interface MtcuteWasmModule {
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module
-export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module

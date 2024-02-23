@@ -12,9 +12,6 @@
         "build": "pnpm run -w build-package wasm",
         "build:wasm": "docker build --output=lib --target=binaries lib"
     },
-    "browser": {
-        "./src/init.js": "./src/init.web.js"
-    },
     "distOnlyFields": {
         "exports": {
             ".": {

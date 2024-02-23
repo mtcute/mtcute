@@ -1,5 +1,4 @@
-import { loadWasmBinary } from './init.js'
-import { InitInput, MtcuteWasmModule, SyncInitInput } from './types.js'
+import { MtcuteWasmModule, SyncInitInput } from './types.js'
 
 export * from './types.js'
 
@@ -46,19 +45,6 @@ export function initSync(module: SyncInitInput): void {
 }
 
 /* c8 ignore end */
-
-/**
- * Init the WASM blob asynchronously (e.g. by passing a URL to the WASM file)
- *
- * By default, will try to determine the best way to load the WASM file automatically.
- */
-export async function initAsync(input?: InitInput): Promise<void> {
-    if (wasm !== undefined) return
-    const instance = await loadWasmBinary(input)
-
-    wasm = instance.exports as unknown as MtcuteWasmModule
-    initCommon()
-}
 
 /**
  * Deflate some data with zlib headers and max output size
