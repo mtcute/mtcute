@@ -12,6 +12,10 @@
         "build": "pnpm run -w build-package wasm",
         "build:wasm": "docker build --output=lib --target=binaries lib"
     },
+    "exports": {
+        ".": "./src/index.ts",
+        "./mtcute.wasm": "./lib/mtcute.wasm"
+    },
     "distOnlyFields": {
         "exports": {
             ".": {

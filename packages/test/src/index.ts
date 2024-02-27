@@ -1,5 +1,7 @@
 export * from './client.js'
 export * from './crypto.js'
+export * from './platform.js'
+export * from './platform.js'
 export * from './storage.js'
 export * from './storage/index.js'
 export * from './stub.js'

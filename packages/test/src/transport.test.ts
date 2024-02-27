@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { BaseTelegramClient, MemoryStorage } from '@mtcute/core'
 
+import { defaultCryptoProvider } from './platform.js'
 import { createStub } from './stub.js'
 import { StubTelegramTransport } from './transport.js'
 
@@ -18,6 +19,7 @@ describe('transport stub', () => {
                 media: createStub('dcOption', { ipAddress: '1.2.3.4', port: 5678 }),
             },
             storage: new MemoryStorage(),
+            crypto: defaultCryptoProvider,
             transport: () =>
                 new StubTelegramTransport({
                     onConnect: (dc, testMode) => {

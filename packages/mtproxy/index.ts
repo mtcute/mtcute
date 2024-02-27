@@ -4,6 +4,7 @@
 import { connect } from 'net'
 
 import {
+    BaseTcpTransport,
     IntermediatePacketCodec,
     IPacketCodec,
     MtcuteError,
@@ -13,9 +14,8 @@ import {
     PaddedIntermediatePacketCodec,
     tl,
     TransportState,
-} from '@mtcute/core'
-import { BaseTcpTransport } from '@mtcute/core/src/network/transports/tcp.js'
-import { buffersEqual } from '@mtcute/core/utils.js'
+} from '@mtcute/node'
+import { buffersEqual } from '@mtcute/node/utils.js'
 
 import { FakeTlsPacketCodec, generateFakeTlsHeader } from './fake-tls.js'
 

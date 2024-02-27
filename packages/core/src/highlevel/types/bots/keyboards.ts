@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
-import { utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 
+import { getPlatform } from '../../../platform.js'
 import { assertNever } from '../../../types/utils.js'
 import { toInputUser } from '../../utils/peer-utils.js'
 import { BotKeyboardBuilder } from './keyboard-builder.js'
@@ -218,7 +218,7 @@ export namespace BotKeyboard {
             _: 'keyboardButtonCallback',
             text,
             requiresPassword,
-            data: typeof data === 'string' ? utf8EncodeToBuffer(data) : data,
+            data: typeof data === 'string' ? getPlatform().utf8Encode(data) : data,
         }
     }
 

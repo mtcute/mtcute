@@ -21,5 +21,8 @@
     "dependencies": {
         "@mtcute/tl-runtime": "workspace:^",
         "long": "5.2.3"
+    },
+    "devDependencies": {
+        "@mtcute/test": "workspace:^"
     }
 }

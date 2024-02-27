@@ -1,4 +1,4 @@
-import { base64Encode, byteLengthUtf8, TlBinaryWriter } from '@mtcute/tl-runtime'
+import { ITlPlatform, TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { tdFileId as td } from './types.js'
 import { assertNever, telegramRleEncode } from './utils.js'
@@ -11,7 +11,7 @@ const SUFFIX = new Uint8Array([td.CURRENT_VERSION, td.PERSISTENT_ID_VERSION])
  *
  * @param location  Information about file location
  */
-export function toFileId(location: Omit<td.RawFullRemoteFileLocation, '_'>): string {
+export function toFileId(platform: ITlPlatform, location: Omit<td.RawFullRemoteFileLocation, '_'>): string {
     const loc = location.location
 
     let type: number = location.type
@@ -25,7 +25,7 @@ export function toFileId(location: Omit<td.RawFullRemoteFileLocation, '_'>): str
     //
     // longest file ids are around 80 bytes, so i guess
     // we are safe with allocating 100 bytes
-    const writer = TlBinaryWriter.alloc(undefined, loc._ === 'web' ? byteLengthUtf8(loc.url) + 32 : 100)
+    const writer = TlBinaryWriter.manual(loc._ === 'web' ? platform.utf8ByteLength(loc.url) + 32 : 100)
 
     writer.int(type)
     writer.int(location.dcId)
@@ -108,5 +108,5 @@ export function toFileId(location: Omit<td.RawFullRemoteFileLocation, '_'>): str
     withSuffix.set(result)
     withSuffix.set(SUFFIX, result.length)
 
-    return base64Encode(withSuffix, true)
+    return platform.base64Encode(withSuffix, true)
 }

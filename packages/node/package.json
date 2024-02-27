@@ -5,11 +5,15 @@
     "description": "Meta-package for Node JS",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
-    "main": "index.ts",
+    "main": "src/index.ts",
     "type": "module",
     "scripts": {
         "docs": "typedoc",
         "build": "pnpm run -w build-package node"
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./utils.js": "./src/utils.ts"
     },
     "distOnlyFields": {
         "exports": {
@@ -25,8 +29,12 @@
     },
     "dependencies": {
         "@mtcute/core": "workspace:^",
+        "@mtcute/wasm": "workspace:^",
         "@mtcute/sqlite": "workspace:^",
         "@mtcute/markdown-parser": "workspace:^",
         "@mtcute/html-parser": "workspace:^"
+    },
+    "devDependencies": {
+        "@mtcute/test": "workspace:^"
     }
 }

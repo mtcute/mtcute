@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { findKeyByFingerprints, parsePublicKey } from '../index.js'
-import { NodeCryptoProvider } from './node.js'
+import { defaultCryptoProvider } from '@mtcute/test'
 
-const crypto = new NodeCryptoProvider()
+import { findKeyByFingerprints, parsePublicKey } from '../index.js'
+
+const crypto = defaultCryptoProvider
 
 describe('parsePublicKey', () => {
     it('should parse telegram public keys', () => {

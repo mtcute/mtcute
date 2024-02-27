@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { hexDecodeToBuffer } from '@mtcute/tl-runtime'
-
+import { getPlatform } from '../../platform.js'
 import { guessFileMime } from './file-type.js'
+
+const p = getPlatform()
 
 describe('guessFileMime', () => {
     it.each([
@@ -60,6 +61,6 @@ describe('guessFileMime', () => {
     ])('should detect %s as %s', (header, mime) => {
         header += '00'.repeat(16)
 
-        expect(guessFileMime(hexDecodeToBuffer(header))).toEqual(mime)
+        expect(guessFileMime(p.hexDecode(header))).toEqual(mime)
     })
 })

@@ -6,6 +6,7 @@ import { tl } from '@mtcute/tl'
 import { parseMarkedPeerId } from '../../utils/peer-utils.js'
 
 import FileType = td.FileType
+import { getPlatform } from '../../platform.js'
 import { assertNever } from '../../types/utils.js'
 
 const EMPTY_BUFFER = new Uint8Array(0)
@@ -45,7 +46,7 @@ function dialogPhotoToInputPeer(
  * @param fileId  File ID, either parsed or as a string
  */
 export function fileIdToInputWebFileLocation(fileId: string | FileId): tl.RawInputWebFileLocation {
-    if (typeof fileId === 'string') fileId = parseFileId(fileId)
+    if (typeof fileId === 'string') fileId = parseFileId(getPlatform(), fileId)
 
     if (fileId.location._ !== 'web') {
         throw new td.ConversionError('inputWebFileLocation')
@@ -65,7 +66,7 @@ export function fileIdToInputWebFileLocation(fileId: string | FileId): tl.RawInp
  * @param fileId  File ID, either parsed or as a string
  */
 export function fileIdToInputFileLocation(fileId: string | FileId): tl.TypeInputFileLocation {
-    if (typeof fileId === 'string') fileId = parseFileId(fileId)
+    if (typeof fileId === 'string') fileId = parseFileId(getPlatform(), fileId)
 
     const loc = fileId.location
 
@@ -219,7 +220,7 @@ export function fileIdToInputFileLocation(fileId: string | FileId): tl.TypeInput
  * @param fileId  File ID, either parsed or as a string
  */
 export function fileIdToInputDocument(fileId: string | FileId): tl.RawInputDocument {
-    if (typeof fileId === 'string') fileId = parseFileId(fileId)
+    if (typeof fileId === 'string') fileId = parseFileId(getPlatform(), fileId)
 
     if (
         fileId.location._ !== 'common' ||
@@ -256,7 +257,7 @@ export function fileIdToInputDocument(fileId: string | FileId): tl.RawInputDocum
  * @param fileId  File ID, either parsed or as a string
  */
 export function fileIdToInputPhoto(fileId: string | FileId): tl.RawInputPhoto {
-    if (typeof fileId === 'string') fileId = parseFileId(fileId)
+    if (typeof fileId === 'string') fileId = parseFileId(getPlatform(), fileId)
 
     if (fileId.location._ !== 'photo') {
         throw new td.ConversionError('inputPhoto')
@@ -281,7 +282,7 @@ export function fileIdToInputPhoto(fileId: string | FileId): tl.RawInputPhoto {
  * @param fileId  File ID, either parsed or as a string
  */
 export function fileIdToEncryptedFile(fileId: string | FileId): tl.RawInputEncryptedFile {
-    if (typeof fileId === 'string') fileId = parseFileId(fileId)
+    if (typeof fileId === 'string') fileId = parseFileId(getPlatform(), fileId)
 
     if (fileId.location._ !== 'common' || fileId.type !== FileType.Encrypted) {
         throw new td.ConversionError('inputEncryptedFile')
@@ -301,7 +302,7 @@ export function fileIdToEncryptedFile(fileId: string | FileId): tl.RawInputEncry
  * @param fileId  File ID, either parsed or as a string
  */
 export function fileIdToSecureFile(fileId: string | FileId): tl.RawInputSecureFile {
-    if (typeof fileId === 'string') fileId = parseFileId(fileId)
+    if (typeof fileId === 'string') fileId = parseFileId(getPlatform(), fileId)
 
     if (fileId.location._ !== 'common' || (fileId.type !== FileType.Secure && fileId.type !== FileType.SecureRaw)) {
         throw new td.ConversionError('inputSecureFile')

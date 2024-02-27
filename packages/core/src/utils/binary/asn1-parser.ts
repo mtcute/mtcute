@@ -1,13 +1,13 @@
 // all available libraries either suck or are extremely large for the use case, so i made my own~
 
-import { base64DecodeToBuffer, hexEncode } from '@mtcute/tl-runtime'
+import { getPlatform } from '../../platform.js'
 
 /**
  * Parses a single PEM block to buffer.
  * In fact just strips begin/end tags and parses the rest as Base64
  */
 export function parsePemContents(pem: string): Uint8Array {
-    return base64DecodeToBuffer(pem.replace(/^-----(BEGIN|END)( RSA)? PUBLIC KEY-----$|\n/gm, ''))
+    return getPlatform().base64Decode(pem.replace(/^-----(BEGIN|END)( RSA)? PUBLIC KEY-----$|\n/gm, ''))
 }
 
 // based on https://git.coolaj86.com/coolaj86/asn1-parser.js/src/branch/master/asn1-parser.js
@@ -66,7 +66,7 @@ export function parseAsn1(data: Uint8Array): Asn1Object {
         if (0x80 & asn1.length) {
             asn1.lengthSize = 0x7f & asn1.length
             // I think that buf->hex->int solves the problem of Endianness... not sure
-            asn1.length = parseInt(hexEncode(buf.subarray(index, index + asn1.lengthSize)), 16)
+            asn1.length = parseInt(getPlatform().hexEncode(buf.subarray(index, index + asn1.lengthSize)), 16)
             index += asn1.lengthSize
         }
 

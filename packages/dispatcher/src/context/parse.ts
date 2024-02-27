@@ -1,4 +1,5 @@
-import { ParsedUpdate, TelegramClient } from '@mtcute/core'
+import { ParsedUpdate } from '@mtcute/core'
+import { TelegramClient } from '@mtcute/core/client.js'
 
 import { UpdateContextDistributed } from './base.js'
 import { CallbackQueryContext } from './callback-query.js'

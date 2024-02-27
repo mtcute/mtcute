@@ -7,6 +7,7 @@ import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlSerializationCounter, Tl
 
 import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
+import { reportUnknownError } from '../utils/error-reporting.js'
 import {
     concatBuffers,
     ControllablePromise,
@@ -17,7 +18,6 @@ import {
     randomLong,
     removeFromLongArray,
 } from '../utils/index.js'
-import { reportUnknownError } from '../utils/platform/error-reporting.js'
 import { doAuthorization } from './authorization.js'
 import { MtprotoSession, PendingMessage, PendingRpc } from './mtproto-session.js'
 import { PersistentConnection, PersistentConnectionParams } from './persistent-connection.js'

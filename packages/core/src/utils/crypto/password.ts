@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
-import { utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 
+import { getPlatform } from '../../platform.js'
 import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
 import { bigIntModPow, bigIntToBuffer, bufferToBigInt } from '../bigint-utils.js'
 import { concatBuffers } from '../buffer-utils.js'
@@ -49,7 +49,7 @@ export async function computeNewPasswordHash(
     crypto.randomFill(salt1.subarray(algo.salt1.length))
     ;(algo as tl.Mutable<typeof algo>).salt1 = salt1
 
-    const _x = await computePasswordHash(crypto, utf8EncodeToBuffer(password), algo.salt1, algo.salt2)
+    const _x = await computePasswordHash(crypto, getPlatform().utf8Encode(password), algo.salt1, algo.salt2)
 
     const g = BigInt(algo.g)
     const p = bufferToBigInt(algo.p)
@@ -103,7 +103,7 @@ export async function computeSrpParams(
 
     const _k = crypto.sha256(concatBuffers([algo.p, _g]))
     const _u = crypto.sha256(concatBuffers([_gA, request.srpB]))
-    const _x = await computePasswordHash(crypto, utf8EncodeToBuffer(password), algo.salt1, algo.salt2)
+    const _x = await computePasswordHash(crypto, getPlatform().utf8Encode(password), algo.salt1, algo.salt2)
     const k = bufferToBigInt(_k)
     const u = bufferToBigInt(_u)
     const x = bufferToBigInt(_x)

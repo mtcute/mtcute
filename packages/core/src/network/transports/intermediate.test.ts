@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
 import { defaultTestCryptoProvider, useFakeMathRandom } from '@mtcute/test'
-import { hexDecodeToBuffer, hexEncode } from '@mtcute/tl-runtime'
 
 import { IntermediatePacketCodec, PaddedIntermediatePacketCodec, TransportError } from '../../index.js'
+import { getPlatform } from '../../platform.js'
+
+const p = getPlatform()
 
 describe('IntermediatePacketCodec', () => {
     it('should return correct tag', () => {
-        expect(hexEncode(new IntermediatePacketCodec().tag())).eq('eeeeeeee')
+        expect(p.hexEncode(new IntermediatePacketCodec().tag())).eq('eeeeeeee')
     })
 
     it('should correctly parse immediate framing', () =>
@@ -17,7 +19,7 @@ describe('IntermediatePacketCodec', () => {
                 expect([...data]).eql([5, 1, 2, 3, 4])
                 done()
             })
-            codec.feed(hexDecodeToBuffer('050000000501020304'))
+            codec.feed(p.hexDecode('050000000501020304'))
         }))
 
     it('should correctly parse incomplete framing', () =>
@@ -27,8 +29,8 @@ describe('IntermediatePacketCodec', () => {
                 expect([...data]).eql([5, 1, 2, 3, 4])
                 done()
             })
-            codec.feed(hexDecodeToBuffer('050000000501'))
-            codec.feed(hexDecodeToBuffer('020304'))
+            codec.feed(p.hexDecode('050000000501'))
+            codec.feed(p.hexDecode('020304'))
         }))
 
     it('should correctly parse multiple streamed packets', () =>
@@ -46,9 +48,9 @@ describe('IntermediatePacketCodec', () => {
                     done()
                 }
             })
-            codec.feed(hexDecodeToBuffer('050000000501'))
-            codec.feed(hexDecodeToBuffer('020304050000'))
-            codec.feed(hexDecodeToBuffer('000301020301'))
+            codec.feed(p.hexDecode('050000000501'))
+            codec.feed(p.hexDecode('020304050000'))
+            codec.feed(p.hexDecode('000301020301'))
         }))
 
     it('should correctly parse transport errors', () =>
@@ -61,7 +63,7 @@ describe('IntermediatePacketCodec', () => {
                 done()
             })
 
-            codec.feed(hexDecodeToBuffer('040000006cfeffff'))
+            codec.feed(p.hexDecode('040000006cfeffff'))
         }))
 
     it('should reset when called reset()', () =>
@@ -73,15 +75,15 @@ describe('IntermediatePacketCodec', () => {
                 done()
             })
 
-            codec.feed(hexDecodeToBuffer('ff0000001234567812345678'))
+            codec.feed(p.hexDecode('ff0000001234567812345678'))
             codec.reset()
-            codec.feed(hexDecodeToBuffer('050000000102030405'))
+            codec.feed(p.hexDecode('050000000102030405'))
         }))
 
     it('should correctly frame packets', () => {
-        const data = hexDecodeToBuffer('6cfeffff')
+        const data = p.hexDecode('6cfeffff')
 
-        expect(hexEncode(new IntermediatePacketCodec().encode(data))).toEqual('040000006cfeffff')
+        expect(p.hexEncode(new IntermediatePacketCodec().encode(data))).toEqual('040000006cfeffff')
     })
 })
 
@@ -96,12 +98,12 @@ describe('PaddedIntermediatePacketCodec', () => {
     }
 
     it('should return correct tag', async () => {
-        expect(hexEncode((await create()).tag())).eq('dddddddd')
+        expect(p.hexEncode((await create()).tag())).eq('dddddddd')
     })
 
     it('should correctly frame packets', async () => {
-        const data = hexDecodeToBuffer('6cfeffff')
+        const data = p.hexDecode('6cfeffff')
 
-        expect(hexEncode((await create()).encode(data))).toEqual('0a0000006cfeffff29afd26df40f')
+        expect(p.hexEncode((await create()).encode(data))).toEqual('0a0000006cfeffff29afd26df40f')
     })
 })

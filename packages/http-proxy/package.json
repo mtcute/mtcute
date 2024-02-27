@@ -20,6 +20,6 @@
         }
     },
     "dependencies": {
-        "@mtcute/core": "workspace:^"
+        "@mtcute/node": "workspace:^"
     }
 }

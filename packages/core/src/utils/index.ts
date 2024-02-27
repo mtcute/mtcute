@@ -1,4 +1,10 @@
 export * from '../highlevel/utils/index.js'
+// todo: remove after 1.0.0
+export * from '../highlevel/storage/service/current-user.js'
+export * from '../highlevel/storage/service/updates.js'
+export * from '../storage/service/base.js'
+export * from '../storage/service/default-dcs.js'
+// end todo
 export * from './async-lock.js'
 export * from './bigint-utils.js'
 export * from './buffer-utils.js'
@@ -17,7 +23,6 @@ export * from './lru-map.js'
 export * from './lru-set.js'
 export * from './misc-utils.js'
 export * from './peer-utils.js'
-export * from './platform/exit-hook.js'
 export * from './sorted-array.js'
 export * from './tl-json.js'
 export * from './type-assertions.js'

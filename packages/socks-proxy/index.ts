@@ -5,9 +5,10 @@
 import { normalize } from 'ip6'
 import { connect } from 'net'
 
-import { assertNever, IntermediatePacketCodec, MtArgumentError, tl, TransportState } from '@mtcute/core'
-import { BaseTcpTransport } from '@mtcute/core/src/network/transports/tcp.js'
-import { dataViewFromBuffer, utf8EncodeToBuffer } from '@mtcute/core/utils.js'
+import { assertNever, BaseTcpTransport, IntermediatePacketCodec, MtArgumentError, NodePlatform, tl, TransportState } from '@mtcute/node'
+import { dataViewFromBuffer } from '@mtcute/node/utils.js'
+
+const p = new NodePlatform()
 
 /**
  * An error has occurred while connecting to an SOCKS proxy
@@ -71,7 +72,7 @@ function writeIpv4(ip: string, buf: Uint8Array, offset: number): void {
 }
 
 function buildSocks4ConnectRequest(ip: string, port: number, username = ''): Uint8Array {
-    const userId = utf8EncodeToBuffer(username)
+    const userId = p.utf8Encode(username)
     const buf = new Uint8Array(9 + userId.length)
 
     buf[0] = 0x04 // VER
@@ -102,8 +103,8 @@ function buildSocks5Greeting(authAvailable: boolean): Uint8Array {
 }
 
 function buildSocks5Auth(username: string, password: string) {
-    const usernameBuf = utf8EncodeToBuffer(username)
-    const passwordBuf = utf8EncodeToBuffer(password)
+    const usernameBuf = p.utf8Encode(username)
+    const passwordBuf = p.utf8Encode(password)
 
     if (usernameBuf.length > 255) {
         throw new MtArgumentError(`Too long username (${usernameBuf.length} > 255)`)

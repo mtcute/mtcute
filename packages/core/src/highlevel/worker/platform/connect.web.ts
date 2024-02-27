@@ -1,4 +1,4 @@
-import { beforeExit } from '../../../utils/platform/exit-hook.js'
+import { getPlatform } from '../../../platform.js'
 import { ClientMessageHandler, SendFn, SomeWorker } from '../protocol.js'
 
 export function connectToWorker(worker: SomeWorker, handler: ClientMessageHandler): [SendFn, () => void] {
@@ -52,7 +52,7 @@ export function connectToWorker(worker: SomeWorker, handler: ClientMessageHandle
             worker.port.close()
         }
 
-        beforeExit(close)
+        getPlatform().beforeExit(close)
 
         return [send, close]
     }

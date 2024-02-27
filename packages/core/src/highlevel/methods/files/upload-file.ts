@@ -7,7 +7,6 @@ import { UploadedFile, UploadFileLike } from '../../types/index.js'
 import { guessFileMime } from '../../utils/file-type.js'
 import { determinePartSize, isProbablyPlainText } from '../../utils/file-utils.js'
 import { bufferToStream, createChunkedReader, streamToBuffer } from '../../utils/stream-utils.js'
-import { _createFileStream, _extractFileStreamMeta, _handleNodeStream, _isFileStream } from './_platform.js'
 
 const OVERRIDE_MIME: Record<string, string> = {
     // tg doesn't interpret `audio/opus` files as voice messages for some reason
@@ -37,9 +36,6 @@ export async function uploadFile(
     params: {
         /**
          * Upload file source.
-         *
-         * > **Note**: `fs.ReadStream` is a subclass of `stream.Readable` and contains
-         * > info about file name, thus you don't need to pass them explicitly.
          */
         file: UploadFileLike
 
@@ -113,17 +109,7 @@ export async function uploadFile(
     if (typeof File !== 'undefined' && file instanceof File) {
         fileName = file.name
         fileSize = file.size
-        // file is now ReadableStream
         file = file.stream()
-    }
-
-    if (typeof file === 'string') {
-        file = _createFileStream(file)
-    }
-
-    if (_isFileStream(file)) {
-        [fileName, fileSize] = await _extractFileStreamMeta(file)
-        // fs.ReadStream is a subclass of Readable, will be handled below
     }
 
     if (typeof file === 'object' && 'headers' in file && 'body' in file && 'url' in file) {
@@ -160,8 +146,6 @@ export async function uploadFile(
 
         file = file.body
     }
-
-    file = _handleNodeStream(file)
 
     if (!(file instanceof ReadableStream)) {
         throw new MtArgumentError('Could not convert input `file` to stream!')

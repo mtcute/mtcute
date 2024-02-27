@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
+import { defaultCryptoProvider } from '@mtcute/test'
+
 import { bigIntToBuffer, bufferToBigInt } from '../bigint-utils.js'
 import { factorizePQSync } from './factorization.js'
-import { defaultCryptoProviderFactory } from './index.js'
 
 describe('prime factorization', () => {
     const testFactorization = (pq: bigint, p: bigint, q: bigint) => {
-        const [p_, q_] = factorizePQSync(defaultCryptoProviderFactory(), bigIntToBuffer(pq))
+        const [p_, q_] = factorizePQSync(defaultCryptoProvider, bigIntToBuffer(pq))
         expect(bufferToBigInt(p_)).toBe(p)
         expect(bufferToBigInt(q_)).toBe(q)
     }

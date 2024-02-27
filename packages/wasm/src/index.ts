@@ -34,13 +34,15 @@ function getUint8Memory() {
 export function initSync(module: SyncInitInput): void {
     if (wasm !== undefined) return
 
-    if (!(module instanceof WebAssembly.Module)) {
-        module = new WebAssembly.Module(module)
+    if (!(module instanceof WebAssembly.Instance)) {
+        if (!(module instanceof WebAssembly.Module)) {
+            module = new WebAssembly.Module(module)
+        }
+
+        module = new WebAssembly.Instance(module)
     }
 
-    const instance = new WebAssembly.Instance(module)
-
-    wasm = instance.exports as unknown as MtcuteWasmModule
+    wasm = (module as WebAssembly.Instance).exports as unknown as MtcuteWasmModule
     initCommon()
 }
 

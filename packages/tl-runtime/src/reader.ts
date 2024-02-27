@@ -27,6 +27,8 @@ export type TlReaderMap = Record<number, (r: any) => unknown> & {
  * Reader for TL objects.
  */
 export class TlBinaryReader {
+    static platform: ITlPlatform
+
     readonly dataView: DataView
     readonly uint8View: Uint8Array
 
@@ -38,7 +40,6 @@ export class TlBinaryReader {
      * @param start  Position to start reading from
      */
     constructor(
-        readonly platform: ITlPlatform,
         readonly objectsMap: TlReaderMap | undefined,
         data: ArrayBuffer,
         start = 0,
@@ -60,8 +61,8 @@ export class TlBinaryReader {
      * @param data  Buffer to read from
      * @param start  Position to start reading from
      */
-    static manual(platform: ITlPlatform, data: ArrayBuffer, start = 0): TlBinaryReader {
-        return new TlBinaryReader(platform, undefined, data, start)
+    static manual(data: ArrayBuffer, start = 0): TlBinaryReader {
+        return new TlBinaryReader(undefined, data, start)
     }
 
     /**
@@ -71,8 +72,8 @@ export class TlBinaryReader {
      * @param data  Buffer to read from
      * @param start  Position to start reading from
      */
-    static deserializeObject<T>(platform: ITlPlatform, objectsMap: TlReaderMap, data: Uint8Array, start = 0): T {
-        return new TlBinaryReader(platform, objectsMap, data, start).object() as T
+    static deserializeObject<T>(objectsMap: TlReaderMap, data: Uint8Array, start = 0): T {
+        return new TlBinaryReader(objectsMap, data, start).object() as T
     }
 
     int(): number {
@@ -174,7 +175,7 @@ export class TlBinaryReader {
     }
 
     string(): string {
-        return this.platform.utf8Decode(this.bytes())
+        return TlBinaryReader.platform.utf8Decode(this.bytes())
     }
 
     object(id = this.uint()): unknown {

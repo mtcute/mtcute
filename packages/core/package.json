@@ -12,18 +12,12 @@
         "gen-client": "node ./scripts/generate-client.cjs",
         "gen-updates": "node ./scripts/generate-updates.cjs"
     },
-    "browser": {
-        "./src/utils/platform/crypto.js": "./src/utils/platform/crypto.web.js",
-        "./src/utils/platform/transport.js": "./src/utils/platform/transport.web.js",
-        "./src/utils/platform/logging.js": "./src/utils/platform/logging.web.js",
-        "./src/utils/platform/random.js": "./src/utils/platform/random.web.js",
-        "./src/utils/platform/exit-hook.js": "./src/utils/platform/exit-hook.web.js",
-        "./src/highlevel/worker/platform/connect.js": "./src/highlevel/worker/platform/connect.web.js",
-        "./src/highlevel/worker/platform/register.js": "./src/highlevel/worker/platform/register.web.js",
-        "./src/highlevel/methods/files/_platform.js": "./src/highlevel/methods/files/_platform.web.js",
-        "./src/highlevel/methods/files/download-file.js": "./src/highlevel/methods/files/download-file.web.js",
-        "./src/highlevel/utils/platform/storage.js": "./src/highlevel/utils/platform/storage.web.js",
-        "./src/storage/json-file.js": false
+    "exports": {
+        ".": "./src/index.ts",
+        "./utils.js": "./src/utils/index.ts",
+        "./client.js": "./src/highlevel/client.ts",
+        "./methods.js": "./src/highlevel/methods.ts",
+        "./platform.js": "./src/platform.ts"
     },
     "distOnlyFields": {
         "exports": {
@@ -35,25 +29,17 @@
                 "import": "./esm/utils/index.js",
                 "require": "./cjs/utils/index.js"
             },
-            "./utils/crypto/*": {
-                "import": "./esm/utils/crypto/*",
-                "require": "./cjs/utils/crypto/*"
-            },
-            "./network/transports/*": {
-                "import": "./esm/network/transports/*",
-                "require": "./cjs/network/transports/*"
-            },
-            "./storage/*": {
-                "import": "./esm/storage/*",
-                "require": "./cjs/storage/*"
-            },
-            "./highlevel/*": {
-                "import": "./esm/highlevel/*",
-                "require": "./cjs/highlevel/*"
-            },
             "./methods.js": {
                 "import": "./esm/highlevel/methods.js",
                 "require": "./cjs/highlevel/methods.js"
+            },
+            "./platform.js": {
+                "import": "./esm/platform.js",
+                "require": "./cjs/platform.js"
+            },
+            "./client.js": {
+                "import": "./esm/highlevel/client.js",
+                "require": "./cjs/highlevel/client.js"
             }
         }
     },

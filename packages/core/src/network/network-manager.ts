@@ -1,6 +1,7 @@
 import { mtp, tl } from '@mtcute/tl'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
+import { getPlatform } from '../platform.js'
 import { StorageManager } from '../storage/storage.js'
 import { MtArgumentError, MtcuteError, MtTimeoutError, MtUnsupportedError } from '../types/index.js'
 import {
@@ -18,7 +19,7 @@ import { PersistentConnectionParams } from './persistent-connection.js'
 import { defaultReconnectionStrategy, ReconnectionStrategy } from './reconnection.js'
 import { ServerSaltManager } from './server-salt.js'
 import { SessionConnection, SessionConnectionParams } from './session-connection.js'
-import { defaultTransportFactory, TransportFactory } from './transports/index.js'
+import { TransportFactory } from './transports/index.js'
 
 export type ConnectionKind = 'main' | 'upload' | 'download' | 'downloadSmall'
 
@@ -44,7 +45,7 @@ export interface NetworkManagerParams {
     enableErrorReporting: boolean
     apiId: number
     initConnectionOptions?: Partial<Omit<tl.RawInitConnectionRequest, 'apiId' | 'query'>>
-    transport?: TransportFactory
+    transport: TransportFactory
     reconnectionStrategy?: ReconnectionStrategy<PersistentConnectionParams>
     floodSleepThreshold: number
     maxRetryCount: number
@@ -439,15 +440,7 @@ export class NetworkManager {
         readonly params: NetworkManagerParams & NetworkManagerExtraParams,
         readonly config: ConfigManager,
     ) {
-        let deviceModel = 'mtcute on '
-        /* eslint-disable no-restricted-globals */
-        if (typeof process !== 'undefined' && typeof require !== 'undefined') {
-            const os = require('os') as typeof import('os')
-            deviceModel += `${os.type()} ${os.arch()} ${os.release()}`
-            /* eslint-enable no-restricted-globals */
-        } else if (typeof navigator !== 'undefined') {
-            deviceModel += navigator.userAgent
-        } else deviceModel += 'unknown'
+        const deviceModel = `mtcute on ${getPlatform().getDeviceModel()}`
 
         this._initConnectionParams = {
             _: 'initConnection',
@@ -463,7 +456,7 @@ export class NetworkManager {
             query: null as any,
         }
 
-        this._transportFactory = params.transport ?? defaultTransportFactory
+        this._transportFactory = params.transport
         this._reconnectionStrategy = params.reconnectionStrategy ?? defaultReconnectionStrategy
         this._connectionCount = params.connectionCount ?? defaultConnectionCountDelegate
         this._updateHandler = params.onUpdate

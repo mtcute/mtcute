@@ -2,7 +2,6 @@
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
 
-import { defaultTlPlatform } from './platform.test-utils.js'
 import { TlBinaryWriter, TlSerializationCounter, TlWriterMap } from './writer.js'
 
 // todo: replace with platform-specific packages
@@ -24,7 +23,7 @@ if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
 
 describe('TlBinaryWriter', () => {
     const testSingleMethod = (size: number, fn: (w: TlBinaryWriter) => void, map?: TlWriterMap): string => {
-        const w = TlBinaryWriter.alloc(defaultTlPlatform, map, size)
+        const w = TlBinaryWriter.alloc(map, size)
         fn(w)
         expect(w.pos).toEqual(size)
 
@@ -128,8 +127,8 @@ describe('TlBinaryWriter', () => {
         }
 
         const length =
-            TlSerializationCounter.countNeededBytes(defaultTlPlatform, stubObjectsMap, object1) +
-            TlSerializationCounter.countNeededBytes(defaultTlPlatform, stubObjectsMap, object2)
+            TlSerializationCounter.countNeededBytes(stubObjectsMap, object1) +
+            TlSerializationCounter.countNeededBytes(stubObjectsMap, object2)
         expect(length).toEqual(20)
 
         expect(
@@ -160,9 +159,9 @@ describe('TlBinaryWriter', () => {
         }
 
         const length =
-            TlSerializationCounter.countNeededBytes(defaultTlPlatform, stubObjectsMap, object1) +
-            TlSerializationCounter.countNeededBytes(defaultTlPlatform, stubObjectsMap, object2) +
-            TlSerializationCounter.countNeededBytes(defaultTlPlatform, stubObjectsMap, object3) +
+            TlSerializationCounter.countNeededBytes(stubObjectsMap, object1) +
+            TlSerializationCounter.countNeededBytes(stubObjectsMap, object2) +
+            TlSerializationCounter.countNeededBytes(stubObjectsMap, object3) +
             8 // because technically in tl vector can't be top-level, but whatever :shrug:
         expect(length).toEqual(48)
 
@@ -205,7 +204,7 @@ describe('TlBinaryWriter', () => {
 
             const length =
                 20 + // mtproto header
-                TlSerializationCounter.countNeededBytes(defaultTlPlatform, map, resPq)
+                TlSerializationCounter.countNeededBytes(map, resPq)
 
             expect(length).toEqual(expected.length / 2)
             expect(

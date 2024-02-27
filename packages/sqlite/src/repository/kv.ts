@@ -1,10 +1,7 @@
 import { Statement } from 'better-sqlite3'
 
 import { IKeyValueRepository } from '@mtcute/core'
-import { CurrentUserService } from '@mtcute/core/src/highlevel/storage/service/current-user.js'
-import { UpdatesStateService } from '@mtcute/core/src/highlevel/storage/service/updates.js'
-import { ServiceOptions } from '@mtcute/core/src/storage/service/base.js'
-import { DefaultDcsService } from '@mtcute/core/src/storage/service/default-dcs.js'
+import { CurrentUserService, DefaultDcsService, ServiceOptions, UpdatesStateService } from '@mtcute/core/utils.js'
 import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 

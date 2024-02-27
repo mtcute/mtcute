@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
-import { utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 
+import { getPlatform } from '../../../platform.js'
 import { ITelegramClient } from '../../client.types.js'
 import { InputMessageId, normalizeInputMessageId } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -53,7 +53,7 @@ export async function getCallbackAnswer(
             _: 'messages.getBotCallbackAnswer',
             peer: await resolvePeer(client, chatId),
             msgId: message,
-            data: typeof data === 'string' ? utf8EncodeToBuffer(data) : data,
+            data: typeof data === 'string' ? getPlatform().utf8Encode(data) : data,
             password,
             game: game,
         },

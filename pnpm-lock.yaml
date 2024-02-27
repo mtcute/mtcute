@@ -182,9 +182,9 @@ importers:
 
   packages/crypto-node:
     dependencies:
-      '@mtcute/core':
+      '@mtcute/node':
         specifier: workspace:^
-        version: link:../core
+        version: link:../node
     devDependencies:
       '@mtcute/test':
         specifier: workspace:^
@@ -214,6 +214,10 @@ importers:
       long:
         specifier: 5.2.3
         version: 5.2.3
+    devDependencies:
+      '@mtcute/test':
+        specifier: workspace:^
+        version: link:../test
 
   packages/html-parser:
     dependencies:
@@ -230,9 +234,9 @@ importers:
 
   packages/http-proxy:
     dependencies:
-      '@mtcute/core':
+      '@mtcute/node':
         specifier: workspace:^
-        version: link:../core
+        version: link:../node
 
   packages/i18n:
     devDependencies:
@@ -255,9 +259,9 @@ importers:
 
   packages/mtproxy:
     dependencies:
-      '@mtcute/core':
+      '@mtcute/node':
         specifier: workspace:^
-        version: link:../core
+        version: link:../node
 
   packages/node:
     dependencies:
@@ -273,12 +277,19 @@ importers:
       '@mtcute/sqlite':
         specifier: workspace:^
         version: link:../sqlite
+      '@mtcute/wasm':
+        specifier: workspace:^
+        version: link:../wasm
+    devDependencies:
+      '@mtcute/test':
+        specifier: workspace:^
+        version: link:../test
 
   packages/socks-proxy:
     dependencies:
-      '@mtcute/core':
+      '@mtcute/node':
         specifier: workspace:^
-        version: link:../core
+        version: link:../node
       ip6:
         specifier: 0.2.7
         version: 0.2.7
@@ -310,9 +321,15 @@ importers:
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
+      '@mtcute/node':
+        specifier: workspace:^
+        version: link:../node
       '@mtcute/tl':
         specifier: workspace:*
         version: link:../tl
+      '@mtcute/web':
+        specifier: workspace:^
+        version: link:../web
       long:
         specifier: 5.2.3
         version: 5.2.3
@@ -333,6 +350,9 @@ importers:
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
+      '@mtcute/node':
+        specifier: workspace:^
+        version: link:../node
       '@mtcute/tl-utils':
         specifier: workspace:^
         version: link:../tl-utils
@@ -373,6 +393,19 @@ importers:
       '@mtcute/tl-runtime':
         specifier: workspace:^
         version: link:../tl-runtime
+
+  packages/web:
+    dependencies:
+      '@mtcute/core':
+        specifier: workspace:^
+        version: link:../core
+      '@mtcute/wasm':
+        specifier: workspace:^
+        version: link:../wasm
+    devDependencies:
+      '@mtcute/test':
+        specifier: workspace:^
+        version: link:../test
 
 packages:
 

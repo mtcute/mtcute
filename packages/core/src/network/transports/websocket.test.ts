@@ -2,9 +2,12 @@ import { describe, expect, it, Mock, MockedObject, vi } from 'vitest'
 
 import { defaultTestCryptoProvider, u8HexDecode } from '@mtcute/test'
 
-import { defaultProductionDc, hexDecodeToBuffer, LogManager } from '../../utils/index.js'
+import { getPlatform } from '../../platform.js'
+import { defaultProductionDc, LogManager } from '../../utils/index.js'
 import { TransportState } from './abstract.js'
 import { WebSocketTransport } from './websocket.js'
+
+const p = getPlatform()
 
 describe('WebSocketTransport', () => {
     const create = async () => {
@@ -74,9 +77,9 @@ describe('WebSocketTransport', () => {
         const socket = getLastSocket(ws)
         await vi.waitFor(() => expect(t.state()).toEqual(TransportState.Ready))
 
-        await t.send(hexDecodeToBuffer('00010203040506070809'))
+        await t.send(p.hexDecode('00010203040506070809'))
 
-        expect(socket.send).toHaveBeenCalledWith(hexDecodeToBuffer('af020630c8ef14bcf53af33853ea'))
+        expect(socket.send).toHaveBeenCalledWith(p.hexDecode('af020630c8ef14bcf53af33853ea'))
     })
 
     it('should correctly close', async () => {
@@ -101,7 +104,7 @@ describe('WebSocketTransport', () => {
         const socket = getLastSocket(ws)
         await vi.waitFor(() => expect(t.state()).toEqual(TransportState.Ready))
 
-        const data = hexDecodeToBuffer('00010203040506070809')
+        const data = p.hexDecode('00010203040506070809')
         const message = new MessageEvent('message', { data })
 
         const onMessageCall = socket.addEventListener.mock.calls.find(([event]) => event === 'message') as unknown as [

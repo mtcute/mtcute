@@ -1,7 +1,7 @@
 import sqlite3, { Database, Options, Statement } from 'better-sqlite3'
 
 import { BaseStorageDriver } from '@mtcute/core'
-import { beforeExit } from '@mtcute/core/utils.js'
+import { getPlatform } from '@mtcute/core/platform.js'
 
 export interface SqliteStorageDriverOptions {
     /**
@@ -167,7 +167,7 @@ export class SqliteStorageDriver extends BaseStorageDriver {
 
         this.db.transaction(() => this._initialize())()
 
-        this._cleanup = beforeExit(() => {
+        this._cleanup = getPlatform().beforeExit(() => {
             this._save()
             this._destroy()
         })

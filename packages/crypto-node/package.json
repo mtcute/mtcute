@@ -19,20 +19,24 @@
     "keepScripts": [
         "install"
     ],
+    "exports": {
+        ".": "./src/index.ts",
+        "./native.js": "./src/native.ts"
+    },
     "distOnlyFields": {
         "exports": {
             ".": {
                 "import": "./esm/index.js",
                 "require": "./cjs/index.js"
             },
-            "./native": {
+            "./native.js": {
                 "import": "./esm/native.cjs",
                 "require": "./cjs/native.cjs"
             }
         }
     },
     "dependencies": {
-        "@mtcute/core": "workspace:^"
+        "@mtcute/node": "workspace:^"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"

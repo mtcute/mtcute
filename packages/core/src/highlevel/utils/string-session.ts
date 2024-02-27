@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/tl'
-import { base64DecodeToBuffer, base64Encode, TlBinaryReader, TlBinaryWriter, TlReaderMap } from '@mtcute/tl-runtime'
+import { TlBinaryReader, TlBinaryWriter, TlReaderMap } from '@mtcute/tl-runtime'
 
+import { getPlatform } from '../../platform.js'
 import { MtArgumentError } from '../../types/index.js'
 import { BasicDcOption, DcOptions, parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
 import { CurrentUserInfo } from '../storage/service/current-user.js'
@@ -53,11 +54,11 @@ export function writeStringSession(data: StringSessionData): string {
 
     writer.bytes(data.authKey)
 
-    return base64Encode(writer.result(), true)
+    return getPlatform().base64Encode(writer.result(), true)
 }
 
 export function readStringSession(readerMap: TlReaderMap, data: string): StringSessionData {
-    const buf = base64DecodeToBuffer(data, true)
+    const buf = getPlatform().base64Decode(data, true)
 
     const version = buf[0]
 

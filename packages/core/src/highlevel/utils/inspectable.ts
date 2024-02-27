@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-argument */
 
-import { base64Encode } from '@mtcute/tl-runtime'
+import { getPlatform } from '../../platform.js'
 
 const customInspectSymbol = Symbol.for('nodejs.util.inspect.custom')
 
@@ -52,7 +52,7 @@ export function makeInspectable<T>(obj: new (...args: any[]) => T, props?: (keyo
 
                 if (val && typeof val === 'object') {
                     if (val instanceof Uint8Array) {
-                        val = base64Encode(val)
+                        val = getPlatform().base64Encode(val)
                     } else if (typeof val.toJSON === 'function') {
                         val = val.toJSON(true)
                     }

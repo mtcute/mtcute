@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
-import { utf8Decode } from '@mtcute/tl-runtime'
 
+import { getPlatform } from '../../../platform.js'
 import { MtArgumentError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { encodeInlineMessageId } from '../../utils/inline-utils.js'
@@ -58,7 +58,7 @@ class BaseCallbackQuery {
     get dataStr(): string | null {
         if (!this.raw.data) return null
 
-        return utf8Decode(this.raw.data)
+        return getPlatform().utf8Decode(this.raw.data)
     }
 
     /**

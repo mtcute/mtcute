@@ -7,6 +7,7 @@ import {
     tl,
 } from '@mtcute/core'
 
+import { defaultCryptoProvider } from './platform.js'
 import { StubMemoryTelegramStorage } from './storage.js'
 import { StubTelegramTransport } from './transport.js'
 import { InputResponder } from './types.js'
@@ -54,6 +55,7 @@ export class StubTelegramClient extends BaseTelegramClient {
 
                 return transport
             },
+            crypto: defaultCryptoProvider,
             ...params,
         })
     }
