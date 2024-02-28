@@ -281,7 +281,7 @@ export class SessionConnection extends PersistentConnection {
             .then(([authKey, serverSalt, timeOffset]) => {
                 this._session._authKey.setup(authKey)
                 this._salts.currentSalt = serverSalt
-                this._session._timeOffset = timeOffset
+                this._session.updateTimeOffset(timeOffset)
 
                 this._session.authorizationPending = false
 
@@ -1092,10 +1092,10 @@ export class SessionConnection extends PersistentConnection {
                     // msg_id is either too high or too low
                     // code 20 means msg_id is too old,
                     // we just need to resend the message
-                    const serverTime = msgId.low >>> 0
+                    const serverTime = msgId.high >>> 0
                     const timeOffset = Math.floor(Date.now() / 1000) - serverTime
 
-                    this._session._timeOffset = timeOffset
+                    this._session.updateTimeOffset(timeOffset)
                     this.log.debug('server time: %d, corrected offset to %d', serverTime, timeOffset)
                 }
 

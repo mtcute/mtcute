@@ -333,6 +333,7 @@ export async function doAuthorization(
 
     const dhPrime = bufferToBigInt(serverDhInner.dhPrime)
     const timeOffset = Math.floor(Date.now() / 1000) - serverDhInner.serverTime
+    session.updateTimeOffset(timeOffset)
 
     const g = BigInt(serverDhInner.g)
     const gA = bufferToBigInt(serverDhInner.gA)

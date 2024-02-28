@@ -169,6 +169,13 @@ export class MtprotoSession {
         this._authKeyTempSecondary.reset()
     }
 
+    updateTimeOffset(offset: number) {
+        this._timeOffset = offset
+        // lastMessageId was generated with (potentially) wrong time
+        // reset it to avoid bigger issues - at worst, we'll get bad_msg_notification
+        this._lastMessageId = Long.ZERO
+    }
+
     /**
      * Reset session state and generate a new session ID.
      *
@@ -230,7 +237,7 @@ export class MtprotoSession {
 
     getMessageId(): Long {
         const timeTicks = Date.now()
-        const timeSec = Math.floor(timeTicks / 1000) + this._timeOffset
+        const timeSec = Math.floor(timeTicks / 1000) - this._timeOffset
         const timeMSec = timeTicks % 1000
         const random = getRandomInt(0xffff)
 
