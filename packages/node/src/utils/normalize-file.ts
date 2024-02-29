@@ -3,17 +3,11 @@ import { stat } from 'fs/promises'
 import { basename } from 'path'
 import { Readable } from 'stream'
 
-import { ITelegramClient } from '@mtcute/core'
-import { uploadFile as uploadFileCore } from '@mtcute/core/methods.js'
+import { UploadFileLike } from '@mtcute/core'
 
 import { nodeStreamToWeb } from '../utils/stream-utils.js'
 
-export async function uploadFile(
-    client: ITelegramClient,
-    params: Parameters<typeof uploadFileCore>[1],
-) {
-    let file = params.file
-
+export async function normalizeFile(file: UploadFileLike) {
     if (typeof file === 'string') {
         file = createReadStream(file)
     }
@@ -22,20 +16,19 @@ export async function uploadFile(
         const fileName = basename(file.path.toString())
         const fileSize = await stat(file.path.toString()).then((stat) => stat.size)
 
-        return uploadFileCore(client, {
-            ...params,
+        return {
             file: nodeStreamToWeb(file),
             fileName,
             fileSize,
-        })
+        }
     }
 
     if (file instanceof Readable) {
-        return uploadFileCore(client, {
-            ...params,
+        return {
             file: nodeStreamToWeb(file),
-        })
+        }
     }
 
-    return uploadFileCore(client, params)
+    // string -> ReadStream, thus already handled
+    return null
 }

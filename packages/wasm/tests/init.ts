@@ -1,6 +1,5 @@
 import { initSync } from '../src/index.js'
 
-// todo: use platform-specific packages
 export async function initWasm() {
     const url = new URL('../lib/mtcute.wasm', import.meta.url)
 

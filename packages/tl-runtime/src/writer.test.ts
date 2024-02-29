@@ -94,6 +94,10 @@ describe('TlBinaryWriter', () => {
         expect(testSingleMethod(1004, (w) => w.bytes(random1000bytes))).toEqual(hexEncode(buffer))
     })
 
+    it('should write tg-encoded string', () => {
+        expect(testSingleMethod(8, (w) => w.string('test'))).toEqual('0474657374000000')
+    })
+
     const stubObjectsMap: TlWriterMap = {
         deadbeef: function (w, obj) {
             w.uint(0xdeadbeef)

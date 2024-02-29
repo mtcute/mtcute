@@ -26,6 +26,8 @@
         }
     },
     "devDependencies": {
-        "@mtcute/tl-runtime": "workspace:^"
+        "@mtcute/core": "workspace:^",
+        "@mtcute/web": "workspace:^",
+        "@mtcute/node": "workspace:^"
     }
 }

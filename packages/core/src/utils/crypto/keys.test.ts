@@ -1,10 +1,14 @@
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 import { defaultCryptoProvider } from '@mtcute/test'
 
 import { findKeyByFingerprints, parsePublicKey } from '../index.js'
 
 const crypto = defaultCryptoProvider
+
+beforeAll(async () => {
+    await crypto.initialize()
+})
 
 describe('parsePublicKey', () => {
     it('should parse telegram public keys', () => {

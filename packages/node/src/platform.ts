@@ -4,6 +4,7 @@ import { ICorePlatform } from '@mtcute/core/platform.js'
 
 import { beforeExit } from './utils/exit-hook.js'
 import { defaultLoggingHandler } from './utils/logging.js'
+import { normalizeFile } from './utils/normalize-file.js'
 
 const BUFFER_BASE64_URL_AVAILABLE = typeof Buffer.isEncoding === 'function' && Buffer.isEncoding('base64url')
 
@@ -17,6 +18,7 @@ export class NodePlatform implements ICorePlatform {
     // ICorePlatform
     log!: typeof defaultLoggingHandler
     beforeExit!: typeof beforeExit
+    normalizeFile!: typeof normalizeFile
 
     getDeviceModel(): string {
         return `${os.type()} ${os.arch()} ${os.release()}`
@@ -76,3 +78,4 @@ export class NodePlatform implements ICorePlatform {
 
 NodePlatform.prototype.log = defaultLoggingHandler
 NodePlatform.prototype.beforeExit = beforeExit
+NodePlatform.prototype.normalizeFile = normalizeFile

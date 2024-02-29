@@ -135,36 +135,3 @@ export function createChunkedReader(stream: ReadableStream<Uint8Array>, chunkSiz
         read: readLocked,
     }
 }
-
-export function nodeReadableToWeb(stream: NodeJS.ReadableStream): ReadableStream {
-    // using .constructor here to avoid import hacks
-    const ctor = stream.constructor as {
-        toWeb?: (stream: NodeJS.ReadableStream) => ReadableStream
-    }
-
-    if (ctor.toWeb) {
-        // use `Readable.toWeb` if available
-        return ctor.toWeb(stream)
-    }
-
-    // otherwise, use a silly little adapter
-
-    stream.pause()
-
-    return new ReadableStream({
-        start(c) {
-            stream.on('data', (chunk) => {
-                c.enqueue(chunk)
-            })
-            stream.on('end', () => {
-                c.close()
-            })
-            stream.on('error', (err) => {
-                c.error(err)
-            })
-        },
-        pull() {
-            stream.resume()
-        },
-    })
-}

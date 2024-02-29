@@ -390,9 +390,15 @@ importers:
 
   packages/wasm:
     devDependencies:
-      '@mtcute/tl-runtime':
+      '@mtcute/core':
         specifier: workspace:^
-        version: link:../tl-runtime
+        version: link:../core
+      '@mtcute/node':
+        specifier: workspace:^
+        version: link:../node
+      '@mtcute/web':
+        specifier: workspace:^
+        version: link:../web
 
   packages/web:
     dependencies:

@@ -1,10 +1,10 @@
 import { describe, expect, it, Mock, MockedObject, vi } from 'vitest'
 
+import { TransportState } from '@mtcute/core'
+import { getPlatform } from '@mtcute/core/platform.js'
+import { defaultProductionDc, LogManager } from '@mtcute/core/utils.js'
 import { defaultTestCryptoProvider, u8HexDecode } from '@mtcute/test'
 
-import { getPlatform } from '../../platform.js'
-import { defaultProductionDc, LogManager } from '../../utils/index.js'
-import { TransportState } from './abstract.js'
 import { WebSocketTransport } from './websocket.js'
 
 const p = getPlatform()

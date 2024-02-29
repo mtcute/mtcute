@@ -7,7 +7,7 @@ import { setPlatform } from '@mtcute/core/platform.js'
 import { SqliteStorage } from '@mtcute/sqlite'
 
 import { downloadToFile } from './methods/download-file.js'
-import { uploadFile } from './methods/upload-file.js'
+import { downloadAsNodeStream } from './methods/download-node-stream.js'
 import { NodePlatform } from './platform.js'
 import { NodeCryptoProvider } from './utils/crypto.js'
 import { TcpTransport } from './utils/tcp.js'
@@ -120,7 +120,10 @@ export class TelegramClient extends TelegramClientBase {
         return downloadToFile(this, filename, location, params)
     }
 
-    uploadFile(params: Parameters<typeof uploadFile>[1]) {
-        return uploadFile(this, params)
+    downloadAsNodeStream(
+        location: FileDownloadLocation,
+        params?: FileDownloadParameters | undefined,
+    ) {
+        return downloadAsNodeStream(this, location, params)
     }
 }

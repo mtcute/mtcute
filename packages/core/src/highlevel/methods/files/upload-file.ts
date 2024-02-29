@@ -1,5 +1,6 @@
 import { tl } from '@mtcute/tl'
 
+import { getPlatform } from '../../../platform.js'
 import { MtArgumentError } from '../../../types/errors.js'
 import { randomLong } from '../../../utils/long-utils.js'
 import { ITelegramClient } from '../../client.types.js'
@@ -20,6 +21,10 @@ const DEFAULT_FILE_NAME = 'unnamed'
 const REQUESTS_PER_CONNECTION = 3
 const MAX_PART_COUNT = 4000 // 512 kb * 4000 = 2000 MiB
 const MAX_PART_COUNT_PREMIUM = 8000 // 512 kb * 8000 = 4000 MiB
+
+// platform-specific
+const HAS_FILE = typeof File !== 'undefined'
+const HAS_RESPONSE = typeof Response !== 'undefined'
 
 // @available=both
 /**
@@ -101,19 +106,30 @@ export async function uploadFile(
     let fileName = DEFAULT_FILE_NAME
     let fileMime = params.fileMime
 
+    const platform = getPlatform()
+
+    if (platform.normalizeFile) {
+        const res = await platform.normalizeFile(file)
+
+        if (res?.file) {
+            file = res.file
+            if (res.fileSize) fileSize = res.fileSize
+            if (res.fileName) fileName = res.fileName
+        }
+    }
+
     if (ArrayBuffer.isView(file)) {
         fileSize = file.length
         file = bufferToStream(file)
     }
 
-    if (typeof File !== 'undefined' && file instanceof File) {
+    if (HAS_FILE && file instanceof File) {
         fileName = file.name
         fileSize = file.size
         file = file.stream()
     }
 
-    if (typeof file === 'object' && 'headers' in file && 'body' in file && 'url' in file) {
-        // fetch() response
+    if (HAS_RESPONSE && file instanceof Response) {
         const length = parseInt(file.headers.get('content-length') || '0')
         if (!isNaN(length) && length) fileSize = length
 

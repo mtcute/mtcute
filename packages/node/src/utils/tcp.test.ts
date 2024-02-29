@@ -4,7 +4,6 @@ import { describe, expect, it, MockedObject, vi } from 'vitest'
 import { TransportState } from '@mtcute/core'
 import { getPlatform } from '@mtcute/core/platform.js'
 import { defaultProductionDc, LogManager } from '@mtcute/core/utils.js'
-import { defaultTestCryptoProvider, u8HexDecode } from '@mtcute/test'
 
 if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
     vi.doMock('net', () => ({
@@ -27,6 +26,7 @@ if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
     const connect = vi.mocked(net.connect)
 
     const { TcpTransport } = await import('./tcp.js')
+    const { defaultTestCryptoProvider, u8HexDecode } = await import('@mtcute/test')
 
     describe('TcpTransport', () => {
         const getLastSocket = () => {

@@ -2248,7 +2248,7 @@ export interface TelegramClient extends ITelegramClient {
     downloadAsBuffer(location: FileDownloadLocation, params?: FileDownloadParameters): Promise<Uint8Array>
 
     /**
-     * Download a remote file to a local file (only for NodeJS).
+     * Download a remote file to a local file (only for Node.js).
      * Promise will resolve once the download is complete.
      *
      * **Available**: ✅ both users and bots
@@ -2267,6 +2267,15 @@ export interface TelegramClient extends ITelegramClient {
      * @param params  Download parameters
      */
     downloadAsIterable(input: FileDownloadLocation, params?: FileDownloadParameters): AsyncIterableIterator<Uint8Array>
+
+    /**
+     * Download a remote file as a Node.js Readable stream.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param params  File download parameters
+     */
+    downloadAsNodeStream(location: FileDownloadLocation, params?: FileDownloadParameters): import('stream').Readable
     /**
      * Download a file and return it as a readable stream,
      * streaming file contents.
@@ -2320,9 +2329,6 @@ export interface TelegramClient extends ITelegramClient {
     uploadFile(params: {
         /**
          * Upload file source.
-         *
-         * > **Note**: `fs.ReadStream` is a subclass of `stream.Readable` and contains
-         * > info about file name, thus you don't need to pass them explicitly.
          */
         file: UploadFileLike
 

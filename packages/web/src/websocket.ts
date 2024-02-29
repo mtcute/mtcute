@@ -1,10 +1,15 @@
 import EventEmitter from 'events'
 
-import { MtcuteError, MtUnsupportedError } from '../../types/errors.js'
-import { BasicDcOption, ICryptoProvider, Logger } from '../../utils/index.js'
-import { IPacketCodec, ITelegramTransport, TransportState } from './abstract.js'
-import { IntermediatePacketCodec } from './intermediate.js'
-import { ObfuscatedPacketCodec } from './obfuscated.js'
+import {
+    IntermediatePacketCodec,
+    IPacketCodec,
+    ITelegramTransport,
+    MtcuteError,
+    MtUnsupportedError,
+    ObfuscatedPacketCodec,
+    TransportState,
+} from '@mtcute/core'
+import { BasicDcOption, ICryptoProvider, Logger } from '@mtcute/core/utils.js'
 
 export type WebSocketConstructor = {
     new (address: string, protocol?: string): WebSocket
