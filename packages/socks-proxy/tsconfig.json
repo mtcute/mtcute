@@ -7,8 +7,7 @@
     "./index.ts"
   ],
   "references": [
-    {
-      "path": "../core"
-    }
+    { "path": "../core" },
+    { "path": "../node" }
   ]
 }

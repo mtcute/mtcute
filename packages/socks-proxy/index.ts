@@ -1,5 +1,3 @@
-// ^^ because of this._socket. we know it's not null, almost everywhere, but TS doesn't
-
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 import { normalize } from 'ip6'
