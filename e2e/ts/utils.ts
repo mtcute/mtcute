@@ -2,7 +2,9 @@
 import { join } from 'path'
 
 import { MaybePromise, MemoryStorage } from '@mtcute/core'
+import { setPlatform } from '@mtcute/core/platform.js'
 import { LogManager, sleep } from '@mtcute/core/utils.js'
+import { NodeCryptoProvider, NodePlatform, TcpTransport } from '@mtcute/node'
 import { SqliteStorage } from '@mtcute/sqlite'
 
 export const getApiParams = (storage?: string) => {
@@ -10,12 +12,16 @@ export const getApiParams = (storage?: string) => {
         throw new Error('API_ID and API_HASH env variables must be set')
     }
 
+    setPlatform(new NodePlatform())
+
     return {
         apiId: parseInt(process.env.API_ID),
         apiHash: process.env.API_HASH,
         testMode: true,
         storage: storage ? new SqliteStorage(join(__dirname, storage)) : new MemoryStorage(),
         logLevel: LogManager.VERBOSE,
+        transport: () => new TcpTransport(),
+        crypto: new NodeCryptoProvider(),
     }
 }
 

@@ -3,7 +3,8 @@ import { expect } from 'chai'
 import { createHash } from 'crypto'
 import { describe, it } from 'mocha'
 
-import { FileDownloadLocation, TelegramClient, Thumbnail } from '@mtcute/core'
+import { FileDownloadLocation, Thumbnail } from '@mtcute/core'
+import { TelegramClient } from '@mtcute/core/client.js'
 import { sleep } from '@mtcute/core/utils.js'
 
 import { getApiParams } from '../utils.js'
