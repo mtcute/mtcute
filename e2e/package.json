@@ -18,6 +18,7 @@
         "@mtcute/tl-runtime": "*",
         "@mtcute/tl-utils": "*",
         "@mtcute/wasm": "*",
+        "@mtcute/web": "*",
         "@types/chai": "^4.3.8",
         "@types/mocha": "^10.0.2",
         "chai": "^4.3.10",

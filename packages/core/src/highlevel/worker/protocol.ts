@@ -46,4 +46,5 @@ export type ClientMessageHandler = (message: WorkerOutboundMessage) => void
 export type RespondFn = (message: WorkerOutboundMessage) => void
 export type WorkerMessageHandler = (message: WorkerInboundMessage, respond: RespondFn) => void
 
-export type WorkerCustomMethods = Record<string, (...args: unknown[]) => Promise<unknown>>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type WorkerCustomMethods = Record<string, (...args: any[]) => Promise<any>>

@@ -11,6 +11,8 @@ module.exports = {
         getFiles: () => 'tests/**/*.ts',
         beforeAll: () => ['tsc', 'node build-esm.cjs'],
         runFile: (file) => {
+            if (require('path').basename(file)[0] === '_') return null
+
             if (file.startsWith('tests/packaging/')) {
                 // packaging tests - we need to make sure everything imports and works
                 return [
