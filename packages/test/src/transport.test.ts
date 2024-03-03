@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { BaseTelegramClient, MemoryStorage } from '@mtcute/core'
+import { MemoryStorage } from '@mtcute/core'
+import { BaseTelegramClient } from '@mtcute/core/client.js'
 
 import { defaultCryptoProvider } from './platform.js'
 import { createStub } from './stub.js'

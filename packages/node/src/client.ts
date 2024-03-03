@@ -1,8 +1,13 @@
 import { createRequire } from 'module'
 import { createInterface, Interface as RlInterface } from 'readline'
 
-import { FileDownloadLocation, FileDownloadParameters, User } from '@mtcute/core'
-import { TelegramClient as TelegramClientBase, TelegramClientOptions } from '@mtcute/core/client.js'
+import { FileDownloadLocation, FileDownloadParameters, ITelegramStorageProvider, PartialOnly, User } from '@mtcute/core'
+import {
+    BaseTelegramClient as BaseTelegramClientBase,
+    BaseTelegramClientOptions as BaseTelegramClientOptionsBase,
+    TelegramClient as TelegramClientBase,
+    TelegramClientOptions,
+} from '@mtcute/core/client.js'
 import { setPlatform } from '@mtcute/core/platform.js'
 import { SqliteStorage } from '@mtcute/sqlite'
 
@@ -25,18 +30,22 @@ try {
     nativeCrypto = require('@mtcute/crypto-node').NodeNativeCryptoProvider
 } catch (e) {}
 
-/**
- * Telegram client for use in Node.js
- */
-export class TelegramClient extends TelegramClientBase {
-    constructor(opts: TelegramClientOptions) {
+export interface BaseTelegramClientOptions
+    extends PartialOnly<Omit<BaseTelegramClientOptionsBase, 'storage'>, 'transport' | 'crypto'> {
+    /**
+     * Storage to use for this client.
+     *
+     * If a string is passed, it will be used as
+     * a name for an SQLite database file.
+     *
+     * @default `"client.session"`
+     */
+    storage?: string | ITelegramStorageProvider
+}
+
+export class BaseTelegramClient extends BaseTelegramClientBase {
+    constructor(opts: BaseTelegramClientOptions) {
         setPlatform(new NodePlatform())
-
-        if ('client' in opts) {
-            super(opts)
-
-            return
-        }
 
         super({
             // eslint-disable-next-line
@@ -47,6 +56,23 @@ export class TelegramClient extends TelegramClientBase {
                 typeof opts.storage === 'string' ?
                     new SqliteStorage(opts.storage) :
                     opts.storage ?? new SqliteStorage('client.session'),
+        })
+    }
+}
+
+/**
+ * Telegram client for use in Node.js
+ */
+export class TelegramClient extends TelegramClientBase {
+    constructor(opts: TelegramClientOptions) {
+        if ('client' in opts) {
+            super(opts)
+
+            return
+        }
+
+        super({
+            client: new BaseTelegramClient(opts),
         })
     }
 
@@ -120,10 +146,7 @@ export class TelegramClient extends TelegramClientBase {
         return downloadToFile(this, filename, location, params)
     }
 
-    downloadAsNodeStream(
-        location: FileDownloadLocation,
-        params?: FileDownloadParameters | undefined,
-    ) {
+    downloadAsNodeStream(location: FileDownloadLocation, params?: FileDownloadParameters | undefined) {
         return downloadAsNodeStream(this, location, params)
     }
 }

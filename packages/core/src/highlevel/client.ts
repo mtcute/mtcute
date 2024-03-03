@@ -5135,6 +5135,8 @@ export interface TelegramClient extends ITelegramClient {
 
 export type { TelegramClientOptions }
 
+export * from './base.js'
+
 export class TelegramClient extends EventEmitter implements ITelegramClient {
     _client: ITelegramClient
     constructor(opts: TelegramClientOptions) {

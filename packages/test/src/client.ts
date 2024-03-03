@@ -1,11 +1,5 @@
-import {
-    BaseTelegramClient,
-    BaseTelegramClientOptions,
-    MaybePromise,
-    MustEqual,
-    RpcCallOptions,
-    tl,
-} from '@mtcute/core'
+import { MaybePromise, MustEqual, RpcCallOptions, tl } from '@mtcute/core'
+import { BaseTelegramClient, BaseTelegramClientOptions } from '@mtcute/core/client.js'
 
 import { defaultCryptoProvider } from './platform.js'
 import { StubMemoryTelegramStorage } from './storage.js'

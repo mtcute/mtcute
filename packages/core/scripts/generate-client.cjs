@@ -689,6 +689,7 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
     output.write('}\n')
 
     output.write('\nexport type { TelegramClientOptions }\n')
+    output.write('\nexport * from "./base.js"\n')
     output.write('\nexport class TelegramClient extends EventEmitter implements ITelegramClient {\n')
 
     output.write('    _client: ITelegramClient\n')
