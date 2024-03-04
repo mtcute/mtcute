@@ -1,5 +1,16 @@
-import { ICryptoProvider, WasmCryptoProvider } from '@mtcute/core/utils.js'
-import { initSync } from '@mtcute/wasm'
+import { BaseCryptoProvider, IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
+import {
+    createCtr256,
+    ctr256,
+    deflateMaxSize,
+    freeCtr256,
+    gunzip,
+    ige256Decrypt,
+    ige256Encrypt,
+    initSync,
+    sha1,
+    sha256,
+} from '@mtcute/wasm'
 
 import { loadWasmBinary, WasmInitInput } from './wasm.js'
 
@@ -14,9 +25,41 @@ export interface WebCryptoProviderOptions {
     wasmInput?: WasmInitInput
 }
 
-export class WebCryptoProvider extends WasmCryptoProvider implements ICryptoProvider {
+export class WebCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
     readonly crypto: Crypto
     private _wasmInput?: WasmInitInput
+
+    sha1(data: Uint8Array): Uint8Array {
+        return sha1(data)
+    }
+
+    sha256(data: Uint8Array): Uint8Array {
+        return sha256(data)
+    }
+
+    createAesCtr(key: Uint8Array, iv: Uint8Array): IAesCtr {
+        const ctx = createCtr256(key, iv)
+
+        return {
+            process: (data) => ctr256(ctx, data),
+            close: () => freeCtr256(ctx),
+        }
+    }
+
+    createAesIge(key: Uint8Array, iv: Uint8Array): IEncryptionScheme {
+        return {
+            encrypt: (data) => ige256Encrypt(data, key, iv),
+            decrypt: (data) => ige256Decrypt(data, key, iv),
+        }
+    }
+
+    gzip(data: Uint8Array, maxSize: number): Uint8Array | null {
+        return deflateMaxSize(data, maxSize)
+    }
+
+    gunzip(data: Uint8Array): Uint8Array {
+        return gunzip(data)
+    }
 
     constructor(params?: WebCryptoProviderOptions) {
         super()

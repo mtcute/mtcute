@@ -51,7 +51,6 @@
     "dependencies": {
         "@mtcute/tl": "workspace:^",
         "@mtcute/tl-runtime": "workspace:^",
-        "@mtcute/wasm": "workspace:^",
         "@mtcute/file-id": "workspace:^",
         "@types/events": "3.0.0",
         "events": "3.2.0",

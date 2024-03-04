@@ -126,9 +126,6 @@ importers:
       '@mtcute/tl-runtime':
         specifier: workspace:^
         version: link:../tl-runtime
-      '@mtcute/wasm':
-        specifier: workspace:^
-        version: link:../wasm
       '@types/events':
         specifier: 3.0.0
         version: 3.0.0
