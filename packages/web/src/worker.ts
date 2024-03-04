@@ -26,15 +26,6 @@ export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorke
 
         _registered = true
 
-        if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
-            const respond: RespondFn = self.postMessage.bind(self)
-
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            self.addEventListener('message', (message) => handler(message.data, respond))
-
-            return respond
-        }
-
         if (typeof SharedWorkerGlobalScope !== 'undefined' && self instanceof SharedWorkerGlobalScope) {
             const connections: MessagePort[] = []
 
@@ -90,9 +81,19 @@ export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorke
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     handler(message.data, respond)
                 })
+                port.start()
             }
 
             return broadcast
+        }
+
+        if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+            const respond: RespondFn = self.postMessage.bind(self)
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            self.addEventListener('message', (message) => handler(message.data, respond))
+
+            return respond
         }
 
         throw new Error('TelegramWorker must be created from a worker')
