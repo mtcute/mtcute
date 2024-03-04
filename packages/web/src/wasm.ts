@@ -1,8 +1,10 @@
+import { getWasmUrl } from '@mtcute/wasm'
+
 export type WasmInitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module
 
 export async function loadWasmBinary(input?: WasmInitInput): Promise<WebAssembly.Instance> {
     if (typeof input === 'undefined') {
-        input = new URL('@mtcute/wasm/mtcute.wasm', import.meta.url)
+        input = getWasmUrl()
     }
 
     if (

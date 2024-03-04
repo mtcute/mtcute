@@ -2,6 +2,15 @@ import { MtcuteWasmModule, SyncInitInput } from './types.js'
 
 export * from './types.js'
 
+export function getWasmUrl(): URL {
+    // would be nice if we could just use `new URL('@mtcute/wasm/mtcute.wasm', import.meta.url)`
+    // wherever this is used, but vite does some funky stuff with transitive dependencies
+    // making it not work. probably related to https://github.com/vitejs/vite/issues/8427,
+    // but asking the user to deoptimize the entire @mtcute/web is definitely not a good idea
+    // so we'll just use this hack for now
+    return new URL('../mtcute.wasm', import.meta.url)
+}
+
 let wasm!: MtcuteWasmModule
 let compressor!: number
 let decompressor!: number
