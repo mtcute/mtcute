@@ -14,7 +14,7 @@
     },
     "exports": {
         ".": "./src/index.ts",
-        "./mtcute.wasm": "./lib/mtcute.wasm"
+        "./mtcute.wasm": "./mtcute.wasm"
     },
     "distOnlyFields": {
         "exports": {

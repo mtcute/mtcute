@@ -1,7 +1,7 @@
 import { initSync } from '../src/index.js'
 
 export async function initWasm() {
-    const url = new URL('../lib/mtcute.wasm', import.meta.url)
+    const url = new URL('../mtcute.wasm', import.meta.url)
 
     if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
         const fs = await import('fs/promises')
