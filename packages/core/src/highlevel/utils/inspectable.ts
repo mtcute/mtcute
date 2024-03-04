@@ -33,7 +33,11 @@ function getAllGettersNames<T>(obj: T): (keyof T)[] {
  * > (getter that caches after its first invocation is also
  * > considered pure in this case)
  */
-export function makeInspectable<T>(obj: new (...args: any[]) => T, props?: (keyof T)[], hide?: (keyof T)[]): void {
+export function makeInspectable<T>(
+    obj: new (...args: any[]) => T,
+    props?: (keyof T)[],
+    hide?: (keyof T)[],
+): typeof obj {
     const getters: (keyof T)[] = props ? props : []
 
     for (const key of getAllGettersNames<T>(obj.prototype)) {
@@ -67,4 +71,6 @@ export function makeInspectable<T>(obj: new (...args: any[]) => T, props?: (keyo
         return ret
     }
     obj.prototype[customInspectSymbol] = obj.prototype.toJSON
+
+    return obj
 }

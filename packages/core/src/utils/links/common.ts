@@ -57,7 +57,7 @@ function writeQuery(query: InputQuery) {
     return `?${str}`
 }
 
-export function deeplinkBuilder<T>(params: BuildDeeplinkOptions<T>): Deeplink<T> {
+/* @__NO_SIDE_EFFECTS__ */ export function deeplinkBuilder<T>(params: BuildDeeplinkOptions<T>): Deeplink<T> {
     const { internalBuild, internalParse, externalBuild, externalParse } = params
 
     const fn_ = (options: T & CommonDeeplinkOptions) => {

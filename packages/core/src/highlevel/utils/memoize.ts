@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-assignment */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function memoizeGetters<T>(cls: new (...args: any[]) => T, fields: (keyof T)[]) {
+export function memoizeGetters<T>(cls: new (...args: any[]) => T, fields: (keyof T)[]): typeof cls {
     for (const field of fields) {
         const desc = Object.getOwnPropertyDescriptor(cls.prototype, field)
         if (!desc) continue
@@ -25,4 +25,6 @@ export function memoizeGetters<T>(cls: new (...args: any[]) => T, fields: (keyof
             configurable: true,
         })
     }
+
+    return cls
 }
