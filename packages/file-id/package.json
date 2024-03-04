@@ -7,6 +7,7 @@
     "license": "MIT",
     "main": "src/index.ts",
     "type": "module",
+    "sideEffects": false,
     "scripts": {
         "build": "pnpm run -w build-package file-id"
     },

@@ -6,6 +6,7 @@
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
     "type": "module",
+    "sideEffects": false,
     "scripts": {
         "docs": "typedoc",
         "build": "pnpm run -w build-package tl-runtime"
