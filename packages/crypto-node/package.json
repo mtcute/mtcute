@@ -7,6 +7,7 @@
     "private": true,
     "license": "MIT",
     "type": "module",
+    "sideEffects": false,
     "scripts": {
         "build:bin": "node-gyp configure && node-gyp -j 16 build ",
         "build:dev": "node-gyp -j 16 build --debug",
