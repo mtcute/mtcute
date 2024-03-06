@@ -16,7 +16,7 @@ Then, install the package as usual. The native library will be built automatical
 ## Usage
 
 ```typescript
-import { TelegramClient } from '@mtcute/client'
+import { TelegramClient } from '@mtcute/core'
 import { NodeNativeCryptoProvider } from '@mtcute/crypto-node'
 
 const tg = new TelegramClient({

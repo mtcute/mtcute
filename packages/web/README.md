@@ -1,23 +1,53 @@
-# @mtcute/node
+# @mtcute/web
 
-📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_node.html)
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_web.html)
 
-All-in-one package for NodeJS. Includes support for native crypto addon
-(must be installed separately, `@mtcute/crypto-node`), terminal I/O via
-`readline` and includes HTML and Markdown parsers.
+Web support package for mtcute. Includes:
+- WASM crypto provider
+- Websocket transport
+- IndexedDB storage
+- `TelegramClient` implementation using the above
 
 ## Usage
 
 ```typescript
-import { NodeTelegramClient } from '@mtcute/node'
+import { TelegramClient } from '@mtcute/web'
 
-const tg = new NodeTelegramClient({
+const tg = new TelegramClient({
     apiId: 12345,
     apiHash: 'abcdef',
     storage: 'my-account'
 })
 
 tg.run(async (user) => {
+    console.log(`✨ logged in as ${user.displayName}`)
+})
+```
+
+## Usage with workers
+
+You can also use this package with web workers to offload most of the heavy lifting to a separate thread:
+
+```typescript
+// worker.ts
+import { BaseTelegramClient, TelegramWorker } from '@mtcute/web'
+
+const client = new BaseTelegramClient({
+    apiId: 12345,
+    apiHash: 'abcdef',
+    storage: 'my-account'
+})
+
+new TelegramWorker({ client })
+
+// main.ts
+import { TelegramClient, TelegramWorkerPort } from '@mtcute/web'
+
+const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }) // or SharedWorker
+const port = new TelegramWorkerPort({ worker })
+const tg = new TelegramClient({ client: port })
+
+tg.run({}, async (user) => {
     console.log(`✨ logged in as ${user.displayName}`)
 })
 ```
