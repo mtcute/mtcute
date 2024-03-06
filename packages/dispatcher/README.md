@@ -15,7 +15,7 @@ Dispatcher and bot framework based on @mtcute/core.
 ## Usage
 
 ```ts
-import { TelegramClient, Dispatcher } from '@mtcute/node'
+import { Dispatcher } from '@mtcute/dispatcher'
 
 const tg = new TelegramClient({ ... })
 const dp = Dispatcher.for(tg)
