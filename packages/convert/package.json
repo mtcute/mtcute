@@ -1,0 +1,29 @@
+{
+    "name": "@mtcute/convert",
+    "private": true,
+    "version": "0.7.0",
+    "description": "Cross-library session conversion utilities",
+    "author": "Alina Sireneva <alina@tei.su>",
+    "license": "MIT",
+    "main": "src/index.ts",
+    "type": "module",
+    "sideEffects": false,
+    "scripts": {
+        "build": "pnpm run -w build-package convert"
+    },
+    "distOnlyFields": {
+        "exports": {
+            ".": {
+                "import": "./esm/index.js",
+                "require": "./cjs/index.js"
+            }
+        }
+    },
+    "dependencies": {
+        "@mtcute/core": "workspace:^",
+        "@mtcute/tl": "*"
+    },
+    "devDependencies": {
+        "@mtcute/test": "workspace:^"
+    }
+}

@@ -2,6 +2,7 @@
     "extends": "../tsconfig.json",
     "exclude": [
         "../**/*.test.ts",
-        "../**/*.test-utils.ts"
+        "../**/*.test-utils.ts",
+        "../**/__fixtures__/**",
     ]
 }
