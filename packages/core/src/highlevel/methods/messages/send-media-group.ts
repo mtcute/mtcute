@@ -2,7 +2,7 @@ import { tl } from '@mtcute/tl'
 
 import { randomLong } from '../../../utils/long-utils.js'
 import { ITelegramClient } from '../../client.types.js'
-import { InputMediaLike } from '../../types/media/input-media.js'
+import { InputMediaLike } from '../../types/media/input-media/types.js'
 import { Message } from '../../types/messages/message.js'
 import { InputPeerLike, PeersIndex } from '../../types/peers/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'

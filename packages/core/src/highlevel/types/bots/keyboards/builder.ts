@@ -1,6 +1,6 @@
 import { tl } from '@mtcute/tl'
 
-import type { InlineKeyboardMarkup, ReplyKeyboardMarkup } from './keyboards.js'
+import type { InlineKeyboardMarkup, ReplyKeyboardMarkup } from './types.js'
 
 export type ButtonLike = tl.TypeKeyboardButton | false | null | undefined | void
 

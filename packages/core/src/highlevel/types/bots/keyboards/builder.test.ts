@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { BotKeyboardBuilder } from './keyboard-builder.js'
+import { BotKeyboardBuilder } from './builder.js'
 
 describe('BotKeyboardBuilder', () => {
     describe('#push', () => {
