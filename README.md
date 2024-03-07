@@ -73,11 +73,11 @@ learn more: [guide](https://mtcute.dev/guide/)
 
 ## features
 
-- 🍰 **simple**: mtcute hides all the complexity and provides a clean and modern API
-- ✨ **compatible**: mtcute supports almost everything Bot API does, and even more!
-- 🍡 **lightweight**: Running instance uses less than 50 MB of RAM.
-- 🛡️ **type-safe**: Most of the APIs (including MTProto) are strictly typed to help your workflow
-- ⚙️ **hackable**: Almost every aspect of the library is customizable, including networking and storage
+- 🍰 **simple**: mtcute hides all the complexity and provides a clean and modern api
+- ✨ **compatible**: mtcute supports almost everything bot api does, and even more!
+- 🍡 **lightweight**: running instance uses less than 50 mb of ram
+- 🛡️ **type-safe**: most of the apis (including mtproto) are strictly typed to help your workflow
+- ⚙️ **hackable**: almost every aspect of the library is customizable, including networking and storage
 - 🕙 **up-to-date**: mtcute uses the latest TL schema to provide the newest features as soon as possible
 
 ## cat in the readme 🐈
@@ -85,6 +85,21 @@ learn more: [guide](https://mtcute.dev/guide/)
 <p align="center">
     <img src="https://cataas.com/cat" align="center" width="480" />
 </p>
+
+## project goals
+
+mtcute strives to:
+- be customizable enough to fit most of the possible use-cases
+- be lightweight, both in terms of runtime and bundle size
+- support (theoretically) any environment without much hassle
+- provide a solid foundation for all kinds of applications on telegram platform
+- provide a convenient high-level api for the most commonly used features
+
+mtcute is **NOT** and will never be:
+- a library for spam/flood or otherwise malicious activities
+- a fully feature-complete library - highlevel apis will never cover the entirety of the apis. feel free to contribute, though!
+- a drop-in replacement for (insert library name)
+- a teapot
 
 ## setting up for development
 
