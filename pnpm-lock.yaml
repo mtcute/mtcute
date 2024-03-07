@@ -115,6 +115,19 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(@vitest/browser@0.34.6)(@vitest/ui@0.34.6)(playwright@1.40.1)
 
+  packages/convert:
+    dependencies:
+      '@mtcute/core':
+        specifier: workspace:^
+        version: link:../core
+      '@mtcute/tl':
+        specifier: '*'
+        version: link:../tl
+    devDependencies:
+      '@mtcute/test':
+        specifier: workspace:^
+        version: link:../test
+
   packages/core:
     dependencies:
       '@mtcute/file-id':
