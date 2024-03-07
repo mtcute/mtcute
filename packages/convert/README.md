@@ -1,22 +1,46 @@
-# @mtcute/file-id
+# @mtcute/convert
 
-📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_file_id.html)
+📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_convert.html)
 
-This package is used internally by `@mtcute/core` to parse, serialize
-and manipulate TDLib and Bot API compatible File IDs, but can also be used
-for any other purposes.
+This package can be used to convert other libraries sessions to/from mtcute sessions
 
-## Acknowledgements
-This is basically a port of a portion of TDLib APIs, but greatly
-simplified in usage and made to work seamlessly with the rest of the
-mtcute APIs.
+Currently only the libraries that support exporting sessions to strings are supported, namely:
 
-This is a list of files from TDLib repository, from which most of the code was taken:
- - [td/telegram/files/FileManager.cpp](https://github.com/tdlib/td/blob/master/td/telegram/files/FileManager.cpp)
- - [td/telegram/files/FileLocation.hpp](https://github.com/tdlib/td/blob/master/td/telegram/files/FileLocation.hpp)
- - [td/telegram/PhotoSizeSource.h](https://github.com/tdlib/td/blob/master/td/telegram/PhotoSizeSource.h)
- - [td/telegram/PhotoSizeSource.hpp](https://github.com/tdlib/td/blob/master/td/telegram/PhotoSizeSource.hpp)
- - [td/telegram/Version.h](https://github.com/tdlib/td/blob/master/td/telegram/Version.h)
+## [Telethon](https://github.com/LonamiWebs/Telethon)
 
-Additionally, some of the test cases were taken from a similar Python
-library, [luckydonald/telegram_file_id](https://github.com/luckydonald/telegram_file_id)
+> Telethon v2 seems to have removed the ability to export sessions, 
+> so it's currently not supported
+
+```ts
+import { convertFromTelethonSession } from '@mtcute/convert'
+
+const client = new TelegramClient({ ... })
+await client.importSession(convertFromTelethonSession("..."))
+```
+
+## [Pyrogram](https://github.com/gram-js/gramjs)
+
+```ts
+import { convertFromPyrogramSession } from '@mtcute/convert'
+
+const client = new TelegramClient({ ... })
+await client.importSession(convertFromPyrogramSession("..."))
+```
+
+## GramJS
+
+```ts
+import { convertFromGramjsSession } from '@mtcute/convert'
+
+const client = new TelegramClient({ ... })
+await client.importSession(convertFromGramjsSession("..."))
+```
+
+## [MTKruto](https://github.com/MTKruto/MTKruto)
+
+```ts
+import { convertFromMtkrutoSession } from '@mtcute/convert'
+
+const client = new TelegramClient({ ... })
+await client.importSession(convertFromMtkrutoSession("..."))
+```
