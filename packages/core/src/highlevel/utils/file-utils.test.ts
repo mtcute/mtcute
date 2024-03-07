@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { hexDecodeToBuffer, hexEncode, utf8Decode, utf8EncodeToBuffer } from '@mtcute/tl-runtime'
-
+import { getPlatform } from '../../platform.js'
 import {
     extractFileName,
     inflateSvgPath,
@@ -10,28 +9,30 @@ import {
     svgPathToFile,
 } from './file-utils.js'
 
+const p = getPlatform()
+
 describe('isProbablyPlainText', () => {
     it('should return true for buffers only containing printable ascii', () => {
-        expect(isProbablyPlainText(utf8EncodeToBuffer('hello this is some ascii text'))).to.be.true
-        expect(isProbablyPlainText(utf8EncodeToBuffer('hello this is some ascii text\nwith unix new lines'))).to.be.true
-        expect(isProbablyPlainText(utf8EncodeToBuffer('hello this is some ascii text\r\nwith windows new lines'))).to.be
+        expect(isProbablyPlainText(p.utf8Encode('hello this is some ascii text'))).to.be.true
+        expect(isProbablyPlainText(p.utf8Encode('hello this is some ascii text\nwith unix new lines'))).to.be.true
+        expect(isProbablyPlainText(p.utf8Encode('hello this is some ascii text\r\nwith windows new lines'))).to.be
             .true
-        expect(isProbablyPlainText(utf8EncodeToBuffer('hello this is some ascii text\n\twith unix new lines and tabs')))
+        expect(isProbablyPlainText(p.utf8Encode('hello this is some ascii text\n\twith unix new lines and tabs')))
             .to.be.true
         expect(
             isProbablyPlainText(
-                utf8EncodeToBuffer('hello this is some ascii text\r\n\twith windows new lines and tabs'),
+                p.utf8Encode('hello this is some ascii text\r\n\twith windows new lines and tabs'),
             ),
         ).to.be.true
     })
 
     it('should return false for buffers containing some binary data', () => {
-        expect(isProbablyPlainText(utf8EncodeToBuffer('hello this is cedilla: ç'))).to.be.false
-        expect(isProbablyPlainText(utf8EncodeToBuffer('hello this is some ascii text with emojis 🌸'))).to.be.false
+        expect(isProbablyPlainText(p.utf8Encode('hello this is cedilla: ç'))).to.be.false
+        expect(isProbablyPlainText(p.utf8Encode('hello this is some ascii text with emojis 🌸'))).to.be.false
 
         // random strings of 16 bytes
-        expect(isProbablyPlainText(hexDecodeToBuffer('717f80f08eb9d88c3931712c0e2be32f'))).to.be.false
-        expect(isProbablyPlainText(hexDecodeToBuffer('20e8e218e54254c813b261432b0330d7'))).to.be.false
+        expect(isProbablyPlainText(p.hexDecode('717f80f08eb9d88c3931712c0e2be32f'))).to.be.false
+        expect(isProbablyPlainText(p.hexDecode('20e8e218e54254c813b261432b0330d7'))).to.be.false
     })
 })
 
@@ -53,14 +54,14 @@ describe('svgPathToFile', () => {
     it('should convert SVG path to a file', () => {
         const path = 'M 0 0 L 100 0 L 100 100 L 0 100 L 0 0 Z'
 
-        expect(utf8Decode(svgPathToFile(path))).toMatchInlineSnapshot(
+        expect(p.utf8Decode(svgPathToFile(path))).toMatchInlineSnapshot(
             '"<?xml version=\\"1.0\\" encoding=\\"utf-8\\"?><svg version=\\"1.1\\" xmlns=\\"http://www.w3.org/2000/svg\\" xmlns:xlink=\\"http://www.w3.org/1999/xlink\\"viewBox=\\"0 0 512 512\\" xml:space=\\"preserve\\"><path d=\\"M 0 0 L 100 0 L 100 100 L 0 100 L 0 0 Z\\"/></svg>"',
         )
     })
 })
 
 describe('inflateSvgPath', () => {
-    const data = hexDecodeToBuffer(
+    const data = p.hexDecode(
         '1a05b302dc5f4446068649064247424a6a4c704550535b5e665e5e4c044a024c' +
             '074e06414d80588863935fad74be4704854684518b528581904695498b488b56' +
             '965c85438d8191818543894a8f4d834188818a4284498454895d9a6f86074708' +
@@ -85,9 +86,9 @@ describe('inflateSvgPath', () => {
 
 describe('strippedPhotoToJpg', () => {
     // strippedThumb of @Channel_Bot
-    const dataPfp = hexDecodeToBuffer('010808b1f2f95fed673451457033ad1f')
+    const dataPfp = p.hexDecode('010808b1f2f95fed673451457033ad1f')
     // photoStrippedSize of a random image
-    const dataPicture = hexDecodeToBuffer(
+    const dataPicture = p.hexDecode(
         '012728b532aacce4b302d8c1099c74a634718675cb6381f73d3ffd557667d9b5' +
             '816f4c28ce69aa58a863238cf62a334590f999042234cbe1986d03eefe14c68e' +
             '32847cc00ce709ea7ffad577773f78fe54d6c927f78c3db14ac1ccca91a2ef4f' +
@@ -99,7 +100,7 @@ describe('strippedPhotoToJpg', () => {
     )
 
     it('should inflate stripped jpeg (from profile picture)', () => {
-        expect(hexEncode(strippedPhotoToJpg(dataPfp))).toMatchInlineSnapshot(
+        expect(p.hexEncode(strippedPhotoToJpg(dataPfp))).toMatchInlineSnapshot(
             '"ffd8ffe000104a46494600010100000100010000ffdb004300281c1e231e192' +
                 '82321232d2b28303c64413c37373c7b585d4964918099968f808c8aa0b4e6c3a' +
                 '0aadaad8a8cc8ffcbdaeef5ffffff9bc1fffffffaffe6fdfff8ffdb0043012b2' +
@@ -124,7 +125,7 @@ describe('strippedPhotoToJpg', () => {
     })
 
     it('should inflate stripped jpeg (from a picture)', () => {
-        expect(hexEncode(strippedPhotoToJpg(dataPicture))).toMatchInlineSnapshot(
+        expect(p.hexEncode(strippedPhotoToJpg(dataPicture))).toMatchInlineSnapshot(
             '"ffd8ffe000104a46494600010100000100010000ffdb004300281c1e231e192' +
                 '82321232d2b28303c64413c37373c7b585d4964918099968f808c8aa0b4e6c3a' +
                 '0aadaad8a8cc8ffcbdaeef5ffffff9bc1fffffffaffe6fdfff8ffdb0043012b2' +

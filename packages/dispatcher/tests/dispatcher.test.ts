@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { PeersIndex, TelegramClient } from '@mtcute/core'
+import { PeersIndex } from '@mtcute/core'
+import { TelegramClient } from '@mtcute/core/client.js'
+import { StubTelegramClient } from '@mtcute/test'
 
 import { Dispatcher, PropagationAction } from '../src/index.js'
 
 describe('Dispatcher', () => {
     // todo: replace with proper mocked TelegramClient
-    const client = new TelegramClient({ apiId: 0, apiHash: '' })
+    const client = new TelegramClient({ client: new StubTelegramClient({ disableUpdates: false }) })
     const emptyPeers = new PeersIndex()
 
     describe('Raw updates', () => {

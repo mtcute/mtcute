@@ -6,16 +6,17 @@ import { PeersIndex } from '../types/peers/peers-index.js'
 import { RawUpdateHandler } from '../updates/types.js'
 import { AppConfigManagerProxy } from './app-config.js'
 import { WorkerInvoker } from './invoker.js'
-import { connectToWorker } from './platform/connect.js'
-import { ClientMessageHandler, SomeWorker, WorkerCustomMethods } from './protocol.js'
+import { ClientMessageHandler, SendFn, SomeWorker, WorkerCustomMethods } from './protocol.js'
 import { TelegramStorageProxy } from './storage.js'
 
 export interface TelegramWorkerPortOptions {
     worker: SomeWorker
 }
 
-export class TelegramWorkerPort<Custom extends WorkerCustomMethods> implements ITelegramClient {
+export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> implements ITelegramClient {
     constructor(readonly options: TelegramWorkerPortOptions) {}
+
+    abstract connectToWorker(worker: SomeWorker, handler: ClientMessageHandler): [SendFn, () => void]
 
     readonly log = new LogManager('worker')
 
@@ -60,7 +61,7 @@ export class TelegramWorkerPort<Custom extends WorkerCustomMethods> implements I
         }
     }
 
-    private _connection = connectToWorker(this.options.worker, this._onMessage)
+    private _connection = this.connectToWorker(this.options.worker, this._onMessage)
     private _invoker = new WorkerInvoker(this._connection[0])
     private _bind = this._invoker.makeBinder<ITelegramClient>('client')
 

@@ -11,6 +11,9 @@ export default defineConfig({
                 'packages/**/*.test-d.ts',
             ],
         },
+        setupFiles: [
+            './.config/vitest.setup.mts'
+        ]
     },
     define: {
         'import.meta.env.TEST_ENV': '"node"'

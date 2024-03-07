@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { defaultCryptoProviderFactory } from './index.js'
+import { defaultCryptoProvider } from '@mtcute/test'
+
 import { millerRabin } from './miller-rabin.js'
 
 describe(
     'miller-rabin test',
     function () {
         // miller-rabin factorization relies on RNG, so we should use a real random number generator
-        const c = defaultCryptoProviderFactory()
+        const c = defaultCryptoProvider
 
         const testMillerRabin = (n: number | string | bigint, isPrime: boolean) => {
             expect(millerRabin(c, BigInt(n))).eq(isPrime)

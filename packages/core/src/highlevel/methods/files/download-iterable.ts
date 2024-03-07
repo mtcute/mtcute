@@ -2,6 +2,7 @@ import { parseFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { ConnectionKind } from '../../../network/network-manager.js'
+import { getPlatform } from '../../../platform.js'
 import { MtArgumentError, MtUnsupportedError } from '../../../types/errors.js'
 import { ConditionVariable } from '../../../utils/condition-variable.js'
 import { ITelegramClient } from '../../client.types.js'
@@ -56,7 +57,7 @@ export async function* downloadAsIterable(
         if (!fileSize) fileSize = input.fileSize
         location = locationInner
     } else if (typeof input === 'string') {
-        const parsed = parseFileId(input)
+        const parsed = parseFileId(getPlatform(), input)
 
         if (parsed.location._ === 'web') {
             location = fileIdToInputWebFileLocation(parsed)

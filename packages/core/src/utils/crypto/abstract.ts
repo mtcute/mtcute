@@ -55,5 +55,3 @@ export abstract class BaseCryptoProvider {
         return buf
     }
 }
-
-export type CryptoProviderFactory = () => ICryptoProvider

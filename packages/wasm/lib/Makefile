@@ -43,7 +43,7 @@ ifneq ($(OS),Windows_NT)
     endif
 endif
 
-OUT := mtcute.wasm
+OUT := ../mtcute.wasm
 
 $(OUT): $(SOURCES)
 	$(CC) $(CFLAGS) -I . -I utils -o $@ $^

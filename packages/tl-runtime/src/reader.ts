@@ -1,7 +1,6 @@
 import Long from 'long'
 
-import { hexEncode } from './encodings/hex.js'
-import { utf8Decode } from './encodings/utf8.js'
+import { ITlPlatform } from './platform.js'
 
 const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 
@@ -28,6 +27,8 @@ export type TlReaderMap = Record<number, (r: any) => unknown> & {
  * Reader for TL objects.
  */
 export class TlBinaryReader {
+    static platform: ITlPlatform
+
     readonly dataView: DataView
     readonly uint8View: Uint8Array
 
@@ -174,7 +175,7 @@ export class TlBinaryReader {
     }
 
     string(): string {
-        return utf8Decode(this.bytes())
+        return TlBinaryReader.platform.utf8Decode(this.bytes())
     }
 
     object(id = this.uint()): unknown {
@@ -197,7 +198,7 @@ export class TlBinaryReader {
             // mtproto sucks and there's no way we can just skip it
             this.seek(-4)
             const pos = this.pos
-            const error = new TypeError(`Unknown object id: 0x${id.toString(16)}. Content: ${hexEncode(this.raw())}`)
+            const error = new TypeError(`Unknown object id: 0x${id.toString(16)}`)
             this.pos = pos
             throw error
         }

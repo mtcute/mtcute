@@ -1,4 +1,5 @@
-import { CallbackQuery, InlineCallbackQuery, MaybePromise, Message, TelegramClient } from '@mtcute/core'
+import { CallbackQuery, InlineCallbackQuery, MaybePromise, Message } from '@mtcute/core'
+import { TelegramClient } from '@mtcute/core/client.js'
 
 import { UpdateContext } from './base.js'
 

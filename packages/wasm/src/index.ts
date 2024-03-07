@@ -1,7 +1,18 @@
-import { loadWasmBinary } from './init.js'
-import { InitInput, MtcuteWasmModule, SyncInitInput } from './types.js'
+import { MtcuteWasmModule, SyncInitInput } from './types.js'
 
 export * from './types.js'
+
+export function getWasmUrl(): URL {
+    // would be nice if we could just use `new URL('@mtcute/wasm/mtcute.wasm', import.meta.url)`
+    // wherever this is used, but vite does some funky stuff with transitive dependencies
+    // making it not work. probably related to https://github.com/vitejs/vite/issues/8427,
+    // but asking the user to deoptimize the entire @mtcute/web is definitely not a good idea
+    // so we'll just use this hack for now
+    // @only-if-esm
+    return new URL('../mtcute.wasm', import.meta.url)
+    // @/only-if-esm
+    throw new Error('ESM-only')
+}
 
 let wasm!: MtcuteWasmModule
 let compressor!: number
@@ -35,30 +46,19 @@ function getUint8Memory() {
 export function initSync(module: SyncInitInput): void {
     if (wasm !== undefined) return
 
-    if (!(module instanceof WebAssembly.Module)) {
-        module = new WebAssembly.Module(module)
+    if (!(module instanceof WebAssembly.Instance)) {
+        if (!(module instanceof WebAssembly.Module)) {
+            module = new WebAssembly.Module(module)
+        }
+
+        module = new WebAssembly.Instance(module)
     }
 
-    const instance = new WebAssembly.Instance(module)
-
-    wasm = instance.exports as unknown as MtcuteWasmModule
+    wasm = (module as WebAssembly.Instance).exports as unknown as MtcuteWasmModule
     initCommon()
 }
 
 /* c8 ignore end */
-
-/**
- * Init the WASM blob asynchronously (e.g. by passing a URL to the WASM file)
- *
- * By default, will try to determine the best way to load the WASM file automatically.
- */
-export async function initAsync(input?: InitInput): Promise<void> {
-    if (wasm !== undefined) return
-    const instance = await loadWasmBinary(input)
-
-    wasm = instance.exports as unknown as MtcuteWasmModule
-    initCommon()
-}
 
 /**
  * Deflate some data with zlib headers and max output size

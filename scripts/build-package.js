@@ -17,7 +17,8 @@ function exec(cmd, params) {
 
 function transformFile(file, transform) {
     const content = fs.readFileSync(file, 'utf8')
-    fs.writeFileSync(file, transform(content))
+    const res = transform(content, file)
+    if (res != null) fs.writeFileSync(file, res)
 }
 
 const buildConfig = {
@@ -44,6 +45,7 @@ const buildConfig = {
             config = config({
                 fs,
                 path,
+                glob,
                 exec,
                 transformFile,
                 packageDir,

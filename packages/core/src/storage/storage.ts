@@ -1,6 +1,7 @@
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import { asyncResettable, beforeExit } from '../utils/index.js'
+import { getPlatform } from '../platform.js'
+import { asyncResettable } from '../utils/index.js'
 import { Logger } from '../utils/logger.js'
 import { IMtStorageProvider } from './provider.js'
 import { AuthKeysService } from './service/auth-keys.js'
@@ -62,7 +63,7 @@ export class StorageManager {
         this.driver.setup?.(this.log)
 
         if (this.options.cleanup ?? true) {
-            this._cleanupRestore = beforeExit(() => {
+            this._cleanupRestore = getPlatform().beforeExit(() => {
                 this._destroy().catch((err) => this.log.error('cleanup error: %s', err))
             })
         }

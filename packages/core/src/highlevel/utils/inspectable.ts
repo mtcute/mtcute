@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-argument */
 
-import { base64Encode } from '@mtcute/tl-runtime'
+import { getPlatform } from '../../platform.js'
 
 const customInspectSymbol = Symbol.for('nodejs.util.inspect.custom')
 
@@ -33,7 +33,11 @@ function getAllGettersNames<T>(obj: T): (keyof T)[] {
  * > (getter that caches after its first invocation is also
  * > considered pure in this case)
  */
-export function makeInspectable<T>(obj: new (...args: any[]) => T, props?: (keyof T)[], hide?: (keyof T)[]): void {
+export function makeInspectable<T>(
+    obj: new (...args: any[]) => T,
+    props?: (keyof T)[],
+    hide?: (keyof T)[],
+): typeof obj {
     const getters: (keyof T)[] = props ? props : []
 
     for (const key of getAllGettersNames<T>(obj.prototype)) {
@@ -52,7 +56,7 @@ export function makeInspectable<T>(obj: new (...args: any[]) => T, props?: (keyo
 
                 if (val && typeof val === 'object') {
                     if (val instanceof Uint8Array) {
-                        val = base64Encode(val)
+                        val = getPlatform().base64Encode(val)
                     } else if (typeof val.toJSON === 'function') {
                         val = val.toJSON(true)
                     }
@@ -67,4 +71,6 @@ export function makeInspectable<T>(obj: new (...args: any[]) => T, props?: (keyo
         return ret
     }
     obj.prototype[customInspectSymbol] = obj.prototype.toJSON
+
+    return obj
 }

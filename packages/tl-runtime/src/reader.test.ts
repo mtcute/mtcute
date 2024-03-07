@@ -1,12 +1,15 @@
 // eslint-disable-next-line max-len
 /* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-argument */
 
-// import { randomBytes } from 'crypto'
+// import Long from 'long'
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
 
-import { hexDecodeToBuffer, hexEncode } from './encodings/hex.js'
 import { TlBinaryReader, TlReaderMap } from './reader.js'
+
+// todo: replace with platform-specific packages
+const hexEncode = (buf: Uint8Array) => buf.reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '')
+const hexDecodeToBuffer = (hex: string) => new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)))
 
 let randomBytes: (n: number) => Uint8Array
 
@@ -33,17 +36,25 @@ describe('TlBinaryReader', () => {
         expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0])).uint()).toEqual(0)
         expect(TlBinaryReader.manual(new Uint8Array([1, 0, 0, 0])).uint()).toEqual(1)
         expect(TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4])).uint()).toEqual(67305985)
-        expect(TlBinaryReader.manual(new Uint8Array([0xff, 0xff, 0xff, 0xff])).uint()).toEqual(4294967295)
+        expect(TlBinaryReader.manual(new Uint8Array([0xff, 0xff, 0xff, 0xff])).uint()).toEqual(
+            4294967295,
+        )
     })
 
     it('should read int53', () => {
         expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0])).int53()).toEqual(0)
         expect(TlBinaryReader.manual(new Uint8Array([1, 0, 0, 0, 0, 0, 0, 0])).int53()).toEqual(1)
-        expect(TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4, 0, 0, 0, 0])).int53()).toEqual(67305985)
-        expect(TlBinaryReader.manual(new Uint8Array([1, 0, 1, 0, 1, 0, 1, 0])).int53()).toEqual(281479271743489)
-        expect(TlBinaryReader.manual(new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff])).int53()).toEqual(
-            -1,
+        expect(TlBinaryReader.manual(new Uint8Array([1, 2, 3, 4, 0, 0, 0, 0])).int53()).toEqual(
+            67305985,
         )
+        expect(TlBinaryReader.manual(new Uint8Array([1, 0, 1, 0, 1, 0, 1, 0])).int53()).toEqual(
+            281479271743489,
+        )
+        expect(
+            TlBinaryReader.manual(
+                new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+            ).int53(),
+        ).toEqual(-1)
     })
 
     it('should read long', () => {
@@ -65,16 +76,31 @@ describe('TlBinaryReader', () => {
     })
 
     it('should read float', () => {
-        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0x80, 0x3f])).float()).toBeCloseTo(1, 0.001)
-        expect(TlBinaryReader.manual(new Uint8Array([0xb6, 0xf3, 0x9d, 0x3f])).float()).toBeCloseTo(1.234, 0.001)
-        expect(TlBinaryReader.manual(new Uint8Array([0xfa, 0x7e, 0x2a, 0x3f])).float()).toBeCloseTo(0.666, 0.001)
+        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0x80, 0x3f])).float()).toBeCloseTo(
+            1,
+            0.001,
+        )
+        expect(TlBinaryReader.manual(new Uint8Array([0xb6, 0xf3, 0x9d, 0x3f])).float()).toBeCloseTo(
+            1.234,
+            0.001,
+        )
+        expect(TlBinaryReader.manual(new Uint8Array([0xfa, 0x7e, 0x2a, 0x3f])).float()).toBeCloseTo(
+            0.666,
+            0.001,
+        )
     })
 
     it('should read double', () => {
-        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0, 0, 0, 0xf0, 0x3f])).double()).toBeCloseTo(1, 0.001)
-        expect(TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0, 0, 0, 0x25, 0x40])).double()).toBeCloseTo(10.5, 0.001)
         expect(
-            TlBinaryReader.manual(new Uint8Array([0x9a, 0x99, 0x99, 0x99, 0x99, 0x99, 0x21, 0x40])).double(),
+            TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0, 0, 0, 0xf0, 0x3f])).double(),
+        ).toBeCloseTo(1, 0.001)
+        expect(
+            TlBinaryReader.manual(new Uint8Array([0, 0, 0, 0, 0, 0, 0x25, 0x40])).double(),
+        ).toBeCloseTo(10.5, 0.001)
+        expect(
+            TlBinaryReader.manual(
+                new Uint8Array([0x9a, 0x99, 0x99, 0x99, 0x99, 0x99, 0x21, 0x40]),
+            ).double(),
         ).toBeCloseTo(8.8, 0.001)
     })
 

@@ -1,8 +1,11 @@
 const wasm = require('@mtcute/wasm')
 const { describe, it, before } = require('mocha')
 const { expect } = require('chai')
+const { NodeCryptoProvider } = require('@mtcute/node')
 
-before(() => wasm.initAsync())
+before(async () => {
+    await new NodeCryptoProvider().initialize()
+})
 
 describe('@mtcute/wasm', () => {
     const key = Buffer.from('5468697320697320616E20696D706C655468697320697320616E20696D706C65', 'hex')

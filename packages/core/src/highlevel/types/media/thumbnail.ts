@@ -3,6 +3,7 @@ import Long from 'long'
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
+import { getPlatform } from '../../../platform.js'
 import { MtArgumentError, MtTypeAssertionError } from '../../../types/errors.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
 import { inflateSvgPath, strippedPhotoToJpg, svgPathToFile } from '../../utils/file-utils.js'
@@ -192,7 +193,7 @@ export class Thumbnail extends FileLocation {
         }
 
         if (this._media._ === 'stickerSet') {
-            return toFileId({
+            return toFileId(getPlatform(), {
                 type: td.FileType.Thumbnail,
                 dcId: this.dcId!,
                 fileReference: null,
@@ -210,7 +211,7 @@ export class Thumbnail extends FileLocation {
             })
         }
 
-        return toFileId({
+        return toFileId(getPlatform(), {
             type: this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail,
             dcId: this.dcId!,
             fileReference: this._media.fileReference,
@@ -239,7 +240,7 @@ export class Thumbnail extends FileLocation {
         }
 
         if (this._media._ === 'stickerSet') {
-            return toUniqueFileId(td.FileType.Thumbnail, {
+            return toUniqueFileId(getPlatform(), td.FileType.Thumbnail, {
                 _: 'photo',
                 id: Long.ZERO,
                 source: {
@@ -251,7 +252,7 @@ export class Thumbnail extends FileLocation {
             })
         }
 
-        return toUniqueFileId(this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail, {
+        return toUniqueFileId(getPlatform(), this._media._ === 'photo' ? td.FileType.Photo : td.FileType.Thumbnail, {
             _: 'photo',
             id: this._media.id,
             source: {

@@ -11,9 +11,7 @@ import { StorageManager, StorageManagerExtraOptions } from '../storage/storage.j
 import { MustEqual } from '../types/index.js'
 import {
     asyncResettable,
-    CryptoProviderFactory,
     DcOptions,
-    defaultCryptoProviderFactory,
     defaultProductionDc,
     defaultProductionIpv6Dc,
     defaultTestDc,
@@ -49,10 +47,10 @@ export interface MtClientOptions {
     storageOptions?: StorageManagerExtraOptions
 
     /**
-     * Cryptography provider factory to allow delegating
+     * Cryptography provider to allow delegating
      * crypto to native addon, worker, etc.
      */
-    crypto?: CryptoProviderFactory
+    crypto: ICryptoProvider
 
     /**
      * Whether to use IPv6 datacenters
@@ -96,7 +94,7 @@ export interface MtClientOptions {
      *
      * @default  platform-specific transport: WebSocket on the web, TCP in node
      */
-    transport?: TransportFactory
+    transport: TransportFactory
 
     /**
      * Reconnection strategy.
@@ -254,7 +252,7 @@ export class MtClient extends EventEmitter {
             this.log.mgr.level = params.logLevel
         }
 
-        this.crypto = (params.crypto ?? defaultCryptoProviderFactory)()
+        this.crypto = params.crypto
         this._testMode = Boolean(params.testMode)
 
         let dc = params.defaultDcs

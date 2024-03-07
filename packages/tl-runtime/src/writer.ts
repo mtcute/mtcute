@@ -1,6 +1,6 @@
 import Long from 'long'
 
-import { byteLengthUtf8, utf8EncodeToBuffer } from './encodings/utf8.js'
+import { ITlPlatform } from './platform.js'
 
 const TWO_PWR_32_DBL = (1 << 16) * (1 << 16)
 
@@ -27,7 +27,9 @@ export class TlSerializationCounter {
     /**
      * @param objectMap  Writers map
      */
-    constructor(readonly objectMap: TlWriterMap) {}
+    constructor(
+        readonly objectMap: TlWriterMap,
+    ) {}
 
     /**
      * Count bytes required to serialize the given object.
@@ -115,7 +117,7 @@ export class TlSerializationCounter {
     }
 
     string(val: string): void {
-        const length = byteLengthUtf8(val)
+        const length = TlBinaryWriter.platform.utf8ByteLength(val)
         this.count += TlSerializationCounter.countBytesOverhead(length) + length
     }
 
@@ -134,6 +136,8 @@ export class TlSerializationCounter {
  * Writer for TL objects.
  */
 export class TlBinaryWriter {
+    static platform: ITlPlatform
+
     readonly dataView: DataView
     readonly uint8View: Uint8Array
 
@@ -192,9 +196,14 @@ export class TlBinaryWriter {
      * @param obj  Object to serialize
      * @param knownSize  In case the size is known, pass it here
      */
-    static serializeObject(objectMap: TlWriterMap, obj: { _: string }, knownSize = -1): Uint8Array {
+    static serializeObject(
+        objectMap: TlWriterMap,
+        obj: { _: string },
+        knownSize = -1,
+    ): Uint8Array {
         if (knownSize === -1) {
-            knownSize = objectMap._staticSize[obj._] || TlSerializationCounter.countNeededBytes(objectMap, obj)
+            knownSize =
+                objectMap._staticSize[obj._] || TlSerializationCounter.countNeededBytes(objectMap, obj)
         }
 
         const writer = TlBinaryWriter.alloc(objectMap, knownSize)
@@ -298,7 +307,7 @@ export class TlBinaryWriter {
     }
 
     string(val: string): void {
-        this.bytes(utf8EncodeToBuffer(val))
+        this.bytes(TlBinaryWriter.platform.utf8Encode(val))
     }
 
     // hot path, avoid additional runtime checks

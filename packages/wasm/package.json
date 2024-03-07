@@ -7,13 +7,15 @@
     "license": "MIT",
     "main": "src/index.ts",
     "type": "module",
+    "sideEffects": false,
     "scripts": {
         "docs": "typedoc",
         "build": "pnpm run -w build-package wasm",
         "build:wasm": "docker build --output=lib --target=binaries lib"
     },
-    "browser": {
-        "./src/init.js": "./src/init.web.js"
+    "exports": {
+        ".": "./src/index.ts",
+        "./mtcute.wasm": "./mtcute.wasm"
     },
     "distOnlyFields": {
         "exports": {
@@ -25,6 +27,8 @@
         }
     },
     "devDependencies": {
-        "@mtcute/tl-runtime": "workspace:^"
+        "@mtcute/core": "workspace:^",
+        "@mtcute/web": "workspace:^",
+        "@mtcute/node": "workspace:^"
     }
 }

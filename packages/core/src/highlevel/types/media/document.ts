@@ -1,6 +1,7 @@
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
+import { getPlatform } from '../../../platform.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { FileLocation } from '../files/index.js'
@@ -123,7 +124,7 @@ export abstract class RawDocument extends FileLocation {
      * representing this document.
      */
     get fileId(): string {
-        return toFileId({
+        return toFileId(getPlatform(), {
             type: this._fileIdType(),
             dcId: this.raw.dcId,
             fileReference: this.raw.fileReference,
@@ -139,7 +140,7 @@ export abstract class RawDocument extends FileLocation {
      * Get a unique File ID representing this document.
      */
     get uniqueFileId(): string {
-        return toUniqueFileId(td.FileType.Document, {
+        return toUniqueFileId(getPlatform(), td.FileType.Document, {
             _: 'common',
             id: this.raw.id,
         })

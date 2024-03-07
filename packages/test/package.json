@@ -18,8 +18,21 @@
     },
     "peerDependencies": {
         "@mtcute/core": "workspace:^",
+        "@mtcute/node": "workspace:^",
+        "@mtcute/web": "workspace:^",
         "@mtcute/tl": "workspace:*",
         "vitest": "^0.34.6"
+    },
+    "peerDependenciesMeta": {
+        "@mtcute/node": {
+            "optional": true
+        },
+        "@mtcute/web": {
+            "optional": true
+        }
+    },
+    "browser": {
+        "./src/platform.js": "./src/platform.web.js"
     },
     "distOnlyFields": {
         "exports": {

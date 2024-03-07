@@ -7,8 +7,7 @@ import Long from 'long'
 import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
-import { MemoryStorage } from '../storage/providers/memory/index.js'
-import { MaybeArray, MaybePromise, PartialExcept, PartialOnly } from '../types/index.js'
+import { MaybeArray, MaybePromise, MtUnsupportedError, PartialExcept, PartialOnly } from '../types/index.js'
 import { BaseTelegramClient, BaseTelegramClientOptions } from './base.js'
 import { ITelegramClient } from './client.types.js'
 import { checkPassword } from './methods/auth/check-password.js'
@@ -95,7 +94,6 @@ import { getPeerDialogs } from './methods/dialogs/get-peer-dialogs.js'
 import { iterDialogs } from './methods/dialogs/iter-dialogs.js'
 import { setFoldersOrder } from './methods/dialogs/set-folders-order.js'
 import { downloadAsBuffer } from './methods/files/download-buffer.js'
-import { downloadToFile } from './methods/files/download-file.js'
 import { downloadAsIterable } from './methods/files/download-iterable.js'
 import { downloadAsStream } from './methods/files/download-stream.js'
 import { _normalizeInputFile } from './methods/files/normalize-input-file.js'
@@ -314,21 +312,19 @@ import {
     UserTypingUpdate,
 } from './types/index.js'
 import { makeParsedUpdateHandler, ParsedUpdateHandlerParams } from './updates/parsed.js'
-import { _defaultStorageFactory } from './utils/platform/storage.js'
 import { StringSessionData } from './utils/string-session.js'
 
 // from methods/_init.ts
 // @copy
 type TelegramClientOptions = (
-    | (Omit<BaseTelegramClientOptions, 'storage'> & {
+    | (PartialOnly<Omit<BaseTelegramClientOptions, 'storage'>, 'transport' | 'crypto'> & {
           /**
            * Storage to use for this client.
            *
-           * If a string is passed, it will be used as:
-           *   - a path to a JSON file for Node.js
-           *   - IndexedDB database name for browsers
+           * If a string is passed, it will be used as
+           * a name for the default platform-specific storage provider to use.
            *
-           * If omitted, {@link MemoryStorage} is used
+           * @default `"client.session"`
            */
           storage?: string | ITelegramStorageProvider
       })
@@ -2250,8 +2246,9 @@ export interface TelegramClient extends ITelegramClient {
      * @param params  File download parameters
      */
     downloadAsBuffer(location: FileDownloadLocation, params?: FileDownloadParameters): Promise<Uint8Array>
+
     /**
-     * Download a remote file to a local file (only for NodeJS).
+     * Download a remote file to a local file (only for Node.js).
      * Promise will resolve once the download is complete.
      *
      * **Available**: ✅ both users and bots
@@ -2270,6 +2267,15 @@ export interface TelegramClient extends ITelegramClient {
      * @param params  Download parameters
      */
     downloadAsIterable(input: FileDownloadLocation, params?: FileDownloadParameters): AsyncIterableIterator<Uint8Array>
+
+    /**
+     * Download a remote file as a Node.js Readable stream.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param params  File download parameters
+     */
+    downloadAsNodeStream(location: FileDownloadLocation, params?: FileDownloadParameters): import('stream').Readable
     /**
      * Download a file and return it as a readable stream,
      * streaming file contents.
@@ -2323,9 +2329,6 @@ export interface TelegramClient extends ITelegramClient {
     uploadFile(params: {
         /**
          * Upload file source.
-         *
-         * > **Note**: `fs.ReadStream` is a subclass of `stream.Readable` and contains
-         * > info about file name, thus you don't need to pass them explicitly.
          */
         file: UploadFileLike
 
@@ -5132,6 +5135,8 @@ export interface TelegramClient extends ITelegramClient {
 
 export type { TelegramClientOptions }
 
+export * from './base.js'
+
 export class TelegramClient extends EventEmitter implements ITelegramClient {
     _client: ITelegramClient
     constructor(opts: TelegramClientOptions) {
@@ -5140,20 +5145,13 @@ export class TelegramClient extends EventEmitter implements ITelegramClient {
         if ('client' in opts) {
             this._client = opts.client
         } else {
-            let storage: ITelegramStorageProvider
-
-            if (typeof opts.storage === 'string') {
-                storage = _defaultStorageFactory(opts.storage)
-            } else if (!opts.storage) {
-                storage = new MemoryStorage()
-            } else {
-                storage = opts.storage
+            if (!opts.storage || typeof opts.storage === 'string' || !opts.transport || !opts.crypto) {
+                throw new MtUnsupportedError(
+                    'You need to explicitly provide storage, transport and crypto for @mtcute/core',
+                )
             }
 
-            this._client = new BaseTelegramClient({
-                ...opts,
-                storage,
-            })
+            this._client = new BaseTelegramClient(opts as BaseTelegramClientOptions)
         }
 
         // @ts-expect-error codegen
@@ -5447,9 +5445,6 @@ TelegramClient.prototype.setFoldersOrder = function (...args) {
 }
 TelegramClient.prototype.downloadAsBuffer = function (...args) {
     return downloadAsBuffer(this._client, ...args)
-}
-TelegramClient.prototype.downloadToFile = function (...args) {
-    return downloadToFile(this._client, ...args)
 }
 TelegramClient.prototype.downloadAsIterable = function (...args) {
     return downloadAsIterable(this._client, ...args)

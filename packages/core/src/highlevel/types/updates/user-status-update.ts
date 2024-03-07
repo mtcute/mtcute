@@ -46,4 +46,4 @@ export class UserStatusUpdate {
 }
 
 memoizeGetters(UserStatusUpdate, ['_parsedStatus' as keyof UserStatusUpdate])
-makeInspectable(UserStatusUpdate)
+makeInspectable(UserStatusUpdate, undefined, ['_parsedStatus' as keyof UserStatusUpdate])

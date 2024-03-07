@@ -2,8 +2,11 @@
 import Long from 'long'
 import { describe, expect, it } from 'vitest'
 
-import { hexDecodeToBuffer, hexEncode } from '../src/encodings/hex.js'
 import { TlBinaryWriter, TlSerializationCounter, TlWriterMap } from './writer.js'
+
+// todo: replace with platform-specific packages
+const hexEncode = (buf: Uint8Array) => buf.reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '')
+const hexDecodeToBuffer = (hex: string) => new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)))
 
 let randomBytes: (n: number) => Uint8Array
 
@@ -89,6 +92,10 @@ describe('TlBinaryWriter', () => {
         new DataView(buffer.buffer).setUint32(1, 1000, true)
         buffer.set(random1000bytes, 4)
         expect(testSingleMethod(1004, (w) => w.bytes(random1000bytes))).toEqual(hexEncode(buffer))
+    })
+
+    it('should write tg-encoded string', () => {
+        expect(testSingleMethod(8, (w) => w.string('test'))).toEqual('0474657374000000')
     })
 
     const stubObjectsMap: TlWriterMap = {

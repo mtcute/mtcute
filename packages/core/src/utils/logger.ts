@@ -1,25 +1,6 @@
-import { hexEncode } from '@mtcute/tl-runtime'
+import { getPlatform } from '../platform.js'
 
-import { _defaultLoggingHandler } from './platform/logging.js'
-
-let defaultLogLevel = 3
-
-/* c8 ignore start */
-if (typeof process !== 'undefined') {
-    const envLogLevel = parseInt(process.env.MTCUTE_LOG_LEVEL ?? '')
-
-    if (!isNaN(envLogLevel)) {
-        defaultLogLevel = envLogLevel
-    }
-} else if (typeof localStorage !== 'undefined') {
-    const localLogLevel = parseInt(localStorage.MTCUTE_LOG_LEVEL as string)
-
-    if (!isNaN(localLogLevel)) {
-        defaultLogLevel = localLogLevel
-    }
-}
-/* c8 ignore end */
-
+const DEFAULT_LOG_LEVEL = 3
 const FORMATTER_RE = /%[a-zA-Z]/g
 
 /**
@@ -81,7 +62,7 @@ export class Logger {
                     args.splice(idx, 1)
 
                     if (m === '%h') {
-                        if (ArrayBuffer.isView(val)) return hexEncode(val as Uint8Array)
+                        if (ArrayBuffer.isView(val)) return this.mgr.platform.hexEncode(val as Uint8Array)
                         if (typeof val === 'number' || typeof val === 'bigint') return val.toString(16)
 
                         return String(val)
@@ -96,10 +77,10 @@ export class Logger {
                         return JSON.stringify(val, (k, v) => {
                             if (
                                 ArrayBuffer.isView(v) ||
-                                (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data))
+                                (typeof v === 'object' && v.type === 'Buffer' && Array.isArray(v.data)) // todo: how can we do this better?
                             ) {
                                 // eslint-disable-next-line
-                                let str = v.data ? Buffer.from(v.data as number[]).toString('hex') : hexEncode(v)
+                                let str = v.data ? Buffer.from(v.data as number[]).toString('hex') : this.mgr.platform.hexEncode(v)
 
                                 if (str.length > 300) {
                                     str = str.slice(0, 300) + '...'
@@ -171,8 +152,10 @@ export class LogManager extends Logger {
 
     private _filter: (tag: string) => boolean = defaultFilter
 
-    level = defaultLogLevel
-    handler = _defaultLoggingHandler
+    readonly platform = getPlatform()
+
+    level = this.platform.getDefaultLogLevel() ?? DEFAULT_LOG_LEVEL
+    handler = this.platform.log.bind(this.platform)
 
     /**
      * Create a {@link Logger} with the given tag

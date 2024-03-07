@@ -254,7 +254,7 @@ module.exports = {
             },
         },
         {
-            files: ['**/scripts/**', '*.test.ts', 'packages/create-*/**', '**/build.config.cjs'],
+            files: ['**/scripts/**', '*.test.ts', 'packages/create-*/**', '**/build.config.cjs', 'packages/node/**'],
             rules: {
                 'no-console': 'off',
                 'no-restricted-imports': [
@@ -273,7 +273,7 @@ module.exports = {
             },
         },
         {
-            files: ['e2e/**'],
+            files: ['e2e/**', 'packages/node/**'],
             rules: {
                 'no-restricted-globals': 'off',
             },

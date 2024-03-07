@@ -1,5 +1,4 @@
-import { hexDecodeToBuffer, utf8EncodeToBuffer } from '@mtcute/tl-runtime'
-
+import { getPlatform } from '../../platform.js'
 import { MtArgumentError } from '../../types/errors.js'
 import { concatBuffers } from '../../utils/buffer-utils.js'
 
@@ -33,7 +32,7 @@ export function isProbablyPlainText(buf: Uint8Array): boolean {
 }
 
 // from https://github.com/telegramdesktop/tdesktop/blob/bec39d89e19670eb436dc794a8f20b657cb87c71/Telegram/SourceFiles/ui/image/image.cpp#L225
-const JPEG_HEADER = hexDecodeToBuffer(
+const JPEG_HEADER = () => getPlatform().hexDecode(
     'ffd8ffe000104a46494600010100000100010000ffdb004300281c1e231e1928' +
         '2321232d2b28303c64413c37373c7b585d4964918099968f808c8aa0b4e6c3a0aad' +
         'aad8a8cc8ffcbdaeef5ffffff9bc1fffffffaffe6fdfff8ffdb0043012b2d2d3c35' +
@@ -54,6 +53,7 @@ const JPEG_HEADER = hexDecodeToBuffer(
         'b6b7b8b9bac2c3c4c5c6c7c8c9cad2d3d4d5d6d7d8d9dae2e3e4e5e6e7e8e9eaf2f' +
         '3f4f5f6f7f8f9faffda000c03010002110311003f00',
 )
+let JPEG_HEADER_BYTES: Uint8Array | null = null
 const JPEG_FOOTER = new Uint8Array([0xff, 0xd9])
 
 /**
@@ -64,7 +64,11 @@ export function strippedPhotoToJpg(stripped: Uint8Array): Uint8Array {
         throw new MtArgumentError('Invalid stripped JPEG')
     }
 
-    const result = concatBuffers([JPEG_HEADER, stripped.slice(3), JPEG_FOOTER])
+    if (JPEG_HEADER_BYTES === null) {
+        JPEG_HEADER_BYTES = JPEG_HEADER()
+    }
+
+    const result = concatBuffers([JPEG_HEADER_BYTES, stripped.slice(3), JPEG_FOOTER])
     result[164] = stripped[1]
     result[166] = stripped[2]
 
@@ -108,7 +112,7 @@ export function inflateSvgPath(encoded: Uint8Array): string {
  * @param path
  */
 export function svgPathToFile(path: string): Uint8Array {
-    return utf8EncodeToBuffer(
+    return getPlatform().utf8Encode(
         '<?xml version="1.0" encoding="utf-8"?>' +
             '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"' +
             'viewBox="0 0 512 512" xml:space="preserve">' +

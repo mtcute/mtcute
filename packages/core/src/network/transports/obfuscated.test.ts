@@ -2,9 +2,12 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { defaultTestCryptoProvider, u8HexDecode } from '@mtcute/test'
 
-import { hexDecodeToBuffer, hexEncode, LogManager } from '../../utils/index.js'
+import { getPlatform } from '../../platform.js'
+import { LogManager } from '../../utils/index.js'
 import { IntermediatePacketCodec } from './intermediate.js'
 import { MtProxyInfo, ObfuscatedPacketCodec } from './obfuscated.js'
+
+const p = getPlatform()
 
 describe('ObfuscatedPacketCodec', () => {
     const create = async (randomSource?: string, proxy?: MtProxyInfo) => {
@@ -22,7 +25,7 @@ describe('ObfuscatedPacketCodec', () => {
 
             const tag = await codec.tag()
 
-            expect(hexEncode(tag)).toEqual(
+            expect(p.hexEncode(tag)).toEqual(
                 'ff'.repeat(56) + 'fce8ab2203db2bff', // encrypted part
             )
         })
@@ -40,7 +43,7 @@ describe('ObfuscatedPacketCodec', () => {
 
                 const tag = await codec.tag()
 
-                expect(hexEncode(tag)).toEqual(
+                expect(p.hexEncode(tag)).toEqual(
                     'ff'.repeat(56) + 'ecec4cbda8bb188b', // encrypted part with dcId = 1
                 )
             })
@@ -57,7 +60,7 @@ describe('ObfuscatedPacketCodec', () => {
 
                 const tag = await codec.tag()
 
-                expect(hexEncode(tag)).toEqual(
+                expect(p.hexEncode(tag)).toEqual(
                     'ff'.repeat(56) + 'ecec4cbdb89c188b', // encrypted part with dcId = 10001
                 )
             })
@@ -74,7 +77,7 @@ describe('ObfuscatedPacketCodec', () => {
 
                 const tag = await codec.tag()
 
-                expect(hexEncode(tag)).toEqual(
+                expect(p.hexEncode(tag)).toEqual(
                     'ff'.repeat(56) + 'ecec4cbd5644188b', // encrypted part with dcId = -1
                 )
             })
@@ -124,7 +127,7 @@ describe('ObfuscatedPacketCodec', () => {
     it('should correctly create aes ctr for mtproxy', async () => {
         const proxy: MtProxyInfo = {
             dcId: 1,
-            secret: hexDecodeToBuffer('00112233445566778899aabbccddeeff'),
+            secret: p.hexDecode('00112233445566778899aabbccddeeff'),
             test: true,
             media: false,
         }
@@ -137,20 +140,20 @@ describe('ObfuscatedPacketCodec', () => {
         expect(spyCreateAesCtr).toHaveBeenCalledTimes(2)
         expect(spyCreateAesCtr).toHaveBeenNthCalledWith(
             1,
-            hexDecodeToBuffer('dd03188944590983e28dad14d97d0952389d118af4ffcbdb28d56a6a612ef7a6'),
+            p.hexDecode('dd03188944590983e28dad14d97d0952389d118af4ffcbdb28d56a6a612ef7a6'),
             u8HexDecode('936b33fa7f97bae025102532233abb26'),
             true,
         )
         expect(spyCreateAesCtr).toHaveBeenNthCalledWith(
             2,
-            hexDecodeToBuffer('413b8e08021fbb08a2962b6d7187194fe46565c6b329d3bbdfcffd4870c16119'),
+            p.hexDecode('413b8e08021fbb08a2962b6d7187194fe46565c6b329d3bbdfcffd4870c16119'),
             u8HexDecode('db6aeee6883f45f95def566dadb4b610'),
             false,
         )
     })
 
     it('should correctly encrypt the underlying codec', async () => {
-        const data = hexDecodeToBuffer('6cfeffff')
+        const data = p.hexDecode('6cfeffff')
         const msg1 = 'a1020630a410e940'
         const msg2 = 'f53ff53f371db495'
 
@@ -158,8 +161,8 @@ describe('ObfuscatedPacketCodec', () => {
 
         await codec.tag()
 
-        expect(hexEncode(await codec.encode(data))).toEqual(msg1)
-        expect(hexEncode(await codec.encode(data))).toEqual(msg2)
+        expect(p.hexEncode(await codec.encode(data))).toEqual(msg1)
+        expect(p.hexEncode(await codec.encode(data))).toEqual(msg2)
     })
 
     it('should correctly decrypt the underlying codec', async () => {
@@ -176,8 +179,8 @@ describe('ObfuscatedPacketCodec', () => {
             log.push(e.toString())
         })
 
-        codec.feed(hexDecodeToBuffer(msg1))
-        codec.feed(hexDecodeToBuffer(msg2))
+        codec.feed(p.hexDecode(msg1))
+        codec.feed(p.hexDecode(msg2))
 
         await vi.waitFor(() => expect(log).toEqual(['Error: Transport error: 404', 'Error: Transport error: 404']))
     })

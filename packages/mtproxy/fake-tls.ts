@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
-import { IPacketCodec, WrappedCodec } from '@mtcute/core'
-import { bigIntModInv, bigIntModPow, bigIntToBuffer, bufferToBigInt, ICryptoProvider } from '@mtcute/core/utils.js'
+import { IPacketCodec, WrappedCodec } from '@mtcute/node'
+import { bigIntModInv, bigIntModPow, bigIntToBuffer, bufferToBigInt, ICryptoProvider } from '@mtcute/node/utils.js'
 
 const MAX_TLS_PACKET_LENGTH = 2878
 const TLS_FIRST_PREFIX = Buffer.from('140303000101', 'hex')

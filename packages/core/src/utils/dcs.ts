@@ -49,7 +49,6 @@ export interface DcOptions {
     media: BasicDcOption
 }
 
-/** @internal */
 export const defaultProductionDc: DcOptions = {
     main: {
         ipAddress: '149.154.167.50',
@@ -64,7 +63,6 @@ export const defaultProductionDc: DcOptions = {
     },
 }
 
-/** @internal */
 export const defaultProductionIpv6Dc: DcOptions = {
     main: {
         ipAddress: '2001:067c:04e8:f002:0000:0000:0000:000a',
@@ -81,7 +79,6 @@ export const defaultProductionIpv6Dc: DcOptions = {
     },
 }
 
-/** @internal */
 export const defaultTestDc: DcOptions = {
     main: {
         ipAddress: '149.154.167.40',
@@ -96,7 +93,6 @@ export const defaultTestDc: DcOptions = {
     },
 }
 
-/** @internal */
 export const defaultTestIpv6Dc: DcOptions = {
     main: {
         ipAddress: '2001:67c:4e8:f002::e',

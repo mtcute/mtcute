@@ -21,6 +21,10 @@ function runForFile(dir, file, single = true) {
 
     let cmds = runFile(file)
 
+    if (!cmds) {
+        return
+    }
+
     const options = {
         env: {
             ...env,

@@ -273,6 +273,7 @@ async function addSingleMethod(state, fileName) {
             }
 
             const isExported = (stmt.modifiers || []).find((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
+            const isDeclare = (stmt.modifiers || []).find((mod) => mod.kind === ts.SyntaxKind.DeclareKeyword)
             const isInitialize = checkForFlag(stmt, '@initialize')
             const isManualImpl = checkForFlag(stmt, '@manual-impl')
             const isInitializeSuper = isInitialize === 'super'
@@ -327,7 +328,7 @@ async function addSingleMethod(state, fileName) {
                 })
             }
 
-            if (!isExported) continue
+            if (!isExported && !isDeclare) continue
 
             const firstArg = stmt.parameters[0]
 
@@ -344,7 +345,7 @@ async function addSingleMethod(state, fileName) {
                 state.methods.used[name] = relPath
             }
 
-            if (isExported) {
+            if (isExported || isDeclare) {
                 const isPrivate = checkForFlag(stmt, '@internal')
                 const isManual = checkForFlag(stmt, '@manual')
                 const isNoemit = checkForFlag(stmt, '@noemit')
@@ -358,6 +359,7 @@ async function addSingleMethod(state, fileName) {
                         isPrivate,
                         isManual,
                         isNoemit,
+                        isDeclare,
                         shouldEmit,
                         func: stmt,
                         comment: getLeadingComments(stmt),
@@ -369,12 +371,14 @@ async function addSingleMethod(state, fileName) {
                         hasOverloads: hasOverloads[name] && !isOverload,
                     })
 
-                    if (!(module in state.imports)) {
-                        state.imports[module] = new Set()
-                    }
+                    if (!isDeclare) {
+                        if (!(module in state.imports)) {
+                            state.imports[module] = new Set()
+                        }
 
-                    if (!isManual || isManual.split('=')[1] !== 'noemit') {
-                        state.imports[module].add(name)
+                        if (!isManual || isManual.split('=')[1] !== 'noemit') {
+                            state.imports[module].add(name)
+                        }
                     }
                 }
             }
@@ -399,6 +403,9 @@ async function addSingleMethod(state, fileName) {
                 }
 
                 state.imports[module].add(stmt.name.escapedText)
+
+                state.exported[module] = state.exported[module] || new Set()
+                state.exported[module].add(stmt.name.escapedText)
                 continue
             }
 
@@ -429,6 +436,9 @@ async function addSingleMethod(state, fileName) {
             }
 
             state.imports[module].add(stmt.name.escapedText)
+
+            state.exported[module] = state.exported[module] || new Set()
+            state.exported[module].add(stmt.name.escapedText)
         } else if (isCopy) {
             state.copy.push({ from: relPath, code: stmt.getFullText().trim() })
         } else if (isTypeExported) {
@@ -442,6 +452,7 @@ async function main() {
     const output = fs.createWriteStream(targetFile)
     const state = {
         imports: {},
+        exported: {},
         fields: [],
         init: [],
         methods: {
@@ -527,6 +538,7 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
             available,
             rawApiMethods,
             dependencies,
+            isDeclare,
         }) => {
             if (!available && !overload) {
                 // no @available directive
@@ -659,7 +671,7 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
                     output.write(`${name}${generics}(${parameters})${returnType}\n`)
                 }
 
-                if (!overload && !isManual) {
+                if (!overload && !isManual && !isDeclare) {
                     if (hasOverloads) {
                         classProtoDecls.push('// @ts-expect-error this kinda breaks typings for overloads, idc')
                     }
@@ -677,6 +689,7 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
     output.write('}\n')
 
     output.write('\nexport type { TelegramClientOptions }\n')
+    output.write('\nexport * from "./base.js"\n')
     output.write('\nexport class TelegramClient extends EventEmitter implements ITelegramClient {\n')
 
     output.write('    _client: ITelegramClient\n')
@@ -737,9 +750,14 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
     const outputMethods = fs.createWriteStream(targetFileMethods)
 
     outputMethods.write('/* THIS FILE WAS AUTO-GENERATED */\n')
-    state.methods.list.forEach(({ module, name, overload }) => {
-        if (overload) return
+    state.methods.list.forEach(({ module, name, overload, isDeclare }) => {
+        if (overload || isDeclare) return
         outputMethods.write(`export { ${name} } from '${module}'\n`)
+
+        if (state.exported[module]) {
+            outputMethods.write(`export type { ${[...state.exported[module]].join(', ')} } from '${module}'\n`)
+            delete state.exported[module]
+        }
     })
 
     await new Promise((resolve) => { outputMethods.end(resolve) })

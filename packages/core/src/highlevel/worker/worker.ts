@@ -1,40 +1,88 @@
-import { BaseTelegramClient, BaseTelegramClientOptions } from '../base.js'
+import { BaseTelegramClient } from '../base.js'
 import { serializeError } from './errors.js'
-import { registerWorker } from './platform/register.js'
 import { RespondFn, WorkerCustomMethods, WorkerInboundMessage, WorkerMessageHandler } from './protocol.js'
 
 export interface TelegramWorkerOptions<T extends WorkerCustomMethods> {
-    client: BaseTelegramClient | BaseTelegramClientOptions
+    client: BaseTelegramClient
     customMethods?: T
 }
 
-export function makeTelegramWorker<T extends WorkerCustomMethods>(params: TelegramWorkerOptions<T>) {
-    const { client: client_, customMethods } = params
+export abstract class TelegramWorker<T extends WorkerCustomMethods> {
+    readonly client: BaseTelegramClient
+    readonly broadcast: RespondFn
 
-    const client = client_ instanceof BaseTelegramClient ? client_ : new BaseTelegramClient(client_)
+    abstract registerWorker(handler: WorkerMessageHandler): RespondFn
 
-    const onInvoke = (msg: Extract<WorkerInboundMessage, { type: 'invoke' }>, respond: RespondFn) => {
+    constructor(readonly params: TelegramWorkerOptions<T>) {
+        this.broadcast = this.registerWorker((message, respond) => {
+            switch (message.type) {
+                case 'invoke':
+                    this.onInvoke(message, respond)
+                    break
+            }
+        })
+
+        const client = params.client
+        this.client = client
+
+        client.log.mgr.handler = (color, level, tag, fmt, args) =>
+            this.broadcast({
+                type: 'log',
+                color,
+                level,
+                tag,
+                fmt,
+                args,
+            })
+        client.onError((err) =>
+            this.broadcast({
+                type: 'error',
+                error: err,
+            }),
+        )
+
+        if (client.updates) {
+            client.onUpdate((update, peers) =>
+                this.broadcast({
+                    type: 'update',
+                    update,
+                    users: peers.users,
+                    chats: peers.chats,
+                    hasMin: peers.hasMin,
+                }),
+            )
+        } else {
+            client.onServerUpdate((update) =>
+                this.broadcast({
+                    type: 'server_update',
+                    update,
+                }),
+            )
+        }
+    }
+
+    private onInvoke(msg: Extract<WorkerInboundMessage, { type: 'invoke' }>, respond: RespondFn) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let target: any
 
         switch (msg.target) {
             case 'custom':
-                target = customMethods
+                target = this.params.customMethods
                 break
             case 'client':
-                target = client
+                target = this.client
                 break
             case 'storage':
-                target = client.storage
+                target = this.client.storage
                 break
             case 'storage-self':
-                target = client.storage.self
+                target = this.client.storage.self
                 break
             case 'storage-peers':
-                target = client.storage.peers
+                target = this.client.storage.peers
                 break
             case 'app-config':
-                target = client.appConfig
+                target = this.client.appConfig
                 break
 
             default: {
@@ -79,50 +127,5 @@ export function makeTelegramWorker<T extends WorkerCustomMethods>(params: Telegr
                     error: serializeError(err),
                 })
             })
-    }
-
-    const onMessage: WorkerMessageHandler = (message, respond) => {
-        switch (message.type) {
-            case 'invoke':
-                onInvoke(message, respond)
-                break
-        }
-    }
-
-    const broadcast = registerWorker(onMessage)
-
-    client.log.mgr.handler = (color, level, tag, fmt, args) =>
-        broadcast({
-            type: 'log',
-            color,
-            level,
-            tag,
-            fmt,
-            args,
-        })
-    client.onError((err) =>
-        broadcast({
-            type: 'error',
-            error: err,
-        }),
-    )
-
-    if (client.updates) {
-        client.onUpdate((update, peers) =>
-            broadcast({
-                type: 'update',
-                update,
-                users: peers.users,
-                chats: peers.chats,
-                hasMin: peers.hasMin,
-            }),
-        )
-    } else {
-        client.onServerUpdate((update) =>
-            broadcast({
-                type: 'server_update',
-                update,
-            }),
-        )
     }
 }

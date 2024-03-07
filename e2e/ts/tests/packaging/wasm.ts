@@ -1,9 +1,12 @@
 import { expect } from 'chai'
 import { before, describe, it } from 'mocha'
 
-import { ige256Decrypt, ige256Encrypt, initAsync } from '@mtcute/wasm'
+import { NodeCryptoProvider } from '@mtcute/node'
+import { ige256Decrypt, ige256Encrypt } from '@mtcute/wasm'
 
-before(() => initAsync())
+before(async () => {
+    await new NodeCryptoProvider().initialize()
+})
 
 describe('@mtcute/wasm', () => {
     const key = Buffer.from('5468697320697320616E20696D706C655468697320697320616E20696D706C65', 'hex')

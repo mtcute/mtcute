@@ -2,7 +2,7 @@
 
 📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_file_id.html)
 
-This package is used internally by `@mtcute/client` to parse, serialize
+This package is used internally by `@mtcute/core` to parse, serialize
 and manipulate TDLib and Bot API compatible File IDs, but can also be used
 for any other purposes.
 

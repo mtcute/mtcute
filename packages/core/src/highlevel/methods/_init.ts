@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 // @copy
-import { MemoryStorage } from '../../storage/providers/memory/index.js'
+import { MtUnsupportedError, PartialOnly } from '../../types/index.js'
 import { BaseTelegramClient, BaseTelegramClientOptions } from '../base.js'
 import { TelegramClient } from '../client.js'
 import { ITelegramClient } from '../client.types.js'
@@ -11,19 +11,16 @@ import { ITelegramStorageProvider } from '../storage/provider.js'
 import { Conversation } from '../types/conversation.js'
 // @copy
 import { makeParsedUpdateHandler, ParsedUpdateHandlerParams } from '../updates/parsed.js'
-// @copy
-import { _defaultStorageFactory } from '../utils/platform/storage.js'
 
 // @copy
-type TelegramClientOptions = ((Omit<BaseTelegramClientOptions, 'storage'> & {
+type TelegramClientOptions = ((PartialOnly<Omit<BaseTelegramClientOptions, 'storage'>, 'transport' | 'crypto'> & {
     /**
      * Storage to use for this client.
      *
-     * If a string is passed, it will be used as:
-     *   - a path to a JSON file for Node.js
-     *   - IndexedDB database name for browsers
+     * If a string is passed, it will be used as
+     * a name for the default platform-specific storage provider to use.
      *
-     * If omitted, {@link MemoryStorage} is used
+     * @default `"client.session"`
      */
     storage?: string | ITelegramStorageProvider
 }) | ({ client: ITelegramClient })) & {
@@ -37,41 +34,17 @@ type TelegramClientOptions = ((Omit<BaseTelegramClientOptions, 'storage'> & {
     skipConversationUpdates?: boolean
 }
 
-// // @initialize=super
-// /** @internal */
-// function _initializeClientSuper(this: TelegramClient, opts: TelegramClientOptions) {
-//     if (typeof opts.storage === 'string') {
-//         opts.storage = _defaultStorageFactory(opts.storage)
-//     } else if (!opts.storage) {
-//         opts.storage = new MemoryStorage()
-//     }
-
-//     /* eslint-disable @typescript-eslint/no-unsafe-call */
-//     // @ts-expect-error codegen
-//     super(opts)
-//     /* eslint-enable @typescript-eslint/no-unsafe-call */
-// }
-
 // @initialize
 /** @internal */
 function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
     if ('client' in opts) {
         this._client = opts.client
     } else {
-        let storage: ITelegramStorageProvider
-
-        if (typeof opts.storage === 'string') {
-            storage = _defaultStorageFactory(opts.storage)
-        } else if (!opts.storage) {
-            storage = new MemoryStorage()
-        } else {
-            storage = opts.storage
+        if (!opts.storage || typeof opts.storage === 'string' || !opts.transport || !opts.crypto) {
+            throw new MtUnsupportedError('You need to explicitly provide storage, transport and crypto for @mtcute/core')
         }
 
-        this._client = new BaseTelegramClient({
-            ...opts,
-            storage,
-        })
+        this._client = new BaseTelegramClient(opts as BaseTelegramClientOptions)
     }
 
     // @ts-expect-error codegen

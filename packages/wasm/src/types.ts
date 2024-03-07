@@ -28,5 +28,4 @@ export interface MtcuteWasmModule {
     sha1: (data: number, dataLen: number) => void
 }
 
-export type SyncInitInput = BufferSource | WebAssembly.Module
-export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module
+export type SyncInitInput = BufferSource | WebAssembly.Module | WebAssembly.Instance

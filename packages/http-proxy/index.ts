@@ -1,9 +1,7 @@
 import { connect as connectTcp } from 'net'
 import { connect as connectTls, SecureContextOptions } from 'tls'
 
-import { IntermediatePacketCodec, MtcuteError, tl, TransportState } from '@mtcute/core'
-import { BaseTcpTransport } from '@mtcute/core/src/network/transports/tcp.js'
-import { base64Encode, utf8EncodeToBuffer } from '@mtcute/core/utils.js'
+import { BaseTcpTransport, IntermediatePacketCodec, MtcuteError, NodePlatform, tl, TransportState } from '@mtcute/node'
 
 /**
  * An error has occurred while connecting to an HTTP(s) proxy
@@ -71,6 +69,8 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
         this._proxy = proxy
     }
 
+    private _platform = new NodePlatform()
+
     connect(dc: tl.RawDcOption): void {
         if (this._state !== TransportState.Idle) {
             throw new MtcuteError('Transport is not IDLE')
@@ -110,7 +110,7 @@ export abstract class BaseHttpProxyTcpTransport extends BaseTcpTransport {
             if (this._proxy.password) {
                 auth += ':' + this._proxy.password
             }
-            headers['Proxy-Authorization'] = 'Basic ' + base64Encode(utf8EncodeToBuffer(auth))
+            headers['Proxy-Authorization'] = 'Basic ' + this._platform.base64Encode(this._platform.utf8Encode(auth))
         }
         headers['Proxy-Connection'] = 'Keep-Alive'
 

@@ -1,4 +1,5 @@
-import { ParsedUpdate, TelegramClient } from '@mtcute/core'
+import { ParsedUpdate } from '@mtcute/core'
+import { TelegramClient } from '@mtcute/core/client.js'
 
 export type UpdateContext<T> = T & {
     client: TelegramClient

@@ -1,7 +1,6 @@
-import { Readable } from 'node:stream'
 import { describe, expect, it } from 'vitest'
 
-import { createChunkedReader, nodeReadableToWeb } from './stream-utils.js'
+import { createChunkedReader } from './stream-utils.js'
 
 describe('createChunkedReader', () => {
     it('should correctly handle chunks smaller than chunkSize', async () => {
@@ -82,26 +81,3 @@ describe('createChunkedReader', () => {
         expect(await reader.read()).to.be.null
     })
 })
-
-if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
-    describe('nodeReadableToWeb', () => {
-        it('should correctly convert a readable stream', async () => {
-            const stream = new Readable({
-                read() {
-                    // eslint-disable-next-line no-restricted-globals
-                    this.push(Buffer.from([1, 2, 3]))
-                    // eslint-disable-next-line no-restricted-globals
-                    this.push(Buffer.from([4, 5, 6]))
-                    this.push(null)
-                },
-            })
-
-            const webStream = nodeReadableToWeb(stream)
-            const reader = webStream.getReader()
-
-            expect(await reader.read()).to.deep.equal({ value: new Uint8Array([1, 2, 3]), done: false })
-            expect(await reader.read()).to.deep.equal({ value: new Uint8Array([4, 5, 6]), done: false })
-            expect(await reader.read()).to.deep.equal({ value: undefined, done: true })
-        })
-    })
-}

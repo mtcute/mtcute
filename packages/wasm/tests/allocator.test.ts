@@ -1,9 +1,10 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { __getWasm, initAsync } from '../src/index.js'
+import { __getWasm } from '../src/index.js'
+import { initWasm } from './init.js'
 
 beforeAll(async () => {
-    await initAsync()
+    await initWasm()
 })
 
 describe('allocator', () => {

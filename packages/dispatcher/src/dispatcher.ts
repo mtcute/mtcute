@@ -19,11 +19,11 @@ import {
     PollUpdate,
     PollVoteUpdate,
     StoryUpdate,
-    TelegramClient,
     tl,
     UserStatusUpdate,
     UserTypingUpdate,
 } from '@mtcute/core'
+import { TelegramClient } from '@mtcute/core/client.js'
 
 import { UpdateContext } from './context/base.js'
 import {

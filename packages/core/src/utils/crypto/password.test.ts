@@ -3,17 +3,19 @@ import { describe, expect, it } from 'vitest'
 
 import { defaultTestCryptoProvider } from '@mtcute/test'
 import { tl } from '@mtcute/tl'
-import { hexDecodeToBuffer, hexEncode, utf8EncodeToBuffer } from '@mtcute/tl-runtime'
 
+import { getPlatform } from '../../platform.js'
 import { computeNewPasswordHash, computePasswordHash, computeSrpParams } from './index.js'
+
+const p = getPlatform()
 
 // a real-world request from an account with "qwe123" password
 const fakeAlgo: tl.RawPasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow = {
     _: 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow',
-    salt1: hexDecodeToBuffer('9b3accc457c0d5288e8cff31eb21094048bc11902f6614dbb9afb839ee7641c37619537d8ebe749e'),
-    salt2: hexDecodeToBuffer('6c619bb0786dc4ed1bf211d23f6e4065'),
+    salt1: p.hexDecode('9b3accc457c0d5288e8cff31eb21094048bc11902f6614dbb9afb839ee7641c37619537d8ebe749e'),
+    salt2: p.hexDecode('6c619bb0786dc4ed1bf211d23f6e4065'),
     g: 3,
-    p: hexDecodeToBuffer(
+    p: p.hexDecode(
         'c71caeb9c6b1c9048e6c522f70f13f73980d40238e3e21c14934d037563d930f' +
             '48198a0aa7c14058229493d22530f4dbfa336f6e0ac925139543aed44cce7c37' +
             '20fd51f69458705ac68cd4fe6b6b13abdc9746512969328454f18faf8c595f64' +
@@ -30,7 +32,7 @@ const fakeRequest: tl.account.RawPassword = {
     hasSecureValues: false,
     hasPassword: true,
     currentAlgo: fakeAlgo,
-    srpB: hexDecodeToBuffer(
+    srpB: p.hexDecode(
         '1476a7b5991d7f028bbee33b3455cad3f2cd0eb3737409fcce92fa7d4cd5c733' +
             'ec6d2cb3454e587d4c17eda2fd7ef9a57327215f38292cc8bd5dc77d3e1d31cd' +
             'dae2652f8347c4b0093f7c78242f70e6cc13137ee7acc257a49855a63113db8f' +
@@ -43,10 +45,10 @@ const fakeRequest: tl.account.RawPassword = {
     srpId: Long.fromBits(-2046015018, 875006452),
     newAlgo: {
         _: 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow',
-        salt1: hexDecodeToBuffer('9b3accc457c0d528'),
-        salt2: hexDecodeToBuffer('6c619bb0786dc4ed1bf211d23f6e4065'),
+        salt1: p.hexDecode('9b3accc457c0d528'),
+        salt2: p.hexDecode('6c619bb0786dc4ed1bf211d23f6e4065'),
         g: 3,
-        p: hexDecodeToBuffer(
+        p: p.hexDecode(
             'c71caeb9c6b1c9048e6c522f70f13f73980d40238e3e21c14934d037563d930f' +
                 '48198a0aa7c14058229493d22530f4dbfa336f6e0ac925139543aed44cce7c37' +
                 '20fd51f69458705ac68cd4fe6b6b13abdc9746512969328454f18faf8c595f64' +
@@ -59,7 +61,7 @@ const fakeRequest: tl.account.RawPassword = {
     },
     newSecureAlgo: {
         _: 'securePasswordKdfAlgoPBKDF2HMACSHA512iter100000',
-        salt: hexDecodeToBuffer('fdd59abc0bffb24d'),
+        salt: p.hexDecode('fdd59abc0bffb24d'),
     },
     secureRandom: new Uint8Array(), // unused
 }
@@ -68,16 +70,16 @@ const password = 'qwe123'
 describe('SRP', () => {
     it('should correctly compute password hash as defined by MTProto', async () => {
         const crypto = await defaultTestCryptoProvider()
-        const hash = await computePasswordHash(crypto, utf8EncodeToBuffer(password), fakeAlgo.salt1, fakeAlgo.salt2)
+        const hash = await computePasswordHash(crypto, p.utf8Encode(password), fakeAlgo.salt1, fakeAlgo.salt2)
 
-        expect(hexEncode(hash)).toEqual('750f1fe282965e63ce17b98427b35549fb864465211840f6a7c1f2fb657cc33b')
+        expect(p.hexEncode(hash)).toEqual('750f1fe282965e63ce17b98427b35549fb864465211840f6a7c1f2fb657cc33b')
     })
 
     it('should correctly compute new password hash as defined by MTProto', async () => {
         const crypto = await defaultTestCryptoProvider()
         const hash = await computeNewPasswordHash(crypto, fakeAlgo, '123qwe')
 
-        expect(hexEncode(hash)).toEqual(
+        expect(p.hexEncode(hash)).toEqual(
             '2540539ceeffd4543cd845bf319b8392e6b17bf7cf26bafcf6282ce9ae795368' +
                 '4ff49469c2863b17e6d65ddb16ae6f60bc07cc254c00e5ba389292f6cea0b3aa' +
                 'c459d1d08984d65319df8c5d124042169bbe2ab8c0c93bc7178827f2ea84e7c3' +
@@ -94,7 +96,7 @@ describe('SRP', () => {
         const params = await computeSrpParams(crypto, fakeRequest, password)
 
         expect(params.srpId).toEqual(fakeRequest.srpId)
-        expect(hexEncode(params.A)).toEqual(
+        expect(p.hexEncode(params.A)).toEqual(
             '363976f55edb57cc5cc0c4aaca9b7539eff98a43a93fa84be34860d18ac3a80f' +
                 'ffd57c4617896ff667677d0552a079eb189d25d147ec96edd4495c946a18652d' +
                 '31d78eede40a8b29da340c19b32ccac78f8482406e392102c03d850d1db87223' +
@@ -104,6 +106,6 @@ describe('SRP', () => {
                 '4fa454aa69d9219d9c5fa3625f5c6f1ac03892a70aa17269c76cd9bf2949a961' +
                 'fad2a71e5fa961824b32db037130c7e9aad4c1e9f02ebc5b832622f98b59597e',
         )
-        expect(hexEncode(params.M1)).toEqual('25a91b21c634ad670a144165a9829192d152e131a716f676abc48cd817f508c6')
+        expect(p.hexEncode(params.M1)).toEqual('25a91b21c634ad670a144165a9829192d152e131a716f676abc48cd817f508c6')
     })
 })

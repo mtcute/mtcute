@@ -7,6 +7,7 @@
     "license": "MIT",
     "main": "index.ts",
     "type": "module",
+    "sideEffects": false,
     "scripts": {
         "docs": "typedoc",
         "build": "pnpm run -w build-package socks-proxy"
@@ -20,7 +21,7 @@
         }
     },
     "dependencies": {
-        "@mtcute/core": "workspace:^",
+        "@mtcute/node": "workspace:^",
         "ip6": "0.2.7"
     }
 }
