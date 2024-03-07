@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { tl } from '@mtcute/tl'
 
-import { BotKeyboard } from './keyboards.js'
+import { BotKeyboard } from './index.js'
 
 describe('findButton', () => {
     const kb: tl.TypeKeyboardButton[][] = [

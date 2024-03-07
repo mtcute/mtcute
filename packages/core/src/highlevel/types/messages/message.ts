@@ -6,7 +6,7 @@ import { getMarkedPeerId, toggleChannelIdMark } from '../../../utils/peer-utils.
 import { assertTypeIsNot } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { BotKeyboard, ReplyMarkup } from '../bots/keyboards.js'
+import { BotKeyboard, ReplyMarkup } from '../bots/keyboards/index.js'
 import { TextWithEntities } from '../misc/index.js'
 import { Chat } from '../peers/chat.js'
 import { parsePeer, Peer } from '../peers/peer.js'
