@@ -27,10 +27,10 @@
 > releases may not follow semver just yet, so please pin the versions for now
 
 ```ts
-import { NodeTelegramClient } from '@mtcute/node'
+import { TelegramClient } from '@mtcute/node'
 import { Dispatcher, filters } from '@mtcute/dispatcher'
 
-const tg = new NodeTelegramClient({
+const tg = new TelegramClient({
     apiId: parseInt(process.env.API_ID),
     apiHash: process.env.API_HASH,
     storage: 'my-account'
@@ -64,9 +64,9 @@ pnpm add @mtcute/node
 pnpm add @mtcute/crypto-node
 ```
 
-✨ building something for web? use the client directly:
+✨ building something for web? use the web package:
 ```bash
-pnpm add @mtcute/client
+pnpm add @mtcute/web
 ```
 
 learn more: [guide](https://mtcute.dev/guide/)
