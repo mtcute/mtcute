@@ -18,7 +18,7 @@ const client = new TelegramClient({ ... })
 await client.importSession(convertFromTelethonSession("..."))
 ```
 
-## [Pyrogram](https://github.com/gram-js/gramjs)
+## [Pyrogram](https://github.com/pyrogram/pyrogram)
 
 ```ts
 import { convertFromPyrogramSession } from '@mtcute/convert'
@@ -27,7 +27,7 @@ const client = new TelegramClient({ ... })
 await client.importSession(convertFromPyrogramSession("..."))
 ```
 
-## GramJS
+## [GramJS](https://github.com/gram-js/gramjs)
 
 ```ts
 import { convertFromGramjsSession } from '@mtcute/convert'
