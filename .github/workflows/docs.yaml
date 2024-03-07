@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches: [ master ]    
   workflow_dispatch:
 
 permissions:
@@ -17,7 +19,6 @@ concurrency:
 
 jobs:
   build:
-    if: github.repository == 'mtcute/mtcute' # do not run on forks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +26,7 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Build
-        run: pnpm run -r build
+        run: pnpm run -r --workspace-concurrency=1 build
       - name: Build docs
         run: |
           pnpm run docs 
@@ -38,6 +39,8 @@ jobs:
 
   # Deployment job
   deploy:
+    # do not run on forks and PRs
+    if: github.repository == 'mtcute/mtcute' && github.event_name == 'push' && github.ref == 'refs/heads/master'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
