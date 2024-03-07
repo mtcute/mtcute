@@ -20,6 +20,7 @@ import {
     TlFullSchema,
     writeTlEntryToString,
 } from '@mtcute/tl-utils'
+import { parseTlEntriesFromJson } from '@mtcute/tl-utils/json.js'
 
 import {
     __dirname,
@@ -31,6 +32,9 @@ import {
     TDESKTOP_LAYER,
     TDESKTOP_SCHEMA,
     TDLIB_SCHEMA,
+    WEBA_LAYER,
+    WEBA_SCHEMA,
+    WEBK_SCHEMA,
 } from './constants.js'
 import { applyDocumentation, fetchDocumentation, getCachedDocumentation } from './documentation.js'
 import { packTlSchema, TlPackedSchema, unpackTlSchema } from './schema.js'
@@ -97,6 +101,44 @@ async function fetchCoreSchema(domain = CORE_DOMAIN, name = 'Core'): Promise<Sch
     return {
         name,
         layer: parseInt(layer[1]),
+        content: tlToFullSchema(schema),
+    }
+}
+
+async function fetchWebkSchema(): Promise<Schema> {
+    const schema = await fetchRetry(WEBK_SCHEMA)
+    const json = JSON.parse(schema) as {
+        layer: number
+        API: object
+    }
+
+    let entries = parseTlEntriesFromJson(json.API, { parseMethodTypes: true })
+    entries = entries.filter((it) => {
+        if (it.kind === 'method') {
+            // json schema doesn't provide info about generics, remove these
+            return !it.arguments.some((arg) => arg.type === '!X') && it.type !== 'X'
+        }
+
+        return true
+    })
+
+    return {
+        name: 'WebK',
+        layer: json.layer,
+        content: parseFullTlSchema(entries),
+    }
+}
+
+async function fetchWebaSchema(): Promise<Schema> {
+    const [schema, layerFile] = await Promise.all([fetchRetry(WEBA_SCHEMA), fetchRetry(WEBA_LAYER)])
+
+    // const LAYER = 174;
+    const version = layerFile.match(/^const LAYER = (\d+);$/m)
+    if (!version) throw new Error('Layer number not found')
+
+    return {
+        name: 'WebA',
+        layer: parseInt(version[1]),
         content: tlToFullSchema(schema),
     }
 }
@@ -182,18 +224,20 @@ async function overrideInt53(schema: TlFullSchema): Promise<void> {
 async function main() {
     console.log('Loading schemas...')
 
-    const schemas: Schema[] = [
-        await fetchTdlibSchema(),
-        await fetchTdesktopSchema(),
-        await fetchCoreSchema(),
-        await fetchCoreSchema(COREFORK_DOMAIN, 'Corefork'),
-        await fetchCoreSchema(BLOGFORK_DOMAIN, 'Blogfork'),
-        {
+    const schemas: Schema[] = await Promise.all([
+        fetchTdlibSchema(),
+        fetchTdesktopSchema(),
+        fetchCoreSchema(),
+        fetchCoreSchema(COREFORK_DOMAIN, 'Corefork'),
+        fetchCoreSchema(BLOGFORK_DOMAIN, 'Blogfork'),
+        fetchWebkSchema(),
+        fetchWebaSchema(),
+        readFile(join(__dirname, '../data/custom.tl'), 'utf8').then((tl) => ({
             name: 'Custom',
             layer: 0, // handled manually
-            content: tlToFullSchema(await readFile(join(__dirname, '../data/custom.tl'), 'utf8')),
-        },
-    ]
+            content: tlToFullSchema(tl),
+        })),
+    ])
 
     console.log('Available schemas:')
     schemas.forEach((schema) =>

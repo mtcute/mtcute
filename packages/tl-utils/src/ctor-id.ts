@@ -9,5 +9,7 @@ import { TlEntry } from './types.js'
  * @param entry  TL entry
  */
 export function computeConstructorIdFromEntry(entry: TlEntry): number {
-    return CRC32.str(writeTlEntryToString(entry, true)) >>> 0
+    const str = writeTlEntryToString(entry, true)
+
+    return CRC32.str(str) >>> 0
 }
