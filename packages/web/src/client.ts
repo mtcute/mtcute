@@ -25,11 +25,19 @@ export interface BaseTelegramClientOptions
      * @default `"client.session"`
      */
     storage?: string | ITelegramStorageProvider
+
+    /**
+     * **ADVANCED USE ONLY**
+     *
+     * Whether to not set up the platform.
+     * This is useful if you call `setPlatform` yourself.
+     */
+    platformless?: boolean
 }
 
 export class BaseTelegramClient extends BaseTelegramClientBase {
     constructor(opts: BaseTelegramClientOptions) {
-        setPlatform(new WebPlatform())
+        if (!opts.platformless) setPlatform(new WebPlatform())
 
         super({
             crypto: new WebCryptoProvider(),

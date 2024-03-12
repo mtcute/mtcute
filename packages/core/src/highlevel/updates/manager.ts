@@ -124,7 +124,6 @@ export class UpdatesManager {
     oldQts?: number
     oldDate?: number
     oldSeq?: number
-    selfChanged = false // todo what is this?
 
     // whether to catch up channels from the locally stored pts
     catchUpChannels = false

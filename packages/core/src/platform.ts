@@ -14,6 +14,8 @@ export interface ICorePlatform extends ITlPlatform {
         fileSize?: number
         fileName?: string
     } | null>
+    onNetworkChanged?(fn: (connected: boolean) => void): () => void
+    isOnline?(): boolean
 }
 
 // eslint-disable-next-line

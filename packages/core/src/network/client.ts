@@ -301,6 +301,8 @@ export class MtClient extends EventEmitter {
                 useIpv6: Boolean(params.useIpv6),
                 enableErrorReporting: params.enableErrorReporting ?? false,
                 onUsable: () => this.emit('usable'),
+                onConnecting: () => this.emit('connecting'),
+                onNetworkChanged: (connected) => this.emit('networkChanged', connected),
                 onUpdate: (upd) => this.emit('update', upd),
                 ...params.network,
             },

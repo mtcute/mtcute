@@ -59,6 +59,8 @@ export interface NetworkManagerParams {
     emitError: (err: Error, connection?: SessionConnection) => void
     onUpdate: (upd: tl.TypeUpdates) => void
     onUsable: () => void
+    onConnecting: () => void
+    onNetworkChanged: (connected: boolean) => void
 }
 
 export type ConnectionCountDelegate = (kind: ConnectionKind, dcId: number, isPremium: boolean) => number
@@ -490,6 +492,8 @@ export class NetworkManager {
         return { main, media }
     }
 
+    private _resetOnNetworkChange?: () => void
+
     private _switchPrimaryDc(dc: DcConnectionManager) {
         if (this._primaryDc && this._primaryDc !== dc) {
             this._primaryDc.setIsPrimary(false)
@@ -498,8 +502,15 @@ export class NetworkManager {
         this._primaryDc = dc
         dc.setIsPrimary(true)
 
+        this.params.onConnecting()
+
         dc.main.on('usable', () => {
+            if (dc !== this._primaryDc) return
             this.params.onUsable()
+        })
+        dc.main.on('wait', () => {
+            if (dc !== this._primaryDc) return
+            this.params.onConnecting()
         })
         dc.main.on('update', (update: tl.TypeUpdates) => {
             this._updateHandler(update, false)
@@ -556,6 +567,8 @@ export class NetworkManager {
             // shouldn't happen
             throw new MtArgumentError('DC manager already exists')
         }
+
+        this._resetOnNetworkChange = getPlatform().onNetworkChanged?.(this.notifyNetworkChanged.bind(this))
 
         const dc = new DcConnectionManager(this, defaultDcs.main.id, defaultDcs, true)
         this._dcConnections.set(defaultDcs.main.id, dc)
@@ -646,6 +659,18 @@ export class NetworkManager {
     notifyLoggedOut(): void {
         this.setIsPremium(false)
         this.resetSessions()
+    }
+
+    notifyNetworkChanged(connected: boolean): void {
+        this._log.debug('network changed: %s', connected ? 'connected' : 'disconnected')
+        this.params.onNetworkChanged(connected)
+
+        for (const dc of this._dcConnections.values()) {
+            dc.main.notifyNetworkChanged(connected)
+            dc.upload.notifyNetworkChanged(connected)
+            dc.download.notifyNetworkChanged(connected)
+            dc.downloadSmall.notifyNetworkChanged(connected)
+        }
     }
 
     resetSessions(): void {
@@ -837,5 +862,6 @@ export class NetworkManager {
             dc.destroy()
         }
         this.config.offReload(this._onConfigChanged)
+        this._resetOnNetworkChange?.()
     }
 }

@@ -5961,6 +5961,9 @@ TelegramClient.prototype.computeSrpParams = function (...args) {
 TelegramClient.prototype.computeNewPasswordHash = function (...args) {
     return this._client.computeNewPasswordHash(...args)
 }
+TelegramClient.prototype.onConnectionState = function (...args) {
+    return this._client.onConnectionState(...args)
+}
 TelegramClient.prototype.onServerUpdate = function () {
     throw new Error('onServerUpdate is not available for TelegramClient, use .on() methods instead')
 }

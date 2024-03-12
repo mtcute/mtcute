@@ -15,7 +15,7 @@ import {
     writeStringSession,
 } from '../utils/index.js'
 import { LogManager } from '../utils/logger.js'
-import { ITelegramClient } from './client.types.js'
+import { ConnectionState, ITelegramClient } from './client.types.js'
 import { AppConfigManager } from './managers/app-config-manager.js'
 import { ITelegramStorageProvider } from './storage/provider.js'
 import { TelegramStorageManager, TelegramStorageManagerExtraOptions } from './storage/storage.js'
@@ -31,6 +31,7 @@ export interface BaseTelegramClientOptions extends MtClientOptions {
 export class BaseTelegramClient implements ITelegramClient {
     readonly updates?: UpdatesManager
     private _serverUpdatesHandler: (updates: tl.TypeUpdates) => void = () => {}
+    private _connectionStateHandler: (state: ConnectionState) => void = () => {}
 
     constructor(readonly params: BaseTelegramClientOptions) {
         if (!params.disableUpdates && params.updates !== false) {
@@ -40,6 +41,17 @@ export class BaseTelegramClient implements ITelegramClient {
 
         this.mt.on('update', (update: tl.TypeUpdates) => {
             this._serverUpdatesHandler(update)
+        })
+        this.mt.on('usable', () => {
+            this._connectionStateHandler('connected')
+        })
+        this.mt.on('wait', () => {
+            this._connectionStateHandler('connecting')
+        })
+        this.mt.on('networkChanged', (connected: boolean) => {
+            if (!connected) {
+                this._connectionStateHandler('offline')
+            }
         })
     }
 
@@ -265,6 +277,10 @@ export class BaseTelegramClient implements ITelegramClient {
         }
 
         this.updates.setHandler(handler)
+    }
+
+    onConnectionState(handler: (state: ConnectionState) => void): void {
+        this._connectionStateHandler = handler
     }
 
     async getApiCrenetials() {

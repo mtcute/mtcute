@@ -5,6 +5,7 @@ import Long from 'long'
 import { mtp, tl } from '@mtcute/tl'
 import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlSerializationCounter, TlWriterMap } from '@mtcute/tl-runtime'
 
+import { getPlatform } from '../platform.js'
 import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
 import { reportUnknownError } from '../utils/error-reporting.js'
@@ -102,6 +103,8 @@ export class SessionConnection extends PersistentConnection {
         this._salts = params.salts
         this._handleRawMessage = this._handleRawMessage.bind(this)
     }
+
+    private _online = getPlatform().isOnline?.() ?? true
 
     getAuthKey(temp = false): Uint8Array | null {
         const key = temp ? this._session._authKeyTemp : this._session._authKey
@@ -1435,6 +1438,16 @@ export class SessionConnection extends PersistentConnection {
         return pending.promise
     }
 
+    notifyNetworkChanged(online: boolean): void {
+        this._online = online
+
+        if (online) {
+            this.reconnect()
+        } else {
+            this.disconnectManual()
+        }
+    }
+
     private _cancelRpc(rpc: PendingRpc, onTimeout = false, abortSignal?: AbortSignal): void {
         if (rpc.done) return
 
@@ -1510,12 +1523,18 @@ export class SessionConnection extends PersistentConnection {
     }
 
     private _flush(): void {
-        if (!this._session._authKey.ready || this._isPfsBindingPending || this._session.current429Timeout) {
+        if (
+            !this.isConnected ||
+            !this._session._authKey.ready ||
+            this._isPfsBindingPending ||
+            this._session.current429Timeout
+        ) {
             this.log.debug(
-                'skipping flush, connection is not usable (auth key ready = %b, pfs binding pending = %b, 429 timeout = %b)',
+                'skipping flush, connection is not usable (connected = %b, auth key ready = %b, pfs binding pending = %b, 429 timeout = %b)',
+                this.isConnected,
                 this._session._authKey.ready,
                 this._isPfsBindingPending,
-                Boolean(this._session.current429Timeout),
+                this._session.current429Timeout,
             )
 
             // it will be flushed once connection is usable
