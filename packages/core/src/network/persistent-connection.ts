@@ -35,7 +35,7 @@ export abstract class PersistentConnection extends EventEmitter {
     private _previousWait: number | null = null
     private _reconnectionTimeout: NodeJS.Timeout | null = null
     private _shouldReconnectImmediately = false
-    private _disconnectedManually = true
+    private _disconnectedManually = false
 
     // inactivity timeout
     private _inactivityTimeout: NodeJS.Timeout | null = null
@@ -182,13 +182,12 @@ export abstract class PersistentConnection extends EventEmitter {
         }
 
         this._inactive = false
+        this._disconnectedManually = false
         this._transport.connect(this.params.dc, this.params.testMode)
     }
 
     reconnect(): void {
         if (this._inactive) return
-
-        this._disconnectedManually = false
 
         // if we are already connected
         if (this.isConnected) {

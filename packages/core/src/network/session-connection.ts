@@ -757,7 +757,7 @@ export class SessionConnection extends PersistentConnection {
 
         rpc.done = true
 
-        this.log.verbose('<<< (%s) %j', rpc.method, result)
+        this.log.verbose('<<< (%s:%l) %j', rpc.method, reqMsgId, result)
 
         if (result._ === 'mt_rpc_error') {
             const res = result as mtp.RawMt_rpc_error
