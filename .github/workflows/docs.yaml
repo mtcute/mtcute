@@ -39,8 +39,8 @@ jobs:
 
   # Deployment job
   deploy:
-    # do not run on forks and PRs
-    if: github.repository == 'mtcute/mtcute' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    # only run on releases
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.actor == 'mtcute-bot'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
