@@ -34,6 +34,8 @@ export abstract class PersistentConnection extends EventEmitter {
     private _consequentFails = 0
     private _previousWait: number | null = null
     private _reconnectionTimeout: NodeJS.Timeout | null = null
+    private _shouldReconnectImmediately = false
+    protected _disconnectedManually = false
 
     // inactivity timeout
     private _inactivityTimeout: NodeJS.Timeout | null = null
@@ -128,7 +130,14 @@ export abstract class PersistentConnection extends EventEmitter {
     onTransportClose(): void {
         // transport closed because of inactivity
         // obviously we dont want to reconnect then
-        if (this._inactive) return
+        if (this._inactive || this._disconnectedManually) return
+
+        if (this._shouldReconnectImmediately) {
+            this._shouldReconnectImmediately = false
+            this.connect()
+
+            return
+        }
 
         this._consequentFails += 1
 
@@ -169,13 +178,31 @@ export abstract class PersistentConnection extends EventEmitter {
 
         if (this._reconnectionTimeout != null) {
             clearTimeout(this._reconnectionTimeout)
+            this._reconnectionTimeout = null
         }
 
         this._inactive = false
+        this._disconnectedManually = false
         this._transport.connect(this.params.dc, this.params.testMode)
     }
 
     reconnect(): void {
+        if (this._inactive) return
+
+        // if we are already connected
+        if (this.isConnected) {
+            this._shouldReconnectImmediately = true
+            this._transport.close()
+
+            return
+        }
+
+        // if reconnection timeout is pending, it will be cancelled in connect()
+        this.connect()
+    }
+
+    disconnectManual(): void {
+        this._disconnectedManually = true
         this._transport.close()
     }
 

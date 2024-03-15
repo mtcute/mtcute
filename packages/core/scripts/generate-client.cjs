@@ -727,6 +727,7 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
         'getPrimaryDcId',
         'computeSrpParams',
         'computeNewPasswordHash',
+        'onConnectionState',
     ].forEach((name) => {
         output.write(
             `TelegramClient.prototype.${name} = function(...args) {\n` +

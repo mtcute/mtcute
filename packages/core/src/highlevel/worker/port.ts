@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/tl'
 
 import { LogManager } from '../../utils/logger.js'
-import { ITelegramClient } from '../client.types.js'
+import { ConnectionState, ITelegramClient } from '../client.types.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
 import { RawUpdateHandler } from '../updates/types.js'
 import { AppConfigManagerProxy } from './app-config.js'
@@ -36,6 +36,11 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     private _updateHandler: RawUpdateHandler = () => {}
     onUpdate(handler: RawUpdateHandler): void {
         this._updateHandler = handler
+    }
+
+    private _connectionStateHandler: (state: ConnectionState) => void = () => {}
+    onConnectionState(handler: (state: ConnectionState) => void): void {
+        this._connectionStateHandler = handler
     }
 
     private _onMessage: ClientMessageHandler = (message) => {

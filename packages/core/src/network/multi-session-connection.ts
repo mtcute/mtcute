@@ -184,6 +184,7 @@ export class MultiSessionConnection extends EventEmitter {
                 })
             })
             conn.on('usable', () => this.emit('usable', i))
+            conn.on('wait', () => this.emit('wait', i))
             conn.on('request-auth', () => this.emit('request-auth', i))
             conn.on('flood-done', () => {
                 this._log.debug('received flood-done from connection %d', i)
@@ -295,6 +296,12 @@ export class MultiSessionConnection extends EventEmitter {
         }
 
         // connection is idle, we don't need to notify it
+    }
+
+    notifyNetworkChanged(connected: boolean): void {
+        for (const conn of this._connections) {
+            conn.notifyNetworkChanged(connected)
+        }
     }
 
     requestAuth(): void {

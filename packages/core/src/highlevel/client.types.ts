@@ -8,6 +8,20 @@ import type { TelegramStorageManager } from './storage/storage.js'
 import type { RawUpdateHandler } from './updates/types.js'
 import type { StringSessionData } from './utils/string-session.js'
 
+/**
+ * Connection state of the client
+ *
+ * - `offline` - not connected (only emitted when {@link ICorePlatform.onNetworkChanged} callback
+ *   is called with `false`)
+ * - `connecting` - currently connecting. All requests will be queued until the connection is established
+ * - `updating` - connected and is currently updating the state (i.e. downloading missing updates).
+ *   At this point client is already fully operational, but some updates may be missing.
+ *   Is only emitted when updates manager is enabled.
+ * - `connected` - connected and ready to send requests. When updates manager is enabled, this state
+ *   may be emitted before `updating` state
+ */
+export type ConnectionState = 'offline' | 'connecting' | 'updating' | 'connected'
+
 // NB: when adding new methods, don't forget to add them to:
 //  - worker/port.ts
 //  - generate-client script
@@ -38,6 +52,7 @@ export interface ITelegramClient {
 
     onServerUpdate(handler: (update: tl.TypeUpdates) => void): void
     onUpdate(handler: RawUpdateHandler): void
+    onConnectionState(handler: (state: ConnectionState) => void): void
 
     getApiCrenetials(): Promise<{ id: number; hash: string }>
     // todo - this is only used for file dl/ul, which should probably be moved

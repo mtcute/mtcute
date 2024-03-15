@@ -29,6 +29,23 @@ export class WebPlatform implements ICorePlatform {
         return null
     }
 
+    onNetworkChanged(fn: (connected: boolean) => void) {
+        if (!('onLine' in navigator)) return () => {}
+
+        const onlineHandler = () => fn(navigator.onLine)
+        window.addEventListener('online', onlineHandler)
+        window.addEventListener('offline', onlineHandler)
+
+        return () => {
+            window.removeEventListener('online', onlineHandler)
+            window.removeEventListener('offline', onlineHandler)
+        }
+    }
+
+    isOnline(): boolean {
+        return navigator.onLine
+    }
+
     // ITlPlatform
     utf8ByteLength!: typeof utf8ByteLength
     utf8Encode!: typeof utf8Encode
