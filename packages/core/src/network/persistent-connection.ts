@@ -35,7 +35,7 @@ export abstract class PersistentConnection extends EventEmitter {
     private _previousWait: number | null = null
     private _reconnectionTimeout: NodeJS.Timeout | null = null
     private _shouldReconnectImmediately = false
-    private _disconnectedManually = false
+    protected _disconnectedManually = false
 
     // inactivity timeout
     private _inactivityTimeout: NodeJS.Timeout | null = null

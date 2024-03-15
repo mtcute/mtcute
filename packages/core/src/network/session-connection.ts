@@ -1524,14 +1524,14 @@ export class SessionConnection extends PersistentConnection {
 
     private _flush(): void {
         if (
-            !this.isConnected ||
+            this._disconnectedManually ||
             !this._session._authKey.ready ||
             this._isPfsBindingPending ||
             this._session.current429Timeout
         ) {
             this.log.debug(
-                'skipping flush, connection is not usable (connected = %b, auth key ready = %b, pfs binding pending = %b, 429 timeout = %b)',
-                this.isConnected,
+                'skipping flush, connection is not usable (offline = %b, auth key ready = %b, pfs binding pending = %b, 429 timeout = %b)',
+                this._disconnectedManually,
                 this._session._authKey.ready,
                 this._isPfsBindingPending,
                 this._session.current429Timeout,
