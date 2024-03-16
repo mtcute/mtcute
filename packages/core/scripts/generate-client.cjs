@@ -264,6 +264,8 @@ async function addSingleMethod(state, fileName) {
         } else if (stmt.kind === ts.SyntaxKind.FunctionDeclaration) {
             const name = stmt.name.escapedText
 
+            if (checkForFlag(stmt, '@skip')) { continue }
+
             if (stmt.body && name in state.methods.used) {
                 throwError(
                     stmt.name,
@@ -345,40 +347,38 @@ async function addSingleMethod(state, fileName) {
                 state.methods.used[name] = relPath
             }
 
-            if (isExported || isDeclare) {
-                const isPrivate = checkForFlag(stmt, '@internal')
-                const isManual = checkForFlag(stmt, '@manual')
-                const isNoemit = checkForFlag(stmt, '@noemit')
-                const shouldEmit = !isNoemit && !(isPrivate && !isOverload && !Object.keys(hasOverloads).length)
+            const isPrivate = checkForFlag(stmt, '@internal')
+            const isManual = checkForFlag(stmt, '@manual')
+            const isNoemit = checkForFlag(stmt, '@noemit')
+            const shouldEmit = !isNoemit && !(isPrivate && !isOverload && !Object.keys(hasOverloads).length)
 
-                if (shouldEmit) {
-                    state.methods.list.push({
-                        from: relPath,
-                        module,
-                        name,
-                        isPrivate,
-                        isManual,
-                        isNoemit,
-                        isDeclare,
-                        shouldEmit,
-                        func: stmt,
-                        comment: getLeadingComments(stmt),
-                        aliases,
-                        available,
-                        rawApiMethods,
-                        dependencies,
-                        overload: isOverload,
-                        hasOverloads: hasOverloads[name] && !isOverload,
-                    })
+            if (shouldEmit) {
+                state.methods.list.push({
+                    from: relPath,
+                    module,
+                    name,
+                    isPrivate,
+                    isManual,
+                    isNoemit,
+                    isDeclare,
+                    shouldEmit,
+                    func: stmt,
+                    comment: getLeadingComments(stmt),
+                    aliases,
+                    available,
+                    rawApiMethods,
+                    dependencies,
+                    overload: isOverload,
+                    hasOverloads: hasOverloads[name] && !isOverload,
+                })
 
-                    if (!isDeclare) {
-                        if (!(module in state.imports)) {
-                            state.imports[module] = new Set()
-                        }
+                if (!isDeclare) {
+                    if (!(module in state.imports)) {
+                        state.imports[module] = new Set()
+                    }
 
-                        if (!isManual || isManual.split('=')[1] !== 'noemit') {
-                            state.imports[module].add(name)
-                        }
+                    if (!isManual || isManual.split('=')[1] !== 'noemit') {
+                        state.imports[module].add(name)
                     }
                 }
             }
@@ -482,6 +482,7 @@ async function main() {
         if (!items.length) return
         output.write(`import { ${items.sort().join(', ')} } from '${module}'\n`)
     })
+    output.write("import { withParams } from './methods/misc/with-params.js'")
 
     output.write('\n')
 
@@ -518,7 +519,15 @@ on(name: '${type.typeName}', handler: ((upd: ${type.updateType}) => void)): this
 
     output.write(`
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-on(name: string, handler: (...args: any[]) => void): this\n`)
+on(name: string, handler: (...args: any[]) => void): this\n
+
+/**
+ * Wrap this client so that all RPC calls will use the specified parameters.
+ * 
+ * @param params  Parameters to use
+ * @returns  Wrapped client
+ */
+withParams(params: RpcCallOptions): this\n`)
 
     const printer = ts.createPrinter()
 
@@ -703,7 +712,13 @@ on(name: string, handler: (...args: any[]) => void): this\n`)
     output.write('}\n')
 
     classContents.forEach((line) => output.write(line + '\n'))
+
+    output.write(`    withParams(params: RpcCallOptions): this {
+        return withParams(this, params)
+    }\n`)
+
     output.write('}\n')
+
     classProtoDecls.forEach((line) => output.write(line + '\n'))
     // proxied methods
     ;[

@@ -7,6 +7,7 @@ import Long from 'long'
 import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
+import { RpcCallOptions } from '../network/index.js'
 import { MaybeArray, MaybePromise, MtUnsupportedError, PartialExcept, PartialOnly } from '../types/index.js'
 import { BaseTelegramClient, BaseTelegramClientOptions } from './base.js'
 import { ITelegramClient } from './client.types.js'
@@ -169,6 +170,7 @@ import { unpinAllMessages } from './methods/messages/unpin-all-messages.js'
 import { unpinMessage } from './methods/messages/unpin-message.js'
 import { initTakeoutSession } from './methods/misc/init-takeout-session.js'
 import { _normalizePrivacyRules } from './methods/misc/normalize-privacy-rules.js'
+import { withParams } from './methods/misc/with-params.js'
 import { changeCloudPassword } from './methods/password/change-cloud-password.js'
 import { enableCloudPassword } from './methods/password/enable-cloud-password.js'
 import { cancelPasswordEmail, resendPasswordEmail, verifyPasswordEmail } from './methods/password/password-email.js'
@@ -313,7 +315,6 @@ import {
 } from './types/index.js'
 import { makeParsedUpdateHandler, ParsedUpdateHandlerParams } from './updates/parsed.js'
 import { StringSessionData } from './utils/string-session.js'
-
 // from methods/_init.ts
 // @copy
 type TelegramClientOptions = (
@@ -512,6 +513,14 @@ export interface TelegramClient extends ITelegramClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(name: string, handler: (...args: any[]) => void): this
+
+    /**
+     * Wrap this client so that all RPC calls will use the specified parameters.
+     *
+     * @param params  Parameters to use
+     * @returns  Wrapped client
+     */
+    withParams(params: RpcCallOptions): this
     /**
      * Check your Two-Step verification password and log in
      *
@@ -5176,6 +5185,9 @@ export class TelegramClient extends EventEmitter implements ITelegramClient {
                 },
             }),
         )
+    }
+    withParams(params: RpcCallOptions): this {
+        return withParams(this, params)
     }
 }
 

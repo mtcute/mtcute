@@ -6,6 +6,8 @@ import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 // @copy
+import { RpcCallOptions } from '../../network/index.js'
+// @copy
 import { MaybeArray, MaybePromise, MtUnsupportedError, PartialExcept, PartialOnly } from '../../types/index.js'
 // @copy
 import { BaseTelegramClient, BaseTelegramClientOptions } from '../base.js'
