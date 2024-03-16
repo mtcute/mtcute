@@ -2,6 +2,7 @@ import type { Worker as NodeWorker } from 'worker_threads'
 
 import { tl } from '@mtcute/tl'
 
+import { ConnectionState } from '../client.types.js'
 import { SerializedError } from './errors.js'
 
 export type WorkerInboundMessage = {
@@ -23,6 +24,7 @@ export type WorkerOutboundMessage =
           hasMin: boolean
       }
     | { type: 'error'; error: unknown }
+    | { type: 'conn_state'; state: ConnectionState }
     | {
           type: 'log'
           color: number

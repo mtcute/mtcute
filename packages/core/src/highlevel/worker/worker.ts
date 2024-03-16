@@ -40,6 +40,12 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
                 error: err,
             }),
         )
+        client.onConnectionState((state) =>
+            this.broadcast({
+                type: 'conn_state',
+                state,
+            }),
+        )
 
         if (client.updates) {
             client.onUpdate((update, peers) =>

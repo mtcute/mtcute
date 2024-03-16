@@ -51,6 +51,9 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
             case 'server_update':
                 this._serverUpdatesHandler(message.update)
                 break
+            case 'conn_state':
+                this._connectionStateHandler(message.state)
+                break
             case 'update': {
                 const peers = new PeersIndex(message.users, message.chats)
                 peers.hasMin = message.hasMin
