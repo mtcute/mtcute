@@ -26,7 +26,7 @@ export async function createFolder(
         // determine next id by finding max id
         // thanks durov for awesome api
         let max = 1
-        old.forEach((it) => {
+        old.filters.forEach((it) => {
             if (it._ === 'dialogFilter' && it.id > max) max = it.id
         })
         id = max + 1

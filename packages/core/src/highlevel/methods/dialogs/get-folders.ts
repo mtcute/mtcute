@@ -7,7 +7,7 @@ import { InputDialogFolder } from '../../types/index.js'
 /**
  * Get list of folders.
  */
-export async function getFolders(client: ITelegramClient): Promise<tl.TypeDialogFilter[]> {
+export async function getFolders(client: ITelegramClient): Promise<tl.messages.RawDialogFilters> {
     return client.call({
         _: 'messages.getDialogFilters',
     })
@@ -20,7 +20,7 @@ export async function _normalizeInputFolder(
 ): Promise<tl.TypeDialogFilter> {
     if (typeof folder === 'string' || typeof folder === 'number') {
         const folders = await getFolders(client)
-        const found = folders.find((it) => {
+        const found = folders.filters.find((it) => {
             if (it._ === 'dialogFilterDefault') {
                 return folder === 0
             }

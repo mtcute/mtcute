@@ -2117,7 +2117,7 @@ export interface TelegramClient extends ITelegramClient {
      * **Available**: 👤 users only
      *
      */
-    getFolders(): Promise<tl.TypeDialogFilter[]>
+    getFolders(): Promise<tl.messages.RawDialogFilters>
     /**
      * Get dialogs with certain peers.
      *

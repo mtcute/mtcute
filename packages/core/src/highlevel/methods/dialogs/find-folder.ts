@@ -31,7 +31,7 @@ export async function findFolder(
     const folders = await getFolders(client)
 
     return (
-        (folders.find((it) => {
+        (folders.filters.find((it) => {
             if (it._ === 'dialogFilterDefault') return false
             if (params.id && it.id !== params.id) return false
             if (params.title && it.title !== params.title) return false
