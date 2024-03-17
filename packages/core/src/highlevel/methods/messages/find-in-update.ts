@@ -1,4 +1,4 @@
-/* eslint-disable max-params */
+/* eslint-disable max-params,no-lonely-if */
 import { tl } from '@mtcute/tl'
 
 import { MtTypeAssertionError } from '../../../types/errors.js'
@@ -17,6 +17,7 @@ export function _findMessageInUpdate(
     isEdit?: boolean,
     noDispatch?: boolean,
     allowNull?: false,
+    randomId?: tl.Long,
 ): Message
 /**
  * @internal
@@ -28,6 +29,7 @@ export function _findMessageInUpdate(
     isEdit?: boolean,
     noDispatch?: boolean,
     allowNull?: true,
+    randomId?: tl.Long,
 ): Message | null
 
 /**
@@ -40,23 +42,40 @@ export function _findMessageInUpdate(
     isEdit = false,
     noDispatch = true,
     allowNull = false,
+    randomId?: tl.Long,
 ): Message | null {
     assertIsUpdatesGroup('_findMessageInUpdate', res)
 
     client.handleClientUpdate(res, noDispatch)
 
-    for (const u of res.updates) {
-        if (
-            (isEdit && (u._ === 'updateEditMessage' || u._ === 'updateEditChannelMessage')) ||
-            (!isEdit &&
-                (u._ === 'updateNewMessage' ||
-                    u._ === 'updateNewChannelMessage' ||
-                    u._ === 'updateNewScheduledMessage'))
-        ) {
-            const peers = PeersIndex.from(res)
+    let ourMessageId = 0
 
-            return new Message(u.message, peers, u._ === 'updateNewScheduledMessage')
+    for (const u of res.updates) {
+        if (randomId && u._ === 'updateMessageID' && u.randomId.eq(randomId)) {
+            ourMessageId = u.id
+            continue
         }
+
+        if (isEdit) {
+            if (!(u._ === 'updateEditMessage' || u._ === 'updateEditChannelMessage')) continue
+        } else {
+            if (
+                !(
+                    u._ === 'updateNewMessage' ||
+                    u._ === 'updateNewChannelMessage' ||
+                    u._ === 'updateNewScheduledMessage'
+                )
+            ) { continue }
+        }
+
+        // this *may* break if updateMessageID comes after the message update
+        // but it's unlikely and is not worth the effort to fix
+        // we should eventually move to properly handling updateMessageID
+        if (ourMessageId !== 0 && u.message.id !== ourMessageId) continue
+
+        const peers = PeersIndex.from(res)
+
+        return new Message(u.message, peers, u._ === 'updateNewScheduledMessage')
     }
 
     if (allowNull) return null
