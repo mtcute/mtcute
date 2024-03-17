@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/tl-runtime",
     "private": true,
-    "version": "0.7.0",
+    "version": "0.8.0",
     "description": "Runtime for TL",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
