@@ -32,7 +32,7 @@ export class RpcError extends Error {
     static fromTl(obj: object): RpcError;
 }
 ",
-  "const _descriptionsMap = JSON.parse('{\\"FLOOD_WAIT_%d\\":\\"Wait %d seconds\\"}')
+  "const _descriptionsMap = JSON.parse('{"FLOOD_WAIT_%d":"Wait %d seconds"}')
 class RpcError extends Error {
     constructor(code, text, description) {
         super(description || 'Unknown RPC error: [' + code + ':' + text + ']');
@@ -50,7 +50,7 @@ RpcError.fromTl = function (obj) {
 
     var err = new RpcError(obj.errorCode, obj.errorMessage);
     var match, param;
-    if ((match=err.text.match(/^FLOOD_WAIT_(\\\\d+)$/))!=null){ err.text = 'FLOOD_WAIT_%d'; param = err.duration = parseInt(match[1]) }
+    if ((match=err.text.match(/^FLOOD_WAIT_(\\d+)$/))!=null){ err.text = 'FLOOD_WAIT_%d'; param = err.duration = parseInt(match[1]) }
 
     else return err
 
@@ -69,5 +69,81 @@ RpcError.BAD_REQUEST = 400;
 
 exports.RpcError = RpcError;
 ",
+]
+`;
+
+exports[`generateCodeForErrors should correctly generate errors 1`] = `
+[
+  
+"type MtErrorText =
+    | 'USER_NOT_FOUND'
+    | 'FLOOD_WAIT_%d'
+
+    | (string & {}) // to keep hints
+
+interface MtErrorArgMap {
+    'FLOOD_WAIT_%d': { duration: number },
+
+}
+
+type RpcErrorWithArgs<T extends string> =
+    RpcError & { text: T } & (T extends keyof MtErrorArgMap ? (RpcError & MtErrorArgMap[T]) : {});
+
+export class RpcError extends Error {
+    static BAD_REQUEST: 400;
+
+
+    readonly code: number;
+    readonly text: MtErrorText;
+    readonly unknown: boolean;
+    constructor(code: number, text: MtErrorText);
+
+    is<const T extends MtErrorText>(text: T): this is RpcErrorWithArgs<T>;
+    static is<const T extends MtErrorText>(err: unknown): err is RpcError;
+    static is<const T extends MtErrorText>(err: unknown, text: T): err is RpcErrorWithArgs<T>;
+    static create<const T extends MtErrorText>(code: number, text: T): RpcErrorWithArgs<T>;
+    static fromTl(obj: object): RpcError;
+}
+"
+,
+  
+"const _descriptionsMap = JSON.parse('{"FLOOD_WAIT_%d":"Wait %d seconds"}')
+class RpcError extends Error {
+    constructor(code, text, description) {
+        super(description || 'Unknown RPC error: [' + code + ':' + text + ']');
+        this.code = code;
+        this.text = text;
+    }
+
+    static is(err, text) { return err.constructor === RpcError && (!text || err.text === text); }
+    is(text) { return this.text === text; }
+}
+RpcError.fromTl = function (obj) {
+    if (obj.errorMessage in _descriptionsMap) {
+        return new RpcError(obj.errorCode, obj.errorMessage, _descriptionsMap[obj.errorMessage]);
+    }
+
+    var err = new RpcError(obj.errorCode, obj.errorMessage);
+    var match, param;
+    if ((match=err.text.match(/^FLOOD_WAIT_(\d+)$/))!=null){ err.text = 'FLOOD_WAIT_%d'; param = err.duration = parseInt(match[1]) }
+
+    else return err
+
+    err.message = _descriptionsMap[err.text].replace('%d', param);
+    return err
+}
+RpcError.create = function(code, text) {
+    var desc = _descriptionsMap[text];
+    var err = new RpcError(code, text, desc);
+    if (!desc) {
+        err.unknown = true;
+    }
+    return err;
+}
+RpcError.BAD_REQUEST = 400;
+
+exports.RpcError = RpcError;
+"
+,
 ]
 `;

@@ -29,3 +29,24 @@ exports[`groupTlEntriesByNamespace > should group entries correctly 1`] = `
   ],
 }
 `;
+
+exports[`groupTlEntriesByNamespace should group entries correctly 1`] = `
+{
+  "foo": [
+    {
+      "arguments": [],
+      "id": 0,
+      "kind": "class",
+      "name": "foo.bar",
+      "type": "FooBar",
+    },
+    {
+      "arguments": [],
+      "id": 0,
+      "kind": "class",
+      "name": "foo.baz",
+      "type": "FooBaz",
+    },
+  ],
+}
+`;

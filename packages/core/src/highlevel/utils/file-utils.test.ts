@@ -15,15 +15,11 @@ describe('isProbablyPlainText', () => {
     it('should return true for buffers only containing printable ascii', () => {
         expect(isProbablyPlainText(p.utf8Encode('hello this is some ascii text'))).to.be.true
         expect(isProbablyPlainText(p.utf8Encode('hello this is some ascii text\nwith unix new lines'))).to.be.true
-        expect(isProbablyPlainText(p.utf8Encode('hello this is some ascii text\r\nwith windows new lines'))).to.be
+        expect(isProbablyPlainText(p.utf8Encode('hello this is some ascii text\r\nwith windows new lines'))).to.be.true
+        expect(isProbablyPlainText(p.utf8Encode('hello this is some ascii text\n\twith unix new lines and tabs'))).to.be
             .true
-        expect(isProbablyPlainText(p.utf8Encode('hello this is some ascii text\n\twith unix new lines and tabs')))
+        expect(isProbablyPlainText(p.utf8Encode('hello this is some ascii text\r\n\twith windows new lines and tabs')))
             .to.be.true
-        expect(
-            isProbablyPlainText(
-                p.utf8Encode('hello this is some ascii text\r\n\twith windows new lines and tabs'),
-            ),
-        ).to.be.true
     })
 
     it('should return false for buffers containing some binary data', () => {
@@ -55,7 +51,7 @@ describe('svgPathToFile', () => {
         const path = 'M 0 0 L 100 0 L 100 100 L 0 100 L 0 0 Z'
 
         expect(p.utf8Decode(svgPathToFile(path))).toMatchInlineSnapshot(
-            '"<?xml version=\\"1.0\\" encoding=\\"utf-8\\"?><svg version=\\"1.1\\" xmlns=\\"http://www.w3.org/2000/svg\\" xmlns:xlink=\\"http://www.w3.org/1999/xlink\\"viewBox=\\"0 0 512 512\\" xml:space=\\"preserve\\"><path d=\\"M 0 0 L 100 0 L 100 100 L 0 100 L 0 0 Z\\"/></svg>"',
+            '"<?xml version="1.0" encoding="utf-8"?><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"viewBox="0 0 512 512" xml:space="preserve"><path d="M 0 0 L 100 0 L 100 100 L 0 100 L 0 0 Z"/></svg>"',
         )
     })
 })
