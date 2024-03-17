@@ -82,6 +82,7 @@ export async function sendMedia(
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
     const { peer, replyTo, scheduleDate, chainId } = await _processCommonSendParameters(client, chatId, params)
 
+    const randomId = randomLong()
     const res = await client.call(
         {
             _: 'messages.sendMedia',
@@ -89,7 +90,7 @@ export async function sendMedia(
             media: inputMedia,
             silent: params.silent,
             replyTo,
-            randomId: randomLong(),
+            randomId,
             scheduleDate,
             replyMarkup,
             message,
@@ -102,7 +103,7 @@ export async function sendMedia(
         { chainId },
     )
 
-    const msg = _findMessageInUpdate(client, res, false, !params.shouldDispatch)
+    const msg = _findMessageInUpdate(client, res, false, !params.shouldDispatch, false, randomId)
 
     return msg
 }

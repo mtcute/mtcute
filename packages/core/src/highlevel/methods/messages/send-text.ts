@@ -56,6 +56,7 @@ export async function sendText(
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
     const { peer, replyTo, scheduleDate, chainId } = await _processCommonSendParameters(client, chatId, params)
 
+    const randomId = randomLong()
     const res = await client.call(
         {
             _: 'messages.sendMessage',
@@ -63,7 +64,7 @@ export async function sendText(
             noWebpage: params.disableWebPreview,
             silent: params.silent,
             replyTo,
-            randomId: randomLong(),
+            randomId,
             scheduleDate,
             replyMarkup,
             message,
@@ -135,7 +136,7 @@ export async function sendText(
         return ret
     }
 
-    const msg = _findMessageInUpdate(client, res, false, !params.shouldDispatch)
+    const msg = _findMessageInUpdate(client, res, false, !params.shouldDispatch, false, randomId)
 
     return msg
 }
