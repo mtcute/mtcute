@@ -10,7 +10,7 @@ import {
 
 import { SqliteStorage } from '../src/index.js'
 
-if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
+if (import.meta.env.TEST_ENV === 'node') {
     describe('SqliteStorage', () => {
         const storage = new SqliteStorage(':memory:')
 

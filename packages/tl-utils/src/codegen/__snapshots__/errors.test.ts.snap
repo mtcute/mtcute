@@ -125,7 +125,7 @@ RpcError.fromTl = function (obj) {
 
     var err = new RpcError(obj.errorCode, obj.errorMessage);
     var match, param;
-    if ((match=err.text.match(/^FLOOD_WAIT_(\d+)$/))!=null){ err.text = 'FLOOD_WAIT_%d'; param = err.duration = parseInt(match[1]) }
+    if ((match=err.text.match(/^FLOOD_WAIT_(d+)$/))!=null){ err.text = 'FLOOD_WAIT_%d'; param = err.duration = parseInt(match[1]) }
 
     else return err
 

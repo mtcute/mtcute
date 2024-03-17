@@ -623,159 +623,6 @@ exports[`generateTlSchemasDifference shows added constructors 1`] = `
 }
 `;
 
-exports[`generateTlSchemasDifference shows removed constructors 1`] = `
-{
-  "classes": {
-    "added": [],
-    "modified": [],
-    "removed": [
-      {
-        "arguments": [],
-        "id": 3847402009,
-        "kind": "class",
-        "name": "test2",
-        "type": "Test",
-      },
-    ],
-  },
-  "methods": {
-    "added": [],
-    "modified": [],
-    "removed": [],
-  },
-  "unions": {
-    "added": [],
-    "modified": [
-      {
-        "classes": {
-          "added": [],
-          "modified": [],
-          "removed": [
-            {
-              "arguments": [],
-              "id": 3847402009,
-              "kind": "class",
-              "name": "test2",
-              "type": "Test",
-            },
-          ],
-        },
-        "methods": {
-          "added": [],
-          "modified": [],
-          "removed": [],
-        },
-        "name": "Test",
-      },
-    ],
-    "removed": [],
-  },
-}
-`;
-
-exports[`generateTlSchemasDifference shows modified constructors 1`] = `
-{
-  "classes": {
-    "added": [],
-    "modified": [
-      {
-        "arguments": {
-          "added": [],
-          "modified": [
-            {
-              "name": "foo",
-              "type": {
-                "new": "Foo",
-                "old": "int",
-              },
-            },
-          ],
-          "removed": [],
-        },
-        "id": {
-          "new": 3348640942,
-          "old": 1331975629,
-        },
-        "name": "test",
-      },
-    ],
-    "removed": [],
-  },
-  "methods": {
-    "added": [],
-    "modified": [],
-    "removed": [],
-  },
-  "unions": {
-    "added": [],
-    "modified": [],
-    "removed": [],
-  },
-}
-`;
-
-exports[`generateTlSchemasDifference shows removed unions 1`] = `
-{
-  "classes": {
-    "added": [],
-    "modified": [
-      {
-        "arguments": {
-          "added": [],
-          "modified": [
-            {
-              "name": "foo",
-              "type": {
-                "new": "Foo",
-                "old": "int",
-              },
-            },
-          ],
-          "removed": [],
-        },
-        "id": {
-          "new": 3348640942,
-          "old": 1331975629,
-        },
-        "name": "test",
-      },
-    ],
-    "removed": [
-      {
-        "arguments": [],
-        "id": 3739166976,
-        "kind": "class",
-        "name": "test1",
-        "type": "Test1",
-      },
-    ],
-  },
-  "methods": {
-    "added": [],
-    "modified": [],
-    "removed": [],
-  },
-  "unions": {
-    "added": [],
-    "modified": [],
-    "removed": [
-      {
-        "classes": [
-          {
-            "arguments": [],
-            "id": 3739166976,
-            "kind": "class",
-            "name": "test1",
-            "type": "Test1",
-          },
-        ],
-        "name": "Test1",
-      },
-    ],
-  },
-}
-`;
-
 exports[`generateTlSchemasDifference shows added unions 1`] = `
 {
   "classes": {
@@ -834,6 +681,79 @@ exports[`generateTlSchemasDifference shows added unions 1`] = `
     ],
     "modified": [],
     "removed": [],
+  },
+}
+`;
+
+exports[`generateTlSchemasDifference shows modified constructors 1`] = `
+{
+  "classes": {
+    "added": [],
+    "modified": [
+      {
+        "arguments": {
+          "added": [],
+          "modified": [
+            {
+              "name": "foo",
+              "type": {
+                "new": "Foo",
+                "old": "int",
+              },
+            },
+          ],
+          "removed": [],
+        },
+        "id": {
+          "new": 3348640942,
+          "old": 1331975629,
+        },
+        "name": "test",
+      },
+    ],
+    "removed": [],
+  },
+  "methods": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "unions": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+}
+`;
+
+exports[`generateTlSchemasDifference shows modified methods 1`] = `
+{
+  "classes": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "methods": {
+    "added": [],
+    "modified": [
+      {
+        "id": {
+          "new": 3994885231,
+          "old": 471282454,
+        },
+        "name": "test",
+      },
+    ],
+    "removed": [],
+  },
+  "unions": {
+    "added": [
+      undefined,
+    ],
+    "modified": [],
+    "removed": [
+      undefined,
+    ],
   },
 }
 `;
@@ -1114,33 +1034,113 @@ exports[`generateTlSchemasDifference shows modified unions 3`] = `
 }
 `;
 
-exports[`generateTlSchemasDifference shows modified methods 1`] = `
+exports[`generateTlSchemasDifference shows removed constructors 1`] = `
 {
   "classes": {
     "added": [],
     "modified": [],
-    "removed": [],
+    "removed": [
+      {
+        "arguments": [],
+        "id": 3847402009,
+        "kind": "class",
+        "name": "test2",
+        "type": "Test",
+      },
+    ],
   },
   "methods": {
     "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "unions": {
+    "added": [],
     "modified": [
       {
-        "id": {
-          "new": 3994885231,
-          "old": 471282454,
+        "classes": {
+          "added": [],
+          "modified": [],
+          "removed": [
+            {
+              "arguments": [],
+              "id": 3847402009,
+              "kind": "class",
+              "name": "test2",
+              "type": "Test",
+            },
+          ],
         },
-        "name": "test",
+        "methods": {
+          "added": [],
+          "modified": [],
+          "removed": [],
+        },
+        "name": "Test",
       },
     ],
     "removed": [],
   },
-  "unions": {
-    "added": [
-      undefined,
+}
+`;
+
+exports[`generateTlSchemasDifference shows removed unions 1`] = `
+{
+  "classes": {
+    "added": [],
+    "modified": [
+      {
+        "arguments": {
+          "added": [],
+          "modified": [
+            {
+              "name": "foo",
+              "type": {
+                "new": "Foo",
+                "old": "int",
+              },
+            },
+          ],
+          "removed": [],
+        },
+        "id": {
+          "new": 3348640942,
+          "old": 1331975629,
+        },
+        "name": "test",
+      },
     ],
+    "removed": [
+      {
+        "arguments": [],
+        "id": 3739166976,
+        "kind": "class",
+        "name": "test1",
+        "type": "Test1",
+      },
+    ],
+  },
+  "methods": {
+    "added": [],
+    "modified": [],
+    "removed": [],
+  },
+  "unions": {
+    "added": [],
     "modified": [],
     "removed": [
-      undefined,
+      {
+        "classes": [
+          {
+            "arguments": [],
+            "id": 3739166976,
+            "kind": "class",
+            "name": "test1",
+            "type": "Test1",
+          },
+        ],
+        "name": "Test1",
+      },
     ],
   },
 }

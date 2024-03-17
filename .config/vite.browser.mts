@@ -1,11 +1,8 @@
 /// <reference types="vitest" />
 import { defineConfig, mergeConfig } from 'vite'
-import * as cjsLexer from 'cjs-module-lexer'
-import esbuild from 'esbuild'
 
 import baseConfig from './vite.mjs'
-
-await cjsLexer.init()
+import { fixupCjs } from './vite-utils/fixup-cjs'
 
 export default mergeConfig(baseConfig, defineConfig({
     test: {
@@ -26,24 +23,7 @@ export default mergeConfig(baseConfig, defineConfig({
         // ],
     },
     plugins: [
-        {
-            name: 'fixup-cjs',
-            async transform(code, id) {
-                if (!id.match(/\/packages\/tl\/.*\.js$/)) return code
-                
-                const lexed = cjsLexer.parse(code)
-                const r = await esbuild.transform(code, { format: 'esm' })
-                code = r.code.replace(/export default require_stdin\(\);/, '')
-
-                code += 'const __exp = require_stdin()\n'
-
-                for (const exp of lexed.exports) {
-                    code += `export const ${exp} = __exp.${exp}\n`
-                }
-
-                return code
-            }
-        }
+        fixupCjs(),
     ],
     define: {
         'import.meta.env.TEST_ENV': '"browser"'

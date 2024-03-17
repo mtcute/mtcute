@@ -2,10 +2,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { gzipSync, inflateSync } from 'zlib'
 
 import { getPlatform } from '@mtcute/core/platform.js'
-import {
-    dataViewFromBuffer,
-    ICryptoProvider,
-} from '@mtcute/core/utils.js'
+import { dataViewFromBuffer, ICryptoProvider } from '@mtcute/core/utils.js'
 
 import { defaultCryptoProvider } from './platform.js'
 
@@ -42,9 +39,14 @@ export function withFakeRandom(provider: ICryptoProvider, source = DEFAULT_ENTRO
         offset += buf.length
     }
 
-    provider.randomFill = getRandomValues
+    return new Proxy<ICryptoProvider>(provider, {
+        get(target, prop, receiver) {
+            if (prop === 'randomFill') return getRandomValues
 
-    return provider
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            return Reflect.get(target, prop, receiver)
+        },
+    })
 }
 
 export function useFakeMathRandom(source = DEFAULT_ENTROPY): void {
@@ -176,14 +178,10 @@ export function testCryptoProvider(c: ICryptoProvider): void {
             p.hexDecode('6D656E746174696F6E206F6620494745206D6F646520666F72204F70656E5353'),
         )
         expect(
-            p.hexEncode(
-                aes.encrypt(p.hexDecode('99706487a1cde613bc6de0b6f24b1c7aa448c8b9c3403e3467a8cad89340f53b')),
-            ),
+            p.hexEncode(aes.encrypt(p.hexDecode('99706487a1cde613bc6de0b6f24b1c7aa448c8b9c3403e3467a8cad89340f53b'))),
         ).to.eq('792ea8ae577b1a66cb3bd92679b8030ca54ee631976bd3a04547fdcb4639fa69')
         expect(
-            p.hexEncode(
-                aes.decrypt(p.hexDecode('792ea8ae577b1a66cb3bd92679b8030ca54ee631976bd3a04547fdcb4639fa69')),
-            ),
+            p.hexEncode(aes.decrypt(p.hexDecode('792ea8ae577b1a66cb3bd92679b8030ca54ee631976bd3a04547fdcb4639fa69'))),
         ).to.eq('99706487a1cde613bc6de0b6f24b1c7aa448c8b9c3403e3467a8cad89340f53b')
     })
 
