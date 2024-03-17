@@ -1,5 +1,6 @@
 import { UserConfig } from './cli.js'
 import { MtcuteFeature } from './features/types.js'
+import { getInstallCommand } from './package-manager.js'
 import { exec } from './utils.js'
 
 export function buildDependenciesList(config: UserConfig) {
@@ -52,6 +53,6 @@ export function buildDependenciesList(config: UserConfig) {
 export async function installDependencies(cwd: string, config: UserConfig) {
     const { dependencies, devDepdenencies } = buildDependenciesList(config)
 
-    await exec(cwd, 'pnpm', 'add', ...dependencies)
-    await exec(cwd, 'pnpm', 'add', '--save-dev', ...devDepdenencies)
+    await exec(cwd, ...getInstallCommand({ mgr: config.packageManager, packages: dependencies }))
+    await exec(cwd, ...getInstallCommand({ mgr: config.packageManager, packages: devDepdenencies, dev: true }))
 }

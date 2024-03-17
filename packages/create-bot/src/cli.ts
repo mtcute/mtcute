@@ -6,6 +6,7 @@ import { readConfig, UserConfigPersisted, writeConfig } from './config.js'
 import { TELEGRAM_APPS_PAGE } from './constants.js'
 import { getFeatureChoices } from './features/cli.js'
 import { MtcuteFeature } from './features/types.js'
+import { getPackageManager, PackageManager } from './package-manager.js'
 
 interface UserConfigAnswers {
     reuse?: boolean
@@ -19,6 +20,7 @@ export interface UserConfig extends UserConfigPersisted {
     name: string
     botToken?: string
     features: MtcuteFeature[]
+    packageManager: PackageManager
 }
 
 export async function askForConfigPersisted(): Promise<UserConfigPersisted> {
@@ -135,6 +137,7 @@ export async function askForConfig(): Promise<UserConfig> {
     return {
         ...persisted,
         name: '', // will be filled later
+        packageManager: getPackageManager(),
         botToken: botToken || undefined,
         features,
     }

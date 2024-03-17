@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import * as colors from 'colorette'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -5,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { askForConfig } from './cli.js'
 import { installDependencies } from './dependencies.js'
 import { MtcuteFeature } from './features/types.js'
+import { getExecCommand } from './package-manager.js'
 import { runTemplater } from './templater.js'
 import { exec } from './utils.js'
 
@@ -35,10 +37,10 @@ if (config.features.includes(MtcuteFeature.Linters)) {
         await exec(outDir, 'chmod', '+x', '.husky/pre-commit')
     }
 
-    await exec(outDir, 'pnpm', 'exec', 'husky', 'install')
+    await exec(outDir, ...getExecCommand(config.packageManager, 'husky', 'install'))
 }
 
 console.log(`✅ Scaffolded new project at ${colors.blue(outDir)}`)
 console.log('🚀 Run it with:')
 console.log(`  ${colors.blue('$')} cd ${projectName}`)
-console.log(`  ${colors.blue('$')} pnpm start`)
+console.log(`  ${colors.blue('$')} ${config.packageManager} start`)
