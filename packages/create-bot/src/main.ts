@@ -37,7 +37,7 @@ if (config.features.includes(MtcuteFeature.Linters)) {
         await exec(outDir, 'chmod', '+x', '.husky/pre-commit')
     }
 
-    await exec(outDir, ...getExecCommand(config.packageManager, 'husky', 'install'))
+    await exec(outDir, ...getExecCommand(config.packageManager, 'husky'))
 }
 
 console.log(`✅ Scaffolded new project at ${colors.blue(outDir)}`)
