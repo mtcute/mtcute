@@ -11,6 +11,14 @@ export default defineConfig({
                 'packages/**/*.test-d.ts',
             ],
         },
+        coverage: {
+            include: [
+                'packages/**/*.ts',
+            ],
+            exclude: [
+                'packages/**/index.ts',
+            ]
+        },
         setupFiles: [
             './.config/vite-utils/test-setup.mts'
         ]
