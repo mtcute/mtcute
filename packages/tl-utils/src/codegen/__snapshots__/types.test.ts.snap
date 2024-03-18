@@ -188,7 +188,7 @@ type TlObject =
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with methods 2`] = `
 "ns.isAnyTest = _isAny('Test');
-_types = JSON.parse('{\\"test\\":\\"Test\\"}');"
+_types = JSON.parse('{"test":"Test"}');"
 `;
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with multi-unions 1`] = `
@@ -210,7 +210,7 @@ type TlObject =
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with multi-unions 2`] = `
 "ns.isAnyTest = _isAny('Test');
-_types = JSON.parse('{\\"test\\":\\"Test\\",\\"test2\\":\\"Test\\"}');"
+_types = JSON.parse('{"test":"Test","test2":"Test"}');"
 `;
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes schemas with namespaces 1`] = `
@@ -270,7 +270,7 @@ ns.test = {};
 (function(ns){
 ns.isAnyTest = _isAny('test.Test');
 })(ns.test);
-_types = JSON.parse('{\\"test\\":\\"Test\\",\\"test2\\":\\"Test\\",\\"test.test\\":\\"test.Test\\",\\"test.test2\\":\\"test.Test\\"}');"
+_types = JSON.parse('{"test":"Test","test2":"Test","test.test":"test.Test","test.test2":"test.Test"}');"
 `;
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes simple schemas 1`] = `
@@ -288,5 +288,5 @@ type TlObject =
 
 exports[`generateTypescriptDefinitionsForTlSchema > writes simple schemas 2`] = `
 "ns.isAnyTest = _isAny('Test');
-_types = JSON.parse('{\\"test\\":\\"Test\\"}');"
+_types = JSON.parse('{"test":"Test"}');"
 `;

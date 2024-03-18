@@ -5,7 +5,7 @@ import { TransportState } from '@mtcute/core'
 import { getPlatform } from '@mtcute/core/platform.js'
 import { defaultProductionDc, LogManager } from '@mtcute/core/utils.js'
 
-if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
+if (import.meta.env.TEST_ENV === 'node') {
     vi.doMock('net', () => ({
         connect: vi.fn().mockImplementation((port: number, ip: string, cb: () => void) => {
             cb()

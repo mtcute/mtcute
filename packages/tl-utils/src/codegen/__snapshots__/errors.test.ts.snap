@@ -32,7 +32,7 @@ export class RpcError extends Error {
     static fromTl(obj: object): RpcError;
 }
 ",
-  "const _descriptionsMap = JSON.parse('{\\"FLOOD_WAIT_%d\\":\\"Wait %d seconds\\"}')
+  "const _descriptionsMap = JSON.parse('{"FLOOD_WAIT_%d":"Wait %d seconds"}')
 class RpcError extends Error {
     constructor(code, text, description) {
         super(description || 'Unknown RPC error: [' + code + ':' + text + ']');
@@ -50,7 +50,7 @@ RpcError.fromTl = function (obj) {
 
     var err = new RpcError(obj.errorCode, obj.errorMessage);
     var match, param;
-    if ((match=err.text.match(/^FLOOD_WAIT_(\\\\d+)$/))!=null){ err.text = 'FLOOD_WAIT_%d'; param = err.duration = parseInt(match[1]) }
+    if ((match=err.text.match(/^FLOOD_WAIT_(\\d+)$/))!=null){ err.text = 'FLOOD_WAIT_%d'; param = err.duration = parseInt(match[1]) }
 
     else return err
 

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url'
 import { getPackageJsons } from './utils.mjs'
 
 export async function validateDepsVersions() {
-    const packageJsons = await getPackageJsons()
+    const packageJsons = await getPackageJsons(true)
 
     const versions = {}
     const errors = []

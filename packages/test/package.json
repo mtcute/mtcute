@@ -7,6 +7,7 @@
     "license": "MIT",
     "main": "src/index.ts",
     "type": "module",
+    "sideEffects": false,
     "scripts": {
         "build": "pnpm run -w build-package test"
     },
@@ -21,7 +22,7 @@
         "@mtcute/node": "workspace:^",
         "@mtcute/web": "workspace:^",
         "@mtcute/tl": "workspace:*",
-        "vitest": "^0.34.6"
+        "vitest": "1.4.0"
     },
     "peerDependenciesMeta": {
         "@mtcute/node": {
