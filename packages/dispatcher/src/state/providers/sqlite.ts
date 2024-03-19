@@ -1,5 +1,4 @@
-import { MaybePromise } from '@mtcute/core'
-import type { SqliteStorage, SqliteStorageDriver, Statement } from '@mtcute/sqlite'
+import { BaseSqliteStorage, BaseSqliteStorageDriver, ISqliteStatement, MaybePromise } from '@mtcute/core'
 
 import { IStateStorageProvider } from '../provider.js'
 import { IStateRepository } from '../repository.js'
@@ -15,7 +14,7 @@ interface RateLimitDto {
 }
 
 class SqliteStateRepository implements IStateRepository {
-    constructor(readonly _driver: SqliteStorageDriver) {
+    constructor(readonly _driver: BaseSqliteStorageDriver) {
         _driver.registerMigration('state', 1, (db) => {
             db.exec(`
                 create table fsm_state (
@@ -49,12 +48,12 @@ class SqliteStateRepository implements IStateRepository {
         })
     }
 
-    private _setState!: Statement
+    private _setState!: ISqliteStatement
     setState(key: string, state: string, ttl?: number | undefined): MaybePromise<void> {
         this._setState.run(key, state, ttl ? Date.now() + ttl * 1000 : undefined)
     }
 
-    private _getState!: Statement
+    private _getState!: ISqliteStatement
     getState(key: string, now: number): MaybePromise<string | null> {
         const res_ = this._getState.get(key)
         if (!res_) return null
@@ -69,21 +68,21 @@ class SqliteStateRepository implements IStateRepository {
         return res.value
     }
 
-    private _deleteState!: Statement
+    private _deleteState!: ISqliteStatement
     deleteState(key: string): MaybePromise<void> {
         this._deleteState.run(key)
     }
 
-    private _deleteOldState!: Statement
-    private _deleteOldRl!: Statement
+    private _deleteOldState!: ISqliteStatement
+    private _deleteOldRl!: ISqliteStatement
     vacuum(now: number): MaybePromise<void> {
         this._deleteOldState.run(now)
         this._deleteOldRl.run(now)
     }
 
-    private _setRl!: Statement
-    private _getRl!: Statement
-    private _deleteRl!: Statement
+    private _setRl!: ISqliteStatement
+    private _getRl!: ISqliteStatement
+    private _deleteRl!: ISqliteStatement
 
     getRateLimit(key: string, now: number, limit: number, window: number): [number, number] {
         const val = this._getRl.get(key) as RateLimitDto | undefined
@@ -117,9 +116,9 @@ class SqliteStateRepository implements IStateRepository {
 }
 
 export class SqliteStateStorage implements IStateStorageProvider {
-    constructor(readonly driver: SqliteStorageDriver) {}
+    constructor(readonly driver: BaseSqliteStorageDriver) {}
 
-    static from(provider: SqliteStorage) {
+    static from(provider: BaseSqliteStorage) {
         return new SqliteStateStorage(provider.driver)
     }
 

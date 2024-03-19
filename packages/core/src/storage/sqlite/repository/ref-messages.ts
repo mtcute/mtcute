@@ -1,8 +1,7 @@
-import { Statement } from 'better-sqlite3'
-
 import { IReferenceMessagesRepository } from '@mtcute/core'
 
-import { SqliteStorageDriver } from '../driver.js'
+import { BaseSqliteStorageDriver } from '../driver.js'
+import { ISqliteStatement } from '../types.js'
 
 interface ReferenceMessageDto {
     peer_id: number
@@ -11,7 +10,7 @@ interface ReferenceMessageDto {
 }
 
 export class SqliteRefMessagesRepository implements IReferenceMessagesRepository {
-    constructor(readonly _driver: SqliteStorageDriver) {
+    constructor(readonly _driver: BaseSqliteStorageDriver) {
         _driver.registerMigration('ref_messages', 1, (db) => {
             db.exec(`
                 create table if not exists message_refs (
@@ -36,12 +35,12 @@ export class SqliteRefMessagesRepository implements IReferenceMessagesRepository
         })
     }
 
-    private _store!: Statement
+    private _store!: ISqliteStatement
     store(peerId: number, chatId: number, msgId: number): void {
         this._store.run(peerId, chatId, msgId)
     }
 
-    private _getByPeer!: Statement
+    private _getByPeer!: ISqliteStatement
     getByPeer(peerId: number): [number, number] | null {
         const res = this._getByPeer.get(peerId)
         if (!res) return null
@@ -51,19 +50,19 @@ export class SqliteRefMessagesRepository implements IReferenceMessagesRepository
         return [res_.chat_id, res_.msg_id]
     }
 
-    private _del!: Statement
+    private _del!: ISqliteStatement
     delete(chatId: number, msgIds: number[]): void {
         for (const msgId of msgIds) {
             this._driver._writeLater(this._del, [chatId, msgId])
         }
     }
 
-    private _delByPeer!: Statement
+    private _delByPeer!: ISqliteStatement
     deleteByPeer(peerId: number): void {
         this._delByPeer.run(peerId)
     }
 
-    private _delAll!: Statement
+    private _delAll!: ISqliteStatement
     deleteAll(): void {
         this._delAll.run()
     }
