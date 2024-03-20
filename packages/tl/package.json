@@ -3,7 +3,7 @@
     "version": "176.0.0",
     "description": "TL schema used for mtcute",
     "main": "index.js",
-    "author": "Alina Sireneva <alina@tei.su>",
+    "author": "alina sireneva <alina@tei.su>",
     "license": "MIT",
     "scripts": {
         "test": "tsc --noEmit --esModuleInterop tests/types.ts",

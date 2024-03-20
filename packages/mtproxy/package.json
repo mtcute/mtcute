@@ -3,7 +3,7 @@
     "private": true,
     "version": "0.8.0",
     "description": "MTProto proxy (MTProxy) support for mtcute",
-    "author": "Alina Sireneva <alina@tei.su>",
+    "author": "alina sireneva <alina@tei.su>",
     "license": "MIT",
     "main": "index.ts",
     "type": "module",

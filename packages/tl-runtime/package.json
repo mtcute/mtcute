@@ -3,7 +3,7 @@
     "private": true,
     "version": "0.8.0",
     "description": "Runtime for TL",
-    "author": "Alina Sireneva <alina@tei.su>",
+    "author": "alina sireneva <alina@tei.su>",
     "license": "MIT",
     "type": "module",
     "sideEffects": false,
