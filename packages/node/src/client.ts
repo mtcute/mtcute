@@ -9,11 +9,11 @@ import {
     TelegramClientOptions,
 } from '@mtcute/core/client.js'
 import { setPlatform } from '@mtcute/core/platform.js'
-import { SqliteStorage } from '@mtcute/sqlite'
 
 import { downloadToFile } from './methods/download-file.js'
 import { downloadAsNodeStream } from './methods/download-node-stream.js'
 import { NodePlatform } from './platform.js'
+import { SqliteStorage } from './sqlite/index.js'
 import { NodeCryptoProvider } from './utils/crypto.js'
 import { TcpTransport } from './utils/tcp.js'
 

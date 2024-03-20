@@ -13,7 +13,6 @@
         "@mtcute/mtproxy": "*",
         "@mtcute/node": "*",
         "@mtcute/socks-proxy": "*",
-        "@mtcute/sqlite": "*",
         "@mtcute/tl": "*",
         "@mtcute/tl-runtime": "*",
         "@mtcute/tl-utils": "*",

@@ -281,37 +281,9 @@ importers:
       '@mtcute/markdown-parser':
         specifier: workspace:^
         version: link:../markdown-parser
-      '@mtcute/sqlite':
-        specifier: workspace:^
-        version: link:../sqlite
       '@mtcute/wasm':
         specifier: workspace:^
         version: link:../wasm
-    devDependencies:
-      '@mtcute/test':
-        specifier: workspace:^
-        version: link:../test
-
-  packages/socks-proxy:
-    dependencies:
-      '@mtcute/node':
-        specifier: workspace:^
-        version: link:../node
-      ip6:
-        specifier: 0.2.7
-        version: 0.2.7
-
-  packages/sqlite:
-    dependencies:
-      '@mtcute/core':
-        specifier: workspace:^
-        version: link:../core
-      '@mtcute/tl':
-        specifier: '*'
-        version: link:../tl
-      '@mtcute/tl-runtime':
-        specifier: workspace:^
-        version: link:../tl-runtime
       better-sqlite3:
         specifier: 9.2.2
         version: 9.2.2
@@ -322,6 +294,15 @@ importers:
       '@types/better-sqlite3':
         specifier: 7.6.4
         version: 7.6.4
+
+  packages/socks-proxy:
+    dependencies:
+      '@mtcute/node':
+        specifier: workspace:^
+        version: link:../node
+      ip6:
+        specifier: 0.2.7
+        version: 0.2.7
 
   packages/test:
     dependencies:

@@ -2,7 +2,7 @@
     "name": "@mtcute/node",
     "private": true,
     "version": "0.8.0",
-    "description": "Meta-package for Node JS",
+    "description": "Meta-package for Node.js",
     "author": "Alina Sireneva <alina@tei.su>",
     "license": "MIT",
     "main": "src/index.ts",
@@ -31,11 +31,12 @@
     "dependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/wasm": "workspace:^",
-        "@mtcute/sqlite": "workspace:^",
         "@mtcute/markdown-parser": "workspace:^",
-        "@mtcute/html-parser": "workspace:^"
+        "@mtcute/html-parser": "workspace:^",
+        "better-sqlite3": "9.2.2"
     },
     "devDependencies": {
-        "@mtcute/test": "workspace:^"
+        "@mtcute/test": "workspace:^",
+        "@types/better-sqlite3": "7.6.4"
     }
 }

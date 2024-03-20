@@ -9,7 +9,7 @@ import {
 } from '@mtcute/test'
 
 if (import.meta.env.TEST_ENV === 'node') {
-    const { SqliteStorage } = await import('../src/index.js')
+    const { SqliteStorage } = await import('./index.js')
 
     describe('SqliteStorage', () => {
         const storage = new SqliteStorage(':memory:')
