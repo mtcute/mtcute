@@ -1,15 +1,10 @@
 import { CheckboxChoiceOptions } from 'inquirer'
 
+import { PackageManager } from '../package-manager.js'
 import { MtcuteFeature } from './types.js'
 
-export function getFeatureChoices(): CheckboxChoiceOptions[] {
-    return [
-        {
-            name: ' 🚀 Native addon (better performance)',
-            short: 'Native addon',
-            value: MtcuteFeature.NativeAddon,
-            checked: true,
-        },
+export function getFeatureChoices(packageMananger: PackageManager): CheckboxChoiceOptions[] {
+    const arr: CheckboxChoiceOptions[] = [
         {
             name: ' 🌐 Internationalization',
             short: 'i18n',
@@ -19,12 +14,6 @@ export function getFeatureChoices(): CheckboxChoiceOptions[] {
             name: ' 📨 Event dispatcher',
             short: 'Dispatcher',
             value: MtcuteFeature.Dispatcher,
-            checked: true,
-        },
-        {
-            name: ' 🐳 Generate Dockerfile',
-            short: 'Dockerfile',
-            value: MtcuteFeature.Docker,
             checked: true,
         },
         {
@@ -40,4 +29,25 @@ export function getFeatureChoices(): CheckboxChoiceOptions[] {
             checked: true,
         },
     ]
+
+    if (packageMananger !== PackageManager.Bun) {
+        arr.unshift({
+            name: ' 🚀 Native addon (better performance)',
+            short: 'Native addon',
+            value: MtcuteFeature.NativeAddon,
+            checked: true,
+        })
+    }
+
+    if (packageMananger === PackageManager.Pnpm) {
+        // todo: add support for dockerfile generation for other package managers
+        arr.push({
+            name: ' 🐳 Generate Dockerfile',
+            short: 'Dockerfile',
+            value: MtcuteFeature.Docker,
+            checked: true,
+        })
+    }
+
+    return arr
 }

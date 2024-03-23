@@ -1,11 +1,17 @@
 import { UserConfig } from './cli.js'
 import { MtcuteFeature } from './features/types.js'
-import { getInstallCommand } from './package-manager.js'
+import { getInstallCommand, PackageManager } from './package-manager.js'
 import { exec } from './utils.js'
 
 export function buildDependenciesList(config: UserConfig) {
-    const dependencies = ['@mtcute/node']
+    const dependencies = []
     const devDepdenencies = ['dotenv-cli']
+
+    if (config.packageManager === PackageManager.Bun) {
+        dependencies.push('@mtcute/bun')
+    } else {
+        dependencies.push('@mtcute/node')
+    }
 
     if (config.features.includes(MtcuteFeature.Dispatcher)) {
         dependencies.push('@mtcute/dispatcher')

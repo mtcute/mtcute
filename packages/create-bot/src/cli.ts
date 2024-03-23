@@ -6,7 +6,7 @@ import { readConfig, UserConfigPersisted, writeConfig } from './config.js'
 import { TELEGRAM_APPS_PAGE } from './constants.js'
 import { getFeatureChoices } from './features/cli.js'
 import { MtcuteFeature } from './features/types.js'
-import { getPackageManager, PackageManager } from './package-manager.js'
+import { PackageManager } from './package-manager.js'
 
 interface UserConfigAnswers {
     reuse?: boolean
@@ -101,7 +101,7 @@ export async function askForConfigPersisted(): Promise<UserConfigPersisted> {
     return config
 }
 
-export async function askForConfig(): Promise<UserConfig> {
+export async function askForConfig(packageManager: PackageManager): Promise<UserConfig> {
     const persisted = await askForConfigPersisted()
 
     let allowEmptyBotToken = false
@@ -128,7 +128,7 @@ export async function askForConfig(): Promise<UserConfig> {
         },
         {
             type: 'checkbox',
-            choices: getFeatureChoices(),
+            choices: getFeatureChoices(packageManager),
             name: 'features',
             message: 'Select features:',
         },
@@ -137,7 +137,7 @@ export async function askForConfig(): Promise<UserConfig> {
     return {
         ...persisted,
         name: '', // will be filled later
-        packageManager: getPackageManager(),
+        packageManager,
         botToken: botToken || undefined,
         features,
     }

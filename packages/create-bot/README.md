@@ -1,6 +1,6 @@
 # @mtcute/create-bot
 
-Starter kit for creating bots using `@mtcute/node`.
+Starter kit for creating bots using `@mtcute/node` or `@mtcute/bun`.
 
 [Learn more](https://mtcute.dev/guide/)
 
@@ -12,7 +12,15 @@ Starter kit for creating bots using `@mtcute/node`.
 
 ## Usage
 
+Depending on your preferred package manager, run one of the following commands:
 ```bash
 pnpm create @mtcute/bot
-# and follow the instructions
+# or
+yarn create @mtcute/bot
+# or
+npm create @mtcute/bot
+# or
+bun create @mtcute/bot
 ```
+
+and follow the instructions

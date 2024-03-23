@@ -2,7 +2,11 @@
 {{#if features.dispatcher}}
 import { Dispatcher, filters } from '@mtcute/dispatcher'
 {{/if}}
+{{#if (eq packageManager "bun")}}
+import { TelegramClient } from '@mtcute/bun'
+{{else}}
 import { TelegramClient } from '@mtcute/node'
+{{/if}}
 
 import * as env from './env.js'
 {{#if features.i18n}}
