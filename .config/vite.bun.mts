@@ -26,7 +26,7 @@ const SKIP_TESTS = [
 export default defineConfig({
     build: {
         lib: {
-            entry: (() => {
+            entry: process.env.ENTRYPOINT ? [process.env.ENTRYPOINT] : (() => {
                 const files: string[] = []
 
                 const packages = resolve(__dirname, '../packages')
@@ -57,11 +57,15 @@ export default defineConfig({
                 'module',
                 'fs',
                 'fs/promises',
+                'node:fs',
+                'readline',
+                'worker_threads',
                 'events',
                 'path',
                 'util',
                 'os',
                 'bun:test',
+                'bun:sqlite',
             ],
             output: {
                 chunkFileNames: 'chunk-[hash].js',
@@ -73,7 +77,7 @@ export default defineConfig({
         commonjsOptions: {
             ignoreDynamicRequires: true,
         },
-        outDir: 'dist/tests',
+        outDir: process.env.OUT_DIR || 'dist/tests',
         emptyOutDir: true,
         target: 'esnext',
         minify: false,

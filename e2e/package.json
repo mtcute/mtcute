@@ -2,6 +2,7 @@
     "name": "mtcute-e2e",
     "private": true,
     "dependencies": {
+        "@mtcute/bun": "*",
         "@mtcute/core": "*",
         "@mtcute/crypto-node": "*",
         "@mtcute/dispatcher": "*",
@@ -13,7 +14,6 @@
         "@mtcute/mtproxy": "*",
         "@mtcute/node": "*",
         "@mtcute/socks-proxy": "*",
-        "@mtcute/sqlite": "*",
         "@mtcute/tl": "*",
         "@mtcute/tl-runtime": "*",
         "@mtcute/tl-utils": "*",

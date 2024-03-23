@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { askForConfig } from './cli.js'
 import { installDependencies } from './dependencies.js'
 import { MtcuteFeature } from './features/types.js'
-import { getExecCommand } from './package-manager.js'
+import { getExecCommand, getPackageManager, PackageManager } from './package-manager.js'
 import { runTemplater } from './templater.js'
 import { exec } from './utils.js'
 
@@ -17,7 +17,13 @@ if (!projectName) {
     process.exit(1)
 }
 
-const config = await askForConfig()
+const packageManager = getPackageManager()
+
+if (packageManager === PackageManager.Bun) {
+    console.log(`${colors.red('‼️ Warning:')} ${colors.yellow('Bun')} support is ${colors.bold('experimental')}`)
+}
+
+const config = await askForConfig(packageManager)
 config.name = projectName
 const outDir = process.env.TARGET_DIR || join(process.cwd(), projectName)
 

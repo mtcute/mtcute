@@ -8,8 +8,8 @@ import {
     testRefMessagesRepository,
 } from '@mtcute/test'
 
-if (import.meta.env.TEST_ENV === 'node') {
-    const { SqliteStorage } = await import('../src/index.js')
+if (import.meta.env.TEST_ENV === 'bun') {
+    const { SqliteStorage } = await import('./index.js')
 
     describe('SqliteStorage', () => {
         const storage = new SqliteStorage(':memory:')

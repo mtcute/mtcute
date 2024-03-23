@@ -1,4 +1,3 @@
-import { createRequire } from 'module'
 import { createInterface, Interface as RlInterface } from 'readline'
 
 import { FileDownloadLocation, FileDownloadParameters, ITelegramStorageProvider, PartialOnly, User } from '@mtcute/core'
@@ -14,21 +13,10 @@ import { NodePlatform } from './common-internals-node/platform.js'
 import { downloadToFile } from './methods/download-file.js'
 import { downloadAsNodeStream } from './methods/download-node-stream.js'
 import { SqliteStorage } from './sqlite/index.js'
-import { NodeCryptoProvider } from './utils/crypto.js'
+import { BunCryptoProvider } from './utils/crypto.js'
 import { TcpTransport } from './utils/tcp.js'
 
 export type { TelegramClientOptions }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let nativeCrypto: any
-
-try {
-    // @only-if-esm
-    const require = createRequire(import.meta.url)
-    // @/only-if-esm
-    // eslint-disable-next-line
-    nativeCrypto = require('@mtcute/crypto-node').NodeNativeCryptoProvider
-} catch (e) {}
 
 export interface BaseTelegramClientOptions
     extends PartialOnly<Omit<BaseTelegramClientOptionsBase, 'storage'>, 'transport' | 'crypto'> {
@@ -56,8 +44,7 @@ export class BaseTelegramClient extends BaseTelegramClientBase {
         if (!opts.platformless) setPlatform(new NodePlatform())
 
         super({
-            // eslint-disable-next-line
-            crypto: nativeCrypto ? new nativeCrypto() : new NodeCryptoProvider(),
+            crypto: new BunCryptoProvider(),
             transport: () => new TcpTransport(),
             ...opts,
             storage:

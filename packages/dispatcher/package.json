@@ -26,13 +26,5 @@
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"
-    },
-    "peerDependencies": {
-        "@mtcute/sqlite": "workspace:^"
-    },
-    "peerDependenciesMeta": {
-        "@mtcute/sqlite": {
-            "optional": true
-        }
     }
 }

@@ -15,11 +15,19 @@
         "lint:fix": "eslint --fix .",
         "format": "prettier --write \"src/**/*.ts\"",
         {{/if}}
+        {{#if (eq packageManager "bun")}}
+        {{#if features.typescript}}
+        "start": "bun ./src/index.ts"
+        {{else}}
+        "start": "bun ./src/index.js"
+        {{/if}}
+        {{else}}
         {{#if features.typescript}}
         "start": "tsc && dotenv node ./dist/index.js",
         "build": "tsc"
         {{else}}
         "start": "dotenv node ./src/index.js"
+        {{/if}}
         {{/if}}
     }
 }

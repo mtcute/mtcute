@@ -1,8 +1,12 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "outDir": "./dist/esm",
-        "rootDir": "./src"
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "types": [
+            "bun-types",
+            "vite/client"
+        ]
     },
     "include": [
         "./src",

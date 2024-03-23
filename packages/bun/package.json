@@ -1,8 +1,8 @@
 {
-    "name": "@mtcute/node",
+    "name": "@mtcute/bun",
     "private": true,
     "version": "0.8.0",
-    "description": "Meta-package for Node.js",
+    "description": "Meta-package for Bun",
     "author": "alina sireneva <alina@tei.su>",
     "license": "MIT",
     "main": "src/index.ts",
@@ -10,7 +10,7 @@
     "sideEffects": false,
     "scripts": {
         "docs": "typedoc",
-        "build": "pnpm run -w build-package node"
+        "build": "pnpm run -w build-package bun"
     },
     "exports": {
         ".": "./src/index.ts",
@@ -18,25 +18,18 @@
     },
     "distOnlyFields": {
         "exports": {
-            ".": {
-                "import": "./esm/index.js",
-                "require": "./cjs/index.js"
-            },
-            "./utils.js": {
-                "import": "./esm/utils.js",
-                "require": "./cjs/utils.js"
-            }
+            ".": "./index.js",
+            "./utils.js": "./utils.js"
         }
     },
     "dependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/wasm": "workspace:^",
         "@mtcute/markdown-parser": "workspace:^",
-        "@mtcute/html-parser": "workspace:^",
-        "better-sqlite3": "9.2.2"
+        "@mtcute/html-parser": "workspace:^"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^",
-        "@types/better-sqlite3": "7.6.4"
+        "bun-types": "1.0.33"
     }
 }

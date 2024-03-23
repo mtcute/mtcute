@@ -1,26 +1,6 @@
-import sqlite3, { Database, Options, Statement } from 'better-sqlite3'
-
-import { BaseStorageDriver } from '@mtcute/core'
-import { getPlatform } from '@mtcute/core/platform.js'
-
-export interface SqliteStorageDriverOptions {
-    /**
-     * By default, WAL mode is enabled, which
-     * significantly improves performance.
-     * [Learn more](https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/performance.md)
-     *
-     * However, you might encounter some issues,
-     * and if you do, you can disable WAL by passing `true`
-     *
-     * @default  false
-     */
-    disableWal?: boolean
-
-    /**
-     * Additional options to pass to `better-sqlite3`
-     */
-    options?: Options
-}
+import { getPlatform } from '../../platform.js'
+import { BaseStorageDriver } from '../driver.js'
+import { ISqliteDatabase, ISqliteStatement } from './types.js'
 
 const MIGRATIONS_TABLE_NAME = 'mtcute_migrations'
 const MIGRATIONS_TABLE_SQL = `
@@ -30,26 +10,19 @@ create table if not exists ${MIGRATIONS_TABLE_NAME} (
 );
 `.trim()
 
-type MigrationFunction = (db: Database) => void
+type MigrationFunction = (db: ISqliteDatabase) => void
 
-export class SqliteStorageDriver extends BaseStorageDriver {
-    db!: Database
+export abstract class BaseSqliteStorageDriver extends BaseStorageDriver {
+    db!: ISqliteDatabase
 
-    constructor(
-        readonly filename = ':memory:',
-        readonly params?: SqliteStorageDriverOptions,
-    ) {
-        super()
-    }
-
-    private _pending: [Statement, unknown[]][] = []
-    private _runMany!: (stmts: [Statement, unknown[]][]) => void
+    private _pending: [ISqliteStatement, unknown[]][] = []
+    private _runMany!: (stmts: [ISqliteStatement, unknown[]][]) => void
     private _cleanup?: () => void
 
     private _migrations: Map<string, Map<number, MigrationFunction>> = new Map()
     private _maxVersion: Map<string, number> = new Map()
 
-    // todo: remove in 1.0.0 + remove direct dep on @mtcute/tl
+    // todo: remove in 1.0.0
     private _legacyMigrations: Map<string, MigrationFunction> = new Map()
 
     registerLegacyMigration(repo: string, migration: MigrationFunction): void {
@@ -85,9 +58,9 @@ export class SqliteStorageDriver extends BaseStorageDriver {
         }
     }
 
-    private _onLoad = new Set<(db: Database) => void>()
+    private _onLoad = new Set<(db: ISqliteDatabase) => void>()
 
-    onLoad(cb: (db: Database) => void): void {
+    onLoad(cb: (db: ISqliteDatabase) => void): void {
         if (this.loaded) {
             cb(this.db)
         } else {
@@ -95,7 +68,7 @@ export class SqliteStorageDriver extends BaseStorageDriver {
         }
     }
 
-    _writeLater(stmt: Statement, params: unknown[]): void {
+    _writeLater(stmt: ISqliteStatement, params: unknown[]): void {
         this._pending.push([stmt, params])
     }
 
@@ -149,17 +122,12 @@ export class SqliteStorageDriver extends BaseStorageDriver {
         }
     }
 
+    abstract _createDatabase(): ISqliteDatabase
+
     _load(): void {
-        this.db = sqlite3(this.filename, {
-            ...this.params?.options,
-            verbose: this._log.mgr.level >= 5 ? (this._log.verbose as Options['verbose']) : undefined,
-        })
+        this.db = this._createDatabase()
 
-        if (!this.params?.disableWal) {
-            this.db.pragma('journal_mode = WAL')
-        }
-
-        this._runMany = this.db.transaction((stmts: [Statement, unknown[]][]) => {
+        this._runMany = this.db.transaction((stmts: [ISqliteStatement, unknown[]][]) => {
             stmts.forEach((stmt) => {
                 stmt[0].run(stmt[1])
             })

@@ -2,7 +2,7 @@ import { describe } from 'vitest'
 
 import { testCryptoProvider } from '@mtcute/test'
 
-if (import.meta.env.TEST_ENV === 'node' || import.meta.env.TEST_ENV === 'bun') {
+if (import.meta.env.TEST_ENV === 'node') {
     describe('NodeCryptoProvider', async () => {
         const { NodeCryptoProvider } = await import('./crypto.js')
 

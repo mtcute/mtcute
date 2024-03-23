@@ -1,8 +1,6 @@
-import { Statement } from 'better-sqlite3'
-
-import { IPeersRepository } from '@mtcute/core'
-
-import { SqliteStorageDriver } from '../driver.js'
+import { IPeersRepository } from '../../../highlevel/storage/repository/peers.js'
+import { BaseSqliteStorageDriver } from '../driver.js'
+import { ISqliteStatement } from '../types.js'
 
 interface PeerDto {
     id: number
@@ -26,7 +24,7 @@ function mapPeerDto(dto: PeerDto): IPeersRepository.PeerInfo {
 }
 
 export class SqlitePeersRepository implements IPeersRepository {
-    constructor(readonly _driver: SqliteStorageDriver) {
+    constructor(readonly _driver: BaseSqliteStorageDriver) {
         _driver.registerMigration('peers', 1, (db) => {
             db.exec(`
                 create table peers (
@@ -60,7 +58,7 @@ export class SqlitePeersRepository implements IPeersRepository {
         })
     }
 
-    private _store!: Statement
+    private _store!: ISqliteStatement
     store(peer: IPeersRepository.PeerInfo): void {
         this._driver._writeLater(this._store, [
             peer.id,
@@ -73,7 +71,7 @@ export class SqlitePeersRepository implements IPeersRepository {
         ])
     }
 
-    private _getById!: Statement
+    private _getById!: ISqliteStatement
     getById(id: number): IPeersRepository.PeerInfo | null {
         const row = this._getById.get(id)
         if (!row) return null
@@ -81,7 +79,7 @@ export class SqlitePeersRepository implements IPeersRepository {
         return mapPeerDto(row as PeerDto)
     }
 
-    private _getByUsername!: Statement
+    private _getByUsername!: ISqliteStatement
     getByUsername(username: string): IPeersRepository.PeerInfo | null {
         const row = this._getByUsername.get(username)
         if (!row) return null
@@ -89,7 +87,7 @@ export class SqlitePeersRepository implements IPeersRepository {
         return mapPeerDto(row as PeerDto)
     }
 
-    private _getByPhone!: Statement
+    private _getByPhone!: ISqliteStatement
     getByPhone(phone: string): IPeersRepository.PeerInfo | null {
         const row = this._getByPhone.get(phone)
         if (!row) return null
@@ -97,7 +95,7 @@ export class SqlitePeersRepository implements IPeersRepository {
         return mapPeerDto(row as PeerDto)
     }
 
-    private _delAll!: Statement
+    private _delAll!: ISqliteStatement
     deleteAll(): void {
         this._delAll.run()
     }

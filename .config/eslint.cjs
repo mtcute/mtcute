@@ -273,11 +273,19 @@ module.exports = {
             },
         },
         {
-            files: ['e2e/**', 'packages/node/**'],
+            files: ['e2e/**', 'packages/node/**',  'packages/bun/**'],
             rules: {
                 'no-restricted-globals': 'off',
             },
         },
+        {
+            files: ['packages/bun/**'],
+            rules: {
+                'import/no-unresolved': 'off',
+                'no-restricted-imports': 'off',
+                'import/no-relative-packages': 'off', // common-internals is symlinked from node
+            }
+        }
     ],
     settings: {
         'import/resolver': {

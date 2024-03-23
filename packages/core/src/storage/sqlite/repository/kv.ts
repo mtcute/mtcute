@@ -1,11 +1,13 @@
-import { Statement } from 'better-sqlite3'
-
-import { IKeyValueRepository } from '@mtcute/core'
-import { CurrentUserService, DefaultDcsService, ServiceOptions, UpdatesStateService } from '@mtcute/core/utils.js'
 import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 
-import { SqliteStorageDriver } from '../driver.js'
+import { CurrentUserService } from '../../../highlevel/storage/service/current-user.js'
+import { UpdatesStateService } from '../../../highlevel/storage/service/updates.js'
+import { IKeyValueRepository } from '../../repository/key-value.js'
+import { ServiceOptions } from '../../service/base.js'
+import { DefaultDcsService } from '../../service/default-dcs.js'
+import { BaseSqliteStorageDriver } from '../driver.js'
+import { ISqliteStatement } from '../types.js'
 
 interface KeyValueDto {
     key: string
@@ -13,7 +15,7 @@ interface KeyValueDto {
 }
 
 export class SqliteKeyValueRepository implements IKeyValueRepository {
-    constructor(readonly _driver: SqliteStorageDriver) {
+    constructor(readonly _driver: BaseSqliteStorageDriver) {
         _driver.registerMigration('kv', 1, (db) => {
             db.exec(`
                 create table key_value (
@@ -88,12 +90,12 @@ export class SqliteKeyValueRepository implements IKeyValueRepository {
         /* eslint-enable @typescript-eslint/no-unsafe-argument */
     }
 
-    private _set!: Statement
+    private _set!: ISqliteStatement
     set(key: string, value: Uint8Array): void {
         this._driver._writeLater(this._set, [key, value])
     }
 
-    private _get!: Statement
+    private _get!: ISqliteStatement
     get(key: string): Uint8Array | null {
         const res = this._get.get(key)
         if (!res) return null
@@ -101,12 +103,12 @@ export class SqliteKeyValueRepository implements IKeyValueRepository {
         return (res as KeyValueDto).value
     }
 
-    private _del!: Statement
+    private _del!: ISqliteStatement
     delete(key: string): void {
         this._del.run(key)
     }
 
-    private _delAll!: Statement
+    private _delAll!: ISqliteStatement
     deleteAll(): void {
         this._delAll.run()
     }

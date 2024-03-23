@@ -25,6 +25,8 @@ const MAX_PART_COUNT_PREMIUM = 8000 // 512 kb * 8000 = 4000 MiB
 // platform-specific
 const HAS_FILE = typeof File !== 'undefined'
 const HAS_RESPONSE = typeof Response !== 'undefined'
+const HAS_URL = typeof URL !== 'undefined'
+const HAS_BLOB = typeof Blob !== 'undefined'
 
 // @available=both
 /**
@@ -125,6 +127,15 @@ export async function uploadFile(
 
     if (HAS_FILE && file instanceof File) {
         fileName = file.name
+        fileSize = file.size
+        file = file.stream()
+    }
+
+    if (HAS_URL && file instanceof URL) {
+        file = await fetch(file)
+    }
+
+    if (HAS_BLOB && file instanceof Blob) {
         fileSize = file.size
         file = file.stream()
     }

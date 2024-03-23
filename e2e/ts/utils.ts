@@ -4,8 +4,7 @@ import { join } from 'path'
 import { MaybePromise, MemoryStorage } from '@mtcute/core'
 import { setPlatform } from '@mtcute/core/platform.js'
 import { LogManager, sleep } from '@mtcute/core/utils.js'
-import { NodeCryptoProvider, NodePlatform, TcpTransport } from '@mtcute/node'
-import { SqliteStorage } from '@mtcute/sqlite'
+import { NodeCryptoProvider, NodePlatform, SqliteStorage, TcpTransport } from '@mtcute/node'
 
 export const getApiParams = (storage?: string) => {
     if (!process.env.API_ID || !process.env.API_HASH) {
