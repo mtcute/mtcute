@@ -5,8 +5,8 @@
 Node.js support package for mtcute. Includes:
 - Support for native crypto addon (must be installed separately, `@mtcute/crypto-node`)
 - Terminal I/O via `readline`
-- SQLite storage (`@mtcute/sqlite`)
-- TCP transport
+- SQLite storage (via `better-sqlite3`)
+- TCP transport (via `node:net`)
 - `TelegramClient` implementation using the above
 - HTML and Markdown parsers
 
