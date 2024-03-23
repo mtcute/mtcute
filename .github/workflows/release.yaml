@@ -35,6 +35,8 @@ jobs:
           git config user.name "mtcute-bot"
           git config user.email mtcute-bot@tei.su
           npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+      - name: Verify NPM token
+        run: npm whoami
       - name: Find packages to publish
         id: find
         run: node scripts/find-updated-packages.js ${{ inputs.kind }} ${{ inputs.packages }}
@@ -44,15 +46,15 @@ jobs:
       - name: Bump versions
         id: bump
         run: node scripts/bump-version.js ${{ inputs.kind }} ${{ steps.find.outputs.modified }}
-      - name: Commit version bumps
-        run: |
-          git commit -am "v${{ steps.bump.outputs.version }}"
-          git push
       - name: Build packages and publish to NPM
         id: build
         env:
           GH_RELEASE: 1
         run: node scripts/publish.js ${{ steps.find.outputs.modified }}
+      - name: Commit version bumps
+        run: |
+          git commit -am "v${{ steps.bump.outputs.version }}"
+          git push
       - name: GitHub Release
         uses: ncipollo/release-action@v1
         with:

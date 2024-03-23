@@ -91,6 +91,7 @@ async function main(arg = process.argv[2]) {
     console.log('[i] Using registry %s', REGISTRY)
 
     const publishedPkgs = []
+    const failedPkgs = []
 
     if (arg === 'all' || arg === 'updated') {
         for (const pkg of listPackages()) {
@@ -102,14 +103,35 @@ async function main(arg = process.argv[2]) {
                 continue
             }
 
-            await publishSinglePackage(pkg)
-            publishedPkgs.push(pkg)
+            try {
+                await publishSinglePackage(pkg)
+                publishedPkgs.push(pkg)
+            } catch (e) {
+                console.error('[!] Failed to publish %s:', pkg)
+                console.error(e)
+                failedPkgs.push(pkg)
+            }
         }
     } else {
         for (const pkg of arg.split(',')) {
-            await publishSinglePackage(pkg)
-            publishedPkgs.push(pkg)
+            try {
+                await publishSinglePackage(pkg)
+                publishedPkgs.push(pkg)
+            } catch (e) {
+                console.error('[!] Failed to publish %s:', pkg)
+                console.error(e)
+                failedPkgs.push(pkg)
+            }
         }
+    }
+
+    if (failedPkgs.length > 0) {
+        console.error('[!] Failed to publish packages:')
+
+        for (const pkg of failedPkgs) {
+            console.error('  - %s', pkg)
+        }
+        process.exit(1)
     }
 
     if (process.env.GH_RELEASE) {
