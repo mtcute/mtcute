@@ -273,7 +273,7 @@ module.exports = {
             },
         },
         {
-            files: ['e2e/**', 'packages/node/**'],
+            files: ['e2e/**', 'packages/node/**',  'packages/bun/**'],
             rules: {
                 'no-restricted-globals': 'off',
             },

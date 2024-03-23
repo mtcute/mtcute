@@ -316,9 +316,6 @@ importers:
       '@types/better-sqlite3':
         specifier: 7.6.4
         version: 7.6.4
-      '@types/node':
-        specifier: 20.10.0
-        version: 20.10.0
 
   packages/socks-proxy:
     dependencies:

@@ -1,6 +1,6 @@
 inputs:
   bun-version:
-    default: '1.0.25'
+    default: '1.0.32'
 
 runs:
   using: 'composite'
