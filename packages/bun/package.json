@@ -1,0 +1,35 @@
+{
+    "name": "@mtcute/bun",
+    "private": true,
+    "version": "0.8.0",
+    "description": "Meta-package for Bun",
+    "author": "alina sireneva <alina@tei.su>",
+    "license": "MIT",
+    "main": "src/index.ts",
+    "type": "module",
+    "sideEffects": false,
+    "scripts": {
+        "docs": "typedoc",
+        "build": "pnpm run -w build-package bun"
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./utils.js": "./src/utils.ts"
+    },
+    "distOnlyFields": {
+        "exports": {
+            ".": "./index.js",
+            "./utils.js": "./utils.js"
+        }
+    },
+    "dependencies": {
+        "@mtcute/core": "workspace:^",
+        "@mtcute/wasm": "workspace:^",
+        "@mtcute/markdown-parser": "workspace:^",
+        "@mtcute/html-parser": "workspace:^"
+    },
+    "devDependencies": {
+        "@mtcute/test": "workspace:^",
+        "bun-types": "1.0.33"
+    }
+}

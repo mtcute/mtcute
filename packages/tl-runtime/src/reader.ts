@@ -41,7 +41,7 @@ export class TlBinaryReader {
      */
     constructor(
         readonly objectsMap: TlReaderMap | undefined,
-        data: ArrayBuffer,
+        data: ArrayBuffer | ArrayBufferView,
         start = 0,
     ) {
         if (ArrayBuffer.isView(data)) {
@@ -61,7 +61,7 @@ export class TlBinaryReader {
      * @param data  Buffer to read from
      * @param start  Position to start reading from
      */
-    static manual(data: ArrayBuffer, start = 0): TlBinaryReader {
+    static manual(data: ArrayBuffer | ArrayBufferView, start = 0): TlBinaryReader {
         return new TlBinaryReader(undefined, data, start)
     }
 

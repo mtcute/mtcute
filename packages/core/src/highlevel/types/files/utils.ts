@@ -11,16 +11,20 @@ import { UploadedFile } from './uploaded-file.js'
  * Describes types that can be used in {@link TelegramClient.uploadFile}
  * method. Can be one of:
  *  - `Uint8Array`/`Buffer`, which will be interpreted as raw file contents
- *  - `File` (from the Web API)
+ *  - `File`, `Blob` (from the Web API)
  *  - `string`, which will be interpreted as file path (**non-browser only!**)
- *  - `ReadStream` (for NodeJS, from the `fs` module)
+ *  - `URL` (from the Web API, will be `fetch()`-ed; `file://` URLs are not available in browsers)
+ *  - `ReadStream` (for Node.js/Bun, from the `fs` module)
+ *  - `BunFile` (from `Bun.file()`)
  *  - `ReadableStream` (Web API readable stream)
- *  - `Readable` (NodeJS readable stream)
+ *  - `Readable` (Node.js/Bun readable stream)
  *  - `Response` (from `window.fetch`)
  */
 export type UploadFileLike =
+    | URL
     | Uint8Array
     | File
+    | Blob
     | string
     | ReadStream
     | ReadableStream<Uint8Array>
@@ -34,14 +38,15 @@ export type UploadFileLike =
  * Can be one of:
  *  - `Buffer`, which will be interpreted as raw file contents
  *  - `File` (from the Web API)
- *  - `ReadStream` (for NodeJS, from the `fs` module)
+ *  - `ReadStream` (for Node.js/Bun, from the `fs` module)
  *  - `ReadableStream` (from the Web API, base readable stream)
- *  - `Readable` (for NodeJS, base readable stream)
+ *  - `Readable` (for Node.js/Bun, base readable stream)
  *  - {@link UploadedFile} returned from {@link TelegramClient.uploadFile}
  *  - `tl.TypeInputFile` and `tl.TypeInputMedia` TL objects
  *  - `string` with a path to a local file prepended with `file:` (non-browser only) (e.g. `file:image.jpg`)
  *  - `string` with a URL to remote files (e.g. `https://example.com/image.jpg`)
  *  - `string` with TDLib and Bot API compatible File ID.
+ *  - `URL` (from the Web API, will be `fetch()`-ed if needed; `file://` URLs are not available in browsers)
  *  - `td.RawFullRemoteFileLocation` (parsed File ID)
  */
 export type InputFileLike =

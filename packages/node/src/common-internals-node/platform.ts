@@ -2,17 +2,13 @@ import * as os from 'os'
 
 import { ICorePlatform } from '@mtcute/core/platform.js'
 
-import { beforeExit } from './utils/exit-hook.js'
-import { defaultLoggingHandler } from './utils/logging.js'
-import { normalizeFile } from './utils/normalize-file.js'
+import { normalizeFile } from '../utils/normalize-file.js'
+import { beforeExit } from './exit-hook.js'
+import { defaultLoggingHandler } from './logging.js'
 
 const BUFFER_BASE64_URL_AVAILABLE = typeof Buffer.isEncoding === 'function' && Buffer.isEncoding('base64url')
 
-const toBuffer = (buf: Uint8Array): Buffer => Buffer.from(
-    buf.buffer,
-    buf.byteOffset,
-    buf.byteLength,
-)
+const toBuffer = (buf: Uint8Array): Buffer => Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength)
 
 export class NodePlatform implements ICorePlatform {
     // ICorePlatform

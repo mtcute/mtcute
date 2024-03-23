@@ -4,7 +4,7 @@ import { isNodeVersionAfter } from './version.js'
 
 export function nodeStreamToWeb(stream: Readable): ReadableStream<Uint8Array> {
     if (typeof Readable.toWeb === 'function') {
-        return Readable.toWeb(stream)
+        return Readable.toWeb(stream) as unknown as ReadableStream<Uint8Array>
     }
 
     // otherwise, use a silly little adapter
@@ -57,9 +57,12 @@ export function webStreamToNode(stream: ReadableStream<Uint8Array>): Readable {
         },
         destroy(error, cb) {
             if (!ended) {
-                void reader.cancel(error).catch(() => {}).then(() => {
-                    cb(error)
-                })
+                void reader
+                    .cancel(error)
+                    .catch(() => {})
+                    .then(() => {
+                        cb(error)
+                    })
 
                 return
             }
@@ -68,11 +71,13 @@ export function webStreamToNode(stream: ReadableStream<Uint8Array>): Readable {
         },
     })
 
-    reader.closed.then(() => {
-        ended = true
-    }).catch((err) => {
-        readable.destroy(err as Error)
-    })
+    reader.closed
+        .then(() => {
+            ended = true
+        })
+        .catch((err) => {
+            readable.destroy(err as Error)
+        })
 
     return readable
 }
