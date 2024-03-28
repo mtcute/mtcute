@@ -138,6 +138,15 @@ export class SessionConnection extends PersistentConnection {
             clearTimeout(timeout)
         })
 
+        // resend pending state_req-s
+        for (const msgId of this._session.pendingMessages.keys()) {
+            const pending = this._session.pendingMessages.get(msgId)!
+
+            if (pending._ === 'state') {
+                this._onMessageFailed(msgId, 'connection loss', true)
+            }
+        }
+
         this.emit('disconnect')
 
         this.reset()
@@ -1175,6 +1184,8 @@ export class SessionConnection extends PersistentConnection {
 
                 return
             }
+
+            this._session.pendingMessages.delete(msgId)
 
             switch (status & 7) {
                 case 1:
