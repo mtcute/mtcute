@@ -130,13 +130,13 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
         if (this._state === TransportState.Idle) return
         this.log.info('connection closed')
 
-        this.emit('close')
         this._state = TransportState.Idle
         this._socket!.removeEventListener('close', this.close)
         this._socket!.close()
         this._socket = null
         this._currentDc = null
         this._packetCodec.reset()
+        this.emit('close')
     }
 
     handleError(event: Event | { error: Error }): void {

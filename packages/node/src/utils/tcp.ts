@@ -73,13 +73,13 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
         if (this._state === TransportState.Idle) return
         this.log.info('connection closed')
 
-        this.emit('close')
         this._state = TransportState.Idle
         this._socket!.removeAllListeners()
         this._socket!.destroy()
         this._socket = null
         this._currentDc = null
         this._packetCodec.reset()
+        this.emit('close')
     }
 
     handleError(error: Error): void {
