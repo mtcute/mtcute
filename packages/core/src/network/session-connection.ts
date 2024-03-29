@@ -1185,8 +1185,6 @@ export class SessionConnection extends PersistentConnection {
                 return
             }
 
-            this._session.pendingMessages.delete(msgId)
-
             switch (status & 7) {
                 case 1:
                 case 2:
@@ -1255,6 +1253,8 @@ export class SessionConnection extends PersistentConnection {
             return
         }
 
+        this._session.pendingMessages.delete(msg.reqMsgId)
+
         this._onMessagesInfo(info.msgIds, msg.info)
     }
 
@@ -1272,6 +1272,8 @@ export class SessionConnection extends PersistentConnection {
 
             return
         }
+
+        this._session.pendingMessages.delete(msg.reqMsgId)
 
         this.log.debug('received future_salts: %d salts', msg.salts.length)
 
