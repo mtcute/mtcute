@@ -68,6 +68,7 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
                 error: this.handleError.bind(this),
                 data: (socket, data) => this._packetCodec.feed(data),
                 close: this.close.bind(this),
+                drain: this.handleDrained.bind(this),
             },
         }).catch((err) => {
             this.handleError(null, err as Error)
@@ -84,6 +85,7 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
         this._socket = null
         this._currentDc = null
         this._packetCodec.reset()
+        this._sendOnceDrained = []
         this.emit('close')
     }
 
@@ -117,7 +119,24 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
             throw new MtcuteError('Transport is not READY')
         }
 
-        this._socket!.write(framed)
+        const written = this._socket!.write(framed)
+
+        if (written < framed.length) {
+            this._sendOnceDrained.push(framed.subarray(written))
+        }
+    }
+
+    private _sendOnceDrained: Uint8Array[] = []
+    private handleDrained(): void {
+        while (this._sendOnceDrained.length) {
+            const data = this._sendOnceDrained.shift()!
+            const written = this._socket!.write(data)
+
+            if (written < data.length) {
+                this._sendOnceDrained.unshift(data.subarray(written))
+                break
+            }
+        }
     }
 }
 
