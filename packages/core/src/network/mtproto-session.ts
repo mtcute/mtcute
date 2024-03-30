@@ -170,6 +170,7 @@ export class MtprotoSession {
     }
 
     updateTimeOffset(offset: number) {
+        this.log.debug('time offset updated: %d', offset)
         this._timeOffset = offset
         // lastMessageId was generated with (potentially) wrong time
         // reset it to avoid bigger issues - at worst, we'll get bad_msg_notification
@@ -243,7 +244,7 @@ export class MtprotoSession {
 
         let messageId = new Long((timeMSec << 21) | (random << 3) | 4, timeSec)
 
-        if (this._lastMessageId.gt(messageId)) {
+        if (this._lastMessageId.ge(messageId)) {
             messageId = this._lastMessageId.add(4)
         }
 

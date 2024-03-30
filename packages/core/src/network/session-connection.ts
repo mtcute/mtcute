@@ -954,8 +954,9 @@ export class SessionConnection extends PersistentConnection {
     private _onAllFailed(reason: string) {
         // called when all the pending messages are to be resent
         // e.g. when server returns 429
-
         // most service messages can be omitted as stale
+
+        this.log.debug('all messages failed because of %s', reason)
 
         for (const msgId of this._session.pendingMessages.keys()) {
             const info = this._session.pendingMessages.get(msgId)!
@@ -966,6 +967,7 @@ export class SessionConnection extends PersistentConnection {
                 case 'resend':
                 case 'ping':
                     // no longer relevant
+                    this.log.debug('forgetting about %s message %l', info._, msgId)
                     this._session.pendingMessages.delete(msgId)
                     break
                 default:
@@ -1949,10 +1951,12 @@ export class SessionConnection extends PersistentConnection {
             packetSize = writer.pos
 
             const containerId = this._session.getMessageId()
+            const seqNo = this._session.getSeqNo(false)
+            this.log.debug('container: msg_id assigned %l, seqno: %d', containerId, seqNo)
             writer.pos = 0
             rootMsgId = containerId
             writer.long(this._registerOutgoingMsgId(containerId))
-            writer.uint(this._session.getSeqNo(false))
+            writer.uint(seqNo)
             writer.uint(packetSize - 16)
             writer.pos = packetSize
 
