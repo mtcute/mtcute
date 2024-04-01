@@ -42,7 +42,7 @@ import { addChatMembers } from './methods/chats/add-chat-members.js'
 import { archiveChats } from './methods/chats/archive-chats.js'
 import { banChatMember } from './methods/chats/ban-chat-member.js'
 import { createChannel } from './methods/chats/create-channel.js'
-import { createGroup } from './methods/chats/create-group.js'
+import { createGroup, CreateGroupResult } from './methods/chats/create-group.js'
 import { createSupergroup } from './methods/chats/create-supergroup.js'
 import { deleteChannel } from './methods/chats/delete-channel.js'
 import { deleteChatPhoto } from './methods/chats/delete-chat-photo.js'
@@ -1175,6 +1175,7 @@ export interface TelegramClient extends ITelegramClient {
      *
      * @param chatId  ID of the chat or its username
      * @param users ID(s) of the user(s) to add
+     * @returns  List of users that were failed to be invited (may be empty)
      */
     addChatMembers(
         chatId: InputPeerLike,
@@ -1188,7 +1189,7 @@ export interface TelegramClient extends ITelegramClient {
              */
             forwardCount?: number
         },
-    ): Promise<void>
+    ): Promise<tl.RawMissingInvitee[]>
     /**
      * Archive one or more chats
      *
@@ -1266,7 +1267,7 @@ export interface TelegramClient extends ITelegramClient {
          * @default 0 (i.e. messages don't expire)
          */
         ttlPeriod?: number
-    }): Promise<Chat>
+    }): Promise<CreateGroupResult>
     /**
      * Create a new supergroup
      *

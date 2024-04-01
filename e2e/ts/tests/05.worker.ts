@@ -36,7 +36,7 @@ describe('5. worker', async function () {
 
     it('should throw errors', async function () {
         try {
-            await port.call({ _: 'test.useError' })
+            await port.call({ _: 'test.useConfigSimple' })
             throw new Error('should have thrown')
         } catch (e) {
             expect(e).to.be.an.instanceOf(tl.RpcError)

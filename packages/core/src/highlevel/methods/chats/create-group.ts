@@ -1,9 +1,19 @@
+import { tl } from '@mtcute/tl'
+
 import { MaybeArray } from '../../../types/utils.js'
 import { ITelegramClient } from '../../client.types.js'
 import { Chat, InputPeerLike } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
+
+// @exported
+export interface CreateGroupResult {
+    /** Chat that was created */
+    chat: Chat
+    /** Users that were failed to be invited */
+    missing: tl.RawMissingInvitee[]
+}
 
 /**
  * Create a legacy group chat
@@ -32,7 +42,7 @@ export async function createGroup(
          */
         ttlPeriod?: number
     },
-): Promise<Chat> {
+): Promise<CreateGroupResult> {
     const { title } = params
     let { users } = params
 
@@ -40,15 +50,18 @@ export async function createGroup(
 
     const peers = await resolvePeerMany(client, users, toInputUser)
 
-    const res = await client.call({
+    const { updates, missingInvitees } = await client.call({
         _: 'messages.createChat',
         title,
         users: peers,
     })
 
-    assertIsUpdatesGroup('messages.createChat', res)
+    assertIsUpdatesGroup('messages.createChat', updates)
 
-    client.handleClientUpdate(res)
+    client.handleClientUpdate(updates)
 
-    return new Chat(res.chats[0])
+    return {
+        chat: new Chat(updates.chats[0]),
+        missing: missingInvitees,
+    }
 }

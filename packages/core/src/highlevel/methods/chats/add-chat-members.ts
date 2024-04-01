@@ -1,3 +1,5 @@
+import { tl } from '@mtcute/tl'
+
 import { MaybeArray } from '../../../types/utils.js'
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
@@ -10,6 +12,7 @@ import { resolvePeerMany } from '../users/resolve-peer-many.js'
  *
  * @param chatId  ID of the chat or its username
  * @param users ID(s) of the user(s) to add
+ * @returns  List of users that were failed to be invited (may be empty)
  */
 export async function addChatMembers(
     client: ITelegramClient,
@@ -24,7 +27,7 @@ export async function addChatMembers(
          */
         forwardCount?: number
     },
-): Promise<void> {
+): Promise<tl.RawMissingInvitee[]> {
     const { forwardCount = 100 } = params
 
     const chat = await resolvePeer(client, chatId)
@@ -32,23 +35,31 @@ export async function addChatMembers(
     if (!Array.isArray(users)) users = [users]
 
     if (isInputPeerChat(chat)) {
+        const missing: tl.RawMissingInvitee[] = []
+
         for (const user of users) {
             const p = await resolveUser(client, user)
 
-            const updates = await client.call({
+            const { updates, missingInvitees } = await client.call({
                 _: 'messages.addChatUser',
                 chatId: chat.chatId,
                 userId: p,
                 fwdLimit: forwardCount,
             })
             client.handleClientUpdate(updates)
+            missing.push(...missingInvitees)
         }
+
+        return missing
     } else if (isInputPeerChannel(chat)) {
-        const updates = await client.call({
+        const { updates, missingInvitees } = await client.call({
             _: 'channels.inviteToChannel',
             channel: toInputChannel(chat),
             users: await resolvePeerMany(client, users, toInputUser),
         })
         client.handleClientUpdate(updates)
-    } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
+
+        return missingInvitees
+    }
+    throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 }
