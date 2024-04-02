@@ -142,20 +142,23 @@ export class LogManager extends Logger {
     static DEBUG = 4
     static VERBOSE = 5
 
+    readonly platform
+    level: number
+    handler
+
     constructor(tag = 'base') {
         // workaround because we cant pass this to super
         // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-argument
         super(null as any, tag)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(this as any).mgr = this
+
+        this.platform = getPlatform()
+        this.level = this.platform.getDefaultLogLevel() ?? DEFAULT_LOG_LEVEL
+        this.handler = this.platform.log.bind(this.platform)
     }
 
     private _filter: (tag: string) => boolean = defaultFilter
-
-    readonly platform = getPlatform()
-
-    level = this.platform.getDefaultLogLevel() ?? DEFAULT_LOG_LEVEL
-    handler = this.platform.log.bind(this.platform)
 
     /**
      * Create a {@link Logger} with the given tag

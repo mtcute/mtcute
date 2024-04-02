@@ -70,7 +70,7 @@ function makeNiceStack(error: tl.RpcError, stack: string, method?: string) {
  * A connection to a single DC.
  */
 export class SessionConnection extends PersistentConnection {
-    readonly params!: SessionConnectionParams
+    declare readonly params: SessionConnectionParams
 
     private _flushTimer = new EarlyTimer()
     private _queuedDestroySession: Long[] = []
@@ -78,7 +78,7 @@ export class SessionConnection extends PersistentConnection {
     // waitForMessage
     private _pendingWaitForUnencrypted: [ControllablePromise<Uint8Array>, NodeJS.Timeout][] = []
 
-    private _usePfs = this.params.usePfs ?? false
+    private _usePfs
     private _isPfsBindingPending = false
     private _isPfsBindingPendingInBackground = false
     private _pfsUpdateTimeout?: NodeJS.Timeout
@@ -102,9 +102,12 @@ export class SessionConnection extends PersistentConnection {
         this._crypto = params.crypto
         this._salts = params.salts
         this._handleRawMessage = this._handleRawMessage.bind(this)
+
+        this._usePfs = this.params.usePfs ?? false
+        this._online = getPlatform().isOnline?.() ?? true
     }
 
-    private _online = getPlatform().isOnline?.() ?? true
+    private _online
 
     getAuthKey(temp = false): Uint8Array | null {
         const key = temp ? this._session._authKeyTemp : this._session._authKey

@@ -33,7 +33,18 @@ export class BaseTelegramClient implements ITelegramClient {
     private _serverUpdatesHandler: (updates: tl.TypeUpdates) => void = () => {}
     private _connectionStateHandler: (state: ConnectionState) => void = () => {}
 
+    readonly log
+    readonly mt
+    readonly crypto
+    readonly storage
+
     constructor(readonly params: BaseTelegramClientOptions) {
+        this.log = this.params.logger ?? new LogManager('client')
+        this.mt = new MtClient({
+            ...this.params,
+            logger: this.log.create('mtproto'),
+        })
+
         if (!params.disableUpdates && params.updates !== false) {
             this.updates = new UpdatesManager(this, params.updates)
             this._serverUpdatesHandler = this.updates.handleUpdate.bind(this.updates)
@@ -56,18 +67,13 @@ export class BaseTelegramClient implements ITelegramClient {
                 this._connectionStateHandler('offline')
             }
         })
-    }
 
-    readonly log = this.params.logger ?? new LogManager('client')
-    readonly mt = new MtClient({
-        ...this.params,
-        logger: this.log.create('mtproto'),
-    })
-    readonly crypto = this.mt.crypto
-    readonly storage = new TelegramStorageManager(this.mt.storage, {
-        provider: this.params.storage,
-        ...this.params.storageOptions,
-    })
+        this.crypto = this.mt.crypto
+        this.storage = new TelegramStorageManager(this.mt.storage, {
+            provider: this.params.storage,
+            ...this.params.storageOptions,
+        })
+    }
     readonly appConfig = new AppConfigManager(this)
 
     private _prepare = asyncResettable(async () => {

@@ -15,11 +15,17 @@ export { IdbStorageDriver } from './driver.js'
  * recommended over local storage based one.
  */
 export class IdbStorage implements IMtStorageProvider {
-    constructor(readonly dbName: string) {}
+    readonly driver
+    readonly kv
+    readonly authKeys
+    readonly peers
+    readonly refMessages
 
-    readonly driver = new IdbStorageDriver(this.dbName)
-    readonly kv = new IdbKvRepository(this.driver)
-    readonly authKeys = new IdbAuthKeysRepository(this.driver)
-    readonly peers = new IdbPeersRepository(this.driver)
-    readonly refMessages = new IdbRefMsgRepository(this.driver)
+    constructor(readonly dbName: string) {
+        this.driver = new IdbStorageDriver(this.dbName)
+        this.kv = new IdbKvRepository(this.driver)
+        this.authKeys = new IdbAuthKeysRepository(this.driver)
+        this.peers = new IdbPeersRepository(this.driver)
+        this.refMessages = new IdbRefMsgRepository(this.driver)
+    }
 }
