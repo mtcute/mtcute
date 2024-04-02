@@ -2285,7 +2285,10 @@ export interface TelegramClient extends ITelegramClient {
      *
      * @param params  File download parameters
      */
-    downloadAsNodeStream(location: FileDownloadLocation, params?: FileDownloadParameters): import('stream').Readable
+    downloadAsNodeStream(
+        location: FileDownloadLocation,
+        params?: FileDownloadParameters,
+    ): import('node:stream').Readable
     /**
      * Download a file and return it as a readable stream,
      * streaming file contents.

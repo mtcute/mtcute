@@ -1,5 +1,4 @@
-import { IReferenceMessagesRepository } from '@mtcute/core'
-
+import { IReferenceMessagesRepository } from '../../../highlevel/storage/repository/ref-messages.js'
 import { BaseSqliteStorageDriver } from '../driver.js'
 import { ISqliteStatement } from '../types.js'
 

@@ -1,4 +1,4 @@
-import type { Worker as NodeWorker } from 'worker_threads'
+import type { Worker as NodeWorker } from 'node:worker_threads'
 
 import { tl } from '@mtcute/tl'
 
