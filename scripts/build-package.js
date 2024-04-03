@@ -8,7 +8,8 @@ if (process.argv.length < 3) {
     process.exit(0)
 }
 
-const packageDir = path.join(__dirname, '../packages', process.argv[2])
+const packagesDir = path.join(__dirname, '../packages')
+const packageDir = path.join(packagesDir, process.argv[2])
 const outDir = path.join(packageDir, 'dist')
 
 function exec(cmd, params) {
@@ -178,30 +179,55 @@ if (buildConfig.buildTs) {
         console.log('[i] Building typescript (CJS)...')
         const originalFiles = {}
 
-        // todo - get rid of these, use @esm-replace-import instead
-        if (buildConfig.esmOnlyDirectives) {
-            for (const f of glob.sync(path.join(packageDir, '**/*.ts'))) {
-                const content = fs.readFileSync(f, 'utf8')
-                if (!content.includes('@only-if-esm')) continue
-                originalFiles[f] = content
+        for (const f of glob.sync(path.join(packagesDir, '**/*.ts'))) {
+            const content = fs.readFileSync(f, 'utf8')
+            if (!content.includes('@only-if-esm')) continue
+            originalFiles[f] = content
 
-                fs.writeFileSync(f, content.replace(/@only-if-esm.*?@\/only-if-esm/gs, ''))
-            }
+            fs.writeFileSync(f, content.replace(/@only-if-esm.*?@\/only-if-esm/gs, ''))
         }
-        if (buildConfig.esmImportDirectives) {
-            for (const f of glob.sync(path.join(packageDir, '**/*.ts'))) {
-                const content = fs.readFileSync(f, 'utf8')
-                if (!content.includes('@esm-replace-import')) continue
-                originalFiles[f] = content
+        for (const f of glob.sync(path.join(packagesDir, '**/*.ts'))) {
+            const content = fs.readFileSync(f, 'utf8')
+            if (!content.includes('@esm-replace-import')) continue
+            originalFiles[f] = content
 
-                fs.writeFileSync(f, content.replace(/@esm-replace-import.*?await import/gs, 'require'))
+            fs.writeFileSync(f, content.replace(/@esm-replace-import.*?await import/gs, 'require'))
+        }
+
+        // set type=commonjs in all package.json-s
+        for (const pkg of fs.readdirSync(packagesDir)) {
+            const pkgJson = path.join(packagesDir, pkg, 'package.json')
+            if (!fs.existsSync(pkgJson)) continue
+
+            const orig = fs.readFileSync(pkgJson, 'utf8')
+            originalFiles[pkgJson] = orig
+
+            fs.writeFileSync(pkgJson, JSON.stringify({
+                ...JSON.parse(orig),
+                type: 'commonjs',
+            }, null, 2))
+
+            // maybe also dist/package.json
+            const distPkgJson = path.join(packagesDir, pkg, 'dist/package.json')
+
+            if (fs.existsSync(distPkgJson)) {
+                const orig = fs.readFileSync(distPkgJson, 'utf8')
+                originalFiles[distPkgJson] = orig
+
+                fs.writeFileSync(distPkgJson, JSON.stringify({
+                    ...JSON.parse(orig),
+                    type: 'commonjs',
+                }, null, 2))
             }
         }
 
         let error = false
 
         try {
-            exec('pnpm exec tsc --module commonjs --outDir dist/cjs', { cwd: packageDir, stdio: 'inherit' })
+            exec('pnpm exec tsc --outDir dist/cjs', {
+                cwd: packageDir,
+                stdio: 'inherit',
+            })
         } catch (e) {
             error = e
         }

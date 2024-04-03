@@ -37,10 +37,7 @@
     },
     "distOnlyFields": {
         "exports": {
-            ".": {
-                "import": "./esm/index.js",
-                "require": "./cjs/index.js"
-            }
+            ".": "./esm/index.js"
         }
     }
 }

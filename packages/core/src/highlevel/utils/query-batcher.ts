@@ -95,7 +95,7 @@ export function batchedQuery<T, U, K extends string | number>(params: {
         }
 
         return new Promise<U | null>((resolve, reject) => {
-            arr!.push([item, resolve, reject])
+            arr.push([item, resolve, reject])
         })
     }
 
