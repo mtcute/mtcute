@@ -116,11 +116,12 @@ class SqliteStateRepository implements IStateRepository {
 }
 
 export class SqliteStateStorage implements IStateStorageProvider {
-    constructor(readonly driver: BaseSqliteStorageDriver) {}
+    readonly state
+    constructor(readonly driver: BaseSqliteStorageDriver) {
+        this.state = new SqliteStateRepository(driver)
+    }
 
     static from(provider: BaseSqliteStorage) {
         return new SqliteStateStorage(provider.driver)
     }
-
-    readonly state = new SqliteStateRepository(this.driver)
 }

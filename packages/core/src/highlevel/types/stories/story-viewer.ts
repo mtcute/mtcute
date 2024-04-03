@@ -129,9 +129,10 @@ export class StoryRepost {
  * List of story viewers.
  */
 export class StoryViewersList {
-    constructor(readonly raw: tl.stories.RawStoryViewsList) {}
-
-    readonly _peers = PeersIndex.from(this.raw)
+    readonly _peers: PeersIndex
+    constructor(readonly raw: tl.stories.RawStoryViewsList) {
+        this._peers = PeersIndex.from(this.raw)
+    }
 
     /** Next offset for pagination */
     get next(): string | undefined {
