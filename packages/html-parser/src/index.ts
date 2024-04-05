@@ -27,10 +27,10 @@ function parse(
     let plainText = ''
     let pendingText = ''
 
-    function processPendingText(tagEnd = false) {
+    function processPendingText(tagEnd = false, keepWhitespace = false) {
         if (!pendingText.length) return
 
-        if (!stacks.pre?.length) {
+        if (!stacks.pre?.length && !keepWhitespace) {
             pendingText = pendingText.replace(/[^\S\u00A0]+/gs, ' ')
 
             if (tagEnd) pendingText = pendingText.trimEnd()
@@ -237,6 +237,8 @@ function parse(
                     entities.push({ ...ent, offset: ent.offset + baseOffset })
                 }
             }
+
+            processPendingText(false, true)
         }
     })
 
