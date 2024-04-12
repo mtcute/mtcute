@@ -9,8 +9,6 @@
     <a href="https://ref.mtcute.dev">api reference</a>
     &nbsp;•&nbsp;
     <a href="https://t.me/mt_cute">telegram chat</a>
-    &nbsp;•&nbsp;
-    <a href="https://lindie.app/share/6c5d9f04cae4f0640f58b9d5d7ddca467e87e980">kanban board</a>
     <br/><br/>
     <img src="https://github.com/mtcute/mtcute/actions/workflows/test.yaml/badge.svg" alt="NodeJS CI" />
     <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmtcute%2Fmtcute%2Fmaster%2Fpackages%2Ftl%2Fapi-schema.json&query=l&label=tl%20layer" alt="tl layer" />
