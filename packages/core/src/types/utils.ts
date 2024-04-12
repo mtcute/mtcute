@@ -4,7 +4,7 @@ export type PartialOnly<T, K extends keyof T> = Partial<Pick<T, K>> & Omit<T, K>
 
 export type MaybeArray<T> = T | T[]
 
-export type MustEqual<T, V> = T extends V ? (V extends T ? T : V) : V
+export type MustEqual<T, V> = (() => T) extends () => V ? ((() => V) extends () => T ? T : V) : V
 
 export type PublicPart<T> = { [K in keyof T]: T[K] }
 
