@@ -49,6 +49,14 @@ function getCommitsSince(tag, until = 'HEAD') {
     return items.reverse()
 }
 
+function getCurrentCommit() {
+    return cp.execSync('git rev-parse HEAD', { encoding: 'utf8', stdio: 'pipe' }).trim()
+}
+
+function getCurrentBranch() {
+    return cp.execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8', stdio: 'pipe' }).trim()
+}
+
 function parseConventionalCommit(msg) {
     const match = msg.match(/^(\w+)(?:\(([^)]+)\))?(!?): (.+)$/)
 
@@ -64,4 +72,6 @@ module.exports = {
     findChangedFilesSince,
     getCommitsSince,
     parseConventionalCommit,
+    getCurrentCommit,
+    getCurrentBranch,
 }

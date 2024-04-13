@@ -10,7 +10,7 @@
     "sideEffects": false,
     "scripts": {
         "build": "pnpm run -w build-package crypto-node",
-        "install": "node-gyp configure && node-gyp -j 16 build",
+        "install": "node-gyp-build",
         "rebuild": "node-gyp configure && node-gyp -j 16 rebuild",
         "clean": "node-gyp clean"
     },
@@ -34,7 +34,8 @@
         }
     },
     "dependencies": {
-        "@mtcute/node": "workspace:^"
+        "@mtcute/node": "workspace:^",
+        "node-gyp-build": "4.8.0"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"

@@ -1,10 +1,3 @@
-/* eslint-disable no-restricted-globals */
-let native
-
-try {
-    native = require('../build/Release/crypto')
-} catch (e) {
-    native = require('../build/Debug/crypto')
-}
+const native = require('node-gyp-build')(`${__dirname}/..`)
 
 module.exports = { native }

@@ -270,6 +270,6 @@ fs.cpSync(path.join(__dirname, '../LICENSE'), path.join(outDir, 'LICENSE'))
 
 fs.writeFileSync(path.join(outDir, '.npmignore'), '*.tsbuildinfo\n')
 
-buildConfig.final()
-
-console.log('[v] Done!')
+Promise.resolve(buildConfig.final()).then(() => {
+    console.log('[v] Done!')
+})

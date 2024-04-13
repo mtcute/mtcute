@@ -217,6 +217,9 @@ importers:
       '@mtcute/node':
         specifier: workspace:^
         version: link:../node
+      node-gyp-build:
+        specifier: 4.8.0
+        version: 4.8.0
     devDependencies:
       '@mtcute/test':
         specifier: workspace:^
@@ -4728,6 +4731,11 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       semver: 7.5.1
+    dev: false
+
+  /node-gyp-build@4.8.0:
+    resolution: {integrity: sha512-u6fs2AEUljNho3EYTJNBfImO5QTo/J/1Etd+NVdCj7qWKUSN/bSLkZwhDv7I+w/MSC6qJ4cknepkAYykDdK8og==}
+    hasBin: true
     dev: false
 
   /node-gyp@9.3.1:

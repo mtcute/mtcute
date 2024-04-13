@@ -27,7 +27,7 @@ jobs:
         run: python3 -m pip install --break-system-packages setuptools
       - uses: ./.github/actions/init
       - name: 'Build'
-        run: pnpx prebuildify --napi --strip
+        run: pnpx prebuildify@6.0.0 --napi --strip
         working-directory: packages/crypto-node
       - name: 'Upload'
         uses: actions/upload-artifact@v4

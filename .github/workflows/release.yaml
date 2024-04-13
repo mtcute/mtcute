@@ -50,6 +50,7 @@ jobs:
         id: build
         env:
           GH_RELEASE: 1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/publish.js ${{ steps.find.outputs.modified }}
       - name: Commit version bumps
         run: |
