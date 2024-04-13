@@ -147,6 +147,8 @@ async function main(arg = process.argv[2]) {
 
         fs.writeFileSync(process.env.GITHUB_OUTPUT, `tarballs=${tarballs.join(',')}\n`, { flag: 'a' })
     }
+
+    process.exit(0) // idk why but it sometimes hangs indefinitely
 }
 
 exports.main = main

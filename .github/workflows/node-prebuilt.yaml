@@ -1,0 +1,36 @@
+# this workflow is invoked from @mtcute/crypto-node build config to generate prebuilt binaries
+name: Generate prebuilt @mtcute/crypto-node
+
+on:
+  workflow_dispatch: 
+    inputs:
+      commit:
+        description: 'Commit to build'
+        required: true
+        default: 'HEAD'
+      hash:
+        description: 'Hash of the input files'
+        required: true
+        default: ''
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit }}
+      - if: matrix.platform == 'macos-latest'
+        run: python3 -m pip install --break-system-packages setuptools
+      - uses: ./.github/actions/init
+      - name: 'Build'
+        run: pnpx prebuildify --napi --strip
+        working-directory: packages/crypto-node
+      - name: 'Upload'
+        uses: actions/upload-artifact@v4
+        with:
+          name: prebuilt-${{ matrix.platform }}-${{ inputs.hash }}
+          path: packages/crypto-node/prebuilds

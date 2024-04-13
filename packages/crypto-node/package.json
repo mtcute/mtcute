@@ -9,11 +9,8 @@
     "type": "module",
     "sideEffects": false,
     "scripts": {
-        "build:bin": "node-gyp configure && node-gyp -j 16 build ",
-        "build:dev": "node-gyp -j 16 build --debug",
         "build": "pnpm run -w build-package crypto-node",
         "install": "node-gyp configure && node-gyp -j 16 build",
-        "rebuild:dev": "node-gyp configure --debug && node-gyp -j 16 rebuild --debug",
         "rebuild": "node-gyp configure && node-gyp -j 16 rebuild",
         "clean": "node-gyp clean"
     },
