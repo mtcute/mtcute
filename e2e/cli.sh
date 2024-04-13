@@ -5,8 +5,6 @@ set -eau
 method=$1
 shift
 
-# rewrite using switch:
-
 case "$method" in
     "run")
         node runner.js $@

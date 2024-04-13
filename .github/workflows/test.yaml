@@ -89,6 +89,7 @@ jobs:
         env:
           API_ID: ${{ secrets.TELEGRAM_API_ID }}
           API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: cd e2e && ./cli.sh ci
       - name: Publish to canary NPM
         if: github.repository == 'mtcute/mtcute' # do not run on forks
