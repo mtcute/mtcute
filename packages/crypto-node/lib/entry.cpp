@@ -1,4 +1,5 @@
 #include <assert.h>
+#define NAPI_VERSION 1
 #include <node_api.h>
 #include "ige256.h"
 
