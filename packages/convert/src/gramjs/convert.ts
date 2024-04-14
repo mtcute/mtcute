@@ -1,5 +1,4 @@
 import { readStringSession, StringSessionData } from '@mtcute/core/utils.js'
-import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 
 import { convertFromTelethonSession } from '../telethon/convert.js'
 import { TelethonSession } from '../telethon/types.js'
@@ -16,7 +15,7 @@ export function convertFromGramjsSession(session: TelethonSession | string): Str
 
 export function convertToGramjsSession(session: StringSessionData | string): string {
     if (typeof session === 'string') {
-        session = readStringSession(__tlReaderMap, session)
+        session = readStringSession(session)
     }
 
     return serializeGramjsSession({

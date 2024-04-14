@@ -199,7 +199,7 @@ export class BaseTelegramClient implements ITelegramClient {
 
         if (defaultDcAuthKey && !force) return
 
-        const data = typeof session === 'string' ? readStringSession(this.mt._readerMap, session) : session
+        const data = typeof session === 'string' ? readStringSession(session) : session
 
         if (data.testMode && !this.params.testMode) {
             throw new Error(

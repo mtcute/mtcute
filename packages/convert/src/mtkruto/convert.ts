@@ -1,5 +1,4 @@
 import { readStringSession, StringSessionData } from '@mtcute/core/utils.js'
-import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 
 import { DC_MAPPING_PROD, DC_MAPPING_TEST } from '../dcs.js'
 import { parseMtkrutoSession } from './parse.js'
@@ -21,7 +20,7 @@ export function convertFromMtkrutoSession(session: MtkrutoSession | string): Str
 
 export function convertToMtkrutoSession(session: StringSessionData | string): string {
     if (typeof session === 'string') {
-        session = readStringSession(__tlReaderMap, session)
+        session = readStringSession(session)
     }
 
     return serializeMtkrutoSession({

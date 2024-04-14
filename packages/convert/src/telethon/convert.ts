@@ -33,7 +33,7 @@ export function convertFromTelethonSession(session: TelethonSession | string): S
 
 export function convertToTelethonSession(session: StringSessionData | string): string {
     if (typeof session === 'string') {
-        session = readStringSession(__tlReaderMap, session)
+        session = readStringSession(session)
     }
 
     return serializeTelethonSession({

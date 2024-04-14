@@ -1,5 +1,4 @@
 import { readStringSession, StringSessionData } from '@mtcute/core/utils.js'
-import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 
 import { DC_MAPPING_PROD, DC_MAPPING_TEST } from '../dcs.js'
 import { parsePyrogramSession } from './parse.js'
@@ -32,7 +31,7 @@ export function convertToPyrogramSession(
     },
 ): string {
     if (typeof session === 'string') {
-        session = readStringSession(__tlReaderMap, session)
+        session = readStringSession(session)
     }
 
     return serializePyrogramSession({

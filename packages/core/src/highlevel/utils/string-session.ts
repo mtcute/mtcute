@@ -1,5 +1,4 @@
-import { tl } from '@mtcute/tl'
-import { TlBinaryReader, TlBinaryWriter, TlReaderMap } from '@mtcute/tl-runtime'
+import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { getPlatform } from '../../platform.js'
 import { MtArgumentError } from '../../types/index.js'
@@ -12,6 +11,31 @@ export interface StringSessionData {
     primaryDcs: DcOptions
     self?: CurrentUserInfo | null
     authKey: Uint8Array
+}
+
+function readTlDcOption(reader: TlBinaryReader): BasicDcOption {
+    const ctorId = reader.uint()
+
+    if (ctorId !== 414687501) {
+        throw new MtArgumentError(`Invalid dcOption constructor id: ${ctorId}`)
+    }
+
+    const flags = reader.uint()
+    const id = reader.int()
+    const ipAddress = reader.string()
+    const port = reader.int()
+
+    if (flags & 1024) {
+        reader.bytes() // skip secret
+    }
+
+    return {
+        id,
+        ipAddress,
+        port,
+        ipv6: Boolean(flags & 1),
+        mediaOnly: Boolean(flags & 2),
+    }
 }
 
 export function writeStringSession(data: StringSessionData): string {
@@ -57,7 +81,7 @@ export function writeStringSession(data: StringSessionData): string {
     return getPlatform().base64Encode(writer.result(), true)
 }
 
-export function readStringSession(readerMap: TlReaderMap, data: string): StringSessionData {
+export function readStringSession(data: string): StringSessionData {
     const buf = getPlatform().base64Decode(data, true)
 
     const version = buf[0]
@@ -75,7 +99,7 @@ export function readStringSession(readerMap: TlReaderMap, data: string): StringS
         )
     }
 
-    const reader = new TlBinaryReader(readerMap, buf, 1)
+    const reader = TlBinaryReader.manual(buf, 1)
 
     const flags = reader.int()
     const hasSelf = flags & 1
@@ -86,12 +110,8 @@ export function readStringSession(readerMap: TlReaderMap, data: string): StringS
     let primaryMediaDc: BasicDcOption
 
     if (version <= 2) {
-        const primaryDc_ = reader.object() as tl.TypeDcOption
-        const primaryMediaDc_ = hasMedia ? (reader.object() as tl.TypeDcOption) : primaryDc_
-
-        if (primaryDc_._ !== 'dcOption') {
-            throw new MtArgumentError(`Invalid session string (dc._ = ${primaryDc_._})`)
-        }
+        const primaryDc_ = readTlDcOption(reader)
+        const primaryMediaDc_ = hasMedia ? readTlDcOption(reader) : primaryDc_
 
         primaryDc = primaryDc_
         primaryMediaDc = primaryMediaDc_
