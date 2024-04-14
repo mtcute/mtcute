@@ -128,3 +128,38 @@ export function guessFileMime(chunk: Uint8Array): string | null {
 
     return null
 }
+
+export const MIME_TO_EXTENSION: Record<string, string | undefined> = {
+    'image/bmp': 'bmp',
+    'application/x-msdownload': 'exe',
+    'application/x-compress': 'z',
+    'application/gzip': 'gz',
+    'application/x-bzip2': 'bz2',
+    'audio/mpeg': 'mp3',
+    'application/zip': 'zip',
+    'image/vnd.adobe.photoshop': 'psd',
+    'application/zstd': 'zst',
+    'audio/x-flac': 'flac',
+    'image/jpeg': 'jpg',
+    'audio/ogg': 'ogg',
+    'video/ogg': 'ogv',
+    'application/ogg': 'ogg',
+    'application/pdf': 'pdf',
+    'image/gif': 'gif',
+    'application/x-7z-compressed': '7z',
+    'image/png': 'png',
+    'application/x-rar-compressed': 'rar',
+    'image/avif': 'avif',
+    'image/heif': 'heif',
+    'image/heif-sequence': 'heif',
+    'image/heic': 'heic',
+    'image/heic-sequence': 'heic',
+    'video/quicktime': 'mov',
+    'video/x-m4v': 'm4v',
+    'audio/x-m4a': 'm4a',
+    'audio/mp4': 'm4a',
+    'image/x-canon-cr3': 'cr3',
+    'video/3gpp2': '3g2',
+    'video/3gpp': '3gp',
+    'video/mp4': 'mp4',
+}
