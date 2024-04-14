@@ -1,5 +1,4 @@
 import { BasicDcOption, readStringSession, StringSessionData } from '@mtcute/core/utils.js'
-import { __tlReaderMap } from '@mtcute/tl/binary/reader.js'
 
 import { isTestDc } from '../dcs.js'
 import { parseTelethonSession } from './parse.js'

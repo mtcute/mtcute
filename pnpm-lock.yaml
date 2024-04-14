@@ -142,9 +142,6 @@ importers:
       '@mtcute/core':
         specifier: workspace:^
         version: link:../core
-      '@mtcute/tl':
-        specifier: '*'
-        version: link:../tl
     devDependencies:
       '@mtcute/test':
         specifier: workspace:^
