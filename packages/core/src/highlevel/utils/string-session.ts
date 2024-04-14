@@ -66,6 +66,15 @@ export function readStringSession(readerMap: TlReaderMap, data: string): StringS
         throw new Error(`Invalid session string (version = ${version})`)
     }
 
+    if (version < 3) {
+        console.warn(
+            `You are using a deprecated session string (${data.slice(
+                0,
+                10,
+            )}...). Please update your session string, as it will stop working in the future.`,
+        )
+    }
+
     const reader = new TlBinaryReader(readerMap, buf, 1)
 
     const flags = reader.int()
