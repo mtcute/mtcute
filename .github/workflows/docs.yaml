@@ -26,6 +26,8 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Build
+        env:
+          BUILD_FOR_DOCS: 1
         run: pnpm run -r --workspace-concurrency=1 build
       - name: Build docs
         run: |

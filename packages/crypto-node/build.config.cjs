@@ -7,8 +7,9 @@ const { Readable } = require('stream')
 const git = require('../../scripts/git-utils')
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
+const SKIP_PREBUILT = process.env.BUILD_FOR_DOCS === '1'
 
-if (!GITHUB_TOKEN) {
+if (!GITHUB_TOKEN && !SKIP_PREBUILT) {
     throw new Error('GITHUB_TOKEN is required to publish crypto-node')
 }
 
@@ -151,30 +152,32 @@ module.exports = ({ fs, glob, path, packageDir, outDir }) => ({
     async final() {
         const libDir = path.join(packageDir, 'lib')
 
-        // generate sources hash
-        const hashes = []
+        if (!SKIP_PREBUILT) {
+            // generate sources hash
+            const hashes = []
 
-        for (const file of glob.sync(path.join(libDir, '**/*'))) {
+            for (const file of glob.sync(path.join(libDir, '**/*'))) {
+                const hash = crypto.createHash('sha256')
+                hash.update(fs.readFileSync(file))
+                hashes.push(hash.digest('hex'))
+            }
+
             const hash = crypto.createHash('sha256')
-            hash.update(fs.readFileSync(file))
-            hashes.push(hash.digest('hex'))
+                .update(hashes.join('\n'))
+                .digest('hex')
+            console.log(hash)
+
+            console.log('[i] Checking for prebuilt artifacts for %s', hash)
+            let artifacts = await findArtifactsByHash(hash)
+
+            if (!artifacts) {
+                console.log('[i] No artifacts found, running workflow')
+                artifacts = await runWorkflow(git.getCurrentCommit(), hash)
+            }
+
+            console.log('[i] Extracting artifacts')
+            await extractArtifacts(artifacts)
         }
-
-        const hash = crypto.createHash('sha256')
-            .update(hashes.join('\n'))
-            .digest('hex')
-        console.log(hash)
-
-        console.log('[i] Checking for prebuilt artifacts for %s', hash)
-        let artifacts = await findArtifactsByHash(hash)
-
-        if (!artifacts) {
-            console.log('[i] No artifacts found, running workflow')
-            artifacts = await runWorkflow(git.getCurrentCommit(), hash)
-        }
-
-        console.log('[i] Extracting artifacts')
-        await extractArtifacts(artifacts)
 
         // copy native sources and binding.gyp file
 
