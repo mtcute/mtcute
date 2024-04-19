@@ -1,20 +1,27 @@
 const KNOWN_DECORATORS = ['memoizeGetters', 'makeInspectable']
 
-module.exports = ({ path, glob, transformFile, packageDir, outDir }) => ({
+module.exports = ({ path, glob, transformFile, packageDir, outDir, jsr }) => ({
     esmOnlyDirectives: true,
     esmImportDirectives: true,
     final() {
         const version = require(path.join(packageDir, 'package.json')).version
         const replaceVersion = (content) => content.replace('%VERSION%', version)
 
-        transformFile(path.join(outDir, 'cjs/network/network-manager.js'), replaceVersion)
-        transformFile(path.join(outDir, 'esm/network/network-manager.js'), replaceVersion)
+        if (jsr) {
+            transformFile(path.join(outDir, 'network/network-manager.ts'), replaceVersion)
+        } else {
+            transformFile(path.join(outDir, 'cjs/network/network-manager.js'), replaceVersion)
+            transformFile(path.join(outDir, 'esm/network/network-manager.js'), replaceVersion)
+        }
+
+        if (jsr) return
 
         // make decorators properly tree-shakeable
         // very fragile, but it works for now :D
+        // skip for jsr for now because types aren't resolved correctly and it breaks everything (TODO: fix this)
         const decoratorsRegex = new RegExp(
-            `(${KNOWN_DECORATORS.join('|')})\\((.+?)\\);`,
-            'gs',
+            `(${KNOWN_DECORATORS.join('|')})\\((.+?)\\)(?:;|$)`,
+            'gsm',
         )
 
         const replaceDecorators = (content, file) => {
@@ -57,7 +64,9 @@ module.exports = ({ path, glob, transformFile, packageDir, outDir }) => ({
             return content + '\n' + customExports.join('\n') + '\n'
         }
 
-        for (const f of glob.sync(path.join(outDir, 'esm/highlevel/types/**/*.js'))) {
+        const globSrc = path.join(outDir, jsr ? 'highlevel/types/**/*.ts' : 'esm/highlevel/types/**/*.js')
+
+        for (const f of glob.sync(globSrc)) {
             transformFile(f, replaceDecorators)
         }
     },

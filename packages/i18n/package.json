@@ -11,20 +11,18 @@
     "scripts": {
         "build": "pnpm run -w build-package i18n"
     },
-    "distOnlyFields": {
-        "exports": {
-            ".": {
-                "import": "./esm/index.js",
-                "require": "./cjs/index.js"
-            },
-            "./plurals/*": {
-                "import": "./esm/plurals/*",
-                "require": "./cjs/plurals/*"
-            }
-        }
+    "exports": {
+        ".": "./src/index.ts",
+        "./plurals/*": "./src/plurals/*"
     },
     "devDependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/dispatcher": "workspace:^"
+    },
+    "jsrOnlyFields": {
+        "dependencies": {
+            "@mtcute/core": "workspace:^",
+            "@mtcute/dispatcher": "workspace:^"
+        }
     }
 }

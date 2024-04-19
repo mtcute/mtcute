@@ -21,34 +21,6 @@
         "./methods.js": "./src/highlevel/methods.ts",
         "./platform.js": "./src/platform.ts"
     },
-    "distOnlyFields": {
-        "exports": {
-            ".": {
-                "import": "./esm/index.js",
-                "require": "./cjs/index.js"
-            },
-            "./utils.js": {
-                "import": "./esm/utils/index.js",
-                "require": "./cjs/utils/index.js"
-            },
-            "./methods.js": {
-                "import": "./esm/highlevel/methods.js",
-                "require": "./cjs/highlevel/methods.js"
-            },
-            "./platform.js": {
-                "import": "./esm/platform.js",
-                "require": "./cjs/platform.js"
-            },
-            "./client.js": {
-                "import": "./esm/highlevel/client.js",
-                "require": "./cjs/highlevel/client.js"
-            },
-            "./worker.js": {
-                "import": "./esm/highlevel/worker/index.js",
-                "require": "./cjs/highlevel/worker/index.js"
-            }
-        }
-    },
     "dependencies": {
         "@mtcute/tl": "workspace:^",
         "@mtcute/tl-runtime": "workspace:^",

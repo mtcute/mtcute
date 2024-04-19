@@ -31,5 +31,8 @@
     },
     "typedoc": {
         "entryPoint": "index.d.ts"
+    },
+    "jsrOnlyFields": {
+        "exports": {}
     }
 }

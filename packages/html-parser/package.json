@@ -11,19 +11,10 @@
     "scripts": {
         "build": "pnpm run -w build-package html-parser"
     },
-    "distOnlyFields": {
-        "exports": {
-            ".": {
-                "import": "./esm/index.js",
-                "require": "./cjs/index.js"
-            }
-        }
-    },
+    "exports": "./src/index.ts",
     "dependencies": {
         "htmlparser2": "^6.0.1",
-        "long": "5.2.3"
-    },
-    "devDependencies": {
+        "long": "5.2.3",
         "@mtcute/core": "workspace:^"
     }
 }

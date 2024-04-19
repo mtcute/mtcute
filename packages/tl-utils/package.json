@@ -16,22 +16,8 @@
         ".": "./src/index.ts",
         "./json.js": "./src/json/index.ts"
     },
-    "distOnlyFields": {
-        "exports": {
-            ".": {
-                "import": "./dist/esm/index.js",
-                "require": "./dist/cjs/index.js"
-            },
-            "./json.js": {
-                "import": "./dist/esm/json/index.js",
-                "require": "./dist/cjs/json/index.js"
-            }
-        }
-    },
     "dependencies": {
-        "crc-32": "1.2.0"
-    },
-    "devDependencies": {
+        "crc-32": "1.2.0",
         "@mtcute/tl-runtime": "workspace:^"
     }
 }

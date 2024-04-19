@@ -1,8 +1,6 @@
-index.d.ts
-index.js
-errors.d.ts
-errors.js
+/index.d.ts
+/index.js
 binary/reader.js
 binary/writer.js
 
-diff.json
+/diff.json

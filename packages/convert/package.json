@@ -11,14 +11,7 @@
     "scripts": {
         "build": "pnpm run -w build-package convert"
     },
-    "distOnlyFields": {
-        "exports": {
-            ".": {
-                "import": "./esm/index.js",
-                "require": "./cjs/index.js"
-            }
-        }
-    },
+    "exports": "./src/index.ts",
     "dependencies": {
         "@mtcute/core": "workspace:^"
     },

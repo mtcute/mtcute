@@ -2,21 +2,40 @@ const fs = require('fs')
 const path = require('path')
 const cp = require('child_process')
 
-const NPMJS = 'https://registry.npmjs.org'
-const REGISTRY = process.env.REGISTRY || NPMJS
+const IS_JSR = process.env.JSR === '1'
+const MAIN_REGISTRY = IS_JSR ? 'http://jsr.test/' : 'https://registry.npmjs.org'
+const REGISTRY = process.env.REGISTRY || MAIN_REGISTRY
 exports.REGISTRY = REGISTRY
+
+if (IS_JSR) {
+    // for the underlying tools that expect JSR_URL env var
+    process.env.JSR_URL = REGISTRY
+}
+
+const JSR_EXCEPTIONS = {
+    bun: 'never',
+    'create-bot': 'never',
+    'crypto-node': 'never',
+    node: 'never',
+    'http-proxy': 'never',
+    'socks-proxy': 'never',
+    mtproxy: 'never',
+    test: 'never',
+}
 
 async function checkVersion(name, version, retry = 0) {
     let registry = REGISTRY
     if (!registry.endsWith('/')) registry += '/'
 
-    return fetch(`${registry}@mtcute/${name}/${version}`)
+    const url = IS_JSR ? `${registry}@mtcute/${name}/${version}_meta.json` : `${registry}@mtcute/${name}/${version}`
+
+    return fetch(url)
         .then((r) => r.status === 200)
         .catch((err) => {
             if (retry >= 5) throw err
 
             // for whatever reason this request sometimes fails with ECONNRESET
-            // no idea why, probably some issue in orbstack networking
+            // no idea why, probably some issue in docker networking
             console.log('[i] Error checking version:')
             console.log(err)
 
@@ -39,12 +58,14 @@ async function publishSinglePackage(name) {
 
     console.log('[i] Publishing %s', name)
 
-    const version = require(path.join(packageDir, 'dist/package.json')).version
+    const version = IS_JSR ?
+        require(path.join(packageDir, 'dist/jsr/deno.json')).version :
+        require(path.join(packageDir, 'dist/package.json')).version
 
     const exists = await checkVersion(name, version)
 
     if (exists) {
-        if (process.env.E2E) {
+        if (process.env.E2E && !IS_JSR) {
             console.log('[i] %s already exists, unpublishing..', name)
             cp.execSync(`npm unpublish --registry ${REGISTRY} --force @mtcute/${name}`, {
                 cwd: path.join(packageDir, 'dist'),
@@ -57,24 +78,52 @@ async function publishSinglePackage(name) {
         }
     }
 
-    // publish to npm
-    const params = REGISTRY === NPMJS ? '--access public' : '--force'
-    cp.execSync(`npm publish --registry ${REGISTRY} ${params} -q`, {
-        cwd: path.join(packageDir, 'dist'),
-        stdio: 'inherit',
-    })
+    if (IS_JSR) {
+        // publish to jsr
+        cp.execSync('deno publish --allow-dirty', {
+            cwd: path.join(packageDir, 'dist/jsr'),
+            stdio: 'inherit',
+        })
+    } else {
+        // make sure dist/jsr doesn't exist (it shouldn't, but just in case)
+        if (fs.existsSync(path.join(packageDir, 'dist/jsr'))) {
+            fs.rmdirSync(path.join(packageDir, 'dist/jsr'), { recursive: true })
+        }
+
+        // publish to npm
+        const params = REGISTRY === MAIN_REGISTRY ? '--access public' : '--force'
+        cp.execSync(`npm publish --registry ${REGISTRY} ${params} -q`, {
+            cwd: path.join(packageDir, 'dist'),
+            stdio: 'inherit',
+        })
+    }
 }
 
-const LOCAL = ['crypto']
-
 function listPackages() {
-    const packages = []
+    let packages = []
 
     for (const f of fs.readdirSync(path.join(__dirname, '../packages'))) {
-        if (LOCAL.indexOf(f) > -1) continue
         if (f[0] === '.') continue
+        if (IS_JSR && JSR_EXCEPTIONS[f] === 'never') continue
+        if (!IS_JSR && JSR_EXCEPTIONS[f] === 'only') continue
 
         packages.push(f)
+    }
+
+    if (IS_JSR) {
+        // we should sort them in a way that dependencies are published first. stc has a util for that
+        const map = {}
+
+        for (const pkg of packages) {
+            const deps = require(`../packages/${pkg}/package.json`).dependencies || {}
+            map[pkg] = Object.keys(deps)
+                .filter((d) => d.startsWith('@mtcute/'))
+                .map((d) => d.slice(8))
+        }
+
+        const stc = require('@teidesu/slow-types-compiler')
+        packages = stc.determinePublishOrder(map)
+        console.log('[i] Publishing order:', packages.join(', '))
     }
 
     return packages
