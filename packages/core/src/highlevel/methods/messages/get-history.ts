@@ -19,6 +19,11 @@ const defaultOffset: GetHistoryOffset = {
     date: 0,
 }
 
+const defaultOffsetReverse: GetHistoryOffset = {
+    id: 1,
+    date: 0,
+}
+
 /**
  * Get chat history.
  *
@@ -87,12 +92,12 @@ export async function getHistory(
     if (!params) params = {}
 
     const {
+        reverse = false,
         limit = 100,
-        offset: { id: offsetId = 0, date: offsetDate = 0 } = defaultOffset,
+        offset: { id: offsetId, date: offsetDate } = reverse ? defaultOffsetReverse : defaultOffset,
         addOffset = 0,
         minId = 0,
         maxId = 0,
-        reverse = false,
     } = params
 
     const addOffsetAdjusted = addOffset + (reverse ? -limit : 0)
