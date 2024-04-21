@@ -5,7 +5,7 @@ RUN apk add python3 make g++ && \
     corepack enable && \
     corepack prepare pnpm@8.7.1 --activate
 
-COPY ../ /app/
+COPY ../.. /app/
 
 RUN pnpm install --frozen-lockfile && \
     pnpm -C packages/tl run gen-code && \

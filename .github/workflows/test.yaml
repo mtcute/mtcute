@@ -90,7 +90,7 @@ jobs:
           API_ID: ${{ secrets.TELEGRAM_API_ID }}
           API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cd e2e && ./cli.sh ci
+        run: cd e2e/node && ./cli.sh ci
       - name: Publish to canary NPM
         if: github.repository == 'mtcute/mtcute' # do not run on forks
         continue-on-error: true
@@ -98,4 +98,4 @@ jobs:
           NPM_TOKEN: ${{ secrets.CANARY_NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REGISTRY: 'https://npm.tei.su'
-        run: cd e2e && ./cli.sh ci-publish
+        run: cd e2e/node && ./cli.sh ci-publish

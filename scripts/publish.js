@@ -147,7 +147,7 @@ async function main(arg = process.argv[2]) {
             const pkgVersion = require(`../packages/${pkg}/package.json`).version
             const published = await checkVersion(pkg, pkgVersion)
 
-            if (published) {
+            if (published && !process.env.E2E) {
                 console.log('[i] %s is up to date', pkg)
                 continue
             }
