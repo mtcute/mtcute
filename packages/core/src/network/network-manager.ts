@@ -413,11 +413,11 @@ export class DcConnectionManager {
         return true
     }
 
-    destroy() {
-        this.main.destroy()
-        this.upload.destroy()
-        this.download.destroy()
-        this.downloadSmall.destroy()
+    async destroy() {
+        await this.main.destroy()
+        await this.upload.destroy()
+        await this.download.destroy()
+        await this.downloadSmall.destroy()
         this._salts.destroy()
     }
 }
@@ -861,9 +861,9 @@ export class NetworkManager {
         return this._primaryDc.dcId
     }
 
-    destroy(): void {
+    async destroy(): Promise<void> {
         for (const dc of this._dcConnections.values()) {
-            dc.destroy()
+            await dc.destroy()
         }
         this.config.offReload(this._onConfigChanged)
         this._resetOnNetworkChange?.()

@@ -155,8 +155,8 @@ export class SessionConnection extends PersistentConnection {
         this.reset()
     }
 
-    destroy(): void {
-        super.destroy()
+    async destroy(): Promise<void> {
+        await super.destroy()
         this.reset(true)
     }
 
@@ -1462,7 +1462,9 @@ export class SessionConnection extends PersistentConnection {
         if (online) {
             this.reconnect()
         } else {
-            this.disconnectManual()
+            this.disconnectManual().catch((err) => {
+                this.log.warn('error while disconnecting: %s', err)
+            })
         }
     }
 

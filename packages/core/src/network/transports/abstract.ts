@@ -48,7 +48,7 @@ export interface ITelegramTransport extends EventEmitter {
      */
     connect(dc: BasicDcOption, testMode: boolean): void
     /** call to close existing connection to some DC */
-    close(): void
+    close(): MaybePromise<void>
     /** send a message */
     send(data: Uint8Array): Promise<void>
 

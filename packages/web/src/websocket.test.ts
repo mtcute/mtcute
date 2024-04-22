@@ -11,20 +11,24 @@ const p = getPlatform()
 
 describe('WebSocketTransport', () => {
     const create = async () => {
+        let closeListener: () => void = () => {}
         const fakeWs = vi.fn().mockImplementation(() => ({
             addEventListener: vi.fn().mockImplementation((event: string, cb: () => void) => {
                 if (event === 'open') {
                     cb()
                 }
+                if (event === 'close') {
+                    closeListener = cb
+                }
             }),
             removeEventListener: vi.fn(),
-            close: vi.fn(),
+            close: vi.fn().mockImplementation(() => closeListener()),
             send: vi.fn(),
         }))
 
         const transport = new WebSocketTransport({ ws: fakeWs })
         const logger = new LogManager()
-        logger.level = 0
+        logger.level = 10
         transport.setup(await defaultTestCryptoProvider(), logger)
 
         return [transport, fakeWs] as const
@@ -89,9 +93,9 @@ describe('WebSocketTransport', () => {
         const socket = getLastSocket(ws)
         await vi.waitFor(() => expect(t.state()).toEqual(TransportState.Ready))
 
-        t.close()
+        await t.close()
+        console.log('kek')
 
-        expect(socket.removeEventListener).toHaveBeenCalled()
         expect(socket.close).toHaveBeenCalled()
     })
 

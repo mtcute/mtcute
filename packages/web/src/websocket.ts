@@ -9,7 +9,13 @@ import {
     ObfuscatedPacketCodec,
     TransportState,
 } from '@mtcute/core'
-import { BasicDcOption, ICryptoProvider, Logger } from '@mtcute/core/utils.js'
+import {
+    BasicDcOption,
+    ControllablePromise,
+    createControllablePromise,
+    ICryptoProvider,
+    Logger,
+} from '@mtcute/core/utils.js'
 
 export type WebSocketConstructor = {
     new (address: string, protocol?: string): WebSocket
@@ -69,8 +75,6 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
         this._baseDomain = baseDomain
         this._subdomains = subdomains
         this._WebSocket = ws
-
-        this.close = this.close.bind(this)
     }
 
     private _updateLogPrefix() {
@@ -123,20 +127,33 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
         )
         this._socket.addEventListener('open', this.handleConnect.bind(this))
         this._socket.addEventListener('error', this.handleError.bind(this))
-        this._socket.addEventListener('close', this.close)
+        this._socket.addEventListener('close', this.handleClosed.bind(this))
     }
 
-    close(): void {
+    private _closeWaiters: ControllablePromise<void>[] = []
+    async close(): Promise<void> {
         if (this._state === TransportState.Idle) return
-        this.log.info('connection closed')
 
-        this._state = TransportState.Idle
-        this._socket!.removeEventListener('close', this.close)
+        const promise = createControllablePromise<void>()
+        this._closeWaiters.push(promise)
+
         this._socket!.close()
+
+        return promise
+    }
+
+    handleClosed(): void {
+        this.log.info('connection closed')
+        this._state = TransportState.Idle
         this._socket = null
         this._currentDc = null
         this._packetCodec.reset()
         this.emit('close')
+
+        for (const waiter of this._closeWaiters) {
+            waiter.resolve()
+        }
+        this._closeWaiters = []
     }
 
     handleError(event: Event | { error: Error }): void {

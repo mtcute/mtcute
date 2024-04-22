@@ -351,7 +351,7 @@ export class MtClient extends EventEmitter {
      */
     async close(): Promise<void> {
         this._config.destroy()
-        this.network.destroy()
+        await this.network.destroy()
 
         await this.storage.save()
         await this.storage.destroy?.()

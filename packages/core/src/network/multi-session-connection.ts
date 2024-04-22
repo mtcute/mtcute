@@ -116,7 +116,9 @@ export class MultiSessionConnection extends EventEmitter {
             // destroy extra connections
             for (let i = this._connections.length - 1; i >= this._count; i--) {
                 this._connections[i].removeAllListeners()
-                this._connections[i].destroy()
+                this._connections[i].destroy().catch((err) => {
+                    this._log.warn('error destroying connection: %s', err)
+                })
             }
 
             this._connections.splice(this._count)
@@ -199,8 +201,8 @@ export class MultiSessionConnection extends EventEmitter {
     }
 
     _destroyed = false
-    destroy(): void {
-        this._connections.forEach((conn) => conn.destroy())
+    async destroy(): Promise<void> {
+        await Promise.all(this._connections.map((conn) => conn.destroy()))
         this._sessions.forEach((sess) => sess.reset())
         this.removeAllListeners()
 
