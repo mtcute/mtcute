@@ -13,25 +13,24 @@
         "build": "pnpm run -w build-package web"
     },
     "exports": {
-        ".": "./src/index.ts"
-    },
-    "distOnlyFields": {
-        "exports": {
-            ".": {
-                "import": "./esm/index.js",
-                "require": "./cjs/index.js"
-            },
-            "./utils.js": {
-                "import": "./esm/utils.js",
-                "require": "./cjs/utils.js"
-            }
-        }
+        ".": "./src/index.ts",
+        "./utils.js": "./src/utils.ts"
     },
     "dependencies": {
         "@mtcute/core": "workspace:^",
-        "@mtcute/wasm": "workspace:^"
+        "@mtcute/wasm": "workspace:^",
+        "events": "3.2.0"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"
+    },
+    "denoJson": {
+        "compilerOptions": {
+            "lib": [
+              "dom",
+              "dom.iterable",
+              "WebWorker"
+            ]
+        }
     }
 }

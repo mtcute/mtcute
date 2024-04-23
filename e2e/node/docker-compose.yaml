@@ -12,8 +12,8 @@ services:
       - mtcute-e2e
   build:
     build: 
-      context: ..
-      dockerfile: e2e/Dockerfile.build
+      context: ../..
+      dockerfile: e2e/node/Dockerfile.build
     environment:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
     networks:

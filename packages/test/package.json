@@ -35,12 +35,5 @@
     "browser": {
         "./src/platform.js": "./src/platform.web.js"
     },
-    "distOnlyFields": {
-        "exports": {
-            ".": {
-                "import": "./esm/index.js",
-                "require": "./cjs/index.js"
-            }
-        }
-    }
+    "exports": "./src/index.ts"
 }

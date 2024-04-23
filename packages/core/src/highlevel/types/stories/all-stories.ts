@@ -12,13 +12,14 @@ import { StoriesStealthMode } from './stealth-mode.js'
  * Returned by {@link TelegramClient.getAllStories}
  */
 export class AllStories {
+    /** Peers index */
+    readonly _peers
     constructor(
         /** Raw TL object */
         readonly raw: tl.stories.RawAllStories,
-    ) {}
-
-    /** Peers index */
-    readonly _peers = PeersIndex.from(this.raw)
+    ) {
+        this._peers = PeersIndex.from(this.raw)
+    }
 
     /** Whether there are more stories to fetch */
     get hasMore(): boolean {

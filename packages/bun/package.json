@@ -16,12 +16,6 @@
         ".": "./src/index.ts",
         "./utils.js": "./src/utils.ts"
     },
-    "distOnlyFields": {
-        "exports": {
-            ".": "./index.js",
-            "./utils.js": "./utils.js"
-        }
-    },
     "dependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/wasm": "workspace:^",

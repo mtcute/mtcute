@@ -6,11 +6,12 @@ interface RefMessagesState {
 }
 
 export class MemoryRefMessagesRepository implements IReferenceMessagesRepository {
-    constructor(readonly _driver: MemoryStorageDriver) {}
-
-    readonly state = this._driver.getState<RefMessagesState>('refMessages', () => ({
-        refs: new Map(),
-    }))
+    readonly state
+    constructor(readonly _driver: MemoryStorageDriver) {
+        this.state = this._driver.getState<RefMessagesState>('refMessages', () => ({
+            refs: new Map(),
+        }))
+    }
 
     store(peerId: number, chatId: number, msgId: number): void {
         if (!this.state.refs.has(peerId)) {

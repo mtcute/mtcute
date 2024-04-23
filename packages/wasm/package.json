@@ -17,18 +17,13 @@
         ".": "./src/index.ts",
         "./mtcute.wasm": "./mtcute.wasm"
     },
-    "distOnlyFields": {
-        "exports": {
-            ".": {
-                "import": "./esm/index.js",
-                "require": "./cjs/index.js"
-            },
-            "./mtcute.wasm": "./mtcute.wasm"
-        }
-    },
+    "exportsKeepPath": ["./mtcute.wasm"],
     "devDependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/web": "workspace:^",
         "@mtcute/node": "workspace:^"
+    },
+    "jsrOnlyFields": {
+        "exports": "./src/index.ts"
     }
 }

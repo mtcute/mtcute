@@ -1,0 +1,10 @@
+FROM denoland/deno:1.42.4
+WORKDIR /app
+
+RUN apt update && apt install -y socat
+
+COPY ./ /app/
+
+ENV DOCKER="1"
+
+ENTRYPOINT [ "./cli.sh", "run" ]

@@ -8,25 +8,32 @@ import { TelegramStorageManager } from '../storage/storage.js'
 import { WorkerInvoker } from './invoker.js'
 
 class CurrentUserServiceProxy implements PublicPart<CurrentUserService> {
-    constructor(private _invoker: WorkerInvoker) {}
-    private _bind = this._invoker.makeBinder<CurrentUserService>('storage-self')
+    private _store
+    private _storeFrom
+    private _fetch
+    private _update
+
+    constructor(invoker: WorkerInvoker) {
+        const bind = invoker.makeBinder<CurrentUserService>('storage-self')
+        this._store = bind('store')
+        this._storeFrom = bind('storeFrom')
+        this._fetch = bind('fetch')
+        this._update = bind('update')
+    }
 
     private _cached?: CurrentUserInfo | null
 
-    private _store = this._bind('store')
     async store(info: CurrentUserInfo | null): Promise<void> {
         await this._store(info)
         this._cached = info
     }
 
-    private _storeFrom = this._bind('storeFrom')
     async storeFrom(user: tl.TypeUser): Promise<CurrentUserInfo> {
         this._cached = await this._storeFrom(user)
 
         return this._cached
     }
 
-    private _fetch = this._bind('fetch')
     async fetch(): Promise<CurrentUserInfo | null> {
         if (this._cached) return this._cached
 
@@ -45,7 +52,6 @@ class CurrentUserServiceProxy implements PublicPart<CurrentUserService> {
         return this._cached
     }
 
-    private _update = this._bind('update')
     async update(params: Parameters<CurrentUserService['update']>[0]): Promise<void> {
         await this._update(params)
         this._cached = await this._fetch()
@@ -53,28 +59,41 @@ class CurrentUserServiceProxy implements PublicPart<CurrentUserService> {
 }
 
 class PeersServiceProxy implements PublicPart<PeersService> {
-    constructor(private _invoker: WorkerInvoker) {}
-    private _bind = this._invoker.makeBinder<PeersService>('storage-peers')
+    readonly updatePeersFrom
+    readonly store
+    readonly getById
+    readonly getByPhone
+    readonly getByUsername
+    readonly getCompleteById
 
-    readonly updatePeersFrom = this._bind('updatePeersFrom')
-    readonly store = this._bind('store')
-    readonly getById = this._bind('getById')
-    readonly getByPhone = this._bind('getByPhone')
-    readonly getByUsername = this._bind('getByUsername')
-    readonly getCompleteById = this._bind('getCompleteById')
+    constructor(private _invoker: WorkerInvoker) {
+        const bind = this._invoker.makeBinder<PeersService>('storage-peers')
+
+        this.updatePeersFrom = bind('updatePeersFrom')
+        this.store = bind('store')
+        this.getById = bind('getById')
+        this.getByPhone = bind('getByPhone')
+        this.getByUsername = bind('getByUsername')
+        this.getCompleteById = bind('getCompleteById')
+    }
 }
 
 export class TelegramStorageProxy implements PublicPart<TelegramStorageManager> {
-    constructor(private _invoker: WorkerInvoker) {}
+    readonly self
+    readonly peers
 
-    private _bind = this._invoker.makeBinder<TelegramStorageManager>('storage')
+    readonly clear
+
+    constructor(private _invoker: WorkerInvoker) {
+        const bind = this._invoker.makeBinder<TelegramStorageManager>('storage')
+
+        this.self = new CurrentUserServiceProxy(this._invoker)
+        this.peers = new PeersServiceProxy(this._invoker)
+
+        this.clear = bind('clear')
+    }
 
     // todo - remove once we move these to updates manager
     readonly updates = null as never
     readonly refMsgs = null as never
-
-    readonly self = new CurrentUserServiceProxy(this._invoker)
-    readonly peers = new PeersServiceProxy(this._invoker)
-
-    readonly clear = this._bind('clear')
 }

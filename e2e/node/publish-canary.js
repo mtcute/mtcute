@@ -18,7 +18,9 @@ execSync(`npm config set //${REGISTRY.replace(/^https?:\/\//, '')}/:_authToken $
 const commit = CURRENT_COMMIT.slice(0, 7)
 
 const myPkgJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'))
-const packages = Object.keys(myPkgJson.dependencies).filter((x) => x.startsWith('@mtcute/')).map((x) => x.slice('@mtcute/'.length))
+const packages = Object.keys(myPkgJson.dependencies)
+    .filter((x) => x.startsWith('@mtcute/'))
+    .map((x) => x.slice('@mtcute/'.length))
 
 const workDir = path.join(__dirname, 'temp')
 fs.mkdirSync(workDir, { recursive: true })

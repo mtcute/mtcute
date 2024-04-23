@@ -69,7 +69,9 @@ export abstract class PersistentConnection extends EventEmitter {
 
     changeTransport(factory: TransportFactory): void {
         if (this._transport) {
-            this._transport.close()
+            Promise.resolve(this._transport.close()).catch((err) => {
+                this.log.warn('error closing previous transport: %s', err)
+            })
         }
 
         this._transport = factory()
@@ -149,7 +151,9 @@ export abstract class PersistentConnection extends EventEmitter {
         )
 
         if (wait === false) {
-            this.destroy()
+            this.destroy().catch((err) => {
+                this.log.warn('error destroying connection: %s', err)
+            })
 
             return
         }
@@ -192,7 +196,9 @@ export abstract class PersistentConnection extends EventEmitter {
         // if we are already connected
         if (this.isConnected) {
             this._shouldReconnectImmediately = true
-            this._transport.close()
+            Promise.resolve(this._transport.close()).catch((err) => {
+                this.log.error('error closing transport: %s', err)
+            })
 
             return
         }
@@ -201,12 +207,12 @@ export abstract class PersistentConnection extends EventEmitter {
         this.connect()
     }
 
-    disconnectManual(): void {
+    async disconnectManual(): Promise<void> {
         this._disconnectedManually = true
-        this._transport.close()
+        await this._transport.close()
     }
 
-    destroy(): void {
+    async destroy(): Promise<void> {
         if (this._reconnectionTimeout != null) {
             clearTimeout(this._reconnectionTimeout)
         }
@@ -214,7 +220,7 @@ export abstract class PersistentConnection extends EventEmitter {
             clearTimeout(this._inactivityTimeout)
         }
 
-        this._transport.close()
+        await this._transport.close()
         this._transport.removeAllListeners()
         this._destroyed = true
     }
@@ -229,7 +235,9 @@ export abstract class PersistentConnection extends EventEmitter {
         this.log.info('disconnected because of inactivity for %d', this.params.inactivityTimeout)
         this._inactive = true
         this._inactivityTimeout = null
-        this._transport.close()
+        Promise.resolve(this._transport.close()).catch((err) => {
+            this.log.warn('error closing transport: %s', err)
+        })
     }
 
     setInactivityTimeout(timeout?: number): void {

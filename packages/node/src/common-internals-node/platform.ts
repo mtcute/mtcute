@@ -12,9 +12,9 @@ const toBuffer = (buf: Uint8Array): Buffer => Buffer.from(buf.buffer, buf.byteOf
 
 export class NodePlatform implements ICorePlatform {
     // ICorePlatform
-    log!: typeof defaultLoggingHandler
-    beforeExit!: typeof beforeExit
-    normalizeFile!: typeof normalizeFile
+    declare log: typeof defaultLoggingHandler
+    declare beforeExit: typeof beforeExit
+    declare normalizeFile: typeof normalizeFile
 
     getDeviceModel(): string {
         return `${os.type()} ${os.arch()} ${os.release()}`

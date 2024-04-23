@@ -66,7 +66,7 @@ export async function startTest(
         let dcId = await client.getPrimaryDcId()
 
         if (params.dcId) {
-            if (!availableDcs.find((dc) => dc.id === params!.dcId)) {
+            if (!availableDcs.find((dc) => dc.id === params.dcId)) {
                 throw new MtArgumentError(`DC ID is invalid (${dcId})`)
             }
             dcId = params.dcId
@@ -85,7 +85,7 @@ export async function startTest(
         code: () => code,
         codeSentCallback: (sent) => {
             for (let i = 0; i < sent.length; i++) {
-                code += phone![5]
+                code += phone[5]
             }
         },
     })

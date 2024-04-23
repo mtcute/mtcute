@@ -11,15 +11,9 @@
         "docs": "typedoc",
         "build": "pnpm run -w build-package tl-runtime"
     },
-    "distOnlyFields": {
-        "exports": {
-            ".": {
-                "import": "./esm/index.js",
-                "require": "./cjs/index.js"
-            }
-        }
+    "exports": {
+        ".": "./src/index.ts"
     },
-    "main": "src/index.ts",
     "dependencies": {
         "long": "5.2.3"
     }

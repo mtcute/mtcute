@@ -13,4 +13,4 @@ declare function downloadAsNodeStream(
     client: ITelegramClient,
     location: FileDownloadLocation,
     params?: FileDownloadParameters,
-): import('stream').Readable
+): import('node:stream').Readable

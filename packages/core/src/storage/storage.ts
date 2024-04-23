@@ -40,22 +40,29 @@ export interface StorageManagerExtraOptions {
 }
 
 export class StorageManager {
-    constructor(readonly options: StorageManagerOptions & StorageManagerExtraOptions) {}
+    readonly provider
+    readonly driver
+    readonly log
+    readonly dcs
+    readonly salts
+    readonly keys
 
-    readonly provider = this.options.provider
-    readonly driver = this.provider.driver
-    readonly log = this.options.log.create('storage')
+    constructor(readonly options: StorageManagerOptions & StorageManagerExtraOptions) {
+        this.provider = this.options.provider
+        this.driver = this.provider.driver
+        this.log = this.options.log.create('storage')
 
-    readonly _serviceOptions: ServiceOptions = {
-        driver: this.driver,
-        readerMap: this.options.readerMap,
-        writerMap: this.options.writerMap,
-        log: this.log,
+        const serviceOptions: ServiceOptions = {
+            driver: this.driver,
+            readerMap: this.options.readerMap,
+            writerMap: this.options.writerMap,
+            log: this.log,
+        }
+
+        this.dcs = new DefaultDcsService(this.provider.kv, serviceOptions)
+        this.salts = new FutureSaltsService(this.provider.kv, serviceOptions)
+        this.keys = new AuthKeysService(this.provider.authKeys, this.salts, serviceOptions)
     }
-
-    readonly dcs = new DefaultDcsService(this.provider.kv, this._serviceOptions)
-    readonly salts = new FutureSaltsService(this.provider.kv, this._serviceOptions)
-    readonly keys = new AuthKeysService(this.provider.authKeys, this.salts, this._serviceOptions)
 
     private _cleanupRestore?: () => void
 

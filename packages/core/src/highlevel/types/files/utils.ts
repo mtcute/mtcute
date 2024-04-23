@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-imports */
-import type { ReadStream } from 'fs'
+import type { ReadStream } from 'node:fs'
 
 import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'

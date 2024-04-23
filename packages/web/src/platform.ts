@@ -8,8 +8,8 @@ import { defaultLoggingHandler } from './logging.js'
 
 export class WebPlatform implements ICorePlatform {
     // ICorePlatform
-    log!: typeof defaultLoggingHandler
-    beforeExit!: typeof beforeExit
+    declare log: typeof defaultLoggingHandler
+    declare beforeExit: typeof beforeExit
 
     getDeviceModel(): string {
         if (typeof navigator === 'undefined') return 'Browser'
@@ -47,14 +47,14 @@ export class WebPlatform implements ICorePlatform {
     }
 
     // ITlPlatform
-    utf8ByteLength!: typeof utf8ByteLength
-    utf8Encode!: typeof utf8Encode
-    utf8Decode!: typeof utf8Decode
-    hexEncode!: typeof hexEncode
-    hexDecode!: typeof hexDecode
+    declare utf8ByteLength: typeof utf8ByteLength
+    declare utf8Encode: typeof utf8Encode
+    declare utf8Decode: typeof utf8Decode
+    declare hexEncode: typeof hexEncode
+    declare hexDecode: typeof hexDecode
 
-    base64Encode!: typeof base64Encode
-    base64Decode!: typeof base64Decode
+    declare base64Encode: typeof base64Encode
+    declare base64Decode: typeof base64Decode
 }
 
 WebPlatform.prototype.log = defaultLoggingHandler

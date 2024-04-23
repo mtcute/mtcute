@@ -100,7 +100,7 @@ export class UpdatesManager {
     pendingQtsUpdatesPostponed = new SortedLinkedList<PendingUpdate>((a, b) => a.qtsBefore! - b.qtsBefore!)
     pendingUnorderedUpdates = new Deque<PendingUpdate>()
 
-    noDispatchEnabled = !this.params.disableNoDispatch
+    noDispatchEnabled
     // channel id or 0 => msg id
     noDispatchMsg = new Map<number, Set<number>>()
     // channel id or 0 => pts
@@ -128,14 +128,14 @@ export class UpdatesManager {
 
     // whether to catch up channels from the locally stored pts
     catchingUp = false
-    catchUpOnStart = this.params.catchUp ?? false
+    catchUpOnStart
 
     cpts = new Map<number, number>()
     cptsMod = new Map<number, number>()
     channelDiffTimeouts = new Map<number, NodeJS.Timeout>()
     channelsOpened = new Map<number, number>()
 
-    log = this.client.log.create('updates')
+    log
     private _handler: RawUpdateHandler = () => {}
 
     private _onCatchingUp: (catchingUp: boolean) => void = () => {}
@@ -157,6 +157,9 @@ export class UpdatesManager {
             this.hasTimedoutPostponed = true
             this.updatesLoopCv.notify()
         })
+        this.log = client.log.create('updates')
+        this.catchUpOnStart = params.catchUp ?? false
+        this.noDispatchEnabled = !params.disableNoDispatch
     }
 
     setHandler(handler: RawUpdateHandler): void {

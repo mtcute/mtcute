@@ -11,18 +11,9 @@
     "scripts": {
         "build": "pnpm run -w build-package markdown-parser"
     },
-    "distOnlyFields": {
-        "exports": {
-            ".": {
-                "import": "./esm/index.js",
-                "require": "./cjs/index.js"
-            }
-        }
-    },
+    "exports": "./src/index.ts",
     "dependencies": {
-        "long": "5.2.3"
-    },
-    "devDependencies": {
+        "long": "5.2.3",
         "@mtcute/core": "workspace:^"
     }
 }

@@ -14,11 +14,67 @@ export interface TelegramWorkerPortOptions {
 }
 
 export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> implements ITelegramClient {
-    constructor(readonly options: TelegramWorkerPortOptions) {}
+    readonly log
+
+    private _connection
+    private _invoker
+
+    readonly storage
+    readonly appConfig
+
+    // bound methods
+    readonly prepare
+    private _connect
+    readonly close
+    readonly notifyLoggedIn
+    readonly notifyLoggedOut
+    readonly notifyChannelOpened
+    readonly notifyChannelClosed
+    readonly call
+    readonly importSession
+    readonly exportSession
+    readonly handleClientUpdate
+    readonly getApiCrenetials
+    readonly getPoolSize
+    readonly getPrimaryDcId
+    readonly computeSrpParams
+    readonly computeNewPasswordHash
+    readonly startUpdatesLoop
+    readonly stopUpdatesLoop
+
+    constructor(readonly options: TelegramWorkerPortOptions) {
+        this.log = new LogManager('worker')
+
+        this._connection = this.connectToWorker(this.options.worker, this._onMessage)
+        this._invoker = new WorkerInvoker(this._connection[0])
+
+        this.storage = new TelegramStorageProxy(this._invoker)
+        this.appConfig = new AppConfigManagerProxy(this._invoker)
+
+        const bind = this._invoker.makeBinder<ITelegramClient>('client')
+
+        this.prepare = bind('prepare')
+        this._connect = bind('connect')
+
+        this.close = bind('close')
+        this.notifyLoggedIn = bind('notifyLoggedIn')
+        this.notifyLoggedOut = bind('notifyLoggedOut')
+        this.notifyChannelOpened = bind('notifyChannelOpened')
+        this.notifyChannelClosed = bind('notifyChannelClosed')
+        this.call = bind('call')
+        this.importSession = bind('importSession')
+        this.exportSession = bind('exportSession')
+        this.handleClientUpdate = bind('handleClientUpdate', true)
+        this.getApiCrenetials = bind('getApiCrenetials')
+        this.getPoolSize = bind('getPoolSize')
+        this.getPrimaryDcId = bind('getPrimaryDcId')
+        this.computeSrpParams = bind('computeSrpParams')
+        this.computeNewPasswordHash = bind('computeNewPasswordHash')
+        this.startUpdatesLoop = bind('startUpdatesLoop')
+        this.stopUpdatesLoop = bind('stopUpdatesLoop')
+    }
 
     abstract connectToWorker(worker: SomeWorker, handler: ClientMessageHandler): [SendFn, () => void]
-
-    readonly log = new LogManager('worker')
 
     private _serverUpdatesHandler: (updates: tl.TypeUpdates) => void = () => {}
     onServerUpdate(handler: (updates: tl.TypeUpdates) => void): void {
@@ -69,13 +125,6 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
         }
     }
 
-    private _connection = this.connectToWorker(this.options.worker, this._onMessage)
-    private _invoker = new WorkerInvoker(this._connection[0])
-    private _bind = this._invoker.makeBinder<ITelegramClient>('client')
-
-    readonly storage = new TelegramStorageProxy(this._invoker)
-    readonly appConfig = new AppConfigManagerProxy(this._invoker)
-
     private _destroyed = false
     destroy(terminate = false): void {
         if (this._destroyed) return
@@ -91,26 +140,8 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
         return this._invoker.invoke('custom', method as string, args) as Promise<ReturnType<Custom[T]>>
     }
 
-    readonly prepare = this._bind('prepare')
-    private _connect = this._bind('connect')
     async connect(): Promise<void> {
         await this._connect()
         await this.storage.self.fetch() // force cache self locally
     }
-    readonly close = this._bind('close')
-    readonly notifyLoggedIn = this._bind('notifyLoggedIn')
-    readonly notifyLoggedOut = this._bind('notifyLoggedOut')
-    readonly notifyChannelOpened = this._bind('notifyChannelOpened')
-    readonly notifyChannelClosed = this._bind('notifyChannelClosed')
-    readonly call = this._bind('call')
-    readonly importSession = this._bind('importSession')
-    readonly exportSession = this._bind('exportSession')
-    readonly handleClientUpdate = this._bind('handleClientUpdate', true)
-    readonly getApiCrenetials = this._bind('getApiCrenetials')
-    readonly getPoolSize = this._bind('getPoolSize')
-    readonly getPrimaryDcId = this._bind('getPrimaryDcId')
-    readonly computeSrpParams = this._bind('computeSrpParams')
-    readonly computeNewPasswordHash = this._bind('computeNewPasswordHash')
-    readonly startUpdatesLoop = this._bind('startUpdatesLoop')
-    readonly stopUpdatesLoop = this._bind('stopUpdatesLoop')
 }

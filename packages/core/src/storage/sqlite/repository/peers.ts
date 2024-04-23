@@ -8,8 +8,7 @@ interface PeerDto {
     usernames: string
     updated: number
     phone: string | null
-    // eslint-disable-next-line no-restricted-globals
-    complete: Buffer
+    complete: Uint8Array
 }
 
 function mapPeerDto(dto: PeerDto): IPeersRepository.PeerInfo {

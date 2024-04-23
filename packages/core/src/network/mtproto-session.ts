@@ -91,9 +91,9 @@ export type PendingMessage =
 export class MtprotoSession {
     _sessionId = randomLong()
 
-    _authKey = new AuthKey(this._crypto, this.log, this._readerMap)
-    _authKeyTemp = new AuthKey(this._crypto, this.log, this._readerMap)
-    _authKeyTempSecondary = new AuthKey(this._crypto, this.log, this._readerMap)
+    _authKey: AuthKey
+    _authKeyTemp: AuthKey
+    _authKeyTempSecondary: AuthKey
 
     _timeOffset = 0
     _lastMessageId = Long.ZERO
@@ -139,6 +139,10 @@ export class MtprotoSession {
         readonly _salts: ServerSaltManager,
     ) {
         this.log.prefix = `[SESSION ${this._sessionId.toString(16)}] `
+
+        this._authKey = new AuthKey(_crypto, log, _readerMap)
+        this._authKeyTemp = new AuthKey(_crypto, log, _readerMap)
+        this._authKeyTempSecondary = new AuthKey(_crypto, log, _readerMap)
     }
 
     get hasPendingMessages(): boolean {

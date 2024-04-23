@@ -3,7 +3,7 @@
         "outDir": "./dist",
         "module": "NodeNext",
         "moduleResolution": "NodeNext",
-        "target": "es2020",
+        "target": "es2022",
         "allowJs": true,
         "sourceMap": true,
         "inlineSources": true,
@@ -29,6 +29,7 @@
         ],
         "resolveJsonModule": true,
         "isolatedModules": true,
+        "useDefineForClassFields": true,
     },
     "ts-node": {
         "esm": true,

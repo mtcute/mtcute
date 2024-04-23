@@ -165,7 +165,7 @@ class TlsHelloWriter implements TlsOperationHandler {
     pos = 0
 
     private _domain: Buffer
-    private _grease = initGrease(this.crypto, 7)
+    private _grease
     private _scopes: number[] = []
 
     constructor(
@@ -175,6 +175,7 @@ class TlsHelloWriter implements TlsOperationHandler {
     ) {
         this._domain = domain
         this.buf = Buffer.allocUnsafe(size)
+        this._grease = initGrease(this.crypto, 7)
     }
 
     string(buf: Buffer) {

@@ -2,9 +2,10 @@ import { IKeyValueRepository } from '../../repository/key-value.js'
 import { MemoryStorageDriver } from '../driver.js'
 
 export class MemoryKeyValueRepository implements IKeyValueRepository {
-    constructor(readonly _driver: MemoryStorageDriver) {}
-
-    readonly state = this._driver.getState<Map<string, Uint8Array>>('kv', () => new Map())
+    readonly state
+    constructor(readonly _driver: MemoryStorageDriver) {
+        this.state = this._driver.getState<Map<string, Uint8Array>>('kv', () => new Map())
+    }
 
     set(key: string, value: Uint8Array): void {
         this.state.set(key, value)

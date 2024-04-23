@@ -188,53 +188,16 @@ export interface RpcCallOptions {
  */
 export class DcConnectionManager {
     private _salts = new ServerSaltManager()
-    private __baseConnectionParams = (): SessionConnectionParams => ({
-        crypto: this.manager.params.crypto,
-        initConnection: this.manager._initConnectionParams,
-        transportFactory: this.manager._transportFactory,
-        dc: this._dcs.media,
-        testMode: this.manager.params.testMode,
-        reconnectionStrategy: this.manager._reconnectionStrategy,
-        layer: this.manager.params.layer,
-        disableUpdates: this.manager.params.disableUpdates,
-        readerMap: this.manager.params.readerMap,
-        writerMap: this.manager.params.writerMap,
-        usePfs: this.manager.params.usePfs,
-        isMainConnection: false,
-        isMainDcConnection: this.isPrimary,
-        inactivityTimeout: this.manager.params.inactivityTimeout ?? 60_000,
-        enableErrorReporting: this.manager.params.enableErrorReporting,
-        salts: this._salts,
-    })
-
-    private _log = this.manager._log.create('dc-manager')
+    private _log
 
     /** Main connection pool */
     main: MultiSessionConnection
-
     /** Upload connection pool */
-    upload = new MultiSessionConnection(
-        this.__baseConnectionParams(),
-        this.manager._connectionCount('upload', this.dcId, this.manager.params.isPremium),
-        this._log,
-        'UPLOAD',
-    )
-
+    upload: MultiSessionConnection
     /** Download connection pool */
-    download = new MultiSessionConnection(
-        this.__baseConnectionParams(),
-        this.manager._connectionCount('download', this.dcId, this.manager.params.isPremium),
-        this._log,
-        'DOWNLOAD',
-    )
-
+    download: MultiSessionConnection
     /** Download connection pool (for small files) */
-    downloadSmall = new MultiSessionConnection(
-        this.__baseConnectionParams(),
-        this.manager._connectionCount('downloadSmall', this.dcId, this.manager.params.isPremium),
-        this._log,
-        'DOWNLOAD_SMALL',
-    )
+    downloadSmall: MultiSessionConnection
 
     private get _mainConnectionCount() {
         if (!this.isPrimary) return 1
@@ -252,9 +215,29 @@ export class DcConnectionManager {
         /** Whether this DC is the primary one */
         public isPrimary = false,
     ) {
+        this._log = this.manager._log.create('dc-manager')
         this._log.prefix = `[DC ${dcId}] `
 
-        const mainParams = this.__baseConnectionParams()
+        const baseConnectionParams = (): SessionConnectionParams => ({
+            crypto: this.manager.params.crypto,
+            initConnection: this.manager._initConnectionParams,
+            transportFactory: this.manager._transportFactory,
+            dc: this._dcs.media,
+            testMode: this.manager.params.testMode,
+            reconnectionStrategy: this.manager._reconnectionStrategy,
+            layer: this.manager.params.layer,
+            disableUpdates: this.manager.params.disableUpdates,
+            readerMap: this.manager.params.readerMap,
+            writerMap: this.manager.params.writerMap,
+            usePfs: this.manager.params.usePfs,
+            isMainConnection: false,
+            isMainDcConnection: this.isPrimary,
+            inactivityTimeout: this.manager.params.inactivityTimeout ?? 60_000,
+            enableErrorReporting: this.manager.params.enableErrorReporting,
+            salts: this._salts,
+        })
+
+        const mainParams = baseConnectionParams()
         mainParams.isMainConnection = true
         mainParams.dc = _dcs.main
 
@@ -263,6 +246,24 @@ export class DcConnectionManager {
         }
 
         this.main = new MultiSessionConnection(mainParams, this._mainConnectionCount, this._log, 'MAIN')
+        this.upload = new MultiSessionConnection(
+            baseConnectionParams(),
+            this.manager._connectionCount('upload', this.dcId, this.manager.params.isPremium),
+            this._log,
+            'UPLOAD',
+        )
+        this.download = new MultiSessionConnection(
+            baseConnectionParams(),
+            this.manager._connectionCount('download', this.dcId, this.manager.params.isPremium),
+            this._log,
+            'DOWNLOAD',
+        )
+        this.downloadSmall = new MultiSessionConnection(
+            baseConnectionParams(),
+            this.manager._connectionCount('downloadSmall', this.dcId, this.manager.params.isPremium),
+            this._log,
+            'DOWNLOAD_SMALL',
+        )
 
         this._setupMulti('main')
         this._setupMulti('upload')
@@ -412,11 +413,11 @@ export class DcConnectionManager {
         return true
     }
 
-    destroy() {
-        this.main.destroy()
-        this.upload.destroy()
-        this.download.destroy()
-        this.downloadSmall.destroy()
+    async destroy() {
+        await this.main.destroy()
+        await this.upload.destroy()
+        await this.download.destroy()
+        await this.downloadSmall.destroy()
         this._salts.destroy()
     }
 }
@@ -425,8 +426,8 @@ export class DcConnectionManager {
  * Class that manages all connections to Telegram servers.
  */
 export class NetworkManager {
-    readonly _log = this.params.log.create('network')
-    readonly _storage = this.params.storage
+    readonly _log
+    readonly _storage
 
     readonly _initConnectionParams: tl.RawInitConnectionRequest
     readonly _transportFactory: TransportFactory
@@ -465,6 +466,9 @@ export class NetworkManager {
 
         this._onConfigChanged = this._onConfigChanged.bind(this)
         config.onReload(this._onConfigChanged)
+
+        this._log = params.log.create('network')
+        this._storage = params.storage
     }
 
     private async _findDcOptions(dcId: number): Promise<DcOptions> {
@@ -857,9 +861,9 @@ export class NetworkManager {
         return this._primaryDc.dcId
     }
 
-    destroy(): void {
+    async destroy(): Promise<void> {
         for (const dc of this._dcConnections.values()) {
-            dc.destroy()
+            await dc.destroy()
         }
         this.config.offReload(this._onConfigChanged)
         this._resetOnNetworkChange?.()

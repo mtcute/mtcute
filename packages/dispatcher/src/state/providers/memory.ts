@@ -14,9 +14,12 @@ interface RateLimitDto {
 }
 
 class MemoryStateRepository implements IStateRepository {
-    constructor(readonly _driver: MemoryStorageDriver) {}
-
-    readonly state = this._driver.getState<Map<string, StateDto>>('dispatcher_fsm', () => new Map())
+    readonly state
+    readonly rl
+    constructor(readonly _driver: MemoryStorageDriver) {
+        this.state = this._driver.getState<Map<string, StateDto>>('dispatcher_fsm', () => new Map())
+        this.rl = this._driver.getState<Map<string, RateLimitDto>>('rl', () => new Map())
+    }
 
     setState(key: string, state: string, ttl?: number | undefined): void {
         this.state.set(key, {
@@ -55,8 +58,6 @@ class MemoryStateRepository implements IStateRepository {
             }
         }
     }
-
-    readonly rl = this._driver.getState<Map<string, RateLimitDto>>('rl', () => new Map())
 
     getRateLimit(key: string, now: number, limit: number, window: number): [number, number] {
         // leaky bucket
@@ -97,7 +98,9 @@ class MemoryStateRepository implements IStateRepository {
 }
 
 export class MemoryStateStorage implements IStateStorageProvider {
-    constructor(readonly driver: MemoryStorageDriver = new MemoryStorageDriver()) {}
+    readonly state
 
-    readonly state = new MemoryStateRepository(this.driver)
+    constructor(readonly driver: MemoryStorageDriver = new MemoryStorageDriver()) {
+        this.state = new MemoryStateRepository(this.driver)
+    }
 }
