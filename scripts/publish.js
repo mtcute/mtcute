@@ -4,8 +4,17 @@ const cp = require('child_process')
 
 const IS_JSR = process.env.JSR === '1'
 const MAIN_REGISTRY = IS_JSR ? 'http://jsr.test/' : 'https://registry.npmjs.org'
-const REGISTRY = process.env.REGISTRY || MAIN_REGISTRY
+let REGISTRY = process.env.REGISTRY || MAIN_REGISTRY
 exports.REGISTRY = REGISTRY
+if (!REGISTRY.endsWith('/')) REGISTRY += '/'
+
+if (process.env.E2E && IS_JSR) {
+    // running behind a socat proxy seems to fix some of the docker networking issues (thx kamillaova)
+    const hostname = new URL(REGISTRY).hostname
+    const port = new URL(REGISTRY).port || { 'http:': 80, 'https:': 443 }[new URL(REGISTRY).protocol]
+    cp.spawn('bash', ['-c', `socat TCP-LISTEN:1234,fork,reuseaddr TCP4:${hostname}:${port}`], { stdio: 'ignore' })
+    REGISTRY = 'http://localhost:1234/'
+}
 
 if (IS_JSR) {
     // for the underlying tools that expect JSR_URL env var
@@ -23,26 +32,49 @@ const JSR_EXCEPTIONS = {
     test: 'never',
 }
 
-async function checkVersion(name, version, retry = 0) {
+function fetchRetry(url, init, retry = 0) {
+    return fetch(url, init).catch((err) => {
+        if (retry >= 5) throw err
+
+        // for whatever reason this request sometimes fails with ECONNRESET
+        // no idea why, probably some issue in docker networking
+        console.log('[i] Error fetching %s:', url)
+        console.log(err)
+
+        return new Promise((resolve) => setTimeout(resolve, 1000)).then(() => fetchRetry(url, init, retry + 1))
+    })
+}
+
+async function checkVersion(name, version) {
     let registry = REGISTRY
-    if (!registry.endsWith('/')) registry += '/'
 
     const url = IS_JSR ? `${registry}@mtcute/${name}/${version}_meta.json` : `${registry}@mtcute/${name}/${version}`
 
-    return fetch(url)
-        .then((r) => r.status === 200)
-        .catch((err) => {
-            if (retry >= 5) throw err
+    return fetchRetry(url).then((r) => r.status === 200)
+}
 
-            // for whatever reason this request sometimes fails with ECONNRESET
-            // no idea why, probably some issue in docker networking
-            console.log('[i] Error checking version:')
-            console.log(err)
+async function jsrMaybeCreatePackage(name) {
+    // check if the package even exists
+    const packageMeta = await fetchRetry(`${REGISTRY}api/scopes/mtcute/packages/${name}`)
 
-            return new Promise((resolve) => setTimeout(resolve, 1000)).then(() =>
-                checkVersion(name, version, retry + 1),
-            )
+    if (packageMeta.status === 404) {
+        console.error('[i] %s does not exist, creating..', name)
+
+        const create = await fetchRetry(`${REGISTRY}api/scopes/mtcute/packages`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Cookie: `token=${process.env.JSR_TOKEN}`,
+            },
+            body: JSON.stringify({ package: name }),
         })
+
+        if (create.status !== 200) {
+            throw new Error(`Failed to create package: ${create.statusText} ${await create.text()}`)
+        }
+    } else if (packageMeta.status !== 200) {
+        throw new Error(`Failed to check package: ${packageMeta.statusText} ${await packageMeta.text()}`)
+    }
 }
 
 async function publishSinglePackage(name) {
@@ -76,11 +108,14 @@ async function publishSinglePackage(name) {
 
             return
         }
+    } else if (IS_JSR && process.env.JSR_TOKEN) {
+        await jsrMaybeCreatePackage(name)
     }
 
     if (IS_JSR) {
         // publish to jsr
-        cp.execSync('deno publish --allow-dirty', {
+        const params = process.env.JSR_TOKEN ? `--token ${process.env.JSR_TOKEN}` : ''
+        cp.execSync(`deno publish --allow-dirty ${params}`, {
             cwd: path.join(packageDir, 'dist/jsr'),
             stdio: 'inherit',
         })
@@ -158,6 +193,7 @@ async function main(arg = process.argv[2]) {
             } catch (e) {
                 console.error('[!] Failed to publish %s:', pkg)
                 console.error(e)
+                if (IS_JSR || process.env.E2E) throw e
                 failedPkgs.push(pkg)
             }
         }
@@ -169,6 +205,8 @@ async function main(arg = process.argv[2]) {
             } catch (e) {
                 console.error('[!] Failed to publish %s:', pkg)
                 console.error(e)
+                if (IS_JSR || process.env.E2E) throw e
+
                 failedPkgs.push(pkg)
             }
         }

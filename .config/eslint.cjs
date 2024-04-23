@@ -285,6 +285,12 @@ module.exports = {
                 'no-restricted-imports': 'off',
                 'import/no-relative-packages': 'off', // common-internals is symlinked from node
             }
+        },
+        {
+            files: ['e2e/deno/**'],
+            rules: {
+                'import/no-unresolved': 'off',
+            }
         }
     ],
     settings: {

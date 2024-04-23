@@ -1,0 +1,3 @@
+/.jsr-data
+.env
+/deno.lock

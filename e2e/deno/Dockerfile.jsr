@@ -1,0 +1,3 @@
+FROM ghcr.io/teidesu/jsr-api:latest
+
+RUN apt update && apt install -y curl
