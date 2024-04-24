@@ -1,0 +1,18 @@
+FROM node:20
+WORKDIR /app
+
+ARG BROWSER
+
+RUN corepack enable && \
+    corepack prepare pnpm@8.7.1 --activate
+
+COPY ../ /app/
+
+RUN pnpm install --frozen-lockfile && \
+    pnpm -C packages/tl run gen-code && \
+    pnpm exec playwright install --with-deps $BROWSER
+
+ENV BROWSER="$BROWSER"
+
+ENTRYPOINT [ "pnpm", "run", "test:browser" ]
+CMD [ "--browser.name=$BROWSER" ]

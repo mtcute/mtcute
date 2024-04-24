@@ -65,9 +65,8 @@ jobs:
         browser: [chromium, firefox]
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/init
-      - name: 'Initialize browser'
-        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+      - name: 'Build Docker image'
+        run: docker build . -f .github/Dockerfile.test-web --build-arg BROWSER=${{ matrix.browser }} -t mtcute/test-web
       - name: 'Run tests'
         # i wish we didn't have to do this, but vitest in browser is very flaky
         # see: https://github.com/vitest-dev/vitest/issues/4173
@@ -75,7 +74,7 @@ jobs:
         with:
           max_attempts: 3
           timeout_minutes: 30
-          command: pnpm run test:browser --browser.name=${{ matrix.browser }}
+          command: docker run -e CI=1 mtcute/test-web
   
   e2e:
     runs-on: ubuntu-latest
