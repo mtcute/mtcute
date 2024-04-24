@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/wasm",
     "private": true,
-    "version": "0.10.0",
+    "version": "0.11.0",
     "description": "WASM implementation of common algorithms used in Telegram",
     "author": "alina sireneva <alina@tei.su>",
     "license": "MIT",
@@ -17,7 +17,9 @@
         ".": "./src/index.ts",
         "./mtcute.wasm": "./mtcute.wasm"
     },
-    "exportsKeepPath": ["./mtcute.wasm"],
+    "exportsKeepPath": [
+        "./mtcute.wasm"
+    ],
     "devDependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/web": "workspace:^",
