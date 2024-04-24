@@ -1,3 +1,4 @@
+import { BunFile } from 'bun'
 import { ReadStream } from 'fs'
 import { stat } from 'fs/promises'
 import { basename } from 'path'
@@ -5,9 +6,22 @@ import { Readable as NodeReadable } from 'stream'
 
 import { UploadFileLike } from '@mtcute/core'
 
+// https://github.com/oven-sh/bun/issues/10481
+function isBunFile(file: unknown): file is BunFile {
+    return file instanceof Blob && 'name' in file && file.name.length > 0
+}
+
 export async function normalizeFile(file: UploadFileLike) {
     if (typeof file === 'string') {
         file = Bun.file(file)
+    }
+
+    if (isBunFile(file)) {
+        return {
+            file: file,
+            fileName: file.name,
+            fileSize: file.size,
+        }
     }
 
     // while these are not Bun-specific, they still may happen
@@ -28,6 +42,6 @@ export async function normalizeFile(file: UploadFileLike) {
         }
     }
 
-    // string -> ReadStream, thus already handled
+    // string -> BunFile, thus already handled
     return null
 }

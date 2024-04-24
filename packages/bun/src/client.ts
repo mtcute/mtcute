@@ -9,9 +9,9 @@ import {
 } from '@mtcute/core/client.js'
 import { setPlatform } from '@mtcute/core/platform.js'
 
-import { NodePlatform } from './common-internals-node/platform.js'
 import { downloadToFile } from './methods/download-file.js'
 import { downloadAsNodeStream } from './methods/download-node-stream.js'
+import { BunPlatform } from './platform.js'
 import { SqliteStorage } from './sqlite/index.js'
 import { BunCryptoProvider } from './utils/crypto.js'
 import { TcpTransport } from './utils/tcp.js'
@@ -41,7 +41,7 @@ export interface BaseTelegramClientOptions
 
 export class BaseTelegramClient extends BaseTelegramClientBase {
     constructor(opts: BaseTelegramClientOptions) {
-        if (!opts.platformless) setPlatform(new NodePlatform())
+        if (!opts.platformless) setPlatform(new BunPlatform())
 
         super({
             crypto: new BunCryptoProvider(),
