@@ -10,7 +10,6 @@ import { isUploadedFile } from '../../types/files/uploaded-file.js'
 import { UploadFileLike } from '../../types/files/utils.js'
 import { InputMediaLike } from '../../types/media/input-media/types.js'
 import { fileIdToInputDocument, fileIdToInputPhoto } from '../../utils/convert-file-id.js'
-import { extractFileName } from '../../utils/file-utils.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
 import { encodeWaveform } from '../../utils/voice-utils.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
@@ -363,7 +362,7 @@ export async function _normalizeInputMedia(
     if (media.type !== 'voice') {
         attributes.push({
             _: 'documentAttributeFilename',
-            fileName: media.fileName || (typeof media.file === 'string' ? extractFileName(media.file) : 'unnamed'),
+            fileName: media.fileName || inputFile.name,
         })
     }
 
