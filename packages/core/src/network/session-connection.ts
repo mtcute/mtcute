@@ -167,6 +167,9 @@ export class SessionConnection extends PersistentConnection {
 
         if (forever) {
             this.removeAllListeners()
+            this.on('error', (err) => {
+                this.log.warn('caught error after destroying: %s', err)
+            })
         }
     }
 
@@ -309,6 +312,7 @@ export class SessionConnection extends PersistentConnection {
             })
             .catch((err: Error) => {
                 this._session.authorizationPending = false
+                if (this._destroyed) return
                 this.log.error('Authorization error: %s', err.message)
                 this.onError(err)
                 this.reconnect()
@@ -476,6 +480,7 @@ export class SessionConnection extends PersistentConnection {
                 )
             })
             .catch((err: Error) => {
+                if (this._destroyed) return
                 this.log.error('PFS Authorization error: %s', err.message)
 
                 if (this._isPfsBindingPendingInBackground) {
@@ -492,6 +497,9 @@ export class SessionConnection extends PersistentConnection {
     }
 
     waitForUnencryptedMessage(timeout = 5000): Promise<Uint8Array> {
+        if (this._destroyed) {
+            return Promise.reject(new MtcuteError('Connection destroyed'))
+        }
         const promise = createControllablePromise<Uint8Array>()
         const timeoutId = setTimeout(() => {
             promise.reject(new MtTimeoutError(timeout))

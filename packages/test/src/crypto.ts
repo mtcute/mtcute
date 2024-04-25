@@ -1,5 +1,5 @@
+import { gzipSync, inflateSync } from 'node:zlib'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { gzipSync, inflateSync } from 'zlib'
 
 import { getPlatform } from '@mtcute/core/platform.js'
 import { dataViewFromBuffer, ICryptoProvider } from '@mtcute/core/utils.js'
