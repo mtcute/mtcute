@@ -7,10 +7,11 @@ const { Readable } = require('stream')
 const git = require('../../scripts/git-utils')
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
-const SKIP_PREBUILT = process.env.BUILD_FOR_DOCS === '1'
+let SKIP_PREBUILT = process.env.BUILD_FOR_DOCS === '1'
 
 if (!GITHUB_TOKEN && !SKIP_PREBUILT) {
-    throw new Error('GITHUB_TOKEN is required to publish crypto-node')
+    console.warn('GITHUB_TOKEN is required to publish crypto-node, skipping prebuilt artifacts')
+    SKIP_PREBUILT = true
 }
 
 const GITHUB_HEADERS = {
@@ -36,7 +37,6 @@ async function findArtifactsByHash(hash) {
 
             if (parts[0] === 'prebuilt' &&
                 PLATFORMS.includes(parts[1]) &&
-                parts[2] === 'latest' &&
                 parts[3] === hash) {
                 return artifacts
             }
@@ -63,6 +63,7 @@ async function runWorkflow(commit, hash) {
 
     // wait for the workflow to finish
     // github api is awesome and doesn't return the run id, so let's just assume it's the last one
+    await new Promise((resolve) => setTimeout(resolve, 5000))
     const runsRes = await fetch(`${API_PREFIX}/runs`, {
         headers: GITHUB_HEADERS,
     }).then((r) => r.json())
@@ -93,7 +94,6 @@ async function runWorkflow(commit, hash) {
 
         if (parts[0] !== 'prebuilt' ||
             !PLATFORMS.includes(parts[1]) ||
-            parts[2] !== 'latest' ||
             parts[3] !== hash) {
             throw new Error(`Invalid artifact name: ${it.name}`)
         }
@@ -106,7 +106,7 @@ async function extractArtifacts(artifacts) {
     fs.mkdirSync(path.join(__dirname, 'dist/prebuilds'), { recursive: true })
     await Promise.all(
         artifacts.map(async (it) => {
-            const platform = it.name.split('-')[1]
+            const platform = it.name.split('-').slice(1, 3).join('-')
 
             const res = await fetch(it.archive_download_url, {
                 headers: GITHUB_HEADERS,
