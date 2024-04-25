@@ -1,4 +1,3 @@
-import { createRequire } from 'module'
 import { createInterface, Interface as RlInterface } from 'readline'
 
 import { FileDownloadLocation, FileDownloadParameters, ITelegramStorageProvider, PartialOnly, User } from '@mtcute/core'
@@ -23,11 +22,13 @@ export type { TelegramClientOptions }
 let nativeCrypto: any
 
 try {
-    // @only-if-esm
-    const require = createRequire(import.meta.url)
-    // @/only-if-esm
-    // eslint-disable-next-line
-    nativeCrypto = require('@mtcute/crypto-node').NodeNativeCryptoProvider
+    /* eslint-disable @typescript-eslint/prefer-ts-expect-error, @typescript-eslint/ban-ts-comment */
+    /* eslint-disable import/no-unresolved */
+    // @ts-ignore  not in deps
+    // @esm-replace-import
+    nativeCrypto = (await import('@mtcute/crypto-node')).NodeNativeCryptoProvider // eslint-disable-line
+    /* eslint-enable @typescript-eslint/prefer-ts-expect-error, @typescript-eslint/ban-ts-comment */
+    /* eslint-enable import/no-unresolved */
 } catch (e) {}
 
 export interface BaseTelegramClientOptions

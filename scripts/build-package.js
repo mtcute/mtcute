@@ -274,7 +274,7 @@ if (buildConfig.buildTs && !IS_JSR) {
             if (!content.includes('@esm-replace-import')) continue
             originalFiles[f] = content
 
-            fs.writeFileSync(f, content.replace(/@esm-replace-import.*?await import/gs, 'require'))
+            fs.writeFileSync(f, content.replace(/(?<=@esm-replace-import.*?)await import/gs, 'require'))
         }
 
         // set type=commonjs in all package.json-s
@@ -464,6 +464,29 @@ const builtPkgJson = buildPackageJson()
 
 if (buildConfig.buildCjs) {
     fs.writeFileSync(path.join(outDir, 'cjs/package.json'), JSON.stringify({ type: 'commonjs' }, null, 2))
+
+    const CJS_DEPRECATION_WARNING = `
+"use strict";
+if (typeof globalThis !== 'undefined' && !globalThis._MTCUTE_CJS_DEPRECATION_WARNED) { 
+    globalThis._MTCUTE_CJS_DEPRECATION_WARNED = true
+    console.warn("[${builtPkgJson.name}] CommonJS support is deprecated and will be removed soon. Please consider switching to ESM, it's "+(new Date()).getFullYear()+" already.")
+    console.warn("[${builtPkgJson.name}] Learn more about switching to ESM: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c")
+}
+`.trim()
+    const entrypoints = []
+
+    if (typeof builtPkgJson.exports === 'string') {
+        entrypoints.push(builtPkgJson.exports)
+    } else if (builtPkgJson.exports && typeof builtPkgJson.exports === 'object') {
+        for (const entrypoint of Object.values(builtPkgJson.exports)) {
+            entrypoints.push(entrypoint.require)
+        }
+    }
+
+    for (const entry of entrypoints) {
+        if (!entry.endsWith('.js')) continue
+        transformFile(path.join(outDir, entry), (content) => `${CJS_DEPRECATION_WARNING}\n${content}`)
+    }
 }
 
 if (IS_JSR) {
