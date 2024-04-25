@@ -1,5 +1,4 @@
-import { BaseNodeCryptoProvider } from '@mtcute/node'
-import { IEncryptionScheme } from '@mtcute/node/utils.js'
+import { BaseNodeCryptoProvider, IEncryptionScheme } from '@mtcute/node/utils.js'
 
 import { native } from './native.cjs'
 

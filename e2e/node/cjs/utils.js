@@ -1,7 +1,8 @@
 const { MemoryStorage } = require('@mtcute/core')
 const { setPlatform } = require('@mtcute/core/platform.js')
 const { LogManager } = require('@mtcute/core/utils.js')
-const { NodeCryptoProvider, NodePlatform, TcpTransport } = require('@mtcute/node')
+const { NodePlatform, TcpTransport } = require('@mtcute/node')
+const { NodeCryptoProvider } = require('@mtcute/node/utils.js')
 
 exports.getApiParams = () => {
     if (!process.env.API_ID || !process.env.API_HASH) {
