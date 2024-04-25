@@ -1,7 +1,8 @@
 import { MemoryStorage } from '@mtcute/core'
 import { setPlatform } from '@mtcute/core/platform.js'
 import { LogManager } from '@mtcute/core/utils.js'
-import { NodeCryptoProvider, NodePlatform, TcpTransport } from '@mtcute/node'
+import { NodePlatform, TcpTransport } from '@mtcute/node'
+import { NodeCryptoProvider } from '@mtcute/node/utils.js'
 
 export const getApiParams = () => {
     if (!process.env.API_ID || !process.env.API_HASH) {
