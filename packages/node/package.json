@@ -21,7 +21,7 @@
         "@mtcute/wasm": "workspace:^",
         "@mtcute/markdown-parser": "workspace:^",
         "@mtcute/html-parser": "workspace:^",
-        "better-sqlite3": "9.2.2"
+        "better-sqlite3": "9.5.0"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^",
