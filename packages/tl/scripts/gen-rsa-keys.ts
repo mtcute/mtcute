@@ -4,7 +4,7 @@ import { join } from 'path'
 import readline from 'readline'
 
 import { parsePublicKey } from '@mtcute/core/utils.js'
-import { NodeCryptoProvider } from '@mtcute/node'
+import { NodeCryptoProvider } from '@mtcute/node/utils.js'
 
 import { TlPublicKey } from '../binary/rsa-keys.js'
 import { __dirname, ESM_PRELUDE } from './constants.js'

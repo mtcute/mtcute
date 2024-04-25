@@ -66,6 +66,11 @@ case "$method" in
         ;;
     "ci")
         set -eaux
+        if [ -d .jsr-data ]; then
+            # clean up data from previous runs
+            docker compose down
+            rm -rf .jsr-data
+        fi
         mkdir .jsr-data
         ./cli.sh start
         ./cli.sh update
