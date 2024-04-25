@@ -123,4 +123,9 @@ jobs:
           API_ID: ${{ secrets.TELEGRAM_API_ID }}
           API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cd e2e/deno && ./cli.sh ci
+        uses: nick-fields/retry@v2
+        # thanks docker networking very cool
+        with:
+          max_attempts: 3
+          timeout_minutes: 30
+          command: cd e2e/deno && ./cli.sh ci
