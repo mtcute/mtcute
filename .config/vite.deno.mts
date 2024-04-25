@@ -4,7 +4,7 @@ import { fixupCjs } from './vite-utils/fixup-cjs'
 import { testSetup } from './vite-utils/test-setup-plugin'
 import { collectTestEntrypoints } from './vite-utils/collect-test-entrypoints'
 
-const FIXUP_TEST = resolve(__dirname, 'vite-utils/fixup-deno-test.ts')
+const POLYFILLS = resolve(__dirname, 'vite-utils/polyfills-deno.ts')
 
 export default defineConfig({
     build: {
@@ -25,22 +25,6 @@ export default defineConfig({
         },
         rollupOptions: {
             external: [
-                // todo which of these are actually needed?
-                'zlib',
-                'vitest',
-                'stream',
-                'net',
-                'crypto',
-                'module',
-                'fs',
-                'fs/promises',
-                'readline',
-                'worker_threads',
-                'events',
-                'path',
-                'util',
-                'os',
-                // 
                 /^(jsr|npm|node|https?):/,
             ],
             output: {
@@ -61,13 +45,13 @@ export default defineConfig({
     plugins: [
         fixupCjs(),
         {
-            name: 'fix-vitest',
+            name: 'polyfills',
             transform(code) {
                 if (!code.includes('vitest')) return code
                 code = code.replace(/^import {(.+?)} from ['"]vitest['"]/gms, (_, names) => {
                     const namesParsed = names.split(',').map((name) => name.trim())
 
-                    return `import {${namesParsed.join(', ')}} from '${FIXUP_TEST}'`
+                    return `import {${namesParsed.join(', ')}} from '${POLYFILLS}'`
                 })
                 return code
             },
