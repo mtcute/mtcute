@@ -17,17 +17,31 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [ubuntu-latest, windows-latest, macos-latest]
+        platform: 
+          - ubuntu-20.04
+          - macos-13
+          - macos-14
+          - windows-2022
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.commit }}
-      - if: matrix.platform == 'macos-latest'
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - if: ${{ startsWith(matrix.platform, 'windows') }}
+        run: pip.exe install setuptools
+      - if: ${{ !startsWith(matrix.platform, 'windows') && !startsWith(matrix.platform, 'macos') }}
+        run: python3 -m pip install setuptools
+      - if: ${{ startsWith(matrix.platform, 'macos') }}
         run: python3 -m pip install --break-system-packages setuptools
-      - uses: ./.github/actions/init
       - name: 'Build'
-        run: pnpx prebuildify@6.0.0 --napi --strip
+        run: npx -y prebuildify@6.0.1 --napi --strip
+        working-directory: packages/crypto-node
+      - if: ${{ !startsWith(matrix.platform, 'macos') }}
+        name: 'Build (arm64)'
+        run: npx -y prebuildify@6.0.1 --napi --strip --arch arm64
         working-directory: packages/crypto-node
       - name: 'Upload'
         uses: actions/upload-artifact@v4
