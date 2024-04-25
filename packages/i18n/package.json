@@ -11,10 +11,7 @@
     "scripts": {
         "build": "pnpm run -w build-package i18n"
     },
-    "exports": {
-        ".": "./src/index.ts",
-        "./plurals/*": "./src/plurals/*"
-    },
+    "exports": "./src/index.ts",
     "devDependencies": {
         "@mtcute/core": "workspace:^",
         "@mtcute/dispatcher": "workspace:^"
