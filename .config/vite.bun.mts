@@ -6,7 +6,7 @@ import { fixupCjs } from './vite-utils/fixup-cjs'
 import { testSetup } from './vite-utils/test-setup-plugin'
 import { collectTestEntrypoints } from './vite-utils/collect-test-entrypoints'
 
-const FIXUP_TEST = resolve(__dirname, 'vite-utils/fixup-bun-test.ts')
+const POLYFILLS = resolve(__dirname, 'vite-utils/polyfills-bun.ts')
 
 export default defineConfig({
     build: {
@@ -20,17 +20,14 @@ export default defineConfig({
                 skipTests: [
                     // uses timers
                     'core/src/network/config-manager.test.ts',
-                    // incompatible spies
-                    'core/src/utils/crypto/mtproto.test.ts',
-                    // snapshot format
-                    'tl-utils/src/codegen/errors.test.ts'
+                    'core/src/network/persistent-connection.test.ts',
                 ],
             }),
             formats: ['es'],
         },
         rollupOptions: {
             external: [
-                'zlib',
+                'node:zlib',
                 'vitest',
                 'stream',
                 'net',
@@ -66,7 +63,7 @@ export default defineConfig({
     plugins: [
         fixupCjs(),
         {
-            name: 'fix-vitest',
+            name: 'polyfills',
             transform(code) {
                 if (!code.includes('vitest')) return code
                 code = code.replace(/^import {(.+?)} from ['"]vitest['"]/gms, (_, names) => {
@@ -86,7 +83,7 @@ export default defineConfig({
                     let code = `import {${newNames.join(', ')}} from 'bun:test'`
 
                     if (namesFromFixup.length) {
-                        code += `\nimport { ${namesFromFixup.join(', ')} } from '${FIXUP_TEST}'`
+                        code += `\nimport { ${namesFromFixup.join(', ')} } from '${POLYFILLS}'`
                     }
                     return code
                 })

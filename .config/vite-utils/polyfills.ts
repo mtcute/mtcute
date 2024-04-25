@@ -55,3 +55,33 @@ export function setupChai(chai: any, vitestExpect: any) {
         configurable: true,
     })
 }
+
+const stubbedGlobal = new Map()
+export function stubGlobal(name: string, value: any) {
+    stubbedGlobal.set(name, globalThis[name])
+    globalThis[name] = value
+}
+
+export function unstubAllGlobals() {
+    for (const [name, value] of stubbedGlobal) {
+        globalThis[name] = value
+    }
+    stubbedGlobal.clear()
+}
+
+export async function waitFor(fn: Function) {
+    // less customizations than vi.waitFor but it's good enough for now
+    const timeout = Date.now() + 5000
+
+    let lastError: unknown
+    while (Date.now() < timeout) {
+        try {
+            return await fn()
+        } catch (e) {
+            lastError = e
+            await new Promise((resolve) => setTimeout(resolve, 10))
+        }
+    }
+
+    throw lastError
+}
