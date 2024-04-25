@@ -43,18 +43,34 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           files: ./coverage/coverage-final.json
-
+  
   test-bun:
     runs-on: ubuntu-latest
     needs: lint
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/init
-      - uses: ./.github/actions/init-bun
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: '1.1.4'
       - name: 'Build tests'
         run: pnpm exec vite build -c .config/vite.bun.mts
       - name: 'Run tests'
         run: cd dist/tests && bun test
+  
+  test-deno:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/init
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: 2f5a6a8514ad8eadce1a0a9f1a7a419692e337ef
+      - name: 'Build tests'
+        run: pnpm exec vite build -c .config/vite.deno.mts
+      - name: 'Run tests'
+        run: cd dist/tests && deno test
   
   test-web:
     runs-on: ubuntu-latest
@@ -78,7 +94,7 @@ jobs:
   
   e2e:
     runs-on: ubuntu-latest
-    needs: [test-node, test-web, test-bun]
+    needs: [test-node, test-web, test-bun, test-deno]
     permissions:
       contents: read
       actions: write
@@ -100,7 +116,7 @@ jobs:
         run: cd e2e/node && ./cli.sh ci-publish
   e2e-deno:
     runs-on: ubuntu-latest
-    needs: [test-node, test-web, test-bun]
+    needs: [test-node, test-web, test-bun, test-deno]
     permissions:
       contents: read
       actions: write
