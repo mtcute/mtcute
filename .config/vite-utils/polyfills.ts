@@ -54,6 +54,8 @@ export function setupChai(chai: any, vitestExpect: any) {
         writable: true,
         configurable: true,
     })
+
+    chai.expect.addEqualityTesters = customTesters => vitestExpect.addCustomEqualityTesters(customTesters)
 }
 
 const stubbedGlobal = new Map()
