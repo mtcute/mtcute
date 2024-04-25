@@ -39,6 +39,12 @@ importers:
       '@vitest/coverage-v8':
         specifier: 1.4.0
         version: 1.4.0(vitest@1.4.0)
+      '@vitest/expect':
+        specifier: 1.4.0
+        version: 1.4.0
+      '@vitest/spy':
+        specifier: 1.4.0
+        version: 1.4.0
       '@vitest/ui':
         specifier: 1.4.0
         version: 1.4.0(vitest@1.4.0)

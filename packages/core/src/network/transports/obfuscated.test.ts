@@ -140,13 +140,13 @@ describe('ObfuscatedPacketCodec', () => {
         expect(spyCreateAesCtr).toHaveBeenCalledTimes(2)
         expect(spyCreateAesCtr).toHaveBeenNthCalledWith(
             1,
-            p.hexDecode('dd03188944590983e28dad14d97d0952389d118af4ffcbdb28d56a6a612ef7a6'),
+            u8HexDecode('dd03188944590983e28dad14d97d0952389d118af4ffcbdb28d56a6a612ef7a6'),
             u8HexDecode('936b33fa7f97bae025102532233abb26'),
             true,
         )
         expect(spyCreateAesCtr).toHaveBeenNthCalledWith(
             2,
-            p.hexDecode('413b8e08021fbb08a2962b6d7187194fe46565c6b329d3bbdfcffd4870c16119'),
+            u8HexDecode('413b8e08021fbb08a2962b6d7187194fe46565c6b329d3bbdfcffd4870c16119'),
             u8HexDecode('db6aeee6883f45f95def566dadb4b610'),
             false,
         )

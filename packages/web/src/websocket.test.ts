@@ -83,7 +83,7 @@ describe('WebSocketTransport', () => {
 
         await t.send(p.hexDecode('00010203040506070809'))
 
-        expect(socket.send).toHaveBeenCalledWith(p.hexDecode('af020630c8ef14bcf53af33853ea'))
+        expect(socket.send).toHaveBeenCalledWith(u8HexDecode('af020630c8ef14bcf53af33853ea'))
     })
 
     it('should correctly close', async () => {

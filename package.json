@@ -42,6 +42,8 @@
         "@typescript-eslint/parser": "6.4.0",
         "@vitest/browser": "1.4.0",
         "@vitest/coverage-v8": "1.4.0",
+        "@vitest/expect": "1.4.0",
+        "@vitest/spy": "1.4.0",
         "@vitest/ui": "1.4.0",
         "chai": "^5.1.0",
         "cjs-module-lexer": "1.2.3",
