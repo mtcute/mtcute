@@ -1,5 +1,5 @@
+import { gzipSync } from 'node:zlib'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { gzipSync } from 'zlib'
 
 import { getPlatform } from '@mtcute/core/platform.js'
 
@@ -13,7 +13,7 @@ beforeAll(async () => {
 const p = getPlatform()
 
 function gzipSyncWrap(data: Uint8Array) {
-    if (import.meta.env.TEST_ENV === 'browser') {
+    if (import.meta.env.TEST_ENV === 'browser' || import.meta.env.TEST_ENV === 'deno') {
         // @ts-expect-error fucking crutch because @jspm/core uses Buffer.isBuffer for some reason
         data._isBuffer = true
 
