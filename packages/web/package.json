@@ -5,7 +5,6 @@
     "description": "Meta-package for the web platform",
     "author": "alina sireneva <alina@tei.su>",
     "license": "MIT",
-    "main": "src/index.ts",
     "type": "module",
     "sideEffects": false,
     "scripts": {

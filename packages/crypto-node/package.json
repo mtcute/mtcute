@@ -3,7 +3,6 @@
     "version": "0.11.0",
     "description": "Native crypto implementation for NodeJS",
     "author": "alina sireneva <alina@tei.su>",
-    "main": "src/index.ts",
     "private": true,
     "license": "MIT",
     "type": "module",

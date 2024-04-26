@@ -2,11 +2,6 @@
     "name": "{{ name }}",
     "license": "MIT",
     "version": "0.0.0",
-    {{#if features.typescript}}
-    "main": "dist/index.js",
-    {{else}}
-    "main": "src/index.js",
-    {{/if}}
     "type": "module",
     "scripts": {
         {{#if features.linters}}
