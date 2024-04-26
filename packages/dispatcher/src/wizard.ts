@@ -1,7 +1,7 @@
 import { MaybePromise } from '@mtcute/core'
 
 import { MessageContext } from './context/message.js'
-import { Dispatcher } from './dispatcher.js'
+import { Dispatcher, DispatcherParams } from './dispatcher.js'
 import { filters } from './filters/index.js'
 import { UpdateState } from './state/update-state.js'
 
@@ -36,6 +36,15 @@ export class WizardScene<State extends object> extends Dispatcher<State & Wizard
     private _steps = 0
 
     private _defaultState: State & WizardInternalState = {} as State & WizardInternalState
+
+    constructor(name: string, params?: Omit<DispatcherParams, 'sceneName'>) {
+        super(undefined, { sceneName: name, ...params })
+    }
+
+    // remove inherited statics from Dispatcher
+    declare static for: never
+    declare static child: never
+    declare static scene: never
 
     setDefaultState(defaultState: State): void {
         this._defaultState = defaultState as State & WizardInternalState
