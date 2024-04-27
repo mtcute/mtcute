@@ -16,6 +16,10 @@ on:
           - major
           - minor
           - patch
+      branch:
+        description: 'Branch to release from'
+        required: true
+        default: 'master'
 
 jobs:
   release:
@@ -29,6 +33,8 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_PAT }}
+      - if: ${{ github.event.inputs.branch != 'master' }}
+        run: git checkout ${{ github.event.inputs.branch }}
       - uses: ./.github/actions/init
       - name: Initialize configs
         run: |
