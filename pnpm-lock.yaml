@@ -231,6 +231,31 @@ importers:
         specifier: workspace:^
         version: link:../test
 
+  packages/deno:
+    dependencies:
+      '@db/sqlite':
+        specifier: npm:@jsr/db__sqlite@0.11.1
+        version: /@jsr/db__sqlite@0.11.1
+      '@mtcute/core':
+        specifier: workspace:^
+        version: link:../core
+      '@mtcute/html-parser':
+        specifier: workspace:^
+        version: link:../html-parser
+      '@mtcute/markdown-parser':
+        specifier: workspace:^
+        version: link:../markdown-parser
+      '@mtcute/wasm':
+        specifier: workspace:^
+        version: link:../wasm
+      '@std/io':
+        specifier: npm:@jsr/std__io@0.223.0
+        version: /@jsr/std__io@0.223.0
+    devDependencies:
+      '@mtcute/test':
+        specifier: workspace:^
+        version: link:../test
+
   packages/dispatcher:
     dependencies:
       '@mtcute/core':
@@ -1188,6 +1213,86 @@ packages:
       '@jridgewell/resolve-uri': 3.0.6
       '@jridgewell/sourcemap-codec': 1.4.11
     dev: true
+
+  /@jsr/db__sqlite@0.11.1:
+    resolution: {integrity: sha512-6IKyfi+TQan431kwOy3WrdzgKwITuDdSKfq6nkWINfNWknPQ+lQ6/R008bAUUz+AwW8e0prxi3IMMxzELUV8Lw==, tarball: https://npm.jsr.io/~/8/@jsr/db__sqlite/0.11.1.tgz}
+    dependencies:
+      '@jsr/denosaurs__plug': 1.0.6
+      '@jsr/std__path': 0.217.0
+    dev: false
+
+  /@jsr/denosaurs__plug@1.0.6:
+    resolution: {integrity: sha512-2uqvX2xpDy5W76jJVKazXvHuh5WPNg8eUV+2u+Hcn5XLwKqWGr/xj4wQFRMXrS12Xhya+ToZdUg4gxLh+XOOCg==, tarball: https://npm.jsr.io/~/8/@jsr/denosaurs__plug/1.0.6.tgz}
+    dependencies:
+      '@jsr/std__encoding': 0.221.0
+      '@jsr/std__fmt': 0.221.0
+      '@jsr/std__fs': 0.221.0
+      '@jsr/std__path': 0.221.0
+    dev: false
+
+  /@jsr/std__assert@0.217.0:
+    resolution: {integrity: sha512-RCQbXJeUVCgDGEPsrO57CI9Cgbo9NAWsJUhZ7vrHgtD//Ic32YmUQazdGKPZzao5Zn8dP6xV4Nma3HHZC5ySTw==, tarball: https://npm.jsr.io/~/8/@jsr/std__assert/0.217.0.tgz}
+    dependencies:
+      '@jsr/std__fmt': 0.217.0
+    dev: false
+
+  /@jsr/std__assert@0.221.0:
+    resolution: {integrity: sha512-2B+5fq4Rar8NmLms7sv9YfYlMukZDTNMQV5fXjtZvnaKc8ljt+59UsMtIjTXFsDwsAx7VoxkMKmmdHxlP+h5JA==, tarball: https://npm.jsr.io/~/8/@jsr/std__assert/0.221.0.tgz}
+    dependencies:
+      '@jsr/std__fmt': 0.221.0
+    dev: false
+
+  /@jsr/std__assert@0.223.0:
+    resolution: {integrity: sha512-9FWOoAQN1uF5SliWw3IgdXmk2usz5txvausX4sLAASHfQMbUSCe1akcD7HgFV01J/2Mr9TfCjPvsSUzuuASouQ==, tarball: https://npm.jsr.io/~/8/@jsr/std__assert/0.223.0.tgz}
+    dependencies:
+      '@jsr/std__fmt': 0.223.0
+    dev: false
+
+  /@jsr/std__bytes@0.223.0:
+    resolution: {integrity: sha512-BBjhj0uFlB3+AVEmaPygEwY5CL5mj3vSZlusC8xxjCRNWDYGukfQT/F5GOTTfjeaq7njduk7TYe6e5cDg659yg==, tarball: https://npm.jsr.io/~/8/@jsr/std__bytes/0.223.0.tgz}
+    dev: false
+
+  /@jsr/std__encoding@0.221.0:
+    resolution: {integrity: sha512-FT5i/WHNtXJvqOITDK0eOVIyyOphqtxwhzo5PiVWoYTFmUuFcRYKas39GT1UQDi4s24FcHd2deQEBbi3tPAj1Q==, tarball: https://npm.jsr.io/~/8/@jsr/std__encoding/0.221.0.tgz}
+    dev: false
+
+  /@jsr/std__fmt@0.217.0:
+    resolution: {integrity: sha512-L3mVYP7DsujrJ001SvPr4Fl/Fu0e3uzgHJ6NYTRUk7sgi9k7YKeLOLVwRijUX7qIsp3Ourp2DyAHHgYDgT4GcQ==, tarball: https://npm.jsr.io/~/8/@jsr/std__fmt/0.217.0.tgz}
+    dev: false
+
+  /@jsr/std__fmt@0.221.0:
+    resolution: {integrity: sha512-VLqM052U78LQ11p/KfqI49a2/sDbKtHFHuxO/h+3Cnvhze9beIZU4Lg3Gpu8rGYjB2YS6CfXzKXHuyAJn5FJFg==, tarball: https://npm.jsr.io/~/8/@jsr/std__fmt/0.221.0.tgz}
+    dev: false
+
+  /@jsr/std__fmt@0.223.0:
+    resolution: {integrity: sha512-J6SVTw/l3C4hOwEuqnZ4ZHD1jVIIZt09fb5LP9CMGyVGNnoW8/lxJvCNhIOv+3ZXC1ErGlIzW4bgYSxHwbvSaQ==, tarball: https://npm.jsr.io/~/8/@jsr/std__fmt/0.223.0.tgz}
+    dev: false
+
+  /@jsr/std__fs@0.221.0:
+    resolution: {integrity: sha512-2XMlO67zQlKoxbCsfGOBVlnyWhMMdOzYUWfajvggfw2p+yITd9hJj9+tpfiwLf/88CzknhlMLwSCamSYjHKloA==, tarball: https://npm.jsr.io/~/8/@jsr/std__fs/0.221.0.tgz}
+    dependencies:
+      '@jsr/std__assert': 0.221.0
+      '@jsr/std__path': 0.221.0
+    dev: false
+
+  /@jsr/std__io@0.223.0:
+    resolution: {integrity: sha512-K+OXJHsIf9227aYgNTaapEkpphHrI+oYVkl14UV+le+Fk9MzkJmebU0XAU6krgVS283mW7VPJsXVV3gD5JWvJw==, tarball: https://npm.jsr.io/~/8/@jsr/std__io/0.223.0.tgz}
+    dependencies:
+      '@jsr/std__assert': 0.223.0
+      '@jsr/std__bytes': 0.223.0
+    dev: false
+
+  /@jsr/std__path@0.217.0:
+    resolution: {integrity: sha512-OkP+yiBJpFZKTH3gHqlepYU3TQzXM/UjEQ0U1gYw8BwVr87TwKfzwAb1WT1vY/Bs8NXScvuP4Kpu/UhEsNHD3A==, tarball: https://npm.jsr.io/~/8/@jsr/std__path/0.217.0.tgz}
+    dependencies:
+      '@jsr/std__assert': 0.217.0
+    dev: false
+
+  /@jsr/std__path@0.221.0:
+    resolution: {integrity: sha512-uOWaY4cWp28CFBSisr8M/92FtpyjiFO0+wQSH7GgmiXQUls+vALqdCGewFkunG8RfA/25RGdot5hFXedmtPdOg==, tarball: https://npm.jsr.io/~/8/@jsr/std__path/0.221.0.tgz}
+    dependencies:
+      '@jsr/std__assert': 0.221.0
+    dev: false
 
   /@ljharb/through@2.3.11:
     resolution: {integrity: sha512-ccfcIDlogiXNq5KcbAwbaO7lMh3Tm1i3khMPYpxlK8hH/W53zN81KM9coerRLOnTGu3nfXIniAmQbRI9OxbC0w==}

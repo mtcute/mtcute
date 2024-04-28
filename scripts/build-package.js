@@ -499,6 +499,10 @@ if (IS_JSR) {
         for (const [name, version] of Object.entries(builtPkgJson.dependencies)) {
             if (name.startsWith('@mtcute/')) {
                 importMap[name] = `jsr:${name}@${version}`
+            } else if (version.startsWith('npm:@jsr/')) {
+                const jsrName = version.slice(9).split('@')[0].replace('__', '/')
+                const jsrVersion = version.slice(9).split('@')[1]
+                importMap[name] = `jsr:@${jsrName}@${jsrVersion}`
             } else {
                 importMap[name] = `npm:${name}@${version}`
             }

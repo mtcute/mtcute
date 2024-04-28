@@ -1,13 +1,16 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "outDir": "./dist/esm",
-        "rootDir": "./src"
+        "outDir": "./dist",
+        "rootDir": "./src",
     },
     "include": [
         "./src",
     ],
     "references": [
         { "path": "../core" },
+        { "path": "../dispatcher" },
+        { "path": "../html-parser" },
+        { "path": "../markdown-parser" }
     ]
 }

@@ -1,3 +1,5 @@
+/// <reference lib="dom" />
+/// <reference lib="webworker" />
 import { setPlatform } from '@mtcute/core/platform.js'
 import {
     ClientMessageHandler,

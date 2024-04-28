@@ -171,7 +171,8 @@ export async function uploadFile(
             throw new MtArgumentError('Fetch response contains `null` body')
         }
 
-        file = file.body
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        file = file.body as ReadableStream<Uint8Array>
     }
 
     if (!(file instanceof ReadableStream)) {

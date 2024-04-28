@@ -25,6 +25,7 @@ const JSR_EXCEPTIONS = {
     bun: 'never',
     'create-bot': 'never',
     'crypto-node': 'never',
+    deno: 'only',
     node: 'never',
     'http-proxy': 'never',
     'socks-proxy': 'never',

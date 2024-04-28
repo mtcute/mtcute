@@ -1,9 +1,7 @@
-/* eslint-disable no-restricted-imports */
-import type { ReadStream } from 'node:fs'
-
 import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
+import { AnyToNever } from '../../../types/utils.js'
 import { FileLocation } from './file-location.js'
 import { UploadedFile } from './uploaded-file.js'
 
@@ -14,8 +12,9 @@ import { UploadedFile } from './uploaded-file.js'
  *  - `File`, `Blob` (from the Web API)
  *  - `string`, which will be interpreted as file path (**non-browser only!**)
  *  - `URL` (from the Web API, will be `fetch()`-ed; `file://` URLs are not available in browsers)
- *  - `ReadStream` (for Node.js/Bun, from the `fs` module)
+ *  - `ReadStream` (for Node.js/Bun, from the `node:fs` module)
  *  - `BunFile` (from `Bun.file()`)
+ *  - `Deno.FsFile` (from `Deno.open()` in Deno)
  *  - `ReadableStream` (Web API readable stream)
  *  - `Readable` (Node.js/Bun readable stream)
  *  - `Response` (from `window.fetch`)
@@ -26,10 +25,14 @@ export type UploadFileLike =
     | File
     | Blob
     | string
-    | ReadStream
-    | ReadableStream<Uint8Array>
-    | NodeJS.ReadableStream
-    | Response
+    | AnyToNever<import('node:fs').ReadStream>
+    | AnyToNever<ReadableStream<Uint8Array>>
+    | AnyToNever<NodeJS.ReadableStream>
+    | AnyToNever<Response>
+    | AnyToNever<Deno.FsFile>
+
+// AnyToNever in the above type ensures we don't make the entire type `any`
+// if some of the types are not available in the current environment
 
 /**
  * Describes types that can be used as an input
@@ -41,6 +44,8 @@ export type UploadFileLike =
  *  - `ReadStream` (for Node.js/Bun, from the `fs` module)
  *  - `ReadableStream` (from the Web API, base readable stream)
  *  - `Readable` (for Node.js/Bun, base readable stream)
+ *  - `BunFile` (from `Bun.file()`)
+ *  - `Deno.FsFile` (from `Deno.open()` in Deno)
  *  - {@link UploadedFile} returned from {@link TelegramClient.uploadFile}
  *  - `tl.TypeInputFile` and `tl.TypeInputMedia` TL objects
  *  - `string` with a path to a local file prepended with `file:` (non-browser only) (e.g. `file:image.jpg`)

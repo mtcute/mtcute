@@ -1,3 +1,5 @@
+/// <reference lib="dom" />
+/// <reference lib="dom.iterable" />
 import { BaseStorageDriver, MtUnsupportedError } from '@mtcute/core'
 
 import { txToPromise } from './utils.js'

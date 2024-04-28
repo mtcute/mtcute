@@ -7,7 +7,8 @@ export function reportUnknownError(log: Logger, error: tl.RpcError, method: stri
 
     fetch(`https://rpc.pwrtelegram.xyz/?code=${error.code}&method=${method}&error=${error.text}`)
         .then((r) => r.json())
-        .then((r) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then((r: any) => {
             if (r.ok) {
                 log.info('telerpc responded with error info for %s: %s', error.text, r.result)
             } else {

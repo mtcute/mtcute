@@ -67,7 +67,7 @@ jobs:
       - name: 'Build tests'
         run: pnpm exec vite build -c .config/vite.deno.mts
       - name: 'Run tests'
-        run: cd dist/tests && deno test
+        run: cd dist/tests && deno test -A --unstable-ffi
   
   test-web:
     runs-on: ubuntu-latest
