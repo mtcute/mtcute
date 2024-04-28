@@ -1,4 +1,5 @@
-/// <reference lib="WebWorker" />
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { setPlatform } from '@mtcute/core/platform.js'
 import {
     ClientMessageHandler,
@@ -19,6 +20,10 @@ export type { TelegramWorkerOptions, TelegramWorkerPortOptions, WorkerCustomMeth
 
 let _registered = false
 
+// thanks deno for this awesome lack of typings
+declare const WorkerGlobalScope: any
+declare const self: any
+
 export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorkerBase<T> {
     registerWorker(handler: WorkerMessageHandler): RespondFn {
         if (_registered) {
@@ -31,7 +36,7 @@ export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorke
             const respond: RespondFn = self.postMessage.bind(self)
 
             // eslint-disable-next-line
-            self.addEventListener('message', (message) => handler((message as any).data, respond))
+            self.addEventListener('message', (message: any) => handler(message.data, respond))
 
             return respond
         }

@@ -87,7 +87,8 @@ export class TelegramClient extends TelegramClientBase {
             this._rl = createInterface({
                 // eslint-disable-next-line
                 input: Readable.fromWeb(Deno.stdin.readable as any),
-                output: Writable.fromWeb(Deno.stdout.writable),
+                // eslint-disable-next-line
+                output: Writable.fromWeb(Deno.stdout.writable as any),
             })
         }
 

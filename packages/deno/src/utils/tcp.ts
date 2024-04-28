@@ -1,4 +1,4 @@
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 
 import { IntermediatePacketCodec, IPacketCodec, ITelegramTransport, MtcuteError, TransportState } from '@mtcute/core'
 import { BasicDcOption, ICryptoProvider, Logger } from '@mtcute/core/utils.js'

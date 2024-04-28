@@ -1,10 +1,10 @@
-/* eslint-disable no-restricted-globals */
 import { Buffer } from 'node:buffer'
 import { createCipheriv, createHash, createHmac, pbkdf2 } from 'node:crypto'
 import { deflateSync, gunzipSync } from 'node:zlib'
 
 import { BaseCryptoProvider, IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
 import { getWasmUrl, ige256Decrypt, ige256Encrypt, initSync } from '@mtcute/wasm'
+
 // node:crypto is properly implemented in deno, so we can just use it
 // largely just copy-pasting from @mtcute/node
 

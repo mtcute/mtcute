@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const cp = require('child_process')
+const stc = require('@teidesu/slow-types-compiler')
 
 const IS_JSR = process.env.JSR === '1'
 const MAIN_REGISTRY = IS_JSR ? 'http://jsr.test/' : 'https://registry.npmjs.org'
@@ -54,30 +55,6 @@ async function checkVersion(name, version) {
     return fetchRetry(url).then((r) => r.status === 200)
 }
 
-async function jsrMaybeCreatePackage(name) {
-    // check if the package even exists
-    const packageMeta = await fetchRetry(`${REGISTRY}api/scopes/mtcute/packages/${name}`)
-
-    if (packageMeta.status === 404) {
-        console.error('[i] %s does not exist, creating..', name)
-
-        const create = await fetchRetry(`${REGISTRY}api/scopes/mtcute/packages`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Cookie: `token=${process.env.JSR_TOKEN}`,
-            },
-            body: JSON.stringify({ package: name }),
-        })
-
-        if (create.status !== 200) {
-            throw new Error(`Failed to create package: ${create.statusText} ${await create.text()}`)
-        }
-    } else if (packageMeta.status !== 200) {
-        throw new Error(`Failed to check package: ${packageMeta.statusText} ${await packageMeta.text()}`)
-    }
-}
-
 async function publishSinglePackage(name) {
     let packageDir = path.join(__dirname, '../packages', name)
 
@@ -110,7 +87,11 @@ async function publishSinglePackage(name) {
             return
         }
     } else if (IS_JSR && process.env.JSR_TOKEN) {
-        await jsrMaybeCreatePackage(name)
+        await stc.jsrMaybeCreatePackage({
+            name: `@mtcute/${name}`,
+            token: process.env.JSR_TOKEN,
+            registry: REGISTRY,
+        })
     }
 
     if (IS_JSR) {
@@ -157,7 +138,6 @@ function listPackages() {
                 .map((d) => d.slice(8))
         }
 
-        const stc = require('@teidesu/slow-types-compiler')
         packages = stc.determinePublishOrder(map)
         console.log('[i] Publishing order:', packages.join(', '))
     }

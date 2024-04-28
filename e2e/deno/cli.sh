@@ -69,7 +69,7 @@ case "$method" in
         if [ -d .jsr-data ]; then
             # clean up data from previous runs
             docker compose down
-            rm -rf .jsr-data
+            sudo rm -rf .jsr-data
         fi
         mkdir .jsr-data
         ./cli.sh start

@@ -433,6 +433,8 @@ if (buildConfig.buildTs && !IS_JSR) {
 
         for (const [name, decl_] of Object.entries(nodeSpecificApis)) {
             if (fileContent.includes(name)) {
+                if (name === 'Buffer' && fileContent.includes('node:buffer')) continue
+
                 changed = true
                 const isType = Array.isArray(decl_) && decl_[0] === 'type'
                 const decl = isType ? decl_[1] : decl_
@@ -546,6 +548,34 @@ if (IS_JSR) {
             2,
         ),
     )
+
+    if (process.env.E2E) {
+        // populate dependencies, if any
+        const depsToPopulate = []
+
+        for (const dep of Object.values(importMap)) {
+            if (!dep.startsWith('jsr:')) continue
+            if (dep.startsWith('jsr:@mtcute/')) continue
+            depsToPopulate.push(dep.slice(4))
+        }
+
+        if (depsToPopulate.length) {
+            console.log('[i] Populating %d dependencies...', depsToPopulate.length)
+            cp.spawnSync('pnpm', [
+                'exec',
+                'slow-types-compiler',
+                'populate',
+                '--downstream',
+                process.env.JSR_URL,
+                '--token',
+                process.env.JSR_TOKEN,
+                '--unstable-create-via-api',
+                ...depsToPopulate,
+            ], {
+                stdio: 'inherit',
+            })
+        }
+    }
 
     console.log('[i] Processing with slow-types-compiler...')
     const project = stc.createProject()
