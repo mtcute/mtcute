@@ -1,4 +1,4 @@
-# @mtcute/bun
+# @mtcute/deno
 
 📖 [API Reference](https://ref.mtcute.dev/modules/_mtcute_deno.html)
 

@@ -56,7 +56,7 @@ export class BaseTelegramClient extends BaseTelegramClientBase {
 }
 
 /**
- * Telegram client for use in Node.js
+ * Telegram client for use in Deno
  */
 export class TelegramClient extends TelegramClientBase {
     constructor(opts: TelegramClientOptions) {
