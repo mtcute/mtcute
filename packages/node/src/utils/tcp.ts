@@ -84,7 +84,10 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
 
     handleError(error: Error): void {
         this.log.error('error: %s', error.stack)
-        this.emit('error', error)
+
+        if (this.listenerCount('error') > 0) {
+            this.emit('error', error)
+        }
     }
 
     handleConnect(): void {

@@ -91,7 +91,10 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
 
     handleError(socket: unknown, error: Error): void {
         this.log.error('error: %s', error.stack)
-        this.emit('error', error)
+
+        if (this.listenerCount('error') > 0) {
+            this.emit('error', error)
+        }
     }
 
     handleConnect(socket: Socket): void {
@@ -109,7 +112,11 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
                     this.emit('ready')
                 }
             })
-            .catch((err) => this.emit('error', err))
+            .catch((err) => {
+                if (this.listenerCount('error') > 0) {
+                    this.emit('error', err)
+                }
+            })
     }
 
     async send(bytes: Uint8Array): Promise<void> {
