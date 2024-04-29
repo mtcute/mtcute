@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { setPlatform } from '@mtcute/core/platform.js'
 import {
     ClientMessageHandler,
@@ -18,11 +17,6 @@ import { WebPlatform } from './platform.js'
 export type { TelegramWorkerOptions, TelegramWorkerPortOptions, WorkerCustomMethods }
 
 let _registered = false
-
-// thanks deno for this awesome lack of typings
-declare const WorkerGlobalScope: any
-declare const SharedWorkerGlobalScope: any
-declare const self: any
 
 export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorkerBase<T> {
     registerWorker(handler: WorkerMessageHandler): RespondFn {

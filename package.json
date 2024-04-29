@@ -10,7 +10,7 @@
     ],
     "scripts": {
         "prepare": "husky install .config/husky",
-        "postinstall": "node scripts/validate-deps-versions.mjs && node scripts/fetch-deno-dts.mjs && node scripts/remove-jsr-sourcefiles.mjs",
+        "postinstall": "node scripts/validate-deps-versions.mjs && node scripts/install-deno-dts.mjs && node scripts/remove-jsr-sourcefiles.mjs",
         "test": "pnpm run -r test && vitest --config .config/vite.mts run",
         "test:dev": "vitest --config .config/vite.mts watch",
         "test:ui": "vitest --config .config/vite.mts --ui",

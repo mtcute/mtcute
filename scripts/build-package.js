@@ -428,6 +428,12 @@ if (buildConfig.buildTs && !IS_JSR) {
                 'from: (data: any, encoding?: string) => { toString(encoding?: string): string }, ' +
                 ' }',
             SharedWorker: ['type', 'never'],
+            WorkerGlobalScope:
+                '{ ' +
+                '  new (): typeof WorkerGlobalScope, ' +
+                '  postMessage: (message: any, transfer?: Transferable[]) => void, ' +
+                '  addEventListener: (type: "message", listener: (ev: MessageEvent) => void) => void, ' +
+                ' }',
             process: '{ ' + 'hrtime: { bigint: () => bigint }, ' + '}',
         }
 
@@ -561,19 +567,23 @@ if (IS_JSR) {
 
         if (depsToPopulate.length) {
             console.log('[i] Populating %d dependencies...', depsToPopulate.length)
-            cp.spawnSync('pnpm', [
-                'exec',
-                'slow-types-compiler',
-                'populate',
-                '--downstream',
-                process.env.JSR_URL,
-                '--token',
-                process.env.JSR_TOKEN,
-                '--unstable-create-via-api',
-                ...depsToPopulate,
-            ], {
-                stdio: 'inherit',
-            })
+            cp.spawnSync(
+                'pnpm',
+                [
+                    'exec',
+                    'slow-types-compiler',
+                    'populate',
+                    '--downstream',
+                    process.env.JSR_URL,
+                    '--token',
+                    process.env.JSR_TOKEN,
+                    '--unstable-create-via-api',
+                    ...depsToPopulate,
+                ],
+                {
+                    stdio: 'inherit',
+                },
+            )
         }
     }
 

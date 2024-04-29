@@ -115,8 +115,7 @@ export class IdbStorageDriver extends BaseStorageDriver {
                     db.createObjectStore(`${REPO_VERSION_PREFIX}${repo}:${targetVer}`)
                 }
 
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                for (const key of db.objectStoreNames as any as string[]) {
+                for (const key of db.objectStoreNames) {
                     if (!key.startsWith(REPO_VERSION_PREFIX)) continue
                     const [, repo, version] = key.split(':')
 
@@ -143,7 +142,7 @@ export class IdbStorageDriver extends BaseStorageDriver {
         this._pendingWrites = []
         this._pendingWritesOses = new Set()
 
-        const tx = this.db.transaction([...oses], 'readwrite')
+        const tx = this.db.transaction(oses, 'readwrite')
 
         const osMap = new Map<string, IDBObjectStore>()
 
