@@ -9,6 +9,9 @@ import {
 } from '@mtcute/test'
 
 if (import.meta.env.TEST_ENV === 'deno') {
+    // load sqlite in advance so test runner doesn't complain about us leaking the library
+    // (it's not on us, @db/sqlite doesn't provide an api to unload the library)
+    await import('@db/sqlite')
     const { SqliteStorage } = await import('./index.js')
 
     describe('SqliteStorage', () => {

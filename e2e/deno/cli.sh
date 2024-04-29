@@ -45,7 +45,7 @@ case "$method" in
             source .env
         fi
 
-        if [ -n "$DOCKER" ]; then
+        if [ ! -z ${DOCKER+x} ]; then
             # running behind a socat proxy seems to fix some of the docker networking issues (thx kamillaova)
             socat TCP-LISTEN:4873,fork,reuseaddr TCP4:jsr:80 &
             socat_pid=$!
@@ -54,7 +54,7 @@ case "$method" in
         fi
 
         export JSR_URL=http://localhost:4873
-        if [ -z "$@" ]; then
+        if [ $# -eq 0 ]; then
             deno test -A tests/**/*.ts
         else
             deno test -A $@

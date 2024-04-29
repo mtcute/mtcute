@@ -134,7 +134,8 @@ if (import.meta.env.TEST_ENV === 'node') {
         it('should propagate errors', async () => {
             const t = await create()
 
-            const spyEmit = vi.spyOn(t, 'emit').mockImplementation(() => true)
+            const spyEmit = vi.fn()
+            t.on('error', spyEmit)
 
             t.connect(defaultProductionDc.main, false)
             await vi.waitFor(() => expect(t.state()).toEqual(TransportState.Ready))
@@ -147,7 +148,7 @@ if (import.meta.env.TEST_ENV === 'node') {
             ]
             onErrorCall[1](new Error('test error'))
 
-            expect(spyEmit).toHaveBeenCalledWith('error', new Error('test error'))
+            expect(spyEmit).toHaveBeenCalledWith(new Error('test error'))
         })
     })
 } else {

@@ -1,7 +1,7 @@
 import { MaybePromise, MemoryStorage } from '@mtcute/core'
 import { setPlatform } from '@mtcute/core/platform.js'
 import { LogManager, sleep } from '@mtcute/core/utils.js'
-import { WebCryptoProvider, WebPlatform, WebSocketTransport } from '@mtcute/web'
+import { DenoCryptoProvider, DenoPlatform, TcpTransport } from '@mtcute/deno'
 
 export const getApiParams = (storage?: string) => {
     if (storage) throw new Error('unsupported yet')
@@ -10,7 +10,7 @@ export const getApiParams = (storage?: string) => {
         throw new Error('API_ID and API_HASH env variables must be set')
     }
 
-    setPlatform(new WebPlatform())
+    setPlatform(new DenoPlatform())
 
     return {
         apiId: parseInt(Deno.env.get('API_ID')!),
@@ -18,8 +18,8 @@ export const getApiParams = (storage?: string) => {
         testMode: true,
         storage: new MemoryStorage(),
         logLevel: LogManager.VERBOSE,
-        transport: () => new WebSocketTransport(),
-        crypto: new WebCryptoProvider(),
+        transport: () => new TcpTransport(),
+        crypto: new DenoCryptoProvider(),
     }
 }
 
