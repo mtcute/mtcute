@@ -1,6 +1,6 @@
 import { BaseSqliteStorageDriver, ISqliteDatabase } from '@mtcute/core'
 
-import { Database } from '@db/sqlite'
+let Database: typeof import('@db/sqlite').Database
 
 export interface SqliteStorageDriverOptions {
     /**
@@ -22,6 +22,15 @@ export class SqliteStorageDriver extends BaseSqliteStorageDriver {
         readonly params?: SqliteStorageDriverOptions,
     ) {
         super()
+    }
+
+    async _load(): Promise<void> {
+        if (!Database) {
+            // we load this lazily to avoid loading ffi if it's not needed,
+            // in case the user doesn't use sqlite storage
+            Database = (await import('@db/sqlite')).Database
+        }
+        super._load()
     }
 
     _createDatabase(): ISqliteDatabase {
