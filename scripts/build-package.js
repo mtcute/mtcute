@@ -32,7 +32,6 @@ const buildConfig = {
     buildTs: true,
     buildCjs: true,
     removeReferenceComments: true,
-    replaceSrcImports: true,
     esmOnlyDirectives: false,
     esmImportDirectives: false,
     before: () => {},
@@ -349,28 +348,9 @@ if (buildConfig.buildTs && !IS_JSR) {
             let content = fs.readFileSync(f, 'utf8')
             let changed = false
 
-            if (content.indexOf('/// <reference types="node" />') !== -1) {
+            if (content.indexOf('/// <reference types="') !== -1) {
                 changed = true
-                content = content.replace('/// <reference types="node" />', '')
-            }
-
-            if (content.match(/@mtcute\/[a-z-]+\/src/)) {
-                changed = true
-                content = content.replace(/(@mtcute\/[a-z-]+)\/src/g, '$1')
-            }
-
-            if (changed) fs.writeFileSync(f, content)
-        }
-    }
-
-    if (buildConfig.replaceSrcImports) {
-        for (const f of glob.sync(path.join(outDir, '**/*.js'))) {
-            let content = fs.readFileSync(f, 'utf8')
-            let changed = false
-
-            if (content.match(/@mtcute\/[a-z-]+\/src/)) {
-                changed = true
-                content = content.replace(/(@mtcute\/[a-z-]+)\/src/g, '$1')
+                content = content.replace(/\/\/\/ <reference types="(node|deno\/ns)".+?\/>\n?/g, '')
             }
 
             if (changed) fs.writeFileSync(f, content)
@@ -497,6 +477,15 @@ if (typeof globalThis !== 'undefined' && !globalThis._MTCUTE_CJS_DEPRECATION_WAR
     }
 }
 
+// validate exports
+if (typeof builtPkgJson.exports === 'object') {
+    for (const [name, target] of Object.entries(builtPkgJson.exports)) {
+        if (name.includes('*')) {
+            throw new Error(`Wildcards are not supported: ${name} -> ${target}`)
+        }
+    }
+}
+
 if (IS_JSR) {
     // generate deno.json from package.json
     // https://jsr.io/docs/package-configuration
@@ -515,27 +504,6 @@ if (IS_JSR) {
                 importMap[name] = `npm:${name}@${version}`
             }
         }
-    }
-
-    for (const [name, target] of Object.entries(builtPkgJson.exports)) {
-        // jsr doesn't support wildcards, so we need to flatten those
-        if (!name.includes('*')) continue
-
-        if (!name.endsWith('*') || !target.endsWith('*')) {
-            // for simplicity + it's the only one supported in some bundlers
-            throw new Error(`Invalid wildcard in export map: ${name} -> ${target}`)
-        }
-
-        const base = name.slice(0, -1)
-        const targetBase = target.slice(0, -1)
-
-        for (const file of glob.sync(path.join(outDir, base, '**/*'))) {
-            const newName = (base + path.relative(path.join(outDir, base), file)).replace(/\.ts$/, '.js')
-            const newTarget = targetBase + path.relative(path.join(outDir, base), file)
-            builtPkgJson.exports[newName] = newTarget
-        }
-
-        delete builtPkgJson.exports[name]
     }
 
     const denoJson = path.join(outDir, 'deno.json')
@@ -595,6 +563,34 @@ if (IS_JSR) {
     if (unsavedSourceFiles.length > 0) {
         console.log('[v] Changed %d files', unsavedSourceFiles.length)
         project.saveSync()
+    }
+} else {
+    // make shims for esnext resolution (that doesn't respect package.json `exports` field)
+    function makeShim(name, target) {
+        if (name === '.') name = './index.js'
+
+        if (!fs.existsSync(path.join(outDir, name))) {
+            fs.writeFileSync(path.join(outDir, name), `export * from '${target}'\n`)
+            fs.writeFileSync(path.join(outDir, name.replace(/\.js$/, '.d.ts')), `export * from '${target}'\n`)
+        }
+    }
+
+    if (typeof builtPkgJson.exports === 'string') {
+        makeShim('.', builtPkgJson.exports)
+    } else if (typeof builtPkgJson.exports === 'object') {
+        for (const [name, target] of Object.entries(builtPkgJson.exports)) {
+            let esmTarget
+
+            if (typeof target === 'object') {
+                if (!target.import) throw new Error(`Invalid export target: ${name} -> ${JSON.stringify(target)}`)
+                esmTarget = target.import
+            } else if (typeof target === 'string') {
+                if (buildConfig.buildCjs) throw new Error(`Invalid export target (with cjs): ${name} -> ${target}`)
+                esmTarget = target
+            }
+
+            makeShim(name, esmTarget)
+        }
     }
 }
 
