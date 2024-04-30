@@ -21,6 +21,9 @@ importers:
       '@teidesu/slow-types-compiler':
         specifier: 1.1.0
         version: 1.1.0(typescript@5.4.3)
+      '@types/deno':
+        specifier: npm:@teidesu/deno-types@1.42.4
+        version: /@teidesu/deno-types@1.42.4
       '@types/node':
         specifier: 20.10.0
         version: 20.10.0
@@ -1466,6 +1469,10 @@ packages:
 
   /@sinclair/typebox@0.27.8:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
+
+  /@teidesu/deno-types@1.42.4:
+    resolution: {integrity: sha512-MMDkfWOsfedYWy+aPK4fAYyZfrBsY6+DeC7DGg6eESzh90zxuf1fSvXRsY8y09Hh4mm04tAf1632S2/JLaTXQg==}
+    dev: true
 
   /@teidesu/slow-types-compiler@1.1.0(typescript@5.4.3):
     resolution: {integrity: sha512-+WUHSKh56B32Jk5aJgXf07E2EOkMX1yilvgKLKBCJPFAJZ4xeo1U5aDu3wwHX3lrFl7AiVGXUP+FfuHy8X43BA==}

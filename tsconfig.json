@@ -19,7 +19,7 @@
         "composite": true,
         "types": [
             "node",
-            "deno",
+            "deno/ns",
             "vite/client"
         ],
         "lib": [
