@@ -45,19 +45,27 @@ case "$method" in
             source .env
         fi
 
+        export JSR_URL=http://localhost:4873
+
         if [ ! -z ${DOCKER+x} ]; then
             # running behind a socat proxy seems to fix some of the docker networking issues (thx kamillaova)
             socat TCP-LISTEN:4873,fork,reuseaddr TCP4:jsr:80 &
             socat_pid=$!
 
+            # run `deno cache` with a few retries to make sure everything is cached
+            for i in {1..5}; do
+                if deno cache tests/*.ts; then
+                    break
+                fi
+            done
+
             trap "kill $socat_pid" EXIT
         fi
 
-        export JSR_URL=http://localhost:4873
         if [ $# -eq 0 ]; then
-            deno test -A tests/**/*.ts
+            deno test -A --unstable-ffi tests/**/*.ts
         else
-            deno test -A $@
+            deno test -A --unstable-ffi $@
         fi
         ;;
     "run-docker")
