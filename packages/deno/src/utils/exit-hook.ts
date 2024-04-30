@@ -6,7 +6,7 @@ export function beforeExit(fn: () => void): () => void {
     if (!registered) {
         registered = true
 
-        window.addEventListener('unload', () => {
+        globalThis.addEventListener('unload', () => {
             for (const callback of callbacks) {
                 callback()
             }
