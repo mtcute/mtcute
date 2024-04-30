@@ -35,7 +35,7 @@ export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorke
                 }
             }
 
-            self.onconnect = (event) => {
+            self.onconnect = (event: MessageEvent) => {
                 const port = event.ports[0]
                 connections.push(port)
 
@@ -91,7 +91,7 @@ export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorke
             const respond: RespondFn = self.postMessage.bind(self)
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            self.addEventListener('message', (message) => handler(message.data, respond))
+            self.addEventListener('message', (message: MessageEvent) => handler(message.data, respond))
 
             return respond
         }

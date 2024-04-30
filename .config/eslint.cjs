@@ -279,7 +279,7 @@ module.exports = {
             },
         },
         {
-            files: ['packages/bun/**'],
+            files: ['packages/bun/**', 'packages/deno/**'],
             rules: {
                 'import/no-unresolved': 'off',
                 'no-restricted-imports': 'off',
@@ -291,7 +291,7 @@ module.exports = {
             rules: {
                 'import/no-unresolved': 'off',
             }
-        }
+        },
     ],
     settings: {
         'import/resolver': {

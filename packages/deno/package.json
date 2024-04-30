@@ -1,0 +1,30 @@
+{
+    "name": "@mtcute/deno",
+    "private": true,
+    "version": "0.11.0",
+    "description": "Meta-package for Deno",
+    "author": "alina sireneva <alina@tei.su>",
+    "license": "MIT",
+    "main": "src/index.ts",
+    "type": "module",
+    "sideEffects": false,
+    "scripts": {
+        "docs": "typedoc",
+        "build": "pnpm run -w build-package deno"
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./utils.js": "./src/utils.ts"
+    },
+    "dependencies": {
+        "@mtcute/core": "workspace:^",
+        "@mtcute/wasm": "workspace:^",
+        "@mtcute/markdown-parser": "workspace:^",
+        "@mtcute/html-parser": "workspace:^",
+        "@db/sqlite": "npm:@jsr/db__sqlite@0.11.1",
+        "@std/io": "npm:@jsr/std__io@0.223.0"
+    },
+    "devDependencies": {
+        "@mtcute/test": "workspace:^"
+    }
+}

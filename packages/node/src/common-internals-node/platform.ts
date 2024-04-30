@@ -17,7 +17,7 @@ export class NodePlatform implements ICorePlatform {
     declare normalizeFile: typeof normalizeFile
 
     getDeviceModel(): string {
-        return `${os.type()} ${os.arch()} ${os.release()}`
+        return `Node.js/${process.version} (${os.type()} ${os.arch()})`
     }
 
     getDefaultLogLevel(): number | null {

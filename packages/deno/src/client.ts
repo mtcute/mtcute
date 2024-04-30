@@ -1,4 +1,5 @@
-import { createInterface, Interface as RlInterface } from 'readline'
+import { createInterface, Interface as RlInterface } from 'node:readline'
+import { Readable, Writable } from 'node:stream'
 
 import { FileDownloadLocation, FileDownloadParameters, ITelegramStorageProvider, PartialOnly, User } from '@mtcute/core'
 import {
@@ -10,10 +11,9 @@ import {
 import { setPlatform } from '@mtcute/core/platform.js'
 
 import { downloadToFile } from './methods/download-file.js'
-import { downloadAsNodeStream } from './methods/download-node-stream.js'
-import { BunPlatform } from './platform.js'
+import { DenoPlatform } from './platform.js'
 import { SqliteStorage } from './sqlite/index.js'
-import { BunCryptoProvider } from './utils/crypto.js'
+import { DenoCryptoProvider } from './utils/crypto.js'
 import { TcpTransport } from './utils/tcp.js'
 
 export type { TelegramClientOptions }
@@ -41,10 +41,10 @@ export interface BaseTelegramClientOptions
 
 export class BaseTelegramClient extends BaseTelegramClientBase {
     constructor(opts: BaseTelegramClientOptions) {
-        if (!opts.platformless) setPlatform(new BunPlatform())
+        if (!opts.platformless) setPlatform(new DenoPlatform())
 
         super({
-            crypto: new BunCryptoProvider(),
+            crypto: new DenoCryptoProvider(),
             transport: () => new TcpTransport(),
             ...opts,
             storage:
@@ -56,7 +56,7 @@ export class BaseTelegramClient extends BaseTelegramClientBase {
 }
 
 /**
- * Telegram client for use in Bun
+ * Telegram client for use in Deno
  */
 export class TelegramClient extends TelegramClientBase {
     constructor(opts: TelegramClientOptions) {
@@ -85,8 +85,10 @@ export class TelegramClient extends TelegramClientBase {
     input(text: string): Promise<string> {
         if (!this._rl) {
             this._rl = createInterface({
-                input: process.stdin,
-                output: process.stdout,
+                // eslint-disable-next-line
+                input: Readable.fromWeb(Deno.stdin.readable as any),
+                // eslint-disable-next-line
+                output: Writable.fromWeb(Deno.stdout.writable as any),
             })
         }
 
@@ -139,9 +141,5 @@ export class TelegramClient extends TelegramClientBase {
         params?: FileDownloadParameters | undefined,
     ): Promise<void> {
         return downloadToFile(this, filename, location, params)
-    }
-
-    downloadAsNodeStream(location: FileDownloadLocation, params?: FileDownloadParameters | undefined) {
-        return downloadAsNodeStream(this, location, params)
     }
 }

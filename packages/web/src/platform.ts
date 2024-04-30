@@ -1,10 +1,10 @@
 import { ICorePlatform } from '@mtcute/core/platform.js'
 
-import { base64Decode, base64Encode } from './encodings/base64.js'
-import { hexDecode, hexEncode } from './encodings/hex.js'
-import { utf8ByteLength, utf8Decode, utf8Encode } from './encodings/utf8.js'
+import { base64Decode, base64Encode } from './common-internals-web/base64.js'
+import { hexDecode, hexEncode } from './common-internals-web/hex.js'
+import { defaultLoggingHandler } from './common-internals-web/logging.js'
+import { utf8ByteLength, utf8Decode, utf8Encode } from './common-internals-web/utf8.js'
 import { beforeExit } from './exit-hook.js'
-import { defaultLoggingHandler } from './logging.js'
 
 export class WebPlatform implements ICorePlatform {
     // ICorePlatform
@@ -52,7 +52,6 @@ export class WebPlatform implements ICorePlatform {
     declare utf8Decode: typeof utf8Decode
     declare hexEncode: typeof hexEncode
     declare hexDecode: typeof hexDecode
-
     declare base64Encode: typeof base64Encode
     declare base64Decode: typeof base64Decode
 }

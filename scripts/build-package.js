@@ -428,11 +428,19 @@ if (buildConfig.buildTs && !IS_JSR) {
                 'from: (data: any, encoding?: string) => { toString(encoding?: string): string }, ' +
                 ' }',
             SharedWorker: ['type', 'never'],
+            WorkerGlobalScope:
+                '{ ' +
+                '  new (): typeof WorkerGlobalScope, ' +
+                '  postMessage: (message: any, transfer?: Transferable[]) => void, ' +
+                '  addEventListener: (type: "message", listener: (ev: MessageEvent) => void) => void, ' +
+                ' }',
             process: '{ ' + 'hrtime: { bigint: () => bigint }, ' + '}',
         }
 
         for (const [name, decl_] of Object.entries(nodeSpecificApis)) {
             if (fileContent.includes(name)) {
+                if (name === 'Buffer' && fileContent.includes('node:buffer')) continue
+
                 changed = true
                 const isType = Array.isArray(decl_) && decl_[0] === 'type'
                 const decl = isType ? decl_[1] : decl_
@@ -499,6 +507,10 @@ if (IS_JSR) {
         for (const [name, version] of Object.entries(builtPkgJson.dependencies)) {
             if (name.startsWith('@mtcute/')) {
                 importMap[name] = `jsr:${name}@${version}`
+            } else if (version.startsWith('npm:@jsr/')) {
+                const jsrName = version.slice(9).split('@')[0].replace('__', '/')
+                const jsrVersion = version.slice(9).split('@')[1]
+                importMap[name] = `jsr:@${jsrName}@${jsrVersion}`
             } else {
                 importMap[name] = `npm:${name}@${version}`
             }
@@ -542,6 +554,38 @@ if (IS_JSR) {
             2,
         ),
     )
+
+    if (process.env.E2E) {
+        // populate dependencies, if any
+        const depsToPopulate = []
+
+        for (const dep of Object.values(importMap)) {
+            if (!dep.startsWith('jsr:')) continue
+            if (dep.startsWith('jsr:@mtcute/')) continue
+            depsToPopulate.push(dep.slice(4))
+        }
+
+        if (depsToPopulate.length) {
+            console.log('[i] Populating %d dependencies...', depsToPopulate.length)
+            cp.spawnSync(
+                'pnpm',
+                [
+                    'exec',
+                    'slow-types-compiler',
+                    'populate',
+                    '--downstream',
+                    process.env.JSR_URL,
+                    '--token',
+                    process.env.JSR_TOKEN,
+                    '--unstable-create-via-api',
+                    ...depsToPopulate,
+                ],
+                {
+                    stdio: 'inherit',
+                },
+            )
+        }
+    }
 
     console.log('[i] Processing with slow-types-compiler...')
     const project = stc.createProject()

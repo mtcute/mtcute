@@ -14,7 +14,7 @@ import {
     WorkerMessageHandler,
 } from '@mtcute/core/worker.js'
 
-import { NodePlatform } from './common-internals-node/platform.js'
+import { BunPlatform } from './platform.js'
 
 export type { TelegramWorkerOptions, TelegramWorkerPortOptions, WorkerCustomMethods }
 
@@ -44,7 +44,7 @@ export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorke
 
 export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramWorkerPortBase<T> {
     constructor(readonly options: TelegramWorkerPortOptions) {
-        setPlatform(new NodePlatform())
+        setPlatform(new BunPlatform())
         super(options)
     }
 

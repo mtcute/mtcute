@@ -62,10 +62,9 @@ export class SqlitePeersRepository implements IPeersRepository {
         this._driver._writeLater(this._store, [
             peer.id,
             peer.accessHash,
-            // add commas to make it easier to search with LIKE
             JSON.stringify(peer.usernames),
             peer.updated,
-            peer.phone,
+            peer.phone ?? null,
             peer.complete,
         ])
     }

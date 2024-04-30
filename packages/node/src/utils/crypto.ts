@@ -4,7 +4,6 @@ import { readFile } from 'fs/promises'
 import { createRequire } from 'module'
 import { deflateSync, gunzipSync } from 'zlib'
 
-import { MaybePromise } from '@mtcute/core'
 import { BaseCryptoProvider, IAesCtr, ICryptoProvider, IEncryptionScheme } from '@mtcute/core/utils.js'
 import { ige256Decrypt, ige256Encrypt, initSync } from '@mtcute/wasm'
 
@@ -25,7 +24,7 @@ export abstract class BaseNodeCryptoProvider extends BaseCryptoProvider {
         iterations: number,
         keylen = 64,
         algo = 'sha512',
-    ): MaybePromise<Uint8Array> {
+    ): Promise<Uint8Array> {
         return new Promise((resolve, reject) =>
             pbkdf2(password, salt, iterations, keylen, algo, (err: Error | null, buf: Uint8Array) =>
                 err !== null ? reject(err) : resolve(buf),

@@ -10,7 +10,7 @@
     ],
     "scripts": {
         "prepare": "husky install .config/husky",
-        "postinstall": "node scripts/validate-deps-versions.mjs",
+        "postinstall": "node scripts/validate-deps-versions.mjs && node scripts/remove-jsr-sourcefiles.mjs",
         "test": "pnpm run -r test && vitest --config .config/vite.mts run",
         "test:dev": "vitest --config .config/vite.mts watch",
         "test:ui": "vitest --config .config/vite.mts --ui",
@@ -35,8 +35,9 @@
     "devDependencies": {
         "@commitlint/cli": "17.6.5",
         "@commitlint/config-conventional": "17.6.5",
-        "@teidesu/slow-types-compiler": "1.0.2",
+        "@teidesu/slow-types-compiler": "1.1.0",
         "@types/node": "20.10.0",
+        "@types/deno": "npm:@teidesu/deno-types@1.42.4",
         "@types/ws": "8.5.4",
         "@typescript-eslint/eslint-plugin": "6.4.0",
         "@typescript-eslint/parser": "6.4.0",

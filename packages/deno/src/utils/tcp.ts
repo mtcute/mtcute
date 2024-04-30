@@ -1,8 +1,9 @@
-import EventEmitter from 'events'
-import { connect, Socket } from 'net'
+import EventEmitter from 'node:events'
 
 import { IntermediatePacketCodec, IPacketCodec, ITelegramTransport, MtcuteError, TransportState } from '@mtcute/core'
 import { BasicDcOption, ICryptoProvider, Logger } from '@mtcute/core/utils.js'
+
+import { writeAll } from '@std/io/write-all'
 
 /**
  * Base for TCP transports.
@@ -11,7 +12,7 @@ import { BasicDcOption, ICryptoProvider, Logger } from '@mtcute/core/utils.js'
 export abstract class BaseTcpTransport extends EventEmitter implements ITelegramTransport {
     protected _currentDc: BasicDcOption | null = null
     protected _state: TransportState = TransportState.Idle
-    protected _socket: Socket | null = null
+    protected _socket: Deno.TcpConn | null = null
 
     abstract _packetCodec: IPacketCodec
     protected _crypto!: ICryptoProvider
@@ -60,13 +61,16 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
 
         this.log.debug('connecting to %j', dc)
 
-        this._socket = connect(dc.port, dc.ipAddress, this.handleConnect.bind(this))
-
-        this._socket.on('data', (data) => {
-            this._packetCodec.feed(data)
+        Deno.connect({
+            hostname: dc.ipAddress,
+            port: dc.port,
+            transport: 'tcp',
         })
-        this._socket.on('error', this.handleError.bind(this))
-        this._socket.on('close', this.close.bind(this))
+            .then(this.handleConnect.bind(this))
+            .catch((err) => {
+                this.handleError(err)
+                this.close()
+            })
     }
 
     close(): void {
@@ -74,44 +78,48 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
         this.log.info('connection closed')
 
         this._state = TransportState.Idle
-        this._socket!.removeAllListeners()
-        this._socket!.destroy()
+        this._socket?.close()
         this._socket = null
         this._currentDc = null
         this._packetCodec.reset()
         this.emit('close')
     }
 
-    handleError(error: Error): void {
-        this.log.error('error: %s', error.stack)
+    handleError(error: unknown): void {
+        this.log.error('error: %s', error)
 
         if (this.listenerCount('error') > 0) {
             this.emit('error', error)
         }
     }
 
-    handleConnect(): void {
+    async handleConnect(socket: Deno.TcpConn): Promise<void> {
+        this._socket = socket
         this.log.info('connected')
 
-        Promise.resolve(this._packetCodec.tag())
-            .then((initialMessage) => {
-                if (initialMessage.length) {
-                    this._socket!.write(initialMessage, (err) => {
-                        if (err) {
-                            this.log.error('failed to write initial message: %s', err.stack)
-                            this.emit('error')
-                            this.close()
-                        } else {
-                            this._state = TransportState.Ready
-                            this.emit('ready')
-                        }
-                    })
-                } else {
-                    this._state = TransportState.Ready
-                    this.emit('ready')
-                }
-            })
-            .catch((err) => this.emit('error', err))
+        try {
+            const packet = await this._packetCodec.tag()
+
+            if (packet.length) {
+                await writeAll(this._socket, packet)
+            }
+
+            this._state = TransportState.Ready
+            this.emit('ready')
+
+            const reader = this._socket.readable.getReader()
+
+            while (true) {
+                const { done, value } = await reader.read()
+                if (done) break
+
+                this._packetCodec.feed(value)
+            }
+        } catch (e) {
+            this.handleError(e)
+        }
+
+        this.close()
     }
 
     async send(bytes: Uint8Array): Promise<void> {
@@ -121,15 +129,7 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
             throw new MtcuteError('Transport is not READY')
         }
 
-        return new Promise((resolve, reject) => {
-            this._socket!.write(framed, (error) => {
-                if (error) {
-                    reject(error)
-                } else {
-                    resolve()
-                }
-            })
-        })
+        await writeAll(this._socket!, framed)
     }
 }
 

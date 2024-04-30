@@ -1,6 +1,8 @@
 export type MaybePromise<T> = T | Promise<T>
 export type PartialExcept<T, K extends keyof T> = Partial<Omit<T, K>> & Pick<T, K>
 export type PartialOnly<T, K extends keyof T> = Partial<Pick<T, K>> & Omit<T, K>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyToNever<T> = any extends T ? never : T
 
 export type MaybeArray<T> = T | T[]
 
