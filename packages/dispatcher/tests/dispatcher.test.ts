@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { PeersIndex } from '@mtcute/core'
+import { Message, PeersIndex } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
-import { StubTelegramClient } from '@mtcute/test'
+import { createStub, StubTelegramClient } from '@mtcute/test'
 
 import { Dispatcher, PropagationAction } from '../src/index.js'
 
@@ -234,6 +234,43 @@ describe('Dispatcher', () => {
                 '(parent 1) received updateConfig',
                 '(child 0) received updateConfig',
                 '(child 1) received updateConfig',
+            ])
+        })
+    })
+
+    describe('Dependency injection', () => {
+        it('should inject dependencies into update contexts', async () => {
+            const dp = Dispatcher.for(client)
+
+            dp.inject('foo' as never, 'foo' as never)
+
+            const log: string[] = []
+
+            dp.onNewMessage(() => {
+                // eslint-disable-next-line
+                log.push(`received ${(dp.deps as any).foo}`)
+            })
+
+            const dp2 = Dispatcher.child()
+
+            dp2.onNewMessage(() => {
+                // eslint-disable-next-line
+                log.push(`received ${(dp.deps as any).foo} (child)`)
+            })
+
+            dp.addChild(dp2)
+
+            await dp.dispatchUpdateNow({
+                name: 'new_message',
+                data: new Message(
+                    createStub('message'),
+                    emptyPeers,
+                ),
+            })
+
+            expect(log).eql([
+                'received foo',
+                'received foo (child)',
             ])
         })
     })

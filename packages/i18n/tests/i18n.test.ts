@@ -85,6 +85,7 @@ describe('i18n', () => {
     it('should parse language from a message', () => {
         const message = new MessageContext(
             null as never,
+            {},
             new Message(
                 { _: 'message', peerId: { _: 'peerUser', userId: 1 } } as never,
                 PeersIndex.from({

@@ -90,6 +90,10 @@ export interface DispatcherParams {
     key?: StateKeyDelegate
 }
 
+export interface DispatcherDependencies {
+    // intentionally empty, to be extended by consumers
+}
+
 /**
  * Updates dispatcher
  */
@@ -111,6 +115,8 @@ export class Dispatcher<State extends object = never> {
 
     private _customStateKeyDelegate?: StateKeyDelegate
     private _customStorage?: StateService
+
+    private _deps: DispatcherDependencies = {}
 
     private _errorHandler?: <T = {}>(
         err: Error,
@@ -191,6 +197,26 @@ export class Dispatcher<State extends object = never> {
     /** For scene dispatchers, name of the scene */
     get sceneName(): string | undefined {
         return this._scene
+    }
+
+    /**
+     * Inject a dependency to be available in this dispatcher and all its children.
+     *
+     * **Note**: This is only available for the root dispatcher.
+     */
+    inject<Name extends keyof DispatcherDependencies>(name: Name, value: DispatcherDependencies[Name]): void {
+        if (this._parent) {
+            throw new MtArgumentError('Cannot inject dependencies to child dispatchers')
+        }
+
+        this._deps[name] = value
+    }
+
+    /**
+     * Get the dependencies injected into this dispatcher.
+     */
+    get deps(): DispatcherDependencies {
+        return this._deps
     }
 
     /**
@@ -678,6 +704,7 @@ export class Dispatcher<State extends object = never> {
         child._parent = this as any
         child._client = this._client
         child._storage = this._storage
+        child._deps = this._deps
         child._stateKeyDelegate = this._stateKeyDelegate
         child._customStorage ??= this._customStorage
         child._customStateKeyDelegate ??= this._customStateKeyDelegate
@@ -773,8 +800,9 @@ export class Dispatcher<State extends object = never> {
 
     private _unparent(): void {
         this._parent = this._client = undefined
-        ;(this as any)._stateKeyDelegate = undefined
-        ;(this as any)._storage = undefined
+        this._deps = {} // to avoid dangling references
+        this._stateKeyDelegate = undefined
+        this._storage = undefined
     }
 
     /**

@@ -12,6 +12,7 @@ peers.chats.set(1, createStub('channel', { id: 1 }))
 const createMessageContext = (partial: Partial<tl.RawMessage>) =>
     new MessageContext(
         StubTelegramClient.full(), // eslint-disable-line
+        {},
         new Message(createStub('message', partial), peers, false),
     )
 
