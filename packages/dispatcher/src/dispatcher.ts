@@ -204,12 +204,28 @@ export class Dispatcher<State extends object = never> {
      *
      * **Note**: This is only available for the root dispatcher.
      */
-    inject<Name extends keyof DispatcherDependencies>(name: Name, value: DispatcherDependencies[Name]): void {
+    inject<Name extends keyof DispatcherDependencies>(name: Name, value: DispatcherDependencies[Name]): void
+    /**
+     * Inject dependencies to be available in this dispatcher and all its children.
+     *
+     * **Note**: This is only available for the root dispatcher.
+     */
+    inject(deps: Partial<DispatcherDependencies>): void
+    inject<Name extends keyof DispatcherDependencies>(
+        name: Name | Partial<DispatcherDependencies>,
+        value?: DispatcherDependencies[Name],
+    ): void {
         if (this._parent) {
             throw new MtArgumentError('Cannot inject dependencies to child dispatchers')
         }
 
-        this._deps[name] = value
+        if (typeof name === 'object') {
+            for (const [k, v] of Object.entries(name)) {
+                (this._deps as any)[k] = v
+            }
+        } else {
+            this._deps[name] = value!
+        }
     }
 
     /**
