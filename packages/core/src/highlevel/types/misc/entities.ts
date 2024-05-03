@@ -15,3 +15,17 @@ export interface TextWithEntities {
  * Can be either a plain string or an object with `text` and `entities` fields.
  */
 export type InputText = string | TextWithEntities
+
+/**
+ * Convert {@link InputText} to a {@link tl.RawTextWithEntities} object
+ *
+ * @param text  Input text
+ * @returns  TL object
+ */
+export function inputTextToTl(text: InputText): tl.RawTextWithEntities {
+    return {
+        _: 'textWithEntities',
+        text: typeof text === 'string' ? text : text.text,
+        entities: typeof text === 'string' ? [] : text.entities ?? [],
+    }
+}

@@ -35,7 +35,7 @@ export async function closePoll(
                 _: 'poll',
                 id: Long.ZERO,
                 closed: true,
-                question: '',
+                question: { _: 'textWithEntities', text: '', entities: [] },
                 answers: [],
             },
         },

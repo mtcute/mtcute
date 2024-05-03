@@ -460,7 +460,7 @@ export interface InputMediaPoll extends CaptionMixin {
     /**
      * Question of the poll (1-255 chars for users, 1-300 chars for bots)
      */
-    question: string
+    question: InputText
 
     /**
      * Answers of the poll.
@@ -471,7 +471,7 @@ export interface InputMediaPoll extends CaptionMixin {
      * objects, with a single=byte incrementing
      * `option` value.
      */
-    answers: (string | tl.TypePollAnswer)[]
+    answers: (InputText | tl.TypePollAnswer)[]
 
     /**
      * Whether this is poll is closed

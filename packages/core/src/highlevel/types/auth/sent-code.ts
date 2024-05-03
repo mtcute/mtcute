@@ -12,6 +12,8 @@ const sentCodeMap: Record<tl.auth.TypeSentCodeType['_'], SentCodeDeliveryType> =
     'auth.sentCodeTypeSetUpEmailRequired': 'email_required',
     'auth.sentCodeTypeFragmentSms': 'fragment',
     'auth.sentCodeTypeFirebaseSms': 'firebase',
+    'auth.sentCodeTypeSmsWord': 'sms_word',
+    'auth.sentCodeTypeSmsPhrase': 'sms_phrase',
 }
 
 const nextCodeMap: Record<tl.auth.TypeCodeType['_'], NextCodeDeliveryType> = {
@@ -33,7 +35,8 @@ const nextCodeMap: Record<tl.auth.TypeCodeType['_'], NextCodeDeliveryType> = {
  * - `email_required`: Code sending via email setup is required
  * - `fragment`: Code is sent via Fragment anonymous numbers
  * - `firebase`: Code is sent via Firebase
- * - `Success`: Code is not needed, you're already logged in (only for future auth tokens)
+ * - `sms_word`, `sms_phrase`: Code is sent via SMS with a word/phrase (see {@link SentCode#beginning})
+ * - `success`: Code is not needed, you're already logged in (only for future auth tokens)
  */
 export type SentCodeDeliveryType =
     | 'app'
@@ -45,6 +48,8 @@ export type SentCodeDeliveryType =
     | 'email_required'
     | 'fragment'
     | 'firebase'
+    | 'sms_word'
+    | 'sms_phrase'
     | 'success'
 
 /**
@@ -89,6 +94,19 @@ export class SentCode {
      */
     get timeout(): number {
         return this.raw.timeout ?? 0
+    }
+
+    /**
+     * If the code is sent via SMS with a word/phrase, this field *may* contain the beginning of the message
+     */
+    get beginning(): string | undefined {
+        switch (this.raw.type._) {
+            case 'auth.sentCodeTypeSmsPhrase':
+            case 'auth.sentCodeTypeSmsWord':
+                return this.raw.type.beginning
+            default:
+                return undefined
+        }
     }
 
     /**
