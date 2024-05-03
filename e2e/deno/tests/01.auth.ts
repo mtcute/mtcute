@@ -1,6 +1,6 @@
 import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 
-import { MtcuteError } from '@mtcute/core'
+import { MtcuteError, tl } from '@mtcute/core'
 import { BaseTelegramClient, TelegramClient } from '@mtcute/core/client.js'
 
 import { getApiParams } from '../utils.ts'
@@ -29,7 +29,10 @@ Deno.test('1. authorization', { sanitizeResources: false }, async (t) => {
                     code: () => '22222',
                 })
             } catch (e) {
-                if (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) {
+                if (
+                    (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) ||
+                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')
+                ) {
                     // retry with another number
                     continue
                 } else {
@@ -64,7 +67,10 @@ Deno.test('1. authorization', { sanitizeResources: false }, async (t) => {
                     code: () => '11111',
                 })
             } catch (e) {
-                if (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) {
+                if (
+                    (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) ||
+                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')
+                ) {
                     // retry with another number
                     continue
                 } else {

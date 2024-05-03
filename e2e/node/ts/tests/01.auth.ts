@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { MtcuteError } from '@mtcute/core'
+import { MtcuteError, tl } from '@mtcute/core'
 import { BaseTelegramClient, TelegramClient } from '@mtcute/core/client.js'
 
 import { getApiParams } from '../utils.js'
@@ -32,7 +32,10 @@ describe('1. authorization', function () {
                     code: () => '22222',
                 })
             } catch (e) {
-                if (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) {
+                if (
+                    (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) ||
+                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')
+                ) {
                     // retry with another number
                     continue
                 } else {
@@ -67,7 +70,10 @@ describe('1. authorization', function () {
                     code: () => '11111',
                 })
             } catch (e) {
-                if (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) {
+                if (
+                    (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) ||
+                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')
+                ) {
                     // retry with another number
                     continue
                 } else {
