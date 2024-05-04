@@ -2,7 +2,7 @@ import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { ITelegramClient } from '../../client.types.js'
-import { Chat, InputPeerLike } from '../../types/index.js'
+import { FullChat, InputPeerLike } from '../../types/index.js'
 import {
     INVITE_LINK_REGEX,
     isInputPeerChannel,
@@ -22,7 +22,7 @@ import { resolvePeer } from '../users/resolve-peer.js'
  *   In case you are trying to get info about private chat that you haven't joined.
  *   Use {@link getChatPreview} instead.
  */
-export async function getFullChat(client: ITelegramClient, chatId: InputPeerLike): Promise<Chat> {
+export async function getFullChat(client: ITelegramClient, chatId: InputPeerLike): Promise<FullChat> {
     if (typeof chatId === 'string') {
         const m = chatId.match(INVITE_LINK_REGEX)
 
@@ -61,5 +61,5 @@ export async function getFullChat(client: ITelegramClient, chatId: InputPeerLike
         })
     } else throw new Error('should not happen')
 
-    return Chat._parseFull(res)
+    return FullChat._parse(res)
 }

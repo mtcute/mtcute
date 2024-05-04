@@ -261,6 +261,7 @@ import {
     FileDownloadLocation,
     FileDownloadParameters,
     ForumTopic,
+    FullChat,
     GameHighScore,
     HistoryReadUpdate,
     InlineCallbackQuery,
@@ -1562,7 +1563,7 @@ export interface TelegramClient extends ITelegramClient {
      *   In case you are trying to get info about private chat that you haven't joined.
      *   Use {@link getChatPreview} instead.
      */
-    getFullChat(chatId: InputPeerLike): Promise<Chat>
+    getFullChat(chatId: InputPeerLike): Promise<FullChat>
     /**
      * Get nearby chats
      *

@@ -42,6 +42,7 @@ import {
     FileDownloadLocation,
     FileDownloadParameters,
     ForumTopic,
+    FullChat,
     GameHighScore,
     HistoryReadUpdate,
     InlineCallbackQuery,
