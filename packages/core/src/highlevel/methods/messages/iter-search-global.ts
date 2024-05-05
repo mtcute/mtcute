@@ -33,7 +33,7 @@ export async function* iterSearchGlobal(
 ): AsyncIterableIterator<Message> {
     if (!params) params = {}
 
-    const { query = '', filter = SearchFilters.Empty, limit = Infinity, chunkSize = 100 } = params
+    const { query = '', filter = SearchFilters.Empty, limit = Infinity, chunkSize = 100, onlyChannels } = params
 
     const minDate = normalizeDate(params.minDate) ?? 0
     const maxDate = normalizeDate(params.maxDate) ?? 0
@@ -49,6 +49,7 @@ export async function* iterSearchGlobal(
             minDate,
             maxDate,
             offset,
+            onlyChannels,
         })
 
         if (!res.length) return

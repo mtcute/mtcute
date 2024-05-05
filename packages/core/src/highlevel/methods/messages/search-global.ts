@@ -63,6 +63,11 @@ export async function searchGlobal(
          * Only return messages older than this date
          */
         maxDate?: Date | number
+
+        /**
+         * Whether to only search across broadcast channels
+         */
+        onlyChannels?: boolean
     },
 ): Promise<ArrayPaginated<Message, SearchGlobalOffset>> {
     if (!params) params = {}
@@ -72,6 +77,7 @@ export async function searchGlobal(
         filter = SearchFilters.Empty,
         limit = 100,
         offset: { rate: offsetRate, peer: offsetPeer, id: offsetId } = defaultOffset,
+        onlyChannels,
     } = params
 
     const minDate = normalizeDate(params.minDate) ?? 0
@@ -87,6 +93,7 @@ export async function searchGlobal(
         offsetRate,
         offsetPeer,
         limit,
+        broadcastsOnly: onlyChannels,
     })
 
     assertTypeIsNot('searchGlobal', res, 'messages.messagesNotModified')
