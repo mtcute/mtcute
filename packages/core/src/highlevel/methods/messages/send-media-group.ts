@@ -50,7 +50,11 @@ export async function sendMediaGroup(
 ): Promise<Message[]> {
     if (!params) params = {}
 
-    const { peer, replyTo, scheduleDate, chainId } = await _processCommonSendParameters(client, chatId, params)
+    const { peer, replyTo, scheduleDate, chainId, quickReplyShortcut } = await _processCommonSendParameters(
+        client,
+        chatId,
+        params,
+    )
 
     const multiMedia: tl.RawInputSingleMedia[] = []
 
@@ -105,6 +109,7 @@ export async function sendMediaGroup(
             noforwards: params.forbidForwards,
             sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
             invertMedia: params.invertMedia,
+            quickReplyShortcut,
         },
         { chainId },
     )

@@ -214,6 +214,17 @@ export class Message {
     }
 
     /**
+     * If non-null, this message is not actually sent, and is
+     * instead inside a group of "quick reply" messages
+     * under the given shortcut ID
+     */
+    get quickReplyShortcutId(): number | null {
+        if (this.raw._ === 'messageService') return null
+
+        return this.raw.quickReplyShortcutId ?? null
+    }
+
+    /**
      * If this message is generated from an inline query,
      * information about the bot which generated it
      */

@@ -80,7 +80,11 @@ export async function sendMedia(
     )
 
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
-    const { peer, replyTo, scheduleDate, chainId } = await _processCommonSendParameters(client, chatId, params)
+    const { peer, replyTo, scheduleDate, chainId, quickReplyShortcut } = await _processCommonSendParameters(
+        client,
+        chatId,
+        params,
+    )
 
     const randomId = randomLong()
     const res = await client.call(
@@ -99,6 +103,7 @@ export async function sendMedia(
             noforwards: params.forbidForwards,
             sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
             invertMedia: params.invert,
+            quickReplyShortcut,
         },
         { chainId },
     )

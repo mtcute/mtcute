@@ -63,9 +63,12 @@ export function _findMessageInUpdate(
                 !(
                     u._ === 'updateNewMessage' ||
                     u._ === 'updateNewChannelMessage' ||
-                    u._ === 'updateNewScheduledMessage'
+                    u._ === 'updateNewScheduledMessage' ||
+                    u._ === 'updateQuickReplyMessage'
                 )
-            ) { continue }
+            ) {
+                continue
+            }
         }
 
         // this *may* break if updateMessageID comes after the message update

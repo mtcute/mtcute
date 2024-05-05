@@ -54,7 +54,11 @@ export async function sendText(
     const [message, entities] = await _normalizeInputText(client, text)
 
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
-    const { peer, replyTo, scheduleDate, chainId } = await _processCommonSendParameters(client, chatId, params)
+    const { peer, replyTo, scheduleDate, chainId, quickReplyShortcut } = await _processCommonSendParameters(
+        client,
+        chatId,
+        params,
+    )
 
     const randomId = randomLong()
     const res = await client.call(
@@ -73,6 +77,7 @@ export async function sendText(
             noforwards: params.forbidForwards,
             sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
             invertMedia: params.invertMedia,
+            quickReplyShortcut,
         },
         { chainId },
     )
