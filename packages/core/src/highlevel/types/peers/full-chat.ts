@@ -4,8 +4,12 @@ import { MtTypeAssertionError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Photo } from '../media/photo.js'
+import { StickerSet } from '../misc/sticker-set.js'
+import { BusinessAccount } from '../premium/business-account.js'
 import { Chat } from './chat.js'
+import { ChatInviteLink } from './chat-invite-link.js'
 import { ChatLocation } from './chat-location.js'
+import { PeersIndex } from './peers-index.js'
 
 /**
  * Complete information about a particular chat.
@@ -20,31 +24,32 @@ export class FullChat extends Chat {
 
     /** @internal */
     static _parse(full: tl.messages.RawChatFull | tl.users.TypeUserFull): FullChat {
+        const peers = PeersIndex.from(full)
+
         if (full._ === 'users.userFull') {
-            const user = full.users.find((it) => it.id === full.fullUser.id)
+            const { fullUser } = full
+            const user = peers.user(full.fullUser.id)
 
             if (!user || user._ === 'userEmpty') {
                 throw new MtTypeAssertionError('Chat._parseFull', 'user', user?._ ?? 'undefined')
             }
 
-            return new FullChat(user, full.fullUser)
+            const ret = new FullChat(user, fullUser)
+
+            if (fullUser.personalChannelId) {
+                ret._linkedChat = new Chat(peers.chat(fullUser.personalChannelId))
+            }
+
+            return ret
         }
 
-        const fullChat = full.fullChat
-        let chat: tl.TypeChat | undefined = undefined
-        let linked: tl.TypeChat | undefined = undefined
+        const { fullChat } = full
 
-        for (const c of full.chats) {
-            if (fullChat.id === c.id) {
-                chat = c
-            }
-            if (fullChat._ === 'channelFull' && fullChat.linkedChatId === c.id) {
-                linked = c
-            }
+        const ret = new FullChat(peers.chat(fullChat.id), fullChat)
+
+        if (fullChat._ === 'channelFull' && fullChat.linkedChatId) {
+            ret._linkedChat = new Chat(peers.chat(fullChat.linkedChatId))
         }
-
-        const ret = new FullChat(chat!, fullChat)
-        ret._linkedChat = linked ? new Chat(linked) : undefined
 
         return ret
     }
@@ -132,15 +137,15 @@ export class FullChat extends Chat {
     }
 
     /**
-     * Chat's permanent invite link, for groups, supergroups and channels.
+     * Chat's primary invite link, for groups, supergroups and channels.
      */
-    get inviteLink(): string | null {
+    get inviteLink(): ChatInviteLink | null {
         if (this.fullPeer && this.fullPeer._ !== 'userFull') {
             switch (this.fullPeer.exportedInvite?._) {
                 case 'chatInvitePublicJoinRequests':
                     return null
                 case 'chatInviteExported':
-                    return this.fullPeer.exportedInvite.link
+                    return new ChatInviteLink(this.fullPeer.exportedInvite)
             }
         }
 
@@ -148,10 +153,21 @@ export class FullChat extends Chat {
     }
 
     /**
-     * For supergroups, name of the group sticker set.
+     * For supergroups, information about the group sticker set.
      */
-    get stickerSetName(): string | null {
-        return this.fullPeer && this.fullPeer._ === 'channelFull' ? this.fullPeer.stickerset?.shortName ?? null : null
+    get stickerSet(): StickerSet | null {
+        if (this.fullPeer?._ !== 'channelFull' || !this.fullPeer.stickerset) return null
+
+        return new StickerSet(this.fullPeer.stickerset)
+    }
+
+    /**
+     * For supergroups, information about the group emoji set.
+     */
+    get emojiSet(): StickerSet | null {
+        if (this.fullPeer?._ !== 'channelFull' || !this.fullPeer.emojiset) return null
+
+        return new StickerSet(this.fullPeer.emojiset)
     }
 
     /**
@@ -162,18 +178,39 @@ export class FullChat extends Chat {
     }
 
     /**
+     * Number of boosts applied by the current user to this chat.
+     */
+    get boostsApplied(): number {
+        if (!this.fullPeer || this.fullPeer._ !== 'channelFull') return 0
+
+        return this.fullPeer?.boostsApplied ?? 0
+    }
+
+    /**
+     * Number of boosts required for the user to be unrestricted in this chat.
+     */
+    get boostsForUnrestrict(): number {
+        if (!this.fullPeer || this.fullPeer._ !== 'channelFull') return 0
+
+        return this.fullPeer?.boostsUnrestrict ?? 0
+    }
+
+    /**
      * Chat members count, for groups, supergroups and channels only.
      */
     get membersCount(): number | null {
-        if (this.fullPeer && this.fullPeer._ !== 'userFull') {
-            if (this.fullPeer._ === 'chatFull' && this.fullPeer.participants._ === 'chatParticipants') {
-                return this.fullPeer.participants.participants.length
-            } else if (this.fullPeer._ === 'channelFull') {
-                return this.fullPeer.participantsCount ?? null
-            }
-        }
+        switch (this.fullPeer._) {
+            case 'userFull':
+                return null
+            case 'chatFull':
+                if (this.fullPeer.participants._ !== 'chatParticipants') {
+                    return null
+                }
 
-        return null
+                return this.fullPeer.participants.participants.length
+            case 'channelFull':
+                return this.fullPeer.participantsCount ?? null
+        }
     }
 
     /**
@@ -189,8 +226,10 @@ export class FullChat extends Chat {
 
     private _linkedChat?: Chat
     /**
-     * The linked discussion group (in case of channels)
-     * or the linked channel (in case of supergroups).
+     * Information about a linked chat:
+     * - for channels: the discussion group
+     * - for supergroups: the linked channel
+     * - for users: the personal channel
      */
     get linkedChat(): Chat | null {
         return this._linkedChat ?? null
@@ -202,7 +241,25 @@ export class FullChat extends Chat {
     get ttlPeriod(): number | null {
         return this.fullPeer?.ttlPeriod ?? null
     }
+
+    /**
+     * If this is a business account, information about the business.
+     */
+    get business(): BusinessAccount | null {
+        if (!this.fullPeer || this.fullPeer._ !== 'userFull') return null
+
+        return new BusinessAccount(this.fullPeer)
+    }
 }
 
-memoizeGetters(FullChat, ['fullPhoto', 'personalPhoto', 'realPhoto', 'publicPhoto', 'location'])
+memoizeGetters(FullChat, [
+    'fullPhoto',
+    'personalPhoto',
+    'realPhoto',
+    'publicPhoto',
+    'location',
+    'stickerSet',
+    'emojiSet',
+    'business',
+])
 makeInspectable(FullChat)

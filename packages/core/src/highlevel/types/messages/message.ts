@@ -80,6 +80,14 @@ export class Message {
     }
 
     /**
+     * Whether the message was sent by an implicit action, for example,
+     * as an away or a greeting business message, or as a scheduled message
+     */
+    get isFromOffline(): boolean {
+        return this.raw._ === 'message' && this.raw.offline!
+    }
+
+    /**
      * Multiple media messages with the same grouped ID
      * indicate an album or media group
      *
@@ -124,6 +132,15 @@ export class Message {
         }
 
         return parsePeer(from, this._peers)
+    }
+
+    /**
+     * Number of boosts applied to this {@link chat} by the sender
+     */
+    get senderBoostCount(): number {
+        if (this.raw._ !== 'message') return 0
+
+        return this.raw.fromBoostsApplied ?? 0
     }
 
     /**

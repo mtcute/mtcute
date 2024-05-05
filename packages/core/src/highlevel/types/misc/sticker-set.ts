@@ -139,6 +139,13 @@ export class StickerSet {
     }
 
     /**
+     * Whether this sticker set was created by the current user
+     */
+    get isCreator(): boolean {
+        return this.brief.creator!
+    }
+
+    /**
      * Type of the stickers in this set
      */
     get type(): StickerType {
