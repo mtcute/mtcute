@@ -168,6 +168,7 @@ import { translateMessage } from './methods/messages/translate-message.js'
 import { translateText } from './methods/messages/translate-text.js'
 import { unpinAllMessages } from './methods/messages/unpin-all-messages.js'
 import { unpinMessage } from './methods/messages/unpin-message.js'
+import { getCollectibleInfo } from './methods/misc/get-collectible-info.js'
 import { initTakeoutSession } from './methods/misc/init-takeout-session.js'
 import { _normalizePrivacyRules } from './methods/misc/normalize-privacy-rules.js'
 import { withParams } from './methods/misc/with-params.js'
@@ -191,8 +192,10 @@ import { createStickerSet } from './methods/stickers/create-sticker-set.js'
 import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set.js'
 import { getCustomEmojis, getCustomEmojisFromMessages } from './methods/stickers/get-custom-emojis.js'
 import { getInstalledStickers } from './methods/stickers/get-installed-stickers.js'
+import { getMyStickerSets } from './methods/stickers/get-my-sticker-sets.js'
 import { getStickerSet } from './methods/stickers/get-sticker-set.js'
 import { moveStickerInSet } from './methods/stickers/move-sticker-in-set.js'
+import { replaceStickerInSet } from './methods/stickers/replace-sticker-in-set.js'
 import { setChatStickerSet } from './methods/stickers/set-chat-sticker-set.js'
 import { setStickerSetThumb } from './methods/stickers/set-sticker-set-thumb.js'
 import { canSendStory, CanSendStoryResult } from './methods/stories/can-send-story.js'
@@ -263,6 +266,7 @@ import {
     ChatMemberUpdate,
     ChatPreview,
     ChosenInlineResult,
+    CollectibleInfo,
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     Dialog,
@@ -3593,6 +3597,11 @@ export interface TelegramClient extends ITelegramClient {
          * Only return messages older than this date
          */
         maxDate?: Date | number
+
+        /**
+         * Whether to only search across broadcast channels
+         */
+        onlyChannels?: boolean
     }): Promise<ArrayPaginated<Message, SearchGlobalOffset>>
     /**
      * Search for messages inside a specific chat
@@ -4072,6 +4081,13 @@ export interface TelegramClient extends ITelegramClient {
      * @param messageId  Message ID
      */
     unpinMessage(params: InputMessageId): Promise<void>
+
+    /**
+     * Get information about a fragment collectible
+     * **Available**: 👤 users only
+     *
+     */
+    getCollectibleInfo(kind: 'phone' | 'username', item: string): Promise<CollectibleInfo>
     /**
      * Create a new takeout session
      *
@@ -4338,8 +4354,7 @@ export interface TelegramClient extends ITelegramClient {
     /**
      * Add a sticker to a sticker set.
      *
-     * Only for bots, and the sticker set must
-     * have been created by this bot.
+     * For bots the sticker set must have been created by this bot.
      *
      * **Available**: ✅ both users and bots
      *
@@ -4363,9 +4378,6 @@ export interface TelegramClient extends ITelegramClient {
     ): Promise<StickerSet>
     /**
      * Create a new sticker set.
-     *
-     * This is the only sticker-related method that
-     * users can use (they allowed it with the "import stickers" update)
      *
      * **Available**: ✅ both users and bots
      *
@@ -4447,8 +4459,7 @@ export interface TelegramClient extends ITelegramClient {
     /**
      * Delete a sticker from a sticker set
      *
-     * Only for bots, and the sticker set must
-     * have been created by this bot.
+     * For bots the sticker set must have been created by this bot.
      *
      * **Available**: ✅ both users and bots
      *
@@ -4479,26 +4490,36 @@ export interface TelegramClient extends ITelegramClient {
      *
      * > **Note**: This method returns *brief* meta information about
      * > the packs, that does not include the stickers themselves.
-     * > Use {@link StickerSet.getFull} or {@link getStickerSet}
-     * > to get a stickerset that will include the stickers
+     * > Use {@link getStickerSet} to get a stickerset that will include the stickers
      * **Available**: 👤 users only
      *
      */
     getInstalledStickers(): Promise<StickerSet[]>
+
     /**
-     * Get a sticker pack and stickers inside of it.
+     * Get the list of sticker sets that were created by the current user
+     * **Available**: 👤 users only
+     *
+     */
+    getMyStickerSets(params?: {
+        /** Offset for pagination */
+        offset?: Long
+        /** Limit for pagination */
+        limit?: number
+    }): Promise<ArrayPaginated<StickerSet, Long>>
+    /**
+     * Get a sticker set and stickers inside of it.
      *
      * **Available**: ✅ both users and bots
      *
-     * @param setId  Sticker pack short name, dice emoji, `"emoji"` for animated emojis or input ID
+     * @param setId  Sticker set identifier
      */
     getStickerSet(setId: InputStickerSet): Promise<StickerSet>
     /**
      * Move a sticker in a sticker set
      * to another position
      *
-     * Only for bots, and the sticker set must
-     * have been created by this bot.
+     * For bots the sticker set must have been created by this bot.
      *
      * **Available**: ✅ both users and bots
      *
@@ -4506,11 +4527,38 @@ export interface TelegramClient extends ITelegramClient {
      *     TDLib and Bot API compatible File ID, or a
      *     TL object representing a sticker to be removed
      * @param position  New sticker position (starting from 0)
-     * @returns  Modfiied sticker set
+     * @returns  Modified sticker set
      */
     moveStickerInSet(
         sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument,
         position: number,
+    ): Promise<StickerSet>
+
+    /**
+     * Replace a sticker in a sticker set with another sticker
+     *
+     * For bots the sticker set must have been created by this bot.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param sticker
+     *     TDLib and Bot API compatible File ID, or a
+     *     TL object representing a sticker to be removed
+     * @param newSticker  New sticker to replace the old one with
+     * @returns  Modfiied sticker set
+     */
+    replaceStickerInSet(
+        sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument,
+        newSticker: InputStickerSetItem,
+        params?: {
+            /**
+             * Upload progress callback
+             *
+             * @param uploaded  Number of bytes uploaded
+             * @param total  Total file size
+             */
+            progressCallback?: (uploaded: number, total: number) => void
+        },
     ): Promise<StickerSet>
     /**
      * Set group sticker set for a supergroup
@@ -5836,6 +5884,9 @@ TelegramClient.prototype.unpinAllMessages = function (...args) {
 TelegramClient.prototype.unpinMessage = function (...args) {
     return unpinMessage(this._client, ...args)
 }
+TelegramClient.prototype.getCollectibleInfo = function (...args) {
+    return getCollectibleInfo(this._client, ...args)
+}
 TelegramClient.prototype.initTakeoutSession = function (...args) {
     return initTakeoutSession(this._client, ...args)
 }
@@ -5914,11 +5965,17 @@ TelegramClient.prototype.getCustomEmojisFromMessages = function (...args) {
 TelegramClient.prototype.getInstalledStickers = function (...args) {
     return getInstalledStickers(this._client, ...args)
 }
+TelegramClient.prototype.getMyStickerSets = function (...args) {
+    return getMyStickerSets(this._client, ...args)
+}
 TelegramClient.prototype.getStickerSet = function (...args) {
     return getStickerSet(this._client, ...args)
 }
 TelegramClient.prototype.moveStickerInSet = function (...args) {
     return moveStickerInSet(this._client, ...args)
+}
+TelegramClient.prototype.replaceStickerInSet = function (...args) {
+    return replaceStickerInSet(this._client, ...args)
 }
 TelegramClient.prototype.setChatStickerSet = function (...args) {
     return setChatStickerSet(this._client, ...args)

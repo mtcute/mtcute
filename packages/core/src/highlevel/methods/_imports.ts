@@ -38,6 +38,7 @@ import {
     ChatMemberUpdate,
     ChatPreview,
     ChosenInlineResult,
+    CollectibleInfo,
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     Dialog,
