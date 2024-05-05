@@ -9,16 +9,14 @@ import { fileIdToInputDocument } from '../../utils/convert-file-id.js'
  * Move a sticker in a sticker set
  * to another position
  *
- * Only for bots, and the sticker set must
- * have been created by this bot.
+ * For bots the sticker set must have been created by this bot.
  *
  * @param sticker
  *     TDLib and Bot API compatible File ID, or a
  *     TL object representing a sticker to be removed
  * @param position  New sticker position (starting from 0)
- * @returns  Modfiied sticker set
+ * @returns  Modified sticker set
  */
-
 export async function moveStickerInSet(
     client: ITelegramClient,
     sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument,
