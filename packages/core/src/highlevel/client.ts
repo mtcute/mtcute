@@ -130,6 +130,7 @@ import { deleteScheduledMessages } from './methods/messages/delete-scheduled-mes
 import { editInlineMessage } from './methods/messages/edit-inline-message.js'
 import { editMessage } from './methods/messages/edit-message.js'
 import { ForwardMessageOptions, forwardMessages, forwardMessagesById } from './methods/messages/forward-messages.js'
+import { getAllScheduledMessages } from './methods/messages/get-all-scheduled-messages.js'
 import { getCallbackQueryMessage } from './methods/messages/get-callback-query-message.js'
 import { getDiscussionMessage } from './methods/messages/get-discussion-message.js'
 import { getHistory, GetHistoryOffset } from './methods/messages/get-history.js'
@@ -3199,6 +3200,14 @@ export interface TelegramClient extends ITelegramClient {
             messages: Message[]
         },
     ): Promise<Message[]>
+    /**
+     * Get all scheduled messages in chat
+     *
+     * **Available**: 👤 users only
+     *
+     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
+     */
+    getAllScheduledMessages(chatId: InputPeerLike): Promise<Message[]>
 
     /**
      * Get the message containing the button being clicked
@@ -5801,6 +5810,9 @@ TelegramClient.prototype.forwardMessagesById = function (...args) {
 }
 TelegramClient.prototype.forwardMessages = function (...args) {
     return forwardMessages(this._client, ...args)
+}
+TelegramClient.prototype.getAllScheduledMessages = function (...args) {
+    return getAllScheduledMessages(this._client, ...args)
 }
 TelegramClient.prototype.getCallbackQueryMessage = function (...args) {
     return getCallbackQueryMessage(this._client, ...args)
