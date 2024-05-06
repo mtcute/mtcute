@@ -37,6 +37,11 @@ export const incoming: UpdateFilter<Message, { isOutgoing: false }> = (msg) => !
 export const outgoing: UpdateFilter<Message, { isOutgoing: true }> = (msg) => msg.isOutgoing
 
 /**
+ * Filter for scheduled messages
+ */
+export const scheduled: UpdateFilter<Message, { isScheduled: true }> = (msg) => msg.isScheduled
+
+/**
  * Filter messages that are replies to some other message
  */
 export const reply: UpdateFilter<Message, { replyToMessage: RepliedMessageInfo }> = (msg) => msg.replyToMessage !== null
