@@ -21,7 +21,13 @@ export class BusinessMessage extends Message {
         return this.update.connectionId
     }
 
-    get groupedIdUnique(): string {
+    get groupedIdUnique(): string | null {
+        const superGroupedIdUnique = super.groupedIdUnique
+
+        if (!superGroupedIdUnique) {
+            return null
+        }
+
         return `${super.groupedIdUnique}|${this.update.connectionId}`
     }
 
