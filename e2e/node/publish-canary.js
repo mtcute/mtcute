@@ -1,6 +1,6 @@
 // this scripts publishes our e2e-tested builds to canary npm
-// at this point, we should have all our packages installed in node_modules
-// so it should be safe to just cd into them and run `npm publish` on them
+// at this point, we should have all our packages installed in verdaccio
+// so it should be safe to just pull them and run `npm publish` on them
 
 const fs = require('fs')
 const path = require('path')

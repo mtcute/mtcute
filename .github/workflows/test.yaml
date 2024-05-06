@@ -129,3 +129,16 @@ jobs:
           max_attempts: 3
           timeout_minutes: 30
           command: cd e2e/deno && ./cli.sh ci
+      - name: Setup Deno for canary publishing
+        uses: denoland/setup-deno@v1
+        if: github.repository == 'mtcute/mtcute' # do not run on forks
+        with:
+          deno-version: 2f5a6a8514ad8eadce1a0a9f1a7a419692e337ef
+      - name: Publish to canary JSR
+        if: github.repository == 'mtcute/mtcute' # do not run on forks
+        continue-on-error: true
+        env:
+          JSR_TOKEN: ${{ secrets.CANARY_JSR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY: 'https://jsr.tei.su'
+        run: cd e2e/deno && sudo chmod -R 777 .jsr-data && deno run -A publish-canary.mjs
