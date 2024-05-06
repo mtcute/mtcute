@@ -1,11 +1,9 @@
-FROM denoland/deno:bin-1.42.4 as deno-bin
+FROM denoland/deno:bin-1.43.1 as deno-bin
 
 FROM node:20
 WORKDIR /app
 
 COPY --from=deno-bin /deno /bin/deno
-# todo: remove once 1.42.5 is out
-RUN deno upgrade --canary --version=2f5a6a8514ad8eadce1a0a9f1a7a419692e337ef
 
 RUN corepack enable && \
     corepack prepare pnpm@8.7.1 --activate
