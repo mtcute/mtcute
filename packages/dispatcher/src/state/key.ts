@@ -1,5 +1,6 @@
 import { assertNever, MaybePromise, Peer } from '@mtcute/core'
 
+import { BusinessMessageContext } from '../context/business-message.js'
 import { CallbackQueryContext, MessageContext } from '../context/index.js'
 
 /**
@@ -10,7 +11,9 @@ import { CallbackQueryContext, MessageContext } from '../context/index.js'
  * @param msg  Message or callback from which to derive the key
  * @param scene  Current scene UID, or `null` if none
  */
-export type StateKeyDelegate = (upd: MessageContext | CallbackQueryContext | Peer) => MaybePromise<string | null>
+export type StateKeyDelegate = (
+    upd: MessageContext | BusinessMessageContext | CallbackQueryContext | Peer,
+) => MaybePromise<string | null>
 
 /**
  * Default state key delegate.
@@ -29,7 +32,7 @@ export const defaultStateKeyDelegate: StateKeyDelegate = (upd): string | null =>
         return String(upd.id)
     }
 
-    if (upd._name === 'new_message') {
+    if (upd._name === 'new_message' || upd._name === 'new_business_message') {
         switch (upd.chat.chatType) {
             case 'private':
             case 'bot':

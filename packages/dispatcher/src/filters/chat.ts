@@ -3,6 +3,7 @@ import {
     Chat,
     ChatMemberUpdate,
     ChatType,
+    DeleteBusinessMessageUpdate,
     HistoryReadUpdate,
     MaybeArray,
     Message,
@@ -58,6 +59,7 @@ export const chatId: {
         | HistoryReadUpdate
         | PollVoteUpdate
         | BotChatJoinRequestUpdate
+        | DeleteBusinessMessageUpdate
     >>
 } = (id) => {
     const indexId = new Set<number>()

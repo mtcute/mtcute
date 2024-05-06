@@ -57,14 +57,23 @@ export function _findMessageInUpdate(
         }
 
         if (isEdit) {
-            if (!(u._ === 'updateEditMessage' || u._ === 'updateEditChannelMessage')) continue
+            if (
+                !(
+                    u._ === 'updateEditMessage' ||
+                    u._ === 'updateEditChannelMessage' ||
+                    u._ === 'updateBotEditBusinessMessage'
+                )
+            ) {
+                continue
+            }
         } else {
             if (
                 !(
                     u._ === 'updateNewMessage' ||
                     u._ === 'updateNewChannelMessage' ||
                     u._ === 'updateNewScheduledMessage' ||
-                    u._ === 'updateQuickReplyMessage'
+                    u._ === 'updateQuickReplyMessage' ||
+                    u._ === 'updateBotNewBusinessMessage'
                 )
             ) {
                 continue

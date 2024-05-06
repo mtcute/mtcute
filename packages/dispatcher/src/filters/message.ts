@@ -18,6 +18,7 @@ import {
     Video,
 } from '@mtcute/core'
 
+import { BusinessMessageContext } from '../context/business-message.js'
 import { MessageContext } from '../index.js'
 import { Modify, UpdateFilter } from './types.js'
 
@@ -237,14 +238,16 @@ export const sender =
 export const replyTo =
     <Mod, State extends object>(
         filter?: UpdateFilter<Message, Mod, State>,
-    ): UpdateFilter<MessageContext, { getReplyTo: () => Promise<Message & Mod> }, State> =>
+    ): UpdateFilter<MessageContext | BusinessMessageContext, { getReplyTo: () => Promise<Message & Mod> }, State> =>
         async (msg, state) => {
             if (!msg.replyToMessage?.id) return false
 
-            const reply = await msg.getReplyTo()
+            const reply = msg._name === 'new_message' ? await msg.getReplyTo() : msg.replyTo
             if (!reply) return false
 
-            msg.getReplyTo = () => Promise.resolve(reply)
+            if (msg._name === 'new_message') {
+                msg.getReplyTo = () => Promise.resolve(reply)
+            }
 
             if (!filter) return true
 

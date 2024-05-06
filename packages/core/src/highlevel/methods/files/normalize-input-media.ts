@@ -28,6 +28,7 @@ export async function _normalizeInputMedia(
     params: {
         progressCallback?: (uploaded: number, total: number) => void
         uploadPeer?: tl.TypeInputPeer
+        businessConnectionId?: string
     } = {},
     uploadMedia = false,
 ): Promise<tl.TypeInputMedia> {
@@ -254,6 +255,7 @@ export async function _normalizeInputMedia(
             _: 'messages.uploadMedia',
             peer: uploadPeer,
             media: inputMedia,
+            businessConnectionId: params.businessConnectionId,
         })
 
         if (photo) {

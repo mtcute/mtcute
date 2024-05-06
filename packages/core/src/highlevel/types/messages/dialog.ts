@@ -194,21 +194,7 @@ export class Dialog {
      * Chat that this dialog represents
      */
     get chat(): Chat {
-        const peer = this.raw.peer
-
-        let chat
-
-        switch (peer._) {
-            case 'peerChannel':
-            case 'peerChat':
-                chat = this._peers.chat(peer._ === 'peerChannel' ? peer.channelId : peer.chatId)
-                break
-            default:
-                chat = this._peers.user(peer.userId)
-                break
-        }
-
-        return new Chat(chat)
+        return Chat._parseFromPeer(this.raw.peer, this._peers)
     }
 
     /**

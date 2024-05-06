@@ -1,5 +1,6 @@
 import { MaybeArray, MaybePromise, Message } from '@mtcute/core'
 
+import { BusinessMessageContext } from '../context/business-message.js'
 import { MessageContext } from '../context/message.js'
 import { chat } from './chat.js'
 import { and, or } from './logic.js'
@@ -30,7 +31,7 @@ export const command = (
         prefixes?: MaybeArray<string> | null
         caseSensitive?: boolean
     } = {},
-): UpdateFilter<MessageContext, { command: string[] }> => {
+): UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }> => {
     if (!Array.isArray(commands)) commands = [commands]
 
     if (!caseSensitive) {
@@ -51,7 +52,7 @@ export const command = (
 
     const _prefixes = prefixes
 
-    const check = (msg: MessageContext): MaybePromise<boolean> => {
+    const check = (msg: MessageContext | BusinessMessageContext): MaybePromise<boolean> => {
         if (msg.isMessageGroup) return check(msg.messages[0])
 
         for (const pref of _prefixes) {
@@ -107,8 +108,10 @@ export const start = and(chat('private'), command('start'))
 export const startGroup = and(or(chat('supergroup'), chat('group')), command('start'))
 
 const deeplinkBase =
-    (base: UpdateFilter<MessageContext, { command: string[] }>) =>
-        (params: MaybeArray<string | RegExp>): UpdateFilter<MessageContext, { command: string[] }> => {
+    (base: UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }>) =>
+        (
+            params: MaybeArray<string | RegExp>,
+        ): UpdateFilter<MessageContext | BusinessMessageContext, { command: string[] }> => {
             if (!Array.isArray(params)) {
                 return and(start, (_msg: Message) => {
                     const msg = _msg as Message & { command: string[] }

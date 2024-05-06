@@ -254,6 +254,20 @@ export class Message {
     }
 
     /**
+     * If this message was sent by a business bot on behalf of {@link sender},
+     * information about the business bot.
+     *
+     * **Note**: only available to the business account and the bot itself.
+     */
+    get viaBusinessBot(): User | null {
+        if (this.raw._ === 'messageService' || !this.raw.viaBusinessBotId) {
+            return null
+        }
+
+        return new User(this._peers.user(this.raw.viaBusinessBotId))
+    }
+
+    /**
      * Message text or media caption.
      *
      * Empty string for service messages

@@ -8,6 +8,7 @@ import { InputPeerLike } from '../../types/peers/index.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 import { _getDiscussionMessage } from './get-discussion-message.js'
 import { _processCommonSendParameters, CommonSendParams } from './send-common.js'
@@ -87,7 +88,9 @@ export async function sendMedia(
     )
 
     const randomId = randomLong()
-    const res = await client.call(
+    const res = await _maybeInvokeWithBusinessConnection(
+        client,
+        params.businessConnectionId,
         {
             _: 'messages.sendMedia',
             peer,

@@ -199,6 +199,7 @@ export { deleteBusinessChatLink } from './methods/premium/edit-business-chat-lin
 export { getBoostStats } from './methods/premium/get-boost-stats.js'
 export { getBoosts } from './methods/premium/get-boosts.js'
 export { getBusinessChatLinks } from './methods/premium/get-business-chat-links.js'
+export { getBusinessConnection } from './methods/premium/get-business-connection.js'
 export { getMyBoostSlots } from './methods/premium/get-my-boost-slots.js'
 export { iterBoosters } from './methods/premium/iter-boosters.js'
 export { setBusinessIntro } from './methods/premium/set-business-intro.js'

@@ -111,6 +111,12 @@ export interface CommonSendParams {
      * to the client's update handler.
      */
     shouldDispatch?: true
+
+    /**
+     * Unique identifier of the business connection on behalf of which
+     * the message will be sent
+     */
+    businessConnectionId?: string
 }
 
 /**

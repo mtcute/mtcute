@@ -6,10 +6,13 @@ import {
     BotReactionCountUpdate,
     BotReactionUpdate,
     BotStoppedUpdate,
+    BusinessConnection,
+    BusinessMessage,
     CallbackQuery,
     ChatJoinRequestUpdate,
     ChatMemberUpdate,
     ChosenInlineResult,
+    DeleteBusinessMessageUpdate,
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     HistoryReadUpdate,
@@ -94,6 +97,14 @@ export function _parseUpdate(update: tl.TypeUpdate, peers: PeersIndex): ParsedUp
             return { name: 'bot_reaction', data: new BotReactionUpdate(update, peers) }
         case 'updateBotMessageReactions':
             return { name: 'bot_reaction_count', data: new BotReactionCountUpdate(update, peers) }
+        case 'updateBotBusinessConnect':
+            return { name: 'business_connection', data: new BusinessConnection(update.connection, peers) }
+        case 'updateBotNewBusinessMessage':
+            return { name: 'new_business_message', data: new BusinessMessage(update, peers) }
+        case 'updateBotEditBusinessMessage':
+            return { name: 'edit_business_message', data: new BusinessMessage(update, peers) }
+        case 'updateBotDeleteBusinessMessage':
+            return { name: 'delete_business_message', data: new DeleteBusinessMessageUpdate(update, peers) }
         default:
             return null
     }

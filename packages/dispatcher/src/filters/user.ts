@@ -83,7 +83,9 @@ export const userId: {
     return (upd) => {
         switch (upd._name) {
             case 'new_message':
-            case 'edit_message': {
+            case 'edit_message':
+            case 'new_business_message':
+            case 'edit_business_message': {
                 const sender = upd.sender
 
                 return (matchSelf && sender.isSelf) ||

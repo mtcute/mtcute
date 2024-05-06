@@ -13,6 +13,7 @@ import { inputPeerToPeer } from '../../utils/peer-utils.js'
 import { _getRawPeerBatched } from '../chats/batched-queries.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 import { _getDiscussionMessage } from './get-discussion-message.js'
 import { _processCommonSendParameters, CommonSendParams } from './send-common.js'
@@ -61,7 +62,9 @@ export async function sendText(
     )
 
     const randomId = randomLong()
-    const res = await client.call(
+    const res = await _maybeInvokeWithBusinessConnection(
+        client,
+        params.businessConnectionId,
         {
             _: 'messages.sendMessage',
             peer,

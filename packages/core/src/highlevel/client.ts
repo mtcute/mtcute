@@ -183,6 +183,7 @@ import { deleteBusinessChatLink, editBusinessChatLink } from './methods/premium/
 import { getBoostStats } from './methods/premium/get-boost-stats.js'
 import { getBoosts } from './methods/premium/get-boosts.js'
 import { getBusinessChatLinks } from './methods/premium/get-business-chat-links.js'
+import { getBusinessConnection } from './methods/premium/get-business-connection.js'
 import { getMyBoostSlots } from './methods/premium/get-my-boost-slots.js'
 import { iterBoosters } from './methods/premium/iter-boosters.js'
 import { setBusinessIntro } from './methods/premium/set-business-intro.js'
@@ -255,6 +256,8 @@ import {
     BotReactionUpdate,
     BotStoppedUpdate,
     BusinessChatLink,
+    BusinessConnection,
+    BusinessMessage,
     BusinessWorkHoursDay,
     CallbackQuery,
     Chat,
@@ -267,6 +270,7 @@ import {
     ChatPreview,
     ChosenInlineResult,
     CollectibleInfo,
+    DeleteBusinessMessageUpdate,
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     Dialog,
@@ -524,6 +528,41 @@ export interface TelegramClient extends ITelegramClient {
      * @param handler  Bot reaction count update handler
      */
     on(name: 'bot_reaction_count', handler: (upd: BotReactionCountUpdate) => void): this
+    /**
+     * Register a business connection update handler
+     *
+     * @param name  Event name
+     * @param handler  Business connection update handler
+     */
+    on(name: 'business_connection', handler: (upd: BusinessConnection) => void): this
+    /**
+     * Register a new business message handler
+     *
+     * @param name  Event name
+     * @param handler  New business message handler
+     */
+    on(name: 'new_business_message', handler: (upd: BusinessMessage) => void): this
+    /**
+     * Register an edit business message handler
+     *
+     * @param name  Event name
+     * @param handler  Edit business message handler
+     */
+    on(name: 'edit_business_message', handler: (upd: BusinessMessage) => void): this
+    /**
+     * Register a business message group handler
+     *
+     * @param name  Event name
+     * @param handler  Business message group handler
+     */
+    on(name: 'business_message_group', handler: (upd: BusinessMessage[]) => void): this
+    /**
+     * Register a delete business message handler
+     *
+     * @param name  Event name
+     * @param handler  Delete business message handler
+     */
+    on(name: 'delete_business_message', handler: (upd: DeleteBusinessMessageUpdate) => void): this
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(name: string, handler: (...args: any[]) => void): this
@@ -2338,6 +2377,7 @@ export interface TelegramClient extends ITelegramClient {
         params?: {
             progressCallback?: (uploaded: number, total: number) => void
             uploadPeer?: tl.TypeInputPeer
+            businessConnectionId?: string
         },
         uploadMedia?: boolean,
     ): Promise<tl.TypeInputMedia>
@@ -3123,6 +3163,8 @@ export interface TelegramClient extends ITelegramClient {
              * client render the preview above the caption and not below.
              */
             invertMedia?: boolean
+
+            businessConnectionId?: string
         },
     ): Promise<Message>
     /**
@@ -4010,6 +4052,11 @@ export interface TelegramClient extends ITelegramClient {
             progress?: number
 
             /**
+             * Unique identifier of the business connection on behalf of which the action will be sent
+             */
+            businessConnectionId?: string
+
+            /**
              * For comment threads, ID of the thread (i.e. top message)
              */
             threadId?: number
@@ -4263,6 +4310,15 @@ export interface TelegramClient extends ITelegramClient {
      *
      */
     getBusinessChatLinks(): Promise<BusinessChatLink[]>
+
+    /**
+     * Get information about the connection of the bot with a business account
+     *
+     * **Available**: 🤖 bots only
+     *
+     * @param connectionId  ID of the business connection
+     */
+    getBusinessConnection(connectionId: string): Promise<BusinessConnection>
     /**
      * Get boost slots information of the current user.
      *
@@ -5934,6 +5990,9 @@ TelegramClient.prototype.getBoosts = function (...args) {
 }
 TelegramClient.prototype.getBusinessChatLinks = function (...args) {
     return getBusinessChatLinks(this._client, ...args)
+}
+TelegramClient.prototype.getBusinessConnection = function (...args) {
+    return getBusinessConnection(this._client, ...args)
 }
 TelegramClient.prototype.getMyBoostSlots = function (...args) {
     return getMyBoostSlots(this._client, ...args)

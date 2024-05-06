@@ -1,4 +1,4 @@
-import type { Message } from '../../types/index.js'
+import type { BusinessConnection, Message } from '../../types/index.js'
 import { BotChatJoinRequestUpdate } from './bot-chat-join-request.js'
 import { BotStoppedUpdate } from './bot-stopped.js'
 import { CallbackQuery, InlineCallbackQuery } from './callback-query.js'
@@ -7,7 +7,9 @@ import { ChatMemberUpdate } from './chat-member-update.js'
 import { InlineQuery } from './inline-query.js'
 export type { ChatMemberUpdateType } from './chat-member-update.js'
 import { BotReactionCountUpdate, BotReactionUpdate } from './bot-reaction.js'
+import { BusinessMessage } from './business-message.js'
 import { ChosenInlineResult } from './chosen-inline-result.js'
+import { DeleteBusinessMessageUpdate } from './delete-business-message-update.js'
 import { DeleteMessageUpdate } from './delete-message-update.js'
 import { DeleteStoryUpdate } from './delete-story-update.js'
 import { HistoryReadUpdate } from './history-read-update.js'
@@ -23,10 +25,12 @@ export {
     BotReactionCountUpdate,
     BotReactionUpdate,
     BotStoppedUpdate,
+    BusinessMessage,
     CallbackQuery,
     ChatJoinRequestUpdate,
     ChatMemberUpdate,
     ChosenInlineResult,
+    DeleteBusinessMessageUpdate,
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     HistoryReadUpdate,
@@ -64,5 +68,10 @@ export type ParsedUpdate =
     | { name: 'delete_story'; data: DeleteStoryUpdate }
     | { name: 'bot_reaction'; data: BotReactionUpdate }
     | { name: 'bot_reaction_count'; data: BotReactionCountUpdate }
+    | { name: 'business_connection'; data: BusinessConnection }
+    | { name: 'new_business_message'; data: BusinessMessage }
+    | { name: 'edit_business_message'; data: BusinessMessage }
+    | { name: 'business_message_group'; data: BusinessMessage[] }
+    | { name: 'delete_business_message'; data: DeleteBusinessMessageUpdate }
 
 // end-codegen

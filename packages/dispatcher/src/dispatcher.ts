@@ -7,8 +7,10 @@ import {
     BotReactionCountUpdate,
     BotReactionUpdate,
     BotStoppedUpdate,
+    BusinessConnection,
     ChatJoinRequestUpdate,
     ChatMemberUpdate,
+    DeleteBusinessMessageUpdate,
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     HistoryReadUpdate,
@@ -26,6 +28,7 @@ import {
 import { TelegramClient } from '@mtcute/core/client.js'
 
 import { UpdateContext } from './context/base.js'
+import { BusinessMessageContext } from './context/business-message.js'
 import {
     CallbackQueryContext,
     ChatJoinRequestUpdateContext,
@@ -43,17 +46,22 @@ import {
     BotReactionCountUpdateHandler,
     BotReactionUpdateHandler,
     BotStoppedHandler,
+    BusinessConnectionUpdateHandler,
+    BusinessMessageGroupHandler,
     CallbackQueryHandler,
     ChatJoinRequestHandler,
     ChatMemberUpdateHandler,
     ChosenInlineResultHandler,
+    DeleteBusinessMessageHandler,
     DeleteMessageHandler,
     DeleteStoryHandler,
+    EditBusinessMessageHandler,
     EditMessageHandler,
     HistoryReadHandler,
     InlineCallbackQueryHandler,
     InlineQueryHandler,
     MessageGroupHandler,
+    NewBusinessMessageHandler,
     NewMessageHandler,
     PollUpdateHandler,
     PollVoteHandler,
@@ -1014,9 +1022,9 @@ export class Dispatcher<State extends object = never> {
         if (typeof handler === 'number' || typeof handler === 'undefined') {
             this.addUpdateHandler(
                 {
-                    name,
+                    name: name,
                     callback: filter,
-                },
+                } as UpdateHandler,
                 handler,
             )
         } else {
@@ -1025,7 +1033,7 @@ export class Dispatcher<State extends object = never> {
                     name,
                     callback: handler,
                     check: filter,
-                },
+                } as UpdateHandler,
                 group,
             )
         }
@@ -1741,6 +1749,213 @@ export class Dispatcher<State extends object = never> {
     /** @internal */
     onBotReactionCountUpdate(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('bot_reaction_count', filter, handler, group)
+    }
+
+    /**
+     * Register a business connection update handler without any filters
+     *
+     * @param handler  Business connection update handler
+     * @param group  Handler group index
+     */
+    onBusinessConnectionUpdate(handler: BusinessConnectionUpdateHandler['callback'], group?: number): void
+
+    /**
+     * Register a business connection update handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Business connection update handler
+     * @param group  Handler group index
+     */
+    onBusinessConnectionUpdate<Mod>(
+        filter: UpdateFilter<UpdateContext<BusinessConnection>, Mod>,
+        handler: BusinessConnectionUpdateHandler<filters.Modify<UpdateContext<BusinessConnection>, Mod>>['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onBusinessConnectionUpdate(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('business_connection', filter, handler, group)
+    }
+
+    /**
+     * Register a new business message handler without any filters
+     *
+     * @param handler  New business message handler
+     * @param group  Handler group index
+     */
+    onNewBusinessMessage(
+        handler: NewBusinessMessageHandler<
+            BusinessMessageContext,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register a new business message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  New business message handler
+     * @param group  Handler group index
+     */
+    onNewBusinessMessage<Mod>(
+        filter: UpdateFilter<BusinessMessageContext, Mod, State>,
+        handler: NewBusinessMessageHandler<
+            filters.Modify<BusinessMessageContext, Mod>,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register a new business message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  New business message handler
+     * @param group  Handler group index
+     */
+    onNewBusinessMessage<Mod>(
+        filter: UpdateFilter<BusinessMessageContext, Mod>,
+        handler: NewBusinessMessageHandler<
+            filters.Modify<BusinessMessageContext, Mod>,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onNewBusinessMessage(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('new_business_message', filter, handler, group)
+    }
+
+    /**
+     * Register an edit business message handler without any filters
+     *
+     * @param handler  Edit business message handler
+     * @param group  Handler group index
+     */
+    onEditBusinessMessage(
+        handler: EditBusinessMessageHandler<
+            BusinessMessageContext,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register an edit business message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Edit business message handler
+     * @param group  Handler group index
+     */
+    onEditBusinessMessage<Mod>(
+        filter: UpdateFilter<BusinessMessageContext, Mod, State>,
+        handler: EditBusinessMessageHandler<
+            filters.Modify<BusinessMessageContext, Mod>,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register an edit business message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Edit business message handler
+     * @param group  Handler group index
+     */
+    onEditBusinessMessage<Mod>(
+        filter: UpdateFilter<BusinessMessageContext, Mod>,
+        handler: EditBusinessMessageHandler<
+            filters.Modify<BusinessMessageContext, Mod>,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onEditBusinessMessage(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('edit_business_message', filter, handler, group)
+    }
+
+    /**
+     * Register a business message group handler without any filters
+     *
+     * @param handler  Business message group handler
+     * @param group  Handler group index
+     */
+    onBusinessMessageGroup(
+        handler: BusinessMessageGroupHandler<
+            BusinessMessageContext,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register a business message group handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Business message group handler
+     * @param group  Handler group index
+     */
+    onBusinessMessageGroup<Mod>(
+        filter: UpdateFilter<BusinessMessageContext, Mod, State>,
+        handler: BusinessMessageGroupHandler<
+            filters.Modify<BusinessMessageContext, Mod>,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register a business message group handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Business message group handler
+     * @param group  Handler group index
+     */
+    onBusinessMessageGroup<Mod>(
+        filter: UpdateFilter<BusinessMessageContext, Mod>,
+        handler: BusinessMessageGroupHandler<
+            filters.Modify<BusinessMessageContext, Mod>,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onBusinessMessageGroup(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('business_message_group', filter, handler, group)
+    }
+
+    /**
+     * Register a delete business message handler without any filters
+     *
+     * @param handler  Delete business message handler
+     * @param group  Handler group index
+     */
+    onDeleteBusinessMessage(handler: DeleteBusinessMessageHandler['callback'], group?: number): void
+
+    /**
+     * Register a delete business message handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Delete business message handler
+     * @param group  Handler group index
+     */
+    onDeleteBusinessMessage<Mod>(
+        filter: UpdateFilter<UpdateContext<DeleteBusinessMessageUpdate>, Mod>,
+        handler: DeleteBusinessMessageHandler<
+            filters.Modify<UpdateContext<DeleteBusinessMessageUpdate>, Mod>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onDeleteBusinessMessage(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('delete_business_message', filter, handler, group)
     }
 
     // end-codegen

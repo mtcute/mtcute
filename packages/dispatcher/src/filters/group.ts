@@ -1,5 +1,6 @@
 import { MaybePromise, Message } from '@mtcute/core'
 
+import { BusinessMessageContext } from '../context/business-message.js'
 import { MessageContext } from '../context/message.js'
 import { Modify, UpdateFilter } from './types.js'
 
@@ -15,9 +16,9 @@ import { Modify, UpdateFilter } from './types.js'
 export function every<Mod, State extends object>(
     filter: UpdateFilter<Message, Mod, State>,
 ): UpdateFilter<
-    MessageContext,
+    MessageContext | BusinessMessageContext,
     Mod & {
-        messages: Modify<MessageContext, Mod>[]
+        messages: Modify<MessageContext | BusinessMessageContext, Mod>[]
     },
     State
 > {
@@ -61,7 +62,7 @@ export function some<State extends object>(
     // eslint-disable-next-line
     filter: UpdateFilter<Message, any, State>,
     // eslint-disable-next-line
-): UpdateFilter<MessageContext, {}, State> {
+): UpdateFilter<MessageContext | BusinessMessageContext, {}, State> {
     return (ctx, state) => {
         let i = 0
         const upds = ctx.messages
