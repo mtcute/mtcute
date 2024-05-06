@@ -6,7 +6,7 @@ WORKDIR /app
 COPY --from=deno-bin /deno /bin/deno
 
 RUN corepack enable && \
-    corepack prepare pnpm@8.7.1 --activate
+    corepack prepare pnpm@9.0.6 --activate
 
 COPY ../.. /app/
 

@@ -3,7 +3,7 @@ WORKDIR /app
 
 RUN apk add python3 make g++ && \
     corepack enable && \
-    corepack prepare pnpm@8.7.1 --activate
+    corepack prepare pnpm@9.0.6 --activate
 
 COPY ./ /app/
 RUN npm config set -L project @mtcute:registry http://verdaccio:4873/ && \
