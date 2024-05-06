@@ -101,10 +101,44 @@ export interface CommonSendParams {
     sendAs?: InputPeerLike
 
     /**
+     * If passed, instead of sending the message, it will be saved into the
+     * given quick reply shortcut (either its ID or its shortcut string).
+     */
+    quickReply?: number | string
+
+    /**
      * Whether to dispatch the returned message
      * to the client's update handler.
      */
     shouldDispatch?: true
+
+    /**
+     * Unique identifier of the business connection on behalf of which
+     * the message will be sent
+     */
+    businessConnectionId?: string
+}
+
+/**
+ * @internal
+ * @noemit
+ */
+export function _normalizeQuickReplyShortcut(
+    shortcut: number | string | undefined,
+): tl.TypeInputQuickReplyShortcut | undefined {
+    if (!shortcut) return undefined
+
+    if (typeof shortcut === 'number') {
+        return {
+            _: 'inputQuickReplyShortcutId',
+            shortcutId: shortcut,
+        }
+    }
+
+    return {
+        _: 'inputQuickReplyShortcut',
+        shortcut,
+    }
 }
 
 /**
@@ -172,6 +206,7 @@ export async function _processCommonSendParameters(
         peer,
         replyTo: tlReplyTo,
         scheduleDate,
+        quickReplyShortcut: _normalizeQuickReplyShortcut(params.quickReply),
         chainId: _getPeerChainId(client, peer, 'send'),
     }
 }

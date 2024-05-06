@@ -108,6 +108,14 @@ export class User {
         return this.raw.bot!
     }
 
+    /**
+     * Whether this user is a bot that can be connected to a
+     * Telegram Business account to receive its messages
+     */
+    get isBusinessBot(): boolean {
+        return this.raw.botBusiness!
+    }
+
     /** Whether this user is a bot that has access to all messages */
     get isBotWithHistory(): boolean {
         return this.raw.botChatHistory!

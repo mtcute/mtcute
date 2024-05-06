@@ -1,4 +1,4 @@
-const { types, toSentence, replaceSections, formatFile } = require('../../mtcute/scripts/generate-updates.cjs')
+const { types, toSentence, replaceSections, formatFile } = require('../../core/scripts/generate-updates.cjs')
 
 function generateHandler() {
     const lines = []

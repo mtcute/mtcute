@@ -2,8 +2,10 @@ import {
     BotReactionCountUpdate,
     BotReactionUpdate,
     BotStoppedUpdate,
+    BusinessConnection,
     ChatJoinRequestUpdate,
     ChatMemberUpdate,
+    DeleteBusinessMessageUpdate,
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     HistoryReadUpdate,
@@ -19,6 +21,7 @@ import {
 import { TelegramClient } from '@mtcute/core/client.js'
 
 import { UpdateContext } from './context/base.js'
+import { BusinessMessageContext } from './context/business-message.js'
 import {
     CallbackQueryContext,
     ChatJoinRequestUpdateContext,
@@ -89,6 +92,29 @@ export type BotReactionCountUpdateHandler<T = UpdateContext<BotReactionCountUpda
     'bot_reaction_count',
     T
 >
+export type BusinessConnectionUpdateHandler<T = UpdateContext<BusinessConnection>> = ParsedUpdateHandler<
+    'business_connection',
+    T
+>
+export type NewBusinessMessageHandler<T = BusinessMessageContext, S = never> = ParsedUpdateHandler<
+    'new_business_message',
+    T,
+    S
+>
+export type EditBusinessMessageHandler<T = BusinessMessageContext, S = never> = ParsedUpdateHandler<
+    'edit_business_message',
+    T,
+    S
+>
+export type BusinessMessageGroupHandler<T = BusinessMessageContext, S = never> = ParsedUpdateHandler<
+    'business_message_group',
+    T,
+    S
+>
+export type DeleteBusinessMessageHandler<T = UpdateContext<DeleteBusinessMessageUpdate>> = ParsedUpdateHandler<
+    'delete_business_message',
+    T
+>
 
 export type UpdateHandler =
     | RawUpdateHandler
@@ -114,5 +140,10 @@ export type UpdateHandler =
     | DeleteStoryHandler
     | BotReactionUpdateHandler
     | BotReactionCountUpdateHandler
+    | BusinessConnectionUpdateHandler
+    | NewBusinessMessageHandler
+    | EditBusinessMessageHandler
+    | BusinessMessageGroupHandler
+    | DeleteBusinessMessageHandler
 
 // end-codegen

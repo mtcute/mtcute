@@ -5,6 +5,7 @@ import { assertTrue } from '../../../utils/type-assertions.js'
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike, TypingStatus } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 
 /**
  * Sends a current user/bot typing event
@@ -27,6 +28,11 @@ export async function sendTyping(
          * For `upload_*` and history import actions, progress of the upload
          */
         progress?: number
+
+        /**
+         * Unique identifier of the business connection on behalf of which the action will be sent
+         */
+        businessConnectionId?: string
 
         /**
          * For comment threads, ID of the thread (i.e. top message)
@@ -91,7 +97,7 @@ export async function sendTyping(
         }
     }
 
-    const r = await client.call({
+    const r = await _maybeInvokeWithBusinessConnection(client, params?.businessConnectionId, {
         _: 'messages.setTyping',
         peer: await resolvePeer(client, chatId),
         action: status,

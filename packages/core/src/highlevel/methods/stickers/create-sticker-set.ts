@@ -5,19 +5,16 @@ import {
     InputFileLike,
     InputPeerLike,
     InputStickerSetItem,
-    MASK_POSITION_POINT_TO_TL,
     StickerSet,
     StickerSourceType,
     StickerType,
 } from '../../types/index.js'
 import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
 import { resolveUser } from '../users/resolve-peer.js'
+import { _normalizeInputStickerSetItem } from './_utils.js'
 
 /**
  * Create a new sticker set.
- *
- * This is the only sticker-related method that
- * users can use (they allowed it with the "import stickers" update)
  *
  * @param params
  * @returns  Newly created sticker set
@@ -106,22 +103,7 @@ export async function createStickerSet(
     for (const sticker of params.stickers) {
         const progressCallback = params.progressCallback?.bind(null, i)
 
-        inputStickers.push({
-            _: 'inputStickerSetItem',
-            document: await _normalizeFileToDocument(client, sticker.file, {
-                progressCallback,
-            }),
-            emoji: sticker.emojis,
-            maskCoords: sticker.maskPosition ?
-                {
-                    _: 'maskCoords',
-                    n: MASK_POSITION_POINT_TO_TL[sticker.maskPosition.point],
-                    x: sticker.maskPosition.x,
-                    y: sticker.maskPosition.y,
-                    zoom: sticker.maskPosition.scale,
-                } :
-                undefined,
-        })
+        inputStickers.push(await _normalizeInputStickerSetItem(client, sticker, { progressCallback }))
 
         i += 1
     }

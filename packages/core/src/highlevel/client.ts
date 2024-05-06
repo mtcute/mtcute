@@ -130,6 +130,7 @@ import { deleteScheduledMessages } from './methods/messages/delete-scheduled-mes
 import { editInlineMessage } from './methods/messages/edit-inline-message.js'
 import { editMessage } from './methods/messages/edit-message.js'
 import { ForwardMessageOptions, forwardMessages, forwardMessagesById } from './methods/messages/forward-messages.js'
+import { getAllScheduledMessages } from './methods/messages/get-all-scheduled-messages.js'
 import { getCallbackQueryMessage } from './methods/messages/get-callback-query-message.js'
 import { getDiscussionMessage } from './methods/messages/get-discussion-message.js'
 import { getHistory, GetHistoryOffset } from './methods/messages/get-history.js'
@@ -168,6 +169,7 @@ import { translateMessage } from './methods/messages/translate-message.js'
 import { translateText } from './methods/messages/translate-text.js'
 import { unpinAllMessages } from './methods/messages/unpin-all-messages.js'
 import { unpinMessage } from './methods/messages/unpin-message.js'
+import { getCollectibleInfo } from './methods/misc/get-collectible-info.js'
 import { initTakeoutSession } from './methods/misc/init-takeout-session.js'
 import { _normalizePrivacyRules } from './methods/misc/normalize-privacy-rules.js'
 import { withParams } from './methods/misc/with-params.js'
@@ -177,17 +179,25 @@ import { cancelPasswordEmail, resendPasswordEmail, verifyPasswordEmail } from '.
 import { removeCloudPassword } from './methods/password/remove-cloud-password.js'
 import { applyBoost } from './methods/premium/apply-boost.js'
 import { canApplyBoost, CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
+import { createBusinessChatLink } from './methods/premium/create-business-chat-link.js'
+import { deleteBusinessChatLink, editBusinessChatLink } from './methods/premium/edit-business-chat-link.js'
 import { getBoostStats } from './methods/premium/get-boost-stats.js'
 import { getBoosts } from './methods/premium/get-boosts.js'
+import { getBusinessChatLinks } from './methods/premium/get-business-chat-links.js'
+import { getBusinessConnection } from './methods/premium/get-business-connection.js'
 import { getMyBoostSlots } from './methods/premium/get-my-boost-slots.js'
 import { iterBoosters } from './methods/premium/iter-boosters.js'
+import { setBusinessIntro } from './methods/premium/set-business-intro.js'
+import { setBusinessWorkHours } from './methods/premium/set-business-work-hours.js'
 import { addStickerToSet } from './methods/stickers/add-sticker-to-set.js'
 import { createStickerSet } from './methods/stickers/create-sticker-set.js'
 import { deleteStickerFromSet } from './methods/stickers/delete-sticker-from-set.js'
 import { getCustomEmojis, getCustomEmojisFromMessages } from './methods/stickers/get-custom-emojis.js'
 import { getInstalledStickers } from './methods/stickers/get-installed-stickers.js'
+import { getMyStickerSets } from './methods/stickers/get-my-sticker-sets.js'
 import { getStickerSet } from './methods/stickers/get-sticker-set.js'
 import { moveStickerInSet } from './methods/stickers/move-sticker-in-set.js'
+import { replaceStickerInSet } from './methods/stickers/replace-sticker-in-set.js'
 import { setChatStickerSet } from './methods/stickers/set-chat-sticker-set.js'
 import { setStickerSetThumb } from './methods/stickers/set-sticker-set-thumb.js'
 import { canSendStory, CanSendStoryResult } from './methods/stories/can-send-story.js'
@@ -225,6 +235,7 @@ import { iterProfilePhotos } from './methods/users/iter-profile-photos.js'
 import { resolveChannel, resolvePeer, resolveUser } from './methods/users/resolve-peer.js'
 import { resolvePeerMany } from './methods/users/resolve-peer-many.js'
 import { setGlobalTtl } from './methods/users/set-global-ttl.js'
+import { setMyBirthday } from './methods/users/set-my-birthday.js'
 import { setMyEmojiStatus } from './methods/users/set-my-emoji-status.js'
 import { setMyProfilePhoto } from './methods/users/set-my-profile-photo.js'
 import { setMyUsername } from './methods/users/set-my-username.js'
@@ -245,6 +256,10 @@ import {
     BotReactionCountUpdate,
     BotReactionUpdate,
     BotStoppedUpdate,
+    BusinessChatLink,
+    BusinessConnection,
+    BusinessMessage,
+    BusinessWorkHoursDay,
     CallbackQuery,
     Chat,
     ChatEvent,
@@ -255,12 +270,15 @@ import {
     ChatMemberUpdate,
     ChatPreview,
     ChosenInlineResult,
+    CollectibleInfo,
+    DeleteBusinessMessageUpdate,
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     Dialog,
     FileDownloadLocation,
     FileDownloadParameters,
     ForumTopic,
+    FullChat,
     GameHighScore,
     HistoryReadUpdate,
     InlineCallbackQuery,
@@ -270,6 +288,7 @@ import {
     InputFileLike,
     InputInlineResult,
     InputMediaLike,
+    InputMediaSticker,
     InputMessageId,
     InputPeerLike,
     InputPrivacyRule,
@@ -510,6 +529,41 @@ export interface TelegramClient extends ITelegramClient {
      * @param handler  Bot reaction count update handler
      */
     on(name: 'bot_reaction_count', handler: (upd: BotReactionCountUpdate) => void): this
+    /**
+     * Register a business connection update handler
+     *
+     * @param name  Event name
+     * @param handler  Business connection update handler
+     */
+    on(name: 'business_connection', handler: (upd: BusinessConnection) => void): this
+    /**
+     * Register a new business message handler
+     *
+     * @param name  Event name
+     * @param handler  New business message handler
+     */
+    on(name: 'new_business_message', handler: (upd: BusinessMessage) => void): this
+    /**
+     * Register an edit business message handler
+     *
+     * @param name  Event name
+     * @param handler  Edit business message handler
+     */
+    on(name: 'edit_business_message', handler: (upd: BusinessMessage) => void): this
+    /**
+     * Register a business message group handler
+     *
+     * @param name  Event name
+     * @param handler  Business message group handler
+     */
+    on(name: 'business_message_group', handler: (upd: BusinessMessage[]) => void): this
+    /**
+     * Register a delete business message handler
+     *
+     * @param name  Event name
+     * @param handler  Delete business message handler
+     */
+    on(name: 'delete_business_message', handler: (upd: DeleteBusinessMessageUpdate) => void): this
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(name: string, handler: (...args: any[]) => void): this
@@ -1562,7 +1616,7 @@ export interface TelegramClient extends ITelegramClient {
      *   In case you are trying to get info about private chat that you haven't joined.
      *   Use {@link getChatPreview} instead.
      */
-    getFullChat(chatId: InputPeerLike): Promise<Chat>
+    getFullChat(chatId: InputPeerLike): Promise<FullChat>
     /**
      * Get nearby chats
      *
@@ -2324,6 +2378,7 @@ export interface TelegramClient extends ITelegramClient {
         params?: {
             progressCallback?: (uploaded: number, total: number) => void
             uploadPeer?: tl.TypeInputPeer
+            businessConnectionId?: string
         },
         uploadMedia?: boolean,
     ): Promise<tl.TypeInputMedia>
@@ -3109,6 +3164,8 @@ export interface TelegramClient extends ITelegramClient {
              * client render the preview above the caption and not below.
              */
             invertMedia?: boolean
+
+            businessConnectionId?: string
         },
     ): Promise<Message>
     /**
@@ -3143,6 +3200,14 @@ export interface TelegramClient extends ITelegramClient {
             messages: Message[]
         },
     ): Promise<Message[]>
+    /**
+     * Get all scheduled messages in chat
+     *
+     * **Available**: 👤 users only
+     *
+     * @param chatId  Chat's marked ID, its username, phone or `"me"` or `"self"`
+     */
+    getAllScheduledMessages(chatId: InputPeerLike): Promise<Message[]>
 
     /**
      * Get the message containing the button being clicked
@@ -3583,6 +3648,11 @@ export interface TelegramClient extends ITelegramClient {
          * Only return messages older than this date
          */
         maxDate?: Date | number
+
+        /**
+         * Whether to only search across broadcast channels
+         */
+        onlyChannels?: boolean
     }): Promise<ArrayPaginated<Message, SearchGlobalOffset>>
     /**
      * Search for messages inside a specific chat
@@ -3991,6 +4061,11 @@ export interface TelegramClient extends ITelegramClient {
             progress?: number
 
             /**
+             * Unique identifier of the business connection on behalf of which the action will be sent
+             */
+            businessConnectionId?: string
+
+            /**
              * For comment threads, ID of the thread (i.e. top message)
              */
             threadId?: number
@@ -4062,6 +4137,13 @@ export interface TelegramClient extends ITelegramClient {
      * @param messageId  Message ID
      */
     unpinMessage(params: InputMessageId): Promise<void>
+
+    /**
+     * Get information about a fragment collectible
+     * **Available**: 👤 users only
+     *
+     */
+    getCollectibleInfo(kind: 'phone' | 'username', item: string): Promise<CollectibleInfo>
     /**
      * Create a new takeout session
      *
@@ -4161,6 +4243,47 @@ export interface TelegramClient extends ITelegramClient {
     canApplyBoost(): Promise<CanApplyBoostResult>
 
     /**
+     * Create a new business chat link
+     *
+     * **Available**: 👤 users only
+     *
+     * @param text  Text to be inserted into the message input
+     */
+    createBusinessChatLink(
+        text: InputText,
+        params?: {
+            /** Custom title for the link */
+            title?: string
+        },
+    ): Promise<BusinessChatLink>
+
+    /**
+     * Edit an existing business chat link
+     *
+     * **Available**: 👤 users only
+     *
+     * @param link  The link to edit
+     */
+    editBusinessChatLink(
+        link: string | BusinessChatLink,
+        params: {
+            /** Text to be inserted in the message input */
+            text: InputText
+            /** Custom title for the link */
+            title?: string
+        },
+    ): Promise<BusinessChatLink>
+
+    /**
+     * Delete a business chat link
+     *
+     * **Available**: 👤 users only
+     *
+     * @param link  The link to delete
+     */
+    deleteBusinessChatLink(link: string | BusinessChatLink): Promise<void>
+
+    /**
      * Get information about boosts in a channel
      *
      * **Available**: 👤 users only
@@ -4189,6 +4312,22 @@ export interface TelegramClient extends ITelegramClient {
             limit?: number
         },
     ): Promise<ArrayPaginated<Boost, string>>
+
+    /**
+     * Get current user's business chat links
+     * **Available**: 👤 users only
+     *
+     */
+    getBusinessChatLinks(): Promise<BusinessChatLink[]>
+
+    /**
+     * Get information about the connection of the bot with a business account
+     *
+     * **Available**: 🤖 bots only
+     *
+     * @param connectionId  ID of the business connection
+     */
+    getBusinessConnection(connectionId: string): Promise<BusinessConnection>
     /**
      * Get boost slots information of the current user.
      *
@@ -4226,11 +4365,61 @@ export interface TelegramClient extends ITelegramClient {
             chunkSize?: number
         },
     ): AsyncIterableIterator<Boost>
+
+    /**
+     * Set current user's business introduction.
+     *
+     * **Available**: 👤 users only
+     *
+     * @param intro  Introduction parameters, or `null` to remove
+     */
+    setBusinessIntro(
+        intro: {
+            /**
+             * Title of the introduction
+             */
+            title?: string
+
+            /**
+             * Description of the introduction
+             */
+            description?: string
+
+            /**
+             * Sticker to show beneath the introduction
+             */
+            sticker?: InputMediaSticker | InputFileLike | tl.TypeInputDocument
+        } | null,
+    ): Promise<void>
+
+    /**
+     * Set current user's business work hours.
+     * **Available**: 👤 users only
+     *
+     */
+    setBusinessWorkHours(
+        params:
+            | ({
+                  /** Timezone in which the hours are defined */
+                  timezone: string
+              } & (
+                  | {
+                        /**
+                         * Business work intervals, per-day (like available in {@link BusinessWorkHours.days})
+                         */
+                        hours: ReadonlyArray<BusinessWorkHoursDay>
+                    }
+                  | {
+                        /** Business work intervals, raw intervals */
+                        intervals: tl.TypeBusinessWeeklyOpen[]
+                    }
+              ))
+            | null,
+    ): Promise<void>
     /**
      * Add a sticker to a sticker set.
      *
-     * Only for bots, and the sticker set must
-     * have been created by this bot.
+     * For bots the sticker set must have been created by this bot.
      *
      * **Available**: ✅ both users and bots
      *
@@ -4254,9 +4443,6 @@ export interface TelegramClient extends ITelegramClient {
     ): Promise<StickerSet>
     /**
      * Create a new sticker set.
-     *
-     * This is the only sticker-related method that
-     * users can use (they allowed it with the "import stickers" update)
      *
      * **Available**: ✅ both users and bots
      *
@@ -4338,8 +4524,7 @@ export interface TelegramClient extends ITelegramClient {
     /**
      * Delete a sticker from a sticker set
      *
-     * Only for bots, and the sticker set must
-     * have been created by this bot.
+     * For bots the sticker set must have been created by this bot.
      *
      * **Available**: ✅ both users and bots
      *
@@ -4370,26 +4555,36 @@ export interface TelegramClient extends ITelegramClient {
      *
      * > **Note**: This method returns *brief* meta information about
      * > the packs, that does not include the stickers themselves.
-     * > Use {@link StickerSet.getFull} or {@link getStickerSet}
-     * > to get a stickerset that will include the stickers
+     * > Use {@link getStickerSet} to get a stickerset that will include the stickers
      * **Available**: 👤 users only
      *
      */
     getInstalledStickers(): Promise<StickerSet[]>
+
     /**
-     * Get a sticker pack and stickers inside of it.
+     * Get the list of sticker sets that were created by the current user
+     * **Available**: 👤 users only
+     *
+     */
+    getMyStickerSets(params?: {
+        /** Offset for pagination */
+        offset?: Long
+        /** Limit for pagination */
+        limit?: number
+    }): Promise<ArrayPaginated<StickerSet, Long>>
+    /**
+     * Get a sticker set and stickers inside of it.
      *
      * **Available**: ✅ both users and bots
      *
-     * @param setId  Sticker pack short name, dice emoji, `"emoji"` for animated emojis or input ID
+     * @param setId  Sticker set identifier
      */
     getStickerSet(setId: InputStickerSet): Promise<StickerSet>
     /**
      * Move a sticker in a sticker set
      * to another position
      *
-     * Only for bots, and the sticker set must
-     * have been created by this bot.
+     * For bots the sticker set must have been created by this bot.
      *
      * **Available**: ✅ both users and bots
      *
@@ -4397,11 +4592,38 @@ export interface TelegramClient extends ITelegramClient {
      *     TDLib and Bot API compatible File ID, or a
      *     TL object representing a sticker to be removed
      * @param position  New sticker position (starting from 0)
-     * @returns  Modfiied sticker set
+     * @returns  Modified sticker set
      */
     moveStickerInSet(
         sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument,
         position: number,
+    ): Promise<StickerSet>
+
+    /**
+     * Replace a sticker in a sticker set with another sticker
+     *
+     * For bots the sticker set must have been created by this bot.
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param sticker
+     *     TDLib and Bot API compatible File ID, or a
+     *     TL object representing a sticker to be removed
+     * @param newSticker  New sticker to replace the old one with
+     * @returns  Modfiied sticker set
+     */
+    replaceStickerInSet(
+        sticker: string | tdFileId.RawFullRemoteFileLocation | tl.TypeInputDocument,
+        newSticker: InputStickerSetItem,
+        params?: {
+            /**
+             * Upload progress callback
+             *
+             * @param uploaded  Number of bytes uploaded
+             * @param total  Total file size
+             */
+            progressCallback?: (uploaded: number, total: number) => void
+        },
     ): Promise<StickerSet>
     /**
      * Set group sticker set for a supergroup
@@ -5061,6 +5283,22 @@ export interface TelegramClient extends ITelegramClient {
      * @param period  New TTL period, in seconds (or 0 to disable)
      */
     setGlobalTtl(period: number): Promise<void>
+
+    /**
+     * Set or remove current user's birthday.
+     * **Available**: 👤 users only
+     *
+     */
+    setMyBirthday(
+        birthday: {
+            /** Birthday day */
+            day: number
+            /** Birthday month */
+            month: number
+            /** Birthday year (optional) */
+            year?: number
+        } | null,
+    ): Promise<void>
     /**
      * Set an emoji status for the current user
      *
@@ -5573,6 +5811,9 @@ TelegramClient.prototype.forwardMessagesById = function (...args) {
 TelegramClient.prototype.forwardMessages = function (...args) {
     return forwardMessages(this._client, ...args)
 }
+TelegramClient.prototype.getAllScheduledMessages = function (...args) {
+    return getAllScheduledMessages(this._client, ...args)
+}
 TelegramClient.prototype.getCallbackQueryMessage = function (...args) {
     return getCallbackQueryMessage(this._client, ...args)
 }
@@ -5711,6 +5952,9 @@ TelegramClient.prototype.unpinAllMessages = function (...args) {
 TelegramClient.prototype.unpinMessage = function (...args) {
     return unpinMessage(this._client, ...args)
 }
+TelegramClient.prototype.getCollectibleInfo = function (...args) {
+    return getCollectibleInfo(this._client, ...args)
+}
 TelegramClient.prototype.initTakeoutSession = function (...args) {
     return initTakeoutSession(this._client, ...args)
 }
@@ -5741,17 +5985,38 @@ TelegramClient.prototype.applyBoost = function (...args) {
 TelegramClient.prototype.canApplyBoost = function (...args) {
     return canApplyBoost(this._client, ...args)
 }
+TelegramClient.prototype.createBusinessChatLink = function (...args) {
+    return createBusinessChatLink(this._client, ...args)
+}
+TelegramClient.prototype.editBusinessChatLink = function (...args) {
+    return editBusinessChatLink(this._client, ...args)
+}
+TelegramClient.prototype.deleteBusinessChatLink = function (...args) {
+    return deleteBusinessChatLink(this._client, ...args)
+}
 TelegramClient.prototype.getBoostStats = function (...args) {
     return getBoostStats(this._client, ...args)
 }
 TelegramClient.prototype.getBoosts = function (...args) {
     return getBoosts(this._client, ...args)
 }
+TelegramClient.prototype.getBusinessChatLinks = function (...args) {
+    return getBusinessChatLinks(this._client, ...args)
+}
+TelegramClient.prototype.getBusinessConnection = function (...args) {
+    return getBusinessConnection(this._client, ...args)
+}
 TelegramClient.prototype.getMyBoostSlots = function (...args) {
     return getMyBoostSlots(this._client, ...args)
 }
 TelegramClient.prototype.iterBoosters = function (...args) {
     return iterBoosters(this._client, ...args)
+}
+TelegramClient.prototype.setBusinessIntro = function (...args) {
+    return setBusinessIntro(this._client, ...args)
+}
+TelegramClient.prototype.setBusinessWorkHours = function (...args) {
+    return setBusinessWorkHours(this._client, ...args)
 }
 TelegramClient.prototype.addStickerToSet = function (...args) {
     return addStickerToSet(this._client, ...args)
@@ -5771,11 +6036,17 @@ TelegramClient.prototype.getCustomEmojisFromMessages = function (...args) {
 TelegramClient.prototype.getInstalledStickers = function (...args) {
     return getInstalledStickers(this._client, ...args)
 }
+TelegramClient.prototype.getMyStickerSets = function (...args) {
+    return getMyStickerSets(this._client, ...args)
+}
 TelegramClient.prototype.getStickerSet = function (...args) {
     return getStickerSet(this._client, ...args)
 }
 TelegramClient.prototype.moveStickerInSet = function (...args) {
     return moveStickerInSet(this._client, ...args)
+}
+TelegramClient.prototype.replaceStickerInSet = function (...args) {
+    return replaceStickerInSet(this._client, ...args)
 }
 TelegramClient.prototype.setChatStickerSet = function (...args) {
     return setChatStickerSet(this._client, ...args)
@@ -5898,6 +6169,9 @@ TelegramClient.prototype.resolveChannel = function (...args) {
 }
 TelegramClient.prototype.setGlobalTtl = function (...args) {
     return setGlobalTtl(this._client, ...args)
+}
+TelegramClient.prototype.setMyBirthday = function (...args) {
+    return setMyBirthday(this._client, ...args)
 }
 TelegramClient.prototype.setMyEmojiStatus = function (...args) {
     return setMyEmojiStatus(this._client, ...args)

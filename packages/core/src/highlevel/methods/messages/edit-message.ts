@@ -13,6 +13,7 @@ import {
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _findMessageInUpdate } from './find-in-update.js'
 
 /**
@@ -75,6 +76,8 @@ export async function editMessage(
          * client render the preview above the caption and not below.
          */
         invertMedia?: boolean
+
+        businessConnectionId?: string
     },
 ): Promise<Message> {
     const { chatId, message } = normalizeInputMessageId(params)
@@ -96,7 +99,7 @@ export async function editMessage(
         [content, entities] = await _normalizeInputText(client, params.text)
     }
 
-    const res = await client.call({
+    const res = await _maybeInvokeWithBusinessConnection(client, params.businessConnectionId, {
         _: 'messages.editMessage',
         id: message,
         peer: await resolvePeer(client, chatId),

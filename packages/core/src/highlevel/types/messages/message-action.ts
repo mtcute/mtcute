@@ -372,7 +372,24 @@ export interface ActionPhotoSuggested {
     photo: Photo
 }
 
-/** A peer was chosen by the user after clicking on a RequestPeer button */
+/**
+ * A peer was chosen by the user after clicking on a RequestPeer button.
+ * The user-side version of {@link ActionPeerChosen}
+ */
+export interface ActionPeerSent {
+    readonly type: 'peer_sent'
+
+    /** ID of the button passed earlier by the bot */
+    buttonId: number
+
+    /** Brief information about the chosen peers */
+    peers: tl.TypeRequestedPeer[]
+}
+
+/**
+ * A peer was chosen by the user after clicking on a RequestPeer button
+ * The bot-side version of {@link ActionPeerSent}
+ */
 export interface ActionPeerChosen {
     readonly type: 'peer_chosen'
 
@@ -472,6 +489,7 @@ export type MessageAction =
     | ActionWebviewDataReceived
     | ActionPremiumGifted
     | ActionPhotoSuggested
+    | ActionPeerSent
     | ActionPeerChosen
     | ActionWallpaperChanged
     | ActionGiftCode
@@ -695,6 +713,12 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
             return {
                 type: 'photo_suggested',
                 photo: new Photo(act.photo as tl.RawPhoto),
+            }
+        case 'messageActionRequestedPeerSentMe':
+            return {
+                type: 'peer_sent',
+                buttonId: act.buttonId,
+                peers: act.peers,
             }
         case 'messageActionRequestedPeer':
             return {

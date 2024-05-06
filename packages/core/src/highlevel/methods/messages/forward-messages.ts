@@ -5,6 +5,7 @@ import { InputPeerLike, Message, PeersIndex } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+import { _normalizeQuickReplyShortcut } from './send-common.js'
 
 // @exported
 export interface ForwardMessageOptions {
@@ -57,6 +58,12 @@ export interface ForwardMessageOptions {
     sendAs?: InputPeerLike
 
     /**
+     * If passed, instead of sending the message, it will be saved into the
+     * given quick reply shortcut (either its ID or its shortcut string).
+     */
+    quickReply?: number | string
+
+    /**
      * Whether to dispatch the forwarded messages
      * to the client's update handler.
      */
@@ -105,6 +112,7 @@ export async function forwardMessagesById(
         dropMediaCaptions: noCaption,
         noforwards: forbidForwards,
         sendAs: sendAs ? await resolvePeer(client, sendAs) : undefined,
+        quickReplyShortcut: _normalizeQuickReplyShortcut(params.quickReply),
     })
 
     assertIsUpdatesGroup('messages.forwardMessages', res)

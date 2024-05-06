@@ -58,6 +58,23 @@ export class Message {
     }
 
     /**
+     * For channel posts, number of forwards
+     *
+     * `null` for service messages and non-post messages, or
+     * if the current user is not an admin in the channel
+     */
+    get forwards(): number | null {
+        return this.raw._ === 'message' ? this.raw.forwards ?? null : null
+    }
+
+    /**
+     * For channel posts with signatures enabled, name of the post author
+     */
+    get signature(): string | null {
+        return this.raw._ === 'message' ? this.raw.postAuthor ?? null : null
+    }
+
+    /**
      * Whether the message is incoming or outgoing:
      *  - Messages received from other chats are incoming (`outgoing = false`)
      *  - Messages sent by you to other chats are outgoing (`outgoing = true`)
@@ -77,6 +94,56 @@ export class Message {
     /** Whether this message has content protection (i.e. disabled forwards) */
     get isContentProtected(): boolean {
         return this.raw._ === 'message' && this.raw.noforwards!
+    }
+
+    /**
+     * Whether the message was sent by an implicit action, for example,
+     * as an away or a greeting business message, or as a scheduled message
+     */
+    get isFromOffline(): boolean {
+        return this.raw._ === 'message' && this.raw.offline!
+    }
+
+    /** Whether this is a silent message (no notification triggered) */
+    get isSilent(): boolean {
+        return this.raw.silent!
+    }
+
+    /** Whether there are unread media attachments in this message */
+    get hasUnreadMedia(): boolean {
+        return this.raw.mediaUnread!
+    }
+
+    /** Whether this is a broadcast channel post */
+    get isChannelPost(): boolean {
+        return this.raw._ === 'message' && this.raw.post!
+    }
+
+    /**
+     * Whether this message was automatically sent from a scheduled message.
+     *
+     * **Note**: for messages sent by other users, this is always `false`.
+     */
+    get isFromScheduled(): boolean {
+        return this.raw._ === 'message' && this.raw.fromScheduled!
+    }
+
+    /** Whether the message is pinned in the current chat */
+    get isPinned(): boolean {
+        return this.raw._ === 'message' && this.raw.pinned!
+    }
+
+    /** Whether the message should be considered unedited, even if {@link editDate} ≠ null */
+    get hideEditMark(): boolean {
+        return this.raw._ === 'message' && this.raw.editHide!
+    }
+
+    /**
+     * If set, any eventual webpage preview should be shown on top of
+     * the message instead of at the bottom.
+     */
+    get invertMedia(): boolean {
+        return this.raw._ === 'message' && this.raw.invertMedia!
     }
 
     /**
@@ -127,6 +194,15 @@ export class Message {
     }
 
     /**
+     * Number of boosts applied to this {@link chat} by the sender
+     */
+    get senderBoostCount(): number {
+        if (this.raw._ !== 'message') return 0
+
+        return this.raw.fromBoostsApplied ?? 0
+    }
+
+    /**
      * Conversation the message belongs to
      */
     get chat(): Chat {
@@ -134,10 +210,19 @@ export class Message {
     }
 
     /**
-     * Date the message was sent
+     * Date when the message was sent
      */
     get date(): Date {
         return new Date(this.raw.date * 1000)
+    }
+
+    /**
+     * Date when the message was last edited
+     */
+    get editDate(): Date | null {
+        if (this.raw._ === 'messageService') return null
+
+        return this.raw.editDate ? new Date(this.raw.editDate * 1000) : null
     }
 
     /**
@@ -214,6 +299,17 @@ export class Message {
     }
 
     /**
+     * If non-null, this message is not actually sent, and is
+     * instead inside a group of "quick reply" messages
+     * under the given shortcut ID
+     */
+    get quickReplyShortcutId(): number | null {
+        if (this.raw._ === 'messageService') return null
+
+        return this.raw.quickReplyShortcutId ?? null
+    }
+
+    /**
      * If this message is generated from an inline query,
      * information about the bot which generated it
      */
@@ -223,6 +319,20 @@ export class Message {
         }
 
         return new User(this._peers.user(this.raw.viaBotId))
+    }
+
+    /**
+     * If this message was sent by a business bot on behalf of {@link sender},
+     * information about the business bot.
+     *
+     * **Note**: only available to the business account and the bot itself.
+     */
+    get viaBusinessBot(): User | null {
+        if (this.raw._ === 'messageService' || !this.raw.viaBusinessBotId) {
+            return null
+        }
+
+        return new User(this._peers.user(this.raw.viaBusinessBotId))
     }
 
     /**

@@ -8,8 +8,7 @@ import { fileIdToInputDocument } from '../../utils/convert-file-id.js'
 /**
  * Delete a sticker from a sticker set
  *
- * Only for bots, and the sticker set must
- * have been created by this bot.
+ * For bots the sticker set must have been created by this bot.
  *
  * @param sticker
  *     TDLib and Bot API compatible File ID, or a

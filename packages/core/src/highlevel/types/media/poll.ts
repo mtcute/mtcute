@@ -7,17 +7,32 @@ import { memoizeGetters } from '../../utils/memoize.js'
 import { MessageEntity } from '../messages/message-entity.js'
 import { PeersIndex } from '../peers/peers-index.js'
 
-export interface PollAnswer {
+export class PollAnswer {
+    constructor(
+        readonly raw: tl.TypePollAnswer,
+        readonly result?: tl.TypePollAnswerVoters,
+    ) {}
     /**
      * Answer text
      */
-    text: string
+    get text(): string {
+        return this.raw.text.text
+    }
+
+    /**
+     * Format entities for {@link text}, currently may only contain custom emojis
+     */
+    get textEntities(): ReadonlyArray<MessageEntity> {
+        return this.raw.text.entities.map((ent) => new MessageEntity(ent, this.raw.text.text))
+    }
 
     /**
      * Answer data, to be passed to
      * {@link TelegramClient.sendVote}
      */
-    data: Uint8Array
+    get data(): Uint8Array {
+        return this.raw.option
+    }
 
     /**
      * Number of people who has chosen this result.
@@ -25,12 +40,16 @@ export interface PollAnswer {
      *
      * @default  `0`
      */
-    voters: number
+    get voters(): number {
+        return this.result?.voters ?? 0
+    }
 
     /**
      * Whether this answer was chosen by the current user
      */
-    chosen: boolean
+    get chosen(): boolean {
+        return Boolean(this.result?.chosen)
+    }
 
     /**
      * Whether this answer is correct (for quizzes).
@@ -38,8 +57,13 @@ export interface PollAnswer {
      *
      * @default  `false`
      */
-    correct: boolean
+    get correct(): boolean {
+        return Boolean(this.result?.correct)
+    }
 }
+
+memoizeGetters(PollAnswer, ['textEntities'])
+makeInspectable(PollAnswer)
 
 export class Poll {
     readonly type = 'poll' as const
@@ -61,7 +85,14 @@ export class Poll {
      * Poll question
      */
     get question(): string {
-        return this.raw.question
+        return this.raw.question.text
+    }
+
+    /**
+     * Format entities for {@link question} (currently may only contain custom emojis)
+     */
+    get questionEntities(): ReadonlyArray<MessageEntity> {
+        return this.raw.question.entities.map((ent) => new MessageEntity(ent, this.raw.question.text))
     }
 
     /**
@@ -72,24 +103,10 @@ export class Poll {
 
         return this.raw.answers.map((ans, idx) => {
             if (results) {
-                const res = results[idx]
-
-                return {
-                    text: ans.text,
-                    data: ans.option,
-                    voters: res.voters,
-                    chosen: Boolean(res.chosen),
-                    correct: Boolean(res.correct),
-                }
+                return new PollAnswer(ans, results[idx])
             }
 
-            return {
-                text: ans.text,
-                data: ans.option,
-                voters: 0,
-                chosen: false,
-                correct: false,
-            }
+            return new PollAnswer(ans)
         })
     }
 
@@ -189,5 +206,5 @@ export class Poll {
     }
 }
 
-memoizeGetters(Poll, ['answers', 'solutionEntities'])
+memoizeGetters(Poll, ['answers', 'solutionEntities', 'questionEntities'])
 makeInspectable(Poll, undefined, ['inputMedia'])

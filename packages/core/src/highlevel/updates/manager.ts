@@ -523,7 +523,8 @@ export class UpdatesManager {
 
             switch (upd._) {
                 case 'updateNewMessage':
-                case 'updateNewChannelMessage': {
+                case 'updateNewChannelMessage':
+                case 'updateBotNewBusinessMessage': {
                     const channelId = upd.message.peerId?._ === 'peerChannel' ? upd.message.peerId.channelId : 0
 
                     const set = noDispatchMsg.get(channelId)
@@ -1260,7 +1261,11 @@ export class UpdatesManager {
         if (this.noDispatchEnabled) {
             const channelId = pending.channelId ?? 0
             const msgId =
-                upd._ === 'updateNewMessage' || upd._ === 'updateNewChannelMessage' ? upd.message.id : undefined
+                upd._ === 'updateNewMessage' ||
+                upd._ === 'updateNewChannelMessage' ||
+                upd._ === 'updateBotNewBusinessMessage' ?
+                    upd.message.id :
+                    undefined
 
             // we first need to remove it from each index, and then check if it was there
             const foundByMsgId = msgId && this.noDispatchMsg.get(channelId)?.delete(msgId)

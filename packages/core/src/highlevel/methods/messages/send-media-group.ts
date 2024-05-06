@@ -9,6 +9,7 @@ import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { _normalizeInputMedia } from '../files/normalize-input-media.js'
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
+import { _maybeInvokeWithBusinessConnection } from './_business-connection.js'
 import { _getDiscussionMessage } from './get-discussion-message.js'
 import { _processCommonSendParameters, CommonSendParams } from './send-common.js'
 
@@ -50,7 +51,11 @@ export async function sendMediaGroup(
 ): Promise<Message[]> {
     if (!params) params = {}
 
-    const { peer, replyTo, scheduleDate, chainId } = await _processCommonSendParameters(client, chatId, params)
+    const { peer, replyTo, scheduleDate, chainId, quickReplyShortcut } = await _processCommonSendParameters(
+        client,
+        chatId,
+        params,
+    )
 
     const multiMedia: tl.RawInputSingleMedia[] = []
 
@@ -73,6 +78,7 @@ export async function sendMediaGroup(
                 // but otherwise Telegram throws MEDIA_INVALID
                 // fuck my life
                 uploadPeer: peer,
+                businessConnectionId: params.businessConnectionId,
             },
             true,
         )
@@ -93,7 +99,9 @@ export async function sendMediaGroup(
         })
     }
 
-    const res = await client.call(
+    const res = await _maybeInvokeWithBusinessConnection(
+        client,
+        params.businessConnectionId,
         {
             _: 'messages.sendMultiMedia',
             peer,
@@ -105,6 +113,7 @@ export async function sendMediaGroup(
             noforwards: params.forbidForwards,
             sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
             invertMedia: params.invertMedia,
+            quickReplyShortcut,
         },
         { chainId },
     )

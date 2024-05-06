@@ -1,5 +1,5 @@
 import { Message } from '../types/messages/index.js'
-import { ParsedUpdate } from '../types/updates/index.js'
+import { BusinessMessage, ParsedUpdate } from '../types/updates/index.js'
 import { _parseUpdate } from '../types/updates/parse-update.js'
 import { RawUpdateHandler } from './types.js'
 
@@ -54,10 +54,11 @@ export function makeParsedUpdateHandler(params: ParsedUpdateHandlerParams): RawU
         onRawUpdate(update, peers)
 
         if (parsed) {
-            if (parsed.name === 'new_message') {
+            if (parsed.name === 'new_message' || parsed.name === 'new_business_message') {
                 const group = parsed.data.groupedIdUnique
 
                 if (group) {
+                    const isBusiness = parsed.name === 'new_business_message'
                     const pendingGroup = pending.get(group)
 
                     if (pendingGroup) {
@@ -66,7 +67,12 @@ export function makeParsedUpdateHandler(params: ParsedUpdateHandlerParams): RawU
                         const messages = [parsed.data]
                         const timeout = setTimeout(() => {
                             pending.delete(group)
-                            onUpdate({ name: 'message_group', data: messages })
+
+                            if (isBusiness) {
+                                onUpdate({ name: 'business_message_group', data: messages as BusinessMessage[] })
+                            } else {
+                                onUpdate({ name: 'message_group', data: messages })
+                            }
                         }, messageGroupingInterval)
 
                         pending.set(group, [messages, timeout])

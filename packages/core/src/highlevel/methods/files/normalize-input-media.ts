@@ -9,6 +9,7 @@ import { ITelegramClient } from '../../client.types.js'
 import { isUploadedFile } from '../../types/files/uploaded-file.js'
 import { UploadFileLike } from '../../types/files/utils.js'
 import { InputMediaLike } from '../../types/media/input-media/types.js'
+import { inputTextToTl } from '../../types/misc/entities.js'
 import { fileIdToInputDocument, fileIdToInputPhoto } from '../../utils/convert-file-id.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
 import { encodeWaveform } from '../../utils/voice-utils.js'
@@ -27,6 +28,7 @@ export async function _normalizeInputMedia(
     params: {
         progressCallback?: (uploaded: number, total: number) => void
         uploadPeer?: tl.TypeInputPeer
+        businessConnectionId?: string
     } = {},
     uploadMedia = false,
 ): Promise<tl.TypeInputMedia> {
@@ -151,16 +153,14 @@ export async function _normalizeInputMedia(
 
     if (media.type === 'poll' || media.type === 'quiz') {
         const answers: tl.TypePollAnswer[] = media.answers.map((ans, idx) => {
-            if (typeof ans === 'string') {
-                return {
-                    _: 'pollAnswer',
-                    text: ans,
-                    // emulate the behaviour of most implementations
-                    option: new Uint8Array([48 /* '0' */ + idx]),
-                }
-            }
+            if (typeof ans === 'object' && tl.isAnyPollAnswer(ans)) return ans
 
-            return ans
+            return {
+                _: 'pollAnswer',
+                text: inputTextToTl(ans),
+                // emulate the behaviour of most implementations
+                option: new Uint8Array([48 /* '0' */ + idx]),
+            }
         })
 
         let correct: Uint8Array[] | undefined = undefined
@@ -192,7 +192,7 @@ export async function _normalizeInputMedia(
                 publicVoters: media.public,
                 multipleChoice: media.multiple,
                 quiz: media.type === 'quiz',
-                question: media.question,
+                question: inputTextToTl(media.question),
                 answers,
                 closePeriod: media.closePeriod,
                 closeDate: normalizeDate(media.closeDate),
@@ -255,6 +255,7 @@ export async function _normalizeInputMedia(
             _: 'messages.uploadMedia',
             peer: uploadPeer,
             media: inputMedia,
+            businessConnectionId: params.businessConnectionId,
         })
 
         if (photo) {

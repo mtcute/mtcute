@@ -174,6 +174,15 @@ export interface RpcCallOptions {
     throw503?: boolean
 
     /**
+     * Whether the `X_MIGRATE_%d` errors should be handled locally on request level
+     * instead of changing the default datacenter for the entire client.
+     *
+     * Useful for `invokeWithBusinessConnection`, as it returns a `USER_MIGRATE_%d` error
+     * that is in fact not related to the user, but to the specific request.
+     */
+    localMigrate?: boolean
+
+    /**
      * Some requests should be processed consecutively, and not in parallel.
      * Using the same `chainId` for multiple requests will ensure that they are processed in the order
      * of calling `.call()`.
@@ -807,10 +816,15 @@ export class NetworkManager {
 
                 if (manager === this._primaryDc) {
                     if (e.is('PHONE_MIGRATE_%d') || e.is('NETWORK_MIGRATE_%d') || e.is('USER_MIGRATE_%d')) {
-                        this._log.info('Migrate error, new dc = %d', e.newDc)
+                        if (params?.localMigrate) {
+                            manager = await this._getOtherDc(e.newDc)
+                        } else {
+                            this._log.info('Migrate error, new dc = %d', e.newDc)
 
-                        await this.changePrimaryDc(e.newDc)
-                        manager = this._primaryDc!
+                            await this.changePrimaryDc(e.newDc)
+                            manager = this._primaryDc!
+                        }
+
                         multi = manager[kind]
 
                         continue

@@ -55,11 +55,11 @@ export class PollUpdate {
             poll = {
                 _: 'poll',
                 id: this.raw.pollId,
-                question: '',
+                question: { _: 'textWithEntities', text: '', entities: [] },
                 answers:
                     this.raw.results.results?.map((res) => ({
                         _: 'pollAnswer',
-                        text: '',
+                        text: { _: 'textWithEntities', text: '', entities: [] },
                         option: res.option,
                     })) ?? [],
             }

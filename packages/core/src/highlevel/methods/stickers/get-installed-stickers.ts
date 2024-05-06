@@ -9,8 +9,7 @@ import { StickerSet } from '../../types/index.js'
  *
  * > **Note**: This method returns *brief* meta information about
  * > the packs, that does not include the stickers themselves.
- * > Use {@link StickerSet.getFull} or {@link getStickerSet}
- * > to get a stickerset that will include the stickers
+ * > Use {@link getStickerSet} to get a stickerset that will include the stickers
  */
 export async function getInstalledStickers(client: ITelegramClient): Promise<StickerSet[]> {
     const res = await client.call({

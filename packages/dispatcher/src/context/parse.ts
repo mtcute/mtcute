@@ -2,6 +2,7 @@ import { ParsedUpdate } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
 
 import { UpdateContextDistributed } from './base.js'
+import { BusinessMessageContext } from './business-message.js'
 import { CallbackQueryContext } from './callback-query.js'
 import { ChatJoinRequestUpdateContext } from './chat-join-request.js'
 import { ChosenInlineResultContext } from './chosen-inline-result.js'
@@ -26,6 +27,10 @@ export function _parsedUpdateToContext(client: TelegramClient, update: ParsedUpd
             return new ChatJoinRequestUpdateContext(client, update.data)
         case 'pre_checkout_query':
             return new PreCheckoutQueryContext(client, update.data)
+        case 'new_business_message':
+        case 'edit_business_message':
+        case 'business_message_group':
+            return new BusinessMessageContext(client, update.data)
     }
 
     const _update = update.data as UpdateContextDistributed<typeof update.data>
