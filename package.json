@@ -72,6 +72,7 @@
         "vite-plugin-node-polyfills": "0.21.0",
         "vitest": "1.4.0"
     },
+    "packageManager": "pnpm@9.0.6",
     "prettier": "./.config/prettier.cjs",
     "eslintConfig": {
         "extends": "./.config/eslint.cjs"
