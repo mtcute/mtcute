@@ -607,7 +607,7 @@ if (!IS_JSR) {
 }
 
 Promise.resolve(buildConfig.final()).then(() => {
-    if (IS_JSR) {
+    if (IS_JSR && !process.env.CI) {
         console.log('[i] Trying to publish with --dry-run')
         exec('deno publish --dry-run --allow-dirty --quiet', { cwd: outDir })
         console.log('[v] All good!')

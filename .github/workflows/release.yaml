@@ -27,6 +27,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write # The OIDC ID token is used for authentication with JSR.      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -56,6 +57,12 @@ jobs:
         id: build
         env:
           GH_RELEASE: 1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/publish.js ${{ steps.find.outputs.modified }}
+      - uses: denoland/setup-deno@v1
+      - name: Build packages and publish to JSR
+        env:
+          JSR: 1
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/publish.js ${{ steps.find.outputs.modified }}
       - name: Commit version bumps

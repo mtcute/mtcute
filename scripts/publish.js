@@ -4,7 +4,7 @@ const cp = require('child_process')
 const stc = require('@teidesu/slow-types-compiler')
 
 const IS_JSR = process.env.JSR === '1'
-const MAIN_REGISTRY = IS_JSR ? 'http://jsr.test/' : 'https://registry.npmjs.org'
+const MAIN_REGISTRY = IS_JSR ? 'https://jsr.io/' : 'https://registry.npmjs.org'
 let REGISTRY = process.env.REGISTRY || MAIN_REGISTRY
 exports.REGISTRY = REGISTRY
 if (!REGISTRY.endsWith('/')) REGISTRY += '/'
@@ -97,7 +97,7 @@ async function publishSinglePackage(name) {
     if (IS_JSR) {
         // publish to jsr
         const params = process.env.JSR_TOKEN ? `--token ${process.env.JSR_TOKEN}` : ''
-        cp.execSync(`deno publish --allow-dirty ${params}`, {
+        cp.execSync(`deno publish --allow-dirty --quiet ${params}`, {
             cwd: path.join(packageDir, 'dist/jsr'),
             stdio: 'inherit',
         })
@@ -179,7 +179,28 @@ async function main(arg = process.argv[2]) {
             }
         }
     } else {
-        for (const pkg of arg.split(',')) {
+        let pkgs = arg.split(',')
+
+        const deps = {}
+        // determine the order of packages to publish
+
+        for (const pkg of pkgs) {
+            if (IS_JSR && JSR_EXCEPTIONS[pkg] === 'never') continue
+            if (!IS_JSR && JSR_EXCEPTIONS[pkg] === 'only') continue
+
+            if (IS_JSR) {
+                const pkgDeps = require(`../packages/${pkg}/package.json`).dependencies || {}
+                deps[pkg] = Object.keys(pkgDeps)
+                    .filter((d) => d.startsWith('@mtcute/'))
+                    .map((d) => d.slice(8))
+            }
+        }
+
+        if (IS_JSR) {
+            pkgs = stc.determinePublishOrder(deps)
+        }
+
+        for (const pkg of pkgs) {
             try {
                 await publishSinglePackage(pkg)
                 publishedPkgs.push(pkg)
