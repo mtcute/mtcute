@@ -34,6 +34,9 @@ Deno.test('1. authorization', { sanitizeResources: false }, async (t) => {
                     tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')
                 ) {
                     // retry with another number
+                    await tg.logOut().catch((err) => {
+                        console.error('Failed to log out:', err)
+                    })
                     continue
                 } else {
                     await tg.close()

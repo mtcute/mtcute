@@ -37,6 +37,9 @@ describe('1. authorization', function () {
                     tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')
                 ) {
                     // retry with another number
+                    await tg.logOut().catch((err) => {
+                        console.error('Failed to log out:', err)
+                    })
                     continue
                 } else {
                     await tg.close()
