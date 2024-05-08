@@ -45,7 +45,7 @@ function isMeaningfulChange(pkg, path) {
 }
 
 function findChangedPackagesSince(tag, until) {
-    const packages = new Set(listPackages())
+    const packages = new Set(listPackages(true))
     const changedFiles = findChangedFilesSince(tag, until)
 
     const changedPackages = new Set()
@@ -91,7 +91,7 @@ if (require.main === module && process.env.CI && process.env.GITHUB_OUTPUT) {
     let res
 
     if (input === 'all') {
-        res = listPackages()
+        res = listPackages(true)
     } else if (input === 'updated') {
         const tag = getLatestTag()
         console.log('[i] Latest tag is %s', tag)

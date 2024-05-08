@@ -60,6 +60,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/publish.js ${{ steps.find.outputs.modified }}
       - uses: denoland/setup-deno@v1
+        with:
+          deno-version: '1.43.1'
       - name: Build packages and publish to JSR
         env:
           JSR: 1

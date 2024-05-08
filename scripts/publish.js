@@ -116,13 +116,16 @@ async function publishSinglePackage(name) {
     }
 }
 
-function listPackages() {
+function listPackages(all = false) {
     let packages = []
 
     for (const f of fs.readdirSync(path.join(__dirname, '../packages'))) {
         if (f[0] === '.') continue
-        if (IS_JSR && JSR_EXCEPTIONS[f] === 'never') continue
-        if (!IS_JSR && JSR_EXCEPTIONS[f] === 'only') continue
+
+        if (!all) {
+            if (IS_JSR && JSR_EXCEPTIONS[f] === 'never') continue
+            if (!IS_JSR && JSR_EXCEPTIONS[f] === 'only') continue
+        }
 
         packages.push(f)
     }
@@ -180,6 +183,7 @@ async function main(arg = process.argv[2]) {
         }
     } else {
         let pkgs = arg.split(',')
+        let filteredPkgs = []
 
         const deps = {}
         // determine the order of packages to publish
@@ -188,6 +192,8 @@ async function main(arg = process.argv[2]) {
             if (IS_JSR && JSR_EXCEPTIONS[pkg] === 'never') continue
             if (!IS_JSR && JSR_EXCEPTIONS[pkg] === 'only') continue
 
+            filteredPkgs.push(pkg)
+
             if (IS_JSR) {
                 const pkgDeps = require(`../packages/${pkg}/package.json`).dependencies || {}
                 deps[pkg] = Object.keys(pkgDeps)
@@ -195,6 +201,8 @@ async function main(arg = process.argv[2]) {
                     .map((d) => d.slice(8))
             }
         }
+
+        pkgs = filteredPkgs
 
         if (IS_JSR) {
             pkgs = stc.determinePublishOrder(deps)
