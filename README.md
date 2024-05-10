@@ -55,10 +55,10 @@ supporting both web and nodejs.
 pnpm create @mtcute/bot
 ```
 
-🏭 want to integrate it into your existing nodejs app? use the nodejs wrapper:
+🏭 want to integrate it into your existing nodejs app? use the nodejs package:
 ```bash
 pnpm add @mtcute/node
-# for native crypto
+# optional, for faster crypto
 pnpm add @mtcute/crypto-node
 ```
 
@@ -66,6 +66,10 @@ pnpm add @mtcute/crypto-node
 ```bash
 pnpm add @mtcute/web
 ```
+
+🚀 using the newfangled runtimes? we've got you covered:
+- bun: `bun add @mtcute/bun`
+- deno: `import { TelegramClient } from 'jsr:@mtcute/deno'`
 
 learn more: [guide](https://mtcute.dev/guide/)
 
