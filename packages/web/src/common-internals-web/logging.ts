@@ -25,13 +25,13 @@ const TAG_COLORS = [
 ]
 
 /** @internal */
-export const defaultLoggingHandler = (
+export const defaultLoggingHandler: (
     color: number,
     level: number,
     tag: string,
     fmt: string,
     args: unknown[],
-): void => {
+) => void = (color: number, level: number, tag: string, fmt: string, args: unknown[]): void => {
     // eslint-disable-next-line no-console
     console.log(
         BASE_FORMAT + fmt,

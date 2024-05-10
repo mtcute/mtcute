@@ -1,7 +1,7 @@
 const sharedEncoder = new TextEncoder()
 const sharedDecoder = new TextDecoder('utf8')
 
-export function utf8ByteLength(str: string) {
+export function utf8ByteLength(str: string): number {
     // https://stackoverflow.com/a/23329386
     let s = str.length
 

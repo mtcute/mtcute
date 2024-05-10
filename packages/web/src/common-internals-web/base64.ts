@@ -111,14 +111,14 @@ function fromByteArray(uint8: Uint8Array) {
     return parts.join('')
 }
 
-export function base64Encode(buf: Uint8Array, url = false): string {
+export function base64Encode(buf: Uint8Array, url: boolean = false): string {
     const str = fromByteArray(buf)
     if (url) return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 
     return str
 }
 
-export function base64Decode(string: string, url = false): Uint8Array {
+export function base64Decode(string: string, url: boolean = false): Uint8Array {
     if (url) {
         string = string.replace(/-/g, '+').replace(/_/g, '/')
         while (string.length % 4) string += '='
