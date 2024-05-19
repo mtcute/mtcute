@@ -243,6 +243,7 @@ export class SessionConnection extends PersistentConnection {
                 this._session.resetAuthKey()
                 this._resetSession()
                 this.emit('key-change', null)
+                this.emit('error', error)
 
                 return
             }
