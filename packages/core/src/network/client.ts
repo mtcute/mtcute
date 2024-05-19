@@ -238,7 +238,7 @@ export class MtClient extends EventEmitter {
 
     readonly _config = new ConfigManager(() => this.call({ _: 'help.getConfig' }))
 
-    emitError: (err: unknown, connection?: SessionConnection) => void = console.error.bind(console)
+    private _emitError?: (err: unknown, connection?: SessionConnection) => void
 
     readonly log: Logger
     readonly network: NetworkManager
@@ -308,6 +308,14 @@ export class MtClient extends EventEmitter {
             },
             this._config,
         )
+    }
+
+    emitError(err: unknown, connection?: SessionConnection): void {
+        if (this._emitError) {
+            this._emitError(err, connection)
+        } else {
+            this.log.error('unhandled error:', err)
+        }
     }
 
     private _prepare = asyncResettable(async () => {
