@@ -350,6 +350,14 @@ type TelegramClientOptions = (
       })
     | { client: ITelegramClient }
 ) & {
+    /**
+     * If true, all API calls will be wrapped with `tl.invokeWithoutUpdates`,
+     * effectively disabling the server-sent events for the clients.
+     * May be useful in some cases.
+     *
+     * @default false
+     */
+    disableUpdates?: boolean
     updates?: Omit<ParsedUpdateHandlerParams, 'onUpdate'>
     /**
      * If `true`, the updates that were handled by some {@link Conversation}
@@ -5410,23 +5418,25 @@ export class TelegramClient extends EventEmitter implements ITelegramClient {
         // @ts-expect-error codegen
         this.storage = this._client.storage
 
-        const skipConversationUpdates = opts.skipConversationUpdates ?? true
-        const { messageGroupingInterval } = opts.updates ?? {}
+        if (!opts.disableUpdates) {
+            const skipConversationUpdates = opts.skipConversationUpdates ?? true
+            const { messageGroupingInterval } = opts.updates ?? {}
 
-        this._client.onUpdate(
-            makeParsedUpdateHandler({
-                messageGroupingInterval,
-                onUpdate: (update) => {
-                    if (Conversation.handleUpdate(this._client, update) && skipConversationUpdates) return
+            this._client.onUpdate(
+                makeParsedUpdateHandler({
+                    messageGroupingInterval,
+                    onUpdate: (update) => {
+                        if (Conversation.handleUpdate(this._client, update) && skipConversationUpdates) return
 
-                    this.emit('update', update)
-                    this.emit(update.name, update.data)
-                },
-                onRawUpdate: (update, peers) => {
-                    this.emit('raw_update', update, peers)
-                },
-            }),
-        )
+                        this.emit('update', update)
+                        this.emit(update.name, update.data)
+                    },
+                    onRawUpdate: (update, peers) => {
+                        this.emit('raw_update', update, peers)
+                    },
+                }),
+            )
+        }
     }
     withParams(params: RpcCallOptions): this {
         return withParams(this, params)

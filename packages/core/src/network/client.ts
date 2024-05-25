@@ -122,13 +122,9 @@ export interface MtClientOptions {
     maxRetryCount?: number
 
     /**
-     * If true, every single API call will be wrapped with `tl.invokeWithoutUpdates`,
+     * If true, all API calls will be wrapped with `tl.invokeWithoutUpdates`,
      * effectively disabling the server-sent events for the clients.
      * May be useful in some cases.
-     *
-     * Note that this only wraps calls made with `.call()` within the primary
-     * connection. Additional connections and direct `.sendForResult()` calls
-     * must be wrapped manually.
      *
      * @default false
      */
