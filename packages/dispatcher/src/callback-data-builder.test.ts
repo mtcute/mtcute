@@ -58,44 +58,84 @@ describe('CallbackDataBuilder', () => {
                 new PeersIndex(),
             )
 
-        const getFilterMatch = (filter: UpdateFilter<CallbackQuery>, data: string) => {
+        const getFilterMatch = async (filter: UpdateFilter<CallbackQuery>, data: string) => {
             const cb = createCb(data)
 
-            const matched = filter(cb)
+            const matched = await filter(cb)
             if (!matched) return null
 
             // eslint-disable-next-line
             return (cb as any).match
         }
 
-        it('should create a filter without params', () => {
+        it('should create a filter without params', async () => {
             const cdb = new CallbackDataBuilder('prefix', 'foo', 'bar')
 
-            expect(getFilterMatch(cdb.filter(), 'prefix:foo:bar')).toEqual({
+            expect(await getFilterMatch(cdb.filter(), 'prefix:foo:bar')).toEqual({
                 foo: 'foo',
                 bar: 'bar',
             })
-            expect(getFilterMatch(cdb.filter(), 'prefix:foo:bar:baz')).toEqual(null)
+            expect(await getFilterMatch(cdb.filter(), 'prefix:foo:bar:baz')).toEqual(null)
         })
 
-        it('should create a filter with params', () => {
+        it('should create a filter with params', async () => {
             const cdb = new CallbackDataBuilder('prefix', 'foo', 'bar')
 
-            expect(getFilterMatch(cdb.filter({ foo: 'foo' }), 'prefix:foo:bar')).toEqual({
+            expect(await getFilterMatch(cdb.filter({ foo: 'foo' }), 'prefix:foo:bar')).toEqual({
                 foo: 'foo',
                 bar: 'bar',
             })
-            expect(getFilterMatch(cdb.filter({ foo: 'foo' }), 'prefix:bar:bar')).toEqual(null)
+            expect(await getFilterMatch(cdb.filter({ foo: 'foo' }), 'prefix:bar:bar')).toEqual(null)
         })
 
-        it('should create a filter with regex params', () => {
+        it('should create a filter with regex params', async () => {
             const cdb = new CallbackDataBuilder('prefix', 'foo', 'bar')
 
-            expect(getFilterMatch(cdb.filter({ foo: /\d+/ }), 'prefix:123:bar')).toEqual({
+            expect(await getFilterMatch(cdb.filter({ foo: /\d+/ }), 'prefix:123:bar')).toEqual({
                 foo: '123',
                 bar: 'bar',
             })
-            expect(getFilterMatch(cdb.filter({ foo: /\d+/ }), 'prefix:bar:bar')).toEqual(null)
+            expect(await getFilterMatch(cdb.filter({ foo: /\d+/ }), 'prefix:bar:bar')).toEqual(null)
+        })
+
+        it('should create a filter with dynamic params', async () => {
+            const cdb = new CallbackDataBuilder('prefix', 'foo', 'bar')
+
+            expect(
+                await getFilterMatch(
+                    cdb.filter(() => ({ foo: 'foo' })),
+                    'prefix:foo:bar',
+                ),
+            ).toEqual({
+                foo: 'foo',
+                bar: 'bar',
+            })
+            expect(
+                await getFilterMatch(
+                    cdb.filter(() => ({ foo: 'foo' })),
+                    'prefix:bar:baz',
+                ),
+            ).toEqual(null)
+        })
+
+        it('should create a filter with a predicate matcher', async () => {
+            const cdb = new CallbackDataBuilder('prefix', 'foo', 'bar')
+
+            expect(
+                await getFilterMatch(
+                    cdb.filter((_, data) => data.foo === 'foo'),
+                    'prefix:foo:bar',
+                ),
+            ).toEqual({
+                foo: 'foo',
+                bar: 'bar',
+            })
+            expect(
+                await getFilterMatch(
+                    cdb.filter((_, data) => data.foo === 'foo'),
+                    'prefix:bar:baz',
+                ),
+            ).toEqual(null)
         })
     })
 })

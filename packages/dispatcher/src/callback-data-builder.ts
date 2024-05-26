@@ -1,4 +1,4 @@
-import { CallbackQuery, MaybeArray, MtArgumentError } from '@mtcute/core'
+import { CallbackQuery, MaybeArray, MaybePromise, MtArgumentError } from '@mtcute/core'
 
 import { UpdateFilter } from './filters/types.js'
 
@@ -84,18 +84,71 @@ export class CallbackDataBuilder<T extends string> {
     /**
      * Create a filter for this callback data.
      *
-     * > **Note**: `params` object will be compiled to a RegExp,
-     * > so avoid using characters that have special meaning in regex,
-     * > or use RegExp directly to let the IDE guide you.
+     * You can either pass an object with field names as keys and values as strings or regexes,
+     * which will be compiled to a RegExp, or a function that will be called with the parsed data.
+     * Note that the strings will be passed to `RegExp` **directly**, so you may want to escape them.
+     *
+     * When using a function, you can either return a boolean, or an object with field names as keys
+     * and values as strings or regexes. In the latter case, the resulting object will be matched
+     * against the parsed data the same way as if you passed it directly.
      *
      * @param params
      */
-    filter(params: Partial<Record<T, MaybeArray<string | RegExp>>> = {}): UpdateFilter<
+    filter(
+        params:
+            | ((
+                  upd: CallbackQuery,
+                  parsed: Record<T, string>,
+              ) => MaybePromise<Partial<Record<T, MaybeArray<string | RegExp>>> | boolean>)
+            | Partial<Record<T, MaybeArray<string | RegExp>>> = {},
+    ): UpdateFilter<
         CallbackQuery,
         {
             match: Record<T, string>
         }
     > {
+        if (typeof params === 'function') {
+            return async (query) => {
+                if (!query.dataStr) return false
+
+                const data = this.parse(query.dataStr)
+                const fnResult = await params(query, data)
+
+                if (typeof fnResult === 'boolean') {
+                    (
+                        query as CallbackQuery & {
+                            match: Record<T, string>
+                        }
+                    ).match = data
+
+                    return fnResult
+                }
+
+                // validate result
+                for (const key in fnResult) {
+                    const value = data[key]
+                    if (value === undefined) return false
+
+                    let matchers = fnResult[key] as MaybeArray<string | RegExp>
+                    if (!Array.isArray(matchers)) matchers = [matchers]
+
+                    for (const matcher of matchers) {
+                        if (typeof matcher === 'string') {
+                            if (value !== matcher) return false
+                        } else if (!matcher.test(value)) return false
+                    }
+                }
+
+                (
+                    query as CallbackQuery & {
+                        match: Record<T, string>
+                    }
+                ).match = data
+
+                return true
+            }
+        }
+
         const parts: string[] = []
 
         this._fields.forEach((field) => {
