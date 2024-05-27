@@ -21,7 +21,7 @@
         "@mtcute/node": "workspace:^",
         "@mtcute/web": "workspace:^",
         "@mtcute/tl": "workspace:*",
-        "vitest": "1.4.0"
+        "vitest": "^1.4.0"
     },
     "peerDependenciesMeta": {
         "@mtcute/node": {
