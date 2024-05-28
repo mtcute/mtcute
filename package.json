@@ -29,9 +29,6 @@
         "docs": "typedoc --options .config/typedoc/config.cjs",
         "build-package": "node scripts/build-package.js"
     },
-    "dependencies": {
-        "node-gyp": "9.3.1"
-    },
     "devDependencies": {
         "@commitlint/cli": "17.6.5",
         "@commitlint/config-conventional": "17.6.5",
