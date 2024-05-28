@@ -64,11 +64,17 @@ export class CallbackDataBuilder<T extends string> {
         const parts = data.split(this.sep)
 
         if (parts[0] !== this.prefix) {
-            throw new MtArgumentError('Invalid data passed')
+            throw new MtArgumentError(
+                `Invalid data passed: "${data}" (bad prefix, expected ${this.prefix}, got ${parts[0]})`,
+            )
         }
 
         if (parts.length !== this._fields.length + 1) {
-            throw new MtArgumentError('Invalid data passed')
+            throw new MtArgumentError(
+                `Invalid data passed: "${data}" (bad parts count, expected ${this._fields.length}, got ${
+                    parts.length - 1
+                })`,
+            )
         }
 
         const ret = {} as Record<T, string>
