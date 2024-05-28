@@ -59,17 +59,22 @@ export class CallbackDataBuilder<T extends string> {
      * Parse callback data to object
      *
      * @param data  Callback data as string
+     * @param safe  If `true`, will return `null` instead of throwing on invalid data
      */
-    parse(data: string): Record<T, string> {
+    parse(data: string, safe?: false): Record<T, string>
+    parse(data: string, safe: true): Record<T, string> | null
+    parse(data: string, safe = false): Record<T, string> | null {
         const parts = data.split(this.sep)
 
         if (parts[0] !== this.prefix) {
+            if (safe) return null
             throw new MtArgumentError(
                 `Invalid data passed: "${data}" (bad prefix, expected ${this.prefix}, got ${parts[0]})`,
             )
         }
 
         if (parts.length !== this._fields.length + 1) {
+            if (safe) return null
             throw new MtArgumentError(
                 `Invalid data passed: "${data}" (bad parts count, expected ${this._fields.length}, got ${
                     parts.length - 1
@@ -117,7 +122,9 @@ export class CallbackDataBuilder<T extends string> {
             return async (query) => {
                 if (!query.dataStr) return false
 
-                const data = this.parse(query.dataStr)
+                const data = this.parse(query.dataStr, true)
+                if (!data) return false
+
                 const fnResult = await params(query, data)
 
                 if (typeof fnResult === 'boolean') {

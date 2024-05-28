@@ -137,5 +137,12 @@ describe('CallbackDataBuilder', () => {
                 ),
             ).toEqual(null)
         })
+
+        it('should not throw on invalid data', async () => {
+            const cdb = new CallbackDataBuilder('prefix', 'foo', 'bar')
+
+            await expect(getFilterMatch(cdb.filter(), 'wrong-prefix:foo:bar')).resolves.toEqual(null)
+            await expect(getFilterMatch(cdb.filter(), 'prefix:foo:bar:baz')).resolves.toEqual(null)
+        })
     })
 })
