@@ -146,6 +146,9 @@ function parse(
     let insidePre = false
     let insideLink = false
 
+    let insideLinkUrl = false
+    let pendingLinkUrl = ''
+
     function feed(text: string) {
         const len = text.length
         let pos = 0
@@ -154,7 +157,11 @@ function parse(
             const c = text[pos]
 
             if (c === '\\') {
-                result += text[pos + 1]
+                if (insideLinkUrl) {
+                    pendingLinkUrl += text[pos + 1]
+                } else {
+                    result += text[pos + 1]
+                }
                 pos += 2
                 continue
             }
@@ -220,51 +227,58 @@ function parse(
                 }
 
                 pos += 2
-                let url = ''
-
-                while (pos < text.length && text[pos] !== ')') {
-                    url += text[pos++]
-                }
-
-                pos += 1 // )
-
-                if (pos > text.length) {
-                    throw new Error('Malformed LINK entity, expected )')
-                }
-
-                if (url.length) {
-                    ent.length = result.length - ent.offset
-
-                    let m = url.match(MENTION_REGEX)
-
-                    if (m) {
-                        const userId = parseInt(m[1])
-                        const accessHash = m[2]
-
-                        if (accessHash) {
-                            (ent as tl.Mutable<tl.RawInputMessageEntityMentionName>)._ =
-                                'inputMessageEntityMentionName'
-                            ;(ent as tl.Mutable<tl.RawInputMessageEntityMentionName>).userId = {
-                                _: 'inputUser',
-                                userId,
-                                accessHash: Long.fromString(accessHash, false, 16),
-                            }
-                        } else {
-                            (ent as tl.Mutable<tl.RawMessageEntityMentionName>)._ = 'messageEntityMentionName'
-                            ;(ent as tl.Mutable<tl.RawMessageEntityMentionName>).userId = userId
-                        }
-                    } else if ((m = EMOJI_REGEX.exec(url))) {
-                        (ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>)._ = 'messageEntityCustomEmoji'
-                        ;(ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>).documentId = Long.fromString(m[1])
-                    } else {
-                        if (url.match(/^\/\//)) url = 'http:' + url
-                        ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>)._ = 'messageEntityTextUrl'
-                        ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>).url = url
-                    }
-                    entities.push(ent)
-                }
-
                 insideLink = false
+                insideLinkUrl = true
+                stacks.link.push(ent)
+                continue
+            }
+
+            if (insideLinkUrl) {
+                pos += 1
+
+                if (c !== ')') {
+                    // not ended yet
+                    pendingLinkUrl += c
+                    continue
+                }
+
+                const ent = stacks.link.pop()!
+
+                let url = pendingLinkUrl
+                pendingLinkUrl = ''
+                insideLinkUrl = false
+
+                if (!url.length) continue
+
+                ent.length = result.length - ent.offset
+
+                let m = url.match(MENTION_REGEX)
+
+                if (m) {
+                    const userId = parseInt(m[1])
+                    const accessHash = m[2]
+
+                    if (accessHash) {
+                        (ent as tl.Mutable<tl.RawInputMessageEntityMentionName>)._ = 'inputMessageEntityMentionName'
+                        ;(ent as tl.Mutable<tl.RawInputMessageEntityMentionName>).userId = {
+                            _: 'inputUser',
+                            userId,
+                            accessHash: Long.fromString(accessHash, false, 16),
+                        }
+                    } else {
+                        (ent as tl.Mutable<tl.RawMessageEntityMentionName>)._ = 'messageEntityMentionName'
+                        ;(ent as tl.Mutable<tl.RawMessageEntityMentionName>).userId = userId
+                    }
+                } else if ((m = EMOJI_REGEX.exec(url))) {
+                    (ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>)._ = 'messageEntityCustomEmoji'
+                    ;(ent as tl.Mutable<tl.RawMessageEntityCustomEmoji>).documentId = Long.fromString(m[1])
+                } else {
+                    if (url.match(/^\/\//)) url = 'http:' + url
+                    ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>)._ = 'messageEntityTextUrl'
+                    ;(ent as tl.Mutable<tl.RawMessageEntityTextUrl>).url = url
+                }
+                entities.push(ent)
+
                 continue
             }
 
@@ -394,6 +408,19 @@ function parse(
         feed(strings[idx])
 
         if (typeof it === 'boolean' || !it) return
+
+        if (insideLinkUrl) {
+            if (typeof it === 'string' || typeof it === 'number') {
+                pendingLinkUrl += it
+            } else if (Long.isLong(it)) {
+                pendingLinkUrl += it.toString(10)
+            } else {
+                // ignore the entity, only use text
+                pendingLinkUrl += it.text
+            }
+
+            return
+        }
 
         if (typeof it === 'string' || typeof it === 'number') {
             result += it

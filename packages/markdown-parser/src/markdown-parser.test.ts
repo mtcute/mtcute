@@ -514,6 +514,11 @@ describe('MarkdownMessageEntityParser', () => {
             test(md_`${'**plain**'}`, [], '**plain**')
         })
 
+        it('should handle numbers/Longs', () => {
+            test(md_`${1234567890}`, [], '1234567890')
+            test(md_`${Long.fromString('1234567890')}`, [], '1234567890')
+        })
+
         it('should skip falsy values', () => {
             test(md_`some text ${null} more text ${false}`, [], 'some text  more text ')
         })
@@ -576,6 +581,23 @@ describe('MarkdownMessageEntityParser', () => {
                     createEntity('messageEntityBold', 0, 21),
                 ],
                 'bold italic underline',
+            )
+        })
+
+        it('should interpolate inside links', () => {
+            test(
+                md_`[${'link'}](${'https'}://example.com/\\)${'foo'}/bar/${'baz'}?foo=bar&baz=${'egg'})`,
+                [
+                    createEntity('messageEntityTextUrl', 0, 4, {
+                        url: 'https://example.com/)foo/bar/baz?foo=bar&baz=egg',
+                    }),
+                ],
+                'link',
+            )
+            test(
+                md_`[emoji](tg://emoji?id=${Long.fromNumber(123123)})`,
+                [createEntity('messageEntityCustomEmoji', 0, 5, { documentId: Long.fromNumber(123123) })],
+                'emoji',
             )
         })
 
