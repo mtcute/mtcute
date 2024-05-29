@@ -18,16 +18,13 @@ export interface ICorePlatform extends ITlPlatform {
     isOnline?(): boolean
 }
 
-// eslint-disable-next-line
-const globalObject = (0, eval)('this')
-
 // NB: when using with some bundlers (e.g. vite) re-importing this module will not return the same object
 // so we need to store the platform in a global object to be able to survive hot-reloads etc.
 // try to use Symbol if available, otherwise fallback to a string
 const platformKey = typeof Symbol !== 'undefined' ? Symbol.for('mtcute.platform') : '__MTCUTE_PLATFORM__'
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-let _platform: ICorePlatform | null = globalObject?.[platformKey] ?? null
+// eslint-disable-next-line
+let _platform: ICorePlatform | null = (globalThis as any)?.[platformKey] ?? null
 
 export function setPlatform(platform: ICorePlatform): void {
     if (_platform) {
@@ -42,9 +39,8 @@ export function setPlatform(platform: ICorePlatform): void {
     TlBinaryReader.platform = platform
     TlBinaryWriter.platform = platform
 
-    if (globalObject) {
-        globalObject[platformKey] = platform
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(globalThis as any)[platformKey] = platform
 }
 
 export function getPlatform(): ICorePlatform {
