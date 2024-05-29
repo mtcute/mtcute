@@ -25,6 +25,18 @@ export async function getCallbackAnswer(
         timeout?: number
 
         /**
+         * Whether to "fire and forget" this request,
+         * in which case the promise will resolve as soon
+         * as the request is sent with an empty response.
+         *
+         * Useful for interacting with bots that don't correctly
+         * answer to callback queries and the request always times out.
+         *
+         * **Note**: any errors will be silently ignored.
+         */
+        fireAndForget?: boolean
+
+        /**
          * Whether this is a "play game" button
          */
         game?: boolean
@@ -39,7 +51,7 @@ export async function getCallbackAnswer(
     },
 ): Promise<tl.messages.TypeBotCallbackAnswer> {
     const { chatId, message } = normalizeInputMessageId(params)
-    const { data, game, timeout = 10000 } = params
+    const { data, game, timeout = 10000, fireAndForget } = params
 
     let password: tl.TypeInputCheckPasswordSRP | undefined = undefined
 
@@ -48,7 +60,7 @@ export async function getCallbackAnswer(
         password = await client.computeSrpParams(pwd, params.password)
     }
 
-    return await client.call(
+    const promise = client.call(
         {
             _: 'messages.getBotCallbackAnswer',
             peer: await resolvePeer(client, chatId),
@@ -59,4 +71,15 @@ export async function getCallbackAnswer(
         },
         { timeout, throw503: true },
     )
+
+    if (fireAndForget) {
+        promise.catch(() => {})
+
+        return {
+            _: 'messages.botCallbackAnswer',
+            cacheTime: 0,
+        }
+    }
+
+    return promise
 }
