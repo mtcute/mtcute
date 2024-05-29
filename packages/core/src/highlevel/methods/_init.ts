@@ -73,7 +73,7 @@ function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
             makeParsedUpdateHandler({
                 messageGroupingInterval,
                 onUpdate: (update) => {
-                    if (Conversation.handleUpdate(this._client, update) && skipConversationUpdates) return
+                    if (Conversation.handleUpdate(this, update) && skipConversationUpdates) return
 
                     this.emit('update', update)
                     this.emit(update.name, update.data)
