@@ -501,6 +501,41 @@ describe('HtmlMessageEntityParser', () => {
                 )
             })
 
+            it('should handle interpolation into attrs', () => {
+                test(
+                    htm`<a href="${'https'}://example.com/&quot;${'foo'}/bar/${'baz'}?foo=bar&baz=${'egg'}">link</a>`,
+                    [
+                        createEntity('messageEntityTextUrl', 0, 4, {
+                            url: 'https://example.com/"foo/bar/baz?foo=bar&baz=egg',
+                        }),
+                    ],
+                    'link',
+                )
+                test(
+                    // at the same time testing that non-quoted attributes work
+                    htm`<a href=tg://user?id=${1234567}&hash=${'aabbccddaabbccdd'}>user</a>`,
+                    [
+                        createEntity('inputMessageEntityMentionName', 0, 4, {
+                            userId: {
+                                _: 'inputUser',
+                                userId: 1234567,
+                                accessHash: Long.fromString('aabbccddaabbccdd', 16),
+                            },
+                        }),
+                    ],
+                    'user',
+                )
+                test(
+                    htm`<tg-emoji id="${'123123123123'}">🚀</tg-emoji>`,
+                    [
+                        createEntity('messageEntityCustomEmoji', 0, 2, {
+                            documentId: Long.fromString('123123123123'),
+                        }),
+                    ],
+                    '🚀',
+                )
+            })
+
             it('should skip falsy values', () => {
                 test(htm`some text ${null} some ${false} more text`, [], 'some text some more text')
             })

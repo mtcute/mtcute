@@ -27,6 +27,8 @@ function parse(
     let plainText = ''
     let pendingText = ''
 
+    let isInsideAttrib = false
+
     function processPendingText(tagEnd = false, keepWhitespace = false) {
         if (!pendingText.length) return
 
@@ -212,7 +214,29 @@ function parse(
         ontext(data) {
             pendingText += data
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     })
+
+    // a hack for interpolating inside attributes
+    // instead of hacking into the parser itself (which would require a lot of work
+    // and test coverage because of the number of edge cases), we'll just feed
+    // an escaped version of the text right to the parser.
+    // however, to do that we need to know if we are inside an attribute or not,
+    // and htmlparser2 doesn't really expose that.
+    // it only exposes .onattribute, which isn't really useful here, as
+    // we want to know if we are mid-attribute or not
+    const onattribname = parser.onattribname
+    const onattribend = parser.onattribend
+
+    parser.onattribname = function (name) {
+        onattribname.call(this, name)
+        isInsideAttrib = true
+    }
+
+    parser.onattribend = function (quote) {
+        onattribend.call(this, quote)
+        isInsideAttrib = false
+    }
 
     if (typeof strings === 'string') strings = [strings] as unknown as TemplateStringsArray
 
@@ -220,6 +244,20 @@ function parse(
         parser.write(strings[idx])
 
         if (typeof it === 'boolean' || !it) return
+
+        if (isInsideAttrib) {
+            let text: string
+
+            if (typeof it === 'string') text = it
+            else if (typeof it === 'number') text = it.toString()
+            else {
+                // obviously we can't have entities inside attributes, so just use the text
+                text = it.text
+            }
+            parser.write(escape(text, true))
+
+            return
+        }
 
         if (typeof it === 'string' || typeof it === 'number') {
             pendingText += it
