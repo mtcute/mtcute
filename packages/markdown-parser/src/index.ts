@@ -135,7 +135,7 @@ function unparse(input: InputText): string {
 
 function parse(
     strings: TemplateStringsArray | string,
-    ...sub: (InputText | MessageEntity | boolean | number | undefined | null)[]
+    ...sub: (InputText | MessageEntity | Long | boolean | number | undefined | null)[]
 ): TextWithEntities {
     const entities: tl.TypeMessageEntity[] = []
     let result = ''
@@ -397,6 +397,8 @@ function parse(
 
         if (typeof it === 'string' || typeof it === 'number') {
             result += it
+        } else if (Long.isLong(it)) {
+            result += it.toString(10)
         } else {
             // TextWithEntities or MessageEntity
             const text = it.text
@@ -447,7 +449,7 @@ export const md: {
      */
     (
         strings: TemplateStringsArray,
-        ...sub: (InputText | MessageEntity | boolean | number | undefined | null)[]
+        ...sub: (InputText | MessageEntity | Long | boolean | number | undefined | null)[]
     ): TextWithEntities
     /**
      * A variant taking a plain JS string as input
