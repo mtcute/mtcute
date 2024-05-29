@@ -1453,7 +1453,7 @@ export class SessionConnection extends PersistentConnection {
         }
 
         if (timeout) {
-            pending.timeout = setTimeout(this._cancelRpc, timeout, pending, true)
+            pending.timeout = setTimeout(() => this._cancelRpc(pending, true), timeout)
         }
 
         if (abortSignal) {
