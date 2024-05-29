@@ -501,6 +501,14 @@ describe('HtmlMessageEntityParser', () => {
                 )
             })
 
+            it('should handle numbers and Longs', () => {
+                test(
+                    htm`a number ${123123} and a long ${Long.fromNumber(456456)}`,
+                    [],
+                    'a number 123123 and a long 456456',
+                )
+            })
+
             it('should handle interpolation into attrs', () => {
                 test(
                     htm`<a href="${'https'}://example.com/&quot;${'foo'}/bar/${'baz'}?foo=bar&baz=${'egg'}">link</a>`,
@@ -526,7 +534,7 @@ describe('HtmlMessageEntityParser', () => {
                     'user',
                 )
                 test(
-                    htm`<tg-emoji id="${'123123123123'}">🚀</tg-emoji>`,
+                    htm`<tg-emoji id="${Long.fromString('123123123123')}">🚀</tg-emoji>`,
                     [
                         createEntity('messageEntityCustomEmoji', 0, 2, {
                             documentId: Long.fromString('123123123123'),

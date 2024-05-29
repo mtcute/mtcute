@@ -20,7 +20,7 @@ function escape(str: string, quote = false): string {
 
 function parse(
     strings: TemplateStringsArray | string,
-    ...sub: (InputText | MessageEntity | boolean | number | undefined | null)[]
+    ...sub: (InputText | MessageEntity | Long | boolean | number | undefined | null)[]
 ): TextWithEntities {
     const stacks: Record<string, tl.Mutable<tl.TypeMessageEntity>[]> = {}
     const entities: tl.TypeMessageEntity[] = []
@@ -250,6 +250,7 @@ function parse(
 
             if (typeof it === 'string') text = it
             else if (typeof it === 'number') text = it.toString()
+            else if (Long.isLong(it)) text = it.toString(10)
             else {
                 // obviously we can't have entities inside attributes, so just use the text
                 text = it.text
@@ -261,6 +262,8 @@ function parse(
 
         if (typeof it === 'string' || typeof it === 'number') {
             pendingText += it
+        } else if (Long.isLong(it)) {
+            pendingText += it.toString(10)
         } else {
             // TextWithEntities or MessageEntity
             const text = it.text
@@ -451,7 +454,7 @@ export const html: {
      */
     (
         strings: TemplateStringsArray,
-        ...sub: (InputText | MessageEntity | boolean | number | undefined | null)[]
+        ...sub: (InputText | MessageEntity | boolean | Long | number | undefined | null)[]
     ): TextWithEntities
     /**
      * A variant taking a plain JS string as input
