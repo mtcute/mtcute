@@ -24,7 +24,6 @@ import { ConfigManager } from './config-manager.js'
 import { NetworkManager, NetworkManagerExtraParams, RpcCallOptions } from './network-manager.js'
 import { PersistentConnectionParams } from './persistent-connection.js'
 import { ReconnectionStrategy } from './reconnection.js'
-import { SessionConnection } from './session-connection.js'
 import { TransportFactory } from './transports/index.js'
 
 /** Options for {@link MtClient} */
@@ -234,7 +233,7 @@ export class MtClient extends EventEmitter {
 
     readonly _config = new ConfigManager(() => this.call({ _: 'help.getConfig' }))
 
-    private _emitError?: (err: unknown, connection?: SessionConnection) => void
+    private _emitError?: (err: unknown) => void
 
     readonly log: Logger
     readonly network: NetworkManager
@@ -306,9 +305,9 @@ export class MtClient extends EventEmitter {
         )
     }
 
-    emitError(err: unknown, connection?: SessionConnection): void {
+    emitError(err: unknown): void {
         if (this._emitError) {
-            this._emitError(err, connection)
+            this._emitError(err)
         } else {
             this.log.error('unhandled error:', err)
         }
@@ -392,6 +391,6 @@ export class MtClient extends EventEmitter {
      * @param handler Error handler.
      */
     onError(handler: (err: unknown) => void): void {
-        this.emitError = handler
+        this._emitError = handler
     }
 }
