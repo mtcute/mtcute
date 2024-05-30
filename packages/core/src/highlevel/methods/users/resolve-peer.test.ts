@@ -140,16 +140,10 @@ describe('resolvePeer', () => {
                 })
             })
 
-            it('should return user with zero hash if not in storage', async () => {
+            it('should throw if not in storage', async () => {
                 const client = new StubTelegramClient()
 
-                const resolved = await resolvePeer(client, 123)
-
-                expect(resolved).toEqual({
-                    _: 'inputPeerUser',
-                    userId: 123,
-                    accessHash: Long.ZERO,
-                })
+                await expect(resolvePeer(client, 123)).rejects.toThrow(MtPeerNotFoundError)
             })
         })
 
@@ -198,16 +192,10 @@ describe('resolvePeer', () => {
                 })
             })
 
-            it('should return channel with zero hash if not in storage', async () => {
+            it('should throw if not in storage', async () => {
                 const client = new StubTelegramClient()
 
-                const resolved = await resolvePeer(client, -1000000000123)
-
-                expect(resolved).toEqual({
-                    _: 'inputPeerChannel',
-                    channelId: 123,
-                    accessHash: Long.ZERO,
-                })
+                await expect(resolvePeer(client, -1000000000123)).rejects.toThrow(MtPeerNotFoundError)
             })
         })
 

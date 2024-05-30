@@ -133,11 +133,13 @@ export async function resolvePeer(
         throw new MtPeerNotFoundError(`Could not find a peer by ${peerId}`)
     }
 
-    // in some cases, the server allows us to use access_hash=0.
-    // particularly, when we're a bot or we're referencing a user
-    // who we have "seen" recently
+    // in some cases, the server allows bots to use access_hash=0.
     // if it's not the case, we'll get an `PEER_ID_INVALID` error anyways
     const [peerType, bareId] = parseMarkedPeerId(peerId)
+
+    if (peerType !== 'chat' && !client.storage.self.getCached(true)?.isBot) {
+        throw new MtPeerNotFoundError(`Peer ${peerId} is not found in local cache`)
+    }
 
     switch (peerType) {
         case 'user':

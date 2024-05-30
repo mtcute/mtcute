@@ -1,5 +1,5 @@
 import Long from 'long'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { createStub, StubTelegramClient } from '@mtcute/test'
 
@@ -19,6 +19,8 @@ const stubChannel = createStub('channel', {
 describe('sendText', () => {
     it('should correctly handle updateNewMessage', async () => {
         const client = new StubTelegramClient()
+
+        await client.registerPeers(stubUser)
 
         client.respondWith('messages.sendMessage', (req) =>
             createStub('updates', {
@@ -60,6 +62,8 @@ describe('sendText', () => {
     it('should correctly handle updateNewChannelMessage', async () => {
         const client = new StubTelegramClient()
 
+        await client.registerPeers(stubChannel, stubUser)
+
         client.respondWith('messages.sendMessage', (req) =>
             createStub('updates', {
                 users: [stubUser],
@@ -100,7 +104,7 @@ describe('sendText', () => {
         })
     })
 
-    it('should correctly handle updateShortSentMessage with cached peer', async () => {
+    it('should correctly handle updateShortSentMessage', async () => {
         const client = new StubTelegramClient()
 
         await client.storage.self.store({
@@ -120,44 +124,6 @@ describe('sendText', () => {
 
         await client.with(async () => {
             const msg = await sendText(client, stubUser.id, 'test')
-
-            expect(msg).toBeDefined()
-            expect(msg.id).toEqual(123)
-            expect(msg.chat.chatType).toEqual('private')
-            expect(msg.chat.id).toEqual(stubUser.id)
-            expect(msg.text).toEqual('test')
-        })
-    })
-
-    it('should correctly handle updateShortSentMessage without cached peer', async () => {
-        const client = new StubTelegramClient()
-
-        await client.storage.self.store({
-            userId: stubUser.id,
-            isBot: false,
-            isPremium: false,
-            usernames: [],
-        })
-
-        const getUsersFn = client.respondWith(
-            'users.getUsers',
-            vi.fn(() => [stubUser]),
-        )
-
-        client.respondWith('messages.sendMessage', () =>
-            createStub('updateShortSentMessage', {
-                id: 123,
-                out: true,
-            }),
-        )
-
-        await client.with(async () => {
-            const msg = await sendText(client, stubUser.id, 'test')
-
-            expect(getUsersFn).toHaveBeenCalledWith({
-                _: 'users.getUsers',
-                id: [{ _: 'inputUser', userId: stubUser.id, accessHash: Long.ZERO }],
-            })
 
             expect(msg).toBeDefined()
             expect(msg.id).toEqual(123)

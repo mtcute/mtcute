@@ -1,5 +1,5 @@
 import Long from 'long'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 import { createStub, StubTelegramClient } from '@mtcute/test'
 
@@ -19,6 +19,23 @@ describe('getUsers', () => {
             return createStub('user', { id: it.userId, accessHash: Long.ZERO })
         }),
     )
+
+    beforeAll(async () => {
+        await client.registerPeers(
+            createStub('user', {
+                id: 123,
+                accessHash: Long.fromBits(123, 456),
+            }),
+            createStub('user', {
+                id: 456,
+                accessHash: Long.fromBits(123, 456),
+            }),
+            createStub('user', {
+                id: 1,
+                accessHash: Long.fromBits(123, 456),
+            }),
+        )
+    })
 
     it('should return users returned by users.getUsers', async () => {
         expect(await getUsers(client, [123, 456])).toEqual([
