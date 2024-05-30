@@ -1,5 +1,6 @@
 import { tl } from '@mtcute/tl'
 
+import { isPresent } from '../../../utils/type-assertions.js'
 import { ITelegramClient } from '../../client.types.js'
 import { InputPrivacyRule } from '../../types/index.js'
 import { toInputUser } from '../../utils/index.js'
@@ -36,7 +37,7 @@ export async function _normalizePrivacyRules(
 
             res.push({
                 _: rule.allow ? 'inputPrivacyValueAllowChatParticipants' : 'inputPrivacyValueDisallowChatParticipants',
-                chats: chats.map((peer) => {
+                chats: chats.filter(isPresent).map((peer) => {
                     if ('channelId' in peer) return peer.channelId
                     if ('chatId' in peer) return peer.chatId
 
