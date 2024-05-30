@@ -171,7 +171,8 @@ export class Conversation {
         this._chatId = getMarkedPeerId(this._inputPeer)
 
         const [dialog] = await getPeerDialogs(this.client, this._inputPeer)
-        const lastMessage = dialog.lastMessage
+
+        const lastMessage = dialog?.lastMessage
 
         if (lastMessage) {
             this._lastMessage = this._lastReceivedMessage = lastMessage.id
