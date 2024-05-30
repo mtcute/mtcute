@@ -89,6 +89,7 @@ import { importContacts } from './methods/contacts/import-contacts.js'
 import { createFolder } from './methods/dialogs/create-folder.js'
 import { deleteFolder } from './methods/dialogs/delete-folder.js'
 import { editFolder } from './methods/dialogs/edit-folder.js'
+import { findDialogs } from './methods/dialogs/find-dialogs.js'
 import { findFolder } from './methods/dialogs/find-folder.js'
 import { getFolders } from './methods/dialogs/get-folders.js'
 import { getPeerDialogs } from './methods/dialogs/get-peer-dialogs.js'
@@ -1038,6 +1039,18 @@ export interface TelegramClient extends ITelegramClient {
              * @default  `10000` (10 sec)
              */
             timeout?: number
+
+            /**
+             * Whether to "fire and forget" this request,
+             * in which case the promise will resolve as soon
+             * as the request is sent with an empty response.
+             *
+             * Useful for interacting with bots that don't correctly
+             * answer to callback queries and the request always times out.
+             *
+             * **Note**: any errors will be silently ignored.
+             */
+            fireAndForget?: boolean
 
             /**
              * Whether this is a "play game" button
@@ -2156,6 +2169,18 @@ export interface TelegramClient extends ITelegramClient {
         /** Modification to be applied to this folder */
         modification: Partial<Omit<tl.RawDialogFilter, 'id' | '_'>>
     }): Promise<tl.RawDialogFilter>
+
+    /**
+     * Try to find a dialog (dialogs) with a given peer (peers) by their ID, username or phone number.
+     *
+     * This might be an expensive call, as it will potentially iterate over all
+     * dialogs to find the one with the given peer
+     *
+     * **Available**: 👤 users only
+     *
+     * @throws {MtPeerNotFoundError}  If a dialog with any of the given peers was not found
+     */
+    findDialogs(peers: MaybeArray<string | number>): Promise<Dialog[]>
     /**
      * Find a folder by its parameter.
      *
@@ -5242,6 +5267,8 @@ export interface TelegramClient extends ITelegramClient {
      * while also normalizing and removing
      * peers that can't be normalized to that type.
      *
+     * If a peer was not found, it will be skipped.
+     *
      * Uses async pool internally, with a concurrent limit of 8
      *
      * @param peerIds  Peer Ids
@@ -5254,11 +5281,13 @@ export interface TelegramClient extends ITelegramClient {
     /**
      * Get multiple `InputPeer`s at once.
      *
+     * If a peer was not found, `null` will be returned instead
+     *
      * Uses async pool internally, with a concurrent limit of 8
      *
      * @param peerIds  Peer Ids
      */
-    resolvePeerMany(peerIds: InputPeerLike[]): Promise<tl.TypeInputPeer[]>
+    resolvePeerMany(peerIds: InputPeerLike[]): Promise<(tl.TypeInputPeer | null)[]>
 
     /**
      * Get the `InputPeer` of a known peer id.
@@ -5691,6 +5720,9 @@ TelegramClient.prototype.deleteFolder = function (...args) {
 }
 TelegramClient.prototype.editFolder = function (...args) {
     return editFolder(this._client, ...args)
+}
+TelegramClient.prototype.findDialogs = function (...args) {
+    return findDialogs(this._client, ...args)
 }
 TelegramClient.prototype.findFolder = function (...args) {
     return findFolder(this._client, ...args)
