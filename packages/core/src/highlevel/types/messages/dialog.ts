@@ -4,7 +4,6 @@ import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { assertTypeIsNot, hasValueAtKey } from '../../../utils/type-assertions.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import { MtMessageNotFoundError } from '../errors.js'
 import { Chat } from '../peers/chat.js'
 import { PeersIndex } from '../peers/peers-index.js'
 import { DraftMessage } from './draft-message.js'
@@ -198,16 +197,16 @@ export class Dialog {
     }
 
     /**
-     * The latest message sent in this chat
+     * The latest message sent in this chat (if any)
      */
-    get lastMessage(): Message {
+    get lastMessage(): Message | null {
         const cid = this.chat.id
 
         if (this._messages.has(cid)) {
             return new Message(this._messages.get(cid)!, this._peers)
         }
 
-        throw new MtMessageNotFoundError(cid, 0)
+        return null
     }
 
     /**
