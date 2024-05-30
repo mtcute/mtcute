@@ -64,10 +64,16 @@ export async function resolvePeer(
             const fromStorage = await client.storage.peers.getByPhone(peerId)
             if (fromStorage) return fromStorage
 
-            res = await client.call({
-                _: 'contacts.resolvePhone',
-                phone: peerId,
-            })
+            try {
+                res = await client.call({
+                    _: 'contacts.resolvePhone',
+                    phone: peerId,
+                })
+            } catch (e) {
+                if (tl.RpcError.is(e, 'PHONE_NOT_OCCUPIED')) {
+                    throw new MtPeerNotFoundError(`Peer with phone number ${peerId} was not found`)
+                } else throw e
+            }
         } else {
             // username
             if (!force) {
@@ -75,10 +81,16 @@ export async function resolvePeer(
                 if (fromStorage) return fromStorage
             }
 
-            res = await client.call({
-                _: 'contacts.resolveUsername',
-                username: peerId,
-            })
+            try {
+                res = await client.call({
+                    _: 'contacts.resolveUsername',
+                    username: peerId,
+                })
+            } catch (e) {
+                if (tl.RpcError.is(e, 'USERNAME_NOT_OCCUPIED')) {
+                    throw new MtPeerNotFoundError(`Peer with username ${peerId} was not found`)
+                } else throw e
+            }
         }
 
         if (res.peer._ === 'peerUser') {
