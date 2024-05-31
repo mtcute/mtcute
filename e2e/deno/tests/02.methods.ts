@@ -24,6 +24,7 @@ Deno.test('2. calling methods', { sanitizeResources: false }, async (t) => {
     })
 
     await t.step('getHistory(777000)', async () => {
+        await tg.findDialogs(777000) // ensure it's cached
         const history = await tg.getHistory(777000, { limit: 5 })
 
         assertEquals(history[0].chat.chatType, 'private')

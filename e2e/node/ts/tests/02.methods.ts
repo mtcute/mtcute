@@ -27,6 +27,7 @@ describe('2. calling methods', function () {
     })
 
     it('getHistory(777000)', async () => {
+        await tg.findDialogs(777000) // ensure it's cached
         const history = await tg.getHistory(777000, { limit: 5 })
 
         expect(history[0].chat.chatType).to.equal('private')
