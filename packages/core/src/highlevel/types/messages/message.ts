@@ -485,6 +485,15 @@ export class Message {
     }
 
     /**
+     * If this message was sent with a message effect, ID of the effect
+     */
+    get effectId(): tl.Long | null {
+        if (this.raw._ === 'messageService') return null
+
+        return this.raw.effect ?? null
+    }
+
+    /**
      * Generated permalink to this message, only for groups and channels
      *
      * @throws MtArgumentError  In case the chat does not support message links

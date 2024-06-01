@@ -130,6 +130,7 @@ export type { ForwardMessageOptions } from './methods/messages/forward-messages.
 export { forwardMessagesById } from './methods/messages/forward-messages.js'
 export { forwardMessages } from './methods/messages/forward-messages.js'
 export { getAllScheduledMessages } from './methods/messages/get-all-scheduled-messages.js'
+export { getAvailableMessageEffects } from './methods/messages/get-available-effects.js'
 export { getCallbackQueryMessage } from './methods/messages/get-callback-query-message.js'
 export { getDiscussionMessage } from './methods/messages/get-discussion-message.js'
 export { getFactCheck } from './methods/messages/get-fact-check.js'

@@ -81,6 +81,7 @@ export async function sendText(
             sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
             invertMedia: params.invertMedia,
             quickReplyShortcut,
+            effect: params.effect,
         },
         { chainId },
     )

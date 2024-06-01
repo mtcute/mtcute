@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/tl'
 
 import { RpcCallOptions } from '../../../network/network-manager.js'
+import { MustEqual } from '../../../types/utils.js'
 import { LruMap } from '../../../utils/lru-map.js'
 import { ITelegramClient } from '../../client.types.js'
 import { getBusinessConnection } from '../premium/get-business-connection.js'
@@ -26,7 +27,7 @@ const getDcMap = (client: ITelegramClient): LruMap<string, number> => {
 export async function _maybeInvokeWithBusinessConnection<T extends tl.RpcMethod>(
     client: ITelegramClient,
     businessConnectionId: string | undefined,
-    request: T,
+    request: MustEqual<T, tl.RpcMethod>,
     params?: RpcCallOptions,
 ): Promise<tl.RpcCallReturn[T['_']]> {
     if (!businessConnectionId) {

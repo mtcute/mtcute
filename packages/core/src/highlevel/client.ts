@@ -132,6 +132,7 @@ import { editInlineMessage } from './methods/messages/edit-inline-message.js'
 import { editMessage } from './methods/messages/edit-message.js'
 import { ForwardMessageOptions, forwardMessages, forwardMessagesById } from './methods/messages/forward-messages.js'
 import { getAllScheduledMessages } from './methods/messages/get-all-scheduled-messages.js'
+import { getAvailableMessageEffects } from './methods/messages/get-available-effects.js'
 import { getCallbackQueryMessage } from './methods/messages/get-callback-query-message.js'
 import { getDiscussionMessage } from './methods/messages/get-discussion-message.js'
 import { getFactCheck } from './methods/messages/get-fact-check.js'
@@ -302,6 +303,7 @@ import {
     InputText,
     MaybeDynamic,
     Message,
+    MessageEffect,
     MessageMedia,
     MessageReactions,
     ParametersSkip2,
@@ -3246,6 +3248,13 @@ export interface TelegramClient extends ITelegramClient {
     getAllScheduledMessages(chatId: InputPeerLike): Promise<Message[]>
 
     /**
+     * Get a list of available message effects
+     * **Available**: 👤 users only
+     *
+     */
+    getAvailableMessageEffects(): Promise<MessageEffect[]>
+
+    /**
      * Get the message containing the button being clicked
      * in the given callback query.
      * **Available**: 🤖 bots only
@@ -5915,6 +5924,9 @@ TelegramClient.prototype.forwardMessages = function (...args) {
 }
 TelegramClient.prototype.getAllScheduledMessages = function (...args) {
     return getAllScheduledMessages(this._client, ...args)
+}
+TelegramClient.prototype.getAvailableMessageEffects = function (...args) {
+    return getAvailableMessageEffects(this._client, ...args)
 }
 TelegramClient.prototype.getCallbackQueryMessage = function (...args) {
     return getCallbackQueryMessage(this._client, ...args)

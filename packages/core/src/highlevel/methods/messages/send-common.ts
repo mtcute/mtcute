@@ -117,6 +117,13 @@ export interface CommonSendParams {
      * the message will be sent
      */
     businessConnectionId?: string
+
+    /**
+     * ID of a message effect to use when sending the message
+     * (see {@link TelegramClient.getAvailableMessageEffects})
+     */
+    effect?: tl.Long
+    // todo: once we have a caching layer, we can accept an emoji here
 }
 
 /**

@@ -69,6 +69,7 @@ import {
     InputText,
     MaybeDynamic,
     Message,
+    MessageEffect,
     MessageMedia,
     MessageReactions,
     ParametersSkip2,

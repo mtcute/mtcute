@@ -107,6 +107,7 @@ export async function sendMedia(
             sendAs: params.sendAs ? await resolvePeer(client, params.sendAs) : undefined,
             invertMedia: params.invert,
             quickReplyShortcut,
+            effect: params.effect,
         },
         { chainId },
     )
