@@ -34,7 +34,8 @@ describe('1. authorization', function () {
             } catch (e) {
                 if (
                     (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) ||
-                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')
+                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') ||
+                    tl.RpcError.is(e, 'PHONE_NUMBER_FLOOD')
                 ) {
                     // retry with another number
                     await tg.logOut().catch((err) => {
@@ -75,7 +76,8 @@ describe('1. authorization', function () {
             } catch (e) {
                 if (
                     (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) ||
-                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')
+                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') ||
+                    tl.RpcError.is(e, 'PHONE_NUMBER_FLOOD')
                 ) {
                     // retry with another number
                     continue

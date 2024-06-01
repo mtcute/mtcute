@@ -31,7 +31,8 @@ Deno.test('1. authorization', { sanitizeResources: false }, async (t) => {
             } catch (e) {
                 if (
                     (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) ||
-                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')
+                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') ||
+                    tl.RpcError.is(e, 'PHONE_NUMBER_FLOOD')
                 ) {
                     // retry with another number
                     await tg.logOut().catch((err) => {
@@ -72,7 +73,8 @@ Deno.test('1. authorization', { sanitizeResources: false }, async (t) => {
             } catch (e) {
                 if (
                     (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) ||
-                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')
+                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') ||
+                    tl.RpcError.is(e, 'PHONE_NUMBER_FLOOD')
                 ) {
                     // retry with another number
                     continue
