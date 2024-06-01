@@ -39,10 +39,10 @@ export type MessageEntityParams =
               | 'strikethrough'
               | 'spoiler'
               | 'code'
-              | 'blockquote'
               | 'bank_card'
               | 'unknown'
       }
+    | { kind: 'blockquote'; collapsible: boolean }
     | { kind: 'pre'; language?: string }
     | { kind: 'text_link'; url: string }
     | { kind: 'text_mention'; userId: number }
@@ -125,7 +125,7 @@ export class MessageEntity {
             case 'messageEntityMentionName':
                 return { kind: 'text_mention', userId: this.raw.userId }
             case 'messageEntityBlockquote':
-                return { kind: 'blockquote' }
+                return { kind: 'blockquote', collapsible: this.raw.collapsed! }
             case 'messageEntityCustomEmoji':
                 return { kind: 'emoji', emojiId: this.raw.documentId }
             case 'messageEntityBankCard':
