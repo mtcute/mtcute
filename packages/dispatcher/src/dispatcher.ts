@@ -420,7 +420,10 @@ export class Dispatcher<State extends object = never> {
                 (update.name === 'new_message' ||
                     update.name === 'edit_message' ||
                     update.name === 'callback_query' ||
-                    update.name === 'message_group')
+                    update.name === 'message_group' ||
+                    update.name === 'new_business_message' ||
+                    update.name === 'edit_business_message' ||
+                    update.name === 'business_message_group')
             ) {
                 // no need to fetch scene if there are no registered scenes
 
