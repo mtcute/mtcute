@@ -181,6 +181,13 @@ export class Dispatcher<State extends object = never> {
     /**
      * Create a new dispatcher and bind it to the client.
      */
+    static for<State extends object = never>(
+        client: TelegramClient,
+        ...args: [State] extends [never]
+            ? [params?: DispatcherParams]
+            : [params: DispatcherParams & { storage: IStateStorageProvider }]
+    ): Dispatcher<State>
+
     static for<State extends object = never>(client: TelegramClient, params?: DispatcherParams): Dispatcher<State> {
         return new Dispatcher<State>(client, params)
     }
