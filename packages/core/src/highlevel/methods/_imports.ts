@@ -45,6 +45,7 @@ import {
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     Dialog,
+    FactCheck,
     FileDownloadLocation,
     FileDownloadParameters,
     ForumTopic,

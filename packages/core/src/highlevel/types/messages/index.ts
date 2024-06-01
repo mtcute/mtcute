@@ -1,5 +1,6 @@
 export * from './dialog.js'
 export * from './draft-message.js'
+export * from './fact-check.js'
 export * from './input-message-id.js'
 export * from './message.js'
 export * from './message-action.js'

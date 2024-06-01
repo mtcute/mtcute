@@ -12,6 +12,7 @@ import { Chat } from '../peers/chat.js'
 import { parsePeer, Peer } from '../peers/peer.js'
 import { PeersIndex } from '../peers/peers-index.js'
 import { User } from '../peers/user.js'
+import { FactCheck } from './fact-check.js'
 import { _messageActionFromTl, MessageAction } from './message-action.js'
 import { MessageEntity } from './message-entity.js'
 import { MessageForwardInfo } from './message-forward.js'
@@ -462,12 +463,25 @@ export class Message {
         return this.raw._ === 'message' && !this.raw.noforwards
     }
 
+    /**
+     * Reactions added to this message, if any
+     */
     get reactions(): MessageReactions | null {
         if (this.raw._ === 'messageService' || !this.raw.reactions) {
             return null
         }
 
         return new MessageReactions(this.raw.id, getMarkedPeerId(this.raw.peerId), this.raw.reactions, this._peers)
+    }
+
+    /**
+     * Information about fact-check added to the message, if any
+     */
+    get factCheck(): FactCheck | null {
+        if (this.raw._ === 'messageService') return null
+        if (!this.raw.factcheck || this.raw.factcheck.hash.isZero()) return null
+
+        return new FactCheck(this.raw.factcheck)
     }
 
     /**
@@ -499,5 +513,6 @@ memoizeGetters(Message, [
     'media',
     'markup',
     'reactions',
+    'factCheck',
 ])
 makeInspectable(Message, ['isScheduled'], ['link'])

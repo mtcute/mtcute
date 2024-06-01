@@ -134,6 +134,7 @@ import { ForwardMessageOptions, forwardMessages, forwardMessagesById } from './m
 import { getAllScheduledMessages } from './methods/messages/get-all-scheduled-messages.js'
 import { getCallbackQueryMessage } from './methods/messages/get-callback-query-message.js'
 import { getDiscussionMessage } from './methods/messages/get-discussion-message.js'
+import { getFactCheck } from './methods/messages/get-fact-check.js'
 import { getHistory, GetHistoryOffset } from './methods/messages/get-history.js'
 import { getMessageByLink } from './methods/messages/get-message-by-link.js'
 import { getMessageGroup } from './methods/messages/get-message-group.js'
@@ -277,6 +278,7 @@ import {
     DeleteMessageUpdate,
     DeleteStoryUpdate,
     Dialog,
+    FactCheck,
     FileDownloadLocation,
     FileDownloadParameters,
     ForumTopic,
@@ -3277,6 +3279,16 @@ export interface TelegramClient extends ITelegramClient {
      * @param message  ID of the channel post
      */
     getDiscussionMessage(params: InputMessageId): Promise<Message | null>
+
+    /**
+     * Get fact check information for one or more messages in a chat
+     *
+     * **Available**: 👤 users only
+     *
+     * @param chatId  Chat where the messages are located
+     * @param msgIds  One or more message IDs
+     */
+    getFactCheck(chatId: InputPeerLike, msgIds: MaybeArray<number>): Promise<(FactCheck | null)[]>
     /**
      * Get chat history.
      *
@@ -5909,6 +5921,9 @@ TelegramClient.prototype.getCallbackQueryMessage = function (...args) {
 }
 TelegramClient.prototype.getDiscussionMessage = function (...args) {
     return getDiscussionMessage(this._client, ...args)
+}
+TelegramClient.prototype.getFactCheck = function (...args) {
+    return getFactCheck(this._client, ...args)
 }
 TelegramClient.prototype.getHistory = function (...args) {
     return getHistory(this._client, ...args)
