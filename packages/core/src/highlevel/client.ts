@@ -151,6 +151,7 @@ import { pinMessage } from './methods/messages/pin-message.js'
 import { readHistory } from './methods/messages/read-history.js'
 import { readReactions } from './methods/messages/read-reactions.js'
 import { searchGlobal, SearchGlobalOffset } from './methods/messages/search-global.js'
+import { iterSearchHashtag, searchHashtag, SearchHashtagOffset } from './methods/messages/search-hashtag.js'
 import { searchMessages, SearchMessagesOffset } from './methods/messages/search-messages.js'
 import { answerMedia, answerMediaGroup, answerText } from './methods/messages/send-answer.js'
 import { commentMedia, commentMediaGroup, commentText } from './methods/messages/send-comment.js'
@@ -3687,6 +3688,53 @@ export interface TelegramClient extends ITelegramClient {
          */
         onlyChannels?: boolean
     }): Promise<ArrayPaginated<Message, SearchGlobalOffset>>
+
+    /**
+     * Perform a global hashtag search, across the entire Telegram
+     *
+     * **Available**: 👤 users only
+     *
+     * @param hashtag  Hashtag to search for
+     * @param params  Additional parameters
+     */
+    searchHashtag(
+        hashtag: string,
+        params?: {
+            /** Offset for the search */
+            offset?: SearchHashtagOffset
+            /** Limit the number of results */
+            limit?: number
+        },
+    ): Promise<ArrayPaginated<Message, SearchHashtagOffset>>
+    /**
+     * Perform a global hashtag search, across the entire Telegram
+     *
+     * Iterable version of {@link searchHashtag}
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param hashtag  Hashtag to search for
+     * @param params  Additional parameters
+     */
+    iterSearchHashtag(
+        hashtag: string,
+        params?: Parameters<typeof searchHashtag>[2] & {
+            /**
+             * Limits the number of messages to be retrieved.
+             *
+             * @default  `Infinity`, i.e. all messages are returned
+             */
+            limit?: number
+
+            /**
+             * Chunk size, which will be passed as `limit` parameter
+             * for `messages.search`. Usually you shouldn't care about this.
+             *
+             * @default  100
+             */
+            chunkSize?: number
+        },
+    ): AsyncIterableIterator<Message>
     /**
      * Search for messages inside a specific chat
      *
@@ -5915,6 +5963,12 @@ TelegramClient.prototype.readReactions = function (...args) {
 }
 TelegramClient.prototype.searchGlobal = function (...args) {
     return searchGlobal(this._client, ...args)
+}
+TelegramClient.prototype.searchHashtag = function (...args) {
+    return searchHashtag(this._client, ...args)
+}
+TelegramClient.prototype.iterSearchHashtag = function (...args) {
+    return iterSearchHashtag(this._client, ...args)
 }
 TelegramClient.prototype.searchMessages = function (...args) {
     return searchMessages(this._client, ...args)
