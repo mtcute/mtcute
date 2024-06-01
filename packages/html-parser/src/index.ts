@@ -105,6 +105,7 @@ function parse(
                         _: 'messageEntityBlockquote',
                         offset: plainText.length,
                         length: 0,
+                        collapsed: 'collapsible' in attribs,
                     }
                     break
                 case 'code':
@@ -372,7 +373,6 @@ function _unparse(
             case 'messageEntityUnderline':
             case 'messageEntityStrike':
             case 'messageEntityCode':
-            case 'messageEntityBlockquote':
             case 'messageEntitySpoiler':
                 {
                     const tag = (
@@ -382,12 +382,14 @@ function _unparse(
                             messageEntityUnderline: 'u',
                             messageEntityStrike: 's',
                             messageEntityCode: 'code',
-                            messageEntityBlockquote: 'blockquote',
                             messageEntitySpoiler: 'spoiler',
                         } as const
                     )[type]
                     html.push(`<${tag}>${entityText}</${tag}>`)
                 }
+                break
+            case 'messageEntityBlockquote':
+                html.push(`<blockquote${entity.collapsed ? ' collapsible' : ''}>${entityText}</blockquote>`)
                 break
             case 'messageEntityPre':
                 html.push(

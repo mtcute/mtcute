@@ -64,6 +64,14 @@ describe('HtmlMessageEntityParser', () => {
             )
         })
 
+        it('should handle collapsible blockquotes', () => {
+            test(
+                'plain blockquote plain',
+                [createEntity('messageEntityBlockquote', 6, 10, { collapsed: true })],
+                'plain <blockquote collapsible>blockquote</blockquote> plain',
+            )
+        })
+
         it('should handle links and text mentions', () => {
             test(
                 'plain https://google.com google @durov Pavel Durov mail@mail.ru plain',
@@ -253,10 +261,18 @@ describe('HtmlMessageEntityParser', () => {
                 [
                     createEntity('messageEntityCode', 6, 4),
                     createEntity('messageEntityPre', 11, 3, { language: '' }),
-                    createEntity('messageEntityBlockquote', 15, 10),
+                    createEntity('messageEntityBlockquote', 15, 10, { collapsed: false }),
                     createEntity('messageEntitySpoiler', 26, 7),
                 ],
                 'plain code pre blockquote spoiler plain',
+            )
+        })
+
+        it('should handle collapsible blockquotes', () => {
+            test(
+                htm`plain <blockquote collapsible>blockquote</blockquote> plain`,
+                [createEntity('messageEntityBlockquote', 6, 10, { collapsed: true })],
+                'plain blockquote plain',
             )
         })
 
