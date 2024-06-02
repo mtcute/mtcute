@@ -1,7 +1,7 @@
 {
     "name": "@mtcute/core",
     "private": true,
-    "version": "0.12.5",
+    "version": "0.13.0",
     "description": "Type-safe library for MTProto (Telegram API)",
     "author": "alina sireneva <alina@tei.su>",
     "license": "MIT",
