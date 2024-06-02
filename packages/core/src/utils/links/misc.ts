@@ -82,3 +82,28 @@ export const boost = deeplinkBuilder<{ username: string } | { channelId: number 
         return { username: path }
     },
 })
+
+/**
+ * Link to a shared folder (chat list)
+ */
+export const folder = deeplinkBuilder<{ slug: string }>({
+    // tg://addlist?slug=XXX
+    internalBuild: ({ slug }) => ['addlist', { slug }],
+    internalParse: (path, query) => {
+        if (path !== 'addlist') return null
+
+        const slug = query.get('slug')
+        if (!slug) return null
+
+        return { slug }
+    },
+
+    // https://t.me/addlist/XXX
+    externalBuild: ({ slug }) => [`addlist/${slug}`, null],
+    externalParse: (path) => {
+        const [prefix, slug] = path.split('/')
+        if (prefix !== 'addlist') return null
+
+        return { slug }
+    },
+})

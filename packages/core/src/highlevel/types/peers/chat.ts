@@ -237,6 +237,11 @@ export class Chat {
         return this.peer._ === 'channel' && this.peer.forum!
     }
 
+    /** Whether the chat is not available (e.g. because the user was banned from there) */
+    get isUnavailable(): boolean {
+        return this.peer._ === 'chatForbidden' || this.peer._ === 'channelForbidden'
+    }
+
     /**
      * Whether the current user is a member of the chat.
      *

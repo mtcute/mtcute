@@ -36,6 +36,7 @@ import {
     ChatInviteLink,
     ChatInviteLinkMember,
     ChatJoinRequestUpdate,
+    ChatlistPreview,
     ChatMember,
     ChatMemberUpdate,
     ChatPreview,

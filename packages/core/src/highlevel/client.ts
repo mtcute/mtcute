@@ -91,9 +91,11 @@ import { deleteFolder } from './methods/dialogs/delete-folder.js'
 import { editFolder } from './methods/dialogs/edit-folder.js'
 import { findDialogs } from './methods/dialogs/find-dialogs.js'
 import { findFolder } from './methods/dialogs/find-folder.js'
+import { getChatlistPreview } from './methods/dialogs/get-chatlist-preview.js'
 import { getFolders } from './methods/dialogs/get-folders.js'
 import { getPeerDialogs } from './methods/dialogs/get-peer-dialogs.js'
 import { iterDialogs } from './methods/dialogs/iter-dialogs.js'
+import { joinChatlist } from './methods/dialogs/join-chatlist.js'
 import { setFoldersOrder } from './methods/dialogs/set-folders-order.js'
 import { downloadAsBuffer } from './methods/files/download-buffer.js'
 import { downloadAsIterable } from './methods/files/download-iterable.js'
@@ -270,6 +272,7 @@ import {
     ChatInviteLink,
     ChatInviteLinkMember,
     ChatJoinRequestUpdate,
+    ChatlistPreview,
     ChatMember,
     ChatMemberUpdate,
     ChatPreview,
@@ -2206,6 +2209,14 @@ export interface TelegramClient extends ITelegramClient {
         id?: number
     }): Promise<tl.RawDialogFilter | null>
     /**
+     * Get a preview of a chatlist by its invite link
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param link  Invite link
+     */
+    getChatlistPreview(link: string): Promise<ChatlistPreview>
+    /**
      * Get list of folders.
      * **Available**: 👤 users only
      *
@@ -2329,6 +2340,22 @@ export interface TelegramClient extends ITelegramClient {
          */
         filter?: Partial<Omit<tl.RawDialogFilter, '_' | 'id' | 'title'>>
     }): AsyncIterableIterator<Dialog>
+    /**
+     * Join a chatlist by its link
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param link  Invite link to the chatlist
+     * @param params  Additional parameters
+     * @returns  Folder representing the chatlist
+     */
+    joinChatlist(
+        link: string,
+        params?: {
+            /** Chats to join from the chatlist (all by default) */
+            peers?: MaybeArray<InputPeerLike>
+        },
+    ): Promise<tl.RawDialogFilterChatlist>
     /**
      * Reorder folders
      *
@@ -5796,6 +5823,9 @@ TelegramClient.prototype.findDialogs = function (...args) {
 TelegramClient.prototype.findFolder = function (...args) {
     return findFolder(this._client, ...args)
 }
+TelegramClient.prototype.getChatlistPreview = function (...args) {
+    return getChatlistPreview(this._client, ...args)
+}
 TelegramClient.prototype.getFolders = function (...args) {
     return getFolders(this._client, ...args)
 }
@@ -5804,6 +5834,9 @@ TelegramClient.prototype.getPeerDialogs = function (...args) {
 }
 TelegramClient.prototype.iterDialogs = function (...args) {
     return iterDialogs(this._client, ...args)
+}
+TelegramClient.prototype.joinChatlist = function (...args) {
+    return joinChatlist(this._client, ...args)
 }
 TelegramClient.prototype.setFoldersOrder = function (...args) {
     return setFoldersOrder(this._client, ...args)

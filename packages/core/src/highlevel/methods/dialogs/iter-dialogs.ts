@@ -2,7 +2,7 @@ import Long from 'long'
 
 import { tl } from '@mtcute/tl'
 
-import { MtUnsupportedError } from '../../../types/errors.js'
+import { MtArgumentError } from '../../../types/errors.js'
 import { ITelegramClient } from '../../client.types.js'
 import { Dialog, InputDialogFolder } from '../../types/index.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
@@ -156,11 +156,75 @@ export async function* iterDialogs(
         localFilters_ = undefined
     }
 
-    if (localFilters_?._ === 'dialogFilterChatlist') {
-        throw new MtUnsupportedError('Shared chat folders are not supported yet')
-    }
-
     const localFilters = localFilters_
+
+    if (localFilters?._ === 'dialogFilterChatlist') {
+        if (offsetId !== 0 || offsetDate !== 0 || offsetPeer._ !== 'inputPeerEmpty') {
+            throw new MtArgumentError('Cannot use offset parameters with chatlist filters')
+        }
+
+        // we only need to fetch pinnedPeers and includePeers
+        // instead of fetching the entire dialog list, we can shortcut
+        // and just fetch the peer dialogs
+
+        let remaining = Math.min(limit, localFilters.includePeers.length + localFilters.pinnedPeers.length)
+
+        if (pinned === 'include' || pinned === 'only') {
+            // yield pinned dialogs
+
+            const peers: tl.TypeInputDialogPeer[] = []
+
+            for (const peer of localFilters.pinnedPeers) {
+                if (remaining <= 0) break
+                remaining--
+                peers.push({
+                    _: 'inputDialogPeer',
+                    peer,
+                })
+            }
+
+            const res = await client.call({
+                _: 'messages.getPeerDialogs',
+                peers,
+            })
+
+            res.dialogs.forEach((dialog: tl.Mutable<tl.TypeDialog>) => (dialog.pinned = true))
+
+            yield* Dialog.parseTlDialogs(res)
+        }
+
+        if (pinned === 'only' || remaining <= 0) {
+            return
+        }
+
+        // yield non-pinned dialogs
+
+        let offset = 0
+
+        while (remaining > 0) {
+            const peers: tl.TypeInputDialogPeer[] = []
+
+            for (let i = 0; i < chunkSize; i++) {
+                if (remaining <= 0) break
+                remaining--
+                peers.push({
+                    _: 'inputDialogPeer',
+                    peer: localFilters.includePeers[offset + i],
+                })
+            }
+
+            offset += chunkSize
+
+            const res = await client.call({
+                _: 'messages.getPeerDialogs',
+                peers,
+            })
+
+            yield* Dialog.parseTlDialogs(res)
+        }
+
+        return
+    }
 
     if (localFilters) {
         archived = localFilters.excludeArchived ? 'exclude' : 'keep'

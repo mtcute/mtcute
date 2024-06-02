@@ -185,4 +185,22 @@ describe('Deep links', function () {
             expect(links.boost.parse('tg://boost?channel=123')).eql({ channelId: 123 })
         })
     })
+
+    describe('Shared folder links', () => {
+        it('should generate tg://addlist?slug=XXX links', () => {
+            expect(links.folder({ slug: 'XXX', protocol: 'tg' })).eq('tg://addlist?slug=XXX')
+        })
+
+        it('should generate https://t.me/addlist/XXX links', () => {
+            expect(links.folder({ slug: 'XXX' })).eq('https://t.me/addlist/XXX')
+        })
+
+        it('should parse tg://addlist?slug=XXX links', () => {
+            expect(links.folder.parse('tg://addlist?slug=XXX')).eql({ slug: 'XXX' })
+        })
+
+        it('should parse https://t.me/addlist/XXX links', () => {
+            expect(links.folder.parse('https://t.me/addlist/XXX')).eql({ slug: 'XXX' })
+        })
+    })
 })
