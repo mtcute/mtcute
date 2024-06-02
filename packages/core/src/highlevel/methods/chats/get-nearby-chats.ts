@@ -23,7 +23,7 @@ export async function getNearbyChats(client: ITelegramClient, latitude: number, 
     })
 
     assertIsUpdatesGroup('contacts.getLocated', res)
-    // client.handleClientUpdate(res, true)
+    client.handleClientUpdate(res, true)
 
     if (!res.updates.length) return []
 

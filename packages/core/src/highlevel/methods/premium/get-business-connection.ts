@@ -20,6 +20,7 @@ export async function getBusinessConnection(
     })
 
     assertIsUpdatesGroup('account.getBotBusinessConnection', res)
+    client.handleClientUpdate(res)
     assertTypeIs('account.getBotBusinessConnection', res.updates[0], 'updateBotBusinessConnect')
 
     const peers = PeersIndex.from(res)

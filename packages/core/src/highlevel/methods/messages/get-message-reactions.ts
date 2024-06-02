@@ -28,6 +28,7 @@ export async function getMessageReactionsById(
     })
 
     assertIsUpdatesGroup('messages.getMessagesReactions', res)
+    client.handleClientUpdate(res)
 
     // normally the group contains updateMessageReactions
     // for each message requested that has reactions
