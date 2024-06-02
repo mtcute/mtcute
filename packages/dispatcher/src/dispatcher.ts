@@ -39,6 +39,7 @@ import {
     PreCheckoutQueryContext,
 } from './context/index.js'
 import { _parsedUpdateToContext, UpdateContextType } from './context/parse.js'
+import { SceneTransitionContext } from './context/scene-transition.js'
 import { filters, UpdateFilter } from './filters/index.js'
 // begin-codegen-imports
 import {
@@ -142,6 +143,11 @@ export class Dispatcher<State extends object = never> {
         update: ParsedUpdate & T,
         state?: UpdateState<State>,
     ) => MaybePromise<void>
+
+    private _sceneTransitionHandler?: (
+        update: SceneTransitionContext,
+        state: UpdateState<State>,
+    ) => MaybePromise<PropagationAction | void>
 
     protected constructor(client?: TelegramClient, params?: DispatcherParams) {
         this.dispatchRawUpdate = this.dispatchRawUpdate.bind(this)
@@ -462,7 +468,10 @@ export class Dispatcher<State extends object = never> {
                 (update.name === 'new_message' ||
                     update.name === 'edit_message' ||
                     update.name === 'callback_query' ||
-                    update.name === 'message_group')
+                    update.name === 'message_group' ||
+                    update.name === 'new_business_message' ||
+                    update.name === 'edit_business_message' ||
+                    update.name === 'business_message_group')
             ) {
                 if (!parsedContext) parsedContext = _parsedUpdateToContext(this._client, update)
                 const key = await this._stateKeyDelegate!(parsedContext as any)
@@ -521,6 +530,40 @@ export class Dispatcher<State extends object = never> {
                                 handled = true
                             } else continue
 
+                            if (parsedState && this._scenes) {
+                                // check if scene transition was made
+                                const newScene = parsedState.scene
+
+                                if (parsedScene !== newScene) {
+                                    const nextDp = newScene ? this._scenes.get(newScene) : this._parent
+
+                                    if (!nextDp) {
+                                        throw new MtArgumentError(`Scene ${newScene} not found`)
+                                    }
+
+                                    if (nextDp._sceneTransitionHandler) {
+                                        const transition = new SceneTransitionContext(parsedScene, parsedContext)
+                                        const transitionResult = await nextDp._sceneTransitionHandler?.(
+                                            transition,
+                                            parsedState,
+                                        )
+
+                                        switch (transitionResult) {
+                                            case 'stop':
+                                                return true
+                                            case 'continue':
+                                                continue
+                                            case 'scene': {
+                                                const scene = parsedState.scene
+                                                const dp = scene ? nextDp._scenes!.get(scene)! : nextDp._parent!
+
+                                                return dp._dispatchUpdateNowImpl(update, undefined, scene, true)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             switch (result) {
                                 case 'continue':
                                     continue
@@ -535,18 +578,10 @@ export class Dispatcher<State extends object = never> {
                                         throw new MtArgumentError('Cannot use ToScene without state')
                                     }
 
-                                    const scene = parsedState['_scene']
+                                    const scene = parsedState.scene
+                                    const dp = scene ? this._scenes!.get(scene)! : this._parent!
 
-                                    if (!scene) {
-                                        throw new MtArgumentError('Cannot use ToScene without entering a scene')
-                                    }
-
-                                    return this._scenes!.get(scene)!._dispatchUpdateNowImpl(
-                                        update,
-                                        undefined,
-                                        scene,
-                                        true,
-                                    )
+                                    return dp._dispatchUpdateNowImpl(update, undefined, scene, true)
                                 }
                             }
 
@@ -739,6 +774,7 @@ export class Dispatcher<State extends object = never> {
         child._client = this._client
         child._storage = this._storage
         child._deps = this._deps
+        child._scenes = this._scenes
         child._stateKeyDelegate = this._stateKeyDelegate
         child._customStorage ??= this._customStorage
         child._customStateKeyDelegate ??= this._customStateKeyDelegate
@@ -1069,6 +1105,32 @@ export class Dispatcher<State extends object = never> {
     /** @internal */
     onRawUpdate(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('raw', filter, handler, group)
+    }
+
+    /**
+     * Register a scene transition handler
+     *
+     * This handler is called whenever a scene transition occurs
+     * in the context of the scene that is being entered,
+     * and before any of the its own handlers are called,
+     * and can be used to customize the transition behavior:
+     *   - `Stop` to prevent dispatching the update any further **even if ToScene/ToRoot was used**
+     *   - `Continue` same as Stop, but still dispatch the update to children
+     *   - `ToScene` to prevent the transition and dispatch the update to the scene entered in the transition handler
+     *
+     * > **Note**: if multiple `state.enter()` calls were made within the same update,
+     * > this handler will only be called for the last one.
+     *
+     * @param handler  Raw update handler
+     * @param group  Handler group index
+     */
+    onSceneTransition(
+        handler:
+            | ((ctx: SceneTransitionContext, state: UpdateState<State>) => MaybePromise<PropagationAction | void>)
+            | null,
+    ): void {
+        if (handler) this._sceneTransitionHandler = handler
+        else this._sceneTransitionHandler = undefined
     }
 
     // begin-codegen

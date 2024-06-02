@@ -11,7 +11,8 @@
  *
  * `Continue`: Continue propagating the event inside the same handler group.
  *
- * `ToScene`: Used after using `state.enter()` to dispatch the update to the scene
+ * `ToScene`: Used after using `state.enter()` to dispatch the update to the scene,
+ * or after `state.exit()` to dispatch the update to the root dispatcher.
  */
 export enum PropagationAction {
     Stop = 'stop',
