@@ -808,7 +808,7 @@ export class NetworkManager {
                     }
 
                     if (e.seconds <= floodSleepThreshold) {
-                        this._log.info('Flood wait for %d seconds', e.seconds)
+                        this._log.info('Flood wait for %d seconds (because of %s)', e.seconds, message._)
                         await sleep(e.seconds * 1000)
                         continue
                     }
