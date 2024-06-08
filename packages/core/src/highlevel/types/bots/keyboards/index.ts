@@ -1,3 +1,4 @@
+export * from './builder.js'
 export * from './types.js'
 import * as BotKeyboard from './factories.js'
 
