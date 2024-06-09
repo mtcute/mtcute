@@ -122,11 +122,11 @@ export class BaseTelegramClient implements ITelegramClient {
     }
 
     async close(): Promise<void> {
+        this._connected = false
         await this.mt.close()
         this.updates?.stopLoop()
         this._prepare.reset()
         this._connect.reset()
-        this._connected = false
     }
 
     async notifyLoggedIn(auth: tl.auth.TypeAuthorization | tl.RawUser): Promise<tl.RawUser> {
