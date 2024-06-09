@@ -1,6 +1,6 @@
 import { assertEquals } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 
-import { MtcuteError, tl } from '@mtcute/core'
+import { tl, User } from '@mtcute/core'
 import { BaseTelegramClient, TelegramClient } from '@mtcute/core/client.js'
 
 import { getApiParams } from '../utils.ts'
@@ -10,85 +10,72 @@ const getAccountId = () =>
         .toString()
         .padStart(4, '0')
 
-Deno.test('1. authorization', { sanitizeResources: false }, async (t) => {
-    await t.step('should authorize in default dc', async () => {
-        const base = new BaseTelegramClient(getApiParams('dc2.session'))
-        const tg = new TelegramClient({ client: base })
+async function authorizeInDc(dc: number, base: BaseTelegramClient) {
+    const tg = new TelegramClient({ client: base })
 
-        // reset storage just in case
+    while (true) {
         await base.mt.storage.load()
         await base.storage.clear(true)
 
-        while (true) {
-            const phone = `999662${getAccountId()}`
-            let user
+        const phone = `99966${dc}${getAccountId()}`
 
-            try {
-                user = await tg.start({
-                    phone,
-                    code: () => '22222',
+        const sentCode = await tg.sendCode({ phone })
+
+        let user
+
+        try {
+            let auth = await tg.call({
+                _: 'auth.signIn',
+                phoneNumber: phone,
+                phoneCode: `${dc}${dc}${dc}${dc}${dc}`,
+                phoneCodeHash: sentCode.phoneCodeHash,
+            })
+
+            if (auth._ === 'auth.authorizationSignUpRequired') {
+                auth = await tg.call({
+                    _: 'auth.signUp',
+                    phoneNumber: phone,
+                    phoneCodeHash: sentCode.phoneCodeHash,
+                    firstName: 'mtcute e2e',
+                    lastName: '',
                 })
-            } catch (e) {
-                if (
-                    (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) ||
-                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') ||
-                    tl.RpcError.is(e, 'PHONE_NUMBER_FLOOD')
-                ) {
-                    // retry with another number
-                    await tg.logOut().catch((err) => {
-                        console.error('Failed to log out:', err)
-                    })
-                    continue
-                } else {
-                    await tg.close()
-                    throw e
+
+                if (auth._ !== 'auth.authorization') {
+                    throw new Error('Unexpected response')
                 }
             }
 
-            await tg.close()
+            await tg.notifyLoggedIn(auth)
 
-            assertEquals(user.isSelf, true)
-            assertEquals(user.phoneNumber, phone)
-            break
+            user = new User(auth.user)
+        } catch (e) {
+            if (tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') || tl.RpcError.is('PHONE_NUMBER_FLOOD')) {
+                // retry with another number
+                await tg.close()
+                continue
+            }
+
+            throw e
         }
+
+        await tg.close()
+
+        assertEquals(user.isSelf, true)
+        assertEquals(user.phoneNumber, phone)
+        break
+    }
+}
+
+Deno.test('1. authorization', { sanitizeResources: false }, async (t) => {
+    await t.step('should authorize in default dc', async () => {
+        const base = new BaseTelegramClient(getApiParams('dc2.session'))
+
+        await authorizeInDc(2, base)
     })
 
     await t.step('should authorize in dc 1', async () => {
         const base = new BaseTelegramClient(getApiParams('dc1.session'))
-        const tg = new TelegramClient({ client: base })
 
-        // reset storage just in case
-        await base.mt.storage.load()
-        await base.mt.storage.clear(true)
-
-        while (true) {
-            const phone = `999661${getAccountId()}`
-            let user
-
-            try {
-                user = await tg.start({
-                    phone,
-                    code: () => '11111',
-                })
-            } catch (e) {
-                if (
-                    (e instanceof MtcuteError && e.message.match(/Signup is no longer supported|2FA is enabled/)) ||
-                    tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') ||
-                    tl.RpcError.is(e, 'PHONE_NUMBER_FLOOD')
-                ) {
-                    // retry with another number
-                    continue
-                } else {
-                    await tg.close()
-                    throw e
-                }
-            }
-
-            await tg.close()
-
-            assertEquals(user.isSelf, true)
-            assertEquals(user.phoneNumber, phone)
-            break
-        }
+        await authorizeInDc(1, base)
     })
 })
