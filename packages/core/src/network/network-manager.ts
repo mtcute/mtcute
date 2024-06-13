@@ -879,6 +879,7 @@ export class NetworkManager {
         for (const dc of this._dcConnections.values()) {
             await dc.destroy()
         }
+        this._dcConnections.clear()
         this.config.offReload(this._onConfigChanged)
         this._resetOnNetworkChange?.()
     }

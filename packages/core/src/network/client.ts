@@ -308,7 +308,7 @@ export class MtClient extends EventEmitter {
     emitError(err: unknown): void {
         if (this._emitError) {
             this._emitError(err)
-        } else {
+        } else if (this._connect.finished()) {
             this.log.error('unhandled error:', err)
         }
     }
