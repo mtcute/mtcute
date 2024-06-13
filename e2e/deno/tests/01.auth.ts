@@ -49,7 +49,7 @@ async function authorizeInDc(dc: number, base: BaseTelegramClient) {
 
             user = new User(auth.user)
         } catch (e) {
-            if (tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') || tl.RpcError.is('PHONE_NUMBER_FLOOD')) {
+            if (tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') || tl.RpcError.is(e, 'PHONE_NUMBER_FLOOD')) {
                 // retry with another number
                 await tg.close()
                 continue
