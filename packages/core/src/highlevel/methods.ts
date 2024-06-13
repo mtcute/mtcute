@@ -1,6 +1,7 @@
 /* THIS FILE WAS AUTO-GENERATED */
 export { checkPassword } from './methods/auth/check-password.js'
 export { getPasswordHint } from './methods/auth/get-password-hint.js'
+export type { LogOutResult } from './methods/auth/log-out.js'
 export { logOut } from './methods/auth/log-out.js'
 export { recoverPassword } from './methods/auth/recover-password.js'
 export { resendCode } from './methods/auth/resend-code.js'

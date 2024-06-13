@@ -432,6 +432,14 @@ export class UpdatesManager {
 
             log.debug('loaded initial state: pts=%d, qts=%d, date=%d, seq=%d', this.pts, this.qts, this.date, this.seq)
         } catch (e) {
+            if (tl.RpcError.is(e, 'AUTH_KEY_UNREGISTERED')) {
+                // we are logged out, stop updates loop
+                lock.release()
+                this.stopLoop()
+
+                return
+            }
+
             if (this.client.isConnected) {
                 log.error('failed to fetch updates state: %s', e)
             }

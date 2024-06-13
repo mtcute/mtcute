@@ -13,7 +13,7 @@ import { BaseTelegramClient, BaseTelegramClientOptions } from './base.js'
 import { ITelegramClient } from './client.types.js'
 import { checkPassword } from './methods/auth/check-password.js'
 import { getPasswordHint } from './methods/auth/get-password-hint.js'
-import { logOut } from './methods/auth/log-out.js'
+import { logOut, LogOutResult } from './methods/auth/log-out.js'
 import { recoverPassword } from './methods/auth/recover-password.js'
 import { resendCode } from './methods/auth/resend-code.js'
 import { run } from './methods/auth/run.js'
@@ -620,7 +620,7 @@ export interface TelegramClient extends ITelegramClient {
      *
      * @returns  On success, `true` is returned
      */
-    logOut(): Promise<true>
+    logOut(): Promise<LogOutResult>
     /**
      * Recover your password with a recovery code and log in.
      *
@@ -672,6 +672,12 @@ export interface TelegramClient extends ITelegramClient {
     sendCode(params: {
         /** Phone number in international format */
         phone: string
+
+        /** Saved future auth tokens, if any */
+        futureAuthTokens?: Uint8Array[]
+
+        /** Additional code settings to pass to the server */
+        codeSettings?: Omit<tl.RawCodeSettings, '_' | 'logoutTokens'>
     }): Promise<SentCode>
     /**
      * Send a code to email needed to recover your password
@@ -818,6 +824,12 @@ export interface TelegramClient extends ITelegramClient {
          * @default  `console.log`.
          */
         codeSentCallback?: (code: SentCode) => MaybePromise<void>
+
+        /** Saved future auth tokens, if any */
+        futureAuthTokens?: Uint8Array[]
+
+        /** Additional code settings to pass to the server */
+        codeSettings?: Omit<tl.RawCodeSettings, '_' | 'logoutTokens'>
     }): Promise<User>
     /**
      * Check if the given peer/input peer is referring to the current user
@@ -1779,6 +1791,11 @@ export interface TelegramClient extends ITelegramClient {
      *
      * Some library logic depends on this, for example, the library will
      * periodically ping the server to keep the updates flowing.
+     *
+     * > **Warning**: Opening a chat with `openChat` method will make the library make additional requests
+     * > every so often. Which means that you should **avoid opening more than 5-10 chats at once**,
+     * > as it will probably trigger server-side limits and you might start getting transport errors
+     * > or even get banned.
      *
      * **Available**: ✅ both users and bots
      *

@@ -10,9 +10,10 @@ import { resolvePeer } from '../users/resolve-peer.js'
  * Some library logic depends on this, for example, the library will
  * periodically ping the server to keep the updates flowing.
  *
- * > **Warning**: Opening a chat with `openChat` method will make the library make additional requests every so often.
- * > Which means that you should **avoid opening more than 5-10 chats at once**, as it will probably trigger
- * > server-side limits and you might start getting transport errors or even get banned.
+ * > **Warning**: Opening a chat with `openChat` method will make the library make additional requests
+ * > every so often. Which means that you should **avoid opening more than 5-10 chats at once**,
+ * > as it will probably trigger server-side limits and you might start getting transport errors
+ * > or even get banned.
  *
  * @param chat  Chat to open
  */

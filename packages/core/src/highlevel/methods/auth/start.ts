@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { tl } from '@mtcute/tl'
 
-import { MtArgumentError } from '../../../types/errors.js'
+import { MtArgumentError, MtcuteError } from '../../../types/errors.js'
 import { MaybePromise } from '../../../types/utils.js'
 import { ITelegramClient } from '../../client.types.js'
 import { SentCode } from '../../types/auth/sent-code.js'
@@ -94,11 +94,21 @@ export async function start(
          * @default  `console.log`.
          */
         codeSentCallback?: (code: SentCode) => MaybePromise<void>
+
+        /** Saved future auth tokens, if any */
+        futureAuthTokens?: Uint8Array[]
+
+        /** Additional code settings to pass to the server */
+        codeSettings?: Omit<tl.RawCodeSettings, '_' | 'logoutTokens'>
     },
 ): Promise<User> {
     if (params.session) {
         await client.importSession(params.session, params.sessionForce)
     }
+
+    let has2fa = false
+    let sentCode: SentCode | undefined
+    let phone: string | null = null
 
     try {
         const me = await getMe(client)
@@ -111,79 +121,101 @@ export async function start(
 
         return me
     } catch (e) {
-        if (!tl.RpcError.is(e, 'AUTH_KEY_UNREGISTERED')) throw e
-    }
-
-    if (!params.phone && !params.botToken) {
-        throw new MtArgumentError('Neither phone nor bot token were provided')
-    }
-
-    let phone = params.phone ? await resolveMaybeDynamic(params.phone) : null
-
-    if (phone) {
-        phone = normalizePhoneNumber(phone)
-
-        if (!params.code) {
-            throw new MtArgumentError('You must pass `code` to use `phone`')
+        if (tl.RpcError.is(e)) {
+            if (e.text === 'SESSION_PASSWORD_NEEDED') has2fa = true
+            else if (e.text !== 'AUTH_KEY_UNREGISTERED') throw e
         }
-    } else {
-        const botToken = params.botToken ? await resolveMaybeDynamic(params.botToken) : null
+    }
 
-        if (!botToken) {
-            throw new MtArgumentError('Either bot token or phone number must be provided')
+    // if has2fa == true, then we are half-logged in, but need to enter password
+    if (!has2fa) {
+        if (!params.phone && !params.botToken) {
+            throw new MtArgumentError('Neither phone nor bot token were provided')
         }
 
-        return await signInBot(client, botToken)
-    }
+        phone = params.phone ? await resolveMaybeDynamic(params.phone) : null
 
-    let sentCode = await sendCode(client, { phone })
+        if (phone) {
+            phone = normalizePhoneNumber(phone)
 
-    if (params.forceSms && sentCode.type === 'app') {
-        sentCode = await resendCode(client, { phone, phoneCodeHash: sentCode.phoneCodeHash })
-    }
+            if (!params.code) {
+                throw new MtArgumentError('You must pass `code` to use `phone`')
+            }
+        } else {
+            const botToken = params.botToken ? await resolveMaybeDynamic(params.botToken) : null
 
-    if (params.codeSentCallback) {
-        await params.codeSentCallback(sentCode)
-    } else {
-        console.log(`The confirmation code has been sent via ${sentCode.type}.`)
-    }
+            if (!botToken) {
+                throw new MtArgumentError('Either bot token or phone number must be provided')
+            }
 
-    let has2fa = false
-
-    for (;;) {
-        const code = await resolveMaybeDynamic(params.code)
-        if (!code) throw new tl.RpcError(400, 'PHONE_CODE_EMPTY')
+            return await signInBot(client, botToken)
+        }
 
         try {
-            return await signIn(client, { phone, phoneCodeHash: sentCode.phoneCodeHash, phoneCode: code })
+            sentCode = await sendCode(client, {
+                phone,
+                futureAuthTokens: params.futureAuthTokens,
+                codeSettings: params.codeSettings,
+            })
         } catch (e) {
-            if (!tl.RpcError.is(e)) throw e
-
-            if (e.is('SESSION_PASSWORD_NEEDED')) {
+            if (tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')) {
                 has2fa = true
-                break
-            } else if (
-                e.is('PHONE_CODE_EMPTY') ||
-                e.is('PHONE_CODE_EXPIRED') ||
-                e.is('PHONE_CODE_INVALID') ||
-                e.is('PHONE_CODE_HASH_EMPTY')
-            ) {
-                if (typeof params.code !== 'function') {
-                    throw new MtArgumentError('Provided code was invalid')
-                }
+            } else {
+                throw e
+            }
+        }
+    }
 
-                if (params.invalidCodeCallback) {
-                    await params.invalidCodeCallback('code')
-                } else {
-                    console.log('Invalid code. Please try again')
-                }
-
-                continue
-            } else throw e
+    if (sentCode) {
+        if (params.forceSms && (sentCode.type === 'app' || sentCode.type === 'email')) {
+            sentCode = await resendCode(client, { phone: phone!, phoneCodeHash: sentCode.phoneCodeHash })
         }
 
-        // if there was no error, code was valid, so it's either 2fa or signup
-        break
+        if (params.codeSentCallback) {
+            await params.codeSentCallback(sentCode)
+        } else {
+            if (sentCode.type === 'email_required') {
+                throw new MtcuteError('Email login setup is required to sign in')
+            }
+
+            console.log(`The confirmation code has been sent via ${sentCode.type}.`)
+        }
+
+        for (;;) {
+            const code = await resolveMaybeDynamic(params.code)
+            if (!code) throw new tl.RpcError(400, 'PHONE_CODE_EMPTY')
+
+            try {
+                return await signIn(client, { phone: phone!, phoneCodeHash: sentCode.phoneCodeHash, phoneCode: code })
+            } catch (e) {
+                if (!tl.RpcError.is(e)) throw e
+
+                if (e.is('SESSION_PASSWORD_NEEDED')) {
+                    has2fa = true
+                    break
+                } else if (
+                    e.is('PHONE_CODE_EMPTY') ||
+                    e.is('PHONE_CODE_EXPIRED') ||
+                    e.is('PHONE_CODE_INVALID') ||
+                    e.is('PHONE_CODE_HASH_EMPTY')
+                ) {
+                    if (typeof params.code !== 'function') {
+                        throw new MtArgumentError('Provided code was invalid')
+                    }
+
+                    if (params.invalidCodeCallback) {
+                        await params.invalidCodeCallback('code')
+                    } else {
+                        console.log('Invalid code. Please try again')
+                    }
+
+                    continue
+                } else throw e
+            }
+
+            // if there was no error, code was valid, so it's either 2fa or signup
+            break
+        }
     }
 
     if (has2fa) {
