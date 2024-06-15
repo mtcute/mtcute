@@ -13,7 +13,7 @@ import { PeersIndex } from '../types/peers/peers-index.js'
 export type RawUpdateHandler = (upd: tl.TypeUpdate, peers: PeersIndex) => void
 
 /**
- * Parameters for {@link enableUpdatesProcessing}
+ * Parameters for the updates manager
  */
 export interface UpdatesManagerParams {
     /**
@@ -43,6 +43,44 @@ export interface UpdatesManagerParams {
      * @default false
      */
     disableNoDispatch?: boolean
+
+    /**
+     * **ADVANCED**
+     *
+     * PTS limit for `getChannelDifference` requests (max. 100000).
+     * When there are more updates than this limit, the library will
+     * skip some of them.
+     * According to the [official docs](https://core.telegram.org/method/updates.getChannelDifference),
+     * "Ordinary (non-bot) users are supposed to pass `10-100`", so passing >100
+     * for users may lead to issues.
+     *
+     * @default 100 for users, 100000 for bots
+     */
+    channelPtsLimit?: number | ((channelId: number) => number)
+
+    /**
+     * **ADVANCED**
+     *
+     * Whenever an `updates.channelDifferenceTooLong` is received,
+     * the library isn't able to efficiently handle it on its own,
+     * and will call this function for you to handle it instead.
+     *
+     * [See docs](https://core.telegram.org/constructor/updates.channelDifferenceTooLong)
+     */
+    onChannelTooLong?: (channelId: number, update: tl.updates.RawChannelDifferenceTooLong) => void
+
+    /**
+     * **ADVANCED**
+     *
+     * When `openChat` method is used on a client, the library will
+     * set up a timer to periodically fetch the new updates.
+     * By default, it will respect the value provided by the server,
+     * but it some cases you may want to override it (e.g. decrease it to
+     * poll more often and potentially get updates faster).
+     *
+     * The returned value is treated as seconds.
+     */
+    overrideOpenChatTimeout?: (upd: tl.updates.TypeChannelDifference) => number
 
     /**
      * Whether to catch up with missed updates when starting updates loop.

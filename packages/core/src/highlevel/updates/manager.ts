@@ -140,6 +140,9 @@ export class UpdatesManager {
 
     private _onCatchingUp: (catchingUp: boolean) => void = () => {}
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    private _channelPtsLimit: Extract<UpdatesManagerParams['channelPtsLimit'], Function>
+
     auth?: CurrentUserInfo | null // todo: do we need a local copy?
     keepAliveInterval?: NodeJS.Timeout
 
@@ -160,6 +163,17 @@ export class UpdatesManager {
         this.log = client.log.create('updates')
         this.catchUpOnStart = params.catchUp ?? false
         this.noDispatchEnabled = !params.disableNoDispatch
+
+        if (params.channelPtsLimit) {
+            if (typeof params.channelPtsLimit === 'function') {
+                this._channelPtsLimit = params.channelPtsLimit
+            } else {
+                const limit = params.channelPtsLimit
+                this._channelPtsLimit = () => limit
+            }
+        } else {
+            this._channelPtsLimit = () => (this.auth?.isBot ? 100000 : 100)
+        }
     }
 
     setHandler(handler: RawUpdateHandler): void {
@@ -815,7 +829,7 @@ export class UpdatesManager {
 
         // to make TS happy
         let pts = _pts
-        let limit = this.auth?.isBot ? 100000 : 100
+        let limit = this._channelPtsLimit(channelId)
 
         if (pts <= 0) {
             pts = 1
@@ -834,7 +848,11 @@ export class UpdatesManager {
                 filter: { _: 'channelMessagesFilterEmpty' },
             })
 
-            if (diff.timeout) lastTimeout = diff.timeout
+            if (diff.timeout) {
+                lastTimeout = this.params.overrideOpenChatTimeout ?
+                    this.params.overrideOpenChatTimeout(diff) :
+                    diff.timeout
+            }
 
             if (diff._ === 'updates.channelDifferenceEmpty') {
                 log.debug('getChannelDifference (cid = %d) returned channelDifferenceEmpty', channelId)
@@ -848,25 +866,29 @@ export class UpdatesManager {
                     pts = diff.dialog.pts!
                 }
 
-                log.warn(
-                    'getChannelDifference (cid = %d) returned channelDifferenceTooLong. new pts: %d, recent msgs: %d',
-                    channelId,
-                    pts,
-                    diff.messages.length,
-                )
-
-                diff.messages.forEach((message) => {
-                    log.debug(
-                        'processing message %d (%s) from TooLong diff for channel %d',
-                        message.id,
-                        message._,
+                if (this.params.onChannelTooLong) {
+                    this.params.onChannelTooLong(channelId, diff)
+                } else {
+                    log.warn(
+                        'getChannelDifference (cid = %d) returned channelDifferenceTooLong. new pts: %d, recent msgs: %d',
                         channelId,
+                        pts,
+                        diff.messages.length,
                     )
 
-                    if (message._ === 'messageEmpty') return
+                    diff.messages.forEach((message) => {
+                        log.debug(
+                            'processing message %d (%s) from TooLong diff for channel %d',
+                            message.id,
+                            message._,
+                            channelId,
+                        )
 
-                    pendingUnorderedUpdates.pushBack(toPendingUpdate(messageToUpdate(message), peers, true))
-                })
+                        if (message._ === 'messageEmpty') return
+
+                        pendingUnorderedUpdates.pushBack(toPendingUpdate(messageToUpdate(message), peers, true))
+                    })
+                }
                 break
             }
 
