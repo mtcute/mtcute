@@ -1,4 +1,4 @@
-import { CallbackQuery, MaybeArray, MaybePromise, MtArgumentError } from '@mtcute/core'
+import { CallbackQuery, InlineCallbackQuery, MaybeArray, MaybePromise, MtArgumentError } from '@mtcute/core'
 
 import { UpdateFilter } from './filters/types.js'
 
@@ -105,15 +105,15 @@ export class CallbackDataBuilder<T extends string> {
      *
      * @param params
      */
-    filter(
+    filter<Update extends CallbackQuery | InlineCallbackQuery>(
         params:
             | ((
-                  upd: CallbackQuery,
+                  upd: Update,
                   parsed: Record<T, string>,
               ) => MaybePromise<Partial<Record<T, MaybeArray<string | RegExp>>> | boolean>)
             | Partial<Record<T, MaybeArray<string | RegExp>>> = {},
     ): UpdateFilter<
-        CallbackQuery,
+        Update,
         {
             match: Record<T, string>
         }
@@ -129,7 +129,7 @@ export class CallbackDataBuilder<T extends string> {
 
                 if (typeof fnResult === 'boolean') {
                     (
-                        query as CallbackQuery & {
+                        query as Update & {
                             match: Record<T, string>
                         }
                     ).match = data
@@ -153,7 +153,7 @@ export class CallbackDataBuilder<T extends string> {
                 }
 
                 (
-                    query as CallbackQuery & {
+                    query as Update & {
                         match: Record<T, string>
                     }
                 ).match = data
@@ -187,7 +187,7 @@ export class CallbackDataBuilder<T extends string> {
             const m = query.dataStr?.match(regex)
             if (!m) return false
             ;(
-                query as CallbackQuery & {
+                query as Update & {
                     match: Record<T, string>
                 }
             ).match = this.parse(m[0])

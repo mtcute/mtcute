@@ -1133,6 +1133,58 @@ export class Dispatcher<State extends object = never> {
         else this._sceneTransitionHandler = undefined
     }
 
+    /**
+     * Register a callback query (both inline and non-inline) handler without any filters
+     *
+     * @param handler  Callback query handler
+     * @param group  Handler group index
+     */
+    onAnyCallbackQuery(
+        handler: CallbackQueryHandler<
+            CallbackQueryContext | InlineCallbackQueryContext,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register a callback query (both inline and non-inline) handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Callback query handler
+     * @param group  Handler group index
+     */
+    onAnyCallbackQuery<Mod>(
+        filter: UpdateFilter<CallbackQueryContext | InlineCallbackQueryContext, Mod, State>,
+        handler: CallbackQueryHandler<
+            filters.Modify<CallbackQueryContext | InlineCallbackQueryContext, Mod>,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register a callback query (both inline and non-inline) handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Callback query handler
+     * @param group  Handler group index
+     */
+    onAnyCallbackQuery<Mod>(
+        filter: UpdateFilter<CallbackQueryContext | InlineCallbackQueryContext, Mod>,
+        handler: CallbackQueryHandler<
+            filters.Modify<CallbackQueryContext | InlineCallbackQueryContext, Mod>,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onAnyCallbackQuery(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('callback_query', filter, handler, group)
+        this._addKnownHandler('inline_callback_query', filter, handler, group)
+    }
+
     // begin-codegen
 
     /**
