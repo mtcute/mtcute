@@ -1,6 +1,7 @@
-import { promises as fs } from 'fs'
-import { homedir } from 'os'
-import * as path from 'path'
+import { promises as fs } from 'node:fs'
+import { homedir } from 'node:os'
+import * as path from 'node:path'
+import process from 'node:process'
 
 export interface UserConfigPersisted {
     apiId: number

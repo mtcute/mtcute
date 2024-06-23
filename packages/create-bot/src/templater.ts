@@ -5,6 +5,7 @@ import * as path from 'node:path'
 
 import type { UserConfig } from './cli.js'
 import { MtcuteFeature } from './features/types.js'
+import { getPackageManagerVersion, packageManagerToRuntime } from './package-manager.js'
 
 const templater = Handlebars.create()
 
@@ -37,6 +38,8 @@ export async function runTemplaterForFile(file: string, config: UserConfig): Pro
 
     const result = execute({
         ...config,
+        runtime: packageManagerToRuntime(config.packageManager),
+        packageManagerVersion: getPackageManagerVersion()?.join('@'),
         features: config.features.reduce<Record<MtcuteFeature, boolean>>(
             (acc, f) => {
                 acc[f] = true

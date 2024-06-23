@@ -1,20 +1,48 @@
+import * as colors from 'colorette'
+import process from 'node:process'
+
+export function getPackageManagerVersion(): [string, string] | null {
+    if (typeof Deno !== 'undefined') {
+        return null
+    }
+
+    const userAgent = process.env.npm_config_user_agent
+
+    if (!userAgent) {
+        return null
+    }
+
+    const software = userAgent.split(' ')[0]
+    const manager = software.split('/')[0]
+    const version = software.split('/')[1]
+
+    if (!version.match(/^\d+\.\d+\.\d+$/)) {
+        return null
+    }
+
+    return [manager, version]
+}
+
 export enum PackageManager {
     Npm = 'npm',
     Yarn = 'yarn',
     Pnpm = 'pnpm',
     Bun = 'bun',
+    Deno = 'deno',
 }
 
 export function getPackageManager(): PackageManager {
-    const userAgent = process.env.npm_config_user_agent
+    const parsed = getPackageManagerVersion()
 
-    if (!userAgent) {
+    if (!parsed) {
+        if (typeof Deno !== 'undefined') return PackageManager.Deno
+
+        console.warn(colors.yellow('[warning] could not detect package manager, falling back to pnpm'))
+
         return PackageManager.Pnpm // fall back to the most based one
     }
 
-    const name = userAgent.split('/')[0]
-
-    switch (name) {
+    switch (parsed[0]) {
         case 'pnpm':
             return PackageManager.Pnpm
         case 'yarn':
@@ -24,7 +52,7 @@ export function getPackageManager(): PackageManager {
         case 'bun':
             return PackageManager.Bun
         default:
-            throw new Error(`Unsupported package manager: ${name}`)
+            throw new Error(`Unsupported package manager: ${parsed[0]}`)
     }
 }
 
@@ -66,5 +94,20 @@ export function getExecCommand(mgr: PackageManager, ...cmd: string[]) {
             return ['pnpm', 'exec', ...cmd]
         case PackageManager.Bun:
             return ['bun', 'run', ...cmd]
+        case PackageManager.Deno:
+            throw new Error('Deno does not support exec commands')
+    }
+}
+
+export function packageManagerToRuntime(mgr: PackageManager) {
+    switch (mgr) {
+        case PackageManager.Npm:
+        case PackageManager.Yarn:
+        case PackageManager.Pnpm:
+            return 'node'
+        case PackageManager.Bun:
+            return 'bun'
+        case PackageManager.Deno:
+            return 'deno'
     }
 }

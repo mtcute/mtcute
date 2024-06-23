@@ -1,8 +1,14 @@
 {{emit_if (and (not features.typescript) features.i18n)}}
 
 import { createMtcuteI18n } from '@mtcute/i18n'
+
+{{#if (eq runtime "node")}}
 import { en } from './en.js'
 import { ru } from './ru.js'
+{{else}}
+import { en } from './en.ts'
+import { ru } from './ru.ts'
+{{/if}}
 
 export const tr = createMtcuteI18n({
     primaryLanguage: {

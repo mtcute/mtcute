@@ -1,14 +1,24 @@
 # {{name}}
 
-MTCute powered Telegram bot
+mtcute powered Telegram bot
 
 ## Development
 
 ```bash
-pnpm install --frozen-lockfile
+{{#if (ne runtime "deno")}}
+{{#if (eq packageManager "npm")}}
+npm ci
+{{else}}
+{{packageManager}} install --frozen-lockfile
+{{/if}}
+{{/if}}
 cp .env.example .env 
 # edit .env
-pnpm start
+{{#if (eq runtime "deno")}}
+deno task start
+{{else}}
+{{packageManager}} start
+{{/if}}
 ```
 
 *generated with @mtcute/create-bot*

@@ -23,14 +23,23 @@ export function getFeatureChoices(packageMananger: PackageManager): CheckboxChoi
             checked: true,
         },
         {
-            name: ' 🥰 Setup Prettier & ESLint',
-            short: 'Linters',
-            value: MtcuteFeature.Linters,
+            name: ' 📦 Initialize git repository',
+            short: 'Git',
+            value: MtcuteFeature.Git,
             checked: true,
         },
     ]
 
-    if (packageMananger !== PackageManager.Bun) {
+    if (packageMananger !== PackageManager.Deno) {
+        arr.unshift({
+            name: ' 🥰 Setup ESLint with @antfu/eslint-config',
+            short: 'Linters',
+            value: MtcuteFeature.Linters,
+            checked: true,
+        })
+    }
+
+    if (packageMananger !== PackageManager.Bun && packageMananger !== PackageManager.Deno) {
         arr.unshift({
             name: ' 🚀 Native addon (better performance)',
             short: 'Native addon',

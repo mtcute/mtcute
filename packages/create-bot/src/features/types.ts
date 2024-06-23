@@ -5,4 +5,5 @@ export enum MtcuteFeature {
     Docker = 'docker',
     TypeScript = 'typescript',
     Linters = 'linters',
+    Git = 'git',
 }

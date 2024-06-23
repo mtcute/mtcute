@@ -12,4 +12,4 @@ RUN pnpm install --frozen-lockfile
 COPY src /app/src
 RUN pnpm run build
 
-CMD [ "node", "/app/dist/index.js" ]
+CMD [ "node", "/app/dist/main.js" ]

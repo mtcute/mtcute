@@ -2,8 +2,10 @@
 {{#if features.dispatcher}}
 import { Dispatcher, filters } from '@mtcute/dispatcher'
 {{/if}}
-{{#if (eq packageManager "bun")}}
+{{#if (eq runtime "bun")}}
 import { TelegramClient } from '@mtcute/bun'
+{{else if (eq runtime "deno")}}
+import { TelegramClient } from '@mtcute/deno'
 {{else}}
 import { TelegramClient } from '@mtcute/node'
 {{/if}}
@@ -31,11 +33,9 @@ dp.onNewMessage(filters.start, async (msg) => {
 })
 {{/if}}
 
-tg.run(
-    {{#if botToken}}
-    { botToken: env.BOT_TOKEN },
-    {{/if}}
-    (user) => {
-        console.log('Logged in as', user.username)
-    },
-)
+{{#if botToken}}
+const user = await tg.start({ botToken: env.BOT_TOKEN })
+{{else}}
+const user = await tg.start()
+{{/if}}
+console.log('Logged in as', user.username)

@@ -1,27 +1,31 @@
+{{emit_if (ne runtime "deno")}}
 {
     "name": "{{ name }}",
     "license": "MIT",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "type": "module",
+    {{#if packageManagerVersion}}
+    "packageManager": "{{packageManagerVersion}}",
+    {{/if}}
     "scripts": {
         {{#if features.linters}}
-        "prepare": "husky || true",
         "lint": "eslint .",
         "lint:fix": "eslint --fix .",
         "format": "prettier --write \"src/**/*.ts\"",
         {{/if}}
-        {{#if (eq packageManager "bun")}}
+        {{#if (eq runtime "bun")}}
         {{#if features.typescript}}
-        "start": "bun ./src/index.ts"
+        "start": "bun ./src/main.ts",
+        "build": "tsc && bun build src/main.ts --target=bun --outdir=dist"
         {{else}}
-        "start": "bun ./src/index.js"
+        "start": "bun ./src/main.js"
         {{/if}}
         {{else}}
         {{#if features.typescript}}
-        "start": "tsc && dotenv node ./dist/index.js",
+        "start": "dotenv tsx ./src/main.ts",
         "build": "tsc"
         {{else}}
-        "start": "dotenv node ./src/index.js"
+        "start": "dotenv node ./src/main.js"
         {{/if}}
         {{/if}}
     }
