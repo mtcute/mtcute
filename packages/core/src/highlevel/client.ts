@@ -1439,11 +1439,9 @@ export interface TelegramClient extends ITelegramClient {
         params?: {
             /**
              * Deletion mode. Can be:
-             * - `delete`: delete messages (only for yourself)
-             * - `clear`: delete messages (only for yourself)
+             * - `delete`: delete messages (only for yourself) AND the dialog itself
+             * - `clear`: delete messages (only for yourself), but keep the dialog in the list
              * - `revoke`: delete messages for all users
-             * - I'm not sure what's the difference between `delete` and `clear`,
-             * but they are in fact different flags in TL object.
              *
              * @default  'delete'
              */
