@@ -7,7 +7,7 @@ export class BunPlatform extends NodePlatform {
     declare normalizeFile: typeof normalizeFile
 
     getDeviceModel(): string {
-        return `Bun/${process.version} (${os.type()} ${os.arch()})`
+        return `Bun/${Bun.version} (${os.type()} ${os.arch()})`
     }
 }
 
