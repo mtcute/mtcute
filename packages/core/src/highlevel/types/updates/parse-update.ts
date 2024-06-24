@@ -6,6 +6,7 @@ import {
     BotReactionCountUpdate,
     BotReactionUpdate,
     BotStoppedUpdate,
+    BusinessCallbackQuery,
     BusinessConnection,
     BusinessMessage,
     CallbackQuery,
@@ -105,6 +106,8 @@ export function _parseUpdate(update: tl.TypeUpdate, peers: PeersIndex): ParsedUp
             return { name: 'edit_business_message', data: new BusinessMessage(update, peers) }
         case 'updateBotDeleteBusinessMessage':
             return { name: 'delete_business_message', data: new DeleteBusinessMessageUpdate(update, peers) }
+        case 'updateBusinessBotCallbackQuery':
+            return { name: 'business_callback_query', data: new BusinessCallbackQuery(update, peers) }
         default:
             return null
     }

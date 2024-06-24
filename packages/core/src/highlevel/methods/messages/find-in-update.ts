@@ -59,9 +59,12 @@ export function _findMessageInUpdate(
         if (isEdit) {
             if (
                 !(
-                    u._ === 'updateEditMessage' ||
-                    u._ === 'updateEditChannelMessage' ||
-                    u._ === 'updateBotEditBusinessMessage'
+                    (
+                        u._ === 'updateEditMessage' ||
+                        u._ === 'updateEditChannelMessage' ||
+                        u._ === 'updateBotEditBusinessMessage' ||
+                        u._ === 'updateBotNewBusinessMessage'
+                    ) // for whatever reason
                 )
             ) {
                 continue

@@ -3,7 +3,7 @@ import { TelegramClient } from '@mtcute/core/client.js'
 
 import { UpdateContextDistributed } from './base.js'
 import { BusinessMessageContext } from './business-message.js'
-import { CallbackQueryContext, InlineCallbackQueryContext } from './callback-query.js'
+import { BusinessCallbackQueryContext, CallbackQueryContext, InlineCallbackQueryContext } from './callback-query.js'
 import { ChatJoinRequestUpdateContext } from './chat-join-request.js'
 import { ChosenInlineResultContext } from './chosen-inline-result.js'
 import { InlineQueryContext } from './inline-query.js'
@@ -25,6 +25,8 @@ export function _parsedUpdateToContext(client: TelegramClient, update: ParsedUpd
             return new CallbackQueryContext(client, update.data)
         case 'inline_callback_query':
             return new InlineCallbackQueryContext(client, update.data)
+        case 'business_callback_query':
+            return new BusinessCallbackQueryContext(client, update.data)
         case 'bot_chat_join_request':
             return new ChatJoinRequestUpdateContext(client, update.data)
         case 'pre_checkout_query':

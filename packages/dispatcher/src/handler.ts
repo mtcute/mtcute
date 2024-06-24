@@ -21,8 +21,9 @@ import {
 import { TelegramClient } from '@mtcute/core/client.js'
 
 import { UpdateContext } from './context/base.js'
-import { BusinessMessageContext } from './context/business-message.js'
 import {
+    BusinessCallbackQueryContext,
+    BusinessMessageContext,
     CallbackQueryContext,
     ChatJoinRequestUpdateContext,
     ChosenInlineResultContext,
@@ -67,6 +68,11 @@ export type ChosenInlineResultHandler<T = ChosenInlineResultContext> = ParsedUpd
 export type CallbackQueryHandler<T = CallbackQueryContext, S = never> = ParsedUpdateHandler<'callback_query', T, S>
 export type InlineCallbackQueryHandler<T = InlineCallbackQueryContext, S = never> = ParsedUpdateHandler<
     'inline_callback_query',
+    T,
+    S
+>
+export type BusinessCallbackQueryHandler<T = BusinessCallbackQueryContext, S = never> = ParsedUpdateHandler<
+    'business_callback_query',
     T,
     S
 >
@@ -127,6 +133,7 @@ export type UpdateHandler =
     | ChosenInlineResultHandler
     | CallbackQueryHandler
     | InlineCallbackQueryHandler
+    | BusinessCallbackQueryHandler
     | PollUpdateHandler
     | PollVoteHandler
     | UserStatusUpdateHandler

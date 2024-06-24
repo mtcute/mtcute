@@ -30,6 +30,7 @@ import { TelegramClient } from '@mtcute/core/client.js'
 import { UpdateContext } from './context/base.js'
 import { BusinessMessageContext } from './context/business-message.js'
 import {
+    BusinessCallbackQueryContext,
     CallbackQueryContext,
     ChatJoinRequestUpdateContext,
     ChosenInlineResultContext,
@@ -47,6 +48,7 @@ import {
     BotReactionCountUpdateHandler,
     BotReactionUpdateHandler,
     BotStoppedHandler,
+    BusinessCallbackQueryHandler,
     BusinessConnectionUpdateHandler,
     BusinessMessageGroupHandler,
     CallbackQueryHandler,
@@ -1141,7 +1143,7 @@ export class Dispatcher<State extends object = never> {
      */
     onAnyCallbackQuery(
         handler: CallbackQueryHandler<
-            CallbackQueryContext | InlineCallbackQueryContext,
+            CallbackQueryContext | InlineCallbackQueryContext | BusinessCallbackQueryContext,
             State extends never ? never : UpdateState<State>
         >['callback'],
         group?: number,
@@ -1155,9 +1157,13 @@ export class Dispatcher<State extends object = never> {
      * @param group  Handler group index
      */
     onAnyCallbackQuery<Mod>(
-        filter: UpdateFilter<CallbackQueryContext | InlineCallbackQueryContext, Mod, State>,
+        filter: UpdateFilter<
+            CallbackQueryContext | InlineCallbackQueryContext | BusinessCallbackQueryContext,
+            Mod,
+            State
+        >,
         handler: CallbackQueryHandler<
-            filters.Modify<CallbackQueryContext | InlineCallbackQueryContext, Mod>,
+            filters.Modify<CallbackQueryContext | InlineCallbackQueryContext | BusinessCallbackQueryContext, Mod>,
             State extends never ? never : UpdateState<State>
         >['callback'],
         group?: number,
@@ -1171,9 +1177,9 @@ export class Dispatcher<State extends object = never> {
      * @param group  Handler group index
      */
     onAnyCallbackQuery<Mod>(
-        filter: UpdateFilter<CallbackQueryContext | InlineCallbackQueryContext, Mod>,
+        filter: UpdateFilter<CallbackQueryContext | InlineCallbackQueryContext | BusinessCallbackQueryContext, Mod>,
         handler: CallbackQueryHandler<
-            filters.Modify<CallbackQueryContext | InlineCallbackQueryContext, Mod>,
+            filters.Modify<CallbackQueryContext | InlineCallbackQueryContext | BusinessCallbackQueryContext, Mod>,
             State extends never ? never : UpdateState<State>
         >['callback'],
         group?: number,
@@ -1183,6 +1189,7 @@ export class Dispatcher<State extends object = never> {
     onAnyCallbackQuery(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('callback_query', filter, handler, group)
         this._addKnownHandler('inline_callback_query', filter, handler, group)
+        this._addKnownHandler('business_callback_query', filter, handler, group)
     }
 
     // begin-codegen
@@ -1535,6 +1542,57 @@ export class Dispatcher<State extends object = never> {
     /** @internal */
     onInlineCallbackQuery(filter: any, handler?: any, group?: number): void {
         this._addKnownHandler('inline_callback_query', filter, handler, group)
+    }
+
+    /**
+     * Register a business callback query handler without any filters
+     *
+     * @param handler  Business callback query handler
+     * @param group  Handler group index
+     */
+    onBusinessCallbackQuery(
+        handler: BusinessCallbackQueryHandler<
+            BusinessCallbackQueryContext,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register a business callback query handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Business callback query handler
+     * @param group  Handler group index
+     */
+    onBusinessCallbackQuery<Mod>(
+        filter: UpdateFilter<BusinessCallbackQueryContext, Mod, State>,
+        handler: BusinessCallbackQueryHandler<
+            filters.Modify<BusinessCallbackQueryContext, Mod>,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /**
+     * Register a business callback query handler with a filter
+     *
+     * @param filter  Update filter
+     * @param handler  Business callback query handler
+     * @param group  Handler group index
+     */
+    onBusinessCallbackQuery<Mod>(
+        filter: UpdateFilter<BusinessCallbackQueryContext, Mod>,
+        handler: BusinessCallbackQueryHandler<
+            filters.Modify<BusinessCallbackQueryContext, Mod>,
+            State extends never ? never : UpdateState<State>
+        >['callback'],
+        group?: number,
+    ): void
+
+    /** @internal */
+    onBusinessCallbackQuery(filter: any, handler?: any, group?: number): void {
+        this._addKnownHandler('business_callback_query', filter, handler, group)
     }
 
     /**

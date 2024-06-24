@@ -1,4 +1,4 @@
-import { CallbackQuery, InlineCallbackQuery, MaybePromise, Message } from '@mtcute/core'
+import { BusinessCallbackQuery, CallbackQuery, InlineCallbackQuery, MaybePromise, Message } from '@mtcute/core'
 import { TelegramClient } from '@mtcute/core/client.js'
 
 import { UpdateContext } from './base.js'
@@ -84,6 +84,40 @@ export class InlineCallbackQueryContext extends InlineCallbackQuery implements U
     async editMessage(params: Omit<Parameters<TelegramClient['editInlineMessage']>[0], 'messageId'>) {
         return this.client.editInlineMessage({
             messageId: this.raw.msgId,
+            ...params,
+        })
+    }
+}
+
+/**
+ * Context of an callback query update originated from a business connection message
+ *
+ * This is a subclass of {@link BusinessCallbackQuery}, so all its fields are also available.
+ */
+export class BusinessCallbackQueryContext
+    extends BusinessCallbackQuery
+    implements UpdateContext<BusinessCallbackQuery> {
+    readonly _name = 'business_callback_query'
+
+    constructor(
+        readonly client: TelegramClient,
+        query: BusinessCallbackQuery,
+    ) {
+        super(query.raw, query._peers)
+    }
+
+    /** Answer to this callback query */
+    answer(params: Parameters<TelegramClient['answerCallbackQuery']>[1]) {
+        return this.client.answerCallbackQuery(this.id, params)
+    }
+
+    /**
+     * Edit the message that contained the callback button that was clicked.
+     */
+    async editMessage(params: Omit<Parameters<TelegramClient['editInlineMessage']>[0], 'messageId'>) {
+        return this.client.editMessage({
+            message: this.message,
+            businessConnectionId: this.connectionId,
             ...params,
         })
     }

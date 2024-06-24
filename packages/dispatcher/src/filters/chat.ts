@@ -1,5 +1,6 @@
 import {
     BotChatJoinRequestUpdate,
+    BusinessMessage,
     Chat,
     ChatMemberUpdate,
     ChatType,
@@ -48,12 +49,14 @@ export const chat =
 export const chatId: {
     (id: MaybeArray<number>): UpdateFilter<UpdateContextDistributed<
         | Message
+        | BusinessMessage
         | ChatMemberUpdate
         | PollVoteUpdate
         | BotChatJoinRequestUpdate
     >>
     (id: MaybeArray<number | string>): UpdateFilter<UpdateContextDistributed<
         | Message
+        | BusinessMessage
         | ChatMemberUpdate
         | UserTypingUpdate
         | HistoryReadUpdate

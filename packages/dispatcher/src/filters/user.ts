@@ -1,5 +1,7 @@
 import {
     BotChatJoinRequestUpdate,
+    BusinessCallbackQuery,
+    BusinessMessage,
     CallbackQuery,
     ChatMemberUpdate,
     ChosenInlineResult,
@@ -39,6 +41,7 @@ export const bot: UpdateFilter<Message, { sender: User }> = (msg) => msg.sender.
 export const userId: {
     (id: MaybeArray<number>): UpdateFilter<UpdateContextDistributed<
         | Message
+        | BusinessMessage
         | StoryUpdate
         | DeleteStoryUpdate
         | InlineQuery
@@ -46,11 +49,13 @@ export const userId: {
         | ChosenInlineResult
         | CallbackQuery
         | InlineCallbackQuery
+        | BusinessCallbackQuery
         | PollVoteUpdate
         | BotChatJoinRequestUpdate
     >>
     (id: MaybeArray<number | string>): UpdateFilter<UpdateContextDistributed<
         | Message
+        | BusinessMessage
         | UserStatusUpdate
         | UserTypingUpdate
         | StoryUpdate
@@ -61,6 +66,7 @@ export const userId: {
         | ChosenInlineResult
         | CallbackQuery
         | InlineCallbackQuery
+        | BusinessCallbackQuery
         | PollVoteUpdate
         | BotChatJoinRequestUpdate
     >>

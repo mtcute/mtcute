@@ -1,4 +1,5 @@
 export * from './base.js'
+export * from './business-message.js'
 export * from './callback-query.js'
 export * from './chat-join-request.js'
 export * from './chosen-inline-result.js'

@@ -5,6 +5,7 @@ import { MtArgumentError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { encodeInlineMessageId } from '../../utils/inline-utils.js'
 import { memoizeGetters } from '../../utils/memoize.js'
+import { Message } from '../messages/message.js'
 import { Chat } from '../peers/chat.js'
 import { PeersIndex } from '../peers/peers-index.js'
 import { User } from '../peers/user.js'
@@ -12,7 +13,10 @@ import { User } from '../peers/user.js'
 /** Base class for callback queries */
 class BaseCallbackQuery {
     constructor(
-        readonly raw: tl.RawUpdateBotCallbackQuery | tl.RawUpdateInlineBotCallbackQuery,
+        readonly raw:
+            | tl.RawUpdateBotCallbackQuery
+            | tl.RawUpdateInlineBotCallbackQuery
+            | tl.RawUpdateBusinessBotCallbackQuery,
         readonly _peers: PeersIndex,
     ) {}
 
@@ -67,6 +71,8 @@ class BaseCallbackQuery {
      * short name of the game that should be returned.
      */
     get game(): string | null {
+        if (this.raw._ === 'updateBusinessBotCallbackQuery') return null
+
         return this.raw.gameShortName ?? null
     }
 }
@@ -138,3 +144,35 @@ export class InlineCallbackQuery extends BaseCallbackQuery {
 
 memoizeGetters(InlineCallbackQuery, ['user', 'dataStr', 'inlineMessageIdStr'])
 makeInspectable(InlineCallbackQuery)
+
+/**
+ * A callback query originating from a message sent by the bot via a business connection
+ */
+export class BusinessCallbackQuery extends BaseCallbackQuery {
+    constructor(
+        readonly raw: tl.RawUpdateBusinessBotCallbackQuery,
+        _peers: PeersIndex,
+    ) {
+        super(raw, _peers)
+    }
+
+    /** ID of the business connection */
+    get connectionId(): string {
+        return this.raw.connectionId
+    }
+
+    /** Message containing the button */
+    get message(): Message {
+        return new Message(this.raw.message, this._peers)
+    }
+
+    /** Message that {@link message} is a reply to (if any) */
+    get replyToMessage(): Message | null {
+        if (!this.raw.replyToMessage) return null
+
+        return new Message(this.raw.replyToMessage, this._peers)
+    }
+}
+
+memoizeGetters(BusinessCallbackQuery, ['user', 'dataStr', 'message', 'replyToMessage'])
+makeInspectable(BusinessCallbackQuery)

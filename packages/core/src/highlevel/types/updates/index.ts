@@ -1,7 +1,7 @@
 import type { BusinessConnection, Message } from '../../types/index.js'
 import { BotChatJoinRequestUpdate } from './bot-chat-join-request.js'
 import { BotStoppedUpdate } from './bot-stopped.js'
-import { CallbackQuery, InlineCallbackQuery } from './callback-query.js'
+import { BusinessCallbackQuery, CallbackQuery, InlineCallbackQuery } from './callback-query.js'
 import { ChatJoinRequestUpdate } from './chat-join-request.js'
 import { ChatMemberUpdate } from './chat-member-update.js'
 import { InlineQuery } from './inline-query.js'
@@ -25,6 +25,7 @@ export {
     BotReactionCountUpdate,
     BotReactionUpdate,
     BotStoppedUpdate,
+    BusinessCallbackQuery,
     BusinessMessage,
     CallbackQuery,
     ChatJoinRequestUpdate,
@@ -55,6 +56,7 @@ export type ParsedUpdate =
     | { name: 'chosen_inline_result'; data: ChosenInlineResult }
     | { name: 'callback_query'; data: CallbackQuery }
     | { name: 'inline_callback_query'; data: InlineCallbackQuery }
+    | { name: 'business_callback_query'; data: BusinessCallbackQuery }
     | { name: 'poll'; data: PollUpdate }
     | { name: 'poll_vote'; data: PollVoteUpdate }
     | { name: 'user_status'; data: UserStatusUpdate }
