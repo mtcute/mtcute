@@ -30,6 +30,7 @@ export interface ITelegramClient {
     readonly log: Logger
     readonly storage: PublicPart<TelegramStorageManager>
     readonly appConfig: PublicPart<AppConfigManager>
+    readonly stopSignal: AbortSignal
 
     prepare(): Promise<void>
     connect(): Promise<void>

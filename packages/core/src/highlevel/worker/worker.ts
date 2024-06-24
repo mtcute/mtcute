@@ -46,6 +46,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
                 state,
             }),
         )
+        client.stopSignal.addEventListener('abort', () => this.broadcast({ type: 'stop' }))
 
         if (client.updates) {
             client.onUpdate((update, peers) =>

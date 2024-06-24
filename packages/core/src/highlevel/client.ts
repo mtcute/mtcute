@@ -5557,6 +5557,9 @@ export class TelegramClient extends EventEmitter implements ITelegramClient {
         this.log = this._client.log
         // @ts-expect-error codegen
         this.storage = this._client.storage
+        Object.defineProperty(this, 'stopSignal', {
+            get: () => this._client.stopSignal,
+        })
 
         if (!opts.disableUpdates) {
             const skipConversationUpdates = opts.skipConversationUpdates ?? true

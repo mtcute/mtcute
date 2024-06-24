@@ -1,4 +1,4 @@
-import { sleep } from '../../../utils/misc-utils.js'
+import { sleepWithAbort } from '../../../utils/misc-utils.js'
 import { ITelegramClient } from '../../client.types.js'
 import { InputPeerLike, Message } from '../../types/index.js'
 import { isInputPeerChannel } from '../../utils/peer-utils.js'
@@ -32,7 +32,7 @@ export async function kickChatMember(
     // not needed in case this is a legacy group
     if (isInputPeerChannel(chat)) {
         // i fucking love telegram serverside race conditions
-        await sleep(1000)
+        await sleepWithAbort(1000, client.stopSignal)
         await unbanChatMember(client, { chatId: chat, participantId: user })
     }
 

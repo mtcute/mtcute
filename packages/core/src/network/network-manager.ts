@@ -10,7 +10,7 @@ import {
     DcOptions,
     ICryptoProvider,
     Logger,
-    sleep,
+    sleepWithAbort,
 } from '../utils/index.js'
 import { assertTypeIs } from '../utils/type-assertions.js'
 import { ConfigManager } from './config-manager.js'
@@ -61,6 +61,7 @@ export interface NetworkManagerParams {
     onUsable: () => void
     onConnecting: () => void
     onNetworkChanged: (connected: boolean) => void
+    stopSignal: AbortSignal
 }
 
 export type ConnectionCountDelegate = (kind: ConnectionKind, dcId: number, isPremium: boolean) => number
@@ -738,7 +739,7 @@ export class NetworkManager {
                 // flood waits below 3 seconds are "ignored"
                 this._floodWaitedRequests.delete(message._)
             } else if (delta <= this.params.floodSleepThreshold) {
-                await sleep(delta)
+                await sleepWithAbort(delta, this.params.stopSignal)
                 this._floodWaitedRequests.delete(message._)
             } else {
                 const err = tl.RpcError.create(tl.RpcError.FLOOD, 'FLOOD_WAIT_%d')
@@ -790,7 +791,7 @@ export class NetworkManager {
 
                     if (e.text === 'WORKER_BUSY_TOO_LONG_RETRY') {
                         // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
-                        await sleep(1000)
+                        await sleepWithAbort(1000, this.params.stopSignal)
                     }
                     continue
                 }
@@ -809,7 +810,7 @@ export class NetworkManager {
 
                     if (e.seconds <= floodSleepThreshold) {
                         this._log.warn('%s resulted in a flood wait, will retry in %d seconds', message._, e.seconds)
-                        await sleep(e.seconds * 1000)
+                        await sleepWithAbort(e.seconds * 1000, this.params.stopSignal)
                         continue
                     }
                 }

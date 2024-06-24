@@ -238,6 +238,9 @@ export class MtClient extends EventEmitter {
     readonly log: Logger
     readonly network: NetworkManager
 
+    private _abortController: AbortController
+    readonly stopSignal: AbortSignal
+
     constructor(readonly params: MtClientOptions) {
         super()
 
@@ -266,6 +269,9 @@ export class MtClient extends EventEmitter {
         this._layer = params.overrideLayer ?? tl.LAYER
         this._readerMap = params.readerMap ?? defaultReaderMap
         this._writerMap = params.writerMap ?? defaultWriterMap
+
+        this._abortController = new AbortController()
+        this.stopSignal = this._abortController.signal
 
         this.storage = new StorageManager({
             provider: params.storage,
@@ -299,6 +305,7 @@ export class MtClient extends EventEmitter {
                 onConnecting: () => this.emit('connecting'),
                 onNetworkChanged: (connected) => this.emit('networkChanged', connected),
                 onUpdate: (upd) => this.emit('update', upd),
+                stopSignal: this.stopSignal,
                 ...params.network,
             },
             this._config,
@@ -361,6 +368,7 @@ export class MtClient extends EventEmitter {
 
         this._prepare.reset()
         this._connect.reset()
+        this._abortController.abort()
     }
 
     /**

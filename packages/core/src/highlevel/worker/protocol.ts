@@ -24,6 +24,7 @@ export type WorkerOutboundMessage =
           hasMin: boolean
       }
     | { type: 'error'; error: unknown }
+    | { type: 'stop' }
     | { type: 'conn_state'; state: ConnectionState }
     | {
           type: 'log'

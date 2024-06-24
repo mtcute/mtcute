@@ -321,4 +321,8 @@ export class BaseTelegramClient implements ITelegramClient {
     computeNewPasswordHash(algo: tl.TypePasswordKdfAlgo, password: string): Promise<Uint8Array> {
         return computeNewPasswordHash(this.crypto, algo, password)
     }
+
+    get stopSignal(): AbortSignal {
+        return this.mt.stopSignal
+    }
 }

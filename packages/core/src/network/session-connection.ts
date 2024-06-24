@@ -166,6 +166,7 @@ export class SessionConnection extends PersistentConnection {
         this._salts.isFetching = false
 
         if (forever) {
+            clearTimeout(this._pfsUpdateTimeout)
             this.removeAllListeners()
             this.on('error', (err) => {
                 this.log.warn('caught error after destroying: %s', err)

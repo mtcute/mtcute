@@ -42,6 +42,9 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     readonly startUpdatesLoop
     readonly stopUpdatesLoop
 
+    private _abortController = new AbortController()
+    readonly stopSignal = this._abortController.signal
+
     constructor(readonly options: TelegramWorkerPortOptions) {
         this.log = new LogManager('worker')
 
@@ -121,6 +124,9 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
                 break
             case 'error':
                 this.emitError(message.error)
+                break
+            case 'stop':
+                this._abortController.abort()
                 break
         }
     }
