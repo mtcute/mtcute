@@ -1,4 +1,5 @@
 import { IPeersRepository } from '../../../highlevel/storage/repository/peers.js'
+import { MtcuteError } from '../../../types/errors.js'
 import { BaseSqliteStorageDriver } from '../driver.js'
 import { ISqliteStatement } from '../types.js'
 
@@ -23,6 +24,8 @@ function mapPeerDto(dto: PeerDto): IPeersRepository.PeerInfo {
 }
 
 export class SqlitePeersRepository implements IPeersRepository {
+    private _loaded = false
+
     constructor(readonly _driver: BaseSqliteStorageDriver) {
         _driver.registerMigration('peers', 1, (db) => {
             db.exec(`
@@ -39,6 +42,8 @@ export class SqlitePeersRepository implements IPeersRepository {
             `)
         })
         _driver.onLoad((db) => {
+            this._loaded = true
+
             this._store = db.prepare(
                 'insert or replace into peers (id, hash, usernames, updated, phone, complete) values (?, ?, ?, ?, ?, ?)',
             )
@@ -57,6 +62,16 @@ export class SqlitePeersRepository implements IPeersRepository {
         })
     }
 
+    private _ensureLoaded() {
+        // this is (so far) the only repo where we do such check because it's a common mistake to forget to call start()
+        // or connect() on the client and immediately start using high-level methods, which in turn try to resolve peers
+        // from the database, and fail because nothing is initialized yet
+
+        if (!this._loaded) {
+            throw new MtcuteError('Peers repository is not loaded. Have you called client.start() (or similar)?')
+        }
+    }
+
     private _store!: ISqliteStatement
     store(peer: IPeersRepository.PeerInfo): void {
         this._driver._writeLater(this._store, [
@@ -71,6 +86,7 @@ export class SqlitePeersRepository implements IPeersRepository {
 
     private _getById!: ISqliteStatement
     getById(id: number): IPeersRepository.PeerInfo | null {
+        this._ensureLoaded()
         const row = this._getById.get(id)
         if (!row) return null
 
@@ -79,6 +95,7 @@ export class SqlitePeersRepository implements IPeersRepository {
 
     private _getByUsername!: ISqliteStatement
     getByUsername(username: string): IPeersRepository.PeerInfo | null {
+        this._ensureLoaded()
         const row = this._getByUsername.get(username)
         if (!row) return null
 
@@ -87,6 +104,7 @@ export class SqlitePeersRepository implements IPeersRepository {
 
     private _getByPhone!: ISqliteStatement
     getByPhone(phone: string): IPeersRepository.PeerInfo | null {
+        this._ensureLoaded()
         const row = this._getByPhone.get(phone)
         if (!row) return null
 
