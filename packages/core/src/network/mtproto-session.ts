@@ -200,6 +200,7 @@ export class MtprotoSession {
         if (!keepPending) {
             for (const info of this.pendingMessages.values()) {
                 if (info._ === 'rpc') {
+                    this.log.debug('rejecting pending rpc %s', info.rpc.method)
                     info.rpc.promise.reject(new MtcuteError('Session is reset'))
                 }
             }
@@ -214,6 +215,7 @@ export class MtprotoSession {
                 const rpc = this.queuedRpc.popFront()!
 
                 if (rpc.sent === false) {
+                    this.log.debug('rejecting pending rpc %s', rpc.method)
                     rpc.promise.reject(new MtcuteError('Session is reset'))
                 }
             }

@@ -360,6 +360,8 @@ export class MtClient extends EventEmitter {
      * Close all connections and finalize the client.
      */
     async close(): Promise<void> {
+        this.log.debug('closing client')
+
         this._config.destroy()
         await this.network.destroy()
 
@@ -369,6 +371,8 @@ export class MtClient extends EventEmitter {
         this._prepare.reset()
         this._connect.reset()
         this._abortController.abort()
+
+        this.log.debug('client closed successfully')
     }
 
     /**
