@@ -107,6 +107,7 @@
         "storyView": ["user_id"],
         "storyViews": ["recent_viewers"],
         "updateBotCallbackQuery": ["user_id"],
+        "updateBusinessBotCallbackQuery": ["user_id"],
         "updateBotCommands": ["bot_id"],
         "updateBotInlineQuery": ["user_id"],
         "updateBotInlineSend": ["user_id"],

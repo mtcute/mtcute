@@ -130,4 +130,12 @@ export class StoryElement {
             flipped: params.flipped,
         }
     }
+
+    url(url: string): tl.RawMediaAreaUrl {
+        return {
+            _: 'mediaAreaUrl',
+            coordinates: this._position,
+            url,
+        }
+    }
 }
