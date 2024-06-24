@@ -808,7 +808,7 @@ export class NetworkManager {
                     }
 
                     if (e.seconds <= floodSleepThreshold) {
-                        this._log.info('Flood wait for %d seconds (because of %s)', e.seconds, message._)
+                        this._log.warn('%s resulted in a flood wait, will retry in %d seconds', message._, e.seconds)
                         await sleep(e.seconds * 1000)
                         continue
                     }
