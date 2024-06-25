@@ -20,11 +20,11 @@ async function authorizeInDc(dc: number, base: BaseTelegramClient) {
 
         const phone = `99966${dc}${getAccountId()}`
 
-        const sentCode = await tg.sendCode({ phone })
-
         let user
 
         try {
+            const sentCode = await tg.sendCode({ phone })
+
             let auth = await tg.call({
                 _: 'auth.signIn',
                 phoneNumber: phone,
