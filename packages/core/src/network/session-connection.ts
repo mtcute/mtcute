@@ -55,6 +55,8 @@ const GZIP_PACKED_ID = 0x3072cfa1
 const MSG_CONTAINER_ID = 0x73f1f8dc
 // rpc_result#f35c6d01 req_msg_id:long result:Object = RpcResult;
 const RPC_RESULT_ID = 0xf35c6d01
+// rpc_error#2144ca19 error_code:int error_message:string = RpcError;
+const RPC_ERROR_ID = 0x2144ca19
 // invokeAfterMsg#cb9f372d {X:Type} msg_id:long query:!X = X;
 const INVOKE_AFTER_MSG_ID = 0xcb9f372d
 const INVOKE_AFTER_MSG_SIZE = 12 // 8 (invokeAfterMsg) + 4 (msg_id)
@@ -752,11 +754,17 @@ export class SessionConnection extends PersistentConnection {
 
         const rpc = msg.rpc
 
-        const customReader = this._readerMap._results![rpc.method]
+        const resultConstructorId = message.peekUint()
 
         let result: any
 
-        if (customReader) {
+        const customReader = this._readerMap._results![rpc.method]
+
+        if (resultConstructorId === RPC_ERROR_ID) {
+            // we need to handle this before anything else because otherwise we might
+            // try to use customReader on an error which will inevitably fail or break
+            result = message.object()
+        } else if (customReader) {
             result = customReader(message)
         } else {
             const objectId = message.uint()
