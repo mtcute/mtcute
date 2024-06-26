@@ -69,7 +69,7 @@ export type ConnectionCountDelegate = (kind: ConnectionKind, dcId: number, isPre
 const defaultConnectionCountDelegate: ConnectionCountDelegate = (kind, dcId, isPremium) => {
     switch (kind) {
         case 'main':
-            return 1
+            return 0
         case 'upload':
             return isPremium || (dcId !== 2 && dcId !== 4) ? 8 : 4
         case 'download':
@@ -95,10 +95,15 @@ export interface NetworkManagerExtraParams {
      * The function should be pure to avoid unexpected behavior.
      *
      * Defaults to TDLib logic:
-     *   - main: handled internally, **cannot be changed here**
+     *   - main: 0 (which stands for "handle internally, based on tmp_sessions value")
      *   - upload: if premium or dc id is other than 2 or 4, then 8, otherwise 4
      *   - download: if premium then 8, otherwise 2
      *   - downloadSmall: 2
+     *
+     * Non-zero value for `main` is **for advanced users only**
+     * as it may lead to unexpected behavior, and is generally not recommended
+     * because of unnecessary extra load on both the server and the client as well as
+     * increased possibility of encountering AUTH_KEY_DUPLICATED errors.
      */
     connectionCount?: ConnectionCountDelegate
 
@@ -209,10 +214,8 @@ export class DcConnectionManager {
     /** Download connection pool (for small files) */
     downloadSmall: MultiSessionConnection
 
-    private get _mainConnectionCount() {
-        if (!this.isPrimary) return 1
-
-        return this.manager.config.getNow()?.tmpSessions ?? 1
+    private get _mainCountOverride() {
+        return this.manager.params.connectionCount?.('main', this.dcId, this.manager.params.isPremium) ?? 0
     }
 
     constructor(
@@ -255,7 +258,19 @@ export class DcConnectionManager {
             mainParams.inactivityTimeout = undefined
         }
 
-        this.main = new MultiSessionConnection(mainParams, this._mainConnectionCount, this._log, 'MAIN')
+        let mainCount
+
+        if (this.isPrimary) {
+            mainCount = this._mainCountOverride
+
+            if (mainCount === 0) {
+                mainCount = this.manager.config.getNow()?.tmpSessions ?? 1
+            }
+        } else {
+            mainCount = 1
+        }
+
+        this.main = new MultiSessionConnection(mainParams, mainCount, this._log, 'MAIN')
         this.upload = new MultiSessionConnection(
             baseConnectionParams(),
             this.manager._connectionCount('upload', this.dcId, this.manager.params.isPremium),
@@ -421,6 +436,12 @@ export class DcConnectionManager {
         }
 
         return true
+    }
+
+    setMainConnectionCount(count: number): void {
+        if (this._mainCountOverride > 0) return
+
+        this.main.setCount(count)
     }
 
     async destroy() {
@@ -647,7 +668,7 @@ export class NetworkManager {
 
         if (auth._ === 'auth.authorization') {
             if (auth.tmpSessions) {
-                this._primaryDc?.main.setCount(auth.tmpSessions)
+                this._primaryDc?.setMainConnectionCount(auth.tmpSessions)
             }
 
             user = auth.user as tl.RawUser
@@ -699,7 +720,7 @@ export class NetworkManager {
 
     private _onConfigChanged(config: tl.RawConfig): void {
         if (config.tmpSessions) {
-            this._primaryDc?.main.setCount(config.tmpSessions)
+            this._primaryDc?.setMainConnectionCount(config.tmpSessions)
         }
     }
 
