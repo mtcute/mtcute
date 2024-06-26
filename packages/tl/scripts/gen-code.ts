@@ -28,7 +28,8 @@ async function generateTypings(apiSchema: TlFullSchema, apiLayer: number, mtpSch
     await writeFile(OUT_TYPINGS_JS_FILE, ESM_PRELUDE + apiJs + '\n\n' + mtpJs)
 }
 
-const removeInternalEntries = (entries: TlEntry[]) => entries.filter((it) => !it.name.startsWith('mtcute.'))
+const removeInternalEntries = (entries: TlEntry[]) =>
+    entries.filter((it) => !it.name.startsWith('mtcute.') || it.name === 'mtcute.customMethod')
 
 async function generateReaders(apiSchema: TlFullSchema, mtpSchema: TlFullSchema) {
     console.log('Generating readers...')
@@ -55,6 +56,18 @@ async function generateWriters(apiSchema: TlFullSchema, mtpSchema: TlFullSchema)
         variableName: 'm',
         includeStaticSizes: true,
     })
+
+    // for mtcute.customMethod we want to generate a writer that writes obj.bytes directly
+    const newCode = code.replace(
+        /^('mtcute.customMethod':function\(w,v\){)w.uint\(2440218877\);w.bytes\(h\(v,'bytes'\)\)/m,
+        "$1w.raw(h(v,'bytes'))",
+    )
+
+    if (newCode === code) {
+        throw new Error('Failed to replace customMethod writer')
+    }
+
+    code = newCode
 
     code += '\nexports.__tlWriterMap = m;'
 
