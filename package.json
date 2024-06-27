@@ -5,6 +5,21 @@
     "description": "Type-safe library for MTProto (Telegram API) for browser and NodeJS",
     "license": "MIT",
     "author": "alina sireneva <alina@tei.su>",
+    "keywords": [
+        "telegram",
+        "telegram-api",
+        "telegram-bot",
+        "telegram-library",
+        "mtproto",
+        "tgbot",
+        "userbot",
+        "api"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mtcute/mtcute"
+    },
+    "homepage": "https://mtcute.dev",
     "workspaces": [
         "packages/*"
     ],

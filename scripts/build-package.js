@@ -5,6 +5,8 @@ const fs = require('fs')
 const glob = require('glob')
 const ts = require('typescript')
 const stc = require('@teidesu/slow-types-compiler')
+// @ts-ignore
+const rootPackageJson = require('../package.json')
 
 if (process.argv.length < 3) {
     console.log('Usage: build-package.js <package name>')
@@ -76,6 +78,13 @@ function buildPackageJson() {
     if (buildConfig.buildCjs) {
         pkgJson.main = 'cjs/index.js'
         pkgJson.module = 'esm/index.js'
+    }
+
+    // copy common fields from root
+    for (const field of ['license', 'author', 'contributors', 'homepage', 'repository', 'bugs']) {
+        if (rootPackageJson[field]) {
+            pkgJson[field] = rootPackageJson[field]
+        }
     }
 
     const newScripts = {}
