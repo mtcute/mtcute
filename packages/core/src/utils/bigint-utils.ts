@@ -117,7 +117,7 @@ export function randomBigIntInRange(crypto: ICryptoProvider, max: bigint, min = 
     const interval = max - min
     if (interval < 0n) throw new Error('expected min < max')
 
-    const byteSize = bigIntBitLength(interval) / 8
+    const byteSize = Math.ceil(bigIntBitLength(interval) / 8)
 
     let result = randomBigInt(crypto, byteSize)
     while (result > interval) result -= interval
