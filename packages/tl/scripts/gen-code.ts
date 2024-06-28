@@ -40,6 +40,18 @@ async function generateReaders(apiSchema: TlFullSchema, mtpSchema: TlFullSchema)
         includeMethodResults: true,
     })
 
+    // for mtcute.customMethod we want to generate a reader that uses r.raw()
+    const newCode = code.replace(
+        "'mtcute.customMethod':function(r){return r.bytes()},",
+        "'mtcute.customMethod':function(r){return r.raw()},",
+    )
+
+    if (newCode === code) {
+        throw new Error('Failed to replace customMethod writer')
+    }
+
+    code = newCode
+
     const mtpCode = generateReaderCodeForTlEntries(mtpSchema.entries, {
         variableName: 'm',
     })
