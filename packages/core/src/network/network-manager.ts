@@ -320,7 +320,10 @@ export class DcConnectionManager {
                     this.download.notifyKeyChange()
                     this.downloadSmall.notifyKeyChange()
                 })
-                .catch((e: Error) => this.manager.params.emitError(e))
+                .catch((e: Error) => {
+                    this.manager._log.warn('failed to save auth key for dc %d: %s', this.dcId, e)
+                    this.manager.params.emitError(e)
+                })
         })
         connection.on('tmp-key-change', (idx: number, key: Uint8Array | null, expires: number) => {
             if (kind !== 'main') {
@@ -342,7 +345,10 @@ export class DcConnectionManager {
                     this.download.notifyKeyChange()
                     this.downloadSmall.notifyKeyChange()
                 })
-                .catch((e: Error) => this.manager.params.emitError(e))
+                .catch((e: Error) => {
+                    this.manager._log.warn('failed to save temp auth key %d for dc %d: %s', idx, this.dcId, e)
+                    this.manager.params.emitError(e)
+                })
         })
         connection.on('future-salts', (salts: mtp.RawMt_future_salt[]) => {
             Promise.resolve(this.manager._storage.salts.store(this.dcId, salts)).catch((e: Error) =>
