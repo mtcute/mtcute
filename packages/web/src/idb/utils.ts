@@ -11,15 +11,3 @@ export function reqToPromise<T>(req: IDBRequest<T>): Promise<T> {
         req.onerror = () => reject(req.error)
     })
 }
-
-export async function* cursorToIterator<T extends IDBCursor>(
-    req: IDBRequest<T | null>,
-): AsyncIterableIterator<T> {
-    let cursor = await reqToPromise(req)
-
-    while (cursor) {
-        yield cursor
-        cursor.continue()
-        cursor = await reqToPromise(req)
-    }
-}

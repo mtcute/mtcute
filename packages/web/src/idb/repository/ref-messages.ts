@@ -1,7 +1,7 @@
 import { IReferenceMessagesRepository } from '@mtcute/core'
 
 import { IdbStorageDriver } from '../driver.js'
-import { cursorToIterator, reqToPromise, txToPromise } from '../utils.js'
+import { reqToPromise, txToPromise } from '../utils.js'
 
 const TABLE = 'messageRefs'
 
@@ -62,8 +62,14 @@ export class IdbRefMsgRepository implements IReferenceMessagesRepository {
         const os = tx.objectStore(TABLE)
         const index = os.index('by_peer')
 
-        for await (const cursor of cursorToIterator(index.openCursor(peerId))) {
+        const req = index.openCursor(peerId)
+
+        let cursor = await reqToPromise(req)
+
+        while (cursor) {
             cursor.delete()
+            cursor.continue()
+            cursor = await reqToPromise(req)
         }
 
         return txToPromise(tx)
