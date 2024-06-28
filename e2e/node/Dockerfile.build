@@ -15,6 +15,7 @@ RUN pnpm install --frozen-lockfile && \
 
 ENV REGISTRY="http://verdaccio:4873/"
 ENV E2E="1"
+ENV SKIP_PREBUILT="1"
 
 ENTRYPOINT [ "node", "/app/scripts/publish.js" ]
 CMD [ "all" ]
