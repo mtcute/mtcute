@@ -743,6 +743,8 @@ withParams(params: RpcCallOptions): this\n`)
         'computeSrpParams',
         'computeNewPasswordHash',
         'onConnectionState',
+        'getServerUpdateHandler',
+        'changePrimaryDc',
     ].forEach((name) => {
         output.write(
             `TelegramClient.prototype.${name} = function(...args) {\n` +

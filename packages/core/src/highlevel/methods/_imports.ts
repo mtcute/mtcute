@@ -26,6 +26,7 @@ import {
     BotReactionCountUpdate,
     BotReactionUpdate,
     BotStoppedUpdate,
+    BusinessCallbackQuery,
     BusinessChatLink,
     BusinessConnection,
     BusinessMessage,

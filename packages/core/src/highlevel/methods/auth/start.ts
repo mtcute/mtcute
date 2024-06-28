@@ -15,6 +15,7 @@ import { resendCode } from './resend-code.js'
 import { sendCode } from './send-code.js'
 import { signIn } from './sign-in.js'
 import { signInBot } from './sign-in-bot.js'
+import { signInQr } from './sign-in-qr.js'
 
 // @available=both
 /**
@@ -47,6 +48,15 @@ export async function start(
          * Whether to overwrite existing session.
          */
         sessionForce?: boolean
+
+        /**
+         * When passed, [QR login flow](https://core.telegram.org/api/qr-login)
+         * will be used instead of the regular login flow.
+         *
+         * This function will be called whenever the login URL is changed,
+         * and the app is expected to display it as a QR code to the user.
+         */
+        qrCodeHandler?: (url: string, expires: Date) => void
 
         /**
          * Phone number of the account.
@@ -100,11 +110,16 @@ export async function start(
 
         /** Additional code settings to pass to the server */
         codeSettings?: Omit<tl.RawCodeSettings, '_' | 'logoutTokens'>
+
+        /** Abort signal */
+        abortSignal?: AbortSignal
     },
 ): Promise<User> {
     if (params.session) {
         await client.importSession(params.session, params.sessionForce)
     }
+
+    const { abortSignal } = params
 
     let has2fa = false
     let sentCode: SentCode | undefined
@@ -128,7 +143,7 @@ export async function start(
     }
 
     // if has2fa == true, then we are half-logged in, but need to enter password
-    if (!has2fa) {
+    if (!has2fa && !params.qrCodeHandler) {
         if (!params.phone && !params.botToken) {
             throw new MtArgumentError('Neither phone nor bot token were provided')
         }
@@ -156,6 +171,7 @@ export async function start(
                 phone,
                 futureAuthTokens: params.futureAuthTokens,
                 codeSettings: params.codeSettings,
+                abortSignal,
             })
         } catch (e) {
             if (tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED')) {
@@ -168,7 +184,11 @@ export async function start(
 
     if (sentCode) {
         if (params.forceSms && (sentCode.type === 'app' || sentCode.type === 'email')) {
-            sentCode = await resendCode(client, { phone: phone!, phoneCodeHash: sentCode.phoneCodeHash })
+            sentCode = await resendCode(client, {
+                phone: phone!,
+                phoneCodeHash: sentCode.phoneCodeHash,
+                abortSignal,
+            })
         }
 
         if (params.codeSentCallback) {
@@ -186,7 +206,12 @@ export async function start(
             if (!code) throw new tl.RpcError(400, 'PHONE_CODE_EMPTY')
 
             try {
-                return await signIn(client, { phone: phone!, phoneCodeHash: sentCode.phoneCodeHash, phoneCode: code })
+                return await signIn(client, {
+                    phone: phone!,
+                    phoneCodeHash: sentCode.phoneCodeHash,
+                    phoneCode: code,
+                    abortSignal,
+                })
             } catch (e) {
                 if (!tl.RpcError.is(e)) throw e
 
@@ -243,6 +268,14 @@ export async function start(
                 } else throw e
             }
         }
+    }
+
+    if (params.qrCodeHandler) {
+        return await signInQr(client, {
+            onUrlUpdated: params.qrCodeHandler,
+            password: params.password,
+            abortSignal,
+        })
     }
 
     throw new MtArgumentError('Failed to log in with provided credentials')

@@ -15,7 +15,7 @@ import {
     writeStringSession,
 } from '../utils/index.js'
 import { LogManager } from '../utils/logger.js'
-import { ConnectionState, ITelegramClient } from './client.types.js'
+import { ConnectionState, ITelegramClient, ServerUpdateHandler } from './client.types.js'
 import { AppConfigManager } from './managers/app-config-manager.js'
 import { ITelegramStorageProvider } from './storage/provider.js'
 import { TelegramStorageManager, TelegramStorageManagerExtraOptions } from './storage/storage.js'
@@ -30,7 +30,7 @@ export interface BaseTelegramClientOptions extends MtClientOptions {
 
 export class BaseTelegramClient implements ITelegramClient {
     readonly updates?: UpdatesManager
-    private _serverUpdatesHandler: (updates: tl.TypeUpdates) => void = () => {}
+    private _serverUpdatesHandler: ServerUpdateHandler = () => {}
     private _connectionStateHandler: (state: ConnectionState) => void = () => {}
 
     readonly log
@@ -276,8 +276,12 @@ export class BaseTelegramClient implements ITelegramClient {
         this.updates?.handleClientUpdate(updates, noDispatch)
     }
 
-    onServerUpdate(handler: (update: tl.TypeUpdates) => void): void {
+    onServerUpdate(handler: ServerUpdateHandler): void {
         this._serverUpdatesHandler = handler
+    }
+
+    getServerUpdateHandler(): ServerUpdateHandler {
+        return this._serverUpdatesHandler
     }
 
     onUpdate(handler: RawUpdateHandler): void {
@@ -324,5 +328,9 @@ export class BaseTelegramClient implements ITelegramClient {
 
     get stopSignal(): AbortSignal {
         return this.mt.stopSignal
+    }
+
+    changePrimaryDc(dcId: number): Promise<void> {
+        return this.mt.network.changePrimaryDc(dcId)
     }
 }

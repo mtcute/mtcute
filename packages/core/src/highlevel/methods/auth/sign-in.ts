@@ -19,16 +19,21 @@ export async function signIn(
         phoneCodeHash: string
         /** The confirmation code that was received */
         phoneCode: string
+        /** Abort signal */
+        abortSignal?: AbortSignal
     },
 ): Promise<User> {
-    const { phone, phoneCodeHash, phoneCode } = params
+    const { phone, phoneCodeHash, phoneCode, abortSignal } = params
 
-    const res = await client.call({
-        _: 'auth.signIn',
-        phoneNumber: normalizePhoneNumber(phone),
-        phoneCodeHash,
-        phoneCode,
-    })
+    const res = await client.call(
+        {
+            _: 'auth.signIn',
+            phoneNumber: normalizePhoneNumber(phone),
+            phoneCodeHash,
+            phoneCode,
+        },
+        { abortSignal },
+    )
 
     return _onAuthorization(client, res)
 }

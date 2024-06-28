@@ -17,15 +17,21 @@ export async function resendCode(
 
         /** Confirmation code identifier from {@link SentCode} */
         phoneCodeHash: string
+
+        /** Abort signal */
+        abortSignal?: AbortSignal
     },
 ): Promise<SentCode> {
-    const { phone, phoneCodeHash } = params
+    const { phone, phoneCodeHash, abortSignal } = params
 
-    const res = await client.call({
-        _: 'auth.resendCode',
-        phoneNumber: normalizePhoneNumber(phone),
-        phoneCodeHash,
-    })
+    const res = await client.call(
+        {
+            _: 'auth.resendCode',
+            phoneNumber: normalizePhoneNumber(phone),
+            phoneCodeHash,
+        },
+        { abortSignal },
+    )
 
     assertTypeIs('sendCode', res, 'auth.sentCode')
 

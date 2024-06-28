@@ -22,6 +22,8 @@ import type { StringSessionData } from './utils/string-session.js'
  */
 export type ConnectionState = 'offline' | 'connecting' | 'updating' | 'connected'
 
+export type ServerUpdateHandler = (update: tl.TypeUpdates) => void
+
 // NB: when adding new methods, don't forget to add them to:
 //  - worker/port.ts
 //  - generate-client script
@@ -51,7 +53,8 @@ export interface ITelegramClient {
     emitError(err: unknown): void
     handleClientUpdate(updates: tl.TypeUpdates, noDispatch?: boolean): void
 
-    onServerUpdate(handler: (update: tl.TypeUpdates) => void): void
+    onServerUpdate(handler: ServerUpdateHandler): void
+    getServerUpdateHandler(): ServerUpdateHandler
     onUpdate(handler: RawUpdateHandler): void
     onConnectionState(handler: (state: ConnectionState) => void): void
 
@@ -61,6 +64,7 @@ export interface ITelegramClient {
     // or at least load this once at startup (and then these methods can be made sync)
     getPoolSize(kind: ConnectionKind, dcId?: number): Promise<number>
     getPrimaryDcId(): Promise<number>
+    changePrimaryDc(newDc: number): Promise<void>
 
     computeSrpParams(request: tl.account.RawPassword, password: string): Promise<tl.RawInputCheckPasswordSRP>
     computeNewPasswordHash(algo: tl.TypePasswordKdfAlgo, password: string): Promise<Uint8Array>

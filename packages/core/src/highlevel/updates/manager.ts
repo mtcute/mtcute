@@ -180,6 +180,10 @@ export class UpdatesManager {
         this._handler = handler
     }
 
+    getHandler(): RawUpdateHandler {
+        return this._handler
+    }
+
     onCatchingUp(handler: (catchingUp: boolean) => void): void {
         this._onCatchingUp = handler
     }

@@ -21,6 +21,7 @@ import { sendCode } from './methods/auth/send-code.js'
 import { sendRecoveryCode } from './methods/auth/send-recovery-code.js'
 import { signIn } from './methods/auth/sign-in.js'
 import { signInBot } from './methods/auth/sign-in-bot.js'
+import { signInQr } from './methods/auth/sign-in-qr.js'
 import { start } from './methods/auth/start.js'
 import { startTest } from './methods/auth/start-test.js'
 import { isSelfPeer } from './methods/auth/utils.js'
@@ -262,6 +263,7 @@ import {
     BotReactionCountUpdate,
     BotReactionUpdate,
     BotStoppedUpdate,
+    BusinessCallbackQuery,
     BusinessChatLink,
     BusinessConnection,
     BusinessMessage,
@@ -456,6 +458,13 @@ export interface TelegramClient extends ITelegramClient {
      */
     on(name: 'inline_callback_query', handler: (upd: InlineCallbackQuery) => void): this
     /**
+     * Register a business callback query handler
+     *
+     * @param name  Event name
+     * @param handler  Business callback query handler
+     */
+    on(name: 'business_callback_query', handler: (upd: BusinessCallbackQuery) => void): this
+    /**
      * Register a poll update handler
      *
      * @param name  Event name
@@ -647,6 +656,9 @@ export interface TelegramClient extends ITelegramClient {
 
         /** Confirmation code identifier from {@link SentCode} */
         phoneCodeHash: string
+
+        /** Abort signal */
+        abortSignal?: AbortSignal
     }): Promise<SentCode>
     /**
      * Simple wrapper that calls {@link start} and then
@@ -678,6 +690,9 @@ export interface TelegramClient extends ITelegramClient {
 
         /** Additional code settings to pass to the server */
         codeSettings?: Omit<tl.RawCodeSettings, '_' | 'logoutTokens'>
+
+        /** Abort signal */
+        abortSignal?: AbortSignal
     }): Promise<SentCode>
     /**
      * Send a code to email needed to recover your password
@@ -697,6 +712,29 @@ export interface TelegramClient extends ITelegramClient {
      * @throws BadRequestError  In case the bot token is invalid
      */
     signInBot(token: string): Promise<User>
+
+    /**
+     * Execute the [QR login flow](https://core.telegram.org/api/qr-login).
+     *
+     * This method will resolve once the authorization is complete,
+     * returning the authorized user.
+     * **Available**: 👤 users only
+     *
+     */
+    signInQr(params: {
+        /**
+         * Function that will be called whenever the login URL is changed.
+         *
+         * The app is expected to display `url` as a QR code to the user
+         */
+        onUrlUpdated: (url: string, expires: Date) => void
+
+        /** Password for 2FA */
+        password?: MaybeDynamic<string>
+
+        /** Abort signal */
+        abortSignal?: AbortSignal
+    }): Promise<User>
     /**
      * Authorize a user in Telegram with a valid confirmation code.
      *
@@ -713,6 +751,8 @@ export interface TelegramClient extends ITelegramClient {
         phoneCodeHash: string
         /** The confirmation code that was received */
         phoneCode: string
+        /** Abort signal */
+        abortSignal?: AbortSignal
     }): Promise<User>
     /**
      * Utility function to quickly authorize on test DC
@@ -779,6 +819,15 @@ export interface TelegramClient extends ITelegramClient {
         sessionForce?: boolean
 
         /**
+         * When passed, [QR login flow](https://core.telegram.org/api/qr-login)
+         * will be used instead of the regular login flow.
+         *
+         * This function will be called whenever the login URL is changed,
+         * and the app is expected to display it as a QR code to the user.
+         */
+        qrCodeHandler?: (url: string, expires: Date) => void
+
+        /**
          * Phone number of the account.
          * If account does not exist, it will be created
          */
@@ -830,6 +879,9 @@ export interface TelegramClient extends ITelegramClient {
 
         /** Additional code settings to pass to the server */
         codeSettings?: Omit<tl.RawCodeSettings, '_' | 'logoutTokens'>
+
+        /** Abort signal */
+        abortSignal?: AbortSignal
     }): Promise<User>
     /**
      * Check if the given peer/input peer is referring to the current user
@@ -5613,6 +5665,9 @@ TelegramClient.prototype.sendRecoveryCode = function (...args) {
 TelegramClient.prototype.signInBot = function (...args) {
     return signInBot(this._client, ...args)
 }
+TelegramClient.prototype.signInQr = function (...args) {
+    return signInQr(this._client, ...args)
+}
 TelegramClient.prototype.signIn = function (...args) {
     return signIn(this._client, ...args)
 }
@@ -6427,6 +6482,12 @@ TelegramClient.prototype.computeNewPasswordHash = function (...args) {
 }
 TelegramClient.prototype.onConnectionState = function (...args) {
     return this._client.onConnectionState(...args)
+}
+TelegramClient.prototype.getServerUpdateHandler = function (...args) {
+    return this._client.getServerUpdateHandler(...args)
+}
+TelegramClient.prototype.changePrimaryDc = function (...args) {
+    return this._client.changePrimaryDc(...args)
 }
 TelegramClient.prototype.onServerUpdate = function () {
     throw new Error('onServerUpdate is not available for TelegramClient, use .on() methods instead')

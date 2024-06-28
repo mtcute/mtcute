@@ -21,23 +21,29 @@ export async function sendCode(
 
         /** Additional code settings to pass to the server */
         codeSettings?: Omit<tl.RawCodeSettings, '_' | 'logoutTokens'>
+
+        /** Abort signal */
+        abortSignal?: AbortSignal
     },
 ): Promise<SentCode> {
     const phone = normalizePhoneNumber(params.phone)
 
     const { id, hash } = await client.getApiCrenetials()
 
-    const res = await client.call({
-        _: 'auth.sendCode',
-        phoneNumber: phone,
-        apiId: id,
-        apiHash: hash,
-        settings: {
-            _: 'codeSettings',
-            logoutTokens: params.futureAuthTokens,
-            ...params.codeSettings,
+    const res = await client.call(
+        {
+            _: 'auth.sendCode',
+            phoneNumber: phone,
+            apiId: id,
+            apiHash: hash,
+            settings: {
+                _: 'codeSettings',
+                logoutTokens: params.futureAuthTokens,
+                ...params.codeSettings,
+            },
         },
-    })
+        { abortSignal: params.abortSignal },
+    )
 
     assertTypeIs('sendCode', res, 'auth.sentCode')
 

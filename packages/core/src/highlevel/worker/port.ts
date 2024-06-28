@@ -1,7 +1,5 @@
-import { tl } from '@mtcute/tl'
-
 import { LogManager } from '../../utils/logger.js'
-import { ConnectionState, ITelegramClient } from '../client.types.js'
+import { ConnectionState, ITelegramClient, ServerUpdateHandler } from '../client.types.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
 import { RawUpdateHandler } from '../updates/types.js'
 import { AppConfigManagerProxy } from './app-config.js'
@@ -37,6 +35,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     readonly getApiCrenetials
     readonly getPoolSize
     readonly getPrimaryDcId
+    readonly changePrimaryDc
     readonly computeSrpParams
     readonly computeNewPasswordHash
     readonly startUpdatesLoop
@@ -71,6 +70,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
         this.getApiCrenetials = bind('getApiCrenetials')
         this.getPoolSize = bind('getPoolSize')
         this.getPrimaryDcId = bind('getPrimaryDcId')
+        this.changePrimaryDc = bind('changePrimaryDc')
         this.computeSrpParams = bind('computeSrpParams')
         this.computeNewPasswordHash = bind('computeNewPasswordHash')
         this.startUpdatesLoop = bind('startUpdatesLoop')
@@ -79,9 +79,13 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
 
     abstract connectToWorker(worker: SomeWorker, handler: ClientMessageHandler): [SendFn, () => void]
 
-    private _serverUpdatesHandler: (updates: tl.TypeUpdates) => void = () => {}
-    onServerUpdate(handler: (updates: tl.TypeUpdates) => void): void {
+    private _serverUpdatesHandler: ServerUpdateHandler = () => {}
+    onServerUpdate(handler: ServerUpdateHandler): void {
         this._serverUpdatesHandler = handler
+    }
+
+    getServerUpdateHandler(): ServerUpdateHandler {
+        return this._serverUpdatesHandler
     }
 
     private _errorHandler: (err: unknown) => void = () => {}
