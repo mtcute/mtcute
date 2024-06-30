@@ -77,7 +77,7 @@ export async function editInlineMessage(
         if ('caption' in params.media && params.media.caption !== undefined) {
             [content, entities] = await _normalizeInputText(client, params.media.caption)
         }
-    } else if (params.text) {
+    } else if (params.text !== undefined) {
         [content, entities] = await _normalizeInputText(client, params.text)
     }
 

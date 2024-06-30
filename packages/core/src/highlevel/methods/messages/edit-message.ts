@@ -95,7 +95,7 @@ export async function editMessage(
         }
     }
 
-    if (params.text) {
+    if (params.text !== undefined) {
         [content, entities] = await _normalizeInputText(client, params.text)
     }
 
