@@ -2278,7 +2278,7 @@ export interface TelegramClient extends ITelegramClient {
     /**
      * Get a preview of a chatlist by its invite link
      *
-     * **Available**: ✅ both users and bots
+     * **Available**: 👤 users only
      *
      * @param link  Invite link
      */
@@ -5611,6 +5611,9 @@ export class TelegramClient extends EventEmitter implements ITelegramClient {
         this.storage = this._client.storage
         Object.defineProperty(this, 'stopSignal', {
             get: () => this._client.stopSignal,
+        })
+        Object.defineProperty(this, 'appConfig', {
+            get: () => this._client.appConfig,
         })
 
         if (!opts.disableUpdates) {

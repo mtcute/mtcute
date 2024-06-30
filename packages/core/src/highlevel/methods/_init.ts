@@ -67,6 +67,9 @@ function _initializeClient(this: TelegramClient, opts: TelegramClientOptions) {
     Object.defineProperty(this, 'stopSignal', {
         get: () => this._client.stopSignal,
     })
+    Object.defineProperty(this, 'appConfig', {
+        get: () => this._client.appConfig,
+    })
 
     if (!opts.disableUpdates) {
         const skipConversationUpdates = opts.skipConversationUpdates ?? true
