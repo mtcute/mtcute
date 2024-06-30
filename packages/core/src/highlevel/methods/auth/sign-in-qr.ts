@@ -1,6 +1,7 @@
 import { tl } from '@mtcute/tl'
 
 import { getPlatform } from '../../../platform.js'
+import { MaybePromise } from '../../../types/utils.js'
 import { ControllablePromise, createControllablePromise } from '../../../utils/controllable-promise.js'
 import { sleepWithAbort } from '../../../utils/misc-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
@@ -28,6 +29,14 @@ export async function signInQr(
 
         /** Password for 2FA */
         password?: MaybeDynamic<string>
+
+        /**
+         * Function that will be called after the server has rejected the password.
+         *
+         * Note that in case {@link password} is not a function,
+         * this callback will never be called, and an error will be thrown instead.
+         */
+        invalidPasswordCallback?: () => MaybePromise<void>
 
         /** Abort signal */
         abortSignal?: AbortSignal
@@ -59,6 +68,34 @@ export async function signInQr(
         waiter?.reject(abortSignal.reason)
     })
 
+    async function handle2fa(input: MaybeDynamic<string>) {
+        const isDynamic = typeof input === 'function'
+
+        while (true) {
+            const password = await resolveMaybeDynamic(input)
+
+            try {
+                return await checkPassword(client, password)
+            } catch (e) {
+                if (tl.RpcError.is(e, 'PASSWORD_HASH_INVALID')) {
+                    if (!isDynamic) {
+                        throw e
+                    }
+
+                    if (params.invalidPasswordCallback) {
+                        await params.invalidPasswordCallback?.()
+                    } else {
+                        // eslint-disable-next-line no-console
+                        console.log('Invalid password. Please try again')
+                    }
+                    continue
+                }
+
+                throw e
+            }
+        }
+    }
+
     try {
         const { id, hash } = await client.getApiCrenetials()
         const platform = getPlatform()
@@ -78,7 +115,7 @@ export async function signInQr(
                 )
             } catch (e) {
                 if (tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') && params.password) {
-                    return checkPassword(client, await resolveMaybeDynamic(params.password))
+                    return handle2fa(params.password)
                 }
 
                 throw e
@@ -109,7 +146,7 @@ export async function signInQr(
                         )
                     } catch (e) {
                         if (tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') && params.password) {
-                            return checkPassword(client, await resolveMaybeDynamic(params.password))
+                            return handle2fa(params.password)
                         }
 
                         throw e

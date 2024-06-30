@@ -274,6 +274,9 @@ export async function start(
         return await signInQr(client, {
             onUrlUpdated: params.qrCodeHandler,
             password: params.password,
+            invalidPasswordCallback: params.invalidCodeCallback ?
+                () => params.invalidCodeCallback!('password') :
+                undefined,
             abortSignal,
         })
     }

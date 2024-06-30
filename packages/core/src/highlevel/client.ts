@@ -732,6 +732,14 @@ export interface TelegramClient extends ITelegramClient {
         /** Password for 2FA */
         password?: MaybeDynamic<string>
 
+        /**
+         * Function that will be called after the server has rejected the password.
+         *
+         * Note that in case {@link password} is not a function,
+         * this callback will never be called, and an error will be thrown instead.
+         */
+        invalidPasswordCallback?: () => MaybePromise<void>
+
         /** Abort signal */
         abortSignal?: AbortSignal
     }): Promise<User>
