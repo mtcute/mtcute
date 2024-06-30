@@ -5,7 +5,7 @@ import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { WebDocument } from '../files/web-document.js'
 import type { MessageMedia } from '../messages/message-media.js'
-import { Thumbnail } from './thumbnail.js'
+import { ExtendedMediaPreview } from './extended-media.js'
 
 /**
  * Information about invoice's extended media.
@@ -14,43 +14,6 @@ import { Thumbnail } from './thumbnail.js'
  *  - `full`: there is a full version of this invoice's media available ({@link Invoice.extendedMedia})
  */
 export type InvoiceExtendedMediaState = 'none' | 'preview' | 'full'
-
-export class InvoiceExtendedMediaPreview {
-    constructor(public readonly raw: tl.RawMessageExtendedMediaPreview) {}
-
-    /**
-     * Width of the preview, in pixels (if available, else 0)
-     */
-    get width(): number {
-        return this.raw.w ?? 0
-    }
-
-    /**
-     * Height of the preview, in pixels (if available, else 0)
-     */
-    get height(): number {
-        return this.raw.h ?? 0
-    }
-
-    get thumbnail(): Thumbnail | null {
-        if (!this.raw.thumb) {
-            return null
-        }
-
-        return new Thumbnail(this.raw, this.raw.thumb)
-    }
-
-    /**
-     * If this is a video, the duration of the video,
-     * in seconds (if available, else 0)
-     */
-    get videoDuration(): number {
-        return this.raw.videoDuration ?? 0
-    }
-}
-
-memoizeGetters(InvoiceExtendedMediaPreview, ['thumbnail'])
-makeInspectable(InvoiceExtendedMediaPreview)
 
 /**
  * An invoice
@@ -152,12 +115,12 @@ export class Invoice {
      * Only available if {@link extendedMediaState} is `preview`.
      * Otherwise, throws an error.
      */
-    get extendedMediaPreview(): InvoiceExtendedMediaPreview {
+    get extendedMediaPreview(): ExtendedMediaPreview {
         if (this.raw.extendedMedia?._ !== 'messageExtendedMediaPreview') {
             throw new MtArgumentError('No extended media preview available')
         }
 
-        return new InvoiceExtendedMediaPreview(this.raw.extendedMedia)
+        return new ExtendedMediaPreview(this.raw.extendedMedia)
     }
 
     /**

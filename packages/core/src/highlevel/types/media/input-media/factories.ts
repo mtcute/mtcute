@@ -13,6 +13,7 @@ import {
     InputMediaGeoLive,
     InputMediaInvoice,
     InputMediaLike,
+    InputMediaPaidMedia,
     InputMediaPhoto,
     InputMediaPoll,
     InputMediaQuiz,
@@ -276,6 +277,13 @@ export function webpage(url: string, params: OmitTypeAndFile<InputMediaWebpage, 
     const ret = params as tl.Mutable<InputMediaWebpage>
     ret.type = 'webpage'
     ret.url = url
+
+    return ret
+}
+
+export function paid(params: OmitTypeAndFile<InputMediaPaidMedia>): InputMediaPaidMedia {
+    const ret = params as tl.Mutable<InputMediaPaidMedia>
+    ret.type = 'paid'
 
     return ret
 }

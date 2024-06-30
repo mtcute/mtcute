@@ -221,6 +221,22 @@ export async function _normalizeInputMedia(
         }
     }
 
+    if (media.type === 'paid') {
+        let medias: tl.TypeInputMedia[]
+
+        if (Array.isArray(media.media)) {
+            medias = await Promise.all(media.media.map((m) => _normalizeInputMedia(client, m, params)))
+        } else {
+            medias = [await _normalizeInputMedia(client, media.media, params)]
+        }
+
+        return {
+            _: 'inputMediaPaidMedia',
+            starsAmount: Long.isLong(media.starsAmount) ? media.starsAmount : Long.fromNumber(media.starsAmount),
+            extendedMedia: medias,
+        }
+    }
+
     let inputFile: tl.TypeInputFile | undefined = undefined
     let thumb: tl.TypeInputFile | undefined = undefined
     let mime = 'application/octet-stream'

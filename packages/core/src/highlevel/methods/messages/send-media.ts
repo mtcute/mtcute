@@ -70,8 +70,16 @@ export async function sendMedia(
             file: media,
         }
     }
+    const { peer, replyTo, scheduleDate, chainId, quickReplyShortcut } = await _processCommonSendParameters(
+        client,
+        chatId,
+        params,
+    )
 
-    const inputMedia = await _normalizeInputMedia(client, media, params)
+    const inputMedia = await _normalizeInputMedia(client, media, {
+        progressCallback: params.progressCallback,
+        uploadPeer: peer,
+    })
 
     const [message, entities] = await _normalizeInputText(
         client,
@@ -81,11 +89,6 @@ export async function sendMedia(
     )
 
     const replyMarkup = BotKeyboard._convertToTl(params.replyMarkup)
-    const { peer, replyTo, scheduleDate, chainId, quickReplyShortcut } = await _processCommonSendParameters(
-        client,
-        chatId,
-        params,
-    )
 
     const randomId = randomLong()
     const res = await _maybeInvokeWithBusinessConnection(

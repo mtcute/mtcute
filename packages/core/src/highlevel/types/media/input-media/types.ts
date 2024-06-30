@@ -578,6 +578,20 @@ export interface InputMediaWebpage extends CaptionMixin {
     url: string
 }
 
+export interface InputMediaPaidMedia extends CaptionMixin {
+    type: 'paid'
+
+    /**
+     * Media to be sent
+     */
+    media: MaybeArray<InputMediaLike>
+
+    /**
+     * Amount of stars that should be paid for the media
+     */
+    starsAmount: number | tl.Long
+}
+
 /**
  * Input media that can be sent somewhere.
  *
@@ -606,4 +620,5 @@ export type InputMediaLike =
     | InputMediaQuiz
     | InputMediaStory
     | InputMediaWebpage
+    | InputMediaPaidMedia
     | tl.TypeInputMedia

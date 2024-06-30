@@ -9,6 +9,7 @@ import { parseDocument } from '../media/document-utils.js'
 import { Game } from '../media/game.js'
 import { Invoice } from '../media/invoice.js'
 import { LiveLocation, Location } from '../media/location.js'
+import { PaidMedia } from '../media/paid-media.js'
 import { Photo } from '../media/photo.js'
 import { Poll } from '../media/poll.js'
 import { Sticker } from '../media/sticker.js'
@@ -37,6 +38,7 @@ export type MessageMedia =
     | Poll
     | Invoice
     | MediaStory
+    | PaidMedia
     | null
 export type MessageMediaType = Exclude<MessageMedia, null>['type']
 
@@ -95,6 +97,17 @@ export function _messageMediaFromTl(peers: PeersIndex | null, m: tl.TypeMessageM
             }
 
             return new MediaStory(m, peers)
+        }
+        case 'messageMediaPaidMedia': {
+            const extended: MessageMedia[] = []
+
+            m.extendedMedia.forEach((e) => {
+                if (e._ !== 'messageExtendedMedia') return
+
+                extended.push(_messageMediaFromTl(peers, e.media))
+            })
+
+            return new PaidMedia(m, extended)
         }
         default:
             return null

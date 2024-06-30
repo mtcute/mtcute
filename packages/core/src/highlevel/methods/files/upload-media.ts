@@ -50,6 +50,7 @@ export async function uploadMedia(
         case 'inputMediaInvoice':
         case 'inputMediaPoll':
         case 'inputMediaDice':
+        case 'inputMediaPaidMedia':
             throw new MtArgumentError("This media can't be uploaded")
     }
 
