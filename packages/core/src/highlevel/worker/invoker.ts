@@ -10,7 +10,7 @@ export class WorkerInvoker {
     private _nextId = 0
     private _pending = new Map<number, ControllablePromise>()
 
-    private _invoke(target: InvokeTarget, method: string, args: unknown[], isVoid: boolean) {
+    private _invoke(target: InvokeTarget, method: string, args: unknown[], isVoid: boolean, abortSignal?: AbortSignal) {
         const id = this._nextId++
 
         this.send({
@@ -20,6 +20,14 @@ export class WorkerInvoker {
             method,
             args,
             void: isVoid,
+            withAbort: Boolean(abortSignal),
+        })
+
+        abortSignal?.addEventListener('abort', () => {
+            this.send({
+                type: 'abort',
+                id,
+            })
         })
 
         if (!isVoid) {
@@ -38,6 +46,12 @@ export class WorkerInvoker {
     invokeVoid(target: InvokeTarget, method: string, args: unknown[]): void {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this._invoke(target, method, args, true)
+    }
+
+    invokeWithAbort(target: InvokeTarget, method: string, args: unknown[], abortSignal: AbortSignal): Promise<unknown> {
+        if (abortSignal.aborted) return Promise.reject(abortSignal.reason)
+
+        return this._invoke(target, method, args, false, abortSignal) as Promise<unknown>
     }
 
     handleResult(msg: Extract<WorkerOutboundMessage, { type: 'result' }>) {

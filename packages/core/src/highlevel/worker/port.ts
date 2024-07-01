@@ -1,3 +1,7 @@
+import { tl } from '@mtcute/tl'
+
+import { RpcCallOptions } from '../../network/network-manager.js'
+import { MustEqual } from '../../types/utils.js'
 import { LogManager } from '../../utils/logger.js'
 import { ConnectionState, ITelegramClient, ServerUpdateHandler } from '../client.types.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
@@ -28,7 +32,6 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     readonly notifyLoggedOut
     readonly notifyChannelOpened
     readonly notifyChannelClosed
-    readonly call
     readonly importSession
     readonly exportSession
     readonly handleClientUpdate
@@ -63,7 +66,6 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
         this.notifyLoggedOut = bind('notifyLoggedOut')
         this.notifyChannelOpened = bind('notifyChannelOpened')
         this.notifyChannelClosed = bind('notifyChannelClosed')
-        this.call = bind('call')
         this.importSession = bind('importSession')
         this.exportSession = bind('exportSession')
         this.handleClientUpdate = bind('handleClientUpdate', true)
@@ -75,6 +77,21 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
         this.computeNewPasswordHash = bind('computeNewPasswordHash')
         this.startUpdatesLoop = bind('startUpdatesLoop')
         this.stopUpdatesLoop = bind('stopUpdatesLoop')
+    }
+
+    call<T extends tl.RpcMethod>(
+        message: MustEqual<T, tl.RpcMethod>,
+        params?: RpcCallOptions,
+    ): Promise<tl.RpcCallReturn[T['_']]> {
+        if (params?.abortSignal) {
+            const { abortSignal, ...rest } = params
+
+            return this._invoker.invokeWithAbort('client', 'call', [message, rest], abortSignal) as Promise<
+                tl.RpcCallReturn[T['_']]
+            >
+        }
+
+        return this._invoker.invoke('client', 'call', [message, params]) as Promise<tl.RpcCallReturn[T['_']]>
     }
 
     abstract connectToWorker(worker: SomeWorker, handler: ClientMessageHandler): [SendFn, () => void]

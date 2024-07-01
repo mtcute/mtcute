@@ -13,12 +13,22 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
 
     abstract registerWorker(handler: WorkerMessageHandler): RespondFn
 
+    readonly pendingAborts = new Map<number, AbortController>()
+
     constructor(readonly params: TelegramWorkerOptions<T>) {
         this.broadcast = this.registerWorker((message, respond) => {
             switch (message.type) {
                 case 'invoke':
                     this.onInvoke(message, respond)
                     break
+                case 'abort': {
+                    const abort = this.pendingAborts.get(message.id)
+
+                    if (abort) {
+                        abort.abort()
+                        this.pendingAborts.delete(message.id)
+                    }
+                }
             }
         })
 
@@ -116,9 +126,28 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
             return
         }
 
+        let args = msg.args
+
+        if (msg.target === 'client' && msg.method === 'call' && msg.withAbort) {
+            const abort = new AbortController()
+            this.pendingAborts.set(msg.id, abort)
+
+            args = [
+                args[0],
+                {
+                    ...(args[1] as object),
+                    abortSignal: abort.signal,
+                },
+            ]
+        }
+
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        Promise.resolve(method.apply(target, msg.args))
+        Promise.resolve(method.apply(target, args))
             .then((res) => {
+                if (msg.withAbort) {
+                    this.pendingAborts.delete(msg.id)
+                }
+
                 if (msg.void) return
 
                 respond({
@@ -128,6 +157,10 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
                 })
             })
             .catch((err) => {
+                if (msg.withAbort) {
+                    this.pendingAborts.delete(msg.id)
+                }
+
                 respond({
                     type: 'result',
                     id: msg.id,

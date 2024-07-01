@@ -5,14 +5,20 @@ import { tl } from '@mtcute/tl'
 import { ConnectionState } from '../client.types.js'
 import { SerializedError } from './errors.js'
 
-export type WorkerInboundMessage = {
-    type: 'invoke'
-    id: number
-    target: 'custom' | 'client' | 'storage' | 'storage-self' | 'storage-peers' | 'app-config'
-    method: string
-    args: unknown[]
-    void: boolean
-}
+export type WorkerInboundMessage =
+    | {
+          type: 'invoke'
+          id: number
+          target: 'custom' | 'client' | 'storage' | 'storage-self' | 'storage-peers' | 'app-config'
+          method: string
+          args: unknown[]
+          void: boolean
+          withAbort: boolean
+      }
+    | {
+          type: 'abort'
+          id: number
+      }
 
 export type WorkerOutboundMessage =
     | { type: 'server_update'; update: tl.TypeUpdates }
