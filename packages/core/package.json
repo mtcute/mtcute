@@ -21,11 +21,12 @@
         "./platform.js": "./src/platform.ts"
     },
     "dependencies": {
+        "@mtcute/file-id": "workspace:^",
         "@mtcute/tl": "workspace:^",
         "@mtcute/tl-runtime": "workspace:^",
-        "@mtcute/file-id": "workspace:^",
         "@types/events": "3.0.0",
         "events": "3.2.0",
+        "jsbi": "^4.3.0",
         "long": "5.2.3"
     },
     "devDependencies": {

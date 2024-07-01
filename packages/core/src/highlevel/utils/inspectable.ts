@@ -40,41 +40,5 @@ export function makeInspectable<T>(
     props?: (keyof T)[],
     hide?: (keyof T)[],
 ): typeof obj {
-    const getters: (keyof T)[] = props ? props : []
-
-    for (const key of getAllGettersNames<T>(obj.prototype)) {
-        if (!hide || !hide.includes(key)) getters.push(key)
-    }
-
-    // dirty hack to set name for inspect result
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval
-    const proto = new Function(`return function ${obj.name}(){}`)().prototype
-
-    obj.prototype.toJSON = function () {
-        const ret: any = Object.create(proto)
-        getters.forEach((it) => {
-            try {
-                let val = this[it]
-
-                if (val && typeof val === 'object') {
-                    if (val instanceof Uint8Array) {
-                        val = getPlatform().base64Encode(val)
-                    } else if (Long.isLong(val)) {
-                        val = val.toString()
-                    } else if (typeof val.toJSON === 'function') {
-                        val = val.toJSON(true)
-                    }
-                }
-                ret[it] = val
-            } catch (e: any) {
-                ret[it] = 'Error: ' + e.message
-            }
-        })
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return ret
-    }
-    obj.prototype[customInspectSymbol] = obj.prototype.toJSON
-
     return obj
 }

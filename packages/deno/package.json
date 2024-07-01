@@ -20,9 +20,7 @@
         "@mtcute/core": "workspace:^",
         "@mtcute/wasm": "workspace:^",
         "@mtcute/markdown-parser": "workspace:^",
-        "@mtcute/html-parser": "workspace:^",
-        "@db/sqlite": "npm:@jsr/db__sqlite@0.11.1",
-        "@std/io": "npm:@jsr/std__io@0.223.0"
+        "@mtcute/html-parser": "workspace:^"
     },
     "devDependencies": {
         "@mtcute/test": "workspace:^"

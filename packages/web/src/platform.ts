@@ -33,12 +33,12 @@ export class WebPlatform implements ICorePlatform {
         if (!('onLine' in navigator)) return () => {}
 
         const onlineHandler = () => fn(navigator.onLine)
-        window.addEventListener('online', onlineHandler)
-        window.addEventListener('offline', onlineHandler)
+        globalThis.addEventListener('online', onlineHandler)
+        globalThis.addEventListener('offline', onlineHandler)
 
         return () => {
-            window.removeEventListener('online', onlineHandler)
-            window.removeEventListener('offline', onlineHandler)
+            globalThis.removeEventListener('online', onlineHandler)
+            globalThis.removeEventListener('offline', onlineHandler)
         }
     }
 

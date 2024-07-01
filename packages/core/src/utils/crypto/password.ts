@@ -7,6 +7,7 @@ import { concatBuffers } from '../buffer-utils.js'
 import { assertTypeIs } from '../type-assertions.js'
 import { ICryptoProvider } from './abstract.js'
 import { xorBuffer } from './utils.js'
+import JSBI from 'jsbi'
 
 /**
  * Compute password hash as defined by MTProto.
@@ -51,7 +52,7 @@ export async function computeNewPasswordHash(
 
     const _x = await computePasswordHash(crypto, getPlatform().utf8Encode(password), algo.salt1, algo.salt2)
 
-    const g = BigInt(algo.g)
+    const g = JSBI.BigInt(algo.g)
     const p = bufferToBigInt(algo.p)
     const x = bufferToBigInt(_x)
 
@@ -90,7 +91,7 @@ export async function computeSrpParams(
         throw new MtSecurityError('SRP_ID is not present in the request')
     }
 
-    const g = BigInt(algo.g)
+    const g = JSBI.BigInt(algo.g)
     const _g = bigIntToBuffer(g, 256)
     const p = bufferToBigInt(algo.p)
     const gB = bufferToBigInt(request.srpB)
@@ -109,11 +110,11 @@ export async function computeSrpParams(
     const x = bufferToBigInt(_x)
 
     const v = bigIntModPow(g, x, p)
-    const kV = (k * v) % p
+    const kV = JSBI.remainder(JSBI.multiply(k, v), p)
 
-    let t = gB - kV
-    if (t < 0n) t += p
-    const sA = bigIntModPow(t, a + u * x, p)
+    let t = JSBI.subtract(gB, kV)
+    if (JSBI.lessThan(t, JSBI.BigInt(0))) t = JSBI.add(t, p)
+    const sA = bigIntModPow(t, JSBI.add(a, JSBI.multiply(u, x)), p)
     const _kA = H(bigIntToBuffer(sA, 256))
 
     const _M1 = H(concatBuffers([xorBuffer(H(algo.p), H(_g)), H(algo.salt1), H(algo.salt2), _gA, request.srpB, _kA]))
