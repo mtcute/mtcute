@@ -20,6 +20,7 @@ CFLAGS_WASM := \
 	-target wasm32-unknown-unknown \
 	-nostdlib -ffreestanding -DFREESTANDING \
 	-mbulk-memory \
+	-msimd128 \
 	-Wl,--no-entry,--export-dynamic,--lto-O3
 
 CFLAGS := $(CFLAGS_WASM) \
