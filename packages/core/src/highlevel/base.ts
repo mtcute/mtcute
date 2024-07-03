@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/require-await */
-import { tl } from '@mtcute/tl'
+import { mtp, tl } from '@mtcute/tl'
 
 import { MtClient, MtClientOptions } from '../network/client.js'
 import { ConnectionKind, RpcCallOptions } from '../network/network-manager.js'
 import { StorageManagerExtraOptions } from '../storage/storage.js'
 import { MtArgumentError } from '../types/errors.js'
 import { MustEqual } from '../types/utils.js'
+import { reportUnknownError } from '../utils/error-reporting.js'
 import {
     asyncResettable,
     computeNewPasswordHash,
     computeSrpParams,
+    isTlRpcError,
     readStringSession,
     StringSessionData,
     writeStringSession,
@@ -26,6 +28,16 @@ export interface BaseTelegramClientOptions extends MtClientOptions {
     storage: ITelegramStorageProvider
     storageOptions?: StorageManagerExtraOptions & TelegramStorageManagerExtraOptions
     updates?: UpdatesManagerParams | false
+}
+
+function makeRpcError(raw: mtp.RawMt_rpc_error, stack: string, method?: string) {
+    const error = tl.RpcError.fromTl(raw)
+    error.stack = `RpcError (${error.code} ${error.text}): ${error.message}\n    at ${method}\n${stack
+        .split('\n')
+        .slice(2)
+        .join('\n')}`
+
+    return error
 }
 
 export class BaseTelegramClient implements ITelegramClient {
@@ -181,6 +193,16 @@ export class BaseTelegramClient implements ITelegramClient {
         }
 
         const res = await this.mt.call(message, params)
+
+        if (isTlRpcError(res)) {
+            const error = makeRpcError(res, new Error().stack ?? '', message._)
+
+            if (error.unknown && this.params.enableErrorReporting) {
+                reportUnknownError(this.log, error, message._)
+            }
+
+            throw error
+        }
 
         await this.storage.peers.updatePeersFrom(res)
 
