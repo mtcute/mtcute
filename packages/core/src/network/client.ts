@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import EventEmitter from 'events'
 
-import { tl } from '@mtcute/tl'
+import { mtp, tl } from '@mtcute/tl'
 import { __tlReaderMap as defaultReaderMap } from '@mtcute/tl/binary/reader.js'
 import { __tlWriterMap as defaultWriterMap } from '@mtcute/tl/binary/writer.js'
 import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
@@ -17,6 +17,7 @@ import {
     defaultTestDc,
     defaultTestIpv6Dc,
     ICryptoProvider,
+    isTlRpcError,
     Logger,
     LogManager,
 } from '../utils/index.js'
@@ -142,20 +143,6 @@ export interface MtClientOptions {
     enableErrorReporting?: boolean
 
     /**
-     * If true, RPC errors will have a stack trace of the initial `.call()`
-     * or `.sendForResult()` call position, which drastically improves
-     * debugging experience.<br>
-     * If false, they will have a stack trace of mtcute internals.
-     *
-     * Internally this creates a stack capture before every RPC call
-     * and stores it until the result is received. This might
-     * use a lot more memory than normal, thus can be disabled here.
-     *
-     * @default true
-     */
-    niceStacks?: boolean
-
-    /**
      * Extra parameters for {@link NetworkManager}
      */
     network?: NetworkManagerExtraParams
@@ -223,7 +210,6 @@ export class MtClient extends EventEmitter {
      */
     _defaultDcs: DcOptions
 
-    private _niceStacks: boolean
     /** TL layer used by the client */
     readonly _layer: number
     /** TL readers map used by the client */
@@ -231,7 +217,13 @@ export class MtClient extends EventEmitter {
     /** TL writers map used by the client */
     readonly _writerMap: TlWriterMap
 
-    readonly _config = new ConfigManager(() => this.call({ _: 'help.getConfig' }))
+    readonly _config = new ConfigManager(async () => {
+        const res = await this.call({ _: 'help.getConfig' })
+
+        if (isTlRpcError(res)) throw new Error(`Failed to get config: ${res.errorMessage}`)
+
+        return res
+    })
 
     private _emitError?: (err: unknown) => void
 
@@ -264,7 +256,6 @@ export class MtClient extends EventEmitter {
         }
 
         this._defaultDcs = dc
-        this._niceStacks = params.niceStacks ?? true
 
         this._layer = params.overrideLayer ?? tl.LAYER
         this._readerMap = params.readerMap ?? defaultReaderMap
@@ -390,11 +381,9 @@ export class MtClient extends EventEmitter {
     async call<T extends tl.RpcMethod>(
         message: MustEqual<T, tl.RpcMethod>,
         params?: RpcCallOptions,
-    ): Promise<tl.RpcCallReturn[T['_']]> {
-        const stack = this._niceStacks ? new Error().stack : undefined
-
+    ): Promise<tl.RpcCallReturn[T['_']] | mtp.RawMt_rpc_error> {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return this.network.call(message, params, stack)
+        return this.network.call(message, params)
     }
 
     /**

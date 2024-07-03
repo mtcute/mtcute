@@ -8,7 +8,6 @@ import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlSerializationCounter, Tl
 import { getPlatform } from '../platform.js'
 import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
-import { reportUnknownError } from '../utils/error-reporting.js'
 import {
     concatBuffers,
     ControllablePromise,
@@ -28,7 +27,6 @@ import { TransportError } from './transports/abstract.js'
 export interface SessionConnectionParams extends PersistentConnectionParams {
     initConnection: tl.RawInitConnectionRequest
     inactivityTimeout?: number
-    niceStacks?: boolean
     enableErrorReporting: boolean
     layer: number
     disableUpdates?: boolean
@@ -60,13 +58,6 @@ const RPC_ERROR_ID = 0x2144ca19
 // invokeAfterMsg#cb9f372d {X:Type} msg_id:long query:!X = X;
 const INVOKE_AFTER_MSG_ID = 0xcb9f372d
 const INVOKE_AFTER_MSG_SIZE = 12 // 8 (invokeAfterMsg) + 4 (msg_id)
-
-function makeNiceStack(error: tl.RpcError, stack: string, method?: string) {
-    error.stack = `RpcError (${error.code} ${error.text}): ${error.message}\n    at ${method}\n${stack
-        .split('\n')
-        .slice(2)
-        .join('\n')}`
-}
 
 /**
  * A connection to a single DC.
@@ -867,17 +858,7 @@ export class SessionConnection extends PersistentConnection {
                 }
             }
 
-            const error = tl.RpcError.fromTl(res)
-
-            if (this.params.niceStacks !== false) {
-                makeNiceStack(error, rpc.stack!, rpc.method)
-            }
-
-            if (error.unknown && this.params.enableErrorReporting) {
-                reportUnknownError(this.log, error, rpc.method)
-            }
-
-            rpc.promise.reject(error)
+            rpc.promise.resolve(res)
         } else {
             this.log.debug('received rpc_result (%s) for request %l (%s)', result._, reqMsgId, rpc.method)
 
@@ -1350,17 +1331,12 @@ export class SessionConnection extends PersistentConnection {
 
     sendRpc<T extends tl.RpcMethod>(
         request: T,
-        stack?: string,
         timeout?: number,
         abortSignal?: AbortSignal,
         chainId?: string | number,
     ): Promise<tl.RpcCallReturn[T['_']]> {
         if (this._usable && this.params.inactivityTimeout) {
             this._rescheduleInactivity()
-        }
-
-        if (!stack && this.params.niceStacks !== false) {
-            stack = new Error().stack
         }
 
         const method = request._
@@ -1436,7 +1412,6 @@ export class SessionConnection extends PersistentConnection {
             method,
             promise: createControllablePromise(),
             data: content,
-            stack,
             // we will need to know size of gzip_packed overhead in _flush()
             gzipOverhead: shouldGzip ? 4 + TlSerializationCounter.countBytesOverhead(content.length) : 0,
             initConn,
@@ -1498,14 +1473,11 @@ export class SessionConnection extends PersistentConnection {
         }
 
         if (onTimeout) {
-            // todo: replace with MtTimeoutError
-            const error = new tl.RpcError(400, 'Client timeout')
-
-            if (this.params.niceStacks !== false) {
-                makeNiceStack(error, rpc.stack!, rpc.method)
-            }
-
-            rpc.promise.reject(error)
+            rpc.promise.resolve({
+                _: 'mt_rpc_error',
+                errorCode: 400,
+                errorMessage: 'TIMEOUT',
+            } satisfies mtp.RawMt_rpc_error)
         } else if (abortSignal) {
             rpc.promise.reject(abortSignal.reason)
         }
