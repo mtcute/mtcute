@@ -85,3 +85,7 @@ export function assertTrue(context: string, cond: boolean): asserts cond {
         throw new MtTypeAssertionError(context, 'true', 'false')
     }
 }
+
+export function isTlRpcError(obj: unknown): obj is mtp.RawMt_rpc_error {
+    return typeof obj === 'object' && obj !== null && (obj as { _: string })._ === 'mt_rpc_error'
+}
