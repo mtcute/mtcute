@@ -888,6 +888,8 @@ export class NetworkManager {
                 await this._exportAuthTo(manager)
                 continue
             }
+
+            return res
         }
 
         return lastError!
