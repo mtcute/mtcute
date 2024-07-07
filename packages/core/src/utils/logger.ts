@@ -1,6 +1,6 @@
 import { getPlatform } from '../platform.js'
 
-const DEFAULT_LOG_LEVEL = 3
+const DEFAULT_LOG_LEVEL = 2
 const FORMATTER_RE = /%[a-zA-Z]/g
 
 /**
