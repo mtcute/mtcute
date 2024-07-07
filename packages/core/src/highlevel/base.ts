@@ -11,7 +11,9 @@ import {
     asyncResettable,
     computeNewPasswordHash,
     computeSrpParams,
+    ICryptoProvider,
     isTlRpcError,
+    Logger,
     readStringSession,
     StringSessionData,
     writeStringSession,
@@ -45,10 +47,10 @@ export class BaseTelegramClient implements ITelegramClient {
     private _serverUpdatesHandler: ServerUpdateHandler = () => {}
     private _connectionStateHandler: (state: ConnectionState) => void = () => {}
 
-    readonly log
-    readonly mt
-    readonly crypto
-    readonly storage
+    readonly log: Logger
+    readonly mt: MtClient
+    readonly crypto: ICryptoProvider
+    readonly storage: TelegramStorageManager
 
     constructor(readonly params: BaseTelegramClientOptions) {
         this.log = this.params.logger ?? new LogManager('client')

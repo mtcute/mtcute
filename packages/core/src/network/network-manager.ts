@@ -4,6 +4,7 @@ import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 import { getPlatform } from '../platform.js'
 import { StorageManager } from '../storage/storage.js'
 import { MtArgumentError, MtcuteError, MtTimeoutError, MtUnsupportedError } from '../types/index.js'
+import { ComposedMiddleware, composeMiddlewares, Middleware } from '../utils/composer.js'
 import {
     ControllablePromise,
     createControllablePromise,
@@ -113,6 +114,14 @@ export interface NetworkManagerExtraParams {
      * @default  60000 (60 seconds).
      */
     inactivityTimeout?: number
+
+    /**
+     * List of middlewares to use for the network manager
+     *
+     * > **Note**: these middlewares apply to **outgoing requests only**.
+     * > If you need to handle incoming updates, use a {@link Dispatcher} instead.
+     */
+    middlewares?: Middleware<RpcCallMiddlewareContext, unknown>[]
 }
 
 /** Options that can be customized when making an RPC call */
@@ -197,6 +206,13 @@ export interface RpcCallOptions {
      */
     chainId?: string | number
 }
+
+export interface RpcCallMiddlewareContext {
+    request: tl.RpcMethod
+    manager: NetworkManager
+    params?: RpcCallOptions
+}
+export type RpcCallMiddleware<Result = unknown> = Middleware<RpcCallMiddlewareContext, Result>
 
 /**
  * Wrapper over all connection pools for a single DC.
@@ -501,6 +517,8 @@ export class NetworkManager {
         this._connectionCount = params.connectionCount ?? defaultConnectionCountDelegate
         this._updateHandler = params.onUpdate
 
+        this.call = this._composeCall(params.middlewares)
+
         this._onConfigChanged = this._onConfigChanged.bind(this)
         config.onReload(this._onConfigChanged)
 
@@ -752,11 +770,34 @@ export class NetworkManager {
         await this._switchPrimaryDc(this._dcConnections.get(newDc)!)
     }
 
-    private _floodWaitedRequests = new Map<string, number>()
-    async call<T extends tl.RpcMethod>(
+    readonly call: <T extends tl.RpcMethod>(
         message: T,
         params?: RpcCallOptions,
-    ): Promise<tl.RpcCallReturn[T['_']] | mtp.RawMt_rpc_error> {
+    ) => Promise<tl.RpcCallReturn[T['_']] | mtp.RawMt_rpc_error>
+
+    private _composeCall = (middlewares?: Middleware<RpcCallMiddlewareContext, unknown>[]) => {
+        if (!middlewares?.length) {
+            return this._call
+        }
+
+        const final: ComposedMiddleware<RpcCallMiddlewareContext, unknown> = async (ctx) => {
+            return this._call(ctx.request, ctx.params)
+        }
+        const composed = composeMiddlewares(middlewares, final)
+
+        return async <T extends tl.RpcMethod>(message: T, params?: RpcCallOptions): Promise<tl.RpcCallReturn[T['_']]> =>
+            composed({
+                request: message,
+                manager: this,
+                params,
+            })
+    }
+
+    private _floodWaitedRequests = new Map<string, number>()
+    private _call = async <T extends tl.RpcMethod>(
+        message: T,
+        params?: RpcCallOptions,
+    ): Promise<tl.RpcCallReturn[T['_']] | mtp.RawMt_rpc_error> => {
         if (!this._primaryDc) {
             throw new MtcuteError('Not connected to any DC')
         }
@@ -871,7 +912,7 @@ export class NetworkManager {
                     if (params?.localMigrate) {
                         manager = await this._getOtherDc(newDc)
                     } else {
-                        this._log.info('Migrate error, new dc = %d', newDc)
+                        this._log.info('received %s, migrating to dc %d', err, newDc)
 
                         await this.changePrimaryDc(newDc)
                         manager = this._primaryDc!
