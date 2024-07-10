@@ -383,7 +383,7 @@ export class MtprotoSession {
 
         if (lastMsgId.eq(msgId)) {
             // last message of the chain, remove it
-            this.log.debug('chain %s: exhausted, last message %l', msgId, chainId)
+            this.log.debug('chain %s: exhausted, last message %l', chainId, msgId)
             this.chains.delete(chainId)
         }
 

@@ -836,7 +836,9 @@ export class NetworkManager {
                     return res
                 }
 
+
                 if (err.startsWith('SLOWMODE_WAIT_')) {
+                if (!err.startsWith('SLOWMODE_WAIT_')) {
                     // SLOW_MODE_WAIT is chat-specific, not request-specific
                     this._floodWaitedRequests.set(message._, Date.now() + seconds * 1000)
                 }
@@ -853,7 +855,6 @@ export class NetworkManager {
                     continue
                 }
             }
-
             if (manager === this._primaryDc) {
                 if (
                     err.startsWith('PHONE_MIGRATE_') ||
@@ -867,7 +868,6 @@ export class NetworkManager {
 
                         return res
                     }
-
                     if (params?.localMigrate) {
                         manager = await this._getOtherDc(newDc)
                     } else {
@@ -888,6 +888,8 @@ export class NetworkManager {
                 await this._exportAuthTo(manager)
                 continue
             }
+
+            return res
         }
 
         return lastError!

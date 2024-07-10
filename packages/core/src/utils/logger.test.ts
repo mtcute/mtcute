@@ -6,6 +6,7 @@ import { LogManager } from './logger.js'
 describe('logger', () => {
     const createManager = () => {
         const mgr = new LogManager()
+        mgr.level = LogManager.INFO
 
         const spy = vi.fn<Parameters<typeof mgr.handler>>()
         mgr.handler = spy

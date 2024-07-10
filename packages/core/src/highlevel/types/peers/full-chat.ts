@@ -195,6 +195,11 @@ export class FullChat extends Chat {
         return this.fullPeer?.boostsUnrestrict ?? 0
     }
 
+    /** Whether the current user can view Telegram Stars revenue for this chat */
+    get canViewStarsRevenue(): boolean {
+        return this.fullPeer._ === 'channelFull' && this.fullPeer.canViewStats!
+    }
+
     /**
      * Chat members count, for groups, supergroups and channels only.
      */

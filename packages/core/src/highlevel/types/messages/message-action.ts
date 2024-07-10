@@ -1,5 +1,6 @@
 import { tl } from '@mtcute/tl'
 
+import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { _callDiscardReasonFromTl, CallDiscardReason } from '../calls/index.js'
 import { Photo } from '../media/photo.js'
 import { parsePeer, Peer } from '../peers/peer.js'
@@ -453,6 +454,26 @@ export interface ActionBoostApply {
     count: number
 }
 
+/** A payment was refunded */
+export interface ActionPaymentRefunded {
+    readonly type: 'payment_refunded'
+
+    /** Three-letter ISO 4217 currency code */
+    currency: string
+
+    /** Marked ID of the peer where the stars were refunded (?) */
+    peerId: number
+
+    /** Number of `currency` refunded, in the smallest unit */
+    amount: tl.Long
+
+    /** Payload defined by the bot */
+    payload?: Uint8Array
+
+    /** Information about the charge */
+    charge: tl.TypePaymentCharge
+}
+
 export type MessageAction =
     | ActionChatCreated
     | ActionChannelCreated
@@ -496,6 +517,7 @@ export type MessageAction =
     | ActionGiveawayStarted
     | ActionGiveawayEnded
     | ActionBoostApply
+    | ActionPaymentRefunded
     | null
 
 /** @internal */
@@ -752,6 +774,15 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
             return {
                 type: 'boost_apply',
                 count: act.boosts,
+            }
+        case 'messageActionPaymentRefunded':
+            return {
+                type: 'payment_refunded',
+                currency: act.currency,
+                peerId: getMarkedPeerId(act.peer),
+                amount: act.totalAmount,
+                payload: act.payload,
+                charge: act.charge,
             }
         default:
             return null
