@@ -321,7 +321,7 @@ export class DcConnectionManager {
                     this.downloadSmall.notifyKeyChange()
                 })
                 .catch((e: Error) => {
-                    this.manager._log.warn('failed to save auth key for dc %d: %s', this.dcId, e)
+                    this.manager._log.warn('failed to save auth key for dc %d: %e', this.dcId, e)
                     this.manager.params.emitError(e)
                 })
         })
@@ -346,7 +346,7 @@ export class DcConnectionManager {
                     this.downloadSmall.notifyKeyChange()
                 })
                 .catch((e: Error) => {
-                    this.manager._log.warn('failed to save temp auth key %d for dc %d: %s', idx, this.dcId, e)
+                    this.manager._log.warn('failed to save temp auth key %d for dc %d: %e', idx, this.dcId, e)
                     this.manager.params.emitError(e)
                 })
         })

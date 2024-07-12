@@ -264,7 +264,7 @@ export class SessionConnection extends PersistentConnection {
             // it will send us updates
             this.sendRpc({ _: 'updates.getState' }).catch((err: any) => {
                 if (this._destroyed || tl.RpcError.is(err, 'AUTH_KEY_UNREGISTERED')) return // silently fail
-                this.log.warn('failed to send updates.getState: %s', err.text || err.message)
+                this.log.warn('failed to send updates.getState: %e', err)
             })
         }
 
@@ -308,7 +308,7 @@ export class SessionConnection extends PersistentConnection {
             .catch((err: Error) => {
                 this._session.authorizationPending = false
                 if (this._destroyed) return
-                this.log.error('Authorization error: %s', err.message)
+                this.log.error('Authorization error: %e', err)
                 this.onError(err)
                 this.reconnect()
             })
@@ -476,7 +476,7 @@ export class SessionConnection extends PersistentConnection {
             })
             .catch((err: Error) => {
                 if (this._destroyed) return
-                this.log.error('PFS Authorization error: %s', err.message)
+                this.log.error('PFS Authorization error: %e', err)
 
                 if (this._isPfsBindingPendingInBackground) {
                     this._isPfsBindingPendingInBackground = false
@@ -820,7 +820,7 @@ export class SessionConnection extends PersistentConnection {
                             this.log.debug('additional help.getNearestDc for initConnection ok')
                         })
                         .catch((err) => {
-                            this.log.debug('additional help.getNearestDc for initConnection error: %s', err)
+                            this.log.debug('additional help.getNearestDc for initConnection error: %e', err)
                         })
 
                     return
@@ -1456,7 +1456,7 @@ export class SessionConnection extends PersistentConnection {
             this.reconnect()
         } else {
             this.disconnectManual().catch((err) => {
-                this.log.warn('error while disconnecting: %s', err)
+                this.log.warn('error while disconnecting: %e', err)
             })
         }
     }
@@ -2000,7 +2000,7 @@ export class SessionConnection extends PersistentConnection {
 
         const enc = this._session.encryptMessage(result)
         const promise = this.send(enc).catch((err: Error) => {
-            this.log.error('error while sending pending messages (root msg_id = %l): %s', rootMsgId, err.stack)
+            this.log.error('error while sending pending messages (root msg_id = %l): %e', rootMsgId, err)
 
             // put acks in the front so they are the first to be sent
             if (ackMsgIds) {

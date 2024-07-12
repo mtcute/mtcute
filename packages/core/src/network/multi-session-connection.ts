@@ -117,7 +117,7 @@ export class MultiSessionConnection extends EventEmitter {
             for (let i = this._connections.length - 1; i >= this._count; i--) {
                 this._connections[i].removeAllListeners()
                 this._connections[i].destroy().catch((err) => {
-                    this._log.warn('error destroying connection: %s', err)
+                    this._log.warn('error destroying connection: %e', err)
                 })
             }
 

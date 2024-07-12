@@ -71,7 +71,7 @@ export class StorageManager {
 
         if (this.options.cleanup ?? true) {
             this._cleanupRestore = getPlatform().beforeExit(() => {
-                this._destroy().catch((err) => this.log.error('cleanup error: %s', err))
+                this._destroy().catch((err) => this.log.error('cleanup error: %e', err))
             })
         }
 
