@@ -70,7 +70,7 @@ export abstract class PersistentConnection extends EventEmitter {
     changeTransport(factory: TransportFactory): void {
         if (this._transport) {
             Promise.resolve(this._transport.close()).catch((err) => {
-                this.log.warn('error closing previous transport: %s', err)
+                this.log.warn('error closing previous transport: %e', err)
             })
         }
 
@@ -98,7 +98,7 @@ export abstract class PersistentConnection extends EventEmitter {
                     .send(data)
                     .then(sendNext)
                     .catch((err) => {
-                        this.log.error('error sending queued data: %s', err)
+                        this.log.error('error sending queued data: %e', err)
                         this._sendOnceConnected.unshift(data)
                     })
             }
@@ -152,7 +152,7 @@ export abstract class PersistentConnection extends EventEmitter {
 
         if (wait === false) {
             this.destroy().catch((err) => {
-                this.log.warn('error destroying connection: %s', err)
+                this.log.warn('error destroying connection: %e', err)
             })
 
             return
@@ -197,7 +197,7 @@ export abstract class PersistentConnection extends EventEmitter {
         if (this.isConnected) {
             this._shouldReconnectImmediately = true
             Promise.resolve(this._transport.close()).catch((err) => {
-                this.log.error('error closing transport: %s', err)
+                this.log.error('error closing transport: %e', err)
             })
 
             return
@@ -236,7 +236,7 @@ export abstract class PersistentConnection extends EventEmitter {
         this._inactive = true
         this._inactivityTimeout = null
         Promise.resolve(this._transport.close()).catch((err) => {
-            this.log.warn('error closing transport: %s', err)
+            this.log.warn('error closing transport: %e', err)
         })
     }
 

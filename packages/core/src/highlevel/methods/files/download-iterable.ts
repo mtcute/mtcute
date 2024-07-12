@@ -176,7 +176,7 @@ export async function* downloadAsIterable(
     let error: unknown = undefined
     void Promise.all(Array.from({ length: Math.min(poolSize * REQUESTS_PER_CONNECTION, numChunks) }, downloadChunk))
         .catch((e) => {
-            client.log.debug('download workers errored: %s', e.message)
+            client.log.debug('download workers errored: %e', e)
             error = e
             aborted = true // not really aborted, but we dont want to download more chunks
             nextChunkCv.notify()

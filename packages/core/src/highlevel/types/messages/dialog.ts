@@ -176,10 +176,12 @@ export class Dialog {
     }
 
     /**
-     * Whether this dialog is muted
+     * Whether this dialog is muted.
+     *
+     * If `null`, the default account-level setting should be used.
      */
-    get isMuted(): boolean {
-        return this.raw.notifySettings.silent!
+    get isMuted(): boolean | null {
+        return this.raw.notifySettings.silent ?? null
     }
 
     /**

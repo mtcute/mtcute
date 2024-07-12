@@ -1,11 +1,14 @@
 import Long from 'long'
 import { describe, expect, it, vi } from 'vitest'
 
+import { tl } from '@mtcute/tl'
+
 import { LogManager } from './logger.js'
 
 describe('logger', () => {
     const createManager = () => {
         const mgr = new LogManager()
+        mgr.level = LogManager.INFO
 
         const spy = vi.fn<Parameters<typeof mgr.handler>>()
         mgr.handler = spy
@@ -187,6 +190,41 @@ describe('logger', () => {
                 mgr.info('test %L', 123)
 
                 expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test n/a', [])
+            })
+        })
+
+        describe('%e', () => {
+            it('should format mt_rpc_error', () => {
+                const [mgr, spy] = createManager()
+
+                mgr.info('test %e', { _: 'mt_rpc_error', errorCode: 400, errorMessage: 'FLOOD_WAIT_42' })
+
+                expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test 400 FLOOD_WAIT_42', [])
+            })
+
+            it('should format RpcError', () => {
+                const [mgr, spy] = createManager()
+
+                mgr.info('test %e', tl.RpcError.create(400, 'FLOOD_WAIT_42'))
+
+                expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test 400 FLOOD_WAIT_42', [])
+            })
+
+            it('should format errors', () => {
+                const [mgr, spy] = createManager()
+
+                const err = new Error('test error')
+                mgr.info('test %e', err)
+
+                expect(spy).toHaveBeenCalledWith(3, 3, 'base', `test ${err.stack}`, [])
+            })
+
+            it('should format everything else as strings', () => {
+                const [mgr, spy] = createManager()
+
+                mgr.info('test %e', 'test')
+
+                expect(spy).toHaveBeenCalledWith(3, 3, 'base', 'test test', [])
             })
         })
     })

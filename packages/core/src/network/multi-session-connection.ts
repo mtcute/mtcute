@@ -1,6 +1,6 @@
 import EventEmitter from 'events'
 
-import { tl } from '@mtcute/tl'
+import { mtp, tl } from '@mtcute/tl'
 
 import { createControllablePromise, Logger } from '../utils/index.js'
 import { MtprotoSession } from './mtproto-session.js'
@@ -117,7 +117,7 @@ export class MultiSessionConnection extends EventEmitter {
             for (let i = this._connections.length - 1; i >= this._count; i--) {
                 this._connections[i].removeAllListeners()
                 this._connections[i].destroy().catch((err) => {
-                    this._log.warn('error destroying connection: %s', err)
+                    this._log.warn('error destroying connection: %e', err)
                 })
             }
 
@@ -213,11 +213,10 @@ export class MultiSessionConnection extends EventEmitter {
 
     sendRpc<T extends tl.RpcMethod>(
         request: T,
-        stack?: string,
         timeout?: number,
         abortSignal?: AbortSignal,
         chainId?: string | number,
-    ): Promise<tl.RpcCallReturn[T['_']]> {
+    ): Promise<tl.RpcCallReturn[T['_']] | mtp.RawMt_rpc_error> {
         // if (this.params.isMainConnection) {
         // find the least loaded connection
         let min = Infinity
@@ -233,7 +232,7 @@ export class MultiSessionConnection extends EventEmitter {
             }
         }
 
-        return this._connections[minIdx].sendRpc(request, stack, timeout, abortSignal, chainId)
+        return this._connections[minIdx].sendRpc(request, timeout, abortSignal, chainId)
         // }
 
         // round-robin connections

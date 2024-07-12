@@ -55,7 +55,7 @@ export abstract class BaseStorageDriver implements IStorageDriver {
     protected _log!: Logger
 
     setup(log: Logger): void {
-        this._log = log
+        this._log = log.create('sqlite')
     }
 
     protected get loaded(): boolean {

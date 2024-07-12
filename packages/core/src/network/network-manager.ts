@@ -12,7 +12,7 @@ import {
     Logger,
     sleepWithAbort,
 } from '../utils/index.js'
-import { assertTypeIs } from '../utils/type-assertions.js'
+import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
 import { ConfigManager } from './config-manager.js'
 import { MultiSessionConnection } from './multi-session-connection.js'
 import { PersistentConnectionParams } from './persistent-connection.js'
@@ -321,7 +321,7 @@ export class DcConnectionManager {
                     this.downloadSmall.notifyKeyChange()
                 })
                 .catch((e: Error) => {
-                    this.manager._log.warn('failed to save auth key for dc %d: %s', this.dcId, e)
+                    this.manager._log.warn('failed to save auth key for dc %d: %e', this.dcId, e)
                     this.manager.params.emitError(e)
                 })
         })
@@ -346,7 +346,7 @@ export class DcConnectionManager {
                     this.downloadSmall.notifyKeyChange()
                 })
                 .catch((e: Error) => {
-                    this.manager._log.warn('failed to save temp auth key %d for dc %d: %s', idx, this.dcId, e)
+                    this.manager._log.warn('failed to save temp auth key %d for dc %d: %e', idx, this.dcId, e)
                     this.manager.params.emitError(e)
                 })
         })
@@ -634,6 +634,10 @@ export class NetworkManager {
                 dcId: manager.dcId,
             })
 
+            if (isTlRpcError(auth)) {
+                throw new MtcuteError(`Failed to export (${auth.errorCode}: ${auth.errorMessage})`)
+            }
+
             const res = await this.call(
                 {
                     _: 'auth.importAuthorization',
@@ -642,6 +646,10 @@ export class NetworkManager {
                 },
                 { manager },
             )
+
+            if (isTlRpcError(res)) {
+                throw new MtcuteError(`Failed to import (${res.errorCode}: ${res.errorMessage})`)
+            }
 
             assertTypeIs('auth.importAuthorization', res, 'auth.authorization')
 
@@ -748,8 +756,7 @@ export class NetworkManager {
     async call<T extends tl.RpcMethod>(
         message: T,
         params?: RpcCallOptions,
-        stack?: string,
-    ): Promise<tl.RpcCallReturn[T['_']]> {
+    ): Promise<tl.RpcCallReturn[T['_']] | mtp.RawMt_rpc_error> {
         if (!this._primaryDc) {
             throw new MtcuteError('Not connected to any DC')
         }
@@ -775,7 +782,7 @@ export class NetworkManager {
             }
         }
 
-        let lastError: Error | null = null
+        let lastError: mtp.RawMt_rpc_error | null = null
 
         const kind = params?.kind ?? 'main'
         let manager: DcConnectionManager
@@ -791,85 +798,101 @@ export class NetworkManager {
         let multi = manager[kind]
 
         for (let i = 0; i < maxRetryCount; i++) {
-            try {
-                const res = await multi.sendRpc(message, stack, params?.timeout, params?.abortSignal, params?.chainId)
+            const res = await multi.sendRpc(message, params?.timeout, params?.abortSignal, params?.chainId)
 
+            if (!isTlRpcError(res)) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return res
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } catch (e: any) {
-                lastError = e as Error
-
-                if (!tl.RpcError.is(e)) {
-                    throw e
-                }
-
-                if (!(e.code in CLIENT_ERRORS)) {
-                    if (throw503 && e.code === -503) {
-                        throw new MtTimeoutError()
-                    }
-
-                    this._log.warn(
-                        'Telegram is having internal issues: %d:%s (%s), retrying',
-                        e.code,
-                        e.text,
-                        e.message,
-                    )
-
-                    if (e.text === 'WORKER_BUSY_TOO_LONG_RETRY') {
-                        // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
-                        await sleepWithAbort(1000, this.params.stopSignal)
-                    }
-                    continue
-                }
-
-                if (e.is('FLOOD_WAIT_%d') || e.is('SLOWMODE_WAIT_%d') || e.is('FLOOD_TEST_PHONE_WAIT_%d')) {
-                    if (e.text !== 'SLOWMODE_WAIT_%d') {
-                        // SLOW_MODE_WAIT is chat-specific, not request-specific
-                        this._floodWaitedRequests.set(message._, Date.now() + e.seconds * 1000)
-                    }
-
-                    // In test servers, FLOOD_WAIT_0 has been observed, and sleeping for
-                    // such a short amount will cause retries very fast leading to issues
-                    if (e.seconds === 0) {
-                        e.seconds = 1
-                    }
-
-                    if (e.seconds <= floodSleepThreshold) {
-                        this._log.warn('%s resulted in a flood wait, will retry in %d seconds', message._, e.seconds)
-                        await sleepWithAbort(e.seconds * 1000, this.params.stopSignal)
-                        continue
-                    }
-                }
-
-                if (manager === this._primaryDc) {
-                    if (e.is('PHONE_MIGRATE_%d') || e.is('NETWORK_MIGRATE_%d') || e.is('USER_MIGRATE_%d')) {
-                        if (params?.localMigrate) {
-                            manager = await this._getOtherDc(e.newDc)
-                        } else {
-                            this._log.info('Migrate error, new dc = %d', e.newDc)
-
-                            await this.changePrimaryDc(e.newDc)
-                            manager = this._primaryDc!
-                        }
-
-                        multi = manager[kind]
-
-                        continue
-                    }
-                } else if (e.is('AUTH_KEY_UNREGISTERED')) {
-                    // we can try re-exporting auth from the primary connection
-                    this._log.warn('exported auth key error, trying re-exporting..')
-
-                    await this._exportAuthTo(manager)
-                    continue
-                }
-
-                throw e
             }
+
+            lastError = res
+
+            const err = res.errorMessage
+
+            if (!(res.errorCode in CLIENT_ERRORS)) {
+                if (throw503 && res.errorCode === -503) {
+                    throw new MtTimeoutError()
+                }
+
+                this._log.warn('Telegram is having internal issues: %d:%s, retrying', res.errorCode, err)
+
+                if (err === 'WORKER_BUSY_TOO_LONG_RETRY') {
+                    // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
+                    await sleepWithAbort(1000, this.params.stopSignal)
+                }
+                continue
+            }
+
+            if (
+                err.startsWith('FLOOD_WAIT_') ||
+                err.startsWith('SLOWMODE_WAIT_') ||
+                err.startsWith('FLOOD_TEST_PHONE_WAIT_')
+            ) {
+                let seconds = Number(err.lastIndexOf('_') + 1)
+
+                if (Number.isNaN(seconds)) {
+                    this._log.warn('invalid flood wait error received: %s, ignoring', err)
+
+                    return res
+                }
+
+                if (!err.startsWith('SLOWMODE_WAIT_')) {
+                    // SLOW_MODE_WAIT is chat-specific, not request-specific
+                    this._floodWaitedRequests.set(message._, Date.now() + seconds * 1000)
+                }
+
+                // In test servers, FLOOD_WAIT_0 has been observed, and sleeping for
+                // such a short amount will cause retries very fast leading to issues
+                if (seconds === 0) {
+                    seconds = 1
+                }
+
+                if (seconds <= floodSleepThreshold) {
+                    this._log.warn('%s resulted in a flood wait, will retry in %d seconds', message._, seconds)
+                    await sleepWithAbort(seconds * 1000, this.params.stopSignal)
+                    continue
+                }
+            }
+
+            if (manager === this._primaryDc) {
+                if (
+                    err.startsWith('PHONE_MIGRATE_') ||
+                    err.startsWith('NETWORK_MIGRATE_') ||
+                    err.startsWith('USER_MIGRATE_')
+                ) {
+                    const newDc = Number(err.slice(err.lastIndexOf('_') + 1))
+
+                    if (Number.isNaN(newDc)) {
+                        this._log.warn('invalid migrate error received: %s, ignoring', err)
+
+                        return res
+                    }
+
+                    if (params?.localMigrate) {
+                        manager = await this._getOtherDc(newDc)
+                    } else {
+                        this._log.info('Migrate error, new dc = %d', newDc)
+
+                        await this.changePrimaryDc(newDc)
+                        manager = this._primaryDc!
+                    }
+
+                    multi = manager[kind]
+
+                    continue
+                }
+            } else if (err === 'AUTH_KEY_UNREGISTERED') {
+                // we can try re-exporting auth from the primary connection
+                this._log.warn('exported auth key error, trying re-exporting..')
+
+                await this._exportAuthTo(manager)
+                continue
+            }
+
+            return res
         }
 
-        throw lastError!
+        return lastError!
     }
 
     changeTransport(factory: TransportFactory): void {

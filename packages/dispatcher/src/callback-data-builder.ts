@@ -1,4 +1,11 @@
-import { CallbackQuery, InlineCallbackQuery, MaybeArray, MaybePromise, MtArgumentError } from '@mtcute/core'
+import {
+    BusinessCallbackQuery,
+    CallbackQuery,
+    InlineCallbackQuery,
+    MaybeArray,
+    MaybePromise,
+    MtArgumentError,
+} from '@mtcute/core'
 
 import { UpdateFilter } from './filters/types.js'
 
@@ -105,7 +112,7 @@ export class CallbackDataBuilder<T extends string> {
      *
      * @param params
      */
-    filter<Update extends CallbackQuery | InlineCallbackQuery>(
+    filter<Update extends CallbackQuery | InlineCallbackQuery | BusinessCallbackQuery>(
         params:
             | ((
                   upd: Update,

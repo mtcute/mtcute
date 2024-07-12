@@ -27,6 +27,12 @@ export async function signInQr(
          */
         onUrlUpdated: (url: string, expires: Date) => void
 
+        /**
+         * Function that will be called when the user has scanned the QR code
+         * (i.e. when `updateLoginToken` is received), and the library is finalizing the auth
+         */
+        onQrScanned?: () => void
+
         /** Password for 2FA */
         password?: MaybeDynamic<string>
 
@@ -42,7 +48,7 @@ export async function signInQr(
         abortSignal?: AbortSignal
     },
 ): Promise<User> {
-    const { onUrlUpdated, abortSignal } = params
+    const { onUrlUpdated, abortSignal, onQrScanned } = params
 
     let waiter: ControllablePromise<void> | undefined
 
@@ -56,6 +62,7 @@ export async function signInQr(
 
     const onUpdate: ServerUpdateHandler = (upd) => {
         if (upd._ === 'updateShort' && upd.update._ === 'updateLoginToken') {
+            onQrScanned?.()
             waiter?.resolve()
             client.onServerUpdate(originalHandler)
         }

@@ -104,7 +104,7 @@ export async function resolvePeerMany(
 
     let error: unknown = undefined
     void Promise.all(Array.from({ length: limit }, (_, i) => fetchNext(i))).catch((e) => {
-        client.log.debug('resolvePeerMany errored: %s', e.message)
+        client.log.debug('resolvePeerMany errored: %e', e)
         error = e
         cv.notify()
     })

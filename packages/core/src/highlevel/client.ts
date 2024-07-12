@@ -729,6 +729,12 @@ export interface TelegramClient extends ITelegramClient {
          */
         onUrlUpdated: (url: string, expires: Date) => void
 
+        /**
+         * Function that will be called when the user has scanned the QR code
+         * (i.e. when `updateLoginToken` is received), and the library is finalizing the auth
+         */
+        onQrScanned?: () => void
+
         /** Password for 2FA */
         password?: MaybeDynamic<string>
 

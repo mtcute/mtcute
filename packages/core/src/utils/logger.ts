@@ -1,7 +1,9 @@
-import JSBI from 'jsbi'
-import { getPlatform } from '../platform.js'
+import { tl } from '@mtcute/tl'
 
-const DEFAULT_LOG_LEVEL = 3
+import { getPlatform } from '../platform.js'
+import { isTlRpcError } from './type-assertions.js'
+
+const DEFAULT_LOG_LEVEL = 2
 const FORMATTER_RE = /%[a-zA-Z]/g
 
 /**
@@ -53,11 +55,12 @@ export class Logger {
             fmt.includes('%j') ||
             fmt.includes('%J') ||
             fmt.includes('%l') ||
-            fmt.includes('%L')
+            fmt.includes('%L') ||
+            fmt.includes('%e')
         ) {
             let idx = 0
             fmt = fmt.replace(FORMATTER_RE, (m) => {
-                if (m === '%h' || m === '%b' || m === '%j' || m === '%J' || m === '%l' || m === '%L') {
+                if (m === '%h' || m === '%b' || m === '%j' || m === '%J' || m === '%l' || m === '%L' || m === '%e') {
                     let val = args[idx]
 
                     args.splice(idx, 1)
@@ -102,6 +105,20 @@ export class Logger {
                         if (!Array.isArray(val)) return 'n/a'
 
                         return `[${(val as unknown[]).map(String).join(', ')}]`
+                    }
+
+                    if (m === '%e') {
+                        if (isTlRpcError(val)) {
+                            return `${val.errorCode} ${val.errorMessage}`
+                        }
+
+                        if (tl.RpcError.is(val)) {
+                            return `${val.code} ${val.text}`
+                        }
+
+                        return val && typeof val === 'object'
+                            ? (val as Error).stack || (val as Error).message
+                            : String(val)
                     }
                 }
 

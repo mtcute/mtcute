@@ -959,7 +959,7 @@ export class UpdatesManager {
                 channelId,
                 this._fetchChannelDifference(channelId, fallbackPts)
                     .catch((err) => {
-                        this.log.warn('error fetching difference for %d: %s', channelId, err)
+                        this.log.warn('error fetching difference for %d: %e', channelId, err)
                     })
                     .then((ok) => {
                         requestedDiff.delete(channelId)
@@ -1092,7 +1092,7 @@ export class UpdatesManager {
                             return
                         }
 
-                        this.log.warn('error fetching common difference: %s', err)
+                        this.log.warn('error fetching common difference: %e', err)
 
                         if (tl.RpcError.is(err, 'PERSISTENT_TIMESTAMP_INVALID')) {
                             // this function never throws
@@ -1285,7 +1285,7 @@ export class UpdatesManager {
                             log.warn('cannot fetch full peer %d - unknown peer type %s', id, peer._)
                         })
                         .catch((err) => {
-                            log.warn('error fetching full peer %d: %s', id, err)
+                            log.warn('error fetching full peer %d: %e', id, err)
                         })
                 }
             }

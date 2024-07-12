@@ -18,6 +18,6 @@ export function reportUnknownError(log: Logger, error: tl.RpcError, method: stri
             }
         })
         .catch((e) => {
-            log.debug('failed to report error %s to telerpc: %s', error.text, e)
+            log.debug('failed to report error %s to telerpc: %e', error.text, e)
         })
 }
