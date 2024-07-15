@@ -1,6 +1,6 @@
 import { ControllablePromise, createControllablePromise } from '../../utils/controllable-promise.js'
 import { deserializeError } from './errors.js'
-import { SendFn, WorkerInboundMessage, WorkerOutboundMessage } from './protocol.js'
+import { deserializeResult, SendFn, WorkerInboundMessage, WorkerOutboundMessage } from './protocol.js'
 
 export type InvokeTarget = Extract<WorkerInboundMessage, { type: 'invoke' }>['target']
 
@@ -61,7 +61,7 @@ export class WorkerInvoker {
         if (msg.error) {
             promise.reject(deserializeError(msg.error))
         } else {
-            promise.resolve(msg.result)
+            promise.resolve(deserializeResult(msg.result!))
         }
     }
 

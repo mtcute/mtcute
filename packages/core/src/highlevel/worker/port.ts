@@ -8,7 +8,7 @@ import { PeersIndex } from '../types/peers/peers-index.js'
 import { RawUpdateHandler } from '../updates/types.js'
 import { AppConfigManagerProxy } from './app-config.js'
 import { WorkerInvoker } from './invoker.js'
-import { ClientMessageHandler, SendFn, SomeWorker, WorkerCustomMethods } from './protocol.js'
+import { ClientMessageHandler, deserializeResult, SendFn, SomeWorker, WorkerCustomMethods } from './protocol.js'
 import { TelegramStorageProxy } from './storage.js'
 
 export interface TelegramWorkerPortOptions {
@@ -129,15 +129,15 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
                 this.log.handler(message.color, message.level, message.tag, message.fmt, message.args)
                 break
             case 'server_update':
-                this._serverUpdatesHandler(message.update)
+                this._serverUpdatesHandler(deserializeResult(message.update))
                 break
             case 'conn_state':
                 this._connectionStateHandler(message.state)
                 break
             case 'update': {
-                const peers = new PeersIndex(message.users, message.chats)
+                const peers = new PeersIndex(deserializeResult(message.users), deserializeResult(message.chats))
                 peers.hasMin = message.hasMin
-                this._updateHandler(message.update, peers)
+                this._updateHandler(deserializeResult(message.update), peers)
                 break
             }
             case 'result':
