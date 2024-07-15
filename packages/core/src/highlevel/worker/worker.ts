@@ -1,6 +1,12 @@
 import { BaseTelegramClient } from '../base.js'
 import { serializeError } from './errors.js'
-import { RespondFn, WorkerCustomMethods, WorkerInboundMessage, WorkerMessageHandler } from './protocol.js'
+import {
+    RespondFn,
+    serializeResult,
+    WorkerCustomMethods,
+    WorkerInboundMessage,
+    WorkerMessageHandler,
+} from './protocol.js'
 
 export interface TelegramWorkerOptions<T extends WorkerCustomMethods> {
     client: BaseTelegramClient
@@ -62,9 +68,9 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
             client.onUpdate((update, peers) =>
                 this.broadcast({
                     type: 'update',
-                    update,
-                    users: peers.users,
-                    chats: peers.chats,
+                    update: serializeResult(update),
+                    users: serializeResult(peers.users),
+                    chats: serializeResult(peers.chats),
                     hasMin: peers.hasMin,
                 }),
             )
@@ -72,7 +78,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
             client.onServerUpdate((update) =>
                 this.broadcast({
                     type: 'server_update',
-                    update,
+                    update: serializeResult(update),
                 }),
             )
         }
@@ -153,7 +159,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
                 respond({
                     type: 'result',
                     id: msg.id,
-                    result: res,
+                    result: serializeResult(res),
                 })
             })
             .catch((err) => {
