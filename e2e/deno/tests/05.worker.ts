@@ -1,7 +1,7 @@
 import { assertEquals, assertGreater, assertInstanceOf } from 'https://deno.land/std@0.223.0/assert/mod.ts'
 
 import { TelegramClient } from '@mtcute/core/client.js'
-import { Message, TelegramWorkerPort, tl } from '@mtcute/deno'
+import { Long, Message, TelegramWorkerPort, tl } from '@mtcute/deno'
 
 import { getApiParams, waitFor } from '../utils.ts'
 import type { CustomMethods } from './_worker.ts'
@@ -18,8 +18,11 @@ Deno.test('5. worker', { sanitizeResources: false }, async (t) => {
 
     await t.step('should make api calls', async function () {
         const res = await port.call({ _: 'help.getConfig' })
-
         assertEquals(res._, 'config')
+
+        const premiumPromo = await port.call({ _: 'help.getPremiumPromo' })
+        // ensure Long-s are correctly serialized
+        assertEquals(Long.isLong((premiumPromo.users[0] as tl.RawUser).accessHash), true)
     })
 
     await t.step('should call custom methods', async function () {
@@ -47,6 +50,8 @@ Deno.test('5. worker', { sanitizeResources: false }, async (t) => {
             await port.startUpdatesLoop()
 
             const me = await portClient.getMe()
+            // ensure Long-s are correctly serialized
+            assertEquals(Long.isLong(me.raw.accessHash), true)
             let username = me.username
 
             if (!username) {

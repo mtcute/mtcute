@@ -5,7 +5,7 @@ import path from 'path'
 import { Worker } from 'worker_threads'
 
 import { TelegramClient } from '@mtcute/core/client.js'
-import { Message, TelegramWorkerPort, tl } from '@mtcute/node'
+import { Long, Message, TelegramWorkerPort, tl } from '@mtcute/node'
 
 import { getApiParams, waitFor } from '../utils.js'
 import type { CustomMethods } from './_worker.js'
@@ -22,8 +22,11 @@ describe('5. worker', async function () {
 
     it('should make api calls', async function () {
         const res = await port.call({ _: 'help.getConfig' })
-
         expect(res._).to.equal('config')
+
+        const premiumPromo = await port.call({ _: 'help.getPremiumPromo' })
+        // ensure Long-s are correctly serialized
+        expect(Long.isLong((premiumPromo.users[0] as tl.RawUser).accessHash)).to.equal(true)
     })
 
     it('should call custom methods', async function () {
@@ -51,6 +54,9 @@ describe('5. worker', async function () {
             await port.startUpdatesLoop()
 
             const me = await portClient.getMe()
+            // ensure Long-s are correctly serialized
+            expect(Long.isLong(me.raw.accessHash)).equals(true)
+
             let username = me.username
 
             if (!username) {
