@@ -104,24 +104,6 @@ export interface MtClientOptions {
     reconnectionStrategy?: ReconnectionStrategy<PersistentConnectionParams>
 
     /**
-     * Maximum duration of a flood_wait that will be waited automatically.
-     * Flood waits above this threshold will throw a FloodWaitError.
-     * Set to 0 to disable. Can be overridden with `throwFlood` parameter in call() params
-     *
-     * @default 10000
-     */
-    floodSleepThreshold?: number
-
-    /**
-     * Maximum number of retries when calling RPC methods.
-     * Call is retried when InternalError or FloodWaitError is encountered.
-     * Can be set to Infinity.
-     *
-     * @default 5
-     */
-    maxRetryCount?: number
-
-    /**
      * If true, all API calls will be wrapped with `tl.invokeWithoutUpdates`,
      * effectively disabling the server-sent events for the clients.
      * May be useful in some cases.
@@ -287,8 +269,6 @@ export class MtClient extends EventEmitter {
                 testMode: Boolean(params.testMode),
                 transport: params.transport,
                 emitError: this.emitError.bind(this),
-                floodSleepThreshold: params.floodSleepThreshold ?? 10000,
-                maxRetryCount: params.maxRetryCount ?? 5,
                 isPremium: false,
                 useIpv6: Boolean(params.useIpv6),
                 enableErrorReporting: params.enableErrorReporting ?? false,
