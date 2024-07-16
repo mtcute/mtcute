@@ -3,18 +3,12 @@ import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { getPlatform } from '../platform.js'
 import { StorageManager } from '../storage/storage.js'
-import { MtArgumentError, MtcuteError, MtTimeoutError, MtUnsupportedError } from '../types/index.js'
+import { MtArgumentError, MtcuteError, MtUnsupportedError } from '../types/index.js'
 import { ComposedMiddleware, composeMiddlewares, Middleware } from '../utils/composer.js'
-import {
-    ControllablePromise,
-    createControllablePromise,
-    DcOptions,
-    ICryptoProvider,
-    Logger,
-    sleepWithAbort,
-} from '../utils/index.js'
+import { ControllablePromise, createControllablePromise, DcOptions, ICryptoProvider, Logger } from '../utils/index.js'
 import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
 import { ConfigManager } from './config-manager.js'
+import { basic as defaultMiddlewares } from './middlewares/default.js'
 import { MultiSessionConnection } from './multi-session-connection.js'
 import { PersistentConnectionParams } from './persistent-connection.js'
 import { defaultReconnectionStrategy, ReconnectionStrategy } from './reconnection.js'
@@ -23,16 +17,6 @@ import { SessionConnection, SessionConnectionParams } from './session-connection
 import { TransportFactory } from './transports/index.js'
 
 export type ConnectionKind = 'main' | 'upload' | 'download' | 'downloadSmall'
-
-const CLIENT_ERRORS = {
-    [tl.RpcError.BAD_REQUEST]: 1,
-    [tl.RpcError.UNAUTHORIZED]: 1,
-    [tl.RpcError.FORBIDDEN]: 1,
-    [tl.RpcError.NOT_FOUND]: 1,
-    [tl.RpcError.FLOOD]: 1,
-    [tl.RpcError.SEE_OTHER]: 1,
-    [tl.RpcError.NOT_ACCEPTABLE]: 1,
-}
 
 /**
  * Params passed into {@link NetworkManager} by {@link TelegramClient}.
@@ -48,8 +32,6 @@ export interface NetworkManagerParams {
     initConnectionOptions?: Partial<Omit<tl.RawInitConnectionRequest, 'apiId' | 'query'>>
     transport: TransportFactory
     reconnectionStrategy?: ReconnectionStrategy<PersistentConnectionParams>
-    floodSleepThreshold: number
-    maxRetryCount: number
     disableUpdates?: boolean
     testMode: boolean
     layer: number
@@ -132,7 +114,7 @@ export interface RpcCallOptions {
      *
      * If set to `0`, the call will not be retried.
      *
-     * @default {@link BaseTelegramClientOptions.floodSleepThreshold}
+     * Only applies when the flood waiter middleware is enabled.
      */
     floodSleepThreshold?: number
 
@@ -140,7 +122,8 @@ export interface RpcCallOptions {
      * If the call results in an internal server error or a flood wait,
      * the maximum amount of times to retry the call.
      *
-     * @default {@link BaseTelegramClientOptions.maxRetryCount}
+     * Only applies when the flood waiter middleware and/or
+     * internal errors handler middleware is enabled.
      */
     maxRetryCount?: number
 
@@ -185,6 +168,9 @@ export interface RpcCallOptions {
      *
      * Useful for methods like `messages.getBotCallbackAnswer` that reliably return
      * -503 in case the upstream bot failed to respond.
+     *
+     * Only applies if the internal error handler middleware is enabled,
+     * otherwise -503 is always thrown.
      */
     throw503?: boolean
 
@@ -776,7 +762,11 @@ export class NetworkManager {
     ) => Promise<tl.RpcCallReturn[T['_']] | mtp.RawMt_rpc_error>
 
     private _composeCall = (middlewares?: Middleware<RpcCallMiddlewareContext, unknown>[]) => {
-        if (!middlewares?.length) {
+        if (!middlewares) {
+            middlewares = defaultMiddlewares()
+        }
+
+        if (!middlewares.length) {
             return this._call
         }
 
@@ -793,7 +783,6 @@ export class NetworkManager {
             })
     }
 
-    private _floodWaitedRequests = new Map<string, number>()
     private _call = async <T extends tl.RpcMethod>(
         message: T,
         params?: RpcCallOptions,
@@ -801,29 +790,6 @@ export class NetworkManager {
         if (!this._primaryDc) {
             throw new MtcuteError('Not connected to any DC')
         }
-
-        const floodSleepThreshold = params?.floodSleepThreshold ?? this.params.floodSleepThreshold
-        const maxRetryCount = params?.maxRetryCount ?? this.params.maxRetryCount
-        const throw503 = params?.throw503 ?? false
-
-        // do not send requests that are in flood wait
-        if (this._floodWaitedRequests.has(message._)) {
-            const delta = this._floodWaitedRequests.get(message._)! - Date.now()
-
-            if (delta <= 3000) {
-                // flood waits below 3 seconds are "ignored"
-                this._floodWaitedRequests.delete(message._)
-            } else if (delta <= this.params.floodSleepThreshold) {
-                await sleepWithAbort(delta, this.params.stopSignal)
-                this._floodWaitedRequests.delete(message._)
-            } else {
-                const err = tl.RpcError.create(tl.RpcError.FLOOD, 'FLOOD_WAIT_%d')
-                err.seconds = Math.ceil(delta / 1000)
-                throw err
-            }
-        }
-
-        let lastError: mtp.RawMt_rpc_error | null = null
 
         const kind = params?.kind ?? 'main'
         let manager: DcConnectionManager
@@ -838,102 +804,53 @@ export class NetworkManager {
 
         let multi = manager[kind]
 
-        for (let i = 0; i < maxRetryCount; i++) {
-            const res = await multi.sendRpc(message, params?.timeout, params?.abortSignal, params?.chainId)
+        let res = await multi.sendRpc(message, params?.timeout, params?.abortSignal, params?.chainId)
 
-            if (!isTlRpcError(res)) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                return res
-            }
+        if (!isTlRpcError(res)) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            return res
+        }
 
-            lastError = res
+        const err = res.errorMessage
 
-            const err = res.errorMessage
-
-            if (!(res.errorCode in CLIENT_ERRORS)) {
-                if (throw503 && res.errorCode === -503) {
-                    throw new MtTimeoutError()
-                }
-
-                this._log.warn('Telegram is having internal issues: %d:%s, retrying', res.errorCode, err)
-
-                if (err === 'WORKER_BUSY_TOO_LONG_RETRY') {
-                    // according to tdlib, "it is dangerous to resend query without timeout, so use 1"
-                    await sleepWithAbort(1000, this.params.stopSignal)
-                }
-                continue
-            }
-
+        if (manager === this._primaryDc) {
             if (
-                err.startsWith('FLOOD_WAIT_') ||
-                err.startsWith('SLOWMODE_WAIT_') ||
-                err.startsWith('FLOOD_TEST_PHONE_WAIT_')
+                err.startsWith('PHONE_MIGRATE_') ||
+                err.startsWith('NETWORK_MIGRATE_') ||
+                err.startsWith('USER_MIGRATE_')
             ) {
-                let seconds = Number(err.lastIndexOf('_') + 1)
+                const newDc = Number(err.slice(err.lastIndexOf('_') + 1))
 
-                if (Number.isNaN(seconds)) {
-                    this._log.warn('invalid flood wait error received: %s, ignoring', err)
+                if (Number.isNaN(newDc)) {
+                    this._log.warn('invalid migrate error received: %s, ignoring', err)
 
                     return res
                 }
 
-                if (!err.startsWith('SLOWMODE_WAIT_')) {
-                    // SLOW_MODE_WAIT is chat-specific, not request-specific
-                    this._floodWaitedRequests.set(message._, Date.now() + seconds * 1000)
+                if (params?.localMigrate) {
+                    manager = await this._getOtherDc(newDc)
+                } else {
+                    this._log.info('received %s, migrating to dc %d', err, newDc)
+
+                    await this.changePrimaryDc(newDc)
+                    manager = this._primaryDc!
                 }
 
-                // In test servers, FLOOD_WAIT_0 has been observed, and sleeping for
-                // such a short amount will cause retries very fast leading to issues
-                if (seconds === 0) {
-                    seconds = 1
-                }
+                multi = manager[kind]
 
-                if (seconds <= floodSleepThreshold) {
-                    this._log.warn('%s resulted in a flood wait, will retry in %d seconds', message._, seconds)
-                    await sleepWithAbort(seconds * 1000, this.params.stopSignal)
-                    continue
-                }
+                res = await multi.sendRpc(message, params?.timeout, params?.abortSignal, params?.chainId)
             }
+        } else if (err === 'AUTH_KEY_UNREGISTERED') {
+            // we can try re-exporting auth from the primary connection
+            this._log.warn('exported auth key error, trying re-exporting..')
 
-            if (manager === this._primaryDc) {
-                if (
-                    err.startsWith('PHONE_MIGRATE_') ||
-                    err.startsWith('NETWORK_MIGRATE_') ||
-                    err.startsWith('USER_MIGRATE_')
-                ) {
-                    const newDc = Number(err.slice(err.lastIndexOf('_') + 1))
+            await this._exportAuthTo(manager)
 
-                    if (Number.isNaN(newDc)) {
-                        this._log.warn('invalid migrate error received: %s, ignoring', err)
-
-                        return res
-                    }
-
-                    if (params?.localMigrate) {
-                        manager = await this._getOtherDc(newDc)
-                    } else {
-                        this._log.info('received %s, migrating to dc %d', err, newDc)
-
-                        await this.changePrimaryDc(newDc)
-                        manager = this._primaryDc!
-                    }
-
-                    multi = manager[kind]
-
-                    continue
-                }
-            } else if (err === 'AUTH_KEY_UNREGISTERED') {
-                // we can try re-exporting auth from the primary connection
-                this._log.warn('exported auth key error, trying re-exporting..')
-
-                await this._exportAuthTo(manager)
-                continue
-            }
-
-            return res
+            res = await multi.sendRpc(message, params?.timeout, params?.abortSignal, params?.chainId)
         }
 
-        return lastError!
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return res
     }
 
     changeTransport(factory: TransportFactory): void {
