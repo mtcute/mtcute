@@ -12,7 +12,7 @@ export type WorkerInboundMessage =
           id: number
           target: 'custom' | 'client' | 'storage' | 'storage-self' | 'storage-peers' | 'app-config'
           method: string
-          args: unknown[]
+          args: SerializedResult<unknown[]>
           void: boolean
           withAbort: boolean
       }

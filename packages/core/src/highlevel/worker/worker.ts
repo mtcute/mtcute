@@ -1,7 +1,9 @@
 import { BaseTelegramClient } from '../base.js'
 import { serializeError } from './errors.js'
 import {
+    deserializeResult,
     RespondFn,
+    SerializedResult,
     serializeResult,
     WorkerCustomMethods,
     WorkerInboundMessage,
@@ -132,19 +134,21 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
             return
         }
 
-        let args = msg.args
+        let args: unknown[]
 
         if (msg.target === 'client' && msg.method === 'call' && msg.withAbort) {
             const abort = new AbortController()
             this.pendingAborts.set(msg.id, abort)
 
             args = [
-                args[0],
+                deserializeResult((msg.args as unknown as unknown[])[0] as SerializedResult<unknown>),
                 {
-                    ...(args[1] as object),
+                    ...((msg.args as unknown as unknown[])[1] as object),
                     abortSignal: abort.signal,
                 },
             ]
+        } else {
+            args = deserializeResult(msg.args)
         }
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
