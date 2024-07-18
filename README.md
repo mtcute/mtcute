@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/mtcute/mtcute/">
-        <img src="https://raw.githubusercontent.com/mtcute/mtcute/master/.github/logo.svg" alt="mtcute logo" title="mtcute" width="480" /><br/>
+        <img src="https://raw.githubusercontent.com/mtcute/mtcute/master/.github/logo.svg?new" alt="mtcute logo" title="mtcute" width="480" /><br/>
     </a><br/>
     <b>modern typescript library for mtproto</b>
     <br>
@@ -122,3 +122,5 @@ some parts were based on or greatly inspired by these projects:
 - [TDLib](https://github.com/tdlib/td) - the official mtproto client library
 - [TDesktop](https://github.com/telegramdesktop/tdesktop) - the official desktop client
 - [Pyrogram](https://github.com/pyrogram/pyrogram), [Telethon](https://github.com/LonamiWebs/Telethon) - popular python libraries
+
+thanks [@dotvhs](//t.me/AboutTheDot) for the logo <3
