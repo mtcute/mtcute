@@ -39,6 +39,8 @@ export interface UpdatesManagerParams {
      *
      * > **Note**: you can disable this on per-request basis by passing
      * > `shouldDispatch: true` to the method call that accepts it.
+     * > For some methods you need to always pass `shouldDispatch: true` explicitly.
+     * > This is noted in the corresponding method's documentation by "Doesn't follow `disableNoDispatch`"
      *
      * @default false
      */

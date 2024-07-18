@@ -100,9 +100,9 @@ export async function sendText(
             entities: res.entities,
         }
 
-        // is this needed?
-        // this._date = res.date
-        client.handleClientUpdate(createDummyUpdate(res.pts, res.ptsCount))
+        if (!params.shouldDispatch) {
+            client.handleClientUpdate(createDummyUpdate(res.pts, res.ptsCount))
+        }
 
         const peers = new PeersIndex()
 
