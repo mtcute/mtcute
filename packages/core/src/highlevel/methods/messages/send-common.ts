@@ -107,8 +107,8 @@ export interface CommonSendParams {
     quickReply?: number | string
 
     /**
-     * Whether to dispatch the returned message
-     * to the client's update handler.
+     * Whether to dispatch the returned message to the client's update handler.
+     * Doesn't follow `disableNoDispatch`
      */
     shouldDispatch?: true
 
