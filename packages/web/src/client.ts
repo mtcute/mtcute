@@ -64,6 +64,7 @@ export class TelegramClient extends TelegramClientBase {
 
         super({
             client: new BaseTelegramClient(opts),
+            disableUpdates: opts.disableUpdates,
         })
     }
 }
