@@ -33,6 +33,7 @@ async function findArtifactsByHash(hash) {
             .then((r) => r.artifacts)
 
         for (const it of artifacts) {
+            if (it.expired) continue
             const parts = it.name.split('-')
 
             if (parts[0] === 'prebuilt' &&
