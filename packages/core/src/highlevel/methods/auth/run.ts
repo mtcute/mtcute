@@ -12,6 +12,7 @@ import { start } from './start.js'
  *
  * @param params  Parameters to be passed to {@link start}
  * @param then  Function to be called after {@link start} returns
+ * @deprecated  This method provides no real value over {@link start}, please use it instead
  */
 export function run(
     client: ITelegramClient,

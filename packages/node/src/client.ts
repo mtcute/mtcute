@@ -90,10 +90,10 @@ export class TelegramClient extends TelegramClientBase {
 
     /**
      * Tiny wrapper over Node `readline` package
-     * for simpler user input for `.run()` method.
+     * for simpler user input for `.start()` method.
      *
      * Associated `readline` interface is closed
-     * after `run()` returns, or with the client.
+     * after `start()` returns, or with the client.
      *
      * @param text  Text of the question
      */

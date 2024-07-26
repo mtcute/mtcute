@@ -19,7 +19,6 @@ const tg = new TelegramClient({
     storage: 'my-account'
 })
 
-tg.run(async (user) => {
-    console.log(`✨ logged in as ${user.displayName}`)
-})
+const self = await tg.start()
+console.log(`✨ logged in as ${self.displayName}`)
 ```

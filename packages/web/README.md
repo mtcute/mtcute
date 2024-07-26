@@ -19,9 +19,8 @@ const tg = new TelegramClient({
     storage: 'my-account'
 })
 
-tg.run(async (user) => {
-    console.log(`✨ logged in as ${user.displayName}`)
-})
+const self = await tg.start()
+console.log(`✨ logged in as ${self.displayName}`)
 ```
 
 ## Usage with workers
@@ -47,7 +46,6 @@ const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'modu
 const port = new TelegramWorkerPort({ worker })
 const tg = new TelegramClient({ client: port })
 
-tg.run({}, async (user) => {
-    console.log(`✨ logged in as ${user.displayName}`)
-})
+const self = await tg.start()
+console.log(`✨ logged in as ${user.displayName}`)
 ```

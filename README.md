@@ -39,9 +39,8 @@ dp.onNewMessage(filters.chat('private'), async (msg) => {
     await msg.replyText('hiiii from mtcute! 🌸')
 })
 
-tg.run({ /* optional params */ }, async (self) => {
-    console.log(`✨ logged in as ${self.displayName}`)
-})
+const self = await tg.start({ /* optional params */ }
+console.log(`✨ logged in as ${self.displayName}`)
 ```
 
 mtcute is a modern, performant and *✨ cute ✨* [mtproto](https://mtcute.dev/guide/intro/mtproto-vs-bot-api.html) library and bot framework,

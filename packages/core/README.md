@@ -39,11 +39,10 @@ const tg = new TelegramClient({
     // ... same options as above
 })
 
-tg.run({
+const self = await tg.start({
     phone: '+1234567890',
     code: () => prompt('Enter the code:'),
     password: 'my-password',
-}, async (user) => {
-    console.log(`✨ logged in as ${user.displayName}`)
 })
+console.log(`✨ logged in as ${self.displayName}`)
 ```
