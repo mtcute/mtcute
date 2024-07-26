@@ -533,6 +533,12 @@ describe('MarkdownMessageEntityParser', () => {
                 [createEntity('messageEntityBold', 10, 4)],
                 'some text\nbold\nmore text',
             )
+
+            test(
+                md_`text\n\n\nmore text`,
+                [],
+                'text\n\n\nmore text',
+            )
         })
 
         it('should process entities', () => {

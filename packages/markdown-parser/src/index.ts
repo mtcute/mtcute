@@ -385,7 +385,7 @@ function parse(
                     result += '\n'
                 }
 
-                const nonWhitespace = text.slice(pos + 1).search(/\S/)
+                const nonWhitespace = text.slice(pos + 1).search(/[^ \t]/)
 
                 if (nonWhitespace !== -1) {
                     pos += nonWhitespace + 1
