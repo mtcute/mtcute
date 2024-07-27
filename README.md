@@ -39,7 +39,7 @@ dp.onNewMessage(filters.chat('private'), async (msg) => {
     await msg.replyText('hiiii from mtcute! 🌸')
 })
 
-const self = await tg.start({ /* optional params */ }
+const self = await tg.start({ /* optional params */ })
 console.log(`✨ logged in as ${self.displayName}`)
 ```
 
