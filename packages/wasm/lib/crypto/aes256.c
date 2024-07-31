@@ -3,11 +3,9 @@
 #define LROTL(x) (((x) << 8) | ((x) >> 24))
 #define LROTR(x) (((x) >> 8) | ((x) << 24))
 #define SWAP(x) ((LROTL((x)) & 0x00ff00ff) | (LROTR((x)) & 0xff00ff00))
-#define GET(p) SWAP(*((uint32_t *)(p)))
-#define PUT(ct, st) (*((uint32_t *)(ct)) = SWAP((st)))
 
-uint8_t aes_shared_key_buffer[32];
-uint8_t aes_shared_iv_buffer[32];
+alignas(16) uint8_t aes_shared_key_buffer[32];
+alignas(16) uint8_t aes_shared_iv_buffer[32];
 
 WASM_EXPORT uint8_t* __get_shared_key_buffer() {
   return aes_shared_key_buffer;
@@ -394,13 +392,17 @@ void aes256_set_decryption_key(uint8_t* key, uint32_t* expandedKey) {
             );
 }
 
-void aes256_encrypt(uint8_t* in, uint8_t* out, uint32_t* key) {
+v16qi aes256_encrypt(v16qi in, uint32_t* key) {
     uint32_t s0, s1, s2, s3, t0, t1, t2, t3;
 
-    s0 = GET(in) ^ key[0];
-    s1 = GET(in + 4) ^ key[1];
-    s2 = GET(in + 8) ^ key[2];
-    s3 = GET(in + 12) ^ key[3];
+    v4si v4_in = (v4si)in;
+    v4_in = SWAP(v4_in);
+    v4_in ^= *(v4si*)key;
+
+    s0 = v4_in[0];
+    s1 = v4_in[1];
+    s2 = v4_in[2];
+    s3 = v4_in[3];
 
     t0 = Te0[s0 >> 24] ^ Te1[(s1 >> 16) & 0xff] ^ Te2[(s2 >> 8) & 0xff] ^ Te3[s3 & 0xff] ^ key[4];
     t1 = Te0[s1 >> 24] ^ Te1[(s2 >> 16) & 0xff] ^ Te2[(s3 >> 8) & 0xff] ^ Te3[s0 & 0xff] ^ key[5];
@@ -475,8 +477,6 @@ void aes256_encrypt(uint8_t* in, uint8_t* out, uint32_t* key) {
         ^ key[56]
     );
 
-    PUT(out, s0);
-
     s1 = (
         (Te2[(t1 >> 24)] & 0xff000000)
         ^ (Te3[(t2 >> 16) & 0xff] & 0x00ff0000)
@@ -484,8 +484,6 @@ void aes256_encrypt(uint8_t* in, uint8_t* out, uint32_t* key) {
         ^ (Te1[(t0) & 0xff] & 0x000000ff)
         ^ key[57]
     );
-
-    PUT(out + 4, s1);
 
     s2 = (
         (Te2[(t2 >> 24)] & 0xff000000)
@@ -495,8 +493,6 @@ void aes256_encrypt(uint8_t* in, uint8_t* out, uint32_t* key) {
         ^ key[58]
     );
 
-    PUT(out + 8, s2);
-
     s3 = (
         (Te2[(t3 >> 24)] & 0xff000000)
         ^ (Te3[(t0 >> 16) & 0xff] & 0x00ff0000)
@@ -505,16 +501,23 @@ void aes256_encrypt(uint8_t* in, uint8_t* out, uint32_t* key) {
         ^ key[59]
     );
 
-    PUT(out + 12, s3);
+    v4si v4_out = { s0, s1, s2, s3 };
+    v4_out = SWAP(v4_out);
+
+    return (v16qi)v4_out;
 }
 
-void aes256_decrypt(uint8_t* in, uint8_t* out, uint32_t* key) {
+v16qi aes256_decrypt(v16qi in, uint32_t* key) {
     uint32_t s0, s1, s2, s3, t0, t1, t2, t3;
 
-    s0 = GET(in) ^ key[0];
-    s1 = GET(in + 4) ^ key[1];
-    s2 = GET(in + 8) ^ key[2];
-    s3 = GET(in + 12) ^ key[3];
+    v4si v4_in = (v4si)in;
+    v4_in = SWAP(v4_in);
+    v4_in ^= *(v4si*)key;
+
+    s0 = v4_in[0];
+    s1 = v4_in[1];
+    s2 = v4_in[2];
+    s3 = v4_in[3];
 
     t0 = Td0[s0 >> 24] ^ Td1[(s3 >> 16) & 0xff] ^ Td2[(s2 >> 8) & 0xff] ^ Td3[s1 & 0xff] ^ key[4];
     t1 = Td0[s1 >> 24] ^ Td1[(s0 >> 16) & 0xff] ^ Td2[(s3 >> 8) & 0xff] ^ Td3[s2 & 0xff] ^ key[5];
@@ -589,8 +592,6 @@ void aes256_decrypt(uint8_t* in, uint8_t* out, uint32_t* key) {
         ^ key[56]
     );
 
-    PUT(out, s0);
-
     s1 = (
         ((uint32_t) Td4[(t1 >> 24)] << 24)
         ^ ((uint32_t) Td4[(t0 >> 16) & 0xff] << 16)
@@ -598,8 +599,6 @@ void aes256_decrypt(uint8_t* in, uint8_t* out, uint32_t* key) {
         ^ ((uint32_t) Td4[(t2) & 0xff])
         ^ key[57]
     );
-
-    PUT(out + 4, s1);
 
     s2 = (
         ((uint32_t) Td4[(t2 >> 24)] << 24)
@@ -609,8 +608,6 @@ void aes256_decrypt(uint8_t* in, uint8_t* out, uint32_t* key) {
         ^ key[58]
     );
 
-    PUT(out + 8, s2);
-
     s3 = (
         ((uint32_t) Td4[(t3 >> 24)] << 24)
         ^ ((uint32_t) Td4[(t2 >> 16) & 0xff] << 16)
@@ -619,5 +616,8 @@ void aes256_decrypt(uint8_t* in, uint8_t* out, uint32_t* key) {
         ^ key[59]
     );
 
-    PUT(out + 12, s3);
+    v4si v4_out = { s0, s1, s2, s3 };
+    v4_out = SWAP(v4_out);
+
+    return (v16qi)v4_out;
 }
